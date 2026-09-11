@@ -1,0 +1,104 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 17.4.2
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Added
+  - Image content blocks accept an optional url mirror: providers whose APIs fetch remote images (Anthropic url sources, OpenAI/xAI Responses and Chat Completions image_url, Google fileData) send the URL instead of the inline base64 payload.
+  Fixed
+  - Fixed Cursor thinking-effort selection being cosmetic: collapsed effort-routed families (GPT-5.6 Luna/Sol/Terra, Grok 4.5/4.6) now send the effort-routed wire model id instead of always pinning the -none off tier (#9246).
+  - Fixed OAuth preflight refresh stranding a peer-rotated credential: when a concurrent process rotated a rotating-refresh-token grant (e.g. Anthropic) during preflight, the resolve pass skipped the freshly reloaded row and failed the request with no credentials for single-account setups (#9194).
+  - Fixed Cursor reasoning-sibling models (e.g. gpt-5.4-mini-low, gpt-5.6-sol-xhigh) failing with resource_exhausted (errorId 528384): the per-effort GPT slug is now split into its base model id plus a { id: "reasoning", value: <effort> } request parameter, matching the official cursor-agent wire shape, instead of sending the sibling slug as the wire model id with no parameters (#9164).
+  @oh-my-pi/pi-catalog
+  Added
+  - Added identification of provider-side image fetchers (OpenAI, Anthropic, xAI, Google), so a server hosting images by URL can attribute an inbound fetch to the vendor that issued it.
+  Fixed
+  - Fixed Cursor model discovery showing separate picker rows for pure effort-suffixed models beyond GPT-5.6 by collapsing each standard and Fast lane into one reasoning-effort model (#9237).
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added an opt-in image URL broker (images.urls.enabled) that publishes outgoing images through an ordered chain of backends instead of sending inline base64 to URL-fetching providers
+  - Composer attachment chips (ported from omp2): pasted images and large text pastes stage as rounded preview cards above the prompt — image cards show a live thumbnail (Kitty Unicode placeholders) with pixel dimensions, text cards a snippet with +N lines/N chars — while the editor buffer holds a compact <icon> #N token in the card's identity color.
+  Changed
+  - Pasted images now insert only the [Image #N, WxH] marker; the redundant trailing attachment://N URI is no longer added to the composer.
+  - Added a consolidated CLI reference (docs/cli-reference.md) documenting every top-level subcommand and launch flag, including headless print mode (--print/-p, --print-thoughts) (#9252)
+  Fixed
+  - Fixed unreadable colors in macOS Terminal.app by using its supported 256-color mode (#9162).
+  - Fixed Esc after a fast /mcp test result aborting the active agent turn instead of consuming the advertised cancellation input (#9173).
+  - Fixed task spawns crashing when legacy boolean per-agent prewalk or advisor overrides are present in config.yml.
+  - Fixed ACP session/prompt requests hanging forever when a builtin slash command's residual prompt (e.g. /force:<tool> /some-command) resolved locally, which also wedged all subsequent prompts on the session (#9206).
+  - Fixed eval-spawned subagent output being omitted from per-turn output-token budgets, including failed and isolated runs (#9187).
+  - Fixed /compact over RPC blocking the serialized command queue for the full summarization round-trip, so a follow-up abort could not interrupt it (#9200).
+  - Fixed RPC UI select requests dropping option descriptions, allowing hosts to render described choices (#9175).
+  - Fixed /todo edit failing with "Could not parse Markdown" when checklist items had backslash-escaped brackets (- \[x\]), which editors and markdown renderers commonly emit (#9188).
+  - Fixed omp setup --check/--json with no component printing usage text to stdout and exiting 0; it now errors on stderr and exits non-zero so scripted JSON health checks fail loudly (#9221).
+  - Fixed an aggressive task.maxRuntimeMs mislabeling committed subagent outcomes: a budget-killed run is no longer reported as a runtime-limit timeout, and a subagent that yielded a complete result before the deadline is no longer reported as aborted when teardown crosses the deadline (#9191).
+  - Fixed startup fallback-chain warnings for discovered OpenCode Zen, OpenCode Go, and GitHub Copilot models cached under credential-scoped IDs (#9205).
+  - Fixed interactive /models and Ctrl+P cycling omitting an enabledModels/--models model discovered by a background provider refresh (e.g. opencode-go/ox-alpha-free) after startup, by rebuilding the scoped list once discovery completes (#9220).
+  - Documented how to enable, trigger, target, and manually re-arm prewalk (#9179).
+  - Pasted images and large text pastes appear in the composer as compact icon tokens instead of bracketed markers; the bracketed form remains the outgoing/stored format, and the transcript renders it back as the compact chip.
+  - Deleting an attachment's inline token now removes the attachment from the submission (surviving image markers are renumbered).
+  - Restored prompts (esc-esc, /tree, branch, queued-message dequeue, failed-submit recovery) collapse image markers back into clickable atomic chip tokens and re-materialize their file links instead of degrading to dead text.
+  @oh-my-pi/pi-tui
+  Added
+  - Editor atom table: insertAtom/registerAtom stage compact atomic tokens whose registered expansion is emitted on submit (getExpandedText), alongside the existing paste-marker store.
+  @oh-my-pi/pi-utils
+  Fixed
+  - Made malformed advanced-serialization frames from a worker subprocess non-fatal: Bun surfaces an undecodable IPC frame as a process-level uncaughtException in the parent (oven-sh/bun#37287), which the postmortem handler treated as fatal and tore down every active session and subagent. The handler now recognizes the decode failure and, keeping the session alive, faults the active advanced-IPC worker subsystems so their clients reject in-flight requests and recycle the subprocess instead of awaiting forever — mirroring the existing ipc-send EPIPE containment. (#9158)
+  What's Changed
+  - fix(subprocess): contain malformed worker IPC frame to the faulting worker by @roboomp in https://github.com/can1357/oh-my-pi/pull/9160
+  - fix(theme): respect Terminal.app color depth by @roboomp in https://github.com/can1357/oh-my-pi/pull/9163
+  - fix(cursor): split reasoning-sibling slugs into base id + reasoning param by @roboomp in https://github.com/can1357/oh-my-pi/pull/9166
+  - fix(coding-agent): keep /mcp test Esc from aborting active turns by @roboomp in https://github.com/can1357/oh-my-pi/pull/9174
+  - fix(rpc): preserve select option descriptions by @roboomp in https://github.com/can1357/oh-my-pi/pull/9176
+  - docs(coding-agent): document prewalk by @roboomp in https://github.com/can1357/oh-my-pi/pull/9181
+  - fix(coding-agent): account eval subagent output in turn budget by @roboomp in https://github.com/can1357/oh-my-pi/pull/9189
+  - fix(todo): parse escaped-bracket checklist items in /todo edit by @roboomp in https://github.com/can1357/oh-my-pi/pull/9190
+  - fix(task): stop wall-clock timer rewriting committed subagent outcomes by @roboomp in https://github.com/can1357/oh-my-pi/pull/9192
+  - fix(ai): retry peer-rotated oauth credential during preflight by @roboomp in https://github.com/can1357/oh-my-pi/pull/9195
+  - fix(rpc): background-dispatch /compact so abort can interrupt it by @roboomp in https://github.com/can1357/oh-my-pi/pull/9202
+  - fix(task): normalize boolean agent overrides by @roboomp in https://github.com/can1357/oh-my-pi/pull/9207
+  - fix(acp): settle prompt turn when a residual prompt resolves locally by @roboomp in https://github.com/can1357/oh-my-pi/pull/9209
+  - fix(models): hydrate credential-scoped startup caches by @roboomp in https://github.com/can1357/oh-my-pi/pull/9210
+  - fix(setup): error on setup --check/--json without a component by @roboomp in https://github.com/can1357/oh-my-pi/pull/9224
+  - fix(coding-agent): rebuild scoped models after background discovery by @roboomp in https://github.com/can1357/oh-my-pi/pull/9225
+  - fix(catalog): collapse Cursor effort siblings by @roboomp in https://github.com/can1357/oh-my-pi/pull/9238
+  - fix(cursor): apply thinking-effort routing to wire model id by @roboomp in https://github.com/can1357/oh-my-pi/pull/9248
+  - docs: reduce exa settings rows to surviving schema keys by @roboomp in https://github.com/can1357/oh-my-pi/pull/9259
+  - docs(settings): document omitted schema groups by @roboomp in https://github.com/can1357/oh-my-pi/pull/9260
+  - docs: add consolidated CLI reference page by @roboomp in https://github.com/can1357/oh-my-pi/pull/9261
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v17.4.1...v17.4.2
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v17.4.2
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

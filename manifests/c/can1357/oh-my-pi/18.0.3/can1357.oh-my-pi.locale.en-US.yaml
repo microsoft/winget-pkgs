@@ -1,0 +1,77 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.0.3
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Fixed
+  - Fixed a Fireworks-hosted model aborting mid-generation with an HTTP 400 Floating point NaN (not-a-number) is detected in generation killing the turn instead of retrying; this model-side numerical fault is now classified transient and retried, matching the existing treatment of Copilot fleet-skew 400s (#9458).
+  - Fixed OpenAI-compatible completions hosts that stream content then terminate with the [DONE] sentinel while omitting (or nulling) finish_reason failing every turn with OpenAI completions stream closed before a finish_reason was received; a [DONE]-terminated stream now finalizes as a clean stop and only a genuine transport EOF (no [DONE], no finish reason) surfaces the incomplete-stream error (#9433).
+  @oh-my-pi/pi-catalog
+  Fixed
+  - Fixed OpenRouter auxiliary requests (e.g. session-title generation) failing with 400 Reasoning is mandatory for this endpoint and cannot be disabled on mandatory-reasoning models such as stealth/ox-alpha. Live discovery now honors the endpoint's reasoning.mandatory flag, clamping thinking-off to the lowest supported effort instead of sending reasoning: { enabled: false } (#9415).
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added opt-in edit auto-repair (edit.autoRepair.enabled): when an edit breaks a file's AST parse, the smol model repairs the broken region in place — validated by re-parse, revert-rejected, and surfaced as a diff in the tool result — instead of only warning.
+  - Added update channels: omp update --canary installs canary prereleases from the npm canary dist-tag and omp update --stable switches back; the chosen channel persists and drives the startup update check.
+  Changed
+  - Unexpected Stops now offers None, Mechanical (default), and Smart modes; Smart adds small-model classification to recover text-only stops.
+  Fixed
+  - Resolved cursor drift and text duplication caused by overlapping or out-of-bounds spelling ranges
+  - Squeezed transcript tool rows no longer render as a bare unstyled ╭─ Hub frame: a squeezed block keeps its real render whenever it fits the allocated rows, and blocks that genuinely overflow fold to a themed frame that names the tool's activity (e.g. Hub · send → Main).
+  - Python/Ruby/Julia eval cells that hit their wall-clock timeout during a parallel()/agent()/tool.* fan-out no longer get their kernel force-killed (losing all session state): the timeout now aborts in-flight bridge calls so the runner unwinds as a clean KeyboardInterrupt and the kernel survives.
+  - Multi-select ask options whose labels end in (Recommended) now show their checked state and avoid duplicate recommendation suffixes (#9452).
+  - Fixed crash during update output when theme configuration is missing
+  - Fixed flickering typo undercurls while typing by projecting state during revalidation
+  - Fixed self-update on Windows leaving the omp command missing or stuck on the previous version when package-manager reinstalls fail on running files
+  - Ctrl+T now toggles every thinking block in the transcript, including blocks already retired to terminal history (#9440).
+  - Copilot Grok 4.6 Responses streams that repeatedly close after thinking now stop after one same-model retry instead of consuming the full retry budget (#9427).
+  - /mcp test now reports cancellation immediately when Esc is pressed during a slow config lookup, instead of staying suspended until the read settles (#9419).
+  - Fixed remote browser relay endpoints advertising a client-local CDP WebSocket URL: /json/version now reflects a valid request Host and falls back to the relay's loopback address when it is absent or unusable.
+  - Restored red/green and syntax highlighting in edit-tool result bodies (#9439).
+  - Fixed goal mode failing to start (No such tool: xd://goal) when goal.enabled was turned on after the session had already started; the goal tool is now registered lazily on goal-mode entry (#9444).
+  @oh-my-pi/pi-natives
+  Fixed
+  - macOSCheckSpelling no longer reports the whole checked string as misspelled: automatic language identification returns an orthography result spanning the entire text, which leaked through as a typo range overlapping the real word span (doubling editor text under the undercurl and drifting the cursor).
+  @oh-my-pi/pi-tui
+  Fixed
+  - Fixed inline images vanishing from the transcript and scrollback when the session exits: stop no longer deletes transmitted Kitty images from the terminal's graphics store.
+  - Fixed visible history being erased when enlarging the terminal.
+  What's Changed
+  - fix(tui): show checked state for recommended-suffixed options by @roboomp in https://github.com/can1357/oh-my-pi/pull/9456
+  - fix(ai): classify Fireworks mid-generation NaN 400 as transient by @roboomp in https://github.com/can1357/oh-my-pi/pull/9459
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.0.2...v18.0.3
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.0.3
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

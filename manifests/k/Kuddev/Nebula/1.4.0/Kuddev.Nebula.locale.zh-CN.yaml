@@ -1,0 +1,50 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: Kuddev.Nebula
+PackageVersion: 1.4.0
+PackageLocale: zh-CN
+ShortDescription: 一款 GPU 加速的 Windows 终端：关闭窗口不杀会话，重新打开，你的 claude 对话原样回来。
+Description: Nebula 是一款 Windows 上的终端模拟器，以 Rust 编写，构建在 GPU 加速渲染内核之上，并围绕一个理念设计：终端会话太宝贵，不该随窗口一起消失。它把 tmux 式的常驻会话模型、玻璃质感界面、AI CLI 感知侧边栏和无需额外配置的 shell 体验组合在一起。
+Tags:
+- claude
+- codex
+- ssh
+- 终端
+ReleaseNotes: |-
+  新增
+  - 新增版本化 Runtime 控制 API 与资源式 CLI — nebula env、window、tab、pane、agent 通过可发现的 JSON 操作统一控制 Nebula，并同步更新 Bash、Fish 与 Zsh 补全。
+  - 新增强类型 Agent 工作流 — 可创建布局、启动经过核实的 Provider、等待指定 generation、提交 Prompt、运行受限非 TTY 命令、安全粘贴，并事务化创建 Git worktree 分叉。原生 SSH 遇到依赖本机控制面的操作会明确报告不支持，不会改在错误位置执行。
+  - 新增 Windows 独立快速终端 — 进程级单例窗口从当前显示器顶部滑入，使用全宽和 40% 高度，并在隐藏时保留 PTY 与滚屏。
+  - 新增 GPUI 设置页内置 English 与简体中文语言包 — 语言可跟随系统或显式选择，跨启动保留，并只在内存中切换，无需运行时读取翻译文件。此项仅对应 #71 的 GPUI 设置页范围；其他尚未翻译的界面不在本次发布范围内。
+  - 新增 Quick Jump 与 Send to Chat — 可搜索标签、pane、目录、SSH 主机和可恢复 Agent 会话，也可把终端或文档选区发送给用户明确选择的 live Agent。
+  - 新增 Windows 跨窗口拖动标签 — 可把标签或完整 split tree 停靠到另一个 Nebula 窗口，同时保留 pane 状态、订阅与会话元数据。
+  - 新增本地与 WSL 文件树完整操作 — 支持打开、在资源管理器中显示、复制路径、启动终端和送入回收站，并保留 WSL 发行版与 guest path。
+  - 新增 OSC 9;4 Windows 任务栏进度 — 终端应用可以显示普通、不确定、暂停、错误和清除状态。
+  修复
+  - 修复终端输出停在半帧、必须再按键或缩放才继续，以及补全弹窗尚未选中时抢走 Up/Down 历史键的问题。
+  - 修复 Windows 新建 pane 继承 Nebula 常驻进程中的过期环境变量；新 pane 现在会重建当前机器与用户环境。对应 #68。
+  - 修复快速终端全局快捷键、首次打开空白条、窗口尺寸错误，以及混入普通工作区生命周期的问题。
+  - 修复代理输入框包含非 ASCII 文本或全角标点时设置页崩溃。对应 #67。
+  - 修复文件树、Git、顶部标签与侧栏控件把点击泄漏给标题栏拖动或父级折叠处理。对应 #62。
+  - 修复 GPUI 诊断与 Windows panic 报告在记录原始故障时触发第二次 panic。对应 #70。
+  - 修复 Runtime 读取、快照、Prompt、paste、exec、布局与 Agent 操作意外激活后台窗口；现在只有显式 focus 命令可以激活工作区。
+  - 修复 Runtime Agent 通知、wait、布局变更与 SSH 选区路由使用过期或歧义目标。
+  - 修复终端数学误判、跨行定界符错误配对、\boxed / \tag 回退，以及合法无墨字形导致整条公式消失。
+  - 修复宽字符选区、ConPTY resize 后的光标对账，以及 DECSET 2031 色彩方案通知。
+  - 修复设置重置、终端 pane 缝隙、侧栏拖拽几何、光标闪烁与 Tab 徽章优先级，让界面状态与已保存或权威状态一致。
+  改进
+  - 改进终端 TeX 渲染，采用基于内容的识别与 GPUI 紧凑投影 — WSL、SSH 和全屏 Agent 界面中的公式可以正常渲染，同时保持选区、光标、补全、输入法、链接与终端源坐标准确。包含 @liu-ws 在 #55 中贡献的工作。
+  - 改进快速终端动画，沿用既有顶部滑入节奏，支持动画中途平滑反向，且动画期间不重复激活或 resize。
+  - 改进主题与 pane 几何 — Nord 成为默认深色主题，Paper 作为浅色配对；主题控制的圆角、卡缝、阴影与分隔线共用同一条渲染路径。
+  - 改进 Runtime 快照，为自动化与审计提供语义化 pane 生命周期、任务状态、进程证据、Agent generation 与 worktree provenance。
+  - 改进 GPUI 设置导航，使用稳定的扁平列表展示“应用、外观、配置文件、交互、按键映射、SSH、网络、高级”。
+  - 改进 GPUI 会话驻留、托盘路由与终端色彩，同时让快速终端窗口保持在普通工作区持久化之外。
+ReleaseNotesUrl: https://github.com/Kuddev/nebula/releases/tag/v1.4.0
+Documentations:
+- DocumentLabel: 安装指南
+  DocumentUrl: https://github.com/Kuddev/nebula/blob/main/INSTALL.md
+- DocumentLabel: Lua 配置
+  DocumentUrl: https://github.com/Kuddev/nebula/blob/main/docs/lua-configuration.md
+ManifestType: locale
+ManifestVersion: 1.12.0

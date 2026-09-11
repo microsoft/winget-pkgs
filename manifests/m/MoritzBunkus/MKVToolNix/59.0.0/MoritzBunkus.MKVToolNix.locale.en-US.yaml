@@ -1,0 +1,62 @@
+# Created with YamlCreate.ps1 v2.2.0 $debug=QUS2.CRLF.7-2-7.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.2.0.schema.json
+
+PackageIdentifier: MoritzBunkus.MKVToolNix
+PackageVersion: 59.0.0
+PackageLocale: en-US
+Publisher: Moritz Bunkus
+PublisherUrl: https://www.bunkus.org/
+PublisherSupportUrl: https://mkvtoolnix.download/community.html
+PrivacyUrl: https://mkvtoolnix.download/privacy-policy.html
+Author: Moritz Bunkus
+PackageName: MKVToolNix
+PackageUrl: https://mkvtoolnix.download/
+License: GPL-2.0
+LicenseUrl: https://gitlab.com/mbunkus/mkvtoolnix/-/blob/main/COPYING
+Copyright: © 2002 – 2021 Moritz Bunkus
+# CopyrightUrl:
+ShortDescription: MKVToolNix is a set of tools to create, alter and inspect Matroska files under Linux, other Unices and Windows.
+# Description:
+# Moniker:
+Tags:
+- mkv
+# Agreements:
+ReleaseNotes: |-
+  New features and enhancements
+  - mkvmerge: WebVTT parser: the parser now follows the specs' rules for parsing timestamps more closely by being more lenient: it allows arbitrary number of spaces & tabs at the start of the line & around the arrow; it allows any number of digits for the hours. Part of #3139.
+  - MKVToolNix GUI: multiplexer: when adding a Blu-ray playlist without scanning for other playlists the GUI will now look for disc library information & let the user select which one to use if there's more than one entry. Implements #3143.
+  - MKVToolNix GUI: multiplexer: added an option for sorting files & tracks by track types when adding them to multiplex settings. The order is: video first followed by audio, subtitles and other types. Files & tracks can still be reordered manually later. The option is enabled by default & can be found in the preferences → "Multiplexer" page → "Adding files" section. Implements #2366.
+  - MKVToolNix GUI: multiplexer: added an option for recognizing file name sequences such as movie.001.mp4, movie.002.mp4, movie.003.mp4 when adding multiple files at once. If a sequence is detected, the only first file will be added while the second and following file names will be appended to the first one. The option is enabled by default & can be found in the preferences → "Multiplexer" page → "Adding files" section. Implements #2866.
+  - MKVToolNix GUI: multiplexer: added small colored boxes for each file & track in order to indicate from which file each track is read. The colors used can be configured in the preferences → "Multiplexer" page → "File & track colors" section.
+
+  Bug fixes
+  - build system: fixed compilation with fmt v8. Fixes #3151.
+  - mkvmerge: SRT subtitle reader: characters that aren't valid according to the assumed encoding of the file will now be replaced by the Unicode "Replacement Character" U+FFFD instead of keeping the invalid characters, potentially violating the Matroska specs.
+  - mkvmerge: WebVTT parser: the parser now accepts timestamps with hours larger than 99. Part of #3139.
+  - mkvextract: TTA extraction, only on Windows: fixed removing the temporary file created during extraction.
+  - mkvmerge, mkvpropedit, MKVToolNix GUI's multiplexer & header editor: MIME type detection is now done using Qt instead of the magic library. The main impact is the MIME types of TrueType & OpenType fonts are now detected correctly. Fixes #3137.
+  - mkvmerge, mkvinfo, MKVToolNix GUI's info tool: only on Windows: displaying dates before 1970-01-01 00:00:00 UTC or after 2038-01-19 03:14:08 UTC was broken. Note that the header editor was not affected. Fixes #3148.
+  - MKVToolNix GUI: only on 64-bit Windows: under certain conditions, the 64-bit Windows binaries crashed when opening dialog windows. Even though the underlying bug hasn't been identified, the investigation showed that building it with newer versions than 10.2.0 of the mingw/gcc cross-compiler enabled the crashes, while binaries built with 10.2.0 were fine. This affected v57 and v58 which were built with gcc versions 10.3.0 and 11.1.0 respectively. For the time being I've switched back to building Windows binaries with gcc 10.2.0. Fixes #3132 & #3133.
+  - MKVToolNix GUI: multiplexer: when adding files to the multiplexer by running the GUI's executable with file names as command line arguments, the source directory will be remembered as the "last open directory" again, causing subsequent uses of the "open file" dialog to start in the same directory.
+  - MKVToolNix GUI: multiplexer: the "default track flag" column in the track list was missing its icons. Additionally it contained text even for things that aren't regular tracks and therefore do not actually have that flag (e.g. chapters or tags). Fixes #3144.
+  - MKVToolNix GUI: multiplexer: the default for the dialog asking the user what to do with dragged & dropped files if they've never seen the dialog is back to adding the files to the current multiplex settings instead of "add as additional parts" which was an unintentional default.
+  - MKVToolNix GUI: multiplexer: the "show command line" dialog will now always use backward slashes for the "Windows (cmd.exe)" mode and forward slashes for the "Linux/Unix shells" mode, regardless of the operating system it's currently running on. Fixes #3155.
+
+  Build system changes
+  - The Qt library is now required for building all applications, even the command-line ones, as they use Qt's MIME type detection capabilities. In turn this means that you cannot disable the Qt usage anymore; either Qt5 or Qt 6 is required.  You can still chose not to build MKVToolNix GUI, though. A new option has been added to configure for this purpose: --disable-gui.
+  - The gmp library is now required.
+  - The magic library is not used anymore.
+  - The PCRE2 & JPCRE2 libraries are not used anymore. The bundled version of JPCRE2 was removed.
+  - Boost's "rational" library is not used anymore.
+  - configure: the option --enable-appimage has been removed. The location of the relevant directories within an AppImage is now detected automatically.
+  - The bundled fmt library was updated to v8.0.0.
+ReleaseNotesUrl: https://mkvtoolnix.download/doc/NEWS.md
+# PurchaseUrl:
+# InstallationNotes:
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://mkvtoolnix.download/docs.html
+- DocumentLabel: FAQ
+  DocumentUrl: https://gitlab.com/mbunkus/mkvtoolnix/-/wikis/FAQ
+ManifestType: defaultLocale
+ManifestVersion: 1.2.0

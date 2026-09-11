@@ -1,0 +1,84 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: CognitionAI.DevinCLI
+PackageVersion: 3000.5.20
+PackageLocale: en-US
+Publisher: Cognition AI, Inc.
+# PublisherUrl: https://devin.ai/
+PrivacyUrl: https://cognition.ai/privacy-policy
+Author: Cognition AI, Inc.
+PackageName: Devin CLI
+PackageUrl: https://cli.devin.ai/docs
+License: Proprietary
+LicenseUrl: https://cognition.ai/terms-of-service
+ShortDescription: A fast and minimal agent that lives both in your terminal and in the cloud.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+ReleaseNotes: |-
+  Added
+  - New devin rm <session-id-or-name> deletes a session, with confirmation by default and --force for non-interactive use; deletion is refused while another Devin instance has the session open.
+  - New devin desktop shortcut opens Devin Desktop if installed, and a bare path such as devin . opens Devin Desktop on that path.
+  - New devin doctor command checks custom subagent profiles for incorrect frontmatter.
+  - New /recap command catches you up on the session with a short agent-generated summary of what was worked on, key decisions, and where things stand.
+  - New /rename <new title> renames the current session.
+  - New Alt+P shortcut toggles Plan mode without clearing the input.
+  - /handoff now asks which OS the cloud session should continue in when your organization has more than one platform available, instead of silently reusing the last cloud session’s environment.
+  - Ask and Plan modes can now use the read-only webfetch and notebook_read tools for research.
+  - Plugins are now compatible with the Agent Plugins 1.0.0 format.
+  - Plan mode writes plans to a file so they always have a heading and summary paragraph.
+  - The subagent tray and detail view show which model a subagent is running on when it differs from the parent’s model.
+  - Accounts billed in credits now see a model’s credit multiplier in the model selector (e.g. 1.25 credits / message) instead of only a relative cost label.
+  - The input footer shows a “ctrl+v to paste image in clipboard” hint while an image is on the system clipboard.
+
+  Changed
+  - Instant slash commands (/status, /context, /fast, /session-stats, /help, etc.) now run immediately while the agent is working instead of queueing until the turn finishes, render their replies in scrollback instantly rather than through the typewriter, and pair each reply with its own command.
+  - Unknown slash commands now fail instantly with Unknown command: /notacommand. Use /help to see available commands.
+  - /model, /models, the model keyboard shortcuts, and the footer model picker now apply while Devin is working, so the next request uses the selected model.
+  - /btw now opens a side-chat panel that runs in parallel with the main agent: questions are answered from the conversation’s context while the agent keeps working.
+  - /usage shows a richer panel: daily/weekly quota progress bars with reset times, an extra usage balance line when present, and more info on the current session.
+  - The session picker (devin -r, /resume, devin ls) shows all sessions by default with the current directory’s sessions sorted to the top; Alt+G narrows to the current directory.
+  - The background shells tray (Ctrl+B) lists all running background commands.
+  - Command card titles show the meaningful command instead of the first shell token, skipping cd, environment prefixes, and wrappers like sudo/env
+  - Queued messages render in a distinct “N queued” section above the input box with ↑ edit / ↵ send now hints.
+  - Faster session startup, especially in large repositories with many rule and skill files.
+  - On Unix, cancelling or timing out a shell command now sends SIGTERM to the process group first and SIGKILL only after a 5-second grace period.
+  - Read-only git command detection is now shared across bash, PowerShell, and smart mode.
+  - /bug opens the bug submitter when run without a description, rejects submissions from outdated CLI versions, and shows a checklist receipt of what was sent (with the local zip path for zero-data-retention accounts).
+  - Presentation polish across the REPL: agent output is inset by one column with tighter tool cards, code blocks are indented two cells with balanced padding, inline code has padded backgrounds, /help aligns and dims descriptions, the interrupt hint turns a warning color, and the first-run welcome screen is a compact tips card.
+  - Broader Claude plugin compatibility: hooks are also loaded from hooks/hooks.json, hook commands additionally receive CLAUDE_PROJECT_DIR and CLAUDE_PLUGIN_ROOT, and subagent profiles accept the tools frontmatter field as an alias for allowed-tools.
+  - The model picker has been redesigned for improved price transparency and more intuitive navigation.
+
+  Fixed
+  - Hitting a monthly usage limit now shows a “Usage limit reached” alert with a clickable “Request more usage” link instead of a raw permission-denied error, and the “Quota exhausted” alert links to usage settings.
+  - Background shells keep streaming live output to their command card after the turn ends — including after an interruption — and show the full output on completion instead of a 1000-character preview.
+  - Command cards carry the full retained terminal scrollback (up to ~3500 lines), show a scrollable ~100-line window while streaming, elide the middle of very large output with a marker instead of showing only a tail, and no longer lose chunks from commands that emit fast bursts.
+  - Shell commands with endless output no longer grow memory without bound.
+  -  --continue now continues the most recent session in the current directory that is not already open in another process, instead of failing on a locked session.
+  - A single invalid value in config.json no longer discards all user settings.
+  - Permission rules now match correctly when a workspace, config, or granted directory name contains glob metacharacters such as [, ], {, }, *, or ?.
+  - SessionEnd lifecycle hooks now run when a session ends, with a reason matching Claude Code’s vocabulary.
+  - Stop hooks now receive last_assistant_message in their stdin payload, so they can read the agent’s final response without parsing a transcript. Hooks contributed by a plugin also get DEVIN_PLUGIN_ROOT.
+  - Hooks from a second workspace directory now run in that workspace, and DEVIN_PROJECT_DIR always points at the hook’s project root.
+  - Skills, rules, hooks, and subagent profiles that come from an installed plugin now appear in the Skills, Rules, Hooks, and Subagents lists, labeled with the plugin’s name.
+  - Invoking a skill passes the whole SKILL.md to the model instead of truncating it to the tool-result budget, and $ARGUMENTS / $1–$9 placeholders are interpolated with the arguments passed to /skill-name.
+  - Skills discovered mid-session are listed again after context compaction instead of disappearing for the rest of the session.
+  - Ask and Plan modes can use web search for read-only research when the tool is available.
+  - Pressing x on the tray’s Subagents tab kills only the selected subagent instead of cancelling the whole turn.
+  - An interrupted auto-update can no longer leave the installation broken with current pointing at a missing version directory; devin update also repairs an already-dangling installation.
+  - Windows: multi-line pastes no longer split into separate prompts, pty_for_noninteractive_exec no longer makes every non-interactive command hang, cancelled commands kill the whole process tree, and Chrome discovery checks per-user installations.
+  - Terminal rendering fixes: multiline paste works in terminals without bracketed paste, selection lists scroll instead of overflowing short terminals, searchable pickers move the highlight to the adjacent visible row, wrapped inline code no longer leaves a stray highlighted cell, the live area flickers less when it resizes, streaming tool-call arguments animate smoothly again, and sending queued messages no longer shows a spurious cancellation prompt.
+ReleaseNotesUrl: https://cli.devin.ai/docs/changelog/stable
+PurchaseUrl: https://devin.ai/pricing
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://cli.devin.ai/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

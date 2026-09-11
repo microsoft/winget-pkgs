@@ -1,0 +1,126 @@
+# Created with komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Microsoft.Bicep
+PackageVersion: 0.35.1
+PackageLocale: en-US
+Publisher: Microsoft Corporation
+PublisherUrl: https://github.com/Azure/bicep
+PublisherSupportUrl: https://github.com/Azure/bicep/issues
+Author: Azure
+PackageName: Bicep CLI
+PackageUrl: https://github.com/Azure/bicep
+License: MIT
+LicenseUrl: https://github.com/Azure/bicep/blob/HEAD/LICENSE
+Copyright: Copyright (c) Microsoft Corporation.
+CopyrightUrl: https://raw.githubusercontent.com/Azure/bicep/main/LICENSE
+ShortDescription: Bicep is a Domain Specific Language (DSL) for deploying Azure resources declaratively. It aims to drastically simplify the authoring experience with a cleaner syntax and better support for modularity and code re-use.
+Moniker: bicep
+Tags:
+- arm-templates
+- azure
+- bicep
+- bicep-cli
+ReleaseNotes: |-
+  Highlights
+  - GA release for the @secure() decorator on module outputs! You can now output secure values from a child module and read them in a parent module. (#16796)
+  - Visual Studio Bicep extension support for .bicepparam files! (#16861)
+  - New functions for working with URIs - parseUri() and buildUri() (#16802)
+    Example usage:
+    /*
+    Returns
+    {
+      scheme: 'https'
+      host: 'example.com'
+      port: 1234
+      path: '/foo/bar'
+    }
+    */
+    output parsedUri object = parseUri('https://example.com:1234/foo/bar')
+    /*
+    Returns:
+    'https://example.com:1234/foo/bar'
+    */
+    output builtUri string = buildUri({
+      scheme: 'https'
+      host: 'example.com'
+      port: 1234
+      path: 'foo/bar'
+    })
+  - New functions for working with Availaiblity Zones (#16985)
+    - toLogicalZone() - converts physical zones to logical zones
+    - toPhysicalZone() - converts logical zones to physical zones
+    - Array versions for bulk conversions (toLogicalZones() & toPhysicalZones())
+    var subscriptionId = subscription().subscriptionId
+    var location = 'westus2'
+    /*
+    Returns the physical AZ corresponding to the specified logical AZ in the specified subscription and location.
+    For westus2 location, this will be one of 'westus2-az1', 'westus2-az2', 'westus2-az3' depending on the subscription.
+    */
+    output singlePhysicalZone string = toPhysicalZone(subscriptionId, location, '1')
+    /*
+    Returns an array of physical AZs corresponding to the specified logical AZs in the specified subscription and location.
+    */
+    output physicalZones string[] = toPhysicalZones(subscriptionId, location, ['1', '2'])
+    /*
+    Returns the logical AZ corresponding to the specified physical AZ in the specified subscription and location.
+    Returns '1', '2', or '3' depending on the subscription.
+    */
+    output singleLogicalZone string = toLogicalZone(subscriptionId, location, 'westus2-az2')
+    /*
+    Returns an array of logical AZs corresponding to the specified physical AZs in the specified subscription and location.
+    */
+    output logicalZones string[] = toLogicalZones(subscriptionId, location, [
+      'westus2-az1'
+      'westus2-az2'
+    ])
+  - use-secure-value-for-secure-inputs linter rule: Use resource type information to catch more unsafe passing of non-secure values (#16873)
+  - [requires the onlyIfNotExists experimental feature] Resource Existence Checks using @onlyIfNotExists() decorator (#16655)
+    Attaching this decorator to a resource declaration means deployment of the resource will only take place if it hasn't already been deployed. Example usage:
+    @onlyIfNotExists()
+    resource onlyDeployIfNotExists 'Microsoft...' = {
+      name: 'example'
+      location: 'eastus'
+      properties: {
+        ...
+      }
+    }
+  - [requires the typedVariables experimental feature] Support importing and declaring types in .bicepparam files with typedVariables decorator (#16929)
+    - Allow usage of the type keyword in .bicepparam files
+    - Allow importing types from .bicep files in .bicepparam files
+    - Allow usage of inline types in .bicepparam files
+  - [requires the externalInputFunction experimental feature] External Input function - externalInput function to allow reading input that will be resolved later by external tooling in order to inject values at deployment time. (#16726)
+  Bugs and Features
+  - Decompiler support for user-defined functions (#16883)
+  - use-parent-property linter rule: Fix incorrect warning with blobContainer and fileShare (#16738)
+  - Raise diagnostic for unsupported usage of spread (#16739)
+  - Add friendly name to Playground link (#16803)
+  - Revert #16442 - Fixed bug VSCode extension does not read values from parameter file (#16789)
+  - no-hardcoded-env-urls linter rule: Remove URLs not present in environment() function output (#16863)
+  - Fix for intellisense of symbols inside import statement (#16936)
+  - fixing dotnet format issues, and addressing IDE0305: Collection initialization can be simplified errors/warnings (#16808)
+  - Use symbolic name for list function calls (#16862)
+  - Enhance substring type inference - updated parameter types for substring to infer acceptable ranges based on the other arguments provided to the function. (#16859)
+  - Prevent infinite recursion during type narrowing (#17028)
+  - Fix command binding comment in bicepconfig.json (#16807)
+  - use-resource-id-functions linter rule: Set to off by default (#16869)
+  .bicepparam Bug Fixes
+  - Suggest the experimental feature on the extends keyword for extendableparamfiles (#16744)
+  - adding checks to ensure the given file exists before building the bicepparam file (#16742)
+  - Clarifying parameter file generation logic and error message (#16662)
+  Local Deploy
+  - Local Deploy: process kill should be best-effort only (#16786)
+  - Local Deploy: Support deploying Azure modules (#16752)
+  - Local Deploy: Support long-running operations for local and Azure modules (#16797)
+  - Documentation: Replace deploy pane content with link to MSDocs (#16736)
+  - Local deploy: ensure languageversion 2.2-experimental emitting is enabled (#16945)
+  Community Contributions
+  - Remove unused methods (#16927) - thanks @eerhardt !
+  - Update DSC schema v3 (#16685) - thanks @Gijsreyn !
+  - support --pattern --outdir (#16882) - Thanks @NaridaL !
+    Example usage:
+    bicep build --pattern './foo/**/*.bicep' --outdir ./bar
+    bicep build-params --pattern './foo/**/*.bicepparam' --outdir ./bar
+ReleaseNotesUrl: https://github.com/Azure/bicep/releases/tag/v0.35.1
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

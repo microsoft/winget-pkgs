@@ -1,0 +1,62 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: WebCodr.jwtd
+PackageVersion: 5.6.0
+PackageLocale: en-US
+Publisher: webcodr
+PublisherUrl: https://github.com/webcodr
+PublisherSupportUrl: https://github.com/webcodr/jwtd/issues
+Author: David Henning
+PackageName: jwtd
+PackageUrl: https://github.com/webcodr/jwtd
+License: MIT
+LicenseUrl: https://github.com/webcodr/jwtd/blob/main/LICENSE
+Copyright: Copyright (c) David Henning
+ShortDescription: Decode and pretty-print JSON Web Tokens with syntax highlighting
+Description: jwtd is a command-line tool that decodes and pretty-prints JSON Web Tokens (JWT) and JSON Web Encryption (JWE) tokens with syntax-highlighted JSON output. It can verify JWS signatures and decrypt JWEs when given a key via the --key flag or the JWTD_KEY environment variable.
+Moniker: jwtd
+Tags:
+- cli
+- command-line
+- command-line-tool
+- jwe
+- jwt
+- jwt-decode
+- jwt-decoder
+- jwt-token
+ReleaseNotes: |-
+  ## Faster rendering, identical output
+
+  This release is internal work again. Nothing about jwtd's output changes, and on an ordinary token nothing about the speed is perceptible：a `jwtd <token>` run takes about 0.88 ms, and roughly three quarters of that is process startup and Go runtime initialization that happens before jwtd's own code runs at all.
+
+  What changed is the printer. jwtd rendered its colored JSON with `go-prettyjson`, which marshalled the value back to JSON and re-decoded it before formatting, then assembled the result one string per token — each through `fmt.Sprintf`, each re-deriving its ANSI escape sequences. jwtd already holds the decoded token, so the round trip was pure overhead. The replacement walks the value straight into a single buffer, resolves each color's escapes once per section, and quotes strings through `encoding/json` only when quoting would actually change them.
+
+  Where it is measurable — a 725 KB token, far larger than anything you would paste by hand:
+
+  | | 5.5.0 | 5.6.0 |
+  |---|---|---|
+  | rendering the payload | 7.32 ms | 0.33 ms |
+  | allocations while rendering | 19.6 MB, 136k | 579 B, ~0 |
+  | decode and print, end to end | 11.4 ms | 4.3 ms |
+  | decode and print, ordinary token | 14.6 µs | 4.0 µs |
+
+  The last row is the work jwtd does for a normal token, and it is 1 % of the run. Startup dominates, as it did before.
+
+  ## The output is byte-for-byte identical, and that is tested rather than asserted
+
+  `go-prettyjson` is still in `go.mod`, now as a **test-only dependency**, so the formatter that replaced it can be held to its output byte for byte：over enumerated value shapes and 200 seeded-random JSON values, with color on and off. A second differential test pins the cached ANSI escapes against `fatih/color` itself — and earned its keep immediately, catching that the library's `Sprint` family closes with a reset per attribute while its `Fprintf` family closes with a plain reset. Conflating the two would have quietly changed the dimmed reason line under a failed verdict and the JWE encrypted-part listing.
+
+  Beyond the test suite, 129 invocations of the 5.5.0 and 5.6.0 binaries across 15 tokens and 9 flag combinations produce identical bytes, exit codes and stderr included.
+
+  ## Also in this release
+
+  The escaping pass that sanitizes formatted JSON for the terminal had a fast path that never ran when color was on：it required printable ASCII, and colored output always carries the ESC bytes of its own color codes. It now admits them — everything that pass rewrites is DEL or above — which takes it from 612 MB/s to 4,214 MB/s on colored output, the interactive default.
+
+  The repository also gains a benchmark suite covering the parse, render, escape, and signature paths, so performance claims about jwtd can be checked instead of argued. One of them exists to record a limit rather than to invite tuning：decoding the payload is now the largest remaining cost, and it is already at the standard library's floor for a decoder that must preserve exact numeric claim values.
+
+
+  **Full Changelog**：https://github.com/webcodr/jwtd/compare/v5.5.0...v5.6.0
+ReleaseNotesUrl: https://github.com/webcodr/jwtd/releases/tag/v5.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

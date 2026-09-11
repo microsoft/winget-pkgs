@@ -1,0 +1,166 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ractive.hyalo
+PackageVersion: 0.20.0
+PackageLocale: en-US
+Publisher: '@ractive'
+PublisherUrl: https://github.com/ractive
+PublisherSupportUrl: https://github.com/ractive/hyalo/issues
+Author: Jean-Pierre Bergamin
+PackageName: hyalo
+PackageUrl: https://github.com/ractive/hyalo
+License: MIT
+LicenseUrl: https://github.com/ractive/hyalo/blob/HEAD/LICENSE
+ShortDescription: CLI for exploring and managing Markdown knowledge bases with YAML frontmatter
+Description: Hyalo is a fast command-line tool for searching, filtering, and mutating collections of Markdown files with YAML frontmatter. It supports property queries, tag filtering, regex search, wikilink tracking, and bulk metadata updates. Compatible with Obsidian vaults, Zettelkasten systems, and any structured Markdown documentation.
+Moniker: hyalo
+Tags:
+- agent-skill
+- agentic-workflows
+- cli
+- knowledge-base
+- knowledge-management
+- markdown
+- obsidian
+- rust
+- zettelkasten
+ReleaseNotes: |-
+  [0.20.0] - 2026-07-19
+  Added
+  - Broken-anchor detection in find --broken-links (iter-190, L-21): links
+    now carry their #fragment (heading anchor) through parsing and resolution.
+    find --broken-links reports a broken anchor — a link whose target file
+    exists but whose #heading does not — as a category distinct from a broken
+    target. In JSON, an anchored link gains fragment and (when the heading is
+    missing) broken_anchor: true; text output renders "Foo#Real" → "Foo.md"
+    and marks a missing heading as (broken anchor). The two categories are
+    never both reported on one link (a broken target skips the anchor check), and
+    broken anchors do not inflate links fix's broken / fixable counts or
+    its "Apply N fixes" hint — links fix stays target-only, letting anchor
+    semantics soak one release behind find before any lint/CI gate consumes
+    them. Anchor matching is exact and case-insensitive (Obsidian convention:
+    [[Foo#tasks]] matches ## Tasks), decodes percent-encoded markdown
+    fragments (foo.md#my%20heading) for comparison only (the written form is
+    preserved), and skips ^block-id refs (block ids are not indexed). Validation
+    reads headings from the already-materialized index/scan sections — zero
+    extra file reads on the --index path, and no per-file re-read on disk scan.
+    mv and links fix preserve fragments byte-exact (the rewrite span stops
+    before #).
+    The Link wire-shape gained an additive fragment: Option<String> field
+    (#[serde(default)]), serialized into .hyalo-index entries and the
+    persisted link graph. The field is backward compatible: existing
+    .hyalo-index snapshots load unchanged (fragments read as None, so no false
+    anchor reports from stale entries). To pick up fragment data for anchor
+    validation on the --index path, rebuild the index with hyalo create-index after upgrading.
+  - HYALO006 / broken-link lint rule (iter-188): hyalo lint now flags
+    wikilinks and markdown links that point at a vault file which does not exist.
+    Enabled and warn by default; hyalo lint --strict promotes it to an error
+    so CI can gate broken links. The vault-wide resolution context (case/stem
+    index) is built once per invocation — from the .hyalo-index snapshot
+    when --index is active, else a single vault walk — and shared across
+    workers, so the rule adds no per-file graph rebuild. Respects
+    [lint.rules.HYALO006] enable/severity overrides, --rule HYALO006 /
+    --rule-prefix HYALO, and --files-from (resolution stays vault-wide even
+    when the linted set is scoped, so a scoped file linking to an
+    unscoped-but-existing file does not false-positive).
+  - Honest partial-failure envelopes for link write paths (iter-187): when a
+    file write fails mid-batch, hyalo links fix --apply, hyalo links auto --apply, and batch hyalo mv --apply now emit a complete JSON envelope
+    rather than aborting with a bare error. links fix --apply gains failed /
+    failed_fixes buckets (each with the per-file error string); links auto --apply gains files_applied / files_skipped / files_failed counts plus
+    a per-file apply_outcomes list (applied/skipped/failed with reason, so skips
+    that previously only went to stderr are now in the envelope). Any partial
+    failure yields a non-zero exit code. Files written before the failure are
+    reported as applied, never silently kept and unreported.
+  Fixed
+  - find --orphan / --dead-end / --fields backlinks count
+    case-insensitive inbound links (L-6 tail): [[foo]] pointing at Foo.md
+    now counts as inbound in find, matching the backlinks command and
+    summary (all three route through the same case-insensitive graph lookup).
+    Previously find --orphan could list a file that summary and backlinks
+    agreed had inbound links.
+  - Percent-encoded markdown link destinations now resolve (iter-188, L-23):
+    [x](my%20dest.md) previously never resolved (the %20 was compared
+    literally against the on-disk filename my dest.md), so find --broken-links
+    false-positived and backlinks "my dest.md" missed the linker. The path
+    portion is now percent-decoded during resolution and in the link graph, so
+    encoded and angle-bracket ([x](<my dest.md>)) forms resolve to the same
+    file. Malformed (%2, %zz) or non-UTF-8 (%FF) escapes keep the literal
+    text — a filename with a stray % still resolves as written. Rewrite keeps
+    the destination as-authored (the %20 form is preserved on mv).
+  - Batch mv --apply no longer leaves dangling links after a rolled-back
+    rename (PR #221 review): when a mid-batch write failure rolled back file
+    renames, a "self-rewrite" plan — one whose rewritten content was written to
+    a file's own new (renamed) location, e.g. a moved file's outbound link
+    rewrite — was previously left in place even though its rename was undone,
+    stranding the file at its old path with content referencing the (now
+    reverted) new layout. Such plans are now identified by path coinciding
+    with one of the batch's own rename destinations, and their pre-batch
+    content is restored alongside the rename rollback. Plans on files outside
+    the rename set (pure external linker files) still keep the original
+    DEC-056 behavior of being kept and honestly reported.
+  - hyalo links fix --apply no longer aborts the whole batch on a per-file
+    I/O error (PR #221 review): a stat/read failure for one source file
+    (e.g. deleted between detection and apply) now lands that file's fixes in
+    the failed/failed_fixes envelope and the remaining files in the batch
+    still get their fixes applied, instead of propagating the error and losing
+    all progress.
+  - hyalo summary orphan/dead-end counts are now case-insensitive (iter-189,
+    L-6): inbound-link membership for orphan/dead-end classification went through
+    a case-sensitive target-set check, so on a case-insensitively-written vault a
+    file Foo.md linked only as [[foo]] was miscounted as an orphan even though
+    hyalo backlinks Foo.md found the linker. Inbound membership now uses the
+    lower_index-backed backlinks_ci lookup (the same one backlinks uses), so
+    such a file is correctly reported as a dead-end and orphan counts agree with
+    the backlink view. Outbound membership is unchanged (on-disk paths compared
+    against on-disk paths — no case divergence). Note: find --orphan /
+    find --dead-end still compute inbound via the case-sensitive backlinks
+    path; aligning them is a documented follow-up (see iter-189) so this release
+    ships exactly one observable orphan/dead-end change.
+  Changed
+  - hyalo links fix dry-run validates plans against on-disk text (iter-187):
+    dry-run now runs the identical plan-building phase as --apply, so its
+    unapplied / unapplied_fixes fields report exactly the fixes --apply
+    would refuse (stale index / concurrent edit) instead of always being empty.
+    The "Apply N fixes" hint count now discounts would-be-stale fixes so it
+    matches what --apply actually writes.
+  - Classify-side link resolution collapsed onto the shared resolver (iter-189,
+    refactor only): the links fix verdict logic (resolve_and_classify_link,
+    classify_link, classify_short_form_wikilink, plus the LinkResolution /
+    StemIndex types) moved out of link_fix.rs into discovery.rs as
+    classify_link_from_source — the Classify-mode sibling of the Exists-mode
+    resolve_link_from_source. Both now route their kind-dependent normalization
+    through one private normalize_link_target helper, so Exists ("does this link
+    resolve?") and Classify ("full fix-policy verdict") can no longer drift on the
+    wikilink/markdown/site-absolute/bare-basename branching. The test-only
+    detect_broken_links(&[FileLinks]) twin was deleted and its five unit tests
+    ported onto detect_broken_links_from_index. No user-visible behavior change
+    (locked by e2e capturing the broken/case_mismatches/ambiguous buckets).
+  - Shared link-existence resolver entry point (iter-188, task 0): the
+    "does this link exist?" resolution that find --broken-links /
+    find --orphan / find --dead-end and the new HYALO006 rule both need is now
+    a single discovery::resolve_link_from_source function. It owns the
+    kind-dependent normalization (wikilink vault-relative, markdown
+    site-absolute / path-qualified / bare-basename) and the final
+    resolve_target call, so find/mod.rs no longer inlines that branching and
+    the lint rule does not reimplement it.
+  - Unified link write path (iter-187): auto_link now builds
+    RewritePlans and writes through the shared execute_plans_partial
+    machinery instead of a hand-rolled line splitter (removed
+    split_lines_preserving_endings), keeping its stronger full-content TOCTOU
+    guard. Batch mv reports which link rewrites were durably applied before a
+    mid-batch abort (DEC-056: completed content writes on untouched linker files
+    are not rolled back; the renames are, along with the content of any
+    self-rewrite plan whose path coincided with a rename destination).
+  What's Changed
+  Other Changes
+  - feat(links): honest partial-failure envelopes + dry-run parity + unified auto write path (iter-187) by @ractive in #221
+  - iter-188: HYALO006 broken-link rule + L-19/L-23 link semantics & review close-out by @ractive in #222
+  - refactor(links): collapse Classify-side resolution onto shared discovery entry point (iter-189) by @ractive in #223
+  - feat(links): broken-anchor detection in find --broken-links (iter-190, L-21) by @ractive in #224
+  - fix(output): broken-anchor marker missing from find text output by @ractive in #225
+  - fix(find): case-insensitive inbound for --orphan/--dead-end (L-6 tail) by @ractive in #226
+  Full Changelog: v0.19.0...v0.20.0
+ReleaseNotesUrl: https://github.com/ractive/hyalo/releases/tag/v0.20.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

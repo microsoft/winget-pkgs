@@ -1,0 +1,121 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ChrisMcLennan.mnml
+PackageVersion: v0.2.12
+PackageLocale: en-US
+Publisher: Chris McLennan
+PublisherUrl: https://github.com/chris-mclennan
+PublisherSupportUrl: https://github.com/chris-mclennan/mnml/issues
+Author: Chris McLennan
+PackageName: mnml
+PackageUrl: https://mnml.sh/
+License: Apache-2.0
+LicenseUrl: https://github.com/chris-mclennan/mnml/blob/main/LICENSE-MIT
+ShortDescription: A NvChad-style terminal IDE in Rust.
+Description: 'mnml is a terminal IDE: vim or standard editing, LSP, git, embedded HTTP/CDP/DAP, AI panes, headless test harness.'
+Tags:
+- editor
+- ide
+- rust
+- terminal
+- tui
+- vim
+ReleaseNotes: |-
+  Release Notes
+  Bug-fix + polish release built from a long session of live-user feedback
+  (Chris + Liaan). Headline: SEV-1 leader-chord fix — bare <space>
+  now opens the NvChad-style whichkey overlay instead of evaporating,
+  restoring all ~60 <leader>* chords declared in the trie.
+  Added
+  - theme.auto_system — right-click theme chip → "Auto: match
+    system (light/dark)" now actually works. One-shot detection:
+    macOS defaults read -g AppleInterfaceStyle, Linux GNOME
+    gsettings + KDE Plasma kreadconfig6/5 fallback, Windows
+    AppsUseLightTheme registry. Dark → uses [ui] theme_toggle
+    alt-theme; light → [ui] theme default. (#1007)
+  - Codex API routing — first-launch wizard's AI billing pref
+    now exposes Api for Codex too (not just Sub / Off). Codex CLI
+    supports both ChatGPT Plus/Team sub auth and $OPENAI_API_KEY.
+  - Tri-state per-product AI backend routing — [ai.routing.claude]
+    / [ai.routing.codex] blocks with Sub / API / Auto / Off choices,
+    wired into the first-launch wizard. Auto probes CLI-on-PATH +
+    env-key. Ghost-text default flipped to on.
+  - Ghost-text via Claude Code sub — no longer bills against API
+    tokens; uses claude -p under the hood.
+  Changed
+  - Empty-state tab bar renders per-tab — clicking + in the
+    top-right to create a new desktop tab now shows the empty-state
+    bar (left + + right split-cluster with Claude / ghostty / H / V)
+    same as first-launch. Prior check was app.panes.is_empty() which
+    only fires on a fresh workspace. (#1019)
+  - Tab-page chip spacing tightened — 1 2 3 instead of the
+    looser 1 2 3. Dropped a padding cell each side. (#1020)
+  - Wizard section reorder — Nerd Font → Input → Claude+Codex
+    install → AI billing → AI ghost-text → VSCode shim. Prior order
+    asked ghost-text backend first, before install / billing were
+    even covered.
+  - Statusline chips get pill treatment — Claude / Codex usage,
+    coverage, mixr all render on a distinct bg_darker pill so they
+    read as grouped chrome.
+  - Multi-account Claude ticker — the usage chip rotates
+    through accounts one at a time with a bold-active marker,
+    fitting 3+ accounts in the same width.
+  Fixed
+  - SEV-1: <space> opens whichkey via chord-chain fallback —
+    picker.files binds "space f f" making <space> a chord
+    prefix. Prior state: pressing <space> returned Pending with
+    no fallback; after the 1s timeout it evaporated. All ~60 leader
+    chords silently no-op'd (<leader>e fell through to vim as
+    end-of-word motion, etc.). Fix: added "space" to
+    whichkey.leader's keys so resolve_seq([space]) returns
+    PendingWithFallback(whichkey.leader). (#968)
+  - Tree-focused Space activates the row — reviewer follow-up on
+    the SEV-1 fix: pane_wants_bare_space now includes Tree focus
+    in the bypass, so bare Space in the workspace tree reaches the
+    documented tree_activate() handler instead of getting eaten
+    by the chord chain. Leader chords still work from any pane;
+    Ctrl+K opens whichkey from the tree. (#968 f/u)
+  - Tab-page close-button hitbox — bufferline_tab_page_close
+    rect was width: 1 but painted span was 2 cells. Right half of
+    the × was dead. (#1022)
+  - Theme detection on KDE — detect_system_dark was GNOME-only
+    via gsettings; KDE Plasma users got a false "system light"
+    report. Added kreadconfig6 → kreadconfig5 fallback. (#1007 f/u)
+  - Per-section hover-help for activity-bar icons — hovering
+    Explorer / Search / Git / Debug / Integrations / Sessions /
+    Agents / Cloud Agents / HTTP / Notes / TODOs / Findings all
+    previously showed the same generic "one of the sections that
+    shares the left panel" placeholder. Each now has a dedicated
+    title/body/palette-link entry. (#969)
+  Docs
+  - Removed stale "coming soon" claims from activity_bar.rs and
+    ActivitySection enum docs (all 5 sections ship live content).
+    (#1011)
+  - Site: dropped <meta name="robots" content="noindex, nofollow">
+    from astro.config.mjs — was blocking Google indexing. Added
+    Sitemap: line to robots.txt.
+  Install mnml-rs 0.2.12
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/chris-mclennan/mnml/releases/download/v0.2.12/mnml-rs-installer.sh | sh
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/chris-mclennan/mnml/releases/download/v0.2.12/mnml-rs-installer.ps1 | iex"
+  Download mnml-rs 0.2.12
+  ─────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                         │Platform           │Checksum
+  ─────────────────────────────────────────────┼───────────────────┼─────────────
+  mnml-rs-aarch64-apple-darwin.tar.xz          │Apple Silicon macOS│checksum
+  ─────────────────────────────────────────────┼───────────────────┼─────────────
+  mnml-rs-x86_64-apple-darwin.tar.xz           │Intel macOS        │checksum
+  ─────────────────────────────────────────────┼───────────────────┼─────────────
+  mnml-rs-x86_64-pc-windows-gnu.zip            │x64 MinGW          │checksum
+  ─────────────────────────────────────────────┼───────────────────┼─────────────
+  mnml-rs-x86_64-pc-windows-gnu.msi            │x64 MinGW          │checksum
+  ─────────────────────────────────────────────┼───────────────────┼─────────────
+  mnml-rs-aarch64-unknown-linux-gnu.tar.xz     │ARM64 Linux        │checksum
+  ─────────────────────────────────────────────┼───────────────────┼─────────────
+  mnml-rs-x86_64-unknown-linux-gnu.tar.xz      │x64 Linux          │checksum
+  ─────────────────────────────────────────────┴───────────────────┴─────────────
+ReleaseNotesUrl: https://github.com/chris-mclennan/mnml/releases/tag/v0.2.12
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

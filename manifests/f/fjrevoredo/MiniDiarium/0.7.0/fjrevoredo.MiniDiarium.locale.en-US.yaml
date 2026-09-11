@@ -1,0 +1,153 @@
+# Created using wingetcreate 1.12.8.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: fjrevoredo.MiniDiarium
+PackageVersion: 0.7.0
+PackageLocale: en-US
+Publisher: fjrevoredo
+PublisherUrl: https://mini-diarium.com/
+PublisherSupportUrl: https://github.com/fjrevoredo/mini-diarium/issues
+PrivacyUrl: https://github.com/fjrevoredo/mini-diarium/blob/master/docs/PRIVACY.md
+Author: Francisco J. Revoredo
+PackageName: Mini Diarium
+PackageUrl: https://github.com/fjrevoredo/mini-diarium
+License: MIT
+LicenseUrl: https://github.com/fjrevoredo/mini-diarium/blob/master/LICENSE
+Copyright: Copyright (c) 2026 Francisco J. Revoredo
+ShortDescription: Encrypted, local-first journaling app
+Description: A local-first journal with serious encryption. Free, open source, and never touches the internet.
+Moniker: mini-diarium
+Tags:
+- privacy
+- journaling
+- journal
+- diary
+- foss
+- open-source
+- rust
+ReleaseNotes: |-
+  What's Changed
+
+  Mini Diarium has taken automatic backups since early versions, but they lived entirely in the
+  background. There was no way to see one existed, confirm it actually opened with your key, or use it
+  without digging through files by hand. That gap closes here. Backups now have a real interface,
+  reachable from Preferences after you unlock and from the lock screen itself before you do, since a
+  backup you can't reach when the journal won't open isn't much of a safety net. From there you can
+  check a backup's health, restore the whole journal to it, or pull back just the entries you're
+  missing without disturbing anything already there. The same problem also shows up earlier, before a
+  backup would ever be needed. An entry could quietly vanish just from editing it wrong: erase its
+  content, click away, and it was gone, with no backup involved at all. This version stops that at the
+  source. Erasing an entry no longer deletes it out from under you without asking first. Between the
+  two changes, the safety net you already had is now something you can actually see and use, and the
+  everyday accident that used to slip past it entirely no longer does. Design polish, richer
+  notifications, and a quiet support prompt round out the release, but they are not what it is about.
+
+  Added
+
+  - Backups are now visible and recoverable from inside the app (TODO-0098 (docs/todo/TODO.md)): the
+    backup system previously had no user interface at all. There was no way to see whether a backup
+    existed, when it was taken, or whether it was any good. A new Preferences → Backups panel lists
+    every backup with its date, why it was taken, how many entries it holds, its size, and whether it
+    has been checked against this journal's key. It also reports the folder's overall state: whether
+    backups are working, when the last one was taken, how much space they use against their limit, and
+    the retention policy in plain language. From here you can take a backup on demand, re-check one,
+    delete one, or open the backups folder in your file manager.
+  - The same panel is reachable from the unlock screen, before any password is entered, via View
+  backups. This is deliberate: the moment you most need to know what backups exist is the moment the
+  journal will not open. Backup metadata is readable without a key, so the list there is real rather
+  than a stub. Each backup shows its date, age, trigger, size, and checked state. Entry counts and
+  date ranges are deliberately held back at the lock screen: a passer-by should learn that backups
+  exist without learning how much has been written or over what span. Everything that genuinely needs
+  the master key (creating, checking, deleting) is disabled and says why.
+  - A failed backup is no longer invisible: backups taken as the app locks or exits run on a
+  background thread with nothing watching, so a journal whose backups had quietly stopped working
+  looked identical to one that was up to date. The failure is now recorded and reported in the panel.
+  The panel also flags a backups folder that cannot be used, covering both a disconnected external or
+  synced drive and a path that still resolves but holds nothing usable, where something else has taken
+  its place or it can no longer be read. That second case is detected directly rather than inferred
+  from a failure record, because a folder that cannot hold a backup cannot hold the record of the
+  failure either. The record itself carries only when and what triggered it, never an error message:
+  the file it lives in is plaintext, and an I/O error string is the easiest way to leak a folder path
+  by accident.
+  - Passwordless journals say what their backups cannot do: a journal with no password is encrypted
+  with a key held in this app's settings on this device, so copying its backups folder to another
+  machine is not enough to open them there. The panel states this outright rather than leaving it to
+  be discovered during a recovery.
+  - A journal can be rolled back to a backup: every row has a Restore button. Confirming it names the
+  backup's date, warns that entries written since then will be replaced, and states that the current
+  state is saved first. Restoring is reversible because of that safety snapshot, not despite skipping
+  anything. No password or key file is asked for: changing your password re-wraps the same underlying
+  key rather than generating a new one, so whatever unlocked the journal a moment ago also opens every
+  backup it ever produced, however old. A restore that fails partway rolls back to the safety snapshot
+  automatically, and the panel says so plainly rather than leaving the journal in whatever state the
+  failure found.
+  - Individual entries can be recovered without rolling back the whole journal: every row also has a
+  Restore entries… button that opens the backup for browsing. Each entry shows whether it is missing
+  from your current journal, shorter there than in the backup, or already present, so it is clear what
+  is actually worth recovering. Restoring never overwrites anything: a recovered entry is added
+  alongside whatever your journal already holds for that date, and the result says exactly how many
+  entries were added. Tags come back with the entry, and images inside it are copied over as their own
+  fresh copies rather than pointing at whatever unrelated image the journal happens to already have.
+  Nothing decrypted ever touches disk during the process. Local-only (passwordless) journals open a
+  backup here with this device's key, the same way the journal itself unlocks.
+  - Moving a journal offers to move its backups along: Preferences → Data → Change journal directory
+  used to relocate only diary.db and silently stranded every existing backup at the old location. If
+  the journal has backups, you are now asked whether to move them too, and declining tells you plainly
+  where they were left. The move preserves each backup's real history (when it was taken, why, whether
+  it has been checked) instead of the destination re-describing them as unknown files it happens to
+  find.
+  - Credential changes warn about existing backups: every backup keeps the credential it was taken
+  with, which is easy to forget once a password has changed or a key file has been removed. The
+  change-password form carries a persistent reminder that backups taken beforehand still need the old
+  password. Removing an authentication method warns before you confirm that the method keeps opening
+  every backup taken while it was registered, and offers a Review backups shortcut afterward. Each
+  backup in the panel also states which credential it needs, read from the same backup metadata that
+  powers the rest of the list.
+  - A quiet way to support Mini Diarium, without ever interrupting your writing (TODO-0106
+    (docs/todo/TODO.md)): a heart icon appears in the header only once you have genuinely formed a
+    journaling habit, reaching a real 7, 66, or 365-day streak, with a wall-clock age check on the
+    journal itself so bulk-importing old entries cannot fake it. Clicking it opens a short checklist:
+    star the project on GitHub, leave a review, share it with a friend, subscribe to the newsletter,
+    contribute, or donate, ordered from least to most to ask of you. Nothing here is required or ever
+    blocks anything. The same checklist is reachable any time from About → Support Mini Diarium,
+    whether or not a streak milestone is pending. Checked-off items are remembered across restarts,
+    entirely on your device.
+  - Rich notification content and detail view (TODO-0107 (docs/todo/TODO.md)): notification summaries
+    now support light markdown (bold, links, short lists), and entries worth extra detail, like
+    release notes, can show a full rich-markdown "Read more" view without leaving the app.
+
+  Fixed
+
+  - UI/UX design review fixes (found in a full live-app design review):
+  - Search result snippets and two error/destructive controls did not follow the design system's
+  tokens: a matched search term's <mark> rendered with the unstyled browser default (yellow) instead
+  of the app's amber highlight; the custom-font delete button and the image-picker error banner used
+  raw Tailwind red instead of the shared .text-destructive/.text-error tokens. All three now use the
+  same tokens as the rest of the app in both themes.
+  - The calendar gave no reason a future day was unclickable: with future entries disabled (the
+  default), a disabled day now shows a tooltip and an appended aria-label explaining why and where to
+  turn the setting on, without changing the default itself.
+  - The unread-notifications badge could compete with the onboarding tour for attention: the bell's
+  unread count and aria-label are now suppressed while a first-run tour is active, and unaffected
+  otherwise.
+  - Reset Journal read with the same visual weight as routine actions nearby: it now sits below a
+  section divider, separated from "Change journal directory", while keeping the filled
+  .interactive-destructive button style used for destructive actions elsewhere in the app. The
+  existing double-confirmation flow is unchanged.
+  - The Statistics dialog gave every number equal visual weight, including Current Streak, arguably
+  the stat worth glancing at first. It now renders as a hero card above the remaining stat rows, with
+  Best Streak folded in as a secondary line, and no backend or data changes.
+  - A freshly created journal could show "Backups are working" before any backup had ever been taken,
+  alongside "No backup has been taken yet.", two contradictory-sounding lines rendered at once. A new
+  pending state now replaces the misleading "working" claim until the first backup actually exists.
+  - The theme overrides "Reset to default" button (Preferences → Advanced) used the same invented
+  outline-plus-.text-destructive styling the Reset Journal button was just corrected away from
+  (follow-up catch after the review): it now uses the same filled .interactive-destructive button
+  style as every other destructive action.
+  … (truncated — see ReleaseNotesUrl for full notes)
+ReleaseNotesUrl: https://github.com/fjrevoredo/mini-diarium/releases/tag/v0.7.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/fjrevoredo/mini-diarium/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

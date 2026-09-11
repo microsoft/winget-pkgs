@@ -1,0 +1,40 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: NextTrace.NTR
+PackageVersion: 1.7.3
+PackageLocale: zh-CN
+ShortDescription: 一个使用 Golang 实现的开源轻量级可视化 traceroute 工具。
+Tags:
+- asn查询
+- as路径
+- geoip
+- geolocation
+- ip
+- ip查询
+- traceroute
+- 网络
+- 网络分析
+ReleaseNotes: |-
+  What's Changed
+  - 新增 traceroute 终止原因：根据 ICMPv4 / ICMPv6、TCP、UDP 的实际响应语义区分 destination_reached、unreachable 和 max_hops，不再通过响应 IP 是否等于目标 IP 判断终点 by @EveCat29 in https://github.com/nxtrace/NTrace-dev/pull/205
+  - 修复稳定收到不可达响应后仍继续探测更高 TTL 的问题；同一 TTL 存在 transit 响应时会继续探测，避免 ECMP 路径误终止 by @tsosunchia in https://github.com/nxtrace/NTrace-dev/pull/209
+  - 新增标准 ICMP unreachable marker，包括 !N、!H、!P、!F、!X 等；分片 MTU 未知时仅输出 !F
+  - 普通终端输出和 Fast Trace 新增 Trace Stopped 终止说明；--output / --output-default 会同步写入无 ANSI 的纯文本原因
+  - CLI JSON 新增可选 StopReason，包含 hop、reason、responses、markers；classic / raw / JSON 不追加文本 footer，保持机器可读输出兼容
+  - Web、REST、WebSocket 和 MCP 新增结构化 stop_reason；MTR report / raw 新增 path_end，逐 probe 记录可携带 response
+  - MTR 改为根据响应证据维护路径边界；无限运行时 unreachable 边界可被后续 transit 响应重新打开，有限运行以最终 path_end 为准
+  - MTR TUI、report 和 WebUI 会将 unreachable marker 显示在对应 Host 旁，并按语义终点过滤更高 TTL 的陈旧记录
+  - 明确多输出模式优先级：--json > --table > --classic > --raw > --output > 实时输出；日志输出被覆盖时会通过 stderr 提示且不创建无效文件
+  - 将官方 GeoIP 数据源统一命名为 NextTrace API，机器可读 data_provider 规范值统一为 NextTrace-API；继续兼容大小写不敏感的 LeoMoeAPI / LeoMoe 输入别名 by @tsosunchia in https://github.com/nxtrace/NTrace-dev/pull/208
+  - 修复配置 NextTrace API v4 token 后部分服务请求仍初始化 v3 WebSocket 连接的问题
+  - 更新依赖：github.com/modelcontextprotocol/go-sdk 1.7.0、github.com/stretchr/testify 1.12.0、golang.org/x/mod 0.40.0、golang.org/x/net 0.58.0 等
+  额外的：
+  本版本重点调整 traceroute / MTR 的路径终止判断。程序不再通过最后一个响应地址是否等于目标地址推断是否到达终点，而是使用协议响应语义。
+  依赖结构化输出的程序应优先读取 traceroute 的 stop_reason / StopReason 和 MTR 的 path_end。
+  MTR raw stdout 仍保持固定 12 列，不可达边界诊断写入 stderr。
+  旧的 LeoMoeAPI / LeoMoe provider 输入仍然有效，但输出已统一为 NextTrace-API。
+  Full Changelog: https://github.com/nxtrace/NTrace-core/compare/v1.7.2...v1.7.3
+ReleaseNotesUrl: https://github.com/nxtrace/NTrace-core/releases/tag/v1.7.3
+ManifestType: locale
+ManifestVersion: 1.12.0

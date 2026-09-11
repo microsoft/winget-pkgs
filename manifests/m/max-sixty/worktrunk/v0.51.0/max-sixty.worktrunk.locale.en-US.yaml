@@ -1,0 +1,72 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.51.0
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Improved
+  - Codex support: Worktrunk now ships a first-class Codex plugin alongside the Claude Code one. wt config plugins codex install installs it; wt config show --full reports its state. The Codex plugin bundles the shared configuration skill — documentation the agent reads to help set up LLM commits, hooks, and troubleshooting. Codex exposes no turn-end or worktree-lifecycle hooks, so unlike Claude Code it has no wt list activity tracking or session worktree isolation; the skill is the integration. Docs (#2512, thanks @douglas; #2780, #2782, #2786)
+  - Experimental project-level commit-message guidance: [commit.generation] template-append adds to the commit/squash LLM prompt instead of replacing it (template still replaces), and is now valid in both user config and project .config/wt.toml. The user fragment renders into a <user-guidance> block (no approval); the project fragment renders into a gated <project-guidance> block bundled into the existing wt merge hook-approval prompt — declining is non-fatal. User-only commit-generation keys placed in project config still get the "this belongs in user config" redirect. (#2774, #2790, thanks @gabimoncha for the request in #2758)
+  - /wt-switch-create takes an optional repo and a -- task delimiter: The Claude Code skill now accepts <branch> [<repo>] [-- <task>]. The optional second token names a different repository to create the worktree in; -- cleanly separates the task from the rest. Without a --, a path-shaped second token is treated as the repo and the remainder as the task. (#2751)
+  - wt list --full and wt statusline count untracked files in HEAD±: The HEAD± working-diff segment now includes untracked-file lines under --full and in wt statusline, matching wt step diff. Default wt list and the picker stay on the cheap tracked-only path. (#2764)
+  - wt step prune and wt list no longer stall on long-divergent branches: The patch-id squash-merge scan (is_squash_merged_via_patch_id) ran git log -p over the entire target-side history — tens of thousands of commits on a fast-moving repo, taking seconds to tens of seconds. It's now capped at 500 commits via a cheap graph-only pre-flight; above the cap the check returns "not squash-merged" (the safe answer). (#2752)
+  Fixed
+  - Config deprecation-layer correctness: Three independent fixes — structural migration now preserves unrelated [ci] keys and unparsable deprecated sections instead of discarding them; config update aborts on an approvals-copy I/O failure instead of silently dropping approvals; deprecated template-variable renaming rewrites the parsed TOML tree instead of doing a raw text replace that corrupted occurrences inside escaped strings. (#2783)
+  - Data-safety and correctness fixes: Six independent single-file fixes — wt step relocate --clobber refuses to overwrite an existing backup; wt remove re-checks cleanliness immediately before a forced submodule removal (time-of-check/time-of-use); wt switch re-discovers the base worktree via a fresh Repository after worktree add instead of reading a stale cached list; wt switch pr:<N> derives owner/repo from the forge remote rather than the primary remote and validates an empty Azure source branch at the provider boundary; user-controllable branch operands are guarded with --. (#2784)
+  Documentation
+  - Alias template timing: A new Aliases subsection documents that templates render at alias dispatch using the invoking worktree's context, so a nested wt command's own template variables resolve against the outer worktree unless wrapped in {% raw %}…{% endraw %}. Fixes #2753. (thanks @viicslen for reporting) (#2754)
+  Internal
+  - The Claude Code and Codex plugin payloads are consolidated into one shared directory. (#2789)
+  - WORKTRUNK_BOT_TOKEN is renamed to TEND_BOT_TOKEN in non-tend CI workflows. (#2781)
+  Install worktrunk 0.51.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/max-sixty/worktrunk/releases/download/v0.51.0/worktrunk-installer.sh | sh && wt config shell install
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/max-sixty/worktrunk/releases/download/v0.51.0/worktrunk-installer.ps1 | iex"; git-wt config shell install
+  Install prebuilt binaries via Homebrew
+  brew install worktrunk && wt config shell install
+  Download worktrunk 0.51.0
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+  Install via Cargo
+  cargo install worktrunk && wt config shell install
+  Install via Winget (Windows)
+  winget install max-sixty.worktrunk && git-wt config shell install
+  Install via AUR (Arch Linux)
+  paru worktrunk-bin && wt config shell install
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.51.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

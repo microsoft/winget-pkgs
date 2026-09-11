@@ -1,0 +1,41 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: endev.aube
+PackageVersion: 1.33.1
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  A small patch release with two install-path fixes: interactive terminals get their animated progress bar back, and embedders can build native packages again.
+  Fixed
+  - Restore the animated progress bar in interactive terminals (#1117 by @jdx) — An AUBE_TTY_PROGRESS gate introduced back in v1.10.0 had quietly routed every interactive terminal to the CI-oriented append-only heartbeat, so installs appeared to jump in ~2s chunks (0% → 83% → 100%) instead of animating. That gate is removed: stderr TTYs now get the smooth in-place bar again, while pipes and CI runners still use the line-oriented heartbeat. --reporter=append-only remains available to force line output on demand.
+  - Bootstrap node-gyp in-process instead of re-execing aube (#1114 by @jdx) — When aube is embedded as a library (e.g. mise's npm backend), the node-gyp bootstrap shelled out to current_exe, which named the host binary and failed with error: unexpected argument '--ignore-scripts' found. This broke installs of any npm package whose build scripts reach node-gyp (gemini-cli, vercel, wrangler, orval, and others) on a cold cache. The bootstrap now runs in-process under the existing project lock, so native builds work for embedders. Standalone aube behavior is unchanged.
+
+  💚 Sponsor aube
+  aube is maintained by @jdx, an open source developer for entire.io, the title sponsor of the jdx.dev open source tools including mise. Work on aube is funded by sponsors.
+  If aube is saving your team install time or CI minutes, please consider sponsoring at jdx.dev. Individual and company sponsorships are what keep the project fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/aube/releases/tag/v1.33.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

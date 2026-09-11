@@ -1,0 +1,89 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 16.1.11
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Fixed
+  - Fixed OpenAI Responses native history replay leaking image generation provider-only fields into the next request, which made OpenAI-compatible proxies reject pi tool-calling sessions with Unknown parameter: input[1].action. (#3201)
+  - Fixed a stream thought-leakage issue for gemini-3.5-flash where the model's internal reasoning JSON could leak into the visible text stream. The stream parser now uses a brace-balanced counting algorithm to accurately slice and discard the leading thought JSON block, with a robust fallback for unescaped double quotes, dynamic tool-name derivation, and preservation of subsequent text deltas without triggering empty-response retries.
+  @oh-my-pi/pi-catalog
+  Fixed
+  - Fixed Umans umans-glm-5.1 / umans-glm-5.2 advertising native image input. The models/info endpoint reports supports_vision: "via-handoff" for the GLM models, meaning vision routes through a separate handoff pre-analysis step instead of accepting raw image blocks; umansSupportsVision treated any non-empty string as native vision support, so image prompts went directly to GLM and were rejected with 400 This model does not support image inputs. The helper now requires supports_vision === true, the bundled GLM 5.1/5.2 rows are corrected to text-only, and stale mismatched Umans cache rows for those ids are dropped so the vision-handoff path runs even before a successful refresh. (#3184)
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added tab.waitForSelector for more robust element-wait behavior
+  - Added tab.waitForNavigation to monitor and await page transitions
+  Changed
+  - Standardized public HTML exports to use the brand web palette instead of the local TUI theme
+  - Updated export logic to allow choosing between brand-web or local TUI color palettes
+  - Clamped browser tool timeouts to fail fast with named errors instead of opaque cell timeouts
+  - Added strict validation to block unsupported Playwright-only selector engines in browser tools
+  Fixed
+  - Fixed Codex image reads re-encoding to WebP and then failing the next request with an invalid input_image.image_url; Codex-bound images now stay in PNG/JPEG-compatible formats.
+  - Fixed prompt-template and file slash-command submissions rendering both the raw slash invocation and the expanded prompt in the interactive transcript. (#3199)
+  - Fixed the /model thinking picker labeling the OpenAI GPT-5.5 top effort as max instead of the catalog-declared xhigh (#3194).
+  - Fixed session-title generation silently falling back to the online smol model (and billing whatever provider held the resolved API key — OpenRouter in the reporter's case) when the user had explicitly configured a local providers.tinyModel: generateSessionTitle raced local against online with a 10s timeout and fired the online request immediately whenever the local worker returned null (unknown key, model not downloaded, transformers.js failure). Now an explicit local-model choice is honored end-to-end — on local failure the session is left untitled with a logger.warn instead of billing the smol fallback (#3187)
+  - Fixed OpenCode MCP discovery so array commands are normalized into a stdio executable plus arguments, environment is accepted as the OpenCode env key, and argument lists are omitted when empty. (#3180)
+  - Fixed plan mode leaving write hidden under tools.discoveryMode: "all", which made the agent attempt to create the plan file via edit and stall. Plan-mode entry now force-activates write whenever the registry built it, matching the write+edit instructions in the plan-mode prompt (#3165)
+  - Fixed edit and patch tool writes bypassing the ACP client's open buffer when Zed (or another ACP client) advertises the fs.writeTextFile capability: all three write-mode tools (edit, patch, replace) now route through the client bridge when it is available, so the editor's TypeScript diagnostics panel updates immediately instead of requiring a workspace reload.
+  - Fixed the agent dashboard new-agent description and the hook editor (default hook-style mode) treating Ctrl+Q as plain text on Windows Terminal, leaving Windows users unable to submit because the terminal cannot deliver a distinct Ctrl+Enter event. Both forms now submit on the shared app.message.followUp chord (Ctrl+Q or Ctrl+Enter), matching the main prompt editor and any user remap of app.message.followUp (#2118).
+  - Fixed pi.sendMessage({ display: true }) rendering the custom message twice when fired from a session_start extension handler (or any other non-streaming dispatch before the initial transcript render). ExtensionUiController.#applyCustomMessageDisplay rebuilt the chat from the freshly-persisted session entry, and main.ts's subsequent renderInitialMessages(undefined, { preserveExistingChat: true }) then both re-rendered from session entries AND re-appended the preserved chat children — duplicating the message. The rebuild now waits until renderInitialMessages has completed at least once (tracked via InteractiveModeContext.initialChatRendered); after that, post-init extension sends still rebuild as before so messages from tool_result / agent_end / etc. surface immediately (#1955).
+  - Fixed Git-mutating automation silently mis-handling pure Jujutsu workspaces (.jj/repo/ present, no colocated .git/). task/worktree.ts#getRepoRoot previously threw a generic "Git repository not found" for isolated subagent setup, and autoresearch/git.ts#ensureAutoresearchBranch returned a soft "Not in a git repository" warning that let /autoresearch proceed with no branch isolation or auto-commits. Both paths now detect a pure jj workspace via the new jj.isPureJjRepo helper and surface an actionable Jujutsu-specific error pointing at jj git init --colocate. Colocated jj-git (both .jj/ and .git/ at the same root) and plain Git checkouts behave exactly as before (#1935).
+  - Fixed auto thinking mode being silently dropped when a session is resumed (--continue/--resume/in-app switch). The session log persisted only the resolved per-turn effort, not the auto selector, so resume froze the session at the last concrete level and never reclassified again. The log now records the configured selector (auto vs concrete) alongside the resolved effort, so resumed auto sessions stay in auto (shown as pending until the next turn reclassifies) and manual concrete pins still restore as concrete — including a pin whose level matches the effort auto had just resolved to.
+  - Fixed transcript scrollback stability on terminals with eager erase risk so completed assistant messages remain stable while new streaming lines are rendering
+  - Fixed Hindsight retain (and the shared mnemopi/Hindsight recall paths) framing assistant turns whose only content was punctuation/whitespace — most commonly the lone . some providers emit for tool-call-only or thinking-only turns — into [role: assistant]\n.\n[assistant:end] blocks that polluted the bank, wasted retain tokens, and degraded recall. prepareRetentionTranscript, extractMessages, and flattenMessagesForRecall now require at least one letter or digit per message via a shared hasSubstantiveContent predicate (#1806).
+  - Fixed /resume rendering forked child sessions without a fork tag, making them indistinguishable from their parent when titles match (#1792).
+  What's Changed
+  - fix: route edit/patch/replace writes through ACP client bridge by @Mokto in https://github.com/can1357/oh-my-pi/pull/2244
+  - fix(coding-agent): force-activated write tool while plan mode is live by @roboomp in https://github.com/can1357/oh-my-pi/pull/3166
+  - fix(mcp): normalize OpenCode MCP command arrays by @roboomp in https://github.com/can1357/oh-my-pi/pull/3182
+  - fix(catalog/umans): treated supports_vision sentinels as text-only by @roboomp in https://github.com/can1357/oh-my-pi/pull/3186
+  - fix(coding-agent): honor explicit local providers.tinyModel instead of silently billing online smol (issue #3187) by @roboomp in https://github.com/can1357/oh-my-pi/pull/3190
+  - fix(google-gemini-cli): robust stream thought-leakage filter for gemini-3.5-flash by @cagedbird043 in https://github.com/can1357/oh-my-pi/pull/3191
+  - fix(coding-agent): show xhigh in model picker by @roboomp in https://github.com/can1357/oh-my-pi/pull/3195
+  - fix(coding-agent): mark forked sessions in resume picker by @roboomp in https://github.com/can1357/oh-my-pi/pull/1794
+  - fix(hindsight): drop punctuation-only assistant turns before retain by @roboomp in https://github.com/can1357/oh-my-pi/pull/1807
+  - fix(session): keep auto thinking mode active across session resume by @msimon in https://github.com/can1357/oh-my-pi/pull/1865
+  - fix(coding-agent): guarded Git-mutating automation in pure jj workspaces by @roboomp in https://github.com/can1357/oh-my-pi/pull/1939
+  - fix(coding-agent): rendered extension sendMessage(display:true) once during session_start by @roboomp in https://github.com/can1357/oh-my-pi/pull/1956
+  - fix(coding-agent): submit /agents create form and hook editor on Ctrl+Q by @roboomp in https://github.com/can1357/oh-my-pi/pull/2134
+  - fix(tui): replace raw optimistic slash prompt renders by @roboomp in https://github.com/can1357/oh-my-pi/pull/3200
+  - fix(ai): sanitize Responses image history replay by @roboomp in https://github.com/can1357/oh-my-pi/pull/3202
+  New Contributors
+  - @msimon made their first contribution in https://github.com/can1357/oh-my-pi/pull/1865
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v16.1.10...v16.1.11
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v16.1.11
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

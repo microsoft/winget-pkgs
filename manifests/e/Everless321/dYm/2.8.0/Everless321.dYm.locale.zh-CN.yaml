@@ -1,0 +1,42 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Everless321.dYm
+PackageVersion: 2.8.0
+PackageLocale: zh-CN
+Publisher: example.com
+PublisherUrl: https://github.com/Everless321
+PublisherSupportUrl: https://github.com/Everless321/dYm/issues
+PackageName: dYm
+PackageUrl: https://github.com/Everless321/dYm
+License: 免费软件
+Copyright: Copyright © 2026 example.com
+ShortDescription: 抖音视频下载与智能分析管理工具
+Tags:
+- 下载
+- 抖音
+- 视频
+- 解析
+ReleaseNotes: |-
+  脚本钩子：让脚本在特定时机自动运行
+  新建脚本时可以选一个触发时机，之后不用手点也不用配 cron，事件发生就自动跑：
+  - 作品下载完成 — 拿到作品信息与本地文件夹路径，适合自动打标签、转码、推送通知
+  - 作品分析完成 — 拿到 AI 标签、分类、摘要等分析结果
+  - 新作者添加 — 适合自动设置同步计划、下载上限
+  - 直播转封装完成 — 拿到已经是 MP4 的绝对路径
+  钩子脚本默认 10 分钟超时（手动运行仍不限时长），可用 meta.timeout 覆盖。同一脚本正在运行时新事件会排队，不会并发。手动点「运行」会带上最近一次的钩子入参，方便反复调试。
+  脚本运行日志落盘
+  日志写入 script-logs 目录，关掉应用再打开仍然查得到，不再只存在内存里。每个脚本可单独设置留存条数。
+  修复：收藏与收藏夹扫不到内容
+  抖音给收藏、收藏夹、点赞这三个接口加上了 ArgusSecurityPlugin 保护，要求 x-secsdk-web-signature 签名，直连一律返回 403。而旧代码不检查 HTTP 状态码，把 403 的错误文本当成了空数据，表现为「共 0 个收藏夹」——看起来就像账号里什么都没有。
+  现在这三个接口改为在真实抖音页面上下文里请求，签名由页面自己生成，不需要逆向也不会因抖音更新算法而失效。同时修正了分页：收藏接口的游标是递减的时间戳，旧逻辑要求游标递增，会在第二页就停下，只能取回 10 条。
+  修复：请求不再自报 Electron
+  抖音页面会把 UA 解析成 browser_name / browser_version 写进每个接口请求。此前发出去的是 browser_name=Electron，现已统一为正常的 Chrome UA。
+  其它
+  - 抖音接口返回非 JSON 或 status_code 非 0 时会明确报错，不再静默返回空列表
+  - 新增内置脚本「记录新下载的作品」作为钩子示例
+  - 文档站补充钩子章节
+  Full Changelog: https://github.com/Everless321/dYm/compare/v2.7.1...v2.8.0
+ReleaseNotesUrl: https://github.com/Everless321/dYm/releases/tag/v2.8.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

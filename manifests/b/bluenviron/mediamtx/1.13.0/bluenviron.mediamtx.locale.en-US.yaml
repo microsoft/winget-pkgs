@@ -1,0 +1,101 @@
+# Created with komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: bluenviron.mediamtx
+PackageVersion: 1.13.0
+PackageLocale: en-US
+Publisher: bluenviron
+PublisherUrl: https://github.com/bluenviron
+PublisherSupportUrl: https://github.com/bluenviron/mediamtx/issues
+Author: aler9
+PackageName: mediamtx
+PackageUrl: https://github.com/bluenviron/mediamtx
+License: MIT
+LicenseUrl: https://github.com/bluenviron/mediamtx/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2019 aler9
+CopyrightUrl: https://github.com/bluenviron/mediamtx/blob/main/LICENSE
+ShortDescription: |-
+  Ready-to-use SRT / WebRTC / RTSP / RTMP / LL-HLS media server and media proxy that allows to read,
+  publish, proxy, record and playback video and audio streams.
+Description: |-
+  MediaMTX is a ready-to-use and zero-dependency real-time media server and media proxy that allows
+  to publish, read, proxy, record and playback video and audio streams. It has been conceived as a
+  "media router" that routes media streams from one end to the other.
+Tags:
+- go
+- golang
+- hls
+- media-server
+- obs-studio
+- rtcp
+- rtmp
+- rtmp-proxy
+- rtmp-server
+- rtp
+- rtsp
+- rtsp-proxy
+- rtsp-relay
+- rtsp-server
+- streaming
+- webrtc
+ReleaseNotes: |-
+  New major features
+  RTSP
+  - support encrypting UDP and UDP-multicast streams (#4690)
+  General
+  - support routing KLV metadata (#2693) (#4670)
+  Fixes and improvements
+  General
+  - recorder, playback: support changing codec parameters without switching segment (#4262) (#4582)
+  - record: support storing timezone in recording segments (#3566) (#4597)
+  - support assigning paths to different configurations without closing stream (#4576)
+  - add attestation system to protect binaries (#4012) (#4629) this allows to prove that binaries were produced by GitHub Actions.
+  - fix crash when ConfWatcher fails to initialize (#4689)
+  RTSP
+  - support encrypted streams with SRTP and MIKEY (bluenviron/gortsplib#520) (bluenviron/gortsplib#809)
+  - make RTP packet size compatible with RTSP/SRTP (#4692) when RTSP encryption is enabled, maximum RTP packet size is slightly decreased to make room for SRTP.
+  - client: fix reading sources without server ports (#4253) (bluenviron/gortsplib#796) RTCP packets were sent out to nil addresses, due to the lack of server ports, causing an error.
+  - client: prevent downgrading from RTSPS to RTSP during redirect (bluenviron/gortsplib#816)
+  - client: when reading multicast streams, write unicast reports (bluenviron/gortsplib#817) Previously, receiver reports were broadcasted to all connected clients. Now they are sent to the server only.
+  - client: when reading UDP streams, write reports to right IP (bluenviron/gortsplib#818) source IPs sent by the server were not taken into consideration. Thisfixes the issue.
+  - set SSRC of outgoing packets (bluenviron/gortsplib#803) In client and server, each format now has a fixed, unique, known in advance SSRC, that is applied to outgoing packets belonging to each format. This is needed to support SRTP/MIKEY, that require each format to have a fixed, unique, and known in advance SSRC.
+  - client: open firewall before sending PLAY request (bluenviron/gortsplib#821) this prevents losing some initial packets.
+  - support KLV tracks (bluenviron/gortsplib#808)
+  RTMP
+  - fix timeout when publishing with GLive T80 (#4002) (#4583)
+  HLS
+  - muxer: fix race condition when closing (bluenviron/gohlslib#236)
+  - client: fix race condition with non-low-latency streams (bluenviron/gohlslib#237)
+  - Support Verkada EXTINF Tags (bluenviron/gohlslib#244)
+  WebRTC
+  - fix writing tracks to some clients (#4602) some clients require PayloadType to be unique among all tracks, not only among tracks of same kind.
+  RPI Camera
+  - fix RTP packet size (#4691) UDP max payload size was not applied.
+  Dependencies
+  - code.cloudfoundry.org/bytefmt updated from v0.40.0 to v0.43.0
+  - github.com/MicahParks/keyfunc/v3 updated from v3.3.11 to v3.4.0
+  - github.com/alecthomas/kong updated from v1.11.0 to v1.12.0
+  - github.com/bluenviron/gohlslib/v2 updated from v2.1.5 to v2.2.1
+  - github.com/bluenviron/gortsplib/v4 updated from v4.14.1 to v4.15.0
+  - github.com/bluenviron/mediacommon/v2 updated from v2.2.0 to v2.3.0
+  - github.com/go-git/go-git/v5 updated from v5.16.0 to v5.16.2
+  - github.com/matthewhartstonge/argon2 updated from v1.3.1 to v1.3.2
+  - github.com/pion/interceptor updated from v0.1.38 to v0.1.40
+  - github.com/pion/logging updated from v0.2.3 to v0.2.4
+  - github.com/pion/rtp updated from v1.8.16 to v1.8.20
+  - github.com/pion/sdp/v3 updated from v3.0.13 to v3.0.14
+  - golang.org/x/crypto updated from v0.38.0 to v0.39.0
+  - github.com/pion/srtp/v3 updated from v3.0.4 to v3.0.6
+  - golang.org/x/net updated from v0.40.0 to v0.41.0
+  - golang.org/x/text updated from v0.25.0 to v0.26.0
+  - github.com/bluenviron/mediamtx-rpicamera updated from v2.4.2 to v2.4.3
+  - hls.js updated from v1.6.2 to v1.6.6
+  Security
+  Binaries have been produced by the Release workflow without human intervention.
+  You can verify that binaries have been produced by the workflow by using GitHub Attestations:
+  ls mediamtx_* | xargs -L1 gh attestation verify --repo bluenviron/mediamtx
+  You can verify the binaries checksum by downloading checksums.sha256 and running:
+  cat checksums.sha256 | grep "$(ls mediamtx_*)" | sha256sum --check
+ReleaseNotesUrl: https://github.com/bluenviron/mediamtx/releases/tag/v1.13.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

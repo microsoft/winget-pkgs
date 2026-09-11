@@ -1,0 +1,58 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jmrplens.gitlab-mcp-server
+PackageVersion: 2.7.4
+PackageLocale: en-US
+Publisher: José M. Requena Plens
+PublisherUrl: https://github.com/jmrplens
+PublisherSupportUrl: https://github.com/jmrplens/gitlab-mcp-server/issues
+PrivacyUrl: https://github.com/jmrplens/gitlab-mcp-server/blob/main/PRIVACY.md
+PackageName: GitLab MCP Server
+PackageUrl: https://github.com/jmrplens/gitlab-mcp-server
+License: MIT
+LicenseUrl: https://github.com/jmrplens/gitlab-mcp-server/blob/HEAD/LICENSE
+ShortDescription: GitLab MCP server exposing the REST v4 and GraphQL APIs as tools for AI assistants.
+Description: A Model Context Protocol (MCP) server that connects AI assistants (Claude, Cursor, VS Code + Copilot, and any MCP client) to GitLab.com or self-managed GitLab instances. Covers the full REST API v4 and GraphQL with automatic edition gating — roughly 850 to 1070 tools depending on the GitLab tier — plus 45 MCP resources, 37 prompts, argument completions, and progress notifications. Single static binary, stdio and HTTP transports, read-only and safe (mutation-preview) modes, and an interactive setup wizard (gitlab-mcp-server --setup) that auto-configures most MCP clients.
+Moniker: gitlab-mcp-server
+Tags:
+- ai
+- ci-cd
+- claude
+- devops
+- gitlab
+- graphql
+- llm
+- mcp
+- model-context-protocol
+- rest-api
+ReleaseNotes: |-
+  Yes, another release. Sorry. That is four in two days, and I promise there is no grand strategy behind the cadence — just someone finally trying the OAuth mode in anger and discovering it had never authenticated a single human being in its entire life.
+  In my defence: it looked fine. It had a verifier, a metadata endpoint, a token cache, tests, and documentation. What it did not have was a working request.
+  OAuth mode never worked. At all. (#309)
+  --auth-mode=oauth verified your Bearer token correctly, extracted your identity correctly, cached it correctly — and then built the GitLab client that does the actual work with the token in a PRIVATE-TOKEN header. GitLab accepts glpat- there. It does not accept gloas- OAuth access tokens there, in any header but Authorization: Bearer. So every single call after a perfectly successful login came back 401.
+  Fixed by giving the pool an OAuth-aware constructor (NewAuthSourceClient + a static token source) that it selects when --auth-mode=oauth, and by making the two raw HTTP probes — the version check and the credential-rejection check — pick their scheme from the same decision instead of hardcoding PRIVATE-TOKEN. Verified end-to-end against gitlab.com with a real authorization-code + PKCE flow, which is how it should have been verified the first time.
+  The same PR stopped assuming scopes. The verifier used to stamp every identity as api-scoped; it now introspects the token's real scopes (/personal_access_tokens/self for PATs, /oauth/token/info for OAuth tokens) and falls back to the old assumption only where introspection is unavailable.
+  Browser clients were being refused before anyone looked at them (#312)
+  The cross-origin protection wrapped the handler with no way to configure it, so every cross-origin POST got a 403 from Go's stdlib before MCP dispatched anything. That is correct default behaviour and it stays the default — but "validate the Origin header" is not the same instruction as "reject every origin", and there was no allowlist.
+  - --trusted-origins — comma-separated absolute origins (scheme://host[:port], an IP is fine for local deployments) allowed to make cross-origin browser requests. Empty by default, so nothing changes for anyone who does not set it. * accepts any origin and logs a warning that the protection is off. A malformed entry fails startup rather than being quietly dropped.
+  - --public-url's origin is trusted automatically. The flag already declared "the externally reachable origin of this deployment"; now it also behaves like one. It is validated in legacy mode too, since it finally has an effect there.
+  - A dual-header hole is closed. In OAuth mode the SDK verified the Bearer token, but credential extraction still preferred PRIVATE-TOKEN when both headers were present — so a request could be authorized as one identity and executed as another. OAuth mode is now Bearer-only.
+  - The RFC 9728 metadata endpoint answers its own CORS preflight. It was mounted GET-only, which sent OPTIONS to the catch-all gate and 401-ed it, locking out exactly the browser-based clients that discover the server that way. It also gained the two RECOMMENDED fields it was missing, resource_name and resource_documentation.
+  - Two flags that -h had never listed, -public-url and -trusted-origins, are in the full help output. The first is required for OAuth mode, so following the help text could not get you a running server.
+  Documentation that matches the software (#311)
+  Twenty-one files, including the bilingual site. The parts worth calling out are the ones that were actively false: the site claimed PRIVATE-TOKEN still works in OAuth mode through header normalization (it does not — that is a 401), and every OAuth startup example omitted the --public-url flag without which the server refuses to start.
+  Beyond the corrections: which MCP clients can actually complete an OAuth flow against gitlab.com and which cannot (and why mcp is the one scope you must never grant a Dynamic Client Registration client), token lifetimes and refresh behaviour, the device authorization grant and why you do not want it, reverse-proxy and path-inserted metadata URLs, and the cross-origin model written down where the rest of the security model lives.
+  Two more things that would have shipped broken (#314)
+  PUBLIC_URL was documented and never read. In HTTP mode the environment layer carried AUTH_MODE but not PUBLIC_URL, so a container that set both started, read the mode, and then refused to run: "oauth mode requires --public-url". Which means a compose deployment — the shape this server is usually run in over HTTP — could not enable OAuth at all, while the reference happily listed PUBLIC_URL as the flag's environment equivalent. It and TRUSTED_ORIGINS now overlay like everything else, with a passed flag still winning.
+  Honest scopes turned into a lockout. Introspecting a token's real scopes only helps if you then ask for the right one. The server asked for api unconditionally, and the SDK requires every listed scope to be present, so a read_api token got 403 from a server running --read-only that could not have written anything anyway. The required scope is now derived from what the deployment can actually do — read_api under --read-only or --safe-mode, api otherwise — and advertised in scopes_supported, so a client following discovery asks for exactly that much and no more. An api token still works everywhere, because it is a superset.
+  Also
+  CodeRabbit now reviews pull requests targeting any branch, not only the default one — stacked pull requests above the bottom layer were being merged unreviewed. And the LobeHub badge in the README stopped showing red: the listing had been green for a while, but GitHub's image proxy had cached the old picture and only a changed URL evicts it.
+  A full README audit corrected the rest: the one OAuth example that could not start, a /health endpoint that returns JSON rather than the word ok, completions listed as five argument types when there are seventeen, a FAQ answer that forgot the update check exists, and meta-tool counts that five documents had drifted away from — the real figures are 32/49/50 meta-tools over 847/1065/1071 individual ones, and the tests have been asserting them all along.
+  Full detail in #309, #312, #311 and #314.
+ReleaseNotesUrl: https://github.com/jmrplens/gitlab-mcp-server/releases/tag/v2.7.4
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://jmrplens.github.io/gitlab-mcp-server/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

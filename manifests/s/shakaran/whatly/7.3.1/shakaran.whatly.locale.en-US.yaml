@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: shakaran.whatly
+PackageVersion: 7.3.1
+PackageLocale: en-US
+Publisher: shakaran
+PublisherUrl: https://github.com/shakaran
+PublisherSupportUrl: https://github.com/shakaran/whatly/issues
+Author: Ángel Guzmán Maeso
+PackageName: Whatly
+PackageUrl: https://github.com/shakaran/whatly
+License: MIT
+LicenseUrl: https://github.com/shakaran/whatly/blob/main/LICENSE
+Copyright: |-
+  Copyright (c) 2021 Keshav Bhatt
+  Copyright (c) 2026 Ángel Guzmán Maeso
+CopyrightUrl: https://github.com/shakaran/whatly/blob/main/LICENSE
+ShortDescription: Feature rich WhatsApp Client for Desktop Linux
+Description: |
+  A feature-rich desktop client for WhatsApp Web. Native window, system tray, notifications, chat themes, privacy blur, multiple accounts, spell-check and more — on Linux and Windows, with an experimental macOS build.
+ReleaseNotes: |-
+  • **Test coverage raised to ~90%.** New headless suites drive the parts the pure-logic tests could not reach：the network clients (Ollama check/pull, the translator and the AI assistant) against a stand-in HTTP server, including their no-endpoint, empty-input, malformed-reply and network-error paths; the dictionary catalogue fetch and asset download, the Cloud API send path (text/template/media, with their API-error, network-error and unconfigured branches), and the update check (available/up-to-date/malformed/network-error), each pointed at a local stand-in through an env override; the local API server end to end over loopback (auth, routing, `/send`, and the `/webhook` GET handshake and POST delivery/signature); the widgets offscreen — the command palette, the account tab bar as click and drop target, and the dictionary-row delegate across its states; the tar-based profile export/import and its error paths; the drop reader and resolver; scheduled-message due-checking, recurrence and persistence; session-backup startup recovery; chat-export formatting; the About dialog's toggle and key handling; and assorted `Utils` helpers. What little stays uncovered is code a headless CI cannot exercise — the D-Bus notification and portal paths, the tear-off drag, and GUI-only branches.
+  • **The Cloud API host and the update-check URL can be overridden by an environment variable.** `WHATLY_CLOUD_API_BASE` replaces the Graph API host and `WHATLY_UPDATE_URL` the GitHub releases endpoint (as `WHATLY_DICT_BASE_URL` already does for the dictionary catalogue). Both default to the real service when unset; they exist so the network paths can be pointed at a local stand-in for testing, and incidentally let an advanced user route through a proxy.
+  • **Codecov coverage reporting.** A coverage workflow builds the unit suites instrumented for gcov, runs them headless, and uploads a Cobertura report to Codecov; a badge in the README tracks it. (Coverage reflects the CI-safe headless suites — the pure logic in `src/` plus the offscreen widget and network-client tests — not WhatsApp Web itself.)
+  • **OpenSSF Scorecard.** A weekly workflow audits the repository's supply-chain security posture and publishes the result; the score is shown as a badge in the README and its detail at scorecard.dev, with findings also in the code-scanning tab.
+  • **No more "OpenType support missing for Noto Sans" log spam.** The language picker lists each language by its native name, so Qt renders scripts the default sans family does not itself carry (Devanagari, Bengali, Arabic…) and logged a warning per script — even though it composes them correctly from the per-script Noto families (fallback working as designed). That one category is now quieted, appended to any `QT_LOGGING_RULES` the user already set.
+  • **The NVIDIA-on-Wayland fix no longer forces XCB on setups where Wayland works (#84).** 7.3.0 switched every proprietary-NVIDIA Wayland session to XCB up front to avoid a blank window, but on a Wayland setup that renders fine that sent it onto XWayland, where the NVIDIA GL stack could crash the renderer in a loop. Whatly now stays on Wayland and only relaunches on XCB once, automatically, if the backing store actually fails to get a renderer — so the blank-window case is still covered and a working Wayland session is left alone.
+  • **The "storage bucket persistence denied" console error is gone.** WhatsApp Web moved to the Storage Buckets API, which the existing `navigator.storage.persist()` override did not cover, so the persistence grant Whatly fakes for the classic API was denied for the new one. The override now also wraps `navigator.storageBuckets.open()` so a bucket reports itself persisted.
+  • **The Windows/macOS codec notice no longer points at a package that does not exist (#93).** When a build without the proprietary H.264 codecs meets an MP4, the notice named "a distro/native package built with the codecs" — but off Linux there is no Flatpak and no codec-enabled build of Whatly at all, so that remedy pointed at nothing. It now says plainly that this build cannot do MP4, that photos and WebM/VP9 work, and offers a real way through：convert the MP4 to WebM, or send it as a document. (Shipping a codec-enabled Windows build is a separate, licensing-gated decision and is not this change.)
+ReleaseNotesUrl: https://github.com/shakaran/whatly/releases/tag/v7.3.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

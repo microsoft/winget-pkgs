@@ -1,0 +1,48 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: SteveTheKiller.KillerPDF
+PackageVersion: 1.5.1
+PackageLocale: en-US
+Publisher: Steve the Killer
+PublisherUrl: https://github.com/SteveTheKiller
+PublisherSupportUrl: https://github.com/SteveTheKiller/KillerPDF/issues
+Author: Steve the Killer
+PackageName: KillerPDF
+PackageUrl: https://github.com/SteveTheKiller/KillerPDF
+License: GPL-3.0
+LicenseUrl: https://github.com/SteveTheKiller/KillerPDF/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Steve the Killer
+ShortDescription: PDF editor for Windows. Install or run portable. GPLv3. No account, no subscription, no telemetry.
+Description: KillerPDF is a lightweight PDF viewer and toolkit for Windows. View, merge, split, and manage PDF files. Runs portable or installs to your user profile - no admin rights required. No account, no subscription, no telemetry. Open source under GPLv3.
+Moniker: killerpdf
+Tags:
+- dotnet
+- gplv3
+- opensource
+- pdf
+- pdf-editor
+- portable
+- windows
+- wpf
+ReleaseNotes: |-
+  KillerPDF v1.5.1
+  A fix release on top of 1.5.0, with a performance boost for flattening.
+  Performance
+  - Save Flattened PDF now uses multiple CPU cores. Page rasterization is parallelized (PNG encoding runs across cores; the PDFium render step stays serialized since the library isn't thread-safe), so large documents flatten significantly faster while the UI stays responsive (#68).
+  Fixed
+  - PDFs that failed to open with "Unexpected EOF" now open (#72). The failure was PdfSharpCore's Flate inflater (SharpZipLib) rejecting the FlateDecode cross-reference stream on multi-revision PDFs - files that open fine in browsers, Acrobat, and Foxit. KillerPDF now detects this and re-opens the file losslessly through PDFium, preserving selectable text. Thanks to @javajon for the report and a detailed reproduction.
+  - Grid view renders every page. It was capped at the first 26 pages, so longer documents stopped loading partway through. Tiles also stream in progressively now instead of blocking until the whole document is rendered.
+  - Grid Ctrl+Scroll no longer reloads every page when the zoom is already at its limit and nothing would change.
+  - Removed a stray horizontal scrollbar (a thin green line) that could appear across the bottom of grid view.
+  - Files on UNC / network shares (including the WSL \\wsl$ filesystem) are copied locally before opening, avoiding partial-read failures on network filesystems.
+  Changed
+  - Minimum zoom lowered from 10% to 5%, so grid view can pack more columns (helpful for wide/landscape pages) and single-page view can zoom out further.
+  Downloads and verification
+  - KillerPDF.exe - single-file portable, code-signed (Open Source Developer Stephen Riley). No install, no telemetry.
+  - KillerPDF-1.5.1-src.zip - GPLv3 corresponding source.
+  - SHA256SUMS.txt - checksums.
+  SHA256 (KillerPDF.exe) : 466B95F417A969D80BB0416CA462FD170DE39C
+ReleaseNotesUrl: https://github.com/SteveTheKiller/KillerPDF/releases/tag/v1.5.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

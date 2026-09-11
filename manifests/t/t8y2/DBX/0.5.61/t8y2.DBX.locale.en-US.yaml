@@ -1,0 +1,74 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: t8y2.DBX
+PackageVersion: 0.5.61
+PackageLocale: en-US
+Publisher: t8y2
+PublisherUrl: https://github.com/t8y2
+PublisherSupportUrl: https://github.com/t8y2/dbx/issues
+Author: t8y2
+PackageName: DBX
+PackageUrl: https://github.com/t8y2/dbx
+License: Apache-2.0
+LicenseUrl: https://github.com/t8y2/dbx/blob/HEAD/LICENSE
+ShortDescription: 15MB，lightweight, cross-platform database client. Supports MySQL, PostgreSQL, SQLite, Redis, MongoDB, DuckDB, ClickHouse, SQL Server and more.
+Tags:
+- clickhouse
+- database
+- database-client
+- database-management
+- duckdb
+- gui
+- mongodb
+- mysql
+- postgresql
+- redis
+- rust
+- sql-server
+- sqlite
+- tauri
+- vue
+ReleaseNotes: |-
+  新功能
+  - 原生 MCP Server — MCP Server 已迁移到 Rust 原生二进制，继续兼容现有 npm/npx 配置，并提供 macOS、Linux 和 Windows 平台包及离线归档；连接、Schema、SQL、Redis、MongoDB、安全控制和桌面端联动使用统一的原生实现，不再依赖 Node 原生扩展。
+  - 原生 DBX CLI — CLI 已迁移到 Rust 原生二进制，npm 安装会自动选择对应平台包，同时提供无需 Node.js 的独立归档；继续读取与桌面端相同的连接配置，并支持连接、Schema、查询和 MongoDB 操作。
+  - Elasticsearch Kibana 代理 — Elasticsearch 连接新增直连和 Kibana 代理模式，可配置 Kibana 基础路径或 Space 路径，通过 Console Proxy 完成索引、Mapping、查询和文档读写；现有连接默认保持直连。(contributed by @zipg) (closes #3524)
+  - 备份表范围控制 — 定时备份可按精确名称、通配符或限定名称包含、排除表和视图；MySQL 全库备份默认排除系统数据库，并根据 lower_case_table_names 匹配对象，同时增强不同 MySQL 版本及兼容实现的一致性快照处理。(contributed by @CSXFanMeng) (closes #3761, #3770)
+  - SQL 库多级目录 — SQL 库的树形和日期排序视图均可在文件夹内创建子文件夹，创建后会自动展开并进入重命名，也支持搜索状态和任意层级目录持久化。(contributed by @zipg) (closes #3864)
+  - SQL 函数自动补全 — MySQL、PostgreSQL、SQL Server 和 Oracle 可根据输入前缀加载真实函数元数据，展示返回类型和注释，并改善字段与函数冲突时的候选排序；dbo.fn_、public.st_ 等限定名称会使用正确的 Schema 和函数前缀查询。(contributed by @zipg)
+  - 本地数据库实验室 — 新增和完善 ClickHouse、MariaDB、MongoDB、MySQL、PostgreSQL、Redis、Nacos、Pulsar、Qdrant 与 ZooKeeper 的固定版本 Docker Compose 配方、初始化和认证示例。(contributed by @eryajf)
+  改进
+  - 整库导出性能 — CSV/TSV 批量写出减少逐单元格临时分配；PostgreSQL、MySQL 和 ClickHouse 整库导出可有界并发预取表 DDL 与字段元数据，同时保持原有导出顺序、错误处理和单连接数据库的串行行为。(contributed by @serenez)
+  - 表元数据缓存 — 打开表、刷新数据页和保存表结构复用共享元数据缓存及在途请求；结构修改后会可靠失效旧缓存，避免并发请求将过期字段信息重新写回。(contributed by @serenez)
+  - 网格与侧边栏性能 — 数据网格搜索复用小写文本缓存，自动隐藏全空列改为单遍扫描；MySQL 文本解码复用原字节缓冲，连接根节点查找不再穿透已加载的完整对象树。(contributed by @serenez)
+  - 连接池高并发性能 — 连接池活跃时间戳使用原子更新，减少并发查询对全局写锁的竞争；PostgreSQL 复用已有连接池时不再在每条查询前额外执行一次验证查询。(contributed by @serenez)
+  - SQL Server 服务端信息 — DBCC 等没有普通结果集的命令可在 Message 列中显示 SQL Server 返回的信息，原生驱动和 Legacy JDBC 路径行为保持一致，普通查询、DML、多结果集和真实错误不受影响。
+  - 侧边栏注释布局 — 表名和表注释会根据侧边栏宽度自适应分配空间，宽度不足时分别截断，减少注释未完整显示但中间仍留有大块空白的问题。(contributed by @czs208112)
+  - Redis 仪表盘国际化 — Redis 仪表盘的指标说明和界面文本支持随应用语言切换。(contributed by @eryajf)
+  - 下载源简化 — AtomGit 更新、Agent 和驱动下载源已下线，保留官方与 CNB 下载路径，避免继续展示已停止维护的镜像选项。
+  - 贡献者展示 — 官网新增贡献者经历和证书页面，并按 GitHub 身份去重首页贡献者头像。
+  修复
+  - AI 兼容服务流式结束 — LM Studio 等 OpenAI Compatible 服务通过 finish_reason 结束响应但不发送 [DONE] 时，DBX 会在保留尾部 usage 包的短暂宽限期后正常结束，不再长时间停留在“思考中”。(contributed by @zipg)
+  - AI 配置兼容性 — 在缺少 crypto.randomUUID 的运行环境中也可创建 AI 配置，避免配置保存入口直接失败。
+  - Kingbase 普通账号权限 — KingbaseES 普通账号因无权调用 sys_freespace 而无法展开表列表时，会针对目标权限错误回退到不计算存储空间的系统目录查询，并改善 V9 MySQL、Oracle 等兼容模式识别。(contributed by @zipg) (closes #3792)
+  - MongoDB 旧式写入语法 — MongoDB Shell 支持 db.collection.insert(...) 和 db.getCollection(...).insert(...) 的单文档及文档数组写入，桌面端与 Node Core 行为保持一致。(contributed by @zipg) (closes #3811)
+  - MySQL # 注释结果集 — 批量执行以 # 行注释开头的 MySQL SQL 时，后续 SELECT 和 SHOW 可正确识别为结果集，不再丢失第一条查询结果。(contributed by @zipg) (closes #3830)
+  - 桌面端内存稳定性 — 表数据页反复挂载和关闭时不再累积右键菜单的全局事件监听器及已卸载网格引用，同时保持右键菜单、子菜单、Escape、滚动和窗口缩放交互。(contributed by @CN-Scars) (closes #3741)
+  - 对象树展开与主键识别 — XuguDB Schema 下的触发器和类型分组可以正常展开；OceanBase 等数据库首次从冷缓存打开表时会及时加载主键，Dameng 仍保留原有串行元数据保护。(contributed by @mapan0424, @serenez) (closes #3727)
+  - 连接和搜索对话框 — 测试连接后不再用保存名称覆盖正在编辑的连接名称；数据库搜索对话框会限制在动态视口内并保持页头、结果区和关闭按钮可访问。
+  - Schema 筛选刷新 — 可见 Schema 对话框仅在筛选结果实际变化时保存和刷新对象树，取消或未修改筛选不再触发冗余刷新。
+  - 网格字符串 null — 在文本字段中输入 null、NULL 或其他大小写组合会按普通字符串保存；数据库空值继续通过显式的 NULL 操作设置。(contributed by @czs208112)
+  - PostgreSQL 表结构修改 — 修改字段类型时使用显式 USING 转换，覆盖内置类型、数组和 domain 等 PostgreSQL 可转换场景，并在同一条原子操作中正确处理已有默认值。
+  - PostgreSQL 导出与连接兼容 — 整库导出会包含扩展定义并避免重复导出扩展成员；服务器不支持本机自动时区或使用旧 tzdata 别名时，会保留服务器默认时区而不拒绝有效连接，显式配置的时区仍保持严格校验。
+  - SQL Server 字段修改 — 修改字段类型、可空性或名称时会保存并删除现有默认约束，修改完成后按原名称和定义恢复，避免 ALTER COLUMN 被默认约束依赖阻止。
+  - SQL Server 流式导出 — 查询超时按数据库流连续无进展时间计算，只要仍有新行到达，长时间 XLSX 等导出不会因总耗时超过查询超时而中止。
+  - SQL Server SQL 与消息处理 — SQL 分析支持 CREATE PROC 和 CREATE OR ALTER PROC；DBCC 等服务端信息可正常显示，同时不会覆盖普通结果、影响行数或真实错误。
+  - SQL Server 长文本显示 — 普通 VARCHAR(n) 查询结果的网格显示上限提高到 8000 字符，超大 LOB 会显示明确省略标记，复制、详情和原始单元格值不受影响；内部 TDS 类型名也会映射为标准 SQL Server 类型名。(contributed by @zipg) (closes #3858)
+  - SQL Server 编辑器提示 — CONVERT 使用正确的 CONVERT(type, expression) 签名；省略 INSERT 列清单时会排除 identity、computed、hidden 和 generated-always 字段，使多行 VALUES 的字段提示与实际写入顺序一致。(contributed by @zipg) (closes #3867, #3847)
+  - Hive 数据网格保存 — Hive JDBC 返回 table.column 或带引号限定列名时，可正确映射到目标字段并生成有效的 INSERT、UPDATE 和回滚 SQL，同时保留真实包含点号的字段名。
+  安装
+  > 国内下载：如果 GitHub 下载较慢，可从 CNB 镜像 下载桌面端安装包，Docker 镜像从 docker.cnb.cool/dbxio.com/dbx:0.5.61 拉取。
+ReleaseNotesUrl: https://github.com/t8y2/dbx/releases/tag/v0.5.61
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
