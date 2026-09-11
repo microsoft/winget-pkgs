@@ -7,7 +7,7 @@
 # reviewer who sees them is entitled to reject the submission.
 
 PackageIdentifier: NeverAwayTeams.NeverAway
-PackageVersion: 2.0.6
+PackageVersion: 2.0.7
 PackageLocale: en-US
 
 Publisher: NeverAwayTeams
@@ -71,11 +71,15 @@ ReleaseNotes: |-
   - Waking the machine brings presence back. It relied on the resume notification Windows sends for the
     classic sleep states, which a machine using Modern Standby - the low-power idle most recent laptops
     use - may never send at all. When it did not arrive, nothing turned presence back on: the machine was
-    awake, the application was sitting there inactive, and only restarting it helped. It now also notices
-    a wake from the gap in its own clock, which needs no cooperation from Windows and works for sleep,
-    hibernation and Modern Standby alike.
-  - Waking is reported as its own event again, with how long the machine was away. It shared a message
-    with the tray's Resume command, so an overnight sleep and a click on Resume produced the same line.
+    awake, the application was sitting there inactive, and only restarting it helped. How long the machine
+    was suspended is now measured from Windows' own accounting, which exists on every machine and is the
+    same for sleep, hibernation and Modern Standby.
+  - Waking turns presence on even if it had been stopped by hand before the machine was suspended. A stop
+    from before a sleep is not an instruction anybody remembers giving, and the 1.x releases did the same.
+  - Waking is reported as its own event, with how long the machine was away. It shared a message with the
+    tray's Resume command, so an overnight sleep and a click on Resume produced the same line.
+  - A long period with the application not running at all - frozen by a management agent, or starved on a
+    heavily loaded machine - is now noticed too, and the keep-awake request is re-applied.
 
   Also in this release:
 
@@ -91,7 +95,7 @@ ReleaseNotes: |-
     close, which is the case worth being careful about.
   - Both corrections are applied to the fallback path as well.
 
-  Carried forward from 2.0.4 and 2.0.5:
+  Carried forward from 2.0.4 to 2.0.6:
 
   - Meeting detection no longer needs a script host. It asked PowerShell for the process list and
     the UDP endpoint table; on a company-managed machine that request can be refused - Windows
@@ -105,9 +109,6 @@ ReleaseNotes: |-
     "No meeting" is the exception and still requires a clean run, because it is the only verdict
     that permits a close and a close during a call is the one outcome worth being strict about.
   - The activity log now records why detection failed, not only that it did.
-
-  Also in this release:
-
   - The request that keeps Windows awake is now renewed continuously. It was made once, when
     presence started, and never again. That request does not reliably survive a suspend/resume
     cycle or a session switch, and once it had lapsed nothing restored it: the presence signal
