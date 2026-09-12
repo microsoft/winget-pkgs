@@ -22,6 +22,12 @@
 #     service surviving logoff, so the floor is real and stating it keeps the package
 #     off machines where it cannot work.
 #
+#   * `ElevationRequirement: elevatesSelf`. PrivilegesRequired=admin means the exe's
+#     own embedded manifest already carries requestedExecutionLevel=requireAdministrator,
+#     so Windows prompts UAC on launch without winget needing to run itself elevated
+#     first - that is "elevatesSelf", not "elevationRequired" (moderator review on
+#     PR #417819, 2026-09-10).
+#
 # The silent switches are the SAME as the User edition's - but note the Server
 # installer refuses a silent install when a User edition is present unless
 # /MIGRATEFROMUSER is passed, so an unattended migration is never implicit.
@@ -31,6 +37,7 @@ PackageVersion: "26.8.15.1510"
 InstallerType: inno
 Scope: machine
 MinimumOSVersion: 10.0.14393
+ElevationRequirement: elevatesSelf
 InstallerSwitches:
   Silent: /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP- /MIGRATEFROMUSER=yes
   SilentWithProgress: /SILENT /SUPPRESSMSGBOXES /NORESTART /SP- /MIGRATEFROMUSER=yes
