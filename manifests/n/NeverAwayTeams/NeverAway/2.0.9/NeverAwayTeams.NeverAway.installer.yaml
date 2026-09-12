@@ -1,0 +1,50 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.6.0.schema.json
+#
+# THE ZIP IS DELIBERATE, NOT A SHORTCUT.
+#
+# The product ships as one self-contained executable with no installer. It could be offered
+# as a bare .exe, except that the hosting account refuses to serve files with that extension
+# - a request for NeverAway.exe returns a redirect page rather than the file. That is why the
+# site has always distributed .zip archives, and why this manifest uses winget's nested
+# installer support: a zip whose single entry is a portable executable.
+#
+# THE HASH IS OF THE ZIP AS THE SERVER ACTUALLY SERVES IT. It must be verified by downloading
+# from the public URL over HTTPS and comparing against the local build, so what winget
+# validates is byte-for-byte what a user receives.
+#
+# THE URL CARRIES THE VERSION, AND THAT IS NOT COSMETIC. 2.0.0 pointed at an unversioned
+# downloads/NeverAway.zip, which would have been a trap the first time that file was replaced:
+# the manifest pins a hash, so publishing any later build to the same URL breaks
+# `winget install` for the version that named it. A versioned URL is immutable once published,
+# so every manifest keeps working for as long as the file is left alone.
+
+PackageIdentifier: NeverAwayTeams.NeverAway
+PackageVersion: 2.0.9
+
+MinimumOSVersion: 10.0.17763.0
+InstallerType: zip
+NestedInstallerType: portable
+
+NestedInstallerFiles:
+  - RelativeFilePath: NeverAway.exe
+    PortableCommandAlias: neveraway
+
+# x64 only. The build targets win-x64 explicitly; there is no ARM64 or x86 artifact, and
+# claiming one that does not exist would fail validation on download.
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://neverawayteams.com/downloads/NeverAway-2.0.9.zip
+    InstallerSha256: D56E0F74FA840C16390A2DFA5238E0C7AF8553A5D2CF0520F3B69E30CF127AA1
+
+ReleaseDate: 2026-09-12
+
+InstallModes:
+  - interactive
+
+UpgradeBehavior: install
+
+# No InstallerSuccessCodes block: zero is already a success code implicitly, and the schema
+# rejects declaring it.
+
+ManifestType: installer
+ManifestVersion: 1.6.0

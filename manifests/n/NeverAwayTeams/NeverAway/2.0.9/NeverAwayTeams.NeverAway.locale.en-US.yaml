@@ -1,0 +1,165 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+#
+# The description Microsoft's reviewers read and users see in `winget show`.
+#
+# Deliberately free of any claim about being undetectable or invisible. Those claims are
+# what make an honest tool read as an evasion tool, they are not true of this build, and a
+# reviewer who sees them is entitled to reject the submission.
+
+PackageIdentifier: NeverAwayTeams.NeverAway
+PackageVersion: 2.0.9
+PackageLocale: en-US
+
+Publisher: NeverAwayTeams
+PublisherUrl: https://neverawayteams.com
+PublisherSupportUrl: https://neverawayteams.com/contact/
+PrivacyUrl: https://neverawayteams.com/privacy/
+Author: NeverAwayTeams
+
+PackageName: NeverAway
+PackageUrl: https://neverawayteams.com
+
+License: Proprietary
+LicenseUrl: https://neverawayteams.com/terms/
+Copyright: Copyright (c) NeverAwayTeams
+
+ShortDescription: Keeps your Microsoft Teams status honest while you are at your desk, and closes Teams at the hour you finish.
+
+Description: |-
+  Microsoft Teams decides you are "Away" by watching your keyboard and mouse. After a few
+  minutes without input it changes your status and your screen goes dark. It does not know
+  whether you actually left.
+
+  You might be reading a long document, testing something on a phone or tablet, sketching on
+  paper, or talking to the person at the next desk. In every one of those cases you are
+  working, and Teams tells your colleagues you are not.
+
+  NeverAway corrects that, and it does the opposite half too: at an hour you choose it closes
+  Teams, so still being logged in late does not read as an invitation to be interrupted.
+
+  How it works
+  - Sends a one-pixel mouse movement or an F15 key press, but only after you have genuinely
+    stopped touching the machine. While you are typing it does nothing.
+  - Asks Windows not to blank the display while it is running.
+  - Opens and closes Teams and Zoom on a weekly schedule you set.
+  - Will not close Teams if the application looks busy; the scheduled close waits instead.
+
+  Privacy
+  It reads no messages, calls, files, screen contents or keystrokes. Its only network traffic
+  is a licence check to neverawayteams.com carrying a hardware-derived identifier, plus
+  optional weather and public-IP lookups you can switch off.
+
+  Portable: a single signed executable. No installer, and nothing written outside
+  %LOCALAPPDATA%\NeverAway.
+
+Moniker: neveraway
+
+Tags:
+  - teams
+  - microsoft-teams
+  - presence
+  - status
+  - productivity
+  - scheduler
+  - zoom
+  - keep-awake
+  - remote-work
+
+ReleaseNotes: |-
+  The free and paid versions now differ where it matters.
+
+  - Scheduling, application control and the Info Hub are shown as premium rather than left open. The
+    engine already declined to run them without a paid plan, but every control was editable, so a free
+    user could set up a week of automation and watch nothing happen. They are now visibly locked, in
+    place, and selecting one shows what the plans are.
+  - Everything the free version is entitled to stays fully usable and configurable: keeping your status
+    awake, how often and how it signals, the idle threshold, the session cap, whether the display is kept
+    awake, the activity list, and how the window itself behaves.
+  - The version you are running is shown in Settings, under "Account and support", directly above the
+    update check - the first thing support asks for, and now visible whatever your plan. It is read from
+    the build itself rather than written into the source, so it cannot disagree with the executable it is
+    printed in.
+  - "Read more" on a news item opened a web address that no longer exists, so nothing happened. It now
+    opens the same news page as the shortcut.
+
+  Carried forward from 2.0.7 - fixes for waking from sleep, and for the scheduled close reporting a
+  meeting that was not happening:
+
+  - Waking the machine brings presence back. It relied on the resume notification Windows sends for the
+    classic sleep states, which a machine using Modern Standby - the low-power idle most recent laptops
+    use - may never send at all. When it did not arrive, nothing turned presence back on: the machine was
+    awake, the application was sitting there inactive, and only restarting it helped. How long the machine
+    was suspended is now measured from Windows' own accounting, which exists on every machine and is the
+    same for sleep, hibernation and Modern Standby.
+  - Waking turns presence on even if it had been stopped by hand before the machine was suspended. A stop
+    from before a sleep is not an instruction anybody remembers giving, and the 1.x releases did the same.
+  - Waking is reported as its own event, with how long the machine was away. It shared a message with the
+    tray's Resume command, so an overnight sleep and a click on Resume produced the same line.
+  - A long period with the application not running at all - frozen by a management agent, or starved on a
+    heavily loaded machine - is now noticed too, and the keep-awake request is re-applied.
+
+  Also in this release:
+
+  - Teams is no longer treated as permanently in a meeting. The evidence for a call is a UDP endpoint
+    owned by Teams, and ms-teams.exe holds two of them for as long as it is running, for its own
+    signalling - so "Teams is open" was indistinguishable from "Teams is in a call" and the scheduled
+    close was postponed every sixty seconds indefinitely. Those two sockets are now recognised for what
+    they are and discounted.
+  - Having looked and found no call is now a different answer from having been unable to look. It
+    previously reported both as "unknown", which postpones the close and, unlike a detected meeting, was
+    not overridden by the "force close during a meeting" setting either - so there was no way to
+    configure around it. Being unable to read the system's process or network tables still postpones the
+    close, which is the case worth being careful about.
+  - Both corrections are applied to the fallback path as well.
+
+  Carried forward from 2.0.4 to 2.0.6:
+
+  - Meeting detection no longer needs a script host. It asked PowerShell for the process list and
+    the UDP endpoint table; on a company-managed machine that request can be refused - Windows
+    PowerShell is blocked outright by some AppLocker and WDAC policies, and Defender's
+    attack-surface rules can stop it being launched as a child process. A refused request is not
+    the same as "no meeting", so the scheduled close was deferred, retried every sixty seconds,
+    and Teams stayed open all night. Both questions are now answered directly from Windows, with
+    no interpreter, no execution policy and no child process involved.
+  - When the script host is used as a fallback and complains but still answers, the answer is now
+    used. Previously anything written to its error stream discarded a perfectly good verdict.
+    "No meeting" is the exception and still requires a clean run, because it is the only verdict
+    that permits a close and a close during a call is the one outcome worth being strict about.
+  - The activity log now records why detection failed, not only that it did.
+  - The request that keeps Windows awake is now renewed continuously. It was made once, when
+    presence started, and never again. That request does not reliably survive a suspend/resume
+    cycle or a session switch, and once it had lapsed nothing restored it: the presence signal
+    kept working, the window kept saying ACTIVE, and the machine went to sleep anyway. The 1.x
+    releases renewed it on every timer tick, which is why they did not have this problem.
+  - The display is kept awake by default. The previous default asked Windows only to keep the
+    machine from sleeping, which deliberately does not stop the screen going black.
+  - Scheduled times no longer change from one launch to the next. With randomisation on the
+    offsets were drawn fresh at every start, so a close set for 18:00 could be announced as
+    18:07 and then 18:02 after a restart. They are now fixed for the day, still early for the
+    opening and late for the closing, and still different from day to day.
+  - The activity log records that presence is working, hourly, and records it when a presence
+    signal starts being refused by Windows and when it recovers. This previously existed only
+    in memory, so after the fact a working presence loop was indistinguishable from a stopped
+    one.
+  - Support and download destinations, and any notice from the developer, can now be updated
+    without a new release. Nothing about an existing licence depends on them.
+
+  Carried forward from 2.0.1 and 2.0.2:
+
+  - Closing closes, from the window, the taskbar and the notification area alike. In 2.0.0 the
+    shutdown could be abandoned part-way: the window and the icon disappeared, so the program
+    looked closed, but the process stayed alive holding the single-instance lock - which meant
+    it could not be started again either, and its presence loop was already stopped.
+  - The notification-area menu follows the current state instead of continuing to offer "Start"
+    after presence had been started from that same menu.
+  - The status dot is green while presence is being maintained and red while it is not.
+  - The update check no longer reports an update to people already running the newest build.
+
+ReleaseNotesUrl: https://neverawayteams.com/news/
+
+Documentations:
+  - DocumentLabel: User manual
+    DocumentUrl: https://neverawayteams.com/manual/
+
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
