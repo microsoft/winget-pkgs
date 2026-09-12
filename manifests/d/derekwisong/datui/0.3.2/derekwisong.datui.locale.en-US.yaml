@@ -1,0 +1,96 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: derekwisong.datui
+PackageVersion: 0.3.2
+PackageLocale: en-US
+Publisher: derekwisong
+PublisherUrl: https://github.com/derekwisong
+PublisherSupportUrl: https://github.com/derekwisong/datui/issues
+PackageName: datui
+PackageUrl: https://github.com/derekwisong/datui
+License: MIT
+LicenseUrl: https://github.com/derekwisong/datui/blob/HEAD/LICENSE
+ShortDescription: Data Exploration in the Terminal
+Description: Datui is a high-performance terminal UI for exploring and analyzing datasets.
+Tags:
+- analysis
+- cli
+- data
+- eda
+- research
+- tui
+ReleaseNotes: |-
+  What's changed
+  This release fixes several bugs in the text fields, the load path and the
+  parsers, and adds signatures to release artifacts.
+  Fixed
+  - Text input was rewritten on top of a new in-tree editor, replacing the two
+    near-duplicate widgets that wrapped tui-textarea. Pressing / after Esc
+    showed a blank query bar instead of the running query, and switching query
+    tabs showed the last thing typed rather than that tab's query. Both are
+    fixed. Readline keys (Ctrl-A, Ctrl-E, Ctrl-K, Ctrl-W, Ctrl-U) work as
+    before. (#116)
+  - Query history is merged rather than overwritten when two instances run at
+    once. (#116)
+  - Opening a second dataset left the first one on screen, under the incoming
+    file's name and with its row count, for the whole load. The load now owns
+    the screen from the keypress until its dataset is installed. (#113)
+  - Ctrl+O reached the home screen mid-load but did not abandon the load, which
+    ran to completion and swapped its dataset in underneath. Loads are now
+    abandonable, and no phase of a load blocks the event thread. Declining
+    "Continue with download?" exited the app; modals raised over the home screen
+    could not be dismissed; a row count computed for one dataset could be applied
+    to the next. (#109)
+  - The home screen probes remote roots with a cap of four concurrent probes, but
+    completed probes were never removed from the in-flight list. After four
+    roots, no root was probed again for the rest of the session. (#110)
+  - Three parser bugs found by fuzzing: the query parser recursed once per nested
+    parenthesis and exhausted the stack at around two hundred, killing the
+    process; hex colour parsing indexed at fixed byte offsets and panicked on
+    a non-ASCII value; a literal * in a column name consumed a glob pattern's
+    wildcard. (#114)
+  - Builds without the sql feature, and cloud-only builds, did not compile. A
+    cloud-only build also left downloaded data in the temp directory. (#114)
+  - Homebrew refuses a third-party tap without brew trust, so the documented
+    Homebrew install failed. The command is now in the README and the install
+    guide. The one-line install was unaffected. (#108)
+  Security
+  - Cell values, column names, filenames and parser error messages containing
+    terminal escape sequences reached the terminal intact. A spreadsheet cell
+    could write to the clipboard or clear the screen. The rendered buffer is now
+    swept before it is written out. (#80)
+  - --generate-config wrote its template, which invites an S3 access key and
+    secret, at 0644. It is now created 0600, and an existing 0644 file is
+    corrected. (#82)
+  - Releases now publish SHA256SUMS, and install.sh verifies what it
+    downloaded before installing. Verification is skipped for releases that
+    predate the file. (#106)
+  - SHA256SUMS is signed with cosign, keyless via Sigstore, and the signature
+    published alongside it. The identity is the release workflow's OIDC token.
+    SECURITY.md carries the verification command. (#115)
+  - calamine 0.36 moves off quick-xml 0.38, which carries two denial-of-service
+    advisories reachable from any .xlsx opened. The Excel reader, previously the
+    only input format with no test coverage, is now covered. (#79)
+  - arrow and orc-rust upgraded together; both parse untrusted input. (#100)
+  - ureq 3 bounds the whole HTTP exchange rather than individual socket
+    operations, so a server that trickles bytes no longer hangs the TUI. (#101)
+  - ratatui 0.30 resolves lru past two memory-corruption advisories that were
+    unpatchable while ratatui 0.29 pinned it, and drops paste. (#116)
+  - Added a security policy, security tooling in CI, and coverage-guided fuzzing
+    of the five parsers that run on untrusted input. (#59, #78, #114)
+  - The contributor requirements file floors filelock past two advisories it
+    reached through pre-commit, and the security documentation was corrected
+    where it had gone stale. Both are contributor-facing; nothing changes for
+    anyone installing datui. (#117)
+  Build
+  - The dev profile emitted full DWARF for all dependencies, producing a 1.9 GB
+    debug binary that was linked into 15 test binaries. Dependencies now build
+    with no debuginfo; our own crates keep line tables. cargo test --no-run
+    went from over ten minutes to 51 seconds, and target/debug from 185 GB to
+    7.2 GB.
+  Plus dependency updates and CI fixes.
+  Full changelog: v0.3.1...v0.3.2
+ReleaseNotesUrl: https://github.com/derekwisong/datui/releases/tag/v0.3.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

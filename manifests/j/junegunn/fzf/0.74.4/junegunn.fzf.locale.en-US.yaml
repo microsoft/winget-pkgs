@@ -1,0 +1,49 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: junegunn.fzf
+PackageVersion: 0.74.4
+PackageLocale: en-US
+Publisher: Junegunn Choi
+PublisherUrl: https://github.com/junegunn
+PublisherSupportUrl: https://github.com/junegunn/fzf/issues
+Author: Junegunn Choi
+PackageName: fzf
+PackageUrl: https://github.com/junegunn/fzf
+License: MIT
+LicenseUrl: https://github.com/junegunn/fzf/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2013-2023 Junegunn Choi
+CopyrightUrl: https://github.com/junegunn/fzf/blob/master/LICENSE
+ShortDescription: A general-purpose command-line fuzzy finder
+Tags:
+- cli
+- go
+ReleaseNotes: |-
+  - Fixed an escape sequence split across reads being parsed as a fragment, which leaked the rest into the query (#4899)
+    - e.g. A terminal answering the startup DECRQM query late left ?2004;2$y, CTRL-UP left 5A, and SGR mouse input left 0;1;1M
+  - Fixed --tiebreak=pathname not detecting the last path separator when the line contains a non-ASCII character before it (#4902)
+  - Fixed progress in the --listen status payload staying at 100 while a new search was running, which made a snapshot with a new query and the previous result set look complete (#4903)
+    - It is now reset when a search starts and reaches 100 on the final result, so progress of 100 means the matches belong to the query reported next to them
+  - Fixed adaptive height not reserving a line for the divider of an inline header or footer border, so the list came up one line short for each of them (#4904)
+    - e.g. seq 10 | fzf --height=~100% --list-border --header-lines=1 --header-lines-border=inline
+  - Fixed fzf erasing the line the prompt was on when it exits, which made the last line of the prompt flicker in fish, bash, and nushell (#4913)
+  - Fixed fzf exiting with status 2 while waiting for a key, when --listen is used and 100+ signals interrupt the wait (#4917)
+  - Vim plugin
+    - fzf no longer blocks the editor, so live previews keep working while fzf is open
+      - fzf#run returns an empty list when it runs fzf asynchronously. Use sink, sinklist, or exit to get the result
+    - The popup layout now works under Zellij
+    - Added popup as a synonym of the tmux layout key
+      let g:fzf_layout = { 'popup': '90%,70%' }
+    - fzf now opens in a tmux or Zellij floating pane by default, so the window it was started from stays visible and can be used while fzf is running
+      - Requires tmux 3.7+ or Zellij 0.44+
+      - Set g:fzf_layout to pick a different layout
+  - fish
+    - Fixed custom CTRL-T command not using the prefixed target directory in some cases (#4498) (@bitraid)
+    - Optimized description alignment of completion items (#4910) (@bitraid)
+  - nushell
+    - Added key bindings for Helix editing modes, on nushell 0.115.0 or above (#4914) (@sim590)
+    - Fixed CTRL-T inserting the selected paths unquoted
+      - p4p3r (@P4P3R-HAK) reported the security vulnerability and suggested the fix
+ReleaseNotesUrl: https://github.com/junegunn/fzf/releases/tag/v0.74.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
