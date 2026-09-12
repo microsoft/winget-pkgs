@@ -1,0 +1,71 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: AnInsomniacy.Aria2Next
+PackageVersion: 2.7.5
+PackageLocale: en-US
+Publisher: AnInsomniacy
+PublisherUrl: https://github.com/AnInsomniacy
+PublisherSupportUrl: https://github.com/AnInsomniacy/aria2-next/issues
+Author: AnInsomniac
+PackageName: Aria2 Next
+PackageUrl: https://github.com/AnInsomniacy/aria2-next
+License: GPL-2.0
+LicenseUrl: https://github.com/AnInsomniacy/aria2-next/blob/main/COPYING
+ShortDescription: Maintained aria2 fork with extensive bug fixes and modernized architecture
+Description: |-
+  aria2 is remarkable open source software. For over a decade it has been one of the most capable
+  download engines available, trusted by countless tools and users worldwide. We are deeply grateful
+  to the original authors and contributors of the aria2 project. They built something that has stood
+  the test of time, and that enduring quality is the best testament to their vision and craftsmanship.
+
+  But upstream development has slowed dramatically in recent years. Dependencies grew stale, builds
+  broke on modern platforms, and a backlog of bugs went unaddressed. We picked up the baton: migrated
+  the codebase to a modern build framework, triaged and fixed a substantial number of upstream issues,
+  and introduced ED2K protocol support for the first time. A full audit trail is preserved in
+  docs/maintenance/upstream-issue-review/matrix.csv.
+
+  Aria2 Next is an actively maintained aria2-compatible engine for everyone, and it is also the embedded
+  engine used by Motrix Next. Original interfaces, including options, configuration, sessions, JSON-RPC,
+  and libaria2, remain intact so downstream projects get a seamless upgrade. The focus is straightforward:
+  release reliability, current dependency baselines, and ongoing compatibility fixes. Same engine, renewed
+  foundation.
+ReleaseNotes: |-
+  ## Summary
+
+  Improves parallel HTTP downloads through signed redirect links and over uneven IPv4/IPv6 paths, reduces slow completion tails, and fixes Windows event-loop crashes and CRLF input handling. No CLI, RPC, or saved-state migration is required.
+
+  ### Fixed
+
+  • Reuse validated redirect destinations for subsequent ranges instead of repeatedly requesting the original signed entry URL. Refresh rejected destinations through a single in-flight request per source route while preserving healthy transfers and retry delays.
+  • Let idle workers split the largest unfinished range without waiting for a throughput sample. Small stalled tails can now be reassigned even when they have received fewer than 64 KiB.
+  • Preserve the earliest requested event-loop wakeup so a later libcurl timer cannot postpone work already due.
+  • Fix a Windows event-loop crash caused by inconsistent Winsock header initialization across translation units.
+  • Parse CRLF input lists without retaining carriage returns that interfere with blank lines and per-download options.
+
+  ### Changed
+
+  • Share one range queue across bounded IPv4/IPv6 workers for unrestricted parallel HTTP downloads. Workers retain their address-family choice across ranges, allowing faster workers to take more work without switching other active transfers. Existing connection limits and explicit network settings remain effective.
+  • Preserve the original origin boundary for HTTP credentials and manually supplied Authorization and Cookie headers when opening ranges directly at a cached redirect destination. Cookie storage and connection reuse remain managed by libcurl.
+
+  ### Added
+
+  • Native Windows x64 HTTP validation support, with regression scenarios for single-use redirects, expired destinations, cross-origin credentials, and changing dual-stack transfer speeds.
+
+  ### Downloads
+
+  | Platform | Asset |
+  | --- | --- |
+  | Linux x86_64 | `aria2-next-2.7.5-linux-x86_64` |
+  | Linux ARM64 | `aria2-next-2.7.5-linux-aarch64` |
+  | macOS Apple Silicon | `aria2-next-2.7.5-macos-arm64` |
+  | macOS Intel | `aria2-next-2.7.5-macos-x86_64` |
+  | Windows x86_64 | `aria2-next-2.7.5-windows-x86_64.exe` |
+  | Windows ARM64 | `aria2-next-2.7.5-windows-arm64.exe` |
+  | Android ARM64 | `aria2-next-2.7.5-android-arm64` |
+  | SHA-256 checksums | `aria2-next-2.7.5-checksums.sha256` |
+
+  Related report：[Motrix Next #581](https://github.com/AnInsomniacy/motrix-next/issues/581).
+ReleaseNotesUrl: https://github.com/AnInsomniacy/aria2-next/releases/tag/v2.7.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
