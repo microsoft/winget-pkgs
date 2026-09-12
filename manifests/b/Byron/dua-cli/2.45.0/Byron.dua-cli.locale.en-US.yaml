@@ -1,0 +1,181 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Byron.dua-cli
+PackageVersion: 2.45.0
+PackageLocale: en-US
+Publisher: Sebastian Thiel
+PublisherUrl: https://github.com/Byron
+PublisherSupportUrl: https://github.com/Byron/dua-cli/issues
+Author: Sebastian Thiel
+PackageName: Disk Usage Analyzer
+PackageUrl: https://github.com/Byron/dua-cli
+License: MIT
+LicenseUrl: https://github.com/Byron/dua-cli/blob/HEAD/LICENSE
+Copyright: © Sebastian Thiel
+CopyrightUrl: https://github.com/Byron/dua-cli/raw/main/LICENSE
+ShortDescription: View disk space usage and delete unwanted data, fast.
+Description: dua (→ Disk Usage Analyzer) is a tool to conveniently learn about the usage of disk space of a given directory. It's parallel by default and will max out your SSD, providing relevant information as fast as possible. Optionally delete superfluous data, and do so more quickly than rm.
+Moniker: dua
+Tags:
+- cleaner
+- disk-usage-analyser
+- disk-usage-analyzer
+- diskusageanalyser
+- diskusageanalyzer
+- duacli
+- harddisk
+- harddrive
+- requirescmd
+- space-use
+- ssd
+ReleaseNotes: |-
+  This release packs an incredibly useful new sub-command called dua clean [--depth N],
+  to automatically and efficiently find typical build products that you may want to delete,
+  for Rust and Zig and Node for now.
+  Also, when deleting entries, the TUI does not block anymore, but shows the decreasing number
+  of bytes as files are deleted, until the marked entry finally disappers. The TUI can still be
+  used then, albeit in read-only mode.
+  Oh, and it also got faster on macOS when there are folders with a lot of files, when it will
+  switch aways from bulk-reads to multi-threaded stat calls instead, which in my case led to
+  a 2.5x speedup.
+  New Features
+  - add Git-aware dua clean and background deletion
+    This commit was mostly rubber-stamped, but tested for a week or so before that.
+    By now it's fair to accept that dua is in "tool that needs to work, without
+    needing to be very familiar with how it works" territory, while I still look
+    at the code at least but without the requirement to understand it all.
+    Add dua clean [--depth N] [DIRECTORY]... to discover disposable build
+    artifacts and caches, size accepted candidates, and offer them in a dedicated
+    cleanup hub. Keep the TUI responsive during scanning, deletion, and trashing.
+    __KOMAC_HEADER__ Discovery and safety
+    - Search directory entries and types before collecting size metadata. Recognize
+      Node dependencies, Python caches and virtual environments, Cargo build output,
+      and Zig caches and output. Require project markers for ambiguous names.
+    - In Git repositories, require expendable ignore matches and reject tracked
+      contents, conflict stages, gitlinks, and sparse ancestors. Consult HEAD when
+      the index is absent and reject candidates when validation fails.
+    - Reject nested repositories, case variants of Git markers, unreadable contents,
+      excluded descendants, and disallowed filesystem boundaries.
+    - Feed discovered roots into dua-core's running walker within the configured
+      thread budget. Bound active candidates and publish each independently after
+      sizing and validation; commit hardlink/APFS accounting only on acceptance.
+    - Search without a depth limit by default; --depth bounds discovery. Support
+      traversal filters and --once, with no snapshot import/export or parent
+      scanning in clean mode.
+    __KOMAC_HEADER__ Cleanup hub and browsing
+    - Title the hub with its input directories, group siblings and contained
+      candidates, and keep rows in largest-first order as scan results arrive.
+    - Open groups as scoped views of existing candidate nodes. Reuse ordinary
+      sorting, glob search, annotations, navigation, and marking within the group;
+      keep group membership and controls local to the hub.
+    - Group marks target actual candidates. Complete partial marks and toggle fully
+      marked groups off, preserving the real parent and unrelated contents.
+    - Refresh recorded candidates without widening their deletion scope. Revalidate
+      whole candidates with their original discovery roots, restore browser/search
+      positions, and clear stale marks before tree indices are reused.
+    __KOMAC_HEADER__ Background deletion
+    - Run deletion and trash work off the main thread, updating remaining bytes in
+      the tree, mark pane, and progress message about once per second.
+    - Allow navigation, search, sorting, pane controls, and suspend/resume while
+      freezing marks and blocking further filesystem actions until the batch ends.
+    - Preserve bounded filesystem concurrency, parallel file removal, and removal
+      of child directories before parents. Batch tree updates using scanned sizes
+      without double-counting overlapping marks or completed subtrees.
+    - Keep failed entries with their remaining sizes and errors. On quit, cancel
+      pending work, apply in-flight results, and join workers. On event-loop failure,
+      cancel and disconnect events before joining. Trash progress advances when
+      each native trash call returns.
+  - minimize right-hand panels with ]
+    A very quick review, but one that showed that the GUI probably shouldn't get more complicated.
+    Or else it would be batter with more of a layout system than what it has now - manual layout.
+    __KOMAC_HEADER__ Behavior
+    Add a configurable toggle_right_panes action, defaulting to ], that
+    minimizes or restores the shared Help and Marked sidebar. Minimized panes
+    display their translated names vertically with a blank column on each side:
+    three columns for single-width labels and four for double-width labels.
+    The main list uses the remaining terminal width.
+    - Keep Help and Marked stacked when both exist, preserving their contents.
+    - Return focus to the main list on collapse and skip minimized panes with
+      Tab. Restoring with ] keeps focus in the main list; ? restores and
+      focuses Help without resetting its scroll position.
+    - Keep marks and quit protection intact. Do not dispatch deletion actions
+      to a minimized Mark pane, and preserve literal brackets in search input.
+    - Retain the minimized preference for the session, including while marking
+      more entries or temporarily having no right-hand panes. With no panes,
+      ] is a no-op and the sidebar consumes no space.
+    - Advertise toggle-collapse = ] on the bottom border of each unfocused,
+      expanded Help or Mark pane, using the configured key and translated label.
+      Hide the hint during search input, when disabled, or when it cannot fit
+      between the border corners.
+  - add directory_suffix option for directory markers
+    Keep the ncdu-style leading slash by default and render a trailing slash when
+    directory_suffix = true in the configuration.
+  - localize the interactive interface
+    Translate the remaining interactive panes, status messages, progress text,
+    prompts, errors, and notifications for every supported locale. Detect the
+    session language once and keep application, command, key, path, unit, Git-Glob,
+    and mtime names unchanged, while using compact locale-specific action labels
+    where they fit better.
+  - add German help translation
+    Add de locale detection and a complete German translation for the interactive
+    help pane, with documentation.
+    Regression coverage verifies de_DE.UTF-8 and de selection plus English fallback for de_DE.ISO-8859-1.
+  - add Simplified Chinese help translation
+    Add zh locale detection and a complete Simplified Chinese translation for the interactive help pane, with documentation.
+    Regression coverage verifies zh_CN.UTF-8 and zh selection plus English fallback for zh_CN.GB18030.
+    Validated with: cargo test interactive::widgets::i18n::tests
+  - add Korean help translation
+    Add Korean locale detection and a complete Korean translation for the interactive help pane. Generalize the existing UTF-8 locale parser so supported language codes share one path, while preserving English fallback for non-UTF-8 locales.
+
+  Regression: ko_KR.UTF-8 and ko now select Korean; ko_KR.EUC-KR falls back to English.
+
+  Validated with: cargo test interactive::widgets::i18n::tests
+  - repaint screen with Ctrl-L
+    Interactive sessions had no way to recover when terminal contents were corrupted
+    because unchanged frames produce no backend writes.
+    Add a configurable Ctrl-L repaint action. It clears the backend directly
+    to avoid Terminal::clear's cursor-position query racing the input thread,
+    invalidates Ratatui's cached frame, and redraws through the normal event path.
+  - configure flamegraph SVG rendering
+    - Add palette, width, minimum-frame-width, title, and inverted-layout flags.
+    - Label generated graphs in disk-usage terms with byte counts and paths.
+    - Validate rendering arguments and exercise them in parser and end-to-end tests.
+  - add stacks and flamegraph commands
+    __KOMAC_HEADER__ Summary
+    - Promote folded output previously at dua aggregate --stacks to the first-class dua stacks command
+    - Add dua flamegraph, backed by Inferno, with temporary opening by default and --output for file-only output.
+    - Keep aggregate --stack as a hidden compatibility path and limit the new commands to relevant traversal flags.
+
+  Bug Fixes
+  - prevent deletion during scans
+    Deleting a directory while a scan was active could leave queued traversal
+    events referring to removed nodes, aborting dua i with InvalidIndex.
+    Reject delete and trash actions while a scan is active, retaining marked
+    entries and showing "Traversal already running" so the user can retry
+    afterward. Deletion already blocks the event loop, preventing new scans
+    until it finishes.
+  - keep Traditional Chinese locales in English
+    Restrict the Simplified Chinese help table to bare zh, zh_CN, zh_SG, and zh_Hans while retaining English fallback for zh_TW, zh_HK, zh_MO, and zh_Hant.
+    This addresses the post-commit review finding for 7b5e8e4.
+    Validated with: cargo test interactive::widgets::i18n::tests
+
+  Performance
+  - parallelize I/O-bound macOS directory scans
+    This was an issue I encountered on APFS, a directory created by rustc with
+    more than 1m files in it. In that case, bulk reading is slow (while efficient),
+    and it turned out to be better to detect this and switch over to stat-based traversal.
+    While looking at the filesystem probing code more closely (and how it's not dependent
+    on CPU performance by differntiating wall time from kernel time), I basically
+    rubber-stamped all the other code. Too much to look at, too foreign by now.
+    But it did look cleaned up, so 👍.
+    The reported target-directory scan left one worker waiting inside
+    getattrlistbulk at about 15% of a CPU core. Native directory collection also
+    held an entire parent directory before publishing entries and child jobs.
+    Probe at most two initial bulk buffers before publishing them. Compare
+    calling-thread user and kernel CPU time with elapsed time, and select the
+    existing parallel stat queue when both refills spend more time waiting than
+    executing. Reopen through ordinary enumeration only after that decision,
+ReleaseNotesUrl: https://github.com/Byron/dua-cli/releases/tag/v2.45.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
