@@ -1,0 +1,71 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: JGraph.Draw
+PackageVersion: 31.4.5
+PackageLocale: en-US
+Publisher: JGraph
+PublisherUrl: https://www.drawio.com/
+PublisherSupportUrl: https://github.com/jgraph/drawio-desktop/issues
+PrivacyUrl: https://www.diagrams.net/trust
+Author: JGraph Limited
+PackageName: draw.io
+PackageUrl: https://github.com/jgraph/drawio-desktop
+License: Apache-2.0
+LicenseUrl: https://github.com/jgraph/drawio-desktop/blob/HEAD/LICENSE
+Copyright: © 2005-2026 JGraph Ltd, Artisans' House, 7 Queensbridge, NN4 7BF, Northampton, England. Company
+CopyrightUrl: https://www.diagrams.net/trust
+ShortDescription: A diagramming desktop app based on Electron that wraps the core draw.io editor.
+Tags:
+- chart
+- design
+- diagram
+- draw
+- gantt
+- graph
+- graphics
+- mind-map
+- mind-mapping
+- mindmap
+- uml
+ReleaseNotes: |-
+  - Drops files the packaged app never reads, which makes the downloads 7 to 14 MB smaller depending on the package
+  - Sandboxes the renderer of the progress window shown while an update downloads
+  - Enables auto-update for Windows arm64 builds, which were previously published with updates disabled because both architectures wrote the same update manifest. Existing arm64 users need to install this build manually once, after which updates arrive in the app as usual [jgraph/drawio-desktop#2197]
+  - Updates to draw.io core 31.4.5. All changes from 31.4.4 to 31.4.5 are added in this build.
+  Testing:
+  Verified against the packaged, signed macOS build. The Windows arm64 update channel was verified from the build configuration, the produced update manifest and unit tests, rather than from a running Windows build.
+  Base checks
+  - Launch, open a file passed on the command line, add and edit shapes, change styles, undo and redo, copy and paste, save, insert, rename and delete pages, and zoom
+  - Export to PNG, SVG and PDF from the app and from the command line, covering scale, border, transparency, cropping, page selection with -p and --size page against the default --size diagram
+  - Diagram round trip in an exported PDF, including reopening the exported PDF and recovering both pages and their contents
+  - Mermaid and CSV import and the --layout option from the command line
+  - Shape search, the export dialog and the print preview
+  - Quick Look preview on macOS is registered for this build and loads without error
+  - The macOS bundle is signed with a Developer ID certificate under the hardened runtime, is notarised and stapled, and the Quick Look app extension is sandboxed and separately signed
+  - The Electron security fuses are applied, so RunAsNode, the NODE_OPTIONS variable and the node inspect arguments are disabled and the app only loads from the asar
+  - 158 unit tests pass
+  Files dropped from the package
+  - All 204 stencil files are present in the embedded stencil bundle, matching the source tree exactly, and every one of them parses at runtime without a single request reaching a removed file
+  - Of the 2866 shape names referenced by the shipped bundles, the same number resolve as on a reference build made from the same source, so nothing that used to render has been lost
+  - Startup produces no failed loads and no console errors
+  - Shapes backed by stencils, by the compiled shape bundle and by images all render, both in the app and in command line exports
+  - PDF export still works, which is the path that resolves the PDF library build kept in the package
+  - Starting a packaged build with DRAWIO_ENV=dev now keeps the minified bundles instead of opening a blank window
+  Progress window sandbox
+  - The progress window renderer runs sandboxed, confirmed against a control window built without the sandbox
+  - Its text, detail line and bar position still update, the completion event still fires and the window still closes
+  - The window does not stay on top of the editor [jgraph/drawio-desktop#2516]
+  Checks around the changes
+  - Reads, stats and watches of paths the user has not authorised are still refused, and so are writes, while an authorised file still reads and saves [GHSA-fjgc-8xgj-rvh4]
+  - Only http, https, mailto, tel and callto links are opened externally
+  - Libraries opened from a file still load, and saving one repeatedly still writes each time without reopening the save dialog [jgraph/drawio-desktop#2518] [jgraph/drawio-desktop#2521]
+  - Opening a file from the command line, saving it without a dialog and reopening it round trips with both pages intact
+ReleaseNotesUrl: https://github.com/jgraph/drawio-desktop/releases/tag/v31.4.5
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://www.drawio.com/docs/
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/jgraph/drawio-desktop/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
