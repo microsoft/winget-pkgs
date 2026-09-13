@@ -325,7 +325,6 @@ safe-outputs:
       permissions:
         checks: read
         contents: read
-        issues: write
         pull-requests: write
       output: Comment posted to the triggering pull request
       inputs:
