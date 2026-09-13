@@ -312,7 +312,7 @@ safe-outputs:
       permissions:
         checks: read
         issues: write
-        pull-requests: read
+        pull-requests: write
       steps:
         - name: Download deterministic evidence
           uses: actions/download-artifact@v8
