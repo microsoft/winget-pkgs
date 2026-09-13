@@ -269,7 +269,7 @@ safe-outputs:
         checks: read
         contents: read
         issues: write
-        pull-requests: read
+        pull-requests: write
       inputs:
         reconciliation_class:
           description: Exact supported reconciliation class
