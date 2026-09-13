@@ -325,7 +325,7 @@ safe-outputs:
         checks: read
         contents: read
         issues: write
-        pull-requests: read
+        pull-requests: write
       output: Comment posted to the triggering pull request
       inputs:
         body:
