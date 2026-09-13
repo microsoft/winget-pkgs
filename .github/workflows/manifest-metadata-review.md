@@ -371,7 +371,6 @@ safe-outputs:
         needs.detection.outputs.detection_success == 'true'
       max: 1
       permissions:
-        issues: write
         pull-requests: write
       inputs:
         body:
