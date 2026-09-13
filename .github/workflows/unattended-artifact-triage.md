@@ -312,7 +312,6 @@ safe-outputs:
           type: string
       permissions:
         checks: read
-        issues: write
         pull-requests: write
       steps:
         - name: Download deterministic evidence
