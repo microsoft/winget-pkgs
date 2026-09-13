@@ -290,6 +290,7 @@ tools:
 safe-outputs:
   threat-detection: true
   report-failure-as-issue: false
+  report-failed-jobs: false
   report-incomplete:
     create-issue: false
   noop:
