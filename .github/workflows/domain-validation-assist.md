@@ -311,7 +311,6 @@ safe-outputs:
       permissions:
         checks: read
         contents: read
-        issues: write
         pull-requests: write
       inputs:
         classification:
