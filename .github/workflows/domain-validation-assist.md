@@ -311,7 +311,7 @@ safe-outputs:
         checks: read
         contents: read
         issues: write
-        pull-requests: read
+        pull-requests: write
       inputs:
         classification:
           description: Exact supported domain finding class
