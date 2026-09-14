@@ -2,5 +2,1401 @@
 #include <stdlib.h>
 #include <string.h>
 #include "compiler.h"
+
+static char declared_namespaces[64][128];
+static int declared_namespace_count = 0;
+static char current_namespace[128] = "";
+
+static bool is_known_namespace(const char *name) {
+    for (int i = 0; i < declared_namespace_count; i++) {
+        if (strcmp(declared_namespaces[i], name) == 0) return true;
+    }
+    return false;
+}
+
+static bool is_stdlib_module(const char *name) {
+    return strcmp(name, "math") == 0 || strcmp(name, "string") == 0 ||
+           strcmp(name, "collections") == 0 || strcmp(name, "filesystem") == 0 ||
+           strcmp(name, "json") == 0 || strcmp(name, "xml") == 0 ||
+           strcmp(name, "yaml") == 0 || strcmp(name, "csv") == 0 ||
+           strcmp(name, "http") == 0 || strcmp(name, "database") == 0 ||
+           strcmp(name, "crypto") == 0 || strcmp(name, "gui") == 0 ||
+           strcmp(name, "ai") == 0 || strcmp(name, "testing") == 0 ||
+           strcmp(name, "web") == 0 || strcmp(name, "thread") == 0 ||
+           strcmp(name, "channel") == 0 || strcmp(name, "mutex") == 0 ||
+           strcmp(name, "atomic") == 0 || strcmp(name, "task") == 0 ||
+           strcmp(name, "concurrency") == 0 || strcmp(name, "encoding") == 0 ||
+           strcmp(name, "path") == 0 || strcmp(name, "random") == 0 ||
+           strcmp(name, "datetime") == 0 || strcmp(name, "regex") == 0;
+}
+
 #include "chunk.h"
-static void _x01c4(_x0047 *_x022a); static void _x01c5(_x00b3 *_x03e5); static void _x01c2(_x0047 *_x022a); typedef struct { char *_x0319; int _x01ee; bool _x02a8; bool _x02a6; } _x0016; typedef struct { int _x0290; bool _x02ad; } _x002f; typedef enum { _x002d, _x002e } _x000c; typedef struct _x0002 _x0002; struct _x0002 { _x0002 *_x020e; _x0090 *_x0265; _x000c _x0412; _x0016 _x02e6[256]; int _x02e5; _x002f _x041c[256]; int _x03a7; }; typedef struct _x0017 _x0017; struct _x0017 { _x0017 *_x020e; bool _x02aa; int _x03db; int *_x02d0; int _x02cf; int _x02ce; int *_x03c4; int _x03c3; int _x03c2; }; static _x0002 *_x01e2 = NULL; static _x0017 *_x01e3 = NULL; static void _x01cc(_x0002 *_x01ca, const char *_x0319, _x000c _x0412) { _x01ca->_x020e = _x01e2; _x01ca->_x0265 = _x0456(_x0319, 0); _x01ca->_x0412 = _x0412; _x01ca->_x02e5 = 0; _x01ca->_x03a7 = 0; _x01e2 = _x01ca; _x0016 *_x02e4 = &_x01ca->_x02e6[_x01ca->_x02e5++]; _x02e4->_x01ee = 0; _x02e4->_x02a8 = true; _x02e4->_x02a6 = false; if (_x0412 == _x002d) { _x02e4->_x0319 = malloc(1); _x02e4->_x0319[0] = '\0'; } else { _x02e4->_x0319 = malloc(5); strcpy(_x02e4->_x0319, "\x73\x65\x6c\x66"); } } static _x0090 *_x01cb(void) { _x0090 *_x0261 = _x01e2->_x0265; if (_x01e2->_x02e5 > 0) { free(_x01e2->_x02e6[0]._x0319); } _x01e2 = _x01e2->_x020e; return _x0261; } static _x0035 *_x01e1(void) { return &_x01e2->_x0265->_x01a9; } static void _x0206(uint8_t _x018c, int _x02d9) { _x0430(_x01e1(), _x018c, _x02d9); } static void _x0207(uint8_t _x018d, uint8_t _x018e, int _x02d9) { _x0206(_x018d, _x02d9); _x0206(_x018e, _x02d9); } static void _x020b(int _x02d9) { _x0206(_x0065, _x02d9); _x0206(_x007f, _x02d9); } static int _x02f5(_x012a _x0425, int _x02d9) { (void)_x02d9; int _x01d1 = _x042d(_x01e1(), _x0425); return _x01d1; } static void _x0208(_x012a _x0425, int _x02d9) { int _x01d1 = _x02f5(_x0425, _x02d9); if (_x01d1 <= 255) { _x0207(_x0061, (uint8_t)_x01d1, _x02d9); } else { _x0206(_x0062, _x02d9); _x0206(_x01d1 & 0xff, _x02d9); _x0206((_x01d1 >> 8) & 0xff, _x02d9); _x0206((_x01d1 >> 16) & 0xff, _x02d9); } } static int _x0209(uint8_t _x029f, int _x02d9) { _x0206(_x029f, _x02d9); _x0206(0xff, _x02d9); _x0206(0xff, _x02d9); return _x01e1()->_x01d7 - 2; } static void _x0357(int _x0329) { int _x02bb = _x01e1()->_x01d7 - _x0329 - 2; if (_x02bb > 65535) { fprintf(stderr, "\x54\x6f\x6f\x20\x6d\x75\x63\x68\x20\x63\x6f\x64\x65\x20\x74\x6f\x20\x6a\x75\x6d\x70\x20\x6f\x76\x65\x72\x2e\x0a"); exit(1); } _x01e1()->_x01b8[_x0329] = (_x02bb >> 8) & 0xff; _x01e1()->_x01b8[_x0329 + 1] = _x02bb & 0xff; } static void _x020a(int _x02ed, int _x02d9) { _x0206(_x0076, _x02d9); int _x0329 = _x01e1()->_x01d7 + 2 - _x02ed; if (_x0329 > 65535) { fprintf(stderr, "\x4c\x6f\x6f\x70\x20\x62\x6f\x64\x79\x20\x74\x6f\x6f\x20\x6c\x61\x72\x67\x65\x2e\x0a"); exit(1); } _x0206((_x0329 >> 8) & 0xff, _x02d9); _x0206(_x0329 & 0xff, _x02d9); } static void _x014a(void) { _x01e2->_x03a7++; } static void _x0212(int _x02d9) { _x01e2->_x03a7--; while (_x01e2->_x02e5 > 0 && _x01e2->_x02e6[_x01e2->_x02e5 - 1]._x01ee > _x01e2->_x03a7) { _x0206(_x007c, _x02d9); free(_x01e2->_x02e6[_x01e2->_x02e5 - 1]._x0319); _x01e2->_x02e5--; } } static void _x0134(const char *_x0319, bool _x02a7, int _x02d9) { (void)_x02d9; if (_x01e2->_x02e5 >= 256) { fprintf(stderr, "\x54\x6f\x6f\x20\x6d\x61\x6e\x79\x20\x6c\x6f\x63\x61\x6c\x20\x76\x61\x72\x69\x61\x62\x6c\x65\x73\x20\x69\x6e\x20\x66\x75\x6e\x63\x74\x69\x6f\x6e\x2e\x0a"); return; } for (int _x0288 = _x01e2->_x02e5 - 1; _x0288 >= 0; _x0288--) { _x0016 *_x02e4 = &_x01e2->_x02e6[_x0288]; if (_x02e4->_x01ee < _x01e2->_x03a7) break; if (strcmp(_x02e4->_x0319, _x0319) == 0) { fprintf(stderr, "\x56\x61\x72\x69\x61\x62\x6c\x65\x20\x27\x25\x73\x27\x20\x61\x6c\x72\x65\x61\x64\x79\x20\x64\x65\x66\x69\x6e\x65\x64\x20\x69\x6e\x20\x74\x68\x69\x73\x20\x73\x63\x6f\x70\x65\x2e\x0a", _x0319); return; } } _x0016 *_x02e4 = &_x01e2->_x02e6[_x01e2->_x02e5++]; _x02e4->_x0319 = malloc(strlen(_x0319) + 1); strcpy(_x02e4->_x0319, _x0319); _x02e4->_x01ee = _x01e2->_x03a7; _x02e4->_x02a8 = _x02a7; _x02e4->_x02a6 = false; } static int _x038e(_x0002 *_x01ca, const char *_x0319) { for (int _x0288 = _x01ca->_x02e5 - 1; _x0288 >= 0; _x0288--) { _x0016 *_x02e4 = &_x01ca->_x02e6[_x0288]; if (strcmp(_x02e4->_x0319, _x0319) == 0) { return _x0288; } } return -1; } static int _x0135(_x0002 *_x01ca, uint8_t _x0290, bool _x02ad) { int _x01d7 = _x01ca->_x0265->_x041b; for (int _x0288 = 0; _x0288 < _x01d7; _x0288++) { _x002f *_x041a = &_x01ca->_x041c[_x0288]; if (_x041a->_x0290 == _x0290 && _x041a->_x02ad == _x02ad) { return _x0288; } } if (_x01d7 >= 256) { fprintf(stderr, "\x54\x6f\x6f\x20\x6d\x61\x6e\x79\x20\x63\x6c\x6f\x73\x75\x72\x65\x20\x76\x61\x72\x69\x61\x62\x6c\x65\x73\x20\x69\x6e\x20\x66\x75\x6e\x63\x74\x69\x6f\x6e\x2e\x0a"); return 0; } _x01ca->_x041c[_x01d7]._x02ad = _x02ad; _x01ca->_x041c[_x01d7]._x0290 = _x0290; _x01ca->_x0265->_x041b++; return _x01d7; } static int _x038f(_x0002 *_x01ca, const char *_x0319) { if (_x01ca->_x020e == NULL) return -1; int _x02e4 = _x038e(_x01ca->_x020e, _x0319); if (_x02e4 != -1) { _x01ca->_x020e->_x02e6[_x02e4]._x02a6 = true; return _x0135(_x01ca, (uint8_t)_x02e4, true); } int _x041a = _x038f(_x01ca->_x020e, _x0319); if (_x041a != -1) { return _x0135(_x01ca, (uint8_t)_x041a, false); } return -1; } static void _x01c5(_x00b3 *_x03e5); static void _x01c4(_x0047 *_x022a); static void _x01c1(_x0032 _x014e, bool _x031f, int _x02d9); static void _x01c4(_x0047 *_x022a) { if (!_x022a) { _x0206(_x0065, 0); return; } switch (_x022a->_x02c6) { case _x0041: _x0208(_x04a1(_x022a->_x0141._x0326), _x022a->_x02d9); break; case _x0043: _x0208(_x04a2(_x022a->_x0141._x03e8), _x022a->_x02d9); break; case _x0037: _x0206(_x022a->_x0141._x0154 ? _x0089 : _x006a, _x022a->_x02d9); break; case _x003a: _x0206(_x0065, _x022a->_x02d9); break; case _x0040: { int _x013e = _x038e(_x01e2, _x022a->_x0141._x0319); if (_x013e != -1) { _x0207(_x006e, (uint8_t)_x013e, _x022a->_x02d9); } else if ((_x013e = _x038f(_x01e2, _x022a->_x0141._x0319)) != -1) { _x0207(_x0071, (uint8_t)_x013e, _x022a->_x02d9); } else { int _x031a = _x02f5(_x04a2(_x022a->_x0141._x0319), _x022a->_x02d9); _x0207(_x006c, (uint8_t)_x031a, _x022a->_x02d9); } break; } case _x0045: { _x01c4(_x022a->_x0141._x0416._x032e); if (_x022a->_x0141._x0416._x032b == _x00e6) { _x0206(_x0079, _x022a->_x02d9); } else if (_x022a->_x0141._x0416._x032b == _x00ea) { _x0206(_x007a, _x022a->_x02d9); } break; } case _x0036: { if (_x022a->_x0141._x014b._x032b == _x00b7) { _x01c4(_x022a->_x0141._x014b._x02d2); int _x0210 = _x0209(_x0075, _x022a->_x02d9); _x0206(_x007c, _x022a->_x02d9); _x01c4(_x022a->_x0141._x014b._x0396); _x0357(_x0210); break; } if (_x022a->_x0141._x014b._x032b == _x00f0) { _x01c4(_x022a->_x0141._x014b._x02d2); int _x0321 = _x0209(_x0075, _x022a->_x02d9); int _x0210 = _x0209(_x0074, _x022a->_x02d9); _x0357(_x0321); _x0206(_x007c, _x022a->_x02d9); _x01c4(_x022a->_x0141._x014b._x0396); _x0357(_x0210); break; } _x01c4(_x022a->_x0141._x014b._x02d2); _x01c4(_x022a->_x0141._x014b._x0396); switch (_x022a->_x0141._x014b._x032b) { case _x00f5: _x0206(_x0055, _x022a->_x02d9); break; case _x00e6: _x0206(_x0088, _x022a->_x02d9); break; case _x0105: _x0206(_x0078, _x022a->_x02d9); break; case _x0104: _x0206(_x0064, _x022a->_x02d9); break; case _x00f4: _x0206(_x0077, _x022a->_x02d9); break; case _x00b5: _x0206(_x0054, _x022a->_x02d9); break; case _x00bf: _x0206(_x005a, _x022a->_x02d9); break; case _x00bb: _x0206(_x0058, _x022a->_x02d9); break; case _x00bc: _x0206(_x0059, _x022a->_x02d9); break; case _x00fd: _x0206(_x0080, _x022a->_x02d9); break; case _x00ec: _x0206(_x007b, _x022a->_x02d9); break; default: break; } break; } case _x003d: { for (size_t _x0288 = 0; _x0288 < _x022a->_x0141._x02df._x01d7; _x0288++) { _x01c4(_x022a->_x0141._x02df._x0203[_x0288]); } _x0207(_x005b, (uint8_t)_x022a->_x0141._x02df._x01d7, _x022a->_x02d9); break; } case _x003e: { for (size_t _x0288 = 0; _x0288 < _x022a->_x0141._x02f7._x01d7; _x0288++) { _x0208(_x04a2(_x022a->_x0141._x02f7._x02c3[_x0288]), _x022a->_x02d9); _x01c4(_x022a->_x0141._x02f7._x0426[_x0288]); } _x0207(_x005c, (uint8_t)_x022a->_x0141._x02f7._x01d7, _x022a->_x02d9); break; } case _x003c: { _x01c4(_x022a->_x0141._x02b5._x02df); _x01c4(_x022a->_x0141._x02b5._x0290); _x0206(_x006d, _x022a->_x02d9); break; } case _x003f: { int _x013e = _x038e(_x01e2, "\x6d\x69\x6e\x65"); if (_x013e != -1) { _x0207(_x006e, (uint8_t)_x013e, _x022a->_x02d9); } else if ((_x013e = _x038f(_x01e2, "\x6d\x69\x6e\x65")) != -1) { _x0207(_x0071, (uint8_t)_x013e, _x022a->_x02d9); } else { int _x031a = _x02f5(_x04a2("\x6d\x69\x6e\x65"), _x022a->_x02d9); _x0207(_x006c, (uint8_t)_x031a, _x022a->_x02d9); } break; } case _x0042: { int _x013e = _x038e(_x01e2, "\x6d\x69\x6e\x65"); if (_x013e != -1) { _x0207(_x006e, (uint8_t)_x013e, _x022a->_x02d9); } else if ((_x013e = _x038f(_x01e2, "\x6d\x69\x6e\x65")) != -1) { _x0207(_x0071, (uint8_t)_x013e, _x022a->_x02d9); } else { int _x031a = _x02f5(_x04a2("\x6d\x69\x6e\x65"), _x022a->_x02d9); _x0207(_x006c, (uint8_t)_x031a, _x022a->_x02d9); } break; } case _x003b: { if (_x022a->_x0141._x0238._x02f7->_x02c6 == _x0042) { int _x013e = _x038e(_x01e2, "\x6d\x69\x6e\x65"); if (_x013e != -1) { _x0207(_x006e, (uint8_t)_x013e, _x022a->_x02d9); } else if ((_x013e = _x038f(_x01e2, "\x6d\x69\x6e\x65")) != -1) { _x0207(_x0071, (uint8_t)_x013e, _x022a->_x02d9); } else { int _x031a = _x02f5(_x04a2("\x6d\x69\x6e\x65"), _x022a->_x02d9); _x0207(_x006c, (uint8_t)_x031a, _x022a->_x02d9); } _x01c4(_x022a->_x0141._x0238._x0237); _x0206(_x0070, _x022a->_x02d9); } else { _x01c4(_x022a->_x0141._x0238._x02f7); _x01c4(_x022a->_x0141._x0238._x0237); _x0206(_x006b, _x022a->_x02d9); } break; } case _x0038: { _x01c4(_x022a->_x0141._x0194._x0198); for (size_t _x0288 = 0; _x0288 < _x022a->_x0141._x0194._x01d7; _x0288++) { _x01c4(_x022a->_x0141._x0194._x0140[_x0288]); } _x0207(_x005e, (uint8_t)_x022a->_x0141._x0194._x01d7, _x022a->_x02d9); break; } case _x0044: { int _x031a = _x02f5(_x04a2(_x022a->_x0141._x03e9._x0319), _x022a->_x02d9); _x0207(_x006c, (uint8_t)_x031a, _x022a->_x02d9); _x0207(_x005e, 0, _x022a->_x02d9); _x014a(); _x0134("\x24\x73\x74\x72\x75\x63\x74\x5f\x74\x65\x6d\x70", false, _x022a->_x02d9); int _x0402 = _x038e(_x01e2, "\x24\x73\x74\x72\x75\x63\x74\x5f\x74\x65\x6d\x70"); for (size_t _x0288 = 0; _x0288 < _x022a->_x0141._x03e9._x01d7; _x0288++) { _x0207(_x006e, (uint8_t)_x0402, _x022a->_x02d9); int _x0239 = _x02f5(_x04a2(_x022a->_x0141._x03e9._x02c3[_x0288]), _x022a->_x02d9); _x0207(_x0061, (uint8_t)_x0239, _x022a->_x02d9); _x01c4(_x022a->_x0141._x03e9._x0426[_x0288]); _x0206(_x0082, _x022a->_x02d9); } _x01e2->_x03a7--; free(_x01e2->_x02e6[_x01e2->_x02e5 - 1]._x0319); _x01e2->_x02e5--; break; } case _x0039: { _x01c2(_x022a); break; } } } static void _x01c1(_x0032 _x014e, bool _x031f, int _x02d9) { if (_x031f) _x014a(); for (size_t _x0288 = 0; _x0288 < _x014e._x01d7; _x0288++) { _x01c5(_x014e._x03e0[_x0288]); } if (_x031f) _x0212(_x02d9); } static void _x01c3(_x00b3 *_x03e5) { _x0002 _x0150; _x01cc(&_x0150, "\x3c\x63\x6f\x72\x6f\x75\x74\x69\x6e\x65\x5f\x62\x6f\x64\x79\x3e", _x002e); _x0150._x0265->_x0346 = _x03e5->_x0141._x03f8._x0346; _x014a(); for (size_t _x0288 = 0; _x0288 < _x03e5->_x0141._x03f8._x0346; _x0288++) { _x0134(_x03e5->_x0141._x03f8._x0347[_x0288], false, _x03e5->_x02d9); } _x01c1(_x03e5->_x0141._x03f8._x014f, false, _x03e5->_x02d9); _x020b(_x03e5->_x02d9); _x0090 *_x01c7 = _x01cb(); _x0002 _x0338; _x01cc(&_x0338, _x03e5->_x0141._x03f8._x0319, _x002e); _x0338._x0265->_x0346 = _x03e5->_x0141._x03f8._x0346; _x014a(); for (size_t _x0288 = 0; _x0288 < _x03e5->_x0141._x03f8._x0346; _x0288++) { _x0134(_x03e5->_x0141._x03f8._x0347[_x0288], false, _x03e5->_x02d9); } int _x0269 = _x02f5(_x04a2("\x47\x65\x6e\x65\x72\x61\x74\x6f\x72"), _x03e5->_x02d9); _x0206(_x006c, _x03e5->_x02d9); _x0206((uint8_t)_x0269, _x03e5->_x02d9); int _x026a = _x02f5(_x04a2("\x5f\x5f\x67\x65\x6e\x65\x72\x61\x74\x6f\x72\x5f\x63\x72\x65\x61\x74\x65"), _x03e5->_x02d9); _x0206(_x006c, _x03e5->_x02d9); _x0206((uint8_t)_x026a, _x03e5->_x02d9); int _x0151 = _x02f5(_x049c(_x01c7), _x03e5->_x02d9); _x0206(_x0060, _x03e5->_x02d9); _x0206((uint8_t)_x0151, _x03e5->_x02d9); for (int _x0288 = 0; _x0288 < _x01c7->_x041b; _x0288++) { _x0206(_x0150._x041c[_x0288]._x02ad ? 1 : 0, _x03e5->_x02d9); _x0206((uint8_t)_x0150._x041c[_x0288]._x0290, _x03e5->_x02d9); } _x0457(_x01c7); for (size_t _x0288 = 0; _x0288 < _x03e5->_x0141._x03f8._x0346; _x0288++) { int _x03c9 = _x038e(&_x0338, _x03e5->_x0141._x03f8._x0347[_x0288]); _x0207(_x006e, (uint8_t)_x03c9, _x03e5->_x02d9); } _x0207(_x005e, (uint8_t)(_x03e5->_x0141._x03f8._x0346 + 1), _x03e5->_x02d9); _x0207(_x005e, 1, _x03e5->_x02d9); _x0206(_x007f, _x03e5->_x02d9); _x0090 *_x01c9 = _x01cb(); int _x0339 = _x02f5(_x049c(_x01c9), _x03e5->_x02d9); _x0206(_x0060, _x03e5->_x02d9); _x0206((uint8_t)_x0339, _x03e5->_x02d9); for (int _x0288 = 0; _x0288 < _x01c9->_x041b; _x0288++) { _x0206(_x0338._x041c[_x0288]._x02ad ? 1 : 0, _x03e5->_x02d9); _x0206((uint8_t)_x0338._x041c[_x0288]._x0290, _x03e5->_x02d9); } _x0457(_x01c9); } static void _x01c6(_x00b3 *_x03e5) { _x0002 _x03f9; _x01cc(&_x03f9, _x03e5->_x0141._x03f8._x0319, _x002e); _x03f9._x0265->_x0346 = _x03e5->_x0141._x03f8._x0346; _x014a(); for (size_t _x0288 = 0; _x0288 < _x03e5->_x0141._x03f8._x0346; _x0288++) { _x0134(_x03e5->_x0141._x03f8._x0347[_x0288], false, _x03e5->_x02d9); } _x0032 _x014f; _x014f._x03e0 = _x03e5->_x0141._x03f8._x014f._x03e0; _x014f._x01d7 = _x03e5->_x0141._x03f8._x014f._x01d7; _x01c1(_x014f, false, _x03e5->_x02d9); _x020b(_x03e5->_x02d9); _x0090 *_x01c8 = _x01cb(); int _x0262 = _x02f5(_x049c(_x01c8), _x03e5->_x02d9); _x0457(_x01c8); _x0206(_x0060, _x03e5->_x02d9); _x0206((uint8_t)_x0262, _x03e5->_x02d9); for (int _x0288 = 0; _x0288 < _x01c8->_x041b; _x0288++) { _x0206(_x03f9._x041c[_x0288]._x02ad ? 1 : 0, _x03e5->_x02d9); _x0206((uint8_t)_x03f9._x041c[_x0288]._x0290, _x03e5->_x02d9); } } static void _x01c2(_x0047 *_x022a) { _x0002 _x03f9; _x01cc(&_x03f9, "\x3c\x63\x6c\x6f\x73\x75\x72\x65\x3e", _x002e); _x03f9._x0265->_x0346 = _x022a->_x0141._x01b3._x0346; _x014a(); for (size_t _x0288 = 0; _x0288 < _x022a->_x0141._x01b3._x0346; _x0288++) { _x0134(_x022a->_x0141._x01b3._x0347[_x0288], false, _x022a->_x02d9); } _x01c1(_x022a->_x0141._x01b3._x014f, false, _x022a->_x02d9); _x020b(_x022a->_x02d9); _x0090 *_x01c8 = _x01cb(); int _x0262 = _x02f5(_x049c(_x01c8), _x022a->_x02d9); _x0457(_x01c8); _x0206(_x0060, _x022a->_x02d9); _x0206((uint8_t)_x0262, _x022a->_x02d9); for (int _x0288 = 0; _x0288 < _x01c8->_x041b; _x0288++) { _x0206(_x03f9._x041c[_x0288]._x02ad ? 1 : 0, _x022a->_x02d9); _x0206((uint8_t)_x03f9._x041c[_x0288]._x0290, _x022a->_x02d9); } } static void _x01c5(_x00b3 *_x03e5) { if (!_x03e5) return; switch (_x03e5->_x02c6) { case _x00a4: case _x00a2: { bool _x02a7 = (_x03e5->_x02c6 == _x00a2); _x01c4(_x03e5->_x0141._x02f4._x0299); if (_x01e2->_x03a7 == 0) { int _x031a = _x02f5(_x04a2(_x03e5->_x0141._x02f4._x0319), _x03e5->_x02d9); _x0206(_x0063, _x03e5->_x02d9); _x0206((uint8_t)_x031a, _x03e5->_x02d9); _x0206(_x02a7 ? 1 : 0, _x03e5->_x02d9); } else { _x0134(_x03e5->_x0141._x02f4._x0319, _x02a7, _x03e5->_x02d9); } break; } case _x0097: { _x01c4(_x03e5->_x0141._x0142._x0425); int _x013e = _x038e(_x01e2, _x03e5->_x0141._x0142._x0319); if (_x013e != -1) { _x0207(_x0084, (uint8_t)_x013e, _x03e5->_x02d9); } else if ((_x013e = _x038f(_x01e2, _x03e5->_x0141._x0142._x0319)) != -1) { _x0207(_x0086, (uint8_t)_x013e, _x03e5->_x02d9); } else { int _x031a = _x02f5(_x04a2(_x03e5->_x0141._x0142._x0319), _x03e5->_x02d9); _x0207(_x0083, (uint8_t)_x031a, _x03e5->_x02d9); } _x0206(_x007c, _x03e5->_x02d9); break; } case _x00aa: { _x01c4(_x03e5->_x0141._x03a4._x022c); _x0206(_x0081, _x03e5->_x02d9); break; } case _x00ab: { _x01c4(_x03e5->_x0141.send._x022c); _x0206(_x007f, _x03e5->_x02d9); break; } case _x00b1: { _x01c4(_x03e5->_x0141._x04b5._x022c); _x0206(_x008b, _x03e5->_x02d9); break; } case _x00b0: { int *_x0211 = malloc(sizeof(int) * _x03e5->_x0141._x04b0._x0156); for (size_t _x0288 = 0; _x0288 < _x03e5->_x0141._x04b0._x0156; _x0288++) { _x01c4(_x03e5->_x0141._x04b0._x0159[_x0288]._x01ce); int _x0235 = _x0209(_x0075, _x03e5->_x02d9); _x0206(_x007c, _x03e5->_x02d9); _x01c1(_x03e5->_x0141._x04b0._x0159[_x0288]._x014e, true, _x03e5->_x02d9); _x0211[_x0288] = _x0209(_x0074, _x03e5->_x02d9); _x0357(_x0235); _x0206(_x007c, _x03e5->_x02d9); } if (_x03e5->_x0141._x04b0._x0331._x01d7 > 0) { _x01c1(_x03e5->_x0141._x04b0._x0331, true, _x03e5->_x02d9); } for (size_t _x0288 = 0; _x0288 < _x03e5->_x0141._x04b0._x0156; _x0288++) { _x0357(_x0211[_x0288]); } free(_x0211); break; } case _x00a7: { _x01c4(_x03e5->_x0141._x0382._x01d8); _x014a(); _x0134("\x24\x6c\x69\x6d\x69\x74", true, _x03e5->_x02d9); _x0208(_x04a1(0.0), _x03e5->_x02d9); _x0134("\x24\x63\x6f\x75\x6e\x74\x65\x72", false, _x03e5->_x02d9); int _x02ed = _x01e1()->_x01d7; int _x01da = _x038e(_x01e2, "\x24\x63\x6f\x75\x6e\x74\x65\x72"); int _x02d8 = _x038e(_x01e2, "\x24\x6c\x69\x6d\x69\x74"); _x0207(_x006e, (uint8_t)_x01da, _x03e5->_x02d9); _x0207(_x006e, (uint8_t)_x02d8, _x03e5->_x02d9); _x0206(_x005a, _x03e5->_x02d9); int _x0228 = _x0209(_x0075, _x03e5->_x02d9); _x0206(_x007c, _x03e5->_x02d9); _x0017 _x02ea; _x02ea._x020e = _x01e3; _x02ea._x02aa = false; _x02ea._x03db = _x02ed; _x02ea._x02d0 = NULL; _x02ea._x02cf = 0; _x02ea._x02ce = 0; _x02ea._x03c4 = NULL; _x02ea._x03c3 = 0; _x02ea._x03c2 = 0; _x01e3 = &_x02ea; _x01c1(_x03e5->_x0141._x0382._x014f, true, _x03e5->_x02d9); for (int _x0288 = 0; _x0288 < _x02ea._x03c3; _x0288++) { _x0357(_x02ea._x03c4[_x0288]); } free(_x02ea._x03c4); _x0207(_x006e, (uint8_t)_x01da, _x03e5->_x02d9); _x0208(_x04a1(1.0), _x03e5->_x02d9); _x0206(_x0055, _x03e5->_x02d9); _x0207(_x0084, (uint8_t)_x01da, _x03e5->_x02d9); _x0206(_x007c, _x03e5->_x02d9); _x020a(_x02ed, _x03e5->_x02d9); _x0357(_x0228); _x0206(_x007c, _x03e5->_x02d9); for (int _x0288 = 0; _x0288 < _x02ea._x02cf; _x0288++) { _x0357(_x02ea._x02d0[_x0288]); } free(_x02ea._x02d0); _x01e3 = _x02ea._x020e; _x0212(_x03e5->_x02d9); break; } case _x00a9: { _x01c4(_x03e5->_x0141._x0384._x03da); _x01c4(_x03e5->_x0141._x0384._x020f); _x014a(); _x0134("\x24\x73\x74\x61\x72\x74", true, _x03e5->_x02d9); _x0134("\x24\x65\x6e\x64", true, _x03e5->_x02d9); int _x03dd = _x038e(_x01e2, "\x24\x73\x74\x61\x72\x74"); int _x0213 = _x038e(_x01e2, "\x24\x65\x6e\x64"); _x0207(_x006e, (uint8_t)_x03dd, _x03e5->_x02d9); _x0207(_x006e, (uint8_t)_x0213, _x03e5->_x02d9); _x0206(_x0059, _x03e5->_x02d9); int _x0234 = _x0209(_x0075, _x03e5->_x02d9); _x0206(_x007c, _x03e5->_x02d9); _x014a(); _x0207(_x006e, (uint8_t)_x03dd, _x03e5->_x02d9); _x0134(_x03e5->_x0141._x0384._x0428, false, _x03e5->_x02d9); int _x0419 = _x01e1()->_x01d7; int _x028a = _x038e(_x01e2, _x03e5->_x0141._x0384._x0428); _x0207(_x006e, (uint8_t)_x028a, _x03e5->_x02d9); _x0207(_x006e, (uint8_t)_x0213, _x03e5->_x02d9); _x0206(_x0059, _x03e5->_x02d9); int _x0417 = _x0209(_x0075, _x03e5->_x02d9); _x0206(_x007c, _x03e5->_x02d9); _x0017 _x0418; _x0418._x020e = _x01e3; _x0418._x02aa = false; _x0418._x03db = _x0419; _x0418._x02d0 = NULL; _x0418._x02cf = 0; _x0418._x02ce = 0; _x0418._x03c4 = NULL; _x0418._x03c3 = 0; _x0418._x03c2 = 0; _x01e3 = &_x0418; _x01c1(_x03e5->_x0141._x0384._x014f, true, _x03e5->_x02d9); for (int _x0288 = 0; _x0288 < _x0418._x03c3; _x0288++) { _x0357(_x0418._x03c4[_x0288]); } free(_x0418._x03c4); _x0207(_x006e, (uint8_t)_x028a, _x03e5->_x02d9); _x0208(_x04a1(1.0), _x03e5->_x02d9); _x0206(_x0055, _x03e5->_x02d9); _x0207(_x0084, (uint8_t)_x028a, _x03e5->_x02d9); _x0206(_x007c, _x03e5->_x02d9); _x020a(_x0419, _x03e5->_x02d9); _x0357(_x0417); _x0206(_x007c, _x03e5->_x02d9); for (int _x02be = 0; _x02be < _x0418._x02cf; _x02be++) { _x0357(_x0418._x02d0[_x02be]); } free(_x0418._x02d0); _x01e3 = _x0418._x020e; _x0212(_x03e5->_x02d9); int _x0210 = _x0209(_x0074, _x03e5->_x02d9); _x0357(_x0234); _x0206(_x007c, _x03e5->_x02d9); _x014a(); _x0207(_x006e, (uint8_t)_x03dd, _x03e5->_x02d9); _x0134(_x03e5->_x0141._x0384._x0428, false, _x03e5->_x02d9); int _x01fc = _x01e1()->_x01d7; _x028a = _x038e(_x01e2, _x03e5->_x0141._x0384._x0428); _x0207(_x006e, (uint8_t)_x028a, _x03e5->_x02d9); _x0207(_x006e, (uint8_t)_x0213, _x03e5->_x02d9); _x0206(_x0058, _x03e5->_x02d9); int _x01fa = _x0209(_x0075, _x03e5->_x02d9); _x0206(_x007c, _x03e5->_x02d9); _x0017 _x01fb; _x01fb._x020e = _x01e3; _x01fb._x02aa = false; _x01fb._x03db = _x01fc; _x01fb._x02d0 = NULL; _x01fb._x02cf = 0; _x01fb._x02ce = 0; _x01fb._x03c4 = NULL; _x01fb._x03c3 = 0; _x01fb._x03c2 = 0; _x01e3 = &_x01fb; _x01c1(_x03e5->_x0141._x0384._x014f, true, _x03e5->_x02d9); for (int _x0288 = 0; _x0288 < _x01fb._x03c3; _x0288++) { _x0357(_x01fb._x03c4[_x0288]); } free(_x01fb._x03c4); _x0207(_x006e, (uint8_t)_x028a, _x03e5->_x02d9); _x0208(_x04a1(1.0), _x03e5->_x02d9); _x0206(_x0088, _x03e5->_x02d9); _x0207(_x0084, (uint8_t)_x028a, _x03e5->_x02d9); _x0206(_x007c, _x03e5->_x02d9); _x020a(_x01fc, _x03e5->_x02d9); _x0357(_x01fa); _x0206(_x007c, _x03e5->_x02d9); for (int _x02be = 0; _x02be < _x01fb._x02cf; _x02be++) { _x0357(_x01fb._x02d0[_x02be]); } free(_x01fb._x02d0); _x01e3 = _x01fb._x020e; _x0212(_x03e5->_x02d9); _x0357(_x0210); _x0212(_x03e5->_x02d9); break; } case _x00a8: { _x01c4(_x03e5->_x0141._x0383._x01bd); _x014a(); _x0134("\x24\x6c\x69\x73\x74", true, _x03e5->_x02d9); _x0208(_x04a1(0.0), _x03e5->_x02d9); _x0134("\x24\x69\x6e\x64\x65\x78", false, _x03e5->_x02d9); int _x02ed = _x01e1()->_x01d7; int _x02e0 = _x038e(_x01e2, "\x24\x6c\x69\x73\x74"); int _x0291 = _x038e(_x01e2, "\x24\x69\x6e\x64\x65\x78"); _x0207(_x006e, (uint8_t)_x0291, _x03e5->_x02d9); _x0207(_x006e, (uint8_t)_x02e0, _x03e5->_x02d9); _x0206(_x0087, _x03e5->_x02d9); _x0206(_x005a, _x03e5->_x02d9); int _x0228 = _x0209(_x0075, _x03e5->_x02d9); _x0206(_x007c, _x03e5->_x02d9); _x014a(); _x0207(_x006e, (uint8_t)_x02e0, _x03e5->_x02d9); _x0207(_x006e, (uint8_t)_x0291, _x03e5->_x02d9); _x0206(_x006d, _x03e5->_x02d9); _x0134(_x03e5->_x0141._x0383._x0428, false, _x03e5->_x02d9); _x0017 _x02ea; _x02ea._x020e = _x01e3; _x02ea._x02aa = false; _x02ea._x03db = _x02ed; _x02ea._x02d0 = NULL; _x02ea._x02cf = 0; _x02ea._x02ce = 0; _x02ea._x03c4 = NULL; _x02ea._x03c3 = 0; _x02ea._x03c2 = 0; _x01e3 = &_x02ea; _x01c1(_x03e5->_x0141._x0383._x014f, false, _x03e5->_x02d9); _x0212(_x03e5->_x02d9); for (int _x0288 = 0; _x0288 < _x02ea._x03c3; _x0288++) { _x0357(_x02ea._x03c4[_x0288]); } free(_x02ea._x03c4); _x0207(_x006e, (uint8_t)_x0291, _x03e5->_x02d9); _x0208(_x04a1(1.0), _x03e5->_x02d9); _x0206(_x0055, _x03e5->_x02d9); _x0207(_x0084, (uint8_t)_x0291, _x03e5->_x02d9); _x0206(_x007c, _x03e5->_x02d9); _x020a(_x02ed, _x03e5->_x02d9); _x0357(_x0228); _x0206(_x007c, _x03e5->_x02d9); for (int _x02be = 0; _x02be < _x02ea._x02cf; _x02be++) { _x0357(_x02ea._x02d0[_x02be]); } free(_x02ea._x02d0); _x01e3 = _x02ea._x020e; _x0212(_x03e5->_x02d9); break; } case _x009c: { int _x02ed = _x01e1()->_x01d7; _x01c4(_x03e5->_x0141._x01ff._x01ce); int _x0228 = _x0209(_x0075, _x03e5->_x02d9); _x0206(_x007c, _x03e5->_x02d9); _x0017 _x02ea; _x02ea._x020e = _x01e3; _x02ea._x02aa = true; _x02ea._x03db = _x02ed; _x02ea._x02d0 = NULL; _x02ea._x02cf = 0; _x02ea._x02ce = 0; _x02ea._x03c4 = NULL; _x02ea._x03c3 = 0; _x02ea._x03c2 = 0; _x01e3 = &_x02ea; _x01c1(_x03e5->_x0141._x01ff._x014f, true, _x03e5->_x02d9); _x020a(_x02ed, _x03e5->_x02d9); _x0357(_x0228); _x0206(_x007c, _x03e5->_x02d9); for (int _x02be = 0; _x02be < _x02ea._x02cf; _x02be++) { _x0357(_x02ea._x02d0[_x02be]); } free(_x02ea._x02d0); _x01e3 = _x02ea._x020e; break; } case _x00a3: { if (_x01e3 == NULL) { fprintf(stderr, "\x4c\x65\x61\x76\x65\x20\x73\x74\x61\x74\x65\x6d\x65\x6e\x74\x20\x6f\x75\x74\x73\x69\x64\x65\x20\x6c\x6f\x6f\x70\x2e\x0a"); break; } int _x02bb = _x0209(_x0074, _x03e5->_x02d9); if (_x01e3->_x02cf >= _x01e3->_x02ce) { _x01e3->_x02ce = _x01e3->_x02ce < 4 ? 4 : _x01e3->_x02ce * 2; _x01e3->_x02d0 = realloc(_x01e3->_x02d0, _x01e3->_x02ce * sizeof(int)); } _x01e3->_x02d0[_x01e3->_x02cf++] = _x02bb; break; } case _x00ae: { if (_x01e3 == NULL) { fprintf(stderr, "\x53\x6b\x69\x70\x20\x73\x74\x61\x74\x65\x6d\x65\x6e\x74\x20\x6f\x75\x74\x73\x69\x64\x65\x20\x6c\x6f\x6f\x70\x2e\x0a"); break; } if (_x01e3->_x02aa) { _x020a(_x01e3->_x03db, _x03e5->_x02d9); } else { int _x02bb = _x0209(_x0074, _x03e5->_x02d9); if (_x01e3->_x03c3 >= _x01e3->_x03c2) { _x01e3->_x03c2 = _x01e3->_x03c2 < 4 ? 4 : _x01e3->_x03c2 * 2; _x01e3->_x03c4 = realloc(_x01e3->_x03c4, _x01e3->_x03c2 * sizeof(int)); } _x01e3->_x03c4[_x01e3->_x03c3++] = _x02bb; } break; } case _x00af: { if (_x03e5->_x0141._x03f8._x02a9) { _x01c3(_x03e5); } else { _x01c6(_x03e5); } if (_x01e2->_x03a7 == 0) { int _x031a = _x02f5(_x04a2(_x03e5->_x0141._x03f8._x0319), _x03e5->_x02d9); _x0206(_x0063, _x03e5->_x02d9); _x0206((uint8_t)_x031a, _x03e5->_x02d9); _x0206(0, _x03e5->_x02d9); } else { _x0134(_x03e5->_x0141._x03f8._x0319, false, _x03e5->_x02d9); } break; } case _x0098: { int _x038c = _x0209(_x0057, _x03e5->_x02d9); _x01c1(_x03e5->_x0141._x0144._x040f, true, _x03e5->_x02d9); _x0206(_x0066, _x03e5->_x02d9); int _x0210 = _x0209(_x0074, _x03e5->_x02d9); _x0357(_x038c); _x014a(); _x0134(_x03e5->_x0141._x0144._x036d, true, _x03e5->_x02d9); _x01c1(_x03e5->_x0141._x0144._x038a, false, _x03e5->_x02d9); _x0212(_x03e5->_x02d9); _x0357(_x0210); break; } case _x009b: { _x01c4(_x03e5->_x0141._x01a8._x022a); _x014a(); _x0134("\x24\x63\x68\x6f\x6f\x73\x65\x5f\x74\x61\x72\x67\x65\x74", true, _x03e5->_x02d9); int _x03f7 = _x038e(_x01e2, "\x24\x63\x68\x6f\x6f\x73\x65\x5f\x74\x61\x72\x67\x65\x74"); int *_x0211 = malloc(sizeof(int) * _x03e5->_x0141._x01a8._x019e); for (size_t _x0288 = 0; _x0288 < _x03e5->_x0141._x01a8._x019e; _x0288++) { _x0047 *_x01a0 = _x03e5->_x0141._x01a8._x01a2[_x0288]._x022a; if (_x01a0->_x02c6 == _x0040 && strcmp(_x01a0->_x0141._x0319, "\x5f") == 0) { _x0206(_x0089, _x03e5->_x02d9); } else { _x0207(_x006e, (uint8_t)_x03f7, _x03e5->_x02d9); _x01c4(_x01a0); _x0206(_x0080, _x03e5->_x02d9); } int _x0235 = _x0209(_x0075, _x03e5->_x02d9); _x0206(_x007c, _x03e5->_x02d9); _x01c1(_x03e5->_x0141._x01a8._x01a2[_x0288]._x014e, true, _x03e5->_x02d9); _x0211[_x0288] = _x0209(_x0074, _x03e5->_x02d9); _x0357(_x0235); _x0206(_x007c, _x03e5->_x02d9); } if (_x03e5->_x0141._x01a8._x0331._x01d7 > 0) { _x01c1(_x03e5->_x0141._x01a8._x0331, true, _x03e5->_x02d9); } for (size_t _x0288 = 0; _x0288 < _x03e5->_x0141._x01a8._x019e; _x0288++) { _x0357(_x0211[_x0288]); } free(_x0211); _x0212(_x03e5->_x02d9); break; } case _x00a6: { _x01c4(_x03e5->_x0141._x0371._x0425); _x01c4(_x03e5->_x0141._x0371._x02df); _x0206(_x007d, _x03e5->_x02d9); break; } case _x00ac: { _x01c4(_x03e5->_x0141._x03b5._x02f7); _x01c4(_x03e5->_x0141._x03b5._x0237); _x01c4(_x03e5->_x0141._x03b5._x0425); _x0206(_x0082, _x03e5->_x02d9); break; } case _x00a0: { _x0206(_x0073, _x03e5->_x02d9); break; } case _x0099: { _x0206(_x005d, _x03e5->_x02d9); break; } case _x009d: { _x01c4(_x03e5->_x0141._x022b._x022c); _x0206(_x007c, _x03e5->_x02d9); break; } case _x009f: { int _x031a = _x02f5(_x04a2(_x03e5->_x0141._x0273._x0313), _x03e5->_x02d9); _x0207(_x0072, (uint8_t)_x031a, _x03e5->_x02d9); break; } case _x009a: { int _x031a = _x02f5(_x04a2(_x03e5->_x0141._x01a7._x0319), _x03e5->_x02d9); for (size_t _x0288 = 0; _x0288 < _x03e5->_x0141._x01a7._x02fb; _x0288++) { _x0208(_x04a2(_x03e5->_x0141._x01a7._x02fe[_x0288]), _x03e5->_x02d9); } _x0207(_x0067, (uint8_t)_x031a, _x03e5->_x02d9); _x0206((uint8_t)_x03e5->_x0141._x01a7._x02fb, _x03e5->_x02d9); if (_x01e2->_x03a7 == 0) { _x0206(_x0063, _x03e5->_x02d9); _x0206((uint8_t)_x031a, _x03e5->_x02d9); _x0206(0, _x03e5->_x02d9); } else { _x0134(_x03e5->_x0141._x01a7._x0319, false, _x03e5->_x02d9); } break; } case _x00a1: { break; } case _x00a5: { if (_x03e5->_x0141._x0327._x034b) { int _x034a = _x02f5(_x04a2(_x03e5->_x0141._x0327._x034b), _x03e5->_x02d9); _x0207(_x006c, (uint8_t)_x034a, _x03e5->_x02d9); } else { _x0206(_x0065, _x03e5->_x02d9); } int _x031a = _x02f5(_x04a2(_x03e5->_x0141._x0327._x0319), _x03e5->_x02d9); _x0207(_x005f, (uint8_t)_x031a, _x03e5->_x02d9); for (size_t _x0288 = 0; _x0288 < _x03e5->_x0141._x0327._x02fb; _x0288++) { _x00b3 *_x02f0 = _x03e5->_x0141._x0327._x02fe[_x0288]; if (_x02f0->_x02c6 == _x00af) { _x0208(_x04a2(_x02f0->_x0141._x03f8._x0319), _x02f0->_x02d9); _x01c6(_x02f0); _x0206(_x0085, _x02f0->_x02d9); } } if (_x01e2->_x03a7 == 0) { _x0206(_x0063, _x03e5->_x02d9); _x0206((uint8_t)_x031a, _x03e5->_x02d9); _x0206(0, _x03e5->_x02d9); } else { _x0134(_x03e5->_x0141._x0327._x0319, false, _x03e5->_x02d9); } break; } case _x00ad: { _x0206(_x0065, _x03e5->_x02d9); int _x031a = _x02f5(_x04a2(_x03e5->_x0141._x03b9._x0319), _x03e5->_x02d9); _x0207(_x005f, (uint8_t)_x031a, _x03e5->_x02d9); if (_x01e2->_x03a7 == 0) { _x0206(_x0063, _x03e5->_x02d9); _x0206((uint8_t)_x031a, _x03e5->_x02d9); _x0206(0, _x03e5->_x02d9); } else { _x0134(_x03e5->_x0141._x03b9._x0319, false, _x03e5->_x02d9); } break; } case _x009e: { break; } default: break; } } _x0090 *_x0434(_x0032 _x036e) { _x0002 _x01ca; _x01cc(&_x01ca, "\x5f\x5f\x6d\x61\x69\x6e\x5f\x5f", _x002d); _x01c1(_x036e, false, 0); _x020b(0); _x0090 *_x0261 = _x01cb(); return _x0261; }
+
+static void compile_expr(VSS_Expr *expr);
+static void compile_stmt(VSS_Stmt *stmt);
+static void compile_closure_expr(VSS_Expr *expr);
+
+// Scope & Local tracking
+typedef struct {
+    char *name;
+    int depth;
+    bool is_constant;
+    bool is_captured;
+} Local;
+
+typedef struct {
+    int index;
+    bool is_local;
+} UpvalueInfo;
+
+typedef enum {
+    TYPE_MAIN,
+    TYPE_TASK
+} FunctionType;
+
+typedef struct Compiler Compiler;
+struct Compiler {
+    Compiler *enclosing;
+    VSS_ObjFunction *function;
+    FunctionType type;
+    
+    Local locals[256];
+    int local_count;
+    UpvalueInfo upvalues[256];
+    
+    int scope_depth;
+};
+
+// Loop tracking
+typedef struct LoopCompiler LoopCompiler;
+struct LoopCompiler {
+    LoopCompiler *enclosing;
+    bool is_during;
+    int start_offset;
+    int *leave_jumps;
+    int leave_count;
+    int leave_capacity;
+    int *skip_jumps;
+    int skip_count;
+    int skip_capacity;
+};
+
+// Global compile state
+static Compiler *current_compiler = NULL;
+static LoopCompiler *current_loop = NULL;
+
+static void compiler_init(Compiler *compiler, const char *name, FunctionType type) {
+    compiler->enclosing = current_compiler;
+    compiler->function = vss_function_new(name, 0);
+    compiler->type = type;
+    compiler->local_count = 0;
+    compiler->scope_depth = 0;
+    
+    current_compiler = compiler;
+    
+    // Claim local slot 0 for function context/self (or closure)
+    Local *local = &compiler->locals[compiler->local_count++];
+    local->depth = 0;
+    local->is_constant = true;
+    local->is_captured = false;
+    if (type == TYPE_MAIN) {
+        local->name = malloc(1);
+        local->name[0] = '\0';
+    } else {
+        local->name = malloc(5);
+        strcpy(local->name, "self");
+    }
+}
+
+static VSS_ObjFunction *compiler_end(void) {
+    VSS_ObjFunction *func = current_compiler->function;
+    
+    // Free the local 0 name
+    if (current_compiler->local_count > 0) {
+        free(current_compiler->locals[0].name);
+    }
+    
+    current_compiler = current_compiler->enclosing;
+    return func;
+}
+
+static VSS_Chunk *current_chunk(void) {
+    return &current_compiler->function->chunk;
+}
+
+static void emit_byte(uint8_t byte, int line) {
+    vss_chunk_write(current_chunk(), byte, line);
+}
+
+static void emit_bytes(uint8_t byte1, uint8_t byte2, int line) {
+    emit_byte(byte1, line);
+    emit_byte(byte2, line);
+}
+
+static void emit_return(int line) {
+    emit_byte(VSS_OP_EMPTY, line);
+    emit_byte(VSS_OP_RETURN, line);
+}
+
+static int make_constant(VSS_Value value, int line) {
+    (void)line;
+    int constant = vss_chunk_add_constant(current_chunk(), value);
+    return constant;
+}
+
+static void emit_constant(VSS_Value value, int line) {
+    int constant = make_constant(value, line);
+    if (constant <= 255) {
+        emit_bytes(VSS_OP_CONSTANT, (uint8_t)constant, line);
+    } else {
+        emit_byte(VSS_OP_CONSTANT_LONG, line);
+        emit_byte(constant & 0xff, line);
+        emit_byte((constant >> 8) & 0xff, line);
+        emit_byte((constant >> 16) & 0xff, line);
+    }
+}
+
+static int emit_jump(uint8_t instruction, int line) {
+    emit_byte(instruction, line);
+    emit_byte(0xff, line);
+    emit_byte(0xff, line);
+    return current_chunk()->count - 2;
+}
+
+static void patch_jump(int offset) {
+    int jump = current_chunk()->count - offset - 2;
+    if (jump > 65535) {
+        fprintf(stderr, "Too much code to jump over.\n");
+        exit(1);
+    }
+    current_chunk()->code[offset] = (jump >> 8) & 0xff;
+    current_chunk()->code[offset + 1] = jump & 0xff;
+}
+
+static void emit_loop(int loop_start, int line) {
+    emit_byte(VSS_OP_LOOP, line);
+    
+    int offset = current_chunk()->count + 2 - loop_start;
+    if (offset > 65535) {
+        fprintf(stderr, "Loop body too large.\n");
+        exit(1);
+    }
+    emit_byte((offset >> 8) & 0xff, line);
+    emit_byte(offset & 0xff, line);
+}
+
+static void begin_scope(void) {
+    current_compiler->scope_depth++;
+}
+
+static void end_scope(int line) {
+    current_compiler->scope_depth--;
+    
+    while (current_compiler->local_count > 0 &&
+           current_compiler->locals[current_compiler->local_count - 1].depth > current_compiler->scope_depth) {
+        emit_byte(VSS_OP_POP, line);
+        free(current_compiler->locals[current_compiler->local_count - 1].name);
+        current_compiler->local_count--;
+    }
+}
+
+static void add_local(const char *name, bool is_const, int line) {
+    (void)line;
+    if (current_compiler->local_count >= 256) {
+        fprintf(stderr, "Too many local variables in function.\n");
+        return;
+    }
+    
+    for (int i = current_compiler->local_count - 1; i >= 0; i--) {
+        Local *local = &current_compiler->locals[i];
+        if (local->depth < current_compiler->scope_depth) break;
+        if (strcmp(local->name, name) == 0) {
+            fprintf(stderr, "Variable '%s' already defined in this scope.\n", name);
+            return;
+        }
+    }
+    
+    Local *local = &current_compiler->locals[current_compiler->local_count++];
+    local->name = malloc(strlen(name) + 1);
+    strcpy(local->name, name);
+    local->depth = current_compiler->scope_depth;
+    local->is_constant = is_const;
+    local->is_captured = false;
+}
+
+static int resolve_local(Compiler *compiler, const char *name) {
+    for (int i = compiler->local_count - 1; i >= 0; i--) {
+        Local *local = &compiler->locals[i];
+        if (strcmp(local->name, name) == 0) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+static int add_upvalue(Compiler *compiler, uint8_t index, bool is_local) {
+    int count = compiler->function->upvalue_count;
+    for (int i = 0; i < count; i++) {
+        UpvalueInfo *upvalue = &compiler->upvalues[i];
+        if (upvalue->index == index && upvalue->is_local == is_local) {
+            return i;
+        }
+    }
+    
+    if (count >= 256) {
+        fprintf(stderr, "Too many closure variables in function.\n");
+        return 0;
+    }
+    
+    compiler->upvalues[count].is_local = is_local;
+    compiler->upvalues[count].index = index;
+    compiler->function->upvalue_count++;
+    return count;
+}
+
+static int resolve_upvalue(Compiler *compiler, const char *name) {
+    if (compiler->enclosing == NULL) return -1;
+    
+    int local = resolve_local(compiler->enclosing, name);
+    if (local != -1) {
+        compiler->enclosing->locals[local].is_captured = true;
+        return add_upvalue(compiler, (uint8_t)local, true);
+    }
+    
+    int upvalue = resolve_upvalue(compiler->enclosing, name);
+    if (upvalue != -1) {
+        return add_upvalue(compiler, (uint8_t)upvalue, false);
+    }
+    
+    return -1;
+}
+
+// Forward declarations
+static void compile_stmt(VSS_Stmt *stmt);
+static void compile_expr(VSS_Expr *expr);
+static void compile_block(VSS_Block block, bool new_scope, int line);
+
+static void compile_expr(VSS_Expr *expr) {
+    if (!expr) {
+        emit_byte(VSS_OP_EMPTY, 0);
+        return;
+    }
+    
+    switch (expr->kind) {
+        case VSS_EXPR_NUMBER:
+            emit_constant(vss_value_new_number(expr->as.number), expr->line);
+            break;
+        case VSS_EXPR_STRING:
+            emit_constant(vss_value_new_string(expr->as.string), expr->line);
+            break;
+        case VSS_EXPR_BOOL:
+            emit_byte(expr->as.boolean ? VSS_OP_TRUE : VSS_OP_FALSE, expr->line);
+            break;
+        case VSS_EXPR_EMPTY:
+            emit_byte(VSS_OP_EMPTY, expr->line);
+            break;
+        case VSS_EXPR_NAME: {
+            char resolved_name[256];
+            strcpy(resolved_name, expr->as.name);
+            if (current_namespace[0] != '\0' && strncmp(expr->as.name, "__", 2) != 0 && !is_stdlib_module(expr->as.name) && resolve_local(current_compiler, expr->as.name) == -1 && resolve_upvalue(current_compiler, expr->as.name) == -1) {
+                snprintf(resolved_name, sizeof(resolved_name), "%s_%s", current_namespace, expr->as.name);
+            }
+            int arg = resolve_local(current_compiler, resolved_name);
+            if (arg != -1) {
+                emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)arg, expr->line);
+            } else if ((arg = resolve_upvalue(current_compiler, resolved_name)) != -1) {
+                emit_bytes(VSS_OP_GET_UPVALUE, (uint8_t)arg, expr->line);
+            } else {
+                int name_const = make_constant(vss_value_new_string(resolved_name), expr->line);
+                emit_bytes(VSS_OP_GET_GLOBAL, (uint8_t)name_const, expr->line);
+            }
+            break;
+        }
+        case VSS_EXPR_UNARY: {
+            compile_expr(expr->as.unary.operand);
+            if (expr->as.unary.op == VSS_TOKEN_MINUS) {
+                emit_byte(VSS_OP_NEGATE, expr->line);
+            } else if (expr->as.unary.op == VSS_TOKEN_NOT) {
+                emit_byte(VSS_OP_NOT, expr->line);
+            }
+            break;
+        }
+        case VSS_EXPR_BINARY: {
+            if (expr->as.binary.op == VSS_TOKEN_AND) {
+                compile_expr(expr->as.binary.left);
+                int end_jump = emit_jump(VSS_OP_JUMP_IF_FALSE, expr->line);
+                emit_byte(VSS_OP_POP, expr->line);
+                compile_expr(expr->as.binary.right);
+                patch_jump(end_jump);
+                break;
+            }
+            if (expr->as.binary.op == VSS_TOKEN_OR) {
+                compile_expr(expr->as.binary.left);
+                int next_branch = emit_jump(VSS_OP_JUMP_IF_FALSE, expr->line);
+                int end_jump = emit_jump(VSS_OP_JUMP, expr->line);
+                patch_jump(next_branch);
+                emit_byte(VSS_OP_POP, expr->line);
+                compile_expr(expr->as.binary.right);
+                patch_jump(end_jump);
+                break;
+            }
+            
+            compile_expr(expr->as.binary.left);
+            compile_expr(expr->as.binary.right);
+            switch (expr->as.binary.op) {
+                case VSS_TOKEN_PLUS:         emit_byte(VSS_OP_ADD, expr->line); break;
+                case VSS_TOKEN_MINUS:        emit_byte(VSS_OP_SUB, expr->line); break;
+                case VSS_TOKEN_STAR:         emit_byte(VSS_OP_MUL, expr->line); break;
+                case VSS_TOKEN_SLASH:        emit_byte(VSS_OP_DIV, expr->line); break;
+                case VSS_TOKEN_PERCENT:      emit_byte(VSS_OP_MOD, expr->line); break;
+                case VSS_TOKEN_ABOVE:        emit_byte(VSS_OP_ABOVE, expr->line); break;
+                case VSS_TOKEN_BELOW:        emit_byte(VSS_OP_BELOW, expr->line); break;
+                case VSS_TOKEN_AT_LEAST:     emit_byte(VSS_OP_AT_LEAST, expr->line); break;
+                case VSS_TOKEN_AT_MOST:      emit_byte(VSS_OP_AT_MOST, expr->line); break;
+                case VSS_TOKEN_SAME_AS:      emit_byte(VSS_OP_SAME_AS, expr->line); break;
+                case VSS_TOKEN_NOT_SAME_AS:  emit_byte(VSS_OP_NOT_SAME_AS, expr->line); break;
+                default: break;
+            }
+            break;
+        }
+
+        case VSS_EXPR_SET: {
+            for (size_t i = 0; i < expr->as.list.count; i++) {
+                compile_expr(expr->as.list.elements[i]);
+            }
+            emit_bytes(VSS_OP_BUILD_SET, (uint8_t)expr->as.list.count, expr->line);
+            break;
+        }
+
+        case VSS_EXPR_LIST: {
+            for (size_t i = 0; i < expr->as.list.count; i++) {
+                compile_expr(expr->as.list.elements[i]);
+            }
+            emit_bytes(VSS_OP_BUILD_LIST, (uint8_t)expr->as.list.count, expr->line);
+            break;
+        }
+        case VSS_EXPR_MAP: {
+            for (size_t i = 0; i < expr->as.map.count; i++) {
+                emit_constant(vss_value_new_string(expr->as.map.keys[i]), expr->line);
+                compile_expr(expr->as.map.values[i]);
+            }
+            emit_bytes(VSS_OP_BUILD_MAP, (uint8_t)expr->as.map.count, expr->line);
+            break;
+        }
+        case VSS_EXPR_ITEM_ACCESS: {
+            compile_expr(expr->as.item_access.list);
+            compile_expr(expr->as.item_access.index);
+            emit_byte(VSS_OP_GET_ITEM, expr->line);
+            break;
+        }
+        case VSS_EXPR_MINE: {
+            int arg = resolve_local(current_compiler, "mine");
+            if (arg != -1) {
+                emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)arg, expr->line);
+            } else if ((arg = resolve_upvalue(current_compiler, "mine")) != -1) {
+                emit_bytes(VSS_OP_GET_UPVALUE, (uint8_t)arg, expr->line);
+            } else {
+                int name_const = make_constant(vss_value_new_string("mine"), expr->line);
+                emit_bytes(VSS_OP_GET_GLOBAL, (uint8_t)name_const, expr->line);
+            }
+            break;
+        }
+        case VSS_EXPR_PARENT: {
+            int arg = resolve_local(current_compiler, "mine");
+            if (arg != -1) {
+                emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)arg, expr->line);
+            } else if ((arg = resolve_upvalue(current_compiler, "mine")) != -1) {
+                emit_bytes(VSS_OP_GET_UPVALUE, (uint8_t)arg, expr->line);
+            } else {
+                int name_const = make_constant(vss_value_new_string("mine"), expr->line);
+                emit_bytes(VSS_OP_GET_GLOBAL, (uint8_t)name_const, expr->line);
+            }
+            break;
+        }
+        case VSS_EXPR_FIELD_ACCESS: {
+            if (expr->as.field_access.map->kind == VSS_EXPR_PARENT) {
+                int arg = resolve_local(current_compiler, "mine");
+                if (arg != -1) {
+                    emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)arg, expr->line);
+                } else if ((arg = resolve_upvalue(current_compiler, "mine")) != -1) {
+                    emit_bytes(VSS_OP_GET_UPVALUE, (uint8_t)arg, expr->line);
+                } else {
+                    int name_const = make_constant(vss_value_new_string("mine"), expr->line);
+                    emit_bytes(VSS_OP_GET_GLOBAL, (uint8_t)name_const, expr->line);
+                }
+                compile_expr(expr->as.field_access.field);
+                emit_byte(VSS_OP_GET_PARENT, expr->line);
+            } else if (expr->as.field_access.map->kind == VSS_EXPR_NAME &&
+                       (is_known_namespace(expr->as.field_access.map->as.name) || is_stdlib_module(expr->as.field_access.map->as.name))) {
+                if (expr->as.field_access.field->kind == VSS_EXPR_STRING || expr->as.field_access.field->kind == VSS_EXPR_NAME) {
+                    char mangled[256];
+                    const char *field_str = (expr->as.field_access.field->kind == VSS_EXPR_STRING) ? expr->as.field_access.field->as.string : expr->as.field_access.field->as.name;
+                    snprintf(mangled, sizeof(mangled), "%s_%s", expr->as.field_access.map->as.name, field_str);
+                    int arg = resolve_local(current_compiler, mangled);
+                    if (arg != -1) {
+                        emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)arg, expr->line);
+                    } else if ((arg = resolve_upvalue(current_compiler, mangled)) != -1) {
+                        emit_bytes(VSS_OP_GET_UPVALUE, (uint8_t)arg, expr->line);
+                    } else {
+                        int name_const = make_constant(vss_value_new_string(mangled), expr->line);
+                        emit_bytes(VSS_OP_GET_GLOBAL, (uint8_t)name_const, expr->line);
+                    }
+                } else {
+                    compile_expr(expr->as.field_access.map);
+                    compile_expr(expr->as.field_access.field);
+                    emit_byte(VSS_OP_GET_FIELD, expr->line);
+                }
+            } else {
+                compile_expr(expr->as.field_access.map);
+                compile_expr(expr->as.field_access.field);
+                emit_byte(VSS_OP_GET_FIELD, expr->line);
+            }
+            break;
+        }
+        case VSS_EXPR_CALL: {
+            compile_expr(expr->as.call.callee);
+            for (size_t i = 0; i < expr->as.call.count; i++) {
+                compile_expr(expr->as.call.args[i]);
+            }
+            emit_bytes(VSS_OP_CALL, (uint8_t)expr->as.call.count, expr->line);
+            break;
+        }
+        case VSS_EXPR_STRUCT_LITERAL: {
+            int name_const = make_constant(vss_value_new_string(expr->as.struct_literal.name), expr->line);
+            emit_bytes(VSS_OP_GET_GLOBAL, (uint8_t)name_const, expr->line);
+            emit_bytes(VSS_OP_CALL, 0, expr->line);
+            
+            begin_scope();
+            add_local("$struct_temp", false, expr->line);
+            int temp_slot = resolve_local(current_compiler, "$struct_temp");
+            
+            for (size_t i = 0; i < expr->as.struct_literal.count; i++) {
+                emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)temp_slot, expr->line);
+                int field_const = make_constant(vss_value_new_string(expr->as.struct_literal.keys[i]), expr->line);
+                emit_bytes(VSS_OP_CONSTANT, (uint8_t)field_const, expr->line);
+                compile_expr(expr->as.struct_literal.values[i]);
+                emit_byte(VSS_OP_SET_FIELD, expr->line);
+            }
+            
+            current_compiler->scope_depth--;
+            free(current_compiler->locals[current_compiler->local_count - 1].name);
+            current_compiler->local_count--;
+            break;
+        }
+        case VSS_EXPR_CLOSURE: {
+            compile_closure_expr(expr);
+            break;
+        }
+        case VSS_EXPR_AWAIT: {
+            compile_expr(expr->as.await_expr.task_expr);
+            if (expr->as.await_expr.timeout_expr != NULL) {
+                compile_expr(expr->as.await_expr.timeout_expr);
+                emit_bytes(VSS_OP_AWAIT_TASK, 1, expr->line);
+            } else {
+                emit_bytes(VSS_OP_AWAIT_TASK, 0, expr->line);
+            }
+            break;
+        }
+        case VSS_EXPR_START_TASK: {
+            compile_expr(expr->as.start_task.callee);
+            for (size_t i = 0; i < expr->as.start_task.count; i++) {
+                compile_expr(expr->as.start_task.args[i]);
+            }
+            emit_bytes(VSS_OP_START_TASK, (uint8_t)expr->as.start_task.count, expr->line);
+            break;
+        }
+    }
+}
+
+static void compile_block(VSS_Block block, bool new_scope, int line) {
+    if (new_scope) begin_scope();
+    for (size_t i = 0; i < block.count; i++) {
+        compile_stmt(block.statements[i]);
+    }
+    if (new_scope) end_scope(line);
+}
+
+static void compile_coroutine_task(VSS_Stmt *stmt) {
+    Compiler body_compiler;
+    compiler_init(&body_compiler, "<coroutine_body>", TYPE_TASK);
+    body_compiler.function->param_count = stmt->as.task.param_count;
+    
+    begin_scope();
+    for (size_t i = 0; i < stmt->as.task.param_count; i++) {
+        add_local(stmt->as.task.params[i], false, stmt->line);
+    }
+    
+    compile_block(stmt->as.task.body, false, stmt->line);
+    
+    emit_return(stmt->line);
+    VSS_ObjFunction *compiled_body = compiler_end();
+    
+    Compiler outer_compiler;
+    compiler_init(&outer_compiler, stmt->as.task.name, TYPE_TASK);
+    outer_compiler.function->param_count = stmt->as.task.param_count;
+    
+    begin_scope();
+    for (size_t i = 0; i < stmt->as.task.param_count; i++) {
+        add_local(stmt->as.task.params[i], false, stmt->line);
+    }
+    
+    // 1. Push Generator class
+    int gen_class_const = make_constant(vss_value_new_string("Generator"), stmt->line);
+    emit_byte(VSS_OP_GET_GLOBAL, stmt->line);
+    emit_byte((uint8_t)gen_class_const, stmt->line);
+    
+    // 2. Push __generator_create
+    int gen_create_const = make_constant(vss_value_new_string("__generator_create"), stmt->line);
+    emit_byte(VSS_OP_GET_GLOBAL, stmt->line);
+    emit_byte((uint8_t)gen_create_const, stmt->line);
+    
+    // 3. Push body_closure
+    int body_const = make_constant(vss_value_new_function(compiled_body), stmt->line);
+    emit_byte(VSS_OP_CLOSURE, stmt->line);
+    emit_byte((uint8_t)body_const, stmt->line);
+    for (int i = 0; i < compiled_body->upvalue_count; i++) {
+        emit_byte(body_compiler.upvalues[i].is_local ? 1 : 0, stmt->line);
+        emit_byte((uint8_t)body_compiler.upvalues[i].index, stmt->line);
+    }
+    vss_function_release(compiled_body);
+    
+    // 4. Push arguments
+    for (size_t i = 0; i < stmt->as.task.param_count; i++) {
+        int slot = resolve_local(&outer_compiler, stmt->as.task.params[i]);
+        emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)slot, stmt->line);
+    }
+    
+    // 5. Call __generator_create
+    emit_bytes(VSS_OP_CALL, (uint8_t)(stmt->as.task.param_count + 1), stmt->line);
+    
+    // 6. Call Generator
+    emit_bytes(VSS_OP_CALL, 1, stmt->line);
+    
+    // 7. Return the generator instance
+    emit_byte(VSS_OP_RETURN, stmt->line);
+    
+    VSS_ObjFunction *compiled_outer = compiler_end();
+    int outer_const = make_constant(vss_value_new_function(compiled_outer), stmt->line);
+    emit_byte(VSS_OP_CLOSURE, stmt->line);
+    emit_byte((uint8_t)outer_const, stmt->line);
+    for (int i = 0; i < compiled_outer->upvalue_count; i++) {
+        emit_byte(outer_compiler.upvalues[i].is_local ? 1 : 0, stmt->line);
+        emit_byte((uint8_t)outer_compiler.upvalues[i].index, stmt->line);
+    }
+    vss_function_release(compiled_outer);
+}
+
+static void compile_task_closure(VSS_Stmt *stmt) {
+    Compiler task_compiler;
+    compiler_init(&task_compiler, stmt->as.task.name, TYPE_TASK);
+    task_compiler.function->param_count = stmt->as.task.param_count;
+    
+    begin_scope();
+    for (size_t i = 0; i < stmt->as.task.param_count; i++) {
+        add_local(stmt->as.task.params[i], false, stmt->line);
+    }
+    
+    VSS_Block body;
+    body.statements = stmt->as.task.body.statements;
+    body.count = stmt->as.task.body.count;
+    compile_block(body, false, stmt->line);
+    
+    emit_return(stmt->line);
+    VSS_ObjFunction *compiled_func = compiler_end();
+    
+    int func_const = make_constant(vss_value_new_function(compiled_func), stmt->line);
+    vss_function_release(compiled_func);
+    
+    emit_byte(VSS_OP_CLOSURE, stmt->line);
+    emit_byte((uint8_t)func_const, stmt->line);
+    
+    for (int i = 0; i < compiled_func->upvalue_count; i++) {
+        emit_byte(task_compiler.upvalues[i].is_local ? 1 : 0, stmt->line);
+        emit_byte((uint8_t)task_compiler.upvalues[i].index, stmt->line);
+    }
+}
+
+static void compile_closure_expr(VSS_Expr *expr) {
+    Compiler task_compiler;
+    compiler_init(&task_compiler, "<closure>", TYPE_TASK);
+    task_compiler.function->param_count = expr->as.closure.param_count;
+    
+    begin_scope();
+    for (size_t i = 0; i < expr->as.closure.param_count; i++) {
+        add_local(expr->as.closure.params[i], false, expr->line);
+    }
+    
+    compile_block(expr->as.closure.body, false, expr->line);
+    
+    emit_return(expr->line);
+    VSS_ObjFunction *compiled_func = compiler_end();
+    
+    int func_const = make_constant(vss_value_new_function(compiled_func), expr->line);
+    vss_function_release(compiled_func);
+    
+    emit_byte(VSS_OP_CLOSURE, expr->line);
+    emit_byte((uint8_t)func_const, expr->line);
+    
+    for (int i = 0; i < compiled_func->upvalue_count; i++) {
+        emit_byte(task_compiler.upvalues[i].is_local ? 1 : 0, expr->line);
+        emit_byte((uint8_t)task_compiler.upvalues[i].index, expr->line);
+    }
+}
+
+static void compile_stmt(VSS_Stmt *stmt) {
+    if (!stmt) return;
+    
+    switch (stmt->kind) {
+        case VSS_STMT_MAKE:
+        case VSS_STMT_KEEP: {
+            bool is_const = (stmt->kind == VSS_STMT_KEEP);
+            compile_expr(stmt->as.make.initializer);
+            
+            if (current_compiler->scope_depth == 0) {
+                char resolved_name[256];
+            if (current_namespace[0] != '\0') {
+                snprintf(resolved_name, sizeof(resolved_name), "%s_%s", current_namespace, stmt->as.make.name);
+            } else {
+                strcpy(resolved_name, stmt->as.make.name);
+            }
+            int name_const = make_constant(vss_value_new_string(resolved_name), stmt->line);
+                emit_byte(VSS_OP_DEFINE_GLOBAL, stmt->line);
+                emit_byte((uint8_t)name_const, stmt->line);
+                emit_byte(is_const ? 1 : 0, stmt->line);
+            } else {
+                add_local(stmt->as.make.name, is_const, stmt->line);
+            }
+            break;
+        }
+        case VSS_STMT_ASSIGN: {
+            compile_expr(stmt->as.assign.value);
+            int arg = resolve_local(current_compiler, stmt->as.assign.name);
+            if (arg != -1) {
+                emit_bytes(VSS_OP_SET_LOCAL, (uint8_t)arg, stmt->line);
+            } else if ((arg = resolve_upvalue(current_compiler, stmt->as.assign.name)) != -1) {
+                emit_bytes(VSS_OP_SET_UPVALUE, (uint8_t)arg, stmt->line);
+            } else {
+                int name_const = make_constant(vss_value_new_string(stmt->as.assign.name), stmt->line);
+                emit_bytes(VSS_OP_SET_GLOBAL, (uint8_t)name_const, stmt->line);
+            }
+            emit_byte(VSS_OP_POP, stmt->line);
+            break;
+        }
+        case VSS_STMT_SAY: {
+            compile_expr(stmt->as.say.expression);
+            emit_byte(VSS_OP_SAY, stmt->line);
+            break;
+        }
+        case VSS_STMT_ASK: {
+            VSS_Expr *target = stmt->as.ask.target;
+            if (target->kind == VSS_EXPR_NAME) {
+                if (stmt->as.ask.prompt) {
+                    compile_expr(stmt->as.ask.prompt);
+                } else {
+                    emit_byte(VSS_OP_EMPTY, stmt->line);
+                }
+                char resolved_name[256];
+                strcpy(resolved_name, target->as.name);
+                if (current_namespace[0] != '\0' && strncmp(target->as.name, "__", 2) != 0 && !is_stdlib_module(target->as.name) && resolve_local(current_compiler, target->as.name) == -1 && resolve_upvalue(current_compiler, target->as.name) == -1) {
+                    snprintf(resolved_name, sizeof(resolved_name), "%s_%s", current_namespace, target->as.name);
+                }
+                int arg = resolve_local(current_compiler, resolved_name);
+                if (arg != -1) {
+                    emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)arg, stmt->line);
+                } else if ((arg = resolve_upvalue(current_compiler, resolved_name)) != -1) {
+                    emit_bytes(VSS_OP_GET_UPVALUE, (uint8_t)arg, stmt->line);
+                } else {
+                    int name_const = make_constant(vss_value_new_string(resolved_name), stmt->line);
+                    emit_bytes(VSS_OP_GET_GLOBAL, (uint8_t)name_const, stmt->line);
+                }
+                emit_byte(VSS_OP_ASK, stmt->line);
+                if (arg != -1) {
+                    emit_bytes(VSS_OP_SET_LOCAL, (uint8_t)arg, stmt->line);
+                } else if ((arg = resolve_upvalue(current_compiler, resolved_name)) != -1) {
+                    emit_bytes(VSS_OP_SET_UPVALUE, (uint8_t)arg, stmt->line);
+                } else {
+                    int name_const = make_constant(vss_value_new_string(resolved_name), stmt->line);
+                    emit_bytes(VSS_OP_SET_GLOBAL, (uint8_t)name_const, stmt->line);
+                }
+                emit_byte(VSS_OP_POP, stmt->line);
+            } else if (target->kind == VSS_EXPR_FIELD_ACCESS) {
+                compile_expr(target->as.field_access.map);
+                compile_expr(target->as.field_access.field);
+                if (stmt->as.ask.prompt) {
+                    compile_expr(stmt->as.ask.prompt);
+                } else {
+                    emit_byte(VSS_OP_EMPTY, stmt->line);
+                }
+                compile_expr(target->as.field_access.map);
+                compile_expr(target->as.field_access.field);
+                emit_byte(VSS_OP_GET_FIELD, stmt->line);
+                emit_byte(VSS_OP_ASK, stmt->line);
+                emit_byte(VSS_OP_SET_FIELD, stmt->line);
+            }
+            break;
+        }
+        case VSS_STMT_SEND: {
+            compile_expr(stmt->as.send.expression);
+            emit_byte(VSS_OP_RETURN, stmt->line);
+            break;
+        }
+        case VSS_STMT_YIELD: {
+            compile_expr(stmt->as.yield_stmt.expression);
+            emit_byte(VSS_OP_YIELD, stmt->line);
+            break;
+        }
+        case VSS_STMT_WHEN: {
+            int *end_jumps = malloc(sizeof(int) * stmt->as.when.branch_count);
+            
+            for (size_t i = 0; i < stmt->as.when.branch_count; i++) {
+                compile_expr(stmt->as.when.branches[i].condition);
+                int false_jump = emit_jump(VSS_OP_JUMP_IF_FALSE, stmt->line);
+                emit_byte(VSS_OP_POP, stmt->line);
+                
+                compile_block(stmt->as.when.branches[i].block, true, stmt->line);
+                end_jumps[i] = emit_jump(VSS_OP_JUMP, stmt->line);
+                
+                patch_jump(false_jump);
+                emit_byte(VSS_OP_POP, stmt->line);
+            }
+            
+            if (stmt->as.when.otherwise_branch.count > 0) {
+                compile_block(stmt->as.when.otherwise_branch, true, stmt->line);
+            }
+            
+            for (size_t i = 0; i < stmt->as.when.branch_count; i++) {
+                patch_jump(end_jumps[i]);
+            }
+            free(end_jumps);
+            break;
+        }
+        case VSS_STMT_REPEAT_COUNT: {
+            compile_expr(stmt->as.repeat_count.count_expr);
+            
+            begin_scope();
+            add_local("$limit", true, stmt->line);
+            
+            emit_constant(vss_value_new_number(0.0), stmt->line);
+            add_local("$counter", false, stmt->line);
+            
+            int loop_start = current_chunk()->count;
+            int counter_slot = resolve_local(current_compiler, "$counter");
+            int limit_slot = resolve_local(current_compiler, "$limit");
+            
+            emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)counter_slot, stmt->line);
+            emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)limit_slot, stmt->line);
+            emit_byte(VSS_OP_BELOW, stmt->line);
+            
+            int exit_jump = emit_jump(VSS_OP_JUMP_IF_FALSE, stmt->line);
+            emit_byte(VSS_OP_POP, stmt->line);
+            
+            LoopCompiler loop;
+            loop.enclosing = current_loop;
+            loop.is_during = false;
+            loop.start_offset = loop_start;
+            loop.leave_jumps = NULL;
+            loop.leave_count = 0;
+            loop.leave_capacity = 0;
+            loop.skip_jumps = NULL;
+            loop.skip_count = 0;
+            loop.skip_capacity = 0;
+            current_loop = &loop;
+            
+            compile_block(stmt->as.repeat_count.body, true, stmt->line);
+            
+            for (int i = 0; i < loop.skip_count; i++) {
+                patch_jump(loop.skip_jumps[i]);
+            }
+            free(loop.skip_jumps);
+            
+            emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)counter_slot, stmt->line);
+            emit_constant(vss_value_new_number(1.0), stmt->line);
+            emit_byte(VSS_OP_ADD, stmt->line);
+            emit_bytes(VSS_OP_SET_LOCAL, (uint8_t)counter_slot, stmt->line);
+            emit_byte(VSS_OP_POP, stmt->line);
+            
+            emit_loop(loop_start, stmt->line);
+            
+            patch_jump(exit_jump);
+            emit_byte(VSS_OP_POP, stmt->line);
+            
+            for (int i = 0; i < loop.leave_count; i++) {
+                patch_jump(loop.leave_jumps[i]);
+            }
+            free(loop.leave_jumps);
+            current_loop = loop.enclosing;
+            
+            end_scope(stmt->line);
+            break;
+        }
+        case VSS_STMT_REPEAT_RANGE: {
+            compile_expr(stmt->as.repeat_range.start);
+            compile_expr(stmt->as.repeat_range.end);
+            
+            begin_scope();
+            add_local("$start", true, stmt->line);
+            add_local("$end", true, stmt->line);
+            
+            int start_slot = resolve_local(current_compiler, "$start");
+            int end_slot = resolve_local(current_compiler, "$end");
+            
+            emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)start_slot, stmt->line);
+            emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)end_slot, stmt->line);
+            emit_byte(VSS_OP_AT_MOST, stmt->line);
+            
+            int false_branch = emit_jump(VSS_OP_JUMP_IF_FALSE, stmt->line);
+            emit_byte(VSS_OP_POP, stmt->line);
+            
+            // Upward
+            begin_scope();
+            emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)start_slot, stmt->line);
+            add_local(stmt->as.repeat_range.var_name, false, stmt->line);
+            
+            int up_start = current_chunk()->count;
+            int i_slot = resolve_local(current_compiler, stmt->as.repeat_range.var_name);
+            emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)i_slot, stmt->line);
+            emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)end_slot, stmt->line);
+            emit_byte(VSS_OP_AT_MOST, stmt->line);
+            
+            int up_exit = emit_jump(VSS_OP_JUMP_IF_FALSE, stmt->line);
+            emit_byte(VSS_OP_POP, stmt->line);
+            
+            LoopCompiler up_loop;
+            up_loop.enclosing = current_loop;
+            up_loop.is_during = false;
+            up_loop.start_offset = up_start;
+            up_loop.leave_jumps = NULL;
+            up_loop.leave_count = 0;
+            up_loop.leave_capacity = 0;
+            up_loop.skip_jumps = NULL;
+            up_loop.skip_count = 0;
+            up_loop.skip_capacity = 0;
+            current_loop = &up_loop;
+            
+            compile_block(stmt->as.repeat_range.body, true, stmt->line);
+            
+            for (int i = 0; i < up_loop.skip_count; i++) {
+                patch_jump(up_loop.skip_jumps[i]);
+            }
+            free(up_loop.skip_jumps);
+            
+            emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)i_slot, stmt->line);
+            emit_constant(vss_value_new_number(1.0), stmt->line);
+            emit_byte(VSS_OP_ADD, stmt->line);
+            emit_bytes(VSS_OP_SET_LOCAL, (uint8_t)i_slot, stmt->line);
+            emit_byte(VSS_OP_POP, stmt->line);
+            
+            emit_loop(up_start, stmt->line);
+            
+            patch_jump(up_exit);
+            emit_byte(VSS_OP_POP, stmt->line);
+            
+            for (int k = 0; k < up_loop.leave_count; k++) {
+                patch_jump(up_loop.leave_jumps[k]);
+            }
+            free(up_loop.leave_jumps);
+            current_loop = up_loop.enclosing;
+            
+            end_scope(stmt->line);
+            
+            int end_jump = emit_jump(VSS_OP_JUMP, stmt->line);
+            
+            // Downward
+            patch_jump(false_branch);
+            emit_byte(VSS_OP_POP, stmt->line);
+            
+            begin_scope();
+            emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)start_slot, stmt->line);
+            add_local(stmt->as.repeat_range.var_name, false, stmt->line);
+            
+            int down_start = current_chunk()->count;
+            i_slot = resolve_local(current_compiler, stmt->as.repeat_range.var_name);
+            emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)i_slot, stmt->line);
+            emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)end_slot, stmt->line);
+            emit_byte(VSS_OP_AT_LEAST, stmt->line);
+            
+            int down_exit = emit_jump(VSS_OP_JUMP_IF_FALSE, stmt->line);
+            emit_byte(VSS_OP_POP, stmt->line);
+            
+            LoopCompiler down_loop;
+            down_loop.enclosing = current_loop;
+            down_loop.is_during = false;
+            down_loop.start_offset = down_start;
+            down_loop.leave_jumps = NULL;
+            down_loop.leave_count = 0;
+            down_loop.leave_capacity = 0;
+            down_loop.skip_jumps = NULL;
+            down_loop.skip_count = 0;
+            down_loop.skip_capacity = 0;
+            current_loop = &down_loop;
+            
+            compile_block(stmt->as.repeat_range.body, true, stmt->line);
+            
+            for (int i = 0; i < down_loop.skip_count; i++) {
+                patch_jump(down_loop.skip_jumps[i]);
+            }
+            free(down_loop.skip_jumps);
+            
+            emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)i_slot, stmt->line);
+            emit_constant(vss_value_new_number(1.0), stmt->line);
+            emit_byte(VSS_OP_SUB, stmt->line);
+            emit_bytes(VSS_OP_SET_LOCAL, (uint8_t)i_slot, stmt->line);
+            emit_byte(VSS_OP_POP, stmt->line);
+            
+            emit_loop(down_start, stmt->line);
+            
+            patch_jump(down_exit);
+            emit_byte(VSS_OP_POP, stmt->line);
+            
+            for (int k = 0; k < down_loop.leave_count; k++) {
+                patch_jump(down_loop.leave_jumps[k]);
+            }
+            free(down_loop.leave_jumps);
+            current_loop = down_loop.enclosing;
+            
+            end_scope(stmt->line);
+            
+            patch_jump(end_jump);
+            end_scope(stmt->line);
+            break;
+        }
+        case VSS_STMT_REPEAT_EACH: {
+            compile_expr(stmt->as.repeat_each.collection);
+            
+            begin_scope();
+            add_local("$list", true, stmt->line);
+            emit_constant(vss_value_new_number(0.0), stmt->line);
+            add_local("$index", false, stmt->line);
+            
+            int loop_start = current_chunk()->count;
+            int list_slot = resolve_local(current_compiler, "$list");
+            int index_slot = resolve_local(current_compiler, "$index");
+            
+            emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)index_slot, stmt->line);
+            emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)list_slot, stmt->line);
+            emit_byte(VSS_OP_SIZE_OF, stmt->line);
+            emit_byte(VSS_OP_BELOW, stmt->line);
+            
+            int exit_jump = emit_jump(VSS_OP_JUMP_IF_FALSE, stmt->line);
+            emit_byte(VSS_OP_POP, stmt->line);
+            
+            begin_scope();
+            emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)list_slot, stmt->line);
+            emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)index_slot, stmt->line);
+            emit_byte(VSS_OP_GET_ITEM, stmt->line);
+            add_local(stmt->as.repeat_each.var_name, false, stmt->line);
+            
+            LoopCompiler loop;
+            loop.enclosing = current_loop;
+            loop.is_during = false;
+            loop.start_offset = loop_start;
+            loop.leave_jumps = NULL;
+            loop.leave_count = 0;
+            loop.leave_capacity = 0;
+            loop.skip_jumps = NULL;
+            loop.skip_count = 0;
+            loop.skip_capacity = 0;
+            current_loop = &loop;
+            
+            compile_block(stmt->as.repeat_each.body, false, stmt->line);
+            
+            end_scope(stmt->line);
+            
+            for (int i = 0; i < loop.skip_count; i++) {
+                patch_jump(loop.skip_jumps[i]);
+            }
+            free(loop.skip_jumps);
+            
+            emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)index_slot, stmt->line);
+            emit_constant(vss_value_new_number(1.0), stmt->line);
+            emit_byte(VSS_OP_ADD, stmt->line);
+            emit_bytes(VSS_OP_SET_LOCAL, (uint8_t)index_slot, stmt->line);
+            emit_byte(VSS_OP_POP, stmt->line);
+            
+            emit_loop(loop_start, stmt->line);
+            
+            patch_jump(exit_jump);
+            emit_byte(VSS_OP_POP, stmt->line);
+            
+            for (int k = 0; k < loop.leave_count; k++) {
+                patch_jump(loop.leave_jumps[k]);
+            }
+            free(loop.leave_jumps);
+            current_loop = loop.enclosing;
+            
+            end_scope(stmt->line);
+            break;
+        }
+        case VSS_STMT_DURING: {
+            int loop_start = current_chunk()->count;
+            compile_expr(stmt->as.during.condition);
+            int exit_jump = emit_jump(VSS_OP_JUMP_IF_FALSE, stmt->line);
+            emit_byte(VSS_OP_POP, stmt->line);
+            
+            LoopCompiler loop;
+            loop.enclosing = current_loop;
+            loop.is_during = true;
+            loop.start_offset = loop_start;
+            loop.leave_jumps = NULL;
+            loop.leave_count = 0;
+            loop.leave_capacity = 0;
+            loop.skip_jumps = NULL;
+            loop.skip_count = 0;
+            loop.skip_capacity = 0;
+            current_loop = &loop;
+            
+            compile_block(stmt->as.during.body, true, stmt->line);
+            
+            emit_loop(loop_start, stmt->line);
+            
+            patch_jump(exit_jump);
+            emit_byte(VSS_OP_POP, stmt->line);
+            
+            for (int k = 0; k < loop.leave_count; k++) {
+                patch_jump(loop.leave_jumps[k]);
+            }
+            free(loop.leave_jumps);
+            current_loop = loop.enclosing;
+            break;
+        }
+        case VSS_STMT_LEAVE: {
+            if (current_loop == NULL) {
+                fprintf(stderr, "Leave statement outside loop.\n");
+                break;
+            }
+            int jump = emit_jump(VSS_OP_JUMP, stmt->line);
+            
+            if (current_loop->leave_count >= current_loop->leave_capacity) {
+                current_loop->leave_capacity = current_loop->leave_capacity < 4 ? 4 : current_loop->leave_capacity * 2;
+                current_loop->leave_jumps = realloc(current_loop->leave_jumps, current_loop->leave_capacity * sizeof(int));
+            }
+            current_loop->leave_jumps[current_loop->leave_count++] = jump;
+            break;
+        }
+        case VSS_STMT_SKIP: {
+            if (current_loop == NULL) {
+                fprintf(stderr, "Skip statement outside loop.\n");
+                break;
+            }
+            if (current_loop->is_during) {
+                emit_loop(current_loop->start_offset, stmt->line);
+            } else {
+                int jump = emit_jump(VSS_OP_JUMP, stmt->line);
+                if (current_loop->skip_count >= current_loop->skip_capacity) {
+                    current_loop->skip_capacity = current_loop->skip_capacity < 4 ? 4 : current_loop->skip_capacity * 2;
+                    current_loop->skip_jumps = realloc(current_loop->skip_jumps, current_loop->skip_capacity * sizeof(int));
+                }
+                current_loop->skip_jumps[current_loop->skip_count++] = jump;
+            }
+            break;
+        }
+        case VSS_STMT_TASK: {
+            if (stmt->as.task.is_coroutine) {
+                compile_coroutine_task(stmt);
+            } else {
+                compile_task_closure(stmt);
+            }
+            if (current_compiler->scope_depth == 0) {
+                char resolved_name[256];
+            if (current_namespace[0] != '\0') {
+                snprintf(resolved_name, sizeof(resolved_name), "%s_%s", current_namespace, stmt->as.task.name);
+            } else {
+                strcpy(resolved_name, stmt->as.task.name);
+            }
+            int name_const = make_constant(vss_value_new_string(resolved_name), stmt->line);
+                emit_byte(VSS_OP_DEFINE_GLOBAL, stmt->line);
+                emit_byte((uint8_t)name_const, stmt->line);
+                emit_byte(0, stmt->line);
+            } else {
+                add_local(stmt->as.task.name, false, stmt->line);
+            }
+            break;
+        }
+        case VSS_STMT_ATTEMPT: {
+            int rescue_jump = emit_jump(VSS_OP_ATTEMPT, stmt->line);
+            compile_block(stmt->as.attempt.try_body, true, stmt->line);
+            emit_byte(VSS_OP_END_ATTEMPT, stmt->line);
+            int end_jump = emit_jump(VSS_OP_JUMP, stmt->line);
+            
+            patch_jump(rescue_jump);
+            
+            begin_scope();
+            add_local(stmt->as.attempt.problem_var, true, stmt->line);
+            compile_block(stmt->as.attempt.rescue_body, false, stmt->line);
+            end_scope(stmt->line);
+            
+            patch_jump(end_jump);
+            break;
+        }
+        case VSS_STMT_CHOOSE: {
+            compile_expr(stmt->as.choose.expr);
+            
+            begin_scope();
+            add_local("$choose_target", true, stmt->line);
+            int target_slot = resolve_local(current_compiler, "$choose_target");
+            
+            int *end_jumps = malloc(sizeof(int) * stmt->as.choose.case_count);
+            for (size_t i = 0; i < stmt->as.choose.case_count; i++) {
+                VSS_Expr *case_expr = stmt->as.choose.cases[i].expr;
+                if (case_expr->kind == VSS_EXPR_NAME && strcmp(case_expr->as.name, "_") == 0) {
+                    emit_byte(VSS_OP_TRUE, stmt->line);
+                } else {
+                    emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)target_slot, stmt->line);
+                    compile_expr(case_expr);
+                    emit_byte(VSS_OP_SAME_AS, stmt->line);
+                }
+                
+                int false_jump = emit_jump(VSS_OP_JUMP_IF_FALSE, stmt->line);
+                emit_byte(VSS_OP_POP, stmt->line);
+                
+                compile_block(stmt->as.choose.cases[i].block, true, stmt->line);
+                end_jumps[i] = emit_jump(VSS_OP_JUMP, stmt->line);
+                
+                patch_jump(false_jump);
+                emit_byte(VSS_OP_POP, stmt->line);
+            }
+            
+            if (stmt->as.choose.otherwise_branch.count > 0) {
+                compile_block(stmt->as.choose.otherwise_branch, true, stmt->line);
+            }
+            
+            for (size_t i = 0; i < stmt->as.choose.case_count; i++) {
+                patch_jump(end_jumps[i]);
+            }
+            free(end_jumps);
+            
+            end_scope(stmt->line);
+            break;
+        }
+        case VSS_STMT_PUT: {
+            compile_expr(stmt->as.put.value);
+            compile_expr(stmt->as.put.list);
+            emit_byte(VSS_OP_PUT_ITEM, stmt->line);
+            break;
+        }
+        case VSS_STMT_SET_FIELD: {
+            if (stmt->as.set_field.map->kind == VSS_EXPR_NAME &&
+                (is_known_namespace(stmt->as.set_field.map->as.name) || is_stdlib_module(stmt->as.set_field.map->as.name))) {
+                if (stmt->as.set_field.field->kind == VSS_EXPR_STRING || stmt->as.set_field.field->kind == VSS_EXPR_NAME) {
+                    char mangled[256];
+                    const char *field_str = (stmt->as.set_field.field->kind == VSS_EXPR_STRING) ? stmt->as.set_field.field->as.string : stmt->as.set_field.field->as.name;
+                    snprintf(mangled, sizeof(mangled), "%s_%s", stmt->as.set_field.map->as.name, field_str);
+                    compile_expr(stmt->as.set_field.value);
+                    int arg = resolve_local(current_compiler, mangled);
+                    if (arg != -1) {
+                        emit_bytes(VSS_OP_SET_LOCAL, (uint8_t)arg, stmt->line);
+                    } else if ((arg = resolve_upvalue(current_compiler, mangled)) != -1) {
+                        emit_bytes(VSS_OP_SET_UPVALUE, (uint8_t)arg, stmt->line);
+                    } else {
+                        int name_const = make_constant(vss_value_new_string(mangled), stmt->line);
+                        emit_bytes(VSS_OP_SET_GLOBAL, (uint8_t)name_const, stmt->line);
+                    }
+                    emit_byte(VSS_OP_POP, stmt->line);
+                } else {
+                    compile_expr(stmt->as.set_field.map);
+                    compile_expr(stmt->as.set_field.field);
+                    compile_expr(stmt->as.set_field.value);
+                    emit_byte(VSS_OP_SET_FIELD, stmt->line);
+                }
+            } else {
+                compile_expr(stmt->as.set_field.map);
+                compile_expr(stmt->as.set_field.field);
+                compile_expr(stmt->as.set_field.value);
+                emit_byte(VSS_OP_SET_FIELD, stmt->line);
+            }
+            break;
+        }
+        case VSS_STMT_SET_ITEM: {
+            compile_expr(stmt->as.set_item.list);
+            compile_expr(stmt->as.set_item.index);
+            compile_expr(stmt->as.set_item.value);
+            emit_byte(VSS_OP_SET_ITEM, stmt->line);
+            break;
+        }
+        case VSS_STMT_HI_HTMVSS: {
+            emit_byte(VSS_OP_HI_HTMVSS, stmt->line);
+            break;
+        }
+        case VSS_STMT_BYE_HTMVSS: {
+            emit_byte(VSS_OP_BYE_HTMVSS, stmt->line);
+            break;
+        }
+        case VSS_STMT_EXPR: {
+            compile_expr(stmt->as.expr_stmt.expression);
+            emit_byte(VSS_OP_POP, stmt->line);
+            break;
+        }
+        case VSS_STMT_GRAB: {
+            int name_const = make_constant(vss_value_new_string(stmt->as.grab.module_name), stmt->line);
+            emit_bytes(VSS_OP_GRAB, (uint8_t)name_const, stmt->line);
+            break;
+        }
+        case VSS_STMT_CHOICES: {
+            int name_const = make_constant(vss_value_new_string(stmt->as.choices_decl.name), stmt->line);
+            for (size_t i = 0; i < stmt->as.choices_decl.member_count; i++) {
+                emit_constant(vss_value_new_string(stmt->as.choices_decl.members[i]), stmt->line);
+            }
+            emit_bytes(VSS_OP_ENUM, (uint8_t)name_const, stmt->line);
+            emit_byte((uint8_t)stmt->as.choices_decl.member_count, stmt->line);
+            
+            if (current_compiler->scope_depth == 0) {
+                emit_byte(VSS_OP_DEFINE_GLOBAL, stmt->line);
+                emit_byte((uint8_t)name_const, stmt->line);
+                emit_byte(0, stmt->line);
+            } else {
+                add_local(stmt->as.choices_decl.name, false, stmt->line);
+            }
+            break;
+        }
+        case VSS_STMT_INTERFACE: {
+            break;
+        }
+        case VSS_STMT_OBJECT: {
+            if (stmt->as.object_decl.parent_name) {
+                int parent_const = make_constant(vss_value_new_string(stmt->as.object_decl.parent_name), stmt->line);
+                emit_bytes(VSS_OP_GET_GLOBAL, (uint8_t)parent_const, stmt->line);
+            } else {
+                emit_byte(VSS_OP_EMPTY, stmt->line);
+            }
+            char resolved_obj_name[256];
+            if (current_namespace[0] != '\0') {
+                snprintf(resolved_obj_name, sizeof(resolved_obj_name), "%s_%s", current_namespace, stmt->as.object_decl.name);
+            } else {
+                strcpy(resolved_obj_name, stmt->as.object_decl.name);
+            }
+            int name_const = make_constant(vss_value_new_string(resolved_obj_name), stmt->line);
+            emit_bytes(VSS_OP_CLASS, (uint8_t)name_const, stmt->line);
+            
+            for (size_t i = 0; i < stmt->as.object_decl.member_count; i++) {
+                VSS_Stmt *m = stmt->as.object_decl.members[i];
+                if (m->kind == VSS_STMT_TASK) {
+                    emit_constant(vss_value_new_string(m->as.task.name), m->line);
+                    compile_task_closure(m);
+                    emit_byte(VSS_OP_SET_MEMBER, m->line);
+                }
+            }
+            
+            if (current_compiler->scope_depth == 0) {
+                emit_byte(VSS_OP_DEFINE_GLOBAL, stmt->line);
+                emit_byte((uint8_t)name_const, stmt->line);
+                emit_byte(0, stmt->line);
+            } else {
+                add_local(stmt->as.object_decl.name, false, stmt->line);
+            }
+            break;
+        }
+        case VSS_STMT_NAMESPACE: {
+            strcpy(declared_namespaces[declared_namespace_count++], stmt->as.namespace_decl.name);
+            char prev_ns[128];
+            strcpy(prev_ns, current_namespace);
+            strcpy(current_namespace, stmt->as.namespace_decl.name);
+            for (size_t i = 0; i < stmt->as.namespace_decl.body.count; i++) {
+                compile_stmt(stmt->as.namespace_decl.body.statements[i]);
+            }
+            strcpy(current_namespace, prev_ns);
+            break;
+        }
+        case VSS_STMT_SHAPE: {
+            emit_byte(VSS_OP_EMPTY, stmt->line);
+            char resolved_shape_name[256];
+            if (current_namespace[0] != '\0') {
+                snprintf(resolved_shape_name, sizeof(resolved_shape_name), "%s_%s", current_namespace, stmt->as.shape_decl.name);
+            } else {
+                strcpy(resolved_shape_name, stmt->as.shape_decl.name);
+            }
+            int name_const = make_constant(vss_value_new_string(resolved_shape_name), stmt->line);
+            emit_bytes(VSS_OP_CLASS, (uint8_t)name_const, stmt->line);
+            
+            for (size_t i = 0; i < stmt->as.shape_decl.member_count; i++) {
+                VSS_Stmt *m = stmt->as.shape_decl.members[i];
+                if (m->kind == VSS_STMT_TASK) {
+                    emit_constant(vss_value_new_string(m->as.task.name), m->line);
+                    compile_task_closure(m);
+                    emit_byte(VSS_OP_SET_MEMBER, m->line);
+                }
+            }
+
+            if (current_compiler->scope_depth == 0) {
+                emit_byte(VSS_OP_DEFINE_GLOBAL, stmt->line);
+                emit_byte((uint8_t)name_const, stmt->line);
+                emit_byte(0, stmt->line);
+            } else {
+                add_local(stmt->as.shape_decl.name, false, stmt->line);
+            }
+            break;
+        }
+        case VSS_STMT_FIELD: {
+            break;
+        }
+        case VSS_STMT_PARALLEL_EACH: {
+            Compiler item_compiler;
+            compiler_init(&item_compiler, "<parallel_body>", TYPE_TASK);
+            item_compiler.function->param_count = 1;
+            begin_scope();
+            add_local(stmt->as.parallel_each.var_name, false, stmt->line);
+            compile_block(stmt->as.parallel_each.body, false, stmt->line);
+            emit_return(stmt->line);
+            VSS_ObjFunction *compiled_body = compiler_end();
+            
+            int body_const = make_constant(vss_value_new_function(compiled_body), stmt->line);
+            emit_byte(VSS_OP_CLOSURE, stmt->line);
+            emit_byte((uint8_t)body_const, stmt->line);
+            for (int i = 0; i < compiled_body->upvalue_count; i++) {
+                emit_byte(item_compiler.upvalues[i].is_local ? 1 : 0, stmt->line);
+                emit_byte((uint8_t)item_compiler.upvalues[i].index, stmt->line);
+            }
+            vss_function_release(compiled_body);
+            
+            compile_expr(stmt->as.parallel_each.collection);
+            emit_byte(VSS_OP_PARALLEL_EACH, stmt->line);
+            break;
+        }
+        case VSS_STMT_LOCK: {
+            begin_scope();
+            compile_expr(stmt->as.lock_stmt.mutex_expr);
+            add_local("$lock_mutex", true, stmt->line);
+            int m_slot = resolve_local(current_compiler, "$lock_mutex");
+            emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)m_slot, stmt->line);
+            emit_byte(VSS_OP_LOCK_MUTEX, stmt->line);
+            compile_block(stmt->as.lock_stmt.body, true, stmt->line);
+            emit_bytes(VSS_OP_GET_LOCAL, (uint8_t)m_slot, stmt->line);
+            emit_byte(VSS_OP_UNLOCK_MUTEX, stmt->line);
+            end_scope(stmt->line);
+            break;
+        }
+        case VSS_STMT_SELECT: {
+            int *end_jumps = malloc(sizeof(int) * stmt->as.select_stmt.case_count);
+            for (size_t i = 0; i < stmt->as.select_stmt.case_count; i++) {
+                compile_expr(stmt->as.select_stmt.cases[i].expr);
+                int false_jump = emit_jump(VSS_OP_JUMP_IF_FALSE, stmt->line);
+                emit_byte(VSS_OP_POP, stmt->line);
+                compile_block(stmt->as.select_stmt.cases[i].block, true, stmt->line);
+                end_jumps[i] = emit_jump(VSS_OP_JUMP, stmt->line);
+                patch_jump(false_jump);
+                emit_byte(VSS_OP_POP, stmt->line);
+            }
+            if (stmt->as.select_stmt.otherwise_branch.count > 0) {
+                compile_block(stmt->as.select_stmt.otherwise_branch, true, stmt->line);
+            }
+            for (size_t i = 0; i < stmt->as.select_stmt.case_count; i++) {
+                patch_jump(end_jumps[i]);
+            }
+            free(end_jumps);
+            break;
+        }
+        default: break;
+    }
+}
+
+VSS_ObjFunction *vss_compile_program(VSS_Block program) {
+    declared_namespace_count = 0;
+    current_namespace[0] = '\0';
+    Compiler compiler;
+    compiler_init(&compiler, "__main__", TYPE_MAIN);
+    
+    compile_block(program, false, 0);
+    
+    emit_return(0);
+    VSS_ObjFunction *func = compiler_end();
+    return func;
+}

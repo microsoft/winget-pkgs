@@ -5,4 +5,1084 @@
 
 #include "interpreter.h"
 #include "parser.h"
-static char *_x03a2(const char *_x039e) { if (!_x039e) return NULL; char *dup = malloc(strlen(_x039e) + 1); if (dup) { strcpy(dup, _x039e); } return dup; } static _x004f _x024a(void) { _x004f _x0386; _x0386._x0412 = _x004b; _x0386._x0425 = _x0499(); _x0386._x0222 = NULL; _x0386._x02d9 = 0; _x0386._x01bf = 0; return _x0386; } static _x004f _x0249(int _x02d9, int _x01ba, const char *_x0257, ...) { _x004f _x0386; _x0386._x0412 = _x0049; _x0386._x0425 = _x0499(); _x0386._x02d9 = _x02d9; _x0386._x01bf = _x01ba; va_list _x0140; va_start(_x0140, _x0257); int _x02d3 = vsnprintf(NULL, 0, _x0257, _x0140); va_end(_x0140); _x0386._x0222 = malloc(_x02d3 + 1); va_start(_x0140, _x0257); vsnprintf(_x0386._x0222, _x02d3 + 1, _x0257, _x0140); va_end(_x0140); return _x0386; } static _x004f _x0226(_x0047 *_x022a, _x0046 *_x021d, _x012a *_x0336); static _x004f _x0226(_x0047 *_x022a, _x0046 *_x021d, _x012a *_x0336) { if (!_x022a) { *_x0336 = _x0499(); return _x024a(); } switch (_x022a->_x02c6) { case _x0041: *_x0336 = _x04a1(_x022a->_x0141._x0326); return _x024a(); case _x0043: *_x0336 = _x04a2(_x022a->_x0141._x03e8); return _x024a(); case _x0037: *_x0336 = _x0496(_x022a->_x0141._x0154); return _x024a(); case _x003a: *_x0336 = _x0499(); return _x024a(); case _x0040: { if (!_x043f(_x021d, _x022a->_x0141._x0319, _x0336)) { return _x0249(_x022a->_x02d9, _x022a->_x01bf, "\x55\x6e\x64\x65\x66\x69\x6e\x65\x64\x20\x76\x61\x72\x69\x61\x62\x6c\x65\x20\x27\x25\x73\x27\x2e", _x022a->_x0141._x0319); } return _x024a(); } case _x0045: { _x012a _x032e; _x004f _x0386 = _x0226(_x022a->_x0141._x0416._x032e, _x021d, &_x032e); if (_x0386._x0412 != _x004b) return _x0386; if (_x022a->_x0141._x0416._x032b == _x00e6) { if (_x032e._x0412 != _x0120) { _x04a4(_x032e); return _x0249(_x022a->_x02d9, _x022a->_x01bf, "\x4f\x70\x65\x72\x61\x6e\x64\x20\x74\x6f\x20\x27\x2d\x27\x20\x6d\x75\x73\x74\x20\x62\x65\x20\x61\x20\x6e\x75\x6d\x62\x65\x72\x2e"); } *_x0336 = _x04a1(-_x032e._x0141._x0326); _x04a4(_x032e); return _x024a(); } else if (_x022a->_x0141._x0416._x032b == _x00ea) { *_x0336 = _x0496(!_x04a9(_x032e)); _x04a4(_x032e); return _x024a(); } _x04a4(_x032e); return _x0249(_x022a->_x02d9, _x022a->_x01bf, "\x55\x6e\x6b\x6e\x6f\x77\x6e\x20\x75\x6e\x61\x72\x79\x20\x6f\x70\x65\x72\x61\x74\x6f\x72\x2e"); } case _x0036: { if (_x022a->_x0141._x014b._x032b == _x00f0) { _x012a _x02d2; _x004f _x0386 = _x0226(_x022a->_x0141._x014b._x02d2, _x021d, &_x02d2); if (_x0386._x0412 != _x004b) return _x0386; if (_x04a9(_x02d2)) { *_x0336 = _x02d2; return _x024a(); } _x04a4(_x02d2); return _x0226(_x022a->_x0141._x014b._x0396, _x021d, _x0336); } if (_x022a->_x0141._x014b._x032b == _x00b7) { _x012a _x02d2; _x004f _x0386 = _x0226(_x022a->_x0141._x014b._x02d2, _x021d, &_x02d2); if (_x0386._x0412 != _x004b) return _x0386; if (!_x04a9(_x02d2)) { *_x0336 = _x02d2; return _x024a(); } _x04a4(_x02d2); return _x0226(_x022a->_x0141._x014b._x0396, _x021d, _x0336); } _x012a _x02d2, _x0396; _x004f _x0386 = _x0226(_x022a->_x0141._x014b._x02d2, _x021d, &_x02d2); if (_x0386._x0412 != _x004b) return _x0386; _x0386 = _x0226(_x022a->_x0141._x014b._x0396, _x021d, &_x0396); if (_x0386._x0412 != _x004b) { _x04a4(_x02d2); return _x0386; } _x0112 _x032b = _x022a->_x0141._x014b._x032b; if (_x032b == _x00f5) { if (_x02d2._x0412 == _x0120 && _x0396._x0412 == _x0120) { *_x0336 = _x04a1(_x02d2._x0141._x0326 + _x0396._x0141._x0326); _x04a4(_x02d2); _x04a4(_x0396); return _x024a(); } else if (_x02d2._x0412 == _x0121 && _x0396._x0412 == _x0121) { char *_x02b9 = malloc(strlen(_x02d2._x0141._x03e8->_x01a4) + strlen(_x0396._x0141._x03e8->_x01a4) + 1); strcpy(_x02b9, _x02d2._x0141._x03e8->_x01a4); strcat(_x02b9, _x0396._x0141._x03e8->_x01a4); *_x0336 = _x04a2(_x02b9); free(_x02b9); _x04a4(_x02d2); _x04a4(_x0396); return _x024a(); } else { _x04a4(_x02d2); _x04a4(_x0396); return _x0249(_x022a->_x02d9, _x022a->_x01bf, "\x43\x61\x6e\x20\x6f\x6e\x6c\x79\x20\x61\x64\x64\x20\x6e\x75\x6d\x62\x65\x72\x73\x20\x6f\x72\x20\x6a\x6f\x69\x6e\x20\x73\x74\x72\x69\x6e\x67\x73\x2e"); } } if (_x032b == _x00e6 || _x032b == _x0105 || _x032b == _x0104 || _x032b == _x00f4) { if (_x02d2._x0412 != _x0120 || _x0396._x0412 != _x0120) { _x04a4(_x02d2); _x04a4(_x0396); return _x0249(_x022a->_x02d9, _x022a->_x01bf, "\x41\x72\x69\x74\x68\x6d\x65\x74\x69\x63\x20\x6f\x70\x65\x72\x61\x6e\x64\x73\x20\x6d\x75\x73\x74\x20\x62\x65\x20\x6e\x75\x6d\x62\x65\x72\x73\x2e"); } double _x02ca = _x02d2._x0141._x0326; double _x0374 = _x0396._x0141._x0326; _x04a4(_x02d2); _x04a4(_x0396); if (_x032b == _x00e6) *_x0336 = _x04a1(_x02ca - _x0374); else if (_x032b == _x0105) *_x0336 = _x04a1(_x02ca * _x0374); else if (_x032b == _x0104) { if (_x0374 == 0.0) return _x0249(_x022a->_x02d9, _x022a->_x01bf, "\x44\x69\x76\x69\x73\x69\x6f\x6e\x20\x62\x79\x20\x7a\x65\x72\x6f\x2e"); *_x0336 = _x04a1(_x02ca / _x0374); } else { if (_x0374 == 0.0) return _x0249(_x022a->_x02d9, _x022a->_x01bf, "\x4d\x6f\x64\x75\x6c\x6f\x20\x62\x79\x20\x7a\x65\x72\x6f\x2e"); *_x0336 = _x04a1((long long)_x02ca % (long long)_x0374); } return _x024a(); } if (_x032b == _x00b5 || _x032b == _x00bf || _x032b == _x00bb || _x032b == _x00bc) { if (_x02d2._x0412 != _x0120 || _x0396._x0412 != _x0120) { _x04a4(_x02d2); _x04a4(_x0396); return _x0249(_x022a->_x02d9, _x022a->_x01bf, "\x43\x6f\x6d\x70\x61\x72\x69\x73\x6f\x6e\x20\x6f\x70\x65\x72\x61\x6e\x64\x73\x20\x6d\x75\x73\x74\x20\x62\x65\x20\x6e\x75\x6d\x62\x65\x72\x73\x2e"); } double _x02ca = _x02d2._x0141._x0326; double _x0374 = _x0396._x0141._x0326; _x04a4(_x02d2); _x04a4(_x0396); if (_x032b == _x00b5) *_x0336 = _x0496(_x02ca > _x0374); else if (_x032b == _x00bf) *_x0336 = _x0496(_x02ca < _x0374); else if (_x032b == _x00bb) *_x0336 = _x0496(_x02ca >= _x0374); else *_x0336 = _x0496(_x02ca <= _x0374); return _x024a(); } if (_x032b == _x00fd || _x032b == _x00ec) { bool _x03a3 = _x04a6(_x02d2, _x0396); *_x0336 = _x0496(_x032b == _x00fd ? _x03a3 : !_x03a3); _x04a4(_x02d2); _x04a4(_x0396); return _x024a(); } _x04a4(_x02d2); _x04a4(_x0396); return _x0249(_x022a->_x02d9, _x022a->_x01bf, "\x55\x6e\x6b\x6e\x6f\x77\x6e\x20\x62\x69\x6e\x61\x72\x79\x20\x6f\x70\x65\x72\x61\x74\x6f\x72\x2e"); } case _x003d: { _x012a _x02e1 = _x049e(); for (size_t _x0288 = 0; _x0288 < _x022a->_x0141._x02df._x01d7; _x0288++) { _x012a _x0202; _x004f _x0386 = _x0226(_x022a->_x0141._x02df._x0203[_x0288], _x021d, &_x0202); if (_x0386._x0412 != _x004b) { _x04a4(_x02e1); return _x0386; } _x0125 *_x02ca = _x02e1._x0141._x02df; if (_x02ca->_x01d7 >= _x02ca->_x019c) { _x02ca->_x019c = _x02ca->_x019c == 0 ? 8 : _x02ca->_x019c * 2; _x02ca->_x02b7 = realloc(_x02ca->_x02b7, sizeof(_x012a) * _x02ca->_x019c); } _x02ca->_x02b7[_x02ca->_x01d7++] = _x0202; } *_x0336 = _x02e1; return _x024a(); } case _x003e: { _x012a _x02f8 = _x049f(); for (size_t _x0288 = 0; _x0288 < _x022a->_x0141._x02f7._x01d7; _x0288++) { _x012a _x0219; _x004f _x0386 = _x0226(_x022a->_x0141._x02f7._x0426[_x0288], _x021d, &_x0219); if (_x0386._x0412 != _x004b) { _x04a4(_x02f8); return _x0386; } _x0126 *_x02f0 = _x02f8._x0141._x02f7; if (_x02f0->_x01d7 >= _x02f0->_x019c) { _x02f0->_x019c = _x02f0->_x019c == 0 ? 8 : _x02f0->_x019c * 2; _x02f0->_x0218 = realloc(_x02f0->_x0218, sizeof(_x0127) * _x02f0->_x019c); } _x02f0->_x0218[_x02f0->_x01d7]._x02c0 = _x03a2(_x022a->_x0141._x02f7._x02c3[_x0288]); _x02f0->_x0218[_x02f0->_x01d7]._x0425 = _x0219; _x02f0->_x01d7++; } *_x0336 = _x02f8; return _x024a(); } case _x003c: { _x012a _x01ba; _x004f _x0386 = _x0226(_x022a->_x0141._x02b5._x02df, _x021d, &_x01ba); if (_x0386._x0412 != _x004b) return _x0386; if (_x01ba._x0412 != _x011d) { _x04a4(_x01ba); return _x0249(_x022a->_x02d9, _x022a->_x01bf, "\x49\x74\x65\x6d\x20\x61\x63\x63\x65\x73\x73\x20\x65\x78\x70\x65\x63\x74\x73\x20\x6c\x69\x73\x74\x2e"); } _x012a _x028c; _x0386 = _x0226(_x022a->_x0141._x02b5._x0290, _x021d, &_x028c); if (_x0386._x0412 != _x004b) { _x04a4(_x01ba); return _x0386; } if (_x028c._x0412 != _x0120) { _x04a4(_x01ba); _x04a4(_x028c); return _x0249(_x022a->_x02d9, _x022a->_x01bf, "\x4c\x69\x73\x74\x20\x69\x6e\x64\x65\x78\x20\x6d\x75\x73\x74\x20\x62\x65\x20\x61\x20\x6e\x75\x6d\x62\x65\x72\x2e"); } long long _x0290 = (long long)_x028c._x0141._x0326; _x04a4(_x028c); _x0125 *_x02ca = _x01ba._x0141._x02df; if (_x0290 < 0 || (size_t)_x0290 >= _x02ca->_x01d7) { _x04a4(_x01ba); return _x0249(_x022a->_x02d9, _x022a->_x01bf, "\x4c\x69\x73\x74\x20\x69\x6e\x64\x65\x78\x20\x6f\x75\x74\x20\x6f\x66\x20\x72\x61\x6e\x67\x65\x3a\x20\x67\x6f\x74\x20\x25\x6c\x6c\x64\x20\x62\x75\x74\x20\x73\x69\x7a\x65\x20\x69\x73\x20\x25\x7a\x75\x2e", _x0290, _x02ca->_x01d7); } *_x0336 = _x02ca->_x02b7[_x0290]; _x04a5(*_x0336); _x04a4(_x01ba); return _x024a(); } case _x003b: { _x012a _x01ba; _x004f _x0386 = _x0226(_x022a->_x0141._x0238._x02f7, _x021d, &_x01ba); if (_x0386._x0412 != _x004b) return _x0386; if (_x01ba._x0412 != _x011e) { _x04a4(_x01ba); return _x0249(_x022a->_x02d9, _x022a->_x01bf, "\x46\x69\x65\x6c\x64\x20\x61\x63\x63\x65\x73\x73\x20\x65\x78\x70\x65\x63\x74\x73\x20\x61\x20\x6d\x61\x70\x2e"); } _x012a _x023c; _x0386 = _x0226(_x022a->_x0141._x0238._x0237, _x021d, &_x023c); if (_x0386._x0412 != _x004b) { _x04a4(_x01ba); return _x0386; } if (_x023c._x0412 != _x0121) { _x04a4(_x01ba); _x04a4(_x023c); return _x0249(_x022a->_x02d9, _x022a->_x01bf, "\x4d\x61\x70\x20\x66\x69\x65\x6c\x64\x20\x6b\x65\x79\x20\x6d\x75\x73\x74\x20\x62\x65\x20\x61\x20\x73\x74\x72\x69\x6e\x67\x2e"); } const char *_x02c0 = _x023c._x0141._x03e8->_x01a4; _x0126 *_x02f0 = _x01ba._x0141._x02f7; bool _x0259 = false; for (size_t _x0288 = 0; _x0288 < _x02f0->_x01d7; _x0288++) { if (strcmp(_x02f0->_x0218[_x0288]._x02c0, _x02c0) == 0) { *_x0336 = _x02f0->_x0218[_x0288]._x0425; _x04a5(*_x0336); _x0259 = true; break; } } _x04a4(_x023c); _x04a4(_x01ba); if (!_x0259) { return _x0249(_x022a->_x02d9, _x022a->_x01bf, "\x4d\x61\x70\x20\x6b\x65\x79\x20\x27\x25\x73\x27\x20\x6e\x6f\x74\x20\x66\x6f\x75\x6e\x64\x2e", _x02c0); } return _x024a(); } case _x0038: { _x012a _x0198; _x004f _x0386 = _x0226(_x022a->_x0141._x0194._x0198, _x021d, &_x0198); if (_x0386._x0412 != _x004b) return _x0386; if (_x0198._x0412 != _x0122 && _x0198._x0412 != _x011f) { _x04a4(_x0198); return _x0249(_x022a->_x02d9, _x022a->_x01bf, "\x56\x53\x53\x5f\x56\x61\x6c\x75\x65\x20\x69\x73\x20\x6e\x6f\x74\x20\x63\x61\x6c\x6c\x61\x62\x6c\x65\x2e"); } _x012a *_x0140 = malloc(sizeof(_x012a) * _x022a->_x0141._x0194._x01d7); for (size_t _x0288 = 0; _x0288 < _x022a->_x0141._x0194._x01d7; _x0288++) { _x0386 = _x0226(_x022a->_x0141._x0194._x0140[_x0288], _x021d, &_x0140[_x0288]); if (_x0386._x0412 != _x004b) { _x04a4(_x0198); for (size_t _x02b8 = 0; _x02b8 < _x0288; _x02b8++) _x04a4(_x0140[_x02b8]); free(_x0140); return _x0386; } } if (_x0198._x0412 == _x0122) { _x0129 *_x03f8 = _x0198._x0141._x03f8; if (_x022a->_x0141._x0194._x01d7 != _x03f8->_x0346) { _x04a4(_x0198); for (size_t _x0288 = 0; _x0288 < _x022a->_x0141._x0194._x01d7; _x0288++) _x04a4(_x0140[_x0288]); free(_x0140); return _x0249(_x022a->_x02d9, _x022a->_x01bf, "\x45\x78\x70\x65\x63\x74\x65\x64\x20\x25\x7a\x75\x20\x61\x72\x67\x75\x6d\x65\x6e\x74\x73\x20\x62\x75\x74\x20\x67\x6f\x74\x20\x25\x7a\x75\x2e", _x03f8->_x0346, _x022a->_x0141._x0194._x01d7); } _x0046 *_x0195 = _x0440(_x03f8->_x01b3); for (size_t _x0288 = 0; _x0288 < _x03f8->_x0346; _x0288++) { _x043c(_x0195, _x03f8->_x0347[_x0288], _x0140[_x0288]); } _x0032 _x014f; _x014f._x03e0 = _x03f8->_x014f; _x014f._x01d7 = _x03f8->_x0152; _x004f _x0196 = _x045a(_x014f, _x0195); _x0441(_x0195); for (size_t _x0288 = 0; _x0288 < _x022a->_x0141._x0194._x01d7; _x0288++) _x04a4(_x0140[_x0288]); free(_x0140); _x04a4(_x0198); if (_x0196._x0412 == _x004c) { *_x0336 = _x0196._x0425; _x0196._x0412 = _x004b; _x0196._x0425 = _x0499(); return _x0196; } if (_x0196._x0412 == _x004a || _x0196._x0412 == _x004d) { _x004f _x021e = _x0249(_x0196._x02d9, _x0196._x01bf, "\x6c\x65\x61\x76\x65\x20\x6f\x72\x20\x73\x6b\x69\x70\x20\x6f\x75\x74\x73\x69\x64\x65\x20\x6c\x6f\x6f\x70\x2e"); return _x021e; } if (_x0196._x0412 == _x0049) { return _x0196; } *_x0336 = _x0499(); return _x024a(); } else { bool _x021e = false; char *_x021f = NULL; _x012a _x0395 = _x0198._x0141._x031d(_x022a->_x0141._x0194._x01d7, _x0140, &_x021e, &_x021f); for (size_t _x0288 = 0; _x0288 < _x022a->_x0141._x0194._x01d7; _x0288++) _x04a4(_x0140[_x0288]); free(_x0140); _x04a4(_x0198); if (_x021e) { _x004f _x0248 = _x0249(_x022a->_x02d9, _x022a->_x01bf, "\x25\x73", _x021f); free(_x021f); return _x0248; } *_x0336 = _x0395; return _x024a(); } } case _x003f: { _x012a _x0422; if (!_x043f(_x021d, "\x6d\x69\x6e\x65", &_x0422)) { return _x0249(_x022a->_x02d9, _x022a->_x01bf, "\x55\x6e\x64\x65\x66\x69\x6e\x65\x64\x20\x76\x61\x72\x69\x61\x62\x6c\x65\x20\x27\x6d\x69\x6e\x65\x27\x2e"); } _x04a5(_x0422); *_x0336 = _x0422; return _x024a(); } case _x0042: { _x012a _x0422; if (!_x043f(_x021d, "\x6d\x69\x6e\x65", &_x0422)) { return _x0249(_x022a->_x02d9, _x022a->_x01bf, "\x55\x6e\x64\x65\x66\x69\x6e\x65\x64\x20\x76\x61\x72\x69\x61\x62\x6c\x65\x20\x27\x70\x61\x72\x65\x6e\x74\x27\x2e"); } _x04a5(_x0422); *_x0336 = _x0422; return _x024a(); } case _x0044: case _x0039: return _x0249(_x022a->_x02d9, _x022a->_x01bf, "\x4e\x6f\x74\x20\x69\x6d\x70\x6c\x65\x6d\x65\x6e\x74\x65\x64\x20\x69\x6e\x20\x74\x72\x65\x65\x2d\x77\x61\x6c\x6b\x20\x69\x6e\x74\x65\x72\x70\x72\x65\x74\x65\x72\x2e"); } return _x0249(_x022a->_x02d9, _x022a->_x01bf, "\x55\x6e\x6b\x6e\x6f\x77\x6e\x20\x65\x78\x70\x72\x65\x73\x73\x69\x6f\x6e\x20\x6b\x69\x6e\x64\x2e"); } static _x004f _x0227(_x00b3 *_x03e5, _x0046 *_x021d) { if (!_x03e5) return _x024a(); switch (_x03e5->_x02c6) { case _x00a4: { _x012a _x0422; _x004f _x0386 = _x0226(_x03e5->_x0141._x02f4._x0299, _x021d, &_x0422); if (_x0386._x0412 != _x004b) return _x0386; if (!_x043c(_x021d, _x03e5->_x0141._x02f4._x0319, _x0422)) { _x04a4(_x0422); return _x0249(_x03e5->_x02d9, _x03e5->_x01bf, "\x56\x61\x72\x69\x61\x62\x6c\x65\x20\x27\x25\x73\x27\x20\x69\x73\x20\x61\x6c\x72\x65\x61\x64\x79\x20\x64\x65\x66\x69\x6e\x65\x64\x20\x69\x6e\x20\x74\x68\x69\x73\x20\x73\x63\x6f\x70\x65\x2e", _x03e5->_x0141._x02f4._x0319); } _x04a4(_x0422); return _x024a(); } case _x00a2: { _x012a _x0422; _x004f _x0386 = _x0226(_x03e5->_x0141._x02bf._x0299, _x021d, &_x0422); if (_x0386._x0412 != _x004b) return _x0386; if (!_x043d(_x021d, _x03e5->_x0141._x02bf._x0319, _x0422)) { _x04a4(_x0422); return _x0249(_x03e5->_x02d9, _x03e5->_x01bf, "\x43\x6f\x6e\x73\x74\x61\x6e\x74\x20\x27\x25\x73\x27\x20\x69\x73\x20\x61\x6c\x72\x65\x61\x64\x79\x20\x64\x65\x66\x69\x6e\x65\x64\x20\x69\x6e\x20\x74\x68\x69\x73\x20\x73\x63\x6f\x70\x65\x2e", _x03e5->_x0141._x02bf._x0319); } _x04a4(_x0422); return _x024a(); } case _x0097: { _x012a _x0422; _x004f _x0386 = _x0226(_x03e5->_x0141._x0142._x0425, _x021d, &_x0422); if (_x0386._x0412 != _x004b) return _x0386; if (!_x043b(_x021d, _x03e5->_x0141._x0142._x0319, _x0422)) { _x04a4(_x0422); return _x0249(_x03e5->_x02d9, _x03e5->_x01bf, "\x43\x61\x6e\x6e\x6f\x74\x20\x72\x65\x61\x73\x73\x69\x67\x6e\x20\x74\x6f\x20\x27\x25\x73\x27\x20\x28\x65\x69\x74\x68\x65\x72\x20\x63\x6f\x6e\x73\x74\x61\x6e\x74\x20\x6f\x72\x20\x75\x6e\x64\x65\x66\x69\x6e\x65\x64\x20\x76\x61\x72\x69\x61\x62\x6c\x65\x29\x2e", _x03e5->_x0141._x0142._x0319); } _x04a4(_x0422); return _x024a(); } case _x00aa: { _x012a _x0422; _x004f _x0386 = _x0226(_x03e5->_x0141._x03a4._x022c, _x021d, &_x0422); if (_x0386._x0412 != _x004b) return _x0386; _x04a7(_x0422); _x04a4(_x0422); return _x024a(); } case _x00ab: { _x012a _x0422; _x004f _x0386 = _x0226(_x03e5->_x0141.send._x022c, _x021d, &_x0422); if (_x0386._x0412 != _x004b) return _x0386; _x004f _x03af; _x03af._x0412 = _x004c; _x03af._x0425 = _x0422; _x03af._x0222 = NULL; _x03af._x02d9 = _x03e5->_x02d9; _x03af._x01bf = _x03e5->_x01bf; return _x03af; } case _x00a3: { _x004f _x02d1; _x02d1._x0412 = _x004a; _x02d1._x0425 = _x0499(); _x02d1._x0222 = NULL; _x02d1._x02d9 = _x03e5->_x02d9; _x02d1._x01bf = _x03e5->_x01bf; return _x02d1; } case _x00ae: { _x004f _x03c5; _x03c5._x0412 = _x004d; _x03c5._x0425 = _x0499(); _x03c5._x0222 = NULL; _x03c5._x02d9 = _x03e5->_x02d9; _x03c5._x01bf = _x03e5->_x01bf; return _x03c5; } case _x00af: { _x012a _x03fc = _x04a3( _x03e5->_x0141._x03f8._x0347, _x03e5->_x0141._x03f8._x0346, _x03e5->_x0141._x03f8._x014f._x03e0, _x03e5->_x0141._x03f8._x014f._x01d7, _x021d ); if (!_x043c(_x021d, _x03e5->_x0141._x03f8._x0319, _x03fc)) { _x04a4(_x03fc); return _x0249(_x03e5->_x02d9, _x03e5->_x01bf, "\x54\x61\x73\x6b\x20\x27\x25\x73\x27\x20\x72\x65\x64\x65\x66\x69\x6e\x65\x73\x20\x65\x78\x69\x73\x74\x69\x6e\x67\x20\x6e\x61\x6d\x65\x20\x69\x6e\x20\x74\x68\x69\x73\x20\x73\x63\x6f\x70\x65\x2e", _x03e5->_x0141._x03f8._x0319); } _x04a4(_x03fc); return _x024a(); } case _x00b0: { for (size_t _x0288 = 0; _x0288 < _x03e5->_x0141._x04b0._x0156; _x0288++) { _x012a _x01cd; _x004f _x0386 = _x0226(_x03e5->_x0141._x04b0._x0159[_x0288]._x01ce, _x021d, &_x01cd); if (_x0386._x0412 != _x004b) return _x0386; bool _x02b3 = _x04a9(_x01cd); _x04a4(_x01cd); if (_x02b3) { _x0046 *_x0157 = _x0440(_x021d); _x004f _x0158 = _x045a(_x03e5->_x0141._x04b0._x0159[_x0288]._x014e, _x0157); _x0441(_x0157); return _x0158; } } if (_x03e5->_x0141._x04b0._x0331._x01d7 > 0) { _x0046 *_x0157 = _x0440(_x021d); _x004f _x0158 = _x045a(_x03e5->_x0141._x04b0._x0331, _x0157); _x0441(_x0157); return _x0158; } return _x024a(); } case _x00a7: { _x012a _x01d9; _x004f _x0386 = _x0226(_x03e5->_x0141._x0382._x01d8, _x021d, &_x01d9); if (_x0386._x0412 != _x004b) return _x0386; if (_x01d9._x0412 != _x0120) { _x04a4(_x01d9); return _x0249(_x03e5->_x02d9, _x03e5->_x01bf, "\x52\x65\x70\x65\x61\x74\x20\x63\x6f\x75\x6e\x74\x20\x6d\x75\x73\x74\x20\x62\x65\x20\x61\x20\x6e\x75\x6d\x62\x65\x72\x2e"); } double _x0191 = _x01d9._x0141._x0326; _x04a4(_x01d9); for (double _x0288 = 0; _x0288 < _x0191; _x0288++) { _x0046 *_x02eb = _x0440(_x021d); _x004f _x02ec = _x045a(_x03e5->_x0141._x0382._x014f, _x02eb); _x0441(_x02eb); if (_x02ec._x0412 == _x004a) break; if (_x02ec._x0412 == _x004d) continue; if (_x02ec._x0412 != _x004b) return _x02ec; } return _x024a(); } case _x00a9: { _x012a _x03de, _x0214; _x004f _x0386 = _x0226(_x03e5->_x0141._x0384._x03da, _x021d, &_x03de); if (_x0386._x0412 != _x004b) return _x0386; _x0386 = _x0226(_x03e5->_x0141._x0384._x020f, _x021d, &_x0214); if (_x0386._x0412 != _x004b) { _x04a4(_x03de); return _x0386; } if (_x03de._x0412 != _x0120 || _x0214._x0412 != _x0120) { _x04a4(_x03de); _x04a4(_x0214); return _x0249(_x03e5->_x02d9, _x03e5->_x01bf, "\x52\x61\x6e\x67\x65\x20\x62\x6f\x75\x6e\x64\x73\x20\x6d\x75\x73\x74\x20\x62\x65\x20\x6e\x75\x6d\x62\x65\x72\x73\x2e"); } double _x03da = _x03de._x0141._x0326; double _x020f = _x0214._x0141._x0326; _x04a4(_x03de); _x04a4(_x0214); if (_x03da <= _x020f) { for (double _x0288 = _x03da; _x0288 <= _x020f; _x0288++) { _x0046 *_x02eb = _x0440(_x021d); _x043c(_x02eb, _x03e5->_x0141._x0384._x0428, _x04a1(_x0288)); _x004f _x02ec = _x045a(_x03e5->_x0141._x0384._x014f, _x02eb); _x0441(_x02eb); if (_x02ec._x0412 == _x004a) break; if (_x02ec._x0412 == _x004d) continue; if (_x02ec._x0412 != _x004b) return _x02ec; } } else { for (double _x0288 = _x03da; _x0288 >= _x020f; _x0288--) { _x0046 *_x02eb = _x0440(_x021d); _x043c(_x02eb, _x03e5->_x0141._x0384._x0428, _x04a1(_x0288)); _x004f _x02ec = _x045a(_x03e5->_x0141._x0384._x014f, _x02eb); _x0441(_x02eb); if (_x02ec._x0412 == _x004a) break; if (_x02ec._x0412 == _x004d) continue; if (_x02ec._x0412 != _x004b) return _x02ec; } } return _x024a(); } case _x00a8: { _x012a _x01ba; _x004f _x0386 = _x0226(_x03e5->_x0141._x0383._x01bd, _x021d, &_x01ba); if (_x0386._x0412 != _x004b) return _x0386; if (_x01ba._x0412 != _x011d) { _x04a4(_x01ba); return _x0249(_x03e5->_x02d9, _x03e5->_x01bf, "\x72\x65\x70\x65\x61\x74\x20\x65\x61\x63\x68\x20\x65\x78\x70\x65\x63\x74\x73\x20\x6c\x69\x73\x74\x2e"); } _x0125 *_x02ca = _x01ba._x0141._x02df; for (size_t _x0288 = 0; _x0288 < _x02ca->_x01d7; _x0288++) { _x0046 *_x02eb = _x0440(_x021d); _x043c(_x02eb, _x03e5->_x0141._x0383._x0428, _x02ca->_x02b7[_x0288]); _x004f _x02ec = _x045a(_x03e5->_x0141._x0383._x014f, _x02eb); _x0441(_x02eb); if (_x02ec._x0412 == _x004a) break; if (_x02ec._x0412 == _x004d) continue; if (_x02ec._x0412 != _x004b) { _x04a4(_x01ba); return _x02ec; } } _x04a4(_x01ba); return _x024a(); } case _x009c: { for (;;) { _x012a _x01cd; _x004f _x0386 = _x0226(_x03e5->_x0141._x01ff._x01ce, _x021d, &_x01cd); if (_x0386._x0412 != _x004b) return _x0386; bool _x02b3 = _x04a9(_x01cd); _x04a4(_x01cd); if (!_x02b3) break; _x0046 *_x02eb = _x0440(_x021d); _x004f _x02ec = _x045a(_x03e5->_x0141._x01ff._x014f, _x02eb); _x0441(_x02eb); if (_x02ec._x0412 == _x004a) break; if (_x02ec._x0412 == _x004d) continue; if (_x02ec._x0412 != _x004b) return _x02ec; } return _x024a(); } case _x0098: { _x0046 *_x0410 = _x0440(_x021d); _x004f _x0386 = _x045a(_x03e5->_x0141._x0144._x040f, _x0410); _x0441(_x0410); if (_x0386._x0412 == _x0049) { _x012a _x0220 = _x04a2(_x0386._x0222); free(_x0386._x0222); _x0046 *_x038b = _x0440(_x021d); _x043c(_x038b, _x03e5->_x0141._x0144._x036d, _x0220); _x04a4(_x0220); _x004f _x038d = _x045a(_x03e5->_x0141._x0144._x038a, _x038b); _x0441(_x038b); return _x038d; } return _x0386; } case _x009b: { _x012a _x0422; _x004f _x0386 = _x0226(_x03e5->_x0141._x01a8._x022a, _x021d, &_x0422); if (_x0386._x0412 != _x004b) return _x0386; bool _x02f9 = false; for (size_t _x0288 = 0; _x0288 < _x03e5->_x0141._x01a8._x019e; _x0288++) { _x012a _x01e5; _x0386 = _x0226(_x03e5->_x0141._x01a8._x01a2[_x0288]._x022a, _x021d, &_x01e5); if (_x0386._x0412 != _x004b) { _x04a4(_x0422); return _x0386; } bool _x02b2 = _x04a6(_x0422, _x01e5); _x04a4(_x01e5); if (_x02b2) { _x02f9 = true; _x04a4(_x0422); _x0046 *_x019f = _x0440(_x021d); _x004f _x01a1 = _x045a(_x03e5->_x0141._x01a8._x01a2[_x0288]._x014e, _x019f); _x0441(_x019f); return _x01a1; } } _x04a4(_x0422); if (!_x02f9 && _x03e5->_x0141._x01a8._x0331._x01d7 > 0) { _x0046 *_x019f = _x0440(_x021d); _x004f _x01a1 = _x045a(_x03e5->_x0141._x01a8._x0331, _x019f); _x0441(_x019f); return _x01a1; } return _x024a(); } case _x00a6: { _x012a _x0422, _x01ba; _x004f _x0386 = _x0226(_x03e5->_x0141._x0371._x0425, _x021d, &_x0422); if (_x0386._x0412 != _x004b) return _x0386; _x0386 = _x0226(_x03e5->_x0141._x0371._x02df, _x021d, &_x01ba); if (_x0386._x0412 != _x004b) { _x04a4(_x0422); return _x0386; } if (_x01ba._x0412 != _x011d) { _x04a4(_x0422); _x04a4(_x01ba); return _x0249(_x03e5->_x02d9, _x03e5->_x01bf, "\x70\x75\x74\x20\x73\x74\x61\x74\x65\x6d\x65\x6e\x74\x20\x65\x78\x70\x65\x63\x74\x73\x20\x61\x20\x6c\x69\x73\x74\x2e"); } _x0125 *_x02ca = _x01ba._x0141._x02df; if (_x02ca->_x01d7 >= _x02ca->_x019c) { _x02ca->_x019c = _x02ca->_x019c == 0 ? 8 : _x02ca->_x019c * 2; _x02ca->_x02b7 = realloc(_x02ca->_x02b7, sizeof(_x012a) * _x02ca->_x019c); } _x02ca->_x02b7[_x02ca->_x01d7++] = _x0422; _x04a4(_x01ba); return _x024a(); } case _x00ac: { _x012a _x01ba, _x023c, _x0422; _x004f _x0386 = _x0226(_x03e5->_x0141._x03b5._x02f7, _x021d, &_x01ba); if (_x0386._x0412 != _x004b) return _x0386; _x0386 = _x0226(_x03e5->_x0141._x03b5._x0237, _x021d, &_x023c); if (_x0386._x0412 != _x004b) { _x04a4(_x01ba); return _x0386; } _x0386 = _x0226(_x03e5->_x0141._x03b5._x0425, _x021d, &_x0422); if (_x0386._x0412 != _x004b) { _x04a4(_x01ba); _x04a4(_x023c); return _x0386; } if (_x01ba._x0412 != _x011e) { _x04a4(_x01ba); _x04a4(_x023c); _x04a4(_x0422); return _x0249(_x03e5->_x02d9, _x03e5->_x01bf, "\x73\x65\x74\x20\x73\x74\x61\x74\x65\x6d\x65\x6e\x74\x20\x65\x78\x70\x65\x63\x74\x73\x20\x61\x20\x6d\x61\x70\x2e"); } if (_x023c._x0412 != _x0121) { _x04a4(_x01ba); _x04a4(_x023c); _x04a4(_x0422); return _x0249(_x03e5->_x02d9, _x03e5->_x01bf, "\x6d\x61\x70\x20\x66\x69\x65\x6c\x64\x20\x6b\x65\x79\x20\x6d\x75\x73\x74\x20\x62\x65\x20\x61\x20\x73\x74\x72\x69\x6e\x67\x2e"); } _x0126 *_x02f0 = _x01ba._x0141._x02f7; const char *_x02c0 = _x023c._x0141._x03e8->_x01a4; bool _x0259 = false; for (size_t _x0288 = 0; _x0288 < _x02f0->_x01d7; _x0288++) { if (strcmp(_x02f0->_x0218[_x0288]._x02c0, _x02c0) == 0) { _x04a4(_x02f0->_x0218[_x0288]._x0425); _x02f0->_x0218[_x0288]._x0425 = _x0422; _x0259 = true; break; } } if (!_x0259) { if (_x02f0->_x01d7 >= _x02f0->_x019c) { _x02f0->_x019c = _x02f0->_x019c == 0 ? 8 : _x02f0->_x019c * 2; _x02f0->_x0218 = realloc(_x02f0->_x0218, sizeof(_x0127) * _x02f0->_x019c); } _x02f0->_x0218[_x02f0->_x01d7]._x02c0 = _x03a2(_x02c0); _x02f0->_x0218[_x02f0->_x01d7]._x0425 = _x0422; _x02f0->_x01d7++; } _x04a4(_x01ba); _x04a4(_x023c); return _x024a(); } case _x00a0: { printf("\x3c\x21\x44\x4f\x43\x54\x59\x50\x45\x20\x68\x74\x6d\x6c\x3e\x0a\x3c\x68\x74\x6d\x6c\x3e\x0a\x3c\x68\x65\x61\x64\x3e\x0a\x3c\x73\x63\x72\x69\x70\x74\x20\x73\x72\x63\x3d\x22\x68\x74\x74\x70\x73\x3a\x2f\x2f\x63\x64\x6e\x2e\x74\x61\x69\x6c\x77\x69\x6e\x64\x63\x73\x73\x2e\x63\x6f\x6d\x22\x3e\x3c\x2f\x73\x63\x72\x69\x70\x74\x3e\x0a\x3c\x2f\x68\x65\x61\x64\x3e\x0a\x3c\x62\x6f\x64\x79\x20\x63\x6c\x61\x73\x73\x3d\x22\x62\x67\x2d\x73\x6c\x61\x74\x65\x2d\x39\x30\x30\x20\x74\x65\x78\x74\x2d\x77\x68\x69\x74\x65\x20\x66\x6f\x6e\x74\x2d\x73\x61\x6e\x73\x20\x66\x6c\x65\x78\x20\x66\x6c\x65\x78\x2d\x63\x6f\x6c\x20\x69\x74\x65\x6d\x73\x2d\x63\x65\x6e\x74\x65\x72\x20\x6a\x75\x73\x74\x69\x66\x79\x2d\x63\x65\x6e\x74\x65\x72\x20\x6d\x69\x6e\x2d\x68\x2d\x73\x63\x72\x65\x65\x6e\x22\x3e\x0a"); return _x024a(); } case _x0099: { printf("\x3c\x2f\x62\x6f\x64\x79\x3e\x0a\x3c\x2f\x68\x74\x6d\x6c\x3e\x0a"); return _x024a(); } case _x009d: { _x012a _x0422; _x004f _x0386 = _x0226(_x03e5->_x0141._x022b._x022c, _x021d, &_x0422); if (_x0386._x0412 != _x004b) return _x0386; _x04a4(_x0422); return _x024a(); } case _x009f: { char _x0242[256]; snprintf(_x0242, sizeof(_x0242), "\x25\x73\x2e\x76\x73\x73", _x03e5->_x0141._x0273._x0313); FILE *_x022e = fopen(_x0242, "\x72\x62"); if (!_x022e) { snprintf(_x0242, sizeof(_x0242), "\x70\x61\x63\x6b\x61\x67\x65\x73\x2f\x25\x73\x2e\x76\x73\x73", _x03e5->_x0141._x0273._x0313); _x022e = fopen(_x0242, "\x72\x62"); } if (!_x022e) { snprintf(_x0242, sizeof(_x0242), "\x65\x78\x61\x6d\x70\x6c\x65\x73\x2f\x25\x73\x2e\x76\x73\x73", _x03e5->_x0141._x0273._x0313); _x022e = fopen(_x0242, "\x72\x62"); } if (!_x022e) { return _x0249(_x03e5->_x02d9, _x03e5->_x01bf, "\x47\x72\x61\x62\x20\x6d\x6f\x64\x75\x6c\x65\x20\x27\x25\x73\x27\x20\x6e\x6f\x74\x20\x66\x6f\x75\x6e\x64\x2e", _x03e5->_x0141._x0273._x0313); } fclose(_x022e); FILE *_x023e = fopen(_x0242, "\x72\x62"); fseek(_x023e, 0, SEEK_END); long _x03c0 = ftell(_x023e); rewind(_x023e); char *_x03ce = malloc(_x03c0 + 1); size_t _x0378 = fread(_x03ce, 1, _x03c0, _x023e); fclose(_x023e); _x03ce[_x0378] = '\0'; _x0052 _x030e; _x045e(&_x030e, _x03ce); _x0095 _x030f; _x0466(&_x030f, &_x030e); _x0032 _x030b = _x0465(&_x030f); free(_x03ce); if (_x030f._x027a) { _x042c(_x030b); return _x0249(_x03e5->_x02d9, _x03e5->_x01bf, "\x53\x79\x6e\x74\x61\x78\x20\x65\x72\x72\x6f\x72\x20\x69\x6e\x20\x6d\x6f\x64\x75\x6c\x65\x20\x27\x25\x73\x27\x2e", _x03e5->_x0141._x0273._x0313); } _x0046 *_x030c = _x0440(NULL); _x0467(_x030c); _x004f _x0310 = _x045a(_x030b, _x030c); _x042c(_x030b); if (_x0310._x0412 == _x0049) { _x0441(_x030c); return _x0310; } _x012a _x0229 = _x049f(); _x0126 *_x02f0 = _x0229._x0141._x02f7; for (size_t _x0288 = 0; _x0288 < _x030c->_x01d7; _x0288++) { if (strncmp(_x030c->_x02b7[_x0288]._x0319, "\x5f\x5f", 2) == 0) continue; _x02f0->_x0218 = realloc(_x02f0->_x0218, sizeof(_x0127) * (_x02f0->_x01d7 + 1)); _x02f0->_x0218[_x02f0->_x01d7]._x02c0 = _x03a2(_x030c->_x02b7[_x0288]._x0319); _x02f0->_x0218[_x02f0->_x01d7]._x0425 = _x030c->_x02b7[_x0288]._x0425; _x04a5(_x030c->_x02b7[_x0288]._x0425); _x02f0->_x01d7++; } if (_x02f0->_x01d7 == 1 && strcmp(_x02f0->_x0218[0]._x02c0, _x03e5->_x0141._x0273._x0313) == 0) { _x012a _x029a = _x02f0->_x0218[0]._x0425; _x04a5(_x029a); _x04a4(_x0229); _x0229 = _x029a; } _x043c(_x021d, _x03e5->_x0141._x0273._x0313, _x0229); if (_x0229._x0412 == _x011e) { _x0126 *_x0205 = _x0229._x0141._x02f7; for (size_t _x0288 = 0; _x0288 < _x0205->_x01d7; _x0288++) { _x043c(_x021d, _x0205->_x0218[_x0288]._x02c0, _x0205->_x0218[_x0288]._x0425); } } _x04a4(_x0229); _x0441(_x030c); return _x024a(); } case _x00a5: case _x00a1: case _x009a: case _x00ad: case _x009e: case _x00b1: return _x024a(); } return _x0249(_x03e5->_x02d9, _x03e5->_x01bf, "\x55\x6e\x6b\x6e\x6f\x77\x6e\x20\x73\x74\x61\x74\x65\x6d\x65\x6e\x74\x20\x6b\x69\x6e\x64\x2e"); } _x004f _x045a(_x0032 _x014e, _x0046 *_x021d) { for (size_t _x0288 = 0; _x0288 < _x014e._x01d7; _x0288++) { _x004f _x0386 = _x0227(_x014e._x03e0[_x0288], _x021d); if (_x0386._x0412 != _x004b) { return _x0386; } } return _x024a(); }
+
+// Helper to duplicate string safely
+static char *safe_strdup(const char *s) {
+    if (!s) return NULL;
+    char *dup = malloc(strlen(s) + 1);
+    if (dup) {
+        strcpy(dup, s);
+    }
+    return dup;
+}
+
+static VSS_FlowResult flow_normal(void) {
+    VSS_FlowResult res;
+    res.type = VSS_FLOW_NORMAL;
+    res.value = vss_value_new_empty();
+    res.error_msg = NULL;
+    res.line = 0;
+    res.column = 0;
+    return res;
+}
+
+static VSS_FlowResult flow_error(int line, int col, const char *format, ...) {
+    VSS_FlowResult res;
+    res.type = VSS_FLOW_ERROR;
+    res.value = vss_value_new_empty();
+    res.line = line;
+    res.column = col;
+
+    va_list args;
+    va_start(args, format);
+    // Determine size
+    int len = vsnprintf(NULL, 0, format, args);
+    va_end(args);
+
+    res.error_msg = malloc(len + 1);
+    va_start(args, format);
+    vsnprintf(res.error_msg, len + 1, format, args);
+    va_end(args);
+
+    return res;
+}
+
+// Forward declarations of evaluation helpers
+static VSS_FlowResult eval_expr(VSS_Expr *expr, VSS_Env *env, VSS_Value *out_val);
+
+// Built-in Native Functions are registered from builtins.c
+
+
+// Expression evaluation
+static VSS_FlowResult eval_expr(VSS_Expr *expr, VSS_Env *env, VSS_Value *out_val) {
+    if (!expr) {
+        *out_val = vss_value_new_empty();
+        return flow_normal();
+    }
+
+    switch (expr->kind) {
+        case VSS_EXPR_NUMBER:
+            *out_val = vss_value_new_number(expr->as.number);
+            return flow_normal();
+        case VSS_EXPR_STRING:
+            *out_val = vss_value_new_string(expr->as.string);
+            return flow_normal();
+        case VSS_EXPR_BOOL:
+            *out_val = vss_value_new_bool(expr->as.boolean);
+            return flow_normal();
+        case VSS_EXPR_EMPTY:
+            *out_val = vss_value_new_empty();
+            return flow_normal();
+        case VSS_EXPR_NAME: {
+            if (!vss_env_get(env, expr->as.name, out_val)) {
+                return flow_error(expr->line, expr->column, "Undefined variable '%s'.", expr->as.name);
+            }
+            return flow_normal();
+        }
+        case VSS_EXPR_UNARY: {
+            VSS_Value operand;
+            VSS_FlowResult res = eval_expr(expr->as.unary.operand, env, &operand);
+            if (res.type != VSS_FLOW_NORMAL) return res;
+
+            if (expr->as.unary.op == VSS_TOKEN_MINUS) {
+                if (operand.type != VSS_VAL_NUMBER) {
+                    vss_value_release(operand);
+                    return flow_error(expr->line, expr->column, "Operand to '-' must be a number.");
+                }
+                *out_val = vss_value_new_number(-operand.as.number);
+                vss_value_release(operand);
+                return flow_normal();
+            } else if (expr->as.unary.op == VSS_TOKEN_NOT) {
+                *out_val = vss_value_new_bool(!vss_value_truthy(operand));
+                vss_value_release(operand);
+                return flow_normal();
+            }
+            vss_value_release(operand);
+            return flow_error(expr->line, expr->column, "Unknown unary operator.");
+        }
+        case VSS_EXPR_BINARY: {
+            // Short-circuit logical operators
+            if (expr->as.binary.op == VSS_TOKEN_OR) {
+                VSS_Value left;
+                VSS_FlowResult res = eval_expr(expr->as.binary.left, env, &left);
+                if (res.type != VSS_FLOW_NORMAL) return res;
+                if (vss_value_truthy(left)) {
+                    *out_val = left;
+                    return flow_normal();
+                }
+                vss_value_release(left);
+                return eval_expr(expr->as.binary.right, env, out_val);
+            }
+            if (expr->as.binary.op == VSS_TOKEN_AND) {
+                VSS_Value left;
+                VSS_FlowResult res = eval_expr(expr->as.binary.left, env, &left);
+                if (res.type != VSS_FLOW_NORMAL) return res;
+                if (!vss_value_truthy(left)) {
+                    *out_val = left;
+                    return flow_normal();
+                }
+                vss_value_release(left);
+                return eval_expr(expr->as.binary.right, env, out_val);
+            }
+
+            VSS_Value left, right;
+            VSS_FlowResult res = eval_expr(expr->as.binary.left, env, &left);
+            if (res.type != VSS_FLOW_NORMAL) return res;
+            res = eval_expr(expr->as.binary.right, env, &right);
+            if (res.type != VSS_FLOW_NORMAL) {
+                vss_value_release(left);
+                return res;
+            }
+
+            VSS_TokenType op = expr->as.binary.op;
+            if (op == VSS_TOKEN_PLUS) {
+                if (left.type == VSS_VAL_NUMBER && right.type == VSS_VAL_NUMBER) {
+                    *out_val = vss_value_new_number(left.as.number + right.as.number);
+                    vss_value_release(left); vss_value_release(right);
+                    return flow_normal();
+                } else if (left.type == VSS_VAL_STRING && right.type == VSS_VAL_STRING) {
+                    char *joined = malloc(strlen(left.as.string->chars) + strlen(right.as.string->chars) + 1);
+                    strcpy(joined, left.as.string->chars);
+                    strcat(joined, right.as.string->chars);
+                    *out_val = vss_value_new_string(joined);
+                    free(joined);
+                    vss_value_release(left); vss_value_release(right);
+                    return flow_normal();
+                } else {
+                    vss_value_release(left); vss_value_release(right);
+                    return flow_error(expr->line, expr->column, "Can only add numbers or join strings.");
+                }
+            }
+
+            // Other arithmetic operators
+            if (op == VSS_TOKEN_MINUS || op == VSS_TOKEN_STAR || op == VSS_TOKEN_SLASH || op == VSS_TOKEN_PERCENT) {
+                if (left.type != VSS_VAL_NUMBER || right.type != VSS_VAL_NUMBER) {
+                    vss_value_release(left); vss_value_release(right);
+                    return flow_error(expr->line, expr->column, "Arithmetic operands must be numbers.");
+                }
+                double l = left.as.number;
+                double r = right.as.number;
+                vss_value_release(left); vss_value_release(right);
+
+                if (op == VSS_TOKEN_MINUS) *out_val = vss_value_new_number(l - r);
+                else if (op == VSS_TOKEN_STAR) *out_val = vss_value_new_number(l * r);
+                else if (op == VSS_TOKEN_SLASH) {
+                    if (r == 0.0) return flow_error(expr->line, expr->column, "Division by zero.");
+                    *out_val = vss_value_new_number(l / r);
+                } else {
+                    if (r == 0.0) return flow_error(expr->line, expr->column, "Modulo by zero.");
+                    // Standard C Modulo on doubles using fmod? Let's just cast to long long, or use standard double mod.
+                    // Casting to long is standard for small % operators.
+                    *out_val = vss_value_new_number((long long)l % (long long)r);
+                }
+                return flow_normal();
+            }
+
+            // Numeric comparisons
+            if (op == VSS_TOKEN_ABOVE || op == VSS_TOKEN_BELOW || op == VSS_TOKEN_AT_LEAST || op == VSS_TOKEN_AT_MOST) {
+                if (left.type != VSS_VAL_NUMBER || right.type != VSS_VAL_NUMBER) {
+                    vss_value_release(left); vss_value_release(right);
+                    return flow_error(expr->line, expr->column, "Comparison operands must be numbers.");
+                }
+                double l = left.as.number;
+                double r = right.as.number;
+                vss_value_release(left); vss_value_release(right);
+
+                if (op == VSS_TOKEN_ABOVE) *out_val = vss_value_new_bool(l > r);
+                else if (op == VSS_TOKEN_BELOW) *out_val = vss_value_new_bool(l < r);
+                else if (op == VSS_TOKEN_AT_LEAST) *out_val = vss_value_new_bool(l >= r);
+                else *out_val = vss_value_new_bool(l <= r);
+                return flow_normal();
+            }
+
+            // Equality comparisons
+            if (op == VSS_TOKEN_SAME_AS || op == VSS_TOKEN_NOT_SAME_AS) {
+                bool same = vss_value_same_as(left, right);
+                *out_val = vss_value_new_bool(op == VSS_TOKEN_SAME_AS ? same : !same);
+                vss_value_release(left); vss_value_release(right);
+                return flow_normal();
+            }
+
+            vss_value_release(left); vss_value_release(right);
+            return flow_error(expr->line, expr->column, "Unknown binary operator.");
+        }
+        case VSS_EXPR_LIST: {
+            VSS_Value list_val = vss_value_new_list();
+            for (size_t i = 0; i < expr->as.list.count; i++) {
+                VSS_Value elem;
+                VSS_FlowResult res = eval_expr(expr->as.list.elements[i], env, &elem);
+                if (res.type != VSS_FLOW_NORMAL) {
+                    vss_value_release(list_val);
+                    return res;
+                }
+                // Append elem to list_val
+                VSS_ValList *l = list_val.as.list;
+                if (l->count >= l->capacity) {
+                    l->capacity = l->capacity == 0 ? 8 : l->capacity * 2;
+                    l->items = realloc(l->items, sizeof(VSS_Value) * l->capacity);
+                }
+                l->items[l->count++] = elem; // Holds reference
+            }
+            *out_val = list_val;
+            return flow_normal();
+        }
+        case VSS_EXPR_SET: {
+            VSS_Value list_val = vss_value_new_list();
+            VSS_ValList *l = list_val.as.list;
+            for (size_t i = 0; i < expr->as.list.count; i++) {
+                VSS_Value elem;
+                VSS_FlowResult res = eval_expr(expr->as.list.elements[i], env, &elem);
+                if (res.type != VSS_FLOW_NORMAL) {
+                    vss_value_release(list_val);
+                    return res;
+                }
+                bool exists = false;
+                for (size_t k = 0; k < l->count; k++) {
+                    if (vss_value_same_as(l->items[k], elem)) {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (!exists) {
+                    if (l->count >= l->capacity) {
+                        l->capacity = l->capacity == 0 ? 8 : l->capacity * 2;
+                        l->items = realloc(l->items, sizeof(VSS_Value) * l->capacity);
+                    }
+                    l->items[l->count++] = elem;
+                } else {
+                    vss_value_release(elem);
+                }
+            }
+            *out_val = list_val;
+            return flow_normal();
+        }
+        case VSS_EXPR_MAP: {
+            VSS_Value map_val = vss_value_new_map();
+            for (size_t i = 0; i < expr->as.map.count; i++) {
+                VSS_Value entry_val;
+                VSS_FlowResult res = eval_expr(expr->as.map.values[i], env, &entry_val);
+                if (res.type != VSS_FLOW_NORMAL) {
+                    vss_value_release(map_val);
+                    return res;
+                }
+                VSS_ValMap *m = map_val.as.map;
+                if (m->count >= m->capacity) {
+                    m->capacity = m->capacity == 0 ? 8 : m->capacity * 2;
+                    m->entries = realloc(m->entries, sizeof(VSS_ValMapEntry) * m->capacity);
+                }
+                m->entries[m->count].key = safe_strdup(expr->as.map.keys[i]);
+                m->entries[m->count].value = entry_val;
+                m->count++;
+            }
+            *out_val = map_val;
+            return flow_normal();
+        }
+        case VSS_EXPR_ITEM_ACCESS: {
+            VSS_Value col;
+            VSS_FlowResult res = eval_expr(expr->as.item_access.list, env, &col);
+            if (res.type != VSS_FLOW_NORMAL) return res;
+            if (col.type != VSS_VAL_LIST) {
+                vss_value_release(col);
+                return flow_error(expr->line, expr->column, "Item access expects list.");
+            }
+            VSS_Value idx;
+            res = eval_expr(expr->as.item_access.index, env, &idx);
+            if (res.type != VSS_FLOW_NORMAL) {
+                vss_value_release(col);
+                return res;
+            }
+            if (idx.type != VSS_VAL_NUMBER) {
+                vss_value_release(col); vss_value_release(idx);
+                return flow_error(expr->line, expr->column, "List index must be a number.");
+            }
+            long long index = (long long)idx.as.number;
+            vss_value_release(idx);
+
+            VSS_ValList *l = col.as.list;
+            if (index < 0 || (size_t)index >= l->count) {
+                vss_value_release(col);
+                return flow_error(expr->line, expr->column, "List index out of range: got %lld but size is %zu.", index, l->count);
+            }
+            *out_val = l->items[index];
+            vss_value_retain(*out_val);
+            vss_value_release(col);
+            return flow_normal();
+        }
+        case VSS_EXPR_FIELD_ACCESS: {
+            VSS_Value col;
+            VSS_FlowResult res = eval_expr(expr->as.field_access.map, env, &col);
+            if (res.type != VSS_FLOW_NORMAL) return res;
+            if (col.type != VSS_VAL_MAP) {
+                vss_value_release(col);
+                return flow_error(expr->line, expr->column, "Field access expects a map.");
+            }
+            VSS_Value field_val;
+            res = eval_expr(expr->as.field_access.field, env, &field_val);
+            if (res.type != VSS_FLOW_NORMAL) {
+                vss_value_release(col);
+                return res;
+            }
+            if (field_val.type != VSS_VAL_STRING) {
+                vss_value_release(col); vss_value_release(field_val);
+                return flow_error(expr->line, expr->column, "Map field key must be a string.");
+            }
+            const char *key = field_val.as.string->chars;
+
+            VSS_ValMap *m = col.as.map;
+            bool found = false;
+            for (size_t i = 0; i < m->count; i++) {
+                if (strcmp(m->entries[i].key, key) == 0) {
+                    *out_val = m->entries[i].value;
+                    vss_value_retain(*out_val);
+                    found = true;
+                    break;
+                }
+            }
+            vss_value_release(field_val);
+            vss_value_release(col);
+
+            if (!found) {
+                return flow_error(expr->line, expr->column, "Map key '%s' not found.", key);
+            }
+            return flow_normal();
+        }
+        case VSS_EXPR_CALL: {
+            VSS_Value callee;
+            VSS_FlowResult res = eval_expr(expr->as.call.callee, env, &callee);
+            if (res.type != VSS_FLOW_NORMAL) return res;
+
+            if (callee.type != VSS_VAL_TASK && callee.type != VSS_VAL_NATIVE) {
+                vss_value_release(callee);
+                return flow_error(expr->line, expr->column, "VSS_Value is not callable.");
+            }
+
+            // Evaluate arguments
+            VSS_Value *args = malloc(sizeof(VSS_Value) * expr->as.call.count);
+            for (size_t i = 0; i < expr->as.call.count; i++) {
+                res = eval_expr(expr->as.call.args[i], env, &args[i]);
+                if (res.type != VSS_FLOW_NORMAL) {
+                    vss_value_release(callee);
+                    for (size_t j = 0; j < i; j++) vss_value_release(args[j]);
+                    free(args);
+                    return res;
+                }
+            }
+
+            if (callee.type == VSS_VAL_TASK) {
+                VSS_ValTask *task = callee.as.task;
+                if (expr->as.call.count != task->param_count) {
+                    vss_value_release(callee);
+                    for (size_t i = 0; i < expr->as.call.count; i++) vss_value_release(args[i]);
+                    free(args);
+                    return flow_error(expr->line, expr->column, "Expected %zu arguments but got %zu.", task->param_count, expr->as.call.count);
+                }
+
+                // Create environment for call using closure environment
+                VSS_Env *call_env = vss_env_new(task->closure);
+                for (size_t i = 0; i < task->param_count; i++) {
+                    vss_env_define(call_env, task->params[i], args[i]);
+                }
+
+                VSS_Block body;
+                body.statements = task->body;
+                body.count = task->body_count;
+
+                VSS_FlowResult call_res = vss_interpret(body, call_env);
+                vss_env_release(call_env);
+
+                // Release args (they were retained during eval, and call_env also retained them. But call_env is released now).
+                for (size_t i = 0; i < expr->as.call.count; i++) vss_value_release(args[i]);
+                free(args);
+                vss_value_release(callee);
+
+                if (call_res.type == VSS_FLOW_SEND) {
+                    *out_val = call_res.value; // It is already retained in send statement
+                    // Convert VSS_FLOW_SEND to VSS_FLOW_NORMAL for expression result
+                    call_res.type = VSS_FLOW_NORMAL;
+                    call_res.value = vss_value_new_empty(); // Clear so it isn't released twice
+                    return call_res;
+                }
+
+                if (call_res.type == VSS_FLOW_LEAVE || call_res.type == VSS_FLOW_SKIP) {
+                    VSS_FlowResult err = flow_error(call_res.line, call_res.column, "leave or skip outside loop.");
+                    return err;
+                }
+
+                if (call_res.type == VSS_FLOW_ERROR) {
+                    return call_res;
+                }
+
+                *out_val = vss_value_new_empty();
+                return flow_normal();
+            } else {
+                // Native task
+                bool err = false;
+                char *err_msg = NULL;
+                VSS_Value ret_val = callee.as.native(expr->as.call.count, args, &err, &err_msg);
+
+                // Release args
+                for (size_t i = 0; i < expr->as.call.count; i++) vss_value_release(args[i]);
+                free(args);
+                vss_value_release(callee);
+
+                if (err) {
+                    VSS_FlowResult flow_err = flow_error(expr->line, expr->column, "%s", err_msg);
+                    free(err_msg);
+                    return flow_err;
+                }
+                *out_val = ret_val;
+                return flow_normal();
+            }
+        }
+        case VSS_EXPR_MINE: {
+            VSS_Value val;
+            if (!vss_env_get(env, "mine", &val)) {
+                return flow_error(expr->line, expr->column, "Undefined variable 'mine'.");
+            }
+            vss_value_retain(val);
+            *out_val = val;
+            return flow_normal();
+        }
+        case VSS_EXPR_PARENT: {
+            VSS_Value val;
+            if (!vss_env_get(env, "mine", &val)) {
+                return flow_error(expr->line, expr->column, "Undefined variable 'parent'.");
+            }
+            vss_value_retain(val);
+            *out_val = val;
+            return flow_normal();
+        }
+        case VSS_EXPR_STRUCT_LITERAL:
+        case VSS_EXPR_CLOSURE:
+            return flow_error(expr->line, expr->column, "Not implemented in tree-walk interpreter.");
+    }
+
+    return flow_error(expr->line, expr->column, "Unknown expression kind.");
+}
+
+// Statement execution
+static VSS_FlowResult exec_stmt(VSS_Stmt *stmt, VSS_Env *env) {
+    if (!stmt) return flow_normal();
+
+    switch (stmt->kind) {
+        case VSS_STMT_MAKE: {
+            VSS_Value val;
+            VSS_FlowResult res = eval_expr(stmt->as.make.initializer, env, &val);
+            if (res.type != VSS_FLOW_NORMAL) return res;
+            if (!vss_env_define(env, stmt->as.make.name, val)) {
+                vss_value_release(val);
+                return flow_error(stmt->line, stmt->column, "Variable '%s' is already defined in this scope.", stmt->as.make.name);
+            }
+            vss_value_release(val);
+            return flow_normal();
+        }
+        case VSS_STMT_KEEP: {
+            VSS_Value val;
+            VSS_FlowResult res = eval_expr(stmt->as.keep.initializer, env, &val);
+            if (res.type != VSS_FLOW_NORMAL) return res;
+            if (!vss_env_define_const(env, stmt->as.keep.name, val)) {
+                vss_value_release(val);
+                return flow_error(stmt->line, stmt->column, "Constant '%s' is already defined in this scope.", stmt->as.keep.name);
+            }
+            vss_value_release(val);
+            return flow_normal();
+        }
+        case VSS_STMT_ASSIGN: {
+            VSS_Value val;
+            VSS_FlowResult res = eval_expr(stmt->as.assign.value, env, &val);
+            if (res.type != VSS_FLOW_NORMAL) return res;
+            if (!vss_env_assign(env, stmt->as.assign.name, val)) {
+                vss_value_release(val);
+                return flow_error(stmt->line, stmt->column, "Cannot reassign to '%s' (either constant or undefined variable).", stmt->as.assign.name);
+            }
+            vss_value_release(val);
+            return flow_normal();
+        }
+        case VSS_STMT_SAY: {
+            VSS_Value val;
+            VSS_FlowResult res = eval_expr(stmt->as.say.expression, env, &val);
+            if (res.type != VSS_FLOW_NORMAL) return res;
+            vss_value_say(val);
+            vss_value_release(val);
+            return flow_normal();
+        }
+        case VSS_STMT_ASK: {
+            VSS_Value prompt_val = vss_value_new_empty();
+            if (stmt->as.ask.prompt) {
+                VSS_FlowResult res = eval_expr(stmt->as.ask.prompt, env, &prompt_val);
+                if (res.type != VSS_FLOW_NORMAL) return res;
+            }
+            if (prompt_val.type != VSS_VAL_EMPTY) {
+                char *prompt_str = vss_value_to_string(prompt_val);
+                printf("%s", prompt_str);
+                free(prompt_str);
+                fflush(stdout);
+            }
+            char input_buf[1024];
+            if (!fgets(input_buf, sizeof(input_buf), stdin)) {
+                vss_value_release(prompt_val);
+                return flow_error(stmt->line, stmt->column, "Input Error: End of file or stdin failure.");
+            }
+            size_t len = strlen(input_buf);
+            while (len > 0 && (input_buf[len - 1] == '\n' || input_buf[len - 1] == '\r')) {
+                input_buf[len - 1] = '\0';
+                len--;
+            }
+            char *start = input_buf;
+            while (*start == ' ' || *start == '\t') start++;
+            char *end = start + strlen(start);
+            while (end > start && (end[-1] == ' ' || end[-1] == '\t')) end--;
+            *end = '\0';
+
+            VSS_Expr *target = stmt->as.ask.target;
+            VSS_Value curr_val = vss_value_new_empty();
+            
+            if (target->kind == VSS_EXPR_NAME) {
+                if (!vss_env_get(env, target->as.name, &curr_val)) {
+                    vss_value_release(prompt_val);
+                    return flow_error(stmt->line, stmt->column, "Undefined variable '%s'.", target->as.name);
+                }
+                vss_value_retain(curr_val);
+            } else if (target->kind == VSS_EXPR_FIELD_ACCESS) {
+                VSS_FlowResult res = eval_expr(target, env, &curr_val);
+                if (res.type != VSS_FLOW_NORMAL) {
+                    vss_value_release(prompt_val);
+                    return res;
+                }
+            }
+
+            VSS_Value new_val;
+            if (curr_val.type == VSS_VAL_NUMBER) {
+                if (*start == '\0') {
+                    vss_value_release(curr_val);
+                    vss_value_release(prompt_val);
+                    return flow_error(stmt->line, stmt->column, "Input Error: Expected a number but received empty input.");
+                }
+                char *endptr;
+                double val = strtod(start, &endptr);
+                if (*endptr != '\0') {
+                    vss_value_release(curr_val);
+                    vss_value_release(prompt_val);
+                    return flow_error(stmt->line, stmt->column, "Input Error: Expected a number but received \"%s\".", start);
+                }
+                new_val = vss_value_new_number(val);
+            } else if (curr_val.type == VSS_VAL_BOOL) {
+                if (*start == '\0') {
+                    vss_value_release(curr_val);
+                    vss_value_release(prompt_val);
+                    return flow_error(stmt->line, stmt->column, "Input Error: Expected a boolean but received empty input.");
+                }
+                bool b_val = false;
+                bool parsed = false;
+                char lower_start[16];
+                size_t slen = strlen(start);
+                if (slen < 16) {
+                    for (size_t i = 0; i < slen; i++) {
+                        char c = start[i];
+                        if (c >= 'A' && c <= 'Z') c += 32;
+                        lower_start[i] = c;
+                    }
+                    lower_start[slen] = '\0';
+                    if (strcmp(lower_start, "yes") == 0 || strcmp(lower_start, "true") == 0 || strcmp(lower_start, "1") == 0) {
+                        b_val = true;
+                        parsed = true;
+                    } else if (strcmp(lower_start, "no") == 0 || strcmp(lower_start, "false") == 0 || strcmp(lower_start, "0") == 0) {
+                        b_val = false;
+                        parsed = true;
+                    }
+                }
+                if (!parsed) {
+                    vss_value_release(curr_val);
+                    vss_value_release(prompt_val);
+                    return flow_error(stmt->line, stmt->column, "Input Error: Expected a boolean but received \"%s\".", start);
+                }
+                new_val = vss_value_new_bool(b_val);
+            } else {
+                new_val = vss_value_new_string(input_buf);
+            }
+
+            vss_value_release(curr_val);
+            vss_value_release(prompt_val);
+
+            if (target->kind == VSS_EXPR_NAME) {
+                if (!vss_env_assign(env, target->as.name, new_val)) {
+                    vss_value_release(new_val);
+                    return flow_error(stmt->line, stmt->column, "Cannot assign to '%s'.", target->as.name);
+                }
+                vss_value_release(new_val);
+            } else if (target->kind == VSS_EXPR_FIELD_ACCESS) {
+                VSS_Value col, field_val;
+                VSS_FlowResult res = eval_expr(target->as.field_access.map, env, &col);
+                if (res.type != VSS_FLOW_NORMAL) {
+                    vss_value_release(new_val);
+                    return res;
+                }
+                res = eval_expr(target->as.field_access.field, env, &field_val);
+                if (res.type != VSS_FLOW_NORMAL) {
+                    vss_value_release(col);
+                    vss_value_release(new_val);
+                    return res;
+                }
+                if (col.type != VSS_VAL_MAP) {
+                    vss_value_release(col); vss_value_release(field_val); vss_value_release(new_val);
+                    return flow_error(stmt->line, stmt->column, "set statement expects a map.");
+                }
+                if (field_val.type != VSS_VAL_STRING) {
+                    vss_value_release(col); vss_value_release(field_val); vss_value_release(new_val);
+                    return flow_error(stmt->line, stmt->column, "map field key must be a string.");
+                }
+                VSS_ValMap *m = col.as.map;
+                const char *key = field_val.as.string->chars;
+                bool found = false;
+                for (size_t i = 0; i < m->count; i++) {
+                    if (strcmp(m->entries[i].key, key) == 0) {
+                        vss_value_release(m->entries[i].value);
+                        m->entries[i].value = new_val;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    if (m->count >= m->capacity) {
+                        m->capacity = m->capacity == 0 ? 8 : m->capacity * 2;
+                        m->entries = realloc(m->entries, sizeof(VSS_ValMapEntry) * m->capacity);
+                    }
+                    m->entries[m->count].key = safe_strdup(key);
+                    m->entries[m->count].value = new_val;
+                    m->count++;
+                }
+                vss_value_release(col); vss_value_release(field_val);
+            }
+            return flow_normal();
+        }
+        case VSS_STMT_SEND: {
+            VSS_Value val;
+            VSS_FlowResult res = eval_expr(stmt->as.send.expression, env, &val);
+            if (res.type != VSS_FLOW_NORMAL) return res;
+            VSS_FlowResult send_res;
+            send_res.type = VSS_FLOW_SEND;
+            send_res.value = val; // ownership transferred to send result
+            send_res.error_msg = NULL;
+            send_res.line = stmt->line;
+            send_res.column = stmt->column;
+            return send_res;
+        }
+        case VSS_STMT_LEAVE: {
+            VSS_FlowResult leave_res;
+            leave_res.type = VSS_FLOW_LEAVE;
+            leave_res.value = vss_value_new_empty();
+            leave_res.error_msg = NULL;
+            leave_res.line = stmt->line;
+            leave_res.column = stmt->column;
+            return leave_res;
+        }
+        case VSS_STMT_SKIP: {
+            VSS_FlowResult skip_res;
+            skip_res.type = VSS_FLOW_SKIP;
+            skip_res.value = vss_value_new_empty();
+            skip_res.error_msg = NULL;
+            skip_res.line = stmt->line;
+            skip_res.column = stmt->column;
+            return skip_res;
+        }
+        case VSS_STMT_TASK: {
+            // Define task
+            VSS_Value task_val = vss_value_new_task(
+                stmt->as.task.params, stmt->as.task.param_count,
+                stmt->as.task.body.statements, stmt->as.task.body.count,
+                env
+            );
+            if (!vss_env_define(env, stmt->as.task.name, task_val)) {
+                vss_value_release(task_val);
+                return flow_error(stmt->line, stmt->column, "Task '%s' redefines existing name in this scope.", stmt->as.task.name);
+            }
+            vss_value_release(task_val);
+            return flow_normal();
+        }
+        case VSS_STMT_WHEN: {
+            for (size_t i = 0; i < stmt->as.when.branch_count; i++) {
+                VSS_Value cond;
+                VSS_FlowResult res = eval_expr(stmt->as.when.branches[i].condition, env, &cond);
+                if (res.type != VSS_FLOW_NORMAL) return res;
+                bool is_true = vss_value_truthy(cond);
+                vss_value_release(cond);
+
+                if (is_true) {
+                    VSS_Env *branch_env = vss_env_new(env);
+                    VSS_FlowResult branch_res = vss_interpret(stmt->as.when.branches[i].block, branch_env);
+                    vss_env_release(branch_env);
+                    return branch_res;
+                }
+            }
+
+            if (stmt->as.when.otherwise_branch.count > 0) {
+                VSS_Env *branch_env = vss_env_new(env);
+                VSS_FlowResult branch_res = vss_interpret(stmt->as.when.otherwise_branch, branch_env);
+                vss_env_release(branch_env);
+                return branch_res;
+            }
+
+            return flow_normal();
+        }
+        case VSS_STMT_REPEAT_COUNT: {
+            VSS_Value count_val;
+            VSS_FlowResult res = eval_expr(stmt->as.repeat_count.count_expr, env, &count_val);
+            if (res.type != VSS_FLOW_NORMAL) return res;
+            if (count_val.type != VSS_VAL_NUMBER) {
+                vss_value_release(count_val);
+                return flow_error(stmt->line, stmt->column, "Repeat count must be a number.");
+            }
+            double c = count_val.as.number;
+            vss_value_release(count_val);
+
+            for (double i = 0; i < c; i++) {
+                VSS_Env *loop_env = vss_env_new(env);
+                VSS_FlowResult loop_res = vss_interpret(stmt->as.repeat_count.body, loop_env);
+                vss_env_release(loop_env);
+
+                if (loop_res.type == VSS_FLOW_LEAVE) break;
+                if (loop_res.type == VSS_FLOW_SKIP) continue;
+                if (loop_res.type != VSS_FLOW_NORMAL) return loop_res;
+            }
+            return flow_normal();
+        }
+        case VSS_STMT_REPEAT_RANGE: {
+            VSS_Value start_val, end_val;
+            VSS_FlowResult res = eval_expr(stmt->as.repeat_range.start, env, &start_val);
+            if (res.type != VSS_FLOW_NORMAL) return res;
+            res = eval_expr(stmt->as.repeat_range.end, env, &end_val);
+            if (res.type != VSS_FLOW_NORMAL) {
+                vss_value_release(start_val);
+                return res;
+            }
+            if (start_val.type != VSS_VAL_NUMBER || end_val.type != VSS_VAL_NUMBER) {
+                vss_value_release(start_val); vss_value_release(end_val);
+                return flow_error(stmt->line, stmt->column, "Range bounds must be numbers.");
+            }
+            double start = start_val.as.number;
+            double end = end_val.as.number;
+            vss_value_release(start_val); vss_value_release(end_val);
+
+            if (start <= end) {
+                for (double i = start; i <= end; i++) {
+                    VSS_Env *loop_env = vss_env_new(env);
+                    vss_env_define(loop_env, stmt->as.repeat_range.var_name, vss_value_new_number(i));
+                    VSS_FlowResult loop_res = vss_interpret(stmt->as.repeat_range.body, loop_env);
+                    vss_env_release(loop_env);
+
+                    if (loop_res.type == VSS_FLOW_LEAVE) break;
+                    if (loop_res.type == VSS_FLOW_SKIP) continue;
+                    if (loop_res.type != VSS_FLOW_NORMAL) return loop_res;
+                }
+            } else {
+                for (double i = start; i >= end; i--) {
+                    VSS_Env *loop_env = vss_env_new(env);
+                    vss_env_define(loop_env, stmt->as.repeat_range.var_name, vss_value_new_number(i));
+                    VSS_FlowResult loop_res = vss_interpret(stmt->as.repeat_range.body, loop_env);
+                    vss_env_release(loop_env);
+
+                    if (loop_res.type == VSS_FLOW_LEAVE) break;
+                    if (loop_res.type == VSS_FLOW_SKIP) continue;
+                    if (loop_res.type != VSS_FLOW_NORMAL) return loop_res;
+                }
+            }
+            return flow_normal();
+        }
+        case VSS_STMT_REPEAT_EACH: {
+            VSS_Value col;
+            VSS_FlowResult res = eval_expr(stmt->as.repeat_each.collection, env, &col);
+            if (res.type != VSS_FLOW_NORMAL) return res;
+            if (col.type != VSS_VAL_LIST) {
+                vss_value_release(col);
+                return flow_error(stmt->line, stmt->column, "repeat each expects list.");
+            }
+            VSS_ValList *l = col.as.list;
+            for (size_t i = 0; i < l->count; i++) {
+                VSS_Env *loop_env = vss_env_new(env);
+                vss_env_define(loop_env, stmt->as.repeat_each.var_name, l->items[i]);
+                VSS_FlowResult loop_res = vss_interpret(stmt->as.repeat_each.body, loop_env);
+                vss_env_release(loop_env);
+
+                if (loop_res.type == VSS_FLOW_LEAVE) break;
+                if (loop_res.type == VSS_FLOW_SKIP) continue;
+                if (loop_res.type != VSS_FLOW_NORMAL) {
+                    vss_value_release(col);
+                    return loop_res;
+                }
+            }
+            vss_value_release(col);
+            return flow_normal();
+        }
+        case VSS_STMT_DURING: {
+            for (;;) {
+                VSS_Value cond;
+                VSS_FlowResult res = eval_expr(stmt->as.during.condition, env, &cond);
+                if (res.type != VSS_FLOW_NORMAL) return res;
+                bool is_true = vss_value_truthy(cond);
+                vss_value_release(cond);
+
+                if (!is_true) break;
+
+                VSS_Env *loop_env = vss_env_new(env);
+                VSS_FlowResult loop_res = vss_interpret(stmt->as.during.body, loop_env);
+                vss_env_release(loop_env);
+
+                if (loop_res.type == VSS_FLOW_LEAVE) break;
+                if (loop_res.type == VSS_FLOW_SKIP) continue;
+                if (loop_res.type != VSS_FLOW_NORMAL) return loop_res;
+            }
+            return flow_normal();
+        }
+        case VSS_STMT_ATTEMPT: {
+            VSS_Env *try_env = vss_env_new(env);
+            VSS_FlowResult res = vss_interpret(stmt->as.attempt.try_body, try_env);
+            vss_env_release(try_env);
+
+            if (res.type == VSS_FLOW_ERROR) {
+                VSS_Value err_str = vss_value_new_string(res.error_msg);
+                free(res.error_msg); // Free old error message
+
+                VSS_Env *rescue_env = vss_env_new(env);
+                vss_env_define(rescue_env, stmt->as.attempt.problem_var, err_str);
+                vss_value_release(err_str);
+
+                VSS_FlowResult rescue_res = vss_interpret(stmt->as.attempt.rescue_body, rescue_env);
+                vss_env_release(rescue_env);
+                return rescue_res;
+            }
+
+            return res;
+        }
+        case VSS_STMT_CHOOSE: {
+            VSS_Value val;
+            VSS_FlowResult res = eval_expr(stmt->as.choose.expr, env, &val);
+            if (res.type != VSS_FLOW_NORMAL) return res;
+
+            bool matched = false;
+            for (size_t i = 0; i < stmt->as.choose.case_count; i++) {
+                VSS_Value cval;
+                res = eval_expr(stmt->as.choose.cases[i].expr, env, &cval);
+                if (res.type != VSS_FLOW_NORMAL) {
+                    vss_value_release(val);
+                    return res;
+                }
+                bool is_same = vss_value_same_as(val, cval);
+                vss_value_release(cval);
+
+                if (is_same) {
+                    matched = true;
+                    vss_value_release(val);
+                    VSS_Env *case_env = vss_env_new(env);
+                    VSS_FlowResult case_res = vss_interpret(stmt->as.choose.cases[i].block, case_env);
+                    vss_env_release(case_env);
+                    return case_res;
+                }
+            }
+
+            vss_value_release(val);
+            if (!matched && stmt->as.choose.otherwise_branch.count > 0) {
+                VSS_Env *case_env = vss_env_new(env);
+                VSS_FlowResult case_res = vss_interpret(stmt->as.choose.otherwise_branch, case_env);
+                vss_env_release(case_env);
+                return case_res;
+            }
+            return flow_normal();
+        }
+        case VSS_STMT_PUT: {
+            VSS_Value val, col;
+            VSS_FlowResult res = eval_expr(stmt->as.put.value, env, &val);
+            if (res.type != VSS_FLOW_NORMAL) return res;
+            res = eval_expr(stmt->as.put.list, env, &col);
+            if (res.type != VSS_FLOW_NORMAL) {
+                vss_value_release(val);
+                return res;
+            }
+            if (col.type != VSS_VAL_LIST) {
+                vss_value_release(val); vss_value_release(col);
+                return flow_error(stmt->line, stmt->column, "put statement expects a list.");
+            }
+            VSS_ValList *l = col.as.list;
+            if (l->count >= l->capacity) {
+                l->capacity = l->capacity == 0 ? 8 : l->capacity * 2;
+                l->items = realloc(l->items, sizeof(VSS_Value) * l->capacity);
+            }
+            l->items[l->count++] = val; // Transfers reference (already retained by eval_expr)
+            vss_value_release(col);
+            return flow_normal();
+        }
+        case VSS_STMT_SET_FIELD: {
+            VSS_Value col, field_val, val;
+            VSS_FlowResult res = eval_expr(stmt->as.set_field.map, env, &col);
+            if (res.type != VSS_FLOW_NORMAL) return res;
+            res = eval_expr(stmt->as.set_field.field, env, &field_val);
+            if (res.type != VSS_FLOW_NORMAL) {
+                vss_value_release(col);
+                return res;
+            }
+            res = eval_expr(stmt->as.set_field.value, env, &val);
+            if (res.type != VSS_FLOW_NORMAL) {
+                vss_value_release(col); vss_value_release(field_val);
+                return res;
+            }
+            if (col.type != VSS_VAL_MAP) {
+                vss_value_release(col); vss_value_release(field_val); vss_value_release(val);
+                return flow_error(stmt->line, stmt->column, "set statement expects a map.");
+            }
+            if (field_val.type != VSS_VAL_STRING) {
+                vss_value_release(col); vss_value_release(field_val); vss_value_release(val);
+                return flow_error(stmt->line, stmt->column, "map field key must be a string.");
+            }
+
+            VSS_ValMap *m = col.as.map;
+            const char *key = field_val.as.string->chars;
+            bool found = false;
+            for (size_t i = 0; i < m->count; i++) {
+                if (strcmp(m->entries[i].key, key) == 0) {
+                    vss_value_release(m->entries[i].value);
+                    m->entries[i].value = val; // transfers reference (already retained)
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                if (m->count >= m->capacity) {
+                    m->capacity = m->capacity == 0 ? 8 : m->capacity * 2;
+                    m->entries = realloc(m->entries, sizeof(VSS_ValMapEntry) * m->capacity);
+                }
+                m->entries[m->count].key = safe_strdup(key);
+                m->entries[m->count].value = val; // transfers reference
+                m->count++;
+            }
+
+            vss_value_release(col); vss_value_release(field_val);
+            return flow_normal();
+        }
+        case VSS_STMT_HI_HTMVSS: {
+            printf("<!DOCTYPE html>\n<html>\n<head>\n<script src=\"https://cdn.tailwindcss.com\"></script>\n</head>\n<body class=\"bg-slate-900 text-white font-sans flex flex-col items-center justify-center min-h-screen\">\n");
+            return flow_normal();
+        }
+        case VSS_STMT_BYE_HTMVSS: {
+            printf("</body>\n</html>\n");
+            return flow_normal();
+        }
+        case VSS_STMT_EXPR: {
+            VSS_Value val;
+            VSS_FlowResult res = eval_expr(stmt->as.expr_stmt.expression, env, &val);
+            if (res.type != VSS_FLOW_NORMAL) return res;
+            vss_value_release(val);
+            return flow_normal();
+        }
+        case VSS_STMT_GRAB: {
+            // Module Import
+            char filepath[256];
+            snprintf(filepath, sizeof(filepath), "%s.vss", stmt->as.grab.module_name);
+            FILE *f = fopen(filepath, "rb");
+            if (!f) {
+                snprintf(filepath, sizeof(filepath), "stdlib/%s.vss", stmt->as.grab.module_name);
+                f = fopen(filepath, "rb");
+            }
+            if (!f) {
+                snprintf(filepath, sizeof(filepath), "packages/%s.vss", stmt->as.grab.module_name);
+                f = fopen(filepath, "rb");
+            }
+            if (!f) {
+                snprintf(filepath, sizeof(filepath), "examples/%s.vss", stmt->as.grab.module_name);
+                f = fopen(filepath, "rb");
+            }
+            if (!f) {
+                return flow_error(stmt->line, stmt->column, "Grab module '%s' not found.", stmt->as.grab.module_name);
+            }
+            fclose(f);
+
+            // Read the file content
+            FILE *file = fopen(filepath, "rb");
+            fseek(file, 0, SEEK_END);
+            long size = ftell(file);
+            rewind(file);
+            char *source = malloc(size + 1);
+            size_t read_bytes = fread(source, 1, size, file);
+            fclose(file);
+            source[read_bytes] = '\0';
+
+            VSS_Lexer mod_lexer;
+            vss_lexer_init(&mod_lexer, source);
+            VSS_Parser mod_parser;
+            vss_parser_init(&mod_parser, &mod_lexer);
+            VSS_Block mod_ast = vss_parse_program(&mod_parser);
+            free(source);
+
+            if (mod_parser.had_error) {
+                vss_block_free(mod_ast);
+                return flow_error(stmt->line, stmt->column, "Syntax error in module '%s'.", stmt->as.grab.module_name);
+            }
+
+            VSS_Env *mod_env = vss_env_new(NULL);
+            vss_register_builtins(mod_env);
+            
+            VSS_FlowResult mod_res = vss_interpret(mod_ast, mod_env);
+            vss_block_free(mod_ast);
+
+            if (mod_res.type == VSS_FLOW_ERROR) {
+                vss_env_release(mod_env);
+                return mod_res;
+            }
+
+            // Create the exports map
+            VSS_Value exports = vss_value_new_map();
+            VSS_ValMap *m = exports.as.map;
+            for (size_t i = 0; i < mod_env->count; i++) {
+                if (strncmp(mod_env->items[i].name, "__", 2) == 0) continue;
+                m->entries = realloc(m->entries, sizeof(VSS_ValMapEntry) * (m->count + 1));
+                m->entries[m->count].key = safe_strdup(mod_env->items[i].name);
+                m->entries[m->count].value = mod_env->items[i].value;
+                vss_value_retain(mod_env->items[i].value);
+                m->count++;
+            }
+            
+            // Unwrap if single exported item has the module's name
+            if (m->count == 1 && strcmp(m->entries[0].key, stmt->as.grab.module_name) == 0) {
+                VSS_Value inner = m->entries[0].value;
+                vss_value_retain(inner);
+                vss_value_release(exports);
+                exports = inner;
+            }
+            
+            // Define module name namespace
+            vss_env_define(env, stmt->as.grab.module_name, exports);
+            
+            // Define individual exports in current env if not name-conflicting
+            if (exports.type == VSS_VAL_MAP) {
+                VSS_ValMap *em = exports.as.map;
+                for (size_t i = 0; i < em->count; i++) {
+                    vss_env_define(env, em->entries[i].key, em->entries[i].value);
+                }
+            }
+            
+            vss_value_release(exports);
+            vss_env_release(mod_env);
+            return flow_normal();
+        }
+        case VSS_STMT_OBJECT:
+        case VSS_STMT_INTERFACE:
+        case VSS_STMT_CHOICES:
+        case VSS_STMT_SHAPE:
+        case VSS_STMT_FIELD:
+        case VSS_STMT_YIELD:
+        case VSS_STMT_NAMESPACE:
+        case VSS_STMT_SET_ITEM:
+            return flow_normal();
+    }
+
+    return flow_error(stmt->line, stmt->column, "Unknown statement kind.");
+}
+
+VSS_FlowResult vss_interpret(VSS_Block block, VSS_Env *env) {
+    for (size_t i = 0; i < block.count; i++) {
+        VSS_FlowResult res = exec_stmt(block.statements[i], env);
+        if (res.type != VSS_FLOW_NORMAL) {
+            return res;
+        }
+    }
+    return flow_normal();
+}
