@@ -37,7 +37,23 @@ Tags:
 ReleaseNotes: |-
   Stable downloads: https://download.cmtraceopen.com/?source=github-release
   CMTrace Open v1.6.0
-  Open-source CMTrace log viewer with built-in Intune diagnostics.
+  The first release to carry the ConfigMgr/SCCM diagnostics work and the expanded Intune parser family. None of it was in 1.5.2: that was a scoped patch cut from the 1.5.1 branch for a single clipboard fix, so everything below is new to anyone upgrading from it.
+  Highlights
+  ConfigMgr/SCCM diagnostics, client and server — a native evidence path with a diagnostics workspace behind it: site core, management point, distribution point, software update point, hierarchy and replication, task-sequence provenance, client health, policy, deployment, updates, and inventory/compliance/metering analysis, plus bounded database export and advanced server capture contracts. Every finding cites the artifact it came from, coverage gaps stay visible instead of being reported as success, and nothing is inferred from timestamp proximity.
+  The Intune parser family, well past IME and ESP — Win32 app deployment transactions, Windows configuration policy evidence, Microsoft Store app evidence, Company Portal on Windows (LocalState), macOS (Apple unified log) and iOS/iPadOS (Console exports), the full Device Inventory Agent log family with rotation-aware tailing, an Autopilot evidence parser that works outside the ESP workspace, and a four-phase Windows compliance analyzer that will not promote a Conditional Access denial into a local setting verdict.
+  Microsoft Graph sign-in without freezing the UI — enable Graph with an explicit Sign in, cancellable interactive auth, and fast-fail when the host cannot do it (personal MSA, missing org account, provider unavailable). The Entra interactive path is retained where real consent is needed.
+  Restart as administrator, keeping your work — an application-wide elevated restart that restores the sources you had open.
+  Where redaction binds now — the decision behind one line of this release
+  This is the change in 1.6.0 with the most reasoning behind it, and it is worth more than a bullet.
+  What was wrong. The project had a redaction contract, thirteen projection modules written against it, and a screen that masks identifiers. What it did not have was that contract binding anywhere data actually leaves. The audit in ADR-004 revision 1 put it plainly: the accepted boundary "binds at almost no real export surface". The result was the sharpest form of the bug — the operator "reads a masked screen and, one button away, writes cleartext to a file of their choosing." The screen was keeping a promise the export contradicted.
+  The decision. ADR-004 revision 1, accepted and shipped in this release, settles the contract in eight rulings. The load-bearing one is the first: the contract binds at the crate/library export boundary. Every published analysis type is constructible only in projected form; the preserving variant survives behind an explicitly named local-only entry point. The other seven scope token equality to a single analysis, put the caller's context in an opaque handle rather than an identity, forbid a global fallback and any timestamp-derived scope, keep the masking grammar shared while projection stays workload-local, stop the Restricted classification ever emitting a value-derived representation, make the structural enforcement recursive through nested types, and place cross-lane correlation explicitly out of scope.
+  Why the crate boundary, not each save button. Binding at the frontend egress points is precisely the arrangement that failed. It is not that an author forgot a call: the safe form was optional and the unsafe form was what you were handed. Any guarantee that depends on remembering a function call is broken by the next workspace, and the diff looks like an ordinary save(), so review does not catch it either. At the crate boundary the compiler enforces it instead — a workspace that finds itself holding an unprojected value has found a defect in its lane, not a missing call.
+  What this release contains of it. The decision record itself (#550); the ESP session export bound to a redacting crate boundary, so an unredacted snapshot can no longer be written to a file you choose (#549 / #558); the Compliance lane no longer exporting unmasked SIDs and eight other identity shapes (#546); and the extended shared redaction grammar the lanes now draw on (#357 / #533).
+  What is deliberately still open. The ADR defers the IPC boundary rather than dismissing it — it cannot be ruled on until it is known which analysis types are meant to cross it. One DsRegCmd artefact still writes unprojected evidence into a temporary capture bundle whose path the sidebar displays; masking it where it is written would change the analyzer's verdicts, because that bundle is the analyzer's own input, so it is tracked separately (#628) rather than papered over. And lanes still hold real values in memory in order to display them — the ADR governs that as a constraint (an export must never be less protective than the screen), not as a boundary.
+  Upgrading from 1.5.2
+  - msiexec /i app-1.6.0-x64.msi DISABLEUPDATECHECKS=1 now completes. On managed Windows 11 running Constrained Language Mode the custom action threw, and with the install not tolerated to continue it rolled the whole installation back; the policy is written through the 64-bit reg.exe instead (#576).
+  - Auto-update is intact: latest.json is rebuilt from the release's own signature assets and carries all eight updater targets — both Windows architectures, the macOS app and its archive, and the AppImage, .deb and .rpm.
+  - winget carries 1.6.0. Scoop is one review away: the bucket update is open as a pull request (#625), and until it merges scoop install cmtrace serves the previous version. The shortlinks below are unaffected either way.
   Download shortlinks
   Each shortlink always resolves to the current stable release, so it stays valid in
   tickets, runbooks, and slides long after this page scrolls out of view.
@@ -71,6 +87,12 @@ ReleaseNotes: |-
   The MSI installs both the Full and Lite editions. Portable EXEs require no installation.
   CycloneDX SBOMs (sbom-rust.cdx.json, sbom-npm.cdx.json) and build provenance
   attestations are published alongside the binaries.
+  What else changed
+  The release notes above are a digest, not the whole list — this one carries a
+  great deal of parser hardening, privacy work and dependency maintenance.
+  - Full changelog: CHANGELOG.md
+  - The redaction contract: ADR-004 revision 1
+  - Every commit: v1.5.2...v1.6.0
 ReleaseNotesUrl: https://github.com/adamgell/cmtraceopen/releases/tag/v1.6.0
 Documentations:
 - DocumentLabel: Wiki
