@@ -1,0 +1,42 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: watchexec.watchexec
+PackageVersion: 2.7.0
+PackageLocale: en-US
+Publisher: watchexec
+PublisherUrl: https://github.com/watchexec
+PublisherSupportUrl: https://github.com/watchexec/watchexec/issues
+Author: Félix Saparelli <felix@passcod.name>, Matt Green <mattgreenrocks@gmail.com>
+PackageName: watchexec
+PackageUrl: https://github.com/watchexec/watchexec
+License: Apache-2.0
+LicenseUrl: https://github.com/watchexec/watchexec/blob/HEAD/LICENSE
+ShortDescription: Executes commands in response to file modifications
+Moniker: watchexec
+Tags:
+- command-line
+- developer-tools
+- file-watchers
+- rust
+ReleaseNotes: |-
+  Watchexec now only traverses and watches directories that are expected to produce events (according to filter/ignore files and patterns). This means that if you have a very large directory tree, and 90% of it is gitignored, Watchexec will no longer go through and add watches to that 90% at all. Thus:
+  - startup in those cases should be much faster and less resource-intensive
+  - ongoing performance should also improve (as there will be vastly fewer events to process), though that may be less perceptible
+  The way this is achieved is by handling all directory traversal/recursion within Watchexec, instead of letting the Notify library handle it. This is a large amount of work and code, and it's expected that there will be new bugs as a result. However, this limitation was also the underlying source of a number of long-standing bugs, and I quite look forward to close some very old issues as a result.
+  :; hyperfine 'watchexec-2.7.0 -1 echo' 'watchexec-2.6.1 -1 echo'
+  Benchmark 1: watchexec-2.7.0 -1 echo
+    Time (mean ± σ):     158.9 ms ±   2.2 ms    [User: 199.6 ms, System: 63.3 ms]
+    Range (min … max):   155.8 ms … 163.1 ms    18 runs
+  Benchmark 2: watchexec-2.6.1 -1 echo
+    Time (mean ± σ):     387.1 ms ±   2.4 ms    [User: 157.5 ms, System: 366.3 ms]
+    Range (min … max):   382.0 ms … 390.0 ms    10 runs
+  Summary
+    watchexec-2.7.0 -1 echo ran
+      2.44 ± 0.04 times faster than watchexec-2.6.1 -1 echo
+  ^{(The -1 option is a hidden test-only option which starts watchexec normally, runs the command, and exits.)}
+  On BSD, the kqueue backend has been disabled; those platforms will use polling instead. kqueue is not designed for this kind of thing, and using it thus has significant downsides, such as heavy kernel resource usage, as well as correctness bugs. FreeBSD 14 and up have native inotify support; Watchexec does not yet take advantage of this but will in the future (it comes in with Notify 9, which is currently in RC).
+  Watching a single file no longer stops watching it when it is replaced (#190). Similarly, though this is less common, if a folder being watched (using -W or -w) is deleted and recreated, Watchexec used to lose the watch and no longer produce events. That was because the watch was placed on the file (or folder) object, not on a pathname string, and replacing the object naturally makes the watch disappear along with the old version of the object. Watchexec now watches from one path segment above, so it can notice when a watch gets replaced; because it also does directory tree filtering, this is not significantly more expensive.
+ReleaseNotesUrl: https://github.com/watchexec/watchexec/releases/tag/v2.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

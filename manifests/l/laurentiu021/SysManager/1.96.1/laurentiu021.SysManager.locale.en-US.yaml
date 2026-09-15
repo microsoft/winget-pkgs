@@ -1,0 +1,86 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.96.1
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.96.1] - 2026-09-11
+  Pressing Cancel could leave a tab looking like it had finished successfully with nothing to show. When a
+  PowerShell query was cancelled in a narrow window — while its engine was still starting up — the query never
+  ran, but nothing told the tab that. It received an empty list of results, which for a question like "which
+  DNS servers am I using?" or "what did Defender find?" looks exactly like a real answer of "none". The tab
+  would then show an empty state instead of saying it had been cancelled. Cancelling now always reports itself,
+  whichever moment it lands in.
+  Fixed
+  - A cancelled PowerShell query is no longer reported to the app as a successful run that returned nothing.
+    It only reported cancellation when the engine was interrupted mid-script; a cancel that arrived before the
+    script started, or one that failed to interrupt a script already running, was silently discarded.
+  - Cancelling now works the same way with administrator rights as without. The two are not the same
+    underneath — running elevated hands the work to a separate Windows PowerShell process — and the cancelled
+    result came back in a different form from there that the app did not recognise. So on an elevated session
+    a cancelled query surfaced as a raw engine error rather than as a cancellation. This is the half that
+    could only ever be seen on a machine running as administrator.
+  - The cancellation paths now say which one happened, so a failure of this kind can be diagnosed from its
+    message instead of from a stopwatch. That is what this bug needed five CI failures to work out.
+  Verify the download
+  Get-FileHash .\SysManager-v1.96.1.exe -Algorithm SHA256
+  Expected SHA256: 3FFB9D135864A7417C6DD3965D1361A330FA6F702F61385A81B49DF27CAA738B
+  This build is not code-signed, so Windows will warn on first launch. That is
+  expected for a small independent app: see what the warning says and what to
+  click.
+  Code signing is planned through the SignPath Foundation,
+  which provides free certificates to open-source projects, with signing performed by
+  SignPath.io. Until then, the SHA256 above and the build
+  attestation below are what establish that a download is the genuine build.
+  Code signing policy
+  This release is not code-signed. The team roles, release-approval process and
+  privacy policy required by the SignPath Foundation programme
+  are documented in advance under Code signing
+  policy. That
+  documentation is a prerequisite for applying, not evidence of a certificate. The
+  attribution line naming SignPath as the signing provider will appear here once a
+  certificate is actually issued.
+  This program will not transfer any information to other networked systems unless
+  specifically requested by the user or the person installing or operating it. Full
+  privacy policy.
+  Verify where this binary came from
+  This exe was built by GitHub Actions from this public source, and the build is
+  recorded in the Sigstore public transparency log. With the
+  GitHub CLI:
+  gh attestation verify .\SysManager-v1.96.1.exe --repo laurentiu021/SystemManager
+  That proves which commit and workflow produced this exact binary, something the
+  SHA256 file cannot show, since it is published alongside the exe it describes.
+  Each release also ships SysManager-v1.96.1.sbom.json, a CycloneDX inventory of
+  every dependency resolved for this build.
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.96.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

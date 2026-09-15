@@ -1,0 +1,51 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.9.2
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  本次发布聚焦导入流程、RSS 阅读与 Agent 集成：本地 PDF 导入不再被元数据解析阻塞，改为后台自动识别；Plaza RSS 的全文提取与 LaTeX 数学渲染更可靠；arXiv Daily 支持全量分类搜索与嵌入端点健康探测；设置中新增内置 ChatGPT Secure MCP Tunnel；并修复了 PDF 纯文本链接、围栏代码 HTML 属性丢失与 Grok Build 探测等问题。
+  新功能
+  - ChatGPT Secure MCP Tunnel: 设置 → 常规 → MCP 服务器可直接启动/停止内置隧道客户端，Tunnel ID 与运行时 API Key 由界面管理；密钥只经环境变量传递、应用退出时自动停止。（commit by @Phil-Fan）
+  - 后台识别本地 PDF 元数据：通过选择器或拖拽导入的 PDF 先秒级占位入库，随后后台任务自动探测并识别元数据；命中标识符会自动重命名论文目录并重写双链，与库中已有条目自动合并，期间用户的编辑始终优先。（commit by @qychen2001）
+  - arXiv Daily 分类自动补全：面板头部新增搜索弹出框，可从 arXiv 全量分类体系（约 150 个）中挑选分类，选中项以可删除的 chip 展示并持久化到本地。（commit by @Phil-Fan）
+  - Plaza 卡片显示/隐藏开关：悬停卡片即可通过眼睛图标隐藏或恢复数据源，隐藏源保持可见但置灰，侧栏右键菜单中的开关列表随之移除。（commit by @Phil-Fan）
+  改进
+  - 论文库刷新全部元数据字段：库中的刷新操作现在一次性更新全部元数据字段，而不再只更新发表信息。（commit by @Phil-Fan）
+  - 标题元数据链式解析：按标题补全元数据时按 S2 → Crossref → OpenAlex → S2 → arXiv 顺序链式尝试，提高命中率。（commit by @Phil-Fan）
+  - arXiv Daily 嵌入端点健康探测：面板展示结果前先探测嵌入端点，配置失效时不再显示过期缓存，而是进入不可达状态并提供重试/打开设置入口；Agent 设置中的嵌入区也新增了连接测试按钮。（commit by @Phil-Fan）
+  - 长会话虚拟化：Agent 聊天超过 80 行后自动切换为虚拟列表渲染，长对话不再拖慢界面，滚动到底与流式输出保持可用。（commit by @qychen2001）
+  - RSS 全文提取更可靠：以 DOM 可读性评分替代字符串匹配提取正文，并始终尝试抓取原始文章页；对返回 JS 挑战 403 的站点自动带 Cookie 重试。（commit by @Phil-Fan）
+  - RSS 数学渲染改进：LaTeX 块级环境按显示公式渲染，展开文档级 \newcommand 宏定义，清理提取过程残留的 HTML 产物并修复多公式占位符错乱，旧缓存正文会在新版本中自动重新解析。（commit by @Phil-Fan）
+  修复
+  - PDF 纯文本链接：未带链接注解的 http(s) URL 现在也能点击打开，arXiv 编号会映射到摘要页，支持同一区域内多个链接且不与原生注解重叠冲突。（#422 by @July-h5kf3）
+  - 围栏代码保留 HTML 属性：Markdown 往返编辑不再丢失围栏 HTML 代码中的 class、for 等属性，且只作用于 HTML 围栏，不影响 JSX/TSX 示例。（#423 by @Gelly52）
+  - Grok Build 改用原生 CLI: 探测与启动改为本机 grok agent stdio 命令而非 npx 封装，避免在未安装时被自动探测悄悄下载 Agent，并自动迁移旧的注册记录。（commit by @Phil-Fan）
+  - RSS 卡片高度溢出：修复 WebKit 下 -webkit-line-clamp 导致卡片摘要下方出现大片空白的问题。（commit by @Phil-Fan）
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.9.2
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
