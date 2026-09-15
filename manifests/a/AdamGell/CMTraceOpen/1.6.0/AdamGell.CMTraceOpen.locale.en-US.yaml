@@ -37,7 +37,23 @@ Tags:
 ReleaseNotes: |-
   Stable downloads: https://download.cmtraceopen.com/?source=github-release
   CMTrace Open v1.6.0
-  Open-source CMTrace log viewer with built-in Intune diagnostics.
+  The first release to carry the ConfigMgr/SCCM diagnostics work and the expanded Intune parser family. None of it was in 1.5.2: that was a scoped patch cut from the 1.5.1 branch for a single clipboard fix, so everything below is new to anyone upgrading from it.
+  Highlights
+  ConfigMgr/SCCM diagnostics, client and server — a native evidence path with a diagnostics workspace behind it: site core, management point, distribution point, software update point, hierarchy and replication, task-sequence provenance, client health, policy, deployment, updates, and inventory/compliance/metering analysis, plus bounded database export and advanced server capture. Every finding points at the log or file it came from, gaps in the evidence stay visible instead of being reported as success, and nothing is blamed on whatever else happened at the same time.
+  The Intune parser family, well past IME and ESP — Win32 app deployment transactions, Windows configuration policy evidence, Microsoft Store app evidence, Company Portal on Windows (LocalState), macOS (Apple unified log) and iOS/iPadOS (Console exports), the full Device Inventory Agent log family with rotation-aware tailing, an Autopilot evidence parser that works outside the ESP workspace, and a four-phase Windows compliance analyzer that will not turn a Conditional Access denial into a verdict about a setting on the device.
+  Microsoft Graph sign-in without freezing the UI — enable Graph with an explicit Sign in, cancel the sign-in while it is happening, and get told straight away when the machine cannot do it (personal Microsoft account, no work account, provider unavailable). The Entra sign-in window stays for the cases that need real consent.
+  Restart as administrator, keeping your work — an application-wide elevated restart that opens the sources you had open again afterwards.
+  Privacy: why the export now matches the screen
+  This is the change in 1.6.0 with the most thought behind it, so it is worth more than a bullet.
+  What was wrong. CMTrace Open already had code that hides device and user identifiers, and a screen that hides them as well. What it did not have was that hiding happening at the moment data leaves the app. An internal audit found the rule was applied almost everywhere except the places that actually write files or copy to the clipboard. So you could look at a screen with the names, IDs and serial numbers hidden, click the button beside it, and get a file with every one of them in clear text. The app made a privacy promise on screen and broke it in the export.
+  What we decided. The rule is now written down as a formal decision (ADR-004 revision 1, in the repository) and shipped in this release. In plain terms: hiding happens where an analysis is handed out by the app's core, not at each button. Anything the core produces can only be handed out already hidden. The version with the real values in it is kept behind a clearly named function that only the app's own code can reach. That means a screen cannot forget to hide something, because the code will not build if it tries to pass real values on.
+  Why there, and not at each button. Because that was the old arrangement, and it failed. Nobody forgot to call something — the hidden version was optional and the version you had in your hand was the real one. Any rule that depends on remembering to call it gets broken by the next feature, and the change looks like an ordinary save, so nobody catches it in review either. Moving the rule to the point where analyses are handed out means the compiler checks it instead of a person.
+  What this release fixes. The decision itself (#550); the ESP session export, so a saved session can no longer contain real identifiers (#549 / #558); the Intune Compliance lane, which was exporting SIDs, tenant domains, device names and several other identifying values (#546); and the shared hiding code the rest now use (#357 / #533).
+  What is deliberately left open. The boundary between the app's front end and its back end is postponed, not dismissed — we do not yet know which analyses are meant to cross it. One DsRegCmd capture still writes real values into a temporary folder whose path the app shows you; hiding them there would change what the analysis concludes, because that folder is what the analysis reads, so it is tracked separately (#628). And the app still holds real values in memory in order to draw the screen: the rule for that is that an export must never hide less than the screen does, not that the screen must hide everything.
+  Upgrading from 1.5.2
+  - msiexec /i app-1.6.0-x64.msi DISABLEUPDATECHECKS=1 now completes. On a managed Windows 11 machine running in Constrained Language Mode the installer's script failed, and because the install was not allowed to continue past a failure it undid the whole installation; the setting is now written with the 64-bit reg.exe instead (#576).
+  - Auto-update is intact: latest.json is rebuilt from the release's own signature files and carries all eight updater targets — both Windows architectures, the macOS app and its archive, and the AppImage, .deb and .rpm.
+  - winget carries 1.6.0. Scoop is one review away: the bucket update is open as a pull request (#625), and until it merges scoop install cmtrace serves the previous version. The shortlinks below are unaffected either way.
   Download shortlinks
   Each shortlink always resolves to the current stable release, so it stays valid in
   tickets, runbooks, and slides long after this page scrolls out of view.
@@ -71,6 +87,12 @@ ReleaseNotes: |-
   The MSI installs both the Full and Lite editions. Portable EXEs require no installation.
   CycloneDX SBOMs (sbom-rust.cdx.json, sbom-npm.cdx.json) and build provenance
   attestations are published alongside the binaries.
+  What else changed
+  The release notes above are a summary, not the whole list — this one carries a
+  great deal of parser hardening, privacy work and dependency maintenance.
+  - Full changelog: CHANGELOG.md
+  - The decision in full: ADR-004 revision 1
+  - Every commit: v1.5.2...v1.6.0
 ReleaseNotesUrl: https://github.com/adamgell/cmtraceopen/releases/tag/v1.6.0
 Documentations:
 - DocumentLabel: Wiki
