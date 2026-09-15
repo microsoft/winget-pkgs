@@ -37,40 +37,45 @@ Tags:
 ReleaseNotes: |-
   Stable downloads: https://download.cmtraceopen.com/?source=github-release
   CMTrace Open v1.6.0
-  Open-source CMTrace log viewer with built-in Intune diagnostics.
-  Download shortlinks
-  Each shortlink always resolves to the current stable release, so it stays valid in
-  tickets, runbooks, and slides long after this page scrolls out of view.
-  ──────────────────────────────┬───────────────────────────────
-  Platform                      │Shortlink
-  ──────────────────────────────┼───────────────────────────────
-  Windows x64, portable EXE     │https://win.cmtrace.net
-  ──────────────────────────────┼───────────────────────────────
-  Windows ARM64, portable EXE   │https://winarm.cmtrace.net
-  ──────────────────────────────┼───────────────────────────────
-  Windows x64, Lite portable EXE│https://lite.cmtrace.net
-  ──────────────────────────────┼───────────────────────────────
-  Windows x64, MSI installer    │https://msi.cmtrace.net
-  ──────────────────────────────┼───────────────────────────────
-  macOS Apple silicon, DMG      │https://mac.cmtrace.net
-  ──────────────────────────────┼───────────────────────────────
-  Linux x64, AppImage           │https://linux.cmtrace.net
-  ──────────────────────────────┴───────────────────────────────
-  Nightly channel: https://nightly.cmtrace.net
-  Artifacts in v1.6.0
-  ─────────────────────┬─────────────────────────────────────────────────────────────────
-  Platform             │Files
-  ─────────────────────┼─────────────────────────────────────────────────────────────────
-  Windows x64 and ARM64│signed .msi, signed portable .exe (Full and Lite), signed
-                       │-setup.exe
-  ─────────────────────┼─────────────────────────────────────────────────────────────────
-  macOS Apple silicon  │signed and notarized .dmg, plus the .app.tar.gz updater archive
-  ─────────────────────┼─────────────────────────────────────────────────────────────────
-  Linux x64            │.AppImage, .deb, .rpm
-  ─────────────────────┴─────────────────────────────────────────────────────────────────
-  The MSI installs both the Full and Lite editions. Portable EXEs require no installation.
-  CycloneDX SBOMs (sbom-rust.cdx.json, sbom-npm.cdx.json) and build provenance
-  attestations are published alongside the binaries.
+  The first release to carry the ConfigMgr/SCCM diagnostics work and the expanded Intune parser family. None of it was in 1.5.2: that was a scoped patch cut from the 1.5.1 branch for a single clipboard fix, so everything below is new to anyone upgrading from it.
+  Highlights
+  ConfigMgr/SCCM diagnostics, client and server — a native evidence path with a diagnostics workspace behind it, covering setup and health, policy, deployment, software updates, task sequences, inventory and server roles. Every finding points at the log or file it came from, gaps in the evidence stay visible instead of being reported as success, and nothing is blamed on whatever else happened at the same time. Detail below, including what is deliberately still held back.
+  The Intune parser family, well past IME and ESP — Win32 app deployments, Microsoft Store apps, platform scripts, remediations, configuration policy, compliance, Autopilot outside ESP, the Device Inventory Agent log family, and Company Portal on Windows, macOS and iOS/iPadOS. Detail below.
+  Microsoft Graph sign-in without freezing the UI — enable Graph with an explicit Sign in, cancel the sign-in while it is happening, and get told straight away when the machine cannot do it (personal Microsoft account, no work account, provider unavailable). The Entra sign-in window stays for the cases that need real consent.
+  Restart as administrator, keeping your work — an application-wide elevated restart that opens the sources you had open again afterwards.
+  ConfigMgr/SCCM: what is here, and what is still being held back
+  What shipped. Both halves of the product, across the whole log family.
+  On the client: setup, health, identity, assignment and location; policy retrieval, evaluation and reporting; application, package and content deployment transactions; software-update deployments; task sequences across WinPE and after the client starts; inventory, compliance and software metering; and co-management, scripts, notifications and Software Center activity.
+  On the server: site core and the status system; management point client transactions; distribution point and content distribution; software update point and WSUS; hierarchy and replication; and the SMS Provider with its Admin Service.
+  Across both: evidence from the two sides is brought together into cautious findings rather than one side being read in isolation, and the advanced roles — OSD/PXE, notification, the cloud management gateway and service connection, certificate registration, reporting and software metering — have their source contracts defined along with a bounded capture path. Twenty-three issues in the family are closed.
+  What is still held back, and why. Nine issues remain open, and every one of them is waiting on the same thing: real captures from a live ConfigMgr site.
+  - Source contracts waiting for a real collection to validate them: OSD/PXE (#475), certificate registration (#476), reporting services (#477), the cloud management gateway and service connection (#478), BGB notification (#479), software metering (#483), compliance and remediation (#484), and inventory (#485).
+  - Native validation of the advanced-role capture against a real site server (#527): whether source discovery finds the roles as they are actually installed, whether the capture limits hold against real log volumes, whether captured evidence parses instead of falling back to "unknown", and whether redaction holds for a real site's identifiers.
+  Each one has to clear the same bar: sanitized, version-stamped captures with their provenance recorded; fixtures for the awkward cases (failure, retry, recovery, rotation, denied, capped, unknown version, and records that share a timestamp); a privacy review; and independent review before the source is admitted. Until a source clears that bar it stays explicitly unsupported, and the app reports the gap rather than guessing at the format.
+  That is a deliberate choice about how this gets built, not a shortage of work. The design rules out the shortcuts that would make it quick: no synthetic "test" site codes promoted as if they were real, no treating two records as related because their timestamps are close, and no live actions against a customer's site.
+  The Intune parser family: how far it now reaches
+  Before this release the Intune surface was IME and ESP. It now spans the four areas the work was planned around — apps, enrollment, device, and portal, meaning the diagnostics a device exports — across four kinds of source.
+  Windows, read on the device itself:
+  - Win32 app deployments as transactions with phases — install, detection, retry, and what happened after a reboot — rather than a single pass/fail (#357).
+  - Microsoft Store apps, including provisioned packages and the difference between what is installed for the user and what is staged for the machine (#358).
+  - Platform scripts and their execution (#359), and remediations: the detection run and the remediation run, kept separate (#360).
+  - Configuration policy: retrieval, evaluation and application, including where two policies disagree (#363).
+  - Compliance: evaluation and reporting, with the reasons behind a non-compliant result instead of just the result (#364).
+  - Autopilot evidence outside the ESP workspace (#362), so a device's enrollment can be read after the fact.
+  - The Device Inventory Agent log family: the harvester, the Inventory Adaptor, and the rotation-failure dialect, including opening the whole folder with its rotations and following new records as they are written (#354 / #397), with framing that keeps oversized records from being dropped (#511).
+  Enrollment and identity: Autopilot and the Enrollment Status Page, and DSRegCmd analysis for Entra join, hybrid join, primary refresh token, MDM enrolment and Windows Hello for Business.
+  Company Portal, per platform: Windows LocalState logs (#366); macOS app logs (#368) and the Apple unified log they come from (#370); and iOS/iPadOS imported Console diagnostics (#372).
+  What is next in the family — four issues tracked in the epic, none of them blocked on anything but time: Windows Update for Business evidence (#365), macOS package deployment and shell scripts (#361), Company Portal macOS saved diagnostic reports (#369), and Company Portal Android, which starts by establishing what a device actually exports before any of it is parsed (#371). The Device Inventory issue (#354) stays open as the tracker for the log dialects not yet seen on a real device.
+  What holds across all of them: findings point at the records behind them, missing evidence is shown as missing rather than as a clean result, and confidence is kept low where the logs do not support more. None of it leaves the app with a real identifier in it — which is what the next section is about.
+  Privacy: why the export now matches the screen
+  This is the change in 1.6.0 with the most thought behind it, so it is worth more than a bullet.
+  What was wrong. CMTrace Open already had code that hides device and user identifiers, and a screen that hides them as well. What it did not have was that hiding happening at the moment data leaves the app. An internal audit found the rule was applied almost everywhere except the places that actually write files or copy to the clipboard. So you could look at a screen with the names, IDs and serial numbers hidden, click the button beside it, and get a file with every one of them in clear text. The app made a privacy promise on screen and broke it in the export.
+  What we decided. The rule is now written down as a formal decision (ADR-004 revision 1, in the repository) and shipped in this release. In plain terms: hiding happens where an analysis is handed out by the app's core, not at each button. Anything the core produces can only be handed out already hidden. The version with the real values in it is kept behind a clearly named function that only the app's own code can reach. That means a screen cannot forget to hide something, because the code will not build if it tries to pass real values on.
+  Why there, and not at each button. Because that was the old arrangement, and it failed. Nobody forgot to call something — the hidden version was optional and the version you had in your hand was the real one. Any rule that depends on remembering to call it gets broken by the next feature, and the change looks like an ordinary save, so nobody catches it in review either. Moving the rule to the point where analyses are handed out means the compiler checks it instead of a person.
+  What this release fixes. The decision itself (#550); the ESP session export, so a saved session can no longer contain real identifiers (#549 / #558); the Intune Compliance lane, which was exporting SIDs, tenant domains, device names and several other identifying values (#546); and the shared hiding code the rest now use (#357 / #533).
+  What is deliberately left open. The boundary between the app's front end and its back end is postponed, not dismissed — we do not yet know which analyses are meant to cross it. One DsRegCmd capture still writes real values into a temporary folder whose path the app shows you; hiding them there would change what the analysis concludes, because that folder is what the analysis reads, so it is tracked separately (#628). And the app still holds real values in memory in order to draw the screen: the rule for that is that an export must never hide less than the screen does, not that the screen must hide everything.
+  Upgrading from 1.5.2
+  - msiexec /i app-1.6.0-x64.msi DISABLEUPDATECHECKS=1 now completes. On a managed Windows 11 machine running in Constrained Language Mode the installer's script failed, and because the install was not allowed to continue past a failure it undid the whole installation; the setting is now written with the 64-bit reg.exe instead (#576).
 ReleaseNotesUrl: https://github.com/adamgell/cmtraceopen/releases/tag/v1.6.0
 Documentations:
 - DocumentLabel: Wiki
