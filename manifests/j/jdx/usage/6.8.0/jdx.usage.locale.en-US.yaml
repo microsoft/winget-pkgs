@@ -1,0 +1,56 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jdx.usage
+PackageVersion: 6.8.0
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://jdx.dev/
+PublisherSupportUrl: https://github.com/jdx/usage/issues
+Author: Jeff Dickey
+PackageName: usage
+PackageUrl: https://usage.jdx.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+ShortDescription: A specification for CLIs
+Description: |-
+  Usage is a spec and CLI for defining CLI tools. Arguments, flags, environment variables, and config files can all be defined in a Usage spec. It can be thought of like OpenAPI (swagger) for CLIs. Here are some potential reasons for defining your CLI with a Usage spec:
+
+  - Generate autocompletion scripts
+  - Generate markdown documentation
+  - Generate man pages
+  - Generate type-safe SDK client libraries for TypeScript, Python, and Rust
+  - Use an advanced arg parser in any language
+  - Scaffold one spec into different CLI frameworks-even different languages
+  - [coming soon] Host your CLI documentation on usage.sh
+Moniker: usage
+Tags:
+- cli
+- spec
+ReleaseNotes: |-
+  This release gives the usage CLI native shell completions (including PowerShell), adds a configurable link extension for Markdown docs, and fixes a batch of synopsis and Markdown rendering issues across docs and man pages.
+  Added
+  - (cli) Native shell completions (#1388, @jdx). usage --completions <shell> now emits native scripts that call the installed binary's compiled completion handler instead of caching a spec and relying on the bash-completion helpers. Bash, Zsh, Fish, and a new PowerShell script are all supported, and scripts use command usage so a shell function or alias can no longer shadow the executable. All four scripts are published alongside the CLI spec as signed Packslip resources. General usage generate completion behavior is unchanged.
+  - (docs) Configurable Markdown link extension (#1394, @jdx). Generated Markdown links previously always ended in .md, forcing consumers who serve HTML or extensionless pages to rewrite links after generation. A new --link-extension flag (and MarkdownRenderer::with_link_extension, default .md) controls the suffix on command and configuration links without changing output filenames:
+    usage generate markdown --file mycli.usage.kdl --link-extension .html
+    Custom templates now also receive link_extension and config_link in their context.
+
+  Fixed
+  - (docs) Render optional subcommands and mount synopses (#1393, @jdx). Generated synopses showed <SUBCOMMAND> even when a command could run without one; the shared usage string now honors subcommand_required (using [SUBCOMMAND] when optional) and custom placeholder names, keeping terminal help, Markdown, man pages, JSON, and SDK docs consistent. Unresolved mounts can also declare a display-only synopsis (for example mount run="mycli tasks --usage" synopsis="[TASK] [ARGS]…") to document dynamic arguments without running discovery; parsing and completion are unchanged.
+  - (docs) Preserve Markdown code blocks and headings (#1392, @jdx). Indented help text was converted to code fences by stripping four spaces from every matching line, which could corrupt nested lists and existing fenced examples. Markdown code-block boundaries are now parsed so only real indented code blocks are converted, fences are chosen longer than any embedded backtick runs, and HTML escaping recognizes longer fences. Hidden subcommands are now filtered out before the Subcommands heading, and the duplicate synopsis line was removed from the multipage index.
+  - (manpage) Render mount synopses and custom command names (#1395, @jdx). Completes the man-page side of the synopsis fixes above. The man-page renderer now carries declarative mount synopses and custom subcommand names into its own synopsis (instead of hard-coded <COMMAND>/[COMMAND]), includes mount fragments in root and subcommand synopses without running discovery, and emits a detail section for a command whose only documentation is a mount synopsis.
+
+  Changed
+  - (docs) Refreshed guides, navigation, and landing page (#1391, @jdx). A new getting-started guide walks from install through KDL, lint/explain, docs/man, completions, and diff. Navigation is reorganized into guides, framework docs, and references with route-specific sidebars; the landing page is simplified with clearer starting points for Rust apps, existing CLIs, and scripts. Installation commands, Rust and SDK examples, and completion setup were corrected, Go is now labeled a development preview, and broken links across all 171 Markdown files were fixed.
+
+  💚 Sponsor usage
+  usage is built and maintained by @jdx, an open source developer at entire.io, the title sponsor of his open source work.
+  If usage powers CLI specs, docs, or completions for a tool you maintain or use, please consider becoming an individual or company sponsor. Your support funds ongoing development and helps keep usage fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/usage/releases/tag/v6.8.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://usage.jdx.dev/cli/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
