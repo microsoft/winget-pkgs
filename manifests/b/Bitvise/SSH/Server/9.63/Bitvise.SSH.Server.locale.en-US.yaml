@@ -1,0 +1,84 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Bitvise.SSH.Server
+PackageVersion: "9.63"
+PackageLocale: en-US
+Publisher: Bitvise Limited
+PublisherUrl: https://bitvise.com/
+PublisherSupportUrl: https://bitvise.com/contact
+PrivacyUrl: https://bitvise.com/privacy-policy
+Author: Bitvise Limited
+PackageName: Bitvise SSH Server
+PackageUrl: https://bitvise.com/ssh-server
+License: Proprietary
+LicenseUrl: https://bitvise.com/ssh-server-license
+Copyright: Copyright (C) 2000-2026 by Bitvise Limited.
+CopyrightUrl: https://bitvise.com/terms-of-use
+ShortDescription: Secure file transfer and terminal shell access for Windows
+Description: |-
+  Our SSH server supports all desktop and server versions of Windows, 32-bit and 64-bit, from Windows XP SP3 and Windows Server 2003, up to the most recent – Windows 11 and Windows Server 2025.
+  Bitvise SSH Server includes the following:
+  - SFTP server: Secure file transfer using SFTP - compatible with a wide variety of clients
+  - SCP server: Secure file transfer using SCP - compatible with command line and graphical clients
+  - FTPS server: Secure file transfer using FTP over TLS/SSL - compatible with secure FTPS clients
+  - SSH server: Secure remote access via console - vt100, xterm and bvterm are supported
+  - Secure remote access via GUI - Remote Desktop or WinVNC required
+  - Secure, effortless Git integration
+  - Secure TCP/IP connection tunneling (port forwarding)
+Moniker: bitvisesshserver
+Tags:
+- sftp
+- ssh
+- sshd
+Agreements:
+- AgreementLabel: End User License Agreement (EULA)
+  AgreementUrl: https://bitvise.com/ssh-server-license
+ReleaseNotes: |-
+  - Release notes:
+    - We are anticipating an "information security armageddon" due to increasing ability of AI to find security issues, in all software and systems, which were not found in human testing and code review.
+      The quality of commercially available AI tools has improved to where they are now indispensable for software correctness. We are applying AI tools proactively to find and fix flaws which previously missed detection.
+      Users will observe this as an increased frequency of significant and important updates. We believe the time to do this is now, before it becomes too easy to find an issue and generate an exploit by pointing an AI to an executable binary.
+  - DoS protection:
+    - The previous Accept delay mechanism is now removed. The accept delay was triggered based on static parameters, instead of whether the SSH Server was actually handling the load. Once triggered, the accept delay would discard incoming connections indiscriminately, including from clients that were not the cause of the load. The rate of incoming connections was limited, but under some conditions, the total number of connections that have not authenticated could still accumulate.
+    - The SSH Server now uses a new DoS protection mechanism. The new mechanism uses similar settings as Accept delay, but applies them differently. The administrator configures a maximum number of unauthenticated connections that the SSH Server will accept from a single IP address when the server is not otherwise under load. If a client exceeds this limit, or if the server is generally under load, it may start to discard connections. The SSH Server now prefers to accept connections from IP addresses that are less similar to those that are causing the load. When connections authenticate, further new connections can be immediately accepted.
+      Administrators should no longer need to disable DoS protection to accommodate clients which initiate hundreds of concurrent connections. Administrators may still need to increase the setting Max pre-auth conns from single IP. Clients from other IP addresses that connect at the same time as another aggressive client are now less likely to have their connection refused.
+  - Login serialization:
+    - The setting Delayed login expiration is now removed. Login attempts that are delayed due to login serialization now expire either consistently with the Login timeout setting for the connection, or after a maximum time if the login timeout is disabled or very long.
+    - The SSH Server now detects disconnects for connections that are delayed by login serialization, or which receive a Penalty login attempt delay if the configured delay is long.
+    - For clients connecting using IPv6, the SSH Server would use the full client IPv6 address for login serialization by IP address. The full IPv6 address is too easy for clients to vary. The SSH Server now serializes such login attempts using the 64-bit IPv6 address prefix.
+  - Stuck connection detection:
+    - SSH Server versions 9.5x and newer support detection and reporting of stuck connections. The SSH Server now detects stuck connections in additional situations, in particular if connection cleanup is delayed by subsystem exit. This can happen if the file transfer subsystem is stuck in a blocking Windows API while attempting to access a network path.
+  - Control Panel and settings:
+    - In versions 9.61 and 9.62, the Manage password cache interface did not display correctly when using dark mode. Fixed.
+    - Time-based one-time password (TOTP) authentication: When generating a 2D code for authenticators to scan, commonly used authenticators get confused if the Issuer or Issued to fields contain a colon (":"), even if it's URL-encoded. Colons in these fields are now encoded as the Unicode character U+02D0 (Modifier Letter Triangular Colon).
+  - Scriptable settings:
+    - In SSH Server versions 9.61 and 9.62, settings that are retained for scriptable compatibility could not be mutated by scripts. Fixed.
+      For example: the setting $cfg.settings.connections.penaltyLoginAttemptDelay (seconds) is a scriptable compatibility shim for the newer setting penaltyLoginAttemptDelayMs (milliseconds). A script that sets penaltyLoginAttemptDelay = 3 will now again have the effect of setting penaltyLoginAttemptDelayMs = 3000, instead of failing.
+  - Statistics:
+    - The SSH Server previously created statistics XML files with hashes, but only validated the hashes in some situations. The SSH Server now always validates statistics XML hashes. New hashes are now also calculated more strictly.
+  - FTPS:
+    - When a client resumes an upload for an existing file, the file would be incorrectly truncated. Fixed.
+    - FTPS file transfers that end with an error, including a network error, would be incorrectly reported and logged as successful. Fixed.
+    - FTPS file transfers would previously ignore errors when completing a transfer, such as when closing an uploaded file or flushing a final write before close. Fixed.
+    - Detection and logging of TLS alerts with fatal severity was previously mishandled. Fixed.
+    - Double quotes are now escaped if they appear in quoted paths sent in FTPS control connection replies.
+    - CR and LF characters are now removed if they appear in file or directory names sent in directory listings.
+    - Control connection commands containing NUL bytes are no longer accepted.
+  - File transfer:
+    - Fixed an issue which could cause incorrect file access range reporting.
+    - Mount points of type Another SFTP server: Improved handling for uploads opened for append.
+    - Mount points of type Another SFTP server: When uploading a file with text conversion, any error during a final write would not be reported or logged. Fixed.
+  - BvShell:
+    - BvShell now implements a uname command with minimal output. This can help clients which condition further actions based on the uname response.
+ReleaseNotesUrl: https://www.bitvise.com/ssh-server-version-history-9-5#963
+PurchaseUrl: https://bitvise.com/ssh-server-pricing
+Documentations:
+- DocumentLabel: Printable Documentation
+  DocumentUrl: https://bitvise.com/printable-docs/ssh-server-doc-printable
+- DocumentLabel: Users' Guide
+  DocumentUrl: https://bitvise.com/ssh-server-users-guide
+- DocumentLabel: FAQ
+  DocumentUrl: https://bitvise.com/ssh-server-usage-faq
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,84 @@
+# Created with WinGet Updater using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Ahoy.Ahoy
+PackageVersion: 3.0.0
+PackageLocale: en-US
+Publisher: Ahoy
+PublisherUrl: https://github.com/ahoy-cli
+PublisherSupportUrl: https://github.com/ahoy-cli/ahoy/issues
+PackageName: Ahoy
+PackageUrl: https://github.com/ahoy-cli/ahoy
+License: MIT
+LicenseUrl: https://github.com/ahoy-cli/ahoy/blob/HEAD/LICENSE
+ShortDescription: Automate and organize your workflows, no matter what technology you use
+Moniker: ahoy
+Tags:
+- bash
+- cli
+- cli-app
+- devops
+- yaml
+ReleaseNotes: |-
+  ahoy v3.0.0 - The Almost DrupalSouth Release
+  Ahoy v3 migrates the CLI framework from urfave/cli v1 to spf13/cobra.
+  Every existing .ahoy.yml file SHOULD continue to work unchanged - at the moment ahoyapi: v2 is still the current config
+  file format flag, and there are no breaking changes to the command syntax or behaviour. Updates to the configuration file format are likely to happen in the next 6-12 months though, but ahoy release versions will be forwards-compatible.
+  Upgrading
+  For most people this is a drop-in replacement. Two things to be aware of:
+  1. Homebrew
+  brew install ahoy now installs v3. There is no ahoy@2 formula - a versioned formula was
+  submitted to homebrew-core and declined as against their policy. If you need to stay on v2, use
+  the binaries or archives attached to the
+  v2.5.0 release.
+  I will continue to monitor the v2 release line code for security issues, dependency upgrades etc, and will release minor version updates as and when required, for at least the next 6 months.
+  2. 32-bit ARM builds are now split into armv6 and armv7
+  Previous releases shipped a single ahoy-bin-linux-arm built for ARMv6. v3 builds ARMv6 and ARMv7 separately, so that asset is replaced by two:
+  ─────────────────────┬─────────────────────────────────────────────────
+  v2.5.0               │v3.0.0
+  ─────────────────────┼─────────────────────────────────────────────────
+  ahoy-bin-linux-arm   │ahoy-bin-linux-armv6 and ahoy-bin-linux-armv7
+  ─────────────────────┼─────────────────────────────────────────────────
+  ahoy-linux-arm.tar.gz│ahoy-linux-armv6.tar.gz and
+                       │ahoy-linux-armv7.tar.gz
+  ─────────────────────┴─────────────────────────────────────────────────
+  If you hand-wrote a download URL ending in -linux-arm, point it at -linux-armv6 (identical to
+  what you had) or -linux-armv7 (better performance on Raspberry Pi 2 and newer). The install
+  one-liner in the README selects the right one automatically.
+  All other asset names are unchanged from v2.5.0. Static Linux builds
+  (ahoy-bin-linux-amd64-static, ahoy-bin-linux-arm64-static) are new in v3 and useful for minimal containers.
+  What's new
+  ahoy config command group
+  Two new subcommands:
+  - ahoy config validate: validates .ahoy.yml files, with version mismatch detection and
+    field-level checks that catch unsupported features
+  - ahoy config init: the command that downloads a "starter" .ahoy.yml file, is now reworked to use Go's native HTTP client, dropping external dependencies
+  New environment variables
+  - AHOY_CMD: absolute path to the running ahoy binary (via os.Executable()). Nested ahoy
+    calls can use $AHOY_CMD to guarantee they invoke the same binary version of ahoy.
+  - AHOY_COMMAND_NAME: the name of the command being run (e.g. test), so wrapped scripts
+    can detect that they were invoked via ahoy, and which command triggered them. Resolves
+    #165.
+  Better help output
+  Two-tier help with per-command DESCRIPTION sections, as long as you add them to your .ahoy.yml files.
+  Bug fixes
+  - Fixed nil-pointer panics in edge-case command execution paths
+  - Fixed silent error swallowing and incorrect exit codes on invalid flags
+  - Fixed a stderr-capture deadlock by replacing buffering with a goroutine drain
+  - Fixed atomic file writes and URL scheme validation in downloadFile
+  - Fixed AHOY_FILE and AHOY_VERBOSE environment variable wiring
+  Internal changes
+  Framework migration
+  - Replaced urfave/cli with spf13/cobra, a more widely used CLI tool library that has more features we can use
+  - CLI flags are handled directly via Cobra and spf13/pflag
+  - Added a custom pre-parser so the small amount of single-dash flags we have (-version, -help) keep on working
+  - Added expandPath() for unified, consistent file path handling
+  Project structure
+  v3 code now lives at the repository root. The v2 code is preserved in the v2/ subdirectory for posterity and continued support.
+  CI
+  - Tests run against both the v2 and root (v3) codebases
+  - Added Homebrew coreutils to the macOS runners so timeout works in the BATS suite
+  Full changelog: v2.5.0...v3.0.0
+ReleaseNotesUrl: https://github.com/ahoy-cli/ahoy/releases/tag/v3.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

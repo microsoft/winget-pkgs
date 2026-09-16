@@ -1,0 +1,92 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.1.14
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Fixed
+  - Fixed reasoning-off requests (e.g. GitHub Copilot gpt-6-astra) surfacing 400 Unsupported value: 'none' … Supported values are: … instead of retrying at the lowest allowed effort: the reasoning-effort fallback now recognizes Supported values phrasing (#11128 by @H4vC).
+  - Fixed Cursor GPT off-tier requests sending raw -none sibling ids (e.g. gpt-5.6-sol-none-fast), which the Run endpoint rejects; they now normalize to the base model id with no reasoning parameter, matching every other effort tier (#11128 by @H4vC).
+  @oh-my-pi/pi-catalog
+  Fixed
+  - Bills Astra API requests above 272K input at the documented 2x input / 1.5x output long-context tier; the Codex subscription route stays exempt with free cache writes (#11157 by @H4vC).
+  - Fixed Astra's extended window over-advertising input by 128K; it now uses the documented 922K input cap inside the 1.05M total context (#11157 by @H4vC).
+  - Fixed explicit Codex context-window overrides widening past the server-honored maximum; they now clamp to the documented ceiling like upstream Codex (#11157 by @H4vC).
+  - Fixed Codex Astra using its larger window without opt-in; its default is 272K and Extended Context enables at least the documented 1.05M window (#11126 by @H4vC).
+  - Fixed GitHub Copilot enterprise-only model ids inheriting another provider's wire routing (e.g. gpt-5.6-sol-fast pinning every request to the -none sibling id regardless of thinking level) (#11128 by @H4vC).
+  @oh-my-pi/pi-coding-agent
+  Fixed
+  - The startup update notice counts every change in a release: bullets written above a ### heading now count under Other, and +/* markers and lightly indented bullets count like -.
+  - Fixed Codex Astra retaining its larger window after disabling Extended Context, including cached models; explicit model overrides still take precedence.
+  - Fixed explicit Codex context-window overrides widening past the server-honored maximum; they now clamp to the documented ceiling like upstream Codex (#11157 by @H4vC).
+  - Fixed Astra's extended window over-advertising input by 128K; it now uses the documented 922K input cap inside the 1.05M total context (#11157 by @H4vC).
+  - Bills Astra API requests above 272K input at the documented 2x input / 1.5x output long-context tier; the Codex subscription route stays exempt with free cache writes (#11157 by @H4vC).
+  - Fixed Extended Context silently enabling without a settings source (SDK embedding, early boot); it now matches the off default until opted in (#11157 by @H4vC).
+  - Fixed /copy link captions showing Markdown delimiters for formatted labels and splitting across two rows for multiline labels (#11086 by @mustafaabidali).
+  - Fixed Ask custom answers requiring another submission after paste or remaining on the same multi-select question; pending clipboard text is preserved before submission, and single-question multi-select answers still go through review (#11099 by @camjac251).
+  - The startup update notice no longer counts standalone * * * and - - - separator lines as changes.
+  - Fixed /loop replacing the repeating prompt with a mid-turn interjection; steering while the agent runs is now one-off, and only an idle submission becomes the new loop body (#11159 by @H4vC).
+  @oh-my-pi/pi-tui
+  Fixed
+  - extractMarkdownLinks() now returns one-row visible labels for formatted and multiline links (#11086 by @mustafaabidali).
+  What's Changed
+  - fix(lsp): evaluate idle timeout per workspace client (#8389) by @harshaygadekar in https://github.com/can1357/oh-my-pi/pull/10237
+  - test(mcp): event-gate the reauth manual-input claim instead of a wall-clock budget by @rigel-mintaka in https://github.com/can1357/oh-my-pi/pull/11117
+  - fix(coding-agent): preserve and advance Ask custom answers by @camjac251 in https://github.com/can1357/oh-my-pi/pull/11099
+  - fix(tui,copy): flatten Markdown link labels to one visible row for /copy captions by @mustafaabidali in https://github.com/can1357/oh-my-pi/pull/11086
+  - fix(catalog,coding-agent): keep Astra 1.05M window behind extended-context opt it by @H4vC in https://github.com/can1357/oh-my-pi/pull/11126
+  - fix(ai): preserve Codex WebSocket abort causes by @Morrowmake in https://github.com/can1357/oh-my-pi/pull/11046
+  - docs(browser): clarify tab.evaluate string semantics by @vwsa in https://github.com/can1357/oh-my-pi/pull/11114
+  - fix(changelog): stop the startup notice undercounting a release by @2233admin in https://github.com/can1357/oh-my-pi/pull/11070
+  - docs(changelog): hoist post-18.1.12 changes into 18.1.13 by @H4vC in https://github.com/can1357/oh-my-pi/pull/11138
+  - fix(changelog): skip thematic breaks and gate unreleased notes by con… by @H4vC in https://github.com/can1357/oh-my-pi/pull/11134
+  - fix(ai): retry Copilot Supported-values none rejection; normalize Cur… by @H4vC in https://github.com/can1357/oh-my-pi/pull/11128
+  - test(mcp): replace the remaining wall-clock gates in the reauth tests with sync points by @rigel-mintaka in https://github.com/can1357/oh-my-pi/pull/11146
+  - test(coding-agent): fix red runtime/session job on main by @sethmorton in https://github.com/can1357/oh-my-pi/pull/9460
+  - fix(robomp): load work-items fixture from URL by @roboomp in https://github.com/can1357/oh-my-pi/pull/10886
+  - fix(cli): reap orphaned IPC subprocess workers when parent terminates by @harshaygadekar in https://github.com/can1357/oh-my-pi/pull/11141
+  - fix(compaction): defer idle compaction while an async job is pending by @mattwilkinsonn in https://github.com/can1357/oh-my-pi/pull/10223
+  - Fix/codex faithful context window by @H4vC in https://github.com/can1357/oh-my-pi/pull/11157
+  - fix(coding-agent): keep mid-turn steers from replacing the /loop prompt by @H4vC in https://github.com/can1357/oh-my-pi/pull/11159
+  New Contributors
+  - @harshaygadekar made their first contribution in https://github.com/can1357/oh-my-pi/pull/10237
+  - @rigel-mintaka made their first contribution in https://github.com/can1357/oh-my-pi/pull/11117
+  - @camjac251 made their first contribution in https://github.com/can1357/oh-my-pi/pull/11099
+  - @Morrowmake made their first contribution in https://github.com/can1357/oh-my-pi/pull/11046
+  - @vwsa made their first contribution in https://github.com/can1357/oh-my-pi/pull/11114
+  - @2233admin made their first contribution in https://github.com/can1357/oh-my-pi/pull/11070
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.1.13...v18.1.14
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.1.14
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

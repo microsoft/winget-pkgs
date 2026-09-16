@@ -1,0 +1,72 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 4.1.4
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [4.1.4] - 2026-07-13
+  AeroCloud Multi-Pair Sync, Headerless AeroCrypt with an Optional Recovery Kit, a Strict Overlay Scope, and a CLI Agent Mode
+  AeroCloud grows from a single GUI-only folder into a real multi-pair sync engine reachable from the CLI, with delete propagation, one-way modes, a tunable real-time watcher, SFTP key auth and a compression overlay. AeroCrypt's default becomes a lean headerless base that writes nothing on the remote and opens with just your key, paired with an optional on-demand Recovery Kit that works in every mode and a strict sub-folder overlay scope, plus an opt-in same-name privacy hint. The CLI gains an agent-friendly machine mode and a remote find-and-replace edit, native profile backups round-trip every field, and Windows learns to open archives and expose an in-app File associations panel.
+  Added
+  - AeroCloud multiple sync pairs: run more than one local-to-remote pair per install, each with its own saved profile, protocol, direction, sync index and crypt overlay, driven by the same background worker and reachable from the CLI (aeroftp-cli aerocloud pair list/add/remove/enable/disable/sync). A dedicated cloud_pairs.json store keeps each pair's sync index isolated by a per-pair id plus a duplicate-target guard, an empty store falls back to the legacy single config, and the connect-wrap-sync sequence is unified into one helper the worker and CLI share. Verified headless with two independent pairs (MEGA and Koofr) synced in one pass. All 46 non-EN locales (@EhudKirsh, #405).
+  - AeroCloud delete propagation: a file deleted on one side is now removed on the other instead of the surviving copy resurrecting it, an index-aware decide-and-execute with a safety gate on both the provider and FTP twins. This is the line between sync and copy. Verified headless on a real MEGA remote (@EhudKirsh, #405).
+  - AeroCloud send-only and receive-only folders: per-folder direction (bidirectional, send-only, receive-only) with a preserve-remote-deletes toggle for additive backup versus strict mirror (@EhudKirsh, #405).
+  - AeroCloud from the CLI: aeroftp-cli aerocloud show/set/enable/disable/status/sync configures and runs AeroCloud headless where it used to be GUI-only, the first step toward the AeroCloud and AeroSync engine convergence (@EhudKirsh, #405).
+  - AeroCloud SFTP key-based auth: a saved key-auth SFTP profile, plaintext or passphrase-protected, now works as an AeroCloud target, covering both the background worker and aeroftp-cli aerocloud sync (@EhudKirsh, #405).
+  - AeroCloud AeroCompress overlay: compression is now a real per-config and per-pair overlay composed outside the crypt builder, so upload order is compress then optional encrypt; levels persist and are editable from the GUI and CLI. Verified on MEGA with zstd and stored modes and byte-equal round-trips (@EhudKirsh, #405, #276).
+  - AeroCloud real-time watcher tuning: the debounce quiet period and the cooldown between watcher-triggered syncs are now editable from the GUI and CLI (aerocloud set --watcher-debounce-ms / --watcher-cooldown-secs), answering the bandwidth concern about real-time sync (@EhudKirsh, #405).
+  - Overlays Remote Path, a strict sub-folder crypt scope: pin an AeroCrypt overlay to a strict descendant of the connection Remote Path (connect into /data, encrypt only /data/vault, pass everything outside through as plaintext), from the GUI Connection screen and the CLI crypt bind. Relative UX, live validation that rejects an ancestor, sibling or prefix-trap, empty means same-as-Remote-Path, and the scope locks once bound. All 46 non-EN locales (@EhudKirsh, #369).
+  - Optional same-name privacy hint for encrypted vaults: an opt-in setting (Privacy, off by default) that, inside an active crypt overlay, flags files and folders whose plaintext name also appears at another path you have browsed. Filename encryption is deterministic, so identical names are visible as identical to an observer of the encrypted store, the same tradeoff as rclone-crypt and Cryptomator; the hint is a quiet chip with an explanatory tooltip, never a nagging dialog. All 46 non-EN locales (@EhudKirsh, #276).
+  - CLI agent mode and a remote find-and-replace edit: a global --machine flag emits only structured data on stdout for clean agent parsing, and a new edit command (and MCP aeroftp_edit tool) does a literal find-and-replace on a remote text file in place with no local download, replacing all by default or the first with --first, a no-op when nothing matches, refusing binaries, directories and files over 10 MB. Live-verified on SFTP.
+  - CLI delete and del aliases for rm: rclone and DOS muscle-memory now resolve instead of erroring, as visible aliases with no new subcommand.
+  - users -i per-user group labels: the interactive Users section gained Add and Remove group verbs that edit the selected user's own group partition, idempotent add, clear failures on locked users, no global membership table (@EhudKirsh, #311).
+  - Windows archive opener registration: AeroFTP registers as an available opener for .zip, .7z, .rar, .tar, .tgz, .gz, .xz and .bz2 through a shared ProgID and Capabilities, preserving existing defaults, with NSIS and WiX parity (#361).
+  - In-app File associations panel: a compact OS-backed section in Settings > File Handling showing live Default and Available status for AeroFTP formats and archives, applied via xdg-mime on Linux, Default apps on Windows, best-effort on macOS. All locales, unit-tested (#361).
+  - AeroImage lossless-or-pass-through Save As: converting one lossy format into a different lossy one warns and keeps the save buttons disabled until an explicit acknowledgement, while pass-through and lossless targets stay silent; the guard is unit-tested across the full truth table. All 46 non-EN locales (@EhudKirsh, aerovault#2).
+  - Single pre-release smoke entrypoint npm run smoke: one command runs the deterministic Rust and frontend suites plus the lab-backed integration lanes, clean-SKIPs when Docker or credentials are absent, prints a PASS/SKIP/FAIL matrix and exits non-zero only on a real fail (@EhudKirsh, #347).
+  Changed
+  - AeroCrypt default is now a lean headerless base: crypt init writes nothing on the remote by default and stores the public config (version, salt, KDF params, vault id) in the local keystore per profile, so a vault opens with just your key and leaves no marker on the remote; --with-header restores the on-remote .aeroftp-crypt.json marker as an opt-in for self-contained portability and on-remote tamper-evidence. Lossless migration both directions (crypt to-headerless / to-headed, metadata only, objects byte-identical), GUI header opt-in toggle, connect-time keystore load, MCP unlock parity. All 46 non-EN locales (@EhudKirsh, #276).
+  - The AeroCrypt Recovery Kit is optional, on-demand and works in every mode: the public recovery kit (vault id, salt, KDF params, never secrets) no longer gates create or connect in the GUI; it is available any time from the crypt toggle and the saved-server menu, re-viewable and re-savable, for headerless, headed and keyfile vaults alike. Headed vaults now cache their public config locally on connect, so the kit is reachable without the remote marker, and a keyfile vault's kit spells out that the keyfile is also required (@EhudKirsh, #276).
+  - Provider label accuracy: 'pCloud' is now 'pCloud Drive' and 'Amazon S3' is 'Amazon Web Services (AWS)', and the Add Services search matches 'aws' where it returned nothing before (@EhudKirsh, #347).
+  - Yandex Disk WebDAV recategorized as paid: Yandex 360 gates WebDAV behind the subscription since 22 June, so Yandex Disk WebDAV now carries the paid marker in the Add Service table while its OAuth API stays free (@EhudKirsh, #274).
+  - Refreshed the Google Drive and OneDrive provider marks to their current official 2026 icons, in the provider logos and the README integrations row (@EhudKirsh, #347).
+  - RustCrypto core crates held on the 0.10 cohort with documented pins: the aes-gcm 0.11, chacha20poly1305 0.11 and cbc 0.2 bumps do not converge with aerovault, noq-proto and the transitive keyring cohort, so they are pinned with the reason recorded in Cargo.toml; crypto core verified to still round-trip including a live Cryptomator vault (Dependabot #379, #380, #381).
+  - Routine dependency maintenance: six Dependabot bumps merged after the v4.1.3 tag (vite 8.1.4, vitest 4.1.10, autoprefixer 10.5.2, country-flag-icons 1.6.20, ssh2 0.9.6, clap_complete 4.6.7), all patch or minor with green CI.
+  Fixed
+  - Headerless AeroCrypt now works in the GUI: connecting or toggling a headerless profile used to fail closed every time and fall back to the raw provider, so files could upload in plaintext into what looked like an encrypted folder; the GUI was dropping the profile id the keystore config is keyed by. Forwarding it fixes connect-time unlock, the badge toggle and create-at-first-connect, verified live end to end (@EhudKirsh, #276).
+  - Native profile backup (.aeroftp) round-trips every saved field: four top-level fields (share-link base, custom and detected icons, silenced classic-fallback preference), the per-profile Filen CLI API key and the OneDrive drive id and type were silently dropped on export or re-import; all now survive, and a second silent drop in the GUI import merge is fixed (#230, #215).
+  - A profile action leaves no residue and no half-copy: deleting a profile now removes every vault secret scoped to it (before: only the password, orphaning the Filen key, crypt-overlay secrets and OAuth token), duplicating copies all of them, and export carries all of them, through one shared source of truth used by both the GUI and CLI; profile-add reaches full CLI parity and a cloud profile with no host no longer fails profile-export.
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v4.1.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

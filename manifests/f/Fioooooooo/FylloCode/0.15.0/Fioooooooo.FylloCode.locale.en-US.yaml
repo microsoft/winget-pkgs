@@ -1,0 +1,99 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Fioooooooo.FylloCode
+PackageVersion: 0.15.0
+PackageLocale: en-US
+Publisher: Fio
+PublisherUrl: https://github.com/Fioooooooo
+PublisherSupportUrl: https://github.com/Fioooooooo/FylloCode/issues
+PackageName: FylloCode
+PackageUrl: https://github.com/Fioooooooo/FylloCode
+License: AGPL-3.0
+LicenseUrl: https://github.com/Fioooooooo/FylloCode/blob/HEAD/LICENSE
+ShortDescription: A desktop app that turns Coding Agents into reliable teammates — by splitting every change into Task → Proposal → Apply → Archive, with you reviewing the plan before any code is written.
+Description: |-
+  In this new era, the work that really needs our attention is no longer repetitive coding, but higher-level business understanding and architecture design. The future workflow I have in mind is: understand the business → think through the architecture → write a Proposal → review the Proposal → let the Agent implement it automatically, then move on to the next Proposal.
+  That thinking led me to build FylloCode — a step from Vibe Coding toward Agentic Coding.
+
+  How FylloCode Solves It
+  FylloCode enforces a structured workflow that separates thinking from doing:
+  ┌──────────┐     ┌────────────────┐     ┌───────────┐     ┌───────────┐
+  │   Task   │ ──→ │ Chat/Proposal  │ ──→ │   Apply   │ ──→ │  Archive  │
+  │          │     │                │     │           │     │           │
+  │ What to  │     │ Agent explores │     │ Agent     │     │ Specs     │
+  │ work on  │     │ codebase and   │     │ implements│     │ updated,  │
+  │          │     │ writes a plan  │     │ the plan  │     │ change    │
+  │          │     │                │     │           │     │ recorded  │
+  │          │     │  ➜ YOU REVIEW  │     │           │     │           │
+  └──────────┘     └────────────────┘     └───────────┘     └───────────┘
+  Task — Pick a task from your local list or synced from platforms like Yunxiao. One click sends it to Chat.
+  Chat / Proposal — The Agent explores your codebase, asks clarifying questions, and produces a structured proposal (what to change, which files, acceptance criteria). The Agent is prohibited from writing code in this stage. You review, edit, and approve the proposal before anything else happens.
+  Apply — A fresh Agent session implements the approved proposal task-by-task. It reads only the proposal artifacts — not the Chat history — so every decision must be captured in writing, not left in context-window memory.
+  Archive — Specs are updated, the change is recorded with full traceability. Your project's knowledge base grows with every shipped change.
+  Why Separating Thinking from Execution Matters
+  Most Coding Agents understand a task and write code in the same session. Any misunderstanding becomes code directly, and code is expensive to review. FylloCode physically separates understanding from execution. Misunderstandings can only become proposal text — and text is cheap to review. A 2-minute proposal review catches problems that would take 20 minutes to find in a diff.
+
+  Features
+
+  Agent Protocol (ACP)
+  FylloCode connects to any Coding Agent through ACP (Agent Client Protocol). Claude Code, Codex, or any ACP-compatible agent — one protocol, one interface, without juggling a pile of terminal windows.
+  There are currently 35 agents available in the ACP Registry, with support for parallel chats and parallel Proposal Apply runs.
+
+  System Reminders
+  Each workflow stage injects a system reminder that constrains what the Agent can and cannot do. In Chat, the Agent is instructed to explore and propose, not code. In Apply, it follows the approved task list. This isn't a suggestion — it's a hard boundary enforced at session start.
+
+  Task Panel
+  View and manage tasks from your local list or synced from external platforms. Tasks serve as the entry point to the entire workflow — select a task, start a Chat, and the Agent begins with full context.
+
+  Integration with Development Platforms
+  Connect to platforms like Yunxiao (Alibaba Cloud DevOps) at the provider level — one authentication, multiple tools across task management, source code, and CI/CD. More platform integrations (GitHub, TAPD, Jira, etc.) are planned.
+  Task integrations use APIs instead of Agent Skills by design. API calls are fast and do not spend tokens, so tokens stay focused on the work that actually needs reasoning.
+
+  Workflow Editor
+  Define and customize multi-stage workflows. Built-in templates get you started; edit the YAML to fit your team's process.
+
+  OpenSpec-Driven Proposals
+  Proposals are structured artifacts — not chat messages. Each proposal contains a design document, spec changes, and a concrete task list with file paths and acceptance criteria. The built-in fyllo-specs MCP server manages the full lifecycle: explore → create-proposal → apply-change → archive-change.
+
+  Streaming Rendering Engine
+  FylloCode uses markstream-vue as its streaming rendering engine. It is fast and smooth, with built-in integration for Monaco Editor, KaTeX, and Mermaid. While working on Proposals, it can render flowcharts and formatted specs in real time, making architecture flows and business logic easier to inspect.
+  Engineering Guardrails
+  FylloCode provides two layers of engineering guardrails:
+  - Soft constraints — Capture engineering conventions as Guidelines and continuously maintain them through the built-in fyllo-skills MCP server, without manual upkeep.
+  - Hard constraints — Agents may not always follow Guidelines perfectly, so FylloCode's health checks establish engineering-level enforcement through lint, test runners, git hooks, and CI.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  FylloCode now supports Workspaces containing multiple Projects. Launcher, Chat, Overview, Specs, Guidelines, Proposal, Task, Integration, and bundled MCP server contexts use the Workspace scope. Startup and shutdown lifecycle handling is tighter, and Projects without Git history retain their governance information.
+  Added
+  - Workspace management now supports up to 16 Projects, a primary Project, missing or degraded members, directory relocation, recycle-bin deletion, restore, permanent cleanup, and recent switching
+  - Multi-root ACP Sessions now pass additional directories to capable Agents, keep a fixed Workspace snapshot, show the active scope in Chat, and cover member Projects and their worktrees for local files and attachments
+  - Specs, Guidelines, Proposal, and Overview browsers now aggregate results across Workspace Projects and filter or mark ownership by Project, status, and governance capability
+  Changed
+  - Workspace and Folder now use stable identity models. Upgrade migration settles and retires verified legacy Project storage; data with unverified ownership is not deleted blindly, and a failed settlement blocks normal runtime and retries on the next launch
+  - Proposals are now repository-owned: { folderId, changeId } forms a ProposalRef, and create, apply, and archive always resolve to the owning Project's fixed target so same-named changes in different Projects cannot be mixed
+  - Bundled MCP servers are authorized by the active Workspace activation, with one Workspace v2 context model for HTTP and stdio. Callers no longer control Proposal target paths or rely on legacy Project environment variables, request headers, or working-directory fallbacks
+  - Startup is organized into startup shell, required gate, normal runtime, and background phases. ACP/MCP warmup moves to the background, shutdown is phased and time-bounded, and single-instance startup handoff is enforced
+  - Tasks can bind Workspace members through targetFolderIds, while Integration resources use explicit Project bindings. Removed members remain identifiable as stale soft references instead of being treated as current resources
+  - Project / Workspace terminology and icon hierarchy are now consistent, and Project scope moves into a Chat header popover to reduce context ambiguity in the message area
+  Fixed
+  - Fixed Overview clearing Specs, Guidelines, and Proposal governance counts for Projects without Git history. These Projects now show only Git evolution as empty; real Git errors still report partial failure
+  - Fixed MCP grants being revoked too early on normal completion or cancellation, and removed the fixed one-hour expiry that could interrupt long-running ACP Sessions; grants now follow the actual activation lifetime
+  - Fixed ACP binary-download handling for stream interruption, idle, and timeout cases so downloads do not wait indefinitely or leave incomplete results
+  Notes
+  - The application version is now 0.15.0.
+  - The fyllo-specs MCP server is now 0.10.0. This is a breaking contract update: Proposal operations use folderId in multi-root Workspaces, create-proposal uses worktreeMode, and caller-controlled target paths and legacy Project-context fallbacks are removed.
+  - The fyllo-cortex MCP server is now 0.7.0. This is a breaking contract update: knowledge and lineage use Workspace v2, repository evidence identifies ownership with folderId, and legacy Project paths, headers, environment variables, and cwd fallbacks are removed.
+  - The first launch may run the legacy Project-storage settlement migration. A failed migration preserves data and retries on a later launch; orphaned data whose provenance cannot be confirmed is not silently deleted.
+ReleaseNotesUrl: https://github.com/Fioooooooo/FylloCode/blob/HEAD/CHANGELOG.en.md#0150---2026-08-04
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

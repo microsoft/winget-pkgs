@@ -1,0 +1,56 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: tsouth89.Ceiling
+PackageVersion: 1.5.35
+PackageLocale: en-US
+Publisher: Brandon South
+PublisherUrl: https://github.com/tsouth89
+PublisherSupportUrl: https://github.com/tsouth89/ceiling/issues
+Author: Brandon South
+PackageName: Ceiling
+PackageUrl: https://ceiling.win
+License: MIT
+LicenseUrl: https://github.com/tsouth89/ceiling/blob/v1.5.29/LICENSE
+Copyright: Copyright (c) Ceiling contributors
+ShortDescription: Desktop capacity and quota monitor for coding assistants.
+Description: Ceiling is a local-first Windows app for monitoring provider-reported capacity and quota usage across AI coding platforms.
+Moniker: ceiling
+Tags:
+- claude
+- codex
+- cursor
+- desktop
+- gemini
+- grok
+- usage
+- windows
+ReleaseNotes: |-
+  ## [Ceiling] 1.5.35 - 2026-08-22
+
+  Charts stops showing numbers it cannot stand behind. A month whose models have no published prices painted as an empty one, the busiest day on the activity heatmap could share a shade with the quietest, and a Codex session carried whatever calendar day it was first parsed on, so a DST change or a trip moved usage onto the wrong day. Two cards scanning at once could overwrite each other's index, and a price refresh landing mid-scan stamped old dollars as current for every card already in the file.
+
+  The rest is state a surface reported but could not actually reach. A settings or credentials write could run unserialized on a filesystem that cannot `flock`, Install and Restart could check a staged installer against a different release's digest, and dismissing an update mid-download un-dismissed itself on the next progress chunk. A machine reporting no home directory no longer reads Gemini credentials from — or writes refreshed Google tokens into — whatever directory it happened to start in.
+
+  Ceiling also asks for a GitHub star now. At most twice, ever, and only after a provider has actually reported a reading.
+
+  ### Added
+  • **Ceiling asks for a GitHub star, at most twice ever.** A card in the bottom-right of the dashboard, and the only thing Ceiling has ever asked of anyone using it. The first ask waits until a provider has actually reported a reading and that reading has been on screen for twenty seconds, so it lands after the app has done something useful rather than during setup, when it would be asking to be paid before the work. The second, if the first went unanswered, waits for a later version to have shipped and for a week to have passed since the first, because a version bump the day after is still two asks in one week. Clicking through to GitHub ends it permanently; so does reaching the second ask. Later and the close button mean the same thing and never count as interest. It is not a Windows notification, it takes no focus and traps none, Escape closes it, and the only network call involved is opening the repository in your browser when you ask for it.
+
+  ### Security
+  • **Gemini treats a missing home directory as not logged in.** With no `HOME` or `USERPROFILE`, Ceiling used the working directory as `~/.gemini`, so a checkout fixture could be read and then written back after a refresh. Both the credential read and the credential write now refuse that fallback, matching `client_config.json`.
+
+  ### Fixed
+  • **Grok project names read from a Windows path no longer come back as the whole path.** A session's `cwd` is written by whichever machine ran Grok, so a Windows path reaches Ceiling on Linux and inside WSL. `Path::file_name` only treats `\` as a separator on Windows, so everywhere else a `cwd` of `C:\projects\personal\ceiling` was reported as a project literally named `C:\projects\personal\ceiling`, and the URL-encoded session folder split the same way. Both now split on either separator on every host. A Codex sessions directory joined onto a Windows root also keeps `\` instead of picking up the host's separator. Windows behaviour is unchanged.
+  • **A corrupted Claude de-duplication key no longer silently inflates Charts and Estimated API value.** The usage index treated invalid UTF-8 in a present `dedup_key` as "this record has no key", so the same transcript event could be counted twice if its counterpart still had one. Invalid UTF-8 now rejects the whole index the way a required string already does, and the next scan rebuilds it from the transcripts. A key that was never written is still encoded as the length sentinel, not as a failed decode.
+  • **A filesystem that cannot flock no longer writes settings unserialized.** The state-write lock treated every `flock` errno other than contention as "no lock needed" and continued, so an NFS/FUSE/SMB home without `lockd` let the tray and the CLI replace `api_keys.json` over each other. Only `ENOTSUP` — the filesystem saying it does not implement locking at all — now falls back, read from the errno rather than from how a given Rust version happens to decode it, and the fallback is an exclusive-create sibling that a second writer cannot take. `ENOLCK` is no longer treated as a broken filesystem：it also means the kernel lock table is full or `lockd` failed for that one call, while another process still holds a real flock, so falling back to the sibling would have let both writers through. It fails the write instead. An unknown errno already did. Because the sibling has no kernel-backed release, a leftover from a killed process still has to age out, but the age it has to reach is now two minutes rather than the ten seconds an acquirer waits — a holder doing slow work can no longer be outlasted and have its lock taken, and a lock file stamped in the future by a skewed server clock reads as held rather than as expired. A holder unlinks the sibling on release only while it is still the same file it created, so a takeover cannot cascade into deleting a third writer's lock. A `state-write.lock` the current user cannot open — left by a `sudo` run, or by another account — now fails the write and names the path to remove. It used to be unlinked and recreated, which put the running holder and the new one on two different inodes and let both writes proceed. A directory in the lock path still fails the write. Releasing that sibling also hands the lock cleanly to the next writer on Windows, which reports a name whose deletion has begun as access-denied rather than as already-existing; a waiter that arrived in that window used to get a hard failure instead of the lock a moment later.
+  • **The 1.5.33 notes no longer claim the incident badge is Ceiling's only non-provider request.** That sentence was false：models.dev (prices) and GitHub (update checks) already run without that opt-in. The badge is still off by default. The replacement makes no exclusive claim at all: the badge adds each enabled provider's public status page to the hosts Ceiling talks to, on top of the usage requests those providers already receive, while models.dev and GitHub are fixed hosts that run either way. A copy test bans the exclusive phrasings so neither version can come back.
+  • **The activity heatmap no longer paints the busiest day the same shade as the quietest.** Quartile cuts that collapsed to one value still held every active cell at mid-scale, including a day orders of magnitude above the rest, and with four or fewer active cells the 75th-percentile cut sat on the maximum so the legend's top swatch never appeared. An outlier now reaches the darkest step, a genuinely flat month stays mid-scale, and the busiest cell of a small set reaches the top of the ramp. The top swatch is decided by the busiest cell rather than by the 75th-percentile cut, which was wrong in both directions：when the upper half tied, the busiest cell fell into the mid band, and with four distinct cells the cut sat low enough that the second-busiest matched the busiest.
+  • **A single light day no longer becomes the spend-anomaly baseline.** After a week away, one $1.50 session was "the recent daily median", so the first ordinary $12 day back toasted as an 8x spike and marked the day sent. A real runaway later that evening then said nothing. The detector now needs three floor-clearing days before it will compare; fewer is the same as a zero baseline, which already stays quiet. Closes SBS-965.
+  • **Install and Restart no longer checks the downloaded installer against a different release.** Clicking Download and Check for updates at the same moment could let the check finish second and store a newer release digest next to the installer that had just completed. Install then failed closed and discarded a valid download. Download now takes the updater lock for the whole start, a check that lost the slot does not overwrite an in-flight download, and apply verifies the digest captured when that download began. Dismissing an update while its download is still running now sticks：a later progress chunk used to write the Downloading state back, which let the finishing download store Ready and bring Install & Restart back after the banner had been dismissed. That discarded download's installer is deleted rather than left in the staging directory.
+  • **Two Charts scans no longer wipe each other's usage index.** The API-value card and the heatmap can finish at the same time, and each commit encoded its snapshot then released the lock before writing the file. The slower writer could put the older snapshot back on disk, so files the faster scan had just indexed were gone after a restart and had to be parsed again. The lock now covers the write, so the file on disk is always the latest encode. In-memory totals were already correct.
+  • **A light user whose every day is under $1 can now receive a spend-anomaly alert.** Days under a dollar still do not build the recent-median baseline — a five-cent leftover next to a real day would otherwise manufacture a false spike. When that leaves no median at all, the detector used to go silent, so a $0.60/day user never heard about a $180 loop. It now falls back to a $20 absolute trigger (20x the $1 floor, the largest spike factor the setting accepts) so a runaway still toasts and an ordinary first day does not. The budget alert is a separate opt-in and is no longer this feature's only answer for that user. The trigger is compared at cent precision, so a day worth exactly $20.00 cannot be missed because a sum of floating-point estimates landed a fraction under it while the toast still printed "$20.00".
+  • **The activity heatmap follows the UI language.** The rest of Charts already translated; this card had been written after locale landed and never joined. Titles, empty states, axis labels, screen-reader text, and dollar/token formatting now go through the same bundles as the rest of the app, so a Chinese language setting no longer leaves this card in English. A language without its o
+ReleaseNotesUrl: https://github.com/tsouth89/ceiling/releases/tag/v1.5.35
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

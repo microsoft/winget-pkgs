@@ -1,0 +1,112 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Voltius.Voltius
+PackageVersion: 0.31.0
+PackageLocale: en-US
+Publisher: Voltius
+PublisherUrl: https://voltius.app/
+PublisherSupportUrl: https://github.com/VoltiusApp/voltius/issues
+PackageName: Voltius
+PackageUrl: https://voltius.app/
+License: AGPL-3.0
+LicenseUrl: https://github.com/VoltiusApp/voltius/blob/HEAD/LICENSE
+ShortDescription: Cross-platform SSH client and terminal
+Moniker: voltius
+Tags:
+- crdt
+- credential-manager
+- homelab
+- local-first
+- plugins
+- port-forwarding
+- rust
+- serial
+- sftp
+- ssh
+- ssh-client
+- sync
+- sysadmin
+- tauri
+- teams
+- terminal
+ReleaseNotes: |-
+  Added
+  - The font pickers now list the fonts actually installed on your machine.
+    Where Appearance and the theme editor offered two bundled presets and a
+    free-text box, they now enumerate the installed families, preview each one
+    in its own face, and filter the terminal picker to monospaced faces with a
+    "show all fonts" escape hatch — some fonts misreport their pitch, and Nerd
+    Fonts' non-Mono variants report proportional. The free-text box stays, and
+    now warns when the family it holds is not installed instead of silently
+    falling back to a proportional default.
+  - A serial console can hand its port back without losing the tab. The status
+    bar gains a plug toggle that releases /dev/ttyUSB0 — keeping the tab, its
+    scrollback and its configuration — and reopens it on the next click, so a
+    board can be flashed without closing anything. Beside it is an
+    auto-reconnect toggle, stored on the connection so it survives a restart and
+    follows the device; with it off, a drop leaves the port free rather than
+    reclaiming it every few seconds under the flashing tool.
+  - Sharing a private vault now asks before it converts. Adding one person used
+    to create a team, link the vault and switch it to cloud sync with no dialog;
+    inviting someone now opens a modal stating the three costs first — no
+    offline access, members keep a copy of the vault key that removal does not
+    take back, and no way back to private — and states that the vault's existing
+    contents move with it.
+  Fixed
+  - A custom terminal font no longer stretches the cells. A family typed into
+    the theme editor carried no generic fallback, so when it failed to resolve,
+    the canvas measured the cell from its own proportional default: cells came
+    out about 1.6x too wide while the glyphs still painted at the right size.
+    Terminal font stacks now end in monospace unless they already carry a
+    generic family.
+  - A snippet with a choice variable asks which option to use. The parser hands
+    a choice its first option as the default, and anything with a default
+    counted as resolved, so {{env:choice:dev,staging,prod}} ran as dev and
+    the other options were unreachable. The picker now always opens, pre-filled
+    with the first option.
+  - A team member whose role cannot read secrets no longer sees "Access
+    revoked". A connect-only member holds no VIEW_SECRETS, so the vault-key
+    route answers 403 — which the client read as removal from the team. They
+    now get the vault, empty, like any other empty vault.
+  - Converting a private vault from the share sheet no longer empties it for
+    everyone else. The conversion created the team and the key but left the
+    vault's contents behind under the old id: the owner still saw the hosts
+    while every teammate saw an empty vault, with no warning. Both conversion
+    paths now migrate the contents, and do it as a group — a failure unlinks the
+    vault and deletes the team rather than leaving a vault that looks complete
+    to its owner and empty to everyone else.
+  - A vault you have just joined unlocks by itself when its key arrives. The
+    waiting panel was honest but permanent: nothing re-read the key that had
+    landed until you hit Retry or restarted. It also now names who it is waiting
+    for, and a member arriving for the first time lands on the surface their
+    role can actually use — a connect-only invitee gets connections, not a
+    keychain of redacted rows.
+  - Typing exit on a remote shell no longer reconnects it. The close event
+    carried no reason, so a deliberate exit and a dropped link looked
+    identical; the far side's exit-status is now carried through, and a session
+    that ended on purpose stays ended.
+  - A snippet run from the command palette lands in the focused tab. The target
+    was resolved as the first connected session in tab order, so with several
+    tabs open a snippet always went to tab 1.
+  - A plugin installed from the catalogue can be disabled like a bundled one.
+    The enable toggle rendered only on bundled rows, so installing a plugin that
+    also ships with the app took its toggle away, and themes — which are only
+    ever installed — never had one.
+  - A plugin installed from the catalogue now activates. One whose manifest set
+    defaultEnabled: false loaded inactive and contributed nothing, which is
+    why installing a marketplace theme added no theme to the Appearance list.
+    Installing is itself the opt-in; an explicit choice to disable is still
+    honoured, including across a reload that previously re-enabled it.
+  - The role picked for an invitee reaches them. The role was assigned in a
+    follow-up call that 404s against a pending invitation, and the error was
+    swallowed, so every invitee landed on the default role. Alongside it: a
+    failed invite no longer reports success, an invite with no role selected is
+    refused rather than falling back to "member", a sync server that cannot be
+    reached no longer leaks its URL into the error text, seats no longer render
+    "? available · ? total" when the subscription load fails, text on accent
+    backgrounds stays readable under a dark accent, and the vault header's
+    member stack is reachable by keyboard and touch.
+ReleaseNotesUrl: https://github.com/VoltiusApp/voltius/releases/tag/v0.31.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,78 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 15.10.8
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-agent-core
+  Added
+  - Added optional fetch overrides to SummaryOptions and compact/generateSummary so remote compaction can use custom HTTP clients
+  - Added optional fetch option to ProxyStreamOptions to control the HTTP request used by streamProxy
+  - Added optional fetch overrides to requestOpenAiRemoteCompaction and requestRemoteCompaction for injectable HTTP transport
+  - Added the upstream provider that served a request (AssistantMessage.upstreamProvider, e.g. OpenRouter's routed provider) as a pi.gen_ai.response.upstream_provider chat-span telemetry attribute, alongside the existing response id and time-to-first-chunk.
+  @oh-my-pi/pi-ai
+  Added
+  - Added optional fetch transport override (fetch?: FetchImpl) to Google, Ollama, and OpenAI-compatible model-manager options so dynamic model discovery and metadata lookups can use a caller-supplied HTTP client instead of only global fetch
+  - Added optional fetch on OAuth controller and API-key validation/login flows so token exchange, refresh, and device/PKCE login requests can be routed through a custom fetch implementation
+  - Added optional fetch support to usage polling context, allowing usage providers to execute usage checks using an injected HTTP client
+  - Added AssistantMessage.upstreamProvider, capturing the upstream provider an aggregator routed the request to (OpenRouter reports it via a top-level provider field on every chunk, e.g. "Anthropic"). Surfaced from the OpenAI-completions stream alongside responseId.
+  Fixed
+  - Fixed a degenerate OpenAI Codex stream (the model emits whitespace-only function_call_arguments.delta frames forever — commonly seen right after a todo tool call) terminating the turn with an error instead of recovering. The whitespace-loop circuit-breaker now (a) stops aborting the shared per-request AbortController — requestSignal is an AbortSignal.any over it, so aborting latched it and made every reopen on the reused requestSetup impossible — and (b) drops the half-built junk tool call and replays the request from scratch, bounded by CODEX_WHITESPACE_LOOP_RETRY_LIMIT (2). Sampling nondeterminism usually clears the loop on a fresh attempt; once the budget is exhausted the error is surfaced as before, but without the junk tool call polluting the message.
+  - Capped requested output tokens at 64k (OPENAI_MAX_OUTPUT_TOKENS, mirroring Anthropic's CLAUDE_CODE_MAX_OUTPUT_TOKENS) on OpenAI-family wires with a known upstream output cap — the openai-completions request builder (non-OpenRouter) and the shared responses sampling helper (openai-responses, azure-openai-responses). A model's catalog maxTokens often tracks its context window rather than the upstream's per-request output cap, so requesting the full ceiling 400'd (e.g. z-ai/glm-4.7 asking for 131072 output exceeded the upstream's 131072-token total context). Output is now min(requested, model.maxTokens, 64000).
+  - Stopped sending max_tokens/max_completion_tokens on OpenRouter (openrouter.ai) completions requests. OpenRouter filters out any upstream whose advertised output cap is below the requested max_tokens, so a value derived from the catalog (which reflects the highest-cap provider) silently excluded lower-cap upstreams — provider.order: ["cerebras"] for z-ai/glm-4.7 fell through to DeepInfra because Cerebras's ~40k output cap is below the request, while only: ["cerebras"] (no fallback target) bypassed the filter and worked. Omitting the field lets each upstream self-cap and keeps provider routing (only/order) honored. Kimi via OpenRouter stays exempt — it derives TPM rate limits from max_tokens.
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added an optional fetch option to CustomToolContext so custom tools can use a caller-provided HTTP implementation
+  - Added optional fetch overrides to ModelRegistry construction and MCP/web search/tool network calls, enabling callers to inject custom HTTP clients instead of relying on global fetch
+  - Added a bash.enabled setting to disable the model-facing bash tool while leaving user-initiated bang/RPC bash commands available.
+  - Added an @<upstream> model-selector suffix to pin an aggregator model to a single upstream provider per invocation, e.g. --model openrouter/z-ai/glm-4.7@cerebras (sets OpenRouter provider.only; Vercel AI Gateway models map to vercelGatewayRouting.only). Resolved through parseModelPattern, so it works for --model/--smol, model roles, and the SDK, and composes with a trailing thinking level (...@cerebras:high). The base must resolve to an aggregator (openrouter.ai / ai-gateway.vercel.sh); otherwise the @ stays part of the id, so ids that legitimately contain @ (claude-opus-4-8@default, workers-ai/@cf/...) are unaffected.
+  Fixed
+  - Fixed a turn-ending provider error (e.g. a 502 whose body is the proxy's full HTML page) flooding the transcript: AnthropicApiError folds the entire response body into errorMessage, and the inline transcript render reprinted it verbatim — every embedded blank line included — leaving a tall mostly-empty block ending in </html>. The inline error now drops blank lines, clamps to 8 lines, and width-truncates each line via getPreviewLines, matching the pinned error banner.
+  @oh-my-pi/pi-mnemopi
+  Added
+  - Added a fetch option to ExtractionClient to inject a custom fetch implementation for remote LLM requests
+  - Added an optional fetch option to extractFacts to control the transport used for remote extraction calls
+  - Added support for passing a custom fetch implementation through complete and summarizeMemories via remote LLM options
+  @oh-my-pi/pi-tui
+  Fixed
+  - Fixed TUI renders repeatedly clearing terminal scrollback after content filled the viewport. Unknown viewport probes no longer let foreground-streaming offscreen growth take the destructive historyRebuild path on every frame; newly appended tail rows stay reachable while stale history waits for a safe checkpoint. (#2154)
+  @oh-my-pi/pi-utils
+  Removed
+  - Removed the exported hookFetch API, which previously intercepted globalThis.fetch via middleware handlers
+  - Removed hookFetch from the package entrypoint, so imports from @.../utils no longer provide this fetch interception helper
+  What's Changed
+  - fix(tui): preserve scrollback during overflow growth by @roboomp in https://github.com/can1357/oh-my-pi/pull/2155
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v15.10.7...v15.10.8
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v15.10.8
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

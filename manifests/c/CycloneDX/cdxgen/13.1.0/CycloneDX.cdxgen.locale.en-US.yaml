@@ -1,0 +1,57 @@
+# Created with WinGet Updater using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: CycloneDX.cdxgen
+PackageVersion: 13.1.0
+PackageLocale: en-US
+Publisher: OWASP Foundation
+PublisherUrl: https://owasp.org/
+PublisherSupportUrl: https://github.com/CycloneDX/cdxgen/issues
+Author: CycloneDX
+PackageName: CycloneDX Generator (cdxgen)
+PackageUrl: https://github.com/CycloneDX/cdxgen
+License: Apache-2.0
+LicenseUrl: https://github.com/CycloneDX/cdxgen/blob/HEAD/LICENSE
+ShortDescription: A polyglot tool and a library for generating various Bill of Materials in CycloneDX specification.
+Description: Generate Software Bill of Materials (SBOM) for most applications and container images with a single command. Generate Operations Bill of Materials (OBOM) for Linux and Windows hosts. Integrate with any CI/CD pipeline. Automatically submit the generated BOM to your dependency track server for analysis.
+Moniker: cdxgen
+Tags:
+- bom
+- cbom
+- containers
+- cyclonedx
+- docker
+- oci
+- owasp
+- package-url
+- purl
+- saasbom
+- sbom
+- sca
+- software-bill-of-materials
+- supply-chain
+ReleaseNotes: |-
+  cdxgen 13.1.0
+  Build introspection
+  The headline change in this release is that cdxgen can now grade its own work. Run a scan with --introspect or --profile introspect and cdxgen reports how complete the resulting SBOM actually is, which parts of your build environment limited it, and what to fix. The verdict is not just a score. It is an evidence-driven repair loop: the report ranks the remediations that would actually raise fidelity, so you can work through them and re-scan until the tiers stop improving.
+  This pairs with new JVM build tool detection and provisioning, so a project whose wrapper is broken or targets an unsupported JDK can still be resolved properly instead of quietly producing a shallow BOM.
+  Claude Code plugin
+  cdxgen now ships as a Claude Code plugin covering SBOM generation, container and host scans, CBOM, AI-BOM and MCP inventory, auditing, signing, validation, evidence enrichment, and Dependency-Track publishing. The skills encode cdxgen's safety rules, so an agent previews with a dry run before executing and does not install dependencies on your behalf.
+  claude plugin marketplace add cdxgen/cdxgen
+  claude plugin install cdxgen@cdxgen-plugins
+  Deeper analysis for .NET, Go, and Rust
+  The bundled analysis engines all moved forward in this release, and between them they change how much cdxgen can actually see. If you generate SaaSBOMs or rely on evidence and reachability, this is the part of 13.1.0 worth reading.
+  .NET gains framework semantics. Dosai 4.0.0 introduces a new analysis schema built around provider-based framework detection. Instead of listing namespaces and methods, it now resolves routes, inventories services and AI usage, seeds taint sources, and maps trust zones, including MCP tooling. Route templates resolve to concrete URLs, so versioned segments like {version:apiVersion} come through as real endpoints rather than placeholders. Analysis is also considerably more robust: using-alias casts, duplicate symbols, deeply nested code, unreadable files, and the assembly memory blowup on large solutions are all fixed.
+  Go understands your HTTP handlers. Golem now extracts handler signatures, so each route in a SaaSBOM carries its path and query parameters, request body type, and response type. This works across gin, chi, echo, and plain net/http, and it follows import aliases and renamed context parameters. Group-root registrations such as users.GET("", listUsers) resolve to their group prefix instead of being dropped. Go 1.27 is supported end to end, with encoding/json/v2 and post-quantum crypto modelled, and taint now carries field-qualified values across by-value aggregate copies and higher-order calls. Call graph construction no longer aborts a whole report when the underlying analysis panics: it degrades to a CHA fallback and records a diagnostic instead.
+  Rust analysis is faster and much more accurate. Rusi 3.1.0 evaluates cfg attributes, resolves real modules and imports rather than guessing, types method receivers, recovers from macros, and analyses dependencies. The call graph is leaner and roughly ten times faster to build. The toolchain moves to Rust 1.98 with syn 3.
+  Alongside these, Trivy and trustinspector pick up Go 1.27, and pnpm 11.25.0 and Deno 2.9.6 are in for the runtime paths.
+  Python accuracy
+  Framework signals are now derived from PyPI classifiers, and the frameworks list has grown. Lock file parsing emits the parent dependency edge and repairs missing root edges, Poetry dependency keys are normalised, and first-party modules are no longer misattributed to distributions. An unparseable workspace pyproject.toml no longer takes the whole scan down.
+  Dependency-Track
+  BOM submission now uses a multipart form POST, and project tags are sent as a comma separated list. If you were seeing tags land as a single value, this fixes it.
+  Other fixes worth knowing
+  Distro qualifiers are aligned with purl namespaces, and Azure Linux and CBL-Mariner are canonicalised to azure-linux. The cbom command now rejects -t os rather than attempting source crypto analysis against an OS inventory, which was slow and meaningless. Several Windows path and process handling bugs are resolved. Audit rules stay evaluable when a property is absent.
+  Full Changelog: v13.0.1...v13.1.0
+ReleaseNotesUrl: https://github.com/cdxgen/cdxgen/releases/tag/v13.1.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,40 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Iewnfod.LuminaTerminal
+PackageVersion: 0.3.0
+PackageLocale: en-US
+Publisher: iewnfod
+PublisherUrl: https://github.com/iewnfod
+PublisherSupportUrl: https://github.com/iewnfod/lumina-terminal/issues
+Author: Iewnfod
+PackageName: Lumina Terminal
+PackageUrl: https://github.com/iewnfod/lumina-terminal
+License: MPL-2.0
+LicenseUrl: https://github.com/iewnfod/lumina-terminal/blob/HEAD/LICENSE
+ShortDescription: A modern, cross-platform terminal emulator built with Tauri, React, and Xterm.js.
+Description: Lumina Terminal is a modern, cross-platform terminal emulator built with Tauri, React, and Xterm.js, featuring a sleek UI, a command palette, and customizable profiles. Each tab runs a real shell process with multi-tab support, tear-off tabs, find-in-terminal, configurable shells (PowerShell, WSL, Git Bash, or any executable), an optional WebGL renderer, and session save and restore.
+Tags:
+- console
+- shell
+- terminal
+ReleaseNotes: |-
+  ✨ Features
+  - TOML config file — The user configuration moved from config.json to a single hand-editable config.toml, with each profile rendered as its own [profiles.<name>] section instead of a crammed JSON blob. Existing JSON configs are detected and migrated automatically on first launch — there is nothing to do manually
+  - Config hot reload — Lumina now watches config.toml and applies external edits live (directory watch with debounce; its own writes are suppressed so settings changes never loop back). Edit a profile's theme or a global setting in your editor and running tabs pick it up without a restart — and editing or deleting a profile never kills its already-running tabs
+  - Linux window outline — A 1px hairline now traces the window edge on Linux desktop environments that draw no compositor shadow, so a dark terminal on a dark wallpaper still has a visible boundary. The color derives from the terminal background so it reads on light and dark surfaces, follows the rounded corners, and hides when maximized. Toggle it via the new "Window Outline" option in General settings (on by default; ignored on macOS/Windows where the system provides a shadow)
+  ⚡ Performance
+  - Theme file reads now go through an mtime-validated cache — a warm read costs a single stat IPC instead of a full path-exists + read round-trip per lookup, while externally edited theme files still apply on the next re-resolve
+  - The profileLastOpened recency bookkeeping moved out of config.toml into a separate runtime store, so the config file is no longer rewritten on every tab open — hand-edits stay quiet and safe from write races now that the file is hot-reloaded
+  🐛 Bug Fixes
+  - Newly created profiles (untitled local/remote and hosts imported from ~/.ssh/config) no longer hardcode rows: 24, cols: 80 — they now inherit the global terminal size defaults like any other setting
+  - Several UI strings that were stuck in English — the profile-not-found message, devtools description, privileged-command tooltip, command-palette aria labels, and the search bar's label and close button — now go through i18n with English and Chinese translations
+  🔧 Chores
+  - Added a COPR release pipeline (plus a follow-up fix to its push workflow), giving Fedora users a native install path: dnf copr enable iewnfod/lumina-terminal && dnf install lumina-terminal
+  - Internal refactoring with no behavior change: launchers split into platform submodules, settings/about/developer panels migrated onto shared primitives, unified invoke logging with shared Rust fs helpers, and smaller function extraction across large files
+  📚 Docs
+  - Completed the AGENTS.md source map so it now covers all remaining modules
+  Full Changelog: https://github.com/iewnfod/lumina-terminal/compare/v0.2.5...v0.3.0
+ReleaseNotesUrl: https://github.com/iewnfod/lumina-terminal/releases/tag/v0.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

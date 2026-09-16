@@ -1,0 +1,165 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: ForgeLabsSoft.DriveForge
+PackageVersion: 4.3.0
+PackageLocale: en-US
+Publisher: ForgeLabsSoft
+PublisherUrl: https://github.com/ForgeLabsSoft
+PublisherSupportUrl: https://github.com/ForgeLabsSoft/driveforge/issues
+PackageName: DriveForge
+PackageUrl: https://github.com/ForgeLabsSoft/driveforge
+License: GPL-3.0-only
+LicenseUrl: https://github.com/ForgeLabsSoft/driveforge/blob/main/LICENSE.txt
+Copyright: Copyright (C) 2026 ForgeLabsSoft
+ShortDescription: Create Windows USB drives, clone your PC, back it up, recover deleted files, and check drive health. Free and open source.
+Description: |-
+  DriveForge makes common but normally-complicated Windows disk tasks simple and safe:
+  create bootable Windows or Linux USB drives, clone a running PC to another drive,
+  back up and restore Windows to an image, recover deleted files, securely erase drives,
+  and diagnose drive health. It is a single self-contained executable with no ads,
+  no telemetry, and no accounts. Free and open source under the GPL-3.0.
+Moniker: driveforge
+Tags:
+- usb
+- bootable
+- iso
+- clone
+- backup
+- data-recovery
+- undelete
+- secure-erase
+- wipe
+- disk
+- diagnostics
+- ventoy
+- rescue
+- portable
+- open-source
+ReleaseNotes: |-
+  # Changelog
+
+  All notable changes to DriveForge are documented here. Dates are ISO (YYYY-MM-DD).
+
+  ## v4.3.0 — 2026-07-26
+
+  A large safety and reliability pass across every feature in the app, plus a new keep-awake
+  behaviour and the removal of the wipe "certificate" feature.
+
+  ### Removed
+  **The Wipe "Certificate of Data Erasure" has been removed.** DriveForge is not an accredited
+    certification body, and generating a certificate implied a level of formal assurance the
+    project isn't in a position to offer. Wipe itself is unchanged — it still securely overwrites
+    the drive — it just no longer offers to produce a certificate afterwards.
+
+  ### New
+  **The PC no longer goes to sleep or hibernates while an operation is running** (wipe, clone,
+    backup, scan, download, etc.) — the display can still turn off. This cannot override a sleep
+    you initiate yourself (lid close, power button, Start > Sleep), and on a laptop running on
+    battery with Modern Standby, Windows still forces sleep about 5 minutes after its own timeout;
+    plug in for long jobs.
+  Progress reporting is more accurate: several operations (Wipe, raw ISO write + verify,
+    capacity test, Shred) could finish with the bar and percentage stuck around 89% and a
+    stats line quoting a bogus total instead of showing 100% / the real size.
+
+  ### Safety fixes (data-loss / false-success prevention)
+  **File Analyzer**: duplicate/large-file deletion now goes through Windows' own delete
+    confirmation (with the "this can't be undone" warning) instead of silently bypassing the
+    Recycle Bin for files too large for it or on drives without one; a protected/master folder
+    set *after* a scan is now honored; Undo now actually restores files (it previously failed to
+    match filenames with extensions hidden); a file that was both a "largest file" and a
+    duplicate-set's last copy can no longer be deleted from both grids at once.
+  **Multi-Boot USB (Ventoy)**: re-verifies the target disk right before the wipe (a disk can
+    renumber if a drive is unplugged/replugged during the multi-minute download), verifies the
+    downloaded Ventoy tool is digitally signed before running it elevated, and no longer reports
+    success or failure incorrectly around timing edge cases.
+  **Disk erase tools**: Shredding a folder that contains a junction/symlink no longer follows it
+    onto another drive; "SSD Secure Erase" no longer claims blocks were discarded on media that
+    doesn't actually support TRIM (HDDs, most USB flash drives, some USB-bridged SSDs); FAT32
+    formatting over 32 GB (which silently fails) is now blocked up front instead of reporting
+    success on an unusable drive; Shred now also overwrites alternate data streams, not just the
+    main file content.
+  **Partition tools**: an interrupted overlapping partition move could previously corrupt data
+    with no way back — there's now an explicit warning plus an automatic backup of the partition
+    table before the move; Resize no longer reports success when the resize was actually declined.
+  **Diagnostics (Health / SMART / Surface scan / Speed test)**: a failing drive could be reported
+    as healthy in several cases (a stale cached report, a matching-substring bug that read
+    "Unhealthy" as containing "healthy", a surface scan that stopped on the first bad read and
+    called the rest of the drive fine); the Speed test — which writes to free space — now discloses
+    that and asks first, since those are exactly the clusters a Recovery scan might need.
+  **Clone, Restore, Export VHDX, Backup-to-image**: all four now correctly flag a run as
+    incomplete instead of reporting full success when files are skipped or a step fails partway
+    (previously only some of these were checked); restoring a backup now validates the saved image
+    and checks capacity honestly before wiping the destination; backing up now writes to a
+    temporary file and swaps it in only after the new backup is verified, so a failed backup can
+    no longer destroy a good existing one.
+  **Create Windows USB**: fixed BitLocker failures being silently swallowed and reported as
+    success, 32-bit/ARM64 images not booting on UEFI, and a double-click launching two destructive
+    operations on the same disk at once.
+  **Download ISO / Verify ISO checksum**: fixed picking the wrong (older) release when several
+    point releases exist, a truncated download being saved as if complete with no warning, and
+    common checksum-paste formats (a filename attached, a `sha256:` prefix, a whole checksum-list
+    file) being flagged as "does not match" on a perfectly good image.
+
+  ### Other fixes and improvements
+  Fixed the nav-sidebar "Clone to USB / external drive" label getting cut off mid-word in every
+    language.
+  Fast Clone is now the default cloning engine (was DISM); its warning text no longer mentions
+    antivirus, and cloning now shows a single format-confirmation prompt instead of two.
+  The Desktop clone report is now only created when something needs a second look — a clean
+    successful clone no longer leaves a folder + text file behind.
+  The progress bar now resets properly after pressing Stop on any operation (previously stuck at
+    its last position on most of them).
+  Selecting Wipe no longer makes the Drive-tools overview card spuriously repaint as if you'd
+    clicked Health.
+  TestBoot (boot a physical disk in a VM) now protects against targeting the wrong disk, no
+    longer strands a disk offline silently on a script error, and recovers automatically if the
+    app is closed or crashes mid-session.
+  Numerous smaller correctness fixes in the raw NTFS clone/recovery engine shared by Clone,
+    Export, Restore and Recover (bounds-checking on malformed filesystem records, alternate data
+    streams on hidden/system files and directories, 4Kn sector alignment).
+
+  ## v4.2.0 — 2026-07-13
+
+  Adds faithful backup-image restore and completes the multi-language coverage.
+
+  ### Backup & restore
+  **Restore from a VHDX backup** (made by *Export VHDX*) now writes the image back to a drive *faithfully* — using the same raw engine that makes *Clone This PC* an exact copy (preserving apps, permissions, hardlinks, reparse points and alternate data streams). Verified end to end: the restored drive boots on real hardware.
+  The backup image is now attached through the **native Windows Virtual Disk API** instead of scripting an external mount — it is read-only, cleans up any leftover mount automatically, and can never leave the image file locked.
+  Restore reliability fixes: correct handling when Windows auto-assigns a drive letter to the mounted image, the right Windows volume is chosen inside multi-partition images, and the target is only formatted **after** the image is confirmed readable.
+
+  ### Language
+  **Full 17-language coverage**: every remaining stage/status message and completion dialog on the backup / clone / restore screens is now translated, so a chosen language shows no leftover English.
+
+  ### Under the hood
+  Renamed the project internals throughout (no functional change).
+  Numerous smaller reliability fixes across the imaging paths.
+
+  *This release also carries the safety + reliability work listed under v4.1.2 below, which had not yet been published as a download.*
+
+  ## v4.1.2 — 2026-07-04
+
+  A large safety + reliability release. DriveForge writes whole disks, so this focuses on
+  never doing the wrong thing, and on being clear about what is happening.
+
+  ### Safety (data-loss prevention)
+  Destructive confirmation dialogs now default to the **safe** button (Cancel/No), so pressing Enter never erases a drive by accident.
+  Every destructive write now **re-verifies the target disk's identity** (size + serial) immediately before writing — Windows can renumber disks when a drive is unplugged/replugged between the scan and the click. Covers wipe, format, secure-erase, raw ISO write, and the partition tools (Initialize, Convert, Move, Delete, Quick-partition).
+  **Refuses to write when the source file is stored on the target disk** (raw ISO write and image restore) — this used to be able to destroy the very file being written.
+  **Restore now verifies the backup image's integrity *before* formatting the target** — finding a corrupt backup after erasing the destination (a dead-PC recovery) was the worst possible ordering.
+  Pressing **Stop during secure file-shred** no longer deletes the partially-overwritten file (that would lose it *and* leave its data recoverable).
+  Scheduled/unattended clone now matches the target drive by **serial number** (not just name+size) and never targets the system disk.
+
+  ### Cloning a PC
+  **Detects your active real-time antivirus** (any vendor, via Windows Security Center) and warns before cloning that it can drastically slow the process — with a clear choice to pause/exclude it. DriveForge never touches your antivirus itself.
+  Skips antivirus data/quarantine folders and developer caches (NuGet/npm/pip/cargo) during capture — these are self-protected or huge and slow the imaging engine.
+  Clearer live status: distinguishes **"engine busy (high CPU)"** from **"drive stalled"**, and no longer looks frozen during the normal scan phase.
+  Disables legacy 8.3 short-name generation on the target for a faster many-file apply.
+  Antivirus temporarily disabled on the clone for first-boot app repair is now **re-enabled automatically and reliably**, and is left untouched on the Windows-To-Go path (which has no auto-restore).
+
+  ### Reliability & correctness
+
+  _(release notes truncated to fit the 10000-character manifest limit -- see the full notes at the URL below)_
+ReleaseNotesUrl: https://github.com/ForgeLabsSoft/driveforge/releases/tag/v4.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

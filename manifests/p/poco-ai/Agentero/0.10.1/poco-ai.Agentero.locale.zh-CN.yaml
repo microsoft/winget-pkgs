@@ -1,0 +1,62 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.10.1
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  本次发布聚焦阅读与上手体验：PDF 缩放改为底栏滑条、批注悬停连线与高亮色卡扇出；划词自动复制并恢复「加入对话 / 快速提问」；新手引导在完成后自动进入功能导览。同时精简 CLI（移除 usage / config / completion / trash / feed，wiki 并入 doctor wiki），并移除未获官方 ACP 支持的 Antigravity 后端。外部 Agent 完成 paper-reader 精读后会按技能闭环标记已读。
+  破坏性变更
+  - 移除 Antigravity ACP 后端：Google 未官方支持 Antigravity 的 ACP，已删除社区 agy-acp 模板及其安装、版本检查、终端登录与 auth-required 引导；加载 agents.json 时会剥离遗留的 antigravity/gemini 行，避免整表解析失败。（e546373f by @qychen2001）
+  - CLI 命令精简：移除 agentero usage、config、completion、trash、feed；原 wiki check 并入 agentero doctor wiki。Vault 解析仍支持 --vault / AGENTERO_VAULT / 向上查找，以及 vault use 写入的默认路径。（206f6a66、83284d9f、3e9af822、136cc48c by @Phil-Fan）
+  新功能
+  - PDF 底栏缩放滑条：顶栏 +/- 百分比与底栏适应宽/页按钮改为底栏 50%–300% 范围滑条；空闲为低调灰色，悬停/聚焦/拖动使用品牌强调色，右侧工具栏保持固定。（9736b036 by @Phil-Fan）
+  - 批注悬停连线：悬停右侧批注卡片时，向最近高亮片段绘制可读引线，并随纸张色调调整墨色与描边，多行批注连到最近段落而非整框中点。（c500314f、3fbc31a0、fa9836c3 by @Phil-Fan）
+  - 高亮色卡扇出：划词工具栏高亮色改为圆形色点，悬停时向左扇出叠放，叠边加深以便区分；展开时工具栏按右缘锚定，避免挤出视口。（22775a0e、019fac74、428fb5a8 by @Phil-Fan）
+  - 划词自动复制与对话入口：选中文本即复制到剪贴板，并在指针旁显示「已复制」反馈；悬浮工具栏恢复「加入对话 / 快速提问」，快捷键对调后更符合常用路径，且不再把实时选区自动塞进聊天。（8004a9f6、3cb840b7、961b6faa、24bc4aa3、270b6b27 by @Phil-Fan）
+  - 输入框内联选区令牌：显式加入对话的选区以行内引用芯片出现在 Agent 输入框中，图标改为 Quote，发送意图更清晰。（aa235d3d、93d77429 by @Phil-Fan）
+  - 新手功能导览：完成引导后自动启动功能导览，覆盖论文库、Cool Papers、全文翻译、阅读论文与笔记等步骤；推荐项与默认翻译器更醒目，布局模型会提示本地性能成本。（d996541a、72a1d2a0、9e5f1bcf、#452 by @Phil-Fan）
+  - 论文库单击打开：论文行改为单击打开、双击复制标题/标识，减少误触与多余步骤。（f2d7baf2 by @Phil-Fan）
+  - Windows F11 无边框全屏：Windows 上可用 F11 切换无边框全屏，便于沉浸阅读。（ffc4b27a by @Phil-Fan）
+  - 打开笔记菜单显示分屏快捷键：「打开笔记」相关菜单展示分屏快捷键提示，便于左右对照阅读。（4d022568 by @Phil-Fan）
+  - 精读完成后标记已读：paper-reader 与 agentero-cli 技能在写完笔记后要求执行 agentero paper set-read，外部 Agent / CLI 精读闭环后 Catalog is_read 会正确更新。（#495 by @bet4it）
+  改进
+  - 发布日志更精简：单文件上限降至 2 MB，轮转为保留约 5 个文件；发布构建日志级别上限为 Info，避免 Debug/Trace 膨胀磁盘。（052cad4a、#511 by @Phil-Fan）
+  - 空闲 Vault 监听更省电：空闲时阻塞等待文件系统事件而非轮询；窗口隐藏/失焦时缓冲 vault:file-changed，并拉长后台树/wiki/论文库刷新防抖。（7be641f4 by @Phil-Fan）
+  - 后台任务显示论文标题：任务中心行优先展示 Catalog 标题，而不是文件夹 id。（039ea801 by @Phil-Fan）
+  - Cool Papers 笔记清洗：拉取笔记去掉文末 Kimi Web CTA；FAQ 答案嵌在 ## Q 标题下，结构更清晰。（ee24b436、307d4ab3 by @Phil-Fan）
+  - 暗色模式默认白纸：PDF 纸张色调在暗色界面下默认白色，避免一打开就是深色纸。（ae1ac1d8 by @Phil-Fan）
+  - 移除「格式化 Markdown」菜单：右键不再提供 Format Markdown，减少误触改写正文。（cd86a91e by @Phil-Fan）
+  修复
+  - 外部移动后保留论文标题：外部重命名/移动论文文件夹时重写 Catalog 路径并在结构变化时重扫，打开标签也会 remap；不再对未验证的外部重命名弹 Toast。（00d7ef1a、9f35b6c2、3c04259d、f0e37c4a by @Phil-Fan）
+  - 独立文档窗口热更新：「移到新窗口」的 Markdown 会监听 Vault 变更并刷新，Agent/外部编辑不再停留在旧内容。（1175fa50 by @Phil-Fan）
+  - 保留多余空行：Markdown 反序列化不再折叠额外空行，笔记版式更稳定。（9dcc4607 by @Phil-Fan）
+  - 缺 Catalog 元数据仍可开笔记：即使 Catalog 缺少该论文元数据，仍可打开对应 NOTES.md。（88e34988 by @Phil-Fan）
+  - 文件树拖拽残留遮罩：拖出或结束文件树拖拽时清除卡住的 dockview 放置遮罩。（d0997228 by @Phil-Fan）
+  - 同目录移动不再空操作：目标文件夹与当前位置相同时跳过 vault move，避免无意义刷新。（ad450681 by @Phil-Fan）
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.10.1
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

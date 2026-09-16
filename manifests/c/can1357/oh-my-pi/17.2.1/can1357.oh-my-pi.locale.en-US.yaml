@@ -1,0 +1,73 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 17.2.1
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Added
+  - Added exact OAuth credential-row resolution by durable credential id. The targeted path refreshes only that row and never ranks, rotates, or falls back to sibling accounts.
+  Changed
+  - Anthropic OAuth requests now reproduce Cowork's current claude-desktop request profile, including client/runtime metadata, beta selection, system and billing attestation, the 64K output cap, and stable HTTP/1.1 header ordering.
+  @oh-my-pi/pi-catalog
+  Fixed
+  - Fixed Ollama model-manager caches being reused after the configured base URL changed by scoping cache namespaces to the normalized native discovery endpoint, including reverse-proxy path prefixes (#7087).
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added --from-claude and --from-codex session imports, also available from /resume @claude and /resume @codex.
+  - Added an opt-in OMP-native software-security workflow (security.enabled, default off) with immutable scan plans, exact-account Codex subscription affinity, native task-worker review, canonical findings/coverage/SARIF publication, project-scoped history, explicit dispositions, producer-differential comparison, and the read-only security:// resource namespace. Generic SARIF and official Codex Security bundles normalize into the same OMP-owned store.
+  - Added explicit Codex Security cloud operations to the opt-in security workflow: list and start account-pinned cloud scans, inspect their progress, and import current findings into OMP's canonical store and security:// namespace without changing the native scan engine or spoofing official runtime attribution.
+  Changed
+  - Reserved security:// from RPC host URI shadowing so vendor adapters cannot replace OMP's canonical security-analysis namespace.
+  Fixed
+  - Fixed remote or LAN local-engine endpoints being ignored during model discovery: the llama.cpp and Ollama probes used timeouts tuned for loopback, so a host reached over the network could exceed them and return no models, while changing OLLAMA_BASE_URL/OLLAMA_HOST could keep reusing a fresh cache from the previous endpoint. Non-loopback hosts now get a generous discovery timeout, and Ollama cache rows are scoped to the normalized endpoint (#7087).
+  - Fixed omp install failing extension validation for pi extensions that import createEditTool or createWriteTool (e.g. gentle-pi) — the legacy @oh-my-pi/pi-coding-agent shim exported the read/bash/grep/find/ls tool factories but omitted the edit and write ones, so a named import threw Bun's static "Export named X not found" error. Added createEditTool/createEditToolDefinition and createWriteTool/createWriteToolDefinition to match the upstream pi surface (#7094).
+  - Fixed Python eval's loopback tool bridge being routed through macOS system HTTP proxies, which caused parallel() tool reads to fail with ConnectionRefusedError after a local proxy stopped.
+  @oh-my-pi/pi-natives
+  Fixed
+  - Fixed the computer tool advertising Wayland support that never worked: on the default rootless XWayland (GNOME/KDE/sway) the X11 root window has no readable pixmap, so root GetImage failed on every screenshot with a raw BadMatch protocol dump. Monitor::all now probes root drawability at initialization and fails fast with an actionable DESKTOP_BACKEND_UNAVAILABLE message naming the rootless-XWayland constraint, and docs/computer-use.md now lists rootless XWayland as unsupported (#7085).
+  @oh-my-pi/pi-utils
+  Added
+  - Added a postmortem.quit configuration option to safely handle shutdown paths when the terminal output has already disconnected.
+  - Added project-keyed OMP security-state directory helpers under the user state root.
+  What's Changed
+  - feat(security): add OMP-native security scan subsystem by @kmccleary3301 in https://github.com/can1357/oh-my-pi/pull/7048
+  - fix(natives): fail fast on uncapturable rootless XWayland root by @roboomp in https://github.com/can1357/oh-my-pi/pull/7086
+  - fix(coding-agent): honor remote llama.cpp/ollama discovery base urls by @roboomp in https://github.com/can1357/oh-my-pi/pull/7090
+  - fix(coding-agent): add createEditTool/createWriteTool to legacy pi shim by @roboomp in https://github.com/can1357/oh-my-pi/pull/7095
+  New Contributors
+  - @kmccleary3301 made their first contribution in https://github.com/can1357/oh-my-pi/pull/7048
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v17.2.0...v17.2.1
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v17.2.1
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

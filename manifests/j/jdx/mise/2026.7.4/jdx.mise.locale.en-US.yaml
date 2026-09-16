@@ -1,0 +1,58 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jdx.mise
+PackageVersion: 2026.7.4
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/jdx/mise
+Author: jdx
+PackageName: mise-en-place
+PackageUrl: https://mise.en.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+ShortDescription: Your dev env, already prepped.
+Description: Your dev env, already prepped. One tool to manage languages, env vars, and tasks per project, reproducibly.
+Moniker: mise
+Tags:
+- cli
+- dev-tool
+- env
+- environment
+- task
+ReleaseNotes: |-
+  This release graduates mise bootstrap and mise dotfiles out of experimental mode, teaches mise install to reconcile Rust components and targets, and restores Linux arm64 glibc compatibility for release builds.
+  Added
+  - Bootstrap and dotfiles are now stable. mise bootstrap and all of its subcommands (packages, repos, macOS/Linux user services, shell activation, login shell) plus mise dotfiles no longer require experimental mode, so they work with MISE_EXPERIMENTAL=0. The related mise doctor diagnostics (system packages, macOS defaults, login-shell drift) and the missing [bootstrap.packages] hint on mise install are always on as well (#10869 by @jdx).
+  - Skip re-installs in the mise.run install script. Setting MISE_INSTALL_SKIP_IF_EXISTS avoids re-downloading mise when the requested version is already present at the install path, which is handy for CI/Docker builds that re-run the installer on every build (#10882 by @JamBalaya56562):
+    curl https://mise.run | MISE_INSTALL_SKIP_IF_EXISTS=1 sh
+    Only the resolved install path is checked (not the wider PATH), and default behavior is unchanged unless you opt in.
+
+  Fixed
+  - install: the Rust backend now asks rustup whether the configured components and targets are actually installed before skipping an install, so mise install reconciles missing components/targets on an already-installed toolchain instead of treating a bare symlink as complete. Array-form config is now parsed (with trimming and empty-entry filtering) and host-suffixed component names are matched (#10876 by @jdx).
+  - task: task_source_files() is once again available when a task defines usage args and its run script is re-rendered with parsed CLI values (#10870 by @jdx).
+  - upgrade: mise upgrade --minimum-release-age no longer prints a misleading "newer release ignored" warning when the installed version already satisfies the hidden latest release (#10877 by @jdx).
+  - build: pinned the aarch64-unknown-linux-gnu cross image back to a fixed tag and added a shared glibc-floor check to release packaging, restoring predictable glibc compatibility for Linux arm64 tarballs (#10875 by @jdx).
+
+  Performance
+  - install: missing-version detection now runs each backend's install-satisfaction check in parallel, speeding up detection for larger tool sets (a follow-up to the Rust reconciliation work). If the parallel batch fails it falls back to a sequential pass so the missing list stays accurate (#10881 by @jdx).
+
+  Changed
+  - registry: the Scala shorthand now resolves to the canonical vfox:mise-plugins/vfox-scala fork; the asdf:mise-plugins/mise-scala fallback is unchanged (#10864 by @jdx).
+
+  Documentation
+  - Fixed the broken bootstrap docs intro, linked the bootstrap sub-pages, and made a style/consistency pass across the bootstrap pages (#10878, #10880 by @jdx).
+  - Fixed broken source-code links in the generated CLI reference (#10879 by @jdx).
+
+  Aqua Registry Updates
+  New packages: sderosiaux/launchdeck, syntax-sh/lexicon-releases.
+
+  💚 Sponsor mise
+  mise is maintained by @jdx, an open source developer for entire.io, the title sponsor of the jdx.dev open source tools. Development is funded by sponsors.
+  If mise saves you or your team time, please consider sponsoring at jdx.dev. Individual and company sponsorships keep mise fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/mise/releases/tag/v2026.7.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,71 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: DavidEngelhart.Termpolis
+PackageVersion: 1.19.4
+PackageLocale: en-US
+Publisher: Termpolis
+PublisherUrl: https://github.com/codedev-david
+PublisherSupportUrl: https://github.com/codedev-david/termpolis/issues
+PrivacyUrl: https://github.com/codedev-david/termpolis/blob/HEAD/PRIVACY.md
+Author: David Engelhart
+PackageName: Termpolis
+PackageUrl: https://termpolis.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/codedev-david/termpolis/blob/HEAD/LICENSE
+Copyright: Copyright 2026 David Engelhart
+ShortDescription: The open-source multi-agent terminal where Claude, Codex, Gemini, and Qwen work together as a team — without your source code leaving the machine.
+Description: |-
+  Termpolis is a cross-platform desktop terminal manager (Windows, macOS, Linux) built on Electron + React + TypeScript with node-pty powering the underlying shells. It ships as a native app, code signed on Windows, notarized on macOS.
+  What makes it different:
+  - Secure AI-assisted development. Built-in AI Security Center auto-scans every AI prompt against 70+ secret patterns, enforces Gemini paid-tier mode, and keeps an auditable JSONL log of every AI-agent terminal launch — every check runs locally.
+  - Multi-agent swarm. Claude Code, Codex, Gemini CLI, and Qwen Code work together on a task. A dedicated Claude Code instance acts as the conductor.
+  - MCP server baked in. AI agents control Termpolis via Model Context Protocol, open terminals, run commands, send messages.
+  - Transparent routing. Every subtask shows which agent got it, why, and what it cost.
+  - Activity observability. Every token, every tool call, every message from every agent is visible in real time.
+  - Intervention controls. Pause, cancel, or steer any agent mid-task without leaving the feed.
+  - Shared memory. A RAG-backed memory store that any agent can read and write via MCP.
+  - MCP-native end to end. All four agents speak MCP — no terminal-output parsers, no glue scripts, no bridge code paths.
+  - Share-ready output. One shortcut from terminal to Slack, Teams, or a PR — see Copy for Slack / Teams / PRs.
+Tags:
+- ai
+- command-line
+- console
+- terminal
+ReleaseNotes: |-
+  🧠 Memory & Learning hardening — a brain you can trust
+  v1.19.4 is a deep reliability pass on Termpolis's persistent shared memory, driven by a 12-dimension adversarial audit of the memory + learning subsystem. 55 confirmed defects fixed, every one test-first (the 35 primary findings + the anchor bug, plus 19 verified from the audit's second-wave backlog) — the difference between "memory that mostly works" and "memory that never silently loses, corrupts, mis-ranks, or misreports what you told it."
+  Shared memory is the feature — it lets a new session (or a different agent) pick up without re-explaining context. That only holds if the brain is honest. This release makes it so.
+  The anchor fix
+  - Memories are stamped with real conversation time, not ingest time. Re-ingesting an old transcript no longer makes it rank as "most recent" — list and search now order by when the conversation actually happened.
+  It never silently loses data
+  - Writes that don't reach disk are reported as such (no more "success" on a swallowed IO error), and are retried rather than masked by the dedup guard.
+  - Init failure degrades to a local writable store instead of silently dropping every write for the whole session; a degraded status surfaces it.
+  - Crash-safe append log: high-value writes are fsync'd, a torn final line is repaired on launch (so it can't swallow the next good write), and corrupt lines are counted + surfaced instead of vanishing.
+  - Atomic whole-file rewrites (encryption toggle, sync-off snapshot, clear) — an interrupted rewrite can no longer truncate your shard.
+  - Oversized writes are flagged, not silently truncated; whitespace-significant content (Python, YAML, diffs) is no longer false-deduped.
+  It never silently corrupts across devices
+  - A bad clock or one corrupt line can't wipe the brain everywhere — the clear epoch is clamped and backed by a device-local durable floor.
+  - Deletes and clears survive losing the shard that carried them, are skew-proof (identity-based), and a deleted memory can't resurface through its content-hash twin.
+  - The encryption salt is never overwritten on a transient read hiccup (which used to lock you out of your own encrypted memory), and is write-once so two devices with the same passphrase derive the same key.
+  - A restored backup / cloned VM gets a fresh device identity, preserving the single-writer invariant the sync model relies on.
+  It never silently mis-ranks or misleads
+  - Superseded decisions stop resurfacing — memory_search and the session primer now honor the supersedes links the agent creates.
+  - The primer is honest about ordering and dates (relative-age markers; no false "most relevant first").
+  - Project scoping is precise — two repos named api no longer cross-contaminate; Gemini memories are finally project-scoped; curated writes are scoped to your working directory by default.
+  - The semantic embedder self-heals from a transient hiccup instead of latching into keyword-only mode for the session, validates its output dimension, and back-fills vectors captured during an outage.
+  - memory_anticipate / memory_pool draw from the real lesson set instead of a keyhole onto the newest rows, so the fleet stops re-deriving solutions it already found.
+  Learning stays sound
+  The offline recall benchmark (real bge model + IR metrics) holds with zero regression, and no learning mechanism ships on that isn't measurably net-positive.
+  Also in this release
+  - "🧠 Loaded N memories" launch banner for Codex/Gemini/Qwen.
+  - Memory-brain embedding runs off the PTY main thread (typing-lag fix).
+  Quality
+  Every fix ships with a failing-test-first regression guard. Full suite green; lint + build + typecheck clean; coverage gate green across Windows, macOS, and Linux.
+  Full Changelog: https://github.com/codedev-david/termpolis/compare/v1.19.3...v1.19.4
+ReleaseNotesUrl: https://github.com/codedev-david/termpolis/releases/tag/v1.19.4
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://termpolis.com/docs.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

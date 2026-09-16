@@ -1,0 +1,55 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Proma.Proma
+PackageVersion: 0.14.3
+PackageLocale: zh-CN
+Publisher: ErlichLiu
+PublisherUrl: https://proma.cool/
+PublisherSupportUrl: https://github.com/proma-ai/Proma/issues
+PackageName: Proma
+PackageUrl: https://proma.cool/download
+License: 免费软件
+Copyright: Copyright © 2024-2026 Proma
+ShortDescription: 把最丝滑的通用 Agent 体验带进你的工作流，为 100x 专业用户而生的未来产品，正在实现 proactive Agent 阶段。基于 Claude Agent SDK 的完整开源实践，原生支持飞书群聊调用、灵活接入任意大模型供应商 —— 让顶级 Agent 能力真正跑在你每天用的地方。
+Description: |-
+  Proma 是一个本地优先的 AI 桌面应用，把多模型 Chat、通用 Agent、工作区、Skills、MCP、远程机器人和记忆能力放在同一个开源客户端里。
+  它不是只面向闲聊的聊天框，而是一个可以长期沉淀个人工作流的 Agent 工作台：简单问题用 Chat，复杂任务交给 Agent，数据和配置尽量留在本地。
+
+  现在能做什么
+  - Chat 模式：多模型对话、附件解析、图片输入、Markdown / Mermaid / KaTeX / 代码高亮、并排对话、系统提示词、上下文管理。
+  - Agent 模式：基于 @anthropic-ai/claude-agent-sdk 的通用 Agent，支持工作区隔离、权限模式、文件操作、长任务流式输出、计划确认和用户追问。
+  - SubAgent / Tasks：复杂任务可以通过 Claude Agent SDK 的 Agent 工具拆分为子 Agent / Task，并在消息流中展示调用过程和结果。
+  - Skills & MCP：每个工作区可以独立配置 Skills、MCP Server 和工作区文件，适合沉淀可复用能力。
+  - 远程机器人：支持飞书 / Lark 机器人桥接，并已提供钉钉、微信桥接入口，用手机或群聊触发本机 Agent 工作流。
+  - 记忆与工具：Chat 和 Agent 可共享记忆能力，并支持联网搜索、内置 Chat 工具、Agent 推荐等辅助能力。
+  - 本地优先：会话、工作区、附件、配置、Skills 等默认存储在 ~/.proma/，使用 JSON / JSONL 文件组织，不依赖本地数据库。
+  - 桌面体验：自动更新、代理设置、文件预览、全局快捷键、快速任务窗口、语音输入、亮色 / 暗色 / 跟随系统主题。
+Tags:
+- 人工智能
+- 大语言模型
+- 智能体
+- 自主智能
+ReleaseNotes: |-
+  Proma v0.14.3
+  对比基准：v0.14.0
+  这是一个 Agent 协作能力与稳定性版本：SubAgent 委派策略从「谨慎派发」翻转为「主动探索」，Agent 运行中也能排队发消息不打断当前任务；同时修了上下文窗口被拉低、HTTP MCP 工具注册、会话恢复等一批稳定性问题。
+  新功能
+  - 协作子会话触发策略更积极：对抗式审查 + 多样性探索 — SubAgent 委派策略从「先相信直觉、不行再派」翻转为「善用 SubAgent 拓宽探索边界」。新增两种协作模式：对抗式审查——父 Agent 完成方案后派子 Agent 独立审查（只提建议不改文件），帮你挑刺找盲区；多样性探索——方向不唯一时并行派多个子 Agent 各探一个方向（只调研不改文件），汇总对比后帮你做选择。(#1074)
+  - Agent 运行中输入进入可见托管队列 — Agent 正在输出时，你发的消息不再直接软中断当前 turn，而是进入一个可见的消息队列。队列支持拖拽排序、撤回到输入框重新编辑、删除、或点「立即发送」不等排队；等当前 turn 结束后按序自动发送。队列不持久化，重启后自动清空，避免误发过期上下文。(#1075)
+  Bug 修复
+  - 修复上下文窗口被子 Agent 拉低 — 派子 Agent 后，子 Agent 的模型（如 Haiku 200K）的 contextWindow 会错误覆盖主模型（如 Opus 1M），导致上下文指示器在 1M 和 200K 之间跳动、触发误压缩、消息错位。现在所有消费点都取各模型 contextWindow 的最大值。(#1073)
+  - 修复 HTTP MCP 工具注册失败 — Claude Code CLI 在连接 Anthropic 官方 API 时会自动开启 Tool Search（乐观模式），导致外部 HTTP MCP 服务器的工具被标记为延迟注册、运行时找不到。现在强制关闭 Tool Search，确保 MCP 工具跨渠道一致地预先注册。(#1072)
+  - 修复后台等待中发送失败时输入框内容丢失 — 在后台等待状态下发送消息时，若注入失败（如 IPC 异常），已清空的输入框内容会丢失。现在失败时自动恢复输入框内容和补全建议。(#1076)
+  - 修复 Agent 会话恢复 — 修了重启或恢复会话后，Agent 会话可能无法正确恢复的问题。(#1067)
+  - 修复 DeepSeek 上下文恢复 — 处理了 DeepSeek 渠道下上下文恢复时的兼容性问题。(#1070)
+  - 侧边栏与文件面板 UI 细节优化 — 新会话按钮高度对齐 Chat/Agent 切换器，搜索按钮尺寸对齐收起侧边栏按钮；会话列表 hover 三点菜单、文件面板 hover 操作按钮左移避免贴边 (#1051)；修复侧边栏时间标签偶尔抖动的问题 (#1066)。
+  - 修复内置 MCP 详情面板关闭按钮失效 — 内置 MCP 详情面板的关闭按钮之前点不动，现已修复，样式也与 Skill 详情面板统一。(#1050)
+  - 修复 Agent MCP 工具发现范围 — 修了 MCP 工具发现时范围不正确的问题。(#1069)
+  - 禁用 SDK 内置 Workflow — 关闭了 Claude Agent SDK 的内置 Workflow 功能，避免与 Proma 自身的任务调度冲突。(#1071)
+  移除
+  - 移除 Agent 自动审批模式 — 去掉了已废弃的自动审批（auto approval）功能，简化权限模式。(#1068)
+  - 移除过时的 context-1m beta header — 1M 上下文窗口自 Opus 4.6 / Sonnet 4.6（2026 年 3 月）起已正式发布，Sonnet 5 / Opus 4.7+ 更是默认开启，不再需要发送 beta 请求头。(#1053)
+ReleaseNotesUrl: https://github.com/proma-ai/Proma/releases/tag/v0.14.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

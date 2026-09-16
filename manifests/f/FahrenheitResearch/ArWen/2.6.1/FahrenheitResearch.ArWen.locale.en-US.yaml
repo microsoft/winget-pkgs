@@ -1,0 +1,106 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.ArWen
+PackageVersion: 2.6.1
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/arwen/issues
+Author: Fahrenheit Research
+PackageName: ArWen
+PackageUrl: https://github.com/FahrenheitResearch/arwen
+License: Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+Copyright: Copyright © Fahrenheit Research
+CopyrightUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+ShortDescription: 'ArWen: GPU-native WRF-ARW-class regional weather model, verified against WRF v4.6.1'
+Description: "ArWen is an independent, GPU-native implementation of a WRF-ARW-class regional atmospheric model. It is not affiliated with or endorsed by NCAR or UCAR. The name is a wordmark for \"the ARW solver, GPU-native\"; the Python package is currently named gpuwm. Safety. ArWen is a research and educational tool. It is never a substitute for official forecasts and warnings from your national meteorological service. Do not use it to make safety decisions. Regional numerical weather prediction at convective scale has mostly required institutional clusters, which means most of the world runs on global-model guidance at 10-25 km. ArWen's aim is to put a verified, kilometer-scale limited-area model on a single consumer GPU: pick a point, size a nest ladder to your card, pull public analysis data, and run a 1 km (or 500 m) simulation of your own area on hardware you own -- especially in places where no national convection-permitting model exists."
+Moniker: arwen
+ReleaseNotes: |-
+  Continuous assimilation gets a door, agents get a protocol, and the
+  sub-kilometre unlock is finished.
+  New:
+  - gpuwm cycle: continuous radar assimilation as a door. A cycle clock
+    schedules analyses, a ledger records every cycle's inputs and verdicts,
+    a supervisor drives the fetch, assimilation and forecast legs, and
+    anchored child domains follow the feature being cycled.
+  - An MCP server: arwen-mcp serves the CLI doors as tools over stdio, so
+    an LLM agent can plan, price, fetch, prep, forecast and render. Every
+    tool runs the real command line or reads a receipt a door already
+    wrote; refusals arrive as the CLI's own sentences. Long work runs as
+    detached jobs that survive a server restart, one GPU job at a time per
+    card. pip install gpuwm[mcp].
+  - The MPAS column-batch seam carries P3: microphysics_scheme = "p3"
+    transports the scheme's eight species through both phases beside the
+    unchanged WSM6 default, and a restored P3 seam continues
+    bit-identically.
+  - Sub-kilometre static builds: below a 1,310 m source-pixel diagonal the
+    static builder now derives categorical fields by supersampling, keyed
+    to each mesh's measured minimum edge, where it used to refuse.
+    Demonstrated end to end with a 937.5 m mesh generated, built, and run.
+  - Level-2 regional spectral numerics: an optional [spectral_numerics]
+    table runs scale-selective hyperdiffusion and divergent-mode damping in
+    off (bitwise inert, the default), shadow (receipts only), and
+    apply modes, with per-step receipts bound into the run capsule and a
+    gpuwm spectral-op evidence door. A research instrument, not endorsed
+    physics.
+  - Nowcast skill is scored against an operational baseline, with structure
+    metrics beside the existing point verification.
+  - Windowed all-radar ingest: assimilation cost follows the sites in the
+    active window, not the domain, and successive nest windows hand their
+    interior over during the overlap instead of restarting cold.
+  - Nineteen measured sizing configurations for ensemble, reanalysis and
+    AI-model sources the configuration set had not covered.
+  Fixed:
+  - gpuwm prep no longer grows its host memory with the length of the
+    forcing window: the mapped engine decodes one valid time and drops it
+    before asking for the next, and the identity pass admits objects under
+    a bounded byte budget. An ICON-EU preparation peaks at 2.32 GiB at
+    both a 3 h and a 6 h window, frames byte-identical; compressed
+    field-per-file sources still pay a modest wall premium for the
+    per-time discipline, and that remainder is named work.
+  - gpuwm check on a nested tree with [tiles] prices the mixed road
+    the run door actually takes (child streamed, parent resident) instead
+    of refusing trees that fit; the report names each domain's road and
+    --json publishes it.
+  - A [tiles] configuration the loader refuses reaches the terminal as a
+    refusal with its remedy intact, on every door, instead of a traceback.
+  - A restored MPAS column-batch seam no longer refuses its first
+    radiation-not-due step: the restart payload carries radiation carrier
+    provenance, and the seam's device round-trip gate runs at every cut.
+  - P3 no longer computes NaN supersaturation ratios on its first step:
+    the cold-start saturation mixing ratios are floored, default-on in all
+    three arms, inert from step 2 onward, with the one step-1 delta
+    documented.
+  - mp=50 composes with RTE+RRTMGP radiation: the adapter couples P3's own
+    two-radius cloud optics, matching the scheme's own inventory, and the
+    refusal that outlived the gap is retired.
+  - A wrong-version P3 lookup table is refused as a version mismatch
+    instead of being reported as byte corruption, and gpuwm doctor
+    checks the table.
+  - Velocity dealiasing uses each radial's own Nyquist velocity; the
+    reader detected per-radial disagreement and then dealiased against one
+    scalar anyway.
+  - A radar with no innovations no longer reports the whole network's
+    residual as its own, and the continuous nowcast daemon no longer
+    crashes at the first observation stage of every cycle.
+  - Data assimilation reads P3's own 10 cm reflectivity instead of
+    refusing an mp=50 background, and clear-air reflectivity carries one
+    floor value instead of two.
+  - A cycling analysis takes the card by default when one is reachable
+    (auto); host and cuda stay honoured verbatim and every receipt
+    records which device ran and why.
+  - The P3 oracle suite now fails when physical processes are switched
+    off; the previous fixture set stayed green with five disabled.
+  - Mesh generation receipts print small trace values in scientific
+    notation, and the ladder's location check credits grading and
+    insertion instead of refusing meshes it graded correctly seconds
+    earlier.
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/arwen/releases/tag/v2.6.1
+InstallationNotes: |-
+  This application requires an NVIDIA GPU with CUDA support to run.
+  Will not function on integrated graphics or non-NVIDIA hardware.
+  Without compatible hardware, the application will fail to launch.
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

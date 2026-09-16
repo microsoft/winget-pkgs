@@ -1,0 +1,110 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AzaharEmu.Azahar
+PackageVersion: '2126.0'
+PackageLocale: en-US
+Publisher: Azahar
+PublisherUrl: https://github.com/azahar-emu/
+PublisherSupportUrl: https://github.com/azahar-emu/azahar/issues
+Author: OpenSauce04 & PabloMK7
+PackageName: Azahar
+PackageUrl: https://github.com/azahar-emu/azahar
+License: GPL-2.0
+LicenseUrl: https://github.com/azahar-emu/azahar/blob/HEAD/license.txt
+ShortDescription: Azahar is an open-source 3DS emulator project based on Citra.
+Moniker: AzaharEmu.Azahar
+Tags:
+- 3ds
+- emu
+- emulator
+- games
+ReleaseNotes: |-
+  Known Issue Notice
+  There is a minor known issue in the new MXE build for Windows where frame pacing may be slightly inconsistent. A potential fix for this issue has already been implemented, but requires additional testing. This fix will be included in the 2126.1 update.
+  Most users likely won't notice this issue, so use of the MXE build is still encouraged.
+  The MXE build will replace the MSYS2 build in 2127.0.
+  Thank you for your understanding.
+  Azahar 2126.0 Changelog
+  All
+  - Improved GPU interrupt queue & GPU timing emulation. This feature is highly experimental and is disabled by default, the toggle for it can be found in the graphics settings: "Simulate 3DS GPU timings". | @PabloMK7 #2095, #2145
+    - This change improves emulation accuracy by more closely mirroring the behaviour of real hardware.
+      - This PR is known to fix GPU timing issues in Luigi's Mansion 2: Dark Moon, which is now made playable without use of the "delay render thread" option, but likely impacts many other games as well.
+    - This PR also introduces a fix for an issue in Super Mario 3D Land which would prevent users from loading a save file after completing the game.
+    - This is a big change behind the scenes, and may inadvertently introduce issues due to its large scope. Please report any issues which may have been introduced by the new behaviour.
+    - Games that use dynamic FPS and don't reach 60 FPS on real hardware will also not reach 60 FPS on Azahar with this feature enabled.
+    - The PR description contains an in-depth technical explanation of the changes.
+  - Completely revamped the implementation of GDB functionality, with numerous debugging improvements and new debugging features. | @PabloMK7 #2086
+    - The PR description for this change goes into extensive detail about the changes, so read there for more information if curious.
+  - Refactored how filesystem access is handled for special files (such as Z3DS files), in preparation for changes coming in Azahar 2127. | @PabloMK7 #2352
+    - Fixes compressed 3DSX files (.z3dsx) with an embedded RomFS failing to load properly.
+    - Users should not expect any visible changes as this is only an internal restructuring of the code. If that is not the case please consider filing a bug report.
+    - NOTE: Due to internal changes on how system files are stored, system files set up on Azahar 2126 or newer will become incompatible with older Azahar versions. On the other hand, system files set up on versions older than Azahar 2126 will remain backwards compatible for the foreseeable future.
+    - More details on why this change is neccessary can be found in the pull request.
+  - Fixed an issue where screenshots produced by Azahar could have their colour channels swapped on certain platforms and system configurations. | @mal-cap #2170
+  - Added a setting to skip presenting duplicate frames, which is enabled by default. | @KojoZero #1867
+    - This makes frame generation software work properly with Azahar.
+  - Added a new option which allows users to toggle whether the emulated 3DS system thinks headphones are plugged in. | @PabloMK7 #2099
+    - A very small number of games have altered behaviour when using wired headphones. For example, when headphones are plugged in while playing Super Mario 3D Land, the audio playback is slightly altered.
+  - In multiplayer rooms, users' usernames are now pulled directly from the username set in the System tab in Azahar's settings instead of being a separate option.
+  - Fixed a crash which could occur when an application submits a vertex array with an invalid base address. | @PabloMK7 #2299
+    - Known to fix a crash in the credits of Mario & Luigi: Superstar Saga. May fix other problems elsewhere.
+  - Adjusted rom loading error messages displayed to users to be more easily understandable and user-friendly. | @PabloMK7 #2097
+  - LG2/EX2 subroutine functions are now only emitted for shaders when necessary, instead of for every shader, reducing memory usage. | @Wunkolo #2046
+  - Fixed an issue where certain older homebrew software would get stuck on a black screen at boot. | @Masamune3210 #2143
+  - Migrated many of our non-English language translations to simplified language codes, allowing correct system languages to be detected more consistently. | @OpenSauce04 #2152
+  - Fixed an issue related to disabled cubemap texture units; known fixes in Brain Age: Concentration Training. | @Wunkolo #2159
+  - Adjusted the unimplemented gas stub behaviour for the Vulkan renderer, fixing a known graphical issue in the Monster Hunter games. | @RedBlackAka #2165
+  - Fixed a typo in a settings log message. | @72374 #2076
+  - Fixed a possible integer overflow issue relating to custom Luma3DS mapping + optimized implementation. | @0x48kirenh #2202
+  - Implemented APT:MapProgramIdForDebug. | @PabloMK7 #2224
+  - Fixed handling of APT communication between applications. | @DaniElectra #2225
+    - This fixes an issue in the Miiverse posting applet.
+  - Fixed behaviour of HTTPC:GetRequestState when the request still has pending post data. | @PabloMK7 #2234
+    - This fixes the miiverse applet not being able to upload posts due to incorrect behaviour.
+  - Added an API to allow applications to register and unregister URL replacements. Pretendo Network Nimbus now uses this to submit rules for URL replacement. | @PabloMK7 #2234
+  - Fixed a crash on color fill when using the Vulkan Renderer. | @capito27 #2241
+  - Disabled PICA debug functionality on all platforms, with it now being a configurable option. | @PabloMK7 #2254
+  - Fixed an issue related to fill surface downloading, which could cause graphical bugs in some edge cases. | @PabloMK7 #2270
+  - Implemented APT::GetAppletProgramInfo. | @PabloMK7 #2272
+    - Known to be used by Miiverse, but is also likely used elsewhere.
+  - Improved the accuracy of emulated CPU timings, fixing potential timing-related bugs. | @ApfelTeeSaft #2262
+    - Known to fix a softlock issue in Lego City Undercover: The Chase Begins, possibly fixes other issues elsewhere.
+  - Fixed an issue which would corrupt the suspended application framembuffer in some cases.
+    - This prevented users from posting images to Miiverse, which is now fixed. | @PabloMK7 #2272
+  - Improvements to the accuracy of the GSP service, fixing issues relating to suspending applications, posting to Miiverse, and Donkey Kong Country Returns. | @PabloMK7 #2273
+    - Likely addresses other unknown issues elsewhere.
+  - Replaced various URLs which previously linked to archived Citra website pages to instead point to the Azahar wiki. | @RedBlackAka #1881
+  - When using multiplayer rooms, it is now possible to set "No Preference" as the preferred game. | @PabloMK7 #2296
+  - Fixed an issue where auto-mapping could behave incorrectly with some controllers. | @DavidRGriswold #2317
+  - Assorted minor fixes relating to analog input. | @DavidRGriswold #2348
+  Android
+  - Added multiplayer room functionality. | Kleidis, @rtiangha, @Gamer64ytb, @weihuoya, @PabloMK7 #830
+    - This change includes most of the multiplayer functionality found in the desktop version of Azahar.
+      - Public room browsing, private room creation, private room joining and chat are implemented.
+      - Public room creation and some minor UI features, such as room descriptions or currently playing applications, are not yet implemented.
+    - This feature does NOT implement communication with real consoles nor direct connect between Android devices in near proximity.
+      - Android devices need to be connected to the same Wifi network to be able to play together (or use the Android built-in hotspot or wifi sharing functionality).
+    - Public room browsing is possible as long as the user provides an unofficial web API URL in the new network settings. Official public rooms are still not provided by Azahar.
+  - On devices where ANGLE is used for OpenGL rendering, the Vulkan renderer is forcefully enabled due to extremely apparent visual defects when using the OpenGL renderer with ANGLE. | @OpenSauce04 #2197
+    - You can tell if your device is affected by checking the renderer selection option in Azahar's settings. It will be greyed out and will display a message related to ANGLE when selected if you are using an ANGLE-enabled device.
+    - Most devices will not yet be affected, however on and after Android 17's release, ANGLE will become enabled by default and mandatory for all newly released devices (not necessarily devices updating to Android 17 from an earlier version).
+  - Added a new "Combo Button" to the on-screen controller overlay which presses multiple buttons at the same time when pressed. @ADAS2024 #1244 #2266
+    - The buttons activated when the Combo Button is selected can be configured from the settings.
+    - This button is hidden by default, and must be toggled on in the overlay options.
+  - Assorted improvements and new options relating to secondary screen functionality. | @DavidRGriswold #1385
+  - Fixed several issues related to the "Adjust Scale" menu. | @OpenSauce04 #2256
+  Android (vanilla)
+  - Added an in-app toggleable update checker which runs when Azahar starts, functioning the same way as the desktop version. | @OpenSauce04 #2265
+  Desktop
+  - Implemented a CLI (command line interface) for Azahar's compression functionality via the new -c and -x options. | @OpenSauce04 #2084
+    - See azahar --help for more info.
+  - Various improvements to controller integration with Azahar's desktop frontend, including controller hotkeys. | @DavidRGriswold #1717
+  - Fixed some hotkeys not working correctly when using the Separate Windows screen layout. | @DavidRGriswold #1967
+  - After uninstalling an app, update or DLC, the game list is now refreshed. | @andrey545454 #2237
+  - Adjusted "Open Azahar Folder" menubar option to now include variants "NAND Folder" and "SDMC Folder". | @PabloMK7 #2279
+  - Fixed the Outer Right Camera setting incorrectly reading its value from the Inner Camera Flip setting. | @PabloMK7 #2303
+  - Fixed an issue related to clearing bindings for hotkeys bound to controllers. | @DavidRGriswold #2325
+ReleaseNotesUrl: https://github.com/azahar-emu/azahar/releases/tag/2126.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

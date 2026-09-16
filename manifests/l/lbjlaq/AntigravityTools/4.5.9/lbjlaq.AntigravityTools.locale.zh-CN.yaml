@@ -1,0 +1,38 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.5.9
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+Tags:
+- account-manager
+- antigravity
+ReleaseNotes: |-
+  - [核心功能] OpenAI 兼容端点支持多模态音频输入 (OpenAI Audio Input Support):
+    - 支持标准音频格式与多来源映射：支持 OpenAI 官方 input_audio（Base64 编码 + 格式标识）及 audio_url，无缝转换为 Gemini 的 inlineData / fileData 格式。
+    - 多数据源与格式自动归一化：完整兼容 data: URL、http(s):// 远程链接、file:// 本地文件及裸 Base64 编码，自动将 wav, mp3, m4a, ogg, flac, aiff 等格式归一化为标准 MIME 类型。
+    - 全链路与上下文 Token 评估：在 Responses API 转换及 ContextManager Token 估算中完整接入音频内容块，保障音频理解请求稳定交互。
+    - 相关 PR: 详见 PR #3321。
+  - [核心修复] 增强 OAuth Token 刷新平滑度与 invalid_grant 退避确认机制 (OAuth Token Refresh Resilience & Backoff):
+    - 提前平滑刷新 (5 分钟缓冲): 将 Token 主动刷新时机由临界 90 秒扩充至 300 秒（提前 5 分钟），有效防范网络高延迟击穿与临界过期掉登录态。
+    - 原地退避确认 (Backoff Retry): OAuth 刷新层首次收到 invalid_grant 或中间层临时错误时自动执行 500ms 短暂退避并进行二次确认，杜绝代理节点抖动导致的误判。
+    - 连续失败门禁机制：引入连续失败计数器，仅在连续 2 次以上独立确认为 invalid_grant 时才执行账号停用，成功时自动重置计数，彻底解决偶发网络抖动导致账号误停用的问题。
+  - [核心修复] 修复 403 / VALIDATION_REQUIRED 识别时序与死代码，支持动态提取验证链接 (403 Validation Block & URL Parsing Fix):
+    - 执行时序重构：修复代理处理链中因重试策略提早 continue 导致 403 阻断处理逻辑被短路的缺陷，在遇到 403 阻断的瞬间即刻触发 VALIDATION_REQUIRED 判定与账号池剔除保护。
+    - 链接自动提取与 UI 状态同步：深度解析 Google RPC 响应中的 validation_url / appeal_url 验证链接并持久化至本地索引，实时触发前端事件刷新，为故障账号打上 403 标签并提供快捷验证跳转入口。
+    - 状态码精准回退：修正代理池账号全部轮换尝试完毕后一律写死 429 的问题，当上游为 403 / 401 权限问题时精准回传真实 HTTP 状态码。
+    显示历史版本演进 (v4.5.8 及更早)
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.5.9
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

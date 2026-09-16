@@ -1,0 +1,44 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.52.96
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.52.96] - 2026-07-11
+  Fixed
+  - Disabling an all-users (Common) startup-folder item did nothing, and such items could show the wrong enabled/disabled state. Both the per-user Startup folder and the all-users Common Startup folder were scanned and tagged with the same StartupSource.StartupFolder, so ApplyApprovedState read the enabled/disabled state for all folder items only from HKCU, and SetEnabledAsync wrote the toggle blob for all folder items only to HKCU. But Windows stores the StartupApproved\StartupFolder state for all-users shortcuts under HKLM, not HKCU. Consequences for a shortcut in %ProgramData%\...\Startup: an item disabled via Task Manager (HKLM blob) was shown as "Enabled", and disabling it in SysManager wrote the blob to HKCU where Windows never looks — so it returned success yet the program still launched at logon. Added a distinct StartupSource.CommonStartupFolder (set in ReadStartupFolder based on which special folder produced the entry); ApplyApprovedState now reads HKLM for common-folder entries, and SetEnabledAsync routes them to HKLM (which needs administrator — a non-elevated attempt surfaces the same "requires elevation" message the HKLM Run path already produces). Per-user folder items are unchanged.
+  Verify the download
+  Get-FileHash .\SysManager-v1.52.96.exe -Algorithm SHA256
+  Expected SHA256: 09419C9B94936931DAA58F7C0859953E6B1526C46A4ED5AAC408C9B743D7C6C0
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.52.96
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

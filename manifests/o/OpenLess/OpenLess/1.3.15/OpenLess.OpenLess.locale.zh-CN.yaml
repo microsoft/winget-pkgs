@@ -1,0 +1,88 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: OpenLess.OpenLess
+PackageVersion: 1.3.15
+PackageLocale: zh-CN
+Publisher: openless
+PublisherUrl: https://github.com/Open-Less
+PublisherSupportUrl: https://github.com/Open-Less/openless/issues
+PackageName: OpenLess
+PackageUrl: https://github.com/Open-Less/openless
+License: MIT
+LicenseUrl: https://github.com/Open-Less/openless/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 OpenLess contributors
+ShortDescription: 按住快捷键说话，松开即得润色后的文字
+Description: |-
+  OpenLess 是一个跨平台（macOS & Windows）语音输入应用，对标 Typeless、Wispr Flow、Lazy、Superwhisper 等商业语音输入工具的 完全开源 替代品。
+  把光标放在 ChatGPT、Claude、Cursor、Notion、邮件、聊天框任意输入框里，按一次全局快捷键说话——OpenLess 会录音、转写、按你选的模式润色，把结果直接插入光标位置。插入失败时会自动复制到剪贴板，尽量保证「你说过的话不丢」。
+  不像那些只把语音转成「逐字稿」的输入法，OpenLess 的核心模式是 AI prompt 模式：你只管乱讲，它自动补上结构、列出约束、整理出有上下文的 prompt，复制粘贴就能直接喂给 ChatGPT / Claude / Cursor。
+Tags:
+- 听写
+- 语音识别
+- 语音转文字
+- 转写
+- 转录
+ReleaseNotes: |-
+  OpenLess 1.3.15 正式版
+  自 v1.3.14 以来的完整更新（Beta.1 → Beta.4 的全部改动，一次性带给正式版用户）。
+  ✨ 新功能
+  录音胶囊样式可选（本版亮点）
+  - 「设置 → 录音与输入 → 录音胶囊」新增 胶囊样式 下拉菜单：
+    - 流光 Siri 风格（默认）：SiriGL 光效舞台，录音时流光随音量律动；
+    - Openless 默认风格：经典毛玻璃药丸（1.3.14 及以前的样子），支持鼠标悬停操作胶囊。
+  - 附带修复：胶囊入场帧强制重注册 Space 贴附（macOS 26 不再把胶囊钉死在单个桌面）；润色/插入失败改走 error 态（失败提示不再被前端丢掉）；转写中按热键改为静默丢弃，不再排队接力。
+  语音识别（ASR）
+  - 云端 ASR 模型预设下拉：百炼 Qwen3-ASR-Flash / fun-asr-flash 等一键切换，无需手填模型名；本地模型板块重构 + 下拉选择，支持 Whisper Large V3；
+  - 阶跃星辰 StepAudio 2.5 批式转写（支持自定义词典热词）；Qwen-Audio-3.0-ASR-Flash 整段转写；ElevenLabs Scribe v2 提供商；
+  - 火山引擎方舟 API Key 鉴权模式；百炼连接检查真实校验协议连通性，配置错误不再假通过。
+  快捷键与热键
+  - 录音方式新增「自动」：短按=切换式录音，长按=按住说话；
+  - 快捷键录入交互重构：主行按钮移除、箭头右对齐、动画优化；
+  - Esc 取消独立通道：转写/润色期间按 Esc 立即停（不再停不下来）；会话激活期间 Esc 由 OpenLess 独占，不再误透传宿主应用；修饰键热键误当组合键时不再误唤起听写（150ms 仲裁 + 即时撤销）。
+  风格市场
+  - 清晰结构 v3.0 提示词上线：人格化「语修」角色 + 场景优先级分型；
+  - 内置包版本对账：提示词升级随 app 更新自动推向所有用户。
+  其它
+  - 历史详情页：展示每条记录的 ASR/LLM 模型与分步耗时，模型表现可对比；
+  - Windows 选中文本润色工作流；主窗口改为不透明（消除录音时 DWM/GPU 饱和导致的系统卡顿）；
+  - Android：高级调试工具入口、凭据用 Android Keystore 保护、prefs/日志持久化到应用目录、样式分组导航与桌面同步、市场包安装走应用缓存；
+  - 设置页悬停提示：设置项悬停显示功能说明，降低 Less Computer / 录音胶囊等理解门槛；
+  - LLM：StepFun 供应商预设、Atlas Cloud 预设、自定义服务商 temperature 可配置、官方 OpenAI gpt-5 系列不再下发 temperature（修复验证 400）；Less Computer 后端/权限模式/模型选择改用官方 SelectLite。
+  🛠 修复
+  - 热键/连接失灵类：WebSocket 建连补超时（握手挂死不再让热键彻底失灵）；StepFun 实时转写不再随机白等 12 秒（13% 的听写中招）；Apple Speech 保留停顿分段（停顿前内容不再丢失）；
+  - Windows：本地长语音只识别前段；IME 管道关闭时 explorer.exe 不再 AppHang；清理 Windows 上不适用的 UI 选项/标签；
+  - Linux：fcitx5 插件空 triggerKeyList 崩溃；胶囊窗口 GDK 未实例化导致的启动崩溃；
+  - 设置/偏好：解析失败时逐字段抢救 + 备份（升级改 schema 不再静默清空设置）；保存设置不再丢失当前风格选择；「hotkey disabled」日志不再刷爆；
+  - 更新：仓库迁移后（appergb → Open-Less）更新链接修正；发现新版 Beta tag；检查更新按钮旋转方向与尺寸稳定；
+  - 历史：音频播放改用 Blob URL，导出走系统保存对话框。
+  🔐 安全
+  - RustSec 依赖公告修补；
+  - 风格包 ZIP 导入尺寸上限校验；
+  - Less Computer 批准令牌 / 提供商 URL 日志脱敏；
+  - 远程配对 PIN 持久化加固（O_NOFOLLOW / O_NONBLOCK / O_CLOEXEC）；
+  - Marketplace 写入改为 GitHub OAuth 认证。
+  ⚠️ 行为变更提示
+  - 流式输入默认开启；不兼容场景会自动回落到一次性插入。可在「设置 → 高级」关闭。
+  - 流式输入成功后默认把最终文本同步到剪贴板，方便再次粘贴；可在「设置 → 高级」关闭。
+  📥 各平台安装包下载指引
+
+  | 平台                          | 下载包                                                               | 说明                                                                                            |
+  | ----------------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+  | macOS Apple Silicon（M 系列） | OpenLess_1.3.15_aarch64.dmg                                          | 拖入「应用程序」安装，之后可应用内自动更新                                                      |
+  | macOS Intel                   | OpenLess_1.3.15_x64.dmg                                              | 同上                                                                                            |
+  | Windows 10/11 x64             | OpenLess_1.3.15_x64-setup.exe                                        | 安装器（推荐）；另有 .msi 供需要静默/组策略部署的场景                                           |
+  | Linux x64                     | OpenLess_1.3.15_amd64.AppImage（免安装推荐）/ .deb / .rpm            | 桌面发行版选 deb/rpm；fcitx5 输入法用户另装 libopenless.so + openless.conf（在 release 资产中） |
+  | Android 真机                  | OpenLess_1.3.15_arm64-v8a.apk（主流机型）/ armeabi-v7a.apk（老设备） | 首次安装需在系统设置允许「安装未知应用」；应用内更新会拉起系统安装器                            |
+  | Android 模拟器                | OpenLess_1.3.15_x86_64.apk / x86.apk                                 | 同左                                                                                            |
+
+  - macOS 首次安装：若 Gatekeeper 提示「OpenLess 已损坏」，在终端执行：
+    xattr -cr /Applications/OpenLess.app
+    （当前 build 为 ad-hoc 签名、未做 Apple 公证。）
+  - Windows：安装包未签名，SmartScreen 可能提示「未识别的发布者」，点「仍要运行」即可。
+  - 所有 .tar.gz 及 .apk 均附带 .sig（minisign 签名），供应用内自动更新校验；普通用户无需手动下载。
+  - 渠道说明：v1.3.15-tauri 为正式版 tag，自动推送给所有应用内检查更新的用户；Beta 版（pre-release）不推送给正式版用户，仅对「设置 → 关于 → 加入 Beta 渠道」的用户可见。
+  完整提交列表：v1.3.14-tauri...v1.3.15-tauri
+ReleaseNotesUrl: https://github.com/Open-Less/openless/releases/tag/v1.3.15-tauri
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,103 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: RandyHollines.Objeck
+PackageVersion: 2026.9.0
+PackageLocale: en-US
+Publisher: Randy Hollines
+PublisherUrl: https://github.com/objeck
+PublisherSupportUrl: https://github.com/objeck/objeck-lang/issues
+Author: Randy Hollines
+PackageName: Objeck
+PackageUrl: https://github.com/objeck/objeck-lang
+License: Self-designed License
+LicenseUrl: https://github.com/objeck/objeck-lang/blob/HEAD/LICENSE
+Copyright: © 2024 Randy Hollines. All Rights Reserved.
+ShortDescription: Objeck is a 64-bit object-oriented and functional programming language designed to be fast, intuitive, and lightweight.
+Moniker: objeck
+Tags:
+- arm64
+- assembly-language
+- c
+- compiler
+- cplusplus
+- debuggers
+- documentation
+- examples
+- linux
+- lsp-server
+- macos
+- memory-management
+- programming-language
+- runtime-system
+- windows
+- x64
+ReleaseNotes: |-
+  Objeck Language v2026.9.0
+  A socket close that stops losing the response on Windows loopback, a language server that
+  no longer serializes every request behind one lock, and a release pipeline that reports
+  what it actually did.
+
+  What's New in v2026.9.0
+  - A server that wrote a response and closed could lose all of it. On Windows loopback
+    the reader got a connection reset and zero bytes — not a short read — even though every
+    byte had been accepted and delivered. TCPSocket and TCPSecureSocket gain
+    CloseGracefully(), which reads until the peer hangs up and then closes, so the client
+    owns the teardown. Measured over 180 transfers of a 16KB response: Close() lost 21,
+    CloseGracefully() lost none. (#669)
+  - The language server serialized every request behind one lock. Concurrent analysis
+    was correct only because of it, with TreeFactory and TypeFactory as process-wide
+    singletons underneath. They are now bound per thread through an RAII scope guard, so
+    each analysis gets its own, and the coarse lock gives way to per-program locking.
+    Concurrent analysis is now a gating regression test rather than something run by hand.
+    (#659)
+  - Four publish steps reported success while doing nothing. Sourceforge, the
+    Marketplace, the playground and the API docs each skipped on an absent credential and
+    passed — so v2026.8.4 published with all four green while the playground served a
+    three-month-old engine and objeck.org served the previous release's docs. A missing
+    credential now fails and names the secret, or is declared manual in one place that also
+    prints it as a to-do, and a pre-flight gate checks the pipeline can do what it
+    advertises before the tag is pushed.
+  - Documentation: docs/windows_loopback_sockets.md listed bounded drains at 100ms and
+    400ms as having no effect and then recommended a drain bounded at 1000ms. Both are true —
+    the bound is the variable, not the technique — but the document did not say so and read
+    as contradicting itself.
+  Merged: #687, #688, #689, #690, #691
+
+  📦 Installation
+
+  Windows
+  - x64: Download objeck-windows-x64_2026.9.0.msi and run the installer
+  - ARM64: Download objeck-windows-arm64_2026.9.0.msi and run the installer
+  - Portable: objeck-windows-x64_2026.9.0.zip, objeck-windows-arm64_2026.9.0.zip
+
+  Linux
+  - x64: tar -xzf objeck-linux-x64_2026.9.0.tgz
+  - ARM64: tar -xzf objeck-linux-arm64_2026.9.0.tgz
+
+  macOS
+  - ARM64 installer: objeck-macos-arm64_2026.9.0.pkg
+  - ARM64 archive: unzip objeck-macos-arm64_2026.9.0.zip (notarized by Apple)
+
+  Editor support
+  - LSP / VS Code: objeck-lsp_2026.9.0.zip
+
+  📚 Documentation
+  - API Documentation: https://objeck.org/api/latest/
+  - Language Guide: https://github.com/objeck/objeck-lang
+
+  🔐 Verification
+  Both Windows installers in this release are signed, by CN=Randy Hollines
+  (Sectigo Public Code Signing CA R36). Confirm before trusting a download:
+  Get-AuthenticodeSignature objeck-windows-x64_2026.9.0.msi
+  It reports Valid only when the file really is signed and unmodified.
+  Verify any download against the SHA256SUMS asset, which was regenerated after
+  signing — signing rewrites the installers, so a manifest made before it describes bytes
+  you cannot download:
+  sha256sum -c SHA256SUMS
+
+  🐛 Issues
+  Report issues at: https://github.com/objeck/objeck-lang/issues
+ReleaseNotesUrl: https://github.com/objeck/objeck-lang/releases/tag/v2026.9.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

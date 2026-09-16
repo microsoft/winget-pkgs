@@ -1,0 +1,34 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: NextTrace.NextTrace.Tiny
+PackageVersion: 1.7.1
+PackageLocale: zh-CN
+ShortDescription: 一个使用 Golang 实现的开源轻量级可视化 traceroute 工具。
+Tags:
+- asn查询
+- as路径
+- geoip
+- geolocation
+- ip
+- ip查询
+- traceroute
+- 网络
+- 网络分析
+ReleaseNotes: |-
+  What's Changed
+  - 修复 Fast Trace 初始化流程：--fast-trace / --file 现在会先准备 LeoMoeAPI runtime，再进入快速测试，避免 GeoIP / FastIP 相关初始化缺失
+  - 修复配置 NEXTTRACE_API_V4_TOKEN 时 Fast Trace 仍初始化旧 v3 WebSocket 的问题；v4 token runtime 准备成功后会跳过 v3 WS
+  - 修复 Fast Trace 中重复注册 signal / interrupt 处理的问题，减少 Ctrl-C、退出和 WebSocket 清理路径的副作用
+  - 修正 Fast Trace runtime prepared 判定，避免已由上层准备 runtime 后仍重复创建 / 关闭 LeoMoe WebSocket
+  - Fast Trace IPv4 / IPv6 路径统一复用 runtime 初始化与 WebSocket 清理逻辑，降低不同路径行为不一致的风险
+  - 升级 Go toolchain 到 1.26.4，CI / build / regression workflow 同步固定使用 Go 1.26.4
+  - 更新依赖：golang.org/x/net 0.56.0、golang.org/x/sys 0.46.0、golang.org/x/term 0.44.0、golang.org/x/sync 0.21.0、github.com/quic-go/quic-go 0.59.1、github.com/mattn/go-runewidth 0.0.24 等
+  额外的：
+  本版本主要是 Fast Trace 初始化稳定性修复和依赖 / 工具链更新。
+  配置 NextTrace API v4 token 的用户，Fast Trace 会优先走 v4 runtime，不再无意义初始化旧 v3 LeoMoe WebSocket。
+  --from 路径不受 Fast Trace runtime 初始化影响。
+  Full Changelog: https://github.com/nxtrace/NTrace-core/compare/v1.7.0...v1.7.1
+ReleaseNotesUrl: https://github.com/nxtrace/NTrace-core/releases/tag/v1.7.1
+ManifestType: locale
+ManifestVersion: 1.12.0

@@ -1,0 +1,140 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.0.9
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-agent-core
+  Fixed
+  - Fixed /shake elide handling of mixed tool results so images are preserved and token savings are reported accurately.
+  @oh-my-pi/pi-ai
+  Fixed
+  - Improved OAuth sign-in flows, including a fallback message when the browser cannot automatically close the OAuth success tab.
+  - Fixed Cloudflare AI Gateway onboarding and routing so gateway account and endpoint configuration is preserved correctly while gateway credentials are not sent as upstream OpenAI authorization headers.
+  - Fixed Codex OAuth quota handling so chat and Spark usage remain independent, legacy shared quota limits continue to work, and incomplete usage reports are not incorrectly treated as unlimited.
+  @oh-my-pi/pi-catalog
+  Added
+  - Added Z.AI GLM-5.3-Flash to the bundled GLM Coding Plan catalog, with a 1M-token context window, 131,072-token output limit, native image input, and low/high/max thinking levels. It is now available through model discovery and the model picker.
+  Fixed
+  - Fixed Google Antigravity Gemini 3.7 Flash tiered models failing with HTTP 400 errors at minimal or disabled thinking levels; those tiers now use the compatible Gemini 3.7 Flash model routing.
+  - Fixed OpenCode Go and Zen GLM-5.3 Flash models exposing an unsupported extra-high reasoning level; they now use the supported low/high/max reasoning levels.
+  - Fixed Cloudflare AI Gateway credential handling so stored credentials and routing metadata are parsed and used correctly.
+  @oh-my-pi/pi-coding-agent
+  Breaking Changes
+  - Removed the git and jj wrapper modules from the SDK surface. VCS operations are now available through @oh-my-pi/pi-natives/vcs, including native handles and typed VcsError support; the package continues to re-export the github (gh CLI) helpers.
+  Changed
+  - extendedContext now defaults to off: models with premium long-context pricing tiers (e.g. GPT-5.6 1M) stay capped at their standard-pricing window unless the setting or /extended-context on enables the extended window.
+  Fixed
+  - Improved terminal readability on light backgrounds by ensuring TUI surfaces use contrasting foreground colors.
+  - Coalesced simultaneous autonomous continuation requests to prevent repeated calls while the agent is busy, with clearer continuation diagnostics.
+  - Fixed Snapcompact so it skips or falls back when compaction would not reduce context size, and now compacts text in mixed tool results while preserving all source images.
+  - Added Google Antigravity daily quota usage to the status line.
+  - Fixed status-line background-work counts so queued tasks and evaluation jobs remain visible without double-counting running subagents.
+  - Fixed nested subagent visibility in RPC subscriptions, the subagent HUD, get_subagents, subagent_* events, and get_subagent_messages.
+  - Fixed omp token refreshing local MCP OAuth credentials without blocking or losing rotating refresh tokens, and preserved OpenCode MCP OAuth configuration during discovery.
+  - Prevented process crashes caused by socket-closed errors and unhandled promise rejections during concurrent subagent shutdowns, timeouts, and MCP transport disconnects.
+  - Fixed automatic startup model selection so ambient AWS credentials do not incorrectly select an unavailable Amazon Bedrock model over a provider the user has authenticated with.
+  - Kept embedded context usage visible in the status line when long session names or paths consume available space.
+  - Added a status message when CTRL-O toggles tool-output expansion.
+  - Fixed omp usage to report Codex Chat and Spark capacity meters separately when they share a usage window.
+  @oh-my-pi/pi-mnemopi
+  Fixed
+  - Fixed working-memory search returning too few or no results when the most relevant matches had been superseded, ensuring valid older entries are still returned.
+  @oh-my-pi/pi-natives
+  Breaking Changes
+  - Replaced the Git-specific watchHead and headWatchTarget API with the backend-neutral watch and VcsRepo.watchTarget APIs.
+  Added
+  - Added portable repository discovery and read operations through VcsRepo, repo(), and require(), with support for Git and Jujutsu and explicit capability checks for staged and revision diffs.
+  - Added the Vcs* API for repository operations across Git and Jujutsu, including repository discovery, refs and status, diffs, staging, commits, branches, worktrees, patch application, stash, cherry-pick, and CLI-backed push, fetch, and clone operations with cancellation support.
+  Fixed
+  - Fixed Git intent-to-add files so they appear correctly as unstaged additions in statusPorcelain and are handled correctly when staging or applying patches.
+  @oh-my-pi/omp-stats
+  Fixed
+  - Fixed inconsistent model colors between the Model Preference chart and Model Statistics table.
+  @oh-my-pi/pi-tui
+  Added
+  - Exported TuiDebugServer for programmatic headless control
+  - Added debug demonstration script to examples
+  - Added an OMP_TUI_DEBUG Unix socket for headless TUI driving and structured inspection.
+  Changed
+  - Inline hex colors now render with VS Code-style colored backgrounds and automatically selected black or white text for readability, alongside the color swatch.
+  - LaTeX text formatting commands such as \textbf, \textit, \textsl, and \emph now render as terminal bold or italic text.
+  Fixed
+  - Fixed inline color swatches rendering incorrectly inside highlighted lines.
+  - Fixed terminal resizing in tmux panes and Windows consoles duplicating the current in-progress turn in scrollback.
+  @oh-my-pi/pi-utils
+  Fixed
+  - Fixed error handling so unrelated aborted requests and closed-connection failures are no longer silently suppressed.
+  What's Changed
+  - fix(coding-agent): stop the status bar counting subagents twice by @Hunter-124 in https://github.com/can1357/oh-my-pi/pull/9927
+  - fix(coding-agent): keep embedded context usage visible by @641-git641 in https://github.com/can1357/oh-my-pi/pull/9946
+  - fix(mnemopi): stop superseded rows from occupying FTS candidate slots by @BAKocska in https://github.com/can1357/oh-my-pi/pull/9948
+  - fix(mcp): preserve OpenCode OAuth config by @ZanzyTHEbar in https://github.com/can1357/oh-my-pi/pull/9951
+  - fix(cli): refresh local MCP OAuth tokens by @roboomp in https://github.com/can1357/oh-my-pi/pull/9955
+  - fix(tui): stop the resize pre-erase archiving the unfinished frame into scrollback by @nategriffin26 in https://github.com/can1357/oh-my-pi/pull/9962
+  - fix(catalog): include glm-5.3 flash in effort ladder by @roboomp in https://github.com/can1357/oh-my-pi/pull/9963
+  - fix(theme): keep text readable on painted surfaces by @roboomp in https://github.com/can1357/oh-my-pi/pull/9965
+  - fix(coding-agent): prefer concrete-auth provider for startup default model by @roboomp in https://github.com/can1357/oh-my-pi/pull/9968
+  - fix(ai): correct Codex Spark quota isolation by @aleister1102 in https://github.com/can1357/oh-my-pi/pull/9978
+  - fix(tui): preserve LaTeX terminal styles by @aleister1102 in https://github.com/can1357/oh-my-pi/pull/9980
+  - fix(ai): make Cloudflare AI Gateway login self-contained by @AshishKumar4 in https://github.com/can1357/oh-my-pi/pull/9981
+  - Show status message when toggling tool output expansion by @amnkarn in https://github.com/can1357/oh-my-pi/pull/9987
+  - fix(session): coalesce continuation scheduler requests by @roboomp in https://github.com/can1357/oh-my-pi/pull/9992
+  - fix(stats): keep model colors consistent across views by @rthiago in https://github.com/can1357/oh-my-pi/pull/9995
+  - fix(agent): preserve images during shake elision by @Hunter-124 in https://github.com/can1357/oh-my-pi/pull/9997
+  - fix(coding-agent): compact mixed-image tool results by @Hunter-124 in https://github.com/can1357/oh-my-pi/pull/9998
+  - fix(tui): display Antigravity daily usage in status line by @roboomp in https://github.com/can1357/oh-my-pi/pull/10000
+  - fix(catalog): fold gemini-3.7-flash-tiered into gemini-3.7-flash by @roboomp in https://github.com/can1357/oh-my-pi/pull/10018
+  - fix(compaction): skip inflating snapcompact results by @roboomp in https://github.com/can1357/oh-my-pi/pull/10024
+  - fix(coding-agent): prevent unhandled socket closures and floating promise leaks during subagent teardown by @jaimehgb in https://github.com/can1357/oh-my-pi/pull/9751
+  - feat(catalog): add Z.AI GLM-5.3-Flash with native image input by @tmdgusya in https://github.com/can1357/oh-my-pi/pull/9835
+  - fix(ai): degrade the OAuth close button when the tab is not script-closable by @Hunter-124 in https://github.com/can1357/oh-my-pi/pull/9926
+  - docs: document BigModel balance-key setup by @roboomp in https://github.com/can1357/oh-my-pi/pull/9949
+  - fix(rpc): nested subagent frames never reach RPC/observer surfaces (depth >= 2 invisible) by @cwr250 in https://github.com/can1357/oh-my-pi/pull/9952
+  New Contributors
+  - @Hunter-124 made their first contribution in https://github.com/can1357/oh-my-pi/pull/9927
+  - @641-git641 made their first contribution in https://github.com/can1357/oh-my-pi/pull/9946
+  - @BAKocska made their first contribution in https://github.com/can1357/oh-my-pi/pull/9948
+  - @ZanzyTHEbar made their first contribution in https://github.com/can1357/oh-my-pi/pull/9951
+  - @nategriffin26 made their first contribution in https://github.com/can1357/oh-my-pi/pull/9962
+  - @aleister1102 made their first contribution in https://github.com/can1357/oh-my-pi/pull/9978
+  - @AshishKumar4 made their first contribution in https://github.com/can1357/oh-my-pi/pull/9981
+  - @amnkarn made their first contribution in https://github.com/can1357/oh-my-pi/pull/9987
+  - @rthiago made their first contribution in https://github.com/can1357/oh-my-pi/pull/9995
+  - @jaimehgb made their first contribution in https://github.com/can1357/oh-my-pi/pull/9751
+  - @tmdgusya made their first contribution in https://github.com/can1357/oh-my-pi/pull/9835
+  - @cwr250 made their first contribution in https://github.com/can1357/oh-my-pi/pull/9952
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.0.8...v18.0.9
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.0.9
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

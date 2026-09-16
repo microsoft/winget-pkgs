@@ -75,6 +75,8 @@ If you don't have any additional info/context to add but would like to indicate 
 
 Authoring a manifest is not intended to be a painful experience. We have been working to make it easier. Sometimes this is to our own detriment. Please take the time to read our guidance on [authoring manifests](/doc/Authoring.md). This will save everyone time, and it will reduce the frustration of other Windows users who are just trying to get their job done, or have some fun.
 
+If this is your first manifest submission, review the [first-time contributor checklist](/doc/FirstContribution.md) before opening a PR. Routine manifest submissions do not require a separate issue first, but they must stay limited to one package version per PR and should not include non-manifest file changes.
+
 ## Contributing fixes / features
 
 For those able & willing to help fix issues and/or implement features ...
@@ -144,8 +146,8 @@ cd winget-pkgs
 ```
 Create a new branch for your feature or bug fix:
 ```
- git checkout -b feature-branch
- ```
+git checkout -b feature-branch
+```
 
 Make your changes and commit them:
 ```
@@ -176,6 +178,8 @@ When you'd like the team to take a look, (even if the work is not yet fully-comp
 
 > [!IMPORTANT]
 > Remember - **changes you make may affect both the Windows Package Manager and the schema support implemented in our validation pipelines!** Because of this, we will treat community PR's with the same level of scrutiny and rigor as commits submitted to the official Windows source by team members and partners.
+
+When you submit a manifest PR, a **GitHub App** automatically runs the [Validation Pipeline](/doc/Validation.md) on your manifest and installers, reporting results directly on the PR's Checks tab. For details on each step and how to resolve failures, see the [Validation documentation](/doc/Validation.md) and [Validation Failure Guide](/doc/ValidationFailureGuide.md).
 
 ### Merge
 

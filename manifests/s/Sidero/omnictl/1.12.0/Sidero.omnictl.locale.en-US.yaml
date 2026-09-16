@@ -1,0 +1,140 @@
+# Created with WinGet Updater using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Sidero.omnictl
+PackageVersion: 1.12.0
+PackageLocale: en-US
+Publisher: Sidero Labs
+PublisherUrl: https://github.com/siderolabs/omni
+PublisherSupportUrl: https://github.com/siderolabs/omni/issues
+PrivacyUrl: https://www.siderolabs.com/privacy-policy/
+Author: Sidero Labs
+PackageName: omnictl
+PackageUrl: https://github.com/siderolabs/omni
+License: Mozilla Public License Version 2.0
+LicenseUrl: https://github.com/siderolabs/omni/blob/HEAD/LICENSE
+ShortDescription: A command line tool for communicating with Omni
+Moniker: omnictl
+Tags:
+- k8s
+- kubernetes
+- omni
+- talos
+ReleaseNotes: |-
+  Omni 1.12.0 (2026-09-11)
+  Welcome to the v1.12.0 release of Omni!
+  Please try out the release binaries and report any issues at
+  https://github.com/siderolabs/omni/issues.
+  Image Factory API Token Authentication
+  Omni can now authenticate to the image factory with an API token. The token is read from a file, so it can be rotated without a restart. Basic auth is still supported for self-hosted factories using htpasswd.
+  For such a factory, Omni creates a machine token and puts it into the registry auth config of every machine, so that the machines can pull images from the factory.
+  The token file is configured under registries.factories.<primary|secondary> in the config file:
+  registries:
+    factories:
+      primary:
+        url: https://factory.example.com
+        tokenFile: /run/secrets/factory-token
+  The equivalent flags are --primary-factory-token-file and --secondary-factory-token-file.
+  Security Scans in omnictl
+  The new omnictl security command fetches the security artifacts of a Talos schematic from the enterprise image factory:
+  - scan: the vulnerability scan report.
+  - sbom: the SPDX SBOM.
+  - vex: the VEX document.
+  It takes either a cluster ID, covering every schematic and architecture the cluster runs, or an explicit combination of Talos version, architecture and schematic. The scan output also shows the available Talos upgrade paths and the vulnerability diff for each of them.
+  These artifacts are only available on the enterprise image factory, so the command requires Omni to be configured with one.
+  Contributors
+  - Utku Ozdemir
+  - Edward Sammut Alessi
+  - Mateusz Urbanek
+  - Andrey Smirnov
+  - Dmitrii Sharshakov
+  - Immanuel Tikhonov
+  - Mateusz Urbanek
+  - Noel Georgi
+  Changes
+  27 commits
+  - cd616f1cd release(v1.12.0): prepare release
+  - 6192a1450 feat: add security scans to omnictl
+  - 6cdda713c fix: revert stabilizing the tunnel peer address across provisions
+  - c4a37d55e test: run the enterprise image factory tests against the staging factory
+  - c832a504f feat: make the lifetime of the image factory machine tokens configurable
+  - 70814f39c refactor(frontend): make frontend obtain artifact targets from backend
+  - d525fda6c feat: implement ClusterArtifactTargets rpc call
+  - ccc80d254 feat: add ClusterArtifactTargets rpc method
+  - af65853e0 release(v1.12.0-beta.0): prepare release
+  - 723666686 fix: restore the extra parameters of the sqlite connection string
+  - 08695407d fix: read the node unique token uncached in the cleanup controller
+  - 9ddfa5246 feat: authenticate to the image factory with an API token
+  - 800bcac19 test: use ECDSA service account keys for the clusters in the tests
+  - cd8598724 fix: generate the registry auth document by the running Talos version
+  - acc0c4f40 chore: bump delve version in compose
+  - 6692b2c0b fix: ensure the schematic on the target factory before an install
+  - 8c7699a77 fix: run the sqlite database with the NORMAL synchronous mode
+  - d8a281c42 chore(frontend): bump deps
+  - 49861a25e fix: reuse the node unique token already written to the machine
+  - 74003273c chore: bump deps, rekres, Talos 1.13.10
+  - 0a6d296fd test: poll for Vault readiness instead of sleeping in the tests
+  - d411b2554 test: increase the timeout of the node label check
+  - 46e112ac4 chore(frontend): remove factory urls from csp
+  - 8cbf034be fix: keep the machine extensions consistent across extensions configurations
+  - 0a22ac7af fix(frontend): distinguish initial log fetch failures
+  - 4c833c7e1 fix: apply the registry mirrors to machines in maintenance mode
+  - edcad2769 fix: retry the installer image pull in the maintenance lifecycle API
+  Changes since v1.12.0-beta.0
+  8 commits
+  - cd616f1cd release(v1.12.0): prepare release
+  - 6192a1450 feat: add security scans to omnictl
+  - 6cdda713c fix: revert stabilizing the tunnel peer address across provisions
+  - c4a37d55e test: run the enterprise image factory tests against the staging factory
+  - c832a504f feat: make the lifetime of the image factory machine tokens configurable
+  - 70814f39c refactor(frontend): make frontend obtain artifact targets from backend
+  - d525fda6c feat: implement ClusterArtifactTargets rpc call
+  - ccc80d254 feat: add ClusterArtifactTargets rpc method
+  Changes from siderolabs/discovery-service
+  2 commits
+  - 865fb4f release(v1.1.1): prepare release
+  - 270f977 feat: rekres and update dependencies
+  Changes from siderolabs/go-debug
+  1 commit
+  - 44d6398 feat: support Go 1.27
+  Changes from siderolabs/image-factory
+  12 commits
+  - 4520b38 fix(enterprise): evaluate VEX against Talos kernel
+  - a27dfe6 feat: enforce public API with OpenAPI
+  - 773ba3c fix(ui): gate token create modal on the in-flight POST
+  - 2e149c8 fix(auth0): drop Bearer challenge from 401 response
+  - 9f82dde fix: rename registryClientRefreshInterval to refreshInterval
+  - f4f79db feat(enterprise): repo-per-org token storage, url-safe stored tokens
+  - f4e4d01 feat(enterprise): expose actor profiles for token creation UI
+  - 8a77753 feat(enterprise): replace scope enum with route-defined capability scopes
+  - 4d9710f feat(enterprise): add CLI-only admin token scope
+  - 4286666 feat(enterprise): unify download and node tokens as scoped API tokens
+  - 4becd5d release(v1.6.1): prepare release
+  - e5ff748 fix: pull in Talos for the SBC/GRUB/EFI fix
+  Dependency Changes
+  - filippo.io/age v1.3.1 -> v1.3.2
+  - github.com/aws/aws-sdk-go-v2 v1.44.0 -> v1.46.0
+  - github.com/aws/aws-sdk-go-v2/config v1.32.40 -> v1.33.3
+  - github.com/aws/aws-sdk-go-v2/credentials v1.19.39 -> v1.20.3
+  - github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager v0.3.17 -> v0.4.3
+  - github.com/aws/aws-sdk-go-v2/service/s3 v1.108.0 -> v1.111.0
+  - github.com/coreos/go-oidc/v3 v3.20.0 -> v3.21.0
+  - github.com/cosi-project/state-sqlite v0.4.0 -> v0.5.0
+  - github.com/fluxcd/cli-utils v1.2.2 -> v1.3.0
+  - github.com/go-jose/go-jose/v4 v4.1.4 -> v4.1.5
+  - github.com/google/go-containerregistry v0.22.0 -> v0.22.1
+  - github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.3 -> v2.3.4
+  - github.com/prometheus/client_model v0.6.2 -> v0.6.3
+  - github.com/prometheus/common v0.70.1 -> v0.71.0
+  - github.com/siderolabs/discovery-service v1.1.0 -> v1.1.1
+  - github.com/siderolabs/go-debug v0.6.2 -> v0.6.3
+  - github.com/siderolabs/image-factory v1.6.0 -> 4520b38a89a6
+  - github.com/siderolabs/omni/client v1.9.3 -> 000000000000
+  - github.com/siderolabs/talos/pkg/machinery 322de8bf2974 -> 5c5fd29e95f7
+  - github.com/zitadel/oidc/v3 v3.49.3 -> v3.49.6
+  - golang.org/x/crypto v0.55.0 -> v0.56.0
+  - sigs.k8s.io/controller-runtime v0.24.1 -> v0.25.0
+  Previous release can be found at v1.11.0
+ReleaseNotesUrl: https://github.com/siderolabs/omni/releases/tag/v1.12.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,98 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.65.13
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.65.13] - 2026-08-17
+  Three things an audit of the last few releases turned up. Clearing your speed-test history could say it
+  worked when it had not, the precise bandwidth readings could show a nonsense spike if your PC corrected
+  its clock, and the Task Scheduler's two "run time" columns looked broken because they only fill in when
+  you click a row. The version history in this file was also missing three releases' notes.
+  Fixed
+  - "Clear history" could report success after failing. Deleting your saved speed-test results rewrites
+    a file, and if that write failed the app logged it quietly and emptied the list on screen anyway — after
+    a dialog that told you the data was gone for good. It came back on the next launch, with nothing to say
+    which was real. This is the same fault fixed for saving a result in 1.65.10; clearing was missed at the
+    time, and it is the worse half, because you have just confirmed the data should be destroyed. The rows now
+    stay on screen with an explanation when the file cannot be written.
+  - Precise bandwidth could show an absurd spike after a clock correction. The per-app readings are
+    worked out by dividing bytes by elapsed time, and elapsed time was measured with the wall clock. When
+    Windows corrects the clock backwards — a routine time sync — that measurement went negative, got clamped
+    to a single millisecond, and every rate on that reading was multiplied by roughly a thousand. A large
+    forward correction had the opposite effect: every program was treated as idle and dropped from the list,
+    losing its session totals. Both are gone: the timing now uses a clock that cannot run backwards.
+  - Task Scheduler's "Last run" and "Next run" showed a dash on every row. Both times come from a
+    separate lookup that only runs for the row you select, so the columns sat empty until clicked and read as
+    missing data. They now say "(on select)" in the heading, which is what actually happens — fetching them
+    for every task up front would mean one lookup per scheduled task, hundreds on a normal PC. The publisher
+    tooltip on "What it does" is also reachable now on tasks that have no description, which is exactly where
+    it was the only information available.
+  - Three releases had no entry in this file. The notes for 1.65.7, 1.65.8 and 1.65.9 were all welded
+    under the 1.65.10 heading, so this file jumped from 1.65.10 straight to 1.65.6 while carrying five
+    separate sets of fixes under one version. Since the release workflow copies each entry into the download
+    page and the announcement, three releases published nothing describing themselves. Each now has its own
+    entry, 1.56.7 (tagged but never published) is recorded too, and a check now fails the build if a version
+    between two documented ones is ever missing again.
+  Verify the download
+  Get-FileHash .\SysManager-v1.65.13.exe -Algorithm SHA256
+  Expected SHA256: 41192111E3CB5ED5260CCFF9B6AAAF58483287C2AE3C9E449BBC7CBF17735A1B
+  This build is not code-signed, so Windows will warn on first launch. That is
+  expected for a small independent app: see what the warning says and what to
+  click.
+  Code signing is planned through the SignPath Foundation,
+  which provides free certificates to open-source projects, with signing performed by
+  SignPath.io. Until then, the SHA256 above and the build
+  attestation below are what establish that a download is the genuine build.
+  Code signing policy
+  This release is not code-signed. The team roles, release-approval process and
+  privacy policy required by the SignPath Foundation programme
+  are documented in advance under Code signing
+  policy. That
+  documentation is a prerequisite for applying, not evidence of a certificate. The
+  attribution line naming SignPath as the signing provider will appear here once a
+  certificate is actually issued.
+  This program will not transfer any information to other networked systems unless
+  specifically requested by the user or the person installing or operating it. Full
+  privacy policy.
+  Verify where this binary came from
+  This exe was built by GitHub Actions from this public source, and the build is
+  recorded in the Sigstore public transparency log. With the
+  GitHub CLI:
+  gh attestation verify .\SysManager-v1.65.13.exe --repo laurentiu021/SystemManager
+  That proves which commit and workflow produced this exact binary, something the
+  SHA256 file cannot show, since it is published alongside the exe it describes.
+  Each release also ships SysManager-v1.65.13.sbom.json, a CycloneDX inventory of
+  every dependency resolved for this build.
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.65.13
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

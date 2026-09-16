@@ -1,0 +1,78 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 4.0.9
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [4.0.9] - 2026-06-24
+  AeroVault Create Redesign, the AeroVault Zip Plaintext Lane and Universal rclone Export
+  A large pass on AeroVault and the bridge. The vault create flow is rebuilt to match the Compressor: a named vault, mode cards with a conditional password, a result receipt instead of a jump into the browser, and a single tabbed shell (Home, Recent, Files) shared by the standalone modal and the browser. A new AeroVault Zip plaintext lane adds a fast, honestly-unencrypted .aerozip archive format for cases where compression matters and confidentiality does not, with optional recovery parity and a real measured size estimate. AeroMount gains a read-only mount and a one-shot Save-All for unlocked vaults (Ehud Kirsh's idea #1). On the bridge side, rclone export now reaches Filen and every OAuth cloud provider, not just import. The release closes a pre-release audit of all 86 changes (12 findings, including a formatting gate that was red on the previous commit) before tagging.
+  Added
+  - AeroVault create rebuilt Compressor-style (@EhudKirsh, #322): a required Vault Name drives the saved filename, the security level and compression are chosen on mode cards, the password field only appears for an encrypted vault, and create ends in a result receipt with the size composition instead of dropping you into the browser. The create form gained hover states, a reset button, a padlock and format label, an encryption badge and proportional before/after size bars.
+  - Unified tabbed AeroVault shell: the standalone modal and the in-browser view share one tab strip (Home and Recent standalone, Files and Recent in the browser), with the recent-vaults list extracted into a single reusable component rendered in both.
+  - AeroVault Zip plaintext archive lane (.aerozip): a new fast, unencrypted archive format with a CLI (aeroftp aerovz) and a GUI scaffold, opened by header on double-click with the OS file-type association registered. The copy is explicit that it provides no confidentiality. Recovery parity is opt-out (default on); --recovery-level 0 (or off/none) disables it.
+  - AeroMount read-only mount of unlocked vaults (@EhudKirsh, #322, idea #1): mount an unlocked Cryptomator vault, .aerovault or .aerozip as a read-only filesystem in your OS file manager. It is ephemeral and session-bound, the password is passed over stdin and never stored, and it auto-unmounts when you lock the vault or quit. Linux first.
+  - AeroMount "Save all..." for unlocked vaults (@EhudKirsh, #322, idea #1): export the whole decrypted tree of an unlocked Cryptomator vault, .aerovault or .aerozip in one shot, to a folder, a single .zip or a single .aerozip, instead of one file at a time. A shared ReadableVault seam drives a streaming zip writer for both container types, behind a confirm dialog that flags the plaintext export.
+  - Real graphical compressed-size estimate: the Compress and AeroVault Zip dialogs show the estimated output size as a bar that updates on every option change. A backend canary samples the actual input, compresses it with the chosen codec and level and extrapolates (exact when the whole input fits the sample cap).
+  - Live progress bars and a busy-lock for archive and vault operations, with a byte-true inverse bar and an honest result for incompressible input.
+  - Grid and list view in the AeroVault browse modal, the Cryptomator browser and the archive browsers, with a 3-level small/medium/large icon toggle and larger container modals.
+  - Export Filen and the OAuth cloud providers to working rclone remotes (@EhudKirsh, #128): Filen, Google Drive, Dropbox, OneDrive, Box, pCloud, Yandex, OpenDrive and Backblaze B2 now export to rclone.conf as usable remotes, not just import, extending the earlier Jottacloud-only export. Filen carries email, password and its CLI api key; the OAuth backends emit the AeroFTP-persisted token that rclone refreshes on first use (OneDrive also drive_id/drive_type, pCloud the EU hostname); OpenDrive and B2 their account secrets.
+  - Active Sessions in My Servers (@EhudKirsh, #128): a contextual filter for profiles with a live backend session, plus an open-session count chip on the button.
+  - Interactive aeroftp groups and aeroftp users CLI sections (@EhudKirsh, #311): dedicated groups [-i] and users -i prompts on the same -i engine as profiles -i (selectors by index or name, . refresh, h help, sticky loop). Groups gain re-index, Rename, Copy, Delete and List with a persisted order shared with the now drag-reorderable My Servers group list; users gain re-index, Rename, Copy, Delete, Fav, List and Tree, where Copy duplicates a user's servers into a new password-free user and Fav marks the default user auto-unlocked on launch. The default user is now a real is_default DB column with Manage Users parity, and the sidebar is vault-aware (standard buckets hide at zero, user groups always show).
+  - AeroFile recognizes bridge-config files (@EhudKirsh, #128): a bridge config dropped in the home folder is detected and an "Import to AeroFTP" context-menu action brings it into the app.
+  - Preview modal upgrade with an image gallery (@EhudKirsh, #128): opens instantly with a pulsing skeleton, shows load errors inside the modal, and adds hover arrows, toolbar prev/next and arrow-key navigation through a folder's images with a light fade.
+  - Consistent password-create UX on every create-password surface (@EhudKirsh, #322): a strength meter, a live confirm-match indicator and a show/hide toggle across the Cryptomator, AeroCrypt and rclone crypt dialogs, the new-server crypt binding, .aerovault create and change-password, master-password setup, keystore and settings export, user add, the optional Compress password and the share-link field. Save is blocked until the confirm matches; login and unlock boxes are deliberately left alone.
+  Changed
+  - Compression "Maximum" profile: the third compression preset is relabeled from "Archive" to "Maximum" (the old name collided with the encrypted v3 Archive mode) and the level labels are now translated. The backend mapping is unchanged (fast zstd-3, balanced zstd-9, maximum zstd-15).
+  - Crypt overlay padlock badge (@EhudKirsh, #272): the crypt overlay now reads as a padlock at every site (path bar, file context menu, the My Servers saved-profile badge and the unlock dialog headers), replacing the generic two-squares icon. The native AeroCrypt and rclone-crypt overlays stay distinguished by colour and label.
+  - Remote preview cap raised to 25 MB (@EhudKirsh, #128): the backend cap matched the 25 MB the UI already allowed (one shared limit), so 10 to 25 MB photos preview instead of being rejected.
+  Fixed
+  - Filen API key persists in Quick Connect when editing a profile (@EhudKirsh, #215): it is reloaded from the vault into the form on edit, survives switching protocol and back, and the misleading "key stored" hint was removed.
+  - Files from other Filen clients preview correctly (@EhudKirsh, #128): v2 (32-char) file keys are now decrypted, where the previous hex-only path rejected every cross-client file.
+  - 2FA reconnect no longer fires a stale retry (@EhudKirsh, #128): starting a connect by hand during the countdown cancels the pending saved-secret auto-retry, and a live backend session is reused on re-entry instead of re-logging in.
+  - aeroftp-cli profiles --tui stays in the TUI after an action (@EhudKirsh, #311) instead of dropping to the -i line prompt; only an explicit Quit exits.
+  - profiles -i action prompt is labeled with a h help alias (@EhudKirsh, #311), and the . refresh clears the screen via crossterm so the redraw is clean on legacy Windows consoles (#341).
+  - MCP setup dialog shows the correct Claude Code step: the user-scope claude mcp add -s user aeroftp -- aeroftp-cli mcp command replaces the ~/.claude/.mcp.json path that Claude Code does not read.
+  - Usable OneDrive and EU pCloud rclone remotes (@EhudKirsh, #128): OneDrive captures and injects drive_id/drive_type, pCloud the EU hostname, and the CLI export was synced with the GUI.
+  - Accessibility on password and create forms (@EhudKirsh, #322): the password show/hide eye toggle is no longer a Tab stop, the password input is focused when a vault or archive unlock dialog opens, and vault and compressor modals lock to the X with the create form autofocused.
+  - Pre-release audit fixes (F-01 to F-12): a final audit of all 86 changes fixed a Rust formatting gate that was red on the previous commit; a Backblaze B2 application key that skipped CR/LF sanitization on rclone export; a panic in groups -i and users -i on a quote-only line; a vault empty-state hint that rendered a raw i18n key; a leftover googlephotos entry in the release CLI capability JSON; an .aerozip extract and list report that always claimed recovery parity; a compressed-size estimate that could report "exact" after a skipped file; and two dormant context-menu translation keys removed across all 47 locales.
+  Security
+  - rclone config export hardened: the exported rclone.conf is written 0600 before any OAuth refresh token or obscured password lands in it, and every config value (host, user, region, endpoint, secrets, including the Backblaze B2 application key) is stripped of CR/LF so a crafted profile field cannot forge an extra [remote] section on re-export. Covered by injection tests.
+  - quinn-proto advisory RUSTSEC-2026-0185 patched (with a precautionary crypto-bigint unyank), plus routine dependency updates (rustls 0.23.41, regex 1.12.4, country-flag-icons 1.6.18).
+  - Dev-only providers hidden from the release surface: Google Photos and Blomp are no longer advertised by the release CLI capability catalog or the public docs, matching the GUI.
+  Documentation
+  - Bridge compatibility matrix published: docs/BRIDGE-COMPATIBILITY.md, linked from the README, gives the full per-protocol and per-provider import and export breakdown for all 15 bridge tools, corrected to the real export behaviour (recoverable-secret backends plus the OAuth and Jottacloud export added this release).
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v4.0.9
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

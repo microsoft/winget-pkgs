@@ -1,0 +1,81 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: OpenTelemetry.Weaver
+PackageVersion: 0.26.0
+PackageLocale: en-US
+Publisher: OpenTelemetry
+PublisherUrl: https://github.com/open-telemetry
+PublisherSupportUrl: https://github.com/open-telemetry/weaver/issues
+PackageName: Weaver
+PackageUrl: https://github.com/open-telemetry/weaver
+License: Apache-2.0
+LicenseUrl: https://github.com/open-telemetry/weaver/blob/HEAD/LICENSE
+ShortDescription: OTel Weaver lets you easily develop, validate, document, and deploy semantic conventions
+Tags:
+- codegen
+- documentation
+- observability
+- opentelemetry
+- policy
+- semconv
+ReleaseNotes: |-
+  ## Release Notes
+
+  • 💥 BREAKING CHANGE 💥 `registry live-check` and `registry infer` now bind their OTLP and HTTP admin listeners to `127.0.0.1` instead of `0.0.0.0`, so they no longer listen on every local address by default. Pass `--otlp-grpc-address` (live-check) or `--grpc-address` (infer) to bind a specific interface, or `0.0.0.0` for all of them. The admin listener now binds to the same address as the OTLP listener rather than always to `0.0.0.0`. ([#1740](https://github.com/open-telemetry/weaver/pull/1740) by @lmolkova)
+  • Add selectable Rustls crypto providers (`crypto-ring`, `crypto-aws-lc`, `crypto-openssl`, `crypto-openssl-vendored`, `crypto-symcrypt`), with `crypto-ring` as the default. ([#1712](https://github.com/open-telemetry/weaver/pull/1712) by @lquerel)
+  • Add resolve configuration to allow overriding schema URLs for dependencies in `weaver.yaml` and `.weaver.toml`. ([#1693](https://github.com/open-telemetry/weaver/pull/1693) by @jsuereth)
+  • Add `entity_refs` and `lookup_entity` to the `semconv` Rego library, so an `after_resolution` policy can read the entity definition that an `entity_associations` leaf names, including one a dependency defines. `entity_refs` walks the `one_of` and `all_of` levels of an association. ([#1719](https://github.com/open-telemetry/weaver/pull/1719) by @jerbly)
+  • Add a `lookup_entity` Jinja function, which turns an `entity_associations` leaf into the entity definition it names, for `weaver registry generate` on a v2 registry. ([#1718](https://github.com/open-telemetry/weaver/pull/1718) by @jerbly)
+  • Live-check now follows a v2 `entity_associations` reference into a dependency, or to an entity refinement, neither of which the checker could see before：those entities went unchecked, so a resource missing their required attributes passed clean. A Rego advice policy can read the same v2 definitions, as `data.entities`. ([#1716](https://github.com/open-telemetry/weaver/pull/1716) by @jerbly)
+  • 💥 BREAKING CHANGE 💥 An `entity_associations` leaf in the materialized schema now says which registry defines the entity, as the published schema already did. A leaf that was the bare name `host` is now `{ type：host, provenance: { source: <schema url> } }`, and a leaf with no provenance means this registry defines it. A template, jq filter or Rego policy that read the leaf as a string reads `.type` instead, and the `serve` UI and its API are updated too. ([#1710](https://github.com/open-telemetry/weaver/pull/1710) by @jerbly)
+  • `dependencies` in the materialized (forge) schema is now a map keyed by schema url holding each registry once, and the `dependency_graph` gives the direct dependencies of each. ([#1730](https://github.com/open-telemetry/weaver/pull/1730) by @jerbly)
+  • Fix a legacy `type：resource` group converting to a v2 entity whose type carried the group-id prefix. The entity type now comes from the group's `name`, as it always did for imports, and falls back to the id when the group has none. Every `resource` group of semconv v1.33.0 has this shape, so `resource.host` became the entity `resource.host` rather than `host`, and an `entity_associations` entry naming `host` matched nothing. ([#1704](https://github.com/open-telemetry/weaver/pull/1704) by @jerbly)
+  • 💥 BREAKING CHANGE 💥 (v2 only) The resolution no longer strips a leading `entity.` or `span.` prefix from the type. I.e. an entity authored as `type：entity.test` now keeps the type `entity.test` instead of `test`. ([#1704](https://github.com/open-telemetry/weaver/pull/1704) by @jerbly)
+  • Report two groups whose ids differ but that take one id in the v2 output, as a warning. A v2 signal id drops the group-type prefix, so the groups `entity.host` and `host` both become the entity `host` and the second silently replaced the first. ([#1704](https://github.com/open-telemetry/weaver/pull/1704) by @jerbly)
+  • 💥 BREAKING CHANGE 💥 Resolve every `entity_associations` entry, and record which registry defines the entity it names. A name that nothing in scope defines now fails resolution, as does one that two dependencies each declare an unrelated entity under. A private entity (`dependency_resolution.exclude`) satisfies an association only for a signal that is private too. In the v2 resolved schema an association leaf is now an object (`{ type, provenance }`) instead of a bare entity type; `provenance.source` indexes `dependencies` and is absent for an entity of this registry. ([#1704](https://github.com/open-telemetry/weaver/pull/1704) by @jerbly)
+  • Disallow `stability` and `deprecated` on v2 attribute references. ([#1720](https://github.com/open-telemetry/weaver/pull/1720) by @lmolkova)
+  • Report an `imports` pattern that matched nothing in any dependency, as a warning. A typo or a stale name was previously dropped in silence. ([#1701](https://github.com/open-telemetry/weaver/pull/1701) by @jerbly)
+  • Fix a span imported from a v2 dependency losing the `sampling_relevant` setting on its attributes. This is per-span state, held on the span's attribute reference rather than on the catalog attribute, so the import path never read it. Refining such a span was unaffected. ([#1694](https://github.com/open-telemetry/weaver/pull/1694) by @jerbly)
+  • Fix `imports` never matching a legacy `type：resource` entity in a dependency. Such a group sets no `name` and holds its entity type in the group id, so the matcher now matches the group id as well as the name. ([#1694](https://github.com/open-telemetry/weaver/pull/1694) by @jerbly)
+  • Fix a definition reached by two paths through the dependency graph being imported twice, which produced duplicate groups and misleading duplicate-declaration warnings. Imported groups are now deduplicated as the per-dependency results are joined. ([#1694](https://github.com/open-telemetry/weaver/pull/1694) by @jerbly)
+  • Restore support for dependencies declared by `name` + `registry_path` in legacy (v1) manifests. ([#1696](https://github.com/open-telemetry/weaver/pull/1696) by @lmolkova)
+  • Fix the v2 conversion dropping an attribute that has no `stability` from the signal that declares it. The catalog lookup required the field to be present, so an entity could be published with an empty `identity`. A missing stability now converts to `development`, the documented default, instead of `alpha`. ([#1695](https://github.com/open-telemetry/weaver/pull/1695) by @jerbly)
+  • Fix elements inherited from a transitive dependency being reported as locally defined. A resolved schema's `dependencies` set is the table that `DependencyRef` provenance indexes into, but it listed only direct dependencies, so anything reaching the registry through a dependency-of-a-dependency had no entry to point at. It now records the full closure. ([#1655](https://github.com/open-telemetry/weaver/pull/1655) by @jerbly)
+  • Fix provenance and resolution of attributes inherited from dependencies. ([#1669](https://github.com/open-telemetry/weaver/pull/1669) by @lmolkova)
+  • Drop signal refinements from the forge v1 schema representation. ([#1676](https://github.com/open-telemetry/weaver/pull/1676) by @lmolkova)
+  • Refactor semantic convention v1 and v2 models and schemas into dedicated modules. ([#1732](https://github.com/open-telemetry/weaver/pull/1732) by @jsuereth)
+  • Live-check：preserve instrumentation scope through OTLP ingestion, expose it to Rego policies, and render it in standard output. ([#1605](https://github.com/open-telemetry/weaver/pull/1605) by @McGluut)
+  • Live-check：add support for OTel Profiles ([#1698](https://github.com/open-telemetry/weaver/pull/1698) by @flehner)
+
+  ## Install weaver 0.26.0
+
+  ### Install prebuilt binaries via shell script
+
+  ```sh
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/open-telemetry/weaver/releases/download/v0.26.0/weaver-installer.sh | sh
+  ```
+
+  ### Install prebuilt binaries via powershell script
+
+  ```sh
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/open-telemetry/weaver/releases/download/v0.26.0/weaver-installer.ps1 | iex"
+  ```
+
+  ## Download weaver 0.26.0
+
+  |  File  | Platform | Checksum |
+  |--------|----------|----------|
+  | [weaver-aarch64-apple-darwin.tar.xz](https://github.com/open-telemetry/weaver/releases/download/v0.26.0/weaver-aarch64-apple-darwin.tar.xz) | Apple Silicon macOS | [checksum](https://github.com/open-telemetry/weaver/releases/download/v0.26.0/weaver-aarch64-apple-darwin.tar.xz.sha256) |
+  | [weaver-x86_64-apple-darwin.tar.xz](https://github.com/open-telemetry/weaver/releases/download/v0.26.0/weaver-x86_64-apple-darwin.tar.xz) | Intel macOS | [checksum](https://github.com/open-telemetry/weaver/releases/download/v0.26.0/weaver-x86_64-apple-darwin.tar.xz.sha256) |
+  | [weaver-x86_64-pc-windows-msvc.zip](https://github.com/open-telemetry/weaver/releases/download/v0.26.0/weaver-x86_64-pc-windows-msvc.zip) | x64 Windows | [checksum](https://github.com/open-telemetry/weaver/releases/download/v0.26.0/weaver-x86_64-pc-windows-msvc.zip.sha256) |
+  | [weaver-x86_64-pc-windows-msvc.msi](https://github.com/open-telemetry/weaver/releases/download/v0.26.0/weaver-x86_64-pc-windows-msvc.msi) | x64 Windows | [checksum](https://github.com/open-telemetry/weaver/releases/download/v0.26.0/weaver-x86_64-pc-windows-msvc.msi.sha256) |
+  | [weaver-aarch64-unknown-linux-gnu.tar.xz](https://github.com/open-telemetry/weaver/releases/download/v0.26.0/weaver-aarch64-unknown-linux-gnu.tar.xz) | ARM64 Linux | [checksum](https://github.com/open-telemetry/weaver/releases/download/v0.26.0/weaver-aarch64-unknown-linux-gnu.tar.xz.sha256) |
+  | [weaver-x86_64-unknown-linux-gnu.tar.xz](https://github.com/open-telemetry/weaver/releases/download/v0.26.0/weaver-x86_64-unknown-linux-gnu.tar.xz) | x64 Linux | [checksum](https://github.com/open-telemetry/weaver/releases/download/v0.26.0/weaver-x86_64-unknown-linux-gnu.tar.xz.sha256) |
+  | [weaver-aarch64-unknown-linux-musl.tar.xz](https://github.com/open-telemetry/weaver/releases/download/v0.26.0/weaver-aarch64-unknown-linux-musl.tar.xz) | ARM64 MUSL Linux | [checksum](h
+ReleaseNotesUrl: https://github.com/open-telemetry/weaver/releases/tag/v0.26.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/open-telemetry/weaver/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

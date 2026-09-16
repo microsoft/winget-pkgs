@@ -1,0 +1,41 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: PlanetLinux98.GUARD
+PackageVersion: 0.5.4
+PackageLocale: en-US
+Publisher: PlanetLinux98
+PublisherUrl: https://github.com/PlanetLinux98
+PublisherSupportUrl: https://github.com/PlanetLinux98/guard/issues
+Author: PlanetLinux98
+PackageName: GUARD
+PackageUrl: https://github.com/PlanetLinux98/guard
+License: MIT
+LicenseUrl: https://github.com/PlanetLinux98/guard/blob/HEAD/LICENSE
+ShortDescription: A portable, screen-reader-first backup, system-imaging and app-inventory utility for Windows that requires no installation.
+Description: |-
+  GUARD is a portable, fully accessible backup and data-protection utility for Windows. It backs up your chosen folders to any destination (a local drive, an external disk, or a network share), creates full bare-metal system images with Windows' built-in wbadmin, and keeps an inventory of your installed apps so they are easy to reinstall after a clean OS install - optionally with their settings.
+
+  The release ships as a self-contained portable folder with the .NET 10 runtime and Windows App SDK bundled in, so there is nothing to install. GUARD is built screen-reader-first, with native dark-mode theming, and keeps itself current with a built-in checksum-verified updater.
+
+  Features include additive and mirror copy modes (built on Robocopy), one-tick and custom exclusions, dated backup versions with pruning, a dry-run preview, scheduled and run-on-connect backups, scheduled or on-demand system images with a recovery-media wizard, and app-list export/reinstall through winget.
+Moniker: guard
+Tags:
+- accessibility
+- backup
+- data-protection
+- portable
+- restore
+- robocopy
+- winui
+ReleaseNotes: |-
+  GUARD v0.5.4 is a data-safety release. A use-case audit turned up four ways GUARD could break a backup, or tell you it had protected something when it hadn't.
+  Fixed
+  - A Mirror-mode folder pair could delete the rest of your backup. Typing . as the destination subfolder - a reasonable way to ask for "put these files at the top of the backup drive" - sent that pair to the destination root, and the check that stops two pairs mirroring into the same place didn't recognize it as the root, so the save went through and the next run's mirror deleted every other folder's backup. GUARD now reads . as the root it is, and blocks the save the way it already blocks two pairs sharing a folder.
+  - A backup whose source folders were all missing reported success. If the drive holding them didn't mount, or a network share was down, the run still finished green and an unattended run raised the "finished successfully" notification, so you could go weeks believing you were protected while nothing was being copied. A source that isn't there is now reported as an error. If you back up a drive that isn't always connected, runs made while it's absent will now report an error instead of success.
+  - Updating while a scheduled backup was running could leave a broken install. GUARD waited for its own window to close, but not for a scheduled backup, which runs as a second GUARD process. The update could unpack over files still in use and leave the folder part old and part new, with GUARD never restarting. It now waits for every GUARD process, and will abandon an update rather than unpack over one that's still running.
+  - The scheduled system image could be left switched on, or never switched on at all. GUARD reported the schedule as saved whether or not Windows accepted the change: one you switched off could keep taking images on schedule, and one you switched on could never be registered if the Administrator prompt was declined. Either way the page showed the schedule as saved and Save was greyed out, so there was no way to try again. GUARD now checks what Windows actually did, says so when it didn't take, keeps Save available to retry, and notices at startup if the scheduled image has gone missing.
+  Full changelog: https://github.com/PlanetLinux98/guard/blob/main/CHANGELOG.md#054---2026-08-06
+ReleaseNotesUrl: https://github.com/PlanetLinux98/guard/releases/tag/v0.5.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

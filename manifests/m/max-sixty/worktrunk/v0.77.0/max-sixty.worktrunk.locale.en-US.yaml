@@ -1,0 +1,85 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.77.0
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Improved
+  - wt list sizes and aligns its columns to the terminal width: one long branch name no longer sizes the Branch column for every row — it caps at 32 characters and elides, so a narrow terminal keeps its other columns instead of degenerating into a branch list. Remote⇅ stops holding blank space open in a repo with no remote, and alignment now follows the value type. --format=json still carries the whole name. (#3998)
+  - wt list names what it hid and marks detached worktrees: the summary reads hidden: Path, Commit instead of counting columns, a detached worktree shows ⊘ rather than borrowing ⚑, and a prunable row leaves its cells blank instead of showing loading dots that never resolve. (#3998)
+  - wt list --format=json gains a marker field and stops reporting detached twice: the branch marker set by wt config state marker is now readable without parsing it out of symbols, and state no longer carries detached — the sibling detached boolean already does. (#3998)
+  - wt list --format=json now defaults to schema 2: callers get the envelope with repository metadata and orthogonal per-item facts without configuring [list] json-schema. wt list statusline --format=json follows the same key. Set json-schema = 1 to retain the original bare-array format. (Breaking.) (#4038)
+  - wt config show fails on a broken config: it exits 1 on an unreadable or invalid config, an invalid [list] columns, or an invalid approvals.toml. Unknown keys and deprecations stay warnings and still exit 0. A new APPROVALS section names project commands awaiting approval. (Breaking: it always exited 0 before.) (#3999)
+  - Config migration output names its destination: wt config update --output <path> writes the migration artifact to that file instead of applying it in place, and --output=- writes it to stdout. Output mode includes project config when run from a linked worktree. (Breaking: --print was removed.) (#4021)
+  - Pi joins the agent integrations: wt config plugins pi install writes an activity hook to ~/.omp/agent/hooks/pre/worktrunk.ts, so Pi sessions show 🤖/💬 markers in wt list like Claude Code, Codex, OpenCode, and Gemini. $PI_CONFIG_DIR, $PI_CODING_AGENT_DIR, and named $OMP_PROFILE/$PI_PROFILE profiles are honored. Docs (#3594, thanks @adity982, and @ortonomy for the request)
+  - wt config plugins codex install installs the plugin too: it no longer just registers the marketplace, instead of ending with a hint to run /plugins in Codex yourself. Uninstall follows for both Codex and Claude Code, removing the plugin and then the marketplace, so the two commands are inverses. (Breaking: uninstall previously left an installed plugin alone.) (#4019)
+  - wt step copy-ignored says whether it reflinked or copied: the summary now reads (reflinked, no extra disk), (full copy), or a partial count, so the same 29.5 GB line distinguishes a free copy from one that actually wrote the bytes. --format=json gains reflinked and written; a --dry-run plan no longer reports files/bytes. (#4025)
+  - wt config update removes keys its destination cannot hold: migrating [select] or [commit-generation] drops keys the new section has no field for, reporting each one, and removes a [projects."<id>"] section the removal empties. Otherwise the key landed at a path the user never typed and warned on every command, with no way to clear it. (#3994)
+  Fixed
+  - A failed wt switch pr:<n> against a fork no longer deletes your branch: the fork path rolled back by force-deleting the branch on any setup error — including when the branch already existed, so a pre-switch hook or a concurrent session claiming the name cost you that branch and any commits only it held. Branch and worktree are now created in one git worktree add -b, which writes nothing when the name is taken. (#3984)
+  - Codex on Windows: the activity hooks no longer fail on every event: each hook led with a bare bash, which cmd.exe resolves to the WSL launcher rather than Git Bash, so every event raised a Hook failed banner. Hooks now run wt.sh through a shim that finds Git Bash by path. (#4008, fixes #4007, thanks @McNultyyy for reporting and diagnosing)
+  - Templates leave branch unset in a detached worktree: aliases and hooks rendered {{ branch }} as the literal HEAD, which git resolves, so an unguarded template ran against the wrong ref — the reported case ended in git push origin --delete HEAD. base and target follow. (Breaking: an unguarded {{ branch }} now errors.) (#4010, fixes #4009)
+  - The OpenCode plugin loads under OpenCode 2: OpenCode 2's loader dropped the old bare-function export silently, so activity markers stopped appearing. The plugin now exports both shapes and spawns wt through node:child_process rather than the Bun shell. Re-run wt config plugins opencode install to pick it up; OpenCode below 1.14.19 no longer loads it. (#4018, thanks @pragmaticivan for the request)
+  - wt step commit --branch builds its prompt from the worktree being committed: prompt-building git plumbing ran in the invoking worktree, so with nothing staged there the generated message described none of the changes it committed. wt step relocate --commit had the same bug, and --dry-run/--show-prompt now preview the worktree --branch names. (#3996)
+  - LLM commit messages keep diffs for quoted paths: a file whose name git quotes in the diff --git header — any non-ASCII name under the default core.quotePath — had its whole diff section dropped from the prompt once the diff exceeded the 100 KB budget. (#4041)
+  - An unparsable user config is reported, not a panic: wt config show, wt step prune, relocate, eval, and for-each panicked on a debug build and printed a bare ✗ Command failed on a release one. They now report ✗ Failed to load config with the parser's caret diagram. (#4002)
+  - wt switch --execute names the directory the program actually starts in: the Executing (--execute) @ … header rendered the worktree the background hooks run in, not the program's own directory — which differs under --no-cd or a switch from a subdirectory. The path is omitted when the shell already stands there. (#4042, thanks @yajo for reporting)
+  - wt config plugins claude|codex uninstall is safe to re-run: removing an already-absent marketplace reported a failure, and a Claude uninstall that removed the plugin and then failed left the marketplace with no way to clear it. Both now finish a half-done uninstall and succeed when there is nothing left to remove. (#4033, #4034)
+  - wt config state marker set and clear no-op outside a git repository: they errored, so an agent plugin's hooks failed on every event in a non-repo directory. (#3981, thanks @mahirhir)
+  - wt list produces output in a bare repo with no worktrees: it printed nothing at all and exited 0. It now reports ○ No worktrees with a hint, --branches lists the branches, and --format json emits the envelope with an empty items. (#3992)
+  - wt list warns when it can't parse the project config rather than ignoring it silently; the listing still succeeds. (#3993)
+  - Relayed command output no longer prints ahead of the delayed-stream progress line, and delayed-stream output routes through anstream so color is stripped consistently when redirected. (#4037, #3995)
+  - A hook filter that matches nothing names the unconfigured source, rather than reporting no match without saying which source was empty. (#3997)
+  Documentation
+  - wt hook says that post-* hooks from the two sources run concurrently, so dependent commands belong in one source; wt merge records that post-commit can't run when the merge removes the worktree it anchors on. (#4020, #4026)
+  - wt step help pages describe what the commands actually do: wt step prune says it removes branches as well as worktrees, wt step copy-ignored documents --from/--to, and wt step commit / squash document --branch, their hooks, and their no-LLM fallback messages. (#3997)
+  - The FAQ lists the files Worktrunk writes outside its own config: the agent-integration plugin and hook paths for Claude Code, Codex, OpenCode, Pi, and Gemini, alongside the existing inventory of what Worktrunk creates and deletes. (#4036)
+  - wt step copy-ignored documents its disk-space benefit per filesystem, and the bare-repo worktree-path example names the bare repo's own location. (#4022, #4006)
+  - Terminal examples on the docs site fit a desktop window rather than overflowing. (#4039)
+  Install worktrunk 0.77.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/max-sixty/worktrunk/releases/download/v0.77.0/worktrunk-installer.sh | sh && wt config shell install
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/max-sixty/worktrunk/releases/download/v0.77.0/worktrunk-installer.ps1 | iex"; git-wt config shell install
+  Install prebuilt binaries via Homebrew
+  brew install worktrunk && wt config shell install
+  Download worktrunk 0.77.0
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+  Install via Cargo
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.77.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

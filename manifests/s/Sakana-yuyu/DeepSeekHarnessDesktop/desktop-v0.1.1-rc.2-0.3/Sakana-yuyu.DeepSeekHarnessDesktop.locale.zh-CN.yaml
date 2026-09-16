@@ -1,0 +1,37 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Sakana-yuyu.DeepSeekHarnessDesktop
+PackageVersion: desktop-v0.1.1-rc.2-0.3
+PackageLocale: zh-CN
+Publisher: deepseek
+PublisherUrl: https://github.com/Sakana-yuyu
+PublisherSupportUrl: https://github.com/Sakana-yuyu/deepseek-harness-desktop/issues
+Author: Sakana-yuyu
+PackageName: DeepSeek Harness
+PackageUrl: https://github.com/Sakana-yuyu/deepseek-harness-desktop
+License: MIT
+LicenseUrl: https://github.com/Sakana-yuyu/deepseek-harness-desktop/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 DeepSeek
+ShortDescription: DeepSeek Harness 的跨平台 Tauri 桌面外壳。
+Description: DeepSeek Harness Desktop 是 DeepSeek Harness dsh web 界面的跨平台 Tauri/WebView 桌面外壳，提供自定义标题栏、系统托盘、签名自动更新和任务完成提醒。应用首次启动时会检查本机的 Node.js、pnpm 和 ~/.dsh 主目录，并在缺少时下载所需运行时和生产依赖。
+Tags:
+- deepseek
+- deepseek-harness
+- dsh
+- 大模型
+- 大语言模型
+- 智能体
+- 自主智能
+ReleaseNotes: |-
+  DeepSeek Harness Desktop 是现有 dsh web 界面的 Tauri/WebView 外壳。
+  安装包包含裁剪后的 Harness 源码树，不含 node_modules。首次启动会扫描本机 Node / pnpm 和已有 ~/.dsh 主目录，只下载缺失部分，然后启动本地 Harness Web Host，并在桌面 WebView 中打开。
+  更新内容
+  - 修复一个罕见但会自锁的启动失败（现实中表现为 ERR_MODULE_NOT_FOUND: Cannot find package '@deepseek-ai/dsh-app-boot'）：首次运行的依赖安装若被中途打断，可能被记录成已完成，之后每次启动都加载半安装的 Harness 树，启动页一直显示"启动失败"，只能手工删除缓存。
+  - 预配复用现在要求 pnpm 的安装结束标记（node_modules/.modules.yaml）与 .pnpm 存储同时存在，缺失标记的安装失败会明确报错进入恢复路径，WSL 侧的跳过判定也使用同一标记。
+  - 当 Web Host 死于指名道姓的缺依赖错误时，桌面外壳会在同一次启动内清空并重新预配 harness 树一次，而不是把 Node 堆栈甩给用户——无需手工删缓存。
+  - 内置 Harness 源码保持在上游 dsh@0.1.1-rc.2，叠加本次桌面端修复。
+ReleaseNotesUrl: https://github.com/Sakana-yuyu/deepseek-harness-desktop/releases/tag/desktop-v0.1.1-rc.2-0.3
+InstallationNotes: 首次启动会检查本机是否已有兼容的 Node.js、pnpm 和 ~/.dsh 主目录；缺少时会下载所需运行时和生产依赖。
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
