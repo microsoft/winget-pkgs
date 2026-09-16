@@ -1,0 +1,95 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: OmniEdge.OmniEdgeCLI
+PackageVersion: 2.9.0
+PackageLocale: en-US
+Publisher: OmniEdge
+PublisherUrl: https://connect.omniedge.io
+PublisherSupportUrl: https://connect.omniedge.io
+PrivacyUrl: https://connect.omniedge.io/privacy
+Author: OmniEdge
+PackageName: OmniEdgeCLI
+PackageUrl: https://connect.omniedge.io/download/linuxcli
+License: MIT/Apache2
+LicenseUrl: https://github.com/omniedgeio/omniedge/blob/dev/LICENSING.md
+Copyright: OmniEdge
+CopyrightUrl: https://omniedge.io
+ShortDescription: Zero-Config P2P Mesh VPN for AI, Robotics, and Edge Computing
+Description: Zero-Config P2P Mesh VPN for AI, Robotics, and Edge Computing]
+Moniker: omniedge
+Tags:
+- omniedge
+Agreements:
+- AgreementLabel: Agreement
+  AgreementUrl: https://connect.omniedge.io/terms
+ReleaseNotes: |-
+  ### macOS P2P Connectivity & OmniNervous v1.0.0
+
+  This release resolves critical P2P connectivity failures on macOS Desktop and upgrades the core networking library OmniNervous to v1.0.0.
+
+  #### Bug Fixes
+
+  ##### macOS TUN Packet Information Header (Critical)
+  • **Root Cause**：macOS `tun` crate always includes a 4-byte packet information (PI) header on TUN reads/writes. The TUN reader parsed from byte 0, hitting the PI header instead of the IP version nibble, causing all tunnel traffic to be silently dropped.
+  • **Fix**：Added `PI_OFFSET = 4` on macOS (0 on other platforms). TUN reads skip the PI header; TUN writes prepend `AF_INET`/`AF_INET6` PI headers.
+
+  ##### macOS EINVAL on Dual-Stack Socket (Critical)
+  • **Root Cause**：macOS requires IPv4 addresses to be mapped to `::ffff:x.x.x.x` format when sent through IPv6 dual-stack sockets. Raw IPv4 `SocketAddr` causes `EINVAL`.
+  • **Fix**：Added `to_mapped_v6()` helper applied at all UDP send sites in both OmniNervous and `omni-core`.
+
+  ##### Permission Denied on auth.json
+  • **Root Cause**：`~/.omniedge/auth.json` was owned by root after running CLI with `sudo`, preventing the desktop app from reading it.
+  • **Fix**：`chown_to_real_user()` detects the real user via `$SUDO_USER` and corrects file ownership after writes.
+
+  ##### Broken Pipe on start_vpn IPC
+  • **Root Cause**：`connect_with_token()` blocked synchronously in the helper's IPC handler, causing the Unix socket connection to time out.
+  • **Fix**：`tokio::spawn` for async VPN startup; desktop app polls connection status every 500ms instead of waiting for a single response.
+
+  ##### Nucleus Returns 0 Peers
+  • **Root Cause**：`get_recent_peers()` filtered by `joined_at.elapsed() < 90s`, returning 0 peers when no recent joins occurred.
+  • **Fix**：Returns all peers for new registrations + API-seeded peer discovery ensures immediate connectivity.
+
+  #### OmniNervous Upgrade
+
+  | Component | Previous | New |
+  |-----------|----------|-----|
+  | OmniNervous | v0.5.0 | **v1.0.0** |
+
+  Key improvements in OmniNervous v1.0.0:
+  • macOS TUN PI header handling (automatic)
+  • macOS dual-stack socket IPv4-mapped IPv6 conversion
+  • BoringTun timer loop and queued packet flushing
+  • Full peer list for new cluster registrations
+  • CGNAT (100.64.0.0/10) VIP validation
+
+  #### Files Changed
+
+  | File | Change |
+  |------|--------|
+  | `crates/omni-core/src/config.rs` | `chown_to_real_user()` for auth.json ownership |
+  | `crates/omni-core/src/manager.rs` | `to_mapped_v6()`, API-seeded peer discovery |
+  | `crates/omni-helper/src/lib.rs` | Async `start_vpn` with `tokio::spawn` |
+  | `crates/omni-proto/src/lib.rs` | Added `query_peer()` method |
+  | `ui/desktop/src-tauri/src/lib.rs` | Status polling loop, improved error messages |
+  | `crates/omni-core/Cargo.toml` | Added `libc` dependency |
+  | All `Cargo.toml` | Version bumped to 2.9.0 |
+
+  #### Platforms
+
+  • **macOS (Apple Silicon)**：All fixes verified — `ping 100.64.0.18` works through P2P tunnel
+  • **Linux**：No changes in behavior — all macOS fixes are `#[cfg(target_os = "macos")]` conditional
+  • **Windows**：Unaffected
+
+  #### Compatibility
+
+  • **OmniNervous**：v1.0.0 (required)
+  • **Existing Networks**：Backward compatible with v2.7.x/v2.5.x networks
+  • **Mixed Versions**：v2.9.0 clients work with older clients (macOS fixes are local only)
+
+  ---
+ReleaseNotesUrl: https://connect.omniedge.io/docs/article/Release-Notes
+PurchaseUrl: https://connect.omniedge.io
+InstallationNotes: https://connect.omniedge.io/docs/article/install/cli
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
