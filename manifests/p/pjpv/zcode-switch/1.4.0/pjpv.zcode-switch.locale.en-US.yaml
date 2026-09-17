@@ -1,0 +1,31 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: pjpv.zcode-switch
+PackageVersion: 1.4.0
+PackageLocale: en-US
+ShortDescription: A desktop tool for one-click switching between multiple ZCode accounts, with live quota display
+Description: |-
+  Z·SWITCH (zcode-switch) is a Tauri 2 desktop tool for one-click switching between multiple ZCode accounts, with live quota display. Only the login identity changes — projects, sessions, settings and plugins all stay untouched.
+
+  Features
+
+  - Save / switch accounts: snapshots the credentials + config file pair, atomic replacement; the current login is auto-preserved before any switch — accounts are never lost
+  - Add accounts: OAuth login for new accounts inside the tool (BigModel / z.ai entries), never touching the current login
+  - Quota display: inline plan quota and reset time per account row, multi-plan grouping, staggered polling
+  - Claim promotions: one-click claim for eligible promotions (GUI captcha)
+  - Encrypted import / export: .zsb bundle, PBKDF2(100k) + AES-256-GCM password encryption
+  - Bilingual UI: one-click switch in Settings — main window, tray, error messages and CLI output all covered; first run follows your OS language
+  - Tray / autostart / CLI automation
+
+  Security design
+
+  - Local first: all data stays on your machine; no telemetry, no remote storage; quota queries go directly to official endpoints
+  - No account loss: the current login is auto-preserved before switching if not yet saved; file writes go through a temp file + atomic rename
+  - Path traversal protection: account id whitelist ([A-Za-z0-9-]); delete/read cannot escape the account store directory
+  - Encrypted export: PBKDF2-HMAC-SHA256 (100k iterations) + AES-256-GCM, random salt/nonce; wrong password simply fails, no plaintext traces (unit-test asserted)
+  - Credentials decrypted locally only: enc:v1 decryption is used solely to display username/email; export files are password-encrypted
+Tags:
+- zcode
+ManifestType: locale
+ManifestVersion: 1.12.0
