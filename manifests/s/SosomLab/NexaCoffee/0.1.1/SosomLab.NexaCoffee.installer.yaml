@@ -1,0 +1,30 @@
+# winget 매니페스트(포터블 zip) — 버전·해시는 render-manifests.sh가 채운다(손으로 적지 않는다).
+# ★ 세 파일의 ManifestVersion은 반드시 같아야 한다(09-13: komac이 installer만 1.12.0으로 올려 검증 오류 → 전부 1.12.0으로 통일).
+# `winget validate`는 이 스키마 헤더가 없으면 경고를 내고 **종료 코드 40**으로 끝난다
+# (set -e인 워크플로가 거기서 죽는다 — 09-17 실측). ManifestVersion과 같은 값을 유지한다.
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+PackageIdentifier: SosomLab.NexaCoffee
+PackageVersion: "0.1.1"
+MinimumOSVersion: 10.0.0.0
+# zip 안의 exe 하나 — winget이 풀어서 shim(nexa-coffee)만 만든다(설치 흔적 없음). nexa-shortcut 선례.
+InstallerType: zip
+NestedInstallerType: portable
+Commands:
+  - nexa-coffee
+UpgradeBehavior: install
+ReleaseDate: "2026-09-17"
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/SosomLab/nexa-coffee/releases/download/v0.1.1/nexa-coffee-0.1.1-windows-x64.zip
+    InstallerSha256: 4072d9463ab26f0dc7e9fca2614366b55f938642ae3947ce514745143c10ec39
+    NestedInstallerFiles:
+      - RelativeFilePath: nexa-coffee-x64.exe
+        PortableCommandAlias: nexa-coffee
+  - Architecture: x86
+    InstallerUrl: https://github.com/SosomLab/nexa-coffee/releases/download/v0.1.1/nexa-coffee-0.1.1-windows-x86.zip
+    InstallerSha256: fc0ae3cdd2d229cb282d3f41dc6f209282db5ddc58024e596e06ad88e10d782f
+    NestedInstallerFiles:
+      - RelativeFilePath: nexa-coffee-x86.exe
+        PortableCommandAlias: nexa-coffee
+ManifestType: installer
+ManifestVersion: 1.12.0
