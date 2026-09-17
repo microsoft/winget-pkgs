@@ -1,0 +1,49 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Everless321.dYm
+PackageVersion: 2.10.0
+PackageLocale: zh-CN
+Publisher: example.com
+PublisherUrl: https://github.com/Everless321
+PublisherSupportUrl: https://github.com/Everless321/dYm/issues
+PackageName: dYm
+PackageUrl: https://github.com/Everless321/dYm
+License: 免费软件
+Copyright: Copyright © 2026 example.com
+ShortDescription: 抖音视频下载与智能分析管理工具
+Tags:
+- 下载
+- 抖音
+- 视频
+- 解析
+ReleaseNotes: |-
+  视频分析重做、AI 多提供方与订阅接入、目录整理与全站间距修复
+  这是一个大版本：AI 分析从「抽几帧打标签」升级为真正理解整条视频，并补上了直播录制删除等长期缺失的操作。升级后建议到「视频分析 → 分析设置」检查一次提示词与限额，并在「语音转写」页签配置一个转写服务。
+  - 输出视频内容：结果里新增 content，按时间顺序写清楚视频里发生了什么、人物说了什么、画面怎么变化；summary 退为两三句摘要。编辑页新增「AI 理解」卡片展示内容叙述、评分与维度、分类 / 场景 / 人物 / 动作 / 风格 / 口播 / 画面文字、章节，以及可展开的字幕
+  - 云端语音转写：不依赖本地模型，预置 8 家服务模板——国内：硅基流动 SenseVoice、阿里百炼 Qwen3-ASR、智谱 GLM-ASR、阶跃星辰 StepAudio ASR；海外：OpenAI Transcribe、Groq Whisper、Mistral Voxtral、Google Gemini。密钥用系统安全存储加密，支持「验证连接」，按服务独立限流；超过单段上限的音频自动切片拼接
+  - 长视频分段与上限：≤60 秒单次整片理解；更长的按段（默认 90 秒）逐段理解再汇总出章节；超过「最多分析 30 分钟」在全片均匀抽样、首尾必取；超过「跳过 180 分钟」直接跳过不花额度。抽帧改为场景检测去重，10 分钟以上可自动把每段帧拼成网格图省 token
+  - 结构化落库：新增 post_analysis / post_transcripts（中文可子串检索的全文索引）/ post_chapters，标签带分面与置信度；旧的扁平字段继续回写，老页面不受影响；同引擎字幕在重新分析时直接复用
+  - 转写失败不拖垮分析：密钥错误直接报条目失败；其它错误重试后降级为仅画面分析，并在编辑页标出原因
+  - 提示词：用户只写「分析指令」，输出格式由程序固定拼接；启动时自动迁移旧提示词（未改过的替换为新默认，改过的只剪掉旧「其它字段」说明）
+  - 支持配置多个 AI 服务并切换默认：OpenAI 兼容、Anthropic、Google Gemini、xAI Grok，以及 ChatGPT（Codex）订阅登录 与 OpenCode Zen / Go 订阅（按模型自动分流协议，可从 OpenCode CLI 导入 Key）
+  - 分析改为持久化队列：作业可暂停 / 恢复 / 取消 / 重试失败项，退出后下次启动续跑；下载完成可自动入队
+  - 标签正规化：去重、去空格、别名归并，可选「仅保留标签库已有标签」的封闭模式
+  - 卡片悬停出现删除 / 打开所在目录按钮；「选择」进入多选，支持全选与批量删除
+  - 删除确认对话框可勾选「同时删除录制文件」（视频、弹幕、封面、残留分片），并显示预计释放空间
+  - 录制中与转换中的记录拒绝删除，避免半路删掉正在写的文件
+  - 修复全站间距失效：全局 reset 移入 base 层，恢复被覆盖的 margin / space-y 工具类
+  - 统一页面骨架：新增 Page / PageHeader / PageBody / Section 布局组件，所有页面使用同一套页头与内容区间距
+  - 主进程 services 与渲染端 pages 按功能域分目录；清理根目录多余的 lockfile、配置与示例脚本
+  - 修复多处数据正确性问题（同步状态、任务去重、路径处理），拆分主进程 / 数据库层，统一异常处理
+  - 单实例锁拿不到时立即退出，避免第二实例改写主实例状态
+  - 渲染端压缩产物、路由级拆包，消除列表页重渲染热点
+  What's Changed
+  - refactor(ai): AI 分析重构——多提供方、Codex/OpenCode 订阅、持久化队列、标签正规化、统一提示词 by @Everless321 in https://github.com/Everless321/dYm/pull/22
+  - 修复数据正确性问题、拆分主进程 / 数据库层架构并优化异常处理与性能 by @Everless321 in https://github.com/Everless321/dYm/pull/20
+  - 整理目录结构 + 修复全站间距失效、统一页面骨架；直播录制支持删除 by @Everless321 in https://github.com/Everless321/dYm/pull/24
+  - feat(analysis): 视频分析 v2——整片理解、云端语音转写（中外预置）、长视频分段与上限、结构化结果 by @Everless321 in https://github.com/Everless321/dYm/pull/25
+  Full Changelog: https://github.com/Everless321/dYm/compare/v2.9.1...v2.10.0
+ReleaseNotesUrl: https://github.com/Everless321/dYm/releases/tag/v2.10.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
