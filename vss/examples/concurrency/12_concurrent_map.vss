@@ -1,0 +1,26 @@
+note VSS 3.1 Concurrency - Thread-Safe Concurrent Map Operations
+
+grab collections
+
+make shared_map becomes collections.ConcurrentMap()
+
+task map_writer needs map_ref, start_idx
+    repeat i through 1 to 5
+        make key becomes "key_" + (start_idx + i)
+        map_ref.insert(key, "val_" + (start_idx + i))
+    finish
+    send "Writer Done"
+finish
+
+say "Spawning concurrent map writer tasks..."
+make w1 becomes start map_writer(shared_map, 0)
+make w2 becomes start map_writer(shared_map, 5)
+
+await w1
+await w2
+
+say "Concurrent Map Entry Count: " + shared_map.count()
+say "Key 3 Value: " + shared_map.get("key_3")
+say "Key 8 Value: " + shared_map.get("key_8")
+
+say "Concurrent Map Test Completed Successfully!"

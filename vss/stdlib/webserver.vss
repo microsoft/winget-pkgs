@@ -1,0 +1,65 @@
+note VSS Route-Based HTTP Web Server Framework
+
+shape Route
+    field method
+    field path
+    field handler
+    task init needs m, p, h
+        mine.method becomes m
+        mine.path becomes p
+        mine.handler becomes h
+    finish
+finish
+
+shape WebServer
+    field routes
+    field port
+    task init needs
+        mine.routes becomes []
+        mine.port becomes 8080
+    finish
+    task get needs path, handler
+        make r becomes Route()
+        r.init("GET", path, handler)
+        put r into mine.routes
+    finish
+    task post needs path, handler
+        make r becomes Route()
+        r.init("POST", path, handler)
+        put r into mine.routes
+    finish
+    task put_route needs path, handler
+        make r becomes Route()
+        r.init("PUT", path, handler)
+        put r into mine.routes
+    finish
+    task delete needs path, handler
+        make r becomes Route()
+        r.init("DELETE", path, handler)
+        put r into mine.routes
+    finish
+    task listen needs port_num
+        mine.port becomes port_num
+        say "VSS WebServer listening on port " + port_num
+        say "Routes registered: " + (size of mine.routes)
+        repeat each route in mine.routes
+            say "  " + route.method + " " + route.path
+        finish
+    finish
+finish
+
+task json_response needs status, data
+    make body becomes json.stringify(data)
+    make response becomes map [ "status": status, "body": body, "content_type": "application/json" ]
+    send response
+finish
+
+task html_response needs status, html
+    make response becomes map [ "status": status, "body": html, "content_type": "text/html" ]
+    send response
+finish
+
+task text_response needs status, text
+    make response becomes map [ "status": status, "body": text, "content_type": "text/plain" ]
+    send response
+finish

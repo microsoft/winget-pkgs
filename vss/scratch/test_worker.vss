@@ -1,0 +1,14 @@
+grab collections
+
+make processed_files becomes collections.ConcurrentMap()
+make total_lines becomes atomic_create(0)
+
+task file_worker needs filename, line_cnt, map_ref, counter_ref
+    say "Worker processing file: " + filename
+    atomic_add(counter_ref, line_cnt)
+    map_ref.insert(filename, line_cnt)
+    send filename + " processed"
+finish
+
+make res becomes file_worker("log.txt", 1500, processed_files, total_lines)
+say "Result: " + res

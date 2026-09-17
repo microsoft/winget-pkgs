@@ -1,0 +1,27 @@
+note VSS 3.1 Concurrency - Dynamic Worker Pool Task Scheduling
+
+task worker_job needs job_id
+    make calc becomes job_id * 10
+    concurrency_sleep(30)
+    say "Worker completed job #" + job_id + " -> result: " + calc
+    send calc
+finish
+
+say "Dispatching 10 parallel jobs to VM worker thread pool..."
+make handles becomes []
+
+repeat j through 1 to 10
+    make h becomes start worker_job(j)
+    put h into handles
+finish
+
+say "Collecting results from all worker jobs..."
+make total_sum becomes 0
+repeat k through 1 to 10
+    make item_h becomes handles[k - 1]
+    make res becomes await item_h
+    total_sum becomes total_sum + res
+finish
+
+say "All Jobs Completed. Total Result Sum: " + total_sum
+say "Worker Pool Test Completed Successfully!"

@@ -1,0 +1,29 @@
+note VSS 3.1 Real-World Concurrency - Concurrent Cache Invalidation Manager
+
+grab collections
+
+make cache_map becomes collections.ConcurrentMap()
+cache_map.insert("user_101", "Alice")
+cache_map.insert("user_102", "Bob")
+cache_map.insert("user_103", "Charlie")
+
+task cache_invalidator needs key_to_remove, map_ref
+    say "Invalidating cache entry: " + key_to_remove
+    concurrency_sleep(10)
+    map_ref.insert(key_to_remove, "EXPIRED")
+    send "Invalidated_" + key_to_remove
+finish
+
+say "Cache size before invalidation: " + cache_map.count()
+say "Concurrent Invalidation triggered..."
+
+make inv1 becomes start cache_invalidator("user_101", cache_map)
+make inv2 becomes start cache_invalidator("user_103", cache_map)
+
+await inv1
+await inv2
+
+say "Cache size after concurrent invalidation: " + cache_map.count()
+say "Remaining User in Cache (user_102): " + cache_map.get("user_102")
+say "Invalidated User 101 Value: " + cache_map.get("user_101")
+say "Concurrent Cache Invalidation Manager Completed Successfully!"

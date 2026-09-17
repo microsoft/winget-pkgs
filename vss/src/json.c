@@ -7,4 +7,330 @@
 #ifdef _MSC_VER
 #define strdup _strdup
 #endif
-static void _x03c7(const char **_x033a) { while (**_x033a && isspace((unsigned char)**_x033a)) { (*_x033a)++; } } static char *_x0351(const char **_x033a, bool *_x0333, char **_x0334) { if (**_x033a != '"') { *_x0333 = true; *_x0334 = strdup("\x45\x78\x70\x65\x63\x74\x65\x64\x20\x73\x74\x61\x72\x74\x69\x6e\x67\x20\x64\x6f\x75\x62\x6c\x65\x20\x71\x75\x6f\x74\x65\x20\x69\x6e\x20\x73\x74\x72\x69\x6e\x67"); return NULL; } (*_x033a)++; size_t _x019c = 16; size_t _x02d4 = 0; char *_x015a = malloc(_x019c); while (**_x033a && **_x033a != '"') { char _x0191 = **_x033a; if (_x0191 == '\\') { (*_x033a)++; if (!**_x033a) { *_x0333 = true; *_x0334 = strdup("\x55\x6e\x74\x65\x72\x6d\x69\x6e\x61\x74\x65\x64\x20\x65\x73\x63\x61\x70\x65\x20\x73\x65\x71\x75\x65\x6e\x63\x65\x20\x69\x6e\x20\x73\x74\x72\x69\x6e\x67"); free(_x015a); return NULL; } char _x0224 = **_x033a; if (_x0224 == 'n') _x0191 = '\n'; else if (_x0224 == 't') _x0191 = '\t'; else if (_x0224 == 'r') _x0191 = '\r'; else if (_x0224 == 'b') _x0191 = '\b'; else if (_x0224 == 'f') _x0191 = '\f'; else if (_x0224 == '"') _x0191 = '"'; else if (_x0224 == '\\') _x0191 = '\\'; else if (_x0224 == '/') _x0191 = '/'; else { _x0191 = _x0224; } } if (_x02d4 + 1 >= _x019c) { _x019c *= 2; _x015a = realloc(_x015a, _x019c); } _x015a[_x02d4++] = _x0191; (*_x033a)++; } if (**_x033a != '"') { *_x0333 = true; *_x0334 = strdup("\x55\x6e\x74\x65\x72\x6d\x69\x6e\x61\x74\x65\x64\x20\x4a\x53\x4f\x4e\x20\x73\x74\x72\x69\x6e\x67"); free(_x015a); return NULL; } (*_x033a)++; _x015a[_x02d4] = '\0'; return _x015a; } static _x012a _x0352(const char **_x033a, bool *_x0333, char **_x0334); static _x012a _x0350(const char **_x033a, bool *_x0333, char **_x0334) { if (**_x033a != '{') { *_x0333 = true; *_x0334 = strdup("\x45\x78\x70\x65\x63\x74\x65\x64\x20\x27\x7b\x27\x20\x66\x6f\x72\x20\x6f\x62\x6a\x65\x63\x74"); return _x0499(); } (*_x033a)++; _x03c7(_x033a); _x012a _x02f8 = _x049f(); _x0126 *_x02f0 = _x02f8._x0141._x02f7; if (**_x033a == '}') { (*_x033a)++; return _x02f8; } for (;;) { _x03c7(_x033a); if (**_x033a != '"') { *_x0333 = true; *_x0334 = strdup("\x45\x78\x70\x65\x63\x74\x65\x64\x20\x73\x74\x72\x69\x6e\x67\x20\x6b\x65\x79\x20\x69\x6e\x20\x6f\x62\x6a\x65\x63\x74"); _x04a4(_x02f8); return _x0499(); } char *_x02c0 = _x0351(_x033a, _x0333, _x0334); if (*_x0333) { _x04a4(_x02f8); return _x0499(); } _x03c7(_x033a); if (**_x033a != ':') { *_x0333 = true; *_x0334 = strdup("\x45\x78\x70\x65\x63\x74\x65\x64\x20\x27\x3a\x27\x20\x61\x66\x74\x65\x72\x20\x6b\x65\x79\x20\x69\x6e\x20\x6f\x62\x6a\x65\x63\x74"); free(_x02c0); _x04a4(_x02f8); return _x0499(); } (*_x033a)++; _x012a _x0425 = _x0352(_x033a, _x0333, _x0334); if (*_x0333) { free(_x02c0); _x04a4(_x02f8); return _x0499(); } _x02f0->_x0218 = realloc(_x02f0->_x0218, sizeof(_x0127) * (_x02f0->_x01d7 + 1)); _x02f0->_x0218[_x02f0->_x01d7]._x02c0 = _x02c0; _x02f0->_x0218[_x02f0->_x01d7]._x0425 = _x0425; _x04a5(_x0425); _x02f0->_x01d7++; _x04a4(_x0425); _x03c7(_x033a); if (**_x033a == ',') { (*_x033a)++; } else if (**_x033a == '}') { (*_x033a)++; break; } else { *_x0333 = true; *_x0334 = strdup("\x45\x78\x70\x65\x63\x74\x65\x64\x20\x27\x2c\x27\x20\x6f\x72\x20\x27\x7d\x27\x20\x69\x6e\x20\x6f\x62\x6a\x65\x63\x74"); _x04a4(_x02f8); return _x0499(); } } return _x02f8; } static _x012a _x034f(const char **_x033a, bool *_x0333, char **_x0334) { if (**_x033a != '[') { *_x0333 = true; *_x0334 = strdup("\x45\x78\x70\x65\x63\x74\x65\x64\x20\x27\x5b\x27\x20\x66\x6f\x72\x20\x61\x72\x72\x61\x79"); return _x0499(); } (*_x033a)++; _x03c7(_x033a); _x012a _x02e1 = _x049e(); _x0125 *_x02ca = _x02e1._x0141._x02df; if (**_x033a == ']') { (*_x033a)++; return _x02e1; } for (;;) { _x012a _x0422 = _x0352(_x033a, _x0333, _x0334); if (*_x0333) { _x04a4(_x02e1); return _x0499(); } if (_x02ca->_x01d7 >= _x02ca->_x019c) { _x02ca->_x019c = _x02ca->_x019c == 0 ? 8 : _x02ca->_x019c * 2; _x02ca->_x02b7 = realloc(_x02ca->_x02b7, sizeof(_x012a) * _x02ca->_x019c); } _x02ca->_x02b7[_x02ca->_x01d7++] = _x0422; _x04a5(_x0422); _x04a4(_x0422); _x03c7(_x033a); if (**_x033a == ',') { (*_x033a)++; } else if (**_x033a == ']') { (*_x033a)++; break; } else { *_x0333 = true; *_x0334 = strdup("\x45\x78\x70\x65\x63\x74\x65\x64\x20\x27\x2c\x27\x20\x6f\x72\x20\x27\x5d\x27\x20\x69\x6e\x20\x61\x72\x72\x61\x79"); _x04a4(_x02e1); return _x0499(); } } return _x02e1; } static _x012a _x0352(const char **_x033a, bool *_x0333, char **_x0334) { _x03c7(_x033a); if (!**_x033a) { *_x0333 = true; *_x0334 = strdup("\x55\x6e\x65\x78\x70\x65\x63\x74\x65\x64\x20\x65\x6e\x64\x20\x6f\x66\x20\x4a\x53\x4f\x4e\x20\x73\x74\x72\x69\x6e\x67"); return _x0499(); } char _x0191 = **_x033a; if (_x0191 == '{') { return _x0350(_x033a, _x0333, _x0334); } else if (_x0191 == '[') { return _x034f(_x033a, _x0333, _x0334); } else if (_x0191 == '"') { char *_x03e6 = _x0351(_x033a, _x0333, _x0334); if (*_x0333) return _x0499(); _x012a _x0422 = _x04a2(_x03e6); free(_x03e6); return _x0422; } else if (_x0191 == '-' || isdigit((unsigned char)_x0191)) { char *_x0215; double _x01e6 = strtod(*_x033a, &_x0215); if (*_x033a == _x0215) { *_x0333 = true; *_x0334 = strdup("\x49\x6e\x76\x61\x6c\x69\x64\x20\x6e\x75\x6d\x62\x65\x72\x20\x66\x6f\x72\x6d\x61\x74\x20\x69\x6e\x20\x4a\x53\x4f\x4e"); return _x0499(); } *_x033a = _x0215; return _x04a1(_x01e6); } else if (strncmp(*_x033a, "\x74\x72\x75\x65", 4) == 0) { *_x033a += 4; return _x0496(true); } else if (strncmp(*_x033a, "\x66\x61\x6c\x73\x65", 5) == 0) { *_x033a += 5; return _x0496(false); } else if (strncmp(*_x033a, "\x6e\x75\x6c\x6c", 4) == 0) { *_x033a += 4; return _x0499(); } else { *_x0333 = true; char _x0314[128]; snprintf(_x0314, sizeof(_x0314), "\x55\x6e\x65\x78\x70\x65\x63\x74\x65\x64\x20\x63\x68\x61\x72\x61\x63\x74\x65\x72\x20\x27\x25\x63\x27\x20\x69\x6e\x20\x4a\x53\x4f\x4e\x20\x76\x61\x6c\x75\x65", _x0191); *_x0334 = strdup(_x0314); return _x0499(); } } _x012a _x045b(const char *_x02ba, bool *_x0333, char **_x0334) { const char *_x033a = _x02ba; *_x0333 = false; *_x0334 = NULL; _x012a _x0422 = _x0352(&_x033a, _x0333, _x0334); if (!*_x0333) { _x03c7(&_x033a); if (*_x033a) { *_x0333 = true; *_x0334 = strdup("\x45\x78\x74\x72\x61\x20\x64\x61\x74\x61\x20\x61\x66\x74\x65\x72\x20\x76\x61\x6c\x69\x64\x20\x4a\x53\x4f\x4e\x20\x76\x61\x6c\x75\x65"); _x04a4(_x0422); return _x0499(); } } return _x0422; } static void _x013d(char **_x015a, size_t *_x02d3, size_t *_x019b, const char *_x039e) { size_t _x03c8 = strlen(_x039e); while (*_x02d3 + _x03c8 >= *_x019b) { *_x019b = *_x019b == 0 ? 64 : *_x019b * 2; *_x015a = realloc(*_x015a, *_x019b); } strcpy(*_x015a + *_x02d3, _x039e); *_x02d3 += _x03c8; } static void _x013c(char **_x015a, size_t *_x02d3, size_t *_x019b, char _x0191) { char _x039e[2] = {_x0191, '\0'}; _x013d(_x015a, _x02d3, _x019b, _x039e); } static void _x03b2(_x012a _x0422, char **_x015a, size_t *_x02d3, size_t *_x019b) { if (_x0422._x0412 == _x0120) { char _x0323[64]; if (_x0422._x0141._x0326 == (double)(long long)_x0422._x0141._x0326) { sprintf(_x0323, "\x25\x6c\x6c\x64", (long long)_x0422._x0141._x0326); } else { sprintf(_x0323, "\x25\x2e\x31\x37\x67", _x0422._x0141._x0326); } _x013d(_x015a, _x02d3, _x019b, _x0323); } else if (_x0422._x0412 == _x0121) { _x013c(_x015a, _x02d3, _x019b, '"'); const char *_x033a = _x0422._x0141._x03e8->_x01a4; while (*_x033a) { if (*_x033a == '"') _x013d(_x015a, _x02d3, _x019b, "\x5c\x22"); else if (*_x033a == '\\') _x013d(_x015a, _x02d3, _x019b, "\x5c\x5c"); else if (*_x033a == '\n') _x013d(_x015a, _x02d3, _x019b, "\x5c\x6e"); else if (*_x033a == '\t') _x013d(_x015a, _x02d3, _x019b, "\x5c\x74"); else if (*_x033a == '\r') _x013d(_x015a, _x02d3, _x019b, "\x5c\x72"); else { _x013c(_x015a, _x02d3, _x019b, *_x033a); } _x033a++; } _x013c(_x015a, _x02d3, _x019b, '"'); } else if (_x0422._x0412 == _x0115) { _x013d(_x015a, _x02d3, _x019b, _x0422._x0141._x0154 ? "\x74\x72\x75\x65" : "\x66\x61\x6c\x73\x65"); } else if (_x0422._x0412 == _x0118) { _x013d(_x015a, _x02d3, _x019b, "\x6e\x75\x6c\x6c"); } else if (_x0422._x0412 == _x011d) { _x013c(_x015a, _x02d3, _x019b, '['); _x0125 *_x02ca = _x0422._x0141._x02df; for (size_t _x0288 = 0; _x0288 < _x02ca->_x01d7; _x0288++) { if (_x0288 > 0) _x013d(_x015a, _x02d3, _x019b, "\x2c\x20"); _x03b2(_x02ca->_x02b7[_x0288], _x015a, _x02d3, _x019b); } _x013c(_x015a, _x02d3, _x019b, ']'); } else if (_x0422._x0412 == _x011e) { _x013c(_x015a, _x02d3, _x019b, '{'); _x0126 *_x02f0 = _x0422._x0141._x02f7; for (size_t _x0288 = 0; _x0288 < _x02f0->_x01d7; _x0288++) { if (_x0288 > 0) _x013d(_x015a, _x02d3, _x019b, "\x2c\x20"); _x013c(_x015a, _x02d3, _x019b, '"'); const char *_x033a = _x02f0->_x0218[_x0288]._x02c0; while (*_x033a) { if (*_x033a == '"') _x013d(_x015a, _x02d3, _x019b, "\x5c\x22"); else if (*_x033a == '\\') _x013d(_x015a, _x02d3, _x019b, "\x5c\x5c"); else _x013c(_x015a, _x02d3, _x019b, *_x033a); _x033a++; } _x013d(_x015a, _x02d3, _x019b, "\x22\x3a\x20"); _x03b2(_x02f0->_x0218[_x0288]._x0425, _x015a, _x02d3, _x019b); } _x013c(_x015a, _x02d3, _x019b, '}'); } else { _x013d(_x015a, _x02d3, _x019b, "\x6e\x75\x6c\x6c"); } } char *_x045c(_x012a _x0422) { char *_x015a = NULL; size_t _x02d3 = 0; size_t _x019b = 0; _x03b2(_x0422, &_x015a, &_x02d3, &_x019b); return _x015a; }
+
+static void skip_whitespace(const char **p) {
+    while (**p && isspace((unsigned char)**p)) {
+        (*p)++;
+    }
+}
+
+static char *parse_json_string_raw(const char **p, bool *out_error, char **out_error_msg) {
+    if (**p != '"') {
+        *out_error = true;
+        *out_error_msg = strdup("Expected starting double quote in string");
+        return NULL;
+    }
+    (*p)++; // consume "
+    
+    size_t capacity = 16;
+    size_t length = 0;
+    char *buf = malloc(capacity);
+    
+    while (**p && **p != '"') {
+        char c = **p;
+        if (c == '\\') {
+            (*p)++;
+            if (!**p) {
+                *out_error = true;
+                *out_error_msg = strdup("Unterminated escape sequence in string");
+                free(buf);
+                return NULL;
+            }
+            char esc = **p;
+            if (esc == 'n') c = '\n';
+            else if (esc == 't') c = '\t';
+            else if (esc == 'r') c = '\r';
+            else if (esc == 'b') c = '\b';
+            else if (esc == 'f') c = '\f';
+            else if (esc == '"') c = '"';
+            else if (esc == '\\') c = '\\';
+            else if (esc == '/') c = '/';
+            else {
+                c = esc;
+            }
+        }
+        
+        if (length + 1 >= capacity) {
+            capacity *= 2;
+            buf = realloc(buf, capacity);
+        }
+        buf[length++] = c;
+        (*p)++;
+    }
+    
+    if (**p != '"') {
+        *out_error = true;
+        *out_error_msg = strdup("Unterminated JSON string");
+        free(buf);
+        return NULL;
+    }
+    (*p)++; // consume closing "
+    buf[length] = '\0';
+    return buf;
+}
+
+static VSS_Value parse_json_value(const char **p, bool *out_error, char **out_error_msg);
+
+static VSS_Value parse_json_object(const char **p, bool *out_error, char **out_error_msg) {
+    if (**p != '{') {
+        *out_error = true;
+        *out_error_msg = strdup("Expected '{' for object");
+        return vss_value_new_empty();
+    }
+    (*p)++; // consume '{'
+    skip_whitespace(p);
+    
+    VSS_Value map_val = vss_value_new_map();
+    VSS_ValMap *m = map_val.as.map;
+    
+    if (**p == '}') {
+        (*p)++; // consume '}'
+        return map_val;
+    }
+    
+    for (;;) {
+        skip_whitespace(p);
+        if (**p != '"') {
+            *out_error = true;
+            *out_error_msg = strdup("Expected string key in object");
+            vss_value_release(map_val);
+            return vss_value_new_empty();
+        }
+        char *key = parse_json_string_raw(p, out_error, out_error_msg);
+        if (*out_error) {
+            vss_value_release(map_val);
+            return vss_value_new_empty();
+        }
+        
+        skip_whitespace(p);
+        if (**p != ':') {
+            *out_error = true;
+            *out_error_msg = strdup("Expected ':' after key in object");
+            free(key);
+            vss_value_release(map_val);
+            return vss_value_new_empty();
+        }
+        (*p)++; // consume ':'
+        
+        VSS_Value value = parse_json_value(p, out_error, out_error_msg);
+        if (*out_error) {
+            free(key);
+            vss_value_release(map_val);
+            return vss_value_new_empty();
+        }
+        
+        m->entries = realloc(m->entries, sizeof(VSS_ValMapEntry) * (m->count + 1));
+        m->entries[m->count].key = key;
+        m->entries[m->count].value = value;
+        vss_value_retain(value);
+        m->count++;
+        vss_value_release(value);
+        
+        skip_whitespace(p);
+        if (**p == ',') {
+            (*p)++; // consume ','
+        } else if (**p == '}') {
+            (*p)++; // consume '}'
+            break;
+        } else {
+            *out_error = true;
+            *out_error_msg = strdup("Expected ',' or '}' in object");
+            vss_value_release(map_val);
+            return vss_value_new_empty();
+        }
+    }
+    return map_val;
+}
+
+static VSS_Value parse_json_array(const char **p, bool *out_error, char **out_error_msg) {
+    if (**p != '[') {
+        *out_error = true;
+        *out_error_msg = strdup("Expected '[' for array");
+        return vss_value_new_empty();
+    }
+    (*p)++; // consume '['
+    skip_whitespace(p);
+    
+    VSS_Value list_val = vss_value_new_list();
+    VSS_ValList *l = list_val.as.list;
+    
+    if (**p == ']') {
+        (*p)++; // consume ']'
+        return list_val;
+    }
+    
+    for (;;) {
+        VSS_Value val = parse_json_value(p, out_error, out_error_msg);
+        if (*out_error) {
+            vss_value_release(list_val);
+            return vss_value_new_empty();
+        }
+        
+        if (l->count >= l->capacity) {
+            l->capacity = l->capacity == 0 ? 8 : l->capacity * 2;
+            l->items = realloc(l->items, sizeof(VSS_Value) * l->capacity);
+        }
+        l->items[l->count++] = val;
+        vss_value_retain(val);
+        vss_value_release(val);
+        
+        skip_whitespace(p);
+        if (**p == ',') {
+            (*p)++; // consume ','
+        } else if (**p == ']') {
+            (*p)++; // consume ']'
+            break;
+        } else {
+            *out_error = true;
+            *out_error_msg = strdup("Expected ',' or ']' in array");
+            vss_value_release(list_val);
+            return vss_value_new_empty();
+        }
+    }
+    return list_val;
+}
+
+static VSS_Value parse_json_value(const char **p, bool *out_error, char **out_error_msg) {
+    skip_whitespace(p);
+    if (!**p) {
+        *out_error = true;
+        *out_error_msg = strdup("Unexpected end of JSON string");
+        return vss_value_new_empty();
+    }
+    
+    char c = **p;
+    if (c == '{') {
+        return parse_json_object(p, out_error, out_error_msg);
+    } else if (c == '[') {
+        return parse_json_array(p, out_error, out_error_msg);
+    } else if (c == '"') {
+        char *str = parse_json_string_raw(p, out_error, out_error_msg);
+        if (*out_error) return vss_value_new_empty();
+        VSS_Value val = vss_value_new_string(str);
+        free(str);
+        return val;
+    } else if (c == '-' || isdigit((unsigned char)c)) {
+        char *endptr;
+        double d = strtod(*p, &endptr);
+        if (*p == endptr) {
+            *out_error = true;
+            *out_error_msg = strdup("Invalid number format in JSON");
+            return vss_value_new_empty();
+        }
+        *p = endptr;
+        return vss_value_new_number(d);
+    } else if (strncmp(*p, "true", 4) == 0) {
+        *p += 4;
+        return vss_value_new_bool(true);
+    } else if (strncmp(*p, "false", 5) == 0) {
+        *p += 5;
+        return vss_value_new_bool(false);
+    } else if (strncmp(*p, "null", 4) == 0) {
+        *p += 4;
+        return vss_value_new_empty();
+    } else {
+        *out_error = true;
+        char msg[128];
+        snprintf(msg, sizeof(msg), "Unexpected character '%c' in JSON value", c);
+        *out_error_msg = strdup(msg);
+        return vss_value_new_empty();
+    }
+}
+
+VSS_Value vss_json_parse(const char *json_str, bool *out_error, char **out_error_msg) {
+    const char *p = json_str;
+    *out_error = false;
+    *out_error_msg = NULL;
+    VSS_Value val = parse_json_value(&p, out_error, out_error_msg);
+    if (!*out_error) {
+        skip_whitespace(&p);
+        if (*p) {
+            *out_error = true;
+            *out_error_msg = strdup("Extra data after valid JSON value");
+            vss_value_release(val);
+            return vss_value_new_empty();
+        }
+    }
+    return val;
+}
+
+static void append_str(char **buf, size_t *len, size_t *cap, const char *s) {
+    size_t slen = strlen(s);
+    while (*len + slen >= *cap) {
+        *cap = *cap == 0 ? 64 : *cap * 2;
+        *buf = realloc(*buf, *cap);
+    }
+    strcpy(*buf + *len, s);
+    *len += slen;
+}
+
+static void append_char(char **buf, size_t *len, size_t *cap, char c) {
+    char s[2] = {c, '\0'};
+    append_str(buf, len, cap, s);
+}
+
+static void serialize_value_helper(VSS_Value val, char **buf, size_t *len, size_t *cap) {
+    if (val.type == VSS_VAL_NUMBER) {
+        char num[64];
+        if (val.as.number == (double)(long long)val.as.number) {
+            sprintf(num, "%lld", (long long)val.as.number);
+        } else {
+            sprintf(num, "%.17g", val.as.number);
+        }
+        append_str(buf, len, cap, num);
+    } else if (val.type == VSS_VAL_STRING) {
+        append_char(buf, len, cap, '"');
+        const char *p = val.as.string->chars;
+        while (*p) {
+            if (*p == '"') append_str(buf, len, cap, "\\\"");
+            else if (*p == '\\') append_str(buf, len, cap, "\\\\");
+            else if (*p == '\n') append_str(buf, len, cap, "\\n");
+            else if (*p == '\t') append_str(buf, len, cap, "\\t");
+            else if (*p == '\r') append_str(buf, len, cap, "\\r");
+            else {
+                append_char(buf, len, cap, *p);
+            }
+            p++;
+        }
+        append_char(buf, len, cap, '"');
+    } else if (val.type == VSS_VAL_BOOL) {
+        append_str(buf, len, cap, val.as.boolean ? "true" : "false");
+    } else if (val.type == VSS_VAL_EMPTY) {
+        append_str(buf, len, cap, "null");
+    } else if (val.type == VSS_VAL_LIST) {
+        append_char(buf, len, cap, '[');
+        VSS_ValList *l = val.as.list;
+        for (size_t i = 0; i < l->count; i++) {
+            if (i > 0) append_str(buf, len, cap, ", ");
+            serialize_value_helper(l->items[i], buf, len, cap);
+        }
+        append_char(buf, len, cap, ']');
+    } else if (val.type == VSS_VAL_MAP) {
+        append_char(buf, len, cap, '{');
+        VSS_ValMap *m = val.as.map;
+        for (size_t i = 0; i < m->count; i++) {
+            if (i > 0) append_str(buf, len, cap, ", ");
+            append_char(buf, len, cap, '"');
+            const char *p = m->entries[i].key;
+            while (*p) {
+                if (*p == '"') append_str(buf, len, cap, "\\\"");
+                else if (*p == '\\') append_str(buf, len, cap, "\\\\");
+                else append_char(buf, len, cap, *p);
+                p++;
+            }
+            append_str(buf, len, cap, "\": ");
+            serialize_value_helper(m->entries[i].value, buf, len, cap);
+        }
+        append_char(buf, len, cap, '}');
+    } else {
+        append_str(buf, len, cap, "null");
+    }
+}
+
+char *vss_json_serialize(VSS_Value val) {
+    char *buf = NULL;
+    size_t len = 0;
+    size_t cap = 0;
+    serialize_value_helper(val, &buf, &len, &cap);
+    return buf;
+}

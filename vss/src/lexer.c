@@ -2,4 +2,325 @@
 #include <string.h>
 
 #include "lexer.h"
-static bool _x02a5(_x0052 *_x02d6) { return *_x02d6->_x01e0 == '\0'; } static char _x0138(_x0052 *_x02d6) { char _x0191 = *_x02d6->_x01e0; _x02d6->_x01e0++; _x02d6->_x01bf++; return _x0191; } static char _x035e(_x0052 *_x02d6) { return *_x02d6->_x01e0; } static char _x035f(_x0052 *_x02d6) { if (_x02a5(_x02d6)) { return '\0'; } return _x02d6->_x01e0[1]; } static _x0111 _x02f6(_x0052 *_x02d6, _x0112 _x0412) { _x0111 _x0408; _x0408._x0412 = _x0412; _x0408._x03da = _x02d6->_x03da; _x0408._x02d4 = (size_t)(_x02d6->_x01e0 - _x02d6->_x03da); _x0408._x02d9 = _x02d6->_x02d9; _x0408._x01bf = _x02d6->_x0409; return _x0408; } static _x0111 _x0223(_x0052 *_x02d6, const char *_x02ff) { _x0111 _x0408; _x0408._x0412 = _x00cf; _x0408._x03da = _x02ff; _x0408._x02d4 = strlen(_x02ff); _x0408._x02d9 = _x02d6->_x02d9; _x0408._x01bf = _x02d6->_x0409; return _x0408; } static void _x03c6(_x0052 *_x02d6) { for (;;) { char _x0191 = _x035e(_x02d6); if (_x0191 == ' ' || _x0191 == '\t' || _x0191 == '\r') { _x0138(_x02d6); } else { break; } } } static bool _x02b0(char _x0191) { return isalpha((unsigned char)_x0191) || _x0191 == '_'; } static bool _x02af(char _x0191) { return isalnum((unsigned char)_x0191) || _x0191 == '_'; } static _x0112 _x02c4(const char *_x03da, size_t _x02d4) { struct _x0013 { const char *_x0403; _x0112 _x0412; }; static const struct _x0013 _x02c5[] = { {"\x73\x61\x79", _x00fe}, {"\x6d\x61\x6b\x65", _x00e2}, {"\x6b\x65\x65\x70", _x00dd}, {"\x62\x65\x63\x6f\x6d\x65\x73", _x00be}, {"\x77\x68\x65\x6e", _x010b}, {"\x6f\x72\x77\x68\x65\x6e", _x00f1}, {"\x6f\x74\x68\x65\x72\x77\x69\x73\x65", _x00f2}, {"\x66\x69\x6e\x69\x73\x68", _x00d3}, {"\x72\x65\x70\x65\x61\x74", _x00f8}, {"\x74\x69\x6d\x65\x73", _x0109}, {"\x74\x68\x72\x6f\x75\x67\x68", _x0108}, {"\x74\x6f", _x010a}, {"\x65\x61\x63\x68", _x00ca}, {"\x69\x6e", _x00d9}, {"\x64\x75\x72\x69\x6e\x67", _x00c9}, {"\x6c\x65\x61\x76\x65", _x00de}, {"\x73\x6b\x69\x70", _x0103}, {"\x74\x61\x73\x6b", _x0107}, {"\x6e\x65\x65\x64\x73", _x00e7}, {"\x73\x65\x6e\x64", _x00ff}, {"\x77\x69\x74\x68", _x010c}, {"\x79\x65\x73", _x010e}, {"\x6e\x6f", _x00e9}, {"\x65\x6d\x70\x74\x79", _x00cb}, {"\x61\x6e\x64", _x00b7}, {"\x6f\x72", _x00f0}, {"\x6e\x6f\x74", _x00ea}, {"\x61\x62\x6f\x76\x65", _x00b5}, {"\x62\x65\x6c\x6f\x77", _x00bf}, {"\x61\x74\x5f\x6c\x65\x61\x73\x74", _x00bb}, {"\x61\x74\x5f\x6d\x6f\x73\x74", _x00bc}, {"\x73\x61\x6d\x65\x5f\x61\x73", _x00fd}, {"\x6e\x6f\x74\x5f\x73\x61\x6d\x65\x5f\x61\x73", _x00ec}, {"\x69\x74\x65\x6d", _x00dc}, {"\x66\x69\x65\x6c\x64", _x00d2}, {"\x70\x75\x74", _x00f6}, {"\x69\x6e\x74\x6f", _x00db}, {"\x6d\x61\x70", _x00e3}, {"\x73\x65\x74", _x0100}, {"\x67\x72\x61\x62", _x00d4}, {"\x61\x74\x74\x65\x6d\x70\x74", _x00ba}, {"\x72\x65\x73\x63\x75\x65", _x00f9}, {"\x72\x65\x61\x64", _x00f7}, {"\x77\x72\x69\x74\x65", _x010d}, {"\x61\x64\x64", _x00b6}, {"\x65\x72\x61\x73\x65", _x00ce}, {"\x65\x78\x69\x73\x74\x73", _x00d0}, {"\x73\x69\x7a\x65", _x0102}, {"\x6f\x66", _x00ef}, {"\x63\x68\x6f\x6f\x73\x65", _x00c4}, {"\x63\x61\x73\x65", _x00c2}, {"\x6e\x6f\x74\x65", _x00eb}, {"\x68\x69", _x00d5}, {"\x62\x79\x65", _x00c1}, {"\x68\x74\x6d\x76\x73\x73", _x00d6}, {"\x6f\x62\x6a\x65\x63\x74", _x00ee}, {"\x6d\x69\x6e\x65", _x00e5}, {"\x65\x78\x74\x65\x6e\x64\x73", _x00d1}, {"\x69\x6d\x70\x6c\x65\x6d\x65\x6e\x74\x73", _x00d8}, {"\x63\x68\x6f\x69\x63\x65\x73", _x00c3}, {"\x69\x6e\x74\x65\x72\x66\x61\x63\x65", _x00da}, {"\x70\x61\x72\x65\x6e\x74", _x00f3}, {"\x73\x68\x61\x70\x65", _x0101}, {"\x62\x6c\x75\x65\x70\x72\x69\x6e\x74", _x00c0}, {"\x6d\x61\x74\x63\x68", _x00e4}, {"\x61\x73\x79\x6e\x63", _x00b9}, {"\x61\x77\x61\x69\x74", _x00bd}, {"\x79\x69\x65\x6c\x64", _x010f}, {"\x63\x6f\x72\x6f\x75\x74\x69\x6e\x65", _x00c7} }; size_t _x01d7 = sizeof(_x02c5) / sizeof(_x02c5[0]); for (size_t _x0288 = 0; _x0288 < _x01d7; _x0288++) { if (strlen(_x02c5[_x0288]._x0403) == _x02d4 && strncmp(_x02c5[_x0288]._x0403, _x03da, _x02d4) == 0) { return _x02c5[_x0288]._x0412; } } return _x00d7; } static _x0111 _x028b(_x0052 *_x02d6) { while (_x02af(_x035e(_x02d6))) { _x0138(_x02d6); } _x0112 _x0412 = _x02c4(_x02d6->_x03da, (size_t)(_x02d6->_x01e0 - _x02d6->_x03da)); return _x02f6(_x02d6, _x0412); } static _x0111 _x0326(_x0052 *_x02d6) { while (isdigit((unsigned char)_x035e(_x02d6))) { _x0138(_x02d6); } if (_x035e(_x02d6) == '.' && isdigit((unsigned char)_x035f(_x02d6))) { _x0138(_x02d6); while (isdigit((unsigned char)_x035e(_x02d6))) { _x0138(_x02d6); } } return _x02f6(_x02d6, _x00ed); } static _x0111 _x03e8(_x0052 *_x02d6) { while (!_x02a5(_x02d6) && _x035e(_x02d6) != '"') { if (_x035e(_x02d6) == '\n') { _x02d6->_x02d9++; _x02d6->_x01bf = 1; } if (_x035e(_x02d6) == '\\' && _x035f(_x02d6) != '\0') { _x0138(_x02d6); } _x0138(_x02d6); } if (_x02a5(_x02d6)) { return _x0223(_x02d6, "\x55\x6e\x74\x65\x72\x6d\x69\x6e\x61\x74\x65\x64\x20\x73\x74\x72\x69\x6e\x67\x2e"); } _x0138(_x02d6); return _x02f6(_x02d6, _x0106); } void _x045e(_x0052 *_x02d6, const char *_x03ce) { _x02d6->_x03ce = _x03ce; _x02d6->_x03da = _x03ce; _x02d6->_x01e0 = _x03ce; _x02d6->_x02d9 = 1; _x02d6->_x01bf = 1; _x02d6->_x0409 = 1; } _x0111 _x045f(_x0052 *_x02d6) { _x03c6(_x02d6); _x02d6->_x03da = _x02d6->_x01e0; _x02d6->_x0409 = _x02d6->_x01bf; if (_x02a5(_x02d6)) { return _x02f6(_x02d6, _x00cc); } char _x0191 = _x0138(_x02d6); if (_x0191 == '\n') { _x0111 _x0408 = _x02f6(_x02d6, _x00e8); _x02d6->_x02d9++; _x02d6->_x01bf = 1; return _x0408; } if (_x02b0(_x0191)) { _x0111 _x03f0 = _x028b(_x02d6); if (_x03f0._x0412 == _x00eb) { while (!_x02a5(_x02d6) && _x035e(_x02d6) != '\n') { _x0138(_x02d6); } return _x045f(_x02d6); } return _x03f0; } if (isdigit((unsigned char)_x0191)) { return _x0326(_x02d6); } switch (_x0191) { case '"': return _x03e8(_x02d6); case '+': return _x02f6(_x02d6, _x00f5); case '-': if (_x035e(_x02d6) == '>') { _x0138(_x02d6); return _x02f6(_x02d6, _x00b8); } return _x02f6(_x02d6, _x00e6); case '*': return _x02f6(_x02d6, _x0105); case '/': return _x02f6(_x02d6, _x0104); case '%': return _x02f6(_x02d6, _x00f4); case '[': return _x02f6(_x02d6, _x00e0); case ']': return _x02f6(_x02d6, _x00fb); case '{': return _x02f6(_x02d6, _x00df); case '}': return _x02f6(_x02d6, _x00fa); case ',': return _x02f6(_x02d6, _x00c6); case ':': return _x02f6(_x02d6, _x00c5); case '.': return _x02f6(_x02d6, _x00c8); case '(': return _x02f6(_x02d6, _x00e1); case ')': return _x02f6(_x02d6, _x00fc); case '<': if (_x035e(_x02d6) == '=') { _x0138(_x02d6); return _x0223(_x02d6, "\x55\x6e\x65\x78\x70\x65\x63\x74\x65\x64\x20\x27\x3c\x3d\x27\x2e\x20\x49\x6e\x20\x56\x53\x53\x2c\x20\x75\x73\x65\x20\x27\x61\x74\x5f\x6d\x6f\x73\x74\x27\x2e"); } return _x0223(_x02d6, "\x55\x6e\x65\x78\x70\x65\x63\x74\x65\x64\x20\x27\x3c\x27\x2e\x20\x49\x6e\x20\x56\x53\x53\x2c\x20\x75\x73\x65\x20\x27\x62\x65\x6c\x6f\x77\x27\x2e"); case '>': if (_x035e(_x02d6) == '=') { _x0138(_x02d6); return _x0223(_x02d6, "\x55\x6e\x65\x78\x70\x65\x63\x74\x65\x64\x20\x27\x3e\x3d\x27\x2e\x20\x49\x6e\x20\x56\x53\x53\x2c\x20\x75\x73\x65\x20\x27\x61\x74\x5f\x6c\x65\x61\x73\x74\x27\x2e"); } return _x0223(_x02d6, "\x55\x6e\x65\x78\x70\x65\x63\x74\x65\x64\x20\x27\x3e\x27\x2e\x20\x49\x6e\x20\x56\x53\x53\x2c\x20\x75\x73\x65\x20\x27\x61\x62\x6f\x76\x65\x27\x2e"); case '!': if (_x035e(_x02d6) == '=') { _x0138(_x02d6); return _x0223(_x02d6, "\x55\x6e\x65\x78\x70\x65\x63\x74\x65\x64\x20\x27\x21\x3d\x27\x2e\x20\x49\x6e\x20\x56\x53\x53\x2c\x20\x75\x73\x65\x20\x27\x6e\x6f\x74\x5f\x73\x61\x6d\x65\x5f\x61\x73\x27\x2e"); } return _x0223(_x02d6, "\x55\x6e\x65\x78\x70\x65\x63\x74\x65\x64\x20\x27\x21\x27\x2e\x20\x49\x6e\x20\x56\x53\x53\x2c\x20\x75\x73\x65\x20\x27\x6e\x6f\x74\x27\x2e"); case '=': if (_x035e(_x02d6) == '=') { _x0138(_x02d6); return _x0223(_x02d6, "\x55\x6e\x65\x78\x70\x65\x63\x74\x65\x64\x20\x27\x3d\x3d\x27\x2e\x20\x49\x6e\x20\x56\x53\x53\x2c\x20\x75\x73\x65\x20\x27\x73\x61\x6d\x65\x5f\x61\x73\x27\x2e"); } return _x02f6(_x02d6, _x00cd); case '#': { if (_x035e(_x02d6) == '#' && _x035f(_x02d6) == '#') { _x0138(_x02d6); _x0138(_x02d6); while (!_x02a5(_x02d6)) { if (_x035e(_x02d6) == '#' && _x035f(_x02d6) == '#') { if (_x02d6->_x01e0[2] == '#') { _x0138(_x02d6); _x0138(_x02d6); _x0138(_x02d6); break; } } if (_x035e(_x02d6) == '\n') { _x02d6->_x02d9++; _x02d6->_x01bf = 1; } _x0138(_x02d6); } return _x045f(_x02d6); } return _x0223(_x02d6, "\x55\x6e\x65\x78\x70\x65\x63\x74\x65\x64\x20\x63\x68\x61\x72\x61\x63\x74\x65\x72\x20\x27\x23\x27\x2e"); } default: return _x0223(_x02d6, "\x55\x6e\x65\x78\x70\x65\x63\x74\x65\x64\x20\x63\x68\x61\x72\x61\x63\x74\x65\x72\x2e"); } }
+
+static bool is_at_end(VSS_Lexer *lexer) {
+    return *lexer->current == '\0';
+}
+
+static char advance_char(VSS_Lexer *lexer) {
+    char c = *lexer->current;
+    lexer->current++;
+    lexer->column++;
+    return c;
+}
+
+static char peek_char(VSS_Lexer *lexer) {
+    return *lexer->current;
+}
+
+static char peek_next_char(VSS_Lexer *lexer) {
+    if (is_at_end(lexer)) {
+        return '\0';
+    }
+    return lexer->current[1];
+}
+
+static VSS_Token make_token(VSS_Lexer *lexer, VSS_TokenType type) {
+    VSS_Token token;
+    token.type = type;
+    token.start = lexer->start;
+    token.length = (size_t)(lexer->current - lexer->start);
+    token.line = lexer->line;
+    token.column = lexer->token_column;
+    return token;
+}
+
+static VSS_Token error_token(VSS_Lexer *lexer, const char *message) {
+    VSS_Token token;
+    token.type = VSS_TOKEN_ERROR;
+    token.start = message;
+    token.length = strlen(message);
+    token.line = lexer->line;
+    token.column = lexer->token_column;
+    return token;
+}
+
+static void skip_spaces(VSS_Lexer *lexer) {
+    for (;;) {
+        char c = peek_char(lexer);
+        if (c == ' ' || c == '\t' || c == '\r') {
+            advance_char(lexer);
+        } else {
+            break;
+        }
+    }
+}
+
+static bool is_name_start(char c) {
+    return isalpha((unsigned char)c) || c == '_';
+}
+
+static bool is_name_part(char c) {
+    return isalnum((unsigned char)c) || c == '_';
+}
+
+static VSS_TokenType keyword_type(const char *start, size_t length) {
+    struct KeywordEntry {
+        const char *text;
+        VSS_TokenType type;
+    };
+
+    static const struct KeywordEntry keywords[] = {
+        {"say", VSS_TOKEN_SAY},
+        {"make", VSS_TOKEN_MAKE},
+        {"keep", VSS_TOKEN_KEEP},
+        {"becomes", VSS_TOKEN_BECOMES},
+        {"when", VSS_TOKEN_WHEN},
+        {"orwhen", VSS_TOKEN_ORWHEN},
+        {"otherwise", VSS_TOKEN_OTHERWISE},
+        {"finish", VSS_TOKEN_FINISH},
+        {"repeat", VSS_TOKEN_REPEAT},
+        {"times", VSS_TOKEN_TIMES},
+        {"through", VSS_TOKEN_THROUGH},
+        {"to", VSS_TOKEN_TO},
+        {"each", VSS_TOKEN_EACH},
+        {"in", VSS_TOKEN_IN},
+        {"during", VSS_TOKEN_DURING},
+        {"leave", VSS_TOKEN_LEAVE},
+        {"skip", VSS_TOKEN_SKIP},
+        {"task", VSS_TOKEN_TASK},
+        {"needs", VSS_TOKEN_NEEDS},
+        {"send", VSS_TOKEN_SEND},
+        {"with", VSS_TOKEN_WITH},
+        {"yes", VSS_TOKEN_YES},
+        {"no", VSS_TOKEN_NO},
+        {"empty", VSS_TOKEN_EMPTY},
+        {"and", VSS_TOKEN_AND},
+        {"or", VSS_TOKEN_OR},
+        {"not", VSS_TOKEN_NOT},
+        {"above", VSS_TOKEN_ABOVE},
+        {"below", VSS_TOKEN_BELOW},
+        {"at_least", VSS_TOKEN_AT_LEAST},
+        {"at_most", VSS_TOKEN_AT_MOST},
+        {"same_as", VSS_TOKEN_SAME_AS},
+        {"not_same_as", VSS_TOKEN_NOT_SAME_AS},
+        {"item", VSS_TOKEN_ITEM},
+        {"field", VSS_TOKEN_FIELD},
+        {"put", VSS_TOKEN_PUT},
+        {"into", VSS_TOKEN_INTO},
+        {"map", VSS_TOKEN_MAP},
+        {"set", VSS_TOKEN_SET},
+        {"grab", VSS_TOKEN_GRAB},
+        {"attempt", VSS_TOKEN_ATTEMPT},
+        {"rescue", VSS_TOKEN_RESCUE},
+        {"read", VSS_TOKEN_READ},
+        {"write", VSS_TOKEN_WRITE},
+        {"add", VSS_TOKEN_ADD},
+        {"erase", VSS_TOKEN_ERASE},
+        {"exists", VSS_TOKEN_EXISTS},
+        {"size", VSS_TOKEN_SIZE},
+        {"of", VSS_TOKEN_OF},
+        {"choose", VSS_TOKEN_CHOOSE},
+        {"case", VSS_TOKEN_CASE},
+        {"note", VSS_TOKEN_NOTE},
+        {"hi", VSS_TOKEN_HI},
+        {"bye", VSS_TOKEN_BYE},
+        {"htmvss", VSS_TOKEN_HTMVSS},
+        {"object", VSS_TOKEN_OBJECT},
+        {"mine", VSS_TOKEN_MINE},
+        {"extends", VSS_TOKEN_EXTENDS},
+        {"implements", VSS_TOKEN_IMPLEMENTS},
+        {"choices", VSS_TOKEN_CHOICES},
+        {"interface", VSS_TOKEN_INTERFACE},
+        {"parent", VSS_TOKEN_PARENT},
+        {"shape", VSS_TOKEN_SHAPE},
+        {"blueprint", VSS_TOKEN_BLUEPRINT},
+        {"match", VSS_TOKEN_MATCH},
+        {"async", VSS_TOKEN_ASYNC},
+        {"await", VSS_TOKEN_AWAIT},
+        {"yield", VSS_TOKEN_YIELD},
+        {"coroutine", VSS_TOKEN_COROUTINE},
+        {"const", VSS_TOKEN_CONST},
+        {"trait", VSS_TOKEN_TRAIT},
+        {"namespace", VSS_TOKEN_NAMESPACE},
+        {"thread", VSS_TOKEN_THREAD},
+        {"lock", VSS_TOKEN_LOCK},
+        {"unlock", VSS_TOKEN_UNLOCK},
+        {"ask", VSS_TOKEN_ASK},
+        {"start", VSS_TOKEN_START},
+        {"parallel", VSS_TOKEN_PARALLEL},
+        {"timeout", VSS_TOKEN_TIMEOUT},
+        {"select", VSS_TOKEN_SELECT}
+    };
+
+    size_t count = sizeof(keywords) / sizeof(keywords[0]);
+    for (size_t i = 0; i < count; i++) {
+        if (strlen(keywords[i].text) == length && strncmp(keywords[i].text, start, length) == 0) {
+            return keywords[i].type;
+        }
+    }
+    return VSS_TOKEN_IDENTIFIER;
+}
+
+static VSS_Token identifier(VSS_Lexer *lexer) {
+    while (is_name_part(peek_char(lexer))) {
+        advance_char(lexer);
+    }
+
+    VSS_TokenType type = keyword_type(lexer->start, (size_t)(lexer->current - lexer->start));
+    return make_token(lexer, type);
+}
+
+static VSS_Token number(VSS_Lexer *lexer) {
+    while (isdigit((unsigned char)peek_char(lexer))) {
+        advance_char(lexer);
+    }
+
+    if (peek_char(lexer) == '.' && isdigit((unsigned char)peek_next_char(lexer))) {
+        advance_char(lexer);
+        while (isdigit((unsigned char)peek_char(lexer))) {
+            advance_char(lexer);
+        }
+    }
+
+    return make_token(lexer, VSS_TOKEN_NUMBER);
+}
+
+static VSS_Token string(VSS_Lexer *lexer) {
+    while (!is_at_end(lexer) && peek_char(lexer) != '"') {
+        if (peek_char(lexer) == '\n') {
+            lexer->line++;
+            lexer->column = 1;
+        }
+        if (peek_char(lexer) == '\\' && peek_next_char(lexer) != '\0') {
+            advance_char(lexer);
+        }
+        advance_char(lexer);
+    }
+
+    if (is_at_end(lexer)) {
+        return error_token(lexer, "Unterminated string.");
+    }
+
+    advance_char(lexer);
+    return make_token(lexer, VSS_TOKEN_STRING);
+}
+
+extern VSS_THREAD_LOCAL const char *vss_current_source;
+void vss_lexer_init(VSS_Lexer *lexer, const char *source) {
+    vss_current_source = source;
+    lexer->source = source;
+    lexer->start = source;
+    lexer->current = source;
+    lexer->line = 1;
+    lexer->column = 1;
+    lexer->token_column = 1;
+}
+
+VSS_Token vss_lexer_next(VSS_Lexer *lexer) {
+    skip_spaces(lexer);
+    lexer->start = lexer->current;
+    lexer->token_column = lexer->column;
+
+    if (is_at_end(lexer)) {
+        return make_token(lexer, VSS_TOKEN_EOF);
+    }
+
+    char c = advance_char(lexer);
+
+    if (c == '\n') {
+        VSS_Token token = make_token(lexer, VSS_TOKEN_NEWLINE);
+        lexer->line++;
+        lexer->column = 1;
+        return token;
+    }
+
+    if (is_name_start(c)) {
+        VSS_Token t = identifier(lexer);
+        if (t.type == VSS_TOKEN_NOTE) {
+            while (!is_at_end(lexer) && peek_char(lexer) != '\n') {
+                advance_char(lexer);
+            }
+            return vss_lexer_next(lexer);
+        }
+        return t;
+    }
+
+    if (isdigit((unsigned char)c)) {
+        return number(lexer);
+    }
+
+    switch (c) {
+        case '"': return string(lexer);
+        case '+': return make_token(lexer, VSS_TOKEN_PLUS);
+        case '-':
+            if (peek_char(lexer) == '>') {
+                advance_char(lexer);
+                return make_token(lexer, VSS_TOKEN_ARROW);
+            }
+            return make_token(lexer, VSS_TOKEN_MINUS);
+        case '*': return make_token(lexer, VSS_TOKEN_STAR);
+        case '/': return make_token(lexer, VSS_TOKEN_SLASH);
+        case '%': return make_token(lexer, VSS_TOKEN_PERCENT);
+        case '[': return make_token(lexer, VSS_TOKEN_LEFT_BRACKET);
+        case ']': return make_token(lexer, VSS_TOKEN_RIGHT_BRACKET);
+        case '{': return make_token(lexer, VSS_TOKEN_LEFT_BRACE);
+        case '}': return make_token(lexer, VSS_TOKEN_RIGHT_BRACE);
+        case ',': return make_token(lexer, VSS_TOKEN_COMMA);
+        case ':': return make_token(lexer, VSS_TOKEN_COLON);
+        case '.': return make_token(lexer, VSS_TOKEN_DOT);
+        case '(': return make_token(lexer, VSS_TOKEN_LEFT_PAREN);
+        case ')': return make_token(lexer, VSS_TOKEN_RIGHT_PAREN);
+        case '<':
+            if (peek_char(lexer) == '=') {
+                advance_char(lexer);
+                return error_token(lexer, "Unexpected '<='. In VSS, use 'at_most'.");
+            }
+            return error_token(lexer, "Unexpected '<'. In VSS, use 'below'.");
+        case '>':
+            if (peek_char(lexer) == '=') {
+                advance_char(lexer);
+                return error_token(lexer, "Unexpected '>='. In VSS, use 'at_least'.");
+            }
+            return error_token(lexer, "Unexpected '>'. In VSS, use 'above'.");
+        case '!':
+            if (peek_char(lexer) == '=') {
+                advance_char(lexer);
+                return error_token(lexer, "Unexpected '!='. In VSS, use 'not_same_as'.");
+            }
+            return error_token(lexer, "Unexpected '!'. In VSS, use 'not'.");
+        case '=':
+            if (peek_char(lexer) == '=') {
+                advance_char(lexer);
+                return error_token(lexer, "Unexpected '=='. In VSS, use 'same_as'.");
+            }
+            return make_token(lexer, VSS_TOKEN_EQUAL);
+        case '#': {
+            if (peek_char(lexer) == '#' && peek_next_char(lexer) == '#') {
+                // Consume the other two '#'
+                advance_char(lexer);
+                advance_char(lexer);
+                // Scan until closing "###"
+                while (!is_at_end(lexer)) {
+                    if (peek_char(lexer) == '#' && peek_next_char(lexer) == '#') {
+                        if (lexer->current[2] == '#') {
+                            // Found closing "###"
+                            advance_char(lexer);
+                            advance_char(lexer);
+                            advance_char(lexer);
+                            break;
+                        }
+                    }
+                    if (peek_char(lexer) == '\n') {
+                        lexer->line++;
+                        lexer->column = 1;
+                    }
+                    advance_char(lexer);
+                }
+                return vss_lexer_next(lexer);
+            }
+            return error_token(lexer, "Unexpected character '#'.");
+        }
+        default: return error_token(lexer, "Unexpected character.");
+    }
+}

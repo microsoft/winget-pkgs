@@ -1,0 +1,35 @@
+note VSS 3.1 Real-World Concurrency - Parallel Matrix Multiplication Simulator
+
+grab collections
+
+make row_results becomes collections.ConcurrentMap()
+
+task compute_matrix_row needs row_index, vec_a, vec_b, map_ref
+    make dot_product becomes 0
+    repeat k through 1 to 3
+        make idx becomes k - 1
+        make val_a becomes vec_a[idx]
+        make val_b becomes vec_b[idx]
+        dot_product becomes dot_product + (val_a * val_b)
+    finish
+    say "Parallel Task computed Row " + row_index + " Dot Product: " + dot_product
+    map_ref.insert("row_" + row_index, dot_product)
+    send dot_product
+finish
+
+make row1 becomes [1, 2, 3]
+make row2 becomes [4, 5, 6]
+make row3 becomes [7, 8, 9]
+make col_vector becomes [2, 0, 1]
+
+say "Executing Parallel Matrix-Vector Multiplication..."
+make t1 becomes start compute_matrix_row(1, row1, col_vector, row_results)
+make t2 becomes start compute_matrix_row(2, row2, col_vector, row_results)
+make t3 becomes start compute_matrix_row(3, row3, col_vector, row_results)
+
+make res1 becomes await t1
+make res2 becomes await t2
+make res3 becomes await t3
+
+say "Result Vector: [" + res1 + ", " + res2 + ", " + res3 + "]"
+say "Parallel Matrix Multiplication Completed Successfully!"

@@ -1,0 +1,16 @@
+grab collections
+
+make download_results becomes collections.ConcurrentMap()
+
+task download_resource needs resource_name, delay_ms, map_ref
+    say "Async downloading " + resource_name + "..."
+    concurrency_sleep(delay_ms)
+    make size_kb becomes delay_ms * 4
+    map_ref.insert(resource_name, size_kb)
+    say "Finished downloading " + resource_name + " (" + size_kb + " KB)"
+    send resource_name + "_OK"
+finish
+
+make r becomes download_resource("asset.png", 20, download_results)
+say "Result: " + r
+say "Count: " + download_results.count()

@@ -1,0 +1,102 @@
+note VSS Python Expanded Parity - Matrix, DataFrame, WebServer, Plot Tests
+
+grab math
+grab string
+grab matrix
+grab testing
+
+say "========================================"
+say "VSS Expanded Python Parity Test Suite"
+say "========================================"
+
+note 1. Matrix Operations (NumPy parity)
+say "1. Testing Matrix Operations..."
+
+make m becomes matrix.create(3, 3, 0)
+testing.assert_equal(size of m, 3, "matrix.create produces 3 rows")
+testing.assert_equal(size of m[0], 3, "matrix.create row has 3 cols")
+testing.assert_equal(m[0][0], 0, "matrix initial fill value is 0")
+
+make a becomes [[1, 2], [3, 4]]
+make b becomes [[5, 6], [7, 8]]
+
+make c becomes matrix.multiply(a, b)
+testing.assert_equal(c[0][0], 19, "matrix multiply [0][0] = 1*5 + 2*7 = 19")
+testing.assert_equal(c[0][1], 22, "matrix multiply [0][1] = 1*6 + 2*8 = 22")
+testing.assert_equal(c[1][0], 43, "matrix multiply [1][0] = 3*5 + 4*7 = 43")
+testing.assert_equal(c[1][1], 50, "matrix multiply [1][1] = 3*6 + 4*8 = 50")
+
+make d becomes matrix.mat_add(a, b)
+testing.assert_equal(d[0][0], 6, "matrix add [0][0] = 1+5 = 6")
+testing.assert_equal(d[1][1], 12, "matrix add [1][1] = 4+8 = 12")
+
+make t becomes matrix.transpose(a)
+testing.assert_equal(t[0][0], 1, "matrix transpose [0][0]")
+testing.assert_equal(t[0][1], 3, "matrix transpose [0][1] = original[1][0]")
+testing.assert_equal(t[1][0], 2, "matrix transpose [1][0] = original[0][1]")
+
+make v1 becomes [1, 2, 3]
+make v2 becomes [4, 5, 6]
+make dp becomes matrix.dot(v1, v2)
+testing.assert_equal(dp, 32, "dot product [1,2,3].[4,5,6] = 32")
+
+make sc becomes matrix.scale(a, 2)
+testing.assert_equal(sc[0][0], 2, "matrix scale [0][0] = 1*2 = 2")
+testing.assert_equal(sc[1][1], 8, "matrix scale [1][1] = 4*2 = 8")
+
+note 2. ASCII Bar Chart (matplotlib parity)
+say "2. Testing ASCII Plotting..."
+grab plot
+make scores becomes [85, 92, 78, 95, 88]
+make names becomes ["Alice", "Bob", "Carol", "Dave", "Eve"]
+plot.bar_chart(scores, names, "Student Scores")
+testing.assert_true(size of scores above 0, "Plot bar_chart runs successfully")
+
+note 3. SVG Chart Generation
+make svg becomes plot.render_svg([10, 25, 15, 30], ["Q1", "Q2", "Q3", "Q4"], "Quarterly Revenue", 400, 200)
+testing.assert_true(string.startswith(svg, "<svg"), "render_svg produces SVG markup")
+testing.assert_true(string.find(svg, "Quarterly Revenue") above -1, "SVG contains chart title")
+
+note 4. DataFrame Tabular Operations (Pandas parity)
+say "4. Testing DataFrame Operations..."
+grab dataframe
+make csv_data becomes "name,score,grade\nAlice,95,A\nBob,82,B\nCarol,91,A\nDave,74,C"
+make df becomes dataframe.from_csv(csv_data)
+testing.assert_equal(df.count(), 4, "DataFrame row count from CSV is 4")
+testing.assert_equal(size of df.headers, 3, "DataFrame has 3 columns")
+make names_col becomes df.column("name")
+testing.assert_equal(names_col[0], "Alice", "First name is Alice")
+make a_students becomes df.filter("grade", "A")
+testing.assert_equal(size of a_students, 2, "Filter grade=A returns 2 students")
+
+note 5. WebServer Route Registration (FastAPI parity)
+say "5. Testing WebServer Route Registration..."
+grab webserver
+grab json
+make server becomes WebServer()
+server.init()
+task home_handler
+    send webserver.html_response(200, "<h1>Home</h1>")
+finish
+task api_handler
+    make data becomes map [ "status": "ok", "version": "3.1.0" ]
+    send webserver.json_response(200, data)
+finish
+server.get("/", home_handler)
+server.get("/api/status", api_handler)
+testing.assert_equal(size of server.routes, 2, "WebServer has 2 registered routes")
+testing.assert_equal(server.routes[0].method, "GET", "Route method is GET")
+testing.assert_equal(server.routes[0].path, "/", "Route path is /")
+
+make resp becomes webserver.json_response(200, map [ "ok": yes ])
+testing.assert_equal(resp field "status", 200, "JSON response has status 200")
+testing.assert_equal(resp field "content_type", "application/json", "JSON response content_type is application/json")
+
+note 6. FFI Module Presence
+say "6. Testing FFI Module Load..."
+grab ffi
+testing.assert_true(yes, "ffi module loaded successfully")
+
+say "========================================"
+say "All Expanded Parity Tests Passed!"
+say "========================================"

@@ -4,5 +4,18 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
-extern const char *_x0435;
+
+#ifndef VSS_THREAD_LOCAL
+#if defined(_MSC_VER)
+#define VSS_THREAD_LOCAL __declspec(thread)
+#elif defined(__GNUC__) || defined(__clang__)
+#define VSS_THREAD_LOCAL __thread
+#else
+#define VSS_THREAD_LOCAL _Thread_local
 #endif
+#endif
+
+extern VSS_THREAD_LOCAL const char *vss_current_source;
+
+#endif
+

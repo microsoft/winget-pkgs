@@ -6,4 +6,582 @@
 #include "env.h"
 #include "ast.h"
 #include "object.h"
-static char *_x03a2(const char *_x039e) { if (!_x039e) return NULL; char *dup = malloc(strlen(_x039e) + 1); if (dup) { strcpy(dup, _x039e); } return dup; } _x012a _x04a1(double _x0316) { _x012a _x041f; _x041f._x0412 = _x0120; _x041f._x0141._x0326 = _x0316; return _x041f; } _x012a _x04a2(const char *_x039e) { _x012a _x041f; _x041f._x0412 = _x0121; _x041f._x0141._x03e8 = malloc(sizeof(_x0128)); _x041f._x0141._x03e8->_x037e = 1; _x041f._x0141._x03e8->_x01a4 = _x03a2(_x039e); return _x041f; } _x012a _x0496(bool _x0145) { _x012a _x041f; _x041f._x0412 = _x0115; _x041f._x0141._x0154 = _x0145; return _x041f; } _x012a _x0499(void) { _x012a _x041f; _x041f._x0412 = _x0118; return _x041f; } _x012a _x049e(void) { _x012a _x041f; _x041f._x0412 = _x011d; _x041f._x0141._x02df = malloc(sizeof(_x0125)); _x041f._x0141._x02df->_x037e = 1; _x041f._x0141._x02df->_x02b7 = NULL; _x041f._x0141._x02df->_x01d7 = 0; _x041f._x0141._x02df->_x019c = 0; return _x041f; } _x012a _x049f(void) { _x012a _x041f; _x041f._x0412 = _x011e; _x041f._x0141._x02f7 = malloc(sizeof(_x0126)); _x041f._x0141._x02f7->_x037e = 1; _x041f._x0141._x02f7->_x0218 = NULL; _x041f._x0141._x02f7->_x01d7 = 0; _x041f._x0141._x02f7->_x019c = 0; return _x041f; } _x012a _x04a3(char **_x0347, size_t _x0346, struct _x00b3 **_x014f, size_t _x0152, struct _x0046 *_x01b3) { _x012a _x041f; _x041f._x0412 = _x0122; _x041f._x0141._x03f8 = malloc(sizeof(_x0129)); _x041f._x0141._x03f8->_x037e = 1; _x041f._x0141._x03f8->_x0346 = _x0346; _x041f._x0141._x03f8->_x0347 = malloc(sizeof(char*) * _x0346); for (size_t _x0288 = 0; _x0288 < _x0346; _x0288++) { _x041f._x0141._x03f8->_x0347[_x0288] = _x03a2(_x0347[_x0288]); } _x041f._x0141._x03f8->_x0152 = _x0152; _x041f._x0141._x03f8->_x014f = malloc(sizeof(struct _x00b3*) * _x0152); for (size_t _x0288 = 0; _x0288 < _x0152; _x0288++) { _x041f._x0141._x03f8->_x014f[_x0288] = _x014f[_x0288]; } _x041f._x0141._x03f8->_x01b3 = _x01b3; if (_x01b3) { _x0442(_x01b3); } return _x041f; } _x012a _x04a0(_x0053 _x0261) { _x012a _x041f; _x041f._x0412 = _x011f; _x041f._x0141._x031d = _x0261; return _x041f; } _x012a _x0498(_x008d *_x01b3) { _x012a _x041f; _x041f._x0412 = _x0117; _x041f._x0141._x01b3 = _x01b3; return _x041f; } _x012a _x049c(_x0090 *_x0261) { _x012a _x041f; _x041f._x0412 = _x011b; _x041f._x0141._x0265 = _x0261; return _x041f; } _x012a _x0497(const char *_x0319, _x008c *_x0349) { _x008c *_x02c7 = malloc(sizeof(_x008c)); _x02c7->_x037e = 1; _x02c7->_x0319 = _x03a2(_x0319); _x02c7->_x0349 = _x0349; if (_x0349) { _x0349->_x037e++; } _x012a _x02f0 = _x049f(); _x02c7->_x0304 = _x02f0._x0141._x02f7; _x02c7->_x0304->_x037e++; _x04a4(_x02f0); _x012a _x0422; _x0422._x0412 = _x0116; _x0422._x0141._x02c7 = _x02c7; return _x0422; } _x012a _x049d(_x008c *_x02c7) { _x0091 *_x029c = malloc(sizeof(_x0091)); _x029c->_x037e = 1; _x029c->_x02c7 = _x02c7; if (_x02c7) { _x02c7->_x037e++; } _x012a _x02f0 = _x049f(); _x029c->_x023d = _x02f0._x0141._x02f7; _x029c->_x023d->_x037e++; _x04a4(_x02f0); _x012a _x0422; _x0422._x0412 = _x011c; _x0422._x0141._x029e = _x029c; return _x0422; } _x012a _x049a(const char *_x0319) { _x008e *_x0216 = malloc(sizeof(_x008e)); _x0216->_x037e = 1; _x0216->_x0319 = _x03a2(_x0319); _x012a _x02f0 = _x049f(); _x0216->_x02fe = _x02f0._x0141._x02f7; _x0216->_x02fe->_x037e++; _x04a4(_x02f0); _x012a _x0422; _x0422._x0412 = _x0119; _x0422._x0141._x0216 = _x0216; return _x0422; } _x012a _x049b(const char *_x021b, const char *_x02fc, int _x0425) { _x008f *_x0217 = malloc(sizeof(_x008f)); _x0217->_x037e = 1; _x0217->_x021b = _x03a2(_x021b); _x0217->_x02fc = _x03a2(_x02fc); _x0217->_x0425 = _x0425; _x012a _x0422; _x0422._x0412 = _x011a; _x0422._x0141._x0217 = _x0217; return _x0422; } void _x04a5(_x012a _x041f) { switch (_x041f._x0412) { case _x0121: _x041f._x0141._x03e8->_x037e++; break; case _x011d: _x041f._x0141._x02df->_x037e++; break; case _x011e: _x041f._x0141._x02f7->_x037e++; break; case _x0122: _x041f._x0141._x03f8->_x037e++; break; case _x0117: _x0433(_x041f._x0141._x01b3); break; case _x011b: _x0458(_x041f._x0141._x0265); break; case _x0116: _x041f._x0141._x02c7->_x037e++; break; case _x011c: _x041f._x0141._x029e->_x037e++; break; case _x0119: _x041f._x0141._x0216->_x037e++; break; case _x011a: _x041f._x0141._x0217->_x037e++; break; default: break; } } void _x04a4(_x012a _x041f) { switch (_x041f._x0412) { case _x0121: _x041f._x0141._x03e8->_x037e--; if (_x041f._x0141._x03e8->_x037e == 0) { free(_x041f._x0141._x03e8->_x01a4); free(_x041f._x0141._x03e8); } break; case _x011d: _x041f._x0141._x02df->_x037e--; if (_x041f._x0141._x02df->_x037e == 0) { for (size_t _x0288 = 0; _x0288 < _x041f._x0141._x02df->_x01d7; _x0288++) { _x04a4(_x041f._x0141._x02df->_x02b7[_x0288]); } free(_x041f._x0141._x02df->_x02b7); free(_x041f._x0141._x02df); } break; case _x011e: _x041f._x0141._x02f7->_x037e--; if (_x041f._x0141._x02f7->_x037e == 0) { for (size_t _x0288 = 0; _x0288 < _x041f._x0141._x02f7->_x01d7; _x0288++) { free(_x041f._x0141._x02f7->_x0218[_x0288]._x02c0); _x04a4(_x041f._x0141._x02f7->_x0218[_x0288]._x0425); } free(_x041f._x0141._x02f7->_x0218); free(_x041f._x0141._x02f7); } break; case _x0122: _x041f._x0141._x03f8->_x037e--; if (_x041f._x0141._x03f8->_x037e == 0) { for (size_t _x0288 = 0; _x0288 < _x041f._x0141._x03f8->_x0346; _x0288++) { free(_x041f._x0141._x03f8->_x0347[_x0288]); } free(_x041f._x0141._x03f8->_x0347); free(_x041f._x0141._x03f8->_x014f); if (_x041f._x0141._x03f8->_x01b3) { _x0441(_x041f._x0141._x03f8->_x01b3); } free(_x041f._x0141._x03f8); } break; case _x0117: _x0432(_x041f._x0141._x01b3); break; case _x011b: _x0457(_x041f._x0141._x0265); break; case _x0116: _x041f._x0141._x02c7->_x037e--; if (_x041f._x0141._x02c7->_x037e == 0) { free(_x041f._x0141._x02c7->_x0319); if (_x041f._x0141._x02c7->_x0349) { _x012a _x0372; _x0372._x0412 = _x0116; _x0372._x0141._x02c7 = _x041f._x0141._x02c7->_x0349; _x04a4(_x0372); } if (_x041f._x0141._x02c7->_x0304) { _x012a _x0315; _x0315._x0412 = _x011e; _x0315._x0141._x02f7 = _x041f._x0141._x02c7->_x0304; _x04a4(_x0315); } free(_x041f._x0141._x02c7); } break; case _x011c: _x041f._x0141._x029e->_x037e--; if (_x041f._x0141._x029e->_x037e == 0) { if (_x041f._x0141._x029e->_x02c7) { _x012a _x02c9; _x02c9._x0412 = _x0116; _x02c9._x0141._x02c7 = _x041f._x0141._x029e->_x02c7; _x04a4(_x02c9); } if (_x041f._x0141._x029e->_x023d) { _x012a _x0266; _x0266._x0412 = _x011e; _x0266._x0141._x02f7 = _x041f._x0141._x029e->_x023d; _x04a4(_x0266); } free(_x041f._x0141._x029e); } break; case _x0119: _x041f._x0141._x0216->_x037e--; if (_x041f._x0141._x0216->_x037e == 0) { free(_x041f._x0141._x0216->_x0319); if (_x041f._x0141._x0216->_x02fe) { _x012a _x0315; _x0315._x0412 = _x011e; _x0315._x0141._x02f7 = _x041f._x0141._x0216->_x02fe; _x04a4(_x0315); } free(_x041f._x0141._x0216); } break; case _x011a: _x041f._x0141._x0217->_x037e--; if (_x041f._x0141._x0217->_x037e == 0) { free(_x041f._x0141._x0217->_x021b); free(_x041f._x0141._x0217->_x02fc); free(_x041f._x0141._x0217); } break; default: break; } } bool _x04a6(_x012a _x0132, _x012a _x0145) { if (_x0132._x0412 != _x0145._x0412) return false; switch (_x0132._x0412) { case _x0120: return _x0132._x0141._x0326 == _x0145._x0141._x0326; case _x0121: return strcmp(_x0132._x0141._x03e8->_x01a4, _x0145._x0141._x03e8->_x01a4) == 0; case _x0115: return _x0132._x0141._x0154 == _x0145._x0141._x0154; case _x0118: return true; case _x011d: if (_x0132._x0141._x02df == _x0145._x0141._x02df) return true; if (_x0132._x0141._x02df->_x01d7 != _x0145._x0141._x02df->_x01d7) return false; for (size_t _x0288 = 0; _x0288 < _x0132._x0141._x02df->_x01d7; _x0288++) { if (!_x04a6(_x0132._x0141._x02df->_x02b7[_x0288], _x0145._x0141._x02df->_x02b7[_x0288])) return false; } return true; case _x011e: if (_x0132._x0141._x02f7 == _x0145._x0141._x02f7) return true; if (_x0132._x0141._x02f7->_x01d7 != _x0145._x0141._x02f7->_x01d7) return false; for (size_t _x0288 = 0; _x0288 < _x0132._x0141._x02f7->_x01d7; _x0288++) { bool _x0259 = false; for (size_t _x02b8 = 0; _x02b8 < _x0145._x0141._x02f7->_x01d7; _x02b8++) { if (strcmp(_x0132._x0141._x02f7->_x0218[_x0288]._x02c0, _x0145._x0141._x02f7->_x0218[_x02b8]._x02c0) == 0) { if (!_x04a6(_x0132._x0141._x02f7->_x0218[_x0288]._x0425, _x0145._x0141._x02f7->_x0218[_x02b8]._x0425)) { return false; } _x0259 = true; break; } } if (!_x0259) return false; } return true; case _x0122: return _x0132._x0141._x03f8 == _x0145._x0141._x03f8; case _x011f: return _x0132._x0141._x031d == _x0145._x0141._x031d; case _x0117: return _x0132._x0141._x01b3 == _x0145._x0141._x01b3; case _x011b: return _x0132._x0141._x0265 == _x0145._x0141._x0265; case _x0116: return _x0132._x0141._x02c7 == _x0145._x0141._x02c7; case _x011c: return _x0132._x0141._x029e == _x0145._x0141._x029e; case _x0119: return _x0132._x0141._x0216 == _x0145._x0141._x0216; case _x011a: return (strcmp(_x0132._x0141._x0217->_x021b, _x0145._x0141._x0217->_x021b) == 0 && strcmp(_x0132._x0141._x0217->_x02fc, _x0145._x0141._x0217->_x02fc) == 0); } return false; } bool _x04a9(_x012a _x041f) { switch (_x041f._x0412) { case _x0115: return _x041f._x0141._x0154; case _x0118: return false; case _x0120: return _x041f._x0141._x0326 != 0.0; case _x0121: return strlen(_x041f._x0141._x03e8->_x01a4) > 0; case _x011d: return _x041f._x0141._x02df->_x01d7 > 0; default: return true; } } char *_x04a8(_x012a _x041f) { char _x015b[256]; switch (_x041f._x0412) { case _x0120: snprintf(_x015b, sizeof(_x015b), "\x25\x67", _x041f._x0141._x0326); return _x03a2(_x015b); case _x0121: return _x03a2(_x041f._x0141._x03e8->_x01a4); case _x0115: return _x03a2(_x041f._x0141._x0154 ? "\x79\x65\x73" : "\x6e\x6f"); case _x0118: return _x03a2("\x65\x6d\x70\x74\x79"); case _x011d: { size_t _x040a = 3; for (size_t _x0288 = 0; _x0288 < _x041f._x0141._x02df->_x01d7; _x0288++) { char *_x039e = _x04a8(_x041f._x0141._x02df->_x02b7[_x0288]); _x040a += strlen(_x039e) + 2; free(_x039e); } char *_x0392 = malloc(_x040a); strcpy(_x0392, "\x5b"); for (size_t _x0288 = 0; _x0288 < _x041f._x0141._x02df->_x01d7; _x0288++) { char *_x039e = _x04a8(_x041f._x0141._x02df->_x02b7[_x0288]); strcat(_x0392, _x039e); free(_x039e); if (_x0288 < _x041f._x0141._x02df->_x01d7 - 1) { strcat(_x0392, "\x2c\x20"); } } strcat(_x0392, "\x5d"); return _x0392; } case _x011e: { size_t _x040a = 8; for (size_t _x0288 = 0; _x0288 < _x041f._x0141._x02f7->_x01d7; _x0288++) { char *_x0424 = _x04a8(_x041f._x0141._x02f7->_x0218[_x0288]._x0425); _x040a += strlen(_x041f._x0141._x02f7->_x0218[_x0288]._x02c0) + strlen(_x0424) + 6; free(_x0424); } char *_x0392 = malloc(_x040a); strcpy(_x0392, "\x6d\x61\x70\x20\x5b\x20"); for (size_t _x0288 = 0; _x0288 < _x041f._x0141._x02f7->_x01d7; _x0288++) { strcat(_x0392, "\x22"); strcat(_x0392, _x041f._x0141._x02f7->_x0218[_x0288]._x02c0); strcat(_x0392, "\x22\x3a\x20"); char *_x0424 = _x04a8(_x041f._x0141._x02f7->_x0218[_x0288]._x0425); strcat(_x0392, _x0424); free(_x0424); strcat(_x0392, "\x20"); } strcat(_x0392, "\x5d"); return _x0392; } case _x0122: return _x03a2("\x3c\x74\x61\x73\x6b\x3e"); case _x011f: return _x03a2("\x3c\x6e\x61\x74\x69\x76\x65\x20\x74\x61\x73\x6b\x3e"); case _x0117: return _x03a2("\x3c\x74\x61\x73\x6b\x3e"); case _x011b: return _x03a2("\x3c\x74\x61\x73\x6b\x3e"); case _x0116: { char _x015a[128]; snprintf(_x015a, sizeof(_x015a), "\x3c\x63\x6c\x61\x73\x73\x20\x25\x73\x3e", _x041f._x0141._x02c7->_x0319); return _x03a2(_x015a); } case _x011c: { char _x015a[128]; snprintf(_x015a, sizeof(_x015a), "\x3c\x69\x6e\x73\x74\x61\x6e\x63\x65\x20\x25\x73\x3e", _x041f._x0141._x029e->_x02c7->_x0319); return _x03a2(_x015a); } case _x0119: { char _x015a[128]; snprintf(_x015a, sizeof(_x015a), "\x3c\x65\x6e\x75\x6d\x20\x25\x73\x3e", _x041f._x0141._x0216->_x0319); return _x03a2(_x015a); } case _x011a: { char _x015a[128]; snprintf(_x015a, sizeof(_x015a), "\x25\x73\x2e\x25\x73", _x041f._x0141._x0217->_x021b, _x041f._x0141._x0217->_x02fc); return _x03a2(_x015a); } } return _x03a2("\x3c\x75\x6e\x6b\x6e\x6f\x77\x6e\x3e"); } void _x04a7(_x012a _x041f) { if (_x041f._x0412 == _x0121) { printf("\x25\x73\x0a", _x041f._x0141._x03e8->_x01a4); } else { char *_x039e = _x04a8(_x041f); printf("\x25\x73\x0a", _x039e); free(_x039e); } }
+#include "vss_concurrency.h"
+
+// Helper to duplicate string safely
+static char *safe_strdup(const char *s) {
+    if (!s) return NULL;
+    char *dup = malloc(strlen(s) + 1);
+    if (dup) {
+        strcpy(dup, s);
+    }
+    return dup;
+}
+
+VSS_Value vss_value_new_number(double n) {
+    VSS_Value v;
+    v.type = VSS_VAL_NUMBER;
+    v.as.number = n;
+    return v;
+}
+
+VSS_Value vss_value_new_string(const char *s) {
+    VSS_Value v;
+    v.type = VSS_VAL_STRING;
+    v.as.string = malloc(sizeof(VSS_ValString));
+    vss_atomic_set(&v.as.string->ref_count, 1);
+    v.as.string->chars = safe_strdup(s);
+    return v;
+}
+
+VSS_Value vss_value_new_bool(bool b) {
+    VSS_Value v;
+    v.type = VSS_VAL_BOOL;
+    v.as.boolean = b;
+    return v;
+}
+
+VSS_Value vss_value_new_empty(void) {
+    VSS_Value v;
+    v.type = VSS_VAL_EMPTY;
+    return v;
+}
+
+VSS_Value vss_value_new_list(void) {
+    VSS_Value v;
+    v.type = VSS_VAL_LIST;
+    v.as.list = malloc(sizeof(VSS_ValList));
+    vss_atomic_set(&v.as.list->ref_count, 1);
+    v.as.list->items = NULL;
+    v.as.list->count = 0;
+    v.as.list->capacity = 0;
+    return v;
+}
+
+VSS_Value vss_value_new_map(void) {
+    VSS_Value v;
+    v.type = VSS_VAL_MAP;
+    v.as.map = malloc(sizeof(VSS_ValMap));
+    vss_atomic_set(&v.as.map->ref_count, 1);
+    v.as.map->entries = NULL;
+    v.as.map->count = 0;
+    v.as.map->capacity = 0;
+    return v;
+}
+
+VSS_Value vss_value_new_task(char **params, size_t param_count, struct VSS_Stmt **body, size_t body_count, struct VSS_Env *closure) {
+    VSS_Value v;
+    v.type = VSS_VAL_TASK;
+    v.as.task = malloc(sizeof(VSS_ValTask));
+    vss_atomic_set(&v.as.task->ref_count, 1);
+    
+    v.as.task->param_count = param_count;
+    v.as.task->params = malloc(sizeof(char*) * param_count);
+    for (size_t i = 0; i < param_count; i++) {
+        v.as.task->params[i] = safe_strdup(params[i]);
+    }
+    
+    v.as.task->body_count = body_count;
+    v.as.task->body = malloc(sizeof(struct VSS_Stmt*) * body_count);
+    for (size_t i = 0; i < body_count; i++) {
+        v.as.task->body[i] = body[i]; // Statements are owned by AST
+    }
+    
+    v.as.task->closure = closure;
+    if (closure) {
+        vss_env_retain(closure);
+    }
+    
+    return v;
+}
+
+VSS_Value vss_value_new_native(VSS_NativeFnPtr func) {
+    VSS_Value v;
+    v.type = VSS_VAL_NATIVE;
+    v.as.native = func;
+    return v;
+}
+
+VSS_Value vss_value_new_closure(VSS_ObjClosure *closure) {
+    VSS_Value val;
+    val.type = VSS_VAL_CLOSURE;
+    val.as.closure = closure;
+    vss_closure_retain(closure);
+    return val;
+}
+
+VSS_Value vss_value_new_function(VSS_ObjFunction *func) {
+    VSS_Value val;
+    val.type = VSS_VAL_FUNCTION;
+    val.as.function = func;
+    vss_function_retain(func);
+    return val;
+}
+
+VSS_Value vss_value_new_class(const char *name, VSS_ObjClass *parent) {
+    VSS_ObjClass *klass = malloc(sizeof(VSS_ObjClass));
+    vss_atomic_set(&klass->ref_count, 1);
+    klass->name = safe_strdup(name);
+    klass->parent = parent;
+    if (parent) {
+        VSS_Value pval;
+        pval.type = VSS_VAL_CLASS;
+        pval.as.klass = parent;
+        vss_value_retain(pval);
+    }
+    VSS_Value m = vss_value_new_map();
+    klass->methods = m.as.map;
+    vss_atomic_inc(&klass->methods->ref_count);
+    vss_value_release(m);
+    
+    VSS_Value val;
+    val.type = VSS_VAL_CLASS;
+    val.as.klass = klass;
+    return val;
+}
+
+VSS_Value vss_value_new_instance(VSS_ObjClass *klass) {
+    VSS_ObjInstance *inst = malloc(sizeof(VSS_ObjInstance));
+    vss_atomic_set(&inst->ref_count, 1);
+    inst->klass = klass;
+    if (klass) {
+        VSS_Value kval;
+        kval.type = VSS_VAL_CLASS;
+        kval.as.klass = klass;
+        vss_value_retain(kval);
+    }
+    VSS_Value f = vss_value_new_map();
+    inst->fields = f.as.map;
+    vss_atomic_inc(&inst->fields->ref_count);
+    vss_value_release(f);
+    
+    VSS_Value val;
+    val.type = VSS_VAL_INSTANCE;
+    val.as.instance = inst;
+    return val;
+}
+
+VSS_Value vss_value_new_enum(const char *name) {
+    VSS_ObjEnum *enm = malloc(sizeof(VSS_ObjEnum));
+    vss_atomic_set(&enm->ref_count, 1);
+    enm->name = safe_strdup(name);
+    VSS_Value m = vss_value_new_map();
+    enm->members = m.as.map;
+    vss_atomic_inc(&enm->members->ref_count);
+    vss_value_release(m);
+    
+    VSS_Value val;
+    val.type = VSS_VAL_ENUM;
+    val.as.enm = enm;
+    return val;
+}
+
+VSS_Value vss_value_new_enum_val(const char *enum_name, const char *member_name, int value) {
+    VSS_ObjEnumVal *enm_val = malloc(sizeof(VSS_ObjEnumVal));
+    vss_atomic_set(&enm_val->ref_count, 1);
+    enm_val->enum_name = safe_strdup(enum_name);
+    enm_val->member_name = safe_strdup(member_name);
+    enm_val->value = value;
+    
+    VSS_Value val;
+    val.type = VSS_VAL_ENUM_VAL;
+    val.as.enm_val = enm_val;
+    return val;
+}
+
+VSS_Value vss_value_new_task_handle(VSS_TaskHandle *handle) {
+    VSS_Value val;
+    val.type = VSS_VAL_TASK_HANDLE;
+    val.as.task_handle = handle;
+    vss_task_handle_retain(handle);
+    return val;
+}
+
+VSS_Value vss_value_new_channel(VSS_Channel *channel) {
+    VSS_Value val;
+    val.type = VSS_VAL_CHANNEL;
+    val.as.channel = channel;
+    vss_channel_retain(channel);
+    return val;
+}
+
+VSS_Value vss_value_new_mutex(VSS_MutexVal *mutex) {
+    VSS_Value val;
+    val.type = VSS_VAL_MUTEX;
+    val.as.mutex = mutex;
+    vss_mutex_val_retain(mutex);
+    return val;
+}
+
+VSS_Value vss_value_new_atomic(VSS_AtomicVal *atomic) {
+    VSS_Value val;
+    val.type = VSS_VAL_ATOMIC;
+    val.as.atomic = atomic;
+    vss_atomic_val_retain(atomic);
+    return val;
+}
+
+void vss_value_retain(VSS_Value v) {
+    switch (v.type) {
+        case VSS_VAL_STRING:
+            vss_atomic_inc(&v.as.string->ref_count);
+            break;
+        case VSS_VAL_LIST:
+            vss_atomic_inc(&v.as.list->ref_count);
+            break;
+        case VSS_VAL_MAP:
+            vss_atomic_inc(&v.as.map->ref_count);
+            break;
+        case VSS_VAL_TASK:
+            vss_atomic_inc(&v.as.task->ref_count);
+            break;
+        case VSS_VAL_CLOSURE:
+            vss_closure_retain(v.as.closure);
+            break;
+        case VSS_VAL_FUNCTION:
+            vss_function_retain(v.as.function);
+            break;
+        case VSS_VAL_CLASS:
+            vss_atomic_inc(&v.as.klass->ref_count);
+            break;
+        case VSS_VAL_INSTANCE:
+            vss_atomic_inc(&v.as.instance->ref_count);
+            break;
+        case VSS_VAL_ENUM:
+            vss_atomic_inc(&v.as.enm->ref_count);
+            break;
+        case VSS_VAL_ENUM_VAL:
+            vss_atomic_inc(&v.as.enm_val->ref_count);
+            break;
+        case VSS_VAL_TASK_HANDLE:
+            vss_task_handle_retain(v.as.task_handle);
+            break;
+        case VSS_VAL_CHANNEL:
+            vss_channel_retain(v.as.channel);
+            break;
+        case VSS_VAL_MUTEX:
+            vss_mutex_val_retain(v.as.mutex);
+            break;
+        case VSS_VAL_ATOMIC:
+            vss_atomic_val_retain(v.as.atomic);
+            break;
+        default:
+            break;
+    }
+}
+
+void vss_value_release(VSS_Value v) {
+    switch (v.type) {
+        case VSS_VAL_STRING:
+            if (vss_atomic_dec(&v.as.string->ref_count) == 0) {
+                free(v.as.string->chars);
+                free(v.as.string);
+            }
+            break;
+        case VSS_VAL_LIST:
+            if (vss_atomic_dec(&v.as.list->ref_count) == 0) {
+                for (size_t i = 0; i < v.as.list->count; i++) {
+                    vss_value_release(v.as.list->items[i]);
+                }
+                free(v.as.list->items);
+                free(v.as.list);
+            }
+            break;
+        case VSS_VAL_MAP:
+            if (vss_atomic_dec(&v.as.map->ref_count) == 0) {
+                for (size_t i = 0; i < v.as.map->count; i++) {
+                    free(v.as.map->entries[i].key);
+                    vss_value_release(v.as.map->entries[i].value);
+                }
+                free(v.as.map->entries);
+                free(v.as.map);
+            }
+            break;
+        case VSS_VAL_TASK:
+            if (vss_atomic_dec(&v.as.task->ref_count) == 0) {
+                for (size_t i = 0; i < v.as.task->param_count; i++) {
+                    free(v.as.task->params[i]);
+                }
+                free(v.as.task->params);
+                free(v.as.task->body);
+                if (v.as.task->closure) {
+                    vss_env_release(v.as.task->closure);
+                }
+                free(v.as.task);
+            }
+            break;
+        case VSS_VAL_CLOSURE:
+            vss_closure_release(v.as.closure);
+            break;
+        case VSS_VAL_FUNCTION:
+            vss_function_release(v.as.function);
+            break;
+        case VSS_VAL_CLASS:
+            if (vss_atomic_dec(&v.as.klass->ref_count) == 0) {
+                free(v.as.klass->name);
+                if (v.as.klass->parent) {
+                    VSS_Value pval;
+                    pval.type = VSS_VAL_CLASS;
+                    pval.as.klass = v.as.klass->parent;
+                    vss_value_release(pval);
+                }
+                if (v.as.klass->methods) {
+                    VSS_Value mval;
+                    mval.type = VSS_VAL_MAP;
+                    mval.as.map = v.as.klass->methods;
+                    vss_value_release(mval);
+                }
+                free(v.as.klass);
+            }
+            break;
+        case VSS_VAL_INSTANCE:
+            if (vss_atomic_dec(&v.as.instance->ref_count) == 0) {
+                if (v.as.instance->klass) {
+                    VSS_Value kval;
+                    kval.type = VSS_VAL_CLASS;
+                    kval.as.klass = v.as.instance->klass;
+                    vss_value_release(kval);
+                }
+                if (v.as.instance->fields) {
+                    VSS_Value fval;
+                    fval.type = VSS_VAL_MAP;
+                    fval.as.map = v.as.instance->fields;
+                    vss_value_release(fval);
+                }
+                free(v.as.instance);
+            }
+            break;
+        case VSS_VAL_ENUM:
+            if (vss_atomic_dec(&v.as.enm->ref_count) == 0) {
+                free(v.as.enm->name);
+                if (v.as.enm->members) {
+                    VSS_Value mval;
+                    mval.type = VSS_VAL_MAP;
+                    mval.as.map = v.as.enm->members;
+                    vss_value_release(mval);
+                }
+                free(v.as.enm);
+            }
+            break;
+        case VSS_VAL_ENUM_VAL:
+            if (vss_atomic_dec(&v.as.enm_val->ref_count) == 0) {
+                free(v.as.enm_val->enum_name);
+                free(v.as.enm_val->member_name);
+                free(v.as.enm_val);
+            }
+            break;
+        case VSS_VAL_TASK_HANDLE:
+            vss_task_handle_release(v.as.task_handle);
+            break;
+        case VSS_VAL_CHANNEL:
+            vss_channel_release(v.as.channel);
+            break;
+        case VSS_VAL_MUTEX:
+            vss_mutex_val_release(v.as.mutex);
+            break;
+        case VSS_VAL_ATOMIC:
+            vss_atomic_val_release(v.as.atomic);
+            break;
+        default:
+            break;
+    }
+}
+
+bool vss_value_same_as(VSS_Value a, VSS_Value b) {
+    if (a.type != b.type) return false;
+    switch (a.type) {
+        case VSS_VAL_NUMBER:
+            return a.as.number == b.as.number;
+        case VSS_VAL_STRING:
+            return strcmp(a.as.string->chars, b.as.string->chars) == 0;
+        case VSS_VAL_BOOL:
+            return a.as.boolean == b.as.boolean;
+        case VSS_VAL_EMPTY:
+            return true;
+        case VSS_VAL_LIST:
+            if (a.as.list == b.as.list) return true;
+            if (a.as.list->count != b.as.list->count) return false;
+            for (size_t i = 0; i < a.as.list->count; i++) {
+                if (!vss_value_same_as(a.as.list->items[i], b.as.list->items[i])) return false;
+            }
+            return true;
+        case VSS_VAL_MAP:
+            if (a.as.map == b.as.map) return true;
+            if (a.as.map->count != b.as.map->count) return false;
+            for (size_t i = 0; i < a.as.map->count; i++) {
+                // Find matching key in b
+                bool found = false;
+                for (size_t j = 0; j < b.as.map->count; j++) {
+                    if (strcmp(a.as.map->entries[i].key, b.as.map->entries[j].key) == 0) {
+                        if (!vss_value_same_as(a.as.map->entries[i].value, b.as.map->entries[j].value)) {
+                            return false;
+                        }
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) return false;
+            }
+            return true;
+        case VSS_VAL_TASK:
+            return a.as.task == b.as.task;
+        case VSS_VAL_NATIVE:
+            return a.as.native == b.as.native;
+        case VSS_VAL_CLOSURE:
+            return a.as.closure == b.as.closure;
+        case VSS_VAL_FUNCTION:
+            return a.as.function == b.as.function;
+        case VSS_VAL_CLASS:
+            return a.as.klass == b.as.klass;
+        case VSS_VAL_INSTANCE:
+            return a.as.instance == b.as.instance;
+        case VSS_VAL_ENUM:
+            return a.as.enm == b.as.enm;
+        case VSS_VAL_ENUM_VAL:
+            return (strcmp(a.as.enm_val->enum_name, b.as.enm_val->enum_name) == 0 &&
+                    strcmp(a.as.enm_val->member_name, b.as.enm_val->member_name) == 0);
+    }
+    return false;
+}
+
+bool vss_value_truthy(VSS_Value v) {
+    switch (v.type) {
+        case VSS_VAL_BOOL:
+            return v.as.boolean;
+        case VSS_VAL_EMPTY:
+            return false;
+        case VSS_VAL_NUMBER:
+            return v.as.number != 0.0;
+        case VSS_VAL_STRING:
+            return strlen(v.as.string->chars) > 0;
+        case VSS_VAL_LIST:
+            return v.as.list->count > 0;
+        default:
+            return true;
+    }
+}
+
+char *vss_value_to_string(VSS_Value v) {
+    char buffer[256];
+    switch (v.type) {
+        case VSS_VAL_NUMBER:
+            // Format number cleanly
+            snprintf(buffer, sizeof(buffer), "%g", v.as.number);
+            return safe_strdup(buffer);
+        case VSS_VAL_STRING:
+            return safe_strdup(v.as.string->chars);
+        case VSS_VAL_BOOL:
+            return safe_strdup(v.as.boolean ? "yes" : "no");
+        case VSS_VAL_EMPTY:
+            return safe_strdup("empty");
+        case VSS_VAL_LIST: {
+            // Estimate size and build string
+            size_t total_len = 3; // "[" + "]" + null
+            for (size_t i = 0; i < v.as.list->count; i++) {
+                char *s = vss_value_to_string(v.as.list->items[i]);
+                total_len += strlen(s) + 2; // string + ", "
+                free(s);
+            }
+            char *result = malloc(total_len);
+            strcpy(result, "[");
+            for (size_t i = 0; i < v.as.list->count; i++) {
+                char *s = vss_value_to_string(v.as.list->items[i]);
+                strcat(result, s);
+                free(s);
+                if (i < v.as.list->count - 1) {
+                    strcat(result, ", ");
+                }
+            }
+            strcat(result, "]");
+            return result;
+        }
+        case VSS_VAL_MAP: {
+            size_t total_len = 8; // "map [ " + "]" + null
+            for (size_t i = 0; i < v.as.map->count; i++) {
+                char *val_str = vss_value_to_string(v.as.map->entries[i].value);
+                total_len += strlen(v.as.map->entries[i].key) + strlen(val_str) + 6; // '"' + key + '": ' + val_str + ' '
+                free(val_str);
+            }
+            char *result = malloc(total_len);
+            strcpy(result, "map [ ");
+            for (size_t i = 0; i < v.as.map->count; i++) {
+                strcat(result, "\"");
+                strcat(result, v.as.map->entries[i].key);
+                strcat(result, "\": ");
+                char *val_str = vss_value_to_string(v.as.map->entries[i].value);
+                strcat(result, val_str);
+                free(val_str);
+                strcat(result, " ");
+            }
+            strcat(result, "]");
+            return result;
+        }
+        case VSS_VAL_TASK:
+            return safe_strdup("<task>");
+        case VSS_VAL_NATIVE:
+            return safe_strdup("<native task>");
+        case VSS_VAL_CLOSURE:
+            return safe_strdup("<task>");
+        case VSS_VAL_FUNCTION:
+            return safe_strdup("<task>");
+        case VSS_VAL_CLASS: {
+            char buf[128];
+            snprintf(buf, sizeof(buf), "<class %s>", v.as.klass->name);
+            return safe_strdup(buf);
+        }
+        case VSS_VAL_INSTANCE: {
+            char buf[128];
+            snprintf(buf, sizeof(buf), "<instance %s>", v.as.instance->klass->name);
+            return safe_strdup(buf);
+        }
+        case VSS_VAL_ENUM: {
+            char buf[128];
+            snprintf(buf, sizeof(buf), "<enum %s>", v.as.enm->name);
+            return safe_strdup(buf);
+        }
+        case VSS_VAL_ENUM_VAL: {
+            char buf[128];
+            snprintf(buf, sizeof(buf), "%s.%s", v.as.enm_val->enum_name, v.as.enm_val->member_name);
+            return safe_strdup(buf);
+        }
+        case VSS_VAL_TASK_HANDLE: {
+            char buf[128];
+            snprintf(buf, sizeof(buf), "<task handle #%d>", v.as.task_handle->id);
+            return safe_strdup(buf);
+        }
+        case VSS_VAL_CHANNEL:
+            return safe_strdup("<channel>");
+        case VSS_VAL_MUTEX:
+            return safe_strdup("<mutex>");
+        case VSS_VAL_ATOMIC: {
+            char buf[128];
+            snprintf(buf, sizeof(buf), "<atomic %d>", vss_atomic_get(&v.as.atomic->val));
+            return safe_strdup(buf);
+        }
+    }
+    return safe_strdup("<unknown>");
+}
+
+void vss_value_say(VSS_Value v) {
+    if (v.type == VSS_VAL_STRING) {
+        const char *p = v.as.string->chars;
+        while (*p) {
+            if (*p != '\r') {
+                putchar(*p);
+            }
+            p++;
+        }
+        putchar('\n');
+    } else {
+        char *s = vss_value_to_string(v);
+        const char *p = s;
+        while (*p) {
+            if (*p != '\r') {
+                putchar(*p);
+            }
+            p++;
+        }
+        putchar('\n');
+        free(s);
+    }
+}

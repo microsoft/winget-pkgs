@@ -2,4 +2,251 @@
 #include <stdlib.h>
 #include "chunk.h"
 #include "object.h"
-void _x042f(_x0035 *_x01a9) { _x01a9->_x01b8 = NULL; _x01a9->_x02dd = NULL; _x01a9->_x01d7 = 0; _x01a9->_x019c = 0; _x01a9->_x01d3 = NULL; _x01a9->_x01d0 = 0; _x01a9->_x01cf = 0; } void _x042e(_x0035 *_x01a9) { free(_x01a9->_x01b8); free(_x01a9->_x02dd); for (int _x0288 = 0; _x0288 < _x01a9->_x01d0; _x0288++) { _x04a4(_x01a9->_x01d3[_x0288]); } free(_x01a9->_x01d3); _x042f(_x01a9); } void _x0430(_x0035 *_x01a9, uint8_t _x018c, int _x02d9) { if (_x01a9->_x01d7 >= _x01a9->_x019c) { _x01a9->_x019c = _x01a9->_x019c < 8 ? 8 : _x01a9->_x019c * 2; _x01a9->_x01b8 = realloc(_x01a9->_x01b8, _x01a9->_x019c); _x01a9->_x02dd = realloc(_x01a9->_x02dd, _x01a9->_x019c * sizeof(int)); } _x01a9->_x01b8[_x01a9->_x01d7] = _x018c; _x01a9->_x02dd[_x01a9->_x01d7] = _x02d9; _x01a9->_x01d7++; } int _x042d(_x0035 *_x01a9, _x012a _x0425) { _x04a5(_x0425); if (_x01a9->_x01d0 >= _x01a9->_x01cf) { _x01a9->_x01cf = _x01a9->_x01cf < 8 ? 8 : _x01a9->_x01cf * 2; _x01a9->_x01d3 = realloc(_x01a9->_x01d3, _x01a9->_x01cf * sizeof(_x012a)); } _x01a9->_x01d3[_x01a9->_x01d0] = _x0425; return _x01a9->_x01d0++; } void _x0439(_x0035 *_x01a9, const char *_x0319) { printf("\x3d\x3d\x20\x25\x73\x20\x3d\x3d\x0a", _x0319); for (int _x0329 = 0; _x0329 < _x01a9->_x01d7;) { _x0329 = _x043a(_x01a9, _x0329); } } static int _x03bc(const char *_x0319, int _x0329) { printf("\x25\x73\x0a", _x0319); return _x0329 + 1; } static int _x01d2(const char *_x0319, _x0035 *_x01a9, int _x0329) { uint8_t _x01d1 = _x01a9->_x01b8[_x0329 + 1]; printf("\x25\x2d\x31\x36\x73\x20\x25\x34\x64\x20\x27", _x0319, _x01d1); _x04a7(_x01a9->_x01d3[_x01d1]); printf("\x27\x0a"); return _x0329 + 2; } static int _x018f(const char *_x0319, _x0035 *_x01a9, int _x0329) { uint8_t _x03c9 = _x01a9->_x01b8[_x0329 + 1]; printf("\x25\x2d\x31\x36\x73\x20\x25\x34\x64\x0a", _x0319, _x03c9); return _x0329 + 2; } static int _x02bd(const char *_x0319, int _x03bb, _x0035 *_x01a9, int _x0329) { uint16_t _x02bb = (uint16_t)(_x01a9->_x01b8[_x0329 + 1] << 8); _x02bb |= _x01a9->_x01b8[_x0329 + 2]; printf("\x25\x2d\x31\x36\x73\x20\x25\x34\x64\x20\x2d\x3e\x20\x25\x64\x0a", _x0319, _x0329, _x0329 + 3 + _x03bb * _x02bb); return _x0329 + 3; } static int _x026f(const char *_x0319, _x0035 *_x01a9, int _x0329) { uint8_t _x01d1 = _x01a9->_x01b8[_x0329 + 1]; uint8_t _x02a7 = _x01a9->_x01b8[_x0329 + 2]; printf("\x25\x2d\x31\x36\x73\x20\x25\x34\x64\x20\x27", _x0319, _x01d1); _x04a7(_x01a9->_x01d3[_x01d1]); printf("\x27\x20\x28\x63\x6f\x6e\x73\x74\x3a\x20\x25\x73\x29\x0a", _x02a7 ? "\x79\x65\x73" : "\x6e\x6f"); return _x0329 + 3; } int _x043a(_x0035 *_x01a9, int _x0329) { printf("\x25\x30\x34\x64\x20", _x0329); if (_x0329 > 0 && _x01a9->_x02dd[_x0329] == _x01a9->_x02dd[_x0329 - 1]) { printf("\x20\x20\x20\x7c\x20"); } else { printf("\x25\x34\x64\x20", _x01a9->_x02dd[_x0329]); } uint8_t _x029f = _x01a9->_x01b8[_x0329]; switch (_x029f) { case _x0061: return _x01d2("\x56\x53\x53\x5f\x4f\x50\x5f\x43\x4f\x4e\x53\x54\x41\x4e\x54", _x01a9, _x0329); case _x0062: { uint32_t _x01d1 = _x01a9->_x01b8[_x0329 + 1] | (_x01a9->_x01b8[_x0329 + 2] << 8) | (_x01a9->_x01b8[_x0329 + 3] << 16); printf("\x25\x2d\x31\x36\x73\x20\x25\x34\x64\x20\x27", "\x56\x53\x53\x5f\x4f\x50\x5f\x43\x4f\x4e\x53\x54\x41\x4e\x54\x5f\x4c\x4f\x4e\x47", _x01d1); _x04a7(_x01a9->_x01d3[_x01d1]); printf("\x27\x0a"); return _x0329 + 4; } case _x0065: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x45\x4d\x50\x54\x59", _x0329); case _x0089: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x54\x52\x55\x45", _x0329); case _x006a: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x46\x41\x4c\x53\x45", _x0329); case _x007c: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x50\x4f\x50", _x0329); case _x006e: return _x018f("\x56\x53\x53\x5f\x4f\x50\x5f\x47\x45\x54\x5f\x4c\x4f\x43\x41\x4c", _x01a9, _x0329); case _x0084: return _x018f("\x56\x53\x53\x5f\x4f\x50\x5f\x53\x45\x54\x5f\x4c\x4f\x43\x41\x4c", _x01a9, _x0329); case _x006c: return _x01d2("\x56\x53\x53\x5f\x4f\x50\x5f\x47\x45\x54\x5f\x47\x4c\x4f\x42\x41\x4c", _x01a9, _x0329); case _x0063: return _x026f("\x56\x53\x53\x5f\x4f\x50\x5f\x44\x45\x46\x49\x4e\x45\x5f\x47\x4c\x4f\x42\x41\x4c", _x01a9, _x0329); case _x0083: return _x01d2("\x56\x53\x53\x5f\x4f\x50\x5f\x53\x45\x54\x5f\x47\x4c\x4f\x42\x41\x4c", _x01a9, _x0329); case _x0071: return _x018f("\x56\x53\x53\x5f\x4f\x50\x5f\x47\x45\x54\x5f\x55\x50\x56\x41\x4c\x55\x45", _x01a9, _x0329); case _x0086: return _x018f("\x56\x53\x53\x5f\x4f\x50\x5f\x53\x45\x54\x5f\x55\x50\x56\x41\x4c\x55\x45", _x01a9, _x0329); case _x0055: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x41\x44\x44", _x0329); case _x0088: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x53\x55\x42", _x0329); case _x0078: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x4d\x55\x4c", _x0329); case _x0064: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x44\x49\x56", _x0329); case _x0077: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x4d\x4f\x44", _x0329); case _x007a: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x4e\x4f\x54", _x0329); case _x0079: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x4e\x45\x47\x41\x54\x45", _x0329); case _x0054: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x41\x42\x4f\x56\x45", _x0329); case _x005a: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x42\x45\x4c\x4f\x57", _x0329); case _x0058: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x41\x54\x5f\x4c\x45\x41\x53\x54", _x0329); case _x0059: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x41\x54\x5f\x4d\x4f\x53\x54", _x0329); case _x0080: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x53\x41\x4d\x45\x5f\x41\x53", _x0329); case _x007b: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x4e\x4f\x54\x5f\x53\x41\x4d\x45\x5f\x41\x53", _x0329); case _x0081: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x53\x41\x59", _x0329); case _x0074: return _x02bd("\x56\x53\x53\x5f\x4f\x50\x5f\x4a\x55\x4d\x50", 1, _x01a9, _x0329); case _x0075: return _x02bd("\x56\x53\x53\x5f\x4f\x50\x5f\x4a\x55\x4d\x50\x5f\x49\x46\x5f\x46\x41\x4c\x53\x45", 1, _x01a9, _x0329); case _x0076: return _x02bd("\x56\x53\x53\x5f\x4f\x50\x5f\x4c\x4f\x4f\x50", -1, _x01a9, _x0329); case _x005e: return _x018f("\x56\x53\x53\x5f\x4f\x50\x5f\x43\x41\x4c\x4c", _x01a9, _x0329); case _x0060: { _x0329++; uint8_t _x01d1 = _x01a9->_x01b8[_x0329++]; printf("\x25\x2d\x31\x36\x73\x20\x25\x34\x64\x20", "\x56\x53\x53\x5f\x4f\x50\x5f\x43\x4c\x4f\x53\x55\x52\x45", _x01d1); _x04a7(_x01a9->_x01d3[_x01d1]); printf("\x0a"); _x0090 *_x0261 = _x01a9->_x01d3[_x01d1]._x0141._x0265; for (int _x02b8 = 0; _x02b8 < _x0261->_x041b; _x02b8++) { int _x02ad = _x01a9->_x01b8[_x0329++]; int _x0290 = _x01a9->_x01b8[_x0329++]; printf("\x25\x30\x34\x64\x20\x20\x20\x20\x20\x20\x7c\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x25\x73\x20\x25\x64\x0a", _x0329 - 2, _x02ad ? "\x6c\x6f\x63\x61\x6c" : "\x75\x70\x76\x61\x6c\x75\x65", _x0290); } return _x0329; } case _x007f: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x52\x45\x54\x55\x52\x4e", _x0329); case _x008b: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x59\x49\x45\x4c\x44", _x0329); case _x005b: return _x018f("\x56\x53\x53\x5f\x4f\x50\x5f\x42\x55\x49\x4c\x44\x5f\x4c\x49\x53\x54", _x01a9, _x0329); case _x005c: return _x018f("\x56\x53\x53\x5f\x4f\x50\x5f\x42\x55\x49\x4c\x44\x5f\x4d\x41\x50", _x01a9, _x0329); case _x006d: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x47\x45\x54\x5f\x49\x54\x45\x4d", _x0329); case _x007d: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x50\x55\x54\x5f\x49\x54\x45\x4d", _x0329); case _x006b: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x47\x45\x54\x5f\x46\x49\x45\x4c\x44", _x0329); case _x0082: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x53\x45\x54\x5f\x46\x49\x45\x4c\x44", _x0329); case _x0087: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x53\x49\x5a\x45\x5f\x4f\x46", _x0329); case _x0069: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x45\x58\x49\x53\x54\x53", _x0329); case _x007e: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x52\x45\x41\x44\x5f\x46\x49\x4c\x45", _x0329); case _x008a: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x57\x52\x49\x54\x45\x5f\x46\x49\x4c\x45", _x0329); case _x0056: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x41\x44\x44\x5f\x46\x49\x4c\x45", _x0329); case _x0068: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x45\x52\x41\x53\x45\x5f\x46\x49\x4c\x45", _x0329); case _x0057: return _x02bd("\x56\x53\x53\x5f\x4f\x50\x5f\x41\x54\x54\x45\x4d\x50\x54", 1, _x01a9, _x0329); case _x0066: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x45\x4e\x44\x5f\x41\x54\x54\x45\x4d\x50\x54", _x0329); case _x0072: return _x01d2("\x56\x53\x53\x5f\x4f\x50\x5f\x47\x52\x41\x42", _x01a9, _x0329); case _x0073: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x48\x49\x5f\x48\x54\x4d\x56\x53\x53", _x0329); case _x005d: return _x03bc("\x56\x53\x53\x5f\x4f\x50\x5f\x42\x59\x45\x5f\x48\x54\x4d\x56\x53\x53", _x0329); case _x005f: return _x01d2("\x56\x53\x53\x5f\x4f\x50\x5f\x43\x4c\x41\x53\x53", _x01a9, _x0329); case _x0067: return _x01d2("\x56\x53\x53\x5f\x4f\x50\x5f\x45\x4e\x55\x4d", _x01a9, _x0329); case _x006f: return _x01d2("\x56\x53\x53\x5f\x4f\x50\x5f\x47\x45\x54\x5f\x4d\x45\x4d\x42\x45\x52", _x01a9, _x0329); case _x0085: return _x01d2("\x56\x53\x53\x5f\x4f\x50\x5f\x53\x45\x54\x5f\x4d\x45\x4d\x42\x45\x52", _x01a9, _x0329); case _x0070: return _x01d2("\x56\x53\x53\x5f\x4f\x50\x5f\x47\x45\x54\x5f\x50\x41\x52\x45\x4e\x54", _x01a9, _x0329); default: printf("\x55\x6e\x6b\x6e\x6f\x77\x6e\x20\x6f\x70\x63\x6f\x64\x65\x20\x25\x64\x0a", _x029f); return _x0329 + 1; } }
+
+void vss_chunk_init(VSS_Chunk *chunk) {
+    chunk->code = NULL;
+    chunk->lines = NULL;
+    chunk->count = 0;
+    chunk->capacity = 0;
+    chunk->constants = NULL;
+    chunk->const_count = 0;
+    chunk->const_capacity = 0;
+}
+
+void vss_chunk_free(VSS_Chunk *chunk) {
+    free(chunk->code);
+    free(chunk->lines);
+    for (int i = 0; i < chunk->const_count; i++) {
+        vss_value_release(chunk->constants[i]);
+    }
+    free(chunk->constants);
+    vss_chunk_init(chunk);
+}
+
+void vss_chunk_write(VSS_Chunk *chunk, uint8_t byte, int line) {
+    if (chunk->count >= chunk->capacity) {
+        chunk->capacity = chunk->capacity < 8 ? 8 : chunk->capacity * 2;
+        chunk->code = realloc(chunk->code, chunk->capacity);
+        chunk->lines = realloc(chunk->lines, chunk->capacity * sizeof(int));
+    }
+    chunk->code[chunk->count] = byte;
+    chunk->lines[chunk->count] = line;
+    chunk->count++;
+}
+
+int vss_chunk_add_constant(VSS_Chunk *chunk, VSS_Value value) {
+    // Retain the constant value
+    vss_value_retain(value);
+    
+    if (chunk->const_count >= chunk->const_capacity) {
+        chunk->const_capacity = chunk->const_capacity < 8 ? 8 : chunk->const_capacity * 2;
+        chunk->constants = realloc(chunk->constants, chunk->const_capacity * sizeof(VSS_Value));
+    }
+    chunk->constants[chunk->const_count] = value;
+    return chunk->const_count++;
+}
+
+void vss_disassemble_chunk(VSS_Chunk *chunk, const char *name) {
+    printf("== %s ==\n", name);
+    for (int offset = 0; offset < chunk->count;) {
+        offset = vss_disassemble_instruction(chunk, offset);
+    }
+}
+
+static int simple_instruction(const char *name, int offset) {
+    printf("%s\n", name);
+    return offset + 1;
+}
+
+static int constant_instruction(const char *name, VSS_Chunk *chunk, int offset) {
+    uint8_t constant = chunk->code[offset + 1];
+    printf("%-16s %4d '", name, constant);
+    vss_value_say(chunk->constants[constant]);
+    printf("'\n");
+    return offset + 2;
+}
+
+static int byte_instruction(const char *name, VSS_Chunk *chunk, int offset) {
+    uint8_t slot = chunk->code[offset + 1];
+    printf("%-16s %4d\n", name, slot);
+    return offset + 2;
+}
+
+static int jump_instruction(const char *name, int sign, VSS_Chunk *chunk, int offset) {
+    uint16_t jump = (uint16_t)(chunk->code[offset + 1] << 8);
+    jump |= chunk->code[offset + 2];
+    printf("%-16s %4d -> %d\n", name, offset, offset + 3 + sign * jump);
+    return offset + 3;
+}
+
+static int global_define_instruction(const char *name, VSS_Chunk *chunk, int offset) {
+    uint8_t constant = chunk->code[offset + 1];
+    uint8_t is_const = chunk->code[offset + 2];
+    printf("%-16s %4d '", name, constant);
+    vss_value_say(chunk->constants[constant]);
+    printf("' (const: %s)\n", is_const ? "yes" : "no");
+    return offset + 3;
+}
+
+int vss_disassemble_instruction(VSS_Chunk *chunk, int offset) {
+    printf("%04d ", offset);
+    if (offset > 0 && chunk->lines[offset] == chunk->lines[offset - 1]) {
+        printf("   | ");
+    } else {
+        printf("%4d ", chunk->lines[offset]);
+    }
+
+    uint8_t instruction = chunk->code[offset];
+    switch (instruction) {
+        case VSS_OP_CONSTANT:
+            return constant_instruction("VSS_OP_CONSTANT", chunk, offset);
+        case VSS_OP_CONSTANT_LONG: {
+            uint32_t constant = chunk->code[offset + 1] |
+                                (chunk->code[offset + 2] << 8) |
+                                (chunk->code[offset + 3] << 16);
+            printf("%-16s %4d '", "VSS_OP_CONSTANT_LONG", constant);
+            vss_value_say(chunk->constants[constant]);
+            printf("'\n");
+            return offset + 4;
+        }
+        case VSS_OP_EMPTY:
+            return simple_instruction("VSS_OP_EMPTY", offset);
+        case VSS_OP_TRUE:
+            return simple_instruction("VSS_OP_TRUE", offset);
+        case VSS_OP_FALSE:
+            return simple_instruction("VSS_OP_FALSE", offset);
+        case VSS_OP_POP:
+            return simple_instruction("VSS_OP_POP", offset);
+        case VSS_OP_GET_LOCAL:
+            return byte_instruction("VSS_OP_GET_LOCAL", chunk, offset);
+        case VSS_OP_SET_LOCAL:
+            return byte_instruction("VSS_OP_SET_LOCAL", chunk, offset);
+        case VSS_OP_GET_GLOBAL:
+            return constant_instruction("VSS_OP_GET_GLOBAL", chunk, offset);
+        case VSS_OP_DEFINE_GLOBAL:
+            return global_define_instruction("VSS_OP_DEFINE_GLOBAL", chunk, offset);
+        case VSS_OP_SET_GLOBAL:
+            return constant_instruction("VSS_OP_SET_GLOBAL", chunk, offset);
+        case VSS_OP_GET_UPVALUE:
+            return byte_instruction("VSS_OP_GET_UPVALUE", chunk, offset);
+        case VSS_OP_SET_UPVALUE:
+            return byte_instruction("VSS_OP_SET_UPVALUE", chunk, offset);
+        case VSS_OP_ADD:
+            return simple_instruction("VSS_OP_ADD", offset);
+        case VSS_OP_SUB:
+            return simple_instruction("VSS_OP_SUB", offset);
+        case VSS_OP_MUL:
+            return simple_instruction("VSS_OP_MUL", offset);
+        case VSS_OP_DIV:
+            return simple_instruction("VSS_OP_DIV", offset);
+        case VSS_OP_MOD:
+            return simple_instruction("VSS_OP_MOD", offset);
+        case VSS_OP_NOT:
+            return simple_instruction("VSS_OP_NOT", offset);
+        case VSS_OP_NEGATE:
+            return simple_instruction("VSS_OP_NEGATE", offset);
+        case VSS_OP_ABOVE:
+            return simple_instruction("VSS_OP_ABOVE", offset);
+        case VSS_OP_BELOW:
+            return simple_instruction("VSS_OP_BELOW", offset);
+        case VSS_OP_AT_LEAST:
+            return simple_instruction("VSS_OP_AT_LEAST", offset);
+        case VSS_OP_AT_MOST:
+            return simple_instruction("VSS_OP_AT_MOST", offset);
+        case VSS_OP_SAME_AS:
+            return simple_instruction("VSS_OP_SAME_AS", offset);
+        case VSS_OP_NOT_SAME_AS:
+            return simple_instruction("VSS_OP_NOT_SAME_AS", offset);
+        case VSS_OP_SAY:
+            return simple_instruction("VSS_OP_SAY", offset);
+        case VSS_OP_JUMP:
+            return jump_instruction("VSS_OP_JUMP", 1, chunk, offset);
+        case VSS_OP_JUMP_IF_FALSE:
+            return jump_instruction("VSS_OP_JUMP_IF_FALSE", 1, chunk, offset);
+        case VSS_OP_LOOP:
+            return jump_instruction("VSS_OP_LOOP", -1, chunk, offset);
+        case VSS_OP_CALL:
+            return byte_instruction("VSS_OP_CALL", chunk, offset);
+        case VSS_OP_CLOSURE: {
+            offset++;
+            uint8_t constant = chunk->code[offset++];
+            printf("%-16s %4d ", "VSS_OP_CLOSURE", constant);
+            vss_value_say(chunk->constants[constant]);
+            printf("\n");
+            
+            VSS_ObjFunction *func = chunk->constants[constant].as.function;
+            for (int j = 0; j < func->upvalue_count; j++) {
+                int is_local = chunk->code[offset++];
+                int index = chunk->code[offset++];
+                printf("%04d      |                     %s %d\n",
+                       offset - 2, is_local ? "local" : "upvalue", index);
+            }
+            return offset;
+        }
+        case VSS_OP_RETURN:
+            return simple_instruction("VSS_OP_RETURN", offset);
+        case VSS_OP_YIELD:
+            return simple_instruction("VSS_OP_YIELD", offset);
+        case VSS_OP_BUILD_LIST:
+            return byte_instruction("VSS_OP_BUILD_LIST", chunk, offset);
+        case VSS_OP_BUILD_MAP:
+            return byte_instruction("VSS_OP_BUILD_MAP", chunk, offset);
+        case VSS_OP_GET_ITEM:
+            return simple_instruction("VSS_OP_GET_ITEM", offset);
+        case VSS_OP_SET_ITEM:
+            return simple_instruction("VSS_OP_SET_ITEM", offset);
+        case VSS_OP_PUT_ITEM:
+            return simple_instruction("VSS_OP_PUT_ITEM", offset);
+        case VSS_OP_GET_FIELD:
+            return simple_instruction("VSS_OP_GET_FIELD", offset);
+        case VSS_OP_SET_FIELD:
+            return simple_instruction("VSS_OP_SET_FIELD", offset);
+        case VSS_OP_SIZE_OF:
+            return simple_instruction("VSS_OP_SIZE_OF", offset);
+        case VSS_OP_EXISTS:
+            return simple_instruction("VSS_OP_EXISTS", offset);
+        case VSS_OP_READ_FILE:
+            return simple_instruction("VSS_OP_READ_FILE", offset);
+        case VSS_OP_WRITE_FILE:
+            return simple_instruction("VSS_OP_WRITE_FILE", offset);
+        case VSS_OP_ADD_FILE:
+            return simple_instruction("VSS_OP_ADD_FILE", offset);
+        case VSS_OP_ERASE_FILE:
+            return simple_instruction("VSS_OP_ERASE_FILE", offset);
+        case VSS_OP_ATTEMPT:
+            return jump_instruction("VSS_OP_ATTEMPT", 1, chunk, offset);
+        case VSS_OP_END_ATTEMPT:
+            return simple_instruction("VSS_OP_END_ATTEMPT", offset);
+        case VSS_OP_GRAB:
+            return constant_instruction("VSS_OP_GRAB", chunk, offset);
+        case VSS_OP_HI_HTMVSS:
+            return simple_instruction("VSS_OP_HI_HTMVSS", offset);
+        case VSS_OP_BYE_HTMVSS:
+            return simple_instruction("VSS_OP_BYE_HTMVSS", offset);
+        case VSS_OP_CLASS:
+            return constant_instruction("VSS_OP_CLASS", chunk, offset);
+        case VSS_OP_ENUM:
+            return constant_instruction("VSS_OP_ENUM", chunk, offset);
+        case VSS_OP_GET_MEMBER:
+            return constant_instruction("VSS_OP_GET_MEMBER", chunk, offset);
+        case VSS_OP_SET_MEMBER:
+            return constant_instruction("VSS_OP_SET_MEMBER", chunk, offset);
+        case VSS_OP_GET_PARENT:
+            return constant_instruction("VSS_OP_GET_PARENT", chunk, offset);
+        case VSS_OP_ASK:
+            return simple_instruction("VSS_OP_ASK", offset);
+        case VSS_OP_START_TASK:
+            return byte_instruction("VSS_OP_START_TASK", chunk, offset);
+        case VSS_OP_AWAIT_TASK:
+            return byte_instruction("VSS_OP_AWAIT_TASK", chunk, offset);
+        case VSS_OP_PARALLEL_EACH:
+            return simple_instruction("VSS_OP_PARALLEL_EACH", offset);
+        case VSS_OP_LOCK_MUTEX:
+            return simple_instruction("VSS_OP_LOCK_MUTEX", offset);
+        case VSS_OP_UNLOCK_MUTEX:
+            return simple_instruction("VSS_OP_UNLOCK_MUTEX", offset);
+        default:
+            printf("Unknown opcode %d\n", instruction);
+            return offset + 1;
+    }
+}

@@ -1,0 +1,28 @@
+note VSS 3.1 Concurrency - Thread-Safe Concurrent Queue Operations
+
+grab collections
+
+make shared_queue becomes collections.ConcurrentQueue()
+
+task queue_pusher needs queue_ref, prefix
+    repeat i through 1 to 5
+        queue_ref.push(prefix + "_" + i)
+    finish
+    send "Pusher Done"
+finish
+
+say "Spawning 2 queue pushers..."
+make p1 becomes start queue_pusher(shared_queue, "A")
+make p2 becomes start queue_pusher(shared_queue, "B")
+
+await p1
+await p2
+
+say "Concurrent Queue Size: " + shared_queue.count()
+
+repeat item_counter through 1 to 10
+    make item_val becomes shared_queue.pop()
+    say "Popped item: " + item_val
+finish
+
+say "Concurrent Queue Test Completed Successfully!"

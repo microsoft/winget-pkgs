@@ -7,8 +7,41 @@
 #include "object.h"
 #include "env.h"
 
-#define _x0096 256
-#define _x004e 64
-#define _x0110 16
-typedef struct { _x008d *_x01b3; uint8_t *_x02a3; _x012a *_x03ca; } _x0033; typedef struct { int _x01ee; uint8_t *_x027b; } _x0113; typedef struct _x0124 { _x0033 _x025e[_x004e]; int _x025d; _x012a _x03d8[_x0096]; _x012a *_x03d9; _x0113 _x040d[_x0110]; int _x040c; _x0114 *_x032c; _x0046 *_x0272; jmp_buf _x02bc; bool _x04b6; struct _x0124 *_x0369; } _x0124; void _x04ab(_x0124 *_x042a, _x0046 *_x0270); void _x04aa(_x0124 *_x042a); bool _x04ac(_x0090 *_x0261, _x0046 *_x0270);
+#define VSS_STACK_MAX 256
+#define VSS_FRAMES_MAX 64
+#define VSS_TRAPS_MAX 16
+
+typedef struct {
+    VSS_ObjClosure *closure;
+    uint8_t *ip;
+    VSS_Value *slots;
+} VSS_CallFrame;
+
+typedef struct {
+    int depth;
+    uint8_t *handler_ip;
+} VSS_TrapFrame;
+
+typedef struct VSS_VM {
+    VSS_CallFrame frames[VSS_FRAMES_MAX];
+    int frame_count;
+    
+    VSS_Value stack[VSS_STACK_MAX];
+    VSS_Value *stack_top;
+    
+    VSS_TrapFrame traps[VSS_TRAPS_MAX];
+    int trap_count;
+    
+    VSS_Upvalue *open_upvalues;
+    VSS_Env *globals;
+    jmp_buf jump_buffer;
+    bool yielded;
+    struct VSS_VM *prev_vm_instance;
+} VSS_VM;
+
+void vss_vm_init(VSS_VM *vm, VSS_Env *global_env);
+void vss_vm_free(VSS_VM *vm);
+bool vss_vm_run(VSS_ObjFunction *func, VSS_Env *global_env);
+bool vss_vm_run_task(VSS_ObjFunction *func, VSS_Value *args, size_t arg_count, VSS_Env *global_env, VSS_Value *out_result);
+
 #endif

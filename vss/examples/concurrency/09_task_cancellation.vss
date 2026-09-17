@@ -1,0 +1,24 @@
+note VSS 3.1 Concurrency - Task Cancellation
+
+task long_running_task needs id
+    say "Task " + id + " starting work..."
+    concurrency_sleep(2000)
+    say "Task " + id + " finished work!"
+    send "Done"
+finish
+
+say "Spawning long running task..."
+make handle becomes start long_running_task(42)
+
+concurrency_sleep(100)
+say "Cancelling long running task..."
+task_cancel(handle)
+
+attempt
+    make res becomes await handle timeout 500
+    say "Task Status Result: " + res
+rescue err
+    say "Caught expected cancellation exception: " + err
+finish
+
+say "Task Cancellation Test Completed Successfully!"

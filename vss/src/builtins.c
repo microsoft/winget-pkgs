@@ -2440,6 +2440,203 @@ static VSS_Value builtin_task_cancel(size_t arg_count, VSS_Value *args, bool *ou
     return vss_value_new_empty();
 }
 
+// Helper macro for list append
+#define VSS_LIST_PUSH(lst_val, item_val) do { \
+    VSS_ValList *__l = (lst_val).as.list; \
+    if (__l->count >= __l->capacity) { \
+        __l->capacity = __l->capacity == 0 ? 8 : __l->capacity * 2; \
+        __l->items = realloc(__l->items, sizeof(VSS_Value) * __l->capacity); \
+    } \
+    __l->items[__l->count++] = (item_val); \
+} while(0)
+
+static VSS_Value builtin_matrix_create(size_t arg_count, VSS_Value *args, bool *out_error, char **out_error_msg) {
+    if (arg_count < 2 || args[0].type != VSS_VAL_NUMBER || args[1].type != VSS_VAL_NUMBER) {
+        *out_error = true;
+        *out_error_msg = safe_strdup("matrix_create expects rows and columns numbers.");
+        return vss_value_new_empty();
+    }
+    int rows = (int)args[0].as.number;
+    int cols = (int)args[1].as.number;
+    if (rows <= 0) rows = 1;
+    if (cols <= 0) cols = 1;
+    double fill = (arg_count >= 3 && args[2].type == VSS_VAL_NUMBER) ? args[2].as.number : 0.0;
+
+    VSS_Value outer = vss_value_new_list();
+    for (int r = 0; r < rows; r++) {
+        VSS_Value row = vss_value_new_list();
+        for (int c = 0; c < cols; c++) {
+            VSS_Value num = vss_value_new_number(fill);
+            VSS_LIST_PUSH(row, num);
+        }
+        VSS_LIST_PUSH(outer, row);
+    }
+    return outer;
+}
+
+static VSS_Value builtin_matrix_multiply(size_t arg_count, VSS_Value *args, bool *out_error, char **out_error_msg) {
+    if (arg_count < 2 || args[0].type != VSS_VAL_LIST || args[1].type != VSS_VAL_LIST) {
+        *out_error = true;
+        *out_error_msg = safe_strdup("matrix_multiply expects two 2D matrix lists.");
+        return vss_value_new_empty();
+    }
+    VSS_ValList *m1 = args[0].as.list;
+    VSS_ValList *m2 = args[1].as.list;
+    int r1 = (int)m1->count;
+    if (r1 == 0 || m1->items[0].type != VSS_VAL_LIST) return vss_value_new_list();
+    int c1 = (int)m1->items[0].as.list->count;
+    int r2 = (int)m2->count;
+    if (r2 == 0 || m2->items[0].type != VSS_VAL_LIST) return vss_value_new_list();
+    int c2 = (int)m2->items[0].as.list->count;
+
+    if (c1 != r2) {
+        *out_error = true;
+        *out_error_msg = safe_strdup("matrix_multiply: inner dimensions must match.");
+        return vss_value_new_empty();
+    }
+
+    VSS_Value res = vss_value_new_list();
+    for (int i = 0; i < r1; i++) {
+        VSS_Value row = vss_value_new_list();
+        for (int j = 0; j < c2; j++) {
+            double sum = 0.0;
+            for (int k = 0; k < c1; k++) {
+                double val1 = m1->items[i].as.list->items[k].as.number;
+                double val2 = m2->items[k].as.list->items[j].as.number;
+                sum += val1 * val2;
+            }
+            VSS_Value num = vss_value_new_number(sum);
+            VSS_LIST_PUSH(row, num);
+        }
+        VSS_LIST_PUSH(res, row);
+    }
+    return res;
+}
+
+static VSS_Value builtin_matrix_add(size_t arg_count, VSS_Value *args, bool *out_error, char **out_error_msg) {
+    if (arg_count < 2 || args[0].type != VSS_VAL_LIST || args[1].type != VSS_VAL_LIST) {
+        *out_error = true;
+        *out_error_msg = safe_strdup("matrix_add expects two 2D matrix lists.");
+        return vss_value_new_empty();
+    }
+    VSS_ValList *m1 = args[0].as.list;
+    VSS_ValList *m2 = args[1].as.list;
+    int r = (int)m1->count;
+    if (r == 0 || m1->items[0].type != VSS_VAL_LIST) return vss_value_new_list();
+    int c = (int)m1->items[0].as.list->count;
+
+    VSS_Value res = vss_value_new_list();
+    for (int i = 0; i < r; i++) {
+        VSS_Value row = vss_value_new_list();
+        for (int j = 0; j < c; j++) {
+            double v1 = (i < (int)m1->count && j < (int)m1->items[i].as.list->count) ? m1->items[i].as.list->items[j].as.number : 0.0;
+            double v2 = (i < (int)m2->count && j < (int)m2->items[i].as.list->count) ? m2->items[i].as.list->items[j].as.number : 0.0;
+            VSS_Value num = vss_value_new_number(v1 + v2);
+            VSS_LIST_PUSH(row, num);
+        }
+        VSS_LIST_PUSH(res, row);
+    }
+    return res;
+}
+
+static VSS_Value builtin_matrix_transpose(size_t arg_count, VSS_Value *args, bool *out_error, char **out_error_msg) {
+    if (arg_count < 1 || args[0].type != VSS_VAL_LIST) {
+        *out_error = true;
+        *out_error_msg = safe_strdup("matrix_transpose expects 2D matrix list.");
+        return vss_value_new_empty();
+    }
+    VSS_ValList *m = args[0].as.list;
+    int r = (int)m->count;
+    if (r == 0 || m->items[0].type != VSS_VAL_LIST) return vss_value_new_list();
+    int c = (int)m->items[0].as.list->count;
+
+    VSS_Value res = vss_value_new_list();
+    for (int j = 0; j < c; j++) {
+        VSS_Value row = vss_value_new_list();
+        for (int i = 0; i < r; i++) {
+            VSS_Value num = vss_value_new_number(m->items[i].as.list->items[j].as.number);
+            VSS_LIST_PUSH(row, num);
+        }
+        VSS_LIST_PUSH(res, row);
+    }
+    return res;
+}
+
+static VSS_Value builtin_matrix_dot(size_t arg_count, VSS_Value *args, bool *out_error, char **out_error_msg) {
+    if (arg_count < 2 || args[0].type != VSS_VAL_LIST || args[1].type != VSS_VAL_LIST) {
+        *out_error = true;
+        *out_error_msg = safe_strdup("matrix_dot expects two vector lists.");
+        return vss_value_new_number(0);
+    }
+    VSS_ValList *v1 = args[0].as.list;
+    VSS_ValList *v2 = args[1].as.list;
+    size_t count = v1->count < v2->count ? v1->count : v2->count;
+    double sum = 0.0;
+    for (size_t i = 0; i < count; i++) {
+        double a = (v1->items[i].type == VSS_VAL_NUMBER) ? v1->items[i].as.number : 0.0;
+        double b = (v2->items[i].type == VSS_VAL_NUMBER) ? v2->items[i].as.number : 0.0;
+        sum += a * b;
+    }
+    return vss_value_new_number(sum);
+}
+
+static VSS_Value builtin_matrix_scale(size_t arg_count, VSS_Value *args, bool *out_error, char **out_error_msg) {
+    if (arg_count < 2 || args[0].type != VSS_VAL_LIST || args[1].type != VSS_VAL_NUMBER) {
+        *out_error = true;
+        *out_error_msg = safe_strdup("matrix_scale expects 2D matrix list and scalar number.");
+        return vss_value_new_empty();
+    }
+    VSS_ValList *m = args[0].as.list;
+    double factor = args[1].as.number;
+    int r = (int)m->count;
+    if (r == 0 || m->items[0].type != VSS_VAL_LIST) return vss_value_new_list();
+    int c = (int)m->items[0].as.list->count;
+
+    VSS_Value res = vss_value_new_list();
+    for (int i = 0; i < r; i++) {
+        VSS_Value row = vss_value_new_list();
+        for (int j = 0; j < c; j++) {
+            VSS_Value num = vss_value_new_number(m->items[i].as.list->items[j].as.number * factor);
+            VSS_LIST_PUSH(row, num);
+        }
+        VSS_LIST_PUSH(res, row);
+    }
+    return res;
+}
+
+static VSS_Value builtin_ffi_open(size_t arg_count, VSS_Value *args, bool *out_error, char **out_error_msg) {
+    if (arg_count < 1 || args[0].type != VSS_VAL_STRING) {
+        *out_error = true;
+        *out_error_msg = safe_strdup("ffi_open expects dynamic library path string.");
+        return vss_value_new_number(0);
+    }
+    void *handle = vss_dl_open(args[0].as.string->chars);
+    return vss_value_new_number((double)(uintptr_t)handle);
+}
+
+static VSS_Value builtin_ffi_call(size_t arg_count, VSS_Value *args, bool *out_error, char **out_error_msg) {
+    if (arg_count < 2 || args[0].type != VSS_VAL_NUMBER || args[1].type != VSS_VAL_STRING) {
+        *out_error = true;
+        *out_error_msg = safe_strdup("ffi_call expects handle number and symbol string.");
+        return vss_value_new_empty();
+    }
+    void *handle = (void *)(uintptr_t)(size_t)args[0].as.number;
+    const char *sym = args[1].as.string->chars;
+    void *fn = vss_dl_sym(handle, sym);
+    if (!fn) {
+        return vss_value_new_bool(false);
+    }
+    return vss_value_new_bool(true);
+}
+
+static VSS_Value builtin_ffi_close(size_t arg_count, VSS_Value *args, bool *out_error, char **out_error_msg) {
+    if (arg_count >= 1 && args[0].type == VSS_VAL_NUMBER) {
+        void *handle = (void *)(uintptr_t)(size_t)args[0].as.number;
+        vss_dl_close(handle);
+    }
+    return vss_value_new_empty();
+}
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // REGISTRATION
@@ -2505,6 +2702,19 @@ void vss_register_builtins(VSS_Env *env) {
     vss_env_define(env, "__math_max", vss_value_new_native(builtin_math_max));
     vss_env_define(env, "__math_sum", vss_value_new_native(builtin_math_sum));
     vss_env_define(env, "__math_round", vss_value_new_native(builtin_math_round));
+
+    // Matrix Operations
+    vss_env_define(env, "__matrix_create", vss_value_new_native(builtin_matrix_create));
+    vss_env_define(env, "__matrix_multiply", vss_value_new_native(builtin_matrix_multiply));
+    vss_env_define(env, "__matrix_add", vss_value_new_native(builtin_matrix_add));
+    vss_env_define(env, "__matrix_transpose", vss_value_new_native(builtin_matrix_transpose));
+    vss_env_define(env, "__matrix_dot", vss_value_new_native(builtin_matrix_dot));
+    vss_env_define(env, "__matrix_scale", vss_value_new_native(builtin_matrix_scale));
+
+    // FFI Dynamic Library Invocation
+    vss_env_define(env, "__ffi_open", vss_value_new_native(builtin_ffi_open));
+    vss_env_define(env, "__ffi_call", vss_value_new_native(builtin_ffi_call));
+    vss_env_define(env, "__ffi_close", vss_value_new_native(builtin_ffi_close));
 
     // String
     vss_env_define(env, "__string_length", vss_value_new_native(builtin_string_length));
@@ -3115,6 +3325,46 @@ void vss_register_builtins(VSS_Env *env) {
         "            say \"  [PASS] \" + message\n"
         "        otherwise\n"
         "            say \"  [FAIL] \" + message + \" (Expected \" + expected + \", got \" + actual + \")\"\n"
+        "        finish\n"
+        "    finish\n"
+        "\n"
+        "    task assert_not_equal needs actual, expected, message\n"
+        "        when actual not_same_as expected\n"
+        "            say \"  [PASS] \" + message\n"
+        "        otherwise\n"
+        "            say \"  [FAIL] \" + message + \" (Expected value to not equal \" + expected + \")\"\n"
+        "        finish\n"
+        "    finish\n"
+        "\n"
+        "    task assert_true needs condition, message\n"
+        "        when condition same_as yes\n"
+        "            say \"  [PASS] \" + message\n"
+        "        otherwise\n"
+        "            say \"  [FAIL] \" + message + \" (Expected yes, got \" + condition + \")\"\n"
+        "        finish\n"
+        "    finish\n"
+        "\n"
+        "    task assert_false needs condition, message\n"
+        "        when condition same_as no\n"
+        "            say \"  [PASS] \" + message\n"
+        "        otherwise\n"
+        "            say \"  [FAIL] \" + message + \" (Expected no, got \" + condition + \")\"\n"
+        "        finish\n"
+        "    finish\n"
+        "\n"
+        "    task assert_greater needs a, b, message\n"
+        "        when a above b\n"
+        "            say \"  [PASS] \" + message\n"
+        "        otherwise\n"
+        "            say \"  [FAIL] \" + message + \" (Expected \" + a + \" to be greater than \" + b + \")\"\n"
+        "        finish\n"
+        "    finish\n"
+        "\n"
+        "    task assert_less needs a, b, message\n"
+        "        when a below b\n"
+        "            say \"  [PASS] \" + message\n"
+        "        otherwise\n"
+        "            say \"  [FAIL] \" + message + \" (Expected \" + a + \" to be less than \" + b + \")\"\n"
         "        finish\n"
         "    finish\n"
         "\n"

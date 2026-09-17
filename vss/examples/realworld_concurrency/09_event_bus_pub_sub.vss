@@ -1,0 +1,22 @@
+note VSS 3.1 Real-World Concurrency - Event Bus Publish-Subscribe Architecture
+
+make event_bus_chan becomes channel_create(20)
+
+task subscriber_service needs service_name, bus_channel
+    repeat idx through 1 to 3
+        make event_msg becomes channel_recv(bus_channel)
+        say "[" + service_name + "] Received Event: " + event_msg
+    finish
+    send service_name + " subscriber completed"
+finish
+
+say "Starting Event Bus Pub/Sub Architecture..."
+make sub_task1 becomes start subscriber_service("LoggerService", event_bus_chan)
+
+channel_send(event_bus_chan, "USER_LOGGED_IN")
+channel_send(event_bus_chan, "ORDER_CREATED")
+channel_send(event_bus_chan, "PAYMENT_RECEIVED")
+
+await sub_task1
+
+say "Event Bus Pub/Sub Architecture Completed Successfully!"

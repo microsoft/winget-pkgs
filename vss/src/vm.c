@@ -1298,9 +1298,12 @@ bool vss_vm_run(VSS_ObjFunction *func, VSS_Env *global_env) {
                             mm->count++;
                         }
                     }
-                    vss_env_define(vm.globals, module_name, mod_map);
+                    if (mm->count > 0) {
+                        vss_env_define(vm.globals, module_name, mod_map);
+                        vss_value_release(mod_map);
+                        break;
+                    }
                     vss_value_release(mod_map);
-                    break;
                 }
                 
                 CachedModule *cached = get_cached_module(module_name);
@@ -1411,9 +1414,14 @@ bool vss_vm_run(VSS_ObjFunction *func, VSS_Env *global_env) {
                 
                 vss_env_define(vm.globals, module_name, exports);
                 
-                VSS_ValMap *m = exports.as.map;
-                for (size_t i = 0; i < m->count; i++) {
-                    vss_env_define(vm.globals, m->entries[i].key, m->entries[i].value);
+                if (exports.type == VSS_VAL_MAP) {
+                    VSS_ValMap *m = exports.as.map;
+                    for (size_t i = 0; i < m->count; i++) {
+                        vss_env_define(vm.globals, m->entries[i].key, m->entries[i].value);
+                        char mangled[256];
+                        snprintf(mangled, sizeof(mangled), "%s_%s", module_name, m->entries[i].key);
+                        vss_env_define(vm.globals, mangled, m->entries[i].value);
+                    }
                 }
                 
                 vss_value_release(exports);

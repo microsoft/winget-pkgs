@@ -1,0 +1,31 @@
+note VSS 3.1 Real-World Concurrency - Real-time Metrics Dashboard Collector
+
+grab collections
+
+make metrics_store becomes collections.ConcurrentMap()
+
+task metric_collector needs metric_name, initial_val, store_ref
+    repeat tick through 1 to 3
+        make current_val becomes initial_val + (tick * 5)
+        store_ref.insert(metric_name, current_val)
+        say "Metric [" + metric_name + "] updated -> " + current_val
+        concurrency_sleep(10)
+    finish
+    send metric_name + " collector finished"
+finish
+
+say "Launching Real-Time Metrics Collectors..."
+make m1 becomes start metric_collector("cpu_usage_pct", 20, metrics_store)
+make m2 becomes start metric_collector("memory_used_mb", 1024, metrics_store)
+make m3 becomes start metric_collector("requests_per_sec", 450, metrics_store)
+
+await m1
+await m2
+await m3
+
+say "Dashboard Metrics Collected Count: " + metrics_store.count()
+say "Latest CPU Usage: " + metrics_store.get("cpu_usage_pct") + "%"
+say "Latest Memory Used: " + metrics_store.get("memory_used_mb") + " MB"
+say "Latest Request Rate: " + metrics_store.get("requests_per_sec") + " req/sec"
+
+say "Real-Time Metrics Dashboard Collector Completed Successfully!"

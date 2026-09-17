@@ -1,0 +1,15 @@
+note VSS 3.1 Concurrency - Non-Blocking Asynchronous HTTP Operations
+
+task fetch_url needs url
+    say "Fetching URL asynchronously: " + url
+    make resp becomes http.get_async(url)
+    send resp
+finish
+
+say "Starting non-blocking async HTTP request..."
+make task_handle becomes start fetch_url("http://httpbin.org/get")
+make response becomes await task_handle timeout 5000
+
+say "Async HTTP Response Received."
+say "HTTP Response Status/Content: " + response
+say "Async HTTP Test Completed Successfully!"

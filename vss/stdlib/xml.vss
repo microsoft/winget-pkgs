@@ -1,0 +1,24 @@
+note VSS XML Standard Library
+task parse_simple needs xml_str
+    note Simple key-value XML parser
+    make result becomes map []
+    make lines becomes __string_split(xml_str, "\n")
+    repeat each line in lines
+        make trimmed becomes __string_trim(line)
+        when __string_find(trimmed, "<") same_as 0
+            make closing becomes __string_find(trimmed, ">")
+            when closing above 0
+                make tag becomes __string_substring(trimmed, 1, closing - 1)
+                make closing_tag becomes "</" + tag + ">"
+                make end_idx becomes __string_find(trimmed, closing_tag)
+                when end_idx above 0
+                    make val_start becomes closing + 1
+                    make val_len becomes end_idx - val_start
+                    make val becomes __string_substring(trimmed, val_start, val_len)
+                    put val into result[tag]
+                finish
+            finish
+        finish
+    finish
+    send result
+finish

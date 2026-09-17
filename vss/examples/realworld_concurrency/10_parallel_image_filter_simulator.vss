@@ -1,0 +1,29 @@
+note VSS 3.1 Real-World Concurrency - Parallel Image Filter Processing Simulator
+
+grab collections
+
+make processed_chunks becomes collections.ConcurrentMap()
+
+task apply_filter_chunk needs chunk_id, pixel_count, filter_type, map_ref
+    say "Applying " + filter_type + " filter to image chunk " + chunk_id + " (" + pixel_count + " pixels)..."
+    concurrency_sleep(10)
+    make chunk_key becomes "chunk_" + chunk_id
+    make filter_val becomes filter_type + "_APPLIED"
+    map_ref.insert(chunk_key, filter_val)
+    send "Chunk " + chunk_id + " complete"
+finish
+
+say "Starting Parallel Image Filter Processing across 4 tile regions..."
+
+make p1 becomes start apply_filter_chunk("1", 250000, "GRAYSCALE", processed_chunks)
+make p2 becomes start apply_filter_chunk("2", 250000, "GRAYSCALE", processed_chunks)
+make p3 becomes start apply_filter_chunk("3", 250000, "GRAYSCALE", processed_chunks)
+make p4 becomes start apply_filter_chunk("4", 250000, "GRAYSCALE", processed_chunks)
+
+await p1
+await p2
+await p3
+await p4
+
+say "Processed Image Chunks: " + processed_chunks.count()
+say "Parallel Image Filter Processing Completed Successfully!"

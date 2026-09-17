@@ -1056,6 +1056,9 @@ static VSS_FlowResult exec_stmt(VSS_Stmt *stmt, VSS_Env *env) {
                 VSS_ValMap *em = exports.as.map;
                 for (size_t i = 0; i < em->count; i++) {
                     vss_env_define(env, em->entries[i].key, em->entries[i].value);
+                    char mangled[256];
+                    snprintf(mangled, sizeof(mangled), "%s_%s", stmt->as.grab.module_name, em->entries[i].key);
+                    vss_env_define(env, mangled, em->entries[i].value);
                 }
             }
             

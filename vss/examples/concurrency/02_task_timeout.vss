@@ -1,0 +1,23 @@
+note VSS 3.1 Concurrency - Task Await with Timeout
+
+task slow_computation needs delay_ms
+    say "Task started, sleeping for " + delay_ms + " ms..."
+    concurrency_sleep(delay_ms)
+    send "Task completed successfully"
+finish
+
+say "Test 1: Awaiting task with sufficient timeout (2000 ms timeout for 500 ms task)..."
+make handle1 becomes start slow_computation(500)
+make result1 becomes await handle1 timeout 2000
+say "Result 1: " + result1
+
+say "\nTest 2: Awaiting task with insufficient timeout (100 ms timeout for 1000 ms task)..."
+make handle2 becomes start slow_computation(1000)
+attempt
+    make result2 becomes await handle2 timeout 100
+    say "Result 2: " + result2
+rescue err
+    say "Caught expected timeout exception: " + err
+finish
+
+say "\nTask Timeout Test Completed Successfully!"

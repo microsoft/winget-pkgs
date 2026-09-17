@@ -2,4 +2,150 @@
 #include <string.h>
 
 #include "env.h"
-static char *_x03a2(const char *_x039e) { if (!_x039e) return NULL; char *dup = malloc(strlen(_x039e) + 1); if (dup) { strcpy(dup, _x039e); } return dup; } _x0046 *_x0440(_x0046 *_x0349) { _x0046 *_x021d = malloc(sizeof(_x0046)); if (_x021d) { _x021d->_x037e = 1; _x021d->_x02b7 = NULL; _x021d->_x01d7 = 0; _x021d->_x019c = 0; _x021d->_x0349 = _x0349; if (_x0349) { _x0442(_x0349); } } return _x021d; } void _x0442(_x0046 *_x021d) { if (_x021d) { _x021d->_x037e++; } } void _x0441(_x0046 *_x021d) { if (!_x021d) return; _x021d->_x037e--; if (_x021d->_x037e == 0) { for (size_t _x0288 = 0; _x0288 < _x021d->_x01d7; _x0288++) { free(_x021d->_x02b7[_x0288]._x0319); _x04a4(_x021d->_x02b7[_x0288]._x0425); } free(_x021d->_x02b7); _x0046 *_x0349 = _x021d->_x0349; free(_x021d); if (_x0349) { _x0441(_x0349); } } } bool _x043c(_x0046 *_x021d, const char *_x0319, _x012a _x0425) { if (_x043e(_x021d, _x0319)) { return false; } if (_x021d->_x01d7 >= _x021d->_x019c) { _x021d->_x019c = _x021d->_x019c == 0 ? 8 : _x021d->_x019c * 2; _x021d->_x02b7 = realloc(_x021d->_x02b7, sizeof(_x0031) * _x021d->_x019c); } _x0031 *_x0145 = &_x021d->_x02b7[_x021d->_x01d7++]; _x0145->_x0319 = _x03a2(_x0319); _x0145->_x0425 = _x0425; _x0145->_x02a8 = false; _x04a5(_x0425); return true; } bool _x043d(_x0046 *_x021d, const char *_x0319, _x012a _x0425) { if (_x043e(_x021d, _x0319)) { return false; } if (_x021d->_x01d7 >= _x021d->_x019c) { _x021d->_x019c = _x021d->_x019c == 0 ? 8 : _x021d->_x019c * 2; _x021d->_x02b7 = realloc(_x021d->_x02b7, sizeof(_x0031) * _x021d->_x019c); } _x0031 *_x0145 = &_x021d->_x02b7[_x021d->_x01d7++]; _x0145->_x0319 = _x03a2(_x0319); _x0145->_x0425 = _x0425; _x0145->_x02a8 = true; _x04a5(_x0425); return true; } bool _x043b(_x0046 *_x021d, const char *_x0319, _x012a _x0425) { _x0046 *_x01e0 = _x021d; while (_x01e0) { for (size_t _x0288 = 0; _x0288 < _x01e0->_x01d7; _x0288++) { if (strcmp(_x01e0->_x02b7[_x0288]._x0319, _x0319) == 0) { if (_x01e0->_x02b7[_x0288]._x02a8) { return false; } _x04a4(_x01e0->_x02b7[_x0288]._x0425); _x01e0->_x02b7[_x0288]._x0425 = _x0425; _x04a5(_x0425); return true; } } _x01e0 = _x01e0->_x0349; } return false; } bool _x043f(_x0046 *_x021d, const char *_x0319, _x012a *_x0337) { _x0046 *_x01e0 = _x021d; while (_x01e0) { for (size_t _x0288 = 0; _x0288 < _x01e0->_x01d7; _x0288++) { if (strcmp(_x01e0->_x02b7[_x0288]._x0319, _x0319) == 0) { *_x0337 = _x01e0->_x02b7[_x0288]._x0425; _x04a5(*_x0337); return true; } } _x01e0 = _x01e0->_x0349; } return false; } bool _x043e(_x0046 *_x021d, const char *_x0319) { if (!_x021d) return false; for (size_t _x0288 = 0; _x0288 < _x021d->_x01d7; _x0288++) { if (strcmp(_x021d->_x02b7[_x0288]._x0319, _x0319) == 0) { return true; } } return false; }
+
+static char *safe_strdup(const char *s) {
+    if (!s) return NULL;
+    char *dup = malloc(strlen(s) + 1);
+    if (dup) {
+        strcpy(dup, s);
+    }
+    return dup;
+}
+
+VSS_Env *vss_env_new(VSS_Env *parent) {
+    VSS_Env *env = malloc(sizeof(VSS_Env));
+    if (env) {
+        vss_atomic_set(&env->ref_count, 1);
+        env->items = NULL;
+        env->count = 0;
+        env->capacity = 0;
+        env->parent = parent;
+        vss_mutex_init(&env->mutex);
+        if (parent) {
+            vss_env_retain(parent);
+        }
+    }
+    return env;
+}
+
+void vss_env_retain(VSS_Env *env) {
+    if (env) {
+        vss_atomic_inc(&env->ref_count);
+    }
+}
+
+void vss_env_release(VSS_Env *env) {
+    if (!env) return;
+    if (vss_atomic_dec(&env->ref_count) == 0) {
+        vss_mutex_lock(&env->mutex);
+        for (size_t i = 0; i < env->count; i++) {
+            free(env->items[i].name);
+            vss_value_release(env->items[i].value);
+        }
+        free(env->items);
+        VSS_Env *parent = env->parent;
+        vss_mutex_unlock(&env->mutex);
+        vss_mutex_destroy(&env->mutex);
+        free(env);
+        if (parent) {
+            vss_env_release(parent);
+        }
+    }
+}
+
+bool vss_env_define(VSS_Env *env, const char *name, VSS_Value value) {
+    if (!env) return false;
+    vss_mutex_lock(&env->mutex);
+    if (vss_env_exists_local(env, name)) {
+        vss_mutex_unlock(&env->mutex);
+        return false;
+    }
+    
+    if (env->count >= env->capacity) {
+        env->capacity = env->capacity == 0 ? 8 : env->capacity * 2;
+        env->items = realloc(env->items, sizeof(VSS_Binding) * env->capacity);
+    }
+    
+    VSS_Binding *b = &env->items[env->count++];
+    b->name = safe_strdup(name);
+    b->value = value;
+    b->is_constant = false;
+    vss_value_retain(value);
+    vss_mutex_unlock(&env->mutex);
+    return true;
+}
+
+bool vss_env_define_const(VSS_Env *env, const char *name, VSS_Value value) {
+    if (!env) return false;
+    vss_mutex_lock(&env->mutex);
+    if (vss_env_exists_local(env, name)) {
+        vss_mutex_unlock(&env->mutex);
+        return false;
+    }
+    
+    if (env->count >= env->capacity) {
+        env->capacity = env->capacity == 0 ? 8 : env->capacity * 2;
+        env->items = realloc(env->items, sizeof(VSS_Binding) * env->capacity);
+    }
+    
+    VSS_Binding *b = &env->items[env->count++];
+    b->name = safe_strdup(name);
+    b->value = value;
+    b->is_constant = true;
+    vss_value_retain(value);
+    vss_mutex_unlock(&env->mutex);
+    return true;
+}
+
+bool vss_env_assign(VSS_Env *env, const char *name, VSS_Value value) {
+    VSS_Env *current = env;
+    while (current) {
+        vss_mutex_lock(&current->mutex);
+        for (size_t i = 0; i < current->count; i++) {
+            if (strcmp(current->items[i].name, name) == 0) {
+                if (current->items[i].is_constant) {
+                    vss_mutex_unlock(&current->mutex);
+                    return false;
+                }
+                vss_value_release(current->items[i].value);
+                current->items[i].value = value;
+                vss_value_retain(value);
+                vss_mutex_unlock(&current->mutex);
+                return true;
+            }
+        }
+        VSS_Env *next = current->parent;
+        vss_mutex_unlock(&current->mutex);
+        current = next;
+    }
+    return false;
+}
+
+bool vss_env_get(VSS_Env *env, const char *name, VSS_Value *out_value) {
+    VSS_Env *current = env;
+    while (current) {
+        vss_mutex_lock(&current->mutex);
+        for (size_t i = 0; i < current->count; i++) {
+            if (strcmp(current->items[i].name, name) == 0) {
+                *out_value = current->items[i].value;
+                vss_value_retain(*out_value);
+                vss_mutex_unlock(&current->mutex);
+                return true;
+            }
+        }
+        VSS_Env *next = current->parent;
+        vss_mutex_unlock(&current->mutex);
+        current = next;
+    }
+    return false;
+}
+
+bool vss_env_exists_local(VSS_Env *env, const char *name) {
+    if (!env) return false;
+    for (size_t i = 0; i < env->count; i++) {
+        if (strcmp(env->items[i].name, name) == 0) {
+            return true;
+        }
+    }
+    return false;
+}

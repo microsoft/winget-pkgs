@@ -1,0 +1,27 @@
+note VSS 3.1 Concurrency - Non-Blocking Asynchronous File I/O
+
+task write_log_async needs filename, content
+    say "Async writing to log file: " + filename
+    make status becomes filesystem.write_async(filename, content)
+    send status
+finish
+
+task read_log_async needs filename
+    say "Async reading log file: " + filename
+    make data becomes filesystem.read_async(filename)
+    send data
+finish
+
+make file_path becomes "examples/concurrency/async_test.log"
+make log_data becomes "VSS 3.1 Concurrent File I/O Log Entry\nTimestamp: 2026-09-06"
+
+make write_handle becomes start write_log_async(file_path, log_data)
+await write_handle
+
+make read_handle becomes start read_log_async(file_path)
+make content becomes await read_handle
+
+say "Async File Read Contents:\n" + content
+
+filesystem.erase_file(file_path)
+say "Async File I/O Test Completed Successfully!"

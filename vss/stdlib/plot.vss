@@ -1,0 +1,144 @@
+note VSS ASCII & SVG Data Visualization / Plotting Library
+
+task line_plot needs data, title
+    say "=== " + title + " ==="
+    make max_val becomes 0
+    repeat each v in data
+        when v above max_val
+            max_val becomes v
+        finish
+    finish
+    when max_val same_as 0
+        max_val becomes 1
+    finish
+    make height becomes 10
+    repeat i through 1 to height
+        make y_val becomes max_val * (height - i + 1) / height
+        make row_str becomes ""
+        repeat each v in data
+            make bar_h becomes max_val * (height - i + 1) / height
+            when v at_least bar_h
+                row_str becomes row_str + "*"
+            otherwise
+                row_str becomes row_str + " "
+            finish
+        finish
+        say row_str
+    finish
+    say "---"
+finish
+
+task bar_chart needs data, labels, title
+    say "=== " + title + " ==="
+    make max_val becomes 0
+    repeat each v in data
+        when v above max_val
+            max_val becomes v
+        finish
+    finish
+    when max_val same_as 0
+        max_val becomes 1
+    finish
+    make bar_width becomes 20
+    make i becomes 0
+    repeat each v in data
+        make label becomes ""
+        when i below (size of labels)
+            label becomes labels[i]
+        finish
+        make filled becomes round((v / max_val) * bar_width, 0)
+        make bar becomes ""
+        repeat j through 1 to filled
+            bar becomes bar + "█"
+        finish
+        say label + " | " + bar + " " + v
+        i becomes i + 1
+    finish
+finish
+
+task scatter_plot needs x_data, y_data, title
+    say "=== " + title + " ==="
+    make width becomes 40
+    make height becomes 15
+    make x_min becomes x_data[0]
+    make x_max becomes x_data[0]
+    make y_min becomes y_data[0]
+    make y_max becomes y_data[0]
+    repeat each x in x_data
+        when x below x_min
+            x_min becomes x
+        finish
+        when x above x_max
+            x_max becomes x
+        finish
+    finish
+    repeat each y in y_data
+        when y below y_min
+            y_min becomes y
+        finish
+        when y above y_max
+            y_max becomes y
+        finish
+    finish
+    make canvas becomes matrix.create(height, width, 32)
+    make n becomes size of x_data
+    make pi becomes 0
+    repeat pi through 0 to (n - 1)
+        make x_val becomes x_data[pi]
+        make y_val becomes y_data[pi]
+        make x_range becomes x_max - x_min
+        make y_range becomes y_max - y_min
+        when x_range same_as 0
+            x_range becomes 1
+        finish
+        when y_range same_as 0
+            y_range becomes 1
+        finish
+        make cx becomes round((x_val - x_min) / x_range * (width - 1), 0)
+        make cy becomes round((y_max - y_val) / y_range * (height - 1), 0)
+        canvas[cy][cx] becomes 42
+    finish
+    repeat ri through 0 to (height - 1)
+        make line becomes ""
+        repeat ci through 0 to (width - 1)
+            when canvas[ri][ci] same_as 42
+                line becomes line + "*"
+            otherwise
+                line becomes line + "."
+            finish
+        finish
+        say line
+    finish
+finish
+
+task render_svg needs data, labels, title, width, height
+    make svg becomes "<svg xmlns='http://www.w3.org/2000/svg' width='" + width + "' height='" + height + "'>"
+    svg becomes svg + "<text x='10' y='20' font-size='14' font-weight='bold'>" + title + "</text>"
+    make max_val becomes 0
+    repeat each v in data
+        when v above max_val
+            max_val becomes v
+        finish
+    finish
+    when max_val same_as 0
+        max_val becomes 1
+    finish
+    make n becomes size of data
+    make bar_w becomes (width - 40) / n
+    make i becomes 0
+    repeat each v in data
+        make bh becomes round((v / max_val) * (height - 60), 0)
+        make bx becomes 20 + i * bar_w
+        make by becomes height - 30 - bh
+        svg becomes svg + "<rect x='" + bx + "' y='" + by + "' width='" + (bar_w - 4) + "' height='" + bh + "' fill='#4A90E2' opacity='0.8' rx='2'/>"
+        make label becomes ""
+        when i below (size of labels)
+            label becomes labels[i]
+        finish
+        svg becomes svg + "<text x='" + (bx + bar_w / 2 - 4) + "' y='" + (height - 10) + "' font-size='10' text-anchor='middle'>" + label + "</text>"
+        svg becomes svg + "<text x='" + (bx + bar_w / 2 - 4) + "' y='" + (by - 4) + "' font-size='10' text-anchor='middle'>" + v + "</text>"
+        i becomes i + 1
+    finish
+    svg becomes svg + "</svg>"
+    send svg
+finish

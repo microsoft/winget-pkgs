@@ -1,0 +1,36 @@
+note VSS 3.1 Concurrency vs Sequential Benchmark Suite
+
+task compute_heavy needs N
+    make total becomes 0
+    repeat i through 1 to N
+        total becomes total + i
+    finish
+    send total
+finish
+
+say "=========================================="
+say "VSS 3.1 CONCURRENCY PERFORMANCE BENCHMARK"
+say "=========================================="
+
+say "--- Running Sequential Computations ---"
+make seq_res1 becomes compute_heavy(5000)
+make seq_res2 becomes compute_heavy(5000)
+make seq_res3 becomes compute_heavy(5000)
+make seq_res4 becomes compute_heavy(5000)
+
+say "Sequential Total: " + (seq_res1 + seq_res2 + seq_res3 + seq_res4)
+
+say "--- Running Concurrent Worker Thread Computations ---"
+make t1 becomes start compute_heavy(5000)
+make t2 becomes start compute_heavy(5000)
+make t3 becomes start compute_heavy(5000)
+make t4 becomes start compute_heavy(5000)
+
+make par_res1 becomes await t1
+make par_res2 becomes await t2
+make par_res3 becomes await t3
+make par_res4 becomes await t4
+
+say "Concurrent Total: " + (par_res1 + par_res2 + par_res3 + par_res4)
+say "=========================================="
+say "Benchmark Suite Executed Successfully!"

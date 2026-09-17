@@ -1,0 +1,15 @@
+note VSS AI Framework SDK
+task gemini_chat needs api_key, model, prompt
+    make url becomes "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + api_key
+    make body becomes __json_stringify(map [ "contents": [ map [ "parts": [ map [ "text": prompt ] ] ] ] ])
+    make res becomes __http_request("POST", url, map [ "Content-Type": "application/json" ], body)
+    send res
+finish
+
+task openai_chat needs api_key, model, prompt
+    make url becomes "https://api.openai.com/v1/chat/completions"
+    make body becomes __json_stringify(map [ "model": model, "messages": [ map [ "role": "user", "content": prompt ] ] ])
+    make headers becomes map [ "Content-Type": "application/json", "Authorization": "Bearer " + api_key ]
+    make res becomes __http_request("POST", url, headers, body)
+    send res
+finish

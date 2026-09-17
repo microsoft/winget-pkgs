@@ -1,0 +1,27 @@
+note VSS 3.1 Concurrency - Mutex Synchronization & Critical Sections
+
+make counter_mutex becomes mutex_create()
+make shared_counter becomes 0
+
+task increment_work needs iterations
+    repeat i through 1 to iterations
+        lock counter_mutex
+            shared_counter becomes shared_counter + 1
+        finish
+    finish
+    send "Worker done"
+finish
+
+say "Spawning 4 tasks concurrently incrementing shared counter with mutex..."
+make t1 becomes start increment_work(250)
+make t2 becomes start increment_work(250)
+make t3 becomes start increment_work(250)
+make t4 becomes start increment_work(250)
+
+await t1
+await t2
+await t3
+await t4
+
+say "Final Shared Counter Value (Expected 1000): " + shared_counter
+say "Mutex Synchronization Test Completed Successfully!"

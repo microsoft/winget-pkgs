@@ -140,7 +140,20 @@ static void emit_return(int line) {
 
 static int make_constant(VSS_Value value, int line) {
     (void)line;
-    int constant = vss_chunk_add_constant(current_chunk(), value);
+    VSS_Chunk *chunk = current_chunk();
+    if (value.type == VSS_VAL_STRING) {
+        for (int i = 0; i < chunk->const_count; i++) {
+            if (chunk->constants[i].type == VSS_VAL_STRING &&
+                strcmp(chunk->constants[i].as.string->chars, value.as.string->chars) == 0) {
+                vss_value_release(value);
+                return i;
+            }
+        }
+    }
+    int constant = vss_chunk_add_constant(chunk, value);
+    if (constant > 255) {
+        fprintf(stderr, "Warning: constant pool index %d exceeds 255\n", constant);
+    }
     return constant;
 }
 

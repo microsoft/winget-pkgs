@@ -1,0 +1,35 @@
+note VSS 3.1 Real-World Concurrency - Concurrent Server Client Simulator
+
+grab collections
+
+make client_connections becomes collections.ConcurrentQueue()
+make handled_count becomes atomic_create(0)
+
+client_connections.push("Conn_Client_1")
+client_connections.push("Conn_Client_2")
+client_connections.push("Conn_Client_3")
+client_connections.push("Conn_Client_4")
+
+task conn_handler needs handler_id, conns_ref, counter_ref
+    repeat idx through 1 to 2
+        when conns_ref.count() above 0
+            make client_id becomes conns_ref.pop()
+            when client_id not_same_as empty
+                say "Handler Thread " + handler_id + " processing: " + client_id
+                atomic_add(counter_ref, 1)
+                concurrency_sleep(10)
+            finish
+        finish
+    finish
+    send "Handler " + handler_id + " finished"
+finish
+
+say "Starting Concurrent Socket Connection Handlers..."
+make h1 becomes start conn_handler(1, client_connections, handled_count)
+make h2 becomes start conn_handler(2, client_connections, handled_count)
+
+await h1
+await h2
+
+say "Total Client Connections Handled: " + atomic_get(handled_count)
+say "Concurrent Server Client Simulator Completed Successfully!"

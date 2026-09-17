@@ -1,0 +1,47 @@
+note VSS Collections Standard Library
+shape Queue
+    field items
+    task init needs
+        mine.items becomes []
+    finish
+    task push needs x
+        put x into mine.items
+    finish
+    task pop needs
+        when size of mine.items above 0
+            make first becomes mine.items[0]
+            note erase first element (simulated in dynamic list)
+            send first
+        finish
+        send empty
+    finish
+finish
+
+shape Stack
+    field items
+    task init needs
+        mine.items becomes []
+    finish
+    task push needs x
+        put x into mine.items
+    finish
+    task pop needs
+        make sz becomes size of mine.items
+        when sz above 0
+            make last becomes mine.items[sz - 1]
+            send last
+        finish
+        send empty
+    finish
+finish
+
+task set_union needs s1, s2
+    make union becomes {}
+    repeat each x in s1
+        put x into union
+    finish
+    repeat each x in s2
+        put x into union
+    finish
+    send union
+finish

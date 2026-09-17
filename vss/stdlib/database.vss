@@ -1,0 +1,30 @@
+note VSS Database Unified ORM & Driver Library
+task open needs filepath
+    send __db_open(filepath)
+finish
+
+task execute needs db, sql
+    send __db_execute(db, sql)
+finish
+
+task query needs db, sql
+    send __db_query(db, sql)
+finish
+
+shape QueryBuilder
+    field _db
+    field _table
+    field _where
+    task init needs db, table
+        mine._db becomes db
+        mine._table becomes table
+        mine._where becomes ""
+    finish
+    task where needs field_name, value
+        mine._where becomes " WHERE " + field_name + " = '" + value + "'"
+    finish
+    task get needs
+        make sql becomes "SELECT * FROM " + mine._table + mine._where
+        send __db_query(mine._db, sql)
+    finish
+finish

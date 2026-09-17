@@ -22,4 +22,240 @@
 #include "compiler.h"
 #include "vm.h"
 #include "cli.h"
-static char *_x037a(const char *_x0358) { FILE *_x023e = fopen(_x0358, "\x72\x62"); if (!_x023e) return NULL; fseek(_x023e, 0, SEEK_END); long _x03c0 = ftell(_x023e); rewind(_x023e); char *_x015b = (char *)malloc((size_t)_x03c0 + 1); size_t _x0379 = fread(_x015b, 1, (size_t)_x03c0, _x023e); fclose(_x023e); if (_x0379 != (size_t)_x03c0) { free(_x015b); fprintf(stderr, "\x43\x6f\x75\x6c\x64\x20\x6e\x6f\x74\x20\x66\x75\x6c\x6c\x79\x20\x72\x65\x61\x64\x20\x66\x69\x6c\x65\x3a\x20\x25\x73\x0a", _x0358); return NULL; } _x015b[_x03c0] = '\0'; return _x015b; } static char _x03ad[256] = ""; static void _x03dc(int _x0365) { if (!_x0464()) { fprintf(stderr, "\x46\x61\x69\x6c\x65\x64\x20\x74\x6f\x20\x69\x6e\x69\x74\x69\x61\x6c\x69\x7a\x65\x20\x6e\x65\x74\x77\x6f\x72\x6b\x20\x73\x79\x73\x74\x65\x6d\x2e\x0a"); return; } _x00b2 _x03b4 = _x0472(); if (_x03b4 == _x0051) { _x0360("\x73\x6f\x63\x6b\x65\x74\x20\x66\x61\x69\x6c\x65\x64"); _x0463(); return; } if (!_x0470(_x03b4, _x0365)) { _x0360("\x62\x69\x6e\x64\x20\x66\x61\x69\x6c\x65\x64"); _x0471(_x03b4); _x0463(); return; } if (!_x0473(_x03b4, 10)) { _x0360("\x6c\x69\x73\x74\x65\x6e\x20\x66\x61\x69\x6c\x65\x64"); _x0471(_x03b4); _x0463(); return; } char **_x0241 = NULL; int _x01d7 = _x046a("\x2e", &_x0241); bool _x025a = false; if (_x01d7 == 0) { printf("\x4e\x6f\x20\x2e\x68\x74\x6d\x76\x73\x73\x20\x66\x69\x6c\x65\x73\x20\x66\x6f\x75\x6e\x64\x20\x69\x6e\x20\x74\x68\x65\x20\x63\x75\x72\x72\x65\x6e\x74\x20\x70\x72\x6f\x6a\x65\x63\x74\x2e\x0a"); } else { for (int _x0288 = 0; _x0288 < _x01d7; _x0288++) { if (strcmp(_x0241[_x0288], "\x69\x6e\x64\x65\x78\x2e\x68\x74\x6d\x76\x73\x73") == 0) { strncpy(_x03ad, "\x69\x6e\x64\x65\x78\x2e\x68\x74\x6d\x76\x73\x73", sizeof(_x03ad) - 1); _x025a = true; break; } } if (!_x025a) { for (int _x0288 = 0; _x0288 < _x01d7; _x0288++) { if (strcmp(_x0241[_x0288], "\x6d\x61\x69\x6e\x2e\x68\x74\x6d\x76\x73\x73") == 0) { strncpy(_x03ad, "\x6d\x61\x69\x6e\x2e\x68\x74\x6d\x76\x73\x73", sizeof(_x03ad) - 1); _x025a = true; break; } } } if (!_x025a) { if (_x01d7 == 1) { strncpy(_x03ad, _x0241[0], sizeof(_x03ad) - 1); _x025a = true; } else { printf("\x4d\x75\x6c\x74\x69\x70\x6c\x65\x20\x2e\x68\x74\x6d\x76\x73\x73\x20\x66\x69\x6c\x65\x73\x20\x66\x6f\x75\x6e\x64\x3a\x0a"); for (int _x0288 = 0; _x0288 < _x01d7; _x0288++) { printf("\x20\x20\x25\x64\x29\x20\x25\x73\x0a", _x0288 + 1, _x0241[_x0288]); } printf("\x45\x6e\x74\x65\x72\x20\x6e\x75\x6d\x62\x65\x72\x20\x74\x6f\x20\x73\x65\x6c\x65\x63\x74\x20\x28\x64\x65\x66\x61\x75\x6c\x74\x20\x69\x73\x20\x31\x29\x3a\x20"); int _x01a6 = 1; char _x029b[64]; if (fgets(_x029b, sizeof(_x029b), stdin)) { int _x0353 = atoi(_x029b); if (_x0353 >= 1 && _x0353 <= _x01d7) { _x01a6 = _x0353; } } strncpy(_x03ad, _x0241[_x01a6 - 1], sizeof(_x03ad) - 1); _x025a = true; } } } if (_x0241) { for (int _x0288 = 0; _x0288 < _x01d7; _x0288++) { free(_x0241[_x0288]); } free(_x0241); } fprintf(stderr, "\x56\x53\x53\x20\x44\x65\x76\x20\x53\x65\x72\x76\x65\x72\x20\x73\x74\x61\x72\x74\x65\x64\x20\x6f\x6e\x20\x68\x74\x74\x70\x3a\x2f\x2f\x6c\x6f\x63\x61\x6c\x68\x6f\x73\x74\x3a\x25\x64\x2f\x0a", _x0365); fprintf(stderr, "\x50\x72\x65\x73\x73\x20\x43\x74\x72\x6c\x2b\x43\x20\x74\x6f\x20\x73\x74\x6f\x70\x2e\x0a"); if (_x025a && strlen(_x03ad) > 0) { if (_x0455(_x03ad)) { _x045d(_x0365, _x03ad); } } while (1) { _x00b2 _x01ae = _x046f(_x03b4); if (_x01ae == _x0051) continue; char _x015b[2048]; int _x0378 = _x0474(_x01ae, _x015b, sizeof(_x015b) - 1); if (_x0378 <= 0) { _x0471(_x01ae); continue; } _x015b[_x0378] = '\0'; char _x0300[16], _x0358[256]; if (sscanf(_x015b, "\x25\x31\x35\x73\x20\x25\x32\x35\x35\x73", _x0300, _x0358) == 2) { char *_x0240 = _x0358; if (_x0240[0] == '/') _x0240++; if (strlen(_x0240) == 0) { _x0240 = _x03ad; } size_t _x024c = strlen(_x0240); bool _x02ab = (_x024c > 7 && strcmp(_x0240 + _x024c - 7, "\x2e\x68\x74\x6d\x76\x73\x73") == 0); FILE *_x022e = fopen(_x0240, "\x72"); if (!_x022e) { const char *_x0387 = "\x48\x54\x54\x50\x2f\x31\x2e\x31\x20\x34\x30\x34\x20\x4e\x6f\x74\x20\x46\x6f\x75\x6e\x64\x0d\x0a\x43\x6f\x6e\x74\x65\x6e\x74\x2d\x54\x79\x70\x65\x3a\x20\x74\x65\x78\x74\x2f\x70\x6c\x61\x69\x6e\x0d\x0a\x43\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e\x3a\x20\x63\x6c\x6f\x73\x65\x0d\x0a\x0d\x0a\x46\x69\x6c\x65\x20\x4e\x6f\x74\x20\x46\x6f\x75\x6e\x64"; _x0475(_x01ae, _x0387, strlen(_x0387)); } else { fclose(_x022e); if (_x02ab) { int _x03e4 = dup(1); FILE *_x0401 = _x025f("\x74\x65\x6d\x70\x5f\x73\x65\x72\x76\x65\x2e\x68\x74\x6d\x6c", "\x77", stdout); if (_x0401) { char *_x03ce = _x037a(_x0240); if (_x03ce) { _x0052 _x02d6; _x045e(&_x02d6, _x03ce); _x0095 _x0354; _x0466(&_x0354, &_x02d6); _x0032 _x0143 = _x0465(&_x0354); if (!_x0354._x027a) { _x0090 *_x02f2 = _x0434(_x0143); _x0046 *_x0270 = _x0440(NULL); _x0467(_x0270); bool _x039b = _x04ac(_x02f2, _x0270); if (!_x039b) { printf("\x0a\x3c\x64\x69\x76\x20\x73\x74\x79\x6c\x65\x3d\x27\x63\x6f\x6c\x6f\x72\x3a\x72\x65\x64\x3b\x62\x6f\x72\x64\x65\x72\x3a\x31\x70\x78\x20\x73\x6f\x6c\x69\x64\x20\x72\x65\x64\x3b\x70\x61\x64\x64\x69\x6e\x67\x3a\x31\x30\x70\x78\x3b\x6d\x61\x72\x67\x69\x6e\x2d\x74\x6f\x70\x3a\x31\x30\x70\x78\x3b\x27\x3e\x56\x53\x53\x5f\x56\x4d\x20\x52\x75\x6e\x74\x69\x6d\x65\x20\x45\x72\x72\x6f\x72\x3c\x2f\x64\x69\x76\x3e"); } _x0441(_x0270); _x0457(_x02f2); } else { printf("\x0a\x3c\x64\x69\x76\x20\x73\x74\x79\x6c\x65\x3d\x27\x63\x6f\x6c\x6f\x72\x3a\x72\x65\x64\x3b\x62\x6f\x72\x64\x65\x72\x3a\x31\x70\x78\x20\x73\x6f\x6c\x69\x64\x20\x72\x65\x64\x3b\x70\x61\x64\x64\x69\x6e\x67\x3a\x31\x30\x70\x78\x3b\x6d\x61\x72\x67\x69\x6e\x2d\x74\x6f\x70\x3a\x31\x30\x70\x78\x3b\x27\x3e\x56\x53\x53\x5f\x50\x61\x72\x73\x65\x72\x20\x53\x79\x6e\x74\x61\x78\x20\x45\x72\x72\x6f\x72\x3c\x2f\x64\x69\x76\x3e"); } _x042c(_x0143); free(_x03ce); } fflush(stdout); dup2(_x03e4, 1); close(_x03e4); char *_x0287 = _x037a("\x74\x65\x6d\x70\x5f\x73\x65\x72\x76\x65\x2e\x68\x74\x6d\x6c"); remove("\x74\x65\x6d\x70\x5f\x73\x65\x72\x76\x65\x2e\x68\x74\x6d\x6c"); if (_x0287) { char _x0281[512]; snprintf(_x0281, sizeof(_x0281), "\x48\x54\x54\x50\x2f\x31\x2e\x31\x20\x32\x30\x30\x20\x4f\x4b\x0d\x0a\x43\x6f\x6e\x74\x65\x6e\x74\x2d\x54\x79\x70\x65\x3a\x20\x74\x65\x78\x74\x2f\x68\x74\x6d\x6c\x0d\x0a\x43\x6f\x6e\x74\x65\x6e\x74\x2d\x4c\x65\x6e\x67\x74\x68\x3a\x20\x25\x7a\x75\x0d\x0a\x43\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e\x3a\x20\x63\x6c\x6f\x73\x65\x0d\x0a\x0d\x0a", strlen(_x0287)); _x0475(_x01ae, _x0281, strlen(_x0281)); _x0475(_x01ae, _x0287, strlen(_x0287)); free(_x0287); } else { const char *_x0388 = "\x48\x54\x54\x50\x2f\x31\x2e\x31\x20\x35\x30\x30\x20\x49\x6e\x74\x65\x72\x6e\x61\x6c\x20\x53\x65\x72\x76\x65\x72\x20\x45\x72\x72\x6f\x72\x0d\x0a\x43\x6f\x6e\x74\x65\x6e\x74\x2d\x54\x79\x70\x65\x3a\x20\x74\x65\x78\x74\x2f\x70\x6c\x61\x69\x6e\x0d\x0a\x43\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e\x3a\x20\x63\x6c\x6f\x73\x65\x0d\x0a\x0d\x0a\x43\x6f\x75\x6c\x64\x20\x6e\x6f\x74\x20\x72\x65\x61\x64\x20\x56\x53\x53\x20\x6f\x75\x74\x70\x75\x74"; _x0475(_x01ae, _x0388, strlen(_x0388)); } } else { dup2(_x03e4, 1); close(_x03e4); const char *_x0388 = "\x48\x54\x54\x50\x2f\x31\x2e\x31\x20\x35\x30\x30\x20\x49\x6e\x74\x65\x72\x6e\x61\x6c\x20\x53\x65\x72\x76\x65\x72\x20\x45\x72\x72\x6f\x72\x0d\x0a\x43\x6f\x6e\x74\x65\x6e\x74\x2d\x54\x79\x70\x65\x3a\x20\x74\x65\x78\x74\x2f\x70\x6c\x61\x69\x6e\x0d\x0a\x43\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e\x3a\x20\x63\x6c\x6f\x73\x65\x0d\x0a\x0d\x0a\x43\x6f\x75\x6c\x64\x20\x6e\x6f\x74\x20\x72\x65\x64\x69\x72\x65\x63\x74\x20\x73\x74\x64\x6f\x75\x74"; _x0475(_x01ae, _x0388, strlen(_x0388)); } } else { char *_x01d4 = _x037a(_x0240); if (_x01d4) { char _x0281[512]; snprintf(_x0281, sizeof(_x0281), "\x48\x54\x54\x50\x2f\x31\x2e\x31\x20\x32\x30\x30\x20\x4f\x4b\x0d\x0a\x43\x6f\x6e\x74\x65\x6e\x74\x2d\x4c\x65\x6e\x67\x74\x68\x3a\x20\x25\x7a\x75\x0d\x0a\x43\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e\x3a\x20\x63\x6c\x6f\x73\x65\x0d\x0a\x0d\x0a", strlen(_x01d4)); _x0475(_x01ae, _x0281, strlen(_x0281)); _x0475(_x01ae, _x01d4, strlen(_x01d4)); free(_x01d4); } else { const char *_x0388 = "\x48\x54\x54\x50\x2f\x31\x2e\x31\x20\x35\x30\x30\x20\x49\x6e\x74\x65\x72\x6e\x61\x6c\x20\x53\x65\x72\x76\x65\x72\x20\x45\x72\x72\x6f\x72\x0d\x0a\x43\x6f\x6e\x74\x65\x6e\x74\x2d\x54\x79\x70\x65\x3a\x20\x74\x65\x78\x74\x2f\x70\x6c\x61\x69\x6e\x0d\x0a\x43\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e\x3a\x20\x63\x6c\x6f\x73\x65\x0d\x0a\x0d\x0a\x43\x6f\x75\x6c\x64\x20\x6e\x6f\x74\x20\x72\x65\x61\x64\x20\x66\x69\x6c\x65"; _x0475(_x01ae, _x0388, strlen(_x0388)); } } } } _x0471(_x01ae); } _x0471(_x03b4); _x0463(); } int main(int argc, char **argv) { _x03b6(stdout, NULL); _x03b6(stderr, NULL); extern void _x046e(int argc, char **argv); _x046e(argc, argv); if (argc == 2 && (strcmp(argv[1], "\x2d\x2d\x73\x65\x72\x76\x65") == 0 || strcmp(argv[1], "\x2d\x73") == 0)) { _x03dc(8080); return 0; } return _x0469(argc, argv); }
+#include "vss_concurrency.h"
+
+// Set buffered trace flag to 0 since we cleaned up trace logs in vm.c
+
+static char *read_file_text(const char *path) {
+    FILE *file = fopen(path, "rb");
+    if (!file) return NULL;
+
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+    rewind(file);
+
+    char *buffer = (char *)malloc((size_t)size + 1);
+    size_t read_count = fread(buffer, 1, (size_t)size, file);
+    fclose(file);
+
+    if (read_count != (size_t)size) {
+        free(buffer);
+        fprintf(stderr, "Could not fully read file: %s\n", path);
+        return NULL;
+    }
+
+    buffer[size] = '\0';
+    return buffer;
+}
+
+static char selected_default_file[256] = "";
+
+static void start_server(int port) {
+    if (!vss_network_init()) {
+        fprintf(stderr, "Failed to initialize network system.\n");
+        return;
+    }
+
+    VSS_Socket server_fd = vss_socket_create();
+    if (server_fd == VSS_INVALID_SOCKET) {
+        perror("socket failed");
+        vss_network_cleanup();
+        return;
+    }
+    
+    if (!vss_socket_bind(server_fd, port)) {
+        perror("bind failed");
+        vss_socket_close(server_fd);
+        vss_network_cleanup();
+        return;
+    }
+    
+    if (!vss_socket_listen(server_fd, 10)) {
+        perror("listen failed");
+        vss_socket_close(server_fd);
+        vss_network_cleanup();
+        return;
+    }
+
+    // Scan for htmvss files in current working directory
+    char **filenames = NULL;
+    int count = vss_scan_htmvss(".", &filenames);
+    bool found_default = false;
+
+    if (count == 0) {
+        printf("No .htmvss files found in the current project.\n");
+    } else {
+        // 1. check for index.htmvss
+        for (int i = 0; i < count; i++) {
+            if (strcmp(filenames[i], "index.htmvss") == 0) {
+                strncpy(selected_default_file, "index.htmvss", sizeof(selected_default_file) - 1);
+                found_default = true;
+                break;
+            }
+        }
+        // 2. check for main.htmvss
+        if (!found_default) {
+            for (int i = 0; i < count; i++) {
+                if (strcmp(filenames[i], "main.htmvss") == 0) {
+                    strncpy(selected_default_file, "main.htmvss", sizeof(selected_default_file) - 1);
+                    found_default = true;
+                    break;
+                }
+            }
+        }
+        // 3. check for single file
+        if (!found_default) {
+            if (count == 1) {
+                strncpy(selected_default_file, filenames[0], sizeof(selected_default_file) - 1);
+                found_default = true;
+            } else {
+                // 4. multiple files: list and select
+                printf("Multiple .htmvss files found:\n");
+                for (int i = 0; i < count; i++) {
+                    printf("  %d) %s\n", i + 1, filenames[i]);
+                }
+                printf("Enter number to select (default is 1): ");
+                int choice = 1;
+                char input_buf[64];
+                if (fgets(input_buf, sizeof(input_buf), stdin)) {
+                    int parsed = atoi(input_buf);
+                    if (parsed >= 1 && parsed <= count) {
+                        choice = parsed;
+                    }
+                }
+                strncpy(selected_default_file, filenames[choice - 1], sizeof(selected_default_file) - 1);
+                found_default = true;
+            }
+        }
+    }
+
+    if (filenames) {
+        for (int i = 0; i < count; i++) {
+            free(filenames[i]);
+        }
+        free(filenames);
+    }
+    
+    fprintf(stderr, "VSS Dev Server started on http://localhost:%d/\n", port);
+    fprintf(stderr, "Press Ctrl+C to stop.\n");
+    
+    if (found_default && strlen(selected_default_file) > 0) {
+        if (vss_file_exists(selected_default_file)) {
+            vss_launch_browser(port, selected_default_file);
+        }
+    }
+    
+    while (1) {
+        VSS_Socket client_fd = vss_socket_accept(server_fd);
+        if (client_fd == VSS_INVALID_SOCKET) continue;
+        
+        char buffer[2048];
+        int read_bytes = vss_socket_recv(client_fd, buffer, sizeof(buffer) - 1);
+        if (read_bytes <= 0) {
+            vss_socket_close(client_fd);
+            continue;
+        }
+        buffer[read_bytes] = '\0';
+        
+        char method[16], path[256];
+        if (sscanf(buffer, "%15s %255s", method, path) == 2) {
+            char *filename = path;
+            if (filename[0] == '/') filename++;
+            if (strlen(filename) == 0) {
+                filename = selected_default_file;
+            }
+            
+            size_t fn_len = strlen(filename);
+            bool is_htmvss = (fn_len > 7 && strcmp(filename + fn_len - 7, ".htmvss") == 0);
+            
+            FILE *f = fopen(filename, "r");
+            if (!f) {
+                const char *res_404 = "HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nFile Not Found";
+                vss_socket_send(client_fd, res_404, strlen(res_404));
+            } else {
+                fclose(f);
+                if (is_htmvss) {
+                    int stdout_dup = dup(1);
+                    FILE *temp_f = freopen("temp_serve.html", "w", stdout);
+                    if (temp_f) {
+                        char *source = read_file_text(filename);
+                        if (source) {
+                            VSS_Lexer lexer;
+                            vss_lexer_init(&lexer, source);
+                            VSS_Parser parser;
+                            vss_parser_init(&parser, &lexer);
+                            VSS_Block ast = vss_parse_program(&parser);
+                            if (!parser.had_error) {
+                                VSS_ObjFunction *main_func = vss_compile_program(ast);
+                                VSS_Env *global_env = vss_env_new(NULL);
+                                vss_register_builtins(global_env);
+                                bool run_success = vss_vm_run(main_func, global_env);
+                                if (!run_success) {
+                                    printf("\n<div style='color:red;border:1px solid red;padding:10px;margin-top:10px;'>VSS_VM Runtime Error</div>");
+                                }
+                                vss_env_release(global_env);
+                                vss_function_release(main_func);
+                            } else {
+                                printf("\n<div style='color:red;border:1px solid red;padding:10px;margin-top:10px;'>VSS_Parser Syntax Error</div>");
+                            }
+                            vss_block_free(ast);
+                            free(source);
+                        }
+                        fflush(stdout);
+                        dup2(stdout_dup, 1);
+                        close(stdout_dup);
+                        
+                        char *html = read_file_text("temp_serve.html");
+                        remove("temp_serve.html");
+                        if (html) {
+                            char headers[512];
+                            snprintf(headers, sizeof(headers), "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: %zu\r\nConnection: close\r\n\r\n", strlen(html));
+                            vss_socket_send(client_fd, headers, strlen(headers));
+                            vss_socket_send(client_fd, html, strlen(html));
+                            free(html);
+                        } else {
+                            const char *res_500 = "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nCould not read VSS output";
+                            vss_socket_send(client_fd, res_500, strlen(res_500));
+                        }
+                    } else {
+                        dup2(stdout_dup, 1);
+                        close(stdout_dup);
+                        const char *res_500 = "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nCould not redirect stdout";
+                        vss_socket_send(client_fd, res_500, strlen(res_500));
+                    }
+                } else {
+                    char *content = read_file_text(filename);
+                    if (content) {
+                        char headers[512];
+                        snprintf(headers, sizeof(headers), "HTTP/1.1 200 OK\r\nContent-Length: %zu\r\nConnection: close\r\n\r\n", strlen(content));
+                        vss_socket_send(client_fd, headers, strlen(headers));
+                        vss_socket_send(client_fd, content, strlen(content));
+                        free(content);
+                    } else {
+                        const char *res_500 = "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nCould not read file";
+                        vss_socket_send(client_fd, res_500, strlen(res_500));
+                    }
+                }
+            }
+        }
+        vss_socket_close(client_fd);
+    }
+    vss_socket_close(server_fd);
+    vss_network_cleanup();
+}
+
+int main(int argc, char **argv) {
+    setbuf(stdout, NULL);
+    setbuf(stderr, NULL);
+    vss_concurrency_init();
+    extern void vss_set_args(int argc, char **argv);
+    vss_set_args(argc, argv);
+    int res = 0;
+    if (argc == 2 && (strcmp(argv[1], "--serve") == 0 || strcmp(argv[1], "-s") == 0)) {
+        start_server(8080);
+    } else {
+        res = vss_run_cli(argc, argv);
+    }
+    vss_concurrency_cleanup();
+    return res;
+}

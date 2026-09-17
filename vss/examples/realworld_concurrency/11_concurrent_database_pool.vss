@@ -1,0 +1,31 @@
+note VSS 3.1 Real-World Concurrency - Concurrent Database Connection Pool Simulator
+
+grab collections
+
+make pool becomes collections.ConcurrentQueue()
+make executed_queries becomes atomic_create(0)
+
+pool.push("DB_CONN_1")
+pool.push("DB_CONN_2")
+
+task db_query_task needs query_id, pool_ref, counter_ref
+    make conn becomes pool_ref.pop()
+    when conn not_same_as empty
+        say "Executing Query " + query_id + " using " + conn
+        concurrency_sleep(10)
+        atomic_add(counter_ref, 1)
+        pool_ref.push(conn)
+    finish
+    send "Query " + query_id + " Done"
+finish
+
+say "Executing Queries using Concurrent Database Connection Pool..."
+make q1 becomes start db_query_task("SELECT * FROM users", pool, executed_queries)
+make q2 becomes start db_query_task("SELECT * FROM orders", pool, executed_queries)
+
+await q1
+await q2
+
+say "Total DB Queries Executed: " + atomic_get(executed_queries)
+say "Pool Available Connections: " + pool.count()
+say "Concurrent Database Connection Pool Simulator Completed Successfully!"

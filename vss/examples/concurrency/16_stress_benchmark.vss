@@ -1,0 +1,28 @@
+note VSS 3.1 Concurrency - High Volume Task Stress Benchmark
+
+task bench_task needs id
+    make accumulator becomes 0
+    repeat i through 1 to 50
+        accumulator becomes accumulator + i
+    finish
+    send accumulator
+finish
+
+say "Starting VSS 3.1 Stress Benchmark: Spawning 100 concurrent tasks..."
+make task_handles becomes []
+
+repeat t through 1 to 100
+    make h becomes start bench_task(t)
+    put h into task_handles
+finish
+
+say "Awaiting 100 concurrent tasks..."
+make total_accumulator becomes 0
+repeat k through 1 to 100
+    make h_item becomes task_handles[k - 1]
+    make val becomes await h_item
+    total_accumulator becomes total_accumulator + val
+finish
+
+say "Stress Benchmark Complete. Total Accumulator Sum across 100 tasks: " + total_accumulator
+say "100 Task Stress Benchmark Passed Successfully!"

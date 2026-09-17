@@ -2,22 +2,609 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-const char *_x0435 = NULL; static char *_x0362(const char *_x039e) { if (!_x039e) return NULL; char *dup = malloc(strlen(_x039e) + 1); if (dup) { strcpy(dup, _x039e); } return dup; }
+
+VSS_THREAD_LOCAL const char *vss_current_source = NULL;
+
+static char *platform_strdup(const char *s) {
+    if (!s) return NULL;
+    char *dup = malloc(strlen(s) + 1);
+    if (dup) {
+        strcpy(dup, s);
+    }
+    return dup;
+}
+
 #ifdef _WIN32
 #include <direct.h>
 #include <io.h>
 #include <windows.h>
 #include <shellapi.h>
-bool _x0464(void) { _x0130 _x04b4; if (_x0131(_x0018(2,2), &_x04b4) != 0) { return false; } return true; } void _x0463(void) { _x012f(); } _x00b2 _x0472(void) { _x00b2 _x03cb = socket(_x0000, _x0020, _x0012); if (_x03cb == _x0011) return _x0051; int _x032f = 1; setsockopt(_x03cb, _x0021, _x0022, (const char *)&_x032f, sizeof(_x032f)); return _x03cb; } bool _x0470(_x00b2 _x03cb, int _x0365) { struct _x03cd _x0136; _x0136._x03be = _x0000; _x0136._x03bd._x03a1 = _x000f; _x0136._x03bf = htons(_x0365); if (bind(_x03cb, (struct _x03cc *)&_x0136, sizeof(_x0136)) == _x001f) { return false; } return true; } bool _x0473(_x00b2 _x03cb, int _x0149) { if (listen(_x03cb, _x0149) == _x001f) { return false; } return true; } _x00b2 _x046f(_x00b2 _x03cb) { _x00b2 _x01ad = accept(_x03cb, NULL, NULL); if (_x01ad == _x0011) return _x0051; return _x01ad; } int _x0475(_x00b2 _x03cb, const char *_x015a, int _x02d3) { return send(_x03cb, _x015a, _x02d3, 0); } int _x0474(_x00b2 _x03cb, char *_x015a, int _x02d3) { return recv(_x03cb, _x015a, _x02d3, 0); } void _x0471(_x00b2 _x03cb) { if (_x03cb != _x0011) { _x01b2(_x03cb); } } bool _x0455(const char *_x0358) { DWORD _x0200 = _x000d(_x0358); return (_x0200 != _x0010 && !(_x0200 & _x0007)); } bool _x0438(const char *_x0358) { DWORD _x0200 = _x000d(_x0358); return (_x0200 != _x0010 && (_x0200 & _x0007)); } bool _x0462(const char *_x0358) { return _x0003(_x0358, NULL) != 0 || GetLastError() == _x0006; } bool _x0461(const char *_x0358) { size_t _x035a = strlen(_x0358); size_t _x040a = _x035a + 8; char *_x03aa = malloc(_x040a); if (!_x03aa) return false; snprintf(_x03aa, _x040a, "\x25\x73\x5c\x2a\x2e\x76\x73\x73\x63", _x0358); _x012e _x0236; HANDLE _x0279 = _x000a(_x03aa, &_x0236); free(_x03aa); if (_x0279 != INVALID_HANDLE_VALUE) { do { size_t _x023f = strlen(_x0236._x0192); size_t _x025b = _x035a + 1 + _x023f + 1; char *_x0242 = malloc(_x025b); if (_x0242) { snprintf(_x0242, _x025b, "\x25\x73\x5c\x25\x73", _x0358, _x0236._x0192); _x0005(_x0242); free(_x0242); } printf("\x20\x20\x52\x65\x6d\x6f\x76\x65\x64\x3a\x20\x25\x73\x0a", _x0236._x0192); } while (_x000b(_x0279, &_x0236)); _x0009(_x0279); } return true; } int _x046a(const char *_x0358, char ***_x0241) { size_t _x035a = strlen(_x0358); size_t _x040a = _x035a + 10; char *_x03aa = malloc(_x040a); if (!_x03aa) { *_x0241 = NULL; return 0; } snprintf(_x03aa, _x040a, "\x25\x73\x5c\x2a\x2e\x68\x74\x6d\x76\x73\x73", _x0358); _x012e _x0236; HANDLE _x0279 = _x000a(_x03aa, &_x0236); free(_x03aa); if (_x0279 == INVALID_HANDLE_VALUE) { *_x0241 = NULL; return 0; } int _x01d7 = 0; char **_x02df = NULL; do { _x02df = realloc(_x02df, sizeof(char*) * (_x01d7 + 1)); _x02df[_x01d7] = _x0362(_x0236._x0192); _x01d7++; } while (_x000b(_x0279, &_x0236)); _x0009(_x0279); *_x0241 = _x02df; return _x01d7; } int _x0460(const char *_x0358, char ***_x0241) { size_t _x035a = strlen(_x0358); size_t _x040a = _x035a + 5; char *_x03aa = malloc(_x040a); if (!_x03aa) { *_x0241 = NULL; return 0; } snprintf(_x03aa, _x040a, "\x25\x73\x5c\x2a", _x0358); _x012e _x0236; HANDLE _x0279 = _x000a(_x03aa, &_x0236); free(_x03aa); if (_x0279 == INVALID_HANDLE_VALUE) { *_x0241 = NULL; return 0; } int _x01d7 = 0; char **_x02df = NULL; do { if (strcmp(_x0236._x0192, "\x2e") == 0 || strcmp(_x0236._x0192, "\x2e\x2e") == 0) { continue; } _x02df = realloc(_x02df, sizeof(char*) * (_x01d7 + 1)); _x02df[_x01d7] = _x0362(_x0236._x0192); _x01d7++; } while (_x000b(_x0279, &_x0236)); _x0009(_x0279); *_x0241 = _x02df; return _x01d7; } void _x045d(int _x0365, const char *_x0240) { char _x041d[512]; snprintf(_x041d, sizeof(_x041d), "\x68\x74\x74\x70\x3a\x2f\x2f\x6c\x6f\x63\x61\x6c\x68\x6f\x73\x74\x3a\x25\x64\x2f\x25\x73", _x0365, _x0240); _x002b(NULL, "\x6f\x70\x65\x6e", _x041d, NULL, NULL, _x0023); } int _x0443(const char *_x01b7) { return system(_x01b7); } char *_x0459(void) { const char *_x0285 = getenv("\x55\x53\x45\x52\x50\x52\x4f\x46\x49\x4c\x45"); if (!_x0285) { const char *_x01fd = getenv("\x48\x4f\x4d\x45\x44\x52\x49\x56\x45"); const char *_x0358 = getenv("\x48\x4f\x4d\x45\x50\x41\x54\x48"); if (_x01fd && _x0358) { char *_x015a = malloc(strlen(_x01fd) + strlen(_x0358) + 1); sprintf(_x015a, "\x25\x73\x25\x73", _x01fd, _x0358); return _x015a; } } return _x0285 ? _x0362(_x0285) : NULL; }
+
+bool vss_network_init(void) {
+    WSADATA wsa;
+    if (WSAStartup(MAKEWORD(2,2), &wsa) != 0) {
+        return false;
+    }
+    return true;
+}
+
+void vss_network_cleanup(void) {
+    WSACleanup();
+}
+
+VSS_Socket vss_socket_create(void) {
+    VSS_Socket sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (sock == INVALID_SOCKET) return VSS_INVALID_SOCKET;
+    
+    // Set reuseaddr
+    int opt = 1;
+    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const char *)&opt, sizeof(opt));
+    return sock;
+}
+
+bool vss_socket_bind(VSS_Socket sock, int port) {
+    struct sockaddr_in address;
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons(port);
+    if (bind(sock, (struct sockaddr *)&address, sizeof(address)) == SOCKET_ERROR) {
+        return false;
+    }
+    return true;
+}
+
+bool vss_socket_listen(VSS_Socket sock, int backlog) {
+    if (listen(sock, backlog) == SOCKET_ERROR) {
+        return false;
+    }
+    return true;
+}
+
+VSS_Socket vss_socket_accept(VSS_Socket sock) {
+    VSS_Socket client = accept(sock, NULL, NULL);
+    if (client == INVALID_SOCKET) return VSS_INVALID_SOCKET;
+    return client;
+}
+
+int vss_socket_send(VSS_Socket sock, const char *buf, int len) {
+    return send(sock, buf, len, 0);
+}
+
+int vss_socket_recv(VSS_Socket sock, char *buf, int len) {
+    return recv(sock, buf, len, 0);
+}
+
+void vss_socket_close(VSS_Socket sock) {
+    if (sock != INVALID_SOCKET) {
+        closesocket(sock);
+    }
+}
+
+bool vss_file_exists(const char *path) {
+    DWORD dwAttrib = GetFileAttributesA(path);
+    return (dwAttrib != INVALID_FILE_ATTRIBUTES && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+}
+
+bool vss_dir_exists(const char *path) {
+    DWORD dwAttrib = GetFileAttributesA(path);
+    return (dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+}
+
+bool vss_make_dir(const char *path) {
+    return CreateDirectoryA(path, NULL) != 0 || GetLastError() == ERROR_ALREADY_EXISTS;
+}
+
+bool vss_list_dir_clean_vssc(const char *path) {
+    size_t path_len = strlen(path);
+    size_t total_len = path_len + 8; // path + "\\*.vssc" + null
+    char *search_path = malloc(total_len);
+    if (!search_path) return false;
+    snprintf(search_path, total_len, "%s\\*.vssc", path);
+    
+    WIN32_FIND_DATAA fd;
+    HANDLE hFind = FindFirstFileA(search_path, &fd);
+    free(search_path);
+    if (hFind != INVALID_HANDLE_VALUE) {
+        do {
+            size_t file_len = strlen(fd.cFileName);
+            size_t fp_len = path_len + 1 + file_len + 1; // path + "\\" + file + null
+            char *filepath = malloc(fp_len);
+            if (filepath) {
+                snprintf(filepath, fp_len, "%s\\%s", path, fd.cFileName);
+                DeleteFileA(filepath);
+                free(filepath);
+            }
+            printf("  Removed: %s\n", fd.cFileName);
+        } while (FindNextFileA(hFind, &fd));
+        FindClose(hFind);
+    }
+    return true;
+}
+
+int vss_scan_htmvss(const char *path, char ***filenames) {
+    size_t path_len = strlen(path);
+    size_t total_len = path_len + 10; // path + "\\*.htmvss" + null
+    char *search_path = malloc(total_len);
+    if (!search_path) {
+        *filenames = NULL;
+        return 0;
+    }
+    snprintf(search_path, total_len, "%s\\*.htmvss", path);
+    
+    WIN32_FIND_DATAA fd;
+    HANDLE hFind = FindFirstFileA(search_path, &fd);
+    free(search_path);
+    if (hFind == INVALID_HANDLE_VALUE) {
+        *filenames = NULL;
+        return 0;
+    }
+    
+    int count = 0;
+    char **list = NULL;
+    do {
+        list = realloc(list, sizeof(char*) * (count + 1));
+        list[count] = platform_strdup(fd.cFileName);
+        count++;
+    } while (FindNextFileA(hFind, &fd));
+    
+    FindClose(hFind);
+    *filenames = list;
+    return count;
+}
+
+int vss_list_dir(const char *path, char ***filenames) {
+    size_t path_len = strlen(path);
+    size_t total_len = path_len + 5; // path + "\\*" + null
+    char *search_path = malloc(total_len);
+    if (!search_path) {
+        *filenames = NULL;
+        return 0;
+    }
+    snprintf(search_path, total_len, "%s\\*", path);
+    
+    WIN32_FIND_DATAA fd;
+    HANDLE hFind = FindFirstFileA(search_path, &fd);
+    free(search_path);
+    if (hFind == INVALID_HANDLE_VALUE) {
+        *filenames = NULL;
+        return 0;
+    }
+    
+    int count = 0;
+    char **list = NULL;
+    do {
+        if (strcmp(fd.cFileName, ".") == 0 || strcmp(fd.cFileName, "..") == 0) {
+            continue;
+        }
+        list = realloc(list, sizeof(char*) * (count + 1));
+        list[count] = platform_strdup(fd.cFileName);
+        count++;
+    } while (FindNextFileA(hFind, &fd));
+    
+    FindClose(hFind);
+    *filenames = list;
+    return count;
+}
+
+void vss_launch_browser(int port, const char *filename) {
+    char url[512];
+    snprintf(url, sizeof(url), "http://localhost:%d/%s", port, filename);
+    ShellExecuteA(NULL, "open", url, NULL, NULL, SW_SHOWNORMAL);
+}
+
+int vss_execute_cmd(const char *cmd) {
+    return system(cmd);
+}
+
+char *vss_get_home_dir(void) {
+    const char *home = getenv("USERPROFILE");
+    if (!home) {
+        const char *drive = getenv("HOMEDRIVE");
+        const char *path = getenv("HOMEPATH");
+        if (drive && path) {
+            char *buf = malloc(strlen(drive) + strlen(path) + 1);
+            sprintf(buf, "%s%s", drive, path);
+            return buf;
+        }
+    }
+    return home ? platform_strdup(home) : NULL;
+}
+
+typedef struct {
+    VSS_ThreadFunc func;
+    void *arg;
+} WinThreadAdapterArg;
+
+static DWORD WINAPI win_thread_proc(LPVOID lpParam) {
+    WinThreadAdapterArg *adapter = (WinThreadAdapterArg *)lpParam;
+    VSS_ThreadFunc fn = adapter->func;
+    void *arg = adapter->arg;
+    free(adapter);
+    void *res = fn(arg);
+    return (DWORD)(uintptr_t)res;
+}
+
+bool vss_thread_create(VSS_Thread *thread, VSS_ThreadFunc func, void *arg) {
+    WinThreadAdapterArg *adapter = malloc(sizeof(WinThreadAdapterArg));
+    if (!adapter) return false;
+    adapter->func = func;
+    adapter->arg = arg;
+    *thread = CreateThread(NULL, 0, win_thread_proc, adapter, 0, NULL);
+    if (*thread == NULL) {
+        free(adapter);
+        return false;
+    }
+    return true;
+}
+
+bool vss_thread_join(VSS_Thread thread, void **retval) {
+    if (!thread) return false;
+    DWORD res = WaitForSingleObject(thread, INFINITE);
+    if (res != WAIT_OBJECT_0) return false;
+    if (retval) {
+        DWORD exit_code = 0;
+        GetExitCodeThread(thread, &exit_code);
+        *retval = (void *)(uintptr_t)exit_code;
+    }
+    CloseHandle(thread);
+    return true;
+}
+
+void vss_mutex_init(VSS_Mutex *mutex) {
+    InitializeCriticalSection(mutex);
+}
+
+void vss_mutex_lock(VSS_Mutex *mutex) {
+    EnterCriticalSection(mutex);
+}
+
+void vss_mutex_unlock(VSS_Mutex *mutex) {
+    LeaveCriticalSection(mutex);
+}
+
+void vss_mutex_destroy(VSS_Mutex *mutex) {
+    DeleteCriticalSection(mutex);
+}
+
+void vss_cond_init(VSS_Cond *cond) {
+    InitializeConditionVariable(cond);
+}
+
+void vss_cond_wait(VSS_Cond *cond, VSS_Mutex *mutex) {
+    SleepConditionVariableCS(cond, mutex, INFINITE);
+}
+
+bool vss_cond_timedwait(VSS_Cond *cond, VSS_Mutex *mutex, int timeout_ms) {
+    return SleepConditionVariableCS(cond, mutex, (DWORD)timeout_ms) != 0;
+}
+
+void vss_cond_signal(VSS_Cond *cond) {
+    WakeConditionVariable(cond);
+}
+
+void vss_cond_broadcast(VSS_Cond *cond) {
+    WakeAllConditionVariable(cond);
+}
+
+void vss_cond_destroy(VSS_Cond *cond) {
+    (void)cond;
+}
+
+int vss_atomic_inc(VSS_AtomicInt *ptr) {
+    return (int)InterlockedIncrement(ptr);
+}
+
+int vss_atomic_dec(VSS_AtomicInt *ptr) {
+    return (int)InterlockedDecrement(ptr);
+}
+
+int vss_atomic_add(VSS_AtomicInt *ptr, int val) {
+    return (int)InterlockedAdd(ptr, val);
+}
+
+int vss_atomic_get(VSS_AtomicInt *ptr) {
+    return (int)InterlockedCompareExchange(ptr, 0, 0);
+}
+
+void vss_atomic_set(VSS_AtomicInt *ptr, int val) {
+    InterlockedExchange(ptr, (LONG)val);
+}
+
+bool vss_atomic_cas(VSS_AtomicInt *ptr, int old_val, int new_val) {
+    return InterlockedCompareExchange(ptr, (LONG)new_val, (LONG)old_val) == (LONG)old_val;
+}
+
+void vss_sleep_ms(int ms) {
+    Sleep((DWORD)ms);
+}
+
+int vss_get_hardware_concurrency(void) {
+    SYSTEM_INFO sysinfo;
+    GetSystemInfo(&sysinfo);
+    return (int)sysinfo.dwNumberOfProcessors;
+}
+
+void *vss_dl_open(const char *path) {
+    if (!path) return NULL;
+    return (void *)LoadLibraryA(path);
+}
+
+void *vss_dl_sym(void *handle, const char *symbol) {
+    if (!handle || !symbol) return NULL;
+    return (void *)GetProcAddress((HMODULE)handle, symbol);
+}
+
+void vss_dl_close(void *handle) {
+    if (handle) FreeLibrary((HMODULE)handle);
+}
+
 #else
+// POSIX Implementation (Linux/macOS)
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <dirent.h>
-bool _x0464(void) { return true; } void _x0463(void) { } _x00b2 _x0472(void) { int _x03cb = socket(_x0000, _x0020, 0); if (_x03cb < 0) return _x0051; int _x032f = 1; setsockopt(_x03cb, _x0021, _x0022, &_x032f, sizeof(_x032f)); return _x03cb; } bool _x0470(_x00b2 _x03cb, int _x0365) { struct _x03cd _x0136; _x0136._x03be = _x0000; _x0136._x03bd._x03a1 = _x000f; _x0136._x03bf = htons(_x0365); if (bind(_x03cb, (struct _x03cc *)&_x0136, sizeof(_x0136)) < 0) { return false; } return true; } bool _x0473(_x00b2 _x03cb, int _x0149) { if (listen(_x03cb, _x0149) < 0) { return false; } return true; } _x00b2 _x046f(_x00b2 _x03cb) { int _x01ad = accept(_x03cb, NULL, NULL); if (_x01ad < 0) return _x0051; return _x01ad; } int _x0475(_x00b2 _x03cb, const char *_x015a, int _x02d3) { return send(_x03cb, _x015a, _x02d3, 0); } int _x0474(_x00b2 _x03cb, char *_x015a, int _x02d3) { return recv(_x03cb, _x015a, _x02d3, 0); } void _x0471(_x00b2 _x03cb) { if (_x03cb >= 0) { close(_x03cb); } } bool _x0455(const char *_x0358) { return access(_x0358, _x0008) == 0; } bool _x0438(const char *_x0358) { struct stat _x03d6; return stat(_x0358, &_x03d6) == 0 && _x0024(_x03d6._x03d7); } bool _x0462(const char *_x0358) { return mkdir(_x0358, 0777) == 0; } bool _x0461(const char *_x0358) { _x0004 *_x01e6 = _x032d(_x0358); if (_x01e6) { size_t _x035a = strlen(_x0358); struct _x01f2 *_x01f1; while ((_x01f1 = _x037b(_x01e6)) != NULL) { char *_x022d = strrchr(_x01f1->_x01e7, '.'); if (_x022d && strcmp(_x022d, "\x2e\x76\x73\x73\x63") == 0) { size_t _x023f = strlen(_x01f1->_x01e7); size_t _x025b = _x035a + 1 + _x023f + 1; char *_x0242 = malloc(_x025b); if (_x0242) { snprintf(_x0242, _x025b, "\x25\x73\x2f\x25\x73", _x0358, _x01f1->_x01e7); remove(_x0242); free(_x0242); } printf("\x20\x20\x52\x65\x6d\x6f\x76\x65\x64\x3a\x20\x25\x73\x0a", _x01f1->_x01e7); } } _x01b1(_x01e6); } return true; } int _x046a(const char *_x0358, char ***_x0241) { _x0004 *_x01e6 = _x032d(_x0358); if (!_x01e6) { *_x0241 = NULL; return 0; } int _x01d7 = 0; char **_x02df = NULL; struct _x01f2 *_x01f1; while ((_x01f1 = _x037b(_x01e6)) != NULL) { char *_x022d = strrchr(_x01f1->_x01e7, '.'); if (_x022d && strcmp(_x022d, "\x2e\x68\x74\x6d\x76\x73\x73") == 0) { _x02df = realloc(_x02df, sizeof(char*) * (_x01d7 + 1)); _x02df[_x01d7] = _x0362(_x01f1->_x01e7); _x01d7++; } } _x01b1(_x01e6); *_x0241 = _x02df; return _x01d7; } int _x0460(const char *_x0358, char ***_x0241) { _x0004 *_x01e6 = _x032d(_x0358); if (!_x01e6) { *_x0241 = NULL; return 0; } int _x01d7 = 0; char **_x02df = NULL; struct _x01f2 *_x01f1; while ((_x01f1 = _x037b(_x01e6)) != NULL) { if (strcmp(_x01f1->_x01e7, "\x2e") == 0 || strcmp(_x01f1->_x01e7, "\x2e\x2e") == 0) { continue; } _x02df = realloc(_x02df, sizeof(char*) * (_x01d7 + 1)); _x02df[_x01d7] = _x0362(_x01f1->_x01e7); _x01d7++; } _x01b1(_x01e6); *_x0241 = _x02df; return _x01d7; } void _x045d(int _x0365, const char *_x0240) { char _x02cd[512]; #ifdef __APPLE__
-snprintf(_x02cd, sizeof(_x02cd), "\x6f\x70\x65\x6e\x20\x68\x74\x74\x70\x3a\x2f\x2f\x6c\x6f\x63\x61\x6c\x68\x6f\x73\x74\x3a\x25\x64\x2f\x25\x73\x20\x32\x3e\x2f\x64\x65\x76\x2f\x6e\x75\x6c\x6c\x20\x26", _x0365, _x0240); #else
-snprintf(_x02cd, sizeof(_x02cd), "\x78\x64\x67\x2d\x6f\x70\x65\x6e\x20\x68\x74\x74\x70\x3a\x2f\x2f\x6c\x6f\x63\x61\x6c\x68\x6f\x73\x74\x3a\x25\x64\x2f\x25\x73\x20\x32\x3e\x2f\x64\x65\x76\x2f\x6e\x75\x6c\x6c\x20\x26", _x0365, _x0240); #endif
-system(_x02cd); } int _x0443(const char *_x01b7) { return system(_x01b7); } char *_x0459(void) { const char *_x0285 = getenv("\x48\x4f\x4d\x45"); return _x0285 ? _x0362(_x0285) : NULL; }
+
+bool vss_network_init(void) {
+    return true;
+}
+
+void vss_network_cleanup(void) {
+    // No-op
+}
+
+VSS_Socket vss_socket_create(void) {
+    int sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock < 0) return VSS_INVALID_SOCKET;
+    
+    int opt = 1;
+    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+    return sock;
+}
+
+bool vss_socket_bind(VSS_Socket sock, int port) {
+    struct sockaddr_in address;
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons(port);
+    if (bind(sock, (struct sockaddr *)&address, sizeof(address)) < 0) {
+        return false;
+    }
+    return true;
+}
+
+bool vss_socket_listen(VSS_Socket sock, int backlog) {
+    if (listen(sock, backlog) < 0) {
+        return false;
+    }
+    return true;
+}
+
+VSS_Socket vss_socket_accept(VSS_Socket sock) {
+    int client = accept(sock, NULL, NULL);
+    if (client < 0) return VSS_INVALID_SOCKET;
+    return client;
+}
+
+int vss_socket_send(VSS_Socket sock, const char *buf, int len) {
+    return send(sock, buf, len, 0);
+}
+
+int vss_socket_recv(VSS_Socket sock, char *buf, int len) {
+    return recv(sock, buf, len, 0);
+}
+
+void vss_socket_close(VSS_Socket sock) {
+    if (sock >= 0) {
+        close(sock);
+    }
+}
+
+bool vss_file_exists(const char *path) {
+    return access(path, F_OK) == 0;
+}
+
+bool vss_dir_exists(const char *path) {
+    struct stat st;
+    return stat(path, &st) == 0 && S_ISDIR(st.st_mode);
+}
+
+bool vss_make_dir(const char *path) {
+    return mkdir(path, 0777) == 0;
+}
+
+bool vss_list_dir_clean_vssc(const char *path) {
+    DIR *d = opendir(path);
+    if (d) {
+        size_t path_len = strlen(path);
+        struct dirent *dir;
+        while ((dir = readdir(d)) != NULL) {
+            char *ext = strrchr(dir->d_name, '.');
+            if (ext && strcmp(ext, ".vssc") == 0) {
+                size_t file_len = strlen(dir->d_name);
+                size_t fp_len = path_len + 1 + file_len + 1; // path + "/" + file + null
+                char *filepath = malloc(fp_len);
+                if (filepath) {
+                    snprintf(filepath, fp_len, "%s/%s", path, dir->d_name);
+                    remove(filepath);
+                    free(filepath);
+                }
+                printf("  Removed: %s\n", dir->d_name);
+            }
+        }
+        closedir(d);
+    }
+    return true;
+}
+
+int vss_scan_htmvss(const char *path, char ***filenames) {
+    DIR *d = opendir(path);
+    if (!d) {
+        *filenames = NULL;
+        return 0;
+    }
+    
+    int count = 0;
+    char **list = NULL;
+    struct dirent *dir;
+    while ((dir = readdir(d)) != NULL) {
+        char *ext = strrchr(dir->d_name, '.');
+        if (ext && strcmp(ext, ".htmvss") == 0) {
+            list = realloc(list, sizeof(char*) * (count + 1));
+            list[count] = platform_strdup(dir->d_name);
+            count++;
+        }
+    }
+    closedir(d);
+    *filenames = list;
+    return count;
+}
+
+int vss_list_dir(const char *path, char ***filenames) {
+    DIR *d = opendir(path);
+    if (!d) {
+        *filenames = NULL;
+        return 0;
+    }
+    
+    int count = 0;
+    char **list = NULL;
+    struct dirent *dir;
+    while ((dir = readdir(d)) != NULL) {
+        if (strcmp(dir->d_name, ".") == 0 || strcmp(dir->d_name, "..") == 0) {
+            continue;
+        }
+        list = realloc(list, sizeof(char*) * (count + 1));
+        list[count] = platform_strdup(dir->d_name);
+        count++;
+    }
+    closedir(d);
+    *filenames = list;
+    return count;
+}
+
+void vss_launch_browser(int port, const char *filename) {
+    char launch_cmd[512];
+#ifdef __APPLE__
+    snprintf(launch_cmd, sizeof(launch_cmd), "open http://localhost:%d/%s 2>/dev/null &", port, filename);
+#else
+    snprintf(launch_cmd, sizeof(launch_cmd), "xdg-open http://localhost:%d/%s 2>/dev/null &", port, filename);
+#endif
+    system(launch_cmd);
+}
+
+int vss_execute_cmd(const char *cmd) {
+    return system(cmd);
+}
+
+char *vss_get_home_dir(void) {
+    const char *home = getenv("HOME");
+    return home ? platform_strdup(home) : NULL;
+}
+
+bool vss_thread_create(VSS_Thread *thread, VSS_ThreadFunc func, void *arg) {
+    return pthread_create(thread, NULL, func, arg) == 0;
+}
+
+bool vss_thread_join(VSS_Thread thread, void **retval) {
+    return pthread_join(thread, retval) == 0;
+}
+
+void vss_mutex_init(VSS_Mutex *mutex) {
+    pthread_mutex_init(mutex, NULL);
+}
+
+void vss_mutex_lock(VSS_Mutex *mutex) {
+    pthread_mutex_lock(mutex);
+}
+
+void vss_mutex_unlock(VSS_Mutex *mutex) {
+    pthread_mutex_unlock(mutex);
+}
+
+void vss_mutex_destroy(VSS_Mutex *mutex) {
+    pthread_mutex_destroy(mutex);
+}
+
+void vss_cond_init(VSS_Cond *cond) {
+    pthread_cond_init(cond, NULL);
+}
+
+void vss_cond_wait(VSS_Cond *cond, VSS_Mutex *mutex) {
+    pthread_cond_wait(cond, mutex);
+}
+
+bool vss_cond_timedwait(VSS_Cond *cond, VSS_Mutex *mutex, int timeout_ms) {
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    ts.tv_sec += timeout_ms / 1000;
+    ts.tv_nsec += (timeout_ms % 1000) * 1000000;
+    if (ts.tv_nsec >= 1000000000) {
+        ts.tv_sec += 1;
+        ts.tv_nsec -= 1000000000;
+    }
+    return pthread_cond_timedwait(cond, mutex, &ts) == 0;
+}
+
+void vss_cond_signal(VSS_Cond *cond) {
+    pthread_cond_signal(cond);
+}
+
+void vss_cond_broadcast(VSS_Cond *cond) {
+    pthread_cond_broadcast(cond);
+}
+
+void vss_cond_destroy(VSS_Cond *cond) {
+    pthread_cond_destroy(cond);
+}
+
+int vss_atomic_inc(VSS_AtomicInt *ptr) {
+    return __atomic_add_fetch(ptr, 1, __ATOMIC_SEQ_CST);
+}
+
+int vss_atomic_dec(VSS_AtomicInt *ptr) {
+    return __atomic_sub_fetch(ptr, 1, __ATOMIC_SEQ_CST);
+}
+
+int vss_atomic_add(VSS_AtomicInt *ptr, int val) {
+    return __atomic_add_fetch(ptr, val, __ATOMIC_SEQ_CST);
+}
+
+int vss_atomic_get(VSS_AtomicInt *ptr) {
+    return __atomic_load_n(ptr, __ATOMIC_SEQ_CST);
+}
+
+void vss_atomic_set(VSS_AtomicInt *ptr, int val) {
+    __atomic_store_n(ptr, val, __ATOMIC_SEQ_CST);
+}
+
+bool vss_atomic_cas(VSS_AtomicInt *ptr, int old_val, int new_val) {
+    return __atomic_compare_exchange_n(ptr, &old_val, new_val, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+}
+
+void vss_sleep_ms(int ms) {
+    usleep(ms * 1000);
+}
+
+int vss_get_hardware_concurrency(void) {
+    long nprocs = sysconf(_SC_NPROCESSORS_ONLN);
+    return nprocs > 0 ? (int)nprocs : 4;
+}
+
+void *vss_dl_open(const char *path) {
+    if (!path) return NULL;
+    return dlopen(path, RTLD_NOW | RTLD_GLOBAL);
+}
+
+void *vss_dl_sym(void *handle, const char *symbol) {
+    if (!handle || !symbol) return NULL;
+    return dlsym(handle, symbol);
+}
+
+void vss_dl_close(void *handle) {
+    if (handle) dlclose(handle);
+}
+
 #endif

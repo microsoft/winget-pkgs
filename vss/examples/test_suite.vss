@@ -1,0 +1,57 @@
+note VSS 3.0.0 Validation Test Suite
+
+grab math
+grab string
+grab collections
+grab json
+grab testing
+
+say "========================================"
+say "VSS 3.0.0 Test Suite Execution"
+say "========================================"
+
+note 1. Test Const Declarations
+say "Testing constants..."
+const PI becomes 3.14159
+testing.assert_equal(PI, 3.14159, "Constant value should match initialization")
+
+note 2. Test Namespaces
+say "Testing namespaces..."
+namespace Utils
+    make msg becomes "Hello from Namespace!"
+    task greet
+        send msg
+    finish
+finish
+
+testing.assert_equal(Utils.msg, "Hello from Namespace!", "Namespace field access")
+testing.assert_equal(Utils.greet(), "Hello from Namespace!", "Namespace task call")
+
+note 3. Test Set Literals and Collections
+say "Testing sets..."
+make my_set becomes {1, 2, 3, 2}
+note Dynamic sets automatically de-duplicate on insert
+testing.assert_equal(size of my_set, 3, "Set de-duplication and size checks")
+
+note 4. Test Math Library
+say "Testing math library..."
+testing.assert_equal(math.sin(0), 0, "Math.sin(0) should be 0")
+testing.assert_equal(math.floor(2.8), 2, "Math.floor(2.8) should be 2")
+
+note 5. Test String Library
+say "Testing string library..."
+make s becomes "  VSS 3.0  "
+testing.assert_equal(string.trim(s), "VSS 3.0", "String.trim removes outer spacing")
+testing.assert_equal(string.upper("vss"), "VSS", "String.upper converts casing")
+
+note 6. Test JSON Library
+say "Testing JSON library..."
+make data becomes map [ "version": "3.0.0" "stable": yes ]
+make serialized becomes json.stringify(data)
+make parsed becomes json.parse(serialized)
+testing.assert_equal(parsed field "version", "3.0.0", "JSON parse reads correct string field")
+testing.assert_equal(parsed field "stable", yes, "JSON parse reads correct boolean field")
+
+say "========================================"
+say "All VSS 3.0.0 Tests Completed Successfully!"
+say "========================================"

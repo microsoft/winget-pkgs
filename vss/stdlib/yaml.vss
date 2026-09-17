@@ -1,0 +1,15 @@
+note VSS YAML Standard Library
+task parse needs yaml_str
+    make result becomes map []
+    make lines becomes __string_split(yaml_str, "\n")
+    repeat each line in lines
+        make trimmed becomes __string_trim(line)
+        make colon_idx becomes __string_find(trimmed, ":")
+        when colon_idx above 0
+            make key becomes __string_trim(__string_substring(trimmed, 0, colon_idx))
+            make val becomes __string_trim(__string_substring(trimmed, colon_idx + 1, __string_length(trimmed) - colon_idx - 1))
+            put val into result[key]
+        finish
+    finish
+    send result
+finish

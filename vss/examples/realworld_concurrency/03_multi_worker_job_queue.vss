@@ -1,0 +1,40 @@
+note VSS 3.1 Real-World Concurrency - Multi-Worker Job Queue System
+
+make job_channel becomes channel_create(20)
+make result_channel becomes channel_create(20)
+
+task worker_proc needs worker_id, jobs_in, results_out
+    make active becomes yes
+    during active same_as yes
+        make job_item becomes channel_recv(jobs_in)
+        when job_item same_as "STOP"
+            active becomes no
+        otherwise
+            say "Worker " + worker_id + " executing job: " + job_item
+            concurrency_sleep(10)
+            channel_send(results_out, "JOB_OK_" + job_item)
+        finish
+    finish
+    send "Worker " + worker_id + " stopped"
+finish
+
+say "Starting Multi-Worker Job Queue..."
+make w1 becomes start worker_proc(1, job_channel, result_channel)
+make w2 becomes start worker_proc(2, job_channel, result_channel)
+
+repeat j through 1 to 4
+    channel_send(job_channel, "TASK_" + j)
+finish
+
+channel_send(job_channel, "STOP")
+channel_send(job_channel, "STOP")
+
+await w1
+await w2
+
+repeat r through 1 to 4
+    make res becomes channel_recv(result_channel)
+    say "Received job result: " + res
+finish
+
+say "Multi-Worker Job Queue Execution Completed Successfully!"

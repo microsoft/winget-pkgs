@@ -1,0 +1,40 @@
+note VSS 3.1 Concurrency - Producer-Consumer Pipeline Pattern
+
+make job_ch becomes channel_create(20)
+make result_ch becomes channel_create(20)
+
+task producer_pipeline needs out_ch
+    repeat i through 1 to 8
+        make data becomes "RawData_" + i
+        say "Producer generated: " + data
+        channel_send(out_ch, data)
+    finish
+    channel_close(out_ch)
+    send "Producer Finished"
+finish
+
+task worker_pipeline needs in_ch, out_ch, worker_id
+    repeat count through 1 to 4
+        make raw becomes channel_recv(in_ch)
+        make processed becomes "Processed[" + raw + "] by Worker " + worker_id
+        channel_send(out_ch, processed)
+    finish
+    send "Worker " + worker_id + " Finished"
+finish
+
+say "Starting Producer-Consumer Pipeline..."
+make p_handle becomes start producer_pipeline(job_ch)
+make w1_handle becomes start worker_pipeline(job_ch, result_ch, 1)
+make w2_handle becomes start worker_pipeline(job_ch, result_ch, 2)
+
+await p_handle
+await w1_handle
+await w2_handle
+
+say "\nReading Pipeline Results:"
+repeat r through 1 to 8
+    make res becomes channel_recv(result_ch)
+    say "Pipeline Output #" + r + ": " + res
+finish
+
+say "Producer-Consumer Pipeline Test Completed Successfully!"

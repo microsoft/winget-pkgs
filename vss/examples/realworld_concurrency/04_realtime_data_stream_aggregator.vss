@@ -1,0 +1,37 @@
+note VSS 3.1 Real-World Concurrency - Real-time Data Stream Aggregator
+
+make stream_chan becomes channel_create(50)
+make total_events becomes atomic_create(0)
+
+task sensor_emitter needs sensor_id, target_chan
+    repeat event_idx through 1 to 5
+        make val becomes sensor_id * 100 + event_idx
+        channel_send(target_chan, val)
+        concurrency_sleep(10)
+    finish
+    send "Sensor " + sensor_id + " done"
+finish
+
+task aggregator_collector needs src_chan, counter_ref
+    repeat i through 1 to 15
+        make data_point becomes channel_recv(src_chan)
+        atomic_add(counter_ref, 1)
+        say "Aggregated data point #" + i + ": " + data_point
+    finish
+    send "Aggregator finished"
+finish
+
+say "Launching Real-Time Data Stream Aggregator..."
+make agg_task becomes start aggregator_collector(stream_chan, total_events)
+make s1 becomes start sensor_emitter(1, stream_chan)
+make s2 becomes start sensor_emitter(2, stream_chan)
+make s3 becomes start sensor_emitter(3, stream_chan)
+
+await s1
+await s2
+await s3
+await agg_task
+
+make count_val becomes atomic_get(total_events)
+say "Total Streamed Events Aggregated: " + count_val
+say "Real-Time Data Stream Aggregator Completed Successfully!"

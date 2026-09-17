@@ -2,5 +2,127 @@
 #define VSS_TOKEN_H
 
 #include "common.h"
-typedef enum { _x00cc, _x00cf, _x00e8, _x00d7, _x00ed, _x0106, _x00fe, _x00e2, _x00dd, _x00be, _x010b, _x00f1, _x00f2, _x00d3, _x00f8, _x0109, _x0108, _x010a, _x00ca, _x00d9, _x00c9, _x00de, _x0103, _x0107, _x00e7, _x00ff, _x010c, _x010e, _x00e9, _x00cb, _x00b7, _x00f0, _x00ea, _x00b5, _x00bf, _x00bb, _x00bc, _x00fd, _x00ec, _x00dc, _x00d2, _x00f6, _x00db, _x00e3, _x0100, _x00d4, _x00ba, _x00f9, _x00f7, _x010d, _x00b6, _x00ce, _x00d0, _x0102, _x00ef, _x00c4, _x00c2, _x00eb, _x00d5, _x00c1, _x00d6, _x00ee, _x00e5, _x00d1, _x00d8, _x00c3, _x00da, _x00f3, _x00c8, _x00cd, _x00f5, _x00e6, _x0105, _x0104, _x00f4, _x00e0, _x00fb, _x00c6, _x00c5, _x00e1, _x00fc, _x0101, _x00c0, _x00e4, _x00b9, _x00bd, _x010f, _x00c7, _x00b8, _x00df, _x00fa } _x0112; typedef struct { _x0112 _x0412; const char *_x03da; size_t _x02d4; int _x02d9; int _x01bf; } _x0111; const char *_x0492(_x0112 _x0412);
+
+typedef enum {
+    VSS_TOKEN_EOF,
+    VSS_TOKEN_ERROR,
+    VSS_TOKEN_NEWLINE,
+
+    VSS_TOKEN_IDENTIFIER,
+    VSS_TOKEN_NUMBER,
+    VSS_TOKEN_STRING,
+
+    VSS_TOKEN_SAY,
+    VSS_TOKEN_MAKE,
+    VSS_TOKEN_KEEP,
+    VSS_TOKEN_BECOMES,
+    VSS_TOKEN_WHEN,
+    VSS_TOKEN_ORWHEN,
+    VSS_TOKEN_OTHERWISE,
+    VSS_TOKEN_FINISH,
+    VSS_TOKEN_REPEAT,
+    VSS_TOKEN_TIMES,
+    VSS_TOKEN_THROUGH,
+    VSS_TOKEN_TO,
+    VSS_TOKEN_EACH,
+    VSS_TOKEN_IN,
+    VSS_TOKEN_DURING,
+    VSS_TOKEN_LEAVE,
+    VSS_TOKEN_SKIP,
+    VSS_TOKEN_TASK,
+    VSS_TOKEN_NEEDS,
+    VSS_TOKEN_SEND,
+    VSS_TOKEN_WITH,
+    VSS_TOKEN_YES,
+    VSS_TOKEN_NO,
+    VSS_TOKEN_EMPTY,
+    VSS_TOKEN_AND,
+    VSS_TOKEN_OR,
+    VSS_TOKEN_NOT,
+    VSS_TOKEN_ABOVE,
+    VSS_TOKEN_BELOW,
+    VSS_TOKEN_AT_LEAST,
+    VSS_TOKEN_AT_MOST,
+    VSS_TOKEN_SAME_AS,
+    VSS_TOKEN_NOT_SAME_AS,
+    VSS_TOKEN_ITEM,
+    VSS_TOKEN_FIELD,
+    VSS_TOKEN_PUT,
+    VSS_TOKEN_INTO,
+    VSS_TOKEN_MAP,
+    VSS_TOKEN_SET,
+    VSS_TOKEN_GRAB,
+    VSS_TOKEN_ATTEMPT,
+    VSS_TOKEN_RESCUE,
+    VSS_TOKEN_READ,
+    VSS_TOKEN_WRITE,
+    VSS_TOKEN_ADD,
+    VSS_TOKEN_ERASE,
+    VSS_TOKEN_EXISTS,
+    VSS_TOKEN_SIZE,
+    VSS_TOKEN_OF,
+    VSS_TOKEN_CHOOSE,
+    VSS_TOKEN_CASE,
+    VSS_TOKEN_NOTE,
+    VSS_TOKEN_HI,
+    VSS_TOKEN_BYE,
+    VSS_TOKEN_HTMVSS,
+
+    // VSS 2.0 Tokens
+    VSS_TOKEN_OBJECT,
+    VSS_TOKEN_MINE,
+    VSS_TOKEN_EXTENDS,
+    VSS_TOKEN_IMPLEMENTS,
+    VSS_TOKEN_CHOICES,
+    VSS_TOKEN_INTERFACE,
+    VSS_TOKEN_PARENT,
+    VSS_TOKEN_DOT,
+    VSS_TOKEN_EQUAL,
+
+    VSS_TOKEN_PLUS,
+    VSS_TOKEN_MINUS,
+    VSS_TOKEN_STAR,
+    VSS_TOKEN_SLASH,
+    VSS_TOKEN_PERCENT,
+    VSS_TOKEN_LEFT_BRACKET,
+    VSS_TOKEN_RIGHT_BRACKET,
+    VSS_TOKEN_COMMA,
+    VSS_TOKEN_COLON,
+    VSS_TOKEN_LEFT_PAREN,
+    VSS_TOKEN_RIGHT_PAREN,
+
+    // VSS 2.2.2 Tokens
+    VSS_TOKEN_SHAPE,
+    VSS_TOKEN_BLUEPRINT,
+    VSS_TOKEN_MATCH,
+    VSS_TOKEN_ASYNC,
+    VSS_TOKEN_AWAIT,
+    VSS_TOKEN_YIELD,
+    VSS_TOKEN_COROUTINE,
+    VSS_TOKEN_ARROW,
+    VSS_TOKEN_LEFT_BRACE,
+    VSS_TOKEN_RIGHT_BRACE,
+    VSS_TOKEN_CONST,
+    VSS_TOKEN_TRAIT,
+    VSS_TOKEN_NAMESPACE,
+    VSS_TOKEN_THREAD,
+    VSS_TOKEN_LOCK,
+    VSS_TOKEN_UNLOCK,
+    VSS_TOKEN_ASK,
+    VSS_TOKEN_START,
+    VSS_TOKEN_PARALLEL,
+    VSS_TOKEN_TIMEOUT,
+    VSS_TOKEN_SELECT
+} VSS_TokenType;
+
+typedef struct {
+    VSS_TokenType type;
+    const char *start;
+    size_t length;
+    int line;
+    int column;
+} VSS_Token;
+
+const char *vss_token_type_name(VSS_TokenType type);
+
 #endif

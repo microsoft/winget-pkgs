@@ -3,5 +3,106 @@
 
 #include "common.h"
 #include "value.h"
-typedef enum { _x0061, _x0062, _x0065, _x0089, _x006a, _x007c, _x006e, _x0084, _x006c, _x0063, _x0083, _x0071, _x0086, _x0055, _x0088, _x0078, _x0064, _x0077, _x007a, _x0079, _x0054, _x005a, _x0058, _x0059, _x0080, _x007b, _x0081, _x0074, _x0075, _x0076, _x005e, _x0060, _x007f, _x008b, _x005b, _x005c, _x006d, _x007d, _x006b, _x0082, _x0087, _x0069, _x007e, _x008a, _x0056, _x0068, _x0057, _x0066, _x0072, _x0073, _x005d, _x005f, _x0067, _x006f, _x0085, _x0070 } _x0092; typedef struct { uint8_t *_x01b8; int *_x02dd; int _x01d7; int _x019c; _x012a *_x01d3; int _x01d0; int _x01cf; } _x0035; void _x042f(_x0035 *_x01a9); void _x042e(_x0035 *_x01a9); void _x0430(_x0035 *_x01a9, uint8_t _x018c, int _x02d9); int _x042d(_x0035 *_x01a9, _x012a _x0425); void _x0439(_x0035 *_x01a9, const char *_x0319); int _x043a(_x0035 *_x01a9, int _x0329);
+
+typedef enum {
+    VSS_OP_CONSTANT,       // Push constant (1-byte index operand)
+    VSS_OP_CONSTANT_LONG,  // Push constant (3-byte index operand)
+    VSS_OP_EMPTY,          // Push empty
+    VSS_OP_TRUE,           // Push yes (true)
+    VSS_OP_FALSE,          // Push no (false)
+    VSS_OP_POP,            // Pop top of stack
+    
+    VSS_OP_GET_LOCAL,      // Read local variable (1-byte stack slot index)
+    VSS_OP_SET_LOCAL,      // Write local variable (1-byte stack slot index)
+    
+    VSS_OP_GET_GLOBAL,     // Read global variable (operand: constant pool string index)
+    VSS_OP_DEFINE_GLOBAL,  // Define global variable/constant (operand: constant pool string index, +1 byte is_const flag)
+    VSS_OP_SET_GLOBAL,     // Assign to global variable (operand: constant pool string index)
+    
+    VSS_OP_GET_UPVALUE,    // Read captured closure variable (operand: upvalue index)
+    VSS_OP_SET_UPVALUE,    // Write captured closure variable (operand: upvalue index)
+    
+    VSS_OP_ADD,            // Add numbers or join strings
+    VSS_OP_SUB,            // Subtract numbers
+    VSS_OP_MUL,            // Multiply numbers
+    VSS_OP_DIV,            // Divide numbers
+    VSS_OP_MOD,            // Modulo of numbers
+    
+    VSS_OP_NOT,            // Logical NOT
+    VSS_OP_NEGATE,         // Numeric negation
+    
+    VSS_OP_ABOVE,          // Compare above (>)
+    VSS_OP_BELOW,          // Compare below (<)
+    VSS_OP_AT_LEAST,       // Compare at least (>=)
+    VSS_OP_AT_MOST,        // Compare at most (<=)
+    VSS_OP_SAME_AS,        // Compare equality (same_as)
+    VSS_OP_NOT_SAME_AS,    // Compare inequality (not_same_as)
+    
+    VSS_OP_SAY,            // Print top of stack followed by newline
+    
+    VSS_OP_JUMP,           // Jump forward/backward unconditionally (2-byte offset operand)
+    VSS_OP_JUMP_IF_FALSE,  // Jump if stack top is falsy (2-byte offset operand)
+    VSS_OP_LOOP,           // Loop jump backward (2-byte offset operand)
+    
+    VSS_OP_CALL,           // Call a closure or native function (1-byte operand: argument count)
+    VSS_OP_CLOSURE,        // Instantiate closure (operand: function index in constants, followed by upvalue layout)
+    VSS_OP_RETURN,         // Return from current task
+    VSS_OP_YIELD,          // Yield from current coroutine/generator task
+    
+    VSS_OP_BUILD_LIST,     // Create list from stack elements (1-byte operand: count)
+    VSS_OP_BUILD_SET,      // Create set from stack elements (1-byte operand: count)
+    VSS_OP_BUILD_MAP,      // Create map from stack elements (1-byte operand: key-value pair count)
+    VSS_OP_GET_ITEM,       // Access list item: stack has [list, index] -> pushes item
+    VSS_OP_SET_ITEM,       // Assign list item: stack has [list, index, val]
+    VSS_OP_PUT_ITEM,       // Put item in list: stack has [val, list] -> appends val
+    VSS_OP_GET_FIELD,      // Access map field: stack has [map, field_key] -> pushes field value
+    VSS_OP_SET_FIELD,      // Set map field: stack has [map, field_key, val] -> sets field
+    
+    VSS_OP_SIZE_OF,        // Get size of list/map/string
+    VSS_OP_EXISTS,         // File exists check
+    VSS_OP_READ_FILE,      // Read file
+    VSS_OP_WRITE_FILE,     // Write content into file
+    VSS_OP_ADD_FILE,       // Append content to file
+    VSS_OP_ERASE_FILE,     // Delete file
+    
+    VSS_OP_ATTEMPT,        // Enter attempt block (2-byte jump offset to rescue block)
+    VSS_OP_END_ATTEMPT,    // Exit attempt block (pop exception handler)
+    VSS_OP_GRAB,           // Import/grab module (1-byte operand: constant pool string index)
+    
+    VSS_OP_HI_HTMVSS,      // Emit HTML document prefix
+    VSS_OP_BYE_HTMVSS,     // Emit HTML document suffix
+    
+    // OOP Opcodes
+    VSS_OP_CLASS,
+    VSS_OP_ENUM,
+    VSS_OP_GET_MEMBER,
+    VSS_OP_SET_MEMBER,
+    VSS_OP_GET_PARENT,
+    VSS_OP_ASK,
+    VSS_OP_START_TASK,
+    VSS_OP_AWAIT_TASK,
+    VSS_OP_PARALLEL_EACH,
+    VSS_OP_LOCK_MUTEX,
+    VSS_OP_UNLOCK_MUTEX
+} VSS_OpCode;
+
+typedef struct {
+    uint8_t *code;
+    int *lines;
+    int count;
+    int capacity;
+    VSS_Value *constants;
+    int const_count;
+    int const_capacity;
+} VSS_Chunk;
+
+void vss_chunk_init(VSS_Chunk *chunk);
+void vss_chunk_free(VSS_Chunk *chunk);
+void vss_chunk_write(VSS_Chunk *chunk, uint8_t byte, int line);
+int vss_chunk_add_constant(VSS_Chunk *chunk, VSS_Value value);
+
+// Disassembly tools for debugging
+void vss_disassemble_chunk(VSS_Chunk *chunk, const char *name);
+int vss_disassemble_instruction(VSS_Chunk *chunk, int offset);
+
 #endif

@@ -1,0 +1,27 @@
+note VSS 3.1 Concurrency - Lock-Free Atomic Primitives
+
+make counter becomes atomic_create(0)
+
+task atomic_worker needs counter_ref, count
+    repeat i through 1 to count
+        atomic_add(counter_ref, 1)
+    finish
+    send "Worker Finished"
+finish
+
+say "Spawning 5 tasks performing lock-free atomic increments..."
+make t1 becomes start atomic_worker(counter, 500)
+make t2 becomes start atomic_worker(counter, 500)
+make t3 becomes start atomic_worker(counter, 500)
+make t4 becomes start atomic_worker(counter, 500)
+make t5 becomes start atomic_worker(counter, 500)
+
+await t1
+await t2
+await t3
+await t4
+await t5
+
+make final_val becomes atomic_get(counter)
+say "Atomic Counter Final Value (Expected 2500): " + final_val
+say "Atomic Operations Test Completed Successfully!"

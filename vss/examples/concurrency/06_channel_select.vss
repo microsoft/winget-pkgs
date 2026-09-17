@@ -1,0 +1,32 @@
+note VSS 3.1 Concurrency - Channel Multiplexing with Select
+
+make ch1 becomes channel.create(5)
+make ch2 becomes channel.create(5)
+
+task sender_one needs channel1
+    concurrency_sleep(50)
+    channel_send(channel1, "Data from Channel 1")
+    send "Sent 1"
+finish
+
+task sender_two needs channel2
+    concurrency_sleep(100)
+    channel_send(channel2, "Data from Channel 2")
+    send "Sent 2"
+finish
+
+make h1 becomes start sender_one(ch1)
+make h2 becomes start sender_two(ch2)
+
+say "Multiplexing channel receives using Select statement..."
+select
+    case channel_recv(ch1)
+        say "Received from Channel 1!"
+    case channel_recv(ch2)
+        say "Received from Channel 2!"
+finish
+
+await h1
+await h2
+
+say "Channel Select Test Completed Successfully!"

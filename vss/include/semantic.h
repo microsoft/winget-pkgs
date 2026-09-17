@@ -2,5 +2,7 @@
 #define VSS_SEMANTIC_H
 
 #include "ast.h"
-bool _x046b(_x0032 _x036e);
+
+bool vss_semantic_analyze(VSS_Block program);
+
 #endif

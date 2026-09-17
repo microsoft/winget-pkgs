@@ -1,0 +1,30 @@
+note VSS 3.1 Concurrency - Basic Channel Send and Receive
+
+make ch becomes channel_create(10)
+
+task producer needs ch_ref
+    repeat i through 1 to 5
+        say "Producer sending msg: " + i
+        channel_send(ch_ref, "Message #" + i)
+        concurrency_sleep(50)
+    finish
+    channel_close(ch_ref)
+    send "Producer Finished"
+finish
+
+task consumer needs ch_ref
+    repeat count through 1 to 5
+        make msg becomes channel_recv(ch_ref)
+        say "Consumer received: " + msg
+    finish
+    send "Consumer Finished"
+finish
+
+say "Starting Channel Producer and Consumer tasks..."
+make prod_handle becomes start producer(ch)
+make cons_handle becomes start consumer(ch)
+
+await prod_handle
+await cons_handle
+
+say "Channel Communication Completed Successfully!"

@@ -3,4 +3,820 @@
 #include <string.h>
 #include <stdarg.h>
 #include "semantic.h"
-extern const char *_x0435; static void _x03ae(int _x02d9, int _x01ba, const char *_x0257, ...) { fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x65\x72\x72\x6f\x72\x3a\x00\x33\x33\x5b\x30\x6d\x20\x6c\x69\x6e\x65\x20\x25\x64\x2c\x20\x63\x6f\x6c\x20\x25\x64\x3a\x20", _x02d9, _x01ba); va_list _x0140; va_start(_x0140, _x0257); vfprintf(stderr, _x0257, _x0140); va_end(_x0140); fprintf(stderr, "\x0a"); if (_x0435 && _x02d9 > 0) { const char *_x033a = _x0435; int _x01df = 1; while (*_x033a && _x01df < _x02d9) { if (*_x033a == '\n') _x01df++; _x033a++; } const char *_x02dc = _x033a; while (*_x033a && *_x033a != '\n' && *_x033a != '\r') _x033a++; int _x02da = (int)(_x033a - _x02dc); fprintf(stderr, "\x20\x25\x34\x64\x20\x7c\x20\x25\x2e\x2a\x73\x0a", _x02d9, _x02da, _x02dc); fprintf(stderr, "\x20\x20\x20\x20\x20\x20\x7c\x20"); for (int _x0288 = 1; _x0288 < _x01ba; _x0288++) { fprintf(stderr, "\x20"); } fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x5e\x00\x33\x33\x5b\x30\x6d\x0a"); } } static char *_x03a2(const char *_x039e) { if (!_x039e) return NULL; char *dup = malloc(strlen(_x039e) + 1); if (dup) strcpy(dup, _x039e); return dup; } typedef struct { char *_x0319; char **_x0347; size_t _x0346; } _x0029; typedef struct { char *_x0319; _x0029 *_x03fd; size_t _x03fa; } _x0027; typedef struct { char *_x0319; char **_x02fe; size_t _x02fb; } _x0026; typedef struct { char *_x0319; char *_x034b; char **_x02a2; size_t _x02a0; char **_x023d; size_t _x023a; _x0029 *_x0304; size_t _x0301; } _x0025; typedef struct _x002a { char *_x0319; char *_x0413; bool _x02a7; struct _x002a *_x0320; } _x002a; typedef struct _x0028 { _x002a *_x0429; struct _x0028 *_x0349; } _x0028; static _x0027 *_x02a2 = NULL; static size_t _x02a0 = 0; static _x0026 *_x021c = NULL; static size_t _x021a = 0; static _x0025 *_x01ab = NULL; static size_t _x01aa = 0; static _x0027 *_x0246(const char *_x0319) { for (size_t _x0288 = 0; _x0288 < _x02a0; _x0288++) { if (strcmp(_x02a2[_x0288]._x0319, _x0319) == 0) return &_x02a2[_x0288]; } return NULL; } static _x0026 *_x0245(const char *_x0319) { for (size_t _x0288 = 0; _x0288 < _x021a; _x0288++) { if (strcmp(_x021c[_x0288]._x0319, _x0319) == 0) return &_x021c[_x0288]; } return NULL; } static _x0025 *_x0243(const char *_x0319) { for (size_t _x0288 = 0; _x0288 < _x01aa; _x0288++) { if (strcmp(_x01ab[_x0288]._x0319, _x0319) == 0) return &_x01ab[_x0288]; } return NULL; } static _x0029 *_x0244(_x0025 *_x01b4, const char *_x0319) { for (size_t _x0288 = 0; _x0288 < _x01b4->_x0301; _x0288++) { if (strcmp(_x01b4->_x0304[_x0288]._x0319, _x0319) == 0) return &_x01b4->_x0304[_x0288]; } if (_x01b4->_x034b) { _x0025 *_x0349 = _x0243(_x01b4->_x034b); if (_x0349) return _x0244(_x0349, _x0319); } return NULL; } static bool _x027e(_x0025 *_x01b4) { _x0025 *_x01de = _x01b4; size_t _x01ee = 0; while (_x01de && _x01de->_x034b) { if (_x01ee > 256) return true; _x0025 *_x0349 = _x0243(_x01de->_x034b); if (_x0349 == _x01b4) return true; _x01de = _x0349; _x01ee++; } return false; } static void _x03a6(_x0028 *_x03a5, const char *_x0319, const char *_x0413, bool _x02a7) { _x002a *_x041f = malloc(sizeof(_x002a)); _x041f->_x0319 = _x03a2(_x0319); _x041f->_x0413 = _x0413 ? _x03a2(_x0413) : NULL; _x041f->_x02a7 = _x02a7; _x041f->_x0320 = _x03a5->_x0429; _x03a5->_x0429 = _x041f; } static _x002a *_x03a9(_x0028 *_x03a5, const char *_x0319) { _x0028 *_x01de = _x03a5; while (_x01de) { _x002a *_x041f = _x01de->_x0429; while (_x041f) { if (strcmp(_x041f->_x0319, _x0319) == 0) return _x041f; _x041f = _x041f->_x0320; } _x01de = _x01de->_x0349; } return NULL; } static void _x03a8(_x0028 *_x03a5) { _x002a *_x041f = _x03a5->_x0429; while (_x041f) { _x002a *_x0320 = _x041f->_x0320; free(_x041f->_x0319); if (_x041f->_x0413) free(_x041f->_x0413); free(_x041f); _x041f = _x0320; } _x03a5->_x0429 = NULL; } static const char *_x0293(_x0047 *_x022a, _x0028 *_x03a5) { if (!_x022a) return "\x61\x6e\x79"; switch (_x022a->_x02c6) { case _x0041: return "\x6e\x75\x6d\x62\x65\x72"; case _x0043: return "\x74\x65\x78\x74"; case _x0037: return "\x62\x6f\x6f\x6c\x65\x61\x6e"; case _x003a: return "\x61\x6e\x79"; case _x003d: return "\x6c\x69\x73\x74"; case _x003e: return "\x6d\x61\x70"; case _x003f: return "\x61\x6e\x79"; case _x0042: return "\x61\x6e\x79"; case _x0040: { _x002a *_x041f = _x03a9(_x03a5, _x022a->_x0141._x0319); if (_x041f && _x041f->_x0413) return _x041f->_x0413; if (_x0243(_x022a->_x0141._x0319)) return _x022a->_x0141._x0319; if (_x0245(_x022a->_x0141._x0319)) return _x022a->_x0141._x0319; return "\x61\x6e\x79"; } case _x0036: { _x0112 _x032b = _x022a->_x0141._x014b._x032b; if (_x032b == _x00f5 || _x032b == _x00e6 || _x032b == _x0105 || _x032b == _x0104 || _x032b == _x00f4) { const char *_x02ee = _x0293(_x022a->_x0141._x014b._x02d2, _x03a5); const char *_x0399 = _x0293(_x022a->_x0141._x014b._x0396, _x03a5); if (strcmp(_x02ee, "\x64\x65\x63\x69\x6d\x61\x6c") == 0 || strcmp(_x0399, "\x64\x65\x63\x69\x6d\x61\x6c") == 0) return "\x64\x65\x63\x69\x6d\x61\x6c"; return "\x6e\x75\x6d\x62\x65\x72"; } if (_x032b == _x00b5 || _x032b == _x00bf || _x032b == _x00bb || _x032b == _x00bc || _x032b == _x00fd || _x032b == _x00ec || _x032b == _x00b7 || _x032b == _x00f0) { return "\x62\x6f\x6f\x6c\x65\x61\x6e"; } return "\x61\x6e\x79"; } case _x0045: { _x0112 _x032b = _x022a->_x0141._x0416._x032b; if (_x032b == _x00e6 || _x032b == _x00bd) { return _x0293(_x022a->_x0141._x0416._x032e, _x03a5); } if (_x032b == _x00ea) { return "\x62\x6f\x6f\x6c\x65\x61\x6e"; } return "\x61\x6e\x79"; } case _x0038: { if (_x022a->_x0141._x0194._x0198->_x02c6 == _x0040) { _x0025 *_x01b4 = _x0243(_x022a->_x0141._x0194._x0198->_x0141._x0319); if (_x01b4) return _x01b4->_x0319; } return "\x61\x6e\x79"; } case _x003b: { if (_x022a->_x0141._x0238._x02f7->_x02c6 == _x0040) { _x0026 *_x0216 = _x0245(_x022a->_x0141._x0238._x02f7->_x0141._x0319); if (_x0216) return _x0216->_x0319; } return "\x61\x6e\x79"; } case _x0044: { return _x022a->_x0141._x03e9._x0319; } case _x0039: { return "\x61\x6e\x79"; } default: return "\x61\x6e\x79"; } } static bool _x0415(const char *_x01ec, const char *_x0294) { if (!_x01ec || !_x0294) return true; if (strcmp(_x01ec, "\x61\x6e\x79") == 0 || strcmp(_x0294, "\x61\x6e\x79") == 0) return true; if (strcmp(_x01ec, _x0294) == 0) return true; if ((strcmp(_x01ec, "\x6e\x75\x6d\x62\x65\x72") == 0 || strcmp(_x01ec, "\x64\x65\x63\x69\x6d\x61\x6c") == 0) && (strcmp(_x0294, "\x6e\x75\x6d\x62\x65\x72") == 0 || strcmp(_x0294, "\x64\x65\x63\x69\x6d\x61\x6c") == 0)) { return true; } return false; } static bool _x01a5(_x00b3 *_x03e5, _x0028 *_x03a5) { if (!_x03e5) return true; switch (_x03e5->_x02c6) { case _x00a4: { const char *_x0292 = _x0293(_x03e5->_x0141._x02f4._x0299, _x03a5); if (_x03e5->_x0141._x02f4._x0413) { if (!_x0415(_x03e5->_x0141._x02f4._x0413, _x0292)) { _x03ae(_x03e5->_x02d9, _x03e5->_x01bf, "\x54\x79\x70\x65\x20\x6d\x69\x73\x6d\x61\x74\x63\x68\x20\x69\x6e\x20\x76\x61\x72\x69\x61\x62\x6c\x65\x20\x64\x65\x63\x6c\x61\x72\x61\x74\x69\x6f\x6e\x20\x27\x25\x73\x27\x2e\x20\x44\x65\x63\x6c\x61\x72\x65\x64\x20\x74\x79\x70\x65\x20\x69\x73\x20\x27\x25\x73\x27\x2c\x20\x67\x6f\x74\x20\x27\x25\x73\x27\x2e", _x03e5->_x0141._x02f4._x0319, _x03e5->_x0141._x02f4._x0413, _x0292); return false; } } _x03a6(_x03a5, _x03e5->_x0141._x02f4._x0319, _x03e5->_x0141._x02f4._x0413, false); break; } case _x00a2: { const char *_x0292 = _x0293(_x03e5->_x0141._x02bf._x0299, _x03a5); if (_x03e5->_x0141._x02bf._x0413) { if (!_x0415(_x03e5->_x0141._x02bf._x0413, _x0292)) { _x03ae(_x03e5->_x02d9, _x03e5->_x01bf, "\x54\x79\x70\x65\x20\x6d\x69\x73\x6d\x61\x74\x63\x68\x20\x69\x6e\x20\x63\x6f\x6e\x73\x74\x61\x6e\x74\x20\x64\x65\x63\x6c\x61\x72\x61\x74\x69\x6f\x6e\x20\x27\x25\x73\x27\x2e\x20\x44\x65\x63\x6c\x61\x72\x65\x64\x20\x74\x79\x70\x65\x20\x69\x73\x20\x27\x25\x73\x27\x2c\x20\x67\x6f\x74\x20\x27\x25\x73\x27\x2e", _x03e5->_x0141._x02bf._x0319, _x03e5->_x0141._x02bf._x0413, _x0292); return false; } } _x03a6(_x03a5, _x03e5->_x0141._x02bf._x0319, _x03e5->_x0141._x02bf._x0413, true); break; } case _x0097: { _x002a *_x041f = _x03a9(_x03a5, _x03e5->_x0141._x0142._x0319); if (_x041f) { if (_x041f->_x02a7) { _x03ae(_x03e5->_x02d9, _x03e5->_x01bf, "\x43\x61\x6e\x6e\x6f\x74\x20\x72\x65\x61\x73\x73\x69\x67\x6e\x20\x74\x6f\x20\x63\x6f\x6e\x73\x74\x61\x6e\x74\x20\x27\x25\x73\x27\x2e", _x03e5->_x0141._x0142._x0319); return false; } const char *_x0292 = _x0293(_x03e5->_x0141._x0142._x0425, _x03a5); if (_x041f->_x0413) { if (!_x0415(_x041f->_x0413, _x0292)) { _x03ae(_x03e5->_x02d9, _x03e5->_x01bf, "\x54\x79\x70\x65\x20\x6d\x69\x73\x6d\x61\x74\x63\x68\x20\x69\x6e\x20\x61\x73\x73\x69\x67\x6e\x6d\x65\x6e\x74\x20\x74\x6f\x20\x27\x25\x73\x27\x2e\x20\x44\x65\x63\x6c\x61\x72\x65\x64\x20\x74\x79\x70\x65\x20\x69\x73\x20\x27\x25\x73\x27\x2c\x20\x67\x6f\x74\x20\x27\x25\x73\x27\x2e", _x03e5->_x0141._x0142._x0319, _x041f->_x0413, _x0292); return false; } } } else { _x03a6(_x03a5, _x03e5->_x0141._x0142._x0319, "\x61\x6e\x79", false); } break; } case _x00b0: { for (size_t _x0288 = 0; _x0288 < _x03e5->_x0141._x04b0._x0156; _x0288++) { _x0028 _x03ea; _x03ea._x0429 = NULL; _x03ea._x0349 = _x03a5; for (size_t _x02b8 = 0; _x02b8 < _x03e5->_x0141._x04b0._x0159[_x0288]._x014e._x01d7; _x02b8++) { if (!_x01a5(_x03e5->_x0141._x04b0._x0159[_x0288]._x014e._x03e0[_x02b8], &_x03ea)) { _x03a8(&_x03ea); return false; } } _x03a8(&_x03ea); } if (_x03e5->_x0141._x04b0._x0331._x01d7 > 0) { _x0028 _x03ea; _x03ea._x0429 = NULL; _x03ea._x0349 = _x03a5; for (size_t _x02b8 = 0; _x02b8 < _x03e5->_x0141._x04b0._x0331._x01d7; _x02b8++) { if (!_x01a5(_x03e5->_x0141._x04b0._x0331._x03e0[_x02b8], &_x03ea)) { _x03a8(&_x03ea); return false; } } _x03a8(&_x03ea); } break; } case _x00a7: { _x0028 _x03ea; _x03ea._x0429 = NULL; _x03ea._x0349 = _x03a5; for (size_t _x02b8 = 0; _x02b8 < _x03e5->_x0141._x0382._x014f._x01d7; _x02b8++) { if (!_x01a5(_x03e5->_x0141._x0382._x014f._x03e0[_x02b8], &_x03ea)) { _x03a8(&_x03ea); return false; } } _x03a8(&_x03ea); break; } case _x00a9: { _x0028 _x03ea; _x03ea._x0429 = NULL; _x03ea._x0349 = _x03a5; _x03a6(&_x03ea, _x03e5->_x0141._x0384._x0428, "\x6e\x75\x6d\x62\x65\x72", false); for (size_t _x02b8 = 0; _x02b8 < _x03e5->_x0141._x0384._x014f._x01d7; _x02b8++) { if (!_x01a5(_x03e5->_x0141._x0384._x014f._x03e0[_x02b8], &_x03ea)) { _x03a8(&_x03ea); return false; } } _x03a8(&_x03ea); break; } case _x00a8: { _x0028 _x03ea; _x03ea._x0429 = NULL; _x03ea._x0349 = _x03a5; _x03a6(&_x03ea, _x03e5->_x0141._x0383._x0428, "\x61\x6e\x79", false); for (size_t _x02b8 = 0; _x02b8 < _x03e5->_x0141._x0383._x014f._x01d7; _x02b8++) { if (!_x01a5(_x03e5->_x0141._x0383._x014f._x03e0[_x02b8], &_x03ea)) { _x03a8(&_x03ea); return false; } } _x03a8(&_x03ea); break; } case _x009c: { _x0028 _x03ea; _x03ea._x0429 = NULL; _x03ea._x0349 = _x03a5; for (size_t _x02b8 = 0; _x02b8 < _x03e5->_x0141._x01ff._x014f._x01d7; _x02b8++) { if (!_x01a5(_x03e5->_x0141._x01ff._x014f._x03e0[_x02b8], &_x03ea)) { _x03a8(&_x03ea); return false; } } _x03a8(&_x03ea); break; } case _x00af: { _x0028 _x03ea; _x03ea._x0429 = NULL; _x03ea._x0349 = _x03a5; for (size_t _x0288 = 0; _x0288 < _x03e5->_x0141._x03f8._x0346; _x0288++) { _x03a6(&_x03ea, _x03e5->_x0141._x03f8._x0347[_x0288], "\x61\x6e\x79", false); } for (size_t _x02b8 = 0; _x02b8 < _x03e5->_x0141._x03f8._x014f._x01d7; _x02b8++) { if (!_x01a5(_x03e5->_x0141._x03f8._x014f._x03e0[_x02b8], &_x03ea)) { _x03a8(&_x03ea); return false; } } _x03a8(&_x03ea); break; } case _x009b: { for (size_t _x0288 = 0; _x0288 < _x03e5->_x0141._x01a8._x019e; _x0288++) { _x0028 _x03ea; _x03ea._x0429 = NULL; _x03ea._x0349 = _x03a5; for (size_t _x02b8 = 0; _x02b8 < _x03e5->_x0141._x01a8._x01a2[_x0288]._x014e._x01d7; _x02b8++) { if (!_x01a5(_x03e5->_x0141._x01a8._x01a2[_x0288]._x014e._x03e0[_x02b8], &_x03ea)) { _x03a8(&_x03ea); return false; } } _x03a8(&_x03ea); } if (_x03e5->_x0141._x01a8._x0331._x01d7 > 0) { _x0028 _x03ea; _x03ea._x0429 = NULL; _x03ea._x0349 = _x03a5; for (size_t _x02b8 = 0; _x02b8 < _x03e5->_x0141._x01a8._x0331._x01d7; _x02b8++) { if (!_x01a5(_x03e5->_x0141._x01a8._x0331._x03e0[_x02b8], &_x03ea)) { _x03a8(&_x03ea); return false; } } _x03a8(&_x03ea); } break; } case _x0098: { _x0028 _x03ec; _x03ec._x0429 = NULL; _x03ec._x0349 = _x03a5; for (size_t _x02b8 = 0; _x02b8 < _x03e5->_x0141._x0144._x040f._x01d7; _x02b8++) { if (!_x01a5(_x03e5->_x0141._x0144._x040f._x03e0[_x02b8], &_x03ec)) { _x03a8(&_x03ec); return false; } } _x03a8(&_x03ec); _x0028 _x03eb; _x03eb._x0429 = NULL; _x03eb._x0349 = _x03a5; _x03a6(&_x03eb, _x03e5->_x0141._x0144._x036d, "\x74\x65\x78\x74", true); for (size_t _x02b8 = 0; _x02b8 < _x03e5->_x0141._x0144._x038a._x01d7; _x02b8++) { if (!_x01a5(_x03e5->_x0141._x0144._x038a._x03e0[_x02b8], &_x03eb)) { _x03a8(&_x03eb); return false; } } _x03a8(&_x03eb); break; } case _x00ad: { _x0028 _x03ea; _x03ea._x0429 = NULL; _x03ea._x0349 = _x03a5; for (size_t _x02b8 = 0; _x02b8 < _x03e5->_x0141._x03b9._x02fb; _x02b8++) { if (!_x01a5(_x03e5->_x0141._x03b9._x02fe[_x02b8], &_x03ea)) { _x03a8(&_x03ea); return false; } } _x03a8(&_x03ea); break; } case _x009e: { if (_x03e5->_x0141._x023b._x01ed) { _x00b3 *_x03fe = _x047d(_x03e5->_x0141._x023b._x01ed, _x03e5->_x02d9, _x03e5->_x01bf); bool _x032a = _x01a5(_x03fe, _x03a5); free(_x03fe); if (!_x032a) return false; } break; } case _x00b1: { if (_x03e5->_x0141._x04b5._x022c) { _x00b3 *_x03fe = _x047d(_x03e5->_x0141._x04b5._x022c, _x03e5->_x02d9, _x03e5->_x01bf); bool _x032a = _x01a5(_x03fe, _x03a5); free(_x03fe); if (!_x032a) return false; } break; } default: break; } return true; } static _x00b3 *_x0247(_x0032 _x036e, const char *_x0319) { for (size_t _x0288 = 0; _x0288 < _x036e._x01d7; _x0288++) { _x00b3 *_x039e = _x036e._x03e0[_x0288]; if (_x039e->_x02c6 == _x00a5 && strcmp(_x039e->_x0141._x0327._x0319, _x0319) == 0) { return _x039e; } if (_x039e->_x02c6 == _x00ad && strcmp(_x039e->_x0141._x03b9._x0319, _x0319) == 0) { return _x039e; } } return NULL; } bool _x046b(_x0032 _x036e) { for (size_t _x0288 = 0; _x0288 < _x02a0; _x0288++) { free(_x02a2[_x0288]._x0319); for (size_t _x02b8 = 0; _x02b8 < _x02a2[_x0288]._x03fa; _x02b8++) { free(_x02a2[_x0288]._x03fd[_x02b8]._x0319); for (size_t _x02be = 0; _x02be < _x02a2[_x0288]._x03fd[_x02b8]._x0346; _x02be++) { free(_x02a2[_x0288]._x03fd[_x02b8]._x0347[_x02be]); } free(_x02a2[_x0288]._x03fd[_x02b8]._x0347); } free(_x02a2[_x0288]._x03fd); } free(_x02a2); _x02a2 = NULL; _x02a0 = 0; for (size_t _x0288 = 0; _x0288 < _x021a; _x0288++) { free(_x021c[_x0288]._x0319); for (size_t _x02b8 = 0; _x02b8 < _x021c[_x0288]._x02fb; _x02b8++) { free(_x021c[_x0288]._x02fe[_x02b8]); } free(_x021c[_x0288]._x02fe); } free(_x021c); _x021c = NULL; _x021a = 0; for (size_t _x0288 = 0; _x0288 < _x01aa; _x0288++) { free(_x01ab[_x0288]._x0319); if (_x01ab[_x0288]._x034b) free(_x01ab[_x0288]._x034b); for (size_t _x02b8 = 0; _x02b8 < _x01ab[_x0288]._x02a0; _x02b8++) { free(_x01ab[_x0288]._x02a2[_x02b8]); } free(_x01ab[_x0288]._x02a2); for (size_t _x02b8 = 0; _x02b8 < _x01ab[_x0288]._x023a; _x02b8++) { free(_x01ab[_x0288]._x023d[_x02b8]); } free(_x01ab[_x0288]._x023d); for (size_t _x02b8 = 0; _x02b8 < _x01ab[_x0288]._x0301; _x02b8++) { free(_x01ab[_x0288]._x0304[_x02b8]._x0319); for (size_t _x02be = 0; _x02be < _x01ab[_x0288]._x0304[_x02b8]._x0346; _x02be++) { free(_x01ab[_x0288]._x0304[_x02b8]._x0347[_x02be]); } free(_x01ab[_x0288]._x0304[_x02b8]._x0347); } free(_x01ab[_x0288]._x0304); } free(_x01ab); _x01ab = NULL; _x01aa = 0; for (size_t _x0288 = 0; _x0288 < _x036e._x01d7; _x0288++) { _x00b3 *_x03e5 = _x036e._x03e0[_x0288]; if (_x03e5->_x02c6 == _x009a) { _x0026 *_x0201 = _x0245(_x03e5->_x0141._x01a7._x0319); if (_x0201) { _x03ae(_x03e5->_x02d9, _x03e5->_x01bf, "\x44\x75\x70\x6c\x69\x63\x61\x74\x65\x20\x65\x6e\x75\x6d\x20\x64\x65\x63\x6c\x61\x72\x61\x74\x69\x6f\x6e\x20\x27\x25\x73\x27\x2e", _x03e5->_x0141._x01a7._x0319); return false; } _x021c = realloc(_x021c, sizeof(_x0026) * (_x021a + 1)); _x0026 *_x01de = &_x021c[_x021a++]; _x01de->_x0319 = _x03a2(_x03e5->_x0141._x01a7._x0319); _x01de->_x02fe = malloc(sizeof(char*) * _x03e5->_x0141._x01a7._x02fb); _x01de->_x02fb = _x03e5->_x0141._x01a7._x02fb; for (size_t _x02b8 = 0; _x02b8 < _x03e5->_x0141._x01a7._x02fb; _x02b8++) { _x01de->_x02fe[_x02b8] = _x03a2(_x03e5->_x0141._x01a7._x02fe[_x02b8]); } } else if (_x03e5->_x02c6 == _x00a1) { _x0027 *_x028d = _x0246(_x03e5->_x0141._x02a1._x0319); if (_x028d) { _x03ae(_x03e5->_x02d9, _x03e5->_x01bf, "\x44\x75\x70\x6c\x69\x63\x61\x74\x65\x20\x69\x6e\x74\x65\x72\x66\x61\x63\x65\x20\x64\x65\x63\x6c\x61\x72\x61\x74\x69\x6f\x6e\x20\x27\x25\x73\x27\x2e", _x03e5->_x0141._x02a1._x0319); return false; } _x02a2 = realloc(_x02a2, sizeof(_x0027) * (_x02a0 + 1)); _x0027 *_x01de = &_x02a2[_x02a0++]; _x01de->_x0319 = _x03a2(_x03e5->_x0141._x02a1._x0319); _x01de->_x03fd = malloc(sizeof(_x0029) * _x03e5->_x0141._x02a1._x03fa); _x01de->_x03fa = _x03e5->_x0141._x02a1._x03fa; for (size_t _x02b8 = 0; _x02b8 < _x03e5->_x0141._x02a1._x03fa; _x02b8++) { _x00b3 *_x03f0 = _x03e5->_x0141._x02a1._x03fb[_x02b8]; _x01de->_x03fd[_x02b8]._x0319 = _x03a2(_x03f0->_x0141._x03f8._x0319); _x01de->_x03fd[_x02b8]._x0347 = malloc(sizeof(char*) * _x03f0->_x0141._x03f8._x0346); _x01de->_x03fd[_x02b8]._x0346 = _x03f0->_x0141._x03f8._x0346; for (size_t _x02be = 0; _x02be < _x03f0->_x0141._x03f8._x0346; _x02be++) { _x01de->_x03fd[_x02b8]._x0347[_x02be] = _x03a2(_x03f0->_x0141._x03f8._x0347[_x02be]); } } } else if (_x03e5->_x02c6 == _x00a5) { _x0025 *_x01b4 = _x0243(_x03e5->_x0141._x0327._x0319); if (_x01b4) { _x03ae(_x03e5->_x02d9, _x03e5->_x01bf, "\x44\x75\x70\x6c\x69\x63\x61\x74\x65\x20\x63\x6c\x61\x73\x73\x20\x64\x65\x63\x6c\x61\x72\x61\x74\x69\x6f\x6e\x20\x27\x25\x73\x27\x2e", _x03e5->_x0141._x0327._x0319); return false; } _x01ab = realloc(_x01ab, sizeof(_x0025) * (_x01aa + 1)); _x0025 *_x01de = &_x01ab[_x01aa++]; _x01de->_x0319 = _x03a2(_x03e5->_x0141._x0327._x0319); _x01de->_x034b = _x03e5->_x0141._x0327._x034b ? _x03a2(_x03e5->_x0141._x0327._x034b) : NULL; _x01de->_x02a2 = malloc(sizeof(char*) * _x03e5->_x0141._x0327._x02a0); _x01de->_x02a0 = _x03e5->_x0141._x0327._x02a0; for (size_t _x02b8 = 0; _x02b8 < _x03e5->_x0141._x0327._x02a0; _x02b8++) { _x01de->_x02a2[_x02b8] = _x03a2(_x03e5->_x0141._x0327._x02a2[_x02b8]); } _x01de->_x023d = NULL; _x01de->_x023a = 0; _x01de->_x0304 = NULL; _x01de->_x0301 = 0; for (size_t _x02b8 = 0; _x02b8 < _x03e5->_x0141._x0327._x02fb; _x02b8++) { _x00b3 *_x02f0 = _x03e5->_x0141._x0327._x02fe[_x02b8]; if (_x02f0->_x02c6 == _x00a4 || _x02f0->_x02c6 == _x00a2) { const char *_x0256 = (_x02f0->_x02c6 == _x00a4) ? _x02f0->_x0141._x02f4._x0319 : _x02f0->_x0141._x02bf._x0319; _x01de->_x023d = realloc(_x01de->_x023d, sizeof(char*) * (_x01de->_x023a + 1)); _x01de->_x023d[_x01de->_x023a++] = _x03a2(_x0256); } else if (_x02f0->_x02c6 == _x00af) { _x01de->_x0304 = realloc(_x01de->_x0304, sizeof(_x0029) * (_x01de->_x0301 + 1)); _x0029 *_x03ba = &_x01de->_x0304[_x01de->_x0301++]; _x03ba->_x0319 = _x03a2(_x02f0->_x0141._x03f8._x0319); _x03ba->_x0346 = _x02f0->_x0141._x03f8._x0346; _x03ba->_x0347 = malloc(sizeof(char*) * _x02f0->_x0141._x03f8._x0346); for (size_t _x02be = 0; _x02be < _x02f0->_x0141._x03f8._x0346; _x02be++) { _x03ba->_x0347[_x02be] = _x03a2(_x02f0->_x0141._x03f8._x0347[_x02be]); } } } } else if (_x03e5->_x02c6 == _x00ad) { _x0025 *_x01b4 = _x0243(_x03e5->_x0141._x03b9._x0319); if (_x01b4) { _x03ae(_x03e5->_x02d9, _x03e5->_x01bf, "\x44\x75\x70\x6c\x69\x63\x61\x74\x65\x20\x73\x68\x61\x70\x65\x2f\x63\x6c\x61\x73\x73\x20\x64\x65\x63\x6c\x61\x72\x61\x74\x69\x6f\x6e\x20\x27\x25\x73\x27\x2e", _x03e5->_x0141._x03b9._x0319); return false; } _x01ab = realloc(_x01ab, sizeof(_x0025) * (_x01aa + 1)); _x0025 *_x01de = &_x01ab[_x01aa++]; _x01de->_x0319 = _x03a2(_x03e5->_x0141._x03b9._x0319); _x01de->_x034b = NULL; _x01de->_x02a2 = NULL; _x01de->_x02a0 = 0; _x01de->_x023d = NULL; _x01de->_x023a = 0; _x01de->_x0304 = NULL; _x01de->_x0301 = 0; for (size_t _x02b8 = 0; _x02b8 < _x03e5->_x0141._x03b9._x02fb; _x02b8++) { _x00b3 *_x02f0 = _x03e5->_x0141._x03b9._x02fe[_x02b8]; if (_x02f0->_x02c6 == _x009e) { _x01de->_x023d = realloc(_x01de->_x023d, sizeof(char*) * (_x01de->_x023a + 1)); _x01de->_x023d[_x01de->_x023a++] = _x03a2(_x02f0->_x0141._x023b._x0319); } } } } for (size_t _x0288 = 0; _x0288 < _x01aa; _x0288++) { _x0025 *_x01b4 = &_x01ab[_x0288]; _x00b3 *_x01b5 = _x0247(_x036e, _x01b4->_x0319); int _x02d9 = _x01b5 ? _x01b5->_x02d9 : 0; int _x01ba = _x01b5 ? _x01b5->_x01bf : 0; if (_x01b4->_x034b) { _x0025 *_x0349 = _x0243(_x01b4->_x034b); if (!_x0349) { _x03ae(_x02d9, _x01ba, "\x50\x61\x72\x65\x6e\x74\x20\x63\x6c\x61\x73\x73\x20\x27\x25\x73\x27\x20\x6f\x66\x20\x63\x6c\x61\x73\x73\x20\x27\x25\x73\x27\x20\x6e\x6f\x74\x20\x66\x6f\x75\x6e\x64\x2e", _x01b4->_x034b, _x01b4->_x0319); return false; } if (_x027e(_x01b4)) { _x03ae(_x02d9, _x01ba, "\x43\x69\x72\x63\x75\x6c\x61\x72\x20\x69\x6e\x68\x65\x72\x69\x74\x61\x6e\x63\x65\x20\x6c\x6f\x6f\x70\x20\x64\x65\x74\x65\x63\x74\x65\x64\x20\x69\x6e\x76\x6f\x6c\x76\x69\x6e\x67\x20\x63\x6c\x61\x73\x73\x20\x27\x25\x73\x27\x2e", _x01b4->_x0319); return false; } } for (size_t _x02b8 = 0; _x02b8 < _x01b4->_x02a0; _x02b8++) { _x0027 *_x028d = _x0246(_x01b4->_x02a2[_x02b8]); if (!_x028d) { _x03ae(_x02d9, _x01ba, "\x49\x6e\x74\x65\x72\x66\x61\x63\x65\x20\x27\x25\x73\x27\x20\x69\x6d\x70\x6c\x65\x6d\x65\x6e\x74\x65\x64\x20\x62\x79\x20\x63\x6c\x61\x73\x73\x20\x27\x25\x73\x27\x20\x6e\x6f\x74\x20\x66\x6f\x75\x6e\x64\x2e", _x01b4->_x02a2[_x02b8], _x01b4->_x0319); return false; } for (size_t _x02be = 0; _x02be < _x028d->_x03fa; _x02be++) { _x0029 *_x0385 = &_x028d->_x03fd[_x02be]; _x0029 *_x028e = _x0244(_x01b4, _x0385->_x0319); if (!_x028e) { _x03ae(_x02d9, _x01ba, "\x43\x6c\x61\x73\x73\x20\x27\x25\x73\x27\x20\x64\x6f\x65\x73\x20\x6e\x6f\x74\x20\x69\x6d\x70\x6c\x65\x6d\x65\x6e\x74\x20\x72\x65\x71\x75\x69\x72\x65\x64\x20\x69\x6e\x74\x65\x72\x66\x61\x63\x65\x20\x74\x61\x73\x6b\x20\x27\x25\x73\x27\x20\x66\x72\x6f\x6d\x20\x27\x25\x73\x27\x2e", _x01b4->_x0319, _x0385->_x0319, _x028d->_x0319); return false; } if (_x028e->_x0346 != _x0385->_x0346) { _x03ae(_x02d9, _x01ba, "\x43\x6c\x61\x73\x73\x20\x27\x25\x73\x27\x20\x69\x6d\x70\x6c\x65\x6d\x65\x6e\x74\x73\x20\x27\x25\x73\x27\x20\x77\x69\x74\x68\x20\x77\x72\x6f\x6e\x67\x20\x70\x61\x72\x61\x6d\x65\x74\x65\x72\x20\x63\x6f\x75\x6e\x74\x20\x28\x65\x78\x70\x65\x63\x74\x65\x64\x20\x25\x7a\x75\x2c\x20\x67\x6f\x74\x20\x25\x7a\x75\x29\x2e", _x01b4->_x0319, _x0385->_x0319, _x0385->_x0346, _x028e->_x0346); return false; } } } } _x0028 _x0271; _x0271._x0429 = NULL; _x0271._x0349 = NULL; for (size_t _x0288 = 0; _x0288 < _x036e._x01d7; _x0288++) { if (!_x01a5(_x036e._x03e0[_x0288], &_x0271)) { _x03a8(&_x0271); return false; } } _x03a8(&_x0271); return true; }
+
+extern VSS_THREAD_LOCAL const char *vss_current_source;
+
+static void sem_error(int line, int col, const char *format, ...) {
+    fprintf(stderr, "\033[1;31merror:\033[0m line %d, col %d: ", line, col);
+    va_list args;
+    va_start(args, format);
+    vfprintf(stderr, format, args);
+    va_end(args);
+    fprintf(stderr, "\n");
+
+    if (vss_current_source && line > 0) {
+        const char *p = vss_current_source;
+        int curr_line = 1;
+        while (*p && curr_line < line) {
+            if (*p == '\n') curr_line++;
+            p++;
+        }
+        const char *line_start = p;
+        while (*p && *p != '\n' && *p != '\r') p++;
+        int line_len = (int)(p - line_start);
+        
+        fprintf(stderr, " %4d | %.*s\n", line, line_len, line_start);
+        
+        fprintf(stderr, "      | ");
+        for (int i = 1; i < col; i++) {
+            fprintf(stderr, " ");
+        }
+        fprintf(stderr, "\033[1;31m^\033[0m\n");
+    }
+}
+
+static char *safe_strdup(const char *s) {
+    if (!s) return NULL;
+    char *dup = malloc(strlen(s) + 1);
+    if (dup) strcpy(dup, s);
+    return dup;
+}
+
+typedef struct {
+    char *name;
+    char **params;
+    size_t param_count;
+} SemTaskSig;
+
+typedef struct {
+    char *name;
+    SemTaskSig *tasks;
+    size_t task_count;
+} SemInterface;
+
+typedef struct {
+    char *name;
+    char **members;
+    size_t member_count;
+} SemEnum;
+
+typedef struct {
+    char *name;
+    char *parent_name;
+    char **interfaces;
+    size_t interface_count;
+    char **fields;
+    size_t field_count;
+    SemTaskSig *methods;
+    size_t method_count;
+} SemClass;
+
+typedef struct SemVar {
+    char *name;
+    char *type_name;
+    bool is_const;
+    struct SemVar *next;
+} SemVar;
+
+typedef struct SemScope {
+    SemVar *vars;
+    struct SemScope *parent;
+} SemScope;
+
+static SemInterface *interfaces = NULL;
+static size_t interface_count = 0;
+
+static SemEnum *enums = NULL;
+static size_t enum_count = 0;
+
+static SemClass *classes = NULL;
+static size_t class_count = 0;
+
+static SemInterface *find_interface(const char *name) {
+    for (size_t i = 0; i < interface_count; i++) {
+        if (strcmp(interfaces[i].name, name) == 0) return &interfaces[i];
+    }
+    return NULL;
+}
+
+static SemEnum *find_enum(const char *name) {
+    for (size_t i = 0; i < enum_count; i++) {
+        if (strcmp(enums[i].name, name) == 0) return &enums[i];
+    }
+    return NULL;
+}
+
+static SemClass *find_class(const char *name) {
+    for (size_t i = 0; i < class_count; i++) {
+        if (strcmp(classes[i].name, name) == 0) return &classes[i];
+    }
+    return NULL;
+}
+
+static SemTaskSig *find_class_method(SemClass *cls, const char *name) {
+    for (size_t i = 0; i < cls->method_count; i++) {
+        if (strcmp(cls->methods[i].name, name) == 0) return &cls->methods[i];
+    }
+    if (cls->parent_name) {
+        SemClass *parent = find_class(cls->parent_name);
+        if (parent) return find_class_method(parent, name);
+    }
+    return NULL;
+}
+
+static bool has_inheritance_loop(SemClass *cls) {
+    SemClass *curr = cls;
+    size_t depth = 0;
+    while (curr && curr->parent_name) {
+        if (depth > 256) return true;
+        SemClass *parent = find_class(curr->parent_name);
+        if (parent == cls) return true;
+        curr = parent;
+        depth++;
+    }
+    return false;
+}
+
+static void scope_define(SemScope *scope, const char *name, const char *type_name, bool is_const) {
+    SemVar *v = malloc(sizeof(SemVar));
+    v->name = safe_strdup(name);
+    v->type_name = type_name ? safe_strdup(type_name) : NULL;
+    v->is_const = is_const;
+    v->next = scope->vars;
+    scope->vars = v;
+}
+
+static SemVar *scope_lookup(SemScope *scope, const char *name) {
+    SemScope *curr = scope;
+    while (curr) {
+        SemVar *v = curr->vars;
+        while (v) {
+            if (strcmp(v->name, name) == 0) return v;
+            v = v->next;
+        }
+        curr = curr->parent;
+    }
+    return NULL;
+}
+
+static void scope_free(SemScope *scope) {
+    SemVar *v = scope->vars;
+    while (v) {
+        SemVar *next = v->next;
+        free(v->name);
+        if (v->type_name) free(v->type_name);
+        free(v);
+        v = next;
+    }
+    scope->vars = NULL;
+}
+
+static const char *infer_type(VSS_Expr *expr, SemScope *scope) {
+    if (!expr) return "any";
+    switch (expr->kind) {
+        case VSS_EXPR_NUMBER: return "number";
+        case VSS_EXPR_STRING: return "text";
+        case VSS_EXPR_BOOL: return "boolean";
+        case VSS_EXPR_EMPTY: return "any";
+        case VSS_EXPR_LIST: return "list";
+        case VSS_EXPR_SET: return "set";
+        case VSS_EXPR_MAP: return "map";
+        case VSS_EXPR_MINE: return "any";
+        case VSS_EXPR_PARENT: return "any";
+        case VSS_EXPR_NAME: {
+            SemVar *v = scope_lookup(scope, expr->as.name);
+            if (v && v->type_name) return v->type_name;
+            if (find_class(expr->as.name)) return expr->as.name;
+            if (find_enum(expr->as.name)) return expr->as.name;
+            return "any";
+        }
+        case VSS_EXPR_BINARY: {
+            VSS_TokenType op = expr->as.binary.op;
+            if (op == VSS_TOKEN_PLUS || op == VSS_TOKEN_MINUS || op == VSS_TOKEN_STAR || op == VSS_TOKEN_SLASH || op == VSS_TOKEN_PERCENT) {
+                const char *lt = infer_type(expr->as.binary.left, scope);
+                const char *rt = infer_type(expr->as.binary.right, scope);
+                if (strcmp(lt, "decimal") == 0 || strcmp(rt, "decimal") == 0) return "decimal";
+                return "number";
+            }
+            if (op == VSS_TOKEN_ABOVE || op == VSS_TOKEN_BELOW || op == VSS_TOKEN_AT_LEAST || op == VSS_TOKEN_AT_MOST || op == VSS_TOKEN_SAME_AS || op == VSS_TOKEN_NOT_SAME_AS || op == VSS_TOKEN_AND || op == VSS_TOKEN_OR) {
+                return "boolean";
+            }
+            return "any";
+        }
+        case VSS_EXPR_UNARY: {
+            VSS_TokenType op = expr->as.unary.op;
+            if (op == VSS_TOKEN_MINUS || op == VSS_TOKEN_AWAIT) {
+                return infer_type(expr->as.unary.operand, scope);
+            }
+            if (op == VSS_TOKEN_NOT) {
+                return "boolean";
+            }
+            return "any";
+        }
+        case VSS_EXPR_CALL: {
+            if (expr->as.call.callee->kind == VSS_EXPR_NAME) {
+                SemClass *cls = find_class(expr->as.call.callee->as.name);
+                if (cls) return cls->name;
+            }
+            return "any";
+        }
+        case VSS_EXPR_FIELD_ACCESS: {
+            if (expr->as.field_access.map->kind == VSS_EXPR_NAME) {
+                SemEnum *enm = find_enum(expr->as.field_access.map->as.name);
+                if (enm) return enm->name;
+            }
+            return "any";
+        }
+        case VSS_EXPR_STRUCT_LITERAL: {
+            return expr->as.struct_literal.name;
+        }
+        case VSS_EXPR_CLOSURE: {
+            return "any";
+        }
+        default: return "any";
+    }
+}
+
+static bool types_compatible(const char *declared, const char *inferred) {
+    if (!declared || !inferred) return true;
+    if (strcmp(declared, "any") == 0 || strcmp(inferred, "any") == 0) return true;
+    if (strcmp(declared, inferred) == 0) return true;
+    if ((strcmp(declared, "number") == 0 || strcmp(declared, "decimal") == 0) &&
+        (strcmp(inferred, "number") == 0 || strcmp(inferred, "decimal") == 0)) {
+        return true;
+    }
+    return false;
+}
+
+static bool check_stmt(VSS_Stmt *stmt, SemScope *scope) {
+    if (!stmt) return true;
+    switch (stmt->kind) {
+        case VSS_STMT_MAKE: {
+            const char *inf = infer_type(stmt->as.make.initializer, scope);
+            if (stmt->as.make.type_name) {
+                if (!types_compatible(stmt->as.make.type_name, inf)) {
+                    sem_error(stmt->line, stmt->column, "Type mismatch in variable declaration '%s'. Declared type is '%s', got '%s'.",
+                              stmt->as.make.name, stmt->as.make.type_name, inf);
+                    return false;
+                }
+            }
+            scope_define(scope, stmt->as.make.name, stmt->as.make.type_name, false);
+            break;
+        }
+        case VSS_STMT_KEEP: {
+            const char *inf = infer_type(stmt->as.keep.initializer, scope);
+            if (stmt->as.keep.type_name) {
+                if (!types_compatible(stmt->as.keep.type_name, inf)) {
+                    sem_error(stmt->line, stmt->column, "Type mismatch in constant declaration '%s'. Declared type is '%s', got '%s'.",
+                              stmt->as.keep.name, stmt->as.keep.type_name, inf);
+                    return false;
+                }
+            }
+            scope_define(scope, stmt->as.keep.name, stmt->as.keep.type_name, true);
+            break;
+        }
+        case VSS_STMT_ASSIGN: {
+            SemVar *v = scope_lookup(scope, stmt->as.assign.name);
+            if (v) {
+                if (v->is_const) {
+                    sem_error(stmt->line, stmt->column, "Cannot reassign to constant '%s'.",
+                              stmt->as.assign.name);
+                    return false;
+                }
+                const char *inf = infer_type(stmt->as.assign.value, scope);
+                if (v->type_name) {
+                    if (!types_compatible(v->type_name, inf)) {
+                        sem_error(stmt->line, stmt->column, "Type mismatch in assignment to '%s'. Declared type is '%s', got '%s'.",
+                                  stmt->as.assign.name, v->type_name, inf);
+                        return false;
+                    }
+                }
+            } else {
+                scope_define(scope, stmt->as.assign.name, "any", false);
+            }
+            break;
+        }
+        case VSS_STMT_WHEN: {
+            for (size_t i = 0; i < stmt->as.when.branch_count; i++) {
+                SemScope sub;
+                sub.vars = NULL;
+                sub.parent = scope;
+                for (size_t j = 0; j < stmt->as.when.branches[i].block.count; j++) {
+                    if (!check_stmt(stmt->as.when.branches[i].block.statements[j], &sub)) {
+                        scope_free(&sub);
+                        return false;
+                    }
+                }
+                scope_free(&sub);
+            }
+            if (stmt->as.when.otherwise_branch.count > 0) {
+                SemScope sub;
+                sub.vars = NULL;
+                sub.parent = scope;
+                for (size_t j = 0; j < stmt->as.when.otherwise_branch.count; j++) {
+                    if (!check_stmt(stmt->as.when.otherwise_branch.statements[j], &sub)) {
+                        scope_free(&sub);
+                        return false;
+                    }
+                }
+                scope_free(&sub);
+            }
+            break;
+        }
+        case VSS_STMT_REPEAT_COUNT: {
+            SemScope sub;
+            sub.vars = NULL;
+            sub.parent = scope;
+            for (size_t j = 0; j < stmt->as.repeat_count.body.count; j++) {
+                if (!check_stmt(stmt->as.repeat_count.body.statements[j], &sub)) {
+                    scope_free(&sub);
+                    return false;
+                }
+            }
+            scope_free(&sub);
+            break;
+        }
+        case VSS_STMT_REPEAT_RANGE: {
+            SemScope sub;
+            sub.vars = NULL;
+            sub.parent = scope;
+            scope_define(&sub, stmt->as.repeat_range.var_name, "number", false);
+            for (size_t j = 0; j < stmt->as.repeat_range.body.count; j++) {
+                if (!check_stmt(stmt->as.repeat_range.body.statements[j], &sub)) {
+                    scope_free(&sub);
+                    return false;
+                }
+            }
+            scope_free(&sub);
+            break;
+        }
+        case VSS_STMT_REPEAT_EACH: {
+            SemScope sub;
+            sub.vars = NULL;
+            sub.parent = scope;
+            scope_define(&sub, stmt->as.repeat_each.var_name, "any", false);
+            for (size_t j = 0; j < stmt->as.repeat_each.body.count; j++) {
+                if (!check_stmt(stmt->as.repeat_each.body.statements[j], &sub)) {
+                    scope_free(&sub);
+                    return false;
+                }
+            }
+            scope_free(&sub);
+            break;
+        }
+        case VSS_STMT_DURING: {
+            SemScope sub;
+            sub.vars = NULL;
+            sub.parent = scope;
+            for (size_t j = 0; j < stmt->as.during.body.count; j++) {
+                if (!check_stmt(stmt->as.during.body.statements[j], &sub)) {
+                    scope_free(&sub);
+                    return false;
+                }
+            }
+            scope_free(&sub);
+            break;
+        }
+        case VSS_STMT_TASK: {
+            SemScope sub;
+            sub.vars = NULL;
+            sub.parent = scope;
+            for (size_t i = 0; i < stmt->as.task.param_count; i++) {
+                scope_define(&sub, stmt->as.task.params[i], "any", false);
+            }
+            for (size_t j = 0; j < stmt->as.task.body.count; j++) {
+                if (!check_stmt(stmt->as.task.body.statements[j], &sub)) {
+                    scope_free(&sub);
+                    return false;
+                }
+            }
+            scope_free(&sub);
+            break;
+        }
+        case VSS_STMT_CHOOSE: {
+            for (size_t i = 0; i < stmt->as.choose.case_count; i++) {
+                SemScope sub;
+                sub.vars = NULL;
+                sub.parent = scope;
+                for (size_t j = 0; j < stmt->as.choose.cases[i].block.count; j++) {
+                    if (!check_stmt(stmt->as.choose.cases[i].block.statements[j], &sub)) {
+                        scope_free(&sub);
+                        return false;
+                    }
+                }
+                scope_free(&sub);
+            }
+            if (stmt->as.choose.otherwise_branch.count > 0) {
+                SemScope sub;
+                sub.vars = NULL;
+                sub.parent = scope;
+                for (size_t j = 0; j < stmt->as.choose.otherwise_branch.count; j++) {
+                    if (!check_stmt(stmt->as.choose.otherwise_branch.statements[j], &sub)) {
+                        scope_free(&sub);
+                        return false;
+                    }
+                }
+                scope_free(&sub);
+            }
+            break;
+        }
+        case VSS_STMT_ATTEMPT: {
+            SemScope sub_try;
+            sub_try.vars = NULL;
+            sub_try.parent = scope;
+            for (size_t j = 0; j < stmt->as.attempt.try_body.count; j++) {
+                if (!check_stmt(stmt->as.attempt.try_body.statements[j], &sub_try)) {
+                    scope_free(&sub_try);
+                    return false;
+                }
+            }
+            scope_free(&sub_try);
+            
+            SemScope sub_rescue;
+            sub_rescue.vars = NULL;
+            sub_rescue.parent = scope;
+            scope_define(&sub_rescue, stmt->as.attempt.problem_var, "text", true);
+            for (size_t j = 0; j < stmt->as.attempt.rescue_body.count; j++) {
+                if (!check_stmt(stmt->as.attempt.rescue_body.statements[j], &sub_rescue)) {
+                    scope_free(&sub_rescue);
+                    return false;
+                }
+            }
+            scope_free(&sub_rescue);
+            break;
+        }
+        case VSS_STMT_NAMESPACE: {
+            for (size_t i = 0; i < stmt->as.namespace_decl.body.count; i++) {
+                if (!check_stmt(stmt->as.namespace_decl.body.statements[i], scope)) {
+                    return false;
+                }
+            }
+            break;
+        }
+        case VSS_STMT_PARALLEL_EACH: {
+            SemScope sub;
+            sub.vars = NULL;
+            sub.parent = scope;
+            scope_define(&sub, stmt->as.parallel_each.var_name, "any", false);
+            for (size_t j = 0; j < stmt->as.parallel_each.body.count; j++) {
+                if (!check_stmt(stmt->as.parallel_each.body.statements[j], &sub)) {
+                    scope_free(&sub);
+                    return false;
+                }
+            }
+            scope_free(&sub);
+            break;
+        }
+        case VSS_STMT_LOCK: {
+            SemScope sub;
+            sub.vars = NULL;
+            sub.parent = scope;
+            for (size_t j = 0; j < stmt->as.lock_stmt.body.count; j++) {
+                if (!check_stmt(stmt->as.lock_stmt.body.statements[j], &sub)) {
+                    scope_free(&sub);
+                    return false;
+                }
+            }
+            scope_free(&sub);
+            break;
+        }
+        case VSS_STMT_SELECT: {
+            for (size_t i = 0; i < stmt->as.select_stmt.case_count; i++) {
+                SemScope sub;
+                sub.vars = NULL;
+                sub.parent = scope;
+                for (size_t j = 0; j < stmt->as.select_stmt.cases[i].block.count; j++) {
+                    if (!check_stmt(stmt->as.select_stmt.cases[i].block.statements[j], &sub)) {
+                        scope_free(&sub);
+                        return false;
+                    }
+                }
+                scope_free(&sub);
+            }
+            if (stmt->as.select_stmt.otherwise_branch.count > 0) {
+                SemScope sub;
+                sub.vars = NULL;
+                sub.parent = scope;
+                for (size_t j = 0; j < stmt->as.select_stmt.otherwise_branch.count; j++) {
+                    if (!check_stmt(stmt->as.select_stmt.otherwise_branch.statements[j], &sub)) {
+                        scope_free(&sub);
+                        return false;
+                    }
+                }
+                scope_free(&sub);
+            }
+            break;
+        }
+        case VSS_STMT_SET_ITEM: {
+            VSS_Stmt *t1 = vss_stmt_new_expr(stmt->as.set_item.list, stmt->line, stmt->column);
+            VSS_Stmt *t2 = vss_stmt_new_expr(stmt->as.set_item.index, stmt->line, stmt->column);
+            VSS_Stmt *t3 = vss_stmt_new_expr(stmt->as.set_item.value, stmt->line, stmt->column);
+            bool ok = check_stmt(t1, scope) && check_stmt(t2, scope) && check_stmt(t3, scope);
+            free(t1); free(t2); free(t3);
+            if (!ok) return false;
+            break;
+        }
+        case VSS_STMT_SHAPE: {
+            SemScope sub;
+            sub.vars = NULL;
+            sub.parent = scope;
+            for (size_t j = 0; j < stmt->as.shape_decl.member_count; j++) {
+                if (!check_stmt(stmt->as.shape_decl.members[j], &sub)) {
+                    scope_free(&sub);
+                    return false;
+                }
+            }
+            scope_free(&sub);
+            break;
+        }
+        case VSS_STMT_FIELD: {
+            if (stmt->as.field_decl.default_value) {
+                VSS_Stmt *temp = vss_stmt_new_expr(stmt->as.field_decl.default_value, stmt->line, stmt->column);
+                bool ok = check_stmt(temp, scope);
+                free(temp);
+                if (!ok) return false;
+            }
+            break;
+        }
+        case VSS_STMT_YIELD: {
+            if (stmt->as.yield_stmt.expression) {
+                VSS_Stmt *temp = vss_stmt_new_expr(stmt->as.yield_stmt.expression, stmt->line, stmt->column);
+                bool ok = check_stmt(temp, scope);
+                free(temp);
+                if (!ok) return false;
+            }
+            break;
+        }
+        case VSS_STMT_ASK: {
+            if (stmt->as.ask.prompt) {
+                VSS_Stmt *temp = vss_stmt_new_expr(stmt->as.ask.prompt, stmt->line, stmt->column);
+                bool ok = check_stmt(temp, scope);
+                free(temp);
+                if (!ok) return false;
+            }
+            VSS_Expr *target = stmt->as.ask.target;
+            if (target->kind == VSS_EXPR_NAME) {
+                SemVar *v = scope_lookup(scope, target->as.name);
+                if (!v) {
+                    sem_error(stmt->line, stmt->column, "Variable '%s' is not defined.", target->as.name);
+                    return false;
+                }
+                if (v->is_const) {
+                    sem_error(stmt->line, stmt->column, "Cannot assign input to constant '%s'.", target->as.name);
+                    return false;
+                }
+            } else if (target->kind == VSS_EXPR_FIELD_ACCESS) {
+                VSS_Expr *base = target->as.field_access.map;
+                if (base->kind == VSS_EXPR_NAME) {
+                    SemVar *v = scope_lookup(scope, base->as.name);
+                    if (!v) {
+                        sem_error(stmt->line, stmt->column, "Variable '%s' is not defined.", base->as.name);
+                        return false;
+                    }
+                }
+            } else {
+                sem_error(stmt->line, stmt->column, "Invalid target for 'ask' statement. Expected variable name or field.");
+                return false;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    return true;
+}
+
+static VSS_Stmt *find_stmt_for_class_in_block(VSS_Block block, const char *name) {
+    for (size_t i = 0; i < block.count; i++) {
+        VSS_Stmt *s = block.statements[i];
+        if (s->kind == VSS_STMT_OBJECT && strcmp(s->as.object_decl.name, name) == 0) {
+            return s;
+        }
+        if (s->kind == VSS_STMT_SHAPE && strcmp(s->as.shape_decl.name, name) == 0) {
+            return s;
+        }
+        if (s->kind == VSS_STMT_NAMESPACE) {
+            VSS_Stmt *res = find_stmt_for_class_in_block(s->as.namespace_decl.body, name);
+            if (res) return res;
+        }
+    }
+    return NULL;
+}
+
+static VSS_Stmt *find_stmt_for_class(VSS_Block program, const char *name) {
+    return find_stmt_for_class_in_block(program, name);
+}
+
+static bool register_declarations(VSS_Block block) {
+    for (size_t i = 0; i < block.count; i++) {
+        VSS_Stmt *stmt = block.statements[i];
+        if (stmt->kind == VSS_STMT_CHOICES) {
+            SemEnum *e = find_enum(stmt->as.choices_decl.name);
+            if (e) {
+                sem_error(stmt->line, stmt->column, "Duplicate enum declaration '%s'.", stmt->as.choices_decl.name);
+                return false;
+            }
+            enums = realloc(enums, sizeof(SemEnum) * (enum_count + 1));
+            SemEnum *curr = &enums[enum_count++];
+            curr->name = safe_strdup(stmt->as.choices_decl.name);
+            curr->members = malloc(sizeof(char*) * stmt->as.choices_decl.member_count);
+            curr->member_count = stmt->as.choices_decl.member_count;
+            for (size_t j = 0; j < stmt->as.choices_decl.member_count; j++) {
+                curr->members[j] = safe_strdup(stmt->as.choices_decl.members[j]);
+            }
+        } else if (stmt->kind == VSS_STMT_INTERFACE) {
+            SemInterface *iface = find_interface(stmt->as.interface_decl.name);
+            if (iface) {
+                sem_error(stmt->line, stmt->column, "Duplicate interface declaration '%s'.", stmt->as.interface_decl.name);
+                return false;
+            }
+            interfaces = realloc(interfaces, sizeof(SemInterface) * (interface_count + 1));
+            SemInterface *curr = &interfaces[interface_count++];
+            curr->name = safe_strdup(stmt->as.interface_decl.name);
+            curr->tasks = malloc(sizeof(SemTaskSig) * stmt->as.interface_decl.task_count);
+            curr->task_count = stmt->as.interface_decl.task_count;
+            for (size_t j = 0; j < stmt->as.interface_decl.task_count; j++) {
+                VSS_Stmt *t = stmt->as.interface_decl.task_decls[j];
+                curr->tasks[j].name = safe_strdup(t->as.task.name);
+                curr->tasks[j].params = malloc(sizeof(char*) * t->as.task.param_count);
+                curr->tasks[j].param_count = t->as.task.param_count;
+                for (size_t k = 0; k < t->as.task.param_count; k++) {
+                    curr->tasks[j].params[k] = safe_strdup(t->as.task.params[k]);
+                }
+            }
+        } else if (stmt->kind == VSS_STMT_OBJECT) {
+            SemClass *cls = find_class(stmt->as.object_decl.name);
+            if (cls) {
+                sem_error(stmt->line, stmt->column, "Duplicate class declaration '%s'.", stmt->as.object_decl.name);
+                return false;
+            }
+            classes = realloc(classes, sizeof(SemClass) * (class_count + 1));
+            SemClass *curr = &classes[class_count++];
+            curr->name = safe_strdup(stmt->as.object_decl.name);
+            curr->parent_name = stmt->as.object_decl.parent_name ? safe_strdup(stmt->as.object_decl.parent_name) : NULL;
+            curr->interfaces = malloc(sizeof(char*) * stmt->as.object_decl.interface_count);
+            curr->interface_count = stmt->as.object_decl.interface_count;
+            for (size_t j = 0; j < stmt->as.object_decl.interface_count; j++) {
+                curr->interfaces[j] = safe_strdup(stmt->as.object_decl.interfaces[j]);
+            }
+            curr->fields = NULL;
+            curr->field_count = 0;
+            curr->methods = NULL;
+            curr->method_count = 0;
+            for (size_t j = 0; j < stmt->as.object_decl.member_count; j++) {
+                VSS_Stmt *m = stmt->as.object_decl.members[j];
+                if (m->kind == VSS_STMT_MAKE || m->kind == VSS_STMT_KEEP) {
+                    const char *fname = (m->kind == VSS_STMT_MAKE) ? m->as.make.name : m->as.keep.name;
+                    curr->fields = realloc(curr->fields, sizeof(char*) * (curr->field_count + 1));
+                    curr->fields[curr->field_count++] = safe_strdup(fname);
+                } else if (m->kind == VSS_STMT_TASK) {
+                    curr->methods = realloc(curr->methods, sizeof(SemTaskSig) * (curr->method_count + 1));
+                    SemTaskSig *sig = &curr->methods[curr->method_count++];
+                    sig->name = safe_strdup(m->as.task.name);
+                    sig->param_count = m->as.task.param_count;
+                    sig->params = malloc(sizeof(char*) * m->as.task.param_count);
+                    for (size_t k = 0; k < m->as.task.param_count; k++) {
+                        sig->params[k] = safe_strdup(m->as.task.params[k]);
+                    }
+                }
+            }
+        } else if (stmt->kind == VSS_STMT_SHAPE) {
+            SemClass *cls = find_class(stmt->as.shape_decl.name);
+            if (cls) {
+                sem_error(stmt->line, stmt->column, "Duplicate shape/class declaration '%s'.", stmt->as.shape_decl.name);
+                return false;
+            }
+            classes = realloc(classes, sizeof(SemClass) * (class_count + 1));
+            SemClass *curr = &classes[class_count++];
+            curr->name = safe_strdup(stmt->as.shape_decl.name);
+            curr->parent_name = NULL;
+            curr->interfaces = NULL;
+            curr->interface_count = 0;
+            curr->fields = NULL;
+            curr->field_count = 0;
+            curr->methods = NULL;
+            curr->method_count = 0;
+            for (size_t j = 0; j < stmt->as.shape_decl.member_count; j++) {
+                VSS_Stmt *m = stmt->as.shape_decl.members[j];
+                if (m->kind == VSS_STMT_FIELD) {
+                    curr->fields = realloc(curr->fields, sizeof(char*) * (curr->field_count + 1));
+                    curr->fields[curr->field_count++] = safe_strdup(m->as.field_decl.name);
+                }
+            }
+        } else if (stmt->kind == VSS_STMT_NAMESPACE) {
+            if (!register_declarations(stmt->as.namespace_decl.body)) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+bool vss_semantic_analyze(VSS_Block program) {
+    // 1. Clean up any state from previous analyzer runs
+    for (size_t i = 0; i < interface_count; i++) {
+        free(interfaces[i].name);
+        for (size_t j = 0; j < interfaces[i].task_count; j++) {
+            free(interfaces[i].tasks[j].name);
+            for (size_t k = 0; k < interfaces[i].tasks[j].param_count; k++) {
+                free(interfaces[i].tasks[j].params[k]);
+            }
+            free(interfaces[i].tasks[j].params);
+        }
+        free(interfaces[i].tasks);
+    }
+    free(interfaces);
+    interfaces = NULL;
+    interface_count = 0;
+    
+    for (size_t i = 0; i < enum_count; i++) {
+        free(enums[i].name);
+        for (size_t j = 0; j < enums[i].member_count; j++) {
+            free(enums[i].members[j]);
+        }
+        free(enums[i].members);
+    }
+    free(enums);
+    enums = NULL;
+    enum_count = 0;
+    
+    for (size_t i = 0; i < class_count; i++) {
+        free(classes[i].name);
+        if (classes[i].parent_name) free(classes[i].parent_name);
+        for (size_t j = 0; j < classes[i].interface_count; j++) {
+            free(classes[i].interfaces[j]);
+        }
+        free(classes[i].interfaces);
+        for (size_t j = 0; j < classes[i].field_count; j++) {
+            free(classes[i].fields[j]);
+        }
+        free(classes[i].fields);
+        for (size_t j = 0; j < classes[i].method_count; j++) {
+            free(classes[i].methods[j].name);
+            for (size_t k = 0; k < classes[i].methods[j].param_count; k++) {
+                free(classes[i].methods[j].params[k]);
+            }
+            free(classes[i].methods[j].params);
+        }
+        free(classes[i].methods);
+    }
+    free(classes);
+    classes = NULL;
+    class_count = 0;
+
+    // 2. Scan and register enums, interfaces, and classes recursively
+    if (!register_declarations(program)) return false;
+    
+    // 3. Verify class hierarchy and interface requirements
+    for (size_t i = 0; i < class_count; i++) {
+        SemClass *cls = &classes[i];
+        VSS_Stmt *cls_stmt = find_stmt_for_class(program, cls->name);
+        int line = cls_stmt ? cls_stmt->line : 0;
+        int col = cls_stmt ? cls_stmt->column : 0;
+        if (cls->parent_name) {
+            SemClass *parent = find_class(cls->parent_name);
+            if (!parent) {
+                sem_error(line, col, "Parent class '%s' of class '%s' not found.", cls->parent_name, cls->name);
+                return false;
+            }
+            if (has_inheritance_loop(cls)) {
+                sem_error(line, col, "Circular inheritance loop detected involving class '%s'.", cls->name);
+                return false;
+            }
+        }
+        
+        for (size_t j = 0; j < cls->interface_count; j++) {
+            SemInterface *iface = find_interface(cls->interfaces[j]);
+            if (!iface) {
+                sem_error(line, col, "Interface '%s' implemented by class '%s' not found.", cls->interfaces[j], cls->name);
+                return false;
+            }
+            for (size_t k = 0; k < iface->task_count; k++) {
+                SemTaskSig *req = &iface->tasks[k];
+                SemTaskSig *impl = find_class_method(cls, req->name);
+                if (!impl) {
+                    sem_error(line, col, "Class '%s' does not implement required interface task '%s' from '%s'.", cls->name, req->name, iface->name);
+                    return false;
+                }
+                if (impl->param_count != req->param_count) {
+                    sem_error(line, col, "Class '%s' implements '%s' with wrong parameter count (expected %zu, got %zu).",
+                              cls->name, req->name, req->param_count, impl->param_count);
+                    return false;
+                }
+            }
+        }
+    }
+    
+    // 4. Type check statements
+    SemScope global_scope;
+    global_scope.vars = NULL;
+    global_scope.parent = NULL;
+    for (size_t i = 0; i < program.count; i++) {
+        if (!check_stmt(program.statements[i], &global_scope)) {
+            scope_free(&global_scope);
+            return false;
+        }
+    }
+    scope_free(&global_scope);
+    return true;
+}

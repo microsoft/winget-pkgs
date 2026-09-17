@@ -1,4 +1,107 @@
 #include <stdlib.h>
 #include <string.h>
 #include "object.h"
-static char *_x03a2(const char *_x039e) { if (!_x039e) return NULL; char *dup = malloc(strlen(_x039e) + 1); if (dup) { strcpy(dup, _x039e); } return dup; } _x0090 *_x0456(const char *_x0319, size_t _x0346) { _x0090 *_x0261 = malloc(sizeof(_x0090)); _x0261->_x037e = 1; _x0261->_x0319 = _x03a2(_x0319); _x0261->_x0346 = _x0346; _x0261->_x041b = 0; _x042f(&_x0261->_x01a9); return _x0261; } void _x0458(_x0090 *_x0261) { if (!_x0261) return; _x0261->_x037e++; } void _x0457(_x0090 *_x0261) { if (!_x0261) return; _x0261->_x037e--; if (_x0261->_x037e == 0) { free(_x0261->_x0319); _x042e(&_x0261->_x01a9); free(_x0261); } } _x0114 *_x0493(_x012a *_x03c9) { _x0114 *_x041e = malloc(sizeof(_x0114)); _x041e->_x037e = 1; _x041e->_x02e7 = _x03c9; _x041e->_x01b0 = _x0499(); _x041e->_x0320 = NULL; return _x041e; } void _x0495(_x0114 *_x041e) { if (!_x041e) return; _x041e->_x037e++; } void _x0494(_x0114 *_x041e) { if (!_x041e) return; _x041e->_x037e--; if (_x041e->_x037e == 0) { _x04a4(_x041e->_x01b0); free(_x041e); } } _x008d *_x0431(_x0090 *_x0261) { _x008d *_x01b3 = malloc(sizeof(_x008d)); _x01b3->_x037e = 1; _x01b3->_x0265 = _x0261; _x0458(_x0261); _x01b3->_x037d = _x0499(); _x01b3->_x041b = _x0261->_x041b; if (_x01b3->_x041b > 0) { _x01b3->_x041c = malloc(sizeof(_x0114*) * _x01b3->_x041b); for (int _x0288 = 0; _x0288 < _x01b3->_x041b; _x0288++) { _x01b3->_x041c[_x0288] = NULL; } } else { _x01b3->_x041c = NULL; } return _x01b3; } void _x0433(_x008d *_x01b3) { if (!_x01b3) return; _x01b3->_x037e++; _x04a5(_x01b3->_x037d); } void _x0432(_x008d *_x01b3) { if (!_x01b3) return; _x01b3->_x037e--; if (_x01b3->_x037e == 0) { _x0457(_x01b3->_x0265); _x04a4(_x01b3->_x037d); if (_x01b3->_x041b > 0) { for (int _x0288 = 0; _x0288 < _x01b3->_x041b; _x0288++) { if (_x01b3->_x041c[_x0288]) { _x0494(_x01b3->_x041c[_x0288]); } } free(_x01b3->_x041c); } free(_x01b3); } }
+
+static char *safe_strdup(const char *s) {
+    if (!s) return NULL;
+    char *dup = malloc(strlen(s) + 1);
+    if (dup) {
+        strcpy(dup, s);
+    }
+    return dup;
+}
+
+VSS_ObjFunction *vss_function_new(const char *name, size_t param_count) {
+    VSS_ObjFunction *func = malloc(sizeof(VSS_ObjFunction));
+    vss_atomic_set(&func->ref_count, 1);
+    func->name = safe_strdup(name);
+    func->param_count = param_count;
+    func->params = NULL;
+    func->upvalue_count = 0;
+    vss_chunk_init(&func->chunk);
+    return func;
+}
+
+void vss_function_retain(VSS_ObjFunction *func) {
+    if (!func) return;
+    vss_atomic_inc(&func->ref_count);
+}
+
+void vss_function_release(VSS_ObjFunction *func) {
+    if (!func) return;
+    if (vss_atomic_dec(&func->ref_count) == 0) {
+        free(func->name);
+        if (func->params) {
+            for (size_t i = 0; i < func->param_count; i++) {
+                free(func->params[i]);
+            }
+            free(func->params);
+        }
+        vss_chunk_free(&func->chunk);
+        free(func);
+    }
+}
+
+VSS_Upvalue *vss_upvalue_new(VSS_Value *slot) {
+    VSS_Upvalue *uv = malloc(sizeof(VSS_Upvalue));
+    vss_atomic_set(&uv->ref_count, 1);
+    uv->location = slot;
+    uv->closed_value = vss_value_new_empty();
+    uv->next = NULL;
+    return uv;
+}
+
+void vss_upvalue_retain(VSS_Upvalue *uv) {
+    if (!uv) return;
+    vss_atomic_inc(&uv->ref_count);
+}
+
+void vss_upvalue_release(VSS_Upvalue *uv) {
+    if (!uv) return;
+    if (vss_atomic_dec(&uv->ref_count) == 0) {
+        vss_value_release(uv->closed_value);
+        free(uv);
+    }
+}
+
+VSS_ObjClosure *vss_closure_new(VSS_ObjFunction *func) {
+    VSS_ObjClosure *closure = malloc(sizeof(VSS_ObjClosure));
+    vss_atomic_set(&closure->ref_count, 1);
+    closure->function = func;
+    vss_function_retain(func);
+    closure->receiver = vss_value_new_empty();
+    
+    closure->upvalue_count = func->upvalue_count;
+    if (closure->upvalue_count > 0) {
+        closure->upvalues = malloc(sizeof(VSS_Upvalue*) * closure->upvalue_count);
+        for (int i = 0; i < closure->upvalue_count; i++) {
+            closure->upvalues[i] = NULL;
+        }
+    } else {
+        closure->upvalues = NULL;
+    }
+    return closure;
+}
+
+void vss_closure_retain(VSS_ObjClosure *closure) {
+    if (!closure) return;
+    vss_atomic_inc(&closure->ref_count);
+    vss_value_retain(closure->receiver);
+}
+
+void vss_closure_release(VSS_ObjClosure *closure) {
+    if (!closure) return;
+    if (vss_atomic_dec(&closure->ref_count) == 0) {
+        vss_function_release(closure->function);
+        vss_value_release(closure->receiver);
+        if (closure->upvalue_count > 0) {
+            for (int i = 0; i < closure->upvalue_count; i++) {
+                if (closure->upvalues[i]) {
+                    vss_upvalue_release(closure->upvalues[i]);
+                }
+            }
+            free(closure->upvalues);
+        }
+        free(closure);
+    }
+}

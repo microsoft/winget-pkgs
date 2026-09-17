@@ -1,0 +1,38 @@
+note VSS 3.1 Real-World Concurrency - Parallel Web Crawler Simulator
+
+grab collections
+
+make crawled_urls becomes collections.ConcurrentMap()
+make url_queue becomes collections.ConcurrentQueue()
+
+url_queue.push("https://example.com/page1")
+url_queue.push("https://example.com/page2")
+url_queue.push("https://example.com/page3")
+url_queue.push("https://example.com/page4")
+url_queue.push("https://example.com/page5")
+
+task crawler_worker needs worker_id, queue_ref, map_ref
+    repeat idx through 1 to 3
+        when queue_ref.count() above 0
+            make target_url becomes queue_ref.pop()
+            when target_url not_same_as empty
+                map_ref.insert(target_url, "STATUS_200_OK")
+                say "Worker " + worker_id + " crawled: " + target_url
+            finish
+        finish
+        concurrency_sleep(20)
+    finish
+    send "Worker " + worker_id + " completed"
+finish
+
+say "Starting Parallel Web Crawler with 3 worker threads..."
+make w1 becomes start crawler_worker(1, url_queue, crawled_urls)
+make w2 becomes start crawler_worker(2, url_queue, crawled_urls)
+make w3 becomes start crawler_worker(3, url_queue, crawled_urls)
+
+await w1
+await w2
+await w3
+
+say "Crawled Page Count: " + crawled_urls.count()
+say "Parallel Web Crawler Execution Completed Successfully!"

@@ -1,0 +1,26 @@
+note VSS 3.1 Real-World Concurrency - Async Batch HTTP Downloader
+
+grab collections
+
+make download_results becomes collections.ConcurrentMap()
+
+task download_resource needs resource_name, delay_ms, map_ref
+    say "Async downloading " + resource_name + "..."
+    concurrency_sleep(delay_ms)
+    make size_kb becomes delay_ms * 4
+    map_ref.insert(resource_name, size_kb)
+    say "Finished downloading " + resource_name + " (" + size_kb + " KB)"
+    send resource_name + "_OK"
+finish
+
+say "Launching Concurrent Batch HTTP Asset Downloader..."
+make d1 becomes start download_resource("asset_image.png", 20, download_results)
+make d2 becomes start download_resource("app_bundle.js", 15, download_results)
+make d3 becomes start download_resource("styles_main.css", 10, download_results)
+
+await d1
+await d2
+await d3
+
+say "Total Downloaded Assets: " + download_results.count()
+say "Async Batch HTTP Downloader Completed Successfully!"

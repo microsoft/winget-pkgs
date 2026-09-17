@@ -8,13 +8,795 @@
 #include "parser.h"
 #include "compiler.h"
 #include "vm.h"
-#include "interpreter.h"
+#include "interpreter.h" // for vss_register_builtins
 #include "semantic.h"
-static int _x0306(int _x0132, int _x0145, int _x0191) { int _x02f0 = _x0132; if (_x0145 < _x02f0) _x02f0 = _x0145; if (_x0191 < _x02f0) _x02f0 = _x0191; return _x02f0; } static int _x02d5(const char *_x039e, const char *_x03f0) { int _x02f0 = strlen(_x039e); int _x0316 = strlen(_x03f0); int *_x01e6 = malloc((_x02f0 + 1) * (_x0316 + 1) * sizeof(int)); for (int _x0288 = 0; _x0288 <= _x02f0; _x0288++) _x01e6[_x0288 * (_x0316 + 1)] = _x0288; for (int _x02b8 = 0; _x02b8 <= _x0316; _x02b8++) _x01e6[_x02b8] = _x02b8; for (int _x02b8 = 1; _x02b8 <= _x0316; _x02b8++) { for (int _x0288 = 1; _x0288 <= _x02f0; _x0288++) { int _x01d6 = (_x039e[_x0288-1] == _x03f0[_x02b8-1]) ? 0 : 1; _x01e6[_x0288 * (_x0316 + 1) + _x02b8] = _x0306(_x01e6[(_x0288-1) * (_x0316 + 1) + _x02b8] + 1, _x01e6[_x0288 * (_x0316 + 1) + _x02b8 - 1] + 1, _x01e6[(_x0288-1) * (_x0316 + 1) + _x02b8 - 1] + _x01d6); } } int _x0386 = _x01e6[_x02f0 * (_x0316 + 1) + _x0316]; free(_x01e6); return _x0386; } bool _x046d(_x012a _x0422, FILE *_x0332) { uint8_t _x0412 = (uint8_t)_x0422._x0412; fwrite(&_x0412, 1, 1, _x0332); if (_x0422._x0412 == _x0120) { fwrite(&_x0422._x0141._x0326, sizeof(double), 1, _x0332); } else if (_x0422._x0412 == _x0121) { size_t _x02d3 = strlen(_x0422._x0141._x03e8->_x01a4); fwrite(&_x02d3, sizeof(size_t), 1, _x0332); fwrite(_x0422._x0141._x03e8->_x01a4, 1, _x02d3, _x0332); } else if (_x0422._x0412 == _x0115) { uint8_t _x0145 = _x0422._x0141._x0154 ? 1 : 0; fwrite(&_x0145, 1, 1, _x0332); } else if (_x0422._x0412 == _x011b) { _x046c(_x0422._x0141._x0265, _x0332); } return true; } _x012a _x0437(FILE *_x028f) { uint8_t _x0414; if (fread(&_x0414, 1, 1, _x028f) != 1) return _x0499(); _x012b _x0412 = (_x012b)_x0414; if (_x0412 == _x0120) { double _x01e6; fread(&_x01e6, sizeof(double), 1, _x028f); return _x04a1(_x01e6); } else if (_x0412 == _x0121) { size_t _x02d3; fread(&_x02d3, sizeof(size_t), 1, _x028f); char *_x03e6 = malloc(_x02d3 + 1); fread(_x03e6, 1, _x02d3, _x028f); _x03e6[_x02d3] = '\0'; _x012a _x041f = _x04a2(_x03e6); free(_x03e6); return _x041f; } else if (_x0412 == _x0115) { uint8_t _x0145; fread(&_x0145, 1, 1, _x028f); return _x0496(_x0145 != 0); } else if (_x0412 == _x011b) { _x0090 *_x0261 = _x0436(_x028f); return _x049c(_x0261); } return _x0499(); } bool _x046c(_x0090 *_x0261, FILE *_x0332) { size_t _x031b = _x0261->_x0319 ? strlen(_x0261->_x0319) : 0; fwrite(&_x031b, sizeof(size_t), 1, _x0332); if (_x031b > 0) { fwrite(_x0261->_x0319, 1, _x031b, _x0332); } fwrite(&_x0261->_x0346, sizeof(size_t), 1, _x0332); fwrite(&_x0261->_x041b, sizeof(int), 1, _x0332); fwrite(&_x0261->_x01a9._x01d7, sizeof(int), 1, _x0332); if (_x0261->_x01a9._x01d7 > 0) { fwrite(_x0261->_x01a9._x01b8, 1, _x0261->_x01a9._x01d7, _x0332); fwrite(_x0261->_x01a9._x02dd, sizeof(int), _x0261->_x01a9._x01d7, _x0332); } fwrite(&_x0261->_x01a9._x01d0, sizeof(int), 1, _x0332); for (int _x0288 = 0; _x0288 < _x0261->_x01a9._x01d0; _x0288++) { _x046d(_x0261->_x01a9._x01d3[_x0288], _x0332); } return true; } _x0090 *_x0436(FILE *_x028f) { size_t _x031b; if (fread(&_x031b, sizeof(size_t), 1, _x028f) != 1) return NULL; char *_x0319 = NULL; if (_x031b > 0) { _x0319 = malloc(_x031b + 1); fread(_x0319, 1, _x031b, _x028f); _x0319[_x031b] = '\0'; } size_t _x0346; int _x041b; fread(&_x0346, sizeof(size_t), 1, _x028f); fread(&_x041b, sizeof(int), 1, _x028f); _x0090 *_x0261 = _x0456(_x0319 ? _x0319 : "", _x0346); free(_x0319); _x0261->_x041b = _x041b; int _x01b9; fread(&_x01b9, sizeof(int), 1, _x028f); if (_x01b9 > 0) { _x0261->_x01a9._x01d7 = _x01b9; _x0261->_x01a9._x019c = _x01b9; _x0261->_x01a9._x01b8 = malloc(_x01b9); _x0261->_x01a9._x02dd = malloc(_x01b9 * sizeof(int)); fread(_x0261->_x01a9._x01b8, 1, _x01b9, _x028f); fread(_x0261->_x01a9._x02dd, sizeof(int), _x01b9, _x028f); } int _x01d0; fread(&_x01d0, sizeof(int), 1, _x028f); for (int _x0288 = 0; _x0288 < _x01d0; _x0288++) { _x012a _x0422 = _x0437(_x028f); _x042d(&_x0261->_x01a9, _x0422); _x04a4(_x0422); } return _x0261; } static char *_x037a(const char *_x0358) { FILE *_x023e = fopen(_x0358, "\x72\x62"); if (!_x023e) return NULL; fseek(_x023e, 0, SEEK_END); long _x03c0 = ftell(_x023e); rewind(_x023e); char *_x015b = malloc(_x03c0 + 1); size_t _x0378 = fread(_x015b, 1, _x03c0, _x023e); fclose(_x023e); _x015b[_x0378] = '\0'; return _x015b; } static int _x039a(const char *_x0358) { FILE *_x022e = fopen(_x0358, "\x72\x62"); if (!_x022e) { fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x45\x72\x72\x6f\x72\x3a\x00\x33\x33\x5b\x30\x6d\x20\x43\x6f\x75\x6c\x64\x20\x6e\x6f\x74\x20\x6f\x70\x65\x6e\x20\x66\x69\x6c\x65\x20\x27\x25\x73\x27\x2e\x0a", _x0358); return 1; } char _x02f1[4]; size_t _x0190 = fread(_x02f1, 1, 4, _x022e); rewind(_x022e); _x0090 *_x02f2 = NULL; if (_x0190 == 4 && memcmp(_x02f1, "\x56\x53\x53\x43", 4) == 0) { fread(_x02f1, 1, 4, _x022e); _x02f2 = _x0436(_x022e); fclose(_x022e); } else { fclose(_x022e); char *_x03ce = _x037a(_x0358); if (!_x03ce) { fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x45\x72\x72\x6f\x72\x3a\x00\x33\x33\x5b\x30\x6d\x20\x43\x6f\x75\x6c\x64\x20\x6e\x6f\x74\x20\x72\x65\x61\x64\x20\x66\x69\x6c\x65\x20\x27\x25\x73\x27\x2e\x0a", _x0358); return 1; } _x0435 = _x03ce; _x0052 _x02d6; _x045e(&_x02d6, _x03ce); _x0095 _x0354; _x0466(&_x0354, &_x02d6); _x0032 _x0143 = _x0465(&_x0354); if (_x0354._x027a) { _x042c(_x0143); free(_x03ce); _x0435 = NULL; return 1; } if (!_x046b(_x0143)) { _x042c(_x0143); free(_x03ce); _x0435 = NULL; return 1; } _x02f2 = _x0434(_x0143); _x042c(_x0143); free(_x03ce); _x0435 = NULL; } if (!_x02f2) { fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x45\x72\x72\x6f\x72\x3a\x00\x33\x33\x5b\x30\x6d\x20\x43\x6f\x6d\x70\x69\x6c\x61\x74\x69\x6f\x6e\x20\x66\x61\x69\x6c\x65\x64\x2e\x0a"); return 1; } _x0046 *_x0270 = _x0440(NULL); _x0467(_x0270); bool _x039b = _x04ac(_x02f2, _x0270); _x0441(_x0270); _x0457(_x02f2); return _x039b ? 0 : 1; } static int _x015c(const char *_x0358) { char *_x03ce = _x037a(_x0358); if (!_x03ce) { fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x45\x72\x72\x6f\x72\x3a\x00\x33\x33\x5b\x30\x6d\x20\x43\x6f\x75\x6c\x64\x20\x6e\x6f\x74\x20\x6f\x70\x65\x6e\x20\x66\x69\x6c\x65\x20\x27\x25\x73\x27\x2e\x0a", _x0358); return 1; } _x0435 = _x03ce; _x0052 _x02d6; _x045e(&_x02d6, _x03ce); _x0095 _x0354; _x0466(&_x0354, &_x02d6); _x0032 _x0143 = _x0465(&_x0354); if (_x0354._x027a) { _x042c(_x0143); free(_x03ce); _x0435 = NULL; return 1; } if (!_x046b(_x0143)) { _x042c(_x0143); free(_x03ce); _x0435 = NULL; return 1; } _x0090 *_x02f2 = _x0434(_x0143); _x042c(_x0143); free(_x03ce); _x0435 = NULL; if (!_x02f2) { fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x45\x72\x72\x6f\x72\x3a\x00\x33\x33\x5b\x30\x6d\x20\x43\x6f\x6d\x70\x69\x6c\x61\x74\x69\x6f\x6e\x20\x66\x61\x69\x6c\x65\x64\x2e\x0a"); return 1; } char _x0335[256]; strncpy(_x0335, _x0358, sizeof(_x0335)); char *_x01f9 = strrchr(_x0335, '.'); if (_x01f9) { strcpy(_x01f9, "\x2e\x76\x73\x73\x63"); } else { strcat(_x0335, "\x2e\x76\x73\x73\x63"); } FILE *_x0332 = fopen(_x0335, "\x77\x62"); if (!_x0332) { fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x45\x72\x72\x6f\x72\x3a\x00\x33\x33\x5b\x30\x6d\x20\x43\x6f\x75\x6c\x64\x20\x6e\x6f\x74\x20\x6f\x70\x65\x6e\x20\x6f\x75\x74\x70\x75\x74\x20\x66\x69\x6c\x65\x20\x27\x25\x73\x27\x2e\x0a", _x0335); _x0457(_x02f2); return 1; } fwrite("\x56\x53\x53\x43", 1, 4, _x0332); _x046c(_x02f2, _x0332); fclose(_x0332); printf("\x00\x33\x33\x5b\x31\x3b\x33\x32\x6d\x42\x75\x69\x6c\x64\x20\x53\x75\x63\x63\x65\x73\x73\x3a\x00\x33\x33\x5b\x30\x6d\x20\x43\x6f\x6d\x70\x69\x6c\x65\x64\x20\x74\x6f\x20\x25\x73\x0a", _x0335); _x0457(_x02f2); return 0; } static int _x01db(const char *_x0319) { if (!_x0462(_x0319)) { fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x45\x72\x72\x6f\x72\x3a\x00\x33\x33\x5b\x30\x6d\x20\x43\x6f\x75\x6c\x64\x20\x6e\x6f\x74\x20\x63\x72\x65\x61\x74\x65\x20\x64\x69\x72\x65\x63\x74\x6f\x72\x79\x20\x27\x25\x73\x27\x2e\x0a", _x0319); return 1; } char _x0359[512]; snprintf(_x0359, sizeof(_x0359), "\x25\x73\x2f\x76\x73\x73\x2e\x6a\x73\x6f\x6e", _x0319); FILE *_x0232 = fopen(_x0359, "\x77"); if (_x0232) { fprintf(_x0232, "\x7b\x0a\x20\x20\x22\x6e\x61\x6d\x65\x22\x3a\x20\x22\x25\x73\x22\x2c\x0a\x20\x20\x22\x76\x65\x72\x73\x69\x6f\x6e\x22\x3a\x20\x22\x30\x2e\x31\x2e\x30\x22\x2c\x0a\x20\x20\x22\x64\x65\x73\x63\x72\x69\x70\x74\x69\x6f\x6e\x22\x3a\x20\x22\x41\x20\x6e\x65\x77\x20\x56\x53\x53\x20\x70\x72\x6f\x6a\x65\x63\x74\x22\x0a\x7d\x0a", _x0319); fclose(_x0232); } char _x035b[512]; snprintf(_x035b, sizeof(_x035b), "\x25\x73\x2f\x6d\x61\x69\x6e\x2e\x76\x73\x73", _x0319); FILE *_x0233 = fopen(_x035b, "\x77"); if (_x0233) { fprintf(_x0233, "\x6e\x6f\x74\x65\x20\x4d\x61\x69\x6e\x20\x65\x6e\x74\x72\x79\x20\x70\x6f\x69\x6e\x74\x20\x66\x6f\x72\x20\x25\x73\x0a\x73\x61\x79\x20\x22\x48\x65\x6c\x6c\x6f\x20\x66\x72\x6f\x6d\x20\x56\x53\x53\x20\x70\x72\x6f\x6a\x65\x63\x74\x21\x22\x0a", _x0319); fclose(_x0233); } printf("\x00\x33\x33\x5b\x31\x3b\x33\x32\x6d\x50\x72\x6f\x6a\x65\x63\x74\x20\x43\x72\x65\x61\x74\x65\x64\x3a\x00\x33\x33\x5b\x30\x6d\x20\x57\x65\x6c\x63\x6f\x6d\x65\x20\x74\x6f\x20\x56\x53\x53\x21\x20\x43\x72\x65\x61\x74\x65\x64\x20\x27\x25\x73\x27\x20\x74\x65\x6d\x70\x6c\x61\x74\x65\x2e\x0a", _x0319); return 0; } static int _x0296(void) { FILE *_x0232 = fopen("\x76\x73\x73\x2e\x6a\x73\x6f\x6e", "\x77"); if (_x0232) { fprintf(_x0232, "\x7b\x0a\x20\x20\x22\x6e\x61\x6d\x65\x22\x3a\x20\x22\x76\x73\x73\x5f\x70\x72\x6f\x6a\x65\x63\x74\x22\x2c\x0a\x20\x20\x22\x76\x65\x72\x73\x69\x6f\x6e\x22\x3a\x20\x22\x30\x2e\x31\x2e\x30\x22\x2c\x0a\x20\x20\x22\x64\x65\x73\x63\x72\x69\x70\x74\x69\x6f\x6e\x22\x3a\x20\x22\x41\x20\x56\x53\x53\x20\x70\x72\x6f\x6a\x65\x63\x74\x22\x0a\x7d\x0a"); fclose(_x0232); } FILE *_x0233 = fopen("\x6d\x61\x69\x6e\x2e\x76\x73\x73", "\x77"); if (_x0233) { fprintf(_x0233, "\x6e\x6f\x74\x65\x20\x4d\x61\x69\x6e\x20\x65\x6e\x74\x72\x79\x20\x70\x6f\x69\x6e\x74\x0a\x73\x61\x79\x20\x22\x48\x65\x6c\x6c\x6f\x20\x66\x72\x6f\x6d\x20\x56\x53\x53\x21\x22\x0a"); fclose(_x0233); } printf("\x00\x33\x33\x5b\x31\x3b\x33\x32\x6d\x49\x6e\x69\x74\x69\x61\x6c\x69\x7a\x65\x64\x20\x56\x53\x53\x20\x50\x72\x6f\x6a\x65\x63\x74\x3a\x00\x33\x33\x5b\x30\x6d\x20\x43\x72\x65\x61\x74\x65\x64\x20\x27\x76\x73\x73\x2e\x6a\x73\x6f\x6e\x27\x20\x61\x6e\x64\x20\x27\x6d\x61\x69\x6e\x2e\x76\x73\x73\x27\x2e\x0a"); return 0; } static int _x0258(const char *_x0358) { char *_x03ce = _x037a(_x0358); if (!_x03ce) { fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x45\x72\x72\x6f\x72\x3a\x00\x33\x33\x5b\x30\x6d\x20\x43\x6f\x75\x6c\x64\x20\x6e\x6f\x74\x20\x6f\x70\x65\x6e\x20\x66\x69\x6c\x65\x20\x27\x25\x73\x27\x2e\x0a", _x0358); return 1; } FILE *_x0332 = fopen(_x0358, "\x77"); if (!_x0332) { fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x45\x72\x72\x6f\x72\x3a\x00\x33\x33\x5b\x30\x6d\x20\x43\x6f\x75\x6c\x64\x20\x6e\x6f\x74\x20\x6f\x70\x65\x6e\x20\x66\x69\x6c\x65\x20\x27\x25\x73\x27\x20\x66\x6f\x72\x20\x77\x72\x69\x74\x69\x6e\x67\x2e\x0a", _x0358); free(_x03ce); return 1; } char *_x02d9 = strtok(_x03ce, "\x0a"); while (_x02d9 != NULL) { int _x02d3 = strlen(_x02d9); while (_x02d3 > 0 && (_x02d9[_x02d3-1] == ' ' || _x02d9[_x02d3-1] == '\t' || _x02d9[_x02d3-1] == '\r')) { _x02d9[_x02d3-1] = '\0'; _x02d3--; } fprintf(_x0332, "\x25\x73\x0a", _x02d9); _x02d9 = strtok(NULL, "\x0a"); } fclose(_x0332); free(_x03ce); printf("\x00\x33\x33\x5b\x31\x3b\x33\x32\x6d\x46\x6f\x72\x6d\x61\x74\x74\x65\x64\x3a\x00\x33\x33\x5b\x30\x6d\x20\x25\x73\x20\x73\x75\x63\x63\x65\x73\x73\x66\x75\x6c\x6c\x79\x2e\x0a", _x0358); return 0; } static int _x02de(const char *_x0358) { char *_x03ce = _x037a(_x0358); if (!_x03ce) { fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x45\x72\x72\x6f\x72\x3a\x00\x33\x33\x5b\x30\x6d\x20\x43\x6f\x75\x6c\x64\x20\x6e\x6f\x74\x20\x6f\x70\x65\x6e\x20\x66\x69\x6c\x65\x20\x27\x25\x73\x27\x2e\x0a", _x0358); return 1; } printf("\x00\x33\x33\x5b\x31\x3b\x33\x33\x6d\x4c\x69\x6e\x74\x69\x6e\x67\x20\x25\x73\x3a\x00\x33\x33\x5b\x30\x6d\x0a", _x0358); int _x04af = 0; int _x02db = 1; char *_x02d9 = strtok(_x03ce, "\x0a"); while (_x02d9 != NULL) { int _x02d3 = strlen(_x02d9); if (_x02d3 > 120) { printf("\x20\x20\x6c\x69\x6e\x65\x20\x25\x64\x3a\x20\x4c\x69\x6e\x65\x20\x65\x78\x63\x65\x65\x64\x73\x20\x31\x32\x30\x20\x63\x68\x61\x72\x61\x63\x74\x65\x72\x73\x20\x28\x67\x6f\x74\x20\x25\x64\x29\x2e\x0a", _x02db, _x02d3); _x04af++; } if (_x02d3 > 0 && (_x02d9[_x02d3-1] == ' ' || _x02d9[_x02d3-1] == '\t')) { printf("\x20\x20\x6c\x69\x6e\x65\x20\x25\x64\x3a\x20\x54\x72\x61\x69\x6c\x69\x6e\x67\x20\x77\x68\x69\x74\x65\x73\x70\x61\x63\x65\x20\x64\x65\x74\x65\x63\x74\x65\x64\x2e\x0a", _x02db); _x04af++; } if (strstr(_x02d9, "\x6d\x61\x6b\x65\x20") && strstr(_x02d9, "\x70\x69")) { printf("\x20\x20\x6c\x69\x6e\x65\x20\x25\x64\x3a\x20\x53\x75\x67\x67\x65\x73\x74\x20\x75\x73\x69\x6e\x67\x20\x27\x6b\x65\x65\x70\x27\x20\x69\x6e\x73\x74\x65\x61\x64\x20\x6f\x66\x20\x27\x6d\x61\x6b\x65\x27\x20\x66\x6f\x72\x20\x70\x69\x20\x63\x6f\x6e\x73\x74\x61\x6e\x74\x2e\x0a", _x02db); _x04af++; } _x02db++; _x02d9 = strtok(NULL, "\x0a"); } free(_x03ce); if (_x04af == 0) { printf("\x20\x20\x4e\x6f\x20\x69\x73\x73\x75\x65\x73\x20\x66\x6f\x75\x6e\x64\x21\x0a"); } else { printf("\x20\x20\x25\x64\x20\x77\x61\x72\x6e\x69\x6e\x67\x28\x73\x29\x20\x66\x6f\x75\x6e\x64\x2e\x0a", _x04af); } return 0; } static int _x01f7(const char *_x0358) { char *_x03ce = _x037a(_x0358); if (!_x03ce) { fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x45\x72\x72\x6f\x72\x3a\x00\x33\x33\x5b\x30\x6d\x20\x43\x6f\x75\x6c\x64\x20\x6e\x6f\x74\x20\x6f\x70\x65\x6e\x20\x66\x69\x6c\x65\x20\x27\x25\x73\x27\x2e\x0a", _x0358); return 1; } printf("\x23\x20\x41\x50\x49\x20\x44\x6f\x63\x75\x6d\x65\x6e\x74\x61\x74\x69\x6f\x6e\x20\x66\x6f\x72\x20\x25\x73\x0a\x0a", _x0358); char *_x02d9 = strtok(_x03ce, "\x0a"); while (_x02d9 != NULL) { while (*_x02d9 == ' ' || *_x02d9 == '\t') _x02d9++; if (strncmp(_x02d9, "\x6e\x6f\x74\x65\x20", 5) == 0) { printf("\x25\x73\x0a", _x02d9 + 5); } else if (strncmp(_x02d9, "\x74\x61\x73\x6b\x20", 5) == 0) { printf("\x23\x23\x23\x20\x54\x61\x73\x6b\x3a\x20\x60\x25\x73\x60\x0a", _x02d9 + 5); } _x02d9 = strtok(NULL, "\x0a"); } free(_x03ce); return 0; } static int _x01f8(void) { printf("\x00\x33\x33\x5b\x31\x3b\x33\x36\x6d\x56\x53\x53\x20\x44\x69\x61\x67\x6e\x6f\x73\x74\x69\x63\x73\x3a\x00\x33\x33\x5b\x30\x6d\x0a"); printf("\x20\x20\x4f\x53\x20\x54\x61\x72\x67\x65\x74\x3a\x20\x25\x73\x0a", #ifdef _WIN32
-"\x57\x69\x6e\x64\x6f\x77\x73" #elif __APPLE__
-"\x6d\x61\x63\x4f\x53" #else
-"\x4c\x69\x6e\x75\x78" #endif
-); printf("\x20\x20\x42\x69\x6e\x61\x72\x79\x20\x50\x61\x74\x68\x3a\x20\x25\x73\x0a", "\x41\x76\x61\x69\x6c\x61\x62\x6c\x65\x20\x67\x6c\x6f\x62\x61\x6c\x6c\x79\x20\x76\x69\x61\x20\x50\x41\x54\x48"); int _x0268 = _x0443( #ifdef _WIN32
-"\x67\x63\x63\x20\x2d\x2d\x76\x65\x72\x73\x69\x6f\x6e\x20\x3e\x6e\x75\x6c\x20\x32\x3e\x26\x31" #else
-"\x67\x63\x63\x20\x2d\x2d\x76\x65\x72\x73\x69\x6f\x6e\x20\x3e\x2f\x64\x65\x76\x2f\x6e\x75\x6c\x6c\x20\x32\x3e\x26\x31" #endif
-); printf("\x20\x20\x43\x20\x43\x6f\x6d\x70\x69\x6c\x65\x72\x20\x28\x67\x63\x63\x29\x3a\x20\x25\x73\x0a", _x0268 == 0 ? "\x49\x6e\x73\x74\x61\x6c\x6c\x65\x64" : "\x4e\x6f\x74\x20\x46\x6f\x75\x6e\x64\x20\x28\x4f\x70\x74\x69\x6f\x6e\x61\x6c\x20\x66\x6f\x72\x20\x56\x53\x53\x5f\x56\x4d\x20\x65\x78\x65\x63\x75\x74\x69\x6f\x6e\x2c\x20\x6e\x65\x65\x64\x65\x64\x20\x66\x6f\x72\x20\x6e\x61\x74\x69\x76\x65\x20\x63\x6f\x6d\x70\x69\x6c\x65\x72\x29"); char *_x0285 = _x0459(); if (_x0285) { char _x035b[512]; snprintf(_x035b, sizeof(_x035b), "\x25\x73\x25\x73\x2e\x76\x73\x73", _x0285, _x0093); if (_x0438(_x035b)) { printf("\x20\x20\x56\x53\x53\x20\x4c\x6f\x63\x61\x6c\x20\x46\x6f\x6c\x64\x65\x72\x3a\x20\x49\x6e\x73\x74\x61\x6c\x6c\x65\x64\x20\x28\x7e\x2f\x2e\x76\x73\x73\x29\x0a"); } else { printf("\x20\x20\x56\x53\x53\x20\x4c\x6f\x63\x61\x6c\x20\x46\x6f\x6c\x64\x65\x72\x3a\x20\x4e\x6f\x74\x20\x66\x6f\x75\x6e\x64\x20\x28\x7e\x2f\x2e\x76\x73\x73\x29\x0a"); } free(_x0285); } printf("\x00\x33\x33\x5b\x31\x3b\x33\x32\x6d\x44\x69\x61\x67\x6e\x6f\x73\x74\x69\x63\x73\x20\x43\x6f\x6d\x70\x6c\x65\x74\x65\x2e\x20\x41\x6c\x6c\x20\x73\x79\x73\x74\x65\x6d\x20\x70\x61\x72\x61\x6d\x65\x74\x65\x72\x73\x20\x6e\x6f\x6d\x69\x6e\x61\x6c\x2e\x00\x33\x33\x5b\x30\x6d\x0a"); return 0; } static void _x036c(void) { printf("\x00\x33\x33\x5b\x31\x3b\x33\x35\x6d\x56\x53\x53\x20\x50\x72\x6f\x67\x72\x61\x6d\x6d\x69\x6e\x67\x20\x4c\x61\x6e\x67\x75\x61\x67\x65\x00\x33\x33\x5b\x30\x6d\x0a"); printf("\x20\x20\x56\x65\x72\x73\x69\x6f\x6e\x3a\x20\x20\x00\x33\x33\x5b\x31\x3b\x33\x32\x6d\x25\x73\x00\x33\x33\x5b\x30\x6d\x0a", _x0123); printf("\x20\x20\x42\x75\x69\x6c\x64\x3a\x20\x20\x20\x20\x25\x73\x0a", _x0030); printf("\x20\x20\x50\x6c\x61\x74\x66\x6f\x72\x6d\x3a\x20\x25\x73\x0a", _x0094); } static void _x036b(void) { printf("\x00\x33\x33\x5b\x31\x3b\x33\x36\x6d\x56\x65\x72\x79\x20\x53\x69\x6d\x70\x6c\x65\x20\x53\x79\x6e\x74\x61\x78\x20\x28\x56\x53\x53\x29\x20\x43\x6f\x6d\x6d\x61\x6e\x64\x2d\x4c\x69\x6e\x65\x20\x49\x6e\x74\x65\x72\x66\x61\x63\x65\x00\x33\x33\x5b\x30\x6d\x0a\x0a"); printf("\x55\x73\x61\x67\x65\x3a\x0a"); printf("\x20\x20\x76\x73\x73\x20\x3c\x66\x69\x6c\x65\x2e\x76\x73\x73\x3e\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x52\x75\x6e\x20\x61\x20\x56\x53\x53\x20\x73\x6f\x75\x72\x63\x65\x20\x6f\x72\x20\x62\x79\x74\x65\x63\x6f\x64\x65\x20\x66\x69\x6c\x65\x0a"); printf("\x20\x20\x76\x73\x73\x20\x72\x75\x6e\x20\x3c\x66\x69\x6c\x65\x2e\x76\x73\x73\x3e\x20\x20\x20\x20\x20\x20\x20\x20\x20\x45\x78\x70\x6c\x69\x63\x69\x74\x6c\x79\x20\x72\x75\x6e\x20\x61\x20\x56\x53\x53\x20\x66\x69\x6c\x65\x0a"); printf("\x20\x20\x76\x73\x73\x20\x62\x75\x69\x6c\x64\x20\x3c\x66\x69\x6c\x65\x2e\x76\x73\x73\x3e\x20\x20\x20\x20\x20\x20\x20\x43\x6f\x6d\x70\x69\x6c\x65\x20\x61\x20\x73\x6f\x75\x72\x63\x65\x20\x66\x69\x6c\x65\x20\x69\x6e\x74\x6f\x20\x2e\x76\x73\x73\x63\x20\x62\x79\x74\x65\x63\x6f\x64\x65\x0a"); printf("\x20\x20\x76\x73\x73\x20\x6e\x65\x77\x20\x3c\x50\x72\x6f\x6a\x65\x63\x74\x4e\x61\x6d\x65\x3e\x20\x20\x20\x20\x20\x20\x43\x72\x65\x61\x74\x65\x20\x61\x20\x6e\x65\x77\x20\x56\x53\x53\x20\x74\x65\x6d\x70\x6c\x61\x74\x65\x20\x70\x72\x6f\x6a\x65\x63\x74\x20\x66\x6f\x6c\x64\x65\x72\x0a"); printf("\x20\x20\x76\x73\x73\x20\x69\x6e\x69\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x49\x6e\x69\x74\x69\x61\x6c\x69\x7a\x65\x20\x56\x53\x53\x20\x69\x6e\x20\x74\x68\x65\x20\x63\x75\x72\x72\x65\x6e\x74\x20\x64\x69\x72\x65\x63\x74\x6f\x72\x79\x0a"); printf("\x20\x20\x76\x73\x73\x20\x74\x65\x73\x74\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x52\x75\x6e\x20\x74\x65\x73\x74\x20\x73\x75\x69\x74\x65\x73\x20\x69\x6e\x20\x74\x68\x65\x20\x63\x75\x72\x72\x65\x6e\x74\x20\x64\x69\x72\x65\x63\x74\x6f\x72\x79\x0a"); printf("\x20\x20\x76\x73\x73\x20\x66\x6f\x72\x6d\x61\x74\x20\x3c\x66\x69\x6c\x65\x2e\x76\x73\x73\x3e\x20\x20\x20\x20\x20\x20\x46\x6f\x72\x6d\x61\x74\x20\x61\x20\x56\x53\x53\x20\x73\x6f\x75\x72\x63\x65\x20\x66\x69\x6c\x65\x0a"); printf("\x20\x20\x76\x73\x73\x20\x6c\x69\x6e\x74\x20\x3c\x66\x69\x6c\x65\x2e\x76\x73\x73\x3e\x20\x20\x20\x20\x20\x20\x20\x20\x53\x74\x61\x74\x69\x63\x61\x6c\x6c\x79\x20\x61\x6e\x61\x6c\x79\x7a\x65\x20\x61\x20\x56\x53\x53\x20\x66\x69\x6c\x65\x0a"); printf("\x20\x20\x76\x73\x73\x20\x64\x6f\x63\x73\x20\x3c\x66\x69\x6c\x65\x2e\x76\x73\x73\x3e\x20\x20\x20\x20\x20\x20\x20\x20\x47\x65\x6e\x65\x72\x61\x74\x65\x20\x41\x50\x49\x20\x64\x6f\x63\x75\x6d\x65\x6e\x74\x61\x74\x69\x6f\x6e\x20\x66\x72\x6f\x6d\x20\x6e\x6f\x74\x65\x73\x0a"); printf("\x20\x20\x76\x73\x73\x20\x63\x6c\x65\x61\x6e\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x43\x6c\x65\x61\x6e\x20\x62\x75\x69\x6c\x64\x20\x61\x72\x74\x69\x66\x61\x63\x74\x73\x20\x61\x6e\x64\x20\x74\x65\x6d\x70\x6f\x72\x61\x72\x79\x20\x66\x69\x6c\x65\x73\x0a"); printf("\x20\x20\x76\x73\x73\x20\x64\x6f\x63\x74\x6f\x72\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x43\x68\x65\x63\x6b\x20\x65\x6e\x76\x69\x72\x6f\x6e\x6d\x65\x6e\x74\x20\x73\x65\x74\x75\x70\x20\x61\x6e\x64\x20\x69\x6e\x73\x74\x61\x6c\x6c\x61\x74\x69\x6f\x6e\x20\x69\x6e\x74\x65\x67\x72\x69\x74\x79\x0a"); printf("\x20\x20\x76\x73\x73\x20\x76\x65\x72\x73\x69\x6f\x6e\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x53\x68\x6f\x77\x20\x56\x53\x53\x20\x63\x6f\x6d\x70\x69\x6c\x65\x72\x20\x76\x65\x72\x73\x69\x6f\x6e\x0a"); printf("\x20\x20\x76\x73\x73\x20\x68\x65\x6c\x70\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x44\x69\x73\x70\x6c\x61\x79\x20\x74\x68\x69\x73\x20\x68\x65\x6c\x70\x20\x73\x63\x72\x65\x65\x6e\x0a"); } static int _x029d(const char *_x0319) { printf("\x00\x33\x33\x5b\x31\x3b\x33\x36\x6d\x49\x6e\x73\x74\x61\x6c\x6c\x69\x6e\x67\x20\x70\x61\x63\x6b\x61\x67\x65\x20\x27\x25\x73\x27\x2e\x2e\x2e\x00\x33\x33\x5b\x30\x6d\x0a", _x0319); _x0462("\x70\x61\x63\x6b\x61\x67\x65\x73"); char _x01b7[512]; snprintf(_x01b7, sizeof(_x01b7), "\x63\x75\x72\x6c\x20\x2d\x73\x53\x66\x4c\x20\x22\x68\x74\x74\x70\x73\x3a\x2f\x2f\x72\x61\x77\x2e\x67\x69\x74\x68\x75\x62\x75\x73\x65\x72\x63\x6f\x6e\x74\x65\x6e\x74\x2e\x63\x6f\x6d\x2f\x73\x69\x64\x64\x68\x61\x72\x74\x68\x2d\x31\x31\x31\x38\x2f\x76\x73\x73\x2d\x6c\x61\x6e\x67\x75\x61\x67\x65\x2f\x6d\x61\x69\x6e\x2f\x70\x61\x63\x6b\x61\x67\x65\x73\x2f\x25\x73\x2e\x76\x73\x73\x22\x20\x2d\x6f\x20\x22\x70\x61\x63\x6b\x61\x67\x65\x73\x2f\x25\x73\x2e\x76\x73\x73\x22", _x0319, _x0319); int _x0386 = _x0443(_x01b7); if (_x0386 != 0) { fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x45\x72\x72\x6f\x72\x3a\x00\x33\x33\x5b\x30\x6d\x20\x46\x61\x69\x6c\x65\x64\x20\x74\x6f\x20\x64\x6f\x77\x6e\x6c\x6f\x61\x64\x20\x70\x61\x63\x6b\x61\x67\x65\x20\x27\x25\x73\x27\x2e\x20\x4d\x61\x6b\x65\x20\x73\x75\x72\x65\x20\x74\x68\x65\x20\x70\x61\x63\x6b\x61\x67\x65\x20\x65\x78\x69\x73\x74\x73\x20\x69\x6e\x20\x74\x68\x65\x20\x72\x65\x67\x69\x73\x74\x72\x79\x2e\x0a", _x0319); return 1; } printf("\x00\x33\x33\x5b\x31\x3b\x33\x32\x6d\x50\x61\x63\x6b\x61\x67\x65\x20\x49\x6e\x73\x74\x61\x6c\x6c\x65\x64\x3a\x00\x33\x33\x5b\x30\x6d\x20\x27\x25\x73\x27\x20\x69\x73\x20\x6e\x6f\x77\x20\x61\x76\x61\x69\x6c\x61\x62\x6c\x65\x20\x69\x6e\x20\x79\x6f\x75\x72\x20\x6c\x6f\x63\x61\x6c\x20\x70\x61\x63\x6b\x61\x67\x65\x73\x20\x64\x69\x72\x65\x63\x74\x6f\x72\x79\x2e\x0a", _x0319); return 0; } static int _x037f(const char *_x0319) { printf("\x00\x33\x33\x5b\x31\x3b\x33\x36\x6d\x52\x65\x6d\x6f\x76\x69\x6e\x67\x20\x70\x61\x63\x6b\x61\x67\x65\x20\x27\x25\x73\x27\x2e\x2e\x2e\x00\x33\x33\x5b\x30\x6d\x0a", _x0319); char _x0358[256]; snprintf(_x0358, sizeof(_x0358), "\x70\x61\x63\x6b\x61\x67\x65\x73\x2f\x25\x73\x2e\x76\x73\x73", _x0319); if (_x0455(_x0358)) { remove(_x0358); printf("\x00\x33\x33\x5b\x31\x3b\x33\x32\x6d\x50\x61\x63\x6b\x61\x67\x65\x20\x52\x65\x6d\x6f\x76\x65\x64\x3a\x00\x33\x33\x5b\x30\x6d\x20\x53\x75\x63\x63\x65\x73\x73\x66\x75\x6c\x6c\x79\x20\x72\x65\x6d\x6f\x76\x65\x64\x20\x27\x25\x73\x27\x2e\x0a", _x0319); return 0; } else { fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x45\x72\x72\x6f\x72\x3a\x00\x33\x33\x5b\x30\x6d\x20\x50\x61\x63\x6b\x61\x67\x65\x20\x27\x25\x73\x27\x20\x69\x73\x20\x6e\x6f\x74\x20\x69\x6e\x73\x74\x61\x6c\x6c\x65\x64\x2e\x0a", _x0319); return 1; } } static int _x027d(const char *_x03e6, const char *_x022d) { size_t _x03c8 = strlen(_x03e6); size_t _x0204 = strlen(_x022d); if (_x03c8 < _x0204) return 0; const char *_x03f6 = _x03e6 + _x03c8 - _x0204; for (size_t _x0288 = 0; _x0288 < _x0204; _x0288++) { char _x0132 = _x03f6[_x0288], _x0145 = _x022d[_x0288]; if (_x0132 >= 'A' && _x0132 <= 'Z') _x0132 += 32; if (_x0145 >= 'A' && _x0145 <= 'Z') _x0145 += 32; if (_x0132 != _x0145) return 0; } return 1; } int _x0469(int argc, char **argv) { if (argc < 2) { _x036b(); return 0; } const char *_x01b7 = argv[1]; int _x02e8 = _x027d(_x01b7, "\x2e\x76\x73\x73"); int _x02e9 = _x027d(_x01b7, "\x2e\x76\x73\x73\x63"); if (_x02e8 || _x02e9) { if (!_x0455(_x01b7)) { fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x45\x72\x72\x6f\x72\x3a\x00\x33\x33\x5b\x30\x6d\x20\x46\x69\x6c\x65\x20\x6e\x6f\x74\x20\x66\x6f\x75\x6e\x64\x3a\x20\x27\x25\x73\x27\x0a", _x01b7); return 1; } return _x039a(_x01b7); } if (_x0455(_x01b7) && !_x027d(_x01b7, "\x2e\x76\x73\x73") && !_x027d(_x01b7, "\x2e\x76\x73\x73\x63")) { const char *_x033a = _x01b7; int _x027f = 0, _x027c = 0; while (*_x033a) { if (*_x033a == '/' || *_x033a == '\\') { _x027f = 1; break; } if (*_x033a == '.') _x027c = 1; _x033a++; } if (_x027f || _x027c) { return _x039a(_x01b7); } } if (strcmp(_x01b7, "\x68\x65\x6c\x70") == 0 || strcmp(_x01b7, "\x2d\x2d\x68\x65\x6c\x70") == 0 || strcmp(_x01b7, "\x2d\x68") == 0) { _x036b(); return 0; } if (strcmp(_x01b7, "\x76\x65\x72\x73\x69\x6f\x6e") == 0 || strcmp(_x01b7, "\x2d\x2d\x76\x65\x72\x73\x69\x6f\x6e") == 0 || strcmp(_x01b7, "\x2d\x76") == 0) { _x036c(); return 0; } if (strcmp(_x01b7, "\x72\x75\x6e") == 0) { if (argc < 3) { fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x45\x72\x72\x6f\x72\x3a\x00\x33\x33\x5b\x30\x6d\x20\x4d\x69\x73\x73\x69\x6e\x67\x20\x66\x69\x6c\x65\x20\x61\x72\x67\x75\x6d\x65\x6e\x74\x2e\x20\x55\x73\x61\x67\x65\x3a\x20\x76\x73\x73\x20\x72\x75\x6e\x20\x3c\x66\x69\x6c\x65\x2e\x76\x73\x73\x3e\x0a"); return 1; } return _x039a(argv[2]); } if (strcmp(_x01b7, "\x62\x75\x69\x6c\x64") == 0) { if (argc < 3) { fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x45\x72\x72\x6f\x72\x3a\x00\x33\x33\x5b\x30\x6d\x20\x4d\x69\x73\x73\x69\x6e\x67\x20\x66\x69\x6c\x65\x20\x61\x72\x67\x75\x6d\x65\x6e\x74\x2e\x20\x55\x73\x61\x67\x65\x3a\x20\x76\x73\x73\x20\x62\x75\x69\x6c\x64\x20\x3c\x66\x69\x6c\x65\x2e\x76\x73\x73\x3e\x0a"); return 1; } return _x015c(argv[2]); } if (strcmp(_x01b7, "\x6e\x65\x77") == 0) { if (argc < 3) { fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x45\x72\x72\x6f\x72\x3a\x00\x33\x33\x5b\x30\x6d\x20\x4d\x69\x73\x73\x69\x6e\x67\x20\x70\x72\x6f\x6a\x65\x63\x74\x20\x6e\x61\x6d\x65\x2e\x20\x55\x73\x61\x67\x65\x3a\x20\x76\x73\x73\x20\x6e\x65\x77\x20\x3c\x50\x72\x6f\x6a\x65\x63\x74\x4e\x61\x6d\x65\x3e\x0a"); return 1; } return _x01db(argv[2]); } if (strcmp(_x01b7, "\x69\x6e\x69\x74") == 0) { return _x0296(); } if (strcmp(_x01b7, "\x74\x65\x73\x74") == 0) { if (_x0455("\x65\x78\x61\x6d\x70\x6c\x65\x73\x2f\x74\x65\x73\x74\x5f\x73\x75\x69\x74\x65\x2e\x76\x73\x73")) { return _x039a("\x65\x78\x61\x6d\x70\x6c\x65\x73\x2f\x74\x65\x73\x74\x5f\x73\x75\x69\x74\x65\x2e\x76\x73\x73"); } else if (_x0455("\x74\x65\x73\x74\x5f\x73\x75\x69\x74\x65\x2e\x76\x73\x73")) { return _x039a("\x74\x65\x73\x74\x5f\x73\x75\x69\x74\x65\x2e\x76\x73\x73"); } else { fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x33\x6d\x57\x61\x72\x6e\x69\x6e\x67\x3a\x00\x33\x33\x5b\x30\x6d\x20\x4e\x6f\x20\x64\x65\x66\x61\x75\x6c\x74\x20\x27\x74\x65\x73\x74\x5f\x73\x75\x69\x74\x65\x2e\x76\x73\x73\x27\x20\x66\x6f\x75\x6e\x64\x2e\x20\x52\x75\x6e\x6e\x69\x6e\x67\x20\x48\x65\x6c\x6c\x6f\x20\x77\x6f\x72\x6c\x64\x20\x74\x65\x73\x74\x2e\x0a"); if (_x0455("\x65\x78\x61\x6d\x70\x6c\x65\x73\x2f\x68\x65\x6c\x6c\x6f\x2e\x76\x73\x73")) { return _x039a("\x65\x78\x61\x6d\x70\x6c\x65\x73\x2f\x68\x65\x6c\x6c\x6f\x2e\x76\x73\x73"); } } fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x45\x72\x72\x6f\x72\x3a\x00\x33\x33\x5b\x30\x6d\x20\x4e\x6f\x20\x74\x65\x73\x74\x73\x20\x66\x6f\x75\x6e\x64\x2e\x0a"); return 1; } if (strcmp(_x01b7, "\x66\x6f\x72\x6d\x61\x74") == 0) { if (argc < 3) { fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x45\x72\x72\x6f\x72\x3a\x00\x33\x33\x5b\x30\x6d\x20\x4d\x69\x73\x73\x69\x6e\x67\x20\x66\x69\x6c\x65\x2e\x20\x55\x73\x61\x67\x65\x3a\x20\x76\x73\x73\x20\x66\x6f\x72\x6d\x61\x74\x20\x3c\x66\x69\x6c\x65\x2e\x76\x73\x73\x3e\x0a"); return 1; } return _x0258(argv[2]); } if (strcmp(_x01b7, "\x6c\x69\x6e\x74") == 0) { if (argc < 3) { fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x45\x72\x72\x6f\x72\x3a\x00\x33\x33\x5b\x30\x6d\x20\x4d\x69\x73\x73\x69\x6e\x67\x20\x66\x69\x6c\x65\x2e\x20\x55\x73\x61\x67\x65\x3a\x20\x76\x73\x73\x20\x6c\x69\x6e\x74\x20\x3c\x66\x69\x6c\x65\x2e\x76\x73\x73\x3e\x0a"); return 1; } return _x02de(argv[2]); } if (strcmp(_x01b7, "\x64\x6f\x63\x73") == 0) { if (argc < 3) { fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x45\x72\x72\x6f\x72\x3a\x00\x33\x33\x5b\x30\x6d\x20\x4d\x69\x73\x73\x69\x6e\x67\x20\x66\x69\x6c\x65\x2e\x20\x55\x73\x61\x67\x65\x3a\x20\x76\x73\x73\x20\x64\x6f\x63\x73\x20\x3c\x66\x69\x6c\x65\x2e\x76\x73\x73\x3e\x0a"); return 1; } return _x01f7(argv[2]); } if (strcmp(_x01b7, "\x64\x6f\x63\x74\x6f\x72") == 0) { return _x01f8(); } if (strcmp(_x01b7, "\x63\x6c\x65\x61\x6e") == 0) { _x0461("\x2e"); printf("\x00\x33\x33\x5b\x31\x3b\x33\x32\x6d\x43\x6c\x65\x61\x6e\x20\x63\x6f\x6d\x70\x6c\x65\x74\x65\x2e\x00\x33\x33\x5b\x30\x6d\x0a"); return 0; } if (strcmp(_x01b7, "\x70\x61\x63\x6b\x61\x67\x65") == 0) { if (argc < 3) { printf("\x56\x53\x53\x20\x50\x61\x63\x6b\x61\x67\x65\x20\x4d\x61\x6e\x61\x67\x65\x72\x0a\x0a\x55\x73\x61\x67\x65\x3a\x0a\x20\x20\x76\x73\x73\x20\x70\x61\x63\x6b\x61\x67\x65\x20\x69\x6e\x73\x74\x61\x6c\x6c\x20\x3c\x6e\x61\x6d\x65\x3e\x20\x20\x20\x49\x6e\x73\x74\x61\x6c\x6c\x20\x61\x20\x70\x61\x63\x6b\x61\x67\x65\x20\x66\x72\x6f\x6d\x20\x74\x68\x65\x20\x72\x65\x67\x69\x73\x74\x72\x79\x0a\x20\x20\x76\x73\x73\x20\x70\x61\x63\x6b\x61\x67\x65\x20\x72\x65\x6d\x6f\x76\x65\x20\x3c\x6e\x61\x6d\x65\x3e\x20\x20\x20\x20\x52\x65\x6d\x6f\x76\x65\x20\x61\x6e\x20\x69\x6e\x73\x74\x61\x6c\x6c\x65\x64\x20\x70\x61\x63\x6b\x61\x67\x65\x0a\x20\x20\x76\x73\x73\x20\x70\x61\x63\x6b\x61\x67\x65\x20\x75\x70\x64\x61\x74\x65\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x55\x70\x64\x61\x74\x65\x20\x61\x6c\x6c\x20\x69\x6e\x73\x74\x61\x6c\x6c\x65\x64\x20\x70\x61\x63\x6b\x61\x67\x65\x73\x0a\x20\x20\x76\x73\x73\x20\x70\x61\x63\x6b\x61\x67\x65\x20\x70\x75\x62\x6c\x69\x73\x68\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x53\x75\x62\x6d\x69\x74\x20\x61\x20\x70\x61\x63\x6b\x61\x67\x65\x20\x74\x6f\x20\x74\x68\x65\x20\x72\x65\x67\x69\x73\x74\x72\x79\x0a"); return 0; } const char *_x03ea = argv[2]; if (strcmp(_x03ea, "\x69\x6e\x73\x74\x61\x6c\x6c") == 0) { if (argc < 4) { fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x45\x72\x72\x6f\x72\x3a\x00\x33\x33\x5b\x30\x6d\x20\x4d\x69\x73\x73\x69\x6e\x67\x20\x70\x61\x63\x6b\x61\x67\x65\x20\x6e\x61\x6d\x65\x2e\x20\x55\x73\x61\x67\x65\x3a\x20\x76\x73\x73\x20\x70\x61\x63\x6b\x61\x67\x65\x20\x69\x6e\x73\x74\x61\x6c\x6c\x20\x3c\x6e\x61\x6d\x65\x3e\x0a"); return 1; } return _x029d(argv[3]); } else if (strcmp(_x03ea, "\x72\x65\x6d\x6f\x76\x65") == 0) { if (argc < 4) { fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x45\x72\x72\x6f\x72\x3a\x00\x33\x33\x5b\x30\x6d\x20\x4d\x69\x73\x73\x69\x6e\x67\x20\x70\x61\x63\x6b\x61\x67\x65\x20\x6e\x61\x6d\x65\x2e\x20\x55\x73\x61\x67\x65\x3a\x20\x76\x73\x73\x20\x70\x61\x63\x6b\x61\x67\x65\x20\x72\x65\x6d\x6f\x76\x65\x20\x3c\x6e\x61\x6d\x65\x3e\x0a"); return 1; } return _x037f(argv[3]); } else if (strcmp(_x03ea, "\x75\x70\x64\x61\x74\x65") == 0) { printf("\x00\x33\x33\x5b\x31\x3b\x33\x36\x6d\x55\x70\x64\x61\x74\x69\x6e\x67\x20\x69\x6e\x73\x74\x61\x6c\x6c\x65\x64\x20\x70\x61\x63\x6b\x61\x67\x65\x73\x2e\x2e\x2e\x00\x33\x33\x5b\x30\x6d\x0a"); printf("\x41\x6c\x6c\x20\x70\x61\x63\x6b\x61\x67\x65\x73\x20\x61\x72\x65\x20\x75\x70\x20\x74\x6f\x20\x64\x61\x74\x65\x2e\x0a"); return 0; } else if (strcmp(_x03ea, "\x70\x75\x62\x6c\x69\x73\x68") == 0) { printf("\x00\x33\x33\x5b\x31\x3b\x33\x36\x6d\x50\x75\x62\x6c\x69\x73\x68\x69\x6e\x67\x20\x70\x61\x63\x6b\x61\x67\x65\x2e\x2e\x2e\x00\x33\x33\x5b\x30\x6d\x0a"); printf("\x50\x6c\x65\x61\x73\x65\x20\x73\x75\x62\x6d\x69\x74\x20\x61\x20\x70\x75\x6c\x6c\x20\x72\x65\x71\x75\x65\x73\x74\x20\x74\x6f\x20\x67\x69\x74\x68\x75\x62\x2e\x63\x6f\x6d\x2f\x73\x69\x64\x64\x68\x61\x72\x74\x68\x2d\x31\x31\x31\x38\x2f\x76\x73\x73\x2d\x6c\x61\x6e\x67\x75\x61\x67\x65\x20\x77\x69\x74\x68\x20\x79\x6f\x75\x72\x20\x70\x61\x63\x6b\x61\x67\x65\x20\x69\x6e\x20\x74\x68\x65\x20\x70\x61\x63\x6b\x61\x67\x65\x73\x2f\x20\x64\x69\x72\x65\x63\x74\x6f\x72\x79\x2e\x0a"); return 0; } else { fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x55\x6e\x6b\x6e\x6f\x77\x6e\x20\x70\x61\x63\x6b\x61\x67\x65\x20\x63\x6f\x6d\x6d\x61\x6e\x64\x3a\x00\x33\x33\x5b\x30\x6d\x20\x25\x73\x2e\x20\x52\x75\x6e\x20\x27\x76\x73\x73\x20\x70\x61\x63\x6b\x61\x67\x65\x27\x20\x66\x6f\x72\x20\x68\x65\x6c\x70\x2e\x0a", _x03ea); return 1; } } if (strcmp(_x01b7, "\x75\x70\x64\x61\x74\x65") == 0) { printf("\x00\x33\x33\x5b\x31\x3b\x33\x36\x6d\x43\x68\x65\x63\x6b\x69\x6e\x67\x20\x66\x6f\x72\x20\x75\x70\x64\x61\x74\x65\x73\x2e\x2e\x2e\x00\x33\x33\x5b\x30\x6d\x0a"); printf("\x56\x53\x53\x20\x69\x73\x20\x75\x70\x20\x74\x6f\x20\x64\x61\x74\x65\x2e\x20\x43\x75\x72\x72\x65\x6e\x74\x20\x76\x65\x72\x73\x69\x6f\x6e\x3a\x20\x25\x73\x0a", _x0123); return 0; } const char *_x01c0[] = { "\x72\x75\x6e", "\x62\x75\x69\x6c\x64", "\x6e\x65\x77", "\x69\x6e\x69\x74", "\x74\x65\x73\x74", "\x66\x6f\x72\x6d\x61\x74", "\x6c\x69\x6e\x74", "\x64\x6f\x63\x73", "\x64\x6f\x63\x74\x6f\x72", "\x63\x6c\x65\x61\x6e", "\x70\x61\x63\x6b\x61\x67\x65", "\x75\x70\x64\x61\x74\x65", "\x68\x65\x6c\x70", "\x76\x65\x72\x73\x69\x6f\x6e" }; int _x0325 = (int)(sizeof(_x01c0) / sizeof(char *)); const char *_x03ee = NULL; int _x0307 = 999; for (int _x0288 = 0; _x0288 < _x0325; _x0288++) { int _x01f3 = _x02d5(_x01b7, _x01c0[_x0288]); if (_x01f3 < _x0307) { _x0307 = _x01f3; _x03ee = _x01c0[_x0288]; } } fprintf(stderr, "\x00\x33\x33\x5b\x31\x3b\x33\x31\x6d\x55\x6e\x6b\x6e\x6f\x77\x6e\x20\x63\x6f\x6d\x6d\x61\x6e\x64\x3a\x00\x33\x33\x5b\x30\x6d\x20\x25\x73\x0a", _x01b7); if (_x0307 <= 2 && _x03ee) { fprintf(stderr, "\x0a\x44\x69\x64\x20\x79\x6f\x75\x20\x6d\x65\x61\x6e\x3a\x0a\x20\x20\x00\x33\x33\x5b\x31\x3b\x33\x36\x6d\x25\x73\x00\x33\x33\x5b\x30\x6d\x3f\x0a", _x03ee); } else { fprintf(stderr, "\x52\x75\x6e\x20\x27\x76\x73\x73\x20\x68\x65\x6c\x70\x27\x20\x66\x6f\x72\x20\x61\x20\x6c\x69\x73\x74\x20\x6f\x66\x20\x61\x76\x61\x69\x6c\x61\x62\x6c\x65\x20\x63\x6f\x6d\x6d\x61\x6e\x64\x73\x2e\x0a"); } return 1; }
+
+// Levenshtein distance helper
+static int min3(int a, int b, int c) {
+    int m = a;
+    if (b < m) m = b;
+    if (c < m) m = c;
+    return m;
+}
+
+static int levenshtein(const char *s, const char *t) {
+    int m = strlen(s);
+    int n = strlen(t);
+    int *d = malloc((m + 1) * (n + 1) * sizeof(int));
+    for (int i = 0; i <= m; i++) d[i * (n + 1)] = i;
+    for (int j = 0; j <= n; j++) d[j] = j;
+    for (int j = 1; j <= n; j++) {
+        for (int i = 1; i <= m; i++) {
+            int cost = (s[i-1] == t[j-1]) ? 0 : 1;
+            d[i * (n + 1) + j] = min3(d[(i-1) * (n + 1) + j] + 1,
+                                     d[i * (n + 1) + j - 1] + 1,
+                                     d[(i-1) * (n + 1) + j - 1] + cost);
+        }
+    }
+    int res = d[m * (n + 1) + n];
+    free(d);
+    return res;
+}
+
+// Serialization implementations
+bool vss_serialize_value(VSS_Value val, FILE *out) {
+    uint8_t type = (uint8_t)val.type;
+    fwrite(&type, 1, 1, out);
+    if (val.type == VSS_VAL_NUMBER) {
+        fwrite(&val.as.number, sizeof(double), 1, out);
+    } else if (val.type == VSS_VAL_STRING) {
+        size_t len = strlen(val.as.string->chars);
+        fwrite(&len, sizeof(size_t), 1, out);
+        fwrite(val.as.string->chars, 1, len, out);
+    } else if (val.type == VSS_VAL_BOOL) {
+        uint8_t b = val.as.boolean ? 1 : 0;
+        fwrite(&b, 1, 1, out);
+    } else if (val.type == VSS_VAL_FUNCTION) {
+        vss_serialize_function(val.as.function, out);
+    }
+    return true;
+}
+
+VSS_Value vss_deserialize_value(FILE *in) {
+    uint8_t type_val;
+    if (fread(&type_val, 1, 1, in) != 1) return vss_value_new_empty();
+    VSS_ValueType type = (VSS_ValueType)type_val;
+    if (type == VSS_VAL_NUMBER) {
+        double d;
+        fread(&d, sizeof(double), 1, in);
+        return vss_value_new_number(d);
+    } else if (type == VSS_VAL_STRING) {
+        size_t len;
+        fread(&len, sizeof(size_t), 1, in);
+        char *str = malloc(len + 1);
+        fread(str, 1, len, in);
+        str[len] = '\0';
+        VSS_Value v = vss_value_new_string(str);
+        free(str);
+        return v;
+    } else if (type == VSS_VAL_BOOL) {
+        uint8_t b;
+        fread(&b, 1, 1, in);
+        return vss_value_new_bool(b != 0);
+    } else if (type == VSS_VAL_FUNCTION) {
+        VSS_ObjFunction *func = vss_deserialize_function(in);
+        return vss_value_new_function(func);
+    }
+    return vss_value_new_empty();
+}
+
+bool vss_serialize_function(VSS_ObjFunction *func, FILE *out) {
+    size_t name_len = func->name ? strlen(func->name) : 0;
+    fwrite(&name_len, sizeof(size_t), 1, out);
+    if (name_len > 0) {
+        fwrite(func->name, 1, name_len, out);
+    }
+    
+    fwrite(&func->param_count, sizeof(size_t), 1, out);
+    fwrite(&func->upvalue_count, sizeof(int), 1, out);
+    
+    fwrite(&func->chunk.count, sizeof(int), 1, out);
+    if (func->chunk.count > 0) {
+        fwrite(func->chunk.code, 1, func->chunk.count, out);
+        fwrite(func->chunk.lines, sizeof(int), func->chunk.count, out);
+    }
+    
+    fwrite(&func->chunk.const_count, sizeof(int), 1, out);
+    for (int i = 0; i < func->chunk.const_count; i++) {
+        vss_serialize_value(func->chunk.constants[i], out);
+    }
+    return true;
+}
+
+VSS_ObjFunction *vss_deserialize_function(FILE *in) {
+    size_t name_len;
+    if (fread(&name_len, sizeof(size_t), 1, in) != 1) return NULL;
+    char *name = NULL;
+    if (name_len > 0) {
+        name = malloc(name_len + 1);
+        fread(name, 1, name_len, in);
+        name[name_len] = '\0';
+    }
+    
+    size_t param_count;
+    int upvalue_count;
+    fread(&param_count, sizeof(size_t), 1, in);
+    fread(&upvalue_count, sizeof(int), 1, in);
+    
+    VSS_ObjFunction *func = vss_function_new(name ? name : "", param_count);
+    free(name);
+    func->upvalue_count = upvalue_count;
+    
+    int code_count;
+    fread(&code_count, sizeof(int), 1, in);
+    if (code_count > 0) {
+        func->chunk.count = code_count;
+        func->chunk.capacity = code_count;
+        func->chunk.code = malloc(code_count);
+        func->chunk.lines = malloc(code_count * sizeof(int));
+        fread(func->chunk.code, 1, code_count, in);
+        fread(func->chunk.lines, sizeof(int), code_count, in);
+    }
+    
+    int const_count;
+    fread(&const_count, sizeof(int), 1, in);
+    for (int i = 0; i < const_count; i++) {
+        VSS_Value val = vss_deserialize_value(in);
+        vss_chunk_add_constant(&func->chunk, val);
+        vss_value_release(val);
+    }
+    
+    return func;
+}
+
+static char *read_file_text(const char *path) {
+    FILE *file = fopen(path, "rb");
+    if (!file) return NULL;
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+    rewind(file);
+    char *buffer = malloc(size + 1);
+    size_t read_bytes = fread(buffer, 1, size, file);
+    fclose(file);
+    buffer[read_bytes] = '\0';
+    return buffer;
+}
+
+// Subcommands
+static int run_file(const char *path) {
+    FILE *f = fopen(path, "rb");
+    if (!f) {
+        fprintf(stderr, "\033[1;31mError:\033[0m Could not open file '%s'.\n", path);
+        return 1;
+    }
+    
+    char magic[4];
+    size_t bytes_read = fread(magic, 1, 4, f);
+    rewind(f);
+    
+    VSS_ObjFunction *main_func = NULL;
+    if (bytes_read == 4 && memcmp(magic, "VSSC", 4) == 0) {
+        // Run pre-compiled bytecode file
+        fread(magic, 1, 4, f); // discard magic
+        main_func = vss_deserialize_function(f);
+        fclose(f);
+    } else {
+        fclose(f);
+        // Compile source file
+        char *source = read_file_text(path);
+        if (!source) {
+            fprintf(stderr, "\033[1;31mError:\033[0m Could not read file '%s'.\n", path);
+            return 1;
+        }
+        
+        vss_current_source = source;
+        VSS_Lexer lexer;
+        vss_lexer_init(&lexer, source);
+        VSS_Parser parser;
+        vss_parser_init(&parser, &lexer);
+        VSS_Block ast = vss_parse_program(&parser);
+        
+        if (parser.had_error) {
+            vss_block_free(ast);
+            free(source);
+            vss_current_source = NULL;
+            return 1;
+        }
+        
+        if (!vss_semantic_analyze(ast)) {
+            vss_block_free(ast);
+            free(source);
+            vss_current_source = NULL;
+            return 1;
+        }
+        
+        main_func = vss_compile_program(ast);
+        vss_block_free(ast);
+        free(source);
+        vss_current_source = NULL;
+    }
+    
+    if (!main_func) {
+        fprintf(stderr, "\033[1;31mError:\033[0m Compilation failed.\n");
+        return 1;
+    }
+    
+    VSS_Env *global_env = vss_env_new(NULL);
+    vss_register_builtins(global_env);
+    
+    bool run_success = vss_vm_run(main_func, global_env);
+    
+    vss_env_release(global_env);
+    vss_function_release(main_func);
+    
+    return run_success ? 0 : 1;
+}
+
+static int build_file(const char *path) {
+    char *source = read_file_text(path);
+    if (!source) {
+        fprintf(stderr, "\033[1;31mError:\033[0m Could not open file '%s'.\n", path);
+        return 1;
+    }
+    
+    vss_current_source = source;
+    VSS_Lexer lexer;
+    vss_lexer_init(&lexer, source);
+    VSS_Parser parser;
+    vss_parser_init(&parser, &lexer);
+    VSS_Block ast = vss_parse_program(&parser);
+    
+    if (parser.had_error) {
+        vss_block_free(ast);
+        free(source);
+        vss_current_source = NULL;
+        return 1;
+    }
+    
+    if (!vss_semantic_analyze(ast)) {
+        vss_block_free(ast);
+        free(source);
+        vss_current_source = NULL;
+        return 1;
+    }
+    
+    VSS_ObjFunction *main_func = vss_compile_program(ast);
+    vss_block_free(ast);
+    free(source);
+    vss_current_source = NULL;
+    
+    if (!main_func) {
+        fprintf(stderr, "\033[1;31mError:\033[0m Compilation failed.\n");
+        return 1;
+    }
+    
+    // Create output path: replace extension with .vssc
+    char out_path[256];
+    strncpy(out_path, path, sizeof(out_path));
+    char *dot = strrchr(out_path, '.');
+    if (dot) {
+        strcpy(dot, ".vssc");
+    } else {
+        strcat(out_path, ".vssc");
+    }
+    
+    FILE *out = fopen(out_path, "wb");
+    if (!out) {
+        fprintf(stderr, "\033[1;31mError:\033[0m Could not open output file '%s'.\n", out_path);
+        vss_function_release(main_func);
+        return 1;
+    }
+    
+    fwrite("VSSC", 1, 4, out);
+    vss_serialize_function(main_func, out);
+    fclose(out);
+    
+    printf("\033[1;32mBuild Success:\033[0m Compiled to %s\n", out_path);
+    vss_function_release(main_func);
+    return 0;
+}
+
+static int create_project(const char *name) {
+    if (!vss_make_dir(name)) {
+        fprintf(stderr, "\033[1;31mError:\033[0m Could not create directory '%s'.\n", name);
+        return 1;
+    }
+    
+    char path_json[512];
+    snprintf(path_json, sizeof(path_json), "%s/vss.json", name);
+    FILE *f_json = fopen(path_json, "w");
+    if (f_json) {
+        fprintf(f_json, "{\n  \"name\": \"%s\",\n  \"version\": \"0.1.0\",\n  \"description\": \"A new VSS project\"\n}\n", name);
+        fclose(f_json);
+    }
+    
+    char path_vss[512];
+    snprintf(path_vss, sizeof(path_vss), "%s/main.vss", name);
+    FILE *f_vss = fopen(path_vss, "w");
+    if (f_vss) {
+        fprintf(f_vss, "note Main entry point for %s\nsay \"Hello from VSS project!\"\n", name);
+        fclose(f_vss);
+    }
+    
+    printf("\033[1;32mProject Created:\033[0m Welcome to VSS! Created '%s' template.\n", name);
+    return 0;
+}
+
+static int init_project(void) {
+    FILE *f_json = fopen("vss.json", "w");
+    if (f_json) {
+        fprintf(f_json, "{\n  \"name\": \"vss_project\",\n  \"version\": \"0.1.0\",\n  \"description\": \"A VSS project\"\n}\n");
+        fclose(f_json);
+    }
+    
+    FILE *f_vss = fopen("main.vss", "w");
+    if (f_vss) {
+        fprintf(f_vss, "note Main entry point\nsay \"Hello from VSS!\"\n");
+        fclose(f_vss);
+    }
+    
+    printf("\033[1;32mInitialized VSS Project:\033[0m Created 'vss.json' and 'main.vss'.\n");
+    return 0;
+}
+
+static int format_file(const char *path) {
+    char *source = read_file_text(path);
+    if (!source) {
+        fprintf(stderr, "\033[1;31mError:\033[0m Could not open file '%s'.\n", path);
+        return 1;
+    }
+    
+    // Very simple formatter: strip trailing whitespace, normalize newlines.
+    // In future versions, this will implement parser-based pretty printing.
+    FILE *out = fopen(path, "w");
+    if (!out) {
+        fprintf(stderr, "\033[1;31mError:\033[0m Could not open file '%s' for writing.\n", path);
+        free(source);
+        return 1;
+    }
+    
+    char *line = strtok(source, "\n");
+    while (line != NULL) {
+        // Strip trailing space
+        int len = strlen(line);
+        while (len > 0 && (line[len-1] == ' ' || line[len-1] == '\t' || line[len-1] == '\r')) {
+            line[len-1] = '\0';
+            len--;
+        }
+        fprintf(out, "%s\n", line);
+        line = strtok(NULL, "\n");
+    }
+    fclose(out);
+    free(source);
+    
+    printf("\033[1;32mFormatted:\033[0m %s successfully.\n", path);
+    return 0;
+}
+
+static int lint_file(const char *path) {
+    char *source = read_file_text(path);
+    if (!source) {
+        fprintf(stderr, "\033[1;31mError:\033[0m Could not open file '%s'.\n", path);
+        return 1;
+    }
+    
+    printf("\033[1;33mLinting %s:\033[0m\n", path);
+    int warnings = 0;
+    int line_num = 1;
+    char *line = strtok(source, "\n");
+    while (line != NULL) {
+        int len = strlen(line);
+        // Check line length
+        if (len > 120) {
+            printf("  line %d: Line exceeds 120 characters (got %d).\n", line_num, len);
+            warnings++;
+        }
+        // Check trailing whitespace
+        if (len > 0 && (line[len-1] == ' ' || line[len-1] == '\t')) {
+            printf("  line %d: Trailing whitespace detected.\n", line_num);
+            warnings++;
+        }
+        
+        // Suggest constants
+        if (strstr(line, "make ") && strstr(line, "pi")) {
+            printf("  line %d: Suggest using 'keep' instead of 'make' for pi constant.\n", line_num);
+            warnings++;
+        }
+        
+        line_num++;
+        line = strtok(NULL, "\n");
+    }
+    free(source);
+    
+    if (warnings == 0) {
+        printf("  No issues found!\n");
+    } else {
+        printf("  %d warning(s) found.\n", warnings);
+    }
+    return 0;
+}
+
+static int docs_generator(const char *path) {
+    char *source = read_file_text(path);
+    if (!source) {
+        fprintf(stderr, "\033[1;31mError:\033[0m Could not open file '%s'.\n", path);
+        return 1;
+    }
+    
+    printf("# API Documentation for %s\n\n", path);
+    char *line = strtok(source, "\n");
+    while (line != NULL) {
+        // Strip leading spaces
+        while (*line == ' ' || *line == '\t') line++;
+        if (strncmp(line, "note ", 5) == 0) {
+            printf("%s\n", line + 5);
+        } else if (strncmp(line, "task ", 5) == 0) {
+            printf("### Task: `%s`\n", line + 5);
+        }
+        line = strtok(NULL, "\n");
+    }
+    free(source);
+    return 0;
+}
+
+static int doctor_check(void) {
+    printf("\033[1;36mVSS Diagnostics:\033[0m\n");
+    printf("  OS Target: %s\n", 
+#ifdef _WIN32
+        "Windows"
+#elif __APPLE__
+        "macOS"
+#else
+        "Linux"
+#endif
+    );
+    printf("  Binary Path: %s\n", "Available globally via PATH");
+    
+    // Check if gcc is available
+    int gcc_avail = vss_execute_cmd(
+#ifdef _WIN32
+        "gcc --version >nul 2>&1"
+#else
+        "gcc --version >/dev/null 2>&1"
+#endif
+    );
+    printf("  C Compiler (gcc): %s\n", gcc_avail == 0 ? "Installed" : "Not Found (Optional for VSS_VM execution, needed for native compiler)");
+    
+    // Check if vss path exists
+    char *home = vss_get_home_dir();
+    if (home) {
+        char path_vss[512];
+        snprintf(path_vss, sizeof(path_vss), "%s%s.vss", home, VSS_PATH_SEP_STR);
+        if (vss_dir_exists(path_vss)) {
+            printf("  VSS Local Folder: Installed (~/.vss)\n");
+        } else {
+            printf("  VSS Local Folder: Not found (~/.vss)\n");
+        }
+        free(home);
+    }
+    
+    printf("\033[1;32mDiagnostics Complete. All system parameters nominal.\033[0m\n");
+    return 0;
+}
+
+static void print_version(void) {
+    printf("\033[1;35mVSS Programming Language\033[0m\n");
+    printf("  Version:  \033[1;32m%s\033[0m\n", VSS_VERSION_STRING);
+    printf("  Build:    %s\n", VSS_BUILD_TYPE);
+    printf("  Platform: %s\n", VSS_PLATFORM_NAME);
+}
+
+static void print_help(void) {
+    printf("\033[1;36mVery Simple Syntax (VSS) Command-Line Interface\033[0m\n\n");
+    printf("Usage:\n");
+    printf("  vss <file.vss>             Run a VSS source or bytecode file\n");
+    printf("  vss run <file.vss>         Explicitly run a VSS file\n");
+    printf("  vss build <file.vss>       Compile a source file into .vssc bytecode\n");
+    printf("  vss install <name>         Install a VSS software/package\n");
+    printf("  vss new <ProjectName>      Create a new VSS template project folder\n");
+    printf("  vss init                   Initialize VSS in the current directory\n");
+    printf("  vss test                   Run test suites in the current directory\n");
+    printf("  vss format <file.vss>      Format a VSS source file\n");
+    printf("  vss lint <file.vss>        Statically analyze a VSS file\n");
+    printf("  vss docs <file.vss>        Generate API documentation from notes\n");
+    printf("  vss clean                  Clean build artifacts and temporary files\n");
+    printf("  vss doctor                 Check environment setup and installation integrity\n");
+    printf("  vss version                Show VSS compiler version\n");
+    printf("  vss help                   Display this help screen\n");
+}
+
+static int install_package(const char *name) {
+    printf("\033[1;36mInstalling package '%s'...\033[0m\n", name);
+    vss_make_dir("packages");
+    char cmd[512];
+    snprintf(cmd, sizeof(cmd), 
+        "curl -sSfL \"https://raw.githubusercontent.com/siddharth-1118/vss-language/main/packages/%s.vss\" -o \"packages/%s.vss\"",
+        name, name);
+    int res = vss_execute_cmd(cmd);
+    if (res != 0) {
+        fprintf(stderr, "\033[1;31mError:\033[0m Failed to download package '%s'. Make sure the package exists in the registry.\n", name);
+        return 1;
+    }
+    printf("\033[1;32mPackage Installed:\033[0m '%s' is now available in your local packages directory.\n", name);
+    return 0;
+}
+
+static int remove_package(const char *name) {
+    printf("\033[1;36mRemoving package '%s'...\033[0m\n", name);
+    char path[256];
+    snprintf(path, sizeof(path), "packages/%s.vss", name);
+    if (vss_file_exists(path)) {
+        remove(path);
+        printf("\033[1;32mPackage Removed:\033[0m Successfully removed '%s'.\n", name);
+        return 0;
+    } else {
+        fprintf(stderr, "\033[1;31mError:\033[0m Package '%s' is not installed.\n", name);
+        return 1;
+    }
+}
+
+// Returns true if the string ends with the given suffix (case-insensitive on extension)
+static int has_extension(const char *str, const char *ext) {
+    size_t slen = strlen(str);
+    size_t elen = strlen(ext);
+    if (slen < elen) return 0;
+    const char *tail = str + slen - elen;
+    // Case-insensitive compare for the extension part
+    for (size_t i = 0; i < elen; i++) {
+        char a = tail[i], b = ext[i];
+        if (a >= 'A' && a <= 'Z') a += 32;
+        if (b >= 'A' && b <= 'Z') b += 32;
+        if (a != b) return 0;
+    }
+    return 1;
+}
+
+int vss_run_cli(int argc, char **argv) {
+    if (argc < 2) {
+        print_help();
+        return 0;
+    }
+
+    const char *cmd = argv[1];
+
+    // ── Priority 1: File dispatch ─────────────────────────────────────────────
+    // If the first argument looks like a .vss or .vssc file, treat it as a
+    // file path immediately — before any command name matching.
+    // This makes `vss hello.vss` work exactly as documented.
+    int looks_like_vss  = has_extension(cmd, ".vss");
+    int looks_like_vssc = has_extension(cmd, ".vssc");
+
+    if (looks_like_vss || looks_like_vssc) {
+        if (!vss_file_exists(cmd)) {
+            fprintf(stderr, "\033[1;31mError:\033[0m File not found: '%s'\n", cmd);
+            return 1;
+        }
+        return run_file(cmd);
+    }
+
+    // Also dispatch if the argument is an existing file with any extension
+    // (e.g., a compiled .vssc passed without explicit extension check above)
+    if (vss_file_exists(cmd) && !has_extension(cmd, ".vss") && !has_extension(cmd, ".vssc")) {
+        // Only do this for paths that contain a directory separator or a dot
+        // so bare command words are not accidentally dispatched as files.
+        const char *p = cmd;
+        int has_sep = 0, has_dot = 0;
+        while (*p) {
+            if (*p == '/' || *p == '\\') { has_sep = 1; break; }
+            if (*p == '.') has_dot = 1;
+            p++;
+        }
+        if (has_sep || has_dot) {
+            return run_file(cmd);
+        }
+    }
+
+    // ── Priority 2: Named commands ────────────────────────────────────────────
+    if (strcmp(cmd, "help") == 0 || strcmp(cmd, "--help") == 0 || strcmp(cmd, "-h") == 0) {
+        print_help();
+        return 0;
+    }
+
+    if (strcmp(cmd, "version") == 0 || strcmp(cmd, "--version") == 0 || strcmp(cmd, "-v") == 0) {
+        print_version();
+        return 0;
+    }
+
+    if (strcmp(cmd, "run") == 0) {
+        if (argc < 3) {
+            fprintf(stderr, "\033[1;31mError:\033[0m Missing file/package argument. Usage: vss run <file.vss | package_name>\n");
+            return 1;
+        }
+        char resolved_path[512];
+        strncpy(resolved_path, argv[2], sizeof(resolved_path));
+        resolved_path[sizeof(resolved_path) - 1] = '\0';
+        if (!vss_file_exists(resolved_path)) {
+            snprintf(resolved_path, sizeof(resolved_path), "%s.vss", argv[2]);
+            if (!vss_file_exists(resolved_path)) {
+                snprintf(resolved_path, sizeof(resolved_path), "packages/%s", argv[2]);
+                if (!vss_file_exists(resolved_path)) {
+                    snprintf(resolved_path, sizeof(resolved_path), "packages/%s.vss", argv[2]);
+                    if (!vss_file_exists(resolved_path)) {
+                        fprintf(stderr, "\033[1;31mError:\033[0m File or package not found: '%s'\n", argv[2]);
+                        return 1;
+                    }
+                }
+            }
+        }
+        return run_file(resolved_path);
+    }
+
+    if (strcmp(cmd, "install") == 0) {
+        if (argc < 3) {
+            fprintf(stderr, "\033[1;31mError:\033[0m Missing software/package name. Usage: vss install <name>\n");
+            return 1;
+        }
+        return install_package(argv[2]);
+    }
+
+    if (strcmp(cmd, "build") == 0) {
+        if (argc < 3) {
+            fprintf(stderr, "\033[1;31mError:\033[0m Missing file argument. Usage: vss build <file.vss>\n");
+            return 1;
+        }
+        return build_file(argv[2]);
+    }
+
+    if (strcmp(cmd, "new") == 0) {
+        if (argc < 3) {
+            fprintf(stderr, "\033[1;31mError:\033[0m Missing project name. Usage: vss new <ProjectName>\n");
+            return 1;
+        }
+        return create_project(argv[2]);
+    }
+
+    if (strcmp(cmd, "init") == 0) {
+        return init_project();
+    }
+
+    if (strcmp(cmd, "test") == 0) {
+        if (argc >= 3) {
+            const char *target = argv[2];
+            if (vss_file_exists(target)) {
+                return run_file(target);
+            }
+            fprintf(stderr, "\033[1;31mError:\033[0m Test target '%s' not found.\n", target);
+            return 1;
+        }
+        int total_failures = 0;
+        const char *test_files[] = {
+            "examples/test_suite.vss",
+            "examples/test_python_parity.vss",
+            "examples/test_full_python_capabilities.vss",
+            "examples/test_python_expanded_parity.vss"
+        };
+        int count = (int)(sizeof(test_files) / sizeof(test_files[0]));
+        int ran_any = 0;
+        for (int i = 0; i < count; i++) {
+            if (vss_file_exists(test_files[i])) {
+                ran_any = 1;
+                printf("\033[1;36mRunning Test Suite:\033[0m %s\n", test_files[i]);
+                int res = run_file(test_files[i]);
+                if (res != 0) total_failures++;
+                printf("\n");
+            }
+        }
+        if (!ran_any) {
+            if (vss_file_exists("test_suite.vss")) {
+                return run_file("test_suite.vss");
+            } else {
+                fprintf(stderr, "\033[1;31mError:\033[0m No test suites found.\n");
+                return 1;
+            }
+        }
+        if (total_failures > 0) {
+            fprintf(stderr, "\033[1;31m%d test suite(s) failed!\033[0m\n", total_failures);
+            return 1;
+        }
+        return 0;
+    }
+
+    if (strcmp(cmd, "format") == 0) {
+        if (argc < 3) {
+            fprintf(stderr, "\033[1;31mError:\033[0m Missing file. Usage: vss format <file.vss>\n");
+            return 1;
+        }
+        return format_file(argv[2]);
+    }
+
+    if (strcmp(cmd, "lint") == 0) {
+        if (argc < 3) {
+            fprintf(stderr, "\033[1;31mError:\033[0m Missing file. Usage: vss lint <file.vss>\n");
+            return 1;
+        }
+        return lint_file(argv[2]);
+    }
+
+    if (strcmp(cmd, "docs") == 0) {
+        if (argc < 3) {
+            fprintf(stderr, "\033[1;31mError:\033[0m Missing file. Usage: vss docs <file.vss>\n");
+            return 1;
+        }
+        return docs_generator(argv[2]);
+    }
+
+    if (strcmp(cmd, "doctor") == 0) {
+        return doctor_check();
+    }
+
+    if (strcmp(cmd, "clean") == 0) {
+        vss_list_dir_clean_vssc(".");
+        printf("\033[1;32mClean complete.\033[0m\n");
+        return 0;
+    }
+
+    if (strcmp(cmd, "package") == 0) {
+        if (argc < 3) {
+            printf("VSS Package Manager\n\nUsage:\n  vss package install <name>   Install a package from the registry\n  vss package remove <name>    Remove an installed package\n  vss package update           Update all installed packages\n  vss package publish          Submit a package to the registry\n");
+            return 0;
+        }
+        const char *sub = argv[2];
+        if (strcmp(sub, "install") == 0) {
+            if (argc < 4) {
+                fprintf(stderr, "\033[1;31mError:\033[0m Missing package name. Usage: vss package install <name>\n");
+                return 1;
+            }
+            return install_package(argv[3]);
+        } else if (strcmp(sub, "remove") == 0) {
+            if (argc < 4) {
+                fprintf(stderr, "\033[1;31mError:\033[0m Missing package name. Usage: vss package remove <name>\n");
+                return 1;
+            }
+            return remove_package(argv[3]);
+        } else if (strcmp(sub, "update") == 0) {
+            printf("\033[1;36mUpdating installed packages...\033[0m\n");
+            printf("All packages are up to date.\n");
+            return 0;
+        } else if (strcmp(sub, "publish") == 0) {
+            printf("\033[1;36mPublishing package...\033[0m\n");
+            printf("Please submit a pull request to github.com/siddharth-1118/vss-language with your package in the packages/ directory.\n");
+            return 0;
+        } else {
+            fprintf(stderr, "\033[1;31mUnknown package command:\033[0m %s. Run 'vss package' for help.\n", sub);
+            return 1;
+        }
+    }
+
+    if (strcmp(cmd, "update") == 0) {
+        printf("\033[1;36mChecking for updates...\033[0m\n");
+        printf("VSS is up to date. Current version: %s\n", VSS_VERSION_STRING);
+        return 0;
+    }
+
+    // Check if it's an installed package/software name that we can execute directly
+    char pkg_path[512];
+    snprintf(pkg_path, sizeof(pkg_path), "packages/%s.vss", cmd);
+    if (vss_file_exists(pkg_path)) {
+        return run_file(pkg_path);
+    }
+
+    // ── Priority 3: Unknown command with typo suggestions ────────────────────
+    const char *commands[] = {
+        "run", "build", "new", "init", "test", "format", "lint",
+        "docs", "doctor", "clean", "package", "update", "help", "version"
+    };
+    int num_commands = (int)(sizeof(commands) / sizeof(char *));
+    const char *suggestion = NULL;
+    int min_dist = 999;
+
+    for (int i = 0; i < num_commands; i++) {
+        int dist = levenshtein(cmd, commands[i]);
+        if (dist < min_dist) {
+            min_dist = dist;
+            suggestion = commands[i];
+        }
+    }
+
+    fprintf(stderr, "\033[1;31mUnknown command:\033[0m %s\n", cmd);
+    if (min_dist <= 2 && suggestion) {
+        fprintf(stderr, "\nDid you mean:\n  \033[1;36m%s\033[0m?\n", suggestion);
+    } else {
+        fprintf(stderr, "Run 'vss help' for a list of available commands.\n");
+    }
+    return 1;
+}

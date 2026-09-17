@@ -1,0 +1,27 @@
+note VSS 3.1 Real-World Concurrency - Concurrent File Processor
+
+grab collections
+
+make processed_files becomes collections.ConcurrentMap()
+make total_lines becomes atomic_create(0)
+
+task file_worker needs filename, line_cnt, map_ref, counter_ref
+    say "Worker processing file: " + filename
+    concurrency_sleep(10)
+    atomic_add(counter_ref, line_cnt)
+    map_ref.insert(filename, line_cnt)
+    send filename + " processed"
+finish
+
+say "Starting Concurrent File Batch Processor..."
+make t1 becomes start file_worker("log_2026_09_01.txt", 1500, processed_files, total_lines)
+make t2 becomes start file_worker("log_2026_09_02.txt", 2300, processed_files, total_lines)
+make t3 becomes start file_worker("log_2026_09_03.txt", 1800, processed_files, total_lines)
+
+await t1
+await t2
+await t3
+
+say "Processed Files Count: " + processed_files.count()
+say "Total Lines Processed: " + atomic_get(total_lines)
+say "Concurrent File Processor Completed Successfully!"

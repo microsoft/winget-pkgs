@@ -1,0 +1,139 @@
+note VSS DataFrame - Tabular Data Processing Library
+
+shape DataFrame
+    field rows
+    field headers
+    task init needs
+        mine.rows becomes []
+        mine.headers becomes []
+    finish
+    task from_list needs headers_list, rows_list
+        mine.headers becomes headers_list
+        mine.rows becomes rows_list
+    finish
+    task head needs n
+        make result becomes []
+        make i becomes 0
+        repeat each row in mine.rows
+            when i below n
+                put row into result
+            finish
+            i becomes i + 1
+        finish
+        send result
+    finish
+    task tail needs n
+        make sz becomes size of mine.rows
+        make start_idx becomes sz - n
+        when start_idx below 0
+            start_idx becomes 0
+        finish
+        make result becomes []
+        make i becomes 0
+        repeat each row in mine.rows
+            when i at_least start_idx
+                put row into result
+            finish
+            i becomes i + 1
+        finish
+        send result
+    finish
+    task count needs
+        send size of mine.rows
+    finish
+    task column needs col_name
+        make idx becomes -1
+        make i becomes 0
+        repeat each h in mine.headers
+            when h same_as col_name
+                idx becomes i
+            finish
+            i becomes i + 1
+        finish
+        when idx below 0
+            send []
+        finish
+        make result becomes []
+        repeat each row in mine.rows
+            put row[idx] into result
+        finish
+        send result
+    finish
+    task mean needs col_name
+        make col becomes mine.column(col_name)
+        make total becomes 0
+        repeat each v in col
+            total becomes total + v
+        finish
+        send total / size of col
+    finish
+    task filter needs col_name, value
+        make idx becomes -1
+        make i becomes 0
+        repeat each h in mine.headers
+            when h same_as col_name
+                idx becomes i
+            finish
+            i becomes i + 1
+        finish
+        make result becomes []
+        repeat each row in mine.rows
+            when row[idx] same_as value
+                put row into result
+            finish
+        finish
+        send result
+    finish
+    task describe needs
+        say "DataFrame Summary"
+        say "Rows: " + (size of mine.rows)
+        say "Columns: " + (size of mine.headers)
+        say "Headers: " + mine.headers
+    finish
+    task to_csv needs
+        make lines becomes []
+        make header_line becomes ""
+        make first becomes yes
+        repeat each h in mine.headers
+            when first same_as no
+                header_line becomes header_line + ","
+            finish
+            header_line becomes header_line + h
+            first becomes no
+        finish
+        put header_line into lines
+        repeat each row in mine.rows
+            make line becomes ""
+            make fi becomes yes
+            repeat each cell in row
+                when fi same_as no
+                    line becomes line + ","
+                finish
+                line becomes line + cell
+                fi becomes no
+            finish
+            put line into lines
+        finish
+        send string.join(lines, "\n")
+    finish
+finish
+
+task from_csv needs csv_text
+    make df becomes DataFrame()
+    df.init()
+    make lines becomes string.split(csv_text, "\n")
+    make first becomes yes
+    repeat each line in lines
+        make trimmed becomes string.trim(line)
+        when size of trimmed above 0
+            make cells becomes string.split(trimmed, ",")
+            when first same_as yes
+                df.headers becomes cells
+                first becomes no
+            otherwise
+                put cells into df.rows
+            finish
+        finish
+    finish
+    send df
+finish

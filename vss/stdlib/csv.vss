@@ -1,0 +1,25 @@
+note VSS CSV Standard Library
+task parse needs csv_str
+    make result becomes []
+    make lines becomes __string_split(csv_str, "\n")
+    when size of lines above 0
+        make headers becomes __string_split(lines[0], ",")
+        repeat each line in lines
+            note Skip header line
+            when line same_as lines[0]
+                skip
+            finish
+            make row becomes __string_split(line, ",")
+            when size of row same_as size of headers
+                make obj becomes map []
+                make i becomes 0
+                repeat each header in headers
+                    put row[i] into obj[header]
+                    i becomes i + 1
+                finish
+                put obj into result
+            finish
+        finish
+    finish
+    send result
+finish
