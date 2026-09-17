@@ -1,0 +1,93 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Pinvou.PinvouAgent
+PackageVersion: 0.10.1
+PackageLocale: zh-CN
+Publisher: pinvou
+PublisherUrl: https://pinvou.com/
+PublisherSupportUrl: https://github.com/Pinvou/pinvou-agent/issues
+PackageName: pinvou3
+PackageUrl: https://pinvou.com/
+License: MIT
+LicenseUrl: https://github.com/Pinvou/pinvou-agent/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Pinvou
+ShortDescription: 开源桌面 AI 智能体工作台，覆盖工具、文件、知识与工作流。
+Description: Pinvou Agent 是一个开源的桌面 AI 智能体工作区，面向工作、设计与编程。它把日常事务、可视化设计和软件开发整合进同一个桌面工作区，让任务以真实结果收尾：可以使用工具、处理文件、积累个人知识，通过 ACP 在真实项目中引入专用编码智能体，或将提示词变成可持续编辑的可视化作品。
+Tags:
+- mcp
+- 人工智能
+- 工作流
+- 智能体
+- 知识库
+ReleaseNotes: |-
+  新增功能
+  1. 工作与设计模式合并，输入区简化：原首页"工作/设计"双入口合并为单一工作模式，场景（个人工作台、文档写作、海报、数据可视化、PPT）成为工作模式下的场景页签；输入框上方三行堆叠（模式切换器 + 子模式选择器 + 模板选择器）替换为空态问候语下方的场景卡片，个人工作台模板以第二行卡片展开，输入框上方仅保留工作/代码两段切换；旧模式状态自动迁移（design 折叠进 work），历史会话场景标记不变。工件面板不再随产出自动展开，改为通过工件卡片或手动点击打开；全屏 HTML 工件新增手动编辑模式开关，切换工件/页签/全屏时自动退出。
+  2. 会话项目层（存储与侧栏分组）：项目定义与会话归属保存在单一原子 JSON（~/.pinvou3/projects/projects.json），归属语义三态（显式归属 / 显式移出 / 自动归组），项目根目录重叠与嵌套会被拒绝（Windows 折叠分隔符与大小写，POSIX 保持大小写敏感）。侧栏采用三层确定性归组：显式归属 > 项目根自动归组 > 旧版文件夹分桶，无项目时行为与之前完全一致；项目组保持手动排序、空组也渲染，组头悬停菜单提供转为项目、重命名、删除（内嵌确认，会话保留）。仅桌面端可用，Web 端明确不支持。
+  3. 一次性定时任务：定时任务创建对话现在教会单次（ONCE）执行——"明早 9 点提醒我一次"会直接创建单次任务而非循环或拒绝，请求的时刻已过去时会先确认新的未来时刻；编辑器识别 FREQ=ONCE（修改时间只改时刻保持日期，改为重复规则视为有意转换）；任务列表行显示人性化的"一次 <本地时间>"标签而非原始规则串，相关选项提供简中/英/日文案。
+  4. 模型目录刷新到 2026 年 9 月厂商官方文档：新增旗舰 gpt-6-astra、claude-fable-5-1、gemini-3.8/3.7-flash、grok-4.6、GLM-5.3 / GLM-5.3-flash（全部分组）、deepseek-flash（V4.1-Flash）、qwen3.8-flash、doubao-seed-2-0-code-preview、kimi-k3 / kimi-k2.7-code、minimax-m3 等，下架与退役行清理（kimi-k2.5、z.ai GLM-5-Turbo，deepseek-v4-flash 转为兼容别名）；预设默认模型跟随厂商（deepseek-flash、glm-5.3、gemini-3.8-flash、grok-4.6），OpenAI 预设默认保持 gpt-5.6-terra（GPT-6 Astra 的工具调用要求 Responses API）；思考档位路线更新（Kimi K3 low/high/max、GLM-5.3-Flash 加入 z.ai 档位、grok-4.6 low/medium/high/max）；图片能力表修正并显式标注官方纯文本模型；引擎侧上下文窗口同步钉住（gpt-6-astra 1,050,000、gemini-3.8-flash 1,048,576、grok-4.20 修正为 1M 等），监控页显示与引擎压缩阈值一致。
+  5. Linux 语音输入可用：Linux 安装包内置 SenseVoice 识别引擎（此前 Linux 上语音永远无法就绪、点击麦克风只会静默循环安装），每架构仅增重约 1.3MB；语音模型（约 182MB）仍为首次使用时下载；glibc 2.35 下限守护扩展覆盖新增引擎。
+  6. 录音胶囊动画与停止键提示：录音胶囊入场淡入滑动、退出平滑淡出、录音中呼吸光环；录音时提示停止快捷键（"再按一次 Alt（Option）停止"）；系统开启"减弱动态效果"时全部动效自动禁用。
+  7. 安全拒绝面对齐主流 harness 姿态：类型化 Deny 规则扩充至 8,729 条，覆盖凭据路径销毁（含 ~/$HOME//root 等根目录整体销毁与外传）、dd 覆写敏感文件、灾难性磁盘操作（mkfs/dd/wipefs/shred 设备、Windows format/diskpart）、持久化写入（启动文件注入、systemctl enable、crontab、计划任务、注册表 Run 键、sudoers）、凭据直接外传（curl/wget/scp/rsync 携带敏感路径甚至整个 home 目录）；此前可静默执行的危险命令现在会被拒绝或转为确认；超级权限开关切换串行化，关闭切换间的状态过期窗口。
+  问题修复
+  1. 聊天上下文用量尊重保存的上下文窗口：为模型声明上下文窗口（如自定义 glm-5.3-flash 填 1,048,576）后，输入框用量分母此前每 10 秒被端点探测值打回（多模型网关常显示 131.1K 兜底值）；现在显示路径与生效路径共用同一优先级（声明 > 本地探测取小 > 名称/预设推断），多模型网关按配置的模型 id 匹配 /v1/models 条目而非取第一项。
+  2. Windows 语音识别不再因文件占用失败：临时 WAV 文件句柄在识别开始前关闭，修复外部识别后端因共享模式冲突无法打开音频的问题。
+  3. 左右两个 Alt/Option 键均可触发语音快捷键：此前只有左 Alt 生效（Windows 右 Alt 无反应、macOS 右 Option 同样被排除）；Windows 上 AltGr 布局的字符组合不受影响，macOS 上右 Option + 字母仍正常输入符号。
+  4. 后台 Shell 任务卡片按来源对账：任务更新通过发起调用的稳定身份匹配卡片，相同命令的任务不再把历史输出挂到另一张卡上、也不再错序追加；来源卡片被压缩的运行中任务仍以合成卡片保持可见。
+  5. 设置页两处因系统确认框不渲染而静默失效的流程改为应用内弹窗：记忆条目删除入口真实可用（每行新增删除按钮 + 确认框，此前入口甚至未挂载）；反馈面板有草稿时可通过关闭按钮/取消/点击遮罩走"仍要关闭"确认，不再无法关闭。
+  6. 删除已装备的自定义人设卡后清空相关选中：此前卡池刷新但当前与聊天的选中残影仍在；文件系统删除失败如实上报并保留卡片。
+  7. 人设卡不再承诺不存在的能力：三张卡片重写——轮播增长引擎（声称 Gemini 生图与抖音/Instagram 自动日更发布）改为轮播内容策略师、应付账款代理（声称自主执行真实付款）改为应付账款流程顾问、多平台发布编排器（声称 19+ 平台发布工具链）改为多平台内容适配顾问，英/日描述同步更新。
+  8. 生成的命令示例对齐实际执行的 shell：执行侧选中 PowerShell 时不再给出 Unix 语法示例。
+  9. 定时任务表单"重复"与"星期"字段外侧无功能的装饰箭头已移除。
+  内部改进
+  1. CodeWhale 底座升级：从 v0.9.5 r13 fork 升级到已发布的 v0.9.12 r1 基线，并推进到积压批次头（覆盖 13 个上游 PR：execpolicy 第二阶段、轮次绑定取消、工具结果带图、会话归档导出、蜂群限流治理、GLM-5.3 强制思考与 BigModel 路由等）；应用侧完成工具名规范化、定时工件持久化、独立 Agent 信任模式与压缩失败关联 ID 等配套适配。
+  2. 内存与热路径优化（专项审计 19 项）：流式 Markdown 重渲染按 180ms 截止边节流（此前每条增量全量重解析），最终结果仍同步精确；历史工具参数不再常驻内存；侧栏派生计算、会话行与聊天气泡 memo 化，后台会话令牌数与输入不再触发全量正则重扫；启动 HTML 按平台裁剪桥接代码（桌面窗口不再解析约 0.5MB 的 Web 桥代码）。
+  3. 全仓依赖审计与刷新：清理未使用依赖、合并重复声明、原位升级且重复版本族零净增长；含 rustls 0.23.45 补丁级提升（RUSTSEC-2026-0285）。
+  4. 测试并行 flaky 根因消除：git 子进程不再继承被并发改写的 GIT_* 环境（工作区 git 操作对被注入的外壳环境免疫）、环境枚举竞态改为固定清单、knowledge 测试不再共享同一 SQLite 文件。
+  5. CI 审计与修复：gitleaks 门禁真正执行扫描、修正工作流死路径过滤、mac-build 在 main 上不再自取消、Windows Rust 测试超时 90→180 分钟（缓存被驱逐的冷跑实测约 1h39m）、CI 审计清理项落地。
+  注意事项
+  - 版本跨度说明：0.10.0 未对外发布，本版本发布说明同时覆盖 0.10.0 与 0.10.1 两批变更。
+  - 模型目录：预设默认模型仅影响新建或迁移的配置，既有保存的模型不受影响；z.ai 上保存的 GLM-5-Turbo 配置将归入"自定义"分组，需重新选择模型；官方标注不支持图片输入的模型在编辑表单中现在直接显示"不支持图片输入"；已保存的思考档位按各路线自身规则归一化显示（如 grok-4.6 存储的 xhigh 显示为 max，线上发送值不变）。
+  - api.deepseeki.com 已从官方 DeepSeek 端点清单移除（社区报告为无法解析的非官方域名）：仍在使用该域名的配置改走通用 OpenAI 兼容处理，行为可能有细微变化。
+  - 设计模式合并：原首页"设计"入口成为工作模式下的场景页签，模式状态自动迁移，无需手动处理；工件面板改为按需打开（工件卡片或手动点击）。
+  - 安全面扩大：部分此前可静默执行的危险命令（销毁凭据/磁盘、写启动项、外传凭据等）现在会被拒绝或转为确认；如遇误报欢迎通过 Issues 反馈。
+  - Linux 语音输入：识别引擎已内置，首次使用仍需下载约 182MB 语音模型。
+  - Windows 和 macOS 安装包尚未正式签名。Windows 首次安装可能出现 SmartScreen 提示；macOS 首次打开如被 Gatekeeper 拦截，可在确认安装包来源可信后解除隔离再打开。
+  - 本次为预览版本，欢迎通过 GitHub Issues 反馈问题。
+  构建来源：main @ 35196bad / Actions #34877996483（四平台安装包同源构建）
+  官网更新日志
+  zh-CN
+  新功能
+  - 工作与设计模式合并：场景成为工作模式页签，输入区简化为场景卡片，工件面板按需打开。
+  - 会话项目层一期：侧栏项目分组，支持转为项目、重命名、删除（会话保留）；无项目时行为不变。
+  - 定时任务支持一次性执行：可直接创建"明早 9 点提醒一次"类单次任务，编辑器与列表同步支持。
+  - 模型目录按 2026 年 9 月厂商文档刷新：新增 GPT-6 Astra、Claude Fable 5.1、Gemini 3.8 Flash、Grok 4.6、GLM-5.3、DeepSeek Flash、Qwen3.8 Flash、Kimi K3 等旗舰，默认模型跟随厂商。
+  - Linux 语音输入可用：识别引擎内置安装包，首次使用下载模型即可。
+  - 录音胶囊动画与停止键提示。
+  修复
+  - 聊天上下文用量尊重保存的上下文窗口，不再被端点探测打回。
+  - Windows 语音识别因临时文件占用失败的问题修复。
+  - 左右 Alt/Option 均可触发语音快捷键。
+  - 后台 Shell 任务卡不再因相同命令串卡、错序。
+  - 设置页记忆删除与反馈面板关闭修复。
+  - 删除人设卡后清空选中；三张人设卡不再承诺不存在的能力。
+  - 危险命令安全拒绝规则扩充至 8,729 条（凭据销毁、磁盘破坏、持久化写入、凭据外传）。
+  en-US
+  New features
+  - Work and design modes merge: scenes become work-mode subtabs with a simplified scene-card composer, and the artifacts panel opens on demand.
+  - Conversation projects phase one: project groups in the sidebar with convert / rename / delete (conversations kept); behavior is unchanged without projects.
+  - One-shot scheduled tasks: "remind me once tomorrow at 9" creates a single-run task, supported end to end in chat, editor, and task list.
+  - Model catalog refreshed to September 2026 vendor docs: GPT-6 Astra, Claude Fable 5.1, Gemini 3.8 Flash, Grok 4.6, GLM-5.3, DeepSeek Flash, Qwen3.8 Flash, Kimi K3 and more; preset defaults follow the vendors.
+  - Voice input works on Linux: the recognition engine ships inside the installer; download the model on first use.
+  - Animated recording pill with a stop-key hint.
+  Fixes
+  - The chat context meter honors your saved context window instead of snapping back to endpoint probes.
+  - Windows voice recognition no longer fails on a locked temporary WAV file.
+  - Both Alt/Option keys trigger the voice shortcut.
+  - Background shell task cards no longer get mixed up between identical commands or appear out of order.
+  - Settings memory deletion and feedback-panel closing now work on desktop.
+  - Deleting a persona card clears its selections; three persona cards no longer promise nonexistent capabilities.
+  - The dangerous-command deny ruleset grows to 8,729 typed rules (credential destruction, disk wipe, persistence writes, credential exfiltration).
+ReleaseNotesUrl: https://github.com/Pinvou/pinvou-agent/releases/tag/v0.10.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
