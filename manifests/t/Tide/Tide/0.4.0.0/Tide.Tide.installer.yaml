@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.10.0.schema.json
+#
+# The Windows release artifact is Tauri's NSIS installer
+# (tide_v<version>_win-<arch>-setup.exe) — a real installer, so winget consumes it
+# directly: InstallerType nullsoft, /S for silent. The old Electrobun flow
+# shipped a zip wrapping a setup bootstrapper (InstallerType zip +
+# NestedInstallerType exe); that pattern is gone — the tide_v<version>_win-<arch>
+# -portable.zip published beside the setup wraps the bare app exe (not an
+# installer) and is not winget-consumable.
+#
+# Tauri's NSIS install mode is currentUser (Scope: user) and registers an
+# ARP entry under HKCU with DisplayName "Tide" and DisplayVersion
+# <version> (identifier com.tide.code).
+
+PackageIdentifier: Tide.Tide
+PackageVersion: 0.4.0.0
+Installers:
+  - Architecture: x64
+    InstallerType: nullsoft
+    Scope: user
+    InstallerUrl: https://github.com/code-with-current/tide/releases/download/v0.4.0-beta.2/tide_v0.4.0-beta.2_win-x64-setup.exe
+    InstallerSha256: 306fbe5beb143cbdc70d68ee8f3cf259115280ab8919b6f65acf3f1edad8a200
+    InstallerSwitches:
+      Silent: /S
+      SilentWithProgress: /S
+    AppsAndFeaturesEntries:
+      - DisplayName: Tide
+        Publisher: Tide
+        DisplayVersion: "0.4.0-beta.2"
+  - Architecture: arm64
+    InstallerType: nullsoft
+    Scope: user
+    InstallerUrl: https://github.com/code-with-current/tide/releases/download/v0.4.0-beta.2/tide_v0.4.0-beta.2_win-arm64-setup.exe
+    InstallerSha256: 532c452f0368445b0cf382280e73a6c61d8d0383c48aaa41e5139784dda0b1af
+    InstallerSwitches:
+      Silent: /S
+      SilentWithProgress: /S
+    AppsAndFeaturesEntries:
+      - DisplayName: Tide
+        Publisher: Tide
+        DisplayVersion: "0.4.0-beta.2"
+ManifestType: installer
+ManifestVersion: 1.10.0
