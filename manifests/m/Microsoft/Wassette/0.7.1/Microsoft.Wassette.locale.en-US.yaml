@@ -1,0 +1,134 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: Microsoft.Wassette
+PackageVersion: 0.7.1
+PackageLocale: en-US
+Publisher: Microsoft Corporation
+PublisherUrl: https://github.com/microsoft
+PublisherSupportUrl: https://github.com/microsoft/wassette/issues
+PrivacyUrl: https://www.microsoft.com/privacy/privacystatement
+PackageName: Wassette
+PackageUrl: https://github.com/microsoft/wassette
+License: MIT
+LicenseUrl: https://github.com/microsoft/wassette/blob/main/LICENSE
+Copyright: Copyright (c) Microsoft Corporation.
+CopyrightUrl: https://github.com/microsoft/wassette/blob/main/LICENSE
+ShortDescription: "Wassette: A security-oriented runtime that runs WebAssembly Components via MCP"
+Description: |-
+  Wassette: A security-oriented runtime that runs WebAssembly Components via MCP
+
+  Why Wassette?
+
+  - Convenience: Wassette makes it easy to extend AI agents with new tools, all without ever having to leave the chat window.
+  - Reusability: Wasm Components are generic and reusable; there is nothing MCP-specific about them.
+  - Security: Wassette is built on the Wasmtime security sandbox, providing browser-grade isolation of tools.
+Moniker: wassette
+Tags:
+- capabilities
+- mcp
+- mcp-server
+- oci
+- oci-artifacts
+- permissions
+- wasm
+- wasm-component
+- wasmtime
+ReleaseNotes: |-
+  ## Highlights
+
+  A patch release. It updates the WebAssembly runtime to pick up two Wasmtime
+  security fixes, and makes `wassette tool invoke` able to call the tools a
+  component exports.
+
+  ### Security
+
+  Wasmtime moves from 47.0.3 to 47.0.4, picking up fixes for two advisories
+  published on 2026-08-20 (#799). Wassette 0.6.0 and 0.7.0 both shipped 47.0.3,
+  which is affected by both:
+
+  • **RUSTSEC-2026-0269** ([GHSA-vqjp-4c8c-hfgg](https://github.com/bytecodealliance/wasmtime/security/advisories/GHSA-vqjp-4c8c-hfgg)) — filesystem sandbox escape when paths or symlinks contain trailing slashes. This one is worth a look if you grant components filesystem access through a policy.
+  • **RUSTSEC-2026-0268** ([GHSA-x84v-gj2h-g759](https://github.com/bytecodealliance/wasmtime/security/advisories/GHSA-x84v-gj2h-g759)) — guest controlled-size host heap allocation through WASIp3 streams.
+
+  Hyper moves from 1.11.0 to 1.11.1 in the same change.
+
+  ### `wassette tool invoke`
+
+  • `wassette tool invoke <tool>` can now call the tools a component exports (#794). Tool-name resolution ran through the in-memory registry, which only the server's background restore populates, so in a one-shot CLI process every component tool looked absent — even though `tool list` and `tool read` could describe it, because those already fall back to the metadata cached on disk. `tool invoke` now hydrates the registry from that same validated metadata, so resolution is an ordinary in-memory lookup rather than a second lookup path. Hydration is scoped to `tool invoke` and skipped when the named tool is a built-in.
+  • Registering a component from metadata compiles nothing, so the tool-call path now ensures the component is loaded once its id is known. That also closes a server-side gap：during a restore the registry holds tool schemas before instances exist, so a `tools/call` in that window could resolve a tool and then fail to execute it (#794).
+
+  ### Component load concurrency
+
+  Putting an on-demand load on the tool-call path makes a pre-existing race
+  reachable from ordinary tool calls, so this release also hardens component
+  loading (#794):
+
+  • A per-component load guard is held across every path that compiles or removes a component's files：explicit loads (across staging as well as compilation, since staging replaces the `.wasm`, the metadata and the precompiled cache), unloads (across artifact removal and registry cleanup), on-demand loads, the background restore, and startup restoration. Different components still load in parallel; racing loads of one component compile it once.
+  • Registry hydration is published in a single atomic write, so a reader sees either the pre-hydration or the fully hydrated registry — never a half-registered state in which a tool name exported by two components resolves to whichever happened to be registered first.
+
+  ### Dependencies
+
+  Dependency bumps are excluded from the generated list below, so for the record:
+  this release also refreshes rmcp 3.1.4 → 3.2.0, tokio-rustls 0.26.4 → 0.26.5,
+  wasmparser 0.257.1 → 0.258.0, wat 1.256.0 → 1.258.0, rcgen 0.14.9 → 0.14.10,
+  four GitHub Actions, and the mcp-inspector harness dependencies (#795, #796,
+  #797, #801, #802, #803, #804, #805, #806).
+
+  ### Build and test
+
+  • The nightly coverage job compiles again, after raising the recursion limit (#794).
+  • The stateless MCP peer fixture declares its protocol revision in request `_meta` rather than through the initialize handshake, the way a real stateless client does, and asserts that `_meta` takes precedence over the peer's negotiated state (#807).
+
+  No breaking changes. Upgrading from 0.7.0 needs no configuration changes.
+
+
+  <!-- Release notes generated using configuration in .github/release.yml at 04357a4da3bb42fad6a548958e8bce2a1d1fe933 -->
+
+  ## What's Changed
+  • chore：update winget and homebrew for v0.7.0 by @asw101 in https://github.com/microsoft/wassette/pull/792
+  • fix(cli)：hydrate the registry from cached metadata so `tool invoke` works by @asw101 in https://github.com/microsoft/wassette/pull/794
+  • Update Wasmtime to address security advisories by @asw101 with @Copilot in https://github.com/microsoft/wassette/pull/799
+  • test(mcp)：use request metadata for the stateless peer fixture by @asw101 in https://github.com/microsoft/wassette/pull/807
+  • chore(release)：bump version to 0.7.1 by @asw101 in https://github.com/microsoft/wassette/pull/808
+
+
+  **Full Changelog**：https://github.com/microsoft/wassette/compare/v0.7.0...v0.7.1
+
+  ## Downloads
+
+  ### Linux
+  • [AMD64 (tar.gz)](https://github.com/microsoft/wassette/releases/download/v0.7.1/wassette_0.7.1_linux_amd64.tar.gz)
+  • [ARM64 (tar.gz)](https://github.com/microsoft/wassette/releases/download/v0.7.1/wassette_0.7.1_linux_arm64.tar.gz)
+
+  ### macOS (Darwin)
+  • [AMD64/Intel (tar.gz)](https://github.com/microsoft/wassette/releases/download/v0.7.1/wassette_0.7.1_darwin_amd64.tar.gz)
+  • [ARM64/Apple Silicon (tar.gz)](https://github.com/microsoft/wassette/releases/download/v0.7.1/wassette_0.7.1_darwin_arm64.tar.gz)
+
+  ### Windows
+  • [AMD64 (zip)](https://github.com/microsoft/wassette/releases/download/v0.7.1/wassette_0.7.1_windows_amd64.zip)
+  • [ARM64 (zip)](https://github.com/microsoft/wassette/releases/download/v0.7.1/wassette_0.7.1_windows_arm64.zip)
+
+  ## Install
+
+  ### All Platforms (Shell Script)
+
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/microsoft/wassette/main/scripts/install.sh | WASSETTE_GITHUB_REPO=microsoft/wassette bash
+  ```
+
+  This will detect your platform and install the latest `wassette` binary to your `$PATH`.
+
+  ## Usage
+  ```bash
+  # Local MCP client integration (stdio)
+  wassette run
+
+  # Remote MCP server (Streamable HTTP)
+  wassette serve
+  ```
+ReleaseNotesUrl: https://github.com/microsoft/wassette/releases/tag/v0.7.1
+Documentations:
+- DocumentLabel: Wassette Documentation
+  DocumentUrl: https://microsoft.github.io/wassette/latest/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
