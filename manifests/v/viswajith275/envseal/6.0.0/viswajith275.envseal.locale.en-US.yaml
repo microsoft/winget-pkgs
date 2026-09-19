@@ -1,0 +1,80 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: viswajith275.envseal
+PackageVersion: 6.0.0
+PackageLocale: en-US
+Publisher: Viswajith M P
+PublisherUrl: https://github.com/viswajith275
+PublisherSupportUrl: https://github.com/viswajith275/EnvSeal-CLI/issues
+Author: Viswajith M P
+PackageName: envseal
+PackageUrl: https://github.com/viswajith275/EnvSeal-CLI
+License: MIT
+LicenseUrl: https://github.com/viswajith275/EnvSeal-CLI/blob/HEAD/LICENSE
+ShortDescription: Zero-trust secrets engine that replaces dangerous .env files. AES-256 encrypted vaults, least-privilege tokens for CI/CD, and instant DEK rotation, without ever putting your master password on a runner.
+Description: An encrypted vault for your API keys and secrets, because .env files have never once kept a secret.
+Moniker: envseal
+Tags:
+- command-line-tool
+- developer-tools
+- encryption-decryption
+- enviornment-setup
+- envseal
+- hmac-sha256
+- rust
+ReleaseNotes: |-
+  EnvSeal v6.0.0 replaces the shared-password encryption architecture with an asymmetric, zero-trust model powered by Age and SSH keys, adds native Git branch binding, and integrates a pre-commit defense shield.
+  Breaking Changes: No Backward Compatibility
+  > Manual Migration Required
+  > v6.0.0 introduces a redesigned cryptographic container format that cannot parse or decrypt legacy .envseal files created with v5.x or earlier. In-place upgrades are not supported.
+  To migrate an existing project:
+  1. Export secrets using your existing v5.x binary:
+  # Run with your previous EnvSeal version:
+  envseal export -o ./legacy_secrets.env
+  2. Install EnvSeal v6.0.0.
+  3. Re-initialize the project and re-import:
+  rm .envseal
+  envseal init --local
+  envseal git-setup
+  envseal import ./legacy_secrets.env
+  rm ./legacy_secrets.env
+  Highlights
+  - Asymmetric Age & SSH Key Encryption: Vault access is now authorized per collaborator using standard Age identities (age1...) or SSH public keys (~/.ssh/id_ed25519.pub). Shared team passwords and secondary tag passwords (protag) are eliminated.
+  - Direct GitHub Recipient Onboarding: Authorize teammates without manual public-key copy-pasting by pulling their public keys directly from GitHub via envseal recipient add @username.
+  - Git-Native Branch Binding: envseal run automatically checks the current active branch (git rev-parse --abbrev-ref HEAD) and injects matching tagged secrets, falling back cleanly to base variables.
+  - Pre-Commit Shield: envseal git-setup installs an automated pre-commit hook that stops staged .env, .env.local, and .env.staging files from being committed to version control.
+  Architectural Changes
+  ───────────────────┬───────────────────────────┬───────────────────────────────────────
+  Capability         │Legacy (v5.x)              │v6.0.0
+  ───────────────────┼───────────────────────────┼───────────────────────────────────────
+  Identity System    │Master Password + Argon2id │Asymmetric Age / SSH public keys
+  ───────────────────┼───────────────────────────┼───────────────────────────────────────
+  Access Boundaries  │protag secondary passwords │Scoped tags + recipient authorization
+  ───────────────────┼───────────────────────────┼───────────────────────────────────────
+  Branch Context     │Explicit manual --tag      │Automatic branch-to-tag detection
+  ───────────────────┼───────────────────────────┼───────────────────────────────────────
+  Collaborator Access│Distribute shared password │envseal recipient add / rm
+  ───────────────────┼───────────────────────────┼───────────────────────────────────────
+  Leak Prevention    │Manual .gitignore          │Native pre-commit hook (git-setup)
+                     │management                 │
+  ───────────────────┼───────────────────────────┼───────────────────────────────────────
+  Legacy File Support│v5.x vault container       │None (clean re-initialization required)
+  ───────────────────┴───────────────────────────┴───────────────────────────────────────
+  CLI & Command Reference
+  Added:
+  - envseal recipient id: Print your local public identity key.
+  - envseal recipient add <@user | KEY | FILE>: Add a collaborator via GitHub handle, raw public key, or keyfile.
+  - envseal recipient ls: List all authorized recipient keys for the current vault.
+  - envseal recipient rm <NAME INDEX KEY |>: Revoke a recipient and re-encrypt the vault for remaining keys.
+  Removed:
+  - envseal passwd: Removed. Master passphrases no longer exist; encryption is tied to asymmetric keypairs.
+  - envseal protag: Removed. Tag-level secondary passwords have been replaced by asymmetric recipient management and branch scoping.
+  Security Considerations
+  - Git History & Forward Secrecy: Running envseal recipient rm or envseal rotate prevents revoked keys from reading future commits. However, older Git commits retain their historic ciphertext. If a collaborator departs or a key is compromised, you must rotate the actual credentials (API keys, database passwords) at the provider level.
+  - Solo Developer Key Recovery: Zero-trust architecture means there is no central password recovery. Back up your identity key (~/.ssh/id_ed25519 or Age identity), or add a secondary hardware/device key as a backup recipient to avoid locking yourself out.
+  Full Changelog: v5.1.0...v6.0.0
+  Full Changelog: v5.1.0...v6.0.0
+ReleaseNotesUrl: https://github.com/viswajith275/EnvSeal-CLI/releases/tag/v6.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
