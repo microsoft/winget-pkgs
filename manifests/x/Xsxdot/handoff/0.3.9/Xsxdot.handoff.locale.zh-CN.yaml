@@ -1,0 +1,48 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: Xsxdot.handoff
+PackageVersion: 0.3.9
+PackageLocale: zh-CN
+ShortDescription: 纯 CLI 的协调者/执行者两角色 AI 协作工具
+Description: |-
+  handoff 是一个纯 CLI 的两角色协作工具：你（或任意 coding agent 会话——Claude Code、opencode、grok、codex 都行）扮演协调者——写计划、派发任务、裁决权限、审核改动；executor（opencode / Claude Code / grok / codex）在独立会话里真正干活，可以在本机，也可以在网络可达的任何一台开发机上（见「连接远程执行机」）。
+
+  为什么不直接开个终端让 AI 跑？
+  - 执行与审核分离：executor 在独立会话、独立分支（可选独立 worktree）里干活，危险操作被权限门拦下来问你，你批一条它才动一条。
+  - 断网不丢现场：所有状态与事件持久化在执行机的 agentd（SQLite），你的会话崩溃、合盖断网、换一台电脑，两条命令就能完整接管现场。
+  - 远程算力：笔记本上写计划，派发到常开机的工作站执行；代码经 git 走，改动经 handoff pull 回来。
+  - 无中心依赖：没有中心 server、没有 hooks、没有 MCP 配置。两台机器 + 一条 WebSocket 直连。
+  这套流程经过实测检验：本项目自身除第一期外的全部功能，都是由 Claude Code 作为协调者、经 handoff 派发给 opencode 开发完成的——你现在看到的代码就是它自己的产物。
+Tags:
+- 人工智能
+- 代码
+- 多智能体
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  这一版修好桌面端终端的输入丢字，并接通「把文件从访达拖进终端」。
+  三个症状都只在桌面端出现，根因两类：两个是 xterm 在 WebKit 上的输入缺口，
+  一个是原生拖放通道压根没接。升级无需改配置。
+  修复
+  - 文本展开工具（espanso 等）不再只进首字符。 macOS 上这类工具把整串文本塞进
+    一个键事件（key="git status"），而 xterm 判可打印字符的条件是
+    ev.key.length === 1，多字符落到 keypress 分支被 String.fromCharCode 压成
+    首字符发出去，随后那个带完整文本的 input 事件又因「keypress 已处理」被丢弃。
+    现在认出这个形状不让它压缩，改由 input 事件补发完整文本。
+  - 中文输入法下的标点（？ ¥ %）不再要敲好几遍。 WebKit 在输入法直接上屏时
+    把 input 事件排在 keydown 之前，xterm 的准入条件撞上被 Shift 那一下置真的
+    _keyDownSeen，字符被丢；Shift 按住不放时后续几下才侥幸通过——所以症状是
+    「按下 Shift 后的第一个标点必丢」，而要按 Shift 的标点恰好是最常用的那几个。
+    以上两条在 xterm 6.0.0 里代码一字未改，升级上游解决不了，故修在控制台这层。
+    补漏以「xterm 这一轮到底发没发」为判据，上游哪天补上会自动让位，不会变成双发。
+  新增
+  - 可以把文件从访达拖进终端了，落进去的是完整绝对路径，按 POSIX 单引号转义
+    （文件名里的空格、$、反引号都不会被 shell 展开）。走的是 Wails 的原生拖放
+    通道——WKWebView 的网页层拿得到 File 对象却拿不到路径，这件事只能由原生给。
+    拖到终端以外的区域不响应。
+ManifestType: locale
+ManifestVersion: 1.12.0
