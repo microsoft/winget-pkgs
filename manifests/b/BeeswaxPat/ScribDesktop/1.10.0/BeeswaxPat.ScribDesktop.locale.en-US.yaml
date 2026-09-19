@@ -1,0 +1,58 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: BeeswaxPat.ScribDesktop
+PackageVersion: 1.10.0
+PackageLocale: en-US
+Publisher: Beeswax Pat
+PublisherUrl: https://scrib.blog
+PublisherSupportUrl: https://github.com/beeswaxpat/scrib-desktop/issues
+Author: Beeswax Pat
+PackageName: Scrib Desktop
+PackageUrl: https://github.com/beeswaxpat/scrib-desktop
+License: GPL-3.0
+LicenseUrl: https://github.com/beeswaxpat/scrib-desktop/blob/master/LICENSE
+Copyright: Copyright (C) 2026 Beeswax Pat
+CopyrightUrl: https://github.com/beeswaxpat/scrib-desktop/blob/master/LICENSE
+ShortDescription: A tabbed text editor for Windows with AES-256 file encryption, fully offline
+Description: |-
+  Scrib Desktop is a tabbed text editor for Windows that encrypts files with AES-256. It handles plain text, rich text, and its own encrypted .scrb format, and it runs fully offline: no network code, no telemetry, and no account.
+  Encryption is per file and opt in. Press Ctrl+E on any note to set a password and save it as a .scrb, encrypted with AES-256-CBC and an HMAC-SHA256 integrity check in an encrypt-then-MAC scheme, with the key derived by PBKDF2-SHA256. Tampered files are rejected before decryption. Ctrl+L locks an open encrypted note in place, clearing its decrypted content and password from the editor until the password is re-entered, and an optional idle auto-lock does the same unattended.
+  Other features include multi-tab editing with per-tab colours and session restore, rich text with images and tables stored inside the note, RTF import and export, find and replace across all open tabs, a command palette, and atomic saves so an interrupted write cannot truncate a file.
+  Scrib Desktop is free and open source under the GPL-3.0 license.
+Moniker: scrib-desktop
+Tags:
+- aes-256
+- editor
+- encrypted-notes
+- encryption
+- notepad
+- notes
+- offline
+- open-source
+- portable
+- privacy
+- rich-text
+- text-editor
+ReleaseNotes: |-
+  A correctness and security release. No new features. The .scrb file format and settings schema are unchanged, so existing files open untouched.
+  Save integrity:
+  - Text typed while a save was in progress is no longer discarded. A save now records the content it actually wrote, so a note edited mid-write stays unsaved until the next save persists it.
+  - Saves that change a file's extension (Ctrl+E to encrypt, or the plain and rich text toggle) now ask before replacing an existing file, and decline rather than overwrite when the prompt cannot be shown.
+  - Files changed on disk by another program are no longer overwritten without warning.
+  - Save As refuses a file another tab already has open.
+  Security:
+  - Encrypting an existing file now overwrites the plaintext original before removing it. Recovery is still possible on SSDs, snapshotted volumes and synced folders: see the threat model in README.md.
+  - Locking a tab also clears its undo history, the decoded images held in memory, and the clipboard when it holds text copied from that note.
+  - Changing a password no longer applies the new password when the re-encrypt fails.
+  - Reads are capped at 64 MB, and hostile RTF, table and image payloads are bounded.
+  Test suite grown from 518 to 613.
+ReleaseNotesUrl: https://github.com/beeswaxpat/scrib-desktop/releases/tag/v1.10.0
+Documentations:
+- DocumentLabel: Changelog
+  DocumentUrl: https://github.com/beeswaxpat/scrib-desktop/blob/master/CHANGELOG.md
+- DocumentLabel: Architecture
+  DocumentUrl: https://github.com/beeswaxpat/scrib-desktop/blob/master/ARCHITECTURE.md
+- DocumentLabel: Security policy
+  DocumentUrl: https://github.com/beeswaxpat/scrib-desktop/blob/master/SECURITY.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
