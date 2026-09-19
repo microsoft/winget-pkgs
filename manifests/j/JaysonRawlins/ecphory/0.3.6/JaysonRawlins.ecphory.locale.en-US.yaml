@@ -1,0 +1,79 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: JaysonRawlins.ecphory
+PackageVersion: 0.3.6
+PackageLocale: en-US
+Publisher: Jayson Rawlins
+PublisherUrl: https://github.com/JaysonRawlins
+PublisherSupportUrl: https://github.com/JaysonRawlins/ecphory/issues
+Author: Jayson Rawlins
+PackageName: ecphory
+PackageUrl: https://github.com/JaysonRawlins/ecphory
+License: MIT
+LicenseUrl: https://github.com/JaysonRawlins/ecphory/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Jayson Rawlins
+CopyrightUrl: https://github.com/JaysonRawlins/ecphory/blob/main/LICENSE
+ShortDescription: Recall, measured. A single-binary, lexical-first memory store for AI agents.
+Description: |2-
+   ecphory is a memory store for AI agents: one static binary, no model
+      dependencies, no sidecar daemons, no vector database. Full-text BM25 search
+      runs over episode content, names, and write-time search phrases supplied by
+      the capturing agent.
+
+      Every search and by-id fetch is logged, so retrieval quality is measured
+      against the real workload rather than a hand-built gold set. Agents rate a
+      search hit, partial, or miss; a rated miss appends the failed query to the
+      episode that should have surfaced, re-runs the search to validate, and keeps
+      the validated heal as a permanent regression test.
+
+      Speaks MCP (stdio and streamable HTTP), a REST mirror, and a CLI.
+Moniker: ecphory
+ReleaseNotes: |-
+  Release Notes
+  Added
+  - (search) hidden groups are skipped by unscoped search (#23)
+  - offsite mirror — auto-push to a git remote and an export trigger event (#21)
+  - post-write triggers — run a local command when a matching episode changes (#20)
+  Fixed
+  - (index) key the search index on the database file, not its directory (#31)
+  - (cli) read recorder log views through the daemon instead of the store (#27)
+  - separate rating telemetry and add version rollback
+  Other
+  - (openspec) archive per-store-index (#33)
+  - self-correction walkthrough, heal-cycle gif, and the deploy skills (#32)
+  - (openspec) archive daemon-first-log-views (#28)
+  - (openspec) archive the two shipped changes, backfill the triggers spec (#26)
+  - offsite-mirror verify task complete — reference deployment pushing
+  - openspec draft — seed-principles-pack distribution change
+  Added
+  - hidden groups: ECPHORY_HIDDEN_GROUPS lists groups an unscoped search skips; naming the group in group_id opts back in; /status reports the set (#22)
+  - atomic archived-version rollback through MCP, REST, and CLI
+  Fixed
+  - the search index is now keyed on the database file (<db>.index) instead of its parent directory, so two stores in one directory no longer share one index — which failed with "Failed to acquire Lockfile: LockBusy" on the second open. The index directory records the id of the store that built it and is rebuilt if it names another. An existing index/ directory is adopted automatically when it sits beside exactly one store; beside two it is left alone and can be deleted once each store has rebuilt (#29)
+  - heals, ratings, search-log and access-log read through the daemon when one is running instead of dying on redb's process-exclusive lock; --url is now a global flag and each read reports its source on stderr (#15)
+  - keep used_episode_ids as telemetry instead of self-correction targets
+  Install ecphory 0.3.6
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/JaysonRawlins/ecphory/releases/download/v0.3.6/ecphory-installer.sh | sh
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/JaysonRawlins/ecphory/releases/download/v0.3.6/ecphory-installer.ps1 | iex"
+  Install prebuilt binaries via Homebrew
+  brew install JaysonRawlins/tap/ecphory
+  Download ecphory 0.3.6
+  ──────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                          │Platform           │Checksum
+  ──────────────────────────────────────────────┼───────────────────┼─────────────
+  ecphory-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ──────────────────────────────────────────────┼───────────────────┼─────────────
+  ecphory-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ──────────────────────────────────────────────┼───────────────────┼─────────────
+  ecphory-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ──────────────────────────────────────────────┼───────────────────┼─────────────
+  ecphory-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ──────────────────────────────────────────────┼───────────────────┼─────────────
+  ecphory-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ──────────────────────────────────────────────┴───────────────────┴─────────────
+ReleaseNotesUrl: https://github.com/JaysonRawlins/ecphory/releases/tag/v0.3.6
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
