@@ -1,0 +1,53 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+
+PackageIdentifier: MikhailKazakov.ForceAutoHDRNet
+PackageVersion: 1.0.0
+Platform:
+  - Windows.Desktop
+MinimumOSVersion: 10.0.22621.0
+InstallerType: msi
+
+# Scope is deliberately absent, not forgotten.
+#
+# The MSI is authored Scope="perUser" (InstallPrivileges="limited") and genuinely installs with no
+# elevation prompt into the user's own profile. Windows Installer nonetheless writes the
+# Add/Remove Programs key to HKLM rather than HKCU, so winget reports the installed package as
+# ARP\Machine\X64\{ProductCode} regardless. That makes the field a trap in both directions:
+# "user" contradicts what winget observes and can break upgrade correlation, "machine" would make
+# winget ask for elevation this installer does not need and must not have. Leaving it out means
+# winget asserts nothing and correlates on ProductCode, which is exact.
+#
+# Measured, not assumed: notes/per-user-msi-still-registers-arp-under-hklm.md.
+
+InstallModes:
+  - interactive
+  - silent
+  - silentWithProgress
+
+# The MSI carries <MajorUpgrade>, so Windows Installer replaces the previous version itself.
+UpgradeBehavior: install
+
+# Both codes are generated at build time and read back out of the .msi by
+# packaging/msi/Get-MsiProperty.ps1. The ProductCode changes with every version by design; the
+# UpgradeCode is derived from Package/@Id and stays put. winget uses them to match the package
+# against its Add/Remove Programs entry for `winget list` and `winget upgrade`.
+# Quoted because a bare {GUID} is a YAML flow mapping, not a string, and winget validate
+# rejects it with "Value type not permitted by 'type' constraint".
+ProductCode: '{CD3F0E35-C1A9-4F43-8190-854E82255BBC}'
+AppsAndFeaturesEntries:
+  - DisplayName: ForceAutoHDR.Net
+    DisplayVersion: 1.0.0
+    Publisher: Mikhail Kazakov
+    ProductCode: '{CD3F0E35-C1A9-4F43-8190-854E82255BBC}'
+    UpgradeCode: '{EF67DA39-D824-5120-A214-F835571F23CB}'
+    InstallerType: msi
+
+ReleaseDate: 2026-09-08
+
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/Phoenix-/ForceAutoHDR.Net/releases/download/v1.0.0/ForceAutoHDR-1.0.0-win-x64.msi
+    InstallerSha256: 5901599568C427DE6E0DFF10961904F67B790ACAA56053B5DC2CAFA37FF73352
+
+ManifestType: installer
+ManifestVersion: 1.12.0
