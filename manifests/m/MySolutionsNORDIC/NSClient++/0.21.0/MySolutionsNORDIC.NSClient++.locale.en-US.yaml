@@ -1,0 +1,176 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: MySolutionsNORDIC.NSClient++
+PackageVersion: 0.21.0
+PackageLocale: en-US
+Publisher: MySolutions NORDIC
+PublisherUrl: https://medin.name/
+PublisherSupportUrl: https://github.com/mickem/nscp/issues
+Author: My Computer Solutions NORDIC KB
+PackageName: NSClient++
+PackageUrl: https://nsclient.org/
+License: GPL-2.0
+LicenseUrl: https://github.com/mickem/nscp/blob/HEAD/COPYING
+Copyright: Copyright (C) 2026 - Michael Medin
+ShortDescription: A fully fledged monitoring agent which can be used with many monitoring tools.
+Description: |-
+  NSClient++ (nscp) aims to be a simple yet powerful and secure monitoring daemon. It was built for Nagios/Icinga, but nothing in the daemon is Nagios/Icinga specific and it can be used in many other scenarios where you want to receive/distribute check metrics.
+  The daemon has 3 main functions:
+  - Allow a remote machine (monitoring server) to request commands to be run on this machine (the monitored machine) which return the status of the machine.
+  - Submit the same results to a remote (monitoring server).
+  - Take action and perform tasks.
+Moniker: nscp
+Tags:
+- icinga
+- naemon
+- nagios
+ReleaseNotes: |-
+  NSClient Fleet launches: central management for your agents, plus checks that only read what you allow
+  0.21.0 is the agent release that goes with the first release of NSClient
+  Fleet, a new, separate product: one server that holds the configuration for
+  a whole estate of NSClient++ agents, hands each host the part that applies to
+  it, and shows you what every host is actually running. Agents enroll
+  themselves and report what they are, so the server builds the inventory
+  instead of consuming one; groups select hosts by those reported tags, and
+  bundles of configuration and scripts attach to groups. This release brings
+  the agent side to feature parity with the server: encrypted bundles the server
+  cannot read, a way to leave a fleet, and an nscp test prompt that survives a
+  configuration push. Fleet is entirely optional; NSClient++ works exactly as it
+  always has without it.
+  The other theme is reading less. check_logfile, check_files, check_wmi,
+  check_pdh, check_registry_* and check_eventlog read whatever their
+  argument names, with the agent's privileges, which is a general read primitive
+  wherever a caller may choose the argument. Each of them now has an access mode
+  and an allow list, off by default. Two WEB roles complete the picture:
+  restricted runs the checks you define but passes no arguments, and
+  metrics scrapes and does nothing else. And the nscp test prompt got a
+  round of usability work: aligned listings, a desc that shows defaults and
+  what an alias runs, filter keyword lists, single-quoted paths and
+  case-insensitive completion.
+  ✨ Highlights
+  - 🚀 NSClient Fleet is out. A server that enrolls your agents, builds the
+    inventory from what they report, and delivers configuration and scripts per
+    host as signed bundles, pulled by the agent over mTLS with no inbound port.
+    Read the launch announcement
+    and the Fleet documentation; this
+    release is the agent side of it.
+  - 🛡️ Access modes for the checks whose argument decides what is read.
+    check_logfile, check_files, check_single_file, check_disk_write,
+    check_wmi, check_pdh, check_registry_key, check_registry_value and
+    check_eventlog each gained a mode setting and an allow list. The default,
+    any, is exactly the previous behaviour; predefined limits a caller to the
+    names you configured; allowed matches an allow list. Nothing changes on
+    upgrade. (#1516)
+  - 🔒 Two WEB roles that cannot be widened. restricted holds
+    queries.execute.noargs, the REST equivalent of NRPE's
+    allow arguments = false: it runs the checks the agent defines and refuses
+    any query-string parameter. metrics reads the two metrics endpoints and
+    nothing else. The bundled monitoring role finally holds the grant the
+    metrics endpoints actually check, so a monitoring user is no longer answered
+    403 there. (#1517, #1520)
+  - 🔐 Encrypted fleet bundles. A bundle sealed in the fleet server's browser
+    is opened by the agent with a key you hand it out of band, at enrollment
+    (nscp enroll --bundle-key, FLEET_BUNDLE_KEY on the MSI) or later. The key
+    and the optional "sealed bundles only" posture live in the enrollment
+    manifest, never in the settings store, so the server cannot plant or switch
+    them. (#1521)
+  - 🚪 nscp enroll --unenroll leaves the fleet. It removes the include,
+    the identity and keys, and the fleet directory, and reports each step.
+    (#1521)
+  - 💥 nscp test no longer crashes after a fleet configuration push. A
+    settings reload replaced the object the prompt's completion held a pointer
+    to; the next completion refresh dereferenced freed memory. The crash file the
+    agent writes now names the faulting module instead of printing a pointer.
+    (#1521)
+  - 🖥️ A better nscp test prompt. Padded tables instead of tabs in every
+    listing, desc with parameter defaults, the bare-call command line and what
+    an alias runs, a keywords verb listing a check's filter keywords, alias
+    as a shorter aliases, Tab completion that corrects load check to
+    load Check…, single quotes that take paths literally, exec that passes
+    --options to a module, and a settings dump that lists only what is
+    configured with passwords masked. (#1522)
+  - 🔎 Three follow-up fixes to the access gates from review, including a
+    path written with the other separator walking out of an allowed directory,
+    a link the path resolver skipped, and a reload window during which every
+    gate stood open. Ship the release with those in, not the first cut.
+  - 📦 Packaging. Each Windows install no longer strands an 8 MB copy of
+    nscp.exe under %WINDIR%\Installer, the WinGet manifests carry the
+    metadata the upstream validator wants again, and the Debian source package
+    drops a Unicode-licensed file so it passes Lintian. (#1518)
+  🔍 Detailed changes
+  🚀 NSClient Fleet
+  Until now a large estate of agents was configured either by pointing each one
+  at an ini file on a web server or by pushing settings over the REST API from
+  whatever orchestration you already run. Both still work. Neither keeps track
+  of the estate: the only inventory is the one you maintain by hand.
+  Fleet turns that around. A host enrolls with a one-time token, a few MSI
+  properties or one nscp enroll command, and appears in the inventory with its
+  OS, version, drives and detected roles as tags the agent reported. Groups
+  select hosts by tag, bundles of INI fragments and scripts attach to groups,
+  and each host pulls the bundles that apply to it, verifies their signatures,
+  renders them into a fleet.ini its own nsclient.ini includes, and reports
+  back what it applied. The server never pushes and never needs a port opened on
+  a monitored host. Status is derived from what hosts report: in sync, out of
+  sync, offline, lost, and whether local settings outrank what the server sends.
+  It is one static binary and a SQLite file, on Linux or Windows or as a
+  container, in its own repository.
+  To learn more, start with the
+  launch announcement,
+  then the Fleet documentation for running
+  it in Docker, installing it on Linux or Windows, and the deployment reference.
+  The agent-side walkthrough is
+  Central management with NSClient Fleet.
+  What this release adds on the agent side is below.
+  🛡️ Restricting what a check may read
+  The checks in the table take an argument that decides what data is read,
+  and the agent reads it with its own privileges. Where callers choose the
+  argument, NRPE with allow arguments = true or a REST user not on the
+  restricted role, an unrestricted file= is a general file-read primitive.
+  Each module gained a mode setting and an allow list:
+  ──────────────────────────────────────────────┬──────────────────────────┬───────────────┬──────────────────────────────────
+  Check                                         │Section                   │Mode setting   │Allow list
+  ──────────────────────────────────────────────┼──────────────────────────┼───────────────┼──────────────────────────────────
+  check_logfile                                 │[/settings/logfile]       │file access    │allowed files
+  ──────────────────────────────────────────────┼──────────────────────────┼───────────────┼──────────────────────────────────
+  check_wmi                                     │[/settings/wmi]           │query access   │allowed classes, allowed
+                                                │                          │               │namespaces
+  ──────────────────────────────────────────────┼──────────────────────────┼───────────────┼──────────────────────────────────
+  check_pdh                                     │[/settings/system/windows]│counter access │allowed counters
+  ──────────────────────────────────────────────┼──────────────────────────┼───────────────┼──────────────────────────────────
+  check_files, check_single_file,               │[/settings/disk]          │file access    │allowed files
+  check_disk_write                              │                          │               │
+  ──────────────────────────────────────────────┼──────────────────────────┼───────────────┼──────────────────────────────────
+  check_registry_key, check_registry_value      │[/settings/system/windows]│registry access│allowed registry keys
+  ──────────────────────────────────────────────┼──────────────────────────┼───────────────┼──────────────────────────────────
+  check_eventlog                                │[/settings/eventlog]      │log access     │allowed logs
+  ──────────────────────────────────────────────┴──────────────────────────┴───────────────┴──────────────────────────────────
+  The modes are any (the default, and what every earlier release did),
+  predefined (the secure option: only names you configured in the module's own
+  sections, such as [/settings/logfile/files] or the counters already in
+  [/settings/system/windows/counters]) and allowed (only what matches the
+  list; experimental, since it has to parse what the caller sent). Registry and
+  event-log entries are hierarchical and match whole name segments. Configured
+  names resolve in every mode, so you can name your checks first and tighten
+  the mode afterwards.
+  Once a mode is set, some arguments tighten with it: a check_wmi namespace=
+  may no longer leave root\cimv2 unless allowed namespaces says so and its
+  target= must name a configured target, check_registry_* refuses
+  computer=, and check_eventlog's default channels go through the gate like
+  any other. Review of the gates before release closed a path written with the
+  other separator walking out of an allowed directory, a symbolic link the path
+  resolver did not follow, a NUL byte, a remote host in the path, and a window
+  during a settings reload in which every gate stood open; allowed mode judges
+  a WMI query by its class rather than its text. Alongside this, check_files
+  on Windows no longer follows file symbolic links, as the Linux scanner never
+  did, and * and ? in a path allow list no longer cross a directory
+  separator (C:/logs/**.log for the subtree). See
+  Restricting what a check may read.
+  🔒 WEBServer — roles that cannot be widened
+  restricted holds queries.execute.noargs instead of queries.execute: the
+ReleaseNotesUrl: https://github.com/mickem/nscp/releases/tag/0.21.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://nsclient.org/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
