@@ -1,0 +1,173 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: MySolutionsNORDIC.NSClient++
+PackageVersion: 0.20.0
+PackageLocale: en-US
+Publisher: MySolutions NORDIC
+PublisherUrl: https://medin.name/
+PublisherSupportUrl: https://github.com/mickem/nscp/issues
+Author: My Computer Solutions NORDIC KB
+PackageName: NSClient++
+PackageUrl: https://nsclient.org/
+License: GPL-2.0
+LicenseUrl: https://github.com/mickem/nscp/blob/HEAD/COPYING
+Copyright: Copyright (C) 2026 - Michael Medin
+ShortDescription: A fully fledged monitoring agent which can be used with many monitoring tools.
+Description: |-
+  NSClient++ (nscp) aims to be a simple yet powerful and secure monitoring daemon. It was built for Nagios/Icinga, but nothing in the daemon is Nagios/Icinga specific and it can be used in many other scenarios where you want to receive/distribute check metrics.
+  The daemon has 3 main functions:
+  - Allow a remote machine (monitoring server) to request commands to be run on this machine (the monitored machine) which return the status of the machine.
+  - Submit the same results to a remote (monitoring server).
+  - Take action and perform tasks.
+Moniker: nscp
+Tags:
+- icinga
+- naemon
+- nagios
+ReleaseNotes: |-
+  .NET plugins return, the WEB server keeps passive results, and more security fixes
+  0.20.0 brings back .NET plugins — on Linux as well as Windows this time — and
+  lets the WEB server hold on to passive check results so a monitoring server
+  can collect a host's scheduled checks in a single request instead of being
+  pushed to. A security review of NRPE and the TLS layer underneath it fixed a
+  handful of findings; the one to act on is that TLS certificates the agent
+  generated itself were readable by every local user, and a generated CA handed
+  its private key to every client it was distributed to.
+  The release also fixes some seventy crash and hang bugs found by scanning the
+  whole code base after the check_service crash in 0.19.0, closes two gaps in
+  the credential guard introduced in 0.19.0, and makes stopping the service
+  prompt again on Windows hosts where it could hang for minutes.
+  ✨ Highlights
+  - 🔌 .NET plugins are back, on Windows and Linux. The DotnetPlugins
+    module hosts an installed .NET runtime (8.0 or newer), so plugins written in
+    C# or F# load on both platforms. Nothing changes on a default install: the
+    module stays off until you enable it, and no runtime is bundled. Plugins
+    built for the old .NET Framework API need a rebuild against the new
+    NSCP.Core.dll; the interfaces are the same. (#1481)
+  - 📤 The WEB server can keep passive results and serve them over REST.
+    Turn the result cache on and everything submitted to its channel — typically
+    scheduled checks — waits in the agent until something polls
+    GET /api/v2/results. The bundled check_nsclient 1.1.0 adds
+    results feed, which collects that cache and hands every entry to Nagios as
+    a passive result: one active check per host instead of one per service, and
+    no NSCA or NRDP receiver needed. A new scenario walks through the Nagios
+    Core setup. (#1498)
+  - 🔒 Generated TLS keys are private now; check yours. Certificates the
+    agent generated itself — including the one a default NRPE start creates —
+    were written world-readable, and a generated CA wrote its private key into
+    the ca.pem meant for clients. New files are created correctly; existing
+    ones are left alone, so see the upgrade notes. (#1496)
+  - 🛡️ NRPE and TLS hardened. A TLS handshake can no longer be left open
+    forever by a permitted host, a short NRPE packet can no longer smuggle
+    unverified bytes into the command, the NRPE client tells you when it is not
+    authenticating the server, and the Logjam-broken 512-bit DH parameter file
+    is gone. (#1496)
+  - 🐛 Seventy crash and hang fixes across the agent. Three could be
+    triggered from outside: a malformed HTTP response from any server the agent
+    talks to could hang it, an empty console command over REST could crash it,
+    and filter_perf sort=normal could crash on the Nagios U marker. The rest
+    were bugs on the default paths of common Windows checks, races when a module
+    is reloaded or unloaded, and thresholds that silently overflowed. (#1505)
+  - 🔐 Two ways past the credential guard closed. A token or password
+    written inside a target's address is now protected the same way as one in
+    its own key, and a target without an address no longer adopts the caller's
+    host as its own.
+  - ⏱️ Stopping the service is prompt again. On Windows, stopping shortly
+    after start could take minutes while the Windows Update check or a WMI query
+    finished; those are now abandoned on shutdown. (#1504)
+  - 🐧 Builds with GCC 16 for anyone building from source on a current
+    Debian or Fedora. (#1479)
+  🔍 Detailed changes
+  🔌 DotnetPlugins — .NET plugins on Windows and Linux
+  The old module only ever worked on Windows and had been out of the build for
+  years. The new one finds an installed .NET runtime — DOTNET_ROOT, the
+  registered install location or the platform's default folders, or a path you
+  give in runtime path — and hosts your plugins through it. Everything a
+  plugin could do before still works: commands, submission channels,
+  command-line exec and log messages all reach the managed side.
+  [/modules]
+  DotnetPlugins = enabled
+  [/settings/dotnet/plugins]
+  MyPlugin = MyPlugin.dll
+  Assemblies are looked up in plugin path (modules/dotnet by default,
+  where NSCP.Core.dll lives too). On Windows the installer has a ".NET plugin
+  support" feature again, selected by default; the Linux packages ship the same
+  files. See Extending with .NET
+  and the
+  DotnetPlugins reference.
+  📤 WEBServer — a passive result cache served over REST
+  Passive monitoring normally means the agent pushes results to the monitoring
+  server. That does not work when the server has no NSCA or NRDP receiver, or
+  when the agent cannot reach it. The WEB server can now turn it around: with
+  the cache enabled it listens on a submission channel (WEB by default),
+  keeps whatever arrives there — scheduled checks from Scheduler,
+  check_and_forward from CheckHelpers, anything that submits to a channel —
+  and hands it over when polled.
+  ──────────────────────────────────────┬───────────────────────────┬──────────────────────────────────────────────────────────────────────────────────────
+  Setting (/settings/WEB/server/results)│Default                    │Meaning
+  ──────────────────────────────────────┼───────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────
+  enabled                               │false                      │Turn the cache on (takes effect on restart)
+  ──────────────────────────────────────┼───────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────
+  channel                               │WEB                        │The submission channel to listen on
+  ──────────────────────────────────────┼───────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────
+  primary index                         │${host}/${alias-or-command}│What makes two results "the same check"
+  ──────────────────────────────────────┼───────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────
+  mode                                  │last                       │Which of two results for a check to keep: the newest (last) or the most severe (worst)
+  ──────────────────────────────────────┼───────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────
+  clear on poll                         │true                       │Polling empties the cache, so worst means "worst since the last poll"
+  ──────────────────────────────────────┼───────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────
+  max entries                           │1000                       │How many checks to keep before the oldest is dropped
+  ──────────────────────────────────────┼───────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────
+  max age                               │none                       │Drop results older than this
+  ──────────────────────────────────────┴───────────────────────────┴──────────────────────────────────────────────────────────────────────────────────────
+  The cache is exposed as GET /api/v2/results, GET /api/v2/results/{key},
+  DELETE /api/v2/results and DELETE /api/v2/results/{key}. They need the
+  new results.list, results.get and results.delete privileges, which only
+  the full role has, so grant them to the account that polls:
+  nscp web add-role --role poller --grant results.list,results.get,login.get
+  check_nsclient 1.1.0, bundled with the Windows and Linux packages, adds the
+  results list, results show, results delete, results clear and
+  results feed commands; feed is the one to schedule from Nagios. The
+  REST results page describes
+  the API and the
+  Polled Passive Checks (Nagios Core)
+  scenario the complete setup.
+  🔒 NRPE and TLS — what the review found
+  None of the findings lets anyone past allowed hosts run code on the agent.
+  - Generated private keys were readable by every local user, and a
+    generated CA put its private key into the ca.pem you distribute to
+    clients — anyone holding that file could mint certificates the server
+    accepts with verify mode = peer-cert. New keys are created readable only
+    by the agent, and a generated CA keeps its key in a separate ca-key.pem.
+  - A TLS handshake could be left open forever. A permitted host could open
+    connections, send nothing, and hold them indefinitely. The listener's
+    timeout now covers the handshake as well.
+  - The NRPE client did not authenticate the server. With ssl = true and
+    the default verify mode = none the link is encrypted but anyone on the
+    path could impersonate the server. The default stays, but the client now
+    logs one error per target so the choice is visible, and generated
+    certificates name the machine rather than only localhost so verification
+    can actually be turned on.
+  - A short NRPE v3/v4 packet could carry extra bytes into the command that
+    the checksum never covered.
+  - The 512-bit DH parameter file is no longer shipped. Nothing used it by
+    default, but anyone who copied it into dh was running a Logjam-broken
+    key exchange.
+  - Smaller fixes: tls version accepts every spelling the documentation lists
+    (tlsv1.3+, 1.0+, sslv3+, any, … used to fail with "Invalid tls
+    version", which for an NRPE listener showed up as "listener failed to
+    start"), and several NRPE wire-format bugs are fixed, including version 4
+    packets not being recognised by the server.
+  🔐 Client modules — the credential guard covers the address too
+  0.19.0 stopped a caller from redirecting a target that carries a credential
+  to a host of their choosing. It missed two cases: a secret written inside the
+  address itself (?token=SECRET in the URL, or user:password@host), and a
+  target that had a credential but no address, which took the caller's host as
+  its own. Both are closed. If you relied on either, the options are the same as
+ReleaseNotesUrl: https://github.com/mickem/nscp/releases/tag/0.20.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://nsclient.org/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
