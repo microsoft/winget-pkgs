@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.6.0.schema.json
+PackageIdentifier: minhnd410.computer-control
+PackageVersion: 0.3.0
+InstallerType: zip
+NestedInstallerType: portable
+# One binary: what an MCP client launches.
+# Relative to the root of the zip. winget does not strip the leading
+# directory, and the release archive has one, so the path includes it.
+NestedInstallerFiles:
+  - RelativeFilePath: computer-control\computer-control-mcp.exe
+    PortableCommandAlias: computer-control-mcp
+Commands:
+  - computer-control-mcp
+MinimumOSVersion: 10.0.17763.0   # InjectTouchInput needs Win8+; UIA caching wants 1809+
+# Only x64 is published. An arm64 entry pointing at an archive that does not
+# exist would pass a schema check and fail at install time, so it is absent
+# until CI builds one; winget then tells arm64 users there is no package
+# rather than handing them a 404.
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/minhnd410/computer-control/releases/download/v0.3.0/computer-control-windows-x86_64.zip
+    InstallerSha256: 09C40CED73242D3B6B7D33FBFA9FA9545347A5AFCA7FF5667262526249E58D01
+ManifestType: installer
+ManifestVersion: 1.6.0
