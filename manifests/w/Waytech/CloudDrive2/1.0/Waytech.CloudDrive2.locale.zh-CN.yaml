@@ -28,11 +28,12 @@ Tags:
 - 文件
 - 服务器
 ReleaseNotes: |-
-  1. 修复备份的文件过滤规则在白名单模式下部分规则不生效的问题(#490、#163)
-  2. 修复文件夹被删除后又在第三方以同名重新创建（例如在另一台设备上操作，或清空回收站之后），之前对这个文件夹的浏览和读取会一直失败的问题
-  3. 修复 Windows 挂载盘， 当挂载盘根目录是可写目录时，资源管理器中删除文件会提示回收站已损坏的问题，在根目录可写的本地挂载盘上支持 Windows 资源管理器的删除到回收站和从回收站恢复
-  4. 修复 Windows 挂载盘在网页端或者其他设备上进行修改时，无法向操作系统发出文件变更通知的问题(#554)
-ReleaseNotesUrl: https://github.com/cloud-fs/cloud-fs.github.io/releases/tag/v1.0.18
+  1. 修复复制文件夹到本地文件夹时耗尽系统文件句柄的问题。 从云盘复制大文件夹到本地文件夹时，会一次性创建成千上万个空的 .clfstmp 文件并一直保持打开，直到轮到该文件复制；系统句柄用尽后复制便停滞。现在临时文件只在该文件真正开始复制时创建，复制完成即关闭
+  2. 修复挂载盘上 rmdir 会删除非空文件夹 的问题(#560)。 Linux 和 macOS 的 FUSE rmdir 调用的是递归删除，对有内容的云盘文件夹执行 rmdir 会清空整个文件夹。现在按 rmdir(2) 语义处理：非空目录拒绝删除（ENOTEMPTY），对文件返回 ENOTDIR；网页和 API 中的显式递归删除不受影响
+  3. 修复 Windows 网络驱动器每次重启后丢失名称和图标的问题 (#561, #438)。 自 0.9.17 起 WinFsp 的 UNC 前缀带有时间戳，资源管理器把每次挂载都当作新驱动器：重命名丢失、过长的默认名称遮住容量条、MountPoints2 里残留大量注册表项。前缀恢复为 \CloudDrive<名称>；只有真正冲突时（同名挂载到第二个盘符）才追加 -<盘符>
+  4. Windows 挂载盘：修复某些情况下修改文件权限后文件无法再打开的问题
+  5. 登录失败时说明无法连接账号服务器的原因。 不再只显示超时，而是对账号服务器的请求失败进行分类（DNS、连接、超时、TLS、代理、HTTP 5xx、被劫持的门户页面）
+ReleaseNotesUrl: https://github.com/cloud-fs/cloud-fs.github.io/releases/tag/v1.0.19
 PurchaseUrl: https://www.clouddrive2.com/pricing.html
 ManifestType: locale
 ManifestVersion: 1.12.0
