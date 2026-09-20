@@ -1,0 +1,159 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AnalyseDeCircuit.OxideTerm
+PackageVersion: 2.0.29
+PackageLocale: en-US
+Publisher: AnalyseDeCircuit
+PublisherUrl: https://github.com/AnalyseDeCircuit
+PublisherSupportUrl: https://github.com/AnalyseDeCircuit/oxideterm/issues
+Author: AnalyseDeCircuit
+PackageName: OxideTerm
+PackageUrl: https://github.com/AnalyseDeCircuit/oxideterm
+License: GPL-3.0
+LicenseUrl: https://github.com/AnalyseDeCircuit/oxideterm/blob/HEAD/LICENSE
+ShortDescription: Local-first SSH workspace for local shells and remote machines.Zero Electron, zero OpenSSL, zero telemetry, and no app subscription for core SSH workflows.
+Tags:
+- agent
+- ai-terminal
+- bring-your-own-key
+- filemanager
+- mcp
+- rag
+- russh
+- rust
+- sftp
+- ssh-client
+- tauri
+- terminal
+- terminal-emulator
+- tool-calling
+- wslg
+- xterm-js
+ReleaseNotes: |-
+  English
+  OxideTerm 2.0.29 expands OxideSens with more AI providers, resumable task execution, complete persistent history, and conversation archiving. It also improves terminal responsiveness and command observation, reduces editor memory and background work, and adds independent IDE typography settings.
+  🤖 AI Providers and Task Execution
+  - Added OpenAI Responses API support with stateless history replay, including restoration of the conversation context needed for subsequent requests.
+  - Added a native xAI Grok provider with model discovery and model capability settings.
+  - Updated the recommended DeepSeek Flash model to deepseek-flash, with matching context-window and reasoning-level support. Existing Flash aliases remain recognized, and deepseek-v4-pro keeps its current name; saved custom model lists are not rewritten.
+  - Added task checkpoints and resumable execution, bounded condition waits, dependency-aware read scheduling, and classified recovery for interrupted or failed operations.
+  - Replaced manual context and response limits with automatic budgeting, and improved handling of follow-up instructions during running tasks.
+  - Added clarification questions during execution. An agent can present a question, wait for the user's answer, and continue the task.
+  💬 Complete Chat History and Archiving
+  - Removed the conversation message-count cap. Persistent history retains messages, tool activity, subagent history, and alternative branches rather than discarding older messages at a fixed limit.
+  - Reworked history storage around incremental writes, separately stored metadata, chunked content, and on-demand message loading. Large conversations no longer require all message bodies to be loaded for browsing the conversation list.
+  - Added conversation archiving, an archived-conversation list, and restore actions. Archiving hides a conversation from the normal list while retaining its history; archiving alone does not cancel running work.
+  - Added separate indexed pagination for active and archived conversations. Startup loads the first 50 active conversations; archived conversations load when their list is opened, with additional pages available on demand. Clearing all conversations still includes histories outside the loaded pages.
+  - Fixed loading failures involving older history metadata. Existing history is migrated to the new store while the original database is retained. Conversations written after migration are stored in the new database and are not copied back to the old version's database.
+  - Added regression coverage for archive and restore persistence, metadata pagination, message preservation, and conversation switching without losing drafts.
+  🖱️ Chat Display and Scrolling
+  - Added a chat scrollbar and improved scroll-position preservation when reading earlier messages, reducing jumps back to the current screen during content updates.
+  - Fixed a list-rendering borrow conflict that could crash the application during tool activity and history loading.
+  - Simplified tool activity presentation, removing internal activity navigation, JSON-path controls, and redundant “more content” rows. Messages display their complete activity content automatically.
+  - Fixed stopped or historical tool calls remaining in a spinning state, preventing continued animation and unnecessary redraws after the operation ended.
+  - Adjusted conversation-list heading typography and selected-row corners so the highlight follows the list's actual boundaries.
+  🛠️ AI and Terminal Command Handling
+  - Removed the recurring manual terminal-control handback gate. Tool request ownership is released when the request ends, while stale requests cannot release ownership belonging to a newer operation.
+  - Improved command completion, cancellation, and owned-process cleanup. Stopping observation does not claim that an already-issued remote command has stopped.
+  - Improved output capture on shells without integration events. Stable output can be returned as a captured snapshot without being reported as a confirmed command exit.
+  - Kept AI command tracking functional when visual command marks are disabled.
+  - Kept privilege-authentication input local to the running command and improved isolation from ordinary terminal input handling.
+  ⚡ Terminal, Connections, and Remote Desktop
+  - Moved SSH terminal parsing to an owned background worker, reduced output copies, and bounded batch-flush latency to reduce UI work during continuous output.
+  - Fixed switching away from a terminal incorrectly marking already-displayed output as unread, including the first switch after opening a terminal.
+  - Fixed the command sender retaining keyboard focus after clicking a terminal pane.
+  - Improved RDP text pasting through acknowledged clipboard transfers.
+  - Added default connection names when editing unnamed saved connections.
+  - Fixed detached-tab cleanup after native window closure on Windows.
+  ✍️ IDE Mini and Editor Performance
+  - Added independent IDE font-family, Chinese/CJK fallback-font, and font-weight settings alongside the existing font-size and line-height controls. Editor settings can continue to follow the terminal defaults or use explicit overrides.
+  - Shared immutable document text across editor snapshots and save requests, and reclaimed unused text storage to reduce retained memory.
+  - Moved cancellable syntax work off the UI thread and avoided redundant queued work for superseded document versions.
+  - Reused syntax blocks, updated presentation indexes locally, and reduced temporary highlight copies and repeated derived calculations.
+  - Fixed editor callback ownership cycles and made caret-blink scheduling cancel correctly when the editor loses focus or is released.
+  ⌨️ Shortcuts and Validation
+  - Exposed context-specific and plugin shortcuts in settings, and fixed old shortcuts remaining registered after runtime updates.
+  - Expanded mixed-language terminal benchmark coverage and recorded SSH background-parsing measurements.
+  - Fixed CI formatting and asynchronous scheduler issues, and adjusted large-storage test timeout guards without reducing their data-preservation assertions.
+  - Updated affected interface text across all 11 supported languages. Focused archive, pagination, draft-preservation, and storage regression checks passed; the maintainer completed GUI validation before approving this release.
+  中文
+  OxideTerm 2.0.29 为 OxideSens 增加了更多模型接入、可恢复任务执行、完整历史持久化和对话归档，同时改善终端响应与命令输出观察，降低编辑器内存占用和后台计算开销，并新增独立的 IDE 字体设置。
+  🤖 AI 模型接入与任务执行
+  - 新增 OpenAI Responses API 支持及无状态历史重放，恢复后续请求所需的对话上下文。
+  - 新增原生 xAI Grok 提供商，支持模型发现及模型能力设置。
+  - 将 DeepSeek Flash 推荐模型名更新为 deepseek-flash，同步上下文容量与思考档位识别。旧 Flash 别名仍可识别，deepseek-v4-pro 保持原名；已保存的自定义模型列表不会被重写。
+  - 新增任务检查点和可恢复执行、有界条件等待、按依赖安排的读取调度，以及中断或失败操作的分类恢复。
+  - 使用自动预算管理替代手动上下文与回复限制，并改善任务运行期间追加指令的处理。
+  - 新增执行中的澄清提问：代理可以提出问题、等待用户回答，再继续任务。
+  💬 完整聊天历史与归档
+  - 移除对话消息数量上限，持久化保留消息、工具活动、子代理历史和替代分支，不再按固定条数丢弃较早消息。
+  - 重构历史存储，采用增量写入、独立元数据、内容分块和消息按需加载；浏览对话列表时不再需要加载大对话的全部正文。
+  - 新增对话归档、已归档列表和恢复操作。归档后对话从普通列表隐藏，历史记录继续保留；归档本身不会取消正在执行的任务。
+  - 普通与归档对话分别使用索引分页。启动只加载首批 50 条普通对话，归档列表打开时才读取，后续按需加载更多。清空全部对话仍包含尚未加载的历史记录。
+  - 修复旧历史元数据导致的加载失败。现有历史会迁移到新存储，同时保留原数据库；迁移后产生的对话记录写入新数据库，不会回写到旧版本使用的数据库。
+  - 补充归档与恢复持久化、元数据分页、消息保留，以及切换对话时保留草稿的回归验证。
+  🖱️ 聊天展示与滚动
+  - 新增聊天滚动条，改善向上阅读历史时的滚动位置保持，减少内容更新导致的回跳。
+  - 修复工具活动和历史加载期间，列表渲染借用冲突可能引发的应用崩溃。
+  - 简化工具活动展示，移除内部活动翻页、JSON 路径控件及重复的“更多内容”行，自动展示消息的完整活动内容。
+  - 修复已停止或历史工具调用仍持续转圈的问题，避免操作结束后继续动画和无效刷新。
+  - 调整对话列表标题字号和选中行圆角，使高亮符合列表实际边界。
+  🛠️ AI 与终端命令处理
+  - 移除反复要求手动交还终端控制权的阻塞机制。工具请求结束后释放该请求的控制权，旧请求不会错误释放新操作持有的控制权。
+  - 改善命令完成、取消和所属进程的清理处理；停止观察不会被表述为已经停止远端命令。
+  - 改善缺少 Shell 集成事件时的输出捕获。稳定输出可以作为已捕获快照返回，不会被误报为已确认的命令退出。
+  - 关闭可视命令标记后，AI 命令跟踪仍可正常工作。
+  - 特权认证输入保持在正在运行的命令中处理，并改善其与普通终端输入处理的隔离。
+  ⚡ 终端、连接与远程桌面
+  - 将 SSH 终端解析移到具有明确生命周期的后台工作线程，减少输出复制并限制批量刷新延迟，降低连续输出时的界面线程开销。
+  - 修复切出终端后，已展示输出被误判为未读的问题，包括终端打开后的第一次切换。
+  - 修复点击终端窗格后，命令发送栏仍占用键盘焦点的问题。
+  - 通过带确认的剪贴板传输改善 RDP 文本粘贴。
+  - 编辑未命名的已保存连接时，自动提供默认名称。
+  - 修复 Windows 原生窗口关闭后的分离标签清理问题。
+  ✍️ IDE Mini 与编辑器性能
+  - 在现有字号、行高设置基础上，新增独立的 IDE 字体、中文/CJK 回退字体和字重设置，可继续跟随终端默认值，也可单独覆盖。
+  - 编辑器快照与保存请求共享不可变文档文本，并回收不再使用的文本存储，减少常驻内存。
+  - 将可取消的语法分析移出界面线程，避免为已经过期的文档版本重复排队计算。
+  - 复用语法块、局部更新展示索引，减少临时高亮复制与重复派生计算。
+  - 修复编辑器回调所有权循环，使光标闪烁任务在失焦或编辑器释放时正确取消。
+  ⌨️ 快捷键与验证
+  - 设置中展示上下文专用快捷键和插件快捷键，修复运行时更新后旧快捷键仍被注册的问题。
+  - 扩充混合语言终端基准覆盖，并记录 SSH 后台解析的测量结果。
+  - 修复 CI 格式检查和异步调度问题，调整大型存储测试的超时保护，同时保留数据完整性断言。
+  - 相关界面文案同步维护全部 11 种语言。归档、分页、草稿保留及存储的聚焦回归检查通过；维护者已完成 GUI 验收并批准发布。
+  📥 Download for your system
+  ────────────────┬─────────────────────────────────┬─────────────────────────────────
+  Operating system│x64                              │ARM64
+  ────────────────┼─────────────────────────────────┼─────────────────────────────────
+  Windows         │Setup (.exe)                     │Setup (.exe)
+  ────────────────┼─────────────────────────────────┼─────────────────────────────────
+  macOS           │DMG (Intel)                      │DMG (Apple Silicon)
+  ────────────────┼─────────────────────────────────┼─────────────────────────────────
+  Linux           │AppImage · DEB · RPM             │AppImage · DEB · RPM
+  ────────────────┴─────────────────────────────────┴─────────────────────────────────
+  Portable archives, signatures, and sha256sums.txt remain available in the release assets below.
+  📌 Installation Tips / 安装提示
+  macOS
+  Downloaded .dmg files may be quarantined by Gatekeeper. Run in Terminal:
+  xattr -cr ~/Downloads/OxideTerm_*.dmg
+  # or after install / 或安装后
+  xattr -cr /Applications/OxideTerm.app
+  Windows
+  If SmartScreen warns, click More info -> Run anyway.
+  若 SmartScreen 弹出警告，点击 更多信息 -> 仍要运行。
+  Linux
+  # AppImage
+  chmod +x OxideTerm_*_linux_*.AppImage && ./OxideTerm_*_linux_*.AppImage
+  # Debian/Ubuntu
+  sudo dpkg -i OxideTerm_*_linux_*.deb && sudo apt-get install -f
+  # Fedora/RHEL-compatible systems
+  sudo dnf install ./OxideTerm_*_linux_*.rpm
+  🔗 Links
+  - Documentation: https://oxideterm.app
+  - GitHub Issues: https://github.com/AnalyseDeCircuit/oxideterm/issues
+  - Changelog: https://github.com/AnalyseDeCircuit/oxideterm/blob/main/.github/release-notes/stable-changelog.md
+ReleaseNotesUrl: https://github.com/AnalyseDeCircuit/oxideterm/releases/tag/v2.0.29
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

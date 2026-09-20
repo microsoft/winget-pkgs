@@ -1,0 +1,52 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: XinTaoFei.Codeg
+PackageVersion: 0.30.8
+PackageLocale: zh-CN
+ShortDescription: 在一个地方聚合并浏览 AI 编程代理会话（如 Claude Code、Codex、Gemini CLI 等）。支持桌面应用、自建服务器或 Docker 部署。
+Description: Codeg（Code Generation，代码生成）是一款企业级多代理编码工作区。它将本地 AI 编程代理（包括 Claude Code、Codex CLI、OpenCode、Gemini CLI、OpenClaw、Cline 等）统一集成于桌面应用、独立服务器或 Docker 容器中，支持通过任意浏览器进行远程开发；具备对话聚合、并行 Git 工作树开发、MCP/技能管理、聊天频道交互（Telegram、飞书、iLink 等），以及集成的 Git/文件/终端工作流。
+Tags:
+- claude-code
+- codex
+- gemini-cli
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  codeg:// 现在是真正的系统链接——外部工具可以把一条会话交给桌面端，直接落到对应标签页，冷启动也一样。
+  关闭按钮不再自作主张（询问、最小化到托盘、还是退出，由你决定），智能体的临时文件也不会再越堆越多：每次启动都用独立的临时目录，结束时清掉。
+  Cline 用自有供应商终于能正常连接，CodeBuddy 的后台任务结果回到发起它的卡片里，另有十一个内置智能体版本更新。
+  新增
+  - codeg://session/<id> 可以从应用外部直接打开对应会话——macOS、Windows、Linux 都支持，codeg 已在运行或冷启动都能正确跳转。（#725，@changexbc）
+  - 关闭按钮的行为现在可以自己选——每次询问、最小化到托盘、或直接退出；询问弹窗带「记住我的选择」，之后仍可在 设置 → 常规 中修改。（#633 由 @galact-byte 提出，#741，@galact-byte）
+  - Antigravity 设置面板新增「残留临时空间」回收——扫描系统临时目录中旧版本遗留的目录，逐条确认后再删除，仍在使用中的会自动跳过。（#735 由 @chenjing-x 反馈）
+  改进
+  - 内置智能体版本更新： Claude Code ACP 0.77.0（Claude Code 2.1.270）、Codex ACP 1.11.0、Kimi Code 0.43.1、CodeBuddy 2.151.0、Grok 1.0.30、Qoder 1.1.53、Cursor 2026.09.10、Hermes 0.21.3、OpenCode 1.18.31、OpenClaw 2026.9.4、Cline 3.0.62。
+  - 模型与推理强度选择器会标出智能体自己的推荐项——Codex 和 Claude Code 各自给出默认选择，以「推荐」徽章呈现，十种语言均已适配。
+  - Claude Code 的选择器去掉了含糊的「default」行，也不再回填智能体已经不提供的历史选择，每轮记录的模型都是真实跑过的那个。
+  - 被 Claude 标记为「不应被随手批准」的权限请求，现在高亮的是「拒绝」而不是「允许」。
+  - 智能体不会再每次连接都泄漏一个临时目录——每次启动解压到独立目录，退出时删除，崩溃遗留的也会在下次启动时清理。（#735 由 @chenjing-x 反馈）
+  - 下载好的智能体二进制不再因重启或清理工具而消失——托管二进制缓存已迁出系统缓存目录，已有安装会原地迁移。（#736 由 @tyonia 反馈）
+  - 托管智能体的可执行文件定位更可靠——codeg 会把自己的安装目录前置到 PATH，识别 ~/.opencode/bin，并同时兼容两种 OpenCode 插件目录结构（1.18.30 改了包目录）。（#736 由 @tyonia 反馈）
+  - DeepSeek 的会话模式、配置项和审批按钮现在跟随界面语言——deepseek-acp 只提供简体中文文案，codeg 在渲染时重新映射，你自己的模型名保持原样。（#733 由 @Mistic92 反馈）
+  - JSON 解析失败的报错会说明来源，并且不再把原始内容原样回显，凭证不会顺着错误信息泄漏出去。
+  修复
+  - Cline 现在能用你自己配置的供应商正常建立会话——此前无论怎么配都报「Authentication required」；设置面板也改为写入 Cline 3.x 真正读取的位置，第一次之后的保存不会再被悄悄丢弃。
+  - Cline 的「Auto-approve tools」开关终于可以切换了。（#709 由 @udagos 反馈）
+  - CodeBuddy 的后台任务结果会回到发起它的卡片里——不再多出一条塞满 <task-notification> 原始 XML 的气泡，卡片上能看到该任务的状态、摘要以及它自己的工具调用。
+  - 智能体自行发起的回合不会再让会话看起来卡住——话题上方会出现一个提示条，点一下就能把内容拉进来，不必重开会话。
+  - deepseek-acp 0.9.0 写入的 DeepSeek 会话可以正常打开了——该版本改了会话日志文件名，导致会话显示为空，或在迁移点被悄悄截断。（#734 由 @fanliang123 反馈）
+  - 带 query 参数的 MCP 调用保留自己的名字，不再一律显示成「网页搜索」——codegraph_explore 就是 codegraph_explore，而 Codex 真正的网页搜索仍能正确识别。（#710 由 @udagos 反馈，#729，@dawNotPoi）
+  - 只有智能体真正提供的命令才会变成斜杠命令徽章——粘贴文本、恢复草稿、快捷消息、待办简报都不会再把 /etc 变成一条你从没选过的命令。（#727，@Adam-Dalloul）
+  - 恢复草稿或重新打开排队消息时，输入框不会再是空的。
+  - Cursor 遇到可重试的失败会重新尝试——托管的 cursor-agent 包缺少重试策略，codeg 会在安装时补上。（#738，@ZY-Dragon03）
+  - 关闭 stash、推送、项目启动或会话导入窗口时会把工作区带回来，不会再出现主窗口已隐藏到托盘、关掉子窗口后满屏空无一物的情况。（#680，@Adam-Dalloul）
+  - 「打开文件夹」快捷键不再声称会打开新窗口——它是在当前工作区打开文件夹，十种语言的描述都已更正。（#682，@Adam-Dalloul）
+  感谢 @changexbc、@galact-byte、@Adam-Dalloul、@dawNotPoi、@ZY-Dragon03 为本次发布做出的贡献，也感谢 @chenjing-x、@tyonia、@Mistic92、@fanliang123 和 @udagos 的反馈。
+ManifestType: locale
+ManifestVersion: 1.12.0

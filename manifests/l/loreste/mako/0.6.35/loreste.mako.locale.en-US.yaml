@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: loreste.mako
+PackageVersion: 0.6.35
+PackageLocale: en-US
+Publisher: loreste
+PublisherUrl: https://github.com/loreste/mako
+PublisherSupportUrl: https://github.com/loreste/mako/issues
+Author: loreste
+PackageName: Mako
+PackageUrl: https://github.com/loreste/mako
+License: MIT
+LicenseUrl: https://github.com/loreste/mako/blob/v0.1.7/LICENSE
+Copyright: Copyright (c) loreste
+ShortDescription: Mako systems/backend language (.mko to native via C)
+Description: |-
+  Mako is a systems and backend language that compiles .mko sources to native
+  code via C. Ships a single CLI binary plus runtime headers and stdlib.
+Moniker: mako
+Tags:
+- backend
+- compiler
+- programming-language
+- systems
+ReleaseNotes: |-
+  ## Actor correctness and throughput
+
+  This release includes the actor fixes for #60, #61, #62, and #63.
+
+  • Resolve actor state consistently across imported files, nested expressions, and receive handlers. Support constructor state, typed payloads, early returns, and named mailbox ports.
+  • Keep queued envelopes alive until receipt; release handled, rejected, and drained payloads exactly once. Close mailboxes before draining so concurrent senders cannot escape shutdown cleanup.
+  • Snapshot mutable slice payloads, including slices nested in structs, and reject payload types without a safe mailbox-copy contract.
+  • Preserve zero-allocation scalar messages, reduce redundant channel wakeups, and use adaptive glibc mutexes for multi-slot integer channels. Add matched Rust/Mako producer and actor-sharding benchmarks.
+  • Reclaim string and Result temporaries, preserve reusable errors, and fix closure capture ownership and alias lifetimes on the C and native backends.
+  • Update the actor guide, API tables, performance documentation, regression fixtures, and sanitizer gates.
+
+  ## Validation
+
+  • [CI for e589a43](https://github.com/loreste/mako/actions/runs/35044494897)：all 16 jobs passed, including ASan, UBSan, TSan, Linux leak checks, GCC, platform tests, and both performance gates.
+  • Local full suites：468/468 under C ASan/UBSan and 468/468 on native.
+  • Focused actor and closure leak checks report zero leaked allocations. The release memory-safety gate and strict 1.5× Rust performance gate passed.
+
+  Low-level raw mailbox operations retain the documented ownership contract：failed raw sends leave the message with the caller. Prefer the generated actor send helpers, which consume rejected messages safely.
+
+  **Full changelog:** [v0.6.34…v0.6.35](https://github.com/loreste/mako/compare/v0.6.34...v0.6.35)
+ReleaseNotesUrl: https://github.com/loreste/mako/releases/tag/v0.6.35
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

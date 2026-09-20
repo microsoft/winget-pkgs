@@ -1,28 +1,177 @@
+# Created by Anthelion using komac v2.16.0
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
-# Created with winmatsch
 
 PackageIdentifier: jj-vcs.jj
 PackageVersion: 0.44.0
 PackageLocale: en-US
 Publisher: jj-vcs
-PublisherUrl: https://github.com/jj-vcs
+PublisherUrl: https://jj-vcs.dev/
 PublisherSupportUrl: https://github.com/jj-vcs/jj/issues
 PackageName: jj
-PackageUrl: https://github.com/jj-vcs/jj
+PackageUrl: https://jj-vcs.dev/
 License: Apache-2.0
 LicenseUrl: https://github.com/jj-vcs/jj/blob/HEAD/LICENSE
 ShortDescription: A Git-compatible VCS that is both simple and powerful
-Description: A Git-compatible VCS that is both simple and powerful
-Moniker: Jujutsu
+Description: |-
+  Jujutsu is a powerful version control system for software projects. You use it to get a copy of your code, track changes to the code, and finally publish those changes for others to see and use. It is designed from the ground up to be easy to use—whether you're new or experienced, working on brand new projects alone, or large scale software projects with large histories and teams.
+
+  Jujutsu is unlike most other systems, because internally it abstracts the user interface and version control algorithms from the storage systems used to serve your content. This allows it to serve as a VCS with many possible physical backends, that may have their own data or networking models—like Mercurial or Breezy, or hybrid systems like Google's cloud-based design, Piper/CitC.
+
+  Today, we use Git repositories as a storage layer to serve and track content, making it compatible with many of your favorite Git-based tools, right now! However, note that only commits and files are stored in Git; bookmarks (branches) and other higher-level metadata are stored in custom storage outside of Git. All core developers use Jujutsu to develop Jujutsu, right here on GitHub. But it should hopefully work with your favorite Git forges, too.
+Moniker: jujutsu
 Tags:
 - cli
 - git
 - mercurial
 - vcs
-ReleaseNotes: "About\njj is a Git-compatible version control system that is both simple and powerful. See\nthe installation instructions to get started.\nRelease highlights\n• jj run allows you to run a command over a set of changes, each with their\n  own private working copy; the commands may update the working copy and\n  changes/conflicts are propagated accordingly, e.g., jj run -- cargo check --all-features or jj run -- cargo fix behaves as one might expect.\nBreaking changes\n• The deprecated git_head() and git_refs() functions have been removed from\n  revsets and templates.\n• Git-like symbols (e.g. refs/heads/main) are no longer resolved to\n  revisions. Use the bookmark/tag <name> or <name>@<remote> syntax instead.\n• The deprecated ui.revsets-use-glob-by-default option has been removed.\n• jj bookmark track/untrack no longer supports <kind>:<bookmark>@<remote>\n  patterns. However, the <bookmark>@<remote> symbol syntax is still supported.\n  #9226\nDeprecations\nNew features\n• jj show now supports --reversed flag.\n• jj now looks for config files in /etc/jj.\n• jj config gc will delete configuration of deleted/moved repos from\n  ~/.config/jj/repos folder.\n  #9362\n• jj run allows you to run a command over a set of changes, each with their\n  own private working copy; the commands may update the working copy and\n  changes/conflicts are propagated accordingly, e.g., jj run -- cargo check --all-features or jj run -- cargo fix behaves as one might expect.\n• jj gerrit upload now supports the -o (--option) flag, which works like\n  git push -o (--push-option).\n• jj git fetch now rebases the descendants of revisions that were rewritten\n  based on their change IDs. Previously, when multiple bookmarked revisions\n  existed in a stack, those rewritten revisions and their descendants wouldn't\n  always be rebased. Note that immutable descendants will not be rebased.\n• Add a forks() revset function that yields all commits with more than 1 child.\n• colors config now supports crossed-out text styling with\n  { crossed-out = true }.\nFixed bugs\n• On Windows, querying a path's file identity no longer follows symbolic links,\n  matching the behavior on Unix. Previously a symlink shared the identity of its\n  target, so two symlinks pointing at the same target were treated as the same\n  file. This identity check is used when writing the working copy to detect\n  aliases of the reserved .git and .jj directories.\n  #8924\n• jj now creates a new working-copy revision during snapshotting if the\n  working copy was immutable. Previously, the new revision was created\n  immediately after the working copy became immutable.\n  #7751\n  #9338\n• jj git remote add now warns if the new remote exactly matches an existing\n  remote's fetch URL or effective push URL.\n  #413\n• Fixed corrupt loose Git objects on Intel Raptor Lake CPU and aarch64.\n  Previously, jj could report a successful commit even though git fsck would\n  later fail with incorrect data check, corrupt loose object, or missing blob, and later jj operations could fail with corrupt deflate stream.\nContributors\nThanks to the people who made this release happen!\n• adlerd (@adlerd)\n• ase (@adamse)\n• Atakan Yenel (@atakanyenel)\n• Austin Seipp (@thoughtpolice)\n• Benjamin Tan (@bnjmnt4n)\n• David Rieber (@drieber)\n• figsoda (@figsoda)\n• Gaëtan Lehmann (@glehmann)\n• hexbinoct (@hexbinoct)\n• Jakub Stasiak (@jstasiak)\n• Jonas Carpay (@jonascarpay)\n• Joseph Lou (@josephlou5)\n• Josh McKinney (@joshka)\n• Josh Steadmon (@steadmon)\n• Martin von Zweigbergk (@martinvonz)\n• Matt Stark (@matts1)\n• Philip Metzger (@PhilipMetzger)\n• shoce (@shoce)\n• Stephen Jennings (@jennings)\n• Thomas Axelsson (@thomas-2nd)\n• Vincent Ging Ho Yim (@cenviity)\n• Yuya Nishihara (@yuja)"
-ReleaseNotesUrl: https://github.com/jj-vcs/jj/releases/tag/v0.43.0
+ReleaseNotes: |-
+  About
+  jj is a Git-compatible version control system that is both simple and powerful. See
+  the installation instructions to get started.
+
+  Release highlights
+  - Support for fetching and pushing tags has now been stabilized. Tags can be
+    tracked or untracked just like bookmarks. Tracked tags are pushed by default.
+
+  Breaking changes
+  - jj git fetch now fetches tags the same way it fetches bookmarks. Tags are
+    fetched as <name>@<remote>, and these remote tags are automatically tracked
+    by local tags of the same name. Running jj git fetch in an existing
+    repository will re-fetch all tags to initialize the tracking state.
+    Git's tagOpt is no longer respected. To disable tag fetching, set
+    remotes.<name>.fetch-tags = '~*' in the jj configuration.
+  - jj git clone --fetch-tags=all|none|included is removed in favor of
+    --tag=PATTERN.
+  - jj git push --all now pushes all tags in addition to bookmarks.
+  - The WorkspaceRef.root() and RepoPath.absolute() template functions now
+    return Option<FsPath> and FsPath respectively, instead of String. The
+    path keyword in jj config list templates now returns Option<FsPath>.
+  - jj file search now prints every matched line prefixed by the file path,
+    instead of only the file paths of files containing a match. Use
+    --name-only for the previous behavior.
+    #9399
+  - Passing an argument more than once is no longer an error. The last occurrence
+    wins, so jj --no-pager --no-pager version and jj log -n 5 -n 10 now work,
+    and an argument baked into an alias or a wrapper can be given explicitly as
+    well. Arguments that can be specified multiple times, such as --config and
+    jj log -r, are unaffected and still collect all of their values.
+    #8101
+    #9859
+
+  Deprecations
+  None
+
+  New features
+  - New merge_point() revset function which (similar to fork_point) finds the
+    point where multiple branches merge.
+  - jj workspace list now shows workspace roots by default. The output can be
+    customized with templates.workspace_list or -T, and WorkspaceRef.root()
+    returns an optional FsPath value.
+    #9713,
+    #9826
+  - New try(expr, fallback...) template function to suppress runtime errors.
+  - jj run now processes revisions from oldest to newest by default. The start
+    order is guaranteed: each revision begins execution only after the previous
+    one has started, even with --jobs higher than 1.
+  - jj run gained a --passthrough flag that connects the subprocess's
+    stdout/stderr directly to the terminal instead of capturing output.
+  - jj run gained a --ignore-changes flag to avoid editing any revisions even
+    if the command modifies the working copy.
+  - jj run gained a --ignore-errors flag to continue running against the
+    remaining revisions even if the command exits with a nonzero exit code.
+  - jj file search now supports -n/--line-number to prefix each match with
+    its 1-based line number within the file.
+  - jj git push gained a --allow-conflicts flag to allow pushing commits
+    containing conflicts.
+  - New jj tag track/untrack commands to associate local tags with remotes.
+    Note that fetched tags are tracked by default.
+  - Added builtin_log() revset alias for the built-in default jj log revset.
+    revsets.log now defaults to builtin_log(), so custom log revsets can
+    reuse the built-in default instead of copying its full expression.
+  - Added config option diff.stat.max-bar-width for use with --stat to limit
+    the ++-- bar width. In the templating language, diff.stat() can optionally
+    take a second (positional or named) argument max_bar_width for an equivalent
+    effect.
+  - jj absorb now supports --interactive/-i/--tool to let you
+    interactively choose which hunks from the source to consider for absorption.
+    This is useful when you only want to absorb part of a commit without first
+    splitting it. Any hunks that are not selected or cannot be absorbed remain in
+    the source commit.
+
+  Fixed bugs
+  - Recursive alias definitions are detected more precisely. jj can now expand
+    aliases that are simply repeated. For example, with the alias jj = [], the
+    command jj jj jj will resolve to jj. Aliases can also fall back to the
+    default command. For example, with the alias i = ["--ignore-working-copy"],
+    jj i will resolve to jj --ignore-working-copy.
+  - Git temporary files are now cleaned up more reliably in the presence of
+    signals (e.g. Ctrl-C). This should reduce the rate of "Could not acquire
+    lock for index file" errors.
+    (#7530)
+  - Fixed Git HEAD mismatch after the working copy became immutable.
+    #9827
+  - jj now creates a new working-copy revision as soon as the one of the current
+    workspace becomes immutable, as well as during snapshotting. This brings the
+    behavior closer to jj 0.42 and earlier.
+  - Snapshotting no longer fails if the working copy contains a path whose name
+    isn't valid UTF-8. Such paths can't be tracked, so they are now skipped and
+    reported as a warning instead.
+    #9774
+  - Fixed failure when reading configuration in copied repo with an empty
+    repo-level configuration directory.
+  - jj diff and jj status no longer omit a rename or copy in a merge commit
+    when the renamed source is present in more than one parent. The identical copy
+    record reported for each parent was mistaken for a conflict and discarded.
+    #9752
+  - jj run no longer panics when its revset includes a conflicted commit. The
+    conflict is now preserved in the rewritten commit.
+    #9747
+  - Fixed a panic when passing overly-large length parameters to ID templater
+    functions (commit_id.short(), commit_id.shortest(), etc.).
+    #9833
+  - jj git import and export in colocated workspaces are now disabled by
+    default. These commands usually do nothing, but they had a race condition.
+
+  Contributors
+  Thanks to the people who made this release happen!
+  - Aaron Bies (@slerpyyy)
+  - Ada Alakbarova (@ada4a)
+  - Alexandre Hallaine (@alexandre-hallaine)
+  - Amaan Qureshi (@amaanq)
+  - Austin Seipp (@thoughtpolice)
+  - Caleb White (@calebdw)
+  - Chawye Hsu (@chawyehsu)
+  - David Rieber (@drieber)
+  - Gaëtan Lehmann (@glehmann)
+  - hexbinoct (@hexbinoct)
+  - ivelieu (@ivelieu)
+  - Joseph Lou (@josephlou5)
+  - Josh McKinney (@joshka)
+  - Josh Steadmon (@steadmon)
+  - Kevin Liao (@kevincliao)
+  - Luna Schwalbe (@lunagl)
+  - Martin von Zweigbergk (@martinvonz)
+  - Matt Van Horn (@mvanhorn)
+  - Nika Layzell (@mystor)
+  - Niko Savola (@nikosavola)
+  - Nitzan Raz (@BackSlasher)
+  - Noah Lev (@camelid)
+  - OlshaMB (@OlshaMB)
+  - Philip Metzger (@PhilipMetzger)
+  - Remo Senekowitsch (@senekor)
+  - Rob Pilling (@bobrippling)
+  - Stephen Jennings (@jennings)
+  - Techcable (@Techcable)
+  - TogarashiPepper (@TogarashiPepper)
+  - Vladimir Petrzhikovskii (@0xdeafbeef)
+  - Waleed Khan (@arxanas)
+  - Wang Yuantao (@0WD0)
+  - xtqqczze (@xtqqczze)
+  - Yash Bavadiya (@xevrion)
+  - Yuya Nishihara (@yuja)
+ReleaseNotesUrl: https://github.com/jj-vcs/jj/releases/tag/v0.44.0
 Documentations:
-- DocumentLabel: Homepage
-  DocumentUrl: https://jj-vcs.github.io/jj/
+- DocumentLabel: Docs
+  DocumentUrl: https://www.jj-vcs.dev/latest/
 ManifestType: defaultLocale
 ManifestVersion: 1.12.0

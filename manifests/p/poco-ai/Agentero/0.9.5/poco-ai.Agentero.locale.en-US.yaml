@@ -1,0 +1,51 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.9.5
+PackageLocale: en-US
+ShortDescription: Agent-friendly reference management.
+Description: 'Traditional reference managers are not agent-friendly: highlights and notes stay locked inside single files, making it hard for agents to reuse knowledge across papers; every conversation starts from scratch without a stable local knowledge map; PDFs are human-friendly but not the most comfortable reading material for agents. Agentero aims to build an agent-friendly, agent-native way to manage references, exploring how humans and agents collaborate on reference management. Connect your local agent via ACP (BYOA), select-text chat, import papers and Skills, stay compatible with the Zotero ecosystem, and get paper translation, bidirectional links with a knowledge graph, and deep PDF reading.'
+Tags:
+- academics
+- agent
+- article
+- literature
+- paper
+- pdf
+- reference
+- research
+- thesis
+- zotero
+ReleaseNotes: |-
+  This release focuses on more comfortable reading and a smarter library: PDF gains paper tones (sepia / green / dark) plus hand-tool panning via middle button or Space, with Chinese font rendering fixed; the library adds EasyScholar venue-rank and impact-factor tags and moves file-tree multi-select batch actions to the fixed sidebar header. It also fixes two major Windows Agent reliability issues — custom ACP agent startup failures and terminal-tool hangs — while unifying background work in the JobCenter and roughly halving worst-case title-search latency.
+  Features
+  - PDF paper tones: The bottom-bar toggle becomes a four-tone palette (white / sepia / green / dark); light tones blend multiplicatively so white paper lands on the target color, black text stays black, and figures keep their saturation, while layout-translate cover blocks follow the active tone. (01722f49b by @qychen2001)
+  - PDF hand-tool panning: Hold the middle button, or Space plus the left button, to pan the page 1:1; the hovered viewer claims Space, and the drag survives WebKit dropping pointer capture. (2078cac07, 1d015b18f, a10cb297b, a0ed08ed1, #456 by @Phil-Fan)
+  - EasyScholar rank and impact factors: After configuring an EasyScholar key in Settings (with a connectivity status dot), one click on the Library tags-column header batches venue rank, IF/IF5/JCI and SCI/EI/CCF indicators for every paper in the current scope; tags render as short chips with distinct IF colors, and CCF-A venue titles store as abbreviations. (a769cab1e, 891558a10, 30de679ca, 0ae59158f, 73ff2b7f5, efe0ef9bd, #464 by @Phil-Fan)
+  - File-tree multi-select batch actions: The multi-select toolbar moves from an in-tree floating bar to the fixed sidebar header so tree height and scroll stay stable; clear / move / delete act on the whole group, with keyboard activation added. (9b4457ecd, #462 by @qychen2001)
+  - Parse-result clear and reparse: Settings → Layout adds "Clear" and "Clear & Reparse" actions that delete derived layout/PAPER.md results vault-wide with a scope picker, cancelling related queued jobs first. (52821386a by @qychen2001)
+  Improvements
+  - Unified Job Center: Paper import, connector sync, library batch actions and model downloads are all scheduled through the JobCenter, where long-running tasks can be viewed and cancelled; the legacy parallel background-task machinery is gone. (953c9b3d8, 4c72d649c, 50d140041, 30ef0eef4, b5e4fb422 by @qychen2001)
+  - Faster title search: Semantic Scholar and arXiv title searches now race in parallel, with S2 preferred inside a 5-second budget; worst-case latency drops from ~40s to ~20s. (78eb301ad by @Phil-Fan)
+  - Merged import progress: Concurrent asset downloads report a single merged progress line instead of jumping between tasks. (db7729fa7 by @qychen2001)
+  - Dependency security updates: Clears 32 open Dependabot advisories (undici, fast-uri, postcss, brace-expansion, dompurify, and more). (26eb899e6 by @qychen2001)
+  Fixes
+  - Windows terminal-tool hangs: Fixes five Host defects that left Agent terminal tool calls Pending for minutes or wrongly Error-ed: a lock held across awaits, output() waiting for pipe EOF, kill blocked by the child lock, \\?\ paths passed to Git Bash, and a shared initialize budget that now gets a dedicated 30 seconds; late tool updates no longer leave cards dangling. (#474 by @Zhou1317fe5)
+  - Windows custom ACP agent startup: Restores \\?\-prefixed paths to a CMD-acceptable form and passes the cwd and full command through environment variables, fixing Incoming transport closed when paths contain spaces or special characters. (#461, #458 by @Zhou1317fe5)
+  - Automatic selection translate: Selection translation now honors the automatic-translate setting, and the selection toolbar stays visible while translating. (0d9fafc25, ccc35ec8e, #463 by @Phil-Fan)
+  - Chinese PDF fonts: Falls back to system fonts when embedded fonts are missing, so Chinese PDFs render correctly. (6aa18431f, #454 by @Phil-Fan)
+  - Accidental chrome text selection: Dragging across toolbars, sidebars and settings no longer selects UI text. (93f4ab40c, #453 by @Phil-Fan)
+  - Magic-wand IME Enter: The Enter that confirms an IME candidate in the magic-wand search box no longer submits the title search. (5894dbbca, #457 by @Phil-Fan)
+  - Symlinked paper PDFs: Paper PDFs placed via symlinks are recognized and open correctly in the file tree. (49a8ebecd by @Phil-Fan)
+  - Selection during panel drag: Dragging a panel divider no longer triggers text selection. (a69332468 by @Phil-Fan)
+  - Title-search cancellation: Closing the magic-wand search card cancels the in-flight background lookup instead of running to timeout. (73ea9497c by @Phil-Fan)
+  Resolved Issues
+  - pi ACP startup error: pi failing to start over ACP with initialize: Incoming transport closed — the same signature as #458 — was closed following the Windows custom ACP agent startup fix. (#471, #461 by @Phil-Fan)
+  Full Changelog: https://github.com/poco-ai/Agentero/compare/v0.9.4...v0.9.5
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.9.5
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: locale
+ManifestVersion: 1.12.0

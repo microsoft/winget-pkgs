@@ -1,0 +1,50 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jdx.mise
+PackageVersion: 2026.9.0
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/jdx/mise
+Author: jdx
+PackageName: mise-en-place
+PackageUrl: https://mise.en.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+ShortDescription: Your dev env, already prepped.
+Description: Your dev env, already prepped. One tool to manage languages, env vars, and tasks per project, reproducibly.
+Moniker: mise
+Tags:
+- cli
+- dev-tool
+- env
+- environment
+- task
+ReleaseNotes: |-
+  This release introduces lazy tool shims, which install a tool automatically the first time one of its commands is invoked, plus an opt-in Erlang precompiled OS override and a fix for nested mise calls during postinstall hooks.
+  Added
+  - tools: Declare a tool as lazy in [tools] with lazy = true and mise generates bootstrap shims into its normal user/system shim farms. The provider is installed only when one of its commands is first called, then executes immediately; subsequent calls run the real binary without another mise dispatch. Registry tools derive their command names from registry bins, while explicit or non-registry backends declare them with lazy_bins. A bare mise install skips lazy declarations; use mise install --include-lazy to provision them all. New global path settings (shims_dir/MISE_SHIMS_DIR, system_installs_dir/MISE_SYSTEM_INSTALLS_DIR, system_shims_dir/MISE_SYSTEM_SHIMS_DIR) and mise reshim --system support system-scoped and collocated layouts. (#12594 by @jdx)
+    [tools]
+    node = { version = "24", lazy = true }
+    "github:example/acme" = { version = "1.2.3", lazy = true, lazy_bins = ["acme", "acmectl"] }
+  - erlang: New erlang.precompiled_os setting (and MISE_ERLANG_PRECOMPILED_OS) opts into a specific Bob Ubuntu build target—including Ubuntu 26.04—on compatible glibc distributions. Automatic target detection is unchanged, and lockfiles now preserve the selected OS for reproducible builds. Note the portability constraints around shared-library SONAMEs documented with the setting. (#12637 by @jdx)
+
+  Fixed
+  - install: Postinstall hooks now activate the exact tool version being installed, so nested mise invocations (such as mise which or mise ls) resolve that version instead of an older discoverable one—or losing the tool entirely when it was declared through a custom config path with mise use --path. (#12635 by @jdx)
+
+  Registry
+  - Added engram (#12480 by @AndryOre)
+  - Added gentle-ai (aqua:Gentleman-Programming/gentle-ai) (#12444 by @AndryOre)
+
+  New Contributors
+  - @AndryOre made their first contribution in #12444
+
+  💚 Sponsor mise
+  mise is maintained by @jdx, an open source developer for entire.io, the title sponsor of the jdx.dev open source tools. Development is funded by sponsors.
+  If mise saves you or your team time, please consider sponsoring at jdx.dev. Individual and company sponsorships keep mise fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/mise/releases/tag/v2026.9.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

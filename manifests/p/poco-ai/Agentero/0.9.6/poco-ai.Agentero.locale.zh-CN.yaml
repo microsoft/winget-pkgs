@@ -1,0 +1,56 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.9.6
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  本次发布围绕 PDF 双栏翻译、Agent 对话体验与学术数据源展开：版面翻译可在工作区分屏对照阅读并双向滚动同步；Agent 将推理 / 计划 / 工具折叠为思维链，消息表格支持复制与导出，内置目录从 Gemini CLI 切换为 Antigravity；文献库新增引用数列，并接入 PubMed 与 bioRxiv / medRxiv。同时修复重启后 NOTES 面板缺失、版面翻译截断或不完整、以及长时间运行后更新装到旧版本等问题。
+  新功能
+  - PDF 双栏翻译：开启设置后可在工作区以分屏标签对照原文与版面翻译，双栏双向滚动同步；也可在独立功能窗口中打开翻译视图，设置项会持久化到 Host。（92b903ca、5550bbd5、80ebab45、e76cef5a、#466 by @Phil-Fan）
+  - Agent 思维链对话 UI: 将推理、计划与工具调用折叠为统一思维链，流式过程显示紧凑活动行与耗时；悬停展开、错误态徽章与回复思考动画一并整理，对话更易扫读。（357773af、6c853e34、644c04d4、#480 by @Phil-Fan）
+  - 消息表格操作：Agent 消息与推理内容中的表格以 PlainTable 渲染，支持复制、下载与全屏查看。（b6e268f6、94677463 by @Phil-Fan）
+  - Antigravity CLI: 内置目录以 Antigravity（agy-acp）取代 Gemini CLI，并迁移旧注册项；安装 / 更新 / 卸载走 npm 适配器路径，文档同步更新。（d7d7f95d、67e49716、#468 by @Phil-Fan）
+  - 推理强度选择：在模型选择器标题行直接选择 ACP thought_level / reasoning effort，按 Agent 记忆显式选择，未指定时回退到最高可用档。（e100f3b0、bd8bd6ca、#470 by @qychen2001）
+  - 文献库引用数：论文库表格新增引用次数列，便于按影响力扫读与排序。（2056aa02 by @Phil-Fan）
+  - PubMed / bioRxiv 数据源：学术检索与入库新增 PubMed 与 bioRxiv / medRxiv，并支持多源 ApiPaper 合并与按 scope 的标题检索融合。（d92cad0c、9c010212 by @Phil-Fan）
+  改进
+  - 侧栏自动发现 Agent: 扫描目录时自动注册 PATH 上已安装但尚未入库的 Agent，并在打开侧栏时探测，无需先进入设置才能看到可切换列表。（e598aa48、a48ffb0d、#482 by @Phil-Fan）
+  - 历史与切换体验：历史列表去掉空会话并在无记录时给出空状态；Agent 选项按字母排序；切换 Agent 不再插入系统提示，回复气泡也不再重复展示身份标签。（cb0de6e9、0c7612c6、19904af3、aa17a9e4 by @Phil-Fan）
+  - 不支持的 Agent 说明：文档与 Vault 新手笔记明确：Codex 桌面版与 WorkBuddy 目前不能作为应用内 ACP Agent 直接使用（Codex CLI + codex-acp 仍可用）。（700fba77、09aa5cf5、#473 by @Phil-Fan）
+  修复
+  - 登录 Shell / 中转站 ACP: 本地 ACP 子进程合并登录 Shell 环境变量，修复依赖用户 shell 配置（如中转站代理）时连接失败；Agent 工具安装生命周期也会带上设置中的代理。（21b89633、6e76b7ed、#478 by @Phil-Fan）
+  - 重启后 NOTES 面板缺失：布局恢复后若标签状态与 dock 脱节，或占位标签首次点击只激活未补开笔记，会按阅读布局重新打开 NOTES 伴随面板。（#476 by @bet4it）
+  - 版面翻译完整与可重试：保留完整源文本、超大块安全切分并按单元重试；部分成功保留、显式 partial 状态，并拒绝不完整的 OpenAI finish_reason 以便缩小块后重试，避免覆盖层裁切与过期任务覆盖新结果。（#477 by @jiah0231）
+  - 更新装到旧版：安装更新前重新检查远程签名清单，长时间运行的会话也会拿到最新版本，离线时回退到缓存清单。（7b843c14、#481 by @qychen2001）
+  - 历史会话范围与标题：Agent 历史只显示当前 Vault / 目录下的会话；无标题时回退到首条用户提示，不再露出会话 id 前缀。（2664acf5、#483、#484 by @Phil-Fan）
+  - 提示词显示噪音：用户提示展示与选区回填会剥离 harness reminder 与上下文块，只保留可读正文。（e39fb00f by @Phil-Fan）
+  - 双栏翻译同步：加固双栏初始化、PDF 字节拷贝与滚动同步，翻译标签激活时刷新 sidecar，并复用源栏版面结果。（b008df5b、aa42fda9、b4bf7440、2a785db0 by @Phil-Fan）
+  - pi-acp 与宿主同步：更新 pi 宿主时保持 pi-acp 适配器版本一致，避免 ACP 调用失配。（4909b0f7、#471 by @Phil-Fan）
+  - 推理列表缩进：修复思维链推理内容中列表缩进丢失的问题。（e856ec07 by @Phil-Fan）
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.9.6
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

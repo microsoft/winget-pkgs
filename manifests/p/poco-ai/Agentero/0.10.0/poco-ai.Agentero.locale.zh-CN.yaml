@@ -1,0 +1,56 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.10.0
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  本次发布引入官方安装包可用的内置模型服务：翻译走 Hunyuan-MT、Embedding 与 PDF 正文 OCR 可零配置使用，密钥仅编译进 Host、不经 IPC、不落盘。界面侧全面对齐 Apple 风格材质与动效，论文库滚动时压缩顶栏，Agent 输入框支持内联 @ / $skill / /command 芯片与矮窗口紧凑模式。PDF 划词把「加入对话」挪到选区角标、批注轨可悬停直接编辑，并修复 Windows 启动/诊断黑窗闪烁、Antigravity 登录引导、侧栏空白与多图合并等问题。
+  新功能
+  - 内置模型服务：官方安装包可编译进 agentero 内置提供方；翻译走专用 Hunyuan-MT 模板（自动分句、不套 [[n]] 批协议），Embedding 与 PDF 正文 OCR 同样零配置。密钥只存在于 Host（option_env!），不经 IPC、不写入 settings.json；Settings / 引导在可用性查询就绪后才默认选中，无密钥构建则隐藏或禁用该项。（d50228f5、50dfa67b、3f089832、a50ef860、5080349b、a68340f2、849befec、b9cfb969 by @qychen2001）
+  - Agent 内联上下文芯片：@ 提及、$skill 与 /command 以行内芯片插入输入框；块级上下文芯片收进输入区旁，上方保留短标签条，悬停展开说明。（0696564f、b2b98c25、93e97f43、4e971317、5e5935f3 by @Phil-Fan）
+  - PDF 划词角标与批注轨：「加入对话」移出悬浮工具栏，改在选区右下角以文字胶囊显示（仅 Agent 面板打开或独立窗口时出现）；Ask 按钮改用已配置的 PDF Ask Agent 图标。右侧批注芯片悬停即可展开编辑，空内容离开后收回，指针按下时在选区被清除前创建高亮。（8dc60ebe、f01faeec、5c61a43a、4d2b336e、1c88d754 by @Phil-Fan）
+  - 矮窗口紧凑输入框：主窗口高度低于 600px 时 Agent 轨道强制进入紧凑模式，输入区随内容收缩，待发送队列浮在上方且不遮挡单行输入。（00c7baae、357f4212、43d8adea、409a22bd、b530c039 by @Phil-Fan）
+  - 消息代码块交互：Agent 回复中的代码围栏改用与表格一致的 PlainCodeBlock（悬停复制/下载、无外层卡片），并显示语言标签；Mermaid 仍走默认图示路径。（ad8c069b、656143f9 by @Phil-Fan）
+  - 论文标题内联公式：论文标题中的 TeX 数学片段以内联公式渲染，不再整段当纯文本。（a0a23724 by @Phil-Fan）
+  - 论文库滚动压缩顶栏：论文库向下滚动时粘性顶栏压缩，搜索与操作区淡出；停止滚动约 450ms 后淡入恢复，隐藏瞬间完成以避免拖影。（c6cf6eaf、bc023c43、e64dd7c8、728ef2c2 by @Phil-Fan）
+  改进
+  - 壳层与设置的材质动效：主壳与 System Settings 对齐 Apple Design——侧栏材质与滑动高亮、分组 inset 卡片、字重与字号层级、按压缩反馈，并尊重降低透明度 / 减少动态效果；默认色板改用系统灰。（f2681bad、60b0db18、b8f0c16b、cc294cdb、f9188899、c4a919ae by @Phil-Fan）
+  - PDF 浮动层与侧栏精简：划词菜单与翻译卡片材质/字号对齐壳层；整页翻译页签移到左缘并缩小；选区翻译卡片默认开在左侧；Paper Info 顶栏扁平化并做高度折叠动画。（f01faeec、461fc2b5、36b9f73b、2e75dca4、01008f60 by @Phil-Fan）
+  - 启动时软探测目录 Agent: 应用启动时对目录内 Agent 做软探测，减少首次打开聊天才发现不可用的情况。（d23c73fe by @Phil-Fan）
+  修复
+  - Windows 启动/诊断黑窗闪烁：发布版 GUI 进程在启动采集设备型号与 Settings → Doctor 探测时未带 CREATE_NO_WINDOW，会弹出可见控制台；现对 reg query 与诊断子进程统一隐藏控制台，功能与采集结果不变。（#494 by @Zhou1317fe5）
+  - Antigravity 登录与会话恢复：将 auth-required 映射为可操作的登录文案，失败 Toast 提供「登录」并打开带 --login 的系统终端；登录命令按合并后的 Agent PATH 解析。提示失败若含「File not found」则在同一 ACP 连接上用新会话重试一次。同时加固异构机器上的 invoke 拒绝标记与前缀错误解析。（97cff57d、377f891e、#492 by @JiaheChen2002）
+  - 多栏图与图注合并：图注合并改为锚定在图注附近的连通 panel 组，避免通栏图注吞掉整段竖直带、窄不可读图注抢走已有标题下的 panel；并恢复被模型误标为正文的图注候选。（e459a16d、#223 by @qychen2001）
+  - 入库布局抢跑：魔棒入库在本地 PDF 尚未落盘时不再入队版面分析；分析器在文件仍缺失时软跳过，避免任务面板出现「No local PDF」。（20f0826c by @Phil-Fan）
+  - 侧栏文件树空白：去掉逐行 translateY 合成层，并在视口尺寸变化时重同步虚拟列表滚动偏移，避免 WKWebView 下打开论文或刷新树后左侧栏空白直到滚动。（2102df10 by @Phil-Fan）
+  - 划词工具栏随滚动贴合：视口滚动与缩放时重算悬浮菜单与「加入对话」胶囊的屏幕锚点；选区离开视口时菜单贴边并降低透明度。拖选期间抑制引用预览，选区结束后仍可悬停 citation / crossref。（b03d1728、ad45b412、732802be by @Phil-Fan）
+  - macOS 主窗口最小尺寸：配置合并后恢复主窗口最小宽高，避免被错误压到过小。（e13f84d3 by @Phil-Fan）
+  - Cmd+A 选中壳层文案：快捷键全选不再把侧栏与壳层标签一并选中。（32a1eb50 by @Phil-Fan）
+  - 翻译错误码直出：仅将已知 Host 标记映射给用户，避免把 io / json / sqlite 等内部 code 原文抛进 Toast。（533a3801 by @qychen2001）
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.10.0
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
