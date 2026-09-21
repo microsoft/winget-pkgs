@@ -1,0 +1,145 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: fstubner.netscli
+PackageVersion: 0.3.2
+PackageLocale: en-US
+Publisher: Felix Stubner
+PublisherUrl: https://github.com/fstubner
+PublisherSupportUrl: https://github.com/fstubner/netscli/issues
+Author: Felix Stubner
+PackageName: netscli
+PackageUrl: https://netscli.com/
+License: MIT
+LicenseUrl: https://github.com/fstubner/netscli/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Felix Stubner
+ShortDescription: Network scanner with CLI, TUI, desktop app, and MCP server. Written in Rust.
+Description: |-
+  netscli is an open-source network scanner written in Rust. It discovers hosts
+  on a subnet, scans TCP ports, resolves DNS (including mDNS/Bonjour), reads
+  the ARP table with vendor lookup, and optionally captures packets via Npcap.
+  The same functionality is available from a command line, a terminal UI with
+  autocomplete, a desktop app, or a Model Context Protocol (MCP) server that
+  AI agents like Claude Code and Cursor can call directly.
+Moniker: netscli
+Tags:
+- arp
+- cli
+- dns
+- mcp
+- mdns
+- network
+- port-scan
+- rust
+- scanner
+- tui
+ReleaseNotes: |-
+  Repairs the Linux packaging. The AUR desktop package installed a file that could not start, and the AppImage aborted before opening a window on any host with a recent Mesa. A desktop window that opens blank now recovers by itself, netscli with no arguments no longer hangs where there is no terminal, and discover names devices from mDNS when reverse DNS comes back empty.
+  Added
+  - Discover names hosts from mDNS when reverse DNS cannot. Consumer routers
+    do not serve PTR records for their own DHCP clients, and appliances ignore
+    LLMNR and NetBIOS, so reverse lookup returned nothing for exactly the devices
+    someone opened the app to identify. Those devices announce their names over
+    mDNS constantly, and netscli has shipped an mDNS browser all along as a
+    separate operation that discover never consulted. It does now, filling only
+    the blanks, so nothing that resolves today changes. On one ordinary /24 that
+    named 3 more of 26 hosts, taking 21 named to 24. Results carry a
+    hostname_source of reverse or mdns, since a name from a device's own
+    announcement is a different kind of claim from one in DNS.
+  - The desktop app says the MCP server exists. Someone who only ever opens
+    the app had no way to learn that netscli ships an MCP server, let alone
+    connect an agent to one. There is now a panel that looks for a netscli binary
+    and gives you the client configuration to paste, including what to do when it
+    cannot find one — the desktop installers do not carry the CLI.
+  Fixed
+  - netscli with no arguments no longer hangs when there is no terminal.
+    With no subcommand it opens the TUI, which needs a terminal to draw on and
+    read from. Without one it did not fail, it blocked forever: raw mode was
+    entered and the runtime then waited on input that could never arrive. So
+    netscli | head, or netscli from a script or a CI job, ran until
+    something killed it. It now prints what --help prints and exits 0. The TUI
+    is unchanged wherever there is a terminal.
+    This has been the behaviour since 0.1.0, and it is what has kept the CLI's
+    winget package on 0.2.6. Winget's validation runs the executable and waits
+    for it, so the 0.3.1 submission has sat since 12 September carrying
+    Validation-Executable-Error while the desktop app's went through the same
+    day.
+  - The docs site lost its navigation and its theme switch between 800px and
+    1152px wide, and the search button sat stranded beside the wordmark. The
+    header links — Features, Install, FAQ, Docs, Changelog, GitHub — and the
+    light/dark control were both hidden across that range, on the understanding
+    that the mobile menu carried them from there down. The button that opens
+    that menu only appears below 800px, so for 352px of width there was nothing
+    to press and no way to reach any of it. The docs sidebar is not a
+    substitute: it lists the pages of the docs and carries five of those six
+    links nowhere.
+    The search button had a second fault behind it. The width at which the links
+    hide moved from 900px to 1152px and two rules that depended on that number
+    stayed put, so the layout seam ended up on a hidden element, which takes no
+    part in the layout. Search fell back to the left with up to 861px of empty
+    bar beside it.
+    A new check measures where the header's controls sit at seventeen widths.
+    Neither fault was visible to the existing accessibility, contrast or
+    performance gates, because both are about position rather than markup,
+    colour or speed.
+  - netscli-gui-bin on the AUR installed a desktop app that could not
+    start. The PKGBUILD did not set options=('!strip'), and strip is in
+    makepkg's default options. An AppImage is the AppImage runtime — an
+    ordinary static ELF — with a squashfs image appended after everything the
+    ELF headers describe, so stripping it rewrote the file from its section
+    table and threw the appended image away. What reached /usr/bin was the
+    944,632-byte runtime out of a 79 MB download, and running it said only
+    "This doesn't look like a squashfs image". The package built, installed and
+    verified its checksum at every step, because the truncation happened after
+    the checksum was checked. Reported in #377.
+  - The Linux desktop AppImage no longer aborts on hosts with a newer Mesa.
+    It failed with Could not create default EGL display: EGL_BAD_PARAMETER
+    before any window appeared. The AppImage carried its own copies of nine
+    display-stack libraries — the wayland client stack, libxkbcommon, and
+    part of the xcb/X11 stack — and put them ahead of the host's, so the host's
+    Mesa was made to talk to the wayland client library from the machine the
+    release was built on. Those libraries are now removed from the image after
+    it is built. Reported in #378 against v0.2.6 on Mesa 26.2.2; v0.3.1 bundled
+    the same nine.
+  - A desktop window that opens black or blank now recovers on the next
+    launch. WebKitGTK's hardware compositing can fail against a driver that
+    only partly supports it, and it fails silently: the window opens, nothing
+    paints, and there is nothing on stderr to go on. Seen on virtual machines
+    using vmwgfx. The app now marks each launch and clears the mark once the
+    UI has actually drawn a frame, so a launch that never drew one is noticed by
+    the next, which turns hardware compositing off and says why.
+    This could not be a setting in the app. Every GUI preference lives in the
+    webview's localStorage, and the webview is the part that is not rendering,
+    so someone looking at a blank window cannot reach any of it. Alongside the
+    automatic recovery there are now --disable-gpu-compositing and
+    --gpu-compositing flags, which are remembered across launches. Linux only:
+    the other two platforms use a web engine with neither the fault nor the
+    setting. Also reported in #378.
+  - Text in the desktop app's result tables can be selected again. Both the
+    table and its wrapper set user-select: none, so a port, MAC address,
+    vendor string or banner could not be dragged over with the mouse — and those
+    values are on screen precisely so they can go somewhere else. The only route
+    out was the detail pane. Selecting rows is a click, not a drag, so nothing
+    was gained by it. Reported in #417.
+  - The website's release notes lost their paragraph breaks, and the fade over
+    a long entry read navy rather than matching the page. Both on the changelog
+    page.
+  Changed
+  - The website and docs got another pass. The install section's two
+    controls line up and its alternatives stopped shouting; the hero badge shows
+    the released version; the interfaces are shown rather than described; the
+    README says only what a README can and its TUI screenshots work again; the
+    comparison with nmap and the other scanners is fairer in both directions.
+    Docs pages carry structured data, and the docs shell picked up a Lighthouse
+    gate and two fixes it found.
+  Security
+  - Three open advisories cleared. rustls 0.23.40 → 0.23.45
+    (RUSTSEC-2026-0285, medium), which was in 0.3.1's lockfile and so is in the
+    binaries that release produced. The other two are the website's build
+    dependencies rather than anything in a release artifact: adm-zip ≤0.6.0
+    (GHSA-vwc7-r8mq-g2x9 and GHSA-7q85-xj36-vmfc, high) and devalue <5.9.1
+    (GHSA-9rgm-9g3h-6x36, moderate).
+  Full changelog: v0.3.1...v0.3.2
+ReleaseNotesUrl: https://github.com/fstubner/netscli/releases/tag/v0.3.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
