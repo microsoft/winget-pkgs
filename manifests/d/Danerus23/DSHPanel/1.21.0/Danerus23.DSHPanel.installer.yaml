@@ -1,0 +1,63 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+#
+# DSH Panel — installer manifest.
+#
+# The installer is Inno Setup (installer\dsh-panel.iss): PrivilegesRequired=lowest,
+# DefaultDirName={localappdata}\Programs\DSH Panel, so it installs into the user profile
+# and needs no administrator rights for the panel itself. Installing the required
+# components (.NET Desktop Runtime 8, Node.js) from the installer's task page does need
+# administrator rights: Windows asks for them, and the bundled runtime is installed for the
+# whole machine.
+#
+# Silent switches. Inno Setup honours /SILENT (wizard hidden, progress window shown) and
+# /VERYSILENT (nothing shown). WinGet installs in "silent with progress" mode by default,
+# which is exactly /SILENT here; /VERYSILENT is used only for --silent. /SUPPRESSMSGBOXES
+# answers every suppressible Inno prompt with its default (without it a "Reboot now?" box
+# would appear after a silent install) and /NORESTART keeps the machine from rebooting.
+#
+# /SP- is kept as belt-and-braces. The startup prompt is already switched off inside the
+# installer, by the DisableStartupPrompt=yes directive in installer\dsh-panel.iss — that is
+# the setting that matters, and a silent install of this package does not depend on /SP-.
+# /SP- is only here so that a build made from an installer script without that directive
+# still installs unattended. Note that Inno's own documentation is not consistent on this
+# point: the /SP- page says the switch has no effect when DisableStartupPrompt is set to
+# yes, while the DisableStartupPrompt page gives "yes" as the default. We therefore do not
+# rely on either reading: the directive is set explicitly, and /SP- does no harm.
+#
+# There is deliberately NO Dependencies section. The installer carries the .NET Desktop
+# Runtime 8 inside itself and installs it only when the machine does not have it yet.
+# Declaring Microsoft.DotNet.DesktopRuntime.8 would make WinGet install a system-wide
+# runtime with its own UAC prompt before this user-scoped package: a declined elevation
+# would fail the whole install, and it contradicts the bundled copy that is already a
+# silent dependency of this setup.
+#
+# Version and hash are rewritten by tools\winget-manifest.ps1.
+
+PackageIdentifier: Danerus23.DSHPanel
+PackageVersion: 1.21.0
+InstallerType: inno
+Scope: user
+UpgradeBehavior: install
+# The panel updates itself from GitHub releases and therefore refreshes itself far more
+# often than this manifest. RequireExplicitUpgrade keeps `winget upgrade --all` from
+# fighting that self-updater: the package is then skipped by --all, while an explicit
+# `winget upgrade Danerus23.DSHPanel` still works.
+RequireExplicitUpgrade: true
+InstallModes:
+- interactive
+- silent
+- silentWithProgress
+InstallerSwitches:
+  Silent: /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+  SilentWithProgress: /SILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+ProductCode: '{7F3C6A21-9D4E-4B8A-9C1F-2E5D8B7A4C11}_is1'
+AppsAndFeaturesEntries:
+- DisplayName: DSH Panel
+  Publisher: Danerus23
+  ProductCode: '{7F3C6A21-9D4E-4B8A-9C1F-2E5D8B7A4C11}_is1'
+Installers:
+- Architecture: x64
+  InstallerUrl: https://github.com/Danerus23/dsh-panel/releases/download/v1.21.0/dsh-panel-setup.exe
+  InstallerSha256: 33CA9D18427A67196C46DB55B959081C2EABE3D86874A029807A70AE5E6C0388
+ManifestType: installer
+ManifestVersion: 1.12.0
