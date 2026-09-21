@@ -1,0 +1,64 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jdx.usage
+PackageVersion: 6.11.0
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://jdx.dev/
+PublisherSupportUrl: https://github.com/jdx/usage/issues
+Author: Jeff Dickey
+PackageName: usage
+PackageUrl: https://usage.jdx.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+ShortDescription: A specification for CLIs
+Description: |-
+  Usage is a spec and CLI for defining CLI tools. Arguments, flags, environment variables, and config files can all be defined in a Usage spec. It can be thought of like OpenAPI (swagger) for CLIs. Here are some potential reasons for defining your CLI with a Usage spec:
+
+  - Generate autocompletion scripts
+  - Generate markdown documentation
+  - Generate man pages
+  - Generate type-safe SDK client libraries for TypeScript, Python, and Rust
+  - Use an advanced arg parser in any language
+  - Scaffold one spec into different CLI frameworks-even different languages
+  - [coming soon] Host your CLI documentation on usage.sh
+Moniker: usage
+Tags:
+- cli
+- spec
+ReleaseNotes: |-
+  Help output now wraps to the real terminal width instead of a fixed 80 columns, a spec can put ASCII art on its root help page, and default_subcommand_on_empty routes a bare invocation to the default subcommand.
+  Added
+  - (parse) default_subcommand_on_empty selects the default subcommand on an empty invocation (#1458, @zeitlinger). Until now default_subcommand only fired on an unmatched word, so ex with no arguments stayed on the root. With this opt-in (Rust: #[usage(default_subcommand = "run", default_subcommand_on_empty)]), a bare ex or one carrying only parent/global flags such as ex --verbose parses as ex run, with child env values and defaults bound afterwards and the child validated exactly as if it had been named. Explicit commands, positional values, a syntactic --, --help, --version, and parse errors keep their normal precedence; root requirements still apply unless subcommand_negates_reqs is set. It requires default_subcommand (usage lint reports invalid-default-subcommand-on-empty otherwise) and is implemented in the Rust library, usage-argv, generated Go parsers, and the Go runtime.
+    default_subcommand "run"
+    default_subcommand_on_empty #true
+    cmd "run" { arg "[path]" }
+  - (spec) logo puts art on the root help page (#1455, @jdx). The optional style property takes the same +-combined vocabulary as help_template (for example "cyan+bold") and is validated when the spec is parsed, or at compile time for #[usage(logo = include_str!("logo.txt"), logo_style = "cyan+bold")]. Placement depends on terminal width: beside the page when at least 50 columns remain after the art and a two-column gutter, above it as a banner when they do not, and omitted entirely when the terminal is narrower than the art. The logo appears only on the root's -h/--help, never on subcommand pages or in generated Markdown, man pages, or SDKs, and plain (non-TTY) output strips its escapes. usage --help itself now shows the project's logo. The Rust library, usage-argv, and Go renderers share one placement rule.
+    logo #"""
+      /\
+     /  \
+    /____\
+    """# style="cyan+bold"
+
+  Fixed
+  - (help) Help is laid out at the terminal's actual width (#1454, @jdx). Width came only from COLUMNS, which almost no process has set, so nearly every CLI built on usage wrapped at 80 columns regardless of the window. The renderers now probe the terminal (TIOCGWINSZ on unix, the console buffer on Windows) when COLUMNS is unset; output to a pipe or file still uses 80, and a declared term_width/max_term_width still wins. The probe is exposed as usage_argv::tty::columns(). The Go renderer still uses a fixed 80 columns.
+  - (help) Cli::render_help now colours its output by the same rule as parse(): ANSI on a terminal, plain elsewhere, NO_COLOR respected (#1454). CLIs that handled usage::Error::Help themselves were getting a monochrome page. Callers that keep the text rather than printing it can use the new Cli::render_help_styled(cmd, long, Style::PLAIN) to guarantee escape-free output; see Breaking Changes.
+  - (help) Examples are separated by a blank line on both -h and --help, in all three renderers, instead of running together as a single block (#1454).
+  - (cli) The published usage-cli crate now includes src/cli/logo.txt, which the initial 6.11.0 publish was missing and failed on (#1459, @jdx).
+
+  Breaking Changes
+  - Cli::render_help (the derive-generated method) may now return ANSI escape sequences when stdout is a terminal. Code that writes its result to a file, compares it in a snapshot, or embeds it in a document should switch to Cli::render_help_styled(cmd, long, Style::PLAIN); setting NO_COLOR also forces plain output with no code change. usage_argv::help::render is unchanged and still plain.
+  - Help pages rendered to a terminal now wrap at the detected width rather than 80 columns. Redirected output and specs that declare term_width are unaffected.
+
+  💚 Sponsor usage
+  usage is built and maintained by @jdx, an open source developer at entire.io, the title sponsor of his open source work.
+  If usage powers CLI specs, docs, or completions for a tool you maintain or use, please consider becoming an individual or company sponsor. Your support funds ongoing development and helps keep usage fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/usage/releases/tag/v6.11.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://usage.jdx.dev/cli/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
