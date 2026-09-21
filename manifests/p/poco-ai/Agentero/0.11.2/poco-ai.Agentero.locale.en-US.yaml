@@ -1,0 +1,68 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.11.2
+PackageLocale: en-US
+ShortDescription: Agent-friendly reference management.
+Description: 'Traditional reference managers are not agent-friendly: highlights and notes stay locked inside single files, making it hard for agents to reuse knowledge across papers; every conversation starts from scratch without a stable local knowledge map; PDFs are human-friendly but not the most comfortable reading material for agents. Agentero aims to build an agent-friendly, agent-native way to manage references, exploring how humans and agents collaborate on reference management. Connect your local agent via ACP (BYOA), select-text chat, import papers and Skills, stay compatible with the Zotero ecosystem, and get paper translation, bidirectional links with a knowledge graph, and deep PDF reading.'
+Tags:
+- academics
+- agent
+- article
+- literature
+- paper
+- pdf
+- reference
+- research
+- thesis
+- zotero
+ReleaseNotes: |-
+  This release focuses on reading and writing workflows: add inline comments to PDFs, Markdown notes, and AI conversations via text selection; keep the Library tab pinned by default; export PDFs with embedded highlights and annotations; use image groups and column layouts in the editor; and expand the Agent ecosystem with MiniMax Code, bundled Claude/Codex adapters, and a new Dsh profile. It also fixes math rendering, translation, LaTeX compilation, sidebar scrolling, and Agent installation stability.
+  Features
+  - Selection annotations: Select text in PDFs, Markdown notes, or AI conversations and click "Add to chat" to add, edit, delete, and locate inline comments. (#580 by @Miracle-0)
+  - Pinned Library tab: The Library tab is now pinned by default and won't close accidentally; a pin icon is shown and can be toggled via right-click; pinned state is persisted with the layout. (a2ae0f9 by @Phil-Fan)
+  - Annotated PDF export: Export the current PDF with all highlights and comments embedded; available from the PDF tab context menu and command palette. (d39c30d, 4e2841c, 0f16a30 by @Phil-Fan)
+  - Image groups and column layouts: Adjacent images in Markdown can fold into Feishu-style image groups with drag-to-reorder; new /columns slash command and drag-to-column layouts. (8970549, 4913b7a, 0992e7e, 4f14c14 by @Phil-Fan)
+  - MiniMax Code ACP: Added MiniMax Code ACP support to the Agent catalog. (0dbd0f5 by @Phil-Fan)
+  - Bundled Claude/Codex adapters: Falls back to build-in JS-only adapters when Claude/Codex ACP is not installed in PATH, reducing first-install failures. (1b12fa1 by @Phil-Fan)
+  - Custom translation prompt: Settings → Translate now lets you override the default academic translator prompt with your own template, supporting {{targetLang}} / {{sourceLang}} variables. (5509c8d by @Phil-Fan)
+  - Multi-file LaTeX project compile: Compile button, ⌘S save, and split-pane compile now auto-resolve the project root (magic comment / reverse scan) instead of building the triggered child file. (99b8874, 2ef710b by @Phil-Fan)
+  Improvements
+  - MCP tunnel lifecycle: Fixed tunnel-client.exe process leaks on Windows when stopping, rebuilding, or exiting; sweeps orphaned processes at startup. (#588 by @Zhou1317fe5)
+  - KaTeX render caching: Caches rendered KaTeX HTML to significantly reduce CPU usage for Markdown notes with many formulas. (baf42f2 by @Phil-Fan)
+  - Sidebar scroll stability: Fixed the file tree jumping back to top when toggling the left rail or revealing the selected item. (7ea0069 by @Phil-Fan)
+  - Agent CLI status probe: Moved CLI install status probing off the main thread to prevent ~1.5s UI freezes when opening About. (5f0817f by @chenjiahe)
+  - Zotero import precision: Importing a single Zotero folder now scopes the collection tree to the selected subtree only. (54e5fad by @chenjiahe)
+  - Internal refactoring: Unified duplicated logic across selection, translate, ask, dnd, wiki, and fs modules; removed dead code and unused dependencies. (multiple commits by @QiyuanChen)
+  Fixes
+  - Agent message math truncation: Fixed formulas like x_{<n} being truncated by remend after streaming settled. (d382e60 by @Phil-Fan)
+  - PDF dual-pane translation: Fixed bytes-backed PDF dual-pane translation failing due to tab id suffix mismatches. (5c35d03 by @Phil-Fan)
+  - Vault busy flag deadlock: Fixed the busy flag getting stuck when a restored vault path was invalidated mid-load. (6f256c2 by @chenjiahe)
+  - Agent npm cache EPERM: Fixed managed installs failing when npm cache was written by root/sudo on Windows/macOS; now auto-isolates to an Agentero-owned cache when the system cache is unwritable. (1c03213, 7c76448 by @chenjiahe)
+  - Windows adapter staging: Fixed bundled adapter staging failing on Windows Release builds because execFileSync cannot directly execute .cmd batch files; now invokes npm through a shell on Windows. (a5f0034 by @Phil-Fan)
+  - Dsh ACP profile: Migrated to the new umbrella dsh --profile acp to resolve version mismatch with the old standalone package. (f09ea73 by @Phil-Fan)
+  - Jianguoyun icon: Settings WebDAV sync provider now shows the correct Jianguoyun icon. (212e297 by @Phil-Fan)
+  - Paper tab rehydration: Fixed restored paper-folder placeholder tabs being misclassified as plain directories and flipped to Library before the vault tree loaded. (93f0494 by @Phil-Fan)
+  - PAPER.md detection: Paper folders without NOTES.md are now detectable via PAPER.md. (6e215f8 by @Phil-Fan)
+  Resolved Issues
+  - Selection annotations: Add inline comments to PDF, Markdown, and AI chat selections. (#579)
+  - PDF annotation export: Export PDFs with highlights and comments embedded. (#562)
+  - Markdown formula rendering performance: Cache KaTeX renders to speed up reflows. (#583)
+  - KaTeX formula parse error: Fix math formulas containing < being truncated in messages. (#584)
+  - Sidebar file tree jumping: Prevent the tree from jumping to top when toggling the rail or revealing selections. (#576)
+  - LaTeX multi-file compile: Auto-resolve and build the project root. (#575)
+  - Dual-pane translation failure: Fix translation pane state key errors for bytes-backed PDFs. (#574)
+  - DSH ACP error: Migrate to the new dsh --profile acp. (#569)
+  - Built-in Claude/Codex ACP: Provide bundled adapter fallback. (#590)
+  - Custom translation prompt: Allow users to override the default translation prompt. (#582)
+  - ACP install failures: Fix npm cache permission issues blocking installs. (#542)
+  - Windows stuck entering vault: Fix Vault busy flag stuck after restored path invalidated. (#560)
+  - Note image features: Support image groups and column layouts. (#566)
+  Full changelog: v0.11.1...v0.11.2
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.11.2
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: locale
+ManifestVersion: 1.12.0
