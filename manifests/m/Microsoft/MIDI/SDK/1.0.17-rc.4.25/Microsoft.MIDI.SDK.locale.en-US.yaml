@@ -1,0 +1,91 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Microsoft.MIDI.SDK
+PackageVersion: 1.0.17-rc.4.25
+PackageLocale: en-US
+Publisher: Microsoft Corporation
+PublisherUrl: https://github.com/microsoft
+PublisherSupportUrl: https://github.com/microsoft/MIDI/issues
+PrivacyUrl: https://privacy.microsoft.com/privacystatement
+PackageName: Windows MIDI Services Runtime and Tools
+PackageUrl: https://github.com/microsoft/MIDI
+License: MIT
+LicenseUrl: https://github.com/microsoft/MIDI/blob/HEAD/LICENSE
+Copyright: Copyright (c) Microsoft Corporation. All rights reserved.
+CopyrightUrl: https://www.microsoft.com/legal/intellectualproperty/trademarks
+ShortDescription: Windows MIDI Services
+Description: This project is the next-generation MIDI API for Windows, including MIDI 1.0 and MIDI 2.0 (MIDI CI, and MIDI 2.0 UMP). It includes enhancements, a new USB class driver, new transports, and essential tools. The project adds many enhancements and bug fixes to our MIDI 1.0 support, and importantly adds support for the latest revisions to MIDI 2.0 as approved by The MIDI Association.
+Tags:
+- audio
+- midi
+- music
+ReleaseNotes: |-
+  Quality
+
+  | Component         | Stage                                                            |
+  | ----------------- | ---------------------------------------------------------------- |
+  | App SDK Runtime   | Release Candidate. NOTE ABI changes below.                       |
+  | MIDI Settings app | Preview. This is still beta-quality and is in active development |
+  | MIDI Console app  | Preview. This is quite stable at this point                      |
+  | Other tools       | Other tools like midi1monitor, mididiag etc. are all stable      |
+
+  Instructions
+  We recommend uninstalling the old version of the SDK Runtime and Tools from Settings > Apps > Installed Apps (Settings, not control panel) before installing this version. You do not need to uninstall any service plugins.
+  Download the version appropriate for your architecture (Arm64: Qualcomm and similar, x64: AMD, Intel) and double-click to install. You do not need to run the installer as Administrator -- Windows 11 UAC will prompt for admin rights during installation.
+  This installer is not signed, so you will receive warnings when downloading and installing it. Some third-party antivirus may actually delete the app after it has been installed, or may prevent the installer itself from working properly. Refer to your antivirus/antimalware software documentation for how to add a temporary or permanent exclusion.
+  Functional Changes
+  Endpoint Image Handling
+  - This is a breaking change for apps using the endpoint images. We now copy the image to an intermediate location and point everything to that. As a result, we no longer store the full path in the Endpoint properties, but simply the image file name. MidiImageAssetHelper has been updated with GetFullImageAssetPathForEndpointImage to return the full path of the image for the endpoint.
+  SDK
+  Important ABI Change
+  After some discussion on Discord, it was agreed that service transactions such as creating new loopback endpoints needs to have an app-accessible return code, at least in the case of errors. To support this, it required a few ABI changes which require recompiling applications that use any of these types.
+  This also means that apps which take a dependency on RC4 (and eventually 1.0) will not work with runtime installations earlier than RC4.
+  - Microsoft.Windows.Devices.Midi2.ServiceConfig.MidiServiceConfigResponse: Remains a struct, but now has a UInt32 ServiceCode field.
+  - Microsoft.Windows.Devices.Midi2.ServiceConfig.MidiServiceConfig (due to above change)
+  - Microsoft.Windows.Devices.Midi2.Endpoints.Loopback.MidiLoopbackEndpointCreationResult changed from a struct to a runtimeclass, and adds the ErrorCode field, and changes the clsid
+  - Microsoft.Windows.Devices.Midi2.Endpoints.BasicLoopback.MidiBasicLoopbackEndpointCreationResult changed from a struct to a runtimeclass, and adds the ErrorCode field, and changes the clsid
+  - Addition of the following enums
+    - MidiLoopbackEndpointCreationResultErrorCode
+    - MidiBasicLoopbackEndpointCreationResultErrorCode
+  Because runtime types have getter/setter semantics and not fields like structs, C++ clients will need to change calls to fields like Status into function calls like Status(); C# clients use the same syntax for both.
+  In all cases, the Success property is still required to know if the call worked. If the call failed, the ErrorCode property may contain an error code. Note that this is going to require synchronizing with new code in the service, which will take several months. Until that time, the code will be NoErrorInformationAvailable for anything which failed service-side.
+  Result error codes are not guaranteed to be interchangeable across transports.
+  Additional Changes
+  - Additional exception handling in MIDI SDK functions for adding/removing loopback endpoints
+  - Basic Loopback and MIDI 2.0 loopbacks now create default unique ids if not specified at creation time
+  - Basic and MIDI 2 loopback creation will now do some basic validation of the data before sending to service
+  - SDK will now show better error information in some cases when dynamic port creation (loopbacks, virtual device) fails in the service. Previously, when the service returned a failed HRESULT, it would not look for error information. That's technically the correct approach, but the service is already in production, so not going to change that behavior.
+  - Added functions to MidiMessageConverter class to support converting streams of data and text
+  Command-line tools
+  - midifixreg now fixes both the 64 bit and 32 bit registry locations which can get corrupted by KORG and other driver utilities and uninstallers.
+  - midifixreg will not remove some well-known third-party drivers like the KORG BLE driver, VirtualMIDISynth, and MIDIMapper. If you see other entries we should leave in place, please do let us know on Discord or as a new issue in this repo
+  - mididiag now outputs both the 64 and 32 bit registry locations
+  Settings app
+  - The MIDI Settings app no longer refuses to start if the feature is not enabled. This was done because nearly all consumer PCs now have Windows MIDI Services enabled. This has made it possible to incorporate the registry fixing and other troubleshooting tools into MIDI Settings
+  - Added feature to the Troubleshooting page to view and repair registry entries (midifixreg)
+  - Added feature to the Troubleshooting page to capture MIDI repro logs
+  - The transports page now shows the full path of the implementation dll for transport plugins. This makes it easy to see if you are running in-box components, or preview components.
+  - We now have a page for the service transform/processing plugins so those paths can also be verified.
+  - Customizing an endpoint by adding an image now copies the image rather than relying on the original image location being available in the future.
+  - When renaming MIDI 1.0 ports, you can now see a preview of the different naming choices
+  - The MIDI Settings app now has a MIDI scratchpad with helpers for some common messages.
+  Fixed/Cleared Issues
+  - #980 [Feature]: Consider adding error codes to loopback/virtual device creation
+  - #964 [TODO]: Put in a confirmation prompt when deleting loopback ports in MIDI Settings
+  - #963 [BUG]: Set Service to Auto-Start in global settings in MIDI Settings app does nothing
+  - #947 [BUG]: SDK MidiMessageConverter seems to lose group index
+  - #946 [BUG]: MIDI Settings app home screen option to create loopbacks doesn't specify the type
+  - #943 32-bit apps like MIDI-OX and VSThost and ROLI dashboard may not work after KORG or other registry driver removal/reordering (this still happens, but the MIDI Settings app makes this easier to repair now)
+  - #920 [BUG]: Personalize page in settings app can't scroll to view all ports
+  - #870 [BUG]: Settings app doesn't gracefully handle removed/moved personalization images
+  Troubleshooting The Install
+  We're seeing a few instances where the MIDI Settings app is throwing an error on startup. These appear to be dependency issues.
+  If the MIDI Settings app gives you a pop up with a XamlParseException in it, please install the current stable Windows App SDK Runtime from this location:
+  - For x64 (Intel/AMD) PCs (if unsure, this is almost certainly the one you want)
+  - For Arm64 (Qualcomm, etc.) PCs.
+  If that still doesn't sort the error in the MIDI Settings app, then please also install the latest Windows 11 SDK
+  If that still doesn't do it, please start a thread in #midi-user-questions on the MIDI Discord server. We're trying to track down what's in common with the few PCs that are running into this.
+ReleaseNotesUrl: https://github.com/microsoft/MIDI/releases/tag/rc-4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
