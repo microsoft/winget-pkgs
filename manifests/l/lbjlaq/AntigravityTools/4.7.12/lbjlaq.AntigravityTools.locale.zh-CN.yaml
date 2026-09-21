@@ -1,0 +1,45 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.7.12
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+Tags:
+- account-manager
+- antigravity
+ReleaseNotes: |-
+  - [跨模型思考签名回退与历史污染反向清洗] 彻底根除模型频繁切换报 400 与 503 假死 (PR #3496, Fixes #3494):
+    - 进站流水线统一异构拦截与哨兵降级：在 InboundThinkingPipeline 统一节点中对跨模型请求进行协议无关的签名兼容性审查，检测到与目标模型异构的思考签名（如 Claude 与 Gemini 相互切换）时，自动降级为标准哨兵占位符（skip_thought_signature_validator），并同步净化 functionCall 上的脏签名，杜绝非法签名逃逸导致上游抛出 HTTP 400 校验错误。
+    - 受污染签名反向精准净化：在会话重试与模型切换阶段，通过 purge_foreign_signatures_for_session_with_model 仅从内存 (RAM) 与 SQLite (thinking_records) 中精准剔除异构污染签名，完整保全思考文本内容与同会话健康的历史签名，杜绝整段上下文丢失。
+    - 纯文本轮次彻底剥离哨兵：纯文本轮次不再携带任何哨兵签名，仅保留纯净思考文本，杜绝多轮切换中携带脏哨兵导致的二次校验异常。
+  - [UTF-8 字符边界截断致 Rust Panic 崩溃彻底根除] (PR #3496, Fixes #3493):
+    - 通用字符边界对齐基础设施：根除 openai/response.rs 中工具调用参数命令描述的裸字节切片（[..57] 落在中文等复合字符内部时抛出 end byte index 57 is not a char boundary 导致线程崩溃与连接断开），在 common_utils.rs 沉淀 safe_truncate_str 与 safe_truncate_chars 安全切片工具函数，遇到字符内部切片时自动向左安全对齐回退。
+    - 全仓裸切片审计与回归测试：全量审计并加固 upstream/client.rs、tool_result_compressor.rs、payload_audit.rs、claude/streaming.rs 等处切片隐患，增加多字节字符与临界边界的单元回归测试。
+  - [400/429/503 误限流彻底根治、Flash 智能路由与命令参数恢复] (PR #3496, Fixes #3468):
+    - 纯 -flash 模型 404 误限流根除与自适应路由：针对无后缀纯 -flash 模型触发 404 导致整池被误锁冷却的问题，重构自适应路由机制：3.5 以上 Flash 模型统一智能路由至 tiered 变体，并可通过四大 AI 协议的思考强度 (thinking effort) 动态切换 low / medium / high 等级，在模型路由设置中完全开放自定义权。
+    - 剔除 404/500/503 误冷却与增加自锁断路门禁：彻底移除 404 误打入冷却池的逻辑，改为同时透传上游原生报错与网关改写诊断；坚决剔除 500/503 内部报错打入冷却池的自噬死锁，在 pipeline/policy.rs 建立统一的 UpstreamClassification 流水线裁决节点。
+    - 工具调用 command 参数恢复与标准化：彻底清除历史遗留代码中错误误杀 command 参数的缺陷，恢复命令完整性并统一标准化，确保工具调用语义无损透传。
+  - [仪表盘当前账号额度即时更新与健康阵列重构] (PR #3496, Fixes #3492, #3495):
+    - 选中账号额度即时更新：重构首页 Dashboard 账号生态健康阵列与可用配额生产力矩阵算法，默认展示当前选中正常账号的配额，支持一键切换查看全部正常账号的配额，消除配额不更新缺陷。
+    - 双选胶囊与异步调度加速：引入高对比度双选胶囊控制器 (可用账号 vs 包含禁用) 并补齐 12 国多语言；引入 React startTransition 异步并发调度，消除首页切换交互卡顿。
+    - 账号管理白屏崩溃安全加固 (Fixes #3495): 对前端配额桶全面实施空安全解构与空数组兜底降级（group.buckets || []），对齐 TypeScript 契约与 Rust #[serde(default)] 兼容，彻底杜绝 TypeError: Cannot read properties of null (reading 'filter') 崩溃。
+  - [报文查看器超长折行精准定位与交互升级] (PR #3496):
+    - 几何物理定位：彻底修复日志报文框在超长折行场景下搜索高亮目标跳转偏下、被上方视口遮蔽的顽疾，改用精准物理几何差值定位。
+    - Claude 非流式思考签名捕获：修复 Claude 协议非流式模式 (non-streaming) 下捕捉响应报文丢失签名字段 (thinking signature) 的缺陷；支持日志表格 Excel 式拖拽调整列宽与独立复制请求头。
+  - [一键原子化发版同步工具、标准发布 SOP 与架构准则] (PR #3496):
+    - 一键全仓 11 处原子化版本同步：新增 scripts/bump-version.mjs 跨平台发版脚本，一键原子同步全仓库 11 处配置文件与文档，严格遵循语义化版本 (SemVer) 单调递增防呆安全门禁，自适应 CRLF/LF 换行符与无 Rust 环境兜底，修复 Windows cmd.exe 多行提交崩溃，在 package.json 注册 npm run bump 指令。
+    - 标准发布指南与维护准则入库：编写 docs/RELEASE_GUIDE.md 沉淀全流程发版三步流与应急 SOP；正式将 AGENTS.md 架构准则 (Pipeline First, Protocol-agnostic, Root-cause Fixes, Mandatory Rust Formatting) 纳入 Git 版本管理。
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.7.12
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
