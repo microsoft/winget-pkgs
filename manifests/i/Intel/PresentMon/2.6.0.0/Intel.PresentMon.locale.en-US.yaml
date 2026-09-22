@@ -1,0 +1,96 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Intel.PresentMon
+PackageVersion: 2.6.0.0
+PackageLocale: en-US
+Publisher: Intel(R) Corporation
+PublisherUrl: https://github.com/GameTechDev
+PublisherSupportUrl: https://github.com/GameTechDev/PresentMon/issues
+Author: Intel Corporation
+PackageName: Intel(R) PresentMon
+PackageUrl: https://game.intel.com/intel-presentmon/
+License: MIT
+LicenseUrl: https://github.com/GameTechDev/PresentMon/blob/HEAD/LICENSE.txt
+Copyright: Copyright (C) 2017-2026 Intel Corporation
+CopyrightUrl: https://github.com/GameTechDev/PresentMon/blob/HEAD/LICENSE.txt
+ShortDescription: A gaming performance overlay and telemetry application to monitor and measure your gaming experience.
+Description: |-
+  PresentMon is a set of tools to capture and analyze the high-level performance characteristics of graphics applications on Windows.
+  PresentMon traces key performance metrics such as the CPU, GPU, and Display frame durations and latencies; and works across different graphics API such as DirectX, OpenGL, and Vulkan, different hardware configurations, and for both desktop and UWP applications.
+Moniker: presentmon
+Tags:
+- analysis
+- capture
+- event-tracing
+- gaming
+- graphics
+- intel
+- overlay
+- performance
+- telemetry
+ReleaseNotes: |-
+  Release Notes
+
+  Major features
+
+  Metrics and capture
+  - PSO compilation metrics: Track D3D12 pipeline state object compilation via ETW (count, duration, and busy percentage), attributed into frame/CSV capture.
+  - OS DDI flip events: Track newer OS DDI events for per-flip timestamps and completed/dropped flip reporting.
+  - CSV display attribution: CSV output includes source ID and layer ID for flips so multi-plane and multi-display scenarios are easier to analyze.
+  - Display metadata: Additional display metadata is surfaced in capture/output paths.
+
+  Telemetry architecture
+  - Fine-grained telemetry providers: Per-metric provider granularity so only required endpoints are polled; supports combining providers and plug-in-style extension.
+  - Native telemetry format: ADL, NVAPI/NVML, IGCL, and WMI paths emit the dynamic caps/polling model directly; legacy telemetry shims removed.
+  - CPU temperature (UCI socwatch): Optional UCI socwatch integration in the service for CPU temperature where MSR-style access is restricted; builds and runs when UCI is not present.
+  - ADL memory utilization: AMD dedicated VRAM usage reporting improved and validated against Windows-reported values.
+
+  Intel PresentMon (IPM) UI
+  - Per-metric multi-device selection: Telemetry from multiple adapters can be shown at once; overlay presets can mix devices per metric.
+  - Game Experience preset: Overlay preset highlighting metrics that correlate with perceived motion and animation quality.
+  - Metric availability feedback: Unavailable telemetry metrics stay visible in pickers and overlay loadouts (dimmed/marked) instead of disappearing silently. Hovering over unavailable metrics shows reason why not available. This information can also be dumped to CSV via the presentmon-cli dump-caps subcommand.
+  - Array metrics: array metrics (multiple fans on 1 GPU etc.) now surface as a single metric with separate index dropdown, instead of multiple independent metrics.
+
+  Performance and reliability
+
+  Service efficiency
+  - Lower scheduling overhead: ETW flush and related loops use coarser Sleep-based waiting instead of high-precision timers where jitter is acceptable, cutting CPU use under load by 78% (including on mobile-class systems).
+  - Idle log flushing: Diagnostic log flushing is suppressed when the service is not actively tracking or polling telemetry, reducing idle CPU from 0.003% to 0.000%.
+  - Targeted telemetry polling: Continued refinement so providers poll only metrics clients actually consume.
+
+  Stability and targeting
+  - Autotargeting: Fixed failures when GPU top polling errors aborted the loop early, and a race when the target app starts as a console process before its 3D window appears.
+  - Service restart: Fixed service failing to restart while a client session still holds shared-memory objects.
+  - Concurrent launches: Second IPM instance is blocked cleanly instead of opening a broken empty window.
+  - Loader / internal API compatibility: Private API signature changes no longer break the loader; missing or misaligned internal endpoints are non-fatal.
+
+  API and integration
+  - NVIDIA custom flip manifest: NVIDIA custom flip ETW manifest is deployed with the service so decoding works on clean dev machines without a global manifest install.
+  - Integrated GPU ordering: Integrated Intel/AMD GPUs are detected reliably and sorted below discrete GPUs in device lists.
+  - Availability Feedback: introspection now surfaces more detailed reasons why a metric is not available (not available on this device vs. not present at all in the source API vs. PresentMon doesn't support it in this build).
+
+  UI and usability
+  - Version in UI: Installed PresentMon version (or build identity for custom/nightly builds) is shown in the capture application UI.
+
+  Removals
+  - Flash Injector removed: Experimental Flash Injector DLL/EXE, client hooks, build scripting, and UI have been removed to simplify the solution and builds.
+
+  Dependencies and infrastructure
+  - CEF version locking: Checked-in lock file plus upgrade-cef / pull-cef scripts; build and MSI validate CEF version and binary hashes.
+  - UCI SDK: UCI payload externalized with updated packaging/installer deployment (UCI 0.8 line).
+  - Front-end tooling: Vite/Vue dev dependency updates in the web UI project.
+
+  Bug fixes
+  - ADL/NVML struct and provider fixes affecting telemetry correctness.
+  - Introspection readiness wait when opening a client session.
+  - Installer library load in IDE scenarios; AppData apply method fixes.
+  - Coverity-driven fixes and CFG hardening for the Win32 console application.
+  - IGCL version check.
+
+  Developer and test infrastructure (not end-user facing)
+  - Broad test suite repair: session API upgrades, ETL aux data, OPM/service parity, deterministic dynamic-poll playback, reduced brittleness in timer and paced-polled tests.
+  - Parameterized IPM ULT framework to simplify adding ETL playback tests.
+ReleaseNotesUrl: https://github.com/GameTechDev/PresentMon/releases/tag/v2.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
