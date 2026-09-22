@@ -1,0 +1,96 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: Miller.Miller
+PackageVersion: 6.21.0
+PackageLocale: en-US
+Publisher: John Kerl
+PublisherUrl: https://github.com/johnkerl
+PublisherSupportUrl: https://github.com/johnkerl/miller/issues
+Author: John Kerl
+PackageName: Miller
+PackageUrl: https://github.com/johnkerl/miller
+License: BSD-2-Clause
+LicenseUrl: https://github.com/johnkerl/miller/blob/HEAD/LICENSE.txt
+CopyrightUrl: https://github.com/johnkerl/miller/blob/HEAD/LICENSE.txt
+ShortDescription: Miller is like awk, sed, cut, join, and sort for name-indexed data such as CSV, TSV, and tabular JSON
+Description: |-
+  Miller is like awk, sed, cut, join, and sort for name-indexed data such as CSV, TSV, and tabular JSON. You get to work with your data using named fields, without needing to count positional column indices.
+
+  This is something the Unix toolkit always could have done, and arguably always should have done. It operates on key-value-pair data while the familiar Unix tools operate on integer-indexed fields: if the natural data structure for the latter is the array, then Miller’s natural data structure is the insertion-ordered hash map. This encompasses a variety of data formats, including but not limited to the familiar CSV, TSV, and JSON. (Miller can handle positionally-indexed data as a special case.)
+
+  ## Features
+
+  - Miller is multi-purpose: it’s useful for data cleaning, data reduction, statistical reporting, devops, system administration, log-file processing, format conversion, and database-query post-processing.
+  - You can use Miller to snarf and munge log-file data, including selecting out relevant substreams, then produce CSV format and load that into all-in-memory/data-frame utilities for further statistical and/or graphical processing.
+  - Miller complements data-analysis tools such as R, pandas, etc.: you can use Miller to clean and prepare your data. While you can do basic statistics entirely in Miller, its streaming-data feature and single-pass algorithms enable you to reduce very large data sets.
+  - Miller complements SQL databases: you can slice, dice, and reformat data on the client side on its way into or out of a database. (Examples here and here). You can also reap some of the benefits of databases for quick, setup-free one-off tasks when you just need to query some data in disk files in a hurry.
+  - Miller also goes beyond the classic Unix tools by stepping fully into our modern, no-SQL world: its essential record-heterogeneity property allows Miller to operate on data where records with different schema (field names) are interleaved.
+  - Miller is streaming: most operations need only a single record in memory at a time, rather than ingesting all input before producing any output. For those operations which require deeper retention (sort, tac, stats1), Miller retains only as much data as needed. This means that whenever functionally possible, you can operate on files which are larger than your system’s available RAM, and you can use Miller in tail -f contexts.
+  - Miller is pipe-friendly and interoperates with the Unix toolkit
+  - Miller’s I/O formats include tabular pretty-printing, positionally indexed (Unix-toolkit style), CSV, JSON, and others
+  - Miller does conversion between formats
+  - Miller’s processing is format-aware: e.g. CSV sort and tac keep header lines first
+  - Miller has high-throughput performance on par with the Unix toolkit
+  - Not unlike jq (for JSON), Miller is written in portable, modern C, with zero runtime dependencies. You can download or compile a single binary, scp it to a faraway machine, and expect it to work.
+Moniker: miller
+Tags:
+- csv
+- csv-format
+- data-cleaning
+- data-processing
+- data-reduction
+- data-regression
+- devops
+- devops-tools
+- json
+- json-data
+- statistical-analysis
+- statistics
+- streaming-algorithms
+- streaming-data
+- tabular-data
+- tsv
+ReleaseNotes: |-
+  ## New verbs and DSL features
+
+  `mlr rank` verb, `sparkline` DSL function and verb, `bootstrap-ci` verb for bootstrap-resampling confidence intervals
+  Sliding-window mode for `stats1 -w {n}`, more `step -a` back-reference options
+  Positional placeholders (`{1}`, etc.) in the `format` DSL function
+  `--right-align-numeric` for PPRINT/Markdown output
+  Named `.mlrrc` profile sections via `--profile`/`-P`
+  `mlr join --ignore-empty` to skip pairing on empty join keys
+  New GNU recutils (`.rec`) I/O format
+  YAML now follows JSON's auto-flatten/auto-unflatten behavior
+
+  ## Documentation
+
+  Numerous new recipes/guides: wide-CSV transposition, updating a CSV from partial downloads, merging files with colliding column names, combining CSVs with different headers, SQL-style join examples, preprocessing join's left file, --lazy-quotes semantics, malformed-TZ troubleshooting, STAN-format JSON-array reshaping
+  Clarified docs for `uniq`, `join` format flags, `summary` field types, `NF` dynamism
+  Published an epub of the docs on https://miller.readthedocs.io/en/latest
+
+  ## Bug fixes
+
+  `tee`/`split` no longer leak downstream mutations into side-output files (#1671)
+  Fixed float formatting (e.g. 004.56) to emit valid JSON numbers
+  `--ors crlf` is now honored for CSV output (#1810)
+  `reorder -r` groups matched fields by regex order, not record order (#1325)
+  Fixed dedupe-field-names clobbering values on ragged short rows (#1997)
+  `--skip-trivial-records` now exits 0 on trailing blank CSV/TSV lines
+  `join` exits nonzero if the left file can't be read (#2169)
+  DKVPX reader now honors `--ifs`/`--ips` instead of hardcoding comma/equals
+  Fixed recutils parser for empty fields with `+`-continuation
+  Fixed a mid-stream error-loss race causing flaky exit codes on transformer errors
+
+  ## Internal/infra
+
+  Multi-phase removal of `os.Exit` calls below the entrypoint (5 phases) for cleaner exit-code handling
+  Guard against release tags being cut before the version-bump commit lands
+  Plans checked in for future work: exit-handling, recutils, r-strings, format-from-extension inference, nested/JSON-style accessors in non-DSL verbs
+  Routine dependency bumps (golang.org/x/*, codeql-action, go-isatty, etc.)
+
+  Full diff: https://github.com/johnkerl/miller/compare/v6.20.2...v6.21.0
+
+ReleaseNotesUrl: https://github.com/johnkerl/miller/releases/tag/v6.21.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

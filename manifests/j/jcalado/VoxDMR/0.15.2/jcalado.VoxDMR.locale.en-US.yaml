@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: jcalado.VoxDMR
+PackageVersion: 0.15.2
+PackageLocale: en-US
+Publisher: jcalado
+PublisherUrl: https://github.com/jcalado
+PublisherSupportUrl: https://github.com/jcalado/voxdmr-site/issues
+Author: Joel Calado
+PackageName: VoxDMR
+PackageUrl: https://github.com/jcalado/voxdmr-site
+License: Proprietary
+ShortDescription: DMR from your Desktop.
+Description: Join BrandMeister DMR talkgroups from your Windows or Linux PC.
+Tags:
+- brandmeister
+- dmr
+ReleaseNotes: |-
+  # VoxDMR 0.15.2 🎉
+
+  Covers work from 2026-09-05 to 2026-09-06.
+
+  **Platforms:** Android (arm64-v8a, armeabi-v7a/32-bit, x86_64) · Linux x86_64 · Windows x86_64
+
+  > 📱 **Which Android APK?** Most people want **arm64-v8a** from the Play Store. The **32-bit (armeabi-v7a)** APKs are built specifically for PoC radios and older Android phones：**install those manually, not from the Play Store.**
+
+  ---
+
+  A fix release, mostly about transmit audio on radios that went quiet after 0.15.0.
+
+  ## 🐛 Fixes
+
+  • **Transmit audio works again on radios that mis-report their microphone** `[Android]` - from 0.15.0, VoxDMR asked Android for the least-processed microphone it could get. Some radios say they have one, accept the request, and then hand back a microphone that is never wired to anything：the over keys up, the network sees your ID, the mic indicator lights, and the level meter never moves, because not one sample ever arrives. Nothing caught it — the request succeeded and the connection was never dropped. VoxDMR now listens to what the microphone actually delivers: if the first fraction of a second of an over is digitally silent — not quiet, but literally nothing, which no working microphone produces — it moves down to the next microphone source mid-over and says so in the activity log. There are three to work through, ending at the one Android uses for phone calls. A radio caught doing this is remembered, so every later launch starts on the microphone that works from the very first over. The memory is per-radio, is left out of a settings backup, and is cleared automatically when the radio's system software is updated — that update may be the thing that fixed it. Reported on the Sonim XP8800, Hytera P60 and PNC-370SE, and confirmed fixed on a Sonim XP8.
+  • **The app no longer opens onto a blank screen** `[Android]` - on a Hytera PoC radio, an app you had left and re-opened from the launcher icon could come back as nothing but a dark screen, one that not even the back key would leave, while the same app opened from the PoC softkey ran perfectly. The softkey was quietly starting a second copy of the app inside the launcher's own task, and that second copy took the running app's engine away from the first. There is only one copy of the app now, whichever way you open it.
+  • **Starting on boot is now a switch of its own, and can be turned off** `[Android]` - Settings → Connection → Running in the background ends with **Start on boot**, separate from the three background modes. Opening the app when the radio powers on used to come welded to **Always on**：choosing it also meant the app appearing on screen at every boot and after every app update, with nothing in the settings admitting that or offering a way out short of giving up the background session. Radios already set to Always on keep starting on boot — the switch arrives already on for them. The boot decision is written to the activity log either way, including when it declines to start, so a radio that opens on its own can finally say who asked it to.
+ReleaseNotesUrl: https://github.com/jcalado/voxdmr-site/releases/tag/v0.15.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

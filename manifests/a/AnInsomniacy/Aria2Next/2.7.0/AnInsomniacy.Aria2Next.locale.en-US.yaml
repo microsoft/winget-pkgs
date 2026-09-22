@@ -1,0 +1,72 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: AnInsomniacy.Aria2Next
+PackageVersion: 2.7.0
+PackageLocale: en-US
+Publisher: AnInsomniacy
+PublisherUrl: https://github.com/AnInsomniacy
+PublisherSupportUrl: https://github.com/AnInsomniacy/aria2-next/issues
+Author: AnInsomniac
+PackageName: Aria2 Next
+PackageUrl: https://github.com/AnInsomniacy/aria2-next
+License: GPL-2.0
+LicenseUrl: https://github.com/AnInsomniacy/aria2-next/blob/main/COPYING
+ShortDescription: Maintained aria2 fork with extensive bug fixes and modernized architecture
+Description: |-
+  aria2 is remarkable open source software. For over a decade it has been one of the most capable
+  download engines available, trusted by countless tools and users worldwide. We are deeply grateful
+  to the original authors and contributors of the aria2 project. They built something that has stood
+  the test of time, and that enduring quality is the best testament to their vision and craftsmanship.
+
+  But upstream development has slowed dramatically in recent years. Dependencies grew stale, builds
+  broke on modern platforms, and a backlog of bugs went unaddressed. We picked up the baton: migrated
+  the codebase to a modern build framework, triaged and fixed a substantial number of upstream issues,
+  and introduced ED2K protocol support for the first time. A full audit trail is preserved in
+  docs/maintenance/upstream-issue-review/matrix.csv.
+
+  Aria2 Next is an actively maintained aria2-compatible engine for everyone, and it is also the embedded
+  engine used by Motrix Next. Original interfaces, including options, configuration, sessions, JSON-RPC,
+  and libaria2, remain intact so downstream projects get a seamless upgrade. The focus is straightforward:
+  release reliability, current dependency baselines, and ongoing compatibility fixes. Same engine, renewed
+  foundation.
+ReleaseNotes: |-
+  ## Summary
+
+  Aria2 Next 2.7.0 improves HTTP/HTTPS range downloads, interrupted transfers, and paused stream recovery. It includes changes since the previous published release, v2.6.8. CLI and RPC callers can use the improvements without new configuration. Release targets remain Linux, macOS, Windows, and Android.
+
+  ### Fixed
+
+  • Fixed multi-connection and resumed downloads failing on servers that reject ETag-based `If-Range` requests (#43). Requests now use `If-Match` with valid strong ETags, or `If-Unmodified-Since` with valid modification dates.
+  • Prevented malformed or weak ETags from being sent as strong validators. Explicit resource changes stop the transfer before different file versions can be combined.
+  • Added a bounded complete-download fallback when a server ignores byte ranges. Existing partial files remain protected unless `allow-overwrite` permits restarting from zero.
+  • Restored saved progress for paused HTTP/SFTP tasks after an engine restart, before network transfer resumes.
+  • Preserved the missing suffix of short partial responses and correctly handled empty HTTP files.
+  • Corrected libcurl completion-message handling and shutdown ordering while native socket callbacks remain active.
+
+  ### Changed
+
+  • Delegated connection setup and low-speed timeouts to libcurl. Slow tail ranges are reassigned only when the remaining work justifies another request.
+  • Refined concurrency reduction and staggered retries for HTTP 403, 429, and 503 responses, while respecting server retry delays.
+  • Extended trace diagnostics with request queue time, connection reuse, and negotiated HTTP version.
+  • Expanded local HTTP transfer validation for conditional requests, range fallback, file-version changes, and paused restart. Validation uses local fixtures and checks completed file hashes.
+
+  ### Downloads
+
+  Standalone executables and the SHA-256 checksum file are attached by the release workflow after successful builds.
+
+  | Platform | Asset |
+  | --- | --- |
+  | Linux x86_64 | `aria2-next-2.7.0-linux-x86_64` |
+  | Linux ARM64 | `aria2-next-2.7.0-linux-aarch64` |
+  | macOS Apple Silicon | `aria2-next-2.7.0-macos-arm64` |
+  | macOS Intel | `aria2-next-2.7.0-macos-x86_64` |
+  | Windows x86_64 | `aria2-next-2.7.0-windows-x86_64.exe` |
+  | Windows ARM64 | `aria2-next-2.7.0-windows-arm64.exe` |
+  | Android ARM64 | `aria2-next-2.7.0-android-arm64` |
+  | Checksums | `aria2-next-2.7.0-checksums.sha256` |
+
+  [Full changelog](https://github.com/AnInsomniacy/aria2-next/compare/v2.6.8...v2.7.0)
+ReleaseNotesUrl: https://github.com/AnInsomniacy/aria2-next/releases/tag/v2.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

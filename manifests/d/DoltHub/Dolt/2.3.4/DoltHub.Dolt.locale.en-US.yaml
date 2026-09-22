@@ -1,0 +1,131 @@
+# Created with WinGet Updater using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: DoltHub.Dolt
+PackageVersion: 2.3.4
+PackageLocale: en-US
+Publisher: DoltHub
+PublisherUrl: https://github.com/dolthub/dolt
+PublisherSupportUrl: https://github.com/dolthub/dolt/issues
+Author: DoltHub
+PackageName: Dolt
+PackageUrl: https://www.dolthub.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/dolthub/dolt/blob/HEAD/LICENSE
+CopyrightUrl: https://raw.githubusercontent.com/dolthub/dolt/master/LICENSE
+ShortDescription: Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+Description: |-
+  Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+  Connect to Dolt just like any MySQL database to run queries or update the data using SQL commands.
+  Use the command line interface to import CSV files, commit your changes, push them to a remote, or merge your teammate's changes.
+Moniker: dolt
+Tags:
+- cli
+- data
+- git-for-data
+- versioning
+ReleaseNotes: |-
+  Merged PRs
+  dolt
+  - 11796: go/store/nbs: journal_writer.go: Fix a rare race where the journal_writer entered a weird state because its caller context Canceled as it was bootstraping.
+  - 11791: Warn about session-only checkout in noninteractive SQL
+    Warns when a lone dolt_checkout() call in noninteractive SQL changes only the SQL session's branch, leaving the CLI branch unchanged.
+    Fixes #6876
+  - 11790: Add virtual name indexes for tags and branches
+    Adds virtual name indexes with cached ref lookups for dolt_tags and dolt_branches.
+    Fixes #10365
+    Companion PR: dolthub/doltgresql#3342
+  - 11788: Persist sql_mode as string and reload on server startup
+    Fix #11776
+  - 11785: Validate vector index creation without restricting schema loading
+    Preserves existing vector index schemas while validating new index creation, with Dolt commit/reset regression tests and shared DDL coverage in dolthub/go-mysql-server#3858.
+    Fixes #10448
+  - 11782: Omit generated columns from SQL diff assignments
+    Omits generated columns from SQL diff assignments and suppresses updates with no assignable columns, carrying forward #11476 with Elian's review feedback addressed.
+    Fixes #11445
+  - 11780: Handle statement cancellation in the SQL shell
+    Supports \c cancellation in the interactive SQL shell, carrying forward #11291 with regression coverage verifying canceled single-line and multiline inserts leave the table empty.
+    Fixes #10867
+  - 11772: Fix foreign keys with dropped columns
+    Changes are used by:
+    - dolthub/doltgresql#3312
+      This also fixes a Dolt bug dealing with dropping a column used by a foreign key
+  - 11755: build(deps): bump google.golang.org/grpc from 1.83.1 to 1.83.2 in /integration-tests/go-sql-server-driver
+    Bumps google.golang.org/grpc from 1.83.1 to 1.83.2. Release notes
+    Sourced from google.golang.org/grpc's releases.
+    > Release 1.83.2
+    >
+    > Security
+    > - server: Reject requests missing both :authority and Host headers with HTTP 400 and status Internal. (grpc/grpc-go#9365)
+    >   - Special Thanks: @winklemad
+    Commits
+    - 030ee8b Update version to 1.83.2 (#9375)
+    - 8668b69 cherry-pick #9365 to v1.83.x (#9366)
+    - a3e952d cherry-pick #9346 to v1.83.x and update x/net dependency (#9369)
+    - 58f8fd9 Change version to 1.83.2-dev (#9337)
+    - See full diff in compare view
+    [![Dependabot compatibility score](https://dependabot-badges.githubapp.com/badges/compatibility_score?dependency-name=google.golang.org/grpc&package-manager=go_modules&previous-version=1.83.1&new-version=1.83.2)](https://docs.github.com/en/github/managing-security-vulnerabilities/about-dependabot-security-updates#about-compatibility-scores) Dependabot will resolve any conflicts with this PR as long as you don't alter it yourself. You can also trigger a rebase manually by commenting `@dependabot rebase`. [//]: # (dependabot-automerge-start) [//]: # (dependabot-automerge-end) --- Dependabot commands and options
+    You can trigger Dependabot actions by commenting on this PR: - `@dependabot rebase` will rebase this PR - `@dependabot recreate` will recreate this PR, overwriting any edits that have been made to it - `@dependabot show ignore conditions` will show all of the ignore conditions of the specified dependency - `@dependabot ignore this major version` will close this PR and stop Dependabot creating any more for this major version (unless you reopen the PR or upgrade to it yourself) - `@dependabot ignore this minor version` will close this PR and stop Dependabot creating any more for this minor version (unless you reopen the PR or upgrade to it yourself) - `@dependabot ignore this dependency` will close this PR and stop Dependabot creating any more for this dependency (unless you reopen the PR or upgrade to it yourself) You can disable automated security fix PRs for this repo from the [Security Alerts page](https://github.com/dolthub/dolt/network/alerts).
+  - 11303: sql: fix empty/comment-only query handling in interactive shell
+    What
+    In the interactive dolt sql shell, two related edge cases around empty/comment-only statements produced confusing output instead of clear, MySQL-consistent behavior:
+    1. A bare empty query (e.g. typing just ;) silently printed Empty set, 1 warning with a warning body of query was empty after trimming comments, instead of a clear client-side error.
+    2. A comment-only query (e.g. -- foo ;) behaved the same way — a spurious "empty" warning — instead of being silently skipped the way dolt sql < file.sql (batch mode) already treats it.
+       This PR makes the shell branch on sqlparser.ErrEmpty explicitly in execShell's Uninterpreted callback (go/cmd/dolt/commands/sql.go):
+    - A truly empty statement (nothing left after ; is stripped) now prints a MySQL-style No query specified error, matching how the real mysql CLI responds to a bare ;.
+    - A comment-only statement (non-empty input that parses to ErrEmpty because it's all comment) is now skipped silently — no output, no warning — which mirrors the existing behavior of execBatchMode, where err == sqlparser.ErrEmpty is already a silent continue.
+    Why
+    Batch mode (execBatchMode, sql.go) and processQuery (used by scripting/non-interactive paths) both already treat sqlparser.ErrEmpty as "silently skip." The interactive shell was the only place papering over this with a fake Empty set, 1 warning result, which is misleading — there's no result set, and the "warning" concept here doesn't correspond to anything the query actually did. This change brings the shell in line with the rest of the codebase's handling of empty statements while adding a genuinely useful error for the truly-empty case (bare ;), since that's a real MySQL client-side error dolt users would expect to see.
+    Closes #10864
+    Closes #10863
+    Thanks to angelamayxie for the original reports.
+    Test plan
+    - go build ./cmd/dolt/... — passes
+    - go vet ./cmd/dolt/... — passes
+    - gofmt -l go/cmd/dolt/commands/sql.go — clean
+    - New bats regression tests added in integration-tests/bats/sql-shell.bats:
+    - sql-shell: bare empty query gives MySQL-style error, not a warning (uses new sql-shell-empty-query.expect)
+    - sql-shell: comment-only query is skipped silently, no warning (uses new sql-shell-comment-only-query.expect)
+    - Both new bats tests run locally against a freshly built dolt binary and pass:
+    ok 1 sql-shell: bare empty query gives MySQL-style error, not a warning
+    ok 1 sql-shell: comment-only query is skipped silently, no warning
+    - Full sql-shell.bats suite regression run was kicked off locally to check for unrelated breakage; not gating this PR description on it since the two new/targeted cases already passed cleanly and no other test in the file touches this code path.
+  go-mysql-server
+  - 3858: Cover vector index nullability across DDL paths
+    Extends vector-index nullability regression coverage to JSON columns and ALTER TABLE, complementing Dolt's engine coverage in #11785.
+    Fixes #10448
+  - 3857: Set return type for population statistic aggregate functions
+    Fixes #11391
+  - 3855: Implement Numeric to Date conversions
+    Implements conversions from numeric types (int, float, decimal) to DATETIME types.
+    Partially addresses: #10278
+    Fixes: #10088
+  - 3852: Reject unsupported DISTINCT window aggregates
+    Rejects DISTINCT window aggregates with MySQL 8.4-compatible error 1235 / SQLSTATE 42000 for COUNT, SUM, and AVG, including multi-argument COUNT, while preserving accepted MIN and MAX behavior.
+    Adds engine coverage for the exact customer reproduction and adjacent aggregate behavior.
+    Fixes #11392
+  - 3847: Remove schema length check when analyzing subquery aliases
+    Fixes #11501
+    When analyzing subquery aliases, checking if the child schema length matched the ColumnNames length was too strict. In nested subqueries, it's possible the child schema length was already reduced due to table pruning when the child subquery was analyzed. This check was removed altogether because we don't have any tests that actually rely on this check happening.
+  - 3845: Fix CHAR values differing only in trailing space to be equal
+    Fix #11464
+  - 3841: Delimit window partition and order expressions in PartitionId
+    Fix #11461
+  - 3840: Support pluggable UPDATE assignment evaluation
+    Adds an UpdateExpressionApplier engine override for PostgreSQL assignment semantics in dolthub/doltgresql#3300 while preserving MySQL evaluation by default.
+    Fixes dolthub/doltgresql#3092
+  - 3836: [4/6] Test grouped windows and iterator cleanup
+    Adds regression coverage for grouped windows, HAVING order, and iterator cleanup already fixed on main, stacked on #3835 with compatibility in #11753 and dolthub/doltgresql#3291.
+  - 3835: [3/6] Fix user-variable strings and prepared bindings
+    Fixes UserVar SQL quoting and prepared lookup by variable name, stacked on #3834 with compatibility in #11753 and dolthub/doltgresql#3291.
+  - 3834: [2/6] Fix subquery strings and scalar alias resolution
+    Fixes Subquery and InSubquery SQL strings while preserving scalar alias resolution, stacked on #3833 with compatibility in #11753 and dolthub/doltgresql#3291.
+  - 3833: [1/6] Fix independent expression strings and descriptions
+    Fixes independent expression SQL strings and descriptions from #3803, with follow-ups starting at #3834 and compatibility in #11753 and dolthub/doltgresql#3291.
+  - 3832: Always return transform.NewTree when replacing GetField with aliased projection expression
+    Fixes #11407
+    When pushing filters below a subquery alias, we were only returning transform.NewTree when an aliased expression mapped to a GetField has been recursively transformed. However the GetField gets replaced with the aliased expression regardless if it gets transformed recursively, this is incorrect, and we should always be returning transform.NewTree. Not returning transform.NewTree was causing us to not be able to find the correct field index for certain expressions.
+  - 3825: Support multi-byte strings and collation derivation in LPAD and RPAD
+ReleaseNotesUrl: https://github.com/dolthub/dolt/releases/tag/v2.3.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
