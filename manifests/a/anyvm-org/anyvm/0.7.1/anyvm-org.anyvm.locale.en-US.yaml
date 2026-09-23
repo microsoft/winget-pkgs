@@ -1,0 +1,84 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: anyvm-org.anyvm
+PackageVersion: 0.7.1
+PackageLocale: en-US
+Publisher: anyvm.org
+PublisherUrl: https://anyvm.org/
+PublisherSupportUrl: https://github.com/anyvm-org/anyvm/issues
+PackageName: anyvm
+PackageUrl: https://github.com/anyvm-org/anyvm
+License: MIT
+LicenseUrl: https://github.com/anyvm-org/anyvm/blob/HEAD/LICENSE
+ShortDescription: Run any VM anywhere -- bootstrap BSD, Illumos, and Linux guests with QEMU.
+Description: |-
+  anyvm boots a prebuilt BSD, Illumos, Linux, Hurd or Plan 9 guest under QEMU
+  with one command. It downloads the image, configures firmware, ssh, folder
+  sync and port forwarding for that guest on that architecture, then drops you
+  into a shell or runs your command and exits.
+
+  anyvm drives QEMU but does not bundle it, so QEMU is declared as a package
+  dependency and winget installs it first. Pass --skip-dependencies to install
+  anyvm on its own and supply QEMU yourself.
+Moniker: anyvm
+Tags:
+- ci
+- dragonflybsd
+- emulator
+- freebsd
+- haiku
+- illumos
+- netbsd
+- openbsd
+- qemu
+- solaris
+- virtual-machine
+- vm
+ReleaseNotes: |-
+  New: FreeBSD 10.4 and 11.4
+  Two more FreeBSD generations, from builder 2.2.8, on x86_64 only:
+  anyvm.py --os freebsd --release 10.4
+  anyvm.py --os freebsd --release 11.4
+  pkg.FreeBSD.org dropped its FreeBSD 10 / 11 / 12 repositories long ago, so these
+  images take their packages from the preserved SGGS mirror, which keeps FreeBSD's
+  original repository signatures -- pkg verifies them against the fingerprint
+  shipped in the base system. That also reaches 12.4 x86_64: it now ships
+  rsync and fusefs-sshfs, so all five sync backends work there instead of
+  nfs / scp / tar only. 12.4 aarch64 stays base-only; no aarch64 packages
+  exist for FreeBSD 12.
+  Two things anyvm had to learn to run them:
+  - Boot via SeaBIOS below 12. FreeBSD's VM images only gained an EFI system
+    partition on amd64 from 12.x on, so under OVMF a 10.x / 11.x image has nothing
+    to boot from and parks at the EFI shell. anyvm now drops its UEFI default for
+    those releases once the release is resolved, and boots the freebsd-boot
+    partition they do ship. An explicit --uefi still wins.
+  - 10.x runs on the qemu64 CPU model. FreeBSD 10's signal delivery panics
+    when -cpu host exposes the full modern XSAVE feature set, so the image is
+    built and must be run on QEMU's baseline model, under every accelerator.
+    Mirrors the builder's pin; --cpu-type overrides.
+  Fixed: a lost network probe no longer reports "Unsupported OS"
+  vmactions/freebsd-vm#163:
+  a single failed probe of the release download URL sent the run down the
+  unauthenticated GitHub REST API, which the shared runner IP had already
+  exhausted. The 403 was retried for three minutes and then reported as
+  Unsupported OS: freebsd -- true of nothing.
+  - The release-URL probe now retries transient failures; only a 404 means the
+    asset is absent.
+  - A rate-limited 403 (X-RateLimit-Remaining: 0) or a 429 stops the retry loop
+    immediately and reports the reset time and the remedy (GITHUB_TOKEN)
+    instead of burning minutes on a limit that will not lift.
+  - "The API could not be asked" and "this repository does not exist" are now
+    distinct outcomes, so a connectivity failure is reported as one rather than
+    as an unsupported guest.
+  - The Authorization header no longer follows a cross-host redirect.
+    urllib's default handler forwards it to whatever host the redirect names;
+    anyvm now drops it whenever the host changes, so a token set for the GitHub
+    API cannot leak to a release-asset CDN or anywhere else.
+  Other
+  - Default builder pin: freebsd 2.2.7 -> 2.2.8.
+  - CI: 10.4 and 11.4 joined the FreeBSD x86_64 matrix, and 12.4 x86_64 gained
+    its rsync + sshfs legs.
+ReleaseNotesUrl: https://github.com/anyvm-org/anyvm/releases/tag/v0.7.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

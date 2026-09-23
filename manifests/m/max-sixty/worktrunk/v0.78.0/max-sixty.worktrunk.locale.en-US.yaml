@@ -1,0 +1,68 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.78.0
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Improved
+  - Hook scripts read renamed context keys: the JSON piped to every hook drops worktree, repo_root, main_worktree, and main_worktree_path in favour of worktree_path, repo_path, repo, and primary_worktree_path. Config templates migrate on load, so hooks written with the old names keep working; scripts reading the JSON, --execute templates, and --var overrides need updating. (Breaking.) (#4080)
+  - wt config plugins pi installs for Pi; oh-my-pi moves to wt config plugins omp: pi install wrote an oh-my-pi hook, which Pi never loads; Pi users re-run it to get a Pi extension. Existing oh-my-pi hooks keep working, listed as outdated until wt config plugins omp install. (Breaking: scripts that run wt config plugins pi for oh-my-pi need omp.) Docs (#4135, thanks @ashebanow)
+  - Interactive prompts no longer open with a blank line: wt config shell install, wt config plugins claude install, and the commit-message setup offer in wt merge began with one. (#4059)
+  - wt config show gives a single wt config shell install hint: an outdated wrapper, a fish wrapper at the deprecated conf.d path, and missing fish completions each printed their own hint. The zsh compinit snippet is now syntax-highlighted. (#4059)
+  - wt config update --output <path> confirms the write: it now prints ✓ Wrote user config migration @ ~/migrated.toml where it printed nothing. --output=- stays silent. (#4053)
+  Fixed
+  - Removal no longer discards untracked files hidden by status.showUntrackedFiles = no: under that setting, a worktree holding only untracked files looked clean, so wt remove, wt merge, and wt step prune removed it without --force. Safety checks now always count untracked files, and auto-staging warnings list every file they stage. (#4111, thanks @Duang777)
+  - wt remove and wt merge check the right worktree under an inherited GIT_DIR: run from a !wt git alias or a git hook, which pass GIT_DIR down, wt remove could delete a dirty worktree without --force, and wt merge could refuse a clean merge. Both now check the worktree they act on. (#4082, thanks @Duang777)
+  - wt merge no longer deletes a worktree locked with git worktree lock: the merge completes and prints Worktree preserved (locked). Every Worktrunk removal refuses a locked worktree, even with --force; run git worktree unlock <path> first. (#4073, thanks @Duang777)
+  - wt config update no longer overwrites a config edited while its prompt is open: it wrote the pre-prompt snapshot over the newer file and reported success. It now fails with the path and leaves the newer file; re-running previews the current contents. (#4127, thanks @zach-hammad-vs for reporting)
+  - wt step prune no longer deletes a branch created minutes ago from an older commit: --min-age aged a branch without a worktree by its commit's date, so a new branch off a day-old commit was pruned on the next run. Age now comes from the branch's oldest reflog entry. (#4077)
+  - A comment or blank line above an inline config section no longer breaks the config: a save or migration that rewrote commit = { … } as [commit] put that line inside the brackets. wt switch, wt merge, wt remove, and several wt step commands then failed with Failed to load config; wt list warned and ran without the config. Saves also dropped unrecognized keys from inline sections. (#4120, thanks @zach-hammad-vs for reporting)
+  - Config saves keep the trailing comment on a value they rewrite: a save such as answering the commit-generation offer dropped the comment after each value it rewrote, including one after an inline section's closing brace. (#4138)
+  - Ignored project-config keys warn from every worktree: an unknown key in .config/wt.toml, or one that belongs in user config such as [merge], warned only in the main worktree, so wt merge from a linked worktree ignored it silently. (#4145, thanks @ee-prog for reporting)
+  - wt merge skips post-commit when it removes that hook's worktree: before, the hook ran in the primary worktree when the removed one sat inside the repository, and otherwise didn't run. The merge now prints ▲ Skipped post-commit; move work that must finish there to pre-remove. (#4049)
+  - wt switch recovers from a removed worktree in a bare repository: wt switch and the picker surfaced git's raw fatal: Unable to read current working directory instead, and the removed-directory message lacked wt switch ^. (#4067)
+  - wt config shell install fish puts the wrapper where fish reads it under a custom $XDG_CONFIG_HOME: the wrapper always went to ~/.config/fish/functions/, so install reported success while wt switch changed no directory. On Windows, the fish completion moves from %APPDATA%\fish\completions to the wrapper's directory. (#4107)
+  - wt config shell install zsh honours $ZDOTDIR only when it is absolute: an empty or relative value resolved against the current directory, so install appended to a .zshrc under the current directory and reported success while the file zsh reads went untouched. A non-absolute value now falls back to $HOME. (#4085)
+  - wt config shell install for Nushell no longer deletes a wt.nu under the current directory: an empty or relative $XDG_CONFIG_HOME resolved against it, so install removed a nushell/vendor/autoload/wt.nu beneath it unread, as a stale wrapper. It now falls back to ~/.config, which also fixes unread tea logins that let wt switch pr:<n> treat a Gitea host as GitHub. (#4104)
+  - wt switch --create names the branch a failed worktree add leaves behind: git worktree add -b writes the branch ref before populating the worktree, so a failure in between left the branch with no worktree, and the next attempt reported a name collision. The error now says how to delete or reuse it. (#4109, thanks @technicalpickles for reporting)
+  - wt config shell install no longer tells an already-wrapped shell to restart: reinstalling from a shell with the wrapper loaded, such as after a version bump, printed ↳ Restart shell to activate shell integration. (#4059)
+  - wt config shell install migrates a deprecated conf.d fish wrapper when ~/.config/fish/functions is missing: before, only wt config shell install fish migrated it. wt config show now reports that wrapper even when fish isn't on PATH. (#4059)
+  - Plugin status and uninstall checks ask the agent CLIs: wt config show could list an installed Claude Code plugin or Gemini CLI extension as not installed, and wt config plugins claude|codex uninstall could report success over a marketplace still configured. A repeat Claude uninstall now runs both removals instead of stopping at Plugin not installed. (#4048, #4054)
+  - wt config plugins opencode install no longer writes the plugin into the current directory: with OPENCODE_CONFIG_DIR set but empty, it wrote plugins/worktrunk.ts there, typically inside a repository, reporting success though OpenCode never saw it. An empty value now counts as unset. (#4084)
+  - The OpenCode plugin clears its activity marker when OpenCode 1 disposes it: only explicit session deletion cleared it, so a finished session kept its 💬 and wt list showed it as active until wt config state marker clear was run by hand. (#4129, thanks @drewdas for reporting)
+  - wt config update migrates [ci] platform into a [forge] section that only sets hostname: that config, common with GitHub Enterprise and self-hosted GitLab, kept the deprecated key with no deprecation warning. (#4061)
+  - Deprecated keys in an inline [projects] entry now migrate: "example.com/org/repo" = { merge = { no-ff = true } } skipped the migration the section form got, so the per-project setting was ignored. (#4122, thanks @zach-hammad-vs for reporting)
+  - A deprecated config section the migration can't rewrite now warns: select = "not a table", or a [select] whose [switch.picker] destination is already set, was ignored without a message. It now reports unknown field select (will be ignored). (#4121, thanks @zach-hammad-vs for reporting)
+  - wt config update no longer changes what a template renders: it could rename {{ repo_root }} inside a quoted string, and after {% set %} rebound it. A template binding a retired name or its replacement stays unmigrated and unwarned: a hook reading that name fails, and a squash template can silently drop it. (#4124, thanks @zach-hammad-vs for reporting)
+  - Config migration previews ignore diff.external and report a failed diff: wt config show and the wt config update prompt showed an external diff program's output in place of the patch, and nothing when the diff failed. A failure now prints Could not render the proposed diff with git's error. (#4126, thanks @zach-hammad-vs for reporting)
+  - An alias that binds dry_run can take --dry-run <value>: that spelling failed with the retired-flag error even when the template referenced {{ dry_run }}, while --dry-run=<value> worked. A bare --dry-run still errors; pass --dry-run=1. (#4058)
+  - wt <alias> outside a repository names the alias: it fell through to clap's unrecognized subcommand, which suggested the name just typed. It now reports that aliases only run inside a git repository and quotes git's own error. (#3982, thanks @yzx9)
+  Documentation
+  - Shell integration has its own page: Shell integration was previously skill-only. The site gains a footer, the wt config and wt step pages stop repeating the global options under every subcommand, the generated --help blocks drop their copy button, and three recipes are corrected — including the OpenCode -x form, wrong since 0.76.0. (#4000)
+  - wt hook --help describes post-merge correctly: it said the hook runs in the destination worktree "with removal", a condition that never existed — it always runs there. (#4071, thanks @kyle641320 for reporting)
+  - Docs heading anchors are scoped to their subcommand: /step/#min-age-guard is now /step/#wt-step-prune--min-age-guard, so headings repeated across subcommands no longer collide. Links to the old anchors land at the top of the page. (#4079)
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.78.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
