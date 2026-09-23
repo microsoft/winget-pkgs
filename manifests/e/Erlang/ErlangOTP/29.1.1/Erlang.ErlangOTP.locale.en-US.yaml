@@ -1,0 +1,131 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Erlang.ErlangOTP
+PackageVersion: 29.1.1
+PackageLocale: en-US
+Publisher: Ericsson AB
+PublisherUrl: https://www.erlang.org/
+PublisherSupportUrl: https://github.com/erlang/otp/issues
+PackageName: Erlang OTP
+PackageUrl: https://www.erlang.org/downloads
+License: Apache-2.0
+LicenseUrl: https://github.com/erlang/otp/blob/HEAD/LICENSE.txt
+CopyrightUrl: https://github.com/erlang/otp/blob/master/LICENSE.txt
+ShortDescription: Erlang is a programming language and runtime system for building massively scalable soft real-time systems with requirements on high availability.
+Description: Erlang is a programming language and runtime system for building massively scalable soft real-time systems with requirements on high availability.
+Moniker: erlang
+Tags:
+- erlang
+- otp
+- programming-language
+ReleaseNotes: |-
+  Patch Package:           OTP 29.1.1
+  Git Tag:                 OTP-29.1.1
+  Date:                    2026-09-22
+  Trouble Report Id:       OTP-20272, OTP-20287, OTP-20355, OTP-20371,
+                           OTP-20386, OTP-20388, OTP-20390, OTP-20393
+  Seq num:                 CVE-2026-65634, CVE-2026-68956,
+                           CVE-2026-89422, ERIERL-1355, ERIERL-1363,
+                           GH-11586, GH-11619, GH-SA-qhcm-px9c-rvfh,
+                           PR-11523, PR-11559, PR-11616, PR-11630,
+                           PR-11638, PR-11641, PR-11651, PR-11655
+  System:                  OTP
+  Release:                 29
+  Application:             asn1-5.5.2, compiler-10.0.6,
+                           public_key-1.21.7, ssh-6.0.6, ssl-11.7.7
+  Predecessor:             OTP 29.1
+  Check out the git tag OTP-29.1.1, and build a full OTP system including documentation. Apply one or more applications from this build as patches to your installation using the 'otp_patch_apply' tool. For information on install requirements, see descriptions for each application version below.
+  POTENTIAL INCOMPATIBILITIES
+  - Fixed a vulnerability where the max_channels daemon option was not enforced for session channels without an active subsystem, allowing a remote authenticated user to open an infinite number of channels and exhaust server resources despite the configured limit.
+    The default value of the max_channels daemon option has been changed from infinity to 256. Deployments requiring more than 256 simultaneous channels per connection can restore the previous behavior by setting {max_channels, infinity}.
+    The default value of the max_sessions daemon option has been changed from infinity to 1024. Deployments requiring more concurrent SSH connections can restore the previous behavior by setting {max_sessions, infinity}.
+    Own Id: OTP-20287
+    Application(s): ssh
+    Related Id(s): GH-SA-qhcm-px9c-rvfh, PR-11523, CVE-2026-68956
+
+  asn1-5.5.2
+  The asn1-5.5.2 application can be applied independently of other applications on a full OTP 29 installation.
+
+  Fixed Bugs and Malfunctions
+  - Fixed a denial-of-service attack in asn1, where abnormally large OID components (arcs) could cause resource exhaustion.
+    Own Id: OTP-20272
+    Related Id(s): PR-11655, CVE-2026-65634
+  - The JER backend will no longer break certain values (true, false, null) when they are typed as ENUMERATED, they will now be encoded as strings as required by the standard.
+    Own Id: OTP-20355
+    Related Id(s): ERIERL-1355, PR-11559
+  > __KOMAC_HEADER__ Full runtime dependencies of asn1-5.5.2
+  >
+  > erts-14.0, kernel-9.0, stdlib-5.0
+
+  compiler-10.0.6
+  The compiler-10.0.6 application can be applied independently of other applications on a full OTP 29 installation.
+
+  Fixed Bugs and Malfunctions
+  - Certain uses of funs could crash the compiler. For example:
+    f() ->
+        F = fun Fn(0) -> 0; Fn(N) -> Fn(N - 1) end,
+        [F(X) || X <- [1, 2]].
+    This has been corrected.
+    Own Id: OTP-20386
+    Related Id(s): GH-11619, PR-11638
+  > __KOMAC_HEADER__ Full runtime dependencies of compiler-10.0.6
+  >
+  > crypto-5.1, erts-13.0, kernel-8.4, stdlib-8.0
+
+  public_key-1.21.7
+  The public_key-1.21.7 application can be applied independently of other applications on a full OTP 29 installation.
+
+  Fixed Bugs and Malfunctions
+  - Handle that policy qualifiers are optional.
+    Own Id: OTP-20393
+    Related Id(s): PR-11630
+  > __KOMAC_HEADER__ Full runtime dependencies of public_key-1.21.7
+  >
+  > asn1-5.0, crypto-5.8, erts-13.0, kernel-8.0, stdlib-4.0
+
+  ssh-6.0.6
+  The ssh-6.0.6 application can be applied independently of other applications on a full OTP 29 installation.
+
+  Fixed Bugs and Malfunctions
+  - Fixed a vulnerability where the max_channels daemon option was not enforced for session channels without an active subsystem, allowing a remote authenticated user to open an infinite number of channels and exhaust server resources despite the configured limit.
+    The default value of the max_channels daemon option has been changed from infinity to 256. Deployments requiring more than 256 simultaneous channels per connection can restore the previous behavior by setting {max_channels, infinity}.
+    The default value of the max_sessions daemon option has been changed from infinity to 1024. Deployments requiring more concurrent SSH connections can restore the previous behavior by setting {max_sessions, infinity}.
+    Own Id: OTP-20287
+    Related Id(s): GH-SA-qhcm-px9c-rvfh, PR-11523, CVE-2026-68956
+    *** POTENTIAL INCOMPATIBILITY ***
+  - The SSH daemon no longer rejects a subsystem request that is preceded by env or pty-req request on the same channel.
+    Own Id: OTP-20371
+    Related Id(s): ERIERL-1363, GH-11586, PR-11616
+  > __KOMAC_HEADER__ Full runtime dependencies of ssh-6.0.6
+  >
+  > crypto-5.7, erts-14.0, kernel-10.3, public_key-1.6.1, runtime_tools-1.15.1, stdlib-8.0
+
+  ssl-11.7.7
+  Note! The ssl-11.7.7 application cannot be applied independently of other applications on an arbitrary OTP 29 installation.
+     On a full OTP 29 installation, also the following runtime
+     dependency has to be satisfied:
+     -- public_key-1.21.1 (first satisfied in OTP 29.0.1)
+
+  Fixed Bugs and Malfunctions
+  - Reject unsolicited TLS-1.3 pre_shared_key in client.
+    Own Id: OTP-20388
+    Related Id(s): PR-11641, CVE-2026-89422
+  - Security and robustness hardening returning RFC mandated alert reasons, narrowing/correcting length checks.
+    Correct signature algorithm handling that slightly mixed up signature algorithms and signature algorithms cert in TLS-1.2.
+    Add missing TLS-1.3 Brainpool groups support. (Not relevant in 27 patch)
+    Enhanced/corrected documentation and spec errors/deviations.
+    Own Id: OTP-20390
+    Related Id(s): PR-11651
+  > __KOMAC_HEADER__ Full runtime dependencies of ssl-11.7.7
+  >
+  > crypto-5.8, erts-16.0, inets-5.10.7, kernel-10.3, public_key-1.21.1, runtime_tools-1.15.1, stdlib-7.0
+
+  Thanks to
+  Alan Duffield
+ReleaseNotesUrl: https://github.com/erlang/otp/releases/tag/OTP-29.1.1
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/erlang/otp/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
