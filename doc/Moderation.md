@@ -201,6 +201,7 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Needs-Author-Feedback`
 * `Needs-CLA`
 * `Needs-Manual-Merge`
+* `Needs-Manual-Review`
 * `Needs-Review`
 * `Network-Blocker`
 * `Package-Request`
