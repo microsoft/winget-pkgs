@@ -6,6 +6,7 @@
 static char declared_namespaces[64][128];
 static int declared_namespace_count = 0;
 static char current_namespace[128] = "";
+static bool compiler_had_error = false;
 
 static bool is_known_namespace(const char *name) {
     for (int i = 0; i < declared_namespace_count; i++) {
@@ -217,6 +218,7 @@ static void add_local(const char *name, bool is_const, int line) {
     (void)line;
     if (current_compiler->local_count >= 256) {
         fprintf(stderr, "Too many local variables in function.\n");
+        compiler_had_error = true;
         return;
     }
     
@@ -224,7 +226,12 @@ static void add_local(const char *name, bool is_const, int line) {
         Local *local = &current_compiler->locals[i];
         if (local->depth < current_compiler->scope_depth) break;
         if (strcmp(local->name, name) == 0) {
-            fprintf(stderr, "Variable '%s' already defined in this scope.\n", name);
+            if (local->is_constant) {
+                fprintf(stderr, "Cannot redefine constant '%s'.\n", name);
+            } else {
+                fprintf(stderr, "Variable '%s' already defined in this scope.\n", name);
+            }
+            compiler_had_error = true;
             return;
         }
     }
@@ -258,6 +265,7 @@ static int add_upvalue(Compiler *compiler, uint8_t index, bool is_local) {
     
     if (count >= 256) {
         fprintf(stderr, "Too many closure variables in function.\n");
+        compiler_had_error = true;
         return 0;
     }
     
@@ -685,6 +693,10 @@ static void compile_stmt(VSS_Stmt *stmt) {
             compile_expr(stmt->as.assign.value);
             int arg = resolve_local(current_compiler, stmt->as.assign.name);
             if (arg != -1) {
+                if (current_compiler->locals[arg].is_constant) {
+                    fprintf(stderr, "Cannot reassign to constant '%s'.\n", stmt->as.assign.name);
+                    compiler_had_error = true;
+                }
                 emit_bytes(VSS_OP_SET_LOCAL, (uint8_t)arg, stmt->line);
             } else if ((arg = resolve_upvalue(current_compiler, stmt->as.assign.name)) != -1) {
                 emit_bytes(VSS_OP_SET_UPVALUE, (uint8_t)arg, stmt->line);
@@ -1075,6 +1087,7 @@ static void compile_stmt(VSS_Stmt *stmt) {
         case VSS_STMT_LEAVE: {
             if (current_loop == NULL) {
                 fprintf(stderr, "Leave statement outside loop.\n");
+                compiler_had_error = true;
                 break;
             }
             int jump = emit_jump(VSS_OP_JUMP, stmt->line);
@@ -1089,6 +1102,7 @@ static void compile_stmt(VSS_Stmt *stmt) {
         case VSS_STMT_SKIP: {
             if (current_loop == NULL) {
                 fprintf(stderr, "Skip statement outside loop.\n");
+                compiler_had_error = true;
                 break;
             }
             if (current_loop->is_during) {
@@ -1404,6 +1418,7 @@ static void compile_stmt(VSS_Stmt *stmt) {
 VSS_ObjFunction *vss_compile_program(VSS_Block program) {
     declared_namespace_count = 0;
     current_namespace[0] = '\0';
+    compiler_had_error = false;
     Compiler compiler;
     compiler_init(&compiler, "__main__", TYPE_MAIN);
     
@@ -1411,5 +1426,9 @@ VSS_ObjFunction *vss_compile_program(VSS_Block program) {
     
     emit_return(0);
     VSS_ObjFunction *func = compiler_end();
+    if (compiler_had_error) {
+        vss_function_release(func);
+        return NULL;
+    }
     return func;
 }

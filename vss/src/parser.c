@@ -568,9 +568,16 @@ static bool is_set_literal(VSS_Parser *parser) {
     int brace_depth = 1;
     int paren_depth = 0;
     int bracket_depth = 0;
+    bool is_first = true;
     for (;;) {
         VSS_Token tok = vss_lexer_next(&temp);
         if (tok.type == VSS_TOKEN_EOF) break;
+        if (is_first) {
+            is_first = false;
+            if (tok.type == VSS_TOKEN_RIGHT_BRACE) {
+                return true;
+            }
+        }
         if (tok.type == VSS_TOKEN_LEFT_BRACE) brace_depth++;
         else if (tok.type == VSS_TOKEN_RIGHT_BRACE) {
             brace_depth--;

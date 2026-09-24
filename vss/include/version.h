@@ -2,15 +2,15 @@
 #define VSS_VERSION_H
 
 // These are injected at compile time by the build system via -D flags.
-// Example: gcc ... -DVSS_VERSION_STRING="1.0.0" -DVSS_BUILD_TYPE="Release"
+// Example: gcc ... -DVSS_VERSION_STRING="3.3.3" -DVSS_BUILD_TYPE="Release"
 // Falls back to development defaults if not provided.
 
 #ifndef VSS_VERSION_STRING
-#define VSS_VERSION_STRING "3.1.0"
+#define VSS_VERSION_STRING "3.3.3"
 #endif
 
 #ifndef VSS_BUILD_TYPE
-#define VSS_BUILD_TYPE "Debug"
+#define VSS_BUILD_TYPE "Release"
 #endif
 
 // Platform detection

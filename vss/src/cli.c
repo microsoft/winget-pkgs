@@ -664,19 +664,36 @@ int vss_run_cli(int argc, char **argv) {
             return 1;
         }
         int total_failures = 0;
-        const char *test_files[] = {
-            "examples/test_suite.vss",
-            "examples/test_python_parity.vss",
-            "examples/test_full_python_capabilities.vss",
-            "examples/test_python_expanded_parity.vss"
+        const char *suite_names[] = {
+            "test_suite.vss",
+            "test_python_parity.vss",
+            "test_full_python_capabilities.vss",
+            "test_python_expanded_parity.vss"
         };
-        int count = (int)(sizeof(test_files) / sizeof(test_files[0]));
+        int num_suites = (int)(sizeof(suite_names) / sizeof(suite_names[0]));
         int ran_any = 0;
-        for (int i = 0; i < count; i++) {
-            if (vss_file_exists(test_files[i])) {
+        for (int i = 0; i < num_suites; i++) {
+            char target_path[512] = {0};
+            if (vss_file_exists(suite_names[i])) {
+                snprintf(target_path, sizeof(target_path), "%s", suite_names[i]);
+            } else {
+                char path1[512];
+                snprintf(path1, sizeof(path1), "examples/%s", suite_names[i]);
+                if (vss_file_exists(path1)) {
+                    snprintf(target_path, sizeof(target_path), "%s", path1);
+                } else {
+                    char path2[512];
+                    snprintf(path2, sizeof(path2), "vss/examples/%s", suite_names[i]);
+                    if (vss_file_exists(path2)) {
+                        snprintf(target_path, sizeof(target_path), "%s", path2);
+                    }
+                }
+            }
+
+            if (target_path[0] != '\0') {
                 ran_any = 1;
-                printf("\033[1;36mRunning Test Suite:\033[0m %s\n", test_files[i]);
-                int res = run_file(test_files[i]);
+                printf("\033[1;36mRunning Test Suite:\033[0m %s\n", target_path);
+                int res = run_file(target_path);
                 if (res != 0) total_failures++;
                 printf("\n");
             }
@@ -684,6 +701,8 @@ int vss_run_cli(int argc, char **argv) {
         if (!ran_any) {
             if (vss_file_exists("test_suite.vss")) {
                 return run_file("test_suite.vss");
+            } else if (vss_file_exists("vss/examples/test_suite.vss")) {
+                return run_file("vss/examples/test_suite.vss");
             } else {
                 fprintf(stderr, "\033[1;31mError:\033[0m No test suites found.\n");
                 return 1;

@@ -983,11 +983,23 @@ static VSS_FlowResult exec_stmt(VSS_Stmt *stmt, VSS_Env *env) {
                 f = fopen(filepath, "rb");
             }
             if (!f) {
+                snprintf(filepath, sizeof(filepath), "vss/stdlib/%s.vss", stmt->as.grab.module_name);
+                f = fopen(filepath, "rb");
+            }
+            if (!f) {
                 snprintf(filepath, sizeof(filepath), "packages/%s.vss", stmt->as.grab.module_name);
                 f = fopen(filepath, "rb");
             }
             if (!f) {
+                snprintf(filepath, sizeof(filepath), "vss/packages/%s.vss", stmt->as.grab.module_name);
+                f = fopen(filepath, "rb");
+            }
+            if (!f) {
                 snprintf(filepath, sizeof(filepath), "examples/%s.vss", stmt->as.grab.module_name);
+                f = fopen(filepath, "rb");
+            }
+            if (!f) {
+                snprintf(filepath, sizeof(filepath), "vss/examples/%s.vss", stmt->as.grab.module_name);
                 f = fopen(filepath, "rb");
             }
             if (!f) {

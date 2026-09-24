@@ -159,6 +159,16 @@ static SemVar *scope_lookup(SemScope *scope, const char *name) {
     return NULL;
 }
 
+static SemVar *scope_lookup_current(SemScope *scope, const char *name) {
+    if (!scope) return NULL;
+    SemVar *v = scope->vars;
+    while (v) {
+        if (strcmp(v->name, name) == 0) return v;
+        v = v->next;
+    }
+    return NULL;
+}
+
 static void scope_free(SemScope *scope) {
     SemVar *v = scope->vars;
     while (v) {
@@ -252,6 +262,11 @@ static bool check_stmt(VSS_Stmt *stmt, SemScope *scope) {
     if (!stmt) return true;
     switch (stmt->kind) {
         case VSS_STMT_MAKE: {
+            SemVar *existing = scope_lookup_current(scope, stmt->as.make.name);
+            if (existing && existing->is_const) {
+                sem_error(stmt->line, stmt->column, "Cannot reassign to constant '%s'.", stmt->as.make.name);
+                return false;
+            }
             const char *inf = infer_type(stmt->as.make.initializer, scope);
             if (stmt->as.make.type_name) {
                 if (!types_compatible(stmt->as.make.type_name, inf)) {
@@ -264,6 +279,11 @@ static bool check_stmt(VSS_Stmt *stmt, SemScope *scope) {
             break;
         }
         case VSS_STMT_KEEP: {
+            SemVar *existing = scope_lookup_current(scope, stmt->as.keep.name);
+            if (existing) {
+                sem_error(stmt->line, stmt->column, "Cannot redefine constant '%s'.", stmt->as.keep.name);
+                return false;
+            }
             const char *inf = infer_type(stmt->as.keep.initializer, scope);
             if (stmt->as.keep.type_name) {
                 if (!types_compatible(stmt->as.keep.type_name, inf)) {

@@ -19,6 +19,10 @@ static char *platform_strdup(const char *s) {
 #include <io.h>
 #include <windows.h>
 #include <shellapi.h>
+#ifdef _MSC_VER
+#pragma comment(lib, "ws2_32.lib")
+#pragma comment(lib, "shell32.lib")
+#endif
 
 bool vss_network_init(void) {
     WSADATA wsa;

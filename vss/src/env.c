@@ -56,9 +56,18 @@ void vss_env_release(VSS_Env *env) {
 bool vss_env_define(VSS_Env *env, const char *name, VSS_Value value) {
     if (!env) return false;
     vss_mutex_lock(&env->mutex);
-    if (vss_env_exists_local(env, name)) {
-        vss_mutex_unlock(&env->mutex);
-        return false;
+    for (size_t i = 0; i < env->count; i++) {
+        if (strcmp(env->items[i].name, name) == 0) {
+            if (env->items[i].is_constant) {
+                vss_mutex_unlock(&env->mutex);
+                return false;
+            }
+            vss_value_release(env->items[i].value);
+            env->items[i].value = value;
+            vss_value_retain(value);
+            vss_mutex_unlock(&env->mutex);
+            return true;
+        }
     }
     
     if (env->count >= env->capacity) {

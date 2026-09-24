@@ -296,9 +296,17 @@ bool vss_vm_run(VSS_ObjFunction *func, VSS_Env *global_env) {
                 const char *name = name_val.as.string->chars;
                 VSS_Value val = pop();
                 if (is_const) {
-                    vss_env_define_const(vm.globals, name, val);
+                    if (!vss_env_define_const(vm.globals, name, val)) {
+                        vss_value_release(val);
+                        runtime_error("Cannot redefine constant '%s'.", name);
+                        return false;
+                    }
                 } else {
-                    vss_env_define(vm.globals, name, val);
+                    if (!vss_env_define(vm.globals, name, val)) {
+                        vss_value_release(val);
+                        runtime_error("Cannot reassign constant '%s'.", name);
+                        return false;
+                    }
                 }
                 vss_value_release(val);
                 break;
@@ -551,16 +559,34 @@ bool vss_vm_run(VSS_ObjFunction *func, VSS_Env *global_env) {
                     VSS_ObjClass *curr = callee_val.as.klass;
                     VSS_Value create_val;
                     bool found = false;
+                    bool is_init = false;
                     while (curr) {
                         for (size_t i = 0; i < curr->methods->count; i++) {
                             if (strcmp(curr->methods->entries[i].key, "create") == 0) {
                                 create_val = curr->methods->entries[i].value;
                                 found = true;
+                                is_init = false;
                                 break;
+                            } else if (strcmp(curr->methods->entries[i].key, "init") == 0 && !found) {
+                                create_val = curr->methods->entries[i].value;
+                                found = true;
+                                is_init = true;
                             }
                         }
-                        if (found) break;
+                        if (found && !is_init) break;
                         curr = curr->parent;
+                    }
+                    
+                    if (found && is_init && arg_count == 0) {
+                        size_t expected_params = 0;
+                        if (create_val.type == VSS_VAL_CLOSURE) {
+                            expected_params = create_val.as.closure->function->param_count;
+                        } else if (create_val.type == VSS_VAL_FUNCTION) {
+                            expected_params = create_val.as.function->param_count;
+                        }
+                        if (expected_params > 0) {
+                            found = false;
+                        }
                     }
                     
                     if (found) {
@@ -608,7 +634,7 @@ bool vss_vm_run(VSS_ObjFunction *func, VSS_Env *global_env) {
                         frame = next_frame;
                     } else {
                         if (arg_count != 0) {
-                            runtime_error("Constructor 'create' not found on class '%s'.", callee_val.as.klass->name);
+                            runtime_error("Constructor 'create' or 'init' not found on class '%s'.", callee_val.as.klass->name);
                             vss_value_release(inst);
                             return false;
                         }
@@ -683,7 +709,9 @@ bool vss_vm_run(VSS_ObjFunction *func, VSS_Env *global_env) {
                 VSS_Value ret_val = pop(); // pop return value
                 close_upvalues(&vm, frame->slots);
                 
-                if (frame->closure->receiver.type != VSS_VAL_EMPTY && strcmp(frame->closure->function->name, "create") == 0) {
+                if (frame->closure->receiver.type != VSS_VAL_EMPTY &&
+                    (strcmp(frame->closure->function->name, "create") == 0 ||
+                     strcmp(frame->closure->function->name, "init") == 0)) {
                     vss_value_release(ret_val);
                     ret_val = frame->closure->receiver;
                     vss_value_retain(ret_val);
@@ -1324,11 +1352,23 @@ bool vss_vm_run(VSS_ObjFunction *func, VSS_Env *global_env) {
                         f = fopen(filepath, "rb");
                     }
                     if (!f) {
+                        snprintf(filepath, sizeof(filepath), "vss/stdlib/%s.vss", module_name);
+                        f = fopen(filepath, "rb");
+                    }
+                    if (!f) {
                         snprintf(filepath, sizeof(filepath), "packages/%s.vss", module_name);
                         f = fopen(filepath, "rb");
                     }
                     if (!f) {
+                        snprintf(filepath, sizeof(filepath), "vss/packages/%s.vss", module_name);
+                        f = fopen(filepath, "rb");
+                    }
+                    if (!f) {
                         snprintf(filepath, sizeof(filepath), "examples/%s.vss", module_name);
+                        f = fopen(filepath, "rb");
+                    }
+                    if (!f) {
+                        snprintf(filepath, sizeof(filepath), "vss/examples/%s.vss", module_name);
                         f = fopen(filepath, "rb");
                     }
                     if (!f) {

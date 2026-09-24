@@ -52,6 +52,41 @@ make parsed becomes json.parse(serialized)
 testing.assert_equal(parsed field "version", "3.0.0", "JSON parse reads correct string field")
 testing.assert_equal(parsed field "stable", yes, "JSON parse reads correct boolean field")
 
+note 7. Test Shapes, Constructors & Advanced Collections
+say "Testing shapes, constructors & collections..."
+shape User
+    field name
+    task init needs n
+        mine.name becomes n
+    finish
+finish
+
+make u becomes User("Alice")
+testing.assert_equal(u.name, "Alice", "User init constructor initializes field")
+
+make q becomes collections.Queue()
+q.push(10)
+q.push(20)
+testing.assert_equal(q.pop(), 10, "Queue FIFO first element")
+testing.assert_equal(q.pop(), 20, "Queue FIFO second element")
+testing.assert_equal(q.pop(), empty, "Queue empty pop")
+
+make stk becomes collections.Stack()
+stk.push(100)
+stk.push(200)
+testing.assert_equal(stk.pop(), 200, "Stack LIFO first element")
+testing.assert_equal(stk.pop(), 100, "Stack LIFO second element")
+testing.assert_equal(stk.pop(), empty, "Stack empty pop")
+
+make union_res becomes collections.set_union({1, 2}, {2, 3})
+testing.assert_equal(size of union_res, 3, "set_union deduplicates elements")
+
+make numbers becomes [10, 20, 30]
+testing.assert_equal(collections.pop_front(numbers), 10, "collections.pop_front removes first element")
+testing.assert_equal(size of numbers, 2, "numbers size after pop_front is 2")
+testing.assert_equal(collections.pop_back(numbers), 30, "collections.pop_back removes last element")
+testing.assert_equal(size of numbers, 1, "numbers size after pop_back is 1")
+
 say "========================================"
 say "All VSS 3.0.0 Tests Completed Successfully!"
 say "========================================"

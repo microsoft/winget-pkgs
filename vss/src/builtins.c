@@ -1522,6 +1522,52 @@ static VSS_Value builtin_list_unique(size_t arg_count, VSS_Value *args, bool *ou
     return res;
 }
 
+static VSS_Value builtin_list_pop_front(size_t arg_count, VSS_Value *args, bool *out_error, char **out_error_msg) {
+    if (arg_count != 1 || args[0].type != VSS_VAL_LIST) {
+        *out_error = true; *out_error_msg = safe_strdup("list_pop_front expects a list"); return vss_value_new_empty();
+    }
+    VSS_ValList *l = args[0].as.list;
+    if (l->count == 0) {
+        return vss_value_new_empty();
+    }
+    VSS_Value first = l->items[0];
+    if (l->count > 1) {
+        memmove(l->items, l->items + 1, sizeof(VSS_Value) * (l->count - 1));
+    }
+    l->count--;
+    return first;
+}
+
+static VSS_Value builtin_list_pop_back(size_t arg_count, VSS_Value *args, bool *out_error, char **out_error_msg) {
+    if (arg_count != 1 || args[0].type != VSS_VAL_LIST) {
+        *out_error = true; *out_error_msg = safe_strdup("list_pop_back expects a list"); return vss_value_new_empty();
+    }
+    VSS_ValList *l = args[0].as.list;
+    if (l->count == 0) {
+        return vss_value_new_empty();
+    }
+    l->count--;
+    return l->items[l->count];
+}
+
+static VSS_Value builtin_list_remove_at(size_t arg_count, VSS_Value *args, bool *out_error, char **out_error_msg) {
+    if (arg_count != 2 || args[0].type != VSS_VAL_LIST || args[1].type != VSS_VAL_NUMBER) {
+        *out_error = true; *out_error_msg = safe_strdup("list_remove_at expects list and index"); return vss_value_new_empty();
+    }
+    VSS_ValList *l = args[0].as.list;
+    int idx = (int)args[1].as.number;
+    if (idx < 0) idx = (int)l->count + idx;
+    if (idx < 0 || idx >= (int)l->count) {
+        return vss_value_new_empty();
+    }
+    VSS_Value val = l->items[idx];
+    if ((size_t)idx < l->count - 1) {
+        memmove(l->items + idx, l->items + idx + 1, sizeof(VSS_Value) * (l->count - 1 - idx));
+    }
+    l->count--;
+    return val;
+}
+
 static VSS_Value builtin_string_slice(size_t arg_count, VSS_Value *args, bool *out_error, char **out_error_msg) {
     return builtin_string_substring(arg_count, args, out_error, out_error_msg);
 }
@@ -2781,6 +2827,9 @@ void vss_register_builtins(VSS_Env *env) {
     vss_env_define(env, "__list_slice", vss_value_new_native(builtin_list_slice));
     vss_env_define(env, "__list_contains", vss_value_new_native(builtin_list_contains));
     vss_env_define(env, "__list_unique", vss_value_new_native(builtin_list_unique));
+    vss_env_define(env, "__list_pop_front", vss_value_new_native(builtin_list_pop_front));
+    vss_env_define(env, "__list_pop_back", vss_value_new_native(builtin_list_pop_back));
+    vss_env_define(env, "__list_remove_at", vss_value_new_native(builtin_list_remove_at));
     vss_env_define(env, "__string_slice", vss_value_new_native(builtin_string_slice));
 
     // Regex
@@ -2992,9 +3041,7 @@ void vss_register_builtins(VSS_Env *env) {
         "        finish\n"
         "        task pop needs\n"
         "            when size of mine.items above 0\n"
-        "                make first becomes mine.items[0]\n"
-        "                note erase first element (simulated in dynamic list)\n"
-        "                send first\n"
+        "                send __list_pop_front(mine.items)\n"
         "            finish\n"
         "            send empty\n"
         "        finish\n"
@@ -3009,22 +3056,48 @@ void vss_register_builtins(VSS_Env *env) {
         "            put x into mine.items\n"
         "        finish\n"
         "        task pop needs\n"
-        "            make sz becomes size of mine.items\n"
-        "            when sz above 0\n"
-        "                make last becomes mine.items[sz - 1]\n"
-        "                send last\n"
+        "            when size of mine.items above 0\n"
+        "                send __list_pop_back(mine.items)\n"
         "            finish\n"
         "            send empty\n"
         "        finish\n"
         "    finish\n"
         "\n"
+        "    task pop_front needs items\n"
+        "        send __list_pop_front(items)\n"
+        "    finish\n"
+        "\n"
+        "    task pop_back needs items\n"
+        "        send __list_pop_back(items)\n"
+        "    finish\n"
+        "\n"
+        "    task remove_at needs items, index\n"
+        "        send __list_remove_at(items, index)\n"
+        "    finish\n"
+        "\n"
         "    task set_union needs s1, s2\n"
         "        make union becomes {}\n"
         "        repeat each x in s1\n"
-        "            put x into union\n"
+        "            make found becomes no\n"
+        "            repeat each u in union\n"
+        "                when u same_as x\n"
+        "                    found becomes yes\n"
+        "                finish\n"
+        "            finish\n"
+        "            when found same_as no\n"
+        "                put x into union\n"
+        "            finish\n"
         "        finish\n"
         "        repeat each x in s2\n"
-        "            put x into union\n"
+        "            make found becomes no\n"
+        "            repeat each u in union\n"
+        "                when u same_as x\n"
+        "                    found becomes yes\n"
+        "                finish\n"
+        "            finish\n"
+        "            when found same_as no\n"
+        "                put x into union\n"
+        "            finish\n"
         "        finish\n"
         "        send union\n"
         "    finish\n"
@@ -3045,7 +3118,7 @@ void vss_register_builtins(VSS_Env *env) {
         "            make result becomes empty\n"
         "            lock mine._mutex\n"
         "                when size of mine._items above 0\n"
-        "                    result becomes mine._items[0]\n"
+        "                    result becomes __list_pop_front(mine._items)\n"
         "                finish\n"
         "            finish\n"
         "            send result\n"

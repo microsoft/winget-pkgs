@@ -9,9 +9,7 @@ shape Queue
     finish
     task pop needs
         when size of mine.items above 0
-            make first becomes mine.items[0]
-            note erase first element (simulated in dynamic list)
-            send first
+            send __list_pop_front(mine.items)
         finish
         send empty
     finish
@@ -26,22 +24,48 @@ shape Stack
         put x into mine.items
     finish
     task pop needs
-        make sz becomes size of mine.items
-        when sz above 0
-            make last becomes mine.items[sz - 1]
-            send last
+        when size of mine.items above 0
+            send __list_pop_back(mine.items)
         finish
         send empty
     finish
 finish
 
+task pop_front needs items
+    send __list_pop_front(items)
+finish
+
+task pop_back needs items
+    send __list_pop_back(items)
+finish
+
+task remove_at needs items, index
+    send __list_remove_at(items, index)
+finish
+
 task set_union needs s1, s2
     make union becomes {}
     repeat each x in s1
-        put x into union
+        make found becomes no
+        repeat each u in union
+            when u same_as x
+                found becomes yes
+            finish
+        finish
+        when found same_as no
+            put x into union
+        finish
     finish
     repeat each x in s2
-        put x into union
+        make found becomes no
+        repeat each u in union
+            when u same_as x
+                found becomes yes
+            finish
+        finish
+        when found same_as no
+            put x into union
+        finish
     finish
     send union
 finish
