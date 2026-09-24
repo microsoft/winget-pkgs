@@ -241,6 +241,40 @@ pre-agent-steps:
         } finally {
           writeOutput();
         }
+  - name: Skip agent when no supported evidence path remains
+    uses: actions/github-script@v9
+    env:
+      GH_AW_SAFE_OUTPUTS: ${{ steps.set-runtime-paths.outputs.GH_AW_SAFE_OUTPUTS }}
+    with:
+      script: |
+        const fs = require("fs");
+        const path = require("path");
+        const evidence = JSON.parse(
+          fs.readFileSync("/tmp/gh-aw/validation-checks.json", "utf8"),
+        );
+        const checkPathAvailable =
+          evidence.evidenceComplete === true &&
+          evidence.available === true;
+        const singletonPathAvailable =
+          evidence.triggerLabel === "Manifest-Singleton-Deprecated";
+        if (!checkPathAvailable && !singletonPathAvailable) {
+          const safeOutputsPath =
+            String(process.env.GH_AW_SAFE_OUTPUTS ?? "").trim() ||
+            path.join(
+              process.env.RUNNER_TEMP || "/tmp",
+              "gh-aw",
+              "safeoutputs",
+              "outputs.jsonl",
+            );
+          fs.mkdirSync(path.dirname(safeOutputsPath), { recursive: true });
+          fs.appendFileSync(
+            safeOutputsPath,
+            `${JSON.stringify({
+              type: "noop",
+              message: "No supported manifest diagnosis evidence is available.",
+            })}\n`,
+          );
+        }
   - name: Upload sealed validation evidence
     uses: actions/upload-artifact@v7
     with:
@@ -273,6 +307,7 @@ tools:
 safe-outputs:
   threat-detection: true
   report-failure-as-issue: false
+  report-failed-jobs: false
   report-incomplete:
     create-issue: false
   noop:
@@ -290,8 +325,7 @@ safe-outputs:
       permissions:
         checks: read
         contents: read
-        issues: write
-        pull-requests: read
+        pull-requests: write
       output: Comment posted to the triggering pull request
       inputs:
         body:
