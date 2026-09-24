@@ -1,0 +1,49 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: dividebysandwich.SDROxide
+PackageVersion: 1.6.8
+PackageLocale: en-US
+Publisher: Josef Jahn
+PublisherUrl: https://github.com/dividebysandwich
+PublisherSupportUrl: https://github.com/dividebysandwich/sdroxide/issues
+Author: Josef Jahn
+PackageName: sdroxide
+PackageUrl: https://sdroxide.com/
+License: GPL-3.0
+LicenseUrl: https://github.com/dividebysandwich/sdroxide/blob/HEAD/LICENSE
+ShortDescription: A native software-defined radio transceiver client.
+Description: |-
+  A PowerSDR/Thetis-style software-defined-radio transceiver client in Rust, with pluggable radio backends (SoapySDR, OpenHPSDR, TCI, SmartSDR, Icom LAN, ELAD, and CAT), an egui GUI, and a cyberpunk theme. It runs as a native desktop application and, from the same binary, as a server that streams the same UI to a web browser over WebSocket. It includes an integrated, persistent logbook, many digital modes like FT8/FT4/FT2 built-in, and TCI and Hamlib rigctld servers so third-party programs like WSJT-X can use it as their radio.
+
+  One binary, three ways to run it:
+  - Native — a local desktop transceiver against your SDR hardware.
+  - Server — sdroxide --server; the DSP runs on the machine with the radio and the full UI (plus audio and the waterfall) is served to a browser as WebAssembly. Every radio the station has is served, one client each: /ws and /ws/<id>, listed at /radios. Its roster is editable from a client too — a signed-in operator can add a radio to the station and close one again, without touching the machine or restarting it. On a phone or tablet it installs to the home screen and runs full screen, holding the screen awake while it is in front.
+  - Native remote — sdroxide --connect host:4950; the desktop UI driving a remote server instead of local hardware. A station with several radios comes up with all of them, one tab each.
+
+  Core features
+  - Radios - CAT/Audio, CAT/Stereo IQ, TCI (SunSDR), OpenHPSDR P1 and P2 (Hermes Lite 2, Apache Labs), SoapySDR (HackRF, etc.), RTL-SDR (native support, over USB or over the network via rtl_tcp), RX-888 (native support), SDRplay RSP (native, via the vendor API service), SmartSDR (FlexRadio - experimental!), PlutoSDR (native support, experimental!), Icom LAN / RS-BA1 protocol, HackRF (native support, RX verified / TX unmeasured), Airspy R2/Mini (native support, experimental!), HydraSDR RFOne (native support, experimental!), ELAD FDM-DUO / FDM-S1 / FDM-S2 (native support, experimental!), LimeSDR family + LimeRFE front end (via LimeSuite, experimental!), RigExpert Fobos SDR (native, via libfobos)
+  - Panadapter — GPU (wgpu) waterfall + spectrum line, wheel-zoom around the cursor, drag-to-pan, per-digit frequency readout, selectable colormaps, peak-hold, and auto-contrast ("FIT", on by default) that keeps the display floor/ceiling fitted to the signals currently on screen — refitting on a band change, after a pan or zoom, and when the levels drift, eased in rather than switched.
+  - Modes — SSB (USB/LSB), CW, AM, SAM, NFM (with CTCSS/DCS decoding and tone squelch), WFM (with broadcast pilot-tone stereo and RDS/RBDS), DSB, ISB (independent sideband — the two sidebands are two different transmissions, one to each ear), DIGU/DIGL, a spectrum-only mode, FT8/FT4/FT2, JS8 (all four speeds, with directed messaging, heartbeats and multi-frame free text), the keyboard modes PSK31, RTTY, Olivia, THOR and FSQ (with directed messaging + images), WSPR (transmit and receive, with WSPRnet reporting and optional band hopping), receive-only PI4 (the "Next Generation Beacon" propagation mode — 4-FSK, decoded from a rate-1/2 K=32 Fano search across every beacon variant and tone frequency the network uses), Hellschreiber (all seven Feld Hell / FSK Hell variants, on a scrolling raster), image SSTV (Scottie, Martin, Robot), image RIFP (draft-dulaunoy-rifp-00 — packetised, checksummed pictures over a 4800-baud CPFSK modem), receive-only weather fax (WEFAX/radiofax charts with a station picker, phasing and slant correction), transmit-only RF Paint (spectrum painting of text and images onto the waterfall), and receive-only ADS-B — the aircraft overhead on 1090 MHz, on a radar display with history dots, speed vectors and data blocks — and receive-only VDL2, the VHF datalink those same aircraft exchange ACARS over, on all seven channels around 136.8 MHz at once, with the messages and the stations sending them — and receive-only ACARS itself, the classic airband datalink, decoded from the AM carrier on the shared airline channels (131.550, 131.725 MHz and friends) — and receive-only HFDL, the shortwave ground network airliners use where no VHF receiver can hear them, one assigned channel at a time between 2.8 and 22 MHz, with a decode log and a map of the aircraft positions it carries.
+  - Receiver — hang AGC, draggable passband filter edges (on the spectrum and the waterfall), noise blanker, auto-notch, five noise-reduction engines (RNNoise, DeepFilterNet3, a libspecbleach port, a port of WDSP's NR2 and the built-in spectral NR, three strengths each), squelch, a second sub-receiver, RIT/XIT, VFO A/B with split, per-band band stacks, and memory channels.
+  - Winlink radio email — a built-in client for the amateur store-and-forward email network, speaking B2F/FBB, LZHUF and the secure login natively (no Pat, no external modem). Mailbox with inbox / outbox / sent / archive, compose and reply, attachments, and the session transcript when something goes wrong. Over the internet CMS today; AX.25 packet and ARDOP are the planned radio transports.
+  - Bandplan overlay — a colour-coded strip along the bottom of the waterfall that labels allocations (ham bands, broadcast, CB, AM); it shows coarse bands when zoomed out and CW/digital/SSB sub-segments when zoomed into a ham band.
+  - Scanner — work through the memory channels or a frequency range and stop where somebody is transmitting, with a configurable threshold (or the receiver's own squelch), dwell, skip list, and carrier / timed / manual resume. A range scan reads a whole span out of the panadapter's FFT rather than visiting channels one at a time, so sweeping 2 m takes well under a second instead of minutes.
+  - Transmit — PTT and tune carrier, drive/ALC metering, device-aware half-duplex sequencing (HackRF) or full-duplex (LimeSDR), and a ham-band / TX-range lockout so you can't key outside your allocation.
+  - Resizable layout — drag the frequency-scale strip to resize the spectrum vs. waterfall split; in FT8/FT4/FT2, drag the divider to resize the operating panel.
+  - Live spotting, awards & QSL — DX cluster / POTA / SOTA / PSK Reporter spots as clickable panadapter markers (click to tune + pre-fill a log entry), QRZ/HamQTH callsign lookup, one-click upload to LoTW / eQSL / Club Log / QRZ / HamQTH, and live DXCC / WAS / WAZ / grid award tracking (worked vs confirmed).
+  - Control inputs — every shortcut is rebindable, and any class-compliant MIDI controller can drive the radio: a jog wheel as the VFO knob, pads as PTT and band buttons, faders as gain controls, with LED/motor feedback. Mouse buttons take bindings too (a side button held for PTT works as a footswitch), and the panadapter wheel can zoom or tune.
+  - Spoken announcements — the radio reads itself out, for operating it without seeing it. A neural voice ships with the program and runs locally, so nothing is sent anywhere and no speech service has to be installed. It reads the frequency once the dial stops moving, folds a band change into one phrase, warns when you leave an amateur band, reads the SWR out while you tune up (with a warning above 3:1), and announces FT8/JS8 messages addressed to you. Announcements play on their own sound device, so they are never recorded and never sent to a remote listener. The window is also exposed to NVDA, Orca and VoiceOver.
+  - T/R switch — drives an external relay that disconnects and grounds the SDR's antenna input while the station transmits, and sequences an amplifier or an outboard T/R relay with it (per-contact lead and hold, so the antenna always throws before the amplifier is keyed and unkeys before it comes back). Works with the cheap USB relay boards (LCUS/CH340, KMtronic, Numato), USB HID relay boards, CM108/CM119 sound-card GPIO, a serial RTS/DTR line into any interface that wants a PTT closure, a Raspberry Pi GPIO line, or an external command. An optional transmit-sense input on the same port sees a rig keyed at its own microphone in milliseconds instead of the few hundred a CAT poll takes. A contact can also be given a band-decoder role instead, switched by which band the dial is on — a per-band RX/TX output table, the RX-to-TX move sequenced on the same lead and hold as every other contact. The same idea as the HPSDR filter board's open-collector band code (below), on a relay board, GPIO header or RTS/DTR pair, for driving an outboard band-pass/low-pass filter bank or a transverter selector on a PlutoSDR, a LibreSDR, or any other front end without HPSDR's own seven-pin bus. See "T/R switch" in the user manual for what this cannot do.
+  - Persistence — device, rates, gains, memories, band stacks, the FT8/FT4/FT2 operator profile, network/QSL credentials, control bindings, and the logbook are all stored under ~/.config/sdroxide/.
+Tags:
+- ham-radio
+- sdr
+- software-defined-radio
+- transceiver
+ReleaseNotesUrl: https://github.com/dividebysandwich/sdroxide/releases/tag/v1.6.8
+Documentations:
+- DocumentLabel: User Manual
+  DocumentUrl: https://github.com/dividebysandwich/sdroxide/blob/HEAD/docs/USER_MANUAL.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

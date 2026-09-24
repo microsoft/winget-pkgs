@@ -1,0 +1,39 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: dividebysandwich.SDROxide
+PackageVersion: 1.6.8
+PackageLocale: zh-CN
+ShortDescription: 原生软件定义无线电收发信机客户端。
+Description: |-
+  一个使用 Rust 编写的 PowerSDR/Thetis 风格软件无线电 (SDR) 收发信机客户端，具有可插拔的无线电后端（SoapySDR、OpenHPSDR、TCI、SmartSDR、Icom LAN、ELAD 和 CAT）、egui 图形界面以及赛博朋克主题。它既可以作为原生桌面应用程序运行，也可以通过同一个二进制文件作为服务器运行，通过 WebSocket 将相同的 UI 流式传输至 Web 浏览器。它包含一个集成且持久化的电台日志，内置 FT8/FT4/FT2 等多种数字模式，并提供 TCI 和 Hamlib rigctld 服务器，以便 WSJT-X 等第三方程序将其用作无线电设备。
+
+  单一二进制文件，三种运行方式：
+  - 本地原生 —— 直连 SDR 硬件的本地桌面收发信机。
+  - 服务器 —— sdroxide --server；数字信号处理 (DSP) 在连接电台的机器上运行，完整的 UI（以及音频和瀑布图）以 WebAssembly 形式提供给浏览器。电台拥有的每台设备均可提供服务，每个客户端对应一个连接：/ws 和 /ws/<id>，并在 /radios 处列出。设备名录也可从客户端进行编辑——已登录的操作员无需接触实体机器或重启它，即可为电台添加或关闭设备。在手机或平板电脑上，它可以安装到主屏幕并全屏运行，在前台运行时保持屏幕常亮。
+  - 原生远程 —— sdroxide --connect host:4950；桌面 UI 控制远程服务器而非本地硬件。拥有多台电台设备的台站会全部呈现，每个设备各占一个标签页。
+
+  核心特性
+  - 无线电设备 - CAT/音频、CAT/立体声 IQ、TCI (SunSDR)、OpenHPSDR P1 和 P2 (Hermes Lite 2, Apache Labs)、SoapySDR (HackRF 等)、RTL-SDR（原生支持，通过 USB 或通过 rtl_tcp 经由网络）、RX-888（原生支持）、SDRplay RSP（原生支持，通过厂商 API 服务）、SmartSDR (FlexRadio - 实验性！)、PlutoSDR（原生支持，实验性！）、Icom LAN / RS-BA1 协议、HackRF（原生支持，接收已验证 / 发射未测量）、Airspy R2/Mini（原生支持，实验性！）、HydraSDR RFOne（原生支持，实验性！）、ELAD FDM-DUO / FDM-S1 / FDM-S2（原生支持，实验性！）、LimeSDR 系列 + LimeRFE 前端（通过 LimeSuite，实验性！）、RigExpert Fobos SDR（原生支持，通过 libfobos）
+  - 全景适配器 —— 基于 GPU (wgpu) 的瀑布图 + 频谱线，支持以光标为中心滚轮缩放、拖拽平移、逐位频率读数、可选颜色映射、峰值保持，以及自动对比度（“FIT”，默认开启，使显示底噪/上限自动贴合当前屏幕上的信号——在波段切换、平移或缩放后，以及电平漂移时重新拟合，平滑过渡而非生硬切换）。
+  - 模式 —— SSB (USB/LSB)、CW、AM、SAM、NFM（带 CTCSS/DCS 解码和音频静噪）、WFM（带广播导频立体声和 RDS/RBDS）、DSB、ISB（独立边带——两个边带是两种不同的传输，分别对应左右耳）、DIGU/DIGL、仅频谱模式、FT8/FT4/FT2、JS8（全部四种速率，带定向消息、心跳包和多帧自由文本）、键盘模式 PSK31、RTTY、Olivia、THOR 和 FSQ（带定向消息 + 图像）、WSPR（发射与接收，支持 WSPRnet 上报和可选的波段跳变）、仅接收 PI4（“下一代信标”传播模式——4-FSK，通过针对网络使用的每种信标变体和音频频率进行 rate-1/2 K=32 Fano 搜索来解码）、Hellschreiber（滚动光栅上的全部七种 Feld Hell / FSK Hell 变体）、图像 SSTV (Scottie, Martin, Robot)、图像 RIFP（draft-dulaunoy-rifp-00——基于 4800 波特率 CPFSK 调制解调器的分组化、带校验和图像）、仅接收气象传真（WEFAX/无线电传真图表，带电台选择器、相位和斜率校正）、仅发射 RF Paint（将文本和图像绘制在瀑布图上的频谱彩绘），以及仅接收 ADS-B（1090 MHz 上的头顶飞机，显示在带有历史轨迹点、速度矢量和数据块的雷达屏幕上）、仅接收 VDL2（相同飞机用于交换 ACARS 的甚高频数据链，同时监听 136.8 MHz 附近的全部七个信道，包含消息及发送电台）、仅接收 ACARS 本身（经典的航空波段数据链，从共享航空公司信道如 131.550、131.725 MHz 等的 AM 载波中解码），以及仅接收 HFDL（短波地面网络，民航客机在甚高频接收机覆盖范围外使用，在 2.8 至 22 MHz 之间单次监听一个指定信道，带有解码日志及其携带的飞机位置地图）。
+  - 接收机 —— 悬挂式 AGC、可拖动的通带滤波器边界（在频谱和瀑布图上）、噪声消隐器、自动陷波、五种降噪引擎（RNNoise、DeepFilterNet3、libspecbleach 移植版、WDSP 的 NR2 移植版以及内置频谱降噪，每种均有三档强度）、静噪、第二副接收机、RIT/XIT、带异频的 VFO A/B、每波段独立的波段堆栈以及记忆信道。
+  - Winlink 无线电电子邮件 —— 业余无线电存储转发电子邮件网络的内置客户端，原生支持 B2F/FBB、LZHUF 和安全登录（无需 Pat，无需外部调制解调器）。包含收件箱 / 发件箱 / 已发送 / 归档的邮箱，支持撰写与回复、附件，以及出现问题时的会话转录记录。目前通过互联网 CMS 传输；AX.25 分组数据包和 ARDOP 是规划中的无线电传输协议。
+  - 波段规划覆盖层 —— 沿瀑布图底部的彩色编码条带，用于标注频段分配（业余波段、广播、CB、AM）；缩小缩放时显示粗略波段，放大到业余波段时显示 CW/数字/SSB 子频段。
+  - 扫描器 —— 遍历记忆信道或特定频率范围并在有人发射时停止，具有可配置的阈值（或接收机自带静噪）、停留时间、跳过列表，以及载波 / 定时 / 手动恢复机制。范围扫描直接从全景适配器的 FFT 中读取整个频跨，而非逐个检查信道，因此扫描 2 米波段只需远远不到一秒的时间，而无需数分钟。
+  - 发射 —— PTT 和调谐载波、驱动/ALC 电平指示、设备感知的半双工时序控制 (HackRF) 或全双工 (LimeSDR)，以及业余波段 / 发射范围锁定功能，防止你在分配频段之外发射。
+  - 可调整布局 —— 拖动频率刻度条可调整频谱与瀑布图的分割比例；在 FT8/FT4/FT2 模式下，拖动分割线可调整操作面板的大小。
+  - 实时通报、奖状与 QSL —— DX cluster / POTA / SOTA / PSK Reporter 通报作为可点击的全景适配器标记（点击即可调谐 + 预填日志条目）、QRZ/HamQTH 呼号查询、一键上传至 LoTW / eQSL / Club Log / QRZ / HamQTH，以及实时 DXCC / WAS / WAZ / 网格奖状追踪（已通联 vs 已确认）。
+  - 控制输入 —— 所有快捷键均可重新绑定，且任何免驱 MIDI 控制器均可操作电台：转轮用作 VFO 旋钮、打击垫用作 PTT 和波段按钮、推子用作增益控制，支持 LED/电机反馈。鼠标按键亦可绑定（按住侧键作为 PTT，相当于脚踏开关），全景适配器滚轮可用于缩放或调谐。
+  - 语音播报 —— 电台会朗读自身状态，便于无视觉操作。程序自带神经网络语音并在本地运行，因此不会向任何地方发送数据，也无需安装任何语音服务。拨盘停止转动时播报频率、将波段切换合并为一句话、离开业余波段时发出警告、调谐时播报驻波比（高于 3:1 时发出警告），并播报发送给您的 FT8/JS8 消息。播报在独立的音频设备上播放，因此绝不会被录音，也不会发送给远程收听者。窗口还针对 NVDA、Orca 和 VoiceOver 屏幕阅读器进行了适配。
+  - 收发（T/R）切换 —— 控制外部继电器，在电台发射时断开 SDR 的天线输入并将其接地，并协同控制放大器或外接 T/R 继电器（每个触点具备前置导通和延时释放时间，确保天线始终在功放触发前接通，并在功放释放后再复位）。支持廉价的 USB 继电器板（LCUS/CH340、KMtronic、Numato）、USB HID 继电器板、CM108/CM119 声卡 GPIO、连接到任何需要 PTT 闭合接口的串口 RTS/DTR 线路、树莓派 GPIO 引脚或外部命令。同一端口上的可选发射感应输入能在数毫秒内检测到电台自身麦克风的发射动作，而不是 CAT 轮询所需的数百毫秒。触点也可以被赋予波段解码器角色，根据拨盘所在的波段进行切换——每波段独立的 RX/TX 输出表，RX 到 TX 的切换遵循与其他触点相同的前置与保持时序。这与 HPSDR 滤波板的开集电极波段代码思路相同，在继电器板、GPIO 排针或 RTS/DTR 对上实现，用于在 PlutoSDR、LibreSDR 或任何没有 HPSDR 专属 7 针总线的前端上驱动外置带通/低通滤波器组或变频器选择器。关于该功能无法实现的内容，请参阅用户手册中的“T/R 开关”部分。
+  - 数据持久化 —— 设备、采样率、增益、存储信道、波段堆栈、FT8/FT4/FT2 操作员配置文件、网络/QSL 凭据、控制绑定以及电台日志均保存在 ~/.config/sdroxide/ 目录下。
+Tags:
+- sdr
+- 业余无线电
+- 软件定义无线电
+Documentations:
+- DocumentLabel: 用户手册
+  DocumentUrl: https://github.com/dividebysandwich/sdroxide/blob/main/docs/USER_MANUAL.md
+ManifestType: locale
+ManifestVersion: 1.12.0
