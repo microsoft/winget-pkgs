@@ -1,0 +1,42 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.6.9
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+Tags:
+- account-manager
+- antigravity
+ReleaseNotes: |-
+  - [核心修复] 遵循 store:false 抑制 HTTP 会话持久化与全局工具调用缓存驻留 (PR #3408):
+    - 严格响应 store:false 参数：在 HTTP Responses 代理路径中，当全量重放（full-replay）请求显式传入 store:false 时，不再创建多余的会话快照与后台保存任务，大幅抑制大长文本重放时内存持续攀升。
+    - 优化全局工具缓存写入门槛：在下发完整工具参数与完成事件的同时，避免将 store:false 下的工具调用冗余写入全局 Tool-Call 缓存，同时安全加固非流式响应持久化守卫。
+  - [调度与稳定性] 彻底修复 429 故障转移死循环、模型级熔断器绕过与配额保护归一化失效 (PR #3395):
+    - 黏性会话对齐模型级熔断锁：修复黏性会话在检查账号可用性时传入全局锁导致的误判缺陷，精准结合目标模型检测 RESOURCE_EXHAUSTED 熔断状态，杜绝重复向已熔断账号派发请求。
+    - 硬配额耗尽跳过宽限重试并立即切号：当遇到真实的资源耗尽（429 / 529）时，绕过 GraceRetry 并立即解绑该会话关联的账号，消除负载均衡与缓存优先模式下的 429 重试死循环。
+    - 前端配置模型与标准配额分组 ID 归一化：解决前端 UI 配置具体模型 ID（如 gemini-3.7-flash）时未与后端标准分组 ID（gemini-3-flash）对齐导致配额保护静默失效的问题。
+  - [多轮与 Agent 兼容] 修复自主 Agent 首轮 Tool Call 导致 Gemini 400 轮次报错 (PR #3396):
+    - 首轮自动注入轻量 User Primer: 针对 Hermes Agent 等自主智能体以 Assistant/Tool Call 作为首个非 System 轮次的场景，在最前端注入引导提示词，满足 Google Gemini 关于 functionCall 必须紧跟 user 或 functionResponse 轮次的硬性约束，彻底消除 400 INVALID_ARGUMENT。
+    - 空文本用户轮次防御保留：避免过滤空文本时意外丢失用户轮次，维护 Gemini 严格的轮次交替序列。
+  - [OpenAI & Codex 协议演进] 拆分路由与签名标识、生成全新 Request ID 与 Flash 思考映射 (PR #3404, PR #3405, PR #3406):
+    - 解耦会话路由与签名识别：分离会话路由 Key（Routing Identity）与缓存签名 Key（Signature Identity），补全非流式 HTTP 请求的会话历史记录链。
+    - 单次上游请求唯一 Request ID: 每次向上游发送请求时均基于时间戳与随机 UUID 动态生成全新唯一 ID，避免复用相同 ID 被上游判定为重复请求或关联至旧 429。
+    - 分级 Flash 思考档位精准映射：识别分级 Flash 模型的 reasoning_effort 参数并映射到上游 Gemini 的 thinkingLevel 配置。
+  - [Claude 协议标准] 规范 message_start 事件始终包含 usage 字段 (PR #3397):
+    - 首包 usage 兜底填充：当上游开源模型首个数据块不含 Token 统计元数据时，自动向 message_start 事件注入 {input_tokens: 0, output_tokens: 0} 兜底对象，彻底解决 OpenCode / @ai-sdk/anthropic 等严格校验客户端的类型崩溃问题。
+  - [HTTP API & CLI] 修复 /accounts/switch 丢失 targetIde 导致 agy 刷新 Token 意外重启 IDE (Issue #3399):
+    - 透传 targetIde 激活免杀免重启通道：修复 POST /accounts/switch 请求体丢失 target_ide 字段并硬编码传 None 的缺陷。现支持解析可选的 targetIde 参数（如 "agy"），使自动化流水线或 CLI 刷新凭据时仅写系统 Keyring，避免强制杀死并重启正在运行的 Antigravity IDE。
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.6.9
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

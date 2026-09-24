@@ -1,0 +1,138 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.3.0
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-agent-core
+  Added
+  - Added support for documenting agent tools on demand through the new AgentTool.docTopics method.
+  - Added TOOL_INTERRUPT_ABORT_REASON so interruptible tools can distinguish queued steering, peer messages, or background completions from a full run abort.
+  Changed
+  - Improved interrupt handling so tools respect wait mode and can be interrupted when appropriate.
+  - Updated Anthropic compaction compatibility with signature verification.
+  @oh-my-pi/pi-ai
+  Added
+  - Added support for Anthropic User Profiles, including schema-validated API responses.
+  - Added support for Apple Foundation Models running on-device, including tool calling and vision capabilities.
+  - Added multi-account authentication and authorization for Codex cyber access programs, including automatic request replay after access-program rejections.
+  - Added credential-aware authentication routing with per-account OAuth policies, deterministic account selection, protected quota reserves, persistent rate-limit tracking, automatic recovery, and sticky session-to-credential affinity.
+  - Added deprecated getApiKey and reload methods for backward compatibility.
+  @oh-my-pi/pi-catalog
+  Added
+  - Added compaction support for the claude-mythos-preview model.
+  - Added provider and authentication rule definitions for on-device Apple Foundation Models.
+  - Added per-account discovery of Codex cyber access entitlements.
+  - Added org-scoped-identity and oauth-token-env authentication rules for providers.
+  @oh-my-pi/pi-coding-agent
+  Breaking Changes
+  - The hub tool is deprecated; use wait, write, and the proc:// protocols instead.
+  - The irc.timeoutMs configuration setting has been removed.
+  - The edit mode syntax now uses *** Edit File:, *** Find, and *** Replace headers instead of SM: headers.
+  - Cancelling a process through write now requires an explicit proc://<id>/kill target; other write targets validate content normally.
+  Added
+  - Added omp:// documentation scopes for find and omp find. Search all embedded harness documentation with omp:// or a specific document with omp://<file>.md; results are returned as canonical URLs that read can open, including range selectors.
+  - Added extension support for ephemeral, /btw-style side turns through ctx.runEphemeralTurn(), with optional tool suppression and output/context limits without adding the turn to session history.
+  - Added background job and service management through the wait tool and proc:// URLs, including supervised services in bash and direct agent messaging through agent:// write targets.
+  - Added *** Insert Before and *** Insert After edit operations for adding lines without replacing existing code.
+  - Added the toks command for offline token counting, including support for Jev (TypeSafe Jev 1.13) encodings.
+  - Added automatic discovery of Apple Foundation Models on supported Apple silicon devices.
+  - Added /changelog last [N] for viewing the latest release or a selected number of recent releases.
+  - Added terminal-based OAuth authentication with omp login, including browser-assisted login, account and organization details, and automatic model discovery refresh. Added provider support for org-scoped-identity, oauth-token-env, and per-account OAuth priority/reserve policies through auth.accountPolicies, with policy state shown by omp usage.
+  - Added the daybreak badge to omp usage for enabled accounts.
+  - Added /export and /usage to focused subagent views for exporting a focused transcript and viewing account usage without returning to the main session.
+  - Pasted clipboard images are now saved in the session artifact directory, allowing agents to read, copy, or upload them by file path.
+  - Added /annotate for attaching notes to diffs, replies, session messages, files, or quoted text and inserting or sending those notes in prompts and reviews.
+  - Added configurable MCP startup behavior through MCP_STARTUP_TIMEOUT_MS/mcp.startupTimeoutMs and OMP_MCP_REQUIRE_READY=1, allowing headless runs to require MCP servers to become ready before the first turn.
+  - Added native judgment usage reporting, including error stop reasons and messages, and added openrouter/~typesafe/jev-latest as a native judge candidate.
+  Changed
+  - Session compaction now supports native Anthropic snapshot branches and rewinds.
+  - The default bash.autoBackground.strategy is now catalog.
+  - The Launch configuration group has been renamed to Services.
+  - Terminal OAuth behavior is now consistent between omp login and omp auth-broker login.
+  - Judgment fallback now uses only native candidates, preventing prompted models from replacing failed native judges.
+  - Browser screenshot comparisons now tolerate minor rasterizer differences.
+  Fixed
+  - Fixed credential-aware API key resolution during authentication rotation.
+  - Fixed comma-separated line selectors in read, grep paths, and fetch; selectors now read the requested range, while a bare number selects only that line.
+  - Fixed write reporting JavaScript character counts instead of UTF-8 byte counts.
+  - Fixed background job and service status reporting, including incorrect durations, reused job IDs, stale logs after named-service restarts, and foreground calls incorrectly appearing as background jobs.
+  - Fixed wait and agent messaging so completed subagent results and peer messages are delivered reliably, including when a wait is interrupted by an incoming message.
+  - Fixed headless print mode dropping or silently ignoring MCP servers that start slowly; it now waits within the configured timeout and warns when a server is not ready.
+  - Fixed reader-mode fetch sending inline SVG icons and base64 images as unreadable model input; alt text is retained instead.
+  - Fixed long non-Latin judged TTSR output exceeding token limits by applying token-aware truncation.
+  @oh-my-pi/collab-web
+  Added
+  - Added support for rendering coordinated job and messaging views through the wait tool.
+  Removed
+  - Removed the obsolete hub tool renderer.
+  @oh-my-pi/pi-natives
+  Added
+  - Added native bindings for Apple Foundation Models availability checks, text generation, and cancellation.
+  - Added offline token counting support for TypeSafe Jev 1.13 state inputs via Encoding.Jev (excluding the request frame).
+  @oh-my-pi/pi-tui
+  Added
+  - Added proc:// and agent:// URI support for interacting with processes and agents.
+  - Added support for xd:// documentation topic URLs.
+  - Added rendering for background job state and peer-to-peer messages from the wait tool.
+  - Added supervised bash service rendering with status, readiness, and output information.
+  - Added a fullscreen annotation overlay for diffs and text, including multi-line notes, editing, deletion, and undo (#12601 by @anatoli-tsinovoy).
+  - Added Daybreak-enabled account listings to the usage dashboard.
+  Changed
+  - Mermaid flowcharts and state diagrams now automatically choose a layout that best fits the available terminal width and reflow when the terminal is resized.
+  - Plan Review annotations now support multi-line editing, deletion, and undo (#12601 by @anatoli-tsinovoy).
+  Fixed
+  - Fixed AltGr characters, including [, ], {, and }, being dropped in Windows Terminal when using the kitty keyboard protocol on Hungarian and other international keyboard layouts (#12984 by @H4vC).
+  What's Changed
+  - feat(auth): add per-account routing policies by @schickling-assistant in https://github.com/can1357/oh-my-pi/pull/12243
+  - Ci uplifts by @H4vC in https://github.com/can1357/oh-my-pi/pull/12919
+  - feat(coding-agent): add native /annotate and editable plan-review notes by @anatoli-tsinovoy in https://github.com/can1357/oh-my-pi/pull/12601
+  - fix(tui): recovered AltGr text dropped by Windows console kitty encoding by @H4vC in https://github.com/can1357/oh-my-pi/pull/12984
+  - feat(coding-agent): committed clipboard-pasted images to session artifacts by @H4vC in https://github.com/can1357/oh-my-pi/pull/12985
+  - feat(coding-agent): allowed /export and /usage in focused subagent views by @H4vC in https://github.com/can1357/oh-my-pi/pull/12986
+  - feat(coding-agent): add /changelog last [N] by @radkawar in https://github.com/can1357/oh-my-pi/pull/12965
+  - fix(coding-agent): report write sizes in UTF-8 bytes by @radkawar in https://github.com/can1357/oh-my-pi/pull/12969
+  - feat(tui): pick the shortest fitting mermaid layout on resize by @radkawar in https://github.com/can1357/oh-my-pi/pull/12968
+  - fix(tui): pin bare numbers in comma read selectors by @radkawar in https://github.com/can1357/oh-my-pi/pull/12970
+  - fix(coding-agent): strip inline data URI images from reader-mode fetch output by @H4vC in https://github.com/can1357/oh-my-pi/pull/13006
+  - test(task): stop git background maintenance racing the commit fixture copy by @andrebrait in https://github.com/can1357/oh-my-pi/pull/12971
+  - test(browser): wait for the highlight overlay instead of sampling once by @andrebrait in https://github.com/can1357/oh-my-pi/pull/12972
+  - test(config-value): assert the descendant is dead instead of racing its write by @andrebrait in https://github.com/can1357/oh-my-pi/pull/12973
+  - test(compat): address capability policy review follow-ups by @gokceneraslan in https://github.com/can1357/oh-my-pi/pull/12867
+  - Expose ephemeral turns to extensions with a tool opt-out by @gokceneraslan in https://github.com/can1357/oh-my-pi/pull/11657
+  New Contributors
+  - @radkawar made their first contribution in https://github.com/can1357/oh-my-pi/pull/12965
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.2.11...v18.3.0
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.3.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

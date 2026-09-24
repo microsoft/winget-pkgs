@@ -1,0 +1,99 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.2.3
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Added
+  - stream() and streamSimple() support asynchronous model header resolution for each request attempt, including authentication retries and cancellation.
+  - Provider login prompts can request masked entry with secret: true.
+  @oh-my-pi/pi-catalog
+  Added
+  - Models can carry deferred request-header resolvers, and model managers can reconstruct omitted cached headers from authoritative local configuration without persisting credentials.
+  @oh-my-pi/pi-coding-agent
+  Breaking Changes
+  - Config-backed headers now resolve asynchronously through ModelRegistry.getProviderHeaders() or resolveModelHeaders(); removed the synchronous config/model-config-values module.
+  - Removed the unused ConfigFile.getMtimeMsAsync(), tryLoadAsync(), loadAsync(), and loadOrDefaultAsync() methods.
+  - Custom SQL session clients must support transactions for atomic renames.
+  Added
+  - Type ^ to tag a model for delegation, with atomic display-name chips and session-persisted m1, m2, … agents available to task and eval.
+  - Provider login and setup support masked secret prompts; RPC rejects secret prompts rather than requesting ordinary input.
+  Changed
+  - Shell-backed API keys and headers resolve asynchronously without freezing terminal input or running during catalog construction.
+  Fixed
+  - macOS process discovery now retains the complete PID list when locating executables and descendants. (#12290 by @iliaal)
+  - Reduced snapshot-recording stalls when a session retains large file histories. (#12279 by @iliaal)
+  - Cancelled background jobs remain tracked until execution finishes, so cleanup cannot report completion prematurely after retention expires. (#12278 by @iliaal)
+  - Fixed localized edits rewriting unrelated bytes in files with invalid UTF-8; these edits now fail without modifying the file. (#12277 by @iliaal)
+  - Fixed sloppy edits crashing with a char-boundary panic instead of reporting a match error when the file contains multibyte (e.g. CJK) text.
+  - Fixed retry timing reliability in agent sessions by ensuring sleep durations are monotonic
+  - Fixed data stability issues when processing streamed lines
+  - Resolved same-path move failures in indexed session storage
+  - Restricted and revived subagents retain parent-loaded extension hooks without enabling extension-contributed tools.
+  - Revived subagents honor the owning session's extension-discovery restrictions.
+  - Secret login answers stay hidden in later prompts and cannot be recovered through undo or yank.
+  - SQL session renames preserve data on same-path moves, missing sources, and failed overwrites.
+  - MySQL session writes no longer use deprecated upsert value references.
+  - MCP SSE requests honor one response deadline and report timeouts correctly without replaying accepted tool calls.
+  - Legacy extension package-import patterns follow native prefix precedence.
+  - Bundled extensions observe theme initialization and changes through the existing live theme export.
+  - Configured discovery models retain request-time credentials after offline cache reloads and failed refreshes.
+  - Runtime API-key overrides retain precedence over configured credentials.
+  - Element handles returned by tab.waitForSelector, tab.$, and related selector helpers can now be passed as arguments to tab.evaluate inside tab.run instead of failing with "JSHandles can be evaluated only in the context they were created".
+  @oh-my-pi/pi-tui
+  Added
+  - Editors support whitespace-delimited ^ mention autocomplete and expose registered atoms for host-defined chip rendering.
+  Changed
+  - fuzzyRank accepts readonly candidate arrays without copying them.
+  Fixed
+  - Masked inputs no longer expose their text in diagnostic previews.
+  Removed
+  - Removed the internal fastTailSplices and resetFastTailSplices Markdown instrumentation exports.
+  @oh-my-pi/pi-utils
+  Fixed
+  - Optimized model configuration command execution by deduplicating requests and adding failure backoff
+  - Prevented unnecessary credential command execution when runtime API keys are configured
+  - Retained readLines() results no longer change when later chunks reuse the internal buffer.
+  - Long sleeps honor elapsed time and re-arm after premature timer wakes without overflowing native timer delays.
+  What's Changed
+  - fix(pi-edit): gate sloppy closest_fragment tail window on char boundary by @H4vC in https://github.com/can1357/oh-my-pi/pull/12268
+  - fix(coding-agent): latch Windows title static on native-path failure, hermetic title tests by @H4vC in https://github.com/can1357/oh-my-pi/pull/12254
+  - fix(agent): retain cancelled jobs until execution settles by @iliaal in https://github.com/can1357/oh-my-pi/pull/12278
+  - perf(edit): cache retained snapshot UTF-16 accounting by @iliaal in https://github.com/can1357/oh-my-pi/pull/12279
+  - fix(edit): reject invalid UTF-8 before staging edits by @iliaal in https://github.com/can1357/oh-my-pi/pull/12277
+  - fix(shell): report accurate macOS process enumeration counts by @iliaal in https://github.com/can1357/oh-my-pi/pull/12290
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.2.2...v18.2.3
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.2.3
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
