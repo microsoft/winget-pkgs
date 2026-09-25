@@ -68,6 +68,9 @@ if (!$NoCheckout -and !$script:GitIsPresent) { Write-PRTestError "Git is not ins
 if (!$script:SandboxIsPresent) { Write-PRTestError 'Windows Sandbox is not enabled. Enable it and come back here!' 1 }
 
 if ($NoCheckout) {
+    $rootFolder = Join-Path $env:TEMP 'WinGet-PRTest'
+    if ($Clean -and (Test-Path $rootFolder)) { Remove-Item $rootFolder -Recurse -Force }
+
     Write-Output '--> Retrieving PR check runs'
     $headSha = gh api "repos/$repository/pulls/$PullRequest" --jq '.head.sha'
     $checkRuns = gh api "repos/$repository/commits/$headSha/check-runs?app_id=1451866&filter=latest&per_page=100" |
@@ -94,25 +97,35 @@ if ($NoCheckout) {
         Write-PRTestError "The artifact download URL was not found for PR #$PullRequest." 4
     }
 
-    $tempFolder = Join-Path $env:TEMP 'WinGet-PRTest'
-    $zipPath = Join-Path $env:TEMP 'WinGet-PRTest.zip'
-    if (Test-Path $tempFolder) { Remove-Item $tempFolder -Recurse -Force }
-    if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
-    New-Item $tempFolder -ItemType Directory | Out-Null
+    $runFolder = Join-Path $rootFolder "$PullRequest\$headSha"
+    $zipPath = Join-Path $runFolder 'artifacts.zip'
+    $manifestFolder = Join-Path $runFolder 'Manifest'
+    if (Test-Path $runFolder) { Remove-Item $runFolder -Recurse -Force }
+    New-Item $manifestFolder -ItemType Directory | Out-Null
 
     Write-Output '--> Downloading validation artifact'
     Invoke-WebRequest $artifactDownloadUrl -OutFile $zipPath
-    Expand-Archive $zipPath -DestinationPath $tempFolder -ErrorAction SilentlyContinue
-    Remove-Item $zipPath -Force -ErrorAction SilentlyContinue
 
-    $manifest = @(Get-ChildItem $tempFolder -Filter '*.yaml' -File -Recurse)
-    if ($manifest.Count -ne 1) {
+    # Only extract the YAML manifest entry from the archive; the artifact also contains
+    # installation verification logs whose long, nested paths can fail to extract.
+    $manifestFile = $null
+    try {
+        $zipArchive = [System.IO.Compression.ZipFile]::OpenRead($zipPath)
+        $yamlEntries = @($zipArchive.Entries | Where-Object { $_.Name -like '*.yaml' })
+        if ($yamlEntries.Count -eq 1) {
+            Write-Output "--> Extracting file: $($yamlEntries[0].Name)"
+            $manifestFile = Join-Path $manifestFolder $yamlEntries[0].Name
+            [System.IO.Compression.ZipFileExtensions]::ExtractToFile($yamlEntries[0], $manifestFile)
+        }
+    } finally {
+        if ($zipArchive) { $zipArchive.Dispose() }
+    }
+
+    if (!$manifestFile -or !(Test-Path $manifestFile -PathType Leaf)) {
         Write-PRTestError "A single YAML manifest was not found in the validation artifact for PR #$PullRequest." 5
     }
 
-    $path = Join-Path $tempFolder $PullRequest
-    New-Item $path -ItemType Directory | Out-Null
-    Move-Item $manifest[0].FullName $path
+    $path = $manifestFolder
 } else {
     $repositoryRoot = 'https://github.com/microsoft/winget-pkgs/'
     $rootDirectory = ((Resolve-Path (git rev-parse --show-toplevel)).ToString() + '\')
