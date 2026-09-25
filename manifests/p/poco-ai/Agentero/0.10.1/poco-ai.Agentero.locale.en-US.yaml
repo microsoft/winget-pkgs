@@ -1,0 +1,56 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.10.1
+PackageLocale: en-US
+ShortDescription: Agent-friendly reference management.
+Description: 'Traditional reference managers are not agent-friendly: highlights and notes stay locked inside single files, making it hard for agents to reuse knowledge across papers; every conversation starts from scratch without a stable local knowledge map; PDFs are human-friendly but not the most comfortable reading material for agents. Agentero aims to build an agent-friendly, agent-native way to manage references, exploring how humans and agents collaborate on reference management. Connect your local agent via ACP (BYOA), select-text chat, import papers and Skills, stay compatible with the Zotero ecosystem, and get paper translation, bidirectional links with a knowledge graph, and deep PDF reading.'
+Tags:
+- academics
+- agent
+- article
+- literature
+- paper
+- pdf
+- reference
+- research
+- thesis
+- zotero
+ReleaseNotes: |-
+  This release tightens reading and onboarding: PDF zoom moves to a bottom-bar slider, comment cards draw hover connectors, and highlight colors fan out as circular swatches. Selection auto-copies with restored Add to chat / Quick chat, and the feature tour starts after onboarding. The CLI drops usage / config / completion / trash / feed (wiki check lives under doctor wiki), and the unsupported Antigravity ACP backend is removed. External paper-reader runs now mark papers read on completion.
+  Breaking Changes
+  - Antigravity ACP backend removed: Google does not officially support ACP for Antigravity, so the community agy-acp template and its install, version check, terminal sign-in, and auth-required handling are gone. Legacy antigravity/gemini rows are stripped when loading agents.json so they cannot fail the whole registry parse. (e546373f by @qychen2001)
+  - CLI command trim: Removes agentero usage, config, completion, trash, and feed; former wiki check is now agentero doctor wiki. Vault resolution still uses --vault / AGENTERO_VAULT / walk-up, plus the default path from vault use. (206f6a66, 83284d9f, 3e9af822, 136cc48c by @Phil-Fan)
+  Features
+  - PDF bottom zoom slider: Replaces top +/- percentage zoom and bottom fit-width/fit-page controls with a 50%–300% range slider. Idle stays muted gray; hover/focus/drag use the brand accent. The right toolbar stays pinned. (9736b036 by @Phil-Fan)
+  - Comment hover connectors: Hovering a rail comment draws a readable leader to the nearest highlight segment, with ink tuned to paper tone so multi-line notes connect to the closest paragraph instead of the envelope midpoint. (c500314f, 3fbc31a0, fa9836c3 by @Phil-Fan)
+  - Highlight color fan-out: Selection highlight colors become circular dots that fan left on hover with darker overlap edges; the toolbar stays right-edge anchored while expanded. (22775a0e, 019fac74, 428fb5a8 by @Phil-Fan)
+  - Selection auto-copy and chat actions: Selecting text copies it and shows a “Copied” label at the pointer. The floating toolbar restores Add to chat / Quick chat with swapped shortcuts for the common path, and live selections are no longer auto-attached to chat. (8004a9f6, 3cb840b7, 961b6faa, 24bc4aa3, 270b6b27 by @Phil-Fan)
+  - Inline selection tokens in the composer: Explicitly added selections appear as inline quote chips in the Agent input so send intent is clearer. (aa235d3d, 93d77429 by @Phil-Fan)
+  - Feature tour after onboarding: Closing onboarding auto-starts a feature tour covering the library, Cool Papers, full-text translate, reading a paper, and notes. Recommended options and the default translator are emphasized, and the local layout model notes its performance cost. (d996541a, 72a1d2a0, 9e5f1bcf, #452 by @Phil-Fan)
+  - Library single-click open: Paper rows open on single click and copy the title/id on double click. (f2d7baf2 by @Phil-Fan)
+  - Windows F11 borderless fullscreen: Press F11 on Windows to toggle borderless fullscreen for immersive reading. (ffc4b27a by @Phil-Fan)
+  - Split-pane shortcut on Open Notes: Open Notes menus show the split-pane shortcut for side-by-side reading. (4d022568 by @Phil-Fan)
+  - Mark read after paper-reader: The paper-reader and agentero-cli skills require agentero paper set-read after writing notes so external Agent/CLI deep-reads flip Catalog is_read. (#495 by @bet4it)
+  Improvements
+  - Leaner release logs: Per-file size drops to 2 MB with KeepSome(5) rotation; release builds cap at Info so Debug/Trace no longer inflate disk use. (052cad4a, #511 by @Phil-Fan)
+  - Quieter idle vault watching: Block on filesystem events when idle instead of polling; buffer vault:file-changed while the shell is hidden/unfocused and stretch tree/wiki/library debounce in the background. (7be641f4 by @Phil-Fan)
+  - Paper titles in background tasks: Job Center rows prefer Catalog titles over folder ids. (039ea801 by @Phil-Fan)
+  - Cool Papers note cleanup: Fetched notes drop the trailing Kimi web CTA, and FAQ answers nest under ## Q headings. (ee24b436, 307d4ab3 by @Phil-Fan)
+  - White paper tone by default in dark mode: PDF paper tone defaults to white under a dark UI chrome. (ae1ac1d8 by @Phil-Fan)
+  - Format Markdown menu removed: The context-menu Format Markdown action is gone to avoid accidental rewrites. (cd86a91e by @Phil-Fan)
+  Fixes
+  - Preserve titles after external moves: External rename/move of paper folders rewrites Catalog paths and rescans on structural changes; open tabs remap even without link repair, and unverified external renames no longer toast. (00d7ef1a, 9f35b6c2, 3c04259d, f0e37c4a by @Phil-Fan)
+  - Live-reload Markdown in doc popouts: Docs moved to a new window watch Vault changes so Agent/external edits no longer stay stale. (1175fa50 by @Phil-Fan)
+  - Preserve extra blank lines: Markdown deserialize keeps extra blank lines so note spacing stays stable. (9dcc4607 by @Phil-Fan)
+  - Open NOTES without catalog metadata: NOTES.md still opens when Catalog metadata for the paper is missing. (88e34988 by @Phil-Fan)
+  - Stuck file-tree drop overlay: Clearing the dockview drop overlay when a file-tree drag leaves or ends. (d0997228 by @Phil-Fan)
+  - Skip no-op same-folder moves: Vault move is skipped when the destination equals the current folder. (ad450681 by @Phil-Fan)
+  Full Changelog: https://github.com/poco-ai/Agentero/compare/v0.10.0...v0.10.1
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.10.1
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: locale
+ManifestVersion: 1.12.0

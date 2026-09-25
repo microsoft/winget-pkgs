@@ -1,0 +1,74 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 4.2.0
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [4.2.0] - 2026-09-21
+  Measured Against rclone, Read Commit by Commit
+  A cycle of tuning and repair rather than of features, and the longest since the project started: 161 tracked changes over 165 commits in three weeks, most of them fixes and many of them found by measuring rather than by reading. The transfer engine went through a live review battery against rclone on the same links, payloads and servers, and every gap it found (a speed limit most providers ignored, one-way sync re-uploading unchanged trees, a new SSH handshake for every SFTP file, serial scans and serial reads) was closed and measured again, so the DAG engine's performance is confirmed rather than assumed. Filebase joins as a production-ready S3 preset, S3 learns delta uploads, and AeroCrypt reaches its base goal on Linux and, above all, on Windows, where the Rust test suite now runs for the first time and a key-authenticated delta finally transfers only the changed bytes.
+  Every commit of the cycle was read by several independent reviewers, and the finding they returned most often had one shape: an answer that looked complete while part of the work had not been seen. That is why so many entries below are about scans, deletes and exit codes that now say what they did not cover, and it is also why the last work of the cycle went into the download path: a file assembled from several streams could be handed back built out of two different versions of the same object, with the right length and nothing to signal it, and the defect was reproduced on a live server before it was fixed. Nothing here is claimed that was not measured or pinned by a test, and where something is still open it is written down rather than left out.
+  Every change listed here is tracked, with its commit and its discussion, in the release tracker: AeroFTP 4.2.0, known issues, patches and updates.
+  What changes for you
+  Most of this release is repair, so the clearest way to read it is by what stops going wrong. The list below is the short version for people who use AeroFTP rather than read its code; everything in it appears again further down with the detail and the commit.
+  In the app
+  - The comparison panel says how much is really out of sync. AeroSync Compare divided by the rows it lists, and it never lists identical files, so any two folders with a single difference read as 100% out of sync. It now divides by everything the scan examined: two folders that differ by one file out of two read as 50%, by count and by size, on local folders and against every remote and encrypted connection. A path that is a file on one side and a folder on the other is counted as the difference it is, instead of disappearing into the identical total.
+  - Large downloads are faster, and they check what they hand you. A download above 250 MiB now runs on several connections by default, on numbers measured per protocol: 8 on SFTP, WebDAV and FTP, 4 on S3. That part is new in this release, and so is the check that goes with it: if the file changes on the server while it is being read, the download refuses to publish the result and reads it again on one connection instead of handing you a file built out of two versions.
+  - A one-way mirror does not delete what it never synced. In receive-only, a local-only file used to be skipped on the first cycle and deleted on the second; in send-only the same happened to a file another person added to a shared folder. Both are fixed, and more broadly a sync that could not read part of a tree no longer deletes, downloads or uploads anything under the part it could not see.
+  - Interrupted work resumes instead of starting over. The sync journal survives a run that ends with failed files, so Resume is still offered, and resuming transfers the files that had not been reached rather than repeating the ones that had.
+  - Cancelling a large upload no longer leaves pieces behind on the server, and "Remove application data" in the Windows uninstaller now does what it says.
+  - A 1 GiB upload peaks at about half the memory it used to, and a speed limit now actually applies to the cloud providers that used to ignore it.
+  - Trash and restore behave across providers: Dropbox tells folders from files and restore no longer fails, Jottacloud can purge a single file, a whole folder or the entire bin, and the providers that cannot offer a recycle bin say so as their own limit instead of looking like a broken login.
+  - Immich albums show their photos again, and "All assets" and "Favorites" list everything instead of the first page.
+  - New connections: Filebase arrives as a ready S3 preset, Cloudflare R2 buckets created in a jurisdiction are reachable, and a Backblaze B2 bucket says on its card whether its default encryption is on, off, or not readable with that key.
+  - About names the people behind the project, in all 47 languages, and About > Dependencies lists every direct dependency at the version the build actually used.
+  On the command line
+  - Answers that tell a complete result from a partial one. check, cryptcheck, reconcile and sync-doctor used to give a verdict on a tree they had not fully read. They now report what they covered and exit 4 when the answer is partial, which is the difference between "these trees match" and "the part I could see matches".
+  - sync --files-from bounds both sides of the run. It used to filter the local walk and not the remote one, so --direction upload --delete treated every unlisted remote file as an orphan to delete.
+  - Speed limits reach every provider. --limit-rate and --bwlimit now cap S3, WebDAV, FTP and FTPS, Azure, Backblaze B2 and the HTTP cloud providers that kept their own byte loops.
+  - --s3-upload-concurrency reaches the engine that uploads. It was accepted and ignored: measured over a 100 ms link with a 300 MB upload, the engine took 2.19 s at one part and 2.18 s at eight, which is no difference at all; it is now 6.03 s at one, 2.20 s at four and 1.99 s at eight, with the same default of four as before.
+  - aeroftp-cli pwd prints the folder that relative paths resolve against, reading the saved profile, so it answers while the server is down.
+  - Transfers that used to need a second attempt: an interrupted SFTP upload resumes with --partial, a put into a folder that does not exist creates it on SFTP, FTP, FTPS and WebDAV, and get --partial over a download that had already finished is a no-op again instead of an error.
+  - hashsum --download hashes the bytes it downloaded rather than repeating the server's digest, which is the only version of that command that can detect a bad transfer.
+  - Profiles exported to other tools point at the server the connection actually uses. The exporters were rebuilding addresses by hand: bookmarks carried a URL as the hostname, MinIO exports pointed at AWS, explicit-TLS FTP profiles were exported as cleartext. Every exporter now asks the connection, and an export that could not include a profile says so instead of dropping it.
+  Added
+  - The people behind AeroFTP are named in the app and in the repository. A Team block in the About window, translated into all 47 locales, and a TEAM.md that lists who does what.
+  - Filebase is a production-ready S3 preset. Quick Connect asks for the three fields the Filebase console names, with a catalog card, a grid tile and translations in all 47 locales. Filebase answers 501 to UploadPartCopy, so copies take the plain CopyObject path, and versioning and object tagging report "not supported" instead of failing on the wire. Endpoint classification now matches the host at a domain boundary, so a lookalike host is not taken for Filebase, and an rclone remote imported as provider = Other lands on the Filebase preset when its endpoint says so. Verified live against s3.filebase.io: 1 MB and 150 MB multipart round trips with matching SHA-256, server-side move and copy, and a sync upload.
+  - S3 uploads of a large object this client uploaded before send only the parts that changed. For files above 200 MiB the client keeps a local record of per-part digests of what it uploaded (written only after the server's ETag certifies the upload, capped at 10,000 entries), matches a new version against it with no remote read, and assembles the object from server-side UploadPartCopy ranges, pinned to the previous object with x-amz-copy-source-if-match, plus ordinary part uploads for the changed ranges. The result is a plain object, byte-identical to the local file and carrying the source modification time. Any refusal other than an authentication or permission error falls back to a normal upload, a backend that refuses ranged copy is remembered for five minutes, and a crypt overlay never takes this path. Verified against MinIO for an edit in the middle and an append; an insertion at the start of the file is refused before any request, by design.
+  - Cloudflare R2 buckets created in a jurisdiction are reachable. Such a bucket answers only on its own host; a picker next to the Account ID offers the EU and US jurisdictions and shows the host each produces, and the choice reaches the CLI, the MCP pool and schedulers through the profile. A saved R2 endpoint in the older format still has its Account ID recognised.
+  - Jottacloud trash can purge a trashed folder and empty the whole bin. No JFS verb addresses a folder in the Trash view, so the purge goes through the folder's original path, guarded by a tombstone read-back so a live folder is refused; emptying uses the service's own purge call, behind a confirmation, and reports the counts it returns (@EhudKirsh, #397).
+  - A Backblaze B2 bucket's default encryption is shown on its card. Three answers rather than a yes or no: enabled (with a lock whose strength comes from the algorithm the service named), not enabled, and unknown when the key is not allowed to read the setting, which is common with keys restricted to one bucket. No extra request is made: the value arrives with the listing read at connect.
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v4.2.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -322,7 +322,7 @@ configuration:
                         Your pull request requires attention from a repository administrator. It has been assigned to a developer for review.
 
 
-                        Template: msftbot/manualReview
+                        ###### Template: msftbot/manualReview
               # Needs-Author-Feedback
               - if:
                   - commentContains:
@@ -339,6 +339,14 @@ configuration:
                 then:
                   - addLabel:
                       label: Needs-CLA
+              # CLA-Signed
+              - if:
+                  - commentContains:
+                      pattern: '(?in)\[Policy\]\s+CLA[\s-]Signed'
+                      isRegex: True
+                then:
+                  - removeLabel:
+                      label: Needs-CLA
               # Needs-Manual-Merge
               - if:
                   - commentContains:
@@ -347,6 +355,14 @@ configuration:
                 then:
                   - addLabel:
                       label: Needs-Manual-Merge
+              # Needs-Manual-Review
+              - if:
+                  - commentContains:
+                      pattern: '(?in)\[Policy\]\s+Needs[\s-]Manual[\s-]Review'
+                      isRegex: True
+                then:
+                  - addLabel:
+                      label: Needs-Manual-Review
               # Needs-Review
               - if:
                   - commentContains:
@@ -578,6 +594,8 @@ configuration:
                   - removeLabel:
                       label: Needs-Manual-Merge
                   - removeLabel:
+                      label: Needs-Manual-Review
+                  - removeLabel:
                       label: Needs-Review
                   - removeLabel:
                       label: Network-Blocker
@@ -628,7 +646,7 @@ configuration:
                         We've identified this as a duplicate of another issue or PR that already exists. This specific instance is being closed in favor of the linked issue. Please add your 👍 to the other issue to raise its priority. Thanks for your contribution!
 
 
-                        Template: msftbot/duplicate/closed
+                        ###### Template: msftbot/duplicate/closed
                   - closeIssue
                   - removeLabel:
                       label: Needs-Triage

@@ -1,0 +1,120 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: LunarWerxs.SageThumbs2K
+PackageVersion: 3.2.0
+PackageLocale: en-US
+Publisher: LunarWerx
+PublisherUrl: https://github.com/LunarWerxs
+PublisherSupportUrl: https://github.com/LunarWerxs/SageThumbs-2k/issues
+PackageName: SageThumbs 2K
+PackageUrl: https://github.com/LunarWerxs/SageThumbs-2k
+License: PolyForm Noncommercial License 1.0.0
+LicenseUrl: https://github.com/LunarWerxs/SageThumbs-2k/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2026 LunarWerx
+ShortDescription: Explorer thumbnails for 349 file types Windows can't read, plus a right-click image toolkit.
+Description: SageThumbs 2K is a modern, crash-isolated Windows 11 shell extension written in Rust that rebuilds the classic SageThumbs. It gives File Explorer thumbnails for 349 file types Windows can't preview on its own — camera RAW, HEIC/AVIF, Photoshop, DjVu, ebooks and comics, video frames, 3D-print files and a long tail of obscure formats — plus a right-click image toolkit (convert, resize, rotate, OCR, color picker, metadata strip, combine-to-PDF/CBZ) and a console/AI CLI. Free for personal use.
+Moniker: sagethumbs2k
+Tags:
+- converter
+- explorer
+- heic
+- image
+- raw
+- shell-extension
+- thumbnails
+ReleaseNotes: |-
+  <div align="center">
+  <img src="https://raw.githubusercontent.com/LunarWerxs/SageThumbs-2k/v3.2.0/assets/logo-master.png" width="96" alt="SageThumbs 2K logo">
+  </div>
+  
+  ## What's changed
+  
+  - **Uninstalling keeps Windows' thumbnail cache unless you ask.** Since 3.0.5 the uninstaller
+    cleared the whole cache at the next restart - every thumbnail on the machine, not only the
+    ones SageThumbs drew - and did so without asking, on unattended removals too. It now asks: a
+    box on the uninstall dialog, unticked by default, resets the cache; leaving it unticked keeps
+    everything as it is (thumbnails SageThumbs drew stay until those files change, and Windows'
+    Disk Cleanup can clear them any time). Unattended uninstalls never touch the cache; add
+    `/RESETTHUMBCACHE` to the uninstall command to opt in.
+  - **Adobe Illustrator files saved without "Create PDF Compatible File" no longer show a blank
+    page.** Such a file's PDF half is only a page of small print saying it was saved without PDF
+    content, and that page is what showed as a white tile with unreadable text. Files from
+    Illustrator CS4 and earlier carry a small picture of the artwork inside, and that is shown
+    now. Files from Illustrator 2020 and later carry no picture at all, so they get the
+    Illustrator icon instead, and `st2k doctor` says exactly why and how to re-save. Files saved
+    with the option ticked are unchanged. Reported in #45.
+  - **Photoshop EPS files saved with "Preview: None" now thumbnail.** Photoshop writes its
+    embedded thumbnail with a marker spelled one way and SageThumbs looked for another; the
+    first real such file showed the mismatch.
+  - **An Illustrator file with several artboards shows them all.** Up to four artboards are laid
+    out in one tile, the way a comic archive shows its first pages, instead of the first
+    artboard alone. Ordinary PDFs still show their first page. Requested in #44.
+  - **Settings, and every other SageThumbs window, no longer looks patchy in light mode.** The
+    window behind the controls was painted a slightly different grey from the controls
+    themselves, so each row, each label and the sidebar showed as a faint lighter block: obvious
+    on some displays and Windows themes, nearly invisible on others. Every window now uses one
+    background colour. Dark mode was not affected.
+  - **A greyed-out text box or drop-down in Settings now looks like one greyed-out field**, not a
+    grey slab inside a white outline, and the "Never preview these extensions:" caption greys
+    with its box while Quick preview is off.
+  - **The licence-key box on the Licence page gets the same rounded frame as every other field.**
+    It was a bare white strip beside a rounded button.
+  - **The hotkey service's status line on the Screenshots page ("Running", "Stopped") is now
+    translated** in all 36 languages; it was English everywhere.
+  - **Strip metadata no longer damages two kinds of file.** An SVG whose metadata quoted a
+    closing tag inside a CDATA block or a comment was cut short and saved malformed; it is now
+    handled correctly, and a rewrite that would not be valid XML is refused instead of saved. A
+    photo that relied on its EXIF rotation came out sideways after stripping; the rotation tag,
+    and nothing else, is now kept.
+  - **Convert, Resize and Strip can no longer overwrite another file through their temporary
+    file.** The temporary name was predictable; it is now unique and never reuses a file that
+    already exists.
+  - **Screenshot "Save as" can no longer wipe the file it was saving over.** Choosing a name
+    ending in `.jpg` emptied an existing picture and then reported a failure; the save now
+    writes a PNG to a temporary file first and only then replaces the destination, and the
+    dialog keeps the `.png` extension.
+  - **Quick Convert and Resize from the right-click menu now honour "Keep metadata"**, as the
+    Convert dialog always did. Shrink for email still produces a clean file.
+  - **Scitex `.sct` files convert and copy**, not only thumbnail.
+  - **Signing in to settings sync and then pressing Save no longer overwrites the settings that
+    were just pulled from your account** with what was on screen before.
+  - **Reset all settings now matches a fresh install** (comic-cover credit skipping stays on).
+  - **Portable copies keep folder names containing ` #`, ` ;`, brackets or `=`.** A screenshot
+    folder like `D:\Screenshots #2026` was silently shortened to `D:\Screenshots`, and exporting
+    then importing settings dropped such values entirely.
+  - **Set as folder icon keeps the folder's existing `desktop.ini` details** when that file
+    cannot be read at that moment, instead of replacing them.
+  - **Set as lock screen no longer replaces the picture your desktop wallpaper uses.**
+  - **A mistake in a custom screenshot upload host now stops the upload with an explanation**
+    instead of quietly sending the file to the public default hosts.
+  - **`st2k batch` reports an input that does not exist as a failure** instead of leaving it out
+    of the totals.
+  - **`st2k doctor` no longer says HEIC/HEIF keep their default icon when the HEVC extension is
+    missing on a Full install**: the bundled decoder handles them, more slowly.
+  - **Stability:** two animation/sprite formats (SPLA, Aseprite) can no longer make Explorer
+    hold hundreds of megabytes for one tile, and the preview pane cleans up after itself when
+    its DLL unloads.
+  - **Sign-in and settings sync moved to Connections' new permanent address**
+    (`accounts.connectionsapi.com` / `studio.connectionsapi.com`); the previous domain was
+    suspended by its registry on 18 September. Existing sign-ins carry over. The "Move my
+    licence" and sign-in links now go through a LunarWerx redirect, like Buy already did, so a
+    future address change never needs an update.
+  
+  ## Downloads
+  
+  Every file below is code-signed by LUNARWERX LLC; the SHA-256 lets you check a download is the one published here.
+  
+  - **x64 installer:** `SageThumbs2K-Setup-3.2.0.exe` ┬╖ SHA-256 `6e3db9882918698e3d338856a2c198f0679c6baa8380508ba2408eea27c53822`
+  - **ARM64 installer:** `SageThumbs2K-Setup-3.2.0-arm64.exe` ┬╖ SHA-256 `1c6aa3c9bcf284ed27612899fb2992175adcd0c215d50825ed7bbfce344d64d9`
+  - **x64 portable:** `SageThumbs2K-Portable-3.2.0.zip` ┬╖ SHA-256 `66571e74e16f4da079cee40bdca6098c2b76fdeb9948e53f768fe769a8d2030a`
+  - **arm64 portable:** `SageThumbs2K-Portable-3.2.0-arm64.zip` ┬╖ SHA-256 `5513846cd0800d90d59d08c0827459552186fe344c66fd75290cfaa192c81b84`
+  
+  Portable: unzip and run, nothing is installed. `st2k register` (or Settings, Advanced) turns on Explorer thumbnails and the classic right-click menu for your account; only the preview pane, the Details pane and the Windows 11 compact menu still need the installer. `SageThumbs2K-Setup-3.2.0-amd64.exe` is the x64 installer again, under the name copies older than 1.3.6 look for; download the plain one.
+  
+  ---
+  
+  ≡ƒÆ¼ Questions, ideas, or a hello: the [LunarWerx Discord](https://lunarwerx.com/discord).
+ReleaseNotesUrl: https://github.com/LunarWerxs/SageThumbs-2k/releases/tag/v3.2.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

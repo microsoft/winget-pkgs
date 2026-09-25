@@ -1,0 +1,101 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: Parslee.Car
+PackageVersion: 0.55.0
+PackageLocale: en-US
+Publisher: Parslee AI
+PublisherUrl: https://github.com/Parslee-ai
+PublisherSupportUrl: https://github.com/Parslee-ai/car-releases/issues
+PackageName: Common Agent Runtime
+PackageUrl: https://github.com/Parslee-ai/car-releases
+License: Proprietary
+LicenseUrl: https://github.com/Parslee-ai/car-releases/blob/main/LICENSE
+ShortDescription: Deterministic execution layer for AI agents (CLI + server).
+Description: |-
+  Common Agent Runtime (CAR) is a deterministic execution layer for AI
+  agents: models propose actions and the runtime validates, verifies, and
+  executes them. This package provides the pre-built Windows x64 binaries —
+  the CLI (car), the WebSocket server (car-server), and the StateBench
+  evaluation bridge (car-memgine-eval).
+Tags:
+- ai
+- agent
+- runtime
+- llm
+- cli
+ReleaseNotes: |-
+  ## v0.55.0
+
+  ### Changes
+
+  • A confirmed build plan can shorten the agent-build deadline but can no longer remove or extend it past `[coder] max_agent_build_wall_secs`.
+
+  • Stop agent builds immediately on non-retryable model admission, credential, account, missing provider key, routing, and gateway failures, and show the inference recovery text instead of retrying or scoring a scenario mismatch.
+
+  • The macOS agent builder now shows live build attempt, phase, scenario, model, and elapsed-time progress against the deadline; timed-out builds explain what happened and offer Try again with the answers kept, and completed scenario checks show Passed.
+
+  • When approving a build plan in the macOS agent builder does not come back cleanly and CAR then finds the build session was abandoned, the builder keeps the setup answers on the template list, ready to resume, instead of showing a "could not verify that the build plan was approved" failure screen (#1522 follow-up).
+
+  • Agent Builder drafts now persist with registered agents, and rebuilding an existing agent preserves its id plus one prior spec for safe revert.
+
+  • The macOS agent builder's review screen now keeps "Create build plan" visible at any scroll position and window size：it sits in the persistent bottom bar beside "Cancel setup" instead of at the end of the scrolling review, and the builder's scroll indicator is always shown.
+
+  • When an agent build stops because the account is signed out or rejected, the builder now says so, offers Sign in, and lets you try again with the same answers.
+
+  • Stopping an agent build now keeps the answers you wrote：the New Agent screen offers "Continue your draft" and a retry starts a fresh build, instead of clearing all seven fields. Cancel setup still discards them, and now asks first.
+  • Leaving the agent builder now asks before it throws away answers you wrote："Back to Agents", "Cancel setup" and "Start fresh" all confirm first — including "Start fresh" on the failed, timed-out and sign-in screens, where the build session is still attached — so a stopped build's parked setup cannot vanish on one stray click.
+
+  • `car agent new` now documents its 64-character safe project-id limit while continuing to use the full description for generated identity, goals, and scenarios.
+
+  • `car agent run` now prints CAR's goal verdict after the agent's reply (`goal check passed：<check> (N iterations)`, or `goal marked met without a check result`), and when the agent used tools it notes on stderr that the run's temporary workspace was removed when the run ended.
+  • The daemon now logs how each `declagents.invoke` run ended (agent id, turns, tool calls, goal met/grounded/iterations, and any error), never the input or output text.
+
+  • The Android host now treats the daemon's terminal `auth_required` frame as the end of the turn and shows its sign-in message in the assistant bubble — as a calm notice, not an error banner or notification — instead of holding an empty "Parslee Core is working on it..." row for 120 seconds and then showing nothing.
+  • A finished Android chat turn ignores every later event for that turn, so a `token` delivered behind a terminal frame can no longer append to a closed bubble, and a goal-bearing turn that ends signed out clears its pending "Checking：..." verification line.
+
+  • Sparkle appcast publishing now keeps a content-pinned `sign_update` tool outside disposable Swift build artifacts and preserves its diagnostics in detached release logs.
+
+  • **The assistant's project `deny_tool` test no longer fails when host tool availability changes mid-run.** It previously compared two separately discovered tool catalogs, so a host-dependent tool appearing between the control and policy runs failed the comparison. The assertion now reads a single runtime's model-visible and registered surfaces, still proving the denied tool disappears from the model catalog and delegate grants while staying registered for a policy refusal, and that unrelated built-in tools remain visible.
+
+  • `car do --json` and assistant chat streams now emit `inference_started` before model calls and `inference_retry` before transient remote retry backoff, so hosts no longer mistake live inference for a hung loop.
+
+  • Hardware detection no longer hangs indefinitely when `nvidia-smi` or its driver is unresponsive; GPU presence and VRAM probes now fall back after three seconds.
+
+  • `car-cli`'s `capabilities_cli` tests no longer fail when `CAR_SECRETS_FILE_DIR` is set：every spawned `car` child (not just `car info`) now runs through one isolated command builder that clears the caller's environment and gives the child its own scratch `HOME`/`CAR_HOME`, an empty `PATH` directory, and `RUST_LOG=error` — so neither the file-backend "secrets are PLAINTEXT ON DISK" warning nor an external-agent auth probe (Claude Code, Codex, Gemini, mini-swe-agent) inherited via `PATH`/`CAR_*_BIN` can reach the child's stderr. The scratch `HOME` isolates filesystem/config discovery; avoiding the real keychain additionally depends on `car-secrets` itself honoring `CAR_SECRETS_FILE_DIR` in a debug build. The builder also refuses to run at all under a release-profile test binary (`assert!(cfg!(debug_assertions), ...)`, not just `#[ignore]`, since `--include-ignored` would otherwise still spawn a release `car`), so under a release-profile test run these three tests fail loudly before spawning anything rather than reaching a release `car` that ignores `CAR_SECRETS_FILE_DIR`.
+
+  • The published capability manifest and docs bundle now match the shipped calendar and mail tool descriptions, including that creating a local Mail.app draft is approval-gated.
+
+  • CI now blocks pull requests and merge-queue entries when their generated capability manifest is stale.
+
+  • `car do` errors now retain completed-turn and tool-receipt counts and identify exhausted transient inference retries in both JSON and human output.
+
+  • Prevent `car-inference` tests from deadlocking when credential and environment fixtures run in parallel; both guards now use one bounded acquisition order.
+
+  • Shared-target Cargo commands now enforce the repository's pinned Rust toolchain when value-taking global options such as `--color`, `--config`, `-C`, or `-Z` appear before the build command.
+
+  • CarHost now checks the loopback host named by `CAR_DAEMON_URL` before starting its bundled daemon, so an existing listener on `[::1]` is treated as occupied instead of spawning a competing process.
+
+  • Signed CarHost builds can now opt into unreviewed nightly releases from Settings → Updates, switch back to the stable feed without relaunching, and immediately check the selected channel.
+
+  • CarHost now explains that Parslee Core uses Parslee inference, requires Parslee sign-in even when a local model is installed, gives new users an interim parslee.ai account-creation path, and renders terminal `auth_required` chat events as actionable sign-in or workspace-setup cards.
+
+  • CarHost now retires legacy `ai.parslee.car.daemon` and `ai.parslee.car-server` LaunchAgents before starting its bundled daemon, preserving stderr capture; attachments to unrelated daemons are marked in the stderr log and macOS menu.
+
+  • Changelog catch-ups now have a helper that restores every earlier fragment source, including fragments added and consumed within a squashed pull request, and refuses any rebuild that deletes existing release notes.
+
+  • `scripts/changelog-catchup.sh` now refuses to rewrite an already-tagged release unless a deliberate-recut override is supplied, and automatically restores `CHANGELOG.md` and `changelog.d` when its additive-only assertion fails.
+
+  • Accept the release bump commit in the merge queue. GitHub squashes the bump PR and appends ` (#123)` to its subject, but `check-changelog.sh` anchored its release-assembly exemption on the bare subject — so the same change passed on the pull-request event and was then rejected on the merge-group ref as "a feature pull request editing generated CHANGELOG.md", which a release bump is definitionally not. This blocked every stable release under the merge-queue contract.
+
+  • CAR Chat on macOS now renders the turn's completion receipt and names the model that answered, instead of printing the literal `(receipt_report)` and `(model_served)`. A turn with no verification evidence says so rather than showing a blank row, long stage values are bounded in the transcript with the full evidence one click away, and an unrecognized event kind shows a neutral line instead of the daemon's internal discriminator.
+  • A chat approval prompt now names the tool and what it would act on — the URL, command, query or path — and sits above the answer it enabled rather than below it. A `web_search` gate, whose `scope.target` is empty on the wire, recovers its query from the request parameters instead of showing nothing.
+  • A chat approval is marked resolved only when the daemon confirms `resolved：true`. When it does not, the row stays open and CAR says it could not confirm the decision, rather than showing a decision that never reached the parked turn as accepted.
+  • `docs/host-protocol.md` documents the `model_served`, `goal_evaluated` and `receipt_report` chat event kinds, which the daemon has been sending for some time.
+
+  • Chat now pairs every tool request with a bounded, redacted result row, preserves evidence from large responses, and shows task-specific receipts with event IDs, message IDs, redirect destinations, and verification status.
+  • A chat turn receipt now reports only the calls that turn made. It was seeded from the whole replayed thread, so a long session's `receipt_report` published its oldest turns' rows (the wire projection keeps the first 100) and accumulated `desktop_actions` over the entire session. Grounding still sees the full history.
+  • A desktop write is classified from the advertised tool defs' `mutating` flag rather than a literal name list, so `mail_draft`, `browse_navigate`/`browse_scroll`, and the `browser_*` sign-in
+ReleaseNotesUrl: https://github.com/Parslee-ai/car-releases/releases/tag/v0.55.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
