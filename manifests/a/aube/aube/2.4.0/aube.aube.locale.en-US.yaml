@@ -1,0 +1,58 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: aube.aube
+PackageVersion: 2.4.0
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  aube install can now rebuild a deleted lockfile from a hidden copy kept in node_modules, so it doesn't re-resolve from the registry. This release also makes cold installs on Linux faster and lighter on memory, and fixes lifecycle scripts on Windows and a workspace aube update that could drop members from the lockfile.
+  Added
+  - Hidden lockfile in node_modules (#1594 by @jdx): Every install now writes a copy of the resolved graph to node_modules/.aube-lock.yaml. If the project has no lockfile of any supported kind, aube install starts from that copy, as pnpm does with its current lockfile. If the manifests haven't changed, the graph is reused with no resolve. If they have changed, only the specs that changed are resolved again, and the other packages keep their locked versions. aube-lock.yaml is then written again.
+    $ aube install      # writes aube-lock.yaml + node_modules/.aube-lock.yaml
+    $ rm aube-lock.yaml
+    $ aube install      # seeds from node_modules/.aube-lock.yaml, no registry resolve
+    - --frozen-lockfile and aube ci still fail when there is no lockfile.
+    - --no-frozen-lockfile ignores the hidden copy.
+    - In auto-CI mode (CI=true with no explicit flags), an install that seeds from the hidden copy is treated as prefer-frozen.
+    - If the hidden copy is broken, aube shows WARN_AUBE_HIDDEN_LOCKFILE_BROKEN and resolves normally.
+    - The hidden copy is not used with lockfile=false, which also deletes any existing copy, or with sharedWorkspaceLockfile=false. It is also skipped for reuse installs from npm, yarn or bun lockfiles.
+
+  Changed
+  - Faster, lighter cold installs on Linux (#1598, #1603, #1604, #1605 by @jdx):
+    - On Linux, the blocking thread pool now defaults to 8 threads instead of 128. On the benchmark fixture this cut peak memory from about 1.5 GB to about 400 MB and reduced kernel CPU time. AUBE_TOKIO_BLOCKING still overrides the default, and macOS and Windows keep 128.
+    - Small tarballs (up to 1 MiB) are downloaded in full before their store import begins, so an import no longer ties up a thread while it waits on the network. Memory for these buffered downloads is capped at 64 MiB in total.
+    - Installs with the global virtual store no longer read back dependency links they just wrote.
+
+  Fixed
+  - Windows lifecycle scripts failing with EISDIR: illegal operation on a directory, lstat 'C:' (#1591 by @jdx): This affected scripts that start node through a .bin shim (for example node-gyp-build) during aube add, remove, update, dedupe and ci, and during installs from embedding hosts such as mise's npm: backend. The install root and the Node-API embedding's project directory no longer carry the \\?\ verbatim prefix. Fixes #1590.
+  - aube update at a workspace root dropping workspace members from aube-lock.yaml (#1579 by @jdx): With a shared lockfile, running aube update or aube update -w at the root could delete every workspace member's entry in aube-lock.yaml. Member entries, their packages, patch hashes and catalog snapshots are now kept, and only the root's direct dependencies are updated. aube install also treats a workspace member that declares dependencies but has no entry in the lockfile as stale, so installing again repairs lockfiles already damaged by this bug.
+
+  💚 Sponsor aube
+  aube is built and maintained by @jdx, an open source developer at entire.io, the title sponsor of his open source work.
+  If aube saves your team install time or CI minutes, please consider becoming an individual or company sponsor. Your support funds ongoing development and helps keep aube fast, free, and independent.
+ReleaseNotesUrl: https://github.com/aubepkg/aube/releases/tag/v2.4.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
