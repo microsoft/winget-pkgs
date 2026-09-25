@@ -1,0 +1,84 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: JGraph.Draw
+PackageVersion: 31.5.2
+PackageLocale: en-US
+Publisher: JGraph
+PublisherUrl: https://www.drawio.com/
+PublisherSupportUrl: https://github.com/jgraph/drawio-desktop/issues
+PrivacyUrl: https://www.diagrams.net/trust
+Author: JGraph Limited
+PackageName: draw.io
+PackageUrl: https://github.com/jgraph/drawio-desktop
+License: Apache-2.0
+LicenseUrl: https://github.com/jgraph/drawio-desktop/blob/HEAD/LICENSE
+Copyright: © 2005-2026 JGraph Ltd, Artisans' House, 7 Queensbridge, NN4 7BF, Northampton, England. Company
+CopyrightUrl: https://www.diagrams.net/trust
+ShortDescription: A diagramming desktop app based on Electron that wraps the core draw.io editor.
+Tags:
+- chart
+- design
+- diagram
+- draw
+- gantt
+- graph
+- graphics
+- mind-map
+- mind-mapping
+- mindmap
+- uml
+ReleaseNotes: |-
+  - Uses electron 44.4.5
+  - Notices changes made to an open file by another program even when draw.io is not the frontmost application, and sends them to the window that has the file open [jgraph/drawio-desktop#2541]
+  - Asks whether to overwrite or synchronise when another program replaces an open file with an older version of itself, for example a sync client rolling back, instead of merging it silently [jgraph/drawio-desktop#2382]
+  - Loads shape libraries declared with a local path in the libraries configuration again, which were refused with "Path not authorized" since 31.4.4 [jgraph/drawio-desktop#2546]
+  - Adds the --normalize command line option, which repairs generated diagrams before they are exported or opened: edges filed under the wrong parent, edges without a geometry and containers that clip their children
+  - Adds the --timeout command line option, which fails the export of a file that takes longer than the given number of seconds and continues with the next file
+  - Command line exports no longer hang or stop at a dialog: invalid Mermaid input, an unknown or invalid --layout, a crashed export or Visio import and an unreadable file now fail that file with an error while the rest of a folder still exports, an unexpected error ends the export instead of showing a dialog, and the exit code is 1 in both cases. Empty Mermaid and CSV files are refused for HTML export
+  - Skips symbolic links when exporting a folder from the command line, and refuses to write an output file through a symbolic link placed at the file name the export derives from its input. Paths typed on the command line are followed as before [GHSA-2w35-fgjm-2vvh]
+  - Starts Windows system programs by their full path, so a program placed in a diagram's folder can no longer run in their place when the diagram is opened from Explorer [GHSA-qg46-52fx-h7p8]
+  - Stops backups and file writes from following a symbolic link placed at the name of an authorised file or its backup [GHSA-36x5-vw5q-29rv]
+  - Never checks for updates when updates are disabled, including from the Help menu and when the settings cannot be read
+  - The Microsoft Store package requires Windows 10 version 1809 or later
+  - Updates to draw.io core 31.5.2. All changes from 31.4.5 to 31.5.2 are added in this build.
+  Testing:
+  Verified against the packaged, signed macOS build. Windows and Linux packages were verified from the produced release artifacts, their sizes and update manifests, rather than by running them, and the Windows program path change from unit tests and review.
+  Base checks
+  - Launch, open a file passed on the command line, add and edit shapes, change styles, undo and redo, copy and paste, save and reopen, insert and delete pages, rename a page, and zoom
+  - Export to PNG, SVG and PDF from the app and from the command line, covering scale, border, transparency, cropping, page selection with -p and --size page
+  - Diagram round trip in an exported PDF, including reopening the exported PDF and recovering both pages and their contents
+  - Mermaid and CSV import and the --layout option from the command line
+  - Shape search, the export and print dialogs and the configuration dialog
+  - Settings survive a restart, and unsaved changes are kept as a draft next to the file
+  - The macOS bundle is signed with a Developer ID certificate under the hardened runtime, is notarised and stapled, and the Quick Look app extension is sandboxed and separately signed
+  - The Electron security fuses are applied, so RunAsNode, the NODE_OPTIONS variable and the node inspect arguments are disabled and the app only loads from the asar
+  - 225 unit tests pass
+  Changes to open files
+  - A change made by another program reaches a window that is not focused within 5 seconds and shows the notice to synchronise [jgraph/drawio-desktop#2541]
+  - Replacing an open file with an older saved version of itself asks whether to overwrite or synchronise, closing the question keeps the notice, and overwriting writes the current version back [jgraph/drawio-desktop#2382]
+  Command line
+  -  --normalize gives an edge without a geometry its geometry, both when exporting and when opening a file
+  -  --timeout 1 fails a 6000 shape PDF export after one second while the next file in the folder still exports, and the same file exports in about 17 seconds without the option
+  - Invalid Mermaid, an unknown or invalid --layout, an unreadable file, a corrupt Visio file and a killed export process each end with an error and exit code 1 instead of hanging, and the other files in the folder still export
+  - Empty Mermaid and CSV files are refused for HTML export and no page is written
+  Symbolic links
+  - A folder export skips a link to a text file outside the folder and a linked subfolder, and nothing from outside the folder appears in the output [GHSA-2w35-fgjm-2vvh]
+  - An output file name that is a link, to an existing file or to a missing one, is refused and the file the link points to is left untouched, while paths typed on the command line are still followed
+  - Saving still works when the backup file name is a link to a file elsewhere, that file is not written, and normal backups are still created [GHSA-36x5-vw5q-29rv]
+  - Reading, writing and checking an authorised file through a link placed at its name is refused, including a link to a missing file
+  Libraries in the configuration
+  - A shape library declared with a local path in the libraries configuration loads after a restart and shows its shapes, while other local files stay unreadable [jgraph/drawio-desktop#2546]
+  Checks around the changes
+  - Reads, writes and checks of paths the user has not authorised are still refused, and only http, https, mailto, tel and callto links are opened externally
+  - The export menu offers the same formats as in 31.4.5, and every export is produced locally in the app
+  - The list of fonts installed on the system still loads
+  - Update manifests name this version, and the Windows x64 and arm64 manifests each list only their own installer
+ReleaseNotesUrl: https://github.com/jgraph/drawio-desktop/releases/tag/v31.5.2
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://www.drawio.com/docs/
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/jgraph/drawio-desktop/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
