@@ -1,0 +1,125 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: OpenBao.OpenBao
+PackageVersion: 2.7.0
+PackageLocale: en-US
+Publisher: OpenBao
+PublisherUrl: https://openbao.org/
+PublisherSupportUrl: https://github.com/openbao/openbao/issues
+Author: OpenBao a Series of LF Projects, LLC
+PackageName: OpenBao
+PackageUrl: https://openbao.org/
+License: MPL-2.0
+LicenseUrl: https://github.com/openbao/openbao/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2015 HashiCorp, Inc.
+CopyrightUrl: https://github.com/openbao/openbao/blob/main/LICENSE
+ShortDescription: OpenBao is a software solution to manage, store, and distribute sensitive data.
+Description: |-
+  OpenBao exists to provide a software solution to manage, store, and distribute sensitive data including secrets, certificates, and keys.
+  The OpenBao community intends to provide this software under an OSI-approved open-source license, led by a community run under open governance principles.
+Moniker: openbao
+Tags:
+- certificates
+- credentials
+- encryption
+- keys
+- openbao
+- secrets
+- secrets-management
+- security
+- vault
+ReleaseNotes: |-
+  SECURITY
+  - agent, proxy: Ensure the quit endpoint correctly requires the X-Vault-Request header when specified by listener configuration. GHSA-8gmq-wv9h-fcwp. [GH-4065]
+  - auth/cert, auth/kubernetes, auth/userpass, secrets/pki, core/policies, core/workflows: Use ResolvePathOperation to define canonical URLs for canonicalized resources. GHSA-fg5x-7whg-6c28. [GH-4065]
+  - core/plugins: Ensure plugin command name is relative to plugin_directory prior to executing. GHSA-j6wc-jpvg-xfxq. [GH-4065]
+  - core/plugins: Ensure writes to sys/plugins/catalog/* endpoints are restricted to the root namespace. GHSA-cg72-x35g-xfp8. [GH-4065]
+  - core/policies: Ensure denied ACL policy template evaluation returns an error and is not silently dropped. GHSA-hr5j-3j78-4vh2. [GH-4065]
+  - core/policies: Prevent cross-namespace policy resolution traversal in the LRU policy cache, allowing unintentional cross-namespace access. GHSA-mjch-vcw3-hhmf. [GH-4065]
+  - sdk: Prevent TypeKVPair, TypeHeader from leaking malformed request data into audit logs in plaintext. GHSA-8xxq-mq9m-xmhw. [GH-4065]
+  - secrets/pki: Forbid issuance of non-validated SANs through ACME. GHSA-x8fg-h69x-p28f. [GH-4065]
+  - ui: Remove support for prompt=none redirection in the OIDC provider. GHSA-2cjw-94fw-wqjx. [GH-4065]
+
+  FEATURES
+  - External Keys: The PKI and Transit secret engines can now use KMS plugins to perform cryptographic operations without storing key material in OpenBao. [GH-3956]
+    - Configure mappings to HSM or KMS-backed keys via the /sys/external-keys APIs and grant access to select mounts.
+    - Use the PKI engine to sign certificates &co with external private keys.
+    - Use the Transit engine to sign, verify, encrypt, and decrypt payloads with external key material.
+    - Several KMS plugins provide support:
+      - Support for PKCS#11-backed keys is included via the kms-pkcs11 plugin available in openbao-plugins.
+      - Support for Transit-backed keys is built-in. This is similar in concept to the built-in Transit seal.
+      - Like Auto Seal support via KMS plugins, the interface is provider-agnostic: Develop plugins and enable support for additional providers at any time.
+  - ML-DSA Support in PKI: Introduces support for the ML-DSA (NIST's FIPS 204) signature algorithm for all CA, CSR, and leaf actions. [GH-3903]
+    - ML-DSA is a widely standardized post-quantum cryptography (PQC) algorithm resistant to attacks from quantum computers.
+    - Note that Go's OCSP implementation does not support ML-DSA so will be unusable with ML-DSA typed issuers.
+  - ML-DSA Support in Transit: Introduces support for the ML-DSA (NIST's FIPS 204) signature algorithm. [GH-3909]
+    - Generate, import, and export keys of type mldsa-44, mldsa-65 and mldsa-87.
+    - Create and verify pure ML-DSA signatures.
+  - Enable Pure-PQC TLS: TLS connections can now use pure post-quantum key exchanges and certificates. [GH-3769]
+    - Operators can specify tls_key_exchange_preferences in server, agent, and proxy listeners to enforce PQC key exchange algorithms (SecP256r1MLKEM768, SecP384r1MLKEM1024, X25519MLKEM768, and MLKEM1024).
+    - Operators can use ML-DSA certificates via these listeners as well.
+    - Outbound TLS connections from OpenBao can now connect to servers with the above key exchange algorithms or presenting a ML-DSA server or CA certificate.
+  - PostgreSQL Horizontal Scalability: Enable read scalability on the PostgreSQL storage backend similar to existing Raft support. [GH-3904]
+    - Requires ha_enabled = true to be set and cluster_addr to be reachable (establishing a forwarding RPC connection) from standby nodes to the primary.
+    - In the event of extended leadership loss, standby nodes will come up as read-enabled.
+    - Only works with PostgreSQL physical replication; will not work with logical replication.
+  - Strong Consistency Control: Support X-Vault-Index and X-Vault-Inconsistent headers to ensure client/server consistency. [GH-3839]
+    - X-Vault-Index is now sent when a write is performed.
+    - The X-Vault-Inconsistent request header can take the following values to control the fallback behavior when the node is out of date:
+      - fail, to respond with 429 Too Many Requests and a Retry-After value,
+      - forward-active-node to forward the request to the active node, or
+      - await-state to hold the request locally to attempt to catch up, optionally falling back to one of the above behaviors (if also specified) or the server default.
+    - On listeners, three new configuration parameters are now respected:
+      - consistency_fallback_behavior to set the default fallback for await-state,
+      - consistency_missing_header_forward to automatically forward requests which do not have any consistency control headers, and
+      - consistency_max_index_wait to indicate the maximum amount of time await-state should pause before forwarding the request.
+  - PebbleDB Storage Backend: This storage backend is a non-HA, durable backend using PebbleDB for transactions and improved performance. [GH-3879]
+  - Control Groups: Add support for a new ACL policy stanza, control_group, which specifies when a second party must approve a request for a path. [GH-3436]
+
+  IMPROVEMENTS
+  - command/server: Add tls_auto_reload configuration option to automatically reload TLS certificate and key files when their contents change, without requiring SIGHUP. [GH-3530]
+  - command/server: Include disable_standby_reads, allow_unauthenticated_workflows, and unsafe_relative_paths in sanitized config output. [GH-3433]
+  - command/status: Add support for -field argument to bao status. [GH-3750]
+  - command/token: Add support for -field argument to bao token lookup. [GH-3618]
+  - command/namespace/seal-status: Add support for -field and -format argument to bao namespace seal-status. [GH-3750]
+  - core: Add support for revoke-self with wrapping tokens. [GH-3688]
+  - core: Switch to cipher.NewGCMWithRandomNonce for fewer nonce generation calls. [GH-3290]
+  - core/seal: Add configuration options to disable Auto Seal health checks and customize health check intervals and timeout. [GH-3653]
+  - core/metrics: Report vault.core.unsealed=0 when OpenBao is sealed via dedicated metrics loop. [GH-3430]
+  - core/server: Support storage-indicated index values in Server Side Consistent Tokens (SSCTs), improving their utility. Previously these tokens always had an index value of 0. [GH-3839]
+  - core/plugins: Allow auth & secret mounts to automatically request the latest installed version of the underlying external plugin via plugin_version=latest. [GH-3914]
+  - core/plugins: Allow pinning OCI-based plugins by manifest digest (e.g., ghcr.io/openbao/openbao-plugin-secrets-aws@sha256:<digest>) instead of providing the sha256sum of the inner plugin binary. [GH-3915]
+  - core/plugins: Automatically determine binary_name for OCI plugins based on the image's ENTRYPOINT or CMD if unset in configuration. [GH-3760]
+  - core/plugins: Reload KMS plugin configuration stanzas on SIGHUP and respawn plugin clients as needed, enabling plugin upgrades at runtime. [GH-3738]
+  - storage/raft: Automatically create the storage directory if it does not exist. [GH-3649]
+  - sys/raw: Allow reading backed up unseal or recovery shares. [GH-3863]
+  - auth/cert: Add an Envoy decoder to x_forwarded_for_client_cert_decoders, enabling the processing of leaf certificates in the Envoy XFCC header. [GH-2863]
+  - auth/oidc: Return oidc_discovery_url validation errors (like bad issuer) from the underlying library. [GH-3574]
+  - secrets/pki: Support use_pss in issuers/generate/intermediate/:type calls, allowing for CSRs with PSS signatures from RSA-typed intermediates. [GH-3861]
+  - secrets/pki: Add optional ACME client port and host configuration to support non-privileged operation when a load balancer forwards challenges from ports 80 and 443. [GH-3034]
+  - packaging/container: Remove all VOLUME instructions. [GH-3711]
+  - ui/secrets: Add "Show internal engines" button to, by default, hide the cubbyhole secret engine. [GH-3794]
+  - ui: Update ember-data to 4.12.8. [GH-3816]
+  - command/plugin: Add bao plugin prune command to remove unused OCI plugin downloads from disk. [GH-4000]
+  - core/mfa: Handle cache entry invalidation on standby nodes after mfa config deletion on leader node. [GH-4033]
+  - sdk/logical: Introduce ResolvePathOperation to report canonical URLs prior to ACL evaluation. [GH-4065]
+
+  CHANGES
+  - agent, proxy: The .../quit and .../cache-clear endpoints now require the X-Vault-Request request header when require_request_header = true is specified. [GH-4065]
+  - command/server: Remove file storage backend support. [GH-3879]
+  - core/seal: The pkcs11, alicloudkms, awskms, azurekeyvault, gcpckms and ocikms seals are no longer built-in and must be installed as external plugins, as announced with the v2.6.0 release. [GH-3337]
+  - core/plugins: Declarative plugin registration (plugin stanza) no longer requires setting a sha256sum for manually installed plugin binaries. [GH-3759]
+  - core/plugins: Default the plugin_auto_register server configuration option to true. [GH-3910]
+  - auth/kerberos: The built-in Kerberos auth engine has been removed from the main OpenBao binary distribution. It will be included in openbao-plugins going forward. [GH-3882]
+  - auth/ldap: The built-in LDAP auth engine has been removed from the main OpenBao binary distribution. It will be included in openbao-plugins going forward. [GH-3882]
+  - auth/radius: The built-in RADIUS auth engine has been removed from the main OpenBao binary distribution. It will be included in openbao-plugins going forward. [GH-3882]
+  - secrets/ldap: The built-in LDAP secret engine has been removed from the main OpenBao binary distribution. It will be included in openbao-plugins going forward. [GH-3882]
+  - secrets/pki: Due to a breaking change in Go 1.27, OpenBao will no longer accept FQDNs ending with a ., e.g., example.com.. [GH-3752]
+  - sdk: Drop the helper/pointerutil package. Its functionality is natively available in Go as of 1.26 via new syntax around the new builtin. [GH-3532]
+ReleaseNotesUrl: https://github.com/openbao/openbao/releases/tag/v2.7.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://openbao.org/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
