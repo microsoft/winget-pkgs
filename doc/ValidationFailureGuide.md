@@ -46,6 +46,9 @@ These labels track the progress of your PR through the validation pipeline.
 
 ## Error Labels
 
+> [!IMPORTANT]
+> Pull requests with a red `Policy-*`, `Validation-Domain`, or `Validation-Executable-Error` label require review by a Windows Package Manager administrator. Community moderator approval alone cannot resolve or waive these labels. Review any validation details and requested changes first; if the label remains after those issues are addressed, the pull request must wait for administrator review.
+
 ### Manifest & Path Errors
 
 #### `Manifest-Validation-Error`
@@ -140,6 +143,9 @@ manifests/<first-letter>/<Publisher>/<PackageName>/<PackageVersion>/
 2. If flagged as malware/PUA, [submit the installer to Microsoft Defender for analysis](https://www.microsoft.com/wdsi/filesubmission) as a potential false positive.
 3. Ensure the installer URL is publicly accessible.
 
+> [!CAUTION]
+> ESRP scan blocking detections result in the `Binary-Validation-Error` label. This label cannot be waived by a moderator or administrator. The detected issue must be resolved—for example, by correcting or replacing the installer, or by having an incorrect detection cleared—before the pull request can pass a new validation run.
+
 ---
 
 #### `Error-Hash-Mismatch`
@@ -216,7 +222,7 @@ Update the `InstallerSha256` value in your manifest and resubmit.
 - Using a third-party CDN, mirror, or download aggregator instead of the official publisher URL
 - Using a URL shortener or redirector
 
-**How to fix:** Use the official download URL from the publisher's website. If the URL is legitimate, add a comment to your PR for investigation.
+**How to fix:** Use the official download URL from the publisher's website. If the flagged domain is legitimate, add a comment with publisher-controlled evidence showing how the package or download page leads to the installer URL. A Windows Package Manager administrator must review that evidence and determine whether the domain can be approved or waived; community moderators cannot make that decision.
 
 > [!TIP]
 > Including `PackageUrl` in your manifest and ensuring the `InstallerUrl` can be found by navigating the publisher's website from that URL helps speed up moderator reviews.
@@ -302,14 +308,16 @@ Function Get-UrlResponse {
 
 #### `Validation-Executable-Error`
 
-**What it means:** After installation, the test could not locate the primary application executable.
+**What it means:** Post-install validation could not successfully locate or run an expected application executable, or the executable returned an unexpected result.
 
 **Common causes:**
-- The application installs to a non-standard location
-- The application is a service or background process without a visible executable
-- Installation did not complete successfully
+- The application installs to a non-standard location.
+- A command-line application requires an argument such as `--version` to exit successfully.
+- The executable requires a dependency that is unavailable in the validation environment.
+- The application is a service or background process without a suitable executable.
+- Installation did not complete successfully.
 
-**How to fix:** Ensure the application installs correctly and its main executable is discoverable. If the app is not a traditional desktop application, add a comment to the PR for engineer investigation.
+**How to fix:** Review the validation details and confirm that the application installs and runs correctly. If a command-line executable requires a specific argument, include the executable name and argument in a PR comment so a Windows Package Manager administrator can add the installation metadata. Any remaining `Validation-Executable-Error` requires administrator review; community moderators cannot resolve or waive it.
 
 ---
 
@@ -409,7 +417,7 @@ Function Get-UrlResponse {
 
 ## Content Policy Labels
 
-These labels indicate that something in your manifest metadata triggered a content policy review. Your PR will undergo additional manual review.
+These labels indicate that manifest metadata triggered a content policy review. Red `Policy-*` labels require review by a Windows Package Manager administrator; community moderator approval alone cannot resolve or waive them. Review the referenced policy and correct the metadata if necessary. If no correction is needed, the pull request must wait for administrator review.
 
 | Label | Policy |
 |---|---|
@@ -468,23 +476,23 @@ These labels are applied by [moderators](https://github.com/microsoft/winget-pkg
 
 ## Quick Reference Table
 
-| Label | Category | Author Action Required? | Summary |
+| Label | Category | Author Action / Review | Summary |
 |---|---|---|---|
 | `Manifest-Validation-Error` | Manifest | ✅ Yes | Fix YAML syntax / schema errors |
 | `Manifest-Version-Deprecated` | Manifest | ✅ Yes | Update to a supported schema version |
 | `Manifest-Path-Error` | Manifest | ✅ Yes | Fix directory structure / file naming |
 | `PullRequest-Error` | PR | ✅ Yes | One package, one version per PR |
 | `Manifest-Installer-Validation-Error` | Manifest | ✅ Yes | Fix installer metadata inconsistencies |
-| `Binary-Validation-Error` | Installer | ✅ Yes | Fix AV detection or hash/URL issues |
+| `Binary-Validation-Error` | Installer | ✅ Yes | Resolve ESRP detection or installer issue; this label cannot be waived |
 | `Error-Hash-Mismatch` | Installer | ✅ Yes | Update `InstallerSha256` |
 | `Error-Installer-Availability` | Installer | ✅ Yes | Fix installer URL |
 | `URL-Validation-Error` | URL | ✅ Yes | Fix broken or untrusted URLs |
 | `Validation-HTTP-Error` | URL | ✅ Yes | Switch to HTTPS |
-| `Validation-Domain` | URL | ⚠️ Maybe | Use publisher's official URL |
+| `Validation-Domain` | URL | 🔒 Administrator review | Use publisher's official URL or provide publisher-controlled evidence |
 | `Validation-Unapproved-URL` | URL | ⚠️ Maybe | Use approved publisher URL |
 | `Validation-Indirect-URL` | URL | ✅ Yes | Remove URL redirection |
 | `Validation-Unattended-Failed` | Install | ✅ Yes | Fix silent install switches |
-| `Validation-Executable-Error` | Install | ⚠️ Maybe | Verify executable is discoverable |
+| `Validation-Executable-Error` | Install | 🔒 Administrator review | Verify the executable runs successfully and provide any required argument |
 | `Validation-Installation-Error` | Install | ✅ Yes | Fix installation failure (check elevation) |
 | `Validation-Shell-Execute` | Install | ✅ Yes | Fix installer launch failure (check elevation) |
 | `Validation-Defender-Error` | Install | ⚠️ Maybe | Fix or submit for false positive review |
@@ -493,14 +501,14 @@ These labels are applied by [moderators](https://github.com/microsoft/winget-pkg
 | `Validation-VCRuntime-Dependency` | Dependency | ✅ Yes | Add VC++ runtime dependency |
 | `Needs-CLA` | PR | ✅ Yes | Sign the Contributor License Agreement |
 | `Internal-Error-*` | Internal | ❌ No | WinGet team will investigate |
-| `Policy-Test-*` | Content | ⚠️ Maybe | Additional manual review required |
+| `Policy-Test-*` | Content | 🔒 Administrator review | Review the policy and correct the metadata if necessary |
 
 ---
 
 ## Getting Help
 
 - **Re-run validation:** A moderator can comment `@wingetbot run` on your PR to re-trigger the validation pipeline.
-- **Ask a moderator:** Check [recently closed PRs](https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+is%3Aclosed+label%3AModerator-Approved) to find an active moderator and `@mention` them.
+- **Request review:** See the [moderation guidance](Moderation.md) to understand the review queues and determine whether your pull request needs a community moderator or a Windows Package Manager administrator. Before mentioning anyone, confirm that validation has completed and that no author action is outstanding.
 - **File an issue:** If you believe the failure is incorrect, [open an issue](https://github.com/microsoft/winget-pkgs/issues/new).
 - **Matrix chat:** Join the [WinGet-pkgs Matrix room](https://gitter.im/Microsoft/winget-pkgs) for quick questions.
 
