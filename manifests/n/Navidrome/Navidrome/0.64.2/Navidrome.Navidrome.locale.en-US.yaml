@@ -1,0 +1,60 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Navidrome.Navidrome
+PackageVersion: 0.64.2
+PackageLocale: en-US
+Publisher: Navidrome
+PublisherUrl: https://github.com/navidrome
+PublisherSupportUrl: https://github.com/navidrome/navidrome/issues
+PackageName: Navidrome
+PackageUrl: https://github.com/navidrome/navidrome
+License: GPL-3.0
+LicenseUrl: https://github.com/navidrome/navidrome/blob/HEAD/LICENSE
+ShortDescription: Modern Music Server and Streamer compatible with Subsonic/Airsonic
+Tags:
+- airsonic
+- madsonic
+- media-server
+- music
+- music-server
+- navidrome
+- opensubsonic
+- raspberry-pi
+- self-hosted
+- streamer
+- streaming-api
+- streaming-audio
+- subsonic
+- subsonic-server
+ReleaseNotes: |-
+  This is a bug fix release. The main fix is for users on slow storage (USB disks, remote drives), who have seen floods of database is locked errors, UI freezes and failed full scans since 0.64.0. Scans now cause much less lock contention: the artwork worker pauses while a scan runs, and ANALYZE no longer holds the write lock for a long time. It also fixes scans that always failed on 32-bit builds (armv5/6/7, 386) when a file had a broken track or disc number.
+  Security
+  - Sanitize user-controlled names (playlists, albums, artists, track titles) in the Content-Disposition header of downloads, so a crafted name cannot change the name of the downloaded file. (#5895 by @zapisanchez)
+  - Stop writing the admin password to the log when the initial admin user cannot be created. (#5897 by @zapisanchez)
+
+  Scanner
+  - Fix database is locked errors, UI freezes and failed scans on slow storage. The artwork worker now pauses during scans, ANALYZE runs one index at a time, @eaDir thumbnail folders are ignored, and folder saves are retried when the database is busy. (#6201 by @deluan)
+  - Fix scans failing with value out of range on 32-bit builds when a file has an invalid track number, disc number or BPM. A migration resets existing invalid values. (#6202 by @deluan)
+
+  Server
+  - Fix a failed initial admin creation that marked the initial setup as done, leaving the server without an admin user. Also fix invalid JSON in some delete responses and the missing Content-Type on shared playlist (M3U) downloads. (#5897 by @zapisanchez)
+
+  Jellyfin API
+  - Honor the IsPublic flag when creating a playlist. Before, all playlists created through the Jellyfin API were private. (#6204 by @deluan)
+
+  New Contributors
+  - @zapisanchez made their first contribution in #5895
+
+  Helping out
+  This release is only possible thanks to the support of some awesome people!
+  Want to be one of them?
+  You can sponsor, pay me a Ko-fi, or contribute with code.
+
+  Where to go next?
+  - Read installation instructions on our website.
+  - Host Navidrome on PikaPods or Zenith for a simple cloud solution.
+  - Reach out on Discord, Reddit and Twitter!
+ReleaseNotesUrl: https://github.com/navidrome/navidrome/releases/tag/v0.64.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
