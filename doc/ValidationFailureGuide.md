@@ -144,7 +144,7 @@ manifests/<first-letter>/<Publisher>/<PackageName>/<PackageVersion>/
 3. Ensure the installer URL is publicly accessible.
 
 > [!CAUTION]
-> ESRP scan blocking detections result in the `Binary-Validation-Error` label. This label cannot be waived by a moderator or administrator. The detected issue must be resolved—for example, by correcting or replacing the installer, or by having an incorrect detection cleared—before the pull request can pass a new validation run.
+> ESRP scan blocking detections result in the `Binary-Validation-Error` label. This label cannot be waived by a moderator or administrator. Future handling for PUA detections is being evaluated for [PUA broadly](https://github.com/microsoft/winget-cli/issues/6189), [remote-access tools](https://github.com/microsoft/winget-cli/issues/6107), and [encrypted-file detections](https://github.com/microsoft/winget-cli/issues/6250), but these proposals do not currently provide an exception. The detected issue must be resolved—for example, by correcting or replacing the installer, or by having an incorrect detection cleared—before the pull request can pass a new validation run.
 
 ---
 
@@ -417,7 +417,9 @@ Function Get-UrlResponse {
 
 ## Content Policy Labels
 
-These labels indicate that manifest metadata triggered a content policy review. Red `Policy-*` labels require review by a Windows Package Manager administrator; community moderator approval alone cannot resolve or waive them. Review the referenced policy and correct the metadata if necessary. If no correction is needed, the pull request must wait for administrator review.
+These labels indicate that manifest metadata triggered a content policy review. False positives can occur when a word or phrase is interpreted without its surrounding context. Open the `10. Validation Completed` check and review its artifacts to find the flagged word or phrase.
+
+Red `Policy-*` labels require review by a Windows Package Manager administrator; community moderator approval alone cannot resolve or waive them. Review the referenced policy and correct the metadata if necessary. When possible, you may resolve a false positive by accurately rewording the metadata—for example, replacing "explicit approval instructions" with "direct approval instructions." Do not omit or alter relevant facts merely to avoid a policy match. If no accurate correction is appropriate, the pull request must wait for administrator review.
 
 | Label | Policy |
 |---|---|
