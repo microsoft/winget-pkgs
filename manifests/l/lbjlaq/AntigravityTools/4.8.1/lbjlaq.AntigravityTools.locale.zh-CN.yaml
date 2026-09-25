@@ -1,0 +1,46 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.8.1
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+Tags:
+- account-manager
+- antigravity
+ReleaseNotes: |-
+  - [四大协议前缀统一与前缀缓存 100% 保护] 重构四大协议转出报文，消除因格式漂移导致的前缀崩塌与思考签名异常：
+    - 报文确定性键序排序与拓扑拉齐：全面重构 OpenAI Chat、OpenAI Responses、Anthropic Claude 与 Google Gemini 四大协议的中转报文处理，引入确定性键序排序（Deterministic Key Ordering）与结构规范化，四大协议任意来回切换转出报文百分之百一致，长上下文前缀缓存（Prefix Caching）通用不崩塌。
+    - Claude 与 Gemini 思考报文双向无损融合：
+      - Claude 协议下将谷歌思考内容以 <think> 标签优雅包裹并嵌入正文；
+      - 切回 Gemini 协议时，将正文 <think> 思考内容精准提升至原生长思考块，并尝试从因果 Store 召回原始上游签名；若未命中则自动注入合规哨兵签名占位，彻底终结思考块签名不同导致的前缀崩溃与签名校验报错。
+  - [上下文因果伪哈希 ID 全面替代 tool_id] 彻底根除跨协议工具 ID 差异与缺失导致的拓扑混乱：
+    - 因果确定性伪哈希 ID: 全面抛弃四大协议客户端自带或缺失的随机 tool_id，在流水线阶段统一切换为基于上下文因果哈希合成的确定性伪 ID（Context Causal Deterministic Pseudo-Hash ID），统一工具调用、结果回填与思考签名的双向检索，100% 杜绝多轮对话中的拓扑错位。
+  - [工具返回图片直入谷歌视觉载荷] 彻底打通 Agent 工具多模态视觉闭环：
+    - 工具结果 Base64 图片原生透传：完美支持工具返回结果中附带的 Base64 格式图片，自动提取并封装为 Google Gemini 原生的 inlineData 多模态输入载荷，使 Gemini 原生支持直接观察和理解由 Agent 工具生成的图表、屏幕截图与图像素材。
+  - [流水线架构升级与死代码物理清除] 彻底拔除适配器层工具过滤与硬编码补丁：
+    - 工具与提示词私有化处理提升至流水线：全面移除历史架构中残留在适配器层对 web_search 等工具的私有过滤机制与硬编码提示词替换，消除四大协议适配器层的冗余与死代码，统一收敛至 Pipeline 集中治理。
+  - [客户端思考预算控制与关思考能力修复] (Fixes #3516, #3515):
+    - 预算模式关思考修复：修复客户端在预算模式下尝试关闭思考（Budget = 0 / disabled）时偶发失败的问题；如需精细控制思考强度，建议选用不带后缀的模型或 tiered 分级模型。
+    - 思考与参数别名全覆盖：完善 OpenAI Responses 与 Chat 协议中 max_completion_tokens、max_output_tokens 及 reasoning.max_tokens / budget_tokens 思考预算别名链路精准映射。
+  - [Agent CLI 一键配置生态扩充与精美品牌图标] (PR #3518, Thanks to @avlaaak):
+    - 新增 Agent 一键配置：引入 JeikCode、Hermes、OpenClaw、Grok Build 等 Agent 客户端一键配置卡片与同步管理（支持配置安全备份与自动回滚，并在清理 Hermes 配置时自动降级与注销激活）。
+    - 精美 App 品牌图标：统一 CLI 同步卡片图标视觉语言，采用无边框正方形 App 图标设计，集成 JeikCode 及 @lobehub/icons 官方品牌图标资产。
+  - [版本升级思考块缓存失效提醒机制]:
+    - 思考块清理建议弹窗：新增 SuggestionDeleteThinkingModal 12 种系统语言自适应提示弹窗，方便架构升级时单次引导用户清理历史思考块缓存（新安装用户静默对齐，老用户一次性交互并记忆选择）。
+  What's Changed
+  - feat(hermes): add one-click configuration sync and safe restore by @Avlaak in https://github.com/lbjlaq/Antigravity-Manager/pull/3518
+  Full Changelog: https://github.com/lbjlaq/Antigravity-Manager/compare/v4.8.0...v4.8.1
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.8.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
