@@ -18,15 +18,21 @@ configuration:
               - payloadType: Pull_Request_Review_Comment
               - payloadType: Issue_Comment
               - payloadType: Issues
-          - not:
-              isAction:
-                action: Closed
+          - isOpen
           - hasLabel:
               label: No-Recent-Activity
+          - not:
+              or:
+                - isActivitySender:
+                    user: microsoft-github-policy-service[bot]
+                - isActivitySender:
+                    user: wingetvalidator-prod[bot]
+                - isActivitySender:
+                    user: azure-pipelines[bot]
         then:
           - removeLabel:
               label: No-Recent-Activity
-        # The policy service should not trigger itself here, or else the label would be removed immediately after being added
+        # Keep the self-action guard in addition to the sender exclusions because policy rules run independently
         triggerOnOwnActions: False
       - description: Try re-enabling automerge on every PR event for packages
         if:
