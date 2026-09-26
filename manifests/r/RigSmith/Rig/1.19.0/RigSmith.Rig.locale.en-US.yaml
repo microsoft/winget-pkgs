@@ -1,0 +1,58 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: RigSmith.Rig
+PackageVersion: 1.19.0
+PackageLocale: en-US
+Publisher: RigSmith
+PublisherUrl: https://rigsmith.dev/
+PublisherSupportUrl: https://github.com/rigsmith/rigsmith/issues
+Author: John Campion Jr
+PackageName: Rig
+PackageUrl: https://rigsmith.dev/
+License: MIT
+LicenseUrl: https://github.com/rigsmith/rigsmith/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 John Campion Jr
+ShortDescription: Convention-first dev launcher across .NET, Node, Go, and Rust
+Moniker: rig
+Tags:
+- cli
+- developer-tools
+- dotnet
+- go
+- rust
+ReleaseNotes: |-
+  🚀 Enhancements
+  - clauderig: mcp list and mcp get now say whether each MCP server will exist on your other machine, and the answer is more often "no" than people expect.
+    Every place Claude Code stores an MCP server is outside the tree clauderig syncs. User- and local-scope servers live in ~/.claude.json, which sits beside ~/.claude rather than inside it — so a backup that has run nightly for a year carries none of them, and nothing has ever said so. Project-scope servers do travel, but through your own repository rather than through the backup; what does not travel with them is the approval, which is recorded in the gitignored .claude/settings.local.json, so a fresh clone is asked again.
+    A TRAVELS column carries the verdict, with the details below it: which env or header values are committed to your repo in plain text, and which absolute paths are spelled for this machine only and will fail to start elsewhere. mcp list --json emits the same as records for a script to gate on.
+    recent --json is new alongside it, matching search --json.
+    Two smaller fixes: a file the publication audit condemns is now taken back out of the staging tree instead of being left there, one permissive run from being committed; and the dashboard's shortcut legend is derived from the actions actually on screen, so it can no longer name a key that does nothing.
+  - clauderig: clauderig account prepare <account> readies an account's session profile and prints its CLAUDE_CONFIG_DIR, for programs that launch claude themselves. It does everything run does short of starting Claude Code and never touches your machine-wide login. --json returns one object, and on refusal a stable reason a launcher can branch on: no-such-account, ambiguous-account, unmapped-directory, no-tokens, session-unknown, profile-desync (the profile was re-logged as a different account inside a session), or failed. A success always reports session: ok.
+    Two resolution fixes that reach every account command: an exact email stored for two organizations is now refused as ambiguous with the ids to use, instead of silently picking one; and a directory mapped to an account that no longer exists is reported as such, instead of as "not mapped".
+  - codexrig: sync your Codex CLI configuration across machines, and run several Codex logins side by side.
+    The fifth rig does for the Codex CLI what claudeRig does for Claude Code. It copies your setup — config.toml and any named profile overlays, AGENTS.md, skills, prompts, rules — into a private git repo of your own, rewrites machine-specific paths so it lands correctly on a computer laid out differently, and refuses to publish anything that still looks like a credential.
+    codexrig init            # a private remote, and the hooks that keep it current
+    codexrig global trust    # let Codex actually run them
+    codexrig sync
+    Your login is never in the backup. auth.json is excluded, and a value that looks like a token — anything under an [mcp_servers.*.env] table, for instance — is replaced with a sentinel that a restore swaps back for the machine's own value. A restored machine runs codex login once for itself.
+    Your conversations are not backed up unless you ask. codexrig config set syncSessions true turns rollouts on. They are large, and resuming one on another machine is not a proven round trip yet, so carrying them is a backup rather than portability — and every surface says which mode the machine is in, so nobody assumes otherwise.
+    Several logins on one machine. codexrig account add tracks the login you are signed in as; codexrig account run work starts Codex as that one without disturbing the others, each in its own CODEX_HOME, with your setup shared in so they differ only in who they are. codexrig account switch changes which login a plain codex uses, and refuses while Codex is running — a live session holds the credential it started with, and swapping underneath it leaves it unable to refresh.
+    One thing to know about the hooks. Codex will not run a hook until its hash is recorded in config.toml, and it says nothing at all when it declines. That makes installed-but-untrusted the quietest possible way for a backup tool to stop backing anything up, which is why install tells you to run trust every time and codexrig doctor asks Codex directly rather than checking that a file exists.
+    Three things differ from claudeRig because Codex differs, and each would have failed quietly if ported straight across. Codex writes absolute paths as TOML table keys ([projects."/Users/you/Git/thing"]), so a rewriter that walks only values leaves a restored config trusting a directory that does not exist. Codex's configuration is TOML, so it goes through a real codec rather than a second suffix test — a raw-file path would carry config.toml past field-level redaction entirely. And a rollout records its working directory inside the conversation, so codexRig never rewrites one: codex resume --cd is the answer when a directory moved.
+    Large conversations. A rollout past 8 MiB is stored in the repo as content-addressed parts rather than as one blob, so adding a turn costs a chunk instead of a copy. This matters more than it sounds: the biggest rollout on the machine this was built against is 172 MB, which is over the default per-file cap — so without it, the longest conversation you have is the one thing never backed up. Chunked, it becomes 44 parts and a 4 KB index, and one more turn rewrites one of them.
+    codexrig peek reads another machine's session straight out of the repo without restoring anything, and peek get copies just that one session onto this machine. codexrig ledger remembers a session after its body ages out of the retention window, so a search for an old conversation says "this existed, and here is the command that recovers it" rather than nothing. codexrig repo status says what the backup holds by category, because a byte total on its own points at the wrong lever.
+    codexrig account map <account> binds a directory, so a bare account run anywhere under it picks that login.
+    codexrig doctor is where the quiet failures become sentences, and docs/CODEXRIG-PARITY.md lists, feature by feature, what is built and what is not.
+  - brewrig: keep several machines on the same Homebrew software, and the same versions of it.
+    The sixth rig. Each machine publishes what it has deliberately installed to your own private git repo, and installs whatever the others have that it doesn't. brewrig init on both Macs is the whole setup.
+    It deliberately does not sync a Brewfile. brew bundle dump into a shared folder is the obvious answer and it fails in three specific ways: a single file is last-writer-wins, so the other machine's ad-hoc installs are invisible until they are overwritten; --cleanup is the only removal story and it uninstalls everything not listed; and a flat list cannot tell "the other machine hasn't installed this yet" from "the other machine deliberately removed it", which are the two cases that need opposite responses. So each machine writes only machines/<name>.json and the union is derived — which also means two machines syncing at once touch disjoint paths, so git has nothing to merge. That is about content, not about writes: two brewrig processes on ONE machine share a clone, and they are serialised by a lock. A run that loses that race is refused with a clear message and succeeds when you run it again, rather than quietly replacing the other one's work.
+    What gets published is installed_on_request, not the dependency closure and not brew leaves. The closure would turn every upstream dependency change into drift. leaves is subtly wrong in the other direction: it means "nothing depends on this", so it drops a tool you installed on purpose the moment anything else picks it up as a dependency — on the machine this was built against it silently omits ffmpeg and python@3.14, 39 packages where 41 were asked for.
+    Nothing is uninstalled to make machines match: a package only one Mac has is not drift, it is something the other has not caught up on. The single exception is a package you deliberately removed, which is recorded as retired with a timestamp and offered on the other machine one prompt at a time, naming who removed it and when — never in a non-interactive run, where it reports the count and changes nothing. Answer "keep" and that refusal is published as an acknowledged entry stamped with the retirement it answered, so you are not asked again — while a later, separate retirement of the same package still is. (It is deliberately not an opt-out: an opt-out means "do not install this here", and it is cleared the moment the package is installed, which it is.) A reinstall outranks a retirement by timestamp, which is what stops the two machines deadlocking: A uninstalls, B reinstalls it on A, A uninstalls again, forever.
+    status separates three things that a Brewfile collapses into one, because they have three different fixes: missing here (apply), outdated against upstream (update), and skew — the machines on different versions of the same package (update on whichever is behind). Skew is the usual reason two Macs "have the same things installed" and still behave differently, and it is invisible to a dumped Brewfile.
+    Unlike its siblings brewrig ships for macOS and Linux only, since Homebrew does not run on Windows: no winget or Scoop entry, and the install script skips it there instead of failing.
+  🩹 Fixes
+  - rig: The release workflow's dry run builds under the last CLI version again, rather than under the window's tag.
+ReleaseNotesUrl: https://github.com/rigsmith/rigsmith/releases/tag/v1.19.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
