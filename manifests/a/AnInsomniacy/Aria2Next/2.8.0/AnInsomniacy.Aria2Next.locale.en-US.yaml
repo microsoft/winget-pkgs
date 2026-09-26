@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: AnInsomniacy.Aria2Next
+PackageVersion: 2.8.0
+PackageLocale: en-US
+Publisher: AnInsomniacy
+PublisherUrl: https://github.com/AnInsomniacy
+PublisherSupportUrl: https://github.com/AnInsomniacy/aria2-next/issues
+Author: AnInsomniac
+PackageName: Aria2 Next
+PackageUrl: https://github.com/AnInsomniacy/aria2-next
+License: GPL-2.0
+LicenseUrl: https://github.com/AnInsomniacy/aria2-next/blob/main/COPYING
+ShortDescription: Maintained aria2 fork with extensive bug fixes and modernized architecture
+Description: |-
+  aria2 is remarkable open source software. For over a decade it has been one of the most capable
+  download engines available, trusted by countless tools and users worldwide. We are deeply grateful
+  to the original authors and contributors of the aria2 project. They built something that has stood
+  the test of time, and that enduring quality is the best testament to their vision and craftsmanship.
+
+  But upstream development has slowed dramatically in recent years. Dependencies grew stale, builds
+  broke on modern platforms, and a backlog of bugs went unaddressed. We picked up the baton: migrated
+  the codebase to a modern build framework, triaged and fixed a substantial number of upstream issues,
+  and introduced ED2K protocol support for the first time. A full audit trail is preserved in
+  docs/maintenance/upstream-issue-review/matrix.csv.
+
+  Aria2 Next is an actively maintained aria2-compatible engine for everyone, and it is also the embedded
+  engine used by Motrix Next. Original interfaces, including options, configuration, sessions, JSON-RPC,
+  and libaria2, remain intact so downstream projects get a seamless upgrade. The focus is straightforward:
+  release reliability, current dependency baselines, and ongoing compatibility fixes. Same engine, renewed
+  foundation.
+ReleaseNotes: "> [!NOTE]\r\n> **This is the first aria2-next release with native streaming-media downloads.** HLS and MPEG-DASH now run inside the engine, with live recording and support for browser-captured inputs. These capabilities are available through the standalone CLI and RPC.\r\n\r\n### Before upgrading\r\n\r\n• Linux binaries require **glibc 2.35 or newer** and a compatible system C++ runtime, matching Ubuntu 22.04. Older Linux installations must upgrade before using these binaries.\r\n• HLS/DASH manifests are now recognized automatically by URL or HTTP content type. Use **`--media=file`** when a script needs to save the original playlist or manifest unchanged.\r\n• If you used an unreleased media build, incompatible media checkpoints and task caches are discarded. Existing downloaded output is kept.\r\n\r\n### Native media downloads\r\n\r\n• **HLS and MPEG-DASH:** download finite presentations or record live streams. Select video, audio and subtitle tracks, then save MP4, Matroska or compatible subtitle-only WebVTT output without transcoding.\r\n• **Inspect before downloading:** expose available tracks and pause before fetching media payload. Track IDs remain stable when a manifest reorders its representations; unavailable selections return an explicit error.\r\n• **Recording and time ranges:** set a live recording duration, finish a recording on demand, or select a finite HLS/DASH range. Ranges follow segment boundaries rather than individual frames.\r\n• **Pause, restart and retry:** persist committed segments and track selection in SQLite, verify cached resources before reuse, and recover interrupted output finalization. `aria2.retryMedia` retains the task's GID and recovery data; `aria2.finishMedia` finalizes a live recording.\r\n• **Media progress:** report download or recording phases and completed media duration. Final output size remains unknown until remuxing finishes; live streams do not show a fabricated completion percentage.\r\n\r\n### Browser capture support\r\n\r\n• Accept captured HLS/DASH manifests, ordered media fragments, separate source tracks and relative track offsets through `media-input` and `media=collection`.\r\n• Support AES-128 keys and IVs supplied with captured inputs. OpenSSL handles decryption, and FFmpeg checks candidate output. Inline live manifests retain their original URLs for subsequent refreshes.\r\n• Apply browser request headers to their observed origins, including scheme and port. Redirects, child playlists, segments and key requests each select their own context instead of inheriting another origin's credentials.\r\n• Advertise media capabilities and structured errors through RPC so clients can negotiate capture support and distinguish authentication, protected-media and selection failures.\r\n\r\nBrowser discovery and recording are handled by the client; the engine accepts captured inputs for downloading and remuxing.\r\n\r\n### Engine changes and fixes\r\n\r\n• Integrate GPAC **26.07.0** for manifests and segment timing, and FFmpeg **8.1.2** for demuxing and remuxing. Transfers use the existing libcurl transport; the engine does not launch an external downloader or FFmpeg process.\r\n• Refactor task lifecycle, RPC, options, HTTP transport, BitTorrent and platform code into focused modules while retaining the existing CLI, RPC and libaria2 entry points.\r\n• Centralize output naming. Use accepted payload headers for implicit HTTP filenames, preserve already-decoded browser hints, and retain the resolved path across restarts. Media titles keep embedded dots and receive the selected container extension.\r\n• Fix BitTorrent progress freezing after hash failures or file-selection changes by consuming libtorrent's native file progress, while retaining native completion checks.\r\n• Preserve separate HLS audio renditions, subtitle timing and presentation offsets through remuxing, including supported discontinuities and multi-period DASH content.\r\n\r\n### Scope\r\n\r\nDRM and unsupported encryption remain explicit errors. There is no transcoding. Captured fragments must form compatible media streams; arbitrary complete videos cannot be concatenated through this interface. Live recovery is limited to media still available from the server, and output containers must support the selected codecs.\r\n\r\nSee the [media download guide](https://github.com/AnInsomniacy/aria2-next/blob/v2.8.0/docs/media-downloads.md) for CLI examples, RPC fields, track selection and recovery behavior.\r\n\r\n### Downloads\r\n\r\nRelease binaries and SHA-256 checksums are attached after the release build completes.\r\n\r\n| Platform | Asset |\r\n| --- | --- |\r\n| Linux x86_64 | `aria2-next-2.8.0-linux-x86_64` |\r\n| Linux ARM64 | `aria2-next-2.8.0-linux-aarch64` |\r\n| macOS Apple Silicon | `aria2-next-2.8.0-macos-arm64` |\r\n| macOS Intel | `aria2-next-2.8.0-macos-x86_64` |\r\n| Windows x86_64 | `aria2-next-2.8.0-windows-x86_64.exe` |\r\n| Windows ARM64 | `aria2-next-2.8.0-windows-arm64.exe` |\r\n| Android ARM64 | `aria2-next-2.8.0-android-arm64` |\r\n| SHA-256 checksums | `aria2-next-2.8.0-checksums.sha256` |\r\n\r\n**Full changelog:** [v2.7.5...v2.8.0](https://github.com/AnInsomniacy/aria2-next/compare/v2.7.5...v2.8.0)"
+ReleaseNotesUrl: https://github.com/AnInsomniacy/aria2-next/releases/tag/v2.8.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
