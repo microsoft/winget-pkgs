@@ -1,0 +1,49 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ejfkdev.ddc
+PackageVersion: 0.1.4
+PackageLocale: en-US
+Publisher: ejfkdev
+PublisherUrl: https://github.com/ejfkdev
+PublisherSupportUrl: https://github.com/ejfkdev/ddc/issues
+PackageName: ddc
+PackageUrl: https://github.com/ejfkdev/ddc
+License: MIT
+LicenseUrl: https://github.com/ejfkdev/ddc/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 ejfkdev
+ShortDescription: Fast DEX to Java decompiler in Rust with progressive query subcommands.
+Description: ddc decompiles Android DEX bytecode back into readable Java. It covers DEX 035-041 including multi-dex APKs and XAPK/APKS/APKM containers, and ships more than 20 query subcommands (strings, cross-references, hierarchies, manifest, resources, per-method decompiles) that answer in milliseconds without a full run. Output is jadx-style readable, reproducible Java whose emitted files compile cleanly, and the bilingual CLI localizes its messages between English and Chinese automatically.
+Tags:
+- android
+- apk
+- decompiler
+- dex
+- java
+- reverse-engineering
+ReleaseNotes: |-
+  v0.1.4
+  Output quality — four new body-cleanup passes, all on by default:
+  - jadx-style local names: a synthetic v12/p3 never survives when a
+    better name exists (Kotlin Intrinsics parameter strings, the defining
+    call, jadx's type-alias table with the class-name fallback).
+  - Kotlin null-check elision: statement-position
+    Intrinsics.checkNotNull… calls drop after their strings feed the
+    naming pass (lark: 59,106 → 9).
+  - Synthetic-accessor inlining: access$NNN static bridges inline at
+    their call sites — identity, field getter, method forwarder, with d8
+    APM trace wrappers tolerated (lark: 43% of 9,214 call sites).
+  - IntDef constant rendering, now built-in: setVisibility(8) renders
+    as android.view.View.GONE with no flags — the android-37 domain
+    table ships as a readable, diffable
+    platform_symbols.txt that build.rs compresses into the binary;
+    --symbols <platform-dir> overrides.
+  Verified: lark (118,502 files) and weixin (239,599 files) pass the
+  javac parse gate with zero errors; timing within noise (reqable
+  0.29s, lark 6.4s, weixin 17.5s). 67 tests, clippy zero.
+ReleaseNotesUrl: https://github.com/ejfkdev/ddc/releases/tag/v0.1.4
+Documentations:
+- DocumentLabel: CLI Reference
+  DocumentUrl: https://github.com/ejfkdev/ddc/blob/HEAD/docs/cli.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
