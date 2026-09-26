@@ -1,0 +1,34 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Lynricsy.OneSSH
+PackageVersion: 0.1.18
+PackageLocale: zh-CN
+Publisher: Lynricsy
+PublisherUrl: https://github.com/Lynricsy
+PublisherSupportUrl: https://github.com/Lynricsy/OneSSH/issues
+PackageName: OneSSH
+PackageUrl: https://github.com/Lynricsy/OneSSH
+License: GPL-3.0-only
+LicenseUrl: https://github.com/Lynricsy/OneSSH/blob/HEAD/LICENSE
+ShortDescription: 面向 AI Agent 的集中式 SSH 网关，提供 MCP 接入、凭据托管、细粒度授权与全程审计。
+Description: OneSSH 是用 Go 编写的集中式 SSH 网关：单个二进制同时提供无状态 Streamable HTTP MCP、OAuth 2.1 授权、管理 API、实时活动流和浏览器终端。SSH 私钥与密码经 AES-256-GCM 加密存储，凭据不出网关；Agent 通过绑定主机与权限范围的令牌访问远端主机，令牌随时可撤销；每次调用与权限拒绝均写入审计日志。
+Tags:
+- mcp
+- ssh
+- 人工智能
+- 审计
+- 网关
+ReleaseNotes: |-
+  新增
+  - 支持令牌级 MCP 工具组禁用列表：手动创建、编辑令牌及 OAuth 授权时，可按与 ONESSH_DISABLED_TOOLS 相同的工具组限制客户端。
+  - 有效禁用范围为进程级与令牌级的并集。受限工具不出现在 tools/list，直接调用会被拒绝并记录审计；对应 MCP Apps 卡片资源及服务器说明同步过滤，无需重启进程。
+  - Web 令牌页新增编辑入口。新增 GET /api/v1/tool-groups 与 PUT /api/v1/tokens/{id}；后者全量替换名称和权限，不是部分更新。
+  - OAuth 授权、令牌交换和刷新保留工具组限制；编辑当前 OAuth 访问令牌会同步尚未使用、未撤销的刷新令牌权限。
+  安全与升级说明
+  - 禁用列表解析异常时拒绝放行，避免意外扩大 MCP 权限。
+  - 启动时自动执行 SQLite 迁移 13，为令牌、授权码和刷新令牌增加禁用组字段；已有记录默认不额外禁用。升级前建议备份数据目录。
+  - 限制仅作用于 MCP，WebUI / REST 管理面不受影响。工具组限制不是主机操作沙箱：exec、fanout、jobs 仍可能提供独立的命令执行入口，应同时遵循远程账号最小权限原则。
+ReleaseNotesUrl: https://github.com/Lynricsy/OneSSH/releases/tag/v0.1.18
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
