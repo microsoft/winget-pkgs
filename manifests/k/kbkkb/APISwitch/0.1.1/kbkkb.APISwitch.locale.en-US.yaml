@@ -1,0 +1,70 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: kbkkb.APISwitch
+PackageVersion: 0.1.1
+PackageLocale: en-US
+Publisher: kbkkb
+PublisherUrl: https://github.com/kbkkb
+PublisherSupportUrl: https://github.com/kbkkb/APISwitch/issues
+PackageName: APISwitch
+PackageUrl: https://github.com/kbkkb/APISwitch
+License: MIT
+LicenseUrl: https://github.com/kbkkb/APISwitch/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 kbkkb
+ShortDescription: Provider switcher and local routing gateway for AI coding assistants.
+Description: |-
+  APISwitch is a lightweight desktop management tool and local protocol routing gateway for third-party API providers and Google Antigravity official subscriptions. It manages provider configurations for Google Antigravity, Claude Code, Claude Desktop, Codex, OpenCode, and Pi, switches Google accounts with credential snapshots, tracks quota usage, and bridges OpenAI/Anthropic protocols through a local gateway with hot reload.
+
+  ✨ Key Features
+  1. Unified Multi-Tool Management & Zero-Intrusion Switching
+  - Antigravity Quick Account Switching: Save credential snapshots and switch Google accounts with one click. Automatically captures and synchronizes the latest credentials before switching (preventing Refresh Token rotation expiration). Optionally auto-closes and smoothly restarts the IDE.
+  - Cross-Client Provider Sharing: One-click copy of provider configurations across Claude CLI, Claude Desktop, Codex, OpenCode, and Pi with intelligent field mapping (Auth Token ↔ Bearer Token / API Key). Enter once, use everywhere.
+  - Model Pool Management: Dedicated model pool mechanism for OpenCode and Pi, clearly distinguishing "In Config" from "Not in Config" states, supporting on-demand activation and batch maintenance.
+  - One-Click cc-switch Migration: Built-in migration wizard directly reads ~/.cc-switch/cc-switch.db, allowing checkbox selection to import existing providers with automatic deduplication and overwriting.
+  2. Built-in Local Protocol Routing Gateway
+  - High-Performance Local Gateway: Built-in lightweight HTTP gateway service (listening on 127.0.0.1:15725 by default, configurable Host and Port in settings, supports LAN sharing).
+  - Seamless Multi-Protocol Bridging:
+    - Codex Protocol Bridge: Translates standard OpenAI Chat Completions / Anthropic endpoints into Codex native Responses protocol.
+    - Claude CLI Protocol Bridge: Automatically manages authentication headers and request format mapping.
+    - Claude Desktop Model Mapping: Intercepts and rewrites claude-sonnet / opus / haiku requests to your designated upstream custom models.
+  - Long-Context Protection & Prompt Stripping: Automatically strips non-essential excessive system prompts and provides safeguards against massive 1M context overflows to prevent upstream 400 errors or unexpected costs.
+  - Zero-Restart Hot Reload: Point your client to the local gateway once. Provider switches reload instantly in the gateway with no client restarts needed.
+  3. Data Backup & Multi-Device Roaming
+  - One-Click Full Export: Bundle all tool provider configurations and Antigravity account data into a standardized JSON backup file.
+  - Flexible Restore Modes: Supports both "Merge & Append" (recommended: keeps existing configs while adding new or updating matching items) and "Full Overwrite" modes for seamless roaming across multiple machines.
+  - Direct Local Management: One click to open the local physical storage directory for full data ownership and transparency.
+
+  🔬 How It Works
+  - Google Antigravity: Login sessions are stored in VS Code's globalStorage SQLite database (ItemTable) under antigravityUnifiedStateSync.oauthToken and userStatus (base64-encoded Protobuf). APISwitch includes a lightweight Protobuf parser to safely extract email, subscription tier, and quota information. Account switching executes safe transactional writes with automatic .backup creation.
+  - Claude Code CLI: Precisely rewrites ANTHROPIC_* environment variables in ~/.claude/settings.json, strictly preserving all other configuration sections such as hooks and permissions.
+  - Claude Desktop: Manages Cowork inference gateway parameters (inferenceProvider, inferenceGatewayBaseUrl, inferenceGatewayApiKey, etc.). Switching back to "Official" cleanly removes these fields to restore native official login.
+  - OpenAI Codex: Configures model_provider and [model_providers.<id>] in ~/.codex/config.toml, synchronizing authentication with auth.json. Supports direct upstream connections or routing through the local gateway for protocol adaptation.
+  - OpenCode & Pi: Strictly adheres to their official specifications to read and write opencode.json and models.json / auth.json, ensuring immediate recognition by CLI and runtime environments.
+  - Safe Atomic Writes: All file modifications follow a "write temporary file → verify integrity → atomic replace" workflow, generating automatic .bak backups to prevent corruption from unexpected interruptions.
+Tags:
+- ai
+- api
+- gateway
+- proxy
+ReleaseNotes: |-
+  APISwitch is a lightweight, modern API provider and Google Antigravity official account management tool for AI coding assistants (Google Antigravity, Claude Code, Claude Desktop, Codex, OpenCode, Pi).
+  🌟 Highlights in v0.1.1
+  - Google Antigravity Account & Quota Management:
+    - Seamless multi-account switching with credential snapshots and Antigravity Tools bidirectional synchronization.
+    - Accurate quota tracking for Free (Starter) accounts directly via Google official endpoints (fixes earlier issues where used accounts incorrectly showed 100%).
+    - Real-time dual quota metrics: Gemini Models & Claude / GPT models (Weekly base limits, remaining percentages, and refresh countdowns).
+    - Clean, focused UI prioritizing official Google login and account onboarding.
+  - Multi-Platform AI CLI Routing:
+    - Full configuration switching for Claude Code, Claude Desktop, Codex CLI, OpenCode, and Pi.
+    - High-performance local routing gateway (127.0.0.1:28888) with protocol bridging and model redirection.
+  - Desktop Experience:
+    - Modern Windows 10/11 Fluent UI with HarmonyOS Sans SC typography.
+    - System tray resident menu with quick account switching and IDE launch shortcuts.
+    - Built-in automatic update checking.
+  📦 Downloads
+  - Installer: APISwitch-Setup-v0.1.1.exe (Recommended: Modern Inno Setup installer, no UAC admin prompts required, desktop shortcuts, auto-update ready).
+  - Portable: APISwitch-v0.1.1-win-x64.zip (Self-contained, no .NET installation needed, extract and run).
+ReleaseNotesUrl: https://github.com/kbkkb/APISwitch/releases/tag/v0.1.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
