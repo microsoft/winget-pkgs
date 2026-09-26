@@ -1,0 +1,57 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: DataElement.DSHDesktop
+PackageVersion: 0.9.0
+PackageLocale: zh-CN
+ShortDescription: 为 DeepSeek Harness 打造的本地优先、跨平台桌面应用。
+Description: |-
+  DSH Desktop 把本地 DeepSeek Harness 封装为可安装的桌面应用。它会自动启动 Harness，把 Profile、插件、工作区、模型配置和会话保存在应用安装目录之外，并在本地 Runtime 就绪后直接进入完整 Harness 界面。支持 DeepSeek 官方模型或主流第三方模型，并提供可移植的 Agent Preset、手机继续会话与可继续编辑的 PPTX 生成。
+
+  DSH Desktop 带来了什么
+  DeepSeek Harness 已经提供 Agent Runtime 与 Web UI。DSH Desktop 在此基础上补齐真正的桌面宿主能力：
+  - 自动启动和停止 Harness，不需要另开 CLI 或浏览器标签页
+  - 通过系统原生目录选择器添加和管理项目工作区
+  - 支持 DeepSeek 官方模型与主流第三方模型提供方
+  - 将完整的自定义 Agent Preset 导入或导出为便携的 .dshpreset 压缩包，安装前检查命名冲突并提示信任风险
+  - 通过内置 PPT 模式将材料生成并交付为可继续编辑的 PPTX
+  - 应用升级时保留 Profile、插件、工作区、会话和模型配置
+  - 识别 Harness 启动或前端插件故障，把诊断写入 harness.log 并提供引导恢复入口
+  - 提供不破坏用户数据的安全模式，临时屏蔽第三方插件
+  - 让已配对的手机通过局域网或可选的临时公网隧道继续会话
+  - 在应用内检查桌面更新，并由用户决定是否下载和安装
+  - 针对 macOS 和 Windows 优化原生菜单、标题栏、窗口焦点、主题和品牌体验
+
+  PPT 生成
+  点击 PPT 按钮，选择模板，再描述你想制作的内容。内置 16 套模板、192 种版式，可输出可继续编辑的 PPTX。模板预览统一使用英文，生成内容支持中文和英文，并配有对应字体设置；预览语言不决定输出语言。
+  PPT 功能保持预装，相关自动提示词仅在选中 PPT 按钮的会话中生效。模板、校验和参考来源详见 PPT 说明。
+
+  手机连接
+  从 Harness 菜单选择“连接手机…”，再扫描配对二维码。手机获得会话访问权限前，桌面端必须明确批准连接。
+  Harness 本身始终运行在随机的 127.0.0.1 端口。手机访问由独立的配对 Bridge 提供：可以只在局域网内使用，也可以在你选择远程访问时启用临时 Cloudflare Quick Tunnel。桌面端断开连接后，手机会话随即失效。
+  Cloudflare 启动失败时会尝试 Pinggy。若已显示 Cloudflare 配对链接，但手机无法打开，可点击“扫码打不开？换一条线路”切换到 Pinggy。
+
+  安全模式与故障恢复
+  如果第三方插件导致启动或页面渲染异常，DSH Desktop 会结合 Runtime 与前端证据定位相关插件，并打开引导式恢复界面。
+  从 Harness 菜单选择“以安全模式重启…”，应用会使用只包含官方核心 Bundle 的隔离 Profile 启动。正常 Profile 中的第三方插件会被屏蔽，但 Agent、会话、模型配置和工作区仍然可用。你可以从页面顶部的安全模式提示卸载选中的问题插件，或恢复正常启动。
+  恢复页面会检查插件是否有兼容更新；有可用版本时，可升级对应插件，安全模式还支持批量升级。需要帮助时，鼠标悬停“微信群”即可显示二维码，点击 Discord 则会打开社区链接。
+  当正常界面无法进入时，也可以通过 --safe-mode 启动。例如 macOS：
+  open -a "DSH Desktop" --args --safe-mode
+
+  本地数据与安全边界
+  - Harness Web UI 只运行在随机回环端口。
+  - Renderer 不具备 Node.js 权限，并启用 Context Isolation 与 Sandbox。
+  - WebView、不可信站内跳转和非预期权限请求会被阻止。
+  - 外部网页链接交给系统浏览器打开。
+  - Profile 与会话保存在 Electron 的用户级应用数据目录，不在安装目录内。
+  - 手机访问需要短时配对 Token 和桌面端明确批准。
+Tags:
+- deepseek
+- deepseek-harness
+- dsh
+- 大模型
+- 大语言模型
+- 智能体
+- 自主智能
+ManifestType: locale
+ManifestVersion: 1.12.0
