@@ -1,0 +1,209 @@
+# Created using wingetcreate 1.12.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Mickem.NSClient
+PackageVersion: 0.22.0
+PackageLocale: en-US
+Publisher: MySolutions NORDIC
+PublisherUrl: https://nsclient.org/
+PublisherSupportUrl: https://github.com/mickem/nscp/issues
+Author: Michael Medin
+PackageName: NSClient++
+PackageUrl: https://nsclient.org/
+License: Apache-2.0 OR GPL-2.0-only
+LicenseUrl: https://github.com/mickem/nscp/blob/main/COPYING
+Copyright: Copyright (c) Michael Medin
+ShortDescription: A simple, secure and powerful monitoring agent for Windows.
+Description: |-
+  NSClient++ (a.k.a. NSCP) is a free and open-source monitoring agent originally
+  built for Nagios/Icinga and now usable with most modern monitoring systems.
+  It exposes a wide range of system, performance and event-log checks via NRPE,
+  NSCA, NRDP, REST and Prometheus-compatible endpoints, and can run external
+  scripts in PowerShell, Python, Lua, Visual Basic and many more languages.
+Moniker: nscp
+Tags:
+- nagios
+- icinga
+- naemon
+- monitoring
+- nrpe
+- nsca
+- nrdp
+- prometheus
+- agent
+- sysadmin
+ReleaseNotes: |-
+  # Metrics a scraper can actually read, Mod-Gearman, and a much smaller install  
+
+  0.22.0 rebuilds the metrics side of the agent. `/api/v2/openmetrics` served the  
+  JSON keys verbatim — names with dots, spaces and colons in them, no types, no  
+  help text, six significant digits — which a strict parser rejected outright.  
+  It now serves a conformant, self-describing OpenMetrics document: every family  
+  named to the grammar, typed, described, carrying its unit, and per-instance  
+  readings collapsed into one family with a `core`, `nic` or `drive` label  
+  instead of one family per core. Every metric name changes, so read the upgrade  
+  note before you upgrade a scraped host.  
+
+  The second theme is a new transport. `GearmanClient` makes the agent a  
+  Mod-Gearman worker: a Naemon or Nagios Core keeps scheduling its checks, the  
+  agent pulls them off a `gearmand` job server and answers them as native  
+  queries, and the monitored host needs no inbound port at all. The same module  
+  submits passive results back into the core's result queue. It ships marked  
+  **experimental** and has not been exercised at scale: it is verified end to end  
+  against a real job server on both cores, but no one has yet run it across a  
+  large estate, so put it on a slice of your hosts before you move a whole  
+  Mod-Gearman installation onto it.  
+
+  Then a long tail of security work — the low-severity tier of the audit, in  
+  three parts, plus a second undefined-behaviour sweep and the ten worst  
+  threading bugs — and a packaging release: common code moved out of every  
+  plugin into shared libraries, Windows ARM64 is back, and there is a Raspberry  
+  Pi package.  
+
+  ## ✨ Highlights  
+
+  - 📊 **A conformant OpenMetrics exposition, and every metric name changes.**  
+    Names follow the grammar (`system.cpu.core 0.idle` →  
+    `system_cpu_idle_percent{core="0"}`), every family carries `# TYPE`, `# HELP`  
+    and a `# UNIT` where the value is measured in something, counters are typed  
+    as counters, string readings come back as `_info` families, values keep their  
+    full precision and the body ends with `# EOF`. Per-core, per-NIC, per-drive  
+    and per-process readings become one family with a label, so `sum by (core)`  
+    has something to group on. The JSON endpoints, the dashboard, Graphite,  
+    collectd and Python `submit_metrics` report the same keys and values as  
+    before. `openmetrics format = legacy` reproduces the old body as a migration  
+    window. (#1533, #1535, #1538, #1539)  
+  - 📥 **New module: `GearmanClient`, a Mod-Gearman worker and result channel.**  
+    Optional, off by default, and it speaks both flavours — ConSol's Mod-Gearman  
+    for Naemon and Nagios Enterprises' Nagios-Mod-Gearman for Nagios Core 4.5+.  
+    `mode = agent` answers for the host it runs on; `mode = proxy` runs a whole  
+    hostgroup's checks from one box. Windows and Linux. **Experimental and not  
+    yet tested at scale** — try it on a few hosts first. (#1542)  
+  - 🔒 **A settings source, include or attachment that is not `https://` is  
+    refused.** The remote store is the agent's whole configuration, re-read at  
+    boot and on every housekeeping pass, and over plain `http://` nothing  
+    authenticates the server. Opt back in per host with `allow plaintext = true`  
+    in `boot.ini`; every plaintext fetch is then logged as `INSECURE`. (#1529)  
+  - 🛡️ **The audit's low-severity tier lands, in three parts.** A request may no  
+    longer weaken a credentialed target's transport security or re-address  
+    `submit_smtp` mail; script arguments, `check_docker`'s endpoint and the  
+    remote-connection checks are confined; and the web server sends browser  
+    hardening headers, negotiates TLS 1.3 on Linux and stops minting a session  
+    token per request. (#1550, #1551, #1552)  
+  - 🔑 **`check_tcp` and `check_ssh` verify the server certificate by default.**  
+    `verify` defaulted to `none`, so a TLS check handshook against any  
+    certificate at all and reported `ok`. It now defaults to `peer` with `ca=`  
+    falling back to the agent's own trust bundle, and the checks gained  
+    certificate identity, SAN and STARTTLS-service keywords. (#1547)  
+  - 🔁 **Agent-to-agent checking works, over the REST API, and the raw protobuf  
+    web API is gone.** `POST /query.pb` let a caller write the header the core  
+    reads its identity from; its only consumer was `NSCPClient`, which had never  
+    actually worked. `check_remote_nscp` and friends now go through  
+    `/api/v2/queries`, authenticated. (#1552)  
+  - 🧪 **New modules and check commands are marked *experimental*.** A statement  
+    about stability, not about breakage: `nscp test`, the web UI, the REST API  
+    and the reference docs all say which checks may still change their options,  
+    keywords or output. (#1543)  
+  - 🎨 **The prompt and the web UI paint filter expressions.** Both now read the  
+    check's own vocabulary and colour a `filter=`, `warning=` or `detail-syntax=`  
+    as you type it — a keyword the check does not offer is red before the check  
+    is ever run. A new `GET /api/v2/queries/{query}/help` is what the browser  
+    reads. (#1540, #1541)  
+  - ⏱️ **Reloads wait for the checks that are running.** A settings reload holds  
+    new checks off a module while it applies the new configuration, a module can  
+    no longer unload or restart itself from inside a request it is serving, and  
+    connect and TLS handshake now count against a client's configured timeout.  
+    (#1531)  
+  - 📦 **A fifth off the Linux install, and much more off Windows.** Code every  
+    plugin compiled privately moved into shared libraries, and OpenSSL ships as  
+    DLLs instead of being linked into each of NRPE, NSCA, check_mk, the web  
+    server and the HTTP clients. (#1544, #1556)  
+  - 🪟 **Windows ARM64 is packaged again, and there is a Raspberry Pi package.**  
+    `NSCP-<version>-ARM64.msi`/`.zip` are back (without `PythonScript`, and the  
+    ARM64 MSI does not bundle the VC runtime), and  
+    `NSCP-<version>-debian-trixie-arm64.deb` covers Raspberry Pi OS 64-bit and  
+    Debian 13 arm64. (#1546)
+
+  # TYPE system_cpu_idle_percent gauge  
+  system_cpu_idle_percent{core="0"} 93  
+  system_cpu_idle_percent{core="1"} 91  
+  system_cpu_idle_percent{core="total"} 95  
+  ```  
+
+  The label is `core`, `cpu`, `nic`, `zone`, `battery`, `exe`, `disk`, `drive`  
+  or `pdh_instance` depending on the bundle — `pdh_instance` rather than  
+  `instance`, because Prometheus attaches its own `instance` label to every  
+  sample. Windows and Linux spell a CPU core differently in the JSON key  
+  (`core 0` and `core_0`); neither spelling reaches the label, which is the bare  
+  `0` on both, so one query works across a mixed fleet.  
+
+  Around that:  
+
+  - **`/api/v2/metrics?meta=1`** serves the same keys and values with their help  
+    text, unit, type and labels under a `metadata` object. Without `meta` the  
+    endpoint is byte for byte what it was.  
+  - **GraphiteClient can send the labels as carbon tags** (`metric tags = true`,  
+    off by default — a carbon older than 1.1 stores `path;core=0` as the name).  
+  - **CollectdClient mappings can read the labels and the types.** A variable set  
+    to `label:core` expands to every value of that label instead of a regular  
+    expression over flat keys, and `auto:` sends whatever the producing module  
+    declared a counter as a DERIVE and everything else as a GAUGE.  
+  - **Predefined PDH counters can describe themselves** with `help` and `unit`  
+    keys, and **Python `fetch_metrics` accepts a dict per value**  
+    (`{"value": 42, "help": "…", "unit": "bytes", "type": "counter"}`, plus  
+    `"labels"`).  
+  - **Windows only: `system.mem.page.%` and `system.mem.physical.%` report  
+    different numbers**, because they were reporting the wrong thing — both  
+    divided the commit charge by the commit limit. Alert thresholds tuned  
+    against the old reading need re-checking.  
+
+  ### 📥 GearmanClient — Mod-Gearman, either flavour  
+
+  A Naemon or Nagios Core installation running Mod-Gearman keeps its scheduler,  
+  its check definitions and its escalations; the agent registers for the queues  
+  you name, pulls jobs off `gearmand` and answers them as native NSClient++  
+  queries. Nothing listens on the monitored host.  
+
+  | Setting | Effect |  
+  |---|---|  
+  | `mode = agent` | Answers only for the host it runs on; a job for another `host_name` is answered UNKNOWN |  
+  | `mode = proxy` | Answers every check on the queues it registered — one Windows box running a whole hostgroup through `check_nrpe`, `check_wmi` and the rest |  
+
+  The same module submits passive results into the core's result queue  
+  (`/settings/gearman/client`, channel `GEARMAN`, command `submit_gearman`),  
+  which is what lets a Mod-Gearman installation drop NSCA. The two halves are  
+  independent.  
+
+  Two things to unlearn when writing the `check_command` on the core, since  
+  neither fails in a way that names the cause: write `host=$HOSTADDRESS$`, not  
+  `-H $HOSTADDRESS$` (a two-character first token puts the argument parser into  
+  key-value mode and the check answers with a help screen), and  
+  `warning=load gt 80`, not `warning=load>80` (`>` is a metacharacter, and  
+  `allow nasty characters` is `false` by default). See  
+  [Mod-Gearman](https://nsclient.org/docs/scenarios/mod-gearman/) for the full  
+  setup on either core.  
+
+  The module is marked **experimental**, and that mark is doing real work here:  
+  its settings, queue handling and output may still change, and while it has been  
+  run end to end against a real `gearmand` on both cores, it has **not been tested  
+  at scale** — not against hundreds of hosts, a deep job backlog, or a proxy  
+  answering for a large hostgroup. Roll it out to a slice of the estate first and  
+  keep the existing transport until you are satisfied. Reports of how it behaves  
+  on a real workload are exactly what the experimental mark is asking for.  
+  (#1542)  
+
+  ### 🛡️ Security  
+
+  The low-severity tier of the audit landed in three parts, alongside a second
+
+  [...] (truncated)
+ReleaseNotesUrl: https://github.com/mickem/nscp/releases/tag/0.22.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://nsclient.org/docs/
+- DocumentLabel: Upgrading
+  DocumentUrl: https://nsclient.org/docs/setup/upgrading/
+- DocumentLabel: Security notices
+  DocumentUrl: https://nsclient.org/docs/security/notices/
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
