@@ -1,0 +1,63 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Corsinvest.cv4pve.report
+PackageVersion: 2.6.0
+PackageLocale: en-US
+Publisher: Corsinvest Srl
+PublisherUrl: https://www.corsinvest.it/
+PublisherSupportUrl: https://www.corsinvest.it/cv4pve
+PrivacyUrl: https://www.corsinvest.it/privacy
+Author: Corsinvest Srl
+PackageName: cv4pve-report
+PackageUrl: https://github.com/Corsinvest/cv4pve-report
+License: GPL-3.0
+LicenseUrl: https://github.com/Corsinvest/cv4pve-report/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2026 Corsinvest Srl
+CopyrightUrl: https://github.com/Corsinvest/cv4pve-report/blob/master/LICENSE.md
+ShortDescription: Report Tool for Proxmox VE
+Description: |-
+  cv4pve-report exports your entire Proxmox VE infrastructure to a single
+  navigable Excel file — nodes, VMs, containers, storages, users, firewall
+  rules, backup jobs, resource pools and more. Every row is a hyperlink to
+  its detail sheet.
+
+  Features:
+  - Single .xlsx file with one sheet per node, VM and storage
+  - Fully navigable — summary rows link to detail sheets
+  - Cluster: users, API tokens, TFA, groups, roles, ACL, firewall, backup jobs, replication, SDN, pools
+  - Nodes: services, network, disks, SMART, RRD metrics, APT updates, SSL certificates, tasks
+  - VMs/CTs: config, network, disks, RRD metrics, backups, snapshots, firewall, QEMU agent info
+  - Storages: content inventory, RRD metrics
+  - Three profiles: Fast, Standard, Full
+  - Works with a read-only API token, no root access required
+Moniker: cv4pve-report
+Tags:
+- corsinvest
+- excel
+- infrastructure
+- inventory
+- proxmox
+- proxmoxve
+- report
+- xlsx
+ReleaseNotes: |-
+  What's new
+  - Containers show the IP they actually have. Running containers now report the addresses assigned right now, read from Proxmox without any agent. A container configured with dhcp used to show just dhcp; it now shows 10.0.0.5/24 (dhcp). Older Proxmox releases that lack this information keep showing the configured value.
+  - Trunk ports in the Network sheet and diagram. VM Networks has a new Trunks column, and the network diagram shows trunk ports on the NIC line and on the arrow (net1 → vmbr1 trunks 1-4095).
+  - VM NICs read through the guest agent keep their Proxmox name. They now read net0 (Ethernet) → vmbr1, like containers, instead of just Ethernet → vmbr1.
+  - Two-Factor Authentication shows disabled entries. New TfaDisabledCount column in Cluster Access.
+  - Same order on every run. Rows used to follow whatever order Proxmox returned, or a plain text sort where qemu/1000 came before qemu/105. Every table is now sorted, numbers inside names included (105 before 1000, vmbr2 before vmbr10, net2 before net10): VMs, containers, nodes, storages, snapshots, RRD, disks, replication, firewall, syslog, cluster status, users, roles, ACL, host network interfaces and the HTML sidebar. Two reports of an unchanged cluster now differ only in live values, so snapshot diffs show real changes.
+  Fixes
+  - Network diagram: a VM on several bridges is linked to all of them. Only the first bridge used to get an arrow.
+  - Network diagram: VMs listed by numeric id. CT 105 no longer lands between VM 1030 and VM 1104, and NIC lines inside a box always read net0, net1, …
+  - Network diagram: Open vSwitch bridges are wired correctly. A physical port attached to an OVS bridge (declared on the port or in the bridge's port list) now shows up and links to the bridge, so the bridge is no longer mistaken for an internal-only network. OVS internal ports show their address on the bridge and are used to link network storages.
+  - Network diagram: storages on older network configs get their arrow. The storage-to-bridge match now also works when the bridge has address + netmask instead of cidr, and when a Ceph monhost lists several addresses.
+  - Shared storages keep their position. A shared storage was placed according to whichever node it happened to be read from; it is now sorted by name with the other shared storages.
+  What's Changed
+  - feat: SDK 9.2.3 network fields, live container IPs, stable ordering by @franklupo in #59
+  - chore: release 2.6.0 — tests in CI, changelog, docs by @franklupo in #60
+  Full Changelog: v2.5.1...v2.6.0
+ReleaseNotesUrl: https://github.com/Corsinvest/cv4pve-report/releases/tag/v2.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
