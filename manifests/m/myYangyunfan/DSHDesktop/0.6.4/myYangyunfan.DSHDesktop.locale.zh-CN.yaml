@@ -1,0 +1,76 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: myYangyunfan.DSHDesktop
+PackageVersion: 0.6.4
+PackageLocale: zh-CN
+Publisher: deepseek
+PublisherUrl: https://github.com/myYangyunfan
+PublisherSupportUrl: https://github.com/myYangyunfan/dsh_desktop/issues
+PackageName: DSH Desktop
+PackageUrl: https://github.com/myYangyunfan/dsh_desktop
+License: MIT
+LicenseUrl: https://github.com/myYangyunfan/dsh_desktop/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 DSH Desktop contributors
+ShortDescription: 把 DeepSeek Harness (dsh) CLI 与内置 Node.js 运行时打包在一起的桌面客户端。
+Description: |-
+  DSH Desktop 把 DeepSeek Harness (dsh) CLI、完整 Node.js 运行时与全部官方插件打包为开箱即用的桌面客户端。双击即可在原生窗口中启动 dsh web，无需安装 Node.js；关闭窗口后服务在系统托盘中继续运行。提供会话管理、桌面宠物、余额小组件、插件守护与带 sha256 校验的自动更新。
+
+  ✨ 特性
+  开箱即用
+  - 零依赖 — 内置独立 Node 运行时与 npm CLI，目标机器无需安装任何环境
+  - 完整 dsh — 打包 @deepseek-ai/dsh 及全部官方插件，离线可用
+  - 一键启动 — 双击即启 dsh web，优先复用上次端口，就绪后载入原生窗口
+  - 双形态 — 便携版（免安装、可放 U 盘）+ 安装版（桌面/开始菜单快捷方式）
+  体验增强
+  - 深色玻璃无边框窗口 — 自绘标题栏、Win11 圆角，关闭默认隐藏到系统托盘
+  - 桌面宠物 — 随行小鲸鱼常驻桌面，陪伴工作（设置 → 插件可一键开关）
+  - 侧边会话浮窗 — 随时唤起独立会话窗口，与主会话互不干扰
+  - 会话管理 — 归档 / 恢复 / 删除对话，历史不再堆积
+  - 余额小部件 — 对话底部实时显示「本轮费用 · 余额」，支持 OpenCode Go 订阅额度，点击直达充值
+  - 完成通知 — 任务跑完弹系统通知，一分钟内回到主窗口自动跳到对应会话（Windows 通知无点击回调，聚焦即跳转）
+  工程韧性
+  - 守护瀑布 — 内核 boot 链逐级自愈：坏插件自动修复、坏配置自动重建、内核崩溃环原地重启，任何不兼容形态都不退出（v0.5.0 Tauri 架构核心特性）
+  - 崩溃自愈 — 渲染层假死心跳检测自动重载；内核由 supervisor 探活 + 指数退避拉起
+  - 历史兼容 — 自动修补会话事件词汇表，第三方插件写入的事件不破坏会话历史
+  - 自动更新 — 右上角 ⋯ 菜单一键检查并安装客户端更新（双源 GitHub/Gitee Releases 自动切换，sha256 校验 fail-closed，离线静默）；升级安装自动装回旧位置，零配置丢失；内核随客户端整体分发（无独立更新链）
+  - 快捷方式自愈 — 桌面与开始菜单快捷方式缺失即自动补建
+Tags:
+- deepseek
+- deepseek-harness
+- dsh
+- 大模型
+- 大语言模型
+- 智能体
+- 自主智能
+ReleaseNotes: |-
+  DSH Desktop 0.6.4 — 全平台
+  覆盖 v0.6.1 + v0.6.2：① 单项根治「多模态模型说我发不了图片」；② 内核输入区
+  （composer）换代漂移整族修复——9 个插件静默失效全部迁移修复；③ 插件同步
+  把残留依赖树整树分发导致的卡死根治；④ 历史对话完整回溯与「吞消息」根治。
+  ✨ 新功能
+  模型卡「支持图片输入」勾选
+  设置 → 模型管理，每个模型一行一个勾选框：勾上 = 显式声明支持图片，发图不再被
+  「当前模型不支持图片」拒绝；取消 = 恢复纯文本。适合「模型本身支持视觉、但接口
+  没声明」的场景（第三方中转 / 开源模型常见）。从「获取模型」目录挑选模型时会
+  自动带上接口自报的图片能力。视频暂不提供勾选：当前内核协议只支持 text / image。
+  历史对话完整回溯（v0.6.1）
+  - 历史加载每页 50 → 200 条；滚到聊天顶部自动翻页加载更早记录；
+  - 根治「历史只显示约三分之一」「翻到头早期对话仍缺失」——跨页断头自动续读。
+  「编辑并回退」重做（v0.6.2）
+  消息悬停「编辑并回退」：从任意一条历史消息处分叉新会话、预填原文重发，旧会话
+  原样保留。此功能在输入区换代后一度完全失效，本版修复并实测通过。
+  🛠 修复
+  「吞消息」根治（v0.6.1）
+  偶发「消息发出去了、界面却不显示」：现在遇到装配异常自动从持久化完整历史窗口
+  安全重建，不再丢消息；极端情况输出 [dsh-assembly-resilience] 前缀日志可取证。
+  输入区换代适配（9 个插件静默失效全修，v0.6.2）
+  编辑并回退 / 输入历史 ↑ 回溯 / 拖拽文件到对话 / 粘贴图片发送 / 对话导航条 /
+  对话界面增强 / 长消息折叠 / 峰谷价格卫士 / 识图插件草稿被覆盖——全部修复，
+  每处均做了修复前后交叉验证。
+  配套插件同步卡死（v0.6.2）
+  同步会把开发机残留依赖树（上万个文件）整树拷贝、卡数分钟。现在只分发随包正件，
+  同步从分钟级回到秒级。
+ReleaseNotesUrl: https://github.com/myYangyunfan/dsh_desktop/releases/tag/v0.6.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
