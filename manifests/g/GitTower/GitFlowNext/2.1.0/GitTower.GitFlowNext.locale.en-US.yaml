@@ -1,0 +1,56 @@
+# Created with git-flow-next using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: GitTower.GitFlowNext
+PackageVersion: 2.1.0
+PackageLocale: en-US
+Publisher: GitTower
+PublisherUrl: https://github.com/gittower
+PublisherSupportUrl: https://github.com/gittower/git-flow-next/issues
+Author: GitTower
+PackageName: GitTower GitFlowNext
+PackageUrl: https://github.com/gittower/git-flow-next
+License: BSD 2-Clause
+LicenseUrl: https://github.com/gittower/git-flow-next/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2024, git-flow-next contributors
+ShortDescription: A modern reimplementation of git-flow.
+Description: |-
+  A modern reimplementation of git-flow in Go that offers greater flexibility
+  while maintaining backward compatibility with the original git-flow and git-flow-avh.
+Moniker: git-flow
+Tags:
+- git
+- git-flow
+- git-flow-next
+- gitflow
+ReleaseNotes: |-
+  Added
+  - checkout is worktree-aware: when the branch has a worktree, it reports the path and offers it to the calling shell instead of switching the current worktree's branch. --worktree creates a missing worktree first and records git-flow as its creator, --force clears a plain directory out of the way, --no-cd suppresses only the shell handover, and --quiet drops the shell-init tip
+  - shell-init {bash|zsh|fish} prints a shell wrapper that turns that handover into an automatic cd. It defines both a git and a git-flow function, so the documented git flow … form navigates too, and it scopes the navigation variable to a single command rather than exporting it
+  - worktree add now points at shell-init when the navigation channel is unused, and gains --quiet to suppress that tip
+  - <type> start --worktree creates the new branch in its own worktree instead of checking it out, records git-flow as its creator, and offers the path to the calling shell. --worktree-path puts it somewhere else and implies --worktree, --no-worktree opts out, --no-cd suppresses only the shell handover, and --quiet drops the shell-init tip. Combining the three is not an error: the one that appears last on the command line wins, which is specific to these flags — every other --x/--no-x pair in git-flow still prefers the positive flag whatever the order
+  - gitflow.branch.<type>.worktree makes worktree creation the default for a topic branch type, so start needs no flag. init writes the key for topic branch types only
+  - <type> list --worktrees appends a column reporting each branch's linked worktree: its path relative to the main worktree root, [n] for the number of changed entries, (unmanaged) for a worktree git-flow did not create, (missing) for one that is no longer present at its recorded path, and - for a branch with no linked worktree — including a branch checked out in the main worktree, since the column reports linked worktrees. The count is of git status --porcelain entries rather than files, so an untracked directory counts once however many files it holds. Without the flag the output is unchanged
+  - finish --ff-only (and gitflow.<type>.finish.ff-only) makes a fast-forward into the parent a precondition rather than a strategy: if the parent carries any commit the topic branch does not — a true divergence, or merely being ahead — finish aborts before touching any local branch, tag or the working tree, so what lands on the parent is exactly the tested topic tip. It is rejected in combination with --ff, --no-ff, or a squash strategy, it suppresses the rebase of a rebase strategy rather than rewriting the topic branch to make it land, and it constrains the upstream merge only, not the automatic child updates
+  - finish and delete free a branch's linked worktree as part of deleting the branch, instead of leaving a stale checkout behind or failing outright because Git refuses to delete a branch that is still checked out somewhere. A worktree git-flow created is removed; one created by hand (git worktree add) is kept, with its HEAD detached from the branch so the directory and every file in it, including uncommitted work, survive untouched. --keep-worktree routes even a git-flow-created worktree through the detach path instead of removing it, and --force-worktree/-W allows removing one with uncommitted or untracked changes; neither flag has a git config equivalent. Both commands refuse up front, before any destructive step, if the worktree has a merge, rebase, bisect, cherry-pick, or revert in progress. Running finish or delete from inside the worktree being freed first redirects the operation to the parent branch's own worktree (or the main worktree) so the worktree is left untouched until the free step, and reports the new location via GIT_FLOW_CD_FILE if the invoking shell was standing there. A rebase-strategy finish is refused outright against a topic branch with its own separate worktree, and a child base branch due for auto-update is refused the same way if it has its own separate worktree — both before the merge starts
+  Changed
+  - start no longer checks the new branch out when it creates a worktree for it: Git allows a branch in only one worktree at a time, so the invocation worktree stays where it was. Without a worktree, start checks the branch out exactly as before
+  - worktree list now reads every worktree's provenance in one bulked lookup instead of one git config call per row, so the cost of the listing no longer scales with the number of worktrees
+  Fixed
+  - The EXIT STATUS section of the git flow <type> checkout manpage documented codes 1/2/3/4 that the command has never returned; it now documents the actual 1/2/3/5/6
+  - finish collected the auto-update child base branches in Go's randomized map order, so with more than one auto-update child the order they were updated in, the order they were reported in, and the order recorded in merge state (the resume order after a conflict) all varied between identical runs; children are now processed in sorted order, matching integrate
+  - finish left you on the parent branch, so a release or hotfix finish ended on main instead of on develop as git-flow-avh does — even under --keep, where nothing is deleted and the checkout served no purpose. It now ends on the integration branch: the last auto-update child of the parent, or the parent itself when it has none. The branch is derived from the configured topology rather than a hardcoded name, so it works for custom branch names too, and finish reports the branch it leaves you on
+  - The git flow <type> list manpage documented a [pattern] argument with shell-style globbing, a * current-branch marker and remote tracking information that the command has never had, plus a trailing period on the empty-result message and exit codes it has never returned; it now documents what the command actually does and the codes 0/1/2/3 it actually returns. The same [pattern] argument is gone from the topic-subcommand list in the git flow manpage
+  - overview built each of its lists by ranging over the branch configuration map, so on a stock repository the topic branch type sections — and, with more than one trunk or child base branch, those lists too — came out in Go's randomized map order and varied between identical runs. Everything is now listed alphabetically by branch type name, including the type reported for an active topic branch that matches more than one configured prefix
+  - config list categorized the configured branches by ranging over the branch configuration map, so on a stock repository the topic branch type sections — and, with more than one trunk or child base branch, those lists too — came out in Go's randomized map order and varied between identical runs. Trunk branches, child base branches and topic branch types are now each listed alphabetically by branch type name, matching overview
+  - config list presented every started topic branch as a branch type with no parent, start point or prefix. Each start records a runtime gitflow.branch.<branch>.base key, which the config parser turns into an entry with no type, and the listing put anything that was not a base branch in the topic type section. It now lists the configured topic branch types only
+  - Worktree path comparison ignores case on Windows, where two spellings of one location differing only in case were treated as different paths. The refusal to remove or detach the main worktree, the refusal to delete a registered worktree, and the detection that the shell is standing inside a worktree being removed all failed to fire on a case mismatch
+  - The shorthand git flow finish accepted --merge-message and --update-message but built its merge strategy without them, silently ignoring both flags even though the per-type command surface honored them as documented
+  - Zsh tab completion for the git flow <type> ... form (as opposed to git-flow <type> ...) tried to invoke a nonexistent flow command; the dispatcher's word-shifting now gets the same fixup already applied for the bash and fish bridges
+  Installation
+  See the installation instructions in the README.
+  Checksums
+  SHA-256 checksums for the release artifacts are available in the checksums.txt file.
+ReleaseNotesUrl: https://github.com/gittower/git-flow-next/releases/tag/v2.1.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
