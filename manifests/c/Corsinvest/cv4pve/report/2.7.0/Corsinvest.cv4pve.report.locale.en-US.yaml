@@ -1,0 +1,80 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Corsinvest.cv4pve.report
+PackageVersion: 2.7.0
+PackageLocale: en-US
+Publisher: Corsinvest Srl
+PublisherUrl: https://www.corsinvest.it/
+PublisherSupportUrl: https://www.corsinvest.it/cv4pve
+PrivacyUrl: https://www.corsinvest.it/privacy
+Author: Corsinvest Srl
+PackageName: cv4pve-report
+PackageUrl: https://github.com/Corsinvest/cv4pve-report
+License: GPL-3.0
+LicenseUrl: https://github.com/Corsinvest/cv4pve-report/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2026 Corsinvest Srl
+CopyrightUrl: https://github.com/Corsinvest/cv4pve-report/blob/master/LICENSE.md
+ShortDescription: Report Tool for Proxmox VE
+Description: |-
+  cv4pve-report exports your entire Proxmox VE infrastructure to a single
+  navigable Excel file — nodes, VMs, containers, storages, users, firewall
+  rules, backup jobs, resource pools and more. Every row is a hyperlink to
+  its detail sheet.
+
+  Features:
+  - Single .xlsx file with one sheet per node, VM and storage
+  - Fully navigable — summary rows link to detail sheets
+  - Cluster: users, API tokens, TFA, groups, roles, ACL, firewall, backup jobs, replication, SDN, pools
+  - Nodes: services, network, disks, SMART, RRD metrics, APT updates, SSL certificates, tasks
+  - VMs/CTs: config, network, disks, RRD metrics, backups, snapshots, firewall, QEMU agent info
+  - Storages: content inventory, RRD metrics
+  - Three profiles: Fast, Standard, Full
+  - Works with a read-only API token, no root access required
+Moniker: cv4pve-report
+Tags:
+- corsinvest
+- excel
+- infrastructure
+- inventory
+- proxmox
+- proxmoxve
+- report
+- xlsx
+ReleaseNotes: |-
+  What's new
+  - Documentation site. The documentation moved from Markdown files in the repository to corsinvest.github.io/cv4pve-report: getting started, permissions, every output format, every table and column with its JSON key, settings, and a page mapping each RVTools tab to the matching sheet. Every page was checked against the code and a real report.
+  - Settings files use names. create-settings writes the RRD time frame and consolidation as names ("Week", "Average"), and --settings-file reads names or numbers. Before, create-settings printed the names but a file using them was rejected, so only numbers worked.
+  - --log-level works. It was ignored and only --debug changed the log output; now it behaves as in the other cv4pve tools.
+  - New product icon, also used by the NuGet package.
+  - Library: Settings.JsonOptions. The options the command line uses to write and read settings files, with enums as names, for applications that store the report settings themselves.
+  Breaking changes (JSON only)
+  - Size and percentage of the same measure no longer overwrite each other. Memory Usage GB and Memory Usage % both became memoryUsage, and the fraction silently replaced the bytes. The percentage keeps the plain key; the size is now memoryUsageBytes (also diskUsageBytes, usedBytes) in VMs, Containers, Nodes, Storages, Partitions, RRD Nodes and RRD Guests.
+  - Keys renamed: s.m.a.r.t.Data → smartData, iP → ip (/etc/hosts), positon → position (firewall rules), uRIs → uris (APT repositories).
+  Fixes
+  - Syslog failures are reported. A node that timed out or could not be reached gave an empty Syslog with no trace; the failure now lands on the Issues page like every other call.
+  - A VM or container whose configuration cannot be read no longer stops the report: it is listed without a detail page.
+  - Node detail no longer stops the report when a status, version, subscription, time or DNS call fails, for example for a missing privilege: those values stay empty.
+  - Dates keep their time in Excel and HTML. Cluster log, RRD, snapshot and storage content timestamps were shown as a date only.
+  - Description shows the notes of VMs and containers. It showed <vmid> (<name>) instead.
+  - Subscription Expiry shows the next due date, not the registration date.
+  - Snapshots no longer list current, the entry Proxmox VE returns for the running state.
+  - VM network rows from the configuration when the guest agent runs but returns no interfaces, and for configured NICs the agent does not report. Two NICs with the same MAC no longer stop the guest agent data.
+  - Disks sorted as numbers: scsi2 before scsi10.
+  - Links that did nothing now work: Guest in Cluster › Replication, Vm Id in the node Tasks table.
+  - Header typos: Positon → Position, UR Is → Uris.
+  - The Summary counts syslog lines, not nodes.
+  - The Issues table no longer shows the internal Link Key column (issues.json keeps linkKey).
+  - Guest.Detail.Tasks.Source is applied; it was ignored for guest tasks.
+  - Firewall Since / Until use UTC and include the Until day, like Syslog.
+  - --settings-file help no longer mentions a default file that does not exist.
+  What's Changed
+  - docs: documentation site with the shared cv4pve theme by @franklupo in #61
+  - fix: bugs found while documenting the report by @franklupo in #62
+  - style: remove unused using in ReportEngine.Syslog by @franklupo in #63
+  - chore: release 2.7.0 by @franklupo in #64
+  - docs: tested at scale — 25 nodes, about 2700 VMs by @franklupo in #65
+  Full Changelog: v2.6.0...v2.7.0
+ReleaseNotesUrl: https://github.com/Corsinvest/cv4pve-report/releases/tag/v2.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
