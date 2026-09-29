@@ -1,0 +1,36 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: CelikE.soko
+PackageVersion: 0.21.0
+PackageLocale: en-US
+Publisher: Emil Celik
+PublisherUrl: https://github.com/CelikE
+PublisherSupportUrl: https://github.com/CelikE/soko/issues
+PackageName: soko
+PackageUrl: https://github.com/CelikE/soko
+License: MIT
+LicenseUrl: https://github.com/CelikE/soko/blob/HEAD/LICENSE
+ShortDescription: A fast CLI to manage multiple git repositories at once
+ReleaseNotes: |-
+  0.21.0
+  Features
+  - soko snapshot — save and restore exact repo positions: snapshot save records branch + HEAD SHA per repo, snapshot restore moves every repo back (rewinding moved branches, recreating deleted ones, refusing dirty trees), plus list / show / drop. The save game before a risky bulk operation; completes the trust layer started by soko undo.
+  - Worktree entries now inherit their parent repo's tags at filter time, so --tag filters (status, sync, fetch, list, etc.) include worktrees of tagged repos. Retagging the parent instantly re-scopes its worktrees; tag remove on a worktree only removes own tags and errors on inherited ones.
+  - soko ui gains its first mutating key: P fast-forward pulls the selected repo after a confirmation prompt, runs asynchronously, and records a journal entry so soko undo rewinds it to the pre-pull SHA. Satisfies feature 44's scope guard — mutations only once undo exists.
+  - soko undo reverts the last destructive operation via a capped pre-image journal beside the config (journal.yaml). soko clean now records the branches it deletes, so soko undo recreates them at their exact SHAs; soko undo --list shows the journal. This is the trust layer that will unlock mutating keys in soko ui.
+  - soko ui gains read-only power keys — a tag legend, group-by-tag view (G), live name search (/), a filter cycle (f: all/dirty/behind/ahead/conflicts), browser-page jumps (o/p/i/a for home/PRs/issues/actions), and a ? help overlay
+  - Live full-screen TUI dashboard with soko ui — auto-refreshing local workspace state (branch, dirty, ahead/behind, last-commit age, health badge) with sort, dirty/tag filters, cd-on-enter, open-in-browser, and optional background --fetch
+  - Add soko branch for cross-repo branch operations: current branch per repo, branch lookup (current/local/remote/missing), bulk switch with -b create-from-default, and stale unmerged branch detection
+  - Add soko worktree to manage git worktrees across repos: worktree add <repo> <branch> creates and registers in one step (with -b to create the branch, --path, --tag), worktree list shows all worktrees with live branch and dirty status, and worktree rm removes the directory and registry entry together (refusing dirty trees without --force).
+  - Add soko ctx — save and restore workspace contexts: ctx save records each repo's branch and stashes dirty trees under a per-context message, ctx switch checks the branches back out and pops the stashes (refusing repos that are dirty right now), plus ctx list/show/drop.
+  - Add soko sync — fetch all repos, then fast-forward the ones that are provably safe (clean, upstream, not diverged); dirty, diverged, and fetch-only-behind repos are reported as needing attention. Supports positional repos, --tag, --fetch-only, --no-worktrees, and --json.
+  - Add soko apply to copy a file into many repos at once, with a diff preview and dry-run-by-default safety
+  - Add a stable error_code field to per-repo JSON failures in pull, fetch, exec, clean, and stash
+  - Add a global --perf flag (and SOKO_PERF) reporting per-repo and aggregate timing for status, fetch, pull, and exec
+  - soko grep now highlights the matched substring within each result line
+  Chores
+  - Document soko snapshot, soko apply, the soko ui dashboard keys, worktree tag inheritance, the global --perf flag, and JSON error_code in the README
+ReleaseNotesUrl: https://github.com/CelikE/soko/releases/tag/v0.21.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

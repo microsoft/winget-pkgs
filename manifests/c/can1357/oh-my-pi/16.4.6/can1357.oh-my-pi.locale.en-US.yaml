@@ -1,0 +1,82 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 16.4.6
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Added
+  - Added asynchronous invalidateUsageCache method to clear cached usage reports
+  - Added support for cross-service usage cache invalidation between AuthStorage and AuthBroker
+  Fixed
+  - Fixed OAuth credential resolution returning "No API key found" when every plan-eligible OpenAI Codex account was rate-limit blocked and the only unblocked account failed the model's plan gate: resolution now runs a last-resort ladder that first yields a plan-fitting account regardless of usage blocks (so callers get real usage-limit retry semantics), then tries every account with the plan filter dropped before reporting no credential
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added invalidate action to the usage command to clear cached usage reports
+  - Added model-oriented keys and wildcard entries to retry.fallbackChains: a provider/model-id key attaches a fallback chain to that exact model, a provider/* key covers every current or future model of a provider, and a provider/* chain entry keeps the failing model's id while swapping the provider (google-antigravity/x → google/x) — so fallbacks survive role and model reassignments without config edits. Keys resolve by specificity: exact model, then provider wildcard, then role, then default.
+  - Added fallback-chain editing to the /models Roles view: each role's retry.fallbackChains entries render as indented rows beneath it, f picks a fallback model to append, Enter on an entry replaces it, x/backspace removes it, and [/] (or shift+↑/↓) reorder the chain.
+  - Added model-keyed fallback management to the /models Roles view: model and provider/* chains render as a separate section below the roles (divider + "+ New fallback…" row for creating one by picking the protected model, then keying it by model or provider), with the same replace/remove/reorder editing as role chains; the model strip gains fallbacks:<model> and fallbacks:<provider>/* chips as shortcuts.
+  - Added /queue <message> plus -> / => composer shorthand for follow-up messages that wait until the agent yields. The shorthand opens a dim Queueing header and splits sequential numeric, Roman-numeral, or alphabetic lists into separately highlighted queue entries.
+  - Added per-model TPS/TTFT tracking: every completed assistant turn folds its timing into recency-weighted aggregates in ~/.omp/agent.db, and the /models browser shows measured speed — a right-aligned 118t/s column on wide terminals (plus TTFT, e.g. 0.9s 118t/s, when wider) and ~118t/s · 0.9s ttft facts in the selection detail line — with no dependency on the omp stats session scan.
+  Changed
+  - Retain completed and abandoned tasks in session history for improved context on resume
+  - Changed the Model Hub retry-fallback strip chip to append the model to the default fallback chain instead of prepending it, matching the chain-building order of the Roles view (already-registered models are a no-op).
+  - Changed per-model perf recording (recordModelPerf) to be deferred like prompt history: samples are batched and written to agent.db in one transaction ~100ms later, keeping SQLite writes off the turn-completion hot path.
+  Fixed
+  - Fixed failure to trigger model fallback when the retry budget is exhausted by credential rotation
+  - Fixed uncontrollable mouse-wheel scrolling in the /models hub: the wheel moved the selection (one step per wheel event, so a single trackpad flick skipped many rows) and wrapped from the bottom back to the top. Wheel scrolling now pans the list viewport only, clamps at the ends, and leaves the selection where it is; keyboard navigation still scrolls the selection into view. Likewise, the wheel over the provider sidebar no longer switches the active scope (or triggers provider refreshes) — it just scrolls the sidebar.
+  - Fixed TPS being inflated several-fold when a provider hides reasoning tokens until late in the stream (e.g. google/gemini-3.5 vs google-vertex/gemini-3.5 reporting 648 vs 186 TPS for identical durations): omp bench, the per-turn usage row, and the /models perf aggregates now measure tokens/sec over the total request duration instead of the post-TTFT decode window, matching omp stats. Stored perf aggregates are purged and re-backfilled from stats history with the corrected math on first launch.
+  - Fixed the model-perf stats.db backfill freezing the TUI (~30s on multi-million-row stats databases) when /models triggered it: the import is now fire-and-forget, walks the newest rows in small chunks with event-loop yields between them, and is bounded to 90 days / 256 newest samples per model — beyond either bound the recency decay would erase the contribution anyway.
+  - Fixed compiled release binaries bundling fastembed and baking the build-machine @anush008/tokenizers path; native runtime dependencies now stay external for every compiled build path so Mnemopi resolves its on-demand install instead. (#5195)
+  - Fixed /btw side-channel turns on Codex models such as gpt-5.6-luna by preserving the session websocket preference instead of forcing SSE, and made Esc dismiss the active /btw panel before interrupting loop/maintenance work. (#5213)
+  - Fixed the Model Hub role-assignment strip hiding the selected chip once the row overflowed; the strip now scrolls horizontally, truncating passed chips behind a leading ellipsis so the selection (plus one chip of lookahead) stays visible.
+  - Fixed mouse hover and clicks in the /models Roles view landing one row above the pointer (the row mapping subtracted the status row twice).
+  - Fixed model search keeping the most-recently-used model on top of the results: match quality now ranks first (an exact gpt-5.5 beats the active gpt-5.6-sol), with MRU order only breaking ties between equally good matches.
+  @oh-my-pi/pi-natives
+  Added
+  - Added an in-process readlink shell builtin (vendored from uutils coreutils 0.8.0), supporting -f/-e/-m canonicalization, -n/-z delimiters, and -v/-q/-s verbosity, with path operands resolved against the shell working directory.
+  - Added in-process shell builtins for realpath, touch, stat, date, mktemp, seq, yes, printenv, ln, truncate, tac, nproc, uname, whoami, and hostname (vendored from uutils coreutils 0.8.0), plus native which (shell PATH lookup) and diff (unified output, -U/-q/-N, binary detection, recursive directory compare) builtins. All resolve path operands against the shell working directory, read the shell's exported environment, and honor abort/timeout cancellation; ln is gated with the destructive set (PI_DISABLE_UUTILS_DESTRUCTIVE), and system-mutating modes (date --set, hostname setting) are disabled.
+  Fixed
+  - Fixed ast_edit rejecting byte-identical duplicate replacements as "Overlapping replacements detected": multiple rewrite ops matching the same node with the same output now collapse into one deterministic edit (deduped in both the preview listing/counts and the apply pass), so only genuinely divergent overlaps error.
+  @oh-my-pi/pi-tui
+  Added
+  - Added support for width-changing editor text decorators on standalone presentation lines, with decorated output safely truncated to the available content width.
+  @oh-my-pi/pi-utils
+  Added
+  - Added AsyncDrain, the deferred write-batching helper previously private to the coding-agent's prompt-history storage; now shared with model-perf recording.
+  What's Changed
+  - fix(coding-agent): preserve /btw Codex websocket routing by @roboomp in https://github.com/can1357/oh-my-pi/pull/5222
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v16.4.5...v16.4.6
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v16.4.6
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

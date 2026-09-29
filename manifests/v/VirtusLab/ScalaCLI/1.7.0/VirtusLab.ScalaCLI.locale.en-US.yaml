@@ -1,0 +1,131 @@
+# Created with WinGet Releaser using komac v2.10.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: VirtusLab.ScalaCLI
+PackageVersion: 1.7.0
+PackageLocale: en-US
+Publisher: scala-cli@virtuslab.com
+PublisherUrl: https://virtuslab.com/
+PublisherSupportUrl: https://github.com/VirtusLab/scala-cli/issues
+PackageName: Scala CLI
+PackageUrl: https://github.com/VirtusLab/scala-cli
+License: Apache-2.0
+LicenseUrl: https://github.com/VirtusLab/scala-cli/blob/HEAD/LICENSE
+ShortDescription: Scala CLI is a command-line tool to interact with the Scala language.
+Tags:
+- functional
+- java
+- language
+- programming
+- scala
+ReleaseNotes: |-
+  Switch to scalameta/scalafmt images of scalafmt 3.9.1+
+  Since version 3.9.1 scalafmt ships with native images built with Scala Native. As a result, we are sunsetting https://github.com/virtuslab/scalafmt-native-image and Scala CLI will use the artifacts from https://github.com/scalameta/scalafmt for scalafmt versions >=3.9.1
+  Note that older Scala CLI versions may still attempt to download a native image from the old repository for the new versions.
+  We will keep releasing those for a short while to help late upgraders migrate.
+  scala-cli fmt -F -version
+  # scalafmt 3.9.2
+  Added by @Gedochao in #3521
+  Support the --test command line option for run and package
+  It is now possible to run a main method from the test scope with the --test flag.
+  //> using target.scope test
+  @main def helloFromTestScope(): Unit = println("Hello from the test scope!")
+  scala-cli run HelloFromTestScope.scala --test --power
+  # Hello from the test scope!
+  Similarly, it is now possible to package the main and test scopes together, using the same --test flag.
+  scala-cli package HelloFromTestScope.scala --test --power
+  # # Wrote /Users/pchabelski/IdeaProjects/scala-cli-tests-2/untitled/v170/helloFromTestScope, run it with
+  #  ./helloFromTestScope
+  ./helloFromTestScope
+  # Hello from the test scope!
+  Keep in mind that the test and main scopes are still separate compilation units, where the test scope depends on the main scope (while the reverse isn't true).
+  Added by @Gedochao in #3502 and #3519
+  Detect objects with main class in scripts
+  Scala CLI now detects objects with a main method in scripts and runs them by default.
+  object Main {
+    def main(args: Array[String]): Unit = println("Hello")
+  }
+  Do note that, this is chiefly a convenience feature for migration of old scripts, using the old, legacy scala runner.
+  If any top-level code is present alongside an object with a main method, the top-level code will be run instead and a warning printed.
+  object Main {
+    def main(args: Array[String]): Unit = println("Hello")
+  }
+  println("Top level code says hello")
+  scala-cli run scriptWithMainObjectAndTopLevel.sc
+  # [warn]  Script contains objects with main methods and top-level statements, only the latter will be run.
+  # Compiling project (Scala 3.6.3, JVM (23))
+  # Compiled project (Scala 3.6.3, JVM (23))
+  # Top level code says hello
+  Additionally, cases where multiple main methods are present in the same script are not supported, inidicated by a warning.
+  object Main {
+    def main(args: Array[String]): Unit = println("Hello1")
+  }
+  object Main2 {
+    def main(args: Array[String]): Unit = println("Hello2")
+  }
+  Note that no output is printed in this example:
+  scala-cli run scriptWithMultipleMainObjects.sc
+  # [warn]  Only a single main is allowed within scripts. Multiple main classes were found in the script: Main, Main2
+  # Compiling project (Scala 3.6.3, JVM (23))
+  # Compiled project (Scala 3.6.3, JVM (23))
+  Finally, main methods defined in this way cannot be chosen via the --main-class command line option directive, and neither will they be printed by the --list-main-methods flag.
+  Added by @tgodzik in #3479
+  Support for Scala Native 0.5.7
+  This Scala CLI version switches the default Scala Native version to 0.5.7.
+  scala-cli -e 'println("Hello from Scala Native 0.5.7!")' --native
+  # Compiling project (Scala 3.6.3, Scala Native 0.5.7)
+  # Compiled project (Scala 3.6.3, Scala Native 0.5.7)
+  # [info] Linking (multithreadingEnabled=true, disable if not used) (1045 ms)
+  # [info] Discovered 915 classes and 5608 methods after classloading
+  # [info] Checking intermediate code (quick) (41 ms)
+  # [info] Multithreading was not explicitly enabled - initial class loading has not detected any usage of system threads. Multithreading support will be disabled to improve performance.
+  # [info] Linking (multithreadingEnabled=false) (352 ms)
+  # [info] Discovered 498 classes and 2506 methods after classloading
+  # [info] Checking intermediate code (quick) (9 ms)
+  # [info] Discovered 477 classes and 1930 methods after optimization
+  # [info] Optimizing (debug mode) (608 ms)
+  # [info] Produced 9 LLVM IR files
+  # [info] Generating intermediate code (650 ms)
+  # [info] Compiling to native code (1674 ms)
+  # [info] Linking with [pthread, dl, m]
+  # [info] Linking native code (immix gc, none lto) (339 ms)
+  # [info] Postprocessing (0 ms)
+  # [info] Total (4655 ms)
+  # Hello from Scala Native 0.5.7!
+  Added in #3527
+  Features
+  - improvement: Detect objects with main class in scripts by @tgodzik in #3479
+  - Add support for running a main method from the test scope by @Gedochao in #3502
+  - Support the --test flag with the package sub-command by @Gedochao in #3519
+  Fixes
+  - Improve handling for parallel Scala CLI runs by @Gedochao in #3399
+  - fix: Don't compile docs if there is no need by @ghostbuster91 in #3503
+  - fix: correctly report error position on unknown directive without values by @kasiaMarek in #3518
+  Internal and build changes
+  - fix for #3510 by @philwalk in #3513
+  - Fall back to the cs command on PATH in the mill script by @Gedochao in #3517
+  Documentation changes
+  - Curl install launcher in your repo by @joan38 in #3532
+  Updates
+  - Update scala-cli.sh launcher for 1.6.2 by @github-actions in #3495
+  - Update metaconfig-typesafe-config to 0.15.0 by @scala-steward in #3497
+  - Update bloop-config_2.13 to 2.3.2 by @scala-steward in #3496
+  - Update semanticdb-shared_2.13 to 4.13.0 by @scala-steward in #3500
+  - Update ammonite to 3.0.2 by @scala-steward in #3504
+  - Update semanticdb-shared_2.13 to 4.13.1.1 by @scala-steward in #3508
+  - Update scalafix-interfaces to 0.14.1 by @scala-steward in #3511
+  - Update semanticdb-shared_2.13 to 4.13.2 by @scala-steward in #3515
+  - Update scalafix-interfaces to 0.14.2 by @scala-steward in #3514
+  - Update slf4j-nop to 2.0.17 by @scala-steward in #3520
+  - Bump Scala 3 Next RC to 3.6.4-RC2 by @Gedochao in #3525
+  - Update Scala Native to 0.5.7 by @scala-steward in #3527
+  - Bump scala-packager to 0.1.32 & linux CI runners to ubuntu-24.04 by @Gedochao in #3528
+  - Update scalafmt to 3.9.1 by @Gedochao in #3521
+  - Bump scalafmt to 3.9.2 by @Gedochao in #3533
+  - Bump gifs tests Ubuntu Docker image to ubuntu:24.04 by @Gedochao in #3534
+  - Update sbt, scripted-plugin to 1.10.9 by @scala-steward in #3537
+  - Bump Linux ARM64 Docker image to ubuntu:24.04 by @Gedochao in #3535
+  Full Changelog: v1.6.2...v1.7.0
+ReleaseNotesUrl: https://github.com/VirtusLab/scala-cli/releases/tag/v1.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

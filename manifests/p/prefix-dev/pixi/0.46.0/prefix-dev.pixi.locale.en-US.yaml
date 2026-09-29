@@ -1,0 +1,135 @@
+# Created with WinGet Releaser using komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: prefix-dev.pixi
+PackageVersion: 0.46.0
+PackageLocale: en-US
+Publisher: prefix-dev
+PublisherUrl: https://pixi.sh/
+PublisherSupportUrl: https://github.com/prefix-dev/pixi/issues
+Author: pixi contributors
+PackageName: pixi
+PackageUrl: https://github.com/prefix-dev/pixi
+License: BSD-3-Clause
+LicenseUrl: https://github.com/prefix-dev/pixi/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2023, prefix.dev GmbH
+CopyrightUrl: https://github.com/prefix-dev/pixi/blob/main/LICENSE
+ShortDescription: A cross-platform, multi-language package manager and workflow tool
+Moniker: pixi
+Tags:
+- conda
+- conda-environment
+- conda-packages
+- hacktoberfest
+- package-management
+- package-manager
+- package-manager-tool
+- python-virtual-environment
+- rust
+- rust-lang
+ReleaseNotes: |-
+  Release Notes
+  ⚠️ Breaking Change
+  arg names in tasks can no longer contain dashes (-).
+  This restriction is due to the integration of Minijinja for rendering tasks, where dashes could be misinterpreted as a subtraction operator.
+  ✨ Highlights
+  This release comes with another set of features for the tasks!
+  - The command of a task is now able to use minijinja for rendering the command.
+   [tasks]
+  # The arg `text`, converted to uppercase, will be printed.
+  task1 = { cmd = "echo {{ text | upper }}", args = ["text"] }
+  # If arg `text` contains 'hoi', it will be converted to lowercase. The result will be printed.
+  task2 = { cmd = "echo {{ text | lower if 'hoi' in text }}", args = [
+    { arg = "text", default = "" },
+  ] }
+  # With `a` and `b` being strings, they will be appended and then printed.
+  task3 = { cmd = "echo {{ a + b }}", args = ["a", { arg = "b", default = "!" }] }
+  # `names` will be split by whitespace and then every name will be printed separately
+  task4 = { cmd = "{% for name in names | split %} echo {{ name }};{% endfor %}", args = [
+    "names",
+  ] }
+  - Shortened composition of tasks with depends-on key.
+  [tasks]
+  test-all = [{ task = "test", args = ["all"] }]
+  # Equivalent to: test-all = { depends-on = [{task = "test", args = ["all"] }]}
+  - The depends-on key can now include the environment that the task should run in.
+  [tasks]
+  # Using the shortened composition of tasks
+  test-all = [
+    { task = "test", environment = "py311" },
+    { task = "test", environment = "py312" },
+  ]
+  Added
+  - Integrate minijinja for tasks' command's rendering by @prsabahrami in #3579
+  - Support for riscv64 linux by @Hofer-Julian in #3606
+  - Task Environment Selection by @prsabahrami in #3501
+  - Shortened task composition with depends-on key by @prsabahrami in #3450
+  Changed
+  - Format shell script with shfmt by @gzm55 in #3552
+  - Improve error message at missing pixi section by @joyanedel in #3516
+  - Install.sh supports installing without tar and unzip commands by @gzm55 in #3551
+  Documentation
+  - Community: add xsf by @lucascolley in #3515
+  - Mention installation with wget instead of curl by @paugier in #3547
+  - Fix typo in advanced_tasks.md by @AH-Merii in #3555
+  - Update to call pixi task "start" in Index.md by @philipreese in #3487
+  - Migrate ros2.md example to use robostack-humble channel by @traversaro in #3520
+  - Provide guidance on using direnv by @phreed in #3513
+  - Remove unused ordered list in system_requirements.md by @kemingy in #3590
+  - Update authentication.md to fix typo in package name by @PanTheDev in #3615
+  - Replace project with workspace by @munechika-koyo in #3623 and in #3620
+  - Rename pixi build examples by @Hofer-Julian in #3632
+  Fixed
+  - Updating windows installation.md to correspond to installation.ps1 by @Ahschreyer in #3507
+  - Fix panic for pixi task list for platform specific tasks by @synapticarbors in #3510
+  - Improve error message if build backend crashes by @baszalmstra in #3543
+  - Check unzip command on msys and add ITs for install.sh by @gzm55 in #3458
+  - Shell-hook --no-completion by @Hofer-Julian in #3553
+  - Fixed a typo in init.rs by @noamgot in #3561
+  - Pixi-shell: bump timeout to 3 secs, fix docs link by @wolfv in #3528
+  - Invalidate lock-file if a pypi dependency is requested by @baszalmstra in #3562
+  - Build backend missing executable by @baszalmstra in #3527
+  - Community page link in README by @elonzh in #3595
+  - Mark add_tests::add_pypi_git as an online test by @mgorny in #3586
+  - Update git-cliff by @Hofer-Julian in #3614
+  - Pypi local directory satisfiability by @tdejager in #3631
+  - Don't keep reinstalling local pypi archives by @tdejager in #3618
+  - Don't resolve for previously locked platforms by @baszalmstra in #3635
+  Refactor
+  - Reduce difference between default and named feature by @baszalmstra in #3545
+  - Update pixi.toml to use args by @prsabahrami in #3531
+  - Refactor of pypi installer type by @tdejager in #3563
+  New Contributors
+  - @renovate[bot] made their first contribution in #3626
+  - @munechika-koyo made their first contribution in #3623
+  - @elonzh made their first contribution in #3595
+  - @Ahschreyer made their first contribution in #3507
+  - @kemingy made their first contribution in #3590
+  - @joyanedel made their first contribution in #3516
+  - @phreed made their first contribution in #3513
+  - @AH-Merii made their first contribution in #3555
+  - @paugier made their first contribution in #3547
+  - @mwiebe made their first contribution in #3519
+  Download pixi 0.46.0
+  ───────────────────────────────────────────┬───────────────────┬─────────────
+  File                                       │Platform           │Checksum
+  ───────────────────────────────────────────┼───────────────────┼─────────────
+  pixi-aarch64-apple-darwin.tar.gz           │Apple Silicon macOS│checksum
+  ───────────────────────────────────────────┼───────────────────┼─────────────
+  pixi-x86_64-apple-darwin.tar.gz            │Intel macOS        │checksum
+  ───────────────────────────────────────────┼───────────────────┼─────────────
+  pixi-aarch64-pc-windows-msvc.zip           │ARM64 Windows      │checksum
+  ───────────────────────────────────────────┼───────────────────┼─────────────
+  pixi-aarch64-pc-windows-msvc.msi           │ARM64 Windows      │checksum
+  ───────────────────────────────────────────┼───────────────────┼─────────────
+  pixi-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ───────────────────────────────────────────┼───────────────────┼─────────────
+  pixi-x86_64-pc-windows-msvc.msi            │x64 Windows        │checksum
+  ───────────────────────────────────────────┼───────────────────┼─────────────
+  pixi-aarch64-unknown-linux-musl.tar.gz     │ARM64 MUSL Linux   │checksum
+  ───────────────────────────────────────────┼───────────────────┼─────────────
+  pixi-x86_64-unknown-linux-musl.tar.gz      │x64 MUSL Linux     │checksum
+  ───────────────────────────────────────────┴───────────────────┴─────────────
+ReleaseNotesUrl: https://github.com/prefix-dev/pixi/releases/tag/v0.46.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

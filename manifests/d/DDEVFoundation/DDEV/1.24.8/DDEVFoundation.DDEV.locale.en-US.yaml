@@ -1,0 +1,152 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: DDEVFoundation.DDEV
+PackageVersion: 1.24.8
+PackageLocale: en-US
+Publisher: DDEV Foundation
+PublisherUrl: https://github.com/ddev
+PublisherSupportUrl: https://github.com/ddev/ddev/issues
+PackageName: DDEV
+PackageUrl: https://github.com/ddev/ddev
+License: Apache-2.0
+LicenseUrl: https://github.com/ddev/ddev/blob/HEAD/LICENSE
+ShortDescription: Docker-based local PHP+Node.js web development environments
+Tags:
+- backdrop
+- craftcms
+- ddev
+- development
+- docker
+- drupal
+- laravel
+- linux
+- local-development
+- macos
+- magento
+- magento2
+- mariadb
+- moodle
+- nodejs
+- php
+ReleaseNotes: |-
+  Installation
+  See the installation instructions for details, but it's easy:
+  - macOS: brew install ddev/ddev/ddev or just brew upgrade ddev.
+  - Linux: Use apt install ddev or apt upgrade ddev see apt/yum installation
+  - Windows and WSL2: Download the ddev_windows_amd64_installer.v1.24.8.exe; you can run it for install or upgrade.
+  - Consider ddev delete images or ddev delete images --all after upgrading to free up disk space used by previous Docker image versions. This does no harm.
+  - Consider ddev config --auto to update your projects to current configuration.
+  NEW: Docker Buildx is now required for Docker Compose
+  > Error: Docker Compose is configured to build using Bake, but buildx isn't installed
+  Docker Compose changed its default builder to Bake in v2.37.0.
+  DDEV v1.24.7 and below used the legacy builder, but v1.24.8 has switched to the new Bake builder, which requires Docker Buildx to be installed.
+  Solution: Ensure Docker Buildx is installed on your system. Most modern Docker installations include Buildx by default, but if you encounter this error, you may need to update Docker or manually install the Buildx plugin.
+  Highlights
+  - Experimental support for add-ons written primarily in PHP
+  - ddev add-on get can now automatically download add-on dependencies
+  - ddev add-on get <your **PRIVATE** GitHub repo>: Support for DDEV_GITHUB_TOKEN as a bearer token for GitHub downloads and private GitHub add-ons
+  - Parallel Docker image pulls for faster performance, thanks to @glensc for the idea
+  - Improved Pantheon provider support, .ddev/providers/pantheon.yaml provided by default
+  - Upsun support for multiple apps and multiple databases
+  - https://docs.ddev.com/ is now the canonical documentation source (replaces https://ddev.readthedocs.io/)
+  - Dynamic DDEV project sponsorship information if provided once a day on ddev start.
+  Features
+  - ddev debug download-images --all now pulls all images for all projects
+  - ddev heidisql now works on Linux, thanks to @punkrock34
+  - Support for alternative GitHub token environment variables: DDEV_GITHUB_TOKEN (highest priority), GH_TOKEN (lower priority than DDEV_GITHUB_TOKEN), GITHUB_TOKEN (lowest priority)
+  - New ddev npx global command, thanks to @dragonwize
+  - host.docker.internal now available in all containers, not just web
+  - Pantheon provider now always pulls current upstream database (instead of a backup) and uses the Terminus rsync plugin for file push, thanks to @danny2p
+  - Traefik healthcheck extended to validate file routers and detect config errors
+  - Improved support for ddev config global --no-bind-mounts with automated testing
+  - Manual testing with macOS 26 Tahoe (beta) shows no obvious problems; All Docker providers were casually tested.
+  Bug Fixes
+  - Fix non-working ddev-hostname for Homebrew installations on Linux
+  - Add missing ephemeral port handling to XHGui service, thanks to @AkibaAT
+  - Allow .DS_Store files in ddev composer create-project
+  - Fix ddev describe to show exposed ports correctly on new Docker Desktop versions
+  - Fix nginx configuration for Backdrop routes conflicting with directories
+  - Use stable branch for magerun autocompletion script
+  - Don't edit Laravel database config in .env when no database is present, thanks to @cyppe
+  - Remove obsolete PHP 8.4 php.ini configuration, thanks to @kaystrobach for the report
+  - Improve handling of "Failed to copy script" errors in the Windows installer
+  Internal Improvements
+  - Major refactoring of internal Docker logic to reduce API calls and improve error handling
+  - Set 20-minute download timeout for docker-compose and retry with doubled timeout on context deadline exceeded
+  - Remove docker context inspect calls from each ddev command and use the Docker CLI API
+  - ddev auth ssh now uses the Docker API instead of docker run and supports stdin
+  - Better reporting of MariaDB/MySQL/PostgreSQL client installation failures; removed download timeouts
+  - Replace the Docker image busybox:stable with ddev/ddev-utilities:latest for internal use
+  Minor Updates
+  - PHP 8.3.25 and 8.4.12
+  - Xdebug 3.4.5
+  - Docker Compose v2.39.3
+  - Add SVG support to TYPO3 nginx rewrite rules, thanks to @dhuf
+  - Disable innodb_use_native_aio for MariaDB 10.6 (upstream change)
+  - Forward *_PROXY and DDEV_* environment variables for root user in web container
+  - Add DDEV version output to ddev describe, thanks to @tomasnorre
+  - Add warnings for empty pull/push operations in hosting providers
+  What's Changed
+  - docs: Add CLAUDE.md to provide general prompts about behavior by @rfay in #7467
+  - fix: Allow .DS_Store when doing ddev composer create-project [skip ci] by @rfay in #7469
+  - ci: install ddev on Windows before test by @stasadev in #7471
+  - refactor: use compose-spec/compose-go/v2 for fixupComposeYaml by @stasadev in #7422
+  - test: add a no-interaction flag to the install command in ibexa bats file by @rpkoller in #7479
+  - docs: note about Flags annotation with unknown flags, for #7451 by @stasadev in #7478
+  - feat: update Pantheon provider to use environment variables, fixes #4760 by @rfay in #7475
+  - docs: Fix links pantheon.yaml.example -> pantheon.yaml by @rfay in #7481
+  - fix: Attempt to resolve windows installer problems with 'Failed to copy script', fixes #7485, for #7477 by @rfay in #7493
+  - docs: explain how to make build stage in docker-compose.*.yaml work offline by @stasadev in #7480
+  - feat: extend Traefik healthcheck to validate file routers and config errors, fixes #6463, fixes #6553 by @stasadev in #7442
+  - feat: parallel docker-compose pull, improve ddev debug download-images, fixes #7163 by @stasadev in #7483
+  - test: ngrok broke their installation moving to bookworm, fix it by @rfay in #7501
+  - build: use ddev/ddev-utilities instead of busybox, fixes #7499 by @rfay in #7500
+  - fix: Update obsolete WSL2 install scripts to reflect new ddev-wsl2 and not needing ddev.exe, fixes #7464 [skip ci] by @rfay in #7474
+  - ci: enforce conventional commits format for PR titles [skip buildkite] by @rfay in #7513
+  - docs(claude): enhance CLAUDE.md with GitHub workflow guidance [skip buildkite] by @rfay in #7497
+  - docs(wsl): add wsl --update command for Windows by @adiati98 in #7476
+  - refactor: add svg to rewrite rule for TYPO3 by @dhuf in #7482
+  - ci(pr-check): loosen start and middle rules for message [skip ci], for #7513 by @stasadev in #7515
+  - feat(sponsorship): add ability to download sponsorship data and other generic data, for #6892 by @rfay in #7502
+  - chore: revert 3 github copilot commits that it (I) shouldn't have done [skip ci] by @rfay in #7517
+  - fix(ddev-hostname): sudo can't find ddev-hostname in linuxbrew, fixes #7510 by @rfay in #7512
+  - chore(localdev): add path management to .envrc [skip ci] by @rfay in #7516
+  - fix(traefik): improve router port discovery and optimize YAML writes, fixes ddev/ddev-mongo#24 by @stasadev in #7507
+  - build(deps): bump actions/checkout from 4 to 5 by @dependabot[bot] in #7521
+  - build(direnv): Make direnv .envrc idempotent so it doesn't do all that work all the time by @rfay in #7520
+  - build(mariadb): turn off innodb_use_native_aio for mariadb:10.6 by @rfay in #7525
+  - refactor: replace docker context with docker/cli library, fixes #5862, fixes #6557 by @stasadev in #7189
+  - fix(testddevexportdb): postgres:14 output dump statement was suddenly more than 80 characters from end by @rfay in #7528
+  - feat: replace docker run in ddev auth ssh with Docker API and accept stdin by @stasadev in #7511
+  - docs: enhance CLAUDE.md development workflow documentation [skip ci] by @rfay in #7532
+  - feat(tools): consolidate development tool installations into unified script [skip ci] by @rfay in #7530
+  - docs(troubleshooting): add more links to mutagen troubleshooting by @rfay in #7529
+  - fix: make ddev describe work correctly with new Docker Desktop, for docker/for-mac#7742 by @rfay in #7531
+  - build: add optional notarization skip via DISABLE_NOTARIZATION variable [skip ci] by @rfay in #7534
+  - build(webserver): add *_PROXY and DDEV_* env for sudo; testing docs, fixes #7413 by @stasadev in #7535
+  - refactor(docker): suppress any output (stdout, stderr) from docker/cli, for #7189 by @stasadev in #7536
+  - feat: Upsun support for PLATFORM_APP and PLATFORM_PRIMARY_RELATIONSHIP by @stasadev in #7437
+  - feat: add Linux support for heidisql command by @punkrock34 in #7399
+  - fix(backdrop): Fix nginx config for routes conflicting with directories, fixes #7495 by @rfay in #7496
+  - fix(pantheon): update Pantheon database pull to get fresh DB and file push to be CMS-agnostic, fixes #5215, fixes #4760 by @danny2p in #7486
+  - docs: fiddle with sponsorship title [skip ci] by @rfay in #7540
+  - fix: quote DDEV_PRIMARY_URL expansion in launch script to handle empty values, fixes #7424 by @rfay in #7548
+  - fix: add mutagen sync flush after XHProf enable to prevent intermittent test failures by @rfay in #7543
+  - chore(deps): bump docker-compose to v2.39.2, remove COMPOSE_BAKE=false by @stasadev in #7545
+  - feat: add ddev version to ddev describe command, fixes #7398 by @tomasnorre in #7541
+  - docs: add sponsorship banner to documentation, for #6892 by @rfay in #7551
+  - docs: Use docs.ddev.com instead of ddev.readthedocs.io by @rfay in #7552
+  - feat: support add-ons written primarily in PHP, fixes #7316 by @rfay in #7523
+  - docs: Fix blog link in main nav by @mxr576 in #7566
+  - test: jq is not available on Windows, use docker run -i ddev/ddev-utilities by @rfay in #7564
+  - test: Skip TestComposerCreateProjectCmd on Windows where it hangs by @rfay in #7565
+  - fix(magerun): use stable branch for autocompletion by @stasadev in #7567
+  - test(buildkite): do better cleaning up volumes before running test by @rfay in #7568
+  - test(buildkite): Minor fixup for buildkite timeout by @rfay in #7571
+  - chore(mkdocs): disable privacy plugin for local builds, for #6027 [skip ci] by @stasadev in #7569
+  - build(deps): bump 1password/load-secrets-action from 2 to 3 [skip buildkite] by @dependabot[bot] in #7561
+  - build(dbserver): switch to bitnamilegacy/mysql for MySQL 8.0 and 8.4, for #7470 by @stasadev in #7570
+ReleaseNotesUrl: https://github.com/ddev/ddev/releases/tag/v1.24.8
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

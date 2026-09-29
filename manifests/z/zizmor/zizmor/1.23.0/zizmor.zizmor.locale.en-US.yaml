@@ -1,0 +1,72 @@
+# Created by Anthelion using komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: zizmor.zizmor
+PackageVersion: 1.23.0
+PackageLocale: en-US
+Publisher: William Woodruff
+PublisherUrl: https://zizmor.sh/
+PublisherSupportUrl: https://github.com/zizmorcore/zizmor/issues
+Author: William Woodruff
+PackageName: zizmor
+PackageUrl: https://zizmor.sh/
+License: MIT
+LicenseUrl: https://github.com/zizmorcore/zizmor/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2024 William Woodruff <william @ yossarian.net>
+CopyrightUrl: https://github.com/zizmorcore/zizmor/blob/HEAD/LICENSE
+ShortDescription: Static analysis for GitHub Actions.
+Description: |-
+  zizmor is a static analysis tool for GitHub Actions.
+
+  It can find many common security issues in typical GitHub Actions CI/CD setups, including:
+  - Template injection vulnerabilities, leading to attacker-controlled code execution
+  - Accidental credential persistence and leakage
+  - Excessive permission scopes and credential grants to runners
+  - Impostor commits and confusable git references
+  - ...and much more!
+Tags:
+- github-actions
+- security
+- security-tools
+- static-analysis
+ReleaseNotes: |-
+  New Features 🌈🔗
+  - New audit: secrets-outside-env detects usage of the secrets context in jobs that don't have a corresponding environment (#1599)
+  - New audit: superfluous-actions detects usage of actions that perform operations already provided by GitHub's own runner images (#1618)
+  Enhancements 🌱🔗
+  - zizmor's LSP mode is now configuration-aware, and will load configuration files relative to workspace roots (#1555)
+  - zizmor now reads the GITHUB_TOKEN environment variable as an alias/equivalent for GH_TOKEN (#1566)
+  - zizmor now supports inputs that contain duplicated anchor names (#1575)
+  - zizmor now flags missing cooldowns on opentofu ecosystem definitions in Dependabot (again) (#1586)
+  - zizmor now reads the ZIZMOR_GITHUB_TOKEN environment variable as an alias/equivalent for GH_TOKEN and GITHUB_TOKEN (#1641)
+  - The SARIF output format now adds zizmor/confidence, zizmor/persona and zizmor/severity to the properties of findings (#1656)
+  - Added awalsh128/cache-apt-pkgs-action as a cache-aware action to the cache-poisoning audit (#1708)
+  Changes ⚠️🔗
+  - SARIF categories have been regraded. zizmor's "medium" is changed from SARIF's "warning" to "low" (#1635)
+    Bug Fixes 🐛🔗
+  - Fixed a bug where zizmor would crash on uses: clauses containing non-significant whitespace while performing the unpinned-uses audit (#1544)
+  - Fixed a bug in yamlpath where sequences containing anchors were splatted instead of being properly nested (#1557)
+    Many thanks to @DarkaMaul for implementing this fix!
+  - Fixed a bug in yamlpath where anchor prefixes in sequences and mapping were not stripped during path queries (#1562)
+  - Fixed a bug where "merge into" autofixes would produce incorrect patches in the presence of multi-byte Unicode characters (#1581)
+    Many thanks to @ManuelLerchnerQC for implementing this fix!
+  - Fixed a bug where the template-injection audit would produce duplicated pedantic-only findings (#1589)
+  - Fixed a bug where the obfuscation audit would produce incorrect autofixes for a subset of constant-reducible expressions (#1597)
+  - Fixed a bug where the obfuscation audit would fail to apply fixes to a subset of inputs with leading whitespace (#1597)
+  - Fixed a bug where the concurrency-limits audit would incorrectly flag reusable-only workflows as needing a concurrency: key (#1620)
+  - Fixed a bug where the known-vulnerable-actions audit would fail when applying some fixes (#1640)
+    Many thanks to @reubenwong97 for implementing this fix!
+  - Fixed a bug where the pre-commit ecosystem was not recognized in Dependabot configuration files (#1637)
+  - Fixed a bug where the template-injection audit would incorrectly flag github.triggering_actor as an injection risk in the default persona (#1645)
+  - Fixed a bug where zizmor's expression parser did not correctly handle number literals in GitHub Actions expressions (#1625)
+  - Fixed a bug where the template-injection audit would crash on some forms of multi-line expressions (#1669)
+  - Fixed a bug where deserialization of a workflow containing fractional minutes would fail (#1675)
+  - Fixed a bug where deserialization of a workflow where a workflow_run with a scalar types would fail (#1676)
+  - Fixed a bug where zizmor would crash on workflows containing bare numeric values in if: conditions (#1683)
+  - Fixed a bug where GitHub Actions expression string comparisons were not case-insensitive (#1687)
+ReleaseNotesUrl: https://github.com/zizmorcore/zizmor/releases/tag/v1.23.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://docs.zizmor.sh/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

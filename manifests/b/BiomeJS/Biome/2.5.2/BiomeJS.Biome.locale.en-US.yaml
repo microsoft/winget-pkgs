@@ -1,0 +1,131 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.5.2
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.5.2
+
+  Patch Changes
+  - #10595 f458028 Thanks @pkallos! - Added the option ignoreBooleanCoercion to useNullishCoalescing. When enabled, Biome ignores || and ||= used inside a Boolean() call, where coalescing on falsy values is intentional.
+  - #10798 4a32b63 Thanks @pkallos! - Added the option ignorePrimitives to useNullishCoalescing. When enabled, Biome ignores ||, ||=, and ternary expressions whose non-nullish operands are all primitives the option opts out of. Use true to ignore all primitives, or an object selecting string, number, boolean, or bigint.
+  - #10545 f3d4c00 Thanks @Mokto! - Added the new nursery rule noSvelteUnnecessaryStateWrap, which reports unnecessary $state() wrapping of classes from svelte/reactivity that are already reactive.
+    <script>
+    import { SvelteMap } from "svelte/reactivity";
+    const map = $state(new SvelteMap()); // redundant
+    </script>
+  - #10752 f62fb8b Thanks @ematipico! - Fixed #10739. Now the rule useValidAutocomplete correctly flags the autoComplete attribute.
+  - #10796 f1b3ab2 Thanks @ematipico! - Fixed #10768. Improved the performance of the Biome Language Server by cancelling certain in-flight operations when there are fast updates.
+  - #10719 aa649b5 Thanks @minseong0324! - Fixed noMisleadingReturnType false positive on returns that use a widening type assertion: "a" as string is no longer reported as misleading. The rule now also reports a literal-pinning assertion such as false as false, matching the existing as const behavior.
+    // No longer flagged (returns are `string`):
+    function getValue(b: boolean): string {
+      if (b) return "a" as string;
+      return "b" as string;
+    }
+    // Now also reported, like `as const` (returns `false`):
+    function isReady(): boolean {
+      return false as false;
+    }
+  - #10678 8f073a7 Thanks @PranavAchar01! - Fixed #7718: Biome now correctly parses CSS nesting selectors when & appears as a trailing sub-selector after a type selector, e.g. h1& { color: red; }.
+  - #10756 5ec965a Thanks @denbezrukov! - Fixed CSS formatter output for selector lists with allowWrongLineComments and // comments after a selector comma. Biome now keeps the selector before the line comment inline instead of breaking it across descendant combinators.
+    -.powerPathNavigator
+    -  .helm
+    -  button.pressedButton, // pressed
+    +.powerPathNavigator .helm button.pressedButton, // pressed
+     .powerPathNavigator .helm button:active:not(.disabledButton) {
+     }
+  - #10757 6232fcd Thanks @PranavAchar01! - Fixed #8269: the CSS parser now accepts Tailwind @variant and @utility names that start with a digit, such as the 2xl breakpoint.
+    @utility container {
+      @variant 2xl {
+        max-width: 1400px;
+      }
+    }
+  - #10777 575ced6 Thanks @WaterWhisperer! - Fixed an issue reported in #10708: the GitLab reporter now handles --verbose diagnostics filtering correctly.
+  - #10281 0efe244 Thanks @Zelys-DFKH! - Fixed a bug where GritQL patterns rejected positional (unkeyed) arguments.
+  - #10758 e36fd8a Thanks @henrybrewer00-dotcom! - Fixed #10697: The formatter no longer removes the parentheses around an await or yield expression used as the target of a TypeScript instantiation expression. For example, (await makeFactory)<Value> is no longer reformatted to await makeFactory<Value>, which would change the meaning of the code.
+  - #10586 3617094 Thanks @IxxyDev! - Fixed #9568: noFloatingPromises no longer reports a false positive when calling an overloaded function and the selected overload does not return a promise.
+    function bestEffort(cb: () => Promise<number>): Promise<number>;
+    function bestEffort(cb: () => number): number;
+    function bestEffort(
+      cb: () => number | Promise<number>,
+    ): Promise<number> | number {
+      return cb() as Promise<number> | number;
+    }
+    // This resolves to the second overload, which returns `number`, so it is no
+    // longer flagged as a floating promise.
+    bestEffort(() => 42);
+  - #10766 7aff4c1 Thanks @JamBalaya56562! - Fixed #2862: noInteractiveElementToNoninteractiveRole no longer reports custom elements (a tag name containing a dash, e.g. <my-button role="img" />). Per the W3C HTML-ARIA specification, a custom element may be given any role or none.
+  - #10680 771daa4 Thanks @WaterWhisperer! - Fixed #10635: Biome now recognizes chained
+    table tests such as test.concurrent.each() and it.concurrent.each() as test calls, fixing
+    noMisplacedAssertion false positives and improving formatting for those test declarations.
+  - #10759 34570b5 Thanks @henrybrewer00-dotcom! - Fixed #10636: noStaticElementInteractions no longer reports a false positive for event handlers on Svelte special elements such as <svelte:window>, <svelte:document>, and <svelte:body>. These are not real DOM elements, so they are now ignored by the rule.
+  - #10741 bd2364e Thanks @JamBalaya56562! - Fixed #6686: the rage command now respects the --config-path option and the BIOME_CONFIG_PATH environment variable when loading the Biome configuration. Previously it always used the default configuration resolution and reported the configuration as Not set when no biome.json existed in the working directory.
+  - #10763 2c3e82d Thanks @Aqu1bp! - Fixed #10742: noSolidDestructuredProps now reports destructured props in Solid function components and JSX children.
+  - #10606 a4cc4ab Thanks @Mokto! - Fixed false positives in noUnusedImports, noUnusedVariables, and useImportType for Svelte components that use both a <script module> and a <script> block. The two blocks compile to a single module and share a top-level scope, so a binding (import, function, or variable) declared in one block and used only in the other is no longer reported as unused.
+  - #10767 36d5aa7 Thanks @otkrickey! - Fixed #10754: useVueValidVBind no longer reports the Vue 3.4+ same-name shorthand as missing a value. :foo and v-bind:foo are now accepted as equivalent to :foo="foo", while v-bind, v-bind:[dynamicArg], and :[dynamicArg] without a value continue to be reported.
+  - #10775 a918af0 Thanks @WaterWhisperer! - Fixed an issue reported in #10708: biome rage didn't detect running Biome daemon pipes on Windows.
+  - #10730 5a2e65b Thanks @dinocosta! - Fixed an issue where Biome was resolving the well-known Zed settings file from the wrong location on macOS and Windows.
+  - #10807 d97fffe Thanks @ematipico! - Fixed an issue where .scss files were incorrectly analyzed when running biome check.
+  - #10672 53c6efc Thanks @ematipico! - Fixed a bug where Biome incorrectly formatted snippets that have parsing errors.
+  - #10719 aa649b5 Thanks @minseong0324! - Fixed useAwaitThenable false positive when awaiting a custom thenable that is not the global Promise. A value with a callable then member is now recognized as awaitable.
+    interface Thenable<T> {
+      then(onfulfilled: (value: T) => void): void;
+    }
+    declare const t: Thenable<number>;
+    async function f() {
+      await t;
+    }
+  - #10734 4396496 Thanks @BangDori! - Fixed #10708: biome migrate now preserves trivia when migrating the deprecated recommended option to preset.
+  - #10683 ae31a00 Thanks @Netail! - Fixed #10657 #10671 #10661 #10637 #10718: HTML rules now correctly handle dynamic attributes.
+  - #10746 54e8239 Thanks @ematipico! - Fixed an issue where noUndeclaredClasses didn't correctly detect styles defined inside the Astro directive is:global.
+  - #10770 dd1429c Thanks @ematipico! - Improved the Biome Language Server DX by orchestrating certain operations, so that they won't block the editor during typing. This improvement is more visible in large documents.
+  - #10473 d9b5133 Thanks @Mokto! - Improved noUnusedImports, noUnusedVariables, noUnusedFunctionParameters, and useImportType for Svelte, Vue, and Astro files (with html.experimentalFullSupportEnabled). Bindings used only in the template — including component tags, attribute interpolations, directives, bind: shorthand, and snippet parameters — are no longer reported as unused, while genuinely unused ones still are.
+  - #10796 f1b3ab2 Thanks @ematipico! - Fixed an issue where the Biome Language Server didn't enable project or type-aware lint rules, even when they were explicitly enabled.
+  - #10746 54e8239 Thanks @ematipico! - Fixed an issue where noUndeclaredClasses didn't detect styles declared inside HTML documents.
+  - #10774 bde945b Thanks @pattrickrice! - Fixed #10268 where a race condition resulted in internal errors such as: The file biome.json does not exist in the workspace.
+
+  What's Changed
+  - fix(cli): respect --config-path and BIOME_CONFIG_PATH in rage command by @JamBalaya56562 in #10741
+  - fix(migrate): preserve trivia in recommended migration by @BangDori in #10734
+  - fix(css/parser): allow & as a trailing sub-selector in compound selectors by @PranavAchar01 in #10678
+  - perf(cli): don't drop file guard and reuse data by @ematipico in #10731
+  - feat(lint): add ignoreBooleanCoercion option to useNullishCoalescing by @pkallos in #10595
+  - chore: remove dead code and update CLI comments by @BangDori in #10748
+  - fix(lint/noFloatingPromises): select the matching overload by @IxxyDev in #10586
+  - fix(lint): noUnusedImports/noUnusedVariables now flag truly-unused script bindings in Svelte/Vue/Astro by @Mokto in #10473
+  - fix(useValidAutocomplete): update autocomplete attribute validation by @ematipico in #10752
+  - fix(md): parse space+tab indented sublists as nested list items by @xsourabhsharma in #10703
+  - ci: attempt to reduce disk usage on windows by @ematipico in #10753
+  - feat(js/nursery): add noSvelteNoUnnecessaryStateWrap rule by @Mokto in #10545
+  - refactor(core): semantic, embedded bindings and references as salsa tracked functions by @ematipico in #10672
+  - fix(json): detect global Zed settings as JSONC on macOS and Windows by @dinocosta in #10730
+  - fix(formatter): keep parens around await/yield in instantiation expressions by @henrybrewer00-dotcom in #10758
+  - fix(css_formatter): keep selector comments inline by @denbezrukov in #10756
+  - fix(grit): support positional arguments in pattern, function, and node calls by @Zelys-DFKH in #10281
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.5.2
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

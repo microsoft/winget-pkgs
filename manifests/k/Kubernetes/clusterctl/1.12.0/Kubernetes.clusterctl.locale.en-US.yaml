@@ -1,0 +1,174 @@
+# Created with komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Kubernetes.clusterctl
+PackageVersion: 1.12.0
+PackageLocale: en-US
+Publisher: Kubernetes SIGs
+PublisherUrl: https://kubernetes.io/
+PublisherSupportUrl: https://github.com/kubernetes-sigs/cluster-api/issues
+PackageName: clusterctl
+PackageUrl: https://cluster-api.sigs.k8s.io/
+License: Apache-2.0
+LicenseUrl: https://github.com/kubernetes-sigs/cluster-api/blob/HEAD/LICENSE
+Copyright: Copyright 2024 The Kubernetes Authors.
+ShortDescription: The clusterctl CLI tool handles the lifecycle of a Cluster API management cluster.
+Description: The clusterctl CLI tool handles the lifecycle of a Cluster API management cluster.
+Moniker: clusterctl
+Tags:
+- cluster
+- container
+- docker
+- k8s
+- kubernetes
+ReleaseNotes: |-
+  👌 Kubernetes version support
+  - Management Cluster: v1.31.x -> v1.34.x
+  - Workload Cluster: v1.29.x -> v1.34.x
+  More information about version support can be found here
+  Highlights
+  - Bumped to Go 1.24, controller-runtime v0.22, k8s.io/* v0.34, controller-gen v0.19
+  - In-place updates
+    - Cluster API introduces support for update extensions allowing users to execute changes on existing machines without deleting the machines and creating a new one.
+    - Both KCP and Machine deployments support in-place updates based on the new update extension
+    - Can be enabled with the new InPlaceUpdates feature gate
+    - More details can be found in the proposal
+  - Chained upgrades
+    - Clusters using managed topologies can now upgrade by more than one minor Kubernetes version by performing chained and efficient upgrades.
+    - Upgrade plan will be computed using Kubernetes version from the ClusterClass or by calling a new runtimeExtension (also defined in the ClusterClass)
+    - Existing lifecycle hooks have been adapted to the new workflow, new lifecycle hooks have been introduced to allow granular control of the upgrade steps.
+    - More details can be found in the proposal
+  - MachineHealthCheck: Add support for checking Machine conditions (#12827)
+  - Machine: First part of the Taint propagation proposal (Machine/MachineSet/MachineDeployment) (#12936, #12966)
+    - Feature tracking issue
+    - Can be enabled with the new MachineTaintPropagation feature gate
+  - KCP/CABPK: Add EncryptionAlgorithm field to Kubeadmconfig to support keys generated with RSA-3072, RSA-4096, ECDSA-P256, ECDSA-P384 (#12859)
+  - Introduce ReconcilerRateLimiting feature (#13006)
+    - Can be enabled with the new ReconcilerRateLimiting feature gate
+    - Rate-limits all reconcilers to at most 1 request per second
+  Note: Cluster API is only supported on conformant Kubernetes Clusters and contract-relevant provider resources (e.g. InfraCluster) have to be implemented as CRDs (i.e. not via an aggregated apiserver).
+  Other changes
+  - clusterctl: Add conditions filter for clusterctl describe (#12991)
+  - clusterctl: clusterctl move blocks when Cluster or ClusterClass is paused (#12786)
+  - KCP: Enable websocket dialer with fallback to spdy (for communication with etcd) (#12902)
+  - Runtime SDK: Add defensive response status checking in runtime client (#12898)
+  - Improved logging across several controllers
+  - Improved e2e test coverage, e.g.: CAPD: Add scale from/to 0 support for CAPD (#12572)
+  - New providers in clusterctl: HCP (#12800) control plane provider, Metal3 IPAM provider (#12756), metal-stack infrastructure provider (#12925)
+  Deprecation and Removals Warning
+  - ClusterResourceSet: Remove deprecated ClusterResourceSet feature gate (#12950)
+  - Reminder: v1alpha3 & v1alpha4 will be removed in CAPI v1.13 (they are already not served since a while)
+  - Reminder: v1beta1 is on track to be unserved in CAPI v1.14
+    - Reminder: Provider should start implementing the v1beta2 contract ASAP.
+  For additional details for providers, please take a look at Cluster API v1.11 compared to v1.12.
+  Changes since v1.11.0
+  📈 Overview
+  - 298 new commits merged
+  - 5 breaking changes ⚠️
+  - 42 feature additions ✨
+  - 42 bugs fixed 🐛
+  ⚠️ Breaking Changes
+  - CI: Improve KAL config docs for forbidding OpenAPI defaulting (#12869)
+  - clusterctl: Block move when Cluster or ClusterClass is paused (#12786)
+  - Dependency: Bump to controller-runtime v0.22 & controller-tools v0.19 (#12634)
+  - Runtime SDK: Improve chained upgrade observability (#12973)
+  - Runtime SDK: Make the AfterClusterUpgrade hook blocking (#12984)
+  ✨ New Features
+  - API/Machine/MachineSet/MachineDeployment: Machine related API changes, conversion and feature gate (#12936)
+  - CABPK: Add EncryptionAlgorithm to Kubeadmconfig (#12859)
+  - CAPD: Add scale from/to 0 support for CAPD (#12572)
+  - CI: Bump autoscaler to a9cb59fdd (#12643)
+  - CI: Bump Kubernetes in tests to v1.34.0 and claim support for v1.34 (#12699)
+  - ClusterCache/KCP: Deprecate GetClientCertificatePrivateKey and stop using it in KCP (#12846)
+  - ClusterCache: Add GetUncachedClient() (#12803)
+  - ClusterClass: Add .spec.upgrade.external.generateUpgradePlanExtension field to ClusterClass (#12809)
+  - ClusterClass: Add types and hook for GenerateUpgradePlan (#12823)
+  - ClusterClass: Additional validation in Cluster/ClusterClass webhook for chained upgrades (#12816)
+  - ClusterClass: Call GenerateUpgradePlanRequest Runtime Extension (#12903)
+  - ClusterClass: Implement core logic for chained upgrades (#12726)
+  - clusterctl: Add conditions filter for clusterctl describe (#12991)
+  - Control-plane: Add new control-plane provider HCP (#12800)
+  - e2e: Bump Kubernetes version used for testing to v1.34.0-rc.1 (#12623)
+  - e2e: Bump Kubernetes version used for testing to v1.34.0-rc.2 (#12658)
+  - e2e: Bump Kubernetes version used for testing to v1.35.0-beta.0 (#13029)
+  - e2e: Change RuntimeSDK e2e test ClusterClass to use GenerateUpgradePlan extension (#12955)
+  - e2e: Implement e2e test for in-place updates (#12938)
+  - KCP/CABPK/CI: Bump KAL to pick up latest requiredfields linter, add Min/MaxLength to BootstrapToken (#12563)
+  - KCP/MachineSet: Refactor BootstrapConfig/InfraMachine managedFields for in-place (#12890)
+  - KCP: Bump coredns/corefile-migration to v1.0.28 (#12748)
+  - KCP: Bump coredns/corefile-migration to v1.0.29 (#12862)
+  - KCP: Bump corefile-migration to v1.0.27 (#12636)
+  - KCP: Compare ClusterConfiguration via KubeadmConfig instead of annotation on Machine (#12758)
+  - KCP: Extend rollout logic for in-place updates (#12840)
+  - KCP: Implement CanUpdateMachine (#12857)
+  - KCP: Implement trigger in-place update (#12897)
+  - Machine: Add in-place updates support for machine controller (#12831)
+  - MachineDeployment: Add in-place to rollout planner (#12865)
+  - MachineDeployment: Implement CanUpdateMachineSet (#12965)
+  - MachineHealthCheck: Add support for checking Machine conditions in MachineHealthCheck (#12827)
+  - Misc: Add inplace updates featuregate (#12755)
+  - Misc: Improve logs, errors and conditions (#12992)
+  - Misc: Introduce & use wait for cache utils (#12957)
+  - Misc: Introduce reconciler rate-limiting and hook caching (#13006)
+  - Runtime SDK/IPAM/MachinePool: Cleanup exp packages (#12651)
+  - Runtime SDK: Add in-place update hooks to API (#12343)
+  - Runtime SDK: Add lifecycle hooks for chained-upgrade (#12878)
+  - Runtime SDK: Call new lifecycle hooks for chained-upgrades (#12891)
+  - Runtime SDK: Ensure ExtensionConfig controller can be used outside of the core provider (#12754)
+  - Runtime SDK: Implement GenerateUpgradePlan handler (#12927)
+  🐛 Bug Fixes
+  - API: Only try to convert infraRefs if they are set (#12686)
+  - API: Register conversion funcs in schemes (#12687)
+  - CABPK: Always use latest apiVersion when getting owner of KubeadmConfig in CABPK (#12685)
+  - CAPD: CAPD on rootless podman (#12941)
+  - CAPD: Fix the format error of healthCheck in test templates (#12787)
+  - CAPD: Remove finalizers during deletion if ownerRef was never set (#12675)
+  - CAPD: Run CAPD conversion tests in CI (#12583)
+  - CAPIM: Eliminate data race in DialContext (#12778)
+  - ClusterClass/MachinePool: Fix MP error in desired state calculation during Cluster creation (#12607)
+  - ClusterClass: Do not overwrite global http.DefaultClient TLSConfig (#13063)
+  - ClusterClass: Ensure holder field path in GeneratePatchRequest is set based on contract (#12684)
+  - ClusterClass: Fix field paths in ClusterClass compatibility validation errors (#12660)
+  - ClusterClass: Fix wait for cache in reconcile_state.go (#13032)
+  - ClusterClass: Stop adding conversion-data annotation to Cluster object (#12719)
+  - ClusterClass: Stop writing zero values for spec.controlPlaneEndpoint to ControlPlane objects (#12958)
+  - clusterctl: Removing Ready/Available prefix from STATUS Column (#12729)
+  - clusterctl: Verify providers need upgrade before applying (#12753)
+  - Devtools: Fix kube-state-metrics deployment (#13024)
+  - e2e: Do not require kubetest configration if not needed (#12948)
+  - e2e: Fix autoscaler e2e test flake (#12613)
+  - e2e: Fix e2e test issues introduced by chained upgrades (#12766)
+  - e2e: Fix objects with Changed Resource Versions flake (#12848)
+  - e2e: Fix upgrade runtimesdk test (#12833)
+  - e2e: Fix WaitForMachinesReady interval (#13051)
+  - e2e: Increase reconcile timeout for DockerMachine (#13099)
+  - e2e: Propagate clusterctl variables for cluster upgrades (#12949)
+  - KCP: Fix ControlPlaneComponentHealthCheckSeconds validation in KubeadmConfigSpec.Validate (#12609)
+  - KCP: Fix conversion issue in KubeadmControlPlaneTemplate with rolloutStrategy.type (#12608)
+  - KCP: Fix KCP KubeadmConfig isJoin detection (#13035)
+  - KCP: Grant delete permissions to Secrets. (#13097)
+  - Machine/MachinePool: Fix MachinePool nodeRef UID mismatch after K8s upgrade (#12392)
+  - Machine/MachineSet: Use MachineSet template values in completeMoveMachine for in-place updates (#13085)
+  - MachineDeployment: Fix race conditions ScaleDownOldMS (#12812)
+  - MachineDeployment: Fix race conditions ScaleDownOldMS OnDelete (#12830)
+  - MachineDeployment: Fix rollout with unavailable machines (#13020)
+  - Runtime SDK: Export ExtensionConfig webhook (#12598)
+  - Testing/e2e: Fix unit test flakes, improve clusterctl download error in e2e tests (#13056)
+  - Testing: Fix flaky TestFuzzyConversion (Cluster) test (#12618)
+  - Testing: Fix flaky TestReconcileMachinePhases unit test (#12616)
+  - Testing: Fix flaky TestReconcileState unit test (#12617)
+  - Testing: Fix KubeadmConfig fuzz test flake (#12679)
+  - util: Fix a panic in conditions.Delete method if the sources condition list is empty (#13053)
+  🌱 Others
+  - API: Relax validation for Machine .status.addresses to maximum of 128 instead of 32 items (#13090)
+  - Autoscaling: Bump autoscaler in e2e tests to v1.33.1 (#12790)
+  - CABPK: Migrate from Requeue to RequeueAfter in CABPK (#12988)
+  - CAPD: Cleanup CAPD exp packages (#12672)
+  - CAPD: Recreate container if we re-enter reconciliation and it exists but is not running (#12923)
+  - CI: Add OpenAPI defaulting detection for KubeadmConfig by using forbiddenmarkers (#12851)
+ReleaseNotesUrl: https://github.com/kubernetes-sigs/cluster-api/releases/tag/v1.12.0
+Documentations:
+- DocumentLabel: User Guide
+  DocumentUrl: https://cluster-api.sigs.k8s.io/user/quick-start
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

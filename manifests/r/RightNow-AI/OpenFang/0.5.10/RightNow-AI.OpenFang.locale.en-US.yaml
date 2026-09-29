@@ -1,0 +1,53 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: RightNow-AI.OpenFang
+PackageVersion: 0.5.10
+PackageLocale: en-US
+Publisher: RightNow AI, Inc.
+PublisherUrl: https://www.rightnowai.co/
+PublisherSupportUrl: https://github.com/RightNow-AI/openfang/issues
+PrivacyUrl: https://www.rightnowai.co/privacy-policy
+Author: RightNow AI, Inc.
+PackageName: OpenFang
+PackageUrl: https://www.openfang.sh/
+License: MIT
+LicenseUrl: https://github.com/RightNow-AI/openfang/blob/HEAD/LICENSE-MIT
+Copyright: Copyright (c) 2026 OpenFang Contributors
+ShortDescription: Open-source Agent Operating System
+Description: |-
+  OpenFang is an open-source Agent Operating System — not a chatbot framework, not a Python wrapper around an LLM, not a "multi-agent orchestrator." It is a full operating system for autonomous agents, built from scratch in Rust.
+  Traditional agent frameworks wait for you to type something. OpenFang runs autonomous agents that work for you — on schedules, 24/7, building knowledge graphs, monitoring targets, generating leads, managing your social media, and reporting results to your dashboard.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claw
+- large-language-model
+- llm
+ReleaseNotes: |-
+  Follow-up patch to v0.5.9. Seven real bugs off the tracker.
+  Security
+  Auth fail-closed. When no api_key is configured, non-loopback requests are rejected with 401 by default. Loopback still goes through with no config so single user local setups keep the zero-config UX. To run a no-auth server on a LAN address, set OPENFANG_ALLOW_NO_AUTH=1. The startup log now prints loudly which mode the server is in. Closes the B1 and B2 findings on #1034.
+  Runtime
+  Agent context.md is re-read on every turn. If a cron job rewrites context.md with fresh market data, trading agents pick it up on the next message instead of waiting for a session restart. Opt back into the old cache-at-start behavior per agent with cache_context = true in the manifest. Closes #843.
+  Multimodal user messages now combine text and attached image blocks into a single user_with_blocks message. The old path dropped the text when images were attached, so vision models received images with no prompt. Closes #1043.
+  Scheduler
+  Schedule tools and HTTP routes now actually fire. schedule_create, schedule_list, schedule_delete, and the matching /api/schedules* endpoints were writing to a shared memory key that no executor read. They now go through the kernel cron scheduler that the tick loop already uses. A one-shot idempotent migration at startup imports legacy entries from the old key, marks the migration done, and never writes to the old key again. Closes #1069.
+  CLI
+  openfang config get default_model.base_url prints the configured URL again. The lookup was extracted into a pure function pinned by 8 new unit tests, so a regression on any scalar under [default_model] is caught. Missing keys now return a clear "not found" error instead of an empty line. Closes #905.
+  openfang hand config <id> is wired up. The docs promised it, the command did not exist. Now supports --get, --set KEY=VALUE (repeatable), --unset KEY, and --list. Empty keys are rejected loudly, settings persist across daemon restarts. Closes #809.
+  Channels
+  Optional per-channel agent name prefix on outbound messages. Set prefix_agent_name = "bracket" or "bold_bracket" in a channel override and responses are wrapped with [agent] so multi-agent channels show who replied. Default is off, byte identical to prior output. Idempotent, never double wraps. Closes #980.
+  Housekeeping
+  Two issues closed as invalid. #818 and #819 referenced a knowledge-domain API that does not live on main, filed against an unmerged feature branch. The proposed source path validation and stale-timestamp surfacing are still the right shape and should be built into that feature when it lands.
+  Numbers
+  7 fixes. 7 PRs merged. 9 issues closed. 17 new unit tests on scheduler alone. All gated by cargo check, cargo test, cargo clippy --all-targets -- -D warnings, and cargo fmt --check on every affected crate.
+  Full Changelog: https://github.com/RightNow-AI/openfang/compare/v0.5.9...v0.5.10
+ReleaseNotesUrl: https://github.com/RightNow-AI/openfang/releases/tag/v0.5.10
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://www.openfang.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

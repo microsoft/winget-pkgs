@@ -1,0 +1,115 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Rustlang.Rust.GNU.LLVM
+PackageVersion: 1.95.0
+PackageLocale: en-US
+Publisher: The Rust Project Developers
+PublisherUrl: https://www.rust-lang.org/
+PublisherSupportUrl: https://users.rust-lang.org/
+PrivacyUrl: https://rustfoundation.org/policy/privacy-policy/
+Author: The Rust Project Developers
+PackageName: Rust (GNU LLVM)
+PackageUrl: https://www.rust-lang.org/
+License: Apache-2.0 AND MIT
+LicenseUrl: https://github.com/rust-lang/rust/blob/HEAD/COPYRIGHT
+Copyright: Copyright (c) The Rust Project Contributors
+CopyrightUrl: https://github.com/rust-lang/rust/blob/HEAD/COPYRIGHT
+ShortDescription: A language empowering everyone to build reliable and efficient software.
+Description: The Rust programming language helps you write faster, more reliable software. High-level ergonomics and low-level control are often at odds in programming language design; Rust challenges that conflict. Through balancing powerful technical capacity and a great developer experience, Rust gives you the option to control low-level details (such as memory usage) without all the hassle traditionally associated with such control.
+Moniker: rust-gnu-llvm
+Tags:
+- cargo
+- clippy
+- gnu-toolchain
+- llvm
+- rustc
+- rustdoc
+- rustup
+ReleaseNotes: |-
+  Language
+  - Stabilize if let guards on match arms
+  - irrefutable_let_patterns lint no longer lints on let chains
+  - Support importing path-segment keywords with renaming
+  - Stabilize inline assembly for PowerPC and PowerPC64
+  - const-eval: be more consistent in the behavior of padding during typed copies
+  - Const blocks are no longer evaluated to determine if expressions involving fallible operations can implicitly be constant-promoted.. Expressions whose ability to implicitly be promoted would depend on the result of a const block are no longer implicitly promoted.
+  - Make operational semantics of pattern matching independent of crate and module
+  
+  Compiler
+  - Stabilize --remap-path-scope for controlling the scoping of how paths get remapped in the resulting binary
+  
+  Platform Support
+  - Promote powerpc64-unknown-linux-musl to Tier 2 with host tools
+  - Promote aarch64-apple-tvos to Tier 2
+  - Promote aarch64-apple-tvos-sim to Tier 2
+  - Promote aarch64-apple-watchos to Tier 2
+  - Promote aarch64-apple-watchos-sim to Tier 2
+  - Promote aarch64-apple-visionos to Tier 2
+  - Promote aarch64-apple-visionos-sim to Tier 2
+  Refer to Rust's platform support page for more information on Rust's tiered platform support.
+  
+  Libraries
+  - thread::scope: document how join interacts with TLS destructors
+  - Speed up str::contains on aarch64 targets with neon target feature enabled by default
+  
+  Stabilized APIs
+  - MaybeUninit<[T; N]>: From<[MaybeUninit<T>; N]>
+  - MaybeUninit<[T; N]>: AsRef<[MaybeUninit<T>; N]>
+  - MaybeUninit<[T; N]>: AsRef<[MaybeUninit<T>]>
+  - MaybeUninit<[T; N]>: AsMut<[MaybeUninit<T>; N]>
+  - MaybeUninit<[T; N]>: AsMut<[MaybeUninit<T>]>
+  - [MaybeUninit<T>; N]: From<MaybeUninit<[T; N]>>
+  - Cell<[T; N]>: AsRef<[Cell<T>; N]>
+  - Cell<[T; N]>: AsRef<[Cell<T>]>
+  - Cell<[T]>: AsRef<[Cell<T>]>
+  - bool: TryFrom<{integer}>
+  - AtomicPtr::update
+  - AtomicPtr::try_update
+  - AtomicBool::update
+  - AtomicBool::try_update
+  - AtomicIn::update
+  - AtomicIn::try_update
+  - AtomicUn::update
+  - AtomicUn::try_update
+  - cfg_select!
+  - mod core::range
+  - core::range::RangeInclusive
+  - core::range::RangeInclusiveIter
+  - core::hint::cold_path
+  - <*const T>::as_ref_unchecked
+  - <*mut T>::as_ref_unchecked
+  - <*mut T>::as_mut_unchecked
+  These previously stable APIs are now stable in const contexts:
+  - fmt::from_fn
+  - ControlFlow::is_break
+  - ControlFlow::is_continue
+  
+  Cargo
+  - docs(report): enhance man pages for cargo report *
+  
+  Rustdoc
+  - In search results, rank unstable items lower
+  - Add new "hide deprecated items" setting in rustdoc
+  
+  Compatibility Notes
+  - Array coercions may now result in less inference constraints than before
+  - Importing $crate without renaming, i.e. use $crate::{self};, is now no longer permitted due to stricter error checking for self imports.
+  - const-eval: be more consistent in the behavior of padding during typed copies. In very rare cases, this may cause compilation errors due to bytes from parts of a pointer ending up in the padding bytes of a const or static.
+  - A future-incompatibility warning lint ambiguous_glob_imported_traits is now reported when using an ambiguously glob imported trait
+  - Check lifetime bounds of types mentioning only type parameters
+  - Report more visibility-related ambiguous import errors
+  - Deprecate Eq::assert_receiver_is_total_eq and emit future compatibility warnings on manual impls
+  - powerpc64: Use the ELF ABI version set in target spec instead of guessing (fixes the ELF ABI used by the OpenBSD target)
+  - Matching on a #[non_exhaustive] enum now reads the discriminant, even if the enum has only one variant. This can cause closures to capture values that they previously wouldn't.
+  - mut ref and mut ref mut patterns, part of the unstable Match Ergonomics 2024 RFC, were accidentally allowed on stable within struct pattern field shorthand. These patterns are now correctly feature-gated as unstable in this position.
+  - Add future-compatibility warning for derive helper attributes which conflict with built-in attributes
+  - JSON target specs have been destabilized and now require -Z unstable-options to use. Previously, they could not be used without the standard library, which has no stable build mechanism. In preparation for the build-std project adding that support, JSON target specs are being proactively gated to ensure they remain unstable even if build-std is stabilized. Cargo now includes the -Z json-target-spec CLI flag to automatically pass -Z unstable-options to the compiler when needed. See #150151, #151534, and rust-lang/cargo#16557.
+  - The arguments of #[feature] attributes on invalid targets are now checked
+  
+  Internal Changes
+  These changes do not affect any public interfaces of Rust, but they represent significant improvements to the performance or internals of rustc and related tools.
+  - Update to LLVM 22
+ReleaseNotesUrl: https://github.com/rust-lang/rust/releases/tag/1.95.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

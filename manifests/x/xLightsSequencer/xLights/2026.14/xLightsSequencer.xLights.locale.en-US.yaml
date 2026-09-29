@@ -1,0 +1,72 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: xLightsSequencer.xLights
+PackageVersion: '2026.14'
+PackageLocale: en-US
+Publisher: xLightsSequencer
+PublisherUrl: https://github.com/xLightsSequencer/
+PublisherSupportUrl: https://github.com/xLightsSequencer/xLights/issues
+PackageName: xLights
+PackageUrl: https://github.com/xLightsSequencer/xLights
+License: GPL-3.0
+LicenseUrl: https://github.com/xLightsSequencer/xLights/blob/HEAD/License.txt
+ShortDescription: xLights is a free and open source program that enables you to design, create and play amazing lighting displays through the use of DMX controllers, E1.31 Ethernet controllers and more.
+ReleaseNotes: |-
+  2026.14 — July 14, 2026
+  Enhancements
+  - scott — Controller layout printing: right-click "Print..." now opens a resizable print preview dialog (adjustable box size, fit-to-page) before printing, replacing the old direct-to-printer menu entry
+  - cybercop23 — Moved the Controllers tab into the Layout tab and split Models and Groups into their own tabs, matching the iPad; added a controller port/model selector showing what is selected in the layout, plus right-click FPP Connect for a single controller
+  - cybercop23 — Show and base show folder settings moved to a Directories dialog opened from the Layout tab; controller list columns can be shown/hidden from the header
+  - cybercop23 — Directories dialog: buttons to pick a directory and to open it in Finder/Explorer; double-clicking a model opens the unified model definitions panel
+  - cybercop23 — Key bindings are now stored in both the show folder and the platform app-data folder, kept in sync on every save, backup and restore; a new Preferences > Other > "Use keybindings from" option picks which copy is authoritative (default Show Folder)
+  - cybercop23 — Faces, States and SubModels editors combined into one tabbed dialog with a shared model preview, reachable from the Layout menu and the property grid
+  - cybercop23 — Show folders skip the automatic base-show-folder merge (controllers, models, view objects) when the base folder has not changed since the last saved sync
+  - scott — Layout tab: shows a "Loading show..." message while a large show folder loads, and no longer re-resolves the FPP proxy address on every redraw
+  - scott — Layout tab: added a button to open the show folder
+  - nick — New Preferences > Toolbars page: choose which effects appear in the always-visible Effects toolbar and reorder them, handy once the toolbar no longer fits smaller screens; right-click the toolbar to jump there, and "Reset to Defaults" restores every effect in the default order
+  - nick — Media panel: "Bulk Find" now offers to redirect a whole set of already-working media files to a new folder (e.g. a show copied to a new year), not just to fix missing ones
+  - heffneil — Added live filter boxes to the Import Previews and Models tree, the vendor model download catalog, and the Choose Model(s) dialog, which also now shows the model being copied from
+  - heffneil — Model Sets: right-click Align and Distribute now move the whole Set rigidly instead of pulling the clicked model out of its arrangement; a Set containing a locked model is skipped with a message
+  - AGFazio — 3D Layout: Shift + scroll wheel, or a two-finger touchpad drag, pans the view on every platform (#6699)
+  - dkulp — Sequence-level face definitions: a new Faces tab in Sequence Settings defines matrix (image) faces stored in the .xsq and usable by any matrix/group/submodel in that sequence, so a face need not be duplicated on every model; images embed via the Media tab, and Package Sequence, Import Effects and Check Sequence handle them
+  - dkulp — Import Effects: new "Import matrix face definitions into the sequence" option (on by default) stores imported models' Matrix faces in the sequence with images embedded, instead of adding them to your layout
+  - derwin12 — Moving Head: new warmup "Link" tab can snap an effect's end Pan/Tilt to the next Moving Head effect's start
+  - dkulp — FPP Connect: preserve the per-controller UDP pacing/bandwidth caps already configured on FPP10 instead of wiping them when regenerating the universe outputs file; a new optional controller cap applies the rate under full xLights control and otherwise seeds it as a default (WLED and ESPixelStick ESP8266/ESP32 default to 30 Mbps)
+  - MartinMueller — ESPixelStick: added the Octa2Go and several other ESP32 variants, TLS3001 protocol support on the V4 variants, and corrected the maximum pixel-port channel counts
+  - dkulp — Preferences: the "Automation" port is now labelled the "API" port, and the port numbers are shown
+  - dkulp — Stem separation: Cancel now stops the run at the next chunk instead of waiting for the whole track (all backends)
+  - dkulp — Read .fseq files with a parallel block decompressor when the whole sequence is being loaded (FPP/HinksPix upload, convert, fseqcmp): ~10x faster on a multi-core machine, and faster even on one core
+  - dkulp — Batch render and -r no longer read the existing fseq they are about to overwrite, speeding up sequence open (canvas mode still loads it)
+  - dkulp — Render: group rows, large single-model rows (matrices, megatrees) and rows carrying submodel/strand effects now render several frames concurrently when the effects on them are frame-independent, cutting whole-show render time (~5% on a typical show) with byte-identical output; XL_NO_PARALLEL_FRAMES=1 forces the serial path
+  - dkulp — Render: Twinkle, Circles, Candle, Lines, Curtain and 16 VU Meter modes can now render frames concurrently, and GPU-accelerated Candle, Circles, Twinkle, Wave and Meteors keep their Metal/Vulkan acceleration inside those windows instead of falling back to the CPU
+  - dkulp — Render: edit-triggered renders now jump ahead of a running Render All, so the grid and preview update promptly
+  - dkulp — Render: the per-node output copy is now serial instead of fanning out to the job pool - the dispatch cost far exceeded the few bytes copied and slowed the effect rendering beside it; cut the output stage ~76% and total render CPU ~30%
+  - dkulp — Render: reuse cached transition-mask and sparkle GPU buffers across frames instead of reallocating them on every blend (the biggest single GPU win)
+  - dkulp — Fire effect renders about 3x faster with byte-identical output: the flame grid stops once the flame has died out, and the Hue Shift conversion runs once per frame into a palette instead of once per pixel
+  - dkulp — Meteors: particles are bucketed by buffer line instead of testing every meteor against every pixel (CPU, Metal and Vulkan); large-matrix Meteors is dramatically faster
+  - dkulp — Kaleidoscope: Triangle and Square styles render many times faster (2-5x faster total render time on sequences using them)
+  - dkulp — Pictures: much faster when the image is larger than the model (no-scaling mode with big photos)
+  - dkulp — Ripple: faster circle drawing
+  - dkulp — Render: effect settings and value curves are parsed once per effect instead of every frame
+  - dkulp — Render: further per-frame savings - parallel Per Model group merge/unmerge, cached sub-buffer node mapping for animated sub-buffers, a flat blend dispatch table, no dimming-curve lookup on models without one, hoisted value-curve evaluation out of the canvas gap-fill loop, and a reused scratch buffer for CPU rotate/zoom and small blurs
+  - dkulp — GPU render (Metal and Vulkan): the render cache no longer forces a GPU->CPU readback right after a GPU effect renders, so effect+blur+rotozoom+blend stay in one command queue; cheap-to-recompute GPU effects skip the cache and slow CPU effects still use it. Output is unchanged
+  - dkulp — GPU render (Metal and Vulkan): the small/narrow box blur now runs on the GPU, bit-identical to the CPU path, when the layer already rendered there
+  - dkulp — GPU render (Metal and Vulkan): props with a large buffer but few nodes now blend on the GPU when most of their layers already have GPU work queued, instead of waiting on each layer; the win is on discrete GPUs, and those props' output shifts by the usual GPU float rounding
+  - dkulp — Vulkan: a compute buffer grown mid-frame is retired to a deferred-free list and released once its command buffer completes, instead of stalling the pipeline (matches Metal)
+  - dkulp — macOS: video files are now decoded at the size they are actually rendered at instead of full native resolution, cutting peak video render memory 25-35% (a video-heavy sequence dropped from ~16GB to ~12GB) and often rendering a little faster
+  - dkulp — Render: fixed parallel_for's worker-completion wait (it busy-spun on one path and polled around a lost-wakeup race on the other)
+  - dkulp — Render: XL_RENDER_PROFILE=1 dumps per-model/per-effect render, blend, output, GPU-wait and upstream-wait timings at the end of each render batch
+  - dkulp — --fseqcmp: XL_FSEQCMP_RANGE picks the frame window for the per-channel dump, XL_FSEQCMP_PNG= writes an A|B|amplified-diff PNG strip per frame, and XL_FSEQCMP_FRAMES=1 reports which frame ranges differ
+  Bug Fixes
+  - cybercop23 — Fix 15 effects (Bars, Shockwave, ColorWash, Spirals, Circles, Candle, Fan, Garlands, Kaleidoscope, Life, Meteors, Shimmer, Tree, Twinkle, Wave) producing no output on DMX models such as floodlights and moving heads; the SIMD render path wrote raw pixel data instead of going through SetPixel(), which is what spreads a colour across a fixture's channels (#6719)
+  - dkulp — Shockwave: pixels on large GPU-rendered matrices now match small models exactly (the Metal/Vulkan kernels rounded the ring edge differently than the CPU path)
+  - dkulp — Fix Shader effect rendering vertically flipped on Vulkan (Linux and Windows; Canvas/warp shaders over other layers appeared upside down)
+  - dkulp — Vulkan: ISF/GLSL shaders that define their own copy of a GLSL built-in (sinh/cosh/tanh) no longer fail to translate and render solid yellow
+  - dkulp — Shader effect ignored the GPU rendering preference and still built GPU pipelines with it turned off; turning it off now really keeps the effect on the CPU/OpenGL path
+  - derwin12 — Vulkan Shader effect: fix a startup race that let one render thread use the shared sampler/dummy image before another had finished creating them
+  - dkulp — Vulkan Shader effect: check the allocation results that were being ignored, so an out-of-resources driver falls back instead of crashing
+  - dkulp — Vulkan: GPU-built transition masks (e.g. Wipe) are now bound directly to the blend as Metal already does, instead of being copied from the still-in-flight GPU buffer; that race rendered masked transitions nondeterministically (a wipe edge landing a row or two off)
+ReleaseNotesUrl: https://github.com/xLightsSequencer/xLights/releases/tag/2026.14
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,187 @@
+# Created with komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.3.11
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.3.11
+  Patch Changes
+  - #8583 83be210 Thanks @dyc3! - Added the new nursery rule useVueValidTemplateRoot.
+    This rule validates only root-level <template> elements in Vue single-file components. If the <template> has a src attribute, it must be empty. Otherwise, it must contain content.
+    Invalid examples:
+    <template src="./foo.html">content</template>
+    <template></template>
+    Valid examples:
+    <template>content</template>
+    <template src="./foo.html"></template>
+  - #8586 df8fe06 Thanks @dyc3! - Added a new nursery rule useVueConsistentVBindStyle. Enforces consistent v-bind style (:prop shorthand vs v-bind:prop longhand). Default prefers shorthand; configurable via rule options.
+  - #8587 9a8c98d Thanks @dyc3! - Added the rule useVueVForKey, which enforces that any element using v-for also specifies a key.
+    Invalid
+    <li v-for="item in items">{{ item }}</li>
+    Valid
+    <li v-for="item in items" :key="item.id">{{ item }}</li>
+  - #8586 df8fe06 Thanks @dyc3! - Added a new nursery rule useVueConsistentVOnStyle. Enforces consistent v-on style (@event shorthand vs v-on:event longhand). Default prefers shorthand; configurable via rule options.
+  - #8583 83be210 Thanks @dyc3! - Added the new nursery rule useVueValidVOnce. Enforces that usages of the v-once directive in Vue.js SFC are valid.
+    <!-- Valid -->
+    <div v-once />
+    <!-- Invalid -->
+    <div v-once:aaa />
+    <div v-once.bbb />
+    <div v-once="ccc" />
+  - #8498 d80fa41 Thanks @tt-a1i! - Fixed #8494. Extended noUndeclaredEnvVars to support bracket notation (process.env["VAR"], import.meta.env["VAR"]), Bun runtime (Bun.env.VAR, Bun.env["VAR"]), and Deno runtime (Deno.env.get("VAR")).
+  - #8509 574a909 Thanks @ematipico! - Added support for parsing and formatting the Svelte {#await} syntax, when html.experimentalFullSupportEnabled is set to true.
+    -{#await promise  then name }
+    +{#await promise then name}
+    -{:catch    name}
+    +{:catch name}
+    {/await}
+  - #8316 d64e92d Thanks @washbin! - Added the new nursery rule noMultiAssign. This rule helps to prevent multiple chained assignments.
+    For example, the following code triggers because there are two assignment expressions in the same statement.
+    const a = (b = 0);
+  - #8592 a5f59cd Thanks @Netail! - Added the nursery rule useUniqueInputFieldNames. Require fields within an input object to be unique.
+    Invalid:
+    query A($x: Int, $x: Int) {
+      field
+    }
+  - #8524 17a6156 Thanks @JacquesLeupin! - Fixed #8488: Relative plugin paths are now resolved from the configuration file directory, including when configurations are merged (e.g. extends: "//").
+  - #8655 3260ec9 Thanks @JacquesLeupin! - Fixed #8636: Biome's CSS formatter now breaks comma-separated declaration values at top-level commas when wrapping.
+  - #8537 cc3e851 Thanks @dibashthapa! - Fixed #8491: Resolved false positive errors for safe boolean expressions. There are still pending fixes. Head to #8491 (comment) for more details
+    This new change will check for safe boolean expressions in variable declarations.
+    For example,
+    Valid:
+    let isOne = 1;
+    let isPositiveNumber = number > 0;
+    return (
+      <div>
+        {" "}
+        {isOne && "One"} {isPositiveNumber && "Is positive"}
+      </div>
+    );
+    Invalid:
+    let emptyStr = "";
+    let isZero = 0;
+    return (
+      <div>
+        {emptyStr && "Empty String"} {isZero && "Number is zero"}{" "}
+      </div>
+    );
+  - #8511 16a9036 Thanks @ematipico! - Improved the diagnostics of the rules useSortedClasses and noUnnecessaryConditions. The diagnostics now state that these rules are a work in progress and link to the relevant GitHub issue.
+  - #8521 a704be9 Thanks @ToBinio! - Added the nursery rule useVueConsistentDefinePropsDeclaration, which enforces consistent defineProps declaration style.
+    Invalid
+    <script setup lang="ts">
+    const props = defineProps({
+      kind: { type: String },
+    });
+    </script>
+    Valid
+    <script setup lang="ts">
+    const props = defineProps<{
+      kind: string;
+    }>();
+    </script>
+  - #8595 7c85bf0 Thanks @dyc3! - Fixed #8584: The HTML formatter will preserve whitespace after some elements and embedded expressions, which more closely aligns with Prettier's behavior.
+    - <h1>Hello, {framework}and Svelte!</h1>
+    + <h1>Hello, {framework} and Svelte!</h1>
+  - #8598 5e85d43 Thanks @Netail! - Added the nursery rule useUniqueFieldDefinitionNames. Require all fields of a type to be unique.
+    Invalid:
+    type SomeObject {
+      foo: String
+      foo: String
+    }
+  - #8495 b573d14 Thanks @taga3s! - Fixed #8405: noMisusedPromises now emits warnings/errors when a function returns union types such as T | Promise<T> which is used in conditionals.
+    const a = (): boolean | Promise<boolean> => Promise.resolve(true);
+    if (a()) {
+    } // Now correctly flagged
+  - #8632 0be7d12 Thanks @Bertie690! - The documentation & rule sources for lint/complexity/noBannedTypes have been updated to fix a few oversights.
+    In addition to some general typo fixes:
+    - The rule now recommends Record<keyof any, never> instead of Record<string, never> (the latter of which incorrectly allows symbol-keyed properties).
+    - The rule mentions an alternate method to enforce object emptiness involving unique symbol-based guards used by type-fest and many other packages:
+      declare const mySym: unique symbol;
+      // Since this type's only property is an unexported `unique symbol`, nothing that imports it can specify any properties directly
+      // (as far as excess property checks go)
+      export type EmptyObject = { [mySym]?: never };
+      export type IsEmptyObject<T> = T extends EmptyObject ? true : false;
+    The rule's listed sources have been updated as well to reflect the original source rule (ban-types) having been split into 3 separate rules circa April 2024.
+  - #8580 a3a1ad2 Thanks @taga3s! - Added the nursery rule noBeforeInteractiveScriptOutsideDocument to the Next.js domain.
+    This rule prevents usage of next/script's beforeInteractive strategy outside of pages/_document.js.
+  - #8493 5fc24f4 Thanks @ematipico! - Added support for parsing and formatting the Svelte {#each} syntax, when html.experimentalFullSupportEnabled is set to true.
+    - {#each items   as item  }
+    + {#each items as item}
+    {/each}
+  - #8546 0196c0e Thanks @Zaczero! - Hardened union static-member type flattening in edge cases (e.g. unions containing unknown or inferred expression types). This keeps inference conservative and avoids unstable type growth in node = node.parent-style loops.
+  - #8569 1022c76 Thanks @ematipico! - Fixed an issue where the Biome HTML parser would emit a parse error when certain keywords are inside the text of HTML tags.
+  - #8606 f50723b Thanks @dyc3! - Fixed #8563: fixed a bounds check on bogus regex literals that caused panics when doing type inference
+  - #7410 ab9af9a Thanks @sgarcialaguna! - Added the new nursery rule noJsxPropsBind. This rule disallows .bind(), arrow functions, or function expressions in JSX props.
+    Invalid:
+    <Foo onClick={() => console.log("Hello!")}></Foo>
+  - #8523 5f22f1c Thanks @ematipico! - Improved the diagnostics of nursery rules. Added a message to diagnostics emitted by nursery rules, so that users are aware of nature of nursery rules.
+  - #8571 03666fd Thanks @dyc3! - Improved the performance of noRedeclare by eliminating string allocations
+  - #8591 9dd9ca7 Thanks @Netail! - Added the nursery rule useUniqueArgumentNames. Enforce unique arguments for GraphQL fields & directives.
+    Invalid:
+    query {
+      field(arg1: "value", arg1: "value")
+    }
+  - #8521 a704be9 Thanks @ToBinio! - Update useVueDefineMacrosOrder to only run on <script setup> blocks.
+  - #8344 7b982ba Thanks @ematipico! - Reduced the system calls when running the CLI. The performances might be noticeable in big projects that have multiple libraries and enable project rules.
+  - #8588 958e24b Thanks @Netail! - Added the nursery rule useUniqueVariableNames. Enforce unique variable names for GraphQL operations.
+    Invalid:
+    query ($x: Int, $x: Int) {
+      field
+    }
+  - #8529 8794883 Thanks @mdevils! - Fixed #8499: useExhaustiveDependencies properly handles aliased destructured object keys when using stableResult configuration.
+  - #8557 4df2f4d Thanks @dyc3! - Fixed an issue with the HTML formatter where it wouldn't add a space before the /> in self closing elements. This brings the HTML formatter more in line with Prettier.
+    -<Component/>
+    +<Component />
+  - #8509 574a909 Thanks @ematipico! - Added support for parsing and formatting the Svelte {#snippet} syntax, when html.experimentalFullSupportEnabled is set to true.
+    -{#snippet    foo() }
+    +{#snippet foo()}
+    {/snippe}
+  - #8248 1231a5c Thanks @emilyinure! - Added new nursery rule noReturnAssign, which disallows assignments inside return statements.
+    Invalid:
+    function f(a) {
+      return (a = 1);
+    }
+  - #8531 6b09620 Thanks @taga3s! - Fixed #8472: The CSS parser can now accept multiple comma separated parameters in :active-view-transition-type.
+  - #8615 b9da66d Thanks @taga3s! - Remove next/script component name check from noBeforeInteractiveScriptOutsideDocument since it is a default export.
+  - #8536 efbfbe2 Thanks @dyc3! - Fixed #8527: Improved type inference where analyzing code with repeated object property access and assignments (e.g. node = node.parent, a pattern common when traversing trees in a while loop) could hit an internal type limit. Biome now handles these cases without exceeding the type limit.
+  - #8583 83be210 Thanks @dyc3! - Added the new nursery rule useVueValidVCloak. Enforces that usages of the v-cloak directive in Vue.js SFC are valid.
+    <!-- Valid -->
+    <div v-cloak />
+    <!-- Invalid -->
+    <div v-cloak:aaa />
+    <div v-cloak.bbb />
+    <div v-cloak="ccc" />
+  - #8583 83be210 Thanks @dyc3! - Added the new nursery rule useVueValidVPre. Enforces that usages of the v-pre directive in Vue.js SFC are valid.
+    <!-- Valid -->
+    <div v-pre />
+    <!-- Invalid -->
+    <div v-pre:aaa />
+    <div v-pre.bbb />
+    <div v-pre="ccc" />
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.3.11
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

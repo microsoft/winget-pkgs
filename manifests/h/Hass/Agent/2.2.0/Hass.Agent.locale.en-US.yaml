@@ -1,0 +1,72 @@
+# Created with komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Hass.Agent
+PackageVersion: 2.2.0
+PackageLocale: en-US
+Publisher: HASS.Agent Team
+PublisherUrl: https://github.com/hass-agent
+PublisherSupportUrl: https://github.com/hass-agent/HASS.Agent/issues
+PackageName: HASS.Agent
+PackageUrl: https://github.com/hass-agent/HASS.Agent
+License: MIT
+LicenseUrl: https://github.com/hass-agent/HASS.Agent/blob/HEAD/LICENSE.md
+ShortDescription: Unofficial development project for the HASS.Agent platform.
+Moniker: hass.agent
+ReleaseNotes: |-
+  Breaking changes, please read below.
+  Due to security concerns, we were forced to remove Libre Hardware Monitor library that allowed HASS.Agent to access hardware information. The breaking change in this is that starting with this release, the GPU Temperature Sensor is non-functioning.
+  It has been left present for backward compatibility reasons, however it will always return 0.
+  Please see the awesome writeup by @DarkAutumn for more details #43 (comment)
+  Please see Docs for how you can get GPU temperature information using the standalone version of Libre Hardware Monitor.
+  Some changes, some fixes and hopefully not a lot of bugs :)
+  Changes
+  - Added support for Fan domain for Quick Actions (thanks to @axa88 for suggestion) #369
+  - Added configuration backup that is done before migration from LAB02 version actually happens #377
+  - Added WinFormsSleep command (version of sleep command using specifically WinForms API) (thanks to @felipecrs for suggestion) #378
+  - Added ability to test MQTT connection during onboarding process (thanks to @jgstew for suggestion) #379
+  - Added missing "use WebSocket" option to MQTT onboarding step #379
+  - Added "MonitorSleepPowerPlan" command to turn off screen by temporairly modyfying the power plan (should not cause the device to go to sleep) #380
+  - Added permission checks for both client (issues with administrative permissions) and service (not running as system) #383
+  - Added suport for "HumanPresence" internal device sensor #281
+  - Added new "NamedActiveWindow" binary sensor that can tell you if window containing specified name is currently active or not (thanks to @YpsilonTM for suggestion) #298
+  - Added new "AccentColor" sensor that provides #RRGGBB values for Windows' accent colors (thanks to @kineticscreen for suggestion) #299
+  - Added WebSocket support for MQTT connections (experimental :)) (thanks to @axelcypher for suggestion) #253
+  - Added x86 (32bit) support to the project and the published artifacts (thanks to @DoplerGanger for suggestion) #322
+  - Added ability to "hold" the KeyCommand for longer time by making it a switch type (thanks to @f-hicks for suggestion and testing) #325
+  - Added support for selecting on which screen WebView will appear (thanks to @denisabt for the PR!) #246
+  - Added support for button helpers (input_button) for quick actions (thanks to @drewsteinacher for the PR!) #199
+  Fixes:
+  - Fixed rare issue where LocalAPI would not work due to device configuration missing #358
+  - Fixed Home Assistant MQTT warning log regarding "object_id" deprecation (thanks to @Anto79-ops and @Momentum6890 for reporting) #372
+  - Fixed device discovery messages not being properly removed when device name is changed #376
+  - Fixed order of sensors and commands so they are sorted alphabetically by the first letter #381
+  - Fixed onboarding donation message so it's clear all donations go towards original creator of HASS.Agent - Sam #384
+  - Fixed MQTT entities changing ID after device rename #388
+  - Fixed/changed Satellite Service installation logic so it limits possibility of upgrade failing silently (even though there was no UI error) and/or leaving the Libre Hardware Monitor files (.dll and .sys) which causes Windows Defender to still report them even though they are not actively used. #352
+  - Fixed HASS.Agent crash when no WebView screen was explicitly configured (thanks to @cronner for reporting) #346
+  - Fixed issue where user would be presented with "You're running the newest version" even though internet was unavailable (thanks to @patienttruth for reporting) #247
+  - Fixed relative URIs in the notifications not opening properly when clicked on (thanks to @felipecrs for reporting) #294
+  - Fixed typo in the onboarding screen (thanks to @epipenRX for reporting) #300
+  - Fixed quick actions window not scaling properly with the system scale (thanks to @MathisP75 for reporting) #301
+  - Fixed repeating audio sensors error log when no default input or output is present because it was removed (thanks to @floriangagnard for reporting) #302
+  - Fixed (once and for all?) issues with hotkey and german keyboard layouts by changing the default one to Shift+Control+Q (thanks to @FatalMerlin for reporting and to @f-rakete for help in fixing) #303
+  - Fixed issue where InnoSetup installer parameters would not be passed on to the Satellite Service installer (thanks to @KrX3D for reporting) #306
+  - Fixed satellite service missing AudioManager initisation, causing AudioSensor not to work properly (thanks to @Dvvarf for reporting) #326
+  - Fixed HASS.Agent refusing to start after bluetooth dongle was removed with RadioCommand configured (thanks to @barrelltitor for reporting) #333
+  - Fixed note regarding Home Assistant long lived token generation and minor wording tweak (thanks to @SVNKoch for the PR!) #156
+  - Fixed the tray icon being blurry when using RDP extensively (thanks to @whc2001 for the PR!) #249
+  - Fixed code typo in printer sensor's code (thanks to @Selim042 for the PR!) #318
+  - Fixed issue where error of one internal device sensor would cause issues with configuration of others #338
+  - Fixed update notification being shown at startup even though general update notifications were disabled (thanks to @stavismed for reporting) #239
+  Other:
+  - Updated readme file (part 1) #385
+  - Removed dependency on LibreHardwareMonitor that uses WinRing0 (thanks to all people that reported this, especially for @DarkAutumn for all the research!) #280
+  - Moved project from .net6 to .net8 (thanks to @ricoroodenburg for suggestion) #284
+  - Updated dependencies #304
+  - Github Action artifact version update and build target version bump #225
+  Device renaming
+  For best results with renaming devices, this version should work with newest integration version: https://github.com/hass-agent/HASS.Agent-Integration/releases/tag/2.1.2
+ReleaseNotesUrl: https://github.com/hass-agent/HASS.Agent/releases/tag/2.2.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

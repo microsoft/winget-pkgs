@@ -1,0 +1,60 @@
+# Created with Sundry.
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: josephburnett.jd
+PackageVersion: 2.3.0
+PackageLocale: en-US
+Publisher: Joseph Burnett
+PublisherUrl: https://github.com/josephburnett
+PublisherSupportUrl: https://github.com/josephburnett/jd/issues
+Author: Joseph Burnett
+PackageName: JSON diff and patch
+PackageUrl: https://github.com/josephburnett/jd
+License: MIT
+LicenseUrl: https://github.com/josephburnett/jd/blob/master/LICENSE
+Copyright: Copyright (c) 2016 Joseph Burnett
+CopyrightUrl: https://github.com/josephburnett/jd/blob/master/LICENSE
+ShortDescription: JSON diff and patch.
+Description: >
+  jd is a commandline utility and Go library for diffing and patching JSON and YAML values.
+  It supports a native jd format (similar to unified format) as well as JSON Merge Patch (RFC 7386) and a subset of JSON Patch (RFC 6902).
+  Try it out at http://play.jd-tool.io/.
+Moniker: jd
+Tags:
+  - diff
+  - json
+  - patch
+  - yaml
+ReleaseNotes: |-
+  # PathOptions
+  This release introduces PathOptions, a powerful new feature that enables precise control over how different parts of your JSON/YAML data are compared. PathOptions allow you to apply different comparison semantics to specific paths within your data structures, giving you fine-grained control over diff behavior.
+
+  Key Features:
+  - Targeted comparison options: Apply SET, MULTISET, precision, or setkeys options to specific paths using the syntax `{"@":["path","to","target"],"^":[options]}`
+  - Path isolation: Options only affect their specified paths and don't leak globally, allowing you to mix different comparison semantics in the same diff
+  - Enhanced array dispatch: Fixed critical bug where PathOptions with empty paths (root level) weren't being applied correctly for array dispatch
+  - Comprehensive documentation: Complete v2 Diff Language guide with new EBNF grammar, PathOption integration examples, and updated CLI help showing flag equivalents
+  - Extensive test coverage: Added 24 test cases demonstrating PathOption functionality across various data structures and edge cases
+
+  Examples:
+  ### Apply SET semantics to specific array while others remain lists:
+
+  jd -opts='[{"@":["tags"],"^":["SET"]}]' a.json b.json
+
+  ### Multiple PathOptions with different semantics
+
+  jd -opts='[{"@":["items"],"^":["SET"]}, {"@":["price"],"^":[{"precision":0.01}]}]' a.json b.json
+
+  This release maintains full backward compatibility while adding powerful new capabilities for sophisticated diff control scenarios.
+
+  # What's Changed
+  - Fix unicode color diff. by @roberthoenig in #93
+  - add missing closing parenthesis by @mohammadrezaataeii in #98
+
+  # New Contributors
+  - @mohammadrezaataeii made their first contribution in #98
+
+  Full Changelog: https://github.com/josephburnett/jd/compare/v2.2.7...v2.3.0
+ReleaseNotesUrl: https://github.com/josephburnett/jd/releases/tag/v2.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

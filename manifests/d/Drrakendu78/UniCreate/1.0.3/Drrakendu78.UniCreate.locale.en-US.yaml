@@ -1,0 +1,129 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Drrakendu78.UniCreate
+PackageVersion: 1.0.3
+PackageLocale: en-US
+Publisher: Drrakendu78
+PublisherUrl: https://github.com/drrakendu78
+PrivacyUrl: https://github.com/drrakendu78/UniCreate/blob/master/PRIVACY.md
+Author: Drrakendu78
+PackageName: UniCreate
+PackageUrl: https://github.com/drrakendu78/UniCreate
+License: MIT
+LicenseUrl: https://github.com/drrakendu78/UniCreate/blob/master/LICENSE
+ShortDescription: The modern WinGet manifest creator — Create and submit packages to winget-pkgs with a beautiful GUI
+Description: The modern WinGet manifest creator — Create and submit packages to winget-pkgs with a beautiful GUI
+Tags:
+- desktop-app
+- gui
+- manifest
+- open-source
+- package-manager
+- react
+- rust
+- tauri
+- typescript
+- windows
+- winget
+- winget-pkgs
+ReleaseNotes: |-
+  # UniCreate - Patch Notes v1.0.3
+  
+  Date: 2026-02-21
+  Release tag: `v1.0.3`
+  Repository: `drrakendu78/UniCreate`
+  
+  ## Highlights
+  
+  - Silent update no longer flashes a CMD window.
+  - Update mode now auto-fills version, release notes, and release notes URL from the new release.
+  - Recent packages quick-select chips in Update mode.
+  - Multi-segment package IDs fully supported (e.g., `Microsoft.VisualStudio.2022.Community`).
+  - All `InstallerSwitches` fields now written to YAML output.
+  - App version in TitleBar auto-synced from `package.json`.
+  - Docs: PR labels collapsed into hover tooltip.
+  
+  ## Technical changes
+  
+  ### 1) Silent update fix
+  - Added `CREATE_NO_WINDOW` (0x08000000) flag via `.creation_flags()` on the PowerShell process.
+  - Combined with `-WindowStyle Hidden`, the update is now fully invisible.
+  
+  Impacted file:
+  - `src-tauri/src/github.rs`
+  
+  ### 2) YAML field parser fix
+  - `parse_yaml_field` now matches `"Field: "` exactly instead of prefix-matching.
+  - Prevents `Publisher` from matching `PublisherUrl`.
+  
+  Impacted file:
+  - `src-tauri/src/github.rs`
+  
+  ### 3) InstallerSwitches complete output
+  - All switch fields (`Interactive`, `InstallLocation`, `Log`, `Upgrade`, `Repair`) are now written to YAML when provided.
+  - Removed `#[allow(dead_code)]` on `InstallerSwitches` struct.
+  
+  Impacted file:
+  - `src-tauri/src/yaml_generator.rs`
+  
+  ### 4) Multi-segment package ID support
+  - Replaced `splitn(2, '.')` with `split('.')` + `join("/")` for building winget-pkgs paths.
+  - Correctly handles IDs like `Microsoft.VisualStudio.2022.Community` → `manifests/m/Microsoft/VisualStudio/2022/Community/`.
+  - Applied to `fetch_existing_manifest`, `check_package_exists`, and `submit_manifest`.
+  
+  Impacted file:
+  - `src-tauri/src/github.rs`
+  
+  ### 5) Dynamic version in TitleBar
+  - Added `__APP_VERSION__` define in Vite config, reading from `package.json`.
+  - TitleBar now displays version dynamically instead of hardcoded string.
+  
+  Impacted files:
+  - `vite.config.ts`
+  - `src/vite-env.d.ts`
+  - `src/App.tsx`
+  
+  ### 6) Update mode: auto-fill from new release
+  - In update mode, `StepInstaller` now applies `version`, `releaseNotes`, and `releaseNotesUrl` from the new GitHub release metadata.
+  - Removed stale `releaseNotesUrl` from `applyExistingManifest` to prevent old tag carry-over.
+  
+  Impacted files:
+  - `src/pages/StepInstaller.tsx`
+  - `src/stores/manifest-store.ts`
+  
+  ### 7) Recent packages quick-select in Update mode
+  - Added clickable chips showing previously submitted package IDs in the Update search view.
+  - Clicking a chip auto-fills the input and triggers the search immediately.
+  - Chips are deduplicated from submission history.
+  
+  Impacted file:
+  - `src/pages/Home.tsx`
+  
+  ### 8) Docs: PR labels as tooltip
+  - PR label badges on the site are now collapsed into a compact "N labels" chip.
+  - Hovering reveals all labels in a dropdown tooltip.
+  
+  Impacted files:
+  - `docs/app.js`
+  - `docs/styles.css`
+  
+  ### 9) Version bump
+  - App version updated to `1.0.3`.
+  
+  Impacted files:
+  - `package.json`
+  - `src-tauri/Cargo.toml`
+  - `src-tauri/tauri.conf.json`
+  
+  ## Build artifacts and SHA256 checksums
+  
+  Checksums below match binaries produced by `npm run tauri build`.
+  
+  | File | Size (bytes) | SHA256 |
+  |---|---:|---|
+  | `UniCreate_1.0.3_x64-setup.exe` | 11262342 | `d66c0137b44f65519f8f516ad7d099716e69b854f6ebb661968fc644bb6f5ae5` |
+  | `UniCreate_1.0.3_x64_en-US.msi` | 13373440 | `cb0495f5c755c386677f909155322803864c12e76a2ee07abcbf66efc41f4875` |
+  | `UniCreate_1.0.3_x64_portable.exe` | 24466944 | `1eb238bb6845c12e7363604853434735f2576d7182cd3a08caace0060ce2d19a` |
+ReleaseNotesUrl: https://github.com/drrakendu78/UniCreate/releases/tag/v1.0.3
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

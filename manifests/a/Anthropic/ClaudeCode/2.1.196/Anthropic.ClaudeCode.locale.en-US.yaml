@@ -1,0 +1,69 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Anthropic.ClaudeCode
+PackageVersion: 2.1.196
+PackageLocale: en-US
+Publisher: Anthropic PBC
+Author: Anthropic PBC
+PackageName: Claude Code
+License: Proprietary
+Copyright: © 2026 Anthropic PBC
+ShortDescription: Unleash Claude’s raw power directly in your terminal. Search million-line codebases instantly. Turn hours-long workflows into a single command. Your tools. Your workflow. Your codebase, evolving at thought speed.
+Description: |-
+  Claude Code is Anthropic’s agentic coding tool that lives in your terminal and helps you turn ideas into code faster than ever before.
+  What Claude Code does for you
+  - Build features from descriptions: Tell Claude what you want to build in plain English. It will make a plan, write the code, and ensure it works.
+  - Debug and fix issues: Describe a bug or paste an error message. Claude Code will analyze your codebase, identify the problem, and implement a fix.
+  - Navigate any codebase: Ask anything about your team’s codebase, and get a thoughtful answer back. Claude Code maintains awareness of your entire project structure, can find up-to-date information from the web, and with MCP can pull from external datasources like Google Drive, Figma, and Slack.
+  - Automate tedious tasks: Fix fiddly lint issues, resolve merge conflicts, and write release notes. Do all this in a single command from your developer machines, or automatically in CI.
+  Why developers love Claude Code
+  - Works in your terminal: Not another chat window. Not another IDE. Claude Code meets you where you already work, with the tools you already love.
+  - Takes action: Claude Code can directly edit files, run commands, and create commits. Need more? MCP lets Claude read your design docs in Google Drive, update your tickets in Jira, or use your custom developer tooling.
+  - Unix philosophy: Claude Code is composable and scriptable. tail -f app.log | claude -p "Slack me if you see any anomalies appear in this log stream" works. Your CI can run claude -p "If there are new text strings, translate them into French and raise a PR for @lang-fr-team to review".
+  - Enterprise-ready: Use Anthropic’s API, or host on AWS or GCP. Enterprise-grade security, privacy, and compliance is built-in.
+Moniker: claudecode
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claude
+- claude-code
+- claudecode
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  - Added support for organization default models — admins set it in the org console; it shows as "Org default" (or "Role default") in /model when you haven't picked one yourself
+  - Added readable default names for sessions at start, making them easier to identify and message
+  - Added clickable file attachments in chat — Cmd/Ctrl-click reveals the file in Finder/Explorer
+  - Security: claude mcp list/get no longer spawn .mcp.json servers that a repo self-approved via a committed .claude/settings.json; untrusted workspaces show ⏸ Pending approval
+  - Fixed waking a background job permanently deleting its conversation and re-running the original prompt when the transcript probe misread a real transcript; the file is now set aside, never deleted
+  - Fixed the rate-limit warning flickering off and rate-limit telemetry being over-counted when multiple parallel requests were in flight at the moment a usage limit was hit
+  - Fixed duplicate recap lines after a background session's turn: a schema-rejected StructuredOutput attempt no longer renders alongside its retry
+  - Fixed PowerShell git diff/git grep, egrep/fgrep, and quoted search patterns containing | being reported as failures when they exit 1, matching Bash behavior
+  - Fixed multiple claude agents side panel issues: keyboard focus getting stuck when opening an agent, background jobs losing their subagent types on every open, and sessions showing incorrect status while actively running
+  - Fixed claude agents --dangerously-skip-permissions silently falling back to auto mode instead of showing the bypass disclaimer and applying bypass mode to spawned agents
+  - Fixed mid-turn crash recovery for Remote sessions — sessions interrupted by a server restart now auto-resume on the next worker
+  - Fixed sessions moved with /cd reappearing in the old directory's resume list after a non-graceful exit when the old path contained special characters
+  - Fixed claude plugin validate skipping local plugins whose source is "." and stopping after the first error class
+  - Fixed Esc Esc at an idle prompt not opening the rewind menu (regression); use Ctrl+C or Ctrl+X Ctrl+K to stop background agents
+  - Fixed MCP OAuth requesting the authorization server's full scopes_supported catalog when no scope is specified, causing invalid_scope failures on GitLab self-hosted and other enterprise IdPs
+  - Fixed /context showing 0 tokens for all tool groups on Bedrock
+  - Fixed /deep-research misreporting verifier failures as "all claims refuted" instead of unverified
+  - Fixed plugin dependency version pins not being honored when the marketplace was added as a local folder path backed by a git repo
+  - Fixed claude agents session status: completed rows no longer flip between "Done" and "Needs your input", stalled agents are now labeled "Needs attention", and results that mention a PR show a clickable link
+  - Fixed voice dictation swallowing spaces and spuriously starting a recording during very fast typing when voice mode is enabled
+  - Improved background session reliability: long-running commands and workflows now survive the session's process being stopped, restarted, or updated — including on Windows, where background shells are handed off instead of being killed
+  - Improved background agents: workers killed by a daemon restart are now automatically resumed from where they left off the next time the agents view opens
+  - Improved /code-review workflow: merged five cleanup finders into one, cutting token usage by roughly 25%
+  - Reduced per-frame rendering work in the terminal UI by skipping no-op subtree walks during streaming
+  - The streaming idle watchdog is now on by default for all providers — it aborts and retries when a response stream produces no events for 5 minutes. Set CLAUDE_ENABLE_STREAM_WATCHDOG=0 to disable.
+  - Remote Control is now disabled when ANTHROPIC_BASE_URL points at a non-Anthropic host, matching the existing behavior under CLAUDE_CODE_USE_BEDROCK/_VERTEX/_FOUNDRY
+  - Changed opening the agents view from a foreground session to require a single ← press instead of two, matching the behavior in background sessions
+ReleaseNotesUrl: https://github.com/anthropics/claude-code/blob/HEAD/CHANGELOG.md#21196
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

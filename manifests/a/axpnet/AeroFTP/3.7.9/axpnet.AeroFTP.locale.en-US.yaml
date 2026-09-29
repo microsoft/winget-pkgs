@@ -1,0 +1,64 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 3.7.9
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [3.7.9] - 2026-05-11
+  AeroFile Dual Panel (Slice A) and AeroVault v3 (Experimental)
+  A feature release with two large additions and the usual fix sweep.
+  AeroFile Dual Panel ships Slice A of T-DUAL-PANEL-UNIFICATION (issue #162 section 2). AeroFile mode can now show two local panels side by side, with full keyboard parity on the second panel: F2 / Delete / Enter / Backspace / Ctrl+A / Ctrl+C / Ctrl+X / Ctrl+V / Ctrl+R / Ctrl+F / Space (Quick Look) / Alt+Enter (properties) / arrows / Shift+arrow / Home / End all route to whichever panel has focus, and Tab cycles between the two local panes. New Total-Commander-style shortcuts: F5 copies the current selection to the other panel, F6 moves it, F7 creates a folder in the focused panel. The split is resizable from mouse and from keyboard (Arrow Left/Right to shift the ratio, Home/End to jump to the extremes, Enter/Space to reset to 50/50, with aria-valuenow and tabIndex=0 on the separator). Drag-and-drop between the two panels uses the existing rename_local_file / copy_local_file backend; Ctrl+drag switches from move (default) to copy. The two local tab strips are unified in the top tab bar with L / R markers. Toggle via the Columns icon in the toolbar or Ctrl+Shift+D, persisted to localStorage. Slice B (each pane configurable as local or as a saved remote profile) and Slice C (compare / mirror / backup / bisync workflows on top) follow in their own release windows.
+  AeroVault v3 (Experimental tier) lands as a draft container format alongside v2. v3 uses content-defined chunking (gear-CDC) before compression so dedup and future AeroSync range semantics stay chunk-aligned, then per-chunk zstd at one of three profiles (fast / balanced / archive = zstd -3 / -9 / -19), then AES-256-GCM-SIV (RFC 8452, nonce-misuse-resistant) per chunk with a 96-bit random nonce and per-chunk AAD bound to the block index and chunk id, then a manifest encrypted with the same cipher. Chunks are content-addressed by BLAKE3 keyed-128 (the chunk id, 16 hex bytes, also used as the dedup key) and integrity-checked by BLAKE3-256 (the cipher hash, pre-decryption integrity for the future ECC layer). Argon2id with m=128 MiB, t=4, p=4 derives two distinct KEKs (encryption + MAC) via HKDF; both KEKs unwrap independent random 256-bit working keys through AES-KW. The 1024-byte header carries an HMAC-SHA512 tag verified before any unwrap. The header reserves an extension directory and an extension payload region so a future v4 reader can append Reed-Solomon / Parchive-style error-correction blocks without changing the header or manifest layout: this implements the v3 + ECC = v4 forward-compat contract requested in the #162 thread. v2 vaults remain the default; v3 is opt-in by selecting the Experimental tier in the create dialog, and there is no automatic v2 → v3 migration in this release. Full specification: AEROVAULT-V3-SPEC.md.
+  The release also closes the TOTP passthrough point raised in issue #128 for Filen and MEGA (persisted base32 secret derives the 6-digit code on every reconnect, removes the manual prompt), surfaces the response body on MEGA HTTP 402 to make the cronic "session expired or invalid" path actionable, eliminates the empty-state flash in the IntroHub Saved Servers tab on connect/disconnect cycles, and finalizes Activity Log coverage with privacy redaction across the DebugPanel buffer.
+  Added
+  - AeroFile Dual Panel — Slice A: two side-by-side local panes with full keyboard parity, Total-Commander F5/F6/F7 shortcuts, unified tab bar with L/R markers, drag-to-copy/move between panes, keyboard-operable resize separator, blue/amber focus rings, persisted split ratio.
+  - AeroVault v3 (Experimental): gear-CDC chunking, zstd profiles fast/balanced/archive, AES-256-GCM-SIV per chunk, BLAKE3-128 chunk id + BLAKE3-256 cipher hash, Argon2id-derived KEKs (encryption + MAC) via HKDF + AES-KW, HMAC-SHA512 header MAC, reserved extension directory + payload region for the future v4 ECC layer. Draft spec in docs/AEROVAULT-V3-SPEC.md.
+  - TOTP secret passthrough (Filen + MEGA): a base32 2FA secret can be persisted once per profile; the backend derives the current 6-digit code on every connect via totp_helper::generate_totp_code. Single-use codes still accepted as fallback. Closes the TOTP passthrough point in #128.
+  - MEGA HTTP 402 response-body surface: the MEGA native client now reads the response body before classifying HTTP failures and embeds a 200-byte preview in both the tracing log and the surfaced error. Diagnostic-only, no policy change.
+  - DebugPanel diagnostic surface: the DebugPanel is elevated to a real diagnostic surface for users and devs, with backend log streaming via the log://log event, console serializer hardening, redaction of API keys / Bearer tokens / JWT / URL-inline passwords / emails / non-loopback IPv4 / home paths / high-entropy hex strings, a Tests tab driving 6 backend probes + 2 frontend benchmarks, multi-format export (Plain text / JSON / NDJSON / CSV), and a ZIP diagnostic bundle. Three new MCP tools expose the same surface to agents: aeroftp_debug_snapshot, aeroftp_debug_run_test, aeroftp_benchmark.
+  Fixed
+  - IntroHub empty-state flash on Saved Servers: returning to the IntroHub after a connected session or after a Discover → Saved Servers tab switch no longer flashes the "Get started" empty state for a frame. MyServersPanel initialises its servers state synchronously from localStorage at first mount, then reconciles asynchronously against the vault. IntroHub and the main App keep MyServersPanel mounted across tab and screen transitions instead of unmounting/remounting it.
+  - AeroFile copy/move-to-other-panel intermittent failure: the right-click action could read the wrong source panel when activeLocalPanelId was set in the same event. transferLocalSelectionAcrossPanels now accepts an explicit sourceOverride argument and the context menu items pass the panel id captured at right-click time. F5 / F6 keyboard paths unchanged.
+  - AeroFile inline rename refresh: F2 / click-to-rename on a file in the right panel now refreshes the right panel (previously always refreshed the left). When both panes point at the same directory both refresh.
+  - AeroVault Save on local vaults: the footer "Save" button is no longer a no-op for local vaults. Local vaults persist on every backend operation (vault_v3_add_files / delete / move all call save_open_vault internally), so "Save" is now a confirm-and-close: it returns to the vault home screen. Remote vaults keep their existing handleSaveRemoteAndClose path.
+  - Log level fanout from tauri_plugin_log: the global level is back to Info with Trace scoped to the aeroftp / ftp_client_gui_lib crates only. Without the scope, the I/O reactor crates (mio, hyper, rustls, h2) emitted Trace lines that the DebugPanel webview-target forwarded via IPC, stalling the app at startup after the first mio::poll event.
+  - i18n debug.tabs.tests: the Tests tab in the DebugPanel was rendering the raw key. Added to en.json and propagated across all 47 locales.
+  Downloads:
+  - Windows: .msi installer, .exe, or .zip portable (no installation required)
+  - macOS: .dmg disk image
+  - Linux: .deb, .rpm, .snap, or .AppImage
+  Download AeroFTP
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v3.7.9
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

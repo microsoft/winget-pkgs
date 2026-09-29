@@ -1,0 +1,153 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: HulubuluSoftware.AdvancedRenamer
+PackageVersion: "4.14"
+PackageLocale: en-US
+Publisher: Hulubulu Software
+PublisherUrl: https://www.advancedrenamer.com/
+PublisherSupportUrl: https://www.advancedrenamer.com/support
+PrivacyUrl: https://www.advancedrenamer.com/privacy
+Author: Kim Jensen
+PackageName: Advanced Renamer
+PackageUrl: https://www.advancedrenamer.com/download
+License: Proprietary
+LicenseUrl: https://www.advancedrenamer.com/license
+Copyright: Copyright (c) Hulubulu Software by Kim Jensen
+ShortDescription: Batch file renaming utility for Windows and Mac.
+Description: |-
+  Advanced Renamer is a program for renaming multiple files and folders at once. By configuring renaming methods the names can be manipulated in various ways.
+  It is easy to set up a batch rename using multiple methods on a large amount of files. The 13 different methods enables you to change the names, and timestamps of files in one go. The files can also be copied or moved to new locations based on information in the files.
+  With Advanced Renamer you can construct new file names by adding, removing, replacing, changing case, or giving the file a brand new name based on known information about the file.
+  Before performing the operations on the files you can verify that the output will be correct and if you perform the rename and regret it, you can undo the complete batch.
+Moniker: advancedrenamer
+Tags:
+- file
+- folder
+- rename
+- renamer
+- renaming
+ReleaseNotes: |-
+  New tag: <Switch>
+
+  The new tag <Switch> can be used to switch between two or more values, each item in the list getting the next value in the sequence. When the last value is reached, the sequence starts over from the first value.
+
+  This is how you can switch between odd and even or a sequence of letter:
+  <Switch:Odd:Even>
+  <Switch:A:B:C:D>
+
+  Tag modifiers
+
+  From time to time I have seen users try to use tags within tags, which doesn't work, but could be very useful. Instead a new concept has been added named Tag Modifiers. This is a set of special parameters that can be added to tags, to modify their value before inserting into the filename. This is an example of how you can get the artist name in uppercase:
+  <Artist:upper>
+  Or the first 10 characters of the artist name:
+  <Artist:substr:1:10>
+  Or both:
+  <Artist:substr:1:10:upper>
+  Full list of tag modifiers:
+  - default:text
+  - alt:tagname
+  - append:text
+  - prepend:text
+  - suffix:text
+  - prefix:text
+  - pad:length:character
+  - trim
+  - upper:pos:count
+  - lower:pos:count
+  - titlecase:pos:count
+  - substr:pos:count
+  - rsubstr:pos:count
+  - remove:pos:count
+  - insert:text:pos
+  - replace:replace:with
+  - word:index:count
+  - add:number
+  - subtract:number
+  Learn more about tag modifiers in the Tag Modifiers section of the user guide.
+  To be able to implement this new feature, it was necessary to completely rewrite how tags are parsed. As a side effect, the parsing is now 30% faster for larger batches.
+
+  Changes to Remove Method
+
+  The Remove method has the remove type Numbers, but the opposite has been missing. The options "Not numbers" has now been added.
+
+  Some remove types now have the option to get a list of exception characters. This can be used if you want to remove all special characters except a few. For example, you can remove all non-word characters except the dash (-) character.
+
+  Thumbnails in item list
+
+  A feature from version 3 that has been missing is the ability to show thumbnails in the item list. This has now been added back. The thumbnails will be shown in the Filename column. The list is still displayed as a vertical list and not in tiles, which was supported in version 3.
+
+  The source of the thumbnails is the same as for the preview panel. Future versions will add support for extracting thumbnails from more file formats.
+
+  Export to HTML
+
+  The export window has been extended with the option to export the list to HTML format. It will export the same data as the CSV format, but formattet as a HTML table. If you choose the Data Layout "Details" it will export a vertical table for each file. You can choose to also export the image. The generated HTML will have a local link to the file, so if you are exporting the HTML to a website, remember to change those links.
+
+  Support for email metadata
+
+  If you want to rename emails and use metadata fields like Subject, Date or Receiver names and emails on the filename, you can now do that with the new tags, with support for .eml and .msg files:
+  - <Subject>
+  - <Date>
+  - <From>
+  - <FromName>
+  - <FromEmail>
+  - <To>
+  - <ToName>
+  - <ToEmail>
+  - <Cc>
+  - <CcName>
+  - <CcEmail>
+  - <Bcc>
+  - <BccName>
+  - <BccEmail>
+  If an email has multiple recipients, the tags will return a comma separated list of all recipients. If you only want the first, use a numeric parameter like this: <ToName:1> or <ToEmail:1>.
+  Learn more about the new email tags.
+
+  New parameter for Word tag
+
+  The <Word> tag has been extended with a second parameter to specifify the number of words to return. <Word:1:3> will return the first three words of the filename. Any word separator between the words will be preserved. If the filename is "This is a long filename" the result will be "This is a", while the result of "This-is-a-long-filename" will be "This-is-a". If the filename has less words than specified, it will return all the words.
+
+  Exif Sub second
+
+  The behavior of the sub second field has changed to give a more correct result. Previously, the field was interpreted as a two digit field with the possibility of the field being longer, sometimes resulting in wrong results for small values. The reality is that the EXIF specification doesn't specify the length of the sub second field, instead it is up the the camera maker to choose a convention, which can vary from 1 to 6 digits. The program will now correctly interpret the length of the sub second field and show the correct amount of digits. It is still possible to add extra zero padding to the sub second based tags.
+
+  Full list of changes in version 4.14
+  - New tag: <Switch:A:B:C> which will alternate between the values A, B, and C for each item in the list
+  - Tag modifiers. Added support for modifiers in tags, <Artist:lower> or <Artist:substr:1:10> will return the artist in lower case or the first 10 characters of the artist name
+  - Remove method: Added Remove Type: Not numbers
+  - Remove method: Added field Except (character exceptions) for use with Remove Types: Word characters, Non-word characters, Numbers, and Not numbers
+  - Support reading metadata from .epub e-book files
+  - Support reading metadata from email formats .eml and .msg email files
+  - Native support for reading metadata from .raf files
+  - Item details: Added Copy Table to right click
+  - Show thumbnails in item list
+  - Settings: Disable replacing unsupported characters from parsing tags
+  - Settings: Disable code suggestions for script method
+  - New export options: Export to HTML
+  - List right click: Copy to clipboard
+  - Added a second parameter to <Word:X> tag to specify the number of words to return, like this: <Word:2:3> will return 3 words, starting from word 2
+  - New faster tag parser
+  - Fixed random tag <Rand> in some cases giving the same value over and over
+  - Script method: Rearranged buttons and moved JS Console button from main toolbar to script method panel, renamed to "Log" showing the number of log lines on the button
+  - Fixed <Inc Nr> tag sometimes getting the zero padding wrong when the start value is between 2 and 9
+  - Improved performance of <Inc Nr> tag
+  - Fixed the Last Result panel showing buttons on top of each other when using some languages
+  - List method: Right click popup was missing
+  - Improvements when converting methods from version 3 to version 4
+  - Improved how audio and video codecs are read from .mkv files. Note, <CodecId> is now divided into Audio and Video tags, and <CodecId> is no longer available
+  - List replace method: Fixed bug when using tags on other lines than the first line
+  - List replace method: The remove button did not work for the top row
+  - Export of CSV will no longer include columns with no data
+  - Fixed reading BitDepth from .mov files
+  - Sub second values are now treated as text instead of numbers. The reason being the Exif spec not specifying how many digits should be used, and some cameras using 2 digits, while others use 3 or 4
+  - Correcting how certain Exif values are displayed
+  - Word separator limited to only support ASCII characters to avoid unicode issues
+  - Added Persian and Hungarian translation
+  - Fixed some unicode issues in new case method
+ReleaseNotesUrl: https://www.advancedrenamer.com/whatsnew_v4
+PurchaseUrl: https://www.advancedrenamer.com/compare
+Documentations:
+- DocumentLabel: User Guide
+  DocumentUrl: https://www.advancedrenamer.com/user_guide/v4/gettingstarted
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

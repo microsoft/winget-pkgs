@@ -1,0 +1,85 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Nub.Nub
+PackageVersion: 0.9.0
+PackageLocale: en-US
+Publisher: nub contributors
+PublisherUrl: https://nubjs.com/
+PublisherSupportUrl: https://github.com/nubjs/nub/issues
+Author: nub contributors
+PackageName: Nub
+PackageUrl: https://nubjs.com/
+License: MIT
+LicenseUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 nub contributors
+CopyrightUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+ShortDescription: The all-in-one JavaScript toolkit that augments Node.js instead of trying to replace it.
+Description: "An all-in-one toolkit for Node.js. One Rust binary to run your files and scripts, install dependencies, and manage Node itself — a Bun-like modern DX on top of the node you already have. There's no new runtime to adopt and no lock-in: every augmentation rides on Node's own public extension surfaces."
+Moniker: nub
+Tags:
+- javascript-runtime
+- node-version-manager
+- nodejs
+- package-manager
+- script-runner
+ReleaseNotes: |-
+  Nub now applies a packageExtensions compatibility database to every install, repairing packages whose published code imports dependencies their own manifest never declares.
+  Important
+  Two package.json root fields changed, and one of them now errors. The top-level build allowlist is renamed allowBuilds → allowScripts, matching the map npm 12 reads from the same slot (npm/rfcs#868); a project still carrying a top-level allowBuilds is refused with ERR_NUB_ALLOW_BUILDS_RENAMED rather than warned, because honoring neither key would silently drop the map's explicit false denials. pnpm's own allowBuilds in pnpm-workspace.yaml or under package.json#pnpm is untouched. Separately, auditConfig, allowUnusedPatches and allowNonAppliedPatches are no longer read from the package.json root — no package manager reads any of the three there, and nub audit --ignore <id> already covers the audit case.
+  Dependency compatibility database
+  A package whose published code imports something its manifest never declares resolves under npm's flat node_modules — the upward directory walk finds a copy something else installed — and fails under an isolated layout. packageExtensions repairs the manifest at resolve time.
+  ──────────────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────
+  Change                    │What it does                                                                                                                                                                                                                                                                                                                               │PR
+  ──────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────
+  Ecosystem catalogs applied│The vendored Yarn database plus pnpm's additions, 161 entries, were gated on the embedder being standalone aube, so Nub applied none of them. nub install && node -e 'require("reactcss")' failed with Cannot find module 'react'; it now resolves.                                                                                        │#905
+  ──────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────
+  Derived database bundled  │Adds the machine-derived database published as @nubjs/extensions, produced by running Nub's phantom detector over the 10,000 most-downloaded packages. It is a strict superset of Yarn's. Of the 654 entries Yarn lacks, 25 add a hard dependencies edge and the rest are optional peers that install nothing and only repair strict       │#907
+                            │layouts.                                                                                                                                                                                                                                                                                                                                   │
+  ──────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────
+  Lockfile reuse on drift   │A packageExtensions edit discarded the lockfile but still handed the old graph to the resolver as a reuse hint, so the edit rewrote the checksum, installed nothing and reported "Already up to date". The hint is now withheld on real drift.                                                                                             │#906
+  ──────────────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴─────────
+  Both layers are declined together by ignore-compatibility-db=true. Neither is read by the lockfile packageExtensionsChecksum, so a database refresh cannot drift a lockfile or abort a frozen install.
+
+  The nub export condition
+  Nub is a registered WinterTC runtime key, so a package can carry a nub branch in its exports map the way it carries bun or deno ones. Every CLI-augmented run now passes --conditions=nub to Node, alongside whatever the project declares in nub.jsonc or a tsconfig customConditions. Conditions are a set, so a package with no nub key resolves exactly as it does on plain Node.
+  Compat mode is unaffected: --node and NODE_COMPAT both skip the option builder entirely, so a compat run keeps Node's own condition set. The standalone @nubjs/loader also leaves the condition set alone, because its contract is that a file resolves identically under it, under tsx, and under plain Node. (#913)
+
+  Package manager
+  ──────────────┬────────────────────────────────────────────────────────────────────────┬─────────
+  Area          │What changed                                                            │PR
+  ──────────────┼────────────────────────────────────────────────────────────────────────┼─────────
+  pnpmfile      │preResolution runs on every install and receives pnpm's lockfile shape  │#837
+  ──────────────┼────────────────────────────────────────────────────────────────────────┼─────────
+  npm lockfile  │A link: directory dependency emits its link pair                        │#848
+  ──────────────┼────────────────────────────────────────────────────────────────────────┼─────────
+  npm workspaces│Importer detection fixed, and afterAllResolved gets pnpm's lockfile     │#855
+                │shape                                                                   │
+  ──────────────┼────────────────────────────────────────────────────────────────────────┼─────────
+  Manifests     │Duplicate package manifest fields are accepted rather than rejected     │#718
+  ──────────────┼────────────────────────────────────────────────────────────────────────┼─────────
+  Manifests     │package.json line endings and the EOF newline are preserved on write    │#583
+  ──────────────┼────────────────────────────────────────────────────────────────────────┼─────────
+  Lifecycle     │Dependency lifecycle builds run in dependency order                     │#727
+  ──────────────┼────────────────────────────────────────────────────────────────────────┼─────────
+  Store         │Remix 3 projects get a project-local store                              │#849
+  ──────────────┼────────────────────────────────────────────────────────────────────────┼─────────
+  Environment   │Installs degrade gracefully inside coding-agent sandboxes               │#854
+  ──────────────┴────────────────────────────────────────────────────────────────────────┴─────────
+
+  Runtime
+  ─────────────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬───────────────────
+  Area             │What changed                                                                                                                                                                                              │PR
+  ─────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────
+  Worker threads   │--js-defer-import-eval is injected from the load hook instead of argv, and the argv-only flag signal now survives the worker-thread boundary — a Next.js 16 and Turbopack build died on the previous shape│#856, #830
+  ─────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────
+  Standalone loader│The CommonJS cache is preserved under standalone loader imports                                                                                                                                           │#892
+  ─────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────
+  Transpiler       │Inspected source is reused for JavaScript lowering                                                                                                                                                        │#897
+  ─────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────
+ReleaseNotesUrl: https://github.com/nubjs/nub/releases/tag/v0.9.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://nubjs.com/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

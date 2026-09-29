@@ -1,0 +1,82 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: QingJ01.Pebble
+PackageVersion: 0.1.5
+PackageLocale: en-US
+Publisher: qingj01
+PublisherUrl: https://pebble.byebug.cn/
+PublisherSupportUrl: https://github.com/QingJ01/Pebble/issues
+PackageName: Pebble
+PackageUrl: https://pebble.byebug.cn/
+License: AGPL-3.0
+LicenseUrl: https://github.com/QingJ01/Pebble/blob/HEAD/LICENSE
+Copyright: © 2026 Pebble
+ShortDescription: A local-first desktop email client for people who want a calmer, more private inbox.
+Description: |-
+  Pebble is a desktop mail client built with Rust, Tauri, and React. It keeps mail data, the search index, attachments, rules, and application settings on your device by default.
+  The app is designed around a few practical ideas:
+  - Your mailbox should stay readable, fast, and quiet.
+  - Email workflows should be local-first instead of cloud-dashboard-first.
+  - Privacy controls should be explicit, visible, and easy to override per message.
+  - Search, snooze, rules, and a Kanban board should work together instead of living in separate tools.
+  Pebble currently supports Gmail, IMAP, and experimental Outlook accounts.
+
+  Highlights
+
+  Local-first privacy
+  - Local SQLite database for messages, folders, labels, rules, and settings.
+  - Local Tantivy full-text index for fast search.
+  - Attachments are stored on disk under the app data directory.
+  - OAuth tokens and credentials are encrypted with a per-device key.
+  - No telemetry.
+  - Network requests are limited to features you configure: mail sync, translation, and optional WebDAV settings backup.
+
+  Mail workflow
+  - Unified inbox across multiple accounts.
+  - Gmail, IMAP, and experimental Outlook support.
+  - Threaded and message-list views.
+  - Archive, delete, star, mark read, batch actions, and restore flows.
+  - Snooze messages and bring them back later.
+  - Full-text search and advanced filters.
+  - Rules engine for automatic organization.
+
+  Productivity tools
+  - Kanban board with Todo, Waiting, and Done columns.
+  - Command palette and keyboard-first navigation.
+  - Built-in translation providers with bilingual reading.
+  - Dark and light themes.
+  - English and Chinese UI.
+  - Optional WebDAV backup for settings, rules, Kanban cards, and Kanban notes.
+Tags:
+- email
+- mail
+ReleaseNotes: |-
+  Added
+  - Added independent local account labels, visible alongside mailbox addresses, with v3 backup support and imports from v1/v2 backups (#79).
+  - Added OAuth mailbox verification and an in-place repair preview that preserves existing messages, user names, labels and account IDs (#78, #79).
+  - Added a one-time sender-name notice with a preview and a shortcut to account settings (#77).
+  - Added a local address book with searchable contacts, multiple labeled email addresses, favorites, notes, and quick create/edit actions from message participants (#81).
+  - Added recipient suggestions that prioritize saved contacts while retaining recent correspondents, with controls to suppress unwanted recent addresses (#81).
+  - Added standards-compatible vCard import and export with duplicate merging, partial-error reporting, UTF-8/folded-line support, and safe file/card limits (#81).
+  - Added contacts to local file and WebDAV settings backups, with backward-compatible imports (#81).
+  Fixed
+  - Fixed partial Outlook sync updates clearing message subjects, bodies, metadata, and attachments after read or flag changes (#90).
+  - Fixed SMTP and Gmail dropping configured sender names. Structured From headers now support Unicode and punctuation, and outgoing retries preserve the stored sender identity (#77).
+  - Outlook now clearly shows its provider-managed sender name; changing a local label does not change the external identity. New OAuth accounts bind to a verified provider identity, and OAuth addresses cannot be changed through ordinary account editing (#77, #79).
+  - Settings restore preserves existing OAuth mailbox addresses and connected credentials instead of silently replacing them with another mailbox from a backup.
+  - Fixed copied-text feedback leaving a timer running after its popover was closed.
+  - Fixed vCard export/import losing whitespace at folded boundaries and treating carriage returns inside notes as new contact properties.
+  - Fixed participant actions associating a newly saved contact with an email address removed in the editor; recent-suggestion removal is now reachable by keyboard.
+  - Blocked queued SMTP sends after the account mailbox address changes, while retaining frozen names when only a name changes.
+  - OAuth remote drafts now use the same verified identity and connection as sending. Failed identity checks preserve encrypted local drafts without uploading them.
+  - Corrected backup restore feedback to explain that existing OAuth connections and mailboxes with local data are preserved.
+  Upgrade notes
+  - Review existing sender names before sending: the old “Display name” setting is now included in SMTP/Gmail outgoing mail. Use the separate “Account label” for internal descriptions. Previously delivered messages are unchanged.
+  - Queued messages retain their original identity. Messages with missing or incompatible identities stop automatic retries and remain visible for review; unknown send outcomes are never automatically resent.
+  - Outlook sender names remain controlled by the mailbox service. This change does not enable aliases or delegated sending, and recipient address books may affect how names appear.
+  - New backups use schema v3. Upgrade other clients before importing them. Existing OAuth connections are preserved during restore; a new account can still restore its saved credentials. Settings backups do not include message bodies or attachments.
+  - Automated tests and package builds cover client behavior. Live SMTP/Gmail/Outlook recipient-side delivery has not been exercised for this release; provider rewriting and recipient address-book display remain outside the client guarantees. Verify your sender name with a test message before formal use.
+ReleaseNotesUrl: https://github.com/QingJ01/Pebble/releases/tag/v0.1.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

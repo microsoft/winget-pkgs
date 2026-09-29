@@ -1,0 +1,73 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: prefix-dev.pixi
+PackageVersion: 0.76.0
+PackageLocale: en-US
+Publisher: prefix-dev
+PublisherUrl: https://pixi.sh/
+PublisherSupportUrl: https://github.com/prefix-dev/pixi/issues
+Author: pixi contributors
+PackageName: pixi
+PackageUrl: https://github.com/prefix-dev/pixi
+License: BSD-3-Clause
+LicenseUrl: https://github.com/prefix-dev/pixi/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2023, prefix.dev GmbH
+CopyrightUrl: https://github.com/prefix-dev/pixi/blob/main/LICENSE
+ShortDescription: A cross-platform, multi-language package manager and workflow tool
+Moniker: pixi
+Tags:
+- conda
+- conda-environment
+- conda-packages
+- hacktoberfest
+- package-management
+- package-manager
+- package-manager-tool
+- python-virtual-environment
+- rust
+- rust-lang
+ReleaseNotes: |-
+  [0.76.0] - 2026-08-03
+  ✨ Highlights
+  A single Python file can now carry its own environment. Pixi reads PEP 723 inline metadata, and --script works on init, run, add, remove, lock, list, tree, and workspace export.
+  # /// script
+  # requires-python = ">=3.11"
+  # dependencies = ["rich>=13.9.2"]
+  # ///
+  import rich
+  rich.print("Hi from [bold magenta]hello.py[/bold magenta]!")
+  pixi run --script hello.py is the whole setup: no pixi.toml, no .pixi folder, and no lock file unless you ask for one with pixi lock --script.
+  PEP 723 only covers Python and PyPI, so Pixi reads tool.pixi for the rest. This greatly extends the script's capabilities, for example to add conda dependencies:
+  # /// script
+  # dependencies = ["httpx"]
+  # [tool.pixi.workspace]
+  # channels = ["conda-forge"]
+  # [tool.pixi.dependencies]
+  # gdal = "*"
+  # ///
+  pixi init --script, pixi add --script <file> gdal, and pixi add --script <file> --pypi httpx write that block for you. Scripts don't have to be local either: pixi run --script takes a URL, a Gist page (that one builds CPython 3.16 from git first), or - to read from stdin.
+  Thanks @manzt for building this out across five PRs, see the standalone scripts docs for the rest. This release also adds [package.run-exports], an lfs field for git dependencies, and configurable channel priority.
+  Added
+  - Support PEP 723 scripts with --script by @manzt in #6648
+  - Support PEP 723 scripts in pixi list by @manzt in #6726
+  - Support [package.run-exports] in package manifests by @Hofer-Julian in #6696
+  - Run PEP 723 scripts from URLs by @manzt in #6728
+  - Resolve GitHub Gist scripts by @manzt in #6739
+  - Run PEP 723 scripts from standard input by @manzt in #6740
+  - Update rattler and support flexible channel priority by @Hofer-Julian in #6743
+  - Add lfs field to git dependencies by @Hofer-Julian in #6744
+  Changed
+  - Point the uv cache at the pixi cache directory by @wolfv in #6712
+  - Resolve the target subdir to the declared workspace platform by @wolfv in #6715
+  - Strip ANSI escapes from rendered diagnostics in snapshots by @ruben-arts in #6735
+  Documentation
+  - Make more use of the rich platform syntax by @ruben-arts in #6711
+  Fixed
+  - Force reinstall with setuptools in ros backend by @ruben-arts in #6713
+  - Fix pre-commit during backends release script by @lucascolley in #6719
+  New Contributors
+  - @manzt made their first contribution in #6740
+ReleaseNotesUrl: https://github.com/prefix-dev/pixi/releases/tag/v0.76.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

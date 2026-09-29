@@ -1,0 +1,57 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: IcyHotY2K.QuickImageViewer
+PackageVersion: 2.210.0.302
+PackageLocale: en-US
+Publisher: IcyHotY2K
+PublisherUrl: https://github.com/icyhoty2k
+PublisherSupportUrl: https://github.com/icyhoty2k/QuickImageViewer/issues
+PackageName: QuickImageViewer
+PackageUrl: https://github.com/icyhoty2k/QuickImageViewer
+License: AGPL-3.0
+LicenseUrl: https://github.com/icyhoty2k/QuickImageViewer/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 All rights reserved, Ivan Hristov Yanev
+ShortDescription: Fast native Windows image viewer.
+Tags:
+- cpp
+- fast-image-viewer
+- image-viewer
+- lightweight-app
+- native-cpp
+- no-install
+- performance-optimized
+- portable-exe
+- webp
+- win32
+ReleaseNotes: |-
+  Maintenance release focused on decoder safety, the empty-viewer rendering path, and diagnostics coverage.
+  Security and robustness
+  - Targa colour-map decoding: out-of-bounds read on a crafted file. A pixel index below the map's first index passed through the bounds test rather than failing it — both fields are uint16_t, so the subtraction promoted to a negative int and wrapped to near SIZE_MAX, and for a difference of exactly −1 the offset arithmetic wrapped back to zero. A file declaring cmFirst = 1 with a pixel index of 0 was enough to reach a wild pointer. The index is now rejected before the subtraction.
+  - PNM header fields no longer overflow. Width, height and maximum-value parsing accumulated with v = v * 10 + d, which is undefined behaviour on a long run of digits and, in a release build, wrapped to values that passed the range checks below it. Parsing now saturates at INT_MAX, which every caller already treats as a rejection.
+  - PNM samples are clamped before scaling. The ASCII variants (P1/P2/P3) read samples without reference to maxVal, so a malformed file could hand the scaler a value that overflowed on its way to a byte. Samples outside the declared range are clamped.
+  Rendering
+  - The empty-viewer placeholder, the folder overlay and the window title are now driven from a single composition rather than three code paths that could disagree about what is on screen.
+  - Folder overlay text layout is built once and reused instead of being recomposed per frame.
+  - Placeholder rendering is consistent between the Direct2D and GDI back ends.
+  Diagnostics
+  - Slideshow start and stop are recorded in the general log.
+  - The network log now covers the beacon, the blacklist, client and server lifecycle, and TLS handshake outcomes — arrivals, departures and refusals name the peer address and port, so two connections from one host can be told apart.
+  - Logging remains off by default and costs a single atomic read per record point while it is off.
+  Fixes
+  - Playlist sort order is applied consistently when the order is changed from the menu.
+  Documentation
+  - The supported-format tables in the README and on the site now list every format the application actually decodes, including JPEG XR, DDS, camera RAW (DNG/CR2/CR3/NEF/ARW), Targa and APNG, along with the extension aliases each accepts.
+  - The shortcut reference has been corrected across the help panel, the README and the site. Every colour effect requires Ctrl — the plain presses of those keys are navigation. The previous tables listed the bindings as they were before that change.
+  - Added the missing entries for Ctrl+F3 (clear the VRAM cache), U (thumbnail strip visual effects), Ctrl+Shift+Enter (push this position to every connected instance), Right Shift as an alternative directory-panel toggle, Ctrl+O in the Server Log panel, and the -slideshowTransitionSource, -slideshowTransitionOrder and -slideshowTransitions command-line switches.
+  - Documented the Announce (beacon) item in the TCP/IP menu.
+  - Removed a stale entry claiming F12 cleared the thumbnail cache; that moved to Ctrl+F3 when F12 became the mirroring toggle.
+  Installation
+  Single portable executable, 9.8 MB. Windows 10 or newer, x64.
+  The C runtime is linked statically — no Visual C++ Redistributable is required. Nothing is installed and nothing is written outside the registry keys the application uses for its own settings.
+ReleaseNotesUrl: https://github.com/icyhoty2k/QuickImageViewer/releases/tag/v2.210.0.302
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/icyhoty2k/QuickImageViewer/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

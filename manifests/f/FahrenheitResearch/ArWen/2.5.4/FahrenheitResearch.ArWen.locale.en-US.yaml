@@ -1,0 +1,66 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.ArWen
+PackageVersion: 2.5.4
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/arwen/issues
+Author: Fahrenheit Research
+PackageName: ArWen
+PackageUrl: https://github.com/FahrenheitResearch/arwen
+License: Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+Copyright: Copyright © Fahrenheit Research
+CopyrightUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+ShortDescription: 'ArWen: GPU-native WRF-ARW-class regional weather model, verified against WRF v4.6.1'
+Description: "ArWen is an independent, GPU-native implementation of a WRF-ARW-class regional atmospheric model. It is not affiliated with or endorsed by NCAR or UCAR. The name is a wordmark for \"the ARW solver, GPU-native\"; the Python package is currently named gpuwm. Safety. ArWen is a research and educational tool. It is never a substitute for official forecasts and warnings from your national meteorological service. Do not use it to make safety decisions. Regional numerical weather prediction at convective scale has mostly required institutional clusters, which means most of the world runs on global-model guidance at 10-25 km. ArWen's aim is to put a verified, kilometer-scale limited-area model on a single consumer GPU: pick a point, size a nest ladder to your card, pull public analysis data, and run a 1 km (or 500 m) simulation of your own area on hardware you own -- especially in places where no national convection-permitting model exists."
+Moniker: arwen
+ReleaseNotes: |-
+  ArWen 2.5.4
+  Two-way nests and nest slots that open and close on the storm.
+  New:
+  - Two-way nest feedback. feedback = 1 runs WRF's feedback transaction with
+    WRF's parent smoothers, pinned bitwise to the Fortran, on both the native
+    and prepared-tree runners. Off by default; feedback = 0 runs are
+    byte-identical to 2.5.3.
+  - Pressure spawn and retire triggers. A dormant nest slot opens when a low
+    deepens and retires when it fills. configs/cyclone_nest_slots_12km.toml
+    ships three slots with rearm.
+  - Storm-following upgrades. The tracker centres on the 850 hPa height
+    minimum inside a 50 km disc and refines through a finer nest; a
+    containment nest slides the mover's parent while the mover stays
+    earth-fixed.
+  - Statics corridors. --statics-corridor seals child-resolution statics at
+    preparation time, so a prepared bundle hosts a moving nest with no
+    runtime geography.
+  - A track file. [relocation.track] writes the vortex track from the same
+    fix that steers the nest. output_level picks the reported surfaces
+    without touching what steers, and the eight-surface cap is gone.
+  - Tracker defaults: level_hpa 850, radius_km 50. Sea-level tracking is
+    level_hpa = 0; the threshold bands are disjoint, so a config that means
+    one and reads as the other refuses at load.
+  - --cycle latest resolves for every registered source from its own
+    registry row. A reanalysis has a latest like anything else.
+  - A prepared-tree run with a live follower checkpoints and resumes,
+    including across a move, byte-identical.
+  Fixed:
+  - A moved nest keeps its surface-radiation carriers; the shipped radiation
+    defaults no longer refuse at the first move.
+  - Spawn receipts append per boundary instead of rewriting the ledger.
+  - run-plan --estimate on a missing config path refuses by name instead of
+    a traceback.
+  - A resumed run publishes real outgoing longwave instead of zeros.
+  - A forecast whose nest moved can be resumed; the move chain replays on
+    restore.
+  - Sizing and pace estimates work on an install with no GPU runtime.
+  Two-way feedback, the storm-following upgrades, the track file and the OLR
+  restart carry were contributed by Roch.
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/arwen/releases/tag/v2.5.4
+InstallationNotes: |-
+  This application requires an NVIDIA GPU with CUDA support to run.
+  Will not function on integrated graphics or non-NVIDIA hardware.
+  Without compatible hardware, the application will fail to launch.
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

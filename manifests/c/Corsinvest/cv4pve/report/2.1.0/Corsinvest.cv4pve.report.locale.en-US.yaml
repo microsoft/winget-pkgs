@@ -1,0 +1,72 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Corsinvest.cv4pve.report
+PackageVersion: 2.1.0
+PackageLocale: en-US
+Publisher: Corsinvest Srl
+PublisherUrl: https://www.corsinvest.it/
+PublisherSupportUrl: https://www.corsinvest.it/cv4pve
+PrivacyUrl: https://www.corsinvest.it/privacy
+Author: Corsinvest Srl
+PackageName: cv4pve-report
+PackageUrl: https://github.com/Corsinvest/cv4pve-report
+License: GPL-3.0
+LicenseUrl: https://github.com/Corsinvest/cv4pve-report/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2026 Corsinvest Srl
+CopyrightUrl: https://github.com/Corsinvest/cv4pve-report/blob/master/LICENSE.md
+ShortDescription: Report Tool for Proxmox VE
+Description: |-
+  cv4pve-report exports your entire Proxmox VE infrastructure to a single
+  navigable Excel file — nodes, VMs, containers, storages, users, firewall
+  rules, backup jobs, resource pools and more. Every row is a hyperlink to
+  its detail sheet.
+
+  Features:
+  - Single .xlsx file with one sheet per node, VM and storage
+  - Fully navigable — summary rows link to detail sheets
+  - Cluster: users, API tokens, TFA, groups, roles, ACL, firewall, backup jobs, replication, SDN, pools
+  - Nodes: services, network, disks, SMART, RRD metrics, APT updates, SSL certificates, tasks
+  - VMs/CTs: config, network, disks, RRD metrics, backups, snapshots, firewall, QEMU agent info
+  - Storages: content inventory, RRD metrics
+  - Three profiles: Fast, Standard, Full
+  - Works with a read-only API token, no root access required
+Moniker: cv4pve-report
+Tags:
+- corsinvest
+- excel
+- infrastructure
+- inventory
+- proxmox
+- proxmoxve
+- report
+- xlsx
+ReleaseNotes: |-
+  Breaking changes
+  - All formats now produce a single .zip. Excel output used to be a pair of loose files (Report_*.xlsx + Report_*.svg); it is now packed into one Report_*.zip containing report.xlsx and network-diagram.svg. Same logical content, more portable: easier to share, attach to email/tickets, archive, or upload as a CI artifact — and ready for the upcoming --only flag that will produce multiple workbooks per run. To use the workbook, extract the zip and open report.xlsx as before. The --output flag now always writes a .zip; the extension is appended automatically if missing.
+  - Settings renamed — Sheet suffix dropped from section toggles. With three rendering formats (Excel, HTML, JSON-in-progress), the Sheet suffix in settings names was misleading: these flags toggle a section of the report, not a spreadsheet sheet. Rename your existing settings.json if you maintain one:
+    - Cluster.IncludeSheet → Cluster.Include
+    - Cluster.IncludeTasksSheet → Cluster.IncludeTasks
+    - Node.IncludeReplicationSheet → Node.IncludeReplication
+    - Guest.IncludeSnapshotsSheet → Guest.IncludeSnapshots
+    - Guest.IncludeDisksSheet → Guest.IncludeDisks
+    - Guest.IncludePartitionsSheet → Guest.IncludePartitions
+    - Storage.IncludeContentSheet → Storage.IncludeContent
+    - Storage.IncludeBackupsSheet → Storage.IncludeBackups
+  What's new
+  - HTML — per-column filter. Headers backed by short text, flag or hyperlinked values (Node, VmId, Status, Type, …) now carry a hover-revealed funnel icon. Click it to open a dedicated filter input under the column header — the global filter and the per-column filters combine with AND. The big winner is high-cardinality pages like Snapshots (~250 rows for 23 VMs) and RRD Guests (~1600 rows): drilling down to a single VM no longer requires scanning through false positives.
+  - HTML — match-mode toggle (~ / =). Both the global filter and each per-column filter expose a small toggle on the left of the input. ~ is the existing case-insensitive contains match (default). = is exact whole-cell match — essential for short numeric ids like a VM id where 100 would otherwise also match 1014, 260509100047, IP suffixes, ports, etc. The toggle re-applies the filter immediately so you can flip mode mid-query.
+  - HTML — three-state sort. Clicking a sortable header now cycles original → ascending → descending → original. The third click restores the order the engine emitted (e.g. nodes by hostname, snapshots by date) instead of leaving the table sorted by whichever column you last touched.
+  Fixes
+  - Per-sheet Index restored on Excel detail sheets. The clickable index of tables at the top of every node/VM/container detail sheet (lost during the 2.0.0 writers refactor) is back. It now uses a 2-column compact layout — much friendlier on resources with many tables (VM detail with QEMU agent, node detail with full disk/SMART/APT data) — and sits right after the resource identity block instead of at the very top of the sheet.
+  - HTML — header alignment matches column type. Numeric column headers (VmId, Size GB, MaxCount, …) are now right-aligned like their cells; flag headers are centred. A specificity bug introduced with the writers refactor was forcing every header to the left, breaking the visual axis on data-heavy pages.
+  - HTML — global filter input on the cover page. The "Contents" table on index.html lacked the .table-scroll wrapper used elsewhere, which collapsed the gap between the row count and the filter input above it. Wrapped consistently with the rest of the report.
+  Documentation
+  - Settings reference moved to a dedicated guide. The annotated settings.json example, the skip-heavy-sections cheatsheet and the performance tuning notes (MaxParallelRequests, ApiTimeout, QemuAgentTimeout) are now in docs/settings.md. The README keeps the profile comparison matrix inline (it's the decisional content readers actually want at a glance) and links to the full reference.
+  - Per-format reference guides. docs/format-xlsx.md and docs/format-html.md now host the long-form details (sheet order, page layout, sidebar behaviour, export button, hyperlinking rules, …) so the README can stay focused on quickstart and overview.
+  What's Changed
+  - release: 2.1.0 — single-zip output, per-column HTML filter, settings rename by @franklupo in #31
+  Full Changelog: v2.0.1...v2.1.0
+ReleaseNotesUrl: https://github.com/Corsinvest/cv4pve-report/releases/tag/v2.1.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

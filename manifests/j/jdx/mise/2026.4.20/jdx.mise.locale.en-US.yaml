@@ -1,0 +1,55 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jdx.mise
+PackageVersion: 2026.4.20
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://jdx.dev/
+PublisherSupportUrl: https://github.com/jdx/mise
+Author: jdx
+PackageName: mise-en-place
+PackageUrl: https://mise.jdx.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+ShortDescription: Dev tools, env vars, tasks
+Moniker: mise
+ReleaseNotes: |-
+  A focused patch release that cleans up two long-standing lockfile and path-resolution bugs, makes GitHub attestation verification tolerant of regex-based aqua registry URLs, and reworks how the aqua registry is baked into mise.
+  Highlights
+  - mise lock tool@latest now writes a concrete version and heals lockfiles already poisoned with version = "latest".
+  - path: tool versions with relative paths resolve correctly against the config root.
+  - Aqua registry is now baked from the upstream merged registry.yaml, pinned by tag.
+  - GitHub artifact attestation works for registry entries that use regex URLs.
+  Fixed
+  - (config) Relative path: tool versions are now resolved at parse time against the config's root directory (or CWD for CLI args), with ~/ expansion and leading ./ stripped. Previously, a value like path:./packages/logr was joined with installs_path at install time and produced a bogus directory such as ~/.local/share/mise/installs/logr/./packages/logr. (#9320) by @jdx
+  - (lock) mise lock handling of @latest has been overhauled (#9321 by @jdx):
+    - mise lock tool@latest now resolves latest to the newest installed version instead of writing the literal string "latest" into the lockfile.
+    - mise lock no longer produces duplicate [[tools.<name>]] entries when the config uses tool = "latest".
+    - Lockfiles already poisoned with version = "latest" are cleaned up in a single mise lock run.
+  - GitHub artifact attestation verification now works when the aqua registry entry uses a regex in the workflow URL, unblocking installs such as aqua:updatecli/updatecli. (#9327) by @monotek
+  Changed
+  - (aqua) The baked aqua registry source has been swapped for the upstream merged registry.yaml, pinned by tag via crates/aqua-registry/aqua-registry/metadata.json. The build script generates a canonical package-id map plus an alias lookup table, so runtime lookups only parse the selected package YAML. The pinned tag is now visible in mise doctor. (#9043) by @risu729
+  Added
+  - New registry entry: grafana-kubernetes-plugin. (#9300) by @monotek
+  Documentation
+  - A dismissible announcement banner has been added to the docs site, driven by a remote JSON config. Link schemes are restricted to http/https, dismissals persist per-id in localStorage, and the banner height is kept in sync with --vp-layout-top-height via a ResizeObserver. The expires field is respected so banners automatically hide after a given date. (#9326, #9330, #9334) by @jdx
+  Aqua Registry
+  Updated aqua-registry from v4.492.0 to v4.498.0, which includes:
+  - v4.493.0
+  - v4.494.0
+  - v4.494.1
+  - v4.495.0
+  - v4.496.0
+  - v4.497.0
+  - v4.498.0
+  Sponsor mise
+  mise is built by @jdx under en.dev — an independent studio making developer tooling (mise, aube, and more). Development is funded by sponsors.
+  If mise saves you or your team time, please consider sponsoring at en.dev. Individual and company sponsorships keep mise fast, free, and independent.
+  Full Changelog: v2026.4.19...v2026.4.20
+  💚 Sponsor mise
+  mise is built by @jdx under en.dev — an independent studio making developer tooling (mise, aube, and more). Development is funded by sponsors.
+  If mise saves you or your team time, please consider sponsoring at en.dev. Individual and company sponsorships keep mise fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/mise/releases/tag/v2026.4.20
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

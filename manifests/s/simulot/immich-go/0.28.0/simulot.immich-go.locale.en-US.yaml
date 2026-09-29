@@ -1,0 +1,65 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: simulot.immich-go
+PackageVersion: 0.28.0
+PackageLocale: en-US
+Publisher: simulot
+PublisherUrl: https://github.com/simulot
+PublisherSupportUrl: https://github.com/simulot/immich-go/issues
+PackageName: immich-go
+PackageUrl: https://github.com/simulot/immich-go
+License: AGPL-3.0
+LicenseUrl: https://github.com/simulot/immich-go/blob/HEAD/LICENSE
+ShortDescription: An alternative to the immich-CLI command that doesn't depend on nodejs installation.
+Description: Immich-Go is an open-source tool designed to streamline uploading large photo collections to your self-hosted Immich server. It doesn't require NodeJS or Docker for installation. This makes it easy to get started, even for those less familiar with technical environments.
+Tags:
+- golang
+- google
+- immich
+- immich-cli
+- photos
+- takeout
+ReleaseNotes: |-
+  Parallel Uploads
+  On the immich-go side, upload operations are primarily limited by I/O, whether reading takeouts and files or sending files to the server. To improve upload throughput, @jonathan-teamstatus proposed enabling parallel uploads.
+  On my machine, the best performance is achieved when the number of parallel uploads matches the number of cores, resulting in a 2.5x performance gain. I set the default value for the parameter --concurrent-uploads with the number of available cores.
+  Server jobs are paused during the upload (as before), allowing the upload to run at full speed. Once complete, server jobs resume, and the heavy lifting begins (thumbnails, machine learning, video encoding, etc.).
+  image
+  Thank you to the new contributors:
+  - @pmorch made their first contribution in #1006
+  - @Qhilm made their first contribution in #1048
+  - @paultyng made their first contribution in #1045
+  - @jonathan-teamstatus made their first contribution in #993
+  Noteworthy changes
+  Fixed: job pausing / resuming:
+  Only the jobs "thumbnailGeneration", "metadataExtraction", "videoConversion", "faceDetection", "smartSearch" are paused. Those jobs are resumed at the end of the run.
+  Fixed: Windows #1010:
+  The windows folders are now correctly parsed
+  Fixed: Album creation when uploading from an immich server
+  What's Changed
+  - Simulot/issue1055 by @simulot in #1059
+  - add API key permissions by @Qhilm in #1048
+  - make func (t *ImmichExifTime) UnmarshalJSON support hundreths and tenths of seconds too by @pmorch in #1006
+  - Use unix style paths internally and test on windows by @paultyng in #1045
+  - Add concurrent uploads support by @jonathan-teamstatus in #993
+  - docs: add contributing guidelines to improve collaboration by @simulot in #1063
+  - feat: add workflow to validate branch naming conventions and target branches by @simulot in #1064
+  - Feature/documentation-on-concurrency by @simulot in #1066
+  - Bugfix/from-immich-album by @simulot in #1070
+  - Fix issues with image archiving, job pausing, and asset uploads by @simulot in #1072
+  - chore(deps): bump github.com/spf13/pflag from 1.0.6 to 1.0.9 by @dependabot[bot] in #1044
+  - chore(deps): bump github.com/spf13/pflag from 1.0.9 to 1.0.10 by @dependabot[bot] in #1052
+  - chore(deps): bump github.com/rivo/tview from 0.0.0-20241227133733-17b7edb88c57 to 0.42.0 by @dependabot[bot] in #1043
+  - chore(deps): bump actions/checkout from 4 to 5 by @dependabot[bot] in #1039
+  - chore(deps): bump github.com/gdamore/tcell/v2 from 2.8.1 to 2.9.0 by @dependabot[bot] in #1040
+  - chore(deps): bump github.com/go-viper/mapstructure/v2 from 2.2.1 to 2.4.0 in the go_modules group across 1 directory by @dependabot[bot] in #1035
+  - chore(deps): bump github.com/navidys/tvxwidgets from 0.11.0 to 0.11.3 by @dependabot[bot] in #1028
+  - chore(deps): bump golang.org/x/sync from 0.15.0 to 0.16.0 by @dependabot[bot] in #1009
+  - chore(deps): bump golangci/golangci-lint-action from 7 to 8 by @dependabot[bot] in #921
+  - chore(deps): bump actions/setup-go from 5 to 6 by @dependabot[bot] in #1051
+  - chore(deps): bump github.com/samber/slog-multi from 1.4.1 to 1.5.0 by @dependabot[bot] in #1054
+  Full Changelog: v0.27.0...v0.28.0
+ReleaseNotesUrl: https://github.com/simulot/immich-go/releases/tag/v0.28.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

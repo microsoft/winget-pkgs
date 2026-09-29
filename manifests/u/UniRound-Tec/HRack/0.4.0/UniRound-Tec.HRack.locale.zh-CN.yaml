@@ -1,0 +1,98 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: UniRound-Tec.HRack
+PackageVersion: 0.4.0
+PackageLocale: zh-CN
+Publisher: UniRound-Tec
+PublisherUrl: https://github.com/UniRound-Tec
+PublisherSupportUrl: https://github.com/UniRound-Tec/hrack/issues
+PackageName: HRack
+PackageUrl: https://github.com/UniRound-Tec/hrack
+License: Apache-2.0
+LicenseUrl: https://github.com/UniRound-Tec/hrack/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 HRack
+ShortDescription: 面向多 Coding Agent 工作流的桌面终端，保留每个 CLI 的原生 TUI。
+Description: |-
+  HRack（Harness Rack）是一个面向多 Coding Agent 工作流的桌面终端。它保留每个 CLI 原本的 TUI，在外层补上会话状态、注意力提醒、悬浮监控、快速启动和只读工作区浏览。
+
+  解决什么问题？
+  不同 Coding Agent 各有所长，所以一个终端很快就会变成好几个。真正麻烦的不是把它们启动起来，而是一直看着它们：
+  - 切去做别的事，过一会儿回来，才发现 Agent 一直停在权限确认上白等。Codex 和 Gemini CLI 的用户都提出过类似的提醒需求（Codex、Gemini CLI）。
+  - 同时跑几个 Agent 以后，人又开始在终端标签页之间来回找：“到底哪个在等我？”类似问题也出现在 HN 的多 Agent 工作流讨论 和 tmux-claude-session-manager 这类工具里。
+  - 有通知也不一定管用：它可能根本没触发（Codex #8929），不知道 Agent 正在等回答（Codex #13478），或者漏掉交互式 Shell 的输入等待（Gemini CLI #19527）。
+  Vibe Coding 本来就该留点空间给人躺着刷手机、逛 L 站，而不是换一种方式盯进度条。😂
+  HRack 想解决的就是这些每天都会碰到的小麻烦：把会话放在一起，告诉你谁需要处理，再把你带回正确的位置。真正干活的仍然是原来的 CLI，HRack 只是让你不用一直盯着它。
+
+  怎么解决？
+  第一次启动时，HRack 会自动扫描主机和 WSL 中兼容的 CLI；之后直接使用缓存快速启动，也可以随时手动重扫。每个已支持的 Harness 都有自己的 Adapter，把官方 Hooks、SSE、Extension API 或运行时事件收敛成一套统一状态：
+
+  正在思考 · 调用工具 · 需要你 · 本轮完成 · 发生错误
+
+  这些事实会同步到侧边栏、悬浮窗和历史记录，但不会进入终端字符流：
+
+  CLI ── PTY ──────────────────────────────> 原生 TUI
+  └── Hooks / SSE / Extension 事件 ────> Adapter ──> 状态与提醒
+
+  工作区 ── 只读访问 ─────────────────────> 文件树与阅读器
+
+  即使 Observer 失效，PTY 仍会继续运行。HRack 只会降级状态显示，不会拖垮 CLI 会话。
+
+  特性
+  一眼看懂每个 Agent 的状态
+  不同 Agent 可以同时运行。侧边栏会告诉你哪个正在思考、正在调用工具、等待你的确认、已经完成，或者监听能力已经降级。
+  侧边栏收起来，状态仍然看得见
+  主侧边栏可以折叠成紧凑图标栏。内置监控窗仍会汇总所有已关注会话，点击即可回到正确位置。
+  悬浮窗也可以完全自定义
+  默认悬浮窗本身就是一个内置 Renderer。自定义 Renderer 通过同一套公开接口接收真实会话状态，可以使用 HTML、CSS、JavaScript、动画库、Canvas，甚至 Live2D。设置页内置了一份简短 Skill，复制后交给你的 Coding Agent，就能帮你实现并安装自己的悬浮窗。
+  二次元有福了。
+  不离开会话也能阅读代码
+  在终端旁打开只读文件树，查看语法高亮源码并预览 Markdown。Agent 的原生 TUI 仍然保留在左侧。
+  主题、字体和布局都能调整
+  应用主题与终端主题彼此独立；终端字体、字号、导航模式、界面缩放和悬浮窗 Renderer 都可以在设置页配置。
+  主机、WSL，一个入口快速启动
+  从 Home 或快速启动面板打开普通 Shell 和扫描到的 Coding CLI。HRack 支持主机安装和兼容的 WSL 发行版。DeepSeek Harness 只在扫描到本机或 WSL 安装后才显示。
+
+  已支持的 Harness
+  | Harness          | 接入方式                       | HRack 可获得的状态           | 运行环境  |
+  | ---------------- | ------------------------------ | ---------------------------- | --------- |
+  | DeepSeek Harness | 官方 Web 页面 + Runtime Bridge | 已关注会话与生命周期         | 主机、WSL |
+  | Claude Code      | 官方 Hooks                     | 思考、工具、审批、完成状态   | 主机、WSL |
+  | Codex CLI        | Stable Hooks                   | 回合、工具、审批、上下文压缩 | 主机、WSL |
+  | OpenCode         | Server + SSE                   | 会话、思考、工具、问题、权限 | 主机、WSL |
+  | Pi               | Extension API                  | 思考、回复、工具、回合       | 主机、WSL |
+  | Kimi Code        | 官方 Hooks                     | 回合、思考、工具、审批       | 主机、WSL |
+  | Grok Build       | 官方 Hooks                     | 回合、思考、工具、审批       | 主机、WSL |
+  HRack 还可以扫描并启动 Devin CLI、Cline、Qwen Code、Amp、Aider、Goose、Kiro CLI、GitHub Copilot CLI 等注册表入口。仅启动接入的 CLI 暂时不会提供同等级别的状态细节；后续会继续抽象 Adapter 接口，让新的 Harness 可以按需加载。
+Tags:
+- 人工智能
+- 代码
+- 多智能体
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  新增
+  - 新增完整的 HRack Remote：桌面端可生成配对 URL / 二维码，经正式 TLS 公网中继把实时会话状态同步到手机，并支持临时接管终端输入。
+  - 新增 HRack 手机端配套应用：支持扫码或粘贴 URL 配对、会话列表、横屏全屏监听、状态提示音，以及从监听卡片聚焦桌面端对应会话。
+  - 手机端可新建 Claude Code、Codex、OpenCode 等 CLI 会话，并通过桌面端文件选择协议浏览 Windows / WSL 工作区；免审批启动、运行位置和启动参数与桌面端语义一致。
+  - 远程终端支持 ANSI/TUI 实时渲染、控制键、方向键、斜杠指令、持久化缩放比例，以及手机软键盘和横竖屏切换。
+  - 新增 DSH 官方 Web 界面的安全隧道：手机端可查看活跃 DSH 会话、创建会话、发送消息并与桌面端的会话监听及聚焦状态双向同步。
+  - 更新确认弹窗的「更新说明」改为 Markdown 渲染：支持标题、列表、加粗、代码块、表格等 GFM 语法；HTML 仍一律跳过，链接只展示不导航。
+  改进
+  - 远控协议补齐版本协商、消息方向白名单、序号与快照恢复、背压和尺寸上限；断线重连不再把历史 PTY 输出当作新流量重复播放。
+  - 手机终端采用与桌面端一致的网格与字符宽度语义，键盘弹出时整体平移终端而不改变 PTY 行列数，减少 TUI 重排和右侧空白。
+  - 横屏监听状态与桌面悬浮窗对齐，显示 CLI 图标、名称、完成 / 等待确认 / 执行中 / 异常等状态，并复用 HRack 默认提示音。
+  - 公网房间、设备控制权和 DSH 隧道均绑定已认证账户；加入连接撤销、凭据轮换、重连和过期清理边界。
+  修复
+  - 修复手机终端退出输入后无法再次聚焦、滚动时产生 NaN 输入、重连重复回放、字符错位和品牌字形裁切等问题。
+  - 修复 Android 后台切换导致 DSH 会话丢失，以及隧道重连后沿用失效凭据的问题。
+  - 适配新版 DSH 的 --no-open 差异和官方运行时桥接方式；启动失败时自动按兼容参数重试并展示可复制的错误信息。
+  发布说明
+  - 桌面安装包继续提供 Windows x64、macOS Apple Silicon 和 Linux x64；Windows 与 macOS 制品尚未进行商业代码签名，系统首次启动时可能显示安全提醒。
+  - 远程控制需配合已部署的 HRack Remote 服务和手机端应用使用；桌面端不会在手机未主动接管时转发键盘输入。
+ReleaseNotesUrl: https://github.com/UniRound-Tec/hrack/blob/HEAD/CHANGELOG.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

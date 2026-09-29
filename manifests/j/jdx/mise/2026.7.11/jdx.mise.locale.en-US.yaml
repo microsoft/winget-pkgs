@@ -1,0 +1,69 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jdx.mise
+PackageVersion: 2026.7.11
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/jdx/mise
+Author: jdx
+PackageName: mise-en-place
+PackageUrl: https://mise.en.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+ShortDescription: Your dev env, already prepped.
+Description: Your dev env, already prepped. One tool to manage languages, env vars, and tasks per project, reproducibly.
+Moniker: mise
+Tags:
+- cli
+- dev-tool
+- env
+- environment
+- task
+ReleaseNotes: |-
+  This release sharpens task handling around remote files, global config, and tool selectors, trims redundant work from shell activation, and fixes several bootstrap and platform-specific edge cases.
+  Added
+  - config: structured tool definitions now accept version, path, prefix, and ref selectors consistently in root [tools], inline task definitions, task templates, and file-task headers. Exactly one selector is required, and conflicting, missing, or non-string selectors now fail with a clear configuration error instead of silently defaulting or panicking. (#11069 by @risu729)
+    node = { version = "20" }
+    go = { prefix = "1.22" }
+    python = { ref = "main" }
+    shellcheck = { path = "/opt/shellcheck" }
+
+  Fixed
+  - task: remote HTTP and Git-backed task files now have their #MISE headers parsed, so metadata like tools, description, and hide and inline TOML overrides are honored just like local file tasks. Git-backed task files are also made executable after cloning and on cache hits. (#11111 by @Marukome0743)
+  - task: file tasks loaded from user-global or system configs are now correctly treated as global regardless of their include path, so custom global scripts appear under mise tasks --global, stay out of --local, and use the invoking project root. (#11106 by @risu729)
+  - task: mise tasks info, extended listings, task help, and the MCP tasks resource now report every configuration source contributing to a task, with a new config_sources array in JSON output. Changing metadata in a TOML overlay now correctly invalidates the merged file task's cache. (#11098 by @risu729)
+  - watch: mise --env <profile> watch now propagates the selected environment to the watched task, so profile-specific tasks resolve correctly on each rerun. (#11114 by @Marukome0743)
+  - http: raw executables (such as PHP PHARs like Composer) installed via the HTTP backend are now created readable as well as executable (mode 0755 rather than 0711), fixing "Could not open input file" errors for interpreters run by non-owner users. (#11135 by @jdx)
+  - java: mise latest java@<vendor> now prefers the base vendor variant over dashed specializations and sorts multi-feature vendor prefixes correctly. (#11109 by @roele)
+  - config: reject conflicting tool selectors at parse time (see Added). (#11069 by @risu729)
+  - bootstrap: systemd timers can now reference a managed service by its bare TOML key (e.g. unit = "dotfiles-maintain"), which resolves to dev.mise.<name>.service. Fully qualified names like nginx.service are still written verbatim. (#11128 by @jdx)
+  - bootstrap: Homebrew casks that declare auto_updates are now accepted instead of failing with an unsupported-lifecycle error. (#11107 by @casparbreloh)
+  - bootstrap: macOS defaults handling now treats a missing key or domain as unset rather than erroring during initial setup. (#11118 by @roele)
+  - windows: mise uninstall now removes dangling runtime version pointer files (like 16 or latest) and cleans up the now-empty tool directory. (#11095 by @JamBalaya56562)
+
+  Performance
+  - activate: the redundant initial prompt hook that ran immediately after activation is now skipped for bash, zsh, and fish when the session is unchanged, avoiding an extra mise process on shell startup. (#11130, #11131, #11134 by @jdx)
+  - backend: archive extraction and macOS hdiutil/pkgutil waits now run via block_in_place, so parallel installs no longer starve download progress and other tasks of runtime threads. (#11136 by @jdx)
+
+  Registry
+  - Allow the reviewed @nubjs/nub postinstall lifecycle script to run via the npm backend so upgrades keep the ~/.nub/shims hardlinks refreshed; default-deny behavior is preserved for all other packages. (#11126 by @risu729)
+
+  Documentation
+  - environments: clarify mise directory variables (#11127 by @jdx)
+  - Fix dead VersionFox and MCP documentation links (#11117 by @Bartok9)
+  - Add an example showing how to alias multiple tools from one GitHub release (#11110 by @LukasKnuth)
+
+  New Contributors
+  - @Bartok9 made their first contribution in #11117
+  - @LukasKnuth made their first contribution in #11110
+
+  💚 Sponsor mise
+  mise is maintained by @jdx, an open source developer for entire.io, the title sponsor of the jdx.dev open source tools. Development is funded by sponsors.
+  If mise saves you or your team time, please consider sponsoring at jdx.dev. Individual and company sponsorships keep mise fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/mise/releases/tag/v2026.7.11
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

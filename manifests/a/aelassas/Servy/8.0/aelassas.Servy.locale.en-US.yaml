@@ -1,0 +1,134 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: aelassas.Servy
+PackageVersion: '8.0'
+PackageLocale: en-US
+Publisher: Akram El Assas
+PublisherUrl: https://github.com/aelassas
+PublisherSupportUrl: https://github.com/aelassas/servy/issues
+Author: Akram El Assas
+PackageName: Servy
+PackageUrl: https://servy-win.github.io/
+License: MIT
+LicenseUrl: https://github.com/aelassas/servy/blob/HEAD/LICENSE.txt
+Copyright: Copyright (c) 2025 Akram El Assas
+ShortDescription: Servy lets you run any app as a native Windows service with full control over working directory, startup type, process priority, logging, health checks, pre-launch scripts and parameters.
+Description: |-
+  Servy lets you run any app as a native Windows service with full control over the working directory, startup type, process priority, logging, health checks, environment variables, dependencies, pre-launch and post-launch hooks, pre-stop and post-stop hooks, and parameters. It's designed to be a full-featured alternative to NSSM, WinSW, and FireDaemon Pro.
+
+  Servy is digitally signed using a trusted code-signing certificate provided by the SignPath Foundation. This ensures that all Servy executables and installers are verified and secure, giving you peace of mind when using the tool.
+
+  Servy offers a desktop app, a CLI, and a PowerShell module that let you create, configure, and manage Windows services interactively or through scripts and CI/CD pipelines. It also includes a Manager app for easily monitoring and managing all installed services in real time.
+
+  Features:
+  - Clean, simple UI
+  - Monitor and manage all installed services with Servy Manager
+  - Real-time CPU and RAM monitoring with live performance graphs for installed services
+  - Real-time service stdout and stderr output preview in Servy Console
+  - Service dependency tree visualization with status indicators
+  - CLI and PowerShell module for full scripting and automated deployments
+  - Run any executable as a Windows service
+  - Set service name, description, startup type, priority, working directory, environment variables, and dependencies
+  - Environment variable expansion supported in parameters, process paths and startup directories
+  - Run services as Local System, local or domain accounts, Active Directory accounts, or gMSAs
+  - Redirect stdout/stderr to log files with automatic size-based and date-based rotations
+  - Run pre-launch hook before starting the service, with retries, timeout, logging and failure handling
+  - Run post-launch hook after the application starts successfully
+  - Run pre-stop and post-stop hooks before the application stops and after the application stops
+  - Supports Ctrl+C for command-line apps, close-window for GUI apps, and force kill if unresponsive
+  - Prevent orphaned/zombie processes with improved lifecycle management and ensuring resource cleanup
+  - Health checks and automatic service recovery
+  - Browse and search logs by level, date, and keyword for faster troubleshooting from Servy Manager
+  - Export/Import service configurations for easy backups and automation
+  - Service Event Notification alerts on service failures via Windows notifications and email
+  - Compatible with Windows 7-11 x64 and Windows Server editions
+
+  Who is it for?
+  - Developers: Run development servers, scripts, or custom tools as services without extra setup.
+  - Sysadmins & IT professionals: Ensure critical background processes stay alive, monitored, and properly logged.
+  - Teams or organizations: Automate background services reliably across multiple machines.
+Moniker: servy
+Tags:
+- admin
+- automation
+- background-service
+- cli
+- devops
+- dotnet
+- nssm
+- powershell
+- scm
+- service-manager
+- service-supervisor
+- service-wrapper
+- watchdog
+- windows-service
+- windows-tools
+- winsw
+ReleaseNotes: |-
+  Servy 8.0 introduces many fixes across all components. The full release notes are available in the expandable section below.
+  Full Changelog
+  Click to expand release notes!
+  - feat(core): allow MaxRestartAttempts to be set to 0 for unlimited restart attempts (#701)
+  - feat(desktop): replace process parameters inputs by a resizable textarea (#700)
+  - fix(core): EnableRotation is ambiguous now that date rotation exists - should be EnableSizeRotation (#381)
+  - fix(core): MaxRestartAttempts upper bound of 100 is too restrictive for long-running system services (#701)
+  - fix(core): ProtectedKeyProvider.cs - DPAPI entropy migration failure logs Warn once, stuck state invisible (#723)
+  - fix(core): Child folder ACLs in %ProgramData%\Servy break multi-account setups (#725)
+  - fix(core): Central config - Regex ReDoS timeout 200ms duplicated across 6 regexes (#726)
+  - fix(core): NativeMethods.cs - Inconsistent SafeHandle vs bare IntPtr across SCM/Job P/Invokes (#730)
+  - fix(core): ProtectedKeyProvider.SaveProtected - No explicit file ACL, non-atomic write (#731)
+  - fix(core): EventLogReader.cs:44 - Truncated docstring ending mid-word (#748)
+  - fix(service): ensure event log availability during pre-shutdown via explicit dependency
+  - fix(service): ProcessLauncher.cs - Duplicate FireAndForget check is dead code (#707)
+  - fix(service): EnvironmentVariableHelper.cs - Duplicate XML doc on ExpandWithDictionary (#708)
+  - fix(service): ProtectedKeyProvider: stale aes_key.dat from cloned/imaged hosts causes silent 1053, no recovery path (#712)
+  - fix(service): ProcessLaunchOptions.cs - DefaultWaitChunkMs and DefaultScmAdditionalTimeMs duplicated (#728)
+  - fix(desktop): MainViewModel.cs - Hardcoded English dialog titles in 4 SaveFile calls (#735)
+  - fix(desktop): ServiceConfigurationMapper - Mixed AppConfig vs hardcoded defaults within same file (#745)
+  - fix(desktop,manager): App.xaml.cs initialization duplicated between Servy and Manager (#405)
+  - fix(desktop,manager): MainWindow.xaml.cs - CreateMainViewModel is 60-line composition root in View code-behind (#649)
+  - fix(desktop,manager): App.xaml.cs - ContinueWith(async t) drops inner Task, startup faults lost (#714)
+  - fix(desktop,manager): AppBootstrapper.cs - OnExit disposes SecureData but not DbContext (#715)
+  - fix(desktop,manager): 14 unused resource keys across Servy and Servy.Manager (#729)
+  - fix(desktop,manager): ServiceCommands.ValidateFileSize duplicated across Servy and Servy.Manager (#743)
+  - fix(desktop,manager,cli): misleading error "Max Restart Attempts must be a number greater than or equal to 1" fires for upper-bound violations too (#702)
+  - fix(desktop,manager,cli): improve validation messages for numeric options (#703)
+  - fix(manager): MonitoringViewModels - OnTick guard + timer pattern triplicated across 3 ViewModels (#517)
+  - fix(manager): ViewModels - SearchServicesAsync duplicated across ConsoleViewModel, PerformanceViewModel, DependenciesViewModel (#632)
+  - fix(manager): MainViewModel.cs - Child ViewModels newed up directly, not injectable (#648)
+  - fix(manager): MainWindow.xaml.cs - GetDependenciesVm uses 'logsView' as pattern variable (copy-paste bug) (#705)
+  - fix(manager): MainWindow.xaml.cs - Type pattern variable shadows type name in GetPerformanceVm/GetConsoleVm (#706)
+  - fix(manager): XAML code-behind - async void event handlers swallow exceptions (#713)
+  - fix(manager): Monitoring ViewModels - no IDisposable, DispatcherTimer/CTS leak on GC race (#716)
+  - fix(manager): LogsViewModel - CTS + Cleanup() without IDisposable (#732)
+  - fix(manager): ServiceConfigurationMapper vs ServiceMapper - Divergent default-handling and enum validation (#733)
+  - fix(manager): LogTailer.cs - CreationTime rotation detection misses FAT32 tunneling and same-size rotation (#734)
+  - fix(cli): InstallServiceCommand.cs - Duplicate XML doc blocks on Execute method (#704)
+  - fix(cli): ConsoleHelper.cs - Duplicate XML doc on RunWithLoadingAnimation (#709)
+  - fix(tests): ServiceRepositoryTests - Brittle reflection-based property verification couples tests to DTO shape (#736)
+  - fix(tests): RotatingStreamWriterTests - DateTime.UtcNow used twice per test, midnight-boundary flake (#737)
+  - fix(tests): ServiceRepositoryStub - decrypt parameter ignored; DTOs asymmetric between Get methods (#739)
+  - fix(tests): ConsoleViewModelTests - [Fact(Skip="TODO needs to be fixed")] with no tracked follow-up (#741)
+  - fix(tests): tests/ConsoleApp/Program.cs - Developer-specific hardcoded Python path + dead commented code (#746)
+  - fix(tests): DatabaseValidatorTests - Environment-dependent Assert.Fail masquerading as unit test (#747)
+  - fix(psm1): [ValidateRange(1, 2147483647)] for -MaxRestartAttempts mismatches CLI limit of 100 (#703)
+  - fix(psm1): PS 2.0 compat claimed in comments but no #Requires -Version directive (#721)
+  - fix(notifications): force UTF8 encoding to fix NULL character bug
+  - fix(notifications): ensure timestamps are strictly increasing
+  - fix(notifications): handle non-English OS when querying event log
+  - fix(publish): publish-sc.ps1 / publish-fd.ps1 - Duplicate hardcoded Inno Setup and 7-Zip paths (#727)
+  - fix(publish): setup/signpath.ps1 - Install-Module -Force without -RequiredVersion (floating signing-module version) (#750)
+  - chore(deps): update dependencies
+  - ci(changelog,sbom): No permissions block (#717)
+  - ci(scoop): PAT inlined in git clone URL, inconsistent with earlier url.insteadOf pattern (#718)
+  - ci(tmp): Workflow named "tmp" with no documented purpose (#720)
+  - ci(setup-dotnet): uses dotnet-install -Channel (floating patch) instead of -Version (pinned) (#751)
+  - ci(azure-pipelines): orphaned legacy CI alongside GitHub Actions, no tests/coverage/sign (#752)
+ReleaseNotesUrl: https://github.com/aelassas/servy/releases/tag/v8.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/aelassas/servy/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

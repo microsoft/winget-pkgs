@@ -1,0 +1,68 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: JohnMacFarlane.Pandoc
+PackageVersion: 3.8.2.0
+PackageLocale: en-US
+Publisher: John MacFarlane
+PublisherUrl: https://github.com/jgm/pandoc
+PublisherSupportUrl: https://github.com/jgm/pandoc/issues
+Author: John Mac Farlane
+PackageName: Pandoc
+PackageUrl: https://pandoc.org/
+License: GPL-2.0-or-later
+LicenseUrl: https://github.com/jgm/pandoc/blob/master/COPYRIGHT
+Copyright: Copyright (C) 2006-2023 John MacFarlane <jgm at berkeley dot edu>
+CopyrightUrl: https://github.com/jgm/pandoc/blob/master/COPYRIGHT
+ShortDescription: If you need to convert files from one markup format into another, pandoc is your swiss-army knife.
+Tags:
+- converter
+- doc
+- docs
+- markdown
+- pandoc
+ReleaseNotes: |-
+    I'm pleased to announce the release of pandoc 3.8.2,
+    available in the usual places:
+    Binary packages & changelog:
+    https://github.com/jgm/pandoc/releases/tag/3.8.2
+    Source & API documentation:
+    http://hackage.haskell.org/package/pandoc-3.8.2
+    This release fixes a regression in the typst template (since 3.8), which caused links to be omitted.
+    It also adds a new default Markdown extension, `table_attributes`, which allows attributes to be added to tables by putting them after the caption.
+    API change: Add `Ext_table_attributes` constructor to Extension.
+    Of special note:
+        - Markdown reader/writer: implement new `table_attributes` extension
+        (#10884). When `table_attributes` is enabled (as it is by default for
+        pandoc's Markdown), attributes can be attached to a table by
+        including them at the end of the caption. Previously the writer
+        would emit an identifier in this position, but the reader didn't
+        handle it. Now arbitrary attributes are allowed, and they work in
+        both the reader and writer.
+       - Typst writer: don't add superfluous semicolons (#11196).
+        Previously we added semicolons after inline commands not
+        followed by spaces, but mainly this was to deal with one issue:
+        the presence of a semicolon after an inline command, which
+        would be swallowed as a command separator (#9252).
+        This commits adopts an approach that should avoid so many
+        superfluous semicolons: it escapes semicolons that might come
+        right after a command.
+      - Typst template: fix 3.8 regression in which links disappear
+        (#11194). A template change in 3.8 added a show rule for links which
+        causes them to disappear except in special cases.
+      - Text.Pandoc.Parsing: rewrite `oneOfStrings` more efficiently.
+      - LaTeX writer: Fix strikeout in links (#11192, Tuong Nguyen Manh).
+        As in #1294 `\url` and `\href` need to be protected
+        inside an mbox for `soul` commands.
+      - Text.Pandoc.Extensions: Add `Ext_table_attributes` constructor for
+        `Extension` [API change].
+      * Use released texmath 0.13.0.1.
+      * Update FSF contact information in COPYING (#11183, Bensun Muite).
+
+      - MANUAL.txt: remove some redundancy (#11178, Reuben Thomas).
+ReleaseNotesUrl: https://github.com/jgm/pandoc/releases/tag/3.8.2
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/jgm/pandoc/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

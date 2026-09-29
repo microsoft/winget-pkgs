@@ -1,0 +1,70 @@
+# Created with komac v2.6.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: nzbget.nzbget
+PackageVersion: '25.0'
+PackageLocale: en-US
+Publisher: nzbget.com
+PublisherUrl: https://github.com/nzbgetcom
+PublisherSupportUrl: https://github.com/nzbgetcom/nzbget/issues
+PackageName: NZBGet
+PackageUrl: https://github.com/nzbgetcom/nzbget
+License: GPL-2.0
+LicenseUrl: https://github.com/nzbgetcom/nzbget/blob/develop/COPYING
+ShortDescription: Unsenet downloader
+Tags:
+- nzbget
+- usenet
+ReleaseNotes: |-
+  What's Changed
+  - Features:
+      - Completion and downloaded data statistics #544
+          - added a new "Statistics" page to display completion and download volume analytics for news-servers.
+          - the API method "resetservervolumes" now allows for selective resetting of counters. Arguments:
+              - ServerId (int) - Server ID to reset.
+              - Counter (string) - Specifies which counter to reset. The behavior depends on the value of this argument:
+                  - "CUSTOM" (case-sensitive) - Resets only the custom counter associated with the server. Use this option to clear custom statistics while preserving overall download volume data.
+                  - "" (empty string) - Resets all counters associated with the server, including the overall download volume and any custom counters.
+          - the API method "servervolumes" now returns 2 additional properties:
+              - CountersResetTime (int) - Date/time of the last reset of all counters (time is in C/Unix format).
+              - ArticlesPerDays (struct[]) - Per-day amount of failed and success articles since program installation. Contains an array of structs with following fields:
+                  - Failed (int) - Amount of failed articles.
+                  - Success (int) - Amount of success articles.
+      - Flatpak support #550
+      - Snap support #559
+      - Added support of running Docker image rootless #541
+  - Bug fixes:
+      - Deobfuscation: handle hashed filenames with a length of 16 or more #548
+      - Direct unpack failures when processing non-archive files #549
+      - Fixed found memory leaks, potential ub, buffer overflows, cppcheck and compiler warnings #552 #561
+      - Correctly decode Unicode escape sequences in JsonDecode #560
+  - For Developers:
+      - Updated Docker, Libraries, Unpackers #555
+          - updated Docker base image (alpine:3.19.1 -> alpine:3.21.3) and Dockerfile
+          - updated and synced libraries versions for all installers (previous versions specified for Linux installers):
+              - LibXML2 2.12.4 -> 2.13.5
+              - ncurses 6.4 -> 6.5
+              - Gzip 1.3.1
+              - OpenSSL 3.1.2 -> 3.4.1
+              - Boost 1.84
+          - updated unpackers for installers:
+              - 7-Zip 24.05 -> 24.08
+              - UnRAR 7.0 -> 7.11 (Windows x32 7.01, no newer version available)
+          - updated FreeBSD build script and workflow to build on Ubuntu 24.04
+      - Fixed app build, using Xcode CMake generator #538
+      - Fixed TOOLCHAIN_PREFIX were not used by the project (warning) #543
+      - Fixed a build issue on systems lacking native atomic library support #562
+      - Removed GnuTLS support #554
+          - Reasons for removing GnuTLS support:
+              - Maintenance overhead. Maintaining support for two SSL/TLS libraries (OpenSSL and GnuTLS) significantly increases our maintenance burden. Currently, we exclusively use OpenSSL in all production builds.
+              - Boost.Asio incompatibility. The Boost.Asio library, which can be used for cross-platform socket and TLS handling, does not support GnuTLS. Our planned migration of network logic to Boost.Asio makes GnuTLS support redundant.
+ReleaseNotesUrl: https://github.com/nzbgetcom/nzbget/releases/tag/v25.0
+InstallationNotes: |-
+  1. Start NZBGet via start menu or desktop shortcut
+  2. NZBGet puts an icon into the tray area (near clock) and opens a browser window
+  3. In the web-interface (browser window) go to settings page:
+      - Setup your login credentials in section SECURITY
+      - Add one or more news-servers in section NEWS-SERVERS
+      - Save settings and reload NZBGet
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

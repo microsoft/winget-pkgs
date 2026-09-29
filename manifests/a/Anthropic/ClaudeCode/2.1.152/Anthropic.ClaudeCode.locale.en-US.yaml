@@ -1,0 +1,75 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Anthropic.ClaudeCode
+PackageVersion: 2.1.152
+PackageLocale: en-US
+Publisher: Anthropic PBC
+Author: Anthropic PBC
+PackageName: Claude Code
+License: Proprietary
+Copyright: © 2026 Anthropic PBC
+ShortDescription: Unleash Claude’s raw power directly in your terminal. Search million-line codebases instantly. Turn hours-long workflows into a single command. Your tools. Your workflow. Your codebase, evolving at thought speed.
+Description: |-
+  Claude Code is Anthropic’s agentic coding tool that lives in your terminal and helps you turn ideas into code faster than ever before.
+  What Claude Code does for you
+  - Build features from descriptions: Tell Claude what you want to build in plain English. It will make a plan, write the code, and ensure it works.
+  - Debug and fix issues: Describe a bug or paste an error message. Claude Code will analyze your codebase, identify the problem, and implement a fix.
+  - Navigate any codebase: Ask anything about your team’s codebase, and get a thoughtful answer back. Claude Code maintains awareness of your entire project structure, can find up-to-date information from the web, and with MCP can pull from external datasources like Google Drive, Figma, and Slack.
+  - Automate tedious tasks: Fix fiddly lint issues, resolve merge conflicts, and write release notes. Do all this in a single command from your developer machines, or automatically in CI.
+  Why developers love Claude Code
+  - Works in your terminal: Not another chat window. Not another IDE. Claude Code meets you where you already work, with the tools you already love.
+  - Takes action: Claude Code can directly edit files, run commands, and create commits. Need more? MCP lets Claude read your design docs in Google Drive, update your tickets in Jira, or use your custom developer tooling.
+  - Unix philosophy: Claude Code is composable and scriptable. tail -f app.log | claude -p "Slack me if you see any anomalies appear in this log stream" works. Your CI can run claude -p "If there are new text strings, translate them into French and raise a PR for @lang-fr-team to review".
+  - Enterprise-ready: Use Anthropic’s API, or host on AWS or GCP. Enterprise-grade security, privacy, and compliance is built-in.
+Moniker: claudecode
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claude
+- claude-code
+- claudecode
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  - /code-review --fix now applies review findings to your working tree after the review, surfacing reuse, simplification, and efficiency suggestions; /simplify now invokes /code-review --fix
+  - Skills and slash commands can now set disallowed-tools in frontmatter to remove tools from the model while the skill is active
+  - Added /reload-skills command to re-scan skill directories without restarting the session
+  - SessionStart hooks can now return reloadSkills: true to re-scan skill directories, making skills installed by the hook available in the same session
+  - SessionStart hooks can now set the session title via hookSpecificOutput.sessionTitle on startup and resume
+  - Added a MessageDisplay hook event that lets hooks transform or hide assistant message text as it is displayed
+  - Added pluginSuggestionMarketplaces managed setting: admins can allowlist org marketplaces whose plugins may be suggested via context-aware tips
+  - claude plugin marketplace remove now accepts --scope user|project|local for symmetry with marketplace add, install, and uninstall
+  - Claude Code now switches to your configured --fallback-model for the rest of the session when the primary model is not found, instead of failing every request
+  - Auto mode no longer requires opt-in consent
+  - Vim mode: / in NORMAL mode now opens reverse history search (like Ctrl+R), matching bash/zsh vi-mode
+  - The /usage breakdown now includes large session files; files are scanned with a streaming read so memory usage stays flat
+  - Thinking summaries in the collapsed group now stay readable for at least 3 seconds, render as markdown, and cap at 10 lines (Ctrl+O shows the full thinking)
+  - In fullscreen mode, the "Thinking for Ns" indicator now counts up live while the model is thinking, and keeps its value if you interrupt mid-thought
+  - Simplified the Workflow tool's inline progress display — live agent counts now show only in the persistent workflow status row below the prompt
+  - The post-response timer now shows "Waiting for N background agents/workflows to finish" when backgrounded agents or workflows are still running, and reports the cumulative time once their results are processed
+  - Added the session entrypoint as an OpenTelemetry metric attribute (app.entrypoint, opt-in via OTEL_METRICS_INCLUDE_ENTRYPOINT=true)
+  - Fixed terminal styling degrading in very long sessions by recycling the renderer's style pool
+  - Fixed the sandbox-enabled warning not appearing in condensed startup mode — it now shows in every layout
+  - Fixed the loading spinner showing "still thinking"/"almost done thinking" while a tool is running, and reset the thinking status to "thinking" after each tool
+  - Fixed focus mode showing a spurious "N messages hidden" count on turns with no hidden activity
+  - Fixed clicking a link inside an expanded tool result collapsing the section instead of opening the link
+  - Fixed markdown table cell borders inheriting the color of inline code, wrapped continuation lines losing their style, and empty header cells showing a label in the narrow-terminal stacked layout
+  - Fixed plugin MCP servers with the same command but different environment variables being incorrectly deduplicated
+  - Fixed /doctor reporting "marketplace not found" or "plugin not found" for stale enabledPlugins entries referencing removed marketplaces or dropped plugins
+  - Fixed plugins that track a git branch silently no longer receiving updates after the plugin registry was rebuilt
+  - Fixed remote MCP servers failing to connect in Claude Code Remote sessions when the egress proxy is enabled
+  - Fixed the effort-change confirmation dialog appearing when the conversation has no messages or when switching between effort levels that resolve to the same underlying value
+  - Fixed the Agent tool description referencing an agent list that is never delivered when running with --bare or with attachments disabled
+  - Fixed a background worker crash in claude agents when accepting a stale permission prompt after a subagent was cancelled
+  - Fixed cache_creation_input_tokens reporting as 0 in transcript and result usage when the API reports cache writes only via the nested cache_creation breakdown
+  - Fixed the PushNotification tool incorrectly reporting "Mobile push not sent (Remote Control inactive)" in SDK-hosted sessions when Remote Control is enabled
+  - Fixed sessions getting stuck after a model or login switch left stale thinking-block signatures in history; now stripped proactively with a retry safety-net
+ReleaseNotesUrl: https://github.com/anthropics/claude-code/blob/HEAD/CHANGELOG.md#21152
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

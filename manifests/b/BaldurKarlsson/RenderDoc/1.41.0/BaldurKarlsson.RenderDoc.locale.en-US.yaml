@@ -1,0 +1,116 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: BaldurKarlsson.RenderDoc
+PackageVersion: 1.41.0
+PackageLocale: en-US
+Publisher: Baldur Karlsson
+PublisherUrl: https://renderdoc.org/
+PublisherSupportUrl: https://github.com/baldurk/renderdoc/issues
+Author: Baldur Karlsson
+PackageName: RenderDoc
+PackageUrl: https://renderdoc.org/
+License: MIT
+LicenseUrl: https://github.com/baldurk/renderdoc/blob/HEAD/LICENSE.md
+Copyright: Copyright © Baldur Karlsson 2025
+ShortDescription: A stand-alone graphics debugging tool
+Description: RenderDoc is a free MIT licensed stand-alone graphics debugger that allows quick and easy single-frame capture and detailed introspection of any application using Vulkan, D3D11, OpenGL & OpenGL ES or D3D12 across Windows, Linux, Android, or Nintendo Switch™.
+Moniker: renderdoc
+Tags:
+- debug
+- debugger
+- debugging
+- debugging-tool
+- graphics
+- rendering
+ReleaseNotes: |-
+  This release includes new threaded support for the shader debugger on all supported APIs (D3D11, D3D12, Vulkan). More details are found below, and please report any problems encountered with any shader debugging whether crashing or inaccurate simulation.
+  NOTE: currently AMD's official drivers contain a reported bug that may cause any shader debugging that depends on multiple threads to fail to debug correctly. You may also encounter problems with using VK_EXT_descriptor_buffer as noted in the v1.40 release notes.
+  As always binary builds with installers, zips and tarballs are available on renderdoc.org.
+  Main highlights
+  Shader debugger threaded support
+  On all APIs that support shader debugging (D3D11, D3D12, Vulkan) the debugger will now correctly simulate as many threads as needed to accurately debug a shader. This means wave/subgroup ops, workgroup interactions and groupshared memory can all now be debugged and will display accurate reflections of the results based on all threads running.
+  The number of threads simulated will depend on the shader itself - if only wave/subgroup ops are used then one wave/subgroup will be simulated. If groupshared or other whole-workgroup work is used in a compute shader then the whole workgroup will be simulated up to the typical maximum of 1024 threads.
+  When debugging groupshared memory specifically the UI displays one thread's view of groupshared and it will reflect barrier visibility - except for atomics, writes from other threads will not be displayed until the appropriate barrier has been passed.
+  Note that for DXIL and SPIR-V the shader debuggers themselves are multi-threaded on the CPU to simulate across a number of CPU threads, while DXBC is currently single threaded and so may be slower to debug such shaders.
+  Python Breaking API changes
+  - None.
+  Features/Improvements
+  - All: In pixel history view do not offer the option to debug actions which do not use shaders (clears, copies, etc).
+  - All: When fit-to-window is enabled in the texture viewer, editing the zoom level will disable it instead of reverting any edits.
+  - All: Shader debugger now supports simulating many threads, as needed for correct simulation of the threads. See highlights above.
+  - All: If a pixel debug fails and the pixel history pops up, explain this with a message.
+  - Python: All structure members have explicit type annotations to improve code-completion/intellisense ability in IDEs.
+  - Python: Improve generated stubs to not redeclare __new__ which confuses some IDEs about constructors for structs.
+  - D3D12: Display bindless constant buffer access in pipeline state view correctly.
+  - D3D12: Show cbuffer element offset in RenderDoc DXIL disassembly view.
+  - D3D12: Improve memory overhead during capture&replay for applications e.g. UE5 that do a significant amount of aliasing or have very-sparse sparse buffers. The reduction will scale depending how much re-use there is between buffers and/or how sparse buffers are bound.
+  - Vulkan: Sorting of descriptors in the pipeline state view is more natural when using descriptor buffers (sorted logically not physically).
+  - Vulkan: Allow replay with KHR_*_maintenance and EXT_external_memory_dma_buf extensions even if not supported on the replay device.
+  - Vulkan: Don't fill undefined discard pattern in external image transitions which are defined not to discard.
+  - Vulkan: Improve detection of vkconfig due to changed configuration file, and attempt to detect and warn vkconfig being started after RenderDoc.
+  - Vulkan: Implement some extensions:
+    - VK_EXT_fragment_density_offset
+    - VK_VALVE_fragment_density_map_layered
+    - VK_EXT_vertex_attribute_robustness
+  Bugfixes
+  - All: Fix interpretation of packed 10:10:10:2 data in buffer viewer consuming 16 bytes instead of 4.
+  - All: Fix a potential crash when viewing task/mesh shader data in the mesh viewer.
+  - All: Add line-wrapping to improve display of pipeline/shader names which are very long in the pipeline state view and reduce horizontal size needed.
+  - All: Adjust pixel context highlight box to better position itself for NPOT (non-power of two) texture mips.
+  - All: In the texture viewer improve behaviour for NPOT textures when using arrow keys to nudge one texel left or right.
+  - All: Many fixes to pixel history edge cases or consistency problems.
+  - Linux: When loading a 3D DDS for image viewing, fix display of mips.
+  - GL/Vulkan: Fix display of NPOT texture mips.
+  - GL: Fix double clicking on framebuffer attachments not opening the corresponding texture.
+  - GLES: Fix readback of depth textures if reading directly from depth is not supported.
+  - Vulkan: Fix incorrect extension implementation of KHR_present_wait2 function.
+  - Vulkan: Fix misbehaviour when descriptor buffers are bound multiple times per command buffer.
+  - Vulkan: Fix interaction between descriptor buffer and EXT_shader_object.
+  - Vulkan: Fix a crash if descriptor buffers change between graphics and compute pipeline bindings and become temporarily invalid.
+  - Vulkan: Fix a crash processing a mesh shader that writes to clip/cull distance (or any multi-arrayed output)
+  - Vulkan: Fix a potential crash replaying captures using dynamic rendering and attachment feedback loops with unified image layouts.
+  - Vulkan: Fix a problem when images or image views are destroyed and recreated mid-capture when using descriptor buffers.
+  - Vulkan: Fix unconditional use of acceleration structure extension when descriptor buffers is enabled.
+  - Vulkan: Replay memory created mid-capture as if it had cleared contents to begin with, instead of allowing replay data to leak backwards from later events.
+  - Vulkan: Reflect depth bounds passes and failures correctly in depth test overlay.
+  - Vulkan: Fix processing of fake OpModuleProcessed comments in glslang shaders targetting SPIR-V 1.0 when using NonSemantic debug info.
+  - Vulkan: Handle arrays of AS descriptors where not all of them are valid.
+  - Vulkan: Fix a potential crash if an image view is deleted after the image it references.
+  - Vulkan: Fix maintenance9 implementation of vertex attributes which are entirely undeclared in the pipeline but used in the vertex shader.
+  - Vulkan: Fix a crash when viewport count is dynamic in a pipeline but scissor count isn't.
+  - Vulkan: Fix wrong input variable names being shown in vertex inputs in some cases.
+  - Vulkan: Fix a crash if an undefined pointer is declared in SPIR-V.
+  - Vulkan: Fix discard patterns not using the correct layers for 2D-view-of-3D images.
+  - Vulkan: Ensure barriers are forward-compatible to breaking maintenance9 change.
+  - Vulkan: Fix a crash if SPIR-V debug info declares member functions or template instantiations in structures.
+  - Vulkan: Fix failures to replay with incorrect version snapshotting of descriptor buffers.
+  - Vulkan: Fix a potential incompatibility replaying a descriptor buffer capture when images are declared as external during capture.
+  - Vulkan: Debugging a shader that accesses bufferviews via descriptor buffer would return incorrect data.
+  - Vulkan: Fix a potential crash when writing out of bounds to a texture during shader debugging.
+  - D3D: Fix shader debugging when constant buffer elements have a padded offsetted location that doesn't start at a float4 boundary.
+  - D3D11: Fix a potential crash if binding resources or constant buffers with a NULL array to bind many NULLs.
+  - D3D12: Fix pixel history crashing when being run on a UAV-only texture.
+  - D3D12: Fix an incorrect reference to nvapi instead of AGS in error message when extensions are unsupported.
+  - D3D12: Fix a crash if an ExecuteIndirect sets constant parameters to a root signature element which had not been set prior on the command buffer.
+  - D3D12: Fix a crash when running pixel history if some draws have no scissor regions bound.
+  - D3D12: Generate proper dxc command line from new SRCI debug info with -X Y instead of -X=Y.
+  - D3D12: Work around backwards- and forwards-incompatible DXC command line change to survive bad validation.
+  - D3D12: Improve handling of buffers created implicitly in new states. Although not spec-defined, LAYOUT_UNDEFINED resources can be implicitly transitioned to old states.
+  - D3D12: Fix a rare device lost crash encountered when discarding small buffers, most commonly encountered in UE5 captures.
+  - D3D12: Fix a potential crash on AMD when processing marker text.
+  - D3D12: Fix a crash when replaying any EmitRaytracingAccelerationStructurePostbuildInfo call.
+  - D3D12: Fix helper lanes modifying UAVs during shader debugging on DXIL.
+  - D3D12: Fix a case where access to bindless/arrayed samplers would return wrong result in DXIL shader debugging.
+  - D3D12: Improve handling of half and double arguments in a number of instructions.
+  - D3D12: Fix incorrect display of high level source variables for output structures and matrices.
+  - D3D12: Fix a potential rare crash when debugging vertex/pixel shaders.
+  - D3D12: Fix pixel history error if bound target is not declared in PSO.
+ReleaseNotesUrl: https://github.com/baldurk/renderdoc/releases/tag/v1.41
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://renderdoc.org/docs/index.html
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/baldurk/renderdoc/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

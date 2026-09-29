@@ -1,0 +1,111 @@
+# Created with WinGet Updater using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Google.Perfetto
+PackageVersion: '58.2'
+PackageLocale: en-US
+Publisher: Google
+PublisherUrl: https://github.com/google
+PublisherSupportUrl: https://github.com/google/perfetto/issues
+PackageName: Perfetto
+PackageUrl: https://github.com/google/perfetto
+License: Apache-2.0
+LicenseUrl: https://github.com/google/perfetto/blob/HEAD/LICENSE
+ShortDescription: Performance instrumentation and tracing for Android, Linux and Chrome.
+ReleaseNotes: |-
+  We’re excited to share Perfetto v58.2! This release makes it possible to merge traces from different machines onto one timeline, introduces Memscope and Memory Overview for end-to-end memory investigations, lets you keep a parsed trace running and analyze it through lightweight remote clients, adds Zstd trace compression, and substantially improves Perfetto’s AI-assisted analysis workflows. It also introduces a common stack-sampling format, new export options, and a collection of UI and SDK improvements.
+  > Note: v58.0 and v58.1 were never released due to compilation issues with Windows builds.
+  Merge multiple traces onto one timeline
+  Perfetto can now open several traces together and merge their contents onto a single timeline! This makes it much easier to investigate behavior spanning multiple VMs, machines, or separately recorded trace sources without manually converting them into one trace first.
+  Here's a demo of merging traces in the Perfetto UI:
+  merge-trace-demo.mp4
+  In the UI, select Open multiple trace files, select several files in the normal file picker, or drop multiple files onto the page. A new dialog lets you configure how the traces should be merged, shows whether any events would be dropped, and can export the result as a self-contained .tar archive.
+  trace-merging-dialog-crop
+  A powerful use of this feature is to visualize traces that span machines and VMs. For example, to visualize traces across a phone and a backend service the phone is communicating with:
+  multimachine-showcase-150
+  Use the new util merge command which helps avoid common mistakes when merging traces. The resulting trace can be opened in the UI or in the trace processor:
+  # Merge traces from the same machine recorded with consistent clocks. For multi-machine or multi-clock setups, use the JSON
+  # manifest as described below.
+  trace_processor util merge \
+    -o merged.tar \
+     perf.data \
+     perfetto.pftrace
+  # Now you can opened merged.tar in the UI *or* load it in trace processor:
+  trace_processor merged.tar
+  For more complex setups, a perfetto_manifest JSON file can assign machine names, relate clock domains, and apply fixed clock offsets. The UI can generate both the archive and manifest interactively, providing a convenient starting point for scripted or repeatable workflows.
+  See the merging traces documentation for much information examples of how to merge traces in common setups, details of the manifest format and details on how to generate pre-merged traces for loading in the UI, without using trace_processor merge
+  Memscope and Memory Overview (Preview)
+  Perfetto v58 introduces a connected memory-analysis workflow spanning live monitoring, trace recording, initial triage, and detailed investigation.
+  > Preview: Memscope and Memory Overview are still preview features.
+  Memscope is a live memory profiler for Android and Linux. It guides you through connecting to a device or host, displays system-wide and per-process memory statistics as they change, and provides shortcuts for recording a memory trace for a selected process. Instead of constructing a memory-focused recording configuration by hand, you can move directly from observing suspicious memory behavior to capturing the information needed to explain it.
+  memscope-connected
+  After recording, Memory Overview provides a high-level breakdown of where a process’s memory is being used. It combines information from smaps snapshots, ART heap dumps, and native heap profiling into one starting point, with links into more specialized tools such as Heap Dump Explorer.
+  memscope-where-did-memory-go
+  Memory Overview also opens automatically when a trace contains smaps snapshots, making memory traces immediately actionable rather than dropping users onto a generic timeline.
+  Together, Memscope and Memory Overview provide a path from “this process appears to be using too much memory” to the appropriate native, managed, or system-level investigation.
+  See the Memscope and Memory Overview guide for a complete recording and analysis walkthrough.
+  Load once, analyze through lightweight clients
+  Remote Trace Processor analysis is not new: trace_processor server http already allowed the Perfetto UI to use a native Trace Processor instance instead of the browser’s WebAssembly implementation.
+  The command-line experience, however, had significant gaps. The Trace Processor CLI could not connect to an existing server, and running several server instances meant manually assigning port numbers, remembering which trace was attached to each port, and dealing with port clashes.
+  Perfetto v58 turns this into a complete client-server workflow. A trace can be loaded once into a properly named background session, and any number of lightweight command-line clients can connect to it using --remote:
+  # Parse the trace once and keep it in a named session.
+  trace_processor server unix \
+    --name mysession \
+    --daemonize trace.pftrace
+  # Run queries against the existing session.
+  trace_processor query \
+    --remote mysession \
+    "SELECT count(*) FROM slice"
+  Named local sessions use Unix sockets, so there is no port to allocate or remember. The session name identifies both the running Trace Processor and the trace it contains. The new remote client can also connect to a trace_processor server http instance using --remote host:port, bringing the existing HTTP/WebSocket server workflow to the command-line interface.
+  Session state persists across invocations: tables created by one query and modules included by one command remain available to the next, allowing expensive intermediate results to be materialized once and reused. The result is a much more usable workflow for large traces: parse once, give the session a meaningful name, and analyze it repeatedly without juggling ports or restarting Trace Processor.
+  See the command-line analysis guide for session management, remote addresses, and idle-timeout options.
+  Smaller traces with Zstd compression
+  Perfetto now supports Zstd as a trace compression option alongside deflate. Zstd generally produces smaller traces than deflate at a similar speed, reducing the storage and transfer costs of longer or more data-intensive recordings.
+  Compression is selected through the new TraceConfig.compression field:
+  compression {
+    zstd {}
+  }
+  The compression level can also be controlled explicitly:
+  compression {
+    zstd {
+      level: 9
+    }
+  }
+  Level 0, or leaving the level unset, uses Zstd’s default level of 3, which provides a good balance for most traces. The older compression_type field remains honored for compatibility but is now deprecated in favor of TraceConfig.compression.
+  See the trace configuration documentation for level selection, compatibility behavior, and SDK build requirements.
+  Faster and more capable AI-assisted analysis
+  Perfetto’s installable AI skill can now keep a trace loaded across an investigation. Instead of reparsing the same trace for every question, the skill opens a persistent Trace Processor session and reuses it for subsequent queries. This makes iterative analysis significantly faster and allows SQL state and materialized intermediate results to carry across steps.
+  The skill also gains:
+  - A TraceConfig reference and exemplar configurations that an agent can adapt when a question requires a custom recording.
+  - A saved Markdown report at the end of every analysis, containing the original question, the findings, and the queries that produced useful results.
+  - A downloadable perfetto-ai-skill.zip asset in each GitHub release, allowing the skill to be installed on machines that cannot reach GitHub at installation time.
+  See the Using AI with Perfetto guide for installation instructions and example investigations.
+  A common format for stack-sampling profilers
+  Perfetto now defines a common stack-sampling format that any profiler can emit.
+  The new TracePacket.stack_sample packet attributes a callstack to a thread, process, or stackful asynchronous context such as a goroutine or fiber. Samples are measured against an explicit counter timebase—such as wall time, CPU cycles, or allocated bytes—and can carry additional follower counters.
+  Callstacks can be fully inline or use Perfetto’s interning mechanism. Per-sequence StackSampleDefaults identify the profiler and declare common counters once for the whole sampling stream.
+  Trace Processor exposes the results through a common set of tables:
+  - stack_sample
+  - stack_sample_session
+  - stack_sample_task_context
+  - stack_sample_execution_context
+  - stack_sample_async_context
+  - stack_sample_counter_track
+  - stack_sample_counter
+  These tables provide one profiler-neutral model while continuing to share the existing stack_profile_* callstack tables. Linux perf’s specialized perf_sample, perf_session, and perf_counter_track tables remain available for perf-specific information, including counter-only samples.
+  This gives profiler authors a standard route into Perfetto’s SQL and visualization capabilities without having to adopt another profiler’s transport format.
+  Export parsed traces and tables
+  Perfetto v58 adds two Trace Processor export formats for workflows that need to reuse or move already-parsed data.
+  # Reloadable by the same Trace Processor version.
+  trace_processor export perfetto \
+    -o parsed.tar \
+    trace.pftrace
+  # Standard Arrow files for external analysis tools.
+  trace_processor export arrow_tar \
+    -o tables.tar \
+    trace.pftrace
+  The perfetto format stores parsed data in an archive that another Trace Processor instance of the same version can load. This avoids repeatedly parsing a large source trace when a persistent server session is not appropriate.
+  The arrow_tar format writes the built-in tables as standard Apache Arrow files inside a TAR archive. The format is stable across Perfetto versions and can be consumed by tools such as pandas, Polars, and PyArrow. It is intended for interoperability and cannot be loaded back into Trace Processor.
+ReleaseNotesUrl: https://github.com/google/perfetto/releases/tag/v58.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
