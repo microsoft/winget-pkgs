@@ -1,0 +1,68 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: chaitanyagiri.MunderDifflin
+PackageVersion: 0.4.6
+PackageLocale: zh-CN
+ShortDescription: 让一群你的分身像办公室团队一样协作的智能体 Harness
+Description: |-
+  免费、开源且高性能 — 一套多智能体 Harness，直接运行在你已付费订阅的每小时额度之上。它把你已经在用的终端编码 CLI 变成你的分身：你不在场时它持续工作，并在你自己的机器上协调一整个智能体办公室。
+  可接入 Claude Code、Antigravity（Gemini）、OpenAI Codex、xAI Grok、Kimi Code、Gemini CLI、Qwen、OpenCode、Crush、pi.dev、GitHub Copilot CLI 和 Cursor — 支持自带密钥与本地大模型。各智能体之间可以通信、路由并记忆，由你的分身（Michael）统筹调度，并以头像的形式呈现在共享的办公室地板上工作。
+  世界上最强的智能体，世界上最糟糕的纸业公司。Munder Difflin 把你已经在用的终端智能体 CLI — claude、agy、codex、grok、kimi、qwen、opencode、crush、pi 和 copilot — 变成一支会自我协调的团队：每个智能体都有长期记忆、一个邮箱，以及二维办公室地板上的一个工位 — 而你的分身（Michael）在你注视下在它们之间调度工作。他是这层办公室的老板；你仍是他的老板。
+
+  它是什么
+
+  Munder Difflin 是一款桌面应用：它把真实的终端智能体 CLI 封装成能力完整的智能体，把它们接入一个蜂巢思维，并让你的分身负责指挥 — Michael，那个你与之对话以推进工作的智能体。底层运行着世界上最快的记忆层，让每个智能体记住所学内容并即时召回。
+  - 每个终端都是一个智能体。每个 claude、agy、codex、grok、kimi、qwen、opencode、crush、pi、copilot 或自定义会话，都以真实进程的形式运行在伪终端（node-pty）中，逐字节保真，并用 xterm.js 渲染。
+  - 每个智能体都是一个头像。会话以角色形式出现在 Pixi.js 办公室地板上 — 工作时它们走到工位，互相通信时信封在工位之间飞来飞去。
+  - 蜂巢负责协调。智能体读取自己的记忆并清空邮箱；路由器在各收件箱之间传递消息；GOD 智能体负责裁决、分派，只在需要你时才升级上报。
+  - 即时记忆。以 Markdown 为先的记忆层配合语义召回索引，让智能体跨会话记忆，并在毫秒级完成召回。
+
+  工作方式
+
+  1. 你生成智能体 — 每个都是一个普通的终端进程（claude、agy、codex 或自定义命令），拥有自己的工作目录、身份和特定于提供商的生命周期。
+  2. 智能体通过蜂巢协作 — 蜂巢是一个由纯文件构成的本地 git 仓库。它们写入自己的 outbox/；Harness 的路由器把消息投递到接收者的 inbox/。任何智能体都不会直接操作 git（单一提交者设计可避免 index.lock 损坏）。
+  3. GOD 智能体管理整层办公室 — 它读取每一个请求，自行处理日常事务（让系统保持完全自主），只把关键事项（支出、破坏性操作、范围变更）升级到由你处理的审批队列。
+  4. 一切尽收眼底 — 你可以看到头像移动、信件飞递和实时终端流；你可以向任何会话输入内容、浏览其文件并查看其 git 历史。
+
+  功能
+
+  办公室地板
+  - 每个终端都是真实的智能体。Claude Code、Antigravity（Gemini）、OpenAI Codex、xAI Grok、Kimi Code、Gemini CLI、Qwen、OpenCode、Crush、pi.dev、GitHub Copilot CLI、Cursor 或自定义命令 — 各自运行在自己的 node-pty PTY 中，以 xterm.js 渲染。
+  - 每个智能体都是一个头像。Pixi.js 办公室地板上，智能体走到工位、信封在工位间飞递，头像状态反映真实工作。
+  - 可与你对谈的 GOD 编排器。它负责路由任务、裁决消息流，只把需要人处理的事项升级给你。也可以按下 Talk，用语音管理整层办公室。
+  - 每个智能体独立的 git worktree。可选的隔离机制，让并行工作的智能体不会在分支上相互冲突。
+
+  记忆与协作
+  - 蜂巢 — 每个智能体的记忆、原子文件邮箱、共享黑板、只追加事件日志和单一提交者 git。
+  - 语义召回 — Markdown 记忆被挖掘进共享的记忆宫殿，可在界面中搜索，并带有压缩机制，因此不会无限增长。
+  - 企业知识图谱 — 你自己的文档与政策，任何智能体都可查询。
+
+  控制与安全
+  - 人工闸门 — 支出、范围和破坏性操作都会升级给你。可以在运行中途调整方向，或优雅地停止。
+  - 熔断器 — 针对陷入循环、报错风暴或超出预算的智能体，提供 引导 → 限制 → 停止 的阶梯式处置。
+  - 预算与遥测 — 每个智能体的 token 预算、来自会话记录的真实成本、持久化账本、OTel span 和工具调用瀑布图。
+
+  指挥中心
+  - 带依赖关系的看板任务、计划任务 + 心跳、实时机队监控、记忆搜索、活动日志和 CI 观察器。
+  - 技能 — 汇总每个智能体在 Claude Code、OpenCode 和 Codex 中已有的能力，另有 227 个可浏览的技能目录，支持搜索、筛选、安装与卸载。
+  - 内置 Monaco IDE — 文件树、编辑器标签页、保存，以及 CHANGES · HISTORY · COMPARE 三条 git 轨道，带提交图、差异对比、分支比较和受保护的检出。所有文件系统/git 访问都经由主进程代理。
+
+  工作的输入与输出
+  - Slack 与 Webhook — 向频道发消息或 POST 一个 webhook；Michael 可以生成一个临时工作者、在线程中回复，并在结束后拆除。
+  - 可分享的员工 + 智能体画廊 — 通过 munderdifflin://hire 链接导入一个角色；导入只预填表单，仍需由人点击生成。可在智能体画廊浏览这些角色。
+  - 自带密钥 + 本地大模型 — 各提供商的密钥保存在只写秘密代理中，并支持 Ollama / LM Studio / vLLM 的服务地址。
+  - 一键更新：标题栏徽标执行真正的更新。它下载适合你机器的构建版本，然后重启并安装；只有在检查确认你已是最新版本时才会读取 latest。当更新器无法自行获取构建版本时，手动下载是后备方案。更新后的首次启动会以设计好的页面打开该版本的发布说明，而不是一个版本号。
+  - 你的语言：英语、简体中文和阿拉伯语，阿拉伯语支持从右到左布局。英语是默认语言，除非你在设置中选择其他语言，否则一切保持不变。应用不会读取你的操作系统区域设置。三款应用字体都随安装包附带，启动时无需联网获取。
+  - 前置条件 — 一个设置页面，显示你已拥有哪些辅助工具（uv、git、Node、MemPalace、各个智能体 CLI）、它们各自的用途，以及一个让 Michael 安装缺失工具的按钮。
+Tags:
+- 人工智能
+- 代码
+- 多智能体
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ManifestType: locale
+ManifestVersion: 1.12.0

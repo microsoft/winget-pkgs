@@ -1,0 +1,126 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: GLPI-Project.GLPI-Agent
+PackageVersion: "1.20"
+PackageLocale: en-US
+Publisher: Teclib'
+PublisherUrl: https://glpi-project.org/
+PublisherSupportUrl: https://github.com/glpi-project/glpi-agent/issues
+PrivacyUrl: https://glpi-project.org/privacy-policy/
+Author: Teclib'
+PackageName: GLPI Agent
+PackageUrl: https://github.com/glpi-project/glpi-agent/releases/
+License: GPL-2.0
+LicenseUrl: https://github.com/glpi-project/glpi-agent/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright 2006-2010 OCS Inventory contributors
+  Copyright 2010-2019 FusionInventory Team
+  Copyright 2011-2026 Teclib Editions
+ShortDescription: The GLPI Agent is a generic management agent. It can perform a certain number of tasks, according to its own execution plan, or on behalf of a GLPI server acting as a control point.
+Description: |-
+  The GLPI Agent is a generic management agent. It can perform a certain number of tasks, according to its own execution plan, or on behalf of a GLPI server acting as a control point.
+  This agent is based on a fork of FusionInventory agent and so works mainly like FusionInventory agent. It introduces new features and a new protocol to communicate directly with a GLPI server and its native inventory feature. Anyway it also keeps the compatibility with FusionInventory for GLPI plugin.
+Moniker: glpi-agent
+Tags:
+- glpi
+ReleaseNotes: |-
+  core:
+  * daemon: Avoid to sleep in a perl eval
+  * fix #1041: Fix a bug where we can loop forever waiting a forked process linked to
+    a task run. The problem was identified on recent MacOSX systems.
+  * Little enhancement of service optimization handling on windows
+  * support new "features" option/configuration to be used as advanced configuration enabler
+  * Updated OAuth2 options to support a list of values separated by commas to permit
+    setting a much oauth access as configured servers
+
+  inventory:
+  * Security Advisory GHSA-q2j6-54g3-jhcj: Validate credentials values doesn't contain
+    any control character before using it. This invalidated any mysql configuration
+    injection attempt from a compromised glpi server.
+  * fix #1226: Fix regression in network interface inventory on windows related to
+    failing bluetooth inventory
+  * fix #1208: Fix localhost ssh pubkey inventory to limit requests
+  * fix #1207: Fix Parse::EDID warnings on headless linux system
+  * Updated pci.ids to 2026.09.24 version
+  * Bump Inventory task version to 1.27
+
+  remoteinventory:
+  * Don't use dll calls for bluetooth network adapters remote inventory
+  * Bump RemoteInventory task version to 1.11
+
+  netdiscovery/netinventory:
+  * Moved debug level iec61850 protocol debugging to debug2 level
+  * fix #1234: Update iec61850 protocol support to better clean resources. On windows,
+    this fixes a continuous cpu load after netdiscovery or netinvento task run due to
+    a not released thread.
+  * Refacto snmp session handling fixing context reset when using SNMP v3 and vlan
+    context switching is involved
+  * PR #1219: Support bulk snmp requests via maxrepetitions, skip-bulk-support-discovery
+    and bulk-support-discovery-oid options in "snmp-advanced-support.cfg"
+    * maxrepetitions: if set to 1, the default, glpi-agent will test each device to know
+      if it supports bulk requests and then use Net::SNMP library default for the device.
+      If set to 0, force to use Net::SNMP library default as maxrepetitions value, usually 25.
+      Can be set to any arbitrary positive integer to force maxrepetitions.
+    * skip-bulk-support-discovery: if set to 0, the default, glpi-agent will try to
+      discover if devices support snmp bulk request. Any other value will disable bulk support
+      discovery.
+    * bulk-support-discovery-oid: defaults to ".1.3.6.1.2.1.1" (mib-2.system OID)
+      This option permits to set snmp oid on which bulk support should be tested if
+      bulk support discovery is enabled (the default).
+  * fix #1229: Devices like SiemensSicam can answer with NULL or empty string on not
+    supported oid. The fix makes MibSupport based on private oid check more reliable.
+  * netinventory task should not report snmp error when iec61850 protocol inventory
+    was successful
+  * Support --iec-dump and --iec-file on glpi-netdiscovery and glpi-netinventory scripts
+    to permit iec61850 protocol support debugging
+  * Support SKIP_CDP_ON_IPPHONE as possible value for "features" option/configuration to
+    disable CDP support on port where an ip phone as been detected. It permits to report
+    the port as a hub of 2 known mac addresses where a computer is connected behind.
+  * Don't use snmpEngineID free text as serial if known to be the model
+  * fix #1240: Enhance Siemens devices support while using SNMP v3 and which can answer with
+    an unexpected usmStatsNotInTimeWindows.0 PDU report during connection validation.
+  * fix #1241: Enhanced GrandStream IP Phones inventory
+  * Bump NetDiscovery task version to 8.0
+  * Bump NetInventory task version to 8.0
+
+  deploy:
+  * on unix/linux, replace all wrongly formatted eol in command to execute to avoid
+    errors due to \r chars
+  * Bump Deploy task version to 3.8
+
+  proxy-server-plugin:
+  * Security Advisory GHSA-mhx2-67pp-9pmv: When local_store is enabled, Proxy plugin can
+    allow arbitrary .xml file overwrite
+  * fix #1211: Fix pending status when using chained proxy agents
+  * fix #461: Fix again XML content-type support for inventories sent by android agent
+    which was reverted by mistake with v1.17 refacto
+  * Bump Proxy plugin version to 3.2
+
+  toolbox:
+  * fix #1237: Make sure scheduled netscan jobs are planified when service is started
+  * Bump ToolBox plugin version to 2.2
+
+  packaging:
+  * Update Windows packaging to use:
+    - gcc 16.2.0posix-14.0.0-msvcrt-r1
+    - OpenSSL 3.5.8
+    - libxml2 2.15.4
+    - 7-Zip v26.03
+    - Patched libssh2 v1.11.1 to fix CVE-2025-15661, CVE-2026-7598, CVE-2026-55199,
+      CVE-2026-55200, CVE-2026-58050, CVE-2026-58051, CVE-2026-66032, CVE-2026-66033,
+      CVE-2026-66034 and CVE-2026-66035
+  * win32: Updated GLPI-AgentMonitor to v1.5.1
+  * Update MacOSX packages to use OpenSSL 3.5.8
+    - disable getaddrinfo native support in perl to avoid crash on tahoe
+ReleaseNotesUrl: https://github.com/glpi-project/glpi-agent/blob/HEAD/Changes
+PurchaseUrl: https://glpi-project.org/prices/
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://glpi-agent.readthedocs.io/
+- DocumentLabel: FAQ
+  DocumentUrl: https://glpi-project.org/faq/
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/glpi-project/glpi-agent/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

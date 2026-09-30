@@ -1,0 +1,89 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AnInsomniacy.MotrixNext
+PackageVersion: 4.0.0
+PackageLocale: en-US
+Publisher: motrix
+PublisherUrl: https://github.com/AnInsomniacy
+PublisherSupportUrl: https://github.com/AnInsomniacy/motrix-next/issues
+PackageName: MotrixNext
+PackageUrl: https://github.com/AnInsomniacy/motrix-next
+License: MIT
+LicenseUrl: https://github.com/AnInsomniacy/motrix-next/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025-present AnInsomniacy
+ShortDescription: A full-featured download manager — rebuilt from the ground up
+Description: |-
+  Motrix by agalwood was one of the best open-source download managers available — clean UI, aria2-powered, cross-platform. It inspired thousands of users and developers alike.
+  However, the original project has been largely inactive since 2023. The Electron + Vue 2 + Vuex + Element UI stack accumulated technical debt, making it increasingly difficult to maintain, extend, or package for modern platforms.
+
+  What we kept
+  We owe a great deal to the original Motrix and its community. The following were gratefully adopted and continue to serve as the foundation for parts of Motrix Next:
+  - Aria2 error code system and RPC client — the error handling conventions and JSON-RPC communication layer for the aria2 engine
+  - Internationalization — 25+ community-contributed locale files covering Chinese, Japanese, Korean, Arabic, French, German, and many more
+  - Download utilities — tracker list management, cURL command parsing, and other protocol-level helpers
+
+  What we rebuilt
+  Motrix Next is not a fork — it is a complete rewrite. Every other layer of the application has been redesigned and reimplemented from scratch:
+  | Layer        | Motrix (Legacy)         | Motrix Next                     |
+  | ------------ | ----------------------- | ------------------------------- |
+  | Runtime      | Electron                | Tauri 2 (Rust)                  |
+  | Frontend     | Vue 2 + Vuex            | Vue 3 Composition API + Pinia   |
+  | UI Framework | Element UI              | Naive UI                        |
+  | Language     | JavaScript              | TypeScript + Rust               |
+  | Styling      | SCSS + Element theme    | Vanilla CSS + custom properties |
+  | Engine Mgmt  | Node.js `child_process` | Tauri sidecar                   |
+  | Build System | electron-builder        | Vite + Cargo                    |
+  | Bundle Size  | ~80 MB                  | ~20 MB                          |
+  | Auto-Update  | electron-updater        | Tauri updater plugin            |
+
+  Design & Motion
+  The overall UI layout stays true to Motrix's original design — the sidebar navigation, task list, and preference panels all follow the familiar structure that made Motrix intuitive from day one.
+  What changed is everything underneath. Every transition and micro-interaction has been carefully tuned to follow Material Design 3 motion guidelines:
+  - Asymmetric timing — enter animations are slightly longer than exits, giving new content time to land while dismissed content leaves quickly
+  - Emphasized easing curves — decelerate on enter (cubic-bezier(0.2, 0, 0, 1)), accelerate on exit (cubic-bezier(0.3, 0, 0.8, 0.15)), replacing generic ease curves throughout the codebase
+  - Spring-based modals — dialogs use physically-modeled spring animations for a natural, responsive feel
+  - Consistent motion tokens — all durations and curves are defined as CSS custom properties, ensuring a unified rhythm across 12+ components
+Tags:
+- download
+- downloader
+ReleaseNotes: |-
+  Important
+  Motrix Next is now Rayburst. Settings, tasks and history are not imported into the new application.
+  Before switching, finish active downloads, back up unfinished work, and quit and uninstall Motrix Next. Install Rayburst and configure it again. Keep your downloaded files. Updating through the old app may leave both applications installed or retain old shortcuts.
+  Coming from an early 4.0 beta? Review custom file categories in Settings → Downloads. Each rule now needs a relative or absolute directory mode. Classification sets the destination before downloading; it no longer moves completed files.
+  What's Changed
+  Rayburst 4.0 introduces native HLS/DASH downloads, live recording and a unified sidebar. It brings the six beta releases to the stable channel, with Aria2 Next 2.8.2 and fixes for download recovery, browser handoff and desktop integration.
+  ✨ New Features
+  - Media downloads: select video, audio and subtitle tracks from HLS and MPEG-DASH sources. Save compatible output as MP4, MKV or subtitle-only WebVTT without a separate downloader.
+  - Live recording: set a duration or choose Finish recording and save. Pause and retry media tasks using their existing recovery data.
+  - Browser media capture: receive manifests, compatible media fragments and recordings from Rayburst Connect. Confirming a selection in the extension starts the same task without another desktop prompt.
+  - Remember save location: optionally reuse the last directory you selected. Browser submissions follow this preference without changing it.
+  - HTTP range limit: set a maximum size for individual HTTP range requests. Leave it at 0 for automatic sizing.
+  🛠 Improvements
+  - Combine task filters, About and Settings in one sidebar, with a compact layout for narrow windows and coordinated page, toolbar and footer transitions.
+  - Apply theme colors throughout the light and dark interfaces. Refine the default purple palette and add default and dark macOS icon appearances.
+  - Handle submissions, confirmation receipts, history and notifications in Rust while the main window is closed. Retrying a browser handoff after a lost reply reuses its submission identity.
+  - Start the desktop installation paired with the browser's Native Messaging host without relying on URL-handler defaults.
+  - Show native association status and repair actions for .torrent, magnet, ed2k, thunder and rayburst.
+  - Open completed or seeding content by double-clicking its task. List recent save directories in most-recent-first order.
+  🐛 Bug Fixes
+  - Prevent completed HTTP downloads from reappearing after a crash.
+  - Keep duplicate-torrent errors from failing the original task, and preserve torrent directories and per-task limits when global settings change.
+  - Restart eligible partial HTTP downloads when the remote resource changes, without mixing data from different versions of the file.
+  - Protect files used by other tasks during deletion. Keep the history entry if file removal fails.
+  - Pause seeding when downloaded files become missing or inaccessible, including while the window is closed. Recheck affected torrents when they resume.
+  - Fix window recreation in lightweight mode and allow browser submissions to receive acknowledgements without waiting for the window.
+  - Normalize proxy bypass lists and supported IPv4 wildcard rules. Report unsupported imported rules for correction.
+  - Report engine startup and failure separately from desktop connection failures, so Rayburst Connect can offer recovery instead of repeatedly launching the app.
+  - Stop processes owned by the target Windows installation before replacing or removing it. Prevent development builds from overwriting installed browser registrations.
+  Browser Extension
+  Use Rayburst Connect 2.0.4 or later for engine-status messages and recovery actions. Launch Rayburst once after installation, then enter its Extension API port and secret in the extension settings. Disable the previous extension to avoid competing download interception.
+  - Chrome
+  - Edge
+  - Firefox
+  Media Limitations
+  DRM, transcoding and subtitle translation are not supported. Output containers must support the selected codecs. Captured fragments must form a compatible media sequence, and live recovery cannot retrieve segments the server has already removed.
+ReleaseNotesUrl: https://github.com/AnInsomniacy/rayburst/releases/tag/v4.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
