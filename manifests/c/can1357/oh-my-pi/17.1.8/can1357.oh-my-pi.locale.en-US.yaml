@@ -1,0 +1,109 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 17.1.8
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Fixed
+  - Fixed an HTTP 400 error when resuming or replaying OpenAI history after an interrupted native Computer Use turn.
+  - Fixed connection 404 errors when using Google Vertex AI in multi-region locations (eu and us) by correctly resolving regional endpoint (REP) hosts.
+  - Fixed a resource leak in SqliteAuthCredentialStore.close() where unclosed prepared statements kept the SQLite connection alive, preventing database file cleanup (especially on Windows where files remained locked).
+  @oh-my-pi/pi-catalog
+  Added
+  - Added resolveVertexEndpointHost(location) utility to resolve the correct Vertex AI API endpoint hostnames for global, multi-region, and regional locations.
+  Fixed
+  - Fixed an issue where calculateCost under-reported Anthropic cache-write costs by honoring the usage.cttl breakdown to correctly price 1-hour retention writes at 2x the base input rate.
+  @oh-my-pi/pi-coding-agent
+  Breaking Changes
+  - Changed tab.screenshot() to no longer accept a per-call save path; it now saves screenshots under browser.screenshotDir (or the OS temp directory if unset) and returns the saved path.
+  Added
+  - Added omp cleanse, a new command that automatically detects language-ecosystem checkers, parses diagnostics (such as Cargo Clippy JSON), distributes repair workloads across concurrent subagents, and runs verification checks with a live progress bar.
+  Changed
+  - Reworked the /guided-goal command from a modal-based popup flow into a natural, conversational chat interface where the agent asks follow-up questions directly in the session.
+  - Reduced startup memory usage by lazy-loading HTML session export assets only on their first use.
+  Fixed
+  - Fixed Advisor notes appending stale-review-window warnings when newer primary turns are queued during a review.
+  - Fixed layout padding alignment issues in bordered output blocks and web-search result panels.
+  - Fixed excluded web search providers remaining visible in the Web Search Provider Order settings list.
+  - Fixed internal Hub peer messages being exposed as ordinary tool-call updates in clients like Paseo.
+  - Fixed compatibility issues when installing legacy pi extensions by updating the legacy shim to correctly bridge missing runtime symbols and exports (such as isContextOverflow, isRetryableAssistantError, and JSON parsing utilities).
+  - Fixed an issue where routine daemon operations (like list, logs, stop, or describe) could inadvertently trigger a restart loop for detached daemons in a backoff window.
+  - Fixed marketplace plugin MCP discovery to correctly honor the mcpServers manifest field in plugin configuration files.
+  - Fixed user-initiated shell executions (! and $) being misattributed as agent actions in advisor transcripts.
+  - Fixed unnecessary prompt-cache invalidations by preserving the active auto-thinking effort level when per-turn classification fails.
+  - Fixed the omp process name showing up as bun in Linux process managers (like ps and top).
+  - Fixed agent shell commands inheriting environment variables from the launch directory's .env file, ensuring they only receive the parent environment and explicit tool overrides.
+  - Fixed the /new command retaining completed or failed async jobs from the previous session.
+  - Improved error handling in omp update to display a friendly timeout message if the download times out while streaming the binary.
+  - Fixed the write tool incorrectly treating semicolon-joined read selectors as filesystem paths and creating unintended directory structures.
+  - Fixed omp worktree clear prematurely deleting active task-isolation sandboxes owned by running subagents.
+  - Fixed /vibe mode preventing the director from completing parent tasks after verifying worker results by keeping the built-in todo tool active.
+  - Fixed numeric GitHub issue and pull request autocomplete being suppressed inside skill slash-command arguments.
+  @oh-my-pi/pi-natives
+  Fixed
+  - Fixed an issue on macOS (darwin) where the native addon delivered zero AudioCapture callbacks, which prevented microphone audio from being captured.
+  @oh-my-pi/pi-tui
+  Fixed
+  - Fixed wrapped Markdown list continuations losing their hanging indentation in narrow terminal layouts.
+  - Fixed an issue where emergency exits from fullscreen overlays could leave the Kitty keyboard protocol active, corrupting Arrow Up input in the terminal after exiting.
+  @oh-my-pi/pi-utils
+  Added
+  - Added setProcessName utility to set the OS-visible process name on Linux via bun:ffi, bypassing Bun's process.title limitations.
+  Fixed
+  - Fixed child shell environment filtering to drop launch-directory .env values in addition to Bun-autoloaded .env.local values.
+  What's Changed
+  - fix(tui): restore GitHub refs in slash arguments by @roboomp in https://github.com/can1357/oh-my-pi/pull/6605
+  - fix(ai): finalize all prepared statements in SqliteAuthCredentialStore.close() by @ajdiyassin in https://github.com/can1357/oh-my-pi/pull/6762
+  - fix(cli): preserve live task-isolation sandboxes on worktree clear by @roboomp in https://github.com/can1357/oh-my-pi/pull/6763
+  - fix(tools): refuse write targets shaped as a read-selector list by @roboomp in https://github.com/can1357/oh-my-pi/pull/6811
+  - fix(tui): balance keyboard frames on emergency exit by @roboomp in https://github.com/can1357/oh-my-pi/pull/6812
+  - fix(cli): stop forwarding project dotenv to shells by @roboomp in https://github.com/can1357/oh-my-pi/pull/6814
+  - fix(cli): set kernel process name via prctl on linux by @roboomp in https://github.com/can1357/oh-my-pi/pull/6818
+  - fix(cli): wrap streaming-phase download timeout with friendly message by @roboomp in https://github.com/can1357/oh-my-pi/pull/6823
+  - fix(ai): preserve reasoning IDs for computer replay by @lyc-aon in https://github.com/can1357/oh-my-pi/pull/6824
+  - fix(cli): purge completed async jobs on /new by @roboomp in https://github.com/can1357/oh-my-pi/pull/6829
+  - fix(session): attribute user bang executions in advisor transcripts by @roboomp in https://github.com/can1357/oh-my-pi/pull/6838
+  - fix(coding-agent): restore isRetryableAssistantError in legacy pi-ai shim by @roboomp in https://github.com/can1357/oh-my-pi/pull/6848
+  - fix(natives): restore macOS CoreAudio capture bindings by @roboomp in https://github.com/can1357/oh-my-pi/pull/6849
+  - fix(launch): treat restarting daemon as settled in broker #settle by @roboomp in https://github.com/can1357/oh-my-pi/pull/6853
+  - fix(settings): hide excluded web search providers by @roboomp in https://github.com/can1357/oh-my-pi/pull/6861
+  - fix(coding-agent): bridge isContextOverflow in legacy pi-ai shim by @roboomp in https://github.com/can1357/oh-my-pi/pull/6862
+  - fix(discovery): honor plugin MCP manifest pointers by @roboomp in https://github.com/can1357/oh-my-pi/pull/6873
+  - fix(acp): hide internal Hub messages by @roboomp in https://github.com/can1357/oh-my-pi/pull/6874
+  - fix(catalog): price cache writes by ttl breakdown by @roboomp in https://github.com/can1357/oh-my-pi/pull/6878
+  - fix(session): preserve auto-thinking level on classifier failure by @roboomp in https://github.com/can1357/oh-my-pi/pull/6880
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v17.1.7...v17.1.8
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v17.1.8
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

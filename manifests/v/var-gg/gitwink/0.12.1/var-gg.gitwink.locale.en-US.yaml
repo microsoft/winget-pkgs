@@ -1,0 +1,48 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: var-gg.gitwink
+PackageVersion: 0.12.1
+PackageLocale: en-US
+Publisher: var-gg
+PublisherUrl: https://github.com/var-gg/gitwink
+PublisherSupportUrl: https://github.com/var-gg/gitwink/issues
+Author: var-gg
+PackageName: gitwink
+PackageUrl: https://github.com/var-gg/gitwink
+License: MIT
+LicenseUrl: https://github.com/var-gg/gitwink/blob/HEAD/LICENSE
+ShortDescription: Tray-resident, read-only git glance for the AI-agent era.
+Description: |-
+  gitwink is a tray-resident, read-only Git glance tool. It shows a unified
+  timeline of recent commit activity across all of your local Git repositories,
+  so you can wink at what changed, where, and by whom, without opening a
+  heavyweight editor. Built for the AI-agent era, when code changes land
+  across many repositories at once.
+Moniker: gitwink
+Tags:
+- commits
+- developer-tools
+- git
+- tray
+ReleaseNotes: |-
+  A lifecycle reliability patch for long-lived tray sessions. Origin refreshes
+  now complete through one coordinated flight, and repositories created after
+  startup join the catalog when the panel is summoned.
+  Fixed
+  - New repositories no longer disappear during long tray sessions.
+    Summoning the panel now rechecks IDE hints and learned workspace roots, so a
+    sibling repository created after startup joins the catalog without restarting
+    gitwink. Refreshes run off the UI thread and share a 60-second cooldown plus
+    a single-flight lease, preserving the app's no-idle-polling contract.
+  - Reliable explicit origin refresh. Panel-open auto-fetch and the ↻ action
+    now share one common-Git-directory flight instead of racing the same remote
+    refs, including linked worktrees reached through macOS filesystem aliases.
+    Manual refresh applies one 30-second end-to-end deadline, transient external
+    ref locks receive bounded retries, and timeout cleanup terminates Git's
+    helper process tree. Flight lifecycle events keep the UI busy until the real
+    completion, deterministically refresh commits and refs, expose accessible
+    status text, and record only non-secret timing diagnostics.
+ReleaseNotesUrl: https://github.com/var-gg/gitwink/releases/tag/v0.12.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,64 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: RemcoStoeten.Skriuw
+PackageVersion: 0.43.0
+PackageLocale: en-US
+Publisher: Remco Stoeten
+PublisherUrl: https://github.com/remcostoeten
+PublisherSupportUrl: https://github.com/remcostoeten/skriuw/issues
+Author: Remco Stoeten
+PackageName: Skriuw
+PackageUrl: https://skriuw.com/
+License: MIT
+LicenseUrl: https://github.com/remcostoeten/skriuw/blob/HEAD/LICENSE
+Copyright: Copyright (c) Remco Stoeten
+ShortDescription: Fast, local-first desktop app for notes, journaling, and knowledge work.
+Description: Skriuw is a fast, local-first desktop app for notes, journaling, and knowledge work. Version 2 keeps the workspace in local SQLite storage with portable archives and Git-backed history.
+Moniker: skriuw
+Tags:
+- journal
+- knowledge-base
+- local-first
+- markdown
+- note-taking
+- notes
+- obsidian-alternative
+- open-source
+- productivity
+ReleaseNotes: |-
+  Everything since v0.41.0, the last published release. v0.42.0 was tagged but never published, so its changes ship here too.
+  Sync converges by itself
+  Connected devices now reach the same workspace without anyone being asked to choose, and nothing anyone typed is discarded (ADR-0037).
+  - No conflict dialogs. The conflict review surface, the conflict sync status, and the resolve-conflict command are gone. A note edited on two devices while both were offline is now a note, not a prompt.
+  - Deterministic merge. A remote document write is decided against the greatest server sequence this device has already incorporated for that note, plus whether an unsequenced local write is still pending — never against the device-local revision counter or a base sequence the two devices can disagree about. Two devices reading the same log always make the same decision.
+  - Losing bodies are kept. Note history gained provenance (local / remote / superseded); a body that lost a merge is written into that note's history as "Version from another device (superseded)" rather than dropped.
+  - Export stopped failing closed. Portable export no longer refuses to run because of sync state elsewhere in the workspace.
+  - Migration 0023_automatic_convergence.sql rebuilds history_outbox and sync_received_operations, drops the conflict tables, and adds dangling-reference tracking. Forward-safe; existing conflict rows migrate to superseded records carrying their reason.
+  Measured propagation floor with the network removed: p50 0.82 ms, p95 0.94 ms in release builds (benchmark).
+  Account and save reliability
+  - A cloud session that dies is now propagated from the sync coordinator to every account surface, so the app stops offering a dead token.
+  - Sign-in connects sync in the background; when that fails, the failure is now visible instead of leaving a workspace signed in and quietly not syncing.
+  - Saves retry against the winning revision before surfacing an error, and a failed save offers an explicit retry rather than losing the attempt.
+  - A commit gate serializes remote reconciliation against local commits without ever making an optimistic renderer update wait.
+  - Sync flushes on visibility and connectivity changes instead of waiting out its poll interval.
+  - Stale sync epochs are purged on connect, fixing outbox sequence collisions after a workspace was re-provisioned.
+  - The cloud worker reads request bodies under a hard byte bound; an oversized or understated body is cut off instead of buffered.
+  Editing
+  - Whole-note ink annotation layer (#336): pen, highlighter, line, rectangle, ellipse, eraser, and select/move over the entire note surface, versioned on the document root.
+  - Inline comment threads now have hover previews, Tab-to-reply, and a fully keyboard-operable popover.
+  - Version history diffs pair edited lines by similarity and can expand hidden context, so a reworded paragraph reads as an edit instead of a delete plus an insert (#350).
+  - Revision stats on the history view; AI model lists are fetched from the provider instead of hardcoded.
+  - Sidebar pinned chips (#352).
+  - Checklist task promotion now happens in the same transaction as the save that triggers it.
+  - Fixed: stacked code blocks had no gap between them.
+  Browser runtime
+  - Multiple tabs of the same workspace are now allowed.
+  - The last open note is restored across a browser reload.
+  Elsewhere
+  - Canonical Skriuw landing page with social preview metadata (#337).
+  - Animated icons resolve through one keyed module.
+  Addresses #343–#349.
+ReleaseNotesUrl: https://github.com/remcostoeten/skriuw/releases/tag/v2-v0.43.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

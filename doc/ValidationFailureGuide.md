@@ -1,14 +1,14 @@
 # WinGet Package Validation: Common Failure Labels and How to Fix Them
 
-When you submit a pull request to [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs), automated validation pipelines run a series of checks on your manifest and installers. If something fails, labels are applied to your PR to indicate what went wrong. This document explains each label, what causes it, and how to resolve it.
+When you submit a pull request to [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs), a **GitHub App** automatically runs the [Validation Pipeline](Validation.md) on your manifest and installers, reporting results directly on the PR's Checks tab. If something fails, labels are applied to your PR to indicate what went wrong. This document explains each label, what causes it, and how to resolve it.
 
 > [!TIP]
 > Many issues can be caught before submitting by running:
 > ```powershell
-> winget validate <path-to-manifest>
+> winget validate --manifest <path-to-manifest>
 > winget install --manifest <path-to-manifest>
 > ```
-> For isolated testing, use the [SandboxTest.ps1](https://github.com/microsoft/winget-pkgs/blob/master/doc/tools/SandboxTest.md) script or Windows Sandbox.
+> For isolated testing, use the [SandboxTest.ps1](tools/SandboxTest.md) script or Windows Sandbox.
 
 ---
 
@@ -37,14 +37,17 @@ These labels track the progress of your PR through the validation pipeline.
 |---|---|
 | **Azure-Pipeline-Passed** | Your manifest passed automated testing. There may be additional manual verification required. |
 | **Validation-Completed** | All checks passed. Your PR may be merged automatically after moderator review. |
-| **Needs-Author-Feedback** | Something needs your attention. If not addressed within 10 days, the PR will be auto-closed. |
+| **Needs-Author-Feedback** | Something needs your attention. If not addressed within 5 days, `No-Recent-Activity` will be added. If there is still no activity after a further 3 days, the PR will be automatically closed. |
 | **Needs-Attention** | The PR has been escalated to the WinGet engineering team for investigation. |
 | **Blocking-Issue** | The PR cannot be approved until the blocking issue (indicated by an accompanying error label) is resolved. |
-| **Needs-CLA** | You have not signed the [Contributor License Agreement](https://cla.opensource.microsoft.com/microsoft/winget-pkgs). The PR cannot be merged until the CLA is signed. |
+| **Needs-CLA** | You have not signed the [Contributor License Agreement](https://cla.opensource.microsoft.com/microsoft/winget-pkgs). The PR cannot be merged until the CLA is signed. This is checked by a separate automated process, independent of the validation pipeline. |
 
 ---
 
 ## Error Labels
+
+> [!IMPORTANT]
+> Pull requests with a red `Policy-*`, `Validation-Domain`, or `Validation-Executable-Error` label require review by a Windows Package Manager administrator. Community moderator approval alone cannot resolve or waive these labels. Review any validation details and requested changes first; if the label remains after those issues are addressed, the pull request must wait for administrator review.
 
 ### Manifest & Path Errors
 
@@ -112,12 +115,12 @@ manifests/<first-letter>/<Publisher>/<PackageName>/<PackageVersion>/
 **What it means:** There are inconsistencies or missing values in the manifest discovered during MSIX package evaluation or installer metadata validation.
 
 **Common causes:**
-- `InstallerType` mismatch between what is declared and what is detected
+- `InstallerType` mismatch between what is declared and what is detected (e.g., declaring `exe` for an installer that is actually `portable`)
 - Missing or incorrect `PackageFamilyName` for MSIX packages
 - Incorrect `MinimumOSVersion` for MSIX packages
 - Inconsistencies in `AppsAndFeaturesEntries`
 
-**How to fix:** Verify that installer metadata matches the actual installer. For MSIX, ensure `PackageFamilyName` and `SignatureSha256` are correct.
+**How to fix:** Verify that installer metadata matches the actual installer. For MSIX, ensure `PackageFamilyName` and `SignatureSha256` are correct. Use the [SandboxTest.ps1 script](tools/SandboxTest.md) to inspect the installed state.
 
 ---
 
@@ -139,6 +142,9 @@ manifests/<first-letter>/<Publisher>/<PackageName>/<PackageVersion>/
    ```
 2. If flagged as malware/PUA, [submit the installer to Microsoft Defender for analysis](https://www.microsoft.com/wdsi/filesubmission) as a potential false positive.
 3. Ensure the installer URL is publicly accessible.
+
+> [!CAUTION]
+> ESRP scan blocking detections result in the `Binary-Validation-Error` label. This label cannot be waived by a moderator or administrator. Future handling for PUA detections is being evaluated for [PUA broadly](https://github.com/microsoft/winget-cli/issues/6189), [remote-access tools](https://github.com/microsoft/winget-cli/issues/6107), and [encrypted-file detections](https://github.com/microsoft/winget-cli/issues/6250), but these proposals do not currently provide an exception. The detected issue must be resolved—for example, by correcting or replacing the installer, or by having an incorrect detection cleared—before the pull request can pass a new validation run.
 
 ---
 
@@ -216,7 +222,7 @@ Update the `InstallerSha256` value in your manifest and resubmit.
 - Using a third-party CDN, mirror, or download aggregator instead of the official publisher URL
 - Using a URL shortener or redirector
 
-**How to fix:** Use the official download URL from the publisher's website. If the URL is legitimate, add a comment to your PR for investigation.
+**How to fix:** Use the official download URL from the publisher's website. If the flagged domain is legitimate, add a comment with publisher-controlled evidence showing how the package or download page leads to the installer URL. A Windows Package Manager administrator must review that evidence and determine whether the domain can be approved or waived; community moderators cannot make that decision.
 
 > [!TIP]
 > Including `PackageUrl` in your manifest and ensuring the `InstallerUrl` can be found by navigating the publisher's website from that URL helps speed up moderator reviews.
@@ -285,30 +291,33 @@ Function Get-UrlResponse {
 - Incorrect installer type (e.g., `exe` specified for a `nullsoft`, `burn`, or `inno` installer, or `msi` for `wix`) — WinGet handles silent switches automatically for known types, so a wrong type means the wrong switches are used
 - Missing or incorrect silent install switches (`/S`, `/silent`, `/quiet`, etc.)
 - The installer displays a dialog that blocks progress (license agreement, options screen)
+- The installer triggers a UAC prompt that cannot be accepted in the automated test environment — if the installer needs elevation, add `ElevationRequirement: elevationRequired` to the manifest so WinGet handles it
 - A dependency is missing on the test machine
 - The `exe` installer type was specified instead of `portable` for an application that runs without an installer
 
 **How to fix:**
 1. Check that your `InstallerType` is correct — use `nullsoft`, `inno`, `burn`, or `wix` instead of generic `exe` or `msi` when applicable.
 2. Verify your `InstallerSwitches` include the correct `Silent` and `SilentWithProgress` values.
-2. Test locally:
+3. Test locally:
    ```powershell
    winget install --manifest <path-to-manifest>
    ```
-3. Use Windows Sandbox to confirm the install completes without interaction.
+4. Use Windows Sandbox to confirm the install completes without interaction.
 
 ---
 
 #### `Validation-Executable-Error`
 
-**What it means:** After installation, the test could not locate the primary application executable.
+**What it means:** Post-install validation could not successfully locate or run an expected application executable, or the executable returned an unexpected result.
 
 **Common causes:**
-- The application installs to a non-standard location
-- The application is a service or background process without a visible executable
-- Installation did not complete successfully
+- The application installs to a non-standard location.
+- A command-line application requires an argument such as `--version` to exit successfully.
+- The executable requires a dependency that is unavailable in the validation environment.
+- The application is a service or background process without a suitable executable.
+- Installation did not complete successfully.
 
-**How to fix:** Ensure the application installs correctly and its main executable is discoverable. If the app is not a traditional desktop application, add a comment to the PR for engineer investigation.
+**How to fix:** Review the validation details and confirm that the application installs and runs correctly. If a command-line executable requires a specific argument, include the executable name and argument in a PR comment so a Windows Package Manager administrator can add the installation metadata. Any remaining `Validation-Executable-Error` requires administrator review; community moderators cannot resolve or waive it.
 
 ---
 
@@ -324,7 +333,30 @@ Function Get-UrlResponse {
 
 **What it means:** A general error occurred during manual validation of the package.
 
-**How to fix:** Check the accompanying PR comment for specific next steps.
+**Common causes:**
+- The installer requires administrator privileges but the manifest does not specify `ElevationRequirement: elevationRequired`. The validation infrastructure runs installers as a standard (non-elevated) user by default. If the installer needs to write to protected locations (e.g., `Program Files`), modify system registry keys (HKLM), or install a Windows service, it will fail without the correct elevation requirement.
+- A dependency is missing on the test machine.
+- The installer encountered an unexpected error during setup.
+
+**How to fix:**
+1. If the validation logs indicate an access-denied or permissions error, add `ElevationRequirement: elevationRequired` to your installer manifest. See the [ElevationRequirement documentation](https://github.com/microsoft/winget-pkgs/blob/master/doc/manifest/schema/1.12.0/installer.md) for guidance on choosing the correct value.
+2. Check the accompanying PR comment for specific next steps.
+
+---
+
+#### `Validation-Shell-Execute`
+
+**What it means:** The installer failed to launch or did not complete during dynamic validation. WinGet was unable to execute the installer successfully via `ShellExecute`.
+
+**Common causes:**
+- The installer requires administrator privileges but the manifest does not specify `ElevationRequirement: elevationRequired`. The validation environment runs as a standard user — if the installer unconditionally needs elevation (e.g., it writes to `Program Files`, modifies HKLM registry keys, or installs a system service), it will fail without this field.
+- The installer binary is corrupted or not a valid executable.
+- The installer depends on a runtime or framework that is not present on the test machine.
+
+**How to fix:**
+1. If the installer needs elevation to complete, add `ElevationRequirement: elevationRequired` to your manifest. Do **not** use `elevatesSelf` unless the installer has its own built-in logic to conditionally request elevation. See the [ElevationRequirement documentation](https://github.com/microsoft/winget-pkgs/blob/master/doc/manifest/schema/1.12.0/installer.md) for details.
+2. Test locally with `winget install --manifest <path>` from a non-elevated terminal to reproduce the issue.
+3. Verify the installer binary is valid and not corrupted.
 
 ---
 
@@ -385,7 +417,9 @@ Function Get-UrlResponse {
 
 ## Content Policy Labels
 
-These labels indicate that something in your manifest metadata triggered a content policy review. Your PR will undergo additional manual review.
+These labels indicate that manifest metadata triggered a content policy review. False positives can occur when a word or phrase is interpreted without its surrounding context. Open the `10. Validation Completed` check and review its artifacts to find the flagged word or phrase.
+
+Red `Policy-*` labels require review by a Windows Package Manager administrator; community moderator approval alone cannot resolve or waive them. Review the referenced policy and correct the metadata if necessary. When possible, you may resolve a false positive by accurately rewording the metadata—for example, replacing "explicit approval instructions" with "direct approval instructions." Do not omit or alter relevant facts merely to avoid a policy match. If no accurate correction is appropriate, the pull request must wait for administrator review.
 
 | Label | Policy |
 |---|---|
@@ -444,40 +478,42 @@ These labels are applied by [moderators](https://github.com/microsoft/winget-pkg
 
 ## Quick Reference Table
 
-| Label | Category | Author Action Required? | Summary |
+| Label | Category | Author Action / Review | Summary |
 |---|---|---|---|
 | `Manifest-Validation-Error` | Manifest | ✅ Yes | Fix YAML syntax / schema errors |
 | `Manifest-Version-Deprecated` | Manifest | ✅ Yes | Update to a supported schema version |
 | `Manifest-Path-Error` | Manifest | ✅ Yes | Fix directory structure / file naming |
 | `PullRequest-Error` | PR | ✅ Yes | One package, one version per PR |
 | `Manifest-Installer-Validation-Error` | Manifest | ✅ Yes | Fix installer metadata inconsistencies |
-| `Binary-Validation-Error` | Installer | ✅ Yes | Fix AV detection or hash/URL issues |
+| `Binary-Validation-Error` | Installer | ✅ Yes | Resolve ESRP detection or installer issue; this label cannot be waived |
 | `Error-Hash-Mismatch` | Installer | ✅ Yes | Update `InstallerSha256` |
 | `Error-Installer-Availability` | Installer | ✅ Yes | Fix installer URL |
 | `URL-Validation-Error` | URL | ✅ Yes | Fix broken or untrusted URLs |
 | `Validation-HTTP-Error` | URL | ✅ Yes | Switch to HTTPS |
-| `Validation-Domain` | URL | ⚠️ Maybe | Use publisher's official URL |
+| `Validation-Domain` | URL | 🔒 Administrator review | Use publisher's official URL or provide publisher-controlled evidence |
 | `Validation-Unapproved-URL` | URL | ⚠️ Maybe | Use approved publisher URL |
 | `Validation-Indirect-URL` | URL | ✅ Yes | Remove URL redirection |
 | `Validation-Unattended-Failed` | Install | ✅ Yes | Fix silent install switches |
-| `Validation-Executable-Error` | Install | ⚠️ Maybe | Verify executable is discoverable |
+| `Validation-Executable-Error` | Install | 🔒 Administrator review | Verify the executable runs successfully and provide any required argument |
+| `Validation-Installation-Error` | Install | ✅ Yes | Fix installation failure (check elevation) |
+| `Validation-Shell-Execute` | Install | ✅ Yes | Fix installer launch failure (check elevation) |
 | `Validation-Defender-Error` | Install | ⚠️ Maybe | Fix or submit for false positive review |
 | `Validation-Merge-Conflict` | PR | ✅ Yes | Resolve merge conflict |
 | `Validation-MSIX-Dependency` | Dependency | ✅ Yes | Add missing framework dependency |
 | `Validation-VCRuntime-Dependency` | Dependency | ✅ Yes | Add VC++ runtime dependency |
 | `Needs-CLA` | PR | ✅ Yes | Sign the Contributor License Agreement |
 | `Internal-Error-*` | Internal | ❌ No | WinGet team will investigate |
-| `Policy-Test-*` | Content | ⚠️ Maybe | Additional manual review required |
+| `Policy-Test-*` | Content | 🔒 Administrator review | Review the policy and correct the metadata if necessary |
 
 ---
 
 ## Getting Help
 
 - **Re-run validation:** A moderator can comment `@wingetbot run` on your PR to re-trigger the validation pipeline.
-- **Ask a moderator:** Check [recently closed PRs](https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+is%3Aclosed+label%3AModerator-Approved) to find an active moderator and `@mention` them.
+- **Request review:** See the [moderation guidance](Moderation.md) to understand the review queues and determine whether your pull request needs a community moderator or a Windows Package Manager administrator. Before mentioning anyone, confirm that validation has completed and that no author action is outstanding.
 - **File an issue:** If you believe the failure is incorrect, [open an issue](https://github.com/microsoft/winget-pkgs/issues/new).
 - **Matrix chat:** Join the [WinGet-pkgs Matrix room](https://gitter.im/Microsoft/winget-pkgs) for quick questions.
 
 ---
 
-*For more information, see the [official validation documentation](https://docs.microsoft.com/windows/package-manager/package/winget-validation).*
+*For more information, see the [Validation Pipeline documentation](Validation.md) and the [Windows Package Manager Policies](https://learn.microsoft.com/windows/package-manager/package/windows-package-manager-policies) on Microsoft Learn. Please also reference the [official validation documentation](https://docs.microsoft.com/windows/package-manager/package/winget-validation).*

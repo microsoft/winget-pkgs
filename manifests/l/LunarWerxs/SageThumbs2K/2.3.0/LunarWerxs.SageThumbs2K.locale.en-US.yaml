@@ -1,0 +1,116 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: LunarWerxs.SageThumbs2K
+PackageVersion: 2.3.0
+PackageLocale: en-US
+Publisher: LunarWerx
+PublisherUrl: https://github.com/LunarWerxs
+PublisherSupportUrl: https://github.com/LunarWerxs/SageThumbs-2k/issues
+PackageName: SageThumbs 2K
+PackageUrl: https://github.com/LunarWerxs/SageThumbs-2k
+License: PolyForm Noncommercial License 1.0.0
+LicenseUrl: https://github.com/LunarWerxs/SageThumbs-2k/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2026 LunarWerx
+ShortDescription: Explorer thumbnails for 331 file types Windows can't read, plus a right-click image toolkit.
+Description: SageThumbs 2K is a modern, crash-isolated Windows 11 shell extension written in Rust that rebuilds the classic SageThumbs. It gives File Explorer thumbnails for 331 file types Windows can't preview on its own — camera RAW, HEIC/AVIF, Photoshop, DjVu, ebooks and comics, video frames, 3D-print files and a long tail of obscure formats — plus a right-click image toolkit (convert, resize, rotate, OCR, color picker, metadata strip, combine-to-PDF/CBZ) and a console/AI CLI. Free for personal use.
+Moniker: sagethumbs2k
+Tags:
+- converter
+- explorer
+- heic
+- image
+- raw
+- shell-extension
+- thumbnails
+ReleaseNotes: |-
+  ## What's changed
+  
+  ### Fixed
+  
+  - **Wide-gamut JPEG photos could thumbnail in the wrong colours.** A photo saved in AdobeRGB or
+    Display P3 carries a colour profile describing how its numbers should be read. On the faster
+    decoding path Windows does not hand that profile over, so the numbers were used as-is and the
+    thumbnail came out visibly off - most likely on camera photos, which are exactly the files
+    that tend to be wide-gamut. SageThumbs now reads the profile out of the file itself. Every
+    other viewer already showed these correctly, so only the thumbnail was wrong.
+  
+  ### Improved
+  
+  - **Large JPEG XL images thumbnail about 70x faster.** A 12-megapixel .jxl took over a second
+    and a half; it now takes about a fortieth of that. JPEG XL stores a small version of the
+    picture inside the file, ahead of all the fine detail, and the decoder was building the whole
+    full-size image anyway before shrinking it down. It now stops at the small one when a
+    thumbnail is all that was asked for. Nothing about the picture changes that you could see -
+    it matches a full decode to within about four levels out of 255 - and small images, or ones
+    where the small version would be too coarse, still decode in full. Lossless .jxl files are
+    unaffected, as they do not carry that small version.
+  
+  - **DDS / DXT game textures thumbnail about 5x faster.** A large compressed texture used to be
+    unpacked in full, pixel by pixel, just to work out the average colour of each little block.
+    Two changes removed that work: the thumbnail is now built a block at a time instead of
+    assembling the whole surface first, and each block's average is worked out directly from the
+    block's own endpoints rather than by expanding its sixteen texels. Together they take a
+    12-megapixel texture from about 180 ms to about 33 ms. The picture is not merely similar but
+    identical, which is checked automatically against the old method on tens of thousands of
+    blocks.
+  
+  - **The command line tool, the AI tools and the right-click preview now produce the same
+    quality picture as Explorer's thumbnails.** They had been using a cheaper, slightly softer
+    way of shrinking images than the thumbnails themselves. They all share the better one now, so
+    a preview looks the same wherever you see it. Image sizes are unchanged.
+  
+  - **AVIF thumbnails are dramatically faster - now across every common variant.** A user told us (fairly) that our AVIF was much
+    slower than Windows' own thumbnails. Two causes, both fixed. First, the AVIF path was
+    rendering a full-size image and then shrinking it, throwing nearly all the work away; it now
+    renders straight to the size the thumbnail needs. Second, 10- and 12-bit AVIF (most HDR and
+    camera output) was taking an expensive detour to keep its colours correct; the colour error
+    it was avoiding turns out to be exactly reversible, so those files now decode on the fast
+    path and get corrected in place. The net effect on a 6-megapixel 10-bit AVIF: about fifty
+    times faster than 2.2.0, with slightly MORE accurate colour.
+  
+    The last slow case fell too: 8-bit AVIF carrying the colour signalling that `avifenc` and
+    `ffmpeg` write by default (which Windows' own decoder pipeline misreads, and which we
+    therefore used to hand to a slower external decoder to keep colours right). Those files now
+    decode through Windows' AV1 decoder directly while SageThumbs applies the correct colour
+    conversion itself: same accurate colour, roughly 10-40x faster depending on size. Only an
+    AVIF with no colour information at all still takes the careful slow path.
+  
+  - **Large images thumbnail much faster.** Two formats were doing far more work than the picture
+    needed: a 12-megapixel AVIF took about 180 ms and a 12-megapixel BMP about 259 ms, against
+    Windows' own 65 ms and 22 ms. Both now do only the work the thumbnail size actually requires -
+    **AVIF is down to ~39 ms and BMP to ~20 ms**, which makes both faster than or equal to Windows.
+    Colours are unchanged.
+  
+  - **JPEG photos thumbnail up to 20x faster.** SageThumbs can ask the JPEG decoder for a small
+    version directly instead of decoding every pixel and shrinking afterwards, but it was only
+    doing that for files over 512 KB. A JPEG's size depends on its quality, not its megapixels, so
+    a 6-megapixel photo saved at ordinary quality missed out while a smaller one at high quality
+    did not. That limit is gone: a typical photo now goes from about 75 ms to about 5 ms, and the
+    thumbnails come out identical.
+  
+  - **Every large image thumbnails several times faster, in any format.** Shrinking a big picture
+    down to a 256-pixel tile was costing more than decoding it in the first place - about 800 ms
+    for a 12-megapixel image. It now does the bulk of the shrinking in one cheap pass and leaves
+    only the last step to the high-quality filter, which is about **5x to 16x faster** with no
+    visible difference (measured at under one part in 255 on deliberately difficult content).
+  
+  - **HDR images (.hdr) thumbnail about 4x faster.** A high-dynamic-range photo was having its
+    brightness curve applied to all twelve million pixels before anything was shrunk down to a
+    thumbnail. It now shrinks first, which is both quicker (about 600 ms to about 160 ms) and
+    slightly more accurate, since averaging brightness before compressing it is the correct
+    order. OpenEXR files have always worked this way; .hdr now matches them.
+  
+  - **Big GIFs thumbnail several times faster.** A large GIF was decoded at full size and then
+    shrunk, doing the full amount of work for a picture nobody ever sees at that size. A
+    12-megapixel GIF took about 306 ms against Windows' 50 ms; it now takes about 47 ms, which is
+    fractionally faster than Windows. Animated GIFs are untouched, so which frame you see never
+    changes.
+  
+  - **WebP thumbnails are ~4x faster when the Windows WebP codec is installed** (it ships with
+    Windows 11). Still images now use the system codec, which is much quicker than our built-in
+    decoder; animated WebP and machines without the codec keep the previous behaviour, so
+    nothing is lost either way.
+ReleaseNotesUrl: https://github.com/LunarWerxs/SageThumbs-2k/releases/tag/v2.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

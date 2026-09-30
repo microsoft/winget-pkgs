@@ -1,0 +1,140 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Navidrome.Navidrome
+PackageVersion: 0.62.0
+PackageLocale: en-US
+Publisher: Navidrome
+PublisherUrl: https://github.com/navidrome
+PublisherSupportUrl: https://github.com/navidrome/navidrome/issues
+PackageName: Navidrome
+PackageUrl: https://github.com/navidrome/navidrome
+License: GPL-3.0
+LicenseUrl: https://github.com/navidrome/navidrome/blob/HEAD/LICENSE
+ShortDescription: Modern Music Server and Streamer compatible with Subsonic/Airsonic
+Tags:
+- airsonic
+- madsonic
+- media-server
+- music
+- music-server
+- navidrome
+- opensubsonic
+- raspberry-pi
+- self-hosted
+- streamer
+- streaming-api
+- streaming-audio
+- subsonic
+- subsonic-server
+ReleaseNotes: |-
+  This release introduces support for the OpenSubsonic sonicSimilarity extension, enabling audio-based similarity through the plugin system: when a plugin provides the capability, the new getSonicSimilarTracks and findSonicPath endpoints unlock smarter, sound-based recommendations and playlists. One plugin that implements it is AudioMuse-AI. It also brings a major overhaul to playback reporting and the Now Playing experience — the UI now uses the new OpenSubsonic playbackReport extension, replacing the old scrobble flow with a redesigned panel and configurable reporting interval. On the security front, it hardens the server with stronger ownership and authorization checks across shares, players, and transcoding endpoints, caps concurrent transcodes to prevent ffmpeg-based denial of service, and adds an option to refuse to run as root. Smart playlists gain ReplayGain fields and new isMissing/isPresent operators, and there are five new UI themes to choose from.
+  Security
+  This release fixes several reported vulnerabilities. We thank the security researchers who responsibly disclosed them.
+  - Fix cross-account disclosure of other users' shares (incl. share tokens) by enforcing per-user ownership on share reads. (1e7996f5d, GHSA-3g4p-jhv2-xrxf, reported by @Wernerina)
+  - Fix cross-tenant player takeover and share-update IDOR by enforcing ownership atomically on player and share updates. (#5563, GHSA-x65f-m8x9-pjxm reported by @tonghuaroot; GHSA-58gr-c777-g23p reported by @lighthousekeeper1212; GHSA-wx2c-q8g7-4q5p reported by @CE2Sec)
+  - Fix unauthenticated Last.fm scrobble session hijack (IDOR) by requiring a signed state token on the link callback. (#5521, GHSA-8jrh-w926-8rvw, reported by @geo-chen)
+  - Fix JWT expiration bypass on public share stream endpoints by validating token expiration and share existence. (#5426, GHSA-3rfj-qx9q-jghx, reported by @wooseokdotkim)
+  - Fix disclosure of admin-only transcoding configuration to non-admin users by restricting transcoding config reads to admins. (#5564, GHSA-4p3r-6362-833w, reported by @DavidCarliez)
+  - Fix missing admin authorization on internet radio station management endpoints by requiring admin access for Subsonic management endpoints. (#5510, GHSA-jw24-qqrj-633c, reported by @osageling)
+  - Cap concurrent transcodes to prevent an ffmpeg-based denial of service, with new per-server and per-user limits. (#5522 by @deluan)
+  - Add EnforceNonRootUser option to exit early if Navidrome is started as root. (#5373 by @kopf)
+  - Split HTML sanitization from plaintext handling. (7e083e079 by @deluan)
+  > Note: Several of the advisories linked above are still in draft/triage on GitHub at the time of writing. Their links will become publicly accessible once the advisories are published. The fixes themselves are already included in this release.
+
+  Configuration Changes
+  ──────────┬─────────────────────────────────────────────────────────────┬────────────────────────────────────────────────────────────────────────────────────────┬───────
+  Status    │Option                                                       │Description                                                                             │Default
+  ──────────┼─────────────────────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────┼───────
+  New       │EnforceNonRootUser                                           │Exit early on startup if Navidrome is running as root (ignored on Windows). (#5373)     │false
+  ──────────┼─────────────────────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────┼───────
+  New       │Transcoding.MaxConcurrent                                    │Maximum number of concurrent transcodes server-wide (0 = unlimited). (#5522)            │0
+  ──────────┼─────────────────────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────┼───────
+  New       │Transcoding.MaxConcurrentPerUser                             │Maximum number of concurrent transcodes per user (0 = unlimited). (#5522)               │0
+  ──────────┼─────────────────────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────┼───────
+  New       │Matcher.PreferStarred                                        │Bias the fuzzy matcher toward starred/high-rated tracks. (#5387)                        │true
+  ──────────┼─────────────────────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────┼───────
+  New       │UIPlaybackReportInterval                                     │How often the UI reports playback progress. (#5448)                                     │5s
+  ──────────┼─────────────────────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────┼───────
+  Deprecated│EnableTranscodingCancellation →                              │Renamed and moved under the new Transcoding section. (#5523)                            │false
+            │Transcoding.EnableCancellation                               │                                                                                        │
+  ──────────┼─────────────────────────────────────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────┼───────
+  Deprecated│SimilarSongsMatchThreshold → Matcher.FuzzyThreshold          │Renamed and moved under the new Matcher section. (#5387)                                │85
+  ──────────┴─────────────────────────────────────────────────────────────┴────────────────────────────────────────────────────────────────────────────────────────┴───────
+  For a complete list of all configuration options, see the Configuration Options documentation.
+
+  UI
+  - Replace UI scrobble with reportPlayback and redesign the Now Playing panel. (#5448 by @deluan)
+  - Add Tokyo Night theme. (#5497 by @Metalhearf)
+  - Add Catppuccin Latte theme. (#5250 by @lov3b)
+  - Add Moonbase themes (Alpha light + Bravo dark). (#5243 by @craiglush)
+  - Add a "Not Starred" filter option. (#5362 by @danielbanariba)
+  - Add a Rescan button to the plugin list empty state. (#5471 by @deluan)
+  - Suppress capitalization and autocorrection for login on mobile keyboards. (#3783 by @bdefore)
+  - Show album tile actions on keyboard focus. (#5434 by @danielbanariba)
+  - Start a new album from track 1 after closing the player. (#5441 by @deluan)
+  - Prevent autoplay when clearing the play queue. (#5430 by @deluan)
+  - Fix Gruvbox Dark colors. (#5553 by @Tal0na)
+  - Update the AMusic theme to use the correct text color for primary confirmation buttons. (#5509 by @VirtualWolf)
+
+  Smart Playlists
+  - Add ReplayGain fields to the criteria system. (d9dac4445 by @deluan)
+  - Add isMissing and isPresent operators. (#5436 by @deluan)
+  - Relax playlist visibility in inPlaylist/notInPlaylist rules. (#5411 by @deluan)
+  - Optimize smart playlist performance for role and tag criteria. (#5515 by @deluan)
+  - Coerce string booleans in smart playlist rules. (#5450 by @deluan)
+
+  Subsonic API
+  - Implement the playbackReport OpenSubsonic extension. (#5442 by @deluan)
+  - Add the sonicSimilarity extension as a plugin capability. (#5419 by @deluan)
+  - Add a groupings field to the OpenSubsonic Child response. (f12e75aa1 by @deluan)
+  - Use SQLite RANDOM() sorting in getRandomSongs for faster results. (cf1f190bb by @deluan)
+  - Mark AlbumID3 songCount and created as required. (8897ec918 by @deluan)
+  - Normalize non-NFKD Unicode letters (ø, æ, œ, ß) in search. (#5413 by @deluan)
+
+  Transcoding
+  - Place -ss before -i for fast input seeking. (#5492 by @deluan)
+  - Don't apply server-side override on getTranscodeDecision. (#5473 by @deluan)
+  - Log a warning for invalid or stale transcode tokens. (9a2eb483e by @deluan)
+
+  Scanner
+  - Respect tag-split config when multiple frames map to the same tag. (#5193 by @trek-e)
+  - Fix error when importing playlists without an admin user. (5b85b2839 by @deluan)
+
+  Artwork
+  - Fix stale cache and top-level album artwork for multi-disc albums. (#5457 by @deluan)
+  - Prefer album-root images over disc-subfolder images for multi-disc albums. (#5451 by @deluan)
+  - Return the correct timestamp when disc or album cover art changes. (#5378 by @bobo-xxx)
+
+  Server
+  - Prevent artwork throttle token starvation on slow clients. (#5472 by @deluan)
+  - Proxy NowPlaying even when ignoreScrobble is set. (#5559 by @deluan)
+  - Make the /api/song path filter work and use startsWith. (#5566 by @deluan)
+  - Preserve unchanged fields on partial REST playlist updates. (#5542 by @deluan)
+  - Allow toggling playlist auto-import and avoid unnecessary artwork reloads. (#5421 by @deluan)
+
+  Matcher
+  - Add Matcher.PreferStarred option to bias the fuzzy matcher toward starred/high-rated tracks. (#5387 by @deluan)
+
+  Plugins
+  - Add PlaybackReport to the scrobbler capability. (#5452 by @deluan)
+  - Add LibraryID to TrackInfo. (fd930eefd by @deluan)
+
+  CLI
+  - Add pls export/import subcommands for bulk playlist management. (#5412 by @deluan)
+  - Restore int cast for syscall.Stdin on Windows. (e75ab3b03 by @deluan)
+
+  Build & Dependencies
+  - Improve Windows support: the Go test suite now runs on Windows CI, with previously-skipped Subsonic, artwork, watcher, and scheduler tests enabled and fixed. (#5380, #5427, #5416 by @deluan)
+  - Upgrade Go to 1.26. (#5361 by @deluan)
+  - Enable native libwebp encoding in the Docker image. (#5350 by @deluan)
+  - Update TagLib to 2.3. (e55a35544 by @deluan)
+
+  Translations
+  - Add Estonian translation. (725f6ab34 by @deluan)
+  - Update Indonesian translations from POEditor. (#5575 by @deluan)
+  - Update Spanish translations and add missing gain keys. (#5433 by @danielbanariba)
+  - Update Basque localisation. (#5364 by @xabirequejo)
+ReleaseNotesUrl: https://github.com/navidrome/navidrome/releases/tag/v0.62.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

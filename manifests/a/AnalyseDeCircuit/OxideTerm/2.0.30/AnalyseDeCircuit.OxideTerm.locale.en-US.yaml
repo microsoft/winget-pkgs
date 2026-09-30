@@ -1,0 +1,111 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AnalyseDeCircuit.OxideTerm
+PackageVersion: 2.0.30
+PackageLocale: en-US
+Publisher: AnalyseDeCircuit
+PublisherUrl: https://github.com/AnalyseDeCircuit
+PublisherSupportUrl: https://github.com/AnalyseDeCircuit/oxideterm/issues
+Author: AnalyseDeCircuit
+PackageName: OxideTerm
+PackageUrl: https://github.com/AnalyseDeCircuit/oxideterm
+License: GPL-3.0
+LicenseUrl: https://github.com/AnalyseDeCircuit/oxideterm/blob/HEAD/LICENSE
+ShortDescription: Local-first SSH workspace for local shells and remote machines.Zero Electron, zero OpenSSL, zero telemetry, and no app subscription for core SSH workflows.
+Tags:
+- agent
+- ai-terminal
+- bring-your-own-key
+- filemanager
+- mcp
+- rag
+- russh
+- rust
+- sftp
+- ssh-client
+- tauri
+- terminal
+- terminal-emulator
+- tool-calling
+- wslg
+- xterm-js
+ReleaseNotes: |-
+  English
+  OxideTerm 2.0.30 adds a native notes workspace with synchronized Markdown source and preview, expands document rendering, and brings proxy support to Telnet. This release also improves host monitoring, session management, configuration transfers, and terminal input behavior.
+  📝 Notes and AI Knowledge
+  - Added a native notes workspace with notebooks, title-and-body search, file import, and note creation, renaming, moving, copying, cutting, pasting, and deletion. Compact file rows, a collapsible navigator, and notebook controls follow the application's existing theme and animation settings.
+  - Added Markdown source, read-only preview, and side-by-side source/preview modes. The split view updates while editing, supports dragging the divider between 20% and 80%, and synchronizes vertical scrolling in both directions using source positions, including virtualized preview content.
+  - Kept the same editor buffer, selection, cursor, and undo history when switching modes. Added Markdown formatting controls, autosave, explicit save, and unsaved-change handling when navigating or closing notes; conflicting saves retain the draft instead of silently overwriting stored content.
+  - Saved the last Markdown mode and split ratio as device-local preferences. They are excluded from cloud synchronization and .oxide exports, and importing settings preserves the receiving device's values.
+  - Integrated notes with the existing knowledge store and AI indexing actions. Unchanged chunks can retain embeddings; edited or removed content invalidates stale vectors. Save state and AI index state are shown separately, with clearer feedback when embedding configuration is missing or generation fails.
+  📖 Markdown Rendering and Reading
+  - Preserved nested lists, multiple paragraphs within list items, and mixed Markdown/HTML structure. Added native handling for supported HTML blocks and inline formatting, collapsible details sections, image dimensions and alignment, and linked images. HTML support remains a limited native rendering subset; scripts, event handlers, and embedded active content are not executed.
+  - Improved mixed text, links, and inline formulas, including formula baseline alignment and formulas inside tables. Adjusted heading weights and sizes, paragraph spacing, table text, and code-block spacing for more consistent reading.
+  - Added preview text selection and copying, heading and footnote navigation, and relative document/image resolution. Wide tables and code content can scroll horizontally; source and preview views expose scrollbars for overflowing content.
+  - Replaced the previous Mermaid engine with background rendering through mermaid-rs-renderer, and connected diagram enlargement and localized feedback to note previews.
+  - Fixed missing images, incomplete scrolling to the document bottom, excessive overscroll, and blank preview frames during fast synchronized scrolling. Preview surfaces respect image-background transparency without imposing a fixed maximum reading width.
+  ⌨️ Terminal and Editor Interaction
+  - Added configurable previous-word and next-word terminal shortcuts to shortcut settings: Option+Left/Right on macOS and Alt+B/F on Windows and Linux by default. Bindings can be changed or disabled.
+  - Restored shell handling of Ctrl+L on macOS. The default host-side clear-screen shortcut is now Ctrl+Shift+L on all platforms; explicit custom bindings remain configurable.
+  - Suppressed shell-history suggestions while a TUI owns terminal input, including inline applications that report their working directory. Submitting commands through history navigation or completion also leaves shell-prompt input tracking, and TUI input is excluded from command-history recording.
+  - Added semantic coloring for UUIDs and complete hexadecimal MD5/SHA digests, plus short Git object IDs and container IDs in their corresponding command output. Existing ANSI colors and higher-priority URLs, paths, and quoted strings remain intact.
+  - Fixed terminal search refreshes pulling the viewport away from a manually selected scroll position, and focused the command-palette search field immediately when opening it.
+  - Improved the shared text editor's wrapping and scroll geometry using rendered font metrics, kept the caret visible while typing beyond the viewport, and fixed clipping of the final line. Multi-line selections highlight the selected rows while retaining the cursor line's distinct gutter highlight.
+  - Replaced the quick-command body field with the shared multiline editor and stabilized its form scrolling and overflow behavior.
+  🔗 Connections, Sessions, and Transfers
+  - Added Telnet proxy choices for global settings, direct connection, and custom proxy configuration, reusing proxy authentication, remote DNS, and bypass-list behavior. Proxy settings survive saving and reconnecting and participate in cloud synchronization and .oxide import/export; sensitive credentials follow the existing encrypted transfer options. Older Telnet profiles continue to connect directly by default.
+  - Added session search and persistent active-session sorting by name or connected state. SSH algorithm lists can be reordered in the connection editor.
+  - Ran configured post-connect commands when opening another terminal from an existing active SSH session, using the current saved connection settings.
+  - Fixed missing-password prompting while preserving explicitly selected empty-password authentication, including saved connections and portable transfers. Temporary SSH connections now use the host-key confirmation flow before connecting.
+  - Fixed Windows command-line connection requests failing to reach an already-running application because of platform-specific instance-lock error handling.
+  - Unified local encrypted configuration archives with cloud synchronization's scope selection, item selection, and preview flow. Fixed WebDAV folder creation to build missing child folders beneath the configured endpoint without attempting to create the service root.
+  - Aligned connection-note fields with the basic-information section across connection forms.
+  📊 Monitoring, Appearance, and Responsiveness
+  - Added theme-aware usage indicators and trend charts to Host Tools monitoring while retaining detailed system, storage, network, and latency values.
+  - Bounded pending monitoring notifications and retained sample history so a slow interface cannot accumulate an unbounded queue of samples. Stopping monitoring releases its retained history.
+  - Adopted Material file and folder icons across file-list surfaces, including language-specific icons, and included the icon theme's license in packaged distributions.
+  - Reduced repeated session-tree and sorting work, moved local directory listing off the UI thread, coalesced frequent serial-output updates, and reduced fitted background-image memory and repeated decoding.
+  - Fixed native menu language selection at startup and after language changes. AI command approvals now show temporary command previews, and pending AI history is flushed on exit even when no Tokio runtime is active on the calling thread.
+  🧰 Maintenance and Validation
+  - Added bounded retries for macOS DMG creation when hdiutil reports a transient resource-busy error; other creation errors still stop packaging immediately.
+  - Moved the maintained russh dependency to a separate repository pinned to a specific revision, and applied the workspace's Clippy policy across application crates.
+  - Updated affected interface text across all 11 supported languages. The maintainer completed GUI validation before approving this release. The latest identifier-coloring changes passed 44 classification tests, 11 rendering tests, and the application build; Windows CLI handoff still needs Windows-specific runtime confirmation.
+  中文
+  OxideTerm 2.0.30 新增原生笔记工作区，支持 Markdown 源码与预览分栏及双向滚动同步，扩展文档渲染能力，并为 Telnet 接入代理支持。本次更新还改善了主机监控、会话管理、配置传输和终端输入体验。
+  📝 笔记与 AI 知识库
+  - 新增原生笔记工作区，支持笔记本、标题与正文搜索、文件导入，以及笔记新建、重命名、移动、复制、剪切、粘贴和删除。紧凑文件列表、可折叠导航栏与笔记本控件沿用应用主题和动画设置。
+  - 新增 Markdown 源码、只读预览及“源码｜预览”分栏模式。分栏支持边编辑边预览、在 20%～80% 范围内拖动分隔线，并按源码位置进行双向垂直滚动同步，包含虚拟化预览内容的定位。
+  - 切换模式时保留同一编辑器的内容、选区、光标与撤销历史。提供 Markdown 格式工具栏、自动保存、手动保存，以及切换或关闭笔记时的未保存提示；保存冲突时保留草稿，不静默覆盖已存内容。
+  - 将最近使用的 Markdown 模式与分栏比例保存为本机偏好，不进入云同步或 .oxide 导出；导入设置时保留接收设备原有的这些偏好。
+  - 笔记接入现有知识库存储和 AI 索引操作。未变化的分块可保留嵌入向量，编辑或删除内容会使旧向量失效。保存状态与 AI 索引状态分别展示，嵌入配置缺失或生成失败时提供更明确的反馈。
+  📖 Markdown 渲染与阅读
+  - 保留嵌套列表、列表项内多段文字及 Markdown/HTML 混排结构。新增受支持 HTML 块和行内格式的原生解析、details 折叠区、图片尺寸与对齐，以及带链接的图片。HTML 仍按有限的原生渲染子集处理，不执行脚本、事件处理器或嵌入的活动内容。
+  - 改善文字、链接与行内公式混排，修正公式基线及表格内公式对齐，调整标题字号与字重、段落间距、表格文字及代码块留白，使阅读层级更一致。
+  - 接入预览文本选择与复制、标题及脚注导航，以及相对文档和图片路径解析。宽表格和代码内容支持横向滚动，源码与预览为溢出内容提供滚动条。
+  - 使用 mermaid-rs-renderer 在后台渲染 Mermaid，替换原有渲染引擎，并为笔记预览接入图表放大和本地化提示。
+  - 修复图片不显示、无法滚到文档末尾、过度滚动及快速同步滚动时预览短暂空白的问题。预览组件遵循图片背景透明度设置，不再限制固定的最大阅读宽度。
+  ⌨️ 终端与编辑器交互
+  - 在快捷键设置中新增可配置的终端向前／向后移动一个词操作：macOS 默认使用 Option+左／右方向键，Windows 和 Linux 默认使用 Alt+B/F，可修改或禁用。
+  - 恢复 macOS 上由 Shell 处理 Ctrl+L；应用侧清屏的默认快捷键统一为 Ctrl+Shift+L，用户自定义绑定仍可配置。
+  - TUI 接管终端输入时抑制 Shell 历史建议，包含会报告工作目录的内联应用。通过历史导航或补全提交命令后，也会退出 Shell 提示符输入跟踪；TUI 内输入不会被记录为命令历史。
+  - 新增 UUID、完整十六进制 MD5/SHA 摘要，以及对应命令输出中的短 Git 对象 ID 和容器 ID 语义着色，保留程序原有 ANSI 颜色及优先级更高的网址、路径和引号内容。
+  - 修复终端搜索刷新打断手动滚动位置的问题；打开命令面板后立即聚焦搜索框。
+  - 共享文本编辑器按实际字体度量处理换行与滚动，输入超出视口时保持光标可见，并修复最后一行被裁切的问题。多行选区高亮所选行，同时保留光标所在行独立的行号高亮。
+  - 快捷命令正文改用共享多行编辑器，改善表单滚动稳定性和超出输入区域后的显示。
+  🔗 连接、会话与配置传输
+  - Telnet 新增“使用全局／直连／自定义”代理选项，复用代理认证、远端 DNS 和绕过列表。代理配置支持保存、重新连接、云同步及 .oxide 导入导出，敏感凭据遵循现有加密传输选项。旧 Telnet 配置升级后仍默认直连。
+  - 新增会话搜索，以及按名称或连接状态排序并保存偏好的能力；连接编辑器中的 SSH 算法列表支持调整顺序。
+  - 从已有活动 SSH 会话再打开终端时，执行当前保存的连接配置中的连接后命令。
+  - 修复缺少密码时的提示，同时保留用户明确选择的空密码认证，包括已保存连接和可移植配置传输。临时 SSH 连接在建立连接前接入主机密钥确认流程。
+  - 修复 Windows 命令行连接请求因单实例锁错误识别差异而无法转交给已运行应用的问题。
+  - 本地加密配置归档复用云同步的范围选择、条目选择和预览流程。修复 WebDAV 目录创建，仅在配置的端点下逐级创建缺失子目录，不尝试创建服务根目录。
+  - 将各连接表单的备注字段统一放到基本信息区域。
+  📊 监控、外观与响应
+  - 主机工具监控新增使用率指示和趋势图，沿用主题配色，同时保留系统、存储、网络和延迟的详细数值。
+  - 限制待处理监控通知与采样历史的规模，避免界面处理较慢时持续积压采样；停止监控后释放保留的历史数据。
+  - 文件列表采用 Material 文件和文件夹图标，包含语言专属图标，并在发布包中附带图标主题许可证。
+  - 减少会话树和排序的重复计算，将本地目录读取移出界面线程，合并频繁串口输出刷新，并降低适配窗口的背景图片内存占用和重复解码。
+ReleaseNotesUrl: https://github.com/AnalyseDeCircuit/oxideterm/releases/tag/v2.0.30
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

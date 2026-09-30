@@ -1,0 +1,91 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Bitvise.SSH.Server
+PackageVersion: "9.65"
+PackageLocale: en-US
+Publisher: Bitvise Limited
+PublisherUrl: https://bitvise.com/
+PublisherSupportUrl: https://bitvise.com/contact
+PrivacyUrl: https://bitvise.com/privacy-policy
+Author: Bitvise Limited
+PackageName: Bitvise SSH Server
+PackageUrl: https://bitvise.com/ssh-server
+License: Proprietary
+LicenseUrl: https://bitvise.com/ssh-server-license
+Copyright: Copyright (C) 2000-2026 by Bitvise Limited.
+CopyrightUrl: https://bitvise.com/terms-of-use
+ShortDescription: Secure file transfer and terminal shell access for Windows
+Description: |-
+  Our SSH server supports all desktop and server versions of Windows, 32-bit and 64-bit, from Windows XP SP3 and Windows Server 2003, up to the most recent – Windows 11 and Windows Server 2025.
+  Bitvise SSH Server includes the following:
+  - SFTP server: Secure file transfer using SFTP - compatible with a wide variety of clients
+  - SCP server: Secure file transfer using SCP - compatible with command line and graphical clients
+  - FTPS server: Secure file transfer using FTP over TLS/SSL - compatible with secure FTPS clients
+  - SSH server: Secure remote access via console - vt100, xterm and bvterm are supported
+  - Secure remote access via GUI - Remote Desktop or WinVNC required
+  - Secure, effortless Git integration
+  - Secure TCP/IP connection tunneling (port forwarding)
+Moniker: bitvisesshserver
+Tags:
+- sftp
+- ssh
+- sshd
+Agreements:
+- AgreementLabel: End User License Agreement (EULA)
+  AgreementUrl: https://bitvise.com/ssh-server-license
+ReleaseNotes: |-
+  - Release notes:
+    - We are anticipating an "information security armageddon" due to increasing ability of AI to find security issues, in all software and systems, which were not found in human testing and code review.
+      The quality of commercially available AI tools has improved to where they are now indispensable for software correctness. We are applying AI tools proactively to find and fix flaws which previously missed detection.
+      Users will observe this as an increased frequency of significant and important updates. We believe the time to do this is now, before it becomes too easy to exploit issues by pointing an AI to an executable binary.
+  - Installation and updates:
+    - If the SSH Server cannot load instance type settings when upgrading or reinstalling, it now disables checking for updates in new default settings, so that automatic updates remain disabled in case they were disabled previously.
+    - Reworked corner-case behaviors and status reporting when upgrading settings from much older versions.
+  - Control Panel and Settings:
+    - Improved reporting for connections stuck in disconnect cleanup.
+    - If the SSH Server Control Panel cannot load instance type settings, it now more clearly indicates that update settings will also reset to defaults.
+  - Scriptable settings:
+    - Since version 9.51, the BssCfg command-line configuration utility failed to implement round-trip support for BssCfg settings exportText followed by BssCfg settings importText. Fixed.
+  - Connect profiles:
+    - When making an outgoing connection via an HTTP CONNECT proxy, the SSH Server now limits the maximum size of received HTTP headers.
+  - General:
+    - It is possible for SSH Server subsystems to hang indefinitely after a client disconnects. To some extent, this is unavoidable: Windows API functions can hang indefinitely when accessing a network share. If this happens in a file transfer session, the SSH Server's file transfer subsystem hangs until Windows calls return. It is possible that they never return.
+      In versions before 9.5x, the SSH Server would mitigate this by unconditionally terminating subsystems after a client disconnects. This could cause pending log events and On-upload commands to not be processed.
+      In recent versions, we removed the unconditional termination, favoring to wait until the subsystem exits. This revealed that some users are seeing indefinite hangs. Connection cleanup can wait indefinitely for stuck subsystems to complete. This can block new connections until the SSH Server is restarted.
+      The SSH Server now once again terminates stuck subsystems when a client disconnects, as long as the subsystem is not generating further log events or upload notifications. If a subsystem has to be terminated, the SSH Server now performs a diagnostic mini-dump. Recent dumps are retained in the ChildProcessDumps subdirectory of the SSH Server installation directory.
+      We are not aware of anything we can do about subsystems which are stuck in Windows APIs that do not return on network share access. However: if you see subsystems stuck in situations without network shares, any dumps would be of interest for us to investigate.
+    - A number of SSH Server settings support environment variable expansion. The SSH Server previously implemented recursive expansion: an expanded variable could reference another one which would also be expanded. This is atypical for Windows applications and could produce unexpected results. When expanding environment variables, the SSH Server now uses a single expansion pass.
+    - Improved connection disconnect logging.
+    - The SSH Server is now less permissive with regard to NUL characters in protocol strings where NULs are not expected.
+  - Authentication:
+    - When handling many new connections from SSH, SFTP or SCP clients that use the none preliminary authentication method, the SSH Server could lock out IP addresses because of the number of none authentication requests, even though no authentication attempt carrying actual credentials failed. Fixed.
+  - File transfer:
+    - The setting Delete incomplete uploads was available in previous versions, but was ineffective. Fixed.
+    - The SSH Server now limits the number of file or directory handles which a client may hold open at any one time.
+    - The SSH Server now performs more effective throttling of file hashing to limit the amount of CPU and memory that can be used by a single client. This favors to avoid penalizing typical use, such as reasonably-sized blocks and hashing of whole files.
+    - When an On-upload command is configured, the command line can be configured to expand unsafe, client-controlled paths. This remains not recommended: an on-upload script should retrieve paths from environment variables, not command-line parameters.
+      The SSH Server now performs stricter validation of unsafe environment variable expansion for On-upload commands. Commands that were previously safe should continue to run. The SSH Server is now stricter in refusing commands that could compromise the system.
+    - Improved worst-case performance of wildcard patterns in FTPS, SCP, BvShell.
+    - For mount points of type Another SFTP server, the SSH Server now implements a timeout for the duration of the initial SSH key exchange for the outgoing connection.
+    - Reduced metadata disclosure in less common configurations of mount point permissions.
+    - Improved handling of errors that may occur while closing files.
+    - The SSH Server now further restricts client ability to make changes affecting a mount point root directory. This further tightens the fix in 9.39 which prevented mount point roots from being moved.
+  - SFTP:
+    - The SSH Server now implements more granular limits for the sizes of decoded SFTP strings.
+  - FTPS:
+    - A variety of FTPS disconnect conditions were previously logged with excessive severity. These are now logged more appropriately.
+  - Port forwarding:
+    - In previous versions, it was possible for a user to bypass certain custom-configured port forwarding restrictions. Fixed.
+    - The SSH Server now implements a limit for the number of concurrent client-configured server-to-client port forwarding rules which a single user can have active. Currently, this limit is fixed at 10,000. A warning is logged if the limit is close to being reached.
+ReleaseNotesUrl: https://www.bitvise.com/ssh-server-version-history-9-5#965
+PurchaseUrl: https://bitvise.com/ssh-server-pricing
+Documentations:
+- DocumentLabel: Printable Documentation
+  DocumentUrl: https://bitvise.com/printable-docs/ssh-server-doc-printable
+- DocumentLabel: Users' Guide
+  DocumentUrl: https://bitvise.com/ssh-server-users-guide
+- DocumentLabel: FAQ
+  DocumentUrl: https://bitvise.com/ssh-server-usage-faq
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

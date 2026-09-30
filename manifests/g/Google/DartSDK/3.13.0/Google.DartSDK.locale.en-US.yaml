@@ -1,0 +1,130 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Google.DartSDK
+PackageVersion: 3.13.0
+PackageLocale: en-US
+Publisher: Google
+PublisherUrl: https://www.google.com/
+PublisherSupportUrl: https://dart.dev/community
+PrivacyUrl: https://policies.google.com/privacy
+Author: Google LLC
+PackageName: Dart SDK
+PackageUrl: https://dart.dev/
+License: BSD-3-Clause
+LicenseUrl: https://github.com/dart-lang/sdk/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026, the Dart project authors.
+CopyrightUrl: https://github.com/dart-lang/sdk/blob/HEAD/PATENT_GRANT
+ShortDescription: A set of tools and libraries for the Dart programming language.
+Tags:
+- dart
+- flutter
+ReleaseNotes: |-
+  Released on: Unreleased
+  Language
+  Dart 3.13 adds primary constructors to the language. To use this feature, set your package's SDK constraint lower bound to 3.13 or greater (sdk: '^3.13.0').
+  Primary constructors
+  The primary constructors feature is a brevity feature. There are no new semantics, but it lets you express declarations in a less verbose way.
+  This feature lets you specify one constructor and a set of instance variables in the header of a declaration.
+  Currently, you write a declaration with a constructor and some fields as:
+  // Current syntax.
+  class Point {
+    int x;
+    int y;
+    Point(this.x, this.y);
+  }
+  Now you can write:
+  class Point(var int x, var int y);
+  If a primary constructor needs an initializer list, a body, or both, you can specify them inside the class using the this body syntax:
+  class Point(var int x, var int y) {
+    this : assert(x >= 0) {
+      print('Point created at $x, $y');
+    }
+  }
+  As part of this feature, you can also use the new and factory keywords to declare constructors in the class body without repeating the class name:
+  class Point {
+    int x, y;
+
+    // Equivalent to `Point(this.x, this.y)`:
+    new(this.x, this.y);
+
+    // Equivalent to `Point.origin()`:
+    new origin() : x = 0, y = 0;
+
+    // Equivalent to `factory Point.clone(Point other)`:
+    factory clone(Point other) => Point(other.x, other.y);
+  }
+  To learn more about the feature, check out the feature specification.
+  Other changes
+  - Breaking change: A minor change has been made to type promotion to avoid unsound behavior. See SDK issue #62889 for details.
+  Libraries
+  dart:async
+  - Added Future.pause as an alternative to Future.delayed with no callback.
+  dart:core
+  - Added List.unmodifiableOf with better typing than List.unmodifiable.
+  - Added Map.unmodifiableOf with better typing than Map.unmodifiable.
+  - Added two getters on int for efficient bit-counting: trailingZeroBitCount (ctz) and oneBitCount (popcount). On native platforms they operate on the full 64-bit two's-complement representation; on the web they operate on the least-significant 32 bits. For more details, see SDK issue #52673.
+  dart:io
+  - The cookie-date parser now uses the correct algorithm again. A change to the parsing made it only accept the formats that cookie dates should have, but the RFC specifies a very permissive algorithm for what should be accepted.
+  - Behavioral change: File access and modification timestamps (File.lastModified, FileStat, lastAccessed, lastModified, setLastAccessed, setLastModified) now preserve microsecond precision instead of truncating or rounding to millisecond accuracy. See SDK issue #42444.
+  - Breaking change: Added InterfaceAddress, a subtype of InternetAddress that exposes a prefixLength field and a broadcast getter for network interface addresses. NetworkInterface.addresses now returns List<InterfaceAddress> instead of List<InternetAddress>. Code that implements NetworkInterface and overrides addresses will need to update the return type. For more details, see SDK issue #63216.
+  - The InternetAddress.lookup function no longer accepts invalid IPv4 addresses that are traditionally accepted by inet_aton.
+  dart:isolate
+  - Added synchronous execution and event loop control APIs to Isolate: Isolate.runSync, Isolate.create, Isolate.shutdownSync, Isolate.pinToCurrentThread, Isolate.isPinnedToCurrentThread, Isolate.runEventLoopSync, Isolate.onEvent, and Isolate.handleEvent.
+  dart:js_interop
+  - JSFunction and JSExportedDartFunction are now generic. JSExportedDartFunction<T>.toDart now casts the original wrapped function to the type argument T. Calls to isA<JSExportedDartFunction<T>> now also check that the wrapped function is a T. Otherwise, this type argument is purely descriptive and intended for increased static type safety. Importantly, the runtime types of JSFunction and JSExportedDartFunction do not change. For more details, see SDK issue #54557.
+  - JSObject.getPrototypeOf is added.
+  Tools
+  Analyzer
+  - Added LSP support for Inline Values (textDocument/inlineValue), allowing IDEs and debuggers to render inline variable evaluations during active debugging sessions.
+  - Introduced custom LSP methods (dart/textDocument/getFlutterWidgetPreviews and dart/workspace/getFlutterWidgetPreviews) to serve Flutter Widget Preview metadata to editor clients.
+  - Introduced custom LSP method dart/connectToDtd enabling language server clients to pair the Analysis Server with the Dart Tooling Daemon (DTD).
+  - A no_raw_types lint rule is introduced, which replaces the strict-raw-types analysis option, offering a more consistent approach.
+  - A no_dynamic_casts lint rule is introduced, which replaces the strict-casts analysis option, offering a more consistent approach.
+  - The following lint rules have been determined to be low value, and are deprecated: avoid_private_typedef_functions, and one_member_abstracts. If there is desire to keep using these, they can be re-implemented with analyzer plugins.
+  Linter
+  - Added new lint rules:
+    - async_return_with_no_await: Warns on async functions returning a non-Future value without using await.
+    - empty_container_bodies: Highlights empty bodies in classes, enums, mixins, or extensions.
+    - initialize_in_field_declaration: Recommends initializing fields at their declaration site where applicable.
+    - unnecessary_const_in_enum_constructor: Flags redundant const keywords in enum constructors.
+    - unnecessary_primary_constructor_body: Flags unnecessary or empty bodies on primary constructors.
+    - unnecessary_type_name_in_constructor: Flags redundant explicit type names in constructor declarations.
+    - use_declaring_parameters: Encourages declaring parameters in primary constructors.
+  - Added experimental lint rule use_primary_constructors to encourage adopting primary constructor syntax when Dart 3.13 primary constructor feature is enabled.
+  Formatter
+  - Show the supported language versions when running dart format --version --verbose.
+  - Don't crash if an analysis_options.yaml file has an include that points to a non-existent or unreadable file (dart_style #1840).
+  The following minor style bug fixes are not language versioned and apply to all formatted code:
+  - Fix a bug in eager splitting optimization that in rare cases would lead to a collection or argument list splitting unnecessarily (dart_style #1809).
+  - Don't add a blank line before a comment at the end of a compilation unit or braced body (dart_style #1644).
+  - Format extension type representation clauses the same way primary constructor formal parameter lists are formatted.
+  - When trailing commas are preserved, don't insert a newline before the ; in an enum with members unless there actually is a trailing comma. (Fix by @Barbirosha.)
+  The following changes only apply when formatting code at language version 3.13 or higher:
+  - Write a trailing comma in split extension type representation clauses when formatting code at language version 3.13 or higher (dart_style #1845).
+  - Fix a bug in an eager splitting optimization that would led the formatter to prefer less desirable solutions (dart_style #1847).
+  - Prefer to split call chains for single-element targets (dart_style #1732).
+  - Allow block formatting parameter lists (dart_style #1693).
+  - Allow as, is, and is! expressions to be block formatted (dart_style #1542).
+  - Separate imports into sections (dart_style #1120).
+  - In if-case pieces, split the guard if the pattern block-splits (dart_style #1596).
+  - When no solution fits the page width, prefer solutions where the overflowing lines have trailing string literals or comments (dart_style #1802, dart_style #1803, dart_style #1837).
+  - Force blank lines around a mixin or extension type declaration if it doesn't have a ; body.
+  Pub
+  - Added dart pub workspace list command to list all packages in the workspace along with their directory paths, with support for JSON output via --json.
+  - Added dart pub check-resolution-up-to-date internal command for fast timestamp-based package resolution validation without contacting remote servers.
+  - Added dart pub cache preload command for installing packages into PUB_CACHE directly from .tar.gz archives.
+  Dart CLI
+  - Added support for cross-compilation to the dart build cli command via the --target-os and --target-arch flags.
+  - Both dart build and dart compile now support using locally-built target binaries from a local SDK build directory (identifiable by the presence of a build.ninja file), avoiding the need to download them from Google Cloud Storage.
+  Dart Runtime
+  - Built-in fallback root certificates used if the system certificates cannot be found are no longer included. The existing --root-certs-file and --root-certs-cache options to the standalone VM may be used to provide certificates if the system certificates cannot be found.
+  C Embedder API
+  - Breaking change: Updated Dart_FileModifiedCallback in runtime/include/dart_tools_api.h to pass int64_t since in microseconds since epoch (matching FileStat microsecond precision), updated from milliseconds.
+  - Added Dart_SetCurrentThreadOwnsIsolate and Dart_GetCurrentThreadOwnsIsolate functions in runtime/include/dart_api.h (and dart_api_dl.h), allowing custom embedders to bind and query isolate thread ownership.
+ReleaseNotesUrl: https://github.com/dart-lang/sdk/blob/HEAD/CHANGELOG.md#3130
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://dart.dev/guides
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

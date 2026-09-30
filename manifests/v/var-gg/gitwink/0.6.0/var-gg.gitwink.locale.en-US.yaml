@@ -1,0 +1,78 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: var-gg.gitwink
+PackageVersion: 0.6.0
+PackageLocale: en-US
+Publisher: var-gg
+PublisherUrl: https://github.com/var-gg/gitwink
+PublisherSupportUrl: https://github.com/var-gg/gitwink/issues
+Author: var-gg
+PackageName: gitwink
+PackageUrl: https://github.com/var-gg/gitwink
+License: MIT
+LicenseUrl: https://github.com/var-gg/gitwink/blob/HEAD/LICENSE
+ShortDescription: Tray-resident, read-only git glance for the AI-agent era.
+Description: |-
+  gitwink is a tray-resident, read-only Git glance tool. It shows a unified
+  timeline of recent commit activity across all of your local Git repositories,
+  so you can wink at what changed, where, and by whom, without opening a
+  heavyweight editor. Built for the AI-agent era, when code changes land
+  across many repositories at once.
+Moniker: gitwink
+Tags:
+- commits
+- developer-tools
+- git
+- tray
+ReleaseNotes: |-
+  Added
+  - Per-repo identity dots in the all-repos timeline — each repo gets a
+    stable color from the same palette the branch lanes use, so interleaved
+    commits group visually by repo instead of having to read every name.
+  - "Copied as AI context ✓" toast — the c shortcut now confirms (or
+    reports failure) even when the row isn't expanded. Previously the
+    keyboard path copied in total silence, and a failure left your previous
+    clipboard contents in place with no hint.
+  - Filter-aware empty states — instead of a bare "No commits match.", the
+    panel now names the filter that's hiding the commits ("No commits in
+    the last 7 days. Filtered to 2 branches.") and offers one-click outs:
+    Show all time, Clear author filter, and All branches in single-repo mode.
+  Fixed
+  - The timeline no longer shows history your repos don't contain. When
+    an agent (or you) amends or rebases, the rewritten-away commits are now
+    reconciled out of the cache — previously they lingered forever next to
+    their replacements, which is the one lie a sanity-check glance must
+    never tell. Mid-scroll views update in place without losing your
+    position, and agent bursts are no longer truncated (per-refresh caps
+    raised from 10 to 100 commits per repo).
+  - Hiding a repo now actually removes its commits from the timeline and
+    stops watching its .git — previously the rows stayed forever and new
+    commits in the hidden repo kept re-appearing.
+  - Commits made on a detached HEAD (agents checking out a SHA, bisect-style
+    loops) and commits reachable only from a tag now show up in the timeline.
+  - Repos found by the background discovery scan are file-watched
+    immediately — on a fresh install, live updates used to start only after
+    the next app launch.
+  - settings.json can no longer be silently wiped: concurrent writers are
+    serialized, writes are atomic (temp file + fsync + rename), and a
+    hand-edit typo now preserves your original as settings.json.bak
+    instead of resetting everything to defaults on the next auto-save.
+  - Diff window position is restored in physical pixels — on scaled
+    monitors it used to creep toward the bottom-right on every reopen and
+    eventually open off-screen.
+  - Release-candidate tags now publish as GitHub prereleases, so an rc can
+    never reach the in-app updater's "latest" endpoint.
+  Changed
+  - Idle footprint drops sharply in agent-heavy environments: the file
+    watcher now reacts only to actual ref movement — git status index
+    churn and object writes during fetch/gc no longer trigger refreshes —
+    hidden-panel refreshes only fire when rows actually changed, and the
+    SQLite cache runs in WAL mode with migrations applied once per launch
+    instead of replayed on every query.
+  - Panel summon no longer serializes up to 5,000 commit rows over IPC just
+    to discard them — the refill reports a count and the windowed timeline
+    pulls rows from the cache.
+ReleaseNotesUrl: https://github.com/var-gg/gitwink/releases/tag/v0.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

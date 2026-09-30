@@ -1,0 +1,89 @@
+# Created using wingetcreate 1.12.8.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: fjrevoredo.MiniDiarium
+PackageVersion: 0.6.4
+PackageLocale: en-US
+Publisher: fjrevoredo
+PublisherUrl: https://mini-diarium.com/
+PublisherSupportUrl: https://github.com/fjrevoredo/mini-diarium/issues
+PrivacyUrl: https://github.com/fjrevoredo/mini-diarium/blob/master/docs/PRIVACY.md
+Author: Francisco J. Revoredo
+PackageName: Mini Diarium
+PackageUrl: https://github.com/fjrevoredo/mini-diarium
+License: MIT
+LicenseUrl: https://github.com/fjrevoredo/mini-diarium/blob/master/LICENSE
+Copyright: Copyright (c) 2026 Francisco J. Revoredo
+ShortDescription: Encrypted, local-first journaling app
+Description: A local-first journal with serious encryption. Free, open source, and never touches the internet.
+Moniker: mini-diarium
+Tags:
+- privacy
+- journaling
+- journal
+- diary
+- foss
+- open-source
+- rust
+ReleaseNotes: |-
+  What's Changed
+
+  Fixed a potential content-loss bug when editing and quickly navigating to the timeline or another
+  entry, fixed text that could jump into the title field on blank days, and brought the debug dump up
+  to date with current app features.
+
+  Changed
+
+  - The debug dump is up to date with the app again (TODO-0090): the diagnostics file under
+    Preferences → Advanced dated from when Mini Diarium was much smaller, so it described almost
+    nothing the app does today (no tags, images, custom fonts, entry locking, multiple journals, or
+    plugins) and a few of its numbers were misleading. It now covers all of those, adds your OS and
+    WebView versions, backup age and size, and the recent app and in-app log records, and reports the
+    schema version stored in your database next to the one the app expects, so an upgrade that did not
+    finish is visible at a glance. The practical effect: a bug report with this file attached can
+    usually be diagnosed without a round of follow-up questions.
+  - What it never contains has not changed, and is now enforced by a test: no password, no encryption
+  key, no device key, no diary content, no entry titles, no tag names, no unlock-method labels, no
+  journal names, and no file or folder paths. Paths are stripped from the log records before they are
+  written. The in-app guide and the website docs now list every field the file does contain, so you
+  can check it yourself before sending it.
+
+  Fixed
+
+  - Entry content loss when navigating quickly: an entry could be left with its title intact and its
+    body wiped after typing and immediately switching entries, changing the date, or toggling the
+    Timeline. The editor committed which entry it was editing (id and title) separately from what that
+    entry contained, so any interruption in between (a superseded load, a failed image lookup, a
+    keystroke that beat the load) left a window where the next save paired a real entry with an empty
+    document.
+  - Atomic entry commits: id, title, body, and metadata are now written as one indivisible update,
+  after the entry's images have been resolved, never before
+  - Hydration guard: a save is refused outright unless the body in the editor actually belongs to the
+  entry being written
+  - Snapshot-based saves: the save-vs-delete decision is captured together with the content instead of
+  being re-derived when the autosave timer fires up to half a second later
+  - Unmount now flushes: closing the editor (including the Timeline toggle) saves the last few hundred
+  milliseconds of typing instead of discarding it
+  - Backend veto restored: the auto-delete command re-checks the real entry body it is given and
+  refuses to remove anything that is not genuinely blank. It recognises empty editor markup (<p></p>,
+  <p><br></p>, &nbsp;, and blank paragraphs carrying alignment or text-direction attributes) and
+  treats everything else as content: an image, a rule, a table, or any markup it does not recognise
+  keeps the entry
+  - Typing before an entry loads no longer creates a duplicate entry, and the editor no longer
+  auto-focuses until the entry it is about to show has finished loading
+  - Reopening the editor no longer blanks the entry: switching to the Timeline and back reloaded the
+  entry correctly but then immediately replaced it with an empty document and saved that over the real
+  one. The editor library emits an "update" event for things that are not edits, including the
+  internal call that keeps the read-only state in sync, and one of those fired in the moment between
+  the entry's body being loaded and being handed to the editor, so the still-empty document was
+  mistaken for the user having deleted everything. Only genuine document changes now count as edits
+  - Text typed on a blank day could jump into the title field: the title input re-focused itself every
+    time the day's entry list changed, which happens as soon as the first keystroke creates the entry,
+    so the rest of the sentence was typed into the title instead of the body. It now takes focus once,
+    when it appears
+ReleaseNotesUrl: https://github.com/fjrevoredo/mini-diarium/releases/tag/v0.6.4
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/fjrevoredo/mini-diarium/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,91 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.1.20
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Fixed
+  - Fixed Windows OAuth sign-in failing on every attempt after an upgrade when a previous run left a stale native callback registration behind; handlers registered by older binaries are now recognized as owned and rolled back instead of blocking recovery (#11967 by @H4vC).
+  @oh-my-pi/pi-catalog
+  Fixed
+  - Fixed DeepSeek V4.1 Flash dropping image attachments on hosts without their own carve-out, so the natively multimodal model is no longer treated as text-only (#11992 by @infernix).
+  - LiteLLM model groups keep the image input their deployment declares, instead of having attachments replaced with the "model does not support vision" placeholder (#11982, #11985 by @lz37).
+  - Fixed OpenCode Zen/Go Muse Spark models failing every tool-call turn with a 400 "reasoning encrypted_content was not issued to this caller" error: the gateways proxy the Responses lane to Meta but can't round-trip encrypted reasoning, so those SKUs no longer request or replay it (#11928).
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added collab.autoStart (off | view | control): every local interactive session hosts itself as it starts and rotates its room on /new, /resume, fork, or branch, so a phone or dashboard can reach any running session without running /collab first (#11908 by @alphastorm and @sorphwer).
+  - Added omp collab list [--json] and /collab list to enumerate every live local Collab host (instance, generation, session, cwd, model, participants, relay/attention state, access) without exposing links, plus omp collab link <instanceId|pid> [--view] to fetch one generation-bound browser URL from a private per-room Unix socket/named pipe registry; room keys, write tokens, and URLs never touch disk (#6099; #11908 by @alphastorm and @sorphwer).
+  Changed
+  - Documented that native JS/TS hook factories must live in .omp/hooks/pre/ or .omp/hooks/post/ (not directly in .omp/hooks/), and cross-linked the hooks and extension-loading docs (#11942).
+  Fixed
+  - The hidden notice announcing a mid-session tool-availability change now states that it lists only what changed, so an additions-only notice no longer reads as the complete tool set and the model keeps using tools that are still callable (#11824 by @camjac251).
+  - TTSR stream buffers now reset at every assistant message boundary, not only at turn start, so a scope: text or tool-argument rule can no longer fire on a later message because of text streamed by an earlier response in the same turn (#11957 by @srobroek).
+  - Eval completion() calls now use configured retry fallback chains when their role model fails (#11989).
+  - Eval completion() fallback chains now also apply to unqualified role models, walk into a failed fallback's own model chain, stop at retry.maxRetries, and resolve session-sticky credentials with the session id (#11989).
+  - Eval completion() fallbacks now keep depth-first chain order, inherit the failed candidate's effort for bare nested entries, and skip keyless candidates without spending retry.maxRetries budget (#11989).
+  - Eval completion() fallbacks reached at different efforts now each walk their shared descendants instead of truncating the later effort's path (#11989).
+  - Fixed ranged grep rejecting existing files with glob characters in their names (#11977).
+  - Notified Collab guests when admitted prompts are discarded, including room retirement during a session change (#11908 by @alphastorm).
+  - Preserved pending Collab dialog answers across session-switch rollback without accepting them after commit, stop, or writer departure (#11908 by @alphastorm).
+  - Fixed prompts awaiting setup crossing a fork, branch, or tree-navigation commit, multi-question extension dialogs moving later questions to a replacement Collab room, and stale rooms blocking /collab or /join after a failed session change (#11908 by @alphastorm).
+  - Fixed background task cards missing their final completion or failure after an early result or live-session focus replay.
+  - Ranged reads on Windows no longer intermittently open the selector-suffixed path when filesystem probes return transient errors (#11284).
+  What's Changed
+  - fix(catalog): scope the Fable cache-read patch to the 5.1 revision by @camjac251 in https://github.com/can1357/oh-my-pi/pull/11862
+  - docs(hooks): document pre/post discovery location for hook factories by @roboomp in https://github.com/can1357/oh-my-pi/pull/11943
+  - fix(catalog): disable encrypted reasoning replay for opencode muse-spark by @roboomp in https://github.com/can1357/oh-my-pi/pull/11931
+  - fix(catalog): update yolo-auto flash test for 384K maxTokens by @H4vC in https://github.com/can1357/oh-my-pi/pull/11968
+  - fix(catalog): clamp canonical maxTokens fallback to model context window by @onlyysaurabh in https://github.com/can1357/oh-my-pi/pull/11952
+  - fix(auth): accept legacy verbatim commands in Windows OAuth recovery by @H4vC in https://github.com/can1357/oh-my-pi/pull/11967
+  - fix(tui): preserve held background task lifecycle by @serverinspector in https://github.com/can1357/oh-my-pi/pull/11971
+  - feat(collab): auto-start sessions and list live hosts locally by @alphastorm in https://github.com/can1357/oh-my-pi/pull/11908
+  - fix(tools): bypassed literal selector probes on Windows by @roboomp in https://github.com/can1357/oh-my-pi/pull/11288
+  - docs(changelog): drop stray Copilot duplicate from 18.1.19 by @H4vC in https://github.com/can1357/oh-my-pi/pull/11986
+  - fix(coding-agent): reset TTSR buffers per assistant message by @srobroek in https://github.com/can1357/oh-my-pi/pull/11957
+  - fix(catalog): merge LiteLLM compat across management endpoints by @lz37 in https://github.com/can1357/oh-my-pi/pull/11985
+  - fix(grep): preferred existing literal paths for ranges by @roboomp in https://github.com/can1357/oh-my-pi/pull/11981
+  - fix(prompts): mark the tool-roster notice as a delta, not a roster by @camjac251 in https://github.com/can1357/oh-my-pi/pull/11925
+  - fix(coding-agent): recognize successful kernel shutdowns by @moodiness in https://github.com/can1357/oh-my-pi/pull/11865
+  - fix(coding-agent): exclude metadata from executable tool discovery by @moodiness in https://github.com/can1357/oh-my-pi/pull/11864
+  - fix(eval): apply fallback chains to completions by @roboomp in https://github.com/can1357/oh-my-pi/pull/11993
+  - test(mcp): retry heap-snapshot probe until GC settles by @roboomp in https://github.com/can1357/oh-my-pi/pull/11978
+  - fix(eval): harden completion() fallback chains by @H4vC in https://github.com/can1357/oh-my-pi/pull/11994
+  - fix(catalog): keep image input on the natively multimodal DeepSeek V4.1 Flash by @infernix in https://github.com/can1357/oh-my-pi/pull/11992
+  New Contributors
+  - @onlyysaurabh made their first contribution in https://github.com/can1357/oh-my-pi/pull/11952
+  - @moodiness made their first contribution in https://github.com/can1357/oh-my-pi/pull/11865
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.1.19...v18.1.20
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.1.20
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

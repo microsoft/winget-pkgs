@@ -1,0 +1,53 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: zizmor.zizmor
+PackageVersion: 1.29.0
+PackageLocale: en-US
+Publisher: William Woodruff
+PublisherUrl: https://zizmor.sh/
+PublisherSupportUrl: https://github.com/zizmorcore/zizmor/issues
+Author: William Woodruff
+PackageName: zizmor
+PackageUrl: https://zizmor.sh/
+License: MIT
+LicenseUrl: https://github.com/zizmorcore/zizmor/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2024 William Woodruff <william @ yossarian.net>
+CopyrightUrl: https://github.com/zizmorcore/zizmor/blob/HEAD/LICENSE
+ShortDescription: Static analysis for GitHub Actions.
+Description: |-
+  zizmor is a static analysis tool for GitHub Actions.
+
+  It can find many common security issues in typical GitHub Actions CI/CD setups, including:
+  - Template injection vulnerabilities, leading to attacker-controlled code execution
+  - Accidental credential persistence and leakage
+  - Excessive permission scopes and credential grants to runners
+  - Impostor commits and confusable git references
+  - ...and much more!
+Tags:
+- github-actions
+- security
+- security-tools
+- static-analysis
+ReleaseNotes: |-
+  New Features 🌈🔗
+  - zizmor now has experimental support for auditing pre-commit inputs, meaning both pre-commit configuration and hook definitions (#2209)
+  - New audit: insecure-url-scheme detects usages of insecure (i.e. plaintext) protocols when making network requests. The initial version of this audit is limited to pre-commit inputs only (#2228)
+  - zizmor now supports GitHub's "self-repository" reference syntax for local actions, e.g. uses: $/foo/bar instead of a manual checkout and uses: ./foo/bar (#2248)
+
+  Changes ⚠️🔗
+  - The unpinned-uses and unpinned-images audits have been separated more cleanly: unpinned-uses is now principally responsible for Git-style uses: clauses, whereas unpinned-images is now responsible for docker://-style uses: clauses (in addition to already checking other image references) (#2222)
+
+  Removals 🌅🔗
+  - --collect=workflows-only and --collect=actions-only have been fully removed. Use --collect=workflows and --collect=actions for the replacement behavior (#2242)
+
+  Bug Fixes 🐛🔗
+  - Fixed a bug where zizmor would reject a valid workflow definition for containing a literal jobs..outputs. value for being a non-string (#2220)
+  - Fixed a bug where the github-app audit would incorrectly flag some usages as needing a repositories: key, despite requesting organization-level-only permissions (#2227)
+  - Fixed a class of bugs where zizmor would discover the user's configuration in unintuitive ways. When auditing from a Git repository, zizmor now uses the repository root to discover configuration consistently (#2234)
+ReleaseNotesUrl: https://github.com/zizmorcore/zizmor/releases/tag/v1.29.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://docs.zizmor.sh/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

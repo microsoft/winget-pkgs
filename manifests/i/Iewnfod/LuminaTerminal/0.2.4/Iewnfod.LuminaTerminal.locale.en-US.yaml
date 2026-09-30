@@ -1,0 +1,28 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Iewnfod.LuminaTerminal
+PackageVersion: 0.2.4
+PackageLocale: en-US
+Publisher: iewnfod
+PublisherUrl: https://github.com/iewnfod
+PublisherSupportUrl: https://github.com/iewnfod/lumina-terminal/issues
+Author: Iewnfod
+PackageName: Lumina Terminal
+PackageUrl: https://github.com/iewnfod/lumina-terminal
+License: MPL-2.0
+LicenseUrl: https://github.com/iewnfod/lumina-terminal/blob/HEAD/LICENSE
+ShortDescription: A modern, cross-platform terminal emulator built with Tauri, React, and Xterm.js.
+Description: Lumina Terminal is a modern, cross-platform terminal emulator built with Tauri, React, and Xterm.js, featuring a sleek UI, a command palette, and customizable profiles. Each tab runs a real shell process with multi-tab support, tear-off tabs, find-in-terminal, configurable shells (PowerShell, WSL, Git Bash, or any executable), an optional WebGL renderer, and session save and restore.
+Tags:
+- console
+- shell
+- terminal
+ReleaseNotes: |-
+  🐛 Bug Fixes
+  - Fixed tabs closing instantly on bash 5.3 — bash 5.3 enforces that multi-character options must come before single-character options on the command line. Lumina was spawning the shell with bash -i --init-file <path>, which bash 5.3 rejects with bash: --: invalid option (exit 2) — closing the tab, and the window when it held the last tab, right after startup. The argument order is now --init-file <path> -i, which parses correctly on all bash versions and keeps the shell integration working. A regression test now spawns a real bash and asserts the init file is sourced
+  - Fixed the test suite killing its parent shell — The shell-integration tests spawn real interactive shells (bash -i) that were sharing the controlling terminal with whatever ran cargo test (e.g. a release script running inside Lumina). Parallel test shells performing job-control ioctls fought over terminal ownership and could SIGHUP the parent process mid-run. Test-spawned shells are now detached into their own session via setsid, making the terminal ownership conflicts fail harmlessly
+  Full Changelog: https://github.com/iewnfod/lumina-terminal/compare/v0.2.3...v0.2.4
+ReleaseNotesUrl: https://github.com/iewnfod/lumina-terminal/releases/tag/v0.2.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

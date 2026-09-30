@@ -1,0 +1,40 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: HaystackSoftware.Arq
+PackageVersion: 7.48.0.0
+PackageLocale: en-US
+Publisher: Haystack Software LLC
+PublisherUrl: https://arqbackup.com/
+PrivacyUrl: https://arqbackup.com/privacy/
+Author: Haystack Software LLC
+PackageName: Arq
+PackageUrl: https://arqbackup.com/download/
+License: Proprietary
+Copyright: Copyight © 2009-2026 Haystack Software LLC. All rights reserved.
+ShortDescription: A backup software for your Mac or Windows PC.
+Tags:
+- backup
+ReleaseNotes: |-
+  Improvements
+  - Improved the way cached data is managed, reducing the amount of cached data stored over time.
+  - The Budget/Stored Size row in the main window now shows the current stored size, refreshed while a backup is running and again when it finishes.
+  - Google Cloud Storage: Arq now refreshes its access token before it expires instead of waiting for a request to fail. A token that expired in the middle of a large upload previously caused the whole upload to be retried, which could be time-consuming.
+  - Arq Pro: computers managed by an Arq Pro group no longer show the "update available" notification when auto-update is off, since updates are controlled from the Arq Pro console.
+  Bug Fixes
+  - Fixed the Arq7Agent service becoming unresponsive to the Service Control Manager (Windows event 7011) during a Remote Desktop logon. Arq7Agent asked Windows for device-arrival notifications for every device interface class, so RDP device redirection (the client's drives, printers, smart cards and ports) delivered a burst of notifications Arq had no use for. Arq now registers for volume notifications only; removable-drive detection is unchanged.
+  - Fixed a failed read of the previous backup's directory data being reported as a backup error. That skipped thinning and budget enforcement and forced a full rescan on the next run, which could make a transient failure repeat indefinitely. Arq now logs the failure to the activity log and backs the directory up as new.
+  - Fixed a race at the end of a backup where the pass that computes the progress-bar totals could still be reading backup records that retention thinning, budget enforcement, or unreferenced-data removal had just deleted. This also fixes the progress bar dropping to zero during cleanup on plans whose scan hadn't finished.
+  - Fixed the emailed backup report showing 0 for scanned bytes and files when the scan-ahead pass hadn't finished.
+  - Fixed a backup plan's "last backed up" date being updated by an aborted backup, which could silence the "no backups in N days" alert.
+  - Fixed a backup plan's "last backed up" date never being updated when every backup was a back-up-and-validate run. This affected plans backed up to folder, SFTP, or pCloud destinations less often than every 30 days, such as rotating removable disks, and caused false "no backups in N days" alerts.
+  - Fixed retry loops for Google Cloud Storage, Google token refresh, OneDrive, and pCloud that could retry a failing request indefinitely on certain network errors. Arq now gives up after a bounded time, while still waiting out genuine network outages.
+ReleaseNotesUrl: https://arqbackup.com/download/arqbackup/arq7windows_release_notes.html
+PurchaseUrl: https://arqbackup.com/pricing/
+Documentations:
+- DocumentLabel: Learn
+  DocumentUrl: https://arqbackup.com/learn/
+- DocumentLabel: Documentation
+  DocumentUrl: https://arqbackup.com/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

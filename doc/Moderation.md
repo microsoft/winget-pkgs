@@ -15,15 +15,12 @@ Our intent was not to introduce a numbers game for others to achieve and automat
 | **[@AmelBawa-msft](https://github.com/AmelBawa-msft)** |
 | **[@denelon](https://github.com/denelon)** |
 | **[@dkbennett](https://github.com/dkbennett)** |
-| **[@erinpwoo](https://github.com/erinpwoo)** |
 | **[@florelis](https://github.com/florelis)** |
 | **[@hackean-msft](https://github.com/hackean-msft)** |
 | **[@JohnMcPMS](https://github.com/JohnMcPMS)** |
-| **[@KevinLaMS](https://github.com/KevinLaMS)** |
 | **[@Madhusudhan-MSFT](https://github.com/Madhusudhan-MSFT)** |
 | **[@msftrubengu](https://github.com/msftrubengu)** |
 | **[@ranm-msft](https://github.com/ranm-msft)** |
-| **[@RDMacLachlan](https://github.com/RDMacLachlan)** |
 | **[@stephengillie](https://github.com/stephengillie)** |
 | **[@yao-msft](https://github.com/yao-msft)** |
 
@@ -32,12 +29,19 @@ Our intent was not to introduce a numbers game for others to achieve and automat
 | **[@ImJoakim](https://github.com/ImJoakim)** |
 | **[@ItzLevvie](https://github.com/ItzLevvie)** |
 | **[@jedieaston](https://github.com/jedieaston)** |
-| **[@KaranKad](https://github.com/KaranKad)** |
 | **[@mdanish-kh](https://github.com/mdanish-kh)** |
-| **[@OfficialEsco](https://github.com/OfficialEsco)** |
-| **[@quhxl](https://github.com/quhxl)** |
 | **[@russellbanks](https://github.com/russellbanks)** |
 | **[@Trenly](https://github.com/Trenly)** |
+
+## Emeritus Moderators
+
+We are grateful to the following community members for their service as moderators. Their contributions helped shape the Windows Package Manager community repository, and we thank them for their dedication and the time they gave to support contributors. Emeritus moderators are always welcome to return as active moderators on request.
+
+| Emeritus Moderators |
+| ------------------- |
+| **[@KaranKad](https://github.com/KaranKad)** |
+| **[@OfficialEsco](https://github.com/OfficialEsco)** |
+| **[@quhxl](https://github.com/quhxl)** |
 
 # Information for Contributors
 
@@ -47,7 +51,13 @@ Sometimes contributors may request assistance from moderators in order to take a
 
 Before requesting assistance, please work through these recommendations first:
 
-1. Wait. Sometimes moderators are busy or working on pressing matters. If you're an infrequent contributor, your pull request is subject to greater scrutiny than frequent contributors. Please be patient, but reach out if your pull request is outstanding for more than 24 hours.
+1. **Please be patient.** Moderators may be busy or working on pressing matters. They generally prioritize the oldest open pull requests that have completed validation and are otherwise ready for moderator review. A pull request's exact position may vary because different submissions require different levels of scrutiny:
+
+   - [**New versions ready for moderator review, oldest first**](https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+is%3Aopen+label%3ANew-Manifest+label%3AValidation-Completed+-label%3ANew-Package+-label%3ANeeds-Author-Feedback+-label%3ANeeds-Attention+-label%3ABlocking-Issue+-label%3ANeeds-CLA+-label%3AChanges-Requested+-label%3AModerator-Approved+sort%3Acreated-asc): Updates to established packages may require less scrutiny when prior manifests provide clear precedent for the package identity, installer source, and metadata.
+   - [**New packages ready for moderator review, oldest first**](https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+is%3Aopen+label%3ANew-Package+label%3AValidation-Completed+-label%3ANeeds-Author-Feedback+-label%3ANeeds-Attention+-label%3ABlocking-Issue+-label%3ANeeds-CLA+-label%3AChanges-Requested+-label%3AModerator-Approved+sort%3Acreated-asc): New packages generally require more scrutiny because moderators must establish package identity, installer provenance, metadata accuracy, and policy compliance without prior manifest history.
+   - [**Pull requests awaiting author feedback, oldest first**](https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+is%3Aopen+label%3ANeeds-Author-Feedback+sort%3Acreated-asc): These pull requests are not currently waiting on moderator approval. Review the comments and validation labels, make the requested changes, and respond when the pull request is ready for another review.
+
+   These lists can help you understand the approximate position and state of your pull request, but they are not strict queues. Validation results, security or policy concerns, package complexity, and contributor responses may change the order in which pull requests are reviewed.
 2. If you've submitted a pull request and it hasn't been approved, review any comments and labels to ensure no action or information is outstanding from you.
 3. If you're helping on an existing package (new version, change, etc), consider contacting any regular package maintainer and ask for their assistance. They may be able to help vouch for your issue/pull request or help explain why it's stuck.
 
@@ -58,6 +68,9 @@ In spite of the above, if the issue or pull request is urgent (i.e. critical sec
 ### GitHub Mentions
 
 For infrequent contributors, GitHub @mentions are likely the easiest way to get attention. As there are many moderators in the project, the best way to know who to tag is to check [recently closed pull requests](https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+is%3Aclosed+label%3AModerator-Approved) and see which moderator(s) have closed recent pull requests. This is a generally indicative of which moderator(s) are active and able to assist.
+
+> [!NOTE]
+> Community moderators can assist with standard manifest reviews, but pull requests with a red `Policy-*`, `Validation-Domain`, or `Validation-Executable-Error` label require review by a Windows Package Manager administrator. Mentioning a community moderator will not advance an administrator-only review. The current administrators are listed at the top of this document.
 
 Please ensure when you mention a moderator to include a clear and concise note of what action you are requesting. Please only mention a maximum of two moderators at a time to prevent miscommunications.
 
@@ -79,6 +92,23 @@ Matrix Room Alias (for all other homeservers): `#Microsoft_winget-pkgs:gitter.im
 ## Expectations
 
 Moderators are expected to continue behaving in a manner consistent with what led to their nomination. In addition, they are given the ability to approve PRs for manifests. This should not be seen as the goal, however. The goal is to help ensure high-quality manifests and to help the community with package submission. They may request to discontinue this responsibility at any time and for any reason, and it will be honored.
+
+### Maintaining Moderator Status
+
+Moderator status reflects ongoing, active participation in the project. A moderator is considered active if they have reviewed at least ten (10) pull requests covering at least ten (10) different packages within the trailing twelve (12) months.
+
+The core team periodically reviews moderators who fall below this activity bar. Removal is not automatic; each case is considered individually so that context — such as a temporary break or contributions in other areas of the project — can be taken into account. When a moderator is removed for inactivity, it is not a reflection on the quality of their past contributions, which remain appreciated.
+
+Activity in other Windows Package Manager repositories may also be taken into consideration during this review, including:
+
+* [winget-cli](https://github.com/microsoft/winget-cli) — the WinGet client (CLI, PowerShell modules, and COM API)
+* [winget-cli-restsource](https://github.com/microsoft/winget-cli-restsource) — reference implementation for a REST-based winget package source
+* [winget-command-not-found](https://github.com/microsoft/winget-command-not-found) — PowerShell 7 module that recommends packages for unrecognized commands
+* [winget-create](https://github.com/microsoft/winget-create) — the Windows Package Manager Manifest Creator (`wingetcreate`)
+* [winget-dsc](https://github.com/microsoft/winget-dsc) — WinGet DSC resources and sample configurations
+* [winget-studio](https://github.com/microsoft/winget-studio) — WinGet Studio
+
+A moderator who has been removed for inactivity and later wishes to resume may be reinstated on request, at the discretion of the core team, without going through the nomination process again.
 
 ### Reviewing Pull Requests
 
@@ -108,7 +138,13 @@ Occasionally the automatic validation runs into an issue which is transient, or 
 
 > Trigger: Comment `[Policy] reset feedback` on a pull request
 
-The bots which help keep the repository clean sometimes make mistakes or or sometimes a moderator misclicks and accidentally requests changes. This can add the `Needs-Author-Feedback` or `Needs-Attention` labels to pull requests that don't need them. Moderators can remove these labels without re-running the pipelines to allow for the PR to be re-reviewed and merged.
+The bots which help keep the repository clean sometimes make mistakes or sometimes a moderator misclicks and accidentally requests changes. This can add the `Needs-Author-Feedback` or `Needs-Attention` labels to pull requests that don't need them. Moderators can remove these labels without re-running the pipelines to allow for the PR to be re-reviewed and merged.
+
+### Marking CLA as Signed
+
+> Trigger: Comment `[Policy] CLA Signed` on a pull request
+
+When the Contributor License Agreement has been signed but the `Needs-CLA` label remains on a pull request, moderators can use this trigger to remove the label.
 
 ### Removing Labels
 
@@ -174,6 +210,7 @@ Moderators are often the first to see and triage new issues, and so they have th
 * `Needs-Author-Feedback`
 * `Needs-CLA`
 * `Needs-Manual-Merge`
+* `Needs-Manual-Review`
 * `Needs-Review`
 * `Network-Blocker`
 * `Package-Request`

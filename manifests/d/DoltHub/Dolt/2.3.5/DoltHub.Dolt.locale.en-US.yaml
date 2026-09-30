@@ -1,0 +1,100 @@
+# Created with WinGet Updater using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: DoltHub.Dolt
+PackageVersion: 2.3.5
+PackageLocale: en-US
+Publisher: DoltHub
+PublisherUrl: https://github.com/dolthub/dolt
+PublisherSupportUrl: https://github.com/dolthub/dolt/issues
+Author: DoltHub
+PackageName: Dolt
+PackageUrl: https://www.dolthub.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/dolthub/dolt/blob/HEAD/LICENSE
+CopyrightUrl: https://raw.githubusercontent.com/dolthub/dolt/master/LICENSE
+ShortDescription: Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+Description: |-
+  Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+  Connect to Dolt just like any MySQL database to run queries or update the data using SQL commands.
+  Use the command line interface to import CSV files, commit your changes, push them to a remote, or merge your teammate's changes.
+Moniker: dolt
+Tags:
+- cli
+- data
+- git-for-data
+- versioning
+ReleaseNotes: |-
+  Merged PRs
+  dolt
+  - 11842: Support wildcard table filters for binlog replication
+    Adds REPLICATE_WILD_DO_TABLE and REPLICATE_WILD_IGNORE_TABLE support for MySQL-to-Dolt binlog replication, including MySQL wildcard matching, precedence, case handling, validation, and SHOW REPLICA STATUS output.
+    Filter updates are applied atomically and synchronized with replica lifecycle operations.
+    Part of #11787
+    Depends on: dolthub/go-mysql-server#3885
+  - 11804: Enable fine-grained merging for adaptive JSON
+    Recognize the JsonAdaptiveEnc storage encoding in the prolly-row JSON merge path, enabling the existing structural merger for Doltgres JSON storage.
+    Part of dolthub/doltgresql#2018
+  - 11802: Fix legacy table name unmarshalling receiver
+  go-mysql-server
+  - 3888: Fix LOAD_FILE directory handle leaks
+    Avoids leaking directory handles during LOAD_FILE checks, with the regression exercised by Dolt #11838.
+    Fixes #8785
+  - 3886: Simplify partial join parent for window functions in exists subqueries
+    fixes #11421
+  - 3885: Support wildcard replication filter values
+    Adds native string-list values for REPLICATE_WILD_DO_TABLE and REPLICATE_WILD_IGNORE_TABLE, including MySQL-compatible format validation and SHOW REPLICA STATUS formatting.
+    Simplifies replication option handling to use native Go values instead of exported wrapper types.
+    Companion Dolt PR: github.com//pull/11842
+    Companion: dolthub/dolt#11842
+  - 3864: Implement conversions from DATE, DATETIME, and TIMESTAMP to numbers
+    Properly implement conversion from DATE, DATETIME, and TIMESTAMP types to numeric types.
+    Additionally, fixes string output to match precision of date type.
+    Partially fixes: #10278
+  - 3863: Decorrelate inner join subqueries in EXISTS subqueries
+    Fix EXISTS subqueries containing inner joins nested inside outer joins incorrectly dropped matching rows. Correlated conditions on null-supplying side of an outer join are now preserved in place rather than hoisted.
+    - Add (JoinType) IsPreservedTable(childNum int) bool and unified usage with filterPushdownSelector.
+    - Add decorrelateSelector to stop decorrelation traversal from entering null-supplied join branches.
+    - Add decorrelateCondition to decorralate inner join filters alongside WHERE filters.
+      Fix #11771
+  - 3842: Automate dependency bump approval and merge
+    Validate generated dependency bump PRs, approve the exact dependency-only commit, and enable squash auto-merge with a head-SHA guard. Disable auto-merge on superseded bumps before closing them, and standardize stale bump cleanup to close immediately unless marked keep-alive.
+  vitess
+  - 493: Add wildcard replication filter syntax
+    Adds parser and AST support for REPLICATE_WILD_DO_TABLE and REPLICATE_WILD_IGNORE_TABLE in CHANGE REPLICATION FILTER statements. Wildcard values are represented as ordered quoted-string lists, including support for explicitly empty lists.
+    Parser coverage includes multiple patterns, wildcard escapes, quotes, Unicode, empty lists, and rejection of unquoted patterns.
+    Part of #11787
+  - 491: Added NULLs ordering
+    This implements NULL ordering (nulls can be set to be first or last)
+    Related PRs:
+    - dolthub/go-mysql-server#3820
+    - #11746
+    - dolthub/doltgresql#3285
+  Closed Issues
+  - 8822: False positive for incompatible schema change on non-ff merge when indexes on overlapping columns exist
+  - 11421: Dolt raises an internal row-index error for EXISTS with a window expression.
+  - 10278: Properly handle conversions between datetime, date, and time types and Numeric Types
+  - 8275: SHOW CREATE doesn't show indexes on virtual generated columns:
+  - 4989: using hex string as bindvar for decimal type column in prepared statement causes panic
+  - 5942: Unexpected and incorrect is too large for column error
+  - 7130: bad double conversion
+  - 7668: decimal.Decimal loses precision when prepared
+  - 8785: md5 function does not recognize binary keyword
+  - 5414: Argument parser seems to grab prefix
+  - 8855: Support cosine vector distance function
+  - 8658: Create VECTOR type.
+  - 11416: Dolt JSON_EXTRACT does not preserve large JSON integer values.
+  - 8477: dolt sql \commit uses static time stamp
+  - 8325: panic during dolt dumpif db contains a (non-empty) table with virtual columns
+  - 8193: inserts with specified fields should error on empty insert values
+  - 7402: dolt cherry-pick --abort reverts ignored tables.
+  - 11771: EXISTS with a join: a correlated reference in the ON clause is dropped from the plan, and the query returns wrong rows
+  - 7022: Dolt's reset --soft behavior doesn't match Git's
+  - 6300: Prepared statements don't work with as of
+  - 6124: dolt diff after change primary key and adding a column gets error
+  - 5821: Column in SELECT list is allowed when it is not present in the GROUP BY clause
+  - 1894: Statement boundaries do not work across tables
+  - 123: Extension mechanism for the parser
+ReleaseNotesUrl: https://github.com/dolthub/dolt/releases/tag/v2.3.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
