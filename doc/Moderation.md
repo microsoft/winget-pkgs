@@ -51,7 +51,13 @@ Sometimes contributors may request assistance from moderators in order to take a
 
 Before requesting assistance, please work through these recommendations first:
 
-1. Wait. Sometimes moderators are busy or working on pressing matters. If you're an infrequent contributor, your pull request is subject to greater scrutiny than frequent contributors. Please be patient, but reach out if your pull request is outstanding for more than 24 hours.
+1. **Please be patient.** Moderators may be busy or working on pressing matters. They generally prioritize the oldest open pull requests that have completed validation and are otherwise ready for moderator review. A pull request's exact position may vary because different submissions require different levels of scrutiny:
+
+   - [**New versions ready for moderator review, oldest first**](https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+is%3Aopen+label%3ANew-Manifest+label%3AValidation-Completed+-label%3ANew-Package+-label%3ANeeds-Author-Feedback+-label%3ANeeds-Attention+-label%3ABlocking-Issue+-label%3ANeeds-CLA+-label%3AChanges-Requested+-label%3AModerator-Approved+sort%3Acreated-asc): Updates to established packages may require less scrutiny when prior manifests provide clear precedent for the package identity, installer source, and metadata.
+   - [**New packages ready for moderator review, oldest first**](https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+is%3Aopen+label%3ANew-Package+label%3AValidation-Completed+-label%3ANeeds-Author-Feedback+-label%3ANeeds-Attention+-label%3ABlocking-Issue+-label%3ANeeds-CLA+-label%3AChanges-Requested+-label%3AModerator-Approved+sort%3Acreated-asc): New packages generally require more scrutiny because moderators must establish package identity, installer provenance, metadata accuracy, and policy compliance without prior manifest history.
+   - [**Pull requests awaiting author feedback, oldest first**](https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+is%3Aopen+label%3ANeeds-Author-Feedback+sort%3Acreated-asc): These pull requests are not currently waiting on moderator approval. Review the comments and validation labels, make the requested changes, and respond when the pull request is ready for another review.
+
+   These lists can help you understand the approximate position and state of your pull request, but they are not strict queues. Validation results, security or policy concerns, package complexity, and contributor responses may change the order in which pull requests are reviewed.
 2. If you've submitted a pull request and it hasn't been approved, review any comments and labels to ensure no action or information is outstanding from you.
 3. If you're helping on an existing package (new version, change, etc), consider contacting any regular package maintainer and ask for their assistance. They may be able to help vouch for your issue/pull request or help explain why it's stuck.
 
@@ -62,6 +68,9 @@ In spite of the above, if the issue or pull request is urgent (i.e. critical sec
 ### GitHub Mentions
 
 For infrequent contributors, GitHub @mentions are likely the easiest way to get attention. As there are many moderators in the project, the best way to know who to tag is to check [recently closed pull requests](https://github.com/microsoft/winget-pkgs/pulls?q=is%3Apr+is%3Aclosed+label%3AModerator-Approved) and see which moderator(s) have closed recent pull requests. This is a generally indicative of which moderator(s) are active and able to assist.
+
+> [!NOTE]
+> Community moderators can assist with standard manifest reviews, but pull requests with a red `Policy-*`, `Validation-Domain`, or `Validation-Executable-Error` label require review by a Windows Package Manager administrator. Mentioning a community moderator will not advance an administrator-only review. The current administrators are listed at the top of this document.
 
 Please ensure when you mention a moderator to include a clear and concise note of what action you are requesting. Please only mention a maximum of two moderators at a time to prevent miscommunications.
 

@@ -1,0 +1,111 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: dreamlonglll.Mini-Term
+PackageVersion: 1.13.9
+PackageLocale: zh-CN
+Publisher: tauri-app
+PublisherUrl: https://github.com/dreamlonglll
+PublisherSupportUrl: https://github.com/dreamlonglll/mini-term/issues
+PackageName: Mini-Term
+PackageUrl: https://github.com/dreamlonglll/mini-term
+License: 免费软件
+ShortDescription: 为 AI 时代打造的桌面终端管理器
+Description: |-
+  一个 AI 终端管理工具，支持多项目、多终端布局管理
+
+  功能特性
+  终端核心
+  - 多标签管理 — 每个项目独立标签页，拖拽排序，状态图标一目了然
+  - 递归分屏 — 横向 / 纵向任意嵌套分屏，Allotment 拖拽调整比例
+  - 高性能渲染 — xterm.js v6 + WebGL 加速，自动降级为 Canvas
+  - 10 万行滚动缓冲 — 拦截 CSI 3J（ED3）指令，Claude / Codex 等 TUI 清屏时保留上滚历史
+  - 终端缓存 — 切换标签 / 分屏不重建 xterm 实例，已有内容不丢失
+  - 复制粘贴 — Ctrl+Shift+C / Ctrl+Shift+V 快捷键 + 右键菜单，未选中时"复制"自动置灰；Windows 大段多行粘贴自动分块写入，防止 ConPTY 丢行
+  - 长文本粘贴 — 剪贴板文本 ≥10 行或 ≥2000 字符时自动转存为临时 .txt 并粘贴带引号的文件路径，避免 AI 工具直接处理超长内容引发性能与 paste bracket 问题
+  - 图片粘贴 — 剪贴板含截图时自动检测，通过 Win32 API 保存为临时 PNG 并粘贴带引号的路径，兼容 PinPix 等非标准格式
+  - 文件拖拽 — 文件拖到终端自动插入带引号的绝对路径，兼容含空格的路径
+  - 多 Shell 配置 — Windows（cmd / powershell / pwsh）、macOS（zsh / bash）、Linux（bash / sh）等，可自由增删
+  AI 进程感知
+  - 实时状态检测 — 500ms 轮询子进程名，自动识别 Claude / Codex，显示 idle / working / error 状态
+  - 状态聚合 — 面板 → 标签页 → 项目逐层聚合，优先级 error > ai-working > ai-idle > idle
+  - 完成提醒三件套 — AI 任务从 working → idle 时立刻触发：
+    - 右下角 Toast 桌面通知（仅非活跃项目弹出，同项目去重）
+    - 项目列表 DONE 徽章，点击清除
+    - 任务栏闪烁（Windows）/ Dock 跳动（macOS），窗口失焦时才触发
+    - 三个开关独立可配
+  - 会话进出检测 — 命令 echo 识别进入 AI；双击 Ctrl+C / Ctrl+D 或 exit / quit / :quit / /logout 识别退出
+  - 会话历史 — 读取本地 Claude / Codex 历史会话记录，右键复制恢复命令快速续接
+  - AI 任务标记 — AI 会话内每次用户按 Enter 自动在 xterm 打点，标签右上角 ⚑ 按钮下拉展示历史提交列表，点击或 Ctrl+Shift+↑/↓ 在标记间跳转，目标行短暂高亮提示
+  项目管理
+  - 项目列表 — 左侧边栏管理多个项目目录，一键切换工作区，重启自动恢复上次激活项目
+  - 拖拽添加项目 — 从资源管理器拖拽文件夹到项目列表即可快速添加，自动识别文件 / 文件夹 / 重复项目并给出视觉反馈
+  - 嵌套分组 — 最多 3 级项目分组，拖拽排序，折叠 / 展开
+  - 文件树 — 集成目录浏览器，嵌套 .gitignore 置灰（每层子目录的忽略规则与 !pattern 白名单都会生效，与 git 行为一致），notify 文件监听实时刷新
+  - 文件操作 — 文件树内新建文件 / 文件夹、重命名、查看内容（二进制与超大文件友好提示）
+  - VS Code 快捷打开 — 文件树右上角按钮一键用配置的 VS Code 可执行文件打开当前项目，路径可在「设置 → 系统设置 → 外部编辑器」自定义
+  Git 集成
+  - 文件状态 — 文件树显示 Git 状态颜色（修改 / 新增 / 删除 / 冲突）
+  - 变更 Diff — 工作区文件变更的详细 Diff，Hunk 行级解析，并排 / 内联双视图
+  - 提交历史 — 浏览仓库提交记录，游标分页加载（默认 30 条）
+  - 提交 Diff — 查看任意提交的文件变更，逐文件切换
+  - 分支信息 — 本地 / 远程分支列表
+  - 源码控制面板 — VS Code 风格 Changes 面板，Staged / Changes / Untracked 分组展示，支持单文件和全量 stage / unstage / discard，Ctrl+Enter 快速提交，列表与树形视图切换
+  - Pull / Push — 仓库行内按钮一键同步远端，支持刷新按钮重新加载提交记录与分支信息
+  - 多仓库发现 — 自动扫描项目目录下所有 Git 仓库（递归 5 层，跳过 node_modules 等）
+  外观与配置
+  - Activity Bar 侧边栏 — 最左侧常驻 40px 图标栏，含 Projects / Sessions / Files / Git 四个面板开关，独立控制显隐，激活态蓝色竖条指示，状态持久化
+  - 三种主题模式 — Auto（跟随系统）/ Light / Dark，深色基于 Warm Carbon 暖炭色调，自定义 CSS 变量体系
+  - 字体独立调节 — UI 与终端字号分别可调（10-20px），终端可选是否跟随 UI 主题
+  - 布局持久化 — 分屏比例、标签页、窗口大小 / 位置自动保存，重启恢复（tauri-plugin-window-state）
+  - 关闭确认 — 关闭窗口前二次确认，并 flush 所有项目布局，避免误操作
+  - 版本检查 — 启动时拉取 GitHub Release，标题栏显示新版本提示
+  - 设置中心 — 统一的 SettingsModal 管理主题、字体、Shell、AI 通知等所有开关
+ReleaseNotes: |-
+  更新内容
+  新功能
+  - 终端帧率可调：「设置 → 系统 → 性能」新增前台帧率(10240,默认 30)与后台帧率(窗口失焦但仍看得见时，160,默认 5),改完即时生效。高刷屏想让刷屏更顺就调高前台，笔记本想省电就调低；实际帧率不会超过显示器刷新率，窗口最小化时照旧一帧不画。后台帧率调得再低，切回前台也会当场补画并立刻换到前台节拍，不会冻着等上一拍。
+  - 皮肤库新增浅色皮肤 Morning Mist 晨雾：外观页点「更多皮肤」即可找到，下载后导入即用。
+  安全性
+  - SSH 密码自动填充不再「终身待命」:右键「SSH 连接」在公钥先登录成功时，密码填充此前会一直挂着，之后 sudo / su / mysql -p 的密码提示会被自动灌入 SSH 密码；现在写完连接命令即挂上「一打字就解除」并带过期时间。
+  - known_hosts 校验收紧：读取失败不再当空文件放行；支持 Linux 默认的哈希条目；同一主机换了密钥算法按「主机密钥变化」拒绝，不再当新主机静默接受。
+  - 中转桌面密钥加密保存，与 SSH 密码同一套封存；配置明文 ws:// 中转地址时给出警告。
+  - sidecar 的 SSH 文件传输护栏扩到 config.db / 备份 / credential.key。
+  - 会话续接命令拒绝以 - 开头的会话 id,防止被当成命令行参数注入；认不出的 AI 工具不再被拼成 claude --resume。
+  修复
+  - 配置在新旧版本之间来回装不再丢设置：旧版本只删自己认识的键，新版本写入的设置、项目与连接的未知字段原样保留；单个坏值按默认值降级，不再整库进入只读。
+  - 配置加载失败进入只读时给出提示，配置写盘失败也会提示；提交失败在提交框下方原样显示 hook / GPG 输出；暂存、丢弃、在外部程序中打开失败都有提示；删除 worktree 失败显示原因。
+  - 分屏后标签页较多时，整个界面不再被撑出窗口右侧。
+  - Git 历史分页在有合并的仓库里不再漏掉提交。
+  - Git 面板对项目根仓库点「在终端中打开」不再误带目录覆盖、改页签名。
+  - 看图页签在图片文件被改写后跟随刷新。
+  性能
+  - 终端底层改用随包的 Windows Terminal 1.24 便携 ConPTY(此前实际一直用的是系统 conhost);环境变量 MT_DISABLE_PORTABLE_CONPTY=1 可回落系统版。
+  - 启动更快：终端在后台启动(恢复多个分屏时界面不再卡一下),配置只读一次、备份挪到后台。
+  - 闲置分屏不再每帧重画；终端查找条在大回滚区里只重扫有变化的行。
+  - 目录监听改为全进程一个监听器(不再每个展开目录一条线程),注册挪出界面线程；文件树去掉常驻 100ms 轮询。
+  - Git 历史十万级提交的仓库翻页从数百毫秒降到毫秒级。
+  - 弹窗毛玻璃、看图、Markdown 图片、皮肤卡片用完即释放显存；全局内容搜索跳过超大文件并并行读取。
+  - 移动端镜像不再每秒重新定位会话文件，大会话换绑不再整文件读进内存；多个终端同时改标题时状态推送不再被拖延。
+  安装与交付
+  - 安装器只关闭安装目录下的 mini-term,先请它正常退出(保存配置)再强制结束，不再误杀其它位置的副本；卸载时清理四家 AI 工具里的 hook 注册(升级时保留)。
+  - 发布流程先建草稿、全部平台成功后才公开，并附 SHA256SUMS.txt;Windows 调试符号单独提供 x64-pdb.zip,崩溃日志带调用栈。
+  - deb 包声明运行时依赖。
+  升级须知
+  - 从 v1.13.7 及更早版本升级时，旧版卸载器仍会按进程名结束一次所有 mini-term;之后的升级只关安装目录下的实例。
+  - 用量统计的本地账本升级为新格式；装回旧版会自动重建一次，数据不丢。
+  - 全局内容搜索改为收齐候选后再出第一批结果。
+  下载
+
+  | 平台                | 文件                                                                               |
+  | ------------------- | ---------------------------------------------------------------------------------- |
+  | Windows x64         | Mini-Term_1.13.9_x64-setup.exe                                                     |
+  | macOS Apple Silicon | Mini-Term_1.13.9_aarch64.dmg(首次打开前执行 xattr -cr /Applications/Mini-Term.app) |
+  | macOS Intel         | Mini-Term_1.13.9_x64.dmg(同上)                                                     |
+  | Linux x64           | Mini-Term_1.13.9_amd64.deb / Mini-Term_1.13.9_amd64.tar.gz                         |
+
+  校验和见 SHA256SUMS.txt;Windows 调试符号 Mini-Term_1.13.9_x64-pdb.zip 仅排查崩溃时需要。
+  完整变更：https://github.com/dreamlonglll/mini-term/compare/v1.13.7...v1.13.9
+ReleaseNotesUrl: https://github.com/dreamlonglll/mini-term/releases/tag/v1.13.9
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

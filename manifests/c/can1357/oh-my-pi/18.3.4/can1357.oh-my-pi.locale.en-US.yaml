@@ -1,0 +1,54 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.3.4
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Fixed
+  - Fixed Anthropic OAuth requests capping output at 64k tokens; they now request the model's full ceiling (128k on Opus 5.5), matching Claude Code and API-key requests
+  @oh-my-pi/pi-coding-agent
+  Breaking Changes
+  - Replaced the task tool's complexity field with solutionSpace, a description of how open-ended the subtask is; auto thinking for spawned subagents now picks effort from it alone
+  Changed
+  - auto thinking now picks effort for every turn by how open-ended the problem is, so large volumes of mechanical work no longer raise it
+  Fixed
+  - Fixed agents looping for hours when every turn spends the whole output limit on reasoning: length-stop retries now tell the model its reasoning was discarded and to act in smaller steps, and a subagent whose length-stop recovery gives up now fails with that error instead of being re-prompted into the same loop
+  - Fixed tagging a model with ^ mid-session dropping the provider prompt cache for every following turn: new m<N> pseudonyms now arrive as a hidden session notice instead of rewriting the task description, which only absorbs them at a base-prompt rebuild
+  @oh-my-pi/pi-natives
+  Fixed
+  - Fixed the native addon keeping every bun test --isolate/--parallel test file's global object and module graph alive, which grew each test worker by ~15 MB per file until the run was OOM-killed.
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.3.3...v18.3.4
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.3.4
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

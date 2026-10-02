@@ -1,0 +1,112 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Navidrome.Navidrome
+PackageVersion: 0.64.0
+PackageLocale: en-US
+Publisher: Navidrome
+PublisherUrl: https://github.com/navidrome
+PublisherSupportUrl: https://github.com/navidrome/navidrome/issues
+PackageName: Navidrome
+PackageUrl: https://github.com/navidrome/navidrome
+License: GPL-3.0
+LicenseUrl: https://github.com/navidrome/navidrome/blob/HEAD/LICENSE
+ShortDescription: Modern Music Server and Streamer compatible with Subsonic/Airsonic
+Tags:
+- airsonic
+- madsonic
+- media-server
+- music
+- music-server
+- navidrome
+- opensubsonic
+- raspberry-pi
+- self-hosted
+- streamer
+- streaming-api
+- streaming-audio
+- subsonic
+- subsonic-server
+ReleaseNotes: |-
+  This release brings an experimental Jellyfin Music API, so Jellyfin-compatible music clients like Finamp and Jellify can now connect to Navidrome. Artwork got a new background pipeline with blurred low-quality placeholders and a diagnostic CLI. Under the hood, all IDs move to a uniform canonical 128-bit format, genre and artist filtering is now index-backed, and playlist import on large libraries is dramatically faster. There is also natural sort order, playlist favourites, Refresh Metadata actions, new Catppuccin themes, and many fixes across scanning, transcoding and scrobbling.
+  ⚠️ Breaking Changes / Migration Notes
+  - All internal IDs are re-encoded to a single canonical 128-bit base62 format. The migration touches every table, so back up your database before upgrading. Clients that cache item IDs (for example, offline downloads) may need to re-sync. (#5824)
+  - Plugin authors: Extism's built-in HTTP is disabled. Calls through pdk.NewHTTPRequest (Go), http::request (Rust) or the equivalent in other PDKs now fail with HTTP request ... is not allowed. Plugins must use the host HTTP service instead: host.HTTPSend (Go) or nd_pdk::host::http::send (Rust). Also, plugin HTTP and WebSocket connections to private or loopback addresses are now blocked for named hosts; to reach a LAN service, list its IP or CIDR in the manifest's requiredHosts, or use a bare "*". (1a8463f7d, 276d767ce)
+  - Shares are always owned by the user who creates them. Admins can no longer create shares on behalf of another user via userId. (1a8463f7d)
+  - Configuration durations are now validated. Negative values are rejected at startup. (#6002)
+  - Navidrome now warns about unrecognized options in the config file, so typos no longer fail silently. (#5870)
+
+  Security
+  This release fixes several reported vulnerabilities. We thank the security researchers who responsibly disclosed them.
+  - Fix SQL injection via the artist role sort and filter parameters in the Native API by validating the role against the known list. (4168377b6, GHSA-hm54-32q6-3rcr, reported and fixed by @Sudo-Ivan)
+  - Fix share-ownership spoofing (IDOR) that let a client-supplied userId on share creation expose other users' private libraries, and fix a plugin HTTP client SSRF guard bypass via DNS names and redirects by disabling Extism's built-in HTTP and checking the resolved IP at dial time. (1a8463f7d, GHSA-82gh-4ggp-gfg5, reported by @gigioneggiando)
+  - Fix the same SSRF bypass in the plugin WebSocket host service by adding the private-address guard it was missing. (276d767ce, GHSA-pr2j-mfc8-qjcc, reported by @qrn12580)
+  - Fix login rate limit bypass via spoofed X-Forwarded-For, X-Real-IP and True-Client-IP headers by keying the limit on the trust-aware client IP. (#6124, GHSA-f295-6wp9-qqfg, reported by @gehan-psbc and @skarn958)
+  - Fix memory exhaustion via a negative size parameter on getCoverArt and share images, which bypassed the artwork size clamp, by rejecting negative and oversized dimensions before decoding. (#5847, GHSA-f22h-6qxh-rqq2, reported by @arpitjain099)
+  - Enforce track membership on public share streams so a share can only stream the tracks it contains. (#5769 by @deluan)
+  - Validate every resource ID in a share, load share metadata as the owner, cap login request bodies, create the log file with mode 0600, and stop logging the Last.fm auth token. (#6098 by @deluan)
+  - Confine plugin filesystem mounts to their root and reject plugin IDs that are unusable as directory names. (#5881, #5886 by @deluan)
+  - Redact sensitive auth headers from request logs. (82b9a44a1 by @deluan)
+  > Note: Several of the advisories linked above are still in draft on GitHub at the time of writing. Their links will become publicly accessible once the advisories are published. The fixes themselves are already included in this release.
+
+  Configuration Changes
+  ──────┬─────────────────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────┬──────────────────────
+  Status│Option                       │Description                                                                                    │Default
+  ──────┼─────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────
+  New   │Jellyfin.Enabled             │Enable the experimental Jellyfin Music API. (#5730)                                            │false
+  ──────┼─────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────
+  New   │Jellyfin.ServerName          │Server name advertised to Jellyfin clients. (#5730)                                            │Navidrome <version>
+  ──────┼─────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────
+  New   │Jellyfin.ExposedPublicUsers  │Comma-separated usernames advertised on the unauthenticated public users endpoint. (#5730)     │""
+  ──────┼─────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────
+  New   │Jellyfin.MaxConcurrentStreams│Bounds how many Jellyfin collection responses can stream at once. (#5783)                      │max(2, MaxOpenConns/2)
+  ──────┼─────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────
+  New   │EnableNaturalSorting         │Sort names and titles naturally (e.g. "Track 2" before "Track 10"). (#6015)                    │false
+  ──────┼─────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────
+  New   │MaxImageSize                 │Cap on the size of artwork images Navidrome will decode. (#5931)                               │20MB
+  ──────┼─────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────
+  New   │EnableScheduledDBAnalyze     │Periodically run a full ANALYZE to keep query planner statistics fresh. (#5740)                │true
+  ──────┴─────────────────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────┴──────────────────────
+  For a complete list of all configuration options, see the Configuration Options documentation.
+
+  Jellyfin API (Experimental)
+  - Add an experimental Jellyfin Music API, enabling Jellyfin-compatible music clients to connect to Navidrome. Enable it with Jellyfin.Enabled = true. (#5730 by @deluan)
+  - Supports library browsing, search, favorites and ratings, playlists, lyrics, Instant Mix (album, playlist and genre sources), ReplayGain normalization, and filtering by year and record label. (#5791, #5948, #5815, #5817 by @deluan, #5809 by @kgarner7)
+  - Jellyfin clients get sonic similarity features (similar tracks, sonic path) when a sonic similarity plugin is installed, backed by the same engine already exposed over the Subsonic API. (#5782 by @deluan)
+  - Jellyfin tokens never expire, are scoped to the Jellyfin API, and are revoked when the user changes their password. (#6013 by @deluan)
+
+  Artwork
+  - New artwork pipeline: artwork resolves in the background and pages show a blurred Low Quality Image Placeholder until the real image arrives. External providers are rate-limited and guarded by a circuit breaker, and missing artwork is rechecked slowly instead of on every request. (#5847 by @deluan)
+  - Make the artwork image size cap configurable. (#5931 by @deluan)
+  - Fix artist folder being promoted to album folder. (#5856 by @kgarner7)
+  - Fix Deezer picking the wrong artist among same-name matches, and treat an exhausted Deezer quota as a throttle instead of a missing artist. (#5808, #6068 by @deluan)
+
+  UI
+  - Add Refresh Metadata action to album and artist pages and context menus. (#6036, #6078 by @deluan)
+  - Add playlist favourites: heart button, list filter, and a sidebar favourites-only toggle. (#5805 by @deluan)
+  - Add Catppuccin Mocha and Frappé themes, and update Macchiato to match the official palette. (#5835 by @cmyksoda)
+  - Add Artists, Songs, Playlists and Radio to the Default View options. (#5754, #5801 by @deluan)
+  - Add Share and Download actions to the Artist detail page. (#5944 by @deluan)
+  - Show translation completion percentage in the language selector. (#5979 by @deluan)
+  - Remember the "items per page" selection across sessions. (#5819 by @deluan)
+  - Give visual feedback when downloading from a share. (#5865 by @deluan)
+  - Fix logins sometimes showing the wrong user. (#5882 by @deluan, #5767 by @apkatsikas)
+  - Fix each page's scroll position not being restored when navigating back. (#5892 by @deluan)
+  - Fix playback starting when closing the disc cover lightbox. (#5901 by @deluan)
+  - Fix playlist not reloading after rating or loving a track. (#6009 by @polybjorn)
+  - Fix the album grid resizing in Safari when top menus open. (#6125 by @york9675)
+  - Fix the album grid hover overlay corners in the Nautiline theme. (#6115 by @deluan)
+  - Fix transcoding Default Bit Rate not accepting 0. (8d77a49b3 by @deluan)
+  - Fix the Last.fm link not always showing on the artist details page. (b0e1943d8 by @deluan)
+
+  Playlists & Smart Playlists
+  - Add album-level fields for sorting and filtering in smart playlists. (#5899 by @deluan)
+  - Add per-playlist refreshDelay for stable daily or weekly smart playlists. (#5790 by @deluan)
+  - Store playlist stars and ratings per user. (#5749 by @deluan)
+  - Make playlist import much faster on large libraries. (#6055 by @deluan)
+  - Fix in-place playlist edits not being detected by the scanner. (#5914 by @junkerderprovinz)
+  - Fix track edits being allowed on synced playlists via some APIs. (#5984 by @deluan)
+  - Fix smart playlist song count being lost on re-import. (#5908 by @deluan)
+ReleaseNotesUrl: https://github.com/navidrome/navidrome/releases/tag/v0.64.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

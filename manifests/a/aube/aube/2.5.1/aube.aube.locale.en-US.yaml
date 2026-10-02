@@ -1,0 +1,46 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: aube.aube
+PackageVersion: 2.5.1
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  Repeated fresh installs skip redundant OSV lookups, and the Linux release binaries start a little faster.
+  Changed
+  - Faster repeated fresh installs (#1631 by @jdx): When the OSV Bloom filter flags a package that turns out to have no malicious advisory, aube used to confirm it with a live OSV query on every install. That added about 220–250 ms each time. aube now caches a clean result for 30 seconds. A cached result is reused only when both the exact package/version pairs and the validated Bloom filter match. On a warmed Svelte fixture, installing with node_modules and aube-lock.yaml removed went from a 346 ms median to 107 ms.
+    - Failed OSV queries, failed Bloom filter refreshes and confirmed malicious hits are never cached.
+    - Explicit add/update/dlx checks, advisoryCheck = required and advisoryCheckEveryInstall = true still query OSV live every time.
+    - Tradeoff: if a malicious-package advisory is published for a version that was just cleared, a repeated ordinary install may take up to 30 seconds to catch it.
+  - About 0.6 ms faster startup on Linux (#1625 by @jdx): The Linux GNU release binaries (x86_64 and aarch64) for aube, aubr and aubx are now linked as non-PIE. The loader no longer has to patch about 56k pointers at each launch, so aube --version drops from about 2.2 ms to 1.6 ms.
+    - Tradeoff: ASLR no longer randomizes aube's own code and data. The heap, stack and shared libraries are still randomized.
+    - musl, macOS and Windows builds are unchanged, as are cargo install, source builds and the PPA/COPR packages.
+
+  💚 Sponsor aube
+  aube is built and maintained by @jdx, an open source developer at entire.io, the title sponsor of his open source work.
+  If aube saves your team install time or CI minutes, please consider becoming an individual or company sponsor. Your support funds ongoing development and helps keep aube fast, free, and independent.
+ReleaseNotesUrl: https://github.com/aubepkg/aube/releases/tag/v2.5.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
