@@ -1,0 +1,61 @@
+# Created with WinGet Updater using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Ahoy.Ahoy
+PackageVersion: 3.0.2
+PackageLocale: en-US
+Publisher: Ahoy
+PublisherUrl: https://github.com/ahoy-cli
+PublisherSupportUrl: https://github.com/ahoy-cli/ahoy/issues
+PackageName: Ahoy
+PackageUrl: https://github.com/ahoy-cli/ahoy
+License: MIT
+LicenseUrl: https://github.com/ahoy-cli/ahoy/blob/HEAD/LICENSE
+ShortDescription: Automate and organize your workflows, no matter what technology you use
+Moniker: ahoy
+Tags:
+- bash
+- cli
+- cli-app
+- devops
+- yaml
+ReleaseNotes: |-
+  A patch release that fixes a v3 regression in tab completion, and makes release downloads verifiable.
+  If you use a completion script written for Ahoy v2, please upgrade. In v3.0.0 and v3.0.1, pressing Tab after a command name could run that command.
+  Fixes
+  Tab completion no longer (accidentally) runs your commands.
+  #193, reported and fixed by @hanoii in #194.
+  Completion scripts from the v2 (urfave/cli) era, including the bash script in our own docs, work by adding --generate-bash-completion to the words typed so far:
+  opts=$( ${COMP_WORDS[@]:0:$COMP_CWORD} --generate-bash-completion )
+  So ahoy deploy <TAB> runs ahoy deploy --generate-bash-completion. Since v3.0.0, Ahoy's own flags are only recognised before the command name. That meant the flag was passed to deploy as an ordinary argument, and deploy ran.
+  ──────────────────────────────────────┬──────────────────┬───────
+  Typed                                 │v3.0.1            │v3.0.2
+  ──────────────────────────────────────┼──────────────────┼───────
+  ahoy foo <TAB>                        │runs foo          │nothing
+  ──────────────────────────────────────┼──────────────────┼───────
+  ahoy foo dis<TAB>                     │runs foo dis      │nothing
+  ──────────────────────────────────────┼──────────────────┼───────
+  ahoy bar <TAB> (bar imports baz and   │prints help for   │baz qux
+  qux)                                  │bar               │
+  ──────────────────────────────────────┼──────────────────┼───────
+  ahoy bar ba<TAB>                      │prints help for   │baz qux
+                                        │bar               │
+  ──────────────────────────────────────┴──────────────────┴───────
+  A --generate-bash-completion that comes last is now treated as a completion request. Ahoy lists the subcommands of the command you typed and runs nothing, as v2 did. Anywhere else in the arguments, it still reaches your command unchanged, so wrapped tools that take a flag of that name still receive it.
+  Cleaner completion from ahoy completion <shell>
+  The same PR fixes the completion scripts that ahoy completion bash|zsh|fish|powershell generates, when you complete the first word after ahoy:
+  - Each command is listed once, instead of twice.
+  - Hidden commands, such as __complete and anything marked hide: true, are no longer suggested.
+  - Suggestions now match what you've typed. ahoy f<TAB> gives foo fo instead of the full command list.
+  - Aliases are still offered alongside command names.
+  Completion of subcommands and of later arguments is unchanged.
+  Thanks
+  - @hanoii (Ariel Barreiro) for reporting #193 with a clear before-and-after table, and for the fix and tests in #194. This is Ariel's second regression fix in two releases.
+  Full changelog
+  - #190, #192 Include the raw binaries in the checksums file, and sign it with cosign
+  - #194 Stop legacy completion from running commands (@hanoii), fixes #193
+  - Updated the README sponsors section
+  Full diff: v3.0.1...v3.0.2
+ReleaseNotesUrl: https://github.com/ahoy-cli/ahoy/releases/tag/v3.0.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

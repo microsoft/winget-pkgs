@@ -1,0 +1,89 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Byron.dua-cli
+PackageVersion: 2.45.1
+PackageLocale: en-US
+Publisher: Sebastian Thiel
+PublisherUrl: https://github.com/Byron
+PublisherSupportUrl: https://github.com/Byron/dua-cli/issues
+Author: Sebastian Thiel
+PackageName: Disk Usage Analyzer
+PackageUrl: https://github.com/Byron/dua-cli
+License: MIT
+LicenseUrl: https://github.com/Byron/dua-cli/blob/HEAD/LICENSE
+Copyright: © Sebastian Thiel
+CopyrightUrl: https://github.com/Byron/dua-cli/raw/main/LICENSE
+ShortDescription: View disk space usage and delete unwanted data, fast.
+Description: dua (→ Disk Usage Analyzer) is a tool to conveniently learn about the usage of disk space of a given directory. It's parallel by default and will max out your SSD, providing relevant information as fast as possible. Optionally delete superfluous data, and do so more quickly than rm.
+Moniker: dua
+Tags:
+- cleaner
+- disk-usage-analyser
+- disk-usage-analyzer
+- diskusageanalyser
+- diskusageanalyzer
+- duacli
+- harddisk
+- harddrive
+- requirescmd
+- space-use
+- ssd
+ReleaseNotes: |-
+  Documentation
+  - correct platform defaults in threads help
+
+  Bug Fixes
+  - don't fail on sole directory inputs beyond MAX_PATH on Windows
+    A sole directory input is changed into so its entries can be listed and
+    reported relative to it, but set_current_dir enforces MAX_PATH on
+    Windows (os error 206) even though the directory itself can still be
+    traversed through verbatim paths.
+    When the change fails, expand the directory into absolute input paths
+    directly instead of aborting, which makes a single long directory input
+    work in list, aggregate, stacks and interactive modes alike. Reported
+    paths are absolute then, consistent with how multiple inputs are already
+    displayed.
+    The expanded root is returned to callers so the interactive mode still
+    knows which directory the inputs belong to, and recorded in the new
+    WalkOptions::base_dir, which every traversal uses as the working
+    directory stand-in for ignore-pattern matching. That keeps --ignore-from
+    patterns matching descendants relative to the expanded root - identical to
+    what a successful chdir would have produced.
+    Fixes #410
+  - don't panic on non-UTF-8 filenames when matching ignore patterns
+    On Windows, NTFS filenames may contain unpaired surrogates that cannot be
+    represented in UTF-8. IgnorePatterns::is_excluded converted each entry's
+    relative path with the panicking gix::path::into_bstr, so a single such
+    name anywhere in a scanned tree aborted the whole process when
+    --ignore-from was used - in list, aggregate and stacks modes alike, as
+    well as in clean's entry filtering.
+    Match on the OS string's encoded bytes instead - OsStr::as_encoded_bytes
+    yields a self-synchronizing UTF-8 superset (WTF-8 on Windows, the raw bytes
+    on Unix) which represents lone surrogates losslessly. The glob matcher then
+    compares bytes, so wildcard patterns that don't spell out the invalid code
+    unit, like * or *.txt, still match such names instead of silently
+    letting them through.
+    Fixes #408
+
+  Commit Statistics
+  - 9 commits contributed to the release.
+  - 18 days passed between releases.
+  - 3 commits were understood as conventional.
+  - 0 issues like '(#ID)' were seen in commit messages
+
+  Commit Details
+  view details
+  - Uncategorized
+    - Merge pull request #411 from Mathjk/fix/long-path-single-dir (9a854d2)
+    - Review (1d68918)
+    - Merge pull request #409 from Mathjk/fix/ignore-from-nonutf8 (37e6aa8)
+    - Don't fail on sole directory inputs beyond MAX_PATH on Windows (2fbb8f5)
+    - Don't panic on non-UTF-8 filenames when matching ignore patterns (22d5588)
+    - Merge pull request #405 from Byron/del-remaining (d190513)
+    - Show deleted bytes in the deletion status line (9a3bfa1)
+    - Merge pull request #404 from Likio3000/docs/dua-cli-behavior-20260923 (cf59618)
+    - Correct platform defaults in threads help (d6acb50)
+ReleaseNotesUrl: https://github.com/Byron/dua-cli/releases/tag/v2.45.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

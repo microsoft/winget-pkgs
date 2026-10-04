@@ -1,0 +1,163 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: fstubner.netscli.gui
+PackageVersion: 0.3.4
+PackageLocale: en-US
+Publisher: Felix Stubner
+PublisherUrl: https://github.com/fstubner
+PublisherSupportUrl: https://github.com/fstubner/netscli/issues
+Author: Felix Stubner
+PackageName: NetsCLI Desktop
+PackageUrl: https://netscli.com/
+License: MIT
+LicenseUrl: https://github.com/fstubner/netscli/blob/HEAD/LICENSE
+Copyright: Copyright (c) Felix Stubner
+ShortDescription: Network scanner desktop app. Discover hosts, scan TCP and UDP ports, look up DNS records and read the ARP table.
+Description: |
+  NetsCLI Desktop is the desktop app for netscli, a network scanner
+  with CLI, terminal UI, desktop app and MCP server interfaces, all
+  backed by the same Rust core. It finds hosts, scans TCP and UDP
+  ports, looks up DNS records and reads the ARP table in a window,
+  without opening a terminal.
+Moniker: netscli-gui
+Tags:
+- arp
+- desktop
+- dns
+- network
+- port-scanner
+- rust
+- scanner
+- tauri
+ReleaseNotes: |-
+  Port scans now name the software and version a service reports, can check common UDP services, and report closed ports as closed on Windows instead of filtered. The CLI writes CSV and Markdown tables, inspect gives an OS hint, and the desktop app can update itself. Discovery no longer lists the network broadcast address as a device.
+  Added
+  - The CLI can write CSV and Markdown tables. --csv and --md work on
+    every command that returns a list (discover, scan, sweep, dns,
+    ping, arp, interfaces, mdns and pcap). The columns are the same
+    field names --json uses, one row per host, port, record or packet, so a
+    result opens straight in a spreadsheet or pastes into an issue without
+    going through jq. Text a scanned host chose is made safe for each. A
+    banner that starts like a spreadsheet formula is defused, the same way the
+    desktop app's CSV export already does it, and one containing Markdown or
+    HTML is escaped.
+  - Port scans show the software and version where a service states them.
+    An SSH server's identification line, a web server's Server header, an
+    FTP or mail server's greeting and a MySQL or MariaDB server's connection
+    greeting usually name the software, often with its version:
+    OpenSSH 9.6p1, nginx 1.25.3, MariaDB 10.11.6. Redis, Valkey and
+    Memcached say nothing until asked, so each gets the one read-only question
+    that returns its version. Scans report this as product and version in
+    the JSON, and in a Version column in the CLI, the terminal UI and the
+    desktop app. It's far narrower than nmap's -sV: a service that doesn't
+    announce itself, and isn't one of those three, gets no version.
+  - UDP scanning. netscli scan <host> --udp checks the UDP services most
+    networks run (DNS, NTP, NetBIOS, SSDP and mDNS), each sent the request it
+    expects, or the ports you give with -p. A reply reads as open, with what
+    came back (NTP v4, stratum 2, a UPnP device's server string, a Windows
+    machine's NetBIOS name). A port-unreachable reads as closed, and silence
+    reads as open|filtered, because UDP can't tell a quiet service from a
+    firewall. It needs no administrator rights. The terminal UI takes
+    /scan <host> --udp, the MCP server's scan_ports takes udp: true, and
+    the desktop app's Port Scan has a TCP/UDP switch.
+  - Inspect gives an OS hint. netscli inspect now says what the host
+    probably runs, with the clues behind it, such as a Windows machine's exact
+    version and build from the start of an SMB connection (no login), the
+    distribution an SSH banner names, an (Ubuntu) or IIS web server header,
+    Windows' RPC and file-sharing ports, an Apple or Raspberry Pi network card,
+    and the ping reply's TTL. It also shows the host's MAC address and vendor
+    when it's on the same network. It's a hint, not nmap's packet
+    fingerprinting, and needs no administrator rights. The same hint is in the
+    terminal UI, the desktop app's Inspect details and the MCP server's
+    inspect_host.
+  - The desktop app can update itself. It already told you when a newer
+    release was out and linked to the release page. Now, where it can, the
+    notice opens a dialog with the release notes and an Install and
+    restart button. The update is downloaded, checked against NetsCLI's
+    signing key, installed, and the app reopens. Nothing downloads unless you
+    click it, and the existing setting still turns the check off entirely.
+    Installs that a package manager owns keep the old link, because an update
+    from inside the app would fight it. That covers Scoop, the AUR package and
+    .deb installs. The Homebrew cask now declares auto_updates, so
+    Homebrew leaves updates to the app.
+    This takes effect from the version after this one. An app can only update
+    itself if it was built with the updater, so 0.3.4 is the first that can,
+    and 0.3.5 is the first update it will install.
+  Changed
+  - MCP scan replies leave out closed and filtered ports. scan_ports and
+    inspect_host returned one entry for every port scanned, so a 1,024-port
+    scan of a machine with two open ports came to 136,834 bytes of mostly
+    "closed". They now return open, open|filtered and errored ports only,
+    which made the same scan 178 bytes. Pass include_closed: true for every
+    port. Replies are also sent as compact JSON instead of indented, which
+    took a sweep of the local network from 15,399 bytes to 8,746.
+  - Defaults now match across the CLI, TUI, desktop app and MCP server.
+    - The desktop app scanned five ports by default (22, 80, 443, 8080 and
+      8443) where everything else scans 22, 80 and 443. It now uses the same
+      three, for port scans and inspect alike.
+    - The MCP server applied the timeout it advertises to every step, so an
+      MCP inspect or sweep pinged with 500 ms where the others use 1,000, and
+      gave name lookups 500 or 1,000 ms where the others give 1,500. Without a
+      timeout each step now keeps its usual default.
+    - The MCP tool list advertised defaults the server did not use. DNS
+      lookups claimed an A record and look up every type, discover and
+      sweep claimed 192.168.1.0/24 and use your own network, and background
+      captures claimed capture.pcap and name the file after the job. The
+      tool list now says what happens.
+    - Ping count tops out at 256 everywhere. The desktop app stopped at 50 or
+      64, and the TUI had no limit at all.
+    - Desktop inspect ignored the concurrency setting in Preferences. It now
+      uses it, like scan, discover and sweep.
+    - A desktop packet capture lasts 10 seconds by default, as on the CLI and
+      MCP server, instead of 5.
+  - Discovery reads the Windows device table directly instead of running
+    arp -a and parsing its text. On an idle machine that makes no measurable
+    difference (arp -a took 65 ms), but it removes a program start from every
+    discover and sweep, and under heavy CPU load arp -a took about 4 seconds
+    on the same machine.
+  Fixed
+  - Discovery reported the broadcast address as a device. The network's
+    device table on Windows lists x.x.x.255 with the MAC
+    ff:ff:ff:ff:ff:ff, and discovery listed it as a host that ignored ping
+    (and a sweep then scanned it). The network and broadcast addresses, and broadcast and
+    multicast MACs, are no longer reported.
+  - Closed ports showed as filtered on Windows. Windows waits about two
+    seconds before reporting a refused connection, and the scan stops waiting
+    after half a second, so a port that was plainly closed came back as
+    filtered. The scan now reports it as closed straight away. A scan of 1,024
+    ports on a LAN machine went from 1,022 filtered to 1,022 closed.
+  - The macOS app could be refused as broken on Apple Silicon. Its only
+    signature was the one Apple's linker puts on every arm64 program, which
+    claims the app's files are sealed when nothing sealed them. macOS's own
+    checks fail it with "code has no resources but signature indicates they
+    must be present", a broken app rather than one from an unidentified
+    developer, so the Open Anyway route the site describes may never be
+    offered. The whole app is now ad-hoc signed, which seals it, and the
+    release checks the app inside the finished .dmg before shipping it. It is
+    still not notarized, so the first launch still goes through Open Anyway in
+    System Settings → Privacy & Security.
+  - Redis, DNS, NFS, SOCKS and Prometheus ports were probed as if they
+    spoke TLS. The scanner treated any service name ending in "s" as a TLS
+    variant, a rule meant for imaps and pop3s, so these ports got a TLS
+    handshake instead of having their greeting read. The TLS services are now
+    listed by name.
+  - Installing the desktop app with Scoop now adds it to the Start menu. The
+    manifest's shortcut pointed at NetsCLI.exe, a file that is in no version of
+    the package. Scoop extracts the MSI rather than running it, which leaves the
+    app at PFiles\NetsCLI\netscli-gui.exe. Scoop reported "Creating shortcut
+    ... failed" and finished the install anyway, so the app was installed with no
+    way to launch it but finding the folder. The manifest now flattens that
+    folder and names the real executable, and the publish job sets both on every
+    release.
+  - The desktop app itself is signed, not only its installer. Since 0.3.3 the
+    .msi has carried an Authenticode signature, but netscli-gui.exe inside it
+    did not, and that is the file SmartScreen and antivirus look at when the app
+    runs. It is now signed during the build, before it is packed into the
+    installer, and the release checks the finished MSI's contents before
+    shipping it. Measured on the published 0.3.3 installer. The MSI's signature
+    is valid, the app inside it is unsigned.
+  Full changelog: v0.3.3...v0.3.4
+ReleaseNotesUrl: https://github.com/fstubner/netscli/releases/tag/v0.3.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

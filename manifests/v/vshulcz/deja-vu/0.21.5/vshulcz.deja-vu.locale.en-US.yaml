@@ -1,0 +1,66 @@
+# Created with deja-vu release workflow using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: vshulcz.deja-vu
+PackageVersion: 0.21.5
+PackageLocale: en-US
+Publisher: vshulcz
+PublisherUrl: https://github.com/vshulcz
+PublisherSupportUrl: https://github.com/vshulcz/deja-vu/issues
+PrivacyUrl: https://vshulcz.github.io/deja-vu/guide/privacy.html
+PackageName: deja-vu
+PackageUrl: https://vshulcz.github.io/deja-vu/
+License: MIT
+LicenseUrl: https://github.com/vshulcz/deja-vu/blob/HEAD/LICENSE
+ShortDescription: Search Claude Code, Codex and Cursor session history locally
+Tags:
+- aider
+- claude-code
+- cli
+- codex
+- cursor
+- mcp
+- memory
+ReleaseNotes: |-
+  Most of this release came from two rounds of running every supported harness
+  live, about 40 clients, and fixing what deja got wrong in each. Sessions it
+  could not read are indexed, tool calls and exit codes it dropped are kept,
+  deja resume prints a command that reopens the session, install and uninstall
+  stop breaking client configs, and a session no longer gets its own work back
+  from recall. copilot-auto, kilocode-auto and kiro-auto start those
+  clients' sessions with the project digest, and deepseek-auto gives dsh the
+  notes on reads, edits and failed commands other harnesses get. Kimi /btw
+  side questions and dsh 2.0.15's v4 logs are indexed. deja index and
+  deja doctor warn about sessions a harness's own cleanup will delete this
+  week (#4604), and an interrupted deja embed keeps what it already computed
+  (#4568). Release checksums are now signed as a sigstore bundle, checked with
+  cosign verify-blob --bundle checksums.txt.sigstore.json.
+  Added
+  - deja install copilot-auto adds a sessionStart hook to Copilot CLI, so a new or resumed session starts with the project digest, as in Claude Code and Gemini CLI. The hook goes under hooks in ~/.copilot/settings.json (or config.json while your own hooks are still there, since Copilot moves them on start), and uninstall gives the file back byte for byte. It also wires preMcpToolCall and sessionEnd, so MCP recall leaves out the session asking however long it runs (#4231, #4551).
+  - deja install kilocode-auto starts each Kilo CLI session with the project digest. Kilo kept opencode's plugin loader, so it writes opencode's plugin, in the 1.x shape Kilo loads, into ~/.config/kilo/plugins (#4398).
+  - deja install kiro-auto writes a deja agent for kiro-cli whose agentSpawn hook puts the project digest in front of the model and whose userPromptSubmit hook adds recall for each prompt. Start it with kiro-cli chat --agent deja, or make it the default with kiro-cli agent set-default deja. deja leaves your default agent alone (#4304).
+  - deja install deepseek-auto gives dsh the point-of-action notes: after a read, edit or write the model hears what past sessions settled about that file, and after a failed bash, the fix this machine found for the same error before. It uses dsh's tools/post-execute seam, so run the install again to get it (#4293).
+  - deja install grok-auto wires PostToolUse, so a Grok Build command that fails gets the earlier fix, as Claude Code and Codex do (#4499).
+  - deja index and deja doctor say how many sessions Claude Code, Gemini CLI or Hermes will delete with its own cleanup in the next 7 days, read from that harness's retention setting (cleanupPeriodDays, general.sessionRetention, sessions.retention_days). deja keeps them searchable after the files go. Nothing is printed when nothing is due (#4604).
+  - A Kimi Code /btw side question is indexed with its answer, from Kimi 0.28 through 2.x, as its own session naming the one it was asked in, without the copy of the session context the fork opens with. deja resume on it points at that session, and doctor no longer counts it as a skipped sub-agent (#4484).
+  - More of what clients keep is indexed: ZCode's older snapshots under ~/.zcode/v2/sessions (#4432), Cherry Studio agents that run on pi or dsh (#4342), prime-agent rlm.spawn children as sub-agents of the session that spawned them (#4407), and kiro-cli chat --no-interactive runs kept only in data.sqlite3 (#4300). DEJA_INCLUDE_SUBAGENTS=1 now takes Kimi Code and Qwen Code sub-agent logs, where it did nothing (#4483).
+  Changed
+  - Releases are signed with cosign 3 and carry checksums.txt.sigstore.json in place of checksums.txt.sig and checksums.txt.pem. Verify with cosign verify-blob --bundle checksums.txt.sigstore.json as SECURITY.md shows (#4577).
+  - One directory is one project whichever agent ran there. Codex, opencode, goose, Cursor, Gemini CLI, Grok, Amp, aider, Copilot Chat, Zed and others named a session in /tmp/w/my-app my-app where Claude Code says w/my-app, and Cline, Roo, Continue, Kiro, Reasonix, CodeWhale and Hermes filed it under my/app. Every reader now takes the last two segments of the recorded directory. A folder name with _, ., a space or non-ASCII characters resolves back to its directory, pi and Senpi take the project from the session header, and a drive is no longer a parent (C:\proj is proj). Sessions change labels on the next rebuild (#4175, #4225, #4402, #4427, #4457, #4458, #4461, #4462, #4514).
+  - The index rebuilds once after upgrading, to pick up the new tool records, project labels and session splits below.
+  - Index updates are faster on big stores. One new message on a 5,000-session goose or Hermes store re-indexes in about 0.7 s, down from 3.2-4.0 s for goose (#4272). One Crush turn in a 3000-session store no longer re-reads all 3000 in 8 s (#4381). One appended run at 10,000 sessions went from 2.1 s to 0.6 s of CPU for the failed-command warnings (#4288). A rebuild with 500 Cursor CLI transcripts whose chat is gone takes 6 ms instead of 3.6 s (#4226). Resuming a recent session reads its digest from cache, 0.1-0.2 ms instead of 24-41 ms (#4224).
+  Fixed
+  - DeepSeek Harness: sessions written by dsh 2.0.15 to session.v4.jsonl.zstd are indexed, reading the newest log in each session directory (#4600). dsh sessions keep their bash commands with exit status and the files, edits and written lines of read, write, edit and str_replace_editor (#4291). A log with a torn or corrupt zstd frame keeps the frames around it, and compressed Codex rollouts and OpenClaw archives are read the same way (#4294). A DSH_HOME starting with ~ is expanded as dsh does (#4390), and doctor says when cordis.patch.yml names a deja plugin file dsh cannot find, which keeps dsh from starting (#4292).
+  - deja embed interrupted partway keeps the vectors it already computed: the sidecar is written every 50 requests and the next run embeds only the rest. A local backend gets two minutes per batch instead of 30 s, and search still gives up after 30 s (#4568, contributed by @perdakovich).
+  - In Claude Code a failing command gets the earlier fix. Claude fires PostToolUseFailure for a non-zero exit, which claude-auto never wired. Existing installs pick the hook up on upgrade. Claude Code before 2.0.56, which would reject the whole settings file over the unknown event, is left without it (#4488).
+  - Sessions that had no record of their tool calls now have one: commands, files read and written, and edits. This covers Hermes (#4242, #4296), Kiro CLI and Kiro IDE (#4299, #4506), Continue (#4373), Amp (#4356, #4527), ZCode (#4428), grok-dev (#4498), Senpi eval cells (#4425), prime-agent ipython edits (#4526), omp hashline edits (#4525), Command Code 1.73, which was not read at all (#4370), aider (#4324, #4325, #4326), pre-native-tools Roo, Kilo Code and Cline tasks (#4424), Cline CLI run_commands results (#4315), and pi, omp, OpenClaw, gjc, prime-agent, senpi and Kimchi (#4113). Cursor CLI sessions with tool output went from 0% to 53% on the measured machine (#4187).
+  - deja blame names the Claude subagent that changed a file: the 1,668 subagent edits on the measured machine were never indexed, and edits inside .claude/worktrees/ were skipped (#4163, #4164).
+  - Edits that kept only the file name now keep the replaced text and written lines, so deja restore and deja blame see them: goose (#4265, #4287, unified diffs from goose 1.10-1.25), Crush (#4377, #4533), Roo Code and Kilo Code (#4419, #4531, #4535), CodeWhale (#4360, #4404, #4538), Zed write_file (#4339), Gemini CLI and Qwen Code (#4254, #4258, #4494), Copilot CLI and Copilot Chat (#4491, #4492), opencode and Kilo CLI (#4495, #4534), Grok Build (#4497), OpenClaw apply_patch (#4500), Cline (#4503, #4504), Antigravity (#4358, #4528), Continue IDE (#4529), Command Code (#4540), Reasonix (#4541), and omp and gjc replace, patch and move edits (#4524, #4576). An edit the client refused or the user rejected is left out.
+  - More commands are kept as commands: Claude Code and Cherry Studio PowerShell and NotebookEdit (#4489), Codex shell_command with unified exec off (#4490), powershell in Kimchi, Senpi and pi (#4523), CodeWhale terminal/run and task_shell_start (#4538), and Command Code args lists, powershell and monitor_command (#4540). A command the user denied in Crush or Hermes is no longer indexed as one that ran (#4575, #4242).
+  - A failed command keeps its exit code in Claude Code, Cherry Studio, pi, omp, gjc, prime, senpi, Kimchi, goose, Cline, Kiro CLI, Zed, Copilot Chat, Roo, Kilo Code, Continue, Amp, Antigravity, Crush, ZCode, CodeWhale, Command Code, Gemini CLI, Qwen Code and Kimi Code, also when its result lands in a later index pass than the call (#4208, #4255, #4262, #4443, #4487, #4493, #4496, #4501, #4502, #4505, #4507, #4530, #4532, #4536, #4537, #4539).
+  - Failed-command recall finds more fixes. Qwen Code sessions yield fix pairs, where an Error: (none) line on every shell result made success read as failure (#4256). A Gemini CLI or Qwen Code command with more than a megabyte of output gets the earlier fix (#4314). A passing command is no longer on file as failing because the agent later read a failing log (#4309).
+  - A session that ended is back in the next session's MCP recall right away, not 20 minutes later. Claude Code, Gemini CLI, Qwen Code, Codex and Cursor CLI get a session-end hook, and the opencode plugin and opencode-deja end their sessions on 1.x and 2.x (#4210, #4257, #4545, #4546, #4571). Installing hooks keeps the key order of your own entries in settings.json.
+  - A session no longer gets its own work back from recall: the first turn of a Hermes session (#4246), gjc, pi, omp and prime-agent sessions (#4394), opencode's opening prompt and image-only turns (#4199, #4273, #4573), OpenClaw sessions and their per-prompt recall, which resent the same block every turn (#4581, #4582), the pre-edit and pre-command lines (#4380), and deja's own credit line (#4247). Run the matching deja install <client>-auto again to update the plugin.
+ReleaseNotesUrl: https://github.com/vshulcz/deja-vu/releases/tag/v0.21.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
