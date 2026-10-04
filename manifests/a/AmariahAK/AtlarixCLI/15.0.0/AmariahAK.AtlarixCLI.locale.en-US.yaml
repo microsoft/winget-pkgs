@@ -1,0 +1,142 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AmariahAK.AtlarixCLI
+PackageVersion: 15.0.0
+PackageLocale: en-US
+Publisher: Atlarix
+PublisherUrl: https://atlarix.dev/
+PublisherSupportUrl: https://github.com/AmariahAK/atlarix-releases/issues
+Author: Amariah Kamau
+PackageName: Atlarix CLI
+PackageUrl: https://atlarix.dev/cli
+License: Proprietary
+LicenseUrl: https://atlarix.dev/terms
+Copyright: Copyright (c) 2026 Atlarix
+ShortDescription: 'Atlarix in your terminal: the AI coding agent that works with any model.'
+Moniker: atlarix
+Tags:
+- ai-agents
+- ai-coding-agent
+- ai-coding-assistant
+- byok
+- cli
+- coding-agent
+- desktop-app
+- developer-productivity
+- developer-tools
+- electron
+- local-llm
+- multi-llm
+- privacy
+- terminal
+ReleaseNotes: |-
+  Atlarix runs in your terminal. The same agent as the app, with the same sessions, keys,
+  models, MCP servers and automations: atlarix opens it in any folder. Install it with
+  curl -fsSL https://atlarix.dev/install | sh (macOS, Linux), irm https://atlarix.dev/install.ps1 | iex
+  (Windows), brew install amariahak/atlarix/atlarix, npm i -g atlarix, or winget. It updates
+  itself quietly. Sign in from the browser, or with atlarix login --device from a machine
+  without one.
+  Relics: pages Atlarix makes to share. Ask for a report, a plan or a design as a relic. On a
+  paid Atlarix model it gets a private atlarix.dev link you can share; otherwise it is saved in
+  the workspace. The app lists them in a new Relics tab; the terminal in /relics.
+  You can sign in with an email and password. For anyone who can't or won't use Google,
+  GitHub or Discord. Choose "Continue with email" in the app or the extension; the form opens on
+  atlarix.dev, where a Cloudflare Turnstile check stops scripted sign-ups, and you land back
+  signed in. New accounts confirm their address first; a forgotten password resets from the same
+  form.
+  Atlarix can work on a repository while your computer is off. Ask from Slack
+  (owner/repo: fix the flaky login test) or from atlarix.dev/cloud. Atlarix runs in that
+  repository's own GitHub Actions, opens a pull request, and posts it back with an Approve &
+  merge button. Nothing merges until the person who asked approves it, and your existing deploy
+  pipeline takes over from the merge. Model usage is billed to your balance; the runner is your
+  Actions minutes.
+  Added
+  - A Relics tab in the app (right panel, beside Automations): every relic in one list, your hosted ones and this workspace's local ones, newest first. Open, copy the link, preview a local one, share or make private, delete. The same logic as the terminal's /relics (src/lib/relics/relic-store.ts).
+  - Usage analytics count your own key and local models (only if you opted in): one model_turn event per agent turn says who pays for the model (Atlarix Core, your own key, or local) and which provider and model, never content. Usage used to be read from paid Core alone, so people on their own keys looked like they had stopped.
+  - Terminal: what runs in the background is in plain sight. Above the prompt box, each background command and sub-agent: what it is, how long it has run, and what the sub-agent is doing now. ↓ still opens the list to follow or stop one.
+  - Terminal: notifications. When a turn ends, or Atlarix needs your OK or an answer, while the terminal isn't the window you're in, it sends a system notification (iTerm2, Ghostty, WezTerm, kitty, Windows Terminal) and rings the bell. /notifications turns them off.
+  - Terminal: a backslash then enter adds a line, in any terminal. Apple's Terminal sends shift+enter as a plain enter, so it sent the message; ctrl+j works there too.
+  - Terminal: ctrl+o is a detail view. It opens every thought, output and diff in full on a screen of its own (ctrl+o or esc goes back), instead of expanding everything in place. Collapsed items say "(ctrl+o)" only where there is more.
+  - Terminal: pick background work from the strip. ↓ selects a running command or sub-agent; enter opens its details (Status, Runtime, the command and its output, or the sub-agent's tool calls), updating live; x stops it.
+  - Terminal: /rename names the session; its name shows in the prompt box's border.
+  - Terminal: commands stand out. A /command and the ! of a shell command are coloured as you type them; a command you ran with ! shows as a band like your messages. A blank line now sits between the reply and the prompt box.
+  - Terminal: a failed command is one line, its error and the exit code, like a thought; ctrl+o shows the full output.
+  - Terminal: file names stand out in tool lines. "Edit src/cli/tui/App.tsx": the folder dim, the file name bold.
+  - Terminal: a pasted text shows in your message after you send it, the first lines with ctrl+o for the rest, instead of only "[Pasted text #1 +32 lines]".
+  - Email + password sign-in on the desktop app, the extension and atlarix.dev, protected by
+    Turnstile. The app and extension hand off to atlarix.dev and check a one-time state on the
+    way back.
+  - The cloud agent: a separate "Atlarix Agent" GitHub App, a one-click setup pull request
+    that adds .github/workflows/atlarix.yml, the atlarix CLI running in the user's runner with
+    a job-scoped Core token, and a Slack app for asking and approving. Paid from the wallet only;
+    free Atlarix Auto never serves a cloud run.
+  - In the atlarix CLI: /model, @ and !. /model picks from every model you can use,
+    searchable, with favourites (ctrl+f) and recents, like opencode's picker; the choice is the
+    CLI's own and does not change the desktop app's. ctrl+t turns deep thinking on and off. @
+    completes a file or folder from the project. !command runs a command yourself, in the
+    project, and Atlarix sees the command and its output with your next message.
+  - Copy on select in the atlarix CLI, like Claude Code: drag over any text and it is on
+    your clipboard when you let go ("copied N chars to clipboard"). It goes through the terminal
+    (OSC 52, which also works over SSH) and, on your own machine, the system copy tool, so it
+    works in macOS Terminal too.
+  - The atlarix CLI's commands. /resume (any earlier session in the folder, the app's too;
+    atlarix -c continues the newest, atlarix --resume opens the list), /compact, /plan,
+    /undo, /export (Markdown or --json, --sanitize for sharing), /import (an export, or
+    --from claude|codex|opencode for this folder's sessions in those tools), /agents,
+    /automations, /mcp, /permissions, /connect (your own API key, shared with the app),
+    /status, /login and /logout.
+  - Plan mode ends with a choice in the CLI: when a plan is ready, Build it, Keep planning, or
+    view it.
+  - Plans outlive their session. /plan in the CLI and the app's Plan panel also list the
+    folder's plans from earlier sessions; "Use in this session" (b in the CLI) copies one in and
+    builds it.
+  - Go back to an earlier message in the CLI: /undo (or esc esc to choose which), optionally
+    restoring the files changed since, then edit it and send — as editing a message does in the app.
+  - Automations run in the CLI too, and are made, edited, run and turned on or off there. They run
+    while Atlarix (the app or the CLI) is open; with both open, each run still happens once.
+  - The CLI and the app share your Chrome. Whichever starts first connects to the extension; the
+    other uses the browser through it, and takes over when the first quits.
+  - The CLI asks you what the agent asks: questions, MCP tool permissions, and the one-time OK for
+    free Atlarix Auto, which now appears in /model.
+  - Relics: pages Atlarix makes for you to share. Ask for a design to agree on before building, an
+    explainer or a report, and Atlarix makes it as a page and updates it as it changes. On paid Atlarix
+    Core it is hosted privately at an atlarix.dev link you can share when you choose, with Share, Copy
+    link and live updates. On your own API keys or free Atlarix Auto it is saved in your project
+    (.atlarix/relics/) to open or send. The CLI lists them with /relics and ctrl+] opens the latest;
+    /plan share shares a plan this way. In the app a relic appears as a card in the chat.
+  - Install the CLI anywhere: curl -fsSL https://atlarix.dev/install | sh, irm https://atlarix.dev/install.ps1 | iex on Windows, brew install amariahak/atlarix/atlarix,
+    npm install -g atlarix, winget, or the .deb/.rpm packages. One self-contained program per
+    platform (macOS, Linux including Alpine, Windows), checked against the release's checksums.
+  - The CLI searches the web through your Chrome, with the Atlarix extension. Without it, a search
+    MCP server works.
+  - The app and the CLI each get their own tab group in Chrome ("Atlarix" and "Atlarix CLI"), so
+    neither touches the other's tabs.
+  - Sub-agents' work shows under them in the CLI: each sub-agent's tool calls, nested under the
+    task that started it, with what it is doing now and its result.
+  - atlarix login --device for machines with no browser (SSH, servers). Sign in on any
+    device at atlarix.dev/auth/cli and type the code the terminal shows. It is the default over
+    SSH. The session travels encrypted to a key only that terminal holds.
+  - --api-key-file on the atlarix CLI: run on your own provider key, read from a file that is then deleted. The key stays in memory, never written to settings or put in the environment, so the agent's commands can't see it. Atlarix Cloud's own-key runs use this.
+  - Atlarix Cloud runs choose their model: paid Atlarix Auto (the default), any paid Core model, or your own API key (free). Never free Atlarix Auto.
+  - --core-token-file on the atlarix CLI: run on Atlarix Core with a token read from a file
+    and deleted, never placed in the environment.
+  - The terminal app reads like a conversation.
+    - Your messages sit on a shaded band.
+    - Thinking is one dim line ending in "…".
+    - Each tool call is one line, with a one-line result under it.
+    - Charts, graphs and mind maps show as bars, edges and outlines instead of raw JSON.
+    - ctrl+o expands everything.
+    - Mode, model and usage moved into the prompt box's top border, and the folder and key hints into its bottom border.
+  - All five modes in the terminal app: Build, Explore, Plan, Debug and Review. shift+tab cycles them; /mode picks one.
+  - /model shows where your own keys go. Its last row, "Add your own API key…", opens /connect.
+  - /exit leaves, like /quit.
+  - Background work is visible in the terminal app.
+    - The prompt box's border counts what's running ("2 agents · 1 command").
+    - ↓ in an empty box, or /tasks, lists the running sub-agents and background commands.
+    - Enter follows one live: a sub-agent's tool calls as the app's card shows them, and the latest output.
+    - k stops one.
+  - The bottom border shows the keys that work right now. While Atlarix works, that's stop, steer, queue, edit queued and tasks.
+ReleaseNotesUrl: https://github.com/AmariahAK/atlarix-releases/releases/tag/v15.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
