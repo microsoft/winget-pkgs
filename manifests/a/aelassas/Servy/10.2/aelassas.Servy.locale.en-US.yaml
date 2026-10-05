@@ -17,9 +17,11 @@ ShortDescription: Servy lets you run any app as a native Windows service with fu
 Description: |-
   Servy lets you run any app as a native Windows service with full control over the working directory, startup type, process priority, CPU affinity, logging, health checks, environment variables, dependencies, pre-launch and post-launch hooks, pre-stop and post-stop hooks, and parameters.
 
-  Servy is digitally signed with a code-signing certificate provided by the SignPath Foundation. The signature verifies the publisher, enables Windows to detect any modification of the released binaries and installers, and prevents SmartScreen warnings.
+  Starting from v10.2, Servy provides enterprise-grade per-service isolation between custom accounts, DPAPI, HKDF & AES-256 HMAC authenticated encryption, and automated vault ACL hardening. All releases feature signed binaries, SBOMs, and continuous vulnerability scanning. See Security.md and Architecture.md for details.
 
   Servy offers a desktop app, a CLI, and a PowerShell module that let you create, configure, and manage Windows services interactively or through scripts and CI/CD pipelines. It also includes a Manager app for easily monitoring and managing all installed services in real time.
+
+  Servy continuously monitors your app, restarting it automatically if it crashes, hangs, or stops. It allows non-service apps to run in the background and start automatically at system boot, even before logon, without rewriting them as services. Use it to run Node.js, Python, .NET, Java, Go, Rust, PHP, or Ruby applications; keep web servers, LLMs, background workers, sync tools, or daemons alive after reboots; and automate task runners, schedulers, or scripts in production with built-in health checks, logging, and restart policies.
 
   Features:
   - Clean, simple UI
@@ -43,7 +45,7 @@ Description: |-
   - Browse and search logs by level, date, and keyword for faster troubleshooting from Servy Manager
   - Export/Import service configurations for easy backups and automation
   - Service Event Notification alerts on service failures via Windows notifications and email
-  - Compatible with Windows 7 SP1 through 11 (x64/ARM64) and Windows Server editions
+  - Modern build (default, self-contained): Windows 10 (1809+), Windows 11 and Windows Server 2016+, on x64 and ARM64
 
   Who is it for?
   - Developers: Run development servers, scripts, or custom tools as services without extra setup.
@@ -85,10 +87,9 @@ ReleaseNotes: |-
   1. Reserved Service Name (Servy): The service name "Servy" is now reserved for the Servy Host service (Servy.Host.exe) that manages secure IPC communication. If you previously installed a Windows service named "Servy", you must rename it prior to installing v10.2.
   2. Fixed Vault File Locations: Custom directory paths for Servy.db and keying material are no longer supported. The configuration database and security keys must reside in %ProgramData%\Servy\db and %ProgramData%\Servy\security, where they are automatically hardened and managed by the host process.
   Full Changelog
-  Click to expand release notes!
   - feat(cli,psm1): Add show command to display service configuration in a human-readable format (#7018)
   - feat(security): Add per-service security isolation through secure IPC, DACLs and ACLs
-  - feat(security): harden the vault in C# instead of Set-ServyExePermissions.ps1, make aes_key.dat read-only for the service account, and re-apply the hardening whenever a binary is extracted
+  - feat(security): harden the vault in C# instead of Set-ServyExePermissions.ps1 and re-apply the hardening whenever a binary is extracted
   - fix(security): Set-ServyExePermissions.ps1 - the handle64/handle64a probe is if/elseif, so a machine with both binaries present (after an architecture migration) leaves one unhardened and unreported (#6855)
   - fix(security): Set-ServyExePermissions.ps1 - Get-Acl/Set-Acl follow NTFS hard links with no reparse/link-count check, letting the runner account redirect the admin's own hardening run onto an arbitrary file (#6866)
   - fix(security): Set-ServyExePermissions.ps1 - the admin-membership warning condition is written twice, and the final-summary copy has already drifted (lost a space around -eq) (#6870)
