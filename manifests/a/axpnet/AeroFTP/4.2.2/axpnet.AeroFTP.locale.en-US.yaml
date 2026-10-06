@@ -1,0 +1,74 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 4.2.2
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [4.2.2] - 2026-10-05
+  MCP Servers for AeroAgent, Faster SFTP, and Parallel Selections
+  A patch release with two things you will notice at once. AeroAgent reaches 1.6: it can now use the tools of MCP servers, local or remote, each call approved in its own window, it can hand read-only work to scoped workers, and Amazon Bedrock joins its providers. SFTP got much faster: uploads move twice the data at a time, downloads keep the server busy, and both use less memory. Selecting several files now transfers them in parallel on every protocol. Around those, providers gained the actions their services offer (S3 storage classes and Glacier restore, Azure access tiers, Box and Google Drive comments, GitLab links, Filen note tags), folder renames work on B2 and ImageKit, and a long sweep removed more than a hundred backend commands nothing called, among them one that handed a decrypted credential to the interface.
+  Every change listed here is tracked, with its commit and its discussion, in the release tracker: AeroFTP 4.2.2, known issues, patches and updates.
+  Thank you to everyone who uses AeroFTP and tells us what works and what does not: several of the changes below exist because someone took the time to report them, and the people who shaped this release by name are listed at the end.
+  What changes for you
+  The short version, split by where you meet it. Everything in this list appears again further down with the detail and the commit.
+  In the app
+  - AeroAgent 1.6 can use MCP servers. In AI Settings > MCP you add local servers (started in a sandbox, Linux only for now) and remote ones over HTTP, with a bearer token or a browser sign-in whose secrets stay in the backend. AeroAgent sees the tools of the servers you enable, and every call is checked again and approved once in the approval window, never remembered for the chat. A Recommended servers section starts with DeepWiki, and a local server can be given read-only access to folders you pick and confirm.
+  - AeroAgent can delegate read-only work, and talks to Amazon Bedrock. Up to two scoped workers run side by side on local folders or on pinned S3 profiles, within one shared budget, and Stop cancels them with the chat. Amazon Bedrock is a new provider, with region and model settings.
+  - SFTP is much faster. A single upload now sends whole write requests, so twice as much data is in flight: 300 MiB over a 47 ms link went from about 20 s to about 10.6 s. Downloads ask for one read per chunk, so the server never idles between rounds (about 46-52 s down to 34-39 s on one connection, 22-27 s to 17-24 s on four), small packets no longer wait for an acknowledgement (one connection on a faster line: 33-35 s down to 17-18 s), and a segmented download shares one memory budget across its connections (25 to 33 MB less at the peak).
+  - Large trees are read several folders at a time. Calculating used storage, and every walk of a WebDAV tree (AeroSync Compare among them), lists up to eight folders at once instead of one after another: on a WebDAV server with 875 folders and 60,800 files the used-storage scan went from 42-52 s to under 7 s, and on SFTP a tree of 834 folders from 160-180 s to 23 s, with the same figure.
+  - Selecting several files transfers them in parallel, on every protocol. A multi-file selection used to go one file at a time; it is now one parallel batch, the first Stop lets the files in flight finish, and a cut deletes only the sources that arrived. Parallel transfers also no longer get pinned to one file at a time on a server after a few batches.
+  - Segmented downloads show real progress, stop when asked, and never publish another download's file. Progress, speed and ETA move while the ranges run, Stop interrupts a large download at once, and two downloads of the same file can no longer leave the second one's empty, pre-sized file in place.
+  - Provider actions from the context menu. S3 objects get Storage Class, Object Tags and Restore from Glacier; Azure blobs get Access Tier; Box and Google Drive files get a comments window, Box gets collaborators and Unlock Folder; GitLab files get View on GitLab, and View on GitHub opens the browser again; Filen notes manage their tags. Share Link offers the options the connected provider actually supports.
+  - Folders can be renamed on B2 and ImageKit. B2 answered "Path not found" and ImageKit refused; on B2 the rename also no longer leaves the source in view on a bucket that keeps file versions.
+  - AeroSync shows its work. A sync run fills the Transfer Queue with a row per file, saved presets are selectable in the Plan and can be deleted, the preset list separates built-in modes from your own presets, and the CLI flags appear beside the options they match.
+  - AeroSync compares only when you ask, and a compare can be stopped. Opening AeroSync no longer starts reading both folders and every folder under them: the Compare and Plan tabs show the pair and a Start button, a running compare shows its counters and a Stop button, and closing AeroSync stops it too. On a home folder that scan ran through hundreds of thousands of files with no way to stop it, even after the window closed.
+  - Calculating used storage shows its progress. Clicking the storage figure in the status bar starts a scan that now updates the figure as it goes, against the total you set or the one the server reports, and ends on that total instead of losing it; the label reads "used / total (N files)", with Cancel while it runs. On WebDAV servers that do not support listing a whole tree at once (Filen Desktop among them) the scan no longer waits 30 seconds on every click.
+  - AeroImage says once per section whether an edit loses data, and Quick Connect calls the saved name "Profile name", with one Optional heading for the S3 temporary-credential fields.
+  - AeroImage crops anywhere in the image. The selection only reached part of the picture; it now starts as the whole image with its eight handles on the edges, as in other image editors, and reaches every side.
+  - Saving a server can no longer fail quietly. A failed save keeps the editor open with your input instead of closing as saved, an overwrite check looks at the real destination, editing a saved OAuth server saves again, and a saved OAuth server whose app keys are missing says so and opens the OAuth settings.
+  - WebDAV works behind an HTTPS reverse proxy, refuses a redirect that would leave HTTPS, and shows upload progress as the bytes go out.
+  - Security fixes you get without doing anything. Deleting a file from an AeroVault v2 vault removes its encrypted data from the vault file; a developer test tool shipped by mistake in the 4.2.1 Windows installers and macOS DMGs is gone; and more than a hundred backend commands nothing called are removed, including one that returned a decrypted credential and one that wrote agent memory without approval.
+  - Linux AppImages are ready for delta updates. From this release on each AppImage carries its update information and a .zsync file next to it, so the next update can fetch only the parts that changed; AM / AppMan join the install methods. The app no longer crashes at start-up on GNOME with appmenu-gtk-module, and opening the approval window no longer reloads the main window.
+  - Smaller things that now behave: Security Tools open as a column next to the editor, the native menu follows a language change, file tags follow renames and moves, the AeroCloud tray badge shows Paused, Export works from a server's context menu, and the Flatpak import results that only inform show OK alone.
+  - Table cells line up with their headers. In the AeroFile file lists the sizes and the - placeholders sat on the right under left-aligned headers: an old rule pushed the 2nd and 3rd column of every table in the app to the right. It is gone, and every table follows its own alignment.
+  - On Linux the window has rounded corners, 8px like on Windows 11, on desktops with a compositor; maximized and fullscreen windows stay square. If your graphics driver shows a blank window, start AeroFTP with AEROFTP_SQUARE_CORNERS=1 to get the square corners back.
+  In the CLI and for automation
+  - The SFTP speed-ups apply to get, put, pget and sync too, and S3 multipart uploads keep each part once (peak memory 156-159 MB instead of 208-216 MB on 300 MiB) and reuse the connection of the connect probe.
+  - pget and every segmented download keep their temporary locked until it is published (Linux, local filesystems), so two downloads of one file can no longer leave a file with holes behind an exit 0.
+  - --transfer-engine says what it does. The help and the docs name the transfers the override reaches, and -v names the real one in use.
+  - df --scan and size walk several folders at once, up to --checkers (default 8), where the provider lists on independent connections (SFTP, Azure Blob, WebDAV), with the same figure as before, and check and sync list a WebDAV tree the same way.
+  Added
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v4.2.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
