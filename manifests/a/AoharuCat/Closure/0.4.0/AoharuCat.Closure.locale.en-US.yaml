@@ -1,8 +1,8 @@
 # Created with YamlCreate.ps1 Dumplings Mod
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
 
-PackageIdentifier: chillison.Closure
-PackageVersion: 0.1.1
+PackageIdentifier: AoharuCat.Closure
+PackageVersion: 0.4.0
 PackageLocale: en-US
 ShortDescription: An open-source, local-first AI novel-writing IDE
 Description: |-
@@ -49,5 +49,26 @@ Tags:
 - fiction
 - novel
 - writing
+ReleaseNotes: |-
+  This release rounds multi-agent support into a mainline of Closure: the AI in your conversation can now hand tasks to background sub-agents running in parallel — the main dialog never blocks, and you can watch or stop them anytime. Alongside it, the materials library gains online import (wiki entries, critique articles), the usage ledger now meters every call type and adds a monthly budget, and the model gateway gains circuit-breaker protection and assignment presets.
+  New Features
+  - Agent panel: Background sub-agents — dispatch research or long-running tasks to background sub-agents from the conversation (up to 3 per project) without interrupting the dialog; the "Background Tasks" bar shows live status and elapsed time, with cancel and a read-only drill-in view of the sub-agent's full session
+  - Agent panel: Three delivery channels for sub-agent results — toast notification, auto-wake the dialog to report, or silent ledger, chosen at dispatch time; unfinished tasks are honestly marked "interrupted" after an app restart
+  - Materials library: Online import — paste a URL or search by keyword (wiki entries such as Moegirl, critique articles); body text is extracted automatically, provenance pre-filled by source tier (community / original / criticism), and re-importing the same link is idempotent
+  - Craft cards: Teaching source badges — distilled teachings are badged on the human-review page as coming from a community wiki, the original work, or criticism
+  - Usage panel: Full-call-surface metering — embedding / rerank / image-generation calls are now metered and broken down by task label (KB retrieval, indexing, image gen, etc.), with image rows showing counts; Antigravity CLI retries and degradations are metered per attempt, neither missed nor double-counted
+  - Usage panel: Monthly budget — set soft/hard caps (CNY); the panel shows monthly progress with status colors and one-time over-line reminders; new calls are blocked and honestly metered once the hard cap is hit
+  - Model config: Task-model presets — save / switch / delete whole model assignment sets in one click; the current state shows the preset name or "Custom"
+  - Model gateway: Circuit breaker — a model failing repeatedly within a short window enters an automatic cooldown and gets skipped, so fallback chains stop hammering a dead endpoint; a probe restores it after cooldown
+  - Antigravity CLI: Bridge-lane tool parity — bridge sessions can call Closure's local writing tools (file reading, search, chapter writing, etc.), with tool failures reported faithfully
+  Fixed
+  - Agent panel: CLI model badge vs. bridge authorization contradiction fixed — shows "CLI · tools via MCP bridge" once authorized
+  - Bridge sessions: The isolated fake home no longer copies CLI history logs (size bloat and privacy)
+  - Settings: Validation toasts are no longer hidden behind the dialog overlay
+  - Agent panel: Bridge warning strips now settle with the turn's outcome — a successful turn rescued by correction no longer keeps a "left the writing toolset" warning
+  - Versioning: Concurrent commits are serialized — simultaneous version commits no longer orphan each other
+  - Usage panel: When the retention window is shorter than a month, the monthly total honestly notes "covers only the last N days"
+  Known Issues
+  - Background sub-agents, online import, and the monthly budget have passed the full automated test suite; complete real-machine verification is in progress — please file issues if you hit anything.
 ManifestType: locale
 ManifestVersion: 1.12.0
