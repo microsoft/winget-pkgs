@@ -1,0 +1,126 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: TukaaniProject.XZUtils
+PackageVersion: 5.8.4
+PackageLocale: en-US
+Publisher: The Tukaani Project
+PublisherUrl: https://github.com/tukaani-project
+PublisherSupportUrl: https://github.com/tukaani-project/xz/issues
+PackageName: XZ Utils
+PackageUrl: https://tukaani.org/xz/
+License: Various open-source licenses
+LicenseUrl: https://raw.github.com/tukaani-project/xz/refs/heads/master/COPYING
+ShortDescription: A complete C99 implementation of the .xz file format. XZ Utils were originally written for POSIX systems but have been ported to a few non-POSIX systems as well.
+Moniker: xzutils
+Tags:
+- c99
+- liblzma.dll
+- lzmadec
+- lzmainfo
+- requirescmd
+- xz-utils
+- xzdec
+ReleaseNotes: |-
+  IMPORTANT: This includes a fix for a security issue that affects all XZ Utils versions since 5.0.0. This and a few other fixes have also been committed to the old stable branches (v5.2, v5.4, and v5.6) in the xz Git repository. Those fixes are marked below. No new 5.2.x, 5.4.x, or 5.6.x releases will be made.
+  5.8.4 (2026-09-09)
+      * liblzma:
+          - lzma_alone_decoder(), lzma_lzip_decoder(),
+            lzma_auto_decoder(), and lzma_microlzma_decoder(): Fix an
+            invalid memory access after memory allocation has failed and
+            the application reinitializes the existing decoder to decode
+            a different file. This bug could at least result in a crash.
+            This is tracked as GHSA-5qpq-xqfv-j9pg. CVE number is pending.
+            (Also in v5.2, v5.4, and v5.6.)
+          - lzma_stream_buffer_decode(): Fix wrong error code and,
+            in debug builds, assertion failure. LZMA_BUF_ERROR could
+            be returned with truncated inputs while LZMA_DATA_ERROR
+            is the correct one in this function.
+            (Also in v5.2, v5.4, and v5.6.)
+          - Fix a performance issue in the typical use case of
+            lzma_index_cat(). Internally liblzma calls it from
+            lzma_file_info_decoder(), so that was affected too. The
+            problem occurred if the input .xz file was created by
+            concatenating a large number of .xz files. A crafted file
+            could make "xz --list" very slow or effectively hang.
+            Normal decompression doesn't use these functions and
+            thus wasn't affected.
+            (Also in v5.2, v5.4, and v5.6.)
+          - Fix a theoretical integer overflow in lzma_index_cat().
+            (Also in v5.2, v5.4, and v5.6.)
+          - Fix bogus memory usage report in lzma_index_decoder() when
+            the .xz Index is obviously invalid. A huge bogus value could
+            cause an integer overflow in lzma_file_info_decoder()'s
+            memory usage reporting due to a missing overflow check,
+            making lzma_memused() report an incorrect tiny value. This
+            bug didn't affect the memory usage limiter in these two
+            decoders; only the reporting via lzma_memused() was affected.
+            (Also in v5.2, v5.4, and v5.6.)
+          - Fix a too low memory usage report in lzma_index_decoder()
+            if lzma_memused() is called after a part of the Index has
+            already been decoded. The typical use case is to call
+            lzma_memused() immediately after LZMA_MEMLIMIT_ERROR,
+            which did work correctly.
+          - Fix copying of check type in lzma_index_dup(). Calling
+            lzma_index_checks() on the duplicated lzma_index returned
+            return garbage a result. lzma_index_dup() is rarely used;
+            liblzma doesn't use it internally and xz itself doesn't use
+            it either.
+            (Also in v5.2, v5.4, and v5.6.)
+          - lzma_file_info_decoder() and lzma_index_decoder(): Reject
+            an obviously-invalid Number of Records field earlier.
+            (Partially also in v5.2, v5.4, and v5.6.)
+          - Fix a missing synchronization in the threaded .xz decoder. It
+            could make lzma_get_progress() return incorrect progress info.
+            (Also in v5.4 and v5.6.)
+          - Detect certain kinds of corrupt inputs slightly earlier in
+            the LZMA2 decoder.
+          - ARM64 and LoongArch: Don't use aligned reads on unaligned
+            buffers. This makes the code work on strict-align processors
+            and fixes a sanitizer error in other cases. (Since 5.7.1alpha)
+      * xz:
+          - Fix a use-after-free when showing an error message if --files
+            or --files0 was specified in the environment variables XZ_OPT
+            or XZ_DEFAULTS.
+            (Also in v5.2, v5.4, and v5.6.)
+          - Fix a use-after-free bug when --verbose is used and
+            standard error isn't a terminal. (Since 5.7.1alpha)
+          - Make it an error if the totals in "xz --list" exceed the range
+            of 64-bit integers.
+            (Also in v5.2, v5.4, and v5.6.)
+      * xz and xzdec on Linux:
+          - Add support for Landlock ABI version 9.
+          - Use fallback macros for Landlock ABI version 2, 3, and 5
+            (but not 4) if <linux/landlock.h> is older than ABI version 5.
+            This makes the binary slightly more protected if it is run on
+            a kernel that supports newer ABIs than <linux/landlock.h>.
+      * Scripts:
+          - xzgrep: Fix handling of the ' char at the end of a command
+            line option. For example, the following tricked xzgrep to
+            run "id": xzgrep "-e'" "-e;id;'" somefile
+            (Also in v5.2, v5.4, and v5.6.)
+          - xzdiff: Use the C locale (LC_ALL=C) with "sed" and "expr"
+            to ensure safe behavior with invalid multibyte sequences.
+            An equivalent improvement was made in xzgrep in 5.2.6
+            (2022-08-12), but it was forgotten from xzdiff.
+            (Also in v5.2, v5.4, and v5.6.)
+      * Tests:
+          - Improve a few tests and fuzz targets.
+          - Add new test files:
+              * bad-0-index-1.xz (32 bytes)
+              * bad-1-index-huge-uncomp.xz (72 bytes)
+      * Man pages:
+          - Improve the rendering with OpenBSD's mandoc(1).
+          - Reduce indentation of the tables to avoid overlong lines
+            in translated versions of the xz man page.
+      * Translations:
+          - In translated man pages, workaround an issue with non-ASCII
+            characters in tables.
+          - Fix syntax errors in a few man page translations.
+          - Update Arabic and German man page translations.
+          - Update Brazilian Portuguese, Croatian, Dutch, German, Italian,
+            Korean, Polish, Portuguese, Romanian, and Ukrainian message
+            translations.
+ReleaseNotesUrl: https://github.com/tukaani-project/xz/releases/tag/v5.8.4
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

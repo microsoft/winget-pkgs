@@ -1,0 +1,121 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.4.9
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Fixed
+  - Fixed rejected HTTP 400 requests from consuming unbounded disk space by automatically cleaning up old request logs and enforcing a size limit.
+  - Fixed unnecessary credential and session updates that could trigger needless authentication reloads in other running processes.
+  - Fixed context-overflow recovery for Strata requests that exceed the model context limit but return no usage information.
+  @oh-my-pi/pi-catalog
+  Fixed
+  - Fixed model catalog caching so unchanged catalogs refresh without unnecessary rewrites, and offline snapshots for endpoint-less models (such as Azure models) are now handled correctly across startups.
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added opt-in stale-session garbage collection with omp gc --stale or gc.stale, removing orphaned session markers and terminal breadcrumbs and expiring old debug reports and collaboration replicas according to configurable retention limits.
+  - Added RPC controls to cancel or steer individual foreground and background subagents without aborting the session.
+  - Added RPC word-completion commands so web and IDE hosts can provide the same ghost-text completion available in the terminal editor.
+  - Added an opt-in RPC ask-dialog mode that lets hosts render all questions together with checkbox or radio-button controls and submit their answers in one response.
+  - Added SDK notifications when a session moves to a new persistence file, including the previous and new paths.
+  - Added SDK APIs to inspect and cancel background jobs, including their command, working directory, process IDs, exit status, and captured output.
+  Changed
+  - Improved the omp predict comparison view with an interactive native interface, table rows, action controls, and clearer status information.
+  - Improved MCP authorization prompts with clickable links, native copy/open context menus, and a clearer URL layout.
+  - RPC hosts are now notified when omp cancels an expired select, confirm, input, or ask dialog, allowing stale UI prompts to be closed.
+  - Limited saved bash, Python, and JavaScript evaluation output artifacts to 16 MB by default while preserving both the beginning and latest output; configure the limit with tools.artifactMaxBytes, or set it to 0 for unlimited output.
+  Fixed
+  - Fixed /wt on filesystems without copy-on-write cloning, including NTFS, so unchanged files are not incorrectly marked modified and staged edits, additions, and deletions retain the correct contents.
+  - Fixed Windows Ctrl+V taking about a second to paste by avoiding unnecessary PowerShell clipboard checks.
+  - Fixed local:// paths being misinterpreted as local filesystem paths by the read, write, and search tools.
+  - Fixed read handling of semicolon-separated URLs, local paths, and line selectors so each entry is processed independently.
+  - Fixed session persistence conflicts between multiple omp processes, preventing lost or interleaved turns and continuing in a new session file when necessary.
+  - Fixed session image handling to avoid unnecessary rewrites, preserve images after interrupted writes, and prevent garbage collection from removing images that are referenced again.
+  - Reduced unnecessary disk writes and improved persistence efficiency across sessions, model data, configuration, and background jobs.
+  - Fixed the native composer showing the main session's effort level instead of the selected subagent's level.
+  - Fixed the omp predict comparison view and MCP authorization prompt rendering with their full native interfaces, including clickable link actions.
+  @oh-my-pi/pi-natives
+  Added
+  - Added readTextFromClipboard() for reading plain text from the system clipboard without starting a subprocess.
+  - Added Shell.pids() to retrieve the IDs of still-running processes spawned by an in-flight shell command.
+  @oh-my-pi/pi-tui
+  Added
+  - Exported wordCompletionQuery() so hosts outside the editor can apply the same prose eligibility rules used by ghost-text word completion.
+  - Added a full-featured Background jobs view with selectable jobs, live status and elapsed time, working directory, process IDs, exit code, command, tailing output, and cancellation for running jobs.
+  Changed
+  - OutputSink now limits artifact files to 16 MiB by default while preserving the beginning and end of oversized output and marking the omitted bytes. Set artifactMaxBytes: 0 to keep artifacts unbounded; dump() reports omitted bytes and full-output references identify sampled artifacts.
+  Fixed
+  - Reduced unnecessary composer startup-cache writes and ensured the cache database is released when it closes on Windows.
+  - Fixed Shift+Enter and Ctrl+Enter prompt behavior in Windows Terminal 1.24 and earlier; Shift+Enter now inserts a newline and Ctrl+Enter sends a follow-up, matching other platforms.
+  - Improved the Tern native terminal experience across background jobs, settings, debugging, logs, extension management, interactive shell, and provider streams: views remain usable and navigable, preserve output and selection behavior, support keyboard scrolling, and keep key actions accessible.
+  - Fixed multi-line labels in Background jobs and multi-line titles in native-terminal prompts so their formatting remains readable.
+  @oh-my-pi/pi-utils
+  Added
+  - Added tryAcquireFileLock, a non-blocking file-lock helper that returns null when the lock is already held.
+  - Added an unref option to AsyncDrain, allowing applications to use long batch windows without keeping the process alive.
+  Changed
+  - Improved logging efficiency and configurability by batching routine file writes, flushing urgent records promptly, adding on-demand logger.flush() support, and allowing file log levels to be limited with OMP_LOG_LEVEL. Log files are created only when needed, and obsolete log and audit files are cleaned up automatically.
+  @oh-my-pi/pi-wire
+  Added
+  - Added terminal scrolling support through the TSP scroll operation, allowing keyboard scrolling of the terminal scroller when supported.
+  - Added a terminal focus event for requesting keyboard focus on editors and inputs, or returning focus to the preferences sheet.
+  What's Changed
+  - feat(rpc): add cancel_subagent command by @andrebrait in https://github.com/can1357/oh-my-pi/pull/13481
+  - feat(rpc): add steer_subagent command by @andrebrait in https://github.com/can1357/oh-my-pi/pull/13482
+  - feat(rpc): add predict_word commands for host-rendered composers by @andrebrait in https://github.com/can1357/oh-my-pi/pull/13517
+  - feat(rpc): added opt-in ask dialog for RPC hosts by @andrebrait in https://github.com/can1357/oh-my-pi/pull/13551
+  - ctrl / shift + enter fixes for windows by @H4vC in https://github.com/can1357/oh-my-pi/pull/13975
+  - fix(vcs): keep staged state and clean stat cache when /wt falls back to checkout by @H4vC in https://github.com/can1357/oh-my-pi/pull/13987
+  - fix(coding-agent): route cwd-prefixed local:// paths to session-local storage by @radkawar in https://github.com/can1357/oh-my-pi/pull/13977
+  - fix(coding-agent): read each entry of a ; list that mixes URLs and local paths by @radkawar in https://github.com/can1357/oh-my-pi/pull/13979
+  - fix(coding-agent): read the Windows clipboard natively on Ctrl+V by @H4vC in https://github.com/can1357/oh-my-pi/pull/13991
+  - fix(session): stop the contested-rewrite loop, skip stored blobs, warn on shared sessions by @radkawar in https://github.com/can1357/oh-my-pi/pull/13989
+  - fix(session): keep a session file with the process that wrote it first by @H4vC in https://github.com/can1357/oh-my-pi/pull/13997
+  - fix(auth): skip no-op agent.db writes on every request by @H4vC in https://github.com/can1357/oh-my-pi/pull/14001
+  - fix(coding-agent): skip no-op config.yml saves by @H4vC in https://github.com/can1357/oh-my-pi/pull/14002
+  - fix(catalog): stop rewriting unchanged model cache rows by @H4vC in https://github.com/can1357/oh-my-pi/pull/14007
+  - fix(tui,coding-agent): skip redundant composer and skill cache writes by @H4vC in https://github.com/can1357/oh-my-pi/pull/14008
+  - fix(coding-agent): persist daemon spec once, skip unchanged meta by @H4vC in https://github.com/can1357/oh-my-pi/pull/14010
+  - fix(tools): cap streaming tool artifact files at 16 MiB by default by @H4vC in https://github.com/can1357/oh-my-pi/pull/14012
+  - fix(coding-agent): drop per-append session lockfile churn by @H4vC in https://github.com/can1357/oh-my-pi/pull/14003
+  - fix(coding-agent): write blobs atomically and keep reuse in gc grace by @H4vC in https://github.com/can1357/oh-my-pi/pull/14004
+  - fix(coding-agent): skip unchanged session pointer writes by @H4vC in https://github.com/can1357/oh-my-pi/pull/14005
+  - fix(coding-agent): debounce text-predict snapshot persistence by @H4vC in https://github.com/can1357/oh-my-pi/pull/14009
+  - fix(logger): batch log writes and stop per-process log churn by @H4vC in https://github.com/can1357/oh-my-pi/pull/14011
+  - feat(coding-agent): add opt-in stale-state pruning to omp gc by @H4vC in https://github.com/can1357/oh-my-pi/pull/14006
+  - fix(ai): recognize Strata context overflow errors by @alphastorm in https://github.com/can1357/oh-my-pi/pull/13864
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.4.8...v18.4.9
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.4.9
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

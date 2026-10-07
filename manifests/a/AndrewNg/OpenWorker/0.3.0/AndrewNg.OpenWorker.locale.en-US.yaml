@@ -1,0 +1,101 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AndrewNg.OpenWorker
+PackageVersion: 0.3.0
+PackageLocale: en-US
+Publisher: OpenWorker
+PublisherUrl: https://www.andrewng.org/
+PublisherSupportUrl: https://github.com/andrewyng/openworker/issues
+PrivacyUrl: https://openworker.com/privacy.html
+Author: Andrew Ng
+PackageName: OpenWorker
+PackageUrl: https://openworker.com/
+License: MIT
+LicenseUrl: https://github.com/andrewyng/openworker/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Andrew Ng
+CopyrightUrl: https://openworker.com/terms.html
+ShortDescription: AI that gets your everyday tasks done.
+Description: |-
+  AI that gets your everyday tasks done. OpenWorker is an open-source AI coworker that lives on your desktop and delivers finished work, not just chat: a polished document, a Slack reply with the numbers, an updated calendar, a triaged inbox.
+  It runs on your machine and doesn't lock you into any model: bring your own API key for OpenAI, Anthropic, Google, or an open-weight provider, or run fully local with Ollama. Your data leaves your machine only through the model and integrations you choose.
+Moniker: openworker
+Tags:
+- agent
+- ai
+- artificial-intelligence
+- assistant
+- automation
+- llm
+- mcp
+ReleaseNotes: |-
+  OpenWorker 0.3.0
+  Agent Security OpenWorker now provides multiple layers of protection for AI agents. The approval system and the permission ladder decide what an agent may do, and a secure runtime now sets a hard limit on what it can do. OpenWorker integrates the OpenShell secure runtime from the NVIDIA Open Agent Safety Platform, announced this week. It is an enforceable boundary outside the model and the agent harness. Every agent runs in its own Linux container, with Landlock and seccomp on every process. This enables Users to restrict AI agents to only allowed files and allowed websites. Even if an agent is misled by a prompt injection or drifts from its task, it cannot read your other files, take your keys, or reach anywhere else. Docker (or Docker Desktop) needs to be installed on Mac, Windows or Linux to allow OpenWorker to setup and use OpenShell. In absence of Docker, sandboxing is still provided using OS specific primitives. Detailed architecture to come soon as a blog and docs. Thanks to @devikaverma for this researching and enabling above techniques inside OpenWorker to provide a more secure way to run AI agents.
+  Set it up in Settings ▸ Sandbox.
+  Machines. Run OpenWorker on a different machine and use it from the desktop app. Sessions live on that remote machine and keep running when your laptop is closed. Join a machine from Settings ▸ Machines.
+  This enables several use cases like 24x7 code reviewer agent, or an agent that answers question from Slack.
+  openworker command line. On Linux, install it with one command:
+  curl -fsSL https://raw.githubusercontent.com/andrewyng/openworker/main/packaging/install.sh | sh
+  Or download it below: openworker-linux-x86_64.tar.gz or openworker-linux-aarch64.tar.gz.
+  The command line can be used to make a remote openworker join the Desktop app, allowing the user to control it remotely.
+  Also: the app is in English and Simplified Chinese; many fixes to the agent loop, approvals, scheduled tasks and MCP tools.
+  More languages are in the roadmap.
+  Downloads: Mac (Apple Silicon: OpenWorker-macos-arm64.dmg; Intel: OpenWorker-macos-x64.dmg), Windows (OpenWorker-windows-setup.exe), Linux (above).
+  What's Changed
+  - Updating README by @rohitprasad15 in https://github.com/andrewyng/openworker/pull/569
+  - security(teams): enforce worker visibility on board item reads by @rakeshutekar in https://github.com/andrewyng/openworker/pull/585
+  - fix(teams): enforce attachment read authorization by @rakeshutekar in https://github.com/andrewyng/openworker/pull/586
+  - Add GUI internationalization with English and Simplified Chinese by @jasmine889966 in https://github.com/andrewyng/openworker/pull/127
+  - fix: scheduled task can run twice when an approval lands on a tick by @Saidheerajgollu in https://github.com/andrewyng/openworker/pull/379
+  - Parse inbox reply intent from the leading word, not substrings by @Saidheerajgollu in https://github.com/andrewyng/openworker/pull/24
+  - Reject path-traversal session ids in the conversation store by @Saidheerajgollu in https://github.com/andrewyng/openworker/pull/55
+  - Recover truncated tool calls, and never pass a leaked one off as an answer by @hacksics in https://github.com/andrewyng/openworker/pull/219
+  - Tolerate a corrupt line when loading a conversation .jsonl by @Saidheerajgollu in https://github.com/andrewyng/openworker/pull/56
+  - Make the conversation-log shrink rewrite atomic (prevent history loss on a mid-write crash) by @lifrary in https://github.com/andrewyng/openworker/pull/70
+  - fix: repair tool-call/result pairing on load to prevent unrecoverable 400 errors by @rkfshakti in https://github.com/andrewyng/openworker/pull/350
+  - fix(skills): confine staged upload tokens by @mo-tunn in https://github.com/andrewyng/openworker/pull/548
+  - MCP permission model: EXTERNAL floor, durable per-tool trust, fixed approval cards (OPE-136) by @devikaverma in https://github.com/andrewyng/openworker/pull/598
+  - fix(engine): agent loop fixes for long, tool-heavy sessions (OPE-156) by @devikaverma in https://github.com/andrewyng/openworker/pull/669
+  - setup_dev_env.sh: install the bedrock extra so a fresh env passes the test suite by @xiaonancui in https://github.com/andrewyng/openworker/pull/285
+  - fix: handle Windows drive-letter paths in grep (ripgrep) output by @engmohamedsalah in https://github.com/andrewyng/openworker/pull/123
+  - fix: preserve exception chain in RelayHub.wait_dispatched by @Anuj04432 in https://github.com/andrewyng/openworker/pull/172
+  - fix: add httpx2 dev dependency to silence Starlette TestClient deprec… by @Aadhithya-arulvanan in https://github.com/andrewyng/openworker/pull/183
+  - security: reject shell variable expansion in read-only grants by @harneet2512 in https://github.com/andrewyng/openworker/pull/566
+  - fix: make Bedrock verification and tests tolerate missing optional boto3 by @tyoon10 in https://github.com/andrewyng/openworker/pull/554
+  - fix(tests): import ExceptionGroup from backport for Python 3.10 compatibility by @tyoon10 in https://github.com/andrewyng/openworker/pull/555
+  - Escape LIKE wildcards when re-keying board cursors by @tyoon10 in https://github.com/andrewyng/openworker/pull/556
+  - fix: add coverage measurement and reporting to CI by @rkfshakti in https://github.com/andrewyng/openworker/pull/328
+  - Remote machines, agent-team cards, and connectors across machines by @rohitprasad15 in https://github.com/andrewyng/openworker/pull/672
+  - CLI: openworker join, up and machine commands; package publishes as openworker by @rohitprasad15 in https://github.com/andrewyng/openworker/pull/673
+  - Add Team View and harden agent-team coordination by @rohitprasad15 in https://github.com/andrewyng/openworker/pull/679
+  - Add support for Sandboxing using NVIDIA OpenShell by @devikaverma in https://github.com/andrewyng/openworker/pull/684
+  - Add docs for OpenShell support by @rohitprasad15 in https://github.com/andrewyng/openworker/pull/685
+  - feat(sandbox): guided OpenShell setup, readiness checks, switching for open sessions (OPE-205, OPE-206, OPE-207, OPE-208, OPE-209) by @devikaverma in https://github.com/andrewyng/openworker/pull/699
+  - Sandboxing improvements for Windows and Mac by @rohitprasad15 in https://github.com/andrewyng/openworker/pull/700
+  - Simplify the Sandbox settings page. by @rohitprasad15 in https://github.com/andrewyng/openworker/pull/701
+  - Fix KeyError 'none' crash in openai_compat_effort for unlisted model ids by @aashish254 in https://github.com/andrewyng/openworker/pull/677
+  - OpenShell clean-up removes only the sandboxes its own state folder made by @rohitprasad15 in https://github.com/andrewyng/openworker/pull/704
+  - Linux: build openworker as one program, no Python needed by @rohitprasad15 in https://github.com/andrewyng/openworker/pull/705
+  - fix(mentions): a corrupt mention_threads.json must not brick server startup by @Lesereingrape in https://github.com/andrewyng/openworker/pull/690
+  - fix(providers): handle effort "none" on every provider, Anthropic omits it, OpenAI-compat sends it (#702) by @devikaverma in https://github.com/andrewyng/openworker/pull/703
+  - fix(security): refuse find's fprint family under a bare allowlist entry by @rkfshakti in https://github.com/andrewyng/openworker/pull/688
+  - Release 0.3.0: Linux download and install script by @rohitprasad15 in https://github.com/andrewyng/openworker/pull/706
+  New Contributors
+  - @rakeshutekar made their first contribution in https://github.com/andrewyng/openworker/pull/585
+  - @jasmine889966 made their first contribution in https://github.com/andrewyng/openworker/pull/127
+  - @Saidheerajgollu made their first contribution in https://github.com/andrewyng/openworker/pull/379
+  - @hacksics made their first contribution in https://github.com/andrewyng/openworker/pull/219
+  - @lifrary made their first contribution in https://github.com/andrewyng/openworker/pull/70
+  - @mo-tunn made their first contribution in https://github.com/andrewyng/openworker/pull/548
+  - @xiaonancui made their first contribution in https://github.com/andrewyng/openworker/pull/285
+  - @engmohamedsalah made their first contribution in https://github.com/andrewyng/openworker/pull/123
+  - @Anuj04432 made their first contribution in https://github.com/andrewyng/openworker/pull/172
+  - @Aadhithya-arulvanan made their first contribution in https://github.com/andrewyng/openworker/pull/183
+  - @harneet2512 made their first contribution in https://github.com/andrewyng/openworker/pull/566
+  - @tyoon10 made their first contribution in https://github.com/andrewyng/openworker/pull/554
+  - @aashish254 made their first contribution in https://github.com/andrewyng/openworker/pull/677
+  - @Lesereingrape made their first contribution in https://github.com/andrewyng/openworker/pull/690
+  Full Changelog: https://github.com/andrewyng/openworker/compare/v0.2.1...v0.3.0
+ReleaseNotesUrl: https://github.com/andrewyng/openworker/releases/tag/v0.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

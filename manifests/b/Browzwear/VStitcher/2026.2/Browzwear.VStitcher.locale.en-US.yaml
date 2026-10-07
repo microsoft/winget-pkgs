@@ -23,61 +23,81 @@ Tags:
 - garment
 - simulation
 ReleaseNotes: |-
-  VStitcher 2026.2 Release Notes
-  Release Date: July 30, 2026
-  VStitcher 2026.2 focuses on precision and control in the 2D workspace. This release adds direct editing of grainlines and notches, multi-2D fold support, consistent export controls across Print to File and Tech Pack, and a set of workspace and shortcut improvements that reduce repetitive manual steps in everyday pattern work.
+  VStitcher 2026.2.1 Release Notes
+  Release Date: September 22nd, 2026
 
-  Fabric Sublimation Workflow - Vector Import & Print Fidelity
-  - VStitcher now correctly renders Illustrator blending modes (Multiply, Screen, Overlay, Hue, Saturation, etc.) on imported AI/SVG vector artwork, fabrics, trims, and seams — read-only, preserved through PDF (Vector Only) export.
-  - Embedded bitmaps in imported AI/SVG files now render once in their original position, scale, and rotation — fixing previous unwanted tiling.
-  Avatar Size Set UI and Functionality Update
-  - Avatar sizes now match Stylezone standards
-  - Consistent display across VStitcher
-  - Auto-resizing for different contexts
-  2D Fold - Multiple Folds & Folded-State Tool Support
-  - Create multiple folds on single pattern
-  - Folded state visualization
-  - Fold editing and management tools
-  Note: This update only applies to folded pieces in the 2D window, not a folded piece in 3D.
+  VStitcher brings displacement mapping directly into the real-time 3D viewer, giving you a more detailed and realistic view of materials as you design. This release also introduces virtual texturing for improved texture quality and performance, expands Auto Stitch with ruler support and improved discoverability, and adds enhancements across plugin licensing, Stylezone Connect translations, API capabilities, pattern information, and overall usability. Continued design system, quality, and stability improvements round out the release.
 
-  Grainline - Editable Size & Placement
-  - Drag grainline to any position on pattern
-  - Resize grainline dynamically
-  - Visual feedback shows current position
-  Preserve Glue Across Graded Sizes
-  - With Clone by Offset and Extend to Edges, glue is maintained during grading
-  - Prevents unwanted separation in graded patterns
-  - Automatic validation on grade completion
-  Print to File / Tech Pack Consistency
-  - PDF export matches onscreen appearance exactly
-  - Tech pack measurements verified against pattern
-  - Supports all output formats: PDF, PNG, SVG
-  Note: because single-file and individual-piece export are now mutually exclusive, workflows that relied on the previous checkbox combination will need to re-select their export option.
+  Real-time displacement in the 3D viewer
+  - Displacement mapping is now supported in the Unreal Engine 3D viewer, in both Standard and Lite.
+  - New setting in Preferences → Rendering, in the 3D Display Engine section: Enable Displacement in real-time 3D viewer. Off by default for all users and all files, including files that already contain displacement maps.
+  - The setting applies to the open scene without restarting the viewer, persists across sessions, and is included in Preferences import and export.
+  - The setting is independent of the production-render displacement option, and is unavailable when OpenGL (Deprecated) is the selected 3D Display Engine.
+  - The setting can be read and written through the VStitcher API, with the same OpenGL restriction.
+  - The warning “Displacement is not supported for Unreal production renders” has been removed, and the Displacement Map Channel editor title no longer reads “(Ray Trace Only)”.
+  - Enabling displacement increases GPU load and may affect performance on complex garments.
+  - Windows is the supported platform in this release; macOS is planned for a later phase.
 
-  Keyboard Shortcuts for Flip & Rotate
-  - New keyboard shortcuts for flip and rotate
-  - Customizable shortcut mapping in Preferences
-  Marquee Select & Delete Guidelines
-  - Visual guidelines appear when using marquee tool
-  - Safer selection and deletion of pattern elements
-  Note: marquee selection now includes guidelines by default. Workflows that relied on marquee selection capturing only pieces and internal lines will now also capture guidelines.
+  Import Rulers during Auto Stitch
+  - Auto Stitch now imports the rulers, carrying across ruler Name, Type, 2D position and 3D position.
+  - Imported rulers use the unit of measure set in VStitcher preferences, not the unit used in the template.
+  - When the garment already has rulers, a prompt appears before Auto Stitch completes offering Merge with existing Rulers, Replace existing Rulers or Keep existing Rulers. Cancel aborts the entire Auto Stitch run.
+  - Undo removes the rulers added from the template and unstitches the garment.
+  - If a template pattern piece has no rulers, nothing is added for that piece.
+  - Highlight Ruler is not included in this release.
 
-  Disable Double-Click Handle Type Change
-  - Prevent accidental handle type changes on double-click
-  - Toggle on/off in Pattern Settings
-  - Reduces rework in complex patterns
-  Fabric Physics & Keyboard Shortcuts
-  - Fabric Physics engine updated for improved accuracy
-  - Keyboard shortcuts standardized across tools
-  - Comprehensive shortcut guide available in Help
-  Additional Notch Types
-  - Three new notch styles added: dart, princess, asymmetric, and more
-  - Each notch type customizable in size and position
-  - Compatible with existing pattern workflows
-  Rulers - Show / Hide Toggle
-  - New toggle in toolbar to show/hide rulers
-  - Declutter canvas while maintaining alignment guides
-  - Keyboard shortcut available (customize in Preferences)
-ReleaseNotesUrl: https://help.browzwear.com/articles/16111588-vstitcher-2026-2-release-notes
+  Plugin license expiration and removal notifications
+  - VStitcher now shows a Plugin Access Changed dialog when plugins fall outside the account's Cloud License entitlement, listing the affected plugins by name. The dialog appears once per event.
+  - In Preferences → Plugins, plugins outside the license show a grey ✕ in the Active column and a red No License badge in the Status column and are sorted to the bottom of the list.
+  - Rescan Plugins Folder has been renamed Refresh Plugins and now checks Cloud License entitlements as well as the local plugins folder.
+  - Failed and Plugin Not Found statuses are retained across sessions until the plugin is removed with the minus button.
+  - An unlicensed plugin cannot be re-added with the plus button while it remains outside the license.
+
+  Translations for Stylezone Connect
+  - The Stylezone Connect sign-in and site-connection flow now follows the language set in VStitcher Preferences. It was previously English-only.
+  - Translated surfaces include the License and Notifications tabs, Log in, Sign up and Logout, the Cloud License and Dongle License sections, and the hamburger menu.
+  - Task statuses (Waiting, Processing, Job Done, Job Failed) and connection messages are translated.
+  - The language switches without restarting Stylezone Connect. VStitcher still requires a restart for its own interface.
+  - Job names and file names remain untranslated. Sign-in pages served by Stylezone are localized separately and are outside this change.
+  - On a new profile where VStitcher has not yet been run, Connect opens in English.
+
+  Virtual Texturing
+  - The Unreal Engine 3D viewer now uses Unreal Engine's virtual texturing system in place of the previous Browzwear texture management.
+  - This applies across the 3D realtime viewport, the 3D Review workspace, the 3D Animation viewport, production render and the V-Ray preview window.
+  - The change improves texture uniformity across a material and reduces VRAM consumption on the same hardware. Texture quality gains are most noticeable on large projects.
+  - The OpenGL Legacy realtime viewer does not use virtual texturing.
+  Note: This is not something you need to enable or setup. Upon installing 2026.2.1, you will automatically be utilizing Virtual Texturing while working in Unreal/Unreal Lite.
+
+  Grainline ID in Shape Info
+  - The Grainline ID is now shown on the pattern piece when View → Shape Info is selected, positioned so that it does not obscure the Shape Name or Shape ID.
+
+  Auto Stitch discoverability
+  - Licensed users now see a new badge on the Auto Stitch toolbar icon, a Try Auto Stitch entry in the Single Stitch context view on unstitched garments, and a one-per-session prompt offering Auto Stitch after a manual stitch action.
+  - The prompt offers Continue with Manual Stitch, Try It and Do not show again, and only appears once the Auto Stitch algorithm has completed initial training for the account.
+
+  Open Platform and API
+  - Auto-Generate Specular can now be enabled, disabled and read through the VStitcher API, matching the behavior of the manual UI control.
+
+  Platform and quality
+  - Continued UI alignment to the Browzwear design system across VStitcher.
+  - Quality and stability fixes from the VStitcher quality backlog.
+  - Improvements to the Auto DPC algorithm.
+
+  Download and Upgrade Versions Instructions
+  Upgrading to VStitcher 2026.2:
+  - Download and install VStitcher from Here
+  - Cloud License Users - send your upgrade request to [email protected]. There is no need to send any files.
+  - Dongle License Users - you must update your license dongle. Send your C2V to [email protected]. For further information, refer to Retrieving a C2V File and Applying a V2C File.
+  - If you need to renew your contract and are interested in version 2026.1 contact your Customer Success Manager.
+  File Versions
+  - VStitcher 2026.2 and Lotta 2026.2 both support files created in earlier VStitcher and Lotta versions.
+  - Earlier VStitcher and Lotta versions do not support version 2026.2 files.
+  Version Support
+  With the release of VStitcher 2026.2 and Lotta 2026.2 the company's support now extends to the following versions of VStitcher and Lotta:
+  - 2026.2
+  - 2026.1
+  - 2025.3
+  - 2025.2
+ReleaseNotesUrl: https://help.browzwear.com/articles/16992808-vstitcher-2026-2-1-release-notes
 ManifestType: defaultLocale
 ManifestVersion: 1.12.0
