@@ -1,0 +1,96 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Coderise.OKF4net
+PackageVersion: 0.6.0
+PackageLocale: en-US
+Publisher: Coderise
+PublisherUrl: https://github.com/jchable
+PublisherSupportUrl: https://github.com/jchable/okf4net/issues
+Author: Julien CHABLE
+PackageName: OKF4net
+PackageUrl: https://github.com/jchable/okf4net
+License: LGPL-3.0
+LicenseUrl: https://github.com/jchable/okf4net/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Julien CHABLE
+ShortDescription: Zero-dependency .NET implementation of the Open Knowledge Format (OKF) v0.2 -- parse, validate, index, and graph OKF knowledge bundles.
+Moniker: okf
+Tags:
+- frontmatter
+- knowledge
+- knowledge-graph
+- markdown
+- okf
+- open-knowledge-format
+- yaml
+ReleaseNotes: |-
+  A large release — 146 changes. This page is the short version: what breaks, and what is new. Every entry is in the CHANGELOG linked at the bottom.
+  Breaking changes at a glance
+  Everything here is a 0.x minor break, stated in full further down.
+  OKF4net (library)
+  - IOkfClock.Now is the required member and Today derives from it. A
+    Today-only clock written against 0.5.0 no longer compiles.
+  - Lifecycle.StaleAfter is a DateTimeOffset?, and Lifecycle.IsStale /
+    StalePolicy.Admits take a DateTimeOffset. The DateOnly overloads are
+    gone; render a date with the new Lifecycle.StaleAfterDate.
+  - Source gained a seventh member, so positional deconstruction and
+    pattern-matching on it break at source level.
+  - Bundle.ReadResourceText throws UnauthorizedAccessException for a path
+    outside the bundle root or one reached through a reparse point. It used to
+    read any path it was given.
+  - The frontmatter fence is --- at column 0 (§4); an indented one no longer
+    closes the block. YAML anchors, aliases, tags, directives and document
+    markers are now rejected with a clear error, as the docs already claimed.
+  - A bare attester.resource / computation path resolves from the bundle
+    root, not beside the concept (§6.2), and FrontmatterResourceKind.Relative
+    is renamed ConceptRelative. A 0.5.0 bundle whose attester sits next to its
+    concept stops running — okf validate now says where the file was found and
+    what to write.
+  - OkfCli.Run takes a TextReader stdin parameter.
+  OKF4net.Attestation
+  - A declared but unresolvable attester.resource ends the run with a
+    non-displayable outcome, and nothing executes. AttestationContext takes a
+    sixth positional parameter.
+  OKF4net.Agents
+  - RunComputation is [Obsolete] for one version; use RunComputationAsync.
+  - ComputationTimeout caps one run at two minutes by default;
+    Timeout.InfiniteTimeSpan restores 0.5.0's unbounded wait.
+  okf-mcp
+  - A bundle is served read-only by default. Set OKF_MCP_WRITABLE=1 to
+    register the four write tools.
+  OKF4net.Attestation.Containers (unpublished)
+  - Containers run as uid 65534, with every capability dropped and
+    no-new-privileges. Isolation settings moved onto one shared
+    ContainerIsolation record.
+  - Receipts and verdicts with duplicate JSON properties, or numbers that cannot
+    be represented exactly, now fail the stage instead of being silently resolved.
+  okfgen (producer, not published)
+  - generate spawns dotnet msbuild in the scanned tree, which executes that
+    repository's build logic. Only point it at a repository you would build.
+    --no-msbuild opts out.
+  - --update prunes concepts under the code prefix that a complete run no
+    longer produces.
+  What is new
+  - §10 attested computation against real containers
+    (OKF4net.Attestation.Containers): a bundle's actual sanctioned script or
+    SQL, and its actual attester, run in Docker/Podman/nerdctl — never a C#
+    reimplementation.
+  - okf audit, a corpus-level query over a bundle's trust, lifecycle and
+    provenance, and okf verify, which records a dated §5.2 verification.
+  - okf-render, the static-site generator split out of okf so the CI
+    validator stops carrying the viewer's JavaScript.
+  - A C# code graph in okfgen: one concept per namespace, type and member,
+    with resolved ## Calls links, plus --check, --roslyn-timeout,
+    --repo-url/--rev and scope flags.
+  - Diversified search (ConceptSearch.TopDiversified), so one dominant
+    concept family stops crowding out the rest of a corpus.
+  - A hardened agent surface: read-only-by-default MCP, tool modes, a
+    cancellable computation tool with a timeout, and neutralised model-facing
+    output.
+  The full list of changes (146 entries) is in the CHANGELOG.
+  dotnet add package OKF4net --version 0.6.0
+  dotnet tool install -g OKF4net.Mcp --version 0.6.0   # okf-mcp
+  The okf and okf-render binaries for Windows, Linux and macOS are attached below.
+ReleaseNotesUrl: https://github.com/jchable/okf4net/releases/tag/v0.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
