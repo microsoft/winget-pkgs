@@ -1,0 +1,40 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Jan.Jan
+PackageVersion: 0.8.6
+PackageLocale: en-US
+Publisher: Jan
+PublisherUrl: https://jan.ai/
+PublisherSupportUrl: https://github.com/janhq/jan/issues
+Author: Homebrew Computer Company
+PackageName: Jan
+PackageUrl: https://jan.ai/
+License: AGPL-3.0
+LicenseUrl: https://github.com/janhq/jan/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Jan
+ShortDescription: Turn your computer into an AI computer
+Description: Run LLMs like Mistral or Llama2 locally and offline on your computer, or connect to remote AI APIs like OpenAI’s GPT-4 or Groq.
+Tags:
+- ai
+- large-language-model
+- llama
+- llm
+- mistral
+ReleaseNotes: |-
+  Jan v0.8.6: hotfix for v0.8.5
+  Fixes only. If you're on 0.8.5, updating is recommended, especially on Linux (AppImage) and on older NVIDIA GPUs.
+  Fixes
+  - Linux AppImage crashed on every model load on some distributions (#9173, fixed in #9178). The AppImage bundled the build machine's Vulkan loader. It now uses your system's loader, and the build fails if a GPU loader is ever bundled again.
+  - NVIDIA Turing GPUs (GTX 16xx, RTX 20xx) failed with "the provided PTX was compiled with an unsupported toolchain" (#9185, fixed in #9187). On drivers older than R595, the Windows and Linux CUDA engine could not run on these cards. It now ships native Turing code, as 0.8.4 did, so no driver update is needed.
+  - Qwen3.8 with MTP (speculative decoding) slowed down sharply after updating to 0.8.5 (#9183, fixed in #9186). With Parallel Sequences on auto, the engine reserved memory for 4 slots. On cards with 12 GB or similar, that pushed the model into shared system memory. A model with MTP now uses one slot when Parallel Sequences is auto; a value you set yourself is respected.
+  - Images returned by MCP tools now reach the model as images (#9188, building on #9176 by @cpius). Previously they were sent as base64 text, which the model could not read and which could exceed a provider's input limit. Models without vision get a short note instead, and long chats no longer drop your question when trimming history around an image.
+  Also
+  - Settings → Model Providers → Llama.cpp now links to how to use a different llama.cpp version (#9179). You run your own llama-server and add it as a custom provider. It's a workaround if the bundled engine misbehaves with a particular model, for example #9177, which remains open.
+  Full Changelog: https://github.com/janhq/jan/compare/v0.8.5...v0.8.6
+ReleaseNotesUrl: https://github.com/janhq/jan/releases/tag/v0.8.6
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://jan.ai/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
