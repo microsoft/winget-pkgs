@@ -1,0 +1,67 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ESEngine.ReasonixDesktop
+PackageVersion: 1.39.8
+PackageLocale: en-US
+Publisher: reasonix
+PublisherUrl: https://esengine.cn/
+PublisherSupportUrl: https://github.com/esengine/DeepSeek-Reasonix/issues
+PackageName: Reasonix
+PackageUrl: https://esengine.github.io/DeepSeek-Reasonix/
+License: MIT
+LicenseUrl: https://github.com/esengine/DeepSeek-Reasonix/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Reasonix Contributors
+ShortDescription: A DeepSeek-native coding agent, for your terminal.
+Description: Reasonix talks straight to api.deepseek.com. The loop is append-only, engineered around DeepSeek's byte-stable prefix cache — long sessions hold 90%+ cache hit and input-token cost collapses to ~1/5. Terminal-first, leave it running.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- deepseek
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  修复未声明读图能力的模型被图片卡住后续所有消息、回复被中断后会话无法打开、QQ 审批请求收不到、与 Studio 共用的项目里删除和归档会话反复失败，旧版恢复链一次归档，子代理工具调用出现在主对话里，以及 Command Code 的一个偶发错误。
+  发布渠道：稳定版 · v1.39.8
+  English → · 网页版完整更新日志 →
+  概览
+  Reasonix v1.39.8 — Reasonix 1.39.8
+  修复未声明读图能力的模型被图片卡住后续所有消息、回复被中断后会话无法打开、QQ 审批请求收不到、与 Studio 共用的项目里删除和归档会话反复失败，旧版恢复链一次归档，子代理工具调用出现在主对话里，以及 Command Code 的一个偶发错误。
+  发布日期：2026-10-07
+  Desktop 8 · CLI 4
+  桌面端更新
+  重点内容
+  - [Desktop] 目录反复重扫时，删除或归档会话不再一直失败 — 在部分项目里（同一个项目文件夹也被 Studio 2.x 打开过时出现），目录没有任何会话变化，却每隔几秒被重新扫描一次，随后任何删除或归档都会失败，提示「该会话正在执行相同操作」。现在锁文件、临时文件、附属文件和子目录的时间戳不再触发重扫，只有会话记录、元数据和事件日志的变化才会；同一目录的重扫会从 1 秒起逐步退避到 60 秒，真实的删除和改名不受退避影响；归档遇到忙碌的锁时最多等待 1.5 秒，不再立刻放弃。不会写入、移动或删除任何会话文件。 (#11693, #11722 by @esengine)
+  - [Desktop] 归档旧版恢复行时，整条恢复链一次归档 — 归档旧版恢复链里的某一行时，原来只会处理一到四个快照，每点一次都会留下新的副本，同一批要归档几十次。现在会顺着父节点找到整条恢复链，并一次归档。每个快照之间会释放锁，所以归档很长的链时，其他标签仍可正常使用。个别快照归档失败时其余照常归档，结果会报告还剩几个，再执行一次即可补完。源文件不会被删除或改写，已归档的副本仍可从「已归档」恢复。 (#11581, #11717 by @esengine)
+  修复
+  - [Desktop · CLI] 只有声明为不读图的模型才会拦截图片 — 没有声明读图能力的模型（自建网关，或目录里没有的模型）以前会被当作不能读图：附加图片会报「没有配置图片理解模型」，而且对话里一旦出现图片（包括 view_image、浏览器截图等工具结果里的图片），之后的每条消息，连纯文字也一样失败。现在只有明确声明为不读图的模型（vision = false、vision_models 列表里没有它，或目录里如此标注）才会被拦截；未声明的模型会直接收到图片，由服务商回答；已配置图片模型时仍按原样使用它。工具结果和历史消息里没有任何模型能读的图片，会在请求里换成一句简短的说明，已保存的对话不会被改动。在声明为不读图的模型上新附加图片仍会被拒绝。未声明读图能力的模型现在交给服务商处理：如果服务商确实不能读图，仍会拒绝，此时需要换用其他模型。 (#11743, #11859, #12302 by @esengine)
+  - [Desktop · CLI] 修复被中断的回复造成的会话记录标识冲突 — 两条被中断的回复在保存时没有消息标识，会推导出相同的内部记录标识，导致整份会话记录被拒绝、会话打不开。现在这类记录会得到各自不同的标识。真正重复的消息或工具记录仍会被拒绝，也不会改写任何会话文件。这只修复了 #10456 中发现的这一处冲突，该报告的其他成因不在此列。 (#10456, #11783 by @aron-intframe)
+  - [Desktop · CLI] QQ 审批按钮改用正确的消息格式，并增加纯文本回退 — 在 QQ 对话里，带审批按钮的消息会被 QQ 拒绝（HTTP 500，错误码 50015001），而普通回复照常到达，且不会重试。现在按钮会按 QQ 消息接口要求的格式发送，被拒绝的富文本消息会改用保留审批说明的纯文本重发。谁能点按钮、谁能批准保持不变。 (#11583 by @SilenceLurker)
+  - [Desktop] 子代理的工具调用留在各自的子代理卡片里 — 后台子代理（task 或 fleet）发出的工具调用会作为独立的行出现在主对话里，没有参数和结果，重新打开会话后也一样。原因是从会话记录读取时丢掉了每个调用的父级标识；现在保留了它，这些调用重新嵌套在各自的子代理卡片里。 (#11338, #11690 by @esengine)
+  - [Desktop · CLI] Command Code 的请求遇到偶发的匿名 400 时会重试一次 — Command Code 的 Responses 接口偶尔会对同一份请求体返回一个没有具体信息的 400，再发一次就成功。现在对这个服务商和这种错误形态，会用同一份请求体重发一次；带具体信息的参数错误、其他服务商和其他状态码都不会重试。 (#11617, #11666 by @Harbor404)
+  CLI 端更新
+  修复
+  - [Desktop · CLI] 只有声明为不读图的模型才会拦截图片 — 没有声明读图能力的模型（自建网关，或目录里没有的模型）以前会被当作不能读图：附加图片会报「没有配置图片理解模型」，而且对话里一旦出现图片（包括 view_image、浏览器截图等工具结果里的图片），之后的每条消息，连纯文字也一样失败。现在只有明确声明为不读图的模型（vision = false、vision_models 列表里没有它，或目录里如此标注）才会被拦截；未声明的模型会直接收到图片，由服务商回答；已配置图片模型时仍按原样使用它。工具结果和历史消息里没有任何模型能读的图片，会在请求里换成一句简短的说明，已保存的对话不会被改动。在声明为不读图的模型上新附加图片仍会被拒绝。未声明读图能力的模型现在交给服务商处理：如果服务商确实不能读图，仍会拒绝，此时需要换用其他模型。 (#11743, #11859, #12302 by @esengine)
+  - [Desktop · CLI] 修复被中断的回复造成的会话记录标识冲突 — 两条被中断的回复在保存时没有消息标识，会推导出相同的内部记录标识，导致整份会话记录被拒绝、会话打不开。现在这类记录会得到各自不同的标识。真正重复的消息或工具记录仍会被拒绝，也不会改写任何会话文件。这只修复了 #10456 中发现的这一处冲突，该报告的其他成因不在此列。 (#10456, #11783 by @aron-intframe)
+  - [Desktop · CLI] QQ 审批按钮改用正确的消息格式，并增加纯文本回退 — 在 QQ 对话里，带审批按钮的消息会被 QQ 拒绝（HTTP 500，错误码 50015001），而普通回复照常到达，且不会重试。现在按钮会按 QQ 消息接口要求的格式发送，被拒绝的富文本消息会改用保留审批说明的纯文本重发。谁能点按钮、谁能批准保持不变。 (#11583 by @SilenceLurker)
+  - [Desktop · CLI] Command Code 的请求遇到偶发的匿名 400 时会重试一次 — Command Code 的 Responses 接口偶尔会对同一份请求体返回一个没有具体信息的 400，再发一次就成功。现在对这个服务商和这种错误形态，会用同一份请求体重发一次；带具体信息的参数错误、其他服务商和其他状态码都不会重试。 (#11617, #11666 by @Harbor404)
+  升级提醒
+  本版本无需手动迁移。
+  风险提示
+  - [Desktop] 归档很长的恢复链可能需要一段时间 — 恢复链里的每个快照都会单独归档（报告的案例里每个约 2 MB），几十个快照可能要花几十秒。期间其他操作可以继续；如果提示还有快照未完成，再执行一次即可。 (#11717 by @esengine)
+  下载与安装
+  - 官网按平台下载
+  - 查看完整差异
+  贡献者
+  感谢本版本的贡献者：@esengine、@aron-intframe、@SilenceLurker、@Harbor404
+ReleaseNotesUrl: https://github.com/esengine/DeepSeek-Reasonix/releases/tag/desktop-v1.39.8
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://esengine.github.io/DeepSeek-Reasonix/index.html#faq
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
