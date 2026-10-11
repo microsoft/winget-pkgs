@@ -1,0 +1,189 @@
+# Created using wingetcreate 1.12.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Mickem.NSClient
+PackageVersion: 0.23.0
+PackageLocale: en-US
+Publisher: MySolutions NORDIC
+PublisherUrl: https://nsclient.org/
+PublisherSupportUrl: https://github.com/mickem/nscp/issues
+Author: Michael Medin
+PackageName: NSClient++
+PackageUrl: https://nsclient.org/
+License: Apache-2.0 OR GPL-2.0-only
+LicenseUrl: https://github.com/mickem/nscp/blob/main/COPYING
+Copyright: Copyright (c) Michael Medin
+ShortDescription: A simple, secure and powerful monitoring agent for Windows.
+Description: |-
+  NSClient++ (a.k.a. NSCP) is a free and open-source monitoring agent originally
+  built for Nagios/Icinga and now usable with most modern monitoring systems.
+  It exposes a wide range of system, performance and event-log checks via NRPE,
+  NSCA, NRDP, REST and Prometheus-compatible endpoints, and can run external
+  scripts in PowerShell, Python, Lua, Visual Basic and many more languages.
+Moniker: nscp
+Tags:
+- nagios
+- icinga
+- naemon
+- monitoring
+- nrpe
+- nsca
+- nrdp
+- prometheus
+- agent
+- sysadmin
+ReleaseNotes: |-
+  # Paths that land where you meant them, more enforced TLS verification, and logins that survive a restart
+
+  0.23.0 is a short release with two themes, and both are about a setting that
+  looked right and did something else.
+
+  The first is paths. Expanding a path substituted `${tokens}` and never made
+  anything absolute, so a bare relative name was measured against the process's
+  working directory — `C:\Windows\System32` for a Windows service, `/` under a
+  bare init script, the shell's directory for `nscp test`. An unrecognised token
+  was not an error either: `${scripst}/check.bat` quietly became a real path
+  under the installation folder, and whatever depended on it went somewhere
+  nobody was looking. A relative value in a setting that writes files now lands
+  in the folder that setting owns, an unknown token is reported and the setting
+  skipped, `file name = none` really switches the log off, and on Windows a
+  relative external-script command is found from where it is rather than from
+  where `nscp` was started.
+
+  The second is TLS verification, in the three places where it was configured
+  but not happening. A listener `verify mode` parser accepted five spellings and
+  silently dropped everything else — including `fail-if-no-peer-cert`, the
+  spelling the documentation tells you to write — so a carefully configured
+  mutual-TLS listener was really a listener with an IP filter. The NSCP and
+  check_mk clients, and `check_nsclient_web_online`, encrypted their connections
+  and never authenticated the peer. And a fleet `mtls_url` that was not
+  `https://` ran the whole management channel — desired state, signed bundles,
+  certificate renewal — on a plain socket, with the client certificate and the
+  pinned CA doing nothing. All three now fail closed, which means three of this
+  release's notes need reading before you upgrade.
+
+  Then the smaller things: you stay logged in to the web UI across a restart,
+  session tokens are only ever held as hashes, a multi-adapter Windows host stops
+  publishing every NIC's metrics twice, and non-ASCII text in the UI and the
+  reference docs is no longer mojibake.
+
+  ## ✨ Highlights
+
+  - 🔒 **A listener `verify mode` it does not recognise now refuses to start.**
+    `verify mode = peer,fail-if-no-peer-cert` resolved to bare `peer`: the
+    listener asked for a client certificate and completed the handshake when none
+    arrived. Both spellings are accepted now, along with `certificate` and
+    `client-certificate`, and any other token makes the listener log it and stop
+    instead of starting with whatever survived the typo. **Check every listener
+    you have configured for mutual TLS before upgrading.** (#1555)
+  - 🔑 **The NSCP and check_mk clients, and `check_nsclient_web_online`, verify
+    the server certificate by default.** All three encrypted the connection and
+    authenticated nothing, while sending the remote agent's password over it.
+    `verify mode` / `verify` now defaults to `peer` and `ca` to the agent's own
+    trust bundle; a target pointed at an agent still using its self-signed
+    certificate needs `ca = <that certificate>` and `verify mode = peer-cert`.
+    (#1568)
+  - 🛰️ **A fleet management url that is not `https://` is refused**, and
+    enrollment no longer follows a symlink planted by the service account. The
+    `mtls_url` carries configuration and signed bundles, which is remote code
+    execution by design; on a plain socket neither the agent's client certificate
+    nor the pinned server certificate did anything. `nscp enroll --insecure`
+    records the decision where plaintext is genuinely wanted. (#1555)
+  - 🗂️ **A relative path in a setting that writes files is rooted at the folder
+    that setting owns.** The log file lands in `${log-path}`, an attachment in
+    `${shared-path}`, a crash archive in `${crash-folder}`, a fleet managed path
+    in `${fleet-folder}`, a filewriter log in `${log-path}` — instead of in
+    whatever the service's working directory happened to be. (#1560)
+  - 🚫 **An unknown `${...}` path token is an error, and a `[paths]` override has
+    to name a location of its own.** A mistyped token used to resolve to the
+    installation directory; now the setting that carried it is skipped and the
+    log says which token and which setting. `file name = none` switches the log
+    off on Windows too, where it used to create a file called
+    `C:\Program Files\NSClient++none`. (#1560)
+  - 🪟 **A relative external-script command is found from where it is, not from
+    where `nscp` started.** `check_foo = scripts\check_foo.bat` worked or failed
+    depending on how it was spelled: an argv-safe spelling resolved against the
+    service's working directory and failed with "the system cannot find the path
+    specified". It is rooted at the installation directory now, both ways. (#1560)
+  - 🔐 **You stay logged in to the web UI across a restart, and a session token is
+    only ever held as a hash.** Restarting or upgrading the agent no longer logs
+    every web user out; only the SHA-256 of each key is kept, in memory and on
+    disk, and a logout removes it immediately. `persist sessions = false` brings
+    back the old behaviour. (#1549, #1573)
+  - 📥 **`ext-scr`, `py` and `lua` `add --import` work on a fresh install and
+    record a path that resolves.** The destination folder is created, the
+    recorded value resolves on both platforms, and an import with no `--script`
+    is refused instead of overwriting the script folder with a file. The Web UI's
+    script upload goes through the same path. (#1560, #1557)
+  - 🔁 **Remote `[/includes]` and `[/attachments]` refresh on their own.** An
+    agent configured from an `http(s)://` settings url re-read only the top-level
+    file on each maintenance pass, so an included file stayed pinned to whatever
+    it held at start. Both are fetched every pass now, and a change in either
+    triggers the same reload. (#1560)
+  - 🛡️ **The op5 installer profile defaults to secure NRPE**, and the Windows
+    release build verifies what it downloads. The op5 page used to force legacy
+    mode, hide the radio group so the choice could not be seen, and enable
+    `allow nasty characters`; the dependency checksum file added last release had
+    every line reading `unrecorded`. (#1555)
+
+  ## ⚠️ Upgrade notes
+
+  - **Check the `verify mode` of every listener configured for mutual TLS before
+    upgrading.** A token this release does not recognise makes the listener log
+    it and refuse to start — which is the point, but it is a restart away. If you
+    believed a listener was requiring client certificates, verify it now: until
+    this release, `fail-if-no-peer-cert` was dropped and the handshake completed
+    without one.
+  - **An `NSCP` or `CheckMK` client target, or a `check_nsclient_web_online`
+    check, pointed at an agent with its self-signed certificate will now fail the
+    handshake.** Set `ca = <that certificate>` with `verify mode = peer-cert`,
+    point `ca` at your own CA, or accept an unauthenticated link explicitly with
+    `verify mode = none`.
+  - **A fleet host enrolled against a plaintext `mtls_url` stops syncing.**
+    Re-enroll against `https://`, or record the decision with
+    `nscp enroll --insecure` / `[tls] allow plaintext = true` in `boot.ini`.
+  - **An op5 host monitored by a `check_nrpe` with no client certificate needs
+    one**, or **Insecure mode** picked explicitly on the installer's
+    monitoring-tool page. The profile no longer forces legacy NRPE, and no longer
+    sets `allow nasty characters`.
+  - **A bare relative path in a setting that writes files moves** — on unix
+    usually not at all, on Windows usually into the folder it should always have
+    been in. Nothing to do if your paths are absolute or written with `${...}`
+    tokens.
+  - **An unrecognised `${...}` token, and a `[paths]` override that does not
+    resolve to a location of its own, are now errors** that skip the setting
+    instead of quietly resolving to the installation directory. `${appdata}` and
+    `${common-appdata}` are rejected on unix.
+  - **If `[/settings/log] file name = none` was set on Windows**, a stray file
+    called `C:\Program Files\NSClient++none` is left where it is — delete it once
+    you have checked you do not need its contents.
+  - **A relative external-script command that relied on the working directory no
+    longer resolves.** Name the script with an absolute path, or with
+    `${scripts}\<name>`. An absolute, UNC, drive-relative or root-relative
+    command is unaffected.
+  - **`nscp lua` and `nscp py` look in a different folder**, and record a
+    different value on import. Existing configuration entries keep working and
+    loading scripts from `nsclient.ini` is unchanged.
+  - **If you relied on a restart to log every web user out**, set
+    `persist sessions = false` under `[/settings/WEB/server]`.
+  - **A settings server now sees one request per included file and per attachment
+    on every maintenance interval.** Responses are hash-compared, so an unchanged
+    file costs only the request — but size the interval accordingly if you serve
+    a large attachment to a large fleet.
+
+  Security notices for this release are on the
+  [security notices page](https://nsclient.org/docs/security/notices/), and the
+  full list of behaviour changes is on the
+  [upgrading page](https://nsclient.org/docs/setup/upgrading/).
+
+  **Full Changelog**: https://github.com/mickem/nscp/compare/0.22.0...0.23.0
+ReleaseNotesUrl: https://github.com/mickem/nscp/releases/tag/0.23.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://nsclient.org/docs/
+- DocumentLabel: Upgrading
+  DocumentUrl: https://nsclient.org/docs/setup/upgrading/
+- DocumentLabel: Security notices
+  DocumentUrl: https://nsclient.org/docs/security/notices/
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
