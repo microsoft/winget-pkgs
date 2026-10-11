@@ -1,0 +1,157 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+
+# Metadata is verified against the published artefact and its build source before merging.
+# Nothing here is copied from the repository's own release notes: the download page and this file
+# are two independent statements about one file, and they are only worth having if they were
+# arrived at separately.
+#
+#   $ curl -sSL https://termiyo.com/releases/termiyo-0.4.27-x64-win.exe -o win.exe
+#   $ sha256sum win.exe   # 5f56c3e90947b0ba76faba340b0569b4b8b8c9cee9ab51a2d48d1c64a48475a4
+#   $ stat -c %s win.exe  # 130727187
+#
+# The same download says, in its uncompressed PE resources: "Nullsoft Install System v3.04",
+# requestedExecutionLevel level="asInvoker", ProductVersion 0.4.27, and a Certificate Table with
+# RVA 0 and size 0 — which is the machine-readable way of saying it is not code-signed. winget
+# does not require a signature; see README.md in this directory for what it does and does not fix.
+PackageIdentifier: HONCO.Termiyo
+PackageVersion: 0.4.27
+Platform:
+- Windows.Desktop
+# The download page states "Windows 10 or later · x64" (apps/web/app/content/download.tsx), which
+# is Electron 43's own floor. Declared so winget refuses the install on Windows 8.1 rather than
+# letting it succeed and produce an app that cannot start.
+MinimumOSVersion: 10.0.0.0
+# `nullsoft`, not `exe`. This is the field that decides whether the install can run unattended at
+# all: winget keeps a table of silent switches per known installer type and, for Nullsoft, hands
+# the installer `/S` with nothing declared here (winget-cli,
+# src/AppInstallerCommonCore/Manifest/ManifestCommon.cpp, GetDefaultKnownSwitches). Declaring
+# `exe` would mean winget knows no switches, runs the installer with a window on a machine nobody
+# is sitting at, and the submission fails with Validation-Unattended-Failed.
+InstallerType: nullsoft
+# electron-builder is configured `perMachine: false` (apps/desktop/electron-builder.yml), and the
+# built installer asks for `asInvoker` rather than administrator, so it installs under the user's
+# own profile and needs no elevation. That is also why there is no ElevationRequirement below:
+# winget's installation test runs as a standard, non-elevated user, and this installer is happy
+# there.
+Scope: user
+InstallModes:
+- interactive
+- silent
+- silentWithProgress
+InstallerSwitches:
+  # `oneClick: false` makes this an ASSISTED installer, so without a switch it would pick its
+  # install mode from whatever a previous installation left in the registry, and a machine that
+  # once had a per-machine copy would try to elevate.
+  #
+  # /currentuser is parsed in the `initMultiUser` macro, which for an assisted installer is the
+  # one defined at assistedInstaller.nsh:84 (oneClick.nsh:13 holds the one-click version).
+  # assistedInstaller.nsh:122-133 reads the command line once and then checks both switches:
+  # /allusers at :123 sets hasPerMachineInstallation, /currentuser at :129 clears it and sets
+  # hasPerUserInstallation, and :135-137 turns that into `setInstallModePerUser`. That last macro
+  # is the only part of this that lives in multiUser.nsh (:21); multiUser.nsh parses no switches
+  # and defines no initMultiUser, so citing it for this behaviour points a reader at a file where
+  # the string /currentuser does not appear. Line numbers are app-builder-lib 26.15.7, the version
+  # pinned in this tree's node_modules.
+  #
+  # `initMultiUser` is inserted from Function .onInit (installer.nsi:49 and :77), which is why the
+  # mode is settled before any page runs and before the install section starts.
+  Custom: /currentuser
+  # Passed only on `winget upgrade`. It sets ${isUpdated} in the NSIS script, which does three
+  # things that matter to an upgrade and nothing else: the running app is waited for rather than
+  # asked about, existing shortcuts are kept (setIsTryToKeepShortcuts turns itself off on a plain
+  # install when allowToChangeInstallationDirectory is set), and a desktop shortcut the user has
+  # deleted is not silently recreated.
+# No `Upgrade:` switch. It used to say `--updated`, which is a misreading: the installer does not
+# parse that token. `${GetOptions}` is called in exactly four places in app-builder-lib 26.15.7 --
+# `/allusers` and `/currentuser` at assistedInstaller.nsh:123,129, and `/S` and `--delete-app-data`
+# in the UNinstaller at uninstaller.nsh:13,221. `--updated` appears at common.nsh:126 and
+# assistedInstaller.nsh:53, both times as the argument the installer passes TO THE APP when it
+# launches it after an update (`StrCpy $startAppArgs "--updated"`, `ExecShellAsUser $0 "$launchLink"
+# "open" "$1"`), and `${isUpdated}` is decided by NSIS rather than read off the command line.
+# Declaring it here would have had winget hand the installer a token nothing reads.
+UpgradeBehavior: install
+# `termiyo://connect/<host>`. Declared because the installed package does handle the scheme — but
+# not, as the comment on the `protocols:` key in apps/desktop/electron-builder.yml still says,
+# because the NSIS installer writes the registry keys. That comment is wrong, correcting it is not
+# this directory's to do, and the evidence is set out here so the next reader can settle the
+# disagreement without deriving it again.
+#
+# Checked in app-builder-lib 26.15.7: the `protocols` key is documented "macOS only"
+# (scheme.json:5940 and out/options/PlatformSpecificBuildOptions.d.ts:220), the only two places
+# that read `protocol.schemes` are out/targets/AppxTarget.js:322 and
+# out/targets/LinuxTargetHelper.js:267 — neither of which this build produces — and nothing under
+# templates/nsis/ mentions a protocol or writes a "URL Protocol" registry value. This repository
+# adds no custom NSIS script that could do it either.
+#
+# What actually registers the scheme on Windows is the app itself at startup:
+# app.setAsDefaultProtocolClient(DEEP_LINK_SCHEME) in apps/desktop/src/main/main.ts:227, which
+# writes the HKCU\Software\Classes\termiyo keys the first time the installed copy is launched.
+# Two consequences worth having written down: the scheme is live after first launch rather than
+# after install, so a silent install alone leaves it unregistered until someone opens the app; and
+# it is a property of the app rather than of this artefact, so the portable zip registers it too
+# once run. Anyone checking this should look for the keys after launching, not after installing.
+# The package does provide a handler for termiyo:// (src/main/deepLink.ts), which is what this
+# field is for -- winget publishes it for discovery rather than validating it against the registry.
+# Worth knowing before somebody checks and thinks it is wrong: a silent install does NOT create
+# HKCU\Software\Classes\termiyo. Measured on a windows-latest runner, both `/S` and
+# `/S /currentuser`. The app writes that key itself on every start
+# (`app.setAsDefaultProtocolClient`, src/main/main.ts:224-227), and app-builder-lib's NSIS
+# templates have no URL-scheme registration at all -- Software\Classes appears there only for file
+# associations. So the handler exists after the app has been opened once, not after it is installed.
+Protocols:
+- termiyo
+# The name of the uninstall registry key electron-builder writes, which is what winget matches an
+# installed copy against. It is a v5 UUID over the appId `com.termiyo.app` in electron-builder's
+# own namespace 50e065bc-3134-11e6-9bab-38c9862bdaf3 (app-builder-lib 26.15.7,
+# out/targets/nsis/NsisTarget.js:162, `UUID.v5(appInfo.id, ELECTRON_BUILDER_NS_UUID)`, with the
+# namespace itself parsed at :28).
+#
+# Derived rather than read out of the .exe, because NSIS compresses the script that writes it. The
+# derivation was checked against a package that is already in this repository and built by the
+# same tool: the same computation over Obsidian's appId `md.obsidian` yields
+# bd400747-f0c1-5638-a859-982036102edf, which is character for character the ProductCode in
+# manifests/o/Obsidian/Obsidian. A Windows run of the install test will confirm this one; if it
+# ever disagrees, the registry key wins and this line is wrong.
+ProductCode: 3fff6bc5-7852-546e-a488-a3313a8ecbdc
+# ReleaseDate must match the published installer's Last-Modified date before merging.
+# The exact served timestamp is recorded in the release PR's independent measurement receipt.
+ReleaseDate: 2026-10-06
+# Two things this installer writes to Add/Remove Programs do not match the manifest, and winget
+# needs to be told rather than left to discover it (CONTRIBUTING.md: "Manifests should be tested
+# to ensure application name matches the defaultLocale PackageName ... publisher matches the
+# defaultLocale Publisher ... or that AppsAndFeaturesEntries are included if necessary").
+#
+#   DisplayName  electron-builder's default uninstallDisplayName is "${productName} ${version}",
+#                so the entry reads "Termiyo 0.4.27" while PackageName is "Termiyo". This is
+#                doc/Authoring.md's first case, "The DisplayName contains the version".
+#   Publisher    the entry says "Termiyo", because electron-builder takes COMPANY_NAME from
+#                package.json's `author.name`, not from anything naming the company. Measured in
+#                the published .exe's version resource: CompanyName "Termiyo", LegalCopyright
+#                "Copyright © 2026 Termiyo". The manifest's Publisher is the legal entity, so the
+#                two will not match until one of them changes.
+#
+# DisplayVersion is deliberately absent. The installer does write one ("DisplayVersion" "${VERSION}"
+# in app-builder-lib's installer.nsh) and it is exactly the PackageVersion above, so declaring it
+# adds nothing and a wrong one is the most common cause of the catalog step's version-range
+# overlap failure.
+AppsAndFeaturesEntries:
+- DisplayName: Termiyo 0.4.27
+  Publisher: Termiyo
+  ProductCode: 3fff6bc5-7852-546e-a488-a3313a8ecbdc
+Installers:
+# One architecture, because one is built. Both the release job and the local script pass --x64
+# and nothing else (.github/workflows/release.yml `--win nsis zip --x64`, scripts/build-win.mjs
+# `['--win', ...targets, '--x64']`), so there is no arm64 Windows artefact of any kind to declare
+# -- the second Windows download is the x64 portable zip, which registers no uninstall entry and
+# no protocol handler and is therefore not the same package.
+#
+# A version-specific URL, as doc/Policies.md asks ("The preference for WinGet manifests is to use
+# unique URLs per version of a package to avoid the hash-mismatch errors"), on the publisher's own
+# domain and reachable by navigating from the PackageUrl in the locale manifest. The GitHub
+# repository is private and its release assets 404 anonymously, so termiyo.com is not a
+# convenience here, it is the only source that exists.
+- Architecture: x64
+  InstallerUrl: https://termiyo.com/releases/termiyo-0.4.27-x64-win.exe
+  InstallerSha256: 5F56C3E90947B0BA76FABA340B0569B4B8B8C9CEE9AB51A2D48D1C64A48475A4
+ManifestType: installer
+ManifestVersion: 1.12.0

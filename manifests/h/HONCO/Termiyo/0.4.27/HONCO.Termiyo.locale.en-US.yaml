@@ -1,0 +1,94 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+# The words. Every URL below was measured with `curl -sI` on 2026-09-22 and returned 200 with no
+# redirect, which is what the URLs validation step checks.
+#
+# The four page URLs carry a trailing slash because that is the form this host serves.
+# apps/web/next.config.mjs sets `trailingSlash: true`, so a bare https://termiyo.com/support
+# answers 308 with `location: /support/` and only the slashed address answers 200. winget follows
+# redirects and would pass either form, so the slash is not here to get the submission through: it
+# is here so the sentence above is a measurement of what the host returns rather than a
+# description of where a redirect eventually lands, and so that anything reading this manifest
+# with a client that does not follow redirects — a mirror, a link checker, a person pasting
+# PackageUrl — is handed the address that answers. Tidying the slashes away reintroduces four
+# 308s and nothing anywhere fails.
+#
+# PublisherUrl and InstallerUrl are bare 200s already; they are not affected, and the installer
+# URL is a file rather than a page.
+#
+# /changelog is deliberately not among them, because it answers 301 to /download/ — the public
+# changelog was moved into the admin panel on 2026-09-21 and a ReleaseNotesUrl pointing at a
+# redirect is a dead link with a 200 behind it.
+PackageIdentifier: HONCO.Termiyo
+PackageVersion: 0.4.27
+PackageLocale: en-US
+# The legal entity, from LICENSE clause 1. Note that this does NOT match the Publisher the
+# installer writes to Add/Remove Programs, which is "Termiyo"; the installer manifest's
+# AppsAndFeaturesEntries declares that difference rather than hiding it.
+Publisher: HONCO PRIVATE LIMITED
+PublisherUrl: https://termiyo.com
+PublisherSupportUrl: https://termiyo.com/support/
+PrivacyUrl: https://termiyo.com/privacy/
+PackageName: Termiyo
+# The page the installer URL is reachable from by clicking, which is what the URL-domain step
+# asks for: "Including PackageUrl in your manifest and ensuring the InstallerUrl can be reached by
+# navigating from that URL helps moderators and the validation system confirm the URL is from an
+# official source."
+PackageUrl: https://termiyo.com/download/
+# LICENSE in this repository is an end-user licence agreement, not an open-source licence: clause
+# 1 grants a personal, non-exclusive, non-transferable licence and says "The Software is licensed,
+# not sold." So the string is Proprietary. The public statement of those terms is /terms, which
+# says the same thing in the reader's own language; the full agreement ships inside the package
+# and is installed beside the app.
+License: Proprietary
+LicenseUrl: https://termiyo.com/terms/
+Copyright: Copyright © 2026 HONCO PRIVATE LIMITED
+ShortDescription: An SSH client that runs the machine rather than listing it — terminal, SFTP, port forwarding, jump hosts and snippets, with every credential in a vault encrypted with Argon2id and XChaCha20-Poly1305 on your own machine.
+# Written from README.md and the home page rather than from a category description. Each sentence
+# is something a reader can go and check, which is the only reason any of them are worth printing.
+Description: |-
+  Termiyo is a cross-platform SSH client. It has the terminal, SFTP, port forwarding, jump hosts
+  and snippets you would expect of one, and it is built around the part the category usually
+  leaves alone: the state that lives on the server. It lists and edits the .env files on a host,
+  writing a key atomically, keeping the previous version, and leaving the file's mode and owner
+  exactly as it found them. A long job can be handed to an agent and left running with the window
+  closed, and a session survives that window without tmux or screen being installed on the host.
+
+  Credentials are held in a vault on your own machine, encrypted with Argon2id and
+  XChaCha20-Poly1305. No account is needed to start — the vault is created the first time the app
+  is opened. The app contains no telemetry, no analytics and no crash reporting, and the licence
+  explicitly permits reverse engineering it to check that, because a tool that asks to hold your
+  credentials has no business being unexaminable. Everything in the vault can be exported again:
+  an encrypted archive whose contents can be verified without the passphrase, and a readable,
+  secret-free inventory of what is held about you. It also reads the connection lists of a dozen
+  other clients, plus ssh_config and known_hosts, so moving in is not a retyping exercise.
+
+  The Windows build is not code-signed. Microsoft Defender SmartScreen therefore warns when the
+  installer is downloaded in a browser and again the first time it is run, because an unsigned
+  file gives it no publisher to check. Installing from the winget community source avoids both,
+  because winget verifies the SHA-256 in this manifest before it runs anything and marks a file
+  whose hash matched a trusted source as trusted rather than as an internet download; that is a
+  property of the source, not of the binary, so it does not carry over to the .exe downloaded from
+  the site. Windows 11's Smart App Control is a separate feature again and blocks unknown unsigned
+  code whatever winget does. The SHA-256 of every artefact is published at
+  https://termiyo.com/download/, and checking it against your own copy is the one test that does
+  not depend on trusting us.
+Moniker: termiyo
+Tags:
+- bastion
+- devops
+- encryption
+- jump-host
+- key-management
+- port-forwarding
+- remote
+- server
+- sftp
+- ssh
+- ssh-client
+- sysadmin
+- terminal
+- tunnel
+- vault
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
