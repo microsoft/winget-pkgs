@@ -1,0 +1,49 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: yinxulai.OSW
+PackageVersion: 1.2.0-pre.2
+PackageLocale: en-US
+Publisher: yinxulai
+PublisherUrl: https://github.com/yinxulai
+PublisherSupportUrl: https://github.com/yinxulai/osw/issues
+Author: Alain
+PackageName: OSW
+PackageUrl: https://github.com/yinxulai/osw
+License: PolyForm-Noncommercial-1.0.0
+LicenseUrl: https://github.com/yinxulai/osw/blob/HEAD/LICENSE
+ShortDescription: Local LLM API proxy with automatic channel failover.
+Description: OSW (One Switch) runs a proxy on your machine. Register every channel you have - different providers, accounts, and models - order them the way they should be tried, and point every AI client at a single local address. OSW identifies the protocol, picks a channel, moves on when one fails, and records exactly what happened. Your client only ever sees the attempt that succeeded.
+Tags:
+- ai
+- api
+- gateway
+- large-language-model
+- llm
+- proxy
+ReleaseNotes: |-
+  Important
+  This is a beta build. Every beta release may change internal APIs and data structures; data compatibility and automatic migration are not promised. Export your provider data before updating (model management → export) as a backup, just in case.
+  See https://github.com/yinxulai/osw/issues/24 for why.
+  Highlights
+  - Requests that are still running are now ordinary rows in the request log. The table could only ever describe finished requests — every row came from request_logs, which is written when a request settles, so the one moment you actually want to look at was the one moment the page had nothing to say. An in-flight request is now aligned column for column with the historical rows (same columns, same widths, same alignment, same "landed on X +n" phrasing) and turns into a historical row in place once it settles, without jumping position or changing face. The data comes from an in-memory ledger in the proxy process and is pushed as NDJSON where every frame is a full snapshot: a lost frame or a slow client drops one frame, it cannot leave the console half-updated. A one-shot pull endpoint is there as a fallback.
+  - Expanding a request that has not finished gives you a timeline, not a post-mortem. One sentence in the present tense (routing / connecting / sent, awaiting headers / answered, awaiting first byte / streaming), then the route conclusion, each attempt, upstream headers and failover as a column of readable sentences whose ticks are offsets from the start, ending in a drawn "now" node that keeps moving with the clock, reports the bytes received so far, and adds one line showing the head of the newest upstream chunk. "Awaiting response headers" and "awaiting first byte" are two phases here rather than one word for "slow": the first means the upstream has not accepted the request yet (queueing, rate limiting, a slow connect), the second means it accepted and is holding the first token — different things to go and check.
+  - Rewrite rules are named on the timeline instead of counted as "2 rules applied". The next question after "this request was modified" is always "modified by which ones". The ledger emits a frame every 150 ms and should not read the config store for a few words, so the executor attaches the names while it still holds the rule table in hand. The persisted path stores ids and looks the names up when it renders, so both paths now say the same thing.
+  - Two "the table is breathing" bugs are fixed. An expanded row is a colSpan cell in an auto-layout table, so a 200-character chunk preview took part in the global column-width calculation and shoved the table back and forth between 1227px and 1421px, toggling a horizontal scrollbar every 150 ms. The expanded card is now contain: inline-size, and the preview is capped at 80 characters and always occupies its line (— when there is nothing yet), so the tail node cannot change height between frames either.
+  - Built-in providers are no longer sorted by the spelling of their folder name. Exposure order now comes from an order weight in each provider.json (providers you added yourself keep the order you drag them into), and every built-in provider gained a link to its own website — domain only, opened in the system browser from the desktop app. Providers without an icon asset now fall back to the new application mark instead of the old green switch shape.
+  - Model diagnostics can target one thing at a time: connectivity, streaming, or speed. The test says which of the three it is verifying, and the result now carries time-to-first-byte and output speed.
+  - The website now states its own exception. Anonymous usage statistics are on by default, ship in every build, and have no switch anywhere in the UI; that is now one of the four claims in the privacy section — the only one that works against us. Three other claims were wrong and are corrected: the gateway is not "never listening on a LAN interface" (127.0.0.1 is only the default, the address can be rebound to 0.0.0.0), the Chinese hero badge still said the project was open source (the PolyForm Noncommercial licence is not), and "every save becomes a version you can roll back" read as if rewrite rules were versioned too (only the routing graph is). The READMEs carry the same exception now. The site also gained an interface preview section with five real screenshots, placed right after the hero: someone who does not yet know the details, and is not yet convinced, is better served by one look at the interface than by the failover rules first.
+  - Also in this build: Button gained a forwardRef, so overlays triggered from Radix asChild elements are anchored correctly; the info icon on metric cards and in detail sections is now one shared InfoHint, so annotations no longer take a line of body text (they expand on hover or keyboard focus).
+  No database migration ships in this build — there are no new migration files. The caution above is the standing prerelease policy, not a remark about this diff.
+  New
+  - www: state the telemetry exception honestly, and show the interface
+  - render: rebuild the request log page around live in-flight requests
+  Changed
+  - www: show the interface preview right after the hero
+  - www: collapse the interface preview into one enlarged shot and a directory
+  Under the hood
+  - proxy: pin the rewrite-rule names the live ledger carries
+  - add a link to LINUX DO in the README files
+ReleaseNotesUrl: https://github.com/yinxulai/osw/releases/tag/v1.2.0-pre.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
