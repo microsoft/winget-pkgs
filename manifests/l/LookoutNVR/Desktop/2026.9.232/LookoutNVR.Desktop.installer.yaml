@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.9.0.schema.json
+PackageIdentifier: LookoutNVR.Desktop
+PackageVersion: 2026.9.232
+InstallerType: inno
+# Per-user by design: someone adding the viewer to their own Windows 11 box should not need an
+# administrator. The SERVER package is the machine-scope one, because it registers a service.
+Scope: user
+InstallModes:
+  - interactive
+  - silent
+  - silentWithProgress
+# The viewer is published framework-dependent: its runtimeconfig.json names Microsoft.NETCore.App
+# 10, and the installer only checks for WebView2. Without this a clean PC gets a viewer that
+# cannot start. It does not use ASP.NET Core or the WindowsDesktop framework.
+Dependencies:
+  PackageDependencies:
+    - PackageIdentifier: Microsoft.DotNet.Runtime.10
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/LookoutNVR/downloads/releases/download/v2026.9.232/LookoutNVR-Desktop-2026.9.232-x64.exe
+    InstallerSha256: 1823DA3DAF73C2B4738CD4FCFE9A5F1F288D60D0CFEA7245C4422D7831FE4612
+    InstallerSwitches:
+      Silent: /VERYSILENT /SUPPRESSMSGBOXES /NORESTART
+      SilentWithProgress: /SILENT /SUPPRESSMSGBOXES /NORESTART
+      InstallLocation: /DIR="<INSTALLPATH>"
+      Log: /LOG="<LOGPATH>"
+    UpgradeBehavior: install
+    # Matches the installed product by its Add/Remove Programs key (the Inno AppId), not by
+    # publisher or display name. That is what keeps `winget upgrade` working for existing
+    # customers if the company, the publisher string or the download host ever changes.
+    ProductCode: '{C4F8A2D6-3B7E-4A19-9E52-6F1B8C0D4A73}_is1'
+ManifestType: installer
+ManifestVersion: 1.9.0
