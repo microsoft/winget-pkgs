@@ -67,9 +67,13 @@ public static class TinyClipsLimitedProcess
     private static extern IntPtr GetCurrentProcess();
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern bool CloseHandle(IntPtr handle);
-    private static void Check(bool success)
+    private static void Check(bool success, string operation)
     {
-        if (!success) { throw new Win32Exception(Marshal.GetLastWin32Error()); }
+        if (!success)
+        {
+            int error = Marshal.GetLastWin32Error();
+            throw new Win32Exception(error, operation + ": " + new Win32Exception(error).Message);
+        }
     }
 
     public static uint IntegrityLevel()
@@ -77,12 +81,12 @@ public static class TinyClipsLimitedProcess
         IntPtr token = IntPtr.Zero, buffer = IntPtr.Zero;
         try
         {
-            Check(OpenProcessToken(GetCurrentProcess(), 0x8, out token));
+            Check(OpenProcessToken(GetCurrentProcess(), 0x8, out token), "OpenProcessToken(current worker)");
             uint size;
             GetTokenInformation(token, 25, IntPtr.Zero, 0, out size);
             if (size == 0) { throw new Win32Exception(Marshal.GetLastWin32Error()); }
             buffer = Marshal.AllocHGlobal(checked((int)size));
-            Check(GetTokenInformation(token, 25, buffer, size, out size));
+            Check(GetTokenInformation(token, 25, buffer, size, out size), "GetTokenInformation(TokenIntegrityLevel)");
             var sid = Marshal.PtrToStructure<SidAndAttributes>(buffer).Sid;
             int count = Marshal.ReadByte(sid, 1);
             return unchecked((uint)Marshal.ReadInt32(sid, 8 + (count - 1) * 4));
@@ -100,10 +104,10 @@ public static class TinyClipsLimitedProcess
         ProcessInformation process = default(ProcessInformation);
         try
         {
-            Check(OpenProcessToken(GetCurrentProcess(), 0x8, out original));
+            Check(OpenProcessToken(GetCurrentProcess(), 0x8, out original), "OpenProcessToken(controller)");
             linked = Marshal.AllocHGlobal(IntPtr.Size);
             uint needed;
-            Check(GetTokenInformation(original, 19, linked, checked((uint)IntPtr.Size), out needed));
+            Check(GetTokenInformation(original, 19, linked, checked((uint)IntPtr.Size), out needed), "GetTokenInformation(TokenLinkedToken)");
             limited = Marshal.ReadIntPtr(linked);
             var variables = new List<string>();
             foreach (DictionaryEntry variable in Environment.GetEnvironmentVariables())
@@ -115,7 +119,7 @@ public static class TinyClipsLimitedProcess
             var startup = new StartupInfo { Size = checked((uint)Marshal.SizeOf<StartupInfo>()), Flags = 1, ShowWindow = 0 };
             var commandLine = new StringBuilder("\"" + executable + "\" " + arguments);
             Check(CreateProcessWithTokenW(limited, 1, executable, commandLine, 0x00000410,
-                environment, directory, ref startup, out process));
+                environment, directory, ref startup, out process), "CreateProcessWithTokenW(non-admin worker)");
             return Process.GetProcessById(checked((int)process.ProcessId));
         }
         finally
@@ -171,6 +175,15 @@ if (-not $StandardUser) {
     }
     catch {
         $_ | Out-String | Set-Content (Join-Path $OutputDirectory 'controller-error.txt')
+        $workerResultsExist = $rootCreated -and (Test-Path "$root\diagnostics\results.json")
+        if (-not $workerResultsExist) {
+            ConvertTo-Json -InputObject @([pscustomobject]@{
+                AccountMode = 'standard-user'
+                Status = 'worker-unavailable'
+                AppLaunchTestExecuted = $false
+                Error = $_.ToString()
+            }) -Depth 5 | Set-Content (Join-Path $OutputDirectory 'results.json')
+        }
         throw
     }
     finally {
