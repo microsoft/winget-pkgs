@@ -1,0 +1,100 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: BlueHeisenberg.SCSKiller
+PackageVersion: 1.2.3
+PackageLocale: en-GB
+Publisher: The SCSKiller authors
+PublisherUrl: https://github.com/BlueHeisenberg
+PublisherSupportUrl: https://github.com/BlueHeisenberg/SCSKiller/issues
+PrivacyUrl: https://scskiller.com/privacy/
+PackageName: SCSKiller
+PackageUrl: https://scskiller.com/
+License: GPL-3.0-or-later
+LicenseUrl: https://github.com/BlueHeisenberg/SCSKiller/blob/HEAD/LICENSE
+Copyright: Copyright (C) 2026 The SCSKiller authors
+CopyrightUrl: https://scskiller.com/legal/
+ShortDescription: Compiles your games' shaders into your GPU driver's cache before you play, so the game doesn't stop to compile them mid-game.
+Description: |-
+  SCSKiller reads the shaders a game ships with, works out the pipelines it will build, and compiles them into your driver's shader cache ahead of time, from its own process and with the game closed. When you launch the game, they're already there.
+
+  Features
+  - NVIDIA and AMD. DirectX 12 games, and DirectX 11 games on NVIDIA.
+  - Finds your games in Steam, Epic Games, EA app, GOG, Ubisoft Connect, Xbox (PC), Battle.net, PURPLE, HoYoPlay and Gaijin.
+  - Knows which games stutter: the library puts known offenders on top, with the reason.
+  - Recompiles after driver updates: a driver update clears the shader cache, and SCSKiller notices and compiles again, on its own if you let it.
+  - Optional recorder for games whose pipelines cannot be worked out from their files: play a few minutes with it on, then compile.
+  - Frame times per session: with the recorder on, a game's page graphs your last session and tells the shader stutters apart from other hitches.
+  - Play button in the Library and on a game's page: starts the game through its store.
+  - Never touches anti-cheat games beyond reading their files: no launching, no injecting, no recorder.
+Tags:
+- amd
+- directx-12
+- gaming
+- gpu
+- nvidia
+- shader
+- shader-compilation
+ReleaseNotes: |-
+  New
+  - "Closing the window quits SCSKiller" in Settings (off by default): the close button quits like Quit in the
+    notification area. A running compile finishes saving first, and a downloaded update installs if set to.
+  - "Scan games when SCSKiller starts" in Settings (on by default): turn it off and SCSKiller shows your last list at
+    start, and reads a game again only when you refresh, when the game closes, or when Steam or the Xbox app installs or
+    updates one.
+  - Updates install by themselves ("Install updates automatically" in About, on by default): a downloaded update
+    installs the next time SCSKiller starts or when you quit it, never during a compile, a game or Windows shutdown.
+    "Restart to update" still installs it at once.
+  - Ray tracing without a recording for Unreal Engine 4.25 games (Returnal) on NVIDIA. With a recording, Returnal also
+    compiles the ray tracing shaders it hadn't recorded, which caused most of its stutters after a compile.
+  Faster and steadier
+  - Much faster start: SCSKiller re-reads only the games that changed, at low disk priority. On a PC with 64 games it
+    lists them in about a second instead of up to 20, and no longer keeps a hard disk busy for minutes. After an update
+    the list shows at once.
+  - Pausing a compile for more than a minute no longer makes it fail when you resume.
+  - A compile no longer stops itself saying the game is running when it isn't.
+  - Large Unreal games no longer run out of memory while their shaders are read (Codename CURE II).
+  - One game with a broken file date no longer stops every game from being listed.
+  - A game page opens without stutter, and Clear cache responds at once.
+  - Skipped pipelines after a compile are shown as a short line instead of a warning, that's normal.
+  Games
+  - Xbox app games are recorded now (before, the recorder never recorded in them), and their Unreal games are compiled
+    for the game's own exe instead of a launcher. Compile Xbox app Unreal games again (Dead Island 2, for example).
+  - Dead Island 2 compiles and matches the game: it's recognised as a DirectX 12 game on its own Unreal Engine 4.25
+    build, and all its shaders are read. Compile it again.
+  - Unreal games with a launcher or installer beside the exe (Returnal) are found as the real game. Compile them
+    again: the earlier compile went to the wrong program.
+  - Monster Hunter Wilds and other RE Engine games no longer sit at "Building plan" for hours and crash.
+  - The Witcher 3 no longer crashes at start with frame generation on and the recorder installed, and it no longer
+    asks for a rebuild after every play session (NVIDIA and AMD).
+  - DRAGON BALL: Sparking! ZERO and other encrypted Unreal games whose key wasn't found now open without entering it.
+  - FINAL FANTASY VII REMAKE INTERGRADE is recognised as a DirectX 12 game (DirectX 11 if you launch it with -dx11
+    through Steam), so it compiles from a recording on AMD and NVIDIA.
+  - Neverness to Everness is recognised as Unreal Engine 5.6.
+  - Unreal games with ray tracing turned off no longer ask for a ray tracing recording, and a game compiled without
+    its ray tracing shows as compiled, with "Ray tracing needs a 5-min recording" under it.
+  - Unreal Engine 4.25 games also compile the pipeline list they ship with.
+  Mods
+  - RenoDX with ReShade loaded by OptiScaler compiles through OptiScaler, ReShade and the HDR mod, and records.
+  - Xbox app games with ReShade in their package folder (next to MicrosoftGame.config) compile through ReShade and
+    RenoDX.
+  - REFramework: RE Engine games record with it installed.
+  - Files a mod or the game writes beside the exe (logs, crash dumps, shader caches) no longer turn the recorder off.
+    If a launch still isn't recorded, the game page says to start the game again.
+  - When a mod setup still can't be compiled, the game page says why and how to fix it, in one line.
+  Recorder and anti-cheat
+  - More anti-cheat is recognised, so the recorder stays out: every Riot Games title (VALORANT, League of Legends,
+    2XKO and others, also when added by hand), Anti-Cheat Expert games (Delta Force), every HoYoverse game, and EA Javelin
+    games. A recorder already in one is removed at the next check.
+  - Turning the recorder on no longer fails with "scskiller.ini is being used by another process".
+  PCs and Windows
+  - Older CPUs without AVX2: SCSKiller no longer closes at "Reading shaders".
+  - Windows 10: games that ship their own DirectX 12 runtime compile with it, instead of failing their newer pipelines.
+  - Maximum mode's description now says it seems to help most on AMD, and what it costs.
+  Updates
+  - A downloaded update installs at the next start even when the PC has no network yet at sign-in.
+  - One update server asking to wait no longer holds back every update check.
+  All changes in 1.2.3
+ReleaseNotesUrl: https://github.com/BlueHeisenberg/SCSKiller/releases/tag/v1.2.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
