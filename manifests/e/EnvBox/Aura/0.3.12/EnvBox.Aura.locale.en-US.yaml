@@ -1,0 +1,65 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: EnvBox.Aura
+PackageVersion: 0.3.12
+PackageLocale: en-US
+Publisher: EnvBox
+PublisherUrl: https://github.com/NGLSL
+PublisherSupportUrl: https://github.com/NGLSL/Aura/issues
+PackageName: Aura
+PackageUrl: https://github.com/NGLSL/Aura
+License: Apache-2.0
+LicenseUrl: https://github.com/NGLSL/Aura/blob/HEAD/LICENSE
+ShortDescription: A Windows process-level environment virtualization launcher that shows target apps virtualized locale, region, language, timezone, and DNS values.
+Description: |-
+  Aura (EnvBox) is a Windows process-level environment virtualization launcher. Target apps run on the host with full access to the filesystem, GPU, network, and user profile, but see Environment Profile values for locale, region, UI language, timezone, DNS view, environment variables, and whitelisted internationalization registry reads.
+
+  EnvBox does not provide a security boundary and is not a sandbox. It does not isolate files, registry writes, network, or privileges, and must not be used as a security control.
+
+  Principles
+  - Process-scoped: changes apply only to one runtime instance's process tree.
+  - Host-transparent: never modifies Windows global configuration.
+  - Environment-consistent: one profile keeps locale, region, language, timezone, DNS, and environment aligned.
+
+  The package includes a GUI for managing profiles and launching apps, the envbox CLI (envbox run / profile / app), and a Detours-based runtime DLL.
+Tags:
+- environment-variables
+- locale
+- localization
+- timezone
+ReleaseNotes: |-
+  Aura v0.3.12
+  This release makes the audit page responsive when scrolling through hundreds of records, corrects the selection and counting of recent audit events, and expands the Profile editor's region, language, and timezone options.
+  Changes
+  - The CPU renderer combines heavily fragmented repaint regions into one bounding rectangle before drawing. Scrolling an audit table previously produced about 100 regions per frame, repeatedly traversing layers and rebuilding the window-sized clip mask. Small updates retain their existing partial repaint behavior. The audit page keeps its continuous list of up to 500 records.
+  - Audit loading now scans every JSONL file one line at a time and retains the 500 newest events by their UTC timestamps. UUID filenames and delayed writes from different processes no longer determine the displayed timeline. Retained event memory is bounded, and the capture count reports all successfully parsed records rather than the 500-row display limit. The page explicitly states that Refresh updates its records.
+  - Region choices now include TW, SG, JP, PH, GB, DE, KR, BO, and TR alongside CN and US. Locale and UI language choices share these new values:
+
+  | Location       | Language choices                 | IANA timezone   |
+  | -------------- | -------------------------------- | --------------- |
+  | Taipei         | Traditional Chinese: zh-TW       | Asia/Taipei     |
+  | Singapore      | English: en-SG; Chinese: zh-SG   | Asia/Singapore  |
+  | Japan          | Japanese: ja-JP                  | Asia/Tokyo      |
+  | Philippines    | English: en-PH; Filipino: fil-PH | Asia/Manila     |
+  | United Kingdom | English: en-GB                   | Europe/London   |
+  | Germany        | German: de-DE                    | Europe/Berlin   |
+  | South Korea    | Korean: ko-KR                    | Asia/Seoul      |
+  | Bolivia        | Spanish: es-BO                   | America/La_Paz  |
+  | Turkey         | Turkish: tr-TR                   | Europe/Istanbul |
+
+  - Manila and La Paz now have explicit Windows/IANA mappings and Chinese display names. Japan, South Korea, Germany, the Philippines, and Bolivia can also be found by their Chinese country names in the Windows timezone selector. Singapore and the Philippines share the Windows ID Singapore Standard Time; the Windows list contains it once. Select Manila in the advanced IANA field for a Philippines-specific IANA identity; the Windows field synchronizes automatically.
+  Validation and performance
+  - Before versioning, an optimized build was measured in an actual Windows GUI using the same two captured logs, a 500-row continuous audit list, and 60 wheel inputs. Total input-processing time fell from about 17.4 seconds to 1.8 seconds, and process CPU time fell from about 17.3 seconds to 0.9 seconds. Median input response fell from about 287 ms to 31 ms. The measurement includes input pacing and message processing; it is not a frame-rate measurement or a guarantee for other machines.
+  - Targeted temporary renderer measurements identified drawing as the dominant cost: approximately 240–310 ms per scrolling frame before coalescing, and 12–14 ms after. Temporary instrumentation was removed. The final build was also checked by scrolling to the bottom, returning to the top, and switching pages, without observed stale pixels or displaced text.
+  - Existing GUI checks passed with 62 tests passed and five conditionally ignored. The separate CPU-renderer suite passed five existing checks. Existing option and timezone-mapping checks passed, and Windows accepted all 11 added locale names and enumerated the required timezone IDs. No new test cases were authored or existing test cases changed.
+  - After versioning, local workspace checks passed 482 tests before stopping at two Supervisor channel failures: a running Release Supervisor owned the same user/integrity endpoint, so the test fixture was correctly rejected for an executable identity mismatch; the second failure followed from the first panic. There were 20 conditionally ignored cases in the executed suites. The existing manager was preserved, subsequent workspace suites were not run locally, and this result is not a complete workspace pass. The locked renderer suite separately passed all five checks.
+  - Publication requires successful Windows CI on the exact release commit, including workspace, Runtime, detached-session, and separate CPU-renderer checks. The release workflow uses the canonical installer script; an independent download and SHA-256 comparison verifies the published installer.
+  Limitations
+  Audit loading still scans the directory synchronously on startup and manual refresh; very large accumulated logs have not been measured. Multi-monitor interaction and long-running scrolling have not been verified. Language tokens being accepted by Windows does not prove that every target application ships the corresponding interface translations.
+  The supplied logs contain Host DNS calls, three child creation/injection failures, and Chromium renderer coverage exceptions. This release does not change those Runtime paths or claim to diagnose their original configurations: the captured processes had exited, and the audit records did not identify the immutable Profile or loaded Runtime build. Audit status badges also retain their existing meaning.
+  Upgrade
+  Install aura-setup.exe or use Aura's updater, then reopen Aura. Existing application, Profile, and UI settings are retained; the new choices do not rewrite saved Profiles. For the new language or timezone settings to affect a target application, edit its Profile and launch a new instance. Already running processes retain their startup configuration.
+ReleaseNotesUrl: https://github.com/NGLSL/Aura/releases/tag/v0.3.12
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
