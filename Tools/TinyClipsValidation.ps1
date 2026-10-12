@@ -135,7 +135,7 @@ public static class TinyClipsValidationWindow
                 $info = [Diagnostics.ProcessStartInfo]::new()
                 $info.FileName = $exe
                 $info.WorkingDirectory = $scenario.Directory
-                $info.UseShellExecute = $false
+                $info.UseShellExecute = $true
                 $process = [Diagnostics.Process]::Start($info)
                 $null = $process.Handle
                 $ownedProcesses.Add($process)
@@ -163,6 +163,7 @@ public static class TinyClipsValidationWindow
                 $results.Add([pscustomobject]@{
                     Scenario = $scenario.Name
                     WorkingDirectory = $scenario.Directory
+                    LaunchMethod = 'ShellExecute'
                     Launch = if ($index -eq 0) { 'first' } else { 'second' }
                     Status = $status
                     ExitCode = $code
