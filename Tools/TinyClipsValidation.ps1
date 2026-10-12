@@ -20,6 +20,9 @@ if ($env:GITHUB_ACTIONS -ne 'true' -or $env:RUNNER_ENVIRONMENT -ne 'github-hoste
 }
 if ($RunnerControl -and -not $StandardUser) { throw 'RunnerControl is only valid for the worker mode.' }
 New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
+if ($StandardUser) {
+    "Worker entered the script (PID $PID)." | Set-Content (Join-Path $OutputDirectory 'bootstrap.log')
+}
 
 Add-Type -TypeDefinition @'
 using System;
@@ -55,18 +58,6 @@ public static class TinyClipsLimitedProcess
     [DllImport("advapi32.dll", SetLastError = true)]
     private static extern bool OpenProcessToken(IntPtr process, uint access, out IntPtr token);
     [DllImport("advapi32.dll", SetLastError = true)]
-    private static extern bool CreateRestrictedToken(IntPtr original, uint flags, uint disableCount,
-        SidAndAttributes[] disabled, uint deleteCount, IntPtr deleted, uint restrictCount,
-        IntPtr restricted, out IntPtr token);
-    [DllImport("advapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern bool ConvertStringSidToSid(string sid, out IntPtr result);
-    [DllImport("advapi32.dll", SetLastError = true)]
-    private static extern uint GetLengthSid(IntPtr sid);
-    [DllImport("advapi32.dll", SetLastError = true)]
-    private static extern bool CopySid(uint length, IntPtr destination, IntPtr source);
-    [DllImport("advapi32.dll", SetLastError = true)]
-    private static extern bool SetTokenInformation(IntPtr token, int kind, IntPtr data, uint size);
-    [DllImport("advapi32.dll", SetLastError = true)]
     private static extern bool GetTokenInformation(IntPtr token, int kind, IntPtr data, uint size, out uint needed);
     [DllImport("advapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     private static extern bool CreateProcessWithTokenW(IntPtr token, uint logonFlags, string application,
@@ -76,9 +67,6 @@ public static class TinyClipsLimitedProcess
     private static extern IntPtr GetCurrentProcess();
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern bool CloseHandle(IntPtr handle);
-    [DllImport("kernel32.dll")]
-    private static extern IntPtr LocalFree(IntPtr memory);
-
     private static void Check(bool success)
     {
         if (!success) { throw new Win32Exception(Marshal.GetLastWin32Error()); }
@@ -108,24 +96,15 @@ public static class TinyClipsLimitedProcess
 
     public static Process Start(string executable, string arguments, string directory)
     {
-        IntPtr original = IntPtr.Zero, limited = IntPtr.Zero, admins = IntPtr.Zero;
-        IntPtr medium = IntPtr.Zero, label = IntPtr.Zero, environment = IntPtr.Zero;
+        IntPtr original = IntPtr.Zero, limited = IntPtr.Zero, linked = IntPtr.Zero, environment = IntPtr.Zero;
         ProcessInformation process = default(ProcessInformation);
         try
         {
-            Check(OpenProcessToken(GetCurrentProcess(), 0xF01FF, out original));
-            Check(ConvertStringSidToSid("S-1-5-32-544", out admins));
-            var disabled = new[] { new SidAndAttributes { Sid = admins } };
-            Check(CreateRestrictedToken(original, 5, 1, disabled, 0, IntPtr.Zero, 0, IntPtr.Zero, out limited));
-            Check(ConvertStringSidToSid("S-1-16-8192", out medium));
-            int structureSize = Marshal.SizeOf<SidAndAttributes>();
-            uint sidSize = GetLengthSid(medium);
-            int labelSize = checked(structureSize + (int)sidSize);
-            label = Marshal.AllocHGlobal(labelSize);
-            var copiedSid = IntPtr.Add(label, structureSize);
-            Check(CopySid(sidSize, copiedSid, medium));
-            Marshal.StructureToPtr(new SidAndAttributes { Sid = copiedSid, Attributes = 0x20 }, label, false);
-            Check(SetTokenInformation(limited, 25, label, checked((uint)labelSize)));
+            Check(OpenProcessToken(GetCurrentProcess(), 0x8, out original));
+            linked = Marshal.AllocHGlobal(IntPtr.Size);
+            uint needed;
+            Check(GetTokenInformation(original, 19, linked, checked((uint)IntPtr.Size), out needed));
+            limited = Marshal.ReadIntPtr(linked);
             var variables = new List<string>();
             foreach (DictionaryEntry variable in Environment.GetEnvironmentVariables())
             {
@@ -133,9 +112,9 @@ public static class TinyClipsLimitedProcess
             }
             variables.Sort(StringComparer.OrdinalIgnoreCase);
             environment = Marshal.StringToHGlobalUni(string.Join("\0", variables) + "\0\0");
-            var startup = new StartupInfo { Size = checked((uint)Marshal.SizeOf<StartupInfo>()) };
+            var startup = new StartupInfo { Size = checked((uint)Marshal.SizeOf<StartupInfo>()), Flags = 1, ShowWindow = 0 };
             var commandLine = new StringBuilder("\"" + executable + "\" " + arguments);
-            Check(CreateProcessWithTokenW(limited, 0, executable, commandLine, 0x08000400,
+            Check(CreateProcessWithTokenW(limited, 1, executable, commandLine, 0x00000410,
                 environment, directory, ref startup, out process));
             return Process.GetProcessById(checked((int)process.ProcessId));
         }
@@ -144,15 +123,16 @@ public static class TinyClipsLimitedProcess
             if (process.Thread != IntPtr.Zero) { CloseHandle(process.Thread); }
             if (process.Process != IntPtr.Zero) { CloseHandle(process.Process); }
             if (environment != IntPtr.Zero) { Marshal.FreeHGlobal(environment); }
-            if (label != IntPtr.Zero) { Marshal.FreeHGlobal(label); }
-            if (medium != IntPtr.Zero) { LocalFree(medium); }
-            if (admins != IntPtr.Zero) { LocalFree(admins); }
+            if (linked != IntPtr.Zero) { Marshal.FreeHGlobal(linked); }
             if (limited != IntPtr.Zero) { CloseHandle(limited); }
             if (original != IntPtr.Zero) { CloseHandle(original); }
         }
     }
 }
 '@
+if ($StandardUser) {
+    'Native interop compiled.' | Add-Content (Join-Path $OutputDirectory 'bootstrap.log')
+}
 
 if (-not $StandardUser) {
     $root = 'C:\TinyClipsValidation'
@@ -172,9 +152,16 @@ if (-not $StandardUser) {
 
         $pwsh = (Get-Process -Id $PID).Path
         $arguments = "-NoLogo -NoProfile -NonInteractive -STA -ExecutionPolicy Bypass -File `"$root\worker.ps1`" -StandardUser -MsixPath `"$root\package.msix`" -OutputDirectory `"$workerOutput`" -WaitSeconds $WaitSeconds"
-        # Preserve the real desktop logon while removing admin membership and privileges.
+        # Use Windows' existing unelevated token rather than constructing a synthetic logon.
         $process = [TinyClipsLimitedProcess]::Start($pwsh, $arguments, $root)
         $null = $process.Handle
+        $readyDeadline = (Get-Date).AddSeconds(60)
+        while (-not (Test-Path (Join-Path $workerOutput 'bootstrap.log')) -and -not $process.HasExited -and (Get-Date) -lt $readyDeadline) {
+            Start-Sleep -Seconds 1
+        }
+        if (-not (Test-Path (Join-Path $workerOutput 'bootstrap.log'))) {
+            throw 'The non-admin worker did not enter the script within 60 seconds.'
+        }
         if (-not $process.WaitForExit(720000)) { throw 'Standard-user validation exceeded 12 minutes.' }
         if (-not (Test-Path (Join-Path $workerOutput 'results.json'))) {
             throw "Standard-user validation produced no results (exit code $($process.ExitCode))."
@@ -213,7 +200,7 @@ Start-Transcript -Path $log | Out-Null
 
 try {
     "Account mode: $(if ($RunnerControl) { 'runner-control' } else { 'standard-user' }); elevated: $isAdmin"
-    "Integrity level: $integrity; standard-user mode uses the existing desktop account with a restricted token."
+    "Integrity level: $integrity; standard-user mode uses the existing desktop account with its Windows UAC-linked token."
     "Process architecture: $([Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture)"
     "Session: $((Get-Process -Id $PID).SessionId); interactive: $([Environment]::UserInteractive)"
     "This is a reproduction approximation, not Microsoft's private validation harness."
