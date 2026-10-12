@@ -5,6 +5,7 @@
 #  2 = Unable to kill a running process
 #  3 = WinGet is not installed
 #  4 = Manifest validation error
+#  5 = Unattended run did not complete within the timeout
 ###
 
 [CmdletBinding()]
@@ -68,6 +69,10 @@ param(
             return $true
         })]
     [string] $WinGetOptions,
+    # Unattended
+    [Parameter(HelpMessage = 'Wait up to this many minutes for the sandbox run to complete and write its output to the host')]
+    [ValidateRange(1, [int]::MaxValue)]
+    [int] $Unattended,
     # Switches
     [switch] $SkipManifestValidation,
     [switch] $Prerelease,
@@ -84,8 +89,11 @@ enum DependencySources {
 $ProgressPreference = 'SilentlyContinue'
 $ErrorActionPreference = 'Stop' # This gets overridden most places, but is set explicitly here to help catch errors
 if ($PSBoundParameters.Keys -notcontains 'InformationAction') { $InformationPreference = 'Continue' } # If the user didn't explicitly set an InformationAction, Override their preference
+$script:IsUnattended = $PSBoundParameters.Keys -contains 'Unattended'
 if ($PSBoundParameters.Keys -contains 'WarningAction') {
     $script:OnMappedFolderWarning = $PSBoundParameters.WarningAction
+} elseif ($script:IsUnattended) {
+    $script:OnMappedFolderWarning = 'Continue'
 } else {
     $script:OnMappedFolderWarning = 'Inquire'
 }
@@ -783,6 +791,14 @@ function Get-ARPTable {
 }
 
 Push-Location $($script:SandboxTestDataFolder)
+`$Unattended = $([int]$script:IsUnattended)
+`$ResultsFolder = Join-Path '$($script:SandboxTestDataFolder)' 'Results'
+`$metadata = [ordered]@{ StartTime = (Get-Date).ToString('o') }
+if (`$Unattended) {
+    New-Item -Path `$ResultsFolder -ItemType Directory -Force | Out-Null
+    Start-Transcript -Path (Join-Path `$ResultsFolder 'transcript.log') | Out-Null
+}
+try {
 Write-Host @'
 --> Installing WinGet
 '@
@@ -875,7 +891,14 @@ if (`$manifestFolder) {
 
 `"@
     `$originalARP = Get-ARPTable
-    winget install -m `$manifestFolder --accept-package-agreements --verbose-logs --ignore-local-archive-malware-scan --dependency-source winget $WinGetOptions
+    `$metadata.Manifest = `$manifestFolder | Split-Path -Leaf
+    if (`$Unattended) {
+        winget install -m `$manifestFolder --accept-package-agreements --verbose-logs --ignore-local-archive-malware-scan --dependency-source winget $WinGetOptions | Out-Host
+    } else {
+        winget install -m `$manifestFolder --accept-package-agreements --verbose-logs --ignore-local-archive-malware-scan --dependency-source winget $WinGetOptions
+    }
+    `$metadata.InstallExitCode = `$LASTEXITCODE
+    `$metadata.InstallExitCodeHex = '0x{0:X8}' -f `$LASTEXITCODE
 
     Write-Host @'
 
@@ -899,7 +922,28 @@ if (`$BoundParameterScript) {
 }
 
 '@
-& `$BoundParameterScript.FullName
+    `$global:LASTEXITCODE = 0
+    try {
+        & `$BoundParameterScript.FullName
+        `$metadata.ScriptSucceeded = `$?
+    } catch {
+        `$metadata.ScriptSucceeded = `$false
+        `$metadata.ScriptError = "`$_"
+        throw
+    } finally {
+        `$metadata.ScriptExitCode = `$LASTEXITCODE
+    }
+}
+} finally {
+    if (`$Unattended) {
+        `$metadata.EndTime = (Get-Date).ToString('o')
+        if (Get-Command winget -ErrorAction SilentlyContinue) { `$metadata.WinGetVersion = winget --version }
+        `$metadata.OSVersion = '{0}.{1}' -f [Environment]::OSVersion.Version.ToString(3), (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion').UBR
+        `$metadata | ConvertTo-Json | Out-File -FilePath (Join-Path `$ResultsFolder 'metadata.json') -Encoding utf8
+        Copy-Item -Path (Join-Path `$env:LOCALAPPDATA 'Packages\$($script:AppInstallerPFN)\LocalState\DiagOutputDir') -Destination (Join-Path `$ResultsFolder 'WinGetLogs') -Recurse -ErrorAction SilentlyContinue
+        Stop-Transcript | Out-Null
+        New-Item -Path (Join-Path `$ResultsFolder 'done') -ItemType File -Force | Out-Null
+    }
 }
 
 Pop-Location
@@ -966,4 +1010,26 @@ $Script
 
 Write-Verbose "Invoking the sandbox using $script:ConfigurationFile"
 WindowsSandbox $script:ConfigurationFile
+
+if ($script:IsUnattended) {
+    $resultsFolder = Join-Path -Path $script:TestDataFolder -ChildPath 'Results'
+    $doneFile = Join-Path -Path $resultsFolder -ChildPath 'done'
+    $deadline = (Get-Date).AddMinutes($Unattended)
+    Write-Information "--> Waiting up to $Unattended minutes for the sandbox run to complete"
+    while (!(Test-Path -Path $doneFile) -and (Get-Date) -lt $deadline) { Start-Sleep -Seconds 5 }
+
+    Get-Content -Path (Join-Path -Path $resultsFolder -ChildPath 'transcript.log') -ErrorAction SilentlyContinue | ForEach-Object { Write-Information $_ }
+    Write-Information @"
+--> Sandbox results:
+    - Transcript: $(Join-Path -Path $resultsFolder -ChildPath 'transcript.log')
+    - Metadata: $(Join-Path -Path $resultsFolder -ChildPath 'metadata.json')
+    - WinGet Logs: $(Join-Path -Path $resultsFolder -ChildPath 'WinGetLogs')
+"@
+    if (!(Test-Path -Path $doneFile)) {
+        Write-Error -Category OperationTimeout "The sandbox run did not complete within $Unattended minutes" -ErrorAction Continue
+        Invoke-CleanExit -ExitCode 5
+    }
+    Get-Content -Path (Join-Path -Path $resultsFolder -ChildPath 'metadata.json') -ErrorAction SilentlyContinue | ForEach-Object { Write-Information $_ }
+}
+
 Invoke-CleanExit -ExitCode 0
