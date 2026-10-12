@@ -1,0 +1,154 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AtomGit.AtomCode
+PackageVersion: 5.2.2
+PackageLocale: zh-CN
+Publisher: 重庆开源共创科技有限公司
+PublisherUrl: https://atomgit.com/
+PublisherSupportUrl: https://atomgit.com/atomgit_atomcode/atomcode/issues
+PrivacyUrl: https://docs.gitcode.com/docs/help/home/protocol/privacy-policy
+Author: 重庆开源共创科技有限公司
+PackageName: AtomCode
+PackageUrl: https://atomcode.atomgit.com/
+License: MIT
+LicenseUrl: https://atomgit.com/atomgit_atomcode/atomcode/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Yubang Xu
+CopyrightUrl: https://docs.gitcode.com/docs/help/home/protocol/ai-privacy-policy
+ShortDescription: AI 编程助手 在你的终端中运行
+Description: Claude Code / Cursor Agent 的开源平替，住在你的终端里。连接任意 OpenAI 兼容大模型，自主读文件、改代码、跑测试、自我验证 —— 用 Rust 构建。
+Tags:
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  AtomCode v5.2.2 Release Notes
+  发布日期：2026-10-10
+  v5.2.2（同源版本 v5.2.0，覆盖自 v5.1.0 以来的全部改动）聚焦于架构与终端界面的重构：运行时重写为分层结构，所有前端共用同一个运行时，会话改为可完整恢复的事件记录；全新的全屏终端界面成为默认，设置、模型、MCP、插件、后台会话都收进了面板。
+
+  ✨ 新增功能（Features）
+  全新架构与运行时
+  - 分层运行时：运行时按「智能体循环 / 能力装配 / 编码运行时」分层重写，旧引擎整体退役；终端、网页、VS Code、ACP 共用同一个运行时，各端行为一致。
+  - 会话事件化：会话改为逐条事件记录，撤销、回退、压缩都作为新记录追加，不改写历史，中断或崩溃后可以完整恢复。
+  全新终端界面（默认开启）
+  - 全屏界面：直接运行 atomcode 即打开新版全屏界面，旧界面可用 --classic 或配置 [ui] screen 切回。
+  - 鼠标操作：支持点击、双击选词、三击选行、右键菜单，跨屏拖拽选中并自动滚动，链接和文件路径点击即可打开。
+  - 会话标识：终端标题和标签页显示会话名，并标出哪个会话在等你。
+  设置与管理面板化
+  - /config 设置面板：包含设置 / Config / Status / Usage / Stats，可查看额度、每日用量和各模型用量。
+  - /provider 账号与模型管理：保存后自动检测连通性，添加模型时可按 Ctrl+F 从服务端拉取模型列表选择。
+  - /mcp 面板：逐个启用、停用 MCP 服务器。
+  - /toolbox / /plugin / /status：在会话中开关单个工具、管理插件、查看登录账号与订阅到期时间。
+  后台会话与团队协作
+  - /background（/bg）：把当前会话放到后台继续跑，可分组查看、切换、取回；后台会话在团队面板中列出，空输入框按 ↓ 直接进入。
+  - /review 后台评审：默认在后台评审，不占用当前对话。
+  - 后台提问前移：后台会话的提问会出现在前台，可就地作答。
+  - 团队面板：列出主会话、成员和子代理的状态、耗时与上下文用量；成员会话会保存，重启后随主会话一起恢复；拆分成员容量与子代理并发上限，并讲清成员生命周期（空闲也占名额，用完需 stop）。
+  会话管理增强
+  - /resume 增强：可预览会话最后聊了什么，按两次 Ctrl+D 删除会话；项目文件夹改名后会话不再丢失。
+  - 回退与回溯：双击 Esc 打开回退面板；在 Git 仓库里 /rewind 默认就能连代码一起回退（设 ATOMCODE_CODE_REWIND=0 可关闭）。
+  新增与增强命令
+  - /changelog：在面板里查看各版本更新内容（概览与 Issues 两个页签），升级后首次启动提示一行亮点。
+  - /worktree：新建独立工作副本并切换过去。
+  - /diff 与 /diff git：查看本会话和工作区的改动。
+  - /loop 5m：按固定间隔循环执行。
+  - /todo add、/todo clear：直接修改计划。
+  - /cost：按模型分列 token 账单。
+  - /copy 与 /copy code：默认复制最后一条回复全文，/copy code [N|all] 复制代码块。
+  - /raw：把整段对话输出到终端自己的屏幕，方便用终端自带的跨屏选择。
+  - !cmd 与 ✻ Done 行：在本机直接执行命令，回显 ! 打头、输出紧贴命令，跑完收一行 ✻ Done 汇总耗时。
+  - /cd：目录跟着会话走，支持书签和最近目录。
+  - 其余命令补齐：新界面支持 /proxy、/schedule、/openrouter、/app、/webui、/sync，/upgrade 可就地升级并重启；Ctrl+Z 挂起回到 shell，fg 返回；斜杠菜单按使用频率排序。
+  WebUI 模型配置重做
+  - 按服务商分组：一张卡片填完服务商和模型，保存后自动检测连通性。
+  - 推理强度档位：可为模型设置可选的推理强度档位与默认档位，聊天里的档位选择据此出现。
+  - 启动引导：服务没在运行时，桌面应用显示启动引导；atomcode webui 新增 --no-open 参数。
+  模型与思考强度
+  - 快速切换：F2 / Shift+F2 快速切换模型，切换后可直接选择思考强度；/effort 只列出当前模型支持的档位。
+  - 思维链保留：保留 GLM、Qwen 的思维链；流式解析识别 vLLM 的 reasoning 字段，思考按服务端使用的名字回传。
+  - OpenRouter：授权过就不再每次跳浏览器，已下架的模型不再出现在列表里。
+  交互体验优化
+  - 输入框：支持粘贴截图和图片路径，大段粘贴自动折叠；Ctrl+R 搜索本项目的输入历史；Ctrl+X 中断当前回合并立即发出排队的消息。
+  - 工具展示：写入和编辑文件的工具调用直接展开显示 diff；/changelog、技能上下文等面板内容折叠展示。
+  - sudo / ssh 密码输入：工具里的 sudo、ssh 会在输入框里请你输入密码，不再卡住。
+  🛠 修复（Fixes）
+  权限 & 安全
+  - 读取凭据、密钥、.env 等敏感文件前先请求审批；工具策略中加固了解析后的凭据路径。
+  - 委派出去的子代理有明确边界。
+  - 工具调用与结果之间不再夹注入消息——切到严格 provider 的会话不再每请求 400。
+  稳定性
+  - 重复调用熔断更温和：不再把「等长任务」当死循环误判，可用 [coding] repeat_stop_rounds 调整阈值。
+  - 图片预算：一次请求带的图片数量有上限并自动压缩（单张约 512KB，413 时减半重发），不再因请求过大失败；预算按 4 张一步裁剪，不再打穿提示词缓存。
+  - token 统计：按请求累加的 token 改用 u64，跨过 u32::MAX 不再饱和失真；回合结束的缓存命中率与花费按本轮每次请求累加。
+  - bash 后台进程的输出与结束更可靠：后台进程在命令返回后照常写输出不被杀，Windows 上命令正常结束不再误杀拉起的进程，bash_kill 能停掉作业留下的进程。
+  - MCP 外部输入边界加固，单个 MCP server 故障不再导致整个会话崩溃。
+  Provider / 网络
+  - 正确识别网关误标与模型权限探测响应，避免把合法响应当校验错误。
+  - 浅色终端可读：[ui] theme 接入新 TUI，256 色按对比度取色。
+  - 登录连接失败时区分「解析器配置不可读」并给出对应指引；i18n auto 模式根据系统语言兜底并跳过通用 locale。
+  终端渲染 / Windows 兼容
+  - Windows 传统控制台、颜色、按键与框线全面兼容：VT 输出先开启、宽字符不写最后一列、超宽行不再把整屏顶上去、豆腐块与吉祥物正常显示。
+  - 控制台画不了新界面时自动退回经典界面并说明原因，不再被 TERM 环境变量骗过。
+  - Windows 上 Ctrl+C 选区复制不再被取消操作拦截；VS Code / JediTerm 上不再请求 Kitty 键盘协议，按 Esc 不再打出 [27u。
+  - 鸿蒙 PC 适配：鼠标默认留给终端、滚轮翻页、Ctrl+V 由终端粘贴文字、欢迎页按键提示与剪贴板提示更准确。
+  - 修复表格渲染不完整、链接边界越界吞入尾随字符、思考正文颜色落错槽位等问题。
+  升级器
+  - Windows 上 /upgrade 不再因旧版本进程占用而「拒绝访问」：自动换空槽位、清理残留，第一步被拒时提示指向安全软件。
+  WebUI
+  - 登录不再静默失败：授权页打开情况、失败原因、webui 重启都在页面上说清。
+  - 旧内核浏览器（Chromium 99 起）可正常使用；无 token 打开时给出引导页。
+  - 会话被另一个 atomcode 占用时说清是哪种情况，同步模式可复制一份继续。
+  - atomcode webui 启动失败或服务停止即退出（非零），并把绑定与退出原因写进日志。
+  - 接口失败不再当成功数据，审批没送达不再静默关卡片。
+  TUI 交互
+  - 回合进行中被拒的命令说清要等这一轮、按 Esc 可先停；/compact 说明会在回合后执行。
+  - 面板打开时滚动对话不再卷走面板；问询在屏时往回翻对话，问题钉在底部不再被卷走。
+  - 中断提示、/model 选中项、右键菜单位置等展示细节修正；skill 调用输出按序整理、不再重复回显。
+  🔧 重构（Refactoring）
+  - 运行时与前端分离：引入 atomcode-harness / atomcode-host-api / atomcode-tui 新 crate，旧 atomcode-clix 退役；产品身份、宿主插件与配置层改由宿主传入（PrepareOptions.identity / host_plugins），用户级 mcp.json 与 mcp_auth.toml 可由宿主自行保管。
+  - 配置收敛：服务商账号与模型的增改删收进 atomcode-config::provider_book，TUI 与 WebUI 统一走它。
+  📚 文档（Docs）
+  - CHANGELOG 补齐 v4.22.3 以来各版本的概览、发布日期与对应里程碑 Issues。
+  - 新增架构与 TUI 设计相关的 ADR 文档、MCP 面板设计与 hooks 文档更新。
+  🧹 工程 / 构建
+  - 清理 Windows / macOS 构建警告（未用导入、链接输出、crossterm 警告）。
+  - 新增 gates 架构守卫脚本与差分测试基线，防止分层约定被破坏。
+  Issues
+  - #1573 V5.1.0 更新说明中修复 ESC 逻辑，实测未修复
+  - #1574 表格渲染不完整
+  - #1576 系统提示末尾注入 Today's date，跨零点后约 91.7% 的 prompt 前缀缓存失效
+  - #1577 memory 记忆注入无预算上限，长期使用 token 成本线性上涨
+  - #1578 mcp 外部输入边界存在大量 unwrap/panic，单个 MCP server 故障可致整个会话崩溃
+  - #1585 长任务偶发"突然结束"，UI 却显示为成功完成
+  - #1596 todowrite 单条 action:update 报成功但状态不落盘，叠加 tool-loop 守卫导致会话死锁
+  - #1597 选择「全部允许」依然重复询问
+  - #1598 tool-loop guard 误报频繁：三类合法重复被拦截
+  - #1602 鼠标交还态下终端把滚轮转成 ↑/↓ 切换输入历史
+  - #1603 /resume 会话列表 Ctrl+D×2 无法删除历史会话
+  - #1606 /mcp reload 在 Agent 回合中被当作普通消息转发给模型
+  - #1607 TUI 输出区 URL 链接边界越界
+  - #1609 Ctrl+R 历史搜索打开即带入上一条 prompt，且计数为全历史条数
+  - #1618 TUI 应能解析 CSI-u 键报（vs code 1.140.0）
+  - #1619 5.2.x 会话存储迁移后部分旧会话从 TUI 消失
+  - #1622 webui 在旧内核浏览器（华为浏览器 Chromium 99）中无法正常显示
+  - #1623 webui「登录账号」在 PWA 应用窗口中静默失败
+  - #1624 team 角色缺 permission 字段时每轮对话重复告警刷屏
+  - #1625 webui 服务随 TUI 进程退出而静默停止，桌面客户端无启动引导
+  - #1626 会话 bucket 内的备份子目录被扫描器计入，聊天连接报 HTTP 409 Conflict
+  - #1629 Windows 平台对话过程中 Ctrl+C 复制会导致对话终止
+  - #1630 右键菜单按钮提示遮挡选中内容
+  - #1632 atomcode 无法正常授权
+  - #1633 长会话多次 compact 后模型重发相同 todowrite，连续触发熔断
+  - #1634 执行 skill 时 SKILL.md 全文刷入对话区，应折叠为摘要展示
+  - #1568 添加 Provider 时根据地址拉取模型列表进行选择
+  - #1581 提供 AtomGit 工具的运行时开关
+ReleaseNotesUrl: https://atomgit.com/atomgit_atomcode/atomcode/releases/v5.2.2
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://atomcode.atomgit.com/docs/zh/index.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

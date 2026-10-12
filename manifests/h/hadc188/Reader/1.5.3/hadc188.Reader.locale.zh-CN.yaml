@@ -1,0 +1,65 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: hadc188.Reader
+PackageVersion: 1.5.3
+PackageLocale: zh-CN
+Publisher: hadc188
+PublisherUrl: https://github.com/hadc188
+PublisherSupportUrl: https://github.com/hadc188/reader/issues
+Author: hadc188
+PackageName: Reader
+PackageUrl: https://github.com/hadc188/reader
+License: MIT
+LicenseUrl: https://github.com/hadc188/reader/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 adc
+ShortDescription: 「阅读3.0」（Legado）的跨平台桌面移植版。
+Description: Reader 是一个面向桌面端的本地阅读器：管理自己的书源与书架，也能阅读本地书籍、订阅 RSS，并按喜欢的方式定制阅读界面。它是「阅读3.0」（Legado）的跨平台桌面移植版，支持 Windows、macOS 和 Linux，使用 Rust、Tauri v2 与 Vue 3 构建。
+Tags:
+- epub
+- rss
+- 电子书
+- 笔记
+- 阅读
+- 阅读器
+ReleaseNotes: |-
+  新增
+  书源登录（#7）
+  - 书源管理新增「登录」入口，支持三种方式：书源自带的自定义表单（loginUi，含文本框 / 密码 / 开关 / 下拉 / 按钮）、书源指定的网页登录、手动粘贴 Cookie。
+  - 登录信息与 Cookie 按书源保存在本机，重启后仍然可用；可在登录窗口一键清除。
+  - 修正一处根因：loginUrl 是脚本的书源会被当成网页地址去加载，得到一个 404 空白页并把脚本源码显示在地址栏。现在会区分「登录脚本」与「登录网页」。
+  书源内置浏览器面板
+  - 书源脚本调用 java.showBrowser / java.startBrowserAwait 时弹出应用内面板，支持网页与 HTML 片段、预加载脚本、确认 / 取消。
+  - 书源自带的设置网页支持在页面内点「确认」保存、「取消」保留原值。
+  书源评论
+  - 支持抓取书源评论并缓存。
+  书源 JS 沙盒增强
+  - 补齐 Packages.java.* 兼容层（BigInteger、Arrays、Base64、MessageDigest、SecureRandom、Cipher、字节流、GZIP）与二进制运算，带签名与加解密的书源现在可以运行。
+  - 补上 Rhino 的 JavaImporter + with(importer) 语法。
+  - 脚本请求与正文请求共用同一份 Cookie：脚本里 java.ajax 预热拿到的 Cookie 对后续搜索可见。
+  简繁转换改用 OpenCC（#6）
+  - 原先只有一张简 → 繁字符表，繁体内容选「简体」实际上什么都没做。单字映射也无法处理短语与港台用词。
+  - 现改用 opencc-js（纯 JavaScript，无 WASM / 无原生依赖），取 twp 配置：雷射 → 激光、列印 → 打印、光碟 → 光盘、介面 → 界面、軟體 → 软件。
+  - 仍然只转换文本节点、不改写标签属性，避免正文里的 class / href 被一并改掉而让选择器失效。
+  阅读器
+  - 「页面宽度」现在只控制正文行宽，一屏一栏；窗口更宽时正文居中、两侧留白（#7）。
+  - 支持按书保存阅读配置。
+  - 章节加载失败会给出提示（此前错误只向上抛，界面没有任何反馈）。
+  优化
+  - 透明度滑块步长 5% → 1%，数字改为可直接输入的百分比输入框。
+  - 主操作按钮配色调整：原先「实心主色 + 白字」的对比度约 3.7:1，达不到 WCAG AA，改为淡主色底 + 主色系文字。
+  修复
+  - F11 全屏露出黑边：最大化状态下进全屏会在底部露出任务栏高度的黑边。根因在 tao：WM_NCCALCSIZE 把最大化窗口的客户区钳到了显示器工作区，而窗口本身已是整屏尺寸。上游 tao#1353 已修复但尚未随任何版本发布，因此引入 vendor 副本。同时标题栏的焦点环已消除。
+  - 退出全屏不再有两段动画：黑边修好后不再需要「进全屏前先取消最大化」的变通，退出时不会先窗口化、再最大化两次动画。
+  - 鼠标侧键快捷键失灵：三处真实缺陷 —— 阻挡规则含 button，录入时鼠标必然停在按钮上而录不进侧键；侧键导航在 mouseup 触发而录入只拦了 mousedown；主因是捕获阶段的事件继续冒泡到滚动容器，取消了翻页补间，位置一帧都没动。
+  - 翻页卡顿：每次滚动都会把上千章的目录数组整个序列化写入 localStorage（3000 章时单次约 10ms，一次翻页补间因此阻塞主线程）。改为只保存进度的轻量快照。
+  - 连按 F11 丢按键：修掉切换全屏的 TOCTOU 竞态，切换失败时也不再静默无反馈。
+  - 暗色主题下三处配色回归：更新进度对话框的主色 hover 被同特异度的旧规则覆盖；替换规则的徽标改了底色没改字（暗色下 1.10:1 几乎不可见）；确认对话框的危险按钮 hover 在暗色主题只有 4.13:1。
+  其它
+  - Windows 安装包改名为 Reader-L：productName 会被直接写成 Windows 卸载注册表的键名，原来的 Reader 与 Readwise Reader 相同，导致 winget 把两者当成同一个包。本次仅覆盖 Windows（macOS / Linux 仍用 Reader，避免波及 .app / .dmg / deb 包名与升级路径），并附带旧版数据与卸载项的迁移逻辑。
+  - 版本号 1.5.2 → 1.5.3。
+
+  完整变更：https://github.com/hadc188/reader/compare/v1.5.2...v1.5.3
+ReleaseNotesUrl: https://github.com/hadc188/reader/releases/tag/v1.5.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
