@@ -1,0 +1,30 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: dream-rec.DreamPaper
+PackageVersion: 0.2.0
+PackageLocale: zh-CN
+Publisher: dreampaper
+PublisherUrl: https://github.com/dream-rec
+PublisherSupportUrl: https://github.com/dream-rec/dreampaper/issues
+Author: dream-rec
+PackageName: DreamPaper
+PackageUrl: https://github.com/dream-rec/dreampaper
+License: PolyForm-Noncommercial-1.0.0
+LicenseUrl: https://github.com/dream-rec/dreampaper/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 dream-rec (https://github.com/dream-rec/dreampaper)
+ShortDescription: 在本地生成科研论文插图与学术幻灯片的智能体。
+Description: DreamPaper 是一款在本地运行的科研论文插图与学术幻灯片制作智能体。它以模板驱动，先抽取结构或母版、再填充内容，兼容 OpenAI、Anthropic 等多种模型协议。生成的图片可在工作台中进行修复与裁剪等后期处理并无损导出，支持离线 OCR 文字修复、历史案例记忆与 advisor 版式建议。配置与产物保存在本地。
+Tags:
+- ppt
+- 人工智能
+- 幻灯片
+- 插图
+- 智能体
+- 演示文稿
+- 科研
+- 论文
+ReleaseNotes: 'DreamPaper v0.2.0 工作台全功能落地：OCR 文字修复、裁剪与离线 OCR，并把「阶段 Hook + 案例记忆 + advisor 角色」补齐为显式机制，加入任务评分与多任务页。 本次更新为大版本更新，建议安装更新版本，优化使用体验。 ### 新增 - 图片工作台。左侧导航新增「工作台」页面，可对生成图片做后期修复后导出：矩形 / 椭圆选区自动取主色覆盖背景，并可 OCR 生成可编辑文字层（字体、字号、粗细可调，无粗体字面时按 Skia 风格合成加粗，预览与导出一致）；支持整数像素裁剪、翻转与 100 步撤销；导出由 Rust 权威合成无损 PNG（保留安全的 ICC/sRGB/pHYs 元数据，移除隐私 EXIF）。工程与源图快照去重存储，多版本共享一份源图，保存采用临时文件加原子替换。 - 离线 OCR 辅助进程。原生 OCR 以纯 Rust 辅助进程承载 PP-OCRv6（det/rec + cls，ONNX Runtime CPU），首次使用时按需下载模型并逐文件校验摘要，识别在独立进程执行，不占用主进程；OCR 缺失或下载失败时，取色修补、手工文字与裁剪仍可用。 - 阶段 Hook 上下文注入。流水线的两类接缝现在有了明确定义：事件 Hook（Begin / Delta / Reset / End，驱动 design 日志流式输出）与上下文 Hook（按阶段向 prompt 注入命名 section）。输出契约、内容清单、检索证据、母版契约、结构规划等不再写死在阶段代码里，而是注册到 ContextHooks 链，按 order 稳定排序，契约始终收尾；进度日志中会列出本阶段注入了哪些 Hook。 - 历史案例记忆。任务进入 implement 阶段后，其 design 产物会连同任务指纹（模式 + 标题 + 描述）沉淀到 memory_cases，并以 FTS5 建立全文索引。索引与查询两侧统一改写为 CJK 二元组，中文描述只要部分重叠即可召回；召回时按模式硬过滤，按 bm25 排序，最多取 3 条；重跑任务会排除自身旧案例；删除任务时同步遗忘。 - advisor 角色。召回到相似案例时增加一次 design 调用（roles/advisor.md），比对候选案例后输出可复用版式、术语映射与要避免的失败模式，以「Advisor Suggestions From Similar Cases」section 注入后续设计阶段。没有候选或解析失败时静默跳过，不影响主流程。 - 任务评分 优 / 良 / 差。任务成功后结果卡片可打标签，再点一次取消。评分写入案例记录，advisor 会把 good 案例视作可复用版式、poor 案例视作失败模式来源。 - 多任务页。科研图与幻灯片页面支持最多 8 个任务页，每页独立持有表单与任务；进行中的任务由共享轮询统一刷新，从历史页打开或重跑会定位到对应任务页。 ### 修复 - 配置 ui 显示：修复下拉箭头乱码。 - 超时重试逻辑：默认跟随用户配置信息，超时时间+等待时间，然后重试。 ## 安装文件 | 文件 | 平台 | | --- | --- | | dreampaper-0.2.0-setup.exe | Windows x64 安装版 | | dreampaper-0.2.0-portable.zip | Windows x64 便携版，完整解压后运行 | | dreampaper-0.2.0-x64-mac.dmg | macOS Intel | | dreampaper-0.2.0-arm64-mac.dmg | macOS Apple Silicon | 四类产物均通过最终包内的模型下载、中英文推理、重启后离线识别门禁。OCR 引擎内置，模型首次使用时下载；无需 Python。便携版要求系统已安装 WebView2 Runtime。 macOS 使用 ad-hoc 签名，未做 Developer ID 公证；Windows 未做商业代码签名。Gatekeeper / SmartScreen 可能提示，请仅从本仓库下载。构建部署目标为 macOS 13.0，但现代 CI runner 不代表最低系统实机测试已经完成。 本项目采用 PolyForm Noncommercial License 1.0.0，仅允许非商业使用。'
+ReleaseNotesUrl: https://github.com/dream-rec/dreampaper/releases/tag/v0.2.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
