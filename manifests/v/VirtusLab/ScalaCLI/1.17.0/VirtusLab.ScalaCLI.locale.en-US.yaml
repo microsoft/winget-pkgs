@@ -1,0 +1,166 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: VirtusLab.ScalaCLI
+PackageVersion: 1.17.0
+PackageLocale: en-US
+Publisher: scala-cli@virtuslab.com
+PublisherUrl: https://virtuslab.com/
+PublisherSupportUrl: https://github.com/VirtusLab/scala-cli/issues
+PackageName: Scala CLI
+PackageUrl: https://github.com/VirtusLab/scala-cli
+License: Apache-2.0
+LicenseUrl: https://github.com/VirtusLab/scala-cli/blob/HEAD/LICENSE
+ShortDescription: Scala CLI is a command-line tool to interact with the Scala language.
+Tags:
+- functional
+- java
+- language
+- programming
+- scala
+ReleaseNotes: |-
+  Changed defaults to Scala 3.9.0 LTS & lts tags now point at the 3.9 LTS series
+  Scala 3.9.0 is both the new default Scala version and the first in line of the new Long Term Support series, so the lts version tags
+  (as passed to -S / --scala-version or the //> using scala directive) now resolve to 3.9 rather than 3.3.
+  Additionally, <prefix>.lts tags are now recognised for any supported LTS series, which lets you pin the older 3.3 LTS
+  explicitly.
+  ───────────────────────────────────────┬──────────────┬──────────────
+  Tag                                    │Before        │After
+  ───────────────────────────────────────┼──────────────┼──────────────
+  lts, 3.lts                             │3.3.8         │3.9.0
+  ───────────────────────────────────────┼──────────────┼──────────────
+  lts.rc, 3.lts.rc                       │latest 3.3 RC │latest 3.9 RC
+  ───────────────────────────────────────┼──────────────┼──────────────
+  lts.nightly, 3.lts.nightly             │3.3 nightly   │3.9 nightly
+  ───────────────────────────────────────┼──────────────┼──────────────
+  3.3.lts, 3.3.lts.rc, 3.3.lts.nightly   │not recognised│the 3.3 series
+  ───────────────────────────────────────┼──────────────┼──────────────
+  3.9.lts, 3.9.lts.rc, 3.9.lts.nightly   │not recognised│the 3.9 series
+  ───────────────────────────────────────┼──────────────┼──────────────
+  3.7.lts (and other non-LTS             │not recognised│not recognised
+  <prefix>.lts)                          │              │
+  ───────────────────────────────────────┴──────────────┴──────────────
+  scala-cli -e 'println(scala.util.Properties.versionNumberString)' -S lts
+  # Compiling project (Scala 3.9.0, JVM (25))
+  # Compiled project (Scala 3.9.0, JVM (25))
+  # 3.9.0
+  scala-cli -e 'println(dotty.tools.dotc.config.Properties.simpleVersionString)' -S 3.3.lts --with-compiler
+  # Compiling project (Scala 3.3.8, JVM (25))
+  # Compiled project (Scala 3.3.8, JVM (25))
+  # 3.3.8
+  Added by @Gedochao in #4442 and #4443
+  JEP 512 flexible main methods
+  Scala CLI now recognises and launches JEP 512 main methods when targeting the JVM:
+  static or instance main methods, with or without a String array parameter, and regardless of whether they are
+  public. This requires JDK 25 or newer (or JDK 21+ with the --enable-preview Java option), and works for both Scala and Java sources.
+  //> using jvm 25
+  class HelloJep512:
+    def main(): Unit = println("Hello from a JEP 512 instance main!")
+  scala-cli run HelloJep512.scala
+  # Hello from a JEP 512 instance main!
+  On JDK 21 through 24 the same code runs as long as preview features are enabled:
+  //> using jvm 21
+  //> using javaOpt --enable-preview
+  class HelloJep512:
+    def main(): Unit = println("Hello on JDK 21 preview")
+  Such main methods are also detected when inherited from a Java class or interface:
+  //> using jvm 25
+  public abstract class Greeter {
+    void main() {
+      System.out.println("Hello from an inherited JEP 512 instance main!");
+    }
+  }
+  public class HelloJava extends Greeter {}
+  scala-cli run java-demo --main-class HelloJava
+  # Hello from an inherited JEP 512 instance main!
+  On older JDKs detection still happens, so instead of a bare No main class found you now get an actionable message:
+  [error]  No main class found
+  Class Hello declares a main method that requires JDK 25 or newer (JEP 512); the current JVM is 17.
+  Note: the default package bootstrap launcher cannot launch JEP 512 main methods as of yet, use --assembly or --library
+  instead. Scala.js and Scala Native are not supported for those, either.
+  Added by @Gedochao and @warcholjakub in #4418, #4425, #4424 and #4430
+  Individual files as resources
+  It is now possible to pass individual files (and not only directories) as resources via the --resource command line option and the //> using resource. A file passed this way lands at the root of the class path under its own name.
+  Hello from an individual resource file!
+  object ReadResource:
+    def main(args: Array[String]): Unit =
+      val stream = getClass.getClassLoader.getResourceAsStream("greeting.txt")
+      println(scala.io.Source.fromInputStream(stream).mkString.trim)
+  scala-cli run ReadResource.scala --resource greeting.txt
+  # Hello from an individual resource file!
+  Note that a single file can now also be passed to the old --resource-dir option and //> using resourceDir directive.
+  scala-cli run ReadResource.scala --resource-dir greeting.txt
+  # Hello from an individual resource file!
+  Added by @Gedochao in #4428
+  Library JARs from -d destinations ending with .jar
+  When the destination passed to -d / --compilation-output ends with .jar, Scala CLI now packages the compilation
+  results as a library JAR (the same contents as package --library) rather than writing class files into a directory
+  of that name. This mirrors scalac -d out.jar, so it does not require --power.
+  object Greeter:
+    def greeting: String = "Hello from a packaged library JAR!"
+  scala-cli compile Greeter.scala -d greeter.jar
+  scala-cli -e 'println(Greeter.greeting)' --extra-jars greeter.jar
+  Added by @Gedochao in #4426
+  The //> using exclude directive in .sc scripts
+  The //> using exclude directive used to be accepted only in the project.scala configuration file. It can now live
+  in any .sc script instead — still in just one place per project, so it stays unambiguous. When both a project.scala
+  and scripts declare excludes, the outermost project.scala wins.
+  this is not valid Scala at all
+  //> using exclude broken.scala
+  println("Hello from a script declaring an exclude directive!")
+  scala-cli run script-demo
+  Added by @Gedochao in #4429 and #4437
+  Features
+  - Support JEP 512 flexible main methods on JDK 25+ / JDK21+ with --enable-preview by @Gedochao in #4418
+  - Auto detect user-created main methods in classes named with the *$_ suffix by @Gedochao in #4424
+  - Package --library JAR files when -d is set to a *.jar path by @Gedochao in #4426
+  - Allow the //> using exclude directive in an .sc script rather than just project.scala (but still only one place) by @Gedochao in #4429
+  - fix: non-public main detection (JEP 512) by @warcholjakub in #4430
+  - Add support for passing individual files as resources by @Gedochao in #4428
+  - Auto detect main methods inherited from Java sources (including JEP 512 ones) by @Gedochao in #4425
+  - Switch lts tags to Scala 3.9 series by @Gedochao in #4443
+  Fixes
+  - fix: reject malformed toolkit coordinates by @warcholjakub in #4427
+  - Strip -scalajs from scaladoc invocation by @halotukozak in #4431
+  - Revert #4431 & add gated test for Scala 3.6.3+ by @Gedochao in #4435
+  - Make exclude order prefer outermost project.scala by @Gedochao in #4437
+  - Fix REPL on JDK 24+ for Scala versions with split JLine modules by @lrytz in #4436
+  Build and internal changes
+  - Maintenance/agents tests by @Gedochao in #4414
+  - Split CI down into smaller workflows by @Gedochao in #4420
+  Updates
+  - Bump the npm-dependencies group in /website with 5 updates by @dependabot[bot] in #4408
+  - Update jsoup to 1.23.1 by @scala-steward in #4409
+  - Update scala-cli.sh launcher for 1.16.0 by @github-actions[bot] in #4407
+  - Bump undici from 7.28.0 to 7.29.0 in /website by @dependabot[bot] in #4411
+  - Bump fast-uri from 3.1.4 to 3.1.5 in /website by @dependabot[bot] in #4412
+  - Bump brace-expansion from 1.1.16 to 1.1.18 in /website by @dependabot[bot] in #4413
+  - Update jsoniter-scala-core, ... to 2.40.1 by @scala-steward in #4415
+  - Update sbt to 2.0.5 by @scala-steward in #4416
+  - Update munit to 1.3.5 by @scala-steward in #4417
+  - Bump Scala 3 Next RC to 3.9.0-RC5 by @Gedochao in #4419
+  - Bump js-yaml from 4.3.0 to 4.3.1 in /website by @dependabot[bot] in #4421
+  - Bump nanoid from 3.3.16 to 3.3.18 in /website by @dependabot[bot] in #4423
+  - Update sloth-core to 0.1.0-M2 by @scala-steward in #4422
+  - Update jimfs to 1.3.2 by @scala-steward in #4433
+  - Update guava to 33.7.1-jre by @scala-steward in #4432
+  - Update Scala 3 Next RC to 3.9.0-RC6 by @scala-steward in #4434
+  - Update bloop-rifle_2.13 to 2.1.2 by @scala-steward in #4438
+  - Bump the npm-dependencies group in /website with 2 updates by @dependabot[bot] in #4439
+  - Update jsoup to 1.23.2 by @scala-steward in #4440
+  - Bump Scala 3 Next to 3.9.0 by @Gedochao in #4442
+  - Bump Scala Next RC to 3.10.0-RC1 by @Gedochao in #4444
+  - Bump fast-uri from 3.1.5 to 3.1.7 in /website by @dependabot[bot] in #4446
+  - Bump browserslist from 4.28.1 to 4.28.8 in /website by @dependabot[bot] in #4447
+  - Update announced Scala 3 Next to 3.9.0 by @scala-steward in #4450
+  - Update metaconfig-typesafe-config to 0.18.8 by @scala-steward in #4451
+  - Update munit to 1.3.6 by @scala-steward in #4452
+  - Update scalafix-interfaces to 0.14.8 by @scala-steward in #4454
+  New Contributors
+  - @warcholjakub made their first contribution in #4427
+  - @halotukozak made their first contribution in #4431
+  - @lrytz made their first contribution in #4436
+  Full Changelog: v1.16.0...v1.17.0
+ReleaseNotesUrl: https://github.com/VirtusLab/scala-cli/releases/tag/v1.17.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
