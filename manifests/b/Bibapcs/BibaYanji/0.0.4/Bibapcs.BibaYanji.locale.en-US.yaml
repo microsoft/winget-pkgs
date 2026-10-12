@@ -1,0 +1,37 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: Bibapcs.BibaYanji
+PackageVersion: 0.0.4
+PackageLocale: en-US
+ShortDescription: Hardware verification tool for new or second-hand laptops
+Description: |-
+  A hardware verification tool for newly purchased or second-hand PCs: one-click collection of CPU, GPU, RAM, storage, network adapter, display (including estimated color gamut), and battery information for manual cross-checking against order specifications. Mark as passed once verified (the dot on the left navigation turns green).
+  All hardware data collection is based on open-source components and native Windows APIs, completely free of closed-source commercial software.
+
+  Features
+
+  - Spec Verification: Automatically collects info in the background upon entering the page (smooth UI without freezing, with staged progress indicators), displayed in grouped cards. Click "Verified and Pass" after checking:
+    - CPU: Model, core/thread count
+    - GPU: Model, VRAM (read directly via NVAPI/ADL or registry qwMemorySize to avoid WMI >4 GB overflow issues), driver version
+    - RAM: Total capacity, actual running frequency (current BIOS configured value); detailed per-stick info (slot/rated and actual frequency/manufacturer/part number) collapsed under "Details"
+    - Storage: Capacity, drive letter(s) (C:/D:, etc.; multiple drive letters on a single disk are listed side by side), model, health status, power-on hours (read directly from SMART, requires administrator privileges; displays "Unknown" if unreadable)
+    - Network Adapter: Model (all physical network adapters, consistent with Device Manager)
+    - Display: Resolution, refresh rate, size (diagonal inches), panel name, color gamut — estimated sRGB / DCI-P3 volume ratio derived from EDID chromaticity coordinates (panel gamut points may exceed the standard gamut, so values can be >100%; represents volume ratio, not coverage)
+    - Battery: Design capacity, full charge capacity, wear level (health), cycle count — using the same source as powercfg /batteryreport (battery class driver IOCTL / root\WMI battery class); unreadable items display "Unavailable", and non-battery devices display a prompt
+  - Keyboard Test: Full-size ANSI 104-key visual keyboard with real-time feedback on physical key presses (highlights on press, turns green on release), displays "Tested X / 104" progress, supports reset; keys not present on laptops (such as the numeric keypad) can simply be left gray
+  - Dead Pixel Test: Full-screen solid color inspection after selecting a monitor (White → Red → Green → Blue → Black). Switch colors with any key or mouse click, press Esc to exit; supports multi-monitor testing screen-by-screen to check for dead, bright, or dark pixels
+  - Audio & Video Test: Camera (device selection + real-time preview, automatically closes upon leaving the page), Microphone (real-time level meter animation + record/playback), Speaker (device selection + sample audio playback); one-click pass after verifying all three items
+  - Stress Test: Three modes available: CPU-only (prime95, compiled from GIMPS source for this project) / GPU-only (FurMark donut, reimplemented with C# / OpenTK) / CPU+GPU dual stress test; customizable FurMark resolution/fullscreen/anti-aliasing and prime95 thread count/FFT modes, with real-time elapsed time display; 4-channel real-time line charts for monitoring (CPU temp/power, GPU temp/power, polled every 2s via LibreHardwareMonitor; CPU monitoring requires the PawnIO kernel driver—a one-click silent installer with an official signature is provided on the page if not installed, ready to use immediately without rebooting); "Show UI" can be toggled off (stress test processes run entirely windowless in the background with identical load); execution log box records start/stop/crash events; multiple safety fallbacks on stop/tab switch/exit ensure no orphaned background stress test processes remain
+  - Disk Benchmark: Integrated CrystalDiskMark source (engine compiled as-is into a CdmHost console host + custom diskspd subprocess, completely windowless throughout), runs four tests on the target drive: SEQ1M Q8T1 sequential read/write + RND4K Q1T1 random read/write (1 GiB random data × 5 passes); result JSON and log CSV are saved in %APPDATA%\YanJi\disk_result (results folder can be opened directly from the page with one click)
+  - Dark/Light theme switching (follows system default), with the left navigation bar showing the completion status of each inspection item (green dot + ✓)
+  - Automatically navigates to the next uncompleted module upon clicking "Pass" in each module, with a completion prompt displayed in the navigation area once all are finished
+  - "Re-detect" in Spec Verification and "Reset" in Keyboard Test allow re-checks at any time (clears the passed status for a fresh verification)
+  - Modular Plugin Architecture: Every inspection module above is an independent plugin (located under plugins\ in the program directory); the installation wizard allows selective module installation; the "Plugin Management" menu in the top bar supports importing zip plugin packages (batch multi-selection supported since v0.0.2) and deleting plugins (loaded immediately upon import; deletion/overwriting completed automatically via restart), with component credits displayed per module (credits are tied to plugins and will disappear if the module is deleted). For plugin development, see AGENTS.md in the root directory
+Tags:
+- benchmark
+- hardware
+- hardware-info
+- laptop
+ManifestType: locale
+ManifestVersion: 1.12.0
