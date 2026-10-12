@@ -1,0 +1,36 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: try2love.CodexMobileBridge
+PackageVersion: 1.3.0
+PackageLocale: en-US
+ShortDescription: A local gateway that continues desktop Codex App chats in a mobile browser.
+Description: |-
+  Continue existing chats in the desktop Codex App from your phone browser, or create an empty chat in a saved project.
+  The phone and desktop use the same chat. Read replies, send messages, choose models and Skills, and respond to pending confirmations. Local tasks continue on the original computer; SSH tasks continue on the original server. Each chat keeps its model provider and authentication settings.
+  Your phone does not need to sign in to the same OpenAI account as the desktop. The gateway has its own username/password login and an explicit passwordless option. Connect over LAN, a temporary HTTPS tunnel, or your own reverse proxy.
+  Community project, not affiliated with OpenAI. Supports macOS and Windows and depends on internal Codex App IPC. See verification records for what was actually tested. App updates may require compatibility changes.
+
+  Edit, branch and copy messages
+  - Copy user messages from their action row. Choose Edit and resend on the latest user message, or Edit in new branch on an older message to keep the original conversation.
+  - Choose Branch from here under a completed answer. The new chat keeps history through that turn and waits for your next message. Chat details link back to the source.
+  - Copy complete replies as Markdown or copy an individual code block. Long replies load their full text. When clipboard access is unavailable, selectable text supports the system Copy action.
+  - In-place editing requires the turn to be stopped and generates a new answer. Editing and branching do not undo file changes; both chats share the working directory.
+  - Branching requires a Codex runtime with turn-specific forking and deferred goal continuation; older versions show an update prompt. Copying and latest-message editing do not require those fork capabilities. Creating a branch does not send a model request.
+  - If delivery is uncertain, check the chat list first; repeating the same request does not replay it. If a branch was created but could not connect, the replacement remains an edit draft for that branch.
+Tags:
+- remote
+- remote-access
+- remote-connection
+ReleaseNotes: |-
+  v1.3.0 adds multiple accounts, custom API connections and experimental Ubuntu support.
+  - Add official ChatGPT accounts, custom APIs or existing local configurations in the Bridge desktop app. Switch saved connections on desktop or Web. Switching restarts Codex while keeping the Bridge gateway online; active tasks and pending approvals block switching, and failures restore the previous configuration.
+  - Keep the active connection first and show official quota and reset credits beside each account. Quota loads on first opening, refreshes every five minutes while visible, and resets its timer after a manual query.
+  - Discover upstream API models or enter an ID manually. API requests use the configured endpoint; Web chat model pickers use the chat's upstream instead of the default GPT catalog. An unavailable old model requires an explicit selection and Apply. The upstream must support the Responses API.
+  - Preserve supported computer-use approval scopes, including conversation and persistent approval.
+  - Ship native Ubuntu x64/ARM64 DEB and AppImage packages, with native CI installation and isolated gateway checks. Linux remains experimental; specific Codex desktop IPC, Wayland/FUSE and other distributions need real-device testing.
+  - Fix mobile switching over LAN HTTP and stale disconnected-task blockers; keep account controls and quota in a compact, consistent location.
+  Upgrade: Mac/Windows v1.1.0–v1.2.2 users can choose App updates → Update and restart, then refresh the browser. Older Windows clients should stop and quit before installing over the existing location. Linux requires a manual upgrade after stopping the gateway and quitting the app. Keep the data directory to retain settings and saved connections.
+  Mac packages are ad-hoc signed, not Apple-notarized; Windows packages have no certificate signature. Verify downloads with SHA256SUMS.txt; Mac/Windows in-app updates use the signed manifest. Windows ARM and 32-bit Linux ARM are not included.
+ManifestType: locale
+ManifestVersion: 1.12.0

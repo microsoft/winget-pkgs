@@ -1,0 +1,50 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: try2love.CodexMobileBridge
+PackageVersion: 1.3.0
+PackageLocale: zh-CN
+Publisher: try2love
+PublisherUrl: https://github.com/try2love
+PublisherSupportUrl: https://github.com/try2love/codex-mobile-bridge/issues
+PackageName: Codex Mobile Bridge
+PackageUrl: https://try2love.github.io/codex-mobile-bridge/
+License: MIT
+LicenseUrl: https://github.com/try2love/codex-mobile-bridge/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 try2love
+ShortDescription: 在手机浏览器里继续电脑 Codex App 已有聊天的本地网关。
+Description: |-
+  在手机浏览器里，继续电脑 Codex App 已有的聊天，或在已保存项目中新建聊天。
+  手机与电脑打开同一个会话，查看回复、发送消息、选择模型与 Skill、回应待确认操作。本地任务继续在原电脑执行，SSH 任务继续在原服务器执行；模型请求沿用该会话的提供商与认证配置。
+  不要求手机登录与电脑相同的 OpenAI 账号。 网关提供独立的账号密码登录，也支持显式开启免密访问。可以通过局域网、临时 HTTPS 隧道或自己的反向代理连接。
+  社区项目，与 OpenAI 无隶属关系。支持 macOS 和 Windows，依赖 Codex App 的内部 IPC；各平台的实测范围见 验证记录。App 更新后可能需要适配。
+
+  消息编辑、分支与复制
+  - 用户消息下方可复制内容。最近一条选择「编辑并重新发送」；更早的消息选择「编辑并新建分支」，原会话保留。
+  - 已完成的回答下选择「从这里分支」，新会话保留截至该轮的历史，等待你继续输入。聊天详情中可返回来源会话。
+  - 回复支持完整 Markdown 复制，代码块单独复制；长回复自动读取完整正文。浏览器限制剪贴板时显示可选中的文本，支持系统复制操作。
+  - 原地编辑要求任务已停止，会重新生成回答。编辑和分支不会撤销既有文件修改；新旧会话共享工作目录。
+  - 分支需要 Codex 运行时同时支持指定轮次与目标续跑延迟；旧版会提示更新 Codex App。复制与最近消息编辑不受此分支能力限制。创建分支不会主动发送模型请求。
+  - 结果不确定时先检查聊天列表，重复提交同一请求不会再次执行。分支已创建但连接失败时，修改保留为该分支的编辑草稿。
+Tags:
+- codex
+- 远程
+- 远程访问
+- 远程连接
+ReleaseNotes: |-
+  v1.3.0 · 多账号、API 接入与 Ubuntu 支持
+  本次更新
+  - 账号与接入：仅在 Bridge 桌面端添加多个官方 ChatGPT 账号、自定义 API，或扫描导入本机已有配置；桌面端与 Web 均可切换已保存接入。切换会重启官方 Codex 桌面应用，Bridge 网关保持运行。运行中、等待确认或发送结果未确定的任务会阻止切换；失败时恢复原配置。
+  - 额度集中展示：当前接入置顶并禁用重复切换，官方账号旁紧凑显示剩余额度和重置卡数量。首次打开自动查询，页面可见时每五分钟更新；点击“查看剩余额度”立即查询并重新计时。重置操作保留单独确认。
+  - API 配置与模型：支持获取上游模型和手动输入模型 ID；修复切换 API 后仍向官方地址请求的问题。网页聊天按原提供商和执行主机读取上游模型，旧模型不在列表时提示重新选择并应用；查询失败不会退回默认 GPT 列表。上游仍需兼容 Responses API。
+  - Computer use 授权：网页根据桌面实际请求显示支持的授权范围，并传递“允许此对话”或“始终允许”的选择，避免把持续授权错误处理为单次允许。
+  - Ubuntu x64 / ARM64（实验性）：新增原生 .deb 与 AppImage，适配运行时发现、桌面启动和网络接口选择。各架构由原生 CI 验证安装、启动、登录、通知和隔离网关；具体 Codex 桌面版本的 IPC、Wayland/FUSE 与其他发行版仍需实机验证。
+  - 界面与切换修复：网页固定显示当前接入入口，移除桌面“反馈问题”和“贡献代码”按钮；修复局域网 HTTP 下手机切换未发出请求，以及断开的旧任务状态误阻止切换。
+  安装与升级
+  提供 Apple Silicon / Intel Mac 的 DMG 和 ZIP、Windows x64 的 Setup.exe 和 ZIP，以及 Ubuntu x64 / ARM64 的 .deb 和 AppImage。Windows ARM 和 32 位 Linux ARM 不在支持范围内。
+  Mac / Windows v1.1.0–v1.2.2 用户可在“应用更新”选择“更新并重启”，随后刷新网页。较老的 Windows 版本请先停止网关并退出，再用新版 Setup.exe 安装到原位置。Linux 暂不支持应用内更新，请停止网关并退出 App 后手动安装或替换 AppImage。保留数据目录即可保留登录、网络、通知、关注聊天和已保存接入。
+  Mac 包采用 ad-hoc 完整性签名，未获 Apple 公证；Windows 包未做证书签名。下载可用 SHA256SUMS.txt 校验，Mac / Windows 应用内更新使用签名的 bridge-update.json。
+  账号凭据保存在本机受权限保护的文件中。添加和管理凭据不开放给 Web；切换不修改聊天历史。使用说明见账号与接入和 Linux 文档。
+ReleaseNotesUrl: https://github.com/try2love/codex-mobile-bridge/releases/tag/v1.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
