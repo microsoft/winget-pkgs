@@ -9,13 +9,16 @@ param(
     [ValidateRange(20, 120)]
     [int] $WaitSeconds = 60,
 
-    [switch] $StandardUser
+    [switch] $StandardUser,
+
+    [switch] $RunnerControl
 )
 
 $ErrorActionPreference = 'Stop'
 if ($env:GITHUB_ACTIONS -ne 'true') {
     throw 'Run this account-creating diagnostic only on a disposable GitHub-hosted runner.'
 }
+if ($RunnerControl -and -not $StandardUser) { throw 'RunnerControl is only valid for the worker mode.' }
 New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
 
 if (-not $StandardUser) {
@@ -50,7 +53,7 @@ if (-not $StandardUser) {
         }
         $credential = [PSCredential]::new("$env:COMPUTERNAME\$userName", $securePassword)
         $pwsh = (Get-Process -Id $PID).Path
-        $arguments = "-NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File `"$root\worker.ps1`" -StandardUser -MsixPath `"$root\package.msix`" -OutputDirectory `"$workerOutput`" -WaitSeconds $WaitSeconds"
+        $arguments = "-NoLogo -NoProfile -NonInteractive -STA -ExecutionPolicy Bypass -File `"$root\worker.ps1`" -StandardUser -MsixPath `"$root\package.msix`" -OutputDirectory `"$workerOutput`" -WaitSeconds $WaitSeconds"
         $process = Start-Process -FilePath $pwsh -ArgumentList $arguments -Credential $credential `
             -LoadUserProfile -WorkingDirectory $root -PassThru `
             -RedirectStandardOutput (Join-Path $workerOutput 'stdout.log') `
@@ -80,7 +83,7 @@ if (-not $StandardUser) {
 $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
 $principal = [Security.Principal.WindowsPrincipal]::new($identity)
 $isAdmin = $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-if ($isAdmin) { throw 'Worker must run as a non-elevated standard user.' }
+if ($isAdmin -and -not $RunnerControl) { throw 'Worker must run as a non-elevated standard user.' }
 
 $start = Get-Date
 $results = [Collections.Generic.List[object]]::new()
@@ -92,7 +95,8 @@ $log = Join-Path $OutputDirectory 'worker.log'
 Start-Transcript -Path $log | Out-Null
 
 try {
-    "Non-elevated user confirmed. Process architecture: $([Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture)"
+    "Account mode: $(if ($RunnerControl) { 'runner-control' } else { 'standard-user' }); elevated: $isAdmin"
+    "Process architecture: $([Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture)"
     "Session: $((Get-Process -Id $PID).SessionId); interactive: $([Environment]::UserInteractive)"
     "This is a reproduction approximation, not Microsoft's private validation harness."
     $localAppData = [Environment]::GetFolderPath([Environment+SpecialFolder]::LocalApplicationData)
@@ -112,13 +116,36 @@ public static class TinyClipsValidationWindow
 {
     [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr window, int command);
     [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr window);
+
+    [ComImport, Guid("2E941141-7F97-4756-BA1D-9DECDE894A3D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    private interface IActivationManager
+    {
+        [PreserveSig] int ActivateApplication(
+            [MarshalAs(UnmanagedType.LPWStr)] string appId,
+            [MarshalAs(UnmanagedType.LPWStr)] string arguments,
+            uint options, out uint processId);
+    }
+
+    public static uint Activate(string appId)
+    {
+        var type = Type.GetTypeFromCLSID(new Guid("45BA127D-10A8-46EA-8AB7-56EA9078943C"), true);
+        var manager = (IActivationManager)Activator.CreateInstance(type);
+        try
+        {
+            uint processId;
+            Marshal.ThrowExceptionForHR(manager.ActivateApplication(appId, null, 2, out processId));
+            return processId;
+        }
+        finally { Marshal.ReleaseComObject(manager); }
+    }
 }
 '@
 
     foreach ($scenario in @(
         @{ Name = 'unrelated-directory'; Directory = $workingDirectory },
         @{ Name = 'e-root'; Directory = 'E:\' },
-        @{ Name = 'e-drive-relative'; Directory = 'E:' }
+        @{ Name = 'e-drive-relative'; Directory = 'E:' },
+        @{ Name = 'registered-activation-control'; Directory = $null }
     )) {
         $ownedProcesses.Clear()
         $scenarioStart = Get-Date
@@ -131,12 +158,20 @@ public static class TinyClipsValidationWindow
             "Scenario $($scenario.Name): $($package.PackageFullName); cwd=$($scenario.Directory)"
 
             $exe = Join-Path $package.InstallLocation 'TinyClips.App.exe'
+            $launchMethod = if ($scenario.Directory) { 'ShellExecute' } else { 'registered-AUMID' }
             foreach ($launch in @('first', 'second')) {
-                $info = [Diagnostics.ProcessStartInfo]::new()
-                $info.FileName = $exe
-                $info.WorkingDirectory = $scenario.Directory
-                $info.UseShellExecute = $true
-                $process = [Diagnostics.Process]::Start($info)
+                if ($scenario.Directory) {
+                    $info = [Diagnostics.ProcessStartInfo]::new()
+                    $info.FileName = $exe
+                    $info.WorkingDirectory = $scenario.Directory
+                    $info.UseShellExecute = $true
+                    $process = [Diagnostics.Process]::Start($info)
+                }
+                else {
+                    $appId = "$($package.PackageFamilyName)!App"
+                    $activatedPid = [TinyClipsValidationWindow]::Activate($appId)
+                    $process = Get-Process -Id $activatedPid
+                }
                 $null = $process.Handle
                 $ownedProcesses.Add($process)
                 "Launched $launch instance; PID $($process.Id)"
@@ -163,7 +198,8 @@ public static class TinyClipsValidationWindow
                 $results.Add([pscustomobject]@{
                     Scenario = $scenario.Name
                     WorkingDirectory = $scenario.Directory
-                    LaunchMethod = 'ShellExecute'
+                    AccountMode = if ($RunnerControl) { 'runner-control' } else { 'standard-user' }
+                    LaunchMethod = $launchMethod
                     Launch = if ($index -eq 0) { 'first' } else { 'second' }
                     Status = $status
                     ExitCode = $code
@@ -175,7 +211,12 @@ public static class TinyClipsValidationWindow
         }
         catch {
             $failure = $true
-            $results.Add([pscustomobject]@{ Scenario = $scenario.Name; Status = 'harness-or-install-error'; Error = $_.ToString() })
+            $results.Add([pscustomobject]@{
+                Scenario = $scenario.Name
+                AccountMode = if ($RunnerControl) { 'runner-control' } else { 'standard-user' }
+                Status = 'harness-or-install-error'
+                Error = $_.ToString()
+            })
             Write-Warning $_
         }
         finally {

@@ -37,6 +37,7 @@ jobs:
           persist-credentials: false
 
       - name: Download and verify the submitted signed package
+        id: package
         shell: pwsh
         run: |
           $manifest = Get-Content 'manifests\r\Refractored\TinyClips\1.8.2.0\Refractored.TinyClips.installer.yaml' -Raw
@@ -53,7 +54,15 @@ jobs:
         shell: pwsh
         run: |
           & .\Tools\TinyClipsValidation.ps1 -MsixPath (Resolve-Path package.msix).Path `
-            -OutputDirectory (Join-Path $env:GITHUB_WORKSPACE 'diagnostics') -WaitSeconds 60
+            -OutputDirectory (Join-Path $env:GITHUB_WORKSPACE 'diagnostics\standard-user') -WaitSeconds 60
+
+      - name: Runner-account control (not a standard-user result)
+        if: always() && steps.package.outcome == 'success'
+        shell: pwsh
+        run: |
+          & .\Tools\TinyClipsValidation.ps1 -StandardUser -RunnerControl `
+            -MsixPath (Resolve-Path package.msix).Path `
+            -OutputDirectory (Join-Path $env:GITHUB_WORKSPACE 'diagnostics\runner-control') -WaitSeconds 60
 
       - name: Upload text diagnostics only
         if: always()
@@ -61,8 +70,8 @@ jobs:
         with:
           name: tinyclips-validation-${{ matrix.arch }}
           path: |
-            diagnostics/*.json
-            diagnostics/*.log
-            diagnostics/*.txt
+            diagnostics/**/*.json
+            diagnostics/**/*.log
+            diagnostics/**/*.txt
           if-no-files-found: warn
           retention-days: 7
