@@ -1,0 +1,68 @@
+name: Tiny Clips winget reproduction
+
+on:
+  push:
+    branches:
+      - diagnostics/tinyclips-arm64-validation
+    paths:
+      - .github/workflows/tinyclips-arm64-validation.yml
+      - Tools/TinyClipsValidation.ps1
+
+permissions:
+  contents: read
+
+jobs:
+  reproduce:
+    if: github.repository == 'jamesmontemagno/winget-pkgs'
+    name: Standard-user launch (${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            runner: windows-11-arm
+          - arch: x64
+            runner: windows-latest
+    env:
+      ARCH: ${{ matrix.arch }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          sparse-checkout: |
+            Tools/TinyClipsValidation.ps1
+            manifests/r/Refractored/TinyClips/1.8.2.0
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Download and verify the submitted signed package
+        shell: pwsh
+        run: |
+          $manifest = Get-Content 'manifests\r\Refractored\TinyClips\1.8.2.0\Refractored.TinyClips.installer.yaml' -Raw
+          $block = [regex]::Match($manifest, "(?ms)^- Architecture: $env:ARCH\r?\n(?<installer>.*?)(?=^- Architecture:|\z)")
+          if (-not $block.Success) { throw "No $env:ARCH installer in the submitted manifest." }
+          $url = [regex]::Match($block.Groups['installer'].Value, '(?m)^\s+InstallerUrl:\s*(\S+)').Groups[1].Value
+          $expected = [regex]::Match($block.Groups['installer'].Value, '(?m)^\s+InstallerSha256:\s*([a-fA-F0-9]{64})').Groups[1].Value
+          if (-not $url -or -not $expected) { throw 'Installer URL or hash is missing.' }
+          Invoke-WebRequest -Uri $url -OutFile package.msix
+          if ((Get-FileHash package.msix -Algorithm SHA256).Hash -ine $expected) { throw 'Package SHA256 does not match the submitted manifest.' }
+          "Testing signed 1.8.2.0 $env:ARCH package; SHA256 verified."
+
+      - name: Install and exercise launches as a standard user
+        shell: pwsh
+        run: |
+          & .\Tools\TinyClipsValidation.ps1 -MsixPath (Resolve-Path package.msix).Path `
+            -OutputDirectory (Join-Path $env:GITHUB_WORKSPACE 'diagnostics') -WaitSeconds 60
+
+      - name: Upload text diagnostics only
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: tinyclips-validation-${{ matrix.arch }}
+          path: |
+            diagnostics/*.json
+            diagnostics/*.log
+            diagnostics/*.txt
+          if-no-files-found: warn
+          retention-days: 7
