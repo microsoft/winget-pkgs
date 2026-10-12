@@ -1,0 +1,122 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Nimbalyst.Nimbalyst
+PackageVersion: 0.77.5
+PackageLocale: en-US
+Publisher: Nimbalyst Team
+PublisherUrl: https://nimbalyst.com/
+PublisherSupportUrl: https://github.com/nimbalyst/nimbalyst/issues
+Author: NIMBALYST, INC.
+PackageName: Nimbalyst
+PackageUrl: https://nimbalyst.com/
+License: MIT
+LicenseUrl: https://github.com/nimbalyst/nimbalyst/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2024-2026 Nimbalyst Inc.
+ShortDescription: An open-source visual workspace for building with Claude Code and Codex.
+Description: |-
+  Nimbalyst is a free, open-source, local visual workspace for building with Claude Code, Codex, and other coding agents. It combines WYSIWYG editors for markdown, mockups, Mermaid, Excalidraw, CSV, data models, and code with parallel session management, task tracking, and git tooling.
+  Features include visual editors where humans and coding agents collaborate on the same files, a kanban-style session manager that links files to sessions, task and bug tracking, AI-assisted commits, worktrees, an embedded terminal, a mobile companion app, and a pluggable extension system for custom editors.
+Moniker: nimbalyst
+Tags:
+- agent
+- agentic
+- ai
+- claude-code
+- codex
+- develop
+- developer-tool
+- development
+- editor
+- ide
+- markdown
+- markdown-editor
+- mcp
+- multi-agent-system
+- opencode
+- wysiwyg-editor
+ReleaseNotes: |-
+  September 9th, 2026 Release
+  New Features
+  - GPT-6 Astra can be selected for Codex sessions, with its Ultra reasoning level.
+  - Agent Files on Right Choose whether Agent mode opens file tabs above the transcript or in the right pane.
+  - Support for multiple folder and repos roots Run multiple repos roots and other folders in a single nimbalyst project.
+  - Database recovery in Settings. Recover preserved database copies and see why a migration is blocked; recovery and rollback keep the original data intact across restarts.
+  - Media Viewer extension. Open and play .mp4 files in a tab, including scrubbing through long recordings.
+  - Document questions. Send a question from a document to your teammates, collect private answers, and let the agent resume once a human settles the outcome. Sent questions show up in Feedback with response progress and links back to each one.
+  - A .deb download for Debian and Ubuntu, which starts on Ubuntu 24.04 and later where the AppImage is blocked by AppArmor's user-namespace restriction.
+  - Decision blocks in documents. Record a decision inline with solo or collaborative voting; the outcome and who voted for it are preserved in the markdown.
+  - Project Graph gains Atlas, Pulse and Evidence Trails, with broader source coverage, saved views, and the ability to explore the sources behind a link.
+  - Radar for shared trackers. A since-you-left digest of teammate activity, status moves, bulk sweeps and stalled work, in both the desktop app and the web console.
+  - Jump to unanswered agent questions, and scroll to new ones automatically.
+  - The Git panel's Changes tab can show every repository in the project at once, each with its own file list and commit box.
+  - A session that launches another session can request the reasoning effort it runs at, rather than leaving it on the app-wide default.
+  Improvements
+  - Commit with AI proposes one commit per repository when your changes span several, so you approve each one separately and each gets its own message.
+  - Project Memory indexes agent instructions and personal memory as separate sources, can use an optional on-device embedding model, and reports semantic-search readiness accurately.
+  - iOS performance and layout fixes releasing to app store soon.
+  - The tracker's Type column can show the type's name instead of its icon.
+  - Database migration no longer times out while copying large document histories, recovers from slow batches, and copies large session tables more efficiently (#1452).
+  Fixed
+  Data and sync
+  - Document sync could delete markdown files from your workspace, including files tracked in git.
+  - Sync connection errors wrote your authentication token to the application log in plain text.
+  - A desktop with a mismatched sync key now pauses session sync and reports the mismatch instead of deleting shared index entries.
+  - Waking from sleep could start a second full database backup while one was still running, so both failed. The backup copies setting now also applies to databases still on the older engine.
+  - Rapid edits to a shared spreadsheet in the web console no longer let an older asynchronous save overwrite the latest cell value.
+  Git and commits
+  - Committing changes that spanned repositories reported files as committed that were never committed, and showed only the first repository's commit hash.
+  - Approving a commit from your phone failed outright when the changes spanned repositories, including the files that could have been committed.
+  - A session running in a worktree silently left out changes in the project's attached folders when committing.
+  - Pull requests were missing from the Git panel when the project is a fork checkout; they now list against the upstream repository (#1439).
+  - The Git tab jumped back to the previously selected repository when you switched between repositories in a multi-repository project.
+  - Git commit details scroll together with the commit list in short panels.
+  - A tracker item closed by a commit recorded the close with no author and an unorderable timestamp, and repeated closes merged into one entry when the item synced.
+  Agents and sessions
+  - Interrupting a turn could let the next queued prompt start alongside the priority prompt that replaced it (#1018).
+  - A background task that finished mid-turn produced no visible follow-up turn, and every tool call in it that needed permission was denied without asking.
+  - Claude Code CLI sessions ignored the custom Claude executable path in settings and reported Claude as not installed (#1296).
+  - The Claude Agent's bundled runtime no longer self-updates out of place; preserved copies are recovered automatically.
+  - A queued prompt containing CJK text could have Enter land mid-paste in a Claude CLI session. An undelivered prompt is now reported as failed instead of marked complete (#1387).
+  - Codex sessions receive the first answer to a question even when the turn that asked it has already ended, and a session's name, tags or phase no longer silently stops updating when a tool call is dropped in transit.
+  - Codex shell edits now appear in file-session links with inferred attribution and live updates.
+  - The effort selector offered reasoning levels the selected Codex model does not accept; choosing Max on those models ran at xHigh without saying so.
+  - A tool call to an extension that stopped responding waited forever instead of failing, leaving the agent stuck with nothing in the logs.
+  - Orchestrating sessions keep up with their children: updates arriving mid-turn are delivered together, a repeat from the same child replaces the earlier one, and coordinating agents read sibling reports without replaying them as extra turns.
+  - A file a child session edited several times was listed once per edit in the parent's Files modified list (#1244).
+  - A session that had previously reached the complete phase stayed out of the menu bar's Running list for the whole of its next turn.
+  - Starting an OpenCode session could wait five minutes before recognizing a server that was already healthy.
+  - Worktrees of a project opened through a symlink did not inherit the project's agent permissions, so every tool call asked for approval again.
+  - Answers typed into an agent's question were lost if you scrolled the conversation far enough to move the question out of view before submitting.
+  Editor and navigation
+  - Applying a heading with Cmd/Ctrl+Alt+1 through 9 switched tabs instead of setting the heading level (#353, contributed by @benoitperrin).
+  - Cmd+B bolds text again when you are typing in an editor, instead of toggling the sidebar.
+  - Typing in a markdown file no longer stutters each time it autosaves in a workspace with a large tracker.
+  - Clicking a markdown link to a file in the same folder did nothing unless the document sat at the top level of the project, and embedded file links now resolve relative to their document, with / for workspace-root paths.
+  - Opening a project from the Project Manager did nothing when the window that project was opened in had since switched to a different project.
+  - Deep links and notifications reveal their destination even when an extension panel is open.
+  - Workstream session tabs scroll in one row with readable names and a new-session button that stays visible when the strip is full.
+  - The New Worktree shortcut on macOS and the Cmd+Shift+K kanban shortcut did nothing.
+  - File quick search opens from the Agent mode file viewer, and slash command results are sorted alphabetically.
+  - Two dollar amounts on different lines of the same paragraph rendered as math, and display math beginning with a number rendered incorrectly in chat.
+  - Embedded mockups repaint after their frame is attached or moved, preventing intermittent blank previews.
+  - Animation MP4 exports finish again, and completed HTML, MP4 and GIF exports are revealed in Finder or Explorer.
+  Trackers
+  - Invalid tracker update requests are rejected instead of changing an unrelated item.
+  - The new-item popup saves typed content as the body, accepts pasted or dropped screenshots, and keeps the draft if creation fails. Items whose creation text was lost to that bug offer the saved description for copy or insertion into the body.
+  - Tracker rows of a custom type showed a blank Type column instead of the icon the type declares.
+  - A tracker item whose title contains a comma showed as two separate values in a relationship column.
+  - tracker_get left out an item's archived state and its comments (#1224).
+  Mobile and web
+  - Opening a session on iOS could show another session's transcript under the correct title.
+  - Files on iOS load large projects reliably and show sync progress and retryable errors.
+  - Project and session lists show loading until sync finishes instead of prematurely reporting that they are empty.
+  - Project Graph keeps loaded data visible instead of repeatedly flashing a blank loading view during startup.
+  - Simple document questions and their selection outlines stay at a readable width on wide screens, with controls that wrap on narrow screens.
+ReleaseNotesUrl: https://github.com/nimbalyst/nimbalyst/releases/tag/v0.77.5
+PurchaseUrl: https://nimbalyst.com/pricing/
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://docs.nimbalyst.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,125 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: rullerzhou-afk.clawd-on-desk
+PackageVersion: 0.6.3
+PackageLocale: en-US
+Publisher: rullerzhou-afk
+PublisherUrl: https://github.com/rullerzhou-afk
+PublisherSupportUrl: https://github.com/rullerzhou-afk/clawd-on-desk/issues
+PackageName: Clawd on Desk
+PackageUrl: https://github.com/rullerzhou-afk/clawd-on-desk
+License: MIT
+LicenseUrl: https://github.com/rullerzhou-afk/clawd-on-desk/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 rullerzhou-afk
+ShortDescription: A pixel desktop pet that watches Claude Code, Codex, Cursor & other AI coding agents — so you don't have to.
+Description: |-
+  Clawd lives on your desktop and reacts to what your AI coding agent is doing — in real time. Start a long task, walk away, come back when the crab tells you it's done.
+  Thinking when you prompt, typing when tools run, juggling subagents, reviewing permissions, celebrating when tasks complete, sleeping when you step away. Ships with two built-in themes: Clawd (pixel crab) and Calico (三花猫), with full support for custom themes.
+  Supports Windows 11, macOS, and Ubuntu/Linux. Requires Node.js. Works with Claude Code, Codex CLI, Copilot CLI, Gemini CLI, Cursor Agent, CodeBuddy, Kiro CLI, and opencode.
+  Features
+  Multi-Agent Support
+  - Claude Code — full integration via command hooks + HTTP permission hooks
+  - Codex CLI — automatic JSONL log polling (~/.codex/sessions/), no configuration needed
+  - Copilot CLI — command hooks via ~/.copilot/hooks/hooks.json
+  - Gemini CLI — command hooks via ~/.gemini/settings.json (registered automatically when Clawd starts, or run npm run install:gemini-hooks)
+  - Cursor Agent — Cursor IDE hooks in ~/.cursor/hooks.json (registered automatically when Clawd starts, or run npm run install:cursor-hooks)
+  - CodeBuddy — Claude Code-compatible command hooks + HTTP permission hooks via ~/.codebuddy/settings.json (registered automatically when Clawd starts, or run node hooks/codebuddy-install.js)
+  - Kiro CLI — command hooks injected into custom agent configs under ~/.kiro/agents/, plus an auto-created clawd agent that is re-synced from Kiro's built-in kiro_default whenever Clawd starts, so you can opt into hooks with minimal behavior drift via kiro-cli --agent clawd or /agent swap clawd (registered automatically when Clawd starts, or run npm run install:kiro-hooks). State hooks have been verified on macOS.
+  - opencode — plugin integration via ~/.config/opencode/opencode.json (registered automatically when Clawd starts); zero-latency event streaming, permission bubbles with Allow/Always/Deny, and building animations when parallel subagents are spawned via the task tool
+  - Multi-agent coexistence — run all agents simultaneously; Clawd tracks each session independently
+  Animations & Interaction
+  - Real-time state awareness — agent hooks and log polling drive Clawd's animations automatically
+  - 12 animated states — idle, thinking, typing, building, juggling, conducting, error, happy, notification, sweeping, carrying, sleeping
+  - Eye tracking — Clawd follows your cursor in idle state, with body lean and shadow stretch
+  - Sleep sequence — yawning, dozing, collapsing, sleeping after 60s idle; mouse movement triggers a startled wake-up animation
+  - Click reactions — double-click for a poke, 4 clicks for a flail
+  - Drag from any state — grab Clawd anytime (Pointer Capture prevents fast-flick drops), release to resume
+  - Mini mode — drag to right edge or right-click "Mini Mode"; Clawd hides at screen edge with peek-on-hover, mini alerts/celebrations, and parabolic jump transitions
+  Permission Bubble
+  - In-app permission review — when Claude Code, CodeBuddy, or opencode request tool permissions, Clawd pops a floating bubble card instead of waiting in the terminal
+  - Allow / deny / agent-native extras — one-click approve or reject, plus permission rules / Always actions when the source agent supports them
+  - Global hotkeys — Ctrl+Shift+Y to Allow, Ctrl+Shift+N to Deny the latest permission bubble (only registered while bubbles are visible)
+  - Stacking layout — multiple permission requests stack upward from the bottom-right corner
+  - Auto-dismiss — if you answer in the terminal first, the bubble disappears automatically
+  - Per-agent toggle — open Settings… → Agents, pick an agent, and turn off Show pop-up bubbles to keep prompts in that agent's own terminal/TUI
+  Session Intelligence
+  - Multi-session tracking — sessions across all agents resolve to the highest-priority state
+  - Subagent awareness — juggling for 1 subagent, conducting for 2+
+  - Terminal focus — right-click Clawd → Sessions menu to jump to a specific session's terminal window; notification/attention states auto-focus the relevant terminal
+  - Process liveness detection — detects crashed/exited supported agent processes and cleans up orphan sessions
+  - Startup recovery — if Clawd restarts while any supported agent is still running, it stays awake instead of falling asleep
+  System
+  - Click-through — transparent areas pass clicks to windows below; only Clawd's body is interactive
+  - Position memory — Clawd remembers where you left it across restarts (including mini mode)
+  - Single instance lock — prevents duplicate Clawd windows
+  - Auto-start — Claude Code's SessionStart hook can launch Clawd automatically if it's not running
+  - Do Not Disturb — right-click or tray menu to enter sleep mode; all hook events are silenced until you wake Clawd. Permission bubbles are suppressed during DND — opencode falls back to its built-in TUI prompt, while Claude Code and CodeBuddy fall back to their built-in permission flow
+  - Sound effects — short audio cues on task completion and permission requests (toggle via right-click menu; 10s cooldown, auto-muted during DND)
+  - System tray — resize (S/M/L), DND mode, language switch, auto-start, check for updates
+  - i18n — English, Chinese, and Korean UI; switch via right-click menu or tray
+  - Auto-update — checks GitHub releases; Windows installs NSIS updates on quit, macOS/Linux git pull + restart when running from a cloned repo
+Tags:
+- claude-code
+- codebuddy
+- codex
+- copilot-cli
+- cursor
+- desktop-pet
+- gemini-cli
+- kiro
+- opencode
+ReleaseNotes: |-
+  v0.6.3
+  New Features
+  - Clawd Doctor - adds a diagnostics modal in Settings for local server health, agent integrations, permission bubble policy, theme health, and live hook connectivity checks. Doctor can copy a redacted diagnostic report, open the debug log, re-run checks, restart Clawd when the local server is unhealthy, and repair supported integration issues such as missing hooks or disabled Codex hook features.
+  - Cloudling built-in theme - ships a third built-in theme with full state coverage, mini-mode assets, direct sleep/DND transitions, pointer-aware idle and mini-eye tracking, theme-specific hitboxes, reaction assets, preview GIFs, state-mapping docs, and bundled source/spec notes for future polish.
+  - Japanese localization (#197) - adds Japanese UI strings across menus, Settings, Dashboard, permission bubbles, Doctor, and a new Japanese README.
+  - Session HUD completion bell (#217) - completed sessions now show an unread bell in the HUD until the row is opened/focused, then the bell reappears on the next completed run.
+  - iTerm2 tab-level focus (#216) - clicking a session can now switch to the matching iTerm2 tab on macOS instead of only raising the iTerm2 window.
+  - Codex permission mode control (#200) - Codex can stay in native mode so AutoReview/native terminal approval remains in charge, or switch to intercept mode for Clawd Allow/Deny bubbles. DND, disabled agents, and disabled bubbles now return no-decision so Codex falls back to its native prompt.
+  - Settings-native Claude hook confirmations (#180) - Claude hook disconnect/disable decisions now happen inside the Settings modal, keeping the hook management flow in one place.
+  - Animation override preview improvements - Settings preview posters now render through an isolated async preview surface, and animation override data merging is split out for safer future changes.
+  - Theme authoring upgrades (#207) - themes can define file-specific hitboxes, users can override wide-hitbox behavior per asset, a Clawd working-typing boss variant asset was added for future theme work, and the theme guide now documents Cloudling's built-in-only scripted SVG runtime boundary.
+  Bug Fixes
+  - AskUserQuestion and elicitation bubbles (#204, #206, #209, #223) - keyboard focus now lands in elicitation bubbles, ArrowUp/ArrowDown can move between preset options and the Other textarea, stale bubbles are dismissed when the user answers in the terminal, initial auto-selection was removed so Enter cannot submit an unread default choice, and Settings now shows the built-in bubble keyboard mappings.
+  - Long permission tool names (#198) - long MCP tool labels now stack below the title, ellipsize cleanly, and marquee on hover instead of wrapping the bubble title into an unreadable column.
+  - Codex desktop cleanup (#192) - stale Codex desktop sessions now emit SessionEnd, preventing long-lived desktop runs from accumulating idle zombie sessions until restart.
+  - Codex subagent handling - official hook role extraction, fallback monitor classification, remote callback handling, and conservative default-role behavior now suppress subagent completion noise instead of incorrectly completing the main session.
+  - Disabled agents during hook sync (#194) - startup integration sync, Claude hook watcher recovery, and hook ingress now respect the agent gate instead of re-syncing or accepting events for disabled agents.
+  - Async Claude hook management (#219) - Claude hook installation, version probing, settings actions, and related UI pending states are now async/serialized to avoid blocking Settings or racing broadcasts.
+  - Mini mode edge-pinned resizing (#213) - resizing now works while the pet is pinned in mini mode, including proportional sizes and cached work-area handling near screen edges.
+  - Session HUD and bubble placement polish - fixes HUD anchoring, keeps update/permission surfaces better aligned with the pet, and avoids stale elicitation or permission UI lingering after terminal-side progress.
+  - Cloudling polish - fixes scripted preview durations, DND sleep transitions, mini sleep glyph mirroring, compact card contrast, mini crabwalk layout, pointer bridge behavior, and several idle/mini eye-follow ranges.
+  - CodeBuddy agent icon (#196) - CodeBuddy sessions now use the official app icon instead of the text fallback.
+  Refactoring & Tests
+  - Doctor internals - diagnostics are split into detector modules, IPC registration, report redaction, log helpers, connection-test activity tracking, and repair actions, with targeted Node tests for each path.
+  - Codex official-hook coverage - adds tests for hook payloads, PermissionRequest behavior, remote monitor state forwarding, subagent field parsing, subagent classification, server callback handling, and ring-buffer diagnostics.
+  - Theme/runtime coverage - expands tests around Cloudling assets, theme loader validation, display hints, file-specific hitboxes, renderer low-power behavior, mini mode, hit geometry, animation cycles, and async preview behavior.
+  - Settings coverage - adds regression coverage for Doctor UI, Codex permission mode, Claude hook actions, shortcut labels, Japanese i18n parity, animation override previews, and controller/store side effects.
+  Docs & Assets
+  - Cloudling docs and previews - README variants now describe three built-in themes, include Cloudling GIF previews, update the state mapping tables, and bundle the multi-monitor demo video locally.
+  - Theme guide refresh - documents built-in theme ids, file-specific hitboxes, updater anchors, mini-working fallback behavior, scripted SVG restrictions, and validation expectations.
+  - Codex/WSL and architecture docs - clarify that Clawd uses Codex official hooks as the primary path with JSONL polling as fallback, explain native/intercept permission behavior, and preserve WSL/remote deployment caveats.
+  - Contributor and README maintenance - contributor tables are collapsed behind localized <details> sections, new contributors are added across README variants and Settings About, and the Japanese README joins the English/Chinese/Korean set.
+  - Artwork notice update - license text now explicitly covers bundled theme assets, including Cloudling.
+  Contributors
+  Huge thanks to everyone who shipped code, design, docs, testing, or review for v0.6.3:
+  - @rullerzhou-afk - Clawd Doctor, Cloudling theme/art/runtime integration, Codex subagent handling, animation preview infrastructure, docs, tests, and release polish
+  - @YOIMIYA66 - Settings-native Claude hook confirmations and async Claude hook management (#180, #219)
+  - @Rladmsrl - Codex desktop stale-session cleanup (#192)
+  - @tongguang2 - disabled-agent gating for startup hook sync and Claude watcher recovery (#194)
+  - @Ziy1-Tan - CodeBuddy icon and AskUserQuestion keyboard/focus fixes (#196, #204, #206)
+  - @tatsuyanakanogaroinc - Japanese UI localization (#197)
+  - @yeonhub - long MCP tool-name permission bubble layout fix (#198)
+  - @PeterShanxin - Codex native permission flow support (#200)
+  - @joshua-wu - stale elicitation cleanup and iTerm2 tab-level focus switching (#209, #216)
+  - @nmsn - mini mode resizing while edge-pinned (#213)
+  - @sunnysonx - Session HUD unread completion bell (#217)
+  Known Limitations
+  - Codex hook coverage is still partial - official hooks are the primary path, but JSONL polling remains necessary for hook-disabled sessions and fallback-only events such as web search, compaction, and aborted turns.
+  - Cloudling scripted SVG support is built-in only - external themes cannot depend on JavaScript inside SVG files; trustedRuntime.scriptedSvgFiles is ignored outside packaged/repo themes.
+  - iTerm2 tab switching is macOS/iTerm2-specific - it depends on matching shell TTY information from the session process chain and falls back to the existing window-focus behavior when a tab cannot be resolved.
+ReleaseNotesUrl: https://github.com/rullerzhou-afk/clawd-on-desk/releases/tag/v0.6.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

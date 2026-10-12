@@ -1,0 +1,163 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: KuestenLogik.Bowire
+PackageVersion: 2.5.0
+PackageLocale: en-US
+Publisher: Küstenlogik
+PublisherUrl: https://kuestenlogik.com
+PublisherSupportUrl: https://github.com/Kuestenlogik/Bowire/issues
+Author: Küstenlogik
+PackageName: Bowire
+PackageUrl: https://github.com/Kuestenlogik/Bowire
+License: Apache-2.0
+LicenseUrl: https://github.com/Kuestenlogik/Bowire/blob/main/LICENSE
+Copyright: Copyright (c) Küstenlogik
+ShortDescription: Interactive multi-protocol API browser and CLI for .NET — gRPC, REST, GraphQL, SignalR, MCP, SSE, WebSocket, MQTT, Socket.IO, OData, Surgewave, Kafka, DIS, UDP.
+Description: |-
+  Bowire is the multi-protocol API workbench. Discover and
+  invoke endpoints across gRPC (with reflection + transcoding), REST
+  (OpenAPI / Swagger), GraphQL, SignalR, MCP, SSE, WebSocket, MQTT,
+  Socket.IO, OData, plus sibling plugins for Küstenlogik Surgewave, Apache
+  Kafka, IEEE 1278 DIS, and raw UDP. Embed it next to your ASP.NET app
+  or run the standalone `bowire` CLI against any host.
+
+  Bowire is 100% local — no accounts, no telemetry, no cloud
+  dependency. Recordings, environments, and credentials persist on
+  disk under `~/.bowire/`.
+Moniker: bowire
+Tags:
+- api
+- api-client
+- api-testing
+- aspnet
+- dotnet
+- graphql
+- grpc
+- http
+- kafka
+- mcp
+- mqtt
+- postman-alternative
+- rest
+- signalr
+- websocket
+ReleaseNotes: |-
+  v2.5 is about what happens **after** you leave the workbench. The things Bowire already knew — your schemas, your recordings, your benchmarks, your contracts — now show up where the work actually gets judged：in CI, on a pull request, and in an editor panel next to the code.
+
+  215 commits since v2.4.0. Every workspace, collection, recording, mock and flow loads identically. Two changes are worth reading before you upgrade — see [Breaking changes](#breaking-changes).
+
+  ## Highlights
+
+  ### The workbench, in VS Code ([#101](https://github.com/Kuestenlogik/Bowire/issues/101))
+
+  `ext install kuestenlogik.bowire-vscode` opens Bowire in an editor panel beside your code.
+
+  It does **not** bundle a CLI — it drives one. The extension uses a `bowire` you configured, one your repository pins in a tool manifest, or one on your `PATH`, and offers to fetch a verified copy when it finds none. That is the whole point：the workbench in your editor, the `bowire` in your terminal and the one in CI are the same binary reading the same collections.
+
+  Uninstalling the extension removes a CLI it downloaded. One you installed yourself is never touched.
+
+  ### Design-time lint — the review comments you keep writing ([#189](https://github.com/Kuestenlogik/Bowire/issues/189))
+
+  Most API design problems are caught in review *if the reviewer is sharp* — inconsistent naming, a field that returns a password, an unbounded list with no pagination, a missing version. That scales with reviewer attention, which does not scale.
+
+  `bowire lint <snapshot|url>` runs a typed rule engine over the schema and reports them without a reviewer having to be sharp that day:
+
+  ```bash
+  bowire lint https://api.example.com --format markdown --fail-on high
+  ```
+
+  Text for a terminal, markdown for a PR comment, JSON for whatever you build next. `--fail-on` gates the build — and `none` or an unrecognised level never fails, because a lint gate is advisory and a typo should not break a build that was passing.
+
+  ### Latency budgets as CI gates ([#360](https://github.com/Kuestenlogik/Bowire/issues/360), [#232](https://github.com/Kuestenlogik/Bowire/issues/232))
+
+  k6-style thresholds：a budget is either met or the run exits non-zero.
+
+  ```bash
+  bowire bench run Weather/getCurrent --url rest@http://localhost:6000 --threshold "p95 < 200" --threshold "error-rate < 0.01"
+  ```
+
+  Budgets are plain numbers — milliseconds for the latency metrics, a
+  fraction for `error-rate`. Metric spellings are forgiving (`p(95)`,
+  `error_rate` and `error-rate` all land on the same metric), the budget is
+  not：a unit suffix is refused rather than guessed at, and every threshold
+  is parsed before the run starts so a typo in the fifth budget does not
+  surface after two minutes of load.
+
+  Benchmarks also gained a **scheduled** shape — a cron-driven run that survives a restart, with the schedule readable and pausable from the workbench. Deliberately no "create" button in the browser：a schedule carries a target URL the server will call unattended, so authoring one stays on the CLI where the operator is explicit about it.
+
+  ### Contract matrix in the workbench ([#364](https://github.com/Kuestenlogik/Bowire/issues/364))
+
+  Consumer × provider, pass/fail, in one grid. Each cell carries how many interactions backed the verdict — 11 of 12 and 0 of 12 are very different mornings — and a pair that was never run reads as a dash rather than a blank, which would look like "checked, nothing wrong".
+
+  ### One rollup over the artefacts you already write ([#587](https://github.com/Kuestenlogik/Bowire/issues/587))
+
+  Lint findings, contract results, benchmark envelopes, k6 summaries, SARIF, JUnit — Bowire already wrote all of it as structured files. `bowire report rollup` reads them into one portfolio view, available identically from the CLI, `GET /api/report/rollup`, and the `bowire.report.rollup` MCP tool.
+
+  Counts stay nullable on purpose："no lint report was read" and "lint found nothing" are different statements, and flattening both to zero would let a missing report read as a clean bill of health.
+
+  ### A PR bot you can use ([#183](https://github.com/Kuestenlogik/Bowire/issues/183), [#582](https://github.com/Kuestenlogik/Bowire/issues/582))
+
+  The PR-report action moved to its own public repository and the Marketplace:
+
+  ```yaml
+  • uses：Kuestenlogik/bowire-action@v1
+  ```
+
+  It posts one comment per PR — API-schema delta, test results, security findings, perf — and **edits that comment** on later runs instead of stacking new ones.
+
+  ### Secrets stay secret in CI output ([#361](https://github.com/Kuestenlogik/Bowire/issues/361))
+
+  Values marked secret are redacted in logs, reports, annotations and exported commands. Bowire's CI story previously printed resolved variables into all of them.
+
+  ### Your repo can own its Bowire configuration ([#172](https://github.com/Kuestenlogik/Bowire/issues/172), [#616](https://github.com/Kuestenlogik/Bowire/issues/616))
+
+  ```jsonc
+  // .bowire/project.json
+  { "version"：1, "storage": "project" }
+  ```
+
+  Collections, environments and recordings then live beside the code and commit, diff and review like any other file. Opt-in — a manifest that says nothing keeps the machine-wide store, so nothing moves under you.
+
+  Underneath, **one resolver** now decides where anything is stored. Fourteen files across six assemblies used to build `~/.bowire/…` by hand, which meant the project opt-in reached some stores and silently missed others — the plugin directory, the proxy CA, the vuln-db cache and the MCP stores among them.
+
+  ### Starting Bowire from another program ([#615](https://github.com/Kuestenlogik/Bowire/issues/615))
+
+  ```bash
+  bowire --port 0 --port-file ./run/bowire.json
+  ```
+
+  The OS picks a free port; Bowire writes the address it actually bound once it is listening, and deletes the file on shutdown. The file exists if and only if the workbench is bound, which makes it the address *and* the readiness signal.
+
+  Do not scrape the startup banner for this. It is a log line, so it disappears at a quieter log level — and it used to be printed *before* the bind was known to have worked, so it could announce a URL that never served. That is fixed too, but `--port-file` is the contract.
+
+  ### Faster REST discovery ([#585](https://github.com/Kuestenlogik/Bowire/issues/585))
+
+  OpenAPI discovery took 5–8 s and flaked near the 8 s probe timeout. It no longer does.
+
+  ## Security
+
+  • **Path injection in the workspace-scoped endpoints** ([#617](https://github.com/Kuestenlogik/Bowire/pull/617)). `?workspaceId=` and `?storageRoot=` went from the query string into `Path.Combine` unchecked, across six endpoint files. A request could name any directory on the machine and have Bowire read or write there, reporting success. Both are now validated in one place：a workspace id must be a single segment from an allow-list; a storage root must be absolute, free of `..`, and name a directory that already exists.
+  • **A reverse-proxy upstream must be `http`/`https`.** `Uri.TryCreate(s, UriKind.Absolute)` returns true for an absolute *file path* on Unix, so `/etc/passwd` parsed as `file:///etc/passwd` and was accepted as an upstream — on Linux only, which is where this runs in production.
+
+  ## Breaking changes
+
+  **`BrowserUiHost.HostRunner` gained a parameter.** Embedded hosts that substituted the runner (a test seam) now receive an `onListening` callback and must invoke it with the bound URL. Everything downstream of the address — the banner, `--port-file`, auto-opening a browser — hangs off that call, because with `--port 0` the port is not knowable before the bind.
+
+  **Storage paths route through `IBowirePathResolver`.** If you referenced `DefaultBowireUserStore.UserProfileRoot` or built `~/.bowire/…` yourself, use `BowirePaths.Resolve(BowireStorageScope.Data, …)` or take `IBowirePathResolver` as a dependency. The old property still works; it is simply no longer the thing that knows where your data is. See [Storage locations](https://bowire.io/docs/architecture/storage-locations.html).
+
+  ## Fixes worth naming
+
+  • **Workspace rows could act on the wrong workspace** ([#610](https://github.com/Kuestenlogik/Bowire/issues/610)). morphdom matched overview rows positionally because they carried no `id`, so after a delete a row kept the click handlers of the workspace that had just been removed while displaying the next one. The visible symptom was a delete button that did nothing; one step further it would have renamed or deleted the wrong workspace.
+  • **Collections were not workspace-scoped** ([#612](https://github.com/Kuestenlogik/Bowire/issues/612)). Every workspace read and wrote the same file, so whichever saved last handed its collections to all the others.
+  • **Streaming responses pushed the detail pane off screen** with no scrollbar.
+  • **The per-workspace disk purge never ran.** `DELETE /api/workspace/{id}` anchored its containment check on the user root, which it asked for with an empty filename — and the store rejects that, so every call ended in an unhandled `ArgumentException` before a single byte was deleted. The check anchors on the workspaces folder now, which also closes a gap the old prefix test left open：a sibling directory whose name merely starts with the root's.
+  • **`bowire contract publish` met a hand-edited recording with a stack trace.** The catch around the recording loader listed `IOException` but not `InvalidDataException`, which lives in `System.IO` and derives from `SystemException` — so every rejection the loader makes (unsupported format version, an ambiguous `--select`, a store with no recordings) escaped as an unhandled exception instead of the intended message and exit 65.
+  • **The release cascade waited for nuget.org indexing** before dispatching to siblings ([#236](https://github.com/Kuestenlogik/Bowire/issues/236)), so a sibling no longer builds against a version the feed has not published yet.
+
+  ## Acknowledgements
+
+  The competitive-research inputs behind the threshold gates (k6) and the redaction work (Hurl) came from a mid-2026 survey p
+ReleaseNotesUrl: https://github.com/Kuestenlogik/Bowire/releases/tag/v2.5.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,59 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: athrvk.Vayu
+PackageVersion: 0.16.0
+PackageLocale: en-US
+Publisher: Atharva Kusumbia
+PublisherUrl: https://github.com/athrvk
+PublisherSupportUrl: https://github.com/athrvk/vayu/issues
+Author: Atharva Kusumbia
+PackageName: Vayu
+PackageUrl: https://github.com/athrvk/vayu
+License: AGPL-3.0
+LicenseUrl: https://github.com/athrvk/vayu/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Atharva Kusumbia
+ShortDescription: Open-source API client with a native C++ load-testing engine - Postman-style requests and k6-level load tests in one local app.
+Description: Vayu is a free, open-source desktop app for Windows, macOS, and Linux that combines a full REST and GraphQL request builder - with collections, environments, and scripting - and a high-throughput load tester powered by a C++20 engine, with all data staying on your machine.
+Moniker: vayu
+Tags:
+- api
+- api-client
+- api-testing
+- benchmark
+- developer-tools
+- graphql
+- http
+- insomnia
+- load-testing
+- performance
+- postman
+- rest
+ReleaseNotes: |-
+  0.16.0 - 2026-08-14
+  The local services and load-test judgement release. Vayu could send in every direction and receive in none, so testing a webhook meant a public tunnel and testing an auth flow meant a live IdP - both now run on loopback listeners the app starts, stops and lists in a new Services drawer, joined by a mock server that replays a collection's imported example responses. On the load-testing side, a run stopped merely reporting numbers and started answering questions: a capacity mode that searches for the knee on its own, per-run thresholds with a pass/fail verdict, a pinned baseline to diff against, per-phase latency histograms over every completion rather than a 1% sample, and a server-vitals overlay charting the target's own metrics on the run's timeline. Around both, the app gained a ⌘K command palette over one shared command registry, and Settings became searchable, with the engine finally declaring what its numbers measure.
+  Added
+  - Local webhook inbox. An inbox is an engine-hosted listener that accepts any method on any path, records what arrived - method, path, query, headers, body, timing - and answers a canned response you configure. It closes the one gap air-gapped and corporate users could not work around, since webhook.site and an ngrok tunnel are both outbound. Its tab carries a live capture stream over SSE, a paged capture list that says how much of the retained ring it is showing, and a four-field reply editor (status, delay, headers, body). Body cap, retention and live cadence are settings.
+  - Built-in OAuth 2.0 mock issuer. Developing against a real identity provider means 2FA prompts, rate limits and "suspicious login" mail; acquire_token always needed a live token endpoint, so auth was the one part of a workspace that could not run offline. A local issuer mints tokens with the lifetime, claims and failure mode you ask for, on its own loopback listener, and is reachable from the Services drawer, the engine API, and three new MCP tools (start_mock_issuer, list_mock_issuers, stop_mock_issuer).
+  - Mock server over a collection's saved examples. POST /mock/start binds a listener that answers a collection subtree's first saved example on the paths its requests describe, with configurable latency and error injection, and a 404 that names the near-miss instead of stating only that nothing matched. All three path-template spellings - {{petId}}, {petId}, :petId - collapse to one wildcard segment, and specificity decides between two matches so a literal route cannot be shadowed by a wildcard an import happened to write first. Started from the collection header - directly for the common case of serving a collection with nothing set, or through a Mock server options dialog that sets latency and error rate, both start-time so a run pointed at a mock can say which configuration produced its numbers - and managed from the drawer.
+  - A Services drawer, and a running-services indicator in the Dock. Services are listeners that keep running after you switch tabs, and the shell had no concept for them - the inbox was reachable from one welcome tile and invisible once its tab closed, and the mock issuer had no app surface at all. The fifth drawer view (⇧⌘S) lists inboxes, issuers and mock servers with status, copy-URL, start/stop and delete. Both lists are polled, because the MCP tools and a bare curl reach the same routes; an indicator that only knew what this window started would contradict what it promises.
+  - Saved example responses have somewhere to live. Imports carried Postman's item.response[] and an OpenAPI operation's responses into a parser that read them and dropped them - no draft field, no wire field, no table, and the loss was not even counted as a skip. A request_examples table owned by its request, CRUD under /requests/:id/examples, an Examples tab, and an example count in the import preview. This is what the mock server serves.
+  - Capacity-discovery run mode. Finding a service's capacity meant manual bisection - guess a concurrency, run a ramp, read the dashboard, adjust, repeat. Every piece of the answer already existed and nothing closed the loop: mode: "capacity" searches for the knee itself, driven by the per-tick signal the engine was already producing, and reports the concurrency it settled on.
+  - Per-run performance thresholds with a pass/fail verdict. A load run measured everything and judged nothing, so "did this meet its budget" was a question only a human reading percentiles could answer - which left CI and the MCP consumer unable to answer it at all. A run now carries its own thresholds and the report carries the verdict.
+  - Pin a run as baseline, and diff any run against it. Run comparison existed and only an MCP client could reach it. There is now a pin, a place in the UI for the diff, and a sidebar filter for pinned runs.
+  - Per-phase latency histograms. The engine computed the DNS/connect/TLS/first-byte/download breakdown for every completion and then discarded it for ~99% of them - only retained records kept their phase values - so timingBreakdown averaged a biased ~1% sample, and a p99 dominated by TLS re-handshakes read identically to a slow server. The breakdown is now aggregated over every completion.
+  - Server-vitals overlay. A run knew everything about the client side and nothing about the target: when p99 climbed, nothing said whether the server's CPU climbed with it. A run may name a metrics endpoint, which the engine scrapes for the life of the run and the dashboard charts on the same timeline as p99 and throughput - with a vitals summary in the report and in the MCP start_load_run block.
+  - Anomaly annotations on the run timeline. A cumulative summary structurally cannot answer "when did it go wrong": a p99 that quadrupled for three seconds and recovered moves the mean by almost nothing, so its only trace was a bump the reader had to notice unaided. The timeline now marks them.
+  - Mid-run OAuth 2.0 refresh. A load run resolved auth exactly once, before the strategy started, so a run outliving its access token became a 401 storm the report never explained. A watchdog refreshes ahead of expiry; its lead time, retry delays and poll interval are settings.
+  - Deferred script validation per step, for scenario load runs. handle_result sampled responses only when the run carried a run-level tests script, which a scenario payload has none of, and the samples went to one flat reservoir with nothing recording which step produced them - so a collection's assertions passed in design mode and were silently never validated under load.
+  - The ⌘K command palette. There was no way to reach anything by name: a request meant the collections drawer plus tree expansion, a run meant the history drawer plus scrolling. The palette does fuzzy navigation over tabs, requests, collections and views, then deep search over settings, variables and runs, each deep source ranking its own corpus and offering an escape row into the surface built for browsing the rest. Variable values are never indexed, secret or not - secret is a masking hint, and a rule that trusted it would leak every token nobody flagged. The chord listens on the capture phase, because Monaco treats ⌘K as the start of a chord and stops it propagating.
+  - One command registry behind the palette and the native menu. "Open settings" existed separately in the menu bridge, the Dock, the settings sidebar and a keydown case; "new request" lived inside the welcome screen, reachable only from the welcome tab. A command is now a declaration - id, title, keywords, group, icon, availability, perform - and every surface points at it. One command per settings section is generated from the catalogues, so a section added there appears in the palette without an edit and cannot be named differently.
+  - The B2 shell. The title row could not hold both the tabs and a search bar, and that was arithmetic rather than taste - tabs are content-width, so every pixel another control took converted directly into overflowed tabs. The title row keeps the window's own business and gains a centred search bar; the tab strip moves into a second row scoped to the content column, its left edge following the drawer's resize handle for free.
+  - Settings search. Searching "theme", "color" or "font" returned nothing on a screen where all three exist, because the index held panel titles rather than their contents. Every setting the client panels render is now declared, checked against the anchors the panels actually paint, and the engine's own entries carry search keywords over the wire - "deadline" finds defaultTimeout, which previously only "timeout" could.
+  - Engine settings declare what their numbers measure. ConfigEntry gains unit and keywords columns, and restartRequired / advanced as typed fields rather than a "(Requires Restart)" substring both consumers regex-matched out of the label. 25 of the 41 seeded entries declare ms, sec, days or bytes, so six byte-valued entries stopped printing 104857600 where 100.0 MB belonged - and the "in milliseconds" clauses come back out of the 19 descriptions that carried them, with a guard against stating a unit twice.
+  - New engine settings: the monitor cadence and metric cap, the vitals scrape budget (previously derived as interval * 3 / 4, which failed every scrape against a heavyweight /metrics - exactly when a run wants vitals), the inbox body cap, retention and live cadence, and the OAuth refresh knobs above.
+  - GraphQL explorer search finds enum values and input-object fields, which are exactly what someone filling in an argument is looking for and were previously browsable only by expanding the tree. The schema affordances also moved into one home, with a collapsible Variables pane and a Refresh on the closed-state schema chip.
+  Changed
+ReleaseNotesUrl: https://github.com/athrvk/vayu/releases/tag/v0.16.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

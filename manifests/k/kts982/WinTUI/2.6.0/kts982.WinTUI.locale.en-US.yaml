@@ -1,0 +1,33 @@
+# Created using wingetcreate 1.12.8.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: kts982.WinTUI
+PackageVersion: 2.6.0
+PackageLocale: en-US
+Publisher: kts982
+PublisherUrl: https://github.com/kts982
+PublisherSupportUrl: https://github.com/kts982/wintui/issues
+Author: Kostas T.
+PackageName: WinTUI
+PackageUrl: https://github.com/kts982/wintui
+License: MIT
+LicenseUrl: https://github.com/kts982/wintui/blob/main/LICENSE
+ShortDescription: Terminal UI for winget on Windows.
+Description: WinTUI is a terminal user interface for Windows Package Manager featuring a split-panel workspace for browsing, searching, installing, upgrading, and managing packages. Includes disk-persistent cache for instant startup, background refresh, integrated search with install queue, batch operations with a single UAC prompt, per-package rules and ignore filters, live command preview, system health checks, temp cleanup, and a headless CLI mode for scripting.
+Moniker: wintui
+Tags:
+- winget
+- windows
+- tui
+- terminal
+- package-manager
+- cli
+ReleaseNotes: |-
+  - Slim Health tab: a flat 7-row WinTUI / winget readiness panel that loads instantly. Drops RAM, uptime, Defender, extra fixed drives, generic ping, PowerShell 7, and the f / d toggle panels. Adds Sources cache age, Updates buckets (visible / auto / held) from the cache, and a neutral Settings summary line.
+  - wintui doctor: verdict-first headless health subcommand. Prints OK / WARN: N issues / FAIL: N issues with exit codes 0 / 1 / 2. Flags: --verbose adds the per-row table beneath the verdict; --full re-adds the trimmed system-diagnostics rows (RAM, Defender, internet ping, extra drives, OS / uptime, PATH, Windows PowerShell); --dev-tools appends a developer-tools detection group; --json emits structured output. Shares the check engine with the Health tab.
+  - Auto-self-update on by default (folded in from the v2.5.1 plan). Pre-TUI startup runs winget list --upgrade-available --id kts982.WinTUI with an 8-second timeout; on a hit, fires the existing PowerShell handoff and exits cleanly so winget can replace the released binary. Removes the admin-gated Ctrl+A self-upgrade relaunch path; manual self-upgrade now uses Enter-to-close + detached winget handoff. Addresses cross-PC reliability seen on family machines.
+  - Opt-in toast notifications: new toast_notifications setting (default off). Single Windows toast on TUI batch finish, on wintui upgrade --auto / --all / --id finish, and when wintui check finds updates. AUMID-attributed as WinTUI via a one-time Start Menu shortcut drop on first toast; self-heals if a previous run crashed between Save and SetAppId. Skipped when CI or WINTUI_DISABLE_TOAST is set.
+  - Bug fix: broken winget shims (App Installer alias on PATH but unable to start) now report as FAIL in Health and wintui doctor instead of falling through to PASS via swallowed exec errors. Pending self-upgrade items are surfaced explicitly in the batch-finish toast (X awaiting restart) so a mixed batch doesn't claim success while one item still needs Enter handoff.
+ReleaseNotesUrl: https://github.com/kts982/wintui/releases/tag/v2.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

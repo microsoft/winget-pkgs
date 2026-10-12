@@ -1,0 +1,108 @@
+# Created with komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: qarmin.czkawka.cli
+PackageVersion: 10.0.0
+PackageLocale: en-US
+Publisher: Rafał Mikrut
+PublisherUrl: https://github.com/qarmin
+PublisherSupportUrl: https://github.com/qarmin/czkawka/issues
+Author: Rafał Mikrut
+PackageName: Czkawka
+PackageUrl: https://github.com/qarmin/czkawka
+License: Proprietary
+Copyright: Copyright (c) Rafał Mikrut
+ShortDescription: Multi functional app to find duplicates, empty folders, similar images etc.
+Tags:
+- cleaner
+- duplicates
+- gtk-rs
+- multiplatform
+- rust
+- similar-images
+- similar-music
+- similar-videos
+ReleaseNotes: |-
+  Version 10.0.0 - 18.08.2025r
+  Breaking changes
+  Users
+  - Some languages now have unified names in Crowdin (e.g. es → es-ES). The GUI may not find them and will fall back to the default language.
+  - Cache files now use memory limits and are incompatible with previous versions.
+  - Cli image filter argument changed from faussian to gaussian
+  Devs
+  - stop_flag is now required argument in most of the core functions
+  - Visibility of some core functions has been reduced to pub(crate)
+  - The modules in czkawka_core have been split and reorganized a bit — imports need to be adjusted, although the actual behavior and item names should not be changed too much
+  Core
+  - Replaced println/eprintln with logging functions - #1478
+  - Slightly improved cache loading and saving speed - #1478
+  - Messages and panics are now also logged to a file (can be disabled by setting the DISABLE_FILE_LOGGING environment variable) - #1508
+  - Added a 8GB memory limit when loading or saving cache to avoid out-of-memory crashes with broken cache files - #1508
+  - Czkawka binaries are now reproducible - #1565
+  - Added protection against deleting a folder that is no longer empty since the scan - #1566
+  - Replaced pdf-rs with the more popular lopdf library, which also has fewer dependencies - #1566
+  - Replaced imagepipe + rawloader with rawler which is still supported and faster to decode raw files - #1572
+  - Added more configuration options in video finder - #1578
+  - fast_image_resize feature is removed and image_hasher/fast_resize_unstable is enabled unconditionally - #1586
+  CLI
+  - Improved logic for deleting files and added progress bar for this operation - #1571
+  GTK GUI
+  - New icons — less visually appealing, but created by me and released under a truly free CC BY license - #1478
+  - Fixed crash when removing outdated cache - #1508
+  - Fixed missing file and folder names for similar videos in reference folders - #1520
+  - Fixed crashes when the SVG pixbuf loader is not available - #1565
+  - Fixed using custom select on referenced folders - #1581
+  Krokiet
+  - Added the ability to select multiple items with mouse and keyboard - #1478
+  - Added sort button - #1501
+  - Window size is now remembered - #1508
+  - Added translations - #1508, #1513
+  - Improved popup styling - #1520
+  - Dark and light themes can now be switched at runtime - #1520
+  - Changed icon color to white for dark theme to improve visibility - #1520
+  - Added the ability to hide text on buttons - #1520
+  - Multithreaded removing, moving, and renaming of files - #1565
+  - Files that fail to be removed, renamed, or moved are no longer deleted from the results list - #1565
+  - Progress information is shown when removing, renaming, or moving files, with the ability to stop the process - #1565
+  - Folders to scan can be now set via cli e.g. krokiet /home/rafal - for more info see krokiet --help - #1566
+  - Improved appearance of bottom directories panel - #1569
+  - Some buttons, are disabled, when there is no files selected - #1586
+  - Added info about the number of items selected to delete - #1589
+  - Limit image preview to max 1024 width/height, to speedup preview loading and fixing crash in software renderer - #1590
+  External
+  - There is a new unofficial Tauri-based frontend for Czkawka - Czkawka Tauri
+  - Czkawka 8.0.0 is now available in Debian Sid - Cli/Gui Gtk
+  CI
+  - Compilation for 32-bit targets is now checked in CI
+  - Czkawka binaries are now checked for reproducibility in CI
+  Prebuilt binaries
+  - AppImage binaries are no longer provided due to random bugs (not present in other packaging formats) and minimal added value compared to prebuilt Linux binaries or Flatpak
+  - HEIF Mac binaries are now provided
+  - CI now builds Linux binaries on Ubuntu 22.04 instead of 20.04(github removed 20.04 images)
+  - musl builds of czkawka_cli are now provided instead of eyra builds (slightly easier to maintain). GUI builds are not included due to limitations of musl and eyra :(
+  - Prebuilt Windows console binaries are no longer provided — logs are now saved to a file, which is easier to read than terminal output
+  - Skia opengl and vulkan backends are provided for Krokiet on Linux(no binaries on Windows, because don't know how to replace sed)
+  - Prebuilt binaries are now build with lto fat instead lto thin and codegen-units=1 to greatly reduce binary size(~25% smaller binaries)
+  Virustotal
+  - https://www.virustotal.com/gui/file-analysis/NGU4ODBmNzgyNTcxMmVmZTY4OGFiNGU2YzZkMGNkNGY6MTc1NTUyOTE1MQ==
+  - https://www.virustotal.com/gui/file-analysis/MzBhZDI5ZmM5ZjkzODgyMmU5MmY5M2Q5NTYzNThmMzI6MTc1NTUyOTE1NA==
+  - https://www.virustotal.com/gui/file-analysis/YjZlZDNhNzBmMTQyYjNiZDIxMThiOGViZjg5M2NhZmM6MTc1NTUyOTE2MA==
+  - https://www.virustotal.com/gui/file-analysis/ODY0MmEyNTRkOGE1NmE0OTE0Y2IyNGQ4NDMzYWFlMzQ6MTc1NTUyOTE2Mw==
+  Legend:
+  - If you are a beginner and don't know which version to use, start with one of these depending on your OS (if they don’t work, try different builds):
+    - Windows – windows_krokiet_on_linux, windows_czkawka_gui_gtk_46
+    - Mac – mac_krokiet_x86_64, mac_krokiet_arm, mac_czkawka_gui_x86_64, mac_czkawka_gui_arm
+    - Linux – linux_krokiet_skia_opengl_x86_64, linux_krokiet_x86_64, linux_czkawka_gui_x86_64
+  - krokiet – graphical version of the app (recommended over the GTK version)
+  - gtk_gui – graphical GTK version of the app
+  - cli – command-line version of the app
+  - gtk_46, gtk_412 – GTK versions used to build the Windows app. On some systems gtk_46 works, on others gtk_412, so choose the one that works on your computer.
+  - arm, x86_64 – CPU architecture. Most Windows/Linux uses x86_64, while on Mac the arm version is becoming the most common choice. (To run the app, you need to use the correct one.)
+  - heif, raw, avif – additional features that require extra libraries installed on the OS
+  - skia_opengl, skia_vulkan – alternative Linux backends for Krokiet; may fix some issues like blurry fonts
+  You can read more about this version on Medium:
+  - English article – https://medium.com/@qarmin/czkawka-krokiet-10-0-4991186b7ad1
+  - Polish article – https://medium.com/@qarmin/czkawka-krokiet-10-0-czyszczenie-duplikat%C3%B3w-ujednolicanie-funkcji-i-gar%C5%9B%C4%87-rustowych-statystyk-7663ee6798ed
+ReleaseNotesUrl: https://github.com/qarmin/czkawka/releases/tag/10.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

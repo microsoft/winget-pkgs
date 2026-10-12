@@ -1,0 +1,75 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: jmrplens.gitlab-mcp-server
+PackageVersion: 2.6.5
+PackageLocale: en-US
+Publisher: José M. Requena Plens
+PublisherUrl: https://github.com/jmrplens
+PublisherSupportUrl: https://github.com/jmrplens/gitlab-mcp-server/issues
+PrivacyUrl: https://github.com/jmrplens/gitlab-mcp-server/blob/main/PRIVACY.md
+PackageName: GitLab MCP Server
+PackageUrl: https://github.com/jmrplens/gitlab-mcp-server
+License: MIT
+LicenseUrl: https://github.com/jmrplens/gitlab-mcp-server/blob/HEAD/LICENSE
+ShortDescription: GitLab MCP server exposing the REST v4 and GraphQL APIs as tools for AI assistants.
+Description: A Model Context Protocol (MCP) server that connects AI assistants (Claude, Cursor, VS Code + Copilot, and any MCP client) to GitLab.com or self-managed GitLab instances. Covers the full REST API v4 and GraphQL with automatic edition gating — roughly 850 to 1070 tools depending on the GitLab tier — plus 45 MCP resources, 37 prompts, argument completions, and progress notifications. Single static binary, stdio and HTTP transports, read-only and safe (mutation-preview) modes, and an interactive setup wizard (gitlab-mcp-server --setup) that auto-configures most MCP clients.
+Moniker: gitlab-mcp-server
+Tags:
+- ai
+- ci-cd
+- claude
+- devops
+- gitlab
+- graphql
+- llm
+- mcp
+- model-context-protocol
+- rest-api
+ReleaseNotes: |-
+  ## Highlights
+
+  ### 🧪 A fully skip-free test suite — and the two product bugs it caught
+
+  The end-to-end suite now provisions everything it needs and runs **1,453 tests with zero skips**：an ephemeral Bitbucket Data Center container backs the `import_bitbucket_server` coverage (unattended setup with Atlassian's public timebomb test license), the db-migration bookkeeping path seeds itself through the Rails console, CI catalog versions are published through a real runner pipeline, and pending-approval users are provisioned for the approve/reject flows.
+
+  Exercising every path for real immediately exposed — and fixed — two bugs mocks had been hiding:
+
+  • **`gitlab_get_catalog_resource` / `gitlab_list_catalog_resources` never worked against current GitLab**：their GraphQL queries used fields GitLab has removed (`webUrl`, `forksCount`, `readmeHtml`, `latestVersion`, …), and the validation error was misreported as *not found*. The queries and output shapes now mirror the live schema 1:1 (`web_path`, `last_30_day_usage_count`, `archived`, `topics`, `verification_level`, `visibility_level`; README and components sourced from the newest version; `semver` flattened from its object form).
+  • **`gitlab_group_board_list_update` could never decode a successful response**：client-go's group-level wrapper declares `[]*BoardList` while GitLab returns the single updated object. The handler issues the request directly until the upstream fix lands — contributed by this project as [client-go!2996](https://gitlab.com/gitlab-org/api/client-go/-/merge_requests/2996), accepted for the v3.0 release branch.
+
+  ### 🎯 1:1 parity audit：zero findings
+
+  The group Datadog integration output now mirrors client-go's own dual shape：the canonical configuration lives in the nested `properties` object, while the flat top-level copies remain as **deprecated** conveniences (prefer `properties.*`). The change is purely additive — no consumer loses a field on any surface. With it, `make audit-1to1` reports **zero findings across every dimension** (struct input/output, action coverage, discovery metadata) for the first time in the project's history.
+
+  ### ⚙️ Go 1.27 toolchain
+
+  Built with **Go 1.27.0** end to end：`go.mod`, CI, and the Docker image (`golang:1.27.0-alpine3.24`). The codebase adopts Go 1.27's promoted-fields-in-composite-literals style (enforced by the golangci-lint 2.13 baseline), and CodeQL moved from GitHub's default setup to a repository-owned workflow so security scanning keeps working the day a new Go version ships.
+
+  ### 📦 GitLab client v2.58.2 — directory-structured package file names
+
+  Generic Package Registry file names may now describe a directory structure：`/` is kept as a real path separator, and empty, `.`, or `..` segments are rejected client-side before any request. `gitlab_package_publish` / `gitlab_package_download` document the contract in their schemas and return a specific, actionable hint when a name is invalid.
+
+  ### 📌 Versioning policy, now written down
+
+  The server's **major version tracks client-go's major**：when client-go releases v3, this project moves to v3 in that same dependency bump — and that release removes the deprecated compatibility fields kept during the v2 cycle (the flat Datadog copies above, among others). Every other dependency update ships as a minor or patch release. Documented on the [about page](https://jmrplens.github.io/gitlab-mcp-server/about/) and in the contributor docs.
+
+  ## Also in this release
+
+  • The release gate itself hardened by this release's own dry runs：the e2e db-migration seeding now picks a version the GitLab **web process** can resolve (Omnibus ships a relative `db/migrate` path that Puma, running with `cwd=/`, cannot — only the absolutely-pathed `post_migrate` directory is visible to the API), and the CI gates' test timeout was sized to the suite's real duration.
+  • Off-goroutine `testing.T` abort sweep completed (541 → 0 sites) with a CI gate (`cmd/audit_test_goroutines`) so they cannot return; two latent data races found by the enabled `-race` validation were fixed at the source.
+  • E2E action coverage at **1062/1062 (100%)**; the CE suite runs skip-free in ~11 minutes.
+  • Site toolchain refreshed (pnpm 11.22.0, Astro 7.2.4, Mermaid 11.17.0); TypeScript intentionally stays on 6.x until the 7.x native compiler exposes the API `astro check` needs.
+  • Dependencies at latest throughout; no direct dependency has a newer major available.
+
+  ## Upgrading
+
+  No breaking changes. Self-update (`AUTO_UPDATE=true`, default), Homebrew (`brew upgrade gitlab-mcp-server`), winget, Docker, and the Claude Desktop `.mcpb` are all published for this tag.
+
+  **Full changelog**：[v2.6.4...v2.6.5](https://github.com/jmrplens/gitlab-mcp-server/compare/v2.6.4...v2.6.5)
+ReleaseNotesUrl: https://github.com/jmrplens/gitlab-mcp-server/releases/tag/v2.6.5
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://jmrplens.github.io/gitlab-mcp-server/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

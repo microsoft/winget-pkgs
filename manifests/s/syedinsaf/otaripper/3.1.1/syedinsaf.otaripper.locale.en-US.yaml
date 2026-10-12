@@ -1,0 +1,70 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: syedinsaf.otaripper
+PackageVersion: 3.1.1
+PackageLocale: en-US
+Publisher: Syed Insaf
+PublisherUrl: https://github.com/syedinsaf
+PublisherSupportUrl: https://github.com/syedinsaf/otaripper/issues
+Author: Syed Insaf
+PackageName: otaripper
+PackageUrl: https://github.com/syedinsaf/otaripper
+License: Apache-2.0
+LicenseUrl: https://github.com/syedinsaf/otaripper/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Syed Insaf
+ShortDescription: 'Fast, safe, and reliable Android OTA partition extractor '
+Description: otaripper is a high-performance, multi-threaded partition extractor for Android OTA packages (payload.bin and full OTA .zip files). Built in Rust, it features SIMD-accelerated memory operations and robust fail-safe behavior.
+Moniker: otaripper
+Tags:
+- android
+- aosp
+- cli
+- payload
+- terminal
+ReleaseNotes: |-
+  What’s New in v3.1.1
+  The Qualcomm ARB & CI Hardening update. v3.1.1 brings crucial compatibility updates for modern Snapdragon secure bootloader scanning, robust cross-platform URL parsing, and structural CI/CD pipeline hardening to protect forks.
+  Highlights
+  - Modern Qualcomm ARB Scan Support: Solved a major limitation with modern Snapdragon bootloaders. The secure boot hash table size validation check has been relaxed from requiring a multiple of 32 (SHA-256) to a multiple of 16. This adds seamless support for modern Qualcomm bootloaders using SHA-384 (48-byte digests) and future-proofs the engine for SHA-512 (64-byte digests).
+  - Supercharged JSON Output UX & Naming:
+    - Zero-Crash URL Parsing: Implemented robust, platform-independent, and URL-aware file stem parsing to prevent crashes on Windows when analyzing remote OTA URLs.
+    - Input Sanitization: Automatically trims white spaces, trailing slashes, and backslashes from user-supplied device inputs ("Device model" and "Update / build") to prevent ugly duplicate underscores in filenames.
+    - Scannable ARB Suffix: Scanned outputs are now automatically suffixed with _ARB(N).json (where N is the detected anti-rollback level) for instant filesystem scannability.
+  - CI/CD Fork Prevention: Protected workflow secrets and eliminated build spams on forks. All automated deployment pipelines (Crates.io, AUR, Winget, manual, and release builds) now explicitly check github.event.repository.fork == false so they never auto-run on forks or spam fork owners with failed scheduled cron runs.
+  - Dependency Upgrades: Bumped sysinfo to v0.39.2 in the Rust dependencies group to ensure optimal platform telemetry accuracy.
+  What's Changed
+  - fix(arbscan): relax hash table size check to multiple of 16 to support SHA-384/384-bit Qualcomm bootloaders
+  - fix(arbscan): implement robust URL-aware stem parsing & input-sanitization for JSON generation
+  - ci: prevent GitHub Action workflow secrets exposure and resource drain on forks
+  - build(deps): bump sysinfo from 0.39.1 to 0.39.2 in production dependencies
+  - docs: add Winget upgrade command guide to README and details of the modern ARB architecture in technical specifications
+  Full Changelog: v3.1.0...v3.1.1
+  Download Guide — Pick the Right Build
+  ───────────────────┬──────────────────────┬────────────────────────────────────────────────┬──────────────────────────────────────────
+  Platform           │Architecture          │Download                                        │Notes
+  ───────────────────┼──────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────
+  🪟 Windows         │x86_64 (MSVC)         │⬇️ otaripper-3.1.1-windows-msvc-x86_64.zip      │⭐ Recommended for most Windows users
+  ───────────────────┼──────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────
+  🪟 Windows         │x86_64 (MinGW / GNU)  │⬇️ otaripper-3.1.1-windows-gnu-x86_64.zip       │Only if you explicitly need MinGW
+  ───────────────────┼──────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────
+  🐧 Linux           │x86_64 (glibc)        │⬇️ otaripper-3.1.1-linux-x86_64.tar.gz          │Standard dynamic Linux build
+  ───────────────────┼──────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────
+  🐧 Linux           │x86_64 (static / musl)│⬇️ otaripper-3.1.1-linux-static-x86_64.tar.gz   │Fully portable, works on almost any distro
+  ───────────────────┼──────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────
+  🐧 Linux           │ARM64 (aarch64)       │⬇️ otaripper-3.1.1-linux-arm64.tar.gz           │ARM servers, SBCs, phones
+  ───────────────────┼──────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────
+  🍎 macOS           │Intel (x86_64)        │⬇️ otaripper-3.1.1-macos-x86_64.tar.gz          │Intel-based Macs
+  ───────────────────┼──────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────
+  🍎 macOS           │Apple Silicon (ARM64) │⬇️ otaripper-3.1.1-macos-arm64.tar.gz           │M1 - M4 Macs
+  ───────────────────┼──────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────
+  🤖 Android / Termux│ARM64                 │⬇️ otaripper-3.1.1-android-arm64.zip            │Termux-only environment
+  ───────────────────┴──────────────────────┴────────────────────────────────────────────────┴──────────────────────────────────────────
+  Integrity & Verification
+  Verify the compressed archives using the master checksums.txt file attached to this release:
+  sha256sum -c checksums.txt
+  Once extracted, verify the raw executables using the internal platform-specific .sha256 file:
+  sha256sum -c *.sha256
+ReleaseNotesUrl: https://github.com/syedinsaf/otaripper/releases/tag/v3.1.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

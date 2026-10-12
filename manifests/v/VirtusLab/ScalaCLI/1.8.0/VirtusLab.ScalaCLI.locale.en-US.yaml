@@ -1,0 +1,166 @@
+# Created with WinGet Releaser using komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: VirtusLab.ScalaCLI
+PackageVersion: 1.8.0
+PackageLocale: en-US
+Publisher: scala-cli@virtuslab.com
+PublisherUrl: https://virtuslab.com/
+PublisherSupportUrl: https://github.com/VirtusLab/scala-cli/issues
+PackageName: Scala CLI
+PackageUrl: https://github.com/VirtusLab/scala-cli
+License: Apache-2.0
+LicenseUrl: https://github.com/VirtusLab/scala-cli/blob/HEAD/LICENSE
+ShortDescription: Scala CLI is a command-line tool to interact with the Scala language.
+Tags:
+- functional
+- java
+- language
+- programming
+- scala
+ReleaseNotes: |-
+  Support for Scala 3.7.0 and 3.3.6
+  This Scala CLI version switches the default Scala version to 3.7.0.
+  The CLI internals are now built with Scala 3.3.6.
+  scala-cli version
+  # Scala CLI version: 1.8.0
+  # Scala version (default): 3.7.0
+  Added by @Gedochao in #3661
+  Support for Scala.js 1.19.0
+  This Scala CLI version adds support for Scala.js 1.19.0.
+  scala-cli -e 'println("Hello")' --js
+  # Compiling project (Scala 3.7.0, Scala.js 1.19.0)
+  # Compiled project (Scala 3.7.0, Scala.js 1.19.0)
+  # Hello
+  Added in #3643 and VirtusLab/scala-js-cli#134
+  Drop support for Scala <3.3 in runner and test-runner modules
+  Starting with Scala CLI v1.8.0, the runner and test-runner modules are built with Scala 3.3.6 LTS (on par with other modules built with Scala 3). They used to be built with Scala 3.0.2, as those modules may get added to the project class path when running, respectively, the main scope and tests. This means that if the application is using pre-3.3 Scala 3, TASTy versions will be incompatible.
+  This is mostly informative, as the change should not be breaking for standard Scala CLI usage, even if an older Scala 3 version is being used. For builds using Scala <3.3, the CLI will automatically fall back to version 1.7.1 of the modules, with an appropriate warning being printed. As the fallback will not be updated in the future, some Scala CLI features might start breaking at some point, as the APIs will stop being fully in sync.
+  scala-cli -e 'println("Hello")' --runner -S 3.1
+  # [warn] Scala 3.1.3 is no longer supported by the runner module.
+  # [warn] Defaulting to a legacy runner module version: 1.7.1.
+  # [warn] To use the latest runner, upgrade Scala to at least Scala 3.3.
+  # Compiling project (Scala 3.1.3, JVM (17))
+  # Compiled project (Scala 3.1.3, JVM (17))
+  # Hello
+  scala-cli test . -S 3.2
+  # [warn] Scala 3.2.2 is no longer supported by the test-runner module.
+  # [warn] Defaulting to a legacy test-runner module version: 1.7.1.
+  # [warn] To use the latest test-runner, upgrade Scala to at least 3.3.
+  # Compiling project (test, Scala 3.2.2, JVM (17))
+  # Compiled project (test, Scala 3.2.2, JVM (17))
+  # Test run started
+  # Test MyTests.foo started
+  # Hello, world!
+  # Test MyTests.foo finished, took 0.001 sec
+  # Test run finished: 0 failed, 0 ignored, 1 total, 0.003s
+  Realistically, the change is only breaking for apps using those modules directly themselves, either depending on them or using them to run things. In either case, it is recommended to update Scala up to at least 3.3 LTS.
+  Added by @Gedochao in #3650
+  Scala CLI now detects and runs multiple test frameworks, rather than just one
+  When running tests in a project with multiple test frameworks in use, Scala CLI will now attempt to detect and run all of them, rather than just one.
+  scala-cli test .
+  # Compiling project (Scala 3.7.0, JVM (23))
+  # Compiled project (Scala 3.7.0, JVM (23))
+  # Compiling project (test, Scala 3.7.0, JVM (23))
+  # Compiled project (test, Scala 3.7.0, JVM (23))
+  # Munit:
+  #   + foo 0.007s
+  # -------------------------------- Running Tests --------------------------------
+  # + MyTests.foo 1ms
+  # Tests: 1, Passed: 1, Failed: 0
+  # + SimpleSpec
+  # Hello from zio-test
+  #   + print hello and assert true
+  # 1 tests passed. 0 tests failed. 0 tests ignored.
+  #
+  # Executed in 97 ms
+  #
+  # Completed tests
+  # ScalaTestSpec:
+  # example
+  # - should work
+  # Run completed in 44 milliseconds.
+  # Total number of tests run: 1
+  # Suites: completed 1, aborted 0
+  # Tests: succeeded 1, failed 0, canceled 0, ignored 0, pending 0
+  # All tests passed.
+  Additionally, it is now possible to pre-define multiple test frameworks to use (rather than just one, as before).
+  //> using test.frameworks org.scalatest.tools.Framework munit.Framework custom.CustomFramework
+  Pre-defining test frameworks may be preferable for bigger projects, as it allows to skip framework detection and run them directly. This is significant particularly for running tests with Scala Native and Scala.js.
+  Added by @Gedochao in #3653
+  Features
+  - Support the --test flag with the publish & publish local sub-commands by @Gedochao in #3538
+  - Misc no-op and/or error handling for the --test command line flag by @Gedochao in #3586
+  - Add scala-cli version to the BuildInfo by @yadavan88 in #3617
+  - fix sub-command tweaks by @Gedochao in #3646
+  - Run all found test frameworks, rather than just one by @Gedochao in #3621
+  - Allow to preconfigure multiple test frameworks by @Gedochao in #3653
+  - Add support for some missing Scala compiler options & aliases without the need for -O by @Gedochao in #3665
+  - Add support for the --repl-quit-after-init REPL option by @Gedochao in #3664
+  Fixes
+  - Fix fmt to format the project.scala configuration file as any other Scala input by @Gedochao in #3609
+  - Apply scalafix rules to test scope inputs, too by @Gedochao in #3641
+  Internal and build changes
+  - Cross compile everything on the CI by @Gedochao in #3570
+  - Add tests for the current behaviour of --cross by @Gedochao in #3589
+  - Run test sub-command integration tests on default JVM settings by @Gedochao in #3592
+  - Retry docs' tests on the CI by @Gedochao in #3618
+  - Move ScopeOptions to SharedOptions by @Gedochao in #3612
+  - Include missing Scala 3.6.* versions in Scala.listAll by @Gedochao in #3652
+  - Check formatting with Scala CLI, rather than the scalafmt launcher itself by @Gedochao in #3660
+  Documentation changes
+  - compileOnly option added to the documentation by @yadavan88 in #3600
+  - Back port of documentation changes to main by @github-actions in #3601
+  - docs: guide for compile only deps by @scarf005 in #3602
+  - Back port of documentation changes to main by @github-actions in #3607
+  - Add missing using directive reference docs by @Gedochao in #3608
+  - Back port of documentation changes to main by @github-actions in #3610
+  - Fix formatting in directives' reference docs by @Gedochao in #3611
+  - Back port of documentation changes to main by @github-actions in #3616
+  - Fixed DEV.md file related to test command by @yadavan88 in #3619
+  - Correct doc with --project-version by @joan38 in #3662
+  Updates
+  - Bump webfactory/ssh-agent from 0.9.0 to 0.9.1 by @dependabot in #3576
+  - Bump react from 18.2.0 to 18.3.1 in /website by @dependabot in #3573
+  - Update scala-cli.sh launcher for 1.7.1 by @github-actions in #3579
+  - Update guava to 33.4.5-jre by @scala-steward in #3581
+  - Update bloop-rifle_2.13 to 2.0.9 by @scala-steward in #3580
+  - Update sbt, scripted-plugin to 1.10.11 by @scala-steward in #3582
+  - Pin & update docker images by @Gedochao in #3558
+  - Bump clsx from 1.2.1 to 2.1.1 in /website by @dependabot in #3560
+  - Bump docusaurus to 3.7.0 by @Gedochao in #3585
+  - Bump react-dom from 18.2.0 to 18.3.1 in /website by @dependabot in #3587
+  - Bump sass from 1.58.3 to 1.86.0 in /website by @dependabot in #3588
+  - Bump @easyops-cn/docusaurus-search-local from 0.49.1 to 0.49.2 in /website by @dependabot in #3604
+  - Update asm to 9.8 by @scala-steward in #3606
+  - Update guava to 33.4.6-jre by @scala-steward in #3605
+  - Bump sass from 1.86.0 to 1.86.1 in /website by @dependabot in #3603
+  - Bump @mdx-js/react from 3.0.0 to 3.1.0 in /website by @dependabot in #3575
+  - Bump sass from 1.86.1 to 1.86.3 in /website by @dependabot in #3622
+  - Bump estree-util-value-to-estree from 3.0.1 to 3.3.3 in /website by @dependabot in #3623
+  - Update guava to 33.4.7-jre by @scala-steward in #3625
+  - Update Scala Next RC to 3.7.0-RC2 by @Gedochao in #3628
+  - Update core_2.13 to 3.11.0 by @scala-steward in #3630
+  - Update scala3-library to 3.7.0-RC3 by @scala-steward in #3638
+  - Update guava to 33.4.8-jre by @scala-steward in #3637
+  - Bump announced Scala Next RC to 3.7.0-RC2 by @Gedochao in #3636
+  - Bump http-proxy-middleware from 2.0.6 to 2.0.9 in /website by @dependabot in #3642
+  - Declare BSP server as capable of providing output paths by @Gedochao in #3645
+  - Update Scala.js to 1.19.0 by @scala-steward in #3643
+  - Update metaconfig-typesafe-config to 0.16.0 by @scala-steward in #3649
+  - Update Scala 3 Next RC to 3.7.0-RC4 by @scala-steward in #3648
+  - Bump sass from 1.86.3 to 1.87.0 in /website by @dependabot in #3651
+  - Update semanticdb-shared_2.13 to 4.13.5 by @scala-steward in #3658
+  - Update munit to 1.1.1 by @scala-steward in #3656
+  - Update jsoup to 1.20.1 by @scala-steward in #3655
+  - Update scalafmt-cli_2.13, scalafmt-core to 3.9.5 by @scala-steward in #3657
+  - Bump Scala 3 Next to 3.7.0 by @Gedochao in #3661
+  - Bump Scala 3 Next RC to 3.7.1-RC1 by @Gedochao in #3663
+  - Update runner & test-runner to Scala 3.3.5 LTS (was 3.0.2) by @Gedochao in #3650
+  - Update scalafmt to 3.9.6 by @scala-steward in #3667
+  - chore: Bump Bloop to 2.0.10 by @tgodzik in #3670
+  - Bump Scala 3 LTS to 3.3.6 by @Gedochao in #3671
+  Full Changelog: v1.7.1...v1.8.0
+ReleaseNotesUrl: https://github.com/VirtusLab/scala-cli/releases/tag/v1.8.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

@@ -1,0 +1,129 @@
+# Created with komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: bluenviron.mediamtx
+PackageVersion: 1.12.0
+PackageLocale: en-US
+Publisher: bluenviron
+PublisherUrl: https://github.com/bluenviron
+PublisherSupportUrl: https://github.com/bluenviron/mediamtx/issues
+Author: aler9
+PackageName: mediamtx
+PackageUrl: https://github.com/bluenviron/mediamtx
+License: MIT
+LicenseUrl: https://github.com/bluenviron/mediamtx/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2019 aler9
+CopyrightUrl: https://github.com/bluenviron/mediamtx/blob/main/LICENSE
+ShortDescription: |-
+  Ready-to-use SRT / WebRTC / RTSP / RTMP / LL-HLS media server and media proxy that allows to read,
+  publish, proxy, record and playback video and audio streams.
+Description: |-
+  MediaMTX is a ready-to-use and zero-dependency real-time media server and media proxy that allows
+  to publish, read, proxy, record and playback video and audio streams. It has been conceived as a
+  "media router" that routes media streams from one end to the other.
+Tags:
+- go
+- golang
+- hls
+- media-server
+- obs-studio
+- rtcp
+- rtmp
+- rtmp-proxy
+- rtmp-server
+- rtp
+- rtsp
+- rtsp-proxy
+- rtsp-relay
+- rtsp-server
+- streaming
+- webrtc
+ReleaseNotes: |-
+  New major features
+  RTSP
+  - support routing absolute timestamps (#1300) (#4378)
+  HLS
+  - support routing absolute timestamps (#1300) (#4372)
+  WebRTC
+  - support routing absolute timestamps (#1300) (#4415)
+  RPI Camera
+  - support exposing a secondary stream from the same camera (#4426)
+  - support routing absolute timestamps (#1300) (#4382)
+  Fixes and improvements
+  General
+  - record: fix crash when recordDeleteAfter is 0 and API is called (#4250) (#4254)
+  - warn users when non-existent fields are used in conf (#4261)
+  - change error message when stream is not found (#4301). Switch from 'no one is publishing to path' to 'no stream is available. on path' since the stream might be provided from a static source too.
+  - record: prevent recordDeleteAfter from deleting current segment (#4331)
+  - allow to customize syslog prefix (#4356). Co-authored-by: Кадышев Вячеслав v.kadyshev@dssl.ru
+  - count and log all discarded frames, decode errors, lost packets (#4363). Discarded frames, decode errors and lost packets were logged individually, then there was a mechanism that prevented more than 1 log entry per second from being printed, resulting in inaccurate reports. Now discarded frames, decode errors and lost packets are accurately counted, and their count is printed once every second.
+  - prevent unmarshalers from returning empty byte arrays (bluenviron/mediacommon#186)
+  API
+  - fix crash in /recordings/list (#4040) (#4291). The API crashed when: * '%path%' is not present in 'recordPath' * 'all_others' is in 'paths' * there's at least one recording segment. A recording segment without path is parsed as a segment with an empty path. This path is then passed to FindPathConf(), that returns an error in case of empty or invalid paths. This error is not checked for performance reasons, leading to the crash. This PR prevents empty or invalid paths from reaching FindPathConf().
+  RTSP
+  - fix authentication when rtspAuthMethods is empty (#4266). when rtspAuthMethods is nil, digest+SHA256 gets enabled, resulting in the inability of FFmpeg and most clients to connect due to compatibility issues.
+  - support using relative URLs in sourceRedirect (#4260)
+  - emit log message when remuxing RTP packets (#4422)
+  - prevent decoders from returning empty NALUs (#4346) (bluenviron/gortsplib#726)
+  - fix wrong size being reported in error messages (bluenviron/gortsplib#740)
+  - improve NALU size limit errors (bluenviron/gortsplib#741)
+  - improve AV1 decoder efficiency (bluenviron/gortsplib#744)
+  - improve AV1 compression (bluenviron/gortsplib#746)
+  HLS
+  - fix race condition when getting absolute time (#4375)
+  - fix reading streams with non-standard clock rates (#4376)
+  WebRTC
+  - fix connecting to TCP-only sources (#4293)
+  - make client always provide UDP candidates (#4298)
+  - fix codec collision in Chrome (#4394). Fix error "A BUNDLE group contains a codec collision for. payload_type='96. All codecs must share the same type, encoding name, clock rate and parameters. (INVALID_PARAMETER)"
+  RPI Camera
+  - make sure all parameters are 32-bit (#4425)
+  - fix cameras being picked randomly regardless of ID (#3994) (bluenviron/mediamtx-rpicamera#39)
+  Dependencies
+  - build(deps): bump golang.org/x/crypto from 0.32.0 to 0.33.0 (#4245)
+  - build(deps): bump github.com/alecthomas/kong from 1.7.0 to 1.8.0 (#4246)
+  - build(deps): bump github.com/alecthomas/kong from 1.8.0 to 1.8.1 (#4255)
+  - build(deps): bump github.com/datarhei/gosrt from 0.8.0 to 0.9.0 (#4271)
+  - build(deps): bump golang.org/x/crypto from 0.33.0 to 0.35.0 (#4279)
+  - build(deps): bump github.com/go-git/go-git/v5 from 5.13.2 to 5.14.0 (#4286)
+  - bump pion/webrtc (#4295)
+  - bump code.cloudfoundry.org/bytefmt (#4296)
+  - build(deps): bump github.com/pion/rtp from 1.8.11 to 1.8.12 (#4303)
+  - build(deps): bump code.cloudfoundry.org/bytefmt from 0.30.0 to 0.31.0 (#4308)
+  - bump mediamtx-rpicamera to v2.3.7 (#4312). Co-authored-by: mediamtx-bot bot@mediamtx
+  - build(deps): bump golang.org/x/crypto from 0.35.0 to 0.36.0 (#4314)
+  - build(deps): bump github.com/matthewhartstonge/argon2 (#4322)
+  - build(deps): bump code.cloudfoundry.org/bytefmt from 0.31.0 to 0.32.0 (#4333)
+  - build(deps): bump github.com/pion/sdp/v3 from 3.0.10 to 3.0.11 (#4332)
+  - build(deps): bump github.com/alecthomas/kong from 1.8.1 to 1.9.0 (#4335)
+  - build(deps): bump github.com/pion/rtp from 1.8.12 to 1.8.13 (#4334)
+  - build(deps): bump github.com/golang-jwt/jwt/v5 from 5.2.1 to 5.2.2 (#4360)
+  - build(deps): bump code.cloudfoundry.org/bytefmt from 0.32.0 to 0.33.0 (#4355)
+  - bump mediacommon and gortsplib (#4364)
+  - build(deps): bump code.cloudfoundry.org/bytefmt from 0.33.0 to 0.34.0 (#4366)
+  - bump hls.js to v1.6.0 (#4374)
+  - build(deps): bump github.com/fsnotify/fsnotify from 1.8.0 to 1.9.0 (#4397)
+  - bump hls.js to v1.6.1 (#4398)
+  - build(deps): bump code.cloudfoundry.org/bytefmt from 0.34.0 to 0.36.0 (#4404)
+  - build(deps): bump github.com/gin-contrib/pprof from 1.5.2 to 1.5.3 (#4401)
+  - build(deps): bump github.com/MicahParks/jwkset from 0.8.0 to 0.9.5 (#4399)
+  - build(deps): bump github.com/alecthomas/kong from 1.9.0 to 1.10.0 (#4387)
+  - build(deps): bump github.com/matthewhartstonge/argon2 (#4406)
+  - bump hls.js to v1.6.2 (#4411). Co-authored-by: mediamtx-bot bot@mediamtx
+  - build(deps): bump github.com/go-git/go-git/v5 from 5.14.0 to 5.15.0 (#4414)
+  - bump gortsplib (#4416)
+  - build(deps): bump github.com/bluenviron/gohlslib/v2 (#4419)
+  - build(deps): bump github.com/bluenviron/gortsplib/v4 (#4420)
+  Security
+  Binaries have been produced by the Release workflow without human intervention.
+  SHA256 checksums:
+  - mediamtx_v1.12.0_darwin_amd64.tar.gz 1d408db2ecb2a363da02ab71797bd13b182ebff36d986d8bc7226581f6e45943
+  - mediamtx_v1.12.0_darwin_arm64.tar.gz dbd3c20557d81bf6d32038cc1d8390652a83a6418cc28f76ba03bd8dbe554317
+  - mediamtx_v1.12.0_linux_amd64.tar.gz 8bbf936e70a8abc80fdb2d0d67c1b53df6a3bfcf4d819ac730a4b0fddcc793bf
+  - mediamtx_v1.12.0_linux_arm64v8.tar.gz fdeb6e1649f82949c33c7619403147dabadf5a3fb178cf29805d3ea0fa5a2886
+  - mediamtx_v1.12.0_linux_armv6.tar.gz 4028650e05223806a969843dcdc9f1605a1c3543906a3e45518855ca5274ba96
+  - mediamtx_v1.12.0_linux_armv7.tar.gz 0b96fb21da1abbf612518daf3978055cb608157cecad2d076b47f644a6aac28b
+  - mediamtx_v1.12.0_windows_amd64.zip 1cca94d874b3fe5b32547159ce2070a3e87d0bf746aeb53e077ca4680a372d6e
+ReleaseNotesUrl: https://github.com/bluenviron/mediamtx/releases/tag/v1.12.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

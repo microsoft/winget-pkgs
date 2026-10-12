@@ -1,0 +1,62 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: tonhowtf.OmniGet
+PackageVersion: 0.7.7
+PackageLocale: en-US
+Publisher: tonhowtf
+PublisherUrl: https://github.com/tonhowtf
+PublisherSupportUrl: https://github.com/tonhowtf/omniget/issues
+Author: tonhowtf
+PackageName: OmniGet
+PackageUrl: https://github.com/tonhowtf/omniget
+License: GPL-3.0
+LicenseUrl: https://github.com/tonhowtf/omniget/blob/HEAD/LICENSE
+ShortDescription: Desktop app to download videos, courses, and media from 50+ platforms.
+Description: Desktop app to download videos, courses, and media from 50+ platforms. YouTube, Instagram, TikTok, Bilibili (哔哩哔哩), Douyin (抖音), 小红书, 快手, 优酷, Hotmart, Udemy, Kiwify, Telegram, and 1000+ more via yt-dlp. Download torrents and send files between devices over P2P.
+Tags:
+- bilibili-downloader
+- course-downloader
+- download-manager
+- hotmart-downloader
+- instagram-downloader
+- media-downloader
+- reddit-downloader
+- rust
+- tauri
+- tiktok-downloader
+- twitter-downloader
+- udemy
+- udemy-downloader
+- video-downloader
+- youtube-downloader
+- yt-dlp
+ReleaseNotes: |-
+  Security release. Everyone should update.
+  Security
+  Arbitrary code execution via aria2c — CVE-2026-50574. OmniGet was passing fragmented manifests (HLS and DASH) to aria2c, which is the exact vector yt-dlp patched in 2026.06.09. On Windows this can lead to immediate arbitrary code execution; on other platforms on the next yt-dlp invocation. The external downloader is now scoped to plain http and ftp, and fragments go through the native downloader with -N.
+  TLS certificate verification is on by default. Every download, metadata fetch and search was running with certificate checking disabled. It is now verified. If you are behind a corporate proxy that intercepts TLS and downloads start failing, set advanced.insecure_tls to true in settings.json.
+  Every managed binary is verified before it runs. yt-dlp, FFmpeg, Deno, gallery-dl and aria2c are now checked against a published SHA-256 and refused on mismatch. Previously only yt-dlp was checked, and even that installed unverified when the checksum file could not be fetched. Moving the parser exposed a latent bug where a single blank line in the checksum file aborted verification entirely.
+  yt-dlp version floor. Settings → Dependencies flags a yt-dlp older than 2026.06.09 as Outdated, because those builds carry CVE-2026-50019, CVE-2026-50023 and CVE-2026-50574. A version string that cannot be parsed is deliberately not reported as outdated.
+  Fixes
+  The YouTube rate-limit throttle never worked. -N and --concurrent-fragments are the same yt-dlp option and both were being sent; the second won. The back-off that should kick in after a 429 had no effect on any install using the default settings. Downloads from a rate-limited account will now correctly slow down.
+  Corrupted state files no longer erase themselves. The cookie registry, yt-dlp templates and per-plugin settings all did read-default-then-write, so one unreadable file was silently replaced with empty defaults and then saved over the original. They are now moved aside as <name>.corrupt-<timestamp> and the content stays recoverable.
+  A corrupted channel history no longer re-downloads the whole channel. An unreadable seen-list used to read as "nothing seen", which meant every archived video looked new.
+  Global hotkey Ctrl+Shift+D — fixed and now gives feedback (#198). It returned silently in every failure path, and its success event had no listener, so nothing happened visibly whether it worked or not. All five outcomes now show a toast.
+  macOS: the window can be dragged again (#198). The title bar used -webkit-app-region, a Chromium property WKWebView ignores.
+  macOS: the hotkey recorder captures keys again (#198). It sat on "Press keys…" forever because macOS WebKit does not focus a button on click. Escape now cancels recording.
+  Improvements
+  Batch downloads can choose a mode. Paste a list of links and pick Auto, Audio Only or No Sound before starting — useful for YouTube Music links. Thanks @Crayz129 (#182).
+  Documentation
+  The Linux install instructions were wrong. All three READMEs told you to run flatpak install wtf.tonho.omniget. There is no Flathub package and the build never produced a Flatpak. The install table now lists what actually ships, with the libfuse2 note for Debian 12+ and Ubuntu 24.04+.
+  Also: a winget install line, a comparison section explaining where OmniGet sits next to yt-dlp, documentation for the omniget-cli binary (marked build-it-yourself, since it is not in these downloads — see #202), bulk subreddit and profile downloads described the way people search for them, and a larger FAQ. The Chinese and Russian READMEs were rewritten with native phrasing rather than translated English.
+  The Flatpak AppStream metainfo had stopped at 0.6.4, so Linux software centres were showing release notes eight versions old. Every 0.7.x release is now listed. A root llms.txt was added for AI crawlers.
+  Downloads
+  Windows — portable .exe, .msi installer, or winget install -e --id tonhowtf.OmniGet (the winget manifest is currently behind, see #203).
+  macOS — .dmg for Apple Silicon (aarch64) or Intel (x64). Unsigned, so the first launch needs xattr -cr /Applications/omniget.app.
+  Linux — .deb for Debian and Ubuntu, .rpm for Fedora and openSUSE, .AppImage for everything else. Both x86_64 and ARM64.
+  On Debian 12+ and Ubuntu 24.04+ the AppImage needs sudo apt install libfuse2, or run it with --appimage-extract-and-run. The .deb has no such requirement.
+  Full changelog: v0.7.6...v0.7.7
+ReleaseNotesUrl: https://github.com/tonhowtf/omniget/releases/tag/v0.7.7
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

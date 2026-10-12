@@ -1,0 +1,47 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: astral-sh.uv
+PackageVersion: 0.8.6
+PackageLocale: en-US
+Publisher: Astral Software Inc.
+PublisherUrl: https://astral.sh/
+PublisherSupportUrl: https://github.com/astral-sh/uv/issues
+Author: Astral Software Inc.
+PackageName: uv
+PackageUrl: https://github.com/astral-sh/uv
+License: Apache-2.0 or MIT
+LicenseUrl: https://github.com/astral-sh/uv/blob/HEAD/README.md#license
+Copyright: Copyright (c) 2024 Astral Software Inc.
+ShortDescription: An extremely fast Python package and project manager, written in Rust.
+Description: An extremely fast Python package and project manager, written in Rust. Designed as a single tool to replace pip, pip-tools, pipx, poetry, pyenv, twine, virtualenv workflows, and more.
+Moniker: uv
+Tags:
+- python
+ReleaseNotes: |-
+  This release contains hardening measures to address differentials in behavior between uv and Python's built-in ZIP parser (CVE-2025-54368).
+  Prior to this release, attackers could construct ZIP files that would be extracted differently by pip, uv, and other tools. As a result, ZIPs could be constructed that would be considered harmless by (e.g.) scanners, but contain a malicious payload when extracted by uv. As of v0.8.6, uv now applies additional checks to reject such ZIPs.
+  Thanks to a triage effort with the Python Security Response Team and PyPI maintainers, we were able to determine that these differentials were not exploited via PyPI during the time they were present. The PyPI team has also implemented similar checks and now guards against these parsing differentials on upload.
+  Although the practical risk of exploitation is low, we take the hypothetical risk of parser differentials very seriously. Out of an abundance of caution, we have assigned this advisory a CVE identifier and have given it a "moderate" severity suggestion.
+  These changes have been validated against the top 15,000 PyPI packages; however, it's plausible that a non-malicious ZIP could be falsely rejected with this additional hardening. As an escape hatch, users who do encounter breaking changes can enable UV_INSECURE_NO_ZIP_VALIDATION to restore the previous behavior. If you encounter such a rejection, please file an issue in uv and to the upstream package.
+  Security
+  - Harden ZIP streaming to reject repeated entries and other malformed ZIP files (#15136)
+  Python
+  - Add CPython 3.13.6
+  Configuration
+  - Add support for per-project build-time environment variables (#15095)
+  Bug fixes
+  - Avoid invalid simplification with conflict markers (#15041)
+  - Respect UV_HTTP_RETRIES in uv publish (#15106)
+  - Support UV_NO_EDITABLE where --no-editable is supported (#15107)
+  - Upgrade cargo-dist to add UV_INSTALLER_URL to PowerShell installer (#15114)
+  - Upgrade h2 again to avoid too_many_internal_resets errors (#15111)
+  - Consider pythonw when copying entry points in uv run (#15134)
+  Documentation
+  - Ensure symlink warning is shown (#15126)
+ReleaseNotesUrl: https://github.com/astral-sh/uv/releases/tag/0.8.6
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://docs.astral.sh/uv/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

@@ -1,0 +1,71 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.43.0
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Fixed
+  - wt step copy-ignored no longer self-lowers priority in the foreground: Since v0.37.0, copy-ignored wrapped its work in taskpolicy -b (macOS) / ionice -c3 (Linux) unconditionally, which throttled disk I/O for interactive runs and synchronous pre-* hooks — not just the background post-start flows the lowering was meant for. Detached background hook pipelines now set an internal sentinel, and copy-ignored only self-lowers when it sees it. Interactive wt step copy-ignored and foreground hooks run at normal priority. See wt step copy-ignored --help → Background-hook priority. (#2358, thanks @bram-rongen for reporting #2342)
+  - wt step commit no longer panics on large CRLF diffs containing multi-byte UTF-8: parse_diff_sections used str::lines() (strips \n and \r\n) but advanced the byte-offset accumulator by line.len() + 1, under-counting one byte per CRLF line. Once the diff exceeded the 400k filtering threshold the drift landed inside a multi-byte character and panicked with byte index N is not a char boundary. Now iterates with split_inclusive('\n') so offsets match real byte positions regardless of line-ending style. (#2356, closes #2355, thanks @Qnurye for reporting with a minimal reproduction)
+  - wt step relocate surfaces failed git checkout/git worktree move instead of printing false success: The four raw Cmd::new("git")...run()? call sites in relocate.rs swallowed non-zero exit codes — only spawn errors propagated through ? — so a failed checkout or move returned Ok and the caller printed Relocated 1 worktree. All four sites now route through repo.worktree_at(path).run_command(...), the project's fail-fast git pattern. Triggered most often when worktrunk.default-branch cached a branch that no longer resolves locally. (#2348)
+  Improved
+  - Alias dispatch ~15-20% faster via batched rev-parse: Parent-side alias dispatch was firing four separate git rev-parse subprocesses on the worktree path (--is-inside-work-tree, --show-toplevel, --git-dir, --symbolic-full-name HEAD). A new WorkingTree::prewarm_info folds all four selectors into a single invocation and populates the worktree_roots, git_dirs, and current_branches caches so later accessors hit cache. benches/alias: warm/1 53.3 → 43.5 ms (−19.6%), cold/100 62.1 → 49.7 ms (−18.2%). On systems with slow execve (macOS Gatekeeper, AV), three saved forks translate to ~600 ms per wt <alias>. (#2352, thanks @markjaquith for continuing to report #2322)
+  - Non-submodule repos no longer pay for a failing submodule probe: Repository::repo_path() used to run git rev-parse --show-toplevel inside .git to resolve the submodule case — that probe fails unconditionally on normal repos, costing ~5 ms per call. Now reads core.worktree directly from the bulk config map (the same signal git itself uses): bare repos short-circuit on core.bare, submodules read core.worktree, normal repos fall through to parent(git_common_dir). hyperfine on a healthy macOS system: wt noop in a normal repo 53.2 → 48.8 ms (1.09×); in a submodule 62.1 → 55.5 ms (1.12×). repo_path() fires ~2× during alias dispatch, so the win compounds. (#2350, thanks @markjaquith for reporting #2322)
+  Documentation
+  - pre-start and post-start hook rows say when the hook fires, not just what to put in it: The hook types table rows for pre-start and post-start now match the phrasing of neighbouring rows (pre-switch has "Runs before…", post-merge has "Runs in the target…"): "Runs once when a new worktree is created, blocking post-start/--execute until complete" and "Runs once when a new worktree is created, in the background". (#2360, thanks @ortonomy for reporting #1571)
+  - Hook docs: Recipes restructured as a table of contents: The "Designing Effective Hooks" umbrella heading was removed; "Recipes" is promoted to a top-level section with each bullet leading with a specifically-named link to its Tips & Patterns section. "Copying untracked files" moved up next to the JSON context section. (#2349, #2351)
+  - Refreshed stale docstrings across recently refactored modules. (#2354)
+  Internal
+  - ahead_behind collapsed into single get-or-insert accessor: cached_ahead_behind was open-coded get-or-insert at the call site. ahead_behind now reads cache.ahead_behind first and falls back to the merge-base + rev-list computation on miss, caching the result. The wt list ahead/behind task collapses from a manual cache check + dual codepath to a single call. batch_ahead_behind still primes the cache in bulk on git ≥ 2.36. (Breaking library API: Repository::cached_ahead_behind removed.) (#2347)
+  Install worktrunk 0.43.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/max-sixty/worktrunk/releases/download/v0.43.0/worktrunk-installer.sh | sh && wt config shell install
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/max-sixty/worktrunk/releases/download/v0.43.0/worktrunk-installer.ps1 | iex"; git-wt config shell install
+  Install prebuilt binaries via Homebrew
+  brew install worktrunk && wt config shell install
+  Download worktrunk 0.43.0
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+  Install via Cargo
+  cargo install worktrunk && wt config shell install
+  Install via Winget (Windows)
+  winget install max-sixty.worktrunk && git-wt config shell install
+  Install via AUR (Arch Linux)
+  paru worktrunk-bin && wt config shell install
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.43.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

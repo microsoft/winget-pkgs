@@ -1,0 +1,111 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: rullerzhou-afk.clawd-on-desk
+PackageVersion: 0.6.2
+PackageLocale: en-US
+Publisher: rullerzhou-afk
+PublisherUrl: https://github.com/rullerzhou-afk
+PublisherSupportUrl: https://github.com/rullerzhou-afk/clawd-on-desk/issues
+PackageName: Clawd on Desk
+PackageUrl: https://github.com/rullerzhou-afk/clawd-on-desk
+License: MIT
+LicenseUrl: https://github.com/rullerzhou-afk/clawd-on-desk/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 rullerzhou-afk
+ShortDescription: A pixel desktop pet that watches Claude Code, Codex, Cursor & other AI coding agents — so you don't have to.
+Description: |-
+  Clawd lives on your desktop and reacts to what your AI coding agent is doing — in real time. Start a long task, walk away, come back when the crab tells you it's done.
+  Thinking when you prompt, typing when tools run, juggling subagents, reviewing permissions, celebrating when tasks complete, sleeping when you step away. Ships with two built-in themes: Clawd (pixel crab) and Calico (三花猫), with full support for custom themes.
+  Supports Windows 11, macOS, and Ubuntu/Linux. Requires Node.js. Works with Claude Code, Codex CLI, Copilot CLI, Gemini CLI, Cursor Agent, CodeBuddy, Kiro CLI, and opencode.
+  Features
+  Multi-Agent Support
+  - Claude Code — full integration via command hooks + HTTP permission hooks
+  - Codex CLI — automatic JSONL log polling (~/.codex/sessions/), no configuration needed
+  - Copilot CLI — command hooks via ~/.copilot/hooks/hooks.json
+  - Gemini CLI — command hooks via ~/.gemini/settings.json (registered automatically when Clawd starts, or run npm run install:gemini-hooks)
+  - Cursor Agent — Cursor IDE hooks in ~/.cursor/hooks.json (registered automatically when Clawd starts, or run npm run install:cursor-hooks)
+  - CodeBuddy — Claude Code-compatible command hooks + HTTP permission hooks via ~/.codebuddy/settings.json (registered automatically when Clawd starts, or run node hooks/codebuddy-install.js)
+  - Kiro CLI — command hooks injected into custom agent configs under ~/.kiro/agents/, plus an auto-created clawd agent that is re-synced from Kiro's built-in kiro_default whenever Clawd starts, so you can opt into hooks with minimal behavior drift via kiro-cli --agent clawd or /agent swap clawd (registered automatically when Clawd starts, or run npm run install:kiro-hooks). State hooks have been verified on macOS.
+  - opencode — plugin integration via ~/.config/opencode/opencode.json (registered automatically when Clawd starts); zero-latency event streaming, permission bubbles with Allow/Always/Deny, and building animations when parallel subagents are spawned via the task tool
+  - Multi-agent coexistence — run all agents simultaneously; Clawd tracks each session independently
+  Animations & Interaction
+  - Real-time state awareness — agent hooks and log polling drive Clawd's animations automatically
+  - 12 animated states — idle, thinking, typing, building, juggling, conducting, error, happy, notification, sweeping, carrying, sleeping
+  - Eye tracking — Clawd follows your cursor in idle state, with body lean and shadow stretch
+  - Sleep sequence — yawning, dozing, collapsing, sleeping after 60s idle; mouse movement triggers a startled wake-up animation
+  - Click reactions — double-click for a poke, 4 clicks for a flail
+  - Drag from any state — grab Clawd anytime (Pointer Capture prevents fast-flick drops), release to resume
+  - Mini mode — drag to right edge or right-click "Mini Mode"; Clawd hides at screen edge with peek-on-hover, mini alerts/celebrations, and parabolic jump transitions
+  Permission Bubble
+  - In-app permission review — when Claude Code, CodeBuddy, or opencode request tool permissions, Clawd pops a floating bubble card instead of waiting in the terminal
+  - Allow / deny / agent-native extras — one-click approve or reject, plus permission rules / Always actions when the source agent supports them
+  - Global hotkeys — Ctrl+Shift+Y to Allow, Ctrl+Shift+N to Deny the latest permission bubble (only registered while bubbles are visible)
+  - Stacking layout — multiple permission requests stack upward from the bottom-right corner
+  - Auto-dismiss — if you answer in the terminal first, the bubble disappears automatically
+  - Per-agent toggle — open Settings… → Agents, pick an agent, and turn off Show pop-up bubbles to keep prompts in that agent's own terminal/TUI
+  Session Intelligence
+  - Multi-session tracking — sessions across all agents resolve to the highest-priority state
+  - Subagent awareness — juggling for 1 subagent, conducting for 2+
+  - Terminal focus — right-click Clawd → Sessions menu to jump to a specific session's terminal window; notification/attention states auto-focus the relevant terminal
+  - Process liveness detection — detects crashed/exited supported agent processes and cleans up orphan sessions
+  - Startup recovery — if Clawd restarts while any supported agent is still running, it stays awake instead of falling asleep
+  System
+  - Click-through — transparent areas pass clicks to windows below; only Clawd's body is interactive
+  - Position memory — Clawd remembers where you left it across restarts (including mini mode)
+  - Single instance lock — prevents duplicate Clawd windows
+  - Auto-start — Claude Code's SessionStart hook can launch Clawd automatically if it's not running
+  - Do Not Disturb — right-click or tray menu to enter sleep mode; all hook events are silenced until you wake Clawd. Permission bubbles are suppressed during DND — opencode falls back to its built-in TUI prompt, while Claude Code and CodeBuddy fall back to their built-in permission flow
+  - Sound effects — short audio cues on task completion and permission requests (toggle via right-click menu; 10s cooldown, auto-muted during DND)
+  - System tray — resize (S/M/L), DND mode, language switch, auto-start, check for updates
+  - i18n — English, Chinese, and Korean UI; switch via right-click menu or tray
+  - Auto-update — checks GitHub releases; Windows installs NSIS updates on quit, macOS/Linux git pull + restart when running from a cloned repo
+Tags:
+- claude-code
+- codebuddy
+- codex
+- copilot-cli
+- cursor
+- desktop-pet
+- gemini-cli
+- kiro
+- opencode
+ReleaseNotes: |-
+  v0.6.2
+  New Features
+  - Session Dashboard & Session HUD — Clawd now tracks every AI coding session it sees and surfaces them through two complementary surfaces: a multi-row clickable HUD docked next to the pet (so you can glance at all live sessions while continuing to work) and a full Session Dashboard (opened from the pet shortcut, tray, or Settings) with second-level elapsed timers, session aliases for naming runs, and an always-on session-id card badge replacing the older showSessionId toggle. The legacy "Sessions" submenu has been retired in favor of the dashboard.
+  - Codex CLI official hook integration — Codex CLI now uses proper state hooks and permission approvals as the primary path on every supported platform — including Windows, which previously had to rely on JSONL polling. State hooks drive the pet's working/notification state directly, permission approvals route through the same bubble UI as Claude Code / CodeBuddy (with safe fallback guards for stale prompts), and the existing JSONL polling is kept as a fallback for older Codex builds that don't expose hooks yet.
+  - Windows ARM64 native installer (#179) — first-class native .exe installer for Windows on ARM, alongside the existing x64 installer.
+  - Windows-on-ARM x64 → ARM64 migration prompt (#183) — packaged x64 builds running under ARM64 translation now detect the situation and prompt the user to download the native ARM64 installer directly from the latest GitHub Release, never silently cross-grading through electron-updater.
+  - Low power idle mode (#175) — opt-in mode that further reduces CPU/GPU work while the pet is idle, on top of the platform-wide idle improvements in #167.
+  - Categorized bubble controls (#165) — permission, notification, and update bubbles are now configurable as separate categories in Settings, with hardened policy controls and clearer auto-close behavior.
+  - Per-agent Notification hook toggle (#155) — each agent can now decide independently whether the Notification hook raises a bubble. Master-off greying logic for sub-switches (#156, #157, #158) makes the resulting state legible at a glance.
+  - Theme-aware update visual flow (#159) — the update process visuals now adapt to the active theme, with hardened overlay rendering and a restored PermissionRequest resync path.
+  Bug Fixes
+  - Taskbar entries lingering after Explorer restart (#185 + follow-up 09b80fc) — floating pet/helper windows could re-appear in the Windows taskbar after explorer.exe was restarted, because shell state is recreated and creation-time skipTaskbar no longer holds. A shared src/taskbar.js helper now reasserts setSkipTaskbar(true) via the existing Windows topmost watchdog, with the same treatment extended to the context-menu owner window.
+  - Multi-question AskUserQuestion bubbles (#191) — elicitation prompts with several option groups now use a stepper and clamp overflowing form content inside the bubble, keeping labels, radio controls, and the Submit action reachable.
+  - Bubble auto-close timers sync with Settings (#173) — changing the auto-close duration in Settings now retimes already-visible bubbles instead of leaving them on the old schedule.
+  - Settings collapsible interaction stability (#171) — Settings collapsible sections no longer flicker / lose focus during quick toggles.
+  - Updater bubble anchors across themes (#164) — update bubbles anchor consistently regardless of the active theme.
+  - Session HUD shadow shell rebalanced (#172) — HUD shadow geometry retuned so the docked HUD sits cleanly against the pet across themes.
+  - Linux Electron sandbox explicitly disabled (#168) — sandbox state is now declared rather than implicit, with matching startup notes.
+  - hideBubbles drops the HTTP connection for Claude Code / CodeBuddy (#162) — hiding a permission bubble now also closes the underlying HTTP connection, so dismissed prompts no longer keep the agent waiting.
+  - Update bubble overlap with permission bubbles — the update bubble now yields layout space when a permission bubble is active.
+  Refactoring, Docs & License
+  - Source license switched to AGPL — please review if you build on top of Clawd's source.
+  - Maintainers section in README/AGENTS recognizing @YOIMIYA66 as the first project maintainer alongside @rullerzhou-afk.
+  - Animated hero GIF added to all three README languages (#187 + follow-ups) — the top-of-README demo now shows the pet reacting through a five-beat product narrative (sleeping → thinking → typing → juggling → notification → happy) using real sprites and TUI shape.
+  - Docs refresh across Codex/WSL clarification, supported-agent guidance, ARM64 installer instructions, agent runtime architecture, and session dashboard readmes.
+  Contributors
+  Huge thanks to everyone who shipped code, reviewed behavior, or improved release quality for this release:
+  - @YOIMIYA66 — categorized bubble controls, theme-aware update flow, Settings collapsibles, session HUD shadow shell, bubble auto-close timer sync, updater bubble anchoring, localized Kimi setup docs (#159, #160, #164, #165, #171, #172, #173)
+  - @PeterShanxin — Windows ARM64 installer support, ARM64 migration prompt, low power idle mode, Windows idle CPU/GPU reduction (#167, #175, #179, #183)
+  - @Rladmsrl — per-agent Notification hook toggle and master-off sub-switch greying (#155, #156)
+  - @v-avuso — taskbar entry leak after Explorer restart (#185, first contribution)
+  - @livlign — animated hero GIF (#187, first contribution)
+  - @tomaioo — Linux Electron sandbox security note (#168)
+  - @anhtrinh919 — hideBubbles HTTP connection drop (#162)
+  Known Limitations
+  - Kimi permission classification is still partly heuristic — explicit approval flags are honored directly, but some Kimi tool runs still rely on a short delay-then-promote heuristic to switch the pet from working to notification.
+ReleaseNotesUrl: https://github.com/rullerzhou-afk/clawd-on-desk/releases/tag/v0.6.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

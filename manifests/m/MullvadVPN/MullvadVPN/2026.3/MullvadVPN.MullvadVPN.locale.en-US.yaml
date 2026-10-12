@@ -1,0 +1,75 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: MullvadVPN.MullvadVPN
+PackageVersion: '2026.3'
+PackageLocale: en-US
+Publisher: Mullvad VPN
+PublisherUrl: https://mullvad.net/
+PublisherSupportUrl: https://mullvad.net/help
+PrivacyUrl: https://mullvad.net/en/help/privacy-policy
+Author: Mullvad VPN
+PackageName: Mullvad VPN
+PackageUrl: https://mullvad.net/
+License: GPL-3.0
+LicenseUrl: https://github.com/mullvad/mullvadvpn-app/blob/HEAD/LICENSE.md
+Copyright: Copyright (C) 2024 Mullvad VPN AB
+CopyrightUrl: https://github.com/mullvad/mullvadvpn-app/blob/main/README.md
+ShortDescription: Mullvad is an open-source commercial virtual private network service based in Sweden.
+Description: Mullvad is an open-source commercial virtual private network service based in Sweden.
+Tags:
+- network
+- open-source
+- privacy
+- private
+- private-network
+- security
+- vpn
+ReleaseNotes: |-
+  This release is for desktop only.
+  Here is a list of all changes since last stable release 2026.2:
+  Added
+  - Add port setting for LWO obfuscation.
+  - Add list of recent server selections in the select location view.
+  - Add context menu to locations in the select location view.
+  - GotaTun is now used as the userspace WireGuard implementation on all desktop platforms, not just
+    macOS. It replaces wireguard-go.
+  Changed
+  - Optimize LWO performance. This gives a 1.5 to 3 times speedup in our benchmarks.
+  - Change default retry connection attempts. LWO is now the third default
+    constraint. The relative order among the following constraints is preserved.
+  Linux
+  - Switch memory allocator to jemalloc to reduce fragmentation.
+  - mullvad-early-boot-blocking.service now waits for local file system to be mounted
+    (After=local-fs.target). This was assumed before, but not required (and is still not required).
+  - mullvad-daemon now installs the same shutdown handler for SIGHUP as SIGINT and SIGTERM.
+  - mullvad-daemon now exits without tearing down firewall rules on SIGUSR1.
+    This is used to avoid leaking network traffic when restarting systemd service.
+  macOS
+  - Restart the GUI after an update if it was running.
+  - mullvad-daemon now installs the same shutdown handler for SIGHUP as SIGINT and SIGTERM.
+  Fixed
+  - Fix duplicate "Connected"/"Disconnected" desktop notifications caused by the daemon sending
+    multiple consecutive tunnel state events for the same state.
+  - Fix GUI appearing stuck in "Disconnecting" state when daemon transitions directly from error to
+    disconnected.
+  - Fix QUIC obfuscation not always being used if relays only had IPv6 addresses for QUIC.
+  - Fix a bug with Shadowsocks-based API access methods where some ciphers were configurable by
+    Mullvad VPN clients while not being supported by the system service.
+  - Fix IPv6 addresses not being allowed as endpoints for Socks5 and Shadowsocks API access methods.
+  Linux
+  - Fix 'mullvad split-tunnel clear' getting stuck.
+  Windows
+  - Fix potential access violation during cleanup on ARM64.
+  - Fix conflicts caused by some other VPN clients that depend on Mullvad's split tunnel driver. Note
+    that split tunneling still cannot be used simultaneously in different clients.
+  - Fix timeout when loading split tunnel driver during boot.
+  Security
+  - Remove ability for renderer process to execute arbitrary binaries. This is a defence-in-depth
+    measure to ensure that the renderer process does not have any capabilities beyond that of a
+    regular user of the app. Affects platforms with the in-app updates feature, i.e. macOS and
+    Windows. Fixes GHSA-h72f-j6r4-c3jc
+ReleaseNotesUrl: https://github.com/mullvad/mullvadvpn-app/releases/tag/2026.3
+PurchaseUrl: https://mullvad.net/en/account/create
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

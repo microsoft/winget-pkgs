@@ -1,0 +1,57 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: RussMckendrick.Aicommit
+PackageVersion: 0.0.9
+PackageLocale: en-US
+Publisher: Russ McKendrick
+PublisherUrl: https://github.com/russmckendrick
+PublisherSupportUrl: https://github.com/russmckendrick/aicommit/issues
+PackageName: aicommit
+PackageUrl: https://github.com/russmckendrick/aicommit
+License: MIT
+ShortDescription: A fast, opinionated CLI that generates Git commit messages and reviews staged diffs using AI. Written in Rust, installed as aic
+Tags:
+- ai-tools
+- commit
+- git
+ReleaseNotes: |-
+  Release focused on a polished terminal interface, quieter push flows, and resilient large-diff generation.
+  Terminal Interface Polish
+  The commit, review, and PR transcripts now read as one visual language with every fact printed once.
+  - One session header per run (previously "Commit session" printed twice), with the staging preflight rendered as dim sub-steps beneath it and the staged-file list shown exactly once.
+  - Branch and provider/model metadata collapse into a single row, and the redundant "Sending to provider/model" line is gone.
+  - Interactive prompts share aic's glyph vocabulary (? pending, ✔ answered, ❯ highlighted option) via a global prompt theme, and sections/cards manage their own vertical spacing for a consistent rhythm.
+  - The pre-commit upstream fetch shows a "Checking branch sync" spinner instead of stalling silently.
+  - Choosing Edit on a generated commit message opens $EDITOR with the message preloaded (matching the split flow) instead of a single-line inline prompt.
+  - aic models marks the active model with ❯ in the shared list style, and aic log aligns the before/after subjects in its comparison view.
+  Quieter Push Flow
+  - The push prompt shows a short remote label ([GitHub] origin) instead of the full URL, and success prints Pushed main → origin.
+  - The final Commit created summary shows the short hash, branch, pushed to origin (GitHub), and a +added −removed diffstat parsed from the commit output.
+  - In terminals with OSC-8 hyperlink support, the hash links to the commit page on GitHub, GitLab, or Bitbucket (driven by the new commit_path field in git_hosts.toml).
+  - Raw git output is no longer re-echoed after successful commits and pushes; it still appears on failures and recovery flows.
+  Large-Diff Generation Hardening
+  - Commit generation no longer appears to hang on very large staged diffs: the token counter now builds its encoder once per process instead of on every call, and diff splitting runs in a single pass (previously minutes to hours of CPU on multi-MB diffs; now seconds).
+  - Local CLI providers (claude-code, codex, copilot) no longer deadlock when the prompt exceeds the OS pipe buffer (~64 KiB): the prompt is written to the child process from a dedicated thread while its output is drained concurrently.
+  - Provider responses rejecting an oversized prompt ("maximum context length", "prompt is too long", HTTP 413) are reported as the diff-too-large error with remediation hints, instead of misleading "service unavailable" or "model is not available" messages.
+  - Chunked commit generation reserves budget for the chunk-summary preamble, so tightly-packed chunks no longer trip the provider token guard.
+  Generation Progress and Timeouts
+  - New AIC_HTTP_TIMEOUT config key: per-request timeout in seconds for the HTTP providers (default 120, 0 disables), with a 10s connection timeout. A timed-out request now fails with a clear message instead of waiting forever.
+  - Live status feedback during generation: the spinner shows the current stage (Splitting diff, Summarizing chunk 2/4, Synthesizing commit message), a rotating status detail, and elapsed time. Large diffs print an upfront note with the chunk count, split-commit drafting shows per-commit progress, and the prepare-commit-msg hook announces itself on stderr.
+  - The rotating status lines ship in src/status_messages.toml (including an occasional [rare] interjection) and can be personalized per user via ~/.aicommit-status.toml; each run shuffles the rotation order so the lines stay fresh.
+  Native TLS Trust Roots
+  - HTTP providers now use the operating system's certificate store instead of the bundled Mozilla root set (reqwest switched from rustls-tls to rustls-tls-native-roots). Custom or corporate CA certificates trusted by the OS — common behind TLS-inspecting proxies — now work without extra configuration. Contributed by @BUR4KBEY in #1, the project's first external contribution. 🎉
+  Fixed
+  - The generated PR preview cards no longer render twice when accepting or editing a draft.
+  - aic log now reports "Rewrote 1 commit message" (singular).
+  What's Changed
+  - Use native system trust roots for Rustls TLS by @BUR4KBEY in #1
+  New Contributors
+  - @BUR4KBEY made their first contribution in #1
+  Full Changelog: v0.0.8...v0.0.9
+ReleaseNotesUrl: https://github.com/russmckendrick/aicommit/releases/tag/v0.0.9
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/russmckendrick/aicommit/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

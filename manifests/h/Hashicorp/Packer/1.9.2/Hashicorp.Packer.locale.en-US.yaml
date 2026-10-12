@@ -1,0 +1,61 @@
+# Created with YamlCreate.ps1 v2.2.4 $debug=NVS0.CRLF.7-4-0-preview-2.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.4.0.schema.json
+
+PackageIdentifier: Hashicorp.Packer
+PackageVersion: 1.9.2
+PackageLocale: en-US
+Publisher: HashiCorp
+PublisherUrl: https://www.packer.io/
+PublisherSupportUrl: https://www.packer.io/community
+PrivacyUrl: https://www.hashicorp.com/privacy
+Author: Copyright (c) 2010-2023 Mitchell Hashimoto
+PackageName: Packer
+PackageUrl: https://www.packer.io/
+License: MPL-2.0
+LicenseUrl: https://github.com/hashicorp/packer/blob/main/LICENSE
+Copyright: Copyright (c) 2010-2023 Mitchell Hashimoto
+# CopyrightUrl:
+ShortDescription: Packer is a tool for building identical machine images for multiple platforms from a single source configuration.
+# Description:
+Moniker: packer
+Tags:
+- developing
+- packer
+- virtualization
+# Agreements:
+ReleaseNotes: |-
+  NOTES:
+  - Vendored plugins within Packer have not been updated. Plugin releases occur on a regular basis to address issues and feature requests. Please note that in an upcoming version of Packer, we will remove the last bundled plugins from Packer. Users are encouraged to use packer init for HCL2 templates or packer plugins install with legacy JSON templates for installing external plugins.
+
+  - Packer will now warn when using bundled plugins. This feature will be removed in a future version of the tool, so this warning is meant to bring awareness of the upcoming change, and to help users update their environment/templates to be ready for this. GH-12495
+
+  BUG FIXES:
+  - Fixed a bug with how Packer was discovering plugins: in order to load plugins, Packer would recursively scan all the known directories in which we could have installed plugins. This caused unnecessary directory walks and slowdowns upon invocation. Packer will now only check for nested plugins within the directories used by commands such as packer init, or packer plugins install, or as defined in PACKER_PLUGIN_PATH. Refer to Packer's plugin directory documentation for details on how loading works. GH-12414
+
+  - The packer init subcommand now bundles all the missing installed plugins into one condensed warning, as opposed to one warning per missing plugin. GH-12506
+
+  PLUGINS:
+  - packer-plugin-parallels: The Parallels plugin has been handed over to the Parallels team. New releases for this plugin are available at https://github.com/parallels/packer-plugin-parallels. This plugin is is no longer being bundled in the Packer binary release. Existing references to the plugin will continue to work but users are advised to update the required_plugins block to use the new plugin source address. GH-12476
+   ```
+   required_plugins {
+     parallels = {
+       source  =  "github.com/parallels/parallels"
+       version =  "~> 1"
+      }
+    }
+  ```
+
+  IMPROVEMENTS:
+  - The hcl2_upgrade subcommand will now add required_plugins to the template generated from JSON for all our officially supported plugins. GH-12504
+
+  BUG FIXES:
+  - On May 16th 2023, HCP introduced multi-project support to the platform. In order to use multiple projects in your organization, you will need to update Packer to version 1.9.1 or above. Starting with 1.9.1, you may specify a project ID to push builds to with the HCP_PROJECT_ID environment variable. If no project ID is specified, Packer will pick the project with the oldest creation date. Older versions of Packer are incompatible with multi-project support on HCP, and builds will fail for HCP organizations with multiple projects on versions before 1.9.1. GH-12453
+
+ReleaseNotesUrl: https://github.com/hashicorp/packer/blob/v1.9.2/CHANGELOG.md
+# PurchaseUrl:
+# InstallationNotes:
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://www.packer.io/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.4.0

@@ -1,0 +1,45 @@
+# Created with WinGet Updater using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: alagrede.znote
+PackageVersion: 4.9.0
+PackageLocale: en-US
+Publisher: alagrede
+PublisherUrl: https://github.com/alagrede
+PublisherSupportUrl: https://github.com/alagrede/znote-app/issues
+PackageName: znote
+PackageUrl: https://github.com/alagrede/znote-app
+License: Freeware
+ShortDescription: Markdown-based note-taking app for developers
+Tags:
+- dev
+- editor
+- electron
+- markdown
+- react
+- znote
+ReleaseNotes: |-
+  4.9.0 — Secrets, encrypted next to the note
+  A dev note is full of things you cannot commit: a password, a token, an Authorization header. Either the note stays out of git, or the credentials get pushed. Now neither — the note stays plain Markdown and versioned, while its sensitive values live in an encrypted file beside it.
+  - A reference, not a value — write secret:cisco.password in the note; the value lives in MyNote.secrets.yaml, encrypted. The Markdown never holds the secret, so the note stays safe to commit, to search, to send to the AI and to export.
+  - Extract what is already there — select a password in your note, right-click → Secret → Move selection to the shared secrets… (or ⌘⇧S). Znote encrypts it and leaves the reference in its place; the cleartext never round-trips through the file.
+  - Read it where you wrote it — a reference renders as •••••••• with a reveal and a copy without revealing button. No padlock to click: opening a note that uses secrets decrypts them.
+  - One panel per note — More (…) → Secrets… shows both files side by side: reveal, copy, rename, delete, or move a value between the shared and the private one. A key the note references but the file does not hold gets a row with an input already waiting.
+  - In code blocks — ${secret:api.token} is substituted when the block runs, through the environment, so the cleartext never reaches the temporary script file. Command output is masked before it is displayed and before it is saved back into the note.
+  - Standard sops + age, not a Znote format — sops decrypt MyNote.secrets.yaml works from any terminal. A generated .znote/README-secrets.md tells whoever clones the repository how.
+  Files that never leave your machine
+  - Private notes — a note matching the private pattern (local-* by default) is kept out of git and carries a local badge in the tree, because nothing else on screen would tell you it is never committed.
+  - Private values inside a shared note — a local: reference goes to MyNote.local.secrets.yaml, encrypted and never committed. Vault backups do include those files: they are the only copy that exists.
+  - The rules are written for you — Znote maintains its own block in the vault's .gitignore. And since .gitignore only governs untracked files, it also runs git rm --cached on what the rules now cover, and tells you.
+  A commit that still carries a password is stopped
+  Before a commit made from Znote, the notes about to be pushed are scanned for plaintext credentials — known token shapes (GitLab, GitHub, AWS, OpenAI…), values on a credential line, high-entropy strings. The push stops, naming the file and the line. Always allow these silences a false positive for the whole team, and stores SHA-256 hashes only, never the string itself.
+  This catches the slip made while working in Znote: no git hook is installed, so a commit from a terminal does not pass through it — the ignore rules above, on the other hand, apply whatever tool you use.
+  Setup
+  Install sops 3.10 or later and age, then point Settings → Secrets at your age key file. Znote never stores the key itself, only its path — and refuses a key file inside the vault, since the vault is the git repository. The ? button walks through the whole setup on macOS, Linux and Windows.
+  📖 Documentation
+ReleaseNotesUrl: https://github.com/alagrede/znote-app/releases/tag/v4.9.0
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://znote.io/faq.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,105 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Huawei.Cangjie.STS.Android
+PackageVersion: 1.1.3
+PackageLocale: zh-CN
+Publisher: Huawei Technologies Co., Ltd.
+PublisherUrl: https://cangjie-lang.cn/
+PrivacyUrl: https://cangjie-lang.cn/pages/privacy
+Author: Huawei Technologies Co., Ltd.
+PackageName: Cangjie (STS) Android
+PackageUrl: https://cangjie-lang.cn/download
+License: Apache-2.0
+LicenseUrl: https://gitcode.com/Cangjie/cangjie_build/blob/dev/LICENSE
+Copyright: Copyright Huawei Technologies Co., Ltd. 2022-2026. All rights reserved.
+ShortDescription: 面向全场景智能的新一代编程语言
+Description: 仓颉编程语言是一款面向全场景智能的新一代编程语言，主打原生智能化、天生全场景、高性能、强安全。主要应用于鸿蒙原生应用及服务应用等场景中，为开发者提供良好的编程体验。
+Tags:
+- harmonyos
+- oniro
+- openharmony
+- 编程
+- 编程语言
+- 语言
+- 鸿蒙
+ReleaseNotes: |-
+  版本介绍
+  Cangjie 1.1.3 为 STS 1.1 第二个发布版本，STS 1.1 维护周期 6 个月。
+  相比 1.1.0 版本，本版本无新增特性，有 1 个功能修复导致的变更，修复了若干问题；各模块修复问题详见本文档各章节介绍。
+  变更说明
+
+  | 场景描述                                                                                                      | 用例说明    | 变更前                                  | 变更后                                   | 适配方案                                       |
+  | ------------------------------------------------------------------------------------------------------------- | ----------- | --------------------------------------- | ---------------------------------------- | ---------------------------------------------- |
+  | 在父类和子类中，存在非 override 关系的 2 个函数，在调用点经过实例化之后函数签名一致，可能会出现运行结果错误的情况 | 见 issue#820 | 使用 O2 编译，运行时会打印"a",返回结果是 1 | 使用 O2 编译，运行时会打印"b", 返回结果是 0 | issue#820 场景的代码需要根据新的返回值进行适配 |
+
+  编译器
+  修复问题
+  - issue#3118 优化宏展开生成错误注解调用时的报错信息。
+  - issue#783 修复 struct 和 class 元数据缺少 reflectVersion1 标记导致运行时反射无法正确识别类型元数据的问题；reflectVersion1 属性现同步写入 struct/class/box_class 的 GenerateAttrsMetadata。
+  - issue#3116 修复管道运算符结合 trailing lambda 调用重载函数时，类型推断触发 ICE（SIGSEGV）的问题。受影响场景：f |> { x => overloaded(x) } 且无类型标注时必现崩溃，根因为 TryEnforceCandidate 中 PSet checkpoint 深度不一致。
+  - issue#2807 修复注解嵌套宏场景下宏展开失败的问题，覆盖两类场景：① 注解嵌套宏展开后生成子宏；② 宏展开结果本身包含注解嵌套宏。
+  - issue#794：修复 macOS 链接 libcangjie-std-ast.a 时动态/静态混用导致 AST 相关接口出错的问题。
+  - issue#470：修复 Windows 场景 Driver 调用 posix_spawn 失败时缺少错误消息的问题，修正 FORMAT_MESSAGE_ALLOCATE_BUFFER 内存分配及 LocalFree 释放逻辑。
+  - issue#465 修复读写 global struct 成员时写/读屏障缺失，在 aarch64 上导致随机崩溃或数据竞争的问题。
+  - issue#820 修复虚函数去虚化时，泛型实例化后多个函数签名相同、过滤逻辑缺失导致选错目标方法、运行时调用到错误函数的问题。
+  - issue#879 修复内联优化后去虚化阶段 src class 类型计算有误的问题：子类虚函数出现在多个父类虚表时，需通过偏移量比对选取正确父类，原实现过早断言唯一结果导致行为错误。
+  - issue#776 修复 VTable 生成中泛型参数类型映射错误的问题（issue #776），泛型继承场景下虚表条目类型不正确，改用 ReplaceRawGenericArgType 进行泛型参数类型替换。
+  - issue#841 修复 override wrapper 返回 CPointer<T> 时生成非法 LLVM IR、触发 verifier ICE 的问题。
+  - issue#851：修复 Windows 下同时依赖 AST 库并启用静态链接时 libgcc_s 链接方式无效的问题。
+  运行时
+  修复问题
+  - issue#513 修复涉及泛型实例类型多次接口查询的场景报错的问题。
+  - issue#592 修复 IntervalEndAsync 偶发崩溃报错问题。
+  - issue#465 修复并发读取/修改 global struct 偶发随机崩溃问题。
+  - issue#590 修复 SchdfdInit 并发随机问题。
+  标准库
+  修复问题
+  - issue#621：修复了 std 文档中代码块缩进不统一、冗余/缺少空格与空行、换行位置不恰当等代码风格问题。
+  - issue#579：修复了 std C/C++ 编译链接告警等问题，包括无参数函数声明未加 void、类型缺少 const 修饰、类型转换不规范、工具链编译标志缺失等。
+  - issue#603：修复了 std.time 包时区 ID 校验过宽接受非法 ID、TZif transition 时间未校验严格递增 等边界行为问题；修复了 std.unicode 包 Rune 级与 String 级大小转换行为不一致问题。
+  - issue#577：修复了 std.net 包 CJ_RawAddressDestroy 释放 sockaddr 后未清除指针导致保留悬空指针的问题。
+  - issue#574：修复了 std.regex 包 matchResult 未初始化导致的问题。
+  - issue#578：修复了 std.unittest 包文档中保留已不存在接口、函数缺少返回值类型声明、参数命名不规范等问题。
+  - issue#550：修复了 std.collection 包 HashSet 遍历方法在删除元素后仍遍历无效条目（hash=-1）的问题。
+  - issue#571：修复了 std.math 包 Decimal Float32 构造函数缺少 scale 溢出检查的问题。
+  - issue#569：修复了 std.net 包抽象 UDS 路径缺少长度校验、超长路径未拒绝的问题。
+  - issue#567：修复了 std.net 包 Windows 下 addrinfo 结构体 ai_addrlen 字段类型定义与实现不一致、getaddrinfo 调用传入空 hints 等问题。
+  - issue#525：修复了 std.net 包 CJ_RawAddressCreate 内存泄漏、IPv6 解析溢出、DNS 地址族过滤缺失、getSocketOptionInt32 use-after-free、IPv4 数组比较逻辑错误、RawSocket 双重关闭竞态、IPv6 scopeId 丢失、空域名未校验、isMulticast() 索引错误等问题。
+  - issue#545：修复了 std.math 包 fmod() 仅检查正无穷遗漏负无穷、域边界检查使用 epsilon 比较可被绕过、round() 对 NaN 输入行为未定义等问题。
+  - issue#521：修复了 std.core 包 atexit 单回调失败中断后续回调、memcpy_s 返回值未检查、UTF-8 支持 5/6 字节非法码点、Duration 计算错误、Future 无限递归、String 多处溢出风险等问题。
+  - issue#527：修复了 std.core 包 Thread.state use-after-free、Thread.name setter TOCTOU 竞态、mallocCString 异常不安全、Array.splitAt 长度计算错误、readFromConsole 静默失败等问题。
+  - issue#541：修复了 std.binary 包 UInt8/Int8/Bool 的 endian 读写方法缺少空缓冲区边界检查的问题。
+  - issue#548：修复了 std.process 包 /dev/null 文件描述符泄漏、fork() 后子进程调用非异步信号安全函数导致死锁等问题。
+  - issue#522：修复了 std.collection 包 HashMap 弱哈希混合易被攻击、ConcurrentHashMap 零哈希混合、TreeMap quickEquals 可产生误判等问题。
+  - issue#530：修复了 std.fs 包 TOCTOU 竞态条件、CopyLink 缓冲区溢出、Path.join 路径遍历、Windows 文件 I/O 整数截断、临时文件创建竞态、目录遍历异常时 handle 未释放等问题。
+  - issue#524：修复了 std.sync 包 SyncCounter.dec() 竞态可导致计数器变负、NotifyOnce.wait 超时计算错误、ReadWriteLock 写者饥饿、Timer ID 溢出越界等问题。
+  - issue#547：修复了 std.interop 包参数拼写错误、handle 默认值无效可导致重复创建句柄泄漏等问题。
+  - issue#561：修复了 std.regex 包 PCRE2 无匹配/递归限制导致 ReDoS 攻击风险 的问题。
+  - issue#559：修复了 std.unicode 包 CASE_RANGES 表映射不完整、希腊语终结 sigma 处理不正确、土耳其语/阿塞拜疆语 I-dot 处理不完整、大小写映射整数溢出、Rune.fromUtf8 和 trim 无限循环风险等问题。
+  工具链
+  IDE 插件
+  修复问题
+  - issue#398 修复复杂中文路径场景下无法正常提供语言服务的问题。
+  cjpm
+  修复问题
+  - issue#465 修复开启流水并行特性后的增量编译问题。
+  cjdb
+  修复问题
+  - issue#111 修复 MacOS 26 系统上 cffi 单步调试失败问题。
+  - issue#121 修复调试工具中整数越界等问题。
+  cjfmt
+  修复问题
+  - issue#421 修复数据越界问题。
+  cjlint
+  修复问题
+  - issue#417 修复 system 接口拼接命令字符串问题。
+  文档变更说明
+  开发指南
+  “类型转换”章节新增“类型模式与子类型转换”小节。
+ReleaseNotesUrl: https://cangjie-lang.cn/docs?url=https%3A%2F%2Fcj-docs.gitcode.com%2Fzh%2F1.1.3%2Frelease-notes%2Fcangjie-1.1.3-release-notes.html
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://cangjie-lang.cn/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

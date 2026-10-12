@@ -1,0 +1,81 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AtomGit.AtomCode
+PackageVersion: 5.0.8
+PackageLocale: zh-CN
+Publisher: 重庆开源共创科技有限公司
+PublisherUrl: https://atomgit.com/
+PublisherSupportUrl: https://atomgit.com/atomgit_atomcode/atomcode/issues
+PrivacyUrl: https://docs.gitcode.com/docs/help/home/protocol/privacy-policy
+Author: 重庆开源共创科技有限公司
+PackageName: AtomCode
+PackageUrl: https://atomcode.atomgit.com/
+License: MIT
+LicenseUrl: https://atomgit.com/atomgit_atomcode/atomcode/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Yubang Xu
+CopyrightUrl: https://docs.gitcode.com/docs/help/home/protocol/ai-privacy-policy
+ShortDescription: AI 编程助手 在你的终端中运行
+Description: Claude Code / Cursor Agent 的开源平替，住在你的终端里。连接任意 OpenAI 兼容大模型，自主读文件、改代码、跑测试、自我验证 —— 用 Rust 构建。
+Tags:
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  AtomCode v5.0.8 Release Notes
+  发布日期：2026-08-20
+  v5.0.8 聚焦于 TUI 文本选择与拖拽体验（双击选词、三击选行、工具块复制、拖拽卡顿消除）、Plugin Hook 事件补齐（PostToolUseFailure / Stop / StopFailure）、WebUI 交互打磨（项目级新建会话、通知去重、局域网访问修复），并新增 Zhipu Coding Plan 与 Ollama 支持、可配置品牌名及输出截断防护等多项稳定性改进。
+
+  ⚠️ Behavior Changes（注意行为变化）
+  - TUI 鼠标捕获改为默认关闭（opt-in）：此前在受支持终端（kitty、WezTerm、iTerm2、Windows Terminal 等）上默认启用应用级鼠标捕获，现改为默认关闭，回归终端原生的鼠标选择 / 复制 / 粘贴 / 双击行为，在各终端表现一致。需要应用级鼠标选择（双击选词、跨区块复制、点击定位光标）时，设置环境变量 ATOMCODE_MOUSE_SGR=1 重新启用（dumb 等不支持的终端即使开启也会被硬性拦截；OSC52 键盘复制不受影响，仍按白名单默认开启）。
+
+  ✨ 新增功能（Features）
+  TUI 文本选择
+  - 双击选词 / 三击选行：双击选中单词（CJK 连续文字按整体选中）、三击选中整行（含软换行链），选中即复制
+  - 工具块可拖拽选中复制：bash 命令、输出与工具头均可拖拽选中并复制，复制内容自动剔除 ● / └ / ⎿ 等装饰性锚点字符，保留命令与输出原文
+  WebUI
+  - 项目内新建会话：工作区项目行以 (N) 内联展示会话数，hover 项目行出现「在此目录新建对话」按钮，可直接在该项目目录开启新会话（不收起已展开的项目树）
+  Provider / 网络
+  - Zhipu Coding Plan 预设：新增 Zhipu Coding Plan 一键预设，指向 Coding Plan 专属端点（/api/coding/paas/v4），与普通智谱 token 端点区分，使用同一 ZHIPUAI_API_KEY
+  - /provider 支持 Ollama：添加 / 编辑 provider 的协议切换由 OpenAI ↔ Anthropic 两值变为 OpenAI → Anthropic → Ollama 三值循环；切到 Ollama 时自动补全本地端点 http://localhost:11434 并隐藏 API Key 字段（用户已填写的地址不会被覆盖或清空）
+  Agent / 工具
+  - read_file 多段读取：新增 ranges 参数，一次调用读取多个不连续行区间，减少弱模型的分页往返；所有区间共享单个输出预算，超限时提示剩余区间可继续请求
+  - 大文件大纲精准跳转：文件大纲（skeleton）为每个符号标注精确的 offset / limit，并给出可直接套用的 read_file 调用形态，模型无需猜测行号
+  Code Review
+  - 审查进度显示：/code-review 进度行实时显示 round X/N 与累计 findings 数，审查过程可感知
+  Plugin 生态
+  - 新增 PostToolUseFailure 事件：工具调用失败（is_error）时触发，插件可区分工具成功与失败，payload / 改写语义与 PostToolUse 一致
+  - 新增 Stop / StopFailure 事件：每回合结束时恰好触发其一——正常结束（含安全熔断、用户取消、限流暂停）触发 Stop，因 API / Provider 出错（ProviderError / Timeout）结束触发 StopFailure；payload 携带 stop_reason、transcript_path 与 stop_hook_active，atomcode hooks CLI 子命令同步支持测试这些事件
+  配置
+  - 可配置品牌名：[ui] brand_name / [ui] oauth_provider_name（或环境变量 ATOMCODE_BRAND_NAME / ATOMCODE_OAUTH_PROVIDER_NAME）可自定义界面与 CLI --help 中展示的品牌名和 OAuth 登录名，{brand} / {oauth} 占位符在 i18n 文案与命令描述中统一替换
+  🛠 修复（Fixes）
+  TUI / 终端渲染
+  - edit_file「未匹配」类错误弱化为黄色警告：可自愈的失败（bash 退出码失败、edit_file 未匹配 / 文件未修改等）改用警告色显示，不再呈现红色硬错误；真正的工具分发失败（参数解析错误等）仍为红色
+  - 带圈数字按全宽计数：①–⑳ 按 2 格全宽字形计算宽度，修复带圈数字与后续字符（如「③的」）重叠
+  - 用量提示过期守卫：滚动窗口重置后，右下角「Token 使用量」提示不再滞留不消失（按距上次拉取的时长与重置剩余时间比对，时区无关）
+  - 滚动后误判双击：滚动 / 重排（SIGWINCH）后清除上次点击记录，同一坐标的点击不再被误判为双击
+  - 选中改用实心主题色背景：文本选中由 SGR-7 反显改为实心主题色背景（深色主题深蓝、浅色主题浅蓝，NO_COLOR 时回退反显），避免选中区内不同前景色导致背景碎片化
+  - 消除拖拽选择卡顿：合并连续拖拽事件，拖到末尾不再越来越卡
+  WebUI
+  - 项目行「+」新建后不再收起：在新项目目录新建会话时不再闪收已展开的项目树
+  - 修复「加载中」僵尸行：其他目录项目在重载覆盖后不再永久卡在「加载中」
+  - 命令通知去重：恢复 / 确认失败等命令通知在尾部的通知连续段内去重，daemon 不可达时不再刷屏堆叠（真实内容出现后重置，后续真实重复仍会显示）
+  - 局域网 HTTP 访问修复：crypto.randomUUID 在非安全上下文（局域网明文 HTTP）不可用导致发消息崩溃的问题，改为带 getRandomValues 回退的 UUID v4 生成
+  会话
+  - /resume 占用会话自动 fork：交互式 /resume 命中被其他运行时占用的会话时，自动复制一份继续（对齐 --continue 行为）；复制失败（如源会话尚未完成格式收敛）时降级为熟悉的「in use」提示
+  Agent / 上下文
+  - 工具调用截断守卫：模型在 finish_reason=length 输出截断时发出的工具调用（参数可能不完整）一律不执行，并以错误结果引导模型拆分写入（先写首段、再以 edit_file 追加），避免半截命令 / 文件被落盘
+  - use_skill 携带技能安装路径：模型调用目录型技能时，展开内容附带安装路径提示，可直接解析技能自带的 scripts/ / references/，无需再在工作目录中重新搜索
+  📚 文档（Docs）
+  - README（中英）重构安装章节：新增官方安装脚本（PowerShell install.ps1 / shell install.sh，支持 ATOMCODE_VERSION / ATOMCODE_PREFIX 覆盖）、WebUI 前端构建步骤、官方 CodingPlan 闭源签名与自建二进制差异说明
+  - hooks 文档补充 post_tool_use_failure / stop / stop_failure 事件说明
+ReleaseNotesUrl: https://atomgit.com/atomgit_atomcode/atomcode/releases/v5.0.8
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://atomcode.atomgit.com/docs/zh/index.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,164 @@
+# Created with komac v2.11.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Meta.Zstandard
+PackageVersion: 1.5.7
+PackageLocale: en-US
+Publisher: Meta
+PublisherUrl: https://opensource.fb.com/
+PublisherSupportUrl: https://github.com/facebook/zstd/issues
+PackageName: Zstandard
+PackageUrl: https://github.com/facebook/zstd
+License: GPL-2.0
+LicenseUrl: https://github.com/facebook/zstd/blob/HEAD/LICENSE
+ShortDescription: Zstandard is a fast lossless compression algorithm, targeting real-time compression scenarios at zlib-level and better compression ratios. It's backed by a very fast entropy stage, provided by Huff0 and FSE library.
+Moniker: zstd
+ReleaseNotes: |-
+  Zstandard v1.5.7 is a significant release, featuring over 500 commits accumulated over the past year. This update brings enhancements across various domains, including performance, stability, and functionality, and is particularly recommended for 32-bit users due to a bug fix detailed below.
+  edit: man pages were not properly updated in this package, and are still pointing to v1.5.6. If you want the v1.5.7 version, they are updated in dev branch, and can be cherry-picked using commit 6af3842. Alternatively, they can also be built locally using make manual and make -C programs man.
+  Performance Enhancements
+  Enhanced Compression Speed for Small Data Blocks
+  The compression speed for small data blocks has been notably improved at fast compression levels, thanks to contributions from @TocarIP, further extended in #4165. Below are benchmark results illustrating the performance improvements for level 1 compression on the Silesia corpus, segmented into different block sizes:
+  ──────────┬────────┬────────┬───────
+  Block Size│v1.5.6  │v1.5.7  │Improv.
+  ──────────┼────────┼────────┼───────
+  4 KB      │280 MB/s│310 MB/s│+10%
+  ──────────┼────────┼────────┼───────
+  8 KB      │328 MB/s│364 MB/s│+11%
+  ──────────┼────────┼────────┼───────
+  16 KB     │360 MB/s│396 MB/s│+10%
+  ──────────┼────────┼────────┼───────
+  32 KB     │383 MB/s│458 MB/s│+20%
+  ──────────┼────────┼────────┼───────
+  64 KB     │423 MB/s│474 MB/s│+12%
+  ──────────┼────────┼────────┼───────
+  128 KB    │460 MB/s│485 MB/s│+5%
+  ──────────┴────────┴────────┴───────
+  These improvements are particularly beneficial in data centers and databases, where data is often divided into small segments to enhance seekability. A notable example is RocksDB, which is frequently configured with block sizes around 16 KB. Such systems will experience an immediate performance boost by updating their compression library to v1.5.7.
+  Additionally, the speed improvements partially extend to dictionary compression, with observed gains ranging from none to +15%.
+  Substantial --patch-from improvements
+  The --patch-from functionality of the zstd CLI allows for differential compression of a file given an older version, similar to bsdiff. While compression levels impact processing speed and compression ratio as expected, at high compression levels (18+), speed was previously reduced to uncomfortable levels.
+  v1.5.7 largely mitigates the speed impact of high compression levels 18+, as illustrated in the following scenario, which compresses linux-6.13.tar as a difference from linux-6.12.tar using 6 threads:
+  ─────┬──────┬──────┬───────
+  level│v1.5.6│v1.5.7│Improv.
+  ─────┼──────┼──────┼───────
+  18   │210 s │42.7 s│x4.9
+  ─────┼──────┼──────┼───────
+  19   │273 s │61.8 s│x4.4
+  ─────┼──────┼──────┼───────
+  20   │310 s │82.3 s│x3.8
+  ─────┼──────┼──────┼───────
+  21   │365 s │120 s │x3.1
+  ─────┴──────┴──────┴───────
+  Additionally, compression ratio of --patch-from is also substantially improved across the board, including higher compression levels:
+  ─────┬─────────┬─────────┬───────
+  level│v1.5.6   │v1.5.7   │Improv.
+  ─────┼─────────┼─────────┼───────
+  15   │6,383,341│6,003,514│6.3%
+  ─────┼─────────┼─────────┼───────
+  16   │5,909,932│5,421,444│9.0%
+  ─────┼─────────┼─────────┼───────
+  17   │5,613,879│5,214,734│7.7%
+  ─────┼─────────┼─────────┼───────
+  18   │5,584,219│5,075,507│10.0%
+  ─────┼─────────┼─────────┼───────
+  19   │5,322,658│4,724,116│12.6%
+  ─────┼─────────┼─────────┼───────
+  20   │5,097,236│4,583,435│11.2%
+  ─────┼─────────┼─────────┼───────
+  21   │4,648,583│4,297,672│8.1%
+  ─────┼─────────┼─────────┼───────
+  22   │4,560,051│4,225,283│7.9%
+  ─────┼─────────┼─────────┼───────
+  --max│N/A      │3,999,476│
+  ─────┴─────────┴─────────┴───────
+  Compression ratio improvements for large files
+  The compression ratio has been enhanced slightly for large data across all compression levels, thanks to a refined approach in selecting block boundaries. This improvement is more pronounced at lower compression levels (≤ 15), where the previous boundary selection method was relatively basic. In contrast, higher compression levels (16+) already employed some analysis, but still benefit from the introduction of the new heuristic, resulting in marginally better compression ratios.
+  A comparison of the compression ratios between v1.5.6 and v1.5.7 is presented below:
+  ─────┬──────────┬──────────┬────────
+  level│v1.5.6    │v1.5.7    │Improv.
+  ─────┼──────────┼──────────┼────────
+  1    │73,492,125│73,292,801│-199,324
+  ─────┼──────────┼──────────┼────────
+  3    │66,555,241│66,217,754│-337,487
+  ─────┼──────────┼──────────┼────────
+  6    │61,614,472│61,350,571│-263,901
+  ─────┼──────────┼──────────┼────────
+  8    │60,089,890│59,816,878│-273,012
+  ─────┼──────────┼──────────┼────────
+  12   │58,297,345│58,039,924│-257,421
+  ─────┼──────────┼──────────┼────────
+  15   │57,290,517│57,031,235│-259,282
+  ─────┼──────────┼──────────┼────────
+  16   │55,341,618│55,304,857│-36,761
+  ─────┼──────────┼──────────┼────────
+  19   │52,876,557│52,840,800│-35,757
+  ─────┼──────────┼──────────┼────────
+  22   │52,326,420│52,289,718│-36,702
+  ─────┴──────────┴──────────┴────────
+  Command-Line Interface Updates
+  Recognizing the prevalence of multi-core systems, zstd now employs multiple threads by default, thanks to #4211 by @daniellerozenblit
+  In v1.5.7, systems will see default threading scaled according to capability, but remains cautious to mitigate risks of overloading surprises on existing user base, with a maximum of 4 threads by default.
+  For example, a typical "low-end" system with 4 cores and hyperthreading will employ 2 threads by default. A "higher-end" system with 8 cores and hyperthreading will employ 4 threads by default.
+  These modifications only impact default settings. As usual, the number of threads that zstd uses can also be set manually, either via command line or via environment variables.
+  Additionally, a new zstd command --max is available, designed to maximize compression ratios by leveraging all parameters, at the expense of time and memory. It's slower and more resource hungry than --ultra -22, but achieves denser compressed archives if that's the goal. For instance, compressing enwik9 (1,000,000,000 bytes) at --max level on a i7-9700k platform yields:
+  ───────────┬───────────┬──────┬───────
+  level      │cSize      │cTime │cMem
+  ───────────┼───────────┼──────┼───────
+  --ultra -22│213,898,083│~6 mn │~ 3 GB
+  ───────────┼───────────┼──────┼───────
+  --max      │202,507,076│~72 mn│~ 18 GB
+  ───────────┴───────────┴──────┴───────
+  Bug Fixes
+  v1.5.7 resolves a long standing and very rare compression issue in 32-bit mode, which can be triggered during long-lasting sessions (same ZSTD_CCtx* being continuously reused). This issue required several conditions to be met and a large amount of data to occur, but at the scale of zstd usage, it has been observed and reported (#4292).
+  In summary, if you use libzstd in 32-bit mode, this update is highly recommended.
+  Miscellaneous
+  The release also brings its lot of various improvements, impacting build scripts (cmake, meson, Apple Framework, Visual Studio), documentation and portability (QNX, FreeBSD, Hurd, icc/icx).
+  Notably, there are measurable performance gains for binaries produced with Visual Studio, as a cumulative result of several contributions.
+  Changelog:
+  - fix: compression bug in 32-bit mode associated with long-lasting sessions
+  - perf: substantial compression speed improvements (up to +30%) on small data, by @TocarIP (#4144) and @Cyan4973 (#4165)
+  - perf: improved compression speed (~+5%) for dictionary compression at low levels (#4170)
+  - perf: much faster --patch-from at high compression levels (#4276)
+  - perf: higher --patch-from compression ratios, notably at high levels (#4288)
+  - perf: better speed for binaries on Windows (@pps83) and when compiled with Visual Studio (@MessyHack)
+  - perf: slightly improve compression ratio across all levels thanks to better block boundaries (#4136, #4176, #4178)
+  - perf: slight compression ratio improvement for dfast, aka levels 3 and 4 (#4171)
+  - perf: runtime bmi2 detection now also enabled on x86 32-bit mode (#4251)
+  - cli: multi-threading as default CLI setting, by @daniellerozenblit
+  - cli: new --max command (#4290)
+  - api: new method ZSTD_compressSequencesAndLiterals() (#4217, #4232)
+  - api: ZSTD_getFrameHeader() now works on skippable frames (#4228)
+  - build: improve msbuild version autodetection, support VS2022, by @ManuelBlanc
+  - build: fix meson build by @artem and @Victor-C-Zhang, and on Windows by @bgilbert
+  - build: compatibility with Apple Framework, by @Treata11
+  - build: improve icc/icx compatibility, by @josepho0918 and @luau-project
+  - build: improve compatibility with Android NDK, by Adenilson Cavalcanti
+  - portability: linux kernel branch, with improved support for Sequence producers (@embg, @gcabiddu, @Cyan4973)
+  - portability: improved qnx compatibility, suggested by @rainbowball
+  - portability: improved install script for FreeBSD, by @sunpoet
+  - portability: fixed test suite compatibility with gnu hurd, by @diegonc
+  - doc: clarify specification, by @elasota
+  - misc: improved tests/decodecorpus validation tool (#4102), by antmicro
+  New Contributors
+  - @ManuelBlanc made their first contribution in #3987
+  - @sunpoet made their first contribution in #3994
+  - @georgthegreat made their first contribution in #3998
+  - @pstef made their first contribution in #4021
+  - @Ansuel made their first contribution in #4020
+  - @b7f7 made their first contribution in #4019
+  - @bgilbert made their first contribution in #3931
+  - @alexlnkp made their first contribution in #4025
+  - @r-barnes made their first contribution in #4034
+  - @Adenilson made their first contribution in #4050
+  - @Federico-Maresca made their first contribution in #4039
+  - @jbajic made their first contribution in #4054
+  - @tpetazzoni made their first contribution in #4096
+  - @uilianries made their first contribution in #4101
+  - @jclab-joseph made their first contribution in #4087
+  - @RubenKelevra made their first contribution in #4094
+  - @proppy made their first contribution in #4102
+ReleaseNotesUrl: https://github.com/facebook/zstd/releases/tag/v1.5.7
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
+
