@@ -1,0 +1,65 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: hsingjui.Pilo
+PackageVersion: 0.2.2
+PackageLocale: zh-CN
+ShortDescription: 简洁的 Pi Coding Agent 桌面客户端，在一个工作区中管理 Local、WSL 与 SSH 项目。
+Description: |-
+  Pilo 是 Pi Coding Agent 的桌面客户端，不重新实现 Agent。它负责在统一工作区中呈现 Connection、Project 与 Pi Session，而会话状态和 Agent 行为仍由 Pi 负责。
+
+  核心能力
+
+  | 能力                               | 为什么重要                                                                                            |
+  | ---------------------------------- | ----------------------------------------------------------------------------------------------------- |
+  | Local、WSL、SSH 统一工作区         | 项目保留在原本的环境中；Pilo 会在所选环境中运行 pilo-server，不需要先把远程项目复制到桌面端。         |
+  | Pi 运行在代码所在环境              | 服务端以项目目录为工作目录启动 pi --mode rpc，Local、WSL 与 SSH 使用一致的交互方式。                  |
+  | Pi 保持事实来源                    | Session 直接读取 Pi 的 JSONL 文件；SQLite 只保存可重建的索引、缓存和桌面状态。                        |
+  | Chat、工具、终端、文件与 Diff 同窗 | Pilo 展示 Pi 的思考与工具调用，并整合 PTY 终端、文件操作、预览端口以及 Git 状态/Diff。                |
+  | 并行 Agent                         | 同一项目可以运行多个 Agent 流，并分别列出、发送消息或停止。                                           |
+  | 原生桌面更新                       | Release 构建会为 Windows x64 与 macOS arm64 生成 updater 产物，Pilo 可以从 GitHub Releases 检查更新。 |
+
+  架构
+
+  Pilo 由桌面应用和运行在目标 Connection 环境中的 pilo-server 组成。Local 直接运行，WSL 通过 wsl.exe，SSH 则向远端部署匹配平台的服务端二进制。桌面端与服务端通过 crates/pilo-protocol 定义的 protobuf Envelope 帧在 stdio 上通信。
+
+  ┌──────────────────────────────┐
+  │        Pilo Desktop          │
+  │       React + Tauri 2        │
+  └──────────────┬───────────────┘
+                │ pilo-protocol / stdio
+                ▼
+  ┌──────────────────────────────┐
+  │          pilo-server         │
+  │   Local | WSL | SSH target   │
+  └──────────────┬───────────────┘
+                │ pi --mode rpc
+                ▼
+  ┌──────────────────────────────┐
+  │       Pi Coding Agent        │
+  └──────────────────────────────┘
+Tags:
+- pi
+- pi-agent
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  新功能
+  - 桌面端自动更新 — 设置里的更新卡片改为侧栏底部更新按钮，检测到新版本后展示下载进度，可一键下载、安装并重启
+  - Remote Web PWA — 新增 Service Worker 与更新提示，Remote Web 可作为 PWA 安装到桌面/主屏，新版本在当前会话空闲时就绪后再更新；补充 maskable 图标与主题元数据
+  - Remote 断线恢复 — 断网或网络切换后自动重连并显示离线提示，恢复后自动重新同步会话列表
+  修复
+  - 修复共享 Host 轮次被误判为中断
+  - 修复 Pi 响应失败标签重复显示
+  - 修复通知在会话命名完成前发出导致标题缺失
+  - 修复 Remote Web 移动端会话行图标槽与标题错位
+  - 修复 Remote Web 重复拉取 run config 目录
+  - 连接「显示在首页」改为后端存储，桌面端与 WebUI 共享同一设置
+  完整变更：https://github.com/hsingjui/pilo/compare/v0.2.1...v0.2.2
+ManifestType: locale
+ManifestVersion: 1.12.0
