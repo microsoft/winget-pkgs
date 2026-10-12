@@ -1,0 +1,65 @@
+# Created with komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: kunobi-ninja.kache
+PackageVersion: 1.1.0
+PackageLocale: en-US
+Publisher: Kunobi Ninja
+PublisherUrl: https://kunobi.com/
+PublisherSupportUrl: https://kunobi.com/contact
+Author: Zondax AG
+PackageName: kache
+PackageUrl: https://github.com/kunobi-ninja/kache
+License: Apache-2.0
+LicenseUrl: https://github.com/kunobi-ninja/kache/blob/HEAD/LICENSE
+Copyright: 2026 Zondax AG
+ShortDescription: Content-addressed zero-copy build cache for Rust, C/C++ and more
+Description: kache is a content-addressed, zero-copy build cache for Rust, C/C++ and more. It avoids file copies and wasted disk by hardlinking artifacts locally and sharing them via S3-compatible object storage.
+Moniker: kache
+Tags:
+- build
+- build-cache
+- cache
+- ci
+- compiler
+- developer-tools
+- rust
+- rustc
+ReleaseNotes: |-
+  Kache 1.1.0 fixes stale cache hits in Rust and C/C++, improves Rust edit loops, and adds reuse from an authorized local cache mounted read-only. It also repairs daemon upgrades and recovery when a cache volume fills up.
+  Install or update:
+  cargo install kache --locked --version 1.1.0
+  New installations can run kache init, then use Cargo as usual. Other installation methods.
+  Highlights
+  - Cache keys now account for more source, build-script and native-library inputs. Inputs changed during compilation prevent affected results from being stored.
+  - Rust edit loops retain incremental state after ordinary compile errors. Learning units seed that state from one compile's emitted dependency information.
+  - Read-only consumers can restore remote entries from a stopped daemon, and writable jobs can restore from a trusted local fallback mounted read-only.
+  Added
+  - Local fallback: writable jobs can reuse an authorized host cache without modifying it. Use a read-only mount and keep it within the same trust domain. #1470 by @jleni, adopted from @temporaryfix.
+  - Build scripts: enable hermetic cached runs by setting build_script_hermetic = true in [cache]. This remains off by default. #1444 by @AlJohri.
+  - Build explanations: kache explain <crate> names changed compiler-reported environment inputs without logging their values. Configured Cargo target directories can reuse matching donor units. #1443 by @jleni.
+  Fixed
+  - Cache correctness: settled-timestamp checks, workspace-tree guards and build-script declarations prevent several stale Rust and C/C++ hits. Results are withheld when relevant inputs change during compilation. #1488, #1491 by @jleni.
+  - Native outputs: restored C/C++ objects now trigger Make relinking, dependency paths follow the consumer checkout, and corrected native-library keys account for repeated link specifications and Apple install names. #1481, #1496 by @jleni.
+  - Build-script launchers: symlinked installations, including Homebrew paths, produce working executable pins. #1496 by @jleni.
+  - Remote access: read-only sessions keep their write restriction when starting a daemon. Upload workers process jobs concurrently, and accepted GC requests are no longer replayed after ambiguous timeouts. #1479 by @jleni.
+  - Cleanup: busy Cargo profiles preserve recent-use evidence. Opt-in live-unit receipts protect outputs Cargo still considers fresh. Full-disk recovery can request eviction after a refused store. #1480, #1485, #1491 by @jleni.
+  - macOS debugging: adaptive-incremental executables retain their debug information. #1440 by @alanxone.
+  - APT updates: package uploads finish before repository indexes advertise them. Failed package uploads leave the live indexes unchanged. #1536 by @jleni, contributed by Viktor (@viktorius007).
+  Performance
+  - Workspace guards share tree-memo work and reuse settled small-file hashes after metadata changes. #1493, #1520 by @jleni.
+  - Adaptive Rust units retain incremental state through ordinary errors and avoid a separate discovery compile when first learning their inputs. #1491, #1497 by @jleni.
+  Upgrade notes
+  - The first upgrade rebuilds file-hash and C/C++ memo data. Expect a cold build for C/C++ units and affected Rust units from packages with build scripts under the corrected keys.
+  - Existing cleanup settings now also apply to eligible targets in sibling Git worktrees. Free-space recovery stays off by default; cache.auto_recover_min_free_bytes enables it.
+  - If the old daemon remains after an upgrade, run kache daemon restart. Using 1.0.x and 1.1.0 together can repeatedly replace the shared daemon.
+  - A selected AWS profile now fails explicitly if it cannot supply credentials. It no longer falls through to a different workload identity.
+  - With cache.ignore_env = true, enable hermetic runs through build_script_hermetic in the file; KACHE_BUILD_SCRIPT_HERMETIC now follows the environment-override policy.
+  New Contributors
+  - @alanxone made their first contribution in #1440
+  Contributors
+  alanxone AlJohri jleni temporaryfix viktorius007
+  Full changelog: v1.0.0...v1.1.0
+ReleaseNotesUrl: https://github.com/kunobi-ninja/kache/releases/tag/v1.1.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
