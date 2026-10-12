@@ -1,0 +1,174 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: SpartanJ.ecode
+PackageVersion: 0.9.0
+PackageLocale: en-US
+Publisher: SpartanJ
+PublisherUrl: https://github.com/SpartanJ
+PublisherSupportUrl: https://github.com/SpartanJ/ecode/issues
+Author: Martín Lucas Golini
+PackageName: ecode
+PackageUrl: https://github.com/SpartanJ/ecode
+License: MIT
+LicenseUrl: https://github.com/SpartanJ/ecode/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2023 Martín Lucas Golini
+CopyrightUrl: https://github.com/SpartanJ/ecode/blob/main/LICENSE
+ShortDescription: |
+  Lightweight multi-platform code editor designed for modern hardware with a focus on responsiveness and performance.
+Description: |
+  ecode is a lightweight multi-platform code editor designed for modern hardware with a focus on responsiveness and performance. It has been developed with the hardware-accelerated eepp GUI, which provides the core technology for the editor. The project comes as the first serious project using the eepp GUI, and it's currently being developed to improve the eepp GUI library as part of one of its main objectives.
+Tags:
+- code
+- code-editor
+- developer-tools
+- editor
+- geany
+- gui
+- ide
+- lapce
+- lite
+- lite-xl
+- lsp-client
+- terminal
+- text
+- text-editor
+- vscode
+- zed
+ReleaseNotes: |-
+  ecode 0.9.0 is one of the largest releases in the project's history. It significantly expands ecode's Git tooling, editor customization, terminal capabilities, debugging workflow, system integration, and performance, while also incorporating a large amount of stability and rendering work from eepp.
+  Major additions include the ability to run the complete ecode GUI directly inside compatible terminals, VS Code-compatible user snippets, an integrated Git conflict resolver and Git History browser, a centralized searchable Settings interface, Zen Mode, persistent and navigable Markdown previews, configurable file associations, richer debugger layouts, Git diff indicators, improved font and text rendering controls, and a substantially upgraded integrated terminal.
+  Highlights
+  Run the full ecode GUI inside a terminal
+  ecode can now run its complete graphical interface directly inside a terminal that supports the Kitty graphics protocol.
+  Launch it with:
+  EEPP_RUNTIME=terminal ecode
+  This is not a separate TUI implementation or a simplified terminal frontend. ecode runs through the same eepp application, widget, editor, rendering, and input architecture used by the native desktop application.
+  In terminal runtime mode, eepp renders the application into an offscreen framebuffer and presents the resulting RGB frames through the Kitty graphics protocol. Terminal input is translated back into the normal eepp input pipeline, including keyboard, mouse, focus, and resize events.
+  The runtime includes:
+  - Full ecode GUI rendering inside the terminal
+  - Kitty graphics framebuffer presentation
+  - Persistent Kitty image updates
+  - Tile-based damage detection and unchanged-frame suppression
+  - Adaptive zlib compression and chunked Base64 frame streaming
+  - Kitty keyboard protocol input
+  - SGR pixel mouse input
+  - Focus events
+  - Terminal pixel-size resize handling
+  - Cross-platform terminal lifecycle support
+  - Hidden native graphics-context hosts where required by the platform
+  Because this is implemented at the eepp runtime layer rather than specifically in ecode, the same terminal runtime architecture can also be used by other eepp GUI applications.
+  And, yes: ecode can now run inside ecode. Launching EEPP_RUNTIME=terminal ecode from ecode's own integrated terminal renders a fully interactive ecode instance inside the terminal of another ecode instance. Apart from being a fun demonstration, it is also a useful illustration of the fact that terminal mode is a real application runtime rather than a separate text-based frontend.
+  This enables workflows that normally require a native graphical session while retaining the ergonomics of terminal environments, including terminal multiplexers, remote shells, and terminal-managed tabs and sessions.
+  As far as we know, ecode is the first native GUI code editor to ship this capability as a built-in application runtime rather than through a separate terminal frontend or browser-based wrapper.
+  simplescreenrecorder-2026-10-08_00.54.17.mp4
+  Zen Mode
+  ecode now includes a Zen Mode for distraction-free editing.
+  Zen Mode can be toggled from the View menu, through its keyboard command, or started directly with:
+  ecode --zen-mode
+  While active, ecode hides the side panel, status bar, menu controls, tab bar, and document information, leaving the editor content as the focus. Leaving Zen Mode restores the previously configured visibility of those interface elements.
+  This also provides a much lighter single-file editing experience when ecode is launched from a file manager or used as a quick editor.
+  #964
+  VS Code-compatible user snippets
+  ecode now supports user-defined snippets in addition to snippets provided by language servers.
+  Snippets can be loaded from language-specific and global configuration, project-local .ecode files, and compatible .vscode snippet files.
+  The implementation supports:
+  - JSONC snippet files
+  - Language and scope filtering
+  - Hot reload
+  - Source-aware completion ranking
+  - Exact prefix replacement
+  - Context-aware indentation
+  - Multi-cursor insertion
+  - Tab stops and final cursor positions
+  - Linked placeholders
+  - Placeholder choices
+  - Variables and transformations
+  - Common case-conversion modifiers
+  - Workspace-relative include and exclude globs
+  A new Insert Snippet provider is also available from the Universal Locator, making snippets searchable even when they are not triggered through autocomplete.
+  Importing VS Code snippets can be disabled independently while keeping personal and .ecode snippets enabled.
+  #111
+  Major Git workflow improvements
+  ecode's Git integration has been substantially expanded.
+  A new integrated three-pane conflict-resolution workflow provides:
+  - Ours, result, and theirs views
+  - An editable shared result document
+  - Conflict navigation
+  - Accept-current, accept-incoming, and related conflict actions
+  - Live diff highlighting
+  - Synchronized scrolling
+  - Conflict staging and resolution
+  - Restoring and discarding conflicted files
+  - Continue, commit, and abort actions for paused Git operations
+  - Session restoration for conflicts already in progress
+  Git History is now available directly from the source-control interface and as a detached tab. It supports browsing HEAD, local branches, remote branches, and tags without checking them out, and includes:
+  - Incremental history loading
+  - Expandable merge commits
+  - A synthetic Working Tree / Index entry for uncommitted changes
+  - Commit metadata and full messages
+  - Changed-file statistics
+  - Multi-file commit diffs
+  - Unified and side-by-side diff modes
+  - Show in Git History
+  - Checkout, merge, fast-forward merge, cherry-pick, and revert actions
+  - Branch and tag creation
+  - Local, remote-branch, and tag deletion
+  - Copy commit ID and commit message actions
+  - Add Tag & Push
+  - Persistent history table layout and column widths
+  The Git status view now supports multi-selection for stage, unstage, discard, open, and diff operations. Multiple selected files can be opened together in a single multi-file diff view.
+  Untracked files can now be deleted directly from Git status after confirmation, including correctly handling Git-quoted paths.
+  Diff views gained shared multi-file controls, aggregate change statistics, global expand/collapse actions, and a configurable default between unified and side-by-side presentation.
+  Remote branch handling now excludes symbolic entries such as origin/HEAD, removes stale local tracking references after remote deletion, and prunes stale refs while pulling.
+  Git diff indicators
+  ecode can now display Git additions, modifications, and removals directly in the editor gutter and minimap.
+  Diff computation runs asynchronously against the repository baseline and handles unsaved changes, newly added files, repository changes, stale jobs, and external file reloads.
+  The feature and its debounce interval are configurable from ecode settings.
+  #955
+  Persistent Markdown previews and local navigation
+  Markdown previews are now much closer to document browsers rather than static renderings.
+  Local Markdown links can be followed relative to the current document, including relative file:// paths. ecode previews maintain optional Back/Forward history, expose navigation actions from the context menu, and support Mod+[ / Mod+] history shortcuts.
+  Markdown preview tabs are now restored between sessions. When navigating away from a preview and then going back, ecode preserves the live editor binding and can continue rendering unsaved source content from the associated document.
+  Markdown and HTML views also gained document-level text selection, including forward and reverse dragging across independent rich-text elements, autoscroll, Copy, Select All, and selection-aware context menus.
+  Centralized Settings interface
+  ecode now provides centralized, searchable User Settings and Project Settings panels.
+  Settings are organized into categories and subsections, supported options update in real time, editable values are validated, and the older settings menus have been simplified to retain only contextual actions.
+  Plugin settings are integrated into the same interface. Plugins can expose structured options including:
+  - Boolean settings
+  - Choices
+  - Editable values
+  - Lists
+  - Secrets
+  - JSON objects
+  - Grouped settings
+  Raw JSON configuration remains available for advanced use cases.
+  The Settings UI is also constructed lazily, reducing startup work and avoiding the cost of creating large settings menus before they are opened.
+  Cross-platform file associations
+  ecode can now manage file associations from the Settings panel on Windows, macOS, Linux, and FreeBSD/XDG environments.
+  The interface exposes extensions known by ecode's syntax definitions and applies association changes asynchronously.
+  On XDG systems it can also install the ecode desktop entry required for the associations.
+  #192
+  Integrated terminal upgrades
+  Separately from the new application-level terminal runtime, ecode's integrated terminal received a major architectural and compatibility update.
+  Terminal emulation and parsing now run away from the UI thread, reducing the amount of terminal work that can block editor rendering.
+  The shared terminal implementation used by ecode gained:
+  - Kitty Graphics Protocol support
+  - Kitty keyboard protocol support
+  - Improved graphics streaming and frame replacement
+  - Application cursor and keypad mode fixes
+  - More complete modified-key handling
+  - Improved frame-damage detection
+  - Better scrollback synchronization
+  - Selection preservation while output arrives
+  - More reliable scrollbar interaction
+  - Correct Shift override behavior for application mouse reporting
+  - Improved mouse-wheel handling
+  - Better search highlighting
+  - Smarter find-bar placement so matches are not obscured
+  - Correct focus reporting without unexpectedly jumping scrollback to the bottom
+  - Improved IME positioning when switching between editor and terminal focus
+  - Improved drag selection bounds and vertical autoscroll when selecting beyond the terminal viewport
+ReleaseNotesUrl: https://github.com/SpartanJ/ecode/releases/tag/ecode-0.9.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
