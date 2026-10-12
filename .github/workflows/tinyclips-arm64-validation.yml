@@ -50,6 +50,18 @@ jobs:
           if ((Get-FileHash package.msix -Algorithm SHA256).Hash -ine $expected) { throw 'Package SHA256 does not match the submitted manifest.' }
           "Testing signed 1.8.2.0 $env:ARCH package; SHA256 verified."
 
+      - name: Prepare the interactive runner desktop
+        shell: pwsh
+        run: |
+          $session = (Get-Process -Id $PID).SessionId
+          Get-Process | Where-Object {
+            $_.SessionId -eq $session -and $_.ProcessName -in @('msoobe', 'CloudExperienceHost', 'WWAHost')
+          } | ForEach-Object { Stop-Process -Id $_.Id -Force }
+          if (-not (Get-Process explorer -ErrorAction SilentlyContinue | Where-Object { $_.SessionId -eq $session })) {
+            Start-Process "$env:WINDIR\explorer.exe"
+          }
+          Start-Sleep -Seconds 15
+
       - name: Install and exercise launches as a standard user
         shell: pwsh
         run: |
