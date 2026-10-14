@@ -1,0 +1,109 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: anyvm-org.anyvm
+PackageVersion: 0.7.2
+PackageLocale: en-US
+Publisher: anyvm.org
+PublisherUrl: https://anyvm.org/
+PublisherSupportUrl: https://github.com/anyvm-org/anyvm/issues
+PackageName: anyvm
+PackageUrl: https://github.com/anyvm-org/anyvm
+License: MIT
+LicenseUrl: https://github.com/anyvm-org/anyvm/blob/HEAD/LICENSE
+ShortDescription: Run any VM anywhere -- bootstrap BSD, Illumos, and Linux guests with QEMU.
+Description: |-
+  anyvm boots a prebuilt BSD, Illumos, Linux, Hurd or Plan 9 guest under QEMU
+  with one command. It downloads the image, configures firmware, ssh, folder
+  sync and port forwarding for that guest on that architecture, then drops you
+  into a shell or runs your command and exits.
+
+  anyvm drives QEMU but does not bundle it, so QEMU is declared as a package
+  dependency and winget installs it first. Pass --skip-dependencies to install
+  anyvm on its own and supply QEMU yourself.
+Moniker: anyvm
+Tags:
+- ci
+- dragonflybsd
+- emulator
+- freebsd
+- haiku
+- illumos
+- netbsd
+- openbsd
+- qemu
+- solaris
+- virtual-machine
+- vm
+ReleaseNotes: |-
+  Ubuntu 26.04 as a host
+  anyvm now runs every guest it runs on 24.04 from an Ubuntu 26.04 host too, and
+  CI has moved to the ubuntu-26.04 runners to keep it that way. Getting there
+  meant working around four regressions in 26.04's QEMU 10.2.1 / edk2 stack, each
+  pinned down to where it starts and fixed only there, so older hosts are
+  untouched.
+  aarch64 guests hung in the firmware. edk2-stable202508 added FEAT_LPA2
+  support, and from then on ArmConfigureMmu() switches the page-table format
+  while ArmVirtQemu is still running on its flash-resident early ID map in the old
+  format. On a CPU that reports a 52-bit PA range with LPA2 -- QEMU's -cpu max
+  under TCG, the default for most aarch64 guests here -- the next instruction fetch
+  faults and the firmware spins forever right after its banner
+  (tianocore/edk2#11962).
+  Ubuntu 26.04's qemu-efi-aarch64 2025.11 has the bug, so every aarch64 guest on
+  a 26.04 host hung. The first upstream build with the fix is no way out either:
+  edk2 2026.05 raises a Synchronous Exception when the loaders of FreeBSD 12.4 and
+  openEuler 22.03-LTS-SP4 hand over to the kernel.
+  anyvm now reads the build stamp embedded in the host's aarch64 UEFI image, and
+  when it is 2025.08 or later swaps in a pinned edk2 2024.02 build -- the
+  unmodified QEMU_EFI.fd from Ubuntu 24.04's qemu-efi-aarch64
+  2024.02-2ubuntu0.9, the firmware these guests were tested on before the move.
+  It is downloaded once from anyvm-org/firmware and checked against a sha256
+  pinned in anyvm itself, so a truncated or re-uploaded asset is discarded rather
+  than booted. Hosts with an older firmware keep their own.
+  NetBSD 9.x aarch64 hung at the interrupt controller when booting through
+  ACPI on QEMU 10.2.1 -- with or without the GICv3 ITS, on GICv2, and on older
+  virt machine types alike. It now boots from the device tree (acpi=off), which
+  works on 10.2.1 and on 8.2.2. NetBSD 10.x and 11.0 are not affected.
+  FreeBSD 13.2 - 14.3 riscv64 hung before "Timecounters tick" on QEMU 10.2.1,
+  the release where the Sstc timer code was reworked; turning the extension off
+  lets them boot, and S-mode then sets its timer through SBI as on hardware
+  without Sstc. anyvm uses -cpu rv64,sstc=off for those releases on QEMU 10.1
+  and later. 14.4, 14.5 and 15.x boot with Sstc and are left alone.
+  LoongArch guests had no firmware. 26.04's QEMU 10.2.1 is new enough by
+  version but ships without edk2-loongarch64-code.fd, so anyvm now falls back to
+  its pinned QEMU build whenever the system QEMU has no LoongArch firmware to
+  find, not only when it is older than 9.2.
+  Packaging. From Ubuntu 25.10 / Debian 13 on, the riscv64 emulator moved out
+  of qemu-system-misc into a separate qemu-system-riscv package, and the
+  binary names are only virtual packages apt refuses to pick between. The
+  dependency hint adds qemu-system-riscv only where apt knows it, and a missing
+  QEMU binary is now reported together with the Debian/Ubuntu package that ships
+  it.
+  New
+  - --firmware accepts an http(s) URL as well as a path. The image is downloaded
+    once into the VM's directory under a name derived from the whole URL, and a
+    failed download is fatal rather than silently falling back to a firmware you
+    did not ask for.
+  Fixed
+  - A data dir that ignores Unix permissions now fails fast with the cause. On
+    a WSL /mnt/<drive> mount without the metadata option every file reads as
+    0777, so ssh ignores the private key, every login fails, and the guest's sshd
+    soon refuses the host outright -- the boot could only ever time out. anyvm now
+    checks the key after chmod 600, stops, and prints the /etc/wsl.conf line
+    that fixes it (or use a --data-dir elsewhere).
+  - WSL without interop now says so instead of silently not opening the
+    browser. When explorer.exe fails with "Exec format error" -- a WSL distro
+    with systemd whose binfmt entry for Windows programs is gone, as on a fresh
+    Ubuntu 26.04 -- anyvm prints the Web VNC URL to open by hand and the two
+    commands that restore interop, rather than logging it only under --debug.
+  Other
+  - CI: all test workflows run on ubuntu-26.04 / ubuntu-26.04-arm, and a new
+    [testarch=<arch>] commit-message marker selects legs by guest architecture,
+    alongside [testos=] and [testhost=].
+  - winget: the release workflow syncs the winget-pkgs fork before submitting.
+    komac refuses to branch off a fork that has fallen behind upstream and reports
+    it as a permissions error, and with winget-pkgs taking hundreds of commits a
+    day that is the steady state rather than an edge case.
+ReleaseNotesUrl: https://github.com/anyvm-org/anyvm/releases/tag/v0.7.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
