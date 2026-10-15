@@ -1,0 +1,55 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.6.0.schema.json
+
+# The installer manifest.
+#
+# `InstallerSha256` is copied from the `SHA256SUMS` the release itself carries — the hash of
+# the installer the GitHub runner built, not of one built on a laptop. `docs/RELEASE.md` step 6
+# is where it is pasted in, once per release, after the draft exists.
+#
+# Two choices worth their explanation:
+#
+#   * `Scope: user`. The NSIS package installs per user, into `%LOCALAPPDATA%\nazar-tray`,
+#     and asks for no elevation. A tray application that watches one account's files has no
+#     business writing to Program Files or to HKLM, and a package that needs a UAC prompt is
+#     a package a lot of people never install.
+#   * `MinimumOSVersion: 10.0.17763.0`. Windows 10 1809. The panel is drawn by WebView2,
+#     which is part of Windows from 1803 onwards; 1809 is the oldest build still worth
+#     naming, and `webviewInstallMode: downloadBootstrapper` covers anything older by
+#     fetching Microsoft's own runtime installer rather than carrying 127 MB of it.
+#   * **The silent switches carry `/R`.** Tauri's NSIS template only launches the application
+#     after a silent or passive install when `/R` is passed; the interactive installer has a
+#     "run nazar-tray" checkbox on its finish page instead, ticked by default. Without `/R`,
+#     `winget install` would leave a tray application installed and not running, which for
+#     this product looks exactly like a broken install — there is nothing to open from the
+#     Start Menu that a tray icon does not already do. Measured on a real machine: **4.4
+#     seconds** from starting the installer to the tray being up.
+
+PackageIdentifier: xfurqan0.nazar-tray
+PackageVersion: 0.2.0
+
+MinimumOSVersion: 10.0.17763.0
+InstallerType: nullsoft
+Scope: user
+InstallModes:
+  - interactive
+  - silent
+  - silentWithProgress
+InstallerSwitches:
+  Silent: /S /R
+  SilentWithProgress: /P /R
+UpgradeBehavior: install
+
+# The name of the Add/Remove Programs key the installer writes under HKCU, which is how
+# winget recognises an installation it did not make and how `winget upgrade` finds this one.
+ProductCode: nazar-tray
+
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/xfurqan0/nazar-tray/releases/download/v0.2.0/nazar-tray_0.2.0_x64-setup.exe
+    # Sixty-four zeros until the release exists: this is the hash of a file that is uploaded in
+    # the step before, so it is filled in from the release's own `SHA256SUMS` — the installer
+    # the GitHub runner built, not one built on a laptop. docs/RELEASE.md step 6.
+    InstallerSha256: 56A270198613632E94ED30AF4D66DDA8BEB6B42DEA5452123780D1DE4473991C
+
+ManifestType: installer
+ManifestVersion: 1.6.0
