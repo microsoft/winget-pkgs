@@ -1,0 +1,69 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: AnInsomniacy.Aria2Next
+PackageVersion: 3.0.4
+PackageLocale: en-US
+Publisher: AnInsomniacy
+PublisherUrl: https://github.com/AnInsomniacy
+PublisherSupportUrl: https://github.com/AnInsomniacy/aria2-next/issues
+Author: AnInsomniac
+PackageName: Aria2 Next
+PackageUrl: https://github.com/AnInsomniacy/aria2-next
+License: GPL-2.0
+LicenseUrl: https://github.com/AnInsomniacy/aria2-next/blob/main/COPYING
+ShortDescription: Maintained aria2 fork with extensive bug fixes and modernized architecture
+Description: |-
+  aria2 is remarkable open source software. For over a decade it has been one of the most capable
+  download engines available, trusted by countless tools and users worldwide. We are deeply grateful
+  to the original authors and contributors of the aria2 project. They built something that has stood
+  the test of time, and that enduring quality is the best testament to their vision and craftsmanship.
+
+  But upstream development has slowed dramatically in recent years. Dependencies grew stale, builds
+  broke on modern platforms, and a backlog of bugs went unaddressed. We picked up the baton: migrated
+  the codebase to a modern build framework, triaged and fixed a substantial number of upstream issues,
+  and introduced ED2K protocol support for the first time. A full audit trail is preserved in
+  docs/maintenance/upstream-issue-review/matrix.csv.
+
+  Aria2 Next is an actively maintained aria2-compatible engine for everyone, and it is also the embedded
+  engine used by Motrix Next. Original interfaces, including options, configuration, sessions, JSON-RPC,
+  and libaria2, remain intact so downstream projects get a seamless upgrade. The focus is straightforward:
+  release reliability, current dependency baselines, and ongoing compatibility fixes. Same engine, renewed
+  foundation.
+ReleaseNotes: |-
+  ## Summary
+
+  Aria2 Next 3.0.4 brings back Thunder links, adds moving unfinished downloads, a suffix for unfinished files, browser-style numbered names and the classic results table that frontends such as Scoop read, and lets downloads that hit a busy server get their connections back quickly. Release assets cover the same seven platforms.
+
+  ### Added
+
+  • `thunder://` links are accepted again wherever a URI is, including `aria2.probe`; 3.0.0 had dropped them. Trailing slashes and missing or escaped padding are tolerated, and non-ASCII bytes are sent percent-encoded as written, so links with GBK names keep working.
+  • `aria2.moveDownload(gid, dir)` moves an unfinished download's files to another directory. A running download pauses for the move and resumes afterwards; if the move fails, the files go back.
+  • `--incomplete-suffix` gives unfinished HTTP and SFTP files a suffix such as `.part`, which is removed when they complete.
+  • `--auto-file-renaming-style=parentheses` numbers taken names `name (1).ext`, as browsers do. The default keeps aria2's `name.1.ext`.
+  • `--download-result=default|full|hide` prints aria2's "Download Results" table on exit, in the layout Scoop and other frontends parse. When the output is piped, progress prints one line per second, as aria2 does ([#70](https://github.com/AnInsomniacy/aria2-next/issues/70)).
+
+  ### Fixed
+
+  • After a server answers 503, a download's connection cap now doubles back after 5 calm seconds instead of returning one connection every 30 s. Large video downloads no longer stay slow after the audio and subtitle downloads beside them finish ([#71](https://github.com/AnInsomniacy/aria2-next/issues/71)).
+  • A failed asynchronous RPC call now answers with an error instead of no answer.
+
+  ### Changed
+
+  • The `--daemon` help notes that service managers such as systemd, NSSM or WinSW should run the engine in the foreground, since they track the process they started ([#69](https://github.com/AnInsomniacy/aria2-next/issues/69)).
+
+  ### Downloads
+
+  | Platform | Download |
+  | --- | --- |
+  | Linux x86_64 | `aria2-next-3.0.4-linux-x86_64` |
+  | Linux ARM64 | `aria2-next-3.0.4-linux-aarch64` |
+  | macOS Apple Silicon | `aria2-next-3.0.4-macos-arm64` |
+  | macOS Intel | `aria2-next-3.0.4-macos-x86_64` |
+  | Windows x86_64 | `aria2-next-3.0.4-windows-x86_64.exe` |
+  | Windows ARM64 | `aria2-next-3.0.4-windows-arm64.exe` |
+  | Android ARM64 | `aria2-next-3.0.4-android-arm64` |
+  | Checksums | `aria2-next-3.0.4-checksums.sha256` |
+ReleaseNotesUrl: https://github.com/AnInsomniacy/aria2-next/releases/tag/v3.0.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
