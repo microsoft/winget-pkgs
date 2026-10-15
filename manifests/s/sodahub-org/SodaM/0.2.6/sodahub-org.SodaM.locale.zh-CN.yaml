@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
 
 PackageIdentifier: sodahub-org.SodaM
-PackageVersion: 0.1.7
+PackageVersion: 0.2.6
 PackageLocale: zh-CN
 Publisher: sodahub-org
 PublisherUrl: https://github.com/sodahub-org
@@ -23,12 +23,21 @@ Tags:
 - 音乐
 - 音频
 ReleaseNotes: |-
-  SodaM v0.1.7：macOS 状态栏图标重绘
-  macOS
-  - 状态栏（菜单栏）图标改为单色模板图：取 logo 的音符与三道音浪，纯黑 + 透明背景，跟随系统明暗主题自动反色（浅色菜单栏黑色、深色菜单栏白色）
-  - 移除原先的彩色圆角方块，与系统菜单栏图标风格保持一致；菜单、tooltip、点击行为不变
+  SodaM v0.2.6：内存优化（RSS 归位）
+  背景
+  - top 里 SodaM 常驻 400+MB，而 Activity Monitor 只有 ~147MB。差在 macOS
+    malloc 释放大块内存后只做 MADV_FREE（reclaimable）：页仍算进 RSS，却没算进
+    phys_footprint。无损整曲下载解密会同时持有「加密体 + 明文 + mdat」多份缓冲
+    （单曲可达 50MB+），播完释放后这些页被 malloc 留着，越听越高。
+  本次改动
+  - 整曲下载解密落盘后调用 malloc_zone_pressure_relief，把已释放的空闲页真正
+    归还系统；需要时再按需缺页，不影响正确性。
+  - 实测（debug）：RSS ~400MB → ~116MB，MALLOC_LARGE_REUSABLE 归零，
+    phys_footprint ~112MB → ~85MB。
   其它
-  - 仅影响 macOS；Linux（SNI）与 Windows（通知区域）托盘图标保持品牌彩色版不变
-ReleaseNotesUrl: https://github.com/sodahub-org/sodam/releases/tag/v0.1.7
+  - 封面缓存此前已改为「按显示尺寸解码 + 16MB 预算」，本次不再是瓶颈。
+  开发钩子
+  - SODAM_COVER_LOG / SODAM_THEME_LOG / SODAM_FRAME_LOG 仍可用于排查。
+ReleaseNotesUrl: https://github.com/sodahub-org/sodam/releases/tag/v0.2.6
 ManifestType: defaultLocale
 ManifestVersion: 1.12.0
