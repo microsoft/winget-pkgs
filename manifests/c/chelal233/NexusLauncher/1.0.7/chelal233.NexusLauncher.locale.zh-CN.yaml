@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
 
 PackageIdentifier: chelal233.NexusLauncher
-PackageVersion: 1.0.3
+PackageVersion: 1.0.7
 PackageLocale: zh-CN
 ShortDescription: 本地 Harness 管理工具，一站式安装与切换 Harness 版本、选择配置档并启动 Web 或官方 Desktop。
 Description: |-
@@ -27,13 +27,15 @@ Tags:
 - dsh
 - 版本管理
 ReleaseNotes: |-
-  Nexus 1.0.3
-  1.0.3 — 2026-09-26
-  - 修复 macOS/Linux 内置 Node 的 bin/npm、bin/npx 及存在的 Corepack 入口：打包展开符号链接后仍从正确的包目录启动，避免选择 bin/node 时出现 npm_probe_failed 并连带显示 pnpm 不可用。旧构建缓存会重新生成；已安装包需要升级才能获得修复。
-  - 官方桌面端后台运行时可再次“打开桌面端”，恢复已有窗口而不重启任务。按实际宿主能力显示入口，旧独立宿主保留原有控制方式。
-  - 明确关闭窗口后进程可能继续运行；切换模式或修改数据前仍须中止桌面端。保留新旧 Harness 接口兼容，不自动升级用户 Harness。
-  验证范围
-  平台构建和自动化检查不等于所有设备上的真实升级验收。内置 Harness 仍为 0.1.6-alpha.2；新版兼容适配不代表所有会话迁移及第三方插件已验收。
+  - 按固定上游 Harness dsh-v0.2.1-alpha.1（5badb15009ae1756c3afe0ae0cef1faafc290ccc）更新诊断文档与适配。区分宿主跳过、不兼容插件、真实客户端导入失败和等待服务；就绪判断绑定当前运行和实际所有者进程，避免沿用陈旧记录。
+  - 将完整外部源码检查移出异步请求线程，配置档列表可等待验证完成，普通读取保持 8 秒默认超时。修复启动观察器同步检查阻塞界面请求的问题。
+  - 大配置保留只读预览和完整恢复路径。超过 32 KiB 预览限制时禁用编辑与保存；恢复前检查文件指纹、备份当前内容并要求界面确认。取消不写入，过期指纹拒绝覆盖。恢复成功不代表恢复后启动已验证。
+  - 诊断导出加入 16／64 KiB 上限的 Host／浏览器记录，拒绝非普通文件及父目录重定向，保留真实 import_failed/blocked 原因并结构化脱敏。诊断快照不代替当前运行的就绪检查。
+  验收范围
+  发布前要求本提交六平台冻结依赖、前端／Rust 回归、资源核验及 CI runner 上的实际安装包启动全部成功。Windows x86_64 使用 Node 24.20.0、原始固定上游 CLI／Cordis／Web、真实认证 Agent／RustBridge 和实际 Electron ClientAudit，验证不兼容插件跳过、缺依赖／缺服务阻断、配置归一化、指纹冲突拒绝、完整备份恢复、新旧运行身份及原生 Nexus 恢复确认界面。R7 诊断另经真实 CLI 导出核验，Host／browser 对应同一运行、导出字节一致，实际凭据和 Harness token 未泄漏；10 项诊断回归通过，零失败、零忽略。
+  Dot 独立复核 25 个完整源码文件、完整诊断修改语义窗口及证据一致性，后续补齐整个 core 文件的哈希一致性复核；该哈希复核不等于整个 core 的完整语义复核。Dot 没有重复执行 Windows 实测。未变功能证据按原候选复用，不能称所有实测均在最终包上重跑。
+  Dot 所在 Linux 环境的真实上游构建／运行受 tsx IPC 权限限制，正常审批后仍不可执行；这项未计为通过。Mac 实机、本上游官方 Desktop Node 24.21.0 启动、真实会话／完整离线迁移、完整浏览器内会话、全部第三方插件、Gatekeeper 首次打开及生产公证未验收。此前 Mac 原包子集记录不能替代本版完整验收。未调用模型或外部 provider。
+  内置 Harness 锁仍为 0.1.6-alpha.2，不自动升级用户 Harness；该锁无官方 Linux Desktop 资源，Linux 保留 Web 模式。显式运行时优先，否则使用内置工具，捆绑 Git 不含 GCM。macOS 包临时签名且未公证，Windows／Linux 为 unsigned；CI 不等于全平台真机升级。本次发布不替换 D 盘或用户数据。
 Documentations:
 - DocumentLabel: 用户指南
   DocumentUrl: https://github.com/chelal233/dsh-nexus/blob/HEAD/docs/user-guide.md
