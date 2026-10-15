@@ -1,0 +1,136 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: hellobertrand.zxc
+PackageVersion: 0.15.0
+PackageLocale: en-US
+Publisher: Bertrand Lebonnois
+PackageName: zxc
+License: BSD-3-Clause
+ShortDescription: Asymmetric lossless compression built for ultra-fast decode
+ReleaseNotes: |-
+  # Release Notes
+
+  v0.15.0 is an integrity release built on a format break, and a speed release on top of it.
+
+  **Decompression gains up to 24 % at levels 3-5 and 9-14 % at level 7 over v0.14.x; compression gains up to 39 % at levels 3-7. Level 3 now decodes 2.03x faster than LZ4 on Apple M2 (1.75x in v0.14), at a smaller size.**
+
+  **Format v9** redoes every integrity field：checksums that leave no header bit unprotected, block checksums over the decoded bytes, an optional archive digest, a seek table that validates itself group by group. On top of it, ZXC archives become **multi-frame**: `cat a.zxc b.zxc` is a valid archive, and the seekable reader spans every frame.
+
+  > ⚠️ **Breaking change (format and ABI).** The container format is now **v9**, and dictionaries move to **`.zxd` version 2**. v0.15.0 cannot read v8 archives or version-1 dictionaries, and v0.14.x cannot read what v0.15.0 writes (`ZXC_ERROR_BAD_VERSION`). The **soname moves to `libzxc.so.5`**：seekable block counts are 64-bit (#438), so programs linked against `libzxc.so.4` must be rebuilt.
+  >
+  > **Migrating v8 -> v9** is the same one-time transcode as before:
+  >
+  > ```sh
+  > zxc-old -dc old.zxc | zxc-new -z -c > new.zxc
+  > ```
+  >
+  > A dictionary is migrated with its archives：retrain it with the new build, or convert it byte for byte to keep its `dict_id`. Full guide, including the CLI output changes and the new Windows archive layout: **[docs/MIGRATION.md](https://github.com/hellobertrand/zxc/blob/v0.15.0/docs/MIGRATION.md)**.
+
+  ## ZXC format v9
+
+  The compressed data is unchanged：same blocks, same parser, same entropy coders. The break is in what protects them and in how a reader finds its way. (#452)
+
+  • **Multiplicative header checksums (#432).** The XOR/shift construction left part of the compressed size unprotected; the same 2 bytes now cover every header bit.
+  • **Block checksums cover the decoded bytes, seeded by position (#434).** A block moved or duplicated inside an archive no longer verifies. The whole-archive hash gives way to an optional 8-byte **archive digest** folded from the block checksums.
+  • **A seek table that validates itself (#436, #438).** Groups of one 64-bit anchor and 64 block sizes, checked one group at a time and loaded lazily, so opening a large archive reads only what a range needs. Block counts are 64-bit.
+  • **`HAS_SEEK_TABLE` header flag (#448).** The table is announced instead of probed for. In v0.14, about one footer in 65 536 parsed as a seek-table header and failed an intact archive with `ZXC_ERROR_IO`; that ambiguity is gone.
+  • **A variable-length footer (#489).** Source size and compressed frame size are stored on the bytes they need, behind the optional digest, with a last byte giving their lengths：3 to 17 bytes, plus 8 with the digest. `ZXC_FILE_FOOTER_SIZE` is replaced by `ZXC_FILE_FOOTER_MIN_SIZE` / `ZXC_FILE_FOOTER_MAX_SIZE`.
+  • **One valid form for the EOF and SEK headers.** Reserved bytes must be zero there and decoders check them, so a lying flag reads as corrupt data rather than a truncated table.
+  • **`.zxd` dictionaries version 2**, signed with the new header checksum.
+
+  ## Multi-frame archives (#490)
+
+  A ZXC file is now one or more frames back to back. After each footer comes the end of the input, the next frame's magic, or an error.
+
+  • **Concatenation just works.** `cat a.zxc b.zxc > ab.zxc` decodes to both sources in order, through the buffer, context, `FILE*` and push-stream APIs, and the size queries add the frames up. Frames keep their own block size, checksum flag and dictionary.
+  • **Seekable across frames.** When every frame carries a seek table, `zxc_seekable_open` spans them all (up to 2^20 frames), with a dictionary per frame.
+  • **Frame info API (#489).** `zxc_get_frame_info()`, `zxc_get_last_frame_info()` and their `FILE*` versions report a frame's sizes and flags; the compressed frame size in each footer lets a reader walk the frames back from the end.
+  • **Wrappers.** Go, Rust and Python readers decode concatenations as one stream by default, with an opt-out (`Multistream(false)`, `.multistream(false)`, `multistream=False`) for a source that stays open after one frame.
+  • **CLI.** `zxc -d` and `-t` decode every frame. `zxc -l` gains `Frames` and `Seekable` columns and reports `enabled` / `disabled` / `mixed`; the JSON keys changed (see MIGRATION).
+
+  ## Performance
+
+  Silesia (202 MB), single-threaded, v0.14.x -> v0.15.0 on the same reference hardware.
+
+  **Decompression:**
+
+  | Level | Apple M2 | Neoverse-V2 | EPYC Zen 5 | EPYC Zen 3 |
+  |:---|---:|---:|---:|---:|
+  | **-1** | 0 % | +0.8 % | +2.0 % | +0.6 % |
+  | **-2** | 0 % | +0.8 % | +0.9 % | +0.9 % |
+  | **-3** | +16.2 % | +9.9 % | +23.8 % | +10.5 % |
+  | **-4** | +11.1 % | +7.6 % | +18.1 % | +8.5 % |
+  | **-5** | +9.8 % | +7.0 % | +17.5 % | +8.5 % |
+  | **-6** | +2.1 % | +3.4 % | +6.5 % | +4.6 % |
+  | **-7** | +9.2 % | +11.8 % | +13.9 % | +12.3 % |
+
+  **Compression:**
+
+  | Level | Apple M2 | Neoverse-V2 | EPYC Zen 5 | EPYC Zen 3 |
+  |:---|---:|---:|---:|---:|
+  | **-1** | +1.3 % | +0.8 % | +2.4 % | +1.7 % |
+  | **-2** | +1.2 % | +0.7 % | +2.6 % | +2.3 % |
+  | **-3** | +9.4 % | +8.0 % | +5.4 % | +8.1 % |
+  | **-4** | +24.4 % | +14.1 % | +11.6 % | +12.9 % |
+  | **-5** | +23.9 % | +13.9 % | +12.6 % | +12.0 % |
+  | **-6** | +15.1 % | +17.4 % | +23.4 % | +16.7 % |
+  | **-7** | +16.1 % | +12.9 % | +39.3 % | +15.7 % |
+
+  In absolute terms, level 3 decodes at **9.7 GB/s** on Apple M2 and **8.3 GB/s** on Zen 5, and level 1 at **13.5 GB/s** on M2. Full tables and effective throughput：[README](https://github.com/hellobertrand/zxc/blob/v0.15.0/README.md#benchmarks) and [WHITEPAPER](https://github.com/hellobertrand/zxc/blob/v0.15.0/docs/WHITEPAPER.md#7-performance-analysis-benchmarks).
+
+  *v0.14.x figures are the v0.14.0 run (lzbench 2.3.1)：v0.14.1 writes byte-identical output and its decode path only changed for the block API. v0.15.0 was measured with lzbench 2.4.1.*
+
+  ### Long GLO matches split into inline sequences at levels 3-5 (#441)
+
+  Long matches leave the decoder's slow path：the encoder splits them into sequences the inline copy handles, which is where most of the level 3-5 gain comes from. The trade is paid in ratio, at those three levels only:
+
+  | Level | Ratio v0.14.x | Ratio v0.15.0 | Compressed size |
+  |:---|---:|---:|---:|
+  | -1, -2 | unchanged | unchanged | 0 pp |
+  | -3 | 46.09 % | 46.65 % | +0.56 pp |
+  | -4 | 42.99 % | 43.43 % | +0.44 pp |
+  | -5 | 40.43 % | 40.83 % | +0.40 pp |
+  | -6, -7 | unchanged | unchanged | 0 pp |
+
+  ### Decoder and encoder kernels
+
+  • **Wild-copy loops (#439)** and **GHI batch register pressure (#460)** tightened in the decoder's hot loops.
+  • **PivCo Huffman tree simplified (#451).**
+  • **Faster LZ77 parsing (#466)**：lazy evaluation exits early, and the optimal parser carries a match over instead of re-evaluating it, skipping redundant comparisons and DP relaxations.
+
+  ### Parallel `FILE*` decompression (#495)
+
+  From a regular file, workers read their own blocks with positioned reads and small blocks travel in batches, so the reader no longer copies every byte. Concatenated frames of the same geometry share one engine instead of restarting threads and buffers per frame. Pipes and sockets still decode block by block, so a live stream is never held back.
+
+  ## API
+
+  • **Zero-allocation in-place decompression (#461):** `zxc_decompress_inplace_dctx()` decodes in place through a reusable context, with no allocation per call.
+  • **Seekable archives from the context API (#487):** the compression context can write a seek table.
+  • **Frame info (#489):** `zxc_get_frame_info()`, `zxc_get_last_frame_info()`, `zxc_stream_get_frame_info()`, `zxc_stream_get_last_frame_info()`, `zxc_frame_info_size()`.
+  • **64-bit seekable block counts (#438):** `zxc_seekable_get_num_blocks()` and `zxc_seek_table_size()` take and return `uint64_t` (the ABI break above).
+  • **Linux kernel support (#454):** the library builds as a kernel module, scalar paths only, with its own CI workflow.
+
+  ## Wrappers
+
+  • **Python (#505):** `zxc.compress()` and `zxc.Cctx` take `seekable=True`, as `stream_compress()` already did.
+  • **Go (#499):** `Compress` and `CompressTo` honour `WithSeekable(true)`; they returned an archive without a seek table. `CompressTo` accepts empty input and writes a minimal frame, as `Compress` does.
+
+  ## Reliability & Security
+
+  • **In-place decompression (#450):** strict read/write separation; a write could overtake unread input under a forged archive.
+  • **Type-safe stream callback (#449):** the processor callback no longer goes through an incompatible function-pointer cast (UBSan `-fsanitize=function`).
+  • **MSVC 19.51 ARM64 (#458):** worked around a miscompile of the seek-table size fold.
+  • **Go seekable reader (#486):** a panic in a user reader is recovered and reported as an error instead of crashing across the C trampoline.
+  • **WASM (#459):** a failed heap allocation throws instead of returning a null pointer.
+  • **Frame validation and dictionary edge cases:** truncated or forged footers, stale `FILE*` error indicators and dictionaries that no frame needs are handled consistently across the buffer, stream and seekable paths.
+  • **Fuzzing (#463):** a block-API fuzzer and coverage of the dictionary Huffman table; OSS-Fuzz line coverage of the v9 decoder went from 0.9 % to 84.8 % once the corpus was rebuilt.
+
+  ## CLI
+
+  • **`zxccat` (#503):** an alias for `zxc -dc` that decompresses every file it is given, or standard input, to standard output, one after the other：`zxccat logs-*.zxc | grep ERROR`. Installed next to `unzxc` on POSIX systems.
+  • **`-c` appends to a `>>` redirect (#503):** decompressing to standard output reopened it and truncated a file it should have appended to.
+  • **`zxcless` (#506):** pages files in `less(1)`, decompressing `.zxc` archives on the fly (through `LESSOPEN`, less 451 or later); other files and standard input display unchanged. With it, `-f` now copies input that
+ReleaseNotesUrl: https://github.com/hellobertrand/zxc/releases/tag/v0.15.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
