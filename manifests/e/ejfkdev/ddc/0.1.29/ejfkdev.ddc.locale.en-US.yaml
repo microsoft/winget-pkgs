@@ -1,0 +1,49 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ejfkdev.ddc
+PackageVersion: 0.1.29
+PackageLocale: en-US
+Publisher: ejfkdev
+PublisherUrl: https://github.com/ejfkdev
+PublisherSupportUrl: https://github.com/ejfkdev/ddc/issues
+PackageName: ddc
+PackageUrl: https://github.com/ejfkdev/ddc
+License: MIT
+LicenseUrl: https://github.com/ejfkdev/ddc/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 ejfkdev
+ShortDescription: Fast DEX to Java decompiler in Rust with progressive query subcommands.
+Description: ddc decompiles Android DEX bytecode back into readable Java. It covers DEX 035-041 including multi-dex APKs and XAPK/APKS/APKM containers, and ships more than 20 query subcommands (strings, cross-references, hierarchies, manifest, resources, per-method decompiles) that answer in milliseconds without a full run. Output is jadx-style readable, reproducible Java whose emitted files compile cleanly, and the bilingual CLI localizes its messages between English and Chinese automatically.
+Tags:
+- android
+- apk
+- decompiler
+- dex
+- java
+- reverse-engineering
+ReleaseNotes: |-
+  v0.1.29
+  New Features
+  - Three new cure (0.1.4-0.1.8) source-level simplification rules, measured on three fresh random APK corpora (telegram/chatglm/cmb, 68k files):
+    - dead_pure_call: discard-result Long.compare(a,b) / Objects.toString(x) statements — the dex cmp-instruction rendering family (~63k sites)
+    - trailing_else_flatten: the else keyword after a terminal then-branch (~41k sites)
+    - (T)(Object)x → (T)x cast folding on Object-typed operands (the dex check-cast widening noise)
+  -  --fast now works on every Java-source command: getclass, getmethod, pkg (in addition to the main decompile path) — skip the simplification pass, keep formatting (~half the time)
+  Bug Fixes
+  - Float constants emitted as raw IEEE bit patterns: dex const literals are untyped bits; in float/double arithmetic they must be reinterpreted with from_bits, not numerically converted (1073741824 is 2.0f, not 1.07e9f) — >27k lines of silently wrong values on telegram alone, invisible to the compile gate
+  - JLS 6.4.2 obscured-member static-import escape: inherited field captures package name in qualified static member references (reqable variable-cannot-finds 103→5)
+  - Seven type/scoping guards in cure found on ddc corpora (null literal overload ambiguity, for-each on non-Iterable, owner-confused method inline, enum constant shadowing, cast-position type loss, dangling cut locals, and the two first-version rule bugs in this release)
+  Performance
+  - Four IR shape passes retired into cure (trailing-return, ternary fold, final dead assigns, bool xor): −360 lines of ddc source with gate parity
+  -  --fast mode: parse+print only (~10× cheaper than the simplify engine) — weibo 23.4s → 11.5s
+  Quality Metrics
+  - Four-corpus javac gate: 8,633 errors (v0.1.28: 8,647, −14) — reqable 317 flat, weibo −1, lark −15
+  - Output lines: weibo 15.47M → 14.78M (−4.5% from the three new rules)
+  - docs/quality.md (bilingual) with the E1/S1/S2/D1/P1 metric definitions and reproduction script
+  Full Changelog: https://github.com/ejfkdev/ddc/compare/v0.1.28...v0.1.29
+ReleaseNotesUrl: https://github.com/ejfkdev/ddc/releases/tag/v0.1.29
+Documentations:
+- DocumentLabel: CLI Reference
+  DocumentUrl: https://github.com/ejfkdev/ddc/blob/HEAD/docs/cli.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
