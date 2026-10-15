@@ -1,0 +1,110 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Nvidia.PersonalAIRouter
+PackageVersion: 1.0.0
+PackageLocale: en-US
+Publisher: NVIDIA
+PublisherUrl: https://www.nvidia.com/
+PublisherSupportUrl: https://github.com/NVIDIA/Personal-AI-Router/issues
+PrivacyUrl: https://www.nvidia.com/en-us/about-nvidia/privacy-policy/
+Author: NVIDIA Corporation
+PackageName: Personal AI Router
+PackageUrl: https://www.nvidia.com/en-us/ai-on-rtx/personal-ai-router/
+License: Apache-2.0
+LicenseUrl: https://github.com/NVIDIA/Personal-AI-Router/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ShortDescription: A local inference router that spreads AI workloads across computers on the same network.
+Description: NVIDIA Personal AI Router (PAIR) is a local inference router for a group of compatible computers on the same network. It discovers participating nodes, manages supported inference engines, and presents Ollama-compatible and OpenAI-compatible proxy endpoints to applications and agents. Independent requests are routed to eligible nodes according to engine availability, model availability, and current workload.
+Tags:
+- ai
+- inference
+- large-language-model
+- llm
+- local-ai
+- ollama
+ReleaseNotes: |-
+  This release brings llama.cpp and RTX Spark support to PAIR, and establishes
+  its public development and contribution workflow on GitHub.
+  What's New
+  - llama.cpp support. Install and manage llama.cpp directly from PAIR,
+    download compatible GGUF models from Hugging Face, and route inference
+    requests across paired devices. Refer to
+    Managing Engines.
+  - Engine launch options. Customize the launch arguments and environment
+    variables of PAIR-managed engines, on this device or a paired one. Tune
+    settings such as context size where the engine supports them. Refer to
+    Engine Settings.
+  - RTX Spark support. PAIR's Windows on ARM build has been validated with
+    llama.cpp and CUDA on RTX Spark N1X hardware.
+  - Improved terminal experience. The terminal interface has a redesigned
+    layout organized around each device, so you can manage engines, download
+    models, and pair devices from one place. A new Jobs tab follows inference
+    work across paired devices and runs the Inference Demo, giving headless
+    machines the same core tools as the desktop app. Refer to
+    Terminal Interface.
+  Compatibility Notes
+  - Browser clients. PAIR's local endpoints now follow each engine's CORS
+    policy instead of allowing every browser origin. A browser-based client may
+    need the engine configured to allow it — for Ollama, set OLLAMA_ORIGINS in
+    the engine's launch options.
+  - The macOS app is now NVIDIA PAIR. The new NVIDIA PAIR.app installs
+    beside the old PAIR.app, so remove the old one to keep just one copy. Your
+    settings, cluster membership, and downloaded models carry over.
+  - LM Studio installed by an earlier PAIR. It keeps working as before. PAIR
+    now removes only engines it has a record of installing, and earlier versions
+    kept no record, so uninstalling or resetting PAIR leaves that LM Studio in
+    place. You can remove it from ~/.lmstudio yourself if you no longer want it.
+  The Upgrade Guide walks through each of these.
+  Targeted Bug Fixes
+  - Uninstalling LM Studio from PAIR, or uninstalling PAIR with its data, no
+    longer deletes the models you downloaded. They stay in ~/.lmstudio/models,
+    just as Ollama's stay in ~/.ollama and llama.cpp's in ~/.llamacpp.
+  Community Contributions
+  - Added Anthropic Messages API routing through Ollama and LM Studio, so
+    compatible clients such as Claude Code can use PAIR's model-aware routing and
+    failover. Thanks @Ratherrayees!
+    (#27)
+  - Made engine monitoring more efficient by reusing HTTP connections for health
+    checks. Thanks @Psych0h3ad!
+    (#37)
+  - Fixed unnecessary cluster trust refreshes: notifications are now sent only
+    after new peer endorsements are saved. Thanks @RecursiveIntell!
+    (#62)
+  - Fixed workload synchronization between nodes: broadcasts preserve event
+    order, and a failed broker notification stays eligible for retry. Thanks
+    @mkalkere! (#80)
+  - Fixed scheduler priority updates being marked as delivered after a failed
+    notification, so they are retried and the status stays accurate. Thanks
+    @sylvesterkaczmarek!
+    (#122)
+  - Isolated the service integration and proxy failover tests from local PAIR
+    settings, so tests no longer read or overwrite a developer's configuration.
+    Thanks @somtri! (#95)
+  - Corrected the release-intent examples to use the required services version
+    key. Thanks @somtri!
+    (#120)
+  - Updated the contributor instructions to branch from and rebase onto
+    develop. Thanks @somtri!
+    (#126)
+  - Fixed node cards showing only the first GPU on multi-GPU systems; they now
+    show every GPU. Thanks @CryptoJones!
+    (#34)
+  Special Thanks
+  Thank you to these community members for sharing ideas, submitting proposals
+  and fixes, investigating issues, and testing PAIR:
+  @XxSilentStormIxX, @agenticocho, @Mayimbe07, @cruzanstx, @pettersandvand,
+  @cguldogan, @mkalkere, @CryptoJones, @woodsonl, @stevbev, @habakan, @arcaven,
+  @somtri, @imluffy000, @ndizazzo, and @fpvo.
+  We are grateful for every contribution, and for the warm welcome from the local
+  AI community.
+ReleaseNotesUrl: https://github.com/NVIDIA/Personal-AI-Router/releases/tag/v1.0.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://docs.nvidia.com/local-ai/nvpair/
+- DocumentLabel: Getting Started
+  DocumentUrl: https://docs.nvidia.com/local-ai/nvpair/getting-started/
+- DocumentLabel: FAQ
+  DocumentUrl: https://www.nvidia.com/en-us/ai-on-rtx/personal-ai-router/faq/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
