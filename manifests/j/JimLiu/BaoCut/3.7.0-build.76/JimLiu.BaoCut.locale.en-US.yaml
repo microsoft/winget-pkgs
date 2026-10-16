@@ -1,0 +1,75 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: JimLiu.BaoCut
+PackageVersion: 3.7.0-build.76
+PackageLocale: en-US
+Publisher: BaoCut
+PublisherUrl: https://github.com/JimLiu
+PublisherSupportUrl: https://github.com/JimLiu/baocut/issues
+Author: Jim Liu
+PackageName: BaoCut
+PackageUrl: https://baocut.app/
+License: Freeware
+LicenseUrl: https://github.com/JimLiu/baocut/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Jim Liu and BaoCut contributors.
+ShortDescription: Your AI agent for subtitles & video
+Description: Tell the agent what you want, or do it by hand. BaoCut 2 transcribes on your computer, translates subtitles that fit the screen, and dubs your video into another language in the speaker’s own voice.
+Tags:
+- ai
+- subtitle
+- transcribe
+- transcription
+- video
+- video-editing
+ReleaseNotes: |-
+  What changed in 3.7.0
+  New
+  - Docs. The agent can create and edit documents in a new built-in Docs editor: rich text, tables, tasks, images and comments, with Markdown export. Comments and requests in a document go to the agent. Documents are stored locally; there is no multi-user collaboration or sharing. (fff741a8, e2dae99d, a68b5c14)
+  - Video annotations. Draw boxes, arrows, text and pins on the editor preview and send them to the agent with your message; clicking a note jumps to that moment. Desktop app only. (b62b6667)
+  - Archived sessions. A new page with search, a project filter, restore and delete; the archive notice now links to it. (7f358759)
+  - Voice cloning. A new capture flow takes a 30-second sample and an optional consent clip and keeps one re-rollable seed per local engine. Google Gemini voice cloning is supported and requires the consent clip. Local cloning models use My voices directly from the reference recording. Capturing a new voice needs the desktop app. Voice exports use a new .bcvoice version; older files still import. (ef750417, db24c839, 5dd27499)
+  - Speech providers. Google Gemini TTS, and Doubao Speech as its own provider (it uses the Doubao Speech console key, not the Ark key). (0a9712bb)
+  - API providers. Settings > Models manages API providers in one place: several accounts per provider, custom OpenAI-compatible endpoints, model refresh and a new Usage page. Local and API models appear together on each capability page. (3dca83ab, 0b6b0de7)
+  - Qwen Code CLI is a built-in agent. Real Qwen account runs and Windows hardware were not tested. (b082ec1b)
+  - Model download folder. Models can be downloaded into a folder chosen for that download without changing the models folder. (ec9adedf)
+  - Explainer-video skill for knowledge and teaching videos. (c4689036, e64a5fe5)
+  Changed
+  - Local speech synthesis runs on the bundled audio.cpp engine (Metal on macOS, Vulkan on Windows) with nine models: Qwen3-TTS 0.6B and 1.7B Base, 1.7B CustomVoice and VoiceDesign, IndexTTS2, IndexTTS 2.5, VoxCPM2, OmniVoice and Fish Audio S2 Pro. GPT-SoVITS and Qwen3-TTS 0.6B CustomVoice are removed, and the new models are separate downloads. On the CPU backend local speech is much slower, and the model page says so. (6f74a819, a7b2dab7)
+  - Translation uses the lines/1 alignment carrier by default. It used about half the tokens of the previous carrier in testing, and pages are 1200 words. Translations started before updating resume with the previous carrier. (089232de, 605bca77)
+  - Thinking defaults. With no effort chosen, DeepSeek V4 turns thinking off and Gemini uses its lowest thinking level, which fixes empty or truncated translation pages. Choose an effort if you want more reasoning. (dd340337, d94564cd)
+  - Quitting with running work asks whether to keep jobs and agent tasks running in the background, stop them, or cancel, and lists remote provider calls that may still be billed. (c959ddcb, a0a52d3b)
+  - Agents. New sessions pick a ready agent when no default is set, and Make default is on each agent card. Sessions about a downloaded video are titled from the video, and the agent can rename sessions. (6b3d99b9, 37b415c3, fe797ba8, cf0eb067)
+  - Semantic search models install from one dialog with per-component download sources. (5f827014)
+  - Local command gateway bounds unauthenticated input and caps each message at 64 MiB (contributed in #75). (c85da553)
+  Windows
+  - Exports decode video on the GPU (D3D11) by default (BAOCUT_MEDIA_HW_DECODE=0 turns it off), with fixes for B-frame timing, colour matrices and NTSC frame rates and a 2-second keyframe interval. 1080p exports were about 1.25x faster on the measured machine. (02b90979, 8bed52cc, 9f10489d)
+  - Local speech recognition and Qwen-Image generation are much faster on CUDA. (2e9cc4ec, 5d1dab19)
+  - npm-installed Codex and Pi are found and started, and quoted Codex paths are accepted. (efae3d1a, 9eea7838)
+  Fixed
+  - Subtitles no longer split a Latin word such as "Transformer" in the middle inside Chinese, Japanese or Korean text. (b770db8b)
+  - Translation fixes for Japanese and Korean to Chinese, Chinese to English, and spaces lost where translated spans join. (7f995726, 9e5818a6, 7126fe5b, f96294e8)
+  - Overlapping speech in multi-speaker recordings no longer fails local MOSS transcription or drops cloud segments; a model output that fails validation fails once instead of re-running and disabling the model. (83928515, 40116a49, 91ce9b5b)
+  - Dubbing with local voices no longer fails for the built-in voices of local cloning models or for My voices on local models. (6eabea67, 0cc43d27)
+  - Semantic indexing starts after a restart instead of staying at "Updating 0/N videos", and speech indexing shows per-video progress. Signed macOS builds can load the LiteRT runtime. (fe5ac272, f2ff0248)
+  - After a reboot the app no longer gets stuck on "Reconnecting" because of leftover Runtime files. (13069c7b)
+  - Model names, licences, service errors and Claude settings descriptions follow a language change without restarting. (67ba7f77, 848ac87c)
+  - Docs editor: replayed writes no longer duplicate content, Enter in list items saves, agent replies show live, and standalone pages hide actions that cannot work there. (27f4a3d9, 90a31121, e330cc2b)
+  - The template library has a close button (#78); importing older projects runs automatically only once; the video downloader keeps Chrome listed and explains how to grant browser access; update and project-picker icons. (53073a7c, 303b9022, f41a41d3, c6f8013e)
+  Compatibility and validation limits
+  Local speech synthesis now uses new audio.cpp model downloads; earlier local speech downloads are not used, and GPT-SoVITS and Qwen3-TTS 0.6B CustomVoice are gone. Recording a new voice for cloning needs the desktop app. Gemini users who relied on the provider's default thinking level should choose an effort explicitly. Semantic models require macOS Apple Silicon; Windows retains lexical search. Windows packages are unsigned and require the Microsoft Visual C++ v14 x64 Redistributable; CUDA needs a compatible NVIDIA driver and Vulkan needs a compatible graphics driver. Automated packaging checks do not cover UI/export, live model/GPU inference or paid agent calls.
+  Source coverage
+  Compare 3.6.1 build 75 to 3.7.0 build 76. Reviewed all 145 commits and 4 associated PRs (#75, #79, #80, #84) in four batches of 36, 36, 36 and 34 plus the three final commits; coverage reconciled 145/145. Superseded work within the range (candle speech-synthesis speedups replaced by audio.cpp, a reverted frame allocator, a removed duplicate update prompt) is not listed as shipped. Test-only, prototype, documentation and 3.6.1 feed commits are recorded as internal. Source: 99c5acece750a0d48ec39328cc2568dc7878b774.
+  Local checks passed: 975 speech-doc tests, 10,514 JS tests after one i18n-scan fix, 7 release-rule/notes tests, and version/build/notes validation. Native build, package and public-download results are described below.
+  Platform publication
+  BaoCut 3.7.0 (Build 76) for Apple Silicon, macOS 14+.
+  Bundle ID: com.baocut.app. Developer ID signed, hardened runtime and Apple notarization accepted for both App and DMG.
+  Runtime and native Worker startup, signer fingerprint, staple and Gatekeeper checks passed. UI/export, real model inference and paid Agent calls were not exercised by this workflow. ffmpeg/ffprobe and an agent engine are external dependencies.
+  Source: 99c5acece750a0d48ec39328cc2568dc7878b774
+  Actions: https://github.com/JimLiu/baocut/actions/runs/38860031417
+  Windows x64
+  Variants: cpu, cuda, vulkan. NSIS installers and portable ZIPs are unsigned. Real credential migration and model/Agent/GPU inference were not exercised by the installer tests. Requires the Microsoft Visual C++ v14 x64 Redistributable; the current package does not bundle the VC runtime DLLs.
+  Native build and installer verification: https://github.com/JimLiu/baocut/actions/runs/38860031417
+ReleaseNotesUrl: https://github.com/JimLiu/baocut/releases/tag/baocut-v3.7.0-build.76
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
