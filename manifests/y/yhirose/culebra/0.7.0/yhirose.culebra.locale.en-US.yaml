@@ -1,0 +1,63 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: yhirose.culebra
+PackageVersion: 0.7.0
+PackageLocale: en-US
+Publisher: Yuji Hirose
+PublisherUrl: https://github.com/yhirose
+PublisherSupportUrl: https://github.com/yhirose/culebra/issues
+PackageName: culebra
+PackageUrl: https://github.com/yhirose/culebra
+License: MIT
+LicenseUrl: https://github.com/yhirose/culebra/blob/HEAD/LICENSE
+ShortDescription: Programming language with a bytecode VM, JIT, and AOT compiler
+Moniker: culebra
+Tags:
+- bytecode-vm
+- jit-compilation
+- language
+- llvm
+- programming-languages
+ReleaseNotes: |-
+  Highlights
+  - culebra lsp: a Language Server Protocol server built on the same static name resolution the compiler uses, with navigation, rename, completion, and typed hover, wired up for VS Code, Zed and Neovim.
+  - Constructor field parameters: new(.x), new(.x: T = v), new(.x?) bind directly to a class's declared fields, cutting the boilerplate every constructor used to repeat.
+  - Tensor: a fused layer_norm, causal_attention, adam_step, Tensor.profile, and an im2col-backed VJP path, with cpp-tensorlib's backend layer landing underneath so ops are written once and each backend (CPU/Metal/CUDA/WebGPU) supplies its own device core.
+  - GC.stat() now derives from the reference-count machinery (gc_refs) instead of a separate walk, and a dying object stays a GC root until its teardown finishes.
+  - eq/cmp/defer semantics tightened: derived eq and cmp no longer imply each other, container/Set equality follows =='s rule consistently, and a throwing defer no longer stops the rest of its scope's defers.
+  - proc: process-tree signaling, fd inheritance, and Ctrl+C handling hardened; net/http gained stricter port and header/method validation ahead of the socket and wire layers.
+  Changes
+  Language / interpreter
+  - Constructor field parameters (new(.x), new(.x: T = v), new(.x?)) parse, lower, and inline into @value constructors.
+  - Derived eq/cmp decoupled: a derived cmp of 0 no longer implies a derived eq; == on a derived eq compares by structure; <= is defined as a < b or a == b.
+  - Container and Set equality follow =='s rule, not structural equality; key equality goes through the same door as value equality.
+  - UFCS candidate resolution: a free function is a candidate only when its first parameter accepts the receiver, closing gaps where the wrong overload could be picked.
+  - defer: a throwing defer no longer aborts the rest of its scope's defers; an interrupt is treated distinctly from a defer's throw; a defer body's bindings belong to the frame it's declared in, not the enclosing function.
+  - Modules: a dependency's top-level defer fires at exit even when the entry point declares none; a duplicate export in a one-statement module is now refused on both engines.
+  - fn name inside an if arm joins the overloads already in scope instead of shadowing them.
+  - Bitwise compound assignment: &=, |=, ^=, <<=, >>=.
+  - match gained range patterns and negative literal patterns.
+  - effects: resume() with no argument resumes with nil.
+  - Unicode handling (UTF-8 scalar length, JSON \u pairs, UTF-16 surrogate units) now goes through one shared table (unicodelib) instead of several ad hoc implementations.
+  JIT / AOT
+  - Calls, method calls, and shadowed built-ins share one dynamic-callee dispatch path across the executor and the JIT.
+  - The VM's inline-frame stack moved into the Runtime; resolved calls run in the caller's dispatch loop on a local pc, cutting call overhead.
+  - AOT: a Tensor method name sharing a name with a user method no longer pulls Metal onto a Tensor-free link; lld is linked into the driver only when building with clang.
+  - Mini front-end JIT legs run under --jit-faststart in the test sweep.
+  Standard library
+  - proc: reaches the whole process tree instead of one PID, no longer swallows Ctrl+C in wait(), fixes an over-clamped fallback close-loop cap, and a spawned child no longer inherits unrelated open file descriptors.
+  - http: a request's method and headers are checked before they reach the wire; Content-Type is checked where it reaches a response; cpp-httplib bumped to v0.58.0.
+  - net: a port is validated before it reaches the socket layer.
+  - Tensor: fused layer_norm and causal_attention VJPs, Tensor.adam_step, Tensor.profile, im2col forward/backward as dual pairs, and a backend layer (via cpp-tensorlib) that lets CPU/Metal/CUDA/WebGPU share one op implementation.
+  - SharedBuffer/JSON/Tensor: a size no machine can satisfy is now a ValueError instead of a crash; malformed JSON numbers, late static mounts, and corrupt FST bytes fail as errors.
+  - Canvas: the Vector2 overloads of the coordinate methods were dropped in favor of the plain numeric ones.
+  - GC.stat() reads from the reference-count table; a dying object stays a GC root until its teardown completes.
+  Tooling
+  - culebra lsp: navigation, rename, completion, typed hover, backed by static name resolution shared with the compiler; editor wiring for VS Code, Zed, and Neovim.
+  - culebra embed-flags: a host build asks the binary itself what compiler/linker flags to build against.
+  - Embedding docs trimmed and reorganized around what a host actually needs beyond the core.
+  Full diff: v0.6.0...v0.7.0
+ReleaseNotesUrl: https://github.com/yhirose/culebra/releases/tag/v0.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
