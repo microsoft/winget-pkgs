@@ -1,0 +1,94 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ggml.llamacpp
+PackageVersion: b11636
+PackageLocale: en-US
+Publisher: ggml
+PublisherUrl: https://github.com/ggml-org
+PublisherSupportUrl: https://github.com/ggml-org/llama.cpp/issues
+PackageName: llama.cpp
+PackageUrl: https://github.com/ggml-org/llama.cpp
+License: MIT
+LicenseUrl: https://github.com/ggml-org/llama.cpp/blob/HEAD/LICENSE
+ShortDescription: LLM inference in C/C++
+Tags:
+- ggml
+- llama
+ReleaseNotes: |-
+  sycl: IQ3 code reorder (#29107)
+  - sycl: persistent IQ3_S/IQ3_XXS weight reorder for SYCL decode and prefill
+  Add persistent reordered weight layouts for IQ3_S and IQ3_XXS. Weights
+  are reordered once at load time; the reordered MMVQ dot products then
+  walk dense super-blocks with dp4a and SWAR sign expansion instead of
+  gathering bits from the interleaved standard layout. Reorder-aware
+  dequantization feeds the batched prefill GEMMs so prompt processing
+  sees the same benefit.
+  Also harden the oneDNN build check: a missing DNNL package or a
+  CPU-only DNNL build now fails at configure time instead of silently
+  producing a degraded backend.
+  Measured on Intel Arc Pro B70 with Qwen3.8-27B-GSQ-RCO-IQ3_S (MTP),
+  -ngl 999 -b 4096 -ub 1024 -fa on:
+  tg256 @ 0 ctx 12.92 -> 23.54 tok/s (+82%)
+  tg256 @ 9,216 12.33 -> 21.69 tok/s (+76%)
+  tg256 @ 64,000 9.76 -> 14.91 tok/s (+53%)
+  pp8192 833.9 -> 833.6 tok/s (flat)
+  Qwen3.5-9B Q4_K_M / Q3_K_M are unchanged within noise (largest delta
+  -0.5% pp, tg flat), so standard quants are not affected.
+  The MMVQ GLU fusion widening and rms_norm+scale fusion are
+  intentionally not part of this change; master already carries them
+  via #28931.
+  - removing wait as per review request
+  - sycl : fix fusion.cpp line ending
+  Website:
+  - https://llama.app
+  Attestations:
+  - https://github.com/ggml-org/llama.cpp/attestations/56116978
+  macOS/iOS:
+  - macOS Apple Silicon (arm64)
+  - macOS Apple Silicon (arm64, KleidiAI enabled) DISABLED
+  - macOS Intel (x64)
+  - iOS XCFramework
+  Linux:
+  - Ubuntu x64 (CPU)
+  - Ubuntu arm64 (CPU)
+  - Ubuntu s390x (CPU)
+  - Ubuntu x64 (Vulkan)
+  - Ubuntu arm64 (Vulkan)
+  - Ubuntu x64 (CUDA 12) - CUDA 12.8 libraries
+  - Ubuntu x64 (CUDA 13) - CUDA 13.4 libraries
+  - Ubuntu arm64 (CUDA 13) - CUDA 13.4 libraries
+  - Ubuntu x64 (ROCm 10.0)
+  - Ubuntu x64 (OpenVINO)
+  - Ubuntu x64 (SYCL FP32)
+  - Ubuntu x64 (SYCL FP16)
+  - Linux arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide
+  Android:
+  - Android arm64 (CPU)
+  - Android arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide
+  Windows:
+  - Windows x64 (CPU)
+  - Windows arm64 (CPU)
+  - Windows arm64 (OpenCL Adreno)
+  - Windows x64 (CUDA 12) - CUDA 12.4 DLLs
+  - Windows x64 (CUDA 13) - CUDA 13.4 DLLs
+  - Windows arm64 (CUDA 13) - CUDA 13.4 DLLs
+  - Windows x64 (Vulkan)
+  - Windows arm64 (Vulkan)
+  - Windows x64 (OpenVINO)
+  - Windows x64 (SYCL)
+  - Windows x64 (ROCm 10.0)
+  openEuler:
+  - DISABLED
+  - openEuler x86 (310p)
+  - openEuler x86 (910b, ACL Graph)
+  - openEuler aarch64 (310p)
+  - openEuler aarch64 (910b, ACL Graph)
+  UI:
+  - UI
+ReleaseNotesUrl: https://github.com/ggml-org/llama.cpp/releases/tag/b11636
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/ggml-org/llama.cpp/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
