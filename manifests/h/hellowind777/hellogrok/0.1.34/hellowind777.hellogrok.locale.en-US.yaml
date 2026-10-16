@@ -1,0 +1,32 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: hellowind777.hellogrok
+PackageVersion: 0.1.34
+PackageLocale: en-US
+Publisher: hellowind777
+PublisherUrl: https://github.com/hellowind777
+PublisherSupportUrl: https://github.com/hellowind777/hellogrok/issues
+PackageName: hellogrok
+PackageUrl: https://github.com/hellowind777/hellogrok
+License: MIT
+LicenseUrl: https://github.com/hellowind777/hellogrok/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 hellowind777
+ShortDescription: Cross-platform local proxy that makes Grok Build custom model channels work with common API formats, native Web tools, isolated authentication, and automatic configuration recovery.
+Description: 'Grok Build can use custom model endpoints, but real-world providers do not all expose the same protocol, response shape, authentication method, or Web-search behavior. hellogrok provides one local compatibility layer for those custom channels: it prepares the required Grok configuration while running, keeps each channel tied to its own endpoint and credentials, supports Grok Build native Web workflows, and restores the original configuration when stopped.'
+Tags:
+- grok
+- grok-build
+- proxy
+ReleaseNotes: |-
+  Added
+  - Responses absorb window for retryable response.failed SSE terminals. While nothing has been written to the client, a Responses stream whose only terminal is a retryable failure (rate limit, concurrency, overload) is withheld — response headers and early frames stay buffered up to 32 frames — and replayed inside the absorb window with the same backoff and Retry-After handling as HTTP soft failures. Grok Build keeps its full retry budget; an exhausted window passes the failure through retryable. absorb_retry_max_secs = 0 streams the failed event immediately; deterministic response.failed events pass through without retry.
+  - Structured upstream error summaries for HTTP errors and Responses response.failed/error events (type, code, message), with bearer tokens, key assignments, and sk- values redacted and long messages truncated. An official Grok catalog name (for example grok-4.6) observed on a non-xAI custom channel is logged with body size, tool count, and session presence to aid /resume diagnosis; first-party api.x.ai routes and custom IDs without the grok- prefix are excluded.
+  - Explicit non-retryable 502 responses for stream-shape mismatches: an SSE body answered to a non-streaming request, or a streaming body answered to Grok Build's fixed non-streaming WebSearchClient request.
+  Fixed
+  - Concurrency-limit rejections (concurrency, concurrency limit, and the corresponding Chinese phrases) classify as transient, and error envelopes nested under response.error are recognized the same as top-level error objects.
+  - Client disconnects no longer surface as upstream stream failures. Messages, Chat Completions, native, and Responses streams log a client abort and emit no proxy_stream_error when the client write fails or the request context is canceled; truly truncated upstream streams still emit the error.
+  - Benign upstream-model mismatches log once per channel/protocol/configured/upstream pair (bounded to 256 keys); conflicting and invalid declarations always log. Responses SSE headers are sent only after the hold decision, so an absorbed retry never emits partial headers.
+ReleaseNotesUrl: https://github.com/hellowind777/hellogrok/blob/HEAD/CHANGELOG.md#0134-2026-09-14
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

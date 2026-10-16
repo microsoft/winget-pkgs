@@ -1,0 +1,79 @@
+# Created with deja-vu release workflow using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: vshulcz.deja-vu
+PackageVersion: 0.21.4
+PackageLocale: en-US
+Publisher: vshulcz
+PublisherUrl: https://github.com/vshulcz
+PublisherSupportUrl: https://github.com/vshulcz/deja-vu/issues
+PrivacyUrl: https://vshulcz.github.io/deja-vu/guide/privacy.html
+PackageName: deja-vu
+PackageUrl: https://vshulcz.github.io/deja-vu/
+License: MIT
+LicenseUrl: https://github.com/vshulcz/deja-vu/blob/HEAD/LICENSE
+ShortDescription: Search Claude Code, Codex and Cursor session history locally
+Tags:
+- aider
+- claude-code
+- cli
+- codex
+- cursor
+- mcp
+- memory
+ReleaseNotes: |-
+  One rules file for every agent: deja rules sync copies yours into the global
+  rules file of each installed agent, and deja rules candidates finds the
+  corrections you keep repeating so your agent can suggest them as rules. On
+  Windows, Claude Code's hooks run again; they had been exiting 127 on every call
+  while doctor said they were wired, and doctor now says so. Chats deleted from
+  Cursor's database, or left behind when a bloated one is moved aside, stay
+  searchable through a full rebuild. deja also installs as a Hermes memory
+  provider straight from Hermes, and from winget on Windows.
+  Added
+  - deja rules keeps the rules you give your agents in one file, ~/.config/deja/rules.md, and deja rules sync copies it as a marked block into the global rules file of each installed agent that has one deja knows: Claude Code, Codex, opencode, Gemini, Qwen, Kimi, Grok and goose. A rule given to one agent used to stay there; on the machine this was measured on, seven were given again in other agents. doctor names an agent whose copy is behind, and uninstall takes the block out.
+  - deja rules candidates lists the turns where you corrected an agent, and the deja skill tells your agent how to group them into suggested rules, with the turns behind each one, and to write only the ones you pick. deja leaves the grouping to the agent because it measured badly without one: three word-based groupings found 0 real rules in their top 10, while a frontier model given the same list found 10 of 10. A small local model did not manage it, so this wants a strong agent.
+  - hermes plugins install vshulcz/deja-vu/extensions/hermes installs deja as a Hermes memory provider without deja install. It is the provider deja install hermes-auto writes, with deja taken from PATH, and a test keeps the two identical.
+  - On Windows, winget install vshulcz.deja-vu installs deja from the winget community repository, next to scoop install deja-vu.
+  Fixed
+  - A full rebuild keeps the chats Cursor deleted from state.vscdb, and the ones left behind when a bloated database is moved aside and Cursor starts over. The incremental pass already kept them; a rebuild read the database and wrote only what is in it now, so they went at the next content-version bump. The same holds for the other database-backed stores (#4128).
+  - On Windows, Claude Code's hooks run again. deja wrote the binary's path with backslashes, Claude Code hands hook commands to Git Bash, and bash strips unquoted backslashes, so every hook exited 127 without a word (#4116). Hook commands now name the path with forward slashes, which bash, cmd.exe and PowerShell all run (a path with a space stays double-quoted, as before). Existing configs are rewritten on the first run after upgrading.
+  - deja doctor says when Claude Code's hooks cannot start, not only when their binary is gone. It asks the shell Claude Code runs hooks in (Git Bash on Windows) for the binary as the settings file spells it, the check that would have caught #4116's 127 on every hook while doctor printed wired (#4125).
+  - deja warmup and deja version refuse arguments instead of ignoring them. deja warmup --rebuild ran the ordinary incremental build and exited 0; it now fails and names deja index --rebuild, which is where the rebuild lives (#4109, contributed by @Sharawey74).
+  - The OpenClaw plugin reaches ClawHub with each release again. ClawHub mints a publish token only for a workflow_dispatch run and refused every tag push since 0.21.0, so the tag run now dispatches release.yml with the tag and that run publishes.
+  Changelog
+  Features
+  - feat(hermes): the memory provider installs with hermes plugins install, from extensions/hermes (#4122)
+  - feat(rules): deja rules candidates lists your corrections, and the skill groups them into rules you pick (#4093)
+  - feat: deja rules copies one rules file into every installed agent's global rules file (#4089)
+  Fixes
+  - fix(doctor): say when the shell cannot start Claude Code's hooks, not only when the binary is gone (#4127)
+  - fix(index): a full rebuild keeps the chats a database store no longer holds (#4129)
+  - fix(install): hooks run on Windows, where Git Bash stripped the backslashes from deja's path (#4124)
+  - fix(resume): an old OpenClaw window is refused as no longer current, not as missing from the store (#4100)
+  - fix(warmup): warmup and version refuse arguments, and warmup --rebuild names deja index --rebuild (#4123) (@Sharawey74)
+  Documentation
+  - docs(guide): Cursor's state.vscdb at 50 GB, what fills it and how to shrink it without losing chats (#4131)
+  - docs(guide): one rules file for Claude Code, Codex and Gemini, and deja rules sync for your own (#4118)
+  - docs(guide): the delete page names claude project purge, which exists since 2.1.126 (#4115)
+  - docs(guide): the omp page names Oh My Pi, the delete page names purge in its title and says /clear keeps the file (#4120)
+  - docs(readme): a shorter first screen and collapsed reference detail — 11,600 px down to 8,400 (#4088)
+  - docs(readme): every translation opens with the accurate, cheap and fast head-to-head (#4091)
+  - docs(readme): lead with accuracy, token cost and speed against the published and measured rivals (#4083)
+  - docs(readme): the demo and the install come first, and what you get is a one-line list (#4102)
+  - docs(site): the landing counters compare — R@5 on all 500 questions, tokens and index time against rivals (#4085)
+  - docs: winget install vshulcz.deja-vu is a Windows install path now (#4095)
+  Other
+  - Fix OpenClaw SQLite session resume using the current key (#4098) (@mikemikimike)
+  - chore: 0.21.4 carries deja rules, the Windows hook fix and the rebuild carry for database stores (#4133)
+  - chore: the manifests and plugin versions say 0.21.3 (#4077)
+  - ci(release): each tag opens its winget-pkgs pull request (#4097)
+  - ci(release): the ClawHub publish runs on the tag and sends the run's own commit and ref (#4081)
+  - ci(release): the tag run dispatches the ClawHub publish, which ClawHub only accepts from workflow_dispatch (#4079)
+  Install
+  curl -fsSL https://raw.githubusercontent.com/vshulcz/deja-vu/main/install.sh | sh
+  go install github.com/vshulcz/deja-vu/cmd/deja@v0.21.4
+  brew install deja-vu
+ReleaseNotesUrl: https://github.com/vshulcz/deja-vu/releases/tag/v0.21.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

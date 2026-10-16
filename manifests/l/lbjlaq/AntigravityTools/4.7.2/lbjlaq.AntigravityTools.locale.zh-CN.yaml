@@ -1,0 +1,34 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.7.2
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+Tags:
+- account-manager
+- antigravity
+ReleaseNotes: |-
+  - [OpenAI / Codex 适配] 修复 Codex 客户端中 Gemini 模型思考过程未作为 reasoning summary 显示的问题 (PR #3439, Issue #3438):
+    - 标准化 Reasoning Summary 事件：使用流式 POST /v1/responses 时，将 Gemini 的 thought: true 思考分片调整为标准 rs_... 项（type: reasoning），并通过 response.reasoning_summary_part.* 与 response.reasoning_summary_text.* 规范事件流输出，使 Codex 可以在合适位置正规渲染思考摘要。
+    - 生命周期隔离与流结束闭合：在普通文本或工具调用开始前以及流结束时及时闭合 reasoning summary，确保与普通输出项的生命周期互不重叠，并保证会话持久化及 response.completed 输出一致性。
+  - [Prompt 格式规范与内存同步] 全局系统提示词换行隔离、Gemini 包装防重与配置即时生效 (PR #3433):
+    - Markdown 格式安全隔离：在 Antigravity 预置身份末尾及全局提示词后添加规范换行分隔符（\n\n），防止用户填写的 Markdown 标题紧贴前置粗体词造成渲染解析异常，并避免后续 HTTP 头部紧挨 Prompt 尾部。
+    - Gemini Wrapper 提示词去重：在 wrap_request_v2 中增加去重检测，防止请求在多次包装或重试时反复注入全局系统提示词。
+    - 配置保存即时同步全局内存：在 save_config 中将全局内存配置（Thinking Budget、全局系统提示词、图片思考模式、上下文压缩参数等）更新提取至代理实例检查之外，确保反代服务未启动或处于停止状态时，保存的配置也能立即同步到内存中。
+  - [存储与数据管理] 支持自定义数据存储目录并一键平滑全量迁移 (Issue #3441):
+    - 自定义数据目录与自举寻址机制：针对默认存储在 C 盘（~/.antigravity_tools）导致系统盘容易爆满的问题，新增持久化指针文件寻址。支持在高级设置中自由选择任意磁盘目录（如 D:\AntigravityData），应用启动时自动识别并重定向。
+    - 全量平滑迁移与空间安全释放：在高级设置中提供「更改并迁移」功能，一键将现有账号、全局配置、请求日志及 SQLite 数据库无损复制到新目录，支持迁移成功后自动清理原目录以释放 C 盘空间，并自动重启应用无缝加载新目录。
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.7.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

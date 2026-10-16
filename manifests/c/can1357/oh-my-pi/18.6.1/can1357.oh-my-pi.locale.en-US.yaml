@@ -1,0 +1,78 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.6.1
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-agent-core
+  Fixed
+  - Fixed native OpenAI context compaction for sessions containing many screenshots, preventing image-size estimates from incorrectly causing compaction requests to be rejected.
+  @oh-my-pi/pi-ai
+  Fixed
+  - Fixed compatibility with Command Code DeepSeek and other DeepSeek-family models by preserving the reasoning context required for warm OpenAI Responses sessions and correctly handling incomplete DSML tool-call wrappers in visible output.
+  @oh-my-pi/pi-coding-agent
+  Fixed
+  - Fixed waiting for subagent follow-up messages: responses now appear as background jobs that can be waited on or canceled, and are delivered only once.
+  - Improved /switch autocomplete so model and role suggestions use the same relevance ordering as the model picker, including support for @role aliases.
+  - Fixed concurrent skill:// searches blocking other filesystem operations and delaying subagent artifact publication.
+  - Fixed compatibility checks for browser relays from other OMP versions and added guidance for resolving stale connection-refused errors.
+  - Fixed follow-up hashline edits being incorrectly rejected after earlier edits shifted anchored lines, while continuing to reject genuinely stale line references.
+  - Fixed pi.exec() reporting exit code 0 when a process was terminated by a timeout or signal; terminated processes now report code -1.
+  - Fixed /collab guests being unable to respond to setting-change approval and tool-issue report consent prompts.
+  - Fixed follow-up hashline edits being rejected as anchored on lines "never displayed" after an earlier edit shifted those lines, when the replacement carries the anchored content; genuinely stale line numbers are still rejected (#14254 by @abilliontokens).
+  - Fixed long /btw answers in Tern being clipped with no way to scroll: /btw now answers in the scrollable BTW history sheet (#14331 by @H4vC)
+  - Fixed /btw answers longer than 4 KiB being cut off with […truncated] once they finished (#14331 by @H4vC)
+  - In Tern, Esc puts the BTW history sheet away while an answer keeps streaming (/btw reopens it); x cancels the answer (#14331 by @H4vC)
+  @oh-my-pi/pi-natives
+  Fixed
+  - Fixed concurrent searches through host-provided filesystem callbacks so they no longer starve other asynchronous filesystem operations, and ensured canceled searches release promptly.
+  @oh-my-pi/pi-tui
+  Fixed
+  - Fixed the Space key in the Git diff pane so it stages or unstages the focused hunk instead of scrolling or acting on the wrong change.
+  - Fixed the BTW history sheet in Tern: the history list no longer collapses beside a long answer, the panes lose their foldable ## headings, and the arrow/page keys scroll the answer (#14331 by @H4vC)
+  - Fixed a single saved side question in the BTW history panel opening on its one-row list: its answer now has focus, and Enter or f to follow up jumps to the bottom of the conversation (#14331 by @H4vC)
+  What's Changed
+  - fix(pi-edit): accept shift-consistent hashline anchors carrying current content by @abilliontokens in https://github.com/can1357/oh-my-pi/pull/14254
+  - fix(agent): estimate image tokens from dimensions for native compaction fit by @H4vC in https://github.com/can1357/oh-my-pi/pull/14260
+  - btw ux uplifts, tern specific. by @H4vC in https://github.com/can1357/oh-my-pi/pull/14331
+  - fix(collab): mirrored cfg:// approval prompts to collab guests by @roboomp in https://github.com/can1357/oh-my-pi/pull/14282
+  - fix(ai): filled reasoning_text on warm summary-only reasoning replay by @roboomp in https://github.com/can1357/oh-my-pi/pull/14294
+  - fix(natives): moved provider searches off libuv workers by @roboomp in https://github.com/can1357/oh-my-pi/pull/14298
+  - fix(browser): diagnosed stale relay after omp upgrades by @roboomp in https://github.com/can1357/oh-my-pi/pull/14299
+  - fix(tui): restored Space row staging in git diff by @roboomp in https://github.com/can1357/oh-my-pi/pull/14329
+  - fix(ai): preserved prose after incomplete dsml wrappers by @roboomp in https://github.com/can1357/oh-my-pi/pull/14273
+  - fix(coding-agent): reported non-zero exit code for killed exec processes by @roboomp in https://github.com/can1357/oh-my-pi/pull/14290
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.6.0...v18.6.1
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.6.1
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,134 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: vriesdemichael.bb
+PackageVersion: 4.1.0
+PackageLocale: en-US
+Publisher: vriesdemichael
+PublisherUrl: https://github.com/vriesdemichael
+PublisherSupportUrl: https://github.com/vriesdemichael/bitbucket-data-center-cli/issues
+PackageName: bb
+PackageUrl: https://github.com/vriesdemichael/bitbucket-data-center-cli
+License: Apache-2.0
+LicenseUrl: https://github.com/vriesdemichael/bitbucket-data-center-cli/blob/HEAD/LICENSE
+ShortDescription: A CLI for Bitbucket Server / Bitbucket Data Center
+Description: |-
+  bb works with Bitbucket Data Center and Bitbucket Server from the command line, the way gh works with GitHub: pull requests, repositories, branches, tags, commits, build status and permissions.
+  Every command can answer in JSON for scripts, and bb ai mcp serve exposes it to AI agents over the Model Context Protocol. It is not for Bitbucket Cloud.
+Moniker: bb
+Tags:
+- atlassian
+- bitbucket
+- bitbucket-data-center
+- bitbucket-server
+- ci
+- cli
+- devops
+- golang
+- mcp
+- pull-requests
+ReleaseNotes: |-
+  v4.1.0
+  bb v4.1.0 adds bb doctor for configuration problems and closes most of the remaining gap with gh for pull requests and repositories. It also makes failures say what actually happened: whether a request that never got an answer may have been applied, whether a listing was cut short, and which file or policy refused a command.
+  It is a minor release with no breaking changes. Most of the behaviour that changes is a fix: v4.0.0's decision records and release notes already specified it, and this release makes the binary keep those decisions everywhere.
+  Highlights
+  - bb doctor (ADR-086, #597): Checks the stored, workspace and system configuration files and reports every problem at once:
+    - schema violations, with their key and line;
+    - keys a file never reads, such as require_keyring in a user's own file;
+    - where each effective setting comes from;
+    - whether a required OS keyring answers.
+    It needs no Bitbucket host, makes no network call, and exits 1 when there is anything to fix.
+  - Closer to gh (ADR-050, #575):
+    - bb pr view, bb pr edit and bb pr close resolve, and bb pr checks shows a pull request's build statuses.
+    - bb pr ready marks a draft ready for review without asking for its version, and --undo turns it back into a draft (#602).
+    - bb repo get, also spelled bb repo view, describes a repository and prints its README (#605).
+  - An interrupted change is no longer reported as safe to retry (ADR-011, #574):
+    - The problem. Suppose bb creates a pull request or a comment, or merges one, and the connection drops, times out, or a gateway answers 502 before Bitbucket does. Bitbucket may already have applied it. bb used to report that as transient, exit 10, which is the code retry wrappers act on, so a retry could create the same pull request or comment twice.
+    - Now. Such a failure is unknown_outcome and exits 13, outside the retry range, and the message says to check whether the change landed before sending it again.
+    - What still exits 10. A failure before the request left the machine, and a delete or an update whose answer is lost: repeating those cannot create a second anything, so bb retries them itself (ADR-009).
+  - Releases you can verify, and a self-update that stays on https unless you allow otherwise. This matters if you check what you install or mirror releases internally; the steps are in Release Verification.
+    - Per-archive SBOMs (#584). Each release archive now has its own SBOM, published beside it as <archive name>.spdx.json: the list of every module the binary inside it is built from, which vulnerability scanners and compliance reviews read. The .deb and .rpm are covered by the _noupdate archive's.
+      - It is generated from that binary, because each platform links different modules.
+      - It is attested against the archive, so gh attestation verify proves the SBOM describes that archive.
+      - It replaces the single sbom.spdx.json, which inventoried the build checkout rather than any binary.
+    - https for update mirrors (ADR-059). bb update fetches release mirrors over https, because over plain HTTP anyone on the network path can read or hold back what the mirror serves.
+      - A mirror without TLS needs bb update --allow-http or BB_ALLOW_HTTP_UPDATE=1; without one of them the update is refused (exit 2).
+      - In system policy, allow_http_update: true permits it for every user without the flag, and allow_http_update: false refuses it for every user (exit 3).
+    - Pinned actions. The workflow that builds and signs releases runs GitHub Actions pinned to exact commits, so a moved tag cannot change what builds the binary.
+    - Windows and macOS CI. The unit suite runs natively on Windows and macOS as well as Linux.
+  Fixes: v4.0.0 decisions the binary now keeps everywhere
+  1. Every destructive delete confirms (ADR-073).
+     - The rule: destructive commands confirm when a person is present and require --yes when not, and --yes is inert on a repository inferred from the git remote.
+     - v4.0.0 enforced it for bb repo delete, bb repo admin delete and bb auth gpg-key clear. Every command whose last word is delete, remove, revoke or clear now follows it: 37 of them, including bb branch delete, bb tag delete, bb webhook delete, bb build delete, bb insights report delete, bb pr review reviewer remove, bb repo permissions revoke and bb auth token revoke.
+     - In a pipeline, pass --yes and name the target explicitly: --repo PROJECT/slug, or BITBUCKET_PROJECT_KEY and BITBUCKET_REPO_SLUG. A repository bb took from the git remote does not count, and --json needs --yes even at a terminal.
+  2. Invalid arguments exit 2, as the v4.0.0 notes promised. A subcommand that a command group does not know printed the group's help and exited 0, which put prose on stdout under --json. It now exits 2 (validation), and the help goes to stderr.
+  3. Error kinds match the taxonomy (ADR-011, #574).
+     - A rejected TLS certificate or a DNS failure is permanent (exit 1). It is not transient (exit 10), which invites a retry that cannot succeed.
+     - A 401 that refuses a known user is authorization, not authentication.
+  4. A capped listing says it was capped (ADR-074, #573). --limit has capped the total since v4.0.0. Every listing that takes it now also reports meta.limitReached, and MCP results (limit_reached) and text output say so too. bb insights annotation list also applies the default limit of 25 it had been ignoring; pass --all for every annotation.
+  Other fixes worth knowing
+  - Error messages no longer carry raw Bitbucket responses.
+    - An upstream response body is summarised, and credentials in it are redacted, before it reaches a message. Some bodies ran to 18 KB.
+    - error.details carries upstreamStatus and, when Bitbucket names one, upstreamException.
+    - --full-error-body prints the whole body when you need it.
+  - --dry-run changes nothing on the local machine either (#571). Twelve commands used to apply their change under --dry-run and now preview it: bb auth login, logout, alias add, alias discover, alias remove, server use, setup-git, bb ai skill install and skill remove, bb clone, bb repo clone and bb pr checkout. bb ai mcp serve --dry-run is refused rather than started, because a running server cannot be previewed (#568).
+  - A configuration file bb cannot read is an error, not an empty file (#567).
+    - Commands name the file, point at bb doctor, and stop with permanent (exit 1), instead of reporting that you are not logged in with validation (exit 2).
+    - bb auth login and bb auth logout no longer rewrite a file they could not read, which removed every other host.
+    - BB_DISABLE_STORED_CONFIG=1 no longer reads the stored file at all.
+  Deprecation
+  - bb bulk is deprecated and is removed in v5.0.0 (ADR-084).
+    - It warns once per invocation on stderr, so --json output stays clean.
+    - Permissions, webhooks and default tasks set at project level already apply to every repository in the project. For anything else, loop over bb repo list.
+  The full change ledger follows.
+  Changes since v4.0.0.
+  Compare: v4.0.0...v4.1.0
+  All 196 changes
+  Features
+  - update: update URLs are https unless plain HTTP is explicitly allowed (7c3c01e)
+  - bb doctor checks the configuration bb would load (fe6962d)
+  - repo: bb repo get describes a repository and prints its README, with gh's view as an alias (3152a9a)
+  - pr: bb pr ready marks a draft ready for review without asking for its version (dc27824)
+  - errors: unknown_outcome, for a request whose result never came back (7dfbf6b)
+  - safety: install the destructive confirmation from one walk (a3621a2)
+  - safety: confirm before deleting a branch, a tag or a webhook (56ed0a4)
+  - bulk: deprecate bb bulk, and add the machinery that remembers (7d6332d)
+  - pr: register the gh spellings so muscle memory resolves (bbd53fa)
+  Fixes
+  - release: ask jq for the one conclusion instead of piping into head (72b82fa)
+  - release: keep a prerelease tag from deciding the next release (b6de809)
+  - pr: let each half of an alias name the other, and prove doctor asks nothing (812a9b9)
+  - errors: ignore a status that is not one, and tidy what the refactors left (1f726b5)
+  - quality: count the endpoints bb calls from outside the services (09d6385)
+  - errors: a 2xx is not proof that a mutation landed (0518320)
+  - update: read the mirror as policy, and warn on the plain HTTP it reaches (ed04460)
+  - pr: read the version bb pr update needs instead of demanding it (e0d699b)
+  - cli: answer a request for help instead of refusing it (44a66a4)
+  - cli: make the destructive confirmation say what it means (7c0b200)
+  - errors: keep the transport's classification through three wrappers (3b1f04f)
+  - auth: give bb auth status its TLS remedy back (d15f3a0)
+  - errors: a status that arrived is the outcome (6d4346c)
+  - errors: a server that refuses the handshake is permanent (54f3790)
+  - doctor: report the refusals bb update would meet (51bad61)
+  - config: do not let an unreadable registry policy switch a control off (7fe30c9)
+  - errors: close the redaction gaps an upstream body can use (1eaf15a)
+  - git: keep a clone credential out of git's command line (4243b75)
+  - config: bind a stored credential to the host it was stored for (ba23a13)
+  - auth: keep the git remote out of a token's scope (d3f093c)
+  - cli: answer an interrupt that finds bb blocked on a read (8757850)
+  - errors: show a JSON envelope under --full-error-body too (edcf1ea)
+  - test: wait for Bitbucket to rescope the pull request before rebasing it (56ffc9f)
+  - update: say which address was refused, and which policy refused it (a6c3502)
+  - config: find a path part's name on disk in one pass that Linux runs in full (7963ded)
+  - config: one keyring key per config file where the file system ignores case (e439e43)
+  - errors: a 401 that refuses a known caller is authorization (b1060e6)
+  - doctor: bb doctor exits 1 for any issue, with every issue in error.details (ac68f3b)
+  - pr: review complete without a draft review names the command that sets the status (af1d650)
+ReleaseNotesUrl: https://github.com/vriesdemichael/bitbucket-data-center-cli/releases/tag/v4.1.0
+InstallationNotes: |-
+  Install the skill for coding agents: bb ai skill install --global
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://vriesdemichael.github.io/bitbucket-data-center-cli/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

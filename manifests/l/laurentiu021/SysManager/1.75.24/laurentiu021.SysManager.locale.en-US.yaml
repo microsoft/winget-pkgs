@@ -1,0 +1,88 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.75.24
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.75.24] - 2026-09-01
+  The previous release stopped a power cut from emptying a file SysManager had just saved. That fix covered the
+  shared code every settings file goes through — and five more places had never used it, including the one that
+  replaces SysManager's own program file when it updates itself.
+  Fixed
+  - An interrupted update can no longer leave SysManager unable to start. Installing an update copies the
+    new version into place and then swaps it with the old one. Windows reports the copy as finished once it has
+    the data in memory, so losing power in between could leave the program file present and empty — and an
+    empty program file does not open at all, with no obvious way back. SysManager now waits for the drive to
+    confirm it has the new version before the swap.
+  - The hosts-file editor and both history files got the same protection. Saving your hosts entries,
+    restoring the backup of them, and trimming the bandwidth or resource history all wrote a replacement file
+    and swapped it in, and none of them waited for the drive. All four now go through the same code the rest of
+    the app uses, which also means the hosts file keeps its own Windows permissions exactly as before.
+  - Trimming the history files no longer leaves a leftover file behind. Both used the same fixed name for
+    the file they write before swapping, and neither deleted it if the swap failed, so a failure left it there
+    for good. They no longer name it themselves.
+  - A downloaded update is confirmed on the drive before it is stored. The mildest of the five, because a
+    damaged download is already caught by its checksum when it is next used, but it is the same one-line
+    omission.
+  Verify the download
+  Get-FileHash .\SysManager-v1.75.24.exe -Algorithm SHA256
+  Expected SHA256: 59777E0FFEC5DDCFE5B22C6AC78E251CCF0AD10021F70222076B0DAF5D5B128A
+  This build is not code-signed, so Windows will warn on first launch. That is
+  expected for a small independent app: see what the warning says and what to
+  click.
+  Code signing is planned through the SignPath Foundation,
+  which provides free certificates to open-source projects, with signing performed by
+  SignPath.io. Until then, the SHA256 above and the build
+  attestation below are what establish that a download is the genuine build.
+  Code signing policy
+  This release is not code-signed. The team roles, release-approval process and
+  privacy policy required by the SignPath Foundation programme
+  are documented in advance under Code signing
+  policy. That
+  documentation is a prerequisite for applying, not evidence of a certificate. The
+  attribution line naming SignPath as the signing provider will appear here once a
+  certificate is actually issued.
+  This program will not transfer any information to other networked systems unless
+  specifically requested by the user or the person installing or operating it. Full
+  privacy policy.
+  Verify where this binary came from
+  This exe was built by GitHub Actions from this public source, and the build is
+  recorded in the Sigstore public transparency log. With the
+  GitHub CLI:
+  gh attestation verify .\SysManager-v1.75.24.exe --repo laurentiu021/SystemManager
+  That proves which commit and workflow produced this exact binary, something the
+  SHA256 file cannot show, since it is published alongside the exe it describes.
+  Each release also ships SysManager-v1.75.24.sbom.json, a CycloneDX inventory of
+  every dependency resolved for this build.
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.75.24
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

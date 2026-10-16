@@ -1,0 +1,80 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.80.0
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Improved
+  - wt list and the wt switch picker settle faster in repos with many worktrees: rows fill from the top down, and on macOS with core.fsmonitor=true no daemon start is forked for a worktree whose daemon is already running. On a 50-worktree repo the picker's per-row work starts at 47ms, down from 120ms. (#4286, #4290, #4288, #4284)
+  - CI status skips branches that were never pushed: wt list --full, the picker, and the statusline no longer query the forge for a local branch no remote has, so a repo with 239 local branches made 25 gh calls instead of 249. A PR opened from a branch another clone pushed shows once you fetch. GitLab looks up its project ID once per command, not per row. (#4289, #4216)
+  - Leaner Codex commit generation: the recommended Codex command moves to gpt-6-luna with reasoning off and unneeded Codex features disabled, so each message sends fewer input tokens. Accepting the first-run Codex prompt now also creates ~/.codex/worktrunk-commit-instructions.txt, which the command reads. Docs (#4261)
+  - Releases ship a signed packslip: each GitHub release includes packslip.sigstore.json, a manifest of the archives' digests, platforms, completions, and agent skills, signed by the release workflow so installers such as mise can verify downloads before unpacking. (#4301, thanks @jdx)
+  Fixed
+  - A squash whose commit fails keeps the branch: when a git commit hook or signing stopped the commit in wt merge or wt step squash, the branch was left at the merge base with its changes staged, recoverable from the reflog. Now the branch is untouched. (Breaking: git commit hooks run on a detached HEAD during a squash.) (#4206, thanks @Bennyjitsu for finding it in #4193)
+  - wt step diff when local main lags origin/main: for a branch built on the newer origin/main, the diff included the upstream commits in between. It now uses the same base as wt merge. (#4281, thanks @starlightromero, whose #3519 reported the same case for wt merge)
+  - Submodules with an ignore setting: when submodule.<name>.ignore or diff.ignoreSubmodules hid uncommitted changes inside a submodule, wt remove and wt step prune read the worktree as clean and removed it along with them; they now keep it. With ignore=all, wt step commit and squashes now commit a staged submodule pointer instead of leaving it staged. (#4252, #4192, #4206, #4303, thanks @Duang777)
+  - Worktrees whose .git was deleted but whose directory remains (macOS $TMPDIR cleanup can do this): wt remove <branch> failed, and wt step prune skipped or errored on them. Both now unregister the worktree and leave its files; one with staged changes or an operation in progress is kept by wt step prune, and refused by wt remove without --force. (#4228, #4226, #4302)
+  - wt merge --no-squash with a stage mode that stages nothing: with --stage=none and only unstaged changes, --stage=tracked and only untracked files, or only dirty submodule contents, it stopped at "Nothing to commit"; it now merges the branch's commits. (#4251, thanks @Duang777)
+  - Nushell 0.116: the first wt tab completion in each session printed a Positional completer input deprecated warning. The completer now takes Nushell's new input and still works on older versions. (#4297)
+  - Hook-log JSON's branch field: wt config state logs --format=json put the sanitized log directory name (feature-x-x2d) there; it now holds feature/x, or null when no local branch owns the directory. (Breaking: filters on the sanitized form need updating.) (#4279)
+  - wt config show --full outside a git repository: it printed only a git rev-parse failure; it now shows the user config and diagnostics. (#4255)
+  - Fixes for unusual git setups: --no-ff merges are signed when commit.gpgSign is set without a value or only for one worktree; after git worktree repair, --separate-git-dir repos put worktrees beside the work tree and wt remove works (fixes #4235); removing an orphan worktree before its first commit no longer errors; with a custom merge driver, leaving the picker during a conflict check no longer strands .merge_file_* files (fixes #4273). (#4206, #4236, #4233, #4274, thanks @zengzheqing and @brndnmtthws for reporting)
+  - Fixes for unusual names and values: branch and remote names starting with -; non-UTF-8 file names in wt step copy-ignored, promote, push, and merge; a bare ~ in CLAUDE_CONFIG_DIR, or Windows HOME differing from USERPROFILE; post-remove hooks after a pre-remove hook breaks the user config; multiline wt config state vars values, which vars list and {{ vars.* }} truncated and wt config state clear failed on. (#4253, #4267, #4277, #4257, #4259, #4262, #4247, #4276, #4272, thanks @Duang777 and @hiro-nikaitou)
+  Documentation
+  - Help and recipe corrections: wt step squash --stage=none and the wt step prune skip list now describe what they do, and the "Database per worktree" and "Monitor hook logs" tips use commands wt accepts. (#4268, #4279)
+  - The worktrunk skill's sub-Agent example runs hooks: it dropped --no-hooks, so pre-start provisioning runs in agent-spawned worktrees, with guidance on when to add it back. (#4219, thanks @passitalong)
+  Internal
+  - Library API changes (Breaking library API): LocalBranch gains push_remote; GitError gains StaleWorktreeHoldsWork and a repairable_at field on WorktreeMissing; Repository::capture_refs_with_ahead_behind is removed; git::parse_porcelain_z and Repository::changed_files now use bytes. (#4228, #4259, #4289, #4290)
+  - Agent guidance moved to AGENTS.md, shared by Claude Code and Codex, and trimmed from 2,763 lines to 382. (#4245, #4246, #4287)
+  Install worktrunk 0.80.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/max-sixty/worktrunk/releases/download/v0.80.0/worktrunk-installer.sh | sh && wt config shell install
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/max-sixty/worktrunk/releases/download/v0.80.0/worktrunk-installer.ps1 | iex"; git-wt config shell install
+  Install prebuilt binaries via Homebrew
+  brew install worktrunk && wt config shell install
+  Download worktrunk 0.80.0
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+  Install via Cargo
+  cargo install worktrunk && wt config shell install
+  Install via Winget (Windows)
+  winget install max-sixty.worktrunk && git-wt config shell install
+  Install via AUR (Arch Linux)
+  paru worktrunk-bin && wt config shell install
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.80.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

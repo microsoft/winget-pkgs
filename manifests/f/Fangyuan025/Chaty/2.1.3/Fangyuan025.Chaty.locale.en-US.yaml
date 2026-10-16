@@ -1,0 +1,152 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: Fangyuan025.Chaty
+PackageVersion: 2.1.3
+PackageLocale: en-US
+Publisher: Fangyuan Lin
+PublisherUrl: https://github.com/Fangyuan025
+PublisherSupportUrl: https://github.com/Fangyuan025/Chaty/issues
+PackageName: Chaty
+PackageUrl: https://chaty.ca
+License: MIT
+LicenseUrl: https://github.com/Fangyuan025/Chaty/blob/main/LICENSE
+ShortDescription: Private, local AI desktop app — run open LLMs fully offline with a coding agent, knowledge base and voice.
+Description: Chaty runs open large language models 100% locally. Chat with any GGUF model (llama.cpp, Vulkan GPU), use a local coding agent that can drive a real browser, ground answers in your own documents with a private knowledge base (RAG), generate cited Deep Research reports, and talk hands-free with offline voice. No account, no cloud, no telemetry.
+Moniker: chaty
+Tags:
+- ai
+- chatbot
+- coding-agent
+- gguf
+- llamacpp
+- llm
+- local
+- offline
+- privacy
+- rag
+ReleaseNotes: |-
+  ## A long conversation stops starting over
+
+  Chat mode re-wrote its own compaction summary on every single
+  message. A fresh wording each time, sitting in the system message —
+  the opening of the prompt — so everything behind it moved and the
+  engine could match nothing it had already computed. Measured on
+  Gemma-4 26B through MLX：99% of the window reused on the turns
+  before compaction began, and 0% on every turn after it, plus a whole
+  extra generation per turn to write the summary again. The summary is
+  kept now until the conversation outgrows the room it left, and it is
+  written from the previous summary rather than from a transcript that
+  gets more elided each time. Same measurement afterwards：99-100% on
+  the turns in between.
+
+  Reasoning kept in its own field counts against the window again.
+  Some templates read a turn's thinking from `reasoning_content`
+  rather than from the message body, so Chaty splits it out for them —
+  and the budget counted only the body, reading a whole reasoning
+  history as very nearly free. Qwen3.8 27B is the one local model that
+  splits it, and in a fourteen-model sweep it was the one model that
+  walked off the end of its own window：six turns in a row answered
+  with "context" and generated nothing, the conversation simply dead,
+  while the budget still reported room to spare. Same shape as
+  pictures counting for nothing before 2.1.2. Afterwards the same ten
+  turns never overflow, and each turn recovers on the next one.
+
+  Today's date and the web-search results moved out of the system
+  message and onto the turn that produced them. A regex on the current
+  question decided whether the date line was there, and the results
+  were new every turn — so one question containing the word "recent"
+  cost two full re-prefills, the turn that added the line and the turn
+  that dropped it again：2% and 1% reused, against 81% and 94% around
+  them. An answer that cited a source now keeps the source, too.
+
+  Code mode's cross-turn trim leaves room to grow. It freed exactly
+  enough to slip back under its ceiling, so the next turn was over
+  again — the same ceiling-hugging that mid-turn compaction was fixed
+  for in 2.1.2, on the other side of the turn boundary.
+
+  Thinking and web search can no longer both claim to be on. They are
+  mutually exclusive — a searching turn is sent with reasoning
+  suppressed — and turning search on from the command palette left a
+  tick beside Thinking in the Tools menu while every later turn
+  quietly stopped reasoning. If some of your turns seemed not to
+  think, this was why, and it was never the model.
+
+  A turn with no answer in it now says so. The prompt outgrew the
+  window and nothing was generated, or the model reasoned to the end
+  of its budget and stopped before writing anything：all of it used to
+  land as an empty bubble, or as a turn that vanished on reload.
+
+  A GPU load that was quietly cut back says so. After a driver crash
+  the next load takes fewer layers, and only the bottom of that ladder
+  was ever reported — the rungs in between just ran slower for no
+  stated reason.
+
+  The knowledge base answered out of six chunks, whatever size your
+  library was — the count was written into the search with a ceiling
+  of twelve above it and nothing in the app could raise it. It is a
+  setting now. Indexing a large file could also take the app down：a
+  file with no blank line in it is one paragraph, and the chunker
+  pulled the whole thing into memory four bytes a character first.
+
+  Code mode's deep / standard switch does something now. On any model
+  without a native effort ladder the rung was one bullet in a
+  six-thousand-character system prompt, while the off switch rode on
+  the last user message — which is where the model decides whether to
+  think, and how much. Measured across five paired tasks：deep used to
+  produce 0.95x the reasoning of standard on Qwen3.6 35B and was the
+  longer of the pair once in five; it now gives 1.52x there (5 of 5),
+  1.81x on Qwen3.5 9B and 3.20x on Gemma-4 E4B through the other
+  engine.
+
+  "Continue" after a paused turn no longer restarts the loop it was
+  breaking. A turn pauses when the model keeps repeating a call or
+  keeps leaving out a required argument, and everything working
+  against that — the heat, the rung the missing-argument ladder had
+  climbed, the repeat count — lived in the turn and died with it. So
+  Continue began the next one at base temperature, on the gentlest
+  rung, facing a transcript in which the model had just made the same
+  empty call five times. The rung carries over now, the first step
+  samples fresh rather than replaying, and the resumed turn says which
+  loop it came from and what to do instead.
+
+  Code mode's step and command-timeout ceilings can be switched off —
+  they stopped at 96 steps and 300 seconds, with a second 600-second
+  ceiling behind the slider that it could not even express.
+
+  The console tool could not see what Chrome was showing. Everything a
+  page spawns — a cross-origin iframe, a window it opens, a worker —
+  reports on its own debugger session, and only the first was attached,
+  so those errors existed in the browser and nowhere else. Reading the
+  console also emptied it, so a model that looked twice was told it was
+  empty while the error was still on screen.
+
+  A tall page's screenshot no longer fails the round on Gemma-4, which
+  through MLX cannot take more than one picture in a prompt：a
+  full-page capture arrives as several tiles, so every one of them
+  failed, and the retry behind each failure is what a browsing session
+  looked like from the outside.
+
+  A long unattended run stops eating the renderer. Every step card held
+  the full tool result — up to 384 KB for one file read, for every
+  step, written to disk on each save — which is how a run grows until
+  the web content process is killed and comes back empty：no error, no
+  notice, the turn gone and the mode reset to chat. Reasoning in code
+  mode is also shown the way chat shows it, a short window pinned to
+  the newest line instead of a trace that pushes the steps off screen.
+
+  On Windows, a GPU crash lowers the offer instead of ending it
+  (issue #9). A 26B model on a 12 GB card took the Vulkan driver down
+  on its first load and the reporter spent every session afterwards on
+  the CPU with no way back — the guard was a tombstone that no code
+  path anywhere removed, and the offload had been sized from the card's
+  total memory rather than what was free. A crash now halves what the
+  load was attempting, and the first load that survives clears it.
+
+  Settings hover explanations stay inside the window. They were drawn
+  on the label they belonged to and clipped by the panel's own edge,
+  which no amount of clamping could fix; they are real elements now,
+  outside the panel, measured rather than estimated.
+ReleaseNotesUrl: https://github.com/Fangyuan025/Chaty/releases/tag/v2.1.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,38 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.7.6
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+Tags:
+- account-manager
+- antigravity
+ReleaseNotes: |-
+  - [对齐官方 IDE 订阅判定与权威解析] 彻底重构订阅解析链路，根治免费账号误判 PRO (PR #3470, Fixes #3469):
+    - 对齐官方机器字段 paidTier.id: 订阅等级提取全面改由机器可读的唯一权威字段 id（free-tier / g1-pro-tier / g1-ultra-tier）优先驱动，摒弃易受语言环境干扰的自由文本 name，精准收敛识别 Ultra 内部代号 helium 与免费代号 starter。
+    - 彻底移除模型启发式推导：经官方逆向与抓包证实 fetchAvailableModels 为全量静态下发，彻底废除后端与前端基于模型列表前缀猜测 PRO/ULTRA 的副作用推导逻辑，收窄函数签名，未识别等级安全归入 FREE。
+    - 取消 project_id 缓存跳过机制：每次刷新配额均发起 loadCodeAssist 权威校验，历史落盘的错误档位可在刷新时即刻自愈纠正。
+    - 调度排序与 UI 展现统一：代理调度优先级全面接入 models::quota::tier_priority，未知等级统一按最低档调度，避免形成隐形负优先级；账号详情弹窗统一采用规范化徽章文案。
+  - [单元测试隔离与数据安全加固] 根治单测篡改真实家目录指针 (Data Directory Pointer):
+    - 指针覆盖环境变量支持：数据目录指针支持 ABV_DATA_DIR_POINTER_FILE 覆盖，测试环境沙箱完全重定向至临时路径。
+    - 中断恢复与真实环境断言：单测增加 panic 捕获安全还原，并在结束时严格断言用户真实家目录 ~/.antigravity_tools_location 未被改动，彻底杜绝测试异常退出导致用户账号“清空”的风险。
+  - [配置中心与命令兼容] 修复反代设置保存时命令未找到错误 (PR #3470):
+    - 保存后重新拉取指令对齐：修正前端保存配置后重新获取配置的指令为 load_config，彻底消除 Command get_config not found 报错提示。
+    - 双向指令兼容：后端 Tauri 与 HTTP 接口中注册 get_config 作为 load_config 兼容别名。
+  - [桌面端反代服务与自启持久化] 修复反代开关状态重启还原与配置覆盖缺陷：
+    - 后端自启持久化对齐：桌面端 start_proxy_service 与 stop_proxy_service 启停逻辑对齐 Web/Docker 实现，操作后即时持久化 auto_start 状态至 gui_config.json，确保应用重启后能准确保留并自动拉起服务。
+    - 前端内存状态即时同步：修复前端 handleToggle 未同步更新 React 内存配置中的 auto_start 字段的缺陷，杜绝后续保存其他反代设置或调整模型映射时因陈旧状态回写而意外覆盖关闭自启。
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.7.6
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

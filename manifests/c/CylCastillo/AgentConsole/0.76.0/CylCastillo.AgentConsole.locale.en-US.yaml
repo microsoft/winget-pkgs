@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: CylCastillo.AgentConsole
+PackageVersion: 0.76.0
+PackageLocale: en-US
+Publisher: Carlos Castillo
+PublisherUrl: https://github.com/cyl-castillo
+PublisherSupportUrl: https://github.com/cyl-castillo/agent-console/issues
+PackageName: Agent Console
+PackageUrl: https://github.com/cyl-castillo/agent-console
+License: MIT
+LicenseUrl: https://github.com/cyl-castillo/agent-console/blob/main/LICENSE
+ShortDescription: Minimalist AI-native console for directing coding agents inside a repository.
+Description: |-
+  Agent Console is a terminal-first desktop app that pairs coding-agent CLIs
+  (Claude Code, Codex) with an integrated PTY terminal, a git diff viewer,
+  per-turn working-tree snapshots, and per-tool approvals — so you can drive
+  an agent through real work without losing control. Every session is
+  witnessed into a hash-chained evidence ledger (Testigo) exportable as
+  signed proof packets verifiable in any browser. Requires the Claude Code
+  CLI and Node.js 20+.
+Moniker: agent-console
+Tags:
+- agent
+- ai
+- claude
+- cli
+- developer-tools
+- git
+- terminal
+ReleaseNotes: |-
+  > **License change:** starting with this release Agent Console is **AGPL-3.0-only** (v0.75.0 and earlier remain MIT, irrevocably). If you just *use* the app — personally or at your company — **nothing changes for you**：no obligations, no disclosure, your code stays yours. The license only bites if you distribute or network-serve a modified build of the app itself. Details: [README → "Using Agent Console at work"](https://github.com/cyl-castillo/agent-console#using-agent-console-at-work).
+
+  ## Highlights
+
+  • **Rewind to a turn — files AND conversation together** (#174). Every closed turn in the proof timeline gains *↶ rewind to this turn*：the working tree is restored to that turn's snapshot (with a backup taken first, so the rewind itself is undoable) and a new session opens with Claude's memory rewound to that same point, via a non-destructive fork of the session transcript. The original session and transcript stay untouched as history, and the rewind lands in the evidence ledger as an auditable event. Claude-only for now; if the fork isn't possible, files are still restored and the app says so instead of pretending.
+  • **Failed turns now close, and say why** (#169). When the API refuses a turn (expired login, billing, org policy), Claude fires `StopFailure` instead of `Stop` — previously that turn hung open forever. Now it closes through the same path as a normal turn (diff included), the timeline renders it as failed with the reason, and the error toast points at "Fix Claude login" only when logging in again would actually help.
+  • **Links in the terminal actually open** (#170). OSC 8 hyperlinks (used by Claude for docs/PR links, and by Codex 0.150+ for markdown labels) now open in your real browser instead of dying in a blocked `window.open`. http(s) only, destination shown on hover.
+  • **The model pill stops lying** (#172). `PostModelSwitch` (Claude 2.1.251+) reports the model that's *actually* running — so a `/model` typed in the terminal, or Claude falling back on its own, no longer leaves the pill stale (and no longer drags the next `--resume` back to the wrong model).
+  • **README got a face** (#166, #167, #168)：real screenshots, refreshed landing, and the getting-started pill no longer covers panel buttons.
+
+  ## Notes
+
+  • Windows binaries remain unsigned (work in progress — SignPath/Certum). winget publish for this version is pending a token rotation; AppImage self-updates in place, .deb/.rpm show the manual-download banner as usual.
+  • Full diff：[v0.75.0...v0.76.0](https://github.com/cyl-castillo/agent-console/compare/v0.75.0...v0.76.0)
+ReleaseNotesUrl: https://github.com/cyl-castillo/agent-console/releases/tag/v0.76.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

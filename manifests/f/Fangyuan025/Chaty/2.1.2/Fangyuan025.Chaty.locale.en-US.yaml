@@ -1,0 +1,31 @@
+# Automatically updated by the winget bot at 2026/Aug/24
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Fangyuan025.Chaty
+PackageVersion: 2.1.2
+PackageLocale: en-US
+Publisher: Fangyuan Lin
+PublisherUrl: https://github.com/Fangyuan025
+PublisherSupportUrl: https://github.com/Fangyuan025/Chaty/issues
+PackageName: Chaty
+PackageUrl: https://chaty.ca
+License: MIT
+LicenseUrl: https://github.com/Fangyuan025/Chaty/blob/main/LICENSE
+ShortDescription: Private, local AI desktop app — run open LLMs fully offline with a coding agent, knowledge base and voice.
+Description: Chaty runs open large language models 100% locally. Chat with any GGUF model (llama.cpp, Vulkan GPU), use a local coding agent that can drive a real browser, ground answers in your own documents with a private knowledge base (RAG), generate cited Deep Research reports, and talk hands-free with offline voice. No account, no cloud, no telemetry.
+Moniker: chaty
+Tags:
+- ai
+- chatbot
+- coding-agent
+- gguf
+- llamacpp
+- llm
+- local
+- offline
+- privacy
+- rag
+ReleaseNotes: "## The model stops re-reading what it just did\n\nBetween turns, code mode threw away everything the agent had\nactually done. The follow-up arrived with the tool results gone and\n\"(tools run：read_file, bash)\" in their place, so the model no\nlonger knew what any of those calls had returned and re-read files\nit had just read. The exchange now carries over intact — and that is\ncheaper than discarding it was：2035 of 2058 prompt tokens reused,\n75ms, against a cold 208ms for the summary it replaces.\n\nA follow-up question no longer re-reads the conversation on MLX\neither. Chaty lays a conversation out one message at a time now,\nfrom a layout learned off the model's own template and used only\nwhen it reproduces that template's token ids exactly. Qwen3.5 2B and\nGemma-4 26B both go from 0% to 99% reuse on the second turn's first\nstep — 1587ms to 95ms, 4292ms to 216ms.\n\nThinking off no longer costs a full prefill every turn. Chaty\nprefills an empty reasoning block after the assistant header, but a\nstored turn was rendered without it, so round two diverged right\nthere — 0% reuse on Qwen3.5 and LFM2, and thinking off is code\nmode's default. Now 100%, on both engines.\n\nLFM2's tool calls run. The engine rendered control tokens as\nnothing, so `<|tool_call_start|>[read_file(path='x')]<|tool_call_end|>`\nreached Chaty as ordinary prose and the call never fired.\n\nA screenshot the model has already seen is no longer re-encoded.\nThree consecutive tool-result rounds on Qwen3.5 4B cost 2826ms,\n5596ms and 5741ms before; they now cost about 150ms each. Dropping\nstale screenshots turned out to make llama.cpp slower, not faster,\nso it keeps them.\n\nContext compaction condenses the work with a model-written summary\ninstead of a 60-character index per turn, and leaves room to breathe\nrather than skimming the limit：the same task on an 8k window went\nfrom 63 rounds and 633 seconds to 18 rounds and 132 seconds. Chat\nand code share one token budget now, calibrated against what the\nengine actually charges, and attached pictures count toward it.\n\nA follow-up question no longer re-reads the conversation on MLX\neither：Qwen3.5 2B and Gemma-4 26B both go from 0% to 99% cache\nreuse on the second turn's first step (1587ms to 95ms, 4284ms to\n217ms).\n\nA screenshot the model has already seen is no longer re-encoded.\nThree consecutive tool-result rounds on Qwen3.5 4B cost 2826ms,\n5596ms and 5741ms before; they now cost about 150ms each, and a\nfresh screenshot encodes only itself. Dropping stale screenshots\nturned out to make llama.cpp slower, not faster, so it keeps them.\n\nA chat reply now travels the way the model wrote it — stripping the\nreasoning out of stored turns meant every reply re-read the whole\nconversation. Attached pictures count toward the context budget.\n\nContext compaction now condenses the work with a model-written\nsummary instead of a 60-character index per turn, and leaves room to\nbreathe rather than skimming the limit：the same task on an 8k\nwindow went from 63 rounds and 633 seconds to 18 rounds and 132\nseconds. Chat and code also share one token budget now, calibrated\nagainst what the engine actually charges.\n\n<!-- Highlights go above this line, hand-written per release —\n     the release page is where people who found Chaty through a\n     model's name land, and a bare install table tells them\n     nothing about why this version exists. -->\n\n## Install\n\n| Platform | File |\n|---|---|\n| **Windows x64** | `Chaty_*_x64-setup.exe` — per-user installer, no admin |\n| **macOS (Apple Silicon)** | `Chaty_*_aarch64.dmg` |\n| **Linux x64 (beta)** | `Chaty_*_amd64.AppImage` — `chmod +x` and run. First Linux release — please report anything odd |\n\n### ⚠️ macOS first launch — \"Apple could not verify…\" / \"damaged\"\n\nChaty is **ad-hoc signed but not notarized** (no paid Apple Developer\naccount), so Gatekeeper flags it on first launch. The app is safe —\neverything runs locally. Clear the download quarantine once, in Terminal:\n\n```sh\nxattr -dr com.apple.quarantine /Applications/Chaty.app\n```\n\nThen open Chaty normally. (Alternatively：try to open it once, then go to\n**System Settings → Privacy & Security → Open Anyway**.)\n\n---\n\n\n**Full Changelog**：https://github.com/Fangyuan025/Chaty/compare/v2.1.1...v2.1.2"
+ReleaseNotesUrl: https://github.com/Fangyuan025/Chaty/releases/tag/v2.1.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

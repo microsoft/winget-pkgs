@@ -1,0 +1,29 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: hellowind777.hellogrok.CLI
+PackageVersion: 0.1.39
+PackageLocale: en-US
+Publisher: hellowind777
+PublisherUrl: https://github.com/hellowind777
+PublisherSupportUrl: https://github.com/hellowind777/hellogrok/issues
+PackageName: hellogrok-cli
+PackageUrl: https://github.com/hellowind777/hellogrok
+License: MIT
+LicenseUrl: https://github.com/hellowind777/hellogrok/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 hellowind777
+ShortDescription: Console-only CLI of hellogrok, a local proxy that makes Grok Build custom model channels work with common API formats, native Web tools, isolated authentication, and automatic configuration recovery.
+Description: 'Grok Build can use custom model endpoints, but real-world providers do not all expose the same protocol, response shape, authentication method, or Web-search behavior. hellogrok provides one local compatibility layer for those custom channels: it prepares the required Grok configuration while running, keeps each channel tied to its own endpoint and credentials, supports Grok Build native Web workflows, and restores the original configuration when stopped. This console-only build runs the same proxy from the terminal without the tray application; run `hellogrok help` for the full CLI reference (start, version, routes, restore, autostart, log, logview).'
+Tags:
+- grok
+- grok-build
+- proxy
+ReleaseNotes: |-
+  Added
+  - Managed inference_idle_timeout_secs for proxied channels: when a custom model does not configure Grok Build's per-chunk idle deadline, hellogrok temporarily materializes 1800 seconds (restored byte-for-byte on stop) so long relay stalls — queued generations that emit heartbeats but no content for many minutes — no longer hit the 600-second shell default. Explicit per-model or global [models] values remain user-owned and are never rewritten; first-party api.deepseek.com routes are excluded so their remote metadata stays authoritative (the watchdog below still protects them).
+  - Downstream content watchdog on every streaming path (native Chat/Messages/Responses passthrough and the translated Responses projections). It mirrors Grok Build's per-protocol "meaningful content" idle classification — text, reasoning, tool-call deltas, and terminal signals count; keepalive comments, usage-only chunks, empty deltas, and lifecycle bookkeeping events do not — and fires one 30-second margin before the client's own content-progress timer. On fire it closes the upstream body and emits a retryable proxy_stream_error, so a genuinely stalled stream re-enters Grok Build's native 15-attempt retry budget instead of dying on the client's non-retryable IdleTimeout. Watchdog activity is logged as SSE stalled: no content reached Grok Build for …; timeouts below 60 seconds disable the watchdog to respect explicit fast-fail choices.
+  Fixed
+  - A relay holding a stream with only keepalive bytes for longer than Grok Build's idle deadline (observed: GLM channels queuing for 3+ minutes with heartbeat-only frames) previously killed the turn permanently: the sampler's content-progress timer raises IdleTimeout, which is classified non-retryable, so neither the 15-attempt budget nor error-triggered compaction could save the turn. The turn now waits out stalls up to the managed deadline and degrades to a normal retryable failure past it.
+ReleaseNotesUrl: https://github.com/hellowind777/hellogrok/blob/HEAD/CHANGELOG.md#0139-2026-09-16
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

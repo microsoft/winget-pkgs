@@ -1,0 +1,189 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: NoahSabaj.Mermaid
+PackageVersion: 0.25.0
+PackageLocale: en-US
+Publisher: Noah Sabaj
+PublisherUrl: https://github.com/noahsabaj
+PublisherSupportUrl: https://github.com/noahsabaj/mermaid-cli/issues
+PackageName: Mermaid
+PackageUrl: https://github.com/noahsabaj/mermaid-cli
+License: Apache-2.0
+LicenseUrl: https://github.com/noahsabaj/mermaid-cli/blob/main/LICENSE-MIT
+ShortDescription: Open-source, model-agnostic AI pair programmer for the terminal.
+Description: |-
+  Mermaid is an open-source, model-agnostic AI pair programmer for the terminal.
+  It works with Ollama (local), Anthropic, Gemini, OpenAI, Groq, OpenRouter, and
+  any OpenAI-compatible endpoint, with native tool calling, subagents,
+  computer-use tools, and a clean TUI.
+Tags:
+- ai
+- cli
+- developer-tools
+- llm
+- rust
+- terminal
+ReleaseNotes: |-
+  ## Mermaid 0.25.0
+
+
+  ### Added
+
+  **`mermaid task <id> --send "<text>"` -- you can talk to a task that is
+    already running.** Attaching to a daemon task could watch it and kill it,
+    and that was all: `subscribe_task` streams a task's events and
+    `cancel_task` fires its token, but nothing could put a message *into* a
+    run in flight. Noticing halfway through a twenty-minute task that you also
+    wanted the tests checked meant cancelling it or waiting it out and
+    starting again from `--resume`.
+
+    The run now publishes an `EngineHandle` -- its mailbox and its event bus --
+    the moment its engine exists, before the first model call. The daemon
+    registers it alongside the cancellation token it already kept, and drops
+    it with the task's event stream. The mailbox is the SAME channel every
+    effect result arrives on, which is the design and not an implementation
+    detail: a prompt sent from outside is indistinguishable from one the run
+    produced itself, so it goes through the same reducer, the same stale-turn
+    filter, the same recorder, and the same event log, and queues behind the
+    live turn exactly as a typed one does. There is no second way into the
+    state.
+
+    A task that is not running says so and points at `mermaid run --resume`,
+    rather than accepting a message with nowhere to go. The send is
+    non-blocking on the daemon's side, so a run that is behind on its own
+    effects cannot stall every other client.
+
+  ### Changed
+
+  **Every provider streams through one read loop, and a slow reader now
+    reaches the socket instead of a queue.** Five adapters each carried their
+    own copy of the same loop -- read a chunk, cap the reassembly buffer, split
+    frames, dispatch, decide whether the stream ended or was cut -- and only the
+    dispatch step was ever about the provider. The copies had drifted: Ollama
+    flushed the un-terminated frame left when a body closes mid-frame and the
+    four SSE adapters dropped theirs, so a server that ends its body directly
+    after `data: {...}` without the blank line loses its final frame on four
+    providers out of five. Nobody chose that; it is a `Framing` decision written
+    down in one place now, with the reason next to it.
+
+    What you can observe. Between the adapters and the screen sat an unbounded
+    staging channel and a relay task spawned per turn, there to stop a `Done`
+    event from overtaking a tool call the model had asked for -- which would
+    make the agent silently skip running it. The adapters' read loops were
+    already async, so they now await the send directly and the ordering holds by
+    construction, with no second channel to reorder anything. The bounded
+    channel that was always documented as the backpressure finally is it: a turn
+    whose consumer falls behind stalls the read and fills the provider's TCP
+    window, rather than growing a queue in memory. A turn also no longer leaks a
+    spawned task if it is cancelled at the wrong moment, because there is no
+    longer a task to leak.
+
+    Meta joins the other four as a real adapter rather than a provider that
+    hand-rolled one, which is what removes the fifth copy of the loop. The wire
+    formats are now covered by one conformance suite: recorded response bodies
+    per provider, asserted in shared terms, so that Anthropic's `max_tokens`,
+    Gemini's `MAX_TOKENS`, OpenAI's `length` and Ollama's `done_reason:
+    "length"` are provably the same fact to everything above them. Each scenario
+    runs twice, the second time one byte at a time, which is the first coverage
+    any adapter has had for a network chunk boundary landing inside a frame.
+
+  **The driving loop is a value now, and a timed-out headless run stops
+    leaking its MCP children.** `update(State, Msg) -> (State, Vec<Cmd>)` is the
+    whole product; driving it is five lines -- stamp the clock, reduce, route the
+    commands, stop on exit -- and those five lines were written out longhand in
+    six places, each with its own spelling of the loop around them. The cost was
+    never the duplication, it was that fixes landed once per copy: #76 (a
+    timed-out child dropped its effect runner mid-flight and leaked the MCP
+    servers it was still holding) was fixed in the subagent's loop by moving the
+    deadline into the `select!`, and `mermaid run` kept the identical bug,
+    unfixed, because it was a different function -- its `timeout()` wrapper
+    returned `Err` through `?` while the runner was still sitting on the caller's
+    stack.
+
+    `crate::engine::Engine` now owns the reducer state and the effect sink and
+    exposes that loop once, with three seams for the axes the callers really
+    differ on: where a `Cmd` goes (`EffectSink`), what watches each message
+    before the reducer consumes it (`StepObserver`), and when the loop stops
+    (`DrivePolicy` -- which turns "abort" versus "inject `CancelTurn` and give
+    the turn 15 seconds to unwind" from two undocumented behaviours into two
+    named ones). The deadline is a `select!` arm, so a timed-out run still owns
+    its state and still reaches its own shutdown path.
+
+    The kernel is deliberately synchronous and observer-free, because `--replay`
+    folds a recorded log with no tokio runtime in sight; it now names dropping
+    the emitted commands as a policy (`DropEffects`) rather than leaving it to a
+    `let (next, _cmds)`.
+
+    All four drive loops are callers: the replay fold, `mermaid run`, the
+    subagent's child, and the interactive TUI -- which keeps its own `select!`,
+    because terminal events and the `$EDITOR` round-trip are genuinely
+    run-loop-owned, but now feeds one `step` call, and reaches its stated
+    "~30-line main loop" for the first time. What each of them contributes is
+    now a named thing rather than an inlined one: the `--record` writer and the
+    `RunEvent` projection are observers, `Cmd::ComposeInEditor` is a sink that
+    peels it off, and the child's progress relay is the observer wrapping the
+    state machine it already had.
+
+    `--replay`, `mermaid run`, `--record`, the subagent, and the daemon's NDJSON
+    and `subscribe_task` streams behave exactly as before -- the `RunEvent` wire
+    is untouched and still v1. See `docs/design/engine-extraction.md`; the actor
+    form (`send`/`subscribe`), which daemon attach and multi-session need,
+    follows.
+
+  **`subscribe_task` replays what an attach missed instead of joining
+    from-now.** `mermaid task <id> --follow` used to start at whatever
+    happened next: attach at minute nine and you saw nine minutes of
+    silence, and never the `session_started` line that names the session --
+    the same empty-handed attach the terminal path was fixed for, still
+    shipping for every live one. The session event log is the durable record
+    of everything before the attach, so the daemon now reads it and replays
+    a catch-up first: identity, then the transcript committed so far as
+    coarse `text` / `reasoning` / tool lines (one per committed message
+    rather than the deltas that produced it), then the newest checklist.
+    The ack gained a `replayed` count so a consumer that only wants what
+    happens from now skips exactly that many lines; the `RunEvent` wire
+    itself is unchanged and still v1.
+
+    Reaching the log mid-run needed the key to exist mid-run:
+    `tasks.conversation_id` was stamped at terminal status, and is now
+    stamped when the run *announces* its session, with the end-of-run write
+    kept as the authority. `mermaid task <id>` shows the conversation while
+    the task is still running as a result. The receiver is attached before
+    the log is read, so a message committed during the read is replayed and
+    also delivered live -- an overlap bounded to that one message, and the
+    right way round, since repetition is recoverable by a consumer and a
+    hole is not.
+
+  **Modal precedence is one resolver, and every picker shares one
+    navigation core.** Which surface owned a keystroke used to be a 25-deep
+    chain of early-return guards in `handle_key`; which pane owned the bottom
+    of the screen was TWO hand-maintained ladders in the render layer (one
+    sizing the zone, one drawing it) that had to be edited in lockstep --
+    the family behind the vanished-composer bug. `State::focus()` now names
+    the precedence once (approval > question > confirm > picker > composer),
+    key routing dispatches on it, and the render layer's new single
+    `BottomPane` decision derives from the same resolver -- what draws and
+    what receives keys are one authority, and the slash palette's filtered
+    entries are computed once per frame instead of once per ladder.
+
+    The four `UiMode` pickers (model, conversations, rewind, plan config)
+    each hand-rolled the same Up/Down/Enter/Escape machine -- the
+    duplication family behind the paste-into-the-file-picker bug. The
+    machine now exists once (`picker::picker_step`); each handler keeps only
+    its confirm semantics and extra keys (query typing, value cycling). The
+    approval-modal and confirm-modal key handlers extracted verbatim into
+    named functions on the way. Frame output is pinned unchanged by the
+    snapshot and PTY suites.
+
+  **One store handle per process on the hot paths.** Every runtime-store
+    touch used to run its own `RuntimeStore::open_default()` -- the per-call
+    open, ACL probe, and migration check repeated on paths that fire per tool
+    call (tool-run bookkeeping, capability-probe caching, process upserts,
+    compaction rows). Those now share one process-wide handle via the new
+    `with_shared_store`, which opens lazily, never caches an open failure,
+
+  _(release notes truncated to fit the 10000-character manifest limit -- see the full notes at the URL below)_
+ReleaseNotesUrl: https://github.com/noahsabaj/mermaid-cli/releases/tag/v0.25.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

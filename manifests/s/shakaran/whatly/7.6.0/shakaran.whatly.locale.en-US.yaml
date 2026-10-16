@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: shakaran.whatly
+PackageVersion: 7.6.0
+PackageLocale: en-US
+Publisher: shakaran
+PublisherUrl: https://github.com/shakaran
+PublisherSupportUrl: https://github.com/shakaran/whatly/issues
+Author: Ángel Guzmán Maeso
+PackageName: Whatly
+PackageUrl: https://github.com/shakaran/whatly
+License: MIT
+LicenseUrl: https://github.com/shakaran/whatly/blob/main/LICENSE
+Copyright: |-
+  Copyright (c) 2021 Keshav Bhatt
+  Copyright (c) 2026 Ángel Guzmán Maeso
+CopyrightUrl: https://github.com/shakaran/whatly/blob/main/LICENSE
+ShortDescription: Feature rich WhatsApp Client for Desktop Linux
+Description: |
+  A feature-rich desktop client for WhatsApp Web. Native window, system tray, notifications, chat themes, privacy blur, multiple accounts, spell-check and more — on Linux and Windows, with an experimental macOS build.
+ReleaseNotes: |-
+  • **"Link with phone number" can be made to work again (#43).** WhatsApp's phone-number linking refuses to issue a pairing code unless the browser it is told about is one it recognises, and the "Identify as Whatly in linked devices" feature reported an unknown "Whatly", which silently broke that flow while QR linking kept working. The browser name is now a setting：leave it empty for the clean "Whatly" label as before, or set a recognised browser such as Chrome to make phone-number linking work (the browser prefix then reappears in the label). Thanks to Nigel1992 for the precise A/B diagnosis.
+  • **The Flatpak build moves off the end-of-life KDE 6.9 runtime (#111).** It now targets the KDE 6.10 runtime (Qt 6.10), which matches Whatly's default Qt floor, so the previous `-DQT_VERSION_MINOR=9` override is dropped. Both the local and Flathub manifests are updated.
+  • **"Find in chats" is now reachable from the command palette.** The `Ctrl+F` chat-list search was already there; it now also appears in the `Ctrl+K` command palette, so it can be reached by name like any other command.
+  • **A global "boss key" hides every window at once.** `Ctrl+Alt+H` hides all Whatly windows immediately and suppresses message popups while hidden, so nothing surfaces after the hide; pressing it again (or the existing `Ctrl+Alt+W`, or the tray) brings them back and re-enables popups. Unread badges keep updating meanwhile. Where the desktop does not allow an app to register global shortcuts, it registers nothing, the same as the existing raise and quick-compose ones.
+  • **The restart no longer risks wedging the new instance at 100% CPU (#98).** "Restart now" (after a setting that needs a restart, or a self-update) spawned the new instance by `fork()`-ing the running process, but a QtWebEngine (Chromium) process is not fork-safe：on some setups, an AppImage on Wayland among them, the new instance could spin on a single core indefinitely and had to be killed. It now uses `posix_spawn` instead, which starts a fresh process that execs at once without cloning Chromium's threads and locks, keeping the same new-session detach and the stdout/stderr the log needs (#62). A libc too old for `posix_spawn`'s session and descriptor controls keeps the previous fork-based path.
+  • **The AppImage self-update now verifies the new image's signature before restarting into it (#85).** 7.5.0 ships a signed AppImage; the updater now checks it. After `appimageupdatetool` writes the new image, Whatly recomputes the signed digest (the image with its `.sha256_sig` and `.sig_key` sections zeroed, SHA-256, hex) and verifies the embedded signature against the signing key compiled into this build (the committed `whatly-appimage-pubkey.asc`, never the incoming image's own key, so a swapped key cannot pass). A tampered image is rejected and the previous version is rolled back from the `.zs-old` backup, with no restart. An unsigned image (older releases) is still applied as before, and a signed one that cannot be checked (no gpg on the system) is applied only with the restart prompt saying so plainly.
+ReleaseNotesUrl: https://github.com/shakaran/whatly/releases/tag/v7.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

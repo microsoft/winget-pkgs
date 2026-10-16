@@ -1,0 +1,61 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Dynare.Dynare
+PackageVersion: "7.2"
+PackageLocale: en-US
+Publisher: Dynare Team
+PublisherUrl: https://www.dynare.org/
+PublisherSupportUrl: https://www.dynare.org/contact/
+PackageName: Dynare
+PackageUrl: https://www.dynare.org/
+License: GPL-3.0-or-later
+LicenseUrl: https://www.gnu.org/licenses/gpl-3.0.html
+Copyright: © 1996–2026 Dynare Team.
+ShortDescription: A software platform for handling a wide class of economic models.
+Description: |-
+  Dynare is a software platform for handling a wide class of economic models, in particular dynamic stochastic general equilibrium (DSGE) and overlapping generations (OLG) models. The models solved by Dynare include those relying on the rational expectations hypothesis, wherein agents form their expectations about the future in a way consistent with the model. But Dynare is also able to handle models where expectations are formed differently: on one extreme, models where agents perfectly anticipate the future; on the other extreme, models where agents have limited rationality or imperfect knowledge of the state of the economy and, hence, form their expectations through a learning process. In terms of types of agents, models solved by Dynare can incorporate consumers, productive firms, governments, monetary authorities, investors and financial intermediaries. Some degree of heterogeneity can be achieved by including several distinct classes of agents in each of the aforementioned agent categories.
+  Dynare offers a user-friendly and intuitive way of describing these models. It is able to perform simulations of the model given a calibration of the model parameters and is also able to estimate these parameters given a dataset. In practice, the user will write a text file containing the list of model variables, the dynamic equations linking these variables together, the computing tasks to be performed and the desired graphical or numerical outputs.
+  A large panel of applied mathematics and computer science techniques are internally employed by Dynare: multivariate nonlinear solving and optimization, matrix factorizations, local functional approximation, Kalman filters and smoothers, MCMC techniques for Bayesian estimation, graph algorithms, optimal control, etc. References to the literature can be found here.
+  Various public bodies (central banks, ministries of economy and finance, international organisations) and some private financial institutions use Dynare for performing policy analysis exercises and as a support tool for forecasting exercises. In the academic world, Dynare is used for research and teaching purposes in postgraduate macroeconomics courses.
+Tags:
+- econometrics
+- economics
+- finance
+- mathematics
+- modeling
+ReleaseNotes: |-
+  We are pleased to announce the release of Dynare 7.2.
+  This maintenance release fixes various bugs.
+  The Windows, macOS, MATLAB Online and source packages are available for download at the Dynare website.
+  This release is compatible with MATLAB versions ranging from 9.8 (R2020a) to 26.1 (R2026a), and with GNU Octave versions ranging from 8.4.0 to 11.3.0 (NB: the Windows package requires version 11.3.0 specifically).
+  Here is a list of the problems identified in version 7.1 and that have been fixed in version 7.2:
+  - Under Windows, after solving a model at third order or higher (or used the k_order_solver option), MATLAB would not properly exit (would stay as a zombie process if launched via the graphical interface, or would deadlock if launched in batch mode)
+  - Estimation
+    - A normalization issue in the computation of the modified harmonic mean marginal data density was fixed that resulted in Inf in pathological cases
+    - posterior_sampling_method='slice' option: some prior draws were incorrectly accepted, causing excess variance in the posterior
+    - The SaveFiles option of mode_compute=5 optimizer would overwrite the temporary files of other workers when a parallel context was used
+  - OccBin: inconsistent error-handling could cause crashes in some cases
+  - dseries:
+    - from syntax: the result would be incorrect when a variable name was the prefix of another variable name
+    - from syntax: any keyword beginning with to or do was mistakenly taken for a to or a do, leading to a crash
+    - The disp method would fail with a single input argument
+    - The struct2dseries command would fail for all sub-annual frequencies
+    - year/subperiod methods would return wrong values for weekly dates
+    - The dates constructor would return an empty object for the weekly frequency
+    - The string2freq command did not know the weekly frequency code 'W'
+    - Bi-annual frequency code 'S' (from freq2string) was not recognized by string2freq/isfreq, which only knew 'H'
+    - Indexing an empty dates object would build wrong dates
+    - Yearly difference/growth rate were wrong for weekly data — lag was fixed at 52 periods, but ISO years can have 53 weeks
+    - Yearly difference/growth rate wrong for daily data — lag was fixed at 365 days, ignoring leap years
+    - Weekly dates for years before year 0 were silently accepted but built invalid/unprintable objects — they are now rejected, since the week-since-year-0 encoding doesn’t extend to negative years
+  - epilogue block:
+    - The result would be incorrect when a variable name was the prefix of another variable name
+    - The computation could return NaN at some early dates instead of the expected value in some cases where a variable was lagged and another variable was not lagged but contained NaN in the first periods
+  As a reminder, the list of new features introduced in versions 7.x can be found in the release notes for 7.0.
+ReleaseNotesUrl: https://www.dynare.org/new-dynare-release/dynare-7.2-released/
+Documentations:
+- DocumentLabel: Reference Manual
+  DocumentUrl: https://www.dynare.org/manual/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

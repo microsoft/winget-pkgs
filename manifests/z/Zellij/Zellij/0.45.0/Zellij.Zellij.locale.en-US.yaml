@@ -1,0 +1,89 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Zellij.Zellij
+PackageVersion: 0.45.0
+PackageLocale: en-US
+Publisher: Zellij Contributors
+PublisherUrl: https://github.com/zellij-org
+PublisherSupportUrl: https://github.com/zellij-org/zellij/issues
+Author: Aram Drevekenin
+PackageName: Zellij
+PackageUrl: https://zellij.dev/
+License: MIT
+LicenseUrl: https://github.com/zellij-org/zellij/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2020 Zellij contributors
+CopyrightUrl: https://github.com/zellij-org/zellij/blob/main/LICENSE.md
+ShortDescription: A terminal workspace with batteries included
+Moniker: zellij
+Tags:
+- multiplexer
+- terminal
+- workspace
+ReleaseNotes: |-
+  This release includes some major long-requested integrations with modern terminals as well as with Zellij itself: nested sessions become a first-class experience, images render through the Kitty graphics protocol, the scrollback understands shell prompts, and the default interface gets a redesign.
+  Following is a non-exhaustive list of some major and significant changes:
+  Nested Sessions
+  Running Zellij inside a Zellij pane (eg. after ssh-ing to a remote machine) is now a first-class workflow. The inner session announces itself to the outer one, and the outer session reacts when its pane gains focus, providing the user with 2 options:
+  1. Zoom in and control the nested session - the nested session takes up the whole screen until toggled back (Ctrl o + f, or clicking the session breadcrumbs in the tab-bar)
+  2. Control the nested session on focus - keys and mouse are routed directly to it, with the outer session's chrome dimmed. Ascend back with Ctrl o + ], descend again with Ctrl o + [
+  The behavior is controlled with the new nested_session_handling config option (ask (default) / fullscreen / descend / never).
+  Kitty Graphics Protocol
+  Zellij now implements the Kitty graphics protocol in addition to the existing Sixel support. Image placements are tracked per pane and behave correctly across resizes, relayouts, scrollback, fullscreen and floating/pinned panes. The host terminal needs to support the protocol as well (queried at startup); the feature can be disabled with support_kitty_graphics_protocol false.
+  Relatedly, Sixel support is now only advertised to applications (through DA1 / XTSMGRAPHICS) when the attached terminal actually supports it.
+  Shell Integration (OSC 133)
+  Zellij now parses the OSC 133 "semantic prompt" sequences (emitted by fish out of the box; bash/zsh need a shell integration snippet). This enables:
+  - Jump between prompts in the scrollback: [ / ] in scroll and search modes
+  - Select a command with its whole output: m in scroll mode, or triple-click inside the output (opt-out of triple-click with osc133_command_selection in the config)
+  - Copy the last command's output to the clipboard: c in scroll mode
+  Also in the selection department: word boundaries for double-click selection are now configurable with word_separators.
+  More info: https://zellij.dev/documentation/shell-integration.html
+  New UI
+  Title frames: pane frames now default to a single title line above each pane instead of a full border. To restore the classic look:
+  pane_frame_style "full"
+  The style can also be changed at runtime with zellij action set-pane-frame-style or the new SetPaneFrameStyle keybinding action.
+  Stacked lists: stacked panes now render as a list of one-line titles with the expanded pane pinned to the bottom, including exit-status indication in collapsed titles and bulk float/embed operations. To restore the previous in-place rendering:
+  stacked_pane_list false
+  Some mouse behaviors can also now be specifically opted out of in the config: mouse_hover_tips false (hover help tips) and mouse_scroll_resize false (Ctrl + scroll wheel resizing).
+  Mobile Web UI + PWA
+  The built-in web client now detects mobile browsers and switches to a dedicated touch interface: pane/tab pickers, an on-screen keyboard, panning and fit toggling, single-pane fullscreen and a light theme. The web client can also be installed as a standalone app (PWA) directly from the browser, including behind a base_url reverse-proxy prefix.
+  Per-Client Tab Sizes
+  Each tab is now sized according to the viewports of only the clients currently viewing it. Clients focused on different tabs no longer force the whole session down to the smallest terminal; clients on the same tab converge to a common size.
+  Desktop Notifications
+  Given the prevalence of a few different desktop notifications protocols, Zellij now supports all and consolidates them to a protocol the host (probably) supports, detected by relevant env variables. Previously Zellij would forward OSC99 directly to the terminal, now this is conditioned on the terminal actually supporting OSC99. Zellij now also supports OSC9 and OSC777 in the same way.
+  Focus Last Pane and No-UI Fullscreen
+  A new FocusLastPane action returns focus to the previously focused pane (Ctrl p + ;, or Alt \ in any mode). A new ToggleFocusNoUiFullscreen action (Ctrl p + Shift f) makes the focused pane cover the entire display, including the UI bars (zen mode). Floating panes can now be made fullscreen as well.
+  CLI Additions
+  - zellij --layout-string <KDL> - use a raw KDL layout string instead of a layout file (new tabs inside a session, a new session otherwise). Also available on new-tab, override-layout and switch-session
+  - --no-focus - open panes, plugins and tabs in the background without changing any client's focus (on run, edit, plugin, new-pane, new-tab, launch-plugin)
+  - --tab-id - target a specific tab (on run, edit, plugin and many actions)
+  - zellij action new-pane --pane-id - choose which pane to replace with --in-place
+  - New actions: focus-last-pane, toggle-no-ui-fullscreen, set-pane-frame-style, set-dark-theme, set-light-theme, toggle-theme
+  Some of the new features come with new default keybindings. The release notes screen detects which of these are missing from existing config files and offers to add them with a single keypress.
+  Plugin API
+  New commands include new_tab_unfocused, new_tiled_pane_in_tab, focus_last_pane, focus_host_session, toggle_focus_no_ui_fullscreen, set_pane_frame_style, toggle_floating_panes, get_session_list and set_soft_keyboard. New events include CommandChanged, InitialKeybinds, HostTerminalThemeChanged, SoftKeyboardVisibilityChanged, HintText and ActivePaneScroll.
+  Source-level breaking changes for plugin authors:
+  - kill_sessions, delete_dead_session and delete_all_dead_sessions now return Result<(), String> and block until acknowledged (the old wire protocol variants remain valid, so old plugin binaries keep working)
+  - open_command_pane_in_new_tab now requires the RunCommands permission, and open_editor_pane_in_new_tab requires OpenFiles
+  - The PaneRenderReportWithAnsi event was removed; the plain-text PaneRenderReport remains
+  Clipboard Reads
+  It's now possible to opt in to allowing terminal programs to read the clipboard through OSC52. This is disabled by default for security reasons, and opting in to it is only recommended with care. An opt-in would mean that any program running in the terminal (including over an SSH connection) can read your clipboard without your knowledge. This can be enabled with dangerously_enable_paste_buffer_read true.
+  Notes for Packagers and Distributors
+  - MSRV raised from 1.92.0 to 1.95.0
+  - YAML converter removed: the convert-config, convert-layout and convert-theme subcommands and the automatic YAML-to-KDL conversion at startup are gone. Users with YAML-era files must convert them with a Zellij release of 0.44.x or older
+  - Manpage removed: the manpage source and its build integration were dropped; packages should no longer attempt to install one
+  - Dependency floors raised: clap 4.6, crossterm 0.29, nix 0.30, vte 0.15, miette 7.6, notify 8.2, axum-extra 0.12, axum-server 0.8, rcgen 0.14 and others - relevant for distros patching to system crate versions
+  - clap 4 migration side effects: repeating a flag overrides the previous value instead of erroring
+  - Bundled plugin wasm files can now be properly unbundled when stripped (#5433)
+  - cargo xtask run informational output moved to stderr, so cargo xtask run -- setup --generate-completion fish > file produces a clean file
+  For the full list of changes, see the CHANGELOG.
+  Addendum: Zellij.online
+  Want to get a sneak peak at something the Zellij maintainers have been working on?
+  Check out https://zellij.online
+  Please Support the Zellij Developer ❤️
+  Zellij is a labor of love and is provided free and open-source to anyone who wishes to use it.
+  Zellij will never display ads or collect your data.
+  To help sustain the project, please consider a recurring donation so that the developer can pay their bills: https://github.com/sponsors/imsnif
+ReleaseNotesUrl: https://github.com/zellij-org/zellij/releases/tag/v0.45.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

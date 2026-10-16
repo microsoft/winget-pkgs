@@ -1,0 +1,50 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Proma.Proma
+PackageVersion: 0.19.31
+PackageLocale: zh-CN
+Publisher: ErlichLiu
+PublisherUrl: https://proma.cool/
+PublisherSupportUrl: https://github.com/proma-ai/Proma/issues
+PackageName: Proma
+PackageUrl: https://proma.cool/download
+License: 免费软件
+Copyright: Copyright © 2024-2026 Proma
+ShortDescription: 把最丝滑的通用 Agent 体验带进你的工作流，为 100x 专业用户而生的未来产品，正在实现 proactive Agent 阶段。基于 Claude Agent SDK 的完整开源实践，原生支持飞书群聊调用、灵活接入任意大模型供应商 —— 让顶级 Agent 能力真正跑在你每天用的地方。
+Description: |-
+  Proma 是一个本地优先的 AI 桌面应用，把多模型 Chat、通用 Agent、工作区、Skills、MCP、远程机器人和记忆能力放在同一个开源客户端里。
+  它不是只面向闲聊的聊天框，而是一个可以长期沉淀个人工作流的 Agent 工作台：简单问题用 Chat，复杂任务交给 Agent，数据和配置尽量留在本地。
+
+  现在能做什么
+  - Chat 模式：多模型对话、附件解析、图片输入、Markdown / Mermaid / KaTeX / 代码高亮、并排对话、系统提示词、上下文管理。
+  - Agent 模式：基于 @anthropic-ai/claude-agent-sdk 的通用 Agent，支持工作区隔离、权限模式、文件操作、长任务流式输出、计划确认和用户追问。
+  - SubAgent / Tasks：复杂任务可以通过 Claude Agent SDK 的 Agent 工具拆分为子 Agent / Task，并在消息流中展示调用过程和结果。
+  - Skills & MCP：每个工作区可以独立配置 Skills、MCP Server 和工作区文件，适合沉淀可复用能力。
+  - 远程机器人：支持飞书 / Lark 机器人桥接，并已提供钉钉、微信桥接入口，用手机或群聊触发本机 Agent 工作流。
+  - 记忆与工具：Chat 和 Agent 可共享记忆能力，并支持联网搜索、内置 Chat 工具、Agent 推荐等辅助能力。
+  - 本地优先：会话、工作区、附件、配置、Skills 等默认存储在 ~/.proma/，使用 JSON / JSONL 文件组织，不依赖本地数据库。
+  - 桌面体验：自动更新、代理设置、文件预览、全局快捷键、快速任务窗口、语音输入、亮色 / 暗色 / 跟随系统主题。
+Tags:
+- 人工智能
+- 大语言模型
+- 智能体
+- 自主智能
+ReleaseNotes: |-
+  Proma v0.19.31 更新
+  新功能
+  - GPT-6 Astra 模型支持 — ChatGPT（Codex）渠道新增 GPT-6 Astra，支持文本与图片输入，按 100 万 token 配置上下文窗口，并提供 low / medium / high / xhigh / max 五档思考强度；存量渠道自动补入新模型，保留已有模型的自定义名称与启用状态。指定的 Codex 模型不存在时明确报错，不再静默切换到其他模型。
+  - Slack Bot 接入 — 设置页新增 Slack Bot，通过 Socket Mode 连接本机 Proma，无需公网回调地址。在已邀请 Bot 的频道中 @Proma 即可发起任务，同一成员在同一 thread 中可继续会话，不同成员的上下文相互隔离；提问、计划确认与单次权限审批以交互卡片返回原 thread。支持未送达最终回复的持久化重试；可选 Home Channel 接收其他来源会话的标题与完成状态，不转发回复正文。当前仅支持频道 @mention，不接收私信，使用时需保持 Proma 桌面端运行。
+  - Agent 表达原则完善 — 核心系统提示词新增面向用户的沟通原则，要求回复、交付文档、代码与提交信息语意连贯、结构清晰，在保持专业深度与信息密度的同时减少不必要的隐喻；如实说明结果、风险与不确定性，避免无依据的强化措辞，不把推测写成结论。
+  Bug 修复
+  - 附加目录展开状态保留 — 项目文件与会话文件中的附加目录在应用运行期间记住展开与折叠状态，按会话、来源和附加根目录分别隔离，切换视图后无需反复展开；目录重命名或移动后同步保留子目录的展开层级，过期加载结果不再覆盖当前目录，并修正路径边界判断，避免影响同名前缀的兄弟目录。
+  - 删除 MCP 不再影响其他服务器 — 删除单个 MCP 时仅移除目标配置，保留其他服务器的配置与启用状态，不再因触发全量重新校验而暂时关闭无关 MCP。
+  - Gemini 3 思考深度适配 — Chat 新增 Gemini 思考深度选择，按当前模型展示支持的档位；Agent 与 Chat 统一模型能力约束，已适配的 Gemini 3 文本模型使用 thinkingLevel，不再沿用旧版 thinkingBudget。不支持的档位自动回到该模型默认值，避免 Gemini 3.7 / 3.8 收到 minimal 后请求报错；同时补齐 Google 协议模型别名与上下文容量识别。
+  - 折叠侧栏会话即时切换 — 修复侧栏折叠时会话入口与协作子会话浮层的切换行为；快速从一个浮层切换到另一个时，旧浮层的延迟关闭不再误关新浮层，设置页未保存内容的离开确认仍然保留。
+  - 搜索弹窗宽度调整 — 扩大对话搜索弹窗的可用宽度，并根据窗口大小自适应保留两侧留白，让长标题与搜索结果有更多展示空间。
+  - Google 搜索页面不再误跳 Bing — 受管浏览器以 Google 主文档导航成功作为可用判据，不再等待图片、脚本等子资源全部加载完成，避免页面已经能用却被误判超时并切换到 Bing；主文档导航超时时仍保留备用搜索回退。
+  依赖升级
+  - Pi SDK 升级 — Pi Agent 相关依赖从 0.84.4 升级至 0.85.0，同步更新模型适配补丁与运行时打包依赖，配合本次 GPT-6 Astra 接入。
+ReleaseNotesUrl: https://github.com/proma-ai/Proma/releases/tag/v0.19.31
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

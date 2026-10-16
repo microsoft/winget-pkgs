@@ -1,0 +1,116 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Patchloom.Patchloom
+PackageVersion: 0.37.2
+PackageLocale: en-US
+Publisher: Patchloom
+PublisherUrl: https://github.com/patchloom
+PublisherSupportUrl: https://github.com/patchloom/patchloom/issues
+Author: Patchloom
+PackageName: Patchloom
+PackageUrl: https://github.com/patchloom/patchloom
+License: MIT
+LicenseUrl: https://github.com/patchloom/patchloom/blob/HEAD/LICENSE
+Copyright: Copyright (c) Patchloom contributors
+ShortDescription: Structured file editing CLI for AI agents
+Description: |-
+  Patchloom is a single-binary CLI that gives AI coding agents safe, structured
+  file editing: search and replace, unified diffs, parser-backed JSON/YAML/TOML
+  document ops, markdown section editing, AST-aware renames, multi-file
+  transactions, undo, and an MCP server for tool calls.
+Moniker: patchloom
+Tags:
+- ai
+- cli
+- developer-tools
+- mcp
+- rust
+ReleaseNotes: |-
+  Patchloom 0.37.2
+  TOML integers that do not fit in a signed 64-bit value stay exact.
+  A plan key that does not belong on an edit is reported instead of
+  changing the edit. A preview of renaming a binary file or a directory
+  names the move.
+  Highlights
+  doc set writes a TOML integer above 9223372036854775807 as bare
+  digits, and doc get reads that same integer back. A plan or MCP
+  call that puts a key on the wrong object now warns, or refuses the
+  edit, instead of applying a different change. rename of a binary
+  file or a directory prints would rename in the default preview.
+  Bug fixes
+  - A TOML integer above i64::MAX became a rounded float.
+    9223372036854775808 was written as 9223372036854776000.0, and
+    doc get then rejected the exact digits as integer number overflowed.
+    Values that fit in u64 but not i64 round-trip as bare digits. A
+    same-line comment survives a sibling edit. A digit token above
+    u64::MAX stays that exact decimal text, written as a quoted string
+    on a new key, instead of a rounded float (#2655).
+  - An ini header that never closed kept later keys in the previous section.
+    [broken is a parse error. A ] inside an inline ; or # comment
+    stays part of that comment. Junk after the header is still a parse
+    error. batch points notebook.edit at a tx plan or the MCP
+    notebook_edit tool (#2657).
+  - An inline MCP plan ignored expected_sha256 on the operation.
+    The file was written and the tool result had no warnings entry.
+    That key on the operation now returns warnings naming
+    expected_sha256, and the write still happens. The pin that stops
+    a stale write is still the plan map expected_sha256: a wrong hash
+    there returns error_kind: stale and leaves the file unchanged (#2659).
+  - A reused MCP worker copied the previous plan warning into the next tool.
+    A later doc_set could include the last execute_plan unknown-key
+    warning. Each tool call now clears that leftover. The plan that had
+    the bad key still warns, and it still applies (#2660).
+  - notebook.edit warned that id was unknown while still using it.
+    The cell source changed and the result also warned. id is accepted.
+    A real unknown key on that operation still warns (#2660).
+  - verify treated attribute as absent and counted every function.
+    Removing a non-test function then failed verification and wrote
+    nothing, while the same plan with attr applied. attribute is now
+    invalid_input and the file stays unchanged. attr still applies.
+    Other unknown operation keys and top-level keys still warn only (#2660).
+  - Preview of rename on a binary file or a directory printed nothing.
+    The command exited 2 and left both paths in place. rename --check
+    already printed would rename FROM -> TO (binary) or (directory).
+    Default preview now prints that line and still does not write. Text
+    files still show the usual diff. JSON still has from, to, and
+    applied: false (#2666).
+  - An env or ini write that would split the file, or read back as another key, is refused.
+    doc set returns invalid_input and leaves the file unchanged. A #
+    comment after a space, or after a closing quote, is not part of the
+    value. A # glued to the value stays in the value. A new properties
+    key escapes backslashes, separators, newlines, and a leading # or
+    ! so the line stays one assignment (#2657).
+  Numbers
+  ───────┬─────────────────────────────────────────────────────────────────
+  Metric │Notes
+  ───────┼─────────────────────────────────────────────────────────────────
+  Version│0.37.1 -> 0.37.2
+  ───────┼─────────────────────────────────────────────────────────────────
+  Focus  │Exact TOML integers, ini and env lines, plan keys, rename preview
+  ───────┼─────────────────────────────────────────────────────────────────
+  Tests  │5800+ (README badge on main)
+  ───────┴─────────────────────────────────────────────────────────────────
+  Upgrading
+  - An ini file whose section header never closes now fails to parse.
+    Close the header, or move those keys into a closed section.
+  - A plan verify step that says attribute instead of attr is
+    invalid_input and does not write. Use attr.
+  - An operation-level expected_sha256 warns and still writes. Put
+    the hash on the plan map when a mismatch must leave the file alone.
+  - Default rename preview of a binary file or a directory now prints
+    a would-rename line. JSON fields are unchanged.
+  - Install from crates.io, npm, Homebrew, or Scoop after the tag
+    ships. On Windows, Scoop is recommended. winget may need
+    winget source update after Microsoft publishes. Chocolatey can
+    lag while moderation runs.
+  Full changelog
+  patchloom-v0.37.1...patchloom-v0.37.2
+ReleaseNotesUrl: https://github.com/patchloom/patchloom/releases/tag/patchloom-v0.37.2
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://patchloom.github.io/patchloom/
+- DocumentLabel: Installation
+  DocumentUrl: https://github.com/patchloom/patchloom/blob/main/docs/getting-started/installation.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

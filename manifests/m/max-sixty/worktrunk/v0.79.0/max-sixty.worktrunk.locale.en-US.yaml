@@ -1,0 +1,82 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.79.0
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Improved
+  - wt switch --no-cd -x <program> runs the program in the worktree: it started in the invoking directory, so a program meant for the new worktree had to be handed {{ worktree_path }}. --no-cd now governs only your shell — wt switch feature --no-cd -x code -- . opens the worktree in an editor and leaves your terminal put. (Breaking: a program that wanted the invoking directory needs an explicit cd.) Fixes #4042. (#4179, thanks @yajo for reporting)
+  - The picker's preview tabs show which have content: a tab's label is dim when that tab is empty for the selected row, and underlined when it's the active tab. Availability sat on the tab's number alone, so every inactive label read dim whatever the row held. (#4174)
+  - Messages name the destination, and end with the command to run: without shell integration, wt merge and wt remove printed Cannot change directory — shell integration not installed and no path; the warning now names the worktree, as wt switch already did. "Cannot determine default branch" had three wordings, and three recovery hints put their command first rather than last. (#4163, #4155, thanks @blrain3 for reporting)
+  - /wt-switch-create no longer stalls at Claude Code's path-entry dialog: Claude Code confirms every entry outside .claude/worktrees/, which is every Worktrunk worktree, so a background session waited for someone to attach. The plugin now approves entry into a worktree at its worktree-path location, and reads a bare name as the repo or the branch. (#4158, #4159)
+  - wt config update --output accepts the config being migrated: it refused that path when the migration dropped approved-commands. Those approvals now move to approvals.toml first, exactly as the in-place update moves them. (#4204)
+  Fixed
+  - wt merge on a dirty worktree describes what it commits: the generated message covered the branch's earlier commits and said nothing about the work the merge had just staged into the same commit. wt step squash --dry-run now previews what the run would commit, as wt step commit --dry-run does. (#4178)
+  - A config save no longer rewrites the rest of your config: declining a prompt, or setting the commit-generation command, rewrote the whole file, dropping values written at their default and re-spelling hook pipelines and dropping their comments. It also reloaded that file over the in-memory config, so wt step commit --config-set 'commit.stage="none"' staged everything once it had asked about commit generation. (#4160, #4156, #4151)
+  - Diff display config no longer reaches Worktrunk's prompts or its integration check: color.ui = always and diff.external reached the commit, squash, and summary prompts. Two corner cases also made wt remove and wt step prune delete an unmerged branch: diff.relative set and a Worktrunk command run from a subdirectory the branch's changes sat entirely outside, or submodule.<name>.ignore = all (git config or .gitmodules) and a submodule bump as its only change. (#4146, #4147)
+  - Auto-staging names a wholly untracked directory once: since 0.78.0 the warning expanded each one into its files, so wt step commit, wt step squash, and wt merge listed 300 paths for a directory of 300 new files. The listing also stops at ten rows, with a hint counting the rest. (#4152, thanks @Duang777)
+  - Valid empty per-project sections stop warning: [projects."host/org/repo".list] is accepted on load, yet every command reported unknown field projects.host/org/repo.list for it — as did the other six per-project sections. Fixes #4115. (#4123, thanks @zach-hammad-vs for reporting)
+  - An unstaged rename counts as a change: after git add -N, git reports the rename in the worktree column ( R), which Worktrunk read only in the index column. A worktree whose only change was such a rename showed clean in wt list, and wt merge's overlap check on the destination misparsed the old path. (#4190, #4191, thanks @Duang777)
+  - wt merge --no-ff and wt step push --no-ff sign their merge commit under commit.gpgSign: they built it with commit-tree, which ignores that setting. wt step rebase and wt merge also pass --no-update-refs, so a rebase rewrites only its own worktree's branch. (Breaking: rebase.updateRefs no longer moves other local branches stacked in the rebased range.) (#4146)
+  - wt step prune --min-age guards branches with no reflog: they got no age guard at all, so in a bare repository — where core.logAllRefUpdates defaults off — a branch that had just arrived at an integrated commit was pruned on the next run. Age now comes from the mtime of the file holding the ref. (#4154)
+  - The picker preview renders the whole pane: a fenced code block with no closing fence dropped everything from the fence to the end of a PR description or comment, and the pane rendered one column wider than skim paints, so a wrapped line flush against the right edge lost its last character. (#4178, #4183)
+  - wt config plugins pi install expands ~ in $PI_CODING_AGENT_DIR: Pi expands it, so PI_CODING_AGENT_DIR="~/x" means a directory under home, where Worktrunk created a literal ~ directory under the current directory. (#4151)
+  - wt config create no longer replaces a dangling symlink at the config path: it wrote a regular file over the link, detaching whatever owns it. It now fails and names the link. (#4204)
+  Documentation
+  - The picker demo shows the CI and summary columns filling in: alt-p widens the rows, the cells land behind them, then it pages a diff, a PR's comment thread, and the PR itself. The homepage omnibus demo opens on the picker. Docs (#4178)
+  - The docs got a sweep: help text drops internals, deprecated behavior, and edge cases the command reports itself when they happen — wt step diff's "How it works", the wt hook --var paragraph, and the wt config state ci-status page among them. Config samples now name the file they belong in as the block's tab. (#4157, #4153, #4173, #4177)
+  Internal
+  - Library API rework (Breaking library API): cargo-semver-checks fails five lints — BranchDiffSpec swaps revs/working_base for diff_base, UserConfig::save_to gives way to the ConfigEdit mutations, config::UnknownAnalysis is gone, Repository::prepare_diff takes from/to in place of a revision list, and four diff helpers on PreparedDiff and WorkingTree go with it. (#4146, #4147, #4160, #4156)
+  - The Nix flake's test sandbox gains openssh, which the merge-signing test needs. (#4168)
+  Install worktrunk 0.79.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/max-sixty/worktrunk/releases/download/v0.79.0/worktrunk-installer.sh | sh && wt config shell install
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/max-sixty/worktrunk/releases/download/v0.79.0/worktrunk-installer.ps1 | iex"; git-wt config shell install
+  Install prebuilt binaries via Homebrew
+  brew install worktrunk && wt config shell install
+  Download worktrunk 0.79.0
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+  Install via Cargo
+  cargo install worktrunk && wt config shell install
+  Install via Winget (Windows)
+  winget install max-sixty.worktrunk && git-wt config shell install
+  Install via AUR (Arch Linux)
+  paru worktrunk-bin && wt config shell install
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.79.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

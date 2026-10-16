@@ -1,0 +1,81 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: SteveTheKiller.KillerNotes
+PackageVersion: 1.3.0
+PackageLocale: en-US
+Publisher: Steve the Killer
+PublisherUrl: https://thekiller.net/
+PublisherSupportUrl: https://github.com/SteveTheKiller/KillerNotes/issues
+PackageName: KillerNotes
+PackageUrl: https://killernotes.net/
+License: GPL-3.0
+LicenseUrl: https://github.com/SteveTheKiller/KillerNotes/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Steve the Killer
+ShortDescription: A searchable, encrypted notepad for techs - rich text, inline images, real tables, full-text search, and tear-off .knote sharing.
+Description: KillerNotes is a searchable, encrypted notepad built for techs who live in a dozen Notepad windows. Every note saves itself on every pause, note switch, and close, and full-text search finds any note as fast as you can type. Rich text with inline screenshots, real tables, a full color picker, adjustable font size, and color-coded tags. Optional whole-database SQLCipher AES-256 encryption. Share a note as a tear-off .knote (drag it into Teams or Outlook) or a whole database as .kndb. Opens and exports .txt, .md, .html, .rtf, and images, with a markdown/HTML preview. Single signed exe, portable or one-click install with /silent for RMM, no account, no cloud, no telemetry, GPLv3. Windows 10/11.
+Moniker: killernotes
+Tags:
+- csharp
+- dotnet
+- encrypted-notes
+- encryption
+- full-text-search
+- note-taking
+- notepad
+- notes
+- portable
+- rich-text-editor
+- sqlcipher
+- sqlite
+- sysadmin
+- windows
+- wpf
+ReleaseNotes: |-
+  1.3.0 is the release where notes start pointing at each other - wikilinks, backlinks and a graph - alongside markdown notes with a whole-database markdown export, search and replace, and two more languages.
+  Added
+  - Hungarian and Polish localization for the complete app interface and killernotes.net, the eleventh and twelfth languages. Every one of the twelve now carries all 682 interface keys, so search and replace, the network-lock warnings, markdown notes, the markdown export, wikilinks and the link graph read in your own language rather than falling back to English.
+  - A network data folder now warns once, and a lock file beside the database guards concurrent use: a database in use on another computer opens read-only instead of competing for SQLite's single writer, with the owning machine named. A clean close clears the lock.
+  - Text labels inside sketches now feed the search index, so a label like "IDF-2, port 14" makes its note findable.
+  - Search and replace (#14): Ctrl+H adds a replace row to the find bar with match-case, whole-word and regex options; Replace All in a note is a single undo step. The sidebar gains replace-across-all-notes behind a confirmation naming each note and its match count, committed in one transaction and undone with one Ctrl+Z.
+  - Notes can now be markdown instead of rich text. A markdown note stores its source text, edits as plain text with markdown syntax highlighting, and converts to and from rich text from the note menu; converting to markdown lists what will not survive before it runs. Images, tables, sketches and embedded recordings are refused in a markdown note rather than being dropped at the next save.
+  - Export all notes as markdown writes the whole database to a folder of .md files, groups as subfolders and tags in YAML front matter. Rich-text notes convert on the way out and nothing in the database changes.
+  - Grab cursors sized to match the standard Windows pointers: an open hand over anything that can be picked up and a closed hand while it is being carried, on the format bar, the find bar, floated images, the SketchPad's select tool and the dialog title bars.
+  - A crash now leaves a log behind, appended to crash.log under %APPDATA%\KillerNotes.
+  - Notes can link to each other. Type [[ and pick a note from the list, Ctrl+Click to follow the link, and a link to a note that does not exist yet offers to create it. A strip tucked into the bottom right of the note lists everything pointing at it, alongside notes that name it without linking it - click one of those to make the link, Ctrl+Click to just go there. Alt+M hides the strip.
+  - A graph of every link in the notebook, on the sidebar rail. Nodes are colored by their group and sized by how much links to them; titles that are linked but not yet written show as outlines. Drag one node or a whole selection and the rest move out of the way while you hold them. Five arrangements: by connection, in a circle, in a grid, by group, and rings by distance from a chosen note. Pin all Notes (P) keeps every note where it is put; turn it off and the notes it links to move out of the way as you drag. Visualizer (V) leaves the graph drifting and slowly turning on its own, shuffling between six shapes as it goes; N skips ahead, and a Shape menu appears in the right-click menu while it runs to pick one directly. Right-click for the rest, including "show only what links here".
+  - The SketchPad opens a large image scaled to fit instead of at full size, and gains zoom (a magnifier in the top bar for 100% and fit, Ctrl+Wheel for anything between) and crop (C, drag a box to keep). The select tool's icon is a hand rather than a marquee.
+  - Back and forward through the notes you have visited, so following a chain of links is not a one-way trip. Alt+Left and Alt+Right, the mouse thumb buttons, or the first two rows of a note's right-click menu.
+  - F11 fills the whole screen, taskbar included. Esc leaves it as well.
+  - Renaming a note offers to update every [[link]] that named it, across the whole notebook, naming each note and its link count first. Rich text and markdown notes both, in one step that a single Ctrl+Z undoes.
+  - Notes can be locked in place in the graph, from the right-click menu or with K: nothing moves a locked note, not an arrangement and not its neighbors. The graph also reopens exactly where you left it, and an arrangement can be saved by name from the Arrange menu and applied again later.
+  Changed
+  - The SQLCipher encryption native is now built from upstream source (SQLCipher 4.18.0, SQLite 3.53.4) and vendored in the repo, replacing the deprecated SQLitePCLRaw.lib.e_sqlcipher package.
+  - Internal cancellation resource keys now use the same American spelling as their displayed text.
+  - Line numbers moved off F11 to Alt+L. The keyboard shortcuts overlay gains an Alt layer to match.
+  - Markdown notes now store their source inside a XamlPackage rather than as raw bytes, so a database or a shared note carrying one can still be opened by releases older than 1.3.0. Notes written by earlier 1.3.0 builds are converted the first time the database is opened, so a database does not stay a hazard to older builds just because nobody edited the note.
+  Fixed
+  - The linked-from strip now squares its corners on 98SE like every other surface, instead of keeping rounded ones. The twelve rounded themes are unchanged.
+  - A comment block at the top of a script is now colored. Language context was only carried forward from the first line that could be identified on its own, so a PowerShell file opening with a <# .SYNOPSIS #> header left that header, its #region and every standalone # line plain while comments further down came out right. Block comments now carry across lines, so the prose inside a help header reads as comment rather than having words like "for" colored as keywords.
+  - A note with markdown pasted into it is now highlighted as markdown throughout. Language was detected per paragraph, so prose lines came back plain and uncolored, a line like "- Local-only: no account, no telemetry" was indistinguishable from YAML and colored its "no" as a boolean, and links were colored in some paragraphs and not others.
+  - Ctrl+Shift+H now highlights in yellow with the text set to black, so it reads as a highlighter on every theme. It used to paint a dark olive and leave the text alone, which was the only way one background color could survive light text, and it never matched its own caption.
+  - The keyboard shortcuts overlay no longer leaves a tall empty area below the keyboard. The card stretches for the list, which needs the height, and sizes to the board in keyboard view.
+  - The shortcuts list now covers the graph window and the SketchPad, in their own sections. Their keys belong to those windows, so they are listed but not painted on the drawn keyboard.
+  - Graph: F now shows only what links to the selection. The key was named in the menu and on killernotes.net but nothing was listening for it.
+  - Graph node titles, the "Linked from" and "Mentioned in" labels, and the strip divider now follow theme changes. They were painted once at startup, so switching to 98SE and back left them the wrong color everywhere.
+  - Submenus now match the menu that opened them. They kept rounded corners and their own bevel on square themes, so on 98SE a submenu came up shaped differently from its parent.
+  - The graph window now follows the 98SE theme like the rest of the app: a window frame, a white work surface with a sunken edge, a title bar on the caption band, minimize and maximize icons matching the main window, and a gray corner behind the resize grip. The twelve rounded themes are unchanged.
+  - The visualizer no longer jolts several times before settling into its spin. The fit that sizes the graph for turning and the simulation's own target link length now agree, and the forces ease in over the first half second.
+  - Converting a note to markdown could take the app down. A run containing nothing but spaces crashed the converter, which is an ordinary shape in a rich-text note - a gap between two formatted words is enough.
+  - Text now renders with ClearType instead of grayscale antialiasing, matching KillerScan and KillerShell. It shows most on small Consolas type, which is why the footer's version and copyright looked heavier and softer than the same line in the other apps.
+  - The content pane no longer casts a shadow down onto the footer. The 20px band it hung into a 24px footer row made the footer read as almost twice its height and darker than the rest of the family; KillerScan and KillerPDF cast nothing there, and KillerNotes now matches them. Card shadows on the Dictation, Whisper, graph and SketchPad windows are unchanged.
+  - Syntax highlighting no longer colors partway into words, covers far more of a line, and survives closing and reopening a note. The per-note toggle is stored with the note's metadata now, so it also travels with shared .knote and .kndb files.
+  - Context menus now open at the pointer instead of an inch away from it when the app zoom is not 100%.
+  - Menu icons and check marks stay readable on a highlighted row instead of disappearing into the selection color.
+  - The resize cursor stays put for the whole drag when resizing an image, instead of reverting the moment the pointer leaves the corner.
+  - A note whose stored content will not load no longer takes the app down at startup. It is left unopened with the reason in the status bar, and saving is blocked so the content on disk is not overwritten.
+  - The Killculator's Print Equation keeps the whole running calculation when you continue from a result with an operator, instead of restarting the tape at that result.
+  - Dragging a note while sorted by time or alphabet now really does keep what is on screen (#4). The drop was landing against the stored order rather than the visible one, reshuffling the sidebar. The sort button still leaves a saved arrangement untouched.
+ReleaseNotesUrl: https://github.com/SteveTheKiller/KillerNotes/releases/tag/v1.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

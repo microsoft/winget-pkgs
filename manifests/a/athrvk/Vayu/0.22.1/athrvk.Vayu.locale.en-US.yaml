@@ -1,0 +1,41 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: athrvk.Vayu
+PackageVersion: 0.22.1
+PackageLocale: en-US
+Publisher: Atharva Kusumbia
+PublisherUrl: https://github.com/athrvk
+PublisherSupportUrl: https://github.com/athrvk/vayu/issues
+Author: Atharva Kusumbia
+PackageName: Vayu
+PackageUrl: https://github.com/athrvk/vayu
+License: AGPL-3.0
+LicenseUrl: https://github.com/athrvk/vayu/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Atharva Kusumbia
+ShortDescription: Open-source API client with a native C++ load-testing engine - Postman-style requests and k6-level load tests in one local app.
+Description: Vayu is a free, open-source desktop app for Windows, macOS, and Linux that combines a full REST and GraphQL request builder - with collections, environments, and scripting - and a high-throughput load tester powered by a C++20 engine, with all data staying on your machine.
+Moniker: vayu
+Tags:
+- api
+- api-client
+- api-testing
+- benchmark
+- developer-tools
+- graphql
+- http
+- insomnia
+- load-testing
+- performance
+- postman
+- rest
+ReleaseNotes: |-
+  0.22.1 - 2026-08-21
+  A follow-up to the import progress release, and both entries are the same shape of defect: work that outlived the state it was started for. Switching tab in the import dialog did not stop a URL fetch and could not, because all three tabs shared one set of state - so the download landed under whichever tab you had moved to. And closing the dialog did not stop the download either, which 0.22.0 said it did. Renderer only; the engine is untouched.
+  Fixed
+  - A URL fetch landed on whichever import tab you were looking at. The dialog kept one phase, one entries, one error and one progress for all three tabs, and switching tab called a reset over them - which cleared the display of work that went right on running. So a document fetched on the URL tab appeared under the File tab's dropzone when it arrived, and the URL you had typed was already gone. Each tab holds its own state now: a switch only switches, an in-progress download stays where you started it and is still there when you come back, and two tabs can hold two results at once. Every async writer patches the tab it started on rather than the one showing when it finishes, which is the part a test can actually hold down. The two option checkboxes stay dialog-wide, so toggling one re-parses every tab holding a parse rather than only the visible one - re-parsing just the one on screen would leave the other holding a parse made under the old options, and importing it later would apply a setting the checkbox says is off.
+  - Closing the dialog now stops the download - which 0.22.0 claimed and only half did. The transport was right: httpClient.stream released its reader as soon as its consumer stopped iterating, and the engine abandons a transfer the moment a write to its SSE sink fails. Nothing ever made the consumer stop. importFetch sat in the loop on the dialog's behalf and ran to completion, so closing the dialog left the engine reading the rest of a 10 MB document for nobody. An AbortSignal threads through both and the close fires it: measured against a local server, 3216 KB served at the click and not one byte more over the next six seconds, with about 2 MB still to go. An abort raises an AbortError, deliberately distinct from the idle stall's Request timeout - both end in an AbortController, and a deliberate cancel reported as a timeout is a banner about a failure nobody had, waiting for the next time the dialog opens. The v0.22.0 note has been corrected in place rather than left standing.
+  - Closing the dialog mid-detect left a ghost preview behind it. The close never blocked on the detecting phase, so a $ref walk or an engine parse already in flight finished afterwards and wrote its preview into the state the dialog next opened with. A per-tab generation counter, bumped by a close or a reset and checked before every write, covers that along with the fetch, an option re-parse and the apply's outcomes - four kinds of write that an abort path per stage would not have reached.
+ReleaseNotesUrl: https://github.com/athrvk/vayu/releases/tag/v0.22.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

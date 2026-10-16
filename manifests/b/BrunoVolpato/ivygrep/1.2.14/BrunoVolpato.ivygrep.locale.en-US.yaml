@@ -1,0 +1,50 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: BrunoVolpato.ivygrep
+PackageVersion: 1.2.14
+PackageLocale: en-US
+Publisher: Bruno Volpato
+PublisherUrl: https://github.com/bvolpato
+PublisherSupportUrl: https://github.com/bvolpato/ivygrep/issues
+Author: Bruno Volpato
+PackageName: ivygrep
+PackageUrl: https://bvolpato.github.io/ivygrep/
+License: MIT
+LicenseUrl: https://github.com/bvolpato/ivygrep/blob/v1.2.6/LICENSE
+ShortDescription: Local code search and relationship-aware context packs for coding agents
+Description: Search source by intent or exact identifiers and build bounded task packs from Git changes, definitions, callers, dependents, tests, configuration, and documentation. Source, queries, embeddings, and indexes stay local.
+Moniker: ig
+Tags:
+- cli
+- code-search
+- coding-agents
+- context
+- developer-tools
+- local-first
+- mcp
+- search
+ReleaseNotes: |-
+  ### Fixed
+
+  • Symbol definitions, references, and callers preserve Unicode identifiers, including combining marks and qualified names, instead of dropping or conflating them. Existing dollar-sigil aliases remain supported. Index format v27 rebuilds unchanged files to repair previously truncated symbol keys.
+  • Rust context dependencies resolve `crate::` imports within the owning Cargo target, including workspace members and custom library and binary paths. Library-name imports from other targets resolve against the package library, and custom crate-root module declarations resolve beside the target file. Index format v28 rebuilds existing indexes once to replace stale cross-package dependency edges.
+  • Incremental dependency graphs refresh unchanged importers when a newly added file takes precedence over an existing target. Deletion, reintroduction, and worktree restoration keep outgoing dependencies and reverse dependents consistent. Python package initializers take precedence over same-named modules, matching runtime imports. Index format v29 rebuilds existing indexes once to retain resolved import specifications and corrected Python targets.
+  • Go caller searches recognize explicit generic invocations, including qualified, parenthesized, and zero-argument calls, when the generic function is defined in the index. Generic type conversions, collection indexing, and uncalled function values remain excluded. Go reference searches exclude type, alias, and interface method declaration names while preserving their uses.
+  • Local indexing and first-query recovery rebuild saved stores when a tracked directory changes between a linked worktree and a standalone checkout, preserving workspace settings and removing the obsolete layout.
+  • Clean Git checkouts reindex files included through `.ignore` whitelists and observe ancestor ignore-rule changes. Files hidden from Git status by index flags also refresh correctly, including when a worktree reuses its base.
+  • Context packs apply the indexer's ignore rules to changed files, explicit paths, and live dependency expansion, keeping excluded source out of CLI and MCP output unless `--skip-gitignore` is requested.
+  • Literal searches apply the hit limit before building excess snippets and keep parallel partial results bounded, avoiding memory growth with every matching line while preserving deterministic result order.
+  • Web context requests acquire workspace leases before CPU capacity, preventing a deadlock with concurrent indexing when search capacity is exhausted. Both resources remain held through context generation.
+  • Failed main-index publication now forces complete recovery before reusing Git state or creating worktree overlays. Doctor detects unfinished publication instead of reporting stale stores as healthy.
+  • Daemon hybrid searches refresh workspace and base-index identity when a checkout is replaced or its Git pointer changes, preventing missing results and stale matches without requiring a daemon restart.
+  • Background hash and neural enhancement discard obsolete work when an index is removed or rebuilt, including worktree overlays and reused generation numbers. Model computation still runs alongside lexical indexing; checkpoints and completion publish under the index lock.
+
+  ### Testing
+
+  • Windows cross-platform E2E allows 60 minutes for the expanded test suite instead of cancelling a still-passing run at the previous 30-minute limit.
+  • Linux ARM release acceptance runs its procedures and daemon-equivalence check offline in an image containing both Git and Python.
+  • Release evidence hashing excludes Git-ignored build outputs while still including tracked and nonignored source inputs, so clean tag checkouts reproduce locally generated evidence.
+ReleaseNotesUrl: https://github.com/bvolpato/ivygrep/releases/tag/v1.2.14
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

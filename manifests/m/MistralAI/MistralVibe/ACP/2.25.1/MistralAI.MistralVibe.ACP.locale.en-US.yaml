@@ -1,0 +1,83 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: MistralAI.MistralVibe.ACP
+PackageVersion: 2.25.1
+PackageLocale: en-US
+Publisher: Mistral AI
+PublisherUrl: https://mistral.ai/
+PublisherSupportUrl: https://github.com/mistralai/mistral-vibe/issues
+PrivacyUrl: https://legal.mistral.ai/terms/privacy-policy
+Author: Mistral AI
+PackageName: Mistral Vibe (ACP mode)
+PackageUrl: https://github.com/mistralai/mistral-vibe
+License: Apache-2.0
+LicenseUrl: https://github.com/mistralai/mistral-vibe/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Mistral AI
+CopyrightUrl: https://legal.mistral.ai/terms
+ShortDescription: Minimal CLI coding agent by Mistral
+Description: |-
+  Mistral's open-source CLI coding assistant.
+  Mistral Vibe is a command-line coding assistant powered by Mistral's models. It provides a conversational interface to your codebase, allowing you to use natural language to explore, modify, and interact with your projects through a powerful set of tools.
+Tags:
+- agent
+- agentic
+- ai
+- code
+- coding
+- develop
+- development
+- programming
+ReleaseNotes: |-
+  Added
+  - Desktop keeps 15 recent managed Code worktrees by default, configurable in Local Coding settings; cleanup skips active, dirty, untracked, or unpushed worktrees.
+  - Background process tools (process.start, process.stop, process.output, process.list, process.write) now show the command or process ID in the call header and a typed result widget instead of raw JSON.
+  - Tool call groups now fold into a single compact summary line by default. Click to expand the full list. Ctrl+O toggles all groups and result bodies. The summary shows present-tense labels while running (e.g. "Running commands") and past-tense when done (e.g. "Ran commands"). File edits and writes are included in the fold.
+  - Show a loading spinner in the conversation while /reload is in progress
+  - A risky call is returned to the model to self-correct rather than interrupting the human, escalating to an approval prompt only after a streak; no failure path auto-approves
+  - Experimental experimental_enable_tab_status config option: shows >> (running) and ? (waiting) indicators in the terminal tab title.
+  - New built-in worktree plugin with a skill for creating, reusing, and cleaning up git worktrees under $VIBE_HOME/worktrees.
+  Changed
+  - The invalid API key error now names where the key came from (env var MISTRAL_API_KEY, the keyring), so a shell-exported key shadowing the one saved at setup is visible.
+  - Optimized resource usage when running the full test suite.
+  - The vibe and skill-creator skills now reach a session as skills of the shipped vibe plugin, so they are offered once, as /vibe:vibe and /vibe:skill-creator.
+  - Bump harness to v0.4.3
+  - Vibe Desktop can create local projects from any existing folder.
+  - Background LLM session titles are now off by default. Set session_logging.generate_titles = true to re-enable them.
+  - Vibe CLI shows the output of a ! command directly in the timeline: it is neither folded behind its own toggle nor gathered into the summary line that folds the agent's tool calls. Shell calls the model makes still fold, as every other tool result does.
+  - The /plugins detail view now leads with Author and Version, then the description, then Location (renamed from "Installed from"), Scope, Format, and Pinned.
+  - The /resume session picker now shows an animated loading indicator while saved sessions are discovered and waits briefly before loading a highlighted session preview, keeping rapid keyboard navigation responsive.
+  - A session that asks for a worktree now starts in the repository and moves into the worktree once git worktree add lands, so the session exists from the moment the prompt is sent instead of after the checkout. Only its first turn waits.
+  Fixed
+  - Worktree sessions retain access to attached images and files.
+  - Pinning or removing a shared skill now republishes this repository's claims, so another repository's cleanup no longer deletes a skill you just added.
+  - Removed unauthenticated debugpy listener on localhost:5678 that was activated by DEBUG_MODE=true under vibe-acp
+  - A rejected API key no longer offers /retry, which could only fail again with the same key.
+  - Path autocomplete now prioritizes matches beneath an explicitly typed directory prefix in large repositories
+  - GrowthBook rollouts set only via a feature's default value now take effect (previously ignored)
+  - GrowthBook boolean feature flags now take effect, not just string on/off values
+  - Cached experiment variants are no longer dropped to defaults on cold start or resume
+  - Stop the CLI from dumping a traceback on exit when the app-server connection drops during shutdown (a failed reconnect/resume no longer crashes the event listener).
+  - Built-in plugins are no longer listed under "Not loaded" in /plugins with "Plugin namespace 'vibe' is reserved". Only a built-in may claim the reserved vibe namespace, but the re-resolve a session's plugin bind performs was re-reading every checkout at project scope, so the shipped vibe plugin was dropped from every session.
+  - Tool call group icon now reflects the status of the last call in the group instead of the worst (any failure no longer overrides a later success)
+  - Individual failed tool call indicators stay grey (muted) when a later call in the same group succeeds, instead of escalating to red
+  - Tool group and individual tool call indicators now show a blinking square while running, then a colored dropdown triangle when settled
+  - App-server validation errors now name the offending field and reason instead of only "Invalid request parameters".
+  - The auto-generated session title now waits for the first turn to complete and ignores the assistant's process preamble, so it names the actual task (e.g. the real subject of a linked issue) rather than an opening line like "I'll explore the codebase"
+  - Session titles now generate and refresh while a turn is still running — including long, tool-heavy turns that emit few assistant messages — instead of only when the turn ends or is interrupted
+  - A ! command that exits non-zero (or is interrupted) now shows what it printed. Only the exit status was reported before, which hid the stderr explaining it.
+  - User-scope plugins (~/.vibe/plugins/) were shown as project scope in /plugins because the bind-time resolve collapsed all staged checkouts to project scope. Scope is now preserved from the original discovery.
+  - Smart approve now runs its classifier on the fast Mistral model regardless of the session's active model, including when you switch into the mode mid-turn; a session on another model (e.g. a non-Mistral provider) sent the classify call to the wrong endpoint, so every gated tool call came back unverifiable and prompted instead of auto-approving
+  - The smart-approve pre-check no longer fast-approves content-dumping git commands (git diff/show/blame, git log -p, git status -v); they defer to the classifier so a secret shown in a diff is not auto-read
+  - The smart-approve pre-check no longer fast-approves a secret path hidden behind a cd prefix (e.g. cd ~/.ssh && ls); the secret scan now reads the whole command, not the part after the cd
+  - The classifier now runs the fast model with deterministic decoding (temperature 0, thinking off) regardless of the session, so a thinking session no longer sends a thinking request to the small model and escalates every gated call
+  - A subagent's classification event under smart approve is now forwarded to telemetry like a top-level one, instead of being applied as a subagent state update — which had dropped the subagent's events from the main-agent stream
+  - Smart approve no longer classifies ui.ask_user_question; asking the user a clarifying question is the escalation channel itself, so it always runs instead of paying a classifier round-trip, being deny-and-continued, or escalating to an approval dialog to ask
+  - Starting with --smart-approve now keeps the mode in the Shift+Tab cycle for the whole session; it was selected at launch but dropped out of the cycle after switching to another mode, so you could not switch back to it
+  - Switching agent mode mid-turn now re-gates MCP/connector tools too: leaving smart approve stopped asking for built-in tools but kept classifying every connector call because the mid-turn config graft dropped provided_tool_mode
+  - "Approve for session" on an MCP/connector tool under smart approve now covers the whole tool instead of the exact arguments, so calling the same tool with different arguments no longer re-prompts (built-in tools keep their per-call resolver scope)
+  - Resuming a session created by a newer version of Vibe now shows a clear message to restart with --check-upgrade and update, instead of an internal store-format validation error.
+  - Hook commands run without a shell to prevent injection via hooks.toml
+ReleaseNotesUrl: https://github.com/mistralai/mistral-vibe/blob/HEAD/CHANGELOG.md#2251---2026-09-09
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

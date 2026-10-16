@@ -1,0 +1,36 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.6.5
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+Tags:
+- account-manager
+- antigravity
+ReleaseNotes: |-
+  - [核心修复] 修复 Gemini JSON Schema 校验 400 报错（嵌套 Array 缺失 items） (PR #3375):
+    - Array 类型 items 兜底补全：解决 Claude Code 等客户端发送无 items 字段的 Array Schema（如 query.where: { type: "array", items: { type: "array" } }）时触发 Gemini 后端 400 校验失败的问题。在 Schema 递归清洗流程中自动为未声明 items 的 array 节点注入 {"type": "string"} 兼容项，并增加回归单测。
+  - [流式代理与协议规范] 规范化 Claude 上游流式中断错误事件 (PR #3371, PR #3373):
+    - Anthropic 标准 SSE Error 事件输出：修复上游流断开或发生异常时 proxy 发送非标准错误 JSON 的问题，规范为 Anthropic 协议标准的 type: "error" 与 error: { "type": "overloaded_error", "message": ... } 结构并通过 state.emit("error", ...) 发送，保证 Claude 客户端正确捕获与处理流中断。
+  - [OpenCode 与模型支持] 补全 Claude Opus 4.5/4.6 基础模型 Thinking 变体支持 (PR #3371, PR #3373):
+    - Opus 基础模型 Thinking 档位对齐：为 claude-opus-4-5 与 claude-opus-4-6 基础模型增加 VariantType::ClaudeThinking 支持，解决此前仅带 -thinking 后缀才有变体导致选择基础模型时下拉列表缺失 Thinking 档位的问题；并统一对齐 Gemini3Pro 的思考档位顺序。
+  - [Linux & AppImage] 修复 AppImage 环境下版本检测触发 GUI 弹窗与环境变量污染问题 (Issue #3370):
+    - 静态 Package.json 优先版本读取：优化 Linux 下 Antigravity 版本检测机制，调整为优先从安装目录 resources/app/package.json 直接读取版本号，避免通过执行 --version 参数意外拉起 Electron/Chromium GUI 窗口。
+    - 子进程 AppImage 环境变量隔离：在 Linux 环境下启动 Antigravity 时，自动剥离 Tauri AppImage 运行时的临时环境变量（APPIMAGE、APPDIR、ARGV0、LD_LIBRARY_PATH、GTK_PATH 等）并清洗 XDG_DATA_DIRS 中的 /tmp/.mount_* 挂载路径，防止子进程继承错误动态库与配置。
+    - 进程探测与自身排除加固：强化 Linux 平台下运行中进程探测与路径匹配逻辑，确保 AppImage 自身挂载实例与家族进程不被误判为目标 Antigravity 实例。
+  - [系统与托盘] 修复开机自启/后台启动时窗口意外显示的问题 (PR #3373):
+    - 窗口可见性状态恢复过滤：优化 tauri-plugin-window-state 插件配置，排除 StateFlags::VISIBLE 状态标志恢复，防止即使配置了 visible: false 静默启动到托盘，仍因插件自动恢复上次退出时的可见状态而导致主窗口闪烁弹出的问题。
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.6.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

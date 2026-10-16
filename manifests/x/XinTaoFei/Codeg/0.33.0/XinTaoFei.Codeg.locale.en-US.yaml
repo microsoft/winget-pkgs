@@ -1,0 +1,67 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: XinTaoFei.Codeg
+PackageVersion: 0.33.0
+PackageLocale: en-US
+Publisher: codeg
+PublisherUrl: https://github.com/xintaofei
+PublisherSupportUrl: https://github.com/xintaofei/codeg/issues
+PackageName: codeg
+PackageUrl: https://github.com/xintaofei/codeg
+License: Apache-2.0
+LicenseUrl: https://github.com/xintaofei/codeg/blob/HEAD/LICENSE
+ShortDescription: Aggregate and browse AI coding agent sessions (Claude Code, Codex, Gemini CLI, etc.) in one place. Desktop app, self-hosted server, or Docker.
+Description: Codeg (Code Generation) is an enterprise-grade multi-agent coding workspace. It unifies local AI coding agents (Claude Code, Codex CLI, OpenCode, Gemini CLI, OpenClaw, Cline, etc.) in a desktop app, standalone server, or Docker container — enabling remote development from any browser — with conversation aggregation, parallel git worktree development, MCP/Skills management, chat channel interactions (Telegram, Lark, iLink, etc.), and integrated Git/file/terminal workflows.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claude-code
+- code
+- codex
+- coding
+- gemini-cli
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  This one lets agents see and operate your desktop. With the new Computer Use preview, you share a window, a whole app or the entire screen, and agents can read it and click, type and drag in it, with Stop sharing always one click away. Codex moves up to its 2.1.1 adapter and Claude Code to 0.85.1, and seven more bundled agents get new versions.
+  Alongside that: the desktop app reopens the workspace windows you had open when you quit, the on-screen keyboard stays down when you switch conversations on a touch device, icons draw a little lighter, a to-do runs the agent its picker shows, and on Windows codeg-server installs into a folder of its own.
+  New
+  - Agents can see and operate the windows you share with them (preview) — switch it on under Settings → Computer Use, share a window from the status bar's Computer use panel as "Read only" or "Read and act", and agents can take screenshots, read what the window shows, and click, scroll, type and press keys in it on macOS, Windows and Linux, while the panel lists what they just did; nothing is readable until you share it. (#870)
+  - One click or one shortcut stops everything — "Stop sharing" in the Computer use panel or on the floating stop bar, or Ctrl+⌘+Esc (Ctrl+Alt+Esc on Windows and Linux), ends every sharing and cuts off whatever agents are doing, and a shared window no agent has used for 30 minutes (adjustable) stops being shared by itself. (#870)
+  - codeg's own windows and your never-share list stay off limits — password managers and system settings are on the list by default, and you can add or remove apps. (#870)
+  - You can share a whole app or the entire screen — an app shared as a whole includes the windows it opens later, its menus and its own shortcuts, and "Offer the entire screen" (macOS and Windows, off by default) lets agents see one picture of the screen and click anywhere on it, with codeg's windows and never-share apps painted over. (#870)
+  - Agents can do more than click — drag, hold keys, restore minimized or hidden windows and, for apps that take no keys in the background (such as Edge, Chrome and VS Code on Windows), bring the window to the front, which you can switch off; opening apps, moving windows and using the clipboard have their own switches, off by default, and an agent can only paste what it put on the clipboard itself. (#870)
+  - codeg-server can offer computer use too — start it with CODEG_COMPUTER_USE=1 and its web clients can share the server machine's windows and stop them from the same panel. (#870)
+  - The desktop app reopens the workspace windows you had open when you quit — the local one and each remote workspace, with the one you were using back in front, and a remote workspace that can't be reached is reported in the local window.
+  Improved
+  - Updated bundled agents: Claude Code ACP 0.85.1 (Claude Code 2.1.286), Codex ACP 2.1.1 (Codex CLI 0.159.3), OpenCode 1.18.34, Cline 3.0.67, CodeBuddy 2.161.0, Grok 1.0.46, Qoder 1.1.65, OpenClaw 2026.9.7, Cursor 2026.09.28.
+  - Forking a conversation no longer leaves the original session held by the agent — codeg closes it after the fork, so Codex lets go of it within about a minute and Claude Code stops keeping a process running for every fork, and the "open elsewhere" banner now says to reload in about a minute if you just forked.
+  - Icons draw a little lighter — those at the icon set's default weight of 2 now use 1.75, which sits better beside small text, while icons given a deliberate weight keep it. (#866, @SousekiL)
+  - Settings → "Browser" is now "Browser Use", next to the new "Computer Use" page, and "Collaboration" moves up to follow "General". (#870)
+  - On Windows, codeg-server installs into its own folder, %LOCALAPPDATA%\codeg-server, so neither install overwrites the other's files or stops the other's processes, and re-running the install script moves a server that shares the desktop app's folder out of it. (#870)
+  - The desktop app drops about 70 MB it never used — the standalone server binary is no longer bundled with it. (#870)
+  - The built-in model catalog is refreshed — 8,339 models from 225 providers, up from 8,281 models.
+  Fixed
+  - On a touch device, switching to another conversation no longer pops up the on-screen keyboard over it — tapping the message box still brings it up, and desktop behavior is unchanged. (#865, @Flyneen)
+  - A to-do runs the agent its picker shows — on a fresh install, or when the usual agent is disabled, the picker could show an agent that wasn't actually saved, and the to-do then failed to start with "no agent configured"; now the agent shown is saved with the to-do, and the hint under the picker says whether it is inherited or saved. (#864 reported by @qq974969638)
+  - Quitting with ⌘Q, from the Dock or by logging out now runs the full quit cleanup — agent processes, terminals and the web service are stopped as they are when you quit from inside codeg, and logging off on Windows does the same.
+  - Cline runs on macOS 27 — macOS 27 killed Cline 3.0.65 and earlier at launch, while 3.0.67 ships with a valid signature, so upgrade it in Settings → Agents; OpenCode 1.18.34 is now properly signed too.
+  - A background command in a Claude Code conversation no longer has its card overwritten with internal marker text when it finishes, and one that moved to the background because you sent a message or it timed out shows the Background badge.
+  - Codex conversations reopen more faithfully — a question you answered with your own text under "Other" comes back as that text rather than as two picks, a failed compaction shows the service's error message instead of raw JSON, and a conversation started in the Codex desktop app shows its attachments as links followed by your request, titled after what you wrote.
+  - A search pipeline that finds nothing no longer shows as a failed command — a command like rg --files src | rg foo that ends in rg or grep and matches nothing now reads as completed with its exit code still shown, instead of a red failure counted as an error in its tool group, while real errors such as exit code 2 or an error message still show as failed. (#877 reported by @Ryn-Mic)
+  - Grok's model picker picks up the full model list — in a session opened before Grok had fetched its model catalog, such as after your sign-in expired, the picker kept the short built-in list for the rest of the connection; it now updates as soon as Grok announces the catalog, and the model and reasoning effort you chose stay selected. (#876 reported by @goon-13)
+  Note
+  - Computer use downloads the open-source cua-driver (0.32.0) the first time it is needed, or when you press Install in Settings → Computer Use.
+  - On macOS, grant Accessibility and Screen Recording to codeg-computer-helper, not to codeg — only codeg can use that helper, so agents' own shells can't borrow the permissions; Windows and Linux have no such separation, so there the settings decide what agents get through codeg.
+  - On Windows, codeg-server's web files now live in %LOCALAPPDATA%\codeg-server\web — if your server moves there, update a CODEG_STATIC_DIR that still points at %LOCALAPPDATA%\codeg\web.
+  - With Claude Code 2.1.286, sending a message moves a running command, MCP call or sub-agent to the background instead of waiting for it or interrupting it — codeg marks such a command with the Background badge, and a question card still open is dropped when you send, as before.
+  - Behind a custom API address, Claude Code's model list no longer has separate "(1M context)" entries — since 2.1.285 those models use their 1M window by default, and a conversation saved on such an entry carries on with the plain model; if your gateway stops at 200K, Claude Code's advice is /autocompact 200k.
+  - Cline 3.0.66 and later count output tokens without reasoning tokens, so reasoning models show lower output token counts.
+  Thanks to @Flyneen and @SousekiL for contributing to this release, and to @qq974969638, @Ryn-Mic and @goon-13 for the reports.
+ReleaseNotesUrl: https://github.com/xintaofei/codeg/releases/tag/v0.33.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

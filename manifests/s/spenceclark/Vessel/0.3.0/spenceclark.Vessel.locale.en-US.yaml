@@ -1,0 +1,65 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: spenceclark.Vessel
+PackageVersion: 0.3.0
+PackageLocale: en-US
+Publisher: Spencer Clark
+PublisherUrl: https://github.com/spenceclark
+PublisherSupportUrl: https://github.com/spenceclark/Vessel/issues
+PrivacyUrl: https://github.com/spenceclark/Vessel/blob/HEAD/PRIVACY.md
+Author: Spencer Clark
+PackageName: Vessel
+PackageUrl: https://github.com/spenceclark/Vessel
+License: MIT
+LicenseUrl: https://github.com/spenceclark/Vessel/blob/HEAD/LICENSE
+ShortDescription: The lightweight observability proxy for LLM traffic
+Description: The lightweight, local-first observability proxy for LLM traffic. Point a client’s base_url at one small binary and get capture, search, metrics, replay, Compare, and a private UI. Captured traffic is stored only on your machine; prompts are forwarded only to the model providers you configure.
+Moniker: vessel
+Tags:
+- ai
+- llms
+- observability
+ReleaseNotes: |-
+  0.3.0 — 2026-09-19
+  Tools tab, Anthropic server tools, TypeSafe System One, MCP resources, and two new warnings.
+  Added
+  - Tools tab: a request that declares tools gets a Tools (n) tab with one card per tool —
+    description, parameter table, and how many times it was called (#86).
+  - Anthropic server-tool blocks (server_tool_use, web search and web fetch results) render
+    as cards, with numbered citations and a sources list per message (#88).
+  - Tool call args and tool results that parse to an object render as a readable field list,
+    with multi-line strings unescaped; Raw JSON still shows the exact bytes (#91).
+  - TypeSafe System One (Jev) support: typesafe-systemone traffic — direct /v1/systemone or
+    OpenRouter's /api/alpha/decisions — is detected instead of falling to raw, with a
+    Decisions view (one card per question, probability bars) and same-backend replay (#122).
+  - Two new warnings: repetitive_output for a response stuck in a loop, and
+    slow_response for a non-streamed request slower than warnings.slowResponseMs
+    (default 120s, 0 disables; editable in the Config panel) (#90).
+  - MCP resources: vessel://requests/{id} and vessel://sessions/{id}, with
+    resources/list returning the most recent requests and sessions (#92).
+  - OpenRouter and TypeSafe in the "Add backend" catalog (#124).
+  Fixed
+  - A queued replay whose backend was repointed while it waited is refused with
+    409 replay_target_changed instead of sending the old credential to the new
+    destination (#106).
+  - MCP request reads decode bodies under capture.maxBodyMb rather than unbounded, and
+    report truncation with decodeTruncated (#107).
+  - While a listen-address change is pending restart, the UI/API stays reachable on the
+    address the process is actually bound to (#112).
+  - path_missing_v1 only fires for the missing-/v1 mistake: an OpenAI SDK path suffix, no
+    /v1/ segment anywhere, and a backend baseUrl with no path of its own (#123).
+  - Anthropic server-tool blocks are included in MCP include=text and full-text search;
+    encrypted_* fields never reach the flattened text (#89).
+  - openai-chat reasoning text under the reasoning key (e.g. Ollama) is no longer dropped
+    from the thinking block and search (#80).
+  - Anthropic rate-limit headers are parsed (#108).
+  - Parameter sweeps on OpenAI Responses replays use max_output_tokens (#111).
+  - Config validation rejects a backend with "type": null (#109).
+  - Multi-replay rejects a null variation with invalid_request and the offending index,
+    before dispatching anything (#110).
+  Changed
+  - Dependency bumps: react 19.3.0, tailwind-merge 3.7.0 (#117, #119).
+ReleaseNotesUrl: https://github.com/spenceclark/Vessel/releases/tag/v0.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

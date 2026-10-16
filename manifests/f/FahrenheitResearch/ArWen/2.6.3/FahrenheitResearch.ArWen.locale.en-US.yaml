@@ -1,0 +1,100 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.ArWen
+PackageVersion: 2.6.3
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/arwen/issues
+Author: Fahrenheit Research
+PackageName: ArWen
+PackageUrl: https://github.com/FahrenheitResearch/arwen
+License: Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+Copyright: Copyright © Fahrenheit Research
+CopyrightUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+ShortDescription: 'ArWen: GPU-native WRF-ARW-class regional weather model, verified against WRF v4.6.1'
+Description: "ArWen is an independent, GPU-native implementation of a WRF-ARW-class regional atmospheric model. It is not affiliated with or endorsed by NCAR or UCAR. The name is a wordmark for \"the ARW solver, GPU-native\"; the Python package is currently named gpuwm. Safety. ArWen is a research and educational tool. It is never a substitute for official forecasts and warnings from your national meteorological service. Do not use it to make safety decisions. Regional numerical weather prediction at convective scale has mostly required institutional clusters, which means most of the world runs on global-model guidance at 10-25 km. ArWen's aim is to put a verified, kilometer-scale limited-area model on a single consumer GPU: pick a point, size a nest ladder to your card, pull public analysis data, and run a 1 km (or 500 m) simulation of your own area on hardware you own -- especially in places where no national convection-permitting model exists."
+Moniker: arwen
+ReleaseNotes: |-
+  A fix release about what a fresh install does: aerosol-aware
+  forecasts run from a wheel install, upgrading gpuwm changes what runs,
+  and the Rust observation engine reads the grids the ingest path writes.
+  New:
+  - gpuwm doctor measures the install root against Windows' 260-character
+    path ceiling, where a deep root on a box without long paths enabled
+    makes every kernel source read fail as a missing file. Windows only,
+    skipped by name elsewhere.
+  - The MPAS column-batch physics seam transports aerosol-aware Thompson
+    (mp_physics = 28): WRF's eleven scalars, graupel receipts, the surface
+    aerosol emission pair on the restart payload, and the scheme's own
+    aerosol initialization at the seam's first microphysics call on the
+    caller's state, so a batch that brings no aerosol data is a valid batch.
+  Fixed:
+  - 2.6.2 was tagged but never published: a test in the suite rewrote
+    os.name process-wide, so every path operation raised on Linux and
+    the release job died. 2.6.3 is that release plus the fix, and no
+    2.6.2 artifacts reached PyPI.
+  - gpuwm fetch-tables stages CCN_ACTIVATE.BIN into the table root, so
+    mp_physics = 28 runs from a wheel install. The command used to report
+    the root complete and byte-valid while every aerosol-aware forecast
+    died at its first microphysics step. It carries the classic set's pin.
+  - gpuwm fetch-tables --wif no longer lets the optional dataset leg
+    cancel the mandatory one. Only --wif-only skips the coefficient
+    tables, the exit code is the worst of the legs that ran, and a summary
+    names each leg staged or refused.
+  - gpuwm fetch-tables --wif resolves QNWFA_QNIFA_SIGMA_MONTHLY.dat
+    from the versioned release-assets base, honoring
+    GPUWM_BRIDGE_ASSET_URL_BASE, where it used to answer 404. A refusal
+    names the file, the URL and two ways to supply it.
+  - A bridge staged in ~/.gpuwm/bridges by an earlier release no longer
+    reaches a door: every ladder checks it against this install's pins and
+    re-fetches by default. Offline it refuses with the file, its revision
+    and the replacing command; overrides, in-tree builds and wheel-shipped
+    binaries are never judged.
+  - The Rust observation engine rw_obsgrid reads the windowed radar-grid
+    layout natively. 2.6.1 made that layout what the ingest path writes
+    while the engine still implemented the whole-domain one, so every
+    freshly built grid was refused at the schema check. Older files stay
+    readable.
+  - gpuwm doctor reports a skewed gpuwm-data companion as a blocking
+    row carrying the exact pip line, rather than dying in an uncaught
+    ImportError. The base-dependency line no longer prints ok over the
+    pinned companion.
+  - The companion version lock compares PEP 440 public versions, so a
+    wheel built with a local label accepts the gpuwm-data it was cut
+    against, with a typeable remedy. A genuine release
+    mismatch is still refused.
+  - The GPU preprocessing remedy names the certified CUDA pair instead of
+    an uncertified extra. It states that such a box has no
+    certified pair today and that the CPU backend runs there.
+  - A config's relative file references resolve from the config's own
+    directory as well as the working directory, so a config that ships
+    beside its data loads from anywhere. A value that already resolves is
+    left byte for byte alone, so run fingerprints do not move.
+  - A host-only run no longer aborts at its first step boundary when CuPy
+    is installed and every device is masked. The pool trim is an
+    optimisation, so an unreachable pool now skips it instead of raising.
+  - Morrison deposition-freezing nucleation is bounded by the vapour excess
+    over ice saturation. The unbounded term drove qv negative below about
+    159 K, beyond a regional lid; it also engages between about 190 and
+    213 K, which a cold tropopause under the default 50 hPa lid reaches.
+    That divergence from WRF is declared and measured; no parity pin moved.
+  - The WPS_GEOG mirror carries the Noah-MP soilgrids archive, so a
+    mesh-door gpuwm fetch-geog no longer falls from the default source to
+    a 404. The publisher refuses to stage a pin table it cannot render.
+  - The two rw-mpas golden helper scripts compile again: a helper sat
+    inside each module docstring, leaving both unterminated and the
+    Rust tests' goldens impossible to regenerate. The whole-tree
+    source scan now fails on a file it cannot parse.
+  - The RRTMGP cloud-fraction refusal names the scheme it refuses instead
+    of citing only WRF line numbers, so the reader learns which arm is
+    unsupported.
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/arwen/releases/tag/v2.6.3
+InstallationNotes: |-
+  This application requires an NVIDIA GPU with CUDA support to run.
+  Will not function on integrated graphics or non-NVIDIA hardware.
+  Without compatible hardware, the application will fail to launch.
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

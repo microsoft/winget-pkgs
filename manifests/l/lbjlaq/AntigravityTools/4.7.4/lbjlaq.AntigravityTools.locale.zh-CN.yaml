@@ -1,0 +1,40 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.7.4
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+Tags:
+- account-manager
+- antigravity
+ReleaseNotes: |-
+  - [统一流水线架构与适配器重构] 引入统一 Pipeline 处理引擎，全面以适配器模式抹平四大 AI 协议差异 (PR #3459):
+    - 四大协议适配与规范化规范：统一收敛 OpenAI Chat (/v1/chat/completions)、Anthropic Claude (/v1/messages)、OpenAI Responses (/v1/responses) 以及 Google Gemini Native 协议；引入模块化 Inbound 进站清洗、Outbound 出站萃取与规范化扩散，抹平多协议由于字段命名、结构嵌套与元数据表达引起的割裂。
+    - 用量精确换算与增量审计：新增 proxy::pipeline::usage 权威计量模块，针对不同协议规范精确收拢 prompt_tokens、completion_tokens 与缓存命中增量（prompt_tokens_details.cached_tokens），杜绝跨协议转接时的用量漏算或异常放大。
+  - [思考链与加密签名归一化回填] 权威思考状态矩阵与双层自动回填 (PR #3459):
+    - 归一化全场景处理矩阵：针对客户端回传请求中思考块（完整/占位符 .../丢失）与签名（真签/伪造签/缺失）的 6 种典型场景建立权威判定流；对携带残缺思考或占位符的请求，原地自动复活为本地数据库记录的完整未截断思考与真实有效签名，彻底攻克 Google 上游 400 签名校验失败。
+    - 双向反向入库保护：客户端回传原生合法签名及有效思考时，自动双层备份落库（L1 内存热存 + L2 SQLite 离线恢复），防止后续会话中模型切换或多轮调用造成历史签名遗失。
+  - [SQLite 性能优化与长上下文飞跃] 复用只读连接查询工具签名并优化多线程测试隔离 (PR #3459, PR #3462, Fixes #3461):
+    - 根治查询链路 fsync 写入瓶颈：彻底将 PRAGMA auto_vacuum = INCREMENTAL 移至 init_db() 初始化阶段，彻底消除大上下文工具查询过程中每次新建连接触发的不必要磁盘 fsync 与写入事务。
+    - 只读连接懒加载与预编译复用：采用 SQLITE_OPEN_READ_ONLY 标志搭配 OnceLock<Mutex<Connection>> 实现只读连接懒加载与进程级单例复用，使用 prepare_cached 高效复用查询计划；查询完毕后即时释放 row、statement 和锁，保障数据更新立即可见。
+    - 显著性能提升：在 38 万 ~ 42 万 tokens 级别的大上下文长会话测试中，本地填充转换耗时从 14.7s 骤降至 0.22s（耗时缩减 98.5%）。
+    - 多线程测试隔离：引入 TEST_MUTEX 机制，保障并行自动化测试环境下的临时数据目录切换与 DB 状态相互隔离。
+  - [稳定性与生态缺陷修复] 彻底修复 Hermes 闪退、OpenAI 429/503 及中文指纹 Panic (PR #3459, Fixes #3455, Fixes #3457):
+    - 彻底修复 Hermes / Python SDK 流式闪退 (Fixes #3455): 严格遵循 OpenAI 流式契约，未明确声明 include_usage 时严禁发射带有空 choices: [] 的 Usage 块；用量信息安全搭载在最后一个含有 choices 的数据分块中，彻底解决下游客户端 IndexError 崩溃。
+    - 彻底修复 OpenAI 协议调用 Gemini 3.8/3.7 异常 429 / 503 (Fixes #3457): 在进站流水线统一定点抹除客户端传入的低限额与 reasoning_effort 污染，自动对齐服务端真实支持的模型档位字典，杜绝死循环与配额误判。
+    - 彻底修复中文系统提示词 UTF-8 截断 502 Panic: 重构 session_manager.rs 中前 512 字节指纹生成逻辑，改用 is_char_boundary 安全向前探查字符边界，彻底根治多字节中文截断导致的运行时 Panic 与 502 Bad Gateway 异常。
+    - CI 门禁与离线编译保障：修复纯 Rust 离线环境下缺失前端产物导致 Tauri 宏编译崩溃的问题，全平台 7 项 CI 自动化构建与代码检查 100% 通过。
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.7.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

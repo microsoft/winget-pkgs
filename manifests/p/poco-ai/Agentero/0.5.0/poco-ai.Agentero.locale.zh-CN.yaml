@@ -1,0 +1,75 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.5.0
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  概要
+  v0.5.0 以 PDF 版面理解与阅读体验、知识库 Doctor、翻译与 Agent 一键安装 为主线：
+  - 解析论文中插图、表格、算法、公式
+  - 并支持版面全文翻译，补充 BYOK 翻译服务
+  - CLI 性能 与 doctor 页面
+  - Agent 一键安装
+  - 提升 PDF 渲染性能
+  新功能
+  - PDF 版面分析：接入 PP-DocLayoutV3，打开论文或入库后可自动/后台解析，结果缓存为 source/layout.json，并生成与侧栏同构的 layout-index.json。（dc154164、fb6e318c、f05d5bb0）
+  - 插图 / 公式侧栏：阅读侧栏按图片、表格、算法与带编号公式分组展示，支持版面控件与分析进度，悬停可发起视觉提问。（61ffcf56、21799ee6）
+  - 版面全文翻译：按阅读顺序批量翻译正文/摘要/标题/图注等区域，译块完成即叠纸色遮罩，并适配暗色模式。（96260eab、2a95f440）
+  - Vault Doctor: 设置页与 CLI 提供只读诊断（目录结构、Catalog、双链、论文 aliases），修复前需确认；可生成英文/中文别名、探测坏链并 git 风格 diff 批量写入，也可把提示词交给 Agent；支持别名检查忽略/恢复。（#210、#217、22049895）
+  - 商业翻译 BYOK 与 DeepLX: 设置中可配置商业翻译提供商并探测可用性；默认免费链路纳入 DeepLX，状态以彩色圆点展示。（42da9797、eb256418、0b9e64f9）
+  - Agent 静默安装 / 升级：设置里分别展示 Agent 与 ACP 状态，支持无终端确认的安装、安装 ACP 与已装 CLI 升级；常用 Agent 列表位置与文案一并调整。（536ebaf0、57f931c9、37a0dd22）
+  - 划词钉到对话：PDF 划词提问会写入 agent-trace，在页边形成可回看的对话钉与选区卡片。（7cf52f7a）
+  - equation-annotation Skill: 内置公式/变量批注 Skill，可生成中英对照的 Annotation.md 术语表。（3a54eadb）
+  - CLI layout 与区域 mark: agentero layout list/get 读取版面索引；mark add --region 等支持区域锚点批注，默认高亮色与桌面一致为黄色。（41e4d340、47111be0）
+  - 诊断遥测（可退出）: 可选诊断上报（崩溃、错误日志、设备与已装 ACP 等），本地队列批量上传；设置 → 通用 → 隐私可关闭或手动发送。（96605306）
+  - 标题栏更新标签：有可用更新时显示「新版本」标签，点击下载安装并重启。（11866065）
+  - 后台任务进度环：后台任务以进度环展示，悬停或点击展开详情。（b35a7f58）
+  - PDF 独立配色：阅读器可独立切换配色，不必跟随系统主题。（51766376）
+  - 编辑器属性入口：Frontmatter / Properties 移入工具栏，阅读整理路径更短。（17091517）
+  - 侧栏 arXiv 链接：论文信息区补充 arXiv 相关服务入口。（9f3375fb）
+  改进
+  - PDF 渲染性能：优先 Worker 引擎（失败回退主线程），限制 base-coat / DPR，放大 tile、预渲染外围环、合并缩放步进，减轻滚动闪白与卡顿。（60d06459、9985326c、9af0991e）
+  - PDF 阅读控件：适应缩放移至底部分页旁；选区卡片贴钉定位；视觉批注缩略图进侧栏；背景任务默认收成环。（5a1a22a5、0cc51ae6、178e9106）
+  - Catalog 单一数据源：不再写入 metadata.json / reading-meta.json，论文元数据以 .agentero/catalog.sqlite 为准，页数等直接读 PDF。（1dd7839a、5528b349）
+  - 内置 Skill 按 version 升级：以 frontmatter version 比较替代 hash；版本更低才升级，用户更高/自定义版本保留。（#224）
+  - 去掉 Zen 模式：Agent 专注布局入口移除，面板与快捷方式统一到常规壳层。（ae47149f）
+  - Agent 排队计数：作曲区显示已排队提示数量。（9e7b7732）
+  - Zotero 集合目录默认开启：迁移导入默认按集合建文件夹。（0635b867）
+  修复
+  - Agent 历史会话恢复：打开历史不再空白；同会话续聊不再拆成多条；续聊偶发只显示提问的问题已处理。（#221）
+  - AskUserQuestion 转发：Agent 向用户提问后的回答会正确回传会话。（2905443a）
+  - ACP 斜杠命令名：去掉命令名中多余的 $，避免 slash 转发错误。（990dd3d5）
+  - Zotero Connector 附件：正确声明 filesEditable 并解析 PDF，修复仅写入元数据、缺附件（如 IEEE 落地页）的情况。（d22f47fe）
+  - 索引文件夹下嵌套论文：组织目录带 index NOTES.md 时不再吞掉子论文单元。（b7b62ac8）
+  - 非论文标签保留信息栏：切到非 paper 标签时论文信息不被清空。（717a5bc0）
+  - CLI 入库后库刷新：文件监听/导入后元数据与论文库及时更新。（2e594f85）
+  - 版面分析细节：同栏公式合并、双栏顺序、图文误标、可无 ONNX 从 layout.json 重分析等多项稳定性修复。（c1800c4a、6ace73e7、8c5cefa7）
+  已解决问题
+  下列在区间内关闭、且已由上方条目覆盖的 issue 不再重复展开：#193、#198、#209、#215、#182、#201、#200、#203、#225、#218、#204、#219、#170（区域部分）、#148（体验相关）。
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.5.0
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

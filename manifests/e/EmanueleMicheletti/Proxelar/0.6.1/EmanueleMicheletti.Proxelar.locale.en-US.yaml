@@ -1,0 +1,47 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: EmanueleMicheletti.Proxelar
+PackageVersion: 0.6.1
+PackageLocale: en-US
+Publisher: Emanuele Micheletti
+PublisherUrl: https://micheletti.io
+PublisherSupportUrl: https://github.com/emanuele-em/proxelar/issues
+Author: Emanuele Micheletti
+PackageName: Proxelar
+PackageUrl: https://github.com/emanuele-em/proxelar
+License: MIT
+LicenseUrl: https://github.com/emanuele-em/proxelar/blob/main/LICENSE-MIT
+Copyright: Copyright (c) Emanuele Micheletti
+ShortDescription: Scriptable local traffic workbench for HTTP, HTTPS, and WebSocket debugging
+Description: Proxelar is a single-binary MITM proxy for developers. Capture, inspect, intercept, replay, and rewrite HTTP/HTTPS and WebSocket traffic from a TUI, web GUI, or headless REST API, with Lua scripting, declarative rules, session persistence, and HAR/curl export.
+Moniker: proxelar
+Tags:
+- cli
+- debugging
+- developer-tools
+- http
+- mitm
+- proxy
+- rust
+- tui
+- websocket
+ReleaseNotes: |-
+  ### Added
+
+  • Add a customizable TUI color theme system：a `--theme` flag / `config.toml` `theme` key selects `default`/`dark`/`light`, `system` (auto-detects terminal/OS appearance via `theme_dark`/`theme_light`), a bundled preset (`cyberdream`, `cyberdream-light`, `cyberdream-muted`, `rose-pine`, `rose-pine-dawn`, `tokyonight`, `tokyonight-day`, `dracula`, `alucard`, `catppuccin-mocha`, `catppuccin-latte`), or a custom theme file under `CA_DIR/themes/<name>.toml`. Custom and bundled theme files only need to override the colors they change; a `[colors]` table in `config.toml` also allows one-off overrides with no theme file. JSON highlighting uses the selected theme. Unknown theme names, unknown color keys, and invalid colors warn and fall back to the default palette rather than failing to start. `Theme::default()` reproduces every previously hardcoded ANSI color, so existing setups are unaffected until a theme is chosen. ([#190](https://github.com/emanuele-em/proxelar/pull/190) by @byt3m4st3r)
+  • Honor `$XDG_CONFIG_HOME` when resolving the directory holding the CA certificate/key, addons, and other proxelar state. When the variable is set to a non-empty absolute path, state lives in `$XDG_CONFIG_HOME/proxelar`; otherwise `~/.proxelar` is used as before. `--ca-dir` still overrides both. If `$XDG_CONFIG_HOME` points somewhere new while an existing `~/.proxelar` is present, proxelar prints a warning naming both directories, since state is not migrated. ([#177](https://github.com/emanuele-em/proxelar/pull/177) by @byt3m4st3r)
+
+  ### Fixed
+
+  • Serialize the TUI theme system's appearance-detection tests on a shared guard so parallel test runs no longer race on the process-wide `COLORFGBG` environment variable. ([#190](https://github.com/emanuele-em/proxelar/pull/190) by @byt3m4st3r)
+
+  • Install Git in the container builder for BoringSSL patch setup, test container builds in pull requests, and allow independent container release recovery. ([#188](https://github.com/emanuele-em/proxelar/pull/188) by @emanuele-em)
+
+  • Build Linux ARM64 release artifacts on a native runner with a supported libclang, validate release builds in workflow pull requests, and allow release recovery against an existing tag. ([#186](https://github.com/emanuele-em/proxelar/pull/186) by @emanuele-em)
+ReleaseNotesUrl: https://github.com/emanuele-em/proxelar/releases/tag/v0.6.1
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://proxelar.micheletti.io
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

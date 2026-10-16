@@ -1,0 +1,55 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.11.4
+PackageLocale: en-US
+ShortDescription: Agent-friendly reference management.
+Description: 'Traditional reference managers are not agent-friendly: highlights and notes stay locked inside single files, making it hard for agents to reuse knowledge across papers; every conversation starts from scratch without a stable local knowledge map; PDFs are human-friendly but not the most comfortable reading material for agents. Agentero aims to build an agent-friendly, agent-native way to manage references, exploring how humans and agents collaborate on reference management. Connect your local agent via ACP (BYOA), select-text chat, import papers and Skills, stay compatible with the Zotero ecosystem, and get paper translation, bidirectional links with a knowledge graph, and deep PDF reading.'
+Tags:
+- academics
+- agent
+- article
+- literature
+- paper
+- pdf
+- reference
+- research
+- thesis
+- zotero
+ReleaseNotes: |-
+  This release focuses on PDF reading, the Library, and Agent integration. Pages with /Rotate render upright again, text-selection highlights hug the glyphs, and a new copy action was added to the selection toolbar. The Library gains editable tag colors, draggable and remembered column widths, sorting by date added, and automatic adoption of custom folders under papers/. On the Agent side, a new Antigravity preset was added, Windows bundled ACP and the OpenCode 2 custom model catalog were fixed, and the whole arXiv Daily list can be referenced with @. Workspace layout persistence, Vault sidebar stability, and mobile builds were also fixed.
+  Features
+  - Copy from PDF selection: The PDF selection toolbar gains a Copy button (⌘C on macOS) after Translate. Clicking it copies the selected text, dismisses the selection menu, and clears the selection. (#640 by @bet4it)
+  - Antigravity preset: The Agent catalog adds an official Google Antigravity ACP preset that installs, updates, and uninstalls through the existing Settings flow. Versions and platform archives are read from Google's official ACP Registry with no hard-coded fallback. (#629 by @Zhou-Ruichen)
+  - Whole arXiv Daily list: The @ menu adds a "Today's recommendations (N)" entry that hands the Agent the full abstract directory of the day at once. When deeper reading is needed, the model can request up to three full texts and the app follows up automatically with a final report. (#626 by @ForeverHYX)
+  - Editable tag colors: Existing Library tag colors can be edited in place and are saved with the tag metadata, mirrored in the sidebar and the paper info panel. (#642, 84ccc2dd by @qychen2001)
+  - Remembered column widths: Library columns can be resized by dragging, and the widths persist through settings so the previous layout is restored next time. (#612, b0178408 by @qychen2001)
+  - Sorting by date added: The Library can be sorted by date added, switchable from the table header. (#620, 8d1a207c by @qychen2001)
+  - Automatic papers/ adoption: Custom subfolders placed under papers/ are adopted as papers automatically: the main PDF is renamed to {id}.pdf, extras move to attachments/, a NOTES shell is written, the catalog row is upserted, and background metadata recognition is triggered. Failures never delete the user folder. The autoIngest setting is on by default, and folders created while the app was closed are adopted on the next launch. (#549, 424ef5f2, 4ac91fd6 by @Phil-Fan)
+  - OpenCode 2 model catalog: When OpenCode 2 returns both an incomplete configOptions catalog and a more complete raw model directory, the complete one is used, so custom-provider models reappear in the picker. OpenCode was also upgraded to v2. (#638, a1665652, 88418fe4 by @Phil-Fan)
+  Improvements
+  - Layout persistence: Sidebar and split widths you drag are remembered per layout and restored after relaunch, fixing widths snapping back to defaults when switching layouts, opening the Agent rail, or clicking the sidebar. (#624, 17416e9d, 9bb8c238, 55351c5a by @qychen2001)
+  - PDF/Notes split: Opening or closing the Notes split keeps its proportion relative to the PDF instead of resetting it. (a6a46391 by @qychen2001)
+  - Library stays first: The Library tab stays first in the tab bar instead of being pushed behind other tabs. (#631, 486c5fd3 by @qychen2001)
+  - Paper path breadcrumb: An active PDF panel shows a clickable paper-path breadcrumb at the top, with hover candidates and a jump back to the matching Library location. (#613, efe00580, 560d276c by @Phil-Fan)
+  - OpenAI-compatible translation: Documentation for configuring a custom OpenAI-compatible translation service now clarifies how to fill in the endpoint. (#621, 0c620050, 2c6d2f2e by @Phil-Fan)
+  Fixes
+  - Rotated PDF pages: Pages with /Rotate were laid out and tiled at their unrotated size, so landscape tables rendered sideways and overlapped the page shell. They now render upright in display orientation. (#604, 6d074dfd, 9a7dcaee by @Phil-Fan)
+  - Selection highlight bounds: Highlight annotations use tight glyph bounds and no longer bleed vertically into neighboring lines or overlap each other. (#639 by @Immortal-Fates)
+  - Deleted translation cards: After deleting a translation card, late provider callbacks or an in-flight write no longer bring the result back. Switching cards normally does not cancel the background completion. (#627 by @Zhou-Ruichen)
+  - Windows bundled ACP: Bundled ACP entry-script paths are normalized against the \\?\ prefix, fixing bundled Codex ACP exiting before initialization and failing to connect on Windows. (#633 by @llamapw)
+  - hermes model picker: The legacy top-level models field is supported again and the warm session/new budget for heavy agents is widened to 30s, fixing the empty model list for the hermes agent. (#628 by @Zhou1317fe5)
+  - Blank Vault sidebar: The whole-rail compositing layer was removed, fixing the sidebar going fully black after opening a paper, switching tabs, or importing, which previously required scrolling to recover. (#607, d341fe27 by @Phil-Fan)
+  - Selection overlay vs. docking: While the selection toolbar or ask card is open, Dockview tab/group dragging is frozen so a drag on the tab strip cannot split the layout. Tab clicks still work. (#608, a3c80932 by @Phil-Fan)
+  - Remote access: The relay endpoint was updated and remote catalog snapshots are published consistently, fixing bridge connection failures when pairing a mobile client. (#619, 45871f8d, cf9b4730 by @Phil-Fan, @qychen2001)
+  - Mobile builds: Plaza scratch PDF parsing is compiled out on iOS/Android without breaking the build, fixing the v0.11.3 Android and TestFlight builds. Existing cache copies can still be reused. (83cb906e by @Phil-Fan)
+  Security
+  - Markdown dependency: platejs and its lockstep @platejs/core were upgraded to 53.3.14, patching the HTML deserialization advisory (Dependabot #49). (4f05d2c4 by @Phil-Fan)
+  https://github.com/poco-ai/Agentero/compare/v0.11.3...v0.11.4
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.11.4
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: locale
+ManifestVersion: 1.12.0

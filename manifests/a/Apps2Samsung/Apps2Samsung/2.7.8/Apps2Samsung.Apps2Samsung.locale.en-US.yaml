@@ -1,0 +1,74 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Apps2Samsung.Apps2Samsung
+PackageVersion: 2.7.8
+PackageLocale: en-US
+Publisher: Apps2Samsung
+PublisherUrl: https://github.com/Apps2Samsung
+PublisherSupportUrl: https://github.com/Apps2Samsung/Apps2Samsung/issues
+PackageName: Apps2Samsung
+PackageUrl: https://apps2samsung.madebypatrick.nl/
+License: MIT
+LicenseUrl: https://github.com/Apps2Samsung/Apps2Samsung/blob/HEAD/LICENSE
+ShortDescription: Install any app on Samsung Tizen devices — TVs, projectors and smart monitors
+Description: Cross-platform desktop installer that side-loads any app onto Samsung Smart TVs, projectors and smart monitors running Tizen OS — Jellyfin, Moonlight, Moonfin, Litefin and a community catalog, or your own WGT package. Handles device discovery, Tizen certificates and installation. Successor to Jellyfin2Samsung.Jellyfin2Samsung.
+Moniker: apps2samsung
+Tags:
+- jellyfin
+- moonlight
+- samsung
+- samsung-tv
+- sideload
+- tizen
+- wgt
+ReleaseNotes: |-
+  📦 v2.7.8 — 2026-08-27
+  A fix-focused release. The big one is for TVApp users — every channel played the first stream — plus three fixes that make failed installs explain themselves instead of dying with a cryptic error, especially on the Android head.
+  🐛 Fixes
+  📺 TVApp: every channel played stream #1
+  Once TVApp was open, switching channels kept playing the first stream. The app created a new player on every switch without tearing down the old one, so the first stream never let go of the video element. The channel injector now destroys the previous player before loading the next channel — you get the fix just by reinstalling from Apps2Samsung, no matter which .wgt you use. (#567, fixes #566)
+  📜 Installs no longer fail on a certificate that isn't valid yet
+  install failed[118, -12] … Certificate in signature is not valid yet
+  Your TV checks the signature against its own clock and refuses a certificate whose validity period hasn't started. Nothing about the package can fix that — only waiting. Apps2Samsung now detects this before signing and pushing, and holds the install behind a live countdown to the moment the certificate becomes valid. "Install now" unlocks at 00:00, the certificate is re-checked, and the install continues where it left off. You can cancel at any point. (#568)
+  🤖 Android: error messages are readable again
+  Every error dialog in the shipped APK showed Exception_WasThrown, Java.Lang.RuntimeException instead of an actual message — a side effect of trimming stripping the .NET message strings. This affected all errors in the mobile head, which is why bug reports from a release build never contained anything useful. Fixed; error dialogs now say what actually went wrong. (#569)
+  🤖 Android: the same pre-install warnings the desktop has
+  The desktop has long warned up front about the setups that make an install fail before it even starts. The mobile head only warned about "TV needs a restart" — everything else failed later, deep in the DUID read, with an error nobody could act on. Android now catches the same things the desktop does:
+  ──────────────────────────────────┬──────────────────────────────────────────────────────────────────
+  Warning                           │What it means
+  ──────────────────────────────────┼──────────────────────────────────────────────────────────────────
+  Developer Mode is off             │Turn it on in the Apps store (12345)
+  ──────────────────────────────────┼──────────────────────────────────────────────────────────────────
+  Developer-Mode IP points elsewhere│Your TV is pointed at another machine — set it to this device's IP
+  ──────────────────────────────────┼──────────────────────────────────────────────────────────────────
+  IP typed back to front            │Happens on right-to-left TV menus
+  ──────────────────────────────────┼──────────────────────────────────────────────────────────────────
+  TV is on another subnet           │Phone and TV must be on the same network
+  ──────────────────────────────────┼──────────────────────────────────────────────────────────────────
+  TV needs a restart                │Developer Mode isn't fully active yet
+  ──────────────────────────────────┴──────────────────────────────────────────────────────────────────
+  (#573, fixes #572)
+  🧰 Under the hood
+  - The pre-install guards and the Samsung Developer-Mode lookup moved into Apps2Samsung.Core, so the desktop and mobile heads share one implementation instead of drifting apart. (#573)
+  - CI now compiles both heads on every pull request (desktop and Android), so a mobile-only regression can't slip into a release again.
+  📥 Downloads
+  ─────────────────────┬─────────┬─────────────────────────────────────────
+  Platform             │Status   │Notes
+  ─────────────────────┼─────────┼─────────────────────────────────────────
+  🍎 macOS (.app + dmg)│✅ Stable│ARM64 + Intel
+  ─────────────────────┼─────────┼─────────────────────────────────────────
+  🍎 macOS (CLI)       │✅ Stable│Per-arch tar.gz
+  ─────────────────────┼─────────┼─────────────────────────────────────────
+  🐧 Linux             │✅ Stable│x64 + ARM64 (tar.gz / .deb)
+  ─────────────────────┼─────────┼─────────────────────────────────────────
+  🪟 Windows           │✅ Stable│CI-built
+  ─────────────────────┼─────────┼─────────────────────────────────────────
+  🤖 Android (.apk)    │✅ Stable│Sideload; use your phone as the installer
+  ─────────────────────┴─────────┴─────────────────────────────────────────
+  🛡️ Security notice
+  Antivirus warnings may occur and are likely false positives — the binaries are unsigned and built in the open by GitHub Actions.
+  Full changelog: v2.7.7...v2.7.8
+ReleaseNotesUrl: https://github.com/Apps2Samsung/Apps2Samsung/releases/tag/v2.7.8
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

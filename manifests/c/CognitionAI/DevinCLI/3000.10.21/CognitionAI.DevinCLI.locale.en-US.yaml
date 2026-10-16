@@ -1,0 +1,72 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: CognitionAI.DevinCLI
+PackageVersion: 3000.10.21
+PackageLocale: en-US
+Publisher: Cognition AI, Inc.
+PrivacyUrl: https://cognition.ai/privacy-policy
+Author: Cognition AI, Inc.
+PackageName: Devin CLI
+PackageUrl: https://cli.devin.ai/docs
+License: Proprietary
+LicenseUrl: https://cognition.ai/terms-of-service
+ShortDescription: A fast and minimal agent that lives both in your terminal and in the cloud.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+ReleaseNotes: |-
+  Added
+  - New mode slash commands alongside /ask and /plan: /code returns to Code mode, /smart switches to Smart mode, and /bypass (alias /bypass-permissions) switches to Bypass Permissions. With a prompt they switch and then run it under the new mode.
+  - /session-stats now ends with a “by model” chart of the session’s billing metric, with per-model totals
+  - Disable tools by name with disabled_tools in your user config.json, for example "disabled_tools": ["webfetch", "web_search"].
+  - Set agent.compaction_threshold_tokens in the user config to trigger automatic compaction earlier than the context-window-based default.
+  - Added an agent.codex_tools setting (off by default) enabling GPT models to use the Codex tool set — shell commands for reading and searching, apply_patch for edits
+  - Beta: shell.exec_shell (bash/zsh/fish/pwsh) selects the shell the agent’s exec tool uses, and the agent can now pick a shell per command instead of always getting the machine’s default.
+  - Ctrl+Y pastes the text most recently deleted with Ctrl+U, Ctrl+K, Ctrl+W, Alt+D, or Alt+Backspace back at the cursor, with a footer hint until it is yanked back. Rebind it via editor.yank.
+  - Refusal fallback: when a provider refuses a request under its usage policy, Devin can switch to another model and retry the turn. Set DEVIN_REFUSAL_FALLBACK to a comma-separated list of models (or pass --refusal-fallback to devin acp); disabled unless configured.
+  - PreToolUse hooks receive a tool_provenance object identifying the skill or MCP server behind the call, and the config file or plugin that declared it.
+  - Terminals without kitty keyboard protocol support (e.g. Apple Terminal) see an “Alt+Enter for multiline prompts” tip.
+  - Skill list and search can target active plugin skills without changing their existing project-path behavior.
+
+  Changed
+  - Model families remember the last configuration you selected, including reasoning level, effort, and fast settings.
+  - Shell commands that only read, search, or list files are titled like the matching tool call (“Read lines 10-20 in src/main.rs”, “Searched for foo in src”) and render as compact title-only cards when they succeed.
+  - Large diff previews show the last 50 diff lines behind a [... N lines truncated ...] marker so big edits no longer slow down rendering.
+  - Unchanged context lines in diffs have a subtle gray background, and in-progress tools use yellow hollow indicators.
+  - Reopening a local session streams the stored conversation to the client message by message and no longer keeps a second copy in memory, roughly halving the memory a large reopened session uses.
+  -  --model now applies when resuming with -c/--continue or -r/--resume, switching the rest of the conversation to that model instead of being ignored.
+  - More specific command permission allows (e.g. allowing git status) can override a broader ask rule at the same configuration level.
+  - Usage-limit warnings follow the enterprise’s configured request action, linking to its own intake tool or showing its guidance; enterprises without one keep the “Request more usage” link.
+  - devin plugins install on a Claude Code plugin marketplace now recognizes it and offers to install a plugin (with a picker for multi-plugin marketplaces) instead of failing to read a manifest, and a repository with no manifest at any supported location fails with “no plugin manifest found”.
+  - MCP OAuth logins advertise http://localhost:8765/callback as the redirect URI (previously http://127.0.0.1:8765/auth/callback). If your identity provider allowlists Devin’s redirect URI by exact string, update it to the new value.
+  - The startup workspace trust prompt, login selection screen, and login confirmations were reworked for clearer navigation and consistent Devin branding.
+
+  Fixed
+  - The CLI no longer shows Devin as idle while a background subagent is still running: the turn stays active until it finishes, so the usual interrupt (esc esc or ctrl+c) cancels it, and its tool cards show live instead of being dumped into your next turn.
+  - Smart mode is never less permissive than Code mode: allow rules and auto-approved workspace edits are honored identically. Sensitive paths still always prompt, with the session’s plan files exempt. Starting or resuming in Smart mode also no longer prints a spurious “Smart permission mode is not available” warning.
+  - Resuming a session and choosing its original directory no longer hangs when that directory has been deleted, and listing local sessions no longer fails entirely when a single stored row is unreadable.
+  - Server-side model errors show the Devin API’s own explanation instead of a generic “Connection error”, and server rate limits are no longer labeled “Quota exhausted”.
+  - cd-prefixed commands whose target can resolve differently at runtime keep the fail-closed permission behavior, and on Windows a PowerShell command starting with a parenthesized expression offers the real command name to allow.
+  - web_search can now be used as a tool name in permissions.deny / permissions.ask / permissions.allow; previously it was rejected and web searches were always auto-approved.
+  - Skills under .cursor/skills/ and ~/.cursor/skills/ are auto-loaded like .claude/skills/, skills reachable through more than one path (e.g. symlinked directories) load once instead of per alias, and skills dropped from context by compaction are discovered again when the agent next touches their trigger paths.
+  - Invalid saved plugin entries no longer prevent unrelated plugins from loading, plugins required only by a forbidden plugin no longer activate, and git plugin sources with @ in repository paths keep a consistent identity across HTTPS and SSH URLs.
+  - devin mcp login succeeds against authorization servers that advertise RFC 9207 issuer identification, MCP connection setup times out instead of leaving later requests waiting on a stalled server, and MCP prompt commands no longer generate background requests every 15 seconds per conversation.
+  - /compact shows only a spinner until it finishes and queues prompts typed during compaction, /fast <prompt> runs the prompt after switching models, long /btw answers scroll with Up/Down, and you can revert the first prompt while Devin is active.
+  - Reduced the risk of local session database corruption with upstream SQLite fixes.
+  - Shared conversation titles show file mention names instead of local file paths.
+  - Debug exports preserve linked foreground and background subagent chains so trajectory viewers can open each agent’s trace, and /debug links directly to the upload page for viewing the export.
+  - Removed the e / Shift+Enter “select+type” shortcut in the question tool. Explanations typed this way were silently dropped; use the “Other” option for custom text.
+ReleaseNotesUrl: https://cli.devin.ai/docs/changelog/stable
+PurchaseUrl: https://devin.ai/pricing
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://cli.devin.ai/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

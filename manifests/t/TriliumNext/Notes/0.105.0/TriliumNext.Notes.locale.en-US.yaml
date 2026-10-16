@@ -1,0 +1,116 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: TriliumNext.Notes
+PackageVersion: 0.105.0
+PackageLocale: en-US
+Publisher: TriliumNext Notes Team
+PublisherUrl: https://github.com/TriliumNext/Notes
+PublisherSupportUrl: https://github.com/orgs/TriliumNext/discussions
+Author: TriliumNext
+PackageName: TriliumNext Notes
+PackageUrl: https://github.com/TriliumNext/Notes
+License: AGPL-3.0
+LicenseUrl: https://github.com/TriliumNext/Trilium/blob/HEAD/LICENSE
+Copyright: Copyright © 2024 TriliumNext Notes Team
+CopyrightUrl: https://github.com/TriliumNext/Notes
+ShortDescription: Build your personal knowledge base with TriliumNext Notes
+Description: TriliumNext Notes is an open-source, cross-platform hierarchical note taking application with focus on building large personal knowledge bases.
+Moniker: trilium
+Tags:
+- documentation-tool
+- electron
+- knowledge-graph
+- knowledgebase
+- local-first
+- markdown
+- note-managment
+- note-taking-app
+- notebook
+- notes
+- personal-wiki
+- scriptable
+- self-hosted
+- self-hosting
+- wiki
+- wysiwyg
+ReleaseNotes: |-
+  v0.105.0
+  Important
+  If you enjoyed this release, consider showing a token of appreciation by:
+  - Pressing the “Star” button on GitHub (top-right).
+  - Considering a one-time or recurrent donation to the lead developer via GitHub Sponsors or PayPal.
+  The release that makes Trilium lighter, more visual and easier to organise: images shrink themselves, attributes get a home of their own, and your backups can finally be restored.
+  🚨 For ARM64 Docker users
+  The arm64 image is now based on Debian 13 "trixie", as Debian 11 reaches end of life on 2026-08-31. Your host needs a libseccomp new enough to know the clone3 syscall (roughly 2.5+), or the container will fail to start. If it does, add:
+  services:
+    trilium:
+      security_opt:
+        - seccomp:unconfined
+  Updating Docker itself will not help since runc links the host's libseccomp. The 32-bit linux/arm/v7 and linux/arm/v8 images and the native ARM builds are unaffected.
+  Warning
+  Before you upgrade. This release contains changes that can break an existing setup.
+  1. MCP now requires authentication and can optionally be accessed over the network. → Reconfigure your existing MCP clients with credentials.
+  2. General HTML support in text notes is now disabled by default. This makes copy-paste from websites behave well, without grabbing unwanted tags such as input boxes. → Re-enable via Options → Text notes → Preserve unsupported HTML tags.
+  3. **<div>**s in text notes are now unwrapped instead of being preserved as-is, regardless of settings. This prevents broken behaviour when entering new paragraphs, and bugs such as being unable to exit a code block.
+  ✨ Highlights
+  Know what's in your database — and take it back
+  Two new tools answer the same question from opposite ends: what is actually taking up all that room?
+  - Space Usage draws it as a treemap — notes, revisions and attachments sized by how much space they take — so the thing quietly eating your disk is visible at a glance instead of guessed at. The cleanup tool then acts on what you find: erase deleted notes, trim old revisions, drop unused attachments and compact the database.
+  - Compress images goes after the usual culprit, resizing oversized pictures and re-saving them smaller — from a note, the tree, the attachments list, the image viewer or the cleanup run itself. It tells you what it found before it starts and what it saved when it finishes.
+  Automatic compression on upload, paste and import now keeps PNGs as PNGs, leaves already-compressed pictures alone, and runs off the thread serving the app, so a large import no longer freezes Trilium. (@adoriandoran)
+  Attributes finally have a home
+  A dedicated Attributes sidebar tab shows owned, inherited and promoted attributes in one clear list, and lets you edit them in place. System attributes are marked with an icon in the sidebar and a badge in autocompletion, and every one of them now has a description. Their values are edited with the right control for the job — colour pickers, URL fields, date selectors.
+  Mobile gains an attribute editor with the same interface, and the classic attribute editor and its configuration modal received a round of fixes.
+  Backups you can lock, and actually restore
+  Backups can now be compressed and encrypted. Encryption uses AES-256-GCM with a password of your own, held in the operating system's keyring, so a backup written to a synced or shared folder cannot be read by whoever else can reach it — and later tampering or damage is detected. Both are off by default.
+  More to the point, Trilium can now restore one. Setting up an instance offers restoring from a backup as a fourth path, alongside a new knowledge base, syncing from a server and pairing with a desktop app; a running instance reaches the same screen from Options → Backup, and is offered a copy of what is already there first. The candidate is checked before anything is replaced, and a restore that fails rolls back — so an unusable backup leaves your notes exactly as they were. Backups measured in gigabytes are handled properly: a browser sends one in resumable pieces, and the desktop app reads it where it already sits. (@adoriandoran)
+  See everything your database is running
+  Databases collect scripts, themes and widgets over the years, and until now there was no single place to see them — or to tell which one was responsible for the odd behaviour you've been living with.
+  The content manager lists them all, grouped by category, and lets you switch any of them off without deleting it. Turn something off, see whether the problem goes away, turn it back on. (@adoriandoran)
+  Ask the editor to do the writing
+  Trilium's LLM support has moved out of the chat panel and into the text editor. Select anything and hand it to a model — proof-read it, tighten it, summarise it — and take the result inline, without copying text into a chat window and back. Custom prompts let you keep the operations you run often. Requires an LLM provider to be configured; a GitHub Copilot subscription now works as one, alongside the existing providers.
+  Settings you can search, on a screen that fits
+  Every settings page has been rebuilt on a shared card component — a card per subject, one setting per row, its explanation under the name rather than beside it — and a search field now looks through all of them at once. It shows the settings themselves, live and operable where they stand, grouped under the page each one belongs to, and finds a page's own commands too: back up now, restore a backup, create an ETAPI token. (@adoriandoran)
+  🎁 Also new
+  - Geo Map on MapLibre — WebGL rendering, 3D terrain, marker clustering, full-screen mode and a floating info panel for each marker, with full GPX track support.
+  - Mind Map node panel — colours, fonts, icons, images and a rich-text memo, from a side panel.
+  - Calendar face lift — a new theme and layout, and a friendlier popup for creating and editing events.
+  - Connections sidebar tab — backlinks, note paths and the note map in one place.
+  - Office & EPUB previews — .docx, .xlsx, .pptx, ODF, RTF and EPUB open in Trilium.
+  - An important memory leak that accumulated components and event listeners has been fixed, and consistency checks no longer take minutes on databases with 20k+ notes.
+  📋 What else changed
+  Backups
+  - New: backups can be compressed, encrypted or both, written as a .tnbackup container. The password is kept in the OS keyring and is offered on the desktop application only, where there is somewhere safe to hold it.
+  - Improved: the backup settings page opens by saying how many backups exist and how long ago the most recent one was written, with "Backup now" beside it.
+  - Improved: a backup can be given a name and a password of its own when taken by hand, rather than following the scheduled-backup settings.
+  - Fixed: a backup that fails part-way is deleted, so a half-written file is never listed or offered for download.
+  Database & maintenance
+  - New: Options → Database is where the knowledge base as a whole is now looked after. It opens with a summary — location, note and attachment counts, creation date, size, and how the backups stand — followed by everything that acts on the database: cleanup, space analysis, integrity check and repair, compaction, and anonymized copies.
+  - New: a cleanup tool that erases deleted notes, unused attachments and excess revision snapshots, honouring #versioningLimit, and compacts the database.
+  - New: a Keep named revisions option, so revisions you have named survive a cleanup.
+  - New: Start over returns an instance to the setup wizard without reinstalling. On a server it asks for your password, and your second factor where one is configured, so an instance reachable from outside stays closed while it waits.
+  - Improved: an anonymized database copy can be deleted once it has been handed over, and the folder holding them opens in the file manager.
+  Settings
+  - New: a search field over every settings page at once, showing the live controls grouped under the page each belongs to.
+  - Improved: all 18 settings pages rebuilt on a shared card component, several of them rearranged so that what a page is really about comes first.
+  - Improved: settings are usable on a phone — stacked controls, native tap-to-pick combo boxes, full-width descriptions and thumb-sized rows.
+  - Improved: the Media page folds image compression into the Images card, rather than keeping it as a subject apart.
+  - Fixed: the plain text entry in the code note MIME list read as unticked, though it is always applied.
+  - Database actions have moved to Options → Database. Cleanup, space analysis, integrity checks, compaction and anonymized copies are no longer under Options → Advanced, which now holds the experimental features and the two advanced sync actions alone.
+  Text notes & editor
+  Improved
+  - Migrated away from premium CKEditor features (commercial licence) to home-made implementations of slash commands, text snippets and copy formatting. Changing text snippets no longer requires an editor refresh, and note icons are integrated more natively.
+  - The automatic replacement of text (quotes, dashes) has been redesigned, with each option now configurable individually.
+  - The autocomplete mechanism for CKEditor (@-references to links, emojis) was rewritten from scratch: it no longer gets stuck on a @ character, and pressing Escape no longer leaves a marker in the text. The attribute editor no longer shows autocompletion when you click inside it.
+  - Text snippets show a small content preview when no description is present.
+  - Markdown highlights (Obsidian-style ==) are supported by the import/export pipeline and the Markdown preview, and appear in the sidebar.
+  - Inline Mermaid diagrams remember their display mode.
+  Fixed
+  - Multiple inline Mermaid diagrams don't render without making a change
+  - Resizing the Mermaid split view makes Gantt and bar charts vanish (@maphew)
+  - A failed image upload crashes the editor
+  - The collapsible block text editor crashes when deleting before it
+ReleaseNotesUrl: https://github.com/TriliumNext/Trilium/releases/tag/v0.105.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

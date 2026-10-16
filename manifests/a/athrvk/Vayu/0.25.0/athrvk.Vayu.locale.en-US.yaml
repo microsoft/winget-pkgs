@@ -1,0 +1,61 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: athrvk.Vayu
+PackageVersion: 0.25.0
+PackageLocale: en-US
+Publisher: Atharva Kusumbia
+PublisherUrl: https://github.com/athrvk
+PublisherSupportUrl: https://github.com/athrvk/vayu/issues
+Author: Atharva Kusumbia
+PackageName: Vayu
+PackageUrl: https://github.com/athrvk/vayu
+License: AGPL-3.0
+LicenseUrl: https://github.com/athrvk/vayu/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Atharva Kusumbia
+ShortDescription: Open-source API client with a native C++ load-testing engine - Postman-style requests and k6-level load tests in one local app.
+Description: Vayu is a free, open-source desktop app for Windows, macOS, and Linux that combines a full REST and GraphQL request builder - with collections, environments, and scripting - and a high-throughput load tester powered by a C++20 engine, with all data staying on your machine.
+Moniker: vayu
+Tags:
+- api
+- api-client
+- api-testing
+- benchmark
+- developer-tools
+- graphql
+- http
+- insomnia
+- load-testing
+- performance
+- postman
+- rest
+ReleaseNotes: |-
+  0.25.0 - 2026-09-03
+  The performance and accessibility release. Vayu used to spend its first second parsing code nobody had asked for and then waiting on the engine before drawing anything; the renderer's module graph is now a fraction of what it was, the window opens alongside the engine rather than behind it, and the memory a long session accumulated is bounded on every axis it grew on. Alongside that, the app became operable from the keyboard end to end - the trees, the tabs, the editors and the regions between them all have keys now, and focus stops falling off the page. The rest is precision work in the editors and the GraphQL pane, one inbox route that had been answering 404 to requests it should have recorded, and a batch of engine hygiene.
+  Added
+  - The tree row menus, the variables sidebar and the regions between them are keyboard-operable. A collection or request row opens its actions with Shift+F10, the Menu key or Shift+Enter, and the tree is one tab stop with roving focus rather than a tab stop per row; the variables sidebar became the same kind of tree, so rename and duplicate finally have a key. F6 and Shift+F6 cycle the app's regions in both directions, which is the desktop convention Explorer and Firefox already use and the one move that makes every other surface reachable without a pointer. A tree row's parent is now read off aria-level rather than off the DOM shape, so the structure a screen reader is told about and the structure the keys walk are the same one.
+  - Six chords for the moves that had none, and a palette that lists them. New request, focus the URL, next and previous tab, leave the editor, and edit the variable under the cursor. Each appears in the command palette with its chord printed beside it, and a parity guard holds the two in step, so a chord that exists and a palette row that runs it cannot drift apart.
+  - Send from the command palette. It runs against the request builder's live draft rather than the last saved copy, which is the only reading that matches what the Send button does.
+  - A palette that leads with Recents and the verbs. Quick actions, recent requests, chord chips on the rows that have one and a hints footer, with the two lead sections kept disjoint so nothing is offered twice, and one ranking authority behind the whole list rather than a per-section order.
+  - {{variable}} tokens are coloured, explained and editable inside the editors. In the body and GraphQL editors a token is now painted by what it resolves to - defined, undefined, or a run-time name - with a hover that gives the value, the scope that answered and any scopes it shadows, secrets masked. Cmd/Ctrl+click or Shift+Cmd/Ctrl+D opens the same variable popover the rest of the app uses, so editing a value no longer means leaving the editor to find where it was defined.
+  - Variable completion in an XML body. The offer is derived from the body-mode table rather than from a second list that had to be remembered, so a mode that gains completion gains it once.
+  - The Windows installer publishes its .exe.blockmap. This is what lets electron-updater compare the release being installed against the one being upgraded from and range-request only the blocks that differ. This release is the first to carry one, so the release it upgrades from has none, that fetch 404s and the fallback runs: Windows users download the full installer one more time, and the saving starts with the next release.
+  Changed
+  - Startup no longer pays for code the first screen does not use. The renderer was a single eager entry chunk that parsed Monaco, the GraphQL packages, the markdown pipeline and all eight feature surfaces before a window could be shown. The tab surfaces and settings panels are behind React.lazy, Monaco loads on the first editor mount through one loader that owns the ordering (a naive defer would have made @monaco-editor/react fetch the editor from a CDN and fail offline), the six typefaces are bundled and subset instead of fetched from Google Fonts at first paint, the MCP stack loads on demand rather than at process start, and Monaco's entry is composed from the languages the app can actually open rather than taken whole. The window is now created alongside the engine instead of after it, with a ramped /health poll that catches a healthy engine in tens of milliseconds and treats a slow one as "not yet" rather than as fatal. Measured by the repo's own per-platform harness: renderer module-graph cost 297 → 65 ms on Linux, 283 → 23 ms on Windows and 157 → ~0 ms on macOS; ready-to-show 601 → 344, 484 → 193 and 688 → 355 ms; the entry chunk 5.3 MB → 0.7 MB.
+  - Memory is bounded on the axes a long session grew on. The response cache is capped against the open-tab count; the response pane gates on body size with a 2 MB display threshold and the engine caps a /execute read at 32 MB, each saying when a body was cut rather than silently truncating; the script-validation reservoir has a byte budget and not only a count; a retained run releases its execution resources and keeps its tick topic rather than its whole event loop; the anomaly detector derives from what just arrived instead of re-walking the entire buffer, and a clipped spike window stops re-walking its recovery tail. The per-request memory the builder held - the row picker's two maps and the auto side-effect records - is now swept by the open tabs. On the streaming side, live scenario steps and design-mode SSE go through one shared throttled batcher that commits per flush window, the Events list is windowed, a batch that matched nothing costs no copy at all, and the dashboard's chart cards and the history percentile card gate on a predicate rather than on a series they build and throw away.
+  - The GraphQL schema controls have one home. Introspection status, the schema source and a single Refresh now sit together at the left edge of the Query header - the edge the pane opens from - instead of being spread across the pane with more than one way to ask for the same refresh.
+  - Windows holds the 1 ms timer resolution only while a run is in flight. timeBeginPeriod(1) was taken at daemon boot and released at shutdown, so an idle Vayu raised the whole system's timer rate for as long as it was open.
+  - The updater's first check is held back 60 seconds after launch, so an update probe no longer competes with the work of starting up.
+  - A script's own fetch is bounded like every other read. pm.sendRequest now takes the same response byte bound as the path it runs on, which was the last unbounded read left after the design-mode and execute reads were capped.
+  - A history entry says which bound thinned its sample. The retention note now names the limit that removed the responses rather than leaving a shrunken sample to be explained by guesswork.
+  - Internal work with no user-visible surface. The JavaScript outside app/ is linted under its own config and routed to the job that lints it; a per-platform performance measurement workflow now runs weekly on the runners the repo already pays for; CI path filters route each doc page and root file to the suite that reads it; the status-colour families are derived from index.css instead of being restated, with the MCP badge and the connection and run status text moved onto them; a jsx-a11y baseline, focus-indicator and raw-icon-button guards, and the design-system records they check are held to a list rather than to prose; the three CLAUDE.md guides were rewritten so each rule is stated once; and a long tail of documentation was corrected against the code it describes, including the release artifact names, the palette row height, the targeted-test command form and several numbers a review caught.
+  Fixed
+  - A webhook to a path longer than 256 characters is recorded again. The regex-route length limit that cpp-httplib added in 0.24.0's security bump answered those requests with a bare 404 that never reached the inbox, so a long callback URL looked like a webhook that was never sent. The inbox now records it.
+  - Focus never lands on <body> again. Closing a tab from the keyboard, deleting a collection or request, and deleting the last row in a list each now hand focus on to a real destination chosen from what the delete actually left, not from what it intended. Revealing a secret in the variable popover hands focus to the field it revealed.
+  - The pm.expect chain stopped squiggling in the editor. The editor's declarations were a second, divergent description of the assertion object, so .and.match(), .and.not.empty and .to.be.equal() were flagged as errors against a runtime that accepts all three. The chain is now declared as one interface matching what the runtime builds.
+  - A scoped read that finds its own scope empty now warns. pm.environment.get("x") where the environment holds "" and another scope holds the real value was silently an empty string; the script chips now say so, tested against the ladder's winner rather than against any other scope that happens to hold something.
+  - A single-scope accessor's completion list offers that scope's own definitions, rather than the names that scope wins in the resolution ladder - the list now answers the question the accessor asks.
+  - GraphQL over GET is sent as query parameters. A GraphQL request on GET was built with its query in the body, which is not what the GraphQL-over-HTTP specification describes and which many servers ignore outright; it now goes out as the spec's query, variables and operationName parameters with no body at all. Choosing GraphQL on a request still sitting at its default GET moves the method to POST, with an inline notice saying what a GET does, so neither choice is made silently.
+ReleaseNotesUrl: https://github.com/athrvk/vayu/releases/tag/v0.25.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

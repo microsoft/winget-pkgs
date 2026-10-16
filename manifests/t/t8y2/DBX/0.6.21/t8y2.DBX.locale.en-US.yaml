@@ -1,0 +1,89 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: t8y2.DBX
+PackageVersion: 0.6.21
+PackageLocale: en-US
+Publisher: t8y2
+PublisherUrl: https://github.com/t8y2
+PublisherSupportUrl: https://github.com/t8y2/dbx/issues
+Author: t8y2
+PackageName: DBX
+PackageUrl: https://github.com/t8y2/dbx
+License: Apache-2.0
+LicenseUrl: https://github.com/t8y2/dbx/blob/HEAD/LICENSE
+ShortDescription: 15MB，lightweight, cross-platform database client. Supports MySQL, PostgreSQL, SQLite, Redis, MongoDB, DuckDB, ClickHouse, SQL Server and more.
+Tags:
+- clickhouse
+- database
+- database-client
+- database-management
+- duckdb
+- gui
+- mongodb
+- mysql
+- postgresql
+- redis
+- rust
+- sql-server
+- sqlite
+- tauri
+- vue
+ReleaseNotes: |-
+  安装
+  > 🔐 重要安全升级：本版本会将连接、插件、AI、Tunnel 和同步凭据迁移到加密 Secret Store，已有配置的用户必须按启动时出现的「数据安全升级」向导完成迁移。
+  - 升级前请备份完整数据目录，保留原有数据库和加密密钥，不要删除或替换。
+  - Docker/Web 部署必须持久化 DBX_DATA_DIR，并保留 .dbx/secret.key；不要直接复制 dbx.db 跨设备迁移配置。
+  - 迁移失败时按向导提示修复并重试，不要删除原始数据、密钥或迁移备份；确认功能正常后再清理备份。
+  - CLI 和 MCP 不会自动执行历史数据迁移，遇到 DATA_MIGRATION_REQUIRED 时请先通过桌面端或 dbx-web 完成升级。
+  - 完整说明见中文文档与英文文档 (PR #9803)
+  新功能
+  - 连接密码、插件密钥、AI API Key 等本地敏感信息改为 AES-256-GCM 加密存储，已有配置升级后由数据安全迁移向导引导完成并自动备份 (contributed by @eryajf) (PR #9803)
+  - 定时数据库备份改为跨平台后台执行，桌面端关闭窗口后仍按计划继续，Web/容器端由服务进程持续执行 (contributed by @CSXFanMeng) (PR #9086)
+  - 新增 DBX_DEMO_MODE 演示模式，公网部署可封锁插件与驱动安装、连接编辑、AI 配置与云同步等入口，仅允许使用预置连接
+  - 插件支持通过清单声明命令与菜单贡献点（命令面板、工具栏、侧边栏），并新增全局底部 Dock 停靠区承载插件面板 (contributed by @jinpy666) (PR #10097)
+  - 插件 Host API 新增只读表结构元数据接口，按 schema:read 权限门控并复用已打开的连接 (contributed by @0verme) (PR #10043)
+  - SQL 编辑器新增表结构 Peek 浮动面板，可快速查看列、类型、可空、默认值与注释，双击单元格即可写入编辑器 (contributed by @Mo-Moore) (PR #10071)
+  - 同一条 SQL 发往多个数据源时，查询结果合并为单个视图展示并对全数字列给出 SUM 汇总，UPDATE/DELETE 等写语句按目标展示状态与影响行数 (contributed by @goodvecn-dev) (PR #10048)
+  - 对象浏览器选中表后，信息面板默认展示表名、注释、行数与大小等属性，MySQL 连接还包含引擎、创建时间与排序规则等 (contributed by @eryajf) (PR #10059)
+  - 侧边栏字段列表显示列的可空性，悬浮详情同步展示 (contributed by @eryajf) (PR #10046)
+  - 数据网格本地值筛选弹窗支持按值或出现次数排序，高频值可直接置顶 (contributed by @eryajf) (PR #10053)
+  - 数据表工具栏新增分行布局，操作按钮与筛选排序控件分为两行显示，可在「设置 → 数据」切换回单行 (contributed by @ma123456mai) (PR #10118)
+  - 数据传输对象选择新增批量录入，粘贴对象名清单一键勾选匹配到的对象 (contributed by @HighBigSky) (PR #10126)
+  改进
+  - 批量执行 SQL 时进度事件改为节流推送并增量应用，长脚本执行过程中界面刷新更平稳
+  - MCP 服务器检测新增 bun 全局安装支持，bun 安装的服务器可正常识别、更新与卸载 (contributed by @yiqiui) (PR #10081)
+  - 设置中心剩余原生下拉框统一为共享组件，控件样式与全局保持一致 (contributed by @Ezreal-byte) (PR #10073)
+  - Meilisearch 索引详情新增手动刷新统计按钮，无需断开重连即可查看最新文档数 (contributed by @eryajf) (PR #10077)
+  修复
+  - MySQL 连接 TDDL 时 group_concat_max_len 参数报错自动降级重试，不再直接连接失败 (contributed by @slowlyo) (PR #10123)
+  - MySQL 连接 StarRocks 3.1 时建连阶段 group concat 初始化的 cast 报错自动降级重试，不再直接连接失败
+  - PostgreSQL 函数结构对比生成的同步 SQL 不再重复 CREATE OR REPLACE 头，脚本可直接执行 (contributed by @thanadon-dev) (PR #10134)
+  - SQL Server 旧版本连接失败时把登录失败、无法打开数据库等真实原因放在报错首位，不再误导用户检查加密配置，侧边栏搜索也不再自动替用户创建连接 (contributed by @zipg) (PR #10066)
+  - SQL Server REAL 列值经 JSON 传输不再丢失精度
+  - TiDB 不支持 EXPLAIN FORMAT=JSON 时自动回退到兼容的执行计划格式
+  - SAP HANA 生成表 DDL 时包含列注释
+  - Vastbase 复制表时保留表与列注释
+  - ArgoDB 查询结果排序不再使用其不支持的列别名
+  - DuckDB 表结构 DDL 不再输出不支持的列类型修饰符
+  - 虚谷数据库大结果集查询改用服务端分页，避免一次性拉取全部结果 (contributed by @mapan0424) (PR #10047)
+  - MongoDB 备份恢复与集合导出正确解析按库划分的连接池，不再报 Agent stdin not available (contributed by @thailoc-dev) (PR #10070)
+  - AI 会话与所属连接绑定，多个会话并行使用时不再互相借用连接和数据库，AI 生成的 SQL 不再写入其他连接的标签页 (contributed by @Abeautifulsnow) (PR #10113)
+  - INSERT 列名提示在全角括号语句中不再整体错位 (contributed by @Mo-Moore) (PR #10105)
+  - 复制含双引号的单元格内容原样输出，不再被多余的引号转义翻倍 (contributed by @yiqiui) (PR #10089)
+  - 对象浏览器复制选中表名时同步写入系统剪贴板，提示复制成功后粘贴不再为空 (contributed by @thanadon-dev) (PR #10135)
+  - Meilisearch、Consul、Nacos、ZooKeeper 等无数据库目标的标签页悬浮提示不再显示「数据库」行 (contributed by @eryajf) (PR #10068)
+  - 标签页重命名只修改当前标签标题，不再连带重命名关联的 SQL 文件 (contributed by @eryajf) (PR #10064)
+  - 升级后已保存的全局查询超时设置不再被旧版本备份值重置 (contributed by @yiqiui) (PR #10060)
+  - 查询结果行数上限与每页行数冲突时不再置灰设置对话框的应用按钮，其他设置的修改可正常保存 (contributed by @zipg) (PR #10044)
+  - 点击「更新全部」时自动继续客户端升级，驱动被占用时提示需要关闭的具体连接名 (contributed by @zipg) (PR #10084)
+  - 窗口置顶按钮默认隐藏，改由「外观 → 工具栏」开关按需开启 (contributed by @zipg) (PR #10050)
+  - 切换界面语言后，已打开的插件工作台标签标题同步更新，不再停留在旧语言 (contributed by @aiLi0617) (PR #10088)
+  - 数据安全迁移完成后启动不再重复显示迁移成功页，并避免启动过程中的空白窗口 (contributed by @eryajf) (PR #10139)
+  - MySQL 空闲连接不再发送冗余的存活探测与心跳重置，降低数据库侧无效负载
+  - MySQL 清理连接时未开启事务则跳过回滚，避免多余的回滚开销
+  - 查询结果不含空间列时不再序列化空间值，减少不必要的数据传输
+  > 国内下载：如果 GitHub 下载较慢，可从 CNB 镜像 下载桌面端安装包，Docker 镜像从 docker.cnb.cool/dbxio.com/dbx:v0.6.21 拉取。
+ReleaseNotesUrl: https://github.com/t8y2/dbx/releases/tag/v0.6.21
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

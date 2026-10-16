@@ -1,0 +1,38 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Everless321.dYm
+PackageVersion: 3.0.0
+PackageLocale: zh-CN
+Publisher: example.com
+PublisherUrl: https://github.com/Everless321
+PublisherSupportUrl: https://github.com/Everless321/dYm/issues
+PackageName: dYm
+PackageUrl: https://github.com/Everless321/dYm
+License: 免费软件
+Copyright: Copyright © 2026 example.com
+ShortDescription: 抖音视频下载与智能分析管理工具
+Tags:
+- 下载
+- 抖音
+- 视频
+- 解析
+ReleaseNotes: |-
+  设备指纹重做：登录与请求同一台"机器"；OpenCode 路由对齐官方文档
+  这是 3.x 的第一个版本。抖音侧的浏览器指纹从头做了一遍，升级后建议在「设置 - 账号」重新登录一次，让新 Cookie 与本机指纹绑定；不重登也能继续使用。
+  - 一台机器一份指纹：首次启动按本机生成 DeviceProfile（真实平台、屏幕分辨率、CPU 核数、内存、时区，近期 Chrome 版本），持久化保存。此前所有用户共用一套写死的 Windows Edge 131 参数，现在每台机器各不相同
+  - 登录与请求同源：登录窗口、后台静默刷新、页内签名请求、接口请求、A-Bogus 签名、视频 / 封面 / 音乐下载、直播拉流，全部使用同一份指纹派生的 UA、Client Hints 与 browser_* / os_* / screen_* 参数。此前是 Mac Chrome 登录、Windows Edge 调接口，两边对不上
+  - 签名指纹会话内稳定：A-Bogus 用的窗口尺寸不再每次请求随机
+  - 重新登录即换新机器：打开登录窗口前生成新指纹并清掉旧指纹下发的匿名 cookie，登录成功后新指纹与新 Cookie 一起保存；未登录关窗则保持原状
+  - 平滑升级：已有 Cookie 的老用户首次生成指纹时沿用旧登录环境（Mac Chrome 142），与手里的 Cookie 一致，下次重新登录再换成真机指纹
+  - 修复：后台静默刷新在分区没有登录态时会用匿名 cookie 覆盖有效 Cookie，现在只在存在会话 cookie 时写入
+  - OpenCode Zen / Go 路由对齐官方文档：grok-*、muse-* 走 /responses，qwen* 走 /messages，MiniMax 在 Go 走 /messages、在 Zen 走 /chat/completions
+  - 首选路由猜错时按网关返回的 ModelError 自动换下一条接口重试，并记住可用路由；带上 User-Agent: dym/<version> 与稳定的 x-opencode-session
+  - polydl 0.4.0 → 0.5.0
+  What's Changed
+  - fix(ai): OpenCode Zen / Go 路由对齐官方文档并支持自动回退 by @Everless321 in https://github.com/Everless321/dYm/pull/23
+  - feat(douyin): 接入 polydl 0.5.0 DeviceProfile，登录与请求使用同一份设备指纹 by @Everless321 in https://github.com/Everless321/dYm/pull/26
+  Full Changelog: https://github.com/Everless321/dYm/compare/v2.10.0...v3.0.0
+ReleaseNotesUrl: https://github.com/Everless321/dYm/releases/tag/v3.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

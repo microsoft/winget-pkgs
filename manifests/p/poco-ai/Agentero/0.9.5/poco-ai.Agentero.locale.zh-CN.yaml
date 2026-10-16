@@ -1,0 +1,57 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.9.5
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  本次发布围绕更舒适的阅读与更聪明的文献库展开：PDF 新增纸张色调（羊皮纸 / 护眼绿 / 暗色）与按住中键或空格的抓手平移，并修复中文 PDF 字体渲染；文献库接入 EasyScholar 期刊分区与影响因子标签，文件树多选批量操作移至固定侧栏头部。同时修复 Windows 上自定义 ACP Agent 启动失败与终端工具卡死两大可靠性问题，后台任务统一收敛到 JobCenter，标题检索并行提速约一半。
+  新功能
+  - PDF 纸张色调：底栏切换扩展为四档调色板（白纸 / 羊皮纸 / 护眼绿 / 暗色）；浅色色调以正片叠底方式着色，白纸落在目标色、黑字保持纯黑、插图不失饱和度，全文翻译覆盖块跟随当前色调。（01722f49b by @qychen2001）
+  - PDF 抓手平移：按住鼠标中键、或按住空格加左键即可 1:1 拖拽平移页面；悬停的阅读器获得空格所有权，WebKit 丢失指针捕获时拖拽依然存活。（2078cac0、1d015b18f、a10cb297b、a0ed08ed1、#456 by @Phil-Fan）
+  - EasyScholar 分区与影响因子：设置页配置 EasyScholar Key（带连通性状态点）后，在文献库标签列头一键为当前范围论文批量写入期刊分区、IF/IF5/JCI、SCI/EI/CCF 等标签；标签以短标签展示、IF 类独立配色，CCF-A 会议名自动缩写。（a769cab1e、891558a10、30de679ca、0ae59158f、73ff2b7f5、efe0ef9bd、#464 by @Phil-Fan）
+  - 文件树多选批量操作：多选工具栏从树内浮动条移至固定侧栏头部，树高与滚动位置保持稳定；清除 / 移动 / 删除作用于整组，并补充键盘激活。（9b4457ecd、#462 by @qychen2001）
+  - 解析结果清理与重跑：设置 → 版面分析新增"清理"与"清理并重新解析"，可按版面 / 正文 / 全部范围整库删除派生结果并重新排队，执行前自动取消相关任务。（52821386a by @qychen2001）
+  改进
+  - 统一任务中心：论文入库、Connector 同步、文献库批量操作与模型下载统一经 JobCenter 调度，长任务可统一查看与取消，旧的并行后台任务机制移除。（953c9b3d8、4c72d649c、50d140041、30ef0eef4、b5e4fb422 by @qychen2001）
+  - 标题检索提速：Semantic Scholar 与 arXiv 标题检索并行竞速，S2 在 5 秒预算内优先返回；最坏耗时从约 40 秒降至约 20 秒。（78eb301ad by @Phil-Fan）
+  - 入库进度合并：并发下载多个附件时进度合并为一条上报，不再来回跳变。（db7729fa7 by @qychen2001）
+  - 依赖安全更新：清除 32 条 Dependabot 安全通告（undici、fast-uri、postcss、brace-expansion、dompurify 等）。（26eb899e6 by @qychen2001）
+  修复
+  - Windows 终端工具卡死：修复 Agent 终端类工具调用长期 Pending 或误报 Error 的五处 Host 缺陷：跨 await 持锁、output() 等待管道 EOF、kill 被子进程锁堵死、\\?\ 路径传入 Git Bash、initialize 共享预算过短（独立延长至 30 秒）；迟到的工具状态不再悬挂卡片。（#474 by @Zhou1317fe5）
+  - Windows 自定义 ACP Agent 启动：将 \\?\ 前缀路径还原为 CMD 可接受形式，并改用环境变量传递 cwd 与完整命令，修复路径含空格或特殊字符时启动报 Incoming transport closed。（#461、#458 by @Zhou1317fe5）
+  - 选区自动翻译：划词后按"自动翻译"设置生效，翻译期间选区工具栏保持可见。（0d9fafc25、ccc35ec8e、#463 by @Phil-Fan）
+  - 中文 PDF 字体：缺失嵌入字体时回退系统字体，中文 PDF 不再渲染异常。（6aa18431f、#454 by @Phil-Fan）
+  - 界面误选中文本：工具栏、侧栏、设置等界面区域不再被拖拽误选中。（93f4ab40c、#453 by @Phil-Fan）
+  - 魔棒输入法回车：中文输入法组词确认的回车不再触发标题搜索提交。（5894dbbca、#457 by @Phil-Fan）
+  - 符号链接 PDF: 通过符号链接放入的论文 PDF 在文件树中正确识别与打开。（49a8ebecd by @Phil-Fan）
+  - 面板拖拽误选：拖动分栏分隔条时不再触发文本选中。（a69332468 by @Phil-Fan）
+  - 标题搜索取消：关闭魔棒搜索卡片即取消后台标题检索，不再空跑到超时。（73ea9497c by @Phil-Fan）
+  已解决问题
+  - pi ACP 启动报错：pi 经 ACP 启动时报 initialize: Incoming transport closed，与 #458 症状一致，问题已随 Windows 自定义 ACP Agent 启动修复关闭。（#471、#461 by @Phil-Fan）
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.9.5
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
