@@ -1,0 +1,104 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.8.1
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-agent-core
+  Added
+  - Added the public validateAgentToolArguments() API for consistent, lenient-aware validation of agent tool arguments across agent and coding-agent workflows.
+  @oh-my-pi/pi-ai
+  Added
+  - Added session restrictions for OAuth account pools via AuthStorage.sessions.restrict, limiting selection, fallback, rotation, and authentication to specified accounts until the returned lease is released with sessions.unrestrict. API keys and other accounts are not used when a session is restricted.
+  - Exported resolveCredentialIdentityKey for determining the identity key used to match credentials with broker account pools and session restrictions.
+  Fixed
+  - Fixed Codex Fast (priority) and Ultrafast usage being recorded, billed, and reported as Standard when the backend echoed a default service tier; the requested tier is now preserved in usage and performance records.
+  @oh-my-pi/pi-catalog
+  Fixed
+  - Fixed Codex Fast (priority) pricing to use OpenAI’s 2.5× included-usage rate for supported models, excluding GPT-5.5 and GPT-6 Astra.
+  - Fixed GitHub Copilot models with tier-specific prompt limits incorrectly defaulting to the long-context window.
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added account pools for task agents, allowing an agent and its related work—including advisors, title generation, subagents, and resumed sessions—to use only specified OAuth accounts and fail rather than fall back to another account or an API key.
+  - Added omp usage accounts to list OAuth account provider and identity keys without exposing tokens, making account-pool configuration easier.
+  Changed
+  - Generated session titles now include their card icon and short code, so the /resume picker and session listings show this context; title.icons applies to newly generated titles.
+  - Symlinked routing configurations now reload when an intermediate file or profile-directory link is replaced, without requiring a session restart.
+  Fixed
+  - Improved Tern ask questions so the question no longer obscures the transcript and can be answered while reviewing and scrolling through the relevant context.
+  - Added warnings for unrecognized compat keys in models.yml while continuing to load the configuration; warnings identify the file and key path.
+  - Fixed /new so new sessions reset plan and goal modes, todo state, and related planning configuration instead of carrying stale state forward; fresh prewalk behavior is also restored after handoffs, cancellations, or automatic recovery.
+  - Fixed OAuth alias login and logout flows so they refresh the underlying provider's models, report authentication state correctly, and list and remove the accounts associated with that provider.
+  - Fixed model speed statistics so throughput from non-default OpenAI or Codex service tiers is kept separate and displayed for the tier used by the session.
+  - Fixed stale model catalogs remaining in memory after provider or catalog refreshes.
+  - Fixed write and edit from hanging or exhausting memory when given FIFOs, terminals, device files, or other non-regular targets; unsupported targets are now rejected safely.
+  - Fixed long conversations from losing user and tool-result images when the conversation also contained assistant-generated images.
+  - Fixed local:// session paths from escaping their intended storage directory when given . or .. session identifiers.
+  - Fixed omp gc --archive --apply from leaving orphaned session-title records behind.
+  - Fixed /retry after an interrupted reopened ask prompt when an extension had registered a context handler.
+  - Fixed browser relay sessions from missing cross-origin iframe content that loaded before the tab was opened.
+  - Fixed browser clicks on invisible native radio and checkbox inputs, including controls commonly used by GOV.UK forms.
+  - Fixed /model so selecting the model already assigned to a project's default role still switches to that model correctly.
+  - Fixed wait and background task state when a completion has already been consumed elsewhere, preventing premature interruption and incorrect idle detection.
+  - Fixed repeated coding-plan fallback confirmations after declining a fallback in cases involving changing thinking settings, unavailable quota data, or account recovery.
+  - Fixed Python evaluation when the shared runner temporary directory was created by another user.
+  - Added RPC support for completing multi-select ask questions without relying on TUI keyboard navigation.
+  - Corrected tool behavior and configuration documentation for read, background bash, Python evaluation, replace editing, goal removal, and advisor.immuneTurns.
+  - Fixed custom glob backends from hanging indefinitely; scans now respect the tool deadline and report incomplete results when necessary.
+  - Fixed --resume <path> from silently creating a new session for a missing path; it now reports the missing path, consistent with --fork <path> and --resume <id>.
+  @oh-my-pi/pi-natives
+  Added
+  - Added the PI_NATIVES_DIR configuration option to control where compiled native addons are extracted. The version-specific subdirectory remains appended, allowing separate HOME environments to share the same native addon copy without sharing other data.
+  Fixed
+  - Fixed background shell builtins and other in-process commands so they terminate when their subshell exits and can be stopped with kill %N, matching the behavior of external commands.
+  @oh-my-pi/pi-tui
+  Fixed
+  - Fixed the native ask dialog on TSP surfaces so it replaces the composer instead of opening as a modal over the transcript, keeping the transcript readable and scrollable.
+  @oh-my-pi/pi-utils
+  Added
+  - Added PI_NATIVES_DIR support to getNativesDir() for configuring the native addon directory.
+  - Added ZipPackage for lazily reading ZIP-based document packages with a total decompressed-size limit, along with DocxImage.readBytes() for accessing raw DOCX image data.
+  What's Changed
+  - fix(catalog): parsed current copilot tier prompt limits by @roboomp in https://github.com/can1357/oh-my-pi/pull/14771
+  - fix(tools): validate cursor calls and eval input by @alphastorm in https://github.com/can1357/oh-my-pi/pull/14624
+  - fix(metaharness): keep agent-started services alive for the verifier by @alphastorm in https://github.com/can1357/oh-my-pi/pull/14734
+  - feat(natives): allow overriding the native addon extraction directory by @alphastorm in https://github.com/can1357/oh-my-pi/pull/14735
+  - fix(config): warn on unknown models.yml compat keys by @alphastorm in https://github.com/can1357/oh-my-pi/pull/14737
+  - fix(tui): dock the Tern ask prompt in the composer slot by @H4vC in https://github.com/can1357/oh-my-pi/pull/14812
+  - fix(ai): keep the sent Codex service tier when the backend echoes default by @alphastorm in https://github.com/can1357/oh-my-pi/pull/14815
+  - fix(catalog): price Codex Fast at the 2.5x included-usage rate by @alphastorm in https://github.com/can1357/oh-my-pi/pull/14816
+  - feat(task): restrict subagents to per-agent OAuth account pools by @alphastorm in https://github.com/can1357/oh-my-pi/pull/14740
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.8.0...v18.8.1
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.8.1
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

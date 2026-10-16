@@ -1,0 +1,109 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: muutot.Clipboard
+PackageVersion: 1.7.0
+PackageLocale: zh-CN
+Publisher: muutot
+PublisherUrl: https://github.com/muutot
+PublisherSupportUrl: https://github.com/muutot/Clipboard/issues
+PackageName: Clipboard
+PackageUrl: https://github.com/muutot/Clipboard
+License: AGPL-3.0
+LicenseUrl: https://github.com/muutot/Clipboard/blob/HEAD/LICENSE
+ShortDescription: 高性能 · 本地优先 · 全平台剪贴板管理器。
+Description: Clipboard Desktop 是一款高性能、跨平台、本地优先的剪贴板管理工具。它在后台静默运行，持续记录剪贴板历史；通过全局热键（默认 Alt+V）一键唤起，支持全文搜索（含中文分词）、图片 OCR 文字识别、收藏、编辑、快速粘贴等操作。支持文本、链接、图片、文件四种内容类型，智能内容识别与富文本带格式粘贴，Tantivy 全文检索引擎与 N-gram 中文分词，PP-OCR 本地离线文字识别。所有数据存储在本地，不包含任何遥测或上传行为，OCR 完全离线运行，无需联网。
+Tags:
+- 剪贴板
+ReleaseNotes: |-
+  Clipboard Desktop v1.7.0
+  崩溃安全原子写入、同步可靠性强化、快捷键深度定制与一轮稳定性修复
+  Released: 2026-09-22
+
+  新功能
+  悬浮面板与快捷键
+  - 悬浮面板点击动作 — 设置可配置点击行为 | 1c668a5
+  - 主窗自定义绑定生效 — 条目操作与快速复制绑定在主窗口内同样生效 | e2e3533
+  - 悬浮粘贴目标记忆 — 切换悬浮面板时记住快速粘贴目标，粘贴跟踪前台窗口 | 1ab1905 6da9ab6
+  搜索与使用统计
+  - 真实匹配总数与截断提示 — 搜索页报告真实匹配总数与是否截断 | d34d4af
+  - 重拷冻结采集时间 — 重拷不刷新采集时间，并盖戳使用记录，搜索缓存随戳失效 | 1f51e0a 830c4dc
+  安全
+  - 本地 API 资源边界 — 限制请求读取字节数与并发连接槽 | b0a6638
+  - 同步密钥脱敏 — SyncSettings 的 Debug 输出不再泄露密钥 | 56b2ded
+  - 替换图标源校验 — 检查 ICO magic 与 SVG prolog，拒绝伪造源 | 11c6505
+
+  崩溃安全与原子写入
+  - 文件与截图落盘 — 经 staging + fsync + 原子 rename，崩溃不再留下半截文件 | e650a8f a03faf2 d70e642
+  - 剪贴板图片原子采集 — 图片经原子写入，带大小门控跳过；RGBA 重编码为 PNG | b39ec15 314f4dc
+  - 应用图标原子写入 — 图标经 atomic writer 落盘，拒绝失败的 GDI 捕获并写原子 PNG | d11e157 eeb2e36
+  - 导入与去重 — 导入按暂存字节哈希关闭竞态，重拷/另存为生成唯一内容哈希 | 99a6552 5c60e77
+  - 搜索 manifest — 容忍瞬时读取失败并原子写入，路径处理经 Path 保持 clippy 清洁 | aeb317c 3bbddc5
+
+  同步可靠性
+  - 孤儿段接纳 — 上传中断不再拖垮对端拉取 | abc7e36
+  - 检查点游标与错误 — 游标领先于冻结检查点向量，恢复时保留原始拉取错误 | 251c7f7 2298773
+  - 锁与线程池 — sync_now 走阻塞线程池，手动同步锁竞争后尽快重试自动同步 | e553cd3 16dcc33
+  - 对象存储兼容 — 压实阶段容忍缺失 ETag 的对象存储 | 6a83bc2
+
+  剪贴板采集与粘贴
+  - Windows 剪贴板加固 — 先分配缓冲区再 EmptyClipboard，OpenClipboard 失败重试而非丢弃采集 | c64e5a6 8af95c5
+  - DIB 解码 — 校验 biCompression、尊重 BITFIELDS 掩码布局、顶行 DIB 不再垂直翻转 | 245b93c abe8289
+  - 自触发标记 — 文件复制注册自触发，写入失败清除标记，托盘/API 复制失败时取消标记 | 01ad0b9 51f922f a3cca40
+  - 文件复制与粘贴 — HDROP 落地后文本负载为尽力而为，文件粘贴写为 OS file drop | 85639c2 23f7046
+  - 前景应用与大图 — 读剪贴板后复查前景应用，大图放宽媒体自触发窗口 | 65e3daf 09062fa
+  - 重拷与缩略图 — 重拷提升 last-used 时间戳，重命名保留生成的 thumbnail preview_path | b0dfd1e 13d6e66
+  - macOS 采集 — 镜像捕获使用唯一临时名 | 54f1832
+
+  快捷键与输入
+  - IME 合成期忽略 keydown — 输入法合成中 Escape 不再隐藏窗口 | 424c7a9
+  - 可编辑宿主内按键 — Enter/Space 留在 contenteditable 内，Ctrl+A 透传有测试钉住 | 13defb4 4e673c6
+  - 自定义绑定全面生效 — Enter 走 copyItem 绑定语义，Space 尊重 openDetail 停用态，Backspace 清除选择可重绑，hideWindow 可重绑/停用 | 0441380 ac8e1ad 4edd762 34fb382
+  - Alt 组合与 Space 穿透 — Alt 修饰的聚焦搜索和弦可穿透可编辑目标，无选中时 Space 下落 | f892f7e 61f7fa0
+  - 双击热键回绕 — GetTickCount 回绕后双击检测仍有效 | abe238d
+  - 快捷配置损坏自愈 — 隔离重命名失败时移除损坏配置 | e6fb540
+  - 键盘选中可见 — 虚拟窗口滚动保持键盘选中可见 | 70d197c
+
+  搜索、历史与快捷动作
+  - 日期区间 — 昨天/上周按日历算术处理 DST，上月区间正确落在月末，非法日期候选后继续扫描 | 9e052a2 6d364d5 9dd885d c34af02
+  - 排序稳定 — 平局排序键保持输入相关性顺序，分页序加唯一 id 决胜 | 0311301 85acdda
+  - 快捷动作检测 — 统一 HEX 颜色检测（含 8 位），URL 在 CJK 标点处截断并剥离句尾符号 | 36c4b91 a8f575c aa9b527
+
+  存储与清理
+  - 回收站与收藏 — 拒绝回收站行设收藏，关闭单删路径的收藏守卫竞态，过期清理保护已收藏回收站记录 | b0f9eba d3fd029 a9d127a
+  - 导入去重 — 重复记录跳过而非重写，未知 PPaste 记录计入跳过 | 7f30726 b567dfe
+  - 批量操作 — 批量删除失败回滚后重同步历史，一次性剪除非法批量选择 | 4587262 335b400
+  - 修复与校验 — 丢弃 repair 中已忽略的 quick_check | d9a84e2
+  - 测试 — 收藏拒绝后重建 favorited-bin fixture | 34b3045
+
+  设置与界面
+  - 设置持久化 — 关闭时刷写挂起写入并收敛远端更新，远端可清除 activePresetId，部分负载保留当前预设 | 772313c d445d6a 6e0304c
+  - 数值钳制 — 同步与历史上限输入钳制，输入值不再清空保留策略 | ddc4f65 569af76
+  - 多语言 — 占位符全量替换、$ 模式忽略，设置搜索文案走 locale key，外观 eyebrow 文案可解析 | 2a73383 c506778 5787aa8
+  - 标签 — 标签添加信号按边沿触发，重命名失败可见，取消/失败后恢复重命名输入 | 300bf92 97c61f1 0d40a41 4b4627f
+  - 详情与查看器 — 重命名后刷新派生文件字段，切换条目重置标签草稿/标题草稿，无关更新不触发文件预览重载，右键子菜单贴边左翻 | 7b8e28a 49a9a9f 7f05eba 83942b3 930434f
+  - 卡片高度与列表 — 高度签名纳入标签/文件名/物化，自定义标题卡片走共享公式，宽 token 折行计入估算 | a4527f0 5cfb6ac 23648df
+  - 复制与文件展示 — 单文件路径列表可复制，无可复制时 toast，双文件条目显示双名与正确后缀计数 | dfd04e6 90c9252
+  - 悬浮与菜单 — 悬浮面板实时套用通用设置，复制/粘贴统一单 toast，Escape 让位于打开的右键菜单 | cf48078 1c20c90 f911f76
+  - 事件与日志 — UI 刷新信号 emit 失败落日志，悬浮位置与同步状态写失败落日志 | e068518 9e77f8f
+  - 设置语言同步 — 各 tab 同步 locale，持久化后清除 dirty keys | 2be0d53
+  - 文本编辑预览 — 文本编辑预览按重载时 buildPreview 规则派生 | dc19da1
+
+  OCR
+  - tesseract 探测 — 探测次数设界、语言代码消毒，探测前释放配置锁 | 434c7bc 15f083b
+
+  安装、构建与发布
+  - 安装器拒绝静默降级 — 解析已安装版本后拒绝降级安装 | a84db0a
+  - 发布直发 + GitCode 同步 — 发布直接上架，并同步镜像到 GitCode | a22fe0f
+  - 下载修复 — 服务器忽略 Range 时重置部分下载 | 81a3bcb
+  - CI — 覆盖 workspace 成员，lockfile 检查用 npm ci | cc31e2f
+  - 依赖 — vitest 升至 5，npm 依赖升至最新 patch/minor | 7eaa689 2334018
+  - 杂项 — 调试构建禁止自重启，平台层清理既有 clippy -D warnings 失败，发布说明对话框全宽 | 8e1deb6 9ace15a 0dc40fb
+  - 文档 — README 增加 UI 截图与工具栏样式对比 | 64de025
+
+  构建产物
+  - MSI 安装包：Clipboard_1.7.0_x64_en-US.msi
+  - NSIS 安装包：Clipboard_1.7.0_x64-setup.exe
+ReleaseNotesUrl: https://github.com/muutot/Clipboard/releases/tag/v1.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

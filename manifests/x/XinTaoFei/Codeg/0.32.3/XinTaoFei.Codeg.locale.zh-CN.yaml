@@ -1,0 +1,63 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: XinTaoFei.Codeg
+PackageVersion: 0.32.3
+PackageLocale: zh-CN
+ShortDescription: 在一个地方聚合并浏览 AI 编程代理会话（如 Claude Code、Codex、Gemini CLI 等）。支持桌面应用、自建服务器或 Docker 部署。
+Description: Codeg（Code Generation，代码生成）是一款企业级多代理编码工作区。它将本地 AI 编程代理（包括 Claude Code、Codex CLI、OpenCode、Gemini CLI、OpenClaw、Cline 等）统一集成于桌面应用、独立服务器或 Docker 容器中，支持通过任意浏览器进行远程开发；具备对话聚合、并行 Git 工作树开发、MCP/技能管理、聊天频道交互（Telegram、飞书、iLink 等），以及集成的 Git/文件/终端工作流。
+Tags:
+- claude-code
+- codex
+- gemini-cli
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  这一版把智能体做出来的 HTML 直接搬进了对话：Codex 的可视化、Hermes 的预览，以及智能体写出的网页，都能以卡片形式在回复里打开。Codex 升级到 2.0 适配器，「Read-only」重新名副其实，旁边还多了「Workspace access」模式；Claude Code 的 Sonnet 也换成了 Sonnet 5.5。
+  同期还有：桌面通知会写明来自哪个会话，「最近」列表可以只看聊天或只看文件夹会话，「提交」页默认显示当前分支，OpenCode 2.x 的会话能在历史记录里看到了，Grok 的后台工作流不再凭空消失，Pi 也能用上「最高」档思考。
+  新增
+  - 智能体做出来的 HTML 直接显示在对话里——Codex 的可视化（Claude Code 用同一技能时也一样）和 Hermes 的预览会以卡片形式出现在回复中，不再显示成一串原始标记；回复里提到的其他本地 HTML 文件会多出一行「预览」，点开就是同样的卡片；智能体写出的网页默认不运行脚本，需要时再手动开启。（#847，@SousekiL）
+  - 「最近」列表可以只看聊天或只看文件夹会话——在它标题栏的「⋯」按钮里选「全部」「聊天」或「文件夹」；选择会被记住，筛选生效期间按钮会一直显示。（#848，@SousekiL）
+  - Codex 新增「Workspace access」模式，「Read-only」重新名副其实——随 Codex ACP 2.0 而来：「Workspace access」下 Codex 可以直接修改工作区内的文件，超出工作区的操作会先问你；「Read-only」下每次修改都要先经你批准；默认模式由模型先筛一遍请求、只把看起来不安全的交给你，更名为「Auto review」（原「Approve for me」）。
+  - Claude Code 用上了 Sonnet 5.5——Claude Code 2.1.284 让模型选择器里的「Sonnet」指向了它。
+  - Claude Code 设置与模型供应商新增「Fable 默认模型」，与 Opus、Sonnet、Haiku 并列，绑定的供应商会像其他几项一样设置或清除它。
+  - Pi 可以用「最高」（Max）档思考了——前提是模型支持：输入框只列出当前模型真正具备的思考档位；所选模型不支持你设定的档位时，Pi 设置页会说明它实际会以哪一档运行。（#467 由 @Smith-106 反馈，#842，@dawNotPoi）
+  改进
+  - 内置智能体版本更新： Claude Code ACP 0.84.0（Claude Code 2.1.284）、Codex ACP 2.0.0（Codex CLI 0.158.0）、OpenCode 1.18.33、Pi ACP 0.0.34、Kimi Code 2.1.1、Cline 3.0.65、CodeBuddy 2.159.0、Qoder 1.1.64、Hermes 0.21.5、OpenClaw 2026.9.6、Cursor 2026.09.26。
+  - 桌面通知会写明来自哪个会话——通知标题是会话标题，正文开头是该会话自己的文件夹，而不是窗口当前打开的文件夹，智能体还在运行时就关掉的标签页也是如此；开启「隐藏通知内容」后，通知里不会出现会话标题。（#834，@Jonathan-Asher）
+  - 「提交」页默认显示当前分支——跟随所在文件夹或工作树的当前分支，不再列出全部分支；选了「全部分支」之后会一直保持。（#620 由 @Luis-WowApps 提出，#838，@dawNotPoi）
+  - 对 PR 或合并请求「评审并修复」时，会先判断方案本身是否站得住——站不住时智能体不提交任何代码，待办任务带着原因和建议做法回到「等你处理」，而不是在一个终究要推倒重来的设计上堆修复。
+  - Claude Code 的插件加载失败时会告诉你——警告里写明是哪个插件、Claude Code 给出的原因，不再让插件的命令、技能、子智能体或 MCP 服务器悄无声息地失效。
+  - 智能体因需要重新登录而拒绝消息时，通知上会带「去登录」按钮——现在所有智能体都有，不再只限 Claude Code 和 Codex。
+  - Claude Code 会话刚打开或刚切换模型，上下文用量就按模型真实的窗口计算，不再在第一次回复前一直按 200K 显示。
+  - 文件面包屑里的各级文件夹改为纯文字，不再套着胶囊，间距与会话标题栏里「文件夹 › 标题」一致，文件标签页和会话标签页的标题栏看起来是一套。
+  修复
+  - 即使 OpenCode 自己的配置固定了服务端口，也能同时开多个 OpenCode 会话——第二个会话不再因「ServeError」崩溃，每个会话的服务也只在本机监听。（#860 由 @qq974969638 反馈）
+  - OpenCode 2.x 的会话能在历史记录里看到了——全新安装的 2.x 不再报「no such table: session」，从 1.x 升级上来的每个会话只列一次，显示的是最新内容。（#858，@n0tlu5）
+  - 重新打开的 OpenCode 会话能显示上下文用量了，OpenCode 自家网关和自定义供应商的模型也不例外——上下文窗口改为按 OpenCode 自己的方式查找，读数也与实时显示一致。
+  - Codex 联网搜索之后，上下文用量不再虚高——此前带联网搜索的那次请求会被当成对话的实际规模（显示 53%，实际只有约 8%）；现在读数会停在原处，直到下一个请求给出新值。（#846 由 @qq974969638 反馈）
+  - Grok 的后台工作流不再凭空消失——运行中的工作流会显示在会话顶部的实时状态条上，写明所处阶段和当前智能体；工作流结束后 Grok 写下的回复也会出现在对话里，不再被丢掉。（#859 由 @goon-13 反馈）
+  - Kimi Code 又能通过关联文件夹工作了——2.1.1 撤销了 2.1.0 的符号链接限制，多文件夹工作区中的关联文件夹，以及 codeg 安装的专家、办公技能附带的文件，都能像以前一样读取、搜索和编辑；改动 MCP 或技能后，已打开的会话也无需重连即可生效。
+  - 把 Claude Code 的认证方式从「模型供应商」切到别处再切回来，仍是你选的那个供应商，不会再被换成最早添加的供应商、连带保存它的模型。（#715，@Adam-Dalloul）
+  - 按 ⌘K 打开搜索时，光标直接落在搜索框里，可以马上输入；在「会话」「文件」之间切换或点选智能体筛选时，光标也会留在搜索框中。（#833，@Jonathan-Asher）
+  - 在 macOS 上，在网页里按 ⌘W 关闭的是标签页，而不是整个窗口——内置浏览器、HTML 文件预览和对话里的 HTML 卡片都是如此。
+  - 重新打开的 Claude Code 和 Codex 会话里，上下文压缩的样子与实时一致——一条分隔线，点「摘要」即可展开保留下来的内容，不再单独显示成一条消息，或拼接在上一条回复的末尾。
+  - 重新打开 Codex 会话时，一段连续思考又回到一张思考卡片，与实时一致——Codex 0.149 及以上版本的会话此前会被拆成好几张。
+  - Claude Code 子智能体流式输出的文字，不会再在它的卡片里出现两遍。
+  - 给 Codex 发出消息后立刻点停止，这一回合会真正停下，不再被忽略。
+  - Cline 运行失败的报错，重新打开会话后不再显示成智能体的回复。
+  - 待办任务最终没有落地任何改动时，回写到议题或 PR 上的评论不再写「accepted」——那读起来像是认可了这个 PR；现在会写明没有推送任何内容，或工作未被合并。
+  注意
+  - 如果你的 Codex 原先选的是「Ask for approval」，现在会是「Read-only」，Codex 每次修改文件都要先问你；想恢复以前那样在工作区内直接修改、其余操作再问你，请改选「Workspace access」。
+  - 部分账号下，Claude Code 的模型列表里不再有「Opus (1M context)」这一项——Opus 本身就有 1M 窗口；原本选了这一项的会话会继续使用 Opus，而不是退回默认模型。
+  - Claude Code ACP 0.84.0 会在会话打开或切换模型时于后台测量上下文窗口，紧随其后的第一条消息或设置更改可能要多等一两秒；若所用模型接口不响应 token 计数请求，等待会长得多。该问题已向上游反馈（agentclientprotocol/claude-agent-acp#1192）。
+  - Pi 会话现在需要 Pi 0.81.0 或更新版本——版本过旧时会直接说明，并附上打开其设置的按钮，而不是报一个内部错误。
+  - Pi 设置不再接受相对路径形式的 Pi 命令或 agent 目录——请使用绝对路径、PATH 中的命令名，或以 ~/ 开头的目录；像 ./pi-test.sh 这样的相对路径在不同工作区会指向不同的位置。
+  感谢 @SousekiL、@dawNotPoi、@Jonathan-Asher、@n0tlu5、@Adam-Dalloul 为本次发布做出的贡献，也感谢 @Smith-106、@Luis-WowApps、@qq974969638 和 @goon-13 的反馈。
+ManifestType: locale
+ManifestVersion: 1.12.0

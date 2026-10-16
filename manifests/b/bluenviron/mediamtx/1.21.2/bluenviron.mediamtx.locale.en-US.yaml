@@ -1,0 +1,57 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: bluenviron.mediamtx
+PackageVersion: 1.21.2
+PackageLocale: en-US
+Publisher: bluenviron
+PublisherUrl: https://github.com/bluenviron
+PublisherSupportUrl: https://github.com/bluenviron/mediamtx/issues
+Author: aler9
+PackageName: mediamtx
+PackageUrl: https://github.com/bluenviron/mediamtx
+License: MIT
+LicenseUrl: https://github.com/bluenviron/mediamtx/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2019 aler9
+CopyrightUrl: https://github.com/bluenviron/mediamtx/blob/main/LICENSE
+ShortDescription: |-
+  Ready-to-use SRT / WebRTC / RTSP / RTMP / LL-HLS media server and media proxy that allows to read,
+  publish, proxy, record and playback video and audio streams.
+Description: |-
+  MediaMTX is a ready-to-use and zero-dependency real-time media server and media proxy that allows
+  to publish, read, proxy, record and playback video and audio streams. It has been conceived as a
+  "media router" that routes media streams from one end to the other.
+Tags:
+- go
+- golang
+- hls
+- media-server
+- obs-studio
+- rtcp
+- rtmp
+- rtmp-proxy
+- rtmp-server
+- rtp
+- rtsp
+- rtsp-proxy
+- rtsp-relay
+- rtsp-server
+- streaming
+- webrtc
+ReleaseNotes: |-
+  General
+  - fix dropping UDP packets during connection close (#6278) UDP packets were dropped in case of errors regardless of their size. Now they are dropped only if they are empty and there's an error.
+  - docs: fix youtube rtmps URL (#6286) The rtmps URL for Youtube was wrong. The fingerprint is not required anymore.
+  - prevent free access to playback server in case of legacy credentials (#6311) When legacy credentials are in use (readUser, readPass, publishUser, publishPass), access to the playback server is granted to anyone. Prevent this by granting access only to users using readUser, readPass.
+  - auth: skip JWKS fetch when no JWT is provided (#6274) authenticateJWT fetched the JWKS before checking whether the request carried a token at all. Every anonymous request, such as the first unauthenticatedRTSP DESCRIBE or HLS request that precedes a 401, caused an outbound request to the JWKS server while holding the manager's write lock. An unauthenticated client could therefore make the server contact the identity provider at will and, while that endpoint was slow or unreachable, stall JWT authentication for everybody. Return "JWT not provided" before touching the JWKS. Also check the JWKS response status code. A non-2xx reply was fed straight to the JSON decoder, so an error page surfaced as a confusing parse error,and an error reply that happened to hold valid JSON was cached as the key set for an hour. Reject it with the status code, as authenticateHTTP already does. Behavior for requests that carry a token against a healthy JWKS server is unchanged.
+  - rewindablereader: fix possible OOM (bluenviron/mediacommon#383) empty datagram packets might cause the allocation of unnecessary entries. Fix that.
+  - h264: revert bluenviron/mediacommon#142 (bluenviron/mediacommon#384) supporting standalone SEI units should not be necessary anymore since these are filtered out at the root (bluenviron/gortsplib#1184). In case of any issue that should arise after this change, open a bug report and we'll adjust things accordingly.
+  - h264: support SEI recovery point in DTS extractor (bluenviron/mediacommon#341) Treat a SEI recovery point message (payload type 6) as a random access point, similarly to a CRA in H265, so the DTS extractor can (re)initialize its state from the first coded frame that follows the recovery point.
+
+  API
+  - fix race condition when kicking RTSP sessions (#6260) (#6275)
+  - do not change passwords when their value is "" (#6141) (https://github.com/bluenviron/mediamtx/issues/6287) (#6292) some users call /config/global/get and passits content to /config/global/patch. Since the former now redacts passwords and replaces their value with "", this string is used as an effective password, breaking authentication. Now password values equal to "" are ignored by /config/global/patch, and the original password value is kept unchanged.
+  - fix deadlock when reloading the API (#6280) (#6279) (#6310) When the API is closing, a /config endpoint might be waiting on the server to
+ReleaseNotesUrl: https://github.com/bluenviron/mediamtx/releases/tag/v1.21.2
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

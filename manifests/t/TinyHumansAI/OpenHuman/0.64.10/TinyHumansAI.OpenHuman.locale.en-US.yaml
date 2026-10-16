@@ -1,0 +1,93 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: TinyHumansAI.OpenHuman
+PackageVersion: 0.64.10
+PackageLocale: en-US
+Publisher: openhuman
+PublisherUrl: https://tinyhumans.ai/
+PublisherSupportUrl: https://github.com/tinyhumansai/openhuman/issues
+PackageName: OpenHuman
+PackageUrl: https://tinyhumans.ai/openhuman
+License: GPL-3.0
+LicenseUrl: https://github.com/tinyhumansai/openhuman/blob/HEAD/LICENSE
+ShortDescription: Your Personal AI super intelligence. Private, Simple and extremely powerful.
+Description: |-
+  OpenHuman is an open-source AI assistant designed to be the memory and doer for everything you do across your tools. Built on Rust + Tauri and licensed under GNU GPL3, it closes the gap between what AI models can do and what they actually know about you.
+  Every model in the world, all 200+ of them, shares the same fundamental limitation: they are stateless. You type a prompt, get a response, and the context evaporates. Even the ones with "memory" store a few bullet points. A few bullet points is a sticky note, not intelligence.
+  OpenHuman solves this with a stack that's calmly, deliberately different:
+  - A local-first Memory Tree. Every source you connect. Gmail, Slack, GitHub, Notion, your own notes, flows through a deterministic pipeline: canonical Markdown, ≤3k-token chunks, scored, folded into per-source / per-topic / per-day summary trees. Stored in SQLite on your machine. No vector-soup black box.
+  - An Obsidian-style wiki on top of it. The same chunks the agent reasons over land as .md files in a vault you can open in Obsidian, browse, edit, and link by hand. Inspired by Karpathy's obsidian-wiki workflow. You can't trust a memory you can't read.
+  - 118+ third-party integrations. One-click OAuth into Gmail, GitHub, Slack, Notion, Stripe, Calendar, Drive, Linear, Jira and more - no API keys to wire by hand, no plugin marketplace to navigate.
+  - Auto-fetch. Every twenty minutes, OpenHuman pulls fresh data from every active connection and folds it into the Memory Tree without you asking, so the agent already has tomorrow's context this morning.
+  - An agent built for big data. Smart token compression (TokenJuice) compacts verbose tool output before it ever enters the model's context, so sweeping through your last six months of email costs single-digit dollars. Automatic model routing sends each task to the right model - hint:reasoning to a frontier model, hint:fast to a cheap one, vision to vision - all under one subscription. Optional local AI via Ollama keeps embeddings and summarization on-device.
+  - Batteries included. A complete agent toolbelt is wired in by default: web search, a web-fetch scraper, a full coder toolset (filesystem, git, lint, test, grep), browser & computer control, cron & scheduling, memory tools, agent coordination for spawning sub-agents, and native voice - STT in, TTS out, mascot lip-sync, and a live Google Meet agent that joins meetings, transcribes them into your Memory Tree, and can speak back into the call. No "install a plugin to read files" friction.
+  - Simple, UI-first. A clean desktop experience and short onboarding paths take you from install to a working agent in a few clicks - no config-first setup, no terminal required. The agent has a face: a desktop mascot that speaks, reacts to its surroundings, joins your Google Meets as a real participant, remembers you across weeks, and keeps thinking in the background even when you've stopped typing.
+  Together, these turn OpenHuman into something fundamentally different from a chatbot. It is an AI agent that consumes large amounts of personal data at low cost, maintains a persistent and evolving understanding of your world, and takes proactive actions on your behalf.
+Tags:
+- ai
+- artificial-intelligence
+- artificialintelligence
+- knowledge-base
+- large-language-model
+- llm
+- llm-wiki
+- wiki
+ReleaseNotes: |-
+  The Speed, Structure & Reliability Upgrade
+  This release tightens the core experience from end to end—faster first turns, clearer chat feedback, sturdier integrations, and a big internal modularity push that sets us up for even quicker iteration. 🎉
+  Highlights
+  Performance & responsiveness ⚡
+  The agent loop is noticeably snappier: first-turn prompts are dramatically smaller, prompt caching stays warm (improving time-to-first-token), and the managed inference path avoids unnecessary per-call client setup. Tool-output compaction is also enabled by default again—with new “REPL-style” tools over stored results to keep large tool outputs from stalling turns.
+  (#6787, #6788, #6823) — Thank you @senamakel!
+  Chat UI & approvals polish 💬
+  Chat got a round of UX improvements: long source lists now collapse cleanly (with better favicons), web-search rendering no longer leaves awkward gaps, and the silence watchdog now warns instead of killing a running turn—staying in sync with the core’s actual turn state. Approvals are also smoother: answered approvals won’t “ghost” into the background deck, and refusals now carry a clear deny reason that the model can actually read.
+  (#6802, #6827, #6800, #6810) — Thank you @senamakel and @M3gA-Mind!
+  Memory & knowledge engines 🧠
+  Memory is now explicitly selectable: you can choose exactly one active engine, including Local (TinyCortex) or CortexDB via TinyHumans, plus other supported providers. Switching engines can also copy existing memories across—making experimentation and migration much less painful.
+  (#6777) — Thank you @senamakel!
+  MCP & Composio integrations 🔌
+  MCP tooling becomes much more ergonomic and robust: server tools are exposed as stable, individually-addressable tools from a persistent cache, and string-encoded JSON arguments are normalized so calls don’t fail unexpectedly. Refusals from tool listing now tell the model what it can do (and avoid pointing at RPC-only methods). On the Composio side, embedders can give each agent its own credentials, and backend-routed Composio calls now flow through the tinyconnectors module instead of an in-process client.
+  (#6767, #6769, #6818, #6689, #6796) — Thank you @senamakel, @M3gA-Mind, and @oxoxDev!
+  Security, safety & policy hardening 🛡️
+  Security protections are sharper and less noisy: the prompt-injection guard is less likely to false-positive on recalled transcripts, and browser IP blocking now uses the full non-global range definitions (with regression tests). Shell execution reliability also improves in scheduled jobs on Windows, and shell scanning logic is consolidated upstream for consistency.
+  (#6776, #6709, #6764, #6790) — Thank you @senamakel, @Avi-Bendetsky, and @sanil-23!
+  Architecture & vendor modularity push 🧱
+  A major theme of this series is extracting host-independent logic out of openhuman-core and into the appropriate vendor/tiny* modules—keeping core focused on product policy, adapters, and contracts. This includes splitting RPC/server responsibilities, moving channels/skills/web3/filesystem/hooks/session/runtime/tooling helpers into their owning crates, and updating vendor pins to merged upstream mains. Along the way, stale subsystem references were cleaned up, and the tool-call type is now adopted directly from tinytools to reduce duplication and drift.
+  (#6703, #6779, #6780, #6782, #6783, #6784, #6785, #6786, #6789, #6791, #6793, #6794, #6795, #6797, #6804, #6805, #6806, #6807, #6809, #6773) — Thank you @senamakel!
+  Reliability, updates & CI/e2e stability ✅
+  This set also focuses on “keeping main green”: E2E web runs now avoid port collisions and refuse taken ports, the core updater once again resolves the correct versioned archive and stages the real binary, and managed backend outages now trigger bounded exponential backoff with explicit terminal outcomes. CI coverage improves too, including executing module-gated Rust tests, better layout gating behavior, and keeping vendor/lockfile pins aligned (including tinymcp and tinymemory pin handling).
+  (#6719, #6770, #6569, #6605, #6817, #6771, #6772, #6798) — Thank you @obchain, @lorenzozanee, @M3gA-Mind, @sanil-23, and @senamakel!
+  Desktop, voice & platform fixes 🖥️
+  TinyComputer gains saved flows, task reports, and a live Bali booking E2E to make real-world debugging and iteration much easier. There are also key platform fixes: macOS desktop builds were restored after upstream accessibility API changes, and vendor bumps include a Windows build fix for unsafe_code constraints in tinyagents.
+  (#6761, #6822, #6839) — Thank you @senamakel and @M3gA-Mind!
+  Web3 & x402 improvements 💱
+  Web3 functionality continues its move into tinywallet, with follow-on pinning to pick up important x402, fee, probing, and chain-status fixes—plus host-side support and tests to keep behavior correct and traceable.
+  (#6792) — Thank you @senamakel!
+  Usage & accounting accuracy 📊
+  The Usage page now reflects the spend it actually recorded: workspace tracking is fixed across auth transitions, duplicate recordings are avoided (and legacy duplicates ignored), and tiny UI details like <$0.01 and negative-zero rendering are corrected. The “Token & Cost” tab was also renamed to “Token savings” in all locales to match what it truly shows.
+  (#6720) — Thank you @graycyrus!
+  Embedder & agent control knobs 🎛️
+  Embedders now have tighter control over runs with a per-turn tool-call budget limiter, without needing to alter persistent agent configuration. There’s also cleanup after the inline-skills/deferred-tools work: vestigial spawn args are removed and e2e tests fixed accordingly.
+  (#6350, #6762) — Thank you @theamazinghenk and @senamakel!
+  Settings & provider catalog changes 🔁
+  A built-in Cheaper Inference provider entry was added, then reverted—returning settings and documentation to their prior routing behavior.
+  (#6620, #6778) — Thank you @aiapienthusiast and @senamakel!
+  Docs & developer workflow helpers 🧰
+  Internal contributor tooling improves with a new tracked Claude skill guide for migrating code into vendor submodules, and tinyskills is bumped to fix sourceUrl resolution behavior for non-SKILL.md Markdown blobs.
+  (#6775, #6819) — Thank you @senamakel and @M3gA-Mind!
+  Release housekeeping 🚀
+  This range includes the release PR used to cut and ship the bundle.
+  (#6826) — Thank you @M3gA-Mind!
+  Additional highlights 🔗
+  A few more focused contributions round out this release with targeted fixes and improvements that are worth calling out. (#6781, #6803) — Thank you @senamakel!
+  Contributor Credits
+  Thanks to everyone who contributed to this release: @aiapienthusiast, @Avi-Bendetsky, @graycyrus, @lorenzozanee, @M3gA-Mind, @obchain, @oxoxDev, @sanil-23, @senamakel, and @theamazinghenk.
+  Full Compare
+  https://github.com/tinyhumansai/openhuman/compare/v0.64.7...v0.64.10
+ReleaseNotesUrl: https://github.com/tinyhumansai/openhuman/releases/tag/v0.64.10
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://tinyhumans.gitbook.io/openhuman
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

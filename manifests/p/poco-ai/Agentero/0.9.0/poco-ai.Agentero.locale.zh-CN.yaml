@@ -1,0 +1,55 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.9.0
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  v0.9.0 围绕「论文库信息补全、PDF 批注交互、Agent 与外部工具连接」进行迭代。新增本地 MCP 回环服务器、首次打开 Vault 的功能导览、Markdown 块级选区，以及统一的右侧批注评论列；同时优化了论文 publication 字段的展示与批量回填、Agent 面板刷新和设置页服务商配置。
+  新功能
+  - 本地 MCP 回环服务器：在 Settings 中开启后，Agentero 会通过 Streamable HTTP 向 ChatGPT/Codex 暴露当前 Vault，支持查询论文元数据、导入论文、读写 NOTES.md 与管理标签。(74067fae by @Phil-Fan, #391)
+  - 首次打开 Vault 的功能导览：基于 driver.js 的高亮引导，首次进入 Vault 时依次介绍侧边栏、魔棒、工作区、Agent 面板与标题栏，可在 Settings 中重新播放。(e96b7773 by @qychen2001)
+  - Markdown 块级选区：编辑器新增块拖拽手柄、块级选择与高亮，支持通过拖拽选中整段或整块内容。(f1a24e20 by @ffy6511, #390)
+  - 统一的 PDF 右侧批注评论列：所有批注评论统一在右侧评论列中就地编辑；悬停评论卡片会高亮对应页面区域，视觉批注也纳入评论列；PDF 左侧切换按钮统一为新的 PdfLeftToolbar。(105eed53, 5d8ac1b5, ce21be7e by @Phil-Fan, #379, #385)
+  - 论文库 Publication 列与批量回填：论文库新增独立的 publication 列并默认置于年份之后；支持从列标题一键批量回填缺失的 venue，导入时优先解析 arXiv journal_ref 并回退到 Semantic Scholar，批量回填使用 10 并发后台执行。(1ba98983, 377fdc76, e3a86cd7, f889f8c6 by @Phil-Fan, #389)
+  改进
+  - Agent 注册表事件走生命周期总线：agent:registry-changed 改为通过 lifecycle bus 分发，避免直接监听 Tauri wire 事件的泄漏型 Promise 模式，并在 Agent 面板中防抖刷新列表，确保 Settings 中安装/探测 Agent 后切换器立即更新。(812fbd03, 6f7fadf0 by @qychen2001)
+  - 设置页布局服务商配置：Layout 设置面板改为以 credential 卡片形式列出所有远程服务商，未配置 API Key 的服务商不会出现在后端选择列表中；默认值直接预填入输入框而非仅作占位提示。(0b6656ca by @qychen2001, #394)
+  - Agent 对话引用展示简化：移除消息内联的引用角标，仅保留底部的 sources 列表。(da3befeb by @Phil-Fan, #378)
+  - 论文库刷新性能与进度：批量刷新 publication 改为并发执行并实时更新 UI，降低并发数、显示每篇论文的统计信息并从 0 开始展示进度。(ee25385a, 90c16a67, 607c2162 by @Phil-Fan)
+  - MCP 服务器元信息：MCP 初始化时返回应用图标数据 URI，并为工具附加 outputSchema，便于 ChatGPT 等客户端结构化解析返回结果。(a92067a3 by @Phil-Fan)
+  - 升级 dsh ACP 依赖：将 dsh npm 包与 launcher 更新到 0.1.1-rc.2，保持 Agent 协议兼容。(2202dc7e by @Phil-Fan, #374)
+  修复
+  - 文件树文件夹优先排序：默认文件夹排序模式下，组织文件夹现在排在论文文件夹之前，符合常见文献库习惯。(ef1ce18b by @Phil-Fan, #387)
+  - Markdown H1 顶部间距：收紧编辑器中 H1 的顶部边距，减少笔记开头 # Title 前的大段空白。(87df769d by @Phil-Fan, #377)
+  - ModelScope 广场导览阻塞滚动：屏蔽 ModelScope 论文广场首次加载时弹出的 antd5 tour，避免其注入 overflow-y: hidden 导致面板无法滚动。(ae46fe72 by @Phil-Fan, #375)
+  - arXiv 学科标签隐藏：arXiv 导入的学科分类现在以 @arxiv: 前缀存储并按隐藏标签处理，不再混入普通标签、搜索与筛选，CLI 默认也不输出，除非使用 --all。(1074ee71 by @Phil-Fan, #380)
+  - PDF 高亮坐标归一化：将高亮矩形坐标统一归一化为页相对坐标，避免不同缩放或渲染模式下批注位置偏移。(8e7f3783 by @Phil-Fan)
+  - 评论卡片禁用文本选择：防止鼠标在右侧评论列批注卡片上触发页面文本选择。(2905fc70 by @Phil-Fan)
+  - 旧版论文库列顺序迁移：自动将旧版列顺序迁移为「年份后紧跟 publication」，避免升级后列顺序异常。(8cef7c99 by @Phil-Fan)
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.9.0
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

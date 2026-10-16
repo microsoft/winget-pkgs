@@ -1,0 +1,87 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: seakee.CPAManagerPlus
+PackageVersion: 1.12.6
+PackageLocale: zh-CN
+ShortDescription: 自托管的 CPA / CLIProxyAPI 管理面板与 AI 网关可观测性仪表盘
+Description: |-
+  面向 CPA / CLIProxyAPI 的自托管管理面板与 AI Gateway 可观测性仪表盘，覆盖请求、用量、成本、配额、失败诊断和账号健康。
+
+  CPAMP 可以帮你回答什么问题？
+  - 请求为什么失败？ 在持久化请求历史中查看失败率、状态码、受影响的模型/账号和脱敏证据。
+  - 成本花在哪里？ 按模型、Provider、账号、API Key、项目、渠道和时间范围拆解 Token 与预估成本。
+  - 账号和配额是否健康？ 查看凭证状态、配额窗口、reset 证据，以及 Codex 和 xAI 的受控自动化状态。
+
+  核心能力
+
+  CPA 网关管理
+  - 管理 CPA Provider 配置，包括 Gemini、Codex、Claude、Vertex、xAI 和 OpenAI-compatible Provider。
+  - 维护认证文件、OAuth 登录、API Key、模型别名、优先级、插件、日志和系统配置。
+  - 导入官方 Sub2API OpenAI OAuth 导出，并把多账号拆分为独立的 CPA Codex 认证文件。
+
+  请求监控与失败诊断
+  - 将 CPA usage queue 中的请求持久化到本地 SQLite，并按账号、调用方 API Key 查看实时请求。
+  - 查看状态、延迟、Token、缓存、Trace 和脱敏失败证据，不暴露原始失败体。
+  - 使用 JSONL 导入或导出请求历史。
+  - 打开 请求监控演示。
+
+  成本与用量分析
+  - 按模型、Provider、账号、认证文件、API Key、项目、渠道和时间范围拆解请求、Token、成本、延迟和失败。
+  - 追踪 input、output、reasoning、cache、service tier 和长上下文计费语义。
+  - 从 LiteLLM 和 OpenRouter 同步模型价格，并为别名或内部模型保留本地覆盖。
+  - 打开 用量分析演示。
+
+  账号健康、配额与自动化
+  - 在浏览器本地或 Manager Server 定时巡检 Codex 和 xAI 账号。
+  - 在 Provider 可提供信息时展示配额窗口、reset 证据、凭证状态、工作区状态和健康信号。
+  - 对明确额度耗尽执行受控冷却，并将认证故障汇总到账号处理队列，支持复核与恢复。
+  - 打开统一的 凭证管理演示。
+
+  生产运维
+  - 使用单 Docker 容器，或 Linux、macOS、Windows 的 amd64/arm64 原生包运行；完整栈可以与 CPA 一起部署。
+  - 请求历史、Manager 配置、账号自动化和模型价格都保存在本地文件，不需要注册账号，也不包含遥测 SDK。
+  - 备份 SQLite 时同时保存 data.key，才能恢复加密后的 CPA Management Key。
+
+  想先了解界面？可以打开在线演示。演示站只使用虚构数据，不是部署或运行模式，不能连接、管理或监控真实 CPA。
+  CPAMP 管理和观测经过 CPA / CLIProxyAPI 的流量，本身不是模型代理，也不会独立转发模型请求。
+
+  数据、隐私与安全
+  - CPAMP 不会回传遥测，不包含分析 SDK，也不要求注册账号。
+  - 外部请求只限于 CPA Gateway 及你明确配置或主动触发的 OAuth、Provider 检查、插件 Release 和模型价格同步。
+  - 请求历史、配置、模型价格、巡检历史和自动化状态都保存在本地文件。
+  - CPA Management Key 入库前会加密；备份需要同时保存 SQLite 文件和 data.key。
+  - 普通 API 和 JSONL 导出只暴露脱敏失败摘要，不返回原始失败体或保存的原始 JSON。
+  - CPAMP 只应用于你有权管理的流量和凭证。
+Tags:
+- 人工智能
+- 代理
+- 仪表盘
+- 大语言模型
+- 网关
+ReleaseNotes: |-
+  Overview
+  v1.12.6 聚焦 CPA 连接迁移与回滚安全、跨 Provider 的计划与配额展示、Codex 历史身份连续性，以及观测间隔后的配额窗口恢复。Manager Server 现在将 CPA Management Key 保持在服务端加密存储中，不再返回浏览器；安装升级保留可恢复状态；Accounts 与 Request Monitoring 共享最新 Provider 配额证据；无法证明身份的历史数据继续安全失败。
+  Highlights
+  Fixes
+  - Manager Server 配置接口现在只返回 CPA Management Key 是否已配置；已保存的密钥留在服务端加密存储中，setup 与轮换均使用只写入输入。
+  - Docker 与原生安装器会将旧 CPA URL/Key 输入导入加密 SQLite，并在健康检查、管理员鉴权和 CPA 管理接口验证通过后才移除旧运行配置；外部密钥文件不会被删除。
+  - 迁移快照与恢复将 usage.sqlite、WAL/SHM/journal 伴随文件和 data.key 视为一个完整文件集；取消或失败时保留安全回滚路径。
+  - Legacy CPA 连接使用明确的 authority 规则：完整 manager_config_v1 优先，兼容的 setup 数据可修复 partial manager 记录；冲突或无法判断的状态要求 store-cpa-connection --repair-conflict，不会静默改绑。
+  - CPA 导入失败时保留受限权限的 pending 状态和临时密钥以便安全重试；v2 之后损坏的持久化密钥以及缺失或错配的 data.key 会 fail closed，不会创建替代密钥。
+  - Accounts 与 Request Monitoring 现在共享 Provider 配额刷新结果，并阻止过期缓存代次或响应头证据覆盖更新的配额状态。
+  - Codex 账号历史和 Monitoring 账号窗口只在明确账号身份与精确凭证来源匹配时复用 legacy 数据；有歧义或不属于目标凭证的记录保持隔离，usage_events 始终不可变。
+  - Accounts 配额详情在自然 rollover 后出现观测间隔时，仍可显示最近关闭的 5 小时或周配额窗口。
+  - Request Monitoring 计划筛选器现在保留 Provider 作用域的身份；等价别名可以在同一 Provider 内归并，但不会与其他 Provider 的计划发生冲突。
+  Refactor
+  - Accounts、Monitoring、Inspection、Dashboard 和 Usage Analytics 统一使用 Provider 感知的计划展示路径，支持 compact/full 标签、原始计划值保留和未知值可见回退。
+  Docs
+  - 部署与备份文档补充加密 CPA 存储、完整快照文件、重试与冲突修复流程，以及回滚清理边界。
+  Upgrade Notes
+  - 已有部署可能在升级启动时执行连接存储规范化迁移；请将 usage.sqlite、WAL/SHM/journal 和匹配的 data.key 一起备份。迁移不会改写 usage_events。
+  - 有效的持久化连接不需要手动改配置。旧 env/secret 导入失败时，请保留安装器管理的 pending 文件和临时密钥以便重试；外部 CPA_MANAGEMENT_KEY_FILE 不会被删除。
+  - 如果服务报告 v2 之后 CPA 连接存储损坏或存在未解决冲突，不要替换 data.key；停止 Manager Server 后，使用已明确核验的 URL 与密钥文件执行 store-cpa-connection --repair-conflict。
+  - Monitoring 集成应使用不透明的 row.id 保存状态、使用 row.account 展示账号，不要仅按 project ID 或显示值合并 Codex 账号。
+ReleaseNotesUrl: https://github.com/seakee/CPA-Manager-Plus/blob/v1.12.6/docs/release-notes/v1.12.6-zh.md
+ManifestType: locale
+ManifestVersion: 1.12.0
