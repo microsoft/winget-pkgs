@@ -1,0 +1,120 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: myYangyunfan.DSHDesktop
+PackageVersion: 1.0.3
+PackageLocale: zh-CN
+Publisher: deepseek
+PublisherUrl: https://github.com/myYangyunfan
+PublisherSupportUrl: https://github.com/myYangyunfan/dsh_desktop/issues
+PackageName: DSH Desktop
+PackageUrl: https://github.com/myYangyunfan/dsh_desktop
+License: MIT
+LicenseUrl: https://github.com/myYangyunfan/dsh_desktop/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 DSH Desktop contributors
+ShortDescription: 把 DeepSeek Harness (dsh) CLI 与内置 Node.js 运行时打包在一起的桌面客户端。
+Description: |-
+  DSH Desktop 把 DeepSeek Harness (dsh) CLI、完整 Node.js 运行时与全部官方插件打包为开箱即用的桌面客户端。双击即可在原生窗口中启动 dsh web，无需安装 Node.js；关闭窗口后服务在系统托盘中继续运行。提供会话管理、桌面宠物、余额小组件、插件守护与带 sha256 校验的自动更新。
+
+  ✨ 特性
+  开箱即用
+  - 零依赖 — 内置独立 Node 运行时与 npm CLI，目标机器无需安装任何环境
+  - 完整 dsh — 打包 @deepseek-ai/dsh 及全部官方插件，离线可用
+  - 一键启动 — 双击即启 dsh web，优先复用上次端口，就绪后载入原生窗口
+  - 双形态 — 便携版（免安装、可放 U 盘）+ 安装版（桌面/开始菜单快捷方式）
+  体验增强
+  - 深色玻璃无边框窗口 — 自绘标题栏、Win11 圆角，关闭默认隐藏到系统托盘
+  - 桌面宠物 — 随行小鲸鱼常驻桌面，陪伴工作（设置 → 插件可一键开关）
+  - 侧边会话浮窗 — 随时唤起独立会话窗口，与主会话互不干扰
+  - 会话管理 — 归档 / 恢复 / 删除对话，历史不再堆积
+  - 余额小部件 — 对话底部实时显示「本轮费用 · 余额」，支持 OpenCode Go 订阅额度，点击直达充值
+  - 完成通知 — 任务跑完弹系统通知，一分钟内回到主窗口自动跳到对应会话（Windows 通知无点击回调，聚焦即跳转）
+  工程韧性
+  - 守护瀑布 — 内核 boot 链逐级自愈：坏插件自动修复、坏配置自动重建、内核崩溃环原地重启，任何不兼容形态都不退出（v0.5.0 Tauri 架构核心特性）
+  - 崩溃自愈 — 渲染层假死心跳检测自动重载；内核由 supervisor 探活 + 指数退避拉起
+  - 历史兼容 — 自动修补会话事件词汇表，第三方插件写入的事件不破坏会话历史
+  - 自动更新 — 右上角 ⋯ 菜单一键检查并安装客户端更新（双源 GitHub/Gitee Releases 自动切换，sha256 校验 fail-closed，离线静默）；升级安装自动装回旧位置，零配置丢失；内核随客户端整体分发（无独立更新链）
+  - 快捷方式自愈 — 桌面与开始菜单快捷方式缺失即自动补建
+Tags:
+- deepseek
+- deepseek-harness
+- dsh
+- 大模型
+- 大语言模型
+- 智能体
+- 自主智能
+ReleaseNotes: |-
+  DSH Desktop 1.0.3 — 预发布版（全平台）
+  本版标为预发布（pre-release）：GitHub 的 latest 端点会跳过预发布，而客户端的在线
+  更新检查轮询的正是 latest——所以本版【不会】自动推给存量用户。这是刻意的发布形态：
+  核心修复只经 macOS 现场取证与本机单测闭环，尚未取得多平台实机复验。需要本版请从下方
+  资产表手动取包安装；在线推送随下一个正式版。
+  🛠 修复
+  macOS 首启「未能保存设置，请重试。」+ 9 条内置插件 failed to load（真根因）
+  现场：v1.0.0 与 v1.0.1 装到 mac 上症状逐字相同——settings / better-sidebar /
+  conversation-tweaks / quest-ui / side-session / openclaw-bridge / dsh-subagent-lens /
+  reasoning-effort / basics-panel 共 9 条 failed to load — auto-isolated，dsh-easyrewrite
+  停在 pending (waiting for settings)，前台保存设置永远失败。
+  取证：逐 bundle 真跑 import 拿到原文 SyntaxError: The requested module
+  '@deepseek-ai/cosmokit' does not provide an export named 'createVolatile'——不是模块
+  找不到，而是 ESM 具名导出在链接期就不存在，条目连 fiber 都没建成，日志里因此只剩一行
+  failed to load。
+  根因：profile 里一条 pnpm 别名链接 node_modules/@deepseek-ai/cosmokit 指向 ../cosmokit，
+  把 scoped 规格符指到了未 scoped 的 cosmokit 1.8.1（没有 createVolatile；应用闭包里是
+  @deepseek-ai/cosmokit 1.8.5）。该链接来自第三方插件安装，不是我们的同步写出来的；共享
+  farm 侧的同名链接是健康的，只是永远轮不到——profile 自身的 node_modules 优先。
+  @deepseek-ai/dsh-settings 同死，于是设置服务缺席。
+  修复：新增别名 / 悬空链接自愈，判据是「链接落点的包名 ≠ 目标 package.json 的 name」，
+  并接进启动链的 repair 步（原先为同类场景写的自愈只挂在 guard-* 子命令上，启动从不触及）。
+  同名 link: 开发安装不误伤；farm 对应物不健康时一条不动；真目录副本刻意不删（会和随后的
+  同步步骤互相拉锯）。装上本版后首启自动回落 farm 的 1.8.5，无需用户操作。
+  注：v1.0.1 修的是同一条症状的另一面（profile 链接落点让目录复制坏掉），那次修复是有效
+  的，但不是本案根因——所以 mac 装 1.0.1 仍逐字复现。
+  发送文件恒报 prompt rejected（session/agent-busy）——同一根因，且原文不再被吞
+  准入链的兜底会把任何非 RemoteError 的异常统一标成 session/agent-busy，真原因只落在
+  details.reason 而界面不渲染；设置服务缺席时上面那条故障就表现成「agent 忙」。
+  本版新增诊断补丁，把原始异常连同 cause 链写进 stderr（前缀 [prompt-admission]），
+  报文 code 与 details 一律不变（换 code 属契约变更，须走 error-codes 契约）。
+  两处静默失败「原文上身」（可观测性）
+  ① 插件导入失败：内核 rc.2 起加载器只把错误交给纯内存环形缓冲的 logger，非核心条目不再
+  抛 StartupError，原始错误从不落地——补一条 guard 补丁把导入异常连同 cause 链写到 stderr
+  （前缀 [loader-diagnostic]）。② 启动通道 stderr：壳侧过去只在退出码非 0 时透出尾行，
+  boot 五步（repair / sync / patches / compat-pin / preflight）成功路径上的日志整段丢弃——
+  现逐行转进 desktop.log（上限 400 行，超出保留末尾并注明截断量；一次启动实测 115 行 /
+  15KB）。以后「看不到报错」不再等于「没有报错」。
+  CI 全量单测两处断链（工程侧，运行时字节零变化）
+  node 22 下 12 例因被 unref 的 0ms 定时器整体 cancelledByParent 连坐；pristine 闭包缺供
+  让 51 例硬红。已把测试床冲刷辅助统一改 setImmediate，流水线在全量单测前先离线解出
+  pristine 内核。同批重取补丁干预面快照，自 2026-10-06 起 chronic 红的漂移校验复绿。
+  ✅ 验证
+  - Node 侧（2026-10-11 实测）：scripts/test/ 192 个测试文件，npm test = 2063 例 /
+    0 fail / 0 cancelled（pass 2053 / skip 10，skip 逐条是环境缺料而非缺陷）；
+    check-syntax、validate-pin（✓ dsh-v0.2.0-rc.2）、patch-surface verify
+    （✓ 68 文件与快照一致，无漂移）全绿。
+  - sidecar：dsh-tauri/sidecar/cli.test.js 21/21 / 0 fail。
+  - 新增回归：别名链接自愈 8 例（别名摘除 / 同名 link: 不误伤 / farm 不健康一条不动 /
+    悬空摘除 / 真目录不动 / guard 路径同判据 / 缺目录早退 / 幂等）+ 启动链接线回归 1 例
+    （幂等断言带阳性对照，防「实例没跑起来也能过」）；诊断补丁 9 例在真字节上跑导入与
+    准入两段 catch。
+  - Rust 侧：本版壳侧一处改动（boot stderr 转出）+ 3 例新单测；其余沿用既有全量基线。
+  - 发版防线：版本一致性四道闸（强制检出 tag、tauri.conf.json 版本比对、产物文件名内嵌
+    版本断言、publish 汇总断言），每个主资产附带同名 .sha256 边车。
+  已知问题
+  - dsh-synapse（会话地图）：重启或切换会话时历史回填可能出现空档——宿主 rc.2 下线了
+    Session 上的 events 属性而插件仍读旧字段（不报错、不崩溃）。已登记在内置插件台账
+    §5.5，本版按裁定未处置。
+  - Windows ARM64：payload 内原生模块仍是 x64 prebuild，靠 Windows 11 模拟层兜底，
+    标为实验性产物。
+  - 两个便携包都不含内置 Node：包内 resources/dsh-desktop/vendor/node/ 是空目录，
+    完整便携版与轻量便携版实为同一份 payload（v1.0.0 实测两包同为 261,149,074 字节 /
+    39,097 条目，本版同形态）。内核三级解析链因此回落「系统 Node ≥22」——用便携版
+    请先装 Node 22+，否则启动会走到清晰报错路径。该缺口自 v0.5.7 起长期存在，
+    流水线侧待改为缺件即拒绝发布（fail-closed）。
+  详细更新日志
+  壳侧（Tauri / Rust / 六份契约）见
+  dsh-tauri/CHANGELOG.md，
+  Node 侧与内置插件见
+  dsh-desktop/CHANGELOG.md
+ReleaseNotesUrl: https://github.com/myYangyunfan/dsh_desktop/releases/tag/v1.0.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
