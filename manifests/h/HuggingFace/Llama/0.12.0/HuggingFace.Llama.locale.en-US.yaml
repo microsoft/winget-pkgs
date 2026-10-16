@@ -1,0 +1,124 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: HuggingFace.Llama
+PackageVersion: 0.12.0
+PackageLocale: en-US
+Publisher: Hugging Face
+PublisherUrl: https://huggingface.co/
+PublisherSupportUrl: https://github.com/ggml-org/Llama-Windows/issues
+PackageName: Llama
+PackageUrl: https://llama.app/
+License: MIT
+LicenseUrl: https://github.com/ggml-org/Llama-Windows/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Hugging Face Inc.
+ShortDescription: Windows Llama App Companion
+Description: |-
+  Llama is a Windows 11 tray app for running llama.cpp models locally. It's a WinUI 3 port of Llama for Mac.
+
+  Highlights
+  - Lives in your tray — a borderless, Mica-backed flyout anchored to the tray icon
+  - Zero-setup llama.cpp — uses your existing llama.exe, or downloads one for you
+  - One-click models — browse and download recommended models from the Hugging Face Hub
+  - Model details — click any model for a context-length picker with per-option memory estimates (read from the GGUF header), remembered per model, plus chat, copy-model-ID, curl-request, and Hugging Face actions
+  - Standard storage — models live in the Hugging Face cache, shared with llama.cpp and other tools
+  - Spotlight-like overlay — press Alt+Space from any app to chat with your loaded model
+Tags:
+- ai
+- gguf
+- large-language-model
+- llama-cpp
+- llm
+- local-inference
+ReleaseNotes: |-
+  Highlights
+  - Search Hugging Face from the app — browse and download any of the Hub's GGUF models straight from the model list, with suggestions as you type, download progress,
+    failure reasons that name the actual problem, and private/gated repo support via your HF token.
+  - New llama server settings — choose which network interface the server listens on, cap how many models run in parallel, quantize the KV cache, and pass arbitrary
+    extra llama serve flags.
+  - Security hardening across the board — an API key now protects the server whenever it's reachable beyond this machine, your Hugging Face token is stored encrypted,
+    the installer download is verified and bounded, and the embedded chat overlay can no longer be navigated off the local server.
+  - Weekly llama.cpp runtime updates now actually work — a JSON-parsing bug had silently disabled them since launch.
+  New features
+  Hugging Face search (#65, #69)
+  - Type in the model list to search the Hugging Face Hub, or paste a repo id (owner/model); suggestions appear as you type.
+  - Download any GGUF variant directly, with live progress, disk-space preflight, cancel support, and clear failure messages (rate limits, auth, disk space, and more).
+  - Sign in with a Hugging Face token (Settings → General) to download private and gated repos; the token is optional and never logged.
+  Settings → Llama (#79, #73, #74, #76)
+  - Listen On — bind the llama server to a specific network interface's address, all interfaces (0.0.0.0), or localhost (the default). All user-facing links and the
+    chat overlay follow the selected address.
+  - Max Loaded Models — cap how many models the server runs simultaneously (0 = unlimited).
+  - KV Cache Quantization — independently choose K/V cache precision (f32, f16, bf16, q8_0, q4_0, q4_1, iq4_nl, q5_0, q5_1) to fit larger contexts in GPU memory.
+    Defaults match llama.cpp (f16).
+  - Custom Serve Arguments — a free-form box for extra llama serve flags, appended after the built-in ones (e.g. --threads 4 --flash-attn). A bad flag is reported as
+    the server's failure reason on the status dot.
+  Misc
+  - Dev builds are now labeled in the footer (#80).
+  - The project is now MIT-licensed (#78).
+  Security
+  This release implements the fixes from a full security audit of the app.
+  The server is no longer an open API on your network (#85, #79)
+  The llama server has no authentication of its own, so previously, choosing "All interfaces" exposed its full control API — load, download, run and delete your models
+  — to everyone on your network. Now:
+  - Any bind beyond localhost automatically gets an app-generated 256-bit API key, passed to the server via a key file and sent on every request Llama makes.
+  - Switching away from localhost requires an explicit confirmation dialog.
+  - The key is shown (with a copy button) in Settings → Llama whenever the server is exposed, for tools that ask for it. The chat overlay authenticates automatically.
+  Custom serve arguments can no longer override security flags (#85)
+  llama.cpp honors the last occurrence of a repeated flag, so a pasted --host 0.0.0.0 could silently re-expose the server while Settings still showed "Localhost". The
+  app-owned flags — --host, --port, --api-key, --api-key-file, --models-preset, --ssl* — are now rejected in custom arguments, at save time and again at launch.
+  Secret-bearing flags are redacted from the log.
+  Your Hugging Face token is encrypted at rest (#86)
+  The token is now stored DPAPI-encrypted (bound to your Windows account on this machine) instead of plaintext in settings.json. Existing plaintext tokens migrate
+  automatically the first time the app runs. Note: a settings file copied from another machine/user will read as "no token configured" — re-enter it there.
+  A stale "Listen On" address can't send your traffic elsewhere (#84)
+  If the configured interface address is no longer assigned to this machine (DHCP change, different network), the app now falls back to loopback and warns you, instead
+  of pointing every request and link at whatever foreign host now owns that address.
+  Hardened installer download (#83)
+  install.ps1 is now fetched with redirects refused, from the exact expected HTTPS URL, size-capped, and its SHA-256 is logged. The interpreter runs from its absolute
+  System32 path so a planted powershell.exe can't hijack it. Behavior change: unattended (weekly) runtime updates now require a pinned script hash; until the project
+  pins one, automatic updates are skipped rather than executed unverified — the first-launch install still works as before. The update check itself was also fixed (#81,
+  below).
+  Chat overlay confinement (#86)
+  The overlay is a borderless window with no address bar, so anything it renders carries the app's visual authority. The embedded WebUI can now only ever display pages
+  from your local llama server: top-level and iframe navigations off the server's origin are cancelled, new windows go to the system browser (plain http/https only),
+  and DevTools are disabled in release builds.
+  Model-id and input validation (#82)
+  Model ids come from remote data and were previously trusted too far: they're now validated before being used as cache paths (closing a path-traversal that could probe
+  files outside the cache) and JSON-escaped in every request body. The copyable sample curl command is now safely serialized and shell-quoted.
+  Supply chain (#87)
+  - NuGet dependencies are pinned to exact versions (no more floating 1.* ranges) and every project commits a restore lock file, making dependency drift visible in
+    review.
+  - Every GitHub Actions workflow — including the Trusted Signing steps — is pinned to a commit SHA instead of a mutable tag.
+  Fixes
+  - Runtime updates actually install now (#81) — the weekly llama.cpp update check never bound GitHub's tag_name field, so it silently always reported "no update". This
+    also re-enables the (now safely gated) auto-update path.
+  - Per-model context length is honored (#62) — the chosen context size was being ignored when loading a model.
+  - Installed-version tracking (#61) — the installed list no longer loses track of which version/quant of a model you have.
+  - Vision tag height and other small UI polish.
+  What's Changed
+  - fix(ui): improve tracking of installed version of a model by @mfuntowicz in #61
+  - fix(llama): honor the context length by @mfuntowicz in #62
+  - Feat/hf search by @mfuntowicz in #65
+  - Add huggingface search by @mfuntowicz in #69
+  - docs: rewrite build-from-source instructions with verified commands by @larroy in #64
+  - Add some basic info export by @mfuntowicz in #70
+  - feat(llama): add max number of concurrent models loaded by @mfuntowicz in #73
+  - feat(llama): add KV cache K/V quantization settings by @mfuntowicz in #74
+  - feat(llama): add custom serve arguments setting by @mfuntowicz in #76
+  - Add ability to define listening interfaces by @mfuntowicz in #79
+  - Add License to the project by @mfuntowicz in #78
+  - feat(ui): label dev builds in the footer by @erusev in #80
+  - [1/7] fix(runtime): bind GitHub tag_name so runtime updates actually install by @mfuntowicz in #81
+  - [2/7] fix: validate model ids at filesystem and JSON sinks by @mfuntowicz in #82
+  - [3/7] fix(llama): verify and bound the downloaded installer before running it by @mfuntowicz in #83
+  - [4/7] fix: fall back to loopback when the saved listen address is gone by @mfuntowicz in #84
+  - [5/7] feat: API key for non-loopback binds + reserved serve flags by @mfuntowicz in #85
+  - [6/7] fix: DPAPI token at rest, pinned interpreter, fail-closed overlay webview by @mfuntowicz in #86
+  - [7/7] build: pin NuGet versions, lock files, SHA-pinned CI actions by @mfuntowicz in #87
+  New Contributors
+  - @larroy made their first contribution in #64
+  - @erusev made their first contribution in #80
+  Full Changelog: https://github.com/ggml-org/Llama-Windows/compare/v0.11.0...v0.12.0
+ReleaseNotesUrl: https://github.com/ggml-org/Llama-Windows/releases/tag/v0.12.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
