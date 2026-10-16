@@ -1,0 +1,57 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: g0orx.hpsdr-rs
+PackageVersion: 0.8.2
+PackageLocale: en-US
+Publisher: John Melton
+PublisherUrl: https://github.com/g0orx
+PublisherSupportUrl: https://github.com/g0orx/hpsdr-rs/issues
+Author: John Melton
+PackageName: hpsdr-rs
+PackageUrl: https://github.com/g0orx/hpsdr-rs
+License: GPL-2.0-or-later
+LicenseUrl: https://github.com/g0orx/hpsdr-rs/blob/HEAD/LICENSE
+ShortDescription: Desktop client for openHPSDR Protocol 1/2 SDR radios.
+Description: |-
+  A Rust/egui desktop client for openHPSDR Protocol 1 and Protocol 2 radios (Metis/Ozy-style and Hermes/Orion-style boards), using WDSP for DSP.
+
+  - Protocol 1 (Metis/Ozy) and Protocol 2 (Hermes/Orion) support, with standard openHPSDR UDP discovery
+  - Multiple simultaneous receivers, each with its own VFO, mode, filter width, and band memory
+  - Spectrum/waterfall display with adjustable dB range, palette, and Click-to-Tune (CTUN)
+  - SSB/CW/AM/FM/digital modes, per-mode/per-band filter width and mode memory
+  - Noise blanker (NB/NB2), noise reduction (NR/NR2/NNR), and SNB, independently switchable
+  - AGC with selectable Off/Long/Slow/Medium/Fast modes
+  - TX: mic audio through WDSP's TXA chain, ALC, TX power/SWR meter with per-band PA calibration, and a Tune button
+  - PureSignal (PA linearization/predistortion), on both Protocol 1 and Protocol 2
+  - rigctl (Hamlib-compatible), TCI (WebSocket), and CAT (Kenwood TS-2000 emulation) control servers
+  - Dual VFO (VFO A/B) with Split -- transmit on VFO B while receiving on VFO A
+  - Selectable RX output / TX input audio devices, independent of the OS default
+  - Per-radio settings persistence, keyed by the radio's MAC address
+  - FPGA firmware upload and static IP configuration
+Tags:
+- amateur-radio
+- dsp
+- ham-radio
+- openhpsdr
+- sdr
+ReleaseNotes: |-
+  A small update to v0.8.1 -- see v0.8.0 for everything new in 0.8.
+  Changes
+  - RX Attenuation / RX Gain / RF Gain is now on the main window, next to AGC Gain, instead of in Settings → RX. It still shows the right control for the radio: RX Attenuation (0-31 dB) on most boards, RX Gain (-12 to +48 dB) on a HermesLite/HL2 over Protocol 1, and RF Gain on an RTL-SDR or MSI.SDR. Hover over its label for a short explanation. The RTL-SDR's Tuner AGC and direct-sampling options stay in Settings → RX.
+  - Spectrum: band edge markers and the dial line are now drawn under the spectrum trace, so a signal on a band edge or the dial frequency isn't hidden behind them.
+  Fixes
+  - Ozy (#8):
+    - On a system with only one Mercury, the background I2C poll no longer queries a second Mercury 4 times a second, which filled the log with "endpoint stalled" errors.
+    - A system without a Penny can now start; before, it failed with "endpoint stalled".
+    - Neither change has been tested on Ozy hardware yet.
+  Downloads
+  - Linux AppImage (x86_64 / aarch64): hpsdr-rs-0.8.2-x86_64.AppImage, hpsdr-rs-0.8.2-aarch64.AppImage -- chmod +x and run. USB radios still need the udev rules installed by hand; a copy is inside the AppImage under usr/share/doc/hpsdr-rs
+  - Debian/Ubuntu (amd64): hpsdr-rs_0.8.2-1_amd64.deb -- sudo apt install ./hpsdr-rs_0.8.2-1_amd64.deb
+  - Debian/Ubuntu/Raspberry Pi OS (arm64): hpsdr-rs_0.8.2-1_arm64.deb -- sudo apt install ./hpsdr-rs_0.8.2-1_arm64.deb
+  - Fedora/openSUSE RPM (x86_64 / aarch64): hpsdr-rs-0.8.2-1.x86_64.rpm, hpsdr-rs-0.8.2-1.aarch64.rpm -- sudo dnf install ./hpsdr-rs-0.8.2-1.x86_64.rpm, or on openSUSE sudo zypper install --allow-unsigned-rpm ./hpsdr-rs-0.8.2-1.x86_64.rpm
+  - macOS (Apple Silicon): hpsdr-rs-0.8.2-macos-arm64.tar.gz -- built in CI, unsigned and not notarized, so Gatekeeper warns on first launch: right-click the hpsdr-rs binary and choose Open, or run xattr -d com.apple.quarantine hpsdr-rs first
+  - Windows (x86_64): hpsdr-rs-0.8.2-x86_64.msi
+ReleaseNotesUrl: https://github.com/g0orx/hpsdr-rs/releases/tag/v0.8.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
