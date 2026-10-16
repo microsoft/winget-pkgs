@@ -1,0 +1,67 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: mateo-ki.VPNParser
+PackageVersion: 1.7.1
+PackageLocale: en-US
+Publisher: VPN Parser
+PublisherUrl: https://github.com/mateo-ki
+PublisherSupportUrl: https://github.com/mateo-ki/vpn-parser/issues
+Author: mateo-ki
+PackageName: VPN Parser
+PackageUrl: https://github.com/mateo-ki/vpn-parser
+License: MIT
+LicenseUrl: https://github.com/mateo-ki/vpn-parser/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 mateo-ki
+ShortDescription: Windows proxy client that collects subscriptions, parses nodes, runs a proxy kernel and measures real exit quality.
+Description: VPN Parser is a Windows desktop application written in Rust and egui that collects free or self-hosted subscriptions, parses them into nodes, runs traffic through a proxy kernel, and measures the quality of that traffic. Sources can be ordinary subscription URLs with a `YYYY-MM-DD` placeholder, Gist search results, or Telegram channel previews. Parsed share links cover `ss`, `vmess`, `vless`, `trojan`, `hysteria2`/`hy2`, `socks5` and authenticated `http(s)`, plus Clash and Clash Meta YAML, Base64 and mixed plain text. Latency comes from a real handshake through the kernel against Google `generate_204`, and the 24-hour exit health bar is drawn from measured results rather than the reported kernel state. On Windows it manages the system proxy, TUN mode with an elevation hand-off, and terminal `HTTP_PROXY` variables, adds per-executable firewall allow rules, keeps a single instance, records failover history, counts rule hits per day, and offers a bearer-authenticated local HTTP API together with mihomo, sing-box and xray configuration export. Proxy kernels are not bundled; the application downloads them when they are missing.
+Tags:
+- clash
+- hysteria2
+- proxy
+- sing-box
+- socks5
+- subscription
+- trojan
+- tun
+- vmess
+- wireguard
+ReleaseNotes: |-
+  🚀 VPN Parser v1.7.1 发布说明 / Release Notes
+  🎉 欢迎使用 VPN Parser v1.7.1！此版本重点修复了分流策略组节点切换异常，上线了全套多语言国际化 (i18n) 引擎，重构了订阅源与系统设置操作体验，并优化了窗口空间与图标细节。
+
+  🌟 新特性与核心更新
+  🛡️ 1. 修复分流策略组与节点切换异常 (Bug Fix)
+  - 修复内核 400 Bad Request 报错：修复在「可用节点」中选中非 Selector 类型策略组（如“美国节点” url-test 自动选优组或“多线并发” load-balance 负载均衡组）时，点击下方节点开启代理触发 操作失败：内核拒绝切换：400 Bad Request 的问题；
+  - 智能出口切换调度：点击节点卡片始终确保将该节点设为主代理连接出口；仅当目标策略组为支持手动指定的 Selector 组时才下发组级别切换，彻底根除了无效指令导致的内核拒绝。
+  📋 2. 订阅源界面操作栏全面重构
+  - 两排规整功能布局：
+    - 第一行（基础运维）：[新建] [拉取全部] [代理拉取全部] [导入订阅] [导出订阅] [清空全部]；
+    - 第二行（专属发现）：[接入 OpenRung 节点] [原生注册 WARP 节点] [Gist 节点] [Gist 配置]；
+  - Gist 抓取协议弹窗配置：点击 [Gist 配置] 弹出模态窗口，支持多选抓取协议（VLESS、VMess、SS、Trojan、Hysteria2、Socks5、Clash proxies）及扫描深度页数调节与历史黑名单重置；
+  - 清空订阅安全守护：[清空全部] 增加防误触二次确认模态弹窗，保护数据安全。
+  ⚙️ 3. 系统设置 Tab 结构重整与外部接口整合
+  - 调整 Tab 优先级：将 [外观] 提前至第 2 个 Tab，常用外观个性化配置一步直达；
+  - 侧边栏精简与收纳：将原左侧导航栏的独立“外部接口”菜单整合入系统设置作为第 4 个 Tab，侧栏更加干净纯粹。
+  🌐 4. 多语言国际化 (i18n) 架构正式上线
+  - 原生多语言支持：首批上线 简体中文 (zh-CN)、English (en-US)、繁體中文 (zh-TW)、日本語 (ja-JP)；
+  - 环境自适应（符合 AppImageHub 全球收录规范）：新装运行根据系统环境变量 LANG/LC_* 智能识别；非中文环境自动回退英文，中文系统保持中文；
+  - 英文国际化文档：仓库根目录新增 README.en.md 完整英文说明文档。
+  🎨 5. 窗口视口空间与品牌图标优化
+  - 窗口尺寸加高加大：默认窗口尺寸扩展至 1440 × 880，大幅扩充节点表格、订阅列表与卡片纵向可视区域；
+  - 任务栏与托盘图标饱满化：重绘优化深空黑底 Squircle 边距占空比，Windows 任务栏与托盘图标视觉更饱满清晰。
+
+  📦 各平台下载指引
+
+  | 平台                  | 文件名                                 | 说明                                        |
+  | --------------------- | -------------------------------------- | ------------------------------------------- |
+  | Windows 64 位          | vpn-parser-1.7.1-windows-x64-setup.exe | 推荐，双击运行向导自动安装升级              |
+  | Linux (通用)          | vpn-parser-1.7.1-x86_64.AppImage       | 推荐，开箱即用，赋予可执行权限后双击运行    |
+  | Linux (Debian/Ubuntu) | vpn-parser_1.7.1-1_amd64.deb           | sudo dpkg -i vpn-parser_1.7.1-1_amd64.deb   |
+  | Linux (Fedora/RHEL)   | vpn-parser-1.7.1-1.x86_64.rpm          | sudo rpm -Uvh vpn-parser-1.7.1-1.x86_64.rpm |
+  | 完整校验文件          | sha256.txt                             | 包含所有发布资产的官方 SHA-256 哈希值       |
+
+  Full Changelog: https://github.com/mateo-ki/vpn-parser/compare/v1.7.0...v1.7.1
+ReleaseNotesUrl: https://github.com/mateo-ki/vpn-parser/releases/tag/v1.7.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
