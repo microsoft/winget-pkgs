@@ -1,0 +1,36 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: hongfaqiu.StrataManager
+PackageVersion: 0.1.13
+PackageLocale: en-US
+Publisher: strata
+PublisherUrl: https://github.com/hongfaqiu
+PublisherSupportUrl: https://github.com/hongfaqiu/strata-manager/issues
+Author: hongfaqiu
+PackageName: Strata Manager
+PackageUrl: https://hongfaqiu.github.io/strata-manager/
+License: MIT
+LicenseUrl: https://github.com/hongfaqiu/strata-manager/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Strata Manager contributors
+ShortDescription: 'A desktop workspace for local inference with Strata: prepare the runtime, manage models and services, and monitor your local API.'
+Description: Strata Manager is an open-source desktop app for managing Niko1221/Strata, a local LLM inference engine. It bundles runtime setup, model downloads, service controls, streaming chat, hardware and API usage monitoring, task-based tuning, and benchmarking into a single workspace. Model weights already on your machine stay untouched.
+Tags:
+- ai
+- large-language-model
+- llm
+- local-llm
+ReleaseNotes: |-
+  - Concurrency: Runtime configuration adds a Concurrency card that recommends settings from VRAM, memory and GPU count: conversation cache on a single 16 GB card, 4 requests at once on 32 GB, and a layer split across multiple GPUs. Applying a recommendation also sets the companion parameters it needs. The card flags a parallel / --batch conflict (with a one-click fix), refuses to save a --batch-groups value that does not divide evenly, and notes the conflict between concurrency and contexts past 262K. Adds --trim-stage-weights; experimental environment switches such as STRATA_BATCH_ATTN_ROWS appear only under Advanced and are labeled Experimental.
+  - Concurrency ladder: the scenario benchmark can step from 1 to N concurrent requests, showing total throughput and per-request speed live for each step, then recommend a concurrency. Results stay on this machine and are not uploaded to the leaderboard.
+  - Slot monitor: always shows every column, and adds active slots, total speed, waiting requests and a per-slot speed trend. Monitoring and the status bar add up speed across generating streams.
+  - Concurrency comparison in Tuning (optional): saves candidate concurrency settings as new configuration versions, switches through them running the ladder, restores the original configuration, and compares results in a table and chart. Switching configurations does not interrupt the run, and quick calibration shows a note when concurrency is above 1.
+  - 1M context: context presets add 384K and 1M. Past 262,144, Runtime configuration writes --rope-scaling yarn and the matching factor (4 for 1M), and removes them when you go back to 262K or less. Manual values are left alone; a wrong factor shows a note with “Use official settings”. An Experimental note stays visible with the KV cache and RoPE table sizes, and resource estimates now include the YaRN factor and RoPE table instead of showing Unknown.
+  - Tuning redesign: live step, round, parameter under test, tok/s, progress and time remaining, with cancel. New quick calibration (the default, matching upstream tools/calibrate.py) measures prefill pipe, PCIe expert share and MTP draft threshold by overriding request parameters only. It changes no configuration and needs no restart, and recommends a value only when it is more than 3% faster. Results are saved as a new configuration version by default; overwriting the current configuration needs confirmation and keeps a .bak. The log is saved with the report. Runtime configuration adds --prefill-pipe.
+  - Scenario benchmark redesign: choosing scenarios, starting, live progress and per-scenario results now come first. A run shows the current request, time to first token, elapsed and remaining time, and a per-request scatter chart. Results show five key metrics (including P50/P95/P99), a per-scenario bar chart and table, and output excerpts in the request samples. No folded sections; every existing option and export is kept.
+  - Leaderboard filters and sorting: the in-app and website leaderboards filter by VRAM, memory, context, KV, concurrency, GPU count and expert cache, and sort by 8K decode, 128K decode, prefill or machine count. Website filters are kept in the link so you can share them.
+  - Removed the Current service capabilities panel from the top of Benchmark; capability checks remain on the API & assistants page.
+  - The website and README have an updated product introduction, new screenshots of the getting-started guide, leaderboard and old-version configuration cleanup, and recaptured daily-experience screenshots.
+ReleaseNotesUrl: https://github.com/hongfaqiu/strata-manager/releases/tag/v0.1.13
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
