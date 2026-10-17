@@ -1,0 +1,43 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: LBEILC.Multiplane
+PackageVersion: 0.3.9
+PackageLocale: en-US
+Publisher: LBEILC
+PublisherUrl: https://github.com/LBEILC
+PublisherSupportUrl: https://github.com/LBEILC/Multiplane/issues
+PackageName: Multiplane
+PackageUrl: https://github.com/LBEILC/Multiplane
+License: Apache-2.0
+LicenseUrl: https://github.com/LBEILC/Multiplane/blob/HEAD/LICENSE
+ShortDescription: Local headless HTML-to-video renderer for AI agents. Shots are plain web pages driven by render(t); includes determinism checks, cut-aware motion blur, and a 3D layer with accumulated depth of field.
+Description: |-
+  A local, headless HTML video renderer for AI agents. A shot is an ordinary web page: the page implements render(t), and the image depends only on time t. Multiplane captures frames with headless Chromium, applies post-processing such as supersampling, motion blur, and film grain, encodes video with FFmpeg, and checks whether a shot is deterministic.
+  The name comes from Disney's multiplane camera: flat artwork placed at different depths, photographed frame by frame with real depth of field. Here, this corresponds to layered web content, a 3D card layer, and accumulated depth of field.
+
+  Features
+  - No new framework to learn. Shots use HTML, CSS, and JavaScript, which agents are well suited to write.
+  - Lint before rendering. lint runs without a browser in under a second. It flags wall-clock time, random numbers, CSS animations, remote resources, and other patterns that break determinism, with file, line, and column locations. Rendering commands run it automatically before starting.
+  - Verifiable. verify renders the same frames out of order, after page reloads, and with single and multiple processes, then compares them pixel by pixel. Mismatches include the affected times, regions, and diff images.
+  - Motion blur respects hard cuts. Each frame uses multiple time samples within the shutter interval, blended in linear light. Images on opposite sides of the shot's declared hard cut times, cuts, are never blurred together.
+  - 3D layer and accumulated depth of field (optional, multiplane/three): place image cards in 3D space and accumulate multiple samples for real out-of-focus blur, combined with motion blur.
+  - Machine-readable. All commands support --json and emit an event stream with stable error codes. Each run has its own job directory, supports progress queries, and can be cancelled.
+  - Stills too. stills writes PNG frames at the times you choose, with the same supersampling, motion blur, depth of field and alpha as video. Use it to check frames, or to produce final images such as covers, posters and illustrations.
+  - Deterministic. The renderer itself introduces no wall-clock time or unseeded random numbers. The same input in the same environment produces identical pixels, backed by tests.
+Tags:
+- ai
+- html
+- html-to-video
+- video
+- video-renderer
+ReleaseNotes: |-
+  Fixes for the desktop app's video preview and Settings page. The renderer is unchanged from 0.3.8, so there is no new npm release.
+  Desktop app
+  - Seeking in the preview works. In longer videos, dragging the timeline, stepping one frame, or jumping to the start or end snapped back to the first frame, because the app served video files without byte-range support and only the part already loaded could be seeked. The app now answers range requests, so any frame can be reached right away.
+  - The play button pauses. During playback the play button was redrawn on every frame, so a click on it was lost and only clicking the picture paused. It now changes only when playback starts or stops.
+  - Settings polish. "Notify when a job finishes" is a switch like "Host renders in Multiplane", and empty path fields show their hint in the interface font instead of a fallback font.
+  - The failure banner's description uses the secondary text colour, as in the design.
+ReleaseNotesUrl: https://github.com/LBEILC/Multiplane/releases/tag/v0.3.9
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
