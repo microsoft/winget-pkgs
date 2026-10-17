@@ -1,0 +1,36 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: NanmiCoder.ClaudeCodeHaha
+PackageVersion: 0.7.4
+PackageLocale: en-US
+ShortDescription: A local-first desktop workspace for Claude Code with multi-agent, Git worktrees, and diff review.
+Description: Claude Code Haha is a desktop Claude Code workspace for macOS, Windows, and Linux. It offers multi-session workspaces, global search, branch and Worktree launching, diff review, a built-in browser preview, and GUI permission approval. Any model works, including Claude, ChatGPT, Grok, presets, or local endpoints, alongside image generation, visual MCP and SubAgent managers, an Agent Teams workbench, dynamic workflow orchestration, model tracing, Computer Use, a skill marketplace, color themes, desktop pets, H5 remote access, IM integration, and scheduled tasks.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claude
+- claude-code
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  This release first fixes the black console windows Windows users saw on every new or resumed session, puts agents, workflows and slash commands on the + menu's first level, and repairs the Linux terminal panel, clipped composer popovers, message selections leaking across sessions and more.
+  Critical fix
+  - Black console windows on every new or resumed session on Windows (#1593, #1583): the desktop sidecar was packaged as a GUI-subsystem binary, so it and every console child it spawned (such as the machine-id probe that runs at each CLI start) opened a visible window. v0.7.3 only covered one of those paths; the sidecar is a console program again, and the build now checks the subsystem so it cannot regress.
+  Highlights
+  - Agents, workflows and slash commands on the + menu's first level (#1601, #1597): running an agent or a workflow no longer needs the More tools submenu — one hover or click reaches it. The More tools row is gone, and the phone sheet loses the extra level too.
+  Fixes
+  - Terminal panel in Linux packages (#1602, #1591): Linux packages shipped without node-pty's native module, so the terminal panel failed with "Failed to load native module: pty.node". Packages now compile and verify that module, and the Linux build targets glibc 2.28 so Ubuntu 20.04, Debian 11 and RHEL 8 can use the terminal as well.
+  - Composer popovers clipped by the page (#1598, #1587): with the composer centred on a new session, in a short window, or pushed up by the bottom terminal, the slash menu, @ references, the + menu and the /help panel are now capped at the room above them and scroll inside; the top is no longer cut off and the + button stays uncovered.
+  - Text-selection menu leaking across sessions (#1590): when two sessions hold a message with the same id and content (a chat and its side chat, for example), the Add to chat / Ask in side chat menu no longer survives a keyboard session switch, and references and side chats only apply to the session where the selection was made.
+  - Upstream errors reported inside the stream (#1600, #1592): when a relay answers 200 but reports api_error / overloaded_error in the SSE body, the request is now retried on the API budget (10 attempts by default, with growing delays) instead of giving up after two retries in two seconds. Errors that a resend cannot fix — context length exceeded, insufficient quota, an invalid prompt — are surfaced immediately.
+  Other
+  - Docs (#1599): the bilingual READMEs recommend Zuiquan API Directory.
+ReleaseNotesUrl: https://github.com/NanmiCoder/cc-haha/releases/tag/v0.7.4
+ManifestType: locale
+ManifestVersion: 1.12.0
