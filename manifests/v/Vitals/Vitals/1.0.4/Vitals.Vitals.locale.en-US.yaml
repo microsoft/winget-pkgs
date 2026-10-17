@@ -1,0 +1,106 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Vitals.Vitals
+PackageVersion: 1.0.4
+PackageLocale: en-US
+Publisher: Vitals contributors
+PublisherUrl: https://github.com/dragoscv
+PublisherSupportUrl: https://github.com/dragoscv/vitals/issues
+PrivacyUrl: https://github.com/dragoscv/vitals/blob/main/PRIVACY.md
+Author: Dragos Catalin Vladulescu
+PackageName: Vitals
+PackageUrl: https://github.com/dragoscv/vitals
+License: MIT
+LicenseUrl: https://github.com/dragoscv/vitals/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Vitals contributors
+ShortDescription: Lightweight, private Windows system monitor.
+Description: |-
+  Vitals shows what is slowing your computer down, in plain language: CPU, GPU, memory, disks,
+  network, temperatures and per-process usage, with history, alerts and a compact overlay.
+  Optional read-only access from your phone on the local network. No account, no telemetry.
+Moniker: vitals
+Tags:
+- cpu
+- gpu
+- hardware-monitor
+- performance
+- system-monitor
+- task-manager
+ReleaseNotes: |-
+  The AI agents page, and updates that install themselves.
+  Added
+  - Restart to update, in Settings › About and in the tray menu, for a copy
+    installed for everyone: Windows asks an administrator to approve its
+    updates, so the prompt now follows your click instead of your Quit.
+  - After an update, Vitals says once whether it worked: "Vitals updated to x",
+    or "x was not installed" with a way to try again.
+  - After moving out of Program Files, Settings › About offers to remove the
+    old copy (one administrator prompt). Start with Windows follows the move.
+  - AI agents page. See which AI coding agents are working on this
+    machine — VS Code Copilot Chat, Copilot CLI, Codai, Codex and Claude Code —
+    what each is doing right now, how long the session has run and how much of
+    that it spent actually working, its turns, tool calls and the tool running
+    this second. Tabs for agentq's build queues and worktree slots, background
+    jobs and releases, a live journal, cloud agents from your codai account, and
+    24-hour insights (time spent waiting, slow builds, failures per repository).
+    Updates live every two seconds while the page is open and costs nothing
+    when it is not. Freeze or clear a queue, remove a dead ticket, release an
+    abandoned worktree, stop a background job or close idle agent terminals,
+    each with a reason that the other agents can read.
+  - AI agents over the network. A paired phone, a script or Prometheus can
+    read the AI page at GET /api/v1/agents (read access) and run the same
+    queue actions at POST /api/v1/agents/actions (control access). User
+    folders and anything that looks like a password or key are hidden before
+    it leaves the PC. Prometheus gains vitals_agents_sessions and
+    vitals_agentq_waiters; the TypeScript client gains agents() and
+    agentqAction(); the Android app shows which agents are working and
+    which queues have someone waiting on each PC's Now tab.
+  Changed
+  - The installer asks whether to install for you only or for everyone on
+    this PC. /S /CurrentUser and /S /AllUsers script either; winget and
+    Chocolatey now install for the current user.
+  Fixed
+  - Updates now install when you quit, without a hidden administrator
+    prompt (DEV-3). Vitals runs without administrator rights, and its
+    Program Files installation needed approval for every update, so the prompt
+    appeared as the window vanished, nobody answered it, and the next launch
+    was the old version again. Vitals can now be installed for you only
+    (%LOCALAPPDATA%\Programs\Vitals), and such a copy updates itself with no
+    prompt at all. Copies installed by 1.0.3 or earlier move there on their
+    next update (ADR 0038).
+  - "Report a problem" and "Source code" in About did nothing. The window
+    was allowed to open links in your browser but no address was on the list,
+    so every link was refused silently. The list now names exactly the two
+    places Vitals opens: its GitHub page and the codai sign-in page.
+  - AI page: a conversation no longer appears twice once you sign in to
+    codai. codai keeps a cloud copy of each local chat; the cloud list now
+    leaves out the ones already read from this PC. Cloud sessions report no
+    turns or tool calls, so those show a dash instead of a misleading 0 — in
+    the app, over the network (null in GET /api/v1/agents) and in the SDK.
+  Downloads
+  ──────────────────┬───────────────────────────
+  Windows           │Installer
+  ──────────────────┼───────────────────────────
+  Intel / AMD (x64) │Vitals_x64-setup.exe
+  ──────────────────┼───────────────────────────
+  ARM64 (Snapdragon)│Vitals_arm64-setup.exe
+  ──────────────────┴───────────────────────────
+  Verifying this download
+  Windows may show a SmartScreen warning on first run (Windows protected your
+  PC) because the installer is not yet signed with a commercial certificate.
+  Choose More info → Run anyway. That is expected — see
+  docs/distribution.md.
+  You do not have to take our word for what is in the binary. With the
+  GitHub CLI:
+  gh attestation verify .\Vitals_x64-setup.exe --repo dragoscv/vitals
+  This proves the file was built by this repository's release workflow from the
+  tagged commit, and nowhere else. Checksums for every file are in
+  SHA256SUMS.txt:
+  (Get-FileHash .\Vitals_x64-setup.exe -Algorithm SHA256).Hash.ToLower()
+  Software bills of materials (CycloneDX) for the Rust and JavaScript
+  dependencies are attached as sbom-rust.cdx.json and sbom-js.cdx.json.
+  Full Changelog: v1.0.3...v1.0.4
+ReleaseNotesUrl: https://github.com/dragoscv/vitals/releases/tag/v1.0.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
