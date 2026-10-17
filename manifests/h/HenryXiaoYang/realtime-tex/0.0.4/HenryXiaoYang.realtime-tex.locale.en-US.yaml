@@ -1,0 +1,41 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: HenryXiaoYang.realtime-tex
+PackageVersion: 0.0.4
+PackageLocale: en-US
+Publisher: Henry Yang
+PublisherUrl: https://henryyang.net/
+PublisherSupportUrl: https://github.com/HenryXiaoYang/realtime-tex/issues
+PackageName: realtime-tex
+PackageUrl: https://github.com/HenryXiaoYang/realtime-tex
+License: MIT
+LicenseUrl: https://github.com/HenryXiaoYang/realtime-tex/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Henry Yang and the realtime-tex contributors
+ShortDescription: Re-typesets only the LaTeX paragraph you are editing in about a millisecond with an unmodified LuaTeX.
+Description: 'rtex is a typesetting engine for editors. When you type, it re-typesets only the paragraph being edited through a LuaLaTeX process that has already loaded your preamble, and hands the editor the new lines to draw. A full background compile takes care of what really is global: page breaks, floats, the table of contents, references and bibliographies. The result is exactly what LuaLaTeX produces — the same line breaks and the same glyphs at the same positions to 1/65536 pt — because rtex uses an unmodified LuaTeX from TeX Live and exported PDFs are identical to a normal LuaLaTeX build. Time from keystroke to updated paragraph is about a millisecond and does not depend on document length. The archive contains the `rtex` command, the C library and header, and rtex TeX support files.'
+Tags:
+- latex
+- lualatex
+- luatex
+- tex
+- texlive
+- typesetting
+ReleaseNotes: |-
+  Two live-editing fixes, both reported with excellent reproductions by @SDDKKK.
+  Fixed
+  - Two-column documents are live again (IEEEtran, \documentclass[twocolumn]{…}). When a column break fell inside a paragraph, rtex recorded the whole page as part of that paragraph, and most of the document lost live editing. In a 12-page IEEEtran paper almost no body text was live. The two-page example from the report now has 61 of 61 paragraphs live, identical to LuaLaTeX's output. (#2)
+  - Comment lines no longer break paragraphs. Two % lines in a row, or one inside a paragraph, made rtex think the paragraph ended there, so its edits waited for the background compile. rtex now treats comments like TeX does. (#3)
+  - Paragraphs with \marginpar update live. The margin note follows after the next background compile, like footnote text.
+  - Full LaTeX error messages. Errors and warnings now include all of LaTeX's continuation lines. For example, "Mismatched LaTeX support files detected" now shows which versions don't match. (#1)
+  Other
+  - scripts/install-texlive.sh only contacts the TeX Live repository when packages are missing, and updates tlmgr first. Re-running it over an existing installation no longer fails with "tlmgr itself needs to be updated".
+ReleaseNotesUrl: https://github.com/HenryXiaoYang/realtime-tex/releases/tag/v0.0.4
+InstallationNotes: rtex needs a TeX Live installation that provides LuaLaTeX with a LaTeX kernel from 2021 or later; pdfLaTeX and XeLaTeX are not supported. Run `rtex doctor` to check that rtex finds its support files and your LuaLaTeX.
+Documentations:
+- DocumentLabel: Live Editing
+  DocumentUrl: https://github.com/HenryXiaoYang/realtime-tex/blob/HEAD/docs/live-editing.md
+- DocumentLabel: Benchmarks
+  DocumentUrl: https://github.com/HenryXiaoYang/realtime-tex/blob/HEAD/docs/benchmarks.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
