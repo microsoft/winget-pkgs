@@ -1,0 +1,206 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: kjanat.actionlint
+PackageVersion: 1.17.0
+PackageLocale: en-US
+Publisher: kjanat
+PublisherUrl: https://github.com/kjanat
+PublisherSupportUrl: https://github.com/kjanat/actionlint/issues
+Author: Kaj Kowalski
+PackageName: actionlint
+PackageUrl: https://actionlint.kjanat.dev
+License: MIT
+LicenseUrl: https://github.com/kjanat/actionlint/blob/v1.17.0/LICENSE.txt
+Copyright: Copyright (c) 2026 Kaj Kowalski, Copyright (c) 2021 rhysd
+CopyrightUrl: https://github.com/kjanat/actionlint/blob/v1.17.0/LICENSE.txt
+ShortDescription: Static checker for GitHub Actions workflow files
+Description: "actionlint is a static checker for GitHub Actions workflow files. It checks the workflow syntax, expression placeholders, the shell scripts in run: steps, and many other mistakes that only surface once a workflow runs. This is the kjanat fork, published separately from rhysd.actionlint."
+Tags:
+- actionlint
+- ci
+- github-actions
+- linter
+- shellcheck
+- static-analysis
+- workflow
+- yaml
+ReleaseNotes: |-
+  More of GitHub Actions understood. More mistakes caught before a workflow runs. actionlint 1.17.0 is a substantial release for this fork: explicit cache access controls, cache safety policies enabled by default, and a broad audit of workflow syntax, expressions, and local action manifests against GitHub's own schemas and runner code.
+
+  The schema work deserves equal billing. Valid expression-built matrices can now pass without spurious errors, newer workflow fields are understood, and malformed schedules and action metadata receive checks they previously escaped. Below are concrete examples of what changes when you upgrade, along with new installation options through the aqua registry and mise.
+
+  Upgrade note: the new policies can make previously clean workflows exit with status 1, including repositories without a configuration file. Existing opt-in policies retain their defaults.
+
+  Make cache access explicit
+
+  GitHub's cache-mode controls cache access independently of token permissions:
+
+  Mode | Restore | Save
+  read | Yes | No
+  write | Yes | Yes
+  write-only | No | Yes
+  none | No | No
+
+  Set it on the workflow or an individual job. Job settings override workflow settings; omission retains GitHub's trigger-dependent defaults. For example, give a reusable workflow a read-only ceiling:
+
+  on: pull_request_target
+  cache-mode: read
+
+  jobs:
+    report:
+      uses: $/.github/workflows/report.yml
+
+  actionlint follows nested local reusable calls and checks their explicit declarations against the caller's limit. Diagnostics preserve the original ./ or $/ reference. Missing or malformed callees are reported consistently regardless of file analysis order. (#163, #164)
+
+  Catch unsafe grants and ineffective cache steps
+
+  Three policies now run automatically:
+
+  - cache-write-untrusted reports explicit write grants on low-trust triggers with access to default-branch caches, including pull_request_target, issue_comment, and workflow_run.
+  - cache-call-unrestricted requires an explicit cache ceiling for reusable calls on those triggers.
+  - cache-operation reports official actions/cache, actions/cache/save, and actions/cache/restore steps whose operations an explicit mode disables. Caller-imposed limits are followed through nested local workflows, including parallel child steps.
+
+  GitHub skips forbidden cache operations without failing the job. The operation check makes ineffective steps visible. The combined actions/cache action remains useful under read or write-only, where one operation is still available. Remote workflow bodies, wrappers, and package-manager caching options are not inspected. (#165)
+
+  For example, this job explicitly disables the operation its cache step requests:
+
+  jobs:
+    build:
+      runs-on: ubuntu-latest
+      cache-mode: read
+      steps:
+        - uses: actions/cache/save@v6
+          with:
+            path: .cache
+            key: build-${{ github.sha }}
+
+  It now receives a cache-operation diagnostic. If the job should only restore a cache, use actions/cache/restore. If it really must save, review the trigger and grant the appropriate write access. The same mismatch is detected when the save lives inside a local reusable workflow and the caller supplies the read ceiling.
+
+  Configure policies and reviewed exceptions
+
+  Disable individual checks in .github/actionlint.yaml:
+
+  policy:
+    cache-write-untrusted: false
+    cache-call-unrestricted: false
+    cache-operation: false
+
+  Omitted or null policy values retain the enabled defaults. For a reviewed exception, place an exact rule ID and a reason on the reported line:
+
+  cache-mode: write # actionlint:ignore cache-write-untrusted -- jobs execute reviewed default-branch code only
+
+  Alternatively, put # actionlint:ignore-next-line cache-write-untrusted -- reviewed reason immediately above it. These directives affect a physical line and support only the three cache policies.
+
+  Repositories can prohibit inline exceptions:
+
+  policy:
+    disallow-suppressions: true
+
+  This reports the prohibited comment and retains the original violation. A mapping can select rules and choose report: all, suppression, or violation. See policy configuration. (#165)
+
+  Give expression-built workflows the checks they deserve
+
+  A workflow assembled with expressions should still benefit from linting. Previously, a whole strategy expression was rejected as a scalar where a mapping was expected. The resulting empty matrix type then produced another error for a perfectly valid matrix.os reference.
+
+  This complete workflow passes in 1.17.0:
+
+  on: push
+  jobs:
+    test:
+      strategy: ${{ fromJSON('{"matrix":{"os":["ubuntu-latest","windows-latest"]}}') }}
+      runs-on: ${{ matrix.os }}
+      steps:
+        - run: echo test
+
+  actionlint now understands the evaluated structure and infers each job's selected os value. Case-insensitive property handling also preserves the matrix when the JSON uses Matrix instead of matrix.
+
+  The work extends to supported whole-object expressions for runs-on, job defaults.run, containers, services, environments, concurrency, snapshots, and step with. When values are statically known, actionlint checks their required fields, property names, nested types, and value constraints. Values only available at runtime remain deferred.
+
+  For example, an expression does not make an invalid concurrency combination valid:
+
+  concurrency:
+    group: build
+    queue: ${{ 'max' }}
+    cancel-in-progress: true
+
+  Previously, this was rejected simply because queue contained an expression. Now the expression is understood and the diagnostic explains the actual conflict: queue: max cannot be combined with cancel-in-progress: true. Known whole-map expressions receive the same check, including differently cased JSON keys.
+
+  Other refinements catch nonpositive or fractional max-parallel values, empty runner-label arrays, malformed snapshot version globs, and invalid elements inside expression-built collections. Interpolated strings retain their surrounding text: environment: pre-${{ '' }} is not mistaken for an empty environment name.
+
+  Use newer workflow fields without fighting the linter
+
+  Workflow descriptions and job cancellation timeouts are now supported. Both were reported as unexpected keys in 1.16.1:
+
+  description: Build and test the project
+  on: push
+  jobs:
+    test:
+      runs-on: ubuntu-latest
+      cancel-timeout-minutes: 2.5
+      steps:
+        - run: echo test
+
+  For cancel-timeout-minutes, this is support for a field present in GitHub's runner schema and parser fixtures. GitHub's public workflow syntax reference does not document this setting, and its cancellation reference describes a five-minute cancellation timeout. This release validates the field's numeric type and expression contexts. A live GitHub-hosted probe subsequently confirmed that values of 1 and 2 minutes are honored after cancellation: GitHub marked the jobs finished after 60 and 120 seconds, with runner shutdown signals arriving a few seconds later. The test used long-running always() cleanup steps; other values and runner environments were not tested. Jobs calling reusable workflows are kept distinct from jobs with their own steps: combining uses with fields such as services, snapshot, or cancellation timeouts no longer causes misleading recursive callee diagnostics.
+
+  Several smaller compatibility fixes make everyday YAML less surprising:
+
+  Workflow feature | What changes in 1.17.0
+  image_version | Recognizes created, ready, and deleted activity types, plus scalar or sequence names and versions filters.
+  Stacked pull requests | Accepts the stacked activity type for pull_request and pull_request_target.
+  Disabled services | Accepts image: '', GitHub's way to disable a service, instead of reporting an empty-string error.
+  Manual choice inputs | Accepts an empty choice option and matching empty default.
+  Schedule timezones | Accepts UTC aliases such as UTC and Universal; rejects machine-local Local.
+  YAML booleans | Decodes True and TRUE correctly instead of retaining them as false.
+
+  Catch missing checks before GitHub does
+
+  The audit also found invalid workflows that previously passed. Each schedule entry must have its own cron; a valid first entry no longer hides a broken second one:
+
+  on:
+    schedule:
+      - cron: '0 0 * * *'
+      - timezone: Europe/Amsterdam
+
+  1.17.0 reports "cron" is missing in element of "schedule" section at the second entry. Put timezone alongside the cron it belongs to:
+
+  on:
+    schedule:
+      - cron: '0 0 * * *'
+        timezone: Europe/Amsterdam
+
+  Expression coverage is more complete too. Snapshot image names and versions were previously skipped; they now receive syntax, type, and context checks. Snapshot conditions can resolve legitimate step outputs. Matrix include expressions check the actual included entry. Static required flags reject expressions, function argument limits follow the runner, and excessive expression nesting is diagnosed.
+
+  Look deeper inside local actions
+
+  The action-manifest audit covers Docker, JavaScript, and composite action structures using generated constraints from GitHub's runner schema. Referenced local actions now receive stronger checks for output declarations, Docker args and env, required fields, cross-runtime properties, composite step shapes, and expressions.
+
+  For example, with expects a mapping. In a composite action, adding an expression to a string does not turn it into one:
+
+  runs:
+    using: composite
+    steps:
+      - uses: actions/cache/restore@v6
+        with: prefix-${{ inputs.cache-key }}
+
+  That interpolated string is now rejected. Supply individual inputs in a mapping instead:
+
+        with:
+          path: .cache
+          key: prefix-${{ inputs.cache-key }}
+
+  A sole mapping-valued expression is supported where the runner allows it; interpolation and whole-map assignment have different meanings. Conversely, workflow steps passing a dynamic whole with mapping no longer receive invented missing-required-input errors for keys only known at evaluation time.
+
+  Full release notes: https://github.com/kjanat/actionlint/releases/tag/v1.17.0
+ReleaseNotesUrl: https://github.com/kjanat/actionlint/releases/tag/v1.17.0
+InstallationNotes: ShellCheck and pyflakes are optional. When installed, actionlint uses them to check shell and Python scripts in run steps.
+Documentations:
+- DocumentLabel: Usage
+  DocumentUrl: https://github.com/kjanat/actionlint/blob/v1.17.0/docs/usage.md
+- DocumentLabel: Configuration
+  DocumentUrl: https://github.com/kjanat/actionlint/blob/v1.17.0/docs/config.md
+- DocumentLabel: Checks
+  DocumentUrl: https://github.com/kjanat/actionlint/blob/v1.17.0/docs/checks.md
+- DocumentLabel: Installation
+  DocumentUrl: https://github.com/kjanat/actionlint/blob/v1.17.0/docs/install.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
