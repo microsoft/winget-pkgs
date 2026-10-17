@@ -1,0 +1,67 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Pinvou.PinvouAgent
+PackageVersion: 0.10.11
+PackageLocale: zh-CN
+Publisher: pinvou
+PublisherUrl: https://pinvou.com/
+PublisherSupportUrl: https://github.com/Pinvou/pinvou-agent/issues
+PackageName: pinvou3
+PackageUrl: https://pinvou.com/
+License: MIT
+LicenseUrl: https://github.com/Pinvou/pinvou-agent/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Pinvou
+ShortDescription: 开源桌面 AI 智能体工作台，覆盖工具、文件、知识与工作流。
+Description: Pinvou Agent 是一个开源的桌面 AI 智能体工作区，面向工作、设计与编程。它把日常事务、可视化设计和软件开发整合进同一个桌面工作区，让任务以真实结果收尾：可以使用工具、处理文件、积累个人知识，通过 ACP 在真实项目中引入专用编码智能体，或将提示词变成可持续编辑的可视化作品。
+Tags:
+- mcp
+- 人工智能
+- 工作流
+- 智能体
+- 知识库
+ReleaseNotes: |-
+  官方下载 / Official Downloads
+  Pinvou 已在新华三官网提供官方下载渠道：
+  - Windows x64：新华三官网 — pinvou3 for Windows
+  - macOS Universal：新华三官网 — pinvou3 for macOS
+  - H3C LinSeer MegaCube（Linux ARM64）：新华三官网 — pinvou3 for MegaCube
+  新华三官网与 GitHub Assets 均为官方分发渠道，版本同步可能存在时间差；下载前请确认页面显示的版本。v0.10.11 官网页面尚未同步更新，当前版本请优先使用本页下方 Assets。
+  新功能
+  1. 模型预设目录按厂商官方文档全面刷新（#693，2026-10-13 复核）：OpenAI 预设默认模型 gpt-6-sol → gpt-6.1-sol（官方 1,050,000 上下文 / 128K 最大输出，Rust 侧上下文与输出锚点随批补齐）；Anthropic 新增 claude-sonnet-5-5、claude-haiku-5-5（5.5 一代统一 1M 上下文 / 128K 输出），claude-haiku-4-5 标注 Azure 2026-11-15 退役日期；Gemini 4 Argon（gemini-4-argon，2026-10-13 GA）加入旗舰行，gemini-3.7-flash/gemini-3.5-flash 标注官方自动路由弃用；MiniMax M2.x 补齐官方退役时间线（新用户 2026-10-19 起、Token Plan 直连至 2026-11-18，此后自动路由 M3.1 Flash Preview）；腾讯云 Coding Plan 收敛至 tc-code-latest 并镜像线上新增的 deepseek/deepseek-flash、mimo-v2.6-flash 行；阿里 Coding Plan 按 2026-10-10 官方页面重同步（移除已下架的 qwen3-coder-plus/qwen3-coder-next/glm-4.7，新增 qwen3.5-plus 官方 1M 上下文）。ACP 通道建议列表同步新增三个新 id（append-only），en/ja 文案 overlay 同批清理死键。已下架的预设行自动回退自定义列表，端点分类不变。
+  问题修复
+  1. 幽灵会话目录复活根治（#690）：保留期清除删除会话记录与目录后，codex_acp 的 session-agents.json 索引条目此前未被同步移除，每次启动的 sidecar 回填循环会为死条目重新生成 code-session.json，批量制造不可见、打不开的幽灵目录（实机事故一秒内产生 46 个、累计约 370 个）。现在清除钩子（保留期驱逐、定时清理）在每次 purge 时同步移除索引条目封住源头；启动扫描清理死索引条目与无记录幽灵 sidecar，存量污染自动收敛；回填循环只对仍有存活记录的条目执行。另将调试构建下的无窗宿主启动改为在 PINVOU3_HOME 未设置/为空时快速失败，防止进程内测试静默写入真实 ~/.pinvou3 并触发保留期清扫误删用户最旧会话（正式构建不受影响）。
+  2. macOS 内嵌浏览器上报 Safari 级 User-Agent（#700，0.10.10 实测发现）：WKWebView 出厂 UA 刻意省略 Version/x Safari/x 令牌，UA 嗅探网站据此判定浏览器过旧——bilibili.com 服务端 302 到「您的浏览器版本过低哦」提示页。现在 macOS 浏览器 WebView 显式设置 Safari UA，Version/ 主版本取自本机已安装 Safari（随 Safari 更新如实反映实际 WebKit 能力），Windows/Linux 系统默认不受影响。
+  3. 目录外云模型申报官方输出上限，修复 deepseek-flash 推理截断（#698）：官方 DeepSeek API 的 deepseek-flash 不被底座输出上限规则识别，按目录外模型被保守钳制 8,192 输出 token，思维链烧满后 finish_reason=length、只有推理无正文并报错（0.10.7 实报场景）。现在 PINVOU_DOCUMENTED_OUTPUT 锚点表补 deepseek-flash 与腾讯拼写 deepseek/deepseek-flash（官方 384K）、glm-5.3-flashx（官方 128K），云预设经既有锚点链申报路由事实后 max_tokens 从 8K 升至 64K，截断消失；max_tokens 是上限非目标，模型自然停止即停，成本不受影响。并配 fill-gap 保护（底座已收录 id 不被锚点行错误收紧）与 wire 层回归测试。
+  内部改进
+  1. CodeWhale 底座升级（#705）：gitlink 480bebf6 → 803e672bb，聚合 2026-10-14 批次——#54 multi-root workspace_roots 授权基建（runtime lanes；父仓以空集最小适配保持既有单根行为逐字节不变，多根功能面留待后续 PR）、#107 同模型 model-aware 请求保持宿主申报路由限额（TUI 内部修复，不改 API 面，#698 的底座侧配套）。fork 登记与四份中英文档随批同步（EXPECTED_COMMITS 68→70）。随批处置供应链门禁事件：rustls 0.23.45 → 0.23.46（RUSTSEC-2026-0346/0347/0348/0349 四条通告），移除已撤销公告 RUSTSEC-2024-0415 的失效 ignore。
+  注意事项
+  - #693 目录刷新后，官方页面已下架的预设行（GLM-5/GLM-5.1、qwen3-coder-plus、qwen3-coder-next、glm-4.7 等）自动回退到自定义列表，端点分类不变；已有模型配置与凭据保持兼容。
+  - MiniMax 国内默认端点维持 api.minimaxi.com/v1：官方新文档的 api.minimax.cn/v1 尚未进入底座精确路由 effort 门，单独切换应用侧默认会静默丢失 M3 推理档位 UI，待上游先行（#693 披露）。
+  - 官网页面版本同步可能滞后，下载前请确认页面显示的版本。
+  - Windows 和 macOS 安装包尚未正式签名。Windows 首次安装可能出现 SmartScreen 提示；macOS 首次打开如被 Gatekeeper 拦截，可在确认安装包来源可信后解除隔离再打开。
+  - 安装包与发布产物由版本 PR 合入 main 后触发的发布工作流构建，未在本地构建。
+  - 本次为预览版本，欢迎通过 GitHub Issues 反馈问题。
+  构建来源：main @ a1f6d1b86 / Actions #38644133430（四平台安装包同源构建）
+  官网更新日志
+  zh-CN
+  新功能
+  - 模型预设目录 2026-10 全面刷新：OpenAI 默认 gpt-6.1-sol、Anthropic 新增 claude-sonnet-5-5/claude-haiku-5-5（1M 上下文）、Gemini 4 Argon 旗舰行、MiniMax M2.x 退役时间线、腾讯/阿里 Coding Plan 重新对齐官方页面；已下架预设行自动回退自定义列表，已有配置与凭据保持兼容。
+  修复
+  - 幽灵会话目录不再复活：保留期清除同步移除 code-mode 索引条目封住源头，启动扫描清理存量幽灵目录。
+  - macOS 内嵌浏览器上报 Safari 级 User-Agent（跟随本机已装 Safari 主版本），不再被 UA 嗅探网站误判为过旧浏览器（如 bilibili 跳「版本过低」提示页）。
+  - 目录外云模型按官方文档申报输出上限：deepseek-flash 384K（修复思维链烧满 8K 误钳制导致的「只有推理无正文」报错）、glm-5.3-flashx 128K。
+  内部改进
+  - CodeWhale 底座升级（multi-root workspace_roots 授权基建 + 同模型请求保持宿主申报路由限额）；rustls 升级 0.23.46（四条 RUSTSEC-2026 通告随批处置）。
+  en-US
+  New
+  - Model preset catalog fully refreshed against vendor docs (2026-10): OpenAI default moves to gpt-6.1-sol, Anthropic gains claude-sonnet-5-5/claude-haiku-5-5 (1M context), Gemini 4 Argon joins as flagship, MiniMax M2.x retirement timeline annotated, Tencent/Alibaba coding plans re-synced to their official pages. Retired preset rows fall back to the custom listing; existing model configurations and credentials stay compatible.
+  Fixes
+  - Ghost session directories no longer resurrect: retention purges now remove the code-mode agents-index entry, and the boot scan disposes leftover ghost sidecars so existing pollution converges.
+  - The embedded browser on macOS reports a Safari-class user agent (Version major derived from the installed Safari), so UA-sniffing sites such as bilibili no longer redirect to a "browser too old" page.
+  - Out-of-catalog cloud models declare documented output caps: deepseek-flash 384K (fixing the reasoning-only, no-answer error caused by a conservative 8K clamp) and glm-5.3-flashx 128K.
+  Internal improvements
+  - CodeWhale base upgraded to 803e672bb (multi-root workspace_roots authorization infrastructure + host-declared route limits kept for same-model requests); rustls bumped to 0.23.46 (four RUSTSEC-2026 advisories addressed).
+ReleaseNotesUrl: https://github.com/Pinvou/pinvou-agent/releases/tag/v0.10.11
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
