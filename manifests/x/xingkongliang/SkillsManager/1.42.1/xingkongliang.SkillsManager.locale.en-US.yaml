@@ -1,0 +1,52 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: xingkongliang.SkillsManager
+PackageVersion: 1.42.1
+PackageLocale: en-US
+Publisher: xingkongliang
+PublisherUrl: https://github.com/xingkongliang
+PublisherSupportUrl: https://github.com/xingkongliang/skills-manager/issues
+PackageName: Skills Manager
+PackageUrl: https://skillsmanager.dev/
+License: MIT
+LicenseUrl: https://github.com/xingkongliang/skills-manager/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Tianliang Zhang
+ShortDescription: One app to manage AI agent skills across all your coding tools.
+Description: |-
+  Skills Manager is a desktop app that keeps AI agent skills in one central library and installs them into coding tools such as Claude Code, Codex, Cursor, Copilot, and Gemini CLI. Skills can be installed from Git repositories, local folders, .zip or .skill archives, or the skills.sh marketplace, then grouped into presets, tagged and filtered, and tracked for upstream updates.
+  Global and project workspaces show what each agent actually sees, and skills sync to any supported tool via symlink or copy. Skills Manager also backs the library up to a Git remote for multi-device sync and records every install, remove, update, and sync operation in an activity log.
+Tags:
+- agent
+- agentic
+- ai
+- large-language-model
+- llm
+- skills
+ReleaseNotes: |-
+  Release date: 2026-10-17
+  Commit range: v1.42.0...v1.42.1
+  Release Overview
+  - Fixes for skills that came back after being removed from a preset, preset changes that did not reach other devices, monorepo skills that always showed an update, and workspace folders deleted by a single click. The market now shows the real error, and local, Windows and Linux installs get smaller fixes.
+  User-facing
+  - Removing a skill from a workspace asks first — In a library skill's Project Workspaces block, clicking the green "Added" chip deleted the skill's folder from the workspace at once. The folder did not go to the Trash, and in a linked workspace it is the folder the agent reads. The chip now asks first. On a project page, turning an agent off for a skill, or turning a preset off, also asks when a workspace copy differs from the library (#542).
+  - Skills removed from the active preset stay removed — Removing a skill that belongs to the active preset came back at the next launch. This happened whether you removed it on an agent page, from the tray, or with skills-manager-cli presets undeploy / skills undeploy. The removal is now kept, and deploying the skill again brings it back (#549).
+  - Removing the last preset member syncs to your other devices — When you removed the last skill from your presets, other devices kept the old membership. They could even back it up again, so the removed skill came back everywhere. Removals now sync (#553).
+  - Monorepo skills no longer always show an update — A skill installed from a subfolder of a repository was flagged "update available" after any commit anywhere in that repository. Now only changes to its own folder count (#561, #507).
+  - Remove a partially added preset — When only some of a preset's skills are in a workspace, a × next to the preset removes them. Thanks to @huoguojun123 (#571).
+  - The market shows the real error — When skills.sh could not be reached, the market said [object Object]. It now shows the cause, such as a timeout or a DNS failure (#529).
+  - Uploading a local-only skill whose folder links back into the library works — It failed with "infinite recursion". Thanks to @shuaiyafei (#565, #560).
+  - Windows: installing a local skill now shows the skill's name, not its full path, in the confirmation. Thanks to @shuaiyafei (#558, #512).
+  - Linux: the tray icon no longer turns into another Tauri app's icon while both are running. Thanks to @jubeater (#564, #563).
+  Developer & Governance
+  - Settings reads the app version at runtime with getVersion(). The locale files hold a {{version}} template, and release:prepare no longer rewrites them. Thanks to @shuaiyafei (#557, #511).
+  - Sync metadata counts a preset snapshot as complete when schema.json and scenarios/ exist. A missing scenario-skills/ now means zero memberships, because Git drops the empty directory.
+  - Per-agent preset toggles changed outside the skill detail panel are written to that member's metadata file under the repo lock. Before, they were stored only in the database, and the next reindex overwrote them. apply_skills_to_tools now writes these toggles for active-preset skills before it adds or removes anything.
+  - The update check for subfolder skills fetches only trees and commits (--filter=blob:none --depth=1) into a throwaway bare repository. It compares the subfolder's tree and every ancestor .gitattributes with libgit2. Any failure still reports an update.
+  - When the central destination of a local install is a real directory, the install returns early; a symlink there is still copied into the library.
+  Current Verification
+  - ✅ Cross-platform build passed (macOS Intel / macOS ARM / Windows x64 / Linux x64 / Linux ARM64)
+  - ✅ TypeScript typecheck passed
+ReleaseNotesUrl: https://github.com/xingkongliang/skills-manager/releases/tag/v1.42.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
