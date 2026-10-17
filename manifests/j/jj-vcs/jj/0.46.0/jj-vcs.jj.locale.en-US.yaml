@@ -1,0 +1,166 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: jj-vcs.jj
+PackageVersion: 0.46.0
+PackageLocale: en-US
+Publisher: jj-vcs
+PublisherUrl: https://github.com/jj-vcs
+PublisherSupportUrl: https://github.com/jj-vcs/jj/issues
+PackageName: jj
+PackageUrl: https://github.com/jj-vcs/jj
+License: Apache-2.0
+LicenseUrl: https://github.com/jj-vcs/jj/blob/HEAD/LICENSE
+ShortDescription: A Git-compatible VCS that is both simple and powerful
+Description: A Git-compatible VCS that is both simple and powerful
+Moniker: Jujutsu
+Tags:
+- cli
+- git
+- mercurial
+- vcs
+ReleaseNotes: |-
+  About
+  jj is a Git-compatible version control system that is both simple and powerful. See
+  the installation instructions to get started.
+
+  Release highlights
+  - Jujutsu can now colocate workspaces besides the default one by creating Git
+    worktrees. Use jj workspace add --[no-]colocate and the setting
+    git.colocate to control this.
+
+  Breaking changes
+  - The minimum supported git command version is now 2.42.0, up from 2.41.0.
+    jj workspace add uses git worktree add --orphan, which was added in
+    2.42.0.
+  - The minimum supported Rust version (MSRV) is now 1.97.1.
+  - jj bisect run now runs some consistency checks before proceeding to bisect.
+    This helps ensure that the command can tell good and bad revisions apart,
+    and that the working copy does go from bad to good over the provided revset.
+    Use the new flag --trust-endpoints to disable these checks.
+  - jj split now opens a single editor session to edit descriptions for the
+    split commits.
+  - jj undo and jj redo now refuse to undo/redo an operation that was
+    performed in another workspace. Use --allow-cross-workspace to undo/redo
+    it anyway.
+  - jj workspace list/root no longer omit unreachable paths. All recorded
+    paths are now shown, with warnings displayed in jj workspace root.
+  - The List.get(), .first(), and .last() template functions now return
+    Option<T> instead of throwing an error on out-of-bounds access.
+
+  New features
+  - jj workspace add supports --colocate/--no-colocate flags to control
+    whether a Git worktree is created alongside the workspace. The default
+    colocates when the current workspace is colocated and the git.colocate
+    config is true. jj workspace forget removes the corresponding Git
+    worktree when one exists.
+  - jj git colocation status/enable/disable now work on child
+    workspaces. status correctly reports colocation state and includes
+    the workspace name. enable creates a Git worktree and disable
+    removes it, allowing colocation to be toggled after workspace
+    creation.
+  - jj workspace remove removes a workspace and its directory from disk. The
+    working-copy state is snapshotted into a commit before removal.
+  - Added commands jj file edit and jj file delete for editing files in any
+    revision without needing to change the working copy.
+  - jj git push now supports pushing to multiple remotes at the same time.
+    This can be configured via git.push set to a string pattern
+    or array of string patterns, or with the repeatable --remote flag,
+    which also accepts string patterns.
+  - The default target revisions for jj git push can now be configured via
+    revsets.git-push.
+  - Added the TreeEntry.normal_value() template method and the TreeValue type
+    to access resolved tree values, formatted as their full object IDs, including
+    Git submodule commit IDs.
+  - Diff hunk headers now include nearby source symbols for many common
+    programming and markup languages.
+  - fix.tools.<name>.line-range-args (replaces line-range-arg) is an array of
+    string template args to pass to the fix tool. This is more flexible in cases
+    where you need to pass multiple arguments to the tool, such as separate args
+    for the range start and range end.
+  - jj run now uses the sparse patterns from the workspace it's run from.
+    Use the --sparse-patterns option to control this behavior (evaluated
+    per each jj run invocation).
+  - jj util diff <path1> <path2> to compare files on disk.
+  - Aliases now support setting aliases.<name>.enabled = false, which will
+    disable them. This can be used to disable built-in aliases or disable aliases
+    in later layers (such as repo config files).
+  - ui.editor now supports $path and $line substitution variables. Example:
+    ui.editor = ["emacs", "+$line", "$path"]
+  - fill template function now supports an additional named parameter
+    break_words, that allows specifying if the template should break words
+    longer than width passed in the input to ensure no words overflow the
+    specified width.
+  - The json() template function now supports map literals: json({'key' => value})
+  - The hunk headers of diff.color-words.conflict = "pair" now include the
+    conflict labels of the compared terms.
+
+  Fixed bugs
+  - On Windows, jj no longer hangs when a subprocess needs to prompt the user,
+    such as ssh asking for a key passphrase or for confirmation of an unknown
+    host key. Subprocesses started from a terminal now inherit its console, rather
+    than being given an invisible one by CREATE_NO_WINDOW for the prompt to
+    disappear into.
+    #6745
+    #8547
+  - On Windows, jj git colocation enable and jj git colocation disable no
+    longer fail with "Access is denied (os error 5)" when the Git repository
+    contains pack files.
+    #8661
+  - jj undo of jj workspace forget now correctly preserves the workspace's
+    recorded path. Previously the path metadata was lost, leaving the workspace
+    in a broken state after undo.
+    #9991
+  - at_operation() can now be used with operations that are not ancestors of
+    the current operation (e.g. sibling operations created by concurrent
+    commands). Previously, evaluating such expressions failed if they resolved
+    to commits missing from the current operation's index.
+  - .gitignore files are now respected even if they aren't materialized in the
+    working copy because they are excluded by the sparse patterns. Previously,
+    ignored files could become tracked in a sparse working copy.
+    #2289
+  - In-tree ignore files (.gitignore) are no longer read through symlinks,
+    matching git behavior. Such files are now silently skipped instead of having
+    their symlink target applied. $GIT_DIR/info/exclude and core.excludesFile
+    are unaffected and still follow symlinks, as git does.
+    #7161
+  - jj workspace list templates are now labeled with workspace name,
+    workspace root, etc.
+
+  Contributors
+  Thanks to the people who made this release happen!
+  - Aaron Bies (@slerpyyy)
+  - Austin Seipp (@thoughtpolice)
+  - Bartok9 (@Bartok9)
+  - Brice Figureau (@masterzen)
+  - Bryan O'Sullivan (@bos)
+  - Caleb White (@calebdw)
+  - David Rieber (@drieber)
+  - Farid Zakaria (@fzakaria)
+  - Gabriel Goller (@kaffarell)
+  - Gasper Stukelj (@mirkomartn)
+  - Jakub Stasiak (@jstasiak)
+  - JamBalaya56562 (@JamBalaya56562)
+  - Joseph Lou (@josephlou5)
+  - Karnajeet Gosavi (@kg290)
+  - LOG (@logarithmone1128)
+  - Martin von Zweigbergk (@martinvonz)
+  - Matt Stark (@matts1)
+  - Mustafa Officewala (@genericusername2709)
+  - pederbe (@pederbe)
+  - Philip Metzger (@PhilipMetzger)
+  - Pro (@twistedfall)
+  - Remo Senekowitsch (@senekor)
+  - Sami Hiltunen (@SamiHiltunen)
+  - sofia (@badp)
+  - Stephen Jennings (@jennings)
+  - Vincent Ging Ho Yim (@cenviity)
+  - xtqqczze (@xtqqczze)
+  - Yannik Sander (@ysndr)
+  - Yuya Nishihara (@yuja)
+ReleaseNotesUrl: https://github.com/jj-vcs/jj/releases/tag/v0.46.0
+Documentations:
+- DocumentLabel: Homepage
+  DocumentUrl: https://jj-vcs.github.io/jj/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
