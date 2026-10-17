@@ -1,0 +1,67 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: mateo-ki.VPNParser
+PackageVersion: 1.8.0
+PackageLocale: zh-CN
+ShortDescription: Windows 桌面程序：采集订阅、解析成节点、跑代理，并把代理质量实测出来。
+Description: VPN Parser 是用 Rust + egui 编写的 Windows 桌面程序，负责采集免费或自建订阅、解析成节点、跑代理，并把代理质量实测出来。订阅入口包括带 `YYYY-MM-DD` 日期占位符的订阅 URL、Gist 搜索页发现，以及 Telegram 频道预览（裸节点链接和订阅链接两类都取，节点只增不删）。解析支持 `ss` `vmess` `vless` `trojan` `hysteria2/hy2` `socks5` `http(s)` 分享链接，以及 Clash / Clash Meta YAML、Base64 与混合文本。延迟以经内核访问 Google `generate_204` 的真实握手为准，24 小时出口健康条按实测绘制，而不是看内核上报的状态。Windows 上它同时管理系统代理、TUN（提权交接后只保留一个实例）和终端 `HTTP_PROXY` 环境变量，按 exe 路径添加防火墙允许规则，支持单实例互斥与托盘，记录出口切换历史并按天统计规则命中，同时提供强制 bearer 鉴权的本地 HTTP API 与 mihomo / sing-box / xray 配置导出。安装包不含内核，内核缺失时由程序按需下载。
+Tags:
+- clash
+- sing-box
+- 代理
+- 出口健康
+- 测速
+- 节点解析
+- 订阅
+ReleaseNotes: |-
+  🚀 VPN Parser v1.8.0 发布说明 / Release Notes
+  🎉 欢迎使用 VPN Parser v1.8.0！这是一个具有里程碑意义的重大版本更新，正式全面拥抱 OpenWrt 路由器生态，支持一键构建和安装 OpenWrt 原生 .ipk 软件包，让 vpn-parser 能够直接作为高可用微服务常驻运行在软路由（x86_64）或大内存硬路由（ARM64）中！同时整合了极致内存调优、高检出率测速管道、以及全新的订阅源节点卡片弹窗交互。
+
+  🌟 新特性与核心更新
+  🌐 1. OpenWrt 原生支持与微服务化守护
+  - 官方 .ipk 原生软件包发布：
+    - 新增标准 OpenWrt opkg 格式安装包，覆盖 x86_64（通用软路由、工控机、PVE/ESXi）与 aarch64_generic（主流 ARM64 软硬路由，NanoPi R2S/R4S/R5S、友善、GL.iNet 等）；
+  - OpenWrt procd 进程守护系统集成：
+    - 提供开箱即用的 /etc/init.d/vpn-parser 脚本，支持 start、stop、restart、reload、status；
+    - 配备 procd 崩溃自愈保护（respawn 3600 5 0），异常退出 5 秒内自动拉起，保障微服务永久在线；
+    - 增加对 Unix SIGTERM 关停信号的捕获支持，停机时优雅终止代理与内核，释放网络端口与文件锁；
+  - UCI 统一配置系统支持 (/etc/config/vpn-parser)：
+    - 支持通过 OpenWrt 原生 uci 命令行或后台修改监听地址、数据库路径与鉴权 Token；
+  - 只读文件系统自适应与系统 $PATH 内核复用：
+    - 完美适配 OpenWrt SquashFS 只读根目录，避免目录切换异常；
+    - 自动探测系统 $PATH（/usr/bin 等）中已由 opkg 安装的 mihomo、sing-box、xray 内核，无需重复下载内核，极大地节省了路由器的 Flash 存储空间；
+  - 无缝衔接透明代理生态：
+    - 路由器的 OpenClash、PassWall、SSR-Plus 等插件可直接将订阅地址填入本地回路 http://127.0.0.1:8080/api/export/clash?quality_only=true&limit=50，获取全天候自愈、保活、低延迟的优质纯净节点池。
+
+  🚀 2. 极致内存瘦身与数据库连接自愈
+  - 根治 attempted to acquire a connection on a closed pool：
+    - 移除定时清理中的强制连接池关闭，改用非破坏性的 PRAGMA shrink_memory; 释放 SQLite 缓存页；
+    - 引入连接池 !pool.is_closed() 自愈重建机制，彻底解决并发测速与代理切换过程中的连接池失效问题；
+  - 单分库精准定向路由：
+    - 针对 get_node(id) 优先查询主库 node_index 索引定位所属订阅源，耗时骤降至 <0.1ms；
+  - 零堆分配字节滑动窗口过滤：
+    - 万级节点名称与服务器检索应用 ASCII 字节切片比较（contains_ignore_ascii_case），消除每次击键产生的大量堆内存开销；
+  - 内存水位大幅压降：
+    - 进程私有工作集内存自 174MB+ 压降至 ~20MB-30MB 水平，极为适合路由器 RAM 资源受限环境。
+
+  ⚡ 3. 测速高吞吐、低误报与最大节点检出率
+  - 双端回退探活机制 (Google → Cloudflare 204)：
+    - sing-box 与 xray 代理内核全面覆盖 Cloudflare 204 回退验证，杜绝单纯因 Google 连通性限制而误判健康节点为不可用；
+  - DNS 预解析去重与直连 IP 直通：
+    - 探测阶段 IPv4/IPv6 地址直接直通，跳过异步 DNS 解析开销；按主机名聚合预解析，消除 80%~95% 冗余 DNS 流量；
+  - 多候选 IP 预算平摊：
+    - 多个解析 IP 均分连接超时预算，单死 IP 不再拖垮整体节点探测；Fast 强度测速宽限至 3000ms。
+
+  🎨 4. 节点池与订阅源管理深度重构
+  - 节点池专属全库视图：
+    - 移除原节点池横向订阅源选项卡，节点池专注于全量节点的高效检索与分类过滤；
+  - 订阅源名称点击弹出节点卡片列表：
+    - 订阅源列表点击任意源名称，立即唤出专属浮层窗口；
+    - 完整复用节点卡片列表 (render_node_cards_grid)：自适应网格排版，支持左键点击连接代理、右键菜单测速/详情/IP 风险画像/删除节点，内置独立统计、翻页、搜索与一键测速该源全部节点；
+  - 状态筛选控件统一：
+    - 节点池与订阅源弹窗统一采用 🟢 仅看可用 胶囊按钮，移除搜索栏多余的复选框；
+  - Gist 发现配置持久化与回显：
+    - 发现深度（页数）与协议检索条件持久化保存至 SQLite，应用重启与弹窗重开自动回选上次配置。
+ManifestType: locale
+ManifestVersion: 1.12.0
