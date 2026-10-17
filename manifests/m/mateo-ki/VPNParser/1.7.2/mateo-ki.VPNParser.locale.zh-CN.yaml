@@ -1,0 +1,47 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: mateo-ki.VPNParser
+PackageVersion: 1.7.2
+PackageLocale: zh-CN
+ShortDescription: Windows 桌面程序：采集订阅、解析成节点、跑代理，并把代理质量实测出来。
+Description: VPN Parser 是用 Rust + egui 编写的 Windows 桌面程序，负责采集免费或自建订阅、解析成节点、跑代理，并把代理质量实测出来。订阅入口包括带 `YYYY-MM-DD` 日期占位符的订阅 URL、Gist 搜索页发现，以及 Telegram 频道预览（裸节点链接和订阅链接两类都取，节点只增不删）。解析支持 `ss` `vmess` `vless` `trojan` `hysteria2/hy2` `socks5` `http(s)` 分享链接，以及 Clash / Clash Meta YAML、Base64 与混合文本。延迟以经内核访问 Google `generate_204` 的真实握手为准，24 小时出口健康条按实测绘制，而不是看内核上报的状态。Windows 上它同时管理系统代理、TUN（提权交接后只保留一个实例）和终端 `HTTP_PROXY` 环境变量，按 exe 路径添加防火墙允许规则，支持单实例互斥与托盘，记录出口切换历史并按天统计规则命中，同时提供强制 bearer 鉴权的本地 HTTP API 与 mihomo / sing-box / xray 配置导出。安装包不含内核，内核缺失时由程序按需下载。
+Tags:
+- clash
+- sing-box
+- 代理
+- 出口健康
+- 测速
+- 节点解析
+- 订阅
+ReleaseNotes: |-
+  🚀 VPN Parser v1.7.2 发布说明 / Release Notes
+  🎉 欢迎使用 VPN Parser v1.7.2！此版本是一次里程碑式的跨平台体验与稳定性升级，全面攻克了 Linux 多桌面环境（Fedora / GNOME / niri / DMS）的 9 项兼容性体验瓶颈，为虚拟机（VirtualBox）与老旧 CPU 架构引入了智能回退兼容内核，并带来了全新的状态栏内核下载实时进度与测速稳定性调优。
+
+  🌟 新特性与核心更新
+  🐧 1. Linux 多桌面环境深度兼容 (Fedora / GNOME / niri / DMS)
+  - 内核路径自适应识别：修正内核更新器候选查找路径，将 $XDG_DATA_HOME 及 ~/.local/share/vpn-parser/kernels 作为第一优先级候选，彻底解决 Linux 下 Mihomo 内核安装后无法被发现导致循环重新下载的问题；
+  - 桌面窗口管理优雅回退：在未接入 Win32 托盘机制的 Linux 环境下，点击标题栏关闭按钮安全退出程序，点击最小化按钮正常最小化窗口，彻底解除被失效的停放逻辑卡死的现象；
+  - Wayland / DMS Dock 图标原生绑定：配置 egui::ViewportBuilder::with_app_id("vpn-parser")，精确关联 .desktop 规范，解决 niri + DMS Dock 及 GNOME Wayland 环境下应用图标丢失为通用占位符的问题；
+  - 代理内核启动生命周期守护：补齐 Linux 启动代理时的系统代理能力检查守卫，避免因平台不支持注册表修改而引发致命错误，进而误杀 kill_on_drop 刚拉起的本地内核进程；
+  - 内核日志实时轮询与交互：切换至“运行日志”页面时自动以 1.5 秒频率实时拉取代理内核标准输出，并提供手动「刷新日志」「复制全部」与「清空显示」工具；
+  - 订阅拉取结果断点恢复：启动及重新加载时自动从本地 SQLite 数据库恢复最近拉取明细，当拉取失败时完整展示报错详情及排查指引；
+  - AppImage 智能环境更新：通过 APPIMAGE/APPDIR 识别运行态环境，检查更新时优先推荐 AppImage 资产，并在启动时自动授予 +x 执行权限。
+
+  ⚡ 2. 内核下载断流熔断与虚拟机 (VirtualBox) 指令集自适应
+  - 镜像断流 12 秒智能熔断：在流式分块读取中引入 CHUNK_IDLE_TIMEOUT = 12s 超时机制，解决 gh-proxy 偶发性连接保持但零数据停滞导致的下载卡死问题；
+  - 多镜像故障转移链 (candidate_urls_for)：为各下载方式建立主备镜像链，gh-proxy 停滞或报错自动无缝降级至 ghfast 备用镜像，ghfast 异常自动切换至 gh-proxy，全流程自动重试；
+  - VirtualBox 0xC0000005 崩溃自动降级：捕获虚拟机特权指令冲突（STATUS_ACCESS_VIOLATION），当标准版内核在虚拟机中崩溃时，自动切换下载 MetaCubeX 官方专为虚拟机和老 CPU 编译的 compatible 兼容版资产；
+  - Defender / 虚拟机首次执行查毒放宽：将内核版本探测超时由 5 秒放宽至 15 秒，给 VirtualBox 虚拟机和 Windows Defender 留出充足的首次沙盒查毒时间，杜绝首次运行误报超时。
+
+  📊 3. 预备阶段状态栏下载进度实时反馈
+  - 状态栏百分比与速率显示：内核下载过程中，底部状态栏动态显示当前百分比与速率，如：
+    [动效] 下载内核 45% 以及 状态：正在下载 mihomo-windows-amd64-v1.19.32.zip 45% (10.1MB / 22.5MB, 2.15 MB/s) · ghfast 镜像；
+  - 迷你进度条无缝嵌入：状态栏左侧指示器旁直接嵌入平滑填充的迷你 ProgressBar 控件；
+  - 侧边栏状态徽章联动：左侧工作区状态徽章同步联动更新为 预备 · 下载内核 45%。
+
+  🛠️ 4. 节点池与测速网络抗抖动优化
+  - 全部订阅源列表修复：修复切换节点池分组至“全部订阅源”时由于条件守卫拦截导致节点列表被意外清空的问题；
+  - 测速超时与并发调优：将 TCP 预过滤和 DNS 并行解析超时时间从 800ms 放宽至 2500ms，将默认最大并发由 128 调整为 64，防止家用路由器 NAT 状态表被打满丢包，避免可用慢节点被误判超时。
+ManifestType: locale
+ManifestVersion: 1.12.0
