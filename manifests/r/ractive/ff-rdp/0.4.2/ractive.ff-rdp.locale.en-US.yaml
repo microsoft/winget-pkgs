@@ -1,0 +1,40 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ractive.ff-rdp
+PackageVersion: 0.4.2
+PackageLocale: en-US
+Publisher: ractive
+PublisherUrl: https://github.com/ractive
+PublisherSupportUrl: https://github.com/ractive/ff-rdp/issues
+Author: James Bergamin
+PackageName: ff-rdp
+PackageUrl: https://github.com/ractive/ff-rdp
+License: MIT
+LicenseUrl: https://github.com/ractive/ff-rdp/blob/HEAD/LICENSE
+ShortDescription: Use Firefox's Remote Debugging Protocol via a CLI
+Description: CLI for Firefox Remote Debugging Protocol — inspect, test, and automate Firefox from the terminal. Supports navigation, DOM queries, screenshots, accessibility audits, performance analysis, network monitoring, and more. Designed for both human users and AI agents.
+Moniker: ff-rdp
+Tags:
+- agentic-skills
+- agentic-workflow
+- cli
+- firefox
+- firefox-rdp
+ReleaseNotes: |-
+  Phone-width screenshots of the live tab, settled dark-mode captures, and clicks that work on smooth-scrolling pages. Every dependency is on its latest release, which clears this week's RustSec advisories for rustls and zip.
+  Added
+  - screenshot --viewport WxH (e.g. 390x844) captures the current page at that exact CSS width on the live tab. It does this by overlaying a same-origin iframe of that size, so media queries see the narrow width. It waits for in-view lazy images, and the result reports viewport, load_complete, images_settled and window_clipped. Pages that refuse framing (X-Frame-Options, CSP frame-ancestors/frame-src) get an error that names the cause and points to --window-size. The iframe loads the page fresh, so state from earlier commands (an open dialog, a filled form) is not in the capture. (#339)
+  Fixed
+  - click no longer fails with click_offscreen on the first try on pages with html { scroll-behavior: smooth }. The element is now scrolled into view instantly before it is measured. The same fix applies to scroll text, scroll until, scroll to/by without --smooth, scroll top/bottom and scroll container, which now all report the settled position. (#337)
+  - screenshot --color-scheme and --media wait for the CSS transitions and animations started by the switch, up to 2 s, so buttons are no longer captured halfway between themes. The result reports emulation.settled. (#336)
+  - consent accept handles Sourcepoint's US opt-out notice and BBC's US "Accept and Continue" notice. (#329, #331)
+  Security
+  - rustls 0.23.46 and zip 9.0.5 (from a pinned 0.6.6) for RUSTSEC-2026-0346–0349 and 0367–0369. The reader for the English language pack was hardened for zip 9: names in the Unicode-path extra field can no longer mask a member's real name, the archive must use the central directory that was validated, and zip 9's own header-consistency check now runs. (#338, #340)
+  Internal
+  - All dependencies upgraded to their latest releases (base64 0.23, sha2 0.11, dirs 7, windows-sys 0.61, toml 1.1, jsonschema 0.59, png 0.18, jaq-*), along with the GitHub Actions they use. The MSRV stays 1.95. (#340)
+  - The release pipeline moved to release-workflows v0.3.1, which adds macOS signing and notarisation. (#332–#334)
+  - kb/backlog/issues/ is now the intake for issue reports from other projects. (#335) A consent-probe workflow and live-test changes support the US consent work. (#328, #330)
+ReleaseNotesUrl: https://github.com/ractive/ff-rdp/releases/tag/v0.4.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
