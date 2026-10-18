@@ -1,0 +1,53 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Bibapcs.BibaYanji
+PackageVersion: 0.0.4
+PackageLocale: zh-CN
+Publisher: 笔吧验机
+PublisherUrl: https://github.com/Bibapcs
+PublisherSupportUrl: https://github.com/Bibapcs/BibaYanji/issues
+Author: Bibapcs
+PackageName: 笔吧验机
+PackageUrl: https://github.com/Bibapcs/BibaYanji
+License: MIT
+LicenseUrl: https://github.com/Bibapcs/BibaYanji/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Bibapcs（笔吧验机项目贡献者）
+ShortDescription: 二手/新机到手后的验机工具
+Description: |-
+  二手/新机到手后的硬件配置核对工具：一键采集 CPU、显卡、内存、硬盘、网卡、屏幕（含色域估算）、电池信息， 人工与订单配置逐项核对，确认无误后标记通过（左侧导航圆点变绿）。
+  全部硬件采集基于开源组件与 Windows 自带接口，不含任何闭源商业软件。
+
+  功能
+
+  - 配置核对：进入页面即自动后台采集（不卡界面，有分阶段进度），分组卡片展示，核对后点「确认无误，通过」：
+    - CPU：型号、核心/线程数
+    - 显卡：型号、显存（NVAPI/ADL 或注册表 qwMemorySize 直读，避免 WMI 超过 4 GB 溢出的问题）、驱动版本
+    - 内存：总容量、实际运行频率（BIOS 当前设定值）；每根详情（插槽/标称与实际频率/厂商/料号）折叠在「详细信息」中
+    - 硬盘：容量、盘符（C:/D: 等，一块盘多个盘符会并列显示）、型号、健康度、通电时间（SMART 直读，需管理员权限；读不到时显示「未知」）
+    - 网卡：型号（全部物理网卡，与设备管理器显示一致）
+    - 屏幕：分辨率、刷新率、尺寸（对角线英寸）、面板名称、色域 —— 由 EDID 色度坐标估算的 sRGB / DCI-P3 容积比（面板顶点可超出标准色域，比值可能 >100%，是容积比而非覆盖率）
+    - 电池：设计容量、完全充电容量、损耗（健康度）、循环次数 —— 与 powercfg /batteryreport 同源（电池类驱动 IOCTL / root\WMI 电池类）；读不到的项显示「无法读取」，无电池设备显示提示
+  - 键盘测试：全尺寸 ANSI 104 键可视化键盘，按物理键实时反馈（按住高亮、松开变绿）， 显示「已测试 X / 104」进度，可重置；笔记本没有的键（如小键盘）保持灰色即可
+  - 屏幕坏点：选显示器后全屏纯色检测（白→红→绿→蓝→黑），按任意键或单击鼠标切换、Esc 退出， 多屏逐台可测，检查坏点/亮点/暗点
+  - 影音会议：摄像头（设备可选 + 实时预览，离开页面自动关闭）、麦克风（电平条实时跳动 + 录制/回放）、 扬声器（设备可选 + 播放试音曲），三项确认后一键通过
+  - 散热测试：CPU 单烤（prime95，本项目按 GIMPS 源码编译）/ GPU 单烤（FurMark 毛球，C# / OpenTK 重实现） / 双烤三模式；FurMark 分辨率/全屏/抗锯齿与 prime95 线程数/FFT 模式可调，已烤时长实时显示； 数据监控四路实时折线（CPU 温度/功耗、GPU 温度/功耗，LibreHardwareMonitor 2 秒轮询； CPU 两路需要 PawnIO 内核驱动，未安装时页面可一键静默安装官方签名安装器，装后立即可用无需重启）；「显示界面」可关（烤机进程完全无窗口后台跑，负载不变）； 运行日志框记录起停/异常退出事件；停止/切页/退出多层兜底，不会留下后台烤机进程
+  - 硬盘跑分：CrystalDiskMark 源码集成（引擎原封编译为 CdmHost 控制台宿主 + 定制 diskspd 子进程，全程无窗口）， 对目标盘跑 SEQ1M Q8T1 顺序读/写 + RND4K Q1T1 随机读/写四项（1 GiB 随机数据 × 5 轮）； 成绩 JSON 与记录 CSV 保存在 %APPDATA%\YanJi\disk_result（页面上可一键打开成绩目录）
+  - 深/浅主题切换（默认跟随系统），左侧导航显示各验机项完成状态（绿点 + ✓）
+  - 每个模块点「确认通过」后自动跳转到下一个未完成模块，全部完成时导航区给出提示
+  - 配置核对「重新检测」、键盘测试「重置」可随时复查（会清除通过状态重新核对）
+  - 插件化：以上每个验机模块都是独立插件（程序目录 plugins\ 下）；安装向导可按模块勾选安装， 程序顶栏「插件管理」支持导入 zip 插件包（0.0.2 起可多选批量导入）/ 删除插件（导入即加载，删除/覆盖自动重启完成）， 并逐模块展示其组件致谢（致谢随插件走，删除模块其致谢也随之消失）。插件开发见根目录 AGENTS.md
+Tags:
+- 基准测试
+- 硬件
+- 硬件检测
+- 笔记本
+- 跑分
+- 验机
+ReleaseNotes: |-
+  - 配置核对硬盘部分新增「介质与数据完整性错误」一项（NVMe SMART，即 CrystalDiskInfo 的 0E 项）
+  - 验机关注值：正常应为 0 次，非 0 多为闪存/主控异常前兆（「0E 门」排查项）
+  - 仅 NVMe 盘显示数值（SATA 盘的同编号属性含义不同，不显示）；无权限/读不到时显示「未知」
+ReleaseNotesUrl: https://github.com/Bibapcs/BibaYanji/releases/tag/v0.0.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
