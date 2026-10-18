@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
 
 PackageIdentifier: LBEILC.Multiplane
-PackageVersion: 0.3.9
+PackageVersion: 0.3.11
 PackageLocale: en-US
 Publisher: LBEILC
 PublisherUrl: https://github.com/LBEILC
@@ -32,12 +32,11 @@ Tags:
 - video
 - video-renderer
 ReleaseNotes: |-
-  Fixes for the desktop app's video preview and Settings page. The renderer is unchanged from 0.3.8, so there is no new npm release.
+  Display fixes for the Jobs page and the tray. Only the desktop app changed; the renderer is the same as 0.3.10, so there is no npm release.
   Desktop app
-  - Seeking in the preview works. In longer videos, dragging the timeline, stepping one frame, or jumping to the start or end snapped back to the first frame, because the app served video files without byte-range support and only the part already loaded could be seeked. The app now answers range requests, so any frame can be reached right away.
-  - The play button pauses. During playback the play button was redrawn on every frame, so a click on it was lost and only clicking the picture paused. It now changes only when playback starts or stops.
-  - Settings polish. "Notify when a job finishes" is a switch like "Host renders in Multiplane", and empty path fields show their hint in the interface font instead of a fallback font.
-  - The failure banner's description uses the secondary text colour, as in the design.
-ReleaseNotesUrl: https://github.com/LBEILC/Multiplane/releases/tag/v0.3.9
+  - Progress numbers no longer doubled. The rolling-number styles were not loaded, so frame counts, speed, elapsed and remaining time on the Jobs page and in the tray were drawn twice side by side (for example 10,82510,825). The styles now ship with the app.
+  - Latest frame preview stays visible. In the Preview tab of a running render, the latest finished frame turned into a broken image after its first update, because the refreshed image address was still HTML-escaped. It now keeps updating.
+  - Rolling numbers line up. A broad style rule in the job list and the tray shifted rolling numbers about 2.5 px above the text next to them. And because progress updates arrive many times a second, fast-changing digits were interrupted mid-roll and looked stuck halfway, like superscripts. Each number now finishes its roll before moving to the latest value (about 0.6 s at most), and always ends on the last value it received. With reduced motion turned on, numbers still update instantly.
+ReleaseNotesUrl: https://github.com/LBEILC/Multiplane/releases/tag/v0.3.11
 ManifestType: defaultLocale
 ManifestVersion: 1.12.0
