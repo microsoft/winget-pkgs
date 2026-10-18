@@ -1,0 +1,138 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: myYangyunfan.DSHDesktop
+PackageVersion: 1.0.5
+PackageLocale: zh-CN
+Publisher: deepseek
+PublisherUrl: https://github.com/myYangyunfan
+PublisherSupportUrl: https://github.com/myYangyunfan/dsh_desktop/issues
+PackageName: DSH Desktop
+PackageUrl: https://github.com/myYangyunfan/dsh_desktop
+License: MIT
+LicenseUrl: https://github.com/myYangyunfan/dsh_desktop/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 DSH Desktop contributors
+ShortDescription: 把 DeepSeek Harness (dsh) CLI 与内置 Node.js 运行时打包在一起的桌面客户端。
+Description: |-
+  DSH Desktop 把 DeepSeek Harness (dsh) CLI、完整 Node.js 运行时与全部官方插件打包为开箱即用的桌面客户端。双击即可在原生窗口中启动 dsh web，无需安装 Node.js；关闭窗口后服务在系统托盘中继续运行。提供会话管理、桌面宠物、余额小组件、插件守护与带 sha256 校验的自动更新。
+
+  ✨ 特性
+  开箱即用
+  - 零依赖 — 内置独立 Node 运行时与 npm CLI，目标机器无需安装任何环境
+  - 完整 dsh — 打包 @deepseek-ai/dsh 及全部官方插件，离线可用
+  - 一键启动 — 双击即启 dsh web，优先复用上次端口，就绪后载入原生窗口
+  - 双形态 — 便携版（免安装、可放 U 盘）+ 安装版（桌面/开始菜单快捷方式）
+  体验增强
+  - 深色玻璃无边框窗口 — 自绘标题栏、Win11 圆角，关闭默认隐藏到系统托盘
+  - 桌面宠物 — 随行小鲸鱼常驻桌面，陪伴工作（设置 → 插件可一键开关）
+  - 侧边会话浮窗 — 随时唤起独立会话窗口，与主会话互不干扰
+  - 会话管理 — 归档 / 恢复 / 删除对话，历史不再堆积
+  - 余额小部件 — 对话底部实时显示「本轮费用 · 余额」，支持 OpenCode Go 订阅额度，点击直达充值
+  - 完成通知 — 任务跑完弹系统通知，一分钟内回到主窗口自动跳到对应会话（Windows 通知无点击回调，聚焦即跳转）
+  工程韧性
+  - 守护瀑布 — 内核 boot 链逐级自愈：坏插件自动修复、坏配置自动重建、内核崩溃环原地重启，任何不兼容形态都不退出（v0.5.0 Tauri 架构核心特性）
+  - 崩溃自愈 — 渲染层假死心跳检测自动重载；内核由 supervisor 探活 + 指数退避拉起
+  - 历史兼容 — 自动修补会话事件词汇表，第三方插件写入的事件不破坏会话历史
+  - 自动更新 — 右上角 ⋯ 菜单一键检查并安装客户端更新（双源 GitHub/Gitee Releases 自动切换，sha256 校验 fail-closed，离线静默）；升级安装自动装回旧位置，零配置丢失；内核随客户端整体分发（无独立更新链）
+  - 快捷方式自愈 — 桌面与开始菜单快捷方式缺失即自动补建
+Tags:
+- deepseek
+- deepseek-harness
+- dsh
+- 大模型
+- 大语言模型
+- 智能体
+- 自主智能
+ReleaseNotes: |-
+  DSH Desktop 1.0.5（正式版 · 全平台补发）
+  本版是正式版：进入 GitHub 的 releases/latest，客户端右上角 ⋯ 菜单的在线更新检查轮询的正是
+  latest，所以存量用户会收到推送。它是 v1.0.4 的补发版：v1.0.4 因打包器的构建期路径墙缺少
+  全部 Windows 资产（Linux / macOS 资产正常），本版用同一份工作树补齐 Windows x64、ARM64
+  安装包与便携包，并在发布流水线里加了两道闸门，避免不完整的正式版再次被推成 latest。
+  🎯 本版重点
+  1. Windows 资产补齐 + 发布门禁：见下方「🚦 发布流水线」两条。这是本版存在的首要原因。
+  2. 自动压缩弹窗不再清空你写了一半的草稿（dsh-auto-compact / dsh-change-review 0.1.2）：
+     替用户提交前先过「草稿为空 + 会话空闲」两道闸门；不满足就等，且不消耗冷却、不弹误导提示。
+  3. 壳进程闪退 / 自动重启的根治：退出闸门 + 窗口路径 panic 隔离、孤儿内核收割、panic 完整回溯、
+     会话退出标记、托盘重启竞态修复。见下方修复第 2 条。
+  4. v1.0.4 的内核与插件内容原样保留：内核仍是 0.2.1-rc.1，构建期补丁层仍是 62 项，
+     内置插件在册 29 条；v1.0.4 已修复的 HTTP 405、{{cwd}} 消息装配失败、引导页卡「开始设置」、
+     文件拖入、余额开关等全部继续生效。
+  🛠 修复
+  1. 右下角自动压缩弹窗强制清空当前草稿（dsh-auto-compact / dsh-change-review 0.1.2）
+  这两件内置插件都用 inputActions.setDraft(text) + submit() 以用户身份提交命令，而内核这条 API
+  的契约是 Replace the whole draft，并会立刻把内容写进该会话的持久化草稿；成功提交后
+  commit-draft 还会清掉撤销栈——用户写了一半的引导词不是被遮挡，是不可恢复地被覆盖。
+  旧判据只看 enabled / 阈值 / 冷却，没判草稿非空、没判轮次在跑；而 /compact 本身要求 agent
+  空闲，于是「草稿已丢 + 命令被拒」双重坏。现在提交前按内核 composer 的同源口径过 composerGate：
+  草稿非空（含附件）、输入形态不是 plain、会话 running 或 pendingSubmissions 非空、快照读不到，
+  一律不提交。自动那一路被挡时不记冷却（等输入框空了补做），也不再弹误导提示。
+  回归锁 unit-auto-compact-gate 17 例，含四条反证（空草稿放行 / 非空拦截 / 忙碌拦截 / 被挡不记冷却）。
+  2. 会话每隔一两小时自动闪退重启（壳侧根治，Rust）
+  用户报障的「闪退」在日志里对应两种形态：内核 node 以 0xC0000409（fail-fast abort）退出后
+  supervisor 自动拉起并整页重载；以及壳主线程在 tao 事件循环里 panic 后直接消失。tao 在窗口过程
+  捕获的 panic 不会当场抛出，而是暂存到下一次消息循环 resume_unwind，从 .run() 直接逃逸——
+  此时 RunEvent::ExitRequested/Exit 全不执行，内核树、session watcher、单实例锁无人收割。六条一起上：
+  - 退出闸门：ExitRequested 先置 EXITING，此后所有跨线程触窗动作（KernelReady 导航 /
+    事件路由 / 渲染心跳 / 诊断探针 / 通知审批）先判闸门再动作，退出中一律不碰窗口；
+  - panic 隔离：上述每条窗口路径各自包 catch_unwind，单条失败只记日志，不带塌消息循环；
+  - 围底收尾：.run() 外层再包一层 catch_unwind，真逃逸时执行 emergency_teardown
+    （关 supervisor / 收 watcher / 释放单实例锁 / 标记非正常退出）并以退出码 70 结束；
+  - 孤儿内核收割：每次 spawn 后写 <app_data>/kernel.pid.json（pid / exe / port，tmp+rename 原子落盘）。
+    下次启动在选端口前读取并判定：记账 exe 必须与本次 node 一致，且 Windows 进程映像路径复核一致
+    才收割整树（防 pid 复用误杀）；任一不成立一律不动，记账在判定后清除；
+  - panic 回溯：panic hook 追加 Backtrace::force_capture()，panics.log 不再只有一行位置；
+  - 会话退出标记 logs/last-session.txt：正常退出写 clean=1，启动期写 clean=0；
+    下次启动据此区分「用户自己关的」与「壳自己没的」，排查不用再靠猜；
+  - 重启竞态：旧的 cmd /C timeout /t 2 在 GUI 进程（stdin 被重定向）里会立刻返回，
+    继任进程与正在退出的旧实例抢单实例锁后静默退出。现改为按旧 pid 轮询（PowerShell，上限 60s）
+    后再 Start-Process，并以 ping -n 4 作兜底延迟。
+  v1.0.4 已修复的内容在本版继续生效（HTTP 405、{{cwd}} 消息装配失败、引导页卡「开始设置」、
+  文件拖入、余额开关、macOS 设置写入、macOS profile 别名链接等，详见 v1.0.4 的发布说明）。
+  🚦 发布流水线（本版新增的两道闸门）
+  A. NSIS 构建期路径墙门禁（dsh-tauri/scripts/stage-nsis-path-gate.mjs）
+  v1.0.4 的 Windows 构建全部失败在 Build installer：makensis 拿到的是 tauri.conf.json 里
+  bundle.resources 的 from 串未归一化字面量（CI 前缀 94 字符，本机 55 字符），Windows MAX_PATH
+  260 就地生效，installer.nsi 在一条 260 字符的 DevTools 议题文本上 File: failed opening file。
+  现在 staging 末尾（必须在 node_modules 镜像与 compat 注入之后）按安装路径上限 240 预检：
+  5 条越线的 dsh-experimental-inspector/.../issues_manager/descriptions/*.md 按有名有姓的清单剪除，
+  清单外任何新越线文件 FATAL 并列出三条出路（加清单 / 缩短 staging 路径 / 上游压短文件名），
+  不放行「跑到一半炸」的发包。
+  B. 发布资产期望集合门禁
+  v1.0.4 的 Publish Release 不看构建结论，Windows 全挂也照样把只有 Linux/macOS 的版本推成 latest——
+  主平台用户点更新拿不到包。现在发布前核对 7 项期望资产：Windows x64 NSIS 主资产缺失 → 直接拒绝发布；
+  其他平台缺件则降级为 prerelease（不进 latest、更新器看不到），不再产生「latest 指向残包」。
+  📦 随包内置插件清单（在册 29 条，本版无增删）
+  - 本版升级：dsh-auto-compact 0.1.1 → 0.1.2、dsh-change-review 0.1.1 → 0.1.2
+    （提交前闸门，见修复第 1 条）。
+  - 与 v1.0.4 相同：dsh-builtin-manager 0.2.0、dsh-goal-completion 0.1.0、
+    dsh-prompt-optimizer 2.4.0、dsh-prompt-custom 0.5.0、dsh-better-sidebar 0.24.2、
+    dsh-basics-panel 0.4.2、dsh-workspace-anchor 0.1.1 等，共 29 条。
+  ✅ 验证（2026-10-18 实测基线）
+  - Node 侧：scripts/test/ 206 个测试文件，npm test = 2275 例 / 0 fail / 0 cancelled
+    （pass 2266 / skip 9；skip 逐条是环境缺料，如 pristine 夹具缺第三方模型包、本机无兄弟仓库克隆）。
+  - 兼容三闸：check-syntax 通过；validate-pin → ✓ dsh-v0.2.1-rc.1（offline-tarball）；
+    patch-surface verify → 85 文件与快照一致、零漂移；补丁层 62 项（root 14 + file 48）。
+  - Rust 侧：gnu 链配对实跑（RUSTUP_TOOLCHAIN=stable-x86_64-pc-windows-gnu +
+    --target x86_64-pc-windows-gnu）709 passed / 0 failed / 4 ignored（8 个 crate / 36 个 target）；
+    新增的 crash_hardening_shape 7 例、stale_kernel 4 例与
+    session_marker_roundtrip_distinguishes_clean_exit 全绿。
+  - 安装布局冒烟 smoke-installed.sh（手拼布局 + 全隔离 DSH_HOME/DSH_TAURI_USERDATA，绝不跑真安装器）
+    在 v1.0.4 同 payload 轮次 PASS：boot 五步全 OK、补丁应用汇总 写入 0 / 失配 0 / 共 62、
+    29 条内置插件镜像进 profile、✓ 插件加载零致命错误、page-error 总数 0、杀壳后残留监听 0。
+    本版壳侧改动集中在退出与孤儿收割路径，未在本机重跑该脚本（脚本收尾按镜像名 taskkill，
+    会误伤本机正在使用的实例），Windows 安装包由 CI 全新建包。
+  - 隔离内核实机（v1.0.4 同 payload）：发一条真消息走到预期的 MISSING_CREDENTIAL（证明装配期已过），
+    POST /sidebar/api/fs.trees / fs.read → 200，/basics/api/* 返回插件自己的 JSON 信封。
+  已知问题
+  - dsh-synapse（会话地图）：重启或切换会话时历史回填可能出现空档——宿主下线了 Session 上的
+    events 属性而插件仍读旧字段（不报错、不崩溃）。已登记在内置插件台账 §5.5，本版按裁定未处置。
+  - 两个便携包都不含内置 Node：包内 resources/dsh-desktop/vendor/node/ 是空目录，完整便携版与轻量便携版
+    实为同一份 payload（实测两包条目数逐字节相同）。内核解析链因此回落「系统 Node ≥22」——
+    用便携版请先装 Node 22+，否则启动会走到清晰报错路径。该缺口自 v0.5.7 起长期存在，安装版不受影响。
+  - Windows ARM64：payload 内原生模块仍是 x64 prebuild，靠 Windows 11 模拟层兜底，标为实验性产物。
+  - 升级安装会先静默卸载旧版：安装器按注册表定位旧安装目录并装回原位置，用户数据（会话、配置）不动；
+    若本机有正在运行的实例，请先退出——托盘常驻时内核 node 仍持有已加载映像，覆盖同名文件可能被系统拒绝。
+ReleaseNotesUrl: https://github.com/myYangyunfan/dsh_desktop/releases/tag/v1.0.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
