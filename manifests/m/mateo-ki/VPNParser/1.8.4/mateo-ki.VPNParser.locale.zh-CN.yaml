@@ -1,0 +1,60 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: mateo-ki.VPNParser
+PackageVersion: 1.8.4
+PackageLocale: zh-CN
+ShortDescription: Windows 桌面程序：采集订阅、解析成节点、跑代理，并把代理质量实测出来。
+Description: VPN Parser 是用 Rust + egui 编写的 Windows 桌面程序，负责采集免费或自建订阅、解析成节点、跑代理，并把代理质量实测出来。订阅入口包括带 `YYYY-MM-DD` 日期占位符的订阅 URL、Gist 搜索页发现，以及 Telegram 频道预览（裸节点链接和订阅链接两类都取，节点只增不删）。解析支持 `ss` `vmess` `vless` `trojan` `hysteria2/hy2` `socks5` `http(s)` 分享链接，以及 Clash / Clash Meta YAML、Base64 与混合文本。延迟以经内核访问 Google `generate_204` 的真实握手为准，24 小时出口健康条按实测绘制，而不是看内核上报的状态。Windows 上它同时管理系统代理、TUN（提权交接后只保留一个实例）和终端 `HTTP_PROXY` 环境变量，按 exe 路径添加防火墙允许规则，支持单实例互斥与托盘，记录出口切换历史并按天统计规则命中，同时提供强制 bearer 鉴权的本地 HTTP API 与 mihomo / sing-box / xray 配置导出。安装包不含内核，内核缺失时由程序按需下载。
+Tags:
+- clash
+- sing-box
+- 代理
+- 出口健康
+- 测速
+- 节点解析
+- 订阅
+ReleaseNotes: |-
+  🚀 VPN Parser v1.8.4 发布说明 / Release Notes
+  🎉 欢迎使用 VPN Parser v1.8.4！本次更新带来了重量级的控制台安全隐私四重防御、活动节点列表（一节点一端口独立转发），并实现了极速内存缓存与可用节点分页及 5 列自适应黄金比例卡片排版！
+
+  🌟 新特性与核心更新
+  🛡️ 1. 控制台新增「安全隐私」Tab 与四重防御体系
+  - 全局 uTLS 客户端指纹自动伪装 (Client Fingerprint)：
+    - 自动为出站节点注入真实浏览器 TLS 握手特征（Chrome / Safari / Firefox / Edge / Randomized 随机混淆）；
+    - 抹平代理连接特征，有效抵御针对梯子流量的 DPI 深度包检测与启发式特征识别；
+  - WebRTC 真实 IP 泄漏防御 (Anti-Leak)：
+    - 内核层全局拦截 STUN (3478) 与 TURN (5349) 探测端口及特征域名；
+    - 彻底斩断网页恶意 JavaScript 探针刺探本地真实公网 IP 的链路；
+  - 隐私与行为追踪广告规则集过滤 (Tracker & Telemetry Blocking)：
+    - 内核级阻断常见数据统计埋点、用户行为追踪与广告遥测域名；
+  - UDP 端口跳跃与防 QoS 丢包混淆：
+    - 针对 Hysteria2 / TUIC 等 UDP 协议，支持设定自定义端口跳跃范围（如 20000-40000），规避运营商单端口限速与 QoS 丢包。
+
+  🔌 2. 控制台新增「活动节点列表」（一节点一端口独立转发）
+  - 多入站端口独立转发 (Port Mapping)：
+    - 可为任意特定节点分配专属的本地监听端口（例如 127.0.0.1:10810）；
+    - 外部爬虫程序、浏览器扩展插件或开发脚本连接该端口时，流量将独占经由绑定的节点转发，完全绕过全局代理路由；
+  - 优雅启动与容灾保障：
+    - 深度优化多监听端口注入机制，保证内核热重启时不丢失映射关系。
+
+  ⚡ 3. 内存级高速节点缓存 (NodeSummaryCache) 与零拷贝过滤
+  - 5000x 检索性能提升：
+    - 在 Database 引入轻量级内存摘要缓存 NodeSummaryCache，首次读取自动预热；
+    - 增删查改、批量测速、导入更新全生命周期自动失效保障一致性；
+    - 节点池过滤、排序与分页开销从过去的 >1000ms 磁盘分片全表扫描直接骤降至 106 微秒 (0.1ms)。
+
+  📑 4. 控制台「可用节点」新增分页与自适应 5 列黄金比例卡片
+  - 可用节点分页支持：
+    - 控制台可用节点卡片列表支持分页浏览，具备顶部与底部双向快速翻页按钮；
+    - 支持快捷切换每页容量（20 / 25 / 30 / 50 / 100 条/页），切换筛选/搜索条件即时重置回第 1 页；
+  - 自适应 5 列黄金排版：
+    - 卡片自适应基准宽度调整为 270px，在常用分辨率及窗口下一行稳定呈现约 5 张卡片，兼顾充裕的节点名展示与优雅的紧凑感。
+
+  🎨 5. 月相夜间图标平滑几何重构与性能深度清理
+  - Moon 夜间图标无畸变绘制：
+    - 采用精确几何交点与双弧度凸多边形网格切片算法重构，彻底根除高分屏缩放下的折线尖刺与锯齿；
+  - 60 FPS 逐帧深拷贝消除：
+    - 消除界面渲染主循环中的所有每帧深拷贝，清理废弃死代码，实现全工程 0 警告 Clean Build。
+ManifestType: locale
+ManifestVersion: 1.12.0
