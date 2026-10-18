@@ -1,0 +1,121 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Patchloom.Patchloom
+PackageVersion: 0.37.1
+PackageLocale: en-US
+Publisher: Patchloom
+PublisherUrl: https://github.com/patchloom
+PublisherSupportUrl: https://github.com/patchloom/patchloom/issues
+Author: Patchloom
+PackageName: Patchloom
+PackageUrl: https://github.com/patchloom/patchloom
+License: MIT
+LicenseUrl: https://github.com/patchloom/patchloom/blob/HEAD/LICENSE
+Copyright: Copyright (c) Patchloom contributors
+ShortDescription: Structured file editing CLI for AI agents
+Description: |-
+  Patchloom is a single-binary CLI that gives AI coding agents safe, structured
+  file editing: search and replace, unified diffs, parser-backed JSON/YAML/TOML
+  document ops, markdown section editing, AST-aware renames, multi-file
+  transactions, undo, and an MCP server for tool calls.
+Moniker: patchloom
+Tags:
+- ai
+- cli
+- developer-tools
+- mcp
+- rust
+ReleaseNotes: |-
+  Patchloom 0.37.1
+  Format commands stop when the timeout is reached, even if a child
+  process still holds stderr. A parent config outside a git repository
+  no longer supplies those commands.
+  Highlights
+  A formatter that closes stderr and keeps running, or a shell that exits
+  while a background process holds stderr, is killed at
+  --format-timeout (30 seconds unless you set another value). The
+  result is error_kind: format_failed. Outside git, write policy from a
+  parent .patchloom.toml still applies, and format commands from that
+  parent are dropped.
+  Bug fixes
+  - A format command could run past its timeout. Closing stderr, or
+    leaving a background process holding stderr, no longer drops the
+    deadline. Patchloom kills that process tree and returns
+    format_failed. The same timeout applies to --format,
+    [defaults] format, [format] command, and [format.by_extension].
+    A per-extension formatter that exits non-zero still warns, and the
+    write stays (#2643, #2648, #2650).
+  - A failed hardlink rewrite could leave the shared file damaged.
+    Patchloom writes the staged bytes back onto the original inode. If
+    that restore also fails, the error names the staged file only when
+    the file was kept (#2643).
+  - A parent config outside git could run a shell. Walk-up still
+    loads write policy. [defaults] format, [format] command, auto,
+    and by_extension from an ancestor are dropped when there is no
+    .git directory above the start path. A symlink
+    .patchloom.toml is refused and its target is not read. A parse
+    error names the config path and the first error line (#2643).
+  - --contain read a path before rejecting it. Git copy from,
+    Begin Patch check, patch merge check, markdown lint, markdown
+    dedupe, and a batch @path payload are checked before the file is
+    read. A path outside the workspace is guard_rejected (#2643, #2645).
+  - A short hunk was applied as a complete edit. A hunk that ends
+    before its line counts are satisfied is a parse error. A git copy
+    that also has hunks keeps the source file and applies the hunks to
+    the copy (#2643).
+  - Replace context skipped regex and whole-line matches. Those
+    matches now honor before_context and after_context. A literal
+    replacement keeps $ as text. In regex mode, $1 is still a
+    capture (#2643).
+  - --files-without-match --assert-count counted every file as
+    zero. The count is the number of files listed (#2643).
+  - An exclude pattern such as _* skipped every directory.
+    Directories that still contain files you asked to edit are walked (#2643).
+  - JSON, TOML, YAML, and markdown edits dropped nearby text. A
+    JSONC block comment between numbers no longer glues them into one
+    number. A TOML integer above 9223372036854775807 stays a decimal
+    integer. A YAML comment after the last list entry stays after the
+    list. Markdown section edits recognize setext headings, a leading
+    BOM, closing hashes, and a blank line between sections.
+    md dedupe-headings says would remove in the dry-run text (#2643).
+  - Signature edits dropped nearby tokens. A Java visibility change
+    leaves static and annotations in place. A C or C++ return-type
+    edit keeps const and volatile on that type. Moving a Rust symbol
+    to the start of a file no longer treats #![ as a shebang. A short
+    fuzzy string is not applied to a much longer name. A plan format
+    step still runs when the replace did not change the file. A plan key
+    named command is reported as unknown instead of ignored (#2643).
+  - PHP parsing uses tree-sitter-php 0.25 (#2649).
+  Numbers
+  ───────┬──────────────────────────────────────────────────────────
+  Metric │Notes
+  ───────┼──────────────────────────────────────────────────────────
+  Version│0.37.0 -> 0.37.1
+  ───────┼──────────────────────────────────────────────────────────
+  Focus  │Format timeouts, containment before reads, edit edge cases
+  ───────┼──────────────────────────────────────────────────────────
+  Tests  │5700+ (README badge, unchanged this release)
+  ───────┴──────────────────────────────────────────────────────────
+  Upgrading
+  - A config or per-extension formatter that hits the timeout now exits
+    1 with error_kind: format_failed. The file may already be written.
+    Use undo, or run the formatter again.
+  - If a parent .patchloom.toml outside a git repository was your
+    format command, move that command into the working directory or into
+    the repository root. Write policy from the parent still applies.
+  - An exclude glob such as _* no longer skips every directory.
+  - Install from crates.io, npm, Homebrew, or Scoop after the tag
+    ships. On Windows, Scoop is recommended. winget may need
+    winget source update after Microsoft publishes. Chocolatey can
+    lag while moderation runs.
+  Full changelog
+  patchloom-v0.37.0...patchloom-v0.37.1
+ReleaseNotesUrl: https://github.com/patchloom/patchloom/releases/tag/patchloom-v0.37.1
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://patchloom.github.io/patchloom/
+- DocumentLabel: Installation
+  DocumentUrl: https://github.com/patchloom/patchloom/blob/main/docs/getting-started/installation.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
