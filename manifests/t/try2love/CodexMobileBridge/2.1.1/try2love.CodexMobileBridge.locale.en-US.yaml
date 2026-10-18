@@ -1,0 +1,52 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: try2love.CodexMobileBridge
+PackageVersion: 2.1.1
+PackageLocale: en-US
+ShortDescription: A local gateway that continues desktop Codex App chats in a mobile browser.
+Description: |-
+  Continue existing chats in the desktop Codex App from your phone browser, or create an empty chat in a saved project.
+  The phone and desktop use the same chat. Read replies, send messages, choose models and Skills, and respond to pending confirmations. Local tasks continue on the original computer; SSH tasks continue on the original server. Each chat keeps its model provider and authentication settings.
+  Your phone does not need to sign in to the same OpenAI account as the desktop. The gateway has its own username/password login and an explicit passwordless option. Connect over LAN, a temporary HTTPS tunnel, or your own reverse proxy.
+  Community project, not affiliated with OpenAI. Supports macOS and Windows and depends on internal Codex App IPC. See verification records for what was actually tested. App updates may require compatibility changes.
+
+  Edit, branch and copy messages
+  - Copy user messages from their action row. Choose Edit and resend on the latest user message, or Edit in new branch on an older message to keep the original conversation.
+  - Choose Branch from here under a completed answer. The new chat keeps history through that turn and waits for your next message. Chat details link back to the source.
+  - Copy complete replies as Markdown or copy an individual code block. Long replies load their full text. When clipboard access is unavailable, selectable text supports the system Copy action.
+  - In-place editing requires the turn to be stopped and generates a new answer. Editing and branching do not undo file changes; both chats share the working directory.
+  - Branching requires a Codex runtime with turn-specific forking and deferred goal continuation; older versions show an update prompt. Copying and latest-message editing do not require those fork capabilities. Creating a branch does not send a model request.
+  - If delivery is uncertain, check the chat list first; repeating the same request does not replay it. If a branch was created but could not connect, the replacement remains an edit draft for that branch.
+Tags:
+- remote
+- remote-access
+- remote-connection
+ReleaseNotes: |-
+  v2.1.1 improves account and model controls across Codex, Claude and DeepSeek Harness, reduces repeated loading, and preserves drafts while making files easier to locate on mobile and Web.
+  Features and improvements
+  - Consistent accounts and models: matching account cards and model pickers across clients. The current account footer contains available models, quota update time and refresh; model catalogs show their own last successful update time.
+  - Cached model catalogs: show cached results first, update on manual refresh or access changes, and refresh every 12 hours while the gateway runs. Keep computers, clients, accounts and effective access configurations separate; retain the last successful catalog after a failed refresh.
+  - API and CLI discovery: query upstream catalogs for verifiable environment-based access and SSH CLI, preserving model IDs and reasoning options supplied by the upstream or native runtime. Claude account catalogs no longer require Desktop to be connected. Unsupported capabilities are explained rather than guessed.
+  - Saved drafts: restore unsent text when switching chats, clients or computers, scoped to gateway, account and conversation. Clear drafts after confirmed sends.
+  - File location and navigation: smoothly reveal a linked file or folder and highlight it for three seconds; user scrolling can interrupt. The top-left Back button returns directly to the chat list; folder-parent controls and system Back retain hierarchical navigation.
+  - Tool screenshots: display tool-returned screenshots with preview controls and bounded preview/cache sizes.
+  - Update and pairing choices: skip automatic reminders for an exact release on desktop and mobile while retaining manual updates. Choose whether valid phone bindings survive a gateway password change.
+  Fixes
+  - Retry brief Windows file-sharing conflicts during account changes or recovery; persistent failures still report an error and preserve the original file.
+  - Fix stuck Codex account model loading, repeated Claude model requests and stale catalog responses after switching access.
+  - Remove unnecessary frequent account refreshes and preserve model-list scroll position.
+  - Prevent fast client swipes from jumping back to Claude; restore cached Claude/DSH lists before background updates and unify filter styles.
+  - Fix non-image attachment visibility/context and ChatGPT identity behind custom gateway routing; bound workspace startup resource concurrency.
+  - Handle iOS scene lifecycle and retry pending notification navigation during startup or resume.
+  - Strengthen model cache identity isolation and fix gateway environment credentials being used for direct upstream model-catalog HTTP requests.
+  Contributors
+  - @qybgh, #38: non-image attachment visibility and context.
+  - @heiqiu47, selected work from #40: account cards, model selection and catalog compatibility, adapted to the current multi-client UI. Reset predictions are not included.
+  - @Lovest20018, #42 and #43: bounded startup resource loading and ChatGPT routing identity.
+  - @RigerWu, #44: tool screenshots, display controls, bounded caches, iOS scenes and pending notification navigation.
+  Updating
+  Desktop and mobile version 2.1.1, Android/iOS build 33. Packages cover Apple Silicon/Intel macOS, Windows x64, experimental Linux x64/ARM64, Android and self-signed iOS. Linux uses Claude Code CLI; automatic Claude Desktop connection supports macOS and Windows.
+  Install over the existing app and retain its data directory. Android keeps its signing identity; iOS requires the same signing identity and Bundle ID to retain data. Reload Web pages and update shared-relay deployments. Verify downloads with SHA256SUMS.txt.
+ManifestType: locale
+ManifestVersion: 1.12.0

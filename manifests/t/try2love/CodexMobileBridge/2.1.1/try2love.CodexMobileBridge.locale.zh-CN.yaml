@@ -1,0 +1,59 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: try2love.CodexMobileBridge
+PackageVersion: 2.1.1
+PackageLocale: zh-CN
+Publisher: try2love
+PublisherUrl: https://github.com/try2love
+PublisherSupportUrl: https://github.com/try2love/codex-mobile-bridge/issues
+PackageName: Codex Mobile Bridge
+PackageUrl: https://try2love.github.io/codex-mobile-bridge/
+License: MIT
+LicenseUrl: https://github.com/try2love/codex-mobile-bridge/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 try2love
+ShortDescription: 在手机浏览器里继续电脑 Codex App 已有聊天的本地网关。
+Description: |-
+  在手机浏览器里，继续电脑 Codex App 已有的聊天，或在已保存项目中新建聊天。
+  手机与电脑打开同一个会话，查看回复、发送消息、选择模型与 Skill、回应待确认操作。本地任务继续在原电脑执行，SSH 任务继续在原服务器执行；模型请求沿用该会话的提供商与认证配置。
+  不要求手机登录与电脑相同的 OpenAI 账号。 网关提供独立的账号密码登录，也支持显式开启免密访问。可以通过局域网、临时 HTTPS 隧道或自己的反向代理连接。
+  社区项目，与 OpenAI 无隶属关系。支持 macOS 和 Windows，依赖 Codex App 的内部 IPC；各平台的实测范围见 验证记录。App 更新后可能需要适配。
+
+  消息编辑、分支与复制
+  - 用户消息下方可复制内容。最近一条选择「编辑并重新发送」；更早的消息选择「编辑并新建分支」，原会话保留。
+  - 已完成的回答下选择「从这里分支」，新会话保留截至该轮的历史，等待你继续输入。聊天详情中可返回来源会话。
+  - 回复支持完整 Markdown 复制，代码块单独复制；长回复自动读取完整正文。浏览器限制剪贴板时显示可选中的文本，支持系统复制操作。
+  - 原地编辑要求任务已停止，会重新生成回答。编辑和分支不会撤销既有文件修改；新旧会话共享工作目录。
+  - 分支需要 Codex 运行时同时支持指定轮次与目标续跑延迟；旧版会提示更新 Codex App。复制与最近消息编辑不受此分支能力限制。创建分支不会主动发送模型请求。
+  - 结果不确定时先检查聊天列表，重复提交同一请求不会再次执行。分支已创建但连接失败时，修改保留为该分支的编辑草稿。
+Tags:
+- codex
+- 远程
+- 远程访问
+- 远程连接
+ReleaseNotes: |-
+  v2.1.1 改善 Codex、Claude 和 DeepSeek Harness 的账号与模型操作，减少重复加载，并补齐手机与 Web 的草稿保存、文件定位和导航体验。
+  新增与优化
+  - 统一账号与模型界面：三个客户端采用一致的账号卡片和模型选择布局。当前账号卡片底部提供“查看可用模型”、用量更新时间及刷新；模型列表单独显示上次成功更新时间。
+  - 模型目录缓存：优先显示缓存；手动刷新、切换接入或网关运行期间每 12 小时更新。按电脑、客户端、账号和有效接入配置隔离；失败保留原目录，不把失败时间当成成功更新时间。
+  - API 与 CLI 模型查询：补齐可核验的环境变量接入及 SSH CLI 上游目录，保留上游或原生运行时提供的具体模型和思考强度。Claude 账号模型查询不再要求先连接 Desktop；不支持的能力会说明原因，不编造型号或推理选项。
+  - 保留未发送草稿：手机与 Web 切换聊天、客户端或电脑后，恢复对应输入草稿；按网关、账号与会话隔离，确认发送后清除。
+  - 更快定位文件：从聊天链接定位文件或文件夹时平滑滚动到目标，并高亮 3 秒；用户滚动可以中止自动定位。左上角返回直接回聊天列表，文件区的上级目录与系统返回继续保留层级导航。
+  - 工具截图：可查看工具返回的截图，并通过显示设置控制预览；限制预览体积及缓存占用。
+  - 更新与绑定选择：网关及手机 App 可跳过当前版本的自动提醒，手动检查仍可更新；修改网关密码时可选择保留仍有效的手机绑定。
+  Bug 修复
+  - 修复 Windows 账号切换或恢复时，配置文件被短暂占用导致操作中断；持续占用仍会报错并保留原文件。
+  - 修复 Codex 当前账号模型列表长时间停留在读取中、Claude 模型设置重复请求，以及账号切换后旧模型结果覆盖新接入的问题。
+  - 降低账号面板无必要的高频刷新，修复模型列表滚动时自动回到顶部。
+  - 修复快速从 Codex 滑到 DeepSeek Harness 时被拉回 Claude；Claude/DSH 重进列表优先展示缓存，再同步最新内容；统一筛选框样式。
+  - 修复非图片附件的显示与上下文信息、ChatGPT 登录经过自定义网关路由时的身份保留，并限制工作台启动资源并发。
+  - 修复 iOS 场景生命周期及通知跳转重试，避免启动或恢复期间丢失待处理跳转。
+  - 加强模型目录缓存身份隔离，修复网关直接查询上游模型目录时的环境凭据误用。
+  贡献者
+  - @qybgh — PR #38：非图片附件显示与上下文修复。
+  - @heiqiu47 — 采纳 PR #40 中的账号卡片、模型选择和模型目录兼容改进，并适配到当前多客户端界面；不包含重置预测功能。
+  - @Lovest20018 — PR #42 的启动资源并发控制，以及 PR #43 的 ChatGPT 路由身份修复。
+  - @RigerWu — PR #44：工具截图预览、显示控制与缓存限制，以及 iOS 场景生命周期和通知跳转改进。
+ReleaseNotesUrl: https://github.com/try2love/codex-mobile-bridge/releases/tag/v2.1.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
