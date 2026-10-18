@@ -1,0 +1,44 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: soulvon.AnyBridge
+PackageVersion: 0.5.37
+PackageLocale: zh-CN
+Publisher: anybridge
+PublisherUrl: https://github.com/soulvon
+PublisherSupportUrl: https://github.com/soulvon/AnyBridge/issues
+PackageName: AnyBridge
+PackageUrl: https://soulvon.github.io/AnyBridge/
+License: MIT
+LicenseUrl: https://github.com/soulvon/AnyBridge/blob/HEAD/LICENSE
+ShortDescription: AI 编程工具的本地 BYOK 模型接入与配置管理客户端。
+Description: AnyBridge 是一款简单方便的本地 BYOK（自带渠道 / Key）模型接入与配置管理客户端，解决各类 AI 编程工具无法自由配置模型或手写配置麻烦的问题。无需手写配置文件、无需搭建复杂环境，在图形界面中即可把第三方中转站（OneAPI / NewAPI 等）、自建网关以及 DeepSeek、Claude、GPT 等自定义模型快捷接入常用的桌面 IDE 与终端 CLI 工具，支持 Claude Code、Codex、Windsurf、Cursor、Devin 等 12 款以上的工具。
+Tags:
+- byok
+- claude-code
+- codex
+- cursor
+- 人工智能
+ReleaseNotes: |-
+  - 新增 Multi2API 插件：把 WorkBuddy / CodeBuddy 等平台账号转成标准 OpenAI 接口，内置账号池轮询、定时签到保活与故障自愈，聚合支持 WorkBuddy、字节 Trae、智谱 Z.ai、MiniMax、华为云平台。
+  - 插件发布包改由主程序统一获取，与 CPA（CLIProxyAPI / CPA Manager Plus）安装部署走完全同一条链路：
+    - 并发测速所有 GitHub 镜像、按速度从快到慢逐个尝试，单源失败自动重试换源；请求跟随 Windows 系统代理。
+    - 插件在 plugin.json 的 deploy.asset 里声明仓库与产物名即可，adaptor 不再自己实现下载。
+    - 移除 adaptor 里基于 curl 的直连下载：curl.exe 用自带 CA 包，在开着本机代理或企业中间证书的环境里会直接 curl: (60) 证书校验失败，而在这些环境里主程序的下载链路一直是通的。
+    - 只替换可执行文件：config、凭证目录 auths/、运行状态 data/ 一概不动。
+  - 修复「重新安装会清空安装目录」：部署前置检查原本对所有策略都执行 rm -rf（只要目录非空且没有 .git），导致重装时把已下载好的二进制、以及上一轮登录留下的 auths/ 账号凭证一并删掉 —— 表现为装完报「缺少 xxx.exe」、账号凭空消失。现在只有真正要跑 shell 命令的策略（源码克隆、Docker 构建）才清理目录，由 adaptor 接管的策略保留现有文件。
+  - 修复「卸载假成功」：卸载时若服务进程不在 status.json 的 pid 记录里（例如服务是在 AnyBridge 之外被启动的），进程杀不掉，被占用的可执行文件会让目录删除失败，而错误被吞掉后仍返回成功 —— 表现为提示已卸载、卡片却以「已停止」复活。现在卸载前按监听端口找出进程杀掉，目录删除失败如实报错。
+  - 修复打开插件主页 / 管理控制台时 Windows 上闪一下 cmd 黑窗：open_url 补上 CREATE_NO_WINDOW；sidecar 一侧的 exec / commandExists 全部强制 windowsHide。
+  - 本地服务未启动时拉取模型列表只报 HTTP 502，看不出原因。现在目标地址是本机（127.0.0.1 / localhost）且拉取失败时，直接提示「本地服务可能未启动，请先启动对应插件」。
+  - 插件部署弹窗：终端日志改为与其余界面一致的白色主题（跟随深色主题），进度收敛为固定 4 阶段（环境检测 → 获取组件 → 生成配置 → 就绪完成）单行展示，去掉嵌套滚动条与「无 shell 命令，跳过」这类内部噪声，下载进度使用后端真实百分比。
+  - 插件部署成功后自动登记为本地供应商（有 API 密钥时），卸载时一并撤销，避免留下指向已删服务的死条目。
+  - grok2api 插件默认端口由 8000 调整为 8700：8000 是大量开发服务器的默认端口，容易被用户的日常开发占用。
+  - 卸载重装后自动恢复账号数据：卸载时插件已把凭证目录 auths/ 与运行状态 data/ 备份到 ~/.anybridge/<pluginId>-backup-<时间戳>/，再次安装时若安装目录里还没有这些目录就自动放回去，并在进度里说明恢复了什么、来自哪份备份；已有数据一律不覆盖。升级（只换二进制）同样不动这两处。
+  - 供应商密钥不再可能出现「与插件网关不是同一把」的情况：插件适配器的 generateConfig 现在把真正写进插件配置文件的密钥回传给主程序，登记本地供应商时以它为准，而不是用本地缓存的那一份。此前两者一旦出现偏差，拉取模型列表就会 401，而界面上只显示「拉取不到模型」，看不出原因。
+  - Multi2API 的密钥默认改用固定值（anybridge-local / anybridge-admin）：网关只监听 127.0.0.1，本机之外不可达，钥匙不承担真实鉴权；随机生成反而让每次安装或重新生成配置都换一把新钥匙，埋下上面这条失配隐患。用户在表单里显式填写时仍以其为准。
+  - 本机地址拉取模型失败时给出可行动的原因：服务没起（端口无人监听）、或本地供应商里的密钥与插件网关不是同一把（401），不再只报笼统的失败。
+  - 供应商编辑页拉取模型失败的原因直接显示在模型面板上：此前失败详情只进扩展中心日志，编辑页上只剩「暂无模型」，无法判断是服务没启动还是密钥不对。
+  - 修复供应商编辑器模型计数在列表清空时不刷新，导致上一次的「N 个」残留在页面上，与「暂无模型」并存的矛盾状态。
+ReleaseNotesUrl: https://github.com/soulvon/AnyBridge/releases/tag/v0.5.37
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
