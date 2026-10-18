@@ -1,0 +1,48 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ejfkdev.ddc
+PackageVersion: 0.1.30
+PackageLocale: en-US
+Publisher: ejfkdev
+PublisherUrl: https://github.com/ejfkdev
+PublisherSupportUrl: https://github.com/ejfkdev/ddc/issues
+PackageName: ddc
+PackageUrl: https://github.com/ejfkdev/ddc
+License: MIT
+LicenseUrl: https://github.com/ejfkdev/ddc/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 ejfkdev
+ShortDescription: Fast DEX to Java decompiler in Rust with progressive query subcommands.
+Description: ddc decompiles Android DEX bytecode back into readable Java. It covers DEX 035-041 including multi-dex APKs and XAPK/APKS/APKM containers, and ships more than 20 query subcommands (strings, cross-references, hierarchies, manifest, resources, per-method decompiles) that answer in milliseconds without a full run. Output is jadx-style readable, reproducible Java whose emitted files compile cleanly, and the bilingual CLI localizes its messages between English and Chinese automatically.
+Tags:
+- android
+- apk
+- decompiler
+- dex
+- java
+- reverse-engineering
+ReleaseNotes: |-
+  v0.1.30
+  Bug Fixes
+  - MCP initialize now declares the tools capability (MCP 2025-11-25 spec MUST): capability-negotiating clients were seeing 0 tools — the empty capabilities object caused them to skip tools/list even though all 10 tools work correctly. Upgrades xyz-rust 0.4.6→0.4.8 (upstream fix + rmcp 3.5.1, axum-server 0.8, TLS ring provider fix). #8
+  - Float constants emitted as raw IEEE bit patterns: dex const literals are untyped bits; in float/double arithmetic they must be reinterpreted with from_bits (>27k lines of silently wrong values on telegram alone).
+  New Features
+  - Three new cure (0.1.4–0.1.8) source-level simplification rules (~105k sites across three fresh APK corpora):
+    - dead_pure_call: discard-result Long.compare/Objects.toString statements (~63k)
+    - trailing_else_flatten: the else keyword after a terminal then-branch (~41k)
+    - (T)(Object)x → (T)x cast folding on Object-typed operands
+  -  --fast now works on every Java-source command: getclass, getmethod, pkg (in addition to the main decompile path)
+  Quality
+  - Four-corpus javac gate: 8,633 errors (−14 vs v0.1.29), output lines weibo −19.9%
+  - JLS 6.4.2 obscured-member static-import escape: inherited field captures package name in qualified references (reqable 103→5)
+  - Seven type/scoping guards in cure found on ddc corpora
+  Performance
+  - weibo decompile: 20.9 s default / 9.9 s --fast (110k files)
+  - Four IR shape passes retired into cure (−360 LoC ddc source)
+  Full Changelog: https://github.com/ejfkdev/ddc/compare/v0.1.29...v0.1.30
+ReleaseNotesUrl: https://github.com/ejfkdev/ddc/releases/tag/v0.1.30
+Documentations:
+- DocumentLabel: CLI Reference
+  DocumentUrl: https://github.com/ejfkdev/ddc/blob/HEAD/docs/cli.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
