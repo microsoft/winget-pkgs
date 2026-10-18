@@ -1,0 +1,125 @@
+# Created using wingetcreate 1.6.5.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: FluxCD.Flux
+PackageVersion: 2.3.0
+PackageLocale: en-US
+Publisher: FluxCD
+PublisherUrl: https://fluxcd.io/
+PublisherSupportUrl: https://github.com/fluxcd/flux2/issues
+PackageName: Flux
+PackageUrl: https://github.com/fluxcd/flux2
+License: Apache-2.0
+LicenseUrl: https://github.com/fluxcd/flux2/blob/HEAD/LICENSE
+ShortDescription: A command line tool for communicating with FluxCD
+Tags:
+- continuous-delivery
+- gitops
+- gitops-toolkit
+- helm
+- kubernetes
+- kustomize
+ReleaseNotes: |-
+  Highlights
+  Flux v2.3.0 is a feature release. Users are encouraged to upgrade for the best experience.For a compressive overview of new features and API changes included in this release, please refer to the Announcing Flux 2.3 GA blog post.This release marks the General Availability (GA) of Flux Helm features and APIs, including helm-controller, the HelmRelease, HelmChart, and HelmRepository APIs.The HelmRepository v2 API comes with new features, such as the ability to reference Helm charts from OCIRepository sources, reuse existing HelmChart resources, and verify the integrity of Helm chart artifacts signed with Notary Notation.❤️ Big thanks to all the Flux contributors that helped us with this release!Kubernetes compatibility
+  This release is compatible with the following Kubernetes versions:| Kubernetes version | Minimum required |
+  |--------------------|------------------|
+  | v1.28            | >= 1.28.0      |
+  | v1.29            | >= 1.29.0      |
+  | v1.30            | >= 1.30.0      |[!NOTE]
+  Note that the Flux project offers support only for the latest three minor versions of Kubernetes.
+  Backwards compatibility with older versions of Kubernetes and OpenShift is offered by vendors such as
+  ControlPlane that provide enterprise support for Flux.
+  API changes
+  HelmRelease v2
+  The HelmRelease kind was promoted from v2beta2 to v2 (GA).The v2 API is backwards compatible with v2beta2, with the exception of the deprecated fields which have been removed.Removed fields:- .spec.chart.spec.valuesFile replaced by .spec.chart.spec.valuesFiles.
+  - .spec.postRenderers.kustomize.patchesJson6902 replaced by .spec.postRenderers.kustomize.patches.
+  - .spec.postRenderers.kustomize.patchesStrategicMerge replaced by .spec.postRenderers.kustomize.patches.
+  - .status.lastAppliedRevision replaced by .status.history.chartVersion.
+  New fields:- .spec.chartRef allows referencing chart artifacts from OCIRepository and HelmChart objects.
+  - .spec.chart.spec.ignoreMissingValuesFiles allows ignoring missing values files instead of failing to reconcile.
+  HelmChart v1
+  The HelmChart kind was promoted from v1beta2 to v1 (GA).The v1 API is backwards compatible with v1beta2, with the exception of the deprecated fields which have been removed.Removed fields:- .spec.valuesFile replaced by .spec.chart.valuesFiles.
+  New fields:- .spec.ignoreMissingValuesFiles allows ignoring missing values files instead of failing to reconcile.
+  - .spec.verify.provider: notation verify the signature of a Helm OCI artifacts using Notation trust policy and CA certificate.
+  HelmRepository v1
+  The HelmRepository kind was promoted from v1beta2 to v1 (GA).The v1 API is backwards compatible with v1beta2.OCIRepository v1beta2
+  The OCIRepository kind gains new optional fields with no breaking changes.New fields:- .spec.ref.semverFilter allows filtering the tags based on regular expressions before applying the semver range.
+  - .spec.verify.provider: notation verify the signature of OCI artifacts using Notation trust policy and CA certificate.
+  Kustomization v1
+  The Flux Kustomization kind gains new optional fields with no breaking changes.New fields:- .spec.namePrefix allows setting a name prefix for the generated resources.
+  - .spec.nameSuffix allows setting a name suffix for the generated resources.
+  ImageUpdateAutomation v1beta2
+  The ImageUpdateAutomation kind was promoted from v1beta1 to v1beta2.The v1beta2 API is backwards compatible with v1beta1.Deprecated fields:- Updated template data has been deprecated in favour of Changed that is designed to accommodate for all the types of updates made.
+  New fields:- .spec.policySelector allows filtering ImagePolicy based on labels.
+  Receiver v1
+  The Receiver kind gains new optional fields with no breaking changes.New fields:- .spec.type: cdevents allows receiving, validating and filtering of CDEvents.
+  Upgrade procedure
+  Upgrade Flux from v2.x to v2.3.0 either by rerunning bootstrap or by using the Flux GitHub Action.For more details, please refer to the upgrade guide from the Announcing Flux 2.3 GA blog post.Components changelog
+  - source-controller v1.3.0
+  - kustomize-controller v1.3.0
+  - notification-controller v1.3.0
+  - helm-controller v1.0.0 v1.0.1
+  - image-reflector-controller v0.32.0
+  - image-automation-controller v0.38.0
+  New Documentation
+  - HelmRelease v2 specification
+  - ImageUpdateAutomation v1beta2 specification
+  - Oracle VBS bootstrap guide
+  - Azure DevOps bootstrap guide for SSH RSA SHA-2
+  - OpenShift installation guide and SCC configuration
+  - Air-gapped installation guide for private container registries
+  - Bootstrap with Terraform examples
+  - Flux hub-and-spoke example repository
+  - Flux CD Architecture Overview blog post
+  CLI Changelog
+  - PR #4783 - @stefanprodan - ci: Consolidate conformance tests
+  - PR #4781 - @stefanprodan - Set Kubernetes 1.28 as min required version
+  - PR #4780 - @stefanprodan - Update helm-controller to v1.0.1
+  - PR #4779 - @fluxcdbot - Update toolkit components
+  - PR #4778 - @darkowlzz - tests/integration: Run flux check after installation
+  - PR #4777 - @stefanprodan - Add k3s to the conformance test suite
+  - PR #4775 - @stefanprodan - Update HelmRelease API to v2 (GA)
+  - PR #4773 - @makkes - Add (create|delete|export) source chart commands
+  - PR #4771 - @matheuscscp - Add 2.3.x release label
+  - PR #4770 - @stefanprodan - Update Flux architecture diagram
+  - PR #4769 - @frekw - Add --reproducible flag to flux push artifact
+  - PR #4768 - @stefanprodan - Improve end-to-end test workflow
+  - PR #4766 - @souleb - Add support for HelmRelease v2 in flux reconcile and flux create
+  - PR #4764 - @stefanprodan - ci: Adapt image automation test to v1beta2
+  - PR #4759 - @stefanprodan - Update Helm Source APIs to v1 (GA)
+  - PR #4754 - @stefanprodan - Add --ssh-hostkey-algos flag to bootstrap command
+  - PR #4747 - @stefanprodan - Update dependencies to Kubernetes 1.30
+  - PR #4746 - @swade1987 - Specifying go version in setup-go github action.
+  - PR #4736 - @dependabot[bot] - build(deps): bump the ci group with 4 updates
+  - PR #4735 - @JasonTheDeveloper - feat(secret): add create notation secret handler
+  - PR #4734 - @stefanprodan - Run conformance tests for Kubernetes 1.30.0
+  - PR #4729 - @stefanprodan - Add OpenShift to the conformance test suite
+  - PR #4728 - @toomaj - bootstrap: Add support for Git HTTP/S authorization header
+  - PR #4727 - @makkes - Add flags for issuer/subject OCI signature verification
+  - PR #4717 - @hawwwdi - Set GOMAXPROCS and GOMEMLIMIT to all Flux controllers
+  - PR #4710 - @stefanprodan - Add flux envsubst command
+  - PR #4709 - @stefanprodan - Add --strict-substitute flag to flux build ks and flux diff ks
+  - PR #4706 - @stefanprodan - Add --registry-creds flag to bootstrap and install commands
+  - PR #4705 - @stefanprodan - Update dependencies to Kustomize v5.4.0
+  - PR #4701 - @fluxcdbot - Update toolkit components
+  - PR #4699 - @stefanprodan - Update dependencies to Go 1.22 and Kubernetes 1.29.3
+  - PR #4689 - @makkes - Pin envtest version
+  - PR #4687 - @carlpett - Add permissions required for flow control
+  - PR #4678 - @darkowlzz - Update ImageUpdateAutomation API to v1beta2
+  - PR #4666 - @stefanprodan - Mark RFC-0006 as implementable
+  - PR #4657 - @stefanprodan - ci: Include all go modules in snyk testing
+  - PR #4654 - @stefanprodan - Remove deprecated e2e tests
+  - PR #4629 - @rishinair11 - Fix a typo in --force flag description
+  - PR #4620 - @stefanprodan - Update Equinix ARM64 GitHub runners
+  - PR #4610 - @takp - Fix typo in build.go
+  - PR #4589 - @stefanprodan - Update dependencies
+  - PR #4583 - @fluxcdbot - Update toolkit components
+  - PR #4575 - @stefanprodan - Update dependencies to Kubernetes v1.28.6
+  - PR #4558 - @twinguy - flux check should error on unrecognised args
+  - PR #4557 - @twinguy - flux stats should error on unrecognised args
+  - PR #4553 - @twinguy - Properly detect unexpected arguments during uninstall
+  - PR #4534 - @adamkenihan - [RFC-0006] Flux-CDEvent Receiver
+ReleaseNotesUrl: https://github.com/fluxcd/flux2/releases/tag/v2.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

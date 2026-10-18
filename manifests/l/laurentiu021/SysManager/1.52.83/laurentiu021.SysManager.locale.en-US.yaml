@@ -1,0 +1,45 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.52.83
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.52.83] - 2026-07-10
+  Fixed
+  - Cancelling an Ookla speed test during the first-run CLI download was misreported as an error instead of "Cancelled". RunOoklaAsync wrapped the prepare phase (EnsureOoklaAsync — download, extract, signature-verify) in a blanket catch (Exception) that re-threw everything as InvalidOperationException("Could not prepare Ookla CLI: …"). Because OperationCanceledException derives from Exception, a user cancel during the download/extract was converted into that error type, bypassing the ViewModel's dedicated catch (OperationCanceledException) { OoklaStatus = "Cancelled"; } handler — the user saw Error: Could not prepare Ookla CLI: A task was canceled. for a clean cancel. Cancellation now propagates untouched when the caller's token is signalled (an OperationCanceledException without the token signalled — HttpClient's internal 2-minute timeout — is reported as a truthful "download timed out" error), and the wrapping catch carries a when (ex is not OperationCanceledException) filter so cancellation can never be swallowed again.
+  - A failed cancel-kill of speedtest.exe could mask the cancellation and escape as an unhandled error. The cancel path killed the child with proc.Kill(entireProcessTree: true) but only caught InvalidOperationException. Kill(entireProcessTree: true) also throws Win32Exception (process access-denied/terminating) and AggregateException (a descendant couldn't be terminated) — either one propagated instead of the intended throw;, so the original OperationCanceledException was lost and an exception type the caller doesn't handle escaped RunOoklaAsync entirely. Now uses the same three-exception filter as PowerShellRunner's cancel-kill (InvalidOperationException or Win32Exception or AggregateException). The analogous schtasks timeout-kill in StartupService.SetTaskSchedulerEnabledAsync had the same gap — a Win32Exception from Kill() escaped to the outer catch, which mislabeled the timeout as "schtasks not available"; it now uses the same filter and reports the truthful "timed out" status.
+  Verify the download
+  Get-FileHash .\SysManager-v1.52.83.exe -Algorithm SHA256
+  Expected SHA256: FACBFA56E755B3F20AA03954FBE4A11B0BE9B5970A9D591548C87AD25F34A6F7
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.52.83
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

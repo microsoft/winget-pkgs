@@ -1,0 +1,47 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Fleet.fleetctl
+PackageVersion: 4.90.1
+PackageLocale: en-US
+Publisher: Fleet Device Management Inc.
+PublisherUrl: https://fleetdm.com/
+PublisherSupportUrl: https://github.com/fleetdm/fleet/issues
+PrivacyUrl: https://fleetdm.com/legal/privacy
+Author: Fleet Device Management Inc.
+PackageName: fleetctl
+PackageUrl: https://github.com/fleetdm/fleet
+License: MIT
+LicenseUrl: https://github.com/fleetdm/fleet/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026-present Fleet Device Management Inc
+ShortDescription: A command line interface (CLI) tool for managing Fleet from the command line.
+Description: |-
+  fleetctl (pronounced "Fleet control") is a command line interface (CLI) tool for managing Fleet from the command line. fleetctl enables a GitOps workflow with Fleet.
+  fleetctl also provides a quick way to work with all the data exposed by Fleet without having to use the Fleet UI or work directly with the Fleet API.
+Tags:
+- fleet
+ReleaseNotes: |-
+  Bug fixes
+  - Fixed a bug where the Fleet-maintained app auto-update job could keep an app's previous install script (which references the old installer filename) after downloading a newer version, causing the install to fail.
+  - Fixed automatic App Store app updates and policy automations queueing a duplicate install on a host whose upcoming activity queue was not draining. Fleet now skips an app that already has an install waiting in the queue, whether or not it has been sent to the device.
+  - Removed the duplicate App Store app installs Fleet had already queued, keeping the most recently queued install of each app on each host. Installs requested from the install button, self-service, or the setup experience are left in place.
+  - Fixed policy automations acting on an App Store app added for a platform other than the host's.
+  - Fixed an issue where the Apple reconciler would queue profiles for deleted hosts, that was pending in Fleet via Apple Business.
+  - Fixed Apple hosts losing built-in label memberships during Automated Device Enrollment (ADE), which prevented label-scoped profiles, software, and OS updates from being delivered.
+  - Fixed a bug where the batched Apple MDM profile and declaration reconcilers could skip hosts on deployments with more than 5000 Apple MDM hosts and one or more duplicate hosts.
+  - Fixed a database migration that could take hours to complete on deployments with many host certificates.
+  - Improved the error message shown when adding a Fleet-maintained app times out or is canceled by a proxy or load balancer while downloading a large installer.
+  - Fixed a Windows configuration profile staying listed on Host details > OS settings when it stopped applying to a host but another profile on that host still enforced all of the same settings. This affected deleting or renaming a profile, and transferring a host between fleets with matching profiles.
+  - Fixed 502 errors and timeouts on the software install endpoints caused by the hourly Fleet-maintained apps sync taking exclusive row locks on the entire software and software_titles tables while normalizing software names.
+  - Fixed a macOS Fleet-maintained app's name being applied to the iOS and iPadOS apps that share its bundle identifier.
+  - Fixed macOS Fleet-maintained app software names not being corrected when the catalog refresh failed.
+  - Fixed a 500 error during Apple MDM enrollment when a host had no DEP assignment yet (e.g. the enrollment request arrived before the host/DEP assignment row was created or replicated). The OS updates settings lookup now returns a not-found error so enrollment proceeds gracefully instead of failing.
+  - Fixed a bug where updating a Fleet-maintained app to a new build that uses the same shortened version did not update the file to the new installer, but did update some fields like install script.
+  - Fixed a bug where hosts that re-enrolled via DEP would sometimes have profiles with exclude-any labels attached installed before they had actually reported label results
+ReleaseNotesUrl: https://github.com/fleetdm/fleet/releases/tag/fleet-v4.90.1
+PurchaseUrl: https://fleetdm.com/pricing
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://fleetdm.com/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

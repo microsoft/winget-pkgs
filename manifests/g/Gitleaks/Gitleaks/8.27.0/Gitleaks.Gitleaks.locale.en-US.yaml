@@ -1,0 +1,72 @@
+# Created with komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Gitleaks.Gitleaks
+PackageVersion: 8.27.0
+PackageLocale: en-US
+Publisher: Gitleaks LLC
+PublisherUrl: https://gitleaks.io/
+PublisherSupportUrl: https://github.com/gitleaks/gitleaks/issues
+Author: Zachary Rice
+PackageName: Gitleaks
+PackageUrl: https://github.com/gitleaks/gitleaks
+License: MIT
+LicenseUrl: https://github.com/gitleaks/gitleaks/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2019 Zachary Rice
+CopyrightUrl: https://github.com/gitleaks/gitleaks/blob/master/LICENSE
+ShortDescription: Protect and discover secrets using Gitleaks
+Description: |-
+  Gitleaks is a SAST tool for detecting and preventing hardcoded secrets like passwords, api keys,
+  and tokens in git repos. Gitleaks is an easy-to-use, all-in-one solution for detecting secrets,
+  past or present, in your code.
+Moniker: gitleaks
+Tags:
+- devsecops
+- git
+- gitleaks
+- go
+- golang
+- hacktoberfest
+- secret
+- security
+- security-tools
+ReleaseNotes: |-
+  Changelog
+  - 782f310 Archive support (#1872)
+  - 489d13c Update README.md
+  - d29ee55 Reduce aws-access-token false positives (#1876)
+  - 611db65 Set pass_filenames to false for Docker hook (#1850)
+  - 0589ae0 unicode decoding (#1854)
+  - 82f7e32 Diagnostics (#1856)
+  - f97a9ee chore: include decoder in debug log (#1853)
+  Got another @bplaxco release. Cheers!
+  Archive Scanning
+  Sometimes secrets are packaged within archive files like zip files or tarballs,
+  making them difficult to discover. Now you can tell gitleaks to automatically
+  extract and scan the contents of archives. The flag --max-archive-depth
+  enables this feature for both dir and git scan types. The default value of
+  "0" means this feature is disabled by default.
+  Recursive scanning is supported since archives can also contain other archives.
+  The --max-archive-depth flag sets the recursion limit. Recursion stops when
+  there are no new archives to extract, so setting a very high max depth just
+  sets the potential to go that deep. It will only go as deep as it needs to.
+  The findings for secrets located within an archive will include the path to the
+  file inside the archive. Inner paths are separated with !.
+  Example finding (shortened for brevity):
+  ...
+  File:        testdata/archives/nested.tar.gz!archives/files.tar!files/.env.prod
+  Line:        4
+  Commit:      6e6ee6596d337bb656496425fb98644eb62b4a82
+  ...
+  Fingerprint: 6e6ee6596d337bb656496425fb98644eb62b4a82:testdata/archives/nested.tar.gz!archives/files.tar!files/.env.prod:generic-api-key:4
+  Link:        https://github.com/leaktk/gitleaks/blob/6e6ee6596d337bb656496425fb98644eb62b4a82/testdata/archives/nested.tar.gz
+  This means a secret was detected on line 4 of files/.env.prod. which is in
+  archives/files.tar which is in testdata/archives/nested.tar.gz.
+  Currently supported formats:
+  The compression
+  and archive
+  formats supported by mholt's archives package
+  are supported.
+ReleaseNotesUrl: https://github.com/gitleaks/gitleaks/releases/tag/v8.27.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

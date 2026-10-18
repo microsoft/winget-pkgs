@@ -1,0 +1,100 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: t8y2.DBX
+PackageVersion: 0.5.33
+PackageLocale: en-US
+Publisher: t8y2
+PublisherUrl: https://github.com/t8y2
+PublisherSupportUrl: https://github.com/t8y2/dbx/issues
+Author: t8y2
+PackageName: DBX
+PackageUrl: https://github.com/t8y2/dbx
+License: Apache-2.0
+LicenseUrl: https://github.com/t8y2/dbx/blob/HEAD/LICENSE
+ShortDescription: 15MB，lightweight, cross-platform database client. Supports MySQL, PostgreSQL, SQLite, Redis, MongoDB, DuckDB, ClickHouse, SQL Server and more.
+Tags:
+- clickhouse
+- database
+- database-client
+- database-management
+- duckdb
+- gui
+- mongodb
+- mysql
+- postgresql
+- redis
+- rust
+- sql-server
+- sqlite
+- tauri
+- vue
+ReleaseNotes: |-
+  新功能
+  - AI Agent — 新增 explain_query 工具，可在 Agent 模式中分析执行计划并辅助索引优化；工具调用支持按能力并行/顺序调度，并按数据库类型过滤可用工具 (contributed by @Abeautifulsnow)
+  - 查询结果 — 支持可切换的查询结果运行记录与归档，并新增可配置最大行数的无限滚动，长结果集浏览更顺滑 (contributed by @SuLea-IT)
+  - Redis — 新增 Pub/Sub 发布订阅实时推送、查询编辑器语法检查，并优化多行命令执行、数据库选择同步和大 key 空间扫描体验 (contributed by @haipengno1)
+  - 数据库支持 — 新增 QuestDB 与 Manticore Search 一等连接支持，SQLite 新增数据库备份操作，Turso 连接表单简化为 URL + token，Databend 补齐编辑与过程能力 (contributed by @ptma, @vergil-lai)
+  - 国际化 — 新增日语界面语言，并将默认语言兜底从中文调整为英文，非中文环境下的初始体验更自然 (contributed by @cwatanab)
+  - 连接与安全 — 支持禁用启动密码保护，并新增连接 keepalive 间隔配置，适合受控环境和长连接场景 (contributed by @Odonno)
+  - SQL 工作流 — 侧边栏表右键菜单新增智能 SQL 模板，SQL 编辑器可直接打开表 DDL 面板，并改进库名限定列补全
+  - MCP — 新增一键安装/升级入口，并支持 DBX_DATA_DIR 以改善便携模式下的数据目录控制
+  改进
+  - 数据网格 — 表格默认使用 Geist Variable 12.5px，并统一编辑器字体、滚动条样式与显示逻辑，减少 Canvas 编辑抖动和横向/纵向滚动不一致
+  - AI 体验 — 新增上下文窗口管理和 token 用量跟踪，执行计划结果可在界面中以内联视图展示
+  - 连接稳定性 — 断开连接清理不再阻塞，Agent 连接超时配置会被正确遵守，损坏连接也可以删除
+  - 数据库兼容性 — PostgreSQL、MySQL、Oracle、IRIS、Xugu、GBase、InfluxDB、MongoDB、Elasticsearch、SQL Server 等连接、元数据、查询和系统函数处理更稳
+  - 界面交互 — 错误横幅新增复制操作，所有密码输入框新增显示/隐藏切换，toast 支持文本选择，外观设置页增加截断 tooltip
+  - 侧边栏 — 固定节点排序更合理，搜索会传递给表列表接口并加 300ms debounce，减少大库浏览时的无效加载
+  - 文档与安装 — README 新增 AtomGit star badge，bug report 模板补充调试日志导出说明，Cargo 配置文档补充可选构建加速提示，官网页脚补充仓库链接
+  修复
+  - macOS 交互 — 修复 Ctrl+click 同时触发点击和右键菜单，导致对象浏览器、SQL 库、查询历史误导航或误打开的问题 (contributed by @lexmin0412, closes #1188)
+  - Tooltip 交互 — 修复表头字段信息 tooltip 无法移入、复制按钮无法点击的问题 (contributed by @lexmin0412, closes #1120)
+  - 数据网格 — 修复编辑抖动、滚动条闪烁/缺失、编辑器字体不一致，以及不安全 int64 显示被精度破坏的问题 (contributed by @ptma)
+  - 查询执行 — 修复本地查询超时后被错误重试、纯注释 SQL 被执行、SQL Library 字号不一致等问题
+  - PostgreSQL — 修复连接失败详情缺失、drop database 前未断开 session、channel_binding=require 兼容、tsvector 列处理等问题
+  - MySQL — 查询结果优先使用 text protocol，并修复 database-qualified columns 补全
+  - Redis — 修复 SELECT 数据库未同步到工具栏和标签、订阅未连接时输入可用、按钮高度抖动、文档刷新和大规模 SCAN 延迟问题
+  - MongoDB / InfluxDB / Elasticsearch — 修复 MongoDB TLS 表单参数和旧驱动 fallback、旧版 InfluxDB 结果集兼容、Elasticsearch index 路径编码问题 (contributed by @ptma)
+  - SSH / Agent — 支持旧版 KEX 算法，Agent 启动时会跳过 stdout 中的非 JSON 行，避免启动解析失败
+  - AI 兼容性 — 修复 aiAgentStream 字段命名、explainData 传递和缺失的 Agent 国际化 key
+  - 结构与元数据 — 修复 IRIS schema 表限定、IRIS 克隆表 false predicate、Xugu schema-aware 查询、Oracle schema 连接运行时复用、GBase 8a/8s profile 等问题
+  - 界面细节 — 修复对话框中的删除数据库确认 loading 状态、toast 层级低于 dialog、Vue warning 和静默 PubSub 自动连接问题
+  - 构建与发布 — 修复 Homebrew formula 发布任务缺少 prepare 依赖，并恢复部分文件末尾缺失换行
+  下载安装
+  Windows
+  ───────────────────────────┬────────────────────────────────
+  文件                       │说明
+  ───────────────────────────┼────────────────────────────────
+  DBX_0.5.33_x64-setup.exe   │推荐 — NSIS 安装包，支持自动更新
+  ───────────────────────────┼────────────────────────────────
+  DBX_0.5.33_x64_en-US.msi   │MSI 安装包，适用于企业部署
+  ───────────────────────────┼────────────────────────────────
+  DBX_0.5.33_x64-portable.zip│便携版 ZIP，适合免安装和离线拷贝
+  ───────────────────────────┴────────────────────────────────
+  Scoop:
+  scoop bucket add dbx https://github.com/t8y2/scoop-bucket
+  scoop install dbx
+  macOS
+  ──────────────────────┬───────────────────────────
+  文件                  │说明
+  ──────────────────────┼───────────────────────────
+  DBX_0.5.33_aarch64.dmg│推荐 — 适用于 Apple Silicon
+  ──────────────────────┼───────────────────────────
+  DBX_0.5.33_x64.dmg    │适用于 Intel Mac
+  ──────────────────────┴───────────────────────────
+  Homebrew:
+  brew install --cask dbx
+  Linux
+  ──────────────────────────────────────┬─────────┬───────────────────────────────────────────
+  发行版                                │推荐格式 │安装方式
+  ──────────────────────────────────────┼─────────┼───────────────────────────────────────────
+  Ubuntu / Debian / Linux Mint / Pop!_OS│.deb     │sudo apt install ./DBX_*.deb
+  ──────────────────────────────────────┼─────────┼───────────────────────────────────────────
+  Fedora / RHEL / CentOS / Rocky Linux  │.rpm     │sudo dnf install ./DBX-*.rpm
+  ──────────────────────────────────────┼─────────┼───────────────────────────────────────────
+  其他发行版                            │.AppImage│chmod +x DBX_*.AppImage && ./DBX_*.AppImage
+  ──────────────────────────────────────┴─────────┴───────────────────────────────────────────
+ReleaseNotesUrl: https://github.com/t8y2/dbx/releases/tag/v0.5.33
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

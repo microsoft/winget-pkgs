@@ -1,0 +1,73 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 15.11.3
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Fixed
+  - Fixed GitHub Copilot long-context model requests to use the upstream requestModelId when calling Anthropic, OpenAI Responses, and OpenAI Completions APIs
+  - Fixed GitHub Copilot model enablement to deduplicate catalog variants by upstream model ID when enabling all models
+  @oh-my-pi/pi-catalog
+  Added
+  - Added requestModelId on Model to represent the upstream model id used when a catalog entry is a local variant
+  - Added synthetic GitHub Copilot long-context model variants with -1m suffixes when tiered token pricing is advertised
+  Changed
+  - Changed GitHub Copilot discovery to request X-GitHub-Api-Version: 2026-06-01 from api.githubcopilot.com
+  - Changed GitHub Copilot discovery to cap base model contextWindow to the default token tier and keep long-context access as the separate -1m model entry
+  - Changed Copilot model mapping to omit non-chat /models entries and enable image input for models whose capabilities indicate vision support
+  Fixed
+  - Fixed long-context variant pricing to use billing.token_prices.long_context rates instead of default model pricing
+  - Fixed mapModel handling in OpenAI-compatible discovery so returning null now skips a model entry rather than falling back to defaults
+  - Fixed model ID precedence so a real upstream Copilot model id is kept when it conflicts with a synthesized -1m variant
+  @oh-my-pi/pi-coding-agent
+  Fixed
+  - Fixed stale Working… loader rows being committed to native scrollback above the live loader: the interactive status container now reports a live-region seam while it has mounted content (#2328 by @35844493).
+  - Fixed Mnemopi memory consolidation never running on session shutdown: MnemopiSessionState.dispose() now drains pending fact extractions and runs sleepAllSessions on every owned bank before closing handles (and AgentSession.dispose() awaits the result), matching the /memory enqueue slash command. mnemopiBackend.clear opts out via dispose({ consolidate: false }) so the destructive /memory clear path does not spend tokens consolidating memories that are wiped on the next line. consolidate() deliberately keeps no aliasOf short-circuit so /memory enqueue from a subagent still flushes and sleeps the parent's shared banks (the alias guard lives in dispose for lifecycle, not in consolidate for content). Without this, episodic_memory, gists, consolidation_log, graph_edges, and triples stayed empty for every deployment because the SHMR/beam pipeline only ran when a user typed /memory enqueue|rebuild (#2320).
+  - Fixed multi-path search collapsing distinct scopes into one walk rooted at their unrequested common ancestor: paths: [".", "~/.gitconfig"] scanned the entire home directory (typically until the 30s grep timeout), and explicit file entries inside walker-pruned directories (e.g. .git/config, gitignored files) silently never matched because they were folded into the directory walk's glob union. Multi-path scopes now fan out into per-target scans when the common ancestor is not itself a requested path, plain-file entries are read directly as their own targets, and matches from overlapping targets are deduplicated.
+  - Fixed lsp.formatOnWrite sending a hardcoded tabSize: 3, insertSpaces: true on every textDocument/formatting request, which silently re-indented 2-space YAML (and any LSP-formatted file) to 3-space on every write/edit through formatter-aware servers like yaml-language-server. Format options are now resolved per-file from .editorconfig (indent_size, indent_style, tab_width), falling back to the indent sniffed from the in-memory content the agent is about to write, then to a 2-space default. The duplicate DEFAULT_FORMAT_OPTIONS constant in lsp/index.ts and lsp/clients/lsp-linter-client.ts is replaced with a single shared resolveFormatOptions helper (#2329).
+  @oh-my-pi/pi-tui
+  Fixed
+  - Fixed the root compose letting a lower child's native-scrollback live seam overwrite a higher one: the topmost seam (and its commit-safe extension) now defines the commit boundary, so a status loader below a streaming transcript can no longer cause still-mutable transcript rows to be committed as stale history (#2328).
+  @oh-my-pi/pi-utils
+  Added
+  - Added getEditorConfigFormatting(file): returns the .editorconfig-pinned tabSize/insertSpaces (both optional, no fallback) so LSP-format callers can layer per-file defaults under it without paving over silence with the renderer's display tab width (#2329).
+  What's Changed
+  - fix(mnemopi): consolidate working memory on session shutdown by @roboomp in https://github.com/can1357/oh-my-pi/pull/2327
+  - Fix working loader scrollback duplication by @35844493 in https://github.com/can1357/oh-my-pi/pull/2328
+  New Contributors
+  - @35844493 made their first contribution in https://github.com/can1357/oh-my-pi/pull/2328
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v15.11.2...v15.11.3
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v15.11.3
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

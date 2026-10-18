@@ -1,0 +1,50 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.SimSat
+PackageVersion: 0.2.1
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/simsat/issues
+Author: Fahrenheit Research
+PackageName: SimSat Studio
+PackageUrl: https://github.com/FahrenheitResearch/simsat
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/simsat/blob/main/LICENSE-APACHE
+Copyright: Copyright © Fahrenheit Research. MIT OR Apache-2.0.
+CopyrightUrl: https://github.com/FahrenheitResearch/simsat/blob/main/LICENSE-MIT
+ShortDescription: Physically-based simulated satellite imagery from WRF model output - visible true-color, IR, water vapor, GeoColor, Sandwich, and derived fields, with a desktop studio, headless CLI, and Python bindings
+Description: 'SimSat Studio - Physically-based simulated satellite imagery from WRF model output. SimSat renders what a geostationary weather satellite would see looking at your WRF run: NASA Blue Marble ground with terrain shadows and seasonal blending, a finite-disk sun with real twilight, volumetric clouds with multiple scattering, Cox-Munk water sun-glint — and synthetic thermal infrared through the same true-Kelvin enhancement pipeline the real GOES/Himawari products use. It ships as a desktop app (simsat_studio, Rust/egui/wgpu), a headless CLI, and a numpy-returning Python binding (import simsat).'
+Moniker: simsat-studio
+ReleaseNotes: |-
+  SimSat v0.2.1
+  This release improves terrain illumination, especially around twilight, while preserving the reviewed cloud appearance. It also makes CIMSS Style the recommended Band-13 presentation.
+  Highlights
+  - Corrected surface sunlight normalization. Removed an unintended second limb-darkening factor from land, water, and glint illumination, bringing surface and cloud solar energy onto the same basis.
+  - Better low-sun terrain. The reviewed, tightly gated terrain recovery is enabled for finished visible products from civil twilight through low sun, then returns to exact identity by +12 degrees solar elevation.
+  - Slightly brighter reviewed terrain default. Recommended Display and High Quality Visible now use a restrained, surface-only ground_gain=1.10; 1.0 remains the neutral override. Cloud radiance is not scaled by this control.
+  - CPU/GPU visual parity. GPU rendering now supports the same post-light terrain controls as CPU rendering instead of disabling them during preview.
+  - CIMSS Style is now Recommended for Band 13. Fresh Studio settings, IR product transitions, the Recommended preset, and the headless IR CLI select CIMSS. Natural grayscale and the other analysis palettes remain available.
+  - Consistent controls everywhere. Twilight recovery can be enabled, disabled, and tuned in Studio, the CLI, Python, and the Rust API. Existing saved settings are preserved through Studio's normal migration choice.
+  - Science data remains unchanged. IR palettes do not alter raw Kelvin values. Raw RGB reflectance, Sensor QA, thermal/derived products, and cloud-only layers retain neutral surface-display behavior.
+  Validation
+  - Owner-reviewed with the 1974 low-sun case and broader visible cases using the exact Windows executable below.
+  - Engine: 568 passed, 2 ignored.
+  - Studio: 65/65 passed.
+  - Public CI passed Linux formatting, strict Clippy, full tests, Windows/macOS engine builds, and an installed-wheel generated-render smoke.
+  - The release-artifact build passed all three Windows Studio, Linux CLI, and manylinux wheel jobs. The exact downloaded wheel rendered a generated 12 x 12 Band-13 scene in WSL; both Linux binaries passed --help, and the tar entries are executable mode 755.
+  - Windows FileVersion/ProductVersion: 0.2.1.
+  Downloads
+  - simsat-studio-v0.2.1-windows-x86_64.exe — self-contained Windows Studio
+    SHA-256: 12FF5C491A7CD4360E5CAFAA88DE34733F8FC4AC13C73E3B5606335776E6117F
+  - simsat-0.2.1-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+    SHA-256: D0E1EEAC793C335D174F06D159271B1A642C485798A87843B1358F57A1A00069
+  - simsat-cli-v0.2.1-linux-x86_64.tar.gz
+    SHA-256: E73C543288C54A5DCE729FA7C596AD6BC43ECA97CDE8BDAE602FA5681357B582
+  - THIRD-PARTY-NOTICES.txt
+    SHA-256: E235FA33875603FE529DED887E6FD2CF4C595B7F486CE57567E3E4CED6C6C036
+  The Windows executable is unsigned, so Microsoft Defender SmartScreen may show an unknown-publisher warning.
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/simsat/releases/tag/v0.2.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

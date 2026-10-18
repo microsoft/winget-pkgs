@@ -1,0 +1,133 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.65.10
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.65.10] - 2026-08-14
+  Two things that were quietly telling you the wrong thing. A speed test result could fail to save without
+  saying so, and the "time remaining" on long jobs could climb upward while the bar stood completely still.
+  Note on versions: 1.65.9 was tagged but never published — its release build stopped on the very save bug
+  fixed below. Everything 1.65.9 contained is in this release.
+  Fixed
+  - A speed test result could vanish without telling you. Saving a result to history writes a file, and
+    if that write failed — a moment of disk contention, a permissions problem — the app noted it in the
+    diagnostic log and then carried on exactly as if it had worked. The reading stayed on screen, so
+    nothing looked wrong until you came back later and found a gap in your history. Now a failed save says
+    so on the Speed Test tab, and the reading still stays visible for the session so you do not lose the
+    number you just waited for.
+  - "Time remaining" grew while progress stood still. The estimate was worked out from the average
+    speed since the start, and recalculated only when a job reported new progress. Long steps report the
+    same percentage repeatedly, and each of those reports made the estimate bigger: measured on a job
+    stuck at 12%, it climbed from about one minute to about thirty-seven while nothing moved. Between
+    reports it froze instead, so a stalled job showed a confident "10 seconds left" for minutes. And a slow
+    first step could show "about 1 hour 39 minutes" for something that finished in ninety seconds.
+    The estimate now follows how fast progress is currently moving, counts down on its own while a job is
+    quiet, and says "calculating…" rather than guessing from the first few percent.
+  Startup Manager was missing a whole class of programs that start with Windows — anything installed by
+  a 32-bit installer, which on a typical PC means a VPN client, a printer helper or an older updater.
+  Those now appear alongside everything else, and can be turned off from here like the rest. Task
+  Scheduler also shows what each task is for and when it will run next, instead of only when it last ran.
+  Fixed
+  - Startup Manager did not list programs installed by 32-bit installers. 64-bit Windows keeps the
+    startup list of a 32-bit program in a separate place, and the app only ever read the main one. So an
+    application that genuinely runs at every boot simply was not in the list — and since the point of the
+    tab is to tell you what starts with Windows, its answer was incomplete without saying so. Windows'
+    own Task Manager shows these, so anyone comparing the two would have seen the gap. They are now
+    listed, and disabling one writes to the place Windows actually reads for that kind of entry, so
+    "Disabled" means disabled rather than looking disabled while the program keeps starting.
+  Added
+  - Task Scheduler now shows what a task is for, and when it runs next. The tab was already asking
+    Windows for each task's description, who created it, and its next scheduled run — on every single
+    scan — and then displaying none of it. "Next run" is now a column beside "Last run", there is a
+    "What it does" column with Windows' own description, and hovering it shows which publisher created
+    the task, which is also what decides whether it is labelled System, Telemetry or Third-party. No
+    extra work is done to collect any of this; it was being fetched and thrown away.
+  If you use one of the six light colour themes, the lines on the Ping, Bandwidth Monitor and Resource
+  History graphs were washed out to the point of being invisible — a pale mint or pale yellow line on a
+  white card. The graphs read the same way on light themes as they always have on dark ones now.
+  Fixed
+  - Graph lines were nearly invisible on the light themes. The colours the three charts draw with
+    were picked for the dark themes, where a bright mint or sky blue stands out against a near-black
+    card. On the six light themes the same colours sit on a near-white card, and several of them all
+    but disappeared: the Ping graph's mint line measured a contrast of 1.03:1 against its own card,
+    where 1.00 means "the same colour as the background". Across the three charts, 80 of the 180
+    colour-and-theme combinations were below the 3:1 that an accessibility guideline asks of any line
+    a reader has to follow (WCAG 2.2, Non-text Contrast). Each line is now darkened just enough to
+    clear that bar when the theme it is drawn on needs it. Only the brightness changes, never the hue,
+    so blue is still CPU and purple is still memory; the dark themes already passed and come through
+    untouched, byte for byte.
+  The diagnostic log no longer fills up with the same repeated line. If you ever need to send a log to
+  report a problem, what is in it is now actually about your problem — before, roughly two lines every
+  second were the app re-listing the same temperature sensors, which pushed everything else out.
+  Fixed
+  - The log recorded the same sensor list every two seconds, forever. Each time the Dashboard
+    refreshed temperatures — every two seconds while the app is open — it wrote one line per piece of
+    hardware describing how many temperature sensors that hardware has. That list never changes while
+    the app is running, so on a typical machine it was four identical lines a second time, and again,
+    and again. The log keeps a bounded amount of history, so this steadily evicted the entries that
+    would actually explain a fault: when a release check dumped the last 40 lines, all 40 were this one
+    message. The sensor list is now recorded once per run, where it is genuinely useful, and the
+    repetition is gone.
+  Verify the download
+  Get-FileHash .\SysManager-v1.65.10.exe -Algorithm SHA256
+  Expected SHA256: CBAFE94A45B25C2F84F4F9BA4F3362DB59186DE37A584B86F4280205B6CD53D2
+  This build is not code-signed, so Windows will warn on first launch. That is
+  expected for a small independent app: see what the warning says and what to
+  click.
+  Code signing is planned through the SignPath Foundation,
+  which provides free certificates to open-source projects, with signing performed by
+  SignPath.io. Until then, the SHA256 above and the build
+  attestation below are what establish that a download is the genuine build.
+  Code signing policy
+  This release is not code-signed. The team roles, release-approval process and
+  privacy policy required by the SignPath Foundation programme
+  are documented in advance under Code signing
+  policy. That
+  documentation is a prerequisite for applying, not evidence of a certificate. The
+  attribution line naming SignPath as the signing provider will appear here once a
+  certificate is actually issued.
+  This program will not transfer any information to other networked systems unless
+  specifically requested by the user or the person installing or operating it. Full
+  privacy policy.
+  Verify where this binary came from
+  This exe was built by GitHub Actions from this public source, and the build is
+  recorded in the Sigstore public transparency log. With the
+  GitHub CLI:
+  gh attestation verify .\SysManager-v1.65.10.exe --repo laurentiu021/SystemManager
+  That proves which commit and workflow produced this exact binary, something the
+  SHA256 file cannot show, since it is published alongside the exe it describes.
+  Each release also ships SysManager-v1.65.10.sbom.json, a CycloneDX inventory of
+  every dependency resolved for this build.
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.65.10
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

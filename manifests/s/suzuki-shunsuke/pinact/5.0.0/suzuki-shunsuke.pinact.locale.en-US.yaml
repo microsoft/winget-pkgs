@@ -1,0 +1,91 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: suzuki-shunsuke.pinact
+PackageVersion: 5.0.0
+PackageLocale: en-US
+Publisher: Shunsuke Suzuki
+PublisherUrl: https://suzuki-shunsuke.github.io/profile/
+PublisherSupportUrl: https://github.com/suzuki-shunsuke/pinact/issues
+Author: Shunsuke Suzuki
+PackageName: pinact
+PackageUrl: https://github.com/suzuki-shunsuke/pinact
+License: MIT
+LicenseUrl: https://github.com/suzuki-shunsuke/pinact/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Shunsuke Suzuki
+CopyrightUrl: https://github.com/suzuki-shunsuke/pinact/blob/HEAD/LICENSE
+ShortDescription: pinact is a CLI to edit GitHub Workflow and Composite action files and pin versions of Actions and Reusable Workflows. pinact can also update their versions and verify version annotations.
+Moniker: pinact
+Tags:
+- cli
+- github-actions
+- oss
+- security
+ReleaseNotes: |-
+  Upgrade Guide
+  ⚠️ Breaking Changes
+  #1704 The CLI is built with spf13/cobra instead of urfave/cli
+  The commands, the flags, and their behavior are unchanged, but a long flag must now be written with two dashes.
+  # v4
+  pinact run -check
+  pinact run -fix=false -no-api
+  pinact run -diff-file diff.txt
+  # v5
+  pinact run --check
+  pinact run --fix=false --no-api
+  pinact run --diff-file diff.txt
+  urfave/cli accepted a long flag with a single dash. cobra's flag parser does not: a single dash introduces short flags, and -c is the short flag of --config, so -check would otherwise be read as --config=heck and pinact would silently look for a configuration file named heck. To prevent that, pinact rejects a single-dash long flag with an error naming the form to use:
+  $ pinact run -check
+  unknown flag: -check. Long flags need two dashes since pinact v5: --check
+  Short flags are unchanged and can still be written with a single dash:
+  pinact run -u -m 7
+  pinact run -i "^actions/.*$" -e "^actions/checkout$"
+  pinact init -g
+  pinact -c pinact.yaml run
+  --verify and --sep also keep working, as aliases of --verify-comment and --separator.
+  The migration fixes two urfave/cli bugs that pinact ran into:
+  - A workflow file named help could not be passed to pinact run: the argument was taken as a request for the help of run.
+  - Pressing TAB after a -- ran the command instead of completing it (urfave/cli#1993). Since pinact run fixes files by default, a TAB pressed while typing a pinact run -- command line rewrote the workflow files then and there. cobra completes through a separate hidden command that never reaches the action.
+  cobra also brings its own completion command, so pinact completion bash|zsh|fish|powershell generates a completion script.
+  #1704 The Go module path is now github.com/suzuki-shunsuke/pinact/v5
+  go install github.com/suzuki-shunsuke/pinact/v5/cmd/pinact@latest
+  This affects anyone importing pinact as a library, and go install. Installing the CLI from a release asset or via aqua is unaffected.
+  #1708 Documents under docs/ are renamed with underscores
+  docs/why-pinact-not-pin.md becomes docs/why_pinact_not_pin.md, so a link to the old path from outside this repository breaks. The README is also split into documents, so links to the section anchors that moved, such as #update-actions--update, now land on the README rather than on the section.
+
+  Features
+  #1708 pinact docs: serve the documentation to coding agents
+  #1705 pinact json-schema: output the JSON Schema of the configuration file
+
+  pinact docs
+  pinact docs lists the documents embedded in the binary and outputs them, so that a coding agent answering a question about pinact reads the documentation of the version that is actually installed rather than the source code or whichever version of the website it lands on.
+  $ pinact docs list          # the name and the description of every document, as JSON
+  $ pinact docs show config   # one document
+  $ pinact docs show codes/005
+  The README is split into documents so that the binary ships them: --update, --min-age, --no-api, SARIF, --diff-file, and the access token used to exist only in the README, which the binary doesn't ship. pinact docs list now lists 21 documents instead of 12, and the README goes from 431 lines to 169, keeping what someone reads to decide whether to use pinact.
+  The command is only useful to an agent that knows it exists, so pinact --help says so, every error pinact reports carries the hint as the help attribute, and pinact -v logs it:
+  $ pinact -v
+  pinact version v5.0.0
+  INF If you are a coding agent, run `pinact docs list` to list the documentation and `pinact docs show <name>` to read it before answering questions about pinact or troubleshooting its errors.
+  The hint goes to stderr as a log rather than to stdout, so it doesn't break a script that parses the version, and it is logged at the info level, so --log-level warn silences it. The routine outcomes of pinact run are unaffected: the exit codes 1, 2, and 3 are unchanged, and nothing is logged for them.
+  An agent skill is also available, and is installed separately from the binary:
+  gh skill install suzuki-shunsuke/pinact pinact
+
+  pinact json-schema
+  pinact json-schema outputs the JSON Schema of the configuration file, which editors such as VSCode use to complete the file and to warn about invalid settings.
+  $ pinact json-schema > pinact.json
+  The schema is embedded in the binary, so it is the schema of the configuration that the running version accepts. The copy served from GitHub, which the existing yaml-language-server comments point at, describes whatever main or the pinned tag holds instead.
+
+  Fixes
+  #1707 Describe every configuration field in the JSON Schema, and correct required
+  min_age was required by the schema, so every configuration file without it was reported as invalid. That is fixed, and version, ignore_actions[].ref, and rules[].conditions, which pinact does require, are now marked required.
+  version, files[].pattern, ignore_actions[].name, and ignore_actions[].ref had no description at all, so an editor completing the configuration file said nothing about them. Every field is now described, and the description of files is no longer truncated at a comma.
+
+  Dependency Updates
+  #1689 #1711 Update Go to v1.27.1
+  #1681 Update module github.com/suzuki-shunsuke/ghtkn-go-sdk to v0.6.1
+  #1713 Update module github.com/google/go-github/v90 to v91
+  #1715 Update module golang.org/x/oauth2 to v0.37.0
+ReleaseNotesUrl: https://github.com/suzuki-shunsuke/pinact/releases/tag/v5.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,112 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: CueLang.Cue
+PackageVersion: 0.15.0
+PackageLocale: en-US
+Publisher: Cue
+PublisherUrl: https://github.com/cue-lang
+PublisherSupportUrl: https://github.com/cue-lang/cue/issues
+PackageName: Cue
+PackageUrl: https://github.com/cue-lang/cue
+License: Apache-2.0
+LicenseUrl: https://github.com/cue-lang/cue/blob/HEAD/LICENSE
+ShortDescription: |-
+  CUE is an open source data constraint language which aims to simplify tasks
+  involving defining and using data.
+Tags:
+- configuration
+- data
+- kubernetes
+- validation
+ReleaseNotes: |-
+  Changes which may break some users are marked below with: ⚠️
+  Note that this release no longer includes a checksums.txt asset; GitHub now provide digests natively.
+  LSP
+  This release includes the initial version of cue lsp - with support for "go to definition", "find references", rename, code completion, hover documentation, and code formatting.
+  See our Getting Started wiki page for instructions on how to set it up with your editor.
+  Please report any bugs or missing features you encounter via the Issue tracker or via the #lsp channels on Discord or Slack.
+  Language
+  explicitopen experiment for #A...
+  The explicitopen per-file experiment enables the posfix ... operator to explicitly open closed structs, allowing additional fields to be added. This change simplifies CUE's semantics, reduces user confusion, and enables clearer expression of type extensibility patterns.
+  You can try this experiment by following our how-to guide. For more information, see the proposal on GitHub and the spec change patch.
+  aliasv2 experiment
+  The aliasv2 per-file experiment implements the new "postfix aliases" syntax, and introduces a "self" predeclared identifier referring to the innermost surrounding struct or list.
+  You can try this experiment by following our how-to guide. For more information, see the proposal on GitHub and the spec change patch.
+  Other experiments
+  ⚠️ With its proposal accepted, the keepvalidators global experiment is now stable, meaning that CUE_EXPERIMENT=keepvalidators is always enabled.
+  With its proposal accepted, the structcmp per-file experiment is now stable with language.version at v0.15.0 or later, meaning that the @experiment(structcmp) attribute is unnecessary as it's always enabled.
+  Evaluator
+  ⚠️ Removing evalv2
+  The old evalv2 evaluator, which previously could be re-enabled via CUE_EXPERIMENT=evalv3=0, is now deleted. The new evalv3 evaluator has been on by default since v0.13.0, and at this point our entire test suite including Unity is working.
+  Removing the old evaluator reduces significant load on development, as we were able to clear out 4000 lines of code, and simplify the internal types and code structure. This is a necessary step to unblock ongoing feature and performance work in the evaluator.
+  As a bonus, because the old and new evaluators shared many core evaluator types, removing the fields only used by the old evaluator yields modest memory usage improvements of around 4-6%.
+  Performance
+  Evaluating concrete CUE values no longer involves dependency analysis; this should result in modest speed improvements when marshaling to YAML, via either cue export -e expr -o yaml or yaml.Marshal.
+  Dependency analysis now avoids computing references more than once, which resolves an expontential performance issue for some configurations using chains of CUE references.
+  Add caching to a part of the typochecker algorithm; this has been measured to provide performance improvements of up to 30% on a few large projects.
+  cue/parser now reuses more memory, which results in parsing performance improvements of up to 30% and memory savings of up to 50%, especially when loading large CUE data files.
+  Other changes
+  File embedding via the @embed attribute has gained an allowEmptyGlob option, to allow glob patterns to match zero files without causing an error.
+  The evaluator now shows all user errors created with the error builtin when they can be related to a disjunction failure. Previously, the evaluator would try to only show user errors directly part of a disjunction error, but that caused too many omissions.
+  Some error positions which were lost in the transition from evalv2 to evalv3 have been reintroduced.
+  Fix a bug where required fields in a definition might not be enforced when unifying with an inline struct in an expression, such as (#RequiresFoo & {bar: "baz"}).bar.
+  Fix a regression introduced in v0.12.0 where incomplete errors were not being handled consistently if they directly involved the top-level value.
+  A number of panics and error regressions in the evaluator which were reported since v0.14 have been fixed; thank you to all who reported these.
+  cmd/cue
+  A new cue help experiments command is introduced to document all available per-file and global experiments.
+  The cue fix --exp flag is introduced to rewrite files or packages to use new and experimental semantics with @experiment attributes.
+  cue mod mirror now copies OCI referrers between registries, which ensures that artifacts like signatures and attestations which reference modules being mirrored are copied as well.
+  cue mod resolve gains a --deps flag that lists all dependencies of the current module and which registries they resolve to.
+  cue get go gains an --outfile flag to generate exactly one CUE file for a single Go package, which can be useful when integrating cue get go into build systems like Bazel.
+  Fix a regression introduced in v0.9.0 where loading a qualified pattern like ./...:pkgname no longer filtered files based on the package name given.
+  cue get go now stops on any Go package loading error. Trying to continue in the presence of syntax or type-checking errors could lead to generating incorrect CUE.
+  Encodings
+  Initial support for encoding CUE schemas as JSON Schema is added. This includes a new encoding/jsonschema.Generate Go API, as well as CLI support via cue def --out jsonschema. This is currently very experimental, and many features are missing. For now, it can only generate a single version of JSON Schema, draft/2020-12.
+  The YAML library in the archived Go module gopkg.in/yaml.v3 has been replaced by go.yaml.in/yaml/v3, an active fork now maintained by the YAML organization.
+  cue exp gengotypes is improved to handle more edge cases with CUE package imports which could result in broken Go code.
+  The Protobuf decoder has been tweaked to not require files such as google/protobuf/timestamp.proto to exist on disk, given that they are mapped to CUE standard library APIs directly.
+  The Protobuf decoder has also been tweaked to support fully qualified references such as my.pkg.name.MessageName.
+  A bug is fixed in the TOML decoder where sub-table keys could incorrectly lead to duplicate key errors.
+  Standard library
+  The net package has gained new AddIP and AddIPCIDR functions to add numerical offsets to IP addresses or CIDR networks.
+  The Atoi, ParseInt, and ParseUint functions in the strconv package now work on integers with unlimited precision, like the rest of the CUE evaluator, rather than just a maximum of 64 bits.
+  Go API
+  The new cue.Value.IsClosed and cue.Value.IsClosedRecursively methods report whether a value has been closed at the top level or recursively, which is useful information when writing schema encodings.
+  The new cue.Patterns and cue.Selector.Pattern APIs allow introspecting pattern constraints in CUE struct values.
+  The new encoding/yaml.Decoder API allows decoding a stream of YAML documents, given that existing APIs did not support streams of multiple YAML documents.
+  encoding/json gains JSON Pointer APIs, which are already useful in packages like encoding/jsonschema.
+  cue/ast introduces PostfixExpr to support upcoming additions to the language syntax.
+  cue/ast introduces StringLabelNeedsQuoting to determine whether a string label needs to be quoted when used in CUE syntax.
+  cue/ast introduces NewStringLabel to create an ast.Label as either an unquoted identifier or a quoted string, depending on whether the string label needs quoting.
+  tools/fix has gained new APIs to fix configs to use an active experiment, as well as fixing configs to a newer language version.
+  cue introduces a Path.Append convenience method.
+  ⚠️ cue/build.Instance.Match is removed, given that it was never set to any value at any point since it was added.
+  cue/token is adjusted so that node positions within a file never result in an offset which is outside the bounds of the file. This could easily lead to subtle bugs or panics when using node position offsets.
+  ⚠️ The cue/token.Pos.Before method is now rewritten to match cue/token.Pos.Compare, given that it always returned "false" for positions from different files. The method is now deprecated as well.
+  cue/errors is adjusted so that Positions only collects printable positions, to prevent printing empty positions in the CLI.
+  cue/ast deprecates the File.Imports field in favor of the File.ImportSpecs iterator method. The iterator method File.ImportDecls is also introduced for completeness.
+  ⚠️ The long-deprecated cue.ResolveReferences option API is now removed.
+  cue/parser.DeprecationError.Version is deprecated, as tracking CUE language versions via integers has not been used since v0.4.3, and the mechanism was never properly documented.
+  Full list of changes since v0.14.0
+  - tools/fix: fix several issues with explicitopen rewrite by @mpvl in 4aad065
+  - tools/fix: add some test cases by @mpvl in 3b2b9b4
+  - internal/core/adt: add __reclose by @mpvl in f8bf47a
+  - doc/ref: clarify exact meaning of value for match* builtins by @mpvl in a650c53
+  - internal/ci/base: cue fmt files by @mpvl in ab19f98
+  - lsp/definitions: fix find-references (UsagesForOffset) by @cuematthew in 27f5797
+  - internal/core/dep: fix dependencies on spread operator by @mpvl in 5634c58
+  - internal/core/dep: add test for spread operator by @mpvl in f1cd0d2
+  - internal/core/export: handle spread operator by @mpvl in 52f26f9
+  - doc/ref/spec.md: document matchN and machIf by @mpvl in 020764b
+  - cue/parser: fix too restrictive parser test by @mpvl in 7d69171
+  - cue/ast/astutil: handle patching of some references in Apply by @mpvl in b979ace
+  - cue/ast/astutil: include Sanitize in TestApply by @mpvl in 57c6f9f
+  - tools/fix: do not add spread operator to lists by @mpvl in 7e9a83e
+  - all: remove two error results which are always nil by @mvdan in 6ed9b98
+  - all: remove three func results which are never used by @mvdan in eca4996
+  - cmd/cue: remove unused addInjectionFlags parameter by @mvdan in 083dd03
+  - internal/core/adt: make CloseInfo.AncestorPositions an iterator by @mvdan in 82c321f
+ReleaseNotesUrl: https://github.com/cue-lang/cue/releases/tag/v0.15.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

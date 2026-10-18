@@ -1,0 +1,49 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: XinTaoFei.Codeg
+PackageVersion: 0.26.2
+PackageLocale: en-US
+Publisher: codeg
+PublisherUrl: https://github.com/xintaofei
+PublisherSupportUrl: https://github.com/xintaofei/codeg/issues
+PackageName: codeg
+PackageUrl: https://github.com/xintaofei/codeg
+License: Apache-2.0
+LicenseUrl: https://github.com/xintaofei/codeg/blob/HEAD/LICENSE
+ShortDescription: Aggregate and browse AI coding agent sessions (Claude Code, Codex, Gemini CLI, etc.) in one place. Desktop app, self-hosted server, or Docker.
+Description: Codeg (Code Generation) is an enterprise-grade multi-agent coding workspace. It unifies local AI coding agents (Claude Code, Codex CLI, OpenCode, Gemini CLI, OpenClaw, Cline, etc.) in a desktop app, standalone server, or Docker container — enabling remote development from any browser — with conversation aggregation, parallel git worktree development, MCP/Skills management, chat channel interactions (Telegram, Lark, iLink, etc.), and integrated Git/file/terminal workflows.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claude-code
+- code
+- codex
+- coding
+- gemini-cli
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  Conversations stay where you put them: no panel stuck on "responding", no history disappearing when a new session starts, and no message landing in a session it doesn't own. The status bar also gains a quick-actions menu.
+  New
+  - Quick actions live in the status bar. A button in the bottom-left corner opens ten entries that were scattered across the sidebar, folder menus, the window chrome and settings: open a folder, clone a repository, the project launcher and remote workspaces; manage conversations, import local sessions, search; automations and to-dos, carrying the same failure and attention counts the sidebar shows; and the pet. The status bar is always on screen, so all of it stays reachable with the sidebar collapsed. Remote workspaces and the pet are desktop-only.
+  - Mention a session straight from the sidebar. Right-click a conversation and pick Add to session to drop it into the composer as a mention badge — the same badge the @ panel and the file tree produce. It lands at the cursor, and clicking twice doesn't add it twice.
+  Improved
+  - The @ panel lines up with the composer. It now takes the composer's width and edges and opens above it, exactly like the / menu, instead of a narrow box pinned to the cursor. The extra room goes to the description, which used to be cut off while the name sat next to several hundred pixels of nothing. It also stays with the composer it belongs to: a panel left open when you switch to Automations or To-dos no longer floats over the new page, and it keeps its place while the sidebar collapses or a panel is dragged.
+  - / works while the agent is still connecting. Slash commands only exist once the agent is up, so typing / during connection used to do nothing at all. The panel now opens with a loading row and fills in the moment the commands arrive — no need to retype.
+  - Updated bundled agents. Hermes 0.20.4, CodeBuddy 2.137.1, Kimi Code 0.37.2, Grok 1.0.5 and DeepSeek Harness 0.5.0.
+  Fixed
+  - A conversation no longer gets stuck on "responding" forever. Opening a finished to-do task's conversation from the sidebar left the composer streaming with nothing on the way: Stop did nothing, and only restarting the app cleared it. Two views of one agent — a conversation tab and a task's transcript, or two split tiles — used to take the live connection from one another, leaving the loser waiting on an answer it could never be told had arrived. Both are kept up to date now, and a view that misses the end of a turn checks with the backend and settles itself instead of freezing.
+  - A new session no longer takes a conversation's history with it. Sending a message could make a long conversation disappear from the sidebar: the agent had quietly opened a fresh session — after a reconnect, or a session that failed to load — and that new session overwrote the one the entire history hung off. The transcript was still on disk, just listed nowhere. The earlier session is now kept as its own entry, with its original name, time and folder, so nothing has to be dug out by hand.
+  - A message no longer lands in a session another conversation owns. When the agent handed back a session that already belonged to a different conversation, codeg took it anyway and sent the turn, which was then written into that other conversation's transcript — so after a reload your message looked like it had moved. Such a turn is now refused before it is sent, rather than dispatched into the wrong place.
+  - Codex sessions show the titles Codex gave them. codeg was using the first user message as the title, while Codex keeps the real one in its own session index, so the same session read one way here and another there. The sidebar, the session details and Codex now agree, titles you renamed by hand are still left alone, and the conversation list no longer stalls behind a bound chat channel that is slow to answer.
+  - Grok reports the tokens it actually spent. The breakdown read "output 0, cache read 0, cache write 0" for every Grok session, because codeg was reading how full the context window was rather than what the session had spent — in one captured session, 26,827 shown against 495,523 actually used. The four buckets now come from Grok's own per-turn numbers and add up to its own total; the context ring still shows occupancy, which is what it was always measuring. Sessions that recorded timings but no usage also get their duration back, Codex sessions included.
+  - Prices are prices again. $9.99 … $19.99 in ordinary prose was read as a formula and rendered in italics with its spacing collapsed. Dollar amounts stay text now, while $$…$$, \(…\) and \[…\] still render as math — including formulas spanning several lines, or sitting inside a list or a quote, which used to leave a stray fence behind and swallow the rest of the line.
+  - Office auto-preview leaves hidden files alone. A document written inside .git/ or .tmp/, or macOS's ._name.docx companion file, would open a tab of its own and start a watcher process for it. Anything under a dot-folder or with a dot-name is skipped by auto-preview now; opening one yourself from the file tree still works.
+  Thanks to @Adam-Dalloul and @RainyCoder for contributing to this release.
+ReleaseNotesUrl: https://github.com/xintaofei/codeg/releases/tag/v0.26.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,37 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: houseabsolute.ubi
+PackageVersion: 0.10.0
+PackageLocale: en-US
+Publisher: A house for code
+PublisherUrl: https://github.com/houseabsolute
+PublisherSupportUrl: https://github.com/houseabsolute/ubi/issues
+PackageName: ubi
+PackageUrl: https://github.com/houseabsolute/ubi
+License: Apache-2.0 or MIT
+Copyright: Copyright (c) 2026 David Rolsky
+ShortDescription: The Universal Binary Installer
+Description: |-
+  UBI is a universal binary installer library and CLI tool.
+  When I say "universal", I mean it downloads binaries from GitHub or GitLab releases.
+  When I say "binary", I mean it handles single-file executables like those created by most Go and Rust projects.
+  When I say "installer", I mean it plops the binary wherever you tell it to.
+  And finally, when I say "UBI", I don't mean "universal basic income", but that'd be nice too.
+Tags:
+- binary
+- download
+- executable
+- install
+- portable
+ReleaseNotes: |-
+  - Breaking change for library users: the rustls-tls-native-roots cargo feature has been removed. As of reqwest 0.13 there is no corresponding feature to enable. Root certificates are now always sourced from the platform's trust store via rustls-platform-verifier, which is what this feature used to select, so enabling it is no longer meaningful.
+  - Most CLI flags can now be set with a corresponding UBI_* environment variable, for example UBI_TAG for --tag or UBI_PROJECT for --project. A variable set to the empty string is treated as unset, so scripts can pass a possibly-empty value without building up a command line by hand. Flags passed on the command line take precedence over environment variables. Requested by @BatmanAoD (Kyle J Strand). GH #153.
+  - The prebuilt macOS binaries were dynamically linked against Homebrew's liblzma, so they failed to start on any machine that did not have that Homebrew package installed. liblzma is now compiled from source and linked statically on all platforms. Reported by @examosa (Jules Amonith). GH #151.
+  - Fixed the bootstrap-ubi.sh script's handling of the TAG env var. A tag with a multi-digit patch version, like v0.0.15, caused the script's version comparison to fail. Under busybox sh this printed a bad number error, and on all shells it made the script download the wrong filename and fail with a 404. Reported by @BatmanAoD (Kyle J Strand). GH #152.
+  - Upgraded zip from 3.x to 8.x. The old < 4.0.0 pin existed because zip 4 conflicted with xz2 over lzma-sys, but modern zip does not depend on lzma-sys at all. This also removes the last C implementation of bzip2 from the dependency tree: zip 3 pinned bzip2 0.5, which uses the C bzip2-sys, while zip 8 uses bzip2 0.6, which uses the pure-Rust libbz2-rs-sys that ubi was already using directly. Previously bzip2 was compiled twice, once as C and once as Rust. As a side benefit, ubi can now read xz-compressed entries in zip files, at no cost in dependencies, since the pure-Rust lzma-rust2 crate that implements this was already in the tree by way of sevenz-rust2.
+  - The minimum supported Rust version (MSRV) for the ubi crate is now 1.88, up from 1.85. This is required by zip 8.
+  - Upgraded reqwest to 0.13. Its rustls feature now pulls in the aws-lc-rs crypto provider, which requires a C/C++ toolchain and does not build under cross for several platforms that ubi supports, notably NetBSD and PowerPC64. The rustls-tls feature now enables reqwest's rustls-no-provider feature instead, and ubi installs the ring provider itself. There should be no user-visible change from this.
+ReleaseNotesUrl: https://github.com/houseabsolute/ubi/releases/tag/v0.10.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

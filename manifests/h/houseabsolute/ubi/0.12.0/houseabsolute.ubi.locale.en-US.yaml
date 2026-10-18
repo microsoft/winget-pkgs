@@ -1,0 +1,36 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: houseabsolute.ubi
+PackageVersion: 0.12.0
+PackageLocale: en-US
+Publisher: A house for code
+PublisherUrl: https://github.com/houseabsolute
+PublisherSupportUrl: https://github.com/houseabsolute/ubi/issues
+PackageName: ubi
+PackageUrl: https://github.com/houseabsolute/ubi
+License: Apache-2.0 or MIT
+Copyright: Copyright (c) 2026 David Rolsky
+ShortDescription: The Universal Binary Installer
+Description: |-
+  UBI is a universal binary installer library and CLI tool.
+  When I say "universal", I mean it downloads binaries from GitHub or GitLab releases.
+  When I say "binary", I mean it handles single-file executables like those created by most Go and Rust projects.
+  When I say "installer", I mean it plops the binary wherever you tell it to.
+  And finally, when I say "UBI", I don't mean "universal basic income", but that'd be nice too.
+Tags:
+- binary
+- download
+- executable
+- install
+- portable
+ReleaseNotes: |-
+  - Fixed a bug where ubi checked the env var CI_TOKEN for a GitLab token. This is now CI_JOB_TOKEN, which is what GitLab actually sets in CI.
+  - Added a --color flag, settable with UBI_COLOR, which accepts auto, always, or never. Previously, ubi always emitted ANSI color escapes, even when its output was redirected to a file or a pipe, which made saved logs hard to read. The new default, auto, colorizes output only when stderr is a terminal and the NO_COLOR env var is not set. Setting NO_COLOR to the empty string or to 0 is treated as not setting it at all.
+  - Breaking change for library users: ubi::init_logger now takes a second argument, a ubi::ColorChoice. Pass ColorChoice::default() to keep the previous behavior of colorizing output, except that it is now suppressed when stderr is not a terminal or NO_COLOR is set.
+  - Fixed up the colors for logging. The DEBUG label was black, which made it unreadable in terminals with a dark background. It is now cyan. INFO level messages are now green. Previously, they looked identical to DEBUG level messages.
+  - When ubi was asked to install an executable to a path where a directory already existed, it failed with a bare Is a directory (os error 21). It now gives a more helpful message with guidance on how to fix the problem. In addition, it checks some various cases that would prevent the install from working before it downloads anything. However, not all cases can be checked before download. Inspired by a report from @oalders (Olaf Alders). GH #136.
+  What happened to 0.11.0? It was lost in the mix as I updated my release tooling.
+ReleaseNotesUrl: https://github.com/houseabsolute/ubi/releases/tag/v0.12.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

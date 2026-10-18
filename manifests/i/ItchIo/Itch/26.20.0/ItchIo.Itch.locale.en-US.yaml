@@ -1,0 +1,85 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ItchIo.Itch
+PackageVersion: 26.20.0
+PackageLocale: en-US
+Publisher: itch corp.
+PublisherUrl: https://itch.io/
+PublisherSupportUrl: https://itch.io/support
+PrivacyUrl: https://itch.io/docs/legal/privacy-policy
+Author: Itch Corp.
+PackageName: itch
+PackageUrl: https://itch.io/app
+License: MIT
+LicenseUrl: https://github.com/itchio/itch/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 itch corp., https://itch.io
+CopyrightUrl: https://itch.io/docs/legal/terms
+ShortDescription: Install, update and play indie games
+Description: The itch.io app, itch, lets you effortlessly download and run games and software from itch.io. All of your downloads are kept in a single place and are automatically updated. Access your collections and purchases, or browse for new games via the in-app browser.
+Moniker: itch.io
+Tags:
+- game
+ReleaseNotes: |-
+  This release adds a Steam shortcuts manager, a method for linking downloads you already have on disk to your library, and a UI refresh over many shared components of the app. Electron has been updated to version 44, and we did a round of security hardening and code and dependency cleanup.
+  Steam shortcuts
+  We've introduced a new tool to manage shortcuts within Steam for projects installed in itch (#3313). You can now make things installed in itch appear in Steam, allowing you to run itch games without having to change apps when using Steam Deck or Steam Big Picture mode. You can find it either in the preferences, or by right clicking on any game cover image.
+  Shortcuts are added to an "itch.io" collection in Steam so they are grouped. For compatibility reasons, we have two launch modes available: launching through the app, which records play time on your profile, or "direct" mode, which points Steam at the game's executable so it runs without the app
+  Launching games in headless mode
+  Games can now be launched without the app running using itch-setup --run-game <gameId> [--profile-id <profileId>]. We introduced this primarily for the Steam shortcuts functionality, but it can be used for any other launcher or shortcut system. This requires itch-setup v1.31.0 or later.
+  This is built on a new butler launch subcommand that runs the launch machinery in-process against an existing butler.db without the need for a daemon process. itch-setup handles the app-specific parts: it locates your app's installation and settings, and generates and executes the corresponding butler launch command to start the game. Executables launched this way will preserve all app settings and per-game launch options, supporting sandboxing, prerequisates, play time tracking, API key, etc..
+  Not every launch can run this way. HTML5 games need a browser window, soundtracks and books need the OS shell, and an unaccepted license or a failed prerequisite install needs a client to prompt the user. For cases when itch-setup can't start the game directly, the full app is started or brought to the foreground on the associated game's launch dialog.
+  macOS is not supported yet, Steam shortcuts can be used but will launch the app with a URL or direct executable
+  Manually link pre-existing downloads to a game
+  If you've downloaded a game on itch.io outside the app, but want it to be registered within the app you can now use the "Link existing folder...". Consider this a power user tool, as no files are verified when you do this. This features exists as an escape hatch to get your games showing up in the app without having to redownload them, or if the game itself doesn't support a download that the app can process (like external download links). #3493
+  Elevate mode for itch-steup
+  itch-setup now supports an elevate mode for applying updates in scenarios where the app has been installed into a protected folder on Windows like Program Files. Previously, auto-update would fail and the app would never get updated. Note that in order for this to take effect, you may have to manually apply at least one update pass by re-running itch-setup.
+  Misc changes
+  - The custom titlebar buttons have been replaced with native window controls (#3496)
+  - Downloads show progress on the taskbar
+  - Tabs mode: Tabs have a context menu with duplicate, close others, and close below (#3489)
+  - macOS: new icons matching the current platform style (#3490)
+  - macOS: the dock icon bounces when something needs attention
+  - Buttons were restyled and their sizes and margins made consistent across the app
+  - Checkboxes are styled instead of using the platform default
+  - Update the bundled font to fix vertical alignment issues on macOS
+  - Navigating between pages no longer flashes white
+  - Load translations sooner so that empty translation string keys don't flash when app is starting
+  - Add context menu item for pushing a new build for each game on the "My creations" page
+  - The app update dialog links to the release notes
+  - The downloads dialog shows richer information about what happened in the status message, eg. if a heal took place vs a reinstall
+  - Search autocomplete results return only games associated with the current profile, and not all games in the local db
+  - Support ITCH_PROFILE_ID environment variable to auto-login the app to specified profile when starting
+  - The components section of preferences now has links to the release notes for each component.
+  Browsing
+  - Shift+click and Ctrl+click on links are respected when opening pages in a new tab or window (tabs mode only for new tab)
+  - A Jams button was added to the new tab page
+  - Fixed the back and forward mouse buttons on macOS and Windows (#3488)
+  - Move all "Open in external browser" buttons off the address bar and into the More menu
+  Security
+  - The app shell is served from an itch-shell:// protocol instead of file://, and the CSP is served from a single place
+  - Webviews have a default permission list, and attaching a webview is guarded
+  - The Electron binary is now fused
+  -  --ignore-certificate-errors is limited to dev builds
+  Translations
+  Translation files use ICU syntax for placeholders and plurals to make it easier to support a wide range of localized plurals.
+  Thank you to all our contributors who contributed translations for this version. You can contribute on weblate: https://weblate.itch.zone/projects/itchio/itch/.
+  Bugs
+  - Fixed a race condition when installing many games at once (#3482)
+  - Fixed text selection in dialogs after the move to <dialog>
+  - Fixed the log display in the scan library window
+  - The stop button in the browser navigation bar did nothing when clicked
+  - Fixed broken retry logic for broth downloads
+  - Windows protocol handlers are now registered through itch-setup instead of the direct app version.
+  - Open at login now points to itch-setup instead of the direct app version.
+  - Attempt to fix a bunch of scenarios where auto-update would get stuck in a loop in Windows, booting the old app instead of the new one.
+ReleaseNotesUrl: https://github.com/itchio/itch/releases/tag/v26.20.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://itch.io/docs
+- DocumentLabel: User Guide
+  DocumentUrl: https://itch.io/docs/itch
+- DocumentLabel: FAQ
+  DocumentUrl: https://itch.io/docs/app/faq
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

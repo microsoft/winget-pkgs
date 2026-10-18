@@ -1,0 +1,186 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ractive.hyalo
+PackageVersion: 0.21.0
+PackageLocale: en-US
+Publisher: '@ractive'
+PublisherUrl: https://github.com/ractive
+PublisherSupportUrl: https://github.com/ractive/hyalo/issues
+Author: Jean-Pierre Bergamin
+PackageName: hyalo
+PackageUrl: https://github.com/ractive/hyalo
+License: MIT
+LicenseUrl: https://github.com/ractive/hyalo/blob/HEAD/LICENSE
+ShortDescription: CLI for exploring and managing Markdown knowledge bases with YAML frontmatter
+Description: Hyalo is a fast command-line tool for searching, filtering, and mutating collections of Markdown files with YAML frontmatter. It supports property queries, tag filtering, regex search, wikilink tracking, and bulk metadata updates. Compatible with Obsidian vaults, Zettelkasten systems, and any structured Markdown documentation.
+Moniker: hyalo
+Tags:
+- agent-skill
+- agentic-workflows
+- cli
+- knowledge-base
+- knowledge-management
+- markdown
+- obsidian
+- rust
+- zettelkasten
+ReleaseNotes: |-
+  [0.21.0] - 2026-08-28
+  Added
+  - Iteration 245 — deferral carry-overs.
+    - UX-3 follow-up: dot-path property filters descend sequences. A
+      frontmatter list of maps (contacts: [{name, email}, …]) is now
+      traversable: --property 'contacts.email=x' auto-descends into every
+      element and matches when any of them carries that value, while a numeric
+      segment pins one element (contacts.0.email). The collected values are
+      returned as a list, so the established list semantics apply unchanged
+      (=/~= match when any element matches, != when none does, and a bare
+      key exists when at least one element yielded a value). Applies to every
+      filter consumer, including --where-property on the mutating commands.
+  - Iteration 244 — index remaining deferrals.
+    - UX-3: nested dot-path property filters. --property 'a.b=v' now
+      traverses nested YAML mappings (contact.email=team@example.com
+      matches contact: {email: …}) across find and every filter consumer;
+      a literal dotted key in a flat map still takes precedence over
+      traversal.
+    - UX-6: case-insensitive link resolution mode. links fix --case-insensitive (or [links.case_insensitive] resolve = true in
+      .hyalo.toml) treats links that resolve only by case folding as
+      resolved rather than fixable, so MDN-style vaults with case-folded
+      directory layouts no longer offer a link-case-mismatch rewrite plan
+      per link in links fix --dry-run.
+  Changed
+  - pi package 0.1.1. Root package.json and pi-package/package.json
+    bumped to 0.1.1 (DEC-101 version discipline for the root-manifest change
+    in PR #279), so pi update --extensions on a pinned git install can
+    observe a pushed change.
+  - hyalo summary --format text no longer prints a kb dir: banner on
+    stdout. The resolved vault dir moves to stderr as note: kb dir: <path>,
+    so a text-mode report is data from its first line; -q suppresses the note
+    and --format json still carries dir (DEC-247).
+  - Internal: the three largest CLI modules are split into submodules.
+    hints.rs (5,059 lines), commands/lint.rs (4,005) and output.rs (3,744)
+    become hints/, commands/lint/ and output/ directories. No behaviour,
+    path or visibility changes — every item keeps the visibility it had in the
+    single module.
+  Fixed
+  - Pre-v0.21.0 dogfood fixes (iter-249).
+    - UX-1: stale-index probe was blind past the vault's top level. The
+      index older than vault staleness probe (create-index/--index)
+      used to check only the vault root and its immediate subdirectories, so
+      a file added or removed two or more directories deep — the common case
+      on real vaults (iterations/done/*.md here, nearly every page on MDN
+      and GitHub Docs) — never tripped the warning. The probe now walks
+      directories recursively down to 3 levels (measured: an unbounded walk
+      added ~65% to an indexed query on MDN's 14k-file tree, well past
+      budget, so depth is bounded rather than unlimited), still without
+      reading any file content. create-index --help and the --index flag
+      help now describe the real depth and its two remaining blind spots
+      (in-place edits of existing files, which never move a directory's
+      mtime, and files added or removed inside a directory more than 3
+      levels below the vault root).
+    - BUG-1 (carry-over): task toggle/task set --index BM25 parity.
+      task toggle --all --index and task set --index used to patch just
+      the toggled tasks' status in place, leaving the entry's cached BM25
+      tokens stale relative to the file's new body bytes; the journal now
+      re-scans the mutated file the same way set/append/mv/lint --fix
+      already do, so find --index scores stay byte-identical to a disk
+      scan after a task mutation. lint --fix --index was audited too and
+      already re-tokenizes correctly.
+    - UX-2: links fix --apply --apply-fuzzy text summary mislabeled
+      applied fuzzy matches as excluded. The Low-confidence matches (…)
+      summary line always said "excluded from plain --apply", even when
+      --apply-fuzzy had just written those matches to disk. It now reads
+      "applied via --apply-fuzzy" when the flag was active, and keeps the
+      original "excluded from plain --apply" wording otherwise. JSON keys
+      are unchanged.
+  - read no longer misreports invalid UTF-8 lines as oversized (iter-246,
+    F-5). A body line containing invalid UTF-8 was skipped with the
+    "exceeds 1 MiB per-line limit" placeholder because the capped line reader
+    folded both skip causes into one flag. scanner::read_line_capped now
+    reports a distinct LineOutcome::InvalidUtf8, and hyalo read emits
+    <line skipped: invalid UTF-8 (lossy in search; fix encoding to read)>;
+    the oversized-line placeholder is reserved for real over-quota lines.
+  - BUG-4 (carry-over): post-mutation BM25 parity. After a mutation wave
+    under --index, find --index scores are byte-identical to a disk scan
+    without an intervening create-index: incremental re-scans re-tokenize
+    bodies when the snapshot carries a BM25 index, and the journal flush
+    rebuilds the persisted inverted index from (re-scanned ∪
+    postings-reconstructed) tokens. BM25 result ordering is now deterministic
+    (ties broken by path) on both the index and disk paths.
+  - new link-graph upsert. A file created by hyalo new now registers
+    its template's outgoing wikilinks (frontmatter link properties such as
+    related) in the persisted link graph, so backlinks --index sees them
+    without a full rebuild — the last mutating write path without the iter-243
+    upsert-with-links guarantee.
+  - Index/disk parity bugfix wave (iter-243, dogfood v0.20.0). Four
+    bugs with one theme — --index output must be indistinguishable from a
+    disk scan:
+    - BUG-1 (upsert on miss): every mutating command (set, set --tag,
+      task toggle, append, remove, lint --fix, links fix --apply,
+      mv, tags rename) now inserts a full entry (frontmatter, tasks,
+      links, graph edges) for a file the snapshot index has never seen —
+      previously only files the index already knew were refreshed, so a file
+      created by an editor/Obsidian and then mutated through hyalo stayed
+      invisible to every indexed read and never contributed links to the
+      graph. links fix/links auto additionally upsert unknown files during
+      their pre-discovery heal pass, so broken links in un-indexed files are
+      found and fixed under --index too.
+    - BUG-2 (links fix trust + applied semantics): the pre-discovery
+      heal (iter-241's detection half) now also covers files the index does
+      not know, and applied in links fix output means "something was
+      actually written", not "apply mode was requested": a fixes: 0
+      --apply run reports applied: false in JSON and Applied: no (no fixes written — nothing to apply) in text (dry runs say
+      Applied: no (dry run)).
+    - BUG-5 (backlinks order): backlinks results are sorted by
+      (source, line) on both the index and disk paths, so the two outputs
+      are byte-identical after a mutation wave and stable across refreshes
+      (the persisted graph's insertion order used to depend on which files a
+      journal refresh happened to rewrite).
+    - BUG-4 (BM25 corpus drift, partially): create-index's BM25 body
+      collection now includes code-fence delimiter lines (```rust) and
+      %% comment-fence lines, exactly matching what the disk-scan corpus
+      builder tokenizes (frontmatter::body_only), so scores are identical
+      between --index and disk scan on a fresh index (TOKENIZER_VERSION
+      is bumped to 3 so pre-existing snapshots re-tokenize from disk).
+      Remaining drift after mutations is timeboxed-out: the persisted
+      inverted index cannot be cheaply updated incrementally (entries' tokens
+      are stripped once an inverted index exists), so a rebuilt index is
+      needed for exact post-mutation parity — see the dogfood note.
+  Changed
+  - Lint subsystem moved into hyalo-mdlint; one MutationJournal owns
+    index maintenance (iter-226). Two architecture refactors with no
+    user-visible behaviour change (lint output is byte-identical, the snapshot
+    format is untouched). The five conformance-profile linters (changelog /
+    madr / okf / skills / github) plus their engines (heading_grammar,
+    link_lint, section_scanner) and the schema-validation core of lint
+    (per-file validation, auto-fix, validate_constraint) now live in
+    hyalo-mdlint (profiles::*, schema), exposing an in-process lint API
+    for library consumers — the CLI keeps flag parsing and output formatting
+    only. On the index side, the three scattered index-refresh mechanisms
+    (save_index_if_dirty, tasks::patch_index,
+    patch_index_for_modified_files) are folded into a single
+    MutationJournal every mutating command records through, flushed once per
+    invocation — always refreshing the persisted entry and its link graph.
+    This also fixes two latent stale-link-graph bugs: properties rename and
+    tags rename under --index used to patch entries but never the link
+    graph, so frontmatter link properties (related, depends-on) renamed
+    across a vault left backlinks stale until a full create-index rebuild.
+    A new cargo run -p xtask -- check-mutation-journal CI gate fails when a
+    mutating command bypasses the journal.
+  Added
+  - find --filenames0 and --iteration <ID> on read/task/backlinks
+    (iter-238). Two agent-CLI ergonomics follow-ups deliberately deferred out
+    of iter-235. find --filenames0 is the NUL-delimited sibling of
+    --filenames-only (GNU find -print0 precedent): each matching path is
+    terminated by a NUL byte instead of a newline, so filenames containing
+    newlines stay unambiguous and the output composes with xargs -0. Same
+    rules as --filenames-only: no envelope/count/hints, zero results → empty
+    output + exit 0, --strict still flips the exit code, and it conflicts
+    with --filenames-only, --jq, --count, and an explicit
+    --format json. Separately, every single-file command built on the shared
+    input resolver — read, backlinks, and all three task actions — now
+    accepts --iteration <ID>: like set --iteration, the ID must resolve to
+ReleaseNotesUrl: https://github.com/ractive/hyalo/releases/tag/v0.21.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

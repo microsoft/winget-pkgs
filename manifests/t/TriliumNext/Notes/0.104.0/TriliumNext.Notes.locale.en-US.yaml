@@ -1,0 +1,169 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: TriliumNext.Notes
+PackageVersion: 0.104.0
+PackageLocale: en-US
+Publisher: TriliumNext Notes Team
+PublisherUrl: https://github.com/TriliumNext/Notes
+PublisherSupportUrl: https://github.com/orgs/TriliumNext/discussions
+Author: TriliumNext
+PackageName: TriliumNext Notes
+PackageUrl: https://github.com/TriliumNext/Notes
+License: AGPL-3.0
+LicenseUrl: https://github.com/TriliumNext/Trilium/blob/HEAD/LICENSE
+Copyright: Copyright © 2024 TriliumNext Notes Team
+CopyrightUrl: https://github.com/TriliumNext/Notes
+ShortDescription: Build your personal knowledge base with TriliumNext Notes
+Description: TriliumNext Notes is an open-source, cross-platform hierarchical note taking application with focus on building large personal knowledge bases.
+Moniker: trilium
+Tags:
+- documentation-tool
+- electron
+- knowledge-graph
+- knowledgebase
+- local-first
+- markdown
+- note-managment
+- note-taking-app
+- notebook
+- notes
+- personal-wiki
+- scriptable
+- self-hosted
+- self-hosting
+- wiki
+- wysiwyg
+ReleaseNotes: |-
+  v0.104.0
+  Note
+  If you enjoyed this release, consider showing a token of appreciation by:
+  - Pressing the “Star” button on GitHub (top-right).
+  - Considering a one-time or recurrent donation to the lead developer via GitHub Sponsors or PayPal.
+  This release is the largest in Trilium's history, built around two big themes: security and interoperability. The attack surface has been dramatically reduced across the desktop app, the server, and shared notes — with 16 dedicated security fixes and a few deliberate breaking changes (backend scripting and the SQL console are now disabled by default), so please review the Breaking changes section before upgrading.
+  Getting notes in and out of Trilium is also much easier: new importers for OneNote, Notion, Google Keep, Anytype and Obsidian join a faster, more memory-efficient import/export pipeline and Spreadsheet now has XLSX and CSV import & export.
+  On top of that come a redesigned setup and login experience, better AI integration (including being able to use your Claude Code subscription), richer text editing (multi-state TODO lists, collapsible blocks, link previews), dashboard collections, and a huge wave of polish — roughly 86 bugfixes and 68 smaller improvements touching nearly every corner of the app. The sections below have the full details.
+  💡 Key highlights
+  1.  Setup was redesigned from scratch to be more modern (see details below).
+  2.  The LLM integration can now use your Claude Code subscription, without the need of an API key or additional cost.
+  3.  Text notes: Customizable multi-state TODO lists by @adoriandoran
+  4.  Collapsible blocks by @adoriandoran
+  5.  Link previews by @stexz01, @eliandoran and @adoriandoran
+  6.  Toggle List (aka Accordion) by @adoriandoran
+  7.  Text notes: Collapsible bullets
+  8.  Spreadsheet gains XLSX and CSV import & export
+  9.  A new experimental Dashboard collection.
+  10. Auto theme switching for code blocks and code notes
+  11. Autocompletion (e.g. Intellisense) for Frontend & Backend code notes
+  12. Significant hardening of the desktop and server app by @perfectra1n and @eliandoran.
+  13. A new import mechanism allows importing from multiple applications: OneNote notebooks using the cloud API, Notion, Google Keep, Anytype, Obsidian
+  14. Significant improvements to the import/export process
+      1. Use a better buffering system so that the memory consumption never increases proportionally to the number of notes exported.
+      2. Display the progress of import/export.
+      3. Use a native mechanism on desktop so that the files being imported are not copied in memory.
+      4. Server now uses the disk to store imported files, reducing memory pressure.
+      5. Improved compression time by skipping already compressed files.
+      6. Improved import performance.
+  🚨 Breaking changes
+  1. Backend scripting is now disabled by default.
+     1. If you make use of these scripts, see the documentation (config.ini change for server or desktop settings).
+     2. The goal of this change is to strengthen Trilium's security posture since backend scripts have dangerously powerful levels of access (e.g. full FS access). Front-end scripts are unaffected.
+  2. SQL console access is disabled by default.
+     1. Similar to backend scripting, it can be reactivated from config.ini.
+  3. The desktop application (based on Electron) has been hardened against potential RCE attacks. You might have to adapt your scripts if you have front-end scripts that depend on Electron remote or the Node.js integration.
+  4. The desktop application now no longer opens its port on the local network by default.
+     1. This can generally affect you only if you are using ETAPI or desktop-to-desktop sync with your desktop client (servers are unaffected).
+     2. This option can be changed in Options → Security.
+  5. OPML v1 export was dropped from this release, v2 which preserves basic formatting has been kept instead. The v1 is still supported for import.
+  🐞 Bugfixes
+  This release lands roughly 86 bugfixes, with a strong focus on data integrity: several issues that could overwrite note content, corrupt the database during ZIP import, or leave sync in an inconsistent state have been resolved. The remainder is steady polish across the text editor, spreadsheets, Markdown import/export, canvas notes, sharing, authentication and mobile.
+  All 86 bugfixes
+  1.  Backend log doesn't respect the code color theme.
+  2.  Search: Wrong escape of highlighted tokens
+  3.  Desktop layout doesn't respect the bottom safe area.
+  4.  When refreshing the page, the sidebar shows up animated.
+  5.  “Upload attachment” not working on mobile.
+  6.  Text notes: Moving lines using keyboard shortcut sometimes not working
+  7.  Flickering note save indicator on desktop.
+  8.  Revisions: “Diff isn't available” when viewing revisions of an empty note.
+  9.  Code block tries to link/create note when typing @, and suggests slash-commands when typing /
+  10. Recovered notes appear after interrupting a sync from a device that was long offline
+  11. Relation map:
+      1. Partially typed name being used as relation by @Renatonet0
+      2. Fix Chinese IME input by @Dinis-Ou
+  12. share* labels are not filtered out during safe import.
+  13. Geomap rendering raw HTML
+  14. Text Notes can not add lists that are not numbered (i.e. letters) by @adoriandoran
+  15. ETAPI YAML endpoint not accessible.
+  16. Status bar: Code language switcher not showing the language if it was not enabled in settings.
+  17. Spreadsheet:
+      1. Ctrl+R copies to the right, intercepting page refresh / Unnecessary save on refresh
+      2. Can't edit the same note in a split.
+      3. Save is sometimes done before recalculation, causing potential incorrect values.
+      4. Unnecessary save when first showing some spreadsheets.
+      5. Exporting as a single file results in a .undefined file with zero content.
+  18. Calendar collection not occupying 100% height.
+  19. Formatting toolbar not showing after temporarily editing a note in the old layout.
+  20. New layout: Note map not visible on text notes
+  21. Not all notes in a split loading after a refresh.
+  22. Background effects interfere with shadow on Linux.
+  23. AI: Extended thinking not working in some models
+  24. Markdown: colspans and rowspans are not preserved during editing
+  25. Read-only Mermaid diagrams not always rendering
+  26. Notes being overwritten with another note
+  27. Changes to AI providers not refreshing the sidebar.
+  28. Markdown: wrong escape of dollar signs
+  29. TOTP: Entering a wrong password uses up the recovery code
+  30. OIDC credentials are not checked for
+  31. Current OpenID Connect Implementation is not compatible with Authelia
+  32. New checkbox rows are already prechecked when previous row was checked
+  33. Spreadsheet not localized
+  34. Move line up/down doesn't always work
+  35. Scroll position is lost when the editor reinitializes.
+  36. Periodic hidden subtree checks causes the text editor to refresh.
+  37. Missing blurred background for the icon switcher for the inline title.
+  38. Geomaps breaking with GPX (entire navigation breaks)
+  39. Tree position resets to top when switching between tabs with different workspaces/hoisted notes.
+  40. Formatting toolbar remains visible after changing note type by @SiriusXT
+  41. Markdown import: preserve heading hierarchy instead of flattening to H2
+  42. Exports: filename length is capped to 30 characters
+  43. Markdown rending issues when using multiple "$" in Code Block inside Blockquote
+  44. Tables not rendering properly in read-only after a Markdown import
+  45. The delete attachment confirmation dialog does not auto-select "OK"
+  46. Misleading "Copy link to clipboard" for attachments
+  47. Backend crash on abrupt WS disconnect
+  48. Allow creating notes from relation auto-complete
+  49. Can't confirm inline note creation via keyboard
+  50. Time offset in Log - 24 hours (timestamps today are showing as yesterday)
+  51. Enabling showLoginInShareTheme does not enable login from base domain
+  52. Docker deployment, when accessing the webpage, the following prompt appears: Share root not found. Please set up a note with #shareRoot label first.
+  53. Video/audio players' seek forward button has incorrect text
+  54. Converting an attachment to a note breaks links
+  55. Built-in LaTeX editor generates \differentialD, which is not supported by the renderer
+  56. Share: Table of contents scrolls to the wrong position for duplicate headings.
+  57. Importing a ZIP archive that contained a root note with content would corrupt the database.
+  58. ignore IME composition Enter when editing card and column titles by @greymoth-jp
+  59. Zooming shortcut Ctrl+ doesn't work on German Keyboard
+  60. Shared note with a large code note freeze the server
+  61. The checkbox and cursor in the to-do list are too close
+  62. Table: boolean column sorting not always working & row number appear shuffled when sorting
+  63. Include note would render recursively for nested includes, causing performance concerns
+  64. Old layout: removed collection properties in the ribbon since they are duplicated with the collection bar.
+  65. Search does not find protected notes while being in protected session
+  66. Markdown import/export
+      1. Some equations containing HTML-like characters are broken
+      2. A table with no heading row but with heading columns will end up having an empty row when reimported.
+  67. Tree can crash in some rare circumstances while updating itself
+  68. “Blob not found” when deleting the active note.
+  69. Table of contents becoming stale when switching between two notes with many headings.
+  70. CTRL-Z with two Canvas notes will delete previous drawing
+  71. Canvas notes sometimes fail to render
+  72. New layout: Note map not shown in empty note type switcher
+  73. Some protected notes and notes titles are still displayed after inactivity delay
+  74. JavaScript error while OCR processing existing image files
+  75. Day notes title pattern replacements not working
+  76. Template collision for Code note
+  77. Fix calendar events that cross midnight not showing up by @Glitch752
+ReleaseNotesUrl: https://github.com/TriliumNext/Trilium/releases/tag/v0.104.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

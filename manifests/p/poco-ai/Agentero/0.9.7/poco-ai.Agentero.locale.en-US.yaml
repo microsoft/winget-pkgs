@@ -1,0 +1,44 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.9.7
+PackageLocale: en-US
+ShortDescription: Agent-friendly reference management.
+Description: 'Traditional reference managers are not agent-friendly: highlights and notes stay locked inside single files, making it hard for agents to reuse knowledge across papers; every conversation starts from scratch without a stable local knowledge map; PDFs are human-friendly but not the most comfortable reading material for agents. Agentero aims to build an agent-friendly, agent-native way to manage references, exploring how humans and agents collaborate on reference management. Connect your local agent via ACP (BYOA), select-text chat, import papers and Skills, stay compatible with the Zotero ecosystem, and get paper translation, bidirectional links with a knowledge graph, and deep PDF reading.'
+Tags:
+- academics
+- agent
+- article
+- literature
+- paper
+- pdf
+- reference
+- research
+- thesis
+- zotero
+ReleaseNotes: |-
+  This release makes "why won't my Agent work" self-diagnosable: Settings → Doctor gains Host runtime, Agent ACP connectivity, and Network connectivity sections that re-probe every registered Agent with a failure category, sign-in state, and remediation hint, and probe paper sources such as arXiv, GitHub, and Google Scholar through the app's global proxy. It also fixes Codex and other npm-global Agents going undetected because GUI launches do not inherit the login-shell PATH. Agent history titles are now prefetched in the background with a first-user-prompt fallback; Skill import gains a GitHub mirror fallback, uninstall can target Agent and ACP scopes separately, About can clear logs, and an installed CLI auto-syncs to the current app version at startup. Additional fixes cover a stuck PDF highlight menu, empty annotations degrading into highlights, MinerU dropping images, and Windows path / terminal issues.
+  Features
+  - Three Doctor sections: Settings → Doctor adds Host runtime (Node.js / npm version and path), Agent ACP connectivity, and Network connectivity, all visible without an open Vault. Agent probing re-runs the ACP initialize handshake (no prompt is sent) and classifies failures as command-missing, not-signed-in, timeout, launch-failed, protocol-failed, or unknown, with a matching remediation hint and per-Agent sign-in status; network probing goes through the app's global proxy and reports reachability, latency, and the effective proxy per row for Baidu, Google, Google Scholar, GitHub, arXiv, and Semantic Scholar. (64476ae0, bf6edb6d, 51903395, 13027456, 9f890fa7 by @Phil-Fan)
+  - Uninstall Agent / ACP separately: The uninstall dialog offers checkboxes to remove the Agent CLI, the ACP adapter, or both, backed by a new partial-uninstall Host command and UninstallInfo split into agent / acp scopes, so only the selected npm globals and managed directories are cleaned. (c5f3fc08, 08655902 by @Phil-Fan)
+  - GitHub mirror fallback for Skill import: Settings → General lets you pick from a built-in list of public mirrors used as a Skill-discovery fallback when api.github.com / codeload.github.com are unreachable, without changing input recognition or network-proxy semantics. (38741ad3, eec88ba1 by @Phil-Fan)
+  - Clear logs: Settings → About adds a Clear logs action that deletes rotated log archives and truncates the live agentero.log when it is locked. (16612fdb by @Phil-Fan)
+  - CLI auto-syncs with the app: The in-app updater only replaces the GUI package, which left an installed CLI on the previous version; the main window now re-runs the install (download + sha256 verification + shim refresh) at startup when it detects an installed-but-stale managed CLI. Silent on success, error toast on failure, skipped in dev and when no CLI is installed. (9e5173ca, #485 by @qychen2001)
+  Improvements
+  - Upgrade appears only when needed: The per-Agent Upgrade button shows only when an update actually exists, comparing local detect --version against npm latest (or the dsh pin); in-progress checks, failed checks, and undeterminable entries such as Hermes stay hidden. (44e89da3 by @Phil-Fan)
+  - Doctor presentation and in-card errors: Host / Agent / Vault check failures now render inside their own cards instead of toasts so diagnostics stay in context; card skeletons replace the flashing "no agents" empty state while ACP probes run; Agent cards use a two-column layout with version above path and drop the redundant Ready label on healthy rows; the Host card no longer shows the npm global prefix (still used for PATH probing); and the host check goes through a typed specta binding so healthy Node / npm no longer reports "Host command failed". (fdd46258, dedf8593, 67beed2e, 5f0a0970, 0f59f18c by @Phil-Fan)
+  Fixes
+  - Codex and other Agents undetected: GUI-launched processes do not inherit the login-shell PATH, so npm-global Agent CLIs could not be found, and an npm shim that was scanned could still fail to run without node in the child environment. PATH is now merged in resolution order (descriptor → process → login shell → common GUI-missing locations), and registry scans, availability checks, and ACP children all resolve commands in that same effective environment; Doctor also runs the catalog auto-register pass before probing, so PATH-installed Agents are visible without opening Settings → Agent or chat first. (5fe0eb36, 8704cddc, #488 by @Phil-Fan)
+  - History titles blocked by id prefixes: Imported-session merging no longer seeds empty ACP titles with the session-id prefix and the history list no longer always appends ses_…, so the first-user-prompt fallback can win; untitled rows are also hydrated in the background (no 5s budget) with titles cached in localStorage and remaining loads finished when the drawer opens, so Agents that return no title — such as Kimi — show user prompts without clicking into each session. (564df98d, 0fe918c0, 11126d5e, #484 by @Phil-Fan)
+  - Highlight menu would not dismiss: EmbedPDF only deselects when the pointer lands exactly on the pointer-provider surface, which child layers usually cover; a capture-phase pointerdown listener on the highlight annotation menu now deselects on outside clicks. (03a1a8c8, #490 by @Phil-Fan)
+  - Empty annotations became highlights: Clicking annotate and then writing nothing deletes the newly created empty PDF note instead of leaving a highlight with no body. (09222164, #491 by @Phil-Fan)
+  - MinerU dropped images: MinerU images/ assets are preserved and persisted alongside PAPER.md, result ZIPs with a task-directory prefix are supported, and archive entries plus output paths are validated before writing to prevent escaping the target directory. (#487, #467 by @LinusQiu)
+  - Windows paths and terminals: Copy-path in the file tree and the recent-Vault list no longer expose the \\?\ prefix, and Open in Terminal no longer treats extended drive-letter paths as UNC; display and copy share one path formatter while internal filesystem paths stay unchanged. CMD now gets an independent interactive console via a hidden start launcher with the directory passed through the process working directory, supporting CJK, spaces, and characters such as & and %, and no longer inherits desktop-process stdio that made the terminal flash and exit. (#486 by @Zhou1317fe5)
+  Full Changelog: https://github.com/poco-ai/Agentero/compare/v0.9.6...v0.9.7
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.9.7
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: locale
+ManifestVersion: 1.12.0

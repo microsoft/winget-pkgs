@@ -1,0 +1,60 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: ChengSoon.Belfry
+PackageVersion: 0.19.0
+PackageLocale: en-US
+ShortDescription: A cross-platform terminal that hosts CLI coding agents such as Codex and Claude Code.
+Description: |-
+  Belfry is a cross-platform terminal for macOS and Windows that hosts CLI coding agents such as Codex and Claude Code. It provides project workspaces, agent detection and status tracking, a prompt composer with queuing, provider switching, SSH sessions, and token usage statistics. Without an agent installed it still works as a full terminal.
+
+  Features
+  Project Workspace
+  - Open local directories as projects, with recent ones remembered
+  - Sidebar grouped by project, collapsible, resizable width (⌘B to collapse all)
+  - Sessions have built-in project affiliation; different sessions can point to different directories
+  - Quick Open (⌘K) to search and switch sessions, open recent projects, or execute common workspace actions
+  - File preview pane to browse current project directories and view read-only code previews; jump directly to file paths in terminal output with alerts on disk changes
+  Agent Hosting
+  - Auto-detect Codex and Claude Code: executable paths, version numbers, and reasons if unavailable
+  - Session status distinguishes process lifecycle (creating/running/exited/error) from current behavior (idle/streaming output/waiting for input)
+  - Tab titles extracted from your first prompt, with the full original text kept in tooltips
+  - Collaborative tasks queued separately per target Agent; deliveries paused while the Agent is busy or awaiting confirmation, sent sequentially once idle
+  Activity Notifications
+  - Only two things are worth interrupting you for: the Agent finished the job, or it's stuck on a question that strictly requires your approval
+  - Completion notifications are delayed by 1500 ms before sending. Activity is inferred by scanning screen text, and the sequence "Streaming Output → Idle → Waiting for Input" is very common (spinner vanishes first, permission prompt renders a beat later); sending a "Completed" notification prematurely in-between is a pure false positive
+  - No notifications when you are actively looking at that session—you can already see it
+  - Status in the title, identity in the body: first decide whether to deal with it now, and only then which session it is
+  - Unread count badges on the Dock / taskbar, automatically cleared when returning to the app
+  Provider Switching
+  - Switch Codex / Claude Code routing between official endpoints and third-party relays by modifying the CLIs' own configuration files, so running claude or codex directly outside Belfry works seamlessly
+  - Precise field modification: touches only routing keys like ANTHROPIC_BASE_URL and the [model_providers.belfry] table, leaving your hooks, MCP definitions, and project trust records verbatim
+  - On first launch, existing configuration settings are ingested into a switchable profile instead of being silently overwritten
+  - Backs up Codex's ChatGPT login state before switching to a third-party provider, and restores it intact when switching back to official
+  - Detects and warns about ANTHROPIC_* / OPENAI_* environment variables that would override config files
+  Terminal
+  - Built on xterm.js with WebGL renderer—no horizontal seams between block characters
+  - Unix PTY on macOS, ConPTY on Windows; shell auto-detects PowerShell, %ComSpec%, and cmd.exe in order
+  - SSH sessions directly invoke the system OpenSSH client: passwords, host fingerprints, and 2FA are handled natively in the terminal; ~/.ssh/config aliases, keys, and agent are inherited as-is
+    - Check "Remember Password" upon connection to save it to the system keychain (macOS Keychain / Windows Credential Manager) for automatic autofill on future connections; saved passwords can be cleared from the SSH form at any time
+  - OSC 10/11 color queries are answered directly on the Rust side. This is unavoidable: TUIs like Codex allow only a 100 ms window, and a full round trip of PTY → IPC → xterm.js → IPC → PTY often times out; on Windows, the consequence of a timeout isn't "no color" but "wrong color"—Codex falls back to reading ConPTY's black palette, rendering the input box as a solid black block
+  - Password prompt detection with suppressed echo
+  - ⌘F to search current terminal content with multi-line matching; clickable HTTP(S) links; CJK, combining characters, and emojis rendered with accurate widths
+  Usage Statistics
+  - Aggregates data by reading local Codex / Claude session logs directly, without making any network requests
+  - Normalized into four token categories: input (cache misses), cachedInput, cacheWrite, output
+  - Split across two dimensions: by model and by project; selectable time windows of Past 7 Days / Past 30 Days / All Time
+  - Rate limit windows and subscription tiers (currently only available in Codex logs, not in Claude's)
+  Appearance
+  - Light/Dark theme switching, with theme colors synchronized to the terminal palette
+  - App-wide font and 10–20px font size customization, supporting locally installed system fonts
+  - Import multiple TTF / OTF / WOFF / WOFF2 fonts with individual switching or removal, and switch back to system fonts at any time
+  - Bundled with JetBrains Mono and HarmonyOS Sans SC
+  Belfry shortcuts: ⌘T for New Shell, ⌘B to toggle sidebar, ⌘K to open Quick Open, ⌘U to toggle Usage, ⌘⇧H to toggle History, ⌘, to open Settings, ⌘1–9 to switch sessions, ⌘/ to open quick commands. Windows / Linux uniformly use Ctrl+Shift combinations to avoid conflicting with native Ctrl shortcuts in Codex and Claude.
+Tags:
+- ai
+- command-line
+- console
+- terminal
+ManifestType: locale
+ManifestVersion: 1.12.0

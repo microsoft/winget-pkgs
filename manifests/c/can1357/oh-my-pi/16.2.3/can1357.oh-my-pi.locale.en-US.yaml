@@ -1,0 +1,135 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 16.2.3
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-agent-core
+  Changed
+  - Enabled V2 streaming remote compaction by default for compatible AI and OpenAI-compatible models, which forwards full conversation history to the provider and supports session routing, prompt caching, provider-native tool history replay, transient error retries, and configurable timeouts.
+  Fixed
+  - Fixed an issue where assistant responses and encrypted reasoning could be lost during local history trimming.
+  - Added title_change session metadata to the compaction entry type union to maintain type compatibility for hosts with title audit entries.
+  @oh-my-pi/pi-ai
+  Changed
+  - Enabled automatic removal of leaked reasoning tags for all models
+  - Prevented reasoning text duplication when models emit both structured and inline thinking
+  - Defaulted reasoning context to all turns for all Codex requests.
+  Fixed
+  - Enabled freeform tool patch support for Azure OpenAI and Codex models.
+  - Fixed an issue where the /usage show command returned "No usage data available" when using a custom proxy base URL for Codex.
+  @oh-my-pi/pi-catalog
+  Added
+  - Added support and configuration parameters for V2 streaming compaction in RemoteCompactionConfig, catalog types, and model/provider metadata.
+  Changed
+  - Enabled automatic content markup healing for all OpenAI-compatible streaming models
+  - Updated pricing and context window limits for several catalog models.
+  - Disabled reasoning capability for multiple providers in the catalog.
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added support for multiple configurable advisors via WATCHDOG.yml/WATCHDOG.yaml files, allowing per-advisor models, tool subsets, and instructions.
+  - Added /advisor configure, a full-screen, mouse-driven TUI to easily manage the advisor roster, configure models, toggle tool permissions, and edit instructions.
+  - Added full unified edit diffs to advisor transcripts, allowing advisors to see changes directly without re-reading files.
+  - Added the statusLine.compactThinkingLevel setting to render the model segment's thinking level as a single leading glyph instead of a separate text suffix.
+  - Added support for tracking reasoning tokens in session and advisor statistics.
+  - Added Remote Compaction V2 streaming configuration settings (compaction.remoteStreamingV2Enabled and compaction.v2RetainedMessageBudget) to control token budgets and toggle V2 streaming for remote compaction.
+  - Added the edit.citationTags setting to emit model-facing hashline section headers as OpenAI citation markers with opaque source IDs, along with citation-marker unwrapping for hashline edit parsing, diff previews, and streaming matching.
+  - Added mutable session titles with automatic replan title refreshes and configurable idle recaps.
+  - Added support for incremental yield submissions with typed sections and final results for subagents.
+  Changed
+  - Reduced session file size by removing redundant thinking signatures already present in payloads
+  - Advisors can now be granted any built-in agent tool (including edit, write, and bash), removing the previous read-only restriction.
+  - Improved the debug log and raw SSE stream viewers with a wider, bordered overlay, clearer status indicators, dynamic layouts, and mouse support for scrolling and interaction.
+  - Updated the idle recap feature to use an LLM-generated summary of where things stand (anchored by the live goal and active todo task) instead of a static status line.
+  - Refined interrupted thinking system instructions to encourage smoother continuation.
+  Fixed
+  - Fixed array-typed output schema validation by correctly assembling incremental yields into lists.
+  - Fixed OpenAI/Codex compatibility by removing top-level schema combinators from tool parameters.
+  - Fixed validation errors for untyped final yields in strict-mode providers by allowing null types.
+  - Fixed Alt+M default-role model configuration being disabled by the current session's context size.
+  - Fixed MCP type: "sse" servers by adding the legacy HTTP+SSE endpoint handshake and streaming JSON-RPC response path.
+  - Fixed interrupted reasoning blocks being incorrectly stripped when they contained a valid signature.
+  - Fixed interrupted thinking being lost in LLM provider requests after user interrupts by properly stripping trailing reasoning blocks from assistant turns while preserving them in the UI and session history.
+  - Fixed the live todo HUD going stale during long tool-use loops by introducing a mid-run reconciliation reminder that prompts the agent to update incomplete items.
+  - Fixed resumed OpenAI and OpenAI-Codex sessions losing encrypted reasoning and native assistant turns during rehydration.
+  - Fixed the ask tool's custom answer editor dropping the original question and option list while typing.
+  - Fixed auto-snapcompact failing the session on local blockers (such as text-only active models, high non-ASCII transcripts, or context budget overflows) by gracefully downgrading automatic maintenance to context-full compaction.
+  - Fixed autoresearch's before_agent_start handler crashing when the system prompt was undefined.
+  - Fixed OMP exiting silently during startup when encountering standalone Codex hook scripts in ~/.codex/hooks/.
+  - Fixed unreachable keyboard shortcuts in HTML session exports by changing the "toggle thinking" and "toggle tools" shortcuts from Ctrl+T and Ctrl+O to bare T and O keys.
+  - Fixed user-invoked /skill: prompts reaching model providers as developer turns instead of user turns, including during compaction.
+  - Fixed reasoning streaming being locked off for OpenAI-compatible providers that stream reasoning content without advertising reasoning support in model metadata.
+  - Fixed /shake and other mid-stream chat rebuilds erasing live LLM output by preserving the in-flight streaming components and pending tools.
+  - Fixed the time_spent status-line segment ticking continuously during idle sessions by ensuring it only accumulates active agent execution windows and resets correctly across session switches.
+  - Fixed expanded pending SSH previews committing provisional rows to native scrollback before the final result render.
+  - Fixed ssh:// rejecting POSIX-capable remotes whose login-shell classification was ambiguous by verifying a working transfer shell directly and gating transfers on that capability.
+  Removed
+  - Removed history URI support for reading agent transcripts
+  @oh-my-pi/omp-stats
+  Added
+  - Support for parsing named advisor transcripts using the __advisor.<slug>.jsonl naming convention.
+  @oh-my-pi/pi-tui
+  Added
+  - Added a desktop notification fallback for Linux terminals using D-Bus (via notify-send or gdbus), enabling completion and prompt notifications in VTE-family terminals (such as GNOME Terminal, Ptyxis, Tilix), Alacritty, and xterm. This is automatically skipped for terminals with native notification support (like VS Code and Warp) and can be disabled using the PI_NO_DESKTOP_NOTIFY=1 environment variable.
+  Fixed
+  - Fixed slash skill autocomplete not opening when there is existing prompt text, ensuring mid-prompt slash lookups correctly display and insert skill commands.
+  - Fixed modified Enter and keyboard shortcuts in fullscreen overlays for terminals using the xterm modifyOtherKeys fallback (such as iTerm2 when Kitty keyboard negotiation is unavailable).
+  @oh-my-pi/pi-utils
+  Added
+  - Added escapeXmlAttribute utility function for safe XML attribute value encoding.
+  Fixed
+  - Fixed a crash in ptree.ChildProcess.bytes() and the ssh:// read path when handling large subprocess outputs (over 128 KB) under Bun by ensuring it consistently returns a Uint8Array.
+  What's Changed
+  - fix(tui): open mid-prompt skill autocomplete by @roboomp in https://github.com/can1357/oh-my-pi/pull/3657
+  - fix(tui): preserve in-flight assistant turn across /shake rebuilds by @roboomp in https://github.com/can1357/oh-my-pi/pull/3658
+  - fix(compaction): fall back from auto-snapcompact on text-only models by @roboomp in https://github.com/can1357/oh-my-pi/pull/3661
+  - fix(autoresearch): guard before_agent_start against undefined event.systemPrompt by @roboomp in https://github.com/can1357/oh-my-pi/pull/3667
+  - fix(export): use browser-safe single-key toggles in HTML export by @roboomp in https://github.com/can1357/oh-my-pi/pull/3671
+  - fix(tui): allow thinking toggle after streamed reasoning by @roboomp in https://github.com/can1357/oh-my-pi/pull/3672
+  - fix(ai): ignore non-canonical codex baseUrl for wham/usage by @roboomp in https://github.com/can1357/oh-my-pi/pull/3682
+  - fix(extensions): isolate codex hook scripts so process.exit cannot kill OMP startup by @roboomp in https://github.com/can1357/oh-my-pi/pull/3683
+  - fix(tui): track active processing time for time_spent status segment by @roboomp in https://github.com/can1357/oh-my-pi/pull/3684
+  - fix(tui): use OSC 9 notifications for VTE terminals by @roboomp in https://github.com/can1357/oh-my-pi/pull/3687
+  - fix(coding-agent): present user skill prompts as user turns by @roboomp in https://github.com/can1357/oh-my-pi/pull/3699
+  - fix(coding-agent): preserve queued skill invocations by @roboomp in https://github.com/can1357/oh-my-pi/pull/3700
+  - fix(tui): keep Shift+Enter enhanced in iTerm fallback overlays by @roboomp in https://github.com/can1357/oh-my-pi/pull/3706
+  - fix(coding-agent): keep Alt+M default role selectable over context by @roboomp in https://github.com/can1357/oh-my-pi/pull/3709
+  - fix(mcp): support legacy SSE transport by @roboomp in https://github.com/can1357/oh-my-pi/pull/3711
+  - fix(utils): normalize ptree.bytes() to Uint8Array by @roboomp in https://github.com/can1357/oh-my-pi/pull/3713
+  - fix(ssh): pinned expanded pending preview commit-unstable by @roboomp in https://github.com/can1357/oh-my-pi/pull/3716
+  - fix(ssh): gate ssh:// transfers on verified POSIX shell capability by @roboomp in https://github.com/can1357/oh-my-pi/pull/3722
+  - fix(providers): keep runtime headers live by @roboomp in https://github.com/can1357/oh-my-pi/pull/3726
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v16.2.2...v16.2.3
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v16.2.3
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

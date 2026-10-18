@@ -1,0 +1,89 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AtomGit.AtomCode
+PackageVersion: 5.0.4
+PackageLocale: zh-CN
+Publisher: 重庆开源共创科技有限公司
+PublisherUrl: https://atomgit.com/
+PublisherSupportUrl: https://atomgit.com/atomgit_atomcode/atomcode/issues
+PrivacyUrl: https://docs.gitcode.com/docs/help/home/protocol/privacy-policy
+Author: 重庆开源共创科技有限公司
+PackageName: AtomCode
+PackageUrl: https://atomcode.atomgit.com/
+License: MIT
+LicenseUrl: https://atomgit.com/atomgit_atomcode/atomcode/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Yubang Xu
+CopyrightUrl: https://docs.gitcode.com/docs/help/home/protocol/ai-privacy-policy
+ShortDescription: AI 编程助手 在你的终端中运行
+Description: Claude Code / Cursor Agent 的开源平替，住在你的终端里。连接任意 OpenAI 兼容大模型，自主读文件、改代码、跑测试、自我验证 —— 用 Rust 构建。
+Tags:
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  AtomCode v5.0.4 Release Notes
+  发布日期：2026-08-04
+  v5.0.4 聚焦于本地定时任务（schedule）能力、流中断时部分输出保留、Provider 错误引导优化、TUI 输入与渲染体验改进，以及 IDE 插件守护进程可靠性提升。
+
+  ⚠️ Behavior Changes（注意行为变化）
+  - Code Rewind（代码回滚）临时禁用：为保护磁盘空间，v5.0.4 暂停工作区代码快照与回滚能力；对话级 Rewind（/rewind、回退历史轮次）不受影响，可正常使用。
+
+  ✨ 新增功能（Features）
+  本地定时任务（里程碑新功能）
+  - atomcode schedule 命令：新增 add / list / remove / enable / disable / sync 子命令，管理本地定时任务
+  - 多种调度频率：支持每日（HH:MM）、每周（N@HH:MM）、每小时、间隔分钟（30m）与 cron 表达式
+  - 操作系统级调度注册：自动写入 macOS launchd / Linux systemd / Windows 计划任务，机器重启后依然按时触发
+  - 无人值守安全执行：定时触发的会话默认拒绝高风险 bash 命令，防止无人看管时执行危险操作；任务运行后按级别通知
+  - 定时会话隔离：定时任务产生的会话不会出现在日常 /resume 与侧边栏历史列表，避免刷屏
+  - /schedule 命令：TUI 中直接查看定时任务列表
+  TUI 输入体验
+  - Ctrl+R 反向历史搜索：readline 风格搜索历史命令，输入即过滤、可跳转更早匹配、Enter 采纳、Esc 恢复草稿
+  - /rewind 命令：将回退点选择器从双 Esc 手势扩展为显式命令，直接打开对话回退选择
+  执行约束
+  - 每轮执行限制：用户以自然语言说明「不要运行任何命令 / 不要编译 / 不要测试 / 不要执行脚本」时，该轮工具调用会被强制拦截，避免误解意图
+  IDE 与 WebUI
+  - 登录后自动同步模型：OAuth 登录成功后自动领取 CodingPlan 并同步模型列表，VS Code / JetBrains 插件无需再手动执行 /codingplan
+  - WebUI 结构化提问：/chat 会话可交互回答单选 / 多选 / 文本形式的结构化问题
+  记忆与配置
+  - 项目记忆目录可覆盖：新增 ATOMCODE_PROJECT_MEMORY_DIR 环境变量，可自定义项目级记忆文件（默认 .atomcode）的存储位置
+  🛠 修复（Fixes）
+  Provider / 网络
+  - 流中断保留部分输出：已产出内容的响应流断开时不再盲目重放请求（避免重复输出或重复执行工具），安全保留已生成的部分回复并可继续
+  - 透明重连增强：仅收到元数据（尚未产出正文）的断流最多自动重连 3 次，网关抖动下更稳定
+  - 网络错误提示优化：Windows 连接重置（os error 10054）时提示检查公司网络 / 代理 / VPN 设置
+  - CodingPlan 引导：账号无 CodingPlan 权限（HTTP 403）时给出明确提示并引导重新登录领取
+  - 配置保存竞争修复：保存配置不再基于过期 revision，保留其他进程的并发编辑
+  TUI / 终端渲染 / Windows 兼容
+  - 暗色主题可读性：限流提示等 muted 文本改用主题感知配色，暗色终端下不再与背景融为一体
+  - 流式渲染优化：流式文本按块增量处理，长输出渲染更平稳
+  - Windows 剪贴板图片：兼容 PixPin / Snipaste / 系统截图工具生成的 DIB 格式，/paste 粘贴图片不再报「剪贴板中没有图片」
+  - 渲染重叠修复：工具执行进度条计入布局计算，不再与正文错位或残留幽灵块
+  - 控制台窗口闪烁：Windows 下启动守护进程不再闪现黑色命令窗口
+  WebUI
+  - 可删除空闲的当前会话：删除前自动切换到新会话，不再被「当前会话」限制
+  - 侧边栏滚动保持：切换会话时列表自动滚动到目标项，不再丢失位置
+  - 活跃回合防切换：回合进行中切换会话会被拒绝并保持原会话，避免状态错乱
+  - 删除会话即时生效：侧边栏删除后本地移除该行，无需整表重载
+  IDE 插件（JetBrains / VS Code）
+  - 守护进程版本自愈：检测到运行中的守护进程与插件捆绑构建不一致（版本或二进制哈希）时，自动停止旧进程并启动正确版本
+  - JetBrains 守护进程解压保护：防止捆绑二进制被意外覆盖
+  定时任务健壮性
+  - 修复 launchd 安装非幂等、plist XML 未转义、systemd ExecStart 未加引号、非法星期未拒绝、列表在无调度器环境下的降级展示等跨平台问题
+  会话与撤销
+  - Rewind 持久化加固：回退点持久化有界化，异常中断后可恢复历史
+  - 会话修复能力：presentation 文件缺失时可通过接口检查并修复会话
+  - 回合中会话切换保护：活跃回合期间 resume / 新建会话 / 切换目录统一返回繁忙，避免并发状态破坏
+  🔧 重构（Refactoring）
+  - 启动提速：模型目录元数据刷新改为异步执行，不再阻塞启动关键路径；启动时不再同步检查并应用升级，改由后台进程完成
+  - JetBrains 守护进程生命周期：引入统一 Supervisor 管理守护进程的连接、启动与版本替换
+ReleaseNotesUrl: https://atomgit.com/atomgit_atomcode/atomcode/releases/v5.0.4
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://atomcode.atomgit.com/docs/zh/index.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

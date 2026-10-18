@@ -1,0 +1,79 @@
+# Created using wingetcreate 1.9.4.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: mtkennerly.ludusavi
+PackageVersion: 0.29.0
+PackageLocale: en-US
+Publisher: mtkennerly
+PublisherUrl: https://github.com/mtkennerly
+PublisherSupportUrl: https://github.com/mtkennerly/ludusavi/issues
+Author: Matthew T. Kennerly
+PackageName: ludusavi
+PackageUrl: https://github.com/mtkennerly/ludusavi
+License: MIT
+LicenseUrl: https://github.com/mtkennerly/ludusavi/blob/master/LICENSE
+Copyright: Copyright (c) 2020 Matthew T. Kennerly (mtkennerly)
+CopyrightUrl: https://github.com/mtkennerly/ludusavi/blob/master/LICENSE
+ShortDescription: Backup tool for PC game saves
+Moniker: ludusavi
+ReleaseNotes: |-
+  * Added:
+    * A custom game's installed name may now be set to a relative path with multiple folders,
+      rather than only supporting a single bare folder name.
+    * CLI: The `wrap` command now supports `--force-backup` and `--force-restore`
+      for more granular control than `--force`.
+    * GUI: During a scan, you can click on the progress bar to see a list
+      of the games currently being scanned and how long each one is taking.
+      This can be useful to identify why a scan might be taking longer than expected.
+    * CLI: When backing up or restoring,
+      if your local and cloud backups are in conflict,
+      Ludusavi will now ask you if you'd like to resolve it by downloading or uploading.
+      You can also choose to ignore the conflict (which is the existing behavior),
+      and `--force` will automatically ignore any conflicts.
+      You can combine `--force` and `--no-force-cloud-conflict`
+      to be prompted only when there is a conflict.
+    * CLI: When using `--gui` in the commands that support it,
+      dialog titles now include the game's name (if you've specified only one)
+      or the total number of games (if you've specified more than one).
+  * Fixed:
+    * For home folder roots, Ludusavi skipped any paths containing `<storeUserId>`,
+      on the assumption that it shouldn't be applicable to non-store-specific roots.
+      However, there are some cases where it's worth scanning regardless,
+      so Ludusavi will now use a wildcard match like it does for other root types.
+    * On Windows, a backup would fail if the original file were encrypted
+      and the backup destination could not be encrypted.
+      Now, in this situation, the backup will proceed without encryption.
+      ([Contributed by Summon528](https://github.com/mtkennerly/ludusavi/pull/476))
+    * Ludusavi did not detect some save data for Heroic Epic games that had been uninstalled.
+    * System folders and game installed names were not scanned properly if they contained `[` or `]`,
+      because Ludusavi did not escape them before integrating them into larger glob patterns.
+
+      For roots, there was a similar issue with escaped brackets (`[[]` or `[]]`).
+      Although root paths do support globs,
+      Ludusavi internally expands each configured root into one root per glob match,
+      but it did not then escape each expanded root path before integrating it into a larger pattern.
+    * GUI: In the scan results, some elements could get squished with long file paths.
+    * CLI: In the scan results, if you enabled the option to skip backups when there are only removals,
+      those games would still count towards the change tally.
+    * CLI: In the default scan results output format,
+      registry content would be dumped even without `--dump-registry`.
+    * On Windows, some paths were unnecessarily scanned twice.
+    * On Windows, some network share paths were not scanned properly in certain contexts.
+    * When an Rclone command failed,
+      the error message did not include quotes around arguments with spaces,
+      even though the actual command did account for spaces.
+  * Changed:
+    * When a disabled game is new or updated in the scan results,
+      that game's change badge will now be faded,
+      and it will be sorted with games that do not have changes.
+    * GUI: In some cases, Ludusavi would automatically close any open modal
+      in order to show a different one,
+      which could be inconvenient if you were filling out fields in certain modals.
+      Now, Ludusavi will redisplay the older modal when the new one is closed.
+    * When Ludusavi checks your non-Steam games added as shortcuts in Steam,
+      it now normalizes the titles to allow for more lenient matching.
+    * Updated translations.
+      (Thanks to contributors on the [Crowdin project](https://crowdin.com/project/ludusavi))
+ReleaseNotesUrl: https://github.com/mtkennerly/ludusavi/releases/tag/v0.29.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

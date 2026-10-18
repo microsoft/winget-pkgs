@@ -1,0 +1,76 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Alibaba.DingTalkWorkspaceCLI
+PackageVersion: 1.0.61
+PackageLocale: en-US
+Publisher: DingTalk (Singapore) Private Limited
+PublisherUrl: https://www.dingtalk.io/
+PublisherSupportUrl: https://github.com/DingTalk-Real-AI/dingtalk-workspace-cli/issues
+PrivacyUrl: https://terms.alicdn.com/legal-agreement/terms/suit_bu1_dingtalk/suit_bu1_dingtalk202102181006_34132.html
+Author: DingTalk (Singapore) Private Limited
+PackageName: DingTalk Workspace CLI
+PackageUrl: https://github.com/DingTalk-Real-AI/dingtalk-workspace-cli
+License: Apache-2.0
+LicenseUrl: https://github.com/DingTalk-Real-AI/dingtalk-workspace-cli/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Alibaba Group
+CopyrightUrl: https://terms.alicdn.com/legal-agreement/terms/suit_bu1_dingtalk/suit_bu1_dingtalk202010161503_40649.html
+ShortDescription: dws — DingTalk Workspace on the command line, built for humans and AI agents.
+Description: |-
+  dws — DingTalk Workspace on the command line, built for humans and AI agents.
+  Why dws?
+  - For humans — --help for usage, --dry-run to preview requests, -f table/json/raw for output formats.
+  - For AI agents — structured JSON responses + built-in Agent Skills, ready out of the box.
+  - For enterprise admins — zero-trust architecture: OAuth device-flow auth + domain allowlisting + least-privilege scoping. Not a single byte can bypass authentication and audit.
+Moniker: dws
+Tags:
+- dingding
+- dingtalk
+ReleaseNotes: |-
+  This release promotes the sealed v1.0.61-beta.3 contents to stable.
+  Changed
+  - Agent-ready command contracts — expands reviewed Help, Schema, safety,
+    selection, result, pagination, and recovery guidance across the CLI, and
+    moves static MCP authoring and published-tool invocation onto explicit
+    dws dev mcp and dws mcp published command surfaces.
+  - Collaboration and event workflows — adds Chat Thread promotion,
+    conversation-file upload, bounded message pagination, safer quoted replies,
+    DingTalk task lifecycle events, and VoIP invite event consumption.
+  - Document and data operations — broadens Sheet batch and CSV controls,
+    strengthens AI Table routing and composite verification, hardens Drive and
+    Wiki shortcuts, and adds safer delegated authorization plus URL-only,
+    optional-output, overwrite-protected, and concurrent-writer-safe downloads.
+  - Organization and automation commands — adds contact label and custom
+    field management, tightens attendance date handling and DingTalk task
+    workflows, and improves login, Windows Skill installation, and executable
+    doctor recovery guidance.
+  - Runtime and connector reliability — preserves compatible document,
+    Markdown, chat, and shortcut result shapes while improving DING, Whiteboard,
+    Qoder Stream, and cross-product verification and failure evidence.
+  Changes since v1.0.61-beta.3
+  Added
+  - Chat conversation-file upload — adds chat conversation-file upload for local files, returning reusable dentryId and spaceId without sending a chat message while leaving the retired chat file upload path unchanged.
+  - Chat message list page-all — dws chat message list now accepts --page-all to iterate the time-boundary pagination automatically and return one merged messages array (with pagesFetched, stopReason, nextPage, and per-page failure diagnostics). --page-limit (default 50), --max-items, and --page-delay tune the sweep; without --page-all the command keeps its exact single-page behavior.
+  - Delegation auth capability options — when --principal-user-id is set, the per-tool check_capability verification now carries a tool-specific options payload so the server can authorize the exact operation. create sends the create action parameters (name/type/target folder or workspace), upload/get_file_upload_info send the upload action parameters (file name and size), import/create_import_session send the target node together with file name, suffix, and size, copy/move send the resolved source node, permission management sends the target members, and drive publish (set_file_publish) sends the share-scope target (shareScopeSetParam) so making a file internet-public (WEB) is pre-checked. Tools without a mapping continue to check without an options key.
+  - Permission target members mapping — permission-management delegation checks normalize both the new structured member format and the legacy --users list. Legacy user ids are converted into the structured target-member shape using the current logged-in enterprise corpId (resolved through the $corpId runtime default), keeping old and new invocations equivalent.
+  - Import and upload dry-run delegation parity — doc import and doc upload now run the delegation pre-check on their dry-run previews, matching the execution path. A dry-run combined with --principal-user-id is verified against the command's real first delegated call (create_import_session / get_file_upload_info) before any preview is rendered, and a denied principal blocks the preview.
+  - Import target folder node resolution — extractNodeId now recognizes targetFolderId (the key doc import --folder uses to carry its destination), so folder-targeted imports resolve a node id and are gated correctly. copy/move remain unaffected because an explicit nodeId still takes precedence over the folder keys.
+  - Drive download URL-only mode — dws drive download and dws drive download-version accept --url-only, a non-downloading mode that returns the temporary signed download URL and required request headers (downloadUrl/headers, plus optional fileName/fileSize/version) without writing any file locally; the caller (Agent runtime / external system) performs the download itself. Signed URLs keep literal & separators in JSON output so they are copy-paste usable. --url-only is mutually exclusive with --output/--overwrite/--part-size/--parallel/--no-resume (explicit combinations fail fast) and stays effective through the download --version N compatibility routing.
+  Changed
+  - Drive download optional output — dws drive download and dws drive download-version no longer require --output: when omitted, files are saved to the current directory with the filename inferred from the response fileName (falling back to the download URL); explicit --output behavior (file path or directory) is unchanged.
+  - Drive download overwrite guard — dws drive download and dws drive download-version now reject downloads when the target file already exists, returning a structured INPUT_FILE_ALREADY_EXISTS error with recovery guidance; pass --overwrite to proceed. Re-running the same download used to silently overwrite the existing file. The guard is enforced both before the transfer starts and atomically at publish time (no-replace link), so a file that appears during a long download is never silently overwritten. Resume artifacts (.dwspart/.dwspart.meta) are not treated as conflicts.
+  Fixed
+  - AI Table composite verification — accepts the service's real newRecordIds, view-filter, and workflow-detail response shapes, and retries only idempotent table-copy read-backs so delayed visibility no longer reports a false partial success.
+  - Workflow deployment status reporting — replaces resolved.enable with resolved.enableRequested; verification.running now reports the workflow's observed remote state instead of mirroring whether --enable was requested.
+  - Chat message reply (#1210) — allows personal and bot quoted replies in ordinary groups when conversation metadata omits convThreadEnabled, using the matching group search channel=false as positive evidence while continuing to block topic-circle targets.
+  - DING failure handling and resource identity — stop when robot credentials are missing or the selected robot is invalid, and preserve source message IDs separately from DING IDs. Recall accepts opaque server-returned DING IDs without guessing resource type from their prefixes; callers check identity provenance in the receipt.
+  - Whiteboard verification and recovery — validate connector payloads locally, normalize numeric coordinate comparisons, return compact successful update receipts, and preserve committed-write evidence on readback failure without recommending duplicate append operations.
+  - DING and Whiteboard guidance — align mono/multi references, clarify product ownership, and reduce redundant discovery and readback without dropping business information.
+  - Drive download concurrent-writer safety — dws drive download and dws drive download-version no longer risk publishing corrupted mixed content when two processes download to the same target concurrently. Streamed (non-ranged) downloads now write to a uniquely created temp file in the target directory instead of the shared <target>.dwspart, so concurrent writers can no longer truncate each other. Ranged/resume downloads keep the fixed .dwspart path (required for checkpoint reuse) and take a cross-process lock (<target>.dwspart.lock): a second concurrent writer fails fast with holder diagnostics (pid/host/start time) instead of interleaving writes; the atomic no-replace publish still guards the final target either way.
+  - Drive shortcut verification — adds bounded automatic pagination for list, search, and recent results, preserves existing data fields alongside unified pagination metadata, identifies pagination failures by their actual operation, rejects metadata-only statistics, and preserves committed resource evidence when create or upload read-back names differ.
+  - Qoder Stream replies (#1217) — sends Qoder CLI user messages as typed text-content blocks and surfaces errors[] from failed stream results, preventing successful DingTalk delivery from degrading into “本地 agent 无文本输出”.
+  - Drive and Wiki shortcut verification — supports workspace-targeted file uploads and strengthens space-type, pagination, node create/copy/move, and imported-name evidence.
+  - Workspace uploads now include the final file name and size in the initial credential request so upload-specific authorization can reject the operation before any file bytes are transferred.
+ReleaseNotesUrl: https://github.com/DingTalk-Real-AI/dingtalk-workspace-cli/releases/tag/v1.0.61
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

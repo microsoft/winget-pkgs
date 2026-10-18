@@ -1,0 +1,78 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: tonhowtf.OmniGet
+PackageVersion: 0.8.0
+PackageLocale: en-US
+Publisher: tonhowtf
+PublisherUrl: https://github.com/tonhowtf
+PublisherSupportUrl: https://github.com/tonhowtf/omniget/issues
+Author: tonhowtf
+PackageName: OmniGet
+PackageUrl: https://github.com/tonhowtf/omniget
+License: GPL-3.0
+LicenseUrl: https://github.com/tonhowtf/omniget/blob/HEAD/LICENSE
+ShortDescription: Desktop app to download videos, courses, and media from 50+ platforms.
+Description: Desktop app to download videos, courses, and media from 50+ platforms. YouTube, Instagram, TikTok, Bilibili (哔哩哔哩), Douyin (抖音), 小红书, 快手, 优酷, Hotmart, Udemy, Kiwify, Telegram, and 1000+ more via yt-dlp. Download torrents and send files between devices over P2P.
+Tags:
+- bilibili-downloader
+- course-downloader
+- download-manager
+- hotmart-downloader
+- instagram-downloader
+- media-downloader
+- reddit-downloader
+- rust
+- tauri
+- tiktok-downloader
+- twitter-downloader
+- udemy
+- udemy-downloader
+- video-downloader
+- youtube-downloader
+- yt-dlp
+ReleaseNotes: |-
+  Seven features that were written, tested and unreachable now have a path from the app to them. Plus a portable-mode leak that turned out to affect Linux too, and a settings section that showed Portuguese to everyone.
+  Features that finally reached the UI
+  Twelve modules had shipped as tested logic with no Tauri command and no call site outside core/ — code that existed but nothing could invoke. Seven are now wired.
+  Failed downloads explain themselves. A failure in the queue is translated into a cause and one action: import cookies, retry, update yt-dlp, free disk space. Instead of a raw yt-dlp stderr line, you get the thing to click.
+  yt-dlp retries as a real browser when a site blocks by TLS fingerprint. Some sites reject the request before any of the player-client switching matters. On that specific failure, the retry now uses --impersonate with a target the bundled binary actually supports.
+  PO token provider support. If you run a bgutil provider, set OMNIGET_POT_PROVIDER_URL and it will be used when YouTube demands a PO token. The provider is probed first — a configured but dead address would otherwise cost a timeout on every download, which is worse than having no provider at all. It is an environment variable rather than a settings field because it is an external service almost nobody runs, and a new settings field costs a migration for everyone.
+  A bad yt-dlp update can be undone. Updating yt-dlp now archives the previous binary before overwriting it, keeping the last three. If a new version breaks a site, Settings → Dependencies → ... lists the earlier ones and rolls back — no internet required.
+  Segment concurrency adapts per host. The number in Settings becomes a ceiling instead of a fixed value. A CDN that throttles at 8 connections delivers more at 4, and only measurement tells you which case a host is. With no history, behaviour is identical to before.
+  Diagnostic reports now include what actually happened. The debug panel's "Copy report" carries a redacted trace of the last download log lines — no tokens, no cookies, no paths with your username. This is what was missing when someone says "it stopped working" and the report only showed the final result.
+  Batch downloads are checked before queueing. Paste 40 links and the unsupported and repeated ones are skipped up front, with a count, instead of being queued and failing one at a time. If nothing in the list is supported, it stops and says so.
+  Accessibility preferences. Reduce motion and reduce transparency, in Settings → Appearance.
+  Fixes
+  Portable mode was leaving a folder in your user profile on Linux. This is the same bug as the Windows one fixed in 0.7.7 — nobody had noticed it applied elsewhere. The WebView redirect was behind a Windows-only compile flag, but Tauri's data_directory has no such restriction and on Linux it drives WebKitGTK's data, cache and cookie paths. It was found by the new startup test on its first run, not by a report.
+  macOS is still not covered — wry does not read data_directory on WKWebView, so the mechanism used on the other two platforms does not exist there. Tracked in #227 rather than left implicit.
+  The browser extension section of Settings was never translated (#222). It showed Portuguese regardless of your language, including the three install hints, which arrived already-translated from the backend — where the UI language is not knowable. The backend now returns a key and the frontend translates it. Ten locales.
+  The dependency row menu was clipped by the table (#222). The ... menu is positioned below its row, and on the last row — the PDFium one — it fell outside a container with overflow: hidden. The "point at a local file" option was rendered but unreachable. Thanks @PaduaPlay for the screenshot that made both of these findable.
+  Bundled WebView2 runtime is now detected (#218). Unpack a WebView2 Fixed Version Runtime next to omniget.exe and it is used, so the app runs on Windows machines without WebView2 installed. The folder is only accepted if it actually contains msedgewebview2.exe — trusting the name alone would fail later, at window creation, and the app would not open at all. Thanks @xmha97.
+  Under the hood
+  CI now launches the app. Every pull request starts the real binary on Windows and Linux and fails if the window does not open, in both normal and portable mode. Previously CI proved the code compiled on four platforms and had never once opened the app — which is exactly how the portable-mode bug reached main. Verified by reverting the fix and confirming the job goes red.
+  Test suite went from 460 to 589.
+  Known gaps
+  The command-line binary is not in this release. The build job was added but failed here — for two separate mistakes of mine, both fixed for the next release. omniget-cli still has to be built from source, exactly as the README says. See #202.
+  Five modules remain unreachable: the rules engine, version diffing, the content-addressed store, playback silence skipping and torrent streaming. None of them is a matter of wiring — each needs interface and product decisions that would have made this release worse if rushed.
+  Nothing in this release was manually clicked. Everything above is covered by tests and CI; the interface paths are listed in docs/VALIDACAO-0.8.0.md for verification.
+  Downloads
+  Windows: .exe installer or portable.
+  macOS: .dmg (Apple Silicon aarch64 or Intel x86_64).
+  Linux: .AppImage (universal) or .deb (Debian/Ubuntu).
+  Debian/Ubuntu users — AppImage compatibility
+  Debian 12+ ships without FUSE 2 by default, which AppImage requires.
+  If ./omniget.AppImage fails with a libfuse error, run:
+  sudo apt install libfuse2
+  …or use ./omniget.AppImage --appimage-extract-and-run.
+  Easier alternative: download the .deb instead — works out of the
+  box on Debian 12+ and Ubuntu 22.04+.
+  macOS users — "OmniGet is damaged and can't be opened"
+  The app is not notarized with Apple yet, so Gatekeeper quarantines it.
+  After moving the app to /Applications, run:
+  xattr -cr /Applications/omniget.app
+  Then open it normally. If it still refuses, allow it under
+  System Settings → Privacy & Security.
+ReleaseNotesUrl: https://github.com/tonhowtf/omniget/releases/tag/v0.8.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,72 @@
+# Created with WinGet Updater using komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: DoltHub.Dolt
+PackageVersion: 1.57.3
+PackageLocale: en-US
+Publisher: DoltHub
+PublisherUrl: https://github.com/dolthub/dolt
+PublisherSupportUrl: https://github.com/dolthub/dolt/issues
+Author: DoltHub
+PackageName: Dolt
+PackageUrl: https://www.dolthub.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/dolthub/dolt/blob/HEAD/LICENSE
+CopyrightUrl: https://raw.githubusercontent.com/dolthub/dolt/master/LICENSE
+ShortDescription: Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+Description: |-
+  Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+  Connect to Dolt just like any MySQL database to run queries or update the data using SQL commands.
+  Use the command line interface to import CSV files, commit your changes, push them to a remote, or merge your teammate's changes.
+Moniker: dolt
+Tags:
+- cli
+- data
+- git-for-data
+- versioning
+ReleaseNotes: |-
+  Merged PRs
+  dolt
+  - 9587: Bug fix: Update secondary index correctly during a merge with a schema change
+    During a merge, Dolt applies diffs to existing indexes to sync their data with the changes being merged in. If the table schema has changed between the merge base and the left/right branches of the merge, Dolt was using the incorrect value tuple to remove the row from the index. This resulted in a customer issue where the secondary index still contained rows and the foreign key validation logic was incorrectly detecting FK violations, even though the child table was empty.
+    As a follow-up to this, we need to investigate other similar cases in the secondary index merger and see if other diff types have a similar issue.
+  - 9585: Run gofmt and goimports on generated protobuf files to ensure clean diffs
+    This change adds gofmt and goimports steps to the protobuf generation process to ensure that generated .pb.go files are consistently formatted.
+  - 9577: Remove broken symlink
+  - 9574: Fix dolt_preview_merge_conflicts for doltgres
+  - 9551: #9530 - Fix auto-increment display for SHOW CREATE TABLE
+    Fixes #9530
+    Companion PR: dolthub/go-mysql-server#3103
+    Fixed auto-increment display discrepancy in SHOW CREATE TABLE by adding type checking to prevent incrementing beyond integer type maximums.
+  go-mysql-server
+  - 3123: Support decimal unique keys
+    fixes #3071
+  - 3122: Allow SYSTEM as valid time zone
+  - 3119: Add test for setting time zone from table value
+  - 3118: Validate time zone before setting it
+    fixes #9559
+  - 3116: fix panic in stats histogram union and intersect
+    I'm not 100% how to repro this, but there is definitely something up with the Union and Intersect logic in stats histograms.
+    Based on the stack trace, there's a panic when attempting to Union histogram buckets.
+    It seems like the logic assumes that the histogram keys are always shorter than the number of buckets.
+    This PR fixes the Union and Intersect logic to compare the keys without the assumption, and adds some unit tests.
+    fixes: #9143
+  - 3114: #9511 - Fix SET type casting to CHAR and BINARY
+    Fixes #9511
+    - Added convertSetToStringForStringContext() helper function following existing patterns
+    - Modified convertValue() to handle SET types in both CHAR and BINARY conversion cases
+  - 3109: #9544 - Fix time type foreign key constraints
+    Fixes #9544
+    Allows foreign key constraints to be created between time-related types (DATETIME, TIMESTAMP, TIME) with different precisions or cross-type references, matching MySQL behavior.
+  Closed Issues
+  - 9590: More granular control over restrictions
+  - 9544: time types and foreign keys
+  - 9530: auto_increment with max integers does not error properly
+  - 9469: Support SET in string context
+  - 9511: SET type does not cast correctly to char or binary
+  - 9143: index out of range panic on CTE
+  - 9559: set time_zone should validate timezone
+  - 3071: In-memory tables don't support DECIMAL(...) UNIQUE KEY
+ReleaseNotesUrl: https://github.com/dolthub/dolt/releases/tag/v1.57.3
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

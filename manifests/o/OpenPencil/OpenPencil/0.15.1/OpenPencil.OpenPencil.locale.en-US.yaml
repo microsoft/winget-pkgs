@@ -1,0 +1,66 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: OpenPencil.OpenPencil
+PackageVersion: 0.15.1
+PackageLocale: en-US
+Publisher: dannote
+PublisherUrl: https://openpencil.dev/
+PublisherSupportUrl: https://github.com/open-pencil/open-pencil/issues
+PackageName: OpenPencil
+PackageUrl: https://openpencil.dev/
+License: MIT
+LicenseUrl: https://github.com/open-pencil/open-pencil/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Danila Poyarkov
+ShortDescription: An AI-native design editor and open-source Figma alternative.
+Description: |-
+  OpenPencil is an AI-native design editor and open-source Figma alternative that supports .fig and .pen design files.
+
+  What it does
+  - Opens .fig and .pen files — read and write native Figma files, open supported Pencil documents from the app or OS file browser, copy & paste nodes between apps
+  - AI builds designs — describe what you want in chat, 90+ tools create and modify nodes. Connect OpenRouter, Anthropic, OpenAI, Google AI, Z.ai, MiniMax, or compatible endpoints
+  - Fully programmable — headless CLI, XPath queries, Figma Plugin API via eval, MCP server for AI agents, and desktop agent integrations for Claude Code, Codex, and Gemini CLI
+  - Lint, convert, and extract tokens — inspect documents, lint naming/layout/accessibility, convert between supported formats, analyze colors/typography/spacing/clusters, and extract design tokens
+  - Components and variants — create reusable components, group variants into component sets, insert local assets as instances, and switch variants from the inspector
+  - Image vectorization — convert image layers into editable vector layers with Recraft or fal.ai
+  - Design-to-code export — export selections as JSX/Tailwind, generate token outputs, and map designs into component-oriented code workflows
+  - Vue SDK for custom editors — headless components and composables for embedding OpenPencil into other apps or building workflow-specific editing surfaces. Read the SDK docs →
+  - Real-time collaboration — P2P via WebRTC, no server, no account. Cursors, presence, follow mode
+  - Auto layout & CSS Grid — flex and grid layout via Yoga WASM, with gap, padding, alignment, track sizing
+  - ~7 MB desktop app — Tauri v2 for macOS, Windows, Linux. Also runs in the browser as a PWA
+Tags:
+- ai
+- design
+- figma
+ReleaseNotes: |-
+  Added
+  - Configure built-in AI and local MCP tool access independently on a Tool access page, including optional extended AI tools, searchable read-only and side-effect groups, and per-target defaults (#584).
+  - Set the built-in AI's maximum steps per message in Chat settings, including a custom number, with consistent stopping and remaining-step warnings (#573).
+  - Open documents and jump to a named layer from openpencil://open?file=&node= links, resolving the file against open tabs or a one-time file picker. Path segments match the way the filesystem does: case-insensitively on macOS and Windows, exactly on Linux.
+  - Open documents and jump to a named layer in the web app from ?file=&node= links, fetching the file from an https: URL without credentials, ignoring the URL fragment, and refusing a document larger than 64 MiB — a ceiling the automation bridge's openFile now shares.
+  Changed
+  - Create new documents with the sRGB colour profile, so Display P3 is reserved for documents that declare it.
+  - Export diagnostics from Settings only, with a retention count you choose. AI requests and tool activity now carry conversation and request identifiers, while chat no longer offers a separate diagnostic log or includes transcript content.
+  - Replace the demo's legacy reference page with a component library on the first page, including component sets, linked instances, component properties, and the variable collections, and show the standard canvas loading overlay and tab indicator while it is generated instead of an empty canvas.
+  Fixed
+  - Store colours edited in the colour picker in the document's colour profile, and convert them on the way to the display, so a Display-P3 document no longer looks different on an sRGB display than on a wide-gamut one.
+  - Keep Display-P3 documents rendering correctly in wide gamut where the browser supports it and in sRGB elsewhere, fixing the black rectangles and incorrect blend colours, with a dismissible notice when wide gamut is unavailable.
+  - Classify MCP open_file and close_file operations as read-only hints, and close opened document tabs through the new close_file tool with the usual unsaved-change prompt.
+  - Let the desktop app use an MCP server you started yourself by allowing the app's own origin by default, instead of requiring OPENPENCIL_MCP_CORS_ORIGIN.
+  - Explain why the local MCP server did not start — a missing @open-pencil/mcp install, a denied command, an early exit, or an unreachable address — with translated guidance, and find a globally installed server when the desktop app is launched from the system shell.
+  - Animate the AI chat tool-call disclosure, which expanded and collapsed without motion because its animation classes were misspelled.
+  - Mark unsaved documents and ask whether to save before closing a tab, the desktop window, or the application, rather than relying on recovery alone.
+  - Defer AI provider connections and system credential reads until you send a message or use a connected feature, so opening documents and browsing chat history no longer trigger unexpected credential prompts.
+  - Save and recover documents whose text uses disabled numeric, fraction, or small-caps OpenType features, which previously failed to write a .fig file.
+  - Update instance text properties on the canvas while typing, with grouped undo for rapid edits.
+  - Point Homebrew installation instructions to the official openpencil cask and document separate CLI installation.
+  - Reach the custom model option in the model picker for providers with large model catalogs instead of requiring a search for it.
+  Performance
+  - Reduce editor pauses while generating recovery snapshots and exporting text-heavy .fig documents.
+  - Recompute layout only for the pages an edit affects, instead of every page, when editing a component or its instances.
+ReleaseNotesUrl: https://github.com/open-pencil/open-pencil/releases/tag/v0.15.1
+Documentations:
+- DocumentLabel: User Guide
+  DocumentUrl: https://openpencil.dev/user-guide/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

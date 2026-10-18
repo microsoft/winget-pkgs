@@ -1,0 +1,94 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: LunarWerxs.SageThumbs2K
+PackageVersion: 2.3.2
+PackageLocale: en-US
+Publisher: LunarWerx
+PublisherUrl: https://github.com/LunarWerxs
+PublisherSupportUrl: https://github.com/LunarWerxs/SageThumbs-2k/issues
+PackageName: SageThumbs 2K
+PackageUrl: https://github.com/LunarWerxs/SageThumbs-2k
+License: PolyForm Noncommercial License 1.0.0
+LicenseUrl: https://github.com/LunarWerxs/SageThumbs-2k/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2026 LunarWerx
+ShortDescription: Explorer thumbnails for 331 file types Windows can't read, plus a right-click image toolkit.
+Description: SageThumbs 2K is a modern, crash-isolated Windows 11 shell extension written in Rust that rebuilds the classic SageThumbs. It gives File Explorer thumbnails for 331 file types Windows can't preview on its own — camera RAW, HEIC/AVIF, Photoshop, DjVu, ebooks and comics, video frames, 3D-print files and a long tail of obscure formats — plus a right-click image toolkit (convert, resize, rotate, OCR, color picker, metadata strip, combine-to-PDF/CBZ) and a console/AI CLI. Free for personal use.
+Moniker: sagethumbs2k
+Tags:
+- converter
+- explorer
+- heic
+- image
+- raw
+- shell-extension
+- thumbnails
+ReleaseNotes: |-
+  ## What's changed
+  
+  ### Added
+  
+  - **Ctrl+F now searches inside a multi-page PDF in the Quick preview.** Type a word and the
+    viewer jumps to the page it is on; Enter or F3 walks through the rest, and the bar counts them
+    the way it already does for text files. Windows' PDF engine hands us pictures of pages and no
+    text at all, so SageThumbs reads the words off the rendered pages itself, using the text
+    recognition Windows already ships. Nothing new is downloaded or installed for it.
+  
+    Reading a long document takes a moment, so the bar says how far it has got: matches appear as
+    their pages are read rather than after a silent wait, and a document longer than 200 pages
+    keeps showing how many of its pages were actually searched instead of pretending it read all
+    of them. If the machine has no text recognition available at all, it says so rather than
+    reporting an empty result. Matches are shown by jumping to the page, not by highlighting the
+    word on it.
+  
+  - **A page-thumbnail strip beside multi-page PDFs in the Quick preview.** Small pictures of
+    every page run down the right-hand side, numbered, with the page you are reading outlined.
+    Click one to jump straight to it. It appears only for documents with more than one page, hides
+    itself on a narrow window where the room is better spent on the page itself, and can be turned
+    off. Thumbnails are drawn as they come into view and kept small, so a long document does not
+    pay for pages you never look at.
+  
+  ### Fixed
+  
+  - **The mouse wheel did nothing on a PDF in the Quick preview.** Continuous scrolling shipped in
+    2.3.1 with the keyboard working and the wheel not: rolling it over a PDF was silently ignored,
+    even though the 2.3.1 notes said it scrolled. It scrolls now. Ctrl and the wheel magnifies,
+    and Shift and the wheel slides a magnified page sideways.
+  
+  - **Zooming a PDF now redraws it sharply instead of blowing up the picture.** Magnifying used to
+    stretch the page image it had already drawn, so text went soft exactly when you were zooming
+    in to read it. Pages are now redrawn at the size you are viewing them at, so they stay crisp.
+  
+  - **Converting or resizing some camera RAW files gave you the camera's small preview instead of
+    the photograph.** A Mamiya `.mef` came out **192x144** and a Phase One `.iiq` **304x220**,
+    when the real pictures are 4016x5344 and 3658x2740. These formats hide the real photo where
+    the usual decoder cannot see it without knowing the file's name, so SageThumbs was silently
+    handing you the thumbnail. Convert and Resize now re-read those files at their full native
+    resolution - the `.mef` really does come out 4016x5344. Thumbnails were always correct and
+    are unchanged, pixel for pixel, and still just as fast. Formats that were already converting
+    correctly keep their quick path, so nothing else got slower.
+  
+  ### Added
+  
+  - **Light or dark is now SageThumbs' own setting, on the Quick preview page.** Until now the
+    preview and the Settings window followed Windows' app colour setting, so wanting a dark
+    preview on an otherwise light desktop meant changing the whole system. There is now a
+    "Theme" choice with Follow Windows, Light and Dark. Follow Windows is the default and is
+    exactly what every earlier version did, so nothing changes unless you pick something. The
+    Explorer right-click menu and the preview pane still follow Windows on purpose: those are
+    drawn inside Explorer's own window, and disagreeing with the shell around them would look
+    broken rather than themed. Suggested by a user.
+  
+  ### Changed
+  
+  - **Installing is quicker at the "Registering the modern context menu" step.** That step
+    unregistered the existing Windows 11 menu package and registered it again from scratch every
+    single time, which is two deployments where one will do, and it is the step people saw the
+    installer appear to hang on. It now registers directly and only falls back to the remove and
+    retry when that fails, and it skips re-importing the signing certificate when the same one is
+    already trusted. Measured at **1,162 ms before and 552 ms after** on a warm machine. It is
+    also safer: the old order tore down the working menu before anything else, so any later
+    failure left you with no modern menu at all.
+ReleaseNotesUrl: https://github.com/LunarWerxs/SageThumbs-2k/releases/tag/v2.3.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
