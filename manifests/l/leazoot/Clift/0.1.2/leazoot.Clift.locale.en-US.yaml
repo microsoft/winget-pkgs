@@ -1,0 +1,62 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: leazoot.Clift
+PackageVersion: 0.1.2
+PackageLocale: en-US
+Publisher: leazoot
+PublisherUrl: https://github.com/leazoot
+PublisherSupportUrl: https://github.com/leazoot/clift/issues
+PackageName: Clift
+PackageUrl: https://github.com/leazoot/clift
+License: Apache-2.0
+LicenseUrl: https://github.com/leazoot/clift/blob/HEAD/LICENSE
+ShortDescription: Paste screenshots from your machine straight into coding agents running on a remote server.
+Description: |-
+  You use Claude Code, Codex, Gemini CLI or another command-line agent on a server over SSH.
+  Text pastes fine. Screenshots don't.
+  The image is on your laptop's clipboard, but the agent runs on another machine. Usually you have to save the image, upload it to the server, then send the path to the agent.
+  Clift turns those steps into one shortcut:
+
+  Screenshot
+    ↓
+  Cmd+Shift+V
+    ↓
+  Sent over SSH / SFTP
+    ↓
+  A file path appears in the terminal
+    ↓
+  The agent reads it
+
+  For example:
+
+  Please inspect this file: '/home/dev/.cache/clift/inbox/2026-09-05/2a07…/clipboard.png'
+
+  In Fast Mode the file goes over your existing SSH connection.
+  Nothing is installed on the server, and no relay is involved.
+Tags:
+- claude-code
+- clipboard
+- codex
+- screenshot
+- ssh
+ReleaseNotes: |-
+  Changed
+  - Fast Mode speaks SFTP over the system ssh (ssh -s <host> sftp) instead of driving the sftp program. Authentication, known_hosts, agent and ProxyJump are still handled by ssh. The sftp program is no longer needed, and doctor no longer checks for it.
+  - The hotkey helper keeps its connection open between presses. connection.persist now defaults to 1 hour (was 10 minutes) and allows up to 24 hours (was 1 hour). After changing it, run clift hotkey --install to restart the helper.
+  - setup records the host's cache directory, so a send logs in once. Run clift setup again for targets set up with an earlier version.
+  - Fewer round trips per send. --verbose shows how long each remote step took.
+  Fixed
+  - Windows: Fast Mode sends took close to a minute. They now log in once.
+  - Windows: sending a file by path failed with stat ////?//D://....
+  - Windows: permissions listed as drwx****** could not be checked.
+  - A request that ran out of time could be sent again.
+  - A missing file was reported as a clipboard failure, with a remedy PowerShell cannot run.
+  Security
+  - rustls 0.23.45, for RUSTSEC-2026-0285.
+  Downloads
+  Binaries for macOS (Apple Silicon and Intel), Linux (x86_64 and aarch64, static) and Windows (x86_64). Install with install.sh / install.ps1 from the repository, which verify against SHA256SUMS. Every file is signed with Sigstore by this release workflow's own identity; the .sigstore.json next to each file is its bundle, and SECURITY.md shows how to verify one. The two .cdx.json files are CycloneDX SBOMs for clift and clift-relayd.
+  Full Changelog: https://github.com/leazoot/clift/compare/v0.1.1...v0.1.2
+ReleaseNotesUrl: https://github.com/leazoot/clift/releases/tag/v0.1.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
