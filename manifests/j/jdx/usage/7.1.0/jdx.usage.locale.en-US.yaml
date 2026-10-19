@@ -1,0 +1,56 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: jdx.usage
+PackageVersion: 7.1.0
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://jdx.dev/
+PublisherSupportUrl: https://github.com/jdx/usage/issues
+Author: Jeff Dickey
+PackageName: usage
+PackageUrl: https://usage.jdx.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+ShortDescription: A specification for CLIs
+Description: |-
+  Usage is a spec and CLI for defining CLI tools. Arguments, flags, environment variables, and config files can all be defined in a Usage spec. It can be thought of like OpenAPI (swagger) for CLIs. Here are some potential reasons for defining your CLI with a Usage spec:
+
+  - Generate autocompletion scripts
+  - Generate markdown documentation
+  - Generate man pages
+  - Generate type-safe SDK client libraries for TypeScript, Python, and Rust
+  - Use an advanced arg parser in any language
+  - Scaffold one spec into different CLI frameworks-even different languages
+  - [coming soon] Host your CLI documentation on usage.sh
+Moniker: usage
+Tags:
+- cli
+- spec
+ReleaseNotes: |-
+  This release adds usage-spec-effect, a new npm package that turns Effect v4 effect/cli command trees into usage specs. It also fixes bash completions from usage-argv, which could pass the command a different value than the one offered when a candidate contained quotes, spaces or other shell syntax.
+  Added
+  - (spec) usage-spec-effect exports a usage spec from an Effect v4 effect/cli command tree (#1564, @jdx). Effect still parses and runs the CLI, and the spec drives shell completions, markdown docs and man pages. It requires effect 4.x.
+    npm install usage-spec-effect
+    import { generate } from "usage-spec-effect";
+    if (process.argv.includes("--usage-spec")) {
+      process.stdout.write(generate(app, { version: "1.0.0" }));
+      process.exit(0);
+    }
+    mycli --usage-spec | usage generate completion bash mycli --file -
+    The exporter handles nested subcommands, aliases, unlisted commands, examples, shared flags (exported as global), flag aliases, boolean and valued flags, choices, defaults, and optional and variadic args. Some constructs can only be exported approximately: orElse alternatives, file, redacted and key-value types (exported as strings), non-primitive defaults, and flags with an optional value. generateWithReport returns these in an unsupported list so they aren't dropped without notice. Effect's public Command type doesn't expose flags or arguments, so the exporter reads the command's runtime config. If a future Effect release changes that shape, generate throws an error that names the command. See the Effect integration guide.
+
+  Fixed
+  - (bash) usage-argv and usage-dynamic now escape bash completion candidates so the command gets the value that was offered (#1566, @jdx). Before this fix, Readline put candidates on the line unescaped, so a candidate like tasks."hello.sh" reached the command as tasks.hello.sh, and it's here left an unclosed quote on the line. Candidates are now backslash-escaped. When a quote is already open in the word (', " or $'), each candidate is escaped for that quote style instead. Path completions still use Readline's own filename quoting, and zsh and fish were already correct. Hosts handling __complete_word__ should call render_request(&answer, &request) instead of render(&answer, shell) so the open-quote state is used. App::completion_request in usage-dynamic already does this. The script-based bash completions behind usage complete-word are unchanged, since compgen -W can't carry spaces or quotes in candidates.
+
+  💚 Sponsor usage
+  usage is built and maintained by @jdx, an open source developer at entire.io, the title sponsor of his open source work.
+  If usage powers CLI specs, docs, or completions for a tool you maintain or use, please consider becoming an individual or company sponsor. Your support funds ongoing development and helps keep usage fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/usage/releases/tag/v7.1.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://usage.jdx.dev/cli/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
