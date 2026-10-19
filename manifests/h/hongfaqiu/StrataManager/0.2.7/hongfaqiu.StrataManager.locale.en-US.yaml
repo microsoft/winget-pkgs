@@ -1,0 +1,30 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: hongfaqiu.StrataManager
+PackageVersion: 0.2.7
+PackageLocale: en-US
+Publisher: strata
+PublisherUrl: https://github.com/hongfaqiu
+PublisherSupportUrl: https://github.com/hongfaqiu/strata-manager/issues
+Author: hongfaqiu
+PackageName: Strata Manager
+PackageUrl: https://hongfaqiu.github.io/strata-manager/
+License: MIT
+LicenseUrl: https://github.com/hongfaqiu/strata-manager/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Strata Manager contributors
+ShortDescription: 'A desktop workspace for local inference with Strata: prepare the runtime, manage models and services, and monitor your local API.'
+Description: Strata Manager is an open-source desktop app for managing Niko1221/Strata, a local LLM inference engine. It bundles runtime setup, model downloads, service controls, streaming chat, hardware and API usage monitoring, task-based tuning, and benchmarking into a single workspace. Model weights already on your machine stay untouched.
+Tags:
+- ai
+- large-language-model
+- llm
+- local-llm
+ReleaseNotes: |-
+  - Headless Server experiment (#6 P0/P1): adds strata-manager-server (axum), default bind 127.0.0.1:8787, first-run Bearer token; POST /api/v1/rpc maps onto RuntimeState::dispatch and can serve the existing Web UI. Browser gains a server transport and token gate; file picks become server path inputs; tray, floating monitor and desktop updater are hidden. Includes systemd unit, scripts/package-server.sh and docs/SERVER.md. CI tests and packages the server on Linux; releases add Strata.Manager.Server_<ver>_amd64.tar.gz / .deb (13 assets total, still no SHA256SUMS; server packages are updater-independent).
+  - macOS Metal prebuilt engine (#53 phase 2a): on Apple Silicon, Manager can download and verify the upstream strata-engine-*-macos-arm64-metal.tar.gz (pinned v0.2.0-beta asset name and SHA256; in-app checks only, no SHA256SUMS files), extract into engine/, or use a local .tar.gz / existing Strata engine or build-metal directory. Windows/Linux engine packages are never offered on Mac; the catalog hides Qwen3.6 / Swift / Coder (not measured on Metal upstream); defaults use --spec 2 and omit PC --calibrate / --parallel. ./setup.sh remains a manual hint; real-device inference validation is still pending.
+  - Taskbar monitor (Windows, #71): Monitor settings → "Taskbar monitor (Windows)" adds an on/off switch, off by default. When on, a small widget sits left of the notification area on the primary taskbar: a ring shows GPU load (or VRAM usage, or no ring), followed by one column per metric: a bold value with a small unit on top (e.g. "21.3 t/s") and a short grey label below (Gen, Prefill, GPU, VRAM, Temp). Each metric has its own colour (generation green, prefill blue, GPU orange, VRAM violet), and GPU temperature changes colour with the reading (green below 60 ℃, amber 60–80 ℃, red above 80 ℃); the light and dark palettes keep at least 4.5:1 contrast on Win11 light and dark taskbars. The ring uses the selected metric's colour, and a small dot at its lower right shows the service state. Numbers are compact (3.2k, no decimals above 100) and every column has a fixed width, so values never shift sideways; the default set is 134 px wide at 100 % scaling. A "Colors" section lets you override the colour of generation, prefill, GPU, VRAM and temperature (swatch, eight presets that stay readable on both light and dark taskbars, a custom picker, and reset to default); a custom colour is used on both taskbar themes, low contrast is flagged, and a custom temperature colour replaces the graded scheme, while the service-state dot keeps its fixed colours. The right-click menu adds "Customize colors…", which opens that section in the app. GPU load, VRAM, GPU temperature and service status can be added, and the width follows the selection. It is drawn by a separate native Win32 helper process (no WebView), refreshes at most once per second and skips repaints when nothing changed; text follows the taskbar's light/dark colour and DPI scaling; it follows or re-attaches on auto-hide, fullscreen apps, notification-area width changes and Explorer restarts, and falls back to the desktop strip with a reason when there is no room. Left-click opens Strata Manager without stealing focus or appearing in Alt-Tab; the right-click menu offers "Open Strata Manager", a "Customize" submenu for items and the ring metric, and "Close taskbar monitor", all in sync with the settings page. Horizontal primary taskbars only.
+  - Tray icon is the plain app icon again: the experimental readings drawn into the tray icon were withdrawn; live readings now come from the taskbar monitor.
+ReleaseNotesUrl: https://github.com/hongfaqiu/strata-manager/releases/tag/v0.2.7
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

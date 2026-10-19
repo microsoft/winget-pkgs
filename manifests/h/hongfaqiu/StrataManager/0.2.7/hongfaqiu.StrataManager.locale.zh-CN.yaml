@@ -1,0 +1,20 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: hongfaqiu.StrataManager
+PackageVersion: 0.2.7
+PackageLocale: zh-CN
+ShortDescription: 面向 Strata 本地推理的桌面工作台。
+Description: Strata Manager 是一款面向 Niko1221/Strata 本地大模型推理引擎的开源桌面管理工具，将运行环境准备、模型配置、服务控制、聊天、监控、调优与基准测试整合到同一工作台，降低使用门槛。已下载的模型权重不会被改动。
+Tags:
+- 人工智能
+- 大模型
+- 大语言模型
+- 本地大模型
+ReleaseNotes: |-
+  - 无头 Server 实验版（#6 P0/P1）：新增 strata-manager-server（axum），默认 127.0.0.1:8787，首次运行生成 Bearer 令牌；POST /api/v1/rpc 对接 RuntimeState::dispatch，可托管同一套 Web 前端。浏览器侧增加 server 传输与令牌门禁；文件选择改为服务器路径输入；隐藏托盘、悬浮监控与桌面自动更新器。附 systemd unit、scripts/package-server.sh 与 docs/SERVER.md。CI 增加 server crate 测试与 Linux 打包产物；发布资产在原 11 项之外增加 Strata.Manager.Server_<ver>_amd64.tar.gz / .deb（共 13 项，仍无 SHA256SUMS，Server 包不进 updater）。
+  - macOS Metal 引擎预制包（#53 第二期 a）：在 Apple Silicon 上可下载并校验上游 strata-engine-*-macos-arm64-metal.tar.gz（钉死 v0.2.0-beta 资产名与 SHA256，应用内校验，不附带 SHA256SUMS），解包到 engine/；也支持选用本地 .tar.gz 或已有 Strata/engine、build-metal 目录。Mac 上不提供 Windows/Linux 引擎包；模型目录隐藏上游未在 Metal 验收的 Qwen3.6 / Swift / Coder；默认 --spec 2，不开放 PC --calibrate 与 --parallel。./setup.sh 源码构建仍为手动提示，真机推理验收待进行。
+  - 任务栏监控（Windows，#71）：「监控设置 → 任务栏监控（Windows）」新增开关，默认关闭。开启后在主屏任务栏通知区左侧嵌入一个小部件：圆环显示 GPU 负载（可改为显存占用或不显示），旁边每项指标一列：上方是加粗数值和小号单位（如「21.3 t/s」），下方是灰色短标签（生成、预填充、GPU、显存、温度）。每项指标有自己的颜色（生成绿、预填充蓝、GPU 橙、显存紫），GPU 温度按数值变色（低于 60℃ 绿、60–80℃ 琥珀、高于 80℃ 红）；深浅两套配色在 Win11 浅色和深色任务栏上的对比度都不低于 4.5:1。圆环用所选指标的颜色，右下角小圆点表示服务状态。数字紧凑显示（3.2k，100 以上不带小数），每列宽度固定，数值变化时不会左右跳动；默认内容在 100% 缩放下宽 134 px。「颜色」区可为生成、预填充、GPU、显存、温度分别设置自定义颜色（色块 + 8 个在深浅任务栏上都清晰的预设色 + 自定义取色，可一键恢复默认）；自定义颜色在深浅两种任务栏上都使用，对比度不足时给出提示，自定义温度颜色会取代按温度变色；服务状态圆点颜色不可改。任务栏右键菜单新增「自定义颜色…」，直接打开设置页的颜色区。还可加入 GPU 负载、显存、GPU 温度、服务状态，宽度随所选内容变化。小部件由独立的原生 Win32 辅助进程绘制（不使用 WebView），每秒最多刷新一次，数值不变时不重绘；文字颜色跟随任务栏深浅色，按 DPI 缩放；任务栏自动隐藏、全屏应用、通知区变宽和 Explorer 重启时会跟随或重新挂载，放不下时回到桌面浮条并说明原因。左键打开 Strata Manager，不抢焦点、不出现在 Alt-Tab；右键菜单可「打开 Strata Manager」、在「自定义内容」中勾选显示项和圆环指标，或「关闭任务栏监控」，与设置页同步。仅支持横向的主屏任务栏。
+  - 托盘图标恢复为普通应用图标：撤回此前在托盘图标上绘制读数的实验方案，实时读数改由任务栏监控提供。
+ManifestType: locale
+ManifestVersion: 1.12.0
