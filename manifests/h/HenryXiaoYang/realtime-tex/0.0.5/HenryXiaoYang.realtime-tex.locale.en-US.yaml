@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
 
 PackageIdentifier: HenryXiaoYang.realtime-tex
-PackageVersion: 0.0.4
+PackageVersion: 0.0.5
 PackageLocale: en-US
 Publisher: Henry Yang
 PublisherUrl: https://henryyang.net/
@@ -22,15 +22,16 @@ Tags:
 - texlive
 - typesetting
 ReleaseNotes: |-
-  Two live-editing fixes, both reported with excellent reproductions by @SDDKKK.
+  Most of this release comes from contributors. Thank you @SDDKKK, @Sigewinne-330 and @Steve-Li-1998!
   Fixed
-  - Two-column documents are live again (IEEEtran, \documentclass[twocolumn]{…}). When a column break fell inside a paragraph, rtex recorded the whole page as part of that paragraph, and most of the document lost live editing. In a 12-page IEEEtran paper almost no body text was live. The two-page example from the report now has 61 of 61 paragraphs live, identical to LuaLaTeX's output. (#2)
-  - Comment lines no longer break paragraphs. Two % lines in a row, or one inside a paragraph, made rtex think the paragraph ended there, so its edits waited for the background compile. rtex now treats comments like TeX does. (#3)
-  - Paragraphs with \marginpar update live. The margin note follows after the next background compile, like footnote text.
-  - Full LaTeX error messages. Errors and warnings now include all of LaTeX's continuation lines. For example, "Mismatched LaTeX support files detected" now shows which versions don't match. (#1)
-  Other
-  - scripts/install-texlive.sh only contacts the TeX Live repository when packages are missing, and updates tlmgr first. Re-running it over an existing installation no longer fails with "tlmgr itself needs to be updated".
-ReleaseNotesUrl: https://github.com/HenryXiaoYang/realtime-tex/releases/tag/v0.0.4
+  - newtxmath in the live preview. Math typed with newtxmath (or any font whose TFM has a .vf) no longer shows wrong symbols such as Ï for +. (#7)
+  - IEEEtran. Page 1 is drawn directly instead of from the PDF. Tables keep the class's \footnotesize when edited live. The run-in \subsubsection waits for the background compile instead of going live wrong. (#5)
+  - Live engine. Fixed for a figure with a % comment or \vspace above it, for a float or list at the end of an \input file, for preamble \input files (they were loaded twice), and for \mathbf after \bm with fontspec (wrong font, sometimes a crash). (#4)
+  - Main files with a space in the name (my paper.tex) work. (#8)
+  - Blank pages (from \cleardoublepage with \pagestyle{empty}) no longer break the whole layout. (#9)
+  New
+  - IEEEtran's IEEEkeywords and IEEEdescription update as you type.
+ReleaseNotesUrl: https://github.com/HenryXiaoYang/realtime-tex/releases/tag/v0.0.5
 InstallationNotes: rtex needs a TeX Live installation that provides LuaLaTeX with a LaTeX kernel from 2021 or later; pdfLaTeX and XeLaTeX are not supported. Run `rtex doctor` to check that rtex finds its support files and your LuaLaTeX.
 Documentations:
 - DocumentLabel: Live Editing
