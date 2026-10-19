@@ -1,0 +1,45 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: chenming0v0.OMPiUI
+PackageVersion: 0.6.34
+PackageLocale: zh-CN
+Publisher: ompiui
+PublisherUrl: https://github.com/chenming0v0
+PublisherSupportUrl: https://github.com/chenming0v0/OMPiUI/issues
+Author: 辰林
+PackageName: OMPiUI
+PackageUrl: https://github.com/chenming0v0/OMPiUI
+License: GPL-3.0-only
+LicenseUrl: https://github.com/chenming0v0/OMPiUI/blob/HEAD/LICENSE
+ShortDescription: OMP（oh-my-pi）的第三方桌面客户端，采用 PiUI 视觉外壳与 OMP 官方 RPC 运行时。
+Description: |-
+  OMPiUI 是 OMP（oh-my-pi）的第三方 Web/桌面客户端：界面沿用 PiUI 的视觉外壳，agent 执行由 oh-my-pi（OMP）的官方 RPC 运行时承担，提供 60+ provider、31 个内置工具、子代理系统、MCP/LSP 和扩展支持。
+  界面来自 lehhair 的 PiUI 与 OpenCodeUI。OMPiUI 不是这两个项目的官方客户端。
+  使用前需要安装 Node ≥ 22.19 与 OMP CLI（≥ 18.2.11，通过 bun install -g @oh-my-pi/pi-coding-agent 安装），并配置 provider 凭据。
+Tags:
+- oh-my-pi
+- omp
+- pi
+- pi-agent
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  - feat: 供应商模型编辑弹窗新增「智能配置」并默认开启：新建模型时按模型 ID 自动查询 models.dev，填入显示名、上下文窗口、输出上限、输入类型、推理能力与推理等级，并显示「正在查询…／已应用 models.dev 数据／已使用本地默认值」；查不到或请求失败时回退本地启发式。编辑已有模型默认不自动改写、需手动开启；关闭开关即取消在途查询，迟到的查询结果不会覆盖已手工修改或已切换的模型。
+  - feat: 新增只读 host 命令 models.dev.lookup（models 域、幂等）：服务端拉取 https://models.dev/api.json，进程内缓存 10 分钟并合并并发查询，请求超时 10 秒、响应体上限 12 MiB；模型 ID 归一化后支持 vendor/ 前缀、[...] 标签与标点差异，精确命中优先于长度不小于 5 的片段命中，跨供应商按「显式指定供应商 > 模型家族对应供应商 > 其他」排序。
+  - feat: 供应商 API 格式新增 google-generative-ai：models.yml 读写接受该值，上游模型列表改走 /v1beta/models（必要时回退 /models），以 x-goog-api-key 鉴权并去掉返回 id 的 models/ 前缀；界面 API 格式选项与提示同步补齐。
+  - fix: 保留「模型声明支持推理、但目录没有可配置等级」的真实状态，不再编造 low/medium/high：弹窗显示「模型支持推理，但目录未提供可配置的推理等级」并提供「手动配置」入口，保存时以 thinking: null 显式清除旧 thinking 段；推理模式按供应商 API 推断（anthropic-messages → anthropic-adaptive、google-generative-ai → google-level、其余 effort），仅在该模型尚无等级配置时套用，不覆盖手工配置；清空「推理参数映射」后提交空映射并由服务端删除旧 thinking.effortMap，改模型 ID 时仍按原 ID 合并保留未暴露字段。
+  - fix: 停止生成期间停止按钮显示进行中状态并禁用重复点击；流式、压缩或提交中的会话始终保留停止入口，输入框有内容时发送与停止可同时使用；worker 的 abort 先发出 agent_settled 让界面先确认已停止，再在后台补齐历史落盘同步（syncEntriesNow），历史同步不再阻塞停止反馈。
+  - fix: 新增会话活动看门狗：会话流订阅期间按 1 秒周期读取一次会话状态（每会话最多一个在途请求、3 秒超时，停止、关闭或断开订阅时取消），把刷新或断连后遗漏的 busy/compacting/idle 状态校准回来；agent_settled 到达时立即按 idle 处理并取消在途校准。
+  - test: 补充 models.dev 查询映射与匹配优先级、Google 上游模型列表拉取、models.yml 保存时清除 thinking/effortMap、推理模式推断、智能配置开关/迟到结果/取消、停止按钮进行中状态与看门狗单飞取消、abort 先确认后同步历史的回归覆盖。
+  - verification: npm run typecheck 通过（protocol / omp-worker / tui / relay 构建及 server / admin / app 类型检查）；本机受限环境无法执行完整 npm run validate（测试子进程被沙箱拒绝 spawn），lint、后端测试、前端全量测试与生产构建以 CI 与发布工作流结果为准。
+  - chore: 根包、全部 workspace、互依赖、npm 锁文件及 Tauri/Cargo 统一为 0.6.34；官方 OMP 会话目录与格式不变。
+ReleaseNotesUrl: https://github.com/chenming0v0/OMPiUI/releases/tag/v0.6.34
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
