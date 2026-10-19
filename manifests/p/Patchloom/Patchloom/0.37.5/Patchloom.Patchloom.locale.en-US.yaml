@@ -1,0 +1,65 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Patchloom.Patchloom
+PackageVersion: 0.37.5
+PackageLocale: en-US
+Publisher: Patchloom
+PublisherUrl: https://github.com/patchloom
+PublisherSupportUrl: https://github.com/patchloom/patchloom/issues
+Author: Patchloom
+PackageName: Patchloom
+PackageUrl: https://github.com/patchloom/patchloom
+License: MIT
+LicenseUrl: https://github.com/patchloom/patchloom/blob/HEAD/LICENSE
+Copyright: Copyright (c) Patchloom contributors
+ShortDescription: Structured file editing CLI for AI agents
+Description: |-
+  Patchloom is a single-binary CLI that gives AI coding agents safe, structured
+  file editing: search and replace, unified diffs, parser-backed JSON/YAML/TOML
+  document ops, markdown section editing, AST-aware renames, multi-file
+  transactions, undo, and an MCP server for tool calls.
+Moniker: patchloom
+Tags:
+- ai
+- cli
+- developer-tools
+- mcp
+- rust
+ReleaseNotes: |-
+  Patchloom 0.37.5
+  MCP results use the path you passed. A regex replacement that names a group the pattern does not have is refused, and the file stays unchanged.
+  Highlights
+  undo_restore without apply still only previews. The hint tells you to set apply to true. tidy_check and write errors use that same relative path, including under /tmp on macOS.
+  A --regex replacement such as $9 is refused when the pattern has no group 9. The file is left as it was. A normal replace, without --regex, still writes the characters $9.
+  Bug fixes
+  - replace --regex with $9 turned xa into x when the pattern was (a). That group is not in the pattern, so the edit is invalid_input and nothing is written. $1 still inserts the capture. Without --regex, replacing a with $9 still writes $9 (#2695).
+  - MCP undo_restore preview said to pass --apply. The field is apply. The preview still does not restore files. The hint now says to set apply to true (#2697).
+  - MCP tidy_check returned an absolute path for note.txt. On macOS that path followed /tmp to /private/tmp. Issue paths are relative to the workspace, including when the workspace itself is a symlink (#2699).
+  - MCP write errors named a long absolute path. Replacing text in a binary file, or tidying a batch that includes a missing file, now names blob.bin or missing.txt. Neither call writes (#2701).
+  - A SEARCH/REPLACE block that matched twice said to set unique: false. apply_patch does not accept unique. The error now says replace_all: true. Until you set that, the file is unchanged. With it, every exact match is updated (#2703).
+  - A rejected Smithery upload did not show the server's reply. The HTTP body is printed with the failure (#2693).
+  Numbers
+  ───────┬─────────────────────────────────────────────
+  Metric │Notes
+  ───────┼─────────────────────────────────────────────
+  Version│0.37.4 -> 0.37.5
+  ───────┼─────────────────────────────────────────────
+  Focus  │MCP paths and hints, regex replacement groups
+  ───────┴─────────────────────────────────────────────
+  Upgrading
+  - Call undo_restore with apply set to true to restore. A preview no longer says to pass --apply.
+  - Paths in tidy_check issues and in MCP write errors are relative to the workspace.
+  - replace --regex fails when the replacement uses a group the pattern does not contain. Drop --regex when $9 should be written as text.
+  - For a SEARCH/REPLACE block with several matches, set replace_all to true on apply_patch.
+  - Install from crates.io, npm, Homebrew, or Scoop after the tag ships. On Windows, Scoop is recommended. winget may need winget source update after Microsoft publishes. Chocolatey can lag while moderation runs.
+  Full changelog
+  patchloom-v0.37.4...patchloom-v0.37.5
+ReleaseNotesUrl: https://github.com/patchloom/patchloom/releases/tag/patchloom-v0.37.5
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://patchloom.github.io/patchloom/
+- DocumentLabel: Installation
+  DocumentUrl: https://github.com/patchloom/patchloom/blob/main/docs/getting-started/installation.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
