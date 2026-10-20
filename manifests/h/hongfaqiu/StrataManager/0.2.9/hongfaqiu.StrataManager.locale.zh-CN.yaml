@@ -1,0 +1,25 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: hongfaqiu.StrataManager
+PackageVersion: 0.2.9
+PackageLocale: zh-CN
+ShortDescription: 面向 Strata 本地推理的桌面工作台。
+Description: Strata Manager 是一款面向 Niko1221/Strata 本地大模型推理引擎的开源桌面管理工具，将运行环境准备、模型配置、服务控制、聊天、监控、调优与基准测试整合到同一工作台，降低使用门槛。已下载的模型权重不会被改动。
+Tags:
+- 人工智能
+- 大模型
+- 大语言模型
+- 本地大模型
+ReleaseNotes: |-
+  - Linux 官方预编译引擎：Linux x86_64（桌面版与无头 Server）现在也能从签名 feed 安装和更新官方引擎包：CUDA 13、CUDA 12、AMD HIP RX 9000 / R9700、AMD HIP RX 7000、AMD HIP Strix Halo。校验与 Windows 完全相同：feed Ed25519 签名、渠道、有效期和序号，整包 SHA256，安全解包，再按包内签名清单 engine-component.json 逐个核对文件。「自动匹配」会先看已安装引擎的 BUILD.json（兼容 Linux 包没有 backend、只有 variant 如 halo 的写法），没有引擎时按检测到的显卡选包：NVIDIA 读取驱动版本和计算能力（nvidia-smi，退而读 /proc/driver/nvidia/version），优先 CUDA 13，驱动低于 feed 要求时改选 CUDA 12 或提示升级驱动；AMD 读取 gfx 架构（KFD 拓扑，退而用 rocminfo）。同时检测到 NVIDIA 与 AMD、未检测到显卡或有多个包都合适时，不猜测，提示在「官方更新包」中手动选择，并在界面上显示匹配理由。解包后保留可执行权限；Linux 的 .venv 缺少新版依赖时会自动补装。源码安装方式不变；首次安装仍走源码方式，之后的版本更新使用官方预编译引擎。
+  - 试启动与自动回滚：安装或更新引擎后，先用新引擎试启动（strata --version，加载包内库目录），再重启服务并做健康检查；任一步未通过都会自动恢复原来的引擎和程序文件，模型和配置不受影响，并重启原服务。原版本在试启动通过前一直保留。Strata 页面会显示「新引擎试启动未通过，已自动回滚」、恢复到的版本和具体原因；更新确认窗口会提前说明这一机制。
+  - 概览：模型名称统一、加载时不再满屏报错（小红书用户反馈，2× RTX 2080 Ti）：
+    - 上方启动卡和下方运行卡现在都显示你选中的模型名。配置里的 model_name（客户端调用 API 时填写的名称）作为「API 模型名」小字显示在旁边。以前下方大标题用的是 model_name，看起来像启动了另一个模型。
+    - 修复启动日志里混进上一次运行记录的问题。上游以追加方式写引擎日志，Manager 之前会把文件末尾的旧内容（上次的请求统计，如 missed experts skipped、prompt … tokens）当成本次启动输出显示。现在只显示本次启动之后写入的内容。
+    - 冷启动期间，接口还没打开或引擎忙时偶尔失败的轮询不再显示成红色报错：启动进行中、进程启动后 2 分钟内、以及 /health 报告模型仍在加载时，状态和指标的连接失败会被隐藏；超过这段时间仍然失败才提示。
+    - 启动卡里的「引擎输出」默认收起，只在标题行显示最新一行；展开后注明这是加载进度和统计，不是报错。真正的错误行（Traceback、…Error:、显存不足、fatal 等）标红，并自动展开。
+    - 运行卡新增「启动参数」按钮，直接打开当前模型的启动参数页（上下文长度、显卡分配、完整引擎参数列表、完整 JSON 编辑，保存前自动备份，可「保存并重启当前模型」）。
+  - Strata 引擎下载与更新进度改为易读格式：以前进度显示原始字节数（如 1320702444 / 2254857830 字节），现在显示为 下载进度：1.23 GiB / 2.10 GiB（58%）· 12.4 MiB/s，带百分比和下载速度。断点续传、重试、SHA256 校验通过、本地引擎包读取、官方同版本源码下载等提示也都改用 KiB / MiB / GiB。更新弹窗「包信息」里的精确字节数保持不变。
+ManifestType: locale
+ManifestVersion: 1.12.0
