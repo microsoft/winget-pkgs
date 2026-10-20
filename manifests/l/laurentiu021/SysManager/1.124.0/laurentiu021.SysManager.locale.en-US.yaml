@@ -1,0 +1,102 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.124.0
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.124.0] - 2026-10-08
+  After you uninstall an app, the Uninstaller now shows what it left behind and lets you remove it. Only the folder
+  the app was installed in arrives ticked; everything else is labelled as a guess, folders go to the Recycle Bin, and a
+  registry key is saved to a file before it is deleted (#1527).
+  Added
+  - Uninstaller shows a Left behind card after a run that removed an app. It lists the folder the app was
+    installed in, read before the uninstaller runs because some uninstallers delete the entry that names it first;
+    folders named exactly after the app directly in AppData, Local AppData and ProgramData; the app's own key,
+    HKEY_CURRENT_USER\Software\<Publisher>\<App>; and a folder named after the publisher in AppData or Local AppData
+    when no other installed app has that publisher. Each says why it is listed and how sure SysManager is — Certain,
+    Probably, Its own key or Guess — and only Certain starts ticked.
+  - Nothing is offered from inside Windows; Program Files, ProgramData, the profile and the AppData folders themselves;
+    Documents, Desktop, Downloads, Pictures, Music and Videos and everything in them; SysManager's own folders; a folder
+    that is a link, holds one or is reached through one; a folder any installed app still uses, judged against every
+    uninstall entry Windows holds, including the drivers and runtimes the list does not show; or anything not on one of
+    this PC's own fixed drives. What was found in those places is listed with the reason it is left alone.
+  - Remove ticked… lists exactly what goes and asks first. Folders go to the Recycle Bin. A registry key is exported
+    with reg export to %LocalAppData%\SysManager\Backups\Uninstaller, the newest three per key kept, and deleted only
+    once that file exists; double-click the file to put the key back. Every folder is checked against the same rules
+    again just before it goes, so one that became a link, or gained one, since the search is refused.
+  - Uninstalling runs without administrator rights, so a leftover under Program Files or ProgramData cannot be removed
+    in the same session. It shows an Administrator label and is kept in
+    %LocalAppData%\SysManager\uninstaller-leftovers.json; the next time Uninstaller is opened with SysManager running
+    as administrator, the card offers it again, once it has checked that the folder is still there, that no app Windows
+    lists as installed uses it or answers to its name, and that the app itself has not been installed again. Nothing on
+    that list arrives ticked, because the file it comes from is one anything running as you could have changed.
+  Changed
+  - Shortcut Cleaner and the Uninstaller's leftovers share one "send to the Recycle Bin" call, and it now asks
+    Windows to warn before deleting anything for good. Since Shortcut Cleaner arrived in 0.32.0, a shortcut the Recycle
+    Bin could not take, such as one on a drive whose bin is turned off, could be deleted permanently without a warning
+    while the tab said it had been moved to the Recycle Bin.
+  - SECURITY.md no longer says the app never touches the registry for cleanup. It says the app never cleans the
+    registry, and names the one key SysManager removes that it did not create: an uninstalled app's own key, when you
+    tick it, after saving it as a .reg file.
+  Verify the download
+  Get-FileHash .\SysManager-v1.124.0.exe -Algorithm SHA256
+  Expected SHA256: DF44C2FAB33341EB685596758D256C5B4CEE97DC06814CFA5259940BB9A11C3B
+  This build is not code-signed, so Windows will warn on first launch. That is
+  expected for a small independent app: see what the warning says and what to
+  click.
+  Code signing is planned through the SignPath Foundation,
+  which provides free certificates to open-source projects, with signing performed by
+  SignPath.io. Until then, the SHA256 above and the build
+  attestation below are what establish that a download is the genuine build.
+  Code signing policy
+  This release is not code-signed. The team roles, release-approval process and
+  privacy policy required by the SignPath Foundation programme
+  are documented in advance under Code signing
+  policy. That
+  documentation is a prerequisite for applying, not evidence of a certificate. The
+  attribution line naming SignPath as the signing provider will appear here once a
+  certificate is actually issued.
+  This program will not transfer any information to other networked systems unless
+  specifically requested by the user or the person installing or operating it. Full
+  privacy policy.
+  Verify where this binary came from
+  This exe was built by GitHub Actions from this public source, and the build is
+  recorded in the Sigstore public transparency log. With the
+  GitHub CLI:
+  gh attestation verify .\SysManager-v1.124.0.exe --repo laurentiu021/SystemManager
+  That proves which commit and workflow produced this exact binary, something the
+  SHA256 file cannot show, since it is published alongside the exe it describes.
+  Each release also ships SysManager-v1.124.0.sbom.json, a CycloneDX inventory of
+  every dependency resolved for this build.
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.124.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,93 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: docmirror.dev-sidecar
+PackageVersion: 2.3.0
+PackageLocale: zh-CN
+Publisher: Greper
+PublisherUrl: https://github.com/docmirror
+PublisherSupportUrl: https://github.com/docmirror/dev-sidecar/issues
+PackageName: dev-sidecar
+PackageUrl: https://github.com/docmirror/dev-sidecar
+License: MPL-2.0
+LicenseUrl: https://github.com/docmirror/dev-sidecar/blob/HEAD/LICENSE
+Copyright: Copyright © 2020-2026 Greper, WangLiang
+ShortDescription: 开发者边车，命名取自 service-mesh 的 service-sidecar，意为为开发者打辅助的边车工具，通过本地代理的方式将 HTTPS 请求代理到一些国内的加速通道上
+Tags:
+- 代理
+- 网络
+ReleaseNotes: |-
+  一、更新内容：
+  【新特性】
+  内核 / 代理
+  - 新增了 ECH（Encrypted Client Hello）加密 SNI 支持：对指定域名启用 ECH（基于 DNS HTTPS/SVCB 记录 + HPKE + 自实现 TLS 1.3 客户端），失败自动回退原生 TLS。默认关闭，可在配置中按域名开启。
+  - 新增了请求自动重试：上游返回 500 或连接失败时自动重试（支持缓存小请求体）。
+  - 新增了按域名设置 TLS 版本（tlsVersionMapping）。
+  - 新增了默认启用 TLS 1.3（可切换允许 TLS 1.2）。
+  - 新增了 Cloudflare 路由增强：新增黑名单 / 白名单模式与域名名单；预设 IP 优先级最高、不参与重定向。
+  - 新增了证书校验增强（verifyHost）：拦截规则可显式声明用哪个域名校验证书。
+  - 增强了 IPv6 支持；预设 IP 支持 CNAME。
+  - 增强了 DNS：测速失败后自动从存活列表移除该 IP。
+  界面
+  - 新增「日志与流量」页（流量监控）。
+  - 新增「GitHub 状态监控」页。
+  - 加速服务页：新增 TLS 版本设置 UI。
+  - Cloudflare 路由：新增 模式（黑/白名单）与域名名单 UI。
+  - 设置页：新增「完全禁用日志」开关。
+  【优化】
+  - 启动提速：大幅提升了启动时首页开关的打开速度
+  - 系统代理：优化开关与恢复逻辑；修复了 Windows 上代理格式不适应部分软件的问题（#578）。
+  - 日志：支持完全关闭（控制台与日志文件都不写）。
+  - 单实例：实现了 CLI / GUI 互斥运行。
+  - 内核代码迁移到独立子模块并扁平化（core/ + mitmproxy/），便于维护。
+  【问题修复】
+  系统代理
+  - 修复了无法启用系统代理 / 开启时报 system call failed 的问题（Windows）（#694、#678）
+  - 修复了打包后 sysproxy.exe 找不到（ENOENT）的问题
+  证书
+  - 修复了 Linux（Arch 等）安装 / 检测根证书使用了错误的命令或无权限的问题（#690、#689、#542）
+  界面 / 窗口
+  - 修复了启动后窗口变灰、出现遮罩层导致无法点击的问题（#648 #656 #658 #705、#696）
+  - 修复了恢复出厂设置后软件变灰卡死的问题（#706）
+  - 修复了 Gnome 任务栏图标异常的问题（#576）
+  - 修复了 Linux 下托盘图标右键菜单无法展开的问题（#716）
+  AI 网页 / 流式
+  - 修复了 Gemini 回答只输出一半、流式中断的问题（#665、#671）
+  视频 / 网站
+  - 修复了 YouTube 视频一直转圈（googlevideo ECONNRESET）的问题（#704）
+  - 修复了 Steam 访问报 EPROTO（TLS alert）的问题（#700 #702）
+  - 修复了 Google 页面部分部件渲染异常（gstatic 图标等）的问题（#625）
+  加速 / 插件 / 测速
+  - 修复了增强模式开关状态不同步的问题（#664）
+  系统 / 平台兼容
+  - 修复了 Linux 设置 https_proxy 环境变量的问题（#718）
+  - 修复了 Ds 与 Android 模拟器（AVD）兼容性的问题（#559）
+  - 修复了检查更新失败的问题（#683）
+  其他
+  - 修复了首次运行「网络检测」报错的问题（#546）
+  - 修复了设置页「恢复默认」后远程配置被忽略的问题
+  - 迁移了官方远程配置地址，现在会自动纠正过时的官方远程配置地址
+  - 错误页 CORS 不再反射 Origin 并携带凭据（安全加固）
+  - 内置配置在构建时自动同步官方远程配置。
+  二、安装前请仔细阅读安装说明
+  各平台安装说明
+  三、贡献者列表
+  非常感谢以下朋友们的贡献。
+  - @cute-omega
+  - @8odream
+  - @OctoBored
+  四、Full Changelog
+  What's Changed
+  - feat: default TLS1.3 only with optional TLS1.2 switch and bump to 2.2.1 by @cute-omega with @Copilot in https://github.com/docmirror/dev-sidecar/pull/670
+  - Revise mirror website section in README by @zhaobokai341 in https://github.com/docmirror/dev-sidecar/pull/676
+  - fix: 修复 README 中损坏的 star history 图表 by @OctoBored in https://github.com/docmirror/dev-sidecar/pull/685
+  - 大量更新内容 by @8odream in https://github.com/docmirror/dev-sidecar/pull/693
+  - fix: 落实 PR #693 review 意见 by @cute-omega in https://github.com/docmirror/dev-sidecar/pull/707
+  New Contributors
+  - @OctoBored made their first contribution in https://github.com/docmirror/dev-sidecar/pull/685
+  Full Changelog: https://github.com/docmirror/dev-sidecar/compare/v2.2.0...v2.3.0
+  五、里程碑：
+  点击 2.3.0 Milestone 查看该版本合并的 PR 和关闭的 Issue。
+ReleaseNotesUrl: https://github.com/docmirror/dev-sidecar/releases/tag/v2.3.0
+ManifestType: locale
+ManifestVersion: 1.12.0
