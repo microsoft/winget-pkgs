@@ -1,0 +1,180 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: rullerzhou-afk.clawd-on-desk
+PackageVersion: 1.4.0
+PackageLocale: en-US
+Publisher: rullerzhou-afk
+PublisherUrl: https://github.com/rullerzhou-afk
+PublisherSupportUrl: https://github.com/rullerzhou-afk/clawd-on-desk/issues
+PackageName: Clawd on Desk
+PackageUrl: https://github.com/rullerzhou-afk/clawd-on-desk
+License: AGPL-3.0-only
+LicenseUrl: https://github.com/rullerzhou-afk/clawd-on-desk/blob/v1.4.0/LICENSE
+Copyright: Copyright (c) 2026 rullerzhou-afk
+ShortDescription: A pixel desktop pet that watches Claude Code, Codex, Cursor & other AI coding agents — so you don't have to.
+Description: |-
+  Clawd on Desk is an open-source desktop pet that shows the activity of AI coding agents, including Claude Code, Codex, Cursor, and others. It reacts to working, permission requests, and task completion with animations and supports multiple concurrent sessions.
+
+  It includes Clawd, Calico, and Cloudling themes, custom themes, a sessions dashboard, optional permission bubbles, and a local activity recap.
+Tags:
+  - claude-code
+  - codebuddy
+  - codex
+  - copilot-cli
+  - cursor
+  - desktop-pet
+  - gemini-cli
+  - kiro
+  - opencode
+ReleaseNotes: |-
+  v1.4.0
+  Clawd v1.4.0 reorganizes Settings into five focused tabs, reduces idle CPU use
+  with sleep-aware rendering, and adds KiroCrew and Qoder CN integrations. It also
+  adds opt-in external permission review, read-only phone approval summaries,
+  local OpenCode/MiMo question answers, and herdr pane focus.
+  Settings
+  - Five-tab Settings redesign (#1218, #1220, #1179; related #969) — splits
+    General into General, Pet, Notifications, Sessions, and Permissions & approval;
+    moves Remote approval into the Permissions & approval tab with On this machine,
+    IM channels, and LAN approval sub-pages; preserves existing values and routes
+    old Remote approval navigation to IM channels. Quota reminders now link into
+    Sessions. Thanks to @YOIMIYA66.
+  Power and animation
+  - Sleep when unattended (#1206; issue #1202) — lets the pet roam briefly
+    after you leave and then sleep, while the falling and sleeping poses stop
+    consuming animation work. On Windows, the whole Electron tree averaged about
+    0.6% of one core in the one-hour post-fix measurement; the same-configuration
+    v1.3.0 baseline averaged about 23% over its 15-minute control run. Thanks to
+    @trvny for the report.
+  - Deep sleep pauses by default (#1212) — collapsing and sleeping pause even
+    when the optional low-power switch is off. The paused segment measured about
+    0.3% on macOS and 0.13% on Windows at 175 Hz, compared with about 5–6% and
+    22% before. These are whole-tree, single-core CPU percentages from the Clawd
+    theme; the macOS measurements used a 50 Hz display.
+  - Object-channel rendering and 24-step sampling (#1210, #1213, #1214;
+    test coverage #1216) — moves Clawd's thinking, long-lived, typing, and building
+    visuals through the Electron-verified <object> path and a 24-step sampling
+    grid without changing their appearance. On macOS, CPU fell about 57–73% for
+    active visuals and about 30% for idle visuals; on Windows at 175 Hz, idle fell
+    about 55% and active visuals were flat to about 24% lower. The same work
+    keeps long Windows theme configuration out of the renderer command line.
+  - Theme-specific sleep behavior (#1210, #1212, #1213, #1214) — Cloudling
+    switches to a static image on sleep; Calico and the official Hash Sage and
+    Whale-chan themes keep playing; third-party object-channel sleep visuals freeze
+    after roughly five seconds. These optimizations are enabled by default for
+    Clawd; external themes can opt in through rendering.objectChannelFiles /
+    rendering.svgChannel and rendering.discreteSampling in their rendering
+    declarations.
+  Permissions and approval
+  - Optional external review command (#1215; issue #995; follow-up #1223) —
+    runs a user-configured argv command before an automatic allow. Exit 0 keeps the
+    allow; every other outcome, including timeout, missing command, concurrency or
+    payload limits, stops automatic allow: it normally leaves the request to the
+    human card, while Codex Auto's claimed WSL/remote Bash/apply_patch requests
+    return to Codex's native approval. It cannot approve an ask, deny a request,
+    rewrite input, or grant session trust. The feature is off by default and
+    command-only: edit permissionReviewCommand and permissionReviewTimeoutMs
+    in prefs after quitting Clawd. DND, disabling the agent, disabling that
+    agent's approval takeover, or quitting Clawd returns an in-flight request to
+    native flow; turning off only the global local bubble does not when a
+    Telegram/Feishu remote-only channel remains available. Thanks to @hanzhe-one.
+  - Codex Auto for WSL and Remote Bash/apply_patch (#1188; issue #1186) —
+    Clawd answers a request immediately when its global automation would already
+    allow it; requests that still need a person remain in Codex, and Auto does not
+    show a blocking Clawd bubble for these non-local requests. Because Clawd cannot
+    read a remote transcript, this exception overrides Codex's automatic reviewer.
+    Thanks to @V1staz for the report.
+  - Local OpenCode and MiMo v1 questions (#1163, #1177; issue #757) — for
+    OpenCode 1.18.31+ in the 1.x line and MiMo 0.1.15+ in the 0.1.x line, local
+    question bubbles can return ordered answers to the native client. DND, a
+    closed or disconnected bubble, Clawd shutdown, remote sessions, child sessions,
+    and OpenCode 2.x leave the question in the native UI. They are never answered
+    by permission automation. Thanks to @200780381.
+  - Read-only phone approval summaries (#1181; based on #893) — adds a
+    default-off LAN preview that requires separate consent for permission summaries.
+    The phone can view but never Allow or Deny; reset-and-enable is the recommended
+    pairing action. The preview uses plain WebSocket transport, so do not expose it
+    to an untrusted network. The #893 real-phone checklist was not rerun on the
+    merge branch. Thanks to @Bynlk for the original implementation.
+  Agent integrations
+  - KiroCrew gateway hooks (#1145; issue #1095; follow-up #1223) — adds a
+    default-off, state-only adapter for AgentSpawn, UserPromptSubmit, PostToolUse,
+    and Stop in ~/.kiro/crew/hooks.json. Install and uninstall require the gateway
+    to be stopped, then the gateway must be restarted; permission bubbles and
+    subagent rows are not added. A hook disabled by KiroCrew remains disabled during
+    startup sync until Install or Doctor Repair explicitly reopens it. Thanks to
+    @zero-or-one.
+  - Qoder CN (#1219) — shares the Qoder agent entry while handling
+    ~/.qoder/settings.json and ~/.qoder-cn/settings.json independently. Clawd
+    does not create a directory for an edition that is not installed. Qoder CN
+    state hooks were tested on Windows with worker runtime 1.1.69; CN on macOS and
+    Linux was not tested. Thanks to @quantai1314.
+  - Product-owned installation detection (#1203) — recognizes Qoder, ZCode,
+    and CodeBuddy installations even when their existing config contains only an
+    empty settings object, without writing integration files automatically. Thanks
+    to @200780381.
+  - OpenCode 2.x registration (#1182, #1187) — a confirmed v2 host receives
+    Clawd's entry under plugins and Clawd-owned legacy entries are removed from
+    plugin; user entries and options remain untouched. v1 hosts and unknown host
+    detection keep their previous behavior. Restart opencode service after an
+    update so the shared service loads the new plugin. Thanks to @gzx19990101.
+  Codex and focus
+  - Windows Codex Desktop side chats (#1166; related #1073) — retains the
+    Desktop app-server process information after the hook wrapper exits, making
+    focus from the second message onward more reliable. The first message of an
+    ordinary conversation can still lack a PID. Thanks to @200780381.
+  - Late SessionStart handling (#1176) — a local rollout that is already
+    working is not reset to idle when its official SessionStart arrives late. Thanks
+    to @200780381.
+  - herdr pane focus (#1164; related #1139) — clicking a HUD or Dashboard
+    session first raises the host terminal and then selects the matching herdr
+    pane. This requires a herdr server at 0.9.1 or newer; restart the herdr
+    server after upgrading it. The scope is local hook sessions that carry pane
+    information; hook-less OpenCode, Pi, and Hermes sessions, plus remote and WSL
+    sessions, are outside this release's scope. Ghostty was tested by the
+    reporter; other terminals remain unverified. See the herdr rows in known limitations.
+    Thanks to @junoseo4work-creator for the report.
+  Themes
+  - Stable random visual pools (#1170) — thinking, working, juggling,
+    and tier entries may list multiple files; the selected file stays stable within
+    a state and rerolls only when the state, tier, theme, or candidate list changes.
+    Older Clawd versions still need the file field. Thanks to @integrasoft-c.
+  - Safer SVG processing-instruction handling (#1178; follow-up #1223) —
+    preserves a valid XML declaration, removes other processing instructions such
+    as external stylesheet references, and re-cleans cached themes after upgrade.
+  Platform
+  - Linux all-workspace pet (#980; issue #979) — keeps the pet visible across
+    X11/XWayland workspaces while adding an ICCCM input hint so the render window
+    does not steal the editor's keyboard focus. Thanks to @yunho09.
+  - Linux X11 allocator failure (#1222; PR #1205) — fixes a crash when an
+    X server rejects a write after a window has already closed. Thanks to @Aminorsh
+    for the report.
+  - WinGet upgrade metadata (#1173) — restores the missing upgrade parameters
+    in the release manifest maintenance path.
+  Documentation and maintenance
+  - README landing pages and contribution guidance (#1192, #1180, #1208,
+    #1209) — keeps six localized READMEs concise, moves agent and feature details
+    into their guide families, adds bilingual contribution guidance, and aligns the
+    Chinese documentation. The contributor artwork is generated from the Settings
+    contributor lists. Thanks to @tianxingjian2406.
+  Upgrade Notes
+  - Settings moved into five tabs. Existing values are preserved; Remote approval
+    is now under Permissions & approval → IM channels.
+  - When you are away, the pet sleeps; deep sleep pauses by default. Cloudling
+    changes to a static sleeping image, while Calico and the official Hash Sage
+    and Whale-chan themes keep playing their sleep poses.
+  - After updating, run opencode service restart for a confirmed OpenCode 2.x
+    host; for OpenCode 1.x and MiMo, restart the running process. Clawd writes
+    plugins for v2 and removes its own old plugin entries; do not add a
+    legacy plugin entry by hand.
+  - With Codex Auto and global automation enabled, Clawd answers remote/WSL
+    Bash/apply_patch requests that would be immediately allowed globally, even
+    over Codex's automatic reviewer. To leave those WSL/remote requests to
+    Codex's automatic reviewer, turn off Clawd's global automatic allow. Requests
+    needing a person remain in Codex.
+  - KiroCrew is not installed by default. Stop its gateway before Install or
+    Uninstall, then restart the gateway.
+ReleaseNotesUrl: https://github.com/rullerzhou-afk/clawd-on-desk/releases/tag/v1.4.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
