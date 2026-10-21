@@ -1,0 +1,91 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Pimalaya.Himalaya
+PackageVersion: 2.2.1
+PackageLocale: en-US
+Publisher: Pimalaya
+PublisherUrl: https://pimalaya.org/
+PublisherSupportUrl: https://github.com/pimalaya/himalaya/issues
+Author: Clément DOUIN
+PackageName: Himalaya
+PackageUrl: https://github.com/pimalaya/himalaya
+License: Apache-2.0 or MIT
+LicenseUrl: https://github.com/pimalaya/himalaya/blob/master/README.md#license
+Copyright: Copyright (c) 2022-2026 soywod <pimalaya.org@posteo.net>
+ShortDescription: CLI to manage emails
+Moniker: himalaya
+Tags:
+- cli
+- client
+- email
+- gpg
+- himalaya
+- imap
+- notmuch
+- pgp
+- pimalaya
+- rust
+- sendmail
+- smtp
+- terminal
+ReleaseNotes: |-
+  Added
+  - Added message.send.save-copy, the mailbox a sent message is copied to when --save is not passed, and --no-save on message send, compose, reply and forward to skip it.
+    It takes a mailbox name, alias or role, and the v1 true still reads as the sent mailbox. Leave it unset on Gmail and Microsoft Graph, which file the sent message themselves.
+  - Added envelope.list.datetime-relative, rendering recent dates relative to today: the time for today, yesterday, then the weekday for the past week, older dates falling back to datetime-fmt ([#510]).
+  - Added proxy, a per-account SOCKS5 or HTTP proxy every network backend connects through, and <backend>.proxy to override it for one backend ([#742]).
+    The password is a secret like any credential, so it stays out of the URL. Without either, the all_proxy and https_proxy environment variables are still read.
+  - Added --posting-style none to message reply and message forward, sending the written body without quoting the source.
+  - Added a decoded template to message compose, message reply and message forward under --json when neither saving nor sending.
+    It carries from, to, cc, bcc, subject and a body without the signature, so an editor can lay the message out and hand it back through the flags.
+  - Added messages-added-details to gmail history list --json, preserving each arrival's message id, optional thread id and supplied label ids alongside the existing message-id arrays.
+  - Added message add on Gmail, inserting the raw message through messages.insert with the mailbox and flags as labels, dated by its Date: header.
+  - Added envelope search on Microsoft Graph, its filter translated to a KQL $search. Flag clauses are refused, Graph accepting no $filter beside $search, and the sort applies within the page.
+  - A pimdir write now shows on the next read instead of on the next sync.
+    A pimdir store is a replica the sync engine owns, so Himalaya appends its writes to the store's queue rather than apply them. A read used to project the committed index alone, so flagging a message lost the flag from the listing until Neverest ran.
+    Reads now overlay the pending queue, so a staged flag, edit, deletion, move or copy shows straight away. All of them address a message that already exists and keeps its public id, so nothing changed about how a message is addressed.
+    A staged creation has no id until the sync engine applies it, so it can be no envelope and does not list. envelope list reports how many the mailbox has and where to see them, and envelope search reports none, a queued message never having been matched against the query.
+  - himalaya pimdir queue list and himalaya pimdir queue cancel, for the staged creations the mailbox listing cannot show.
+    The pimdir binary is kind-agnostic and prints ids, hashes and flags. Himalaya holds the mail conventions and the blobs, so it renders a queued message with its flags, subject, recipient and the moment it was queued.
+    cancel retracts one by the row id that view prints, which is the only way back for a message that does not exist yet: a staged flag or move is undone by doing the opposite.
+    Cancelling is the store owner's write, so it takes that role for the length of the call and reports a sync in flight rather than wait on it.
+  - Added sending from a pimdir account: the message is queued in the store for its owner to send, the one holding the credentials.
+    The row is filed under the --save mailbox, else under mailbox.alias.sent, and shows in pimdir queue list. The command prints its row id, queueId under --json, which pimdir queue cancel takes and the owner reports against.
+  - Added ManageSieve support behind the sieve cargo feature, on by default ([#739]).
+    An account gains an optional [sieve] block, and himalaya sieve exposes capability, list, get, put, check, activate, deactivate, rename, delete and raw.
+    The protocol lives in the new io-managesieve library, so every SASL mechanism the other backends accept works here too, and a password or a bearer token is refused over an unencrypted connection unless sieve.allow-cleartext-auth says otherwise.
+    A bare sieve.server authority takes sieve:// with STARTTLS on, where the imap and smtp ones take their implicit-TLS scheme: RFC 5804 registers one port, 4190, and reaches TLS on it through STARTTLS.
+    sieves:// is accepted for the deployments listening for a handshake straight away, and unix:// for a local pre-authenticated proxy.
+  - Added the mailbox role (inbox, sent, drafts, trash...) to mailbox list, as a ROLE column and a role JSON field, with the mailbox.list.table.role-color option. [#743]
+    JMAP reads the mailbox roles, Gmail its system labels and Graph its well-known folders, resolved in one $batch request. IMAP marks the inbox alone until SPECIAL-USE is read, and Maildir, m2dir and pimdir mark none. A mailbox.alias.<role> entry overrides the role the backend reports.
+  - Added imap fetch --body, fetching the whole message of every UID in the sequence set over one session (BODY.PEEK[], \Seen left unset) ([#762]).
+    Downloading a mailbox took one message read per message, so one login per message, which some providers cut off after a dozen in a row. The JSON body field carries the octets as standard Base64, declared as such in the JSON Schema; the plain output prints the size only.
+  - Added the mbox backend, behind the mbox cargo feature (off by default), over the new io-mbox library ([#697]).
+    An mbox block points at a directory of mbox files and, optionally, at the spool ($MAIL) shown as INBOX. The shared commands read and write it, and himalaya mbox exposes the raw file operations. Any mbox file also opens by passing its absolute path as the mailbox. Writes lock the file the way MTAs and MUAs do, flags live in the Status and X-Status headers mutt and Dovecot use, and an index kept under the XDG cache directory makes a listing read only what changed.
+  Changed
+  - Saving and sending at once (--save with --send, message send --save, message add --send) now sends first, so a failed send leaves no copy behind. A save failing after the send reports that the message was sent.
+  - A pimdir account sends through the store's queue and no longer uses its smtp section. Behaviour change.
+  - -m/--mailbox resolves a role after the aliases, so -m sent reaches the sent mailbox without an alias. A role carried by several mailboxes is an error naming them.
+  - An omitted -m/--mailbox falls back to the inbox role when no inbox alias is set, instead of failing.
+  - message delete takes the trash from mailbox.alias.trash first, then from the backend. Behaviour change: an alias set on JMAP, Gmail or Graph used to be ignored.
+  - The wizard no longer pre-fills mailbox.alias.*, the backends reporting their roles themselves.
+  - Changed Gmail draft create/update JSON output to structured draft, message and thread IDs, with schemas for both commands. Text confirmations are unchanged.
+  - Changed the default --format of gmail messages get, gmail drafts get and gmail threads get from full to metadata.
+    None of them prints more than metadata returns (id, labels, snippet, headers), so their output is unchanged, and Gmail no longer sends bodies that were thrown away. Pass --format full to get a thread's MIME payloads.
+  - Forwarded vendored to io-pimdir and turned it on by default, so cargo install builds SQLite from source and needs none on the machine. Drop it to link the system SQLite and save about 1 MB; it also vendors OpenSSL when native-tls is on. The Nix builds still link the store's SQLite.
+  - BREAKING: a pimdir store written before io-pimdir 0.4 is refused, and Himalaya reads the store's typed summaries.
+    io-replica is retired, its sync engine folded into io-pimdir, and the store format moved with it: summaries are typed rows rather than a JSON meta column, and a store from the earlier draft is refused on open, saying to delete it and let Neverest resync. There is no migration, the draft offering none.
+    An envelope now carries every From and To address with its display name, the In-Reply-To list and whether the message holds an attachment, straight from the store, and envelope list follows the store's newest-first order. A queued creation is rendered from the body it pins, the queued action carrying no summary any more.
+  - A credential command that several blocks of one account name is now spawned once per run instead of once per block.
+    account check and the wizard connection tests open IMAP, SMTP and ManageSieve in a row, each block resolving its own credential, so a pass or gpg entry was unlocked as many times as it was named. They now share one resolver, so it unlocks once.
+    Two commands count as one only where the configuration wrote them identically: a shell line and the argv spelling of it stay distinct. A run reaching a single backend is unchanged.
+  - BREAKING: a pimdir mailbox is now its collection id, verbatim, and pimdir.namespace is removed.
+    -m imap/INBOX is what -m INBOX used to be, and a listing shows imap/INBOX in both columns.
+    The sync engine binds a source's collections under a namespace, and Himalaya used to strip it back off, so one mailbox answered to two spellings. The store cannot be asked where that prefix ends: a collection id is opaque to it and hierarchy is a parent link rather than a separator.
+    The stripping was therefore a guess at the sync engine's convention, needing a config key wherever it could not decide. The id is now the only spelling, as it already is for JMAP's opaque ids, and mailbox.alias.inbox = "imap/INBOX" is how you stop typing it.
+  - Renamed the plural commands that name no vendor resource to their singular, the plural staying as a hidden alias.
+    imap flags, maildir messages, maildir flags, m2dir messages and m2dir flags become imap flag, maildir message, maildir flag, m2dir message and m2dir flag. Every old spelling keeps working, hidden from --help.
+ReleaseNotesUrl: https://github.com/pimalaya/himalaya/releases/tag/v2.2.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
