@@ -1,0 +1,66 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: DavidEngelhart.Termpolis
+PackageVersion: 1.54.0
+PackageLocale: en-US
+Publisher: Termpolis
+PublisherUrl: https://github.com/codedev-david
+PublisherSupportUrl: https://github.com/codedev-david/termpolis/issues
+PrivacyUrl: https://github.com/codedev-david/termpolis/blob/HEAD/PRIVACY.md
+Author: David Engelhart
+PackageName: Termpolis
+PackageUrl: https://termpolis.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/codedev-david/termpolis/blob/HEAD/LICENSE
+Copyright: Copyright 2026 David Engelhart
+ShortDescription: The open-source multi-agent terminal where Claude, Codex, Gemini, and Qwen work together as a team — without your source code leaving the machine.
+Description: |-
+  Termpolis is a cross-platform desktop terminal manager (Windows, macOS, Linux) built on Electron + React + TypeScript with node-pty powering the underlying shells. It ships as a native app, code signed on Windows, notarized on macOS.
+  What makes it different:
+  - Secure AI-assisted development. Built-in AI Security Center auto-scans every AI prompt against 70+ secret patterns, enforces Gemini paid-tier mode, and keeps an auditable JSONL log of every AI-agent terminal launch — every check runs locally.
+  - Multi-agent swarm. Claude Code, Codex, Gemini CLI, and Qwen Code work together on a task. A dedicated Claude Code instance acts as the conductor.
+  - MCP server baked in. AI agents control Termpolis via Model Context Protocol, open terminals, run commands, send messages.
+  - Transparent routing. Every subtask shows which agent got it, why, and what it cost.
+  - Activity observability. Every token, every tool call, every message from every agent is visible in real time.
+  - Intervention controls. Pause, cancel, or steer any agent mid-task without leaving the feed.
+  - Shared memory. A RAG-backed memory store that any agent can read and write via MCP.
+  - MCP-native end to end. All four agents speak MCP — no terminal-output parsers, no glue scripts, no bridge code paths.
+  - Share-ready output. One shortcut from terminal to Slack, Teams, or a PR — see Copy for Slack / Teams / PRs.
+Tags:
+- ai
+- command-line
+- console
+- terminal
+ReleaseNotes: |-
+  1.54.0 follows up on 1.53.1's swarm fixes for GitHub #36, with the cases their reviews left open.
+  Swarm: each task reaches its agent alone (GitHub #36)
+  write_to_terminal with submit: true is how the conductor hands each worker its task.
+  - Submit clears the agent's input before it types the task. When the input already holds something, such as a prompt an earlier call left unsent or one a person typed, Termpolis deletes it with Ctrl+U, which in Claude Code, Codex and Antigravity alike deletes back from the cursor and sends nothing. It writes twenty at a time, up to ten writes a call, and looks at the input after each write. The task then goes alone, even a task taller than the agent's input box: in 1.53.1 the text in front of such a task was out of sight, and the two could go as one prompt.
+  - The conductor no longer has to clear an input itself. In 1.53.1, when submit saw other text in the input, it pressed no Enter, and the conductor was told to clear it, with keys it had no reliable way to send. Now, when what is there can't be cleared, the task isn't sent, and the conductor gives it to a new agent.
+  - Submit looks behind the task too. Ctrl+U deletes only back from the cursor, so if someone moved the cursor back into what the input held, the text after it stays. Submit now looks for other text after the task as well as before it, and presses no Enter if there is any. A leftover of several rows gets nothing typed at all: it can be lines after the cursor, or a text taller than the screen whose rows look alike, such as log lines, and so looks the same after a write that shortened it. Either way, submit says why.
+  - A restarted agent is waited for. Right after run_command starts an agent again, submit waits for the new agent to show its input and types the task there. In 1.53.1 it could answer that the terminal was at its shell's prompt, and the conductor had to send the task again later. Submit now reads only what the terminal printed since run_command typed the agent's command, so the last screen the old agent left, input box and all, isn't taken for the new agent's input, even when a resize paints it again while the new one starts.
+  - A resize no longer makes an exited agent look ready. On Windows a resize repaints the whole screen, including the last screen of an agent that has exited. In 1.53.1, submit took that screen for the agent's input and typed the task at the shell's prompt, which would run it as a command. It now sees that the agent is gone and types nothing, and the conductor starts the agent again. This works in PowerShell, cmd and bash, with Termpolis's shell integration on.
+  Swarm: who is speaking, who is stuck, and Trace from the start
+  - A worker's "SWARM COMPLETE" without a name no longer ends the swarm. A message that gives no sender name, filed as mcp-client, counts as the conductor's only if, when it was posted, no task existed yet and no worker's terminal was open or had closed at most 2 seconds before. Termpolis used to decide when it first saw the message, so a worker's "SWARM COMPLETE" whose terminal had closed by then could end the swarm, with the worker's words as the summary. Termpolis now notes when each worker's terminal opens and closes, from the launch on, workers a previous swarm left running included.
+  - A plan the conductor posts without its name, just before it starts its first worker, counts as its own, so the stall warning no longer says it has created nothing.
+  - A name spelled with lookalike characters no longer passes for system. In the Messages tab, a sender name can look like system when it is spelled, in whole or in part, with characters Unicode lists as drawn like its letters, such as Cyrillic ѕ, Latin small capitals or the symbol ⊤. 1.53.1 filed such a name as written (it folded only fullwidth and other compatibility forms of letters), so a worker could pass a note off as one of Termpolis's own, which the conductor acts on. Termpolis now reads characters that Unicode's list of confusables gives as drawn like a letter of system or conductor as that letter, whatever their script, digits such as 0 and symbols such as ⊤ among them, and rn as m. So such a name is filed as mcp-client, as system itself is, and one drawn like conductor, such as c0nductor, is filed as the conductor. Other names are filed as written.
+  - A Claude Code worker at its usage limit is reported. On some plans, Claude Code answers a stopped prompt with a limit reply instead of opening its rate-limit menu, and Termpolis didn't recognise that reply on a real screen: it read the worker as idle, and no report went out. It now reads the reply under the prompt it stopped, even a task so tall that its first rows have gone off the top of the screen, and with the line Claude Code draws when a turn is done ("✻ Crunched for 0s") under it. When the limit stops Claude Code mid-turn, the reply is read under the output of the tool it ran last, or under the row it folds the turn's file reads and searches into ("Read 1 file"). The report gives the reset time the reply names. On plans where the menu opens, the report now also gives the reset time from the limit message above it.
+  - Trace starts with the conductor's first step. Termpolis now starts the conductor's Claude Code session with an id of its own (claude -p --session-id <id>), new for each swarm, and Trace follows that session's transcript from its first line. In 1.53.1, Trace started up to 15 seconds after the conductor's first message or task, and followed the newest Claude Code transcript in the swarm's folder, which could be the last swarm's conductor's or a Claude Code worker's.
+  - Trace follows the config home the conductor's shell gives Claude Code. It looks for the transcript under the CLAUDE_CONFIG_DIR the conductor's shell gives claude, which your shell profile can set, else under ~/.claude. So that Termpolis knows which, the run script writes the session id and that CLAUDE_CONFIG_DIR to .termpolis-conductor-claude-home, beside the task file in your home folder, before it starts claude.
+  Swarm on Windows: Constrained Language Mode
+  - The task reaches the conductor without a byte order mark. Where AppLocker or WDAC runs the conductor's run script in Constrained Language Mode, PowerShell can't set the encodings its pipe needs, and the task reached claude with a byte order mark in front. The script now hands claude the task file itself as its standard input, so the task arrives exactly as written. It starts the claude.cmd npm installs beside its PowerShell shim; only a claude.ps1 with no claude.cmd beside it is still piped to, with a byte order mark in front, which the conductor's output says.
+  Fixes
+  - A usage limit is read in a narrow terminal. A narrow terminal wraps a CLI's limit message onto more rows than Termpolis read, so in a narrow pane an Antigravity or Codex agent at its limit could go unseen. Termpolis now reads the message whole, as long as the CLI's input box still shows under it, so write_to_terminal's submit says such an agent is blocked instead of typing a task into it. Claude Code's limit reply is read the same way, with its reset time whole.
+  - Claude Code activity is read in more folders. When a folder's path is longer than 200 characters, Claude Code files its transcripts under a shortened name with a hash added, and for a folder reached through a junction, under the junction's target. Termpolis looked under other names and found nothing, so such a terminal showed no Claude Code activity. It now names both the way Claude Code does.
+  Under the hood
+  - On Linux and macOS, the swarm now notices when a worker's terminal is made smaller, as it already did on Windows, and reads the worker's screen at the new size: every read of a terminal's output now comes with the terminal's size.
+  - While a resize redraws a stopped worker's screen, a read can miss the stop. 1.53.1 then forgot the stop, and could report it to the conductor a second time when the next read showed it again. A stop is now forgotten only once the worker is read at work, or after two reads in a row without it.
+  - New tests replay real Claude Code, Codex and Antigravity screens, run the conductor's run script in real Windows PowerShell 5.1 in Constrained Language Mode, and take a cancelled submit through Termpolis's real MCP server and adapter (that fix shipped in 1.53.1). A test that depended on timing no longer fails at random.
+  Full Changelog: https://github.com/codedev-david/termpolis/compare/v1.53.1...v1.54.0
+ReleaseNotesUrl: https://github.com/codedev-david/termpolis/releases/tag/v1.54.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://termpolis.com/docs.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

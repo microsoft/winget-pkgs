@@ -1,0 +1,36 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.9.0
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+Tags:
+- account-manager
+- antigravity
+ReleaseNotes: |-
+  - [Monitor Logging & Thought-Signature Backfill Hardening] Fix Tokio Worker Panic and Connection Hang Caused by Byte-Slicing Thought Snippets on Multi-Byte Character Boundaries (PR #3574, Fixes #3573, Thanks to @a3339530357):
+    - Safe UTF-8 Character Boundary Truncation: Fixed a standard library char boundary panic in monitor.rs's thought signature backfill path, where raw byte-slicing &trimmed[..32] was executed on thinking content. When multi-byte characters (e.g. Chinese at 3 bytes/char or Emojis at 4 bytes) straddled the 32nd byte index, slicing inside a code point caused immediate panics. Replaced with the existing shared utility safe_truncate_str(trimmed, 32), which automatically rolls back to the nearest valid character boundary.
+    - Eradicate Downstream Connection Drops & Silent Log Losses: Permanently eliminated Tokio worker crashes triggered by this panic, resolving socket hang up / Empty reply from server errors in downstream clients (such as Chinese coding agents and chatbots) during non-streaming requests, and ensuring monitor request logs are 100% reliably persisted to the database.
+
+  - [监控日志与思考签名回填安全加固] 修复思考片段按字节切片切在多字节字符中间导致的 Rust worker panic 与连接挂起 (PR #3574, Fixes #3573, Thanks to @a3339530357):
+    - UTF-8 字符边界安全回退：修复在 monitor.rs 签名回填路径中对思考内容执行 &trimmed[..32] 原生字节切片时，因中文（3 字节/字）或 Emoji（4 字节）等宽字符横跨第 32 字节触发的标准库 char boundary panic。改用通用工具 safe_truncate_str(trimmed, 32)，在截断点落在多字节内部时自动向左回退至最近合法字符边界。
+    - 根治下游连接中断与日志静默丢失：彻底消除由上述 panic 引发的 tokio worker 崩溃，解决下游应用（如中文 Agent、聊天客户端）在非流式模式下收到的 socket hang up / Empty reply from server 异常，确保请求监控日志 100% 完整落库。
+  What's Changed
+  - fix(monitor): 修复思考片段按字节截断切在多字节字符中间导致的连接 panic by @a3339530357 in https://github.com/lbjlaq/Antigravity-Manager/pull/3574
+  New Contributors
+  - @a3339530357 made their first contribution in https://github.com/lbjlaq/Antigravity-Manager/pull/3574
+  Full Changelog: https://github.com/lbjlaq/Antigravity-Manager/compare/v4.8.9...v4.9.0
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.9.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
