@@ -1,0 +1,29 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: hongfaqiu.StrataManager
+PackageVersion: 0.2.12
+PackageLocale: en-US
+Publisher: strata
+PublisherUrl: https://github.com/hongfaqiu
+PublisherSupportUrl: https://github.com/hongfaqiu/strata-manager/issues
+Author: hongfaqiu
+PackageName: Strata Manager
+PackageUrl: https://hongfaqiu.github.io/strata-manager/
+License: MIT
+LicenseUrl: https://github.com/hongfaqiu/strata-manager/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Strata Manager contributors
+ShortDescription: 'A desktop workspace for local inference with Strata: prepare the runtime, manage models and services, and monitor your local API.'
+Description: Strata Manager is an open-source desktop app for managing Niko1221/Strata, a local LLM inference engine. It bundles runtime setup, model downloads, service controls, streaming chat, hardware and API usage monitoring, task-based tuning, and benchmarking into a single workspace. Model weights already on your machine stay untouched.
+Tags:
+- ai
+- large-language-model
+- llm
+- local-llm
+ReleaseNotes: |-
+  - macOS packages are signed with a Developer ID and notarized by Apple: the Mac DMG used to be ad-hoc signed and un-notarized, so Gatekeeper blocked the first launch and you had to open it from the context menu or remove quarantine with xattr. CI now signs the app and the strata-supervisor background process with a Developer ID Application certificate and the hardened runtime, notarizes the .app with an App Store Connect API key and staples the ticket. It then rebuilds the DMG around the stapled app and signs the DMG with the Developer ID; the DMG itself is not notarized separately, which saves another wait that can take tens of minutes. Before uploading, CI checks everything with codesign, stapler validate and spctl. Runner network errors (such as NSURLErrorDomain -1009) are retried 3 times, 30 seconds apart, and only warn if Apple is still unreachable. A wrong signing identity or an Invalid/Rejected result from Apple always fails. Open the DMG, drag the app to Applications and open it normally. In-app updates work as before: the Tauri update signature is unaffected, and the .app inside the update archive is signed and notarized too. After upgrading from an ad-hoc signed build, macOS treats the app as a different signing identity, so the first read of credentials saved in the Keychain may ask for permission; choose "Always Allow". Fork and external PR builds without the certificate still fall back to ad-hoc signing; release-capable builds in this repository fail if the certificate or notarization credentials are missing.
+  - When Apple notarization is slow, Windows/Linux ship first and macOS follows automatically (on by default): CI submits the app to Apple once and waits up to 30 minutes (adjust with the repository variable MACOS_NOTARIZATION_TIMEOUT). If Apple accepts in time, all five installers are published together as usual. If not, the release publishes Windows, Linux and the server packages first, leaves macOS out of latest.json for now, and its notes say macOS is being notarized. The new macos-notarize-followup.yml checks every 30 minutes. Once Apple accepts, it staples the app, rebuilds the CI DMG around it and signs the DMG with the Developer ID again. After verifying and update-signing both files, it adds the DMG and .app.tar.gz to the same release, then adds macOS to latest.json. Un-notarized macOS packages are never published. Until the follow-up finishes, update checks on a Mac report that no update exists for this platform and install nothing. To turn this off, set the repository variables MACOS_RELEASE_MODE to include and MACOS_NOTARIZATION to wait.
+  - Pull requests no longer submit to Apple notarization: PR checks, including release/* and full-ci PRs, sign the app but no longer submit it to Apple. A push to main is notarized only when it bumps to a version that has not been released yet; otherwise it is signed only. Release builds are still signed, notarized and stapled. A signed-only build is never published as the Mac package: the release rebuilds and notarizes on the tag instead.
+ReleaseNotesUrl: https://github.com/hongfaqiu/strata-manager/releases/tag/v0.2.12
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
