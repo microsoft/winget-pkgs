@@ -1,0 +1,68 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AiricLenz.Apogee
+PackageVersion: 0.25.0
+PackageLocale: en-US
+Publisher: Airic Lenz
+PublisherUrl: https://github.com/airiclenz
+PublisherSupportUrl: https://github.com/airiclenz/apogee/issues
+Author: Airic Lenz
+PackageName: apogee
+PackageUrl: https://github.com/airiclenz/apogee
+License: MIT
+LicenseUrl: https://github.com/airiclenz/apogee/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Airic Lenz
+CopyrightUrl: https://github.com/airiclenz/apogee/blob/main/LICENSE
+ShortDescription: Terminal coding agent for local LLMs (llama.cpp, Ollama, vLLM) and any OpenAI-compatible API. OS-sandboxed autonomy, MCP, sessions. Go.
+Description: 'apogee is an open-source AI coding agent that runs in your terminal and works with local LLMs. Point it at a local model server — llama.cpp, Ollama, LM Studio, vLLM — and your code never leaves your machine: no API key, no cloud, works offline. The one request apogee makes on its own is a check for a newer release on github.com when the TUI starts; update-check: false turns it off. Point it at any OpenAI-compatible endpoint, at OpenRouter, or at Claude over the Anthropic API, and the same agent runs there. One binary for Windows, macOS and Linux.'
+Moniker: apogee
+Tags:
+- agentic-ai
+- ai-agents
+- cli
+- coding-agent
+- coding-assistant
+- developer-tools
+- golang
+- llama-cpp
+- llm
+- lm-studio
+- mcp
+- ollama
+- openai-api
+- terminal
+- tui
+- vllm
+ReleaseNotes: |-
+  apogee — v0.25.0 — 2026-10-11
+  A project can now carry its own apogee settings and pre-approved commands, with you deciding which of them to trust. apogee can also tell you when a newer release is out, update itself, and install on Windows through Scoop, with winget to follow.
+  Breaking changes
+  - An /audit begun before this update can't be resumed — re-running or resuming an /audit that an earlier apogee planned now stops at its split step with a message instead of carrying on. What to do: start /audit again.
+  New
+  - Per-project settings in .apogee/config.yaml — a project can commit its own .apogee/config.yaml, which apogee layers over your ~/.apogee/config.yaml: some settings take the project's value, safety lists such as disabled tools can only grow, and settings that only make sense globally are ignored with a notice. Edits apply without a restart, headless runs read the file too (apogee daemon does not), and apogee probe config shows both files combined.
+  - Allow rules with allow: — list command prefixes such as go test under allow: → terminal:, or MCP server names under mcp-servers:, and matching calls run without an approval prompt in ask-before, allow-edits and auto. A rule never overrides a refusal or a dangerous-command warning, and the transcript names the rule that let each call through.
+  - You decide which project rules to trust — Allow rules that come from a project's config do nothing until you adopt them: apogee asks about each new one at start-up, or at the next pause after the file changes, with adopt, not now or reject. Your answers are remembered per project, and a rule whose text changes is asked about again.
+  - "Always in this project…" on the approval pane — press p on an approval to save a matching rule into the project's .apogee/config.yaml, already adopted, and let the call run. For a command you can edit the suggested prefix first (go test for go test ./...); for an MCP server the server is saved at once.
+  - /settings shows where each value comes from — every row is marked (default), (global), (project), (env) or (flag), and saving a setting a project may set asks whether to save it globally or to this project. A new Allow rules section lists every rule and whether it is live, adopted, proposed or rejected, and lets you adopt one (⏎) or remove it (⌫ then ⏎).
+  - apogee project adopt — review a project's proposed Allow rules from the command line: y adopts, r rejects, and n or Enter leaves a rule for later. A session that is already running picks up your answers without a restart.
+  - The model can't rewrite a project's apogee config — in every mode, apogee refuses a tool call that writes, moves or deletes .apogee/config.yaml or replaces the .apogee/ folder, shell commands included, so a model cannot grant itself new permissions. Committing the file, copying it elsewhere and writing project skills under .apogee/skills/ still work.
+  - Your own dangerous-command rules with dangerous-rules: — add patterns that make apogee ask first or refuse outright, and, in your global config, remove shipped rules you don't want. A project config can only add rules or make an existing one stricter.
+  - New-release notice at start-up — the interactive app now asks GitHub once per start, in the background, whether a newer release exists, and if so the start-up box names it with the upgrade command for your install (for example brew upgrade apogee). It is on by default; set update-check: false or APOGEE_NO_UPDATE_CHECK=1 to turn it off, and headless runs and the daemon never check.
+  - apogee update — on a release-archive install, apogee update downloads the latest release, checks it against the published checksums, confirms the new binary runs and asks before swapping it in (--yes skips the question, --check only reports). On a Homebrew, Scoop, winget or source install it changes nothing and prints the upgrade command to use instead.
+  - {apogee} in workflow recipes — a recipe stage's run: line can use {apogee} to call the apogee that is running, with no shell script needed. Because of this, an input named apogee is now refused.
+  Improved
+  - Project skills are found from a subfolder — a session started in a subfolder of a project now finds the project's .apogee/skills by looking upward for the nearest .apogee/ folder, stopping at the repository's top and never using your home folder.
+  Fixed
+  - /audit works on Windows — the built-in /audit workflow no longer needs a POSIX shell, so its split step stops failing on a standard Windows machine.
+  - Recipe values with spaces on Windows — values a recipe fills into a run: line are now quoted the way Windows cmd expects, so a path holding a space, & or ^ stays one argument. macOS and Linux behave exactly as before.
+  - MCP sign-in can't be cut short by another program — an MCP OAuth login now finishes only on a reply that belongs to it; a stray or forged reply to the local sign-in address is turned away and the login keeps waiting. Pasting an address from an earlier attempt now gets a clear message at the prompt instead of failing the login.
+  - Go security fixes — apogee is now built with Go 1.26.9 and a newer Go networking library, picking up fixes for a set of Go standard-library security advisories. Building from source now needs Go 1.26.9.
+  Docs & install
+  - Install on Windows with Scoop — run scoop bucket add airiclenz https://github.com/airiclenz/scoop-bucket and then scoop install apogee. winget install AiricLenz.Apogee follows once apogee's first submission to the winget package repository is accepted; the README covers both.
+  - The manual covers project config and Allow rules — the configuration manual gains sections on a project's .apogee/config.yaml, allow:, dangerous-rules: and update-check:, including a plain warning that allowing a command like go test runs whatever the project's code does. The other manual pages and the README follow.
+  Internal
+  - Reproducible release archives — releases are now built and published by a program kept in apogee's own repository, so the same source always produces byte-identical archives, and Homebrew, Scoop and winget are updated in the same step.
+ReleaseNotesUrl: https://github.com/airiclenz/apogee/releases/tag/v0.25.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
