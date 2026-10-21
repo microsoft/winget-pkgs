@@ -1,0 +1,104 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Patchloom.Patchloom
+PackageVersion: 0.37.4
+PackageLocale: en-US
+Publisher: Patchloom
+PublisherUrl: https://github.com/patchloom
+PublisherSupportUrl: https://github.com/patchloom/patchloom/issues
+Author: Patchloom
+PackageName: Patchloom
+PackageUrl: https://github.com/patchloom/patchloom
+License: MIT
+LicenseUrl: https://github.com/patchloom/patchloom/blob/HEAD/LICENSE
+Copyright: Copyright (c) Patchloom contributors
+ShortDescription: Structured file editing CLI for AI agents
+Description: |-
+  Patchloom is a single-binary CLI that gives AI coding agents safe, structured
+  file editing: search and replace, unified diffs, parser-backed JSON/YAML/TOML
+  document ops, markdown section editing, AST-aware renames, multi-file
+  transactions, undo, and an MCP server for tool calls.
+Moniker: patchloom
+Tags:
+- ai
+- cli
+- developer-tools
+- mcp
+- rust
+ReleaseNotes: |-
+  Patchloom 0.37.4
+  TOML edits keep the comments on values you did not change. A replace
+  plan that names both one file and a glob is refused before anything
+  is written.
+  Highlights
+  Appending to a TOML array, shrinking it, or deleting one item leaves
+  each remaining comment on its own item. Changing a scalar, renaming a
+  key, or replacing one element of a multiline array keeps that value's
+  indent and note. An unquoted token such as 01 or 007 is stored as
+  the decimal string, not as 1 or 7.
+  Bug fixes
+  - A TOML note moved onto the wrong value, or vanished, when the array changed.
+    doc append on a multiline array placed the new element on the same
+    line as the previous note. doc delete-where left the removed item's
+    note on the item that stayed. Growing or shrinking an array, changing
+    one scalar, renaming a key, or editing one indented element dropped
+    or relocated those notes. Each note stays with the value it was
+    written on. A one-line nums = [1] # tail note stays outside the
+    brackets. A note on its own line above ] stays above the bracket (#2679, #2682, #2683, #2684, #2685, #2687, #2688).
+  - doc set of unquoted 01 stored the number 1. 007 stored
+    7. Those tokens are not valid JSON or TOML numbers. A padded
+    integer stays a decimal string. A single 0 stays the number zero.
+    JSON doc set of id to 01 writes "01". TOML 007 writes
+    id = "007" (#2686).
+  - doc.ensure on items[*].note checked for a match before refusing the selector.
+    A wildcard or a predicate is invalid_input before any write, and
+    the error points at doc.update. A concrete path that already
+    exists still does not write (#2679).
+  - Deleting a regular file that could not be opened removed it and dropped the operating-system error.
+    The delete now returns invalid_input (failed to read PATH: ...)
+    and leaves the file in place. A binary file or invalid UTF-8 still
+    unlinks (#2679).
+  - md lint and md dedupe-headings printed a missing file's operating-system error twice.
+    The path and the error appear once. The missing path is not created (#2681).
+  - The comparison guide ran doc select with --predicate. That
+    flag is not on doc select, so the command exits invalid_input.
+    The filter belongs in the selector:
+    patchloom doc select f.yaml 'items[name=a]'. doc delete-where
+    is the command that takes --predicate. One match is the value.
+    Two or more matches are an array (#2689).
+  - A replace plan that set both path and glob kept the file and ignored the glob.
+    The operation reported success, so a glob such as *.rs never ran.
+    Validate and execute now return invalid_input (replace: path and glob cannot be combined) and leave every file unchanged (#2692).
+  Numbers
+  ───────┬─────────────────────────────────────────────────────
+  Metric │Notes
+  ───────┼─────────────────────────────────────────────────────
+  Version│0.37.3 -> 0.37.4
+  ───────┼─────────────────────────────────────────────────────
+  Focus  │TOML comments, padded integers, replace path and glob
+  ───────┴─────────────────────────────────────────────────────
+  Upgrading
+  - A replace plan with both path and glob returns invalid_input
+    and writes nothing. Set one of those fields.
+  - doc.ensure with a wildcard or a predicate returns invalid_input.
+    Use doc.update, or a concrete key or index.
+  - doc set of 01 or 007 stores a string. Write 1 or 7 when
+    you want a number.
+  - YAML unknown-field errors now include the field path, such as
+    server.porrt: unknown field: porrt at line 3 column 10. The text
+    still contains unknown field:.
+  - Install from crates.io, npm, Homebrew, or Scoop after the tag
+    ships. On Windows, Scoop is recommended. winget may need
+    winget source update after Microsoft publishes. Chocolatey can
+    lag while moderation runs.
+  Full changelog
+  patchloom-v0.37.3...patchloom-v0.37.4
+ReleaseNotesUrl: https://github.com/patchloom/patchloom/releases/tag/patchloom-v0.37.4
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://patchloom.github.io/patchloom/
+- DocumentLabel: Installation
+  DocumentUrl: https://github.com/patchloom/patchloom/blob/main/docs/getting-started/installation.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
