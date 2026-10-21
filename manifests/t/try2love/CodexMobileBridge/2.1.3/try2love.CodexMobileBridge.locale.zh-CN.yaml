@@ -1,0 +1,50 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: try2love.CodexMobileBridge
+PackageVersion: 2.1.3
+PackageLocale: zh-CN
+Publisher: try2love
+PublisherUrl: https://github.com/try2love
+PublisherSupportUrl: https://github.com/try2love/codex-mobile-bridge/issues
+PackageName: Codex Mobile Bridge
+PackageUrl: https://try2love.github.io/codex-mobile-bridge/
+License: MIT
+LicenseUrl: https://github.com/try2love/codex-mobile-bridge/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 try2love
+ShortDescription: 在手机浏览器里继续电脑 Codex App 已有聊天的本地网关。
+Description: |-
+  在手机浏览器里，继续电脑 Codex App 已有的聊天，或在已保存项目中新建聊天。
+  手机与电脑打开同一个会话，查看回复、发送消息、选择模型与 Skill、回应待确认操作。本地任务继续在原电脑执行，SSH 任务继续在原服务器执行；模型请求沿用该会话的提供商与认证配置。
+  不要求手机登录与电脑相同的 OpenAI 账号。 网关提供独立的账号密码登录，也支持显式开启免密访问。可以通过局域网、临时 HTTPS 隧道或自己的反向代理连接。
+  社区项目，与 OpenAI 无隶属关系。支持 macOS 和 Windows，依赖 Codex App 的内部 IPC；各平台的实测范围见 验证记录。App 更新后可能需要适配。
+
+  消息编辑、分支与复制
+  - 用户消息下方可复制内容。最近一条选择「编辑并重新发送」；更早的消息选择「编辑并新建分支」，原会话保留。
+  - 已完成的回答下选择「从这里分支」，新会话保留截至该轮的历史，等待你继续输入。聊天详情中可返回来源会话。
+  - 回复支持完整 Markdown 复制，代码块单独复制；长回复自动读取完整正文。浏览器限制剪贴板时显示可选中的文本，支持系统复制操作。
+  - 原地编辑要求任务已停止，会重新生成回答。编辑和分支不会撤销既有文件修改；新旧会话共享工作目录。
+  - 分支需要 Codex 运行时同时支持指定轮次与目标续跑延迟；旧版会提示更新 Codex App。复制与最近消息编辑不受此分支能力限制。创建分支不会主动发送模型请求。
+  - 结果不确定时先检查聊天列表，重复提交同一请求不会再次执行。分支已创建但连接失败时，修改保留为该分支的编辑草稿。
+Tags:
+- codex
+- 远程
+- 远程访问
+- 远程连接
+ReleaseNotes: |-
+  本版新增多个独立 Webhook 目标和 Mermaid 图表阅读，并改善弱网加载、iOS 连接恢复及手机输入交互。桌面与手机 App 版本为 2.1.3，Android/iOS 构建号为 35。各平台验收范围以验证记录为准。
+  新增与改进
+  - 多个 Webhook 接收目标：每条配置可单独命名、启停、编辑、测试和删除；旧单目标配置仍可见。支持自动识别、通用自定义、飞书、钉钉、Discord 和 Telegram 的可编辑 JSON 模板，飞书与钉钉支持可选签名。修复飞书返回 HTTP 200 但业务拒绝时误报成功的问题。测试只使用已保存配置；保存不会发送通知。普通配置读取隐藏已保存地址、请求头和签名密钥，地址仅在主动查看时返回。每个已启用目标独立投递、去重与重试，不启动会话，也不补发历史通知。详见 Webhook 配置说明。
+  - Mermaid 图表阅读：在 Codex、Claude、DeepSeek Harness 聊天与 Markdown 文件中预览完整 Mermaid 代码块，可切换源码并复制原文。全屏时手机可双指缩放、放大后拖动或双击放大、还原；宽屏可用滚轮、按钮和双击缩放，再拖动图表。流式未完成内容保留源码；后续文字更新复用未变化图表。iOS App 同步修复图表预览子页面被导航策略拦截的问题，需同时更新网关与 App。
+  - 弱网加载与 Windows 包体：静态资源按内容生成版本地址，重复访问可使用浏览器缓存与条件请求；带页面专属安全随机数的 HTML 仍不缓存。Windows 包仅保留支持的 Electron 语言资源，以缩减包体。
+  - 接入与恢复：修复 DeepSeek Harness 自动折行的 YAML 接入配置无法识别的问题；iOS 网关不可达或遇到隧道错误时提供原生重试、返回电脑列表入口。账号查询在桌面标签可见性变化后恢复，收敛不必要的请求。
+  - 手机交互：弹窗打开时隐藏原生“更多”入口；调整手机列表、弹窗与常规输入框的焦点外观。补充回答卡片输入框被键盘遮挡时做一次可见定位，输入中不反复移动。
+  贡献者
+  - @wangzheuser 提交 PR #51，修复 Harness 折行配置解析；原提交作者 @w154594742 的署名保留。
+  - @RigerWu 在 PR #52 中贡献 iOS 原生连接恢复入口。
+  - @heiqiu47 在 PR #40 中提出账号查询改进；本版纳入范围仅为查询生命周期收敛。
+  - @jasongzy 通过 Issue #60 提出通用 Webhook 通知需求。
+  - @tiancai123123 在 Issue #54 中定位静态资源重复下载，并在 PR #56 中贡献内容哈希缓存与条件请求。
+ReleaseNotesUrl: https://github.com/try2love/codex-mobile-bridge/releases/tag/v2.1.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

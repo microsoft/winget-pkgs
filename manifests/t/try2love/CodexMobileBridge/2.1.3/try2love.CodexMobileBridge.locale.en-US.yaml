@@ -1,0 +1,36 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: try2love.CodexMobileBridge
+PackageVersion: 2.1.3
+PackageLocale: en-US
+ShortDescription: A local gateway that continues desktop Codex App chats in a mobile browser.
+Description: |-
+  Continue existing chats in the desktop Codex App from your phone browser, or create an empty chat in a saved project.
+  The phone and desktop use the same chat. Read replies, send messages, choose models and Skills, and respond to pending confirmations. Local tasks continue on the original computer; SSH tasks continue on the original server. Each chat keeps its model provider and authentication settings.
+  Your phone does not need to sign in to the same OpenAI account as the desktop. The gateway has its own username/password login and an explicit passwordless option. Connect over LAN, a temporary HTTPS tunnel, or your own reverse proxy.
+  Community project, not affiliated with OpenAI. Supports macOS and Windows and depends on internal Codex App IPC. See verification records for what was actually tested. App updates may require compatibility changes.
+
+  Edit, branch and copy messages
+  - Copy user messages from their action row. Choose Edit and resend on the latest user message, or Edit in new branch on an older message to keep the original conversation.
+  - Choose Branch from here under a completed answer. The new chat keeps history through that turn and waits for your next message. Chat details link back to the source.
+  - Copy complete replies as Markdown or copy an individual code block. Long replies load their full text. When clipboard access is unavailable, selectable text supports the system Copy action.
+  - In-place editing requires the turn to be stopped and generates a new answer. Editing and branching do not undo file changes; both chats share the working directory.
+  - Branching requires a Codex runtime with turn-specific forking and deferred goal continuation; older versions show an update prompt. Copying and latest-message editing do not require those fork capabilities. Creating a branch does not send a model request.
+  - If delivery is uncertain, check the chat list first; repeating the same request does not replay it. If a branch was created but could not connect, the replacement remains an edit draft for that branch.
+Tags:
+- remote
+- remote-access
+- remote-connection
+ReleaseNotes: |-
+  v2.1.3 brings multiple Webhook destinations, Mermaid reading, faster repeat loads on slow links, iOS connection recovery and mobile interaction refinements. Desktop and mobile apps use version 2.1.3; Android/iOS build number 35. See the verification record for platform-specific coverage.
+  - Webhook destinations: create multiple named endpoints and enable, edit, test or delete each independently. Editable JSON presets cover automatic detection, Custom Webhook, Feishu, DingTalk, Discord and Telegram; Feishu and DingTalk offer optional signing. Feishu responses with HTTP 200 but a rejected business code no longer report success. Tests use saved settings only, and saving does not send a notification. Ordinary settings reads mask saved URLs, headers and signing secrets; a saved URL is returned only on explicit reveal. Enabled endpoints deliver, deduplicate and retry independently, without activating chats or replaying past notifications. See the setup guide.
+  - Mermaid reading: preview complete Mermaid fences in Codex, Claude and DeepSeek Harness chats and Markdown files, switch to source and copy it. In fullscreen, pinch to zoom, drag when enlarged or double-tap to zoom and reset on mobile; use the wheel, buttons or double-click to zoom, then drag, on wider screens. Incomplete streamed diagrams remain source; unchanged diagrams are reused as text continues. iOS also fixes navigation of the diagram preview subframe, so update both the gateway and iOS app.
+  - Slow-link loading and Windows size: content-versioned static assets use browser caching and conditional requests on repeat visits. The HTML shell still avoids caching because it contains a per-page security nonce. Windows packages retain supported Electron locales only.
+  - Connections: parse DeepSeek Harness YAML settings folded across lines; show native Retry and Back to computers actions when the iOS gateway or tunnel is unreachable. Account queries resume when the desktop tab becomes visible, with narrower request scope.
+  - Mobile controls: hide the native More menu over open dialogs and refine list and dialog focus appearance. When the keyboard covers an answer-card input, bring it into view once without repeatedly moving it during typing.
+  Install over the existing app to retain saved computers, pairings and gateway data. Android keeps its signing identity; iOS keeps its official bundle IDs and requires your own signing. Refresh Web pages after the gateway update. iOS recovery and Mermaid subframe changes require the matching app; shared-relay deployments should update the relay.
+  Contributors: @wangzheuser submitted PR #51, retaining original commit credit for @w154594742; @RigerWu contributed iOS recovery in PR #52; the integrated part of @heiqiu47's PR #40 is limited to account-query lifecycle improvements; and @tiancai123123 reported the static-download issue in Issue #54 and contributed caching in PR #56.
+  @jasongzy requested general Webhook notifications in Issue #60.
+ManifestType: locale
+ManifestVersion: 1.12.0
