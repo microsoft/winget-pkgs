@@ -1,0 +1,49 @@
+# Created with tokenuse release workflow using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: RussMckendrick.TokenUse
+PackageVersion: 1.2.7
+PackageLocale: en-US
+Publisher: Russ McKendrick
+PublisherUrl: https://github.com/russmckendrick
+PublisherSupportUrl: https://github.com/russmckendrick/tokenuse/issues
+Author: Russ McKendrick
+PackageName: Token Use
+PackageUrl: https://www.tokenuse.app/
+License: MIT
+LicenseUrl: https://github.com/russmckendrick/tokenuse/blob/HEAD/LICENSE
+ShortDescription: Desktop app for local AI coding tool token and cost usage
+Description: Desktop app for local AI coding tool token and cost usage
+Moniker: tokenuse-desktop
+Tags:
+- ai-agents
+- claude-code
+- codex
+- copilot
+- cursor
+- tokens
+ReleaseNotes: |-
+  tokenuse v1.2.7 - Small Change
+  tokenuse 1.2.7, named Small Change, makes money read the same everywhere, down to the last penny. It adds names and prices for Claude Haiku 5.5 and Sonnet 5.5, repairs costs already archived for them, and fixes a few UI details on the TUI and desktop app. It also patches new dependency advisories, and Windows releases are now code-signed.
+  Money and pricing
+  - Money is formatted the same way in the TUI and desktop app: two decimals with thousands separators (£1,088.42, not £1088), £0 for exactly zero, and <£0.01 for amounts below a penny instead of £0.0000 or £0.0070. Desktop call rows and the call detail show the exact cost on hover, and the TUI call detail shows it inline. Zero-decimal currencies such as JPY show whole units.
+  - Claude Haiku 5.5 and Sonnet 5.5 now have their own model names and prices. Haiku 5.5 no longer shows as "Haiku 5 5" with a fallback-pricing warning, and Sonnet 5.5 is no longer shown as Sonnet 5 or charged Sonnet 5's higher cache-read rate. Haiku 5.5 prompts over 100,000 tokens are still estimated at the standard rate.
+  - Cursor's Gemini 3.7/3.8 Flash output rate is now $3.75/MTok, and the pricing books were refreshed on October 18, 2026.
+  Archive repair
+  - Archive schema v11 reprices Claude Haiku 5.5 and Sonnet 5.5 calls already in the archive. Haiku 5.5 calls were charged at the Sonnet 4.6 fallback rate, about 30 times too much. Claude Code Sonnet 5.5 calls were charged Sonnet 5's cache-read rate, which is twice the real one. A row changes only when its stored cost proves the old price was used, so correct rows are left alone and the repair never runs twice. Cursor and Copilot Sonnet 5.5 calls are not repriced, because those tools still price Sonnet 5.5 at the Sonnet 5 rate.
+  Interface fixes
+  - Coach colours its practice score bars and sparklines using the same thresholds as the grade letters (green from 90, yellow from 70), so an 80 no longer shows a green bar next to a yellow B. The TUI grade colours now use the same three tones.
+  - In ranked tables, the bar showing each row's share is now a lighter background with a thin underline. The old full-height edge looked like a text cursor. The TUI drops its brighter end cell the same way.
+  - The desktop page title updates when you move from one tool page to another. Previously the Codex page could still be titled "Claude Code".
+  - The desktop status bar only shows period, tool, sort, and project shortcuts on pages that have those controls, and the shortcuts only work there. The tool shortcut now also works on Coach. The TUI Coach footer no longer lists g sort.
+  Security and distribution
+  - Windows releases are now Authenticode-signed with a Certum code-signing certificate: the TUI's tokenuse-windows-amd64.exe, the desktop NSIS and MSI installers, and the app executable inside them. SmartScreen warnings should fade as signed releases build reputation.
+  - Updated rustls to 0.23.46 in both lockfiles (RUSTSEC-2026-0346 to 0349), rust_xlsxwriter to 0.100.0 with zip 9 (RUSTSEC-2026-0367 to 0369), and the desktop's transitive devalue and source-map-js packages.
+  - The desktop updater plugin is now built without its optional zip feature. Releases publish raw NSIS and AppImage updater files, so the old zip and tar.gz extraction code was never used, and it was the only thing pulling in the vulnerable zip 4.
+  Upgrade notes
+  - The first launch runs the archive v11 migration once. Haiku 5.5 history drops sharply to its correct price, and Claude Code Sonnet 5.5 history drops by the overcharged cache-read amount.
+  - Pricing books downloaded before this release are older than the embedded books, so the embedded books are used automatically.
+  - At release preparation, cargo-audit reported no known vulnerabilities in either lockfile, and pnpm audit reported none either. RustSec still reports upstream maintenance warnings, the Linux GTK dependency's glib unsoundness warning, and a yanked yoke-derive.
+ReleaseNotesUrl: https://github.com/russmckendrick/tokenuse/releases/tag/v1.2.7
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

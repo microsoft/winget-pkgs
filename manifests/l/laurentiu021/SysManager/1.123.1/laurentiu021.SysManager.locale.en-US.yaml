@@ -1,0 +1,100 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.123.1
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.123.1] - 2026-10-08
+  Scheduled Maintenance no longer offers a standby memory purge, which failed on every scheduled run. The
+  Dashboard's health score is no longer green with less than 10 GB free on the Windows drive, and Performance Mode
+  keeps saying that a graphics change needs a reboot instead of dropping the notice at once.
+  Removed
+  - Scheduled Maintenance: "Purge standby memory" (#2593). A purge needs administrator rights and the scheduled
+    task runs without them, so every scheduled purge failed, and all the page showed was "Last run returned
+    0x00000001". Giving the task administrator rights is no answer: SysManager's exe sits in a folder your account can
+    write to, so anything running as you could replace it, and Windows would start the replacement with those rights.
+    Standby List Cleaner's "Automatically purge when available RAM is low" purges for you while SysManager runs as
+    administrator. Present since 1.50.0, when Scheduled Maintenance was added.
+    - A purge schedule saved before this keeps running, so the page now says that every run of it fails, that saving
+      a schedule replaces it with a temporary-file cleanup, and where to purge instead. Nothing is removed for you.
+    - --purge-standby stays on the command line, for scripts you run as administrator.
+  Fixed
+  - Scheduled Maintenance: a failed run is described in words (#2593). SysManager's own error codes read "Last run
+    returned 0x00000001" and "0x00000002"; they now read "Last run failed" and "Last run failed (command not
+    recognised)".
+  - Dashboard: the health score could be green with less than 10 GB free on the Windows drive (#2603). Free space
+    counts for a quarter of the score, and below 10 GB its part was held to 25 out of 100, so with everything else
+    perfect the total was 81, and green starts at 80: a 128 GB laptop drive with 9 GB free scored green. Below 10 GB
+    it is now held to 10, its lowest band, and the best total is 78. Present since 1.78.0, when free space joined the
+    score.
+  - Performance Mode: the reboot notice after an NVIDIA change disappeared at once (#2607). The read that shows the
+    new state began by clearing it, and ended on "Settings loaded." in place of "Reboot required". A read no longer
+    clears it, so the notice stays for as long as SysManager is open, and the outcome of the change is written after
+    the read. Any later Refresh or F5 cleared it too, and so did a Restore All that left the graphics setting alone,
+    although the PC had not restarted.
+    - Refresh, and F5, are off while a change or Restore All is running. Either could start a second read in the
+      middle of one, which ended the busy state early and replaced the change's message with "Settings loaded.".
+    - If the NVIDIA card can no longer be found when the change is applied, the page says that nothing was changed.
+    - Both have been there since Performance Mode was added in 0.12.0.
+  Verify the download
+  Get-FileHash .\SysManager-v1.123.1.exe -Algorithm SHA256
+  Expected SHA256: D4137B229760ED96C1A7249C0349063D786635FC3E5E4D7DCDD178CEA33B2E93
+  This build is not code-signed, so Windows will warn on first launch. That is
+  expected for a small independent app: see what the warning says and what to
+  click.
+  Code signing is planned through the SignPath Foundation,
+  which provides free certificates to open-source projects, with signing performed by
+  SignPath.io. Until then, the SHA256 above and the build
+  attestation below are what establish that a download is the genuine build.
+  Code signing policy
+  This release is not code-signed. The team roles, release-approval process and
+  privacy policy required by the SignPath Foundation programme
+  are documented in advance under Code signing
+  policy. That
+  documentation is a prerequisite for applying, not evidence of a certificate. The
+  attribution line naming SignPath as the signing provider will appear here once a
+  certificate is actually issued.
+  This program will not transfer any information to other networked systems unless
+  specifically requested by the user or the person installing or operating it. Full
+  privacy policy.
+  Verify where this binary came from
+  This exe was built by GitHub Actions from this public source, and the build is
+  recorded in the Sigstore public transparency log. With the
+  GitHub CLI:
+  gh attestation verify .\SysManager-v1.123.1.exe --repo laurentiu021/SystemManager
+  That proves which commit and workflow produced this exact binary, something the
+  SHA256 file cannot show, since it is published alongside the exe it describes.
+  Each release also ships SysManager-v1.123.1.sbom.json, a CycloneDX inventory of
+  every dependency resolved for this build.
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.123.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

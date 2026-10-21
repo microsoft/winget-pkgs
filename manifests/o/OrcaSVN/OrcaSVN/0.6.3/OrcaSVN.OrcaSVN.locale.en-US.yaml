@@ -1,0 +1,61 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: OrcaSVN.OrcaSVN
+PackageVersion: 0.6.3
+PackageLocale: en-US
+Publisher: OrcaSVN
+PublisherUrl: https://github.com/wustites/OrcaSVN
+PublisherSupportUrl: https://github.com/wustites/OrcaSVN/issues
+Author: OrcaSVN
+PackageName: OrcaSVN
+PackageUrl: https://github.com/wustites/OrcaSVN
+License: MIT
+LicenseUrl: https://github.com/wustites/OrcaSVN/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2024 OrcaSVN
+ShortDescription: A modern SVN client built with Tauri, Vue 3, and TypeScript
+Description: OrcaSVN is a modern SVN workbench that provides a graphical interface for managing Subversion repositories. Built with Tauri for native performance, Vue 3 for the frontend, and TypeScript for type safety. Features include workspace management, commit, update, diff, blame, log viewing, and more.
+Tags:
+- git-alternative
+- subversion
+- svn
+- tauri
+- typescript
+- version-control
+- vue
+ReleaseNotes: |-
+  OrcaSVN v0.6.3
+  自 v0.6.2 以来的更新
+  性能与体验
+  - 工作区保存并复核状态快照，重开时先展示缓存列表；无变化时复用状态，小范围文件变化使用定向 SVN 查询。Windows 本地 NTFS 在权限允许时使用 USN 日志，不可用时自动回退元数据扫描。
+  - SVN 命令采用异步进程等待，同时读取标准输出和错误输出，移除 100 ms 结束状态轮询；保留超时和子进程终止处理。
+  - 工作区文件列表、Diff 及文件导航按可见范围渲染；Diff 支持全文查找、前后匹配、Ctrl/Cmd+F 和完整复制，大文本索引放到 Worker 中。
+  - 日志使用修订号游标分页，每页 20 条，作者、关键词和日期筛选也分页；长作者名和提交说明提供完整悬停提示。
+  - 忽略规则在 Worker 中计算，共享刷新请求并避免旧异步结果覆盖新工作区。
+  - 对齐浅色/深色主题、对话框、动画和窄窗口布局；补充用户手册和性能测量说明。
+  修复
+  - 打开工作副本子目录时，核对上级 SVN 管理文件，避免遗漏外部属性修改、加入版本控制或还原；快照格式升级后旧原生缓存重新建立一次。
+  - 更新完成后的工作区刷新不再受页面是否激活影响，离开更新页也能获得最新版本号和变更状态；页面停用时停止远端轮询。
+  - 统一 Windows SVN 状态路径分隔符，避免定向刷新残留旧条目。
+  - 工作区还原和删除未跟踪文件增加确认对话框，展示完整目标路径；工作区切换或目标状态改变后使旧确认失效。
+  - 缓存状态未验证时，限制提交、创建贮藏及工作区还原/删除操作。
+  性能测量边界
+  Linux aarch64、Release 构建、热文件系统的 10,000 文件本地工作副本对照中，原生数据阶段的无变化刷新中位耗时由 100.7 ms 降至 20.4 ms，缓存重开由 100.7 ms 降至 29.5 ms；无应用缓存首次加载由 101.0 ms 降至 82.8 ms。每场景测量 15 次，包含本地版本号查询，首次加载另包含仓库元信息请求。
+  这些数字不包含 WebView 启动或界面渲染，也不能代表 Windows、冷盘或所有真实仓库。完整方法、汇总数据和重跑脚本见性能基准。
+  What's new since v0.6.2
+  - Persist and verify workspace status snapshots, reuse unchanged state, and query small sets of changed paths. Use the NTFS USN journal when available, with filesystem metadata scans as the fallback.
+  - Wait for SVN processes asynchronously, drain both output streams, and remove the previous 100 ms completion polling interval.
+  - Virtualize workspace files, diffs, and file navigation. Add full-text diff search, match navigation, Ctrl/Cmd+F, full copy, and worker indexing for large documents.
+  - Use revision cursors for explicit 20-entry log pages, including author, keyword, and date filters; preserve full author and message text in hover previews.
+  - Move ignore matching to a worker, share refresh requests, and reject outdated asynchronous results.
+  - Align themes, dialogs, motion, and narrow layouts, and expand the user guide and performance documentation.
+  - Check ancestor SVN administrative metadata when opening a working-copy subdirectory, and refresh shared workspace state after an update even if its page has been deactivated.
+  - Normalize Windows status paths, confirm destructive workspace actions, and restrict mutations while cached state remains unverified.
+  The Linux Release benchmark shows substantial gains for unchanged refreshes and cached reopening. The measured 10,000-file first-load improvement is smaller. These are native data-request measurements, not desktop startup or Windows performance claims.
+  Downloads / 下载
+  Choose the installer for your operating system from the release assets below. Windows provides NSIS EXE and MSI installers; macOS provides Apple Silicon packages; Linux provides x64 packages. OrcaSVN still requires a locally available SVN CLI.
+  从下方 Assets 选择适合操作系统的安装包。Windows 提供 NSIS EXE 和 MSI，macOS 提供 Apple Silicon 包，Linux 提供 x64 包。安装后仍需确保本机 SVN CLI 可用。
+  User guide / 用户手册 · All changes / 完整改动
+ReleaseNotesUrl: https://github.com/wustites/OrcaSVN/releases/tag/v0.6.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

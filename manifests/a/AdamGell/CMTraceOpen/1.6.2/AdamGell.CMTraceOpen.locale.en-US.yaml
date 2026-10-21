@@ -1,0 +1,88 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AdamGell.CMTraceOpen
+PackageVersion: 1.6.2
+PackageLocale: en-US
+Publisher: Adam Gell
+PublisherUrl: https://github.com/adamgell
+PublisherSupportUrl: https://github.com/adamgell/cmtraceopen/issues
+PackageName: CMTrace Open
+PackageUrl: https://cmtraceopen.com/
+License: MIT
+LicenseUrl: https://github.com/adamgell/cmtraceopen/blob/HEAD/LICENSE
+ShortDescription: Free, open-source CMTrace replacement for Windows log files, with Intune and Autopilot ESP diagnostics.
+Description: |-
+  CMTrace Open is a free, open-source log viewer and Windows troubleshooting tool, built as a modern replacement for Microsoft's CMTrace.exe. It auto-detects and parses ConfigMgr/SCCM (CCM), CBS, DISM, Panther, MSI, PSADT, and plain-text log formats, with severity color coding, real-time tailing, find and filter, and lookup for 700+ embedded Windows, ConfigMgr, and Intune error codes.
+  Beyond the log viewer it adds dedicated troubleshooting workspaces: Intune Management Extension (IME) diagnostics with an event timeline and download statistics, Autopilot Enrollment Status Page (ESP) and Device Preparation triage, DSRegCmd analysis for Entra join, hybrid join, PRT, MDM, and Windows Hello for Business, software deployment log scanning, Windows Event Log (.evtx) and Sysmon analysis, Secure Boot certificate checks, and diagnostic evidence collection.
+  Ships as a single-file executable with no runtime prerequisites; Windows builds are code-signed. CMTrace Open is an independent open-source project and is not affiliated with Microsoft Corporation.
+Moniker: cmtrace
+Tags:
+- autopilot
+- cmtrace
+- configmgr
+- dsregcmd
+- endpoint-management
+- entra-id
+- esp
+- event-log
+- evtx
+- intune
+- log-viewer
+- mdm
+- mecm
+- sccm
+- sysadmin
+- troubleshooting
+ReleaseNotes: |-
+  Stable downloads: https://download.cmtraceopen.com/?source=github-release
+  CMTrace Open v1.6.2
+  Download shortlinks
+  Each shortlink always resolves to the current stable release, so it stays valid in
+  tickets, runbooks, and slides long after this page scrolls out of view.
+  ──────────────────────────────┬───────────────────────────────
+  Platform                      │Shortlink
+  ──────────────────────────────┼───────────────────────────────
+  Windows x64, portable EXE     │https://win.cmtrace.net
+  ──────────────────────────────┼───────────────────────────────
+  Windows ARM64, portable EXE   │https://winarm.cmtrace.net
+  ──────────────────────────────┼───────────────────────────────
+  Windows x64, Lite portable EXE│https://lite.cmtrace.net
+  ──────────────────────────────┼───────────────────────────────
+  Windows x64, MSI installer    │https://msi.cmtrace.net
+  ──────────────────────────────┼───────────────────────────────
+  macOS Apple silicon, DMG      │https://mac.cmtrace.net
+  ──────────────────────────────┼───────────────────────────────
+  Linux x64, AppImage           │https://linux.cmtrace.net
+  ──────────────────────────────┴───────────────────────────────
+  Nightly channel: https://nightly.cmtrace.net
+  The MSI installs both the Full and Lite editions. Portable EXEs require no installation.
+  CycloneDX SBOMs (sbom-rust.cdx.json, sbom-npm.cdx.json) and build provenance
+  attestations are published alongside the binaries.
+  Changed
+  - Parser and IPC source compatibility: The parser source version advances from 0.1.1 at v1.6.0 through 0.2.0 to 0.3.0. Changes include the required ErrorCodeSpan.outcome field, caller-supplied DsRegCmd evaluation time, canonical Intune/CCM module paths, the removal of environment expansion from the parser crate and of the timeline error variant, new ParseResult.modified_unix_ms / AggregateParseResult.child_errors fields for Rust struct constructors, and expanded event/provenance data contracts. Downstream source consumers must update; desktop version 1.6.2 does not publish the parser crate.
+  - Observed BGB source contract (#775): Record sanitized client-notification evidence and the Simple-framed BgbServer.log format for the observed site version. The card remains capture guidance: its keys are unvalidated and the SCCM evidence admission path does not admit this Simple-framed source as supported diagnostic evidence.
+  - Redaction architecture decision (#589): Record accepted ADR-004 revision 2 for context-bound publication. The ADR defines later implementation work; this release does not claim that all Intune lanes implement its future contract.
+  - Canonical Intune parser ownership (#356): IME analysis now lives under intune::apps::windows::ime, ESP under intune::enrollment::windows::esp, and shared logical CCM framing under parser::ccm::logical. The former public paths and ESP-only administrator-restart command are removed. Captured ESP bundles require a manifest; a missing manifest is reported as missing coverage without discovering undeclared evidence.
+  Added
+  - Expanded Event Viewer (#583): Add provider-database import/export and packaged provider metadata, recovery and source-coverage reporting, event diagnosis, reusable filters, triage highlights, durable event markers, and a unified timeline. Event identities and source provenance survive merged and streamed loads; records without a placeable timestamp remain visible. Exact evidence keys drive correlation, and incomplete evidence stays explicit.
+  - Live Event Log operations and portable evidence (#583): Add Windows live tail and an explicitly confirmed channel-clear operation, diagnostic ZIP intake, bounded capture/archive handling, and streamed exports that follow the visible filter and ordering. Provider handling retains coverage gaps; normalized event exports apply identity masking. Provider-database export preserves the validated database bytes. Live Windows operations remain Windows-only; offline evidence has separate supported paths.
+  - Stop large explicit event loads (#639, #643): Stop a running channel load, retain the fetched records with cancelled/incomplete coverage, and allow a fresh load. Concurrent channel reads share the cancellation request; explicit loads remain frontend-owned under ADR-005 rather than gaining backend paging.
+  - WIM metadata parser foundation (#597): Add pure byte-slice parsing for WIM headers, resource entries, and image XML metadata. Unsupported compression, split images, malformed XML, invalid versions and out-of-bounds resources produce coverage states. This is parser-library groundwork, not a new image-extraction or mounting UI.
+  - Event detail resolves the error codes in an event's text (#665): A grid full of 0x8007… and HRESULTs from MDM, AppX, Windows Update or ConfigMgr events was readable only by opening the Error Lookup dialog and retyping the code. The detail pane now lists the codes it finds in the message and event data with their name and category, and marks a code the database cannot explain as not in the database rather than staying silent. Results stay associated with the selected event text, so a pending or failed lookup cannot show the previous event's codes. Detection stays in the parser crate, so the frontend never grows a second idea of what a code looks like (#665).
+  - Configuration Manager and Intune error code coverage (#614): The embedded table now resolves every 0x87D… code published with Error source: Configuration Manager and every 0x87D… code in the Intune app installation error reference: 54 new codes, plus published wording replacing paraphrased text on 9 existing entries (792 codes total).
+  Fixed
+  - Standalone Windows Event Log exporter: Remove the live-query metadata limit's dependency on the separately gated Intune diagnostics module, preserving its 512 KiB bound. Linux and Windows CI now compile library tests and run the exporter CLI tests with only the release's event-log feature enabled, catching the feature combination that failed in the 1.6.1 draft build.
+  - Linux AppImage launcher permissions: The npm build commands prepare Tauri's x86_64 AppRun launcher with mode 0755 before AppImage bundling and signing. Debian/RPM-only and executable-only builds leave the launcher cache and network untouched. This addresses the launcher permission denial reported by AppImage catalog #8206; Linux library compatibility remains a separate requirement.
+  - Moved environment-variable expansion out of the pure parser crate: collector::env_expand read the host process environment, which is engine-side work under the crate's own boundary rule. It now lives in the shared native src-tauri/src/env_expand.rs module, so collector and ESP diagnostics can each use it without enabling the other feature. CI checks the ESP-only and collector-only builds to protect that boundary.
+  - DsRegCmd capture freshness uses an explicit evaluation instant (item 3 of #738): Both public analysis entry points now require evaluated_at: DateTime<Utc>, supplied once at the application boundary and passed through to the capture-confidence rules. Fixed-time public API regressions cover repeatability and the existing confidence thresholds. This removes the DsRegCmd freshness clock read; other parser clock and local-time behavior is outside this change. cmtraceopen-parser goes to 0.3.0, and the native dependency requirement moves to 0.3, because the required argument breaks the previous 0.2.0 source API.
+  - event-log-export --help exits zero (#740): A help request took the usage-error path, so it printed its usage to stderr and exited 1 - a caller checking the interface, including the exporter's own CI smoke step, saw a failure. --help and -h now print the usage on stdout and exit 0, while a genuine usage error - no source, or an unknown argument - still exits 1 with its diagnostic.
+  - External diagnostic tools run under a deadline (#684): The bounded-command runner the ESP queries used was private to that module and compiled only on Windows, so the macOS diagnostic tools (mdatp, pkgutil, profiles, system_profiler, sw_vers, log) and the SCCM CIM query ran with no deadline at all: a hanging tool could leave its diagnostic operation waiting indefinitely. The runner now lives in process_util as one cross-platform primitive with a neutral error type, the ESP lane keeps its own vocabulary through a thin adapter, and the tools whose output is read are bounded by it. The non-waiting interactive launches and the elevated boot-script wrapper retain their existing execution behavior.
+  - A rotated-in log larger than the old offset is detected as a new file: Tail rotation was detected by size, so a replacement that had already grown past the offset held for the previous file was missed: the reader sought into the middle of the new file, never read its head, and could emit a partial first entry. Rotation is now detected by file identity (#687).
+  - ReportingEvents.log parses as ReportingEvents again (#657): A real ReportingEvents.log was detected as plain text and every row fell through to a raw line: no timestamp, no provider, no severity, and hundreds of successful Windows Update transactions counted as Info. The record carries the writing machine's offset (-0500), writes the millisecond group with . or : inside one file, and orders its fields differently from the shape the parser expected. The parser now reads the real order, keeps the offset as provenance, normalises the display to the form every other log's Date/Time column already uses, maps the provider to the component, takes severity from the agent's own status, and turns the hexadecimal result code into the 0xNNNNNNNN form the error database and message highlighting expect (240005 becomes 0x00240005).
+ReleaseNotesUrl: https://github.com/adamgell/cmtraceopen/releases/tag/v1.6.2
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/adamgell/cmtraceopen/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

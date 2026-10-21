@@ -1,0 +1,78 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jdx.usage
+PackageVersion: 6.12.0
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://jdx.dev/
+PublisherSupportUrl: https://github.com/jdx/usage/issues
+Author: Jeff Dickey
+PackageName: usage
+PackageUrl: https://usage.jdx.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+ShortDescription: A specification for CLIs
+Description: |-
+  Usage is a spec and CLI for defining CLI tools. Arguments, flags, environment variables, and config files can all be defined in a Usage spec. It can be thought of like OpenAPI (swagger) for CLIs. Here are some potential reasons for defining your CLI with a Usage spec:
+
+  - Generate autocompletion scripts
+  - Generate markdown documentation
+  - Generate man pages
+  - Generate type-safe SDK client libraries for TypeScript, Python, and Rust
+  - Use an advanced arg parser in any language
+  - Scaffold one spec into different CLI frameworks-even different languages
+  - [coming soon] Host your CLI documentation on usage.sh
+Moniker: usage
+Tags:
+- cli
+- spec
+ReleaseNotes: |-
+  Wrapper CLIs can now pass completion of their trailing words to the wrapped tool's own shell completion. Argument values can come from a command's output with choices run=, and scripts get the chosen subcommand as $usage_cmd. The release also fixes several completion bugs in bash, zsh and fish, and two crashes in #[derive(Cli)] binaries.
+  Added
+  - (complete) complete … delegate="<command>" completes a wrapped command's arguments with that command's own shell completion (#1498, @jdx). With the spec below, wrapper layer1 plan -o<Tab> offers whatever terraform plan -o<Tab> would. delegate can carry fixed arguments (delegate="kubectl --context prod"), and it can't be combined with run or type. It works in fish, bash (requires bash-completion) and zsh. PowerShell and Nushell get no delegated candidates. Typed words are passed to the shell as arguments, not spliced into a script, so they are never run. If the shell can't answer within 3 seconds, completion falls back to files. Fig output leaves delegated args bare.
+    arg "<layer>"
+    arg "<command>" var=#true
+    complete "command" delegate="terraform"
+  - (spec) choices run="…" builds an argument's or flag's allowed values from a command that prints one value per line (#1497, @jdx). These values are used to check input (strict and ignore_case still apply), for Tab completion, and in --help handled by the parser, usage bash and usage exec. Any values written on the node are kept alongside them. Static outputs never run the command. render_help, Markdown and man pages describe it as output of `…` , Fig emits a generator, and Go tables and TypeScript/Python SDK types treat the value as an open string. During a parse, the command runs at most once and only when a declared value doesn't match. Parser::with_env values are passed to it. New library API includes SpecChoices::run, resolved_values(env), SpecArgBuilder::choices_run, usage::docs::cli::render_runtime_help and usage::sh::sh_with_env. Fig generator commands, from both choices run= and complete run=, now escape backslashes, backticks and ${.
+    arg "<service>" {
+      choices run="docker compose config --services"
+    }
+  - (spec) A complete node can now sit inside the arg it completes, including a flag's arg, or directly inside a flag as shorthand for its value (#1496, @jdx). The inline form takes run, type and descriptions but no name. It takes precedence over a named complete "<name>" for the same arg. The new Spec::completer(cmd, arg) applies this order, and complete-word, Fig, usage-dynamic and the Go generator all follow it.
+    flag "--out <path>" {
+        complete type="dir"
+    }
+  - (lib) Scripts run by usage bash, zsh, fish, powershell and exec get the chosen subcommand's canonical name in usage_cmd, with nested names joined by spaces, such as "db migrate" (#1505, @jdx). It is unset at the top level, and a usage_cmd inherited from a parent process is cleared. If the spec declares its own flag or arg named cmd, that one keeps the variable. The value comes from ParseOutput::as_env, so other embedders such as mise tasks get it too.
+  - (lib) FlagMeta, CommandMeta and ArgMeta in usage-rs/usage-argv have a const fn getter for every field, including the fields that 6.11.1 moved into extra (#1491, @jdx). For example, flag.env_fallback() works however the struct is laid out. The fields stay public for now, but v7 plans to hide them, so switch to the getters.
+  - (lib) Parser::without_running_commands() parses without starting any choices run= command (#1503, @jdx). A value outside the declared choices is accepted unchecked. usage explain now uses this mode, so explaining a command line against an untrusted spec never runs that spec's commands.
+  - (cli) Releases now ship a version-matched usage agent skill for writing specs, parsing script arguments, using usage explain, and generating completions and docs (#1509, @jdx). mise users can install it with mise use usage and then mise skills sync --dir .agents/skills.
+
+  Fixed
+  - (derive) A generated Cli::parse() no longer panics when output goes to a closed pipe, for example with mycli --help | head -1 or a cancelled completion (#1484, @jdx). Before, panic = "abort" builds aborted with SIGABRT. Exit statuses are unchanged.
+  - (derive) Async dispatch generated by #[usage(run_async)] and run_async_with now boxes the selected command's future (#1488, @jdx). Before, debug builds reserved stack for every command's future at each dispatch level, which could overflow the stack in large CLIs (for example, STATUS_STACK_OVERFLOW on Windows). This costs one heap allocation per dispatch level. The API is unchanged.
+  - (derive) A renamed usage-rs dependency inherited from [workspace.dependencies] now resolves even when an earlier entry uses a multi-line inline table (#1507, @jdx). The derive now reads manifests with a real TOML parser.
+  - (complete) Typed completers (#[usage(complete = my_fn)]) now receive the command line when called through a spec's run= (#1487, @jdx). CompletionRequest::parse used to ignore --line=… and now accepts --option=value for every option that takes a value.
+  - (complete) A command line that doesn't parse no longer prints an error over the prompt when you press Tab (#1495, @jdx). zsh shows the message below the prompt with _message. bash, fish and Nushell discard it.
+  - (bash) Values for --flag=value now complete when the cursor is after the =, in both per-binary scripts and the completion-init handler (#1499, @jdx).
+  - (fish) Words you've started quoting or escaping now complete: 'prod<Tab> finds 'prod env' (#1500, @jdx). Text after the cursor is no longer sent. Multi-line help no longer shows up as extra fake candidates in fish, zsh, Nushell or PowerShell.
+  - (zsh) With completion-init zsh sourced, file completion for commands that aren't usage scripts works normally again, including in cases like emacs --<Tab> that used to insert a literal * (#1493, @jdx). The fix applies from the next shell start.
+  - (cli) usage bash <(…), /dev/stdin and other pipe or FIFO script paths used to run an empty script and exit 0. usage now copies the script to a private temp directory first, for bash, zsh, fish and PowerShell (#1494, @jdx).
+  - (lib) The published usage-rs crate's tests now pass on their own, so downstream packagers such as Debian can test the released source (#1510, @jdx).
+
+  Changed
+  - All crates now use the Rust 2024 edition, and the minimum supported Rust version stays at 1.91 (#1511, @jdx). Public macros accept 2024 expression syntax such as var_min = const { 1 }. Generated shadow crates rename reserved field names such as --gen to gen_.
+
+  Upgrading
+  Regenerate completion scripts made with usage generate completion <shell> <bin> to get the fixes from #1495 (all shells), #1499 (bash) and #1500 (fish). If you use completion-init, just start a new shell.
+
+  💚 Sponsor usage
+  usage is built and maintained by @jdx, an open source developer at entire.io, the title sponsor of his open source work.
+  If usage powers CLI specs, docs, or completions for a tool you maintain or use, please consider becoming an individual or company sponsor. Your support funds ongoing development and helps keep usage fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/usage/releases/tag/v6.12.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://usage.jdx.dev/cli/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

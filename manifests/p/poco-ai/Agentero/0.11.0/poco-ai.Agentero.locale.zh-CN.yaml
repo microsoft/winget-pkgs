@@ -1,0 +1,72 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.11.0
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  本次发布围绕「在 Agentero 里直接写与读」：新增 .tex 就地编译与 PDF 预览，为普通文本、PDF 与 Excalidraw 提供轻量查看器，为网页论文带来选区工具，并显著改善 Agent 连接速度与 LaTeX 编译体验。
+  新功能
+  - TeX 就地编译：文件树中每个 .tex 都有编译按钮，可选 PDFLaTeX / XeLaTeX / LuaLaTeX（由 latexmk 自动编排依赖与重跑），编译结果在编辑器右侧以 PDF 分屏打开。（#561 by @byy-yby）
+  - 后台编译任务：编译改为后台任务运行，任务面板实时显示 latexmk 阶段与进度并可取消；.tex 保存后自动重新编译，编译完成即刷新已打开的 PDF pane。（commit by @Phil-Fan）
+  - 纯文本编辑器：papers/ 之外的 txt/tex/bib/json/yaml/python 等文件改用 CodeMirror 6 打开，支持按扩展名高亮、TeX/BibTeX 补全、自动保存与外部改动重载。（commit by @Phil-Fan）
+  - Excalidraw 白板：.excalidraw 文件可作为可编辑画布打开，跟随主题，支持自动保存与外部改动就地重载。（commit by @Phil-Fan）
+  - 普通 PDF 阅读模式：papers/ 之外的 PDF（如编译产物）不再走论文流水线，关闭版面分析、批注、翻译等重功能，保留翻页、缩放、搜索、大纲与文本选择。（commit by @Phil-Fan）
+  - 网页论文选区工具：通过带域名白名单的 agentero-web 代理内嵌网页论文，可在页面上划词复制、翻译，并使用 ⌘K 快速提问与 ⌘L 加入对话。（commit · commit by @Phil-Fan）
+  - 会议论文 PDF 自动推导：新增 USENIX，以及 NeurIPS / CVF / ECVA / IJCAI / PMLR 的 PDF 直达链接推导，落地页缺少附件时也能自动下载正文。（#526 by @bet4it · commit by @Phil-Fan）
+  - Agent 连接复用：Chat 预热后的 ACP 连接会保留复用，避免每轮冷启动；首个 token 前会显示 starting / waiting-model / reconnecting 等阶段。（commit by @Phil-Fan）
+  - CLI 登录引导：认证失败时可在确认后于终端执行 Agent 模板自带的登录命令，设置页与 Doctor 也提供入口。（commit by @Phil-Fan）
+  - 一键安装 Node.js: Doctor 的 Host 运行时区在缺少 Node.js/npm 时提供安装按钮（Windows 走 winget、macOS 走 Homebrew），安装后自动重新探测。（commit by @qychen2001）
+  - 内置 Skills: 新增「科研论文写作」与「学术绘图」技能，并自动发现随应用内置的 skill。（commit · commit by @Phil-Fan）
+  - Plaza PPT 技能推荐：Plaza 新增 PPT 相关技能推荐。（commit by @Phil-Fan）
+  - ⌥A 全文翻译：工具栏的语言按钮绑定 ⌥A（macOS 上按物理键匹配），双栏翻译同样生效。（commit by @Phil-Fan）
+  - 引导页网络代理：首次引导新增网络代理设置步骤。（commit by @Phil-Fan）
+  改进
+  - 标签右键菜单：右键菜单显示关闭标签的快捷键提示。（commit by @Phil-Fan）
+  - Windows Agent 健壮性：改进 Windows 下的命令发现，并对 npm 缓存失败给出更清晰的说明。（commit · commit by @JiaheChen2002）
+  - 翻译卡片锚定：网页中翻译卡片固定显示在选区下方，不再漂移。（commit by @Phil-Fan）
+  修复
+  - macOS 全屏标题栏：原生全屏时折叠避让三色按钮的占位，首个控件不再被顶到约 92px 处。（#555 by @HuangYincan）
+  - 触控板捏合缩放：手势期间只做 CSS 预览、松手提交一次真实缩放，慢速捏合不再无响应、快速捏合不再跳格。（#556 by @HuangYincan）
+  - ModelScope 面板横向平移：恢复站点 1280px 布局并桥接滚轮横向滚动，同时不再裁掉左边缘。（#557 by @HuangYincan）
+  - 编辑器粘贴：修复编辑器内复制粘贴出现多余空行与双链别名重复，以及空标题块粘贴退化为正文。（#558 by @bet4it）
+  - Windows PDF 跳页：修复 Windows 上滚动时视口随机跳到首页或末页。（#545 by @langbit）
+  - Windows MCP 隧道闪窗：健康探测子进程加上 CREATE_NO_WINDOW，不再每 10 秒闪现控制台。（#544 by @Zhou1317fe5）
+  - Agent 目录检测：补上 OpenCode 的 ~/.opencode/bin 与 Grok 的 ~/.grok/bin，并在引导页说明缺失层。（#554 by @HuangYincan）
+  - 内置 embedding: 没有可用内置 embedding 时不再写入不可用的默认值。（commit by @Phil-Fan）
+  - 网页代理：代理返回时剥离上游 CSP meta，避免内嵌页面被自身策略破坏。（commit by @Phil-Fan）
+  - Agent 消息操作：用户消息的操作按钮改为浮动在气泡旁。（commit by @Phil-Fan）
+  - 依赖安全：覆盖 mermaid 依赖链中受影响的 nanoid 与 lodash-es 版本。（commit by @qychen2001）
+  已解决问题
+  - 笔记内容被截断：修复正文中出现 < 比较（如 <0.5B）时，Markdown 笔记后半段被静默丢弃。（#533 by @Phil-Fan）
+  - 引用悬浮卡片：内部链接跳转后自动关闭引用悬浮卡。（#528 by @Phil-Fan）
+  - 导入去重：修复同步去重后论文元数据与笔记不完整。（#507 by @Phil-Fan）
+  - Markdown 导出：导出 .md 时去掉 vault 内部 frontmatter（aliases、tags 等）。（#551 by @Phil-Fan）
+  - 视觉批注边缘：视觉区域边框改用主题色，深色模式下更清晰。（#498 by @Phil-Fan）
+  - Agent 首 token 延迟：通过连接复用与阶段提示改善 TTFT 体验。（#536 by @Phil-Fan）
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.11.0
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
