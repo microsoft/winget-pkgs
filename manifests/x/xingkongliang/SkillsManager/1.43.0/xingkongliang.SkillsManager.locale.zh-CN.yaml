@@ -1,0 +1,42 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: xingkongliang.SkillsManager
+PackageVersion: 1.43.0
+PackageLocale: zh-CN
+ShortDescription: 一个应用，统一管理所有 AI 编码工具的 Skills。
+Description: |-
+  Skills Manager 是一个桌面应用，将 AI Agent 技能集中保存在一个中央技能库中，并可安装到 Claude Code、Codex、Cursor、Copilot、Gemini CLI 等编码工具。技能可以从 Git 仓库、本地文件夹、.zip 或 .skill 归档或 skills.sh 市场安装，然后分组为 Preset、添加标签和筛选，并跟踪上游更新。
+  全局工作区和项目工作区展示每个 Agent 实际看到的技能，技能可通过软链接或复制同步到任意支持的工具。Skills Manager 还支持将技能库备份到 Git 远程仓库以实现多设备同步，并通过活动日志记录每次安装、移除、更新和同步操作。
+Tags:
+- skills
+- 人工智能
+- 大语言模型
+- 技能
+- 智能体
+- 自主智能
+ReleaseNotes: |-
+  发布日期：2026-10-21
+  递交范围：v1.42.2...v1.43.0
+  发布概览
+  - 「我的 Skill」可以按来源筛选和分组；新增支持 MiniMax Code 和海外版 WorkBuddy。从全局工作区上传的 Skill 下次启动不再消失；Agent 的技能目录换了位置，改过的副本也不会被删；设置页会当场拒绝下次启动无法迁入的中央仓库目录。
+  用户可见更新
+  - 「我的 Skill」按来源筛选和分组 — 来源选择器只显示来自某个来源的 Skill；打开分组后，每个来源归到一个标题下，并显示 Skill 数量。同一个仓库不管是用 SSH、HTTPS、owner/repo 还是 skills.sh 添加的，都算一个来源；网站来源的 Skill 按域名分组。多于一个 Skill 的来源默认折叠，搜索时所有分组都会展开。分组时不能拖动排序。感谢 @ZhuYichuan（#589、#530）。
+  - MiniMax Code 成为内置 Agent：用户级 Skill 部署到 ~/.minimax/skills，项目级部署到 <repo>/.minimax/skills。感谢 @ZhuYichuan（#592）。
+  - WorkBuddy AI（海外版） — 海外版 WorkBuddy 从 ~/.workbuddy-ai/skills 读取 Skill，所以部署给 WorkBuddy 的 Skill 在海外版里从来没被加载。现在它是单独的 Agent「WorkBuddy AI」；国内版仍用 ~/.workbuddy/skills。感谢 @huaqian0226（#588、#587、#468）。
+  - 从全局工作区上传的 Skill 会留在技能库里 — 上传后，下次启动应用或 CLI 时，这个 Skill 和它的部署记录可能从技能库里消失，文件却还在磁盘上。现在上传会把技能库需要的信息都存好。已经丢失的记录不会恢复。感谢 @drkraft（#586）。
+  - Agent 的技能目录换了位置，改过的副本不会被删 — 在设置里改了 Agent 的技能目录，或者更新后它的默认路径变了，旧路径下以复制方式部署的 Skill 会连同你在里面的修改一起被删掉。现在这些副本会移到技能库里的 kept-copies/<agent>/。旧路径下的链接仍然删除。取消部署、停用 Agent、切换到不含这个 Skill 的 Preset，仍然会删掉副本（#595、#593）。
+  - 设置页拒绝无法迁入的中央仓库目录 — 新的技能库位置要到下次启动才生效，而启动时会拒绝非空目录和位于当前技能库内的目录，并且不提示，看起来就像设置没生效（#509、#541）。现在保存时就会拒绝这样的目录，并给出提示，不再显示 [object Object]。迁移警告显示在路径下方，提示里也写明要完全退出应用（包括托盘）（#596）。
+  - 来源里没有某个 Skill 时，报错更清楚 — 安装一个在取得的仓库版本里不存在的 Skill，报错里显示的是一个临时目录路径。现在报错会写出 Skill 的名字，并提示检查来源和子路径（#594）。
+  - Windows：可以用 Scoop 安装 — 先 scoop bucket add extras，再 scoop install extras/skills-manager。感谢 @12dxc 把它加入 Scoop Extras（#591）。
+  开发者与治理更新
+  - 前端组件测试：Vitest + jsdom，新增 npm test 脚本和 PresetBar 的测试，Frontend CI 会运行它们。感谢 @huoguojun123（#570）。
+  - 新增 REVIEW.md：按改动涉及的内容决定评审深度，并列出本仓库反复出现的缺陷类型。
+  - 判断「目标是否在当前技能库内」时会先解析链接，保存路径和启动迁移都是如此。以前经由链接指回技能库的目标能通过检查，启动迁移随后会尝试把技能库复制进它自己（#596）。
+  - sync_skill_to_active_scenario 和 sync_desired_targets 一样，不再动另一个工具正在使用的部署路径（#595）。
+  当前校验状态
+  - ✅ 跨平台构建通过（macOS Intel / macOS ARM / Windows x64 / Linux x64 / Linux ARM64）
+  - ✅ TypeScript typecheck 通过
+ReleaseNotesUrl: https://github.com/xingkongliang/skills-manager/releases/tag/v1.43.0
+ManifestType: locale
+ManifestVersion: 1.12.0

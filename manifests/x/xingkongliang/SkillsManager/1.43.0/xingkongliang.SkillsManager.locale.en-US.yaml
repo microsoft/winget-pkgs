@@ -1,0 +1,50 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: xingkongliang.SkillsManager
+PackageVersion: 1.43.0
+PackageLocale: en-US
+Publisher: xingkongliang
+PublisherUrl: https://github.com/xingkongliang
+PublisherSupportUrl: https://github.com/xingkongliang/skills-manager/issues
+PackageName: Skills Manager
+PackageUrl: https://skillsmanager.dev/
+License: MIT
+LicenseUrl: https://github.com/xingkongliang/skills-manager/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Tianliang Zhang
+ShortDescription: One app to manage AI agent skills across all your coding tools.
+Description: |-
+  Skills Manager is a desktop app that keeps AI agent skills in one central library and installs them into coding tools such as Claude Code, Codex, Cursor, Copilot, and Gemini CLI. Skills can be installed from Git repositories, local folders, .zip or .skill archives, or the skills.sh marketplace, then grouped into presets, tagged and filtered, and tracked for upstream updates.
+  Global and project workspaces show what each agent actually sees, and skills sync to any supported tool via symlink or copy. Skills Manager also backs the library up to a Git remote for multi-device sync and records every install, remove, update, and sync operation in an activity log.
+Tags:
+- agent
+- agentic
+- ai
+- large-language-model
+- llm
+- skills
+ReleaseNotes: |-
+  Release date: 2026-10-21
+  Commit range: v1.42.2...v1.43.0
+  Release Overview
+  - My Skills can filter and group skills by where they came from, and MiniMax Code and the overseas edition of WorkBuddy are now supported. Skills uploaded from the Global Workspace no longer vanish at the next launch, copies with your edits survive an agent's skills folder moving, and Settings refuses a central repository folder the next launch could not move to.
+  User-facing
+  - Filter and group My Skills by source — A source picker shows only the skills from one source, and a grouping toggle puts each source under one header with its skill count. One repository counts as one source whether it was added by SSH, HTTPS, owner/repo or skills.sh; site skills group by domain. Sources with more than one skill start collapsed, and a search opens every group. Dragging is off while grouping is on. Thanks to @ZhuYichuan (#589, #530).
+  - MiniMax Code is a built-in agent: user skills go to ~/.minimax/skills, project skills to <repo>/.minimax/skills. Thanks to @ZhuYichuan (#592).
+  - WorkBuddy AI (overseas edition) — The overseas edition of WorkBuddy reads skills from ~/.workbuddy-ai/skills, so skills deployed to WorkBuddy never loaded there. It is now its own agent, WorkBuddy AI; the domestic edition keeps ~/.workbuddy/skills. Thanks to @huaqian0226 (#588, #587, #468).
+  - Skills uploaded from the Global Workspace stay in the library — After an upload, the next launch of the app or the CLI could drop the skill and its deployments from the library, while its files stayed on disk. Uploads now save everything the library needs. Records already lost are not brought back. Thanks to @drkraft (#586).
+  - Edited copies survive an agent's skills folder moving — When an agent's skills folder moved, either in Settings or because an update changed its default path, copies deployed at the old path were deleted together with any edits made in them. They are now moved into kept-copies/<agent>/ inside the library. Links at the old path are still removed. Undeploying, disabling an agent, or switching to a preset without the skill still removes the copy (#595, #593).
+  - Settings refuses a central repository folder it cannot move to — A new library location takes effect at the next launch, and that launch refused a folder that was not empty or that sat inside the current library. It did so silently, so the setting looked like it did nothing (#509, #541). Settings now refuses such a folder when you save, with a message instead of [object Object]. The migration warning appears under the path, and the hints say to quit the app completely, including from the tray (#596).
+  - Clearer error when a source no longer has a skill — Installing a skill missing from the fetched repository showed a temporary folder path. The message now names the skill and asks you to check the source and its subfolder (#594).
+  - Windows: install with Scoop — scoop bucket add extras, then scoop install extras/skills-manager. Thanks to @12dxc for adding it to Scoop Extras (#591).
+  Developer & Governance
+  - Frontend component tests: Vitest with jsdom, an npm test script, and tests for PresetBar. The Frontend CI job runs them. Thanks to @huoguojun123 (#570).
+  - REVIEW.md sets how deep a review goes from what a change touches, and lists the failure classes that keep recurring in this repository.
+  - "Inside the current library" now resolves links, both when saving the path and in the startup migration. Before, a target reached through a link into the library passed, and the startup migration then tried to copy the library into itself (#596).
+  - sync_skill_to_active_scenario now leaves alone a path that another tool has a live deployment at, as sync_desired_targets already did (#595).
+  Current Verification
+  - ✅ Cross-platform build passed (macOS Intel / macOS ARM / Windows x64 / Linux x64 / Linux ARM64)
+  - ✅ TypeScript typecheck passed
+ReleaseNotesUrl: https://github.com/xingkongliang/skills-manager/releases/tag/v1.43.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
