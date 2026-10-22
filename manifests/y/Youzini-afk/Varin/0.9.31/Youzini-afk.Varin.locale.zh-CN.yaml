@@ -1,0 +1,60 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Youzini-afk.Varin
+PackageVersion: 0.9.31
+PackageLocale: zh-CN
+Publisher: Youzini-afk and Varin contributors
+PublisherUrl: https://github.com/Youzini-afk
+PublisherSupportUrl: https://github.com/Youzini-afk/Varin/issues
+PackageName: Varin
+PackageUrl: https://github.com/Youzini-afk/Varin
+License: AGPL-3.0-only
+LicenseUrl: https://github.com/Youzini-afk/Varin/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Youzini-afk and Varin contributors
+ShortDescription: 面向编程与科研的独立 Agent 工作台与完整 Harness。
+Description: Varin 是一个独立的 Agent 工作台与完整 Harness，面向编程、科研和其他项目工作，以本地和桌面体验为中心。它内置 Pi 运行时；模型与提供商栈、会话树、包管理器和扩展模型仍由 Pi 提供，而 Varin 负责周围的工具环境、工作状态、恢复、检索、上下文策略、任务治理和工作台界面。Varin 自带两套官方工作形态：以会话、任务和上下文为中心的 Agent Workspace，以及以编辑器、搜索、Git、诊断和调试为中心、把智能体作为可停靠面板的 IDE Workbench。
+Tags:
+- pi
+- pi-agent
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 科研
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  本版重做快速代码检索，加入可配置的模型请求重试，完善上下文整理、文件恢复和多 Agent 协作界面，并集中修复索引存储、工具诊断与 Windows 安装体验。
+  检索、模型与上下文
+  - 快速检索改为围绕证据进行决策：保留来源、候选与已选片段，按实际请求容量安排比较材料；避免每批重复发送整个候选目录，容量不足时给出具体计数和窗口信息。明确区分模型预览与完整检索记录。
+  - 在「对话默认」加入自动重试设置，支持常见瞬时失败及用户自定义匹配。重试保留原请求身份和尝试记录，停止操作可立即结束等待。
+  - 普通对话、规划和上下文整理保留配置的重试策略；正确识别冻结规划模型配置中的可选空值，避免误报模型选择已改变。
+  - 上下文整理按预算选择需要保留的对话原文，并纳入 Agents 设置。Token 计数接入模型元数据和本地 tokenizer，词表缓存支持内存释放、磁盘压缩和旧版本回收。
+  - 修复辅助模型标题生成的派发与中断恢复；完善决策接口错误和自定义请求路径的说明，移除改动导读模型及其入口。
+  工具、恢复与可靠性
+  - 新增按会话轮次查询恢复点和恢复文件的工具，恢复侧栏提供时间线和文件预览。
+  - 文件读取默认按 64 KiB 分页，并允许显式扩大；符号结果默认按层展开，支持子项展开、翻页和完整树模式。目录游标绑定查询，符号引用检查查询和结果版本。
+  - 文件写入支持明确的创建和替换模式，保留版本冲突检查；修复 CRLF 多行编辑、缺失目录与空目录的状态区分等问题。
+  - 模型可停止后台进程；工具参数错误保留字段与原因，子任务失败携带原始运行错误和事件引用。改进 MCP 错误分类、子任务准备过程和上下文准备失败诊断。
+  - 修复只读检索预设误带恢复工具导致准备失败，以及子任务完成或恢复后父任务偶尔停在“可运行”状态的问题；旧执行线程退出后重新通知继续执行，保留收尾期间的防重入检查。
+  - Linux 目录监听的同步检查支持完整长度的文件名和系统调用中断重试，失败信息保留具体目录和系统原因。
+  - HTTP 关闭和进程信号接入完整 Host 资源清理并合并并发关闭；内核断连后的清理不再因诊断管道关闭而中断。
+  - Host 关闭某项资源失败后继续等待其他资源收尾，避免语义索引异常跳过知识库关闭；保留检查点与退出时的原始存储错误。
+  会话与桌面体验
+  - 重整工作概览与子任务侧栏，加入协作消息和文件交流展示；精简操作并提供任务右键菜单，悬浮概览为聊天内容预留空间。
+  - 共享 Agent 头像库扩充到 64 种，头像随任务身份保留；修复侧栏会话重命名的焦点问题。
+  - 用量改为一行展示输入、输出及有记录的缓存读取和创建，修复模型渠道归属；重新设计 MCP 摘要，并显示脚本意图和内部工具调用详情。
+  - 跟随 Agent 输出时保留底部阅读空间，本轮操作按钮在输出完成后显示；修复 Computer Use 深色主题遮罩，清理旧开发服务器预览入口。
+  - Windows 安装和卸载改用 Varin 产品界面，修复选择目录后的白边、盘符根目录解析、首次安装路径、卸载完成状态和任务栏产品名称。
+  索引、存储与安全
+  - 嵌入文本和批次按模型上下文容量拆分并预留余量，修复 Unicode 分段边界；内核丢失后重新获取 tokenizer 租约，缓存文件被手动删除后允许恢复索引清理。
+  - 回收索引旧发布副本及已删除会话的正文和相关资源，减少持续累积的磁盘占用。
+  - 索引重新打开时保留尚未发布的推理回执，已发布向量对应的重复账本内容仍正常回收。
+  - 升级 TriviumDB 至 0.8.10，接入保存中断后的原生恢复机制，同步云端锁文件和 Windows ARM64 构建、加载适配；索引清理避免重复执行完整检查点。
+  - 更新 Wasmtime 至 48.0.7、rustls-webpki 至 0.103.16、webpki-roots 至 1.0.10，修复新披露的 Wasm 执行和证书信任问题。参见 Wasmtime、webpki 和 根证书公告。
+ReleaseNotesUrl: https://github.com/Youzini-afk/Varin/releases/tag/v0.9.31
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
