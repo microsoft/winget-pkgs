@@ -1,0 +1,73 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: RemcoStoeten.Skriuw
+PackageVersion: 0.44.0
+PackageLocale: en-US
+Publisher: Remco Stoeten
+PublisherUrl: https://github.com/remcostoeten
+PublisherSupportUrl: https://github.com/remcostoeten/skriuw/issues
+Author: Remco Stoeten
+PackageName: Skriuw
+PackageUrl: https://skriuw.com/
+License: MIT
+LicenseUrl: https://github.com/remcostoeten/skriuw/blob/HEAD/LICENSE
+Copyright: Copyright (c) Remco Stoeten
+ShortDescription: Fast, local-first desktop app for notes, journaling, and knowledge work.
+Description: Skriuw is a fast, local-first desktop app for notes, journaling, and knowledge work. Version 2 keeps the workspace in local SQLite storage with portable archives and Git-backed history.
+Moniker: skriuw
+Tags:
+- journal
+- knowledge-base
+- local-first
+- markdown
+- note-taking
+- notes
+- obsidian-alternative
+- open-source
+- productivity
+ReleaseNotes: |-
+  Everything since v0.43.0. This release is about AI you can see and steer, notes you can reuse, and a browser build that can recover from a broken database instead of dead-ending.
+  AI runs are visible work
+  AI is no longer something that happens behind a modal (ADR-0040, #358).
+  - A standing entry point. An Ask AI launcher sits in the editor whenever the AI opt-in gate is open. With nothing selected it opens on the caret, so whole-note actions (summarise, outline, suggest a title, extract tasks, suggest tags) no longer require selecting text they ignore.
+  - One anchored, non-modal menu. The AI menu is a popover over the range it is about and swaps in place with the bubble and link menus. Actions that need nothing from you start on the click that chose them. The three that need an instruction (change tone, translate, custom) get a second pane in the same popover, with a live preview of the exact payload.
+  - Runs report themselves. Every run shows three labelled stages (sending, waiting, generating), a skeleton where the text will land, elapsed time, and a stall note after six seconds naming which half is quiet. A failure marks the stage it failed in and names its one recovery move. Stop works in every in-flight phase and no longer waits on an acknowledgement a dead transport never sends.
+  - One card for every outcome. The word diff for a replacement, the plan checklist for tasks and tags, the proposed line for a title. Only a replacement strikes its range through.
+  - Fixed: the result card could dismiss itself the tick it opened, and a torn-down effect could leave a run holding a disposed stream.
+  Voice dictation
+  Speech-to-text behind the AI opt-in gate (ADR-0039, #339).
+  - Record from the editor with a live level meter; the transcript is inserted as one undoable transaction.
+  - Optionally reformat the transcript through the completion pipeline with two new built-in prompts, Clean transcript and Structure transcript (prompt library v3). A failed format falls back to the raw text.
+  - Groq (Whisper) and Gemini transcribe behind the existing credential and consent gate. Audio bytes are staged over IPC and the provider call runs off the main thread.
+  - Audio-only microphone access now works on Linux (WebKitGTK permission request answered).
+  Reuse your own notes
+  Personal templates and saved searches, both device-local and bounded (ADR-0038, #353).
+  - Save note as template registers an ordinary note as a template source. Copies keep its properties, default to its folder, expand {{date}}, and get fresh task and block ids. The source stays editable; removing it from the picker never deletes it.
+  - Saved searches live in the sidebar and re-evaluate live against current notes. Title text and tag: / person operators keep their meaning across restart, archive round-trips, and preference reset.
+  Editor
+  - Compact selection toolbar (#359). Twenty-one controls become ten: highlight, alignment, and block type each collapse behind one trigger that shows the value in force. Submenus stay inside the window, flip above the toolbar when needed, and are fully keyboard-operable (ArrowDown opens, Escape/Tab return). Highlights can finally be removed with None instead of re-pressing the same colour. The Ask AI entry gets a liquid-metal treatment that respects prefers-reduced-motion and falls back to a plain button.
+  - Block gutter is now a setting (#271, #356). Settings → Editor → Blocks toggles the drag handle live, without an editor remount. With it off, every gutter action stays reachable via Alt+Arrow, the slash menu, and the block context menu.
+  - Raw Markdown view: wrapped lines get aligned line numbers and correct j/k movement.
+  - Task lists: better checkbox accessibility, keyboard navigation, and focus retention.
+  - The first # / @ keystroke on large workspaces is ~18 ms faster (collator warm-up moved out of the hot path).
+  Media
+  - Named media with bulk delete (#289, #356). The settings media library gets an inline name and description per item, and multi-select delete for unused entries. The cover and media picker shows and searches the stored name. Names are keyed by content hash so they survive an image being detached and re-attached.
+  - Migration 0024_media_metadata.sql. Forward-safe; blanking both fields deletes the record rather than storing an empty one.
+  Browser runtime recovers from a broken database
+  - When the database cannot open (corrupt file, failed migration, open failure, worker crash) the startup screen now offers Reset workspace… behind a confirmation that names what is destroyed, instead of only Retry (#355). The reset cannot be started twice, and a storage code survives being wrapped in an error. Database-too-new and quota-exceeded stay out because both recover without erasing anything.
+  Reliability
+  - Closing the window during an in-flight close attempt can no longer close a replacement session.
+  - Filtered full-text search applies candidate ids before the limit, so filtered results are no longer truncated by the wrong set.
+  - A stale editor save can no longer undo an accepted task toggle after restart (30-round regression test).
+  - Sync refresh retries are bounded, support manual retry, and dispose safely (spec).
+  Under the hood
+  - The AI stack now consumes the extracted ai-core / ai-providers SDK (git tag ai-v0.3.0), with transcription moved into it. Skriuw keeps the catalogue, consent vocabulary, prompt library, run history, Ollama lifecycle, and every command surface. The remote AI crate no longer depends on reqwest or base64 (#357).
+  - The browser e2e and performance harnesses are hermetic again: a stubbed Tauri bridge and an offline cloud seam mean neither touches the network. A new headless-Chrome e2e proves the workspace-reset path against a real corrupted OPFS pool file.
+  Known gaps
+  - Voice dictation, named media, and the block gutter setting were verified in the browser build and unit tests, not on a real device against a live provider.
+  - Stored media alt text is not yet rendered by the editor's image node, and the lightbox does not show the name or description.
+  Full Changelog: v2-v0.43.0...v2-v0.44.0
+ReleaseNotesUrl: https://github.com/remcostoeten/skriuw/releases/tag/v2-v0.44.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

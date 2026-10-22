@@ -1,0 +1,94 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: axodotdev.dist
+PackageVersion: 0.33.0
+PackageLocale: en-US
+Publisher: axodotdev
+PublisherUrl: https://github.com/axodotdev
+PublisherSupportUrl: https://github.com/axodotdev/cargo-dist/issues
+PackageName: dist
+PackageUrl: https://github.com/axodotdev/cargo-dist
+License: Apache-2.0
+ShortDescription: 📦 shippable application packaging
+Tags:
+- cargo
+- installers
+- packaging
+- release-automation
+- rust
+ReleaseNotes: |-
+  ## Release Notes
+
+  This release includes several new features and a change to the shell installers in certain environments.
+
+  ## Azure Artifact Signing for Windows binaries and installers
+
+  We now include support for codesigning Windows binaries and installers using [Azure Artifact Signing](https://azure.microsoft.com/en-us/products/artifact-signing). For more information, see [the docs](https://axodotdev.github.io/cargo-dist/book/supplychain-security/signing/windows.html#azure-artifact-signing-quickstart).
+
+  This currently only supports x86_64 Windows targets, and doesn't support aarch64 Windows targets or non-Windows targets.
+
+  • impl @blyedev [Add Azure signing support and improve workflow for releases](https://github.com/axodotdev/cargo-dist/pull/2396)
+
+  ## Shell installers now place `env` helper alongside receipts for flat installs
+
+  In previous versions of dist, we would place the `env` helper scripts which add your program to the user's `PATH` alongside the binary when using a "flat" install layout. ("Flat" layouts consist of only a single directory, as opposed to the default "hierarchical" layout that places binaries in a "bin" subdirectory.) Beginning with dist 0.33.0, we instead place the `env` script in the app-specific config path alongside the install receipt. By default, this is `~/.config/$APP_NAME`. If users had installed a previous version of your app, newer versions of the installer will migrate old `env` files to the new location in addition to updating the user's dotfiles.
+
+  -impl @Gankra [Install env scripts in receipts dir instead of bin dir](https://github.com/axodotdev/cargo-dist/pull/2423)
+
+  ## Fixes
+
+  • impl @ntBre [Include `--repo` in both `gh attestation` commands](https://github.com/axodotdev/cargo-dist/pull/2498)
+
+  ## Install cargo-dist 0.33.0
+
+  ### Install prebuilt binaries via shell script
+
+  ```sh
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/axodotdev/cargo-dist/releases/download/v0.33.0/cargo-dist-installer.sh | sh
+  ```
+
+  ### Install prebuilt binaries via powershell script
+
+  ```sh
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/axodotdev/cargo-dist/releases/download/v0.33.0/cargo-dist-installer.ps1 | iex"
+  ```
+
+  ### Install prebuilt binaries via Homebrew
+
+  ```sh
+  brew install axodotdev/tap/cargo-dist
+  ```
+
+  ### Install prebuilt binaries into your npm project
+
+  ```sh
+  npm install @axodotdev/dist@0.33.0
+  ```
+
+  ## Download cargo-dist 0.33.0
+
+  |  File  | Platform | Checksum |
+  |--------|----------|----------|
+  | [cargo-dist-aarch64-apple-darwin.tar.xz](https://github.com/axodotdev/cargo-dist/releases/download/v0.33.0/cargo-dist-aarch64-apple-darwin.tar.xz) | Apple Silicon macOS | [checksum](https://github.com/axodotdev/cargo-dist/releases/download/v0.33.0/cargo-dist-aarch64-apple-darwin.tar.xz.sha256) |
+  | [cargo-dist-x86_64-apple-darwin.tar.xz](https://github.com/axodotdev/cargo-dist/releases/download/v0.33.0/cargo-dist-x86_64-apple-darwin.tar.xz) | Intel macOS | [checksum](https://github.com/axodotdev/cargo-dist/releases/download/v0.33.0/cargo-dist-x86_64-apple-darwin.tar.xz.sha256) |
+  | [cargo-dist-x86_64-pc-windows-msvc.zip](https://github.com/axodotdev/cargo-dist/releases/download/v0.33.0/cargo-dist-x86_64-pc-windows-msvc.zip) | x64 Windows | [checksum](https://github.com/axodotdev/cargo-dist/releases/download/v0.33.0/cargo-dist-x86_64-pc-windows-msvc.zip.sha256) |
+  | [cargo-dist-aarch64-unknown-linux-gnu.tar.xz](https://github.com/axodotdev/cargo-dist/releases/download/v0.33.0/cargo-dist-aarch64-unknown-linux-gnu.tar.xz) | ARM64 Linux | [checksum](https://github.com/axodotdev/cargo-dist/releases/download/v0.33.0/cargo-dist-aarch64-unknown-linux-gnu.tar.xz.sha256) |
+  | [cargo-dist-x86_64-unknown-linux-gnu.tar.xz](https://github.com/axodotdev/cargo-dist/releases/download/v0.33.0/cargo-dist-x86_64-unknown-linux-gnu.tar.xz) | x64 Linux | [checksum](https://github.com/axodotdev/cargo-dist/releases/download/v0.33.0/cargo-dist-x86_64-unknown-linux-gnu.tar.xz.sha256) |
+  | [cargo-dist-aarch64-unknown-linux-musl.tar.xz](https://github.com/axodotdev/cargo-dist/releases/download/v0.33.0/cargo-dist-aarch64-unknown-linux-musl.tar.xz) | ARM64 MUSL Linux | [checksum](https://github.com/axodotdev/cargo-dist/releases/download/v0.33.0/cargo-dist-aarch64-unknown-linux-musl.tar.xz.sha256) |
+  | [cargo-dist-x86_64-unknown-linux-musl.tar.xz](https://github.com/axodotdev/cargo-dist/releases/download/v0.33.0/cargo-dist-x86_64-unknown-linux-musl.tar.xz) | x64 MUSL Linux | [checksum](https://github.com/axodotdev/cargo-dist/releases/download/v0.33.0/cargo-dist-x86_64-unknown-linux-musl.tar.xz.sha256) |
+
+  ## Verifying GitHub Artifact Attestations
+
+  The artifacts in this release have attestations generated with GitHub Artifact Attestations. These can be verified by using the [GitHub CLI](https://cli.github.com/manual/gh_attestation_verify):
+  ```sh
+  gh attestation verify <file-path of downloaded artifact> --repo axodotdev/cargo-dist
+  ```
+
+  You can also download the attestation from [GitHub](https://github.com/axodotdev/cargo-dist/attestations) and verify against that directly:
+  ```sh
+  gh attestation verify <file-path of downloaded artifact> --bundle <file-path of downloaded attestation>
+  ```
+ReleaseNotesUrl: https://github.com/axodotdev/cargo-dist/releases/tag/v0.33.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

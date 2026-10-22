@@ -1,0 +1,60 @@
+# Rendered by tools/build_packages.py - do not edit the generated copy.
+# Submitted as manifests/d/DonislawDev/BeanNetworkTester/0.8.0/DonislawDev.BeanNetworkTester.installer.yaml
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+
+PackageIdentifier: DonislawDev.BeanNetworkTester
+PackageVersion: 0.8.0
+ReleaseDate: 2026-10-03
+# 🔴 TWO installers, and their ORDER is load-bearing.
+#
+# Only the MSI gives the program a Start Menu entry. A portable package cannot have
+# one at all: the manifest schema has no field for it, winget's portable installer
+# creates no shortcut, and microsoft/winget-cli#2299 asking for one has been open
+# since 2022. While this manifest carried the zip alone, everyone who installed with
+# winget could start the program from a console and from nowhere else.
+#
+# The MSI comes FIRST because that is what decides a fresh install on every client.
+# Recent clients prefer msi/wix over portable when the user has set no preference
+# (microsoft/winget-cli#6123); older ones keep the FIRST applicable installer when
+# nothing else tells two apart. Measured 2026-10-03 on Windows 11 and Windows
+# Server 2025: a fresh install picks the MSI.
+#
+# The zip stays SECOND, and removing it breaks everybody who already has it. An
+# upgrade only considers installers of the kind that is installed, and portable is
+# compatible with nothing but portable - measured: with the MSI alone, upgrading a
+# portable install ends in "No applicable installer found" (0x8A150010); with both,
+# it upgrades as portable. `--scope user` lands here too, for anyone who cannot
+# install for the whole computer.
+Installers:
+- Architecture: x64
+  InstallerType: wix
+  Scope: machine
+  # Windows Installer asks for elevation itself. Measured from a standard user's
+  # token, in the default mode and with --silent alike: one UAC prompt, then success.
+  ElevationRequirement: elevatesSelf
+  InstallerUrl: https://github.com/donislawdev/BeanNetworkTester/releases/download/v0.8.0/BeanNetworkTester-v0.8.0-windows-x64.msi
+  InstallerSha256: 9F879D671942CA57EF86D1DE16828B2C480417C8D34D2D36EB396C69DB89C874
+  # How winget recognises the MSI it installed, release after release: the
+  # UpgradeCode never changes, while every build gets a new ProductCode.
+  AppsAndFeaturesEntries:
+  - UpgradeCode: '{4BE626D0-E975-4E56-92B4-146EF6AEDF3C}'
+- Architecture: x64
+  InstallerType: zip
+  NestedInstallerType: portable
+  NestedInstallerFiles:
+  - RelativeFilePath: BeanNetworkTester/BeanNetworkTester.exe
+  # 🔴 Load-bearing. The default for a portable inside an archive is a SYMLINK in the
+  # links folder, and this exe cannot be reached through one: it needs its sibling
+  # _internal directory, which the symlink leaves behind. Setting this skips the
+  # symlink and puts the directory holding the nested file on PATH instead - verified
+  # in winget's own source (PortableInstaller.cpp takes the parent of the nested
+  # file's path), not inferred from the field's description, which says only
+  # "install location".
+  ArchiveBinariesDependOnPath: true
+  # The program asks for elevation itself when it needs to capture. Saying so here
+  # stops winget from running the whole install elevated.
+  ElevationRequirement: elevatesSelf
+  InstallerUrl: https://github.com/donislawdev/BeanNetworkTester/releases/download/v0.8.0/BeanNetworkTester-v0.8.0-windows-x64.zip
+  InstallerSha256: ED49259A18BBF12424EA79FB31844DA7F87C0D38D3B67677A69A53FBB8F8EEDB
+ManifestType: installer
+ManifestVersion: 1.12.0

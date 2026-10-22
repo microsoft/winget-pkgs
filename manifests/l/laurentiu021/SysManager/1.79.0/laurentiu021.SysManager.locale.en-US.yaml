@@ -1,0 +1,91 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.79.0
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.79.0] - 2026-09-09
+  The Drivers tab now shows whether Windows reports each driver as digitally signed. Until now the only clue
+  about where a driver came from was the Manufacturer column, and that name is a string the driver package
+  supplies about itself, so anyone can write anything in it. The new Signature column comes from Windows
+  instead. It stays blank when Windows reports nothing, because "Unsigned" is the kind of word someone acts
+  on and it must not stand in for "we do not know".
+  Added
+  - Drivers — a Signature column, read from Windows rather than from the driver. Win32_PnPSignedDriver,
+    the Windows source this tab already queried, is named for exactly this property, and the query selected
+    four others and dropped it. So the one tab that could answer "is this driver from who it claims?" was
+    answering it with Manufacturer, which the driver package fills in about itself. The column says "Signed"
+    or "Unsigned" and deliberately not "Safe": a signature identifies the publisher and nothing more, and
+    Windows will load a signed driver from anyone holding a valid certificate. There are three states rather
+    than two. A driver Windows says nothing about shows blank, and a test pins that absent never renders as
+    unsigned, because on this tab that reads as an accusation and sends someone hunting for a driver to remove.
+  Changed
+  - A query that fetches a property nothing reads now fails the build. The dropped IsSigned broke
+    nothing and failed nothing: the query worked, the parse worked, and the column that should have existed
+    simply did not exist. EveryPropertyACimQueryFetches_IsReadBackOut compares both directions over the
+    queries that return JSON — every property selected has to be parsed, and every property parsed has to be
+    selected — so deleting a value from a query fails as loudly as never reading one. The reverse direction is
+    the one that matters most: parse tests supply their own JSON, so they keep passing while the real query
+    quietly stops asking for the value.
+  Verify the download
+  Get-FileHash .\SysManager-v1.79.0.exe -Algorithm SHA256
+  Expected SHA256: DA6509C1F8F3A357E7C253AE5A341E61BEF9365F4F8E02F005A97A6B1A9404C3
+  This build is not code-signed, so Windows will warn on first launch. That is
+  expected for a small independent app: see what the warning says and what to
+  click.
+  Code signing is planned through the SignPath Foundation,
+  which provides free certificates to open-source projects, with signing performed by
+  SignPath.io. Until then, the SHA256 above and the build
+  attestation below are what establish that a download is the genuine build.
+  Code signing policy
+  This release is not code-signed. The team roles, release-approval process and
+  privacy policy required by the SignPath Foundation programme
+  are documented in advance under Code signing
+  policy. That
+  documentation is a prerequisite for applying, not evidence of a certificate. The
+  attribution line naming SignPath as the signing provider will appear here once a
+  certificate is actually issued.
+  This program will not transfer any information to other networked systems unless
+  specifically requested by the user or the person installing or operating it. Full
+  privacy policy.
+  Verify where this binary came from
+  This exe was built by GitHub Actions from this public source, and the build is
+  recorded in the Sigstore public transparency log. With the
+  GitHub CLI:
+  gh attestation verify .\SysManager-v1.79.0.exe --repo laurentiu021/SystemManager
+  That proves which commit and workflow produced this exact binary, something the
+  SHA256 file cannot show, since it is published alongside the exe it describes.
+  Each release also ships SysManager-v1.79.0.sbom.json, a CycloneDX inventory of
+  every dependency resolved for this build.
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.79.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

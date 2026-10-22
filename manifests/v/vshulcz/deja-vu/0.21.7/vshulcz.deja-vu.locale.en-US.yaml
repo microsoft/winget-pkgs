@@ -1,0 +1,93 @@
+# Created with deja-vu release workflow using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: vshulcz.deja-vu
+PackageVersion: 0.21.7
+PackageLocale: en-US
+Publisher: vshulcz
+PublisherUrl: https://github.com/vshulcz
+PublisherSupportUrl: https://github.com/vshulcz/deja-vu/issues
+PrivacyUrl: https://vshulcz.github.io/deja-vu/guide/privacy.html
+PackageName: deja-vu
+PackageUrl: https://vshulcz.github.io/deja-vu/
+License: MIT
+LicenseUrl: https://github.com/vshulcz/deja-vu/blob/HEAD/LICENSE
+ShortDescription: Search Claude Code, Codex and Cursor session history locally
+Tags:
+- aider
+- claude-code
+- cli
+- codex
+- cursor
+- mcp
+- memory
+ReleaseNotes: |-
+  Agents now look up past decisions before they change code, config, a
+  dependency or a schedule, not only when asked about history. On Claude Code
+  that took a test set from 0/10 to 10/10. Recall got more reliable where it was
+  quietly failing: it no longer answers empty when the only full match is the
+  agent's own session (23 of 255 real calls did), and a file path finds the rule
+  written for its directory. A first build on a store of long sessions answers
+  at 19 s instead of 44 s. New harnesses: TRAE CLI and TRAE IDE, CodeBuddy Code,
+  WorkBuddy and Muse Code. The index version is now 67, so the store rebuilds
+  once on the first run after upgrading.
+  Added
+  - TRAE CLI 2.0 sessions are read from ~/.trae/cli (TRAE_HOME, DEJA_TRAE_ROOT) as harness trae, with their own doctor row and traex resume. Prompts come only from TRAE's user events, so the runtime context it writes under the user role is not indexed as something you said (#4680).
+  - CodeBuddy Code sessions are read from ~/.codebuddy/projects, WorkBuddy's from ~/.workbuddy/projects, and Muse Code's from ~/.local/share/muse/sessions; deja install codebuddy and codebuddy-auto wire recall into CodeBuddy (#4681, #4679).
+  - deja install workbuddy and workbuddy-auto wire recall into WorkBuddy, whose agent reads its config from the WorkBuddy home rather than ~/.codebuddy; a new MCP file there is the app's own mcp.json (#4720).
+  - deja install trae adds the MCP server to TRAE CLI's traecli.toml, and trae-auto adds the session-start, per-prompt, tool and compaction hooks to its hooks.json; TRAE runs them once you trust them at start-up (#4702).
+  - deja install trae-ide wires TRAE IDE: the MCP server in User/mcp.json and the skill in ~/.trae/skills (Trae CN and ~/.trae-cn for the CN build; with both builds installed, each gets its own). trae-ide-auto adds hooks to ~/.trae/hooks.json, which TRAE IDE runs only after you turn hooks on in Settings > Hooks; install and doctor both say so. Its chats are encrypted and not indexed (#4731).
+  Changed
+  - A first build on a store of long sessions answers sooner: the early slice of newest sessions stops at 20,000 messages as well as 200 sessions. On 3,871 sessions and 370k messages, recall comes online at 19 s instead of 44 s and the build ends at 45 s instead of 64 s (#4768).
+  - Agents call deja before they change code, config, a dependency or a schedule, not only when asked about past work. The line is in the MCP server instructions, every skill and guidance file, and the npm plugins' deja_recall. On Claude Code the instructions also say how to load the deferred tool. On 10 synthetic change tasks with a recorded decision, Opus on Claude Code went from 0/10 to 10/10 (#4760).
+  Fixed
+  - Recall no longer comes back empty when the only sessions holding every word of the question are filtered out, most often the agent's own live session. It falls through to the ranking. Replayed on 255 real recall calls, 23 had come back empty this way (#4766).
+  - Recall by file path finds what was settled for the file's directory: cmd/reconcile/match.go used to miss a session that set the rule for cmd/reconcile, or rank it under one sharing a single word. Those sessions now come first, and recall says they are about the directory rather than "No session is about this" (#4762). They stay below a session that already answers two of the query's other words (#4764).
+  - The session-start note about a limit hit in another agent fires on Claude Code's real wording ("You've hit your session limit", "You've hit your limit", "API Error: 529 Overloaded"), and reads the newest session of this project from another harness; a parallel session anywhere on the machine used to hide it (#4758).
+  - The per-prompt hook searches on the question even when an instruction comes before it on the same line ("without reading any files: what jitter constant…"); the instruction used to take all six search terms and the hook stayed silent (#4751).
+  - Kilo CLI: a store where a few sessions went through Kilo's /api/session route indexes every session again; deja read only those few and dropped the rest, and a session continued from kilo run keeps both halves (#4694).
+  - WorkBuddy AI desktop chats index with your prompts: the app wraps each one in a <user_query> envelope, and deja read the whole record as harness context (#4734).
+  - A new WorkBuddy AI desktop chat recalls the earlier ones: each chat runs in its own ~/WorkBuddy AI/<timestamp> folder, and those folders now count as one project. Index version 67 refiles chats already indexed (#4735).
+  - deja install workbuddy and deja doctor say when WorkBuddy AI is holding deja's MCP server until you click Trust in its MCP settings; doctor reports it as untrusted (#4740).
+  - deja install workbuddy wires WorkBuddy AI's home rather than the ~/.workbuddy directory it leaves behind (#4724).
+  - CodeBuddy: a command whose long output CodeBuddy saved to a side file keeps its exit code, and reading an image no longer indexes the client's blob reference as text (#4726, #4727).
+  - TRAE CLI 0.208 sessions keep their prompts, and the pre-edit hook runs on TRAE's Edit/Write tools (#4729, #4730).
+  - WorkBuddy AI sessions, kept in ~/.workbuddy-ai by the workbuddy.ai build, are indexed (#4719).
+  - TRAE CLI sessions under TRAECLI_HOME are indexed; deja only followed TRAE_HOME (#4701).
+  - deja install muse and muse-auto wire recall into Muse Code: the MCP server and Claude-shaped hooks in ~/.config/muse/settings.json, and the skill in ~/.agents/skills. deja resume prints muse resume <id> in the session's workspace (#4709, #4710).
+  - deja install muse and muse-auto on a machine with no Muse settings file write one Muse starts with: it refused a file without schema_version (#4736).
+  - A Muse Code session that compacts gets its recovery packet with the next prompt or edit; muse-auto now wires PreCompact, and the log is found by session id (#4737).
+  - Hooks see the index, policy and stores the CLI uses when the host starts them without your environment, as Muse Code does: the deja-hook launcher now carries the XDG_* and DEJA_* locations and indexing settings in effect at install, and your own environment still wins (#4738).
+  - Turning DEJA_INCLUDE_SUBAGENTS off drops the child transcripts on the next index pass, as a rebuild does, instead of keeping them and calling them "no longer on disk". A pass that cannot see a store at all keeps its sessions and says so (#4739).
+  - Under DEJA_INCLUDE_SUBAGENTS=1, Muse Code's reminder and verification observers are no longer indexed as sessions, and a workflow subagent gets its project (#4711, #4712).
+  - CodeBuddy: deja resume prints codebuddy -c -r <id> in the directory the session ran in, so the session-start recall reaches the reopened session (#4718), and install codebuddy-auto writes the deja-history skill and the /deja command where CodeBuddy reads them (#4707, #4708).
+  - CodeBuddy: a failed command keeps its exit code, the /compact instruction prompt is no longer indexed as your words, and the recovery packet after a compaction arrives with the next prompt (#4703, #4704, #4705).
+  - A fix learned from a CodeBuddy or Qwen Code shell call answers the same error anywhere: the Stdout:/Output: label in front of the first line is no longer part of the error (#4717).
+  - The Claude Code and CodeBuddy plugins stand down when deja install <h>-auto already wired the same hooks, instead of running every hook twice (#4706).
+  - CodeBuddy on Windows: when the deja path has a space, install codebuddy-auto writes hooks that run through powershell -NoProfile -Command "& '…'", so they work without Git Bash; the quoted line written before is replaced, not left beside it (#4728).
+  Changelog
+  Features
+  - feat(mcp): agents look up past decisions before they change code, not only when asked about history (#4761)
+  - feat: TRAE IDE install, Windows CodeBuddy hooks, Kilo store and one-line prompt fixes (#4757)
+  - feat: WorkBuddy gets recall, and CodeBuddy resumes with its digest (#4723)
+  - feat: read CodeBuddy Code, TRAE CLI and Muse Code sessions, and wire CodeBuddy (#4699)
+  - feat: recall, resume and install for CodeBuddy Code, TRAE CLI and Muse Code (#4716)
+  Fixes
+  - fix(hook): the limit handoff note fires on Claude Code's real limit text and reads this project's session from another harness (#4759)
+  - fix(recall): a file path finds the rule written for its directory (#4763)
+  - fix(recall): a session that only mentions the asked file's directory stays below one that answers the rest of the query (#4765)
+  - fix(recall): answer from the ranking when the only full match is the agent's own live session (#4767)
+  - fix: WorkBuddy AI desktop chats recall each other, and CodeBuddy, TRAE 0.208 and Muse fixes from the live round (#4745)
+  Performance
+  - perf(index): a first build on long sessions answers at 19 s instead of 44 s (#4769)
+  Documentation
+  - docs: changelog for 0.21.7 (#4770)
+  Other
+  - chore: pin the manifests to 0.21.6 (#4692)
+  Install
+  curl -fsSL https://raw.githubusercontent.com/vshulcz/deja-vu/main/install.sh | sh
+  go install github.com/vshulcz/deja-vu/cmd/deja@v0.21.7
+  brew install deja-vu
+ReleaseNotesUrl: https://github.com/vshulcz/deja-vu/releases/tag/v0.21.7
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

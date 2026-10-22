@@ -1,0 +1,113 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ESEngine.ReasonixCLI
+PackageVersion: 1.38.2
+PackageLocale: en-US
+Publisher: reasonix
+PublisherUrl: https://esengine.cn/
+PublisherSupportUrl: https://github.com/esengine/DeepSeek-Reasonix/issues
+PackageName: Reasonix CLI
+PackageUrl: https://esengine.github.io/DeepSeek-Reasonix/
+License: MIT
+LicenseUrl: https://github.com/esengine/DeepSeek-Reasonix/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Reasonix Contributors
+ShortDescription: A DeepSeek-native coding agent, for your terminal.
+Description: Reasonix talks straight to api.deepseek.com. The loop is append-only, engineered around DeepSeek's byte-stable prefix cache — long sessions hold 90%+ cache hit and input-token cost collapses to ~1/5. Terminal-first, leave it running.
+Moniker: reasonix
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- deepseek
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  此版本提升了会话可靠性、模型服务配置和桌面性能。引入了仅追加会话日志与版本 head、独立网页搜索模型分配、统一图片理解，并修复了导航、取消和 CI 稳定性等多项问题。
+  发布渠道：稳定版 · v1.38.2
+  English → · 网页版完整更新日志 →
+  概览
+  Reasonix v1.38.2 — Reasonix 1.38.2
+  此版本提升了会话可靠性、模型服务配置和桌面性能。引入了仅追加会话日志与版本 head、独立网页搜索模型分配、统一图片理解，并修复了导航、取消和 CI 稳定性等多项问题。
+  发布日期：2026-09-08
+  Desktop 46 · CLI 6
+  桌面端更新
+  重点内容
+  - [Desktop · CLI] 仅追加会话日志与版本 head — 会话现在使用仅追加 DAG 日志（schema 2），将每次更改记录为版本 head。分叉、回退和版本选择均在同一日志内完成，不再创建单独文件，提高了可靠性并支持并发写入。 (#9908, #9910, #9912, #9913, #9916, #9917, #9919, #9921, #9922, #9924, #9925, #9926, #9939)
+  - [Desktop] 会话渲染器替换 — 会话记录改用 Full DOM/窗口化渲染器，由单一滚动写入者与输入意图所有者驱动，替代 Virtuoso。原生滚动中的尾部跟随意图与实测高度发布得以保留，快速滚动时可见内容不再被挤压。 (#9893, #9895, #9896, #9897)
+  - [Desktop] 独立网页搜索模型 — 现在可以在模型偏好中为网页搜索查询指定专用连接和模型。自动模式仍为默认，并保留现有选择行为。 (#9945)
+  - [Desktop · CLI] 统一本地图片与工具图片识别 — 新增 view_image(path)，并在用户附件与所有成功的结构化工具图片结果（包括 MCP 和按需 MCP 工具）之间共享现有图片摘要服务。 (#9933)
+  - [Desktop] 修复模型服务入口跳错页面 — 点击“模型服务”不再进入“模型偏好”。导航 store 现在保留请求的页面和记忆的设置目标。 (#9951)
+  - [Desktop] 停止按钮改为会话级无条件中断 — 停止现在会中断会话中正在运行的内容，即使回合 ID 已过期。只有空闲标签页才会以稳定错误代码被拒绝。 (#9898)
+  - [Desktop] 供应商恢复等待加上限并醒目提示 — 在网络不稳定或供应商过载时，回合不再无限等待。总等待预算为 10 分钟后，回合会以清晰、可操作的错误结束。 (#9899)
+  - [Desktop] 并行工具取消有界化 — 忽略取消的工具不再使整个回合卡住。在有界的宽限期后，回合会放弃掉队者并报告明确的已中断结果。 (#9901)
+  - [Desktop] 崩溃后会话不再从侧栏消失 — 在回合中途强制终止后，会话不再从侧栏消失。在修复运行时，保留最后已知的预览和回合计数作为显示提示。 (#9902)
+  - [Desktop] 后端调用失败改为提示而非崩溃遮罩 — 恢复谱系对话框中后端调用的错误现在以提示形式呈现，而不是用崩溃遮罩替换窗口。 (#9900)
+  - [Desktop] 修复思考型模型摘要与无数字超窗导致的分段压缩死锁 — 压缩不再因思考型模型将摘要放在 reasoning_content 中而失败，且无 token 数字的供应商超窗现在会触发分段回退。 (#9882)
+  - [Desktop] 摘要请求超窗自恢复与硬上限截断救援 — 当摘要请求超窗时，系统现在会重新校准、重新规划更小的前缀，并回退到转录形式或截断救援，而不是重试相同的请求。 (#9879)
+  - [Desktop] 统一设置选择组件与模型偏好布局 — 设置页面现在使用共享的紧凑 SettingsSelect 和 SettingsOptions 组件，提供一致的尺寸、焦点状态和键盘行为。模型偏好与垂直堆叠的运行时偏好分组。 (#9938)
+  - [Desktop] 系统修复模型连接协议与错误恢复 — 更改已保存的供应商连接的 API 格式不再产生无效路由。协议冲突会以推荐端点被拒绝，供应商失败会以其原始错误重新加载。 (#9942)
+  - [Desktop] 完善模型配置与 DeepSeek 协议迁移 — 自定义模型 ID 现在被精确保留，现有的官方 DeepSeek 连接迁移到 Chat Completions 作为默认协议。 (#9947)
+  - [Desktop] 缩短桌面检查并复用已签名发版产物 — 桌面 PR 检查现在共享前端构建产物并并发运行测试，稳定版发布复用预检的已签名产物。 (#9943)
+  - [Desktop] 内存筛查先稳定基线再判定漂移 — 应用内存筛查现在在比较计数器之前稳定基线，防止因嘈杂的第一个样本而产生错误的漂移报告。 (#9950)
+  - [Desktop] 修复设置组件布局所有权 — 设置中的模型分配矩阵不再将连接标签换行到用途下方。共享布局默认值具有较低的特异性，因此组件布局保留所有权。 (#9914)
+  - [Desktop] 修复上下文准备入口的取消语义 — 在准入前取消的上下文准备请求不再通过快速路径返回成功。在获取维护锁之前和之后都会检查取消。 (#9903)
+  - [Desktop] 为 Windows WebView2 选择测试加上限，避免阻塞 CI 队列 — desktop-windows 作业现在有作业级超时，原生选择测试在超时时会终止整个进程树，防止 CI 队列阻塞。 (#9948)
+  - [Desktop] 让两个 race 测试确定化并为 test job 加上限 — 两个对时序敏感的 race 测试现在具有确定性，test 作业有作业级超时，防止卡住的 Windows 步骤占用 CI 并发组。 (#9956)
+  - [Desktop] Standard / Deep 会话展示设置 — 新增统一的会话展示设置：Standard 折叠已完成内容，Deep 保持展开；持久化与启动快照由后端权威管理。 (#9894)
+  - [Desktop · CLI] 独立模型连接与模型偏好 — 模型服务成为具有稳定标识、显示名称与独立凭据的独立连接；新增连接时选择品牌、产品与协议，首次启动设置即进入该流程。 (#9907)
+  新增
+  - [Desktop · CLI] 仅追加会话日志与版本 head — 会话现在使用仅追加 DAG 日志（schema 2），将每次更改记录为版本 head。分叉、回退和版本选择均在同一日志内完成，不再创建单独文件，提高了可靠性并支持并发写入。 (#9908, #9910, #9912, #9913, #9916, #9917, #9919, #9921, #9922, #9924, #9925, #9926, #9939)
+  - [Desktop] 独立网页搜索模型 — 现在可以在模型偏好中为网页搜索查询指定专用连接和模型。自动模式仍为默认，并保留现有选择行为。 (#9945)
+  - [Desktop · CLI] 统一本地图片与工具图片识别 — 新增 view_image(path)，并在用户附件与所有成功的结构化工具图片结果（包括 MCP 和按需 MCP 工具）之间共享现有图片摘要服务。 (#9933)
+  - [Desktop] Standard / Deep 会话展示设置 — 新增统一的会话展示设置：Standard 折叠已完成内容，Deep 保持展开；持久化与启动快照由后端权威管理。 (#9894)
+  改进
+  - [Desktop] 统一设置选择组件与模型偏好布局 — 设置页面现在使用共享的紧凑 SettingsSelect 和 SettingsOptions 组件，提供一致的尺寸、焦点状态和键盘行为。模型偏好与垂直堆叠的运行时偏好分组。 (#9938)
+  - [Desktop] 系统修复模型连接协议与错误恢复 — 更改已保存的供应商连接的 API 格式不再产生无效路由。协议冲突会以推荐端点被拒绝，供应商失败会以其原始错误重新加载。 (#9942)
+  - [Desktop] 完善模型配置与 DeepSeek 协议迁移 — 自定义模型 ID 现在被精确保留，现有的官方 DeepSeek 连接迁移到 Chat Completions 作为默认协议。 (#9947)
+  - [Desktop] 缩短桌面检查并复用已签名发版产物 — 桌面 PR 检查现在共享前端构建产物并并发运行测试，稳定版发布复用预检的已签名产物。 (#9943)
+  - [Desktop] 会话渲染器替换 — 会话记录改用 Full DOM/窗口化渲染器，由单一滚动写入者与输入意图所有者驱动，替代 Virtuoso。原生滚动中的尾部跟随意图与实测高度发布得以保留，快速滚动时可见内容不再被挤压。 (#9893, #9895, #9896, #9897)
+  - [Desktop · CLI] 独立模型连接与模型偏好 — 模型服务成为具有稳定标识、显示名称与独立凭据的独立连接；新增连接时选择品牌、产品与协议，首次启动设置即进入该流程。 (#9907)
+  修复
+  - [Desktop] 修复模型服务入口跳错页面 — 点击“模型服务”不再进入“模型偏好”。导航 store 现在保留请求的页面和记忆的设置目标。 (#9951)
+  - [Desktop] 停止按钮改为会话级无条件中断 — 停止现在会中断会话中正在运行的内容，即使回合 ID 已过期。只有空闲标签页才会以稳定错误代码被拒绝。 (#9898)
+  - [Desktop] 供应商恢复等待加上限并醒目提示 — 在网络不稳定或供应商过载时，回合不再无限等待。总等待预算为 10 分钟后，回合会以清晰、可操作的错误结束。 (#9899)
+  - [Desktop] 并行工具取消有界化 — 忽略取消的工具不再使整个回合卡住。在有界的宽限期后，回合会放弃掉队者并报告明确的已中断结果。 (#9901)
+  - [Desktop] 崩溃后会话不再从侧栏消失 — 在回合中途强制终止后，会话不再从侧栏消失。在修复运行时，保留最后已知的预览和回合计数作为显示提示。 (#9902)
+  - [Desktop] 后端调用失败改为提示而非崩溃遮罩 — 恢复谱系对话框中后端调用的错误现在以提示形式呈现，而不是用崩溃遮罩替换窗口。 (#9900)
+  - [Desktop] 修复思考型模型摘要与无数字超窗导致的分段压缩死锁 — 压缩不再因思考型模型将摘要放在 reasoning_content 中而失败，且无 token 数字的供应商超窗现在会触发分段回退。 (#9882)
+  - [Desktop] 摘要请求超窗自恢复与硬上限截断救援 — 当摘要请求超窗时，系统现在会重新校准、重新规划更小的前缀，并回退到转录形式或截断救援，而不是重试相同的请求。 (#9879)
+  - [Desktop] 内存筛查先稳定基线再判定漂移 — 应用内存筛查现在在比较计数器之前稳定基线，防止因嘈杂的第一个样本而产生错误的漂移报告。 (#9950)
+  - [Desktop] 修复设置组件布局所有权 — 设置中的模型分配矩阵不再将连接标签换行到用途下方。共享布局默认值具有较低的特异性，因此组件布局保留所有权。 (#9914)
+  - [Desktop] 修复上下文准备入口的取消语义 — 在准入前取消的上下文准备请求不再通过快速路径返回成功。在获取维护锁之前和之后都会检查取消。 (#9903)
+  - [Desktop] 为 Windows WebView2 选择测试加上限，避免阻塞 CI 队列 — desktop-windows 作业现在有作业级超时，原生选择测试在超时时会终止整个进程树，防止 CI 队列阻塞。 (#9948)
+  - [Desktop] 让两个 race 测试确定化并为 test job 加上限 — 两个对时序敏感的 race 测试现在具有确定性，test 作业有作业级超时，防止卡住的 Windows 步骤占用 CI 并发组。 (#9956)
+  CLI 端更新
+  重点内容
+  - [Desktop · CLI] 仅追加会话日志与版本 head — 会话现在使用仅追加 DAG 日志（schema 2），将每次更改记录为版本 head。分叉、回退和版本选择均在同一日志内完成，不再创建单独文件，提高了可靠性并支持并发写入。 (#9908, #9910, #9912, #9913, #9916, #9917, #9919, #9921, #9922, #9924, #9925, #9926, #9939)
+  - [Desktop · CLI] 统一本地图片与工具图片识别 — 新增 view_image(path)，并在用户附件与所有成功的结构化工具图片结果（包括 MCP 和按需 MCP 工具）之间共享现有图片摘要服务。 (#9933)
+  - [Desktop · CLI] 独立模型连接与模型偏好 — 模型服务成为具有稳定标识、显示名称与独立凭据的独立连接；新增连接时选择品牌、产品与协议，首次启动设置即进入该流程。 (#9907)
+  新增
+  - [Desktop · CLI] 仅追加会话日志与版本 head — 会话现在使用仅追加 DAG 日志（schema 2），将每次更改记录为版本 head。分叉、回退和版本选择均在同一日志内完成，不再创建单独文件，提高了可靠性并支持并发写入。 (#9908, #9910, #9912, #9913, #9916, #9917, #9919, #9921, #9922, #9924, #9925, #9926, #9939)
+  - [Desktop · CLI] 统一本地图片与工具图片识别 — 新增 view_image(path)，并在用户附件与所有成功的结构化工具图片结果（包括 MCP 和按需 MCP 工具）之间共享现有图片摘要服务。 (#9933)
+  改进
+  - [Desktop · CLI] 独立模型连接与模型偏好 — 模型服务成为具有稳定标识、显示名称与独立凭据的独立连接；新增连接时选择品牌、产品与协议，首次启动设置即进入该流程。 (#9907)
+  升级提醒
+  本版本无需手动迁移。
+  风险提示
+  当前没有需要额外操作的已知风险。
+  致谢
+  感谢本版本的贡献者：@SivanCola、@github-actions[bot]、@XTLine、@Linearl
+  下载与安装
+  - 官网按平台下载
+  - 查看完整差异
+ReleaseNotesUrl: https://github.com/esengine/DeepSeek-Reasonix/releases/tag/v1.38.2
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://esengine.github.io/DeepSeek-Reasonix/index.html#faq
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

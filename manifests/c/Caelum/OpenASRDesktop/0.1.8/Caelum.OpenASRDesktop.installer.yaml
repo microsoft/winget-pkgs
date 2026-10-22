@@ -1,0 +1,35 @@
+# winget-pkgs installer manifest for OpenASR Desktop.
+# See Caelum.OpenASRDesktop.yaml's header comment for what this directory is.
+#
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+
+PackageIdentifier: Caelum.OpenASRDesktop
+PackageVersion: 0.1.8
+InstallerType: nullsoft
+# The installer is a custom Tauri/NSIS template (apps/desktop/src-tauri/nsis/
+# installer.nsi in the openasr-app repo) with two verified modes:
+#   - Interactive (plain double-click): one-click branded flow, no wizard
+#     pages -- installs, creates a desktop shortcut, and auto-launches.
+#   - Silent (`/S`, unchanged from Tauri's upstream NSIS base -- see the
+#     "UNCHANGED" note at the top of installer.nsi): no UI at all, matches
+#     winget's own default silent switch for InstallerType nullsoft, declared
+#     explicitly here anyway since this is a customized template, not the
+#     vanilla Tauri default.
+InstallModes:
+  - interactive
+  - silent
+InstallerSwitches:
+  Silent: /S
+# installMode "currentUser" in tauri.windows.signed.conf.json: the installer
+# writes to %LOCALAPPDATA%, requests no elevation, and the generated NSIS
+# manifest carries no requestedExecutionLevel that would trigger UAC -- so
+# Scope: user is correct and no admin/elevation entry is needed.
+UpgradeBehavior: install
+ReleaseDate: "2026-07-14"
+Installers:
+  - Architecture: x64
+    Scope: user
+    InstallerUrl: https://github.com/QuintinShaw/openasr/releases/download/desktop-v0.1.8/OpenASR-Desktop-0.1.8-x64-setup.exe
+    InstallerSha256: 583770162d353ba9d419212fb7fc2cd4f852c6c446295f3a6ef4aab0016ec8f1
+ManifestType: installer
+ManifestVersion: 1.12.0

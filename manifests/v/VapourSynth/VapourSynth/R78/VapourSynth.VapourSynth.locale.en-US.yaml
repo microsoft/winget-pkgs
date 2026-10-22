@@ -1,0 +1,62 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: VapourSynth.VapourSynth
+PackageVersion: R78
+PackageLocale: en-US
+Publisher: Fredrik Mellbin
+PublisherUrl: https://github.com/myrsloik
+PublisherSupportUrl: https://github.com/vapoursynth/vapoursynth/issues
+Author: Fredrik Mellbin
+PackageName: VapourSynth
+PackageUrl: https://www.vapoursynth.com/
+License: LGPL-2.1
+LicenseUrl: https://github.com/vapoursynth/vapoursynth/blob/master/COPYING.LESSER
+Copyright: Copyright (c) 2012-2026 Fredrik Mellbin
+ShortDescription: A video processing framework with simplicity in mind
+Tags:
+- frameserver
+- media
+- multimedia
+- video
+- vs
+ReleaseNotes: |-
+  - a compiler supporting c++20 is now required to build the project, compatibility has been verified with recent msvc, clang(-cl) and gcc
+  - relaxed the zen4 level instruction check to not include avx512bf16 since compilers never use these instructions on their own, this allows the faster binaries to be used on intel ice lake cpus and later as well
+  - added turn90 and turn270 functions
+  - fixed multiple rare threading issues, the most likely of these to be actually encountered in r76 and r77 was a deadlock that could happen when synchronous getFrame() is called from a filter getFrame function and a pipeline flush is in progress
+  - added basic avx512 as an additional cpu instruction level meaning that on x64 it's now baseline, avx2, avx512 and zen4 level
+  - fixed audiogain and audiomix destroying audio with a bit depth between 17 and 31 bits, most commonly 24 bit, where samples were clamped against the significant bit range instead of the range of the container they are stored left aligned in
+  - added the AudioResample filter for audio sample rate, channel layout and sample format conversion, the downmix coefficients follow itu-r bs.775 and the mix matrix is derived from the two layouts so any combination works
+  - added waveform, amplitude and frequency arguments to BlankAudio for generating slope, sine, square and triangle test signals
+  - added chromatic_adaptation argument to resize filters, it defaults to True which is identical to the previous behavior
+  - mergefulldiff now handles float appropriately
+  - maskedmerge and premultiply will no longer reject clips with different chroma location if only luma is being processed
+  - generic filters now checks the minimum plane dimension restrictions only the actually processed planes
+  - fixed the levels filter not actually reading the second and third plane gamma/max_in/min_in and so on values
+  - many fixes to the python bindings such as fixing potential deadlocks when freeing the core and using frames and other references after a core has been destroyed (ichunjo)
+  - added 7x7, 9x9 and 11x11 square convolution sizes
+  - added half-precision float support to all functions where it makes sense at all (basically only lut/lut2 excluded) in a portable way that generates fast code on both aarch64 and avx2 class x86
+  - all floating point masks passed to maskedmerge are now clamped to the 0-1 range before applying, this includes UV planes as well
+  - fixed possible memory leak audionode.output if an error is triggered early in the output process
+  - the core filters have now been split out and on x64 and are also compiled for avx2 and zen4 class cpus
+  - fixed proptoclip frame reference leak on error
+  - fixed potential crash in shufflechannels with multiple audio clip inputs
+  - lut optimization for all cpus and lut2 optimizations on avx512 cpus
+  - boxblur optimization
+  - improved planestats optimizations
+  - improved merge filters optimization and added avx512 path
+  - added avx512 optimizations to min, max, convolution and other filters internally known as genericfilters
+  - greatly improved the memory management and speed in very memory constrained scenarios, speedups of 2-3x are possible if you run scripts with far too low memory max cache size
+  - now the initial max cache size default is half of the physical available ram (HolyWu)
+  - remembered to actually remove avfs from the source tree
+  - several more small fixes for ai found bugs
+  - added aarch64 neon intrinsics for many for many functions
+  - added YUV410, 411 and 440 constants for 16 bit integer, half and single precision
+  - plugin function return type declarations are now checked and warnings will be printed on mismatch, this will be an error in future versions
+ReleaseNotesUrl: https://github.com/vapoursynth/vapoursynth/releases/tag/R78
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://www.vapoursynth.com/doc/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

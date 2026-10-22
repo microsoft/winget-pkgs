@@ -1,0 +1,101 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: aelassas.Servy
+PackageVersion: '10.1'
+PackageLocale: en-US
+Publisher: Akram El Assas
+PublisherUrl: https://github.com/aelassas
+PublisherSupportUrl: https://github.com/aelassas/servy/issues
+Author: Akram El Assas
+PackageName: Servy
+PackageUrl: https://servy-win.github.io/
+License: MIT
+LicenseUrl: https://github.com/aelassas/servy/blob/HEAD/LICENSE.txt
+Copyright: Copyright (c) 2026 Akram El Assas
+ShortDescription: Servy lets you run any app as a native Windows service with full control over the working directory, startup type, process priority, CPU affinity, logging, health checks, hooks, and parameters.
+Description: |-
+  Servy lets you run any app as a native Windows service with full control over the working directory, startup type, process priority, CPU affinity, logging, health checks, environment variables, dependencies, pre-launch and post-launch hooks, pre-stop and post-stop hooks, and parameters.
+
+  Servy is digitally signed with a code-signing certificate provided by the SignPath Foundation. The signature verifies the publisher, enables Windows to detect any modification of the released binaries and installers, and prevents SmartScreen warnings.
+
+  Servy offers a desktop app, a CLI, and a PowerShell module that let you create, configure, and manage Windows services interactively or through scripts and CI/CD pipelines. It also includes a Manager app for easily monitoring and managing all installed services in real time.
+
+  Features:
+  - Clean, simple UI
+  - Monitor and manage all installed services with Servy Manager
+  - Real-time CPU and RAM monitoring with live performance graphs for installed services
+  - Real-time service stdout and stderr output preview in Servy Console
+  - Service dependency tree visualization with status indicators
+  - CLI and PowerShell module for full scripting and automated deployments
+  - Run any executable as a Windows service
+  - Set service name, description, startup type, priority, CPU affinity, working directory, environment variables, and dependencies
+  - Environment variable expansion supported in parameters, process paths, and startup directories
+  - Run services as Local System, local or domain accounts, Active Directory accounts, or gMSAs
+  - Redirect stdout/stderr to log files with automatic size-based and date-based rotations
+  - Run pre-launch hooks before starting the service, with retries, timeout, logging and failure handling
+  - Run post-launch hooks after the application starts successfully
+  - Run pre-stop and post-stop hooks before and after the application stops
+  - Supports Ctrl+C for command-line apps, close-window for GUI apps, and force kill if unresponsive
+  - Supports Ctrl+C propagation to descendant processes of the wrapped process
+  - Prevent orphaned/zombie processes with improved lifecycle management while ensuring resource cleanup
+  - Health checks and automatic service recovery
+  - Browse and search logs by level, date, and keyword for faster troubleshooting from Servy Manager
+  - Export/Import service configurations for easy backups and automation
+  - Service Event Notification alerts on service failures via Windows notifications and email
+  - Compatible with Windows 7 SP1 through 11 (x64/ARM64) and Windows Server editions
+
+  Who is it for?
+  - Developers: Run development servers, scripts, or custom tools as services without extra setup.
+  - Sysadmins & IT professionals: Ensure critical background processes stay alive, monitored, and properly logged.
+  - Teams or organizations: Automate background services reliably across multiple machines.
+Moniker: servy
+Tags:
+- admin
+- automation
+- background-service
+- cli
+- devops
+- dotnet
+- nssm
+- powershell
+- scm
+- service-manager
+- service-supervisor
+- service-wrapper
+- watchdog
+- windows-service
+- windows-tools
+- winsw
+ReleaseNotes: |-
+  This release includes bug fixes, security patches, code quality improvements, and documentation updates. The full changelog is listed below.
+  Full Changelog
+  Click to expand release notes!
+  - feat(manager): LogsView.xaml / LogEntryModel.cs - EventId is read off every Event Log entry, stored in an observable property and unit-tested, but no column, filter or detail pane ever reads it (#6022)
+  - feat(scripts): add ShouldProcess confirmation prompt for SCM service installation in Servy-Restore.ps1
+  - fix(core): ProcessKiller.cs / ISystemProcess.cs - the CriticalSystemProcesses safelist trusts a process's self-reported name with no path or SID check, so a renamed executable becomes immune to Servy's kill sweep (#6782)
+  - fix(core): handle64.exe invocation flagged as malicious by Cortex XDR (shellcode/injection detection) (#6808)
+  - fix(infra): SQLiteDbInitializer.cs - the whitespace zombie detector and the Version 9 UserAccount migration use SQLite TRIM(), which strips ASCII space only, so tab-padded legacy values are neither detected nor normalized (#6759)
+  - fix(service): ProcessWrapper.cs - Kill(bool) neither verifies the process died nor reports failure, unlike its own sibling twelve lines above, so ProcessLauncher's orphan-cleanup catch can never fire (#6043)
+  - fix(service): EnvironmentVariableHelper.cs - the indirect-circular-reference warning is unreachable because protectInjectedValues masks every substituted token before the pass that would need to see it again (#6739)
+  - fix(service): EnvironmentVariableHelper.cs - ProtectedVariables blocks CA-bundle overrides but not the proxy variables that give the same interception capability (#6797)
+  - fix(service): EnvironmentVariableHelper.cs - ExpandWithDictionary's own IsNullOrEmpty(value) early return can never fire; every call site already guarantees a non-empty value (#6811)
+  - fix(manager): StatusConverter.cs / StartupTypeConverter.cs - GetFallbackValue is the only unshared code left after #2986 and the two overrides disagree on null, so adjacent DataGrid columns render the same unloaded state as blank and as 'Fetching...' (#5771)
+  - fix(manager): EnumLocalizedConverter.cs - GetFallbackValue declares a non-nullable object parameter, but null is precisely the input it exists to handle and both overrides null-check it (#5993)
+  - fix(manager): PidBadgeControl.xaml - binds Pid and CopyPidCommand off an undeclared inherited DataContext, while its folder-sibling ServiceListControl exposes six dependency properties (residual of #4832) (#6018)
+  - fix(manager): LogsView.xaml - unlike every Services grid column, none of the four Logs columns give their cells an AutomationProperties.HelpText, only a header Name (#6793)
+  - ci: build.yml / security.yml / test.yml / loc.yml / wiki.yml - 13 run steps still omit the explicit 'shell:' line that #4665 established for publish.yml; the other 14 CI files are 100% explicit (#5836)
+  - ci(test.yml); Restore dependencies and both Build solution steps run dotnet as bare native calls with no exit-code check, so a broken restore or build can report green (#6773)
+  - ci(test-project.yml): Write-Error alone does not stop the script or fail the step, so a Debug test failure can be silently overwritten by a passing Release run (#6761)
+  - ci(security.yml): Restore dependencies and Build for Analysis steps run dotnet as bare native calls with no exit-code check, letting CodeQL silently scan a build that never compiled (#6772)
+  - ci(bump-version.yml): bump-version.ps1 - the new copyright patterns' [©\xc2\xa9\w\W] class is just [\w\W]: the three escapes are inert, and \xc2\xa9 is a UTF-8 byte pair, not a character (#6476)
+  - ci(wiki.yml): Build test project step (net48) never checks msbuild's exit code, so a compile failure surfaces as a vstest file-not-found error instead of the real build failure (#6764)
+  - ci(wiki.yml): Run parity check (dotnet test) step (main) never checks dotnet test's exit code, so a broken protected-variables parity check reports green (#6774)
+  - ci(wiki.yml): Restore NuGet packages step (net48) runs nuget restore as a bare native call with no exit-code check (#6775)
+  - chore(deps): update dependencies
+ReleaseNotesUrl: https://github.com/aelassas/servy/releases/tag/v10.1
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/aelassas/servy/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

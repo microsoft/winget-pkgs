@@ -1,0 +1,59 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jdx.usage
+PackageVersion: 5.0.0
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://jdx.dev/
+PublisherSupportUrl: https://github.com/jdx/usage/issues
+Author: Jeff Dickey
+PackageName: usage
+PackageUrl: https://usage.jdx.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+ShortDescription: A specification for CLIs
+Description: |-
+  Usage is a spec and CLI for defining CLI tools. Arguments, flags, environment variables, and config files can all be defined in a Usage spec. It can be thought of like OpenAPI (swagger) for CLIs. Here are some potential reasons for defining your CLI with a Usage spec:
+
+  - Generate autocompletion scripts
+  - Generate markdown documentation
+  - Generate man pages
+  - Generate type-safe SDK client libraries for TypeScript, Python, and Rust
+  - Use an advanced arg parser in any language
+  - Scaffold one spec into different CLI frameworks-even different languages
+  - [coming soon] Host your CLI documentation on usage.sh
+Moniker: usage
+Tags:
+- cli
+- spec
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://usage.jdx.dev/cli/
+ReleaseNotes: |-
+  A parser-level fix that makes double_dash="required" actually behave as declared drives the major bump: values before -- are now rejected, and values after -- are routed past greedy variadics to the arg that was waiting for them. The release also fixes a cluster of long-standing Windows problems — usage bash losing every usage_* variable under WSL, run= scripts being handed to cmd /c, and completion guards being fooled by a shell function named usage — and lets generate markdown write to stdout like the other generators.
+  Added
+  - Override the shell binary with USAGE_SHELL_<SHELL> (#767 by @JamBalaya56562). Point usage bash, usage zsh, usage fish, and usage powershell at a specific interpreter — mainly so Windows users can escape the WSL bash.exe that Win32's search order picks up ahead of $PATH:
+    set USAGE_SHELL_BASH=C:\Program Files\Git\usr\bin\bash.exe
+    usage bash C:/work/mycli
+    The variable is keyed by the program (so powershell's override is USAGE_SHELL_PWSH). Unset, empty, or whitespace-only falls back to the default. Spawn failures now name the program that was tried and the variable it came from, and on Windows a bash exit 127 against a drive-letter path prints a hint pointing at this override.
+  - generate markdown writes to stdout (#766 by @JamBalaya56562). --out-file is now optional and defaults to stdout, matching manpage, fig, json, and completion. --out-file - also means stdout on markdown, manpage, and fig, mirroring the -f - input convention. The writing to … progress line moved to stderr on markdown, manpage, fig, and sdk, so it no longer ends up inside the generated document. --out-dir now requires --multi.
+
+  Fixed
+  - double_dash="required" is now enforced on both sides (#762 by @JamBalaya56562). The parser previously ignored SpecDoubleDashChoices::Required entirely — a word offered to such an arg without -- was accepted anyway, and a required arg sitting behind a greedy variadic was unreachable even with a separator. Now offering a value before -- is reported as ArgRequiresDoubleDash (once per variadic, not once per word), and an explicit -- routes the positional cursor onto the arg that required it, past earlier args. Completion learns about -- too: while an arg is locked behind a separator, -- itself is offered rather than values the parser would reject.
+  - Windows: usage_* variables reach WSL bash (#764 by @JamBalaya56562). On Windows the bash picked up from the system directory is WSL's launcher, and WSL only forwards a Win32 variable when WSLENV names it — so scripts saw every usage_* value unset. Both shell and exec now append the parsed argument names to WSLENV (bare, no /p or /l flags), preserving any entries the user had already configured.
+  - Windows: run= scripts use sh when available (#765 by @JamBalaya56562). complete run= already used sh -c everywhere, but mount run= used cmd /c on Windows, so the same POSIX one-liner behaved differently depending on which KDL node it lived in — and shebang scripts silently exited 0 with empty output. Both call sites now share one implementation: sh -c first, falling back to cmd /c only if sh is not found. Non-UTF-8 output from either shell is now reported as an error instead of panicking.
+  - Bash/fish completion guard ignores shell functions (#760 by @JamBalaya56562). The generated completion opens with a guard that bails out when the usage CLI is not installed, but type -p returns exit 0 for a shell function, so any environment defining a usage function (e.g. oh-my-bash) passed the guard and then failed further down with an unrelated error. Switched to type -P in both bash guards and the fish equivalent; zsh's type -p already forces a $PATH search and is unchanged.
+
+  Breaking Changes
+  - double_dash="required" positional args now reject values before -- (#762). Specs where such an arg previously happened to work without a separator will now error. In examples/mise.usage.kdl, post--- values also move from the preceding greedy variadic to the arg that declared the separator (e.g. from TASK_ARGS to TASK_ARGS_LAST, from TOOL@VERSION to COMMAND under exec), which changes which usage_* variable a consumer reads. Spec authors who want the old permissiveness can drop back to double_dash="optional" (the default).
+  - UsageErr and ParseOutput gained fields. UsageErr has a new ArgRequiresDoubleDash variant, and ParseOutput gained next_arg and double_dash_seen. Library consumers matching these types exhaustively will need to update.
+
+  💚 Sponsor usage
+  usage is maintained by @jdx, an open source developer for entire.io, the title sponsor of the jdx.dev open source tools including mise, aube, hk, and more. Work on usage is funded by sponsorships.
+  If usage powers CLI specs, docs, or completions for a tool you maintain or use, please consider sponsoring at jdx.dev. Every sponsorship helps the project stay independent and moving.
+ReleaseNotesUrl: https://github.com/jdx/usage/releases/tag/v5.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

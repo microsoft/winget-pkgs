@@ -1,0 +1,68 @@
+# Created with WinGet Updater using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Sidero.omnictl
+PackageVersion: 1.10.0
+PackageLocale: en-US
+Publisher: Sidero Labs
+PublisherUrl: https://github.com/siderolabs/omni
+PublisherSupportUrl: https://github.com/siderolabs/omni/issues
+PrivacyUrl: https://www.siderolabs.com/privacy-policy/
+Author: Sidero Labs
+PackageName: omnictl
+PackageUrl: https://github.com/siderolabs/omni
+License: Mozilla Public License Version 2.0
+LicenseUrl: https://github.com/siderolabs/omni/blob/HEAD/LICENSE
+ShortDescription: A command line tool for communicating with Omni
+Moniker: omnictl
+Tags:
+- k8s
+- kubernetes
+- omni
+- talos
+ReleaseNotes: |-
+  Omni 1.10.0 (2026-08-07)
+  Welcome to the v1.10.0 release of Omni!
+  Please try out the release binaries and report any issues at
+  https://github.com/siderolabs/omni/issues.
+  Following the Audit Log
+  The audit log read API gains a follow mode. After serving the backlog the stream stays open and delivers new events as they are written, in insertion order. Followed events carry their ids, and a stream can start from an id received earlier, so a consumer resumes exactly where it left off. The start position can also be given as a timestamp. A follow stream ends cleanly after a bounded time rather than staying open indefinitely, and the client continues from the last id it received. omnictl performs that reconnect automatically. omnictl audit-log gains a --follow flag to tail the log live and a --since flag to start from a relative time in either mode. Reading the audit log now produces an audit log event of its own, recording who read it, the time range requested and the filters used, and the new event type can itself be filtered on.
+  Auditor Role
+  Reading the audit log required the Admin role, so anything that consumes audit events also had to hold user management and full administrative access to every managed Kubernetes cluster. The new Auditor role grants read access plus the audit log and nothing else. It is matched by exact role rather than by rank, so an Operator, which outranks an Auditor, still cannot read the audit log. It can be assigned to users and service accounts, but not through access policies or SAML label rules, which now reject roles that are not meant to be assigned that way.
+  Cluster Security Page
+  A new cluster security page lists the vulnerabilities of the images a running cluster uses, together with the upgrade paths that clear them, and the scan details can be filtered by severity. Vulnerability scanning requires the Image Factory Enterprise. Against the public factory the page reports that scanning is unavailable instead of showing results.
+  Kubernetes CA and Service Account Key Rejected in Config Patches
+  Config patches can no longer set the Kubernetes certificate authority or the service account signing key, which Omni generates and owns. This holds for every cluster, not only for clusters on the new Talos 1.14 document layout, and it covers the v1alpha1 fields as well as the Talos 1.14 documents that carry the same material. An already stored patch keeps working while it stays unchanged. Changing one that sets either of them is rejected, so such a patch has to be corrected before it can be edited again.
+  Disabling Config Patches
+  A config patch can now be disabled. It is retained as a resource but is never applied.
+  Discovery Service Configuration Reworked
+  Talos 1.14 replaces the single discovery endpoint with a configuration that can register a machine with more than one discovery service at once, and Omni now removes a departing machine's affiliate from every endpoint it used. A cluster used to pick either the public discovery service or the embedded one. For clusters created with Talos 1.14 or newer it can now also use both at the same time.
+  Talos Enterprise and FIPS Machine Labels
+  Machines running Talos Enterprise now get an omni.sidero.dev/enterprise label, and machines running Talos in FIPS mode get an omni.sidero.dev/fips label carrying either enabled or strict. Like the other labels Omni manages, they cannot be removed by the user, and they are cleared when a machine reverts to a regular build. Both values are read over the Talos API and watched for changes, since they follow the installed image. Older Talos versions do not report them, so machines running those get no labels.
+  Frontend Quality-of-Life Improvements
+  Machine names are shown the same way everywhere, using the hostname with the machine UUID as a fallback, and the machine stage is dimmed while a machine is unhealthy, with the last known status still shown. The home page replaces the radial bars with segmented ones and splits the machine stats into connection and allocation, which used to be mixed together, and it now also shows the ongoing operations that were previously only in the top-right dropdown. The CPU usage chart stacks its system and user areas and labels them as percentages, and the Kubernetes manifests status is drawn as a graph. In the disk view, unallocated space is striped so it reads apart from allocated space, and volumes Omni does not recognize cycle through distinct colors. Errors from machine service queries appear inline on the page instead of as a toast, with retries and backoff, and an unreachable Talos API is reported as not ready yet rather than as a generic failure. The config editor can toggle word wrap from its context menu, and $patch: delete is accepted everywhere the patch validation allows it. On an Auth0 instance the very first user lands on the signup page instead of the login page, and PXE boot is hidden when Omni runs against the Image Factory Enterprise. A node's last configuration error is now shown on every one of its tabs, not just the overview, and Talos and Kubernetes version dropdowns list versions newest first. The machine delete confirmation lists hostnames instead of raw UUIDs. Removing machines is named consistently: deleting a machine or a pending machine is "Delete", removing one from a cluster is "Remove", and the destructive machine option reads "Force Delete" instead of "Force Destroy".
+  Infrastructure Provider Names Validated as DNS Labels
+  An infrastructure provider id must now be a valid DNS label, so lowercase letters, digits and dashes only. Ids with uppercase letters, underscores or spaces used to be accepted and caused failures further along. They are rejected at creation now.
+  Infra Provider Versions in the UI and CLI
+  The UI and the CLI now show the version of an infrastructure provider.
+  Install Disk Selection Respected on Maintenance Installs
+  Machines on Talos 1.13 or newer are installed through the Talos lifecycle API, which takes the install disk as an explicit argument. Omni passed the automatically picked default there, so a disk chosen through the UI or a cluster template was ignored and Talos could be installed to a different disk than the one selected. Omni now reads the install disk from the machine's effective configuration, where the selection is already applied on top of the default.
+  Permanent Install Failures Stop Retrying
+  Talos installers from 1.14 report a distinct exit code per failure instead of one generic code, and Omni now reads them. A failure caused by invalid input or an unsupported operation cannot succeed until the machine configuration or the install options change, so Omni records the reason on the machine and stops retrying. Everything else stays retryable, including the single exit code that pre-1.14 installers report for every failure.
+  No kube-proxy Pre-Pull on Kubernetes Upgrades
+  Kubernetes upgrades no longer pre-pull the kube-proxy image, on any cluster. Clusters that use a kube-proxy replacement such as Cilium turn kube-proxy off, and pre-pulling an image they never run consumed bandwidth needlessly.
+  KubeSpan Quick Start
+  Rather than disabling the KubeSpan tab for a cluster that does not have KubeSpan enabled, Omni now shows a quick start page there with a short explanation, a link to the docs, the config patch it would apply, and a button that applies it. The suggested patch matches what the cluster supports, so a cluster on multi-document configs is offered the newer form. The page warns about the network overhead, which matters most on larger clusters. The KubeSpan status view also tells offline peers apart by shape and line style on top of color, which helps with red and green color blindness.
+  Installs and Upgrades Through Talos's LifecycleService
+  On machines running Talos 1.13 or newer, Omni installs and upgrades through Talos's LifecycleService and runs the sequence itself: pull the installer, install or upgrade to disk, forfeit etcd leadership on control planes, cordon and drain the node, then reboot. Same-minor installs on maintenance machines take this explicit path now, instead of letting a config apply trigger the install, and cluster creation and scale-up bring a maintenance-mode machine to the cluster's Talos version when the two differ by a minor version. Machines on older Talos keep using the classic path, and each machine's running version and schematic decide which one it takes.
+  Logout URL
+  Every Omni instance now answers at /logout, whatever its authentication type. SAML and OIDC instances were already served by the backend, and Auth0 instances now have a page that performs the logout, so the same URL ends a session everywhere.
+  New and Newly Exposed Metrics
+  omni_machine_logs_ingested_bytes_total counts the bytes of machine log messages written to storage. Two gauges that were being kept up to date but never registered are now exposed on the Prometheus endpoint as well, one for the number of CPU cores across all machines and one for the number of active virtual state watches.
+  Multiple Image Factories
+  Omni can now run against two image factories, a primary and a secondary, which makes it possible to migrate from one to the other. They are configured under registries.factories.primary and registries.factories.secondary, each taking a URL, a PXE URL, and Image Factory Enterprise credentials. The flat imageFactoryBaseURL, imageFactoryPXEBaseURL, imageFactoryUsername and imageFactoryPassword options are deprecated in favor of the primary block. They still work on their own, but once the primary block carries a URL they are ignored completely, so credentials meant for one factory are never sent to another.
+  Node Audit Skip Configurable in the UI and Cluster Templates
+  The node audit skip cluster feature, which exempts a Kubernetes node carrying the omni.sidero.dev/node-audit-skip annotation from the node audit, can now be turned on from the cluster create page and the cluster overview, and set in cluster templates.
+ReleaseNotesUrl: https://github.com/siderolabs/omni/releases/tag/v1.10.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,70 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.61.9
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.61.9] - 2026-08-11
+  The Bandwidth Monitor no longer makes the window stutter while it is open.
+  Fixed
+  - The Bandwidth Monitor made the whole window hitch about once a second. The tab measures network activity every second, and all of that measuring was happening on the same thread that draws the window — listing every network adapter and reading its counters, asking Windows for the full table of open TCP and UDP connections, and looking up the name of each program holding one. On a PC with a few adapters (Wi-Fi plus Ethernet, or a VPN or virtual-machine adapter) or a browser holding dozens of connections, that is enough work to be visible: scrolling, dragging the window and switching the chart range all stuttered in step with the once-a-second refresh. The measurement now runs on a background thread, so only the finished numbers touch the window. Nothing about what the tab shows has changed, and the precise (administrator) mode was never affected — its work was already just arithmetic on counters collected in the background.
+  - A related inefficiency in the same code. The lookup that turns a process ID into a program name was cached, but the cache was emptied halfway through each refresh, so any program holding both a TCP and a UDP connection was looked up twice per second instead of once. The cache now lives for the whole refresh.
+  Verify the download
+  Get-FileHash .\SysManager-v1.61.9.exe -Algorithm SHA256
+  Expected SHA256: BC0FC974686B26E33CD36C78EF9099B0D45FF913E02FC557B5C163F11705AC51
+  This build is not code-signed, so Windows will warn on first launch. That is
+  expected for a small independent app: see what the warning says and what to
+  click.
+  Code signing is planned through the SignPath Foundation,
+  which provides free certificates to open-source projects, with signing performed by
+  SignPath.io. Until then, the SHA256 above and the build
+  attestation below are what establish that a download is the genuine build.
+  Code signing policy
+  Free code signing provided by SignPath.io, certificate by
+  SignPath Foundation. Team roles, the release-approval process
+  and the privacy policy are documented under Code signing
+  policy.
+  This program will not transfer any information to other networked systems unless
+  specifically requested by the user or the person installing or operating it. Full
+  privacy policy.
+  Verify where this binary came from
+  This exe was built by GitHub Actions from this public source, and the build is
+  recorded in the Sigstore public transparency log. With the
+  GitHub CLI:
+  gh attestation verify .\SysManager-v1.61.9.exe --repo laurentiu021/SystemManager
+  That proves which commit and workflow produced this exact binary, something the
+  SHA256 file cannot show, since it is published alongside the exe it describes.
+  Each release also ships SysManager-v1.61.9.sbom.json, a CycloneDX inventory of
+  every dependency resolved for this build.
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.61.9
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
