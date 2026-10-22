@@ -1,0 +1,24 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: hongfaqiu.StrataManager
+PackageVersion: 0.2.14
+PackageLocale: zh-CN
+ShortDescription: 面向 Strata 本地推理的桌面工作台。
+Description: Strata Manager 是一款面向 Niko1221/Strata 本地大模型推理引擎的开源桌面管理工具，将运行环境准备、模型配置、服务控制、聊天、监控、调优与基准测试整合到同一工作台，降低使用门槛。已下载的模型权重不会被改动。
+Tags:
+- 人工智能
+- 大模型
+- 大语言模型
+- 本地大模型
+ReleaseNotes: |-
+  - 兼容上游 Strata 0.2.2：一是 0.2.2 新增的 RX 6000 引擎包（Linux hip-rx6000、Windows hip-rdna2，gfx1030/gfx1031）以前不在 Manager 的包列表里，RX 6800/6900/6950、RX 6700/6750 和 PRO W6800 只能看到「没有官方引擎包」。现在会按显卡自动选这个包，下拉框里显示为「AMD HIP · RX 6000（上游未经实机测试）」：上游只编译了这个包，还没有在真实的 RX 6000 显卡上跑过。二是用量统计和请求记录在 0.2.2 上会整体停用：0.2.2 的 Service.run 多了 declared_only 参数，observer 的签名检查不通过。现在 observer 接受这个签名并把参数原样转给上游，0.2.1 和 0.2.2 的 server.py 也已审核并加入白名单；CI 新增 Windows/Linux 两个 Strata 0.2.2 observer 任务，发版门禁要求它们全部通过。三是 0.2.2 起 Terminal 的 settings.json 和上游桌面 App 的 app-settings.json 共用一个模型目录，以较晚选择的为准（data_dir_at）。Manager 改模型目录时没有更新这个时间，旧时间会让上游把目录改回去。现在 Manager 会写入当前时间，上游 App 的设置文件存在时也一并更新，读取时取两者中较新、且目录确实存在的那个。另外用 v0.2.2 全部 12 个引擎包的真实文件清单测试了白名单，11 个 Windows/Linux 包都能解包，并通过签名清单校验。
+  - 使用统计不再因上游给核心函数加可选参数而整体停用：Manager 的请求统计会检查上游 serve/server.py 里几个核心函数（如 Service.run、begin_request、HTTP 处理器的 _json / _capture）的参数，以前要求逐字一致，上游只是在末尾加一个带默认值的参数（像 0.2.2 的 declared_only=False）也会让未审核过的源码停用统计。现在只要原有的必填参数名称、顺序和“必填/可选”都没变，末尾新增的参数都有默认值（或是 *args / **kwargs），就照常统计，包装层会把这些多出来的参数原样转交上游；删掉、改名、调换必填参数，或新增必填参数，仍会停用统计、不影响推理。另修正调优的一个小问题：“异步专家切换”候选原本只看启动参数里有没有 --layer-split 来判断多卡，配置文件顶层写了 layer_split、"gpu": [0, 1] 或多张卡的 gpu_roles 时漏判，现在统一按同一个多卡判断拒绝这个候选。
+  - Mac 上的 Metal 引擎更新到 0.1.47（上游 Strata v0.2.2）：Manager 原来固定安装 v0.2.0-beta 的 Metal 引擎 0.1.45.3，低于上游 0.2.2 要求的最低引擎版本 0.1.46。现在改装 v0.2.2 的 strata-engine-0.1.47-macos-arm64-metal.tar.gz（5,133,090 字节，固定 SHA256）。这个包新增了图片识别程序 strata-vision 和 metal/data、metal/engine-msl 目录，都已加入白名单。解包后，Manager 会用包内签名清单 engine-component.json 逐个核对文件的 SHA256 和大小：清单的摘要必须与签名 feed 一致、签名必须有效，清单之外的文件或改动过一个字节都会被拒绝，并清掉解包出来的文件。以前由 Manager 安装的旧版 Metal 引擎，在下次安装或修复运行环境时会自动换成新版；你自己选的引擎目录和源码构建（build-metal）不会被替换。
+  - Windows 首次安装按 NVIDIA 显卡选 CUDA 包：以前 Windows 上还没装引擎、又检测到 NVIDIA 显卡时，一律装 CUDA 13。但 CUDA 13 包不支持 Pascal/Volta（GTX 10 系列、Titan V 等，计算能力低于 7.5），也要求驱动 580.65 以上，这些电脑装上后引擎根本启动不了。现在 Manager 用 nvidia-smi 读驱动版本和计算能力，按签名 feed 里每个 CUDA 包的架构列表和最低驱动版本来选：GTX 1080 或驱动在 576.02 到 580.65 之间时装 CUDA 12；驱动比两个包的要求都旧时，会提示先更新驱动，或者在「官方更新包」里手动选。同时有 AMD 核显也不影响选择。nvidia-smi 读不出计算能力，或者什么显卡都没检测到时，仍然用 CUDA 13。
+  - 新装的运行环境改用上游 Strata v0.2.2 源码：以前「一键安装」新建的运行环境固定在上游 2026-10-08 的一个提交（fb58e0d，Control 0.1.41），比 v0.2.2 落后两千多个提交，新装环境里的 setup.py 和 serve/server.py 都是旧版。现在固定到 v0.2.2（011c9e6，codeload ZIP 32,149,291 字节，SHA256 0c3139c3…）。新环境装在新目录 strata-011c9e600a93，以前准备的运行环境原样保留，仍可以用「运行环境更新」升级。核对过的兼容点：Manager 传给 setup.py 的参数和取值在 v0.2.2 里都还在；v0.2.2 固定的 Python 包是旧版的子集（cmake/ninja 移到只在本机编译时安装的单独文件）；server.py 已通过 observer 审核。请求诊断（临时记录请求内容）也加入了 v0.2.2 的源码 hash，以前只对 0.1.41/0.1.42 开放。CI 里原生测试和桌面任务用的上游参考代码同步换成 v0.2.2，并补装上游固定版本的 regex（0.2 起 server.py 需要它）。
+  - 显卡角色（主卡 / 辅助 / 关闭，跟进上游 Strata 0.2.2）：「模型 → 运行配置 → 内存与显卡」新增显卡角色编辑，每张卡选择主卡（运行每次回答的最后一段）、辅助（分担模型）或关闭。保存方式与上游应用一致：写入 gpu_roles，同时写 gpu（主卡在最后）和 gpu_order: "as_given"，供旧版本和监控读取；全部关闭时写 gpu: [] 和 gpu_none: true。如果 gpu 被手动改过、与角色不一致，上游以 gpu 为准、忽略 gpu_roles，界面会提示这一点。全部关闭时：CUDA / HIP / SYCL 引擎会直接拒绝启动，界面显示错误；Metal/CPU 只提示会只用 CPU、速度变慢。启动因此失败时，启动诊断不再是笼统的「引擎退出」，而是指向显卡角色。资源评估、并发建议和加速评估改为按 gpu_roles 实际打开的卡计算。安装器的「下载与显卡设置」里指定多张卡后可选主卡，以 setup.py --gpu-roles 传给安装器；运行环境的 setup.py 不支持这个参数（早于 0.2.2）时会提前报错，不会启动安装。角色规则移植自上游 apps/host/src/lib/gpu-roles.ts（MIT），并用上游的测试向量做了回归测试。
+  - 明确不使用 API 密钥（"api_key": "none"）：「设置 → API 与外部助手 → 局域网共享与服务端鉴权」新增「明确不使用密钥」，写入上游 0.2.2 的 "api_key": "none"。选了这一项后，局域网监听不再强制要求设置密钥（上游的决定：网络上推荐设密钥，但不强制），界面会提示风险，并说明更早的版本会把 none 当成一个名为 none 的密钥。导入配置时，"none" 不会再被当成客户端密钥存进系统凭据库。
+  - CPU 专家线程使用的逻辑处理器（pool_cores，进阶、默认关闭）：「处理器」分类新增可选字段，例如 0,2,4,6 或 2-14:2，校验规则与上游 serve/server.py 相同。需要 Strata 0.2.2（引擎 0.1.47）及以上；留空保持默认分配。
+ManifestType: locale
+ManifestVersion: 1.12.0
