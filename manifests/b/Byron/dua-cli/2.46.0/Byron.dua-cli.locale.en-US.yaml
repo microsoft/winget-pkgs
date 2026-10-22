@@ -1,0 +1,76 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Byron.dua-cli
+PackageVersion: 2.46.0
+PackageLocale: en-US
+Publisher: Sebastian Thiel
+PublisherUrl: https://github.com/Byron
+PublisherSupportUrl: https://github.com/Byron/dua-cli/issues
+Author: Sebastian Thiel
+PackageName: Disk Usage Analyzer
+PackageUrl: https://github.com/Byron/dua-cli
+License: MIT
+LicenseUrl: https://github.com/Byron/dua-cli/blob/HEAD/LICENSE
+Copyright: © Sebastian Thiel
+CopyrightUrl: https://github.com/Byron/dua-cli/raw/main/LICENSE
+ShortDescription: View disk space usage and delete unwanted data, fast.
+Description: dua (→ Disk Usage Analyzer) is a tool to conveniently learn about the usage of disk space of a given directory. It's parallel by default and will max out your SSD, providing relevant information as fast as possible. Optionally delete superfluous data, and do so more quickly than rm.
+Moniker: dua
+Tags:
+- cleaner
+- disk-usage-analyser
+- disk-usage-analyzer
+- diskusageanalyser
+- diskusageanalyzer
+- duacli
+- harddisk
+- harddrive
+- requirescmd
+- space-use
+- ssd
+ReleaseNotes: |-
+  A bugfix release, and one that should also restore cargo installations, making them function.
+  New Features
+  - make walk result buffering configurable per worker
+    Replace the fixed QUEUED_BATCHES_PER_WORKER constant with
+    Options::queued_batches_per_worker and a chainable builder method. Use
+    two queued batches per worker by default in both production and tests,
+    preserving the original bounded buffering behavior.
+    Consumers that pause to process entries can opt into a larger queue to
+    keep traversal workers busy, trading memory for less idle time. A value
+    of zero selects an unbuffered channel. Check the worker-count
+    multiplication so excessive capacities cannot silently overflow.
+    Update existing Options literals to inherit the new default. Verify the
+    actual queue capacity with one and two workers, and exercise larger and
+    unbuffered queues through the public single-root and multi-root walkers.
+
+  Bug Fixes
+  - pass strict workspace Clippy on Rust 1.99
+    Replace empty-container assertions with equality comparisons and empty
+    string checks with inequality comparisons. This satisfies Clippy's
+    assert_is_empty lint while showing actual values when assertions fail.
+    Locally allow the deprecated fetch_update alias in directory identifier
+    allocation. Its replacement, try_update, requires Rust 1.95, while
+    dua-core supports Rust 1.88. Preserve the existing atomic update and
+    overflow handling without raising the minimum supported Rust version.
+  - preserve flame graphs when export fails
+
+  Commit Statistics
+  - 6 commits contributed to the release.
+  - 15 days passed between releases.
+  - 3 commits were understood as conventional.
+  - 0 issues like '(#ID)' were seen in commit messages
+
+  Commit Details
+  view details
+  - Uncategorized
+    - Merge pull request #413 from dduugg/buffer-batches-ahead-of-consumer (4179fe2)
+    - Pass strict workspace Clippy on Rust 1.99 (afbe487)
+    - Make walk result buffering configurable per worker (2989d30)
+    - Merge pull request #412 from Likio3000/fix/atomic-flamegraph-export (d11cb9c)
+    - Review (c0c749a)
+    - Preserve flame graphs when export fails (9226029)
+ReleaseNotesUrl: https://github.com/Byron/dua-cli/releases/tag/v2.46.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
