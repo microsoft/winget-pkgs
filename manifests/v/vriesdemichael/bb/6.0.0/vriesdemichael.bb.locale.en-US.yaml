@@ -1,0 +1,129 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: vriesdemichael.bb
+PackageVersion: 6.0.0
+PackageLocale: en-US
+Publisher: vriesdemichael
+PublisherUrl: https://github.com/vriesdemichael
+PublisherSupportUrl: https://github.com/vriesdemichael/bitbucket-data-center-cli/issues
+PackageName: bb
+PackageUrl: https://github.com/vriesdemichael/bitbucket-data-center-cli
+License: Apache-2.0
+LicenseUrl: https://github.com/vriesdemichael/bitbucket-data-center-cli/blob/HEAD/LICENSE
+ShortDescription: A CLI for Bitbucket Server / Bitbucket Data Center
+Description: |-
+  bb works with Bitbucket Data Center and Bitbucket Server from the command line, the way gh works with GitHub: pull requests, repositories, branches, tags, commits, build status and permissions.
+  Every command can answer in JSON for scripts, and bb ai mcp serve exposes it to AI agents over the Model Context Protocol. It is not for Bitbucket Cloud.
+Moniker: bb
+Tags:
+- atlassian
+- bitbucket
+- bitbucket-data-center
+- bitbucket-server
+- ci
+- cli
+- devops
+- golang
+- mcp
+- pull-requests
+ReleaseNotes: |-
+  v6.0.0
+  bb v6.0.0 makes its MCP server one you can hand to an agent without watching every call. It only reads unless you let it write, leaves approving a pull request to you, ends what it publishes with a line saying an AI agent wrote it, and asks you first only when you want it to. A repository you clone can no longer steer bb, and the commands that read a pull request find it from the branch you are on.
+  It is a major release. Seven changes can break a script, a pipeline or an MCP configuration. They are under "Before you upgrade", each with what to change, and are the part to read first if bb runs in CI, in scripts or under an AI agent. What v5.0.0 deprecated is gone. What this release deprecates keeps working until v7.0.0 and is listed at the end.
+  New at the command line
+  - The commands that read a pull request take it from the branch you are on (ADR-102, #766):
+    In a checkout, bb pr view, bb pr checks, bb pr diff and the other commands that only read one pull request need no number. They read the open pull request from the checked-out branch, as gh pr view does, and name it on stderr. A branch with none, or with several, is refused, naming what was found. In a fork's checkout it is the pull request from the fork into its upstream.
+    git switch feature/refunds
+    bb pr checks
+  - bb pr comment delete deletes a comment or a task (#785):
+    Bitbucket keeps a task as a comment, so one command removes either. --dry-run says what Bitbucket will do first: a comment with replies, somebody else's comment you do not administer, and a comment that changed since the --version you name are each refused.
+    bb pr comment delete 42 1389396
+  - Guides for the jobs people ask about (#774, #775): a How do I section, with running bb in a CI pipeline, setting up the MCP server in each client, and changing many repositories at once.
+  New in the MCP server
+  - What an agent writes says an AI agent wrote it (ADR-105, #797):
+    A pull request description, a comment or a tag message written through the MCP server goes out under your name. bb ends each with a line saying an agent wrote it for you, so the people who read it know who they are answering:
+    Retries a declined refund once before failing it.
+    _Written by an AI agent for @alice, via bb._
+    Where an organisation cannot allow the line, --ai-disclosure=false or mcp_ai_disclosure: false turns it off. The server then publishes nothing the agent wrote under your name at once: it does not offer create_pull_request or update_pull_request, it refuses a tag message, and comments still wait in your review until you publish it.
+  For administrators
+  The MCP server's settings, in your own configuration file, and the policy keys that decide them for everyone on a machine:
+  ──────────────────────┬───────────────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Key                   │Registry value     │Effect
+  ──────────────────────┼───────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  mcp_allow_writes      │                   │true in your own file lets the server change Bitbucket, as --allow-writes does. The read_only policy keeps it read-only whatever this says.
+  ──────────────────────┼───────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  mcp_elicitation_opt_in│MCPElicitationOptIn│true makes the server ask before each call of a tool that decides a merge, as --elicitation-opt-in does. As policy it requires asking, and false does not switch asking
+                        │                   │off.
+  ──────────────────────┼───────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  mcp_ai_disclosure     │MCPAIDisclosure    │false turns off the line saying an AI agent wrote a text, as --ai-disclosure=false does. As policy it decides for everyone, either way.
+  ──────────────────────┴───────────────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Set a key in your own config.yaml, or as policy at the top level of the system file or under HKLM\Software\Policies\bb on Windows (System Policy).
+  Before you upgrade
+  1. The MCP server only reads unless you let it write (ADR-103, #799):
+     - bb ai mcp serve offers the tools that read, and nothing that changes Bitbucket. A client configuration whose agent creates or updates pull requests, comments, merges, reports build statuses or creates tags adds --allow-writes to the server's args, or sets mcp_allow_writes: true in your configuration file.
+     - bb ai mcp tools lists what a server with the same flags offers: the tools that read, and with --allow-writes every tool.
+  2. The MCP server asks you only when you opt in (ADR-103, #795):
+     - Merging, turning auto-merge on or off, reporting a build status, creating a tag and changing a pull request's draft flag no longer ask you in the client first, and a client that cannot ask is no longer refused them with -32021. Your MCP client decides whether a call runs, through its own prompts and rules, as it does for its other tools.
+     - To keep the confirmations, start the server with --elicitation-opt-in, set mcp_elicitation_opt_in: true in your configuration file, or set the policy key for everyone.
+  3. An agent prepares a review for you to publish, rather than approving (ADR-104, #796):
+     - submit_pr_review is gone, and nothing through MCP approves, requests changes or publishes a review. prepare_pr_review tells the agent where your review waits and the status it suggests, and you publish it in Bitbucket with Finish review.
+     - add_pr_comment adds a pending comment to your review rather than publishing it. Nobody else sees it until you publish the review.
+     - A prompt or instruction that has the agent call submit_pr_review has it call prepare_pr_review and tell you where the review is.
+  4. MCP tools take a pull request's id as a number (#809):
+     - pr_id on every pull request tool, and id on show, is an integer, as every answer carries it. A string is refused with a schema error:
+       {"name": "get_pull_request", "arguments": {"project": "PAY", "repo": "ledger", "pr_id": 42}}
+     - get_pull_request still takes its former id argument as a string. It is deprecated.
+  5. A repository's files no longer steer bb (ADR-058, #770):
+     - A repository's .env sets only bb's credentials, repository context, timeouts, retries, webhook secrets, logging and prompts, each in capitals; Environment Variables lists them. Anything else in it is not applied, among it BITBUCKET_URL, BB_CONFIG_PATH, HTTPS_PROXY, BB_CA_FILE, BB_INSECURE_SKIP_VERIFY and BB_DISABLE_STORED_CONFIG. A cloned repository could otherwise send your token to a host, or through a proxy, of its choosing.
+     - A workspace .bb/config.yaml no longer sets default_host or update_base_url. It still sets project_key.
+     - bb warns once about each setting of its own it did not take, naming the file, and bb doctor shows it. Set the host in your environment, with --host, or with bb auth server use, and anything else in your environment or your own configuration file.
+  6. A group's flag works only on the commands that read it (#722):
+     - Commands that ignored a flag of their group now refuse it: --filter on bb tag create, view and delete; --start on every bb branch command but list, and on bb commit get, compare and prs; --config-file on bb reviewer condition list and delete. Remove the flag: it never had an effect there.
+  7. What v5.0.0 deprecated is gone (ADR-084):
+     - bb ai mcp serve --yolo, bb ai mcp tools --safe-only, and the safe and exposure fields of bb ai mcp tools --json. Read writes and asks:
+       {
+         "data": [
+           {
+             "name": "merge_pull_request",
+             "description": "Merge a pull request. ...",
+             "writes": true,
+             "asks": "always"
+           }
+         ],
+         "meta": { "command": "ai mcp tools", "bbVersion": "..." }
+       }
+     - --matcher-display on bb branch restriction create and update and on bb project branch-restriction create and update. Bitbucket names the matcher from --matcher-id, as it always did.
+     - --include-unique on bb build status stats, get and set.
+     - --limit and --all on bb build required delete.
+     - scheduled, staged, paths.staged and paths.swapResult in bb update --json, which were always false or empty. Read applied for whether the new binary is in place; paths holds install alone. With release and trust left out:
+       {
+         "data": {
+           "currentVersion": "v5.0.1",
+           "latestVersion": "v6.0.0",
+           "updateAvailable": true,
+           "upToDate": false,
+           "comparison": "upgrade_available",
+           "currentVersionComparable": true,
+           "latestVersionComparable": true,
+           "dryRun": false,
+           "applied": true,
+           "plannedAction": "replace",
+           "paths": { "install": "/usr/local/bin/bb" },
+           "platform": "linux/amd64"
+         },
+         "meta": { "command": "update", "bbVersion": "..." }
+       }
+  Other fixes worth knowing
+  - A user whose login name holds an @ or a +, as names under LDAP and SSO often do, is known to bb: bb auth identity names them and their slug, bb pr review set finds them among the reviewers, and a view knows whose card it shows (#807).
+  - The git credential helper hands git an access token in a form Bitbucket takes (#801), and names bb by a path that survives an upgrade (#777).
+  - bb pr create from a branch Bitbucket does not have says to push it first (#767).
+ReleaseNotesUrl: https://github.com/vriesdemichael/bitbucket-data-center-cli/releases/tag/v6.0.0
+InstallationNotes: |-
+  Set up PowerShell tab completion: bb completion install --shell powershell
+  Install the skill for coding agents: bb ai skill install --global
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://vriesdemichael.github.io/bitbucket-data-center-cli/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
