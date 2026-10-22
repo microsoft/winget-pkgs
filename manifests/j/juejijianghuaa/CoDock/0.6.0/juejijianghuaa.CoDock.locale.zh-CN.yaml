@@ -1,0 +1,135 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: juejijianghuaa.CoDock
+PackageVersion: 0.6.0
+PackageLocale: zh-CN
+Publisher: CoDock
+PublisherUrl: https://github.com/juejijianghuaa
+PublisherSupportUrl: https://github.com/juejijianghuaa/CoDock-Release/issues
+PackageName: CoDock
+PackageUrl: https://codock.pages.dev/
+License: MIT
+LicenseUrl: https://github.com/juejijianghuaa/CoDock-Release/blob/HEAD/LICENSE
+ShortDescription: 本地 Coding Agent 桌面工作台与终端集成中心。
+Description: |-
+  CoDock 是一个面向专业开发者的本地 Coding Agent 桌面工作台与终端控制台：
+  - 多 Agent 并行执行：支持在一个窗口内多 Tab 运行 Claude Code、Codex、Gemini CLI、Antigravity、Grok Build、Pi、Opencode 等，告别杂乱的独立黑窗口。
+  - 全历史与用量看板：本地直接解析各 Agent 的原生日志与 SQLite/JSONL 数据，聚合按项目、模型、日期的 Token 用量与成本统计。
+  - 专为 Coding 打造的终端增强：基于 xterm.js 与原生 ConPTY 封装，支持滚轮穿透、图片快速粘贴、拖拽文件注入绝对路径、全局快捷键呼出。
+  - Markdown Composer 独立浮窗：专为长提示词编写设计的全功能 Markdown 输入层，支持模板复用、提示词优化与一键投递。
+  - 手机/平板与局域网协同：自适应移动端 Web 交互、配对令牌安全门禁与受控只读/可写会话分享。
+Tags:
+- claude-code
+- codex
+- gemini-cli
+- 人工智能
+- 终端
+ReleaseNotes: |-
+  v0.6.0 (2026-10-22)
+  这一版带来 DeepSeek Harness (dsh) 会话日志接入、OpenCode v2 适配、
+  WorkBuddy 桌面 Agent 只读接入、会话记录双向分页（移动端与桌面统一）
+  与 MCP 来源清单自动同步，并把 macOS 的最低系统要求明确钉在 macOS 14。
+  新功能
+  - DeepSeek Harness (dsh) 会话接入搜索与记录视图：
+    - dsh 的历史此前只读它自己的 storages/session_projcache.json（派生缓存）——搜索、
+      会话记录视图、MCP 的 get_session 都读不到 dsh 的会话，模型与用量也是写死的值。
+      现在直接读会话日志本身：~/.dsh/sessions/<projectKey>/<sessionId>/session[.vN].jsonl[.zstd]
+      （默认是 zstd 多帧连接，compression: none 才是明文；多代并存时读编号最大的那一代）。
+    - 侧栏历史、全文搜索、会话记录视图三处一起补齐（与 Wake 的 dsh 适配器同一套事实源）。
+    - 标题取 dsh 自己拟的 session/title，模型与上下文上限取 request/context，用量按每次
+      模型调用累加（dsh 的 token 账本就是「一次调用」的口径）。成本报 unknown——日志里没有金额。
+    - 子代理会话（origin=subagent / delegationDepth>0）与没有真实用户消息的空会话不进列表；
+      fork 的会话会把继承段折成一条，标题 / 模型 / 用量只算它自己的。
+  - OpenCode v2 适配：
+    - 自动发现先找 opencode2 别名再找 opencode；身份校验认 1.x 与 v2 任一形态的帮助文本，
+      不再无条件放行。
+    - 历史与记录改为直连 OpenCode 自己的 SQLite 库（v2 库结构另做适配），不再经
+      opencode db 子进程：起一次 opencode 约 330 毫秒，而 SQL 本身耗时为零，历史列表要两次
+      查询，原先每个请求可能干等 660 毫秒；直连后单次查询在毫秒级，那些只为摊薄子进程开销
+      而存在短 TTL 缓存也一并去掉。写操作（删除会话）与启动探测仍走 CLI。
+    - v2 新增的 --server、-c/--continue 与 api/service/mini/reload/pair/update
+      子命令一并拦截；v2 顶层不认 --fork，分叉暂未支持（已记入 AGENTS.md）。
+  - 远程访问端点白名单：设置页可维护最多 16 个对外访问地址（备注 + 完整 URL），
+    分享弹窗与局域网访问区从中挑选域名，不必每次手输；可指定默认入口，删除默认项时自动清空。
+  - 新建任务默认单选 Agent：选择器默认单选，需要同时派给多个 Agent 时显式开启多选，
+    避免勾错一个就多开一个终端。
+  - MCP codock_get_session 新增 tail 参数：只取最后 N 条（上限 100，优先于
+    from_seq），读长会话的收尾不用先翻完整个记录；/api/transcript 与 /api/share
+    同步改走同一套 TranscriptOptions{Tail} 口径。
+  - 侧栏顶部刷新按钮：点击后图标转圈并重新加载页面，历史与运行状态不用改地址栏手动刷。
+  - WorkBuddy 作为只读转录源接入：
+    - WorkBuddy 没有 CLI，但会话记录与 CodeBuddy 同构，因此单独出一份只读源注册册，不进
+      Agent 注册表——不污染启动探测、设置页启停与恢复入口。
+    - 全文搜索可命中 WorkBuddy 会话，命中标记为不可恢复（只展示记录，不显示「恢复会话」）。
+    - 侧栏历史把 WorkBuddy 会话与同一项目下的 CLI 会话混排展示。
+    - 接力（Relay）对只读源放行：把外部应用的会话交回 CLI 继续，默认目标自动回落到当前
+      可用的 CLI。删除路径不放行——删桌面应用的记录是越权，请用归档。
+  - 会话记录双向分页，移动端与桌面统一：
+    - 移动端聊天视图原来只取尾部窗口，翻不到更早的消息；桌面记录弹窗从开头正向读，长会话
+      永远停在开头。现在两端共用一套分页实现：打开就落在最新一条，往上滚就是历史，滚到
+      顶部自动续页。
+    - 桌面记录弹窗补上向下触底自动续页：从搜索命中跳转时窗口落在会话中间，往下读不再需要
+      手动点「加载更多」。
+    - 移动端点击搜索命中的正文，现在会跳到那条消息并高亮，判据与桌面一致。
+    - 后端接口仍是 from_seq / limit / tail 一套参数，新增 hasEarlier 回答「上面还有
+      没有」；顺带修掉 tail=300 被默认 200 条静默截断的问题。
+  - MCP 来源清单动态生成 + codock_list_sources：
+    - 工具 schema 里给模型看的来源清单改为从注册表动态生成，新增来源不再需要有人记得同步
+      文档；新增 codock_list_sources（kind / 能否启动 / 是否启用 / 能否读记录），让调用方
+      先问再搜。
+    - codock_get_session 新增 view 参数，默认 brief 只返回有正文的消息，不再把注入前言
+      与工具参数全文一股脑吐出。
+  修复
+  - 坏掉的 dsh-tui Profile 会让终端永远黑屏：dsh plugin add 失败时会把 profile
+    回滚成骨架（目录、package.json 都在，但 dependencies 清空、bundles 只剩
+    @deepseek-ai/dsh-base）。原先按目录名判定，会选中这个骨架并启动它——表现是
+    一个字节都不输出地挂起，终端里只有黑屏。现在判据改成「dsh.profile.bundles
+    里除 base 之外还有别的层」，判不出来就回退随包内置的 web 形态。
+    典型成因是 ~/.dsh/profiles/node_modules 那份跨 profile 共享的依赖树版本落后于
+    CLI（实测 dsh-base 0.1.1-rc.2 vs CLI 0.2.0-rc.2），新版 dsh 的兼容性检查会拒绝
+    安装并打印 dsh plugin allow-version 指引；是否接受风险由用户决定，CoDock 不代签，
+    也不去清理那个可能被其他 profile 用着的共享目录。
+  - dsh 的恢复参数只在 tui Profile 上生效：--resume 是 tui 应用自己的 flag，web Profile
+    的命令行只认 --host、--port、--trusted-host、--no-open，多一个参数就当场退出（实测
+    0.1.1-rc.2：unknown option '--resume'）。本机没有 tui Profile 时改为在会话目录启动、
+    由用户在 dsh UI 里选那一条，与 Wake 同处理。
+  - 去掉不存在的 dsh 分叉：--fork 不是 dsh 的命令行开关（分叉是 API/UI 行为），
+    原先拼出来的「分叉」参数会被 CLI 直接拒绝。
+  - Claude 通知按类型细分，后台子代理与 API 错误不再误判：
+    - Notification 按 notification_type 白名单放行，auth_success、agent_completed、
+      computer_use_*、quota_* 不再被误报成「等你处理」的未读。
+    - 注册 StopFailure：API 错误结束回合时立即收口，不再挂到看门狗上等超时。
+    - Stop 时若 background_tasks 还有子代理或工作流在跑，发 background：转圈保留、
+      不报完成，等 Claude 醒来那一轮的 Stop 再收口。
+    - __hook 客户端投递前剥掉 prompt 与 last_assistant_message，避免大段粘贴或长回复
+      超过 64KB 被整条丢弃。
+  - OpenCode 会话标题显示为空：标题现在从会话库的标题字段读，不再留空。
+  - 记录视图默认不显示工具调用：一屏几十条 bash {"command":…} 会把正文挤得看不见，
+    默认收起，要看时再勾选。桌面弹窗与手机端一起改默认，手机端升级前手动打开过的偏好
+    不会被重置；打开或切换会话也不再无条件把用户的选择冲掉。搜索命中只落在工具调用上时，
+    只在「这一条真的会被滤掉」时临时展开，不会一次命中把整页工具调用全冒出来。
+  - 分享页聊天输入框的上下文容量恒为 0：分享页设了 shareId 后 SessionPage 跳过
+    /api/history 查询，访客读不到用量。/api/share/{id} 改为带上该会话的
+    tokens/context/contextWindow/model（只读属主 Agent 的历史，不含路径与 resume UUID），
+    并经已有的尺寸轮询写入同一份状态。
+  - MCP 续读游标单位错误：codock_get_session 的「继续读」提示把 seq 与条数两个单位相加，
+    精简视图下每一页都会重读上一页的大半（结果一直正确，只是贵）。实测读一条 428 条可见
+    消息的会话：从 24 次调用、吐回约 1200 条，降到 9 次调用、428 条、零重复。
+  界面与交互
+  - 「进行中」标记由转圈改为三点跳动：转圈像在等一个必然结束的加载，而 Agent 干活可能
+    持续很久；三点跳动更接近「它在说话」的语义，也让同一排里多个 Tab 的节奏不至于整齐划一。
+  平台与构建
+  - 发布流程不再依赖 Actions 的 artifact 中转：原先四个平台把构建产物当 artifact 上传、
+    再由收尾 job 汇总发版。artifact 存储按账号累计（Free 私有仓库 500 MB），攒满后每个
+    平台都卡在 Upload artifact 报 403，而发版 job 因 needs 被跳过——表现是「构建全绿却
+    发不出去」。现在各平台构建完直接把资产挂到 Release（--clobber 覆盖），CI 的前端产物
+    改用 cache 传递，不再吃那份额度。
+  - macOS 最低系统要求明确为 macOS 14：桌面版走 cgo 外部链接，产物的 minos 默认跟随构建机
+    SDK，此前会随 runner 镜像升级漂移（一度被抬到 macOS 15）。现在两个架构都放在 macos-14
+    上构建并钉住部署目标，CI 增加断言守住这个值。
+  官网与文档
+  - hero 上的版本徽章更新为 v0.6.0，平台说明更新为 macOS 14+。
+ReleaseNotesUrl: https://github.com/juejijianghuaa/CoDock-Release/releases/tag/v0.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
