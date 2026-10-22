@@ -1,0 +1,116 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Canonical.Multipass
+PackageVersion: 1.17.0
+PackageLocale: en-US
+Publisher: Canonical Ltd
+PublisherUrl: https://github.com/canonical
+PublisherSupportUrl: https://github.com/canonical/multipass/issues
+PackageName: Multipass
+PackageUrl: https://github.com/canonical/multipass
+License: GPL-3.0
+LicenseUrl: https://github.com/canonical/multipass/blob/HEAD/LICENSE
+Copyright: © 2024 Canonical Ltd
+ShortDescription: A lightweight VM Manager that supports cloud-deployment simulation
+Description: |-
+  Multipass is a lightweight VM manager for Linux, Windows and macOS.
+  It's designed for developers who want a fresh Ubuntu environment with a single command.
+  It uses KVM on Linux, Hyper-V on Windows and HyperKit on macOS to run the VM with minimal overhead.
+  It can also use VirtualBox on Windows and macOS.
+  Multipass will fetch images for you and keep them up to date.
+Moniker: multipass
+Tags:
+- container
+- multipass
+ReleaseNotes: |-
+  These release notes cover new features and changes in Multipass 1.17.0.
+  Multipass 1.17.0 is a large feature release. Besides a variety of small improvements, it introduces Availability Zones for resilient, zone-aware instance placement, and adds official support for Debian and Fedora images alongside Ubuntu.
+  On the platform support side, a new Windows driver using the Host Compute System (HCS) APIs was built which works on all editions of Windows and makes the support for Hyper-V and VirtualBox obsolete. This version also introduces a preview of a new macOS driver based on the Apple Virtualization framework, which will eventually replace QEMU and VirtualBox altogether.
+  This release completes the deprecation cycle announced in 1.16 by removing the LXD and libvirt drivers, blueprints, and appliances.
+  New features & improvements
+
+  Availability Zones for local cloud simulation
+  Virtual machine instances can now be placed in named availability zones using multipass launch --zone to locally simulate a cloud environment by placing each virtual machine in an availability zone. Each zone has its own isolated subnet and when a zone is disabled, Multipass marks all instances in that zone as unavailable. The multipass disable-zones and multipass enable-zones commands can be used to toggle zone availability and multipass zones to list and view zone availability.
+  Availability Zones are supported on QEMU (Linux and macOS), the new Apple Virtualization framework on macOS, and on the Host Compute System (HCS) backend on Windows. When upgrading to Multipass 1.17, existing instances are placed into zone 1 automatically.
+
+  Built-in Debian and Fedora support
+  Building on the custom image support introduced in the previous release, Multipass 1.17 adds direct support for Linux distributions other than Ubuntu, in particular for Debian and Fedora. We are opening the door for other distributions such that users can benefit from these as new playgrounds. We'd love to get feedback from our users if that direction is worth exploring more in the future.
+
+  Redesigned image catalog
+  The main screen of Multipass' GUI has been redesigned and groups releases per operating system leading to a compact view and improved usability.
+
+  New Host Compute System (HCS) driver on Windows
+  The new default driver on Windows is implemented on top of the Windows Host Compute System (HCS) APIs, replacing the previous Hyper-V-based integration with a more robust native foundation. The main benefit of the new driver is its support across all editions of Windows, including Windows Home. This change allows us to deprecate the VirtualBox and Hyper-V drivers on Windows. A migration path to upgrade existing Hyper-V virtual machines is available. For VirtualBox instances, there is no automatic migration path foreseen.
+
+  New Apple Virtualization framework backend on macOS
+  On macOS, a new driver based on Apple's Virtualization framework is offering faster startup and native ASIF disk image support on macOS 26. While this driver is still in preview, we continue to support QEMU and VirtualBox (Intel/x86 only). The new driver is Multipass' future default driver and once it supports all of Multipass' features, other drivers will be deprecated.
+
+  New CPU architectures: ppc64el and s390x
+  Multipass now builds and runs on Linux on IBM POWER (ppc64el) and Z (s390x) machines, with official snaps published for both architectures.
+
+  Other improvements and noteworthy changes
+  - For scripted and automated environments, the new multipass wait-ready command is particularly helpful to block until the daemon/service is ready and CLI commands can be executed.
+  - Launching virtual machines using cloud-init now supports rebooting the instance.
+  - multipass exec now returns the exit code of the command run inside the instance.
+  - Certificates for the client-daemon connection are now annotated and automatically regenerated which also includes improved reporting on client authentication errors.
+  - Minimum resources for new instances have been raised to 512 MiB of memory and 1 GiB of disk, preventing silent cloud-init failures on undersized launches.
+  - The Windows executables now carry version information.
+  - The macOS installer is more robust when downgrading or reinstalling, and the uninstaller also removes client certificates and GUI data.
+
+  GUI improvements
+  - The latest Ubuntu LTS release is selected by default.
+  - The memory and disk size sliders in the configuration form adapt to the selected image type.
+  - The terminal remembers its font size, and offers a "Select All" context-menu entry.
+  - The About section in the Settings tab provides information about the Multipass version in use.
+  - The GUI was prepared for localization.
+
+  Removed functionality
+  The following features, deprecated in Multipass 1.16, have been removed:
+  - Blueprints and Appliances
+  - The LXD and libvirt drivers
+  - The mem shortcut for the --memory option
+  - The --all option of multipass info
+
+  Breaking changes
+  - CLI exit codes were unified: multipass shell and multipass exec propagate the exit code of the in-instance command, while 255 is reserved for Multipass' own failures
+  - Mount target paths are fully normalized before use; in particular, trailing slashes are now trimmed
+  - Key ordering in --format json output is no longer guaranteed
+
+  Bug fixes
+  - Crashes (#4809, #4937, #4205, #5082)
+  - Virtual machine instance management and lifetime issues (#4708, #4273, #4663, #4236, #4237)
+  - Network issues (#4686, #4833, #4207, #4785, #5017)
+  - Mount issues (#4288, #4964)
+
+  Documentation
+  The documentation was updated throughout for the changes above, including refreshed tutorials, and a new driver setup guide. Furthermore, documentation was moved from https://documentation.ubuntu.com/multipass to https://canonical.com/multipass/docs/.
+
+  New contributors
+  Special thanks to our new contributors:
+  - @0xSA7, with their first contribution in PR (#5057)
+  - @AhmedMagdy9876, with their first contribution in PR (#4937)
+  - @ayaankhan98, with their first contribution in PR (#4165)
+  - @Basmala92, with their first contribution in PR (#4620)
+  - @chrisndbg, with their first contribution in PR (#4943)
+  - @deepakshirkem, with their first contribution in PR (#4657)
+  - @edibotopic, with their first contribution in PR (#4150)
+  - @geoffreynyaga, with their first contribution in PR (#4161)
+  - @halildurmus, with their first contribution in PR (#4843)
+  - @joelle-a-dev, with their first contribution in PR (#5127)
+  - @JohnGahagan, with their first contribution in PR (#4514)
+  - @Laefy, with their first contribution in PR (#5163)
+  - @nicl4ssic, with their first contribution in PR (#4305)
+  - @prachimaskar, with their first contribution in PR (#4203)
+  - @ShadiBahaa, with their first contribution in PR (#4817)
+  - @theartful, with their first contribution in PR (#4814)
+  - @tonyandrewmeyer, with their first contribution in PR (#4481)
+  - @xhon-pelushi, with their first contribution in PR (#5135)
+
+  Changes
+
+  Feedback
+  Please file issues in the Multipass GitHub repository for problems and feature requests, or join the Multipass Discourse forum to chat. You can also find us in the Multipass room on Matrix.
+ReleaseNotesUrl: https://github.com/canonical/multipass/releases/tag/v1.17.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
