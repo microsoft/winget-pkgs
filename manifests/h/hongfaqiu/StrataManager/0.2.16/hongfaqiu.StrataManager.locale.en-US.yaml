@@ -1,0 +1,31 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: hongfaqiu.StrataManager
+PackageVersion: 0.2.16
+PackageLocale: en-US
+Publisher: strata
+PublisherUrl: https://github.com/hongfaqiu
+PublisherSupportUrl: https://github.com/hongfaqiu/strata-manager/issues
+Author: hongfaqiu
+PackageName: Strata Manager
+PackageUrl: https://hongfaqiu.github.io/strata-manager/
+License: MIT
+LicenseUrl: https://github.com/hongfaqiu/strata-manager/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Strata Manager contributors
+ShortDescription: 'A desktop workspace for local inference with Strata: prepare the runtime, manage models and services, and monitor your local API.'
+Description: Strata Manager is an open-source desktop app for managing Niko1221/Strata, a local LLM inference engine. It bundles runtime setup, model downloads, service controls, streaming chat, hardware and API usage monitoring, task-based tuning, and benchmarking into a single workspace. Model weights already on your machine stay untouched.
+Tags:
+- ai
+- large-language-model
+- llm
+- local-llm
+ReleaseNotes: |-
+  - Fixed empty AMD GPU monitoring on Windows (#127): after 0.2.15 moved the ADLX readings into a separate helper process, models started normally, but AMD GPU load, VRAM, temperature and power stayed empty on the monitor, overview and floating bar. The cause is a reference-counting bug in the adlx crate Manager uses (0.0.0-alpha.1 on crates.io): every conversion of the GPU object to another interface (cast) releases one reference too many. Manager did that conversion on every sample, so the GPU object was freed after the first sample, the helper crashed on the next reading and only retried after 5 minutes, which left the readings almost always empty. Upstream fixed this but never published the fix. Manager now holds an extra reference for the conversion and converts once per session. The card name, total VRAM and PCIe are read once at the start; every other value is read on its own, so one missing value does not hide the rest, and IsSupported* flags no longer decide what is read (an RX 7900 XTX reports power as unsupported but does give total board power). The card name now prefers "AMD Radeon RX 7900 XTX" over the board code, and PCIe 5.0 is recognised. This fix has not been verified on real Windows AMD hardware yet.
+  - App updates no longer stop Strata services, and the update dialog can be closed: while any model service was handling requests, the app update used to say "a task is in progress; you can confirm the update when it finishes". App updates never stopped the background process or the engine, and the new version takes over the running model after the restart. App updates no longer wait for services to be idle, and the confirmation text says model services and the local API keep running and are managed again after the restart. Strata runtime updates restart the engine, so they still wait for requests to finish. During download and install you can close the dialog with the close button or "Continue in background", and the update keeps running; the version badge in the title bar shows "Downloading 42%", "Installing" or "Ready to install" and reopens the dialog. An update with a loaded model has not been tested with real installers on Windows, macOS or Linux yet.
+  - The close button minimizes to the tray by default: on some Windows computers upgraded all the way from the 0.1.0 betas, the close button opened "Quit Strata Manager?" instead of minimizing to the tray, because the early betas saved "minimize to tray on close" as off and later versions kept that old value. That old setting is now switched back to minimizing to the tray once; if you had chosen to quit without asking, it is left alone, and your own choice is always respected after this. The quit dialog has a new "Minimize to tray" button, remembered when "Don't ask again" is ticked.
+  - HTML previews in chat: First, clicking Preview no longer jumps back to the code after about a second (while a model runs the window refreshes every second, and the code block was rebuilt and lost the choice). Second, HTML code blocks start collapsed to a single header row (language, page title, line count, copy and Preview) and expand on click; Preview is unavailable while the answer is still streaming. Third, the preview opens in a panel to the right of the chat: drag its left edge to resize (the width is remembered), rerun, go full screen or save as HTML; in narrow windows it becomes an overlay drawer that Esc closes. Fourth, previews can use the network: external scripts, styles, fonts, images and API calls over https: / wss: are allowed, while http:, local services (including the local Strata API) and the app's internal interfaces stay blocked, and the preview still runs in a sandbox with no access to the app or your files. Fifth, a new "Open in browser" button saves the page to a temporary file and opens it in your default browser, where the app's sandbox no longer applies.
+  - Two-column shared settings page: in wide windows, Appearance and Behavior are on the left and Local background and Getting started on the right, at about the same height, instead of one column with empty space beside it. Below 1240 pixels wide it stays one column. Row heights, card titles and dropdown widths are consistent now.
+ReleaseNotesUrl: https://github.com/hongfaqiu/strata-manager/releases/tag/v0.2.16
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
