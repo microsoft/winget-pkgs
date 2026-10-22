@@ -1,0 +1,19 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: hongfaqiu.StrataManager
+PackageVersion: 0.2.15
+PackageLocale: zh-CN
+ShortDescription: 面向 Strata 本地推理的桌面工作台。
+Description: Strata Manager 是一款面向 Niko1221/Strata 本地大模型推理引擎的开源桌面管理工具，将运行环境准备、模型配置、服务控制、聊天、监控、调优与基准测试整合到同一工作台，降低使用门槛。已下载的模型权重不会被改动。
+Tags:
+- 人工智能
+- 大模型
+- 大语言模型
+- 本地大模型
+ReleaseNotes: |-
+  - 修复 Windows AMD 显卡上启动模型几秒后报「读取后台消息失败：unexpected end of file」（#124、#127）：0.2.12 加入的 AMD 显卡监控会在后台进程里直接加载 AMD 驱动的 ADLX 库（amdadlx64.dll）。模型启动几秒后第一次读取监控数据时，如果这个库出错，后台进程会整个退出，正在加载的引擎也被一起结束，界面上只剩这条报错，启动诊断也是空的。现在 ADLX 改到一个独立的小进程里读取，后台和无头 Server 只接收它每秒输出的一行读数。这个小进程出错时，只是暂时没有 AMD 显卡读数，5 分钟后再重试，不会影响后台和模型启动。如果仍有问题，可以设置环境变量 STRATA_MANAGER_AMD_TELEMETRY=0，完全关闭 AMD 读数。这个修复还没有在 Windows AMD 真机上验证过。
+  - 内置的两个 GitHub 代理改为按域名显示（#126）：更新 Strata 和 Manager 时，下载来源里的「GH Proxy」和「GHProxy」只差一个空格，看起来像重复项，其实是两个不同的代理。现在直接显示为 gh-proxy.org 和 ghproxy.net。已经选好的下载来源不受影响。
+  - CI 提速（不影响应用）：Windows 和 Linux 的原生测试从每个平台 3 个分片增加到 5 个，并按实测耗时分配，各分片跑测试的时间基本一致（新增 scripts/native-test-timings.mjs，可以用最新一次 CI 重新生成耗时表）。Linux 的系统依赖改为从缓存安装，不再受 Ubuntu 软件源快慢影响；缓存装不上时自动改回联网安装。
+ManifestType: locale
+ManifestVersion: 1.12.0

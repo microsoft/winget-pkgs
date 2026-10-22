@@ -1,0 +1,29 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: hongfaqiu.StrataManager
+PackageVersion: 0.2.15
+PackageLocale: en-US
+Publisher: strata
+PublisherUrl: https://github.com/hongfaqiu
+PublisherSupportUrl: https://github.com/hongfaqiu/strata-manager/issues
+Author: hongfaqiu
+PackageName: Strata Manager
+PackageUrl: https://hongfaqiu.github.io/strata-manager/
+License: MIT
+LicenseUrl: https://github.com/hongfaqiu/strata-manager/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Strata Manager contributors
+ShortDescription: 'A desktop workspace for local inference with Strata: prepare the runtime, manage models and services, and monitor your local API.'
+Description: Strata Manager is an open-source desktop app for managing Niko1221/Strata, a local LLM inference engine. It bundles runtime setup, model downloads, service controls, streaming chat, hardware and API usage monitoring, task-based tuning, and benchmarking into a single workspace. Model weights already on your machine stay untouched.
+Tags:
+- ai
+- large-language-model
+- llm
+- local-llm
+ReleaseNotes: |-
+  - Fixed "failed to read background message: unexpected end of file" a few seconds after starting a model on Windows with AMD graphics (#124, #127): the AMD GPU monitoring added in 0.2.12 loaded AMD's ADLX driver library (amdadlx64.dll) straight into the background process. When that library failed on the first monitoring read, a few seconds after a model started, the whole background process exited and took the loading engine with it, leaving only this error and an empty startup diagnostic. ADLX now runs in a separate small helper process, and the background process and the headless server only read the one line of readings it prints each second. If the helper fails, AMD GPU readings are missing for a while and retried after 5 minutes; the background process and the model start are not affected. If problems remain, set the environment variable STRATA_MANAGER_AMD_TELEMETRY=0 to turn AMD readings off completely. This fix has not been verified on real Windows AMD hardware yet.
+  - The two built-in GitHub proxies are labelled by host name (#126): when updating Strata or Manager, the download sources "GH Proxy" and "GHProxy" differed only by a space and looked like duplicates, although they are two different proxies. They now show as gh-proxy.org and ghproxy.net. A download source you already chose is not affected.
+  - Faster CI (no app changes): Windows and Linux native tests now run in 5 shards per platform instead of 3, balanced by measured test times so every shard spends about the same time testing (the new scripts/native-test-timings.mjs regenerates the timing table from the latest CI run). Linux system dependencies are installed from a cache, so a slow Ubuntu mirror no longer slows the jobs down; if the cache cannot be installed, the job falls back to installing online.
+ReleaseNotesUrl: https://github.com/hongfaqiu/strata-manager/releases/tag/v0.2.15
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
