@@ -1,0 +1,59 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: jdx.mise
+PackageVersion: 2026.10.17
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/jdx/mise
+Author: jdx
+PackageName: mise-en-place
+PackageUrl: https://mise.en.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+ShortDescription: Your dev env, already prepped.
+Description: Your dev env, already prepped. One tool to manage languages, env vars, and tasks per project, reproducibly.
+Moniker: mise
+Tags:
+- cli
+- dev-tool
+- env
+- environment
+- task
+ReleaseNotes: |-
+  bootstrap.user.login_shell now accepts a shell name such as fish instead of a full path. [doctor.checks] can use templates, and vfox backend plugins get their own cache directory. This release also fixes PATH handling in zsh setups that deduplicate PATH, stale task cache hits, a pipx interpreter mix-up on macOS, and removes trust in the compromised eMudhra CA certificates.
+  Added
+  - [bootstrap.user].login_shell accepts a shell name. A config shared across machines no longer needs to know where each system installs the shell. mise looks up the name when it checks or applies the setting, which happens after bootstrap.packages has installed the shell. It searches PATH first (never the mise shims directory), then common package-manager locations: /opt/homebrew/bin, /usr/local/bin, /home/linuxbrew/.linuxbrew/bin, ~/.linuxbrew/bin, /usr/bin and /bin. If no executable is found, mise bootstrap user apply fails without changing /etc/shells or the account, and status reports not installed. mise bootstrap user status shows the path it found, and --json output has a new resolved field. Absolute paths work as before. #14770 (@jdx)
+    [bootstrap.packages]
+    "brew:fish" = "latest"
+    [bootstrap.user]
+    login_shell = "fish"
+  - Doctor checks support templates. run, description and hint in [doctor.checks.*] are rendered with the template context of the config file that declares them, the same way hooks are. A check can now use a value from [vars] instead of hard-coding it. dir is not rendered. If a template fails, only that check reports ERROR and the other checks still run. Text that already contains {{ or {% in these fields is now parsed as a template. #14771 (@jdx)
+    [doctor.checks."project-a:env"]
+    description = "project-a has a .env file"
+    run = 'test -f {{ vars.repos_dir | quote }}/project-a/.env'
+    hint = "cp {{ vars.repos_dir }}/project-a/.env.example {{ vars.repos_dir }}/project-a/.env"
+  - vfox plugins get RUNTIME.cacheDirPath. This is a cache directory for each plugin at $MISE_CACHE_DIR/plugins/<plugin-name>. mise creates it before running any hook, and every hook of the plugin sees the same path. Unlike pluginDirPath, it is kept when the plugin is reinstalled. mise cache clear deletes it, so plugins must handle it being missing. It is nil when no cache directory is available. #14776 (@jdx)
+
+  Fixed
+  - exec() in [env] values, and other commands mise runs with the pre-activation environment, can now find commands in a _.path directory that was already on PATH before activation, even if the shell deduplicates PATH (for example zsh with typeset -U path PATH). #14772 (@jdx)
+  - With task.source_freshness_hash_contents = true, a task now re-runs when a source file is changed to content of the same size and its old mtime is restored (for example by rsync -a, cp -p or touch -r). On Unix, mise now also compares the file's ctime. Cache entries written by older versions are rehashed once. #14778 (@jdx)
+  - On macOS, pipx: installs no longer fail when aqua:aws/aws-cli is in the toolset. Because macOS filesystems ignore case by default, mise's lookup for python matched aws-cli's executable Python shared library and passed it to uv as the interpreter. This lookup now requires the exact case. #14769 (@jdx)
+  - An aqua registry template with an unterminated string literal now fails with an "unterminated string literal" error instead of hanging. Escaped quotes after backslashes are also detected correctly. #14752 (@Huge, @jdx)
+  - The built-in npm backend no longer trusts the eight eMudhra intermediate CA certificates whose private keys were compromised. The fix comes from updating its bundled root certificates (webpki-root-certs 1.0.10, rustls-webpki 0.103.16). Builds that use the OS trust store are fixed by OS updates instead. #14781 (@jdx)
+
+  Documentation
+  - The dotfiles docs now explain that a group entry with only permissions does not inherit the group's mode, so it deploys nothing. Removing mode from an entry that used to deploy a file leaves that file orphaned, and --prune deletes it. To deploy a file and set its permissions, use { mode = "copy", permissions = "0600" }. #14768 (@jdx)
+
+  New Contributors
+  - @Huge made their first contribution in #14752
+
+  💚 Sponsor mise
+  mise is built and maintained by @jdx, an open source developer at entire.io, the title sponsor of his open source work.
+  If mise saves you or your team time, please consider becoming an individual or company sponsor. Your support funds ongoing development and helps keep mise fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/mise/releases/tag/v2026.10.17
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
