@@ -1,0 +1,51 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.12.1
+PackageLocale: en-US
+ShortDescription: Agent-friendly reference management.
+Description: 'Traditional reference managers are not agent-friendly: highlights and notes stay locked inside single files, making it hard for agents to reuse knowledge across papers; every conversation starts from scratch without a stable local knowledge map; PDFs are human-friendly but not the most comfortable reading material for agents. Agentero aims to build an agent-friendly, agent-native way to manage references, exploring how humans and agents collaborate on reference management. Connect your local agent via ACP (BYOA), select-text chat, import papers and Skills, stay compatible with the Zotero ecosystem, and get paper translation, bidirectional links with a knowledge graph, and deep PDF reading.'
+Tags:
+- academics
+- agent
+- article
+- literature
+- paper
+- pdf
+- reference
+- research
+- thesis
+- zotero
+ReleaseNotes: |-
+  0.12.1 adds live TeX preview, publication status and venue metrics in the library, and MCP tools that can organize more than the vault currently open. Dropped-in papers no longer keep a staging filename prefix, copying math keeps the Markdown source, agent installs guide you to Node.js when it is missing, and macOS can use the system window tiling shortcuts.
+  Features
+  - LuaLaTeX live preview: With the engine set to LuaLaTeX, Live compile or the .tex toolbar opens a preview. The resident engine reflows the current paragraph onto the canvas, while a background compile updates full pages, pagination, and cross-references; saving or reopening the window stays in live preview. It needs a local lualatex and a local Vault. The compiled PDF still goes through latexmk. (#743 by @Phil-Fan)
+  - Publication status and venue metrics: The library Venue column shows Published, Submitted, or Preprint, plus EasyScholar metrics. Sync publication info refreshes metadata, venue tags, and metrics in one action. The Tags column keeps only tags you set; the app no longer writes #venue into tags. (ebc0ffa7 by @Phil-Fan)
+  - Open Scholar from BibTeX: The Scholar button stays visible on the active .bib entry and shows its label on hover. Search uses the title first, and falls back to DOI or arXiv only when the title is absent. Terms are unquoted, so a title that differs by punctuation or subtitle can still be found. (27634775 by @Phil-Fan)
+  - MCP across vaults: vault_list lists local vaults you have opened, and other tools can switch to one with vault. You can move files (updating resolvable wiki links and catalog paths), move files to the recycle bin or delete them permanently (permanent deletion asks for confirmation), inspect paper paths, move a paper within papers/, replace user tags, or list tags across the library. (#792, #795 by @Phil-Fan)
+  - Zotero standalone notes: During migration, notes that are not attached to a paper are written as Markdown in the Vault: uncategorized notes go under notes/, and notes in collections follow the collection path when folder-by-collection is on. Child notes of a paper still go into that paper's NOTES.md; child notes of a standalone note are merged into the same file. Name collisions save a new file instead of overwriting, and a later migration skips notes already imported. Empty notes and notes in the Zotero trash are not imported. (#789 by @qychen2001)
+  - Note reading position: Reopening the app restores each Markdown note's scroll position. When the document is still tall enough it uses the saved pixel offset; if the window is shorter or the first screen has not laid out yet, it uses the same fraction of the scrollable range. (#802 by @ffy6511)
+  Improvements
+  - Main window minimum width: The main window minimum width drops from 960px to 700px. On a 13-inch MacBook it no longer occupies about two thirds of the logical width, and the three-column shell still fits. (5fdc95f0 by @Phil-Fan)
+  - PDF scroll raster: While reading, the full-page base image stays at a fixed low resolution and is not re-rendered on zoom; sharp tiles cover only the current viewport and use the BMP fast path. Rotation, device-pixel-ratio, and scroll-layout fixes remain. (7e104368 by @qychen2001)
+  Fixes
+  - Dropped-in paper filenames: Importing from a drop that does not expose a file path no longer puts the Host staging stamp into the title, id, folder name, or NOTES heading. Only names inside the staging directory that match that stamp are stripped; ordinary local filenames are unchanged. Papers already imported are not renamed. (#812 by @Fengsuid)
+  - Copying a selection that contains math: Copy and cut keep $…$ / $$…$$ source when the selection includes an equation, instead of the glyphs KaTeX painted. Selections without math still copy plain text, and the context menu can force Copy as Markdown. (#806 by @Fengsuid)
+  - Installing agents without Node.js: Settings → Agent prompts you to install Node.js when Node.js or npm is missing. npm ACP adapters, and agents that can only be installed with npm, no longer start an install or upgrade that cannot succeed. Uninstall still works. (#811 by @Fengsuid)
+  - macOS window tiling: On macOS 15 and later, Window → Move & Resize and Fn + Ctrl + arrow keys can tile the window into halves and quarters. Plain Ctrl is no longer treated as ⌘, so the system tiling shortcut is not swallowed by the rail-collapse shortcut. (#794 by @Immortal-Fates)
+  - Antigravity sign-in: Antigravity no longer appears signed in before an auth method is selected. Diagnostics explain that ~/.gemini/antigravity-acp/settings.json needs an auth type, and a guided login can write oauth-personal. Existing hand-written config is left in place. (#748 by @Phil-Fan)
+  - Embedding batch size: arXiv Daily embedding requests send at most 20 inputs per batch. When a provider rejects the batch size, the batch is split in half and retried, so one oversized request no longer fails the whole refresh. (#796 by @Phil-Fan)
+  - Layout menu click: After hover opens the layout menu, the first click pins it open. The next click, or a press outside, closes it. (36167669 by @Phil-Fan)
+  - Library page counts: Each page-count probe closes the PDF it opened and releases the buffer, so filling in page counts for the heatmap no longer accumulates documents. (5a7f9167 by @qychen2001)
+  - Workspace drag and PDF jumps: After a drag is cancelled, panels can be dragged in again, and releasing outside a panel is not treated as a drop. PDF citation jumps wait until layout is ready and keep only the latest request. (#808 by @qychen2001)
+  Known Limitations
+  - Live preview scope: Live preview is LuaLaTeX and local Vaults only. The canvas cannot select or search text yet. TikZ, rotated pages, right-to-left text, or a missing font fall back to the layout PDF for that page. Switch back to the compiled PDF when you need selection or search. (#743 by @Phil-Fan)
+  - PDF scrolling still needs a retest: The low-resolution base image, BMP output, and removal of the duplicate tile cache cut raster work that was already identified. Frame rate on the reported Linux / WebKitGTK machine has not been retested, and #798 remains open. (7e104368 by @qychen2001)
+  https://github.com/poco-ai/Agentero/compare/v0.12.0...v0.12.1
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.12.1
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: locale
+ManifestVersion: 1.12.0
