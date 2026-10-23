@@ -1,0 +1,94 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: seakee.CPAManagerPlus
+PackageVersion: 1.14.9
+PackageLocale: en-US
+Publisher: seakee
+PublisherUrl: https://github.com/seakee
+PublisherSupportUrl: https://github.com/seakee/CPA-Manager-Plus/issues
+PackageName: CPA Manager Plus
+PackageUrl: https://github.com/seakee/CPA-Manager-Plus
+License: MIT
+LicenseUrl: https://github.com/seakee/CPA-Manager-Plus/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Seakee
+ShortDescription: A self-hosted CLIProxyAPI management panel and AI gateway observability dashboard
+Description: |-
+  A self-hosted CPA / CLIProxyAPI management panel and AI gateway observability dashboard for requests, usage, cost, quota, failures, and account health.
+
+  What Can CPAMP Help You Answer?
+  - Why are requests failing? Inspect failure rates, status codes, affected models/accounts, and redacted evidence in persistent request history.
+  - Where is the cost going? Break down tokens and estimated cost by model, provider, account, API key, project, channel, and time range.
+  - Are accounts and quotas healthy? Review credential state, quota windows, reset evidence, and controlled automation for Codex and xAI accounts.
+
+  Core Capabilities
+
+  CPA Gateway Management
+  - Manage CPA provider configurations, including Gemini, Codex, Claude, Vertex, xAI, and OpenAI-compatible providers.
+  - Maintain auth files, OAuth logins, API keys, model aliases, priorities, plugins, logs, and system settings.
+  - Import official Sub2API OpenAI OAuth exports and split multiple accounts into separate CPA Codex auth files.
+
+  Request Monitoring And Failure Diagnosis
+  - Persist requests from the CPA usage queue in local SQLite and search account, client API key, and realtime request views.
+  - Inspect status, latency, token, cache, trace, and redacted failure evidence without exposing raw failure bodies.
+  - Export or import request history as JSONL.
+  - Open the Monitoring Demo.
+
+  Cost And Usage Analytics
+  - Break down calls, tokens, cost, latency, and failures by model, provider, account, credential, API key, project, channel, and time range.
+  - Track input, output, reasoning, cache, service tier, and long-context pricing semantics.
+  - Sync model prices from models.dev first, with LiteLLM and OpenRouter fallbacks plus local overrides for aliases or internal models.
+  - Open the Usage Analytics Demo.
+
+  Account Health, Quota, And Automation
+  - Inspect Codex and xAI accounts locally or on a Manager Server schedule.
+  - Read quota windows, reset evidence, credential state, workspace state, and provider-specific health signals when available.
+  - Apply controlled quota cooldowns and route credential failures into an account action queue for review and recovery.
+  - Open the unified Accounts Demo.
+
+  Production Operations
+  - Run CPAMP Full Mode as one Docker container or a native Linux, macOS, or Windows package for amd64/arm64; the full stack can run alongside CPA.
+  - Keep request history, Manager configuration, automation state, and model prices in local files with no account registration or telemetry SDK.
+  - Back up SQLite files together with data.key to preserve encrypted CPA Management Keys.
+
+  Want to preview the interface first? Open the Live Demo. The demo uses fictional data only. It is not a deployment or runtime mode and cannot connect to, manage, or monitor a real CPA instance.
+  CPAMP manages and observes traffic through CPA / CLIProxyAPI. It is not a replacement proxy and does not forward model traffic by itself.
+
+  Data, Privacy, And Security
+  - CPAMP does not phone home, include analytics SDKs, or require account registration.
+  - External calls are limited to the CPA gateway and integrations you explicitly configure or trigger, such as OAuth, provider checks, plugin releases, and model price sync.
+  - Request history, configuration, model prices, inspection history, and automation state stay in local files.
+  - CPA Management Keys are encrypted before SQLite persistence; backups require the SQLite files and data.key.
+  - Normal APIs and JSONL exports expose redacted failure summaries, never raw failure bodies or stored raw JSON.
+  - CPAMP is intended for traffic and credentials you are authorized to operate.
+Tags:
+- ai
+- api-gateway
+- dashboard
+- llm
+- proxy
+ReleaseNotes: |-
+  Overview
+  v1.14.9 is a 1.x security-maintenance release after v1.14.8. It contains the merged dependency and CI-security maintenance changes in #1049. The focus is to use patched build toolchains and dependencies and prevent future changes with failing dependency scans from passing the existing CI gate.
+  There are no new user-facing features. This release does not include v2 architecture work or change CPA management APIs, authentication, database schemas, credential/configuration formats, or historical usage data.
+  Security and Build Maintenance
+  - Go and Manager Server (#1049): Require Go 1.26.10 for source builds, update golang.org/x/sys to v0.44.0, select the CI Go version from go.mod, and pin the Docker Go builder. The SQLite dependency remains at v1.46.1.
+  - Node.js and frontend dependencies (#1049): Pin Docker's frontend builder to Node.js 22.23.4 and CI to 24.22.1. Update axios, React Router, Vite, Vitest, and related locked dependencies.
+  - Documentation dependencies (#1049): Resolve relevant VitePress/DocSearch advisories with scoped dependency overrides while retaining VitePress 1.6.4, without undertaking a documentation-site redesign.
+  - Ongoing dependency security (#1049): Add a full-workspace npm audit and Go vulnerability scans for Linux, macOS, and Windows on both amd64 and arm64. Missing, skipped, or failed results now block Required checks. Add scheduled security scans and weekly Dependabot updates targeting dev.
+  - The verification recorded on #1049 reduced the npm audit from 26 affected package nodes to zero reported advisories and found no known issues in the six Go source scan targets. These are findings against the vulnerability database snapshot used for that verification, not a guarantee against future advisories.
+  Upgrade Notes
+  - Upgrade from v1.14.8 and restart normally. No database migration, configuration rewrite, or credential recreation is required; migration_required remains false.
+  - Users of prebuilt Docker images or native packages do not need to install Go or Node.js on the host. Source builds of Manager Server now require Go 1.26.10; Node.js builds require compatible 22.23.4+ (22.x), 24.22.1+ (24.x), or 26.12.1+ runtimes.
+  - The dependency/toolchain changes are substantial, but no user-visible UI, authentication, API, or data behavior changes are intended. Check the management UI, existing connections, and key workflows after upgrading.
+  - The CPA compatibility baseline for full Muse / Meta features remains v7.3.4+.
+  - The existing offline derived-index maintenance guidance from v1.14.7 still applies; this release adds no further maintenance steps.
+  - #1049's local verification covered frontend/server tests, offline pages, and native cross-builds. Local Docker build completion was blocked by a base-image metadata fetch error. Formal CI and the release Dry Run remain the authority for publish readiness.
+
+  Full Changelog: https://github.com/seakee/CPA-Manager-Plus/compare/v1.14.8...v1.14.9
+ReleaseNotesUrl: https://github.com/seakee/CPA-Manager-Plus/blob/HEAD/docs/release-notes/v1.14.9-en.md
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://seakee.github.io/CPA-Manager-Plus/docs/en/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
