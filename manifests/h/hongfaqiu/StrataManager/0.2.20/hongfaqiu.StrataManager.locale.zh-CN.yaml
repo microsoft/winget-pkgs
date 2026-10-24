@@ -1,0 +1,21 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: hongfaqiu.StrataManager
+PackageVersion: 0.2.20
+PackageLocale: zh-CN
+ShortDescription: 面向 Strata 本地推理的桌面工作台。
+Description: Strata Manager 是一款面向 Niko1221/Strata 本地大模型推理引擎的开源桌面管理工具，将运行环境准备、模型配置、服务控制、聊天、监控、调优与基准测试整合到同一工作台，降低使用门槛。已下载的模型权重不会被改动。
+Tags:
+- 人工智能
+- 大模型
+- 大语言模型
+- 本地大模型
+ReleaseNotes: |-
+  - 支持 Strata 官方应用 0.2 版生成的引擎组件配置（component:strata-engine），不再误报「引擎文件不存在」：官方应用 0.2 起，配置里的引擎不再写文件路径，而是写成 "exe": "component:strata-engine"，表示使用应用安装在 %LOCALAPPDATA%\Strata\components 里的引擎组件。之前启动器把这串字符当成文件路径去找，于是报「引擎文件不存在」。现在按上游规则到组件目录里找对应版本的引擎（回滚时固定的版本优先），启动前检查、配置扫描和调参后重启都能正确识别。
+  - 修复 Win+Shift+S 截图时任务栏监控变成桌面浮条：系统截图（Win+Shift+S、PrintScreen 截图）打开后会盖住整个屏幕。任务栏监控在这段时间里重新检查位置时，会把截图遮罩误当成挡住任务栏的窗口，或者读到截图期间暂时变化的任务栏，于是判定挂载失败，退回并弹出桌面浮条。现在检测到前台是截图遮罩时，任务栏监控保持原样，暂停检查，截图结束约 1.5 秒后再重新测量；挂载时撞上截图遮罩也只会稍后重试，不再退回浮条。截图遮罩按进程名加窗口特征识别（置顶或铺满屏幕），不看窗口标题：Windows 自带的 ScreenClippingHost.exe（Win10）、SnippingTool.exe（Win11 截图工具）、ScreenSketch.exe（截图和草图），以及置顶且铺满屏幕的微信、QQ、TIM、Snipaste、PixPin、ShareX 截图遮罩。普通的截图工具窗口、聊天窗口和游戏、视频等真正的全屏程序不受影响。
+  - 修复模型分片校验失败后重试一直失败：Strata 自己下载到模型目录的分片，之前在重新准备时会被当成「你自己的文件」交给上游安装器（--gguf-dir），上游对这种文件校验不通过时既不删除也不修复，所以分片损坏（大小对、内容不对）后每次重试都报「文件校验未通过 … does not match the published file」。现在 Strata 自己的模型目录按正常下载处理：校验不通过时只重新下载损坏的部分或这个分片，重试即可恢复。
+  - 自选模型文件夹校验失败时提示先删文件再重试：在「使用已有模型」里选的文件夹仍按你自己的文件处理，Strata 不会删除里面的文件。这种情况下之前提示「重试会重新下载该文件」并不对，现在会说明这个分片和官方发布的文件不一致，请先删除它（和同名的 .done 文件）再重试，会重新下载。
+  - 修复任务卡片报错时标题和说明被挤成一列：模型准备失败、红色报错较长时，任务卡片左边的标题和说明会被挤成每行一个字。现在报错和按钮放到说明下方，和文字左对齐，窄窗口下占满整行。
+ManifestType: locale
+ManifestVersion: 1.12.0
