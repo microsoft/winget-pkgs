@@ -72,7 +72,7 @@ Address all reported errors and resubmit.
 
 **What it means:** Your manifest uses a schema version that is no longer accepted by the repository.
 
-**How to fix:** Update your manifest to use a supported schema version. The recommended schema version is **1.12.0** (1.10.0 is also accepted). Update the `ManifestVersion` field in all manifest files and ensure the `# yaml-language-server: $schema=...` comment references the correct version.
+**How to fix:** Update your manifest to use a supported schema version. The recommended schema version is **1.28.0** (1.12.0 is also accepted). Update the `ManifestVersion` field in all manifest files and ensure the `# yaml-language-server: $schema=...` comment references the correct version.
 
 ---
 
@@ -339,7 +339,7 @@ Function Get-UrlResponse {
 - The installer encountered an unexpected error during setup.
 
 **How to fix:**
-1. If the validation logs indicate an access-denied or permissions error, add `ElevationRequirement: elevationRequired` to your installer manifest. See the [ElevationRequirement documentation](https://github.com/microsoft/winget-pkgs/blob/master/doc/manifest/schema/1.12.0/installer.md) for guidance on choosing the correct value.
+1. If the validation logs indicate an access-denied or permissions error, add `ElevationRequirement: elevationRequired` to your installer manifest. See the [ElevationRequirement documentation](https://github.com/microsoft/winget-pkgs/blob/master/doc/manifest/schema/1.28.0/installer.md) for guidance on choosing the correct value.
 2. Check the accompanying PR comment for specific next steps.
 
 ---
@@ -354,7 +354,7 @@ Function Get-UrlResponse {
 - The installer depends on a runtime or framework that is not present on the test machine.
 
 **How to fix:**
-1. If the installer needs elevation to complete, add `ElevationRequirement: elevationRequired` to your manifest. Do **not** use `elevatesSelf` unless the installer has its own built-in logic to conditionally request elevation. See the [ElevationRequirement documentation](https://github.com/microsoft/winget-pkgs/blob/master/doc/manifest/schema/1.12.0/installer.md) for details.
+1. If the installer needs elevation to complete, add `ElevationRequirement: elevationRequired` to your manifest. Do **not** use `elevatesSelf` unless the installer has its own built-in logic to conditionally request elevation. See the [ElevationRequirement documentation](https://github.com/microsoft/winget-pkgs/blob/master/doc/manifest/schema/1.28.0/installer.md) for details.
 2. Test locally with `winget install --manifest <path>` from a non-elevated terminal to reproduce the issue.
 3. Verify the installer binary is valid and not corrupted.
 

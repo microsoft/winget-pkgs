@@ -25,7 +25,7 @@ Additional `<Id>.locale.<tag>.yaml` files provide optional translations.
 - The version folder name must match `PackageVersion` exactly
 - The first directory under `manifests/` is the **lowercase** first letter of the publisher
 - Each YAML file includes a `# yaml-language-server: $schema=...` comment pointing to its JSON schema
-- Recommended schema version: **1.12.0** (1.10.0 also accepted)
+- Recommended schema version: **1.28.0** (1.12.0 also accepted)
 - Supported installer types: MSIX, MSI, APPX, EXE, and font files only — no scripts
 
 ## PR Conventions
