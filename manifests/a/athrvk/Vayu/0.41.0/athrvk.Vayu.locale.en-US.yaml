@@ -1,0 +1,114 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: athrvk.Vayu
+PackageVersion: 0.41.0
+PackageLocale: en-US
+Publisher: Atharva Kusumbia
+PublisherUrl: https://github.com/athrvk
+PublisherSupportUrl: https://github.com/athrvk/vayu/issues
+Author: Atharva Kusumbia
+PackageName: Vayu
+PackageUrl: https://github.com/athrvk/vayu
+License: AGPL-3.0
+LicenseUrl: https://github.com/athrvk/vayu/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Atharva Kusumbia
+ShortDescription: Open-source API client with a native C++ load-testing engine - Postman-style requests and k6-level load tests in one local app.
+Description: Vayu is a free, open-source desktop app for Windows, macOS, and Linux that combines a full REST and GraphQL request builder - with collections, environments, and scripting - and a high-throughput load tester powered by a C++20 engine, with all data staying on your machine.
+Moniker: vayu
+Tags:
+- api
+- api-client
+- api-testing
+- benchmark
+- developer-tools
+- graphql
+- http
+- insomnia
+- load-testing
+- performance
+- postman
+- rest
+ReleaseNotes: |-
+  0.41.0 - 2026-10-08
+  Read Security and Changed before updating. MCP agents no longer
+  receive secret values unless you turn on Reveal secrets to agents, and an
+  agent can no longer send its own scripts while that setting is off. Secrets
+  are also withheld from recorded runs, exports, logs and several places in the
+  app that showed them in clear, and the workspace database moves to schema
+  version 5. New: History shows who started a run, and hovering any time shows
+  it in your zone and in UTC.
+  Added
+  - Hovering a time shows it in your time zone and in UTC, with how long
+    ago. This covers times in response bodies, headers, variables and the
+    editors, and Vayu's own times such as run start and end, cookie expiry and
+    History.
+  - History shows who started a run. A run an MCP agent started carries the
+    agent's name, a run with no saved request behind it is marked Unsaved,
+    and the list filters by origin (App or Agents).
+  - Save to request turns an agent's unsaved run into a saved request.
+  Security
+  - Agents no longer read secret values unless you allow it. A new
+    Reveal secrets to agents setting in Settings > MCP is off by default.
+    While it is off, secret variables, the credentials in auth blocks,
+    credential headers such as Authorization, cookie values, a password or
+    credential parameter in a saved URL and a proxy password reach an agent
+    marked as withheld, and a secret that appears in a run's output reads
+    <redacted>. Requests an agent sends still use the real values, and an
+    agent cannot clear a variable's secret flag to read it.
+  - An agent cannot change the proxy or the trusted certificate authorities
+    unless you turn on the new Network settings switch in Settings > MCP,
+    off by default and effective only alongside Write access.
+  - Recorded runs no longer store credentials. A typed Authorization
+    header, an API-key header and any secret variable value that reached the
+    URL, params, headers or body are withheld from the request a run records.
+    Runs recorded by earlier versions are not rewritten.
+  - Exports blank every credential they can recognise by name, not only
+    those inside auth blocks: credential headers and query parameters, example
+    requests, cookies and secret keys in imported auth settings. A header is
+    kept only when its whole value is one {{variable}}, so
+    Authorization: Bearer {{token}} is now blanked.
+  - On macOS and Linux the data directory and everything in it is readable by
+    your user only, including files an earlier version created. On Windows the
+    data directories are restricted to your account and administrators.
+  - Vayu no longer stores the full response an OAuth 2.0 provider returns,
+    which held refresh and ID tokens.
+  - A credentialed proxy URL no longer reaches the engine log however it is
+    written, and request debug logs withhold every credential header,
+    including the one an API-key auth names.
+  - The Resolved body view, the Σ peek on Params, Headers and form rows, and
+    the Params Sends line mask secret variable values, and the proxy URL
+    setting is a masked field.
+  - Code snippets mask credential headers by name, and catch a secret that
+    reached the URL percent-encoded.
+  - A hostile import file fails without harm: a deeply nested JMeter plan
+    imports what it can, an OpenAPI spec's $refs cannot read outside the
+    folder you picked or fetch from your machine, and an oversized import is
+    refused before it is read.
+  - A collection's scripts can no longer leave state behind for the next
+    script to read.
+  Changed
+  - The workspace database moves to schema version 5. Once 0.41.0 opens a
+    workspace, earlier versions refuse it, so going back to 0.40 means
+    restoring a backup. The upgrade writes a copy of the database beside it
+    first.
+  - With Reveal secrets to agents off, run_request and start_load_run
+    refuse scripts an agent supplies. A script sees every variable the
+    request resolves against, so it could copy a secret out. Stored scripts in
+    a collection still run.
+  - A masked credential header in a code snippet reads
+    Authorization: <secret>, without the scheme.
+  - The engine refuses a chunked request body on its local API and caps every
+    body's size. The app, vayu-cli and the MCP server are unaffected.
+  Fixed
+  - The folder and request rename fields keep the label's position and no
+    longer clip descenders, and the new-subfolder buttons match the field's
+    height.
+  - The resolved-value peek and several compact dropdowns and inputs were
+    smaller than every other control; they match now.
+  - Internal: OpenSSL 3.6.5 and cpp-httplib 0.59.0, and documentation kept in
+    step with all of the above.
+  Every asset carries a build-provenance attestation: gh attestation verify <asset> --repo athrvk/vayu.
+ReleaseNotesUrl: https://github.com/athrvk/vayu/releases/tag/v0.41.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

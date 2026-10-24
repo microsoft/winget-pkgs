@@ -1,0 +1,86 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: seakee.CPAManagerPlus
+PackageVersion: 1.14.8
+PackageLocale: zh-CN
+ShortDescription: 自托管的 CPA / CLIProxyAPI 管理面板与 AI 网关可观测性仪表盘
+Description: |-
+  面向 CPA / CLIProxyAPI 的自托管管理面板与 AI Gateway 可观测性仪表盘，覆盖请求、用量、成本、配额、失败诊断和账号健康。
+
+  CPAMP 可以帮你回答什么问题？
+  - 请求为什么失败？ 在持久化请求历史中查看失败率、状态码、受影响的模型/账号和脱敏证据。
+  - 成本花在哪里？ 按模型、Provider、账号、API Key、项目、渠道和时间范围拆解 Token 与预估成本。
+  - 账号和配额是否健康？ 查看凭证状态、配额窗口、reset 证据，以及 Codex 和 xAI 的受控自动化状态。
+
+  核心能力
+
+  CPA 网关管理
+  - 管理 CPA Provider 配置，包括 Gemini、Codex、Claude、Vertex、xAI 和 OpenAI-compatible Provider。
+  - 维护认证文件、OAuth 登录、API Key、模型别名、优先级、插件、日志和系统配置。
+  - 导入官方 Sub2API OpenAI OAuth 导出，并把多账号拆分为独立的 CPA Codex 认证文件。
+
+  请求监控与失败诊断
+  - 将 CPA usage queue 中的请求持久化到本地 SQLite，并按账号、调用方 API Key 查看实时请求。
+  - 查看状态、延迟、Token、缓存、Trace 和脱敏失败证据，不暴露原始失败体。
+  - 使用 JSONL 导入或导出请求历史。
+  - 打开 请求监控演示。
+
+  成本与用量分析
+  - 按模型、Provider、账号、认证文件、API Key、项目、渠道和时间范围拆解请求、Token、成本、延迟和失败。
+  - 追踪 input、output、reasoning、cache、service tier 和长上下文计费语义。
+  - 从 LiteLLM 和 OpenRouter 同步模型价格，并为别名或内部模型保留本地覆盖。
+  - 打开 用量分析演示。
+
+  账号健康、配额与自动化
+  - 在浏览器本地或 Manager Server 定时巡检 Codex 和 xAI 账号。
+  - 在 Provider 可提供信息时展示配额窗口、reset 证据、凭证状态、工作区状态和健康信号。
+  - 对明确额度耗尽执行受控冷却，并将认证故障汇总到账号处理队列，支持复核与恢复。
+  - 打开统一的 凭证管理演示。
+
+  生产运维
+  - 使用单 Docker 容器，或 Linux、macOS、Windows 的 amd64/arm64 原生包运行；完整栈可以与 CPA 一起部署。
+  - 请求历史、Manager 配置、账号自动化和模型价格都保存在本地文件，不需要注册账号，也不包含遥测 SDK。
+  - 备份 SQLite 时同时保存 data.key，才能恢复加密后的 CPA Management Key。
+
+  想先了解界面？可以打开在线演示。演示站只使用虚构数据，不是部署或运行模式，不能连接、管理或监控真实 CPA。
+  CPAMP 管理和观测经过 CPA / CLIProxyAPI 的流量，本身不是模型代理，也不会独立转发模型请求。
+
+  数据、隐私与安全
+  - CPAMP 不会回传遥测，不包含分析 SDK，也不要求注册账号。
+  - 外部请求只限于 CPA Gateway 及你明确配置或主动触发的 OAuth、Provider 检查、插件 Release 和模型价格同步。
+  - 请求历史、配置、模型价格、巡检历史和自动化状态都保存在本地文件。
+  - CPA Management Key 入库前会加密；备份需要同时保存 SQLite 文件和 data.key。
+  - 普通 API 和 JSONL 导出只暴露脱敏失败摘要，不返回原始失败体或保存的原始 JSON。
+  - CPAMP 只应用于你有权管理的流量和凭证。
+Tags:
+- 人工智能
+- 代理
+- 仪表盘
+- 大语言模型
+- 网关
+ReleaseNotes: |-
+  Overview
+  v1.14.8 是 v1.14.7 之后的 1.x 维护版本，整合四项已经合并的前端修复：后台刷新数据连续性（#1001）、实时监控来源识别（#1014）、配额窗口显示（#1020），以及 xAI OAuth 订阅计划与可观察配额识别（#1006）。
+  本次不包含 v2 架构改造，不修改 Manager Server、CPA 管理 API、数据库 Schema、凭证格式或配置格式。没有新增用户配置项或迁移步骤。
+  Fixes
+  - 后台刷新连续性（#1001）：凭证历史、配额使用量、Usage Analytics 和模型价格表在相同连接及数据作用域内刷新时保留已加载的数据，避免请求进行中或暂时失败时闪烁、清空或错误显示空态。
+  - 对于替换的凭证，历史及配额使用量以当前凭证身份隔离；未变更的其他凭证仍保留其有效快照。滚动时间范围跨日及筛选条件变化时，旧数据按作用域正常失效。
+  - 实时监控来源（#1014，修复 #1013）：不同提供商共享 API Key 或 Host 序号时，结合事件提供商解析来源，保留原本配置的上游标签；提供商不明或同提供商内仍有歧义时，不猜测具体来源。不会展示原始密钥。
+  - 配额窗口展示（#1020）：Antigravity 的卡片与表格最多显示五个主要配额窗口，包括独立的 Gemini 4 Argon 分组。明确区分已确认的空模型用量和用量未知、快照过期、范围不完整或获取失败等状态。
+  - xAI OAuth 订阅（#1006，修复 #1005）：当 CPA 凭证文件缺少订阅计划时，通过 CPA 既有 api-call 入口后台查询订阅信息；已确认的 SuperGrok Heavy 计划可正确显示，无法确认订阅时仍展示实际获取到的配额。
+  - xAI 配额展示与健康判断分离：只有可信的最新订阅证据才能确认计划与可用性；旧结果不会跨连接或凭证替换复用。订阅查询仅在刷新后触发，并采用去重的低优先级串行查询，不新增定时轮询。
+  Upgrade Notes
+  - 从 v1.14.7 正常升级并重启即可。 没有数据库迁移、配置修改或凭证重建要求；migration_required 为 false。
+  - #1006 的订阅计划补充依赖 CPA 已有的 api-call 能力及上游订阅接口。若上游接口不可用，订阅计划可能保持未知；已有配额显示不会因此被隐藏，也不会仅凭旧计划宣称可用。
+  - #1001 仅保留相同作用域的最后一次可信数据；连接、凭证或筛选条件变更后仍会失效，避免跨账号混用。
+  - 完整 Muse / Meta 功能的 CPA 最低兼容基线仍为 v7.3.4+，本版本不提高该要求。
+  - v1.14.7 关于已有非空数据库延迟分析覆盖索引的离线维护说明继续适用；本版本没有新增索引或维护命令。
+  Acknowledgements
+  - @M1nt-Ch0c0 - 修复 xAI OAuth 订阅计划识别问题，补充后台查询，并在计划未知时保留已获取的配额展示（#1006）。
+  - @imrooki - 修复 Antigravity 配额窗口显示不完整及模型用量空状态识别问题（#1020）。
+
+  Full Changelog: https://github.com/seakee/CPA-Manager-Plus/compare/v1.14.7...v1.14.8
+ReleaseNotesUrl: https://github.com/seakee/CPA-Manager-Plus/blob/HEAD/docs/release-notes/v1.14.8-zh.md
+ManifestType: locale
+ManifestVersion: 1.12.0

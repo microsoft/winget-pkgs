@@ -1,0 +1,82 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.10.2
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-agent-core
+  Added
+  - Added AgentLoopConfig.onDetachedToolUpdate: a tool's onUpdate frames that arrive after its run's event stream ended (a returned call whose background job keeps reporting) reach it instead of being dropped; Agent forwards them to its subscribers as tool_execution_update events
+  @oh-my-pi/pi-ai
+  Added
+  - Added support for CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS on the anthropic provider: when set, requests omit pre-release fields (context_management, beta tool fields such as strict and defer_loading, task budgets, structured-output format, thinking.block_binding, and Anthropic server compaction) along with their beta headers, so ANTHROPIC_BASE_URL gateways that reject them keep working (#15458 by @H4vC)
+  @oh-my-pi/pi-catalog
+  Added
+  - Added the honors-claude-code-beta-kill-switch axis (compat.honorsClaudeCodeBetaKillSwitch), on for the anthropic provider, so a rule or models.yml override decides which providers honor CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS (#15458 by @H4vC)
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS support: set it to stop Anthropic requests sending experimental beta fields that a company ANTHROPIC_BASE_URL gateway rejects, such as the Sonnet 5.5 thinking.adaptive.block_binding 400 (#15458 by @H4vC)
+  - Added the task.structured setting (default off) for structured task results: when on, the task tool accepts outputSchema/schemaMode and subagents return results through yield as before
+  Changed
+  - Subagents spawned by the task tool now return their final message as plain text, with no yield tool, output schemas, or "Submit Result" fields; eval agent()/workpool spawns still return structured results
+  - In Tern, a backgrounded bash command or eval cell keeps filling its own card with live output (In background, with a running clock) and settles it with the job's outcome, Cancelled when the job is killed; wait lists each job on one line (type, id, label, duration) instead of repeating its output
+  - ACP clients now see a backgrounded call's job output stream into its tool call, which settles completed or failed with the job
+  Fixed
+  - Fails unstructured task runs that conclude without a final message
+  - Background task cards no longer stop updating once the agent ends its turn while the task is still running
+  - Transparent images the model receives (small icons, oversized screenshots) keep their transparency instead of turning into a black square, and resized edges no longer pick up a dark fringe
+  @oh-my-pi/pi-natives
+  Added
+  - Added in-process env, du, chmod, fold, rmdir, od, df, uptime, id, and dd shell builtins matching GNU coreutils 9.x options, output, and exit codes (chmod and id on Unix only; dd is disabled with the destructive set by PI_DISABLE_UUTILS_DESTRUCTIVE).
+  - Added an in-process nl shell builtin (ported from uutils coreutils 0.8.0, matching GNU nl), with header/body/footer numbering styles including pBRE regex styles, logical-page section delimiters, -l blank-line grouping, and ln/rn/rz number formats.
+  @oh-my-pi/pi-tui
+  Added
+  - Added opt-in /tree branch navigation across visible branches and nested fork depths; bind app.tree.previousBranch / app.tree.nextBranch (e.g. to Shift+Left / Shift+Right) in keybindings.yml (#12623 by @azain47).
+  Changed
+  - The wait tool's native job rows (omp.wait.job) are a single row: badge, id and label, progress and clock, without the output preview or capture notice beneath
+  - The native bash run foot reads In background with a live clock (omp.run.time without stopped) while a parked job's frames stream (details.async.state === "running", partial), instead of Running
+  - Native model pickers (/model, the quick switch and the advisor's) mark providers with their logo (mark.icon: "provider:<id>", initials where the terminal has none), and every model row leads with its provider's mark
+  Removed
+  - Removed the unused app.tree.foldOrUp / app.tree.unfoldOrDown keybinding ids, which no longer did anything.
+  - Added parksAsBackground(toolName, details), asyncJobState(details), isSettledJobFrame(details) and settleWithJobFrame(component, frame, toolCallId) (chat/tool-execution): whether a returned call's card stays live for its background job's frames (task always; bash and eval under native rendering), the job state a frame reports, and settling the card with the job's last frame (a cancelled job keeps its output and seals as cancelled)
+  - BashToolDetails.async.state and EvalToolDetails.async.state gain cancelled for a job killed before it finished
+  @oh-my-pi/pi-wire
+  Added
+  - Added TspPickerMark.icon: an icon a picker mark draws instead of its initials when the terminal has it (provider:<id> names a model provider's logo)
+  What's Changed
+  - feat(tui): jump across session tree branches by @azain47 in https://github.com/can1357/oh-my-pi/pull/12623
+  - feat(ai): honor CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS for anthropic gateways by @H4vC in https://github.com/can1357/oh-my-pi/pull/15458
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.10.1...v18.10.2
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.10.2
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

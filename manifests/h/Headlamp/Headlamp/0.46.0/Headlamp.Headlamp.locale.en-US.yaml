@@ -1,0 +1,85 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Headlamp.Headlamp
+PackageVersion: 0.46.0
+PackageLocale: en-US
+Publisher: Headlamp
+PublisherUrl: https://headlamp.dev/
+PublisherSupportUrl: https://github.com/kubernetes-sigs/headlamp/issues
+PackageName: Headlamp
+PackageUrl: https://github.com/kubernetes-sigs/headlamp
+License: Apache-2.0
+LicenseUrl: https://github.com/kubernetes-sigs/headlamp/blob/HEAD/LICENSE
+ShortDescription: Kubernetes web UI.
+Description: A Kubernetes web UI that is fully-featured, user-friendly and extensible.
+Tags:
+- cncf
+- dashboard
+- headlamp
+- kinvolk
+- kubernetes
+- logging
+- monitoring
+- plugins
+- ui
+- web
+ReleaseNotes: |-
+  Headlamp 0.46.0 introduces alpha support for Kubernetes Dynamic Resource Allocation, making device classes, GPU claims, and claim templates visible in the dashboard. New hierarchical workload views, Job suspend and resume actions, a configurable details drawer, and a guided Endpoints form simplify everyday cluster work, while service port-forwards reconnect automatically after pod restarts. The release also improves OIDC login and logout, strengthens plugin credential isolation and release signing, and expands integration points for desktop products. Accessibility, localization, frontend build tooling, and reliability improvements round out the release across web and desktop.
+  🌟 Dynamic Resource Allocation (alpha): see how workloads get GPUs and other devices
+  Headlamp now shows Kubernetes Dynamic Resource Allocation (DRA), the Kubernetes API that workloads use to request GPUs and other devices. A new Devices section appears on clusters that serve resource.k8s.io/v1 (Kubernetes 1.34+). DRA support is in alpha.
+
+  Devices section and Device Classes
+  Browse the device classes your cluster offers, with their CEL selectors, driver settings, and extended resource names, in a Devices section that only appears where DRA is served.
+
+  Device Class details
+  See the CEL selectors a class uses to pick devices, shown exactly as written, along with its extended resource name and driver settings.
+
+  Resource Claims
+  See whether each claim is waiting for a device, allocated, or in use, along with the devices it was granted and the node they are on.
+
+  Resource Claim Templates
+  Templates describe the devices a Pod asks for, and Kubernetes makes a new claim from them for every Pod. See each template's namespace, how many requests it makes, and which device classes it uses.
+  Implemented across #7724, #7820, and #7971. Thanks to @Anjali-Chauhan1. Feedback is welcome on #4831.
+
+  ✨ Enhancements (part 1)
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────
+  Adds an OIDC auto-login server flag and Helm setting so users are redirected straight to the identity provider without clicking a login button, fixing post-login redirect bugs along the way.                             │Thanks to:
+                                                                                                                                                                                                                             │@Suyog241005
+                                                                                                                                                                                                                             │@mudit06mah.
+                                                                                                                                                                                                                             │Thanks to @menardorama for reporting.
+                                                                                                                                                                                                                             │#7071
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────
+  Adds Suspend and Resume actions for Jobs in the details header and table row menu, so users can toggle spec.suspend without editing YAML or using kubectl.                                                                 │Thanks to @PixelRobots.
+                                                                                                                                                                                                                             │#7698
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────
+  Adds a setting to open the details drawer on the right, left, or bottom instead of a hardcoded right side, letting users place the panel where they prefer, with the choice saved locally.                                 │Thanks to @WasThatRudy.
+                                                                                                                                                                                                                             │Thanks to @jasoncologix for reporting.
+                                                                                                                                                                                                                             │#7126
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────
+  Added French translations for 75 missing strings, mostly in the new create forms and address validation messages, so French-speaking users see these forms in their language while Kubernetes API values stay untranslated.│Thanks to @berlewis.
+                                                                                                                                                                                                                             │#7902
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────
+  The desktop build manifest now accepts a product-owned company name and a separate Linux maintainer contact, mapped to Electron Builder metadata, so branded products can set their own publisher details.                 │Thanks to @illume.
+                                                                                                                                                                                                                             │#7746
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────
+  Products can now declare an explicit approvedCommands list separate from plugin-authorized commands, giving product-owned defaults without seeding user settings or auto-approving every shipped plugin command.           │Thanks to @illume.
+                                                                                                                                                                                                                             │#7685
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────
+  Added a guided create form for Endpoints that edits subsets, addresses and ports and validates them like the API server, so users avoid hand-writing YAML and catch errors such as loopback IPs before submitting.         │Thanks to @vyncent-t.
+                                                                                                                                                                                                                             │#7666
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Adds Suspend and Resume actions for Jobs in the details header and table row menu, so users can toggle spec.suspend without editing YAML or using kubectl.
+
+  ✨ Enhancements (part 2)
+  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────────
+  Added CompositePodGroup views for hierarchical gang scheduling, so users can see the nested pod group tree and tell which part of a nested workload failed to schedule.                                       │Thanks to @Anjali-Chauhan1.
+                                                                                                                                                                                                                │#7542
+  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────
+ReleaseNotesUrl: https://github.com/kubernetes-sigs/headlamp/releases/tag/v0.46.0
+Documentations:
+- DocumentLabel: Headlamp Documentation
+  DocumentUrl: https://headlamp.dev/docs/latest
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

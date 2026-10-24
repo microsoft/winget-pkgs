@@ -1,0 +1,103 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: aelassas.Servy
+PackageVersion: '10.4'
+PackageLocale: en-US
+Publisher: Akram El Assas
+PublisherUrl: https://github.com/aelassas
+PublisherSupportUrl: https://github.com/aelassas/servy/issues
+Author: Akram El Assas
+PackageName: Servy
+PackageUrl: https://servy-win.github.io/
+License: MIT
+LicenseUrl: https://github.com/aelassas/servy/blob/HEAD/LICENSE.txt
+Copyright: Copyright (c) 2026 Akram El Assas
+ShortDescription: Servy lets you run any app as a native Windows service with full control over the working directory, startup type, process priority, CPU affinity, logging, health checks, hooks, and parameters.
+Description: |-
+  Servy lets you run any app as a native Windows service with full control over the working directory, startup type, process priority, CPU affinity, logging, health checks, environment variables, dependencies, pre-launch and post-launch hooks, pre-stop and post-stop hooks, and parameters.
+
+  Starting from v10.2, Servy provides enterprise-grade per-service isolation between custom accounts, authenticated encryption, and automated ACL hardening. All releases feature signed binaries, SBOMs, and continuous vulnerability scanning.
+
+  Servy offers a desktop app, a CLI, and a PowerShell module that let you create, configure, and manage Windows services interactively or through scripts and CI/CD pipelines. It also includes a Manager app for easily monitoring and managing all installed services in real time.
+
+  Servy continuously monitors your app, restarting it automatically if it crashes, hangs, or stops. It allows non-service apps to run in the background and start automatically at system boot, even before logon, without rewriting them as services. Use it to run Node.js, Python, .NET, Java, Go, Rust, PHP, or Ruby applications; keep web servers, LLMs, background workers, sync tools, or daemons alive after reboots; and automate task runners, schedulers, or scripts in production with built-in health checks, logging, and restart policies.
+
+  Features:
+  - Clean, simple UI
+  - Monitor and manage all installed services with Servy Manager
+  - Real-time CPU and RAM monitoring with live performance graphs for installed services
+  - Real-time service stdout and stderr output preview in Servy Console
+  - Service dependency tree visualization with status indicators
+  - CLI and PowerShell module for full scripting and automated deployments
+  - Run any executable as a Windows service
+  - Set service name, description, startup type, priority, CPU affinity, working directory, environment variables, and dependencies
+  - Environment variable expansion supported in parameters, process paths, and startup directories
+  - Run services as Local System, local or domain accounts, Active Directory accounts, or gMSAs
+  - Redirect stdout/stderr to log files with automatic size-based and date-based rotations
+  - Run pre-launch hooks before starting the service, with retries, timeout, logging and failure handling
+  - Run post-launch hooks after the application starts successfully
+  - Run pre-stop and post-stop hooks before and after the application stops
+  - Supports Ctrl+C for command-line apps, close-window for GUI apps, and force kill if unresponsive
+  - Supports Ctrl+C propagation to descendant processes of the wrapped process
+  - Prevent orphaned/zombie processes with improved lifecycle management while ensuring resource cleanup
+  - Health checks and automatic service recovery
+  - Browse and search logs by level, date, and keyword for faster troubleshooting from Servy Manager
+  - Export/Import service configurations for easy backups and automation
+  - Service Event Notification alerts on service failures via Windows notifications and email
+  - Modern build (default, self-contained): Windows 10 (1809+), Windows 11 and Windows Server 2016+, on x64 and ARM64
+
+  Who is it for?
+  - Developers: Run development servers, scripts, or custom tools as services without extra setup.
+  - Sysadmins & IT professionals: Ensure critical background processes stay alive, monitored, and properly logged.
+  - Teams or organizations: Automate background services reliably across multiple machines.
+Moniker: servy
+Tags:
+- admin
+- automation
+- background-service
+- cli
+- devops
+- dotnet
+- nssm
+- powershell
+- scm
+- service-manager
+- service-supervisor
+- service-wrapper
+- watchdog
+- windows-service
+- windows-tools
+- winsw
+ReleaseNotes: |-
+  Servy v10.4 introduces enhancements in Servy Manager, including the ability to show or hide columns in the Services and Logs grids by right-clicking on a column header, with preferences automatically persisted across sessions. Additionally, the Description column in the Services grid can now be resized and supports horizontal scrolling for better readability.
+  This release also includes bug fixes, security patches, and documentation updates. The full changelog is listed below.
+  Full Changelog
+  Click to expand release notes!
+  - feat(manager): persist services table column visibility state (right-click on a column header to show/hide columns) (#7412)
+  - feat(manager): persist logs table column visibility state (right-click on a column header to show/hide columns) (#7412)
+  - feat(manager): allow description column resizing and horizontal scrolling (#7412)
+  - fix(core): ServiceDto.cs - AllowOverriddenRuntimeVars is the only optional property with no ShouldSerialize hook, though the block comment names only Name and ExecutablePath as exceptions (#7413)
+  - fix(core): AppConfig.cs - DbBatchIdSyncChunkSize lost its last reader when #7376 removed UpsertBatchAsync and its ID-sync loop (#7416)
+  - fix(core): ServyExePermissionsHardener.cs - GetWritableFolderFileRights ignores its relativePath parameter (#7437)
+  - fix(core): ServyExePermissionsHardener.cs - the revocation purges a former service account's ACEs but leaves it the owner of the log files it created, so its implicit WRITE_DAC lets it re-grant itself access (#7442)
+  - fix(core): EventLogLogger.cs - ScopedEventLogLogger's whitespace guards in SanitizePrefixSegment (525) and Format (538) are unreachable (#7450)
+  - fix(infra): ServiceRepository.cs - the try/catch around field.Set(dto, null) in HandleCorruptServiceDecryption cannot catch anything, every target is an auto-property (#7460)
+  - fix(service): consolidate active descendant process logging into a single message
+  - fix(service): ProcessLauncher.cs - Start's catch-all logs 'Failed during synchronous execution or log flushing' for a FireAndForget or never-started launch, where Win32Exception from process.Start() is the real cause (#7421)
+  - fix(desktop): ServiceCommands.cs (Servy) - OpenRuntimeVariablesLinkAsync discards the Process that IProcessHelper.Start returns, while OpenManagerAsync and HelpService.OpenExternalUrl dispose theirs (#7422)
+  - fix(manager): decrease bottom scroll threshold for resume in console tab
+  - fix(manager): MainWindow.xaml (Manager) - the Description column and its cell TextBlock are the only two elements whose attribute continuation lines are not aligned under the element name, a residual of #6076 (#7424)
+  - fix(manager): LogLine.cs - the static _nextId counter and the public Id it feeds are written on every line and read by nothing (#7456)
+  - fix(cli): Program.cs (Servy.CLI) - RunAsync never unsubscribes its Console.CancelKeyPress handler, which keeps cancelling a CancellationTokenSource the using block has disposed (#7472)
+  - fix(psm1): Servy.psm1 - the -EnvVars and -PreLaunchEnv format errors tell the user to escape a double quote as \" while the parser and the CLI help use " (#7417)
+  - fix(psm1): Servy.psm1 - Install-ServyService passes HeartbeatUrl on the servy-cli command line and Format-SecureLogMessage does not mask it, although the service masks the same URL in every log line (#7428)
+  - fix(bump-runtime.ps1): the TargetFramework now lives only in Directory.Build.props, which no bump step targets, so a runtime bump reports success and leaves every project on the old TFM (#7480)
+  - ci(loc.yml): actions/checkout is the only action in .github/ pinned to a mutable tag (@v4), in a job that holds contents: write (#7478)
+  - chore(deps): update dependencies
+ReleaseNotesUrl: https://github.com/aelassas/servy/releases/tag/v10.4
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/aelassas/servy/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
