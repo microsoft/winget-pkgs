@@ -1,0 +1,58 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Songwo.Zhiyu
+PackageVersion: 1.13.0
+PackageLocale: zh-CN
+Publisher: Songwo
+PublisherUrl: https://github.com/Songwo
+PublisherSupportUrl: https://github.com/Songwo/zhiyu/issues
+Author: Zhao Qingsong
+PackageName: Zhiyu
+PackageUrl: https://songwo.github.io/zhiyu/
+License: MIT
+LicenseUrl: https://github.com/Songwo/zhiyu/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Songwo
+ShortDescription: 连接文档、账号与数字资产的个人工作空间。
+Description: |-
+  知屿 Zhiyu 是连接文档、账号与数字资产的个人工作空间，将主机、在线服务、域名、邮箱、AI 订阅、号码、密钥和证书集中到一个桌面应用中。资料保存在本机，凭据库使用 scrypt 派生密钥与 AES-256-GCM 加密；通过 SSH、DNS、TLS 和服务商 API 读取实际状态，并可通过你配置的模型进行有来源的问答。
+  主要功能包括 SSH 终端与主机指标采集、域名 WHOIS 与 TLS 证书到期提示、网站账号密码与 TOTP 动态验证码管理、IMAP/SMTP 邮箱、Markdown 图文文档、浏览器插件密码迁移，以及接入 OpenAI、Claude、Grok、Gemini 等模型进行有来源的问答并查询订阅额度。
+Tags:
+- 人工智能
+- 密码
+- 数字资产
+- 文档
+- 服务器
+- 账号
+ReleaseNotes: |-
+  知屿 Zhiyu 1.13.0
+  这一版来自用户的两条反馈：「有没有倒计时或备忘录，提醒续费」，以及「想部署在服务器上，在家和公司都能用浏览器访问，不想在公司电脑上安装」。已有资料沿用原数据目录，可在应用内更新。
+  备忘提醒与倒计时
+  - 「费用与续费」页新增「备忘提醒」：自己写事项与日期，可每周、每月、每年重复，设定提前几天提醒（当天到 60 天）。不属于任何资产的事（宽带、车险、证件、还款）也能管。
+  - 卡片用大号数字显示倒计时：还剩几天、今天，或已过期几天；进入提醒窗口变橙色，过期变红色。
+  - 处理完点 ✓：不重复的标为已完成（可恢复或删除），重复的自动顺延到今天之后的下一期，月底按较短月份取最后一天；提示里可以撤销。
+  - 首页「近期续费」把 14 天内的提醒与资产续费放在一起，可以直接点完成。
+  - 没有提醒时给出常见事项模板：宽带续费、车险续保、信用卡还款、护照到期。
+  提醒更及时，也能推送到手机
+  - 「设置 → 后台运行」新增「到期前多少天开始提醒」（3、7、14、21、30、60、90 天），原来固定为 21 天；号码仍至少提前 30 天。
+  - 桌面版的系统通知包含备忘提醒；同一件事每天最多提醒一次。
+  - 「设置 → 邮件推送」新增「续费与备忘提醒也推送到这个渠道」：复用已配置的 Telegram、Server 酱 / 微信、企业微信或 WxPusher，不需要勾选邮箱。推送只含名称和剩余天数，需要桌面版运行且密钥库已解锁。
+  自托管网页版
+  - 新增 selfhost/server.mjs 与 Docker 部署：docker compose up -d --build，浏览器打开 http://服务器：8848。家里和公司用同一个账号打开同一份资料，公司电脑不用安装。
+  - 首次启动生成一次性「设置口令」（打印在日志并保存在 server/setup-token.txt），防止他人抢先注册；登录密码用 scrypt 加盐保存，会话 Cookie 为 HttpOnly + SameSite=Strict，可选只走 HTTPS；登录失败 8 次后暂停 15 分钟；修改登录密码后其他设备的会话全部失效。
+  - 改动类接口必须带自定义请求头且同源，跨站页面无法伪造；所有响应带 CSP、禁止被嵌入框架。
+  - 密钥库在浏览器里加解密：主密码只在当前标签页使用，服务器上的 vault.enc 只有密文。格式与桌面版完全相同（scrypt 派生、每条记录单独 AES-256-GCM），桌面版写的记录网页版能读，反之亦然，改主密码后两边都只认新密码。
+  - 资料文件与桌面版资料目录相同（assets.json、documents/、vault.enc）。网页版「设置 → 数据」可以下载与桌面版同格式的加密备份，也能把桌面版的备份恢复到服务器；原资料移到 restore-snapshots/，登录账号不受影响。
+  - 两台设备同时编辑时，保存带版本号；后保存的一方会提示并载入最新资料。切回页面时自动载入其他设备的更新。
+  - 网页版从空白开始（不加载演示数据）；打开页面时按设定的提前天数弹浏览器通知。SSH 终端、主机探测与监控、本机用量、邮箱 IMAP、AI 助手和浏览器插件配对需要本机能力，只在桌面版提供，网页版里会说明。
+  - 部署、HTTPS 反向代理、环境变量和忘记登录密码的处理见 docs/WEB.md。
+  升级与发行
+  Windows 附件为安装包 Zhiyu-1.13.0-setup.exe、便携版 Zhiyu-1.13.0-portable-x64.zip、浏览器插件 Zhiyu-1.13.0-browser-extension.zip 与 SHA256SUMS.txt；应用内更新沿用同次构建的 latest.yml 和 .exe.blockmap。网页版从仓库源码用 Docker 或 npm run web:build && npm run web:start 部署。安装包与便携版均未做代码签名，请核对 SHA256。
+  验证
+  - TypeScript、ESLint、i18n 通过；1003 项后端与脚本单元测试、104 项前端单元测试通过。新增：提醒的校验、顺延、倒计时与通知候选；提醒推送开关；网页服务的设置口令、登录限流、跨站防护、资料版本冲突、文档与密钥库接口、备份与桌面版备份恢复、改密后会话失效；浏览器密钥库与桌面密钥库双向读写和改主密码。
+  - 浏览器端到端测试（真实构建产物）：首次设置 → 空白工作区 → 新建提醒 → 另一台设备登录看到同一份资料 → 完成提醒后原设备切回页面自动更新 → 退出登录后接口返回未登录。另在浏览器里走通网页版密钥库的创建、加密保存与刷新后解锁，服务器文件中不含明文。
+  - 17 项浏览器集成测试与打包程序的 19 项发布检查通过。CI 新增网页版构建、端到端测试，以及 Docker 镜像构建与启动检查。
+  - 已知：agent-workspace 的桌面输入区贴底断言（8px 间距）以及 usage-charts、usage-insights、relations-usage-ui、mail-push、probe-desktop 在 1.10.0 上同样失败，与本版改动无关。本机未启动 Docker，镜像构建由 CI 验证。
+ReleaseNotesUrl: https://github.com/Songwo/zhiyu/releases/tag/v1.13.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
