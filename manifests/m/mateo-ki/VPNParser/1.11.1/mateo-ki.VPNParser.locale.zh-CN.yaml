@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
 
 PackageIdentifier: mateo-ki.VPNParser
-PackageVersion: 1.10.1
+PackageVersion: 1.11.1
 PackageLocale: zh-CN
 ShortDescription: Windows 桌面程序：采集订阅、解析成节点、跑代理，并把代理质量实测出来。
 Description: VPN Parser 是用 Rust + egui 编写的 Windows 桌面程序，负责采集免费或自建订阅、解析成节点、跑代理，并把代理质量实测出来。订阅入口包括带 `YYYY-MM-DD` 日期占位符的订阅 URL、Gist 搜索页发现，以及 Telegram 频道预览（裸节点链接和订阅链接两类都取，节点只增不删）。解析支持 `ss` `vmess` `vless` `trojan` `hysteria2/hy2` `socks5` `http(s)` 分享链接，以及 Clash / Clash Meta YAML、Base64 与混合文本。延迟以经内核访问 Google `generate_204` 的真实握手为准，24 小时出口健康条按实测绘制，而不是看内核上报的状态。Windows 上它同时管理系统代理、TUN（提权交接后只保留一个实例）和终端 `HTTP_PROXY` 环境变量，按 exe 路径添加防火墙允许规则，支持单实例互斥与托盘，记录出口切换历史并按天统计规则命中，同时提供强制 bearer 鉴权的本地 HTTP API 与 mihomo / sing-box / xray 配置导出。安装包不含内核，内核缺失时由程序按需下载。
@@ -15,6 +15,36 @@ Tags:
 - 节点解析
 - 订阅
 ReleaseNotes: |-
+  🚀 VPN Parser v1.11.1 发布说明 / Release Notes
+  🎉 欢迎使用 VPN Parser v1.11.1！本版修复部分订阅在 Shoes 内核下无法启动的问题：
+  🛠️ 缺陷修复
+  - Shoes 因 GEOIP,LAN 类别不存在而拒启（DAT category "LAN" not found）：
+    - 订阅里常见的 GEOIP,LAN,DIRECT / GEOSITE,LAN,DIRECT 写法，在 Loyalsoldier geo 库里
+      对应类别叫 private，直传会让 Shoes 拒绝整个配置、代理起不来；
+    - 现在编译配置时自动映射 LAN → private（mihomo / Shoes 两个编译器都接入），语义不变；
+    - 新增类别存在性防护：编译前直扫 dat 库（大小写不敏感，与内核判定一致），
+      库里确实没有的类别对应规则自动丢弃——该规则本来也匹配不上，不再拖垮整个代理；
+    - geo 分流库的就绪检查从"仅 Mihomo"扩展到全部内核，Shoes 首次启动也会自动补库。
+  - 连接表规则徽标修正：Shoes 返回的标量规则带 JSON 引号（如 "0.0.0.0/0"），
+    兜底规则此前显示成 IP-CIDR("0.0.0.0/0")，已正确显示为 MATCH。
+
+  🚀 VPN Parser v1.11.0 发布说明 / Release Notes
+  🎉 欢迎使用 VPN Parser v1.11.0！本版正式集成 Shoes 多协议代理内核（仪表盘可直接切换），并修复其分流规则编译中的严重缺陷：
+  ✨ 新功能
+  - 运行内核下拉选择：仪表盘状态卡"协议"右侧新增内核选择器（自动选择 / Mihomo / Shoes / Sing-box / Xray），支持运行中热切换并持久化保存；
+  - Shoes 内核完整集成：订阅节点编译为 Shoes 配置（VLESS/VMess/Trojan/Shadowsocks/AnyTLS/Reality），支持下载更新、批量测速与 Clash API 流量统计。
+  🛠️ 关键缺陷修复
+  - Shoes 误拦全部 HTTPS（ERR_EMPTY_RESPONSE 根因）：
+    - QUIC 拦截规则此前被译成裸 destination_port: 443，而 Shoes 规则无 TCP/UDP 维度，导致所有未命中前置域名规则的普通 HTTPS 网站被静默拦截；现按语义整体跳过；
+    - 多谓词规则（如 STUN 端口列表 + 端口段）拆分为多条平铺规则，规避 Shoes any: + no_resolve 组合缺陷；
+    - VLESS Reality 节点识别增强：兼容 reality-opts 内嵌公钥写法与空 pbk 字段（不再把普通 TLS 误判为 Reality）；
+    - WebSocket + TLS 节点自动兜底 alpn_protocols: ["http/1.1"]，规避 CDN 边缘 HTTP/2 协商破坏 WS 握手；
+    - 局域网直连规则补齐 no_resolve，防止境内 DNS 污染抢先解析境外域名。
+  - 策略组切换防护：Shoes 仅暴露 PROXY 主策略组，切换其它子组前先校验组是否真实存在，不再触发内核 404 报错；启动代理后的待应用调度选择延迟到内核上报组列表后再执行。
+  🎨 界面优化
+  - 连接分流规则徽标归一化：Shoes 返回的原始规则 JSON（local-mixed (root): {...}）提炼为与 Mihomo 一致的标准徽标（GEOSITE(cn)、DOMAIN-SUFFIX(...)、MATCH 等），目标列直接显示 PROXY / DIRECT；
+  - 节点质量分档校准：质度徽标与延迟着色按隧道实测场景放宽为 优≤300ms / 良≤800ms / 差>800ms，全库延迟频谱条同步调整为 200/500/1000 分档，不再把可用节点一律判成"质度差"。
+
   🚀 VPN Parser v1.10.1 发布说明 / Release Notes
   🎉 欢迎使用 VPN Parser v1.10.1！本版主要修复 TUN 模式启动体验与仪表盘状态卡出口归属检测的稳定性：
   🛠️ 缺陷修复与体验优化
