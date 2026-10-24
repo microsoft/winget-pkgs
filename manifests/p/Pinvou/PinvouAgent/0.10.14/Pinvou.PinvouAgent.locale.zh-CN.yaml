@@ -1,0 +1,96 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Pinvou.PinvouAgent
+PackageVersion: 0.10.14
+PackageLocale: zh-CN
+Publisher: pinvou
+PublisherUrl: https://pinvou.com/
+PublisherSupportUrl: https://github.com/Pinvou/pinvou-agent/issues
+PackageName: pinvou3
+PackageUrl: https://pinvou.com/
+License: MIT
+LicenseUrl: https://github.com/Pinvou/pinvou-agent/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Pinvou
+ShortDescription: 开源桌面 AI 智能体工作台，覆盖工具、文件、知识与工作流。
+Description: Pinvou Agent 是一个开源的桌面 AI 智能体工作区，面向工作、设计与编程。它把日常事务、可视化设计和软件开发整合进同一个桌面工作区，让任务以真实结果收尾：可以使用工具、处理文件、积累个人知识，通过 ACP 在真实项目中引入专用编码智能体，或将提示词变成可持续编辑的可视化作品。
+Tags:
+- mcp
+- 人工智能
+- 工作流
+- 智能体
+- 知识库
+ReleaseNotes: |-
+  官方下载 / Official Downloads
+  Pinvou 已在新华三官网提供官方下载渠道：
+  - Windows x64：新华三官网 — pinvou3 for Windows
+  - macOS Universal：新华三官网 — pinvou3 for macOS
+  - H3C LinSeer MegaCube（Linux ARM64）：新华三官网 — pinvou3 for MegaCube
+  新华三官网与 GitHub Assets 均为官方分发渠道，版本同步可能存在时间差；下载前请确认页面显示的版本。v0.10.14 官网页面尚未同步更新，当前版本请优先使用本页下方 Assets。
+  新功能
+  1. 单入口工作区选择器与钥匙串（#484）：项目成为会话创建的唯一组织单元。统一工作区选择器作为唯一入口（热视图按最近使用排序、冷项目隐藏；单根项目显示为文件夹、多根项目显示根数量与主根），提供显式临时会话选项与浏览通道（锚定/物化同名文件夹项目）；项目行「新建会话」通道绕过选择器直接以项目钥匙串开会话。每会话钥匙串记录 cwd 主根与附加根，双车道钥匙串芯片（「主 + N」）带「对齐到项目」操作；侧栏会话菜单新增只读「查看工作区」对话框；管理文件夹面板支持设主根、添加/移除/重命名与永不物化排除列表。所有授权入口按模式给出诚实提示（受限模式显示「将访问 N 个文件夹」）。行为变更：跨项目文件夹重叠从拒绝改为合法（#464 的拒绝行为不再存在），成员归属歧义按侧栏顺序确定性解析。
+  2. Tachyon 推理控制（#733）：Tachyon 获得独立提供商标识（owned_by=tachyon 探测优先于 SGLang，保留 served model ID 与本地凭证）。应用内提供 off/low/medium/max 四档推理力度（默认 low），历史 high 偏好钳制为 medium 生效（保存的偏好不被改写），max 经引擎以 xhigh 发送；未知 served model ID 也上报 thinking 能力（Fleet 与模型选择器可用）。分字段推理配置，语音/记忆/评审调用支持关闭思考；监控面板标注 Tachyon，/metrics 同源认证请求。
+  问题修复
+  1. PPT 生成 slides 数组 schema 修复与会话提供商标识（#713）：Kimi k3 模型 PPT 生成确定性失败——工具连环调用 mcp_pptx_make_pptx 27 次且每次 slides 均为空数组。根因是工具 schema 将 slides 声明为无 items 的裸数组，受约束的工具调用解码通道会以最小合法补全 [] 填充；现声明完整类型化 items（全部版式字段的类型形状、嵌套数组与枚举，渲染器对显式 null 与非字符串元素 null-safe）。CI fast-gate 新增内置服务器 schema 合同守卫：遍历每个工具 inputSchema，禁止无类型 items 的数组、空 schema 节点及 MFJS 校验器拒绝的关键字形状（整个故障类别被封死，38 项自测）。另修复会话元数据：model_provider 现记录实际解析的提供商路线（如 Kimi k3 → moonshot，而非硬编码的 deepseek 创建默认戳），并与 model_provider_id 一致成对写入（CLI 恢复路线来源）。
+  2. ACP 安装阶段卡死自愈（#735）：更新 ACP agent CLI（如 Kimi Code 2.1.1 → 2.2.0）后端安装成功，但安装阶段卡片永远停留在「下载安装中…」——安装期间设置面板卸载（关闭面板/切换分区）会使终态落在已卸载组件上被丢弃。后端现以 InstallOutcomeStore 记录每次安装的真实结果（成功/失败/取消），status.installing 覆盖完整安装生命周期；前端自愈效果把恢复的 installing 阶段收敛到终态（按运行序号防陈旧结果误收敛），失败回显真实错误链，preflight 窗口内取消也受支持。
+  3. 连接器详情操作按钮与实时状态同步（#742）：feishu/wecom（及 dingtalk/tmeet/ima）连接成功后，详情对话框仍显示「连接」按钮——同一对话框内的绿色已连接横幅已显示实时状态，形成矛盾，须关闭重开才纠正。按钮驱动字段（installed/actions/updateAvailable）现从实时列表卡片覆盖到详情快照，对话框内 ima 更新完成后的幽灵更新按钮、断开与 OAuth MCP 工具的同类陈旧一并修复；已卸载的自定义包回退快照渲染不变。
+  4. 移动端导航抽屉全高并带动画（#739）：远程控制 WebUI 移动壳（< 640px）的会话抽屉原先夹在顶栏与底栏之间（top: 48 / bottom: 56）且瞬时出现（display 切换无法产生过渡）。现抽屉全视口高（env(safe-area-inset-*) 与应用根一致）、滑入滑出动画配遮罩淡入淡出，prefers-reduced-motion 下两者均退化为即时切换；关闭时先模糊 scrim 按钮再置 aria-hidden（ARIA 合规）。桌面（Tauri 与 ≥ 640px web）行为不变。
+  性能优化
+  1. 会话恢复工具卡索引（#746）：桌面与 Web 会话恢复时，工具结果不再重复全量扫描历史聊天项——replay 局部首匹配索引承接普通字符串工具 ID（非字符串 ID 与实时更新保留原扫描，重复 ID 行为不变）。真实桥接恢复基准（Chrome，2000 回合 × 5 工具/回合）：全新页恢复 P50 1259.4ms → 666.4ms（−47.1%），持久重载 P50 1019.4ms → 520.7ms（−48.9%）；短历史无实质回归。
+  2. 回放跳过缺席工件查找（#749）：文件变更无法匹配任何工件卡时，以 replay 局部惰性 basename 成员集合跳过已证未命中（2000 回合源写历史无工件卡场景消除 15,998,000 次条目检查；可证明的未命中才跳过，一切可能匹配保留原行为，非字符串路径保守回退）。合成 2000 回合桥恢复 P50：桌面 700.1ms → 583.2ms（−16.7%）、混 200 工件卡 585.4ms → 468.2ms（−20.0%）；Web 侧 −12.7%/−19.5%。
+  3. 后台工具输出通知合并（#748）：原生会话路由器移除后台工具输出 delta 的重复即时发布，复用终端功能现有 50ms 节流（输出累积与终端解析仍同步，shell 快照轮询发布不变）。受控 fixture 中「12 个工具 delta + 变化 shell 快照」组合场景发布数 36 → 24（fixture 特定数字，非生产耗时测量）；aux chat 等 pull-on-notify 消费者在现有 50ms 窗口观察到工具输出。
+  内部改进
+  1. LoongArch64 发布管线修复与触发契约收紧（#737/#759）：0.10.13 的 loong64 deb 构建失败于 #731 链接冒烟（找不到 Scrt1.o/crti.o）——--sysroot 整体替换交叉工具链自带 sysroot 后，deepin 树把 C startfile 只放在 Debian multiarch 目录，而 crosstool-NG gcc 不启用 multiarch。本次整体移植回流侧 pinvou3#1993 累计 14 轮交叉链接修复：cargo 链接改走 rust-lld wrapper（钉死的 bfd 2.41 不认 rustc LLVM 新 R_LARCH_CALL36 重定位）；sysroot prune 全面修复（GNU ld 脚本绝对路径改写为裸文件名、物化 /lib 与 /lib64 加载器视图、multiarch 头文件并集、libpthread/libdl GROUP 桩、绝对目标符号链接按层深重基，残留宿主绝对路径 fail-closed 拦截）；cmake 面 -B/-L 贯穿；verify_sysroot 断言扩展至 startup objects、文本脚本 .so 成员、dev 符号链接解析与头文件全子树比对；编排脚本对环境级 RUSTFLAGS/CARGO_ENCODED_RUSTFLAGS fail-closed。全部修复经针对性突变红绿复证。#759 另将 loong64 发布 job 的触发契约收紧为仅 main push 与手动 dispatch，并以策略测试钉扎。自本版本起 loong64 安装包随发布提供。
+  2. 依赖清理、去重与更新（#699）：安全修复——emSign 证书集群（RUSTSEC-2026-0381/-0382/-0383）：rustls-webpki → 0.103.16、webpki-roots/webpki-root-certs → 1.0.10（三个父锁全清 deny 门红灯），quinn-proto 0.11.17 → 0.11.19；agent-client-protocol 精确钉到 2.2.0（elicitation 上游已稳定）。死依赖移除：adapter-gaia 整个 hf-hub 客户端层（改走 reqwest 直连，元数据预读受 2 MiB 上限、大文件流式下载逐读 30s 超时、digest 以实测线型 lfs.oid 为准）、ureq 直接依赖、fs2 → fs4。npm 锁卫生：8 个 npmmirror URL 重写为 npmjs、libc 标记恢复。大版本：arrow/parquet 59 → 60、tauri 2.12 线（MSRV 1.90）、marked 14 → 16.4.2、ESLint 插件升级。保守不动并记录理由：tailwindcss 3.4.x（Safari 14 不支持 @layer）、fastembed 4.9.1（macOS 11/glibc 平台地板）、quick-xml 0.41。Safari-14 兼容守卫落实：audit:compat 对 dist CSS 中任何 @layer 存留即失败（大小写不敏感、注释/字符串剥离、url() 原子 token）。
+  3. 死代码与重复业务代码清扫（#701）：170 commits、254 文件（+10,019/−10,239），每项删除/统一均有证据（全工作树零调用证明、字节级孪生 diff 或行为钉）。全链路移除一个死 wire 面（discard_aux_session：命令、RPC opcode、allowlist、JS facade）；web↔tauri 桥镜像程序 59 对克隆（约 1,900 行）合并进 bridge-shared-helpers 集群；CLI 语音镜像（约 374 行）共享 features::voice::contract；行为归一到可证正确侧（CLI models probe-local Ollama 排序移植 GUI 修复、GUI 传输错误清洗两遍式、web 车道获得 planResolutionConfirmed 补丁与 <turn_meta> 剥离等）；60+ 零调用 pub 项编译器验证降级。jscpd 克隆 160 → 105。
+  4. CodeWhale gitlink 提升（#743）：c08c8c022 → 083cebfd9，吸收上游 #112（模型可见文案对齐）与 #113（Tachyon 推理控制，注册为主题 T10）；fork 登记全量重算（76 commits above upstream、226 个 forkguard_* 名、T3 pdf-skill 指纹随上游措辞重钉），父侧仅登记变更、无行为变化。
+  5. 构建依赖更新（#744）：vite 8.2.2 → 8.3.4（dev 依赖，顺带清除 launch-editor HIGH advisory 链）。
+  注意事项
+  - LoongArch64 安装包自本版起随发布提供：0.10.13 曾公告 loong64 deb 因发布构建问题暂缺；#737/#759 修复管线后本发布附带 loong64 包（dpkg 架构 loong64，面向 UOS V25 / deepin 23/25 新世界系统）。平台降级面不变：本地嵌入不可用（知识库检索自动降级全文检索）、连接器与 Codex/Claude 原生运行时无按需安装器（PATH 已装二进制继续可用）。
+  - 工作区单入口（#484）：跨项目文件夹重叠从拒绝改为合法——同一文件夹（或嵌套文件夹）可被多个项目引用，成员归属按侧栏顺序确定性解析；ACP 车道的附加根暂不投递给第三方 agent（wire session/new 仅单 cwd，fail-safe 不过度授权，为披露的后续项）；web 车道当前绕过选择器、直接创建临时会话。
+  - Tachyon 推理档位默认 low；历史 high 偏好以 medium 生效（保存的偏好不被改写）。
+  - 官网页面版本同步可能滞后，v0.10.14 官网页面尚未更新，下载前请确认页面显示的版本。
+  - Windows 和 macOS 安装包尚未正式签名。Windows 首次安装可能出现 SmartScreen 提示；macOS 首次打开如被 Gatekeeper 拦截，可在确认安装包来源可信后解除隔离再打开。
+  - 安装包与发布产物由版本 PR 合入 main 后触发的发布工作流构建，未在本地构建。
+  - 本次为预览版本，欢迎通过 GitHub Issues 反馈问题。
+  构建来源：main @ 1ef3b3d73 / Actions #39781646347（五平台安装包同源构建）
+  官网更新日志
+  zh-CN
+  新功能
+  - 单入口工作区选择器与钥匙串：项目成为会话创建唯一入口——统一选择器、每会话钥匙串（主根 + 附加根）、管理文件夹面板与查看工作区对话框；跨项目文件夹重叠合法化；ACP 车道附加根投递为披露的后续项。（#484）
+  - Tachyon 推理控制：独立提供商标识，off/low/medium/max 四档（默认 low），max 以 xhigh 发送，历史 high 钳制 medium；未知 served model ID 上报 thinking 能力。（#733）
+  修复
+  - PPT 生成 slides 数组 schema 修复（Kimi k3 空幻灯片调用风暴根因）+ 内置服务器 schema 合同守卫进 CI；会话元数据记录实际解析的提供商路线。（#713）
+  - ACP 安装阶段卡死自愈：设置面板卸载不再吞安装终态，卡片被动收敛到完成/失败/取消并回显真实错误。（#735）
+  - 连接器详情按钮与实时状态同步：连接成功后按钮立即翻转，无需重开对话框。（#742）
+  - 移动端导航抽屉全高并带滑入动画与遮罩淡入淡出（尊重减弱动效偏好）。（#739）
+  性能优化
+  - 会话恢复工具卡索引：2000 回合恢复 P50 最多降低 48.9%。（#746）
+  - 工件缺席查找跳过：2000 回合桥恢复 P50 降低 16.7%–20%。（#749）
+  - 后台工具输出通知合并（复用 50ms 节流）。（#748）
+  内部改进
+  - LoongArch64 发布管线修复（14 轮交叉链接修复移植）与触发契约收紧；loong64 安装包自本版起随发布提供。（#737 #759）
+  - 依赖清理：emSign 集群安全修复、ACP 协议 2.2.0、去重与死依赖移除、Safari 14 守卫落实。（#699）
+  - 死代码与重复业务代码清扫（254 文件；桥镜像 59 对克隆合并）。（#701）
+  - CodeWhale gitlink 提升（登记上游 #112/#113 为主题 T10）。（#743）
+  en-US
+  New
+  - Single-entry workspace picker and keychains: projects are the only organizing unit at conversation creation — a unified picker, per-session keychains (primary + attached roots), a manage-folders panel, and a view-workspace dialog; cross-project folder overlap is legalized; ACP-lane root delivery is a disclosed follow-up. (#484)
+  - Tachyon reasoning controls: dedicated provider identity with off/low/medium/max effort tiers (default low); max is sent as xhigh and legacy high clamps to medium; unknown served model IDs advertise thinking capability. (#733)
+  Fixes
+  - PPT generation: a typed slides array schema fixes the Kimi k3 empty-slides call storm, and a bundled-server schema contract guard now runs in CI; session metadata records the actually resolved provider route. (#713)
+  - ACP install-phase self-heal: unmounting the settings panel no longer swallows the install terminal state; the card converges to done/failed/cancelled with the real error echoed. (#735)
+  - The connector detail dialog action button syncs with live state (no reopen needed). (#742)
+  - The mobile nav drawer spans full viewport height and animates with a fading backdrop (reduced-motion respected). (#739)
+  Performance
+  - Tool-card indexing during transcript replay: 2000-turn restore P50 up to −48.9%. (#746)
+  - Skipping absent artifact lookups during replay: bridge restore P50 down 16.7%–20%. (#749)
+  - Background tool-output notifications coalesced onto the existing 50 ms throttle. (#748)
+  Internal improvements
+  - LoongArch64 release pipeline fixed (14 rounds of cross-link fixes ported) and trigger contract tightened; the loong64 package ships with this release. (#737 #759)
+  - Dependency cleanup: emSign-cluster security fixes, ACP protocol 2.2.0, dedupe and dead-dependency removal, Safari 14 guard enforced. (#699)
+  - Dead and duplicated business code sweep (254 files; 59 bridge mirror clone pairs merged). (#701)
+  - CodeWhale gitlink bump registering upstream #112/#113 as topic T10. (#743)
+ReleaseNotesUrl: https://github.com/Pinvou/pinvou-agent/releases/tag/v0.10.14
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
