@@ -1,0 +1,57 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: mateo-ki.VPNParser
+PackageVersion: 1.10.0
+PackageLocale: zh-CN
+ShortDescription: Windows 桌面程序：采集订阅、解析成节点、跑代理，并把代理质量实测出来。
+Description: VPN Parser 是用 Rust + egui 编写的 Windows 桌面程序，负责采集免费或自建订阅、解析成节点、跑代理，并把代理质量实测出来。订阅入口包括带 `YYYY-MM-DD` 日期占位符的订阅 URL、Gist 搜索页发现，以及 Telegram 频道预览（裸节点链接和订阅链接两类都取，节点只增不删）。解析支持 `ss` `vmess` `vless` `trojan` `hysteria2/hy2` `socks5` `http(s)` 分享链接，以及 Clash / Clash Meta YAML、Base64 与混合文本。延迟以经内核访问 Google `generate_204` 的真实握手为准，24 小时出口健康条按实测绘制，而不是看内核上报的状态。Windows 上它同时管理系统代理、TUN（提权交接后只保留一个实例）和终端 `HTTP_PROXY` 环境变量，按 exe 路径添加防火墙允许规则，支持单实例互斥与托盘，记录出口切换历史并按天统计规则命中，同时提供强制 bearer 鉴权的本地 HTTP API 与 mihomo / sing-box / xray 配置导出。安装包不含内核，内核缺失时由程序按需下载。
+Tags:
+- clash
+- sing-box
+- 代理
+- 出口健康
+- 测速
+- 节点解析
+- 订阅
+ReleaseNotes: |-
+  🚀 VPN Parser v1.10.0 发布说明 / Release Notes
+  🎉 欢迎使用 VPN Parser v1.10.0！这一版带来全新的 Apple 雅致风格仪表盘 (Dashboard v4)、策略组调度抽屉、系统代理与 TUN 模式双开，以及 Windows 便携版免安装打包。
+
+  🌟 本版核心更新
+  🖥️ 1. 全新仪表盘 v4 (Apple 雅致设计语言)
+  - 视觉风格升级：对齐 Apple macOS 设计规范，采用 14px 优雅圆角卡片、极细微边框 #E3E6EB、低饱和柔和底衬与层次分明的大字排版。
+  - 现代化布局：
+    - 第 1 行（核心态势）：状态大卡（带拟物启停大圆按钮、动态运行时长、出口 ASN/ISP 归属、协议胶囊、真实机房/住宅质量检测、IPv4/IPv6 探测）与上传/下载速率卡（实时流速、峰值监控、累计流量与平滑折线波形）。
+    - 第 2 行（服务与策略）：
+      - 服务连通性：真实并行异步探测 Google、ChatGPT、GitHub、YouTube 连通状态与延迟，带服务专属图标，点击可直接打开对应网站；
+      - 分流规则：实时呈现广告拦截、国内直连、流媒体解锁与兜底规则的命中统计；
+      - 出站模式：规则模式、全局代理、直接连接三段式胶囊切换；
+      - 策略组：展示核心策略组当前激活节点及其延迟。
+    - 第 3 行（底部控制台）：终端代理（支持一键复制命令）、端口代理（混合端口）、局域网代理（自动探测并展示本机真实局域网 IP）、系统代理、TUN 模式五卡水平对齐控制。
+  🗂️ 2. 策略组调度抽屉 (Policy Group Drawer)
+  - 点击策略组卡片即刻滑出占半屏宽度的调度抽屉，支持 4 种调度方式切换：延迟选优、故障转移、负载均衡、手动指定。
+  - 手动指定模式直接调用完整可用节点池，支持双列瀑布流、国旗代码徽标、国家/地区快捷筛选与关键词检索。
+  - 支持在代理未启动状态下预选目标节点，启动时直接以该节点生效。
+  ⚡ 3. 系统代理 + TUN 模式双开
+  - 支持系统代理 (L7) 与 TUN 模式 (L3) 同时启用，两者具备独立开关状态。
+  - Windows 下双开模式自动接入管理员权限 UAC 提权流程，确保驱动与网络接管平滑执行。
+  📊 4. 恢复独立「活跃连接」审计标签页
+  - 独立展示「连接列表 / 进程带宽 / DNS 记录」三项详细表格，优化过滤与搜索体验，去除冗余操作列。
+  🔍 5. 默认显示与界面优化
+  - 界面默认字体缩放调整为 120%，文字清晰易读。
+  - 窗口默认尺寸规范为 1280 × 800（中屏），精简冗余尺寸配置选项。
+  📦 6. GitHub Actions 增加 Windows 便携版打包
+  - 持续集成发布脚本整合为 windows.yml。
+  - 发布时自动打包输出 vpn-parser-v1.10.0-windows-x64-portable.zip 免安装便携版，配合安装包双通道分发。
+
+  📐 验证与测试
+  - 测试用例：全量单元测试 418 passed / 0 failed（9 ignored）。
+  - 打包验证：安装包（Inno Setup）与便携版 ZIP 压缩流程均通过校验，生成完整 SHA-256 校验清单。
+
+  ⬇️ 获取与升级
+  - 安装版：下载 vpn-parser-1.10.0-windows-x64-setup.exe 运行安装。
+  - 便携版：下载 vpn-parser-1.10.0-windows-x64-portable.zip 解压后直接运行 vpn-parser.exe。
+  - 在线更新：已安装 v1.3.0+ 的用户可在「关于 → 检查更新」中一键检测并升级。
+ManifestType: locale
+ManifestVersion: 1.12.0
