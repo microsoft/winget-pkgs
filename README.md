@@ -35,3 +35,18 @@ See the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments. More information is available in our [Contributing document](CONTRIBUTING.md).
 
 To avoid doubt, you may not make any Submissions linking to third-party materials if such Submission is prohibited by the applicable third party and/or otherwise violates such third party's rights.
+
+<!-- chaython-funding:start -->
+## Support development
+
+[GitHub Sponsors](https://github.com/sponsors/Chaython) · [Patreon](https://patreon.com/Chaython) · [Buy Me a Coffee](https://buymeacoffee.com/chaython) · [PayPal](https://paypal.me/ChaythonM)
+
+Crypto donation addresses:
+
+- ETH (Ethereum): `0x201B6E0B0282BBAE1592C24f9CbD39009A70F7d7`
+- BTC (Bitcoin): `32o7JmXgFcs4R1SbcLLVKQCRw9KHkhneJi`
+- SOL (Solana): `BDicyUL9zizDeYBLw8oBwotv6jtHotLLQD7Bcqg2atLk`
+- **USDC (Base network):** `0xBeD35dcAd9F1A32459B3C0DF004371EBE939E760`
+
+**Send USDC only on Base.**
+<!-- chaython-funding:end -->
