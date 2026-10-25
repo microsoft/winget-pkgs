@@ -1,0 +1,50 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: TashfeenAhmed.FreeLLMAPI
+PackageVersion: 0.16.9
+PackageLocale: en-US
+Publisher: tashfeenahmed
+PublisherUrl: https://tashfeen.me
+PublisherSupportUrl: https://freellmapi.co/faq
+PrivacyUrl: https://freellmapi.co/privacy
+Author: Tashfeen Ahmed
+PackageName: FreeLLMAPI
+PackageUrl: https://freellmapi.co
+License: MIT
+LicenseUrl: https://github.com/tashfeenahmed/freellmapi/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Tashfeen Ahmed
+ShortDescription: Local OpenAI-compatible router that aggregates free LLM providers.
+Description: |-
+  FreeLLMAPI aggregates the free tiers of dozens of LLM providers, plus custom OpenAI-compatible chat, embedding, image, and audio endpoints, behind a single /v1 API.
+
+  A router picks the best available model for each request, falls over to the next provider when one is rate-limited, and tracks per-key usage so you stay under every free-tier cap. Provider keys are stored encrypted, and the router refreshes its model catalog from a signed feed. Built for personal use only; each provider's terms of service apply.
+Tags:
+- ai
+- gateway
+- large-language-model
+- llm
+- proxy
+- router
+ReleaseNotes: |-
+  This release adds Brave Search as a web search engine, soft budget alerts for keys with monthly caps, and opt-in keep-alive pings for long-thinking models. It also fixes a Groq bug that could leave a model refusing almost every request.
+  Search
+  - Brave Search. New web and news search engine. Add a Brave key on the Keys page and it appears under Models → Search, with fallback to your other engines. Brave gives $5 of free credits a month (about 1,000 searches); a key that runs out of credit waits for the reset instead of being retried. It arrives through the catalog: Premium now, free tier on 22 November (#1650, #1641).
+  Providers
+  - Groq output-token limits. Some Groq accounts have a separate limit on output tokens per minute. One rejection on that limit used to be saved as the model's whole token limit, so later requests were refused before being sent. Output limits are no longer saved, and input-token limits are read correctly (#1546).
+  - Custom endpoints. Models discovered on your own endpoint that it labels as audio, image or embedding models are now added as those types instead of as chat models (#1556, #1506).
+  Budgets
+  - Soft budget alerts. When a key reaches 80% and again 100% of its monthly request or token cap, a key_budget_threshold event appears on the Logs page, once per key per month. Set BUDGET_ALERT_WEBHOOK_URL to also send each alert to a webhook, such as a Slack or Discord workflow (#1665, #1158).
+  - Cap-usage bar. The Edit key dialog shows how much of each monthly cap a key has used, amber from 80% and red at the cap (#1669).
+  Streams
+  - Keep-alive pings (opt-in). Set STREAM_KEEPALIVE_MS (for example 10000) to send a content-free ping on that interval while a model hasn't started answering, so clients with an idle timeout don't disconnect. Once a ping is sent, that attempt can no longer fail over silently, which is why it's off by default (#1674, #1642).
+  Docs
+  - The Fetch Relay note in .env.example points to the doc that exists (#1550).
+ReleaseNotesUrl: https://github.com/tashfeenahmed/freellmapi/releases/tag/v0.16.9
+PurchaseUrl: https://freellmapi.co/pricing
+InstallationNotes: Open the app, then copy the unified API key shown in the tray popover and add your provider keys on the Keys page before pointing a client at the local /v1 endpoint.
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://github.com/tashfeenahmed/freellmapi/blob/HEAD/docs/en/README.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
