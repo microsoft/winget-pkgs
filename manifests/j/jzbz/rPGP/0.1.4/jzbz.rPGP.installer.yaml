@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+
+# Written by hand to the checklist in packaging/winget/README.md in the rPGP
+# repository, and kept in sync there with what was actually submitted, so the
+# next release starts from the real thing rather than from a draft.
+#
+# InstallerType inno: the per-user Inno Setup installer release.yml builds
+# around the bare exe (packaging/windows/). It never asks for administrator
+# rights, so Scope is user and there is no ElevationRequirement. ProductCode is
+# the installer's AppId with the _is1 Inno adds, which is how winget recognizes
+# the installed copy. Commands only helps search here: the installer registers
+# an App Paths entry for rpgp.exe, not a winget alias. Up to 0.1.3 this package
+# was the bare exe as InstallerType portable, which winget will not upgrade to
+# an installer; those installs move by uninstalling and installing once.
+PackageIdentifier: jzbz.rPGP
+PackageVersion: 0.1.4
+InstallerType: inno
+Scope: user
+UpgradeBehavior: install
+Commands:
+- rpgp
+ProductCode: jzbz.rPGP_is1
+ReleaseDate: 2026-10-06
+Installers:
+- Architecture: x64
+  InstallerUrl: https://github.com/jzbz/rpgp/releases/download/v0.1.4/rpgp-v0.1.4-x86_64-setup.exe
+  # Taken from the release's PGP-signed SHA256SUMS rather than computed here,
+  # so the hash winget pins is the one covered by that signature.
+  InstallerSha256: A71225514620BC48FC359C1C80B78C02409208A6FE16B49903F8989AFE427534
+ManifestType: installer
+ManifestVersion: 1.12.0
