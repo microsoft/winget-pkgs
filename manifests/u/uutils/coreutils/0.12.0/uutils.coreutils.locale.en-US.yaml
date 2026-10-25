@@ -1,0 +1,147 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: uutils.coreutils
+PackageVersion: 0.12.0
+PackageLocale: en-US
+Publisher: uutils
+PublisherUrl: https://github.com/uutils
+PublisherSupportUrl: https://github.com/uutils/coreutils/issues
+Author: uutils
+PackageName: coreutils
+PackageUrl: https://github.com/uutils/coreutils
+License: MIT
+LicenseUrl: https://github.com/uutils/coreutils/blob/HEAD/LICENSE
+Copyright: Copyright (c) uutils developers
+CopyrightUrl: https://github.com/uutils/coreutils/blob/main/LICENSE
+ShortDescription: Cross-platform Rust rewrite of the GNU coreutils
+Tags:
+- busybox
+- command-line-tool
+- coreutils
+- cross-platform
+- gnu-coreutils
+- rust
+ReleaseNotes: |-
+  Rust Coreutils 0.12.0 Release:
+  We are happy to announce the release of Rust Coreutils 0.12.0 - a release focused on compatibility fixes for our Ubuntu friends.
+  Ubuntu ships uutils coreutils as its default coreutils implementation, and this cycle was driven by what their users and maintainers reported: the bugs they asked us to prioritize are all fixed here, along with a long tail of smaller divergences from GNU. Few of these are glamorous, but they are exactly what breaks a script that has worked for twenty years.
+  Alongside that, we removed the last C dependency of expr (onig is replaced by the pure-Rust fancy-regex), continued the Windows port (nice, nohup and hostid now build there, and uucore's filesystem layer was rewritten with safe Win32 wrappers) and landed another round of security hardening on ls, sort and install.
+  Also, some contributions had carried comments and code over from GNU coreutils, against our own rule
+  that uutils is an original implementation. We reviewed the tree and rewrote what we found, in comments and in the few functions that followed the C too closely; no behaviour change. The GNU coreutils maintainers have been notified.
+  GNU coreutils 9.12 was released during our cycle (kudos to the team!), and some of the work went that way too. Chasing compatibility tends to turn up things worth fixing or improving on both sides.
+  We also made it official: a utility being significantly slower than GNU is now treated as a bug, not a wishlist item. If you hit one, please report it as a bug.
+  We are now at 653 passing, 21 failing, 0 errors on the GNU test suite.
+
+  GNU Test Suite Compatibility:
+  ──────┬──────┬──────┬───────────────────────┬──────────────┬──────────────┬─────────────────────────
+  Result│0.11.0│0.12.0│Change 0.11.0 to 0.12.0│% Total 0.11.0│% Total 0.12.0│% Change 0.11.0 to 0.12.0
+  ──────┼──────┼──────┼───────────────────────┼──────────────┼──────────────┼─────────────────────────
+  Pass  │653   │653   │0                      │95.33%        │94.36%        │-0.97%
+  ──────┼──────┼──────┼───────────────────────┼──────────────┼──────────────┼─────────────────────────
+  Skip  │10    │18    │+8                     │1.46%         │2.60%         │+1.14%
+  ──────┼──────┼──────┼───────────────────────┼──────────────┼──────────────┼─────────────────────────
+  Fail  │22    │21    │-1                     │3.21%         │3.03%         │-0.18%
+  ──────┼──────┼──────┼───────────────────────┼──────────────┼──────────────┼─────────────────────────
+  Error │0     │0     │0                      │0%            │0%            │0%
+  ──────┼──────┼──────┼───────────────────────┼──────────────┼──────────────┼─────────────────────────
+  Total │685   │692   │+7 (new tests)         │              │              │
+  ──────┴──────┴──────┴───────────────────────┴──────────────┴──────────────┴─────────────────────────
+  > Note: the suite grew by 7 tests (backport of GNU tests) and 8 more tests are skipped on our reference runner, so the raw pass count is flat while the failures went down again. Counting only the tests that actually run, we are at 653/674 (96.9%), our best ratio so far, and the second release in a row with no erroring test. We are comparing against Coreutils 9.11.
+
+  Highlights:
+  - Ubuntu Compatibility
+    - The issues Ubuntu asked us to fix first are all fixed: data loss in a parallel install -D (#12355), du on 32-bit architectures (#11848), ls ACL dereferencing (#13234), cp -R name collisions (LP#2167118) and chmod -R through symlinks (LP#2167122)
+    - A whole family of options now accept a hyphen-leading value, like GNU does: csplit --suffix-format, paste -d, join -t, stat --format/--printf/-c and all of numfmt's options. A - in a delimiter or a format string is data, not a flag
+    - rm no longer segfaults on very deeply nested directories
+    - sort -n applies to the key instead of the whole line, echoes a disorder line verbatim instead of reformatting it as a number, and no longer keeps every input file open while sorting
+    - basename trailing-separator handling for dot components, realpath exit status in quiet mode, ln keeping the destination when a forced link fails, csplit always creating the final split even when empty, fmt -x/-X, printf treating a -- past the format as an argument, test rejecting an -a/-o that ends the expression, echo -e no longer expanding \u, \U and \"
+    - ls: dired fixes, a tie in the time sort broken by the name, name sort for -u/-c in long format, capability markers that respect the dereference config; dir and vdir match the GNU default quoting
+    - cp: --no-preserve is retained over a later --preserve, and --attributes-only gives the destination the source's type
+    - Error messages and exit codes aligned with GNU in uniq, chgrp, factor, date, expr, od, tty, tsort and pathchk
+    - truncate finally implements --io-blocks, and date accepts multiple --reference
+  - Security Hardening
+    - ls: report stat() failures on directory entries instead of silently showing wrong metadata
+    - sort: temporary files are created with mode 0600 instead of the umask, the -o output copy is kept private too, and a failure to truncate the output file is now reported
+    - install: the fd-based destination is created exclusively and at 0600
+    - rm, chmod, chown, chgrp: --preserve-root compares (st_dev, st_ino) rather than the path
+    - chcon walks directories with DirFd instead of fts
+    - SECURITY.md now requires a boundary crossing, not just a GNU divergence, for a report to be treated as a vulnerability
+  - Robustness
+    - Panics and overflows fixed in stat (out-of-range octal escape), ls (a color style with no attributes), split (a huge -n l/K/N chunk count), truncate (a size above i64::MAX no longer creates the file), cksum (an over-length BLAKE2b digest in a check file) and uucore (invalid input lines)
+    - tsort handles invalid UTF-8 input and flushes stdout properly; date reports invalid UTF-8 lines in -f input; truncate supports non-UTF-8 paths for --reference
+  - Dependency Diet
+    - expr replaces onig with fancy-regex, removing a C dependency and the CI hacks that came with it. As a side effect, expr switched to leftmost-longest regex matching, matching GNU
+    - mv replaces fs_extra with std directory sizing; fts-sys is gone; cksum uses aws-lc instead of vendored OpenSSL on MSVC, so a Perl install is no longer needed to build on Windows
+    - bstr default features disabled, uucore's hand-rolled process functions dropped in favor of rustix
+  - Cross-platform Reach
+    - Windows: nice (with a Priority Class mapping), nohup and hostid now build, dirname handles backslashes, user locale detection landed, checksum paths use forward slashes, and mv, sync, hostname, touch and rm moved to safe std APIs
+    - uucore on Windows: fsext rewritten with safe Win32 wrappers, real free space and mount paths; df resolves paths by mount prefix
+    - New and improved targets: aarch64-unknown-linux-ohos, AIX (fsext), Haiku (fs), Hurd (signals), NetBSD (safe-traversal), plus wider process, utmpx and entries support
+    - WASI: cp attribute preservation and reflink handling, mktemp temporary directories, tail integration coverage
+    - macOS: tail stdin-redirect, pid and follow-name tests re-enabled
+  - Performance
+    - sort gained benchmarks for spilling, checking and shared prefixes; du benchmarks now warm the OS page cache before timing
+    - cp avoids resolving the cwd for absolute recursive copies; tsort gives the OS a sequential access hint
+    - A significant performance gap with GNU is now stated in the README as a bug, and we handle it as one
+  - Contributions: This release landed 191 pull requests from 16 new contributors
+
+  Call to Action:
+  Try it in your browser - Online Playground powered by WebAssembly
+  Help us translate - Contribute to Rust Coreutils on Weblate
+  Sponsor us on GitHub to accelerate development: github.com/sponsors/uutils
+
+  What's Changed
+
+  basename
+  - basename: fix trailing-separator handling for dot components by @wangyusheng1985 in #14365
+
+  chcon
+  - chcon: walk directories with DirFd instead of fts by @sylvestre in #14413
+
+  chgrp
+  - rm, chmod, chown, chgrp: compare (st_dev, st_ino) for --preserve-root by @sylvestre in #14411
+  - chgrp: strip error when changing group of file fails by @Devel08 in #14403
+
+  chmod
+  - rm, chmod, chown, chgrp: compare (st_dev, st_ino) for --preserve-root by @sylvestre in #14411
+  - chmod: fix clippy lints by @xtqqczze in #14447
+  - chmod: do not check umask on skipped symlinks during recursion by @okaythi in #14512
+  - chmod: gate by target support by @xtqqczze in #14585
+
+  chown
+  - rm, chmod, chown, chgrp: compare (st_dev, st_ino) for --preserve-root by @sylvestre in #14411
+
+  cksum
+  - cksum: use aws-lc instead of vendored openssl on MSVC to avoid perl by @oech3 in #14559
+  - cksum: do not abort on an over-length BLAKE2b digest in a check file by @Dijaa in #14508
+
+  cp
+  - cp: avoid resolving cwd for absolute recursive copies by @varranvar in #14336
+  - fix(wasi): cp attribute preservation and reflink handling by @eduardomourar in #13685
+  - cp: fix copying entries sharing parent directory name with -R . by @okaythi in #14530
+  - cp: retain --no-preserve over later --preserve by @wtcpython in #14555
+  - cp: --attributes-only must give the destination the source's type by @sylvestre in #14622
+
+  csplit
+  - csplit: accept a hyphen-leading --suffix-format value by @arbelonson-source in #14320
+  - csplit: always create the final split, even when empty by @yuefdev in #14565
+
+  date
+  - date: report invalid UTF-8 lines in -f file/stdin input by @alexchen-sys in #14280
+  - date: wrap errors with thiserror by @Devel08 in #14333
+  - date: exit with 1 for expected file, got directory by @Devel08 in #14435
+  - date: rewrite test to remove thread::sleep by @cakebaker in #14535
+  - date: allow multiple --reference by @cakebaker in #14546
+
+  dd
+  - dd: simplify windows stdin in match guard by @hlsxx in #14347
+  - dd: fix broken man page formatting by @hlsxx in #14348
+
+  dir
+  - dir, vdir: match GNU default quoting by @ChihweiLHBird in #14538
+
+  dirname
+ReleaseNotesUrl: https://github.com/uutils/coreutils/releases/tag/0.12.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

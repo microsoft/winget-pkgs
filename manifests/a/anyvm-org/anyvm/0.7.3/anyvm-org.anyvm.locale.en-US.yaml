@@ -1,0 +1,64 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: anyvm-org.anyvm
+PackageVersion: 0.7.3
+PackageLocale: en-US
+Publisher: anyvm.org
+PublisherUrl: https://anyvm.org/
+PublisherSupportUrl: https://github.com/anyvm-org/anyvm/issues
+PackageName: anyvm
+PackageUrl: https://github.com/anyvm-org/anyvm
+License: MIT
+LicenseUrl: https://github.com/anyvm-org/anyvm/blob/HEAD/LICENSE
+ShortDescription: Run any VM anywhere -- bootstrap BSD, Illumos, and Linux guests with QEMU.
+Description: |-
+  anyvm boots a prebuilt BSD, Illumos, Linux, Hurd or Plan 9 guest under QEMU
+  with one command. It downloads the image, configures firmware, ssh, folder
+  sync and port forwarding for that guest on that architecture, then drops you
+  into a shell or runs your command and exits.
+
+  anyvm drives QEMU but does not bundle it, so QEMU is declared as a package
+  dependency and winget installs it first. Pass --skip-dependencies to install
+  anyvm on its own and supply QEMU yourself.
+Moniker: anyvm
+Tags:
+- ci
+- dragonflybsd
+- emulator
+- freebsd
+- haiku
+- illumos
+- netbsd
+- openbsd
+- qemu
+- solaris
+- virtual-machine
+- vm
+ReleaseNotes: |-
+  rename rocky to rockylinux; new default images for netbsd, midnightbsd
+  and openeuler
+  Rocky Linux is now --os rockylinux, the same name as its builder
+  (anyvm-org/rockylinux-builder, renamed from rocky-builder) and its
+  GitHub Action (vmactions/rockylinux-vm). The default image is
+  rockylinux-builder v2.0.1. The old name is not kept as an alias, so
+  replace --os rocky with --os rockylinux: anyvm no longer applies the
+  Rocky Linux settings (virtio NIC, TCG under nested Windows) to "rocky".
+  New default builder versions:
+  netbsd 2.2.6 -> 2.2.7 adds NetBSD 10.2, fixes 9.x packages
+  midnightbsd 2.0.7 -> 2.0.8 MidnightBSD 4.0.8
+  openeuler 2.0.5 -> 2.0.6 adds openEuler 26.09 (x86_64, aarch64)
+  rockylinux 2.0.1 was rocky 2.0.0
+  Fixed: Redox no longer fails to mount its root filesystem when the host
+  is slow to sync the disk image. Redox 0.9.0's IDE driver gives each ATA
+  command 1 s and flushes after every write, while QEMU completes a guest
+  flush only once the host fdatasync returns. The Redox disk now runs with
+  cache.no-flush=on; guest writes still reach the host page cache, so
+  only a host crash could lose them.
+  Other: --debug now logs the host CPU model on every run, not only when
+  a boot times out. CI tests NetBSD 10.2, and the builder bump bot also
+  picks up point releases of older branches.
+  Full Changelog: v0.7.2...v0.7.3
+ReleaseNotesUrl: https://github.com/anyvm-org/anyvm/releases/tag/v0.7.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

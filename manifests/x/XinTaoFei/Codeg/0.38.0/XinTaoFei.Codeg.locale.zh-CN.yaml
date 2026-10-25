@@ -1,0 +1,50 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: XinTaoFei.Codeg
+PackageVersion: 0.38.0
+PackageLocale: zh-CN
+ShortDescription: 在一个地方聚合并浏览 AI 编程代理会话（如 Claude Code、Codex、Gemini CLI 等）。支持桌面应用、自建服务器或 Docker 部署。
+Description: Codeg（Code Generation，代码生成）是一款企业级多代理编码工作区。它将本地 AI 编程代理（包括 Claude Code、Codex CLI、OpenCode、Gemini CLI、OpenClaw、Cline 等）统一集成于桌面应用、独立服务器或 Docker 容器中，支持通过任意浏览器进行远程开发；具备对话聚合、并行 Git 工作树开发、MCP/技能管理、聊天频道交互（Telegram、飞书、iLink 等），以及集成的 Git/文件/终端工作流。
+Tags:
+- claude-code
+- codex
+- gemini-cli
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  这一版新增了命令行工具 codeg-cli：可以在终端、脚本或 CI 任务里通过 codeg 运行智能体，回复以文本或 JSON 输出，每次运行都是一个可以在 codeg 里打开、接着聊的会话。
+  同期还有：服务器升级后浏览器会用上新版本，消息渠道里的 /deny 不会再给 Claude Code 永久放行，表格和代码块恢复成一层边框、浅色模式下的代码重新有了语法高亮，macOS 上重启后会回到你钉在程序坞上的图标，Windows 上安装或更新不会再卡在停止 codeg-mcp 那一步。
+  新增
+  - 新增 codeg-cli，可以在终端、脚本或 CI 任务里通过 codeg 运行智能体——codeg-cli -a claude_code -p "Review the latest commit" 会把提示词交给本机正在运行的桌面版或 codeg-server，加上 --url 和令牌也能交给别处的 codeg-server；回复以文本、JSON 或 JSON 事件流输出，退出码都有文档说明，每次运行都是 codeg 里的一个普通会话。（#694 由 @yasin1151 提出）
+  - 用 --permissions 决定无人值守的运行怎么回应智能体的权限请求——拒绝（默认）、只允许读取、允许、结束运行，或者留给你在 codeg 里处理；每次都只回应这一次，从不选会在智能体设置里写下永久规则的「始终」。
+  - 运行可以转到后台、稍后再取结果（--detach、result、cancel），也可以用 --worktree 在单独的 git worktree 里进行，或者一次发给多个智能体或助手；--output-schema 能让智能体按你给的 JSON Schema 交回结果。
+  - codeg-cli 还能列出和安装智能体、列出助手、运行已保存的自动化；--standalone 会为单条命令（比如 CI 任务里的一条）启动一个专用的 codeg-server，命令结束就随之关闭。
+  - 「设置 → 系统 → 命令行访问」是本机 codeg-cli 的开关，还会给出一条可以直接试的命令；桌面版在这里另有「安装命令行工具」按钮，把 codeg-cli 放到 PATH 上，桌面版自带的终端和智能体也会优先用它自己的 codeg-cli。
+  - 从命令行启动的会话在侧栏带有终端标记，「最近显示」新增了「命令行」，可以只列出这些会话。
+  - 桌面版、服务器安装包和 Docker 镜像都自带 codeg-cli，install.sh 和 install.ps1 会把它装在 codeg-server 旁边，以后 codeg-server 的在线升级也会一并更新它；所有命令和选项见命令行文档。
+  改进
+  - 权限请求、计划审批和待办任务「结果」里的本地图片也能显示了，和回复里的一样。
+  修复
+  - 服务器升级后浏览器会用上新版本，不会再有时从缓存里打开旧版本，升级时一直开着的页面也会提示你刷新。（#980 由 @wuzhaozhongguo 反馈）
+  - 消息渠道里的 /approve 和 /deny 只回应这一次，并按选项的含义而不是在列表里的位置来选——以前遇到 Claude Code 标为有风险的调用，/deny 可能反而永久放行，/approve 和自动批准却会拒绝。没有「仅这一次」选项的请求，现在会留给你在 codeg 里处理。
+  - 回复、思考和 Markdown 预览里的表格和代码块恢复成一层边框，代码块的语言、下载和复制按钮放在代码上方的标题栏里，浅色模式下的代码也重新有了语法高亮。
+  - 全屏查看表格时，退出按钮不会再跑到屏幕外。
+  - 在 macOS 上，更新或重启后 codeg 会回到你钉在程序坞上的那个图标，不会再在旁边多出一个。
+  - 在 Windows 上安装或更新 codeg 不会再卡在「Stopping codeg-mcp and codeg-computer-helper processes…」——以前在 WMI 服务无响应的电脑上会一直等下去；install.ps1 查询 WMI 也最多等 15 秒。
+  - 智能体同时把两个子任务委派到 codeg 还没记录过的同一个文件夹时，两个都能正常启动，不会再有一个失败。
+  注意
+  - 0.38.0 运行过之后，0.37.0 就无法在同一份数据上启动了，因为这一版给 codeg 的数据库加了内容：codeg-server 的「回滚」恢复出来的 0.37.0 起不来，重新安装旧版桌面版也一样；之后可能还要退回 0.37.0 的话，更新前请先复制一份 codeg 的数据目录。
+  - 从 0.37.0 在线升级的 codeg-server 拿不到 codeg-cli，因为 0.37.0 的升级程序还不认识它：请从本页的服务器安装包里取出 codeg-cli，放到 codeg-server 旁边。桌面版的更新、install.sh、install.ps1 和 Docker 镜像都会带上它。
+  - 命令行访问默认开启——以你的账户运行的任何程序都能借 codeg-cli 通过 codeg 运行智能体，就像它们本来就能读取 codeg 的数据一样；用不到 codeg-cli 的话，可以在「设置 → 系统 → 命令行访问」里关掉。
+  - 在 macOS 上，如果把 codeg 钉在了程序坞，更新到 0.38.0 的这一次仍可能多出一个 codeg 图标，因为这次重启由更新前的版本执行：退出 codeg 后从钉住的图标重新打开即可，之后的更新不受影响。
+  - 在 Windows 上，codeg-cli 和 codeg-server 一样，要装了 Microsoft Visual C++ 可再发行程序包才能启动。
+  - 在 Linux 上，codeg-cli 和 codeg-server 一样需要 glibc 2.34 及以上和 OpenSSL 3，Ubuntu 22.04、Debian 12、RHEL 9 及更新的系统都满足，暂时没有适用于 Alpine 的版本。
+  感谢 @yasin1151 和 @wuzhaozhongguo 的反馈。
+ManifestType: locale
+ManifestVersion: 1.12.0

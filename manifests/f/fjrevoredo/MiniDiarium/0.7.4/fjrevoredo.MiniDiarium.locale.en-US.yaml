@@ -1,0 +1,90 @@
+# Created using wingetcreate 1.12.8.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: fjrevoredo.MiniDiarium
+PackageVersion: 0.7.4
+PackageLocale: en-US
+Publisher: fjrevoredo
+PublisherUrl: https://mini-diarium.com/
+PublisherSupportUrl: https://github.com/fjrevoredo/mini-diarium/issues
+PrivacyUrl: https://github.com/fjrevoredo/mini-diarium/blob/master/docs/PRIVACY.md
+Author: Francisco J. Revoredo
+PackageName: Mini Diarium
+PackageUrl: https://github.com/fjrevoredo/mini-diarium
+License: MIT
+LicenseUrl: https://github.com/fjrevoredo/mini-diarium/blob/master/LICENSE
+Copyright: Copyright (c) 2026 Francisco J. Revoredo
+ShortDescription: Encrypted, local-first journaling app
+Description: A local-first journal with serious encryption. Free, open source, and never touches the internet.
+Moniker: mini-diarium
+Tags:
+- privacy
+- journaling
+- journal
+- diary
+- foss
+- open-source
+- rust
+ReleaseNotes: |-
+  What's Changed
+
+  Attachments on entries, a Timeline that filters by tag, and a feedback dialog. The app also refuses
+  to open a journal saved by a newer version, and Escape no longer quits the app from inside editor
+  dialogs.
+
+  Added
+  - Tag-aware Timeline (TODO-0124, #315, #314): While a tag filter is active, the Timeline lists only
+    the entries that have the tag. The filter applies per entry, so an untagged entry on the same day
+    stays hidden. On a narrow window, where the sidebar is hidden, the Timeline shows its own filter
+    banner with a clear button, and a message when no entry has the tag. A new Preferences → Writing →
+    Timeline → Show tags option (off by default) shows each entry's tags as chips under its row. Click
+    a chip to set or clear the filter. Tag chips come from tag data that is stored unencrypted, so the
+    change adds no decryption cost and no database schema change.
+  - File attachments on entries (TODO-0114): Attach documents, PDFs, short videos, or any other file
+    (up to 20 MB each) to an entry. Attachments show as email-style chips under the editor, next to
+    the tags. Click a chip to save a decrypted copy to a location you choose. The copy must keep the
+    attachment's file extension. You can also place an optional inline 📎 reference to an attachment
+    in the entry text. The reference only points to the attachment and shows as missing if you remove
+    it. A locked entry hides the attach, remove, and insert-reference controls but still allows saving
+    a copy. An entry with attachments is never auto-deleted as empty.
+  - Export: Markdown export writes each attachment as a decrypted file into the assets/ folder and
+  links it from the entry. JSON export adds an attachments array (name, MIME type, size) per entry.
+  Print / PDF lists the attachment names. Custom Rhai export plugins do not receive attachment data.
+  - Restore: Restoring entries from a backup snapshot also restores their attachments and remaps
+  inline references.
+  - Schema v14: Adds attachment storage, where identical files are stored once. Older app versions
+  cannot delete an entry that has attachments, so the app removes the attachment links itself when you
+  delete an entry. The migration runs automatically on unlock.
+  - Older app versions: Versions before 0.7.4 cannot delete an entry that has attachments. When they
+  edit and save such an entry, they drop its inline 📎 references. The files in the strip are kept.
+  Update every computer that shares the journal.
+  - Send feedback from the app (TODO-0115): The ⋮ menu has a new Send feedback item, and the unlock
+    screen has a Send feedback link next to View backups. Both open a dialog with three choices:
+    Report a bug, Suggest a feature, and Email the developer. The first two open a GitHub issue form
+    in your browser. The email choice opens your mail client with a subject that includes only the app
+    version. Nothing is sent automatically, and opening a link does not trigger the focus-loss
+    auto-lock.
+
+  Fixed
+  - Escape in editor dialogs no longer quits the app (TODO-0127): Pressing Escape to close the Insert
+    Link or Insert Timestamp dialog, or the tag suggestions, no longer also quits the app when the ESC
+    key action is set to Quit. App shortcuts no longer fire behind those dialogs. An Escape that
+    cancels IME input also no longer triggers the ESC key action.
+  - Ctrl+[ / Ctrl+] jump to the previous/next day with an entry (TODO-0126, #312): The shortcuts
+    stepped one calendar day, so they landed on empty days, although the docs say "day with an entry".
+    They now skip empty days. While a tag filter is active, they visit only days that have an entry
+    with that tag. At the first or last entry they do nothing. The Header ◀/▶ buttons still step one
+    day. Ctrl+Shift+[ / Ctrl+Shift+] still move by month.
+  - Timeline row opens the clicked entry (TODO-0124): On a day with more than one entry, clicking a
+    Timeline row opened the day's newest entry. It now opens the entry you clicked.
+  - Calendar tag filter refreshes after tag edits (TODO-0124): When you added or removed the filtered
+    tag on an entry, the Calendar dots kept the old dates until you set the filter again. They now
+    update at once.
+
+  [](https://sourceforge.net/projects/mini-diarium/files/v0.7.4/)
+ReleaseNotesUrl: https://github.com/fjrevoredo/mini-diarium/releases/tag/v0.7.4
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/fjrevoredo/mini-diarium/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

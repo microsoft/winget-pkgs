@@ -1,0 +1,46 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: OpenPipal.OpenPipal
+PackageVersion: 1.1.4
+PackageLocale: en-US
+Publisher: OpenPipal
+PublisherUrl: https://github.com/yuanlang12
+PublisherSupportUrl: https://github.com/yuanlang12/OpenPipal/issues
+PackageName: OpenPipal
+PackageUrl: https://openpipal.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/yuanlang12/OpenPipal/blob/HEAD/LICENSE
+ShortDescription: Open-source visual AI agent app built on Pi, no terminal required.
+Description: OpenPipal is an open-source visual desktop app built on the Pi agent framework. Create dedicated agents from real conversations, extend them with plugins, Agent Skills, MCP servers, and detected CLI tools, and run work manually, on a schedule, or through webhooks on macOS and Windows.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- pi
+- programming
+ReleaseNotes: |-
+  This release makes Pals (your own agents) first-class: rules you set inside a Pal now really land in that Pal, Pals get their own avatar shapes, the "My Pals" page becomes a list you can try from in one click, and you can pick a default working folder for the whole app.
+  What's new
+  - Rules inside a Pal. Say "from now on…" inside one of your Pals and the rule is written into that Pal's own hooks/ folder — it applies only there and travels with it. The Rules tab groups rules by where they live: All Pals (global), each Pal, and from plugins. The background rule writer is now confined to the rule folder itself (it cannot touch the Pal's persona or memory) and routes through the same model preset as the conversation that asked.
+  - Default working folder. Settings → Apps → Default working folder is now what conversations actually use when they haven't picked a folder of their own. The folder bar above the input shows the effective default with a "Default" tag; a Pal with its own working folder keeps using it. Precedence: conversation's own choice → the Pal's own tools/config.json → the app default → the built-in workspace folder.
+  - My Pals as a list. Two columns, each row with the avatar, name, one-line description and Try it. The header button is now Create, which starts a conversation with the general assistant — chat there and choose Save as Pal.
+  - Avatar shapes. The avatar studio gains six body outlines (square, circle, shield, hexagon, cloud, triangle). Shapes morph between states like everything else; eyes and accessories are unchanged. Exported SVG/PNG now includes accessories that hang outside the body.
+  - Wording. User-created agents are called Pals throughout the UI; the rules feature is called Rules.
+  What's fixed
+  - Rules set inside a Pal never produced a file (1.1.3): the background writer lacked the Pal's identity and every write was refused by the tenant boundary, so the capsule always said "no rule file was written". Fixed and pinned with a test against the real boundary.
+  - Pals borrowed whatever assistant was selected last. Starting a Pal conversation used the app's currently selected assistant as its underlying role, so a Pal could inherit the design assistant's "full-page HTML must be a Design Component" gate without seeing the skill that explains it. Pal conversations now run on a neutral base; the gate's message also points at the exact skill file.
+  - Avatar changes didn't show up everywhere. The sidebar history, the workspace inspector header, the new-conversation screen and the automation picker printed the Pal's emoji instead of its avatar. All surfaces now share one avatar component.
+  - hook-creator was invisible to Pals in the default runtime (the skill scope rule only fed the legacy path). Both runtimes now use one rule; only built-in and user-authored skills may declare themselves visible to every Pal.
+  - Rules tab spun forever in the browser extension (no rules API there); it now says the list is desktop-only.
+  - Model name could leak into a failure capsule when using the built-in credential; it is now masked like everywhere else.
+  - Exporting an avatar right after previewing the "generating" state produced an off-centre image; the pending-rules list no longer bleeds between conversations; the shell-command probe and the write probe now agree on scope; per-command scans of every Pal's task files are gone.
+  Windows installers are rebuilt from the same source; there are no Windows-specific changes in this release. There is still no OS sandbox on Windows (the agent asks before running shell commands).
+ReleaseNotesUrl: https://github.com/yuanlang12/OpenPipal/releases/tag/v1.1.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

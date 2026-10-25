@@ -1,0 +1,86 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AuthorMore.PenpotDesktop
+PackageVersion: 1.0.0
+PackageLocale: en-US
+Publisher: Author More
+PublisherUrl: https://authormore.com/
+PublisherSupportUrl: https://github.com/author-more/penpot-desktop/issues
+PrivacyUrl: https://penpot.app/privacy
+PackageName: Penpot Desktop
+PackageUrl: https://github.com/author-more/penpot-desktop
+License: AGPL-3.0
+LicenseUrl: https://github.com/author-more/penpot-desktop/blob/HEAD/LICENSE
+ShortDescription: A desktop application for Penpot, an open-source design tool.
+Description: |-
+  Penpot Desktop is an unofficial desktop application for the open-source design tool, Penpot.
+  It provides you with access to the functionality of the browser version of Penpot with an experience of a desktop application. It comes with
+  - system-level application experience e.g. a dedicated window, file extension association,
+  - versatile dark-light mode setup,
+  - tab interface for easy navigation between projects,
+  - ability to connect to different instances e.g. officially hosted, local for offline work,
+  - and more are coming.
+Tags:
+- build
+- design
+- diagram
+- flow
+- flowchart
+- interface
+- mockup
+- present
+- prototype
+- slides
+- specification
+- ui
+- user-experience
+- user-interface
+- ux
+- wireframe
+ReleaseNotes: |-
+  1.0, wow! 🎉
+  Thank you for using the app and for your ongoing support.
+  Thank you to contributors, to those answering questions about Penpot Desktop all around the Internet, to maintainers of alternative packages and installers, and to those working on upstream dependencies.
+  Let's keep going. The new ideas are plenty and Penpot Desktop will be even better. If your company or organisation would like to support my open source activity, including this project, please contact me at belar@authormore.com.
+  Onto the changes!
+  This is a major release and it includes breaking changes. Look for the ⚠️ sign below to see if you need to act.
+  Features
+  - ⚠️ [BREAKING CHANGE] Added local instance resources clean-up on deletion. #370
+    Local instance’s Docker resources will now be deleted as part of the instance removal. That includes ALL of the instance’s containers, networks, and volumes. The action cannot be undone. Back up your data before deletion.
+    If you were removing instances through the Penpot Desktop’s UI and then deleting resources with e.g. Docker Desktop, there is no need to do that anymore.
+  - Added instance removal confirmation. #370
+    Instance removal flow now features a confirmation dialog. In case of a remote instance, it’s an extra click. For a local instance, where all the content is at stake, you will be required to type in the instance’s name as a deletion confirmation.
+  Fixes
+  - Fixed dev tools to open for the application’s window. #352
+    Dev tools toggle, cmd/ctrl + shift + i, now correctly opens dev tools of the application, not the currently focused tab.
+  - Fixed abandoned partitions to be cleaned up. #363
+    The app will now check for abandoned partitions (e.g. for instances removed manually from the configuration file(s)) and move them to the bin/trash. The check happens automatically on launch.
+  - Fixed derived instance content to be saved. #363
+    Instance’s defaults and normalisation were applied after a config read, but not saved until e.g. after an instance setting edit. It included instance id, which could be generated on every launch and change an instance to a new partition. It could result in a build-up of unused partitions.
+    If your installation was affected and accumulated such partitions, v1.0.0 includes (mentioned earlier) an abandoned partition clean-up. The removed partitions will show up in the bin/trash.
+  - [macOS] Fixed top bar to fade when window is not focused. #365
+  - Fixed batch export error to be handled. #366
+  - Fixed batch download button to be present on launch. #367
+  - Fixed instance to use valid origin. #368
+  - Fixed the app to force single instance. #372
+    Penpot Desktop doesn’t support running multiple copies of the application, which could result in broken configuration. The application will now prevent additional copies from starting and point to the already running copy.
+  Removed
+  - ⚠️ [BREAKING CHANGE] Removed elevated access mode for instance creator. #355
+    Starting with this release, local instances require Docker to be able to run unprivileged on the host. For example, Docker Desktop and Rootless mode allow you to run Docker without elevated access.
+    If you created an instance using the elevated access option, you will need to switch to an unprivileged solution in order to perform updates or deletion from Penpot Desktop.
+  - ⚠️ [BREAKING CHANGE] Removed configurations’ migrations. #356
+    Migrations (transformers) in configuration parsers provided a way to apply breaking fixes without requiring everyone affected to manually fix a config file. Now that the migrations have been in place long enough to correct the majority of configurations, they have been removed to not accumulate workarounds in the parsers.
+    If you last ran v0.13.1 or older, I recommend first installing v0.25.0 and then updating to v1.0.0 - manually or letting the auto-updater do it.
+  Security
+  - ⚠️ [BREAKING CHANGE] Added limit for local instance’s network availability. #359
+    The official Docker Compose configuration binds a self-hosted Penpot instance to all interfaces (0.0.0.0), which makes it available on a local network. Considering the intention of the local instance installation, “an offline Penpot”, the binding was changed to the loopback (127.0.0.1) and local instances are now only available to their machine.
+    If you rely on this setup, after an instance update, you will need to open the instance to the local network on your own e.g. via forwarding. Keep in mind the setup is designed around “offline Penpot instance” e.g. with disabled email verification in account registration.
+  - Added limit for URL opener to accept only web URLs. #371
+  Full Changelog: https://github.com/author-more/penpot-desktop/compare/v0.25.0...v1.0.0
+ReleaseNotesUrl: https://github.com/author-more/penpot-desktop/releases/tag/v1.0.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/author-more/penpot-desktop/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

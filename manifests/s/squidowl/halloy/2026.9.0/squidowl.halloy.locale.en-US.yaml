@@ -1,0 +1,96 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: squidowl.halloy
+PackageVersion: 2026.9.0
+PackageLocale: en-US
+Publisher: Squidowl
+PublisherUrl: https://squidowl.org/
+PublisherSupportUrl: https://halloy.squidowl.org/
+PackageName: Halloy
+PackageUrl: https://github.com/squidowl/halloy/releases/tag/2026.9
+License: GPL-3.0-or-later
+LicenseUrl: https://github.com/squidowl/halloy/blob/2026.9/LICENSE
+Copyright: © 2022 - 2026 Casper Rogild Storm & Cory Forsstrom, Inc. All rights reserved.
+ShortDescription: Halloy is an open-source IRC client written in Rust, with the Iced GUI library. It aims to provide a simple and fast client for Mac, Windows, and Linux platforms.
+Description: Halloy is an open-source IRC client written in Rust, with the Iced GUI library. It aims to provide a simple and fast client for Mac, Windows, and Linux platforms.
+Tags:
+  - irc
+  - halloy
+ReleaseNotes: |-
+  Find full documentation at https://halloy.chat/
+
+  Added:
+    - Animated GIFs support
+    - Keyboard-driven message focus: navigate and act on messages without mouse
+    - Links and channel mentions within a message can be focused and opened
+    - New buffer.focus theme color for the focused message border
+    - Smooth scrolling
+    - Support link delimiters (< & >) with markdown formatting
+    - Ability to configure individual bouncer networks with servers.<name>.networks.<network>
+    - buffer.server_messages.condense.timestamp setting to control whether a condensed message shows a time range, its start timestamp, its end timestamp, or no timestamp
+    - Optional font.code setting for code-formatted text
+    - buffer.nickname.offline supports "dimmed" / { dimmed = float }, and { color = "theme"|"nickname", alpha = ...} so theme offline color and dimming can be combined
+    - buffer.nickname.color_override rules for assigning colors to specific nicknames
+    - Optional buffer.self_message theme style for messages sent by yourself
+    - Config options buffer.channel.nicklist.scrollbar.hidden, sidebar.scrollbar.hidden, and pane.scrollbar.hidden that control whether the nicklist, sidebar, and in-pane scrollbars respectively are enabled or not
+    - Additional setting for controlling anti-flood burst parameter (servers.<name>.anti_flood.burst); default value has been reduced from 10 to 8
+    - Expanded servers.<name>.max_connection_attempts to allow unlimited attempts
+    - Server context menu action to open Channel Discovery with that server selected
+    - Server messages can be configured to trigger unread in a buffer or not (buffer.server_messages.<server_message>.triggers_unread)
+    - Sidebar visibility is remembered across application launches
+    - Settings to control how internal and server buffers are opened from the sidebar (actions.sidebar.internal and actions.sidebar.server)
+    - Config file path is now shown in config editor
+    - CTCP actions in private message context menus
+    - Config option to include ignored nicknames in autocomplete (buffer.text_input.autocomplete.include_ignored)
+    - file_transfer.send_completion_message setting to control whether a PRIVMSG is sent to the remote user when a file transfer completes.
+
+  Fixed:
+    - Scroll-to-reply when clicking a reply preview
+    - Allow listing modes by not providing <+|->
+    - Selection on mutliline messages
+    - Display RELAYMSG senders correctly
+    - Receiving an invite will reveal the query with the inviter in the sidebar
+    - Config editor now properly out-scrolls the cursor
+    - Anti-flood rate-limiting applied to post-authentication JOINs (and similar on-connect messages)
+    - Display messages from legacy ISO-8859-1 clients instead of replacing invalid UTF-8 bytes
+    - Reconnect WebSocket connections when ping writes fail or exceed servers.<name>.ping_timeout
+    - Avoid bursts of IRC pings after delays
+    - Text in input box being scrolled/clipped 2px on the left on pane load or when navigating history
+    - Show registration-required join errors in the channel buffer instead of the server buffer
+    - Remove blank space above the input after marking a buffer as read
+    - Don't show another preview from the same message after hiding one
+    - User avatars are only shown when avatar is included in metadata.preferred_keys
+    - Expand $HOME or %AppData% when first component in a path setting
+    - Include/exclude conditions are properly accounted for when highlighting nicknames
+    - Restrict commonly used (()<>") chars from being used to highlight nicks
+    - "Apply Colors & Font Styles" button in Theme Editor persists modifications made via the theme editor
+    - Better support for larger font sizes in modals
+    - Sanitize incoming DCC filenames against Windows reserved device names, illegal characters, and trailing dots/spaces
+    - Reject server icons whose decoded dimensions would exceed the maximum GPU buffer size, matching the existing link-preview guard
+    - Cap the number of concurrently open IRCv3 batches a server can hold open, so a single connection cannot grow memory without bound
+    - User-specified log levels are applied to all log sources (including non-Halloy log sources, which were previously exempt)
+
+  Changed:
+    - Right-aligned nickname columns now size to nearby messages instead of the entire loaded history
+    - Offline nicknames are styled only by buffer.nickname.offline; buffer.nickname.away no longer applies to them
+    - esc in the input box now scrolls the buffer to the bottom
+    - "Changed mode" messages reverted to not trigger unread (but remain not-dimmed by default)
+    - Removed active and passive categories for server message types; control of dimming and triggering unread can be controlled specifically for each server message type instead
+    - User avatars are configurable with metadata.avatar.size
+    - Link preview requests now use Halloy/<version> as their default User-Agent
+    - Anti-flood rate parameter has been moved servers.<name>.anti_flood to servers.<name>.anti_flood.rate
+    - IRC protocol logs for bouncer networks have their logs directory nested under the bouncer name
+    - Rename servers.<name>.websocket_ping_interval to servers.<name>.websocket_ping_time
+    - When reloading the config file, if the config file editor pane is opened with unsaved changes then those changes will be saved before reloading
+    - The XDG data directory ~/.local/share/halloy can be used for storing history/logs/etc macOS, instead of ~/Library/Application Support/halloy/ (move entire directory to migrate)
+    - +draft/unreact and +draft/react capabilities can be enabled separately (when either is available for the server)
+    - The Theme Editor appends a .toml extension when saving a theme without the extension specified
+
+  Thanks:
+    Contributions: @rollecode, @luca020400, @rtmongold, @tranzystorekk, @englut, @furudean, @ncfavier, @edwardloveall
+    Bug reports: @sebbu2, @dpedu, kurwavidae, @ncfavier, wwWraith, kurwavidae, @SRAZKVT, @WinnerWind, @lojinks, @edwardloveall, CGML, @TheDcoder, @ToyKeeper, @BKVad1m, @gigioneggiando, @dei-layborer, @goyusia, @ncfavier
+    Feature requests: @daniiooo, @fabricionaweb, @RoboDanjal, @AbandonedCranium, tbo, ivocavalcante, @sebbu2, @coraxioU9, @ncfavier, @darienm, @Anonymous1157, gkoebel, @BigOjisan, garoto, @classabbyamp, @WinnerWind, @NoHandlebars87, @cyrneko, @Victorious3
+
+ReleaseNotesUrl: https://github.com/squidowl/halloy/releases/tag/2026.9
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

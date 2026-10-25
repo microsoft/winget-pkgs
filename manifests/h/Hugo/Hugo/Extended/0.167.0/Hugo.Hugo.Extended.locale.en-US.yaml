@@ -1,0 +1,104 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Hugo.Hugo.Extended
+PackageVersion: 0.167.0
+PackageLocale: en-US
+Publisher: The Hugo Authors
+PublisherUrl: https://gohugo.io/
+PublisherSupportUrl: https://discourse.gohugo.io/
+Author: The Hugo Authors
+PackageName: Hugo (Extended)
+PackageUrl: https://gohugo.io/
+License: Apache-2.0
+LicenseUrl: https://github.com/gohugoio/hugo/blob/HEAD/LICENSE
+Copyright: Copyright 2026 The Hugo Authors.
+ShortDescription: The world’s fastest framework for building websites (with WebP encoding and Sass transpiling support)
+Description: |-
+  Hugo is one of the most popular open-source static site generators.
+  With its amazing speed and flexibility, Hugo makes building websites fun again.
+  Hugo is available in two flavors: standard and extended.
+  With the extended flavor you can:
+  - Encode WebP images (decoding is also available in the standard build)
+  - Transpile Sass to CSS using the embedded LibSass transpiler
+Tags:
+- blog
+- blog-engine
+- cms
+- content-management-system
+- documentation
+- documentation-tool
+- static-site
+- static-site-generator
+ReleaseNotes: |-
+  This release brings relative partial references, slug support for branch pages, and a handful of security hardening fixes.
+  Relative partial references. A partial name starting with ./ or ../ is now resolved relative to the directory of the calling partial. This makes it much easier to write self-contained, movable partial trees, e.g. {{ partial "./item.html" . }} from within layouts/_partials/card/list.html. Relative paths are only allowed from within partials, and paths resolving outside the partials directory is an error. See #15373 and the documentation.
+  Slugs for section, taxonomy and term pages. The slug front matter now works for branch pages, not just regular pages, and it cascades to descendants. This is particularly useful in multilingual sites, where e.g. content/help/_index.es.md with slug: ayuda gives /es/ayuda/, /es/ayuda/avanzado/ etc. See #14352.
+  Other notable improvements include the new build.cleanDestinationDir config with keepFiles/keepDirs Glob patterns (#14937, docs), hugo now builds without a config file (#15393), exact numeric comparisons in eq, where, in and the set functions (#15322, #15358), and automatic summaries that no longer end inside an open list or blockquote (#14044).
+  Security
+  This release contains several hardening fixes. None of them are known to be exploited, but if you build sites with untrusted themes or modules, you should upgrade.
+  - Sass imports not found in Hugo's file systems were resolved by the Sass compiler itself, which follows symlinks and knows nothing about the project root. A theme could import a file outside the project and get its content into the published CSS. These imports are now resolved by Hugo and checked against the same security.allowRead roots as the Node.js tools and js.Build. 41040cc7 (thanks to @Hama1cco)
+  - Likewise, imports not found in /assets were resolved and read by ESBuild itself. The resolved path is now checked against the allowed read paths before ESBuild loads it. 2aa51f34 (thanks to @Hama1cco)
+  - A symlinked directory in a theme at the parent of a nested mount could expose files outside the module. 2fe9bab7
+  - Explicit heading IDs (e.g. ## Foo {id="..."}) were written unescaped into the table of contents href, allowing attribute breakout. 671fbf2c
+  Note
+  - The default baseURL is now https://example.org/ (it was empty). Hugo has always required a valid URL to work properly, so this mostly affects new and test sites, but if you relied on the empty default for relative URLs, set baseURL explicitly. bc686541 @bep #14625 #15384
+  - The root cleanDestinationDir config key is deprecated in favour of build.cleanDestinationDir.enable. The --cleanDestinationDir flag maps to the new key. Note that .git files in the publish dir are now kept by default. 90861931 @bep #14937
+  - eq now compares numeric values the same way as lt, le etc., so e.g. eq 1 1.0 is now true. Also, in, intersect, union, uniq, symdiff, complement and where's in/not in now compare numbers exactly rather than via float64, and no longer require the Go types to match. 4d628bbd 366377b6 @bep #15322 #15358
+  - A user table render hook is now preferred over the embedded one. 140d9362 @jmooring #15389
+  - Automatic summaries are expanded past summaryLength when needed so they don't end inside an open container element. This may change the summary for some pages. d692a243 @bep #14044
+  Bug fixes
+  - hugolib: Fix failing integration test fdbba5a6 @jmooring
+  - Fix build with Go 1.26 on Fedora 44 Beta 2782bfd3 @flyn-org
+  - Fix smartcrop with rotation (#15371) 5edd05bb @bep #11266 #15369
+  - ci: Fix broken magefile 1d87ee5b @bep
+  - tpl/collections: Fix union of slices with different numeric element types ffbcdba9 @hktitof #15323
+  - Fix stale page content when several files in the same dir change in one batch a374b865 @bep #15330
+  Improvements
+  - Update .gitignore f6606f1f @bep
+  - tocss: Confine Sass import fallbacks to the allowed read paths 41040cc7 @bep
+  - js: Confine ESBuild's fallback resolver to the allowed read paths 2aa51f34 @bep
+  - commands: Allow building without a config file c7f99993 @bep #15393
+  - collections: Preserve slice type when appending an empty slice dd16df14 @jakezwang #11131
+  - tpl/tplimpl: Prefer user table render hook over embedded 140d9362 @jmooring #15389
+  - Avoid allocating in SitesMatrix.MatchSiteVector 83ab7999 @bep
+  - Add slug support for section, taxonomy and term pages 5d43ab70 @bep #14352
+  - tpl: Avoid reflect.Value.Call for common signatures 806a62e8 @bep #15385
+  - ci: Disable vet when running tests 8bac4de7 @bep
+  - tpl/partials: Support relative partial paths from within partials (#15376) bd1588bd @bep #15373
+  - config: Add build.cleanDestinationDir config 90861931 @bep #14937
+  - commands: Make testscripts/commands/hugo__clean_destination_dir.txt portable a74b7539 @bep #8433
+  - commands: Handle missing staticDir in cleanDestinationDir 07b9fba1 @jmooring #8433
+  - hugofs: Cache symlink checks 09fa49be @bep
+  - hugofs: Drop symlinks in virtual ancestor dirs of nested mounts 2fe9bab7 @bep
+  - markup/tableofcontents: Escape heading IDs in ToC HTML 671fbf2c @bep
+  - hugofs: Allow symlinked mount roots in the main project 25f2856a @bep #15367
+  - Expand and consolidate BOM trimming cb6a7072 @bep #15355 #15361
+  - tpl/collections: Compare numbers exactly in set operations and where 366377b6 @bep #15358 #15359
+  - ci: Skip vet on Windows 10bb97ba @bep
+  - Revert "parser/metadecoders: Strip BOM from data prior to unmarshalling" 51cd9e6c @bep
+  - parser/metadecoders: Strip BOM from data prior to unmarshalling ec578f0c @jmooring #15355
+  - tpl: Reformat templates with new formatter version 5698de94 @bep
+  - resources/page: Balance container tags in automatic summaries d692a243 @bep #14044 #14927
+  - config/security: Add an integration test 3be817ed @bep
+  - tpl/compare: Consolidate numeric comparisions 4d628bbd @bep #15322 #15347
+  - tpl/strings: Add a strings.FirstLower function aaacd12c @jmooring #15332
+  - Update brevity guideline in AGENTS.md 881c0ec7 @bep
+  Dependency Updates
+  - build(deps): bump github.com/olekukonko/tablewriter from 1.1.4 to 1.1.5 1567bdef @dependabot[bot]
+  - build(deps): bump github.com/dustin/go-humanize from 1.0.1 to 1.1.0 9e4059cf @dependabot[bot]
+  - build(deps): bump golang.org/x/tools from 0.49.0 to 0.50.0 8e3bbe67 @dependabot[bot]
+  - build(deps): bump golang.org/x/image from 0.45.0 to 0.46.0 753c5fc1 @dependabot[bot]
+  - build(deps): bump golang.org/x/text from 0.41.0 to 0.42.0 facde8aa @dependabot[bot]
+  - build(deps): bump go.opentelemetry.io/otel/sdk from 1.44.0 to 1.45.0 c7e1a8e6 @dependabot[bot]
+  - deps: Bump github.com/bep/imagemeta from 1.0.0 to 1.0.1 (#15338) ec57bb7d @dependabot[bot] #15324
+  Documentation
+  - readme: Bump minimum Go version 7a46cd2b @mikoxyz
+  Build Setup
+  - Update release image to Go 1.27.1 (#15342) 34d8cdb1 @bep
+ReleaseNotesUrl: https://github.com/gohugoio/hugo/releases/tag/v0.167.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://gohugo.io/documentation
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

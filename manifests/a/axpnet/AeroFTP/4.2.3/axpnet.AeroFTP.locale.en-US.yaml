@@ -1,0 +1,82 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 4.2.3
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [4.2.3] - 2026-10-13
+  Checked Writes, Resumable Ranges, and SITE Commands
+  A repair release, one week after 4.2.2: 122 commits and 86 tracked changes. The thread running through it is data you could lose when something goes wrong half way. An operation that checks whether a file exists before writing now writes only when the server confirmed it is not there, a WebDAV replace keeps the old file until the new one is in place, crypt init writes nothing until the Emergency Kit is in your hands, and a large download that loses a connection resumes the range it was reading instead of starting over. Around that: SITE commands for FTP and FTPS, a local folder usable wherever the CLI takes a URL, a transfer speed that shows the current speed, and AeroAgent 1.7, which can drive the visible app when you ask it to.
+  Every change listed here is tracked, with its commit and its discussion, in the release tracker: AeroFTP 4.2.3, known issues, patches and updates.
+  Thank you to everyone who uses AeroFTP, at home or at work, and especially to those who write back when something does not behave. A large part of this release started from a report: benchmark runs from Western Europe that showed MEGA and Proton transfers with no progress, a request for raw SITE commands, a crash report about large uploads that led to the progress and speed rework, and two interface proposals now in the app. The people behind them are listed at the end.
+  Before the tag, an independent pre-release review read how this cycle's changes fit together on main, in three areas: writes that can lose data, the transfer engine and its retries, and the security surface, the latter checked against the security advisories rclone published on October 9. A second pass read the fixes that landed after it. Together they found three blockers, all fixed below before the tag; the non-blocking findings are recorded in the tracker.
+  What changes for you
+  The short version, split by where you meet it. Everything in this list appears again further down with the detail.
+  In the app
+  - A failed check no longer leads to a write. Creating a crypt vault, unlocking AeroCrypt, touching a file, and uploading with no-clobber, immutable or "skip existing" write only when the server answered that the item is not there. If the check itself fails (timeout, permission, server error), the operation stops instead of writing over what might be there.
+  - Replacing a file on WebDAV keeps the old one until the new one is in place. Apache, rclone serve and Nextcloud start an overwriting MOVE by deleting the destination, so a failure in between lost the file. The old file is now set aside, the new one moved in, and only then the old one deleted.
+  - Large downloads survive a stalled read. When one range of a segmented download stalls or loses its connection, that range resumes from where it stopped instead of the whole file starting again, on SFTP, FTP, S3 and every HTTP provider with ranged reads.
+  - The speed you see is the current one. Speed, graph and time remaining follow the last 3 seconds instead of the average since the start, the graph covers the whole transfer and keeps a stall as a dip, and progress moves while the file is being sent on S3, Azure, Dropbox, Box, Google Drive, B2, Swift, Jottacloud, Internxt, OpenDrive, MEGA and Proton.
+  - SITE commands for FTP and FTPS, from a new Connection menu, sent through the connection already open.
+  - Resizable Local and Remote panels, and a day and night appearance on a schedule. Drag or use the keyboard on the divider, and the split is kept across restarts. Appearance can follow the system or switch at the times you set.
+  - AeroAgent 1.7. It can operate the visible app when you ask it to (select, navigate, connect a saved profile, change settings), each step approved, with a cursor on screen and a badge to slow it down, pause or stop it. It also runs the community benchmark inside the app, gains the remote tools the MCP server already had, works with Anthropic again, and shows exact token counts instead of estimated costs.
+  - The Permissions dialog changes a file's mode again on FTP, FTPS and SFTP. Every Apply had failed with "Not connected to server" since v3.1.5.
+  - Encrypted folders behave. The unlock dialogs open the overlay at the folder you opened them on, an Overlays Path whose folder name is itself encrypted keeps the Crypt toggle, a default-salt AeroCrypt vault reopens from its password alone, and AeroCrypt slot changes work on eight more backends once you consent to a non-atomic replace.
+  - Providers that misbehaved: Azure accounts with a hierarchical namespace list folders as folders, B2 retries a busy storage pod and renews an expired token during a long copy, Nextcloud retries a refused chunk instead of failing the file, ownCloud reports a missing path as missing, Box waits for a commit answered 202, MEGA S4 accepts the new megas4.com domain, Internxt explains an unfinished account setup, and the Filen Desktop S3 preset lets you pick the folder to open as its bucket.
+  - Saved servers: opening Edit right after Save shows what you saved, Quick Connect keeps your edits, drafts and imported OAuth credentials, and Lock Now confirms that the lock happened.
+  - AeroImage crops what is on screen after a turn or a mirror, with undo and redo, and its preview gallery follows touchpad swipe and pinch.
+  - The AppImage starts on systems without WebKitGTK, using its bundled libraries only there.
+  - Translations: 165 strings with letters from another alphabet, 892 strings in Armenian, Khmer, Georgian and Macedonian that were not real words, translations left on the previous English in 46 languages, and seven Greek sentences whose semicolon reads as a question mark in Greek are corrected.
+  In the CLI and for automation
+  - A folder of this machine works wherever the CLI takes a URL. aeroftp-cli serve webdav /srv/share shares it with no other server, and ls, get, put, sync, check and crypt take /abs/path, ./rel/path or file:///abs/path, inside a path jail. The folder hashes in place, reports df, copies inside itself with cp and resumes an interrupted transfer.
+  - aeroftp-cli site sends a SITE command through the open FTP or FTPS session, also from the TUI.
+  - hashsum no longer copies the file to the temporary folder. It hashes the bytes as they arrive; a 25.2 GB file used to fill a 27 GB tmpfs.
+  - serve sftp stores what it receives. It acknowledged every upload and discarded the data, 4.2.2 included.
+  - A server that accepts the connection and never answers is a timeout: exit 8 instead of 1 or 4, retried as a network error, with a hint that no longer names a --timeout flag ls, get and stat refuse.
+  - crypt init writes nothing until the Emergency Kit has been handed over, so a corrected command no longer exits 9 asking for --force.
+  - profiles shows the number --profile opens, also with a sort or a --group filter.
+  - -vv no longer prints the FTP password.
+  - An SFTP path that cannot be read is reported as unreadable (exit 3) instead of missing (exit 2), so rm --force, --immutable and the speed test refuse it instead of acting on it.
+  - The CLI agent counts tokens: --cost-limit becomes --token-limit and /cost becomes /usage.
+  - On WebDAV, edit and remote_edit need --allow-non-atomic, and so do AeroCrypt slot changes on the backends that cannot replace a file atomically.
+  Added
+  - SITE commands for FTP and FTPS. A Connection menu entry, aeroftp-cli site and the TUI send a SITE command through the open connection and show the whole reply. A command whose outcome is unknown is never sent again, and its arguments never reach the logs; the protocol feature matrix lists it (@jnewing, #1109, #1143, #1146).
+  - A local folder as a remote in the CLI. Wherever the CLI takes a URL it takes a folder of this machine, as /abs/path, ./rel/path or file:///abs/path, and serve webdav /srv/share shares one with no external server. The folder is the root of a path jail: nothing outside it can be read or written, and a served client cannot reach outside it (#1123). The folder computes md5, sha1, sha256, sha512 and blake3 in place, so hashsum, check --checksum and sync --checksum need no download, reports its filesystem to df, copies inside itself with cp, and resumes an interrupted transfer from the bytes already held (#1126).
+  - AeroAgent 1.7 can operate the visible app. Through stable selectors and bounded state it selects, navigates and refreshes with the same handlers as the interface (#1097, #1098), connects a saved profile by an opaque identity without reading its credentials (#1099), changes supported general and AI settings through approved commits that keep saved API keys and your unsaved drafts (#1107), and opens or closes the AeroTools workspace and its panels (#1108). Approvals are native and bound to the session, snapshots are redacted, control follows the calling session so two agents with the same name cannot act in each other's lease (#1139), a visible cursor shows each action and a badge lets you change the speed, pause, resume or stop (#1141), and Lock Now interrupts it (#1117).
+  - AeroAgent runs the community benchmark in the app, with progress, Stop and the report, and gains 18 remote tools the MCP server already had, with tests that keep every MCP tool reachable from AeroAgent or declined with a reason (#1130). The benchmark runs from the library the CLI and AeroAgent share, and its JSON report is anonymized on every exit (#1128).
+  - Resizable Local and Remote panels. The divider between connected panels can be dragged or moved from the keyboard, and the split is kept across restarts (@Omkar-Wagholikar, #1105, #1118).
+  - Scheduled day and night appearance. Appearance can be manual, follow the system, or switch at local times you choose, overnight schedules included, each with its own palette (@Omkar-Wagholikar, #1105, #1116).
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v4.2.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,67 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: aube.aube
+PackageVersion: 2.8.1
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  v2.8.1 brings aube-written pnpm-lock.yaml files closer to pnpm 11's output and fixes lockfile round-trips for npm and Yarn Berry. It also fixes minimumReleaseAge in update/dedupe, install --force, workspace detection for nested projects, and handling of an empty CI variable.
+  Fixed
+
+  Lockfiles
+  - pnpm 11 parity (#1792, #1793, #1788): when a tool such as Dependabot regenerates the lockfile with pnpm, it should rewrite fewer lines that did not change.
+    - Peer suffixes are now sorted by the full name@version string, e.g. (react-dom@18.2.0(react@18.2.0))(react@18.2.0).
+    - With dedupePeerDependents on (the default), aube resolves an optional peer from any matching version in the graph and lists it under optionalDependencies:. Compatible variants of a package are merged across importers.
+    - catalogs: no longer lists entries that an override replaces.
+  - npm package-lock.json:
+    - aube add now keeps "optional": true (for example on @esbuild/* platform packages) and "hasInstallScript": true. Previously, dropping these made npm fail with Unsupported platform (#1775).
+    - Root file: directory dependencies now keep their link and target entries, so npm ci no longer reports Missing: … from lock file (#1799).
+  - file: peers on re-resolve (#1775): aube add no longer fails with ERR_AUBE_BLOCKED_EXOTIC_SUBDEP when a direct file: dependency satisfies another package's peer.
+  - Yarn Berry yarn.lock (#1798):
+    - Changes to package.json are now detected even when some dependencies are unchanged. Previously aube could print "Lockfile is up to date" and leave yarn.lock stale. This also applies to Yarn Classic.
+    - Rewritten lockfiles now keep the __metadata version and cacheKey, the root workspace entry, bin: maps and builtin<compat/…> patch blocks, and use Yarn's formatting. As a result, yarn install --immutable accepts them.
+    - Not yet round-tripped: conditions:, dependenciesMeta: and non-root workspace blocks.
+
+  Install and resolution
+  - minimumReleaseAge on npmjs.org (#1791): aube update and aube dedupe could install versions that minimumReleaseAge should have blocked, including with minimumReleaseAgeStrict: true. Both commands now fetch the publish times they need to apply the cutoff.
+  - npm's --min-release-age (#1770): when aube receives npm-style install arguments, it now converts --min-release-age <days> and --min-release-age=<days> to aube's minimumReleaseAge, which is set in minutes. Arguments after -- are left as they are.
+  - aube install --force (#1789): now rebuilds every linked package. Files deleted from node_modules are restored instead of the command printing "Already up to date". With the global virtual store, each shared entry is rebuilt in a staging directory and swapped into place.
+  - Nested non-member projects (#1787): running aube install in a subdirectory that is not a workspace member now installs that subdirectory alone. This applies, for example, below an aube-workspace.yaml or pnpm-workspace.yaml that contains only settings. Previously aube installed the ancestor root. --ignore-workspace now works too and is listed in the CLI help.
+  - Empty CI variable (#1786): CI= no longer turns on CI mode (frozen lockfile by default, global virtual store disabled). CI=0 and CI=false still count as CI.
+  - TLS root certificates (#1797): updated rustls-webpki and webpki-root-certs to versions that drop the compromised eMudhra intermediate CA certificates.
+
+  Changed
+  - Homebrew tap (#1771, #1772): releases now go to the Aube-maintained tap, installed with brew install aubepkg/tap/aube. brew install aube installs the Homebrew core formula. The legacy jdx/tap/aube formula remains available during the transition.
+
+  Lockfile changes on upgrade
+  After upgrading, the next resolve rewrites some lines in existing aube-written pnpm-lock.yaml files: peer suffixes are reordered and newly resolved optional peers are added. Lockfiles are read as they are, so --frozen-lockfile installs of older lockfiles keep working.
+
+  💚 Sponsor aube
+  aube is built and maintained by @jdx, an open source developer at entire.io, the title sponsor of his open source work.
+  If aube saves your team install time or CI minutes, please consider becoming an individual or company sponsor. Your support funds ongoing development and helps keep aube fast, free, and independent.
+ReleaseNotesUrl: https://github.com/aubepkg/aube/releases/tag/v2.8.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
