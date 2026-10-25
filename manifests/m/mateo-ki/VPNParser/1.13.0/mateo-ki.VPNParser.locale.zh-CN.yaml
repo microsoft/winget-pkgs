@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
 
 PackageIdentifier: mateo-ki.VPNParser
-PackageVersion: 1.12.0
+PackageVersion: 1.13.0
 PackageLocale: zh-CN
 ShortDescription: Windows 桌面程序：采集订阅、解析成节点、跑代理，并把代理质量实测出来。
 Description: VPN Parser 是用 Rust + egui 编写的 Windows 桌面程序，负责采集免费或自建订阅、解析成节点、跑代理，并把代理质量实测出来。订阅入口包括带 `YYYY-MM-DD` 日期占位符的订阅 URL、Gist 搜索页发现，以及 Telegram 频道预览（裸节点链接和订阅链接两类都取，节点只增不删）。解析支持 `ss` `vmess` `vless` `trojan` `hysteria2/hy2` `socks5` `http(s)` 分享链接，以及 Clash / Clash Meta YAML、Base64 与混合文本。延迟以经内核访问 Google `generate_204` 的真实握手为准，24 小时出口健康条按实测绘制，而不是看内核上报的状态。Windows 上它同时管理系统代理、TUN（提权交接后只保留一个实例）和终端 `HTTP_PROXY` 环境变量，按 exe 路径添加防火墙允许规则，支持单实例互斥与托盘，记录出口切换历史并按天统计规则命中，同时提供强制 bearer 鉴权的本地 HTTP API 与 mihomo / sing-box / xray 配置导出。安装包不含内核，内核缺失时由程序按需下载。
@@ -15,6 +15,33 @@ Tags:
 - 节点解析
 - 订阅
 ReleaseNotes: |-
+  🚀 VPN Parser v1.13.0 发布说明 / Release Notes
+  🎉 欢迎使用 VPN Parser v1.13.0！本版深度重构并增强了节点测速管线与批测容错隔离机制，提供测速任务随时中断控制，彻底移除伪下载测速，并大幅提升 Windows 与跨平台运行稳定性：
+  ✨ 新特性与测速管线重构
+  - 测速任务随时中断控制（CancellationToken）：
+    - 测速运行期间，状态栏/操作栏的“全部测速”按钮实时切换为高亮醒目的红色“停止测速”按钮；
+    - 点击“停止测速”即可在任意阶段（DNS 解析、TCP 预筛选、多内核真实代理握手）安全中断任务并回收子进程资源，杜绝测速卡住无法停止；
+  - 批次二分隔离回退机制（Binary Split Fallback）：
+    - 为 Sing-box、Xray 与 Shoes 内核全面引入自适应批次二分隔离回退；
+    - 批次中任意单一节点配置损坏或解析失败时，系统自动对半拆分二分探测，精准隔离坏节点，彻底杜绝坏节点株连导致整批 64 个正常节点被误判失败；
+  - Sing-box WireGuard 批测规则修正：
+    - 解决 endpoints 与 outbounds 标签不匹配导致的 Sing-box 启动校验失败，确保出站标签在路由规则中严格对应；
+  - DNS 投毒与污染容错：
+    - 识别国内常见的 GFW 投毒保留 IP 与 Bogon 假地址，被污染的节点域名在 TCP 预筛选阶段不再被误杀淘汰，自动放行进入内核阶段交由远程 DoH 权威解析救活；
+  - 修正与默认关闭 dedup_egress（同落地物理剪枝）：
+    - 默认关闭物理落地剪枝以确保所有节点均能正常测速；
+    - 手动开启时采用 IP:Port:Protocol:SNI:Path:Credential 综合特征聚类，彻底消除 Anycast CDN（如 Cloudflare 共享 IP）或中转节点被错误合并误判的隐患；
+  - 彻底移除裸 HTTP 伪下载测速并精简预筛管线：
+    - 彻底删除了原先通过裸 TCP 向专有代理端口发送明文 GET / 的伪测速模块与噪音流量，TCP 预筛专注高效地负责网络连通性与握手延迟初筛；
+    - 界面移除误导性的假下载测速选项，避免混淆认知。
+  🛠️ 稳定性与系统级自愈
+  - 关机与异常退出自愈系统代理（SetConsoleCtrlHandler）：
+    - 注册 Windows 控制台控制处理程序，在接收到系统注销、关机、关闭窗口等事件时，原子化触发直连重置注册表，彻底杜绝异常关机导致下次开机断网；
+  - 多内核 YAML Override 分流规则转译：
+    - 自定义 YAML 分流规则（Override Rules）全面打通多内核转译适配；
+  - WSL2 (Ubuntu Linux) 跨平台测试环境深度兼容：
+    - 优化单元测试端口监听策略，完美适配 WSL2 NAT 模式下的回环网络转发，Linux 与 Windows 全量 439+ 项测试均 100% 绿色通过。
+
   🚀 VPN Parser v1.12.0 发布说明 / Release Notes
   🎉 欢迎使用 VPN Parser v1.12.0！本版正式集成 Meow 内核（Mihomo 的 Rust 高性能重写），支持 TUN 模式网卡自动化、本地文件订阅源、共享连接池及万级探针性能优化：
   ✨ 新特性与内核集成
@@ -101,10 +128,5 @@ ReleaseNotes: |-
   📐 验证与测试
   - 测试用例：全量单元测试 418 passed / 0 failed（9 ignored）。
   - 打包验证：安装包（Inno Setup）与便携版 ZIP 压缩流程均通过校验，生成完整 SHA-256 校验清单。
-
-  ⬇️ 获取与升级
-  - 安装版：下载 vpn-parser-1.10.0-windows-x64-setup.exe 运行安装。
-  - 便携版：下载 vpn-parser-1.10.0-windows-x64-portable.zip 解压后直接运行 vpn-parser.exe。
-  - 在线更新：已安装 v1.3.0+ 的用户可在「关于 → 检查更新」中一键检测并升级。
 ManifestType: locale
 ManifestVersion: 1.12.0
