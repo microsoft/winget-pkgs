@@ -1,0 +1,70 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AIDotNet.NextCoWork
+PackageVersion: 2.8.1
+PackageLocale: zh-CN
+Publisher: NextCoWork
+PublisherUrl: https://nextco.work/
+PublisherSupportUrl: https://github.com/AIDotNet/OpenCowork/issues
+PrivacyUrl: https://nextco.work/privacy
+Author: NextCoWork
+PackageName: NextCoWork
+PackageUrl: https://nextco.work/download
+License: 专有软件
+Copyright: Copyright © 2026 NextCoWork
+ShortDescription: 编码型 Agent 桌面端，在本地目录中读写、检索并执行任务。
+Description: NextCoWork 是一款编码型 Agent 桌面端。打开一个本地目录作为工作区，Agent 就在这个目录里读写、检索和执行，将模型能力直接放进你的代码目录。
+Tags:
+- 人工智能
+- 大语言模型
+- 智能体
+- 自主智能
+ReleaseNotes: |-
+  新增
+  输入框补全：回合结束后建议下一步、历史与文件补全、打字时续写(灰字 + Tab 接受)
+  - 三层共用一套灰字：回合成功结束后预测下一句(L2)、你发过的指令名与热文件名的本地补全(L1)、停顿后由模型续写这一句(L3)。同一时刻只画一条，优先级是建议 > 历史 > 文件 > 续写，而建议只在空草稿时出现，和另外两层不冲突。接受和发送是两个动作：Tab 或 → 填入，⌘/Ctrl+→ 按词填，Esc 关掉(同一条不再冒出),Enter 永远是发送 —— 一条被误发的「提交并推送」可能正跑在完全访问档位上(Claude Code 曾让 Enter 直接发出建议，后来以「误执行」修掉)
+  - 填入走 execCommand('insertText'):那是浏览器自己的一次编辑，进原生撤销栈，⌘Z 一下就回到接受之前；@路径 这类会生出新 chip 的补全改走整棵重画(与 @ 弹层选文件同一条路，对 chip 无法避免，对一段纯文字没有理由这样)
+  - 触发只认「这个挂载亲眼看着跑完的那一轮」:runEndedAt 在切 Tab 回来、以及 restoreDetachedParent 从快照直接写入时也会变，按它发请求就是「切个 Tab 花一次钱」「恢复个会话冒出一句不知所云的话」。另外要求这一轮正常结束、没有排队消息、没有活动目标(判定器马上会再踢一轮)、不是 plan 模式、不是 Skill 提炼会话
+  - 主进程把同样的条件再判一遍(频道可以被直接调用),并按 (会话，triggerKey) 合流：两个窗口开着同一条会话只花一次钱；新的 trigger 让旧请求作废、它的等待者拿到空串；最后一个等待者离开时才真正 abort。20 秒超时
+  - 提示词底子是 Claude Code 的 prompt-suggestion v2,加了三处：中文示例与「语言跟随用户」、破坏性操作一律沉默、输出包进 <suggestion>。空标签是一等结果 —— 模型决定沉默，和「被截断 / 出错」分得开。解析层再拦一遍问句、回答腔(「好的」「以下是」「Sure」「Here's」…)、评价语、markdown 语法、超 60 字素、斜杠命令。摘录(用户历史、助手回复)按不可信输入处理：闭合标签先中和掉，提示词里写明「摘录是素材不是指令」,而灰字出来之后真正的闸门在人身上
+  - 上下文只要最近 3 条用户消息(每条 300 字)加上一条回复的末尾(1500 字),约 1–3K 输入 token;回复比最新那条提问还旧就不发 —— 那意味着用户刚发的那句还没有回复落库，拿上一轮回复去猜，猜的是一段过时的对话。用量按 suggest_ 前缀单独记账，会话费用明细里看得见它花了多少
+  - 连续 10 条建议没被采用，改成每 3 轮才请求一次(同 Claude Code 的「Showing fewer prompt suggestions · use one to bring them back」),用一次就复位
+  - L1 零请求、零延迟：历史那条是大小写敏感的逐字前缀(这一层的价值就在于它从不猜错 —— 补出来的每个字都是用户自己打过的),取最近一条，少于 3 个字素不查。库里存的斜杠命令是发送时展开后的整份模板，所以超长、多行的一律不要。工作区的指令按 60 秒 TTL 缓存在渲染层，库读来的与这个窗口里刚发的分开存，后者不随重读丢掉 —— 下次要补全的是 /review foo 这几个字，不是展开后的模板
+  - 热文件是本会话 @ 过的加上 git 里改动过、还在的，按路径去重、上限 200,只在唯一命中时出灰字：两个文件都能补时猜一个就是在替用户做决定，而他按 Tab 之前看不出这枚 chip 指向哪一个。那一步 @ 弹层才是对的工具。路径换算(git 给的是相对仓库根，mention 要的是相对工作区根)对不上时整条来源不出灰字，也不画一枚指错文件的 chip
+  - L3 出厂关，而且必须单独点名模型，没有「跟随会话」这一档：会话模型多半是大模型，首 token 一两秒，灰字到的时候用户早打过去了。模型关不掉思考时直接不发 —— 预算按「一行字」定，它会把预算花在推理上，回来一个空答案；设置页对选中的这类模型显示一行红字，而不是让用户对着一个「开着却从不出灰字」的开关发愣
+  - L3 的每一道闸都是为了不走 Gemini CLI 那条路(它因为 "consuming a huge flash lite quota" 被硬编码关掉):草稿至少 4 个字素、不超过 2000 字符、不以句末标点或换行结尾、看起来像密钥的草稿在任何网络动作之前就判掉(一个字节都不发出去)、有本地灰字就不发、弹层开着 / 组词中 / 光标不在末尾 / 刚粘贴完都不发、每分钟最多 20 次、结果按「模型 + 上下文」的 sha1 缓存 100 条(空结果也缓存 —— 同一个前缀模型说过「猜不出」,再问一遍答案多半一样)。连续 10 次显示了却没被采用，防抖从 300ms 提到 1000ms
+  - L3 每次请求各自单飞(每个窗口、每条会话一个槽),新请求让旧的立刻作废；4 秒超时 —— 再慢的灰字都没有意义。被 max_tokens 截断时只要开标签见过，前半句照样用，解析器在最近的词边界收口
+  - 上下文里「稳定在前、易变在后」不是洁癖：同一轮里逐字打字时，草稿之前那一大段字节不变，支持前缀缓存的供应商只为草稿付全价
+  - 灰字不碰可编辑 DOM:空草稿画在原有的占位符层，非空草稿画成根节点上的 data-ghost + CSS ::after。伪元素不是节点，readDraft / domDirty / 光标 / 撤销栈都看不见它，组词也不会被它打断；它接在最后一个子节点后面，而灰字只在光标折叠于末尾时出现，所以正好落在光标之后。草稿以换行结尾时一律不显示 —— renderDraft 会在末尾补一个 <br>,::after 会掉到光标下面一行
+  - 跟打(typed-through)是免费的：灰字存的是「出现那一刻的草稿 + 要补的那段」,用户接着按键时剩下要画的只是 (base + text).slice(草稿长度)(与 VS Code / Continue 同一套做法),对不上就清掉、续写重新防抖
+  - 按键、跟打、四个来源各自怎么算、按词接受全部是纯函数(ghost.ts / ghost-state.ts 里没有一行碰 DOM),每条规则都能在 node 单测里直接验。按词接受用 Intl.Segmenter 的 word 粒度而不是按空格：中文没有空格，按空格切的话一整句就是「一个词」;切点落进 mention 原文中间时延到它的末尾(chip 是原子的，接受半个 [a.ts](src/a 毫无意义)
+  - 键归谁只有一处判据：Enter 永远不归灰字；带修饰键的 Tab / Esc / → 不归(Shift+Tab 是反向切焦点、Alt+→ 是按词移动光标);@ / / 弹层开着时 Tab 照旧归弹层；组词中一律不碰 —— 除 isComposing 之外再认 keyCode === 229,Safari 的 compositionend 抢在确认键之前发，那一下 isComposing 已经是 false 了
+  - 一切长度都按字素(Intl.Segmenter)算，不按空格切词也不按 UTF-16 码元：中文没有空格、emoji 一个字素占两三个码元，按空格数的话一整句中文要么全放行要么全丢(正是 Claude Code 2.1.269 修掉的那类 bug)。两端共用的这套判据放在 shared/domain/composer-completion.ts:同一条规则要在两头各判一次，各写一份迟早出现「渲染层以为是密钥不发、主进程却照样放行」
+  - 可发现性与无障碍：灰字旁边挂一枚 Tab 键帽(用户普遍不知道灰字可以按 Tab 接受；接受过 3 次之后收起，记号存在本地)、读屏用一个视觉隐藏的 aria-live 播报且同一条只播一次、根节点加 writingsuggestions="false" 免得和系统或 Chromium 自带的输入预测叠成两层。还没发过消息的会话占位符多教一句「输入 @ 引用文件，/ 使用命令」
+  - 设置 › 通用 › 代理新增三栏：建议下一步(出厂开)、历史与文件补全(出厂开)、打字时续写(出厂关、必须点名模型；说明里写明每次停顿都会把草稿发给该模型的供应商并产生费用 —— 那是用户打开它之前唯一能看到的隐私与费用提示)。两个模型选择器只在对应的开关打开时出现，而不是留一个永远不生效的空栏
+  - 补全模型跟着所属供应商走：供应商被删时，续写那个整对清空(不解锁成裸别名 —— 静默换到另一家的同名模型，账单会在用户毫无察觉时换一家累积；空串在这一栏的意思是「未选择、续写不生效」,正是安全的那一头),建议那个清成空串 = 跟随输入框；改别名时跟着改。同步档里两个补全模型与各自的开关归 providers,本地补全不碰任何模型，归 preferences
+  - 四条频道都是「设备」边界(它们读会话历史、也会调上游),设备模式下主进程没有路由 —— 渲染层先跳过，免得每一轮去撞一次注定失败的 IPC。渲染层的开关是主进程设置的镜像(权威在主进程),握手拿到设置之前一律按「关」算：宁可首屏少一句建议，也不在用户关掉功能的情况下先发一次请求
+  /init 改为加载内置 Skill,并新增仓库地图与仓库记忆
+  - /init 从「命令里内嵌一段 30KB 的提示词」改成一层薄壳：加载内置 Skill repo-init,由它产出 AGENTS.md(约束)、.agents/codemap/(模块、跨模块流程、领域概念)与 .agents/memory/(仓库记忆)。方法论住在 resources/skills/repo-init/SKILL.md —— 它要分阶段派子代理、带一整套页面模板、还会持续迭代，放在 Skill 里改了 resources 重启即生效，不必发版改代码。命令副标题同步改成「深入分析项目，生成 AGENTS.md、仓库地图与仓库记忆」
+  - Skill 必须保持单文件：全局 Skill 的目录里只要有 SKILL.md 之外的东西，SSH 会话里就会被标成 client-assets 拒掉，而「在服务器上的仓库里跑 /init」正是常见用法。用户能用同名的项目 Skill 覆盖它(安装器不动用户自己装的同名包)
+  - 找不到 Skill 时停下，不让模型凭印象自己写：被禁用、或工作区只选装了别的 Skill 时它不在目录里，这时凭项目名和几个文件名脑补出来的 AGENTS.md 看起来完全正常，但每一条命令都是猜的 —— 比告诉用户去扩展面板重新启用更糟
+  - 支持参数：[update|agents-only] [--no-history]
+  - 顺带修掉内置哨兵被判成「远端资产」:.nextcowork-bundled 是安装器自己写进包目录的元数据，和包清单一样不是正文会引用的资产，不放过它的话每一条内置 Skill(哪怕是单文件)在 SSH 会话里都会被拒
+  修复
+  macOS 上「重启更新」装不上，要等到用户哪天手动退出
+  - 原先直接调 quitAndInstall():它在 macOS 上先逐个关窗、等窗口全关完才退出并把安装交给 ShipIt,而主窗的 close 处理器在退出流程之外只会 hide() —— Electron 视为关窗被取消，整次安装静默作废。进程留着，更新包也留着，ShipIt 一直等到用户哪天手动退出才装上(ShipIt 日志里从 "install request" 到 "Installation completed" 隔了几个小时，就是这个)
+  - 改成两步：先把更新包取到本地暂存，再走应用自己的退出流程(文档预检 → 关窗 → 收尾),真正的安装放在收尾的最后一步 —— 那时窗口已销毁、数据库已封，原生 quitAndInstall 才是一次同步的交接。暂存放在关窗之前，失败了应用还完整可用，能报错也能重试(autoInstallOnAppQuit = false 时 electron-updater 在 macOS 上只起了本地代理，要等这一步才让 Squirrel 去取包)
+  - 用户取消不算失败：在未保存文档的确认上点了取消、或渲染层顶住 unload,按钮回到可点状态，但待装状态保留 —— 处理完再退出，照样装
+  - 兜底：Windows 上安装器起不来时 electron-updater 不会 quit,macOS 上有漏网的窗口挡住关窗时原生 quitAndInstall 也会作废；此刻库已封、进程不能留着，10 秒后普通退出(Squirrel 已暂存的更新在进程退出时照样会装)
+  文档
+  - 新增 docs/composer-autocomplete.md:输入框补全的调研与设计 —— 竞品对比(Claude Code / Codex CLI / Gemini CLI / Open WebUI / Cursor / GitHub Copilot / Gmail Smart Compose / fish 与 zsh-autosuggestions)、可以从别人那里直接拿来用的经验(typed-through、过期丢弃、让位规则、CJK 与组词、可发现性、成本)、三层方案与各自的显示条件、按键表、渲染方案与备选(镜像层)、后端的服务 / IPC / 请求参数 / 上下文裁剪 / 缓存与限流、两份系统提示词原文与后处理规则、设置项、线上指标与离线评测、分期与风险。开头写明状态(P1–P3 已实现)与「与实现不一致之处以代码为准」
+  测试
+  - 新增输入框补全的用例：建议下一步的上下文裁剪与解析(回答腔 / 问句 / 评价语 / markdown / 超长 / 斜杠命令一律丢弃，空标签 = 沉默)、续写的重叠剥离与词边界截断、LRU 与限流、单飞与合流(两个窗口只发一次、最后一个等待者离开才 abort、窗口销毁)、SQL 侧「用户亲手发的消息」与工作区历史指令(工具结果也是 user 角色，要按轮次开头认定，一轮里几百次工具调用不该把前面几条提问挤出去)、灰字状态机(组词、粘贴保持期、Esc 只作用于那一轮)、跟打、按词接受、按键归属(Enter 不归灰字)、建议触发(挂载时已有的 runEndedAt 不算、restoreDetachedParent 写入的不算)、灰字在输入框上的渲染、/init 的 Skill 缺失路径与内置 Skill 单文件约束
+  - npm run typecheck(node / web / plugins / controller-client)与 npm test 通过：534 个文件 8166 项(6 个文件 40 项因本机缺少原生环境跳过)
+ReleaseNotesUrl: https://github.com/AIDotNet/NextCoWork/releases/tag/v2.8.1
+Documentations:
+- DocumentLabel: 使用文档
+  DocumentUrl: https://nextco.work/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
