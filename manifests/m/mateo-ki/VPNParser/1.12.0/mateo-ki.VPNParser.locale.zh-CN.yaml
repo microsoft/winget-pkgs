@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
 
 PackageIdentifier: mateo-ki.VPNParser
-PackageVersion: 1.11.1
+PackageVersion: 1.12.0
 PackageLocale: zh-CN
 ShortDescription: Windows 桌面程序：采集订阅、解析成节点、跑代理，并把代理质量实测出来。
 Description: VPN Parser 是用 Rust + egui 编写的 Windows 桌面程序，负责采集免费或自建订阅、解析成节点、跑代理，并把代理质量实测出来。订阅入口包括带 `YYYY-MM-DD` 日期占位符的订阅 URL、Gist 搜索页发现，以及 Telegram 频道预览（裸节点链接和订阅链接两类都取，节点只增不删）。解析支持 `ss` `vmess` `vless` `trojan` `hysteria2/hy2` `socks5` `http(s)` 分享链接，以及 Clash / Clash Meta YAML、Base64 与混合文本。延迟以经内核访问 Google `generate_204` 的真实握手为准，24 小时出口健康条按实测绘制，而不是看内核上报的状态。Windows 上它同时管理系统代理、TUN（提权交接后只保留一个实例）和终端 `HTTP_PROXY` 环境变量，按 exe 路径添加防火墙允许规则，支持单实例互斥与托盘，记录出口切换历史并按天统计规则命中，同时提供强制 bearer 鉴权的本地 HTTP API 与 mihomo / sing-box / xray 配置导出。安装包不含内核，内核缺失时由程序按需下载。
@@ -15,6 +15,19 @@ Tags:
 - 节点解析
 - 订阅
 ReleaseNotes: |-
+  🚀 VPN Parser v1.12.0 发布说明 / Release Notes
+  🎉 欢迎使用 VPN Parser v1.12.0！本版正式集成 Meow 内核（Mihomo 的 Rust 高性能重写），支持 TUN 模式网卡自动化、本地文件订阅源、共享连接池及万级探针性能优化：
+  ✨ 新特性与内核集成
+  - 集成 Meow 内核：新增集成高性能 Rust 代理内核 Meow（支持 Shadowsocks/VMess/Trojan/VLESS），内存占用仅 ~28MB，速度与稳定性兼备；
+  - Meow TUN 虚拟网卡模式：打通 Meow 的 TUN 模式，提权 runner 自动配置 Wintun 网卡 DNS 指向 198.18.0.2（fake-ip 网段），退出时自动还原 DHCP；
+  - 本地文件订阅源支持：订阅源支持读取本地文件路径（file://... 或普通绝对/相对路径），并在新建源弹窗中明确说明与引导；
+  - 工作模式动态切换：在代理运行中点击状态栏「TUN」或「系统代理」开关，自动保存配置并平滑重启代理生效；
+  - 五内核基准测试：万级节点并发探针对比测试就绪，覆盖 Mihomo / Sing-box / Xray / Shoes / Meow 五大内核；
+  - 网络资源优化：核心轮询与存活检查接入共享 HTTP Client 连接池，避免频繁创建连接导致系统句柄耗尽。
+  🛠️ 体验与稳定性优化
+  - 内核选择下拉菜单优化：放宽下拉宽度并将高度上限提升至 330px，完整展示 6 个内核选项，避免“自动选择”被卷出可视区；
+  - WebRTC 防护与工作模式状态联动：修复 TUN 模式下状态联动展示。
+
   🚀 VPN Parser v1.11.1 发布说明 / Release Notes
   🎉 欢迎使用 VPN Parser v1.11.1！本版修复部分订阅在 Shoes 内核下无法启动的问题：
   🛠️ 缺陷修复
