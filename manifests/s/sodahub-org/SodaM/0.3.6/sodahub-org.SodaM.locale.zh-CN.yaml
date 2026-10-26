@@ -1,0 +1,57 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: sodahub-org.SodaM
+PackageVersion: 0.3.6
+PackageLocale: zh-CN
+Publisher: sodahub-org
+PublisherUrl: https://github.com/sodahub-org
+PublisherSupportUrl: https://github.com/sodahub-org/sodam/issues
+PrivacyUrl: https://github.com/sodahub-org/sodam/blob/HEAD/PRIVACY.md
+PackageName: SodaM
+PackageUrl: https://github.com/sodahub-org/sodam
+License: AGPL-3.0-or-later
+LicenseUrl: https://github.com/sodahub-org/sodam/blob/HEAD/LICENSE
+ShortDescription: 基于 GPUI + Rust 的原生汽水音乐桌面客户端。
+Description: SodaM 是一个基于 GPUI 和 libresoda 的原生汽水音乐桌面客户端，面向 Linux、macOS 和 Windows 桌面，重点提供接近官方客户端的操作手感、稳定的本地播放体验、会员账号的无损音质播放，以及干净自适应的主题系统。
+Tags:
+- 专辑
+- 播放器
+- 歌单
+- 歌手
+- 歌曲
+- 汽水音乐
+- 音乐
+- 音频
+ReleaseNotes: |-
+  SodaM 0.3.6
+  本机诊断日志
+  - 新增默认开启的本机日志出口：跨平台写入用户数据目录下的 logs/sodam.log，单文件 5 MB 按大小轮转、保留 5 份旧文件；目录不可写时降级为内存缓冲，恢复后自动写回（#57）。
+  - 日志行格式固定为「时间 级别 话题 事件 key=value…」，时间戳带本地时区偏移与毫秒；六话题闭环（player / prefetch / audio / report / media / app），四级级别且错误级不可关闭（#58）。
+  - 写盘前统一切断 URL 查询串，并替换 Cookie、Authorization、x-helios、x-medusa 与签名 token；账号 user_id 仅在 DEBUG 级保留。连续重复行折叠并附 repeat 计数（#58）。
+  - 环境变量语义从「写不写的开关」改为「写到多细」：SODAM_PLAYER_LOG、SODAM_PREFETCH_LOG、SODAM_REPORT_LOG 等现在把所属话题提到 DEBUG 级，默认 INFO 始终记录，不会再让某段输出消失（#61）。
+  - 全仓不再有绕过日志入口直接写终端的诊断输出，发布版里所有诊断都进同一个文件（#61）。
+  - 日志写入改为通道 + 后台线程，调用方只做脱敏并投递，不再让渲染线程做同步文件 IO（#59）。
+  排障能力
+  - 一次「播这首歌」的尝试会留下完整轨迹：开始一行、每次失败的判定一行（带 stage / retryability / action / decision，重试带 wait_ms、放弃带 reason）、成功一行（带 elapsed_ms）。每条都带 attempt= 与 track_id=，可按曲目串起来（#59）。
+  - 永久失败只留一次尝试的记录，不会因为重试预算再次请求远端（#59）。
+  播放模式
+  - 播放栏新增模式按钮，按「列表循环 → 单曲循环 → 随机播放」轮换，选择结果跨启动保留（#12）。
+  - 随机播放改为「先进队再随机取下一首」：队列抽屉显示真实的「接下来」，一轮内不重复；「上一首」沿实际播放历史回退，「上一首 → 下一首」原路返回（#12）。
+  - 推荐流、听歌模式与电台不显示模式按钮，固定列表循环——那边的歌由服务端持续追加（#12）。
+  歌词
+  - 长句按容器宽度折行，不再被固定行高裁掉；句间距恒定 32px，不受折行行数影响（#56）。
+  - 切歌与拖动进度后歌词立即对齐到当前句，不再等下一帧回调；手动滚动后 5 秒内不自动跟随（#56）。
+  - 歌词页右侧不再重复显示标题与「歌手 · 时长 · 进度」，加载中 / 出错 / 无歌词三种状态改为垂直居中（#56）。
+  设置页
+  - 新增「诊断日志」区块：显示日志目录、可打开目录、可单独清除诊断日志；清除失败会如实报错，不再误报成功（#60、#65）。
+  修复
+  - 修复 seek 之后误触发下一首的问题（#54）。
+  - 播放失败分层、熔断恢复与试听状态贯通（#52）。
+  文档
+  - 新增中英文隐私政策中关于本机日志的内容，说明日志里有什么、不含什么。
+  - docs/ARCHITECTURE.md 补充日志出口与播放模式的实现说明。
+  感谢本次 Release 涉及的贡献者 @Xxx91n：诊断日志出口、日志格式与脱敏、播放轨迹、设置页日志区块、i18n 词典守卫与 --fmt-only 检查、Windows 验收记录。也感谢所有提交 issue、参与 review 和测试的朋友。
+ReleaseNotesUrl: https://github.com/sodahub-org/sodam/releases/tag/v0.3.6
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
