@@ -1,0 +1,112 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jcardama.LeopardWM
+PackageVersion: 0.2.10
+PackageLocale: en-US
+Publisher: jcardama
+PublisherUrl: https://github.com/jcardama
+PublisherSupportUrl: https://github.com/jcardama/LeopardWM/issues
+Author: jcardama
+PackageName: LeopardWM
+PackageUrl: https://github.com/jcardama/LeopardWM
+License: GPL-3.0
+LicenseUrl: https://github.com/jcardama/LeopardWM/blob/HEAD/LICENSE
+ShortDescription: Scroll-first tiling window manager for Windows 10 and 11.
+Description: LeopardWM is an open-source tiling window manager for Windows 10 and 11 that takes a scroll-first approach inspired by niri and PaperWM. Windows sit on a horizontal strip and the monitor acts as a viewport that scrolls over them, so navigation stays spatially consistent as windows are added — instead of constantly rebuilding split trees. Written in Rust on top of the Win32 API.
+Moniker: leopardwm
+Tags:
+- niri
+- paperwm
+- rust
+- scrollable
+- tiling
+- window-manager
+- windows
+- workspace
+ReleaseNotes: |-
+  Features
+  - Complete workspace state over the existing IPC subscription. Opt in with
+    lwm subscribe --events workspace_state for coherent, byte-bounded snapshots
+    covering every connected monitor, all nine workspace slots, and tiled/floating
+    membership. Legacy default subscriptions remain unchanged. lwm query workspaces
+    returns one snapshot; lwm workspace N --monitor DEVICE selects a workspace on
+    an explicit monitor. IPC v4 adds this capability after v3 hotkey queries. See
+    agent_docs/ipc-events.md for schemas and recovery.
+  - Session-only ignore for the actual OS foreground window. lwm toggle-ignore
+    (and the unbound toggle_ignore hotkey catalog action) unmanages the live
+    foreground HWND without writing application rules or changing pause state.
+    The same command re-admits a previously ignored eligible window onto the
+    current monitor's active workspace. Persistent Ignore still wins. Memory is
+    session-only and is cleared when the daemon restarts.
+  Improvements
+  - Release every managed window from the CLI with lwm release-all-windows.
+    The command pauses tiling, clears active decoration, restores off-screen windows,
+    and cascades tiled and floating memberships without removing them. Use
+    lwm toggle-pause to resume; recovery failures and live windows that cannot be
+    restored, cascaded, or remain maximized leave tiling paused and are reported.
+    Release drains older placement work before cascading and orders final positions
+    after queued animation frames. A busy worker leaves tiling paused without a
+    cascade; explicitly retry the command once the worker finishes. Partial
+    off-screen recovery logs its restored-window count.
+  - Confirmed, non-skipped ordinary visible landings now log origin drift greater than 2 px at warn level with both rectangles.
+    The warning excludes parked, failed, unreadable, and non-visible landings, drift of 2 px or less, and size-only mismatches. Eligible drift can be diagnosed from a default-level daemon log; placement behavior is unchanged.
+  - Opt-in touchpad gesture diagnostic capture writes a bounded dedicated report.
+    [gestures] diagnostic_capture_secs (default 0, max 120) is startup-only; lwm reload does not start a capture. Restart with lwm stop then lwm run. The report distinguishes hook delivery, classifier pass/reject, accumulation, timeout, cooldown, recognized events, and daemon binding dispatch, including no-action. Capture can report disabled registration when gestures are disabled, but hook input is recorded only when gestures are enabled and registration succeeds. lwm collect-logs includes the full capture file. Default-off does not truncate a previous report; a new capture replaces it.
+  Fixes
+  - Temporary ignore now distinguishes a recycled live HWND from a destroyed one.
+    A delayed Destroyed event no longer wipes a replacement managed window or a still-ignored lifetime. A dead identity read prunes the session ignore instead of keeping it forever; an injected transient identity failure still stays closed. Production identity reads are IsWindow plus GetPropW (property handle or NULL) and do not classify GetLastError. Unmanage and readmit report layout failures instead of returning success with contradictory membership. Unmanage restores geometry before clearing placement cloak and park, cancels an unfinished drag or resize so MoveSizeEnd cannot reinsert the window, and drops owned tab-title and snapshot state. Explicit readmit adopts internal focus, border, and broadcast to the OS foreground without setting native focus or switching workspace. A failed placement drain, an injected transient identity read after drain, or a rejected readmission after drain leaves a pending idle reapply. Every layout path now keeps that recovery pending until the animation barrier clears and placement succeeds; transient placement failures retry a bounded number of times before being logged as deferred. Reused HWND admission, delayed Destroyed, and explicit mismatch retirement each clear stale old-lifetime icon, move-origin, and stashed-layout cache entries before a replacement establishes its own state. Deferred recovery is distinct from a completed layout landing, including ghost and interrupted-animation handling, while paused and shutdown guards remain authoritative. Interrupted transitions and scrolls now settle to their final targets after the barrier clears rather than restarting the interrupted animation, retire active ghost ownership without exposing unsafe sources, and preserve the post-animation compositor nudge through a failed retry. Their matching focus-suppression one-shot is consumed by any successful recovered physical landing, including an empty or fullscreen-filtered landing and an explicit Apply after a failed automatic attempt. The animation-complete event-loop landing keeps that one-shot only while recovery is still pending, including a paused no-op apply, and consumes it on the successful retry. A non-recovery suppressed landing still consumes the one-shot if that apply fails, so a later ordinary landing can resync. Parked or unconfirmed pending ghost sources stay cloaked until a confirmed current-epoch landing. IPC Apply returns apply_pending for a still-pending landing instead of claiming success or a generic error, including while tiling is paused with recovery still pending; a genuine layout failure still returns Error. A resume safely settles a now-idle interrupted transition or rolls back while its barrier remains busy, and reports the actual placement error on a failed recovery attempt instead of treating an early failure as a busy barrier. The event loop consumes recovery without starting concurrent placement or changing pause.
+  - Toggle-ignore unmanage restores geometry before releasing membership.
+    A detected native restore failure leaves the window managed, keeps owned
+    metadata, does not ignore or uncloak, and requests idle reapply. SetWindowPos
+    is not transactional; a failed restore may still have moved the window, so
+    recovery retries placement. Peer-layout failure after a successful release
+    still leaves the window unmanaged and ignored.
+  - Toggle-ignore unmanage cancels unfinished drag or resize only after geometry restore succeeds.
+    A detected restore failure keeps in-membership drag/resize tracking and overlay
+    state. Success still cancels before membership release so a delayed MoveSizeEnd
+    cannot reinsert.
+  - Paused tiling no longer suppresses Snap Layouts on a newly tiled window.
+    disable_snap_for_window is a no-op while paused. Successful resume still
+    suppresses all tiled windows; a failed resume stays paused without
+    re-suppression.
+  - Daemon exit now best-effort clears matching ignore lifetime tokens.
+    Temporarily ignored windows are not managed, so their owned properties survived
+    normal cleanup. Graceful and panic-revert shutdown attempt a clear only after a
+    matching identity read. That is not an atomic no-race guarantee: a recycled HWND
+    can still appear between read and clear. Mismatch, missing, gone, and transient
+    reads skip clear. Native RemovePropW treats a missing property (NULL) as
+    success. A documented UIPI denial (GetLastError 5) is logged and does not
+    block exit. A NULL return that does not set last error cannot be distinguished
+    from missing. Release All does not clear those tokens.
+  - Gesture capture now preserves an existing report when duplicate daemon startup is rejected.
+    Closed captures no longer evaluate diagnostic trace fields, and admitted or in-flight deadline-boundary work prevents a false no_input=true result.
+  - The gesture capture's 256 KiB limit now includes the header and summary.
+    Space is reserved for the complete summary so capped records remain visible in its counters.
+  - Closing the last window on a workspace keeps that workspace selected.
+    An attributable Windows replacement activation on another workspace or
+    monitor no longer follows away from a genuinely empty selection (no tiled
+    or floating windows, including minimized). Logical focus is cleared rather
+    than pointed at a fake target, including when tracking already names the
+    replacement or another window; the active border hides with that clear.
+    Tab-strip reconciliation removes the emptied workspace's strip while
+    retaining other monitors' strips on both the immediate and final-landing
+    paths. A strictly newer activation still wins, and the next new window
+    opens on the preserved selection.
+  Known limitations
+  - Last-window empty preservation cannot attribute every event order.
+    If a replacement Focused event arrives while the departing window still
+    appears live or stale-window pruning is throttled, that activation is
+    followed. Handler execution time is not a true departure timestamp, so a
+    user activation that occurred before the destroy or hide handler ran may
+    be treated as the replacement auto-activation. Eventless disappearance
+    can arm the same guard while handling the first cross-workspace
+    activation, so that first activation may be consumed and need to be
+    repeated. That eventless-disappearance case is deferred to 0.2.11.
+  - Gesture capture cannot prove finger count, device origin, or Windows touchpad-setting compatibility.
+    A zero-event interval is not proof that the hook is dead. Dropped or capped records mean input may have been lost; do not treat no_input=true as absent hardware when drops are reported. Elevated versus unelevated hook visibility is not guaranteed from this report.
+  - Corrected Apply pending handling requires matching CLI and daemon from the same release.
+    A newer daemon returns apply_pending when recovery landing is still outstanding. An older CLI maps that status to Unknown and may run emergency visibility restore. Mixed CLI/daemon versions are not negotiated or isolated on the pipe. Pending handling does not change the Apply request shape. This release still advances the overall IPC protocol from v3 to v4 for workspace-state snapshots.
+ReleaseNotesUrl: https://github.com/jcardama/LeopardWM/releases/tag/v0.2.10
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

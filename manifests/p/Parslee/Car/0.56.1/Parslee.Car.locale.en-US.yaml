@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: Parslee.Car
+PackageVersion: 0.56.1
+PackageLocale: en-US
+Publisher: Parslee AI
+PublisherUrl: https://github.com/Parslee-ai
+PublisherSupportUrl: https://github.com/Parslee-ai/car-releases/issues
+PackageName: Common Agent Runtime
+PackageUrl: https://github.com/Parslee-ai/car-releases
+License: Proprietary
+LicenseUrl: https://github.com/Parslee-ai/car-releases/blob/main/LICENSE
+ShortDescription: Deterministic execution layer for AI agents (CLI + server).
+Description: |-
+  Common Agent Runtime (CAR) is a deterministic execution layer for AI
+  agents: models propose actions and the runtime validates, verifies, and
+  executes them. This package provides the pre-built Windows x64 binaries —
+  the CLI (car), the WebSocket server (car-server), and the StateBench
+  evaluation bridge (car-memgine-eval).
+Tags:
+- ai
+- agent
+- runtime
+- llm
+- cli
+ReleaseNotes: |-
+  ## v0.56.1
+
+  ### Changes
+
+  • A2A tasks created by a CAR peer are owned by its full-key principal (`peer:<key>`), not its 4-byte fingerprint label, so two keys sharing a label cannot read, list, cancel, or continue each other's tasks. `RuntimeScope.caller_id` and the eventlog's `caller_id` carry the same principal. Tasks live in memory only, so no stored owner needs migrating (#2312).
+
+  • Peer-message and tool admission read the agent-permission policy chosen by their server state's `ServerStateConfig::agent_permissions_path`. The daemon default is unchanged：the operator's live `<CAR_HOME>/agent-permissions.json`, whatever `--journal-dir` is. Embedders can set `with_agent_permissions_path`, and `car-server-core`'s own unit tests use their tempdir's file. Before this, three `lattice::tests` failed on any Mac whose real policy held or denied an agent named `milo` (#2308).
+
+  • Keep builder sessions alive on macOS and Linux while a silent model-invoked `shell` process tree is doing measurable CPU work, using the same sampler, cadence, and one-percent-of-one-core threshold as protected checks. Truly idle silent commands still become stale.
+
+  • Preserve a bounded, credential-redacted stdout/stderr tail under each coder session's `evidence/shell` directory when a builder `shell` call times out or is cancelled, while continuing to terminate its complete process tree so build locks are released.
+
+  • **Your default org now applies to coding sessions, on any local engine.** `coder.start` (and `car code`) binds a session to your default org (`car auth default-org`) when you name no org and the repository declares none. A bound session can now run Claude Code, Codex or local Foreman, not only the native engine. Those engines always run isolated when bound：the CLI loads none of your own MCP servers, plugins, settings or memory, so organization work cannot leak into personal state, and it has no web access; Gemini and mini-swe-agent cannot isolate and refuse when bound. A default that cannot be used — a `distributed` run (fleet workers do not carry an organization yet), a default no login holds any more, or a failed membership check (offline, revoked) — refuses the start and tells you to pass `personal: true`; nothing silently runs as personal.
+
+  • A Lattice review mirrored onto host approvals no longer carries the review text. Approval rows are readable by every session, so the row holds only who asked whom and a summary of at most 120 characters; the full text stays on host-only `lattice.requests`. `host.resolve_approval` decides such a row only with `approve` or `deny`, since that word is passed back to the asker as the person's answer (#2299).
+
+  • **Organization-bound coding sessions stop calling the issuer on every step.** A session bound to an organization re-checked membership with the Parslee issuer at start, twice per turn, on every tool call and before every check — each an HTTPS round trip. A successful admission receipt is now reused until the issuer's own expiry on it (at most 30 seconds, counted from when the request was sent), per organization context; any denial or failure drops it immediately, so revocation still takes effect within 30 seconds. Removing a login or signing out through the daemon drops its cached admissions at once, and a slow success can never overwrite a newer denial.
+
+  • **Your machines under any of your logins are trusted peers.** Device discovery already covered every signed-in Parslee login (#2318), but only machines under the boot login were trusted, so a machine signed in under another of your logins could be seen but not messaged or handed fleet work. Trust now follows discovery. What it rests on is a login signed in on this machine plus the shared sync passphrase — so signing in a login that is not yours extends trust to its devices. Fleet work still spends one shared budget. Removing a login (`auth.remove_account`) or signing out (`auth.logout`) through the daemon withdraws its machines' trust before the call returns, the boot login's included; a change made through the `car auth` CLI is noticed within 30 seconds (from the non-secret credential-authority hint, never the keychain) and drops other logins' trust until the next `sync.pump`. If the login list cannot be read, other logins' trust is dropped rather than kept.
+
+  • Windows compiles `car-server-core` tests again：the `shell_call_dirs` test helper from #2345 is gated to unix like all of its callers, so Windows `clippy --all-targets -D warnings` no longer fails on dead code.
+ReleaseNotesUrl: https://github.com/Parslee-ai/car-releases/releases/tag/v0.56.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

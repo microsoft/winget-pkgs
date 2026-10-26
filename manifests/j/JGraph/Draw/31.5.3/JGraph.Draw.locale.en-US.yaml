@@ -1,0 +1,80 @@
+# Created with WinGet Updater using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: JGraph.Draw
+PackageVersion: 31.5.3
+PackageLocale: en-US
+Publisher: JGraph
+PublisherUrl: https://www.drawio.com/
+PublisherSupportUrl: https://github.com/jgraph/drawio-desktop/issues
+PrivacyUrl: https://www.diagrams.net/trust
+Author: JGraph Limited
+PackageName: draw.io
+PackageUrl: https://github.com/jgraph/drawio-desktop
+License: GPL-3.0
+LicenseUrl: https://github.com/jgraph/drawio-desktop/blob/HEAD/LICENSE
+Copyright: © 2005-2026 JGraph Ltd, Artisans' House, 7 Queensbridge, NN4 7BF, Northampton, England. Company
+CopyrightUrl: https://www.diagrams.net/trust
+ShortDescription: A diagramming desktop app based on Electron that wraps the core draw.io editor.
+Tags:
+- chart
+- design
+- diagram
+- draw
+- gantt
+- graph
+- graphics
+- mind-map
+- mind-mapping
+- mindmap
+- uml
+ReleaseNotes: |-
+  Release Notes for 31.5.3
+  Windows Installer
+  Windows No Installer (zip)
+  macOS - Universal
+  Linux - deb, AppImage or rpm
+  ChangeLog:
+  - Opens and saves files on mapped network drives again, which 31.5.2 refused with "path not authorised". Files and libraries on such a drive that were opened with 31.5.2 or earlier need opening once more after the update [#2559]
+  - Shows tooltip icons again when the retired Tooltips plugin is enabled in the settings, instead of failing to load the plugin
+  - Command line exports of Mermaid input with nothing to draw, for example statements that are not recognised, fail with "Nothing to draw" and exit code 1 instead of writing an empty PDF or XML file or failing without a reason
+  - The Linux deb and rpm packages give the licence as GPL-3.0-only, following the licence change in 31.5.2
+  - Updates to draw.io core 31.5.3. All changes from 31.5.2 to 31.5.3 are added in this build.
+  Testing:
+  Verified against the packaged, signed macOS build. Windows and Linux packages were verified from the produced release artifacts, their sizes and update manifests, rather than by running them, and the Windows mapped drive fix from unit tests and the same path mismatch reproduced on macOS.
+  Base checks
+  - Launch, open a file passed on the command line, add and edit shapes, change styles, undo and redo, copy and paste, save and reopen, insert and delete pages, rename a page, and zoom
+  - Export to PNG, SVG and PDF from the app and from the command line, covering scale, border, transparency, cropping, page selection with -p and --size page
+  - Diagram round trip in an exported PDF, including reopening the exported PDF and recovering both pages and their contents
+  - Mermaid, CSV and Visio import and the --layout and --normalize options from the command line
+  - Shape search, the menus, the export and print dialogs
+  - Settings survive a restart, and unsaved changes are kept as a draft next to the file
+  - The macOS bundle is signed with a Developer ID certificate under the hardened runtime, is notarised and stapled, and the Quick Look app extension is sandboxed and separately signed
+  - The Electron security fuses are applied, so RunAsNode, the NODE_OPTIONS variable and the node inspect arguments are disabled and the app only loads from the asar
+  - 229 unit tests pass
+  Files on mapped drives
+  - A diagram opened through a path whose spelling differs from its location on disk, the mismatch a mapped drive causes, opens with both pages, reads back, saves without a dialog and gets its backup and draft, where 31.5.2 refused it with "path not authorised" [#2559]
+  - A library declared in the configuration through such a path loads, and writing to it is still refused
+  Tooltips plugin
+  - A profile with the retired Tooltips plugin enabled starts without a failed load and draws the tooltip icon on shapes that have a tooltip, built-in plugins still load, and plugin entries pointing outside the app are skipped
+  Mermaid on the command line
+  - Two kinds of Mermaid input with nothing to draw fail PNG, SVG, PDF and XML exports with exit code 1 and the reason, and write no file, while valid Mermaid still exports
+  draw.io core 31.5.3
+  - Curved connectors stay curved when their waypoints are set to Straight [#1442]
+  - The new Orthogonal Ends option shows with its label in the Format panel and applies to the selected connector
+  - PlantUML sequence diagrams convert with the sequence connector style
+  - Shape search matches the tags of shapes whose names contain several words
+  - A Visio file imports from the command line with the same result as in 31.5.2
+  Checks around the changes
+  - Reading, writing and checking a file through a link placed next to an authorised file is refused, as are files outside the authorised set, and the files the links point to are unchanged
+  - Saving still works when the backup file name is a link to a file elsewhere, that file is not written, and a normal backup is created once the link is gone [GHSA-36x5-vw5q-29rv]
+  - file: and javascript: links are not opened externally
+  - All menus list the same entries as in 31.5.2 apart from the version
+ReleaseNotesUrl: https://github.com/jgraph/drawio-desktop/releases/tag/v31.5.3
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://www.drawio.com/docs/
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/jgraph/drawio-desktop/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

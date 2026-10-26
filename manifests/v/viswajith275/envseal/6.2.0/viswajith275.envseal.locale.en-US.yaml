@@ -1,0 +1,59 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: viswajith275.envseal
+PackageVersion: 6.2.0
+PackageLocale: en-US
+Publisher: Viswajith M P
+PublisherUrl: https://github.com/viswajith275
+PublisherSupportUrl: https://github.com/viswajith275/EnvSeal-CLI/issues
+Author: Viswajith M P
+PackageName: envseal
+PackageUrl: https://github.com/viswajith275/EnvSeal-CLI
+License: MIT
+LicenseUrl: https://github.com/viswajith275/EnvSeal-CLI/blob/HEAD/LICENSE
+ShortDescription: Zero-trust secrets engine that replaces dangerous .env files. AES-256 encrypted vaults, least-privilege tokens for CI/CD, and instant DEK rotation, without ever putting your master password on a runner.
+Description: An encrypted vault for your API keys and secrets, because .env files have never once kept a secret.
+Moniker: envseal
+Tags:
+- command-line-tool
+- developer-tools
+- encryption-decryption
+- enviornment-setup
+- envseal
+- hmac-sha256
+- rust
+ReleaseNotes: |-
+  Mix global and local secrets at runtime. No breaking changes — drop-in upgrade from v6.1.0.
+  New: global vault override
+  Four new flags on run, load, and export let you combine the system-wide global vault with a project's local vault:
+  ────────────────────┬─────────────────────────────────────────────────────────────────────────────────────
+  Flag                │Effect
+  ────────────────────┼─────────────────────────────────────────────────────────────────────────────────────
+  --override KEY1,KEY2│Pull only the named keys from the global vault.
+  ────────────────────┼─────────────────────────────────────────────────────────────────────────────────────
+  --with-global       │Overlay all keys from the global vault (global wins on collision).
+  ────────────────────┼─────────────────────────────────────────────────────────────────────────────────────
+  --global-group GROUP│Which group inside the global vault to use. Defaults to the directory's linked group.
+  ────────────────────┼─────────────────────────────────────────────────────────────────────────────────────
+  --global-tag TAG    │Optional tag inside that global group. Defaults to base.
+  ────────────────────┴─────────────────────────────────────────────────────────────────────────────────────
+  --override and --with-global are mutually exclusive. If neither is given, only the local vault is used, unchanged from before.
+  # Pull a single key from the global vault
+  envseal run --override DATABASE_URL -- npm start
+  # Overlay everything from the global vault
+  envseal run --with-global -- npm start
+  # Target a specific global group and tag
+  envseal run --with-global --global-group shared-aws --global-tag prod -- ./deploy.sh
+  Personal tokens no longer need to be copied into every project's .envseal. Keep them once in the global vault and pull them in on demand.
+  Install
+  # Linux & macOS
+  curl -sSfL https://raw.githubusercontent.com/viswajith275/EnvSeal-CLI/master/scripts/install.sh | bash
+  # Windows
+  winget install --id viswajith275.envseal -e
+  Verify with envseal --version (expects 6.2.0). No migration needed.
+  Full changelog: v6.1.0...v6.2.0
+  Full Changelog: v6.1.0...v6.2.0
+ReleaseNotesUrl: https://github.com/viswajith275/EnvSeal-CLI/releases/tag/v6.2.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

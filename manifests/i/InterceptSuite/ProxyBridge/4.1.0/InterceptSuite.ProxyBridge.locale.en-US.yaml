@@ -1,0 +1,91 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: InterceptSuite.ProxyBridge
+PackageVersion: 4.1.0
+PackageLocale: en-US
+Publisher: InterceptSuite
+PublisherUrl: https://interceptsuite.com/
+PublisherSupportUrl: https://github.com/InterceptSuite/ProxyBridge/issues
+PrivacyUrl: https://interceptsuite.com/privacy
+Author: Sourav Kalal
+PackageName: ProxyBridge
+PackageUrl: https://github.com/InterceptSuite/ProxyBridge
+License: MIT
+LicenseUrl: https://github.com/InterceptSuite/ProxyBridge/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Anof-cyber/InterceptSuite
+ShortDescription: Redirect any Windows/MacOS TCP and UDP traffic to HTTP/Socks5 proxy
+Description: ProxyBridge is a lightweight, open-source universal proxy client (Proxifier alternative) that provides transparent proxy routing for applications on Windows and macOS. It redirects TCP and UDP traffic from specific processes through SOCKS5 or HTTP proxies, with the ability to route, block, or allow traffic on a per-application basis. ProxyBridge fully supports both TCP and UDP proxy routing and works at the system level, making it compatible with proxy-unaware applications without requiring any configuration changes.
+Tags:
+- network
+- proxy
+- request
+- response
+- traffic
+- web
+ReleaseNotes: |-
+  🚀 ProxyBridge v4.1.0 (Windows)
+  This release brings a fully native GUI, domain-name rules, no more admin prompt on every launch, and a long list of stability and performance fixes for long-running sessions, VPNs, and heavy traffic.
+  ✨ Major changes
+  🌐 Domain name support in proxy rules
+  Rules can now match domain names as well as IPs and ports, for example *.github.com, api.example.com, or *.company.local.
+  🖥️ Native Windows GUI (rewritten in C / Win32)
+  The Windows GUI has been completely rewritten from scratch. The previous GUI was built with C# + Avalonia. The new GUI is written entirely in native C using the Windows API, with no GUI frameworks or rendering libraries.
+  - ✅ Native Win32 GUI, written entirely in C
+  - ✅ No Avalonia, SkiaSharp, HarfBuzz, or .NET runtime
+  - ✅ Native Windows controls
+  - ✅ Faster startup, lower resource usage
+  - ✅ Simpler deployment
+  AI-assisted development: the initial implementation was generated with Claude Code. After that, the code was manually reviewed, refactored, optimized, debugged, security-reviewed, and integrated with the existing ProxyBridge codebase.
+  📦 Binary size
+  The previous GUI needed multiple runtime files: ProxyBridge.exe (GUI + .NET runtime), libSkiaSharp.dll, av_libglesv2.dll, and libHarfBuzzSharp.dll. The new GUI is a single native executable.
+
+  | Component                             | Previous | Now    | Improvement    |
+  | ------------------------------------- | -------- | ------ | -------------- |
+  | Windows GUI (EXE + runtime libraries) | 43.4 MB  | 517 KB | ~98.8% smaller |
+  | Installer                             | 11.8 MB  | 769 KB | ~93.5% smaller |
+
+  🧠 Memory usage
+
+  |            | Previous | Now     |
+  | ---------- | -------- | ------- |
+  | At startup | ~40 MB   | ~2–3 MB |
+
+  That is about a 94% reduction at startup.
+  During use:
+  - Previous GUI: typically grew to 100–140 MB, and often kept growing over time.
+  - New GUI: peaks at about 30 MB during testing, frees temporary allocations aggressively, returns to about 2–5 MB after activity, and can idle at around 1 MB.
+  ⚡ CPU usage
+  - Previous GUI: commonly 3–10% CPU during normal operation and idle periods.
+  - New GUI: about 40–55% lower CPU usage in the workloads tested so far.
+  Performance testing will continue across a wider range of systems.
+  🔓 No admin prompt on every launch
+  The packet engine now runs as a Windows service (ProxyBridgeSvc) set up by the installer. The GUI runs as a normal user and connects to the service.
+  🔍 Rules, proxy settings, and display
+  - Pick several process names in one rule (#196).
+  - Configurable DNS resolution in proxy settings (#177).
+  - Clearer SOCKS5 CONNECT failure log, with repeated errors collapsed. A failed handshake now resets the app's connection instead of leaving it hanging.
+  - DPI-aware layout and fonts, and adjustable text size (#190).
+  VPN Fixed
+  - Fixed redirected connections being dropped on VPN (Public network profile) connections. The installer now adds the firewall rule the relay needs. (Only tested with WireGuard)
+  🛠️ Fixes: long sessions, stability, performance
+  - Fixed the app silently stopping to proxy after hours or days of use. Stale per-port state and a capture-error spin were the causes (#205, #183, #190).
+  - Fixed the owner-process lookup returning nothing for new connections, which made matching traffic bypass the proxy as DIRECT without any notice (#205).
+  - Fixed the slowdown and high CPU/memory with many connections (#184, #213):
+    - The process lookup now uses WinDivert socket events instead of scanning the system TCP table.
+    - Relays run on a fixed pool of worker threads, so the thread count no longer grows with connections.
+    - Relay buffers follow active transfers, not open connections.
+  - Fixed UDP flows being misrouted after hours, and the per-packet cost of direct UDP (affected Discord voice and similar apps).
+  - Fixed short-lived connections being dropped, and failed packet re-injection is now logged.
+  - Fixed traffic to the proxy server itself being redirected into the proxy (a stale-port collision).
+  - Fixed proxy rules pointing at the wrong proxy after deleting and re-adding a proxy (#203).
+  - Fixed a stale direct-connection entry that survived the connection closing (#206).
+  - Fixed the service crashing every time the GUI disconnected.
+  - The CLI no longer blocks the engine's capture thread on console output.
+  - Fixed the empty white area in the rules list (#200), the startup task now removed on uninstall (#199), the installer closes the app safely and launches it after install (#198), the startup tray delay (#195), and a profile buffer overflow.
+  ⚠️ Notes
+  - Windows asks for admin once, during install, when the service is created.
+  - If you hit a problem, please include your Windows version, the ProxyBridge version, steps to reproduce, and logs or screenshots.
+ReleaseNotesUrl: https://github.com/InterceptSuite/ProxyBridge/releases/tag/v4.1.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

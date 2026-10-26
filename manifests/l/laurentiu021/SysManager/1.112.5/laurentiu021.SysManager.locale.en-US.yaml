@@ -1,0 +1,98 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.112.5
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.112.5] - 2026-09-22
+  Five copies of the same directory walk, and two safety rules that only lived in one of them. Every part
+  of the app that deletes files — Deep Cleanup, Quick Cleanup, the temp sweep, Browser Cleaner, Shortcut
+  Cleaner, File Shredder — walked folders with its own hand-copied loop. Each copy had a comment saying it
+  mirrored the others, and two rules had since been added to one and not the rest. They are now one walk, so a
+  rule added to it is a rule every one of them gets.
+  Fixed
+  - Deep Cleanup stripped a file's Hidden and System attributes when it could not delete it. Clearing
+    attributes before a delete is correct, but it was clearing all of them rather than the one that blocks a
+    delete, and the file it failed on then stayed on disk without them. Explorer's thumbnail and icon caches
+    are hidden system files that Explorer holds open, so the bucket that cleans them did this on every run.
+  - One unreadable entry could end the whole temp clean. A folder listing can fail part-way through
+    rather than at the start, and the temp sweep let that stop it entirely — silently, reporting the space it
+    had freed up to that point as a finished clean. %TEMP% is the busiest folder on a Windows machine, with
+    other programs creating and deleting files in it while the sweep runs, which is exactly when a file stops
+    being readable between being listed and being opened. A folder that fails now costs that folder, not the
+    rest of the drive.
+  - A shortcut to a file, inside a folder being cleaned, was counted as its target's size. Windows lets
+    a file be a link to another file, and deleting the link never touches what it points at — so the space
+    reported as reclaimable included bytes no delete could free. Links are now left alone by every cleaner,
+    which is what File Shredder already did.
+  Changed
+  - The reparse-point, exclusion, cancellation and enumerator rules live in one place. Five walkers and
+    four copies of the same "is this a link?" test became one SafeFileWalk, and a test now fails the build
+    if a service grows its own tree walk again. Three read-only scanners (Disk Analyzer, Duplicate Finder,
+    Large Files) keep theirs for now, because they report progress per folder — they are a named, asserted
+    exemption rather than an oversight.
+  - Deep Cleanup and the temp sweep are slightly faster. The old copies asked Windows for each
+    subdirectory's attributes a second time to test it; the shared walk reads them from the listing the OS
+    already returned.
+  Verify the download
+  Get-FileHash .\SysManager-v1.112.5.exe -Algorithm SHA256
+  Expected SHA256: FF57E7D310A199179F54776BD44BA012B1BEA7E3CC15A867659B59168E0A94AF
+  This build is not code-signed, so Windows will warn on first launch. That is
+  expected for a small independent app: see what the warning says and what to
+  click.
+  Code signing is planned through the SignPath Foundation,
+  which provides free certificates to open-source projects, with signing performed by
+  SignPath.io. Until then, the SHA256 above and the build
+  attestation below are what establish that a download is the genuine build.
+  Code signing policy
+  This release is not code-signed. The team roles, release-approval process and
+  privacy policy required by the SignPath Foundation programme
+  are documented in advance under Code signing
+  policy. That
+  documentation is a prerequisite for applying, not evidence of a certificate. The
+  attribution line naming SignPath as the signing provider will appear here once a
+  certificate is actually issued.
+  This program will not transfer any information to other networked systems unless
+  specifically requested by the user or the person installing or operating it. Full
+  privacy policy.
+  Verify where this binary came from
+  This exe was built by GitHub Actions from this public source, and the build is
+  recorded in the Sigstore public transparency log. With the
+  GitHub CLI:
+  gh attestation verify .\SysManager-v1.112.5.exe --repo laurentiu021/SystemManager
+  That proves which commit and workflow produced this exact binary, something the
+  SHA256 file cannot show, since it is published alongside the exe it describes.
+  Each release also ships SysManager-v1.112.5.sbom.json, a CycloneDX inventory of
+  every dependency resolved for this build.
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.112.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

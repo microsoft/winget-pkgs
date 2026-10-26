@@ -1,0 +1,76 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Hugo.Hugo
+PackageVersion: 0.168.0
+PackageLocale: en-US
+Publisher: The Hugo Authors
+PublisherUrl: https://gohugo.io/
+PublisherSupportUrl: https://discourse.gohugo.io/
+PackageName: Hugo
+PackageUrl: https://gohugo.io/
+License: Apache-2.0
+LicenseUrl: https://github.com/gohugoio/hugo/blob/HEAD/LICENSE
+Copyright: Copyright 2026 The Hugo Authors.
+ShortDescription: The world’s fastest framework for building websites
+Description: |-
+  Hugo is one of the most popular open-source static site generators.
+  With its amazing speed and flexibility, Hugo makes building websites fun again.
+Tags:
+- blog
+- blog-engine
+- cms
+- content-management-system
+- documentation
+- documentation-tool
+- static-site
+- static-site-generator
+ReleaseNotes: |-
+  Notable new features
+  - New imaging.firstFrameOnly option (and a matching processing flag) to only decode/encode the first frame of animated images. Hugo now also only decodes the first frame when the target format doesn't support animation, and fails early with an informative error if processing all frames would exceed the WASM memory limit.
+  - New FrameCount method on images, e.g. to check if an image is animated.
+  - site.Language now has Translate and Format* methods, so you can e.g. range over site.Languages and translate into each language.
+  - New charset option for js.Build and css.Build.
+  - Basic support for the OSC 7501 program status (working/done/idle/error) in terminals that support it, alongside the existing OSC 9;4 progress.
+  Security fixes
+  This release is built with Go 1.27.2, which includes 15 security fixes. The most relevant for Hugo are:
+  - Two html/template escaping fixes, which also apply to Hugo's fork of the package: CVE-2026-94448 (context tracking not reset on consecutive expressions in JS template literals) and CVE-2026-97030 (yield not recognized as a regexp preceder keyword). Both could lead to incorrect escaping of inline JavaScript.
+  - Several net/http fixes (HTTP/2 server crash and memory exhaustion, connection desynchronization, unbounded Range header parsing), relevant for hugo server and remote resources. The corresponding HTTP/2 fixes are also included via the upgrade of golang.org/x/net to v0.61.0.
+  - CVE-2026-56857: os.Root.Mkdir(All) could follow junctions out of the root on Windows.
+  Also:
+  - github.com/tdewolff/minify is upgraded to v2.24.19, which fixes GHSA-3ppm-p7r9-c5w3: </script> (and <!--) inside inline scripts was not properly escaped (case-insensitively) when minifying JS in HTML.
+  - Hugo now ignores module.replacements defined in themes; only the project can define replacements.
+  Changes
+  - Fix PAGE.IsNode warning in jsonify 0732eadd @bep #15420
+  - hugolib: Fix rebuild when content is also mounted as assets ac62c804 @taekop #12838
+  - Fix deprecation issues in tests be8ffd62 @bep
+  - circleci: Update config.yml to version 2.1 285d0efc @bep
+  - warpc: Upgrade libavif, AOM, dav1d versions c94bdf92 @bep
+  - warpc: Upgrade to javy 9.1.0 63fb71ca @bep
+  - warpc: Upgrade to wasi-sdk-34 2f2f33b2 @bep
+  - ci: Drop extended build tag on Windows tests 53aae446 @bep
+  - Add imaging.firstFrameOnly and some animation performance improvements 13ee7e97 @bep #15433
+  - js, css: Add charset option to js.Build and css.Build 0688a8cd @bep #15435
+  - Add ImageResource.FrameCount c9f6e4d4 @bep #15430
+  - Add Translate and Format* methods to Language df8badea @bep #7844
+  - Add basic support for OSC 7501 program status d1024ae6 @bep #15425
+  - modules: Ignore module.replacements defined in themes 6883b55a @bep
+  - Upgrade to Go 1.27.2 f44c355e @bep #15427
+  - ci: Add temporary workaround for staticcheck vs Go 1.27.2 46123a60 @bep
+  - transform/metainject: Inject Hugo generator tag last in
+  - Make tests run on GOARCH 386 6b3ba3a7 @bep #15403
+  - Update vulnerability reporting instructions ec69d0e6 @bep
+  Dependency Updates
+  - build(deps): bump golang.org/x/image from 0.46.0 to 0.47.0 2bbad501 @dependabot[bot]
+  - build(deps): bump golang.org/x/mod from 0.41.0 to 0.42.0 030619b4 @dependabot[bot]
+  - build(deps): bump golang.org/x/net from 0.59.0 to 0.61.0 13ef7079 @dependabot[bot]
+  - build(deps): bump github.com/bits-and-blooms/bitset 846b1d74 @dependabot[bot]
+  - build(deps): bump github.com/tdewolff/minify/v2 from 2.24.17 to 2.24.19 16441d2f @dependabot[bot]
+  Build Setup
+  - snap: Update base to core26 8c88da37 @jmooring
+ReleaseNotesUrl: https://github.com/gohugoio/hugo/releases/tag/v0.168.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://gohugo.io/documentation
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

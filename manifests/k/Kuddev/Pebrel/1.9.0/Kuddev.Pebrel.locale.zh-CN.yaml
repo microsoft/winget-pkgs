@@ -1,0 +1,62 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: Kuddev.Pebrel
+PackageVersion: 1.9.0
+PackageLocale: zh-CN
+ShortDescription: 一款 GPU 加速的 Windows 终端：关闭窗口不杀会话，重新打开，你的 claude 对话原样回来。
+Description: Nebula 是一款 Windows 上的终端模拟器，以 Rust 编写，构建在 GPU 加速渲染内核之上，并围绕一个理念设计：终端会话太宝贵，不该随窗口一起消失。它把 tmux 式的常驻会话模型、玻璃质感界面、AI CLI 感知侧边栏和无需额外配置的 shell 体验组合在一起。
+Tags:
+- claude
+- codex
+- ssh
+- 终端
+ReleaseNotes: |-
+  新增
+  - 新增：Windows ARM64 原生便携 ZIP，与 Windows x64 安装器及便携 ZIP 一同提供。ARM64 使用原生运行器构建，并配套 ARM64 Hook 辅助程序与控制台运行时。
+  - 新增：Kimi Code 识别、原生会话命令和受管理的生命周期 Hook，包含品牌图标及终端活动状态。
+  - 新增：独立 Agents 设置页，覆盖 Claude Code、Codex、OpenCode、Cursor Agent、Kimi Code、Pi、Oh My Pi、GitHub Copilot 和 Grok。每项显示检测到的 CLI 路径，并在开关旁显示实际 Hook 安装状态；自动 Hook 管理适用于 Windows。
+  - 新增：通知停留时长设置：保持既有默认值，或选择 5、10、30、90 秒以及手动关闭。用户选择的时长优先于 Agent 自带的横幅默认时长。
+  - 新增：可持久保存的终端字体连字开关，默认开启，并可应用于已打开的会话，无需重启终端。对应 #220。
+  - 新增：设置首页「项目与支持」中的赞助商页面，介绍赞助商 Fluxion AI 并提供注册链接。
+  修复
+  - 修复：Codex 冷恢复误用 Hook 分组标识而非原生对话身份的问题。旧快照中的会话文件名无法识别时，保留原有有效对话 ID。
+  - 修复：Windows 本地 Codex 身份缺失的问题，可从运行中的进程找回原生对话 ID 和文件路径；后续仅包含生命周期信息的事件会保留已核验身份。
+  - 修复：保存的 Codex 对话不存在时恢复流程无法继续的问题：包括 CMD 在内，可打开原生会话选择器，标签菜单也提供主动选择对话的入口。
+  - 修复：已恢复的 AI 对话尚未确认时，本次启动被会话断路器误计为失败的问题。Codex 对话停在启动提示上、正常退出三次后，不再把整个工作区隔离到 session.crashed.json；已保存的对话目标保留至下次启动。
+  - 修复：部分 AI 身份无法取得时关闭流程卡住的问题。用户可以保存已知状态并退出；保存失败或编辑器草稿随后发生变化时仍保持应用打开。
+  - 修复：AI 失败和取消事件被显示为成功完成的问题，Claude 失败事件及 Pi 重试后的结果统一进入通知结果处理。
+  - 修复：通知替换后残留旧结果或旧到期时间的问题。新的窗格结果遵循选定时长，旧计时器不能关闭替换后的通知。
+  - 修复：受支持 AI 确认动作：发送前检查请求仍然有效，并完成必要的按下、释放按键序列；Windows 通知激活时恢复对应应用窗口。
+  - 修复：WSL Hook 安装与事件传递，使用发行版自身的用户配置；命令补全同步包含发行版和用户选项。
+  - 修复：继承的 Ctrl+C 忽略状态导致 CMD 子命令无法中断的问题，同时保留选区复制。
+  - 修复：原生 CMD 命令活动检测、多行输入以及等待折行边界的回显文本跟踪。
+  - 修复：应用的 256 色块被终端提示符颜色覆盖的问题，保留明确配置的自定义颜色覆盖。
+  - 修复：已保存 SSH 主机在自动认证时忽略可用系统 SSH 代理的问题。
+  - 修复：终端工作目录复制，改为复制 Shell 上报的路径，包括访客环境路径；普通选区复制保留原始文字。
+  - 修复：终端和回答阅读页打开受支持的本地 Markdown 链接、文件 URI 及相对路径的行为。含空格、中文或括号的路径按原窗格目录解析，路径缺失时提供可见反馈。对应 #203。
+  - 修复：文件编辑器选区与查找命中融入浅色、深色背景的问题；普通文本和代码编辑器可透出已配置的工作区背景图，光标所在行跟随主题。
+  - 修复：Markdown 目录长标题压住相邻行的问题，完整标题仍可通过悬停提示和复制取得。对应 #184。
+  - 修复：Markdown 拖选被中断后，未按住鼠标移动仍继续扩大选区的问题。
+  - 修复：代码语言菜单在窄窗口中越界的问题，并保持搜索框和键盘操作可用。
+  - 修复：SSH 主机图标因字体可见轮廓与排版宽度不同而偏离中心的问题。
+  - 修复：移除拖动标签时重复出现的标题预览。
+  改进
+  - 改进：Markdown 默认以只读方式渲染，保留文字选择、复制、代码复制及公式操作；编辑需要显式切换到源码模式。
+  - 改进：阅读模式仍可选择代码块语言，只改变语法高亮，不改写 Markdown；滚动离开再返回后保留选择，复制得到的代码内容不变。
+  - 改进：从源码模式返回阅读页时保留草稿，同时阻止只读模式下的撤销、重做快捷键修改文档。
+  - 改进：Markdown 使用虚拟列表、可见代码块和图片资源管理，并释放非活动文档的布局缓存，减少重复工作；不把单机结果写成固定的内存或速度承诺。
+  - 改进：Git／SVN 抽屉复用仓库快照，仅渲染可见条目，减少大型仓库中的重复工作。
+  - 改进：Agents 页面整体居中，九种 Agent 图标使用放大的 SVG 资源；CLI 是否存在与 Hook 是否安装分别展示，长路径可通过悬停提示查看。
+  - 改进：设置搜索、SSH 连接卡片和筛选、文件面板控件对齐，以及命令分组的导航、排序和新增操作。
+  - 改进：安装或移除受管理的 Agent Hook 时，保留其他集成及用户已有配置。
+  - 改进：暂时隐藏设置侧栏和搜索中的备份入口，本版不开放云备份控件。
+  Windows x64 提供安装器和 ZIP 便携包，Windows ARM64 提供原生便携 ZIP；安装器和应用内自动安装仍仅支持 x64。Linux x64 包及 macOS Apple Silicon／Intel DMG 继续标记为 Preview。macOS 最低版本为 14。分子结构渲染仍处于禁用状态。
+ReleaseNotesUrl: https://github.com/Kuddev/pebrel/releases/tag/v1.9.0
+Documentations:
+- DocumentLabel: 安装指南
+  DocumentUrl: https://github.com/Kuddev/pebrel/blob/main/INSTALL.md
+- DocumentLabel: Lua 配置
+  DocumentUrl: https://github.com/Kuddev/pebrel/blob/main/docs/lua-configuration.md
+ManifestType: locale
+ManifestVersion: 1.12.0

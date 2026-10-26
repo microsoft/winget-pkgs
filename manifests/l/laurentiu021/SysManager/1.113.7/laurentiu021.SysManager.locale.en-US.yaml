@@ -1,0 +1,92 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.113.7
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.113.7] - 2026-09-24
+  The Services tab no longer reports a change it did not make, or makes one you did not ask for. Stop now
+  says when Windows will not stop a service, Enable leaves a service that is already enabled exactly as it is,
+  and a service whose name SysManager will not pass on gets a plain explanation instead of an error window.
+  Fixed
+  - Stop says so when Windows will not stop a service. Some services accept no stop request while they
+    run — on Windows 11, DNS Client is one, and services.msc greys out its Stop button. SysManager skipped
+    them without a word and then reported "✓ … stopped." while the service kept running. It now says Windows
+    cannot stop it. The Gaming Profile's "Pause search indexing" step stops Windows Search the same way, and
+    when that happens it is now counted among the optimizations that could not be applied, not the ones that
+    were. Present since the Services tab was added in v0.13.0.
+  - Enable only acts on a disabled service. On any other service it went on to "set to Manual", so
+    clicking Enable on an Automatic service that SysManager had no record of stopped it starting at boot. And
+    because Enable, unlike Stop and Disable, has no refusal for the services Windows needs to boot and sign
+    in, the same offer appeared on those. Enable now says the service is already enabled and changes nothing.
+    Present since v0.13.0.
+  - Disabling a service that is already disabled changes nothing. It used to remember "Disabled" as the
+    type to put back, so the next Enable promised to set the service "back to Disabled" and then set it to
+    Manual. Present since Enable began restoring the previous startup type, in v1.20.34.
+  - A service with a name like "Vendor(R) Updater" gets an explanation, not an error window. Windows
+    allows almost any character in a service name. SysManager passes only letters, digits, spaces and
+    - _ . $ to the command it uses to change a startup type, so Disable and Enable on any other name
+    ended in the "SysManager error" window. They now say why they cannot change it, and point to Windows' own
+    Services window, before asking anything. Present since that check was added in v0.28.10.
+  Verify the download
+  Get-FileHash .\SysManager-v1.113.7.exe -Algorithm SHA256
+  Expected SHA256: D911AE5C3DD543237CC7A1043036C2EEED45606C26BBB94313895E2EFC2C71E5
+  This build is not code-signed, so Windows will warn on first launch. That is
+  expected for a small independent app: see what the warning says and what to
+  click.
+  Code signing is planned through the SignPath Foundation,
+  which provides free certificates to open-source projects, with signing performed by
+  SignPath.io. Until then, the SHA256 above and the build
+  attestation below are what establish that a download is the genuine build.
+  Code signing policy
+  This release is not code-signed. The team roles, release-approval process and
+  privacy policy required by the SignPath Foundation programme
+  are documented in advance under Code signing
+  policy. That
+  documentation is a prerequisite for applying, not evidence of a certificate. The
+  attribution line naming SignPath as the signing provider will appear here once a
+  certificate is actually issued.
+  This program will not transfer any information to other networked systems unless
+  specifically requested by the user or the person installing or operating it. Full
+  privacy policy.
+  Verify where this binary came from
+  This exe was built by GitHub Actions from this public source, and the build is
+  recorded in the Sigstore public transparency log. With the
+  GitHub CLI:
+  gh attestation verify .\SysManager-v1.113.7.exe --repo laurentiu021/SystemManager
+  That proves which commit and workflow produced this exact binary, something the
+  SHA256 file cannot show, since it is published alongside the exe it describes.
+  Each release also ships SysManager-v1.113.7.sbom.json, a CycloneDX inventory of
+  every dependency resolved for this build.
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.113.7
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

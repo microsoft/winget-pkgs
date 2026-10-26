@@ -1,0 +1,84 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Kurokeita.NovelDownloader
+PackageVersion: 2.0.0
+PackageLocale: en-US
+Publisher: kurokeita
+PublisherUrl: https://github.com/kurokeita
+PublisherSupportUrl: https://github.com/kurokeita/novel-downloader/issues
+Author: kurokeita
+PackageName: novel-downloader
+PackageUrl: https://github.com/kurokeita/novel-downloader
+License: GPL-3.0-or-later
+LicenseUrl: https://github.com/kurokeita/novel-downloader/blob/HEAD/LICENSE
+ShortDescription: Rust crawler and EPUB builder for Vietnamese web novel sites
+ReleaseNotes: |-
+  novel-downloader v2.0.0. The project is renamed from truyenazz-crawler to novel-downloader, and it now supports more than one novel site. Breaking: the binary, the Homebrew formula and the winget package all changed name, so an existing 1.1.0 install will not upgrade itself. See Install below for the uninstall-then-reinstall step.
+  Renamed
+  The old name described one site the tool no longer targets. Everything outward-facing moved at once:
+  ───────────┬────────────────────────────────────┬──────────────────────────────────
+             │1.1.0                               │2.0.0
+  ───────────┼────────────────────────────────────┼──────────────────────────────────
+  Binary     │truyenazz-crawl                     │novel-downloader
+  ───────────┼────────────────────────────────────┼──────────────────────────────────
+  Homebrew   │kurokeita/brew/truyenazz-crawler    │kurokeita/brew/novel-downloader
+  ───────────┼────────────────────────────────────┼──────────────────────────────────
+  winget     │Kurokeita.TruyenazzCrawler          │Kurokeita.NovelDownloader
+  ───────────┼────────────────────────────────────┼──────────────────────────────────
+  Crate / lib│truyenazz-crawler /                 │novel-downloader /
+             │truyenazz_crawler                   │novel_downloader
+  ───────────┴────────────────────────────────────┴──────────────────────────────────
+  CLI flags, output layout and the chapter_NNNN.html file naming are all unchanged. Only the name you type changed.
+  Highlights
+  - khodocsach.com support. A second source, read through the site's JSON API rather than scraped. You never pick a source: pass a novel URL and the host decides which adapter handles it. Unsupported hosts are rejected before any network request.
+  - A real site seam. Every site now sits behind one SiteAdapter trait, with chapters addressed by opaque source-owned locators instead of arithmetic on a chapter number. Sites whose chapter ids are database ids rather than sequential numbers work correctly as a result.
+  - Per-source rate policies. Each source declares the pacing it tolerates. The runner clamps --workers to it, spaces requests, and absorbs a rate-limit response by backing off the whole run and retrying, rather than failing the chapter.
+  - Remembered EPUB fonts. The interactive wizard keeps a recency-ordered list of the custom fonts you have used and offers them alongside the bundled one.
+  - Elapsed time and an estimate on the TUI download screen, matching what the plain progress bar already showed.
+  - Drop caps in EPUB chapters. Each chapter opens with its first character enlarged, skipping dialogue openers and anything that is not a letter.
+  Other improvements
+  - EPUB output now passes epubcheck. The cover extension is picked from an explicit media-type map, so image/jpeg no longer becomes a .jfif that readers report as corrupt, and the package carries the mandatory dcterms:modified timestamp.
+  - The EPUB writer no longer re-fetches the novel's main page. Metadata is collected once, upfront.
+  - Build-only runs (--epub-only) stop asking for an output root they never use, and no longer create an empty directory.
+  - --delay is honored in parallel runs.
+  - Whole-book khodocsach downloads no longer stop short: the chapter index is paged to completion, and a page that cannot be fetched fails the index rather than silently truncating the novel.
+  Quality
+  - 289 tests passing
+  - cargo clippy --all-targets clean
+  - cargo fmt --check clean
+  - cargo build --release succeeds
+  Install
+  Existing 1.1.0 users must uninstall the old package first. The rename is a clean break with no alias, so neither brew upgrade nor winget upgrade will find a replacement.
+  Homebrew, available now:
+  brew uninstall truyenazz-crawler
+  brew tap kurokeita/brew
+  brew install novel-downloader
+  winget, once the new manifest is accepted upstream. Kurokeita.NovelDownloader is a new identifier, so its first version needs a manual submission to microsoft/winget-pkgs; that pull request is pending review. Until it merges, use the Windows asset below or Homebrew.
+  winget uninstall Kurokeita.TruyenazzCrawler
+  winget install Kurokeita.NovelDownloader
+  Downloads
+  - Linux x86_64 (novel-downloader-linux-x86_64.tar.gz)
+  - Linux ARM64 (novel-downloader-linux-aarch64.tar.gz)
+  - macOS Intel (novel-downloader-macos-x86_64.tar.gz)
+  - macOS Apple Silicon (novel-downloader-macos-aarch64.tar.gz)
+  - Windows x86_64 (novel-downloader-windows-x86_64.zip)
+  What's changed since v1.1.0
+  - chore: prepare repo for the novel-downloader overhaul (#9)
+  - refactor: rename truyenazz-crawler to novel-downloader (#10)
+  - refactor: address chapters by ChapterRef instead of number arithmetic (#11)
+  - refactor: move metruyenhot behind a SiteAdapter seam (#12)
+  - refactor: pass novel metadata into the EPUB writer (#13)
+  - feat: enforce the source rate policy in both runners (#14)
+  - feat: add the khodocsach.com JSON API adapter (#15)
+  - feat: unblock whole-book khodocsach downloads and fix --delay in parallel runs (#16)
+  - feat: remember recently used EPUB fonts in the interactive wizard (#17)
+  - feat: show elapsed time and an ETA on the TUI download screen (#18)
+  - feat: style the first character of each EPUB chapter as a drop cap (#19)
+  - fix: pass epubcheck, and stop asking build-only runs for an output root (#20)
+  - docs: refresh the README for the source seam and add a site-adapter skill (#21)
+  - ci: re-enable Homebrew and winget publishing for the 2.0.0 release (#22)
+  - chore(release): v2.0.0 (#23)
+ReleaseNotesUrl: https://github.com/kurokeita/novel-downloader/releases/tag/v2.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

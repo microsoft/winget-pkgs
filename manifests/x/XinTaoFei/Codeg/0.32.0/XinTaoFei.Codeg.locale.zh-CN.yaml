@@ -1,0 +1,40 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: XinTaoFei.Codeg
+PackageVersion: 0.32.0
+PackageLocale: zh-CN
+ShortDescription: 在一个地方聚合并浏览 AI 编程代理会话（如 Claude Code、Codex、Gemini CLI 等）。支持桌面应用、自建服务器或 Docker 部署。
+Description: Codeg（Code Generation，代码生成）是一款企业级多代理编码工作区。它将本地 AI 编程代理（包括 Claude Code、Codex CLI、OpenCode、Gemini CLI、OpenClaw、Cline 等）统一集成于桌面应用、独立服务器或 Docker 容器中，支持通过任意浏览器进行远程开发；具备对话聚合、并行 Git 工作树开发、MCP/技能管理、聊天频道交互（Telegram、飞书、iLink 等），以及集成的 Git/文件/终端工作流。
+Tags:
+- claude-code
+- codex
+- gemini-cli
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  这一版 Claude Code 和 Codex 一起升级，codeg 也接住了它俩刚学会表达的两件事：提示信息改为 toast 弹出，不再写进回复正文；上下文压缩会如实显示它是怎么结束的，以及保留下了什么。
+  底层方面，codeg 现在通过官方的 Agent Client Protocol 2.2 运行时与所有智能体通信。服务器部署可以按主机名访问开发服务，不必再预先猜一段端口范围；网页版也补上了仍然生效的浏览器设置。
+  新增
+  - 上下文压缩可以展开查看保留下来的摘要——Claude Code 或 Codex 会话进行中发生压缩时，分隔线上会多出一个「摘要」开关，点开就能看到模型从被压掉的历史里留下了什么，生成过程中实时显示。（#809、#814，@xintaofei）
+  - 服务器部署可以按主机名而不是端口访问开发服务——把 CODEG_BRIDGE_HOST_PATTERN 设为 auto 或 {port}.preview.example.com 这类模板后，3000.codeg.example.com 会经由 codeg 已在监听的端口直达 3000 端口，不必再预先开放一段端口范围。（#788 由 @kekxv 反馈，#801，@xintaofei）
+  改进
+  - 内置智能体版本更新： Claude Code ACP 0.81.0（Claude Code 2.1.280）、Codex ACP 1.13.0（Codex CLI 0.155.1，gpt-5.2 与 gpt-5.4-mini 随之下线）。（#806，@xintaofei）
+  - Claude Code 与 Codex 的提示信息改为 toast 弹出，不再以粗体行写进回复——模型回退、hook 拦截了你的提示、配置或弃用警告都在此列，其中警告和错误还会留在会话横幅上。（#809，@xintaofei）
+  - Codex 执行命令时，输出会实时流进卡片，不再整段时间停在 [Terminal: …] 占位符上、等命令结束才一次性填满。（#806，@xintaofei）
+  - 网页版的「设置 → 浏览器」补上了仍然生效的设置——本机服务、站点规则和终端链接菜单，终端里启动服务时弹出的提示终于可以关掉，或改成直接打开标签页。（#788 由 @kekxv 反馈，#798，@xintaofei）
+  - 写入智能体的 JSON 配置时不再打乱键的顺序——比如保存 MCP 服务器时，文件其余部分保持你原来写的顺序，不会被整体按字母重排；工具参数也按智能体发来的顺序显示。（#814，@xintaofei）
+  - codeg 现在通过官方的 Agent Client Protocol 2.2 运行时与所有智能体通信，某条消息处理出错不会再拖垮整条连接。（#814，@xintaofei）
+  修复
+  - 压缩分隔线如实显示压缩的结局——失败会给出原因，被中断或取消的不再一直转圈，Codex 同一回合里的两次压缩也各有一条分隔线。（#806、#809，@xintaofei）
+  - 历史记录里的 Claude Code 子智能体卡片直接从汇报内容开始，不再先显示 Claude Code 2.1.277 及以上版本垫在前面的一段来源说明。（#806，@xintaofei）
+  - 恢复 Claude Code 会话后，第一轮不再把之前整段会话的 Token 都算进来，Token 用量看板里的分模型数据不会在恢复后虚高。（#806，@xintaofei）
+  - Codex 的子智能体不会再比失败或被中断的回合活得更久——Codex 1.13.0 会关掉该回合启动的所有子智能体，卡片不再一直挂在「运行中」。（#806，@xintaofei）
+  感谢 @kekxv 的反馈。
+ManifestType: locale
+ManifestVersion: 1.12.0

@@ -1,0 +1,63 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: steipete.gogcli
+PackageVersion: 0.41.0
+PackageLocale: en-US
+Publisher: Peter Steinberger
+PublisherUrl: https://steipete.me/
+PublisherSupportUrl: https://github.com/steipete/gogcli/issues
+Author: Peter Steinberger
+PackageName: gogcli
+PackageUrl: https://gogcli.sh/
+License: MIT
+LicenseUrl: https://github.com/openclaw/gogcli/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Peter Steinberger
+CopyrightUrl: https://github.com/steipete/gogcli/blob/HEAD/LICENSE
+ShortDescription: gog unifies Gmail, Calendar, Drive, Contacts, Tasks, Sheets, Docs, Slides, and People under one CLI — with JSON output and sane defaults.
+Description: |-
+  gog unifies Gmail, Calendar, Drive, Contacts, Tasks, Sheets, Docs, Slides, and People under one CLI — with JSON output and sane defaults.
+
+  Features
+  - Gmail
+    - Search threads, send mail, manage labels, drafts, filters, settings, and watch (Pub/Sub push).
+  - Calendar
+    - List/create/update events, respond to invites, detect conflicts, and check free/busy.
+  - Drive
+    - List/search/upload/download, export Docs formats, permissions, folders, URLs.
+  - Sheets / Docs / Slides
+    - Read/write Sheets; export Docs/Slides/Sheets to PDF/DOCX/PPTX/XLSX/CSV via Drive.
+  - Contacts / People
+    - Personal contacts, “other contacts”, Workspace directory, and your profile.
+  - Tasks
+    - Tasklists + tasks: add/update/done/undo/delete/clear with paging and JSON output.
+Moniker: gogcli
+Tags:
+- gcal
+- gcontacts
+- gdrive
+- gmail
+- google
+ReleaseNotes: |-
+  0.41.0 - 2026-09-22
+  Highlights: Raw RFC822 drafts, Search Console URL inspection, automatic Slides image sizing, and fixes for lost Gmail results, cancellation, and Sheets crashes.
+  - Dependencies: retain patched gRPC 1.83.2 with Google API 0.298 to avoid GHSA-2v4p-qf9q-27wj; gog does not use the affected xDS server. (#1150)
+  - Gmail: stage and replace raw RFC822 drafts, retrieve their MIME, and preview safely offline; bound raw draft/send input to 35 MiB while preserving no-send policies. (#1126) — thanks @darkamenosa.
+  - Search Console: add searchconsole inspect for per-URL index status via the URL Inspection API (coverage state, indexing/page-fetch/robots.txt state, canonical, sitemaps, last crawl time), using the existing webmasters OAuth scope. (#1094) — thanks @laihenyi.
+  - Slides: derive either missing image dimension from local files or anonymously readable public HTTPS images, preserving explicit size pairs and documenting the public-fetch requirement. (#1112) — thanks @sebsnyk.
+  - Sheets: return an error instead of crashing when append responses omit update metadata, without retrying the potentially completed write. (#1142) — thanks @SebTardif.
+  - Calendar: show failed Zoom meeting cleanup alongside a failed Calendar write, preserving both causes through CLI error formatting. (#1144) — thanks @SebTardif.
+  - Gmail: fail thread searches when a detail fetch fails instead of silently returning partial results after a discarded retry. (#1138) — thanks @SebTardif.
+  - Gmail: accumulate repeated --add and --remove label flags across thread, message, batch, and label modifications while preserving literal comma/backslash splitting and normalization. (#1139) — thanks @ShacharBialick.
+  - Gmail: inspect Pub/Sub notifications matching the saved watch cursor so pending history changes can reach the hook. (#1140) — thanks @kazuyuki-eguchi.
+  - API: honor in-flight command cancellation in YouTube, Chat unread lookups and sends, and People profile and relation requests. (#1145) — thanks @SebTardif.
+  - API: honor api list --plain with stable, sanitized TSV columns while preserving default and JSON catalog responses. (#1141, #1146) — thanks @postoso and @goutamadwant.
+  - API: close upload bodies when the circuit breaker rejects a request or retry buffering fails, preventing leaked files and streams. (#1136)
+  - Apps Script: keep file names within one TSV field in appscript content, escaping line breaks instead of splitting output rows. (#1091) — thanks @haosdent.
+  - Docs: identify the queued batch UUID in revision-mismatch errors so it can be inspected or aborted. (#1143) — thanks @SebTardif.
+  - Search Console: preserve permission-denied exit codes when adding API setup or scope guidance. (#1094)
+  - Dependencies: refresh Google/MCP clients and protocol modules, gofumpt, Node 26/Corepack, pnpm 11, Docker build pins, and tracking-worker Vite, PostCSS, Undici, Nano ID, and tooling pins while retaining Go 1.26 compatibility and release-age limits. (#1134, #1148)
+  - CI: verify the Go 1.26 minimum, worker types, and generated skills; avoid duplicate pull-request test runs and repair remote validation setup. (#1131, #1147)
+ReleaseNotesUrl: https://github.com/openclaw/gogcli/releases/tag/v0.41.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

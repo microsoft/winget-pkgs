@@ -1,0 +1,79 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.3.2
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-agent-core
+  Fixed
+  - Fixed tool calls that put their payload in the intent field i (for example a file body in write) silently running with the leftover arguments; they now fail with an error telling the model to retry (#13140, #13141 by @radkawar)
+  - Fixed the Anthropic compaction failure log omitting why no compaction block came back; it now names the stop reason (#13300 by @alphastorm)
+  @oh-my-pi/pi-ai
+  Fixed
+  - Fixed capped Anthropic and Bedrock Claude requests with thinking enabled, including on-demand compaction, ending at max_tokens with no answer; every capped request now gets its effort's thinking budget on top of the requested output (#13300 by @alphastorm)
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added ctx.agent to the extension context, reporting whether the session is the top-level agent or a subagent, plus its registry id, agent definition name, task depth and parent id, so handlers rebound to subagent sessions can tell which agent they serve (#13314 by @andrebrait)
+  - Added tracking of Anthropic's usage-limit wrap-up allowance for Claude subscription accounts: after the 5-hour or weekly limit is reached, the status line and /slow status show limit reached · wrapping up · resets HH:MM, and the agent is told to wrap up when neither low priority nor extra usage will continue the work (#13340 by @H4vC)
+  Changed
+  - providers.anthropic.slowMode now controls only the low-priority lane; the usage-limit wrap-up allowance is tracked for every first-party Claude subscription account (#13340 by @H4vC)
+  - Enter on the /model hub sidebar now moves focus to the model list (like →) instead of acting on the highlighted row (#13347 by @H4vC)
+  Fixed
+  - Fixed the Windows bash tool exporting TEMP, TMP, and TMPDIR with 8.3 short names such as ADMINI~1, so they now match the long-form pwd/$PWD after cd "$TEMP" (#13265 by @CoderTCY)
+  - edit and write no longer refuse handwritten files named generated.go, generated.ts, generated.js, or generated.py; these are treated as auto-generated only when their header carries a generated-code marker (#13138, #13139 by @radkawar)
+  - Fixed the edit tool warning that valid Go 1.26 new(expr) calls (e.g. new(f(x))) introduced a syntax error, and ast_grep/ast_edit reporting parse errors on them (#13148, #13149 by @radkawar)
+  - Fixed hashline PUT N* / CUT N* on the first statement of a block (for example a Go or Python function that opens with an if) also replacing or deleting every statement after it (#13153, #13154 by @radkawar)
+  - Fixed the Full output: artifact:// link on large background bash and eval results pointing at a truncated copy with […elided…] gaps instead of the complete output (#13142, #13143 by @radkawar)
+  - Fixed grep paths like dir/*.go also matching files in subdirectories of dir (#13146, #13150 by @radkawar)
+  - Fixed auto-compaction re-sending a failed native (server-side) compaction on every turn, re-reading the full context each time; after a failure a retry would repeat, the next configured method runs instead until a compaction succeeds (#13310 by @alphastorm)
+  - Fixed a /slow off session resending requests indefinitely when another session had activated the shared Anthropic low-priority lane (#13340 by @H4vC)
+  What's Changed
+  - fix(pi-edit): allow editing handwritten generated.go files by @radkawar in https://github.com/can1357/oh-my-pi/pull/13139
+  - fix(agent): reject tool calls whose intent field carries the payload by @radkawar in https://github.com/can1357/oh-my-pi/pull/13141
+  - fix(ast): parse Go 1.26 new(expr) without syntax errors by @radkawar in https://github.com/can1357/oh-my-pi/pull/13149
+  - fix(natives): fail the build when an installed host addon cannot load by @alphastorm in https://github.com/can1357/oh-my-pi/pull/12682
+  - fix(coding-agent): link background job Full output to the raw capture by @radkawar in https://github.com/can1357/oh-my-pi/pull/13143
+  - fix(pi-ast): PUT/CUT N* on a block's first statement stops at that statement by @radkawar in https://github.com/can1357/oh-my-pi/pull/13154
+  - fix(shell): expand inherited Windows temp 8.3 paths by @CoderTCY in https://github.com/can1357/oh-my-pi/pull/13265
+  - fix(coding-agent): keep grep dir/*.go globs out of subdirectories by @radkawar in https://github.com/can1357/oh-my-pi/pull/13150
+  - feat(tui): filter the esc-esc rewind selector with f by @H4vC in https://github.com/can1357/oh-my-pi/pull/13295
+  - feat(advisor): evict stale tool results from finished reviews by @alnaggar-dev in https://github.com/can1357/oh-my-pi/pull/13238
+  - fix(ai): add thinking headroom to capped anthropic requests by @alphastorm in https://github.com/can1357/oh-my-pi/pull/13300
+  - fix(coding-agent): stop re-sending a native compaction that failed for good by @alphastorm in https://github.com/can1357/oh-my-pi/pull/13310
+  - feat(extensions): expose the running agent's identity as ctx.agent by @andrebrait in https://github.com/can1357/oh-my-pi/pull/13314
+  - feat(anthropic): track the usage-limit wrap-up allowance under /slow by @H4vC in https://github.com/can1357/oh-my-pi/pull/13340
+  - enter behavior change for models menu by @H4vC in https://github.com/can1357/oh-my-pi/pull/13347
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.3.1...v18.3.2
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.3.2
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

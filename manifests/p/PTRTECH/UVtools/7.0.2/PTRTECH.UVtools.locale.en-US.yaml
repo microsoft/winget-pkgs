@@ -1,0 +1,76 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: PTRTECH.UVtools
+PackageVersion: 7.0.2
+PackageLocale: en-US
+Publisher: PTRTECH
+PublisherUrl: https://github.com/sn4k3
+PublisherSupportUrl: https://github.com/sn4k3/UVtools/discussions
+Author: Tiago Conceição
+PackageName: UVtools
+PackageUrl: https://github.com/sn4k3/UVtools
+License: AGPL-3.0
+LicenseUrl: https://github.com/sn4k3/UVtools/blob/HEAD/LICENSE
+Copyright: Copyright © 2020 PTRTECH
+ShortDescription: MSLA/DLP, file analysis, calibration, repair, conversion and manipulation
+Moniker: UVtools
+Tags:
+- 3d print
+- dlp
+- image analysis
+- msla
+- resin print
+- sla
+- slicer
+ReleaseNotes: |-
+  - File formats:
+    - (Improvement) Encoding is up to 10x faster for GR1 and MDLP, 2x for PWS, and 25-35% faster for cbddlp, N4/N7, and
+      Photon S; decoding PWS, cbddlp, FDG, and PHZ is 25-45% faster. Runs are found with vectorized searches, and the
+      duplicated CTB, anti-aliasing plane, and column line codecs are now shared
+    - (Improvement) CTB, PHZ, and FDG layer encryption is processed 4 bytes at a time, and the CTB encrypted encoder
+      writes layers in batches instead of keeping all of them in memory
+    - (Improvement) Thumbnail encoding and decoding no longer compares strings or queries the channel count per pixel
+    - (Improvement) QDT and SVGX decoding parse without allocating a string per token, SVGX decoding no longer searches
+      the layer group linearly, and its encoding no longer creates a native wrapper per contour point
+    - (Improvement) Truncated CTB RLE data now fails with a corrupted data error instead of an index out of range
+    - (Fix) Anet: the last pixel of the layer was lost when it differed from the previous one, making the file unreadable
+    - (Fix) OSF: encoding failed when the layer content touched the last row of the image, Layer.LastPixelIndex pointed
+      one row below the last pixel
+    - (Fix) cbddlp: layers with anti-aliasing 1 turned every gray pixel black, and identical layers did not copy the page
+      number
+    - (Fix) OSLA: the preview table padding used the layer table size
+    - (Fix) Encoding layers to a zip with the cache enabled skipped the duplicated layers
+    - (Fix) The hash helpers shared non-thread safe instances, and the AES padding bytes were not zeroed
+    - (Fix) ZCode: wrong exception arguments for a too long G-code line; QDT: swapped resolution names on header errors
+  - (Fix) Crash Cannot access a disposed object on Image.MeasureOverride (#1150): the thumbnail and tool preview
+    bitmaps are now disposed after the UI applied the new image, and the PCB exposure preview no longer leaks the previous
+    bitmap
+  - Windows and controls:
+    - (Improvement) 3D layer preview: model volume, weight, cost and base contact are cached instead of recomputed from
+      the whole mesh on every plate change, clicking where the model is not hit skips the full mesh picking, and the
+      orientation cube, peel curve and measure overlay no longer allocate geometries, pens and brushes on every frame
+    - (Improvement) PCB exposure and Lithophane previews are rendered off the UI thread, outdated renders are discarded
+    - (Improvement) Moving files and layers in the PCB exposure and Phased exposure tools no longer rebuilds the list
+    - (Improvement) Tool windows scripting inputs share one numeric input implementation, and icon only buttons have tooltips
+    - (Fix) Scripting: the save file dialog input was ignored when a file was picked, and the open file text was joined wrong
+    - (Fix) 3D layer preview: wrong center of mass vertex on the wireframe
+    - (Fix) Message window: custom button tags were lost
+    - (Fix) Settings: parallelism and decimal values were parsed with the current culture instead of the invariant one
+    - (Fix) Tool window: the layer count text, and Enter triggering the first button by default
+    - (Fix) Layer import: unreadable images crashed the preview, and the filter index was not validated
+    - (Fix) Pixel editor profiles: selection with no profile and out of range indexes
+    - (Fix) Suggestion settings: stale content kept when no suggestion was active
+    - (Fix) Benchmark: a zero duration produced a division by zero
+  - (Fix) Error when executing UVtooldCmd run with a script (#1138)
+  - (Fix) LayerCache disposed the wrong SkiaSurface when the layer was changed, and did not release the framebuffer
+  - (Fix) Zstd: the fastest compression level was not really the fastest
+  - (Improvement) Update NativeCompressions and use it LZ4 codec
+  - (Update) Benchmark 13900K reference values
+  - (Drop) K4os.Compression.LZ4 library
+ReleaseNotesUrl: https://github.com/sn4k3/UVtools/releases/tag/v7.0.2
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/sn4k3/UVtools/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

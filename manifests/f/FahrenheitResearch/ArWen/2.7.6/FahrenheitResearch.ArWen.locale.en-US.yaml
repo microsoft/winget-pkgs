@@ -1,0 +1,66 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.ArWen
+PackageVersion: 2.7.6
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/arwen/issues
+Author: Fahrenheit Research
+PackageName: ArWen
+PackageUrl: https://github.com/FahrenheitResearch/arwen
+License: Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+Copyright: Copyright © Fahrenheit Research
+CopyrightUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+ShortDescription: 'ArWen: GPU-native WRF-ARW-class regional weather model, verified against WRF v4.6.1'
+Description: "ArWen is an independent, GPU-native implementation of a WRF-ARW-class regional atmospheric model. It is not affiliated with or endorsed by NCAR or UCAR. The name is a wordmark for \"the ARW solver, GPU-native\"; the Python package is currently named gpuwm. Safety. ArWen is a research and educational tool. It is never a substitute for official forecasts and warnings from your national meteorological service. Do not use it to make safety decisions. Regional numerical weather prediction at convective scale has mostly required institutional clusters, which means most of the world runs on global-model guidance at 10-25 km. ArWen's aim is to put a verified, kilometer-scale limited-area model on a single consumer GPU: pick a point, size a nest ladder to your card, pull public analysis data, and run a 1 km (or 500 m) simulation of your own area on hardware you own -- especially in places where no national convection-permitting model exists."
+Moniker: arwen
+ReleaseNotes: |-
+  ArWen 2.7.6 is a feature and fix release with Desktop 1.0.6.
+  - Windows desktop: extract and open ArWen.exe. Setup installs and checks the matching runtime, tables and geography.
+  - Linux desktop: follow the included installation guide. The graphical application requires x86-64 Linux with glibc 2.39 or newer.
+  - Integration kit, desktop source, verification records, and checksums.
+  New
+  - Omega is diagnosed one column per thread in WRF's own operation order, so a whole step is 5.1 to 7.0 percent cheaper on an RTX 5070 Ti (1.07, 2.02 and 5.33 ms per step at 250x200x49, 320x256x49 and 480x384x49 under Morrison). Because the summation order changed, results move slightly: one Omega call by at most 6.0e-7 of its maximum, the dynamic fields by 1.7e-4 to 7.2e-4 of theirs after 60 steps, and of the moisture fields only Morrison's cloud droplet number, by 2.5e-6 of its maximum. Proposed and measured by weiserhase in issue #5.
+  - --source hrrr now defaults to RTE+RRTMGP radiation (thompson-mp8-ysu-mm5-noah-rte-rrtmgp-v1) in place of the legacy RRTMG pair, so every route, door and catalog case shares one radiation default. The legacy suite stays selectable everywhere as --physics-profile thompson-mp8-ysu-mm5-noah-rrtmg-legacy-v1, and a proposal that sets ra_rrtmg_variant composes instead of being refused.
+  - The new radiation default fits more domain on the same card: a 6 hour 12/3 km HRRR ladder on a 16 GiB card sizes to 268x216 with a 536x432 nest (13.76 GiB peak) where the legacy suite fits 184x146 and 368x288 (13.74 GiB), 2.15 times the root cells. Both radiation engines still cap a longwave column at 128 radiation layers.
+  - The nowcast door can run the fine nest: --nest-half-width-km (or --nest-nx and --nest-ny) turns it on, the other nest options pass through to the cycle driver, and the receipt reports what was asked for under sizing.nested_free_forecast.
+  - The nowcast receipt says where the forecast is: outputs.forecast_frames names the frame folder and which legs are the free forecast, and the nowcast pages show the gpuwm render --engine rust line that draws one. Each frame is a one-level composite snapshot; full fields come from the prepared forecast.
+  - The fine nest's forecast can be drawn: the cycle writes a wrfout per leg beside the child's .npz, and gpuwm render --engine rust draws its composite reflectivity into a d02-1km folder.
+  - gpuwm render --section-top-km N sets how tall a vertical cut is drawn, 1 to 40 km, on every render route. Every cut had been fitted to 14 km, which stays the default, and render-summary.json records section_tops_km.
+  - gpuwm render draws twelve column products from a wrfout: the 0, -10 and -20 C isotherm heights, the supercooled liquid water path over the whole column and the 0 to 3 and 3 to 6 km layers, each hydrometeor's column maximum, and simulated_ir_satellite, whose stored field nothing had written.
+  - Preparation no longer stops when the configured vertical coordinate cannot order the terrain: it derives the largest etac WRF's hybrid coordinate supports for the highest ground any domain or following nest can reach, prints the choice, records it in the receipt and applies it to every domain. Terrain no positive etac can order is still refused.
+  - tools/build_stretched_eta_ladder.py --dt with --price-band reports a ladder's vertical Courant number and the step that holds it, and the DA cycle's preflight names the updraft at which limiting starts. On one storm, 200 m layers under a step chosen for 680 m layers ran the limiter at 1.41 on 606 cells and halved the peak updraft from 33.9 to 18.5 m/s. Both read the full-level layer a parcel crosses, so on the shipped 49-level ladder the thinnest convective layer reads 630.30 m instead of 614.90 m, and its Courant number at 15 s under 33.9 m/s reads 0.8068 instead of 0.8270.
+  - gpuwm downscale tells you at the door when a child at or below 250 m spacing is not set up for LES (it inherits its parent's ladder, runs a 1-D boundary-layer scheme with no 3-D closure, or mixes vertically by no route) and names the ways out: --child-levels N,STRETCH, km_opt = 3 or km_opt = 2 with bl_pbl_physics = 0 in --child-config, and --child-surface-from.
+
+  Fixed
+  - gpuwm resume finds the configuration in the run directory it is given: as typed, as a hidden .toml, under --outdir, or as the run recorded it. --explain says which, and a refusal names every path tried and, for a path it cannot read, the errno and the way out.
+  - gpuwm resume on a downscaled child's run directory says what to do instead: a finished child gets the gpuwm render ... --series line for its frames, and one that stopped inside its forecast is sent back to gpuwm downscale.
+  - python -m gpuwm.prepared_domain_tree_forecast imports the tilestream it shipped with from any directory, instead of dying with an ImportError beside an older checkout.
+  - An ERA5 window sized for a 16 GiB card initializes and runs instead of refusing with "specific humidity must be finite in [0, 1)": the check allows for the interpolation's own envelope and floors every admitted value at WRF's qv_min. A source small enough to window no longer stops preparation with an AttributeError.
+  - gpuwm check accepts ERA5's descending pressure levels, as gpuwm run does.
+  - --source hrrr-prs starts with the cloud water, cloud ice, rain, snow and graupel the wrfprs file carries instead of starting dry. Vertical velocity still starts at zero and the boundaries do not carry the five.
+  - gpuwm run --wrfinput and run --met-em write their run report again instead of failing at the end with an AttributeError. The wrfbdy and wrfinput seam refusal names USE_THETA_M and what it compared, and says WRF 3.7 to 3.9.1.1 wrote a dry T_BXS where 4.0 onward writes a moist one.
+  - A specified domain forced with an aerosol boundary table keeps its outer row on that table under mp_physics = 28. The nwfa and nifa boundary row was never put back, so on a 2.7 km domain over 81 levels one corner grew 74 times in an hour, from 6.94e8 to 5.13e10 kg-1, until the health gate stopped the forecast; the same hour now holds at 6.96e8 kg-1.
+  - An mp_physics = 28 cold start whose analysis carries cloud, rain or ice but no droplet, rain or ice numbers now sets those numbers the scheme's way, and the prepared cache counts it under hydrometeor_initialization.cold_start_moment_closure. Before the fix such a start read 145.38 dBZ between steps and 62.89 dBZ as prepared.
+  - --soil-source pointed at the run's WPS directory recovers the soil column when the source table declares more layers than that cycle carried, and names the met_em and the layer source it chose. A layer it cannot convert is refused with what it converted and which table fields to fix.
+  - The prepared single-domain and domain-tree doors offer icon-global, with the same fourteen physics profiles as icon-eu.
+  - The standalone rw-wps bundle carries gdt101_remap and rw_fetch, so rw-wps --source icon-global runs on a bundle install, and a build that leaves out a bridge is refused naming it.
+  - The configuration reference documents ra_lw_physics and ra_sw_physics, two per-domain keys it accepted and never listed; the page promised 61 keys and printed 59.
+  - python -m tools.da_nowcast run --window-end replays the hour asked for: the volumes, the lag, the echo census and the storm motion that places the domain come from that window, not the clock. On one archived hour, 15 volumes and a motion of 8.27 m/s toward 166.7 degrees became 18 volumes and 15.14 m/s toward 146.5. Only --window-end latest reads the clock, and a malformed value is refused before any download.
+  - Reflectivity and hydrometeor analyses run under Thompson (mp_physics 8 and 28): a cell given mass and no number is repaired the scheme's way instead of refused (one cycle had refused 1,834 cells), and the reflectivity operator works out graupel number itself instead of raising an error.
+  - The DA positivity policy covers every number concentration and volume the model carries (nwfa, nifa, Milbrandt-Yau hail number, WDM6 CCN number, P3 rime mass and volume); one filter increment had driven one to -1.005e8 per kilogram and the next leg refused the state. A field the policy does not cover is refused at the merge, and the moment conditioning uses the running scheme's condensate threshold (1e-12 under Thompson, 1e-14 under Morrison).
+  - The hot start's insertion and the filter's increment are bounded together; each was admissible alone while their sum put water vapour at -1.02e-4 kg/kg. The correction handed to a nested child is bounded against the child's own background, which had received -1.014e-5 kg/kg on a boundary row.
+  - The 1 km child runs on every cycling leg and is corrected by its parent's analysis instead of rebuilt from it; on the free legs alone it had lived 90 to 165 seconds. An analysis that changed nothing leaves the child bitwise alone.
+  - A forecast leg that starts part way through a run makes the radiation call its land surface needs, so a cycle under a both-streams profile no longer dies at its first surface call with "GLW has no producer", and a nest born on a later leg counts its steps from its birth.
+  - Each cycling analysis leg is a restart: soil, surface, accumulators and held physics tendencies carry across legs through the checkpoint set gpuwm run --restart reads, so two 60 s legs equal one 120 s run byte for byte. A cycling ensemble saved by 2.7.5 cannot be continued by 2.7.6, because it holds none of that soil, surface or accumulator state: it is refused with a message naming it, and the cycle is started again from the prepared background.
+  - rw_nexrad verify checks each pack array against its own declared type, so a pack written with decode --censor-flags verifies and --clear-air-from-censor keeps every radar it was given.
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/arwen/releases/tag/v2.7.6
+InstallationNotes: |-
+  This application requires an NVIDIA GPU with CUDA support to run.
+  Will not function on integrated graphics or non-NVIDIA hardware.
+  Without compatible hardware, the application will fail to launch.
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
