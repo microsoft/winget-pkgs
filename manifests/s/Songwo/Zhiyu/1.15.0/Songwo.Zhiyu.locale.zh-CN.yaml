@@ -1,0 +1,60 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Songwo.Zhiyu
+PackageVersion: 1.15.0
+PackageLocale: zh-CN
+Publisher: Songwo
+PublisherUrl: https://github.com/Songwo
+PublisherSupportUrl: https://github.com/Songwo/zhiyu/issues
+Author: Zhao Qingsong
+PackageName: Zhiyu
+PackageUrl: https://songwo.github.io/zhiyu/
+License: MIT
+LicenseUrl: https://github.com/Songwo/zhiyu/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Songwo
+ShortDescription: 连接文档、账号与数字资产的个人工作空间。
+Description: |-
+  知屿 Zhiyu 是连接文档、账号与数字资产的个人工作空间，将主机、在线服务、域名、邮箱、AI 订阅、号码、密钥和证书集中到一个桌面应用中。资料保存在本机，凭据库使用 scrypt 派生密钥与 AES-256-GCM 加密；通过 SSH、DNS、TLS 和服务商 API 读取实际状态，并可通过你配置的模型进行有来源的问答。
+  主要功能包括 SSH 终端与主机指标采集、域名 WHOIS 与 TLS 证书到期提示、网站账号密码与 TOTP 动态验证码管理、IMAP/SMTP 邮箱、Markdown 图文文档、浏览器插件密码迁移，以及接入 OpenAI、Claude、Grok、Gemini 等模型进行有来源的问答并查询订阅额度。
+Tags:
+- 人工智能
+- 密码
+- 数字资产
+- 文档
+- 服务器
+- 账号
+ReleaseNotes: |-
+  知屿 Zhiyu 1.15.0
+  这一版回应两条反馈：「AI 订阅的列表里还有 CPU 和内存，每类资产应该显示自己的内容」，以及「想在域名页直接连 Cloudflare，一次看到所有域名的到期时间并改 DNS」。同时修复了 Cloudflare 连接卡片不能编辑、重复连接会导入出两份同名域名的问题。已有资料沿用原数据目录，可在应用内更新。
+  资产表格按类型显示
+  - 服务器：状态、CPU、内存、磁盘、系统 / 地区、到期 / 续费、费用。
+  - AI 订阅：服务商、套餐、额度 / 用量、续费日、月费，不再显示 CPU 与内存。
+  - 域名：到期时间、注册商、DNS 服务商、续费方式、费用。
+  - 证书（颁发者）、邮箱（类型、容量已用）、密钥（类型、上次轮换）、服务（类型、服务商、地址、到期、费用）也各有自己的列。标签页等混合视图仍用通用列。
+  - 到期列同时显示剩余天数，快到期或已过期标红；操作列固定在右侧，列多时不会被挤出窗口。
+  域名页直连 Cloudflare（桌面版）
+  - 域名页顶部新增「连接 Cloudflare」：粘贴 API Token，先验证再保存；Token 无效或没有读取权限时不会保留连接。
+  - 读取账户下的全部域名，预览状态、到期时间、自动续费和 NS，勾选后导入。在 Cloudflare 注册的域名用 Registrar 注册信息填入到期日与自动续费；其他注册商的域名读不到，导入后用 WHOIS 补全，列表里会提示。没有 Registrar 权限时静默跳过，不报错。
+  - 已导入的域名在表格操作列有「管理 DNS」，也可以在预览窗口里直接进入：查看、新增、修改、删除记录，沿用「预览变更、确认后应用」的流程。
+  - 「同步」按钮与进入域名页时的自动同步（10 分钟内不重复）只更新已导入域名的 NS、到期日、自动续费，不会新增资产，也不会覆盖备注、标签、费用。
+  - 创建 Token 所需权限：区域 · 区域 · 读取（必需）；区域 · DNS · 编辑（要改 DNS 时）；账户 · Registrar · 读取（可选，读取 Cloudflare 注册域名的到期日）。详见 Cloudflare 接入。
+  修复
+  - Cloudflare 连接卡片现在可以改名、换 Token（先用新 Token 验证，通过后才替换）和移除；移除后域名资产保留，但不再指向已删除的连接。
+  - 用同一账号再连一次会被拦下并指向已有连接，不再出现两个同名连接。
+  - 导入域名时，同名的本机域名、换了连接的同一个 Cloudflare 域名都并入已有资产，备注和标签保留，不再导入成两份。已经出现的重复资产不会自动删除，可在列表里手动删掉多余的一份。
+  响应速度
+  - 表格视图不再计算关系图所需的资源、关联和节点，资产行只计算一次。
+  - Cloudflare 的注册信息与 Workers、Pages、Tunnel 并行读取，不增加等待时间。
+  升级与发行
+  Windows 附件为安装包 Zhiyu-1.15.0-setup.exe、便携版 Zhiyu-1.15.0-portable-x64.zip、浏览器插件 Zhiyu-1.15.0-browser-extension.zip 与 SHA256SUMS.txt；应用内更新沿用同次构建的 latest.yml 和 .exe.blockmap。网页版镜像为 ghcr.io/songwo/zhiyu-web:1.15.0；Cloudflare 直连仅桌面版提供。安装包与便携版均未做代码签名，请核对 SHA256。浏览器插件本版只同步版本号。
+  验证
+  - 范围说明：Cloudflare 相关功能用合成响应验证（分页、权限、注册信息、导入合并、移除解绑、重复连接），开发阶段没有使用真实 Token，也没有修改真实 Cloudflare 资源；真实账号结果由使用者自行确认。
+  - TypeScript、ESLint（0 错误）、i18n 检查通过；1012 项后端与脚本单元测试、105 项前端单元测试通过。新增覆盖：Cloudflare 注册信息读取（游标分页、无权限静默跳过、其他错误提示）、批量导入与同步、同名与换连接域名并入已有资产、移除连接后解绑。
+  - 桌面与网页构建（desktop:build、build）通过。界面检查（开发预览，模拟桌面桥接）：各类型表格列、连接卡片的编辑与移除、连接 → 预览 → 导入 → DNS 的完整流程。
+  - 打包程序 node scripts/release-smoke.mjs 检查通过（版本 1.15.0、独立数据目录、首次设置、重启、缩放）。
+  - SHA256：Zhiyu-1.15.0-setup.exe 0cc684ec42537597978b30bf6dd385ddaccb3480c55a0a277536efa804747b35；Zhiyu-1.15.0-portable-x64.zip 96eae564b0b17bfd04c85cbdae710a0ff2fa70ee0b0262981c0461ea11b437ef。
+  - 未执行：docs/RELEASING.md 中依赖开发预览的 Electron 集成脚本（agent、mail、subscription 等）本版未重跑，这些模块本版没有改动；macOS 构建未验证。
+ReleaseNotesUrl: https://github.com/Songwo/zhiyu/releases/tag/v1.15.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
