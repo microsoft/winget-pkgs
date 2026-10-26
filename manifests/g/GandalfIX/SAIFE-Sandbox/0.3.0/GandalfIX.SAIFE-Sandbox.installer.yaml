@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+PackageIdentifier: GandalfIX.SAIFE-Sandbox
+PackageVersion: 0.3.0
+# The default backend needs the in-box base-container / PSEC support of Windows 11
+# 24H2. The AppContainer backend also runs on older builds, but this package's
+# default path does not, so the floor is stated instead of discovered at runtime.
+MinimumOSVersion: 10.0.26100.0
+InstallerType: zip
+NestedInstallerType: portable
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/GandalfIX/saife/releases/download/v0.3.0/saife-0.3.0-x64.zip
+    InstallerSha256: 9DD85C4EA0518F9CAAE597297C3EF978274873380D26A5DE7974C97CBFBF6640
+    NestedInstallerType: portable
+    NestedInstallerFiles:
+      # The supervisor must find its launcher beside itself: both files are
+      # extracted, but only the supervisor is aliased onto PATH.
+      - RelativeFilePath: saife.exe
+        PortableCommandAlias: saife
+      - RelativeFilePath: saife-launch.exe
+    Commands:
+      - saife
+ManifestType: installer
+ManifestVersion: 1.12.0
