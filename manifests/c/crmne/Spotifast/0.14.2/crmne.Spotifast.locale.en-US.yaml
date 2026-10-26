@@ -1,8 +1,8 @@
 # Created with YamlCreate.ps1 Dumplings Mod
-# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: crmne.Spotifast
-PackageVersion: 0.14.1
+PackageVersion: 0.14.2
 PackageLocale: en-US
 Publisher: Carmine Paolino
 PublisherUrl: https://paolino.me/
@@ -59,19 +59,42 @@ Tags:
 - sound
 - spotify
 ReleaseNotes: |-
-  Spotifast 0.14.1 fixes music dropping out on Linux.
+  Spotifast 0.14.2 fixes signing in for the first time. Until now, Spotifast signed in through ncspot's Spotify app, and its developer has closed that app to other apps, so a first sign-in failed with "redirect_uri: Not matching configuration". Now you make your own free Spotify app, and the sign-in screen guides you through it. This release also plays local files at any sample rate, with their own covers and lyrics, asks Spotify for fewer audio keys, and fixes a crash in playlists with hidden songs.
   Download Spotifast: Mac · Windows · Windows ARM · Linux · Linux ARM · Flatpak · AppImage · AppImage ARM
   On Windows, pick the .msi. The setup program (-setup.exe) is still attached so that installs from 0.12.0 and earlier can update through it.
+  Changed
+  - Sign in with your own free Spotify app, guided on the sign-in screen. The screen shows each step: open Spotify's developer dashboard, create an app with the redirect URI it shows (with a Copy button) and Web API ticked, then paste the app's Client ID. Spotifast checks the Client ID with Spotify before the browser opens. Spotify requires Premium on the account that creates the app. If you are already signed in, nothing changes: Spotifast keeps working, and Settings offers the switch to your own app. Getting started has the steps. By @crmne; thanks @MrHunor and @Fabsss0505. (#1057, #1059)
+  New
+  - Local files play at any sample rate, including 48 kHz, hi-res and mono files, instead of only 44.1 kHz stereo. By @crmne; thanks @PeeblyWeeb. (#3)
+  - Queue a playlist's local files. Add to queue, Play next, a selection and a drop now queue them while this computer plays. By @crmne; thanks @paulwinches. (#1002)
+  - Local files show their own cover and lyrics, from the picture in the file and a .lrc file beside it or the lyrics in its tags. By @crmne; thanks @MaximoLongo. (#1001)
+  - A page for when something goes wrong. When something goes wrong explains "Spotify refused the audio key" and "Spotify is being slow" in plain words, with what helps. By @crmne.
+  - The Winamp D button steps through 1x too, so a skin can show pixel for pixel. By @crmne.
   Fixed
-  - Music plays without dropouts on Linux. 0.14.0 kept too little sound ready for PipeWire, so playback stuttered. Spotifast now keeps 200 ms of sound queued, and the visualizers stay in time with it. By @crmne; thanks @jqewdfr13, @ez-ruh and @gcsvieira. (#994)
+  - Fewer "Spotify refused the audio key" errors. Spotifast now asks Spotify for one audio key at a time, waits after a refusal before asking again, and fetches ahead only the next song's key. By @crmne; thanks @mrcego. (#283)
+  - A refused audio key is explained in a banner that says what happened, that a phone or another device still plays, and opens the device picker, instead of a red error. By @crmne; thanks @mrcego. (#283)
+  - When Spotify slows the shared app, a banner says so and offers to set up your own app, at most once a day. By @crmne.
+  - Repeat One turns into Repeat All when you change songs, as in Spotify's apps. Restarting the song keeps it. By @crmne; thanks @jorisw. (#1022)
+  - Scrolling to the end of a playlist with hidden songs no longer crashes Spotifast, and the right row plays. By @MaxRong; thanks @Alexandre-Froes. (#1046, #1041)
+  - The remote volume slider no longer jumps back while Spotify catches up. By @nikankad; thanks @TobiasVeiga00. (#1045, #1009)
+  - Related artists load without waiting on the shared app. By @github-lover-9999. (#1044)
+  - A .lrc file saved with a byte order mark keeps its first line. By @MaxFreedomPollard. (#1034)
+  - Dates like "2 days ago" stay in step with the clock in every language. By @EnricoNSilva. (#1032)
+  - Single-key player shortcuts work while a song row has focus. By @EnricoNSilva. (#1031)
+  - Full-screen lyrics use the whole window width, without room kept for a side panel. By @itsmunzir; thanks @pomjoep. (#892, #783)
+  - Page Up, Page Down, Home and End move through the main page. By @sabrimete; thanks @warfl0p. (#998, #990)
+  - The account menu shows your plan right under your name, and settings cards no longer have extra room at the bottom. By @crmne; thanks @Guanran928. (#1038, #1037)
+  - macOS says menu bar, not tray. By @crmne; thanks @jorisw. (#1006)
+  - Visualizers keep moving in Winamp shade mode. By @jeffgreco. (#985)
+  - Your Top Songs can show the last 4 weeks, the last 6 months or the past year, on Home and its page, in every language. By @saikumargudelly. (#956, #955)
   Thanks
-  @jqewdfr13, @ez-ruh and @gcsvieira for the quick reports, and everyone who reported problems since 0.14.0.
-  Full changelog: https://github.com/crmne/spotifast/compare/v0.14.0...v0.14.1
-ReleaseNotesUrl: https://github.com/crmne/spotifast/releases/tag/v0.14.1
+  @MrHunor, @Fabsss0505, @PeeblyWeeb, @paulwinches, @MaximoLongo, @mrcego, @jorisw, @MaxRong, @Alexandre-Froes, @nikankad, @TobiasVeiga00, @github-lover-9999, @MaxFreedomPollard, @EnricoNSilva, @itsmunzir, @pomjoep, @sabrimete, @warfl0p, @Guanran928, @jeffgreco, @saikumargudelly, and everyone who reported problems since 0.14.1.
+  Full changelog: https://github.com/crmne/spotifast/compare/v0.14.1...v0.14.2
+ReleaseNotesUrl: https://github.com/crmne/spotifast/releases/tag/v0.14.2
 Documentations:
 - DocumentLabel: What is Spotifast?
   DocumentUrl: https://spotifast.rocks/what-is-spotifast/
 - DocumentLabel: Settings and Files
   DocumentUrl: https://spotifast.rocks/settings-and-files/
 ManifestType: defaultLocale
-ManifestVersion: 1.12.0
+ManifestVersion: 1.28.0
