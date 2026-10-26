@@ -1,0 +1,105 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Patchloom.Patchloom
+PackageVersion: 0.37.3
+PackageLocale: en-US
+Publisher: Patchloom
+PublisherUrl: https://github.com/patchloom
+PublisherSupportUrl: https://github.com/patchloom/patchloom/issues
+Author: Patchloom
+PackageName: Patchloom
+PackageUrl: https://github.com/patchloom/patchloom
+License: MIT
+LicenseUrl: https://github.com/patchloom/patchloom/blob/HEAD/LICENSE
+Copyright: Copyright (c) Patchloom contributors
+ShortDescription: Structured file editing CLI for AI agents
+Description: |-
+  Patchloom is a single-binary CLI that gives AI coding agents safe, structured
+  file editing: search and replace, unified diffs, parser-backed JSON/YAML/TOML
+  document ops, markdown section editing, AST-aware renames, multi-file
+  transactions, undo, and an MCP server for tool calls.
+Moniker: patchloom
+Tags:
+- ai
+- cli
+- developer-tools
+- mcp
+- rust
+ReleaseNotes: |-
+  Patchloom 0.37.3
+  YAML is parsed without the archived unsafe-libyaml crate. Edits to ini
+  files, markdown lists, and document moves keep the surrounding text
+  instead of rewriting or deleting it.
+  Highlights
+  Unquoted yes, no, on, and off in YAML stay strings. doc set
+  on an ini line keeps the spaces around = and a spaced ; or #
+  note. md upsert-bullet puts the new item in that heading's list,
+  before a nested heading. doc move refuses to replace a key that
+  already has a value, and [0], 0, and 00 name the same array slot.
+  Bug fixes
+  - YAML was parsed with the archived unsafe-libyaml crate.
+    Parsing now uses noyalib. Unquoted yes, no, on, and off
+    stay strings. A document doc set still appends a trailing newline
+    when the serializer omits one (#2668).
+  - doc set on port = 8080 ; primary rewrote the line as port=9090.
+    The spaces around = disappeared and the note was deleted. The
+    edited line now keeps that spacing and the note. A new value that
+    would be read back shorter, because a space before ; or #
+    starts a comment, is invalid_input and the file stays unchanged.
+    8080;primary and foo#bar stay part of the value (#2673).
+  - replace told every refused file to pass --allow-absent-old.
+    A file that simply did not contain the pattern printed that hint.
+    The hint is now only for exact_old_absent, when a fuzzy candidate
+    was found and not written. A plain miss prints refused PATH: no_matches (#2674).
+  - md upsert-bullet placed the new item after a nested section.
+    Adding - beta under # List wrote it after the body of ## Other,
+    so it read as part of that section. The new item stays with the
+    heading's own list, before the first child heading. A bullet that
+    exists only under the child is not treated as already present.
+    A second upsert of the same item does not add it again (#2675).
+  - doc move onto a key that already had a value replaced that value.
+    Moving server.http onto server.host exited 0 and replaced
+    localhost with 8080. The command now returns already_exists
+    and leaves the file unchanged. Moving a field into an earlier array
+    slot no longer clears the sibling that slid into the old index (#2676).
+  - doc move treated [0], 0, and 00 as different array slots.
+    Moving items[0].child to items.0.child.nested deleted the value
+    and exited 0. The same destination written as items[0].child.nested
+    was already refused. rows[0][0] to rows.0[2] wrote the values in
+    the wrong order, and rows[0][0] to rows.0[1] left the array
+    unchanged. Those spellings are now one slot. A move into a
+    descendant is refused and the file stays unchanged. An object key
+    such as 01 is not bracket index 1 (#2677).
+  Numbers
+  ───────┬─────────────────────────────────────────────────────
+  Metric │Notes
+  ───────┼─────────────────────────────────────────────────────
+  Version│0.37.2 -> 0.37.3
+  ───────┼─────────────────────────────────────────────────────
+  Focus  │YAML parsing, ini lines, list bullets, document moves
+  ───────┴─────────────────────────────────────────────────────
+  Upgrading
+  - If a YAML file relied on unquoted yes, no, on, or off as
+    booleans, those values are strings now. Quote them only when you
+    want a string that would otherwise be a number or a boolean (true,
+    false, null).
+  - doc move onto an existing key returns already_exists and does
+    not write. Move to a free key, or delete the destination first.
+  - replace no longer suggests --allow-absent-old for a file that
+    has no match. Pass that flag only when you mean to accept a fuzzy
+    candidate.
+  - Install from crates.io, npm, Homebrew, or Scoop after the tag
+    ships. On Windows, Scoop is recommended. winget may need
+    winget source update after Microsoft publishes. Chocolatey can
+    lag while moderation runs.
+  Full changelog
+  patchloom-v0.37.2...patchloom-v0.37.3
+ReleaseNotesUrl: https://github.com/patchloom/patchloom/releases/tag/patchloom-v0.37.3
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://patchloom.github.io/patchloom/
+- DocumentLabel: Installation
+  DocumentUrl: https://github.com/patchloom/patchloom/blob/main/docs/getting-started/installation.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

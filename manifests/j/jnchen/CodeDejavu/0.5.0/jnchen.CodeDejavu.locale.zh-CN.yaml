@@ -1,0 +1,49 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jnchen.CodeDejavu
+PackageVersion: 0.5.0
+PackageLocale: zh-CN
+Publisher: jnchen
+PublisherUrl: https://github.com/jnchen
+PublisherSupportUrl: https://github.com/jnchen/code_dejavu/issues
+PackageName: Code Déjà Vu
+PackageUrl: https://github.com/jnchen/code_dejavu
+License: MIT
+LicenseUrl: https://github.com/jnchen/code_dejavu/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Code Déjà Vu contributors
+ShortDescription: 统一浏览和管理 Claude Code、Codex CLI 与 OpenCode 留在本机的会话、指令和配置资料的本地桌面工具
+Description: Code Déjà Vu 是一个基于 Tauri、SvelteKit 与 Rust 的本地桌面工具，用于统一浏览和管理 Claude Code、Codex CLI 与 OpenCode 留在本机的会话、指令和配置资料。会话解析、搜索索引和配置管理均在本机完成。应用不会把会话内容上传到项目维护者的服务；手动检查更新时会访问 GitHub Release 更新地址。
+Tags:
+- claude-code
+- codex
+- opencode
+- 会话管理
+ReleaseNotes: |-
+  新增
+  - OpenCode 同时支持 v1 与 v2 两种本地存储：v1 的 session/message/part 和 v2 的
+    session_v2/session_message 都会读取。升级到 v2 后仍保留在 v1 表中、未被迁移的旧会话
+    也会继续显示，两个版本都有的会话按 ID 去重并以 v2 为准。
+  - OpenCode v2 的会话、消息、工具调用、子代理、搜索、用量和归档均可正常解析，包括新的
+    subagent 工具和嵌套子代理。
+  - Claude Code 子代理元数据兼容可选字段和 parentAgentId：缺少 description/toolUseId
+    的子代理不再被跳过；嵌套子代理仍可在父会话的 Agent 卡片中逐层展开。
+  改进
+  - OpenCode v2 的 read/write/edit 参数、shell 工具和工具结果统一映射到现有的文件与
+    终端卡片。
+  - 未安装 OpenCode v2 的用户不受影响：纯 v1 数据库仍走原有解析路径。
+  - 新增两层 E2E 测试：Playwright 前端测试使用内存 IPC 夹具，覆盖会话、全部主页面、
+    快照/记忆/规则/指令/设置等写流程，以及分页、深度搜索、进程关闭、WSL 徽标、更新检查和
+    多级子代理；原生 Tauri WebDriver 测试使用一次性 home 和夹具数据，覆盖 Claude、Codex、
+    OpenCode v1/v2、Pi 的真实解析链路与两级子代理。二者都不会读取或修改真实 agent
+    记录。详见 docs/E2E_TESTING.md。
+  - 新增真实数据只读核心测试：复制本机会话到一次性 home 后运行，验证索引、四类来源、
+    会话打开与真实搜索，原始数据保持只读；测试前后校验 mtime。
+  修复
+  - 设置页检测到新版本时，更新日志现在按 Markdown 渲染，不再直接显示 ##、列表符号等源文本。
+ReleaseNotesUrl: https://github.com/jnchen/code_dejavu/releases/tag/v0.5.0
+Documentations:
+- DocumentLabel: 操作指南
+  DocumentUrl: https://github.com/jnchen/code_dejavu/blob/HEAD/docs/USER_GUIDE.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,63 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: NGLSL.Kite
+PackageVersion: 0.6.5
+PackageLocale: zh-CN
+Publisher: NGLSL
+PublisherUrl: https://github.com/NGLSL
+PublisherSupportUrl: https://github.com/NGLSL/Kite/issues
+Author: Leixinxin
+PackageName: Kite
+PackageUrl: https://github.com/NGLSL/Kite
+License: Apache-2.0
+LicenseUrl: https://github.com/NGLSL/Kite/blob/HEAD/LICENSE
+ShortDescription: 按下快捷键即可快速搜索并启动应用的 Windows 轻量启动器，支持拼音搜索。
+Description: Kite 是一款面向 Windows 的轻量应用启动器，使用 Rust 和 Iced 构建原生桌面应用，无需 WebView2 或 Node.js。通过全局快捷键唤起搜索窗口，输入应用名称、别名或拼音即可快速筛选并启动目标程序；支持扫描开始菜单、桌面、注册表 App Paths 和 Windows 打包应用，提供启动历史、固定结果、系统托盘以及可选的 Everything 文件搜索。
+Tags:
+- 启动器
+- 快速启动
+ReleaseNotes: |-
+  Kite v0.6.5
+  版本重点
+  文件搜索在 Windows 变更日志过期或日志身份变化后自动恢复，无需手动点击“重建索引”。后台重新采集、构建并追平，完整的新索引就绪后切换，继续实时同步。
+  自动恢复
+  - 启动补读和运行中同步均保留明确的日志失效类别；所需记录已被覆盖时自动重新建立索引，包括查询日志边界后、实际读取前发生轮转的情况。
+  - 设置页与文件结果显示“正在恢复文件索引”及阶段进度。恢复在后台进行，应用搜索、正常窗口隐藏和退出继续可用，关闭文件搜索会取消恢复。
+  - 旧索引与最后完整提交的变化状态保留到新索引完整就绪后再切换；恢复失败继续保留旧代际。
+  - 每次启动或重试最多自动恢复一次；再次失效时显示原因和“重试恢复”，避免持续反复全盘重建。
+  - 权限不足、磁盘写入失败、连接断开及心跳故障保留各自的错误，不因笼统的 stale 状态触发全盘扫描。明确缺失的索引固定文件可以进入自动恢复。
+  升级影响
+  - 读取组件协议升级为 4，以确保日志失效类别完整传给主程序。安装器会更新已经安装的组件；旧组件与新主程序混用时提示授权更新。
+  - 现有基库和持久变化层继续复用。日志起点已过期的旧索引在普通启动时自动恢复，不需要预先手动重建。
+  - 手动“重建索引”继续作为主动维护入口。文件搜索保持默认关闭，排除目录、设置和其他用户数据保留。
+  验证与发布
+  - 本机执行必要编译、目标格式和差异检查，复用已有真实录制数据与诊断入口，不新增测试用例。
+  - 完整 CI、正式构建、NSIS 与安装验收由 GitHub Actions 执行，安装器和实际验收结果绑定同一提交及 SHA-256。
+  - 原有真实 NTFS 验收继续覆盖超过 65,536 个存活变化对象、查询、持久续读和日志切段回收。
+  - 在一次性 runner 的非系统 NTFS 暂存卷，复用同批文件的实际改名推进日志保留边界，保持 journal 身份、容量和分配配置不变；随后普通启动必须自动恢复到新的可查询索引，全程不发送手动重建命令。实际结果由下方自动报告提供。
+  验证边界
+  - 自动恢复会重新读取文件名元数据，大索引需要等待后台构建完成。
+  - UAC 拒绝、全部旧版本迁移、强制崩溃、磁盘满和长期运行观察未包含在静默安装验收内。
+  - 安装包未做 Authenticode 数字签名。
+  构建与验证
+  - 发布 tag：v0.6.5
+  - tag 提交：74132a282950a3ec43a697440d845795441f7a00
+  - 上一个发布：v0.6.4
+  - 提交数量：2
+  - 构建环境：GitHub Actions windows-latest
+  - 检查与构建：精确 main 提交 CI、cargo test --locked、cargo build --release --locked、官方插件与 NSIS 打包
+  - 独立 Windows runner 安装验收：全新安装、同版本覆盖、卸载、负载哈希、注册表、用户数据保留、按需读取组件注册／更新／卸载
+  - 真实 NTFS 补读：停机期间创建 70002 个存活文件，查询变化层实际 70023 个对象；新增／改名／删除哨兵查询通过
+  - 分段与恢复：实际生成 2 个 32 MiB feed 段，确认首段已回收；同一 generation 重启从已提交游标续读
+  - 自动恢复：一次性 runner 的 D: 卷保持原 journal 身份和容量配置，通过 11 轮真实文件改名实际越过旧游标保留范围；普通启动观测到 recovering，自动建成新 generation 并通过哨兵查询，全程没有发送手动重建命令
+  - 产物核对：发布 job 重新计算安装器大小和 SHA-256，与验收报告及校验和文件一致后才上传
+  - 验收报告：installer-validation.json
+  - 验证边界：同版本覆盖不包含旧版本迁移；未验证人工 UAC 拒绝、桌面交互、强制崩溃或磁盘满恢复
+  - 构建记录：Release #32
+  本次提交范围
+  - fix: verify recovery using natural journal retention rollover (74132a2)
+  - fix: automatically recover file search after journal retention loss (e0d3d04)
+ReleaseNotesUrl: https://github.com/NGLSL/Kite/releases/tag/v0.6.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
