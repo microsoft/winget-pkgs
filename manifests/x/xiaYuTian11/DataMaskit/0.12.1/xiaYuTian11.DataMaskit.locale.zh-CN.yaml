@@ -1,0 +1,79 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: xiaYuTian11.DataMaskit
+PackageVersion: 0.12.1
+PackageLocale: zh-CN
+Publisher: maskit
+PublisherUrl: https://github.com/xiaYuTian11
+PublisherSupportUrl: https://github.com/xiaYuTian11/maskit/issues
+PackageName: Data Maskit
+PackageUrl: https://github.com/xiaYuTian11/maskit
+License: AGPL-3.0
+LicenseUrl: https://github.com/xiaYuTian11/maskit/blob/HEAD/LICENSE
+ShortDescription: 专为大模型打造的本地隐私脱敏与还原网关。
+Description: |-
+  Data Maskit（数据面具）是一个运行在本地的隐私脱敏网关。它把开发工具发往大模型的请求自动打码成结构化占位符，并在模型回复时将占位符实时流式还原为原文。它支持 Cursor、Claude Code、Codex 等任意可配置 Base URL 的工具，全部运算在本地完成，零遥测。
+
+  💡 为什么需要 Maskit？
+  当你在使用 Cursor、Claude Code、Codex、Pi、OpenCode、ChatGPT 或任意 AI 编程助手 时，代码中的高危敏感信息往往在不知不觉中被发送到外部模型服务商：
+  - 🔑 凭据与密钥：sk-proj-...、ghp_...、云厂商 AccessKey、JWT Token、PEM 私钥证书；
+  - 🌐 内网资产拓扑：数据库连接串（mysql://root:Pass123@192.168.1.50:3306/db）、私有 IP 地址（10.x / 172.16.x / 192.168.x）；
+  - 👤 业务隐私（PII）：手机号、身份证、姓名、银行卡、企业内部代号与保密业务词。
+  Maskit 的使命：在你的开发终端与外部 AI 服务之间架设一道透明的“本地隐私防护网关”——请求出网前在本地自动打码成结构化占位符，模型回答时毫秒级流式无感还原成原文！
+
+  ✨ 核心亮点与功能全景
+  🛡️ 1. 深度脱敏与多轮会话一致性
+  - 开箱即用规则库：内置 19 类正则扫描规则（API Key/Token、PEM 私钥、数据库连接串、手机号、身份证、邮箱、银行卡、内网 IP 等），默认收敛核心隐私，低误报；
+  - 自定义敏感词与正则：支持一键按分类管理内部人名、项目代号、敏感术语；支持整词匹配边界与自定义正则扩展；
+  - 多轮会话滑动窗口复用：独创占位符复用机制。同一长对话中，“张三”在第 1 轮和第 10 轮始终映射为同一个占位符，大模型逻辑推理完全一致不串号。
+  ⚡ 2. 毫秒级 SSE 流式接管（真 · 打字机体验）
+  - 针对 OpenAI / Anthropic 的 text/event-stream 流式响应，逐事件还原下发；
+  - 智能处理跨 chunk 占位符切片与缓冲区拼接，完全保留官方原生丝滑打字机体验，不卡顿、不迟滞。
+  🔌 3. 免装根证书 + 原生直连兜底（绝不断网）
+  - 多端口反代模式：为不同模型/渠道分配独立本地端口（如 18701 对应 OpenAI、18703 对应 Anthropic），只需在工具中将 base_url 改为本地端口，无需向操作系统安装自签名 CA 根证书；
+  - Fallback Passthrough 兜底保障：哪怕你关闭了脱敏代理或退出软件，本地端口依然由轻量底层维持监听并透明直连转发明文，你的 AI 工具绝不会意外断网或报网络错误！
+  📊 4. 实时日志、安全审计与成本排行
+  - 全链路日志明细：查看每一笔请求的出网打码、上游响应、耗时分布，并提供一键高亮原文对照；
+  - 被动安全审计：实时监控模型回复中是否存在错误泄露、身份换芯、Prompt 越狱、命令执行等潜在风险；
+  - Token 用量与费用估算：支持主流大模型价格智能匹配，直观统计每日调用量与费用支出。
+  🔒 5. 100% 纯本地运行，零外部遥测
+  - 脱敏与还原全部在本地进程内运行，不收集任何用户隐私，不上传任何日志，无第三方分析统计 SDK。
+Tags:
+- 人工智能
+- 大模型
+- 大语言模型
+- 数据脱敏
+- 网关
+- 隐私保护
+ReleaseNotes: |-
+  更新摘要 / Summary
+  - 修复更新到 0.12.0 后日志页几乎每条请求都标「检测不完整」的问题，告警恢复正常。
+  - 修复部分请求会整条失败、客户端一直重试失败的问题，涉及工具定义、结构化输出与出口复检。
+  - 网关不再因为「检测到某个值可能没遮住」就拦截请求：现在只在日志里提示，请求照常转发，不会让微信机器人、编辑器助手这类服务整条不可用。
+  - Fixed nearly every request showing "incomplete scan" after updating to 0.12.0.
+  - Fixed requests failing outright and the client retrying forever.
+  - The gateway no longer blocks requests over a possibly unmasked value: it logs a note and forwards them, so chat bots and editor assistants stay online.
+  修复
+  - 「检测不完整」告警不再被长对话误触发：中文姓名补漏只扫前 32KB 是有界设计，此前它把整条请求判成降级，于是长对话（每轮重发整段历史）几乎每条都标黄；现在它仍可见，但不再算作检测未完成。
+  - 工具定义里 type 写成数组（["string","null"]）或对象时不再整条报错：此前请求侧会直接失败（503），响应侧会让整段流式还原降级。
+  - 上游返回的 choices 不是数组时不再中断还原：此前这类畸形响应会让整段回复以未还原形态透传。
+  - The "incomplete scan" badge is no longer triggered by long conversations: the 32KB cap on Chinese-name detection is intentional, but it used to mark the whole request as degraded, so long conversations (which resend full history every turn) were almost always flagged.
+  - Tool definitions whose type is an array (["string","null"]) or an object no longer break the request: previously the request failed outright, and responses fell back to passing text through unmasked.
+  - Responses whose choices is not an array no longer interrupt restoration.
+  - 出口复检不再把「本来就该放过的写法」当成泄漏：同一个值在别处以更长数字串、带字母边界、结尾多一个点的形式出现时，规则本就主动放过它，此前会被判成泄漏并让整条请求失败（客户端重试也一样失败）。现在复检与扫描规则同口径，真泄漏仍然拦截。
+  - 出口复检不再被占位符「拼接」骗过：当对话正文里出现「部分被遮」的示例时，此前把占位符删掉会让两侧文字拼回原文，误判成泄漏；现在占位符按分隔符处理，不会拼出原文。
+  - The egress recheck no longer treats "forms the rules deliberately skip" as leaks: when the same value appears elsewhere as part of a longer digit run, with letter boundaries, or followed by a trailing dot, the rules intentionally skip it — this used to be flagged as a leak and fail the whole request (client retries failed too). The recheck now uses the same criteria as the scanner, while real leaks are still blocked.
+  - The egress recheck is no longer fooled by placeholder "splicing": when the conversation text contains a "partially masked" example, deleting the placeholder used to glue the surrounding text back into the original value and misreport a leak. Placeholders are now treated as separators, so no such value can be reconstructed.
+  - 出口复检默认改为「只记录、不拦截」：命中时日志里留下原因与残留明细，请求照常上行。阻断会让整条业务链路不可用，而漏掉的值可以事后从日志里补规则；需要旧行为的用户可显式开启拦截开关。
+  - 修复部分地址在含全角字符的文本里被误判为需要打码、而在纯英文文本里又不需要，导致同一条请求被反复拦截的问题。
+  - The egress recheck now records instead of blocking by default: a hit leaves the reason and the leftover details in the log while the request is forwarded. Blocking takes a whole service offline, whereas a missed value can be fixed later from the log; users who want the old behaviour can turn the block switch on explicitly.
+  - Fixed addresses being masked in text containing full-width characters but not in plain text, which made the same request get blocked repeatedly.
+
+  扩展更新提示 / Extension update notice
+  ✅ 本次发版扩展无改动：已安装的扩展无需重新加载。
+  ✅ The browser extension did not change: no need to reload it.
+  Full Changelog: https://github.com/xiaYuTian11/maskit/compare/v0.12.0...v0.12.1
+ReleaseNotesUrl: https://github.com/xiaYuTian11/maskit/releases/tag/v0.12.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
