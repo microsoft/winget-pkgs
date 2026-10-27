@@ -1,0 +1,108 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: wkjarosz.hdrview
+PackageVersion: 3.1.0
+PackageLocale: en-US
+Publisher: wkjarosz
+PublisherUrl: https://github.com/wkjarosz
+PublisherSupportUrl: https://github.com/wkjarosz/hdrview/issues
+PackageName: hdrview
+PackageUrl: https://github.com/wkjarosz/hdrview
+License: Custom
+LicenseUrl: https://github.com/wkjarosz/hdrview/blob/HEAD/LICENSE.txt
+Copyright: Copyright (c) Wojciech Jarosz
+ShortDescription: simple image viewer for examining and comparing HDR images
+Description: A simple research-oriented image viewer with an emphasis on examining and comparing high-dynamic range (HDR) images.
+Tags:
+- comparison-tool
+- exr
+- hdr
+- hdr-images
+- high-dynamic-range
+- image
+- image-processing
+- macos
+- openexr
+- pfm
+ReleaseNotes: |-
+  What's changed
+  ========
+
+  Highlights above SDR white
+  ----------------------
+
+  The default tonemap mode has a new **Highlights** setting：pass highlights through, clip them at SDR white (the old *Clamp to LDR*, still <kbd>Ctrl</kbd>/<kbd>Cmd</kbd>+<kbd>L</kbd>), or roll them off smoothly to SDR white or to your display's maximum brightness (#236). The rolloff function is the one defined in BT.2390 for HDR10-style TV content, but implemented in stops relative to SDR white. It tracks your display's headroom as it changes, for instance when you change display brightness in Linux or macOS. The image's peak comes from its metadata or is measured. You can drag the curve's knee and peak around in a small plot.
+
+
+  Saving and exporting
+  ----------------------
+
+  • **Export rendition...** (<kbd>Ctrl</kbd>/<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd>). It saves the view, with exposure, tonemapping and highlight rolloff applied, for a target display you pick：SDR, or an HDR peak such as 1000 cd/m² (#237).
+  • **Gain maps**：Export rendition can write Ultra HDR JPEGs and JPEG XL files with an ISO 21496-1 gain map. The Ultra HDR writer allows using HDRView's own SDR rendition or the one created by libultrahdr. It also now records the right peak brightness; before, a 1000-nit display showed only part of the HDR range (#240).
+  • **Color and HDR labels.** TIFF, JPEG 2000 and WebP can now label PQ and HLG through an ICC profile, HEIF/AVIF can save at 10 bits, and PNG and HEIF/AVIF save content light level and mastering display metadata (#238).
+  • When macOS, Chrome or Firefox is known to misread a particular setting, the save dialog warns you (#238).
+  • **PFM** files are now read and written according to spec：bottom row first. Photoshop does it the other way round, so there's an option for that during saving (#247).
+  • **Lossless HEIF/AVIF** is actually lossless now; it was previously chroma-subsampled (#247).
+
+  Editing
+  ----------------------
+
+  • **Live previews.** Most edit dialogs now preview their result in the viewport while you adjust them, and you can still pan and zoom the image behind the dialog (#246, #247). The Shift... and Remap envmap... commands allow interactively dragging the viewport to shift/rotate.
+  • **Remap envmap** has yaw, pitch and roll controls, and improved EWA filtering. Supersampling uses a Gaussian with an adjustable width instead of a box (#247).
+  • **Generate mipmaps** lets you pick Box, Mitchell or Gaussian filtering and up to four levels per octave (#247).
+  • Changes in the **Colorspace panel** can be undone (#243).
+  • **Brightness/contrast** uses a new s-curve that behaves past black and white, and **Hue/saturation** keeps the hue of values above white (#247).
+  • **Bump to normal map** had the x component of its normals flipped (#247).
+
+  Viewing and loading
+  ----------------------
+
+  • The View menu's flips are now **Mirror view**, to distinguish them from the Edit menu's Flip image, which actually changes the pixels. They're still on <kbd>H</kbd> and <kbd>V</kbd> (#247).
+  • **Native file dialogs.** Open and save dialogs now use the system's native file dialogs, running inside HDRView, so they take keyboard focus, and Open image has a filter for each format (#250). On Linux they go through the desktop portal to match the GNOME or KDE desktop.
+  • **Faster loading** (#231, #232). EXR now decodes chunks in parallel (an uncompressed 192 MB file went from 83 ms to 20 ms), and other formats read files in one go (a 144 MB PFM：72 ms → 27 ms). The macOS builds now decode AVIF with dav1d, about twice as fast as before.
+  • HDR light-level metadata from PNG, HEIF/AVIF and EXR is shown in the Info panel (#234).
+  • Pixel readouts now match the screen when a single channel is selected (#233).
+  • HDR displays expecting HLG or other less common encodings now get the right signal (#233).
+  • A plain click in the image list now selects just that item (#247).
+
+  Fixes
+  ----------------------
+
+  • **Dithering** had been inadvertently broken since 2025. It works again, and now adapts to the bit depth of the display or the saved format, and is left out when the format can store the values exactly (#251).
+  • DCI-P3 files loaded almost 6 stops too bright, and DCI-P3 files HDRView wrote looked far too dark elsewhere (#237).
+  • Lossy JPEG XL files described by an ICC profile reloaded in sRGB primaries (#247).
+  • 8-bit HEIF/AVIF didn't read back exactly (#247).
+  • A session saved with nothing selected reopened with everything selected (#247).
+  • Builds from source could crash on raw files when a newer LibRaw was installed system-wide (#235).
+
+  Packaging and platforms
+  ----------------------
+
+  • **The macOS builds run on macOS 11 or later** (#239). The 3.0.2 builds bundled libraries that needed macOS 14, so they failed to start on anything older.
+  • Building against a Linux distribution's own packages works now (#248). Thanks @dreirund for the detailed reports (#244, #245).
+  • The AppImage packaging works on newer distributions (#230).
+
+  Behavior changes
+  ----------------------
+
+  • The per-format gain option in the save dialog is gone. Use Edit → Exposure/gamma... first instead (#237).
+  • PFM files saved by older HDRView versions will open upside down. Flip image vertically fixes them.
+  • Images labeled BT.709 (CICP transfer 1) now display as they would on a BT.709 video monitor, the way macOS, Chrome and other viewers show them. Previously HDRView erroneously used the inverse camera curve for display (#238).
+
+  Known limitations
+  ----------------------
+
+  • HEIF/AVIF gain maps can't be exported yet, since libheif has no API for writing them.
+  • macOS ignores JPEG XL gain maps and only shows the base image.
+  • The web build still has no HDR output, and its filters can't be canceled.
+
+  Notes
+  ----------------------
+
+  Precompiled binaries for macOS (Apple Silicon, Intel), Linux (AppImage, x86-64 and arm64), and Windows (x64 and ARM64) are available below, and the web version is at [wkjarosz.github.io/hdrview](https://wkjarosz.github.io/hdrview/).
+
+  **Full Changelog**：https://github.com/wkjarosz/hdrview/compare/v3.0.2...v3.1.0
+ReleaseNotesUrl: https://github.com/wkjarosz/hdrview/releases/tag/v3.1.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
