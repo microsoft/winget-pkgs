@@ -1,0 +1,53 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: try2love.CodexMobileBridge
+PackageVersion: 2.1.6
+PackageLocale: zh-CN
+Publisher: try2love
+PublisherUrl: https://github.com/try2love
+PublisherSupportUrl: https://github.com/try2love/codex-mobile-bridge/issues
+PackageName: Codex Mobile Bridge
+PackageUrl: https://try2love.github.io/codex-mobile-bridge/
+License: MIT
+LicenseUrl: https://github.com/try2love/codex-mobile-bridge/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 try2love
+ShortDescription: 在手机浏览器里继续电脑 Codex App 已有聊天的本地网关。
+Description: |-
+  在手机浏览器里，继续电脑 Codex App 已有的聊天，或在已保存项目中新建聊天。
+  手机与电脑打开同一个会话，查看回复、发送消息、选择模型与 Skill、回应待确认操作。本地任务继续在原电脑执行，SSH 任务继续在原服务器执行；模型请求沿用该会话的提供商与认证配置。
+  不要求手机登录与电脑相同的 OpenAI 账号。 网关提供独立的账号密码登录，也支持显式开启免密访问。可以通过局域网、临时 HTTPS 隧道或自己的反向代理连接。
+  社区项目，与 OpenAI 无隶属关系。支持 macOS 和 Windows，依赖 Codex App 的内部 IPC；各平台的实测范围见 验证记录。App 更新后可能需要适配。
+
+  消息编辑、分支与复制
+  - 用户消息下方可复制内容。最近一条选择「编辑并重新发送」；更早的消息选择「编辑并新建分支」，原会话保留。
+  - 已完成的回答下选择「从这里分支」，新会话保留截至该轮的历史，等待你继续输入。聊天详情中可返回来源会话。
+  - 回复支持完整 Markdown 复制，代码块单独复制；长回复自动读取完整正文。浏览器限制剪贴板时显示可选中的文本，支持系统复制操作。
+  - 原地编辑要求任务已停止，会重新生成回答。编辑和分支不会撤销既有文件修改；新旧会话共享工作目录。
+  - 分支需要 Codex 运行时同时支持指定轮次与目标续跑延迟；旧版会提示更新 Codex App。复制与最近消息编辑不受此分支能力限制。创建分支不会主动发送模型请求。
+  - 结果不确定时先检查聊天列表，重复提交同一请求不会再次执行。分支已创建但连接失败时，修改保留为该分支的编辑草稿。
+Tags:
+- codex
+- 远程
+- 远程访问
+- 远程连接
+ReleaseNotes: |-
+  本版完善手机 App 与 Web 的会话整理、复制和文件阅读，优化账号管理，并修复跨平台项目分组与列表更新问题。桌面与手机 App 版本为 2.1.6，Android/iOS 构建号为 39。
+  新增与改进
+  - 会话置顶：Codex、Claude 和 DSH 在“按最近交互”列表中支持置顶与取消置顶。操作先在当前设备生效，再同步到网关，减轻弱网等待；这是 Bridge 手机 App 与 Web 的列表偏好，不修改原生 App 或 CLI 的置顶状态。电脑右键、手机长按可打开会话菜单。
+  - 断开连接并归档：增加二次确认，左侧“确认归档”、右侧“取消”，两个按钮采用相同样式和大小。在支持的接入中停止所选会话及可核验的子任务，确认停止后再归档；聊天记录保留，可取消归档。无法确认停止或归档结果时不会自动重复提交。原生能力限制见下文，不能保证所有 App/CLI 会话均可归档。
+  - 复制与会话详情（#74、#75）：支持复制 Codex 深度链接、DSH Session ID，以及文件和目录的绝对路径；修复旧版 iOS/Android App 中复制未写入剪贴板、缺少结果提示的问题。深度链接入口移至会话详情的“在电脑运行”旁；Windows 普通盘符与 UNC 路径显示不再带扩展路径前缀。
+  - 文件阅读（#80、#81）：Markdown 可切换阅读与源码模式，并保留相应阅读位置。增加独立的文件字号设置，应用于文本、代码、Markdown 和 HTML 预览；图片与 PDF 继续使用各自的缩放方式。
+  - 账号与 API 接入（#78）：统一 Codex 账号清单，保留桌面网关的“添加账号或 API”和具体额度展示。手机 API 表单沿用现有配色，折叠标题与相邻设置一致，去掉多余外框，补齐输入标识；支持“获取上游模型”并自动填入默认模型。官方账号登录仍在电脑完成。
+  - 网关与列表：直接展示全部访问地址（#76），移除“客户端与接入”中多余的 Codex/Claude 分组标题。Mac/Linux 不初始化或展示 WSL 模块。修复 DSH/Claude 列表与置顶状态读取范围导致的更新失败，以及最近会话和项目列表之间的缓存干扰。
+  - 连接与项目分组（PR #73、#82）：修复 Windows SSH/CLI 项目目录分组名称；提高 HTTP 监听队列容量，改善并发连接接入，并验证异常 GET 请求关闭连接时不会污染后续请求。
+  归档支持范围与限制
+  - Codex：支持兼容原生运行时上的 CLI/WSL 会话，以及没有活跃写入者的 App 历史。仍由 Codex App 持有的部分会话暂时不能从 Bridge 释放并归档，请在 Codex App 中归档；Bridge 不会为此退出整个 App、影响其他会话或直接改写原生数据库。
+  - Claude：Claude Code Desktop 通过支持的原生接口停止并归档。CLI/SSH/WSL 使用可逆文件归档，仅在原生版本、配置身份、会话文件及写入进程检查通过后启用；未验证的版本、Windows 原生 CLI，以及仍检测到其他写入者的环境可能无法归档。Cowork 暂不支持归档与恢复。
+  - DSH：需要支持本版归档流程的连接器。停止目标会话及其任务后重新核验，再调用原生归档；无法确认安全状态时不执行。升级运行中的旧连接器需要显式重启接入，启动网关本身不会自动重启 DSH。
+  - 归档不会删除聊天记录，也不会在取消归档时自动恢复未完成任务。上述未完成范围继续由 #77 跟踪。
+  贡献与反馈
+  感谢 @lanchengjiu 的 PR #73，以及 @mc373906408（waken） 的 PR #82。两位作者的原始提交通过 merge 保留。感谢 #74、#75、#76、#77、#78、#80、#81 的建议与跨平台测试反馈。
+ReleaseNotesUrl: https://github.com/try2love/codex-mobile-bridge/releases/tag/v2.1.6
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
