@@ -1,0 +1,46 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: ranger1112.FlashNote
+PackageVersion: 0.5.1
+PackageLocale: zh-CN
+Publisher: phoebe
+PublisherUrl: https://github.com/ranger1112
+PublisherSupportUrl: https://github.com/ranger1112/flashnote/issues
+Author: Ranger
+PackageName: FlashNote
+PackageUrl: https://github.com/ranger1112/flashnote
+License: MIT
+LicenseUrl: https://github.com/ranger1112/flashnote/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 ranger
+ShortDescription: 按全局快捷键唤起的桌面速记悬浮窗，内容按日期保存为本地 Markdown 文件。
+Description: 看文章、看视频时不打断思路的桌面速记小窗。按一下全局快捷键，小窗浮在当前窗口上方；写下想法，Ctrl+Enter 保存后窗口自动收起，焦点回到原来的文章或播放器。内容按日期追加到本地 Markdown 文件，不注册账号、不上传云端。支持全局唤起与无边框悬浮、两种保存方式、自动记录来源窗口标题、草稿不丢、可选 WebDAV 云同步、Markdown 模式、笔记历史（全文检索与编辑）、系统托盘、单实例运行、自动更新以及主题与背景不透明度调节。
+Tags:
+- markdown
+- 笔记
+- 速记
+ReleaseNotes: |-
+  一次围绕同步安全与解析保真的集中修复。建议所有 0.5.0 用户升级。
+  同步安全
+  - 本地删除传播到远端前先把内容备份进 trash/；本地与远端都不再出现「两端无副本」。
+  - 安全阀新增「已跟踪文件在本地全部消失」判定，小笔记库同样受保护；命中时只跳过删除，上传/下载/合并照常。
+  - 服务器把写请求重定向为 303 时中止本轮，不再把未执行的 PUT/DELETE 当成成功。
+  - 能力探测单独验证 If-None-Match；不支持时不发送该头，改为写前复核 + 写后回读。
+  - 403 只影响单个文件，401 才中止整轮；认证失败与持续限流不再逐文件重试。
+  - 跨源重定向只允许公网 https，解析域名后拒绝回环/私网/链路本地地址，并拒绝 https→http 降级。
+  - 目录列表增加 8 MiB 上限；写入/删除前预留请求预算，避免「写成功但回读被预算拦下」。
+  - 从 0.5.0 升级时自动复用旧的同步密码与状态目录。
+  解析与本地文件
+  - 正文中缩进的 ### HH:MM、正文中间形似 _来源：…_ 的行不再被误当成条目头或来源。
+  - 删除/编辑/追加/合并都保持原文件的 CRLF 与末尾换行。
+  - 远端非 UTF-8 内容不再写入本地；state.json 读不出来时整轮中止，高版本状态先备份。
+  - 设置文件单个字段类型写错时只回退该字段，不再整份恢复默认（笔记目录不会因此丢失）。
+  界面
+  - 面板打开时 Ctrl+S / Ctrl+Enter 不再保存主输入框并收起窗口。
+  - 密码未持久化时不再提示「设置已保存」；保存按钮防重复提交。
+  - 同步状态刷新加序号，慢响应不再覆盖新状态；测试连接失败会更新状态行。
+  - 编辑历史条目时关闭面板、重新打开或打开设置都会提示先保存。
+  - Markdown 预览禁止内联 style；隐藏的撤销按钮退出 Tab 序。
+ReleaseNotesUrl: https://github.com/ranger1112/flashnote/releases/tag/v0.5.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
