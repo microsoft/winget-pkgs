@@ -1,0 +1,97 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: BlueHeisenberg.SCSKiller
+PackageVersion: 1.3.4
+PackageLocale: en-GB
+Publisher: The SCSKiller authors
+PublisherUrl: https://github.com/BlueHeisenberg
+PublisherSupportUrl: https://github.com/BlueHeisenberg/SCSKiller/issues
+PrivacyUrl: https://scskiller.com/privacy/
+PackageName: SCSKiller
+PackageUrl: https://scskiller.com/
+License: GPL-3.0-or-later
+LicenseUrl: https://github.com/BlueHeisenberg/SCSKiller/blob/HEAD/LICENSE
+Copyright: Copyright (C) 2026 The SCSKiller authors
+CopyrightUrl: https://scskiller.com/legal/
+ShortDescription: Compiles your games' shaders into your GPU driver's cache before you play, so the game doesn't stop to compile them mid-game.
+Description: |-
+  SCSKiller reads the shaders a game ships with, works out the pipelines it will build, and compiles them into your driver's shader cache ahead of time, from its own process and with the game closed. When you launch the game, they're already there.
+
+  Features
+  - NVIDIA and AMD. DirectX 12 games, and DirectX 11 games on NVIDIA.
+  - Finds your games in Steam, Epic Games, EA app, GOG, Ubisoft Connect, Xbox (PC), Battle.net, PURPLE, HoYoPlay and Gaijin.
+  - Knows which games stutter: the library puts known offenders on top, with the reason.
+  - Recompiles after driver updates: a driver update clears the shader cache, and SCSKiller notices and compiles again, on its own if you let it.
+  - Optional recorder for games whose pipelines cannot be worked out from their files: play a few minutes with it on, then compile.
+  - Frame times per session: with the recorder on, a game's page graphs your last session and tells the shader stutters apart from other hitches.
+  - Play button in the Library and on a game's page: starts the game through its store.
+  - Never touches anti-cheat games beyond reading their files: no launching, no injecting, no recorder.
+Tags:
+- amd
+- directx-12
+- gaming
+- gpu
+- nvidia
+- shader
+- shader-compilation
+ReleaseNotes: |-
+  This build isn't code-signed yet, so the first run will probably show SmartScreen's "Windows protected your PC".
+  Click More info, then Run anyway. Updates never show it.
+  Signing through the SignPath Foundation is in progress for stable releases. Alpha and beta builds stay unsigned. To
+  check the download arrived whole, compare its SHA-256 with the one at the end of these notes (PowerShell:
+  Get-FileHash <file>). These notes aren't signed, so that doesn't prove who built it. The source: https://github.com/BlueHeisenberg/SCSKiller/tree/v1.3.4.
+  Smart App Control (Windows 11) blocks unsigned apps outright. If it's on, wait for a signed release.
+  New
+  - For games with Advanced Shader Delivery, the compile will skip the shaders Windows already delivered and compile only
+    the rest.
+  - The Library will show what SCSKiller checks by itself after an update, those checks will use at most a quarter of the
+    RAM up to 8 GB, a compile you start will no longer wait for them, and a check that can't finish will keep the game's
+    plan and no longer run again at every start.
+  - Games with anti-cheat will get an "Always record" switch that records every launch after you confirm it once, at your
+    own risk.
+  - The recorder will check a game's steam_appid.txt for VAC, and a game whose steam_appid.txt names an app Steam doesn't
+    know will offer a recording session at your own risk.
+  - Settings will offer the same shader cache sizes as the NVIDIA app, from 512 MB to Unlimited.
+  Improved
+  - A Plague Tale: Requiem will compile every shader combination found in its files instead of about 97%.
+  - The RE4 Chainsaw Demo will compile from its own root signatures on AMD.
+  - While SCSKiller hands a finished compile to the game's cache, the Library and the game's page will show its progress
+    ("Handing the compile to the game's cache: N%"). Clear cache will stop it first instead of failing with files in use.
+  - A game's page will say why pipelines couldn't be compiled, and a problem report will list the top reasons.
+  - A pipeline that crashed or hung the GPU driver will stay skipped on later compiles until the driver changes, and a
+    pipeline that hangs before the compile's workers start will no longer stall the compile.
+  - Compile progress will keep its total after a driver crash or hang, clear the retry note once the compile is past it,
+    and estimate the time left from a stopped compile until one completes.
+  - Unreal Engine 5.8 games such as Fortnite will compile their compute shaders that use NVIDIA's extensions the way the
+    game creates them, so those will no longer compile during play on NVIDIA.
+  - On NVIDIA, the pipelines a stopped or failed compile created will no longer be compiled again after the game's plan
+    changes or SCSKiller updates.
+  - The cache hand-off after a game session will read the game's whole cache only once a week instead of every time.
+  Fixed
+  - Unreal Engine games with a recording will compile all their pipelines again, instead of leaving out a large part of
+    them on NVIDIA. The affected games will compile once more after the update.
+  - A game's coverage will show what its last compile covers, and pipelines found since then will only be counted in the
+    line that offers to compile them, instead of lowering the percentage.
+  - The Shader layouts row will no longer say DirectX 11 for a DirectX 12 game that compiles from its recordings.
+  - Resident Evil Requiem (demo) will compile the pipelines its game creates on NVIDIA, also from a shared recording made
+    on another GPU.
+  - Pipelines whose pixel shader sets the stencil reference will no longer be compiled on NVIDIA, where they always fail.
+  - Resident Evil Requiem (demo) and Dragon's Dogma 2 Character Creator will compile most of their pipelines instead of
+    about a third.
+  - DLSS games on NVIDIA whose exe loads none of winmm, version or dinput8, such as Dying Light: The Beast, will be
+    recorded, and no game will show Not supported because of DLSS.
+  - An Unreal game whose files are only partly readable without its AES key will say it needs the key for full coverage,
+    and will still compile what it can read.
+  - "Delete all" will no longer say a compile is in progress after a compile has finished.
+  - NVIDIA players without a recording will no longer compile Unreal games with a root-signature layout the game doesn't
+    use (an extra, larger compile). The first compile after the update redoes those games once.
+  - Microsoft Flight Simulator 2024 and other games whose shader delivery has no engine name will take the compiled cache
+    again instead of waiting for it with "Not reached yet".
+  - SCSKiller will hand a compile to a game whose shader cache folder you moved to another drive with a junction or link,
+    without rereading it at every start, and the game's page will say why when it can't.
+  - A compile's shader cache will no longer go missing when one of its files is damaged or can't be read, or when a driver
+    update comes before the game's next start.
+ReleaseNotesUrl: https://github.com/BlueHeisenberg/SCSKiller/releases/tag/v1.3.4
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
