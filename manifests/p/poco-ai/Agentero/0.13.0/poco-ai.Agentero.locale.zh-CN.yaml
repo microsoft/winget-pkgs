@@ -1,0 +1,51 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.13.0
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  这次发布让 LaTeX 项目可以在侧栏里编译和浏览结构，桌面端可以安装按 Vault 授权的本地插件，命令行也能单独提供同一套 MCP。Git 同步可以排除 PDF、源码和附件，Vault 中的 HTML 能在沙箱里预览，论文可以手填 OpenReview 链接。PDF 与笔记并排时会铺上实际可见区域的高清瓦片，Linux 上由整页阴影引起的滚动停顿也得到改善。
+  新功能
+  - LaTeX 项目侧栏：当前文件属于 LaTeX 项目时，左栏显示结构大纲，并可编译、强制重建、查看 PDF 或切换实时预览；切换实时预览不会改变正式编译引擎。项目设置可以选择主文件、输出目录和命名配方，配方中的工具使用各自的工作目录与环境变量；大纲、引用补全和论文库引文可以在项目内跳转并写入 bibliography，分屏时标签旁的实时预览状态仍会保留。（0da6256e, ee696c94 by @qychen2001）
+  - 本地插件：在「设置 → 插件」可以从文件夹安装 JavaScript 插件，安装后默认停用，启用和授权按本地 Vault 分别保存。插件可以把命令放进命令面板、论文库、文件树和 PDF 选区菜单，并在随安装包提供的 agentero-plugin-host 进程中运行，不会重新拉起主程序；iOS、Android 和远程 Vault 没有这个宿主。（e2a613b2, 9a34e0ad by @qychen2001）
+  - 命令行 MCP: agentero mcp serve 在不打开桌面应用时，于本机回环地址提供与桌面相同的 MCP 工具，并且必须显式指定 Vault。PDF 正文默认不提供，需要 --expose-paper-text；ChatGPT 隧道和 stdio 仍只在桌面端。（#816 by @qychen2001）
+  - Git 同步范围：Git 同步使用与对象存储和 WebDAV 相同的 PDF、源码和附件开关。关闭的类别会写入仓库 .gitignore 的标记区块，并用 git rm --cached 取消跟踪，磁盘上的文件仍保留；这是整库一份策略，已经进入历史的文件不会被清除。（f0998179 by @qychen2001）
+  - 本地 HTML 预览：Vault 中的 .html 经 agentero-html 在沙箱里打开，同目录的图片和样式可以显示，页面不会使用应用自身的地址。远程脚本、表单、弹窗和该目录之外的路径不会加载，划词与翻译也不作用在这个预览上。（01d2f75f by @qychen2001）
+  - OpenReview 链接：论文信息的更多字段可以手填或清空 OpenReview 地址，有效的 HTTP(S) 链接会显示为按钮；没有协议前缀时，展示时补上 https://，保存的原文不变。应用不会按 DOI 或 arXiv 自动查找，刷新标识符和 Zotero 同步会保留这个手工值，远程 Vault 不显示该字段。（#828 by @qychen2001）
+  改进
+  - Vault 根目录名称：侧栏把 Vault 根上的 notes/、thesis/ 和 data/ 显示为「笔记」「文稿」「数据」，并配上对应图标，磁盘目录名保持不变。只有这三个根目录会换显示名；重命名时输入框里仍是磁盘名，更深的同名文件夹不受影响。（5be6c851 by @qychen2001）
+  修复
+  - 分屏 PDF 清晰度：PDF 与笔记并排时，视口会按实际可见尺寸铺高清瓦片，靠近笔记的一侧也会清晰。评论列占用的页外空白只从缩放计算里扣除，适应宽度和缩放锚点保持不变。（#827 by @qychen2001）
+  - 划词工具栏位置：划词工具栏把高亮色板后面的分隔线对准选区顶部中心；没有色板时，整栏居中。定位按菜单和分隔线的实际尺寸计算，会随语言、可选动作、插件按钮和窗口宽度重算，并尽量把整栏和展开的色板留在窗口内。（#822 by @qychen2001）
+  - 复制 AI 回复中的公式：在 AI 回复里复制包含公式的选区时，公式会写成 $…$ 或 $$…$$ 源码。选区从公式中间开始时会先扩到整条公式；不含公式的划词仍使用系统复制。（#829 by @Fengsuid）
+  - macOS 全屏：macOS 上 Ctrl+Cmd+F 切换系统全屏，PDF、Markdown 和查找替换不会把这个组合键当成搜索。「视图」菜单提供同一项原生全屏命令。（#818 by @Sagecheni）
+  - Linux PDF 滚动停顿：正文和双栏译文的纸面去掉整页模糊阴影，细边框、圆角和纸张主题仍然保留。受影响的 Linux / WebKitGTK 阅读停顿已由使用者确认减轻。（#815 by @learner-ui）
+  已知限制
+  - PDF 滚动的其余情况：去掉整页阴影改善的是已确认的 Linux / WebKitGTK 停顿。默认配置下原先没有复现，阴影与位图优化合在一起之后也还没有在该环境复测，#798 仍然开放。（#815 by @learner-ui）
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.13.0
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
