@@ -1,0 +1,50 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: chenming0v0.OMPiUI
+PackageVersion: 0.6.43
+PackageLocale: zh-CN
+Publisher: ompiui
+PublisherUrl: https://github.com/chenming0v0
+PublisherSupportUrl: https://github.com/chenming0v0/OMPiUI/issues
+Author: 辰林
+PackageName: OMPiUI
+PackageUrl: https://github.com/chenming0v0/OMPiUI
+License: GPL-3.0-only
+LicenseUrl: https://github.com/chenming0v0/OMPiUI/blob/HEAD/LICENSE
+ShortDescription: OMP（oh-my-pi）的第三方桌面客户端，采用 PiUI 视觉外壳与 OMP 官方 RPC 运行时。
+Description: |-
+  OMPiUI 是 OMP（oh-my-pi）的第三方 Web/桌面客户端：界面沿用 PiUI 的视觉外壳，agent 执行由 oh-my-pi（OMP）的官方 RPC 运行时承担，提供 60+ provider、31 个内置工具、子代理系统、MCP/LSP 和扩展支持。
+  界面来自 lehhair 的 PiUI 与 OpenCodeUI。OMPiUI 不是这两个项目的官方客户端。
+  使用前需要安装 Node ≥ 22.19 与 OMP CLI（≥ 18.2.11，通过 bun install -g @oh-my-pi/pi-coding-agent 安装），并配置 provider 凭据。
+Tags:
+- oh-my-pi
+- omp
+- pi
+- pi-agent
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  - fix(message): 孤立工具结果与正常工具行采用相同的默认折叠规则；工具展开状态按服务器／会话／调用 ID 保存，历史补齐或相邻消息重分组不再丢失手动操作。刷新只清除已落盘结果的旧运行／失败状态，调用方不在当前页时保留已收到的原始参数；真正缺失参数时仍可手动展开查看原始输出。Chromium 隔离组件界面已复现修复前自动展开与折叠丢失，并验证修复后的双向切换；不据此推断具体会话的断连原因。
+  - fix(history): 主动分页阅读保留完整已加载区间，不再按 400 条／8 MiB 删除较新的后缀；最新页缓存及关闭窗格后的回收仍有界。修复长会话上滚后下方上下文消失、只能滚到被裁窗口底部的问题。真实长会话从历史起点经原卡住消息滚到原生末尾，727 项相关回归及 app 生产构建通过。
+  - feat(chat): 后台任务指示器移到顶栏模型名右侧，只在页面确有后台任务运行时出现，不再占用输入框下方空间。
+  - feat(message): 多子代理 task 调用按子任务拆成多条工具卡片，每条是标准 Task 行（图标 + Task + 子代理名 + 耗时），展开后是该子代理的 prompt、实时转录与结果；子代理徽标按状态着色（运行绿／完成蓝／失败红），去掉徽标前的状态圆点。单子代理调用保持原样。
+  - feat(worker): 异步 task 派发结果走 async-result 自定义消息投递，按 jobId 与派发时间回填对应子任务，派发回执不再被当作子任务完成。
+  - fix: OMPiUI 会话目录与写出边界保持只读浏览约定；上述前端改动已在隔离预览实例（真实 ~/.omp 会话目录、独立界面数据目录）核对。
+  - fix(chat): 输入框停止与发送共用单个按钮槽位，运行中有可发送草稿时显示发送，空草稿或等待提交时保留停止，停止确认期间禁止重复点击；不再同时显示两个实心按钮。已在真实浏览器组件界面验证空闲、运行、草稿和停止确认切换。
+  - fix(chat): 忙碌提交及「立即发送」从首帧由待发送区展示，原生实际消费后才进入对话，避免先出现气泡再撤回及队列／历史重复；连续立即发送按 FIFO 追加，不再因插到队首反序。受管会话首次提交采用进程内原生 all 模式，两条未消费消息在下一轮一起进入模型上下文，不修改官方全局设置。
+  - fix(worker): 手动 Stop 先启用官方 client-owned continuation 门禁再发送 abort，保留原生队列及身份，阻止中止清理重新启动下一轮；只读刷新不解除暂停，明确提交／立即发送／恢复目标才解除。最低及打包 OMP 版本更新为 18.12.6。
+  - verification(chat): 隔离真实官方 OMP + Web UI 验证 A/B 排队无历史闪现、下一轮模型上下文同时包含 A→B、连续立即发送 C→D 不反序且不重复显示；Stop 后草稿、队列 entryId 与顺序保留，刷新不启动新模型请求。前端受影响 6 文件／67 项、worker 55 项回归及 worker 构建、app 类型检查通过。
+  - verification(chat): 官方会话与 GUI 双向可见、相同会话继续写入、只读预览不改文件的真实验收通过；前端生产构建通过，受影响前端 lint 为 0 error、2 条既有 ref 警告。
+  - fix(message): 后台任务行统一走普通工具行渲染：bash 类型投递沿用 Bash 渲染器并与前后工具行同组连线，task 等类型不再冒用 Task 渲染器，外观与普通工具行一致。
+  - fix(sidebar): 侧栏只显示有会话的 worktree，文件夹改为手风琴展开；会话树深链不再因超长链路抛 RangeError 崩掉整个页面。
+  - docs: 新增工具调用渲染 skill，记录新增工具与工具行连线的约定。
+ReleaseNotesUrl: https://github.com/chenming0v0/OMPiUI/releases/tag/v0.6.43
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
