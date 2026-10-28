@@ -1,0 +1,103 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: GitButler.GitButler
+PackageVersion: 0.23.0
+PackageLocale: en-US
+Publisher: GitButler
+PublisherUrl: https://gitbutler.com/
+PrivacyUrl: https://app.termly.io/policy-viewer/policy.html?policyUUID=a001c8b7-505b-4eab-81e3-fcd1c72bdd79
+PackageName: GitButler
+PackageUrl: https://gitbutler.com/
+License: Functional Source License, Version 1.1, MIT Future License
+LicenseUrl: https://github.com/gitbutlerapp/gitbutler/blob/master/LICENSE.md
+Copyright: Copyright 2023-2024 GitButler Inc
+CopyrightUrl: https://github.com/gitbutlerapp/gitbutler/blob/master/LICENSE.md
+ShortDescription: A Git client for simultaneous branches on top of your existing workflow.
+Tags:
+- git
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://docs.gitbutler.com/
+ReleaseNotes: |-
+  ReleaseNotes: |-
+    ## Work in any branch without `gitbutler/workspace`
+    
+    GitButler now works in any Git repo, without the need to run a setup or to be on `gitbutler/workspace` ref.
+    All app operations work as normal. GitButler switches to `gitbutler/workspace` only when you apply a second parallel branch and moves back when you return to one.
+    
+    ## Worktree support
+    
+    You can now work with linked Git worktrees directly in GitButler. Worktrees created by other apps show up in the CLI status or as lanes in the GUI and support most GitButler operations.
+    For example you (or your agent) can move individual changes, commits or branches to and from worktrees as needed.
+    Parallel branches are light & fast while worktrees offer full code isolation so each tool can be used situationally.
+    Worktrees that already exist when you upgrade start archived. Bring them in from the new Worktrees page in Project settings or with the `but` CLI.
+    Discarding changes in a worktree can’t be undone yet.
+    
+    
+    ## Changes
+    
+    - Projects now use a local target branch, so GitButler can be used on repos without a remote
+    - Faster refreshes in Git LFS repositories and after undo, plus faster workspace updates in repositories with many pack files
+    - Commit signing now honors more Git settings, including X.509 signing and `gpg.ssh.defaultKeyCommand`
+    - SHA-256 repositories now support commit signing, rewording, undo and push
+    - Workspace update previews no longer sign temporary commits or disable signing when a preview signature fails
+    - GitButler no longer installs its own `pre-commit` and `post-checkout` hooks
+    - Branches can now be dragged below the last branch in a stack
+    
+    ## CLI
+    
+    - `zz` is now `@` for uncommitted changes
+    - `but land` is now `but merge`, and `land` still works as an alias
+    - `but setup` is gone because `but` works in any repository. `but init` replaces `but setup --init`
+    - `but review`, `but branch new --anchor` and ID ranges such as `g0-h2` are removed. Use `but pr`, `--above` and single IDs instead
+    
+    ### Worktrees
+    
+    - `but status` lists worktrees with their own IDs and marks ones behind the target
+    - `but worktree` creates, lists, archives, restores and removes worktrees. `but worktree new` can start at a commit with `--above` or on an existing branch outside the workspace
+    - `but pull --update <workspace|worktrees>` picks what to update. A worktree whose branch merged upstream moves to a new branch at the latest target commit
+    - `but move <branch> --above <branch>` moves a branch between a worktree and the workspace
+    
+    ### New in this release:
+    
+    - `but split` moves files or hunks out of a commit into a new commit above it
+    - `but diff <commit>` shows hunk IDs, so `but squash`, `but move`, `but uncommit` and `but discard` can work on single hunks of a commit
+    - `but merge` and `but pull` work without a remote, using the local target branch
+    - `but merge --ff-only` refuses merges that can't fast-forward
+    - `but commit`, `but squash`, `but move` and `but split` read the message from a file or stdin with `-F/--file`
+    - `but status` marks the checked-out branch with `[HEAD]`
+    - `b` is a default alias for `but branch`
+    
+    ## TUI
+    
+    - You can squash several marked commits into one
+    - You can archive (`a`) and unarchive (`u`) worktrees
+    - Mark committed hunks in the details view to discard, squash or move them
+    - Move a commit's files to another commit, a branch or a new branch
+    - In move mode, `b` moves commits onto a new branch above the selected one
+    - Undo (`u`) works from details mode
+    - The status view scrolls with the mouse wheel, and clicking a row selects it
+    - `but tui` starts faster, especially on Linux
+    - Windows: `?` and `:` now respond
+    
+    ## Fixes
+    
+    - Fixes the diff preview jumping to another file when the file list changes
+    - Fixes workspace loading failures after commits made outside GitButler or a concurrent fetch
+    - Failed workspace updates now show the error and a retry button; unrelated target or remote history now comes with recovery guidance
+    - Fixes partial commits leaving Git's index out of sync, and empty commits being created when all selected changes are rejected
+    - Fixes "Create branch below" moving existing commits into the new branch
+    - Fixes undo leaving stray branch names, failing to restore deleted branches, or showing files outside a sparse checkout as deleted
+    - Fixes deleted files reappearing as changes after pulling or applying a branch that also deletes them
+    - Fixes pushing a branch based on `gitbutler/workspace` accidentally publishing unrelated applied branches
+    - GitHub and GitLab: Authentication, access and rate-limit errors now explain how to recover and stop repeated background failures
+    - GitHub: Fixes merging native stacked pull requests and loading CI checks for pull requests from forks
+    - Fixes self-hosted forge detection and repository URLs containing `.git` within their names
+    - Network operations now time out when the remote stops responding; failed Git hooks now show their error output
+    - Git changes now appear promptly while builds or dev servers keep writing files
+    - Windows: Commits and amendments now preserve executable permissions
+    - macOS: Newly created symlinks, hard links and APFS clones now appear promptly
+  ReleaseNotesUrl: https://github.com/gitbutlerapp/gitbutler/releases
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
