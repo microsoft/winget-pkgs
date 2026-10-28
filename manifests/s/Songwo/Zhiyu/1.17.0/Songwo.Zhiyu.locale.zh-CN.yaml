@@ -1,0 +1,62 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Songwo.Zhiyu
+PackageVersion: 1.17.0
+PackageLocale: zh-CN
+Publisher: Songwo
+PublisherUrl: https://github.com/Songwo
+PublisherSupportUrl: https://github.com/Songwo/zhiyu/issues
+Author: Zhao Qingsong
+PackageName: Zhiyu
+PackageUrl: https://songwo.github.io/zhiyu/
+License: MIT
+LicenseUrl: https://github.com/Songwo/zhiyu/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Songwo
+ShortDescription: 连接文档、账号与数字资产的个人工作空间。
+Description: |-
+  知屿 Zhiyu 是连接文档、账号与数字资产的个人工作空间，将主机、在线服务、域名、邮箱、AI 订阅、号码、密钥和证书集中到一个桌面应用中。资料保存在本机，凭据库使用 scrypt 派生密钥与 AES-256-GCM 加密；通过 SSH、DNS、TLS 和服务商 API 读取实际状态，并可通过你配置的模型进行有来源的问答。
+  主要功能包括 SSH 终端与主机指标采集、域名 WHOIS 与 TLS 证书到期提示、网站账号密码与 TOTP 动态验证码管理、IMAP/SMTP 邮箱、Markdown 图文文档、浏览器插件密码迁移，以及接入 OpenAI、Claude、Grok、Gemini 等模型进行有来源的问答并查询订阅额度。
+Tags:
+- 人工智能
+- 密码
+- 数字资产
+- 文档
+- 服务器
+- 账号
+ReleaseNotes: |-
+  知屿 Zhiyu 1.17.0
+  这一版来自两条需求：「桌面版和部署在 VPS 上的网页版希望能同步，而且要安全」，以及用户评论里的「能不能监控 Docker 运行状态、绑定的端口和域名」。已有资料沿用原数据目录，可在应用内更新；网页版镜像为 ghcr.io/songwo/zhiyu-web:1.17.0。
+  桌面版与网页版同步
+  - 在网页版「设置 → 同步」点「生成配对码」，在桌面版「设置 → 同步」填入网页版地址和配对码即可配对，只需要一次。之后每 2 分钟和每次修改后自动同步，也可以点「立即同步」。
+  - 同步的是资产与关联、文档；密钥库默认不同步，开启后只传 AES-256-GCM 密文。系统加密保存的 Cloudflare Token、模型 API Key、图床 Key、用量来源凭据不参与同步，需要在网页版重新填写。
+  - 两边都能改，桌面端用「上次同步后的基线」做三方合并：不同记录与字段直接合并；同一字段两边都改取较新的一边并在界面提示；文档两边都改时另存「冲突副本」；一边删除、一边修改时保留修改，不会静默丢数据。
+  - 密钥库在密文层按记录合并（每条记录是独立的 GCM 密文，不需要主密码也不需要解密）；两边主密码不同且都改过时不会自动处理，由你选择以哪一边为准。
+  - 服务器的 CPU、内存、最近采集时间等两端各自采集的数据不触发同步，也不产生冲突提示。
+  安全设计（ZSP 协议）
+  - 配对：一次性 50 位配对码，5 分钟有效、只能用一次；用 CPace 风格的 PAKE（ristretto255）交换密钥，抓到全部配对流量也无法离线穷举。桌面端先证明知道配对码，服务器验证通过后才回应，所以每次猜错都会被服务器计数，错 3 次或交换超限即作废。
+  - 会话：配对时固定服务器与设备的 Ed25519 公钥；每次同步先互相认证，再用 X25519 临时密钥协商 AES-256-GCM 会话密钥，计数器严格递增防重放，纯 http 下也不怕中间人读取或篡改，并有前向保密。
+  - 防回滚：服务器为每次观察到的资料状态递增序号并签名，桌面端记住见过的最大序号，序号倒退或分叉时拒绝同步并提示（例如服务器恢复了旧备份），确认后才重新对照，不删除任何数据。
+  - 可撤销：网页版「已配对的设备」里可以随时撤销，立即生效并断开已有会话；桌面端也可以主动解除配对。设备私钥由系统安全存储加密，只提供明文存储时拒绝保存。
+  - 设计、威胁模型、参数与已知限制见 SYNC.md。这是自研的协议组合（构件均为标准算法和通用库），没有经过第三方审计，欢迎审阅。
+  端口与 Docker 容器监控
+  - 服务器详情新增「端口与容器」：通过 SSH 在同一条连接上只读执行 ss（或 netstat）与 docker ps / inspect / stats，不改动主机。显示监听端口（对外 / 内网 / 仅本机、进程名）、容器状态、健康检查、重启次数、CPU 与内存、端口映射，并把端口与容器、绑定的服务关联起来。
+  - 没装 Docker、没有 docker 组权限、Docker 服务没运行时会说明原因，不影响原有的 CPU、内存、磁盘采集。远端输出一律当作不可信数据处理，限制数量与长度。
+  - 容器反复重启、异常退出、因内存不足被终止、健康检查失败时，主机进入「注意」，并发系统通知与手机推送；同一问题 24 小时内只提醒一次，恢复后再次出现会重新提醒。正常退出（退出码 0）的一次性任务容器不算问题。
+  - 网页版同样可用：由服务器通过 SSH 采集，页面打开且密钥库解锁时按设定周期自动刷新。
+  服务绑定端口、容器与域名
+  - 服务资产新增「运行位置」：选择运行在哪台主机、监听哪个端口、对应哪个 Docker 容器、对外用哪个域名。
+  - 绑定后，状态由这台主机最近一次采集自动决定：端口没在监听或容器停了为「告警」，容器健康检查失败或域名快到期为「注意」；采集过期或没采集过时保留手动记录的状态。
+  - 保存绑定时在关系图里自动连上主机与域名。
+  升级与发行
+  Windows 附件为安装包 Zhiyu-1.17.0-setup.exe、便携版 Zhiyu-1.17.0-portable-x64.zip、浏览器插件 Zhiyu-1.17.0-browser-extension.zip 与 SHA256SUMS.txt；应用内更新沿用同次构建的 latest.yml 和 .exe.blockmap。安装包与便携版均未做代码签名，请核对 SHA256。浏览器插件本版只同步版本号。新增依赖 @noble/curves 已加入桌面打包清单。
+  验证
+  - 范围说明：同步用本机真实启动的网页版服务器和桌面客户端做端到端测试（配对、双向同步、冲突、撤销、回滚、重放、中间人篡改、越权路径）；容器与端口的解析用真实输出格式的样本测试。开发阶段没有连接真实 VPS，也没有在真实 Docker 主机上执行采集脚本，真实主机上的结果请使用者自行确认。
+  - TypeScript、ESLint（0 错误）、i18n 检查通过；1083 项后端与脚本单元测试、112 项前端单元测试通过。其中新增：同步密码学与协议（16 项）、三方合并（21 项）、真实网页版服务器 + 桌面客户端端到端（18 项，含配对失败与作废、中间人篡改、猜码耗尽、重放、越权路径、回滚、服务器身份变更、撤销与解除配对）、端口与容器解析和告警（10 项）、服务绑定状态（7 项）。
+  - 桌面与网页构建（desktop:build、build）通过；界面检查（开发预览与真实网页版构建）：桌面配对与已配对页、网页版生成配对码、服务器「端口与容器」面板。
+  - 打包程序 node scripts/release-smoke.mjs 检查通过（版本 1.17.0、独立数据目录、首次设置、重启、缩放，无页面错误）。
+  - SHA256：Zhiyu-1.17.0-setup.exe 786ea844628d086b3cc48e96c3d7337dc699472fa6feab11adc4a009d1435118；Zhiyu-1.17.0-portable-x64.zip 2a8dbfd608937a115d23de7e7f37b454afd9a0903b9a4e17e23b70b922899b76。
+  - 未执行：docs/RELEASING.md 中依赖开发预览的 Electron 集成脚本本版未重跑；macOS 构建未验证；同步的真机验证（两台真实设备之间）未做。
+ReleaseNotesUrl: https://github.com/Songwo/zhiyu/releases/tag/v1.17.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
