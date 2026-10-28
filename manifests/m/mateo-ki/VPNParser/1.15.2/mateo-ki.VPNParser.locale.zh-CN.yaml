@@ -1,0 +1,38 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: mateo-ki.VPNParser
+PackageVersion: 1.15.2
+PackageLocale: zh-CN
+ShortDescription: Windows 桌面程序：采集订阅、解析成节点、跑代理，并把代理质量实测出来。
+Description: VPN Parser 是用 Rust + egui 编写的 Windows 桌面程序，负责采集免费或自建订阅、解析成节点、跑代理，并把代理质量实测出来。订阅入口包括带 `YYYY-MM-DD` 日期占位符的订阅 URL、Gist 搜索页发现，以及 Telegram 频道预览（裸节点链接和订阅链接两类都取，节点只增不删）。解析支持 `ss` `vmess` `vless` `trojan` `hysteria2/hy2` `socks5` `http(s)` 分享链接，以及 Clash / Clash Meta YAML、Base64 与混合文本。延迟以经内核访问 Google `generate_204` 的真实握手为准，24 小时出口健康条按实测绘制，而不是看内核上报的状态。Windows 上它同时管理系统代理、TUN（提权交接后只保留一个实例）和终端 `HTTP_PROXY` 环境变量，按 exe 路径添加防火墙允许规则，支持单实例互斥与托盘，记录出口切换历史并按天统计规则命中，同时提供强制 bearer 鉴权的本地 HTTP API 与 mihomo / sing-box / xray 配置导出。安装包不含内核，内核缺失时由程序按需下载。
+Tags:
+- clash
+- sing-box
+- 代理
+- 出口健康
+- 测速
+- 节点解析
+- 订阅
+ReleaseNotes: |-
+  🚀 VPN Parser v1.15.2 发布说明 / Release Notes
+  🎉 欢迎使用 VPN Parser v1.15.2！本版深度重构与优化了核心代理启停链路，启动延迟降幅超 90%，实现毫秒级瞬间启停体验，并修复了自定义端口重置与卡片视觉布局问题：
+  ⚡ 核心启停性能极致优化（毫秒级极速响应，告别卡顿）
+  - 内核规则引擎与启动性能飙升（启动耗时降幅超 90%）：
+    - 深度优化 VP-Core 规则引擎，将域名树 DomainTrie 升级为 \(O(1)\) 哈希索引并引入流式规则批处理合并，根除 24,000+ 域名规则二分平移构建的巨大内存拷贝瓶颈；
+    - 2.4 万条规则编译耗时由 1145ms 直降至 79ms（提升 14.5 倍），内核冷启动进入百毫秒时代；
+    - 启动阶段配置快速路径流式扫描日志级别，避免两次完整反序列化巨型配置文件的开销；
+    - 核心端口就绪检测与进程清理策略调优，点击“启动代理”瞬间完成就绪绑定。
+  - 停止代理瞬间响应：
+    - 彻底移除停止代理时无条件阻塞执行 PowerShell RunAs 脚本重置 DNS 的硬等待，仅在 TUN 模式残留时异步自愈，告别 2~3 秒停止等待；
+    - 终端代理环境变量广播升级为非阻塞式的 Win32 SendNotifyMessageW，彻底杜绝 SendMessageTimeoutW 广播阻塞等待桌面无响应窗口引发的 2 秒硬等待；
+    - 终端代理环境变量与 Git 全局代理配置解耦为后台异步任务，不再阻塞系统代理启动与停止的核心流程。
+  🛠️ 核心问题修复与细节调优
+  - 修复自定义代理端口重启后被重置为默认 9980 的问题：
+    - 彻底移除数据库读取时对旧版本 7890 端口的强制冲刷逻辑，用户将 Mixed 端口自定义为任意端口（如经典 Clash 7890 端口）保存后，重启软件将稳定持久化保留，不再异常重置回 9980；
+    - 优化 GUI 启动流程：应用首帧直接同步载入已持久化的代理配置与自定义分流规则，彻底消除异步初始化首帧与默认配置的竞争。
+  - 仪表盘上传与下载卡片视觉平衡调优：
+    - 增加上传与下载卡片顶部留白边距（下移 14px），下移“上传”/“下载”标签、速率数值与累计流量文本；
+    - 增大流量波浪折线走势图上下留白与振幅高度（38px），告别此前内容紧贴卡片顶部的紧凑感，卡片内部垂直比例更加居中协调、赏心悦目。
+ManifestType: locale
+ManifestVersion: 1.28.0
