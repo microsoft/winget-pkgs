@@ -31,6 +31,15 @@ Use this checklist before you open your first manifest PR to `microsoft/winget-p
 11. If possible, test in Windows Sandbox with [`Tools\SandboxTest.ps1`](tools/SandboxTest.md).
 12. If your PR is a routine manifest submission, you do **not** need a separate issue first. Open an issue when you are proposing a repo change, discussing a policy/spec question, or reporting a broader problem.
 13. After you submit the PR, watch for validation labels and review [ValidationFailureGuide.md](ValidationFailureGuide.md) if the bot reports a problem.
+14. Check whether Microsoft's Contributor License Agreement (CLA) bot asks you to complete the agreement. Follow its instructions using your own account; a successful WinGet validation does **not** clear a CLA-related merge block.
+
+## Contributor License Agreement (CLA)
+
+Most Microsoft contributions require a [Contributor License Agreement](https://cla.opensource.microsoft.com/). This is separate from the manifest's validation checks: a PR may pass the validation pipeline and still be blocked from merging until the CLA requirement is satisfied.
+
+After submitting a PR, read the Microsoft CLA bot's message or status check and follow its linked instructions. **The contributor must personally complete any required agreement**; a generic acknowledgement comment on the PR does not replace the official CLA process. Microsoft's [repository contribution guidance](../README.md#contributing) explains the requirement and notes that the agreement generally needs to be completed only once for Microsoft repositories using the same CLA.
+
+Once the CLA requirement is met, continue responding to validation and maintainer review feedback as usual.
 
 ## One PR change means one package version
 
@@ -64,4 +73,8 @@ flowchart TD
     O --> P{Install test<br/>succeeded?}
     P -- No --> Q[Fix installer behavior,<br/>URL, or metadata]
     P -- Yes --> R[Submit the PR and<br/>monitor labels]
+    R --> S{CLA action requested<br/>by Microsoft bot?}
+    S -- Yes --> T[Complete the official<br/>Microsoft CLA process]
+    S -- No --> U[Continue with validation<br/>and maintainer review]
+    T --> U
 ```
