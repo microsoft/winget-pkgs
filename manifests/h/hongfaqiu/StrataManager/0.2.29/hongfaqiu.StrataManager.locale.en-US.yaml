@@ -1,0 +1,41 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: hongfaqiu.StrataManager
+PackageVersion: 0.2.29
+PackageLocale: en-US
+Publisher: strata
+PublisherUrl: https://github.com/hongfaqiu
+PublisherSupportUrl: https://github.com/hongfaqiu/strata-manager/issues
+Author: hongfaqiu
+PackageName: Strata Manager
+PackageUrl: https://hongfaqiu.github.io/strata-manager/
+License: MIT
+LicenseUrl: https://github.com/hongfaqiu/strata-manager/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Strata Manager contributors
+ShortDescription: 'A desktop workspace for local inference with Strata: prepare the runtime, manage models and services, and monitor your local API.'
+Description: Strata Manager is an open-source desktop app for managing Niko1221/Strata, a local LLM inference engine. It bundles runtime setup, model downloads, service controls, streaming chat, hardware and API usage monitoring, task-based tuning, and benchmarking into a single workspace. Model weights already on your machine stay untouched.
+Tags:
+- ai
+- large-language-model
+- llm
+- local-llm
+ReleaseNotes: |-
+  - NVIDIA speed estimates now check the card model: 32 GB shows a range, and the RTX 5090 / 3060 / 4060 Ti use their own measurements: the estimate only looked at VRAM, but memory bandwidth differs a lot within one VRAM tier. Changes:
+    - A modified RTX 4080 SUPER 32 GB on IQ3_S now shows "85–104" instead of "≥ 85 tok/s". This follows leaderboard runs of 84.9–97.9 and an upstream community run of 85.3–103.9; one user's own requests have a median of about 95.
+    - The desktop RTX 5090 uses upstream community runs: IQ3_S 127–171, IQ3_XXS 172–181 and IQ2_XS 165–179. It previously showed "≥ 85", well below what it measures.
+    - The RTX 3060 12 GB uses an upstream community run: IQ3_S 18–21, IQ3_XXS 24–27, Q2_0 37–45 and IQ2_XS 38–46. It used the RTX 5070 table before, so IQ3_S showed 46–53, more than twice the measurement.
+    - The RTX 4060 Ti 16 GB uses an upstream community run: IQ3_S 30–35 and Q2_0 48–56. IQ2_XS and IQ3_XXS were not measured on it, so they show "≥ 30" from its own IQ3_S run (see the next entry). It previously showed "≥ 46" and "≥ 76".
+    - 24 GB cards (RTX 4090 table) and other 12 / 16 GB cards (RTX 5070 table) match the existing measurements and are unchanged.
+  - Q2_0 / IQ2_XS no longer look slower than IQ3 on big-VRAM cards: v0.2.28 showed Q2_0 "≥ 76" and IQ2_XS "≥ 63" on a 32 GB NVIDIA card, below IQ3_S "85–104" and IQ3_XXS "≥ 108". These sizes are not actually slower. The 24 / 32 GB tiers have no run of them, so the estimate fell back to the 12 GB RTX 5070 table and showed it as a lower bound. Upstream MODELS.md lists Q2_0 as the fastest, and in every comparison on one machine (RTX 5070, RTX 3060, RTX 3090, RTX 4070 Ti SUPER, RX 9070 XT) a smaller size is not slower than a bigger one. When a tier has no run of a size, the nearest bigger size measured on that tier is now its lower bound, and the note says it is inferred. This only happens when the machine has at least the reference card's VRAM. Changes:
+    - 24 / 32 GB NVIDIA: Q2_0 and IQ2_XS now show "≥ 108" instead of "≥ 76" and "≥ 63", from the RTX 4090 IQ3_XXS runs. Upstream also has an RTX 4090 at 116–154 on IQ2_XS and a 24 GB laptop RTX 5090 at 135–138 on Q2_0, both above this bound.
+    - Desktop RTX 5090: Q2_0 now shows "≥ 165" instead of "≥ 76", from its own IQ2_XS run. IQ2_XS at 165–179 is slightly below IQ3_XXS at 172–181 because it was measured on the older engine 0.1.29; the note says so.
+    - AMD 32 GB: adds an upstream community R9700 run on IQ2_XS at 88–100 (engine 0.1.38). Q2_0 now shows "≥ 88" (was "≥ 48") and IQ3_XXS "≥ 75" (was "≥ 49").
+    - AMD 16 GB: adds an upstream community RX 9070 XT run on IQ3_S at 45–46 (engine 0.1.35), replacing the RTX 5070's 46–53. IQ3_XXS now shows "≥ 45" (was 49–62).
+    - Cards under 20 GB, the RTX 3060 and 12 / 16 GB NVIDIA cards are unchanged. Their figures are measurements, or the reference card has more VRAM than the machine, so nothing is inferred.
+  - Fixed the "Update Strata" confirmation reappearing after an update, with the old version as installed, and downloading the same release again: after the update task replaced the files, the installation list still returned the result cached during the update (up to 10 seconds), so the automatic prompt saw the old version (e.g. Release v0.2.2 · engine 0.1.47) and offered v0.2.7 again; confirming it reinstalled the release already there. The update task now drops that cache when it ends; after any task the automatic prompt re-reads the installed version before deciding; the confirmation shows the folder as it is now and closes once it is current; and confirming re-checks first, so an up-to-date folder is not downloaded again. A chosen version or a local package can still reinstall the same release.
+  - New "Official benchmark" test that runs upstream tools/strata_bench.py's method and compares with the published numbers: the Benchmark page gets an "Official benchmark" tab. Request settings, warm-up, the chat / 4K / 16K / 32K prefill / agent items and the skip rules follow the upstream script (commit 46c152a1), and the figures are the medians of the engine's first-token time, prefill and decode speed. Results sit next to the numbers the maintainers published for the same hardware, model and quantization (Strix Halo with Qwen IQ3_S and DeepSeek 2.00 bpw, RTX PRO 5000 with NVFP4-QAD, each with its source), with the difference; without a matching setup it says the maintainers have no numbers for it. Existing tests are unchanged.
+  - The leaderboard now ranks by the official benchmark by default: if you agreed to share results, an official run uploads after it finishes, like a context run (with signed run evidence, compared only within the same model and quantization, kept for 12 months). The in-app leaderboard and the website's /leaderboard rank by chat decode speed by default and can switch to 4K / 16K / 32K prefill, agent decode or machine count. The maintainers' published numbers appear as "Official" rows with their source and are not ranked. The old 8K decode ranking is now "Context runs", kept as a switchable view with its filters, sorting and recommendations; old links still open it. Until the server supports official runs, the app keeps showing the old ranking and keeps the upload queued for a later retry.
+ReleaseNotesUrl: https://github.com/hongfaqiu/strata-manager/releases/tag/v0.2.29
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
