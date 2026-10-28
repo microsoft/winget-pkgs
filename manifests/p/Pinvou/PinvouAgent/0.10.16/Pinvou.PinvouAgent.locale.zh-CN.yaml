@@ -1,0 +1,72 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Pinvou.PinvouAgent
+PackageVersion: 0.10.16
+PackageLocale: zh-CN
+Publisher: pinvou
+PublisherUrl: https://pinvou.com/
+PublisherSupportUrl: https://github.com/Pinvou/pinvou-agent/issues
+PackageName: pinvou3
+PackageUrl: https://pinvou.com/
+License: MIT
+LicenseUrl: https://github.com/Pinvou/pinvou-agent/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Pinvou
+ShortDescription: 开源桌面 AI 智能体工作台，覆盖工具、文件、知识与工作流。
+Description: Pinvou Agent 是一个开源的桌面 AI 智能体工作区，面向工作、设计与编程。它把日常事务、可视化设计和软件开发整合进同一个桌面工作区，让任务以真实结果收尾：可以使用工具、处理文件、积累个人知识，通过 ACP 在真实项目中引入专用编码智能体，或将提示词变成可持续编辑的可视化作品。
+Tags:
+- mcp
+- 人工智能
+- 工作流
+- 智能体
+- 知识库
+ReleaseNotes: |-
+  官方下载 / Official Downloads
+  Pinvou 已在新华三官网提供官方下载渠道：
+  - Windows x64：新华三官网 — pinvou3 for Windows
+  - macOS Universal：新华三官网 — pinvou3 for macOS
+  - H3C LinSeer MegaCube（Linux ARM64）：新华三官网 — pinvou3 for MegaCube
+  新华三官网与 GitHub Assets 均为官方分发渠道，版本同步可能存在时间差；下载前请确认页面显示的版本。v0.10.16 官网页面尚未同步更新，当前版本请优先使用本页下方 Assets。
+  问题修复
+  1. 会话转录提交跨引擎回收保持（#785）：引擎回收（模型热切换 → 驱逐 → 重建、空闲回收、删除/重绑、失败 spawn 清理）可能静默丢失已准入写入者的 chat:transcript_committed 通知——事件转发器以 spawn_blocking 持久化聊天快照并在等待任务完成后才发出提交通知，回收可中止等待中的转发器、却拦不住已在途的阻塞写入：文件可能已多出一条运行期追加（如 MCP 启动失败回执），而前端仍只知道上一个已提交修订，严格版本对账每次重试都失败并弹出虚假的「权威记录暂未同步」提示（按缓冲区计，重新进入会话才会消除）。同时，退役引擎的排队快照可能在替换引擎的回合之后被准入并覆盖它（丢消息）。现修订计算与提交通知在同一阻塞事务（持久写入之下）内执行，回收前的排队写入者直接跳过而非持久化；替换引擎的 spawn 基线读取改经同一变更门（load_for_engine_spawn），排在每个已准入写入者之后。冷启动水合改为 fail-closed：基线读取先于 spawn 并在阻塞工作线程执行，加载失败对所有会话类型中止 spawn；sync_session 失败现在拆除引擎并使 spawn 失败，而非仅打日志后发布未水合引擎——此前死引擎会留在缓存中，用不透明的发送错误卡死后续每个回合，直到驱逐、换模型或重启。
+  2. 定时任务创建管线 drain 加固（#680，自 #629 round-12 拆分）：卡住事件按载荷摘要去重——Poison/重试耗尽/超限尾部三类臂的审计行与失败标记每个卡住事件（每进程）只写一次，同字节重新入队的停放记录不再无限追加 jsonl；同名校正重投（服务器摘除其过期 ok:false 标记）按摘要重绑定开新事件。停放解除门：mtime 递增仅在载荷变化时解除停放——同字节 mtime 刷动在整个进程生命周期内买不到任何重放，校正后的载荷则重绑定并应用。标记补写：去重只停止重写、绝不留下无人应答的调用，服务器摘除的标记按在手的错误恢复，且 ok:true 拒绝保证恢复永不覆盖已落地的回执。超限尾部如实分类：搬移前探针并复核快照，损坏报「不可解析」、超大/不可读如实标注、只有真正超限的记录保留超限标签，摘要绑定的已记录回执抑制失败标记；非 UTF-8 队列名在批计数前即见即隔离（此前消耗枚举窗口与批次配额、饿死合法命名的记录）；轮次中文件消失的幽灵条目直接丢弃而非毒化为「不可读」。
+  3. 全应用视觉 e2e 扫荡修复（#762）：20 代理舰队扫荡（明/暗 × 中/英/日 × 1440→390px，全部发现经截图 + 计算样式/DOM 证据确认、修复后浏览器复验）确认的视觉缺陷逐项修复（36 文件，+512/−138，每缺陷一个提交），后续五轮对抗评审收口。聊天 markdown：300 字符长 URL 被 content-visibility 绘制包含静默裁剪（无省略号无滚动）——.msg-md/.persona-body/.codex-markdown 获 overflow-wrap（break-word 先于 anywhere 保住 Safari 14 换行地板），表格保住块级滚动框；重载时相邻助手文本块以空行拼接，后续 markdown 表格能正常解析。知识库视图：固定宽对话框在窄边栏贴边裁切、头部控件裁切、窄屏网格降列等问题修复。设置：深色对话框上的白底确认按钮（亮色白上白）改为双主题共享主按钮配方。人设横幅头像行在 ~1134px 窗口才可用、旧断点永不生效——改为元素级可见性工具类。工具商店：拖入提示被滚动边缘截断、图标 .png 改名 .jpg（实为 JPEG）、五张模态卡加视口边距、卡片类型徽章经本地化字典解析（此前每个语言都渲染英文原文 'Skill'/'MCP Server'）、社区 QQ 群名三语本地化、回收站徽章单数标签。阅读器窗口：新增 pre-paint 主题引导脚本，首帧/挂载帧/稳态同色——分离窗口（加载 index.html）曾从暗→亮→暗翻转直到引导设置到达，现经共享配色种子修复。深色主题与对比度：远程知识库与运行时提示的深色配对补齐，多处低于 AA 的文本对提高（授权按钮 2.15:1 → 6.97:1 等），第四轮逐对在真实祖先背景上重算复验。静默透明度着色：Tailwind 裸透明度刻度只覆盖 5 的倍数，bg-[#d63a3a]/8、bg-white/88 等非刻度修饰符编译为空——14 个文件中设计好的着色从未渲染（监控指标卡亮色无卡片背景、右侧停靠面板无玻璃底、语音条无卡片着色、定时过滤轨道、工件芯片与遮罩全部失效），现已全仓以保分数的方括号形式恢复并逐对复验 AA。新增免浏览器回归钉套件 tests/ui_visual_artifacts.test.mjs（每个 CI 腿都跑），突变电池验证其捕获能力；钉对类名顺序敏感——重排被钉文件中的类名会失败，须同提交更新钉。
+  4. Shell 命令生成提示改进（#754）：共享应用指引改为复用已验证的解释器、把可检视的脚本经目标 shell 的文件入口点发送（PowerShell 用 -NoProfile -File；Windows PowerShell 5.1 含非 ASCII 文本的脚本使用 UTF-8 BOM——原生运行验证引号、美元符、中文与换行逐字保留），必需探针失败独立上报。提示要求仅使用 schema 支持的参数，并显式拒绝臆测 stdin 支持或使用 PowerShell 输入重定向。三个新的选择性加入评估任务保留四调用默认；脚本传输只允许其命名临时文件。不改任何工具执行、权限边界或子模块；残余指引覆盖面与传输策略限制在 #767/#768 跟踪。
+  内部改进
+  1. 依赖清理、去重与更新第三轮（#777）：继 #699（2026-10-20）、#761（2026-10-23）之后第三遍依赖卫生，macOS 11 / Safari 14.0、glibc 2.35、Windows 10 1809 与 MSRV 1.90 地板全部不变。随发 SDK/运行时钉：捆绑桥 Node 24.22.0 → 24.22.1（安全版：Brotli 解码器越界写、TLS 主机名/IPv4 绕过、dns NUL 截断；五平台摘要逐一从官方 + unofficial-builds SHASUMS256.txt 重导出）；claude-agent-acp 0.94.0 → 0.95.0（其 claude-agent-sdk 0.3.303 → 0.3.309，ACP v1 stdio wire 不变）；dws 连接器 CLI 1.0.64 → 1.0.65（第二轮挂起解除：上游 1.0.64 起发布 checksums.txt，本轮完成验证——五平台归档摘要核对 + 提取后二进制重哈希；上游变更均为增量，捆绑 dingtalk-skills 基线保持 1.0.64 内容并在 NOTICE 分列）。Rust：wry 0.57.1（脱离 base64 0.22 族）、zip 9.1.0、similar 3.2.1、tao 0.37.2、uuid 1.29.0、webpki-roots/-certs 1.0.11 等 cargo update 刷新，刷新后三工作区 cargo update --dry-run 全 no-op；pinvou-cli 虚拟 workspace 解析器显式升到 "3"（MSRV 感知解析保护，锁零移动）；RUSTSEC-2026-0387（crypto-bigint）ignore 按 #776 语义合并为单一条目并补充 age 实际使用分析（curve25519 算术，脆弱 NIST 曲线常时操作被链接但不在执行路径上）。npm：eslint-plugin-unicorn 78 → 79、@eslint-react 5.28.8；生产 audit 0；去重 24 名/49 副本与基线持平。全部文档化挂起对 2026-10-24 上游逐一复验；upstream-first 附录落地 CodeWhale #120/#122。
+  2. CodeWhale 底座消费公共维护批次 #118–#122（#796）：gitlink ea9fdc90f → 6e1ee88ee（pinvou3-clean 头），仅引用与锁更新，无新 fork 主题。#118——恢复引擎已返回的工具结果（T2）：串行/并行/聚合三条派发路径都在路由级上下文压缩前保留引擎返回的工具结果，保持工件失败、不可变发布与策略过滤检索边界（生产者边界如实声明：tasks.rs 在返回 DTO 前将 stdout/stderr 摘要截到 900 字符；父侧采纳与登记在 #757 跟踪）。#119——子代理已结算名释放与 wait 超时重广告（T1）：会话名只被活着的子代理持有（completed/failed/cancelled/budget-exhausted 持有者释放，重试名解析到重试）；wait 的 timeout_secs 重新广告（广告面 14 字段，范围与 SUBAGENT_WAIT_{MIN,DEFAULT,MAX}_TIMEOUT_SECS 绑定），并行 general spawn 写冲突拒绝附只读恢复指引。#120——npm 安全修复（CodeWhale 内部 web/telemetry-ingest，next 16.4.3 关键 RCE 链清零）。#121——telemetry-ingest CI 车道恢复。#122——deps round-3：keyring 3 → 4.2（Linux 丢弃 keyutils 直写缓存，Secret Service 成为唯一持久存储；会话加密保持 RustCrypto）、oauth2 default-features = false（收拢 CodeWhale TUI 整个 reqwest 0.12/0.13 分裂）。父仓两份 Cargo.lock 因 #122 的依赖图移动在同一 PR 内再生成（cargo check --locked 强制）；fork-guard EXPECTED_COMMITS 79 → 84，并新增四个指纹钉住 #118/#119 的回归（输出在串行保留/并行聚合保活、Web 信封字段幸存、wait 超时别名仍接受、settled 名单次释放）。
+  3. fork 登记 JSONPath 回移来源记录（#756）：把上游 #7046 的 provenance 按已集成状态记录（经 CodeWhale#117 集成、父仓 #750 消费），两个登记文件都以顶层历史证据节区分 cherry-pick 4164aa6fd 与候选分支尖 4bf5e0894，保留上游来源与留存分支出处；删除重复的基线/计数/测试陈述、过期的待重钉前置与历史探针/合并资格叙述。纯文档变更（四文件 +14/−0），运行时、gitlink、守卫与 CI 均为基线版本。
+  注意事项
+  - 定时任务 drain 加固（#680）的有界残留：门路径恢复在校正重投落在摘要读取与标记写入之间时，可能用重投前的一次失败回答一次轮询；校正重投的 mtime 未高过停放时刻时走静默路径、隔离不应用（下次重投即应用）。超限上限约束而非关闭无键重试放大——watcher 死亡/停滞绕过它，停滞累积的积压在恢复时整体兑现（256 帽为每轮限制）；UTF-8 非 .json 队列名永不进入枚举（无限期保留）；非 UTF-8 .json 名即见即隔离。
+  - 会话引擎回收（#785）：此前见过虚假「权威记录暂未同步」提示的会话无需任何操作，重新进入会话即消除（按缓冲区计）；历史数据无损坏。
+  - 依赖更新（#777）：捆绑桥 Node 升至 24.22.1 安全版；dws 连接器 CLI 升至 1.0.65（增量变更：审批图片上传、A2UI 回复、skill-setup fail-closed + Windows junction 修复、兼容保留的 aitable 更名）。
+  - LoongArch64 安装包继续随发布提供（dpkg 架构 loong64，面向 UOS V25 / deepin 23/25 新世界系统）；平台降级面不变：本地嵌入不可用（知识库检索自动降级全文检索）、连接器与 Codex/Claude 原生运行时无按需安装器（PATH 已装二进制继续可用）。
+  - 官网页面版本同步可能滞后，v0.10.16 官网页面尚未更新，下载前请确认页面显示的版本。
+  - Windows 和 macOS 安装包尚未正式签名。Windows 首次安装可能出现 SmartScreen 提示；macOS 首次打开如被 Gatekeeper 拦截，可在确认安装包来源可信后解除隔离再打开。
+  - 安装包与发布产物由版本 PR 合入 main 后触发的发布工作流构建，未在本地构建。
+  - 本次为预览版本，欢迎通过 GitHub Issues 反馈问题。
+  构建来源：main @ 5167f1f7b / Actions #40324941891（五平台安装包同源构建）
+  官网更新日志
+  zh-CN
+  修复
+  - 会话转录提交跨引擎回收保持：模型热切换/回收不再丢失提交通知、退役引擎排队快照不再覆盖替换引擎回合；冷启动水合失败即失败，不再缓存死引擎卡死后续回合；「权威记录暂未同步」假通知根除，无需用户操作。（#785）
+  - 定时任务创建管线 drain 加固：卡住事件按载荷摘要去重、mtime 递增仅在载荷变化时解除停放、服务器摘除的失败标记补写且不覆盖已落地回执、超限尾部如实分类、非 UTF-8 队列名即见即隔离。（#680）
+  - 全应用视觉扫荡修复：聊天长 URL 换行且表格保滚动框、知识库对话框窄窗不再贴边、设置对话框按钮对比度、阅读器窗口首帧主题闪烁修复、深色主题配对与 AA 对比度、14 个文件静默失效的透明度着色全仓恢复、卡片类型徽章与社区群名三语本地化。（#762）
+  - Shell 命令生成提示改进：复用已验证解释器、经目标 shell 文件入口发送可检视脚本（PowerShell -NoProfile -File，Windows PowerShell 5.1 非 ASCII 用 UTF-8 BOM）；拒绝臆测 stdin 支持。（#754）
+  内部改进
+  - 依赖清理第三轮：捆绑桥 Node 24.22.1（安全版）、claude-agent-acp 0.95.0、dws 连接器 CLI 1.0.65（上游校验和已验证）、wry 0.57.1；平台地板（macOS 11 / Safari 14、glibc 2.35、Windows 10 1809、MSRV 1.90）不变。（#777）
+  - CodeWhale 底座消费 #118–#122：引擎已返回工具结果恢复（T2）、子代理已结算名释放与 wait 超时重广告（14 字段）、npm 安全修复、keyring 4.2 / oauth2 瘦身。（#796）
+  - fork 登记 JSONPath 回移来源记录（纯文档，四文件 +14/−0）。（#756）
+  en-US
+  Fixes
+  - Session transcript commits survive engine recycle: model hot-switch/reclaim no longer loses commit notifications, and a retired engine's queued snapshot can no longer clobber the replacement's turn; failed cold-spawn hydration now fails the spawn instead of caching a dead engine that bricked later turns; the spurious "authority record not synced" notice is fixed at the root — no user action needed. (#785)
+  - Scheduled-task creation drain hardening: stuck episodes deduped by payload digest, mtime bumps un-park only on payload change, server-unlinked failure markers restored without clobbering landed receipts, truthful ceiling-tail labels, and non-UTF-8 spool names quarantined on sight. (#680)
+  - Full-app visual sweep repairs: long-URL wrapping in chat markdown with table scroll boxes kept, knowledge dialogs no longer pinned edge-to-edge in narrow panes, settings dialog button contrast, reader-window first-frame theme flash fixed, dark-theme pairings and AA contrast, silently-dead alpha tints restored repo-wide across 14 files, and card-type badges plus community group names localized in all three languages. (#762)
+  - Shell command generation guidance: reuse a verified interpreter and send inspectable scripts through the target shell's file entry point (PowerShell -NoProfile -File; UTF-8 BOM for non-ASCII text on Windows PowerShell 5.1); assuming stdin support is explicitly rejected. (#754)
+  Internal improvements
+  - Dependency cleanup round 3: bundled bridge Node 24.22.1 (security release), claude-agent-acp 0.95.0, dws connector CLI 1.0.65 (upstream checksums now verified), wry 0.57.1; platform floors (macOS 11 / Safari 14, glibc 2.35, Windows 10 1809, MSRV 1.90) unchanged. (#777)
+  - CodeWhale foundation consumes #118–#122: engine-returned tool-result recovery (T2), settled subagent-name release and wait-timeout re-advertisement (14 advertised fields), npm security fixes, keyring 4.2 / oauth2 slimming. (#796)
+  - Fork register records the consumed JSONPath backport provenance (docs-only, four files +14/−0). (#756)
+ReleaseNotesUrl: https://github.com/Pinvou/pinvou-agent/releases/tag/v0.10.16
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
