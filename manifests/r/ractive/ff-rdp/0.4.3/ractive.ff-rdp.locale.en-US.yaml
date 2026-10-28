@@ -1,0 +1,52 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ractive.ff-rdp
+PackageVersion: 0.4.3
+PackageLocale: en-US
+Publisher: ractive
+PublisherUrl: https://github.com/ractive
+PublisherSupportUrl: https://github.com/ractive/ff-rdp/issues
+Author: James Bergamin
+PackageName: ff-rdp
+PackageUrl: https://github.com/ractive/ff-rdp
+License: MIT
+LicenseUrl: https://github.com/ractive/ff-rdp/blob/HEAD/LICENSE
+ShortDescription: Use Firefox's Remote Debugging Protocol via a CLI
+Description: CLI for Firefox Remote Debugging Protocol — inspect, test, and automate Firefox from the terminal. Supports navigation, DOM queries, screenshots, accessibility audits, performance analysis, network monitoring, and more. Designed for both human users and AI agents.
+Moniker: ff-rdp
+Tags:
+- agentic-skills
+- agentic-workflow
+- cli
+- firefox
+- firefox-rdp
+ReleaseNotes: |-
+  ff-rdp stop now shuts down the Firefox that ff-rdp launch started, without touching a Firefox you started yourself. This release also makes consent accept wait until the banner is really gone, warns when a known cookie banner covers the page, fixes a crash when navigating to file: URLs, and fixes several screenshot and accessibility-summary bugs reported by other projects.
+  Changed
+  - navigate refuses file: URLs, even with --allow-file-urls. Loading a file: URL into a web tab crashed the whole Firefox ("Illegal load attempt of file: URL from webIsolated"). Use ff-rdp launch --allow-file-urls --url file://… instead. (#347)
+  - navigate --with-page: page.title is now document.title. It used to be Readability's title, often the og:title. Readability's title moved to the new page.reader_title. (#347)
+  - a11y summary and --with-page list headings in document order, no longer grouped by level. (#347)
+  - The kill check launch --replace uses is stricter. It now requires a recorded start token, and it signals a process group only when the PID leads that group. A Firefox launched by a much older ff-rdp, without a start token, can no longer be replaced automatically; stop it yourself once. (#344)
+  Added
+  - ff-rdp stop [--port N], plus stop --all (every Firefox launched under the current FF_RDP_HOME) and stop --dry-run. It sends SIGTERM, then SIGKILL, and removes the instance's temporary profile.
+    - It only signals a Firefox it can prove it launched: an owner marker in a private profile root, a matching start token, and a Firefox executable.
+    - A port held by any other process gets an error, not a kill.
+    - launch, doctor, the "port in use" error and profiles prune all point to it. (#344, #345)
+  - navigate, screenshot and scroll warn when a known cookie banner covers the page. The consent_overlay entry in results.warnings[] names ff-rdp consent accept, which also leads the hints. (#352)
+  - ff-rdp launch <URL> accepts the start URL as a positional argument, the same as --url. Passing both is an error. (#351)
+  - doctor reports whether ff-rdp launched the Firefox listening on the port. (#344)
+  - screenshot --window-size WxH --full-page is now allowed. The capture uses width W and the page's full height. (#347)
+  Fixed
+  - consent accept reports accepted only once the banner is hidden and the page scrolls again. Before, it returned as soon as the click landed, so an immediate screenshot still showed the banner. A banner that stays up now gets clicked_not_dismissed (exit 1). navigate --auto-consent waits the same way. (#352)
+  - a11y summary: <header> and <footer> inside article, section, nav, main or aside are no longer reported as banner and contentinfo landmarks. (#347)
+  - screenshot --full-page keeps sticky headers at full width and in the page flow. Before, they shrank and content slid underneath them. (#347)
+  - screenshot --output-root DIR without -o writes into DIR instead of failing with "escapes --output-root". (#347)
+  - A Firefox launched by ff-rdp never opens a crash-reporter dialog (MOZ_CRASHREPORTER_DISABLE=1). (#347)
+  - Launch failures name how to see Firefox's own stderr. (#347)
+  - click --help states that a click gives the page no user activation. (#347)
+  Internal
+  The kill gate is shared between stop and launch --replace, with a typed refusal for each failed check. This release adds live tests for stop and iteration 296, and bumps the rustls/webpki crates for RUSTSEC-2026-0381/0382. The live sweep now skips and reports quarantined (flaky:) tests (#353); two flaky live tests are quarantined (#350, #354).
+ReleaseNotesUrl: https://github.com/ractive/ff-rdp/releases/tag/v0.4.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
