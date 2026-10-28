@@ -1,0 +1,142 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+#
+PackageIdentifier: Freelensapp.Freelens
+PackageVersion: 2.0.0
+PackageLocale: en-US
+Publisher: Freelens Authors
+PublisherUrl: https://freelens.app/
+PublisherSupportUrl: https://github.com/freelensapp/freelens/issues
+PackageName: Freelens
+PackageUrl: https://github.com/freelensapp/freelens
+License: MIT
+LicenseUrl: https://github.com/freelensapp/freelens/blob/HEAD/LICENSE
+ShortDescription: FOSS IDE for Kubernetes
+Tags:
+- cloud-native
+- containers
+- devops
+- kubernetes
+- kubernetes-dashboard
+- kubernetes-ui
+ReleaseNotes: |-
+  The major release that modernizes Freelens internals and unlocks further development.
+
+  v2.0.0 is a full internal rewrite of how Freelens is built, bundled, and tested. The application, its internal packages, and the extension API are now ESM-first, compiled by a single [Vite](https://vite.dev/) (electron-vite) pipeline directly from TypeScript sources, and tested with [Vitest](https://vitest.dev/). The UI runs on React 19, and the extension API has been redesigned as a specified, frozen contract, checked by porting real extensions to it. Most of the work is in the foundation, but the release also brings a standalone terminal, faster and more reliable cluster connections over HTTP/2, custom resources for users who may not list their definitions, verified binary downloads, and a long list of fixes. The extension API is **not compatible with v1 extensions**.
+
+  ## What's new:
+
+  ### Breaking Changes
+
+  * The extension API has been reorganized and is **not compatible with Freelens v1 extensions**. Extensions must be updated for v2 before they will load. Extensions may now be authored as either ESM or CommonJS, and must target React 19. See the [migration guide](https://github.com/freelensapp/freelens/blob/main/docs/extensions/migrating-from-v1.md). See #2102, #2110, #2304, #2465
+  * Extensions are now installed under the application data directory (`<userData>/extensions`) instead of `~/.freelens/extensions`. Extensions installed for v1 are not migrated and have to be installed again in their v2 versions. See #2400, #2467
+  * Renderer extensions get no guarantee of Node or Electron, `require()` included; Node work belongs in the main process, reached over IPC. See #2483, #2484
+  * Freelens is now ESM-first throughout — the main process, the renderer, all internal modules, and the extension API ship as ES modules. See #2102, #1718
+  * macOS 13 Ventura or later is required: Electron 44 no longer supports macOS 12. See #2864
+  * Removed the hierarchical-namespaces (HNC) tree view from the namespace details, together with the deprecated `@mui/lab` it was built on. See #2290
+  * Downloaded kubectl versions start at Kubernetes 1.22, and the China package mirror option is gone (the mirror stopped syncing). Older clusters use the bundled kubectl. See #2348, #2351
+
+  ### New Features
+
+  * Open a terminal outside a cluster session: a standalone terminal page with its own tabs, reachable from the Welcome page, the Catalog, the hotbar and the command palette. It uses your own shell environment, `KUBECONFIG` and `kubectl`/`helm`, and the application's proxy as `HTTPS_PROXY`. See #2359, #2364
+  * Custom resources work for users who may list them but not their `CustomResourceDefinitions`: the sidebar, the list views and the details are built from the cluster's API discovery instead. See #2675, #2676, #2677, #2679
+  * Resource search matches across dashes and underscores, so `nginxingress` finds `nginx-ingress`. See #1937, #2711
+  * Cluster settings to skip the namespace authorization and metrics endpoint checks, for faster connection to large clusters. See #1699
+  * Terminal tabs show startup progress, including the kubectl download and its verification, instead of a stalled "Connecting ...". See #2357, #2358, #2367, #2368
+  * macOS natural text editing shortcuts in the embedded terminal (Option+Arrow word navigation, Command+Arrow line navigation, Command/Option+Delete). See #1051, #2338, #2354, #2355
+  * Installing an extension that is already installed and enabled offers to replace it, or to reinstall the same version, instead of failing with "Disable or uninstall it first". See #2798, #2799
+  * The Extensions page shows "Failed to load" for an enabled extension whose code did not load, with the process, the stage and the error in its tooltip, and labels each install as `verified`, `unverified` or `development` in colour. See #2780, #2787, #2788
+  * Downloaded log files have a timestamp in their name, so repeated downloads no longer overwrite each other. See #1884, #2565
+  * The Node Group column of the nodes list recognizes kops instance groups. See #2454
+  * The installers have their own icon, the application icon with an install badge, so they are no longer mistaken for the application. See #2838
+  * The HTTP Proxy preference accepts `socks5://` proxies as well as `http://` and `https://`, and becomes `HTTPS_PROXY` in the terminal outside clusters, as the proxy of a cluster already is in its terminal. Both proxy settings now say what goes through them. See #2433, #2878
+
+  ### Extensions API
+
+  * **A specified contract.** The v2 API is described by normative contracts — the guarantee, the stable surface and the failure mode of each part — and everything it exports stays frozen until the next major. See [api.md](https://github.com/freelensapp/freelens/blob/main/docs/extensions/api.md), [binaries.md](https://github.com/freelensapp/freelens/blob/main/docs/extensions/binaries.md) and the [migration guide](https://github.com/freelensapp/freelens/blob/main/docs/extensions/migrating-from-v1.md) with the v1 → v2 rename table. See #2304, #2465, #2501, #2562
+  * **Proven by porting real extensions.** The contract and the migration guide were checked by porting the example, Gateway API, Flux CD, AI, Karpenter, Velero and Freelens for Claude extensions to v2, and every gap found on the way was fixed in the host or in the documentation. The documentation points to [freelens-example-extension](https://github.com/freelensapp/freelens-example-extension) as the reference template, and to its agent skills for creating and porting an extension. See #2653, #2654, #2655, #2662, #2663, #2664, #2665, #2666, #2686, #2687, #2694, #2696, #2705, #2706, #2719, #2723, #2732, #2761, #2770
+  * **New delivery mechanism.** A built-in installer replaces pnpm (and drops 20 MB of it from every build): install from a package name, a URL, a `.tgz` file or a local directory, with integrity checked at install time. Extensions are served over a privileged `freelens-extension://` scheme and loaded by URL, and a development extension reloads when it is rebuilt — once per rebuild, also for a build that writes its main and renderer entries in two runs. Installing from a typed Windows drive path now works. See #2400, #2467, #2468, #2469, #2471, #2472, #2500, #2710
+  * **Host singletons.** React, ReactDOM, the JSX runtime, MobX, mobx-react and Monaco are shared with extensions through the `FreelensExtensionApi` global, so an extension never ships its own copy. `@ogre-tools/*` is no longer part of the contract; an extension that wants dependency injection bundles its own. See #2450, #2474, #2534, #2535
+  * **Complete Kubernetes types.** `K8sApi` re-exports the whole kube-object and kube-api type surfaces, and `KubeApi` and the other type-and-value pairs can be named as types again. The concrete host store classes are no longer exported. See #2365, #2475, #2478, #2480, #2504, #2505
+  * **Typed registrations.** `Renderer.K8sApi.detailsFor()` and `menuItemFor()` build detail and menu registrations from the model class, so a component written for another kind does not compile. Pages, preference inputs and hints, menu items and cluster frame components are typed with the props the host actually passes. See #2655, #2656, #2670, #2671, #2672, #2692
+  * **Custom resources.** A new `customResources` field lists the custom resources an extension presents with pages of its own, and hides them from the Custom Resources tree of the sidebar while the extension is enabled. The host registers an API and a store for every served version of a CRD, prefers the served storage version, and drops the APIs and stores of a deleted CRD. See #2655, #2656, #2668, #2674, #2698, #2700
+  * **The host's kubectl, helm and terminal environment** are available to main-process extensions through `Main.Shell`: the binaries Freelens runs for a cluster, with the download and verification phases reported, and the environment its terminals get. The same code now prepares the cluster, node shell and standalone terminals. See #2704, #2709, #2712, #2715
+  * **Renderer-safe utilities.** `Main.Util.fetch`, the host's proxy-aware `fetch`, typed as the standard `fetch` (the renderer uses Chromium's global `fetch`), `createReactKey`, `sha256Hex` and `kustomizeHash` hashing helpers, a Node-free event emitter for `CatalogCategory`, and the Node-bound members removed from `Util`. `Catalog.getAllClusters()` and `getClusterById()` are observable by contract in both processes. See #2395, #2396, #2481, #2482, #2487, #2488, #2489, #2490, #2723, #2732
+  * **Fixes found by the ports.** `KubeJsonApi.forCluster` is callable, `objectConstructor` of an API object is the class itself, so a store over a host API applies its watch events, `ExtensionStore` accepts a model declared as an interface, disabling an extension stops the sync of its stores instead of leaving two copies saving each other in an endless loop, stylesheets load without console errors, and `Renderer.Navigation.navigate` warns about a relative pathname. An unset boolean query value of `KubeApi` (`follow`, `watch`, `previous`, `timestamps`) is no longer sent as `true`, and `PodApi.deleteWithFinalizers()` really clears the finalizers. See #2651, #2652, #2667, #2669, #2707, #2708, #2721, #2722, #2759, #2767, #2770
+  * **A leaner published package.** `@freelensapp/extensions` ships a self-contained declaration built with TypeScript 7 and rolldown-plugin-dts. Unused members that pulled Electron, `react-window`, `@xterm/xterm`, MUI, `forRemoteCluster` and several abandoned packages into the declaration are gone, every external package it imports is declared, and the build fails if it ever references Node. See #2360, #2363, #2375, #2388, #2445, #2446, #2485, #2486, #2498, #2499, #2545, #2557, #2559
+  * An in-repo fixture extension tests the contract in the unit and integration suites on all three platforms. See #2451, #2452, #2492, #2500
+
+  ### Architecture
+
+  * **Vite replaces webpack.** The entire webpack setup — the app bundle, the `packages/core` library bundle, and the infrastructure build — is replaced by a single electron-vite pipeline for the main, preload, and renderer processes. See #2102, #2112, #2118
+  * **Single transpilation from TypeScript source.** Every workspace package is now consumed directly from its TypeScript sources; no package emits a `dist/` bundle. The separate transpilation shims that repackaged ESM-only dependencies are gone. See #2102, #2113
+  * **Vitest replaces Jest.** The 33 per-package Jest configurations and the whole layer of ESM-in-CommonJS workarounds (`ts-jest`, the custom resolver, `@side/jest-runtime`) are replaced by one root Vitest configuration running on the same Vite pipeline as the app. The suites run through a single sharded Vitest invocation with CI-friendly reporters. See #2102, #2109, #2123, #2185, #2595
+  * **Separate runtime environments in type-checking.** Main, renderer and common code are type-checked against their own runtime (Node without DOM, DOM without Node), so an API the process does not have fails the build. See #2491, #2492, #2493
+  * **React 19 and in-house routing.** React was upgraded from 17 to 19 in staged steps, with `React.StrictMode` enabled in development, ref-as-prop, `react-window` v2 and the deprecated mobx-react `disposeOnUnmount` replaced. The `react-router` v5 / `history` v4 stack was replaced by an in-house router in `@freelensapp/routing`, with the used parts of `path-to-regexp` v1 and `history` v5 vendored in. See #2154, #2251, #2254, #2261, #2263, #2266, #2267, #2268, #2269, #2270, #2278, #2280, #2283, #2286, #2289, #2298, #2393
+  * **Per-process HTTP.** `node-fetch` is gone: the renderer uses Chromium's fetch and the main process uses undici. `http-proxy-node16` was replaced by the maintained `http-proxy-3`. See #2361, #2373, #2540, #2541
+  * **Proxies named after what they are.** The two proxies of the main process are now `FreelensProxy`, which serves the renderer, and `FreelensK8sProxy`, the per-cluster `freelens-k8s-proxy` process, and their log lines carry `[FREELENS-PROXY]` and `[FREELENS-K8S-PROXY]`. See #2572, #2573, #2829
+  * **Dependency and toolchain cleanup.** Dropped `electron-rebuild` and `node-gyp` in favor of `node-pty` prebuilds, removed the `@freelensapp/legacy-global-di` package, unified the build patterns across executable packages, moved shared versions into a pinned pnpm catalog, unified `tsconfig` on the ES2025 baseline, switched to the React automatic JSX runtime, moved `electron` to `devDependencies`, re-enabled `knip` (now also for unused files and stylesheets), and switched Node.js builtin imports to the `node:` prefix. See #2126, #2128, #2129, #2131, #2137, #2164, #2228, #2229, #2247, #2125, #2330, #2336, #2678
+  * **Fewer, lighter dependencies.** Several third-party libraries were replaced with native APIs or lighter, maintained equivalents: lodash → [es-toolkit](https://es-toolkit.dev/), moment / moment-timezone → native `Date` and `Intl`, crypto-js → `node:crypto`, query-string → `URLSearchParams`, url-parse → `URL`, grapheme-splitter → `Intl.Segmenter`, semver → [verkit](https://www.npmjs.com/package/verkit), p-limit → es-toolkit `limitAsync`, react-beautiful-dnd → [@dnd-kit](https://dndkit.com/), react-table → an in-house sortable table, and `stoppable`, `typed-regex`, `typed-emitter`, `glob-to-regexp`, `randomcolor` and `winston-transport-browserconsole` → small in-house code. `mobx-react-lite` is gone in favour of `mobx-react` alone. `selfsigned` was upgraded to v5, Chart.js from v2 to v4, MUI from v5 to v9, and `@ogre-tools/*` from 17 to 27. See #2167, #2306, #2180, #2188, #2189, #2217, #2197, #2394, #2386, #2387, #2389, #2390, #2391, #2392, #2220, #2177, #2282, #2316, #2326, #2178, #2618, #2620, #2630, #2632, #2807
+
+  ### Improvements
+
+  * Cluster requests travel over HTTP/2 end to end: the internal proxy serves the renderer over HTTP/2, and talks HTTP/2 to the per-cluster `freelens-k8s-proxy` too, so all requests of a cluster share one connection. A cluster view with many open watches no longer stalls its other requests behind Chromium's six-connection limit, and list views close their watch requests when you leave them. See #2444, #2566, #2568, #2569, #2570, #2784, #2820, #2830
+  * Cluster requests recover when the k8s proxy process exits on its own, instead of failing with "connection refused" until the cluster is reconnected. Concurrent requests no longer spawn duplicate proxy processes, a proxy that cannot start answers at once with the reason instead of hanging, and its restarts are bounded. A change of the server address in the kubeconfig is picked up, and the proxy of a cluster removed from the catalog is stopped, as is every proxy on quit. See #2563, #2564, #2713, #2714, #2716, #2717, #2718, #2720, #2789, #2791
+  * Authentication failures back off (1 minute, then 5 minutes, then pause until you reconnect) instead of running an exec credential plugin such as kubelogin every 30 seconds and opening a browser tab each time. A failing connection also reports its error 16 seconds sooner. See #2459, #2629, #2634
+  * Watch events are applied with one index per flush, and a list is sorted again only when a field it is sorted by changed, which makes busy clusters with thousands of objects cheaper to follow. See #2783, #2792, #2793
+  * Cluster CPU and memory charts keep their history on clusters with node churn (Karpenter, Cluster Autoscaler, spot instances). See #2456
+  * The logs tab no longer freezes for seconds with "Show timestamps" on, and stale pod log requests are cancelled instead of piling up. See #2463, #2494
+  * Freelens no longer fills `~/.kube/cache/discovery` with an entry for every session: kubectl, helm and the cluster terminals get a cache directory of their own for the proxy kubeconfig. See #2437, #2649, #2650
+  * Shell sync no longer runs the Electron binary as Node inside your shell: the environment is read with `env -0`, so multi-line values come through, a shell that hangs is killed together with everything its profile started, and a failure is shown once the window is ready instead of never. See #2724, #2725, #2726, #2727, #2728, #2730
+  * Windows terminals run on node-pty's bundled, Microsoft-signed ConPTY, and closing a terminal no longer starts a short-lived helper process. See #2729, #2731
+  * Notifications start below the close button of the Extensions and Preferences pages instead of covering it, and the "Extension successfully installed" notification hides on its own. See #2697, #2699, #2794, #2795, #2854
+  * Avatar colours are deterministic and always keep a readable contrast with their text. See #2392
+  * A terminal shows its last output again after the window reloads, kept by the main process, and an edit tab stores only its unsaved changes. API responses are kept out of the HTTP cache, and the caches are cleared on start. See #2872, #2873, #2874
+  * Simpler, faster development: a single Vite dev server with hot module replacement (`pnpm dev`) and a single build step (`pnpm build:app:dir`) replace the previous multi-stage webpack builds, and both work on Windows, ARM64 included. See #2102, #2118, #2165, #2526, #2810
+  * Faster, more reliable builds and CI: unchanged binaries are no longer re-downloaded and the integration-tests workflow was sped up across all platforms. See #2213, #2216, #2774
+  * Documented v2 styling conventions (theme CSS custom properties, global SCSS, CSS Modules, and Tailwind CSS v4) and auto-injected extension stylesheets. The legacy in-house flexbox utilities have been fully migrated to Tailwind and the `flexbox.scss` layer removed. See #2144, #2145, #2162
+
+  ### Security
+
+  * The digests of the bundled `kubectl`, `helm` and `freelens-k8s-proxy` are pinned in a lock file, verified against the publisher's signature (GitHub build provenance, PGP, keyless cosign) at bump time, and every bundled binary is hashed against the lock on every build, including one restored from a cache. Checksum verification is mandatory, including Windows binaries, which were previously never verified. See #2342, #2345, #2346, #2774
+  * Every kubectl downloaded at runtime is checked against a pinned, signature-verified checksum; a version without a pin is never downloaded. See #2348, #2350, #2351
+  * The compromised eMudhra intermediate certificates are refused: Electron, since v43.8.3, blocks them in Chromium and in Node's `tls`, `https` and `fetch`, and freelens-k8s-proxy v2.0.0, built with Go 1.27.3, in its connection to the cluster. See #2832
+  * CVE-2026-111497, an out-of-bounds write in the Brotli decoder of Node.js, is fixed by Node v24.22.1 in Electron v44.10.0. The user interface was not affected, because Chromium decodes Brotli with its own, fixed copy. See #2848, #2881
+  * A security policy describes how to report a vulnerability privately, and which versions are supported. See #2800
+  * The last release is scanned in its own workflow, and the main branch nightly. See #2340
+
+  ### Fixes
+
+  * Clusters whose API server, or a gateway in front of it, answers with a relative redirect can be opened, instead of failing with `Unexpected token '<'`. See #2757
+  * Deleting or changing resources from the UI works on clusters behind a gateway that refuses unknown origins, such as the GitLab agent, instead of failing with a 403 and "Unknown error occurred while ok-ing". See #2842
+  * Extensions no longer flip between Enabled and Disabled in a loop after they are installed, freezing the application. See #1005, #2777
+  * A command sent to a new terminal (Pod Shell, Pod Attach, extensions) is no longer lost when the shell takes more than 10 seconds to start, and a terminal closed while it starts leaves no shell process, or privileged node shell pod, behind. See #2806, #2817, #2818, #2819
+  * A change of the Terminal Shell Path preference applies to the next terminal of a cluster, without restarting the application. See #2841
+  * With "Automatically start Freelens on login" enabled, the application starts hidden on macOS 13 and later, as it already did on Windows. See #2864
+  * The "App crash" page of a page that threw goes away when you navigate elsewhere. See #2808
+  * Fixed RoleBinding and ClusterRoleBinding dialogs: "Create" did nothing for a new binding, selected service accounts were not shown, and pressing Enter in the Users or Groups field submitted the dialog too early. See #2119, #2458
+  * A secret value revealed in the pod details no longer stays revealed when switching to another pod, and the details of the new object load their referenced config maps. See #2416, #2457
+  * The pod context menu closes when a Logs, Shell or Attach submenu item is clicked. See #2043, #2466
+  * Clicking a path picker button several times no longer opens several file dialogs at once. See #2455
+  * An aborted list load no longer shows a "Failed to load" warning or leaves a list empty until the window is reloaded. See #2300, #2496, #2527
+  * The main process no longer crashes when its stdout pipe is closed, for example when launched through Amazon AppStream 2.0. See #2370, #2372
+  * Ingress rows with many routes no longer push the following rows out of view. See #2195
+  * Managed fields entries that differ only by subresource are now distinguishable in the details drawer. See #2299
+  * Wizard dialogs, confirmation dialogs and dialog select menus now follow the dark theme. See #2196, #2257
+  * Byte-valued chart Y axes no longer force a 1-unit step. See #2191
+  * Word-wrapped log rows no longer overlap. See #2166
+  * Disconnecting a cluster no longer logs an error that the application window failed to load. See #2760, #2762
+  * Helm > Charts shows the charts of a repository added or removed in the preferences without reloading the cluster. See #2867, #2868
+  * The Install button of a chart with a long name and the Save button of the values of a release stay on screen. See #2851
+  * Secret values that are not valid base64 are shown as they are, instead of being decoded leniently into wrong data. See #2190
+
+  ### Updates
+
+  * Built with electron-vite 6 on Vite 8, tested with Vitest 5, type-checked with TypeScript 7, and styled with Tailwind CSS v4.
+  * Runs on React 19.3, MobX 7, MUI 9 and Monaco 0.57, and talks to clusters with `@kubernetes/client-node` 2.0.
+  * Upgraded to Electron v44 (previously v41 in Freelens v1.10). See #2192, #2198, #2538, #2542, #2863, #2864, #2881
+  * Over 180 dependency updates in total, including 16 security updates (dompurify, js-yaml, undici, tar, sharp, joi, fast-xml-parser, handlebars, vitest, uuid, pnpm and Electron).
+  * Uses Electron v44.10.0 with Chromium 152.0.7977.169 and Node v24.22.1
+  * Has bundled kubectl v1.37.1, Helm v4.3.1 and freelens-k8s-proxy v2.0.0
+ReleaseNotesUrl: https://github.com/freelensapp/freelens/releases/tag/v2.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0
