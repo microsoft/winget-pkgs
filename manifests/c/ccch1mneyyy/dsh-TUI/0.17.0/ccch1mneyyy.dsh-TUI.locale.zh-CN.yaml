@@ -1,0 +1,102 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: ccch1mneyyy.dsh-TUI
+PackageVersion: 0.17.0
+PackageLocale: zh-CN
+ShortDescription: DeepSeek Harness 官方首推的终端界面：高性能、低占用。
+Description: dsh-TUI 是 DeepSeek Harness（DSH）的交互式终端界面，支持全屏会话、像素鲸鱼伴侣、流畅鼠标交互和低占用，并提供供脚本驱动的独立 headless 命令 dst。
+Tags:
+- deepseek
+- deepseek-harness
+- dsh
+- harness
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  自 v0.16.1 以来，dsh-TUI 跟上 DSH 0.2.1-rc.3 验证线，加入独立 headless CLI、Windows 离线安装器、
+  /settings 分页与插件底栏字段，并让 TUI 跟随会话的工作目录。
+  亮点
+  - 独立 headless CLI（dst） — dst run、-p、dst cli 不加载 React / Ink / channel / TUI 偏好即可被脚本驱动，dst dsh 原样转交官方参数；随 npm 包分发，src/ 零改动。自动化适配器当前只验证 DSH 0.2.0-rc.2，使用官方 headless 的持久化与恢复规则，不承诺与任意 TUI preset / fork 会话互通，也不是逐 token 正文流。(#1560 by @T-Auto)
+  - Windows 离线安装器 — Release 增加 dsh-tui-setup-win-x64.exe：自带轻量 Node 运行时（系统已有满足版本约束的 Node 则复用）、免管理员、把 npm 全局路径追加到 HKCU 的 PATH、profile 落在 %USERPROFILE%\.dsh\profiles\dsh-tui，卸载不触碰 .dsh 核心数据。暂未做代码签名，首次运行会有 SmartScreen 提示；旧的 dsh-tui-setup.zip 与便携包继续并存。(#1554 by @FlameTN7)
+  - /settings 分页 — 设置屏分成「常规 + 插件」页签；不声明 page 的旧插件区块并入常规页，只有一页时不显示页签条。同时修掉 dsh-tui 自己的设置区块会因注册表竞态从屏上消失的问题。(#1619 by @ccch1mneyyy)
+  - 插件底栏字段逐项可控 — statusBar.pluginFieldsOrder 决定显示哪些插件字段与链内顺序，默认 * 表示全部（含以后注册的）；高级行从 * 进入后原样保存仍写回 *，不会把「还没见过的字段」钉死。(#1628 by @Lucas2011wastaken)
+  - 插件侧栏面板可复用宿主渲染 — TuiPanelProps.ui 新增 ui.Markdown 与 ui.CodeBlock，插件不必自己拼围栏、算表格宽度。(#1652 by @Lucas2011wastaken)
+  - 会话搜索实验包进入 /plugin list — 官方 session-search 包的开关与用法可直接看到，检索卡标题显示查询词；极简模式仍只提供 shell（有意与上游该包「含 minimal」的描述不同，保持 Minimal 对用户的单 shell 承诺）。(#1707 by @Lucas2011wastaken)
+  - 启动页多行草稿带到聊天页 — 启动页用 Shift/Option+Enter 换行后，未发送的文字、光标与图片在切到聊天页时保留，同一批输入中随后的按键按原序重放。(#1703 by @CikeSeven)
+  - 会话状态与完成提醒 — 经 OSC 7501 向终端报告 idle / working / blocked / done / error，跨 SSH、容器与多路复用器可用（不包 tmux/screen passthrough）；Windows 上 notificationMethod 新增 windows 档，用系统原生 toast 提醒完成（点击跳回尚未包含）。(#1561 by @zerodegress；#1574 by @baobaolaodie)
+  - 跟随会话工作目录 — 上游 working_directory 或 Git worktree 把会话切到别的目录后，状态栏、Git 分支、@ 补全、! 命令、技能命令与已加载上下文一起跟随，项目归属不变；已知限制是 cd 之前渲染的工具卡里的相对路径，点击时按当前目录解析。(#1733 by @MomentDerek；#1634 by @baobaolaodie)
+  - 会话管理页统一显示项目路径 — 路径放在来源标签下方、横跨两栏，DSH 不再缺目录、外部会话不再逐条重复；超长路径最多四行，可悬停看完整值。(#1264 by @xuzijian2019)
+  - DSH 验证线升到 0.2.1-rc.3 — 主适配线与开发树、CI alpha-compat、验证常量同批前移，0.2.1-rc.2 继续作为已验证兼容线。(#1736 by @Lucas2011wastaken)
+  - 插件市场元数据 — 随包提供中英文本地化的市场标题/描述、方形像素鲸鱼图标与 dsh-plugin 发现关键字。(#1677 by @ccch1mneyyy)
+  需要留意的行为变化
+  - /team 只报告状态 — /team on|off 不再是启停入口，只接受 status；需要启停时改用 /plugin enable|disable，旧写法会返回迁移提示。Agent Teams 仍是实验特性，默认关闭；/plugin list 里各实验功能的提示也改成直接说明它的作用。(#1604、#1734 by @Lucas2011wastaken)
+  - sidePanel.panels 的显式列表现在是精确集合 — 写过显式 CSV 的用户升级后，之后新注册的插件面板不会自动出现，而是在 /settings 里显示为未勾选行，点一下加回。默认值 * 仍表示全部已注册面板；临时面板的显示/隐藏随之改成运行态，结构上进不了持久设置。(#1683、#1695 by @Lucas2011wastaken)
+  修复
+  - 输入、选择与复制：Option+方向键按词编辑、Esc 先消费本地层再中断回合、rewind 重复同一段文本时重新回填草稿、退出时选择可恢复且终端输入干净、复制内容与高亮留在锚定面板内、软换行代码块复制不丢内容。(#1657、#1659、#1680、#1693、#1661 by @ccch1mneyyy；#1670 by @MomentDerek)
+  - 会话与持久化：detached fork 保留父链、失败的 resume 预检释放预留、频道 token 留在当前 home、已结算回复 / 目标页脚 / 子代理失败保持一致、工作区与会话管理器统计同一批可见会话、损坏挂载账本给出可操作处置、存储打包行预算与发布批次按版本精确匹配。(#1654、#1656、#1653、#1678、#1691、#1694 by @ccch1mneyyy；#1581 by @baobaolaodie)
+  - 渲染与交互：diff 展开视图折行、/btw 分屏无法渲染时回退浮层、装饰动画时钟隔离、面板长正文限高且保留问卷说明全文、面板 / 状态行 / diff 宽度与原始颜色一致、sixel 光标漂移先检测再停放、Windows Terminal 内 chalk truecolor 提升、被卡住的回合仍可 Esc 且发送失败可见、多行插件命令输出保留在本地。(#1602 by @baobaolaodie；#1648、#1672 by @Lucas2011wastaken；#1658、#1681、#1689、#1690、#1692、#1621 by @ccch1mneyyy；#1643 by @xuzijian2019)
+  - 运行时、更新与后端：开发模式需显式 opt-in React、启动器解析包根并限制堆快照文件、拒绝已确认不支持的 Node 版本、开发缓存按真实输入校验、更新器在超时与取消时接管安装进程树、发布年龄排除合并为一条区间、effort 选项取自当前模型路由、保留会话 effort 并给 TPS 采样设下限、暴露写入锁。(#1655、#1679、#1682、#1686、#1687、#1688、#1696 by @ccch1mneyyy；#1607 by @MomentDerek)
+  兼容与升级
+  - DSH 主适配线：0.2.1-rc.3；0.2.1-rc.2、0.2.0-rc.1、0.2.0-rc.2 以及更早的验证线仍在契约内，升级 DSH 后首次启动会按已装版本报告版本线，契约外版本打漂移警告。
+  - 从 v0.16.1 升级：程序内 /update，或
+    npm install -g @deepseek-ai/dsh @deepseek-harness-tui/dsh-tui@0.17.0。
+  - Windows 安装方式两套并存：dsh-tui-setup-win-x64.exe 面向默认布局（不读取自定义 DSH_HOME），无代码签名；dsh-tui-setup.zip 与各平台 dsh-tui-standalone-* 便携包仍随 Release 分发，SHA256SUMS 覆盖全部资产。
+  - dst 与 TUI 共用同一个包：普通启动仍进 TUI，只有 run、-p、cli 走无界面 CLI；自动化适配器当前只验证 DSH 0.2.0-rc.2。
+  安装
+  npm install -g @deepseek-ai/dsh @deepseek-harness-tui/dsh-tui@0.17.0
+  偏好一键安装的用户可下载 Release 中的 dsh-tui-setup.zip（解压后按平台运行 install.sh / install.ps1）
+  或 Windows 离线安装程序 dsh-tui-setup-win-x64.exe；便携包解压即用。
+  What's Changed
+  - docs(profile): write the ecosystem admission requirements into the guide by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1610
+  - docs(profile): clarify that manifest.name is a display name by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1611
+  - docs(profile): close the Stage D-4 governance gaps and the two stale comments by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1613
+  - feat(plugin): surface DSH experimental bundles in /plugin list by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1604
+  - feat(settings): page the screen into tabs and keep its section registry current by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1619
+  - fix(tui): keep a wedged turn escapable and make failed sends visible by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1621
+  - fix(diff): wrap long lines in the expanded two-pane view by @baobaolaodie in https://github.com/ccch1mneyyy/dsh-TUI/pull/1602
+  - feat(statusline): admit and render plugin footer fields by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1628
+  - fix(session): tell the user how to repair a damaged mount ledger（账本损坏时给出可操作处置：文案收短到能上屏 + 全零/截断回归） by @baobaolaodie in https://github.com/ccch1mneyyy/dsh-TUI/pull/1581
+  - feat(session-supervisor): unify project paths across sources by @xuzijian2019 in https://github.com/ccch1mneyyy/dsh-TUI/pull/1264
+  - fix(update): exempt both versions in one release-age entry by @MomentDerek in https://github.com/ccch1mneyyy/dsh-TUI/pull/1607
+  - Feat: 引入 Windows 离线一键安装包 by @FlameTN7 in https://github.com/ccch1mneyyy/dsh-TUI/pull/1554
+  - feat(cli): add decoupled headless execution and management adapters by @T-Auto in https://github.com/ccch1mneyyy/dsh-TUI/pull/1560
+  - fix(copy): preserve soft-wrapped code block content by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1661
+  - fix(input): consume local Escape layers before interrupting turns by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1659
+  - perf(ui): isolate decoration animation clocks by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1658
+  - fix(input): support Option word editing in chat and launchpad by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1657
+  - fix(session): release failed resume preflight reservations by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1656
+  - fix(runtime): require explicit development React opt-in by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1655
+  - fix(session): retain parent lineage in detached forks by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1654
+  - fix(auth): keep channel tokens in the active home by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1653
+  - fix(runtime): resolve the launcher package root and bound heap watch files by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1679
+  - fix(backend): preserve session effort, floor TPS samples and surface writer locks by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1682
+  - fix(ui): keep panels, status rows, diff widths and raw colors consistent by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1681
+  - fix(session): keep settled replies, goal footer and subagent failures consistent by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1678
+  - fix(input): keep selections recoverable and terminal input clean on exit by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1680
+  - fix(ink): boost chalk truecolor inside Windows Terminal by @xuzijian2019 in https://github.com/ccch1mneyyy/dsh-TUI/pull/1643
+  - fix(workspaces): count the same visible sessions as the manager by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1691
+  - fix(panels): separate temporary panel identity from persisted choices by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1695
+  - fix(commands): retain multiline plugin command output locally by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1689
+  - fix(storage): enforce packed-row budgets and exact release cohorts by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1694
+  - fix(selection): keep copied text and highlights inside the anchor pane by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1693
+  - fix(runtime): reject confirmed unsupported Node versions by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1686
+  - fix(ink): detect sixel cursor drift before parking by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1692
+  - fix(update): own installer process trees through timeout and cancellation by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1696
+  - fix(dev): make fast development cache validate real inputs by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1687
+  - fix(shutdown): drain only the renderer-owned input on exit by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1690
+  - fix(settings): load effort choices from the active model route by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1688
+  - fix(panels): 限制长正文高度并保留问卷说明全文 by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1672
+  - fix(panels): make sidePanel.panels registry-aware with a "*" default by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1683
+  - fix(input): refill the composer when a rewind repeats the same text by @MomentDerek in https://github.com/ccch1mneyyy/dsh-TUI/pull/1670
+  - chore: add localized DSH plugin market metadata and whale icon by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1677
+  - feat(launchpad): continue multiline drafts in chat by @CikeSeven in https://github.com/ccch1mneyyy/dsh-TUI/pull/1703
+  - feat(plugin): adopt the official session-search experimental plugin by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1707
+ManifestType: locale
+ManifestVersion: 1.28.0
