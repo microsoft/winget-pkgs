@@ -1,0 +1,18 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: hongfaqiu.StrataManager
+PackageVersion: 0.2.30
+PackageLocale: zh-CN
+ShortDescription: 面向 Strata 本地推理的桌面工作台。
+Description: Strata Manager 是一款面向 Niko1221/Strata 本地大模型推理引擎的开源桌面管理工具，将运行环境准备、模型配置、服务控制、聊天、监控、调优与基准测试整合到同一工作台，降低使用门槛。已下载的模型权重不会被改动。
+Tags:
+- 人工智能
+- 大模型
+- 大语言模型
+- 本地大模型
+ReleaseNotes: |-
+  - 修复 DeepSeek-V4.1-Flash 配置被一键提速、校准结果或重启候选写入 Qwen 专用参数：体检的「显存余量」「长上下文」修复会写 --vram-reserve-mib / --expert-cache / --kv-resident，套用校准结果会写 --pcie-frac / --spec-min-p / --prefill-pipe，场景复验的重启候选会写 --pool-workers / --vram-reserve-mib / --prefill / --adapt-*。这些都是 Qwen 引擎的参数，DeepSeek 的独立引擎（strata-dsv41）不认识，遇到未知参数会停止启动。现在当前配置是 DeepSeek 时：体检只显示一行「引擎：使用独立引擎，检查和修复不适用」；一键提速、套用校准、完整场景实测都显示不可用并说明原因；写入前会检查参数，凡不在 DeepSeek 引擎参数表里的一律拒绝，后台的重启候选和应用调优也同样拦截。功能本身没有删除，Qwen 配置不受影响；DeepSeek 的运行选项仍在启动设置里调整。
+  - 监控浮条反复点击打开不再越变越大：每次从托盘、任务栏或快捷键重新打开浮条时，程序都会读回窗口尺寸，但读回的是包含边框的外框尺寸（Windows 无边框窗口有一圈看不见的缩放边框/阴影），再按内容区尺寸写回。于是每点一次就多出一圈边框，150% 缩放下约宽 +22、高 +13 像素，直到最大尺寸。现在改为读回内容区尺寸，并用同一个屏幕缩放比换算；摆放位置时把边框计入，靠右下边缘的浮条也不会漂移。
+ManifestType: locale
+ManifestVersion: 1.28.0
