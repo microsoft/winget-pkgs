@@ -1,0 +1,70 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: juejijianghuaa.CoDock
+PackageVersion: 0.6.2
+PackageLocale: zh-CN
+Publisher: CoDock
+PublisherUrl: https://github.com/juejijianghuaa
+PublisherSupportUrl: https://github.com/juejijianghuaa/CoDock-Release/issues
+PackageName: CoDock
+PackageUrl: https://codock.pages.dev/
+License: MIT
+LicenseUrl: https://github.com/juejijianghuaa/CoDock-Release/blob/HEAD/LICENSE
+ShortDescription: 本地 Coding Agent 桌面工作台与终端集成中心。
+Description: |-
+  CoDock 是一个面向专业开发者的本地 Coding Agent 桌面工作台与终端控制台：
+  - 多 Agent 并行执行：支持在一个窗口内多 Tab 运行 Claude Code、Codex、Gemini CLI、Antigravity、Grok Build、Pi、Opencode 等，告别杂乱的独立黑窗口。
+  - 全历史与用量看板：本地直接解析各 Agent 的原生日志与 SQLite/JSONL 数据，聚合按项目、模型、日期的 Token 用量与成本统计。
+  - 专为 Coding 打造的终端增强：基于 xterm.js 与原生 ConPTY 封装，支持滚轮穿透、图片快速粘贴、拖拽文件注入绝对路径、全局快捷键呼出。
+  - Markdown Composer 独立浮窗：专为长提示词编写设计的全功能 Markdown 输入层，支持模板复用、提示词优化与一键投递。
+  - 手机/平板与局域网协同：自适应移动端 Web 交互、配对令牌安全门禁与受控只读/可写会话分享。
+Tags:
+- claude-code
+- codex
+- gemini-cli
+- 人工智能
+- 终端
+ReleaseNotes: |-
+  v0.6.2 (2026-10-29)
+  这一版以细节打磨为主：全站动效统一到同一套基础层，侧栏与 Tab 的过渡补上，
+  WorkBuddy 里已删除的会话不再冒出来，官网也接上了 GSAP 动效。
+  新功能
+  - WorkBuddy 里已删除的会话不再出现：WorkBuddy 桌面端的删除是软删，只把
+    workbuddy.db 的 sessions.deleted_at 写成时间戳，projects 下的 jsonl 原样留在磁盘上，
+    只扫目录的读法会把用户删掉的会话重新列进侧栏和搜索。现在只读打开那个活库取隐藏集合，
+    搜索摄入与侧栏历史在同一层过掉，两边口径一致；deleted_at 为 NULL 或 -1 都算未删除，
+    老库没这一列、库打不开、没装 WorkBuddy 一律按「一条都不藏」处理——藏错比多列一条严重。
+  - 全站统一动效基础层：默认过渡 120ms + 减速曲线（hover、聚焦、按钮反馈一并受益）、
+    ease-out-quint、attention-pop、pane-fade，以及 prefers-reduced-motion 统一归零；
+    .animate-spin 单独放行——转圈是「还在做事」的唯一信号，停掉会像卡死。
+  - 侧栏开合与 Tab 关闭补上过渡：侧栏改为推出窗口左边缘（DOM 常驻 + inert 摘掉焦点序），
+    动画期间挂起终端重排、落位后补一次 resize，避免 260ms 里连发十几次 resize 把 TUI 刷成闪屏；
+    Tab 关闭先收网格列宽 180ms 再真正卸载，其余 Tab 连续左移补位。
+  - 折叠面板的过渡真正生效：项目组与归档面板改用 Base UI 的
+    data-starting-style/ending-style + grid-template-rows 0fr↔1fr——原先那套
+    animate-collapsible-* 读的是 Radix 的变量，在 Base UI 下取不到值，一直没生效。
+  - 过长的目录名悬停滚动：会话标题的悬停滚动抽成 useHoverScroll 与 HoverScrollText，
+    项目目录与 worktree 子目录名共用一套逻辑，截断处由省略号改为渐隐。
+  - 官网接入 GSAP 动效：首屏编排、滚动进场、顶栏收紧 + 阅读进度条、视差、六步流程线随滚动点亮、
+    特性卡指针柔光、Dock 磁吸、灯箱进场。GSAP 3.15 + ScrollTrigger 本地 vendored，站点仍是零构建单文件。
+  修复
+  - 新会话第一轮的转圈不再丢：claude 写记录文件与触发 UserPromptSubmit 是同一刻，
+    认领轮询（500ms）还没看到新文件时事件被直接丢弃，第一轮 Tab 永远不亮。现在找不到会话时
+    后台每 200ms 重试、最多 10 秒。
+  - 「清空已归档」不再把只读源算成删除失败：只读源（WorkBuddy 这类）本来就进不了删除路径，
+    批量清理改为只收可恢复条目、只读源单独计数，弹窗先说明「另有 N 条来自只读来源，需到对应应用中删除」，
+    结果里再确认一次；归档里全是只读源时不弹只能取消的对话框，直接说明去哪儿删。
+  - 置顶区会话行的激活 / 已开 Tab 标记不再被裁：平铺的会话行从视口左边缘起算，
+    而标记是 absolute -left-[7px]，被 overflow: scroll 裁得只剩一条缝。现在补上与树内会话行
+    同位置的左边槽位，两类行共用一条竖线。
+  - 官网画廊灯箱点不开：<div id="lightbox"> 原本在 <script> 之后，脚本同步执行时
+    getElementById 拿到 null，openLightbox 一路 early return。
+  界面与交互
+  - 对话框 240ms zoom-in-96，右键菜单 / 气泡 / 悬浮卡沿用 120ms 默认曲线，
+    分段 chip 补上底色过渡，空态与新建 Tab 上浮淡入，跑完的未读点弹出。
+  官网与文档
+  - hero 上的版本徽章更新为 v0.6.2。
+ReleaseNotesUrl: https://github.com/juejijianghuaa/CoDock-Release/releases/tag/v0.6.2
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
