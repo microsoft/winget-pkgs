@@ -1,0 +1,42 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: chenming0v0.OMPiUI
+PackageVersion: 0.6.45
+PackageLocale: zh-CN
+Publisher: ompiui
+PublisherUrl: https://github.com/chenming0v0
+PublisherSupportUrl: https://github.com/chenming0v0/OMPiUI/issues
+Author: 辰林
+PackageName: OMPiUI
+PackageUrl: https://github.com/chenming0v0/OMPiUI
+License: GPL-3.0-only
+LicenseUrl: https://github.com/chenming0v0/OMPiUI/blob/HEAD/LICENSE
+ShortDescription: OMP（oh-my-pi）的第三方桌面客户端，采用 PiUI 视觉外壳与 OMP 官方 RPC 运行时。
+Description: |-
+  OMPiUI 是 OMP（oh-my-pi）的第三方 Web/桌面客户端：界面沿用 PiUI 的视觉外壳，agent 执行由 oh-my-pi（OMP）的官方 RPC 运行时承担，提供 60+ provider、31 个内置工具、子代理系统、MCP/LSP 和扩展支持。
+  界面来自 lehhair 的 PiUI 与 OpenCodeUI。OMPiUI 不是这两个项目的官方客户端。
+  使用前需要安装 Node ≥ 22.19 与 OMP CLI（≥ 18.2.11，通过 bun install -g @oh-my-pi/pi-coding-agent 安装），并配置 provider 凭据。
+Tags:
+- oh-my-pi
+- omp
+- pi
+- pi-agent
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  - fix(history): 修复 snapcompact 压缩图片上下文后分页反复 STALE_REVISION：分页与大条目分片统一读取相同运行时或磁盘来源，保留只读历史、不放宽原有内容及版本校验边界（cc2f04c）。
+  - verification(session): 补齐 #356 的真实专项证据：双窗格从图片消息 Fork 后身份／文字／图片草稿同步，左右窗格后续消息只写新原生日志；Undo 后新发沿同文件 parent 形成另一子分支，树面板双向切分支、逐回合 Redo、刷新图片草稿／Redo 恢复通过。新增可重复原生验收脚本与生产网页隔离入口、双 composer 永久回归；不重写已有原生接口。
+  - diagnostics(session): #361 保留上游来源阻塞。官方 OMP 18.12.6 旧扩展回调在 new 后报错的原始帧仍无源 session／prompt／generation；最新 18.13.3 RPC 源码核对也仍只转发路径／事件／错误。专项 exit 2 明确未完成隔离，不以全忽略错误或文本猜测冒充修复。详见 docs/session-transition-acceptance.md。
+  - fix(feedback): 本地 RPC 协议错误按影响分级送达：分片丢失、超时、缓冲超限、长度不符等导致整条重组消息丢失的失败改为 rpc_stream_error（前端既有 handler 激活，语义＝流中止有数据丢失），单帧解码失败、嵌套分片、非对象帧等只丢一帧的保持 rpc_frame_error；两类共用既有 20 条/60s 防风暴窗口。不伪造官方协议帧——官方 runtime 的 rpc_stream_error emitter 仍按上游接口缺失标注（#367）。
+  - verification(feedback): worker rpc-chunks.test.ts 11 项通过（含新增 stream/frame kind 断言：无效 UTF-8→frame、长度不符/无效 count→stream），omp-worker typecheck 0 error；会话级 open_url 归属经 eventStream.test.ts:710 既有回归确认（link 通知按 sessionId 落到所属会话），无需改动。
+  - verification(release): 集成后的 npm run validate 全流程通过：前端 211 文件／1677 项通过，worker 288 通过／13 跳过，server 317 通过／1 跳过，protocol／admin／relay／tui 零失败；全工作区类型检查与生产构建通过，lint 0 error／36 条既有 warning。发布路由 12 项回归及隔离官方 OMP 历史矩阵通过；#361 与 #367 的已知上游边界仍保留，不随发版宣称解决。
+ReleaseNotesUrl: https://github.com/chenming0v0/OMPiUI/releases/tag/v0.6.45
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
