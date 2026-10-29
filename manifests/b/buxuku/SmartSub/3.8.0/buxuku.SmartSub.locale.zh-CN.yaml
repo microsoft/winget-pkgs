@@ -1,0 +1,87 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: buxuku.SmartSub
+PackageVersion: 3.8.0
+PackageLocale: zh-CN
+Publisher: buxuku
+PublisherUrl: https://blog.linxiaodong.com/
+PublisherSupportUrl: https://github.com/buxuku/SmartSub/issues
+Author: 林晓东
+PackageName: SmartSub
+PackageUrl: https://github.com/buxuku/SmartSub
+License: MIT
+LicenseUrl: https://github.com/buxuku/SmartSub/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Lin Xiaodong
+ShortDescription: 批量为视频生成字幕，并将字幕翻译成其它语言。
+Description: |-
+  批量为视频生成字幕，并可将字幕翻译成其它语言。这是在之前的一个开源项目 VideoSubtitleGenerator 的基础上，制作成的一个客户端工具，以方便更多朋友们的使用。
+  它保留了之前 VideoSubtitleGenerator 这个命令行工具的全部特性，并新增了以下功能：
+  - 图形用户界面，操作更加便捷
+  - 源语言字幕文件和目标语言字幕文件放在视频同目录下，方便播放时任意挂载字幕文件
+  - 批量处理视频/音频/字幕文件
+  - 支持视频/音频生成字幕
+  - 支持对生成的字幕，或者导入的字幕进行翻译
+  - 支持多种翻译服务：
+    - 火山引擎翻译
+    - 百度翻译
+    - DeepLX 翻译（批量翻译容易存在被限流的情况）
+    - 本地模型 Ollama 翻译
+    - 支持 OpenAI 风格 API 翻译，如 deepseek, azure 等
+  - 自定义字幕文件名，方便兼容不同的播放器挂载字幕识别
+  - 自定义翻译后的字幕文件内容，支持纯翻译结果或原字幕+翻译结果
+  - 项目集成 whisper.cpp，对 Apple Silicon 进行了优化，有较快的生成速度
+  - 项目集成了 fluent-ffmpeg，无须单独安装 ffmpeg
+  - 支持运行本地安装的 whisper 命令
+  - 支持选择模型下载源（国内镜像源或官方源）
+  - 支持自定义并发任务数量
+Tags:
+- 字幕
+- 视频
+- 翻译
+- 音频
+ReleaseNotes: |-
+  v3.8.0 多格式字幕导出、备用服务容灾与音频引擎扩容
+  💐 今天是教师节，向所有传道授业、启迪心灵的老师与教育工作者致以最真挚的敬意，祝各位老师节日快乐！
+  Happy Teachers' Day to all teachers and educators who inspire, guide, and share knowledge—thank you for your dedication!
+  feat
+  - 支持一次导出多种字幕格式，可在 SRT、VTT、ASS、LRC、TXT 中自由多选，无需重复识别或翻译 (感谢 @nightt5879 #471)
+    Support exporting multiple subtitle formats simultaneously (SRT, VTT, ASS, LRC, TXT) in a single run without redundant transcription or translation (thanks @nightt5879 #471)
+  - 支持配置同类型备用翻译服务，在当前服务失败或额度用尽时自动顺延切换，大幅提升批量翻译稳定性 (#428 #466)
+    Support backup translation providers with automatic failover on error or quota exhaustion, improving batch translation reliability (#428 #466)
+  - 新增小米澎湃 MiMo 语音识别 (ASR) 与语音合成 (TTS) 服务商支持 (#472)
+    Add Xiaomi MiMo speech recognition (ASR) and speech synthesis (TTS) providers (#472)
+  - 新增 Parakeet v2 英文及日文 CTC 转写模型，提供更多轻量本地离线识别选择 (#416 #470)
+    Add Parakeet v2 English and Japanese CTC transcription models for more lightweight local offline ASR options (#416 #470)
+  - 引入疑似漏听检测与预警机制，结合音频能量与 VAD 标记缺口，便于快速复核与试听排查 (#433 #469)
+    Introduce suspected missed speech detection and warnings, combining audio energy and VAD gap analysis for fast review and audio audition (#433 #469)
+  - 支持在任务设置中关闭内封字幕直提，当原视频自带字幕不准确时可强制重新语音识别 (#419 #457)
+    Add an option to disable embedded subtitle extraction, allowing forced speech recognition when embedded subtitles are inaccurate (#419 #457)
+  - 本地配音支持统一解析字幕与目标语言，智能应用对应的数字、日期与电话朗读规则 (#463)
+    Dubbing automatically resolves subtitle and target language to apply accurate local number, date, and phone reading rules (#463)
+  perf
+  - 调优 AI 翻译默认批量大小（20 条）与并发数，AI 语义断句复用服务商并发，显著提升处理速度 (#475)
+    Optimize AI translation default batch size (20 lines) and concurrency, with AI segmentation reusing provider concurrency for faster throughput (#475)
+  fix
+  - 修复 Kokoro 英文音色误加载中文规则导致数字朗读异常的问题 (感谢 @nightt5879 #458)
+    Fix Kokoro English voices incorrectly loading Chinese rules which caused abnormal number reading (thanks @nightt5879 #458)
+  - 改进 GPT-5.6 / Gemini 等模型的思考控制参数映射，并在端点拒绝自动参数时自动去参降级重试 (#438 #453 #455)
+    Improve thinking control parameter mapping for models like GPT-5.6 and Gemini, automatically retrying without thinking parameters if rejected by endpoints (#438 #453 #455)
+  - 纯音频输入时在任务向导和流水线中明确拒绝视频压制合成，避免 FFmpeg 因无视频流报错 (#465 #467)
+    Reject video composition for audio-only inputs in the task wizard and pipeline, avoiding FFmpeg stream-mapping errors (#465 #467)
+  - 更新 Bing 与 DeepLX 免费翻译服务协议及速率限制处理，保障免费翻译可用性 (#473 #474)
+    Update Bing and DeepLX free translation protocols and rate-limiting handling to restore free translation reliability (#473 #474)
+  - 修复使用 ElevenLabs Scribe v2 转写阿拉伯语时单词间空格丢失拼接的问题 (#449 #456)
+    Fix missing word spacing when generating Arabic SRT subtitles with ElevenLabs Scribe v2 (#449 #456)
+  - 净化 Sherpa Qwen-ASR 输出中的控制字符，修复特定环境下转写结果 JSON 解析崩溃的问题 (#427 #429)
+    Sanitize control characters in Sherpa Qwen-ASR output to fix JSON parsing crashes under specific environments (#427 #429)
+  - 将通义千问与 Qwen-MT 配置提示中的 API Key 获取链接更新为阿里云百炼控制台 (#460 #461)
+    Update DashScope and Qwen-MT API Key console links in provider tips to Alibaba Cloud Bailian console (#460 #461)
+  贡献者 / Contributors
+  感谢 @nightt5879 对本版本的贡献 (#458 #471)
+  Thanks to @nightt5879 for contributing to this release (#458 #471)
+  感谢 @FaintFlower 提交的文档修复 (#447)
+  Thanks to @FaintFlower for the documentation fix (#447)
+ReleaseNotesUrl: https://github.com/buxuku/SmartSub/releases/tag/v3.8.0
+ManifestType: locale
+ManifestVersion: 1.12.0

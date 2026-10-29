@@ -1,0 +1,64 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: XinTaoFei.Codeg
+PackageVersion: 0.32.2
+PackageLocale: en-US
+Publisher: codeg
+PublisherUrl: https://github.com/xintaofei
+PublisherSupportUrl: https://github.com/xintaofei/codeg/issues
+PackageName: codeg
+PackageUrl: https://github.com/xintaofei/codeg
+License: Apache-2.0
+LicenseUrl: https://github.com/xintaofei/codeg/blob/HEAD/LICENSE
+ShortDescription: Aggregate and browse AI coding agent sessions (Claude Code, Codex, Gemini CLI, etc.) in one place. Desktop app, self-hosted server, or Docker.
+Description: Codeg (Code Generation) is an enterprise-grade multi-agent coding workspace. It unifies local AI coding agents (Claude Code, Codex CLI, OpenCode, Gemini CLI, OpenClaw, Cline, etc.) in a desktop app, standalone server, or Docker container — enabling remote development from any browser — with conversation aggregation, parallel git worktree development, MCP/Skills management, chat channel interactions (Telegram, Lark, iLink, etc.), and integrated Git/file/terminal workflows.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claude-code
+- code
+- codex
+- coding
+- gemini-cli
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  This one teaches the built-in browser two things: marking up a screenshot before it goes to the agent, and working inside remote workspace windows, where the remote host's own pages now load. Session warnings and errors now all arrive the same way — as a notification you can find again in the status bar — leaving the banner under the composer to what's still in progress.
+  Alongside that: the network proxy gets a bypass list and no longer breaks OpenCode and Antigravity when it runs on another machine, links in replies stop turning into "[blocked]", dragging a tab no longer empties it, and Antigravity moves up to 1.2.1, which installs on Intel Macs too.
+  New
+  - You can mark up a screenshot before sending it to a conversation — "Send to chat" in the built-in browser's address bar gains "Mark up a screenshot…" for drawing numbered boxes and arrows, and the agent also gets where each mark sits on the page, so "box 2" in your message points at something real. (#817, @xintaofei)
+  - Remote workspace windows get the built-in browser, and the remote host's own pages load in it — an address that lives on the remote host (a localhost:3000 an agent printed there, a container's IP) opens in a tab whose every connection leaves from the remote host through its codeg server, and a page that can't be reached says why. (#822, #824, @xintaofei)
+  - The network proxy gets a "Bypass proxy for" list — in Settings → System → Network Proxy, enter the domains and IP addresses to reach directly, separated by commas; localhost, 127.0.0.1 and ::1 always connect directly.
+  - Antigravity can be installed on Intel Macs — 1.2.1 is its first release with an Intel build.
+  Improved
+  - Updated bundled agents: CodeBuddy 2.157.0, Antigravity 1.2.1.
+  - Session warnings and errors now arrive as notifications instead of on the session banner — each pops up once as a toast carrying its Sign in, Retry or New session button and stays in the status bar's Alerts list, while the banner under the composer only shows what's still in progress, such as a retry with its attempt count and countdown.
+  - The composer's agent connection icon says why the last connection attempt failed, instead of just showing a dimmed "Disconnected".
+  - More agent errors read in your language — a failed mode switch or setting change, an image the agent didn't receive, or a session that couldn't be restored and started over, which now also says the agent has lost the earlier context.
+  - Codex's "long threads and multiple compactions" warning no longer pops up after every compaction — the compaction divider already shows it.
+  Fixed
+  - Relative file links in replies open — ./index.html no longer fails with "File does not exist", and index.html, ../docs/a.md, a.ts:12, Dockerfile or ~/notes.md no longer show as "[blocked]"; each opens from the conversation's folder, in thinking blocks too. (#815, @nnnmdzz)
+  - Dragging a conversation tab no longer empties its messages or closes another tab, and its context usage, session details and Diff panel keep up with the conversation after the move. (#726, @Adam-Dalloul)
+  - On Windows, a conversation you reopen no longer comes up with a message box you can't type in — after a restart or reload, its text area could shrink to nothing once the folder and branch row appeared beneath it, leaving only the border and buttons. (#828, @tangsenfei)
+  - OpenCode and Antigravity work with a proxy on another machine — their connections to their own local services now skip the proxy instead of failing with "OpenCode service failure" or "Failed to connect to WebSocket". (#804 reported by @zhou51320)
+  - A Codex conversation you edited or retried in the Codex desktop app shows its current history — the earlier turns followed by the new ones rather than the old version — and is listed once instead of twice. (#823 reported by @isCopyman)
+  - A web page opened beside a conversation over To-dos, Infinite Conversations or the Repository panel now shows, instead of leaving the side panel blank. (#824, @xintaofei)
+  - What you send from the built-in browser looks the same live, in history and on other clients — the message keeps the badge you sent ("Page screenshot", "3 console errors", a picked element) with the site it came from beneath it, instead of coming back named after the page's address.
+  - A link that is still streaming in reads as plain text instead of "[blocked]" — in replies and thinking blocks it turns into its link or file badge as soon as it closes, rather than sometimes staying "[blocked]" until the turn ends.
+  - Session, commit and agent references in thinking blocks render as badges, as they do in replies, instead of "[blocked]".
+  - A Claude Code message that's only an attachment no longer shows up twice — sending a file, or a page from the built-in browser, with nothing typed used to repeat the message and its reply while it ran.
+  - A failed Grok context compaction shows on the compaction divider with its reason, live and in history, like Claude Code's and Codex's.
+  Note
+  - Remote tabs need the remote codeg server on 0.32.2 as well — an older server has no tunnel for them, and the tab says so.
+  - Server deployments can narrow where remote tabs may connect with CODEG_BROWSER_TUNNEL — all (the default), private or off.
+  - On macOS, a remote tab shows the remote host's localhost as remote.localhost in the address bar; a link you copy from it, and a page you send to a conversation, use the real address.
+  - Agents can't use the built-in browser in a remote workspace window — they run on the remote host, so sharing a page with them stays off there.
+  - Custom install of Antigravity now needs version 1.2.0 or later — Google renamed the downloads from 1.2.0 on, so an older version fails to download (on an Intel Mac, 1.2.1 or later).
+  Thanks to @nnnmdzz, @Adam-Dalloul and @tangsenfei for contributing to this release, and to @zhou51320 and @isCopyman for the reports.
+ReleaseNotesUrl: https://github.com/xintaofei/codeg/releases/tag/v0.32.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,119 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.2.5
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-agent-core
+  Fixed
+  - Improved agent performance by reducing redundant tool-schema processing during repeated model calls and optimizing streamed tool-call argument parsing.
+  @oh-my-pi/pi-ai
+  Added
+  - Added support for templating and custom base and authentication URLs in OAuth flows.
+  Fixed
+  - Fixed Anthropic prompt-cache breakpoints stalling when conversations include mid-conversation tool changes, preventing growing message tails from being unnecessarily re-billed as uncached input.
+  @oh-my-pi/pi-catalog
+  Added
+  - Added the stencil authentication provider for omp stream, supporting OAuth code + PKCE sign-in with auth.stencil.so, configurable via STENCIL_API_KEY, STENCIL_AUTH_URL, and STENCIL_BASE_URL. This is an authentication-only provider, not a model provider; OAuth-code login configuration also supports base-url and auth-url nodes with {base} and {auth} URL placeholders.
+  Fixed
+  - Corrected Yolo-Auto metadata for Qwen Flash: qwen3.8-flash and the paid yolo route now report the documented 256K context window and use the Qwen chat-template reasoning dialect, with qwen3.8-flash as the provider default.
+  @oh-my-pi/pi-coding-agent
+  Breaking Changes
+  - Moved terminal UI modules—including themes, tool renderers, chat, overlay, status-line, composer, setup wizard, and Git/PS/debug apps—to @oh-my-pi/pi-tui. The corresponding @oh-my-pi/pi-coding-agent subpaths no longer exist; names re-exported from the package root remain unchanged.
+  Added
+  - Added omp stream for livestreaming terminal sessions at live.omp.sh/<your Stencil username>, with viewer chat, pane-per-session display for sessions in the same directory, screen redaction, and configurable stream.serverUrl and stream.redactPatterns settings. Use --server to override the stream server, --title to set a title, and --no-tui to retain the line-based log interface.
+  - Added Stencil account support to /login. omp stream uses a signed-in Stencil account or STENCIL_API_KEY for channel ownership and authentication. Sensitive environment, dotenv, secrets.yml, credential-shaped, and configured pattern-matching values are redacted before screen data is transmitted.
+  - Added faster keyless web search fallback by prioritizing the default keyless Parallel provider ahead of Perplexity.
+  Changed
+  - Improved parent IRC message prompts to make interruption handling more reliable.
+  - Improved subagent task labels and plan filenames to use concise, action-oriented descriptions.
+  - Updated CLI byte sizes to use decimal KB units and made duration displays coarser and easier to read.
+  Fixed
+  - Fixed edit auto-repair waiting up to 60 seconds when the smol model does not respond; it now times out after 20 seconds and reports repair start and timeout details.
+  - Fixed subagents leaving queued parent messages behind after tool interruptions.
+  - Fixed a subagent burning its whole run on yield calls that never finish it: an incremental-only yield turn no longer bypasses the request budget, and the forced final yield ends the run (#12351 by @pedropaulovc).
+  - Fixed browser.open({ app: { relay: true } }) waiting for the full tool timeout when no relay extension is installed or reachable; it now fails promptly with an actionable error while preserving the wait for a connected extension to recover.
+  - Fixed edit handling of ellipsis markers, inline closing tags, copy-ready corrections, and retries, including cases that could insert literal markers, misreport matches, omit the file target, or panic.
+  - Enabled edit.enforceSeenLines by default to reject hashline edits anchored to content that was not displayed, and prevented stale-tag recovery from applying edits to a structurally different duplicate construct (#12369 by @pedropaulovc).
+  - Fixed startup failures when the plugins directory or its manifest cannot be read; inaccessible plugin roots are now skipped with a warning.
+  - Fixed generation token-rate displays for subagents and restored the main session's reading after switching focus.
+  - Fixed subagent HUD labels and plan filenames being populated with example prompt text on smaller models.
+  - Improved shell, file, session, and persistence operations to avoid unnecessary repeated work, improving responsiveness and resource usage.
+  @oh-my-pi/pi-mnemopi
+  Fixed
+  - Improved SQLite vector search and import performance by reducing repeated database metadata checks.
+  @oh-my-pi/omp-stats
+  Fixed
+  - Improved session and fork-detection polling performance, reducing unnecessary filesystem and database work when monitoring sessions.
+  @oh-my-pi/pi-tui
+  Added
+  - Added the full coding-agent terminal UI to the package, including themed rendering primitives, shared chrome, tool renderers, chat transcripts, overlays and hubs, status lines, prompt and autocomplete controls, setup flows, and standalone utilities such as the Git TUI, process viewer, debug viewers, boards, and pickers.
+  - Added reusable terminal UI components for forms, menus, split layouts, disclosures, tree views, tool cards, data widgets, fullscreen hubs, scrollable overlay navigation, and interactive footer chips.
+  - Added live viewer counts to the status line and exposed paint observers through TUIOptions.onPaint and TUI.setPaintListener for hosts that need to track committed scrollback and viewport rows.
+  - Added details and notes fields to todo items, plus an interactive task-list renderer for managing subtasks.
+  - Added inline summaries for structured task outputs.
+  - Added image input validation with automatic conversion of unsupported formats and support for video previews in chat.
+  - Added the MCP Add Wizard for streamlined server configuration.
+  - Added an autoresearch tool renderer for tracking experiments.
+  - Added side-by-side diff rendering for merge conflicts and improved presentation of GitHub Actions workflow jobs and runs.
+  - Added the dark-celestial built-in theme with a twilight palette and pink, coral, purple, cyan, and peach accents.
+  Changed
+  - Overhauled JSON tree visualization with syntax highlighting, item counts, clearer indentation, and a simplified layout.
+  - Improved agent task, evaluation, hub, and model displays with clearer layouts, better truncation, and metric support.
+  - Standardized form labels, descriptions, and overlay styling, and improved overlay text rendering by collapsing newlines consistently.
+  - Updated spinner animations to use theme-consistent frames and refined tool-output notice stripping for more consistent display.
+  - Improved performance and responsiveness when rendering long-running Bash streams and large or continuously updating terminal content.
+  @oh-my-pi/pi-utils
+  Added
+  - Added utilities for reading dotenv-sourced environment values, customizing filtered child-shell environment values, converting color palettes to RGB, cleaning trailing spaces from YAML block headers, and counting newlines in text.
+  Fixed
+  - Improved rotating file logging performance by reusing an append file descriptor for each active log file.
+  - Improved JSON serialization performance by avoiding unnecessary bigint handling when serializing values without bigints.
+  - Fixed $which cache collisions for lookups using different PATH or working-directory options.
+  - SSE token reads now expose raw wire-line data only when explicitly requested; the default token path no longer includes per-line raw slices.
+  @oh-my-pi/pi-wire
+  Added
+  - Added the omp stream wire contract (@oh-my-pi/pi-wire/stream) for pane screen updates, viewer snapshots and chat, channel metadata, and live.omp.sh stream routes.
+  - Added authentication support for stencil.so streams, including user identity in welcome messages, channel ownership metadata, and explicit unauthorized and forbidden close codes.
+  Changed
+  - Restricted channel names to the Stencil-compatible alphanumeric-and-underscore format and derived host channels from authentication tokens rather than URL path segments.
+  What's Changed
+  - fix(plugins): skip an unreadable plugin root instead of failing collection by @alphastorm in https://github.com/can1357/oh-my-pi/pull/12270
+  - fix(ai): skip undecoratable tail messages when placing Anthropic cache breakpoints by @H4vC in https://github.com/can1357/oh-my-pi/pull/12332
+  - fix(catalog): serve Yolo-Auto Qwen Flash at documented 256K window by @H4vC in https://github.com/can1357/oh-my-pi/pull/12339
+  - fix(edit): honour the seen-line guard and refuse cross-construct stale remaps by @pedropaulovc in https://github.com/can1357/oh-my-pi/pull/12369
+  - fix(coding-agent): bound subagent runs that only emit incremental yields by @pedropaulovc in https://github.com/can1357/oh-my-pi/pull/12351
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.2.4...v18.2.5
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.2.5
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

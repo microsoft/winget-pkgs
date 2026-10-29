@@ -1,0 +1,81 @@
+# Created using wingetcreate 1.12.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: OpenVPNTechnologies.OpenVPN
+PackageVersion: 2.7.601
+PackageLocale: en-US
+Publisher: OpenVPN, Inc.
+PublisherUrl: https://openvpn.net/
+PublisherSupportUrl: https://support.openvpn.com/
+PrivacyUrl: https://openvpn.net/privacy-policy/
+Author: OpenVPN, Inc.
+PackageName: OpenVPN
+PackageUrl: https://openvpn.net/community/
+License: GPL-2.0
+LicenseUrl: https://github.com/OpenVPN/openvpn/blob/HEAD/COPYING
+Copyright: © 2002-2026 OpenVPN Inc <sales@openvpn.net>
+CopyrightUrl: https://openvpn.net/legal/
+ShortDescription: Create secure VPN connections over the internet with this VPN software.
+Description: OpenVPN provides flexible VPN solutions to secure your data communications, whether it's for Internet privacy, remote access for employees, securing IoT, or for networking Cloud data centers.
+Moniker: openvpn
+Tags:
+- network
+- open-vpn
+- virtual-private-network
+- virtualprivatenetwork
+- vpn
+ReleaseNotes: |-
+  Security fixes:
+  - openvpnserv (windows): better scrutinize command line passed in
+    from the control socket to openvpn. This would lead to circumventing
+    admin restrictions on allowed openvpn config directories (but never
+    to "read files the user has no permissions for") (CVE-2026-63649)
+    Bug found by 章鱼哥 (www.aipyaipy.com)
+  - dco: make key state desync recoverable
+    This was reported as a "with suitable timing, a key-update de-sync between
+    OpenVPN and the kernel could trigger an ASSERT()", and was initially
+    handled as security report. It turned out to be not exploitable, but the
+    state machine was not very robust and so the opportunity was used to
+    improve the code.
+    Bug found by 章鱼哥 (www.aipyaipy.com)
+  - make --x509-username-field work with mbedTLS.
+    In very particular setups, together with a CA creating matching certificates,
+    this could lead to unintentionally permitting a certificate that should
+    not have. This is why this was considered a (low-prio) security bug and a
+    CVE ID was assigned (CVE-2026-63650)
+    Bug found by 章鱼哥 (www.aipyaipy.com)
+  User-visible Changes:
+  - if --dev is not specified, default to --dev tun - so for the
+    tun case, this option can now be left out of the openvpn config.
+  -  --ping and --keepalive settings are now limited to 24 hours
+    maximum - the primary reason for that is to avoid lots of extra code
+    in the DCO kernel to handle arbitrarily large values without overflowing
+    32 bit integers. 24h is considered much higher than any reasonable use.
+  - The TCP_NODELAY socket flag is now "always on". The --tcp-nodelay
+    option is kept, because setting it on a p2mp server also enables pushing
+    of socket-flags TCP_NODELAY to clients, which might not have this
+    code change yet.
+  - Remove --providers from --help output on mbedTLS builds.
+  Bugfixes:
+  - refuse incoming HARD RESET packets with a sequence ID != 0
+    (this is basically making an OpenVPN server ignore and log a
+    "should never happen" client-side misbehaviour, which could lead to
+    TLS handshake establishment failures in p2p TLS setups)
+  - correctly calculate packet id size if epoch packet format is in use -
+    this was off by 4, for connections openvpn 2.7+ to openvpn 2.7+,
+    exceeding "mssfix mtu" headroom by those 4 bytes
+    (Github: OpenVPN/openvpn#1074)
+  - correct minimum packet length check for 802.1q tagged packets
+    (Github: OpenVPN/openvpn#1044).
+    This was also reported (twice) as a security bug, as technically
+    OpenVPN with --client-nat would read and write up to 4 bytes
+    "after the end of the packet" - but due to the OpenVPN packet buffer
+    layouts, which are always full-frame-sized this is fully safe and has
+    no adverse consequences.
+  Full Changelog: https://github.com/OpenVPN/openvpn/compare/v2.7.5...v2.7.6
+ReleaseNotesUrl: https://github.com/OpenVPN/openvpn/releases/tag/v2.7.6
+Documentations:
+- DocumentLabel: Community Resources
+  DocumentUrl: https://openvpn.net/community-resources/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

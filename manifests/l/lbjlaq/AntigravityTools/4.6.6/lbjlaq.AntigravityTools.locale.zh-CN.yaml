@@ -1,0 +1,27 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.6.6
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+Tags:
+- account-manager
+- antigravity
+ReleaseNotes: |-
+  - [核心修复] 修复 Gemini 3.7 长上下文工具调用文本泄露导致 Agent 静默中断 (Issue #3379):
+    - call:default_api 泄露检测与受控恢复 (Fail-Closed Bridge): 解决 Gemini 3.7 Flash 在长上下文压缩后，偶发未在结构化 functionCall 字段返回工具调用，而是以内部伪代码文本（call:default_api:ToolName{...}）输出导致 Claude Desktop / Claude Code Agent 工具循环中断的问题。引入 7 项严格守卫条件（已注册工具、本回合无原生工具调用、严格前缀匹配、注册工具白名单精准对齐、无额外散文干扰、参数合法 JSON 解析、本回合未发出任何 text_delta），在确保绝不发生 Prompt Injection 或误执行普通文本的前提下，将泄露文本安全恢复为标准 tool_use 块。
+    - 流式与非流式全链路对齐与诊断预警：在 SSE 流式通道（streaming.rs）与非流式响应转换（response.rs）中实现对称防御恢复逻辑，并在检测到未通过守卫条件的疑似泄露文本时输出诊断日志（tracing::warn），全面加固 9 组单元测试矩阵。
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.6.6
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

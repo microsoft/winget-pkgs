@@ -1,0 +1,98 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: LunarWerxs.SageThumbs2K
+PackageVersion: 3.0.1
+PackageLocale: en-US
+Publisher: LunarWerx
+PublisherUrl: https://github.com/LunarWerxs
+PublisherSupportUrl: https://github.com/LunarWerxs/SageThumbs-2k/issues
+PackageName: SageThumbs 2K
+PackageUrl: https://github.com/LunarWerxs/SageThumbs-2k
+License: PolyForm Noncommercial License 1.0.0
+LicenseUrl: https://github.com/LunarWerxs/SageThumbs-2k/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2026 LunarWerx
+ShortDescription: Explorer thumbnails for 334 file types Windows can't read, plus a right-click image toolkit.
+Description: SageThumbs 2K is a modern, crash-isolated Windows 11 shell extension written in Rust that rebuilds the classic SageThumbs. It gives File Explorer thumbnails for 334 file types Windows can't preview on its own — camera RAW, HEIC/AVIF, Photoshop, DjVu, ebooks and comics, video frames, 3D-print files and a long tail of obscure formats — plus a right-click image toolkit (convert, resize, rotate, OCR, color picker, metadata strip, combine-to-PDF/CBZ) and a console/AI CLI. Free for personal use.
+Moniker: sagethumbs2k
+Tags:
+- converter
+- explorer
+- heic
+- image
+- raw
+- shell-extension
+- thumbnails
+ReleaseNotes: |-
+  ## What's changed
+  
+  The first update after 3.0. Three things, all from user reports in the days after the release,
+  plus a tighter signing gate. If you are still on 2.x, the "What 3.0 brought" list at the end of
+  these notes is the reason to update.
+  
+  ### New
+  
+  - **A size for the format mark in a thumbnail's corner.** Settings > Appearance > "Format mark
+    size": Small (the original), Medium or Large. A designer with folders of near-identical
+    previews asked for it, because the mark is how you tell a PSD from its JPG at a glance and
+    the original was too small to read. The mark scales with the tile, so Large stays readable
+    in every Explorer view.
+  
+  ### Fixed
+  
+  - **The doctor says whether Explorer draws program icons on thumbnails at all.** A new
+    "ShowTypeOverlay" line under Windows thumbnail settings reads Explorer's "Display file icon
+    on thumbnails" switch and warns when it is off, because with it off no thumbnail gets a
+    corner icon, ours or Windows' own, and the corner setting "Windows' file-type icon" reads as
+    broken while every other line is green.
+  
+  - **The per-file doctor report names the drive.** `st2k doctor <file>` now prints a "Volume"
+    line: whether the drive is fixed, removable, network, optical or a RAM disk, its file system,
+    and the device behind the letter, so a substituted (`subst`) or per-session drive, which
+    Explorer's thumbnail helper may not see at all, is called out instead of leaving a green
+    report next to a folder full of icons.
+  
+  - **HDR JPEG XL files thumbnailed almost black**
+    ([#38](https://github.com/LunarWerxs/SageThumbs-2k/issues/38)). A `.jxl` whose base image is
+    HDR (PQ transfer, BT.2020 primaries, the shape Google's Ultra HDR samples and Adobe's gain-map
+    exports use) decoded to samples that still carried the PQ curve, and colour management then
+    treated 10,000 nits as white, so a picture whose real white sits at 203 nits came out at a
+    fiftieth of its brightness. An HDR `.jxl` now goes through the same conversion and tone map
+    an HDR PNG or an EXR does. The SDR twin of the same picture was always fine and is unchanged.
+  
+  ### Changed
+  
+  - **Nothing ships unsigned, and the pipeline now proves it.** Every executable and library we
+    build, including the three ImageMagick shim libraries the bundle carries, is signed by
+    LUNARWERX LLC before the installer, the portable zip and the Windows 11 menu package pick them
+    up, and the release run refuses to publish if any shipped binary or installer fails
+    signature verification.
+  
+  ### What 3.0 brought
+  
+  For anyone updating from 2.x, the headlines of 3.0.0 (the full list is in that section below):
+  
+  - **Code-signed installers and packages** from LUNARWERX LLC, so SmartScreen and antivirus
+    warnings on a fresh download fade with the file's age instead of never.
+  - **Rename with pattern**, **Set as lock screen**, **Copy as data URI**, **Sort into folders by
+    date taken**, and Fill / Fit / Span wallpaper placements in the right-click menu.
+  - **Watermarks in the Convert dialog**, and conversions to AVIF, JPEG XL and the other
+    ImageMagick-encoded formats keep their metadata.
+  - **Quick preview gains**: a hex view for files nothing else can render, folder sizes, printing
+    (Ctrl+P), a Save button for the current PDF page, animation frame or video frame, a
+    per-extension blocklist, keyboard-reachable toolbars, and script-file highlighting.
+  - **HDR PNGs render correctly**, AVIF colours are back after September's Windows codec change,
+    and Canon CRW thumbnails are fast again.
+  - **The program's icon is back in the corner of Photoshop, Illustrator and other editor
+    files** when the corner is set to Windows' file-type icon.
+  - **A per-file doctor** (`st2k doctor <file>`) that names the program, policy or sync client
+    standing between a file and its thumbnail, and a diagnostics bundle safe to hand to anyone.
+  - **A Licence page** for business seat keys, an installer question about personal or business
+    use, settings export and import from the command line, and signature-checked self-updates.
+  - **Portable copies keep their state in their own folder**, and the `st2k` command line and
+    MCP tools gained `cbz`, folder recursion and richer batch reporting.
+  - **Dozens of robustness fixes** in the shell extension: hostile or malformed files can no
+    longer hang, crash or pile up work inside Explorer.
+ReleaseNotesUrl: https://github.com/LunarWerxs/SageThumbs-2k/releases/tag/v3.0.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

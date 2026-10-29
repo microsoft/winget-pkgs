@@ -1,0 +1,77 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: EarendilWorks.pi
+PackageVersion: 1.1.0
+PackageLocale: en-US
+Publisher: EARENDIL INC.
+PublisherUrl: https://github.com/earendil-works
+PublisherSupportUrl: https://github.com/earendil-works/pi/issues
+Author: Mario Zechner
+PackageName: pi
+PackageUrl: https://github.com/earendil-works/pi
+License: MIT
+LicenseUrl: https://github.com/earendil-works/pi/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Mario Zechner
+ShortDescription: AI coding assistant with read, bash, edit, write tools
+Description: |-
+  Pi is a minimal terminal coding harness. Adapt pi to your workflows, not the other way around, without having to fork and modify pi internals. Extend it with TypeScript Extensions, Skills, Prompt Templates, and Themes. Put your extensions, skills, prompt templates, and themes in Pi Packages and share them with others via npm or git.
+  Pi ships with powerful defaults but skips features like sub agents and plan mode. Instead, you can ask pi to build what you want or install a third party pi package that matches your workflow.
+  Pi runs in four modes: interactive, print or JSON, RPC for process integration, and an SDK for embedding in your own apps. See openclaw/openclaw for a real-world SDK integration.
+Moniker: pi
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  New Features
+  - Program status reporting: terminals and agent dashboards that support OSC 7501 see whether Pi is working, blocked on a dialog or login, done, or failed. See Program status.
+  - Claude Haiku 5.5: anthropic/claude-haiku-5-5, with adaptive thinking up to xhigh/max effort.
+  - Adjust default tools with +name/-name: --tools entries like pi -t +codemode,-write change the default selection instead of replacing it. See Tools.
+  - GPT-6 Luna and image classification: OpenAI's GPT-6 Luna is available as a classifier model through the Decisions API, and codemode's models.classify() accepts images for classifiers that support them. See Use classifier models.
+  - Native llama.cpp decision models: Julia-1, Laya, Kev, lev, and OpenJev served by llama.cpp 0.6.0 or later run natively as classifiers through /v1/systemone. See Classification.
+  Added
+  - Added +name and -name entries to --tools, which change the default tool selection instead of replacing it, for example pi -t +codemode
+  - Added durationMs to the tool render context and to tool_execution_end extension events: the recorded execution time of a final tool result (#10549)
+  - Added outputPad to the tool render context (#10557 by @rwachtler)
+  - Added OpenAI's GPT-6 Luna as a classifier model through the Decisions API, available with OPENAI_API_KEY (see Use classifier models)
+  - Added images to codemode's models.classify() context, so classifiers that accept images, such as GPT-6 Luna, can judge them
+  - Added program status reporting with OSC 7501: terminals and agent dashboards that support it see whether Pi is working, blocked on a dialog or login, done, or failed. PI_PROGRAM_STATUS=1|0 overrides detection (see Terminal setup) (#10607)
+  - Added aborted to agent_settled session, extension, and JSON events, so integrations can tell a cancelled run from a finished one (#10607)
+  - Added Claude Haiku 5.5 (anthropic/claude-haiku-5-5), with adaptive thinking up to xhigh/max effort and prompt caching on Bedrock
+  - Added native llama.cpp decision models: Julia-1, Laya, Kev, lev, and OpenJev served by llama.cpp 0.6.0 or later are listed only as classifiers through /v1/systemone instead of as chat models (see Classification) (#10382)
+  Changed
+  - Changed outputPad to also apply to ! command output, tool output, and summary blocks (#9946, #10557 by @rwachtler)
+  - Changed pi mcp login --timeout to limit the whole sign-in, including requests to the authorization server, instead of only the wait for the browser (#10565)
+  Fixed
+  - Fixed bash and PowerShell results losing Took after reloading a session, and the live Took including wall-clock steps; both now show the recorded execution time (#10549)
+  - Fixed managed installs keeping every old release; pi update now keeps only the new release and the one it updated from (#10392, #10511 by @davidbrai)
+  - Fixed standalone binaries loading .env, .env.local, and .env.development from the launch directory into Pi's environment (#10473)
+  - Fixed !! command headers losing their dim color once output arrives (#10557 by @rwachtler)
+  - Fixed the codemode description not marking searchTools(), describeTool(), and describeNamespace() as async, which led models to serialize the unawaited promise as {} (#10555)
+  - Fixed codemode output items running together, so models could not tell where one text() or console.log() output ended and the next began. With several text items, each now starts with a ==> text N/M <== line, and console calls follow the other output in one <console_output> block with one line per call
+  - Fixed /mcp waiting for all servers to connect before opening; the manager now updates live and remains usable while enabling, reconnecting, or disabling servers (#10562)
+  - Fixed images being dropped as "could not be resized" when running under node --watch on Node 24.19+ and 26.x, where Node posts its own messages on the image resize worker channel (#10527)
+  - Fixed clipboard paste doing nothing in Termux, and failed copies there omitting the Termux:API install hint (#10391)
+  - Fixed ! and RPC bash output keeping fragments of color codes, such as a stray m, when a code was split across output chunks (#10504)
+  - Fixed MCP OAuth sign-ins that could not be cancelled while waiting on the authorization server and kept running after the session ended. The sign-in screen now cancels with Esc at every step, session shutdown aborts a running sign-in, and each request to the authorization server times out after 15 seconds (#10565)
+  - Fixed shutdown waiting up to 15 seconds to refresh an MCP OAuth token that was about to expire, only to close the server's session (#10565)
+  - Fixed the fullscreen text selection surviving session switches and other transcript rebuilds, which highlighted unrelated text in the new transcript (#9311, #10567 by @christianklotz)
+  - Fixed OpenAI models on Bedrock ignoring the thinking level and always running at Bedrock's default reasoning effort (#9331, #10142 by @jsanter27)
+  - Fixed model headers in models.json not overriding the originator and User-Agent headers of Codex requests (#10429 by @lucasmeijer)
+  - Fixed server_busy and servers are currently busy provider errors ending the turn instead of being retried (#10543)
+  - Fixed Mistral responses that end with finish_reason: "error" not being retried (#10487)
+  - Reduced context-limit request failures by estimating input at 3.5 characters per token instead of 4 when calculating output limits (#10497)
+  - Fixed Radius models disabled by an organization owner still being listed
+  - Fixed Anthropic browser login failing with "localhost refused to connect" when port 53692 is reserved or in use, for example by Hyper-V/WSL port exclusions on Windows: login now falls back to a free loopback port (#10571)
+  - Fixed session costs undercounting long prompts on models with prompt-length pricing tiers, such as Claude Haiku 5.5, Gemini 3.1 Pro, and GPT-5.4, through OpenCode, OpenCode Go, OpenRouter, Vercel AI Gateway, Google, MiniMax, and other providers
+  - Fixed Markdown links not being clickable in Herdr (#10573)
+ReleaseNotesUrl: https://github.com/earendil-works/pi/releases/tag/v1.1.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

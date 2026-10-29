@@ -1,0 +1,61 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: XinTaoFei.Codeg
+PackageVersion: 0.25.0
+PackageLocale: en-US
+Publisher: codeg
+PublisherUrl: https://github.com/xintaofei
+PublisherSupportUrl: https://github.com/xintaofei/codeg/issues
+PackageName: codeg
+PackageUrl: https://github.com/xintaofei/codeg
+License: Apache-2.0
+LicenseUrl: https://github.com/xintaofei/codeg/blob/HEAD/LICENSE
+ShortDescription: Aggregate and browse AI coding agent sessions (Claude Code, Codex, Gemini CLI, etc.) in one place. Desktop app, self-hosted server, or Docker.
+Description: Codeg (Code Generation) is an enterprise-grade multi-agent coding workspace. It unifies local AI coding agents (Claude Code, Codex CLI, OpenCode, Gemini CLI, OpenClaw, Cline, etc.) in a desktop app, standalone server, or Docker container — enabling remote development from any browser — with conversation aggregation, parallel git worktree development, MCP/Skills management, chat channel interactions (Telegram, Lark, iLink, etc.), and integrated Git/file/terminal workflows.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claude-code
+- code
+- codex
+- coding
+- gemini-cli
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  This release is mostly about who is allowed to do what. Two ways a repository could act on your machine without ever asking are closed, an agent can now run its own files and commands so its own sandbox covers them, and OpenCode's permissions get a real editor. Approvals that arrive together no longer hang the agent, and a merge that finds the slot busy queues instead of failing.
+  New
+  - OpenCode permissions without the JSON. A Permissions card on OpenCode's settings page: auto-accept everything, set a global default, or pick Allow / Ask / Deny per tool, with pattern rules for the tools that support them. A rule order that would silently override your settings is flagged and fixed in place.
+  - Let an agent handle its own files and commands. codeg served file reads, writes and terminal commands for every agent, which meant they ran outside whatever sandbox the agent applies to itself. A toggle beside the environment editor (CODEG_ACP_HOST_TOOLS=agent) hands all three back. Off by default — codeg adds no sandbox of its own, so turn it on only for an agent that has one (#436).
+  - Merges queue instead of failing. Accepting a second reviewed to-do while the project was landing another one used to be refused outright. It now takes a place in line and starts on its own as soon as the slot frees; cards and rows show where it sits and let you leave the queue.
+  - The connection heart is a button. Click the status icon below the composer for the agent, its real state, working directory, session id and any error — plus a Reconnect that works in every state, including the stuck "connecting" you click it from precisely because it is stuck. It resumes the session rather than starting a new one.
+  - Live output speed. While an agent is replying, the turn row above the composer shows its output in tokens per second, beside elapsed time and files changed. It also appears in the read-only transcripts on To-dos and loop runs.
+  - See which agent is on a to-do. Board cards and list rows carry the agent's mark beside the title, resolved the same way the run itself resolves it — so a task inheriting its folder's default shows the agent that will actually run.
+  - Manage conversations across the whole workspace. The dialog is no longer locked to the folder that opened it: one search row over folder, branch, agent and status filters, with branches folded by prefix so task/49 and task/50 sit under one task/. Each row shows the branch it was started on.
+  Improved
+  - Updated bundled agents. OpenCode 1.18.18, Gemini 0.55.1, Cline 3.0.55, Hermes 0.20.1, CodeBuddy 2.136.0, Kimi Code 0.36.1, Grok 1.0.3 and Cursor 2026.08.11.
+  - The shell you pick applies to agent commands too. The shell setting in General said it covered terminal tabs only; it now also applies when an agent asks codeg to run a whole command line. Leaving it on System default keeps the previous behavior exactly. Agents emit POSIX syntax, so the setting warns that fish, nushell and Windows PowerShell 5.1 may reject it.
+  - Folder pickers search, and show the real folder name. To-dos, Automations and Token usage now use the same searchable list as the new-conversation composer, showing alias [ name ] over the full path and matching on all three. An alias used to replace the real name, so two folders aliased alike were indistinguishable.
+  - Worktrees say what they are and where they live. A worktree folder is labeled with the branch checked out there and reads task/49 [ codeg-task-49 ] in the sidebar. Existing worktrees are labeled on startup, and a name you chose yourself is never overwritten.
+  - The French interface is complete. 61 strings were still surfacing in English — 28 of them the entire Remote Workspace module — and are now translated and aligned to the glossary the rest of the locale uses.
+  - Release notes come in your language. Releases carry English and Chinese in one body; the settings page and the update popover now render only the half matching your interface language.
+  Fixed
+  - pi no longer trusts a repository just because you opened it (#446). codeg marked every folder it launched pi into as trusted in pi's own trust file, which let that repository's .pi/extensions — code that runs at pi startup with your permissions — execute as soon as a Pi conversation was created or restored, with nothing sent and nothing in the transcript. Trust is now an explicit per-workspace decision, prompted only when a repo actually ships such files. Grants written by the old behavior block the launch until you confirm them, and can be reviewed and revoked one by one in pi's settings.
+  - A symlinked folder is a folder again — and can't be used to reach outside the workspace (#430). A directory made with ln -s rendered as an unopenable file. It now expands through the link. Fixing that surfaced that delete, rename and move had no boundary check at all — with ln -s .. up in a workspace, deleting up/<root name> wiped the whole workspace. All three now require the target to resolve inside the workspace.
+  - Approvals that arrive together no longer hang the agent (#442). When an agent asked for several permissions at once, only the last one was reachable — the rest could never be answered, their tool calls waited forever, and to-dos sat at "awaiting input". Codex hit this routinely. Requests now queue and are answered in turn, with the number still waiting shown so a queue doesn't read as a hang.
+  - ~/.codex/config.toml sandbox and approval settings take effect. approval_policy and sandbox_mode were dead in every codeg session — worst case, an explicitly read-only sandbox was silently widened to workspace-write. The launch now derives its mode from your config and never widens the sandbox.
+  - A sub-agent waiting on you doesn't stall out of sight (#447). A delegated sub-agent stuck on a permission appeared nowhere but a badge inside its parent's transcript, so an unattended run could sit blocked indefinitely. It now reaches the pet badge and panel, where the permission is answered directly, and to-do rows say awaiting input instead of running.
+  - The reasoning picker sticks on pi's custom providers. It snapped back to Off the moment it was touched, because codeg never declared the model could think. Pi's settings page gains a Reasoning card to declare the levels a custom model supports and the value each is sent as, and editing a model now updates its existing entry instead of being skipped.
+  - When an agent turns down a setting, it says so. A model or option the agent refuses or downgrades used to look like the dropdown springing back for no reason. codeg now names what was adopted instead, and keeps your preference for the next session.
+  - Popovers inside dialogs scroll with the wheel. Long lists in a dialog — the folder and branch pickers above all — could only be moved by dragging the scrollbar, which read as broken.
+  - Toasts can't hide under a dialog. A message raised while a dialog was open painted behind it, so an action that failed inside a dialog looked like it had done nothing. This covers every dialog in the app.
+  - "Expand the details" now points at something real. The empty-turn errors told you to expand details that existed nowhere; the agent's output now sits behind a disclosure in the status bar's Alerts.
+  - The agent selector's marks line up. Every icon sat 2px above the center of its pill, and the bar stood 4px taller than it should.
+  Thanks to @pia, @doublecurry and @Charlie-1909 for contributing to this release.
+ReleaseNotesUrl: https://github.com/xintaofei/codeg/releases/tag/v0.25.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

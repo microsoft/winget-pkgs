@@ -1,0 +1,91 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Nub.Nub
+PackageVersion: 0.9.3
+PackageLocale: en-US
+Publisher: nub contributors
+PublisherUrl: https://nubjs.com/
+PublisherSupportUrl: https://github.com/nubjs/nub/issues
+Author: nub contributors
+PackageName: Nub
+PackageUrl: https://nubjs.com/
+License: MIT
+LicenseUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 nub contributors
+CopyrightUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+ShortDescription: The all-in-one JavaScript toolkit that augments Node.js instead of trying to replace it.
+Description: "An all-in-one toolkit for Node.js. One Rust binary to run your files and scripts, install dependencies, and manage Node itself — a Bun-like modern DX on top of the node you already have. There's no new runtime to adopt and no lock-in: every augmentation rides on Node's own public extension surfaces."
+Moniker: nub
+Tags:
+- javascript-runtime
+- node-version-manager
+- nodejs
+- package-manager
+- script-runner
+ReleaseNotes: |-
+  The nub binary answers to nubr, so every install channel that puts nub and nubx on the path now puts the unified runner there too.
+  nubr on every channel
+  0.9.2 introduced nubr as the bin of @nubjs/runner on npm. This release makes the same command a third name on the nub binary: invoked as nubr, it runs the nubr.mjs the binary already embeds, on the project's Node, provisioning one when none is installed. The npm package and the binary run the same file, so a project behaves the same under either.
+  curl -fsSL https://nubjs.com/install.sh | bash   # macOS / Linux
+  irm https://nubjs.com/install.ps1 | iex           # Windows (PowerShell)
+  nubr app.ts        # a file
+  nubr build         # a package.json script
+  nubr vitest run    # an installed node_modules/.bin entry
+  ───────────────────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Channel                │What changed
+  ───────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────
+  install.sh /           │Create nubr beside nubx; the uninstall paths remove it
+  install.ps1            │
+  ───────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────
+  nub upgrade            │Recreates the nubr alias on Unix and refreshes nubr.exe on Windows
+  ───────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Homebrew tap           │The generated formula symlinks nubr and asserts nubr --version
+  ───────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────
+  @nubjs/nub on npm      │Ships a nubr bin next to nub and nubx
+  ───────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Nix flake              │Adds the symlink and an apps.nubr entry
+  ───────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────
+  winget                 │The committed Nub.Nub fixture registers nubr as a third alias of the one nub.exe, and CI proves all three
+                         │run
+  ───────────────────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────
+  nubr --version prints the bare version, matching the npm command. (#943, adfdba73ce)
+
+  winget
+  Nub has been published on winget as Nub.Nub since 0.1.0 and is bumped by community automation on each release; winget install Nub.Nub is now in the README. The in-repo fixture tracks that identifier at 0.9.2, and the release workflow's own submission job stays a dormant fallback. (#944, 4a0f4dc5e3)
+
+  Configuration
+  Note
+  The string form of prefix refuses a backslash. The string is split like a POSIX shell, so "C:\\tools\\wrap.exe --" reached the launch as C:toolswrap.exe. The error names the array form, which takes each argument as written. The published schema carries the same rule. (#941, 66af607145)
+
+  Documentation
+  ──────────────┬────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬───────────────
+  Area          │What changed                                                                                                    │Commit
+  ──────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────
+  Unified runner│New "From the nub installer" section, a nubr section in the README, and the install page lists all three        │adfdba73ce
+                │commands                                                                                                        │
+  ──────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────
+  Resolution    │The nub export-condition example points at JavaScript, since files under node_modules are never transpiled      │921f4def52
+  ──────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────
+  Extensions    │The @nubjs/extensions page is removed and its URL redirects to the package's own repository                     │483eaa84ff
+  ──────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────
+  @nubjs/types  │The import.meta.hot comment no longer names a --hot flag that does not exist                                    │af955b380f
+  ──────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────
+  0.9.2 post    │Introduces nubr on @nubjs/runner without naming the retired loader package                                      │979196a4d0
+  ──────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴───────────────
+
+  Testing & internals
+  - The docs link checker validates same-page #anchor links (41d27d8c24).
+  - Fenced code lines on the site are linted against the rendered column width rather than a character count (aa08e86ca8).
+  - The busybox lifecycle probe runs on windows-11-arm as well, so the arm64 sidecar is executed in CI (fcdb08cbc3).
+
+  What's Changed
+  - config: refuse a backslash in the prefix string form by @colinhacks in #941
+  - nubr: a third name on the nub binary, the unified runner on every channel by @colinhacks in #943
+  - winget: the package is Nub.Nub, community-maintained; the fixture proves a third alias for nubr by @colinhacks in #944
+ReleaseNotesUrl: https://github.com/nubjs/nub/releases/tag/v0.9.3
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://nubjs.com/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

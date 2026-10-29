@@ -1,0 +1,32 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Everless321.dYm
+PackageVersion: 2.9.1
+PackageLocale: zh-CN
+Publisher: example.com
+PublisherUrl: https://github.com/Everless321
+PublisherSupportUrl: https://github.com/Everless321/dYm/issues
+PackageName: dYm
+PackageUrl: https://github.com/Everless321/dYm
+License: 免费软件
+Copyright: Copyright © 2026 example.com
+ShortDescription: 抖音视频下载与智能分析管理工具
+Tags:
+- 下载
+- 抖音
+- 视频
+- 解析
+ReleaseNotes: |-
+  添加用户失败时报出真实原因
+  v2.9.0 把「获取作品详情失败」拆成了三种，但其中「作品详情中未找到作者数据」仍然把原因归给「作品可能已删除或为私密」，而实际情况往往不是。
+  根因在上游库 polydl：fetchOneVideo 调用正式详情接口失败时会静默吞掉异常（catch {}），转而回退到移动端分享页，而分享页返回的数据不包含作者信息。结果就是拿到了详情、却没有 sec_uid，表现成「作品已删除或私密」——即便作品完全正常。
+  本版在拿不到作者时，直接调用一次详情接口把被吞掉的原因取出来，错误消息会明确区分：
+  - 详情接口请求失败 —— 附带原始错误（如「响应数据为空字符串」，抖音风控返回空响应的典型特征）
+  - 详情接口返回空作品 —— 附带 HTTP 状态与 status_code，通常是 cookie 失效或触发风控
+  - 详情接口正常返回但缺少作者字段
+  诊断仅在失败路径上触发，正常添加流程不受影响。
+  Full Changelog: https://github.com/Everless321/dYm/compare/v2.9.0...v2.9.1
+ReleaseNotesUrl: https://github.com/Everless321/dYm/releases/tag/v2.9.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

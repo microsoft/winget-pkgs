@@ -1,0 +1,35 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: lonr-6.CCDesktopSwitch
+PackageVersion: 1.0.26
+PackageLocale: zh-CN
+ShortDescription: 用于在 Claude 桌面版中配置 DeepSeek、Kimi、智谱 GLM 和 百炼 提供商的轻量级桌面工具。
+Description: |-
+  CC Desktop Switch 是一款轻量级桌面应用，专为官方 Claude 桌面客户端设计。它可帮助您管理第三方兼容 Anthropic API 的服务提供商，例如 DeepSeek、Kimi、智谱 GLM、阿里云百炼、小米 MiMo，并一键应用正确的 Claude 桌面端第三方配置。
+  本项目专注于 Windows 和 macOS 平台上的 Claude 桌面客户端，与 farion1231/cc-switch 等以命令行为主的工具不同，其目标是为普通桌面用户提供一个简洁的用户界面，用于服务商设置、模型映射、健康检查以及本地网关兼容性管理。
+  自 v1.0.18 版本起，Claude 桌面客户端默认配置为调用位于 127.0.0.1 的本地 CC Desktop Switch 网关。当使用第三方服务商时，请保持 CC Desktop Switch 在后台运行。关闭窗口后，程序仍将在 Windows 系统托盘中驻留，或在 macOS 的程序坞生命周期中保持隐藏运行。
+
+  功能说明
+  - 支持管理 DeepSeek、Kimi、智谱 GLM、阿里云百炼、小米 MiMo 及自定义第三方服务商。
+  - 在 Windows 和 macOS 上应用 Claude 桌面端的第三方推理配置。
+  - 使用本地网关，将模型映射、协议兼容性、额外请求头及上游密钥等控制在本地。
+  - 仅在 Claude 桌面客户端中显示明确映射的、安全的 Claude 模型路由。
+  - 对未映射的 Claude 模型路由直接拒绝访问，而非静默回退至内部默认设置。
+  - 支持导入兼容 Anthropic 格式的 CC-Switch 配置，而 OpenAI 格式条目需手动启用。
+  - 提供服务商连接检测、模型可用性检查、SSE 流式传输，以及自定义上游 HTTP/SOCKS 代理支持。
+  - 防止 Windows 上重复启动应用程序实例：再次运行快捷方式将激活已存在的窗口。
+ReleaseNotes: |-
+  本次补丁版重点加固 provider 编辑、上游错误诊断、卸载清理和跨平台发布门禁。
+  - 修复带旧别名的模型映射在用户明确删除 Opus、Sonnet 或 Haiku 槽位后又自动恢复的问题。
+  - 收紧 DeepSeek Max 兼容错误判断。鉴权、URL、模型、上下文长度和其他参数错误会保留真实上游诊断，不再被误报为“模型不支持 Max”。
+  - 修复小写及规范 OpenAI 兼容预设元数据的处理，统一交给现有 API 格式归一化逻辑。
+  - Windows 正常卸载时只清理由 ccds_managed=true 标记、确由 CCDS 写入的 Claude Desktop 策略值；静默覆盖升级通过 /UPGRADE 保留当前 provider 配置。
+  - 修复 Windows 覆盖升级竞态：旧 NSIS 卸载器完成同步清理后，新安装器才写入替换文件和卸载信息。
+  - 新增 Ubuntu、Windows、macOS 三平台测试、前端 JavaScript 语法检查和 NSIS 安装器编译。
+  - GitHub Actions 升级到当前 Node 24 action 代际，并补充 Claude 账号功能和 GitHub Copilot BYOK 的产品边界说明。
+  升级说明
+  无需迁移 provider。升级后请重新对当前 provider 执行“一键应用到 Claude 桌面版”，并完整重启 Claude Desktop。卸载 v1.0.25 及更早版本前，建议先执行“清除桌面版配置”。
+ReleaseNotesUrl: https://github.com/lonr-6/cc-desktop-switch/releases/tag/v1.0.26
+ManifestType: locale
+ManifestVersion: 1.12.0

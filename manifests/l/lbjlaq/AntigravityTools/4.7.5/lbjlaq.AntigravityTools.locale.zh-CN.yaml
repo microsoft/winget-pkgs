@@ -1,0 +1,41 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.7.5
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+Tags:
+- account-manager
+- antigravity
+ReleaseNotes: |-
+  - [上游 WAF 与请求清洗重构] 完美修复 Agent 客户端 404/429/503 报错，清洗伪 Header 杜绝上游雪崩 (PR #3463, Fixes #3458, Fixes #3467, Fixes #3466, Fixes #3460, Fixes #3454, Fixes #3453):
+    - 出站 UA 规范化对齐：统一升级客户端出站 User-Agent 至 >= 4.3.0，彻底规避因陈旧客户端标识被上游云控拦截。
+    - 中转流水线 PromptSanitizer 节点：拦截清洗请求体中不合规的 *-billing 等伪 Header，彻底根除 Google 上游 WAF 将非法请求误判为 429 进而造成 503 账号雪崩的恶性连锁反应。
+  - [深度推理调控与思维链保护] 废除 1000 毒药截断预算，全面开放 24576/32768 大思考预算 (PR #3463):
+    - 破除思维链清零缺陷：经 48 轮对照实验证实，硬编码 < 2048（特别是 1000）会导致 Gemini 3.x 评估推理空间不足而自我截断弃思（思维 Token 清零）；彻底移除过小预算硬编码。
+    - 释放极致深度思考能力：全面开放 24576 与 32768 大预算自定义设定，思考 Token 量显著提升 130%~165%，完整输出逻辑推演树；建立网关权威控制与客户端直接控制双轨解耦机制。
+  - [日志大报文虚拟化与容量治理] 引入行级虚拟滚动与滑动窗口物理淘汰 (PR #3463):
+    - DOM 行级虚拟化 (@tanstack/react-virtual): 针对单次几 MB 的超大上下文报文，DOM 仅渲染视口 40~50 行，彻底根治大请求查看时的卡顿与白屏崩溃；实现纯内存解耦极速搜索与整行 Tokenizer 语法高亮。
+    - 物理容量上限与滑动窗口淘汰：废除按天清理，改用按 GB 物理上限控制 + 30% 滑动窗口平滑淘汰与碎片整理，彻底杜绝 SQLite 达到 1GB 时的写锁死问题。
+  - [负载均衡容灾与粘性死锁根治] Balance 模式快速故障转移与会话粘性切断 (PR #3464):
+    - Balance 模式禁用原地 GraceRetry: 在多账号 Balance 模式及 PerformanceFirst 模式下，遭遇 429 立即触发 50ms 快速故障转移，迅速轮换至池内健康账号。
+    - 彻底切断粘性会话死锁 (Session Deadlock): 遭遇 429/529 时统一调用 unbind_session_and_clear_last_used，彻底清理解绑当前 session_id 并置空 last_used_account，杜绝后续重试持续死锁在受限账号上。
+    - 扩充硬配额耗尽判定：将 "credits" 纳入硬配额耗尽检测，遇积分/额度用尽立即切号，不再进行无意义等待。
+  - [系统环境与原生体验优化] Windows 原生图标自愈与 NSIS 安装冲突解决 (PR #3463):
+    - Win32 COM 快捷方式自愈：采用纯原生 COM 接口静默刷新快捷方式图标，杜绝杀毒软件误报拦截；重构 NSIS 安装脚本，在安装/升级前释放旧进程句柄，根治文件覆盖写入冲突。
+    - 账号 PRO 标识历史自愈：修复 ineligibleTiers 误判降级缺陷，启动时自动推导补齐磁盘历史数据，老用户升级无需重新登录即可恢复 PRO 标识。
+    - 更新机制与代理支持：规范更新检测链路，更新检测与下载完整继承全局 HTTP / SOCKS5 代理。
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.7.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

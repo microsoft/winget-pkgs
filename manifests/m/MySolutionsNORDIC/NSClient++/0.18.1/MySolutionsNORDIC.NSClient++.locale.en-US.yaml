@@ -1,0 +1,133 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: MySolutionsNORDIC.NSClient++
+PackageVersion: 0.18.1
+PackageLocale: en-US
+Publisher: MySolutions NORDIC
+PublisherUrl: https://medin.name/
+PublisherSupportUrl: https://github.com/mickem/nscp/issues
+Author: My Computer Solutions NORDIC KB
+PackageName: NSClient++
+PackageUrl: https://nsclient.org/
+License: GPL-2.0
+LicenseUrl: https://github.com/mickem/nscp/blob/HEAD/COPYING
+Copyright: Copyright (C) 2026 - Michael Medin
+ShortDescription: A fully fledged monitoring agent which can be used with many monitoring tools.
+Description: |-
+  NSClient++ (nscp) aims to be a simple yet powerful and secure monitoring daemon. It was built for Nagios/Icinga, but nothing in the daemon is Nagios/Icinga specific and it can be used in many other scenarios where you want to receive/distribute check metrics.
+  The daemon has 3 main functions:
+  - Allow a remote machine (monitoring server) to request commands to be run on this machine (the monitored machine) which return the status of the machine.
+  - Submit the same results to a remote (monitoring server).
+  - Take action and perform tasks.
+Moniker: nscp
+Tags:
+- icinga
+- naemon
+- nagios
+ReleaseNotes: |-
+  Security hardening and bugfixes of monitoring clients
+  0.18.1 is a security and correctness release for the passive/outbound side of
+  the agent. A review pass over the client modules — Icinga, NRDP, NSCA, NSCA-NG,
+  check_mk, Elastic, Graphite, syslog, and a second round on SMTP — turned up the
+  same three shapes over and over: configuration that parsed fine and was then
+  thrown away, network operations that could never time out, and
+  attacker-influenced text reaching another system's log unscrubbed. The
+  external-script launcher and the filter framework got the same treatment.
+  The most consequential single item is NSCA-NG cert mode, which applied its TLS
+  configuration too late and therefore accepted any server certificate. Alongside
+  the hardening, the Elastic module can finally talk to a current Elasticsearch,
+  the web UI moves to MUI 9 / react-router 8 with its test suites wired into CI,
+  and a coverage sweep adds unit tests to every source file that was under 50%.
+  ✨ Highlights
+  - 🔐 NSCA-NG cert mode verifies the server again — and presents your client
+    certificate. The OpenSSL context was configured after the TLS stream was
+    created from it, and SSL_new() copies the verify mode, certificate, cipher
+    list and version bounds at creation time. So verify mode = peer-cert ran
+    with verification off, any certificate was accepted, and the configured client
+    certificate was never sent. The default PSK mode was never affected. (#1461)
+  - 🧾 Configuration that silently did nothing now applies. check_mk client
+    targets discarded every TLS key (use ssl, certificate, verify mode, …)
+    and connected in plaintext regardless; syslog targets never read severity,
+    facility, tag_syntax or message_syntax; NSCAServer's
+    performance data = false was ignored; and ext-scr install --arguments=…
+    wrote its lockdown to a key the module does not read. All four are fixed.
+  - ⏱️ A stalled endpoint can no longer wedge a submitting thread forever.
+    Icinga, NRDP, Graphite and Elastic submissions all ran with no deadline; each
+    is now bounded by the target's timeout (default 30 s) as a single budget
+    over resolve, connect, handshake and exchange. External scripts enforce their
+    timeout by wall clock on both platforms. (#1464, #1465, #1466, #1467, #1468,
+    #1453)
+  - 🔎 The Elastic module works against Elasticsearch 8 — and verifies TLS.
+    Verification was hardcoded off; it now defaults to peer with tls version,
+    verify mode and ca settings, plus new user/password and api key
+    authentication. The legacy _type parameter is no longer sent by default, and
+    every document in a bulk request gets its own _id — previously they shared
+    one and overwrote each other. (#1453)
+  - 🔒 tls version = 1.2+ means "1.2 or later" again. The + was stripped
+    and the value mapped onto a version-pinned method, which pins the maximum
+    too — so the common default negotiated TLS 1.2 only and silently excluded
+    TLS 1.3. Fixed in the shared stack: all HTTP-based clients, the NRPE/NSCA
+    socket clients and servers, and check_tcp. (#1464)
+  - 📨 Syslog datagrams carry the RFC 3164 HOSTNAME field, so a conforming
+    receiver stops promoting the tag to origin host — which meant check output
+    could choose which host a record was filed under. An unknown severity or
+    facility now degrades to <13> (user.notice) instead of <0>,
+    kernel.emergency. (#1470)
+  - 🧱 Filter expressions are bounded at 1024 characters and 64 nesting levels.
+    The parser and the AST evaluator both recurse with the shape of the input, so
+    a long or deeply nested expression could exhaust the stack and crash the
+    agent. Real filters sit an order of magnitude below the limits. (#1469)
+  - 🖥️ The web UI moves to MUI 9, react-router 8 and TypeScript 6, with its 65
+    vitest unit tests and 18 Playwright integration tests now running in CI on
+    every build. (#1459)
+  🔍 Detailed changes
+  🔐 NSCA-NG — cert mode applies TLS configuration before the stream exists
+  use psk = false targets built the ssl::context, created the connection from
+  it, and then set the verify mode, client certificate, cipher list and TLS
+  version bounds. OpenSSL copies all of that out of the context when the stream is
+  created, so none of it took effect: verify mode = peer-cert accepted a
+  man-in-the-middle's certificate, and a server asking for a client certificate
+  never got one. Configuration is applied first now.
+  Two visible consequences: a cert-mode target whose server certificate does not
+  chain to the configured ca (or does not match the host name) will now fail to
+  connect — that is the verification working — and servers requiring a client
+  certificate will start receiving it. The default PSK mode authenticates both
+  ends through the pre-shared key and is unaffected.
+  🧾 Settings that were read but never applied
+  ────────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Module              │Setting(s)                                                                                                 │What happened
+  ────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  CheckMKClient       │use ssl, certificate, certificate key, ca, allowed ciphers, verify mode, dh                                │The target object never called register_all()/notify(), so the keys were parsed and thrown away — the client connected in plaintext whatever the configuration said, and the keys were missing from the reference
+                      │                                                                                                           │docs.
+  ────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  SyslogClient        │severity, facility, tag_syntax, message_syntax,                                                            │Stored under keys the sender never read, so built-in defaults always won: a settings-defined target sent an empty tag and dropped the message text.
+                      │ok-severity/warning-severity/critical-severity/unknown-severity                                            │
+  ────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  NSCAServer          │performance data = false                                                                                   │Ignored; perfdata is stripped from forwarded submissions again, as documented.
+  ────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  CheckExternalScripts│ext-scr install --arguments=…                                                                              │Wrote the lockdown to a path nothing reads, so it reported success while leaving arguments enabled. Re-run it after upgrading.
+  ────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  GraphiteClient      │timeout                                                                                                    │Looked up in the free-form option map, where the well-known timeout key is not stored — the default 30 always won.
+  ────────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Values you configured — possibly years ago, without effect — now apply. Review
+  those target sections for stale keys before upgrading.
+  ⏱️ Operations that could never time out
+  Each of these ran with no deadline, so an endpoint that accepted the connection
+  and then went silent held the submitting thread indefinitely, quietly stopping
+  passive results until a service restart.
+  - Icinga, NRDP, Graphite (both the submission and the recurring
+    metrics flush) and Elastic are now bounded by the configured timeout
+    (default 30 s; 10 s for one-shot nscp client submissions) as one budget
+    covering name resolution, connect, TLS handshake and the exchange. NRDP also
+    retries transport failures up to retry, each attempt on a fresh connection.
+  - Graphite's retry is gone. It never had any effect — the module always
+    made exactly one attempt — and a retry loop would multiply the worst-case time
+    a stalled endpoint can hold a thread. It is still registered centrally for all
+    client modules, so it remains in the reference, but GraphiteClient does not
+ReleaseNotesUrl: https://github.com/mickem/nscp/releases/tag/0.18.1
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://nsclient.org/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

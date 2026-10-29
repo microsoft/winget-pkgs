@@ -1,0 +1,158 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ggml.llamacpp
+PackageVersion: b10448
+PackageLocale: en-US
+Publisher: ggml
+PublisherUrl: https://github.com/ggml-org
+PublisherSupportUrl: https://github.com/ggml-org/llama.cpp/issues
+PackageName: llama.cpp
+PackageUrl: https://github.com/ggml-org/llama.cpp
+License: MIT
+LicenseUrl: https://github.com/ggml-org/llama.cpp/blob/HEAD/LICENSE
+ShortDescription: LLM inference in C/C++
+Tags:
+- ggml
+- llama
+ReleaseNotes: |-
+  model: add Kimi-K3 text model (#26185)
+  - model: add Kimi-K3 text model
+  Hybrid KDA (linear) + MLA (full) attention as in Kimi-Linear-48B, plus five
+  things that architecture does not have:
+  1. cross-layer residual attention (attn_res_block_size)
+  2. latent MoE (routed experts run at n_expert_latent)
+  3. situ activation (replaces SwiGLU everywhere)
+  4. MLA output gate (sigmoid gate before o_proj)
+  5. full-rank KDA gate (single ssm_g instead of ssm_g_a/ssm_g_b)
+  K3's text_config reports KimiLinearForCausalLM - the older 48B architecture -
+  so get_model_architecture routes on the top-level name instead.
+  The KDA decay gate has two forms, selected by linear_attn_config's
+  gate_lower_bound. It is not a clamp: when set it swaps the activation entirely
+  (fla/ops/kda/gate.py), from -exp(A_log)softplus(x) to
+  lower_boundsigmoid(exp(A_log)*x). K3 sets it to -5.0; kimi-linear leaves it
+  unset, so that path is unchanged.
+  Cross-layer residuals reuse ggml_dsv4_hc_pre for the weighted sum. That op is
+  CPU + CUDA only, so Metal/Vulkan will fall back per-node until those kernels
+  exist.
+  The routed experts ship as compressed-tensors "mxfp4-pack-quantized". That is
+  bit-compatible with ggml's MXFP4 - same E2M1 code assignment, same E8M0 scale
+  byte, only the nibble positions within a block differ - so they are repacked
+  rather than dequantized, losslessly and without a ~5.5 TB bf16 round-trip.
+  The repack is built lazily because gguf_writer holds every added tensor until
+  the final write. DeepSeek-V4 was already doing the identical bit-shuffling, so
+  it now shares the helper.
+  Verified against Moonshot's own code path (transformers + fla's Triton KDA
+  kernels) on a tiny model exercising every K3-specific feature. Final-position
+  logits vs the fp32 reference: 6.7e-05 rel / corr 1.00000000 for both the
+  chunked and the recurrent delta-net path. MXFP4 blocks dequantize to the source
+  weights with 0.0e+00 error.
+  Assisted-By: Claude Opus 5 (1M context) noreply@anthropic.com
+  - model: fix ty errors in the Kimi-K3 converter
+  - _res_parts buffers (kind, tensor) pairs, not bare tensors
+  - get_tensors must return an Iterator, matching ModelBase
+  - LazyBase's func takes one argument, so pass the expert loaders through
+    args instead of the closure
+  - borrowing KimiLinearModel.set_vocab from an unrelated TextModel is
+    deliberate and safe, but not expressible in the signature
+  No behaviour change: the MXFP4 repack still dequantizes to the source weights
+  with 0.0e+00 error and end-to-end logits are unchanged (8.386e-03 rel,
+  corr 0.99996630).
+  Assisted-By: Claude Opus 5 (1M context) noreply@anthropic.com
+  - Update conversion/kimi_k3.py
+  Co-authored-by: Boris Dvorkin b_dvorkin@niuitmo.ru
+  - Increase LLAMA_MAX_EXPERTS from 512 to 1024
+  - tests : support for Kimi K3 in archs test
+  - chat : add Kimi K3 chat format (reasoning, content, typed tool calls)
+  K3's assistant output is an XTML-ish tagged format built by the template's
+  open_tag/close_tag macros. Two properties break generic parsing:
+  1. The generation prompt ends with open_tag('think'), so the completion
+     starts inside the think section with no opening marker in the output
+     (thinking_forced_open).
+  2. Only <|open|>/<|close|>/<|sep|>/<|end_of_msg|> are special tokens; tag
+     names ("think", "response", "message") are ordinary text tokens.
+  Adds common_chat_params_init_kimi_k3 (PEG_NATIVE) with detection on the
+  marker trio, reasoning extraction, response unwrapping, and tool-call
+  parsing of the tools/call/argument tag structure with argument types
+  taken from the tool schema. Includes the K3 chat template fixture and 9
+  test-chat cases derived from real generations of the full 2.8T model.
+  Verified end-to-end against Kimi-K3-Q2_K (GrEarl/Kimi-K3-GGUF) on 8x B200:
+  content, reasoning_content, streaming deltas, and tool_calls all correct;
+  finish_reason stop/tool_calls as appropriate.
+  Co-Authored-By: Claude Fable 5 noreply@anthropic.com
+  - chat : add message_delimiters for Kimi K3
+  Per-role message-start markers for token-level span splitting. User and
+  assistant messages carry only the role attribute, so their full opener
+  (through <|sep|>) is used; system and tool messages continue with more
+  attributes (type=/tool=/index=), so those delimiters stop after the
+  role's closing quote. Verified against the K3 tiktoken vocabulary that
+  the closing quote is always a standalone token across all attribute
+  variants, so the token-level prefix match stays exact.
+  Co-Authored-By: Claude Fable 5 noreply@anthropic.com
+  - fix: apply nits from @ngxson and text fixes from @danielhanchen
+  - tests : added missing hyperparameters and tensors for Kimi K3 in test-llama-archs
+  - chore : move overly verbose header file comments to Kimi K3 source file
+  - tests : re-enabled KIMI_K3 in test-llama-archs for WebGPU backend
+  - model-saver : emit kda_gate_lower_bound for Kimi K3
+  Quick fix. The Kimi K3 loader reads kda_gate_lower_bound and gates a graph branch on it (it scales the KDA gate when the bound is above -INFINITY), but the model
+  saver never wrote the key, so a save->load roundtrip silently dropped it back to the -INFINITY default and changed the model's output. The real K3 config sets gate_lower_bound = -5.0.
+  I propose to emit it from the saver, and set it to -5.0 in the test-llama-archs K3 case so the roundtrip check exercises it (the roundtrip fails without the saver line).
+  - Refactor conditional for model architecture check
+  - tests : re-enabled (again) KIMI_K3 and MINIMAX_M3 in test-llama-archs for WebGPU backend
+  - fix code comments
+  - add template on conversion
+  - move repack_mxfp4_blocks to model base
+  - nits
+  - add_value_length
+  - optimize res_stack construction
+  - nits
+  Co-authored-by: Boris Dvorkin b_dvorkin@niuitmo.ru
+  Co-authored-by: Stanisław Szymczyk sszymczy@gmail.com
+  Co-authored-by: Deepankar Singh singh.deepankar39@gmail.com
+  Co-authored-by: Claude Fable 5 noreply@anthropic.com
+  Co-authored-by: Caleb DeLeeuw caleb.deleeuw@gmail.com
+  Co-authored-by: Xuan Son Nguyen son@huggingface.co
+  Website:
+  - https://llama.app
+  macOS/iOS:
+  - macOS Apple Silicon (arm64)
+  - macOS Apple Silicon (arm64, KleidiAI enabled) DISABLED
+  - macOS Intel (x64)
+  - iOS XCFramework
+  Linux:
+  - Ubuntu x64 (CPU)
+  - Ubuntu arm64 (CPU)
+  - Ubuntu s390x (CPU)
+  - Ubuntu x64 (Vulkan)
+  - Ubuntu arm64 (Vulkan)
+  - Ubuntu x64 (ROCm 7.14)DISABLED
+  - Ubuntu x64 (OpenVINO)
+  - Ubuntu x64 (SYCL FP32)
+  - Ubuntu x64 (SYCL FP16)
+  Android:
+  - Android arm64 (CPU)
+  Windows:
+  - Windows x64 (CPU)
+  - Windows arm64 (CPU)
+  - Windows arm64 (OpenCL Adreno)
+  - Windows x64 (CUDA 12) - CUDA 12.4 DLLs
+  - Windows x64 (CUDA 13) - CUDA 13.3 DLLs
+  - Windows arm64 (CUDA 13) (preview) - CUDA 13.4 DLLs
+  - Windows x64 (Vulkan)
+  - Windows x64 (OpenVINO)
+  - Windows x64 (SYCL)
+  - Windows x64 (ROCm 7.14)
+  openEuler:
+  - DISABLED
+  - openEuler x86 (310p)
+  - openEuler x86 (910b, ACL Graph)
+  - openEuler aarch64 (310p)
+  - openEuler aarch64 (910b, ACL Graph)
+  UI:
+  - UI
+ReleaseNotesUrl: https://github.com/ggml-org/llama.cpp/releases/tag/b10448
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/ggml-org/llama.cpp/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

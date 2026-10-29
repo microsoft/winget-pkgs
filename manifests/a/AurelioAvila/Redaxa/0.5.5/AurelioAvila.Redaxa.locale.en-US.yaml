@@ -1,0 +1,37 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AurelioAvila.Redaxa
+PackageVersion: 0.5.5
+PackageLocale: en-US
+Publisher: Aurelio Avila
+PublisherUrl: https://github.com/AurelioAvila
+PublisherSupportUrl: https://github.com/AurelioAvila/redaxa/issues
+PrivacyUrl: https://redaxa.getcertsprint.com/privacy.html
+PackageName: Redaxa
+PackageUrl: https://github.com/AurelioAvila/redaxa
+License: Proprietary
+LicenseUrl: https://github.com/AurelioAvila/redaxa/blob/HEAD/LICENSE
+ShortDescription: Review sensitive data in AI prompts and likely credential exposures in public GitHub repositories.
+Description: Redaxa checks prompts for sensitive data and offers redaction before sharing with AI tools. On Windows, Pro and Business include focused local reviews of public GitHub repositories. Redaxa prioritizes likely API keys, tokens and credentials, identifies probable providers, groups repeated matches, separates examples from actionable findings and provides masked, redacted reports. Extended history and dependency scanning remains optional. Findings are possible exposures, not proof that a credential is valid or a complete vulnerability audit.
+Tags:
+- ai
+- credentials
+- privacy
+- redaction
+- security
+ReleaseNotes: |-
+  Redaxa 0.5.5 brings the newer detection to the Windows app's local repository check: secrets assigned by name in .env and configuration files, passwords inside connection URLs and three more provider keys, with fewer false alarms in code. It also keeps you signed in when the computer's clock is wrong.
+  - Secrets assigned by name in .env files and configuration (DB_PASSWORD=…, JWT_SECRET: …, "apiKey": "…") are found and shown as "Secret in a configuration value". Only literal values with letters and digits count; type names, environment references and code expressions are left alone.
+  - Passwords inside connection URLs such as postgres://app:…@db.internal/main are found and shown as "Password in a URL". Only the password is masked, so the scheme, user and host stay readable. Neither kind is tested for validity, so the repository check lists them for review at high priority, or medium in example files.
+  - Stripe webhook signing secrets, SendGrid API keys and Slack incoming webhook URLs are recognised with their service. AWS secret access keys are also found under the names the AWS CLI and SDKs print (SecretAccessKey, secretAccessKey, aws_secret_key).
+  - "The password is …" is caught as well as "password: …", and an IBAN followed by its BIC or another word in capitals is no longer missed.
+  - Fewer false alarms: password: string, process.env.API_KEY, git@github.com remotes and 13-digit millisecond timestamps that happen to pass the card checksum are no longer reported. A password-like value in a code comment is described as "Usually a placeholder".
+  - Sign-in: when the Redaxa service refuses a session this computer's clock still considers valid (a clock set back after sign-in, or a session ended elsewhere), the app asks the service once for a refreshed session instead of signing you out.
+  - Text fields show a single focus ring instead of two concentric lines.
+  - Detection relies on patterns and checksums, so it can miss sensitive information; review results before relying on them.
+  Windows installers require verified Aurelio Avila publisher signatures, trusted timestamps and compatible updater signatures before publication.
+ReleaseNotesUrl: https://github.com/AurelioAvila/redaxa/releases/tag/v0.5.5
+PurchaseUrl: https://redaxa.getcertsprint.com/#pricing
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,116 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.8.4
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Breaking Changes
+  - AuthBrokerClient.notifyUsageStale and UsageLedgerStore.invalidateUsageCache (including RemoteAuthCredentialStore.invalidateUsageCache) now take an optional leading provider argument: the signature is (provider?: string, signal?: AbortSignal) instead of (signal?: AbortSignal) (#14761 by @will-bogusz)
+  Added
+  - Auth gateway route option excludeProviders leaves those providers' accounts out of /v1/usage and /v1/credentials/check (#14755 by @will-bogusz)
+  Fixed
+  - Fixed a single-provider usage refresh from an auth broker client (omp usage invalidate --provider, Codex auto-redeem, a saved-reset redeem) wiping the broker's cached usage for every provider, so other accounts showed no usage on every client until their next successful probe (#14761 by @will-bogusz)
+  - Fixed Anthropic sessions missing the prompt cache a second time after the API dropped thinking blocks from a changed conversation (#14748 by @will-bogusz)
+  - Fixed Cursor logins never renewing: every refresh was rejected with "Invalid User API Key", so logins lapsed about 60 days after sign-in; a session Cursor has ended is now disabled with a re-login hint (#14753 by @will-bogusz)
+  - Fixed the auth broker logging caller-supplied X-Forwarded-For / X-Real-IP values and unknown request paths; peers come from the socket unless trustProxyHeaders is set (#14762 by @will-bogusz)
+  - Fixed false thinking-loop detections on Gemini, DeepSeek, and Grok when the model drafts or answers with repetitive code or markup (VRML, SVG, JSON); such output is no longer discarded and retried.
+  - Fixed Cursor provider leaking conversation checkpoints, blob stores and abort listeners after requests end (#14669 by @H4vC)
+  - Fixed session-affinity pins growing without bound in long-lived gateways (now capped at 256 sessions per provider) (#14672 by @H4vC)
+  - Fixed completed Cursor turns failing with "Cursor stream ended before turnEnded" when the connection closed after the answer had fully arrived (#14851 by @kyle-elliott-asymptote).
+  - Fixed Cursor provider errors that Cursor marks as not retryable being retried until the retry budget ran out (#14851 by @kyle-elliott-asymptote).
+  @oh-my-pi/pi-catalog
+  Fixed
+  - Fixed Claude Haiku 5.5 opening at its full 1M window on Amazon Bedrock, Google Vertex, and other non-Anthropic hosts: every priced host now carries the 5x pricing band above 100K input tokens, so the window stays at 100K unless extended context is on (#14903 by @H4vC).
+  @oh-my-pi/pi-coding-agent
+  Changed
+  - Agent Hub keeps existing agents in place while open; new agents appear first in the flat roster or within their tree sibling group (#13066 by @kmccleary3301)
+  Fixed
+  - Fixed omp auth-broker serve logging every client as unknown (or as whatever a caller put in X-Forwarded-For); it now logs the socket address, with --trust-proxy-headers for brokers behind a reverse proxy (#14762 by @will-bogusz)
+  - Fixed relative file links in Tern assistant replies opening against the folder omp was started in after /wt or /move; they now open the file in the session's working directory (#14879 by @H4vC)
+  - Fixed the BTW history, git shortcuts, and autoresearch sheets in Tern having no Close button, and the plan review sheet having no Cancel button (#14894 by @H4vC)
+  - Fixed the agent transcript viewer and /annotate review in Tern having no clickable way out; both now show a clickable esc at the top right (#14894 by @H4vC)
+  - Fixed the /move folder picker in Tern having only key hints; Accept (Tab), Cancel (Esc) and Confirm (Enter) are now clickable buttons (#14894 by @H4vC)
+  - Fixed omp usage listing a second "7 days … not reported" row for a Codex account that reports only a weekly window, and misaligning its rows against accounts that report a 5-hour window too (#14760 by @will-bogusz)
+  - Fixed omp auth-gateway serve showing the usage and credential health of providers listed in disabledProviders, account emails included, on /v1/usage and /v1/credentials/check (#14755 by @will-bogusz)
+  - Fixed omp usage --history on auth-broker clients always reporting no recorded history; it now reads the broker host's history, as omp usage clients already does (#14758 by @will-bogusz)
+  - Fixed omp usage --history and omp usage clients dying with a stack dump when the auth broker is unreachable or lacks the endpoint; they now print a one-line error and exit nonzero
+  - Fixed omp usage --history showing two Codex accounts that share an email under the same name; they now carry the same qualifier as omp usage (#14767 by @will-bogusz)
+  - Fixed --model, /model and /switch with a bare id that several logged-in providers carry ignoring modelProviderOrder and recent use; they now pick the same provider as modelRoles, and omp bench, compress, cleanse and the stdio auth gateway follow the same ranking (#14517 by @will-bogusz)
+  - Fixed omp usage --provider <id> blaming a missing usage endpoint when no credentials are stored for that provider, and omp usage invalidate --provider <id> reporting success for it; both now list the providers that have credentials (#14763 by @will-bogusz)
+  - Fixed omp usage labelling an exhausted account "inside reserve" on its account-policy line; it now says "exhausted" (#14764 by @will-bogusz)
+  - Fixed /new keeping plan mode (and its plan-role model) or goal mode active in the new session (#14653)
+  - Fixed parallel first bash calls each spawning an rc-sourcing shell (#14680 by @H4vC)
+  - Fixed the todo list's auto-clear never firing while subagents were streaming progress (#14692 by @H4vC)
+  - Fixed memory growth while ACP client-terminal commands run (#14680 by @H4vC)
+  - Fixed ephemeral side-channel replies (idle recap, completion probe, runEphemeralTurn) truncating in quadratic time (#14695 by @H4vC)
+  - Sped up omp compress by tokenizing each draft once per round (#14702 by @H4vC)
+  - Fixed the agent slowing down while streaming long eval cells (#14704 by @H4vC)
+  - Fixed quadratic slowdown reading large Python kernel output (big reprs, base64 images) (#14704 by @H4vC)
+  - Sped up TUI repaints of live stream and /record rows (#14705 by @H4vC)
+  - Fixed quadratic slowdown in omp cleanse on large tsc/clippy/golangci output (#14706 by @H4vC)
+  - Fixed documents served as application/octet-stream being downloaded twice (#14708 by @H4vC)
+  - Fixed collab TUI guests rebuilding the transcript per token (#14715 by @H4vC)
+  @oh-my-pi/pi-natives
+  Fixed
+  - Fixed long output from a failing jq command hiding its error message: the output minimizer now shortens jq output only when the command succeeded (#14657 by @will-bogusz)
+  @oh-my-pi/pi-tui
+  Changed
+  - Agent Hub keeps existing agents in place while open; new agents appear first in the flat roster or within their tree sibling group (#13066 by @kmccleary3301)
+  Fixed
+  - Fixed relative file links in Tern assistant replies opening against the folder omp was started in; they now open the file in the session's working directory (#14879 by @H4vC)
+  - Fixed Tern modals with no clickable exit: BTW history, git shortcuts and autoresearch gain a Close button, plan review a Cancel button, the agent transcript viewer and /annotate review a top-right esc that runs Esc, and the /move dialog Accept, Cancel and Confirm buttons; new escCloseButton() builds the esc keycap button (#14894 by @H4vC)
+  What's Changed
+  - fix(tui): resolve relative links in Tern against the session's working directory by @H4vC in https://github.com/can1357/oh-my-pi/pull/14879
+  - fix(ai): complete Cursor turns cut after stepCompleted and honor isRetryable by @kyle-elliott-asymptote in https://github.com/can1357/oh-my-pi/pull/14851
+  - fix(coding-agent): show exhausted accounts as exhausted, not inside reserve, in omp usage by @will-bogusz in https://github.com/can1357/oh-my-pi/pull/14764
+  - fix(tui): add clickable exits to Tern modals that lacked them by @H4vC in https://github.com/can1357/oh-my-pi/pull/14894
+  - fix(tui): keep the transcript draft on esc click and follow the cancel binding in /move by @H4vC in https://github.com/can1357/oh-my-pi/pull/14895
+  - fix(coding-agent): say no credentials are stored when omp usage --provider names an unknown provider by @will-bogusz in https://github.com/can1357/oh-my-pi/pull/14763
+  - fix(cli): honor modelProviderOrder for a bare --model id shared by several providers by @will-bogusz in https://github.com/can1357/oh-my-pi/pull/14517
+  - fix(ai): log the auth broker's socket peer instead of forwarded headers by @will-bogusz in https://github.com/can1357/oh-my-pi/pull/14762
+  - fix(ai): renew Cursor logins instead of letting them expire by @will-bogusz in https://github.com/can1357/oh-my-pi/pull/14753
+  - fix(coding-agent): qualify same-email accounts in omp usage --history by @will-bogusz in https://github.com/can1357/oh-my-pi/pull/14767
+  - fix(ai): stop a second Anthropic cache miss after the API drops thinking blocks by @will-bogusz in https://github.com/can1357/oh-my-pi/pull/14748
+  - fix(coding-agent): read omp usage --history from the auth broker by @will-bogusz in https://github.com/can1357/oh-my-pi/pull/14758
+  - fix(ai): keep a single-provider usage refresh from wiping the broker's other providers by @will-bogusz in https://github.com/can1357/oh-my-pi/pull/14761
+  - fix(ai,coding-agent): keep disabled providers out of auth-gateway usage and credential checks by @will-bogusz in https://github.com/can1357/oh-my-pi/pull/14755
+  - fix(coding-agent): align omp usage rows by window across accounts by @will-bogusz in https://github.com/can1357/oh-my-pi/pull/14760
+  - fix(shell): keep a failing jq's error visible past the minimizer by @will-bogusz in https://github.com/can1357/oh-my-pi/pull/14657
+  - fix(catalog): band Claude Haiku 5.5 at 100K input tokens on every priced host by @H4vC in https://github.com/can1357/oh-my-pi/pull/14903
+  New Contributors
+  - @kyle-elliott-asymptote made their first contribution in https://github.com/can1357/oh-my-pi/pull/14851
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.8.3...v18.8.4
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.8.4
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

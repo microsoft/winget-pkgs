@@ -1,0 +1,95 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ESEngine.ReasonixCLI
+PackageVersion: 1.36.0
+PackageLocale: en-US
+Publisher: reasonix
+PublisherUrl: https://esengine.cn/
+PublisherSupportUrl: https://github.com/esengine/DeepSeek-Reasonix/issues
+PackageName: Reasonix CLI
+PackageUrl: https://esengine.github.io/DeepSeek-Reasonix/
+License: MIT
+LicenseUrl: https://github.com/esengine/DeepSeek-Reasonix/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Reasonix Contributors
+ShortDescription: A DeepSeek-native coding agent, for your terminal.
+Description: Reasonix talks straight to api.deepseek.com. The loop is append-only, engineered around DeepSeek's byte-stable prefix cache — long sessions hold 90%+ cache hit and input-token cost collapses to ~1/5. Terminal-first, leave it running.
+Moniker: reasonix
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- deepseek
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  此版本为桌面端新增粘性上下文文件固定，为桌面端与 CLI 新增协作式会话接管，并强制完成长文件读取。同时带来大量 CLI 与桌面端的稳定性与性能修复。
+  发布渠道：稳定版 · v1.36.0
+  English → · 网页版完整更新日志 →
+  使用攻略
+  - 会话所有权 — 了解协作式会话接管与取回如何在桌面端与 CLI 之间工作。
+  - 会话所有权（中文） — 协作式会话接管与取回在桌面端和 CLI 中工作方式的中文指南。
+  概览
+  Reasonix v1.36.0 — Reasonix 1.36：粘性上下文固定、会话接管与长文件读取强制
+  此版本为桌面端新增粘性上下文文件固定，为桌面端与 CLI 新增协作式会话接管，并强制完成长文件读取。同时带来大量 CLI 与桌面端的稳定性与性能修复。
+  发布日期：2026-09-02
+  Desktop 14 · CLI 16
+  桌面端更新
+  重点内容
+  - [Desktop] 粘性上下文文件固定 — 将会话中的工作区文件固定，使其在上下文压缩后仍可逐字保留。固定文件在下一次接受的轮次前以仅追加的用户角色修订形式传递，不会重写系统提示或使提示缓存失效。 (#9689)
+  - [Desktop · CLI] 协作式会话接管 — 通过协作式移交从另一个客户端接管会话。同一时间只有一个写入者拥有会话；另一方保持只读旁观状态，并可协作式取回所有权。 (#9692)
+  - [Desktop · CLI] 强制完成长文件读取 — 长 read_file 结果现在使用动态预算，并阻止变更、终结器和最终答案，直到所有不完整读取得到解决。这可以防止模型静默遗漏文件末尾附近的规则。 (#9708)
+  - [Desktop] 防止 Ask 提示循环 — 在回答 Ask 提示前从权威状态解析缺失的本地轮次 ID，并通过提示 ID 和控制器纪元隔离清理，使迟到的完成不会清除更新的提示。 (#9693)
+  新增
+  - [Desktop] 粘性上下文文件固定 — 将会话中的工作区文件固定，使其在上下文压缩后仍可逐字保留。 (#9689)
+  - [Desktop · CLI] 协作式会话接管 — 通过协作式移交从另一个客户端接管会话，并协作式取回所有权。 (#9692)
+  改进
+  - [Desktop · CLI] 强制完成长文件读取 — 长 read_file 结果现在使用动态预算，并阻止变更、终结器和最终答案，直到所有不完整读取得到解决。 (#9708)
+  - [Desktop · CLI] 语义完成校验 — 完成校验现在默认使用 enforce 模式，采用基于模型的语义检查而非关键词匹配，防止接受不完整的轮次。 (#9654)
+  - [Desktop · CLI] 停止空闲 CPU 修复循环 — 会话目录在严格验证后不再重放恢复转录，防止空闲 CPU 修复循环。 (#9697)
+  - [Desktop · CLI] 斜杠参数补全缓存 — 斜杠参数补全数据现在在按键间缓存，消除补全弹窗打开时的输入卡顿。 (#9636)
+  - [Desktop] Worktree 合并回主分支 — 隔离工作树现在支持一键差异对比、冲突预检与合并回主分支，并具备失败原子安全性。 (#9650)
+  修复
+  - [Desktop] 防止 Ask 提示循环 — 在回答 Ask 提示前从权威状态解析缺失的本地轮次 ID，并通过提示 ID 和控制器纪元隔离清理。 (#9693)
+  - [Desktop] 修复普通点击触发会话回跳 — 手动滚动后，普通点击转录内容不再导致视口跳动。 (#9721)
+  - [Desktop] 修复 Ask 会话首次切换失败 — 在主题激活票据与终端就绪之间到达的 Ask 提示现在会被保留。 (#9724)
+  CLI 端更新
+  重点内容
+  - [Desktop · CLI] 协作式会话接管 — 通过协作式移交从另一个客户端接管会话。同一时间只有一个写入者拥有会话；另一方保持只读旁观状态，并可协作式取回所有权。 (#9692)
+  - [Desktop · CLI] 强制完成长文件读取 — 长 read_file 结果现在使用动态预算，并阻止变更、终结器和最终答案，直到所有不完整读取得到解决。这可以防止模型静默遗漏文件末尾附近的规则。 (#9708)
+  - [CLI] watchdog 优雅退出与时钟跳变容忍 — 交互式 TUI 不再在可恢复的停滞时硬杀进程，并容忍挂起/恢复后的时钟跳变，防止 Windows 上出现错误的“程序被杀死”错误。 (#9639)
+  新增
+  - [Desktop · CLI] 协作式会话接管 — 通过协作式移交从另一个客户端接管会话，并协作式取回所有权。 (#9692)
+  改进
+  - [Desktop · CLI] 强制完成长文件读取 — 长 read_file 结果现在使用动态预算，并阻止变更、终结器和最终答案，直到所有不完整读取得到解决。 (#9708)
+  - [Desktop · CLI] 语义完成校验 — 完成校验现在默认使用 enforce 模式，采用基于模型的语义检查而非关键词匹配，防止接受不完整的轮次。 (#9654)
+  - [Desktop · CLI] 停止空闲 CPU 修复循环 — 会话目录在严格验证后不再重放恢复转录，防止空闲 CPU 修复循环。 (#9697)
+  - [Desktop · CLI] 斜杠参数补全缓存 — 斜杠参数补全数据现在在按键间缓存，消除补全弹窗打开时的输入卡顿。 (#9636)
+  修复
+  - [CLI] watchdog 优雅退出与时钟跳变容忍 — 交互式 TUI 不再在可恢复的停滞时硬杀进程，并容忍挂起/恢复后的时钟跳变。 (#9639)
+  - [CLI] 剪贴板图片粘贴协商 — 在 Wayland 和 X11 上，图片粘贴现在协商支持的 MIME 类型，并在失败时回退到文本，而不是静默失败。 (#9635)
+  - [CLI] SSH 会话强制同步输出 — TUI 现在在 SSH 会话中强制同步输出，消除远程会话中输入时的闪烁。 (#9641)
+  - [CLI] SSH 会话默认原生鼠标 — SSH 会话现在默认启用原生鼠标选择，使用户可以选择和复制终端输出。 (#9634)
+  - [CLI] 控制器派发轮次时进入运行态 — 当控制器自动派发排队的后续任务时，TUI 现在进入运行状态，防止输入竞争和静默丢弃。 (#9638)
+  - [CLI] 应用内选区复制剥离装饰竖线 — 复制渲染的 TUI 输出不再包含应用拥有的装饰竖线，同时保留字面字形和缩进。 (#9640)
+  - [CLI] 让 /preset 在 TUI 完成列表、帮助与状态栏可见 — /preset 命令现在出现在斜杠补全、帮助和状态栏中，并提供 standard 和 delivery 的参数补全。 (#9633)
+  - [CLI] 未知操作时列出有效操作 — 当拒绝未知操作时，hook、session 和 task 现在会列出有效操作并回显被拒绝的名称。 (#9700)
+  升级提醒
+  本版本无需手动迁移。
+  风险提示
+  当前没有需要额外操作的已知风险。
+  致谢
+  感谢本版本的贡献者：@SivanCola、@mchenziyi、@XTLine、@dadgrand
+  下载与安装
+  - 官网按平台下载
+  - 查看完整差异
+ReleaseNotesUrl: https://github.com/esengine/DeepSeek-Reasonix/releases/tag/v1.36.0
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://esengine.github.io/DeepSeek-Reasonix/index.html#faq
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

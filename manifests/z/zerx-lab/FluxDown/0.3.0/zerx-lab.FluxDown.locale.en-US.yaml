@@ -1,0 +1,49 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: zerx-lab.FluxDown
+PackageVersion: 0.3.0
+PackageLocale: en-US
+Publisher: FluxDown
+PublisherUrl: https://github.com/zerx-lab
+PublisherSupportUrl: https://github.com/zerx-lab/FluxDown/issues
+Author: zerx-lab
+PackageName: FluxDown
+PackageUrl: https://github.com/zerx-lab/FluxDown
+License: AGPL-3.0
+LicenseUrl: https://github.com/zerx-lab/FluxDown/blob/HEAD/LICENSE
+ShortDescription: Rust 驱动的多协议下载管理器，支持 HTTP/FTP/BitTorrent 磁力链接及 HLS/DASH 流媒体，智能多线程加速与浏览器无缝集成。精美界面，极致性能，永久免费，零广告。
+ReleaseNotes: |-
+  0.3.0 - 2026-07-31
+  🚀 新功能
+  - 新建下载与快速下载支持按站点保存 HTTP Basic 认证凭据：设置页可搜索、新增、编辑与删除已保存的站点凭据；同一站点的后续任务会自动回填用户名密码
+  - 新增「无人值守」下载模式：HLS/DASH 等需要用户二次确认的下载变体会自动选取默认项、不再弹窗打断，并可通过子开关控制是否交由其他客户端接管
+  - 新增「文件已存在时」设置，支持在下载时选择保留原名或覆盖旧文件
+  - 支持将 FluxDown 注册为 magnet: 链接的系统默认处理程序（设置页开关控制，可随时关闭）；若已有其他客户端占用该关联则不会自动抢占，卸载时会清理注册信息
+  - BT 任务：暂停不再销毁做种会话，恢复暂停的种子可秒级生效，无需重建会话与重新执行完整校验；Windows 上的分段占位文件改为稀疏写入，减少磁盘预留和写入放大；初次校验阶段的下载详情统一展示「校验文件中」及实际校验进度
+  - 自动代理路由的判定结果会持久化保存，重启应用后可直接沿用此前验证过的最优代理，无需重新采样；连接类失败会及时清除已失效的历史判定
+  - 下载详情的日志 Tab 新增代理链路切换的记录事件，便于追溯下载过程中使用过哪些代理
+  🐛 问题修复
+  - 修复恢复下载时如果连接数被收敛为 1，会丢弃此前已下载的多段进度并从头重新下载的问题
+  - 修复部分服务器返回非标准 Content-Encoding: none 响应头时，下载被永久拒绝且无法通过重试恢复的问题
+  - 修复登录态过期后，多个并发请求可能相互干扰导致误判会话失效、清空本地登录凭据的问题
+  - 修复登录对话框中「发送验证码」按钮不会随账号输入内容更新的问题
+  - 修复新创建的任务在按队列筛选任务列表时可能不显示的问题
+  0.3.0 - 2026-07-31
+  🚀 Features
+  - New downloads and quick downloads now support per-site HTTP Basic auth credentials: manage (search, add, edit, delete) saved site credentials from Settings, and subsequent tasks for the same site auto-fill the saved username/password
+  - Added an "unattended" download mode: variants that normally require a manual choice (HLS/DASH, etc.) now pick a sensible default automatically instead of prompting, with a sub-toggle to control whether such links are handed off to other clients
+  - Added a "when file exists" setting to choose between keeping the original name or overwriting the existing file on disk
+  - FluxDown can now register itself as the system default handler for magnet: links (toggle in Settings, off anytime); it won't take over an association already claimed by another client, and the registration is cleaned up on uninstall
+  - BitTorrent: pausing a task no longer tears down its seeding session, so resuming a paused torrent takes effect instantly without rebuilding the session or re-running a full fastresume check; on Windows, staged segment files now use sparse writes to cut disk pre-allocation and write amplification; the initial verification phase now shows a "Verifying files" status with real progress across task details
+  - Auto proxy routing decisions are now persisted across restarts, so a previously proven best proxy route is reused immediately instead of being re-sampled; connection-level failures promptly invalidate stale route decisions
+  - The Log tab in task details now records proxy route switch events, making it easier to trace which proxy was used during a download
+  🐛 Bug Fixes
+  - Fixed a bug where resuming a download whose connection count collapsed to 1 would discard already-downloaded multi-segment progress and restart from scratch
+  - Fixed downloads being permanently rejected (and unrecoverable via retry) when a server returned the non-standard Content-Encoding: none header
+  - Fixed a race where concurrent requests after session expiry could misinterpret each other's failures and incorrectly clear locally stored login credentials
+  - Fixed the "send verification code" button on the login dialog not updating when the account field changed
+  - Fixed newly created tasks sometimes not appearing when the task list was filtered by queue
+ReleaseNotesUrl: https://github.com/zerx-lab/FluxDown/releases/tag/v0.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

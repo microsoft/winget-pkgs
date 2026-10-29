@@ -1,0 +1,63 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.8.0
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  v0.8.0 聚焦 Agent 工作流、PDF 阅读器界面、CLI 效率与同步体验的打磨。新增 ACP Terminal 能力、PDF 悬浮图表/参考文献面板、同步范围控制，并优化了文件树默认展开、Agent 链接跳转、Onboarding 等细节交互。
+  新功能
+  - ACP Terminal 终端能力：Agent 现在可以通过 ACP terminal 能力执行本地终端命令；针对 Kimi 等未原生暴露 terminal 的 Agent 补充了路由与权限适配说明。（#365 by @Phil-Fan）
+  - PDF 悬浮图表面板：PDF 阅读器新增独立的浮动 Figures 面板，可在页面外查看论文图表，不再占用右侧边栏空间。（461918cd by @Phil-Fan）
+  - PDF 悬浮参考文献面板：参考文献面板同样改为浮动形式，方便在阅读时随时查看引用列表。（3f1888c1 by @Phil-Fan）
+  - 同步范围控制：新增同步作用域设置，可跳过论文附件等大体积资源、仅同步 metadata；设置面板同步展示连接状态、提供商指引与连接入口。（#360 by @qychen2001, @Phil-Fan）
+  - Agent 身份在全局共享：当前选中的 Agent 身份现在通过 chrome store 在应用内部共享，标题栏右侧的切换按钮也替换为当前 Agent 的 logo。（67eb212d by @Phil-Fan）
+  - CLI 阅读标注：CLI 支持从文本引用写入高亮、批注与翻译标注，并可通过 PDFium 文本引擎将引用定位到具体页面区域。（feb22dc9 by @Phil-Fan）
+  - 缺失 PDF 标记与重下载：论文库会标记没有本地 PDF 的论文，并提供重新下载入口。（72c21749 by @qychen2001）
+  改进
+  - 文件树默认展开：打开 Vault 时仅展开 papers/ 本身，其下的一级组织子文件夹默认保持折叠，减少初始视觉噪音。（#357 by @byy-yby）
+  - Agent 链接直接跳转：移除 Agent 消息中链接点击的安全弹窗，正文与思维链中的链接直接打开系统浏览器，避免 Tauri 重复打开窗口。（#356 by @byy-yby）
+  - CLI 输出瘦身：paper list --json 默认仅输出 id/path/title，体积降至原来的约 3%；JSON 默认紧凑单行输出，并新增 --pretty/--fields/--full 选项，显著降低 Agent token 消耗。（#367 by @Phil-Fan）
+  - PDF 批注与侧边栏重构：批注评论改为固定在页面外侧的持久 rail 中，右侧边栏不再包含 References/Figures/Annotations 标签页，让阅读区域更专注。（e2f848c6 by @Phil-Fan）
+  - Agent 历史标题自动补全：对于不返回会话标题的 ACP Agent，自动从首条用户消息推导标题，让历史抽屉更可读。（#359 by @Phil-Fan）
+  - Onboarding 与 Agent UI 细节：新手引导页显示 Agent 安装进度并去除滚动条；Agent Composer 的推理强度下拉可正常点击；聊天复制按钮新增复制成功反馈态。（449bbf2a by @Phil-Fan）
+  - 论文信息面板精简：统一资源链接宽度并简化操作按钮，使侧边栏论文信息更整洁。（c706da95 by @Phil-Fan）
+  - 标题栏布局菜单移除：移除标题栏中的布局菜单，简化顶部操作栏。（32790949 by @Phil-Fan）
+  - ACL Anthology PDF 导入：魔棒导入 ACL Anthology 论文时自动从 landing page 推导 PDF URL，修复该来源无法下载 PDF 的问题。（#363 by @Phil-Fan）
+  - 移除引用图谱：移除使用率低且依赖较重的引用图谱功能及相关库，简化安装包体积。（433a9090 by @Phil-Fan）
+  修复
+  - 阿里云 OSS 同步失败：对不支持 If-Match/If-None-Match 条件写的后端（如阿里云 OSS）自动降级为普通 PUT，并在设置面板提示非原子写入。（#362 by @qychen2001）
+  - PDF 右侧边栏控件显示：修复 PDF 页面右侧控件在不同宽度下被截断或缩放的问题，保持固定尺寸并始终可见。（ee71c738 by @Phil-Fan）
+  - Source 外部链接跳转：外部 source 链接统一使用系统浏览器打开，避免打开空的 in-app webview；纯 action source 渲染为按钮而非链接。（f5e1af7b by @Phil-Fan）
+  - 工作区空 dockview 分组：恢复布局时压缩空的 dockview 分组并同步成员关系，避免残留空面板。（8c40b385 by @Phil-Fan）
+  - Terminal 输出读取完整性：在读取捕获输出前等待 terminal 输出 reader 完成，避免 ACP terminal 命令输出不完整。（2a45cdd5 by @qychen2001）
+  - Sources 块解析：识别纯文本 Sources 块并去除 [blocked] 标签，提升 Agent source 引用解析的稳定性。（616527db by @Phil-Fan）
+  已解决问题
+  - 右侧栏标签页放入 PDF 页面内：将 References/Figures 面板从右侧边栏移入 PDF 阅读器区域，以浮动形式呈现。（#373 by @Phil-Fan）
+  - 调整默认 Agent 位置与顺序：当前 Agent 身份在标题栏和面板间保持一致，切换入口改为当前 Agent logo，使默认 Agent 展示更直观。（#372 by @Phil-Fan）
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.8.0
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+
+# InstallerType: portable means winget drops the exe under
+# %LOCALAPPDATA%\Microsoft\WinGet\Packages\ and puts an alias on PATH.
+# The alias comes from Commands, which is why the asset can keep its
+# platform-qualified file name and the user still just types "anyvm"
+# (same shape as jqlang.jq, whose asset is jq-windows-amd64.exe).
+# PortableCommandAlias does NOT apply here -- it is only read for a
+# portable nested inside a zip.
+
+PackageIdentifier: anyvm-org.anyvm
+PackageVersion: 0.5.7
+InstallerType: portable
+Commands:
+- anyvm
+ReleaseDate: 2026-08-07
+# anyvm drives QEMU but does not bundle it, so winget installs QEMU first --
+# verified end to end on winget v1.29: with QEMU absent it downloads and
+# installs SoftwareFreedomConservancy.QEMU, then anyvm. QEMU lands in
+# %ProgramFiles%\qemu and stays off PATH, which is exactly where anyvm's
+# find_qemu() looks. Same intent as the Homebrew formula's depends_on "qemu".
+Dependencies:
+  PackageDependencies:
+  - PackageIdentifier: SoftwareFreedomConservancy.QEMU
+Installers:
+- Architecture: x64
+  InstallerUrl: https://github.com/anyvm-org/anyvm/releases/download/v0.5.7/anyvm-windows-x64.exe
+  InstallerSha256: 8F25D3D6A7E3AE523F15FC4A6F096544CA7F384ECC15FCA97F21CFD7D617BE18
+ManifestType: installer
+ManifestVersion: 1.12.0

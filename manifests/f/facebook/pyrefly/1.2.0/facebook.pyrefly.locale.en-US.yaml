@@ -1,0 +1,108 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: facebook.pyrefly
+PackageVersion: 1.2.0
+PackageLocale: en-US
+Publisher: Meta
+PublisherUrl: https://github.com/facebook
+PublisherSupportUrl: https://github.com/facebook/pyrefly/issues
+PackageName: Pyrefly
+PackageUrl: https://github.com/facebook/pyrefly
+License: MIT
+LicenseUrl: https://github.com/facebook/pyrefly/blob/main/LICENSE
+Copyright: Copyright (c) Meta Platforms, Inc. and affiliates.
+CopyrightUrl: https://github.com/facebook/pyrefly/blob/main/LICENSE
+ShortDescription: A fast type checker and language server for Python
+Description: |
+  Pyrefly is a type checker and language server for Python, which provides lightning-fast type checking along with IDE features such as code navigation, semantic highlighting, and code completion. It is available as a command-line tool and an extension for popular IDEs and editors such as VSCode, Neovim, Zed, and more.
+Tags:
+- code-quality
+- contributions-welcome
+- good-first-issue
+- hacktoberfest
+- ide
+- language-server
+- lsp
+- python
+- rust
+- type-check
+- type-checker
+- typecheck
+- typechecker
+- types
+- typing
+ReleaseNotes: |-
+  *Release date: July 31, 2026*
+
+  Pyrefly v1.2.0 bundles **901 commits** from **59 contributors**.
+
+  ---
+
+  ## ✨ New & Improved
+
+  ### Type Checking
+
+  Attrs classes are now fully supported with comprehensive field synthesis, validation, and special-method generation. Pyrefly recognizes `@attr.s`, `@define`, `@frozen`, and their variants, handling field specifiers (`attr.ib()`, `field()`), converters, validators, defaults, and private-field aliasing. Converters are typed from their real input type rather than `Any`, including the `@<field>.converter` decorator, `attrs.converters.pipe`, `attrs.converters.default_if_none`, and generic converters like `copy.deepcopy`. See the new [attrs documentation](https://pyrefly.org/en/docs/attrs/) for details.
+  `functools.partial` is now type-checked instead of treated as opaque. Bound arguments are validated at construction and Pyrefly synthesizes a precise residual signature for the remaining parameters, so errors surface at both the `partial(...)` call and the later invocation. Generic functions, overloads, constructors, bound methods, and `**Unpack[TypedDict]` parameters are supported, and results expose `.func`, `.args`, and `.keywords`. Precise residual callable assignment is enabled by the `strict` and `all` presets or explicitly with `strict-partial-subtyping`.
+  Functions decorated with `functools.singledispatch` now type-check calls using the signature of the function you decorated, and registered implementations are checked against that function's first parameter. Generic `singledispatch` functions infer from call arguments instead of reporting `Unknown`.
+  Pyrefly can now warn when a function declared to return a concrete type returns `Any`, with separate diagnostics for explicit and inferred cases. Off by default, and migrated automatically from mypy's `warn_return_any`.
+  Pattern matching is substantially more precise: positional class patterns resolve attribute names from `__match_args__` at solve time, sequence element captures read from the narrowed subject so sibling constraints refine them, and `isinstance` on a facet filters the parent union to matching members. Fully covered class and sequence patterns now subtract their union member from later cases.
+  Unpacking a variadic tuple with a fixed prefix and suffix no longer smears those elements into the starred capture, so `a, *rest, b = t` where `t: tuple[int, *tuple[bool, ...], str]` types `rest` as `list[bool]`.
+  TypedDict classes now synthesize `__required_keys__` and `__optional_keys__`, so protocols requiring them (like those in langgraph) satisfy structural checks. `.get()` and `.pop()` with literal defaults preserve the field type.
+  Overload handling improved throughout: constrained TypeVar arguments expand during resolution, rejected overloads no longer leak argument errors into diagnostics, and exact callback-forwarding signatures resolve overloaded callbacks against forwarded arguments for helpers like `asyncio.to_thread`.
+  Enum `.value` on an enum type now infers as the union of member literal values instead of widening to the mixed-in data type.
+  Lambda parameters are contextually typed more thoroughly. Types are stored directly rather than resolved through inference variables, and `*args`/`**kwargs` resolve from callable hints to `tuple[...]` and `dict[str, ...]` inside the body while preserving element types in the signature.
+  All properties are now treated as data descriptors, and reflected binary-operation dunders are tried first for proper subclasses, fixing a class of incorrect attribute and operator results.
+  Cyclic type aliases reachable from an annotation are now detected instead of hanging, and class finality is taken into account when deciding whether a condition is redundant.
+  Continued basedpyright parity work: class instance truthiness is recognized, code under `if TYPE_CHECKING` is handled consistently, `typing_extensions.sentinel` is supported with relaxed naming restrictions, and `super(cls, cls)` is accepted.
+  `copy.replace` is now type-checked like dataclass replacement, and `isinstance(x, type)` preserves type arguments when narrowing unions.
+  Narrowing a receiver typed as `Self` to a subclass now preserves `Self`, eliminating false return errors in methods that return the narrowed receiver.
+
+  ### Library Support
+
+  Pydantic constructor synthesis now honors `populate_by_name` and built-in `alias_generator` functions, ignores `Field(init=False)` to match runtime, and treats `frozen` as a readonly field reason.
+  Django `ForeignKey` targets now resolve attribute expressions and string references such as `"app_label.Model"`, preserving the generated relation and `<field>_id` types.
+  Bare factory-boy factory calls now return the model type via `FactoryMetaClass`.
+  PEP 561 partial stub packages are now supported in imports. Pyrefly reads the `partial` marker from `py.typed` and merges the stubs with the runtime package, deferring to the runtime package for omitted modules while preserving `.pyi`-before-`.py` precedence for provided ones.
+  A configured `typeshed-path` now supplies stdlib stubs as well as third-party stubs, enabling complete custom-typeshed testing and overrides.
+
+  ### Language Server
+
+  Hover now resolves keyword arguments, renders callable protocols as their `__call__` signature, preserves overload docstrings at call sites, shows enum fields, wraps nested callable and `Concatenate[...]` signatures for readability, and covers `and`/`or` operators, augmented assignments, and union methods.
+  Auto-import completions respect `python.analysis.autoImportCompletions`, rank deprecated stdlib typing aliases below their modern equivalents, avoid duplicates for already-imported modules, and preserve import aliases correctly.
+  Rename now works on aliased imports and across files for keyword arguments, and renaming a Protocol class targets the class rather than `__init__`.
+  Go-to-definition now navigates directly to symbols in non-Python files such as `.thrift`, including nested attribute and enum access and intermediate components of multi-dotted imports.
+  Inlay hints debounce server-side (default 150ms), preventing width jitter while typing. `NewType` values now use their callable constructor signature instead of producing an invalid `type[N]` annotation.
+  Notebook support improved: hover and type lookups work past the first cell, and inlay hints, document symbols, references, and diagnostic grouping work in cells following markdown cells.
+  Document symbols fall back to flat `SymbolInformation` for clients such as Helix, semantic tokens cover `with ... as` and `except ... as` bindings, and cross-file diagnostics refresh on save in strict-spec clients such as Zed.
+  `#region`/`#endregion` markers create folding regions, and selection ranges now follow AST nesting from expression to statement to scope to document.
+  Baselined errors now appear as hints instead of errors, making it easier to distinguish new issues from known technical debt. Baselining also now applies correctly to unused-ignore diagnostics.
+  Match captures receive consistent semantic highlighting and preserve their declaration identity for go-to-definition.
+  `lspArguments` defaults to `["lsp"]` when empty, preventing startup failures in dev containers and remote environments.
+  The VSCode extension adds an "Infer Types for Current File" command to the command palette.
+
+  ### Error Reporting
+
+  New opt-in diagnostics include `implicit-bool`, `invalid-cast`, `invalid-abstract-method`, `unused-call-result`, `empty-body`, `missing-super-call`, `unsupported-dynamic-base`, `implicit-reexport`, `unknown-argument-type`, `unknown-attribute-type`, `unknown-variable-type`, `implicit-any-lambda`, `untyped-function-decorator`, `untyped-class-decorator`, `unused-type-ignore`, and `no-any-return`.
+  Dict literal element type errors now report on the exact line of the offending key or value, and missing-attribute errors gain a single-line header with the full type when more than one class lacks the attribute.
+  Error summary output is sorted by count then name for stable ordering, and `--output-format=min-text` flattens multi-line headers so each error stays on one line.
+  `--output-format=code-climate` produces GitLab-compatible Code Quality reports, while `full-text-with-github` combines readable diagnostics with GitHub workflow commands and is now used by the Pyrefly action.
+
+  ### Coverage
+
+  `pyrefly coverage` is no longer marked experimental.
+  A `[coverage]` config table with `includes` and `excludes` can target a file set different from the project globs, with `--project-excludes` and positional `FILES...` taking precedence over it.
+  `--public-only` keeps public re-exports from excluded files, so a symbol is only excluded when all of its public re-export locations are. Privately named classes and their members are excluded unless exported via `__all__`.
+  `--fail-under` always prints findings whether or not the threshold is met.
+  Coverage runs stream results as modules are solved, substantially reducing peak memory and improving runtime on large projects.
+
+  ### Configuration & CLI
+
+  `pyrefly infer --dry-run` previews inferred annotations without modifying files and exits unsuccessfully when changes would be made, making it suitable for CI.
+  `python-platform` accepts one platform, multiple platforms, or all platforms. Platform guards are folded only when every configured platform agrees.
+
+  _(release notes truncated to fit the 10000-character manifest limit -- see the full notes at the URL below)_
+ReleaseNotesUrl: https://github.com/facebook/pyrefly/releases/tag/1.2.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,131 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: aelassas.Servy
+PackageVersion: '9.6'
+PackageLocale: en-US
+Publisher: Akram El Assas
+PublisherUrl: https://github.com/aelassas
+PublisherSupportUrl: https://github.com/aelassas/servy/issues
+Author: Akram El Assas
+PackageName: Servy
+PackageUrl: https://servy-win.github.io/
+License: MIT
+LicenseUrl: https://github.com/aelassas/servy/blob/HEAD/LICENSE.txt
+Copyright: Copyright (c) 2026 Akram El Assas
+ShortDescription: Servy lets you run any app as a native Windows service with full control over the working directory, startup type, process priority, CPU affinity, logging, health checks, hooks, and parameters.
+Description: |-
+  Servy lets you run any app as a native Windows service with full control over the working directory, startup type, process priority, CPU affinity, logging, health checks, environment variables, dependencies, pre-launch and post-launch hooks, pre-stop and post-stop hooks, and parameters.
+
+  Servy is digitally signed with a code-signing certificate provided by the SignPath Foundation. The signature verifies the publisher, enables Windows to detect any modification of the released binaries and installers, and prevents SmartScreen warnings.
+
+  Servy offers a desktop app, a CLI, and a PowerShell module that let you create, configure, and manage Windows services interactively or through scripts and CI/CD pipelines. It also includes a Manager app for easily monitoring and managing all installed services in real time.
+
+  Features:
+  - Clean, simple UI
+  - Monitor and manage all installed services with Servy Manager
+  - Real-time CPU and RAM monitoring with live performance graphs for installed services
+  - Real-time service stdout and stderr output preview in Servy Console
+  - Service dependency tree visualization with status indicators
+  - CLI and PowerShell module for full scripting and automated deployments
+  - Run any executable as a Windows service
+  - Set service name, description, startup type, priority, CPU affinity, working directory, environment variables, and dependencies
+  - Environment variable expansion supported in parameters, process paths, and startup directories
+  - Run services as Local System, local or domain accounts, Active Directory accounts, or gMSAs
+  - Redirect stdout/stderr to log files with automatic size-based and date-based rotations
+  - Run pre-launch hooks before starting the service, with retries, timeout, logging and failure handling
+  - Run post-launch hooks after the application starts successfully
+  - Run pre-stop and post-stop hooks before and after the application stops
+  - Supports Ctrl+C for command-line apps, close-window for GUI apps, and force kill if unresponsive
+  - Supports Ctrl+C propagation to descendant processes of the wrapped process
+  - Prevent orphaned/zombie processes with improved lifecycle management while ensuring resource cleanup
+  - Health checks and automatic service recovery
+  - Browse and search logs by level, date, and keyword for faster troubleshooting from Servy Manager
+  - Export/Import service configurations for easy backups and automation
+  - Service Event Notification alerts on service failures via Windows notifications and email
+  - Compatible with Windows 7 SP1 through 11 (x64/ARM64) and Windows Server editions
+
+  Who is it for?
+  - Developers: Run development servers, scripts, or custom tools as services without extra setup.
+  - Sysadmins & IT professionals: Ensure critical background processes stay alive, monitored, and properly logged.
+  - Teams or organizations: Automate background services reliably across multiple machines.
+Moniker: servy
+Tags:
+- admin
+- automation
+- background-service
+- cli
+- devops
+- dotnet
+- nssm
+- powershell
+- scm
+- service-manager
+- service-supervisor
+- service-wrapper
+- watchdog
+- windows-service
+- windows-tools
+- winsw
+ReleaseNotes: |-
+  This release includes UI/UX improvements for low and HD resolutions, bug fixes, security patches, code quality improvements, and documentation updates. The full changelog is listed below.
+  Full Changelog
+  Click to expand release notes!
+  - fix(core): ResourceHelper.cs - log messages still say GetHostProcessLastWriteTimeUTC after the #4804 Utc rename (#5154)
+  - fix(core): Logger.cs - Initialize(null) wipes the re-init baseline while the writer stays live, turning every setter into a silent no-op (#5155)
+  - fix(core): ServiceMapper.cs - ToDomain silently mutates its input DTO (HydrateDefaults fills nulls in place), losing null-vs-default semantics the persistence layer relies on (#5157)
+  - fix(core): NativeMethodsHelpers.cs - GetFileIdentity's string.Empty pre-initialization makes IsDifferentFrom's SAFE DEFAULT unreachable; a failed content probe reads as 'proven same' (regression of #1456) (#5160)
+  - fix(core): Strings.resx (Servy.Core) - style drift between sibling messages: Pre-Launch/pre-launch casing, two range-message phrasings, terminal-punctuation flips, lone contraction (#5163)
+  - fix(core): SecureData.cs - raw-legacy security block is swallowed by its own catch filter; Decrypt still returns ciphertext as plaintext (the #1371 fix never took effect) (#5167)
+  - fix(core): Strings.resx / ServiceDependenciesValidator.cs - Msg_InvalidServiceDependencyName omits 'periods' again; the #1294 fix regressed when the sentence was rebuilt for #2600/#3388 (#5169)
+  - fix(core): ServiceManager.cs - UninstallServiceAsync alone rethrows unexpected exceptions; Install/Start/Stop convert them to OperationResult.Failure (#5176)
+  - fix(core): ServiceManager.cs - InstallServiceAsync's second IsServiceInstalled call drops the cancellation token its sibling at line 253 forwards (#5177)
+  - fix(core): ServicePathValidator.cs - FindAllViolations reflects over typeof(T), not target.GetType(); a base-typed call silently validates nothing (#5181)
+  - fix(core): ServiceValidationRules.cs - the CpuAffinity error is the only rule gated on 'errorMessage != null'; if the guard ever fired it would accept the invalid config silently (#5182)
+  - fix(core): AffinityHelper.cs - comma-only affinity strings bypass validation and silently return IntPtr.Zero, while the hex branch rejects the same zero mask loudly (#5307)
+  - fix(core): ServiceDependenciesValidator.cs - the length error omits the offending dependency name, the defect #1601 fixed in ServiceValidationRules before this check was written (#5341)
+  - fix(core): ServiceManager.cs / ServiceHelper.cs - only the SCM-registering call site zeroes the pre-stop timeout when no pre-stop hook exists, so the runtime stop wait outlives the pre-shutdown deadline (residual of #4465) (#5367)
+  - fix(core): ImportGuard.cs - the fileStream null guard is unreachable once IsValid is established, and Msg_ImportReadFailure is dead with it (#5370)
+  - fix(infra): ServiceRepository.cs - HandleCorruptServiceDecryption's UI marker is written into the stored Description on the next save and stacks on every load/save cycle (#5186)
+  - fix(service): ServiceHelper.cs - MaskRawArguments masks only the last token of an unquoted value, so the credential itself leaks whenever a positional argument follows it (#5223)
+  - fix(service): ServiceHelper.cs - RestartService logs a non-zero restarter exit code at Info level; the failure case is the only path that reaches the line (#5226)
+  - fix(service): ProcessWrapper.cs - SendCtrlC reads Marshal.GetLastWin32Error after process.HasExited has clobbered it, so attach failures classify on a stale error code (#5232)
+  - fix(service): ProcessLauncher.cs / Service.cs - centralizing hook launches dropped the per-hook audit prefix; every hook's expansion warnings now read '[ProcessLauncher.Start]' (#5234)
+  - fix(service): Service.cs - clean-exit path honors RecoveryOnCleanExit without the health-monitoring gate, leaving a zombie service that neither stops nor recovers (#5235)
+  - fix(service): Service.cs - StartPreStopProcess's LogIssue still drops the Exception in the ignore-failure branch (the pre-stop half of #1484's All-fixed close) (#5236)
+  - fix(service): Service.cs - RunFireAndForgetPreLaunch logs launch failure at Error even when PreLaunchIgnoreFailure is true, contradicting its own LogErrorAsWarning setting (#5238)
+  - fix(service): Service.cs - SetProcessCpuAffinity's early-return warning names a nonexistent SetProcessAffinity method (#5239)
+  - fix(service): Service.cs - the pre-launch back-off SCM pulse loop passes _logger while both kill-path pulse loops deliberately pass null, logging one Info line per wait slice (#5242)
+  - fix(service): RotatingStreamWriterAdapter.cs / TimerAdapter.cs - Dispose nulls the inner instance before raising _disposed, so a racing WriteLine surfaces as NullReferenceException instead of the ObjectDisposedException Service.cs deliberately swallows (#5245)
+  - fix(service): Service.cs - InitiateRecoveryAsync calls the restart-attempts helpers without the CancellationToken every sibling caller passes (sites missed by the #1093 fix) (#5250)
+  - fix(service): Service.cs - EmitHeartbeatPing logs the full unmasked heartbeat URL on a non-success status code, while both sibling log lines in the same method call MaskUrl (#5383)
+  - fix(service): EnvironmentVariableHelper.cs - ProtectedVariables omits JDK_JAVA_OPTIONS and the OpenSSL/TLS trust-store family, both inside categories the list already enumerates (#5388)
+  - fix(ui): AppBootstrapper.cs - the shared extraction-failure message says 'Manager cannot start safely', so the Servy desktop app reports the wrong application name in its startup error (#5246)
+  - fix(desktop): fix height issues on low resolutions
+  - fix(desktop): adjust main window MinHeight for 1080p+ displays
+  - fix(desktop): Strings.resx (Servy) - Info_FailureProgram still says the failure program runs 'when the process fails to start'; the last surviving copy of the wording fixed by #2280/#3832/#2279 (#5259)
+  - fix(desktop): Strings.resx (Servy) - automation names 'Cpu Affinity' and 'Heartbeat Url' keep the identifier casing #4830 fixed in the visible labels (#5260)
+  - fix(desktop): Strings.resx (Servy) - 'expansion, example:' comma splice in three info texts vs '. Example:' in the fourth (#5262)
+  - fix(desktop): ServiceCommands.cs (Servy) - import rejection is the only failure logged at Info, and the message reads 'XML File ... not valid' (#5264)
+  - fix(desktop): MainWindow.xaml (Servy) - FailureProgramParameters and PreLaunchParameters get single-line editors while their four sibling parameter fields are 80 px multi-line boxes (#5269)
+  - fix(desktop,manager): ServiceCommands.cs (Servy + Manager) - a null Process.Start result is logged as a launch failure but never surfaced to the user, unlike the exception path (#5263)
+  - fix(desktop,cli): Strings.resx (Servy) - Info_ServiceDependencies says 'without spaces or special characters', contradicting the validator that deliberately allows both (#3240) (#5261)
+  - fix(manager): Strings.resx (Servy / Servy.Manager) - StartupType labels still drifted after #4797, plus new one-word drift in Msg_ServiceAlreadyExists (#5165)
+  - fix(manager): Servy.Manager.csproj - None Remove set omits the two embedded Servy.Service binaries, and resx metadata order is flipped vs the desktop twin (#5197)
+  - fix(manager): HistoryResult.cs - the Lines remark promises snapshot immutability, but the constructor aliases the caller's list instead of copying it (#5198)
+  - fix(manager): LogTailer.cs - both #4867 holes partially survive: the threshold flush still publishes the torn line, and a mid-pass exception after a flush still replays published lines (#5200)
+  - fix(manager): LogTailer.cs - rollback comments describe a re-scan that provably never happens; lastTerminatedLineEndOffset always equals fs.Position at its only use site (#5201)
+  - fix(manager): LogTailer.cs - the CancellationToken added for #3658 never reaches LoadHistory, so an in-flight history load still cannot be cancelled (#5203)
+  - fix(manager): ConsoleViewModel.cs - stderr-only services still load only half the history budget (residual of #3309) (#5204)
+  - fix(manager): SearchableViewModelBase.cs - XML docs and the error log use invented jargon: 'tracking execution task container handle', 'format constraint', 'critical anomaly' (#5207)
+  - fix(manager): MainViewModel.cs - RefreshAllServicesAsync's 'parallel' step is provably sequential (the async lambda never yields) and runs all process-metric collection on the UI thread from OnTick (#5209)
+  - fix(manager): MainWindow.xaml.cs (Manager) - F5 on the Dependencies tab calls LoadDependencyTreeAsync directly, bypassing RefreshCommand's CanExecute/re-entrancy gate its sibling branches respect (#5219)
+  - fix(cli): ExportServiceCommand.cs - the existence check decrypts every stored secret it never reads; last surviving sibling of the #3296/#1839 decrypt:false cleanup (#5267)
+  - fix: Servy.csproj (+ 4 sibling executables) - StripSymbols is set in every executable project but is a Native AOT-only property; no project publishes with AOT (#5265)
+  - ci: fix Node.js 20 runner deprecation warnings
+ReleaseNotesUrl: https://github.com/aelassas/servy/releases/tag/v9.6
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/aelassas/servy/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

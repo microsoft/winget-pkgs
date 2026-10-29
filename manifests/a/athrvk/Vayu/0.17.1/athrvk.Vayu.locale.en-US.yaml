@@ -1,0 +1,44 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: athrvk.Vayu
+PackageVersion: 0.17.1
+PackageLocale: en-US
+Publisher: Atharva Kusumbia
+PublisherUrl: https://github.com/athrvk
+PublisherSupportUrl: https://github.com/athrvk/vayu/issues
+Author: Atharva Kusumbia
+PackageName: Vayu
+PackageUrl: https://github.com/athrvk/vayu
+License: AGPL-3.0
+LicenseUrl: https://github.com/athrvk/vayu/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Atharva Kusumbia
+ShortDescription: Open-source API client with a native C++ load-testing engine - Postman-style requests and k6-level load tests in one local app.
+Description: Vayu is a free, open-source desktop app for Windows, macOS, and Linux that combines a full REST and GraphQL request builder - with collections, environments, and scripting - and a high-throughput load tester powered by a C++20 engine, with all data staying on your machine.
+Moniker: vayu
+Tags:
+- api
+- api-client
+- api-testing
+- benchmark
+- developer-tools
+- graphql
+- http
+- insomnia
+- load-testing
+- performance
+- postman
+- rest
+ReleaseNotes: |-
+  0.17.1 - 2026-08-15
+  A follow-up release, on the wire behaviour v0.17.0 changed and on the release machinery that shipped it. That release made an imported request's query string actually reach the target - url is the wire truth, so every parser's params[] is now joined onto it at parse time. That fix was right, and it exposed a decision the OpenAPI importers had never had to make: a spec lists every query parameter an operation accepts, and they all imported enabled, so a declared-but-optional parameter started riding along on every send as a bare key. The only user-facing change is in the two OpenAPI parsers; the rest is release CI, where v0.17.0's own build had rebuilt every C++ dependency from source and its winget submission had pruned the wrong versions.
+  Fixed
+  - An imported OpenAPI operation no longer sends parameters the spec only documented. A spec declaring an optional verbose with no default imported it enabled and empty, so the stored URL became {{baseUrl}}/pets/{{petId}}?verbose and every request carried a bare key - which some APIs read as verbose=true. Before v0.17.0 the stub never reached the wire at all, so this was a behaviour change nobody chose. An optional parameter with no declared value now imports disabled: the row is still in the Params table, one click from use, and out of the URL. Two things override that and only two - required: true, because a spec saying a parameter must be sent is an instruction rather than documentation, and a declared value, which is now carried into the row instead of being dropped, so a default: 25 sends ?limit=25 rather than a valueless ?limit. Value precedence is the parameter's example, then its examples map, then the schema's example, then its default, following one $ref hop; Swagger 2.0 reads default, having no example keyword for a non-body parameter. An array or object value is left uncarried on purpose, since style/explode and collectionFormat decide its serialization and neither is read - joining on a guessed separator would send what the spec never declared.
+  Internal
+  - Release builds reuse the vcpkg cache again. Every release had compiled all of its C++ dependencies from source on all three platforms, for two unrelated reasons. build.py --bump-version rewrote "version" in engine/vcpkg.json, which is what the caching workflows key on, so a release minted a cache key nothing had ever written - the field was optional, unread, and outside vcpkg's ABI hash, so it is gone and the bumper refuses to reintroduce it. Separately, Actions caches are ref-scoped and the only workflow writing to the scope a release can read was Linux-only, so macOS and Windows had never had a warm cache at all; cache-warm.yml now resolves dependencies for all three on master, with a guard that fails if the workflows' cache keys drift apart. sccache is deliberately left cold, since a version bump changes the preprocessed text of nearly every translation unit by construction.
+  - The macOS x64 build no longer times out discovering its own tests. gtest_discover_tests carried a per-test TIMEOUT 60 but left DISCOVERY_TIMEOUT at its 5-second default, which bounds the one --gtest_list_tests run that enumerates the suite at build time. Listing ~1,600 tests through Rosetta, cold, does not fit in five seconds, and the first build to reuse the dependency cache was the first to find out: the x86_64 configure probes that used to warm Rosetta while vcpkg built from source no longer ran, so discovery paid the translation cost itself and the release died at ninja: build stopped after the arm64 half had built and passed. Raised to 150s - it bounds a hang the job timeout already bounds, so generous is the safe direction.
+  - winget stops deleting the newest versions. The release action's cleanup sorts a single JSON object rather than a list, so -Descending never applies and the tail slice takes the most recent releases - v0.17.0 filed removals against 0.15.0 and 0.16.0 while leaving the broken 0.10.0 in place. Upstream fixed it six months ago and never tagged the fix, so the pruning step is disabled outright.
+  - The import rule lives once in queryParamRow (openapi-shared.ts) rather than once per parser - the OpenAPI 3 and Swagger 2.0 parsers are structural clones, which is how they previously grew the same defect twice. Both mapping docs gain a Query parameter values & enabled state section, and the import pipeline's url/params-invariant note no longer claims the OpenAPI parsers put every declared parameter in the URL.
+ReleaseNotesUrl: https://github.com/athrvk/vayu/releases/tag/v0.17.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

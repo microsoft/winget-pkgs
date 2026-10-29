@@ -1,0 +1,47 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: viswajith275.envseal
+PackageVersion: 5.1.0
+PackageLocale: en-US
+Publisher: Viswajith M P
+PublisherUrl: https://github.com/viswajith275
+PublisherSupportUrl: https://github.com/viswajith275/EnvSeal-CLI/issues
+Author: Viswajith M P
+PackageName: envseal
+PackageUrl: https://github.com/viswajith275/EnvSeal-CLI
+License: MIT
+LicenseUrl: https://github.com/viswajith275/EnvSeal-CLI/blob/HEAD/LICENSE
+ShortDescription: Zero-trust secrets engine that replaces dangerous .env files. AES-256 encrypted vaults, least-privilege tokens for CI/CD, and instant DEK rotation, without ever putting your master password on a runner.
+Description: An encrypted vault for your API keys and secrets, because .env files have never once kept a secret.
+Moniker: envseal
+Tags:
+- command-line-tool
+- developer-tools
+- encryption-decryption
+- enviornment-setup
+- envseal
+- hmac-sha256
+- rust
+ReleaseNotes: |-
+  Native Git Integration
+  - 3-way cryptographic merge driver (envseal merge): Safely merges encrypted .envseal vaults during Git conflicts without ever exposing plaintext secrets.
+  - Configurable merge strategies: Support for standard strategies via git config envseal.merge.strategy [fail|ours|theirs], or one-off overrides with git -c envseal.merge.strategy=ours merge.
+  - On-the-fly diff driver (envseal diff / textconv): git diff, git log, etc. now show plaintext diffs in memory only—no sensitive data written to disk.
+  - envseal git-setup command (renamed from earlier setup): Configures local Git merge/diff drivers and automatically updates .gitignore to exclude lock files. Also cleans up orphaned .merge_file_*.lock temporary files.
+  Password Management
+  - New envseal passwd command: Change the vault master password. Rotates the Key Encryption Key (KEK), re-encrypts the Master DEK in-place, and leaves secret entries and existing zero-trust tokens untouched.
+  Reliability, UX & Platform Improvements
+  - IDE $GIT_ASKPASS support: Background Git operations triggered by editors (VS Code, Cursor, JetBrains, etc.) now correctly surface password prompts in the IDE’s native UI.
+  - Timeout-bound coalescing locks (.envseal.prompt.lock): Prevents “thundering herd” password prompt storms when multiple concurrent IDE workers access the vault.
+  - Headless Linux / WSL2 degradation: Graceful fallback when D-Bus/keyring is unavailable—warns on stderr and continues with in-memory decryption instead of crashing.
+  - Improved group resolution: Recursive search for group fetching.
+  - Bug fixes & quality: Crucial bug fixes (including rotation and architectural issues), code formatting, updated integration tests, binary size/speed improvements, install-script and workflow updates.
+  - Windows: Re-added support via WinGet (work in progress in this release cycle).
+  - Extensive README updates covering Git merge strategies, conflict handling, and overall documentation polish.
+  Full Changelog
+  v5.0.0...v5.1.0
+  This is a focused quality and developer-experience release that makes EnvSeal far more practical for real team Git workflows while adding the missing password-change capability.
+ReleaseNotesUrl: https://github.com/viswajith275/EnvSeal-CLI/releases/tag/v5.1.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

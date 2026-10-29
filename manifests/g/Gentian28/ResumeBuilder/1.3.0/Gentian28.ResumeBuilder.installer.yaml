@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+PackageIdentifier: Gentian28.ResumeBuilder
+PackageVersion: 1.3.0
+
+# Velopack's Setup.exe is a custom installer, so "exe" with explicit switches.
+# --silent is what it actually accepts (src/bins/src/setup.rs: "-s --silent"); winget's
+# validation pipeline installs unattended, so getting this wrong fails submission.
+InstallerType: exe
+InstallerSwitches:
+  Silent: --silent
+  SilentWithProgress: --silent
+
+# Velopack installs per-user under %LocalAppData%, never machine-wide.
+Scope: user
+InstallModes:
+  - interactive
+  - silent
+
+# The app updates itself through Velopack, so winget should reinstall over the top
+# rather than expect an uninstall/install cycle it does not control.
+UpgradeBehavior: install
+ReleaseDate: 2026-10-15
+
+# Pinned to this release; floating latest-download URLs would invalidate the hash.
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/Gentian28/resume-builder/releases/download/v1.3.0/ResumeBuilder-win-Setup.exe
+    InstallerSha256: 8E2454B8269DB5D09458D6B6407569E7792E3DB846BD81373BBBAB2F18145093
+
+ManifestType: installer
+ManifestVersion: 1.12.0

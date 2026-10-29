@@ -1,0 +1,132 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: JohnMacFarlane.Pandoc
+PackageVersion: 3.12.1
+PackageLocale: en-US
+Publisher: John MacFarlane
+PublisherUrl: https://github.com/jgm/pandoc
+PublisherSupportUrl: https://github.com/jgm/pandoc/issues
+Author: John Mac Farlane
+PackageName: Pandoc
+PackageUrl: https://pandoc.org/
+License: GPL-2.0
+LicenseUrl: https://github.com/jgm/pandoc/blob/master/COPYRIGHT
+Copyright: Copyright (C) 2006-2024 John MacFarlane <jgm at berkeley dot edu>
+CopyrightUrl: https://github.com/jgm/pandoc/blob/master/COPYRIGHT
+ShortDescription: If you need to convert files from one markup format into another, pandoc is your swiss-army knife.
+Tags:
+- converter
+- doc
+- docs
+- markdown
+- pandoc
+ReleaseNotes: |-
+  I'm pleased to announce the release of pandoc 3.12.1,
+  available in the usual places:
+  Binary packages & changelog:
+  https://github.com/jgm/pandoc/releases/tag/3.12.1
+  Source & API documentation:
+  http://hackage.haskell.org/package/pandoc-3.12.1
+  Notable changes:
+  - New input and output format: fodt (a flattened representation
+    of an ODT in a single XML file).
+  - With --citeproc, we no longer extract particles from given and family
+    names in structured CSL JSON or CSL YAML references. Thus, for
+    example, family: de Gaulle should not create a non-dropping
+    particle "de"; "de Gaulle" should be considered the integral
+    family name. This is a behavior change that could affect some
+    bibliography processing.
+  - Fixed a regression in keyword resolution with --syntax-definition.
+  - Fixed a serious regression in escaping of data URIs (#11942), which
+    broke --embed-resources.
+  - Fixed reveal.js version to align with plugin changes from 3.12.
+  - Fixed a Markdown reader regression that led to "alerts" not working
+    properly.
+  - Fixed a regression in rendering of abstracts in ODT.
+  - Big performance improvements for XML-based writers and the org,
+    man, Textile, MediaWiki, and docx readers.
+  API changes:
+  - Add readFODT to Text.Pandoc.Readers.ODT.
+  - Add writeFODT to Text.Pandoc.Writers.ODT.
+  Thanks to all who contributed, especially new contributors
+  Aslak Hellesøy, Erik Demaine, Raffaele Mancuso, Kyohei Takahashi,
+  and rca-umb.
+  Click to expand changelog
+  - New input and output format: fodt (#4010). This is ODF’s “flat” representation of a text document: a single XML file instead of a zip package (ODT). It supports the same options as odt, including --reference-doc (which should be a zipped odt) and --link-images.
+  - Resolve keywords after loading a syntax definition (#11921, #11923). This fixes a 3.12 regression in --syntax-definition that was due to a change in skylighting. As the skylighting changelog indicates, users must now apply resolveKeywords after parsing a syntax definition.
+  - With --citeproc, we no longer extract particles from given and family names in structured CSL JSON or CSL YAML references (#11911). Thus, for example, family: de Gaulle should not create a non-dropping particle “de”; “de Gaulle” should be considered the integral family name. This is a behavior change that could affect some bibliography processing.
+  - Commonmark reader:
+    - Make task lists work in commonmark_x. Previously task_lists would not work if fancy_lists was enabled, for any commonmark variant.
+  - Markdown reader:
+    - Put alert after tip, etc. in classes (#11919). Some of the writers (gfm, docbook, asciidoc, rst) check for the admonition name as the first class, so the change putting alert first broke the output. (Regression from 3.12.)
+    - Don’t trim spaces in inline span. Previously we trimmed the space in e.g. [ test ]{.class}. This behavior has no good rationale, and it made it impossible to represent insertions and deletions properly.
+    - Make lookahead for setext header line more efficient.
+  - Docx reader:
+    - Keep bookmark when stripping caption label (#11918). This allows us to preserve internal links to figures.
+    - Add map of table styles to the reader environment.
+    - Fix double strikethrough being dropped (Kyohei Takahashi). w:dstrike was not parsed at all, so text marked with Word’s double strikethrough was read as plain text, with no indication that it had been struck out. Treat it as Strikeout.
+    - Keep spaces at the edges of tracked changes in the span (#11904, Raffaele Mancuso). This is important for tracking insertions/deletions.
+  - ODT reader:
+    - Don’t crash on a table with no rows.
+    - Don’t loop forever on cyclic style inheritance.
+    - Make getStyleFamily linear in the inheritance depth. A style whose family had to be inherited took time exponential in the chain length.
+    - Cap the number of spaces produced by text:s. text:c is unbounded in ODF, so <text:s text:c="200000000"/> let an 832-byte document allocate until the OOM killer stepped in.
+    - Keep the set of used anchors in the reader state.
+    - Look up used anchors in a Set in uniqueIdentFrom.
+    - Keep the archive’s media in a Map rather than an association list.
+    - Attach table captions wherever they occur. post_process' matched a table followed by a caption only at the very head of the block list and then stopped, so a caption was picked up only if its table was the first block of the document; anywhere else the caption was dropped and the internal marker Div leaked into the output. Walk the whole document instead, so captions nested in sections, cells and list items are found too. Accept the caption before its table as well as after it.
+    - Don’t add a bogus media entry for a missing image.
+    - Only treat font weights of 700 and up as bold. Every numeric fo:font-weight from 100 to 900 was mapped to bold, so text in a hairline or light weight was read as Strong.
+    - Read text wrapped in metadata elements and fields. Content of an element the reader did not recognize was discarded along with the element, which silently lost text: fields such as text:page-number, text:author-name or text:chapter, the RDFa wrapper text:meta, the bibliographic wrapper text:meta-field, and ruby annotations. Add matchers for those; for ruby, keep the base text and drop the gloss, which pandoc cannot represent.
+    - Honour table:number-{columns,rows}-repeated. ODF abbreviates a run of identical cells or rows with a repeat count. The reader ignored both counts, so a row of five cells written as three elements came out three cells wide. Also count a cell spanning several columns as occupying all of them when working out the number of columns, rather than as one.
+    - Read rows wrapped in table:table-row-group. Rows need not be immediate children of the table.
+    - Read blocks nested in list items, footnotes and cells. ODF allows the same block-level content wherever it allows a paragraph, but the reader spelled the list of block matchers out separately at each site and each spelling was missing something: a table in a list item was dropped, a list or table in a footnote was dropped, and a heading or nested table in a table cell was dropped. Keep a single list and use it everywhere, so the sites cannot drift apart again.
+    - Read images embedded in office:binary-data.
+    - Read MathML embedded inline in draw:object. A flat OpenDocument file cannot refer to a separate formula document, so the MathML is a descendant of the draw:object instead.
+    - Add readFODT for flat OpenDocument input [API change].
+    - Fix formula lookup when the href has a trailing slash.
+    - Trim the alt text of an image.
+    - Look up the image mime type on the draw:image element instead of guessing from magic bytes.
+  - RTF reader:
+    - Combine UTF-16 surrogate pairs (#11920).
+  - Typst reader:
+    - Do not emit mixed table column widths (#11898, Samuel Huang). Previously we evenly split the remaining width, but generally it looks better just to make every column auto if any column is default width.
+    - Treat zero-width table fractions as unspecified (#11898, Samuel Huang).
+  - Org reader:
+    - Improve performance: use a jump table to find the end of plain text runs, and dispatch on the next character in inline.
+  - Creole reader:
+    - Use jump tables to find the end of plain text runs.
+    - Use takeWhile1P in str.
+  - RST reader:
+    - Use takeWhile1P for raw field list items.
+  - Textile, Vimwiki, MediaWiki, Txt2Tags readers:
+    - Use jump tables to find the end of plain text runs.
+  - Roff readers:
+    - Use takeWhile1P for regularText.
+  - Mdoc reader:
+    - Use takeWhile1P in lexer.
+  - Docx writer:
+    - Use table style id in the tblStyle element (#11932). Previously we used the table style name. This happened to work for the default table style, but only because its name and id matched. It failed for custom styles whose names did not match their ids.
+    - Put a heading’s bookmark in its paragraph (Robert Szarka, #11845, cf. #8825). The bookmark for a section’s id surrounded the whole section, at body level, so a screen reader met it at the section’s last line rather than at the heading. Moreover, the docx reader looks for bookmarks only inside paragraphs, so the ids did not round-trip.
+    - Improve highlighting of marked spans containing math (#11885, Samuel Huang).
+  - OpenDocument writer:
+    - Use literal instead of text . T.unpack.
+    - Emit whitespace runs in one piece.
+    - Count styles and notes in O(1).
+    - Give nested notes distinct ids.
+    - Use valid column style names past column 26 (AA, AB, etc.).
+    - Apply the requested style to Plain blocks. withParagraphStyle only wrapped Para in a paragraph with the requested style; a Plain fell through to blockToOpenDocument and came out with the default style.
+    - Render the abstract as blocks. The abstract was wrapped in a Div with custom-style set to Abstract, but then handed to metaToContext, which renders metadata fields with the inline writer. The style was lost, as well as any block-level formatting. Regression from 013351f.
+    - Reuse identical automatic paragraph styles. Every blockquote, every explicitly aligned table cell, and every direction-adjusted style got a fresh Pn automatic style, even when an identical one already existed.
+    - Look up cross-reference targets in a Map. Skip the collecting walk altogether unless xrefs_name or xrefs_number is enabled, since nothing reads the result otherwise and neither is on by default. Elements with an empty identifier are no longer collected, so a link to “#” can no longer resolve to a reference with an empty ref-name.
+    - Sort automatic text styles numerically rather than alphabetically (T9, T10, …).
+  - ODT writer:
+    - Always render content.xml with a template. writeOpenDocument returns a bare body fragment when writerTemplate is Nothing. This is needed mainly for the fodt writer.
+    - Have pandocToODT return an Archive instead of a ByteString. This lets an alternative entry point post-process the archive.
+ReleaseNotesUrl: https://github.com/jgm/pandoc/releases/tag/3.12.1
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/jgm/pandoc/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

@@ -3,30 +3,293 @@ emoji: 🧭
 name: Manifest Validation Diagnosis
 description: >-
   Experimental author-assist workflow for manifest validation failures. Reads
-  the validation log and submitted manifests, then posts one precise,
+  the validation GitHub Check and submitted manifests, then posts one precise,
   recommend-only explanation when the failure identifies a concrete field,
-  filename, path, singleton manifest, or Apps and Features version conflict.
+  filename, path, unexpected file, singleton manifest, or Apps and Features
+  version conflict.
 on:
   pull_request_target:
     types: [labeled]
   roles: [admin, maintainer, write]
+  bots: ["wingetvalidator-prod[bot]"]
 if: >-
   github.event_name == 'pull_request_target' &&
   github.event.action == 'labeled' &&
+  github.actor == 'wingetvalidator-prod[bot]' &&
   github.event.pull_request.user.login != 'wingetbot' &&
   (
     github.event.label.name == 'Manifest-Validation-Error' ||
     github.event.label.name == 'Manifest-Installer-Validation-Error' ||
     github.event.label.name == 'Manifest-AppsAndFeaturesVersion-Error' ||
-    github.event.label.name == 'Manifest-Singleton-Deprecated'
+    github.event.label.name == 'Manifest-Singleton-Deprecated' ||
+    github.event.label.name == 'Unexpected-File'
   )
 checkout: false
+pre-agent-steps:
+  - name: Fetch trusted validation Check Runs
+    uses: actions/github-script@v9
+    env:
+      TARGET_PR: >-
+        ${{ github.event.pull_request.number || '' }}
+      TRIGGER_HEAD_SHA: ${{ github.event.pull_request.head.sha || '' }}
+      TRIGGER_LABEL: ${{ github.event.label.name || '' }}
+    with:
+      github-token: "${{ github.token }}"
+      script: |
+        const fs = require("fs");
+        const outputPath = "/tmp/gh-aw/validation-checks.json";
+        fs.mkdirSync("/tmp/gh-aw", { recursive: true });
+
+        const owner = "microsoft";
+        const repo = "winget-pkgs";
+        const pullRequestNumber = Number(process.env.TARGET_PR);
+        const triggerHeadSha = String(process.env.TRIGGER_HEAD_SHA ?? "").trim();
+        const triggerLabel = String(process.env.TRIGGER_LABEL ?? "").trim();
+        const maxFailedChecks = 5;
+        const maxCheckTextLength = 12000;
+        const output = {
+          available: false,
+          evidenceComplete: false,
+          pullRequestNumber: null,
+          headSha: null,
+          triggerLabel: null,
+          operationId: null,
+          completionCheck: null,
+          checks: [],
+        };
+        const writeOutput = () =>
+          fs.writeFileSync(outputPath, JSON.stringify(output));
+
+        if (!Number.isSafeInteger(pullRequestNumber) || pullRequestNumber <= 0) {
+          output.reason = "The targeted pull request number is invalid.";
+          writeOutput();
+          return;
+        }
+
+        try {
+          const pull = await github.rest.pulls.get({
+            owner,
+            repo,
+            pull_number: pullRequestNumber,
+          });
+          const headSha = pull.data.head.sha;
+          output.pullRequestNumber = pullRequestNumber;
+          output.headSha = headSha;
+
+          if (triggerHeadSha && triggerHeadSha !== headSha) {
+            output.reason = "The triggering head SHA is stale.";
+            return;
+          }
+          const supported = new Set([
+            "Manifest-Validation-Error",
+            "Manifest-Installer-Validation-Error",
+            "Manifest-AppsAndFeaturesVersion-Error",
+            "Manifest-Singleton-Deprecated",
+            "Unexpected-File",
+          ]);
+          const labels = new Set(
+            (pull.data.labels ?? []).map((label) =>
+              String(label?.name ?? "")
+            ),
+          );
+          if (!supported.has(triggerLabel) || !labels.has(triggerLabel)) {
+            output.reason =
+              "The triggering diagnosis label is no longer active.";
+            return;
+          }
+          output.triggerLabel = triggerLabel;
+
+          let checkRuns = [];
+          let totalCheckRuns = 0;
+          let failedChecks = [];
+          let completionCheck = null;
+          for (let attempt = 0; attempt < 2; attempt++) {
+            const response = await github.rest.checks.listForRef({
+              owner,
+              repo,
+              ref: headSha,
+              app_id: 1451866,
+              filter: "all",
+              per_page: 100,
+            });
+            checkRuns = response.data.check_runs ?? [];
+            totalCheckRuns = response.data.total_count ?? checkRuns.length;
+            completionCheck = checkRuns
+              .filter((check) =>
+                check?.app?.slug === "wingetvalidator-prod" &&
+                check.head_sha === headSha &&
+                check.status === "completed" &&
+                check.name === "10. Validation Completed"
+              )
+              .sort((left, right) =>
+                Date.parse(right.completed_at ?? 0) -
+                  Date.parse(left.completed_at ?? 0) ||
+                right.id - left.id
+              )[0];
+            const completionExternalId = String(
+              completionCheck?.external_id ?? "",
+            ).trim();
+            failedChecks = checkRuns.filter((check) =>
+              check?.app?.slug === "wingetvalidator-prod" &&
+              check.head_sha === headSha &&
+              String(check.external_id ?? "").trim() ===
+                completionExternalId &&
+              ["failure", "timed_out", "action_required"].includes(
+                String(check.conclusion ?? "").toLowerCase(),
+              )
+            );
+            if (
+              (completionExternalId && failedChecks.length > 0) ||
+              attempt === 1
+            ) {
+              break;
+            }
+            await new Promise((resolve) => setTimeout(resolve, 10000));
+          }
+
+          const completionJsonBlocks = [
+            ...String(completionCheck?.output?.text ?? "").matchAll(
+              /```json\s*([\s\S]*?)```/gi,
+            ),
+          ];
+          let completionPayload = null;
+          if (completionJsonBlocks.length === 1) {
+            try {
+              completionPayload = JSON.parse(completionJsonBlocks[0][1]);
+            } catch {
+              completionPayload = null;
+            }
+          }
+          const completionPullRequestNumber =
+            completionPayload?.PullRequestNumber;
+          const completionOperationId = String(
+            completionPayload?.OperationId ?? "",
+          ).trim();
+          const completionExternalId = String(
+            completionCheck?.external_id ?? "",
+          ).trim();
+          const completionTime = Date.parse(
+            completionCheck?.completed_at ?? "",
+          );
+          const newerPendingCheck = checkRuns.some(
+            (check) =>
+              check?.app?.slug === "wingetvalidator-prod" &&
+              check.head_sha === headSha &&
+              ["queued", "in_progress"].includes(check.status) &&
+              (Number(check.id) > Number(completionCheck?.id) ||
+                Date.parse(check.started_at ?? "") > completionTime),
+          );
+          if (
+            totalCheckRuns > checkRuns.length ||
+            newerPendingCheck ||
+            !Number.isSafeInteger(completionPullRequestNumber) ||
+            completionPullRequestNumber <= 0 ||
+            completionPullRequestNumber !== pullRequestNumber ||
+            !completionOperationId ||
+            completionOperationId !== completionExternalId
+          ) {
+            output.reason =
+              "Validation evidence is incomplete, stale, inconsistent, or targets another pull request.";
+            return;
+          }
+          output.pullRequestNumber = completionPullRequestNumber;
+          output.operationId = completionOperationId;
+          const evidenceChecks = [completionCheck, ...failedChecks].filter(
+            Boolean,
+          );
+          if (
+            failedChecks.length > maxFailedChecks ||
+            evidenceChecks.some(
+              (check) =>
+                String(check.output?.text ?? "").length >
+                  maxCheckTextLength,
+            )
+          ) {
+            output.reason =
+              "Validation Check evidence exceeds the safe review bounds.";
+            return;
+          }
+          const mapCheck = (check) => ({
+            id: check.id,
+            name: check.name,
+            status: check.status,
+            conclusion: check.conclusion,
+            externalId: String(check.external_id ?? "").trim(),
+            startedAt: check.started_at,
+            completedAt: check.completed_at,
+            url: check.html_url,
+            output: {
+              title: check.output?.title ?? null,
+              summary: check.output?.summary ?? null,
+              text: String(check.output?.text ?? ""),
+            },
+          });
+          output.evidenceComplete = true;
+          output.completionCheck = completionCheck
+            ? mapCheck(completionCheck)
+            : null;
+          output.checks = failedChecks.map(mapCheck);
+          output.available = output.checks.length > 0;
+          if (!output.available) {
+            output.reason =
+              "No failing WinGetValidator Check Run was found for the current head SHA.";
+          }
+        } catch (error) {
+          output.reason = `Validation Check retrieval failed: ${
+            error instanceof Error ? error.message : String(error)
+          }`;
+        } finally {
+          writeOutput();
+        }
+  - name: Skip agent when no supported evidence path remains
+    uses: actions/github-script@v9
+    env:
+      GH_AW_SAFE_OUTPUTS: ${{ steps.set-runtime-paths.outputs.GH_AW_SAFE_OUTPUTS }}
+    with:
+      script: |
+        const fs = require("fs");
+        const path = require("path");
+        const evidence = JSON.parse(
+          fs.readFileSync("/tmp/gh-aw/validation-checks.json", "utf8"),
+        );
+        const checkPathAvailable =
+          evidence.evidenceComplete === true &&
+          evidence.available === true;
+        const singletonPathAvailable =
+          evidence.triggerLabel === "Manifest-Singleton-Deprecated";
+        if (!checkPathAvailable && !singletonPathAvailable) {
+          const safeOutputsPath =
+            String(process.env.GH_AW_SAFE_OUTPUTS ?? "").trim() ||
+            path.join(
+              process.env.RUNNER_TEMP || "/tmp",
+              "gh-aw",
+              "safeoutputs",
+              "outputs.jsonl",
+            );
+          fs.mkdirSync(path.dirname(safeOutputsPath), { recursive: true });
+          fs.appendFileSync(
+            safeOutputsPath,
+            `${JSON.stringify({
+              type: "noop",
+              message: "No supported manifest diagnosis evidence is available.",
+            })}\n`,
+          );
+        }
+  - name: Upload sealed validation evidence
+    uses: actions/upload-artifact@v7
+    with:
+      name: >-
+        manifest-validation-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+      path: /tmp/gh-aw/validation-checks.json
+      if-no-files-found: error
+      retention-days: 1
 concurrency:
   group: "gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}"
   cancel-in-progress: false
   queue: max
 engine: copilot
 permissions:
+  checks: read
   contents: read
   issues: read
   pull-requests: read
@@ -34,28 +297,473 @@ permissions:
 network:
   allowed:
     - defaults
-    - "dev.azure.com"
 tools:
   github:
     toolsets: [context, repos, issues, pull_requests]
     allowed-repos:
-      - "${{ github.repository }}"
+      - "microsoft/winget-pkgs"
     min-integrity: none
-  web-fetch:
+  bash: ["cat"]
 safe-outputs:
-  messages:
-    footer: "###### Template: msftbot/authorAssist/manifestValidation by [{workflow_name}]({run_url})"
   threat-detection: true
   report-failure-as-issue: false
+  report-failed-jobs: false
+  report-incomplete:
+    create-issue: false
   noop:
     report-as-issue: false
   missing-tool: false
   missing-data: false
-  add-comment:
-    max: 1
-    target: >-
-      ${{ github.event.pull_request.number ||
-      fromJSON(github.event.inputs.aw_context || '{}').item_number || '' }}
+  jobs:
+    post-pr-comment:
+      description: Post one comment to the triggering pull request
+      runs-on: ubuntu-latest
+      needs: detection
+      if: >-
+        needs.detection.result == 'success' &&
+        needs.detection.outputs.detection_success == 'true'
+      permissions:
+        checks: read
+        contents: read
+        pull-requests: write
+      output: Comment posted to the triggering pull request
+      inputs:
+        body:
+          description: Complete Markdown comment body
+          required: true
+          type: string
+        evidence_mode:
+          description: Sealed checks or independently verified singleton
+          required: true
+          type: string
+      steps:
+        - name: Download sealed validation evidence
+          uses: actions/download-artifact@v8
+          with:
+            name: >-
+              manifest-validation-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+            path: ${{ runner.temp }}/manifest-validation-evidence
+        - name: Revalidate and post fixed-target comment
+          uses: actions/github-script@v9
+          env:
+            EVIDENCE_PATH: >-
+              ${{ runner.temp }}/manifest-validation-evidence/validation-checks.json
+            TARGET_PR: ${{ github.event.pull_request.number || '' }}
+            EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || '' }}
+            EXPECTED_LABEL: ${{ github.event.label.name || '' }}
+            RUN_URL: >-
+              ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          with:
+            github-token: "${{ github.token }}"
+            script: |
+              const fs = require("fs");
+              const target = Number(process.env.TARGET_PR);
+              const expectedHead = String(process.env.EXPECTED_HEAD ?? "");
+              const expectedLabel = String(process.env.EXPECTED_LABEL ?? "");
+              const outputPath = process.env.GH_AW_AGENT_OUTPUT;
+              const evidencePath = process.env.EVIDENCE_PATH;
+              let output, evidence;
+              try {
+                if (
+                  !outputPath ||
+                  !fs.existsSync(outputPath) ||
+                  !evidencePath ||
+                  !fs.existsSync(evidencePath) ||
+                  fs.statSync(evidencePath).size > 100000
+                ) {
+                  core.notice("Agent output or sealed evidence is unavailable.");
+                  return;
+                }
+                output = JSON.parse(fs.readFileSync(outputPath, "utf8"));
+                evidence = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
+              } catch (error) {
+                core.notice(
+                  `Agent output or sealed evidence is invalid: ${error.message}`,
+                );
+                return;
+              }
+              const items = Array.isArray(output?.items)
+                ? output.items.filter((item) => item.type === "post_pr_comment")
+                : [];
+              if (
+                !Number.isSafeInteger(target) ||
+                target <= 0 ||
+                !/^[0-9a-f]{40}$/.test(expectedHead) ||
+                !expectedLabel ||
+                items.length !== 1
+              ) {
+                return;
+              }
+              const item = items[0];
+              if (
+                Object.keys(item).sort().join(",") !==
+                "body,evidence_mode,type"
+              ) {
+                core.setFailed("The proposed comment has unexpected fields.");
+                return;
+              }
+              const body = String(item.body ?? "").trim();
+              const evidenceMode = String(item.evidence_mode ?? "");
+              if (
+                body.length < 20 ||
+                body.length > 8000 ||
+                !["checks", "singleton"].includes(evidenceMode) ||
+                /(^|[^\w])@[A-Za-z0-9][\w-]*/.test(body) ||
+                body.includes("Template:") ||
+                !body.includes(`Head SHA: \`${expectedHead}\``)
+              ) {
+                core.setFailed("The proposed comment failed validation.");
+                return;
+              }
+              const owner = "microsoft";
+              const repo = "winget-pkgs";
+              const pull = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: target,
+              });
+              const labels = new Set(
+                (pull.data.labels ?? []).map((label) => label.name),
+              );
+              const supported = [
+                "Manifest-Validation-Error",
+                "Manifest-Installer-Validation-Error",
+                "Manifest-AppsAndFeaturesVersion-Error",
+                "Manifest-Singleton-Deprecated",
+                "Unexpected-File",
+              ];
+              const activeSupported = supported.filter((label) =>
+                labels.has(label),
+              );
+              const unsafe = [
+                "Binary-Validation-Error", "Blocking-Issue",
+                "Error-Analysis-Timeout", "Error-Hash-Mismatch",
+                "Internal-Error", "Internal-Error-AppsAndFeaturesVersion",
+                "Internal-Error-Dependencies", "Internal-Error-Domain",
+                "Internal-Error-Dynamic-Scan", "Internal-Error-Keyword-Policy",
+                "Internal-Error-Manifest", "Internal-Error-Manifest-Installer",
+                "Internal-Error-NoArchitectures",
+                "Internal-Error-NoSupportedArchitectures", "Internal-Error-PR",
+                "Internal-Error-Static-Scan", "Internal-Error-URL",
+                "Internal-Error-Webhook", "Needs-SmartScreen-Investigation",
+                "Network-Blocker", "Package-Flagged", "PUA-Detection",
+                "PullRequest-Error", "Scripted-Application",
+                "URL-Validation-Error", "Validation-Certificate-Root",
+                "Validation-Defender-Error", "Validation-Executable-Error",
+                "Validation-Hash-Flagged", "Validation-Hash-Verification-Failed",
+                "Validation-HTTP-Error", "Validation-No-Executables",
+                "Validation-Shell-Execute", "Validation-SmartScreen",
+                "Validation-SmartScreen-Error", "Validation-Submission-Expired",
+                "Validation-Submission-Failed", "Validation-Submission-Mismatch",
+                "Validation-Submission-Missing",
+                "Validation-Submission-Unsupported",
+                "Validation-Virus-Scan-Error",
+              ];
+              if (
+                pull.data.state !== "open" ||
+                pull.data.head.sha !== expectedHead ||
+                !supported.includes(expectedLabel) ||
+                !labels.has(expectedLabel) ||
+                unsafe.some((label) => labels.has(label))
+              ) {
+                return;
+              }
+              if (
+                evidence?.pullRequestNumber !== target ||
+                evidence?.headSha !== expectedHead ||
+                evidence?.triggerLabel !== expectedLabel
+              ) {
+                core.setFailed("Sealed validation target binding is invalid.");
+                return;
+              }
+              if (evidenceMode === "checks") {
+                if (
+                  evidence.evidenceComplete !== true ||
+                  evidence.available !== true ||
+                  typeof evidence.operationId !== "string" ||
+                  evidence.operationId.length === 0 ||
+                  evidence.operationId.length > 128 ||
+                  !evidence.completionCheck ||
+                  evidence.completionCheck.name !==
+                    "10. Validation Completed" ||
+                  evidence.completionCheck.externalId !==
+                    evidence.operationId ||
+                  !Array.isArray(evidence.checks) ||
+                  evidence.checks.length === 0 ||
+                  evidence.checks.length > 5 ||
+                  evidence.checks.some(
+                    (check) =>
+                      check?.externalId !== evidence.operationId,
+                  )
+                ) {
+                  core.setFailed("Sealed Check evidence is not publishable.");
+                  return;
+                }
+              } else {
+                if (
+                  activeSupported.length !== 1 ||
+                  activeSupported[0] !== "Manifest-Singleton-Deprecated"
+                ) {
+                  core.notice("Singleton is not the sole active diagnosis.");
+                  return;
+                }
+                const filesResponse = await github.rest.pulls.listFiles({
+                  owner,
+                  repo,
+                  pull_number: target,
+                  per_page: 100,
+                  page: 1,
+                });
+                const files = filesResponse.data ?? [];
+                if (
+                  !Number.isSafeInteger(pull.data.changed_files) ||
+                  pull.data.changed_files <= 0 ||
+                  pull.data.changed_files > 50 ||
+                  files.length !== pull.data.changed_files ||
+                  String(filesResponse.headers?.link ?? "").includes(
+                    'rel="next"',
+                  )
+                ) {
+                  core.notice("Singleton file evidence is incomplete.");
+                  return;
+                }
+                const versionFolders = new Set();
+                const singletonFiles = [];
+                for (const file of files) {
+                  const match = String(file.filename ?? "").match(
+                    /^(manifests\/[0-9a-z]\/(?:[^/]+\/)+[^/]+)\/[^/]+\.yaml$/,
+                  );
+                  if (
+                    !match ||
+                    !["added", "modified"].includes(file.status)
+                  ) {
+                    core.notice("Singleton files are outside one version.");
+                    return;
+                  }
+                  versionFolders.add(match[1]);
+                  const response = await github.rest.repos.getContent({
+                    owner,
+                    repo,
+                    path: file.filename,
+                    ref: expectedHead,
+                  });
+                  const content = response.data;
+                  if (
+                    Array.isArray(content) ||
+                    content.type !== "file" ||
+                    content.encoding !== "base64" ||
+                    !Number.isSafeInteger(content.size) ||
+                    content.size <= 0 ||
+                    content.size > 65536
+                  ) {
+                    core.notice("Singleton manifest content is unavailable.");
+                    return;
+                  }
+                  const manifest = Buffer.from(
+                    content.content,
+                    "base64",
+                  ).toString("utf8");
+                  if (/^ManifestType:\s*singleton\s*$/m.test(manifest)) {
+                    singletonFiles.push({
+                      manifest,
+                      path: file.filename,
+                    });
+                  }
+                }
+                if (
+                  versionFolders.size !== 1 ||
+                  singletonFiles.length !== 1
+                ) {
+                  core.notice("Singleton evidence is not uniquely confirmed.");
+                  return;
+                }
+                const singleton = singletonFiles[0];
+                const manifestTypeFields = [
+                  ...singleton.manifest.matchAll(/^ManifestType\s*:/gm),
+                ];
+                const identifiers = [
+                  ...singleton.manifest.matchAll(
+                    /^PackageIdentifier:\s*([A-Za-z0-9][A-Za-z0-9._+-]{0,127})\s*$/gm,
+                  ),
+                ];
+                const identifierFields = [
+                  ...singleton.manifest.matchAll(/^PackageIdentifier\s*:/gm),
+                ];
+                const versions = [
+                  ...singleton.manifest.matchAll(
+                    /^PackageVersion:\s*([A-Za-z0-9][A-Za-z0-9._+()-]{0,127})\s*$/gm,
+                  ),
+                ];
+                const versionFields = [
+                  ...singleton.manifest.matchAll(/^PackageVersion\s*:/gm),
+                ];
+                if (
+                  manifestTypeFields.length !== 1 ||
+                  identifierFields.length !== 1 ||
+                  identifiers.length !== 1 ||
+                  versionFields.length !== 1 ||
+                  versions.length !== 1
+                ) {
+                  core.notice("Singleton identity is not uniquely confirmed.");
+                  return;
+                }
+                const identifier = identifiers[0][1];
+                const version = versions[0][1];
+                const expectedFolder =
+                  `manifests/${identifier[0].toLowerCase()}/` +
+                  `${identifier.replaceAll(".", "/")}/${version}`;
+                if (
+                  versionFolders.size !== 1 ||
+                  !versionFolders.has(expectedFolder) ||
+                  singleton.path.substring(
+                    0,
+                    singleton.path.lastIndexOf("/"),
+                  ) !== expectedFolder
+                ) {
+                  core.notice("Singleton identity does not match its path.");
+                  return;
+                }
+              }
+              const comments = await github.rest.issues.listComments({
+                owner,
+                repo,
+                issue_number: target,
+                per_page: 100,
+              });
+              if (
+                String(comments.headers.link ?? "").includes('rel="next"') ||
+                comments.data.some((comment) =>
+                  String(comment.body ?? "").includes(
+                    "Template: msftbot/authorAssist/manifestValidation",
+                  ) &&
+                  String(comment.body ?? "").includes(
+                    `Head SHA: \`${expectedHead}\``,
+                  ),
+                )
+              ) {
+                return;
+              }
+              const finalPull = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: target,
+              });
+              const finalLabels = new Set(
+                (finalPull.data.labels ?? []).map((label) => label.name),
+              );
+              if (
+                finalPull.data.state !== "open" ||
+                finalPull.data.head.sha !== expectedHead ||
+                !finalLabels.has(expectedLabel) ||
+                unsafe.some((label) => finalLabels.has(label))
+              ) {
+                return;
+              }
+              if (evidenceMode === "checks") {
+                const response = await github.rest.checks.listForRef({
+                  owner,
+                  repo,
+                  ref: expectedHead,
+                  app_id: 1451866,
+                  filter: "all",
+                  per_page: 100,
+                });
+                const runs = response.data?.check_runs ?? [];
+                if (
+                  response.data?.total_count !== runs.length ||
+                  runs.length > 100
+                ) {
+                  core.setFailed("Fresh Check evidence is incomplete.");
+                  return;
+                }
+                const trustedRuns = runs.filter(
+                  (check) =>
+                    check?.app?.id === 1451866 &&
+                    check?.app?.slug === "wingetvalidator-prod" &&
+                    check?.head_sha === expectedHead,
+                );
+                const operationPattern = new RegExp(
+                  `^WinGetSvc-Validation-${target}-([0-9]+)$`,
+                );
+                const selectedMatch = operationPattern.exec(
+                  evidence.operationId,
+                );
+                const sequences = trustedRuns.map((check) => {
+                  const match = operationPattern.exec(
+                    String(check.external_id ?? "").trim(),
+                  );
+                  return match ? BigInt(match[1]) : null;
+                });
+                const completion = trustedRuns.find(
+                  (check) =>
+                    check.id === evidence.completionCheck.id &&
+                    check.name === "10. Validation Completed" &&
+                    check.status === "completed" &&
+                    String(check.external_id ?? "").trim() ===
+                      evidence.operationId,
+                );
+                const blocks = [
+                  ...String(completion?.output?.text ?? "").matchAll(
+                    /```json\s*([\s\S]*?)```/gi,
+                  ),
+                ];
+                let payload = null;
+                try {
+                  if (blocks.length === 1) {
+                    payload = JSON.parse(blocks[0][1]);
+                  }
+                } catch {
+                  payload = null;
+                }
+                const freshOperation = trustedRuns.filter(
+                  (check) =>
+                    String(check.external_id ?? "").trim() ===
+                      evidence.operationId,
+                );
+                const freshById = new Map(
+                  freshOperation.map((check) => [check.id, check]),
+                );
+                if (
+                  !selectedMatch ||
+                  sequences.some(
+                    (sequence) =>
+                      sequence === null ||
+                      sequence > BigInt(selectedMatch[1]),
+                  ) ||
+                  !completion ||
+                  completion.conclusion !== "success" ||
+                  payload?.PullRequestNumber !== target ||
+                  String(payload?.OperationId ?? "").trim() !==
+                    evidence.operationId ||
+                  evidence.checks.some((sealed) => {
+                    const fresh = freshById.get(sealed.id);
+                    return (
+                      !fresh ||
+                      fresh.name !== sealed.name ||
+                      fresh.status !== "completed" ||
+                      fresh.conclusion !== sealed.conclusion ||
+                      fresh.completed_at !== sealed.completedAt ||
+                      (fresh.output?.title ?? null) !==
+                        sealed.output.title ||
+                      (fresh.output?.summary ?? null) !==
+                        sealed.output.summary ||
+                      String(fresh.output?.text ?? "") !==
+                        sealed.output.text
+                    );
+                  })
+                ) {
+                  core.setFailed(
+                    "The sealed validation operation is no longer current.",
+                  );
+                  return;
+                }
+              }
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: target,
+                body: `${body}\n\n###### Template: msftbot/authorAssist/manifestValidation by [Manifest Validation Diagnosis](${process.env.RUN_URL})`,
+              });
 ---
 
 # Manifest Validation Diagnosis (Experimental)
@@ -63,9 +771,9 @@ safe-outputs:
 ## Task
 
 Diagnose a manifest validation failure on a `microsoft/winget-pkgs` pull request. Read the concrete
-failure from the most recent relevant ADO validation log, correlate it with the submitted manifest
-files, and post one concise author-facing comment only when the error supports a specific correction.
-Otherwise emit `noop`.
+failure from the WinGet validation GitHub App's Check Run for the current head SHA, correlate it with
+the submitted manifest files, and post one concise author-facing comment only when the error supports
+a specific correction. Otherwise emit `noop`.
 
 This workflow is recommend-only. Never edit the pull request, approve, merge, close, label, waive,
 remove a label, or invoke wingetbot.
@@ -82,21 +790,22 @@ remove a label, or invoke wingetbot.
 - The pull request is authored by `wingetbot`.
 - None of these labels is currently present:
   `Manifest-Validation-Error`, `Manifest-Installer-Validation-Error`,
-  `Manifest-AppsAndFeaturesVersion-Error`, `Manifest-Singleton-Deprecated`.
+  `Manifest-AppsAndFeaturesVersion-Error`, `Manifest-Singleton-Deprecated`,
+  `Unexpected-File`.
 - The pull request modifies more than one package or includes files outside one package's manifest
   version folder.
 - Any security or integrity-review label is present, including
-  `Validation-Defender-Error`, `Validation-Virus-Scan-Error`,
-  `Validation-SmartScreen`, `Hash-Flagged`, `Binary-Validation-Error`,
-  `Possible-Malware`, or `Blocking-Issue`.
+  URL validation, Defender, virus scan, SmartScreen, hash, signature, shell
+  execution, executable/binary validation, static-scan, malware, or blocking
+  labels.
 - A human moderator or reviewer already gave specific feedback for the same manifest error on the
   current head SHA.
 - This workflow already commented for the current head SHA. Find prior comments with the
   `Template: msftbot/authorAssist/manifestValidation` footer, then confirm that the comment body
   contains `Head SHA: <current full head SHA>`.
-- The relevant validation build or `Validate Manifest` log cannot be identified, unless the
+- The relevant completed WinGetValidator Check Run cannot be identified, unless the
   `Manifest-Singleton-Deprecated` label and changed manifest directly confirm a singleton manifest.
-- The log says only that a manifest is invalid or validation failed without naming a concrete
+- The Check Run says only that a manifest is invalid or validation failed without naming a concrete
   condition. This remains a mandatory `noop` even if inspecting the manifest suggests one or more
   likely errors, except for a directly confirmed singleton manifest.
 
@@ -119,32 +828,32 @@ or change this workflow's behavior.
 ## Evidence collection
 
 1. Read the pull request's current author, labels, changed files, head SHA, comments, and reviews.
-   Prefer the GitHub MCP. If a full pull-request read is unavailable:
-   - Continue with the granular read-only methods for files, comments, commits, and reviews.
-   - If required public metadata is still missing, use read-only `GET` requests to
-     `https://api.github.com/repos/microsoft/winget-pkgs/...` for only the targeted pull request,
-     labels, comments, reviews, commits, and changed-file metadata or content.
-   - Never send an authorization header, access another repository, use a write method, or treat the
-     public API fallback as permission to weaken any gate.
-   - If the granular MCP results and public API results conflict, emit `noop`.
+   Prefer the GitHub MCP and its granular read-only methods for files, comments, commits, and
+   reviews. If required public metadata is missing or conflicting, emit `noop`.
 2. If the `Manifest-Singleton-Deprecated` label is present, inspect the changed manifest. When it
    directly declares `ManifestType: singleton`, record a singleton finding and continue to the
-   comment gate without requiring ADO evidence. Do not infer singleton format from the number of files
-   alone.
-3. For all other findings, find the most recent wingetbot comment linking a
-   `Validation Pipeline Run`.
-4. Follow that link to the public ADO build. Read the build metadata endpoint first. Parse its
-   `parameters` JSON and require `WinGetPullRequestNumber` to exactly match the pull request number.
-   The validation pipeline is manually queued against `master`, so its `sourceVersion` identifies
-   the base-branch checkout and must not be treated as the pull-request revision. Revision freshness
-   comes from the trusted label-event head SHA gate above.
-5. Read only the matching build's status, timeline, and text logs needed to locate the
-   `Validate Manifest` task.
-6. Extract only the manifest-validation error lines and their immediately surrounding context.
-7. Read the changed manifest files from the pull request to confirm the affected filename, path,
+   comment gate without requiring validation Check evidence. Use `evidence_mode: singleton`. Do not
+   infer singleton format from the number of files alone.
+3. Run `cat "/tmp/gh-aw/validation-checks.json"`. A deterministic pre-agent step fetched only Check
+   Runs whose app slug is exactly `wingetvalidator-prod` and whose `head_sha` exactly matches the
+   pull request's current full head SHA. It also required the completion output's
+   `PullRequestNumber` to match the target and accepted failure checks only from the same validation
+   `OperationId`. If `evidenceComplete` is not exactly `true`, or the recorded PR number or head SHA
+   does not match the target, emit `noop`. If `available` is false, emit `noop` unless step 2 directly
+   confirmed a singleton manifest. For a Check-backed finding, use `evidence_mode: checks`.
+4. Select the failed Check Run in `checks` that corresponds to the active validation label. Use
+   `completionCheck` only to confirm the operation and labels. If multiple failing checks conflict
+   or no check names the active condition, emit `noop`.
+5. Extract only the relevant error lines from the selected Check Run's `output.title`,
+   `output.summary`, and `output.text`, with their immediately surrounding context.
+6. Read the changed manifest files from the pull request to confirm the affected filename, path,
    field, `ManifestType`, and `ManifestVersion`.
 
-Except for a directly confirmed singleton manifest, the validation log is the source of the
+For `Unexpected-File`, report a path only when `01. Pull Request Validation` explicitly names it and
+the exact normalized relative path is still present as an added file in the current diff. Never infer
+the offending path from the diff alone.
+
+Except for a directly confirmed singleton manifest, the validation Check Run is the source of the
 diagnosis. Use manifest contents only to confirm and explain a condition already named by the log. Do
 not independently lint the manifests, infer the hidden reason behind a generic validation failure,
 or comment on additional issues discovered only through manifest inspection.
@@ -176,9 +885,20 @@ Comment only when the allowed evidence identifies at least one of:
    other sensitive value. For `SignatureSha256`, say it differs from scanned installer metadata but
    never reproduce the hash.
 7. **Apps and Features version overlap.** State that the submitted `DisplayVersion` overlaps the
-   published index range quoted by the log. Recommend verifying the actual installed display version,
-   removing the entry if it merely duplicates package metadata, or correcting it to the unique value.
-   Do not assert which option is correct without evidence.
+   published index range quoted by the log. Inspect only the exact package folder and related pull
+   requests for the exact `PackageIdentifier`; never search the full `manifests/` tree. Classify the
+   conflict as an index transition only when exactly one
+   removal-only pull request deletes a version with the overlapping `DisplayVersion`, and the
+   remaining published versions would not retain the overlap. If that removal is open or merged but
+   lacks `Publish-Pipeline-Succeeded`, advise waiting for publication. If it published after this
+   failed operation, explain that a maintainer may revalidate. If any remaining published version
+   retains the overlap, emit `noop`. Otherwise recommend verifying the actual installed display
+   version without guessing a replacement or assuming it equals `PackageVersion`.
+8. **Unexpected file.** Quote only each normalized repository-relative path explicitly named by
+   `01. Pull Request Validation` and confirmed as an added file in the current diff. Explain that the
+   file is outside the allowed manifest set and should be removed. Emit `noop` for `.validation`
+   files, malformed or traversal-like paths, deleted or renamed files, package moves or removals,
+   project-file contributions, mixed project/manifest changes, or when the Check and diff disagree.
 
 Deduplicate repeated identical errors emitted once per manifest file. Preserve distinct errors.
 
@@ -187,7 +907,7 @@ Deduplicate repeated identical errors emitted once per manifest file. Preserve d
 - `Manifest is invalid` without the underlying parser or schema reason.
 - `Manifest Validation Failed` without a more specific preceding error.
 - Generic pipeline, Guardian, checkout, Defender-signature-update, or task-wrapper noise.
-- `Manifest-Version-Deprecated` or other sibling-label conditions outside this workflow's four
+- `Manifest-Version-Deprecated` or other sibling-label conditions outside this workflow's five
   target labels.
 - A condition that requires inspecting or executing the installer.
 - A guessed correction not supported by the log, manifest, or matching schema.
@@ -228,17 +948,19 @@ Post one concise comment:
 >
 > Head SHA: `<full head SHA>`
 >
-> Validation run: `<full ADO build URL>`
+> Validation check: `<exact WinGetValidator Check Run name>`
 >
 > Relevant reference: `<full schema or documentation URL, when applicable>`
 >
 > </details>
 
+Submit the body and exact `evidence_mode` through `post_pr_comment`; that tool
+accepts no target fields.
 Include only concrete findings. Do not repeat the generic Validation Guide message. Do not mention
 model names, token usage, workflow internals, installer URLs, or hashes. Include the request to update
 the manifest and rerun validation only once. For a directly confirmed singleton manifest, omit the
-validation-run line when no matching build is available and use the authoring-documentation URL as
-the relevant reference.
+validation-check line when no matching Check Run is available and use the authoring-documentation URL
+as the relevant reference. Do not add a `Template:` line; the privileged fixed-target job appends it.
 
 ## Hard rules
 
@@ -249,5 +971,5 @@ the relevant reference.
 - Never handle security findings.
 - Never comment on wingetbot-authored pull requests.
 - Never reverse-engineer a diagnosis from manifest contents when the validation log is generic.
-- Only bypass ADO evidence requirements for a directly confirmed singleton manifest.
+- Only bypass validation Check Run evidence requirements for a directly confirmed singleton manifest.
 - If uncertain, emit `noop`.

@@ -1,0 +1,99 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Psychotoxical.Psysonic
+PackageVersion: 1.51.0
+PackageLocale: en-US
+Publisher: Psysonic
+PublisherUrl: https://github.com/Psychotoxical
+PublisherSupportUrl: https://github.com/Psychotoxical/psysonic/issues
+PackageName: Psysonic
+PackageUrl: https://www.psysonic.de/
+License: GPL-3.0
+LicenseUrl: https://github.com/Psychotoxical/psysonic/blob/HEAD/LICENSE
+ShortDescription: Gorgeous, modern desktop client for Navidrome and Subsonic music servers
+Description: A beautiful desktop music player built for Subsonic API compatible servers (Navidrome, Gonic, etc.). Built with Tauri v2 and React, featuring a native Rust/rodio audio engine, community theme store, Last.fm integration, synchronized lyrics, EQ, crossfade, gapless playback, and more.
+Tags:
+- audio
+- music
+- navidrome
+- player
+- subsonic
+ReleaseNotes: |-
+  Added
+  True simultaneous multi-server support — use every server as one music library
+  By @cucadmuh, PR #1326
+  - Select music folders from several configured servers in the same priority-ordered library scope. Psysonic browses them simultaneously without making you switch the active server before every search, album, artist or playback action.
+  - Home, Albums, Artists, Composers, Genres, Favourites, Playlists, Folder Browser, Search, Most Played, Statistics, album details and artist details aggregate the selected servers into one catalogue. Shared music is de-duplicated by scope priority instead of appearing once per server.
+  - De-duplication no longer discards physical ownership: each logical track, album and artist retains every concrete server source. Psysonic can therefore show one clean catalogue while still knowing exactly which server must handle playback, artwork, metadata and mutations.
+  Mixed-server playback — one queue can play tracks from different servers
+  By @cucadmuh, PR #1326
+  - A single queue can contain tracks owned by different servers. Each item resolves its stream, cover, lyrics, ReplayGain data and analysis against its own server instead of whichever server is currently active.
+  - Server play queues are pulled, updated and reconciled per owner, so mixed queues survive restart without one server replacing another server's tracks. Gapless, crossfade, infinite queue, shuffle, history and queue restore keep the same ownership.
+  - When one copy cannot play, a new source chooser can offer equivalent copies from the selected servers rather than failing the whole action. Album, artist and track source controls also let you choose a specific physical copy when that distinction matters.
+  Server-aware destinations and actions
+  By @cucadmuh, PR #1326
+  - Playlist creation, smart-playlist editing, radio actions and other destination-sensitive flows select the target server explicitly instead of silently using the active server.
+  - Context menus, ratings, favourites, sharing, offline pins, device sync and Orbit carry the item's owner through the complete action. Creating an Orbit session from a multi-server scope now asks which server should host it, temporarily keeps only that server in the library scope and shared queue, then restores the previous scope when the session ends.
+  - Sharing a mixed-server queue opens a compact server picker directly below the share button; choosing a server copies its tracks immediately, while single-server queues still copy without an extra prompt. Unavailable servers are marked with an explanatory warning.
+  Debug logging — selectable multi-server diagnostics
+  By @cucadmuh, PR #1331
+  - Settings → System → Logging and PsyLab → Logs offer basic and verbose debug-depth levels while Debug logging is enabled. Verbose mode adds structured multi-server scope, reachability, music-folder and New Releases diagnostics, with credentials and sensitive URL data redacted.
+  Streaming quality — per-address Navidrome bitrate and format controls
+  By @Manwe-777, PR #1334
+  - Saved Navidrome servers can request no bitrate cap or a 320…64 kbps ceiling, with Auto / MP3 / Opus / AAC as the target format. Settings are stored per address, so LAN and public endpoints can use different quality profiles and playback follows the connected endpoint.
+  - Offline pins, favourites sync and hot-cache prefetch use the original-stream path; confirmed Navidrome profiles request format=raw, while other servers keep the existing uncapped request. Transcoded live bytes are not promoted as original files, and completed-stream reuse stays isolated by endpoint, account, format and bitrate cap.
+  - Waveform, loudness and enrichment may analyse the played stream, but canonical results stay anchored to the original file's validated raw fingerprint. Different bitrate representations share one track revision, and a failed original probe cannot overwrite library identity.
+  - Because analysis stays anchored to the original, the first play of a track that arrives transcoded also fetches that original once in the background. Later plays skip it, but on a slow link the first play of each new track costs the capped stream plus the original — the cap saves bandwidth from the second play onwards.
+  - After updating, Psysonic checks every offline pin, synced favourite and hot-cache file once against the original's fingerprint, using a 16 KB request per file rather than a fresh download. Pinned albums can briefly show as incomplete while that runs; files that turn out to be a server transcode are replaced with the original.
+  Album details — disc covers in the multi-disc separator
+  By @Psychotoxical and @cucadmuh, PR #1336
+  - Multi-disc albums show each disc's cover next to "CD N" instead of a generic disc icon. Releases with distinct per-disc artwork show each disc's own cover; other albums fall back to the shared album art.
+  - On Navidrome, the queue, playbar mini-cover and "Who is listening?" use the same per-disc artwork, so a multi-disc release no longer keeps showing disc 1 everywhere outside the album page.
+  - Clearing the cover cache no longer leaves junk mf-* directories under the album cover store after browsing All Albums.
+  Fullscreen player — volume slider in Minimal and Immersive modes
+  By @Psychotoxical, PR #1340
+  - The fullscreen player's volume control, previously only in Prism mode, is now also in the Minimal and Immersive styles — a mute toggle plus an always-visible level slider.
+  Theme store — respect a theme's minimum app version
+  By @Psychotoxical, PR #1344
+  - A store theme that needs a newer Psysonic now shows "requires a newer version" in place of the install button, and pending updates that need a newer app are held back, instead of the install failing with a generic error. The notice clears once the app itself is updated.
+  Themes — bundle local images and fonts
+  By @Psychotoxical, PR #1345
+  - Themes can ship their own images and fonts in an assets/ folder and reference them with a relative url("assets/…"), instead of embedding everything as inline data. Assets are written to disk on install and served locally — themes still never reach the network. Works for both Theme Store installs and imported .zip themes; uninstalling a theme removes its files.
+  Theme store — a random theme of the moment
+  By @Psychotoxical, PR #1357
+  - The store now suggests one theme above the search box, picked from further down the catalogue and preferring themes you have not installed. The store lists themes by last change, so older ones were only ever found by paging to the end. Show another picks a different one; installing or applying the suggestion leaves it in place.
+  Player views — click any artist of a credit
+  By @enncoded, PR #1371
+  - Artist names link to the artist page in all three fullscreen styles, the detached mini player and the mobile layout — until now only album and queue rows offered this. Clicking one in fullscreen closes the overlay so the artist page is right there.
+  - Joined credits such as "Primary feat. Guest" read as separate artists, including the bullet separator Navidrome uses when a track carries only plural artist tags. Names like AC/DC stay intact.
+  Audio visualizer — spectrum, scopes and fullscreen views
+  By @Manwe-777, PR #1375
+  - Now Playing and every fullscreen-player style can show a responsive spectrum, oscilloscope, radial scope or stereo field, with cover-derived or theme colours and an expanded window view.
+  - Sensitivity, response, frame rate and peak markers are configurable under Settings → Appearance → Visualizer. Internet radio is supported while its equalizer audio graph is active.
+  Visualizer — separate switches for Now Playing and the fullscreen player
+  By @Psychotoxical, PR #1378
+  - The visualizer can now be switched on for the fullscreen player alone, or for Now Playing alone, under Settings → Appearance → Visualizer. An existing off setting is kept as it was.
+  - The section's controls are grouped into two panels, and long option names such as the radial scope are no longer cut off in translated interfaces.
+  Performance benchmarks — measure real pages from the CLI
+  By @cucadmuh, PR #1382
+  - psysonic benchmark run drives the running desktop app through representative core or all-page scenarios, with realistic and isolated profiles plus repeatable run counts.
+  - JSON reports retain route readiness, React work, quiet time, long tasks and environment details, then compare each run with the previous matching report.
+  Random Mix — combine several genres in one playlist
+  By @cucadmuh, PR #1421, requested by Gypsy on the Psysonic Discord
+  - Select several genre chips at once to build one random playlist instead of replacing the previous selection. Psysonic balances songs across the selected genres and removes duplicates before playback.
+  - Selected genres stay visible when showing a different set of popular genres, and rapid changes keep only the newest mix.
+  Audio controls — fade smoothly when pausing and resuming
+  By @cucadmuh, PR #1422
+  - Settings → Audio → Track transitions can fade playback out before pausing and back in when resuming, with a configurable 0.1–2.0 second duration and a 1.0 second default.
+  - The optional fade works with both ordinary playback and internet radio, while rapid pause, resume and stop actions cancel stale fades instead of changing playback later.
+  Timeline — replay from any point in listening history
+  By @cucadmuh, PR #1423
+  - Right-click a past Timeline track and choose Play from Here to replay that occurrence, every later history entry and the existing Up Next list in their original order.
+  - Mixed-server ownership and queue-only flags stay attached to each rebuilt entry, so the restored sequence plays from the correct servers.
+  Changed
+  Library index — designed for several live servers at once
+  By @cucadmuh, PR #1326
+ReleaseNotesUrl: https://github.com/Psychotoxical/psysonic/releases/tag/app-v1.51.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,92 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Xiaomi.MiMoCode.Baseline
+PackageVersion: 0.1.14
+PackageLocale: en-US
+Publisher: Beijing Xiaomi Mobile Software Co., Ltd.
+PublisherUrl: https://mimo.xiaomi.com/
+PublisherSupportUrl: https://github.com/XiaomiMiMo/MiMo-Code/issues
+Author: Beijing Xiaomi Mobile Software Co., Ltd.
+PackageName: MiMoCode (Baseline)
+PackageUrl: https://mimo.xiaomi.com/mimocode
+License: MIT
+LicenseUrl: https://github.com/XiaomiMiMo/MiMo-Code/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2026 MiMo Code, Xiaomi Corporation
+  Copyright (c) 2025 opencode
+CopyrightUrl: https://platform.xiaomimimo.com/docs/terms/user-agreement
+ShortDescription: A next-generation AI coding assistant for developers. Unlimited context lets you understand, build, and collaborate more efficiently.
+Description: |-
+  MiMoCode is a terminal-native AI coding assistant. It can read and write code, run commands, manage Git, and use a persistent memory system to keep a deep understanding of your project across sessions while continuously improving itself.
+  MiMo Auto is built in as a free-for-limited-time channel, so you can start with zero configuration. MiMoCode also supports connecting to any mainstream LLM provider API.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- mimo
+- programming
+ReleaseNotes: |-
+  Summary
+  Interrupted or errored turns stay recoverable: the incomplete assistant message is kept as a candidate, and /recover continues the turn append-only without rewriting history.
+  Conversation titles can be generated through a dedicated API (POST /experimental/title, plus a genTitle helper) that falls back to a lite model when the preferred one is unavailable or returns invalid output.
+  TUI voice input is upgraded to a tool-based voice_input protocol: ASR applies caret/selection-aware insert or set, submit stays explicit through the send field, and the call shape is validated so models can drive it reliably.
+  Also in this release: compaction keeps a summary plus only the API rounds that arrive while that summary is generated, triggers at a flat 90% of the context window, and collapses the post-rebuild tail into an activity log; unused actor spawn/run resume arguments removed so models are pointed at send (already the supported path for waking and continuing a subagent); subagent actor use via exec limited to send; nested exec tool calls persisted and replayable in the TUI; same-session subagents inherit parent permission grants; per-session system prefix frozen in a snapshot for stable prompt-cache prefixes; optional auto_worktree notice (default off); skills updates for mate, pdf-official CJK fonts, and pptx-official image sourcing; plus provider/retry, MCP, compose-next, and build fixes.
+
+  中断或出错的回合仍可恢复：未完成的 assistant 消息会保留为候选，/recover 以 append-only 方式续跑，不改写历史。
+  会话标题可通过专用 API 生成（POST /experimental/title 与 genTitle helper）；首选模型不可用或返回无效结果时，会回退到 lite model。
+  TUI 语音输入升级为基于工具的 voice_input 协议：ASR 按光标/选区做 insert 或 set，发送始终由 send 字段显式触发；调用 schema 经过校验，模型可以稳定驱动。
+  本版本还包括：compaction 保留 summary 以及生成期间到达的 API 轮次，触发条件改为上下文窗口的固定 90%，重建后的 tail 收成活动日志；删除 actor spawn/run 中未实现的 resume 参数，把模型导向本来就能用的 send；子代理经 exec 使用 actor 时仅允许 send；嵌套 exec 调用会持久化且可在 TUI 回放；同会话子代理继承父级权限；会话 system prefix 冻结进快照以保持 prompt-cache 前缀稳定；可选的 auto_worktree 提示（默认关闭）；mate、pdf-official 中日文字体与 pptx-official 配图规则等 skill 更新；以及 provider/重试、MCP、compose-next 与构建相关修复。
+  Features
+  - tui: upgrade voice input to the tool-based voice_input protocol (caret/selection insert/set, explicit send, validated schema) by @yanyihan-xiaomi in #2308, #2309
+  - session: project compaction as a summary plus compression-time tail; fire at a flat 90% of the context window; add MIMOCODE_COMPACTION_MAX_CONTEXT env default by @MiMoHardFather in #2294, #2263, #2260
+  - session: support append-only interrupted turn recovery (/recover, TUI recover action); keep errored assistants as recovery candidates by @wqymi in #2205, #2279
+  - session: collapse rebuild tail into a compact activity log instead of replaying verbatim tool results by @wqymi in #2275
+  - session: freeze the per-session system prefix in a persistent snapshot; move skill catalogs from user messages to the system tail; preserve prompt cache prefixes by @MiMoHardFather in #2289, #2287, #2258
+  - sdk: expose reliable POST /experimental/title / genTitle with lite-model fallback and write guards by @wqymi in #2228
+  - actor: drop unimplemented spawn/run actor_id resume arguments; keep send as the path for waking and continuing a subagent by @yanyihan-xiaomi in #2262
+  - actor: limit subagent actor calls through exec to send only by @wqymi in #2217, #2223
+  - exec: persist replayable nested tool parts (versioned snapshots, TUI renderers, debounce) by @yanyihan-xiaomi in #2222
+  - permission: same-session subagents inherit parent grants (fall back to current session id for inherit parent) by @wqymi in #2273
+  - config: add auto_worktree toggle (default off); path-based once-per-session main-worktree mutation notice by @wqymi in #2227, #2270, #2292
+  - skill: add mate builtin skill for desktop pet creation by @oscar-cao7 in #2225
+  - skill: pdf-official CJK font protocol (per-OS TTF ladder, CID STSong-Light fallback, never Helvetica) by @oscar-cao7 in #2189
+  - skill: pptx-official image sourcing decision rules (draw / cite / search / generate; limited image_gen budget) by @oscar-cao7 in #2265
+  - provider: route Xiaomi PTC through Responses custom exec; keep exec gateway available under GPT tool filtering by @MiMoHardFather in #2203, #2183
+  - tool-script: typed exec_command parameters (cmd, yield_time_ms, workdir); resolve MCP-prefixed tool aliases by @MiMoHardFather in #2180, #2202
+  Bug Fixes
+  - provider: use 128K output defaults for large model families; align large-model output and compaction reserves by @MiMoHardFather in #2181, #2182
+  - provider: stabilize defaultModel fallback (cfg → recent → id-asc first allowed; no menu-priority sort) by @wqymi in #2306
+  - session: centralize provider retry coordination (terminal vs transient, Retry-After, no live-step replay after side effects) by @wqymi in #2216
+  - session: scope replace-agent base override to main/peer actors so subagents keep their own agent prompt by @MiMoHardFather in #2264
+  - session: allow relative paths within the workspace for file/search tools by @yanyihan-xiaomi in #2251
+  - session: defer text part creation until first delta (no empty text shells in DB) by @wqymi in #2193
+  - skill: replace broken skill-tools filtering with glob prefix matching; remove skill-search reminder infrastructure by @MiMoHardFather in #2166, #2168
+  - llm-server: advertise Server.listen so mimo llm-server issue resolves a real base_url; publish/unpublish on serve stop by @wqymi in #2293
+  - mcp: record local startup exit code and stderr tail on stdio failure by @wqymi in #2269
+  - mcp: show MiMoCode branding in OAuth callback pages and DCR client registration by @MiMoHardFather in #2301
+  - compose-next: require spec to land in the worktree (pipeline grill → workspace → spec → implement) by @yanyihan-xiaomi in #2307
+  - actor: scope fork contexts by session so repeated actor ids cannot collide across sessions by @wqymi in #2259
+  - build: prevent ancestor node_modules bun from hijacking compiled binaries (pin check + process.execPath) by @MiMoHardFather in #2291
+  - build-node: define MIMOCODE_VERSION for the node target so embedded builds stop extracting under builtin_skills/local/ by @yanyihan-xiaomi in #2297
+  Refactor
+  - skill: move drive-mimo to repository scope (.mimocode/skills/) instead of the product-wide builtin bundle by @yanyihan-xiaomi in #2210
+  - session: simplify harness selection — explicit harness flag is the single source of truth; PTC transport no longer auto-selects the GPT toolset; MIMOCODE_CODEX_MODE=false forces the default harness for every model by @MiMoHardFather in #2243, #2252, #2303
+  - tool: remove standalone change_directory; require absolute working directories for shell/code-mode commands by @yanyihan-xiaomi in #2239
+  - prompt: rewrite Tools section as “Using your tools” guidance; instruction files default-on and decoupled from the dynamic system prompt flag by @MiMoHardFather in #2302, #2285
+  Internal / CI
+  - session: retune the auto-overflow fixture for the flat 90% trigger by @yanyihan-xiaomi in #2266
+  - sdk: regenerate openapi and js sdk types (projection schema, harness description, compaction field docs) by @yanyihan-xiaomi in #2310
+  - chore: bump version to 0.1.14 by @yanyihan-xiaomi in #2311
+  Full Changelog: https://github.com/XiaomiMiMo/MiMo-Code/compare/v0.1.13...v0.1.14
+ReleaseNotesUrl: https://github.com/XiaomiMiMo/MiMo-Code/releases/tag/v0.1.14
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://mimo.xiaomi.com/mimocode/start
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

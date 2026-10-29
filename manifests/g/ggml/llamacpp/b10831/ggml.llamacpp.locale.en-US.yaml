@@ -1,0 +1,139 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ggml.llamacpp
+PackageVersion: b10831
+PackageLocale: en-US
+Publisher: ggml
+PublisherUrl: https://github.com/ggml-org
+PublisherSupportUrl: https://github.com/ggml-org/llama.cpp/issues
+PackageName: llama.cpp
+PackageUrl: https://github.com/ggml-org/llama.cpp
+License: MIT
+LicenseUrl: https://github.com/ggml-org/llama.cpp/blob/HEAD/LICENSE
+ShortDescription: LLM inference in C/C++
+Tags:
+- ggml
+- llama
+ReleaseNotes: |-
+  vulkan: add TQ1_0 support (mm, mat-vec, mat-vec-id, dequant, get_rows) (#27765)
+  - vulkan: add TQ1_0 support (mm, mat-vec, dequant, get_rows)
+  - vulkan: pack TQ1_0 powers of 3 into a 32-bit constant
+  Replaces the constant array with a packed 32-bit value (7 bits per entry,
+  max 81 < 128) extracted with shift/mask, as suggested in review — avoids a
+  constant array that may not be kept in registers.
+  test-backend-ops on gfx1151: tq1_0 MUL_MAT 11/11, MUL_MAT_ID 6/6,
+  GET_ROWS 4/4, unchanged.
+  - vulkan: address review - shared TQ1_0 decode helpers, fix standalone dequant shader
+  Review feedback from jeffbolznv, all points:
+  - Move the packed-pow3 decode into shared helpers in types.glsl
+    (tq1_0_byte_of / tq1_0_digit_of / tq1_0_trit) and use them from
+    dequant_funcs.glsl, mul_mm_funcs.glsl, dequant_funcs_cm2.glsl and
+    dequant_tq1_0.comp instead of repeating the logic. The cm2 path also
+    drops its constant array for the packed-constant extraction.
+  - Translate all remaining comments to English.
+  - dequant_tq1_0.comp: use dequant_head.glsl. The shader previously declared
+    its own single-field push constant while the pipeline is created with the
+    5-field layout, so p.ne read the wrong field - confirmed broken, as
+    suspected in review.
+  - Fix wg_denoms for the standalone dequant pipeline: one invocation decodes
+    4 elements with local_size 256, so a workgroup covers 2564 elements, not
+    25616. With the old value the dispatcher launched a quarter of the
+    required workgroups.
+  Verified by temporarily forcing the dequant + f16 matmul path for TQ1_0
+  (hack not committed): test-backend-ops MUL_MAT passes through the rewritten
+  standalone shader, and the standard MUL_MAT / MUL_MAT_ID / GET_ROWS
+  tq1_0 cases still pass on Vulkan (AMD gfx1151).
+  - vulkan: address review — English comments, shared tq1_0_trit, trim TQ1_0 test cases
+  - mul_mat_vec_tq1_0.comp: drop leftover non-English comment and the local
+    POW3_PACKED constant; all decode sites now call tq1_0_trit() from types.glsl
+  - types.glsl / dequant_funcs_cm2.glsl: ASCII-only, drop stale reviewer note
+  - test-backend-ops: remove the oversized MUL_MAT_ID case (432 MiB A tensor,
+    ~172 GFLOP reference); move the two remaining ones next to the other
+    backend-specific mul_mat_id one-offs and document why they are needed
+  - metal: decline TQ1_0 for GET_ROWS and mat-mul in supports_op
+  The new TQ1_0 cases in test-backend-ops exposed that the Metal backend
+  claimed support for GET_ROWS/MUL_MAT/MUL_MAT_ID with TQ1_0 sources while
+  having no such kernels (ggml_metal_library_compile_pipeline aborted on the
+  missing kernel_get_rows_tq1_0). Decline the type so the ops fall back to
+  the CPU, matching the existing NVFP4 handling on the same lines.
+  Assisted-by: Claude Fable 5
+  - vulkan: trim the TQ1_0 comments
+  Addresses @0cc4m's review: keep only what the code does not already say.
+  Removed the block-format recaps (the layout is right there in the struct) and
+  the step-by-step decode walkthrough. Kept the two facts a reader cannot infer:
+  the 8-bit truncation is part of the format, not an optimisation, and the powers
+  of 3 are packed into one uint so they do not end up in a constant array that
+  may miss the registers.
+  No functional change.
+  - vulkan: address review — trim comments, fold Metal check, drop unused _v
+  Per @0cc4m's review:
+  - dequant_funcs.glsl, dequant_funcs_cm2.glsl: drop the "see types.glsl"
+    pointers — they apply to every quant and say nothing specific.
+  - dequant_tq1_0.comp: drop the wg_denoms note. It is a precondition, not
+    information.
+  - mul_mm_funcs.glsl: same pointer removed.
+  - types.glsl: the comment on tq1_0_trit is down to the one fact the code
+    cannot show — the 8-bit truncation is part of the format, matching the C
+    reference, not an optimisation.
+  - dequant_funcs_cm2.glsl: removed dequantFuncTQ1_0_v and its define. You were
+    right that it is optional: it wrapped four scalar decodes and vectorised
+    nothing, and mul_mm_cm2.comp already guards the path with
+    #if defined(dequantFuncA_v) (DATA_A_F32 omits it the same way).
+  - ggml-metal-device.m: folded TQ1_0 into the existing NVFP4 check instead of a
+    separate block, and dropped both comments.
+  - test-backend-ops.cpp: the two mul_mat_id cases stay — they cover the
+    block-stride loop and the per-expert base offset that k == 256 alone never
+    reaches — but the comment is now one line instead of five.
+  Kept: the one-line labels on the three block regions in mul_mat_vec_tq1_0.comp
+  and on tq1_0_byte_of(). Those state the 5-trits-per-byte packing, which the
+  loop bounds do not show. Happy to remove them too if you prefer.
+  Re-verified on AMD gfx1151 (Vulkan), test-backend-ops, 2/2 backends passed:
+  MUL_MAT 9 TQ1_0 cases, MUL_MAT_ID 5, GET_ROWS 4 — all OK, no failures.
+  The coopmat2 path is unchanged apart from the removed _v define.
+  Website:
+  - https://llama.app
+  Attestations:
+  - https://github.com/ggml-org/llama.cpp/attestations/45655910
+  macOS/iOS:
+  - macOS Apple Silicon (arm64)
+  - macOS Apple Silicon (arm64, KleidiAI enabled) DISABLED
+  - macOS Intel (x64)
+  - iOS XCFramework
+  Linux:
+  - Ubuntu x64 (CPU)
+  - Ubuntu arm64 (CPU)
+  - Ubuntu s390x (CPU)
+  - Ubuntu x64 (Vulkan)
+  - Ubuntu arm64 (Vulkan)
+  - Ubuntu x64 (ROCm 10.0)
+  - Ubuntu x64 (OpenVINO)
+  - Ubuntu x64 (SYCL FP32)
+  - Ubuntu x64 (SYCL FP16)
+  Android:
+  - Android arm64 (CPU)
+  Windows:
+  - Windows x64 (CPU)
+  - Windows arm64 (CPU)
+  - Windows arm64 (OpenCL Adreno)
+  - Windows x64 (CUDA 12) - CUDA 12.4 DLLs
+  - Windows x64 (CUDA 13) - CUDA 13.3 DLLs
+  - Windows arm64 (CUDA 13) (preview) - CUDA 13.4 DLLs
+  - Windows x64 (Vulkan)
+  - Windows x64 (OpenVINO)
+  - Windows x64 (SYCL)
+  - Windows x64 (ROCm 10.0)
+  openEuler:
+  - DISABLED
+  - openEuler x86 (310p)
+  - openEuler x86 (910b, ACL Graph)
+  - openEuler aarch64 (310p)
+  - openEuler aarch64 (910b, ACL Graph)
+  UI:
+  - UI
+ReleaseNotesUrl: https://github.com/ggml-org/llama.cpp/releases/tag/b10831
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/ggml-org/llama.cpp/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

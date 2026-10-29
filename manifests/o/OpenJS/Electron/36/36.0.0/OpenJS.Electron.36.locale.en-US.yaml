@@ -1,5 +1,5 @@
-# Created with komac v2.14.0
-# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
 
 PackageIdentifier: OpenJS.Electron.36
 PackageVersion: 36.0.0
@@ -7,6 +7,7 @@ PackageLocale: en-US
 Publisher: OpenJS Foundation
 PublisherUrl: https://openjsf.org/
 PublisherSupportUrl: https://github.com/electron/electron/issues
+PrivacyUrl: https://privacy-policy.openjsf.org/
 PackageName: Electron
 PackageUrl: https://www.electronjs.org/
 License: MIT
@@ -25,18 +26,112 @@ Tags:
 - works-with-codespaces
 ReleaseNotes: |-
   Release Notes for v36.0.0
+  Stack Upgrades
+  - Chromium 136.0.7103.48
+    - New in 136
+    - New in 135
+  - Node 22.14.0
+    - Node 22.14.0 blog post
+  - V8 13.6
+  Breaking Changes
+  - Deprecated NativeImage.getBitmap() and fixed incorrect documentation. #46736
+  - Fixed an issue where badly formatted switches could cause crashes in app.commandLine functions. #46446 (Also in 35)
+  - Moved Session extension APIs to Session.extensions. #45597
+  - The deprecated systemPreferences.isAeroGlassEnabled() API has been removed. #45563
+  - Updated Chromium to 135.0.7015.0 refactor: remove status, isDefault properties from PrinterInfo in 5b65cc7 #45500
+  - Updated Chromium to 135.0.7047.0 docs: call out breaking change for GTK 4 default on GNOME in 02353aa #45859
+  - Updated Chromium to 136.0.7054.0. Removed ses.clearDataStorage({ quota: 'syncable' }) in c180524 #45923
+  Features
+  Additions
+  - Added BrowserWindow.isSnapped() to indicate whether a given window has been arranged via Snap. #46226
+  - Added ServiceWorkerMain class to interact with service workers in the main process.
+    - Added fromVersionID on ServiceWorkers to get an instance of ServiceWorkerMain.
+    - Added running-status-changed event on ServiceWorkers to indicate when a service worker's running status has changed.
+    - Added startWorkerForScope on ServiceWorkers to start a worker that may have been previously stopped. #45232 (Also in 35)
+  - Added WebContents.focusedFrame to get the focused frame.
+    - Fixed WebContents.opener to specify potential null type. #45667
+  - Added contextBridge.executeInMainWorld to safely execute code across world boundaries. #45229 (Also in 35)
+  - Added ffmpeg.dll to delay load configuration. #46173 (Also in 34, 35)
+  - Added nativeTheme.shouldUseDarkColorsForSystemIntegratedUI to distinguish system and app theme. #46598 (Also in 35)
+  - Added view.getVisible(). #44999 (Also in 34, 35)
+  - Added webContents.navigationHistory.restore(index, entries) API that allows restoration of navigation history. #45433 (Also in 34, 35)
+  - Added excludeUrls to webRequest filter and deprecated the use of empty arrays in urls property. #44692 (Also in 35)
+  - Added permission support for document.executeCommand("paste"). #45377 (Also in 33, 34, 35)
+  - Added support for Autofill, Writing Tools and Services macOS level menu items in context menus via the new frame option in menu.popup. #46350
+  - Added support for roundedCorners BrowserWindow constructor option on Windows. #45594 (Also in 34, 35)
+  - Added support for system-context-menu on Linux. #46399
+  - Added support for service worker preload scripts. #44411 (Also in 35)
+  - Redesigned preload script APIs by introducing registerPreloadScript, unregisterPreloadScript, getPreloadScripts on Session.
+    - Deprecated getPreloads and setPreloads on Session. #45230 (Also in 35)
+  - Removed 240 FPS limit when use shared texture OSR. #45669 (Also in 35)
+  - Support Portal's globalShortcuts. Electron must be run with --enable-features=GlobalShortcutsPortal in order to have the feature working. #45171 (Also in 35)
+  Improvements
+  - Improved ASAR integrity checks on Windows. #46537
+  - Improved performance of desktopCapturer.getSources when not requesting thumbnails on macOS. #46251 (Also in 34, 35)
+  Removed/Deprecated
+  - The systemPreferences.isAeroGlassEnabled() API has been deprecated and will be removed without replacement. #45434 (Also in 35)
   Fixes
-  - Fixed electron.shell.openExternal and electron.shell.openPath to honor user-defined system defaults on Linux. #46788 (Also in 33, 34, 35)
+  - Fix: osr stutter fix backport for electron. #46709
   - Fixed getNativeWindowHandle() crash that affected 36 betas on macOS. #46750
-  - Fixed a possible crash when using navigator.bluetooth.requestDevice and the select-bluetooth-device event. #46782 (Also in 34, 35)
-  - Fixed a potential crash when closing a window with child windows. #46773 (Also in 34, 35)
+  - Fixed a possible crash in shell.readShortcutLink. #46324
   - Fixed an issue where the backgroundMaterial feature did not work in a frameless window on initial window creation. #46792
-  - Fixed build error with enable_electron_extensions=false. #46842 (Also in 35)
-  - Fixed crash when renderer process crashes while webview is reloading. #46768 (Also in 34, 35)
-  - Fixed documentation to mark Window.autoHideMenuBar as supported on Linux and Windows. #46830 (Also in 35)
-  - Fixed the border style of windows with vibrancy on macOS. #46771 (Also in 35)
-  Other Changes
-  - Updated Chromium to 136.0.7103.48. #46756
+  - Fixed an issue where context menu actions such as copy/paste did not correctly fire when a frame was not passed in. #46619
+  Also in earlier versions...
+  - Addressed two possible crashes in the File System Access API. #45233 (Also in 34, 35)
+  - Backported fix for a upstream bug that cause Offscreen Rendering to stutter. #45572 (Also in 32, 33, 34, 35)
+  - Fix: don't copy 'package.json's out of ASAR file. #46477 (Also in 35)
+  - Fixed ElectronAccessibilityUI bug. #46590 (Also in 33, 34, 35)
+  - Fixed Minimize menu button to follow set window minimizability on Windows. #46714 (Also in 34, 35)
+  - Fixed NODE_OPTIONS parsing for child processes on macOS. #46243 (Also in 34, 35)
+  - Fixed WebFrameMain crash related to accessing speculative frames that have been destroyed. #45609 (Also in 33, 34, 35)
+  - Fixed electron.shell.openExternal and electron.shell.openPath to honor user-defined system defaults on Linux. #46788 (Also in 33, 34, 35)
+  - Fixed v8.setHeapSnapshotNearHeapLimit api in main and utility process, along with support for --diagnostic-dir Node.js cli flag to specify the directory to save the heap snapshots. #45606 (Also in 33, 34, 35)
+  - Fixed webContents.print() after switch to OOP printing on macOS and Linux. #45266 (Also in 35)
+  - Fixed a bug that could cause some maximized windows on Linux to report an incorrect window state. #46463 (Also in 34, 35)
+  - Fixed a bug where the default path didn't always correctly fill the Name field in KDialogs on Linux. #45402 (Also in 34, 35)
+  - Fixed a crash seen on Linux when calling webContents.print(). #46146 (Also in 35)
+  - Fixed a crash that could occur in OSR on window close. #45573 (Also in 34, 35)
+  - Fixed a crash that could occur when dragging and dropping files into the browser. #46312 (Also in 35)
+  - Fixed a crash when calling shell.readShortcutLink caused by PKEY_AppUserModel_ToastActivatorCLSID sometimes being represented by a string uuid. #45195 (Also in 33, 34, 35)
+  - Fixed a possible BrowserWindow crash caused by closing a parent window with focus or blur events. #46580 (Also in 34, 35)
+  - Fixed a possible crash using Node.js on some arm32 devices. #46460 (Also in 35)
+  - Fixed a possible crash when using navigator.bluetooth.requestDevice and the select-bluetooth-device event. #46782 (Also in 34, 35)
+  - Fixed a potential crash in chrome.tabs.update(). #45276 (Also in 33, 34, 35)
+  - Fixed a potential crash in parentPort. #46496 (Also in 34, 35)
+  - Fixed a potential crash in utilityProcess.postMessage when calling with an invalid transferable. #46667 (Also in 35)
+  - Fixed a potential crash when calling legacy getUserMedia with an invalid chromeMediaSourceId. #45733 (Also in 34, 35)
+  - Fixed a potential crash when closing a window with child windows. #46773 (Also in 34, 35)
+  - Fixed a potential issues permissions in the Pointer Lock API after focus loss and regain. #45574 (Also in 34, 35)
+  - Fixed an error when calling window.emit('close') after toggling fullscreen mode. #46621 (Also in 35)
+  - Fixed an inverted conditional in the above PR that caused broken window borders in some circumstances on Wayland. #46642 (Also in 33, 34, 35)
+  - Fixed an issue where Electron could fail to load on some older Linux distributions. #45984 (Also in 34, 35)
+  - Fixed an issue where Node.js OOM errors terminate the process directly without raising an OOM exception. #45912 (Also in 35)
+  - Fixed an issue where RTL tooltips could be incorrect when using WCO on Windows. #45405 (Also in 33, 34, 35)
+  - Fixed an issue where Web Workers crashed on unhandled rejections. #46021 (Also in 34, 35)
+  - Fixed an issue where Windows Control Overlay didn't work with some window configurations. #45422 (Also in 33, 34, 35)
+  - Fixed an issue where context-menu event weren't emitted as expected on Windows in draggable regions. #46032 (Also in 34, 35)
+  - Fixed an issue where contextmenu events wouldn't be correctly dispatched in draggable regions on Linux. #45813 (Also in 34, 35)
+  - Fixed an issue where navigationHistory.restore() failed to restore the userAgent if it was overridden. #46299 (Also in 34, 35)
+  - Fixed an issue where setContentProtection(true) was reverted when a given window was hidden. #45868 (Also in 34, 35)
+  - Fixed an issue where system-context-menu incorrectly fired for all regions in frameless windows. #46002 (Also in 33, 34, 35)
+  - Fixed an issue where webContents.printToPDF() didn't work as expected with cross-process subframes. #46259 (Also in 34, 35)
+  - Fixed an issue where calling UtilityProcess.fork prior to the app ready event would cause a crash. #46404 (Also in 34, 35)
+  - Fixed an issue where drag-dropping two directories would cause getAsFileSystemHandle to never resolve. #45234 (Also in 33, 34, 35)
+  - Fixed an issue where packages could be mistakenly not found in asar. #46023 (Also in 35)
+  - Fixed an issue where print scaling could be too small during silent print. #45218 (Also in 34, 35)
+  - Fixed an issue where printing from the renderer process crashes the main process when no printers are installed in the system or there's not a default printer. #46617 (Also in 34, 35)
+  - Fixed an issue where selection of multiple directories with the dialog module didn't work on Linux. #45373 (Also in 34, 35)
+  - Fixed an issue where snapped windows in Windows may sometimes be improperly restored. #46041 (Also in 33, 34, 35)
+  - Fixed an issue where the renderer process crashed when loading about:blank in subframes. #45694 (Also in 35)
+  - Fixed an issue where the resizing border didn't work as expected on Wayland windows. #46225 (Also in 33, 34, 35)
+  - Fixed an issue where windows on Windows with backgroundMaterial lost effect on maximization. #45456 (Also in 34, 35)
+  - Fixed an issue with --inspect-brk failing in packaged apps. #46584 (Also in 35)
+  - Fixed an issue with the assert Node.js module in the renderer process. #46561 (Also in 35)
+  - Fixed an issue with token formatting for tokens received after calling pushNotifications.registerForAPNSNotifications(). #46149 (Also in 34, 35)
+  - Fixed broken OOP window.print() on macOS/Linux. #45214 (Also in 35)
+  - Fixed build error with enable_electron_extensions=false. #46842 (Also in 34, 35)
+  - Fixed build failure when building with printing disabled. #46284 (Also in 34, 35)
+  - Fixed case where file dialog filters would get mixed up, if a * filter was included. #46722 (Also in 34, 35)
 ReleaseNotesUrl: https://github.com/electron/electron/releases/tag/v36.0.0
 ManifestType: defaultLocale
-ManifestVersion: 1.10.0
+ManifestVersion: 1.12.0

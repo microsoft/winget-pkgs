@@ -1,0 +1,31 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: hellowind777.hellogrok
+PackageVersion: 0.1.35
+PackageLocale: en-US
+Publisher: hellowind777
+PublisherUrl: https://github.com/hellowind777
+PublisherSupportUrl: https://github.com/hellowind777/hellogrok/issues
+PackageName: hellogrok
+PackageUrl: https://github.com/hellowind777/hellogrok
+License: MIT
+LicenseUrl: https://github.com/hellowind777/hellogrok/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 hellowind777
+ShortDescription: Cross-platform local proxy that makes Grok Build custom model channels work with common API formats, native Web tools, isolated authentication, and automatic configuration recovery.
+Description: 'Grok Build can use custom model endpoints, but real-world providers do not all expose the same protocol, response shape, authentication method, or Web-search behavior. hellogrok provides one local compatibility layer for those custom channels: it prepares the required Grok configuration while running, keeps each channel tied to its own endpoint and credentials, supports Grok Build native Web workflows, and restores the original configuration when stopped.'
+Tags:
+- grok
+- grok-build
+- proxy
+ReleaseNotes: |-
+  Added
+  - Head-truncation repair for tool calls whose first stream delta was lost in transit: arguments missing their opening {" are restored when the prefixed payload parses as exactly one complete JSON object, and empty function names are inferred from the argument key set against the tools declared on the request (the shared command+description shape resolves deterministically to run_terminal_command; remaining ties stay unrepaired). Applied in the shared tool-compatibility layer across chat_completions, messages, and responses, streaming and non-streaming, and on persisted history replayed in later requests, with the repaired name backfilled onto the matching tool-result message.
+  - Stream-terminal emission of Chat tool frames: the chat rectifier holds tool frames until [DONE], stream end, or an error frame instead of flushing at finish_reason, so argument fragments a relay emits after finish_reason merge into complete arguments instead of being discarded tail-truncated. Held inline reasoning still flushes at finish_reason.
+  - Hold rectifiers for name-less tool blocks: Messages tool_use blocks are held between content_block_start and content_block_stop and re-emitted as start (resolved name) + one complete input_json_delta + stop; Responses function_call items are held between response.output_item.added and response.output_item.done, with the done frame's complete item as a second source for name and arguments. Unclosed blocks and items flush at their protocol terminals.
+  - late-tool-deltas-discarded(index=N) proxy log note for tool-call deltas discarded after an early flush, making relays that emit finish_reason before their last argument fragments diagnosable.
+  Fixed
+  - Third-party relays that drop a tool call's first streamed delta no longer surface as Agent tried calling a tool that doesn't exist with head-truncated arguments; the damage is repaired before Grok Build dispatch, and broken records persisted in earlier turns are repaired on replay instead of reaching the upstream verbatim.
+ReleaseNotesUrl: https://github.com/hellowind777/hellogrok/blob/HEAD/CHANGELOG.md#0135-2026-09-15
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

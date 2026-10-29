@@ -1,0 +1,116 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: Decred.Decrediton
+PackageVersion: 2.1.7
+PackageLocale: en-US
+Publisher: Decred
+PublisherUrl: https://decred.org/
+PublisherSupportUrl: https://github.com/decred/decred-binaries/issues
+PackageName: Decrediton
+PackageUrl: https://github.com/decred/decred-binaries
+License: ISC License
+Copyright: Copyright © 2023 The Decred developers
+ShortDescription: Graphical wallet for Decred supporting staking, privacy, and decentralized exchange.
+ReleaseNotes: |-
+  ## Install
+
+  To install Decrediton desktop wallet, download, uncompress, and run [Decrediton Linux AppImage](https://github.com/decred/decred-binaries/releases/download/v2.1.7/decrediton-linux-amd64-v2.1.7.AppImage) or [Decrediton Linux tar](https://github.com/decred/decred-binaries/releases/download/v2.1.7/decrediton-linux-amd64-v2.1.7.tar.gz) or [Decrediton macOS arm64](https://github.com/decred/decred-binaries/releases/download/v2.1.7/decrediton-darwin-arm64-v2.1.7.dmg) or [Decrediton Windows](https://github.com/decred/decred-binaries/releases/download/v2.1.7/decrediton-windows-amd64-v2.1.7.exe).
+
+
+  To install the command-line tools, please see [dcrinstall](https://github.com/decred/decred-release/tree/master/cmd/dcrinstall).
+
+  See decred-v2.1.7-manifest.txt and the other manifest files for SHA-256 hashes and the associated .asc signature files to confirm those hashes.
+
+  See [README.md](./README.md#verifying-binaries) for more info on verifying the files.
+
+  [Skip to downloads](#downloads-v217)
+
+  ## Contents
+  • [dcrd](#dcrd-v217)
+  • [dcrwallet](#dcrwallet-v217)
+
+  <a id="dcrd-v217"></a>
+  # dcrd v2.1.7 Release Notes
+
+  This is a patch release of dcrd that includes the following notable changes:
+
+  • Several fixes for network and mixing-related denial-of-service (DoS) attacks
+  • Improved mixing performance
+  • Resolves a memory leak that accumulates slowly over time
+  • Corrects the test network initial synchronization issue introduced in v2.1.6
+  • Adds extensive safeguards against unexpected transaction spends
+
+  ## Upgrade Highly Recommended
+
+  Miners, stakeholders, and anyone running a full node are strongly encouraged to upgrade to this release.  It includes multiple fixes for potential denial-of-service (DoS) attacks that could disrupt node operation.
+
+  Miners, in particular, are at risk of having their template generation stalled.
+
+  ## Spend Safeguards
+
+  In response to the previous inflation bug, this release adds extensive safeguards designed to detect unexpected transaction spends that should not be possible.  When these safeguards detect certain unexpected conditions, the affected node will shut down rather than continue operating in a potentially
+  unsafe state.
+
+  These safeguards would have prevented the previous inflation bug by causing all affected nodes to halt when they encountered the invalid spend.  They are also designed to catch a broader range of potential problems that could otherwise go unnoticed.
+  ## Changelog
+
+  This patch release consists of 87 commits from 6 contributors which total to 161 files changed, 7389 additional lines of code, and 4543 deleted lines of code.
+
+  All commits since the last release may be viewed on GitHub [here](https://github.com/decred/dcrd/compare/release-v2.1.6...release-v2.1.7).
+
+  See  [dcrd's own release notes](https://github.com/decred/dcrd/releases/tag/release-v2.1.7) for a categorized breakdown of all commits since the last release.
+
+  ### Code Contributors (alphabetical order):
+
+  • Dave Collins
+  • Jamie Holdstock
+  • Josh Rickmar
+  • Iain
+  • LuaLighter
+  • yzxcj797
+
+  <a id="dcrwallet-217"></a>
+  # dcrwallet v2.1.7
+
+  This release focuses on performance improvements and bug fixes for mixing wallets.  All users are recommended to update.
+
+  ## Bug fixes
+
+  • A harmless error logged during the publishing of confirmed mix transactions was fixed by removing an incorrect spend proof check on unmined mempool transactions ([`61ca8901`](https://github.com/decred/dcrwallet/commit/61ca8901)).
+
+  • Change addresses (and the internal address branch index) are only derived and incremented when necessary ([`93fa7d44`](https://github.com/decred/dcrwallet/commit/93fa7d44)).
+
+  • A missing bounds check of the output index for the `mixoutput` JSON-RPC method was added ([`e7865552`](https://github.com/decred/dcrwallet/commit/e7865552)).
+
+  • A performance issue determining which peers were active in a mixing epoch was improved using a more efficient algorithm ([decred/dcrd#3790](https://github.com/decred/dcrd/pull/3790)).
+
+  • Multiple distinct mixing key exchange messages are no longer permitted by the same sender for the same session ([decred/dcrd#3820](https://github.com/decred/dcrd/pull/3820)).
+
+  • The permitted total number of mixing key exchange messages that may be publised by a single peer was reduced ([decred/dcrd#3822](https://github.com/decred/dcrd/pull/3822)).
+
+  • The lower limit of 64 maximum peers per mixing session was relaxed for key exchange messages, allowing up to the larger 512 limit of pair request messages to be referenced before an alternate session is formed.  Following messages in a mix session must still not reference more than 64 total peers ([decred/dcrd#3824](https://github.com/decred/dcrd/pull/3824)).
+
+  • A shorter 10s mixclient stage timeout is being tested on testnet.  Mainnet mixing wallets continue to use a 30s message timeout for each mixing stage ([decred/dcrd#3826](https://github.com/decred/dcrd/pull/3826)).
+
+  ## Changelog
+
+  • [`599b5850`](https://github.com/decred/dcrwallet/commit/599b5850)：[release-v2.1] Bump version to 2.1.7+release.local.
+  • [`4acbfa1c`](https://github.com/decred/dcrwallet/commit/4acbfa1c)：[release-v2.1] Update minimum Go version described in README
+  • [`b9f31d72`](https://github.com/decred/dcrwallet/commit/b9f31d72)：[release-v2.1] Update CI to test with Go 1.26 and 1.27
+  • [`c9691d79`](https://github.com/decred/dcrwallet/commit/c9691d79)：[release-v2.1] Update modules
+  • [`93fa7d44`](https://github.com/decred/dcrwallet/commit/93fa7d44)：[release-v2.1] txauthor: Only get change address when needed.
+  • [`e7865552`](https://github.com/decred/dcrwallet/commit/e7865552)：[release-v2.1] mixing: add missing bounds check
+  • [`61ca8901`](https://github.com/decred/dcrwallet/commit/61ca8901)：[release-v2.1] wallet: Do not check ValueIn of announced mempool transactions
+
+  ## Code Contributors (alphabetical order)
+
+  • David Hill (@dajohi)
+  • Jamie Holdstock (@jholdstock)
+  • Josh Rickmar (@jrick)
+
+
+  <a id="downloads-217"></a>
+ReleaseNotesUrl: https://github.com/decred/decred-binaries/releases/tag/v2.1.7
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

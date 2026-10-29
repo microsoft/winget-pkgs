@@ -1,0 +1,88 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.1.12
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Added
+  - Added Muse Code subscription sign-in, credential refresh, inference, and quota reporting in /usage, with durable rate-limit backoff so quota refresh recovers instead of repeatedly retrying.
+  @oh-my-pi/pi-catalog
+  Added
+  - Added Muse Code as a provider with Muse Spark models and live account-scoped discovery.
+  - Muse Code subscriptions now resolve a compact edit-prompt variant, cutting recurring per-request tool bytes without touching other providers.
+  - Added Meta's new max reasoning effort tier to Muse Spark 1.3 (standard) on the Meta Model API and Muse Code.
+  Fixed
+  - Fixed OpenCode Go/Zen live model discovery (GET /v1/models) missing x-opencode-session and omp's User-Agent: discovery requests now attribute with the stable install id so the requests OpenCode flags as Bun fetch carry the required session header.
+    - Fixed GPT-6 Astra requests through GitHub Copilot failing with an unsupported endpoint error (#10874 by @xpcmdshell).
+    - Fixed GPT-6 Astra showing as free with a 272K-token window in the OpenAI Codex catalog by applying its documented pricing; /extended-context enables the wire-advertised 872K-token maximum (#10980 by @H4vC).
+    - Made extended-context catalog rebuilds faster by resolving each model's maximum window once per process (#11039 by @H4vC).
+  @oh-my-pi/pi-coding-agent
+  Changed
+  - Ranged reads of text without bracket characters skip unnecessary lexical context scanning.
+  - Muse Code sessions send a compact hashline edit description (~3 KB less per request); all other models keep the full prompt.
+  Fixed
+  - Fixed GPT-6 Astra extended-context support and preserved maximum context windows reported by OpenAI Codex discovery ([#10980](https://github.com/can1357/oh-my-pi/pull/10980) by [@H4vC](https://github.com/H4vC)).
+  - Subagent yield no longer rejects a valid data payload because a non-strict OpenAI-compatible backend filled the optional error field with ""; previously the worker retried the identical call until the invalid-yield cap and the parent received nothing.
+  - Fixed fullscreen /copy outlining only a lazily created grouped Read card, so Enter copies the assistant yield instead of tool output.
+  - memory:// now resolves against the session that issued it: a caller's own memory backend answers memory://<id>, so co-located sessions no longer read each other's memory rows, and a caller whose session is no longer live fails closed instead of being answered by a peer. Prompt completion binds to the same caller, so memory://<memory-id> stays on offer while a subagent shares the working directory. Advisors retain their owning session's memory access even without a session file.
+  - Fullscreen /copy now opens on the recent tail of the branch instead of replaying the whole session, so it appears immediately and steps without lag on long sessions (a loads the earlier turns). Both it and the esc-esc rewind selector also cache each transcript row set instead of re-stripping it every frame.
+  - Fixed the fullscreen /copy and esc-esc rewind selectors repainting the whole frame for a wheel notch that cannot move the viewport; because both open scrolled to the newest turn, wheeling down there made the frame twitch.
+  @oh-my-pi/pi-tui
+  Fixed
+  - Avoid inserting a trailing space when auto-completing directory paths with @, and keep autocomplete open when accepting a directory with Tab or Enter.
+  - Horizontal wheel reports (the sideways drift of a two-finger trackpad scroll) no longer decode as a vertical wheel direction, so fullscreen selectors such as /copy and the rewind picker stop jumping up and back down at the end of a scroll gesture.
+  What's Changed
+  - feat(ai): add Muse Code subscription provider by @eggpeat in https://github.com/can1357/oh-my-pi/pull/10677
+  - fix(catalog): route Copilot GPT-6 models through Responses by @xpcmdshell in https://github.com/can1357/oh-my-pi/pull/10874
+  - fix(eval): validate bridged tool arguments before execution by @DarkPhilosophy in https://github.com/can1357/oh-my-pi/pull/10953
+  - fix(catalog,coding-agent): Astra glue by @H4vC in https://github.com/can1357/oh-my-pi/pull/10980
+  - fix(edit): preserve formatted writethrough content by @DarkPhilosophy in https://github.com/can1357/oh-my-pi/pull/10983
+  - fix(coding-agent): accept empty-string yield error beside data by @Bruc3W4yne in https://github.com/can1357/oh-my-pi/pull/10996
+  - fix(tui): fold lazy grouped reads into /copy outline by @atacolak in https://github.com/can1357/oh-my-pi/pull/10922
+  - fix(tui): avoid trailing space on directory at-completions by @kml93 in https://github.com/can1357/oh-my-pi/pull/10613
+  - fix(tui): chain directory at-completions on Enter acceptance by @H4vC in https://github.com/can1357/oh-my-pi/pull/10997
+  - fix(ai,catalog): send x-opencode-session on Go usage polls and gateway discovery by @novozhenets in https://github.com/can1357/oh-my-pi/pull/10860
+  - fix(coding-agent): bind memory URLs to their calling session by @PaleRoses in https://github.com/can1357/oh-my-pi/pull/10998
+  - perf(read): skip lexical context scans for bracket-free text by @wolfiesch in https://github.com/can1357/oh-my-pi/pull/11030
+  - fix(catalog,coding-agent): memoize Astra max-window fallback, default… by @H4vC in https://github.com/can1357/oh-my-pi/pull/11039
+  - fix(tui): do not decode horizontal wheel reports as a vertical direction by @lemonleks in https://github.com/can1357/oh-my-pi/pull/11045
+  - perf(tui): open /copy on the recent tail and cache selector rows by @lemonleks in https://github.com/can1357/oh-my-pi/pull/11002
+  New Contributors
+  - @xpcmdshell made their first contribution in https://github.com/can1357/oh-my-pi/pull/10874
+  - @Bruc3W4yne made their first contribution in https://github.com/can1357/oh-my-pi/pull/10996
+  - @novozhenets made their first contribution in https://github.com/can1357/oh-my-pi/pull/10860
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.1.11...v18.1.12
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.1.12
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

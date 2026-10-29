@@ -1,0 +1,60 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jcardama.LeopardWM
+PackageVersion: 0.3.0
+PackageLocale: en-US
+Publisher: jcardama
+PublisherUrl: https://github.com/jcardama
+PublisherSupportUrl: https://github.com/jcardama/LeopardWM/issues
+Author: jcardama
+PackageName: LeopardWM
+PackageUrl: https://github.com/jcardama/LeopardWM
+License: GPL-3.0
+LicenseUrl: https://github.com/jcardama/LeopardWM/blob/HEAD/LICENSE
+ShortDescription: Scroll-first tiling window manager for Windows 10 and 11.
+Description: LeopardWM is an open-source tiling window manager for Windows 10 and 11 that takes a scroll-first approach inspired by niri and PaperWM. Windows sit on a horizontal strip and the monitor acts as a viewport that scrolls over them, so navigation stays spatially consistent as windows are added — instead of constantly rebuilding split trees. Written in Rust on top of the Win32 API.
+Moniker: leopardwm
+Tags:
+- niri
+- paperwm
+- rust
+- scrollable
+- tiling
+- window-manager
+- windows
+- workspace
+ReleaseNotes: |-
+  Features
+  - Window rules can now target small helper windows separately from an app's main window. Set optional match_max_width and match_max_height limits in logical pixels, or edit Max width and Max height in Settings, alongside a class, title, or executable match. Ignored helpers are re-evaluated if they grow or their title changes; managed windows are not dropped for shrinking. Existing defaults are unchanged. (#129)
+  - Settings, tray menus, and daemon notifications now support English and Simplified Chinese. Choose Settings → Appearance → Language or set language = "zh-CN" under [appearance]; English remains the default, and changes apply without restarting. Adding a language now takes a single locale file; see Translating LeopardWM for instructions. The zh-CN translation is a machine draft pending native-speaker review. (#98)
+  - Move the selected overview window between workspaces without leaving the overview. Your configured move_window_up / move_window_down bindings move it to the previous / next numbered workspace, including empty ones, without switching workspace or taking focus. Selection follows the window; moves stop at 1 and 9, sticky windows stay put, and horizontal move bindings do nothing while the overview is open. (#70)
+  - Your directional focus bindings now navigate the workspace overview without closing it. focus_left, focus_right, focus_up, and focus_down follow your configured keys; arrows, Enter, Esc, and mouse controls still work. (#70)
+  - Taskbar buttons can now stay visible for windows scrolled out of view on the active workspace. Set taskbar_buttons = "hide_inactive_workspaces" under [behavior] or choose Settings → Behavior → Taskbar buttons → Hide inactive workspaces. The default, "hide_offscreen", preserves the existing behavior; "show_all" keeps all buttons. The old hide_offscreen_taskbar_buttons key keeps working, with the new key taking precedence when both are present. (#105)
+  - New windows can now open on the focused monitor's active workspace instead of the monitor where Windows placed them. Set new_window_monitor = "focused" under [behavior] or choose Settings → Behavior → New window monitor → Focused monitor; "opening" remains the default. This applies only to windows that open while LeopardWM is running, not already-open windows discovered at startup or during reload/rescan. Workspace rules select the workspace index on the chosen monitor; sticky windows keep their existing placement. (#108)
+  - Floating windows can now stay above tiled windows without taking focus. Enable floating_above_tiled = true under [behavior] or Settings → Behavior → Keep floating windows above tiled windows; it is off by default. Requires track_focus_changes = true (the default); restart LeopardWM after changing focus tracking. Turning tracking off stops re-raising on reload. Visible floating and sticky floating windows keep their relative order in the normal Z-order band, never become topmost, and are not re-raised during fullscreen or overview. (#117)
+  - Relative workspace navigation can now skip empty workspaces on the same monitor. Enable skip_empty_workspaces = true under [behavior] or Settings → Behavior → Skip empty workspaces; it is off by default. Previous/next workspace and edge-wrap vertical focus skip empty slots, counting floating and minimized windows but not sticky windows. Explicit workspace selection and window moves are unchanged. (#70)
+  - A documented Yasb configuration shows all nine workspaces on a selected monitor and switches them on click. The built-in Custom widget polls the existing CLI for active/occupied indicators and workspace-name tooltips; no plugin is required. (#127)
+  - One binding each can now cycle through all width or height presets, wrapping at the end. cycle_width and cycle_height are unbound by default, with CLI commands lwm cycle-width and lwm cycle-height. (#70)
+  - The only active tiled column can now stay centered when it fits in the viewport. Enable center_single_column = true under [layout] or Settings → Layout → Center single column; it is off by default. (#86)
+  - Side scroll wheels and other wheel-based swipes can now be turned off without disabling native touchpad swipes. Set wheel_swipes = false under [gestures] or turn off Settings → Gestures → Wheel-based swipes; it is on by default. (#107)
+  Fixes
+  - Reloading the configuration or saving Settings no longer turns windows you floated by hand back into tiled windows. Rule changes still apply to the windows they affect.
+  - Floating windows moved or resized by tools like AutoHotkey now keep their new position and size. Switching windows or leaving and returning to a workspace no longer restores the old geometry. (#134)
+  - Hidden tabs no longer shrink to their app's minimum size when you switch away from their workspace.
+  - File Explorer now gets the same small redraw nudge after sliding that Chrome, Firefox and Windows Terminal get, to address reports of its navigation pane being drawn twice after moving off screen and back. (#127)
+  - Windows that resize themselves right after LeopardWM places them, like Zen Browser's first-run welcome window, now go back to their tile instead of leaving part of the column empty.
+  - Untitled helper windows without a title bar, minimize button or resize border, like Zen Browser's first-run startup window, no longer briefly take a column. Fullscreen apps and explicit Tile/Float rules are unchanged.
+  - Apps that maximize themselves right after opening, such as Zen Browser reopening maximized, now settle into their tile instead of staying maximized. (#104)
+  - Disconnecting or reconnecting a monitor now keeps LeopardWM's focus on the window that actually has it. Focus no longer points to a different window or none until the next click.
+  - Reloading configuration now validates it just like startup. lwm reload and Settings save clamp out-of-range values and log configuration warnings instead of applying unchecked values.
+  - Pausing tiling or releasing all windows now restores hidden taskbar buttons. Resuming re-applies the configured taskbar policy.
+  - Showing all taskbar buttons now also applies to background windows and windows leaving fullscreen on an inactive workspace. Those event paths no longer hide buttons independently of the selected policy.
+  - Windows in columns scrolled off the left edge no longer show a sliver on screen when the app resizes itself. Wider windows stay anchored outside the viewport, and off-screen resizes missed during placement are checked again once placement settles.
+  - With workspace_edge_wrap on, vertical focus now leaves an empty workspace. An empty workspace counts as a column edge, so focus_up and focus_down (including three-finger swipes mapped to them) move to the adjacent workspace instead of doing nothing. Moving windows up or down is unchanged. Contributed by @c3us-dev. (#133)
+  - With track_focus_changes = false, a window that is maximized when LeopardWM admits it now always waits for its restore to settle before it is tiled. Whether it waited depended on thread timing.
+  Internal
+  - Lockfile dependency updates: thiserror 2.0.21.
+ReleaseNotesUrl: https://github.com/jcardama/LeopardWM/releases/tag/v0.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

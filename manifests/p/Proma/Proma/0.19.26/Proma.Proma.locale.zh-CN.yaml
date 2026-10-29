@@ -1,0 +1,49 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Proma.Proma
+PackageVersion: 0.19.26
+PackageLocale: zh-CN
+Publisher: ErlichLiu
+PublisherUrl: https://proma.cool/
+PublisherSupportUrl: https://github.com/proma-ai/Proma/issues
+PackageName: Proma
+PackageUrl: https://proma.cool/download
+License: 免费软件
+Copyright: Copyright © 2024-2026 Proma
+ShortDescription: 把最丝滑的通用 Agent 体验带进你的工作流，为 100x 专业用户而生的未来产品，正在实现 proactive Agent 阶段。基于 Claude Agent SDK 的完整开源实践，原生支持飞书群聊调用、灵活接入任意大模型供应商 —— 让顶级 Agent 能力真正跑在你每天用的地方。
+Description: |-
+  Proma 是一个本地优先的 AI 桌面应用，把多模型 Chat、通用 Agent、工作区、Skills、MCP、远程机器人和记忆能力放在同一个开源客户端里。
+  它不是只面向闲聊的聊天框，而是一个可以长期沉淀个人工作流的 Agent 工作台：简单问题用 Chat，复杂任务交给 Agent，数据和配置尽量留在本地。
+
+  现在能做什么
+  - Chat 模式：多模型对话、附件解析、图片输入、Markdown / Mermaid / KaTeX / 代码高亮、并排对话、系统提示词、上下文管理。
+  - Agent 模式：基于 @anthropic-ai/claude-agent-sdk 的通用 Agent，支持工作区隔离、权限模式、文件操作、长任务流式输出、计划确认和用户追问。
+  - SubAgent / Tasks：复杂任务可以通过 Claude Agent SDK 的 Agent 工具拆分为子 Agent / Task，并在消息流中展示调用过程和结果。
+  - Skills & MCP：每个工作区可以独立配置 Skills、MCP Server 和工作区文件，适合沉淀可复用能力。
+  - 远程机器人：支持飞书 / Lark 机器人桥接，并已提供钉钉、微信桥接入口，用手机或群聊触发本机 Agent 工作流。
+  - 记忆与工具：Chat 和 Agent 可共享记忆能力，并支持联网搜索、内置 Chat 工具、Agent 推荐等辅助能力。
+  - 本地优先：会话、工作区、附件、配置、Skills 等默认存储在 ~/.proma/，使用 JSON / JSONL 文件组织，不依赖本地数据库。
+  - 桌面体验：自动更新、代理设置、文件预览、全局快捷键、快速任务窗口、语音输入、亮色 / 暗色 / 跟随系统主题。
+Tags:
+- 人工智能
+- 大语言模型
+- 智能体
+- 自主智能
+ReleaseNotes: |-
+  Proma v0.19.26 更新
+  新功能
+  - 搜索 MCP 预设 — 连接目录内置 Brave Search 与 Tavily 搜索 MCP 预设，选择即可接入联网搜索能力。配套加固：必选 MCP 握手失败后进入 2 分钟冷却，期间不再以完整连接超时拖慢每一轮 Agent，后台重连成功后立即恢复；粘贴带 Bearer 前缀的密钥保存时会自动剥离；stdio 类型的 API Key 与保存时的命令参数绑定，服务器配置被外部改动后不再注入密钥，防止凭据被误用到其它命令。
+  - 协作子会话思考强度可控 — delegate_agent 与 delegate_agents 支持为子会话指定 thinkingLevel（off / minimal / low / medium / high / xhigh / max），可按子任务复杂度分配推理资源；不传时保持新会话默认值，模型不支持请求档位时会自动归一化为其可用的最近档位。
+  - 受管浏览器一键用默认浏览器打开 — 地址栏旁新增「在默认浏览器打开」按钮，将当前 http(s) 页面转交系统默认浏览器；搜索词、内部页面与其他协议仍留在受管浏览器内处理，不泄露内部页面。
+  Bug 修复
+  - Vault 新建文件夹即时可见 — 新建文件夹后立即出现在文件树中；文件夹枚举改用独立配额预算，不再与 Markdown 笔记共享上限，文件夹较多的 Vault 不会再挤掉既有笔记的侧栏显示；同时不再生成看似可展开、却永远列不出子项的边界空节点。
+  - 文件面板首次加载稳定 — 修复工作区路径异步返回期间文件面板抖动与空窗：过期请求的结果不再覆盖当前视图，等待路径解析时不会把临时空目录误判为“空态”闪烁，同一根目录的后台刷新也保持既有树与空态稳定。
+  - 移除 App 内教程链路 — 下线教程查看器 Tab、推荐横幅、设置页教程入口及 Onboarding 的「打开教程 / 创建欢迎对话」步骤，新手完成后直接进入主界面；GitHub 仓库 tutorial/ 文档、飞书配置页视频教程与 Vault 帮助仍保留可读。
+  - MCP 工具调用短语去重 — mcp__ 工具的语义化短语已包含完整「服务器 / 工具」名称，不再叠加冗余的 kind 前缀，避免出现「名称 · 名称」的重复展示。
+  - 会话拖拽提示精简 — 移除悬停会话行时出现的拖拽手柄与「拖拽引用」提示，侧栏更干净；拖拽会话到输入框实现引用的能力保留不变。
+  - Fable 5.1 思考深度适配 — Fable 5.x 系列模型按大版本复用目录配置，不再因缺少精确版本条目而继承错误的协议标志；始终推理的模型在保留“关闭推理”等旧设置时，不再被静默降级为最弱档，而是安全映射为高推理强度。
+  - 启动与欢迎页品牌文案统一 — 启动屏与 Onboarding 标语统一为「FOR PROFESSIONALS」，欢迎文案调整为「为专业用户打造的通用 Agent」，品牌表达前后一致。
+ReleaseNotesUrl: https://github.com/proma-ai/Proma/releases/tag/v0.19.26
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

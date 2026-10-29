@@ -24,8 +24,31 @@ Tags:
 - programming
 - programming-language
 - solver
-ReleaseNotes: https://docs.minizinc.dev/en/2.9.4/changelog.html
-ReleaseNotesUrl: https://github.com/MiniZinc/MiniZincIDE/releases/tag/2.9.4
+ReleaseNotes: |-
+  Changes:
+  - Add new builtin functions for array manipulation: select_from_index_X can slice an array with a non-contiguous set of indices, and concat_index_X can concatenate two arrays along a specified index.
+  - Add option type versions of bin packing and cumulatives constraints.
+  - Remove bool_xor with two arguments from the FlatZinc builtins. It is never output into FlatZinc by the compiler and violated the rule that FlatZinc builtins are not overloaded (issue 913). Also remove some other duplicates and incorrect overloads from flatzinc_builtins.mzn.
+  - Add includes for header files where symbols are required, in order to avoid issues with some compilers.
+  - Fix AST string allocation to avoid warnings about writing into unallocated memory.
+  - Fix float literal parsing, making it consistent across all platforms (issue 941).
+  Bug fixes:
+  - Fix compilation of arrays of arrays when inferred type-inst is var, and pretty-printing of arrays of arrays (issue 942).
+  - Fix CSE for empty arrays, which could cause incorrect function overloads to be called (issue 946).
+  - Fix a bug in the Constants class that caused the GC to access uninitialised memory (issue 933).
+  - Fix a bug in the chain compression algorithm that resulted in incorrectly removing constraints that were not redundant (issue 943).
+  - Fix a bug in the nvalue decomposition to also make it work for empty arrays.
+  - Fix a bug in the parser that could sometimes cause a crash when parsing invalid syntax (issue 950).
+  - Fix a bug in type specialisation that could sometimes lead to a crash (issue 950).
+  - Fix a bug where trace_dbg would always get evaluated regardless of the presence of the --debug flag (issue 926).
+  - Fix a bug where the argument to --fzn-flags would not be correctly parsed if it also matched a MiniZinc flag (issue 940).
+  - Fix bounds computation for division and modulo operations to not abort if the bounds cannot be computed (issue 917).
+  - Fix two incorrect comparison functions that could trigger assertions in debug builds (and likely incorrect behaviour in optimised builds).
+  - Fix incorrect overloading resolution for polymorphic functions when called with empty set literals as arguments (issue 875).
+  - Fix handling of duplicate polymorphic function definitions with empty bodies (issue 875).
+  - Fix internal error when accessing out of bounds indices for arrays containing arrays (issue 954).
+  - Fix performance of evaluating array comprehensions, which previously could lead to quadratic behaviour in some cases.
+ReleaseNotesUrl: https://docs.minizinc.dev/en/2.9.4/changelog.html
 Documentations:
 - DocumentLabel: Handbook
   DocumentUrl: https://docs.minizinc.dev/en/stable/

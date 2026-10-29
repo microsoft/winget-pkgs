@@ -1,0 +1,74 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: sluicesync.sluice
+PackageVersion: 0.137.1
+PackageLocale: en-US
+Publisher: sluicesync
+PublisherUrl: https://sluicesync.com
+PackageName: sluice
+PackageUrl: https://sluicesync.com
+License: Apache-2.0
+LicenseUrl: https://github.com/sluicesync/sluice/blob/main/LICENSE
+Copyright: sluicesync
+ShortDescription: Open-source MySQL <-> Postgres database migration and continuous-sync (CDC) tool
+Description: sluice is an open-source database migration and continuous-sync (CDC) tool covering MySQL and Postgres in all four directions.
+Moniker: sluice
+Tags:
+- database
+- migration
+- cdc
+- mysql
+- postgres
+ReleaseNotes: |-
+  **A one-line fix for a diagnostic regression v0.137.0 introduced.** If you run MySQL sync behind Vitess or PlanetScale, ProxySQL, or a tracing-instrumented client, a `SLUICE-E-CDC-STATEMENT-DML` refusal from v0.137.0 may have quoted your SQL comment instead of your statement — naming neither the verb nor the table. Values were never at risk. Plus the correction of a compatibility claim v0.137.0 over-stated. Drop-in from v0.137.0.
+
+  ## Fixed
+
+  **A comment-prefixed statement keeps its diagnostic in the STATEMENT-DML refusal.** v0.137.0 taught the refusal's redaction to skip a leading SQL comment, and moved the *end* of the quoted fragment without moving its *start* — so the comment was still echoed, and a long one crowded out everything worth reading. An sqlcommenter or `traceparent` prefix runs to about 110 bytes against an 80-byte cap, so the entire quoted fragment could be comment text with no verb and no table：exactly the diagnostic loss v0.137.0 set out to fix, one step further along.
+
+  Short comments still showed a verb, which is why v0.137.0's own tests passed it — "the verb survives" and "the comment is echoed" are both true for a short comment, so a test asserting only the first cannot tell them apart. The test now asserts the comment text is *absent* too, and exercises a real sqlcommenter prefix rather than a short contrived one.
+
+  **Values were never at risk through that defect, in either version.** The comment skip only ever moved the cut earlier, never later, so no literal could reach the refusal through it. What was lost was the ability to tell which statement tripped it.
+
+  **A `/*!` versioned comment carrying a quote no longer leaks a value fragment.** Separately, and found while reviewing the above：MySQL lexes a `/*! … */` *executable* comment's contents as SQL, so a `*/` inside a string literal does **not** terminate it — unlike a plain `/* … */`, where MySQL is quote-blind exactly as sluice's scan is. A versioned comment carrying `*/` inside a quoted value therefore stopped the scan mid-value, and the remainder of that value was echoed into a refusal whose own text promises values are withheld. Ground-truthed against real MySQL 8.0.46. Such a comment is now not trusted as a comment at all: the refusal falls back to quoting nothing, which costs a diagnostic and never a value. Quote-free versioned comments — what `mysqldump` and Vitess actually emit — are unaffected.
+
+  The matching *detection* path is deliberately left alone, and the asymmetry is recorded in the code：the same mis-lex can make a healthy ROW-logged DDL look like a DML verb and raise this refusal on a working configuration, which is loud and recoverable, whereas "fixing" it would make a genuinely statement-logged write lex as nothing at all and be dropped **silently**. A false refusal outranks a silent miss.
+
+  ## Changed
+
+  **v0.137.0's compatibility note is corrected in place.** It said that until `sluice trigger setup` is re-run, every existing pgtrigger install opens with a `STALE-CAPTURE-FUNCTION` warning. It does not. That warning fires only when an install's capture-function definitions **differ** from what the running binary renders — so an install whose definitions are already byte-identical, such as one created by v0.136.0, opens silent with no prompt at all.
+
+  Those installs are not broken and capture correctly. The residual, now stated rather than implied, is that without a recorded provenance digest a later hand-edit of a capture function can only be *warned* about there, never *refused*. Re-running `trigger setup` once records the digest and closes that gap, and v0.134.1's `INSECURE-CAPTURE-FUNCTION` warning already steers most affected installs to the same single re-run. A fresh install on v0.137.0 or later records the digest at setup and is unaffected.
+
+  Whether that silent case should warn is recorded as a deliberate open decision rather than changed quietly：warning there would mean a new warning firing on every stream open for every existing install, which is a judgement call about noise, not a correctness fix.
+
+  ## Compatibility
+
+  Drop-in from v0.137.0 — no schema, format, flag or on-disk change, and no behaviour change beyond the refusal text above.
+
+  ## Who needs this
+
+  • **MySQL sync operators behind Vitess/PlanetScale, ProxySQL, or tracing-instrumented clients**：upgrade if you want STATEMENT-DML refusals to name the statement again. If you hit one on v0.137.0, the binlog coordinate in that refusal still located the event precisely — only the quoted fragment was unhelpful.
+  • **pgtrigger operators**：no action. Read the corrected compatibility note above if you were counting on a warning to tell you which installs still need a `trigger setup` re-run — some will not warn.
+  • Everyone else：upgrade normally; no action.
+
+  ## Install
+
+  ```
+  # Homebrew
+  brew upgrade sluice
+
+  # Scoop (Windows)
+  scoop update sluice
+
+  # Go
+  go install sluicesync.dev/sluice/cmd/sluice@v0.137.1
+  ```
+
+  Container images：`ghcr.io/sluicesync/sluice:0.137.1` (multi-arch; the image tag carries no `v` prefix).
+
+  **Full changelog:** https://github.com/sluicesync/sluice/blob/main/CHANGELOG.md
+ReleaseNotesUrl: https://github.com/sluicesync/sluice/releases/tag/v0.137.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

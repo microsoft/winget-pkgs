@@ -1,0 +1,72 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: athrvk.Vayu
+PackageVersion: 0.26.0
+PackageLocale: en-US
+Publisher: Atharva Kusumbia
+PublisherUrl: https://github.com/athrvk
+PublisherSupportUrl: https://github.com/athrvk/vayu/issues
+Author: Atharva Kusumbia
+PackageName: Vayu
+PackageUrl: https://github.com/athrvk/vayu
+License: AGPL-3.0
+LicenseUrl: https://github.com/athrvk/vayu/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Atharva Kusumbia
+ShortDescription: Open-source API client with a native C++ load-testing engine - Postman-style requests and k6-level load tests in one local app.
+Description: Vayu is a free, open-source desktop app for Windows, macOS, and Linux that combines a full REST and GraphQL request builder - with collections, environments, and scripting - and a high-throughput load tester powered by a C++20 engine, with all data staying on your machine.
+Moniker: vayu
+Tags:
+- api
+- api-client
+- api-testing
+- benchmark
+- developer-tools
+- graphql
+- http
+- insomnia
+- load-testing
+- performance
+- postman
+- rest
+ReleaseNotes: |-
+  0.26.0 - 2026-09-05
+  This release moves to Electron 44, which drops macOS 12, and changes the application identifier. Read the first two entries under Changed before updating. Beyond that it is mostly desktop integration: system notifications, taskbar and Dock progress, a keep-awake option for long runs, right-click menus outside the editors, and Back/Forward across tabs. The engine now owns the default headers it adds, the Windows uninstaller actually deletes your data when you ask it to, and a failed run is finally reported as failed.
+  Added
+  - System notifications. A finished load or collection run, the engine going down, an update becoming ready, and a browser sign-in completing can now post an OS notification. Off by default (Settings > Notifications), and nothing is posted while Vayu is the front window. The run notification carries the numbers ("12,400 requests, p95 210 ms, 0.3% errors") and clicking it brings Vayu forward on that run. A Preview button next to the toggle posts a real one so you can see what your system does with it.
+  - Inbox capture notifications. Off by default even when system notifications are on, and toggled in the inbox header rather than in Settings. Captures are batched into one trailing notification with a count, since a webhook source can deliver hundreds a minute. An interrupted capture stream now resumes.
+  - Taskbar and Dock progress. A running load or collection run shows its progress on the Windows taskbar button and the macOS Dock icon. Captures that arrive while the window is unfocused show as a badge count, and a failed run marks the icon. A run that ends in a state you did not ask for flashes the taskbar or bounces the Dock once, but only when system notifications are off. If two runs are live, the most recently started one owns the indicator. No progress bar on Linux: Electron 44 removed Unity launcher support.
+  - Dock and taskbar menu, and file handover. Right-click the icon for New Request and your recent collections. Dropping a Vayu-openable file on the icon, or opening it with Vayu from the file manager, opens the Import dialog on it. This works from a cold launch too.
+  - Runs started through the MCP surface get the same progress indicator, keep-awake hold and notifications as runs started from the UI. Previously none of that kicked in until you opened the run's dashboard tab.
+  - Keep awake during runs. Vayu can hold the machine out of sleep while a run streams (app suspension only; the screen may still dim). Off by default. Keep awake during runs in Settings > Load testing turns it on for every run; with it off, a load run declaring ten minutes or more asks once as it starts. A run with no declared length is never asked. If the host sleeps anyway, the run reports how long it slept instead of leaving a gap in the series.
+  - Right-click menus everywhere, not only in the Monaco editors. The URL bar, a {{token}}, an editor, tree rows and tabs each get their own menu, with cut/copy/paste, selection and link entries where they apply.
+  - Back and Forward across tabs. Title-bar buttons, Cmd+[ / Cmd+] on macOS and Alt+Left / Alt+Right elsewhere, the mouse back/forward buttons, the macOS two-finger swipe, the View menu and two palette commands. History is by location, not tab instance, so Back can reopen a tab you closed; closing the active tab returns to where you came from. Deleted requests and collections are dropped from history.
+  - GraphQL schema explorer: arguments as rows. A field's row shows its result type and an argument count; the arguments expand as rows underneath. Activating one writes first: $first onto the field and declares $first on the operation. Previously the inline argument list ate the width and users (first: Int, userId: In… never showed what it returned.
+  - resolve_variables MCP tool. Ask it about a variable name and it lists every definition in precedence order (globals, then the collection chain root to leaf, then the active environment), marks the one that wins, and says for each loser whether it was outranked or switched off.
+  - The context bar lists the variables the open request actually uses, each with its scope badge and value, or marked "not defined". The full in-scope set is behind an "All in scope (N)" disclosure. Secrets in the list can be revealed.
+  - The MCP server only offers write tools when write access is on. It used to describe all 28 of them to every agent, about 12,100 of the 30,500 tokens in the tool list, and then refuse each call. Now they are not listed at all until you turn write access on; the server instructions say so and name the setting, and an agent that tries one anyway is told to turn write access on rather than that the tool does not exist.
+  - Script editor snippets are now a list you insert from. Each says which script it belongs in, and inserts on its own line rather than over a selection.
+  Changed
+  - The application identifier is now io.github.athrvk.vayu (was com.vayu.client, a domain the project does not own). macOS keys preferences, caches and permissions by it, so macOS may ask again for permissions you had already granted, and preferences stored by an earlier version are not read. Windows installs upgrade in place; the installer keeps its previous identity so the app does not appear twice in Add/Remove Programs. install.sh --uninstall --purge removes both the old and the new locations.
+  - macOS 13 (Ventura) or later is required. Electron 44 dropped macOS 12, so the universal DMG and zip will not launch on it. Windows and Linux are unaffected. The Linux AppImage stays x86_64 and the Windows installer stays x64, as before.
+  - The window has rounded corners on Linux, matching macOS. Electron 43 made this the default for frameless windows; Vayu now sets it explicitly so a future default cannot change it.
+  - The headers Vayu adds are shown, not saved into your request. Vayu used to write its version header and a request id into the saved request itself, so a stored request replayed one frozen id on every load-test iteration. The version header is no longer sent at all. The defaults are now added at send time and never stored: the User-Agent as before, an optional X-Vayu-Request-Id that is fresh on every send, and Accept-Encoding so compressed responses are decoded. You can see the set in the app and turn any of them off per send, and a header your request already has is never overwritten. Load runs have their own compression setting, since compression changes what a load test measures.
+  - The {{variable}} hover in the editors is now the app's own tooltip instead of Monaco's, and Cmd/Ctrl+click on a token opens it. Monaco's suggestion list, parameter hints and find box use the app's colour tokens.
+  - Sidebar rows have a narrower method column. DELETE, OPTIONS and CONNECT show as DEL, OPT and CONN with the full name on hover, and the method is plain text instead of a chip.
+  - Windows: constant-RPS load runs below ~500 RPS are evenly spaced again. Requests went out in pairs instead of one at a time, because the Windows sleep timer wakes late. The average rate was still exact, so nothing in the report showed it. Rates from ~500 RPS up were never affected.
+  - cpp-httplib 0.54.1 and curl 8.22.0. With the cpp-httplib update, an error inside a request handler no longer takes the engine down, and the webhook inbox gets the same protection.
+  - Internal: the inbox stream is held app-wide through useSyncExternalStore; Monaco 0.56; a named type scale pushed into the card, dialog and input primitives; the September dependency sweep (ESLint 10.9, pnpm 11, graphql 17, zod 4, lucide 1, TypeScript 7, date-fns dropped); the weekly perf harness measures the packaged app's cold start on Linux; and a pass over documentation against the code it describes.
+  Fixed
+  - A run that failed was reported as finished, so you got no failure notification and no error state on the taskbar or Dock. Failures are now reported as failures.
+  - Windows: "Delete everything" at uninstall deleted nothing. Every saved request, collection, environment, history entry and setting stayed on disk and came back on reinstall. Fixed for both per-user and all-users installs. The Debian package also no longer runs cleanup hooks for a lock file the app never writes.
+  - The application menu is reachable on Windows and Linux.
+  - Cmd/Ctrl+S and the quit flush no longer paint "Saved" over an edit that raced them; a rename no longer reports "Saved" over somebody else's unsaved edit; a cleared script reaches the engine; a save clears the dirty flag only for what it actually sent.
+  - Both sidebar trees and the schema explorer draw one guide line per nesting level; nested containers used to stack an extra line each. The loading skeleton lines up with the rows it stands in for.
+  - Restarting the engine no longer lets a health poll from the old process close the start window the new one just opened. A restart you asked for reads as a start, not a failure.
+  - Export as OpenAPI no longer flickers when switching JSON to YAML. The summary counts belong to the collection, not the format, so they stay on screen while the other format assembles.
+  - The "create in" label sits above the choice in the create-variable row, and the popover keeps focus in the value field.
+  - Two live runs can no longer take each other's taskbar or Dock progress indicator.
+  - Run timings no longer depend on the system clock. If the clock changed during a run (a time sync, for instance), the reported duration was wrong, and with it the RPS and throughput figures; a clock stepping backwards could produce a negative duration.
+ReleaseNotesUrl: https://github.com/athrvk/vayu/releases/tag/v0.26.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
