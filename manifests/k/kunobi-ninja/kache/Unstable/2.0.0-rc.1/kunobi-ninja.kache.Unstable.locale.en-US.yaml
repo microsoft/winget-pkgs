@@ -1,0 +1,62 @@
+# Created with komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: kunobi-ninja.kache.Unstable
+PackageVersion: 2.0.0-rc.1
+PackageLocale: en-US
+Publisher: Kunobi Ninja
+PublisherUrl: https://kunobi.com/
+PublisherSupportUrl: https://kunobi.com/contact
+Author: Zondax AG
+PackageName: kache (Unstable)
+PackageUrl: https://github.com/kunobi-ninja/kache
+License: Apache-2.0
+LicenseUrl: https://github.com/kunobi-ninja/kache/blob/HEAD/LICENSE
+Copyright: 2026 Zondax AG
+ShortDescription: Content-addressed zero-copy build cache for Rust, C/C++ and more (unstable channel)
+Description: kache is a content-addressed, zero-copy build cache for Rust, C/C++ and more. It avoids file copies and wasted disk by hardlinking artifacts locally and sharing them via S3-compatible object storage. This is the pre-release (RC/beta) channel.
+Moniker: kache
+Tags:
+- build
+- build-cache
+- cache
+- ci
+- compiler
+- developer-tools
+- rust
+- rustc
+ReleaseNotes: |-
+  This release candidate splits the compiler client from kache-engine, adds incremental reuse between local worktrees, and checks real cache restores with kache doctor --probe. Custom installations must now ship both executables. Use this RC to validate installations and upgrades before 2.0.0 stable.
+  cargo install kache --locked --version 2.0.0-rc.1
+  kache init
+  Highlights
+  - Compiler processes and artifact restores stay in the client while the daemon coordinates the cache pipeline on Linux, macOS and Windows.
+  - Compatible worktrees can reuse local incremental state on rustc 1.98 or later. Imports use private clones or copies.
+  - kache doctor --probe verifies a cold compilation followed by a local cache hit.
+  Added
+  - Diagnostics: kache doctor --probe compiles a small Rust library in a temporary local cache, removes the output, and checks that Kache restores identical bytes without invoking rustc again. Doctor also reports cache access failures, disk and inode pressure, and differences between client and daemon settings. #1707 by @jleni.
+  - Incremental builds: compatible worktrees seed local incremental state automatically on rustc 1.98 or later. Set KACHE_SEED_INCREMENTAL=0 to opt out. #1647 by @jleni.
+  Fixed
+  - Remote resilience: speculative dependency lookups honor the circuit breaker and configured restore deadline, so optional requests do not keep retrying a degraded remote. #1715 by @jleni.
+  - Rust metadata: restored metadata stays writable for cargo fix and cargo clippy --fix. Incremental imports no longer share writable files with their donor, including ThinLTO state. #1704 by @mvanhorn and @jleni.
+  - Cache keys: track optional-header changes, the selected Linux linker, and Windows resource and default-library inputs. #1638, #1664, #1684, #1701 by @jleni, @viktorius007, @TastyCZ and @Veykril.
+  - Windows: opt-in executable caching restores matching PDBs alongside executables and rejects unsupported debug layouts. #1685 by @jleni, adopting @TastyCZ's contribution.
+  - C/C++ headers: transparent aliases of __has_include remain cacheable while optional-header changes still invalidate affected entries. #1713 by @jleni.
+  - Worktree seeds: copied Cargo metadata refers to the receiving checkout, so removing the donor does not leave stale dependency paths. #1694 by @jleni.
+  - Statistics and sync: time-window reports include rotated event logs, text summaries show per-source hits, and filtered pulls resolve compiler target names. #1646, #1671, #1710 by @jleni and @TastyCZ.
+  Breaking Changes
+  - Installation: install matching kache and kache-engine executables in the same directory. Update scripts and container images that copy only kache. Manual Windows installs use the paired ZIP; standalone EXE release assets are discontinued. #1639.
+  - Daemon protocol: run kache daemon restart after upgrading. The new execution protocol rejects older peers before accepting compilation ownership. #1702.
+  - Incremental state: finish active builds before upgrading. Managed incremental state starts cold once and is recreated with private files. #1704.
+  Performance
+  - The small client delegates cache planning to the persistent daemon while retaining native compiler execution and restores. #1639, #1702.
+  - Daemon admission scales with CPU count and Unix descriptor headroom. Override it with cache.daemon_execution_concurrency or KACHE_DAEMON_EXECUTION_CONCURRENCY, then restart the daemon. #1705.
+  New Contributors
+  - @mvanhorn made their first contribution in #1704
+  Contributors
+  Credits include commit authors and coauthors of adopted contributions in this release.
+  mvanhorn Akagi201 burin-labs-agent jleni skyf0l TastyCZ Veykril viktorius007
+  Full changelog: v1.2.2...v2.0.0-rc.1
+ReleaseNotesUrl: https://github.com/kunobi-ninja/kache/releases/tag/v2.0.0-rc.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

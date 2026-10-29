@@ -1,0 +1,101 @@
+# Created with komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AdamGell.CMTraceOpen
+PackageVersion: 1.6.3
+PackageLocale: en-US
+Publisher: Adam Gell
+PublisherUrl: https://github.com/adamgell
+PublisherSupportUrl: https://github.com/adamgell/cmtraceopen/issues
+PackageName: CMTrace Open
+PackageUrl: https://cmtraceopen.com/
+License: MIT
+LicenseUrl: https://github.com/adamgell/cmtraceopen/blob/HEAD/LICENSE
+ShortDescription: Free, open-source CMTrace replacement for Windows log files, with Intune and Autopilot ESP diagnostics.
+Description: |-
+  CMTrace Open is a free, open-source log viewer and Windows troubleshooting tool, built as a modern replacement for Microsoft's CMTrace.exe. It auto-detects and parses ConfigMgr/SCCM (CCM), CBS, DISM, Panther, MSI, PSADT, and plain-text log formats, with severity color coding, real-time tailing, find and filter, and lookup for 700+ embedded Windows, ConfigMgr, and Intune error codes.
+  Beyond the log viewer it adds dedicated troubleshooting workspaces: Intune Management Extension (IME) diagnostics with an event timeline and download statistics, Autopilot Enrollment Status Page (ESP) and Device Preparation triage, DSRegCmd analysis for Entra join, hybrid join, PRT, MDM, and Windows Hello for Business, software deployment log scanning, Windows Event Log (.evtx) and Sysmon analysis, Secure Boot certificate checks, and diagnostic evidence collection.
+  Ships as a single-file executable with no runtime prerequisites; Windows builds are code-signed. CMTrace Open is an independent open-source project and is not affiliated with Microsoft Corporation.
+Moniker: cmtrace
+Tags:
+- autopilot
+- cmtrace
+- configmgr
+- dsregcmd
+- endpoint-management
+- entra-id
+- esp
+- event-log
+- evtx
+- intune
+- log-viewer
+- mdm
+- mecm
+- sccm
+- sysadmin
+- troubleshooting
+ReleaseNotes: |-
+  Stable downloads: https://download.cmtraceopen.com/?source=github-release
+  CMTrace Open v1.6.3
+  Open-source CMTrace log viewer with built-in Intune diagnostics.
+  Download shortlinks
+  Each shortlink always resolves to the current stable release, so it stays valid in
+  tickets, runbooks, and slides long after this page scrolls out of view.
+  ──────────────────────────────┬───────────────────────────────
+  Platform                      │Shortlink
+  ──────────────────────────────┼───────────────────────────────
+  Windows x64, portable EXE     │https://win.cmtrace.net
+  ──────────────────────────────┼───────────────────────────────
+  Windows ARM64, portable EXE   │https://winarm.cmtrace.net
+  ──────────────────────────────┼───────────────────────────────
+  Windows x64, Lite portable EXE│https://lite.cmtrace.net
+  ──────────────────────────────┼───────────────────────────────
+  Windows x64, MSI installer    │https://msi.cmtrace.net
+  ──────────────────────────────┼───────────────────────────────
+  macOS Apple silicon, DMG      │https://mac.cmtrace.net
+  ──────────────────────────────┼───────────────────────────────
+  Linux x64, AppImage           │https://linux.cmtrace.net
+  ──────────────────────────────┴───────────────────────────────
+  Nightly channel: https://nightly.cmtrace.net
+  Artifacts in v1.6.3
+  ─────────────────────┬─────────────────────────────────────────────────────────────────
+  Platform             │Files
+  ─────────────────────┼─────────────────────────────────────────────────────────────────
+  Windows x64 and ARM64│signed .msi, signed portable .exe (Full and Lite), signed
+                       │-setup.exe
+  ─────────────────────┼─────────────────────────────────────────────────────────────────
+  macOS Apple silicon  │signed and notarized .dmg, plus the .app.tar.gz updater archive
+  ─────────────────────┼─────────────────────────────────────────────────────────────────
+  Linux x64            │.AppImage, .deb, .rpm
+  ─────────────────────┴─────────────────────────────────────────────────────────────────
+  The MSI installs both the Full and Lite editions. Portable EXEs require no installation.
+  CycloneDX SBOMs (sbom-rust.cdx.json, sbom-npm.cdx.json) and build provenance
+  attestations are published alongside the binaries.
+  Changes
+  Removed
+  - Hot Dog Stand theme: Remove the theme. Anyone who had it selected opens in the Light theme.
+  Changed
+  - Desktop build compiler: Raise the desktop Rust minimum from 1.88 to 1.89 for the maintained Linux D-Bus dependency. The parser crate remains at version 0.4.0 with its existing Rust 1.88 minimum. Supported desktop OS baselines are unchanged.
+  - Reference screenshots: Remove outdated reference screenshots that showed identifying environment details, and replace the 0.3.0 workspace screenshot with a text caption.
+  - Parser source compatibility (#814): Advance cmtraceopen-parser to 0.4.0 for breaking source API changes from new Windows Firewall enum variants and public struct fields. Update affected exhaustive matches and struct literals; see the migration notes.
+  - DsRegCmd diagnostics link to event-log entries (#870): Diagnostics from rules that fire on a specific 0x code now carry related_error_codes (public field on DsregcmdDiagnosticInsight; struct literals need related_error_codes: Vec::new()), and the analyzer links event-log entries that cite those codes on token boundaries. Only codes that appear in the rule's fields on token boundaries are recorded; a rule firing on a substring hit records none. See the migration notes.
+  Fixed
+  - Linux single-instance handoff: Port an owned copy of the single-instance plugin to maintained zbus 6, preserving exclusive election, file handoff and name cleanup. An unavailable session bus retains startup without instance enforcement and reports a warning; a failed delivery to an existing primary reports an error instead of successful delivery. Windows and macOS implementations are unchanged.
+  - Archive and TLS dependencies: Update ZIP to 9.0.4 and Rustls to 0.23.46, retain archive symlink/special-file rejection, and remove the updater's unused legacy ZIP extraction path without suppressing the new advisories.
+  - IME record framing: Recover interrupted logical records during live tailing and identify retained unparsed fragments without adding public parser fields or variants.
+  - Diagnostics collection bounds: Retain bounded captures and report source changes instead of implying a complete, unchanged capture.
+  - Release package verification: Require Windows embedded application signing during installer bundling, retained macOS trust evidence and complete updater platform coverage before publication.
+  - Find accessibility: Give the Find bar and its live result count named accessible regions so assistive technology can identify the controls and announce search results.
+  - Public Autopilot parser projection: Mask short typed identities consistently in narrative while preserving generated redaction tokens. This addresses the parser-library projection contract; the desktop has no caller of this Autopilot leaf projection.
+  - Development tooling dependencies (#816, #817): Update source-map-js to 1.2.2 in the application and download-metrics lockfiles, addressing indexed source-map offset validation (GHSA-68fv-2mgg-jv7q).
+  - DsRegCmd live event coverage (#918): Report incomplete channel reads and unparseable records as failed coverage with their details, while retaining parsed events and counts.
+  - Windows Firewall logs (#814): Recognize firewall records separately from IIS, preserve all fields and Local wall-clock timestamps, report skipped NUL padding and warn about lost events, and retain encoding and source identity through live tailing and timeline queries.
+  - DsRegCmd live capture reports evidence-write failures (#760): Connectivity, event-log, and scheduled-task evidence now report directory creation, serialization, and file-write errors instead of returning a successful capture with missing evidence.
+  Verification
+  Built from signed tag v1.6.3, source 62fe586a02c199011b7bdc0936a96527c0d335ec. Windows x64/ARM64 package signatures, macOS notarization/trust, Linux ABI checks, all 27 asset checksums and six updater signatures passed. Ubuntu 22.04 final-artifact Xvfb X11 acceptance passed. Windows interactive acceptance was waived and not performed. Ubuntu 24.04 native acceptance was not performed: test-environment isolation setup blocked before application launch; release proceeded at the owner’s direction.
+ReleaseNotesUrl: https://github.com/adamgell/cmtraceopen/releases/tag/v1.6.3
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/adamgell/cmtraceopen/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,101 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.130.8
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.130.8] - 2026-10-20
+  The Recycle Bin is measured the way Windows counts it, so an empty one reads as empty, and every way SysManager
+  empties it now says so in Recent activity.
+  Fixed
+  - An empty Recycle Bin read as one file to delete. Deep Cleanup and Quick Cleanup sized the bin by walking its
+    folders, which also counted the files Windows keeps there for itself: the desktop.ini each bin folder holds even
+    when the bin is empty, and an index file beside every deleted item. On Deep Cleanup an empty bin still showed 129
+    bytes in 1 file for each drive and arrived ticked, and a bin of 10 files on one drive read as 21; Quick Cleanup's
+    label read "0.0 MB in Recycle Bin" for an empty bin. Both take the size and the item count from Windows now, which is what Explorer shows and what emptying
+    removes: an empty bin reads "Empty" and is not ticked, and a deleted folder counts as one item however many files it
+    holds. A bin Windows cannot measure is shown as skipped rather than as empty. Deep Cleanup since its Recycle Bin
+    category was added (0.5.0), the Quick Cleanup label since it was added (0.12.2).
+  - Emptying the Recycle Bin left no trace in Recent activity. Quick Cleanup's Empty Recycle Bin wrote nothing
+    there, and the Quick Tune-Up recorded only the temporary files it removed ("Freed 120 MB"), even after permanently
+    emptying gigabytes from the bin; its status line and notification left the bin out too. Someone looking later for a
+    file they had deleted could not tell that SysManager had emptied the bin. Both record it now with what the bin held,
+    for example "Freed 120.0 MB of temporary files and permanently emptied the Recycle Bin (12 items, 3.0 GB)". The
+    Tune-Up's freed total includes the bin, and its card says what the bin held, that it was already empty, or that it
+    could not be emptied. Deep Cleanup's result names the bin as well when a clean empties it. Since Recent activity was
+    added (1.17.0).
+  - Emptying an empty Recycle Bin could end in "Windows refused the request". Empty Recycle Bin asked Windows to empty
+    the bin whatever it held, and counted every answer but two as a refusal, though Windows does not document what it
+    answers for an empty bin. It looks first now: an empty bin is reported as already empty and left alone, and when
+    Windows answers with an error, whether the bin is empty afterwards decides the result. Since 1.61.5.
+  - Empty Recycle Bin looked as harmless as Rescan. It wore the same grey style as the Rescan button beside it, though
+    what it removes cannot be put back. It is red now, like the other buttons that delete for good, and it, Deep
+    Cleanup's Clean selected and Browser Cleaner's Clean selected tell a screen reader what they do before they are
+    pressed. Since the button was added (0.3.0).
+  - Closing SysManager could cut off Empty Recycle Bin or Remove leftovers without a word. Every other command that
+    deletes takes the lock that makes closing SysManager, or restarting it as administrator, ask first; these two did
+    not, so either could be stopped part-way, and Empty Recycle Bin could run while Deep Cleanup or the Quick Tune-Up was
+    emptying the same bin. Both take it now. Empty Recycle Bin since it was added (0.3.0), Remove leftovers since it was
+    added (1.124.0).
+  Verify the download
+  Get-FileHash .\SysManager-v1.130.8.exe -Algorithm SHA256
+  Expected SHA256: 282DEFC59A727500025CF866966C621D7FAA5A9C142FD2FC6F76F015D0224800
+  This build is not code-signed, so Windows will warn on first launch. That is
+  expected for a small independent app: see what the warning says and what to
+  click.
+  Code signing is planned through the SignPath Foundation,
+  which provides free certificates to open-source projects, with signing performed by
+  SignPath.io. Until then, the SHA256 above and the build
+  attestation below are what establish that a download is the genuine build.
+  Code signing policy
+  This release is not code-signed. The team roles, release-approval process and
+  privacy policy required by the SignPath Foundation programme
+  are documented in advance under Code signing
+  policy. That
+  documentation is a prerequisite for applying, not evidence of a certificate. The
+  attribution line naming SignPath as the signing provider will appear here once a
+  certificate is actually issued.
+  This program will not transfer any information to other networked systems unless
+  specifically requested by the user or the person installing or operating it. Full
+  privacy policy.
+  Verify where this binary came from
+  This exe was built by GitHub Actions from this public source, and the build is
+  recorded in the Sigstore public transparency log. With the
+  GitHub CLI:
+  gh attestation verify .\SysManager-v1.130.8.exe --repo laurentiu021/SystemManager
+  That proves which commit and workflow produced this exact binary, something the
+  SHA256 file cannot show, since it is published alongside the exe it describes.
+  Each release also ships SysManager-v1.130.8.sbom.json, a CycloneDX inventory of
+  every dependency resolved for this build.
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.130.8
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

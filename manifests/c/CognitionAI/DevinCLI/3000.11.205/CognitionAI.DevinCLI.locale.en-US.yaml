@@ -1,0 +1,68 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: CognitionAI.DevinCLI
+PackageVersion: 3000.11.205
+PackageLocale: en-US
+Publisher: Cognition AI, Inc.
+PrivacyUrl: https://cognition.ai/privacy-policy
+Author: Cognition AI, Inc.
+PackageName: Devin CLI
+PackageUrl: https://cli.devin.ai/docs
+License: Proprietary
+LicenseUrl: https://cognition.ai/terms-of-service
+ShortDescription: A fast and minimal agent that lives both in your terminal and in the cloud.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+ReleaseNotes: |-
+  Added
+  - Steering improved to immediately interrupt Devin when a new message is received, without losing progress on long-running terminal commands.
+  - /rename with no argument generates a new session title from the conversation so far. /rename <new title> still sets the title you give it.
+  - /pickup (and /handoff from a cloud session) gives the new local session a summary of the cloud session as background context.
+  - Set read_config_from.cloud: set it to false to keep your Devin Cloud account’s MCP servers and personal plugins out of the CLI. Plugins your organization requires still load.
+  - [Experimental] Introduced a new DEVIN_SESSION_STORE=files option to keep session history as a folder of files instead of SQLite, so devin -r works when your home directory is on NFS, SMB or another shared filesystem.
+  - Hooks:
+    - fail_closed: true blocks the action a hook guards when the hook itself fails to run, instead of going ahead without it.
+    - A hook can end the agent’s turn from any event with stop: "<reason>" in its output (Claude-format hooks: continue: false / stopReason).
+    - PostToolUse hooks can replace a tool result before the model reads it with hookSpecificOutput.updatedToolOutput, for example to redact content a tool returned.
+  - New /confetti command.
+
+  Changed
+  - Tool calls show as compact single-line summaries in the transcript; press Ctrl+O for the full tool cards. Commands that exit with a nonzero status show a red cross.
+    - Use the new agent.verbosity setting to control how much detail is shown in the transcript.
+  - The tool approval prompt is now Allow, Bypass mode and Deny. Use ←/→ on Allow to pick how long the grant lasts (Once, Session, Project, Always), and press e to edit the command.
+  - The /model picker lists models in the same order as Devin Desktop.
+  - The /config editor looks like the model picker: a search box on top, the setting’s description under the list, and values in one aligned column.
+  - /context draws one bar per section (system prompt, tools, messages, free) in the same style as /session-stats.
+  - The session picker (devin --resume, /resume, devin ls) opens as soon as the session list is read instead of taking seconds on a large sessions database; type-to-search matches session titles only. /resume with no id opens the picker over the running session.
+  - devin models on its own lists the available models.
+  - A session you own is made private when your machine connects through a devin --cloud session or Devin Desktop local access, not only through devin connect <code>. Only the user whose machine is connected can approve a local tool call or turn on bypass permissions from the cloud session.
+  - /loop and its agent.model_mixture setting are removed. Use /goal to keep Devin working on an objective until it is done.
+
+  Fixed
+  - Interrupting a turn (Esc-Esc, Ctrl+C, or a steer message) no longer waits for an MCP server that is still connecting or waiting for OAuth sign-in.
+  - MCP servers that answer the server/discover probe with an incomplete result (for example MCP Toolbox for Databases) now connect instead of failing with “expected initialized result”.
+  - GPT-5.x / GPT-6 models can use ask_user_question and todo_write again, in normal and plan mode.
+  - A message with more image data than the server accepts no longer leaves the session failing every later turn with “Request payload is too large”; the images that do not fit are dropped and the turn continues.
+  - Reopening a session (devin -r, or a click in the Devin Desktop sidebar) no longer moves it to the top of the session list; a session moves only when you send a message, rename it, or change its mode, model, or directory.
+  - A change saved to your personal or org plugin in Customize is picked up by the next session, instead of only after the plugin cache’s refresh interval.
+  - A hook matcher written as a list of strings ("tool_name": ["shell", "bash"]) matches any of them.
+  - Local tool use: a local_exec command that names a credential path without ~ ($HOME/.aws/..., %USERPROFILE%\..., an absolute home path) now always asks for approval, as the ~ form already did.
+  - Windows: devin acp no longer leaks memory while sessions sit idle.
+  - The thinking-level shortcut (Opt+T / Alt+T) steps through the levels in order (low, medium, high, xhigh, max) and leaves Fast Mode unchanged.
+  - When the connection drops mid-response, text already streamed stays in the transcript while the request is retried, and repeated failures show as one notice instead of a line per retry.
+  - Rendering: the input box no longer jumps by a line while a reply streams in, wrapped list lines line up under the item’s text, and the session title, tip and placeholder no longer run into the model name or folder path in narrow terminals.
+ReleaseNotesUrl: https://cli.devin.ai/docs/changelog/stable
+PurchaseUrl: https://devin.ai/pricing
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://cli.devin.ai/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

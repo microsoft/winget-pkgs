@@ -1,0 +1,157 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: athrvk.Vayu
+PackageVersion: 0.46.0
+PackageLocale: en-US
+Publisher: Atharva Kusumbia
+PublisherUrl: https://github.com/athrvk
+PublisherSupportUrl: https://github.com/athrvk/vayu/issues
+Author: Atharva Kusumbia
+PackageName: Vayu
+PackageUrl: https://github.com/athrvk/vayu
+License: AGPL-3.0
+LicenseUrl: https://github.com/athrvk/vayu/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Atharva Kusumbia
+ShortDescription: Open-source API client with a native C++ load-testing engine - Postman-style requests and k6-level load tests in one local app.
+Description: Vayu is a free, open-source desktop app for Windows, macOS, and Linux that combines a full REST and GraphQL request builder - with collections, environments, and scripting - and a high-throughput load tester powered by a C++20 engine, with all data staying on your machine.
+Moniker: vayu
+Tags:
+- api
+- api-client
+- api-testing
+- benchmark
+- developer-tools
+- graphql
+- http
+- insomnia
+- load-testing
+- performance
+- postman
+- rest
+ReleaseNotes: |-
+  0.46.0 - 2026-10-28
+  Read before updating: this version upgrades the workspace database to version 9,
+  which earlier versions refuse (details under Changed), and a request with a
+  pre-request script now fills in its {{names}} after the script runs, as
+  Postman does. New: the Trash now holds deleted environments, saved examples and
+  client certificates, a request has its own timeout, a collection run's redirect
+  hops are visible to scripts, and the capacity and scenario dashboards show far
+  more of what a run is doing. An engine crash on a self-referencing schema is
+  fixed.
+  Added
+  - The Trash holds more. Deleting an environment, a saved example or a
+    client certificate moves it to the Trash with an Undo, where before it was
+    gone (#2970, #2971, #2973). A trashed certificate is no longer offered to
+    sends and runs that start after the delete. The MCP trash tools list and
+    restore all three.
+  - A request has its own timeout. Set it in the request's Settings tab; a
+    blank value follows the default timeout in Settings (#2937).
+  - A script can read the redirects a send followed. pm.response.redirects
+    lists each hop's URL (Vayu only, not in Postman). The Cookies tab flags a hop
+    that went from https to http.
+  - A collection keeps its spec file and data file. The files bound in a
+    collection's Spec and Data tabs are stored with the collection, so Backup
+    carries them (#2765). Existing bindings move over once on first launch.
+  - require('ajv'), require('tv4') and the tv4 global run the real
+    libraries (#2656), and require('chai') runs chai 4.4.1 with Postman's
+    response assertions (#2655, #2751).
+  - Scripts at every level run and say where a result came from (#2522). A
+    result shows whether it came from the request, a folder or the collection.
+  - The live dashboard shows more. A scenario load run shows its step
+    sequence (#2823), every run draws its latency distribution and request timing
+    so far (#2782), and a capacity run names the level it is searching, why it
+    stopped, each level's error share and a response-time against concurrency
+    plot (#2815, #2925). The History row of a capacity run says what the search
+    found.
+  - Run exports cover capacity runs and scenarios. The Markdown and HTML
+    exports include the capacity result, the scenario sequence, transactions and
+    skipped requests (#2819, #2911). A run whose exact assertions failed is
+    exported as not judged (#2820).
+  - A Third-party notices button in Settings > General opens the licence
+    list, which also ships with the app and opens from Help (#2693).
+  - MCP agents can read their limits and page big lists. get_safety_config
+    returns the caps, allowlist and gates (#2444). The four
+    whole-list reads (requests, collections, the Trash and cookies) page through
+    limit and offset (#2443), and run_collection_smoke reports progress, pages and runs
+    recursively (#2449, #2451). Every error carries a failure class (#2776), and
+    an unknown id names the missing object and the tool that lists it (#2778).
+  - Import tells you when an OpenAPI document names no server URL. A spec
+    whose response schema refers to itself without describing any value is
+    refused when you add it, naming the operation (#3018).
+  Changed
+  - The database is now version 9. Version 8 stores a collection's bound
+    files and version 9 adds a request timeout and the environment, example and
+    certificate Trash.
+    Once this version opens a workspace, earlier versions refuse it. Vayu copies
+    the workspace to backups/ before upgrading; to go back, install the older
+    release and restore backups/vayu-<stamp>-pre-v9.db, which does not hold
+    anything written after the update.
+  - A scripted request resolves its variables after its pre-request script
+    (#2521). A name the script sets now reaches the URL, headers and body. A
+    collection run holds every step's names back when any step writes a variable.
+    An OAuth 2.0 token is fetched after the script too.
+  - Loading the app no longer uses file:. The window is served from
+    vayu-app://app (#2380); your saved state carries over on first launch.
+  - Timeouts reach everywhere. A load run honours the default timeout (#2798),
+    the connect phase of a transfer is bounded, and pm.sendRequest and OAuth 2.0
+    token requests use the send's timeout (#2833).
+  - Queue wait includes the wait for a connection slot, and the per-host
+    connection limit now covers a run's virtual users (#2394).
+  - constant_rps holds its pace better. The target accrues from absolute
+    time, a stalled generator's skipped requests are counted and shown (#2911),
+    and a ramp that fills the run reaches its target at the end (#2913).
+  - A concurrent edit is refused instead of overwriting. MCP updates to
+    environments, collections and globals are conditional on the version read, and
+    a whole-record save answers with an ETag (#2433, #2988).
+  - History pages by a cursor and counts runs without downloading them
+    (#2978).
+  - The log level defaults to info. A figure a run did not record shows as absent,
+    never 0 (#2938, #2963).
+  - Internal: the Linux release builds in a published container, CI runs on
+    Ubuntu 26.04, and the engine is formatted with clang-format 22.
+  Fixed
+  - The engine crashed on a schema that refers to itself (#3016). A
+    jsonSchema assertion or a bound spec whose schema looped through $ref
+    killed every run in progress. It is refused with a message naming the loop.
+  - A run in progress is saved and the engine stopped when Windows ends the
+    session, and an unreadable settings file is copied aside before the next write
+    (#2433).
+  - The database no longer maps its file into memory, and its write-ahead log is
+    capped (#2433).
+  - A typed Cookie header and the jar's cookies go out as one line.
+  - A latency over one hour is counted. A run that crashed reports its last
+    saved totals, flagged partial.
+  - Redirect hops count their bytes, and a body sent on each hop is counted once
+    per hop. Errors are counted by type past the store's cap, and a request that
+    got no response is listed once, never as HTTP 0 (#2400).
+  - A scenario run counts failed steps by assertion rather than HTTP status, and a
+    collection run counts requests, not steps.
+  - A failing pm.test in a script reads as failed, not as an empty error.
+  - A checked switch clears the contrast bar, and the Collections tree's indent
+    guides line up with the chevrons (#2773).
+  Security
+  - An update on Windows or the Linux AppImage is installed only after its
+    build-provenance attestation verifies against this repository's release
+    workflow (#2372). This version is installed by the previous updater, which
+    does not check; updates from it onward are verified.
+  - The app's window is sandboxed explicitly, SECURITY.md says the renderer is
+    trusted by the engine, and what the window can ask the shell to do is limited
+    (opening links, notifications, folder dialogs, log writes) (#2378, #2379,
+    #2381).
+  - pm.cookies.jar() writes only to the request's own site (#2631). install.sh
+    uses https only and checks provenance against the release tag (#2375).
+  Every asset except the .sha256 checksums carries a build-provenance attestation: gh attestation verify <asset> --repo athrvk/vayu.
+  Which file do I download?
+  - macOS (Apple Silicon and Intel): run bash -c "$(curl --proto '=https' --tlsv1.2 -fsSL https://athrvk.github.io/vayu/install.sh)". The .dmg and .zip are the same universal build, unsigned.
+  - Windows (x64): winget install athrvk.Vayu, or Vayu-x64.exe.
+  - Linux (x86_64 only, there is no arm64 build): the .AppImage, or sudo apt install ./Vayu-amd64.deb.
+  - The .yml, .blockmap and .sha256 files are for the auto-updater and for checking a download. You do not need them.
+  If your OS warns you
+  Vayu is not code-signed, so the OS can stop a downloaded file on first launch. Nothing is wrong with the file.
+  macOS says an app downloaded from this page (.dmg or .zip) is "damaged", because Vayu is not notarized. This command installs it without the warning:
+  bash -c "$(curl --proto '=https' --tlsv1.2 -fsSL https://athrvk.github.io/vayu/install.sh)"
+  Windows shows "Windows protected your PC". Choose More info, then Run anyway. winget install athrvk.Vayu skips it.
+ReleaseNotesUrl: https://github.com/athrvk/vayu/releases/tag/v0.46.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

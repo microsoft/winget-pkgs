@@ -1,0 +1,51 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Alibaba.DingTalkWorkspaceCLI
+PackageVersion: 1.0.65
+PackageLocale: en-US
+Publisher: DingTalk (Singapore) Private Limited
+PublisherUrl: https://www.dingtalk.io/
+PublisherSupportUrl: https://github.com/DingTalk-Real-AI/dingtalk-workspace-cli/issues
+PrivacyUrl: https://terms.alicdn.com/legal-agreement/terms/suit_bu1_dingtalk/suit_bu1_dingtalk202102181006_34132.html
+Author: DingTalk (Singapore) Private Limited
+PackageName: DingTalk Workspace CLI
+PackageUrl: https://github.com/DingTalk-Real-AI/dingtalk-workspace-cli
+License: Apache-2.0
+LicenseUrl: https://github.com/DingTalk-Real-AI/dingtalk-workspace-cli/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Alibaba Group
+CopyrightUrl: https://terms.alicdn.com/legal-agreement/terms/suit_bu1_dingtalk/suit_bu1_dingtalk202010161503_40649.html
+ShortDescription: dws — DingTalk Workspace on the command line, built for humans and AI agents.
+Description: |-
+  dws — DingTalk Workspace on the command line, built for humans and AI agents.
+  Why dws?
+  - For humans — --help for usage, --dry-run to preview requests, -f table/json/raw for output formats.
+  - For AI agents — structured JSON responses + built-in Agent Skills, ready out of the box.
+  - For enterprise admins — zero-trust architecture: OAuth device-flow auth + domain allowlisting + least-privilege scoping. Not a single byte can bypass authentication and audit.
+Moniker: dws
+Tags:
+- dingding
+- dingtalk
+ReleaseNotes: |-
+  This release promotes the sealed v1.0.65-beta.2 contents to stable.
+  Changed
+  - 汇总两个 beta 版本的改进：支持聊天消息内发送本地图片、跨 MCP 委托身份传递，以及数字员工的 A2UI 回复、群聊权限、引用与图片上下文和送达状态反馈。
+  Changes since v1.0.65-beta.2
+  Added
+  - 数字员工新增 A2UI 回复模式：支持的本地接入先发送占位卡，再将公开进度和最终答案更新到同一卡片。新连接默认使用 A2UI，已有未配置回复模式的连接保持文本回复。
+  - A2UI 创建和更新命令支持通过 --content - 从标准输入读取消息数组，避免长正文占用命令行参数。
+  - 审批图片上传 — 新增 oa approval image upload，校验本地图片并自动压缩超出 2MB 的图片，返回 mediaIdV2 供审批图片控件使用；同步修正联系人控件取值格式与部门 ID 核验指引。
+  - 群公告选项 — 创建和编辑公告支持 --no-card 静默发布及 --must-read 新人必看；显式传入 false 可关闭对应选项。
+  - 联系人身份查询 — 新增 contact user get-open-dingtalk-id（别名 get-open-id），按手机号或钉钉号查询 openDingTalkId，提供统一结果与 Schema；服务端灰度与频次限制仍适用。
+  - 登录审批来源 — CLI 授权状态、超级管理员查询及授权申请请求在识别到 Agent 宿主时携带来源标识。
+  Changed
+  - AI 表格访问密钥 — 标准命令调整为 dws aitable supabase api-key create/list/revoke。原 dws aitable api-key 三个命令继续兼容，参数、返回结果和权限要求保持不变。
+  Fixed
+  - Skill setup staging fail-closed (#1421) — path walks no longer skip read-only sibling directories behind a link entry, and staging identity read failures no longer delete by name or silently degrade to compat install, preventing leftover staging objects and false success reports during dws skill setup.
+  - Windows Agent skill link readability (#1425) — uses directory junctions with absolute canonical targets for Agent skill adapters on Windows, upgrades legacy directory symlinks, and validates readability before publication, preventing EPERM errors when followed by Node.js and Agent skill loaders.
+  - 升级版本比较 (#556) — dws upgrade、dws upgrade --check 和 dws doctor 比较版本时按 SemVer 忽略 build metadata（+...）。此前当前或远端版本号带 + 时，可能把更旧或相同的版本误报为可升级，或漏报真正的新版本。
+  - Prevent publishing a digital employee draft when its available last-editor identity differs from the current operator, while preserving compatibility for legacy drafts without that identity.
+  - Describe digital employee create and publish workflows as composite Schema interfaces, and publish the exact-one constraint for Skill updates using --enabled or --file.
+ReleaseNotesUrl: https://github.com/DingTalk-Real-AI/dingtalk-workspace-cli/releases/tag/v1.0.65
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

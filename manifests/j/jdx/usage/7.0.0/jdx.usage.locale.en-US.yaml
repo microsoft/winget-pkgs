@@ -1,0 +1,65 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: jdx.usage
+PackageVersion: 7.0.0
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://jdx.dev/
+PublisherSupportUrl: https://github.com/jdx/usage/issues
+Author: Jeff Dickey
+PackageName: usage
+PackageUrl: https://usage.jdx.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+ShortDescription: A specification for CLIs
+Description: |-
+  Usage is a spec and CLI for defining CLI tools. Arguments, flags, environment variables, and config files can all be defined in a Usage spec. It can be thought of like OpenAPI (swagger) for CLIs. Here are some potential reasons for defining your CLI with a Usage spec:
+
+  - Generate autocompletion scripts
+  - Generate markdown documentation
+  - Generate man pages
+  - Generate type-safe SDK client libraries for TypeScript, Python, and Rust
+  - Use an advanced arg parser in any language
+  - Scaffold one spec into different CLI frameworks-even different languages
+  - [coming soon] Host your CLI documentation on usage.sh
+Moniker: usage
+Tags:
+- cli
+- spec
+ReleaseNotes: |-
+  The derive macros now generate code against usage_rs directly instead of reading your Cargo.toml, usage generate fig has been removed, and the fields on argv metadata types are no longer public API. usage exec now accepts interpreter arguments, and this release also fixes how -- is handled by the shell runners and how multi-line examples are indented in help.
+  Breaking Changes
+  All of these come from #1532 (@jdx).
+  - The derive macros always generate paths through ::usage_rs. In 6.12, usage-derive parsed your Cargo.toml to work out how usage-rs was imported. That put toml and related crates into every downstream build. The macros no longer read the manifest, so toml is out of the dependency tree. If a derive can't find the facade crate, compilation fails with unresolved import usage_rs. To upgrade:
+    - Depend on usage-rs under its own name: usage-rs = { version = "7" }.
+    - If you import it under another name, such as usage = { package = "usage-rs", ... }, add #[usage(crate = usage)] to each derive that needs it. The attribute works on Cli, Args, Subcommands, ValueEnum, ArgGroup and Config, and you have to repeat it on every derive.
+      #[derive(usage::Cli)]
+      #[usage(crate = usage, bin = "ex")]
+      struct Ex { /* ... */ }
+    - If you depend directly on usage-argv, usage-derive, usage-config or usage-validation, also add usage-rs = { version = "7", default-features = false, features = ["spec"] }. Turn on the config or validation features if you use those crates, since they're now reached through usage_rs::config and usage_rs::validation.
+    - schema_from = T now always generates ::schemars. If you renamed the schemars dependency, change it back to its real name.
+    - The derives no longer look up workspace-inherited or target-specific dependencies.
+  - usage generate fig is removed. Fig shut down in 2024. Use usage generate completion <shell> instead.
+  - Fields on FlagMeta, CommandMeta and ArgMeta in usage-argv are now #[doc(hidden)]. Their struct layout is no longer covered by semver. Use the existing accessor methods instead, for example flag.env_fallback() rather than flag.env_fallback.
+
+  Added
+  - (cli) usage exec takes a quoted interpreter followed by its own arguments, and splits them the way a shell would (#1537, @jdx). Before this, there was no shebang form for interpreters that need flags before the script path, such as Deno's run and its permission flags. Values without whitespace, values that are paths to existing files, and the unquoted form all work as before.
+    #!/usr/bin/env -S usage exec "deno run --allow-env=usage_*"
+    //USAGE arg "<name>" help="Name to greet"
+
+  Fixed
+  - (cli) In usage bash, zsh, fish and powershell, words after -- now reach the script as values (#1541, @jdx). Previously, usage bash script.sh positional -- --help printed the script's help with an Error: prefix and exited with status 1. -h and --help still show help when they come before --.
+  - (cli) In --help output, every line of a multi-line example is now indented (#1548, @jdx). Before, sample output lines after the first started at column 0.
+
+  💚 Sponsor usage
+  usage is built and maintained by @jdx, an open source developer at entire.io, the title sponsor of his open source work.
+  If usage powers CLI specs, docs, or completions for a tool you maintain or use, please consider becoming an individual or company sponsor. Your support funds ongoing development and helps keep usage fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/usage/releases/tag/v7.0.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://usage.jdx.dev/cli/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

@@ -1,0 +1,117 @@
+# Created with komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 1.2.1
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v1.1.6
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  ⚙️ Process Updates
+  Go bumped to v1.27.3 for a security fix
+  The version of Golang used to compile the Terragrunt binary has been updated from v1.27.2 to v1.27.3.
+  Go v1.27.3 is a security release. It fixes CVE-2026-111943 in crypto/x509: certificate verification now rejects chains that contain a small set of untrusted intermediate certificates. Terragrunt uses this verification for every HTTPS connection it makes, including source downloads, provider registry lookups, and remote state backends. We recommend upgrading.
+  Terragrunt runs git, hg, and smbclient source downloads itself
+  Terragrunt downloaded git::, hg::, and smb:// sources through the getters built into the go-getter library, which started git, hg, and smbclient on their own. Terragrunt now implements these getters itself and starts those programs the same way it runs every other command.
+  Downloads should behave as they did before. If you find any functional difference, open an issue.
+  Because the downloads now go through Terragrunt's own command handling, Terragrunt's tests can cover them without a real git, hg, or smbclient install or a remote server, which makes regressions in source downloads easier to catch.
+  🏎️ Performance Improvements
+  Faster parsing of shared configuration
+  Repositories where every unit includes a root.hcl that loads shared files with read_terragrunt_config now parse much faster.
+  - Each unit used to parse those shared files itself, so a common.hcl that runs yamldecode(file(...)) on a large YAML file decoded it once per unit. Terragrunt now parses each file once and gives every unit the same result, and parses it again only when the file, or a file it reads, changes during the command. run --all parses it a second time when the run starts, after discovering units. A file whose result can differ between units, like one that calls get_original_terragrunt_dir() or has dependency blocks, is still parsed per unit.
+  - Since v1.1.2, discovery parsed every included configuration twice, once for its feature flag defaults and once to merge it. It parses each include once again, and skips includes with merge_strategy = "no_merge" that it would only have thrown away.
+  - Locals and inputs went through a JSON encoding round trip on their way into Terragrunt. Terragrunt now converts them directly.
+  In benchmarks on an Apple M3 Max, discovering units and their dependencies in a generated repository whose units read a 48 KB YAML file through read_terragrunt_config:
+  ─────┬──────┬─────
+  units│before│after
+  ─────┼──────┼─────
+  100  │819ms │59ms
+  ─────┼──────┼─────
+  500  │3.60s │201ms
+  ─────┼──────┼─────
+  1,000│7.01s │379ms
+  ─────┼──────┼─────
+  5,000│34.2s │1.88s
+  ─────┴──────┴─────
+  Memory allocated during discovery dropped by about 95%.
+  Faster discovery with path filters
+  Terragrunt now analyzes --filter expressions before discovery starts and uses them to narrow the filesystem walk it does during discovery. Filters that name specific paths let Terragrunt skip most of the walk, or walk only the directories those paths can match.
+  On a repository of 10,000 units, discovery with a filter like --filter './doublestar/glob/**', matching 1,250 of those units, took 27 ms instead of 224 ms. A filter like --filter './path/to/specific/unit', which names a single unit, took under 1 ms instead of 215 ms. Discovery selects the same units as before. It still walks the whole working directory when there is no filter, when every filter is negated, or when any filter can select a unit anywhere, such as name=vpc or ...vpc.
+  Units that share a run_cmd result run the command once
+  Units share a run_cmd result when the call uses --terragrunt-global-cache, or when it is in a file they read with read_terragrunt_config. Discovery parses units concurrently, so several of them could start the command before any had cached its result, and run --all could run a shared command once per unit.
+  Units now wait for the first run and reuse its result. If that run fails, the next unit runs the command itself.
+  📖 Documentation Updates
+  Azure and GCP examples across the docs
+  The Overview now has Azure and GCP examples for every step. The Azure examples create a resource group and a virtual network in eastus and westus2, with state in an azurerm backend. The GCP examples create a VPC network and a Cloud Router in us-central1 and us-east1, with state in a gcs backend.
+  The code for each step is in test/fixtures/docs/02-overview-azure and test/fixtures/docs/02-overview-gcp. Integration tests apply and destroy each step in both directories.
+  These pages also have Azure and GCP examples now:
+  - Units shows an env.hcl that generates the provider for every unit in an environment.
+  - Includes shows a root.hcl that configures the backend and generates the provider.
+  - Importing shows how to import resources by resource ID.
+  - backend bootstrap, backend migrate, and backend delete show what each command creates, moves, or deletes for an azurerm or gcs backend.
+  - In Patterns, the "Keep your backend configuration DRY" pattern sets an azurerm or gcs backend once in root.hcl.
+  Authentication now has a page for each cloud provider. The Azure page covers signing in with the Azure CLI, a service principal, OIDC, or a managed identity. The GCP page covers gcloud, a service account key, Workload Identity Federation, and an attached service account. Each lists the roles its state backend needs. The AWS content moved to the AWS page, and links to its old headings redirect there.
+  State Backend also has a page for each backend now: S3, GCS, and Azure Storage. Links to the old backend headings redirect to the new pages. The GCS page now covers what the Azure section already did: the order Terragrunt resolves credentials in, the settings Terragrunt reads without passing them to OpenTofu/Terraform, and the backend's known limitations.
+  Pick a cloud provider in any example tab, and every tab on the page switches with it. Other pages open on the same provider when they have a tab for it, and show AWS when they don't.
+  🐛 Bug Fixes
+  Reading a unit's outputs no longer collides with that unit's own run
+  In run --all, a unit could run at the same time as another unit reading its outputs, e.g. with --queue-ignore-dag-order, or when a Git filter plans the destroy of a removed unit while its dependents plan. Both ran OpenTofu/Terraform in the unit's .terragrunt-cache directory, so one could reinstall providers while the other used them, and the run failed with errors such as:
+  Error: Required plugins are not installed
+    - registry.opentofu.org/hashicorp/null: the cached package for registry.opentofu.org/hashicorp/null 3.2.4 (in .terraform/providers) does not match any of the checksums recorded in the dependency lock file
+  Terragrunt now waits for a unit's run to finish before reading its outputs, and waits for a read in progress before running the unit.
+  -detailed-exitcode no longer hides failures without an exit code
+  With -detailed-exitcode, e.g. terragrunt run --all -- plan -detailed-exitcode, a failure that came with no exit code from OpenTofu/Terraform, such as the binary failing to start, was recorded as exit code 0. Terragrunt dropped the error and reported the unit as successful.
+  Terragrunt now records exit code 1 for these failures and returns the error.
+  exclude blocks that reference dependency outputs fail with a clear error
+  An exclude block whose attributes referenced a dependency output, such as if = dependency.vpc.outputs.skip, never worked with run --all. Terragrunt evaluates the block while it builds the run queue, before any dependency has run, so it ignored the block with a warning and ran the unit anyway. Single unit runs read the output, so the same config behaved differently depending on the command.
+  Terragrunt now rejects the config on every command:
+  exclude block in /live/app/terragrunt.hcl cannot reference dependency outputs; exclude blocks are evaluated before dependencies run
+  Base the exclusion on a feature flag or a local instead.
+  hcl validate errors point at the code that caused them
+  terragrunt hcl validate printed each error in a box, with the absolute path of the file and the whole source line:
+  ╷
+  │ Error: Unsupported argument
+  │
+  │   on /path/to/live/app/terragrunt.hcl line 1:
+  │    1: foo = 1
+  │
+  │ An argument named "foo" is not expected here.
+  ╵
+  It now prints the path relative to the working directory, with the line and column, and underlines the part of the line the error is about:
+  error: Unsupported argument
+   --> app/terragrunt.hcl:1:1
+    |
+  1 | foo = 1
+    | ^^^ An argument named "foo" is not expected here.
+  A dependency block whose config_path names a directory that does not exist is reported the same way, pointing at the config_path:
+  error: Missing dependency
+   --> app/terragrunt.hcl:2:17
+    |
+  2 |   config_path = "../nonexistent"
+    |                 ^^^^^^^^^^^^^^^^ This directory does not exist.
+  Scripts that read hcl validate output should use --json, whose fields have not changed.
+  --out-dir keeps a plan for each Git reference that selects a unit
+  run --all with --out-dir or --json-out-dir mirrors each unit under the output directory. Two Git filters that selected the same unit at different references, e.g. --filter '[HEAD~2...HEAD~1]' --filter '[HEAD~1...HEAD]', mirrored both to the same path. Each run overwrote the other's plan file, so the plan saved for one reference held the other's changes.
+  A unit that a Git filter selects at a reference now goes under a directory named for the reference, with @ in front and characters other than letters, digits, -, and _ replaced by _:
+  <out-dir>/@HEAD_1/env/app/tfplan.tfplan
+  <out-dir>/@HEAD/env/app/tfplan.tfplan
+  A unit found by walking the working directory keeps its path, and planning and applying with the same --filter still find the same files.
+  read_terragrunt_config no longer leaks the reading unit's locals into the file it reads
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v1.2.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

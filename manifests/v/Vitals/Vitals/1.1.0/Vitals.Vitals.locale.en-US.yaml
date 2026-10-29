@@ -1,0 +1,130 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Vitals.Vitals
+PackageVersion: 1.1.0
+PackageLocale: en-US
+Publisher: Vitals contributors
+PublisherUrl: https://github.com/dragoscv
+PublisherSupportUrl: https://github.com/dragoscv/vitals/issues
+PrivacyUrl: https://github.com/dragoscv/vitals/blob/main/PRIVACY.md
+Author: Dragos Catalin Vladulescu
+PackageName: Vitals
+PackageUrl: https://github.com/dragoscv/vitals
+License: MIT
+LicenseUrl: https://github.com/dragoscv/vitals/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Vitals contributors
+ShortDescription: Lightweight, private Windows system monitor.
+Description: |-
+  Vitals shows what is slowing your computer down, in plain language: CPU, GPU, memory, disks,
+  network, temperatures and per-process usage, with history, alerts and a compact overlay.
+  Optional read-only access from your phone on the local network. No account, no telemetry.
+Moniker: vitals
+Tags:
+- cpu
+- gpu
+- hardware-monitor
+- performance
+- system-monitor
+- task-manager
+ReleaseNotes: |-
+  A clean-up for each drive, in plain steps. In short:
+  - Every drive has a Clean up button: Vitals measures what can go, shows
+    which programs it will stop and start again, and reports what it freed.
+  - An optional weekly clean-up per drive does the safe part on its own.
+  - "Why is this drive growing?" shows how fast each drive fills up.
+  - Linux (WSL) and Docker disks can be moved to a drive with more room.
+  - Scheduled tasks on Startup apps say how often they run.
+  - The mouse wheel scrolls the page again over cards and lists, and text
+    stays inside its box on every page.
+  Added
+  - Storage: every drive card (except network and optical drives) has a
+    Clean up button that opens a three-step wizard: it measures what could
+    be cleaned on that drive, lets you choose by group with the space each
+    would give back, lists the programs that will be stopped and started again
+    (Linux distributions, Docker Desktop, containers, scheduled tasks, runners,
+    virtual machines) before you confirm, shows each stage live, and ends with
+    a report that says what was freed and what could not be restarted. Items
+    that cannot be undone need their own tick; "select all" never ticks them.
+    "Remember my choices for this drive" saves the kinds of item for a
+    one-click "Run my usual clean-up" that still stops at the confirmation.
+    Something that is listed for its size but cannot be removed from here
+    (a hibernation file Windows will not let go of, say) says why and cannot
+    be ticked.
+    A "drive nearly full" alert now offers "Clean up this drive". (S22-02)
+  - Storage clean-up: on a drive that is low on space, each Linux (WSL) or
+    Docker Desktop disk has Move to another drive…. For a Linux
+    distribution Vitals lists every drive and says why the ones that cannot
+    take it are refused (the same drive, removable or network, not NTFS, not
+    enough room), stops only that distribution, has WSL move its disk
+    (wsl --manage --move, WSL 2.3.11 or later, no administrator prompt),
+    shows the copy live, checks the result and starts the distribution again.
+    It can be moved back the same way. Docker Desktop moves its own disk, so
+    Vitals shows the exact setting and folder, opens Docker Desktop, and checks
+    afterwards that the disk has left the drive. (S22-07)
+  - Storage: a weekly clean-up per drive, off until you turn it on in the
+    clean-up wizard. Pick a day and time; it runs the safe part of your saved
+    choices (old temporary files, download caches, Docker build cache and old
+    images, Linux package caches) and never anything that needs administrator
+    approval, stops WSL or Docker, compacts a disk or cannot be undone. It
+    waits for the PC to be idle and plugged in (or runs within a day if it
+    never is), catches up at the next start if Vitals was closed, says what it
+    freed in a notification, and the wizard lists recent clean-ups. (S22-05)
+  - Storage: "Why is this drive growing?" in the clean-up wizard. Vitals
+    reads how full each drive is once an hour and shows growth per day over
+    24 hours, 7 days and 30 days with a small chart, and what grew since the
+    previous analysis ("Docker disk file +42 GB since 12 Oct"). It says when
+    there are not enough readings or no earlier analysis yet. Kept in
+    drive-history.sqlite for 180 days (see PRIVACY.md). (S22-06)
+  - Startup: scheduled tasks show how often they run. A "Scheduled task" row
+    gets a second line under its source ("At sign-in · every 5 min",
+    "At sign-in · daily"), and the export and "Copy details" gain a Schedule
+    field. A task whose triggers cannot be read shows nothing rather than a
+    guess. (S22-08)
+  Fixed
+  - Storage clean-up: "Let a virtual disk shrink by itself" is no longer
+    offered on WSL 2.5.6 or later, which refuses sparse disks because they
+    were found to damage distributions — the step always failed there. It is
+    still listed, with that reason, and cannot be ticked; it is also withheld
+    when the WSL version cannot be read. Vitals never forces it with
+    --allow-unsafe; if WSL refuses it anyway the report says so instead of
+    showing a bare error code. (S22-03)
+  - The mouse wheel scrolls the page again when the pointer is over a card or
+    list that has nothing left to scroll. On Storage the page stopped dead
+    over the clean-up cards, the empty project clean-up card and the folder
+    list once it reached its end; every page with cards or tables did the
+    same. Lists still scroll themselves first when they have more to show.
+  - Text stays inside its box on every page, in English and Romanian, from
+    900 px wide to full HD: App history keeps a readable name column and
+    scrolls the table sideways instead of letting the header spill over the
+    next column; a card title is no longer cut to a few letters when its badge
+    is wide (Devices → thermal zones); the CPU column header of Processes fits
+    "Procesor" with its sort arrow. Every page's title row now has the same
+    layout, so Refresh stays in the top-right corner instead of dropping under
+    a long subtitle on some pages. (S22-04)
+  Downloads
+  ──────────────────┬───────────────────────────
+  Windows           │Installer
+  ──────────────────┼───────────────────────────
+  Intel / AMD (x64) │Vitals_x64-setup.exe
+  ──────────────────┼───────────────────────────
+  ARM64 (Snapdragon)│Vitals_arm64-setup.exe
+  ──────────────────┴───────────────────────────
+  Verifying this download
+  Windows may show a SmartScreen warning on first run (Windows protected your
+  PC) because the installer is not yet signed with a commercial certificate.
+  Choose More info → Run anyway. That is expected — see
+  docs/distribution.md.
+  You do not have to take our word for what is in the binary. With the
+  GitHub CLI:
+  gh attestation verify .\Vitals_x64-setup.exe --repo dragoscv/vitals
+  This proves the file was built by this repository's release workflow from the
+  tagged commit, and nowhere else. Checksums for every file are in
+  SHA256SUMS.txt:
+  (Get-FileHash .\Vitals_x64-setup.exe -Algorithm SHA256).Hash.ToLower()
+  Software bills of materials (CycloneDX) for the Rust and JavaScript
+  dependencies are attached as sbom-rust.cdx.json and sbom-js.cdx.json.
+  Full Changelog: v1.0.6...v1.1.0
+ReleaseNotesUrl: https://github.com/dragoscv/vitals/releases/tag/v1.1.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
