@@ -1,0 +1,75 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: anyvm-org.anyvm
+PackageVersion: 0.7.4
+PackageLocale: en-US
+Publisher: anyvm.org
+PublisherUrl: https://anyvm.org/
+PublisherSupportUrl: https://github.com/anyvm-org/anyvm/issues
+PackageName: anyvm
+PackageUrl: https://github.com/anyvm-org/anyvm
+License: MIT
+LicenseUrl: https://github.com/anyvm-org/anyvm/blob/HEAD/LICENSE
+ShortDescription: Run any VM anywhere -- bootstrap BSD, Illumos, and Linux guests with QEMU.
+Description: |-
+  anyvm boots a prebuilt BSD, Illumos, Linux, Hurd or Plan 9 guest under QEMU
+  with one command. It downloads the image, configures firmware, ssh, folder
+  sync and port forwarding for that guest on that architecture, then drops you
+  into a shell or runs your command and exits.
+
+  anyvm drives QEMU but does not bundle it, so QEMU is declared as a package
+  dependency and winget installs it first. Pass --skip-dependencies to install
+  anyvm on its own and supply QEMU yourself.
+Moniker: anyvm
+Tags:
+- ci
+- dragonflybsd
+- emulator
+- freebsd
+- haiku
+- illumos
+- netbsd
+- openbsd
+- qemu
+- solaris
+- virtual-machine
+- vm
+ReleaseNotes: |-
+  nfs: non-root guest users can write the synced folder
+  Both nfs sync methods mapped only guest root to the host user who
+  launched anyvm. Any other guest account kept its own uid, so it could
+  write the share only when that uid happened to equal the host's.
+  FreeBSD's first pw useradd hands out 1001, the GitHub runner's uid, so
+  it worked there by luck; Solaris's useradd hands out 1000, and every
+  write failed with EACCES (vmactions/solaris-vm#70).
+  Every guest uid is now squashed to the launching user:
+  --sync sys-nfs the kernel nfsd export gets all_squash
+  --sync nfs the user-space nfsd moves to v0.1.1 and runs with
+  its new -all_squash
+  Files a non-root guest user creates are owned by you on the host, the
+  same as the ones guest root creates. Where anyvm has to start nfsd
+  under sudo (the BSD guests that need the portmapper on port 111), the
+  squash target is still the user who launched anyvm, not root.
+  The Hurd keeps its guest root unsquashed in both modes, because
+  /hurd/nfs chowns every new file to uid 0.
+  DragonFly BSD is a known exception: its NFS client checks a create or
+  delete against the parent directory's mode bits locally, before any
+  request reaches the server, so a non-root guest user still cannot
+  write a 0755 share it does not own, whatever the server would allow.
+  nfsd v0.1.1 also makes its permission checks match the Linux kernel
+  nfsd when nothing is squashed: owner override, read access to
+  execute-only files, sticky directories, and special stateids.
+  New default builder versions:
+  openbsd 2.1.0 -> 2.1.1 adds OpenBSD 8.0, now the default
+  release
+  openindiana 2.1.2 -> 2.1.4 gcc-14 is optimized again (oi-3), and
+  std::locale("") no longer crashes
+  (oi-4)
+  Other: CI checks that a non-root guest user can write the share with
+  both nfs methods, and refreshes the apt index when an install hits a
+  stale one.
+  Full Changelog: v0.7.3...v0.7.4
+ReleaseNotesUrl: https://github.com/anyvm-org/anyvm/releases/tag/v0.7.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

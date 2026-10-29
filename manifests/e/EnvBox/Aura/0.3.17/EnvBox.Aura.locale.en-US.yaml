@@ -1,0 +1,56 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: EnvBox.Aura
+PackageVersion: 0.3.17
+PackageLocale: en-US
+Publisher: EnvBox
+PublisherUrl: https://github.com/NGLSL
+PublisherSupportUrl: https://github.com/NGLSL/Aura/issues
+PackageName: Aura
+PackageUrl: https://github.com/NGLSL/Aura
+License: Apache-2.0
+LicenseUrl: https://github.com/NGLSL/Aura/blob/HEAD/LICENSE
+ShortDescription: A Windows process-level environment virtualization launcher that shows target apps virtualized locale, region, language, timezone, and DNS values.
+Description: |-
+  Aura (EnvBox) is a Windows process-level environment virtualization launcher. Target apps run on the host with full access to the filesystem, GPU, network, and user profile, but see Environment Profile values for locale, region, UI language, timezone, DNS view, environment variables, and whitelisted internationalization registry reads.
+
+  EnvBox does not provide a security boundary and is not a sandbox. It does not isolate files, registry writes, network, or privileges, and must not be used as a security control.
+
+  Principles
+  - Process-scoped: changes apply only to one runtime instance's process tree.
+  - Host-transparent: never modifies Windows global configuration.
+  - Environment-consistent: one profile keeps locale, region, language, timezone, DNS, and environment aligned.
+
+  The package includes a GUI for managing profiles and launching apps, the envbox CLI (envbox run / profile / app), and a Detours-based runtime DLL.
+Tags:
+- environment-variables
+- locale
+- localization
+- timezone
+ReleaseNotes: |-
+  Aura v0.3.17
+  本版本集中优化界面响应、启动开销和后台空闲等待，并统一字号、表单分组与编辑面板间距。
+  Changes
+  - 审计历史加载与应用启动移至后台处理，合并重复刷新请求。保留完整有效记录总数、全局最新 500 条记录及已有实例复用行为；启动尚未完成时显示提示并暂缓退出。
+  - 合并连续拖动分栏时的配置写入，保留首次保存、尾沿保存及正常退出前刷新。托盘事件直接推送，减少固定间隔轮询。
+  - 优化 Runtime 的语言标识缓存、关闭审计时的日志格式化、注册表句柄查询和时区读取锁；保持 Profile 返回值、句柄容量与错误处理语义。
+  - 优化启动时的 Runtime 指纹、辅助程序内容比对和 PE 预检查。会话存活检查直接读取 Job 进程数量，减少重复枚举。
+  - Supervisor 使用可取消的异步管道等待，减少空闲轮询；保留请求认证、超时及状态刷新。
+  - 界面正文与输入控件统一为 13 px，说明文字使用 12 px；应用和环境编辑按内容分组，路径与参数使用完整表单宽度，设置页归并为常规、数据与诊断、关于三组。
+  - 保存、取消、删除按钮固定在编辑面板底部。根据实际窗口宽度约束右侧面板，解决较窄窗口或旧分栏比例下表单挤窄、保存按钮换行的问题；缩放窗口时保留用户原有分栏偏好。
+  Performance
+  同机对照数据与方法见 性能报告。以下为本轮特定负载的中位数：
+  - 37.4 万条审计记录下，App 状态构造返回由 312.94 ms 降至 92.68 ms；刷新消息处理由 219.29 ms 降至约 0.002 ms。全量扫描仍需约 218 ms，在后台完成。
+  - 200 次连续分栏调整的累计消息处理由 251.01 ms 降至 28.47 ms，可观察配置更新由 200 次降至 13 次。
+  - 同批交替采样的实际 Profile 启动由 144.262 ms 降至 136.012 ms；开启审计时由 151.579 ms 降至 139.359 ms。
+  - 关闭审计时，单线程 LCID 热循环耗时下降约 89.1%，四线程注册表查询下降约 38.6%。开启审计的 LCID 单线程循环增加约 0.763 ms / 10 万次调用，其他负载的结果见报告。
+  状态处理数据未包含窗口渲染；内存采样没有统一下降。本次没有引入 DNS 连接池或异步审计写入线程。
+  Validation
+  - 性能改动已运行现有 Rust 检查，去重合计 485 passed、0 failed、33 ignored；本机固定 Supervisor 端点占用的三个用例在仅修改端点后缀的临时副本中运行，原用例保持不变。未新增测试用例。
+  - x64/x86 Runtime Release 构建、现有 Profile 合约检查，以及 Host/Profile 返回值与实际载入 DLL 哈希对照均已完成。
+  - 最终界面已在独立开发预览中验证 1398 × 878 与 1100 × 760 窗口，实际操作检查覆盖表单滚动、下拉选择、DNS 添加与排序、取消恢复及保存。该验证使用隔离配置。
+  - 发布门禁使用对应提交的干净 Windows CI，包含完整工作区、双架构 Runtime/DNS fixture、独立会话和 CPU 渲染器检查。正式安装包由 Release 工作流调用项目安装脚本生成。
+ReleaseNotesUrl: https://github.com/NGLSL/Aura/releases/tag/v0.3.17
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

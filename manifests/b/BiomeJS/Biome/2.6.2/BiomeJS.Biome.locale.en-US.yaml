@@ -1,0 +1,203 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.6.2
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.6.2
+
+  Minor Changes
+  - #11479 5c60ba8 Thanks @nhedger! - Added a --git flag to biome init. The flag enables Git VCS integration and sets vcs.useIgnoreFile to true in the generated configuration, even when the command runs outside a Git repository.
+  - #11742 3a1356d Thanks @Netail! - Added the biome migrate stylelint command. It imports a Stylelint configuration and its ignore settings into your Biome configuration, mapping Stylelint rules to their Biome equivalents. Pass --write to apply the changes, and --include-inspired or --include-nursery to migrate additional rules.
+  - #12318 774b5b5 Thanks @Netail! - Added the new assist action useGraphqlSortedDefinitions, which sorts the named definitions of a GraphQL document, such as types, type extensions, directives, fragments, and operations.
+    Invalid:
+    type User {
+      id: ID!
+    }
+    enum Role {
+      ADMIN
+      USER
+    }
+    directive @auth on FIELD_DEFINITION
+  - #6886 3479d15 Thanks @christymcgrory! - biome rage now shows the resolved files.includes and files.ignoreUnknown configuration.
+  - #11102 0874b7f Thanks @gameroman! - Added support for useTailwindSortedClasses rule in HTML-ish files.
+  - #10711 40de5a0 Thanks @soconnor-seeq! - Adds a new resolutionKind option for object-syntax plugin entries.
+    This allows shared Biome configs in monorepos to load local Grit plugins from the package that declares them instead of resolving plugin paths from the consuming project.
+    {
+      "plugins": [
+        { "path": "./grit/no-debugger.grit", "resolutionKind": "config" },
+        { "path": "local-plugin.grit", "resolutionKind": "project" },
+        { "path": "local-plugin.grit" }
+      ]
+    }
+    Use resolutionKind: "config" to resolve the plugin from the configuration file that declares it. Use resolutionKind: "project" to resolve the plugin from the consuming project. When omitted, resolutionKind defaults to project. This only affects plugin resolution; includes still apply to end-user project files as usual.
+  - #11432 4befd08 Thanks @ematipico! - Added biome inspect config to show resolved configuration values and their origins as human-readable diagnostics, including matching overrides.
+    Configuration files can also extend other configurations up to ten levels deep. Repeated references to the same resolved file are ignored with an information diagnostic, while resolving multiple versions of one extended package produces an error.
+  - #11477 ab05554 Thanks @nhedger! - Added automatic Git VCS integration when running biome init inside a Git repository, including from nested directories and Git worktrees. The generated configuration sets vcs.enabled and vcs.useIgnoreFile to true, with vcs.clientKind set to "git".
+  - #11451 1ac4b09 Thanks @ematipico! - #### YAML is now supported
+    Added support for formatting YAML files, both .yaml and .yml extensions
+  - #11432 4befd08 Thanks @ematipico! - Configuration files can now recursively extend local files and npm package configurations up to ten levels. Every repeated reference participates in the merge, while resolving multiple versions of one extended package produces an error.
+  - #11713 ac6a640 Thanks @dyc3! - Added support for Grit range() patterns, addressing #8454. Plugins can filter syntax nodes by optional start_line, start_column, end_line, and end_column bounds.
+    For example, this pattern matches function calls contained entirely on line 2.
+    range(start_line=2, end_line=2) as $call where {
+        $call <: call_expression()
+    }
+  - #11244 0628b53 Thanks @ematipico! - Added the new CLI option --profile-type-inference to the commands lint and check.
+    The profiler is designed to track the execution time of internal queries and operations, group them by file, and sort them from the most expensive to the least expensive.
+    biome lint --profile-type-inference
+    profiler ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      i Type inference profile (Biome <version>)
+      src/index.ts
+        Requests (top 5 of 12 groups; 28 source records; 46 executions)
+          1. Promise classification <- nursery/noFloatingPromises
+          ...
+        Queries (top 8 of 25 groups; 61 source records; 94 executions)
+          1. Promises / infer_expression_is_promise
+          ...
+        Whole-module inference (top 1 of 1 group; 1 source record; 1 execution)
+          1. Import depth limit
+          ...
+      68 files omitted.
+      ℹ To show all the information, use the --verbose option. The output might be very verbose, so it's advised to analyze a single file.
+      $ biome lint --profile-type-inference --verbose ./path/to/file.ts
+    Use --verbose to include detailed timings, attribution, breadth, and implementation references for the top source records in each file.
+  - #12108 4fcb880 Thanks @ematipico! - Promoted 59 nursery rules to stable groups.
+    __KOMAC_HEADER__ Correctness
+    Promoted the following rules to the correctness group with error severity. All of them are recommended:
+    - noDuplicateFieldDefinitionNames
+    - noVueRefAsOperand
+    - noVueImportCompilerMacros
+    - noVueVOnNumberValues
+    - useVueValidVFor
+    - noComponentHookFactories
+    - noJsxNamespace
+    - useReactAsyncServerFunction
+    - noReactNativeRawText
+    - useReactNativePlatformComponents
+    - useQwikLoaderLocation
+    - noPlaywrightMissingAwait
+    - usePlaywrightValidDescribeCallback
+    __KOMAC_HEADER__ Suspicious
+    Promoted the following rules to the suspicious group:
+    - noLoopFunc
+    - noJsxLeakedDollar
+    - noReactStringRefs (recommended)
+    - useScopedStyles (recommended)
+    - noReactNativeDeepImports (recommended, error severity)
+    - noDrizzleDeleteWithoutWhere (recommended, error severity)
+    - noDrizzleUpdateWithoutWhere (recommended, error severity)
+    - noConditionalExpect
+    - useExpect
+    - noIdenticalTestTitle (recommended)
+    - noPlaywrightForceOption
+    - noPlaywrightNetworkidle
+    - noPlaywrightPagePause
+    - noPlaywrightWaitForNavigation
+    - noPlaywrightWaitForTimeout
+    - noDuplicateSelectors
+    - noEmptyObjectKeys
+    - useBaseline
+    - noUntrustedLicenses
+    __KOMAC_HEADER__ Security
+    Promoted useIframeSandbox to the security group with error severity.
+    __KOMAC_HEADER__ Performance
+    Promoted the recommended rule useDomNodeTextContent to the performance group with warning severity.
+    __KOMAC_HEADER__ Complexity
+    Promoted the following rules to the complexity group:
+    - useArraySome
+    - useRegexpTest
+    - noUnnecessaryTemplateExpression
+    - noPlaywrightUselessAwait
+    - noExcessiveSelectorClasses
+    - useMathMinMax (recommended, warning severity)
+    - noExcessiveNestedCallbacks
+    __KOMAC_HEADER__ Style
+    Promoted the following rules to the style group with information severity:
+    - useVueConsistentDefinePropsDeclaration
+    - useVueNextTickPromise (recommended)
+    - noReactNativeLiteralColors
+    - useConsistentTestIt
+    - useTestHooksInOrder
+    - useTestHooksOnTop
+    - noPlaywrightEval
+    - noPlaywrightElementHandle
+    - noPlaywrightWaitForSelector
+    - useReduceTypeParameter
+    - useNamedCaptureGroup
+    - useUnicodeRegex
+    - useImportsFirst
+    - useVarsOnTop
+    - useThisInClassMethods
+    - noInlineStyles
+    - useDomQuerySelector
+    - noTopLevelLiterals
+  - #12206 0f984fb Thanks @dyc3! - Added the ignoreUsingDeclarations option to noUnusedVariables. When enabled, the rule no longer reports unused variables declared with using or await using, because these declarations clean up their value automatically even when the code never reads it.
+    {
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedVariables": {
+              "options": { "ignoreUsingDeclarations": true }
+            }
+          }
+        }
+      }
+    }
+  - #12424 6a41490 Thanks @siketyan! - Removed the javascript.parser.gritMetavariables option. It was intended for internal use only and had no effect on how Biome parses JavaScript and TypeScript files. Biome now reports it as an unknown key and exits with a configuration error, so remove it from your configuration file.
+  - #12055 54870c0 Thanks @ff1451! - Added the new assist action useGraphqlSortedVariables, which sorts the variable definitions of GraphQL operations.
+    Invalid:
+    query GetUser($userId: ID!, $includePosts: Boolean = false, $after: String) {
+      user(id: $userId) {
+        name
+      }
+    }
+  - #12149 83df808 Thanks @dyc3! - Added the tailwind.stylesheet option, which points Biome at the CSS file that holds your Tailwind CSS configuration. useTailwindSortedClasses reads the @theme, @utility, and @custom-variant rules in that file and in the local files it imports, so your own theme values, utilities, and variants sort correctly.
+    // biome.json
+    {
+      "tailwind": { "stylesheet": "./src/app.css" }
+    }
+    /* src/app.css */
+    @import "tailwindcss";
+    @theme {
+      --color-brand: #3b82f6;
+    }
+    @utility content-auto {
+      content-visibility: auto;
+    }
+    @custom-variant theme-midnight (&:where([data-theme="midnight"] *));
+  - #12206 0f984fb Thanks @dyc3! - Added migration of the ignoreRestSiblings and ignoreUsingDeclarations options of no-unused-vars, @typescript-eslint/no-unused-vars, and unused-imports/no-unused-vars to noUnusedVariables in biome migrate eslint. Options that the ESLint configuration omits are set to ESLint's defaults, so the migrated rule reports the same variables. For example, "no-unused-vars": "error" now migrates ignoreRestSiblings as false.
+  - #11709 32d12cb Thanks @ematipico! - Added the new command biome inspect file, which returns developer information for the given file.
+    biome inspect file path/to/file.ts
+    By default, the command returns the CST of the file. The command accepts the following arguments:
+    - --ast, which returns the AST of a file.
+    - --ir, which returns the formatting IR of a file.
+    - --semantic, which returns the semantic model information of a file, if available.
+  - #12221 cb571af Thanks @dyc3! - The rule noEmptySource now supports Markdown files. It reports files that contain only blank lines and HTML comments. For example, the following file is now reported:
+    <!-- TODO -->
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.6.2
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
