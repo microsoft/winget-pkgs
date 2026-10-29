@@ -1,0 +1,71 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: g0orx.hpsdr-rs
+PackageVersion: 0.9.0
+PackageLocale: en-US
+Publisher: John Melton
+PublisherUrl: https://github.com/g0orx
+PublisherSupportUrl: https://github.com/g0orx/hpsdr-rs/issues
+Author: John Melton
+PackageName: hpsdr-rs
+PackageUrl: https://github.com/g0orx/hpsdr-rs
+License: GPL-2.0-or-later
+LicenseUrl: https://github.com/g0orx/hpsdr-rs/blob/HEAD/LICENSE
+ShortDescription: Desktop client for openHPSDR Protocol 1/2 SDR radios.
+Description: |-
+  A Rust/egui desktop client for openHPSDR Protocol 1 and Protocol 2 radios (Metis/Ozy-style and Hermes/Orion-style boards), using WDSP for DSP.
+
+  - Protocol 1 (Metis/Ozy) and Protocol 2 (Hermes/Orion) support, with standard openHPSDR UDP discovery
+  - Multiple simultaneous receivers, each with its own VFO, mode, filter width, and band memory
+  - Spectrum/waterfall display with adjustable dB range, palette, and Click-to-Tune (CTUN)
+  - SSB/CW/AM/FM/digital modes, per-mode/per-band filter width and mode memory
+  - Noise blanker (NB/NB2), noise reduction (NR/NR2/NNR), and SNB, independently switchable
+  - AGC with selectable Off/Long/Slow/Medium/Fast modes
+  - TX: mic audio through WDSP's TXA chain, ALC, TX power/SWR meter with per-band PA calibration, and a Tune button
+  - PureSignal (PA linearization/predistortion), on both Protocol 1 and Protocol 2
+  - rigctl (Hamlib-compatible), TCI (WebSocket), and CAT (Kenwood TS-2000 emulation) control servers
+  - Dual VFO (VFO A/B) with Split -- transmit on VFO B while receiving on VFO A
+  - Selectable RX output / TX input audio devices, independent of the OS default
+  - Per-radio settings persistence, keyed by the radio's MAC address
+  - FPGA firmware upload and static IP configuration
+Tags:
+- amateur-radio
+- dsp
+- ham-radio
+- openhpsdr
+- sdr
+ReleaseNotes: |-
+  Changes since v0.8.4.
+  New
+  - ADALM-Pluto (and its clones) as a radio. It's reached over its USB network link at 192.168.2.1, or over Ethernet. Confirmed on a real Pluto clone (AD9363) receiving QO-100.
+    - Receive: 325 MHz to 3.8 GHz (more on a Pluto in AD9364 mode), RF Gain 0-71 dB, rates 48-1536 kHz, and a Wide stream (4608 kHz) for DATV.
+    - Transmit: full duplex, for example QO-100's 2400 MHz uplink while receiving the LNB. TX Drive is set in dB (-60 to 0 dB of the Pluto's few milliwatts). Checked end to end through the chip's own digital loopback, but not yet tested on air. It needs the Wide stream off, because the USB link can't carry both.
+    - Ethernet: a Pluto+ or a USB-Ethernet adapter on the OTG port is found automatically by mDNS.
+    - A new 13cm band (2300-2450 MHz).
+  - DATV: a native DVB-S2 receiver for QO-100's wideband transponder, written from the ETSI standard. It works with an RTL-SDR, MSI.SDR or Pluto, and sends the transport stream over UDP to VLC or ffplay. Off-air, it decoded the wideband beacon and other stations to watchable video with a Pluto.
+    - QPSK and 8PSK, every code rate, normal and short frames, with or without pilots.
+    - Transponder view (Pluto): a spectrum of the whole 10491-10499.5 MHz transponder. Click a station to set the frequency and symbol rate.
+    - Start retunes VFO A when the chosen signal is outside the receiver's stream.
+    - The SNR readout is accurate near threshold, and the manual has a table of what each mode needs.
+  - MSI.SDR Wide stream (4608 kHz) and Record raw IQ (SigMF) for the RTL-SDR, MSI.SDR and Pluto.
+  - PureSignal: Reserve receivers for PureSignal can be turned off, which gives Add Receiver its full receiver count back.
+  - Mute button next to Audio gain, on the main window and extra receivers. Record and TCI carry on while muted.
+  - NB and NR open a menu of their choices instead of cycling through them.
+  - XVTR: LO Error takes the scroll wheel (100 Hz a notch; Alt 10 Hz, Shift 1 kHz).
+  Fixes
+  - RTL-SDR: direct sampling is now automatic below 24 MHz. A saved "Off" left HF silent. The RTL-SDR Blog V4 stays on its upconverter.
+  - TCI: dds is reported in the transverter's RF frequency (TCI Remote showed the IF), and VFO B is reported and can be set.
+  - TCI: "Mute local audio output" now only applies while a client is connected.
+  - Spectrum axis: labels are round numbers in RF terms and are no longer drawn past the right edge.
+  - Settings → Network's note about rigctl and TCI PTT was wrong: all three servers can key the radio.
+  Downloads
+  - Linux AppImage (x86_64 / aarch64): hpsdr-rs-0.9.0-x86_64.AppImage, hpsdr-rs-0.9.0-aarch64.AppImage. Run chmod +x on the file, then run it. USB radios still need the udev rules installed by hand; a copy is inside the AppImage under usr/share/doc/hpsdr-rs.
+  - Debian/Ubuntu (amd64): hpsdr-rs_0.9.0-1_amd64.deb. Install with sudo apt install ./hpsdr-rs_0.9.0-1_amd64.deb.
+  - Debian/Ubuntu/Raspberry Pi OS (arm64): hpsdr-rs_0.9.0-1_arm64.deb. Install with sudo apt install ./hpsdr-rs_0.9.0-1_arm64.deb.
+  - Fedora/openSUSE RPM (x86_64 / aarch64): hpsdr-rs-0.9.0-1.x86_64.rpm, hpsdr-rs-0.9.0-1.aarch64.rpm. Install with sudo dnf install ./hpsdr-rs-0.9.0-1.x86_64.rpm, or on openSUSE sudo zypper install --allow-unsigned-rpm ./hpsdr-rs-0.9.0-1.x86_64.rpm.
+  - macOS (Apple Silicon): hpsdr-rs-0.9.0-macos-arm64.tar.gz. It is built in CI, unsigned and not notarized, so Gatekeeper warns on first launch. Right-click the hpsdr-rs binary and choose Open, or run xattr -d com.apple.quarantine hpsdr-rs first.
+  - Windows (x86_64): hpsdr-rs-0.9.0-x86_64.msi
+ReleaseNotesUrl: https://github.com/g0orx/hpsdr-rs/releases/tag/v0.9.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
