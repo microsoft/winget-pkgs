@@ -1,0 +1,47 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Songwo.Zhiyu
+PackageVersion: 1.17.3
+PackageLocale: zh-CN
+Publisher: Songwo
+PublisherUrl: https://github.com/Songwo
+PublisherSupportUrl: https://github.com/Songwo/zhiyu/issues
+Author: Zhao Qingsong
+PackageName: Zhiyu
+PackageUrl: https://songwo.github.io/zhiyu/
+License: MIT
+LicenseUrl: https://github.com/Songwo/zhiyu/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Songwo
+ShortDescription: 连接文档、账号与数字资产的个人工作空间。
+Description: |-
+  知屿 Zhiyu 是连接文档、账号与数字资产的个人工作空间，将主机、在线服务、域名、邮箱、AI 订阅、号码、密钥和证书集中到一个桌面应用中。资料保存在本机，凭据库使用 scrypt 派生密钥与 AES-256-GCM 加密；通过 SSH、DNS、TLS 和服务商 API 读取实际状态，并可通过你配置的模型进行有来源的问答。
+  主要功能包括 SSH 终端与主机指标采集、域名 WHOIS 与 TLS 证书到期提示、网站账号密码与 TOTP 动态验证码管理、IMAP/SMTP 邮箱、Markdown 图文文档、浏览器插件密码迁移，以及接入 OpenAI、Claude、Grok、Gemini 等模型进行有来源的问答并查询订阅额度。
+Tags:
+- 人工智能
+- 密码
+- 数字资产
+- 文档
+- 服务器
+- 账号
+ReleaseNotes: |-
+  知屿 Zhiyu 1.17.3
+  Windows 版的 SSH 终端改为原生控件，并修复输入法候选框位置、终端卡片四角和默认光标等问题，新增终端工具栏。
+  原生终端
+  - Windows 连接面板由 C# / WPF 原生子控件绘制，嵌入主窗口的终端页，不另开顶层窗口或任务栏图标。运行时依赖 Windows 自带的 .NET Framework 4.8，没有额外安装包。
+  - 支持 UTF-8、中文双宽、16/256/真彩色、备用屏幕、滚动区域、括号粘贴；历史默认 5000 行，可选 1000–20000 行。上翻、选择文字或锁定滚动时新输出不会抢回底部，可一键回到最新。多行粘贴需要确认。
+  - 多个主机以会话标签切换。离开终端页、打开设置或关闭到托盘时保留会话，SSH 每 20 秒发送协议层心跳（不发送 shell 命令）；显式断开只结束对应主机，锁定密钥库、系统锁屏或休眠、完全退出会结束全部连接。会话标识不写入资产文件。
+  - 凭据不经命令行或临时文件传给原生控件，SSH 认证、密钥库与主机指纹校验仍由主进程的 SSH 管理器处理。控件与主进程之间的布局、字体、配色和工具栏输入都有白名单校验。
+  - macOS、Linux 与网页版继续使用 xterm 输出区，与原生控件共用同一套外观设置和 ANSI 配色。
+  修复与改进
+  - 输入法候选框：自绘控件原先没有向输入法提供光标位置，中文输入法的候选框会出现在屏幕左上角。现在组合窗口和候选框跟随终端光标，组合文字字号与终端一致。
+  - 焦点：点击工具栏按钮后焦点回到终端；终端失去焦点时光标变暗（方块光标改为描边），可以直接看出键盘输入会进入哪里。
+  - 四角：原生窗口原先用固定半径裁剪圆角，在 125%/150% 等缩放下与卡片圆角不一致，四角露出方块并切断边框。现在原生控件内缩在圆角卡片内，四角由同色背景补齐。
+  - 光标：默认改为闪烁竖线，可在「设置 → 终端」选择竖线、方块或下划线，或改为常亮。旧版本按默认值保存的“常亮”会迁移为闪烁一次，之后的选择保持不变。
+  - 工具栏：终端卡片新增标题栏，包括常用命令（df -h、free -h、ss -tulpn、docker ps、journalctl 等，点击只插入命令，按回车才执行）、清屏（Ctrl+L）、字号增减、锁定滚动、复制、粘贴，以及收起导航、隐藏标题的专注模式。卡片改用分层阴影，深色主题和独立终端配色下同样适配；窄屏下常用命令改为单行横向滑动。
+  发布验证
+  本地执行类型检查、lint、国际化检查和全部单元测试；原生控件编译后执行 33 项 C# 状态机、键盘、文本输入与布局检查。原生终端集成测试启动本机临时 SSH 服务，验证主窗口内嵌句柄、外观设置、页面切换、多主机会话、关闭到托盘后的心跳保活以及锁定密钥库后的清理。在 150% 缩放的真实窗口截图中确认卡片四角完整。
+  中文输入法候选框的实际位置需要在连接真实服务器时用系统输入法确认，自动化测试没有覆盖真实输入法交互。复杂全屏应用与完整终端协议兼容性仍需另行验证。本版未配置受信任 Authenticode 证书，Windows 可能显示未知发布者或 SmartScreen 提示，下载后请核对 SHA256SUMS。
+ReleaseNotesUrl: https://github.com/Songwo/zhiyu/releases/tag/v1.17.3
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
