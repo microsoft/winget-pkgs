@@ -1,0 +1,125 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AtomGit.AtomCode
+PackageVersion: 5.2.4
+PackageLocale: zh-CN
+Publisher: 重庆开源共创科技有限公司
+PublisherUrl: https://atomgit.com/
+PublisherSupportUrl: https://atomgit.com/atomgit_atomcode/atomcode/issues
+PrivacyUrl: https://docs.gitcode.com/docs/help/home/protocol/privacy-policy
+Author: 重庆开源共创科技有限公司
+PackageName: AtomCode
+PackageUrl: https://atomcode.atomgit.com/
+License: MIT
+LicenseUrl: https://atomgit.com/atomgit_atomcode/atomcode/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Yubang Xu
+CopyrightUrl: https://docs.gitcode.com/docs/help/home/protocol/ai-privacy-policy
+ShortDescription: AI 编程助手 在你的终端中运行
+Description: Claude Code / Cursor Agent 的开源平替，住在你的终端里。连接任意 OpenAI 兼容大模型，自主读文件、改代码、跑测试、自我验证 —— 用 Rust 构建。
+Tags:
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  AtomCode v5.2.4 Release Notes
+  发布日期：2026-10-22
+  v5.2.4 聚焦于长任务的持续执行与恢复能力（/goal 中断恢复、运行中切换会话、后台继续工作），MCP 工具 schema 按需加载以降低上下文占用，并新增只读 IDE 语言服务桥接、手机访问 WebUI 与自定义 Provider 请求头；同时改善终端输入与长内容阅读体验、收紧插件与技能权限边界，并修复流式响应截断、执行轮数误判等多项问题。
+
+  ⚠️ Behavior Changes（注意行为变化）
+  - 旧版终端界面 atomcode-tuix 退役：所有命令统一使用当前终端界面（TUI），旧的 --classic 启动参数与配置中的 ui.screen 选择项已移除，使用这些入口的脚本需相应调整。
+  - /worktree done 语义明确：只切回主检出并返回结果，不再自动把 worktree 改动合并/ squash 回主分支。
+  ✨ 新增功能（Features）
+  长任务执行与恢复
+  - /goal 中断恢复与暂停检查点：长时间运行的任务可恢复执行，暂停时保留检查点；持续保留已完成工作、验证证据和待回答的问题，恢复后上下文不丢失。
+  - 目标状态可视化：区分执行、恢复、验证与完成状态，以状态标签展示目标进度；跨回合累计展示任务耗时与 token 用量，避免把验证中的回复误报为任务完成。
+  - 运行中切换会话：在终端切换历史会话时，正在执行的会话可留在后台继续工作，不必等待长任务结束。
+  - 委派轮数遵循配置：主任务与委派任务正确处理无限轮数设置；显式设置预算时在耗尽后汇总已有进度，避免复杂任务因隐含轮数上限提前停止。
+  MCP 按需加载
+  - 大型工具 schema 按需加载（默认启用）：MCP 大型工具 schema 通过 mcp_search 搜索后按需加载，减少每轮全量发送的上下文开销；支持放宽匹配数量并保留 schema 预算。
+  - 单个 MCP 服务重连：支持从服务详情面板重连单个 MCP server；重连过程可取消、不阻塞运行时响应，并如实展示服务启动中的状态。
+  IDE 语言服务桥接
+  - 只读 IDE 语言通道：新增与 VSCode 等编辑器的只读语言服务桥接，可利用编辑器已有的类型信息、定义跳转、引用查找与诊断能力；支持发现 IDE 窗口并查看桥接连接状态，未连接 IDE 时仍可使用原有文件与代码检索工具。
+  WebUI 远程访问
+  - 手机访问 WebUI：支持通过 HTTPS 中继从手机访问 WebUI，设备可处于不同网络、无需 VPN；局域网访问可在终端展示二维码，并同步修正远程访问指引。
+  Provider 接入
+  - 自定义 HTTP 请求头：账号级支持配置自定义 HTTP 请求头，适配需要特殊鉴权或网关头的接入方式。
+  - DeepSeek Messages 协议：新增可选的 DeepSeek Messages 协议支持。
+  - 思考强度档位：WebUI 接受模型声明支持的思考强度档位（包括 xhigh），保存模型设置后 live 会话即时同步。
+  终端输入与阅读
+  - 自定义换行快捷键：支持可配置的换行快捷键，恢复反斜杠加 Enter 换行并新增菜单入口；改善 Shift+Backspace、重复编辑按键与 Emacs 编辑行为，Ctrl+D 不再误伤草稿。
+  - 终端阅读器与视口翻页：新增阅读模式与视口翻页，长输出阅读更容易；手动导航时停止边缘自动滚动。
+  - 吉祥物图像：新增终端图像显示的吉祥物，支持点击切换图片，不支持图形协议的终端自动回退。
+  权限与安全
+  - 静态工具 allow/deny 策略：支持用户级和项目级 JSON 工具策略配置，可预批准插件 hook 命令。
+  - 技能 allowed-tools 预授权：技能 frontmatter 支持 allowed-tools 字段（含 allowed_tools 别名），为调用回合预授权匹配的工具；未列出的工具仍按常规审批处理，显式 deny 与敏感操作安全边界继续生效。
+  - 技能目录扩展：支持配置额外的技能根目录，并暴露技能加载诊断信息便于排查。
+  会话与上下文
+  - 分层记忆：记忆系统新增分层上下文、条目元数据与可恢复的 TTL 管理。
+  - 本地跨会话消息：新增本地跨会话消息能力，可向其他会话传递信息。
+  - 统一文件与历史引用：跨平台统一文件引用与历史引用（文件 / 会话分类提及）。
+  🛠 修复（Fixes）
+  流式响应稳定性
+  - 移除持续进展响应的默认总时长限制：修复长推理在 600 秒处被截断（dropped_before_terminal）的问题；统一首内容超时处理，改进断流后的有界续接与错误诊断，恢复耗尽时明确保留失败状态。
+  - 恢复预算共享：跨恢复层共享请求重试预算，避免重复消耗。
+  长任务与恢复
+  - /goal 证据与诊断：修复流失败诊断、验证证据保留与评估不确定性处理，目标命令完成前不再接受新的条件输入；目标标签变更与并发工作互不干扰。
+  - 委派与追问：修复追问（steering）问题后活动任务中断不再继续的问题。
+  - Rewind 更稳健：隔离缺失的检查点、保护快照根目录；诊断信息保留在日志中，失败提示更简洁。
+  MCP
+  - stdio 帧边界校验：在分配内存前先校验 stdio 消息帧大小，防止单条超大消息导致内存暴涨。
+  - 连接校验：校验保留的 MCP 连接，服务面板刷新按范围进行。
+  WebUI
+  - 技能列表刷新：重新打开技能菜单时刷新列表，不再显示过期缓存。
+  - 目录弹窗：修复切换工作目录弹窗中「创建」按钮被最近项目遮挡且无法滚动的问题。
+  - 共享问题同步：在终端回答的共享问题同步从网页解除等待；运行中的终端会话无需等待完成即可挂载查看。
+  - 会话分享：解除活动分享时不再遗留存活绑定；重启内嵌服务器时关闭旧 HTTP 连接。
+  - 实时 Provider 同步：保存模型设置后同步更新 live 会话，修复服务商 ID 修改后模型标签仍显示旧 ID 的问题。
+  终端渲染 / Windows 兼容
+  - Windows 输入加固：硬化 Windows 控制台输入与鼠标设置，拒绝不支持的管道输入后再接管屏幕；报告控制台句柄到终端诊断。
+  - 剪贴板串行访问：串行化 Windows 剪贴板访问，避免图片提示解码崩溃；新增可选的剪贴板崩溃诊断。
+  - 路径处理：修正 Windows 下主目录、规则与 hooks 的路径处理；修复非 root 用户残留 sudo 环境导致的主目录误判。
+  - MobaXterm：改善 MobaXterm 下的本地渲染效果。
+  - 代码块显示：长代码行换行显示、不再截断命令；代码块使用背景分组，复制时不再带装饰竖线（修复 ghostty 下的竖线复制问题），语言标签更醒目。
+  - 输入细节：修复 Todo 四项紧凑显示不全、补全在编辑或召回历史后不刷新、队列消息边界在紧凑预览中被破坏等问题；移除输入框鼠标选区带来的干扰。
+  - 失败状态灯：回合失败后保留红色状态灯；区分目标验证中与已完成的回复。
+  Provider / 网络
+  - 请求输入画像：新增 provider 输入画像，按模型约束调整请求内容；诊断中报告 provider 输入尺寸。
+  - 配置保真：旧 provider 的自定义 header 在投影与解析后保持不变。
+  - web_search 安全：禁用重定向并强制 HTTPS。
+  会话与配置
+  - 存储绑定：配置重载时保留会话的真实存储绑定，修复目录变化后的租约不匹配（LeaseMismatch）报错。
+  - 压缩来源标注：压缩保留的历史消息与摘要标明来源，避免被模型误读为新指令。
+  - 启动性能：减少并并行化 Git 初始化探测；自动升级准备不再阻塞终端启动；恢复的历史布局从尾部渐进渲染，首帧更快。
+  - 自动升级：安装回退版本从发布清单解析，修复 fallback 版本仍固定在旧版本的问题。
+  Plugin
+  - hook 脚本入口校验：插件 hook 校验脚本入口，信任与插件包内容绑定，支持经校验的脚本包装器；保留 hook argv 参数，支持通道类 hook 路径。
+  - 复制安全：拒绝符号链接与 Windows junction，目录复制分阶段安全进行，避免路径逃逸。
+  - 兼容状态：显示不兼容插件的提示状态。
+  - 性能：git 探测从每次操作一次降为每进程一次。
+  Agent / 工具
+  - grep 结果限额：限制保留的预览条数与总结果字节数，防止大结果集撑爆内存。
+  - LSP 消息边界：缓冲前先校验消息头大小；IDE 桥接受 vscode-userdata 存储。
+  - 审查委托：跨委托保留用户指令，审查不再丢失原始要求。
+  - VSCode 守护进程：避免接管外部的 daemon 进程。
+  - 凭据提示：Git 终端凭据提示与 bash git 凭据失败提示更明确，便于模型自行诊断授权问题。
+  - AtomGit 仓库查找：明确仓库发现与查询错误提示，支持查找公开仓库。
+  其他
+  - open_file 鸿蒙适配：鸿蒙 PC 上改用设备自身的 aa 命令打开链接。
+  - 离线发现：清理过期的对端队列、忽略离线的发现条目。
+  🔧 重构（Refactoring）
+  - 退役 atomcode-tuix：旧终端前端代码整体移除，命令由 TUI 接管并验证替换完整性，安装体积与维护面显著缩小。
+  📚 文档（Docs）
+  - 新增 IDE 语言桥接、DeepSeek Messages、分层记忆、本地跨会话消息、MCP 工具搜索、技能发现与静态权限模型等文档；更新 hooks、MCP、WebUI 远程访问与键位文档；补充 v5.2.4 CHANGELOG 与 issue 链接。
+  🧹 工程 / 构建
+  - 安装脚本（install.sh / install.ps1）支持从发布清单解析回退版本；webui PWA 清单与站点文档同步更新。
+ReleaseNotesUrl: https://atomgit.com/atomgit_atomcode/atomcode/releases/v5.2.4
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://atomcode.atomgit.com/docs/zh/index.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

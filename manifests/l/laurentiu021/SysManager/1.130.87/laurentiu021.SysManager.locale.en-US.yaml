@@ -1,0 +1,84 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.130.87
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.130.87] - 2026-10-26
+  The System Health tiles no longer wait on each other to load — a slow disk no longer holds up the CPU and
+  memory numbers, on the Dashboard, the tray tooltip or the history chart.
+  Fixed
+  - WMI reads had no time limit, and the first one held a lock that CPU and memory waited behind. Every WMI
+    search in the app but two used the default timeout, which is infinite, so a provider that stopped answering —
+    a failing disk, a dropped USB bridge, a degraded Storage Spaces pool — could hold a reader open for as long as
+    SysManager stayed open. On the Dashboard that was visible at start-up: its 300 ms poll, the notification-area
+    tooltip and the Resource History sampler all begin by awaiting the same first system snapshot, and the static
+    hardware (OS caption, CPU model, disk models, DIMM inventory) that snapshot fills was queried under a lock held
+    across all four WMI round trips — so every one of those callers waited on whichever provider answered slowest,
+    for processor and memory numbers that are plain system calls and never touch WMI at all. Every ManagementObjectSearcher
+    now goes through one helper that bounds the read to 15 seconds (the reliability history keeps its own longer
+    one, since a year of records is work rather than a stall), and the static cache is now filled by whichever
+    caller finds it empty first, claimed so nobody else joins the wait — every other concurrent caller reads
+    whatever is cached right now and moves straight to its own syscalls. Since 0.3.0.
+  Verify the download
+  Get-FileHash .\SysManager-v1.130.87.exe -Algorithm SHA256
+  Expected SHA256: 5CE8CD9120DAA0E58F7C5A346BF1D82A00758BC20AE273AC627967E3506629BB
+  This build is not code-signed, so Windows will warn on first launch. That is
+  expected for a small independent app: see what the warning says and what to
+  click.
+  Code signing is planned through the SignPath Foundation,
+  which provides free certificates to open-source projects, with signing performed by
+  SignPath.io. Until then, the SHA256 above and the build
+  attestation below are what establish that a download is the genuine build.
+  Code signing policy
+  This release is not code-signed. The team roles, release-approval process and
+  privacy policy required by the SignPath Foundation programme
+  are documented in advance under Code signing
+  policy. That
+  documentation is a prerequisite for applying, not evidence of a certificate. The
+  attribution line naming SignPath as the signing provider will appear here once a
+  certificate is actually issued.
+  This program will not transfer any information to other networked systems unless
+  specifically requested by the user or the person installing or operating it. Full
+  privacy policy.
+  Verify where this binary came from
+  This exe was built by GitHub Actions from this public source, and the build is
+  recorded in the Sigstore public transparency log. With the
+  GitHub CLI:
+  gh attestation verify .\SysManager-v1.130.87.exe --repo laurentiu021/SystemManager
+  That proves which commit and workflow produced this exact binary, something the
+  SHA256 file cannot show, since it is published alongside the exe it describes.
+  Each release also ships SysManager-v1.130.87.sbom.json, a CycloneDX inventory of
+  every dependency resolved for this build.
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.130.87
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

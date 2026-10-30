@@ -1,0 +1,65 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: 3899.ncmm
+PackageVersion: 1.2.10
+PackageLocale: zh-CN
+Publisher: "3899"
+PublisherUrl: https://github.com/3899
+PublisherSupportUrl: https://github.com/3899/ncmm/issues
+PackageName: ncmm
+PackageUrl: https://github.com/3899/ncmm
+License: MIT
+LicenseUrl: https://github.com/3899/ncmm/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 chaunsin
+ShortDescription: 网易云音乐一站式任务管理工具。
+Description: ncmm 是一个基于 Go 开发的网易云音乐一站式任务管理工具，同时提供命令行与 WebUI。支持日常签到、云贝与成长值任务、音乐人任务、歌曲播放、图文动态、每日推歌、会员礼品和乐迷团打卡，并提供多账号管理、定时调度、收益统计、运行日志与失败通知。
+Tags:
+- 任务
+- 签到
+- 网易云
+- 网易云音乐
+- 自动化
+ReleaseNotes: |-
+  版本信息
+  - 版本：v1.2.10
+  - 构建时间：2026-10-26 15:16:57 (北京时间)
+  - 发布类型：最新正式版（latest release）
+  更新记录
+  ✨ 新增功能
+  - 云贝任务体系重构扩展与多重活动支持：
+    - 底层 Android XEAPI 协议引擎与自动兜底：实现网易云 XEAPI 加密通信协议支持；在未配置抓包 UA 时自动启用移动端内置 User-Agent（DefaultXEAPIUserAgent），无需繁琐抓包也能无缝发起请求；
+    - 时段红包雨自动领取 (enableRedPacket)：支持每天 4 个时段（00:0010:00、10:0014:00、14:0019:00、19:0024:00）的红包雨自动参与并轮询领取云贝，无风控检测要求，默认开启；
+    - [实验性] 自动抽奖任务 (enableLottery)：支持自动消耗刮刮乐、好运翻卡、扭蛋抽奖的已有剩余次数，避免次数浪费（默认关闭，需手动开启）；
+    - [实验性] 激励视频增次与额外 128 云贝 (enableLotteryWatchVideo)：模拟 8 秒激励视频广告停留，增加上述抽奖活动的刮奖/翻卡次数，并自动检测与领取打开应用首页的额外 128 云贝（需配置移动端 antiCheatToken）；
+    - [实验性] 15 阶段看视频赚云贝 (enableWatchVideoYunbei)：支持赚云贝页面的 15 阶段看视频任务（每天理论上限约 28,320 云贝），单阶段模拟 8 秒视频停留并上报权益，具备阶段防死循环检测和异常自动熔断安全退出机制；
+    - WebUI 与任务队列全量接入：以上所有新任务均已接入 WebUI 可视化配置开关，并在批量快慢任务队列（task.go）中注册就绪。
+  - 新增手机短信验证码登录通道：
+    - 核心接入移动端 EAPI 手机号验证码发送与校验登录接口；
+    - WebUI 账号中心新增「手机验证登录」弹窗，支持输入手机号、60 秒倒计时防重发、自动校验并一键将生成的有效 Cookie 同步入库。
+  - 音乐人每日签到与领云豆任务：
+    - 在音乐人任务体系中新增每日签到领云豆逻辑，自动检测当天签到状态并提交打卡，收益汇总清晰展示。
+  - 多架构构建支持：新增 macOS 平台构件：
+    - CI/CD 打包流水线中正式增加 macOS 系统支持，发布构件提供 darwin_amd64（Intel）与 darwin_arm64（Apple Silicon M 系列）预编译包。
+  🐞 Bug 修复
+  - 跳过黑胶 VIP 任务中的「免费领福利」：
+    - 修复「免费领福利」因接口特性无法实际完成，导致每轮循环反复尝试的问题，现已明确跳过该无效任务。
+  - WebUI 重启接口 CSRF 鉴权失败修复：
+    - 修复在系统设置中点击「重启 ncmm」或更新后「立即重启生效」时报 HTTP 403 invalid CSRF token 的问题；
+    - 对齐前端请求头为 X-NCMM-CSRF，并补齐 same-origin 跨站凭据。
+  - weapi 默认 User-Agent 修复 (fix:Issue 3899/ncmm#40)：
+    - 修复此前 weapi 默认 UA 改为浏览器 UA 后导致扫码登录失效的问题，恢复客户端标准 UA 规范。
+  - 部署配置与文档修正：
+    - 更新 docker-compose.yml 与青龙、Docker 相关部署文档。
+ReleaseNotesUrl: https://github.com/3899/ncmm/releases/tag/v1.2.10
+Documentations:
+- DocumentLabel: WebUI 使用说明
+  DocumentUrl: https://github.com/3899/ncmm/blob/HEAD/docs/webui.md
+- DocumentLabel: 命令行使用说明
+  DocumentUrl: https://github.com/3899/ncmm/blob/HEAD/docs/cli.md
+- DocumentLabel: 配置文件详解
+  DocumentUrl: https://github.com/3899/ncmm/blob/HEAD/docs/configuration.md
+- DocumentLabel: Windows 运行指南
+  DocumentUrl: https://github.com/3899/ncmm/blob/HEAD/docs/windows.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,69 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Nub.Nub
+PackageVersion: 0.9.7
+PackageLocale: en-US
+Publisher: nub contributors
+PublisherUrl: https://nubjs.com/
+PublisherSupportUrl: https://github.com/nubjs/nub/issues
+Author: nub contributors
+PackageName: Nub
+PackageUrl: https://nubjs.com/
+License: MIT
+LicenseUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 nub contributors
+CopyrightUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+ShortDescription: The all-in-one JavaScript toolkit that augments Node.js instead of trying to replace it.
+Description: "An all-in-one toolkit for Node.js. One Rust binary to run your files and scripts, install dependencies, and manage Node itself — a Bun-like modern DX on top of the node you already have. There's no new runtime to adopt and no lock-in: every augmentation rides on Node's own public extension surfaces."
+Moniker: nub
+Tags:
+- javascript-runtime
+- node-version-manager
+- nodejs
+- package-manager
+- script-runner
+ReleaseNotes: |-
+  Nub 0.9.7 runs each nub --test file once again, keeps the full manifest of URL, git and file: dependencies, and fixes two compat-mode launch failures.
+  Runtime
+  ──────────────────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬───────────────────────────
+  Area                  │What changed                                                                                                                                                                                                      │Link
+  ──────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────
+  nub --test            │Each test file runs once. 0.9.5 and 0.9.6 ran every test file twice.                                                                                                                                              │#993
+  ──────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────
+  Threadpool startup    │libuv's threadpool is built on a private loop, so user code no longer sees a startup fs.access request: process.getActiveResourcesInfo() and async_hooks match plain Node, and the event loop exits on the same   │#993
+                        │turn.                                                                                                                                                                                                             │
+  ──────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────
+  Deleted array iterator│A script that deletes Array.prototype[Symbol.iterator] and then imports a module no longer crashes in Nub's load hook.                                                                                            │#993
+  ──────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────
+  Nested invocations    │A nub command started beneath the node shim, --node or nodeCompat runs as Nub instead of on plain Node. A NODE_COMPAT set by the user is honored as before.                                                       │#1006, fixes #1005
+  ──────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────
+  Compat mode on macOS  │With TMPDIR unset, a compat-mode run could exit with code 137 before Node started.                                                                                                                                │#1007
+  ──────────────────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴───────────────────────────
+
+  Package manager
+  URL tarball, git and file: dependencies keep their whole manifest during resolution (#963).
+  - optionalDependencies are filtered by platform, required peers are installed, bundled dependencies are not re-resolved, and os, cpu and libc apply, as they do for registry packages.
+  - nub.lock and the other portable lockfiles record every platform's optional URL tarball with its integrity, as npm and pnpm do. Only the host's variant is installed. An optional URL tarball that fails to download is skipped with a warning.
+  - A direct URL package keeps its platform and peer metadata after the lockfile is written and read back.
+  - Two nub.lock round-trip failures are fixed: a long URL-keyed entry was written on one line and failed the next install with expected struct RawSnapshot, and a scoped URL dependency was read as an npm alias (npm-alias references missing package).
+
+  Testing and internals
+  - A project preload is tested beneath a compat launch and under nub watch (#1009).
+  - The winget manifest fixture tracks 0.9.6 (#996), and the winget-releaser pin names the commit its v2 tag now points at (0260adb).
+  - A benchmark measures request and event-loop latency of the threadpool on a saturated machine (e440c2f).
+
+  What's Changed
+  - aube: resolve URL-tarball optionals, peers and platforms; fix two nub.lock round-trips by @colinhacks in #963
+  - runtime: build libuv's threadpool on a private loop, and walk the pending V8 flags by index by @colinhacks in #993
+  - winget: the fixture tracks 0.9.6 and keeps nubr on its own bin
+  ubr.exe by @colinhacks in #996
+  - runtime: a compat launch no longer opts out a nested nub invocation by @colinhacks in #1006
+  - runtime: resolve the temp dir before starting the shim reaper thread by @colinhacks in #1007
+  - tests: a project preload runs beneath a compat launch and under nub watch by @colinhacks in #1009
+ReleaseNotesUrl: https://github.com/nubjs/nub/releases/tag/v0.9.7
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://nubjs.com/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
