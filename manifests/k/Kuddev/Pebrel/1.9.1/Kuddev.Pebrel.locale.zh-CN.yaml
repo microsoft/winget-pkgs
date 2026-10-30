@@ -1,0 +1,41 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: Kuddev.Pebrel
+PackageVersion: 1.9.1
+PackageLocale: zh-CN
+ShortDescription: 一款 GPU 加速的 Windows 终端：关闭窗口不杀会话，重新打开，你的 claude 对话原样回来。
+Description: Nebula 是一款 Windows 上的终端模拟器，以 Rust 编写，构建在 GPU 加速渲染内核之上，并围绕一个理念设计：终端会话太宝贵，不该随窗口一起消失。它把 tmux 式的常驻会话模型、玻璃质感界面、AI CLI 感知侧边栏和无需额外配置的 shell 体验组合在一起。
+Tags:
+- claude
+- codex
+- ssh
+- 终端
+ReleaseNotes: |-
+  新增
+  - 为 Apple Silicon 和 Intel 上的 macOS 打包应用加入应用内更新：校验通过后，可选择重启安装或下次启动时安装，并恢复已保存的工作区；新应用立即重启失败时回滚到原应用。安装位置必须可写，从磁盘映像或 App Translocation 路径运行的副本需先移动到正常安装位置。
+  - 在 Shell 选择器、快速跳转和命令面板中显示 SSH 主机名称：已命名的主机显示名称与原始连接目标，未命名的主机保持原来的显示。搜索同时匹配名称和目标，选择后仍连接原始地址。
+  - 在“设置 → 按键映射 → 标签页”中新增可修改的“重命名标签”快捷键，默认仍为 F2。修改或清除后，F2 可传递给 Codex CLI 等终端程序；设置无需重启即可生效，菜单提示同步显示实际快捷键。
+  修复
+  - 修复 GitHub 返回 HTTP 403 或 429 时检查更新失败的问题；改用官方最新版本页面与校验清单恢复查询，无法取得已验证安装包信息时仍可手动下载。
+  - 修复 macOS 终端链接无法通过 Command+左键打开的问题；终端应用启用鼠标上报后，链接手势仍可使用，普通点击继续传给应用。悬停提示按当前语言显示对应平台的修饰键。对应 #196。
+  - 修复 Windows Codex Hook 命令在 PowerShell 解析阶段失败的问题，正确处理程序路径中的空格和特殊字符；迁移 Pebrel 管理的旧命令，同时保留用户及第三方 Hook。对应 #254、#255。
+  - 为 Hook 事件转发增加等待期限，避免输入一直未关闭或接收端停止读取时无限等待并持续占用辅助程序文件。已经运行的旧版本 Hook 不会自动获得此超时机制。
+  - 修复同版本修复安装成功后，仅因主程序字节未改变而误报失败的问题。启动安装器前，会短暂等待已安装的 Hook 文件恢复可写；持续占用时提前停止，避免安装器只替换部分文件。仍要求安装器成功、安装包校验通过且最终应用版本正确。对应 #258。
+  - 修复中文及其他宽字符的链接虚线只覆盖半个字符，以及虚线在空格或字体边界处重新起算的问题；下划线按终端列和显示缩放连续绘制。
+  - 修复带引号的 Windows、UNC 和主目录路径包含空格时，只识别到第一个空格的问题；链接高亮与打开操作使用完整的引号内路径。
+  - 修复 WSL 提示符路径把末尾 $、# 包含进链接，以及绝对路径提示符缺少下划线的问题；打开 WSL 绝对提示符路径时使用所属发行版，复制时保留原始路径文本。
+  - 修复新建 Windows 和 WSL 面板缺少真彩色声明的问题，使应用能在不同终端主题下保留其指定的消息背景色，包括 Codex 用户消息背景。动画仍由 CLI 决定，Pebrel 不根据思考等级添加或过滤星点。
+  - 修复标签右键菜单在非中文界面中混用硬编码中文的问题；侧栏和顶部标签的菜单均跟随当前界面语言，覆盖包括韩语在内的全部 11 种支持语言。
+  改进
+  - 整理 Windows 资源管理器右键菜单，保留一个普通 Pebrel 打开入口，并将已安装的 WSL 发行版集中到一个子菜单中；安装时迁移 Pebrel 自有的旧平铺入口，保留无关或经过用户编辑的命令。
+  - 完善问题反馈表单，补充操作系统、Shell、面板程序和连接方式等信息，并明确复现步骤与日志、截图要求，便于定位问题。
+  Windows x64 提供安装器和 ZIP 便携包，Windows ARM64 提供原生便携 ZIP；Windows 安装器和自动安装仍仅支持 x64；macOS 打包应用支持应用内安装。Linux x64 包及 macOS Apple Silicon／Intel DMG 继续标记为 Preview。
+ReleaseNotesUrl: https://github.com/Kuddev/pebrel/releases/tag/v1.9.1
+Documentations:
+- DocumentLabel: 安装指南
+  DocumentUrl: https://github.com/Kuddev/pebrel/blob/main/INSTALL.md
+- DocumentLabel: Lua 配置
+  DocumentUrl: https://github.com/Kuddev/pebrel/blob/main/docs/lua-configuration.md
+ManifestType: locale
+ManifestVersion: 1.12.0

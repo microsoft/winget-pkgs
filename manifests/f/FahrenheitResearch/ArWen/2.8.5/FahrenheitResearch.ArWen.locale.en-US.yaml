@@ -1,0 +1,50 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.ArWen
+PackageVersion: 2.8.5
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/arwen/issues
+Author: Fahrenheit Research
+PackageName: ArWen
+PackageUrl: https://github.com/FahrenheitResearch/arwen
+License: Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+Copyright: Copyright © Fahrenheit Research
+CopyrightUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+ShortDescription: 'ArWen: GPU-native WRF-ARW-class regional weather model, verified against WRF v4.6.1'
+Description: "ArWen is an independent, GPU-native implementation of a WRF-ARW-class regional atmospheric model. It is not affiliated with or endorsed by NCAR or UCAR. The name is a wordmark for \"the ARW solver, GPU-native\"; the Python package is currently named gpuwm. Safety. ArWen is a research and educational tool. It is never a substitute for official forecasts and warnings from your national meteorological service. Do not use it to make safety decisions. Regional numerical weather prediction at convective scale has mostly required institutional clusters, which means most of the world runs on global-model guidance at 10-25 km. ArWen's aim is to put a verified, kilometer-scale limited-area model on a single consumer GPU: pick a point, size a nest ladder to your card, pull public analysis data, and run a 1 km (or 500 m) simulation of your own area on hardware you own -- especially in places where no national convection-permitting model exists."
+Moniker: arwen
+ReleaseNotes: |-
+  ArWen 2.8.5 adds HRRR and RAP native inputs and the HRRR physics options, runs ensembles from real member sources, draws dual-polarization simulated radar, and reduces RUC's near-surface moist bias.
+  - Install or upgrade: pip install --upgrade "gpuwm[all-cu12]==2.8.5".
+  - Integration kit, verification records, and checksums.
+  - Node GPU gate: Stage 1 and both GPU-shard results, with the tested source revision and card identity.
+  New
+  - hrrr-native and rap-native prepare HRRR's and RAP's native hybrid-level analyses through the shared source tables, and gpuwm prep --initial-inputs JSON starts a mapped domain from a separately declared analysis while every lateral frame comes from the boundary source.
+  - use_rap_aero_icbc = true takes aerosol number initial and boundary values from the analyzed input. MYNN supports WRF mixing length 2 and scalar_pblmix = 1. RUC supports mosaic land use and soil (mosaic_lu, mosaic_soil) and WRF's CLM lake model (sf_lake_physics = 1). WRF's off defaults are unchanged.
+  - gpuwm ensemble CONFIG --members N (also gpuwm go and gpuwm run) runs N members, each from its own source trajectory: the source's operational ensemble by default (gefs for gfs, aigefs for aigfs, ecmwf-ens for ecmwf-open-data), earlier cycles of one model with --recipe time-lagged, or a listed set of models and cycles with --trajectories FILE. A source with no operational ensemble exits 2 before any download and names those two options. The run draws ensemble mean, spread, minimum and maximum, threshold probabilities, paintball and postage-stamp maps while it runs. --dry-run prints the member plan and fetches nothing. Ctrl-C stops the run at the next model step.
+  - Members on Thompson, YSU, MM5 surface layer, Noah and legacy RRTMG with a fixed clock advance as one batch per card, with every product file byte-identical to the members run one at a time. On an RTX 5090, four time-lagged members of a 150x120 3 km one-hour case forecast in 22.0 s batched against 39.5 s one at a time. Other members run one after another and the run records why.
+  - gpuwm fetch --source ecmwf-ens fetches ECMWF open-data ENS members p01 to p50, and --source rrfs-ens fetches the five public RRFS ensemble members.
+  - Simulated radar draws ZDR, CC and KDP PPIs when the volume carries them. Radar colours follow the AWIPS reflectivity table (top 85 dBZ) and a green-red velocity table on simulated radar and on the composite, 1 km, ensemble and observed reflectivity maps. [simulated_radar] color_tables = "classic", gpuwm render --radar-colors classic or RUSTWX_RADAR_COLORS=classic brings back the earlier colours.
+
+  Fixed
+  - RUC soil water no longer refills a dry top soil level from below at the WRF v4.6.1 rate, which made evaporation run high and the near-surface air moist. The new default ruc_soilprop = "wrf_45" uses the WRF v4.0 to v4.5 form, also the operational RAP and HRRR form; "wrf_461" keeps the earlier behaviour. In one cycle (2026-10-02 21Z, full HRRR configuration), 2 m dewpoint bias against 2,287 / 2,255 stations went from +1.16 / +1.59 K to +0.92 / +1.22 K at f01 / f02, and 2 m temperature bias went from -0.51 / -0.56 to -0.40 / -0.42 K. Answers change for every RUC run.
+  - Legacy RRTMG longwave applies each stratospheric optical-depth correction once; parallel band calculations previously raced and could change upper-level heating. Answers change.
+  - MYNN initializes turbulent moments from water vapor, as WRF's driver does, instead of including cloud condensate. Answers change for cold-start cloudy columns.
+  - RUC runs its water branch on lake cells when the lake model is off, instead of leaving them unadvanced. Answers change for RUC runs with lake cells.
+  - Split-domain and tiled forecasts initialize gwd_opt and topo_wind with each tile's own orographic statistics and true neighboring terrain.
+  - Forecasts on card sets that do not start at card 0 no longer fail at the first history write, and forecasts run one after another in one process release their microphysics and land-surface tables.
+  Random ensemble perturbations (SPPT, SKEBS, SPP, rand_perturb and the pert_* switches) are refused before any download with the reason: their spread amplitudes have not been calibrated against observations.
+  Known limits: 2 m dewpoint is still moist against stations on RUC runs (above); the leaf-area half of the fix follows. Simulated rain ZDR reads about 2 to 4 times low. Ensemble recipes run one-domain configs with a [fetch] table. RUC and legacy RRTMG checkpoints written by an earlier build are refused on resume, by name.
+  The verification records identify completed artifact and startup checks, the short GPU forecast, and retained component evidence. They do not establish general forecast skill or whole-model parity.
+  Installation and usage | Full changelog
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/arwen/releases/tag/v2.8.5
+InstallationNotes: |-
+  This application requires an NVIDIA GPU with CUDA support to run.
+  Will not function on integrated graphics or non-NVIDIA hardware.
+  Without compatible hardware, the application will fail to launch.
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

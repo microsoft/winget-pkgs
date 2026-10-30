@@ -1,0 +1,67 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: BrunoVolpato.ivygrep
+PackageVersion: 1.2.16
+PackageLocale: en-US
+Publisher: Bruno Volpato
+PublisherUrl: https://github.com/bvolpato
+PublisherSupportUrl: https://github.com/bvolpato/ivygrep/issues
+Author: Bruno Volpato
+PackageName: ivygrep
+PackageUrl: https://bvolpato.github.io/ivygrep/
+License: MIT
+LicenseUrl: https://github.com/bvolpato/ivygrep/blob/v1.2.6/LICENSE
+ShortDescription: Local code search and relationship-aware context packs for coding agents
+Description: Search source by intent or exact identifiers and build bounded task packs from Git changes, definitions, callers, dependents, tests, configuration, and documentation. Source, queries, embeddings, and indexes stay local.
+Moniker: ig
+Tags:
+- cli
+- code-search
+- coding-agents
+- context
+- developer-tools
+- local-first
+- mcp
+- search
+ReleaseNotes: |-
+  ### Upgrade notes
+
+  • Existing indexes rebuild once on first use for index format v30.
+  • The Web UI requires the session token on loopback listeners too. Open the URL that `ig --web` prints; a bare `http://127.0.0.1:4747/` returns 401.
+  • v1.2.15 was tagged but not published：its CUDA Linux binary exceeded the release size budget. This release includes every change listed here.
+
+  ### Security
+
+  • The Web UI requires the session token on loopback listeners too. Other local users could previously read indexed files, list directories, search, and launch the editor through `127.0.0.1`. Open the URL printed by `ig --web`; bare `http://127.0.0.1:4747/` returns 401. The printed URL contains the token, so keep terminal output and logs that capture it private.
+  • `ig --web` opens the browser through an owner-only HTML redirect file under the ivygrep app home instead of passing the tokenized URL to `xdg-open`, `open`, or `ShellExecuteW`, so the token no longer appears in process arguments other local users can read. On Unix the file is mode 0600 in a 0700 `browser/` directory; a later launch removes files older than two minutes. `IVYGREP_NO_BROWSER=1` skips the launch and the file.
+  • The token URL answers with a same-origin page that sets the HttpOnly `SameSite=Strict` cookie and refreshes to the app without the token. A redirect lost the cookie when the URL was opened from a local file, as the launcher's redirect page does. The cookie is named per listener port (`ivygrep_session_<port>`), so daemons on different ports keep separate sessions.
+  • Model downloads use rustls 0.23.45, which fixes RUSTSEC-2026-0285：rustls accepted TLS 1.3 handshake messages sent at the wrong encryption level when they followed a key-changing message in the same record. The handshake transcript stays authenticated, so an attacker could not alter or complete a handshake.
+
+  ### Added
+
+  • **Optional PotionCode v2 static embeddings.** `IVYGREP_MODEL_PROFILE=potion-code-v2` runs the revision-pinned `minishlab/potion-code-16M-v2` Model2Vec profile (256 dimensions, float16 weights widened to f32, unweighted token mean). The default profile is unchanged.
+
+  ### Changed
+
+  • Release binaries build with one codegen unit instead of Cargo's default of 16, shrinking them by about 4%. A local x86_64 Linux release build goes from 73.88 MiB to 70.63 MiB. The CUDA Linux binary grew to 81.64 MiB in v1.2.15, above its 81 MiB budget, and fits again.
+  • Query expansion no longer maps phrases to identifiers from ivygrep's own source or the Linux kernel relevance fixture (`cpu_permits`, `vector_store`, `daemon_request`, `daemon_response`, `indexable`, `doctor`, `block_io`, `workqueue`). Two phrase aliases that tokenization could never match are removed. Self-repository relevance gate floors are lowered to match. Many remaining phrase aliases still come from the same fixture-fitting history and are candidates for corpus-derived expansion.
+
+  ### Fixed
+
+  • Queries whose retrieval text is one line no longer give a fusion vote to hash-vector matches on candidates that lexical, literal, path, or symbol search already found, including when neural retrieval runs. Hash vectors hash the same words BM25 scores, so since the hash graph started returning real neighbors these votes counted prose evidence twice and pulled clusters of near-duplicate, term-dense functions above the relevant one. Multi-line queries, including pasted error output after runtime values are dropped, keep the vote, since hash overlap on pasted identifiers still separates the matching snippet. Neural matches still vote from the neural tier's own rank, and hash-only discoveries still vote. On public-core cosqa (3 runs each), neural recall@20 rises from `.3487` to `.3520`, back above the `.35` gate floor, and hash, hybrid, and blended recall@20 rise from `.3587`, `.3580`, and `.3527` to `.3640`, `.3647`, and `.3560`. No codefeedback-st, codetrans-contest, or codetrans-dl query gains or loses a relevant file in the top 20 in any mode.
+  • Rebuilding an index from identical sources produces the same chunks. Tree-sitter parsing is budgeted in parser operations (500,000 per file) instead of 100 ms of CPU time, so large files such as ivygrep's own `src/search.rs` no longer switch between structural and fallback chunks with machine load; a CPU allowance per operation still stops pathological inputs. Symbol candidates with equal rank order by end line and chunk key instead of SQLite row order.
+  • The Tree-sitter CPU allowance starts when parsing starts instead of before grammar and query setup, and Windows measures it in thread CPU time instead of wall clock. A parse thread that waited for another thread to compile the same queries, or was descheduled on a busy machine, could previously fall back to heuristic chunks without definitions.
+  • Rebuilding an index from identical sources returns the same lexical, path, literal, and Boolean candidates in the same order. Tantivy broke equal BM25 scores by document address, which depends on indexing threads and segment merges, and Block-WAND could move one document's score by a few ULPs between layouts. Candidates now compare scores by bucket (top 13 of 23 f32 mantissa bits, `6e-5` to `1.2e-4` relative) and order equal buckets by chunk key, read from a new fast column on `vector_key` in the same Block-WAND pass, without reading stored documents. Candidates report bucket scores. Three codetrans-dl builds with default, 1, and 8 index threads disagreed on 136 to 144 of 180 lexical top-20 lists per pair, and lexical nDCG@10 ranged `.3096` to `.3201`; they now agree on every list at `.3118`. Hash and hybrid lists can still differ between builds whose vector indexes were built with concurrent insert lanes. Indexes built by unreleased v30 builds before this change keep address order among equal buckets until rebuilt.
+  • Multi-line queries are ranked as pasted source. They no longer boost one-line definition signatures that share a few of the snippet's identifiers, and `owner.member` calls inside them no longer become exact-symbol lookups, so the code that contains the snippet ranks first. On the held-out reranker-evaluation half of the public panel, lexical nDCG@10 rises from `.3140` to `.5418` on codetrans-contest and from `.2273` to `.2932` on codetrans-dl. Single-line queries are unchanged. Multi-line queries with explicit `AND`, `OR`, or `NOT` follow the same rule, and an explicit `signature:` clause keeps its 5x boost in any query.
+  • Pasted error output ranks the code that raises the message first. Queries with a message-like error label at the start of a line (`Error:`, `Caused by:`, `ValueError:`, `java.lang.IllegalStateException:`, `Uncaught TypeError:`), a traceback header, an `[ERROR]` line, an `(os error N)` cause, or `panicked at` drop runtime values before lexical, path, hash-vector, fusion, and reranking signals：absolute paths outside the workspace (quoted paths with spaces included), URLs, hex ids, numbers, timestamps, and the values of `key=value` pairs. Directory names from paths such as `/home/dev/.local/share/<app>/...` no longer pull in manifests and scripts named after the app. The static message text between those values joins the exact-substring pass, and a file whose best chunk lacks that text is shown by the chunk that contains it. Leading severities such as `[ERROR]` stay out of that text, and runs from the message itself are kept ahead of source excerpts and log prose. Field lines in pasted source, such as `error: string | null;`, `fatal: true`, YAML keys, and docstring `Raises:` entries, are not labels. On 337 rendered error outputs from 11 pinned public Rust, Python, Java, JavaScript, and Go repositories, hash-mode MRR@10 rises from .502 to .669 on the development half and from .409 to .656 on the held-out half. Pasted source and queries without error framing are unchanged.
+  • Query singularization no longer truncates `-che` and `-ze` words or words that end in `s`：`caches` becomes `cache` instead of `cach`, `sizes` becomes `size` instead of `siz`, `cookies` becomes `cookie`, and `alias`, `bias`, and `series` stay unchanged. Query expansion, ranking boosts, and hash embeddings use the corrected forms.
+  • Fallback-chunked languages index lines before the first declaration, such as Protobuf `package` and `option` lines. Python multi-line decorators, decorators before a JavaScript or TypeScript `export class`, and decorators on TypeScript class methods stay in their definition's chunk, while continuation headers still name the `def`, `class`, or method line.
+  • Indexed signatures, definition-name ranking, and text-inferred symbol names, including names inferred from every line of module-level chunks, skip multi-line annotations, decorators, and attributes such as `@router.get(...)`, `@RequestMapping(...)`, `#[cfg_attr(...)]`, `#![cfg_attr(...)]`, and C# `[Route(...)]` until their brackets balance, so the declaration line is used instead of an argument line. Brackets inside `/* */` block comments, `#` and `//` comments, backtick strings, and triple-quoted strings do not count. In Python every `#` starts a comment, including `#TODO(`; elsewhere only `#` followed by whitespace does, because `#[`, `#region`, `#fff` and `r#"` are code.
+  • Java records, module-level JavaScript and TypeScript `const name = () => ...` bindings, and module-level Rust `macro_rules!` macros produce symbol definitions. A declaration that binds several functions, such as `export const a = () => 1, b = () => 2`, registers every function name.
+  • Symbol, caller, and context previews drop the stored chunk header, including continuation headers and Windows path separators, so the first preview line matches the reported start line.
+  • Index format v30 rebuilds existing indexes once to pick up the chunking and symbol changes above.
+  • Hash ANN candidates are near neighbors again on large workspaces. The hash tier built its HNSW graph with connectivity 2 and add expansion 8, which returned almost random neighbors
+ReleaseNotesUrl: https://github.com/bvolpato/ivygrep/releases/tag/v1.2.16
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
