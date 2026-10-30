@@ -1,0 +1,40 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: AnywhereLabs.DSHDesktop
+PackageVersion: 2.0.21-next
+PackageLocale: en-US
+ShortDescription: A community-maintained desktop client for DeepSeek Harness; it is not an official DeepSeek product.
+Description: DSH Desktop is a community-maintained desktop client for DeepSeek Harness. It is an Electron desktop shell and is not an official DeepSeek product.
+Tags:
+- ai
+- deepseek
+- deepseek-harness
+- dsh
+- large-language-model
+- llm
+ReleaseNotes: |-
+  This Next release upgrades upstream to DeepSeek Harness v0.2.1-rc.4, improves launch speed and window state restoration, upgrades Profile repair, undo, and failure reporting in the recovery assistant, adds dshfind plugin index support, and upgrades the bundled Agents Anywhere plugin to 2.1.0 (adding Codex session handoff and dual-device turn-taking, dependency environment reinstallation, and history ordering fixes).
+  DSH NEXT is a community-maintained open-source project, not an official DeepSeek product.
+  Upstream version: DeepSeek Harness v0.2.1-rc.4.
+  New and improved
+  - Startup speed and window experience: Sped up macOS proxy detection when no system proxy is set and parallelized login-shell environment loading, enabled frontend script compilation caching for faster warm launches, and persisted the main window’s position, size, and maximized state across restarts.
+  - Recovery assistant and Profile repair: "Back up and repair current Profile" now creates a full backup before resetting the Profile to default template plugins and re-running first-launch onboarding, with a new "Undo last repair" action on Quick Recovery for one-click restoration. Opening the recovery assistant automatically generates a single-file failure report and captures local crash dumps and memory snapshots for troubleshooting.
+  - Plugin sources and Computer Use (Next): Added one-click dshfind plugin index configuration and switching in Source Configuration, renamed "Custom plugin markets" to "Custom plugin indexes", and renamed the bundled desktop Computer Use plugin to Computer Use (Next) (keeping the /computer-use command).
+  - Agents Anywhere 2.1.0: Continue running Codex desktop sessions directly from the web while keeping viewing read-only and taking over briefly only when sending messages or performing actions so desktop and mobile can take turns in the same session; model and permission changes in the session header take effect immediately, and agent questions now use in-session async forms; added "Reinstall dependency environment" under Settings → Maintenance with PyPI mirror switching and automatic fallback to official PyPI for missing packages.
+  Fixes
+  - macOS permission preservation on restart: Fixed in-app restarts (Profile switches, recovery restarts, and plugin changes) potentially losing macOS Local Network permissions.
+  - Session link resilience: Preserved undecodable dsh-session: text in conversations as plain text instead of failing the turn.
+  - Linux packaging and compatibility: Added Linux ARM64 packaging verification; switched Linux AppImage to a static runtime so libfuse.so.2 is no longer required on the host system; fixed community market peer dependency resolution during Next packaging and upstream ACP diagnostics leaking into stdout.
+  - Agents Anywhere sync stability: Fixed out-of-order or interleaved history after attaching to an existing Codex session (automatically recalibrated on the next sync after upgrading), eliminated duplicate timeline entries from searches, image views, and context compaction, and fixed multi-plugin Codex handoff timeouts and oversized sequence number write stalls.
+  Usage notes
+  - Quit the previous version and back up ~/.dsh (or use Back up in Settings → Desktop settings) before installing. Verify your usual plugins and workflows afterward.
+  - Before managing plugins for the desktop Profile from the bundled terminal, launch Desktop to initialize that Profile.
+  - When upgrading from 2.0.17-next or earlier, download and install manually; in-app updates in those versions may not complete the download.
+  - The Office skills install the bundled runtime under ~/.dsh/dsh-runtimes/dsh-next-primary-runtime on first use, requiring additional disk space.
+  - Defaults to the shared ~/.dsh home. Profiles do not isolate sessions, accounts, or credentials within that home.
+  - Change the data directory in Settings → Desktop settings or the recovery assistant, or set DSH_DESKTOP_NEXT_HOME to an absolute path to isolate DSH data (an in-app choice takes precedence over the environment variable); this does not isolate AA’s default shared sign-in and device-binding state.
+  Full changelog · Project website
+  DSH NEXT replaces the former Stable edition channel.
+ManifestType: locale
+ManifestVersion: 1.28.0
