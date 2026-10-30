@@ -1,0 +1,85 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: BytePioneer-AI.CodexHost
+PackageVersion: 0.15.0
+PackageLocale: zh-CN
+Publisher: codexhost
+PublisherUrl: https://github.com/BytePioneer-AI
+PublisherSupportUrl: https://github.com/BytePioneer-AI/codex-host/issues
+PrivacyUrl: https://github.com/BytePioneer-AI/codex-host/blob/HEAD/docs/PRIVACY.md
+Author: BytePioneer-AI
+PackageName: CodexHost
+PackageUrl: https://github.com/BytePioneer-AI/codex-host
+License: MIT
+LicenseUrl: https://github.com/BytePioneer-AI/codex-host/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 BytePioneer-AI
+ShortDescription: 在 Codex Desktop 中直接运行 Pi 和 Claude Code 等 Agent Harness
+Description: |-
+  CodexHost 是一个独立的非官方开源项目，让 Pi、Claude Code 等 Agent Harness 在 Codex Desktop 中运行，并支持跨 Agent 协作。
+  支持通过 SSH 和官方 Codex Desktop Remote Control 使用远程主机上的 Harness。
+  CodexHost 与 OpenAI 无隶属关系，也未获得 OpenAI 的背书。
+
+  我们认为 Codex Desktop 提供了目前最好的桌面开发交互体验。
+  但 Codex 并不是唯一优秀的 Agent Harness，也有人偏好 Claude Code 和 Pi Agent。
+  CodexHost 让你在 Codex Desktop 中选择真正执行任务的 Agent，同时保留 Codex 的原生体验，并让它们协作完成任务。
+  无需切换应用，Pi、Claude Code、OMP、Grok Build 和 DeepSeek Harness 都可以在同一个 Codex Desktop 窗口中直接使用。
+
+  跨 Agent 协作
+
+  你可以让当前 Agent 把独立任务交给另一个 Harness。例如：
+  让 @claude-code 独立审查这次修改，并指出兼容性风险。
+  让 @pi 调查这个测试为什么偶发失败。
+  让 @omp 实现这个功能，我继续整理文档。
+  CodexHost 会为目标 Harness 创建独立的 Native Session。委派会话将出现在 Codex Desktop 的会话列表中，你可以随时打开、查看进度或继续对话。
+Tags:
+- claude-code
+- codex
+- pi
+- 智能体
+- 编程智能体
+ReleaseNotes: |-
+  What's New
+  Import native Sessions from a selected Host, answer multi-select questions, and use Grok's native questions. This release also adds Antigravity usage statistics and improves conversation reliability across Claude Code, Pi, Windows, and Codex Desktop.
+  支持从所选 Host 导入原生 Session、回答多选问题，并接入 Grok 原生提问。本版还新增 Antigravity 用量统计，改进 Claude Code、Pi、Windows 和 Codex Desktop 的会话可靠性。
+  Features
+  - Select a local or remote Host for Session import, keeping import and opening on the selected machine; support macOS Broker-backed imports for Claude Code, Cursor CLI, CodeBuddy, and WorkBuddy (#207)
+  - Answer external Harness multi-select questions in a shared card, with accompanying single-choice and text fields and drafts retained while switching chats (#625)
+  - Answer Grok's native single-choice, multi-select, and text questions, with cancellation and native withdrawal support (#625)
+  - Read Antigravity's native historical request and Token usage, including Sessions created outside codexhost; model and cost information remain unavailable when absent from native records (#588)
+  Fixes
+  - Steer Claude Code continuations within the same Turn without stopping background Subagents, and keep accepted instructions attached to that Turn (#617)
+  - Release Claude Code Turns after refused Subagent messages, and allow Fork and message-edit recovery after entering a native worktree (#626, #629)
+  - Improve Pi's large-history RPC performance and ignore late replies to expired read-only queries without faulting the Session (#607)
+  - Recover stale Windows Mapping Store locks when a PID has been reused by another process (#627)
+  - Keep Antigravity questions working across Turns, preserve the project working directory, and bound process cleanup waits (#586)
+  - Keep Antigravity Conversation totals separate from current context usage (#587)
+  - Disable background self-update by default for Host-started Antigravity processes on Windows and macOS, while retaining explicit updates (#585)
+  - Explain unavailable ZCode plans or quotas without asking an already signed-in account to log in again (#621)
+  - Compact Composer controls in narrow layouts and keep native question and approval inputs separate from chat controls (#624, #625)
+  - Support Codex Desktop 26.1023 native language settings (#636)
+  - Fix availability checks routed through the Harness Broker
+  新功能
+  - 会话导入支持选择本地或远程 Host，导入和打开始终使用所选机器；macOS 上通过 Broker 托管的 Claude Code、Cursor CLI、CodeBuddy 和 WorkBuddy 支持导入 (#207)
+  - 外部 Harness 多选问题使用公共卡片，可与单选、文本字段一起回答，切换聊天时保留未提交草稿 (#625)
+  - 接入 Grok 原生单选、多选和文本提问，支持取消及原生问题撤回 (#625)
+  - 从 Antigravity 原生历史记录统计请求和 Token，包括未经 codexhost 创建的 Session；原生记录缺少模型信息时显示为未知模型且不计价 (#588)
+  修复
+  - Claude Code 后台 Subagent 运行期间支持同一 Turn 内继续插入指令，不必停止后台任务；已接受的指令保持归属当前 Turn (#617)
+  - Claude Code 子 Agent 消息被拒绝后正确释放 Turn；进入原生 worktree 后仍可 Fork 和进行消息编辑恢复 (#626, #629)
+  - 改善 Pi 大历史 RPC 处理性能；只读查询超时后的迟到回复不再导致 Session 故障 (#607)
+  - Windows 上 PID 被其他进程复用时，可以回收残留的 Mapping Store 锁 (#627)
+  - 修复 Antigravity 多轮提问失效，明确项目工作目录，并限制进程清理等待时间 (#586)
+  - 避免把 Antigravity 整段 Conversation 的累计用量误当作当前上下文占用 (#587)
+  - Windows 和 macOS 上由 Host 启动的 Antigravity 进程默认关闭后台自更新，保留显式更新操作 (#585)
+  - ZCode 已登录但套餐或额度不可用时显示正确原因，不再要求重复登录 (#621)
+  - 窄布局下压缩 Composer 控件，并避免聊天控件干扰原生提问与审批输入 (#624, #625)
+  - 适配 Codex Desktop 26.1023 的原生语言设置 (#636)
+  - 修复通过 Harness Broker 路由的可用性检查
+  Breaking Changes
+  - Language overrides require Codex Desktop's native settings service. Desktops exposing only the legacy locale RPC are no longer supported for language overrides; reading can fall back to the browser language, but changing the override requires the native service (#636)
+  破坏性变更
+  - 语言覆盖设置需要 Codex Desktop 原生 settings 服务。仅提供旧 locale RPC 的 Desktop 不再支持语言覆盖；读取时可以降级使用浏览器语言，但修改覆盖值需要原生服务 (#636)
+ReleaseNotesUrl: https://github.com/BytePioneer-AI/codex-host/releases/tag/v0.15.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
