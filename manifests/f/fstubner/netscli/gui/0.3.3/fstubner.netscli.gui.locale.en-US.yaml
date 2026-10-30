@@ -1,0 +1,73 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: fstubner.netscli.gui
+PackageVersion: 0.3.3
+PackageLocale: en-US
+Publisher: Felix Stubner
+PublisherUrl: https://github.com/fstubner
+PublisherSupportUrl: https://github.com/fstubner/netscli/issues
+Author: Felix Stubner
+PackageName: NetsCLI Desktop
+PackageUrl: https://netscli.com/
+License: MIT
+LicenseUrl: https://github.com/fstubner/netscli/blob/HEAD/LICENSE
+Copyright: Copyright (c) Felix Stubner
+ShortDescription: Network scanner desktop app — discover hosts, scan ports, look up DNS records, inspect ARP table.
+Description: |
+  NetsCLI Desktop is the GUI surface of netscli — a network scanner
+  with CLI, terminal UI, desktop app, and MCP server interfaces all
+  backed by the same Rust core. The desktop app provides a Tauri 2 +
+  React window for visual host discovery, port scanning, DNS lookups,
+  and ARP table inspection without opening a terminal.
+Moniker: netscli-gui
+Tags:
+- arp
+- desktop
+- dns
+- network
+- port-scanner
+- rust
+- scanner
+- tauri
+ReleaseNotes: |-
+  Windows executables and the desktop installer are signed, so Windows no longer warns that the publisher is unknown. Connecting the MCP server to a client no longer means installing netscli first and writing the configuration by hand: npx netscli serve works, and each release carries a one-click bundle for clients that support them.
+  Added
+  - Windows executables and the desktop installer are signed. Both netscli
+    builds and the .msi now carry an Authenticode signature from a Certum
+    certificate, timestamped so it keeps verifying after the certificate
+    expires. Windows has been showing an unknown-publisher warning on every
+    download since the first release, and SmartScreen treats an unsigned
+    installer from a low-reputation domain as something to discourage rather
+    than merely flag.
+    Signing happens in one job, after the builds and before anything is
+    uploaded, so a release carries all three signed or none of them. Half a
+    signed release would be worse than none: nothing on the page would say
+    which artifacts were which.
+  - Two new ways to connect the MCP server, so it no longer has to be a
+    hand-written config file. Until now the only route was installing netscli,
+    finding where it landed, and writing the JSON yourself.
+    npx netscli serve now works: netscli is on npm as a small launcher plus
+    one prebuilt binary per platform, and npm fetches only the one that matches
+    your machine. This is the form every MCP client's documentation already uses.
+    There are also .mcpb bundles on each release, one per platform. A client
+    that supports MCP bundles installs one in a single action — the binary is
+    inside, so nothing else is needed. The install prompt carries a switch for
+    the local-network default described below, which is the first time that
+    choice has been visible to the person making it rather than buried in an
+    environment variable.
+    Anyone who already has netscli installed should keep pointing their client
+    at it. That copy is the version you chose, there is only one of it, and it
+    is the only one of the three that can capture packets — libpcap and Npcap
+    cannot be shipped inside an npm package or a bundle.
+  Documentation
+  - The MCP page now says what the local-network default is and why. The
+    server has refused targets outside your own networks since 0.3.1, and the
+    only description of that lived in a source comment, so the first anyone
+    heard of it was an error message naming a variable. It is now written down
+    next to the reason: this is the one surface where a scan can be requested by
+    something a model read rather than by the person at the keyboard.
+  Full changelog: v0.3.2...v0.3.3
+ReleaseNotesUrl: https://github.com/fstubner/netscli/releases/tag/v0.3.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

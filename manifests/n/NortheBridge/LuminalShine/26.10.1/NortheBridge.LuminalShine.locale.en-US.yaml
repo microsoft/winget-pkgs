@@ -1,0 +1,87 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: NortheBridge.LuminalShine
+PackageVersion: 26.10.1
+PackageLocale: en-US
+Publisher: NortheBridge Foundation
+PublisherUrl: https://github.com/NortheBridge
+PublisherSupportUrl: https://apps.northebridge.com/en/luminalshine
+Author: NortheBridge Foundation
+PackageName: LuminalShine
+PackageUrl: https://github.com/NortheBridge/luminalshine
+License: GPL-3.0
+LicenseUrl: https://github.com/NortheBridge/luminalshine/blob/HEAD/LICENSE
+Copyright: Copyright (c) NortheBridge Foundation
+ShortDescription: A Modern Self-hosted High Performance Sunshine-compatible game stream host for Moonlight designed for Windows 11 and Windows 11 Insider Preview. Maintained by the NortheBridge Foundation.
+Description: Modern Self-Hosted High Performance Sunshine-compatible game streaming host for Moonlight clients designed for Windows 11 and Windows 11 Insider Preview.
+Moniker: luminalshine
+Tags:
+- amdgpu
+- blackwell-gpu
+- contributions-welcome
+- contributors-welcome
+- cpp
+- game-stream
+- game-streaming
+- game-streaming-server
+- geforce-experience
+- intelgpu
+- moonlight
+- nvidia-gpu
+- python
+- remote-desktop
+- windows-insiders
+- windows11
+ReleaseNotes: |-
+  LuminalShine 26.10.1
+  Important
+  Bundled virtual display driver: LuminalVGD v0.1.0-alpha.9
+  Signed driver 0.1.0.27 · protocol 0.10 · Build 27 — unchanged from 26.10.0 and 26.09.1.
+  LuminalShine 26.10.1 addresses two regressions reported in 26.10.0 when using Exclusive mode with OLED Protection: existing and newly opened applications could remain on physical displays instead of moving to the selected virtual display, and mouse interaction could expose content or a cursor on the protected physical displays. The report came from Aurora on LG webOS, with 26.09.1 identified as the last working release.
+  This maintenance release includes all fixes from PR #211. The host-persisted WebUI changelog, VHF gamepad backend and Xbox Bluetooth Helper, encoder-probe fixes, and existing client connectivity features from 26.10.0 remain included.
+  Virtual-display application routing
+  - Restore periodic reconciliation. A 500 ms sweep retries eligible windows that remain off the selected virtual display. This restores the periodic containment behavior from 26.09.1 while retaining exact-device targeting, covering missed or early window events, applications that restore saved monitor positions, and asynchronous moves that need another attempt.
+  - Process queued window work promptly. The desktop-guard worker now wakes for messages that Windows has already observed but not removed, and drains window work after configuration wakes as well as message wakes. Queued application moves no longer depend on a later unrelated event to resume processing.
+  - Keep configuration and shutdown responsive. A signaled configuration/shutdown event takes priority over continuous window input. Message draining is bounded, so a noisy application cannot indefinitely postpone reconfiguration.
+  - Keep failed queue posts retryable. Failed message posts release their pending entry. Periodic sweeps filter out windows already on the target so they do not consume the bounded routing queue ahead of off-target applications.
+  - Retain exact-target safeguards. Routing continues to use the session's selected VGD device, with configuration/topology generation checks and no fallback to an unrelated primary display. Maintenance timers are retired when configuration or topology changes.
+  OLED Protection
+  - Consume interaction on black covers. Recovery-display covers now handle hit tests instead of forwarding mouse interaction to the applications beneath them. Clicking a cover does not activate it or the covered application.
+  - Suppress the cursor over protected displays. Cover cursor handling hides the pointer so hovering does not illuminate the physical display with a cursor.
+  - Maintain the covers above application windows. The periodic maintenance pass reasserts the covers' topmost position without activating them. Cover updates retain the generation barrier used during suspension and teardown.
+  LuminalVGD driver
+  This fix is in LuminalShine's desktop helper; the bundled virtual display driver is unchanged:
+  ───────────────┬────────────────────────────────────────────────────────────
+  Bundled release│v0.1.0-alpha.9
+  ───────────────┼────────────────────────────────────────────────────────────
+  Driver version │0.1.0.27 (DriverVer 08/07/2026, 0.1.0.27)
+  ───────────────┼────────────────────────────────────────────────────────────
+  Protocol       │0.10 (handshake build 27, capabilities 0xfe5)
+  ───────────────┼────────────────────────────────────────────────────────────
+  Watchdog       │10-second lease watchdog
+  ───────────────┼────────────────────────────────────────────────────────────
+  Signing        │NortheBridge Foundation OV certificate, RFC 3161 timestamped
+  ───────────────┴────────────────────────────────────────────────────────────
+  Build 27 retains the D3D12 timeline-fence transport and teardown/drain protections. Upgrading from 26.10.0 does not normally require replacing this display driver. The separate VHF virtual gamepad package also remains unchanged: v0.1.0-beta.9, driver 0.1.0.53, protocol 2.
+  Project, tests and release engineering
+  - Added six native Windows regression tests covering previously observed queued input, configuration-event priority, bounded message draining, shutdown, cover hit testing/no-activation, and cursor suppression.
+  - All 15 display-guard tests (six native USER32 tests plus nine exact-device policy tests) are now part of the blocking Windows candidate/release gate. A focused Windows workflow runs them independently as well.
+  - Release validation passed 126 connection-path tests and 72 frontend tests. Its full Windows suite recorded 848 passed, 12 failed, and 10 skipped (870 total), with no new failures versus 26.10.0. The 12 existing failures are an authentication error-text expectation, eight Playnite tests, and three locale-consistency tests. This is not an all-tests-green release.
+  - Release CI results (run): signing, signed-payload integrity, MSI upgrade compatibility, installer invariants, GameStream health checks, the connection/display-guard gate, and configuration consistency all passed. The release is built from commit dba21a9ef69222b40a18227c2783853b954dfdf7.
+  - The changes do not alter the networking protocols, authentication, encoder selection, or capture-start logic. Automated tests validate the routing and cover mechanisms and connection policies; they do not substitute for physical multi-monitor, Aurora/LG OLED, or other client hardware testing.
+  Upgrading
+  - Install 26.10.1 over the previous release with the installer. Settings and pairings are retained; an active stream ends during the upgrade and can be restarted after the service returns.
+  - For the reported configuration, reconnect Aurora using Exclusive mode with OLED Protection enabled. Check both already-open and newly launched applications on the selected virtual display, then verify the physical displays stay covered during mouse movement and after reconnecting.
+  - Hard-refresh Mission Control (Ctrl+F5) if old assets remain cached. Use Changelog in navigation to reopen these notes.
+  - Regular Moonlight sessions, Borealis compatibility, the browser Play page, and opt-in PyroWave support remain available through their existing paths.
+  Checksums
+  SHA-256:
+  ac18964389a71de7d56e51742fef0b087446e3f0e223b04d2b81f97c62581a90  LuminalShine_x64-debuginfo.7z
+  4eaa604019b1078b8530419eb0d7aada8766cd00f1941a53339209d6fc5e5530  LuminalShine_x64-installer.exe
+  181e3c15addc2198b09d46ad8a5f0a1175fe30f83eb72c3cf4503485f4d9601f  LuminalShine_x64-portable.zip
+  The same hashes are attached as SHA256SUMS.
+  Full changelog: 26.10.0…26.10.1
+ReleaseNotesUrl: https://github.com/NortheBridge/luminalshine/releases/tag/26.10.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

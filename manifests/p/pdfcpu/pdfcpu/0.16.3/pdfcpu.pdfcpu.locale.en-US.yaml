@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: pdfcpu.pdfcpu
+PackageVersion: 0.16.3
+PackageLocale: en-US
+Publisher: pdfcpu
+PublisherUrl: https://github.com/pdfcpu
+PublisherSupportUrl: https://github.com/pdfcpu/pdfcpu/issues
+Author: Horst Rutter
+PackageName: pdfcpu
+PackageUrl: https://github.com/pdfcpu/pdfcpu
+License: Apache-2.0
+LicenseUrl: https://github.com/pdfcpu/pdfcpu/blob/master/LICENSE.txt
+ShortDescription: A PDF processor written in Go.
+Tags:
+- go
+- golang
+- golang-library
+- pdf
+- pdf-files
+- pdf-lib
+- pdf-processor
+- pdflib
+- processor
+ReleaseNotes: "# pdfcpu v0.16.3\n\nThis is a security update fixing configured decoded-byte limit bypasses and restricting local image access in create and form input.\n\n**Applications handling untrusted PDFs or create/form input should upgrade.**\n\n**Decoded-byte limits — [GHSA-jp42-qm45-2x6g](https://github.com/pdfcpu/pdfcpu/security/advisories/GHSA-jp42-qm45-2x6g):**\n\nHonor `Limits.MaxDecodeBytes` across stream decoding and combined page content, and stop cross-reference repair after\nlimit failures. Strengthen Flate predictor, DCT and cached-content checks, with regression coverage for strict/relaxed\nvalidation and eager/deferred decoding.\n\nThe limit bounds individual decoded streams and combined page content, not total process memory.\n\n**Additive Go API change:** Add `StreamDict.DecodeWithLimit` and `StreamDict.DecodeLengthWithLimit` to supply the\nconfigured decode limit explicitly.\n\n**Local image access — [GHSA-44h9-p34h-2w4p](https://github.com/pdfcpu/pdfcpu/security/advisories/GHSA-44h9-p34h-2w4p):**\n\nConfine local images referenced by `create`, `form fill`, and JSON/CSV `form multifill` input to an allowed directory.\nReject absolute paths, parent-directory components, symlink escapes and non-regular files, and report access denials\nas errors.\n\n**Compatibility change:** \nAPI callers must set `conf.LocalImageRoot` to enable local images; an empty value disables\nthem. The CLI defaults to its working directory; set `localImageRoot` in `config.yml` to select another root.\nUpdate image paths to be relative to that root. Confined local images are unavailable on `js/wasm`.\nSee [local image access](https://pdfcpu.io/create/create/#local-image-access) for migration guidance and limitations.\n\n**Documentation:** \nUpdated [security policy](https://github.com/pdfcpu/pdfcpu/blob/v0.16.3/SECURITY.md) clarifies vulnerability scope, supported releases and guidance for AI-assisted reports and multiple findings. \nUpdated [pull request template](https://github.com/pdfcpu/pdfcpu/blob/v0.16.3/.github/pull_request_template.md) clarifies contribution requirements.\nAdded local image configuration and migration guidance to README and website.\n\nRequires Go 1.26 or later, unchanged from v0.16.2.\n\n## Changelog\n• * 35ea259eb27d5a607f797edd41fd8a9e50a1f818 bump version\n• * 8befe54db401e8ed0ecb9d52aec700fa67b2972f confine local images in create and form input\n• * c1db2d55c0826689a129012fbac5a25d5fd3a39f honor configured decode limits across stream consumers"
+ReleaseNotesUrl: https://github.com/pdfcpu/pdfcpu/releases/tag/v0.16.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

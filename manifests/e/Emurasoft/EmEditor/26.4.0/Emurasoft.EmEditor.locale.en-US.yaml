@@ -1,0 +1,71 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Emurasoft.EmEditor
+PackageVersion: 26.4.0
+PackageLocale: en-US
+Publisher: Emurasoft, Inc.
+PublisherUrl: https://www.emeditor.com/
+PublisherSupportUrl: https://www.emeditor.com/support/
+PrivacyUrl: https://www.emeditor.com/about/privacy-policy/
+Author: Emurasoft, Inc.
+PackageName: EmEditor
+PackageUrl: https://www.emeditor.com/
+License: Proprietary
+LicenseUrl: https://www.emeditor.com/about/eula/
+Copyright: Copyright © 1997-2026 by Emurasoft, Inc.
+CopyrightUrl: https://www.emeditor.com/about/eula/
+ShortDescription: A fast, lightweight, yet extensible, easy-to-use text editor, code editor, CSV editor, and large file viewer for Windows.
+Moniker: emeditor
+Tags:
+- code
+- coding
+- editing
+- editor
+ReleaseNotes: |-
+  Today, we released EmEditor v26.4.
+  1. Edit Huge Files in Fast View Mode
+  In v26.3, we introduced Fast View mode, which opens a huge file almost instantly without loading the whole file into memory. Fast View mode was read-only, so to edit a huge file, you still had to switch to the normal mode and wait for the whole file to load.
+  In this version, Fast View mode supports editing. You can edit a huge file without loading it into memory: you can type, paste, Undo and Redo, Replace All, use multiple selections, and run most commands on the Insert, Convert, and Sort menus. The original file does not change until you save it.
+  1-1. Merge the Edits, or Save Only the Changes
+  When you save a huge file in Fast View mode, you can choose how to save it:
+  - Save and merge writes the edits into the file.
+  - Save only the changes to a diff file leaves the original file untouched and saves your edits in a separate diff file. The next time you open the file, EmEditor loads the diff file and restores your edits.
+  The diff file also keeps the positions of the lines, so the file opens instantly the next time. You can save, load, and discard diff files with the new Save Diff, Load Diff, and Discard Diff commands (File > Diff submenu of the All Commands menu).
+  1-2. CSV Editing, Workspaces, and the FAST Indicator
+  - Fast View mode now supports the CSV commands that change the document, including cell editing, Split Column, Combine Columns, Combine Lines, Hide Quotes Temporarily, Hide/Unhide Columns, Reset Column Width, and Align Left/Center/Right (Pro version only).
+  - Fast View documents are now included in workspaces, including their unsaved edits.
+  - The new FAST indicator on the status bar and a lightning bolt icon on the document tab show that a document is in Fast View mode. Double-click the indicator to switch between the normal mode and Fast View mode.
+  We also added the Fast View page to the Customize dialog box. The Minimum file size to enable Fast View mode setting has moved to this page from the Advanced page, and you can choose whether to prompt when saving a huge file, whether to save only the changes to a diff file, and whether to save the line positions of huge files. The page also lists the diff files so you can delete them.
+  1-3. Macros and Plug-ins
+  Most properties and methods of the Document and Selection objects that change the document can now be used in Fast View mode, and we added the GetFastViewDiffPath method to the Editor object. For plug-in developers, most messages that change the document can now be used in Fast View mode, and we added the EI_GET_FAST_VIEW_DIFF_PATH parameter to the EE_INFO message and new command IDs for the diff commands and the Customize Fast View command.
+  1-4. Command Line Options
+  We added the /fast and /tail command line options. /fast opens a file in Fast View mode even if the file is smaller than the Minimum file size to enable Fast View mode, and /tail opens a file in Fast View mode and displays the end of the file immediately. /tail is equivalent to /fast /l -1, and we believe it is useful for quickly viewing the last part of a very large file, such as a log file. If you select Auto-Reload from the Changed by another program drop-down list on the File page of the configuration properties, the file is reloaded automatically whenever another program changes it, and EmEditor scrolls to the end of the file, which is useful for monitoring a log file that is still being written.
+  2. Faster
+  EmEditor starts faster in this version, and many operations on huge files are also much faster, especially in Fast View mode. In our tests, the main window was ready 1.93 times faster than in v26.3. With a 48 GB file on a PC with 16 GB of memory, Replace All became about 5 times faster and saving the file about 13 times faster, and opening the file the second time took only 0.02 seconds thanks to the line positions saved in the diff file. Sort and Delete Duplicate Lines in the normal mode also became about 6 times and 3 times faster.
+  3.  31% Smaller Files
+  In this version, we reviewed the code and the libraries of EmEditor and its plug-ins and made almost every EXE and DLL file smaller. We measured the speed before and after each change and kept only the changes that did not slow EmEditor down in our tests. EmEditor.exe is 57% smaller, and the plug-ins are about 50% to 75% smaller. pcre.dll, zlib1.dll, vccorlib140.dll, and msvcp140.dll are no longer installed. In total, the EXE and DLL files are 31% smaller (69,962 KB to 48,431 KB in the portable version). Smaller files load faster, which also contributes to the faster startup.
+  4. Other Improvements
+  - The Start window now supports the App theme and Very dark themes.
+  - Macros are now saved as UTF-8 with a signature (BOM) instead of UTF-16.
+  - Synchronization with a sync folder is now faster and more reliable: EmEditor no longer sends settings that did not change, no longer overwrites newer settings that another computer sent, and does not wait when the folder cannot be reached. Synchronizing settings through a Microsoft account is no longer available, because Windows 11 no longer syncs the roaming folder of Store apps between computers. If you used it, please use a sync folder instead.
+  - Workspaces are now saved and loaded more safely. A failed save no longer destroys the previous workspace, a broken workspace or a workspace saved by a newer version is no longer cleared, and a workspace with more than one window is now saved correctly.
+  - We added the emeditor /register and emeditor /unregister command-line options for per-machine registration, which lets all users of the same PC use the same license (Pro version only). The Registration Information dialog box now displays the email address of a per-machine registration.
+  - The Chat with AI bar now opens on the left side by default.
+  - Store and MSIX versions: EmEditor now offers to remove the file associations left by an uninstalled MSI version, which prevented Windows from opening those files with EmEditor.
+  - We fixed several problems, including a crash with multiple selections whose carets are out of order, a crash when displaying a line with a very large number of combining characters, and an empty line lost by Sort and Delete Duplicate Lines after a line that ends with CR alone.
+  5. Security Update
+  This version addresses the eMudhra Intermediate CA Compromise, a critical security issue. Node.js, which is bundled for the Language Server Protocol feature, was affected, so we updated it to v26.12.1. We scanned the EmEditor source code and found no other affected area: EmEditor uses the Windows CA certificates, and the WebPreview and ChatAI plug-ins use the Microsoft Edge installed on your PC. We recommend keeping Windows and your web browser up to date.
+  We hope you will be satisfied with both the Pro and Free versions. If you have any questions, feature requests, or ideas, please contact us.
+  Thank you for your continued support of EmEditor.
+  — Yutaka Emura
+  For more details, including the main changes and screenshots, please see “New in Version 26.4”.
+  If you use the legacy MSI installer, select Help > Check for Updates to update EmEditor. If the update does not complete successfully, please download the latest version and run the installer manually. If you download the MSI installer directly, please verify that its digital signature is issued by Emurasoft, Inc.
+  The Microsoft Store version is expected to be available within the next few days. We recommend using the Microsoft Store version or the new MSIX installer. The Update Checker of the legacy MSI version is retired after March 31, 2027 (UTC). After that date, EmEditor no longer checks for updates, and Check for Updates is unavailable. For more information, see FAQ: Store Version and New Installer (MSIX).
+  If we release minor updates (v26.4.x) in the future, this blog post may be updated to include those changes.
+ReleaseNotesUrl: https://www.emeditor.com/emeditor-core/emeditor-v26-4-released-edit-huge-files-in-fast-view-mode-faster-startup-and-31-smaller-files/
+Documentations:
+- DocumentLabel: Manual
+  DocumentUrl: https://github.com/Emurasoft/emurasoft.github.io/releases/latest/download/emeditor.pdf
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

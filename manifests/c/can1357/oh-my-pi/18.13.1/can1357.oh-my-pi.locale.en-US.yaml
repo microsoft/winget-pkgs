@@ -1,0 +1,84 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.13.1
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-agent-core
+  Added
+  - Hosts can distinguish safely paused agents from turns still draining with Agent.isPaused (#17073 by @anatoli-tsinovoy).
+  @oh-my-pi/pi-ai
+  Fixed
+  - Codex accounts whose spend cap is used up are no longer picked through credit overage or from usage cached before the upgrade (#16973 by @DusKing1)
+  - Fixed Codex capacity 429s (turn_rate_limit_exceeded, "Codex is at capacity") reporting "Try again in ~N min" from the plan's usage-window reset, which made retries wait hours instead of the response's Retry-After (#17087 by @H4vC)
+  @oh-my-pi/pi-catalog
+  Added
+  - Added GPT-6.1 Terra: openai/gpt-6.1-terra ships bundled ($1/$5, $0.05 cached, >272K long-context tier, 1.05M window), and Codex-discovered gpt-6.1-terra/-wm get API-equivalent pricing, the 922K extended-context maximum, and routing to Plus-or-higher accounts.
+  - Added Kimi K3.1 Pro and K3.1 Pro Highspeed support on Kimi Code (k3.1-pro, k3.1-pro-highspeed) and the Moonshot API (kimi-k3.1-pro, kimi-k3.1-pro-highspeed): official pricing ($2/$10 and $4/$20 per MTok), a 131K output cap, and K3's reasoning and wire contract (#16901 by @eggpeat)
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added tools.restrictedFolders: every action on a listed folder (the folder and everything below it) asks for an explicit Approve/Deny in every approval mode, yolo included, and no remembered grant, session approval, or ACP "Always allow" covers it; recursive searches rooted above a restricted folder ask too, commands are matched by the directory they run in, and a deny policy still denies (#16049 by @Peribunt)
+  - /pause shows draining turns and running jobs across the main agent's subagent tree, without waiting on finished turns, safely parked agents, or suspended advisor reviews (#17073 by @anatoli-tsinovoy).
+  Changed
+  - Reduced redraws during background subagent progress while keeping elapsed previews and native checklists current (#17131 by @iliaal, based on #16647 by @Komzpa).
+  - Restoring a session with many subagents refreshes the running-subagent badge and lists once per burst instead of once per agent (#16642 by @Komzpa)
+  - ask answers now name the option a note is on (m: [X, Y] (note on Y: …), User added note on Y: …) (#17126 by @H4vC)
+  Fixed
+  - Fixed advisors dropping their review and showing a rate-limit error when the provider returns a timed 429 such as Codex's turn_rate_limit_exceeded; the advisor now waits out the Retry-After (within retry.maxDelayMs) and retries like the main agent (#17087 by @H4vC)
+  - Fixed a hashline PUT being refused with "would hold one more copy of line N … than the range did" when its body restates the line next to the range, fills the range, and adds a new line equal to that neighbour (a second @property or #[test], or a break; above a new case); it applies again, dropping only the restated line (#17028)
+  - Fixed task subagents receiving AGENTS.md files, including the user-level ~/.omp/agent/AGENTS.md, when the session has additional workspace roots (--add-dir, /add-dir, workspace.additionalDirectories)
+  - Fixed an ask note added right after picking an answer landing on the next question's answer, in Tern and the TUI; Note now goes to the answer just picked until the next question gets other input (#17126 by @H4vC)
+  @oh-my-pi/pi-tui
+  Added
+  - ANSI and TSP /pause screens show unsettled turns and jobs, hide settled counters, and preserve counts and resume controls on short terminals (#17073 by @anatoli-tsinovoy).
+  - Added noteOption to ExtensionAskDialogResultItem and QuestionResult: the label of the option an ask note is on (unset for a note on the custom answer) (#17126 by @H4vC)
+  Changed
+  - StatusLineComponent.setRunningSubagents() and setSubagentTreeCost() now report whether their state changed, allowing callers to skip redundant redraws (#17131 by @iliaal).
+  Fixed
+  - Fixed the ask dialog's Note (button or n) right after a pick moved to the next question annotating that question's highlighted row instead of the answer just picked (#17126 by @H4vC)
+  - Fixed the ask dialog's Next button reopening the custom-answer editor after Other was cancelled instead of moving on to the next question or Review tab
+  @oh-my-pi/pi-utils
+  Added
+  - Added an optional maxFractionDigits to formatNumber() that caps decimals on values below 1,000 (#16973 by @DusKing1)
+  What's Changed
+  - fix(ai): report Codex spend-cap credits for credit-billed workspace seats by @DusKing1 in https://github.com/can1357/oh-my-pi/pull/16973
+  - fix(advisor): wait out timed Codex capacity 429s instead of dropping reviews by @H4vC in https://github.com/can1357/oh-my-pi/pull/17087
+  - feat: show live pause settlement status in TUI and Tern by @anatoli-tsinovoy in https://github.com/can1357/oh-my-pi/pull/17073
+  - fix(ask): keep a note on the answer just picked and name the noted option by @H4vC in https://github.com/can1357/oh-my-pi/pull/17126
+  - perf(tui): coalesce running-subagent badge refreshes on registry bursts by @Komzpa in https://github.com/can1357/oh-my-pi/pull/16642
+  - perf(tui): skip redundant subagent redraws without stale previews by @iliaal in https://github.com/can1357/oh-my-pi/pull/17131
+  - feat(catalog): add Kimi K3.1 Pro pricing and K3 contract on Kimi Code and Moonshot by @eggpeat in https://github.com/can1357/oh-my-pi/pull/16901
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.13.0...v18.13.1
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.13.1
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
