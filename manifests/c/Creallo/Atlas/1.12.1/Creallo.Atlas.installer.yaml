@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.6.0.schema.json
+PackageIdentifier: Creallo.Atlas
+PackageVersion: 1.12.1
+
+# Inno Setup 이다(release/windows/creallo.iss). winget 은 형식을 알면 조용히 깔 때
+# 쓰는 스위치를 스스로 넣으므로 InstallerSwitches 를 적지 않는다.
+InstallerType: inno
+
+# **사용자 범위다.** iss 가 PrivilegesRequired=lowest 로 {localappdata}\Programs 에
+# 깐다. machine 으로 적으면 winget 이 관리자 권한을 요구하고, 그러면 설치 위치와
+# 어긋나 업그레이드 판정이 깨진다.
+Scope: user
+
+# Inno 는 제거 항목을 AppId 뒤에 `_is1` 을 붙여 등록한다. 이 값이 있어야 winget 이
+# **이미 깔린 판을 알아본다** - 없으면 upgrade 가 늘 새 설치처럼 돈다.
+# AppId 는 iss 의 것과 같아야 한다(바꾸면 안 되는 식별자다).
+ProductCode: '{33EEFC85-5D76-43B8-ACB3-00698B59A662}_is1'
+
+# **앱이 스스로 갱신한다.** brew cask 의 auto_updates 와 같은 사정인데 winget 에는
+# 그 표시가 없다. 그래서 winget 이 아는 판과 실제로 깔린 판이 벌어질 수 있고,
+# `winget upgrade` 가 이미 최신인 앱을 다시 깔려 할 수 있다. UpgradeBehavior 를
+# install 로 두어 그때도 제 자리에 덮어쓰게 한다(uninstallPrevious 로 두면 설정이
+# 남아 있는 폴더를 지우고 다시 깐다).
+UpgradeBehavior: install
+
+InstallModes:
+  - interactive
+  - silent
+  - silentWithProgress
+
+ReleaseDate: 2026-10-19
+
+Installers:
+  # arm64 는 내지 않는다. 윈도우 빌드는 x64 하나뿐이다(맥이 arm64 하나뿐인 것과 반대).
+  - Architecture: x64
+    InstallerUrl: https://atlas.creallo.com/download/atlas/win/1.12.1
+    InstallerSha256: CF2E3C2FEE1350D54BE943A099B8CB7217389C7BA9B7554ED0271E6155B25EEC
+
+ManifestType: installer
+ManifestVersion: 1.6.0
