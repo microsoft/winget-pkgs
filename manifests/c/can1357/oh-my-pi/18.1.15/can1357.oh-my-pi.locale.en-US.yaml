@@ -1,0 +1,93 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.1.15
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Fixed
+  - GitHub Copilot sign-in keeps the GitHub-owned Copilot CLI OAuth app on Enterprise domains: private instances run their own OAuth registry and reject the github.com-registered OpenCode client, which is now used only for public github.com sign-ins (#11285 by @H4vC)
+  - GitHub Copilot sign-in uses the minimal-grant OpenCode OAuth app again (read:user only): GitHub renders each app's existing per-user grant on the consent page, so Enterprise organizations that block the Copilot CLI app's broad historic grant can log in as on 18.1.4. API request identity still mimics the Copilot CLI, and tokens minted by either app keep working (#11280 by @H4vC).
+  - GitHub Copilot plan/model-policy 403s no longer count as credential failures for credential-lifetime decisions: the token is valid, so stored credentials are preserved instead of wiped (#11280 by @H4vC).
+  - Fixed custom google-generative-ai providers failing mid-turn model fallback when Gemini 3 tool calls are replayed without their original thought signature (#11270).
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added advisor.maxNotesPerUpdate setting and WATCHDOG.yml configuration (default 4): allows reasoning verifiers to batch findings in a single review update without being rate-limited.
+  - Headless browser tabs now freeze when a turn settles so idle animated/WebGL pages stop burning CPU/GPU, resuming automatically on next use; tabs idle past browser.idleCloseSec (default 30 minutes) are closed. persist: true on browser.open opts a tab out of both (#8246 by @H4vC).
+  Changed
+  - When enabled (task.showResolvedModelBadge), subagent model badges show the thinking-level icon, model name, and attached-advisor eye before the agent name in task, eval, job, and HUD rows.
+  Fixed
+  - Task descriptions containing tabs no longer misalign or overflow task rows; tabs are expanded before measuring and rendering.
+  - GitHub Copilot model-policy 403s (plan, model policy, org restriction) no longer delete stored credentials, so the provider stays listed in /model after a per-model access denial instead of disappearing until the next /login (#11280 by @H4vC).
+  - Bash results no longer replace a failing command's output with the shell minimizer's lossy summary when the original capture cannot be persisted as an artifact; the raw diagnostics are kept so a failure stays actionable (#11081).
+  - Fixed worker subprocesses failing to declare themselves as worker hosts before dispatching selectors, which prevented nested thread worker spawns during /usage stats sync on multi-core systems.
+  - Fixed /usage displaying a misleading generic database read failure when activity loading fails; the error detail is now sanitized, collapsed to a single line with shortened paths, and surfaced in the dashboard.
+  - Advisor notes now report rate limiting accurately, blockers always interrupt even after a lower-severity note in the same update, and deferred notes flush when the primary run completes, including after advisor quota exhaustion (#11062).
+  - Fixed the built-in clangd registration omitting CUDA source and header files (.cu and .cuh) (#10782 by @alphastorm).
+  - Fixed ast_grep skipping CUDA headers and ignoring an explicit lang override for ambiguous file extensions (#10782 by @alphastorm).
+  - Python cells are no longer replayed automatically after a kernel crash, preventing duplicate side effects; the next call starts a fresh kernel.
+  - Session rewrites preserve open-reader snapshots and replacement identity when a rename needs an EPERM fallback.
+  - Fixed WorkPool children retaining a stale Gemini-formatted yield declaration when pooled items were installed or cleared.
+  @oh-my-pi/pi-natives
+  Fixed
+  - Fixed C++ language inference excluding CUDA header (.cuh) files (#10782 by @alphastorm).
+  @oh-my-pi/pi-tui
+  Fixed
+  - Stopped long flicker when moving or resizing an omp pane in Warp. Resize repaints in place there after the drag settles (override with PI_TUI_RESIZE_IN_PLACE=0), with no alternate-screen borrow, no scrollback replay, blanked live rows so shrink drags cannot archive unfinished rows, and overlay toggle echoes repainting the modal instead of probing (#11247 by @H4vC).
+  What's Changed
+  - fix(cli, usage): declare worker host entry before worker selector dispatch and surface activity error by @keethesh in https://github.com/can1357/oh-my-pi/pull/11201
+  - feat(advisor): add configurable advice budget per update (default 4) by @korri123 in https://github.com/can1357/oh-my-pi/pull/11066
+  - refactor: stop importing nixpkgs by @n3oney in https://github.com/can1357/oh-my-pi/pull/11170
+  - fix(session): preserve replacement identity after rename denial by @iliaal in https://github.com/can1357/oh-my-pi/pull/11224
+  - fix(eval): avoid replaying cells after kernel failure by @iliaal in https://github.com/can1357/oh-my-pi/pull/11225
+  - feat(browser): freeze idle headless tabs at turn settle with idle-clo… by @H4vC in https://github.com/can1357/oh-my-pi/pull/11220
+  - Fix/cuda cuh review nits by @H4vC in https://github.com/can1357/oh-my-pi/pull/11251
+  - docs(notebook): point runtime links at the native edit implementation by @oleg494 in https://github.com/can1357/oh-my-pi/pull/11253
+  - fix(bash): keep raw diagnostics when a minimized failure cannot be persisted by @oleg494 in https://github.com/can1357/oh-my-pi/pull/11259
+  - fix(tui): skip resize alt-buffer borrow on Warp by @H4vC in https://github.com/can1357/oh-my-pi/pull/11247
+  - fix(catalog): applied gemini wire policy to custom providers by @roboomp in https://github.com/can1357/oh-my-pi/pull/11274
+  - fix(copilot): minimal-grant OAuth app and preserve creds on 403 by @H4vC in https://github.com/can1357/oh-my-pi/pull/11280
+  - fix(coding-agent): match finalized tool args in ttsr by @roboomp in https://github.com/can1357/oh-my-pi/pull/10912
+  - fix(copilot): keep official OAuth client for enterprise domains by @H4vC in https://github.com/can1357/oh-my-pi/pull/11285
+  - feat(coding-agent): clarify subagent model badges by @Unravl in https://github.com/can1357/oh-my-pi/pull/11161
+  - fix(coding-agent): expand tabs in task descriptions before render by @H4vC in https://github.com/can1357/oh-my-pi/pull/11292
+  - fix(coding-agent): refresh WorkPool yield prompts by @alphastorm in https://github.com/can1357/oh-my-pi/pull/10784
+  New Contributors
+  - @keethesh made their first contribution in https://github.com/can1357/oh-my-pi/pull/11201
+  - @n3oney made their first contribution in https://github.com/can1357/oh-my-pi/pull/11170
+  - @iliaal made their first contribution in https://github.com/can1357/oh-my-pi/pull/11224
+  - @oleg494 made their first contribution in https://github.com/can1357/oh-my-pi/pull/11253
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.1.14...v18.1.15
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.1.15
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

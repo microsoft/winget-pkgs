@@ -14,6 +14,7 @@ on:
   pull_request_target:
     types: [labeled]
   roles: [admin, maintainer, write]
+  bots: ["wingetvalidator-prod[bot]"]
 # Label gate: only act when THIS event applied the Validation-Missing-Dependency label.
 if: github.event.label.name == 'Validation-Missing-Dependency'
 # We do not need the PR's code; skip checkout to avoid touching untrusted fork content.
@@ -174,6 +175,35 @@ pre-agent-steps:
         } finally {
           writeOutput();
         }
+  - name: Skip agent when validation evidence is unavailable
+    uses: actions/github-script@v9
+    env:
+      GH_AW_SAFE_OUTPUTS: ${{ steps.set-runtime-paths.outputs.GH_AW_SAFE_OUTPUTS }}
+    with:
+      script: |
+        const fs = require("fs");
+        const path = require("path");
+        const evidence = JSON.parse(
+          fs.readFileSync("/tmp/gh-aw/validation-checks.json", "utf8"),
+        );
+        if (evidence.available !== true) {
+          const safeOutputsPath =
+            String(process.env.GH_AW_SAFE_OUTPUTS ?? "").trim() ||
+            path.join(
+              process.env.RUNNER_TEMP || "/tmp",
+              "gh-aw",
+              "safeoutputs",
+              "outputs.jsonl",
+            );
+          fs.mkdirSync(path.dirname(safeOutputsPath), { recursive: true });
+          fs.appendFileSync(
+            safeOutputsPath,
+            `${JSON.stringify({
+              type: "noop",
+              message: "No trusted missing-dependency evidence is available.",
+            })}\n`,
+          );
+        }
 engine: copilot
 # Mirrors winget-cli duplicate-surfacing: default engine model (claude-sonnet-4.6).
 # To use Opus, set repo variable GH_AW_MODEL_AGENT_COPILOT, or here: engine: { id: copilot, model: opus }
@@ -198,6 +228,8 @@ safe-outputs:
     footer: "###### Template: msftbot/authorAssist/missingDependency by [{workflow_name}]({run_url})"
   threat-detection: true
   report-failure-as-issue: false
+  report-incomplete:
+    create-issue: false
   noop:
     report-as-issue: false
   add-comment:

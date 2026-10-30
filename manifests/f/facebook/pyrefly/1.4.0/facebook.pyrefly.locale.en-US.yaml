@@ -1,0 +1,164 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: facebook.pyrefly
+PackageVersion: 1.4.0
+PackageLocale: en-US
+Publisher: Meta
+PublisherUrl: https://github.com/facebook
+PublisherSupportUrl: https://github.com/facebook/pyrefly/issues
+PackageName: Pyrefly
+PackageUrl: https://github.com/facebook/pyrefly
+License: MIT
+LicenseUrl: https://github.com/facebook/pyrefly/blob/main/LICENSE
+Copyright: Copyright (c) Meta Platforms, Inc. and affiliates.
+CopyrightUrl: https://github.com/facebook/pyrefly/blob/main/LICENSE
+ShortDescription: A fast type checker and language server for Python
+Description: |
+  Pyrefly is a type checker and language server for Python, which provides lightning-fast type checking along with IDE features such as code navigation, semantic highlighting, and code completion. It is available as a command-line tool and an extension for popular IDEs and editors such as VSCode, Neovim, Zed, and more.
+Tags:
+- code-quality
+- contributions-welcome
+- good-first-issue
+- hacktoberfest
+- ide
+- language-server
+- lsp
+- python
+- rust
+- type-check
+- type-checker
+- typecheck
+- typechecker
+- types
+- typing
+ReleaseNotes: |-
+  *Release date：October 14, 2026*
+
+  Pyrefly v1.4.0 bundles **1191 commits** from **66 contributors**.
+
+  ---
+
+  ## Release Highlights
+
+  ### Language Server
+
+  • **The VS Code extension now runs the Pyrefly from your environment.** By default, the extension launches the Pyrefly installed in your active Python environment (for example, your project's `.venv`), so your editor and your command line use the same version. If the environment has no Pyrefly, the extension falls back to its bundled binary. Set `pyrefly.pyreflyExecutable` to `bundled` to keep the old behavior. See [Pyrefly binary selection](https://pyrefly.org/en/docs/IDE/#pyrefly-binary-selection).
+
+  ### Configuration & CLI
+
+  • **uv workspace members are now type checked.** In a uv workspace, the interpreter puts each member's source directory on `sys.path` as an editable install. Pyrefly treated those directories as installed packages and skipped them, so errors in workspace members went unreported. Pyrefly now checks editable sources inside your project, while regular `site-packages` stay excluded.
+
+  ### Type Checking
+
+  • **Easier migration from BasedPyright.** Pyrefly reads `basedpyright` sections in `pyproject.toml` and applies the matching type checking mode preset.
+  • **New opt-in checks for untyped code.** New error kinds such as `unknown-member-type`, `unknown-return-type`, `untyped-function-decorator`, and `uninitialized-instance-variable` help you find where `Any` enters your code.
+
+  ### Tensor Shapes
+
+  • **JAX shape stubs on PyPI.** This is the first stable release that ships JAX shape stubs as the `jax-pyrefly-stubs` package.
+
+  ---
+
+  ## ⚠️ Behavior Changes
+
+  These may change your editor setup or surface new errors in code that checked cleanly under v1.3.0.
+
+  • The VS Code extension now uses the Pyrefly in your active environment by default instead of its bundled binary. If your environment pins an older Pyrefly, the editor now runs that version. The **Pyrefly language server** output channel shows which binary was chosen and why.
+  • Pyrefly now checks the source of uv workspace members (editable installs inside your project). Errors in those packages that were hidden before can now appear.
+  • `--typeshed-path` now replaces the bundled typeshed entirely instead of overlaying it.
+  • The `incompatible-overload-residual` error kind is renamed to `incompatible-overload-argument`. The old name still works as a deprecated alias.
+  • `site-package-path` is renamed to `site-packages-path`. The old name still works.
+
+  ---
+
+  ## ✨ New & Improved
+
+  ### Type Checking
+
+  • Pyrefly now recognizes `basedpyright` configuration sections in `pyproject.toml` and applies appropriate type checking mode presets, making it easier to migrate from BasedPyright.
+  • TypedDict handling has been significantly improved：generic `extra_items` are now instantiated correctly, extra items can supply missing arguments, and `definitely_seen` calculation in callable checking has been fixed.
+  • TypeVar restriction checking is now enforced even when the expected type is gradual, preventing silent violations of TypeVar bounds and constraints when `Any` appears in the expected type.
+  • Improved handling of overloaded function arguments in generic function calls through a new overload table mechanism, replacing the previous residual-based approach. The `incompatible-overload-residual` error kind has been renamed to `incompatible-overload-argument` (the old name remains as a deprecated alias).
+  • Variance inference has been improved with fixes for nested variance reliability bugs and explicit stored variance evidence.
+  • Property decorator validation now reports invalid signatures with extra required parameters.
+  • Added opt-in `uninitialized-instance-variable` check for annotated instance attributes never assigned in `__init__` or class body, including `@dataclass(init=False)` fields.
+  • Improved higher-order function call handling with quantified finalization and better overload branch capture.
+  • `functools.partial` now uses standard quantified finalization and handles generic overload targets.
+  • Improved ParamSpec variance in generic comparisons and handling of generic callable residuals.
+  • Added support for propagating divergence through compound statements to detect unreachable code after `if`/`else` blocks where all paths diverge.
+  • Added support for evaluating `sys.version_info` comparisons against tuples with release levels like `(3, 14, 0, "beta")`.
+
+  ### Type Checking Fixes
+
+  • Overload evaluation now forces per-overload argument types before rolling back variables, so variables are no longer pinned by accident.
+  • Overload evaluation step 5 (argument materialization) now runs for implicit descriptor `__get__` calls.
+  • Invalid `type(...)` calls in annotations now suggest valid type forms like `types.NotImplementedType`, `types.EllipsisType`, `None`, `types.ModuleType`, or `type[MyClass]`.
+  • Invalid function calls in return annotations now produce clearer error messages.
+  • Unknown unions in class bases now accept valid known classes while recording dynamic bases.
+  • Conditionally imported base classes now keep the known class while recording a dynamic base.
+  • Tuple constructor type variables no longer leak when the constructor is passed as a higher-order factory callable.
+  • Overloaded constructors no longer leak type parameters through gradual arguments.
+  • Version-gated returns now preserve configured reachability.
+  • Environment-dependent branch tests (like `TYPE_CHECKING = False`) no longer report their suites as unreachable.
+  • Descriptor setter override checking now checks every overload.
+  • Module resolution now honors first-match-wins between single-file modules and packages in later roots.
+  • `Never` containers (`list[Never]`, `dict[Never, Never]`, etc.) are now recognized as falsy.
+  • Unpacking an overloaded tuple now combines branches position by position.
+  • Assigning to an overloaded type now succeeds when the value fits any branch.
+  • Facet narrowing now narrows overloaded values by ruling out branches.
+  • Attribute access and subset checks on overloaded types are more accurate.
+  • Overload selection now ignores type variables that appear only in the return type.
+  • Overloads that violate TypeVar restrictions under a gradual expected type are now rejected.
+  • Return type variables of overloaded protocol methods in invariant classes are now handled correctly.
+  • Union type arguments in indirect diamond inheritance are now compared without regard to member order.
+  • `max`/`min` calls with `key=` and `default=` no longer report argument errors from rejected union hint members.
+  • Attribute facets are now rebased correctly when the base type is replaced.
+  • `Annotated` metadata is no longer type checked, which removes spurious errors.
+  • Methods typed as a union with `Any`, or whose decorator returns `T | Any`, now bind correctly.
+  • A custom `__new__` inherited from an intermediate NamedTuple subclass is now handled correctly.
+  • Identity and membership tests with an `Any` operand now infer `bool`.
+  • Soft errors no longer drive constructor, default, and decorator checks.
+  • A `python-version` below 3.5 is now rejected with an error instead of crashing.
+
+  ### Language Server
+
+  • The VS Code extension now launches the Pyrefly installed in your active Python environment by default, and falls back to the bundled binary. A new `pyrefly.pyreflyExecutable` setting (`from-environment` or `bundled`) controls this. Selecting a different interpreter restarts the server with the new binary when it changes.
+  • Pyrefly now watches explicit `configPath` settings and reloads configuration when those files change.
+  • Hover now prefers interface (`.pyi`) docstrings over implementation (`.py`) docstrings when both exist.
+  • Go-to-definition for standard library symbols now searches the interpreter's stdlib for `.py` files.
+  • Go-to-definition now prefers stub definitions over unresolved `__all__` entries and handles re-export cycles.
+  • Go-to-definition now works for TypedDict subscript keys.
+  • LSP rename now includes attribute assignments and deletions across files.
+  • Added LSP quick-fix code action for removing unused ignores.
+  • Added LSP registration for `workspace/didChangeConfiguration` on `python` section.
+  • Fixed language server to answer startup requests with workspace settings instead of defaults.
+  • Fixed language server deadlock when configuration response triggers file watcher registration.
+  • Added TSP `pyrefly/typeFacts` request for batch type queries.
+  • Fixed TSP `--config` to pin config for every file.
+  • Added code action videos to IDE features documentation.
+  • Fixed attribute definition index recording for assignment and deletion targets in rename.
+  • Added object attributes to LSP attribute completion, ranked after class attributes.
+  • `Callable` class attributes now bind `self` when first parameter is the containing class.
+
+  ### Polars Support
+
+  • `select` and `with_columns` now handle both positional and keyword arguments correctly, preserving schema information.
+  • Added validation for Polars conditional predicates, duplicate `with_columns` outputs, and sole-argument list expansion rules.
+  • Improved Polars column-width tracking with `OutputCount` enum to distinguish provable width from unknown width.
+  • Added support for Polars `pl.col.` attribute completion, suggesting columns from the enclosing DataFrame operation.
+  • Added validation for column names in Polars `filter`, `sort`, `unique`, and `drop_nulls` methods.
+
+  ### Django Support
+
+  • `QuerySet.annotate()` now preserves keyword annotation attributes on result rows for attribute lookup and LSP completion.
+  • Fixed Django relation `to=` keyword argument resolution.
+  • Fixed Django `ForeignKey` keyword-form `to=` resolution.
+
+  ### Configuration & CLI
+
+  • uv workspace members (editable installs inside the project) are now checked instead of being excluded as site packages ([#2667](https://github.com/facebook/pyrefly/issues/2667)).
+  • Added `pyrefly completion` command to generate shell complet
+ReleaseNotesUrl: https://github.com/facebook/pyrefly/releases/tag/1.4.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

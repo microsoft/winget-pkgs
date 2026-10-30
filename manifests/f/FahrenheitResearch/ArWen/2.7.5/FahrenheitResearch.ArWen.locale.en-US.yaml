@@ -1,0 +1,54 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.ArWen
+PackageVersion: 2.7.5
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/arwen/issues
+Author: Fahrenheit Research
+PackageName: ArWen
+PackageUrl: https://github.com/FahrenheitResearch/arwen
+License: Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+Copyright: Copyright © Fahrenheit Research
+CopyrightUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+ShortDescription: 'ArWen: GPU-native WRF-ARW-class regional weather model, verified against WRF v4.6.1'
+Description: "ArWen is an independent, GPU-native implementation of a WRF-ARW-class regional atmospheric model. It is not affiliated with or endorsed by NCAR or UCAR. The name is a wordmark for \"the ARW solver, GPU-native\"; the Python package is currently named gpuwm. Safety. ArWen is a research and educational tool. It is never a substitute for official forecasts and warnings from your national meteorological service. Do not use it to make safety decisions. Regional numerical weather prediction at convective scale has mostly required institutional clusters, which means most of the world runs on global-model guidance at 10-25 km. ArWen's aim is to put a verified, kilometer-scale limited-area model on a single consumer GPU: pick a point, size a nest ladder to your card, pull public analysis data, and run a 1 km (or 500 m) simulation of your own area on hardware you own -- especially in places where no national convection-permitting model exists."
+Moniker: arwen
+ReleaseNotes: |-
+  ArWen 2.7.5 is a feature release with Desktop 1.0.5.
+  - Windows desktop: extract and open ArWen.exe. Setup installs and checks the matching runtime, tables and geography.
+  - Linux desktop: follow the included installation guide. The graphical application requires x86-64 Linux with glibc 2.39 or newer.
+  - Integration kit, desktop source, verification records, and checksums.
+  New:
+  - ICON global forcing. --source icon-global runs DWD's 13 km global ICON like any other source, from gpuwm domain, fetch, prep and go: eighteen pressure levels, surface and near-surface state, the TERRA soil column, sea ice and snow, three-hourly to f180 from the 00 and 12 UTC cycles and to f120 from 06 and 18 UTC. The icosahedral remapper gdt101_remap joins the bridge bundle and reads any source on WMO grid template 101, so a new producer on that grid is a table row rather than new code. Data: Deutscher Wetterdienst, CC BY 4.0.
+  - Local DA scores itself. Every local DA run grades its own forecast against the MRMS composite with no flag: neighbourhood FSS at 15, 30, 45 and 60 minutes, at 20, 30 and 40 dBZ, beside the radar persistence baseline and the difference, in nowcast-score.json beside each window. A lead whose valid time has not arrived stays pending with its reason instead of a zero, and gpuwm local-da --score PLAN fills it in later.
+  - gpuwm local-da --continuous WINDOWS cycles a regional analysis window after window: each window restarts from the last analysis, assimilates its observations, runs the short forecast and renders it. --status says where it is, --stop is durable, --launch resumes the saved plan, and boundary forcing renews itself from the same source cycle when a window runs past it.
+  - Cyclone quick forecasts start at any lead of the cycle (gpuwm cyclone-setup --start-hour), so a storm that exists only late in a run can be forecast, and --nest-budget-gib grows the following nest to the largest size that fits the memory named, so a large card runs a large nest. A budget the preset's own nest does not fit inside is refused, and the refusal says whether the budget or the card is the bound. The desktop's quick forecast form carries both choices and shows the nest the door chose.
+  - Offline downscaling changes the child's microphysics scheme the way live nesting does, for the initial state and every boundary frame, for every ported scheme. A nest edge that changes scheme runs off a streamed parent, and two way feedback runs across it. Both are on by default.
+  - gpuwm enprod files its panels in the same product tree as every other product, on both render engines, with a render summary. --domain dNN works on the rust engine, --dpi 300 renders 2400x1800, and --field takes any field the engine lists. The terminal plot catalog says, per preset, which products this install will not draw and why.
+  - Remote runs retrieve their whole committed output set and resume if interrupted (gpuwm remote sync-outputs), print what the node's renderer serves (remote list-products), name the card they use (--device), and answer a retried launch with the job already created instead of a second forecast on the same card. remote status says which route a job planned and names what could not start or be read.
+  - Faster on an RTX 5070 Ti: MYNN at its measured optimum column chunk (GPUWM_MYNN_COLUMN_CHUNK overrides it), the shortwave chain keeping its workspace instead of rebuilding it, and the RUC land surface reading a whole call's inputs in one device transfer instead of 568. A 1,500 step nested pair went from 2,877 s to 2,390 s with every history frame byte identical.
+  - Forecast receipts split GPU memory into this process, other processes and the card, with the seconds a co-tenant was present, so a run that grew is told from a card that filled up underneath it.
+  Fixed:
+  - The manylinux wheel's bridge binaries install executable under pip, and the installed cycle bridge keeps site-packages on its path.
+  - A following nest holds where it is when its search box carries no closed circulation, and records what it declined. A move that would leave too little of the nest overlapping is made as large as the overlap floor allows instead of ending the run, and the receipt names the bound that cut it. The cyclone quick start derives its movement maximums from the nest it proposes, so they are always a move that nest can make.
+  - A following nest no longer refuses its first move when its parent spans the antimeridian: source pixels are binned at their canonical column, and the stencil averages reduce in a fixed order so two builds of the same ground agree to the bit. A statics corridor sealed before this fix is refused at load and names the re-preparation.
+  - The terminal's CDS key panel saves a key again, an ERA5 fetch that cannot reach the CDS client says which file it looked for and what cdsapi reported, and the keyless ARCO provider works again.
+  - A forecast stopped mid stage exits 130, so the desktop reads it as stopped and the run can still be downscaled after the app is reopened. Runs stopped under 2.7.4 stay failed. A shared GPU is priced against this run's reservation instead of refused for being shared.
+  - A conformant IEEE packed GRIB2 message decodes instead of being refused, a sharp dry slot no longer refuses a real data initialization (vapour taken below zero is floored at WRF's own qv_min_value and receipted, for the parent and every spawned child), radial velocity is dealiased by default at every radar door, and --no-dealias opts out on the nowcast doors and the radar-grid tools, and a spawned child carries its own aerosol receipt.
+  - Frames at forecast hour 1000 and beyond are filed correctly, and a research recipe may name any product the renderer's catalog lists. enprod --engine auto refuses rather than drawing weather fields with matplotlib when the rust engine is missing. --series renders a whole timeline into one renderer store, so windowed products can be differenced across frames. simulated_ir_satellite left the general and hurricane presets and carries its reason: no forward radiative transfer operator exists on the history import route.
+  - A remote forecast started from a configuration already on the node serves its frames, stores, maps and gallery. A node whose card memory could not be measured is priced against its most conservative capacity and launched, and inputs too large for the staging manifest travel by verified transfer.
+  Local data assimilation stays experimental and its ordinary desktop entry point stays hidden. Advanced users enable it with gpuwm tui --enable-local-da.
+  Known limits: gpuwm cycle shows no picture while it runs; the standalone rw-wps bundle does not carry gdt101_remap, and gpuwm doctor names the gap; the desktop's weather map cannot draw ICON global fields; the local DA nowcast score masks a 9 km rim and scores one member; an ARCO window sized for a 16 GiB card refuses in initialization, and the 8 GiB sizing runs end to end.
+  The verification records identify completed artifact and startup checks, the short GPU forecast, and retained component evidence. They do not establish general forecast skill or whole-model parity.
+  Installation and usage | Full changelog
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/arwen/releases/tag/v2.7.5
+InstallationNotes: |-
+  This application requires an NVIDIA GPU with CUDA support to run.
+  Will not function on integrated graphics or non-NVIDIA hardware.
+  Without compatible hardware, the application will fail to launch.
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
