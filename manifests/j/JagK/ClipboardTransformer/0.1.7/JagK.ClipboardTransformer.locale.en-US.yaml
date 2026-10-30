@@ -1,0 +1,84 @@
+# Created using wingetcreate 1.12.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: JagK.ClipboardTransformer
+PackageVersion: 0.1.7
+PackageLocale: en-US
+Publisher: jag-k
+PublisherUrl: https://github.com/jag-k
+PublisherSupportUrl: https://github.com/jag-k/clipboard-transformer/issues
+PackageName: Clipboard Transformer
+PackageUrl: https://github.com/jag-k/clipboard-transformer
+License: MPL-2.0
+LicenseUrl: https://github.com/jag-k/clipboard-transformer/blob/v0.1.7/LICENSE
+Copyright: Copyright (c) 2026 jag-k
+ShortDescription: Rule-based clipboard transformer with a tray app and command-line interface
+Description: Clipboard Transformer is a native tray application and standalone command-line interface that applies configurable rules to clipboard content.
+Moniker: clipboard-transformer
+Tags:
+- automation
+- clipboard
+- productivity
+- text
+- transformer
+- utility
+ReleaseNotes: |-
+  ### Changed
+
+  - **Plugins:** Rename the example GitLab plugin to `dev.jagk.gitlab`. Rename
+    `plugins.dev.jag-k.gitlab` and every `dev.jag-k.gitlab/...` rule type in
+    existing configurations; the old ID is not accepted.
+  - **Packaging/Flatpak:** Add help, source, and contribution links, keywords,
+    categories, input-control hints, and light and dark brand colors to the
+    AppStream metadata shown by software centers, and validate it strictly with
+    `appstreamcli` during the Flatpak build.
+  - **Packaging/Flatpak:** Show the app icon, summary, and homepage when
+    installing from the `.flatpakref`.
+  - **Packaging/Linux:** Add search keywords to the desktop entries.
+  - **Packaging/Flatpak:** Rename the Flatpak to `dev.jagk.clipboard_transformer`.
+    The `dev.jag_k.clipboard_transformer` ref is marked end-of-life with a rebase,
+    so `flatpak update` offers existing installations the new ID and migrates
+    their sandbox data. Notification activation now owns the app ID instead of a
+    separate `--own-name` bus name.
+  - **Packaging/Flatpak:** Use the host `~/.config/clipboard-transformer/` when
+    the user shares it with `flatpak override`, resolved through
+    `HOST_XDG_CONFIG_HOME`; the sandbox configuration stays active until the
+    shared directory has one. Document the sandbox limits and their workarounds.
+  - **Packaging/Flatpak:** Generate AppStream release history with notes and
+    release links from `CHANGELOG.md` (parsed with mistune) before the Flatpak
+    build, so software centers show a changelog for every version. Markdown
+    that AppStream cannot express fails the build instead of being flattened.
+  - **CI:** Run one check, Clippy, and test job per OS instead of one per task.
+    Pull requests run macOS and Windows only for Rust or Cargo changes, the
+    Windows MSI and standalone jobs only for Windows packaging changes, and Nix
+    only on Linux; pushes to `main`, the weekly run, and releases keep every job.
+
+  ### Fixed
+
+  - **Packaging/Flatpak:** Sign the `appstream` and `appstream2` branches when
+    publishing. They were committed unsigned, so clients rejected the remote
+    AppStream pull and software centers such as KDE Discover showed the branch
+    name (`stable`) instead of the available version. Publication also signs
+    heads that earlier releases left unsigned.
+  - **Linux/Flatpak:** Open the config, rules, and their folder from the tray
+    through the OpenURI portal. Host editors from `$EDITOR` or `editor.command`
+    do not exist in the sandbox, and the runtime's `xdg-open` shared files
+    read-only, so sandboxed editors could not save them; folders are now shown
+    with the file selected.
+  - **Linux/Tray:** Name the symbolic tray icon
+    `dev.jagk.clipboard_transformer-symbolic` in every Linux package. Flatpak
+    exports only app-ID-prefixed icons, so the sandboxed tray icon previously
+    fell back to the raster pixmap instead of the theme-aware symbolic icon.
+  - **Release:** Write the Flatpak bundle and source archive `.sha256` files
+    with the bare file name, like every other release asset, so
+    `sha256sum --check` works next to the download.
+  - **Dependencies:** Update `rustls` to 0.23.45 for RUSTSEC-2026-0285.
+ReleaseNotesUrl: https://github.com/jag-k/clipboard-transformer/releases/tag/v0.1.7
+InstallationNotes: This per-machine MSI installs the tray application and standalone CLI and requires administrator approval. Open a new terminal after installation before running clipboard-transformer from PATH. The Windows binaries are not Authenticode-signed yet, so Windows SmartScreen or managed-device policy may display a warning.
+Documentations:
+- DocumentLabel: Installation
+  DocumentUrl: https://github.com/jag-k/clipboard-transformer/blob/v0.1.7/docs/install.md
+- DocumentLabel: Configuration
+  DocumentUrl: https://github.com/jag-k/clipboard-transformer/blob/v0.1.7/docs/configuration.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

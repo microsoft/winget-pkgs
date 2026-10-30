@@ -1,0 +1,65 @@
+# Created using wingetcreate 1.12.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ForgeLabsSoft.DriveForge
+PackageVersion: 4.4.5
+PackageLocale: en-US
+Publisher: ForgeLabsSoft
+PublisherUrl: https://github.com/ForgeLabsSoft
+PublisherSupportUrl: https://github.com/ForgeLabsSoft/driveforge/issues
+PackageName: DriveForge
+PackageUrl: https://github.com/ForgeLabsSoft/driveforge
+License: GPL-3.0-only
+LicenseUrl: https://github.com/ForgeLabsSoft/driveforge/blob/main/LICENSE.txt
+Copyright: Copyright (C) 2026 ForgeLabsSoft
+ShortDescription: Create Windows USB drives, clone your PC, back it up, recover deleted files, and check drive health. Free and open source.
+Description: |-
+  DriveForge makes common but normally-complicated Windows disk tasks simple and safe:
+  create bootable Windows or Linux USB drives, clone a running PC to another drive,
+  back up and restore Windows to an image, recover deleted files, securely erase drives,
+  and diagnose drive health. It is a single self-contained executable with no ads,
+  no telemetry, and no accounts. Free and open source under the GPL-3.0.
+Moniker: driveforge
+Tags:
+- usb
+- bootable
+- iso
+- clone
+- backup
+- data-recovery
+- undelete
+- secure-erase
+- wipe
+- disk
+- diagnostics
+- ventoy
+- rescue
+- portable
+- open-source
+ReleaseNotes: |-
+  Fixed: on a plain USB flash drive, a drive could be emptied and then told the operation had failed.
+
+  Every destructive tool starts with the same command, and on a plain flash drive Windows often refuses it
+  with "Access is denied" - after the partition table is already gone. The tool then showed a hexadecimal
+  error code and created nothing, so the drive was left blank and the message explained nothing. Eleven
+  places started with that command, among them the SSD erase, Format, the full-overwrite Wipe and writing
+  an ISO to a stick.
+
+  They all now look at the disk instead of reading an exit code, and finish the job: when the partition
+  table is already gone they carry on, otherwise they try two further routes before stopping. If all of
+  them fail, the message says in plain language that nothing new was created and that unplugging the drive
+  and trying again usually clears it.
+
+  Four more faults in the same chain were found the same way and fixed: an emptied disk that still reported
+  its old partition table could never be given a new one; a drive that cannot TRIM failed the whole erase;
+  a partition that was created but not formatted was abandoned with no file system on it; and the progress
+  line called a flash drive an SSD immediately after warning that it is not one.
+
+  All of it was measured by driving the application on a real flash drive, and the erase was then run
+  through it four times from end to end.
+ReleaseNotesUrl: https://github.com/ForgeLabsSoft/driveforge/releases/tag/v4.4.5
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/ForgeLabsSoft/driveforge/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

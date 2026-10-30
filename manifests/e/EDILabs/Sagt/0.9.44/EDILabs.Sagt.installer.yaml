@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.6.0.schema.json
+
+PackageIdentifier: EDILabs.Sagt
+PackageVersion: 0.9.44
+InstallerLocale: sv-SE
+Platform:
+  - Windows.Desktop
+# WebView2 följer med Windows 10 från version 1803 (build 17134) enligt Tauris
+# egen dokumentation. Tidigare Windows kräver Evergreen Bootstrapper, vilket
+# installern inte paketerar — därför är 1803 rätt golv och inte en gissning.
+MinimumOSVersion: 10.0.17134.0
+InstallerType: nullsoft
+# tauri.conf.json: bundle.windows.nsis.installMode = "currentUser".
+# Installationen kräver därför ingen förhöjning, vilket också är skälet till att
+# winget-kravet "installs correctly for both administrators and non-administrators"
+# bör vara uppfyllt.
+Scope: user
+InstallModes:
+  - interactive
+  - silent
+  - silentWithProgress
+UpgradeBehavior: install
+ReleaseDate: 2026-08-05
+Installers:
+  # VERSIONERAD URL, inte den stabila `Sagt.ai-setup.exe`.
+  # Den stabila skrivs över vid varje release, vilket hade gjort InstallerSha256
+  # ogiltig utan att någon rörde manifestet — winget kallar det
+  # `Validation-Hash-Verification-Failed` och beskriver det uttryckligen som
+  # vanity-URL-fallet. Den versionerade nyckeln serveras med
+  # `Cache-Control: immutable` och ändras aldrig.
+  - Architecture: x64
+    InstallerUrl: https://downloads.sagt.ai/Sagt.ai-0.9.44-x64-setup.exe
+    InstallerSha256: 2F406071EFDDA53E0F6BB97F1C5EB11669C8CC952817A4FF67F00583FFA6550E
+ManifestType: installer
+ManifestVersion: 1.6.0

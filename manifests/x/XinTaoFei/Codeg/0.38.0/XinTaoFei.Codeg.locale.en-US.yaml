@@ -1,0 +1,60 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: XinTaoFei.Codeg
+PackageVersion: 0.38.0
+PackageLocale: en-US
+Publisher: codeg
+PublisherUrl: https://github.com/spacering-net
+PublisherSupportUrl: https://github.com/spacering-net/codeg/issues
+PackageName: codeg
+PackageUrl: https://github.com/spacering-net/codeg
+License: Apache-2.0
+LicenseUrl: https://github.com/spacering-net/codeg/blob/HEAD/LICENSE
+ShortDescription: Aggregate and browse AI coding agent sessions (Claude Code, Codex, Gemini CLI, etc.) in one place. Desktop app, self-hosted server, or Docker.
+Description: Codeg (Code Generation) is an enterprise-grade multi-agent coding workspace. It unifies local AI coding agents (Claude Code, Codex CLI, OpenCode, Gemini CLI, OpenClaw, Cline, etc.) in a desktop app, standalone server, or Docker container — enabling remote development from any browser — with conversation aggregation, parallel git worktree development, MCP/Skills management, chat channel interactions (Telegram, Lark, iLink, etc.), and integrated Git/file/terminal workflows.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claude-code
+- code
+- codex
+- coding
+- gemini-cli
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  This one adds codeg-cli, a command that runs agents through codeg from a terminal, a script or a CI job and prints the reply as text or JSON, while each run stays a conversation you can open and carry on in codeg.
+  Alongside that: a browser picks up the server's new release after an upgrade, /deny in a chat channel no longer gives Claude Code a lasting permission, tables and code blocks have one border again with code highlighted in light mode, codeg restarts into the Dock icon you pinned on macOS, and installing or updating on Windows no longer hangs while stopping codeg-mcp.
+  New
+  - codeg-cli runs agents through codeg from a terminal, a script or a CI job: codeg-cli -a claude_code -p "Review the latest commit" hands the prompt to the desktop app or codeg-server already running on this computer, or to a codeg-server elsewhere with --url and its token, and prints the reply as text, JSON or a stream of JSON events with documented exit codes, while the run is a conversation in codeg like any other. (#694 requested by @yasin1151)
+  -  --permissions decides how a run with no one watching answers the agent's permission requests: refuse (the default), allow reads only, allow, end the run, or leave them for you in codeg, and it only ever answers for this once, never with an "always" that would write a lasting rule into the agent's settings.
+  - A run can go on in the background and be collected later with --detach, result and cancel, work in a git worktree of its own with --worktree, or go to several agents or assistants at once, and --output-schema has the agent hand back JSON that matches a schema you give.
+  - codeg-cli also lists and installs agents, lists your assistants and runs saved automations, and --standalone gives a single command, in a CI job for example, a codeg-server of its own that goes away when the command ends.
+  - Settings → System → Command-line access is the switch for codeg-cli on this computer and shows a command to try, while in the desktop app Install command-line tool puts codeg-cli on your PATH, and the app's own terminals and agents find its codeg-cli first.
+  - Conversations started from the command line carry a terminal mark in the sidebar, and Show in Recent gains Command line to list only them.
+  - codeg-cli comes with the desktop app, the server packages and the Docker image, install.sh and install.ps1 put it next to codeg-server, and from now on codeg-server's in-place update keeps it up to date. The command-line guide covers every command and option.
+  Improved
+  - Local images also show in permission requests, plan approvals and a to-do's Result, as they do in replies.
+  Fixed
+  - A browser picks up the server's new release after an upgrade, instead of sometimes opening the previous one from its cache, and a tab left open through the upgrade offers to reload. (#980 reported by @wuzhaozhongguo)
+  - /approve and /deny in a chat channel answer just this once and pick the answer by what it does, not by where it sits in the list: for a call Claude Code flags as risky, /deny could give it a lasting permission while /approve and automatic approval refused it. A request with no one-time answer now waits for you in codeg.
+  - Tables and code blocks in replies, thinking and Markdown previews have a single border again, with a code block's language, download and copy buttons in a bar above the code, and code in light mode is highlighted again.
+  - A table opened full screen keeps its exit button on screen.
+  - On macOS, codeg comes back after an update or a restart in the Dock icon you pinned, instead of as a second icon next to it.
+  - Installing or updating codeg on Windows no longer hangs at "Stopping codeg-mcp and codeg-computer-helper processes…" on a PC where Windows Management Instrumentation (WMI) doesn't answer, and install.ps1 waits at most 15 seconds for it.
+  - Two sub-agents delegated at the same moment into a folder codeg hadn't seen yet both start, instead of one of them failing.
+  Note
+  - Once 0.38.0 has run, 0.37.0 no longer starts on the same data, because this version adds to codeg's database: codeg-server's Roll back would restore a 0.37.0 that won't start, and so would reinstalling an older desktop app, so copy codeg's data folder before you update if you may want to go back.
+  - codeg-server updated in place from 0.37.0 doesn't get codeg-cli, since 0.37.0's updater knows nothing of it: take codeg-cli from the server package on this page and put it next to codeg-server. The desktop app's update, install.sh, install.ps1 and the Docker image all bring it.
+  - Command-line access is on by default: any program running under your account can use codeg-cli to run agents through codeg, as it could already read codeg's data, so switch it off under Settings → System → Command-line access if you don't use codeg-cli.
+  - On macOS, the update to 0.38.0 may still leave a second codeg icon in the Dock if codeg is pinned there, because the version you update from does that restart: quit codeg and open it from the pinned icon, and later updates aren't affected.
+  - On Windows, codeg-cli, like codeg-server, needs the Microsoft Visual C++ Redistributable to start.
+  - On Linux, codeg-cli, like codeg-server, needs glibc 2.34 or later and OpenSSL 3, which Ubuntu 22.04, Debian 12, RHEL 9 and later have, and there's no build for Alpine.
+  Thanks to @yasin1151 and @wuzhaozhongguo for the reports.
+ReleaseNotesUrl: https://github.com/spacering-net/codeg/releases/tag/v0.38.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,104 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Exelearning.Exelearning
+PackageVersion: 4.0.6
+PackageLocale: en-US
+Publisher: INTEF
+PublisherUrl: https://exelearning.net/
+PublisherSupportUrl: https://github.com/exelearning/exelearning/issues
+Author: exelearning
+PackageName: eXeLearning
+PackageUrl: https://exelearning.net/
+License: AGPL-3.0
+LicenseUrl: https://github.com/exelearning/exelearning/blob/HEAD/LICENSE
+Copyright: Copyright © 2025 INTEF
+ShortDescription: eXeLearning is a free authoring tool to create educational resources.
+Description: eXeLearning is an open source authoring tool to create educational resources in multiple formats (Web, SCORM, ePub, etc.). It allows teachers and institutions to design, develop and publish digital content without requiring HTML or XML knowledge.
+Moniker: exelearning
+Tags:
+- educational
+- exelearning
+ReleaseNotes: |-
+  Added
+  - Printing: interactive activities are now printed as paper exercises (for example, crosswords include the grid and clues), and a new "Print options" panel beside the preview lets you keep them in place, move them to an appendix, print only activities or leave them out, with the preview updating to reflect your choices
+  - Desktop app: added a "Save as PDF" button to the print preview, so you can save a PDF without a printer
+  - Styles: added Cedec, eTwinning, INTEF and Kids
+  - iDevices: scoring iDevices now share a Grading tab for SCORM score, progress report and minimum score settings
+  - LOMLOE iDevice: added Mathematics A and B for 4th ESO to the state curriculum and its datasets
+  - Project properties: added a project-wide minimum passing score in a new Grading tab; scoring iDevices use it unless they define their own minimum
+  - SCORM: added an option requiring every activity on a page to meet its own minimum score; learners can also see the score needed to pass each page
+  - Web site exports: added a Presentation mode, enabled by adding ?exe-presentation=1 to the URL, that lets you navigate between pages using the keyboard or a presenter remote
+  - Sharing: online installations now support unlisted, read-only links to view projects as exported websites without signing in (disabled by default; admins can enable it)
+  - Desktop app (Windows and Linux): you can now choose spell-checking languages in Preferences, displayed in the interface language, or use the system default
+  - TinyMCE: added the exe-block-download class to highlight blocks containing download links
+  - Documentation: added English and Spanish plugin guides for Moodle, Nextcloud, WordPress, Omeka S, Google Drive and OneDrive, plus a unified Spanish manual on the documentation site
+  - Translations: reviewed Spanish (ES) and completed Galician (GL), Italian (IT) and Valencian (VA)
+  - Translations: added automatic placeholder translations for new strings in incomplete translations
+  Changed
+  - Security: strengthened backend protections; some deployment settings must be updated when upgrading (see UPGRADE.md):
+    - Production environments (NODE_ENV=production or APP_ENV=prod) must set API_JWT_SECRET (at least 32 bytes) and APP_SECRET to private values before the application can start; the Docker Compose examples in doc/deploy/ no longer provide default values
+    - .env.dist now defaults to APP_ENV=dev; production installs that use it, including the root docker-compose.yml, which loads it, must set APP_ENV=prod
+    - With APP_ENV=dev, the server creates the test account user@exelearning.net and, unless NODE_ENV=production is set, skips the API_JWT_SECRET and APP_SECRET check and the Secure cookie flag; delete that account if a production install has already started this way
+    - Moodle integrations (exescorm and exeweb) must explicitly list permitted callback hosts in PROVIDER_URLS; an empty value blocks all callbacks
+    - Moodle sites on private networks (intranet, VPN or localhost) must also set PROVIDER_ALLOW_PRIVATE_NETWORK=true; callbacks no longer follow redirects
+    - Non-Docker deployments using APP_ENV=prod must use HTTPS because session cookies are now marked Secure
+  - Project properties: export options are now arranged in aligned columns, with the global font on its own row
+  - Project properties: the preview image panel now explains what the image is used for, above the recommendations
+  - LOMLOE iDevice: new iDevices now use the state curriculum by default; regional curricula are grouped by Autonomous Community, with the Ministry-managed territory (MEFPD) in a separate group
+  - Printing: the print preview now matches the printed page, including styles, icons, margins, links and code
+  - Link validator: links that cannot be checked because of timeouts, rate limits or server errors are now reported as "unavailable" rather than broken; requests to the same site are spaced out and retried once
+  - Collaborative editing: while you edit an iDevice, other users' moves, reorders and deletions on the same page are applied when you finish editing
+  - Download Source File iDevice: the default button text and instructions now use the correct .elpx file extension instead of .elp
+  - Download Source File iDevice: images, PDFs, office documents and other compressed files are now added to the package without recompression, making package generation much faster
+  - Missing-file notices now identify the affected iDevice by position, type and page
+  - Docker: the image can now run on older x86_64 processors that previously failed at startup
+  - Access denied: the button now signs you out so you can sign in with another account
+  Fixed
+  - Preview: the first preview after opening a project now loads without the previous delay of about five seconds; the preview also recovers automatically if its worker stops responding
+  - Preview: images no longer disappear when a block uses a custom icon
+  - Preview: theme icons, buttons and fonts now appear even when the preview cannot use its service worker
+  - Math: inline formulas are no longer cut off at the first =, +, \mid or thin space (\,) in previews and exports
+  - Collaborative editing: unsaved work in an iDevice is no longer lost when another user adds or moves an iDevice on the same page
+  - Collaborative editing: offline tabs and tabs with outdated project copies no longer overwrite changes saved by other users; saves are merged with the stored project
+  - Collaborative editing: music notation and games such as A-Z Quiz, Guess and GeoGebra now render for other users without requiring a page reload
+  - SCORM and IMS: packages exported with "Editable export" disabled no longer include the editable project
+  - ELPX: exported packages now include the files required by the selected global font
+  - Server exports: images and audio stored in resource subfolders, as in eXeLearning 3, now work correctly
+  - Server exports: 3DMol activities now load their library and images correctly
+  - Exports: lightbox links now work in iDevices rendered after the page loads
+  - Exports: long content in dialog windows created with TinyMCE no longer hides the close button
+  - Exports: pages no longer keep checking indefinitely for an iDevice whose script fails to load
+  - Exports: content.xml no longer contains a duplicate copy of the project screenshot
+  - Printing: the license at the end of a printed project is now shown in the project's language and links to the license
+  - Download Source File iDevice: downloads no longer remain stuck at "Processing... 100%" on sites that block background workers
+  - Games: each iDevice now keeps its own timer and saved progress, even when the same game appears on multiple pages or is duplicated
+  - iDevices: closing an editor now stops its timers and event handlers, preventing them from affecting other iDevices
+  - Sort iDevice: activities no longer fail to start when cards have no image, text or audio
+  - Checklist iDevice: Text items can be ticked and counted again; after Restart, new ticks are saved, counted and scored again
+  - LOMLOE iDevice: Mathematics for 1st–3rd ESO no longer includes 4th ESO evaluation criteria or basic knowledge; changing the curriculum also clears the previous criteria from the screen
+  - Guess, Test and Select iDevices: links with accented characters in their URLs now work in question text and are no longer garbled when the iDevice is edited
+  - UDL Content iDevice: code inserted with "Insert HTML as text", or <, > and & entered as text, is no longer turned into markup when the iDevice is edited; button text containing quotes is no longer cut short
+  - TinyMCE: the ABC music notation dialog preview now works on sites that serve pages without the .html extension
+  - Interface: highlighted buttons now retain readable text contrast when focused with the keyboard
+  - Interface: the editor toolbar and content now fit on tablet screens; the left panels are collapsed by default on screens narrower than 1200px
+  - Styles: the hidden label on the box show/hide button no longer causes a horizontal scrollbar
+  - Stability: fixed errors that could occur in game iDevices, editor tooltips, the image editor and when opening files
+  - Static mode: styles and libraries with missing files are no longer stored in the browser cache
+  - Desktop app: opening a project containing images or other files no longer triggers an unsaved-changes warning on exit
+  - Embedding: saving through the host using REQUEST_SAVE now works; hosts are also notified when a project has unsaved changes and when it is saved
+  - Embedding: the static editor now uses the locale specified in the host's embedding configuration
+  - Moodle: editing an activity now reopens the user's existing project instead of creating a new one each time; older plugin versions no longer trigger an "Access denied" message
+  - Security: strengthened backend protections against path traversal, cross-site scripting, server-side request forgery, broken access control and decompression bombs
+  - Security: OpenID Connect sign-in now rejects callbacks without a valid token exchange and state, preventing account creation without signing in through the identity provider
+  - Security: crafted sign-in links can no longer redirect users to another site after login
+  - Security: tokens signed with a published default secret are no longer accepted (GHSA-5p92-q7pw-7247)
+  - Security: exports and project deletion can no longer read or delete files outside their own folders
+  - Security: content written by collaborators is sanitized in the editor so it cannot run scripts in other users' sessions
+  - Security: uploaded HTML, SVG and XML files are served in an isolated sandbox that cannot access the visitor's session
+  - Security: the server's ZIP extraction endpoint now checks project import limits before extracting
+  - Security: the desktop app now reads only files opened by the user
+  - Security: exporting to a folder in the desktop app can no longer write files outside the selected folder
+ReleaseNotesUrl: https://github.com/exelearning/exelearning/releases/tag/v4.0.6
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+PackageIdentifier: LokCo.Wysely
+PackageVersion: 0.4.4
+MinimumOSVersion: 10.0.0.0
+InstallerType: nullsoft
+# tauri.conf.json -> bundle.windows.nsis.installMode: "currentUser", and the
+# uninstall key really does land in HKCU (verified on a live install).
+Scope: user
+InstallModes:
+  - interactive
+  - silent
+  - silentWithProgress
+UpgradeBehavior: install
+# NSIS registers its uninstall entry under this key name, not a GUID.
+ProductCode: Wysely
+ReleaseDate: 2026-10-01
+Installers:
+  - Architecture: x64
+    InstallerLocale: en-US
+    # MUST be the immutable, version-pinned asset. The repo also publishes a
+    # stable-named Wysely-Setup.exe alias for the website's download button —
+    # never point winget at that one, its bytes change every release and the
+    # SHA256 below would stop matching.
+    InstallerUrl: https://github.com/lokkky-explore/wysely-releases/releases/download/v0.4.4/Wysely_0.4.4_x64-setup.exe
+    # Source: GitHub release asset digest (sha256:f915757a...), 5344792 bytes. Re-verify locally
+    # with Get-FileHash before opening the PR.
+    InstallerSha256: F915757A60308F96C2FEEE3F3110D13A51C6FF998D4576DF3C06FB607205DC42
+ManifestType: installer
+ManifestVersion: 1.12.0
