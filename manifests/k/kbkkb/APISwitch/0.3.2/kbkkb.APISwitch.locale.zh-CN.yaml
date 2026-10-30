@@ -1,0 +1,76 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: kbkkb.APISwitch
+PackageVersion: 0.3.2
+PackageLocale: zh-CN
+ShortDescription: 面向 AI 编程助手的第三方服务商切换与本地路由网关工具。
+Description: |-
+  APISwitch 是一款轻量级桌面管理与本地协议路由网关工具，面向第三方 API 服务商与 Google Antigravity 官方订阅。支持管理 Google Antigravity、Claude Code、Claude Desktop、Codex、OpenCode、Pi 的服务商配置，一键切换 Google 账号并保存凭据快照，跟踪配额用量，并通过本地网关实现 OpenAI/Anthropic 协议桥接与热切换。
+
+  ✨ 核心特性
+  1. 多工具统一管理与零侵入切换
+  - Antigravity 账号快捷切换：凭证快照存档，一键切换 Google 账号；切换前自动捕获并同步当前账号最新凭证（防 Refresh Token 轮换失效）；支持切换后自动关闭并平滑重启 IDE。
+  - 跨端供应商智能互通：支持在 Claude CLI、Claude Desktop、Codex、OpenCode、Pi 之间一键互相复制供应商配置，智能完成字段自动映射（Auth Token ↔ Bearer Token / API Key），一次录入，全端复用。
+  - 模型配置池化管理：针对 OpenCode 与 Pi 提供模型配置池机制，清晰标记「已加入配置 / 未加入配置」状态，支持按需激活与批量维护。
+  - 历史数据一键迁移：内置 cc-switch 数据库迁移向导，直接读取 ~/.cc-switch/cc-switch.db，支持勾选式导入已有供应商，自动去重与覆盖更新。
+  2. 内置本地协议路由网关（Local Protocol Router）
+  - 高性能本地代理：内置轻量级 HTTP 网关服务（默认监听 127.0.0.1:15725，支持在设置中自定义监听主机地址与端口，支持局域网多设备共享）。
+  - 多协议无缝转译：
+    - Codex 协议桥接：将第三方 Chat Completions / Anthropic 端点智能转译为 Codex 原生 Responses 协议；
+    - Claude CLI 协议桥接：自动处理鉴权 Header 与请求结构映射；
+    - Claude Desktop 模型映射：拦截并重写 claude-sonnet / opus / haiku 等请求至目标第三方大模型。
+  - 长文本防护与上下文优化：自动剥离非必要超长 system prompts，提供巨量上下文截断防护，防止第三方端点报 400 错误或费用异常溢出。
+  - 零重启热切生效：客户端只需一次配置指向本地网关，切换供应商时网关即时热重载，无需反复重启客户端。
+  3. 数据备份与多设备漫游
+  - 一键全量导出：将所有工具的供应商配置与 Antigravity 账号数据一键打包导出为标准 JSON 备份文件。
+  - 灵活导入恢复：支持「合并追加」（推荐：保留已有配置，追加新供应商或更新同名项）与「完全覆盖」双模式导入，方便在多台开发机之间无缝漫游。
+  - 便捷本地管理：设置中支持一键打开本地物理存储目录，数据完全透明自主可控。
+
+  🔬 工作原理
+  - Google Antigravity：登录态存储在 VS Code 架构的 globalStorage SQLite 数据库（ItemTable）中，核心字段为 antigravityUnifiedStateSync.oauthToken 和 userStatus（base64 编码的 Protobuf）。APISwitch 内置轻量 Protobuf 解码器，安全解析邮箱、订阅计划与配额信息；切换时执行安全事务写入，并自动维护 .backup 文件。
+  - Claude Code CLI：精准修改 ~/.claude/settings.json 中 env 的 ANTHROPIC_* 相关环境变量，对于 hooks、permissions 等其他系统及业务配置严格原样保留。
+  - Claude Desktop：针对桌面客户端的 Cowork 推理网关参数（inferenceProvider、inferenceGatewayBaseUrl、inferenceGatewayApiKey 等）进行配置写入与维护；切换回「官方」档位时干净移除网关参数，无缝恢复官方原生登录。
+  - OpenAI Codex：配置 ~/.codex/config.toml 中的 model_provider 与 [model_providers.<id>] 节点，同时联动 auth.json 鉴权信息。支持直接连接第三方端点或经由本地网关进行协议适配。
+  - OpenCode & Pi：严格遵循各自官方规范读写 opencode.json 以及 models.json / auth.json，确保配置变更立即可被命令行或运行环境加载。
+  - 安全原子写入：所有涉及物理文件的写操作均执行「写入临时文件 → 校验完整性 → 原子替换」流程，并在写前自动生成 .bak 备份文件，杜绝因进程意外中断导致配置损坏。
+Tags:
+- api
+- 人工智能
+- 代理
+- 网关
+ReleaseNotes: |-
+  【重磅新增 · 支持 Gemini 4 (Argon) 独立配额与限额查看】
+  - 首页账号卡片全面重构升级为「三栏独立配额监控面板」（Gemini 模型、Gemini 4 Argon、Claude & GPT 模型）。
+  - 深度打通 Google 官方配额核心端点（retrieveUserQuotaSummary），精准提取并实时解析 argon 额度桶：
+  - Gemini 4 专属 5 小时动态限额（5H）：清晰显示当前剩余可用百分比、高精度进度条与重置倒计时。
+  - Gemini 4 专属周基础限额（Weekly）：直观展示每周额度池水位与重置周期。
+    • 智能识别账号订阅等级与 Gemini 4 额度归属：
+  - 精准区分 Google 官方渠道的「正价订阅版（PRO）」与「体验专享版（EXP / 体验渠道获取）」。
+  - 针对正价订阅用户，完整激活并呈现专属的独立 Gemini 4 Argon 额度池；
+  - 针对体验/活动渠道账号，友好标明「与 Gemini 共享」或「无独立额度」，并在鼠标悬停 Tooltip 中提供详尽的权益说明与指引。
+    • 历史配额波动留痕：配额快照服务同步支持 gemini-argon-5h 与 gemini-argon-weekly 历史记录，额度消耗趋势一目了然。
+  【新增 · 扩展客户端用量监控 (Gemini CLI / StepCode / zcode / dsh)】
+  - 新增 Gemini CLI 本地聊天会话扫描入库（自动扫描并解析会话 JSON，支持百万级 Token 极速事务批量入库）。
+  - 新增 StepCode 本地会话扫描，修复 Token 统计口径偏差（精确匹配至输入/输出真实消耗）。
+  - 新增 zcode 与 dsh 客户端用量监控，修复 dsh 日志时间戳毫秒对齐与时序问题。
+  - 全客户端扫描与用量数据保留周期从 90 天大幅扩展至 400 天（完整覆盖一年以上历史数据）。
+  【新增 · 长周期快捷选项与 GitHub / Claude 风格方格热力图】
+  - 时间范围新增「半年」（180 天）与「一年」（365 天）快捷切换选项。
+  - 打造 GitHub / Claude 风格的贡献热力方格图（Contribution Heatmap Grid）：
+  - 7 行（周一至周日）按周严谨纵横排列，自动适配全屏与缩放。
+  - 顶部智能对齐月份刻度标签，左侧对齐「一 / 三 / 五」星期标识。
+  - 采用对数刻度（Log10）划分为 5 阶渐变靛紫热力色阶，避免单日突发大流量导致日常活跃度失真。
+  - 鼠标 Hover 实时 Tooltip 显示当日总用量、入/出 Token 及星期几。
+  - 点击方格即刻下钻：选中该日后，顶部汇总卡片、供应商下钻、客户端汇总、模型汇总及调用明细全量联动下钻，再次点击取消选择。
+    • 智能图表模式：≤ 31 天默认柱状图，> 31 天默认方格热力图；并在卡片右上角提供「柱状图 / 方格图」自由切换按钮与动态自适应图例（圆点 vs 热力阶梯块）。
+  【新增 · 应用更新多语言展示与弹窗双语切换】
+  - 更新弹窗（UpdateDialog）支持根据应用当前语言自动匹配并呈现对应语言的更新日志。
+  - 在更新弹窗的日志标题栏右侧加入 [中文] / [English] 快捷切换胶囊，支持实时无缝对照查看。
+  - 提供本地离线双语更新日志回退机制，全面消灭界面中的硬编码中文。
+  【架构优化与工程演进】
+  - 架构重构：引入 IUsageSource 接口与 UsageSourceRegistry 模块化注册机制，统一规范各客户端用量采集与增量读取。
+  - 统一 Release 编译与发布输出，清除冗余 Debug 缓存。
+ReleaseNotesUrl: https://github.com/kbkkb/APISwitch/releases/tag/v0.3.2
+ManifestType: locale
+ManifestVersion: 1.12.0

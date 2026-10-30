@@ -1,0 +1,84 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: kbkkb.APISwitch
+PackageVersion: 0.3.2
+PackageLocale: en-US
+Publisher: kbkkb
+PublisherUrl: https://github.com/kbkkb
+PublisherSupportUrl: https://github.com/kbkkb/APISwitch/issues
+PackageName: APISwitch
+PackageUrl: https://github.com/kbkkb/APISwitch
+License: MIT
+LicenseUrl: https://github.com/kbkkb/APISwitch/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 kbkkb
+ShortDescription: Provider switcher and local routing gateway for AI coding assistants.
+Description: |-
+  APISwitch is a lightweight desktop management tool and local protocol routing gateway for third-party API providers and Google Antigravity official subscriptions. It manages provider configurations for Google Antigravity, Claude Code, Claude Desktop, Codex, OpenCode, and Pi, switches Google accounts with credential snapshots, tracks quota usage, and bridges OpenAI/Anthropic protocols through a local gateway with hot reload.
+
+  ✨ Key Features
+  1. Unified Multi-Tool Management & Zero-Intrusion Switching
+  - Antigravity Quick Account Switching: Save credential snapshots and switch Google accounts with one click. Automatically captures and synchronizes the latest credentials before switching (preventing Refresh Token rotation expiration). Optionally auto-closes and smoothly restarts the IDE.
+  - Cross-Client Provider Sharing: One-click copy of provider configurations across Claude CLI, Claude Desktop, Codex, OpenCode, and Pi with intelligent field mapping (Auth Token ↔ Bearer Token / API Key). Enter once, use everywhere.
+  - Model Pool Management: Dedicated model pool mechanism for OpenCode and Pi, clearly distinguishing "In Config" from "Not in Config" states, supporting on-demand activation and batch maintenance.
+  - One-Click cc-switch Migration: Built-in migration wizard directly reads ~/.cc-switch/cc-switch.db, allowing checkbox selection to import existing providers with automatic deduplication and overwriting.
+  2. Built-in Local Protocol Routing Gateway
+  - High-Performance Local Gateway: Built-in lightweight HTTP gateway service (listening on 127.0.0.1:15725 by default, configurable Host and Port in settings, supports LAN sharing).
+  - Seamless Multi-Protocol Bridging:
+    - Codex Protocol Bridge: Translates standard OpenAI Chat Completions / Anthropic endpoints into Codex native Responses protocol.
+    - Claude CLI Protocol Bridge: Automatically manages authentication headers and request format mapping.
+    - Claude Desktop Model Mapping: Intercepts and rewrites claude-sonnet / opus / haiku requests to your designated upstream custom models.
+  - Long-Context Protection & Prompt Stripping: Automatically strips non-essential excessive system prompts and provides safeguards against massive 1M context overflows to prevent upstream 400 errors or unexpected costs.
+  - Zero-Restart Hot Reload: Point your client to the local gateway once. Provider switches reload instantly in the gateway with no client restarts needed.
+  3. Data Backup & Multi-Device Roaming
+  - One-Click Full Export: Bundle all tool provider configurations and Antigravity account data into a standardized JSON backup file.
+  - Flexible Restore Modes: Supports both "Merge & Append" (recommended: keeps existing configs while adding new or updating matching items) and "Full Overwrite" modes for seamless roaming across multiple machines.
+  - Direct Local Management: One click to open the local physical storage directory for full data ownership and transparency.
+
+  🔬 How It Works
+  - Google Antigravity: Login sessions are stored in VS Code's globalStorage SQLite database (ItemTable) under antigravityUnifiedStateSync.oauthToken and userStatus (base64-encoded Protobuf). APISwitch includes a lightweight Protobuf parser to safely extract email, subscription tier, and quota information. Account switching executes safe transactional writes with automatic .backup creation.
+  - Claude Code CLI: Precisely rewrites ANTHROPIC_* environment variables in ~/.claude/settings.json, strictly preserving all other configuration sections such as hooks and permissions.
+  - Claude Desktop: Manages Cowork inference gateway parameters (inferenceProvider, inferenceGatewayBaseUrl, inferenceGatewayApiKey, etc.). Switching back to "Official" cleanly removes these fields to restore native official login.
+  - OpenAI Codex: Configures model_provider and [model_providers.<id>] in ~/.codex/config.toml, synchronizing authentication with auth.json. Supports direct upstream connections or routing through the local gateway for protocol adaptation.
+  - OpenCode & Pi: Strictly adheres to their official specifications to read and write opencode.json and models.json / auth.json, ensuring immediate recognition by CLI and runtime environments.
+  - Safe Atomic Writes: All file modifications follow a "write temporary file → verify integrity → atomic replace" workflow, generating automatic .bak backups to prevent corruption from unexpected interruptions.
+Tags:
+- ai
+- api
+- gateway
+- proxy
+ReleaseNotes: |-
+  [Key Feature · Gemini 4 (Argon) Independent Quota & Limit Monitoring]
+  - Account cards overhauled with a Triple-Column Quota Panel (Gemini models, Gemini 4 Argon, and Claude & GPT models).
+  - Direct integration with Google Cloud Code quota endpoint (retrieveUserQuotaSummary) to extract and monitor the argon quota bucket:
+  - Gemini 4 Dedicated 5-Hour Dynamic Limit (5H): Displays remaining quota percentage, high-precision progress bar, and reset countdown.
+  - Gemini 4 Dedicated Weekly Base Quota: Real-time weekly pool status, consumption progress, and reset cycle.
+    • Subscription Tier & Quota Entitlement Awareness:
+  - Distinguishes official Paid Subscriptions ("PRO") from Promotional / Trial Quotas ("EXP").
+  - Paid subscription accounts unlock the full, dedicated Gemini 4 Argon quota pool;
+  - Promotional and trial accounts display "Shared with Gemini" or "No separate quota" with comprehensive hover tooltips explaining entitlements.
+    • Historical Quota Snapshot Tracking: Quota snapshot service records historical gemini-argon-5h and gemini-argon-weekly fluctuations over time.
+  [New · Expanded Client Usage Monitoring (Gemini CLI / StepCode / zcode / dsh)]
+  - Added Gemini CLI local session scanning and ingestion (automatically parses %TEMP%\gemini_chat_*.json with high-performance transactional bulk insertion for millions of tokens).
+  - Added StepCode local session scanning, correcting token measurement criteria to precisely reflect true input/output token consumption.
+  - Added zcode and dsh agent usage monitoring; resolved dsh timestamp millisecond alignment and chronological order issues.
+  - Extended session scanning and SQLite retention window from 90 days to 400 days (over 1 year of full historical coverage).
+  [New · Long-Range Quick Ranges & GitHub / Claude-Style Heatmap Grid]
+  - Added "6 Months" (180 days) and "1 Year" (365 days) quick range selection buttons.
+  - Introduced GitHub / Claude-style Contribution Heatmap Grid:
+  - 7 rows (Monday to Sunday) across weeks, adapting dynamically to window resizing.
+  - Aligned month labels along the top and "Mon / Wed / Fri" weekday indicators on the left.
+  - Logarithmic 5-tier indigo intensity coloring to prevent single high-volume spikes from washing out regular daily activity.
+  - Hover tooltip displaying date, weekday, total tokens, and input/output breakdown.
+  - Interactive drill-down: click any cell to filter the entire window (summary cards, providers, clients, models, and recent calls) to that day; click again to deselect.
+    • Adaptive chart mode: automatically defaults to Bar Chart for short ranges (\(\le 31\) days) and Heatmap Grid for long ranges (\(> 31\) days), with manual toggle buttons in the top-right header and dynamic legends.
+  [New · In-App Multilingual Update Dialog & Language Switching]
+  - Update dialog (UpdateDialog) automatically matches and renders release notes in the user's active application language (zh-CN / en-US).
+  - Added interactive [中文] / [English] language switch pills in the Changelog header for instant cross-language inspection.
+  - Offline bilingual fallback to local release notes when remote notes are omitted.
+  [Architecture & Engineering]
+  - Modularized usage scanning: introduced the IUsageSource interface and UsageSourceRegistry for clean multi-client expansion.
+  - Standardized Release outputs and removed unnecessary Debug caches.
+ReleaseNotesUrl: https://github.com/kbkkb/APISwitch/releases/tag/v0.1.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
