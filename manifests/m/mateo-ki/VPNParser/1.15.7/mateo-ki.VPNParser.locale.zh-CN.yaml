@@ -1,0 +1,37 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: mateo-ki.VPNParser
+PackageVersion: 1.15.7
+PackageLocale: zh-CN
+ShortDescription: Windows 桌面程序：采集订阅、解析成节点、跑代理，并把代理质量实测出来。
+Description: VPN Parser 是用 Rust + egui 编写的 Windows 桌面程序，负责采集免费或自建订阅、解析成节点、跑代理，并把代理质量实测出来。订阅入口包括带 `YYYY-MM-DD` 日期占位符的订阅 URL、Gist 搜索页发现，以及 Telegram 频道预览（裸节点链接和订阅链接两类都取，节点只增不删）。解析支持 `ss` `vmess` `vless` `trojan` `hysteria2/hy2` `socks5` `http(s)` 分享链接，以及 Clash / Clash Meta YAML、Base64 与混合文本。延迟以经内核访问 Google `generate_204` 的真实握手为准，24 小时出口健康条按实测绘制，而不是看内核上报的状态。Windows 上它同时管理系统代理、TUN（提权交接后只保留一个实例）和终端 `HTTP_PROXY` 环境变量，按 exe 路径添加防火墙允许规则，支持单实例互斥与托盘，记录出口切换历史并按天统计规则命中，同时提供强制 bearer 鉴权的本地 HTTP API 与 mihomo / sing-box / xray 配置导出。安装包不含内核，内核缺失时由程序按需下载。
+Tags:
+- clash
+- sing-box
+- 代理
+- 出口健康
+- 测速
+- 节点解析
+- 订阅
+ReleaseNotes: |-
+  🚀 VPN Parser v1.15.7 发布说明 / Release Notes
+  🎉 欢迎使用 VPN Parser v1.15.7！本版聚焦测速链路的正确性、安全与速度：节点指纹全面升级、API Token 收紧、测速并发重构（修复死锁）与预筛提速，并修复了 OpenWrt .apk 打包：
+  🔒 正确性与安全
+  - 节点指纹升级 v2：
+    - 指纹从「协议|服务器|端口|凭据片段」升级为对全量规范化连接配置的 SHA-256——SNI、WebSocket path、gRPC service、Reality 公钥/ShortID、flow、ALPN 等传输参数全部参与；
+    - 同服务器同凭据但传输参数不同的节点不再被误判重复而丢失；展示名 / 备注不参与指纹；「字段为空串」与「字段缺省」视为等价；
+    - 指纹运行时现算、不落库，升级无需迁移。
+  - API Query Token 收紧：?token= 仅允许只读导出接口（/api/export/*，订阅链接进浏览器/客户端的合理场景）；其余全部 GET 一律要求 Authorization: Bearer 头——防止 token 经浏览器历史 / 访问日志 / Referer 泄露后被拖走全量节点凭据。
+  - 日志脱敏：
+    - API 访问日志只记 method + path，不再记录完整 URI（导出链接的 ?token= 永不落盘）；
+    - 拉取订阅的日志与失败状态抹除 URL query 后才落盘（订阅 URL 常内嵌付费 token）。
+  🚀 测速稳定性与速度
+  - 测速重构为固定 Worker 池：TCP 预筛改为有界任务队列 + 固定 worker，在途探测恒 ≤ 并发数——万级节点不再一次性创建全量等待任务及其携带的节点副本；附带 2000 节点多线程回归测试（修复了重构中间版本引入的生产者-消费者死锁）；
+  - TCP 预筛超时独立封顶（Standard 1.5s / Deep 2.5s）：预筛只是一次 SYN，不再沿用内核测速超时（用户可设 5s）——死节点密集的大库第一阶段耗时直接减半以上；内核真实握手阶段超时不受影响；
+  - DNS 预解析阶段进度可见：域名多的池子在预筛真正开始前就能看到计数变化，不再长时间纹丝不动。
+  📦 OpenWrt .apk 打包修复
+  - 修复 pipefail 下 grep -q 探测遇 SIGPIPE 必挂、导致历届 CI 发版全部静默跳过 .apk 的问题；apk-tools 构建同步启用 help 并补齐 lua5.3 依赖；
+  - 本版本起 GitHub Release 资产将包含 OpenWrt 25.x .apk 包（x86_64 / aarch64_generic + LuCI 面板）。
+ManifestType: locale
+ManifestVersion: 1.28.0
