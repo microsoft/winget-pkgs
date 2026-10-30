@@ -1,0 +1,88 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: NortheBridge.LuminalShine
+PackageVersion: 26.09.1
+PackageLocale: en-US
+Publisher: NortheBridge Foundation
+PublisherUrl: https://github.com/NortheBridge
+PublisherSupportUrl: https://apps.northebridge.com/en/luminalshine
+Author: NortheBridge Foundation
+PackageName: LuminalShine
+PackageUrl: https://github.com/NortheBridge/luminalshine
+License: GPL-3.0
+LicenseUrl: https://github.com/NortheBridge/luminalshine/blob/HEAD/LICENSE
+Copyright: Copyright (c) NortheBridge Foundation
+ShortDescription: A Modern Self-hosted High Performance Sunshine-compatible game stream host for Moonlight designed for Windows 11 and Windows 11 Insider Preview. Maintained by the NortheBridge Foundation.
+Description: Modern Self-Hosted High Performance Sunshine-compatible game streaming host for Moonlight clients designed for Windows 11 and Windows 11 Insider Preview.
+Moniker: luminalshine
+Tags:
+- amdgpu
+- blackwell-gpu
+- contributions-welcome
+- contributors-welcome
+- cpp
+- game-stream
+- game-streaming
+- game-streaming-server
+- geforce-experience
+- intelgpu
+- moonlight
+- nvidia-gpu
+- python
+- remote-desktop
+- windows-insiders
+- windows11
+ReleaseNotes: |-
+  LuminalShine 26.09.1
+  Important
+  Bundled virtual display driver: LuminalVGD v0.1.0-alpha.9
+  Signed driver 0.1.0.27 · protocol 0.10 · Build 27 — unchanged from 26.09.0.
+  LuminalShine 26.09.1 is the release where the browser streaming path becomes part of the official Windows build. WebRTC is now compiled in, its runtime is shipped with every installer and portable archive, and a fresh build fetches a checksum-pinned wrapper directly from the NortheBridge repository. This release also makes browser sessions and Moonlight sessions hand off cleanly, tears abandoned browser sessions down, fixes two display-helper races behind slow starts and quick reconnects, and closes several Mission Control polish gaps.
+  WebRTC ships in the official Windows build
+  - WebRTC is enabled by default on Windows (#176, fixes #157). Previous official builds exposed the Play page while compiling the host-side WebRTC implementation out. Release CI now enables it explicitly, packages libwebrtc.dll, and stages the DLL beside the test executable as well.
+  - The wrapper comes from a pinned NortheBridge release. CMake downloads libwebrtc-win-x64-release.zip from NortheBridge/libwebrtc tag luminalshine-m150.1, verifies SHA-256 45fec22b910b92b414da4a1fa65179baa4367e4db13c43aefcf55b36490d77a0, and reuses the shared cache on later builds. A missing header or runtime DLL is a hard configuration error instead of a package that starts without its dependency.
+  - Moonlight and browser capture are mutually exclusive. A Moonlight launch preempts an existing browser session; a browser connection is refused while Moonlight is streaming or still connecting. The launch-pending latch spans the HTTP handler, RTSP hand-off and bounded connection window so two capture workers cannot divide the same LuminalVGD frame ring (#176, #180).
+  - Recovery keyframes are acknowledged at the WebRTC encoder boundary. Browser sessions no longer log repeated recovery-IDR timeouts simply because the acknowledgement previously lived only in the RTSP sender.
+  - Lost browser links now clean themselves up (#181). The luminalshine-m150.1 wrapper exposes peer and ICE state callbacks. A failed connection closes immediately; a disconnected connection gets a 10-second recovery window before the session, capture worker and virtual display are released. Short network hiccups and successful ICE restarts remain transparent.
+  - Better browser-session diagnostics. The host records negotiated video, the first accepted keyframe, data-channel and peer/ICE transitions, and 30-second egress windows; session counters are exposed through the WebRTC session API.
+  - Esc reliably leaves fullscreen. Holding Esc exits native fullscreen and the browser fallback mode, with an on-screen hold indicator and a one-time explanation.
+  WebRTC can still be disabled for a custom build with -DSUNSHINE_ENABLE_WEBRTC=OFF. The classic Moonlight path remains unchanged and is still the path to use when broad native-client compatibility is the priority.
+  Display and reconnect reliability
+  - Slow display-helper startup no longer loses a successful APPLY (#182). The host previously gave up on the anonymous-pipe handshake after 500 ms, reconnected with the wrong protocol shape and then waited ten seconds for a reply the decoder could never recover. Display-helper connections now use one bounded, process-aware handshake and keep the APPLY transaction on the same connection.
+  - Quick relaunches no longer race duplicate REVERT requests (#183). Session cleanup and app-exit cleanup now serialize the duplicate check with the transactional restore, preventing a second helper from starting against an already-restored topology. If a helper genuinely exits during the activation APPLY, the host restarts it and retries once instead of spending the full activation timeout on a dead process.
+  - These fixes apply to both Moonlight and browser sessions because they harden the shared Windows display-management path.
+  Mission Control polish
+  - The LuminalShine logo loads everywhere (#184). The reserved /images route now serves the branded logo used by the shell, login page and logged-out screen. Route coverage prevents future Web UI image references from silently becoming broken images.
+  - The YUV 4:4:4 switch now reflects and preserves the saved value (#184, follow-up for #178). Configuration booleans returned as strings are normalized consistently, fixing the same class of stale-toggle problem for Steam Library, Lossless Scaling and other boolean-backed settings.
+  - Configuration hot-apply respects active WebRTC sessions. Autosave and app-lifecycle paths now defer global configuration replacement while either a Moonlight or browser stream is active, instead of checking only RTSP sessions.
+  LuminalVGD driver
+  This release keeps LuminalVGD v0.1.0-alpha.9, the same signed package shipped with 26.09.0:
+  ──────────────┬────────────────────────────────────────────────────────────
+  Driver version│0.1.0.27 (DriverVer 08/07/2026, 0.1.0.27)
+  ──────────────┼────────────────────────────────────────────────────────────
+  Protocol      │0.10 (handshake build 27, capabilities 0xfe5)
+  ──────────────┼────────────────────────────────────────────────────────────
+  Watchdog      │10-second lease watchdog
+  ──────────────┼────────────────────────────────────────────────────────────
+  Signing       │NortheBridge Foundation OV certificate, RFC 3161 timestamped
+  ──────────────┴────────────────────────────────────────────────────────────
+  Build 27 carries the D3D12 timeline-fence transport used by Direct-to-Encode and the teardown/drain protections that prevent the Windows indirect-display host from being terminated during monitor departure, RDP/console transitions or a delayed ring hand-off. Because the bundled driver has not changed, upgrading from 26.09.0 does not normally require a driver replacement or restart page.
+  Project, tests and release engineering
+  - Windows release builds now compile and package WebRTC from the checksum-pinned NortheBridge wrapper, and the test binary receives the same runtime DLL.
+  - WebRTC exclusivity, peer-link liveness, display-helper connection policy, duplicate-revert suppression, static image routes and configuration boolean coercion all have regression coverage.
+  - The signed release path uses SSL.com eSigner with a maintained Java 11 trust store while retaining strict TLS validation and post-sign Authenticode verification (#185).
+  Upgrading
+  - Install over 26.09.0 with the installer; settings, pairings and the LuminalVGD driver are kept.
+  - An active stream ends during the upgrade and can be restarted after the service returns.
+  - Hard-refresh the Web UI once (Ctrl+F5) if a browser still shows cached assets from 26.09.0.
+  - Existing Moonlight clients continue to pair and connect as before. Browser streaming is now available from the Play page without a custom build.
+  Checksums (SHA-256)
+  453771562df6997c23699e16cd884c9e82da4390ace97104224a588d1c8c6dfc  LuminalShine_x64-debuginfo.7z
+  6191f15f2db44bbc6f53e8592fcfcc8f0254d3f0d08be069b00a08c7ac000a63  LuminalShine_x64-installer.exe
+  ad1027943852ae89ff6cd6bd9c18868e16dfc3f35a920fb7cb021781a6dfa7a1  LuminalShine_x64-portable.zip
+  A SHA256SUMS file is attached to this release for sha256sum -c verification.
+  Full changes: 00da7376…6c377335
+ReleaseNotesUrl: https://github.com/NortheBridge/luminalshine/releases/tag/26.09.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

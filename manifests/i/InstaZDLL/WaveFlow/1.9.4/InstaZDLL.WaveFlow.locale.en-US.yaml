@@ -1,0 +1,71 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: InstaZDLL.WaveFlow
+PackageVersion: 1.9.4
+PackageLocale: en-US
+Publisher: InstaZDLL
+PublisherUrl: https://github.com/InstaZDLL
+PublisherSupportUrl: https://github.com/InstaZDLL/WaveFlow/issues
+PrivacyUrl: https://github.com/InstaZDLL/WaveFlow/blob/main/.github/SECURITY.md
+Author: InstaZDLL
+PackageName: WaveFlow
+PackageUrl: https://waveflow.app/
+License: GPL-3.0
+LicenseUrl: https://github.com/InstaZDLL/WaveFlow/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 InstaZDLL. Licensed under GPL-3.0-only.
+ShortDescription: Local-first music player with a Spotify-inspired UI.
+Description: |-
+  WaveFlow is a local music player desktop app built with Tauri 2 and React 19. It scans your local audio folders, organizes tracks by album/artist/genre, and plays them with a real-time audio engine — no streaming, no cloud, your music stays on your machine.
+
+  Features include smart playlists, BPM analysis, LRCLIB lyrics fetch, Last.fm scrobbling, Discord Rich Presence, DLNA streaming, a 6-band equalizer, A-B loop, sleep timer, mood radio, year-in-review Wrapped, and more.
+Moniker: waveflow
+Tags:
+- audio
+- desktop
+- flac
+- local-first
+- lrclib
+- music
+- music-player
+- replaygain
+- spotify
+- tauri
+ReleaseNotes: |-
+  1.9.4 (2026-10-18)
+  🩹 What's new in v1.9.4
+  More reliable exclusive playback, FLAC files that end properly, and a way to keep the mini-player on top under Wayland.
+  🎧 Playback
+  - No more crackling in exclusive mode while the interface is busy. On Windows, with WASAPI exclusive output, opening the immersive view could make the sound crackle for a few seconds. The thread that feeds the device now runs as a Windows "Pro Audio" task, so it keeps priority over the interface. (#889)
+  - Following a track's sample rate no longer reopens the output twice. With the output set to match each track's sample rate, WaveFlow could close and reopen the device twice at a track change. It now keeps the current output when it can, and reopens it only when the requested rate actually changes. (#891)
+  - FLAC files with a few stray bytes after their last frame now end normally. Such a file played to the end, then showed "cannot play this track", and the queue stopped there. WaveFlow now treats it as the end of the track and moves on; a file that is really cut short is still reported. And pressing Play on a track that had stopped in its last two seconds now starts it over instead of failing again at the very end. (#899, closes #898)
+  📚 Library
+  - The playing row turns green again after a double-click. With double-click to play, the row you started stayed blue (selected) instead of green (now playing). Playing a row now clears the selection its own click made, in the library, album and playlist views. (#900, closes #897)
+  🐧 Linux
+  - New setting: Run through XWayland. Native Wayland does not give WaveFlow a reliable way to keep a window always on top or restore its absolute position, so the mini-player's pin and the desktop lyrics' placement may not hold. Settings → Appearance → Player and window → Run through XWayland restores those behaviours through X11 compatibility. It is off by default, since text can look slightly less sharp with fractional scaling, and takes effect at the next start. A GDK_BACKEND you set yourself still wins, and links opened from WaveFlow don't pass the setting on to your browser. (#896, #901, closes #894)
+  📦 Recommended install
+  Use your platform's package manager when one is available, so updates keep flowing through the tool you already use.
+  Windows
+  winget install InstaZDLL.WaveFlow
+  Arch / Manjaro / EndeavourOS / CachyOS
+  yay -S waveflow-bin
+  # or: paru -S waveflow-bin
+  Fedora / RHEL / Rocky / Alma / CentOS Stream
+  sudo dnf copr enable instazdll/waveflow
+  sudo dnf install waveflow
+  Debian / Ubuntu / Mint / Pop!_OS
+  The Debian package is wave-flow (kebab-case, required by the Debian naming spec — Tauri bundles it that way from the WaveFlow product name).
+  sudo install -d -m 0755 /etc/apt/keyrings
+  curl -fsSL https://packages.buildkite.com/instazdll/waveflow/gpgkey \
+    | sudo gpg --dearmor -o /etc/apt/keyrings/waveflow.gpg
+  echo "deb [signed-by=/etc/apt/keyrings/waveflow.gpg] https://packages.buildkite.com/instazdll/waveflow/any/ any main" \
+    | sudo tee /etc/apt/sources.list.d/waveflow.list
+  sudo apt update && sudo apt install wave-flow
+  macOS
+  No Homebrew cask yet — grab the .dmg below. The bundle isn't Apple-signed, so right-click → Open the first time, or run xattr -cr /Applications/WaveFlow.app to clear the quarantine flag.
+  Standalone download
+  Everything is also available as a raw bundle below — .AppImage, .deb, .rpm, .exe, .msi, .dmg.
+  Thanks to @owasd-cyber and @GoEverLo for the detailed reports, and keep the feedback coming. 💚
+ReleaseNotesUrl: https://github.com/InstaZDLL/WaveFlow/releases/tag/v1.9.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,96 @@
+# Created using wingetcreate 1.12.8.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: fjrevoredo.MiniDiarium
+PackageVersion: 0.7.3
+PackageLocale: en-US
+Publisher: fjrevoredo
+PublisherUrl: https://mini-diarium.com/
+PublisherSupportUrl: https://github.com/fjrevoredo/mini-diarium/issues
+PrivacyUrl: https://github.com/fjrevoredo/mini-diarium/blob/master/docs/PRIVACY.md
+Author: Francisco J. Revoredo
+PackageName: Mini Diarium
+PackageUrl: https://github.com/fjrevoredo/mini-diarium
+License: MIT
+LicenseUrl: https://github.com/fjrevoredo/mini-diarium/blob/master/LICENSE
+Copyright: Copyright (c) 2026 Francisco J. Revoredo
+ShortDescription: Encrypted, local-first journaling app
+Description: A local-first journal with serious encryption. Free, open source, and never touches the internet.
+Moniker: mini-diarium
+Tags:
+- privacy
+- journaling
+- journal
+- diary
+- foss
+- open-source
+- rust
+ReleaseNotes: |-
+  What's Changed
+
+  This release adds a manual "Recalculate Word Counts" action in Settings, an agent-friendly Markdown
+  mirror for every documentation page, and a file-based "Create New Journal" flow that lets you pick
+  the exact file. It also fixes Day One JSON and TXT imports, and corrects two website issues around
+  screenshot layout and sitemap freshness.
+
+  Added
+
+  - Agent-friendly docs mirrors (Copy page, llms-full.txt): Each documentation section page now has a
+    "Copy page" dropdown (Copy page, View as Markdown, Open in ChatGPT/Claude/Perplexity), a per-page
+    Markdown mirror at website/docs/<slug>.md, and a <link rel="alternate" type="text/markdown">
+    discovery tag. website/llms-full.txt adds the full concatenated Markdown text of every docs
+    section as a sibling to the curated llms.txt. An nginx Link: rel="canonical" header canonicalizes
+    each Markdown mirror to its HTML page rather than noindex, so ranking signal consolidates onto the
+    HTML page.
+  - Manual word count recalculation (TODO-0111, #275): Settings → Advanced now has a "Recalculate Word
+    Counts" button that rescans every entry in the journal and rewrites any stale word_count. The
+    recalculation skips locked entries and never touches an entry's last-modified date. It runs only
+    on demand, so there is no automatic or background recalculation.
+
+  Changed
+
+  - File-based "Create New Journal" flow (TODO-0112): Creating a journal no longer forces a new folder
+    per journal. On Windows/macOS/non-Flatpak Linux, + Create New Journal now opens a native Save
+    dialog (pre-filled with the default location and diary.db) so you pick or rename the exact file,
+    the same way Open Existing already worked. On the Flathub build, Create still shows a dialog-free
+    form (a native save dialog there can return an unusable temporary path), now with an editable
+    Filename field so you can create a second journal in the same default folder. If a database file
+    already exists at the location you choose, the app refuses with a clear error instead of a raw
+    filesystem failure.
+
+  Fixed
+
+  - Day One JSON import failed on entries with no text (#294): Day One omits the "text" key entirely
+    for blank entries, but the importer required it, so the whole file was rejected with a
+    missing-field error instead of importing anything. text now defaults to empty when absent, and
+    entries with no text content (after trimming) are skipped rather than imported as blank entries.
+  - Day One TXT import didn't recognize the current export date format: the date parser only ever
+    accepted the legacy "DD MMMM YYYY" layout, but Day One's own current export guide documents "MMMM
+    D, YYYY at H:MM:SS AM/PM TZ" (e.g. "June 24, 2016 at 10:59:06 AM MDT"), and a real export in that
+    format would fail every entry's date parse. The importer now tries the modern format first and
+    keeps the legacy format as a fallback. Also fixed: tab-delimited Weather:/Location: metadata lines
+    that real exports place after the date line were previously leaking into the imported title/text
+    instead of being skipped, and a blank entry (title and body both empty, including one with an
+    unparseable date) is now silently skipped instead of importing an empty entry or, for the bad-date
+    case, failing the whole import.
+  - Docs screenshot layout shift + sitemap freshness drift (SEO audit): Documentation pages now set
+    explicit image dimensions, read from the shipped image file at build time, so the page reserves
+    layout space and screenshots no longer shift as they load. The homepage and the fixed pages now
+    take their sitemap freshness date from a manually maintained date instead of the file's
+    modification time, so an unrelated CSS or JS rebuild no longer bumps those pages' freshness
+    signal.
+  - Website docs: Added screenshots and diagrams to 10 of the 11 user guide pages (FAQ excluded as
+    reference-only). Screenshots are live-captured from the real dev app (journal creation, the editor
+    toolbar and multi-entry Timeline, calendar/search/import/export, three Preferences tabs,
+    Statistics, and two Backups panel states), plus two hand-built SVG diagrams (the plugin sandbox
+    boundary and the backup retention/rotation lifecycle) in the site's own dark/gold palette. Images
+    ship as WebP (q80) via a new image handler in the docs generator that wraps each in a captioned
+    <figure class="prose-figure">. The convention is documented in website/CLAUDE.md.
+
+  [](https://sourceforge.net/projects/mini-diarium/files/v0.7.3/)
+ReleaseNotesUrl: https://github.com/fjrevoredo/mini-diarium/releases/tag/v0.7.3
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/fjrevoredo/mini-diarium/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

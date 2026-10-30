@@ -1,0 +1,170 @@
+# Created with deja-vu release workflow using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: vshulcz.deja-vu
+PackageVersion: 0.23.2
+PackageLocale: en-US
+Publisher: vshulcz
+PublisherUrl: https://github.com/vshulcz
+PublisherSupportUrl: https://github.com/vshulcz/deja-vu/issues
+PrivacyUrl: https://vshulcz.github.io/deja-vu/guide/privacy.html
+PackageName: deja-vu
+PackageUrl: https://vshulcz.github.io/deja-vu/
+License: MIT
+LicenseUrl: https://github.com/vshulcz/deja-vu/blob/HEAD/LICENSE
+ShortDescription: Search Claude Code, Codex and Cursor session history locally
+Tags:
+- aider
+- claude-code
+- cli
+- codex
+- cursor
+- mcp
+- memory
+ReleaseNotes: |-
+  Recall is twice as fast and the index a third smaller, with the same answers.
+  On a 19k-session store against 0.23.1, MCP recall p50 goes from 170 to 85 ms
+  and the index from 277 to 185 MB, and LongMemEval-S hit@1 is 88.9 against
+  88.1. Agents get less noise: the per-prompt block is injected for 51 unrelated
+  prompts in 240 instead of 171, and pages with nothing to find are a third of
+  their size. A recall that misses the deadline still reaches the agent, and
+  recall answers during an upgrade's rebuild. Cold builds cost 31% more CPU than
+  0.23.1 because the index now records the commands and edits behind each
+  conclusion. The index rebuilds once on upgrade.
+  Added
+  - deja mcp --context-search serves Qwen Code's External Context MCP
+    Profile v1: one context_search({query}) tool that answers from the local
+    index with at most five items in the profile's untrusted envelope, checked
+    against the profile's published schemas and test vectors. deja mcp itself
+    is unchanged. Register it with qwen mcp add deja-context deja mcp --context-search --timeout 8000 --include-tools context_search (#5662).
+  - DEJA_RECALL_GLOBAL=1 makes MCP recall, deja recall and deja mcp --context-search rank every project the same instead of putting the current
+    one first. Unset, nothing changes, and the hooks and the TUI keep their
+    scope. From @Terminator637 (#5674).
+  Changed
+  - Recall labels who wrote each line (Model said (no record backs it),
+    Prompt written by a parent agent, Output with an instruction to agents …)
+    and shows the command or edit a model's conclusion rests on above the
+    conclusion, from receipts written when the index is built or updated. A check or build
+    rule a person typed in an interactive Claude Code session of the current
+    project is shown as User said (this project), and the frame header and MCP
+    instructions say to follow those lines and nothing else. An instruction to
+    run something that no person in the project typed (tool output, a paste, a
+    parent agent's prompt, a claude -p run, another project) is cut to
+    [instruction to agents left out]; a rule the person took back is not
+    shown. The index version is now 109, so the store rebuilds once on the
+    first run.
+  - Recall no longer heads a page "No session is about this" when a session on
+    it holds most of a long query. The page says which session holds how many of
+    the query's words and which it lacks. A page that shares only filler words
+    with the query, or lacks the path or identifier it names, keeps the old line.
+    A word-form match that had to drop query words no longer outranks the
+    sessions that hold them.
+  - The instructions, skills and extensions ask for 1-3 exact terms on recall (a
+    file path, an error string, a flag or identifier) instead of the task's key
+    nouns. Queries of six or more words almost never matched.
+  - The instructions, skills and extensions no longer tell the agent that a
+    recalled rule outranks its defaults. Recall is untrusted reference data from
+    past transcripts: the agent names the rule in one line and asks before it
+    changes a command, a file write or a config. The standing-decisions block
+    says the same (#5676).
+  - The per-prompt line names the agent the memory came from and how long ago:
+    deja-vu — from Codex CLI, 4 months ago: "<quote>" (via <terms>), where it
+    used to say only "you have been here" and a date. The gates are unchanged:
+    a confident match only, at most once in twenty minutes per session. The dsh
+    card and the OpenClaw chat line read both shapes (#5660).
+  - A spawned subagent's instructions are no longer extended with recall, except
+    in Grok, whose main-thread hooks print to nobody. Over 60 days on one
+    machine, 1339 Claude Code subagents were handed a block and none used it,
+    and those blocks were 55% of all per-prompt recall. opencode task sessions
+    are not searched on their turns either, since the agent that wrote them had
+    the recall already (#5660).
+  - The per-prompt block is injected only when the prompt names something the
+    history holds: two of its lead words said in one message, or one word that
+    names a thing (a path, a symbol, a rare Latin-letter word). The block is also
+    dropped when none of its quoted lines holds two of the question's words.
+    Replayed over 240 real prompts: unrelated blocks 171 to 51, relevant 9 to 11,
+    mean block about 1750 to 600 bytes. On a store under 109 sessions the
+    rareness floor follows the store, so a new user's one-word question is still
+    answered (#5717, #5718).
+  - A recall page headed "No session is about this" lists each lead on one line
+    (where, when, which query words it holds, id), and only the first keeps an
+    excerpt. Agents followed one of those leads 6 times in 212. Replayed over 88
+    real recall calls: these pages are 0.37x the bytes, with no found answer lost
+    (#5722, #5723).
+  - The index is about a third smaller. Records are compressed from 256 bytes
+    instead of 8 KB, at the fastest level: a 19k-session store goes from 277 to
+    185 MB, a 38k one from 548 to 365 MB. Old and new binaries read each other's
+    index, so there is no rebuild (#5727, #5729).
+  - Recall is about twice as fast and uses a third of the memory. Session views
+    and bucket directories are kept between queries, ranking runs on slices
+    instead of maps of maps, and deja mcp checks the index for freshness on a
+    15 s timer instead of walking every transcript inside each call. On a
+    19k-session store against 0.23.1: MCP recall p50 170 to 85 ms, p95 293 to
+    158 ms, CPU per call 368 to 139 ms, allocation 245 to 91 MB; the per-prompt
+    hook p50 148 to 107 ms; deja search p50 203 to 161 ms. Output is
+    unchanged. A session another agent writes becomes searchable within about
+    15 s under deja mcp; the CLI and hooks still check on every call (#5728,
+    #5730, #5732, #5733, #5734, #5736).
+  - Receipt extraction scans tokens by hand instead of with three regexps. A cold
+    build of 19k sessions takes 59 s of CPU instead of 87 s with byte-identical
+    output. That is still 31% more than 0.23.1, which had no receipts (#5735,
+    #5737).
+  Fixed
+  - A two-word recall query where one word is in no session falls back to the
+    other word when it is rare enough to mean something. The page says which word
+    was dropped and shows at most three sessions. It used to come back empty
+    while the same word in a three-word query was dropped (#5711, #5712).
+  - Recall keeps the machine-wide best answer second on a project-first page, and
+    gives the first conclusion only part of the page. On 48 real recall calls the
+    answer that exists was found 10 times in 22 instead of 7 (#5708, #5709). The
+    added session no longer sets the page's first line, so a question with no
+    answer still opens with "No session is about this" (#5713, #5714).
+  - A recall that finishes after its wait note, and found sessions, rides once on
+    the next tool reply on the same connection. Agents repeated the exact call 2
+    times in 47 and the answer was lost (#5715, #5716).
+  - While an upgrade rebuilds the index, recall, recall_context and blame answer
+    from the previous index instead of "ask again". On a 40k-session stand 139 of
+    139 recalls during the rebuild returned hits, against 0 of 260. A build older
+    than 10 minutes no longer starts a second one (#5720, #5721).
+  - A warmup claim names the process that owns it. A live worker that goes quiet
+    under I/O contention, or waits on the index lock, is no longer replaced by a
+    second and third worker, and a finishing worker removes only its own claim.
+    Reported by @j2h4u (#5719, #5726).
+  - deja sources names a location for copilot-chat, roo, kilocode and
+    cherrystudio on a machine where they are not installed yet. Those rows
+    printed an empty column; each now names the directory deja reads once the
+    editor or app creates it: VS Code's User directory, the extension's
+    globalStorage directory, and Cherry Studio's default store (#5638).
+  - Three hook regressions found by replaying 333 real events against v0.23.1.
+    A failure that matches another session's only on a shell parse error no
+    longer gets that session's next command as a hint (unrelated hints 3 of 60
+    to 0). Ran/Output lines give up their room before the line that answers in
+    the per-prompt block. A program's own remedy in tool output is kept; only
+    text addressed to AI agents is cut. The frame names the user-rule
+    exception only when the block carries one (#5704).
+  - deja doctor reports MiniMax Code guidance as installed after deja install mcode-auto wrote the skill, instead of "unsupported" (#5700).
+  - Tab completion offers deja friction --settle and --unsettle in bash, zsh,
+    fish and PowerShell, and completes nothing for the wall id after them.
+    friction shared one case with fix and tests, which offered only --limit
+    and --json (#5640).
+  - deja how and deja restore run without an argument print the usage line
+    deja help prints. Each kept its own copy, and both had drifted: how
+    left out --all-projects and restore spelled -o file for
+    -o|--out file. deja files, a third copy, now reads the same entry
+    (#5641).
+  - opencode and Kilo keep one per-prompt recall block on a user message. The
+    plugins appended on every model call and only checked for their own block at
+    the end, so two copies of the plugin, or a host that keeps the message
+    between calls, stacked a block per call, alternating between two pointers.
+    The block is now put in place of any already there, and a block already on
+    the message is reused rather than asked for again. Run
+    deja install opencode-auto again to rewrite the plugin (#5682).
+  - deja show --offset -1 says --offset wants a number from 0 up and quotes
+    the value, as deja recall does. It shared one message with --limit,
+    "needs a positive integer", which is wrong for --offset: 0 is the first
+    message (#5650).
+  - deja help delete names the agents it takes instead of describing them: the
+    page closes with the list built from the two maps the command reads, so an
+ReleaseNotesUrl: https://github.com/vshulcz/deja-vu/releases/tag/v0.23.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

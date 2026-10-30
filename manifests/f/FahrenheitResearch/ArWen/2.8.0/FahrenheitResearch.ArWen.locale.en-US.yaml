@@ -1,0 +1,76 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.ArWen
+PackageVersion: 2.8.0
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/arwen/issues
+Author: Fahrenheit Research
+PackageName: ArWen
+PackageUrl: https://github.com/FahrenheitResearch/arwen
+License: Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+Copyright: Copyright © Fahrenheit Research
+CopyrightUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+ShortDescription: 'ArWen: GPU-native WRF-ARW-class regional weather model, verified against WRF v4.6.1'
+Description: "ArWen is an independent, GPU-native implementation of a WRF-ARW-class regional atmospheric model. It is not affiliated with or endorsed by NCAR or UCAR. The name is a wordmark for \"the ARW solver, GPU-native\"; the Python package is currently named gpuwm. Safety. ArWen is a research and educational tool. It is never a substitute for official forecasts and warnings from your national meteorological service. Do not use it to make safety decisions. Regional numerical weather prediction at convective scale has mostly required institutional clusters, which means most of the world runs on global-model guidance at 10-25 km. ArWen's aim is to put a verified, kilometer-scale limited-area model on a single consumer GPU: pick a point, size a nest ladder to your card, pull public analysis data, and run a 1 km (or 500 m) simulation of your own area on hardware you own -- especially in places where no national convection-permitting model exists."
+Moniker: arwen
+ReleaseNotes: |-
+  ArWen 2.8.0 is a feature and fix release with Desktop 1.0.8, and the first to ship the Weather Library, ArWen's graphical interface in your browser, beside the desktop app.
+  - Windows desktop: extract and open ArWen.exe. Setup installs and checks the matching runtime, tables and geography.
+  - Linux desktop: follow the included installation guide. The graphical application requires x86-64 Linux with glibc 2.39 or newer.
+  - Integration kit, desktop source, verification records, and checksums.
+  New
+  The Weather Library
+  - gpuwm gui opens the Weather Library in your browser: a page served from this computer with past storms, New forecast, My forecasts, Files, Machines, Settings and a map for each run. See the GUI guide.
+  - It listens on port 8766 or the next free one of ten (--port N picks another) and its link carries a token, so keep the link to yourself. --root DIR names your forecasts' folder, --no-open prints the link without opening a browser, and a --bind address other computers can reach needs --allow-remote.
+  - Forecasts started from the page run detached, so closing the tab, the browser or the server never stops one, and a reload, a restart or a forecast started in a terminal shows the same.
+  - ArWen Desktop keeps shipping with its features unchanged; new features arrive in the Weather Library.
+  - 17 cited storm events (11 tropical cyclones, 6 tornadoes), each with a best simulation for 8, 12, 16, 24 and 32 GB cards that passes the engine's fit check. Run the best simulation for this event starts the one for your card, Customise this run opens it in New forecast, and Find an event fills in the box, date and length.
+  - Until gpuwm fetch-geog --datasets wrf has set up the geography data, Start and Run the best simulation for this event refuse with that command and write nothing.
+  - New forecast starts from any past date and hour. A start a source's archive or publisher does not hold is refused with the reason before anything runs, and one the publisher skipped is refused, not queued. It sizes the run for your card, prices each choice of vertical levels for that grid, and has a Physics step: one table per part of the model, each scheme with its cost, checked by the engine at the run's grid, place and time.
+  - A run's map places each picture on the grid it was drawn on, storm-following nests included, over coastlines, borders, states, lakes and US counties served from this computer. A run across the 180th meridian is framed on the degrees it covers.
+  - Watching a run shows each grid's pictures as they are drawn and which grid sets the pace. While a forecast prepares, a single-domain HRRR one included, its page shows the download, the step, the grid being built, any kernel compile and, for a forecast starting beside its preparation, how many boundary times are ready, whether it was started from the page, gpuwm run-plan or gpuwm go, and gpuwm go prints the reading of the starting data and each grid's start state as steps in its terminal.
+  - Every button shows its exact gpuwm command, and every command the page runs goes into the run's commands.log. A refused fit, a failed forecast and a stopped one each say why in a plain sentence.
+  - Downscale on a finished or stopped forecast's map: click a centre or draw a box, choose how fine, how long and for which card, Review the planned grid and its card memory, and Start it as a new forecast.
+  - A Machines page lists this computer and any SSH host you add with each one's card and state, draws any forecast's pictures on any of them, and starts and stops a cloud machine. A remote run whose updates stopped offers Resume updates. gpuwm machines does the same in a terminal.
+  - A busy card offers Queue it beside Start now. Queued forecasts wait in order, survive a restart and start by themselves when the card is free, or once a check confirms their start is published. Without CuPy Start is off, and gpuwm gui --owner-file PATH shares the card with other programs.
+  - Scripts can ask the page the same questions: GET /api/sources/availability and POST /api/runs/RUN/downscale.
+  The assistant (optional, off by default)
+  - An assistant panel, off until you turn it on in Settings, in the panel or with gpuwm assistant on. While it is off nothing is downloaded, no model server runs and no card memory is used.
+  - Turning it on shows the model for your card with its size and licence and asks before any download. It uses a server you already run (LM Studio, Ollama, llama.cpp) or a model sized to your card, Qwen3.5 4B, Qwen3.5 9B or Qwen3.8 27B, each Apache-2.0 and checked against its published SHA-256.
+  - It answers from the Weather Library, the run folder and the engine's fit check, says where each answer came from, and shows each decision's options with their probabilities. gpuwm assistant say asks it from a terminal, and gpuwm assistant off --remove deletes its model.
+  Data sources
+  - --source icon-d2 starts a forecast from DWD's 2.2 km ICON-D2 over Germany and its neighbours, on its 65 model levels and with its own cloud, ice, rain, snow and graupel. Its data is CC BY 4.0: anything you publish from it carries the attribution "Source: Deutscher Wetterdienst". See SOURCES.
+  - ERA5 reads from Google's analysis-ready store, every hour from 1940 to its newest published day, with no account or key.
+  Forecasts and the command line
+  - Pictures are drawn while the forecast runs on every route that writes history, gpuwm cycle included; in 2.7.7 gpuwm go from GFS, gpuwm downscale, ensemble members and gpuwm run --wrfinput and --met-em drew only the analysis frame while the forecast ran. Up to three frames draw at once as memory allows, and the end-of-run render draws only what is still missing.
+  - gpuwm go shows each nest's progress, it and gpuwm run-plan show each history write and checkpoint, and events.jsonl records each frame drawn. gpuwm go stops a forecast that stops making progress (exit 124) and keeps its error lines; a first kernel compile, live pictures and writes are given their time.
+  - gpuwm go --section cuts the xsec: products along a line on every picture drawn.
+  - gpuwm warm-kernels compiles the forecast kernels for this card before the first forecast, and gpuwm run-plan shows a first run's compile as it happens.
+  - gpuwm physics-catalog prints the scheme catalog and the engine's check in a terminal, refusing a misspelled setting by name, and --into EXPERIMENT.toml writes a mix into an existing experiment file. gpuwm domain takes --cumulus grid and --physics-choices JSON.
+  - Two physics suites put Thompson microphysics with MYNN surface and boundary layers over the RUC land surface, one with radiation by day and night and one daytime only. gpuwm domain, the Physics step and gpuwm physics-catalog offer them, and the catalog's new Coastal fog and low stratus preset starts the first.
+  - gpuwm downscale-parent RUN lists every domain a run wrote with its spacing and frame count and names the finest as the default parent.
+  - gpuwm run-plan --catalog lists the products a local run can draw, the first hour each can exist at and why the others cannot, and the terminal's plot picker offers that list.
+  - gpuwm domain and gpuwm domain-fit --point take --point-extent-km (default 6000), and a run plan's intent takes tiles, ack and point_extent_km.
+  - Config keys that were accepted by name alone, such as physics_mode, e_vert and every [fetch] key, are checked against a declared type and default.
+  - The observation tools rw_atms, rw_igra2, rw_amv, rw_ndbc, rw_gnssro and rw_wis2 build from this repository's source. rw_goes gains bt, colocate, superobs, quicklook and forward, and rw_asos gains table, networks, awc and --product asos1min, which reads one-minute ASOS observations by station.
+
+  Changed defaults
+  - Preparation is chained: a single-domain GFS, ERA5 or mapped-source forecast starts once its start state and next forcing time are prepared, when the RAM holds every boundary interval beside the forecast, and prepares the rest while it runs, with byte-identical history files. Other routes prepare first as before and say why. GPUWM_CHAINED_PREP=0 turns it off.
+  - --preprocess-backend auto, the default, prepares on the CPU when the card is busy (50% use or more), nearly full (25% free or less) or cannot be opened by CUDA, and otherwise on the card, CUDA 13 included, saying why. HRRR preparation and RW-WPS use it too, so an HRRR tree prepares without CuPy or a usable card, and a CPU preparation starts at most eight worker threads unless --preprocess-workers names more.
+  - GFS configurations default to WRF's own 50 hPa model top instead of 100 hPa. gpuwm go and the run plans fetch the extra levels, and a download folder fetched for another top is refused with that reason.
+  - [static.highres] takes land use from CGLC-MODIS-LCZ, WRF's 100 m global land cover (CC BY 4.0), everywhere, a 2.28 GB file downloaded once per cache and checked; landcover_source = "annual-nlcd" keeps the 30 m map inside the United States.
+  - A domain at 1 km or finer builds its terrain from Copernicus GLO-30 (about 30 m) by default instead of 30 arc-second GMTED when its configuration declares no [static.highres] block; the console first names the tiles, the cached share, the download size and the cache folder. enabled = false keeps the coarser terrain, and the new max_dx_m key limits a block by spacing. A cache prepared before this for such a tree is refused and must be prepared again, once.
+  - A run plan's ERA5 reads Google's keyless store unless era5_provider = "cds" keeps the Copernicus service.
+  - gpuwm fetch --source gdas takes the hourly files GDAS publishes; --cadence 3 keeps every third hour.
+  - The default plot sets name only products a local run draws, so they no longer ask for gusts, precipitation type or total cloud cover. all draws every named product the run can draw and no longer every stored variable beside them; stored variables are the variables keyword, each in a folder of its own name.
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/arwen/releases/tag/v2.8.0
+InstallationNotes: |-
+  This application requires an NVIDIA GPU with CUDA support to run.
+  Will not function on integrated graphics or non-NVIDIA hardware.
+  Without compatible hardware, the application will fail to launch.
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

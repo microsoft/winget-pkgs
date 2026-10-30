@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: BlackwellSystems.agent-lsp
+PackageVersion: 0.23.1
+PackageLocale: en-US
+Publisher: Blackwell Systems
+PublisherUrl: https://github.com/blackwell-systems
+PublisherSupportUrl: https://github.com/blackwell-systems/agent-lsp/issues
+PackageName: agent-lsp
+PackageUrl: https://github.com/blackwell-systems/agent-lsp
+License: MIT
+LicenseUrl: https://github.com/blackwell-systems/agent-lsp/blob/main/LICENSE
+ShortDescription: MCP server giving AI agents reliable access to language server protocol
+Description: agent-lsp is a stateful MCP server over real language servers. It keeps the language server's semantic index warm and adds a skill layer that turns multi-step code operations into single, correct workflows. 50 tools, 30 languages, persistent sessions.
+Tags:
+- ai
+- code-intelligence
+- developer-tools
+- language-server
+- lsp
+- mcp
+ReleaseNotes: |-
+  ### Fixed
+  • **`.tsx` and `.jsx` files were opened as plain TypeScript/JavaScript** ([#73](https://github.com/blackwell-systems/agent-lsp/pull/73))：`didOpen` sent the language family (`typescript`, `javascript`) instead of the LSP identifiers `typescriptreact` and `javascriptreact`, so typescript-language-server parsed a `.tsx` file opened before its project loaded it as plain TypeScript and reported every JSX element as a syntax error until the server restarted. Contributed by [@bviolier](https://github.com/bviolier).
+  • **`safe_apply_edit` always failed under the default output format** ([#70](https://github.com/blackwell-systems/agent-lsp/pull/70))：it re-parsed the preview tool's rendered output as JSON, which is GCF by default, so every call returned "failed to parse preview result" and nothing was applied. It now takes the preview result directly. Contributed by [@davalillo](https://github.com/davalillo).
+  • **`safe_apply_edit` no longer applies an edit it could not verify**：an edit was applied whenever the preview reported no new errors, including when the diagnostics wait timed out or the server was still indexing, in which case nothing had been checked (a cold gopls was observed applying a type error this way). It now applies only when the diagnostics settled, and otherwise returns `applied: false` with the reason; `apply_edit` remains available to write an edit without verification.
+  • **`position_pattern` with the `@@text@@` form never matched** ([#70](https://github.com/blackwell-systems/agent-lsp/pull/70))：the closing marker stayed inside the search text, although every tool schema documents this form. It now matches the text between the markers and places the cursor at the end of the match; ambiguous or empty patterns are errors. On files that start with a UTF-8 byte-order mark, line-1 columns count the BOM as one UTF-16 unit, as the language servers and the other position paths do. Contributed by [@davalillo](https://github.com/davalillo).
+
+  ### Changed
+  • **CI refreshes the package index before every `apt-get install`**, so a dependency Ubuntu has replaced on its mirror no longer fails the clangd install with a 404.
+ReleaseNotesUrl: https://github.com/blackwell-systems/agent-lsp/releases/tag/v0.23.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
