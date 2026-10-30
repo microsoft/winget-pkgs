@@ -1,0 +1,43 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: mateo-ki.VPNParser
+PackageVersion: 1.15.8
+PackageLocale: zh-CN
+ShortDescription: Windows 桌面程序：采集订阅、解析成节点、跑代理，并把代理质量实测出来。
+Description: VPN Parser 是用 Rust + egui 编写的 Windows 桌面程序，负责采集免费或自建订阅、解析成节点、跑代理，并把代理质量实测出来。订阅入口包括带 `YYYY-MM-DD` 日期占位符的订阅 URL、Gist 搜索页发现，以及 Telegram 频道预览（裸节点链接和订阅链接两类都取，节点只增不删）。解析支持 `ss` `vmess` `vless` `trojan` `hysteria2/hy2` `socks5` `http(s)` 分享链接，以及 Clash / Clash Meta YAML、Base64 与混合文本。延迟以经内核访问 Google `generate_204` 的真实握手为准，24 小时出口健康条按实测绘制，而不是看内核上报的状态。Windows 上它同时管理系统代理、TUN（提权交接后只保留一个实例）和终端 `HTTP_PROXY` 环境变量，按 exe 路径添加防火墙允许规则，支持单实例互斥与托盘，记录出口切换历史并按天统计规则命中，同时提供强制 bearer 鉴权的本地 HTTP API 与 mihomo / sing-box / xray 配置导出。安装包不含内核，内核缺失时由程序按需下载。
+Tags:
+- clash
+- sing-box
+- 代理
+- 出口健康
+- 测速
+- 节点解析
+- 订阅
+ReleaseNotes: |-
+  🚀 VPN Parser v1.15.8 发布说明 / Release Notes
+  🎉 欢迎使用 VPN Parser v1.15.8！本版全面构筑 GEO 规则“三道防线”体系打破损坏误判死循环、彻底消除 UI 文本截断双提示框、根治 VP-Core TUN 网卡序号累加，并原生集成 Scoop 极速安装与自动发版同步：
+  🛡️ GEO 规则三道防线体系（彻底根治误报与误删死循环）
+  - 第一道防线：自愈诊断与隔离（打破死循环）：
+    - 精准区分“规则分类不存在”与“文件物理损坏”，遇到 not found in geosite.dat 或类别未找到错误时，绝不误删良性规则库；
+    - 弹出清晰精准的引导提示，彻底消除以往“下载成功 → 启动报损坏 → 自动误删 → 重新下载”的死循环。
+  - 第二道防线：MihomoCompiler 编译期安全过滤（主动防御）：
+    - 基于 Protobuf Wire-Format 极速检索本地 dat 库分类，对未知或缺失的 GEOSITE / GEOIP 规则自动跳过，保证生成的配置永远不被内核拒启；
+    - 对用户自定义追加规则（override_yaml）与 nameserver_policy 同步增加安全存在性守卫。
+  - 第三道防线：订阅规则提取与导入清洗（入口防御）：
+    - 提取 Clash 规则时，自动将 GEOIP,LAN 规范化为 GEOIP,private；
+    - 在规则提取、原生 YAML 块提纯、剪贴板导入及 IR 中间表示转换的全链路上，自动清洗并剔除未知/缺失标签。
+  🎨 UI 体验优化
+  - 根治鼠标悬停双重提示框（Dual Tooltip）：
+    - 针对 egui 0.31 的 Label::truncate() 机制进行全量审计；
+    - 清理网络卡片、状态卡、活动连接列表、DNS 解析面板、流量监控排行、节点卡片中冗余挂载的同名 .on_hover_text(...)，彻底杜绝双层重叠气泡。
+  🔌 VP-Core TUN 网卡与设备治理
+  - 根治网卡序号递增（vpcore-tun 2, 3...）：
+    - Windows Wintun 驱动初始化时显式绑定静态确定性设备 GUID（0x7670636f_7265_7475_6e30_303030303031_u128）；
+    - 每次开关 TUN 始终复用同一固定网卡设备，网卡名称永远锁定为 vpcore-tun。
+  📦 Scoop 包管理器集成与自动发版
+  - Scoop 官方/直连单行安装（方案 A）：
+    - 根目录内置 vpn-parser.json 清单，用户无需额外添加第三方 bucket，直接通过 GitHub Raw URL 即可一行命令安装并自动持久化 data/ 目录；
+    - 在 .github/workflows/windows.yml CI 发版流中增加自动化任务，每次发布 Release Tag 自动提取便携包 SHA-256 并同步更新清单至 main 分支。
+ManifestType: locale
+ManifestVersion: 1.28.0
