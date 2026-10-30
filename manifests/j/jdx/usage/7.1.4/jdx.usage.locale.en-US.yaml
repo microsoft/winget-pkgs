@@ -1,0 +1,45 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: jdx.usage
+PackageVersion: 7.1.4
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://jdx.dev/
+PublisherSupportUrl: https://github.com/jdx/usage/issues
+Author: Jeff Dickey
+PackageName: usage
+PackageUrl: https://usage.jdx.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+ShortDescription: A specification for CLIs
+Description: |-
+  Usage is a spec and CLI for defining CLI tools. Arguments, flags, environment variables, and config files can all be defined in a Usage spec. It can be thought of like OpenAPI (swagger) for CLIs. Here are some potential reasons for defining your CLI with a Usage spec:
+
+  - Generate autocompletion scripts
+  - Generate markdown documentation
+  - Generate man pages
+  - Generate type-safe SDK client libraries for TypeScript, Python, and Rust
+  - Use an advanced arg parser in any language
+  - Scaffold one spec into different CLI frameworks-even different languages
+  - [coming soon] Host your CLI documentation on usage.sh
+Moniker: usage
+Tags:
+- cli
+- spec
+ReleaseNotes: |-
+  Fixed
+  - (lib) A mount run= that gets its spec from another usage-shebang script now works even when the environment holds a value that one of that script's env-bound flags rejects (#1591, @jdx). For example, if the child declares flag "--mode <m>" env="X_MODE" { choices "a" "b" }, then X_MODE=zzz ./parent sub used to fail with Invalid choice for option mode: zzz (exit 181), and completion failed the same way. When usage runs the script itself and the parse fails, it now drops the env values the spec rejects and keeps the valid ones. If the parse still fails, the original error is reported. Running the script directly still reports invalid env values, and a bad value typed on the command line is still an error.
+    When a mount does fail, the error now names the command being resolved:
+    could not read the commands mounted under `sub`: exited with code 1
+    sh -c ./child2
+    This message comes from usage-lib, so CLIs built on it show the same wording. Script exit codes have not changed, and they are now documented in docs/cli/scripts.md: the script's own code when it runs, 1 when the command line doesn't satisfy the spec, and 181 when usage can't read or run something the spec depends on, such as an invalid spec or a failing mount.
+  - (cli) The Cobra integration now quotes flag defaults that KDL would otherwise read as non-strings (#1595, @jdx). Before this fix, a Bool flag defaulting to true or an Int flag defaulting to -1 produced default=true or default=-1, and usage lint rejected the spec. Defaults such as true, false, null, inf, -inf, nan, signed numbers (-1, +1, -0.5) and values containing [ or ] are now written as quoted strings. Plain values such as json are still written without quotes.
+ReleaseNotesUrl: https://github.com/jdx/usage/releases/tag/v7.1.4
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://usage.jdx.dev/cli/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
