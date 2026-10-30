@@ -1,0 +1,119 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Duplicati.Duplicati.Canary
+PackageVersion: 2.4.0.105
+PackageLocale: en-US
+Publisher: Duplicati Team
+PublisherUrl: https://www.duplicati.com/
+PublisherSupportUrl: https://github.com/duplicati/duplicati/issues
+Author: Kenneth Skovhede
+PackageName: Duplicati 2
+PackageUrl: https://www.duplicati.com/
+License: MIT
+LicenseUrl: https://github.com/duplicati/duplicati/blob/HEAD/LICENSE
+ShortDescription: Duplicati is a free, open source, backup client that securely stores encrypted, incremental, compressed backups on cloud storage services and remote file servers.
+Moniker: duplicati-canary
+Tags:
+- backup
+- crypted
+- data
+- duplicati
+- incremental
+ReleaseNotes: |-
+  This release is a canary release intended to be used for testing.
+  Point-in-time restores from versioned storage
+  Storage that supports versioning keeps a new version of a file each time it is overwritten or deleted. The new --remote-point-in-time option makes Duplicati read the storage as it was at a given time, either relative such as --remote-point-in-time=2D4h or as an absolute time. While the option is set, the destination is read-only, and listing and downloading use the latest version available at that time.
+  This makes it possible to restore from a damaged or tampered versioned destination without first moving the old versions into a new bucket by hand.
+  Object lock handling was also improved. A destination that does not support object locks is now detected, so Duplicati no longer retries the lock for every file, and a lock failure caused by missing support is reported as a warning since the backup or repair itself completed.
+
+  Duplicati Storage improvements
+  Duplicati Storage now supports object locks, and it can be used as a secondary destination in a multi-destination backup.
+
+  Delta tracking for Microsoft 365 and Google Workspace
+  Backups of Microsoft 365 and Google Workspace now store the delta tokens returned by the services. Each following backup starts from the stored tokens and only lists the items that changed, instead of walking the full mailbox or drive. This can make repeated backups of large tenants much faster and reduces throttling, at the cost of some memory and a larger local database. The progress counter is not shown while a delta walk runs, as the total is not known.
+  Delta tracking is on by default and can be turned off per item type:
+  - Microsoft 365: --office365-disable-mail-delta and --office365-disable-drive-delta
+  - Google Workspace: --google-disable-gmail-delta, --google-disable-drive-delta, --google-disable-calendar-delta and --google-disable-contacts-delta
+  If a drive reports more changes than --office365-drive-delta-max-items or --google-drive-delta-max-items (default 100000), the drive is walked in full instead.
+  Google Workspace now also treats a 403 caused by an exceeded quota, and similar quota messages, as a temporary failure and retries with backoff.
+
+  Local database update
+  The delta tokens are stored in the local backup database, which requires an update of the local database schema to version 22. The update adds a table for source provider state and is applied to all backup databases on first use, not only those for Microsoft 365 and Google Workspace. After the update, the local databases can no longer be opened by earlier versions of Duplicati.
+  If you need to downgrade, the bundled database tool (duplicati-database-tool) can downgrade the local databases back to version 21. Downgrading removes the stored delta tokens, so the next backup of Microsoft 365 or Google Workspace walks all items again, but otherwise causes no data loss.
+
+  Restore tests from the console
+  The console can now start restore tests on a connected machine, either on a schedule or on demand. The duplicati-server-util tool also has a new restore-test command.
+
+  Secret provider switches
+  The secret provider in use, and the default secret provider, are now reported in the system information. New options make it possible to disable the configured secret provider, the default secret provider, or both.
+
+  No more 32-bit Windows builds
+  The 32-bit Windows (x86) packages are no longer part of the regular releases. They can still be built from source.
+
+  SQLite update
+  SQLite is updated to 3.54.0. The custom build for ARMv7 has been removed, and the Linux requirement is once again GLIBC 2.28.
+
+  Files missing from backups
+  Three cases where files were left out of a backup without a warning were fixed, thanks @JamBalaya56562:
+  - When one source is inside another, the inner source was dropped if a folder on the way held an ignore marker such as CACHEDIR.TAG, had excluded attributes, was marked as excluded by an extended attribute, or was a symbolic link that is not followed. The files below the inner source were then missing from the backup.
+  - With --usn-policy, a source that is a single file was checked against the folders above it up to the drive root. As the root is usually hidden and a system folder, the file was excluded from the second backup on when hidden or system files were excluded.
+  - A WebDAV share mapped to a drive letter on Windows could not be used as a source, as the listing returned names with a trailing null character. The file picker failed, and a backup never finished.
+  Symbolic links made by WSL are also read as symbolic links on Windows, instead of failing with a warning on every run.
+
+  Symbolic links and permissions
+  With --symlink-policy=follow, the owner, permissions and extended attributes of a linked file were taken from the link, so with --restore-permissions a file came back with mode 0777 and its extended attributes were lost. These are now read from the target.
+  With --restore-symlink-metadata and --restore-permissions, restoring a symbolic link set the permissions on the file the link points to, making it world-writable. The permissions are now only set on entries that are not links.
+  Thanks @JamBalaya56562 for both fixes.
+
+  Restore fixes
+  More restore problems were fixed, thanks @JamBalaya56562:
+  - Restoring without --overwrite cut a file that had data appended since the backup back to the backed-up length, losing the appended data. The file is now kept, and the backed-up version is restored beside it.
+  - Restoring a symbolic link to a file failed with errors when the target was missing, or when a link that points nowhere was already at the path.
+  - Relative symbolic link targets now have their separators mapped when restoring on another operating system.
+  - A Windows backup restored to the original location on Linux or macOS was put in a folder named C: in the working folder. It is now restored below /C/ as intended.
+  - --restore-path written without =, such as --restore-path D:\target, made the restore go to the original location. It now stops with an error.
+  - An empty file that cannot be created is now reported as not restored.
+  - A legacy dry run restore no longer reports errors for files it did not write, and reports the number of files it would restore.
+  - Unchecking a root folder in the old UI restore picker could leave files below it selected, and restored.
+
+  DatabaseTool cleanup
+  duplicati-database-tool cleanup reported the server database as orphaned, so cleanup --force deleted the live Duplicati-server.sqlite. It also deleted the copy of the server database that is made before a schema upgrade, and any .sqlite file from other applications in the data folder. Cleanup now only deletes orphaned local and sync databases, thanks @JamBalaya56562.
+
+  Stopping a backup
+  Continuing the work from the previous canaries, "Stop now" no longer waits for a stuck source listing. A stop or abort pressed while the task was still being set up, which often happened on the first run after the server started, was dropped and is now kept, thanks @JamBalaya56562.
+
+  Notifications
+  A backup that ended with a warning or error added a new notification without removing the one from its earlier run, so notifications could grow to thousands. Only the latest run's notification is now kept. "Dismiss all" now uses a single request instead of one per notification, and reading and dismissing a notification no longer loads all of them, thanks @JamBalaya56562.
+
+  Storage provider fixes
+  - WebDAV listings on Linux and macOS failed when the folder name had an escaped character such as # or a space, a problem since 2.2.0.1, thanks @JamBalaya56562.
+  - Jottacloud downloads and listings could hang forever when the server stopped sending. They now observe --read-write-timeout, thanks @djdubd.
+  - --s3-list-api-version had no effect with the AWS client. The undocumented --list-api-version option still works but is now reported as deprecated, thanks @JamBalaya56562.
+  - Neon Object Storage is added to the S3 provider list, thanks @rishi-raj-jain.
+
+  Other fixes
+  - Behind a reverse proxy that does not pass the Host header on, the browser rejected the refresh token cookie and the login looped. The cookie is now set for the host the browser asked for, thanks @JamBalaya56562.
+  - If the server was restarted while the machine was suspended, it stayed paused after the restart, thanks @JamBalaya56562.
+  - AUTOUPDATER_Duplicati_SKIP_UPDATE now stops all update checks, as the help text says, thanks @JamBalaya56562.
+  - The Template report output format now uses the bundled templates and fills in the values, thanks @JamBalaya56562.
+  - preload.json is now read by more tools, and DatabaseTool, SourceTool and SecretTool have their own sections. DatabaseTool and SourceTool used to read the serverutil section, so settings meant for them there must be moved to databasetool or sourcetool, thanks @JamBalaya56562.
+
+  Security hardening
+  - A multi-destination backup that fails no longer logs the full destination configuration, which could contain secrets.
+  - The recovery tool now rejects file names from the storage that would write outside the target folder.
+  - The Agent pre-shared key is now compared in constant time.
+  - StreamJsonRpc, MimeKit and System.Security.Cryptography.Pkcs were updated to address published advisories, thanks @JamBalaya56562.
+
+  Detailed list of changes
+  - Added the --remote-point-in-time option for restoring from versioned storage
+  - Improved object lock handling for destinations without object lock support
+  - Added object lock support for Duplicati Storage
+  - Added support for Duplicati Storage as a secondary destination
+  - Added delta tracking for Microsoft 365 mail and drives
+  - Added delta tracking for Google Workspace Gmail, Drive, Calendar and Contacts
+  - Updated the local database schema to version 22 with a table for source provider state
+  - Fixed Google Workspace quota errors not being retried with backoff
+ReleaseNotesUrl: https://github.com/duplicati/duplicati/releases/tag/v2.4.0.105_canary_2026-10-24
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
