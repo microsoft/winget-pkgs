@@ -1,0 +1,51 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: jdx.mise
+PackageVersion: 2026.10.24
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/jdx/mise
+Author: jdx
+PackageName: mise-en-place
+PackageUrl: https://mise.en.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+ShortDescription: Your dev env, already prepped.
+Description: Your dev env, already prepped. One tool to manage languages, env vars, and tasks per project, reproducibly.
+Moniker: mise
+Tags:
+- cli
+- dev-tool
+- env
+- environment
+- task
+ReleaseNotes: |-
+  Added
+  - Container images as daemons (experimental). A custom daemon with an image key runs through docker run or podman run. It supports ports, readiness checks, depends, the proxy and mise daemons logs, just like other daemons. Every port is published on 127.0.0.1 only. Containers are named per project and worktree, so two checkouts never clash, and a stale container left behind by a killed run is removed before the next start. runtime = "auto" (the default) uses docker if it is on PATH, otherwise podman. You can set MISE_CONTAINER_RUNTIME to use any Docker-compatible CLI. data_mount bind-mounts a per-checkout data directory, and ready_cmd can use {{ runtime }}, {{ container }} and port placeholders. Limitations: mise does not pull or build images or start the Docker/Podman service, only TCP ports are supported, and starting a container daemon on Windows fails. #15182 (@jdx)
+    [daemons.cockroach]
+    image = "cockroachdb/cockroach:v25.1.0"
+    command = ["start-single-node", "--insecure"]
+    port = { auto = true, base = 26257 }
+    ports.http = { container = 8080, auto = true, base = 27000 }
+    data_mount = "/cockroach/cockroach-data"
+    ready_cmd = "{{ runtime }} exec {{ container }} cockroach sql --insecure -e 'select 1'"
+  - Per-worktree named ports for daemon presets. Named preset ports such as http_port on cockroachdb or monitor_port on nats now accept { auto = true, base, stride }, just like the primary port. Each linked worktree adds its slot to the port's own base. Before, these ports were either fixed or offset from the preset default. When base is omitted, it defaults to the preset's port. Integer overrides still work as before. mise now reports a load error if an auto named port collides with another daemon's port in the same project. #15181 (@jdx)
+    [daemons.cockroach]
+    preset = "cockroachdb"
+    version = "26"
+    port = { auto = true, base = 26258 }
+    ports.http_port = { auto = true, base = 27000 }
+  - position = "append" for env._.path. Appended entries go after tool paths and before the inherited PATH. This lets directories like ~/bin or ~/.cargo/bin stop shadowing tools that mise installs. The default is still "prepend". #15158 (@jdx, @Mossop)
+    [env]
+    _.path = [
+      "bin",
+      { path = ["~/bin", "~/.cargo/bin"], position = "append" },
+    ]
+  - extra_ca_certs setting. extra_ca_certs (MISE_EXTRA_CA_CERTS) points to a PEM bundle that mise trusts in addition to its usual roots, on every platform. Use it when you're behind a traffic-inspecting proxy such as Socket Firewall. It covers mise's own HTTP requests: downloads, version lookups, GitHub API calls, attestation checks and vfox plugins. Programs that mise runs, such as git
+ReleaseNotesUrl: https://github.com/jdx/mise/releases/tag/v2026.10.24
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
