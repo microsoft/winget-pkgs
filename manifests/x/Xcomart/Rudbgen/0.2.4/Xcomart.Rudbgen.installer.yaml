@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+
+PackageIdentifier: Xcomart.Rudbgen
+PackageVersion: 0.2.4
+MinimumOSVersion: 10.0.0.0
+InstallerType: inno
+# packaging/windows/rudbgen.iss sets PrivilegesRequired=lowest, so the installer never
+# elevates and {autopf} resolves per-user: it lands in %LOCALAPPDATA%\Programs\rudbgen.
+Scope: user
+InstallModes:
+- interactive
+- silent
+- silentWithProgress
+UpgradeBehavior: install
+# rudbgen.exe imports VCRUNTIME140.dll; install the runtime before launching it.
+Dependencies:
+  PackageDependencies:
+  - PackageIdentifier: Microsoft.VCRedist.2015+.x64
+ReleaseDate: 2026-10-26
+Installers:
+# The x64 build also runs under emulation on ARM64 Windows, but there is no native
+# arm64 artifact to declare here yet.
+- Architecture: x64
+  InstallerUrl: https://github.com/xcomart/rudbgen/releases/download/v0.2.4/rudbgen-v0.2.4-x86_64-pc-windows-msvc-setup.exe
+  # SHA256 of the published asset, computed from the download itself:
+  #
+  #   Invoke-WebRequest -Uri <InstallerUrl> -OutFile setup.exe
+  #   (Get-FileHash -Algorithm SHA256 .\setup.exe).Hash
+  #
+  # The winget-pkgs PR pipeline downloads the URL and compares, so a wrong hash
+  # fails validation.
+  InstallerSha256: 77CF6A6FB38E93DD500CC466578D6CBBCF0BB2AA93260C7475E3A77A364963C6
+  # Inno Setup appends "_is1" to the AppId when it writes its Uninstall registry key,
+  # so this is packaging/windows/rudbgen.iss's AppId plus that suffix. It is how winget
+  # recognises an already-installed copy, and it is the same string
+  # crates/rudbgen-app/src/update.rs looks the entry up by. See
+  # packaging/winget/README.md.
+  ProductCode: '{9A84AE34-E54B-46EA-B55D-61C0666D6890}_is1'
+ManifestType: installer
+ManifestVersion: 1.12.0
