@@ -1,0 +1,32 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: soulvon.AnyBridge
+PackageVersion: 1.0.7
+PackageLocale: zh-CN
+Publisher: anybridge
+PublisherUrl: https://github.com/soulvon
+PublisherSupportUrl: https://github.com/soulvon/AnyBridge/issues
+PackageName: AnyBridge
+PackageUrl: https://soulvon.github.io/AnyBridge/
+License: MIT
+LicenseUrl: https://github.com/soulvon/AnyBridge/blob/HEAD/LICENSE
+ShortDescription: AI 编程工具的本地 BYOK 模型接入与配置管理客户端。
+Description: AnyBridge 是一款简单方便的本地 BYOK（自带渠道 / Key）模型接入与配置管理客户端，解决各类 AI 编程工具无法自由配置模型或手写配置麻烦的问题。无需手写配置文件、无需搭建复杂环境，在图形界面中即可把第三方中转站（OneAPI / NewAPI 等）、自建网关以及 DeepSeek、Claude、GPT 等自定义模型快捷接入常用的桌面 IDE 与终端 CLI 工具，支持 Claude Code、Codex、Windsurf、Cursor、Devin 等 12 款以上的工具。
+Tags:
+- byok
+- claude-code
+- codex
+- cursor
+- 人工智能
+ReleaseNotes: |-
+  - 修复（严重）：Cursor 一键接入会把用户原账号冲掉且还原无效 —— Cursor 3.27 的真实登录 token 也是 cursor-safe-storage 加密格式，被注入逻辑判成「降级残留」直接覆盖 cursorAuth/* 7 个键且不留备份；还原侧读的 cursor-state-backup.json 全仓库没有写入方，restore 永远返回「无需还原」，界面报成功而账号实际仍停在 cursor@ai.com 的接管态。
+    - 注入前先把 7 键原值落进 cursor-core/cursor-auth-backup.json（original 仅首次记录、applied 记录写入值），账本写失败即拒绝注入，不再允许不可逆且静默的账号写入。
+    - 关闭接管时 disable() 对称写回原值；当前值 ≠ applied 说明用户接管期间自己改过（重新登录/换会员），保留用户改动。
+    - 还原结果改为三态（无需还原 / 已写回 / 备份缺失），cursor_disable 不再 let _ = 吞掉还原错误，cursor_restart 还原失败直接中止，避免带着接管态重启再次覆盖。
+  - 修复：ide_config 写 Cursor 的 http.proxySupport 用 on，系统代理存在时可绕开本地代理（坑点 cursor-proxy-support-override）；统一为 override，状态判定不再强制 cursor.general.useHttp1（cursor-core 接入路径不写它，会把「已接入」判成未接入）。
+  - 修复：Grok 单测走无参入口读真实 agent-stash.json 且被并行测试的门控 env 污染，全量跑偶发红（坑点 test-isolation-real-stash-and-env-gate）；改为显式传临时账本 + 显式关门控。
+  - 门控：坑点库新增 cursor-auth-overwrite-must-be-reversible、cursor-auth-ledger-shared-across-processes；检查脚本新增 5 条硬规则（两侧账本同名、关闭接管必须调还原、落账本必须早于首次写库、本地账号标识两侧一致、proxySupport 不得写回 on），配套行为测试 12 个。
+ReleaseNotesUrl: https://github.com/soulvon/AnyBridge/releases/tag/v1.0.7
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
