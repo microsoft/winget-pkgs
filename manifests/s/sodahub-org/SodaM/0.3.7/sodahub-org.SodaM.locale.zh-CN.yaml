@@ -1,0 +1,47 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: sodahub-org.SodaM
+PackageVersion: 0.3.7
+PackageLocale: zh-CN
+Publisher: sodahub-org
+PublisherUrl: https://github.com/sodahub-org
+PublisherSupportUrl: https://github.com/sodahub-org/sodam/issues
+PrivacyUrl: https://github.com/sodahub-org/sodam/blob/HEAD/PRIVACY.md
+PackageName: SodaM
+PackageUrl: https://github.com/sodahub-org/sodam
+License: AGPL-3.0-or-later
+LicenseUrl: https://github.com/sodahub-org/sodam/blob/HEAD/LICENSE
+ShortDescription: 基于 GPUI + Rust 的原生汽水音乐桌面客户端。
+Description: SodaM 是一个基于 GPUI 和 libresoda 的原生汽水音乐桌面客户端，面向 Linux、macOS 和 Windows 桌面，重点提供接近官方客户端的操作手感、稳定的本地播放体验、会员账号的无损音质播放，以及干净自适应的主题系统。
+Tags:
+- 专辑
+- 播放器
+- 歌单
+- 歌手
+- 歌曲
+- 汽水音乐
+- 音乐
+- 音频
+ReleaseNotes: |-
+  SodaM 0.3.7
+  走字歌词
+  - 歌词高亮改成逐字推进：亮光停在一个字内部往前走，不再整字跳变，与官方汽水客户端一致（#80）。
+  - 进度按每个字真实的演唱时长推进（词的时长按字符数均分），拖长音的字不会被一下子掠过；位置按「字符 → UTF-8 字节 → 字形」换算，连字、组合字符与 emoji 不会错位（#80）。
+  - 修掉三层真实 bug：逐字时间轴从来没被正确解析（真实格式是 <偏移，时长，flag> 三字段、偏移相对行首）、行结束时间取错了字段、普通 LRC 被误判成有逐字轴（#80）。
+  - 上一句保持高亮到下一句接管，中间不再有暗场；滚动与高亮用同一判定，不再提前 250ms（#80）。
+  - 只在亮光确实推进时才 60fps，其余时间不重绘；走满后走纯文本快路径，shaping 结果缓存（60fps 下单核 31% → 19%）（#80）。
+  - 修复 #84 合并时误删走字节拍导致的 main 编译失败，相关节拍与滚动补间全部恢复（#80）。
+  音质档位
+  - 档位表对齐 libresoda：新增 Hi-Res 与杜比两档，并拆分显示名；50 分档改名「流畅」，避免与 libresoda 的 standard 撞名（#85、#86、#91、#92）。
+  - 音质偏好只记录意图，实际档位由服务端决定并在界面如实显示（#71、#72、#73、#74）。
+  - 偏好同时记录来源：手动选择 / 程序推导 / 未知；旧配置缺字段安全回退，设置页按来源给出准确文案与徽章（#77、#87）。
+  音频缓存
+  - 缓存按档位治理：命中缓存的曲目若低于所选档位，后台自动升级并原子替换，失败不影响旧缓存（#78、#88）。
+  - 设置页新增批量升级入口，带容量与流量预估；升级受缓存文件自身意图上限约束，并有并发与租约护栏（#78、#88）。
+  修复
+  - 切到听歌模式后歌词页不再永久停在「正在切换」：队列就位即清切换态，失败时回到有重试入口的模式列表。
+  - 断网时「推荐」不再点不动：加 10 秒客户端截止时间，失败/超时进入带「重试加载」的终态，在途点击有提示（#55）。
+ReleaseNotesUrl: https://github.com/sodahub-org/sodam/releases/tag/v0.3.7
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
