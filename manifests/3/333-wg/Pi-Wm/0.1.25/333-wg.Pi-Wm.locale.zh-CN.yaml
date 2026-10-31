@@ -1,0 +1,80 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: 333-wg.Pi-Wm
+PackageVersion: 0.1.25
+PackageLocale: zh-CN
+Publisher: Pi-Wm
+PublisherUrl: https://wuming-official.pages.dev/
+PublisherSupportUrl: https://github.com/333-wg/pi-wm/issues
+PackageName: Pi-Wm
+PackageUrl: https://github.com/333-wg/pi-wm
+License: MIT
+LicenseUrl: https://github.com/333-wg/pi-wm/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Pi-Wm
+ShortDescription: 基于 Pi 的本地优先 AI 编程工作台。
+Description: |-
+  Pi-Wm 把对话、项目文件、Git 改动、终端、浏览器预览和多 Agent 协作放进同一个工作台。你可以连接自己的模型服务，在本地项目里完成从理解需求、编写代码到运行验证的工作。
+  本地优先，不等于离线运行。 工作区操作和会话状态由本机服务管理；使用远程模型时，请求及相关上下文仍会发送到你配置的服务商。
+
+  核心功能
+
+  围绕项目完成工作
+  - 本地编码与终端：读取和编辑项目文件、查看 Git 差异，在本机 Shell 中运行命令，使用集成终端检查结果。
+  - 浏览器验证：Agent 可通过独立的 Playwright 浏览器查看页面、操作控件、截图并检查报错；桌面端另有内置浏览器，方便你直接查看本地预览。
+  - 会话与任务管理：保存对话历史，搜索聊天正文，查看请求耗时、失败信息、Token 用量与上下文使用情况。
+  - 恢复与通知：提供中断后的恢复操作、上下文压缩和桌面任务通知，便于接着处理未完成的工作。
+
+  从单个任务到团队协作
+  - 子任务：把独立工作委派给子 Agent，查看各自的完整对话、执行状态和结果。
+  - Agent Teams：由负责人组织持续运行的团队成员，通过共享任务、依赖关系和成员消息协作；工作台展示团队进度与验收记录。
+  - 成员模板：保存和复用成员角色、模型与工具配置，减少重复设置。
+  - 目标与定时任务：支持目标验收、修正轮次和一次性或固定间隔的计划任务。应用关闭后，任务不会继续执行。
+
+  模型、工具与桌面能力
+
+  | 能力         | 可以做什么                                                                                 |
+  | ------------ | ------------------------------------------------------------------------------------------ |
+  | 模型配置     | 配置自己的模型服务、模型能力、上下文窗口与思考选项。                                       |
+  | 官方账号     | 本地模式提供 Claude、ChatGPT、Grok 授权入口；可用模型与额度取决于账号权限和服务商限制。    |
+  | 图片与视频   | 配置独立的媒体模型，在对话中生成和查看媒体结果；实际能力取决于所接服务。                   |
+  | MCP          | 在界面中添加、编辑、授权和连接 MCP 服务；保存配置不会自动授予信任。                        |
+  | Skills       | 使用内置技能，从工作区目录安装、预览和管理本地技能包。                                     |
+  | Computer Use | 在 Windows 上显式开启后，通过 UI Automation 或截图与输入操作桌面应用；需要 Python 3 环境。 |
+  | 界面与主题   | 支持中英文界面、浅色与深色配色，以及跟随系统的主题设置。                                   |
+
+  能力边界和验证范围请查阅下方专题文档。Agent Teams 的自主规划需要真实模型，Demo 模式不会模拟模型决策。
+Tags:
+- pi
+- pi-agent
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  Pi-Wm v0.1.25：一键优化提示词与对话体验修复
+  验证记录
+  - npm run check 通过：源码、前端、E2E、12 个工作区测试类型检查，以及 8 套主题各 80 对颜色对比检查。
+  - 提示词优化定向回归：3 个文件、26 项测试通过，覆盖权限、输入限制、并发、取消、模型选择、真实 ModelRuntime 到本地模拟服务的请求，以及无效输出保留原文。
+  - npx playwright test e2e/prompt-optimizer.spec.ts e2e/background-task-panel.spec.ts e2e/project-switch.spec.ts：9 项通过，包含项目切换的 1440px / 390px 布局及旧请求隔离、优化回填/撤销/取消/失败、附件保留和连续发送后的面板状态。
+  - 已检查本轮优化中、优化完成、项目快捷按钮、手机侧栏和后台任务完成后的截图：相关控件未见遮挡或重叠。新增工作流的运行时错误断言通过；已有 Demo 对话重复键警告不属于本次优化流程的验收覆盖。
+  - npm run desktop:dist 通过：生产构建、15,823 个运行时文件清单、路径预算、安装包 SHA-512、blockmap 与公开更新源一致性检查通过。
+  - node scripts/verify-desktop.mjs --packaged=release/win-unpacked/Pi-Wm.exe 通过：移出源码目录后的构建 UI、鉴权 API/WebSocket、原生终端、渲染器隔离、单实例、项目/主题保存、令牌轮换和正常退出。未运行安装器。
+  - 版本及锁文件同步更新为 0.1.25，未改变依赖版本；提交前格式检查与 git diff --check 通过。保留现有 4 项未使用导入 lint 警告、前端主包超过 500 kB、SQLite 实验性和依赖弃用提示。
+  - macOS 工作流 39896152537 通过：Apple Silicon 与 Intel 均完成 DMG/ZIP 构建、ad-hoc 签名、原生运行时及包内应用验收，六个附件上传成功。Intel 首次在单实例检查等待第二进程退出时触发 15 秒超时；保留原代码、断言和超时设置，仅重跑失败任务后通过，未将首次失败隐藏为通过。
+  - 九个发布附件核验通过：Windows 三个文件大小及 GitHub SHA-256 与本地一致，远端 latest.yml 与本地逐字节一致；Mac 四个安装归档的 GitHub SHA-256 与对应校验文件一致，两个校验文件自身摘要也已核验。
+  - 发布后确认 GitHub Latest 指向 v0.1.25，正式版非草稿、非预发布；九个附件再次核验通过，匿名下载公开 latest.yml 与本地逐字节一致。附件核验记录保存在 test-results/release-0.1.25-assets.json。
+  Windows 安装包 SHA-256：019e59628da0b2431c7a0d120bbc2881245f5ebb06d3e7e8c97e04be5c165187（249,650,878 字节）。
+  本地证据：test-results/release-0.1.25-check.log、test-results/release-0.1.25-unit.log、test-results/release-0.1.25-e2e/、test-results/release-0.1.25-build.log、test-results/release-0.1.25-packaged.log。预览和测试数据不作为发布附件。
+  已知限制与未执行检查
+  - 提示词优化会额外调用模型并可能消耗额度，目前不计入应用内会话用量统计，请以服务商账单为准。取消不能撤销已产生的用量。
+  - JSON 格式校验不代表语义正确；模型仍可能改变原意，发送前请检查。未发起真实收费模型请求，不承诺所有第三方服务或官方账号的优化质量。草稿上限为 16000 字符，空输入和 / 开头的命令不参与优化。
+  - 独立手机访问页暂不开放提示词优化；Demo 运行时不伪造优化结果。
+  - Windows 未配置发布者签名；macOS 使用 ad-hoc 签名，未经 Apple Developer ID 签名与公证，系统可能拦截安装。
+  - 按改动风险执行定向验证，不重复全仓库测试、完整 E2E、完整桌面回归或真实安装升级矩阵；本次未修改安装器、更新器及依赖版本。常规全仓库 CI 沿用既有发布策略跳过，保留本地定向检查与 macOS 专项构建验收。
+ReleaseNotesUrl: https://github.com/333-wg/pi-wm/releases/tag/v0.1.25
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
