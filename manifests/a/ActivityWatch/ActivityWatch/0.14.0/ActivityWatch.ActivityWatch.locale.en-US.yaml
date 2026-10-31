@@ -1,0 +1,116 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ActivityWatch.ActivityWatch
+PackageVersion: 0.14.0
+PackageLocale: en-US
+Publisher: ActivityWatch Contributors
+PublisherUrl: https://github.com/ActivityWatch/activitywatch
+PublisherSupportUrl: https://github.com/ActivityWatch/activitywatch/issues
+Author: ActivityWatch Contributors
+PackageName: ActivityWatch
+PackageUrl: https://activitywatch.net/
+License: MPL-2.0
+LicenseUrl: https://github.com/ActivityWatch/activitywatch/blob/HEAD/LICENSE.txt
+ShortDescription: ActivityWatch is an app that automatically tracks how you spend time on your devices.
+Description: The goal of ActivityWatch is simple, Enable the collection of as much valuable lifedata as possible without compromising user privacy.
+Moniker: activitywatch
+Tags:
+- cross-platform
+- foss
+- open-source
+- privacy
+- productivity
+- quantified-self
+- time-tracker
+- timetracker
+ReleaseNotes: |-
+  Huzzah! v0.14.0 is finally here! 🎉
+  Almost two years since v0.13.2, and eight betas later. This is a big one: faster, steadier, a new desktop app, and an Android app that has caught up. And syncing between your devices works, local-first, with whatever sync tool you already use: it's still early and opt-in, with a few rough edges (see Sync below, or the announcement). More than 30 people contributed.
+  Since the last stable release, ActivityWatch also passed 1 million downloads, and it's now downloaded over 10,000 times a week. Thank you!
+  Read more: the announcement · the full changelog (about 1,000 changes, too long for this page)
+  Summary
+  - ⚡ Much faster, especially once you have years of data: dashboards load day by day and cache finished days, so long ranges no longer time out and repeat visits are near instant
+  - 🐛 Steadier all round: crashed watchers restart on their own, a macOS memory leak and crash are fixed, and a long tail of annoyances is gone
+  - 🔄 Sync between your devices works. It is local-first: no ActivityWatch server, no account. Point it at a folder you already sync with Syncthing, Dropbox or anything else, and each device's data shows up on the others. It is still rough in places (it takes more disk space than it should, and setup is manual), so it is opt-in (how to set it up)
+  - 👀 See all your devices together: the Activity view can now merge any set of devices into one view
+  - 📱 Android caught up: ActivityWatch for Android 0.14 shipped last month, its first stable release since 2023, with far fewer crashes and the same sync built in
+  - 🖥️ A new desktop app built on Tauri: same features as the classic one and lighter, but less battle-tested so far, so the classic app ships too and stays the default
+  - 🌐 A refreshed web UI: a better timeline, custom date ranges, a work-time report, billable hours export, and category sets for switching between rule profiles
+  - 🌍 ActivityWatch now speaks Swedish, German, Ukrainian, Russian and Chinese
+  - 🔒 More control over what gets stored: filter sensitive window titles before they ever reach the database
+  - 🛡️ For those who want it: put an API key on the server
+  - 🍎 macOS: signed and notarized builds for Apple Silicon and Intel, and browser URLs are tracked properly again
+  - 🐧 Linux: Wayland support out of the box in the new app, and arm64 builds
+  - 🤖 For the AI crowd: one canonical query that returns clean, categorized events, so an assistant can answer questions about your time without a custom integration (agents and AI)
+  - And a lot more...
+  Honorable mentions
+  Many of this release's features came from the community. Thank you:
+  - @0xbrayo for aw-tauri, from prototype to a release-ready app, and for aw-notify-rs and the Rust side of Android sync
+  - @BohdanRykush for the Ukrainian, German and Russian translations, and the original i18n setup and language picker (ActivityWatch/aw-webui#855)
+  - @JhihJian for the Simplified Chinese translation (ActivityWatch/aw-webui#865)
+  - @NickWick13 for the Swedish translation (ActivityWatch/aw-webui#947)
+  - @BelKed for rewriting the browser extension for Manifest V3 (ActivityWatch/aw-watcher-web#152), plus theme detection and top browser titles in the web UI
+  - @2e3s for awatcher, which gives the new app native Wayland support
+  - @nerumo for timeline swimlanes and the duration filter (ActivityWatch/aw-webui#679)
+  - @rrogerc for capturing URLs from Firefox-based browsers on macOS (ActivityWatch/aw-watcher-window#134)
+  - @hawai-i for the macOS Apple Events entitlement, which brought native browser URL capture back (#1411)
+  - @FractalMachinist for browser tracking on Android (ActivityWatch/aw-android#151)
+  - @Lorite for fixes to Android's folder-picker sync (ActivityWatch/aw-android#221, ActivityWatch/aw-android#222)
+  - @wind-mask for the Tauri app's headless --daemon and --mini modes
+  - @Q-Ze for fixing the multi-device view with synced data (ActivityWatch/aw-webui#969)
+  - @RTnhN for the universal columns visualization (ActivityWatch/aw-webui#733)
+  - @behdadmansouri for clearer import feedback (ActivityWatch/aw-webui#874)
+  - @fanxing11 for a string of fixes across the watchers, client and notifications
+  Installation
+  See the getting started guide in the documentation.
+  Downloads
+  Classic distribution
+  - Windows (.exe installer)
+  - macOS: Intel | Apple Silicon (.dmg)
+  - Linux: .zip | .AppImage | .deb
+  Tauri distribution (experimental — native Wayland support on Linux)
+  - Windows (.exe installer)
+  - macOS: Intel | Apple Silicon (.dmg)
+  - Linux: .AppImage | .zip
+  Contributors
+  Thanks to everyone who contributed to this release:
+  @0xbrayo, @2e3s, @almirb, @amsam0, @BelKed, @deancureton, @ErikBjare, @fanxing11, @Game4Move78, @hawai-i, @HomeArchbishop, @istudyatuni, @kenoma-hld, @luisgerhorst, @matt-seb-ho, @MBK-fr, @moodyhunter, @musicinmybrain, @nerumo, @NickWick13, @Noorts, @petrroll, @powellnorma, @Q-Ze, @reddaisyy, @rrogerc, @RTnhN, @Senophyx, @TiberiusNemesis, @TimeToBuildBob, @vdonich, @yuhldr
+  More detail
+  Faster
+  Measured on a real 9-year database (9.2 million events, 1.8 GB) on an M2 Mac, with each version's own dashboard queries. The new dashboard asks for long ranges one day at a time, so the servers are compared on that same workload:
+  ────────────────────────────┬───────┬────────────────┬─────────────────
+  Year view, 365 daily queries│v0.13.2│v0.14 first load│v0.14 repeat load
+  ────────────────────────────┼───────┼────────────────┼─────────────────
+  Classic app (Python server) │120 s  │41 s            │0.6 s
+  ────────────────────────────┼───────┼────────────────┼─────────────────
+  Tauri app (Rust server)     │139 s  │32 s            │0.2 s
+  ────────────────────────────┴───────┴────────────────┴─────────────────
+  The v0.13.2 dashboard fetched a Year as a single request instead. That took 120 s on the Python server (past the default 30 s timeout, so it failed) and 19 s on the Rust server. Asking day by day is what makes caching, progress and per-day charts possible. All time across nine years reopens in 5 s on the classic app; the Tauri app doesn't cache All time yet (aw-server-rust#784). Under the hood: new database indexes, SQLite WAL mode, cached category rules (categorizing a year of window titles went from 53 s to 10 s) and streaming exports.
+  Sync
+  aw-sync copies each device's data into a sync folder (~/ActivityWatchSync by default). You choose how that folder moves between devices: Syncthing, Dropbox, a network drive, anything that syncs files. Your data never touches a server of ours. Each device only writes its own files and opens everyone else's read-only, so devices can't corrupt each other, and synced data shows up as -synced-from- buckets that you can query, merge in the Activity view, or ignore.
+  This cycle we ran it on our own desktops and phones and fixed what we hit: duplicate events after a resume, one broken device aborting a whole sync, phone data not being picked up, and a new aw-sync status that tells you what each device has synced. Known rough edges: every device keeps a full copy of every other device's data, so it uses more disk than it should (a much more compact format is in the works), settings and deletions don't sync, and setup is manual. It isn't started by default: turn it on in the app's modules menu, or run aw-sync.
+  Android
+  ActivityWatch for Android 0.14 (v0.14.0 to v0.14.2, September) is the first stable Android release since 2023. User-perceived crashes went from about 7.8% to under 1%. It adds alerts, a home-screen widget, Firefox and Chrome tracking, CSV and JSON export, and the same sync: pick a folder, and your phone's data shows up on your desktop.
+  More reliable
+  - Crashed watchers restart automatically, with crash logs, in both apps; only one instance runs at a time
+  - macOS window watcher: fixed a crash on unusual window titles and a leak of up to ~359 MB of memory per day on busy machines
+  - AFK: locking the screen counts as AFK on macOS, held keys count once, gamepads count on Linux, recovery after an X server restart, and a Windows idle-time overflow after 49.7 days is fixed
+  - Data safety: heartbeats are rejected cleanly under load instead of risking corruption, a damaged database recovers on startup, and imports merge into existing buckets instead of failing
+  - The Python and Rust servers now return the same query results, checked by a new parity test suite (server comparison)
+  The new app (Tauri)
+  aw-tauri ships alongside the classic aw-qt app for Windows, macOS (Apple Silicon and Intel) and Linux (x86_64 and arm64). It has its own window, runs the Rust server inside the app, is smaller to download, supports Wayland on Linux, and updates itself on macOS and Linux (on Windows, install new versions manually for now). The story: A lighter, faster ActivityWatch with Tauri.
+  Also new
+  - Web UI: timeline swimlanes and AFK/category/duration filters, "merge by app", keyboard and scroll panning, rule priority and field-scoped regex rules, top browser titles, top stopwatch events, CSV export that streams large buckets, and bulk delete of a device's buckets
+  - Browsers: Arc, Dia, Zen, Helium, Floorp, Firefox ESR and more Chromium variants; URLs from Firefox-based browsers on macOS
+  - Notifications rewritten in Rust (aw-notify-rs), with a settings panel. They are now off until you enable them
+  - Start at login is a toggle in the app
+  - iOS: Screen Time data imported with aw-import-screentime shows up correctly
+  Upgrade notes
+  - The first start after upgrading updates the database indexes once. Your data isn't changed. On large databases this takes a while (about 30 s for the classic app and a minute for the Tauri app on a 1.8 GB database), and the dashboard may not connect until it's done. Leave ActivityWatch running and reload.
+  - Notifications (aw-notify) are now opt-in. Enable them in Settings if you used them before.
+  - macOS 12 or newer is required.
+  Supporting ActivityWatch
+ReleaseNotesUrl: https://github.com/ActivityWatch/activitywatch/releases/tag/v0.14.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

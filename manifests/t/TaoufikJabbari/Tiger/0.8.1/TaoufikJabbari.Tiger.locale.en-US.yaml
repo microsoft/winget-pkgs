@@ -1,0 +1,69 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: TaoufikJabbari.Tiger
+PackageVersion: 0.8.1
+PackageLocale: en-US
+Publisher: Taoufik Jabbari
+PublisherUrl: https://github.com/jtaoufik
+PublisherSupportUrl: https://github.com/jtaoufik/tiger/issues
+PackageName: Tiger
+PackageUrl: https://jtaoufik.github.io/tiger/
+License: MIT
+LicenseUrl: https://github.com/jtaoufik/tiger/blob/main/LICENSE
+ShortDescription: Free, open source, git-native API client. A local-first Postman alternative with a built-in MCP server.
+Description: Tiger is an open source API client where every request is a plain text .tiger file stored in Git, so teams review API changes in pull requests. It works fully offline with no account, supports REST, SOAP and GraphQL, OAuth 2.0, client certificates, proxies, request chaining, pre/post-request scripts with assertions, environments with secrets, a collection runner and a performance runner, and imports Postman, Insomnia, Bruno, OpenAPI and curl. It also ships a Model Context Protocol (MCP) server so AI assistants can run requests from a collection.
+Moniker: tiger
+Tags:
+- api
+- api-client
+- developer-tools
+- graphql
+- http
+- mcp
+- postman
+- rest
+ReleaseNotes: |-
+  ## What's new
+
+  • Imported requests send with their own variables. Each collection now uses its own environment：opening a request switches to that collection's environment (the one you last picked there), so a second import no longer leaves the first collection's {{variables}} unresolved or pointed at the other collection's host. The collection runner, Copy as curl and export use the right collection's environment too.
+  • Imports bring what their requests need. OpenAPI and Swagger servers become environments with {{baseUrl}}, server variables such as {env} and the auth placeholders. A WSDL without an address asks for the host. Postman globals are added to every environment, as in Postman. An environment imported after its collection gets the collection's variables. Bruno's {{process.env.NAME}} values are read from the collection's .env file. Variable names with spaces resolve.
+  • Tiger never selects an environment named like production (prod, production, live) by itself; the import report says so.
+  • Imported and opened collections start with their folders folded, except the one holding the request that opens, which scrolls into view. The folder page and Run folder include subfolders.
+  • No more dark text on orange：buttons, selected tabs, chips and the active search match are white on a deep orange in light and dark (the Send button was near-black on orange), danger buttons are white on red, checkboxes draw white checkmarks and the dark switch knob is easier to see.
+  • After an import, Tiger shows the imported request on its first section, not a page that was open or the Load test section, with its own history.
+  • Imports are saved. An imported collection is now a collection folder in Documents/Tiger, so it is still there after a restart and Ctrl+S saves your edits (before, an import lived only until Tiger closed and Save did nothing on it). The import report says where it was saved, with a button to open that folder. An environment imported on its own is written into the collection's environments folder. The sample collection, or any collection that only lives in memory, can be saved from its menu (Save to disk) or with Ctrl+S.
+  • Environment variables resolve on Send in more cases：pressing Send right after launching Tiger or switching collection no longer sends {{variables}} unresolved while the environment file is still loading; the environment you picked in each collection is remembered across restarts; a variable whose value spans several lines or holds a brace or quote (a captured JSON body, a password with "}") no longer makes the environment file unreadable; and one unreadable environment file no longer hides the others.
+  • Captured values and pm.environment.set() go to the environment the request was sent with, even if you moved to another collection while it was running. A collection run saves the variables its scripts and captures set. pm.environment.unset() is saved.
+  • OAuth2：the token is reused until it expires instead of being requested again for every send, and the Code tab, Copy as curl and the load test now include it. The load test no longer fills the history, and {{$guid}}-style variables get a new value on every request it fires.
+  • A folder's auth applies from the first send, not only after its page was opened. Opening a collection shows its first request. The environment manager opens on the collection you are working in, and New environment creates it there. A pasted curl command lands in the collection in use.
+  • Windows：files checked out with Windows line endings (the Git for Windows default) no longer add a blank line on every save or send XML bodies with a newline before <?xml. Files saved with a byte order mark or as UTF-16 (Notepad, PowerShell) open and import. Folder names Windows refuses (a colon, a question mark, CON, a trailing dot) are adjusted so they can be created and cloned by teammates on Windows. Renaming a folder or an environment only by case works and no longer deletes the environment. Ctrl+W closes the tab, not the window. The title bar follows Tiger's theme. Launching Tiger again brings the open window forward instead of starting a second copy. Restart now with unsaved edits asks first. The window fits small screens and no longer appears empty before its content.
+  • Requests whose body or script has an unbalanced brace or quote reload correctly. Production environments are never selected by themselves however they are spelled (prod_eu, PROD_US, prd). Postman globals imported on their own sit under your environments instead of replacing the selected one. Insomnia variables with a filter resolve, and Bruno requests keep their order. A file row with a relative path (files/cat.png) is read from the collection folder.
+  • Importing from other tools is more faithful. Bruno：query parameters go out once (they were sent twice), the body Bruno sends is the one imported, a relative file path is read from the collection folder, only the collection's own environments folder holds environments, and two sibling folders named alike stay apart. Postman and Insomnia: two folders with the same name stay apart (one folder's credentials no longer go out on the other's requests), a disabled environment variable no longer hides a collection variable, a query parameter without a value is sent as ?flag, Insomnia keeps its order, and form values with line breaks stay one field. Several collections imported together keep their own variables (a clashing baseUrl no longer sends one API's requests to the other's host). OpenAPI: declared Authorization and Content-Type parameters no longer override the auth and the body type, application/json; charset=utf-8 keeps its body, a public operation sends no auth, large specs import fast with small example bodies, and an undescribed server that looks like production is named so and never selected by itself. WSDL rpc operations wrap their parts in the operation element. curl: Chrome and Firefox "Copy as cURL" in bash and in Windows cmd format imports, -d sends a form like curl does, -XPUT and curl.exe work. Dropping a project folder finds the collection in it and skips node_modules. A Postman v1 file says to export it again as v2.1.
+  • Sending is closer to what you asked for. Headers such as Host, Sec-Fetch-*, Keep-Alive or Transfer-Encoding no longer fail the whole request, so a pasted Chrome "Copy as cURL" sends. Cookies come only from Tiger's cookie jar：off means none are sent, and Clear cookies clears them all. Every Send reaches the server (no browser cache answering instead). With Follow redirects off you see the 3xx response, and Max redirects is honoured. Query values that are already percent-encoded are not encoded again. A URL typed without a scheme goes out over http://. A body set on a GET or HEAD is sent (Elasticsearch-style searches). Header and query rows without a name are skipped. Compressed responses are decoded when certificates are configured, and binary responses keep their exact bytes, with the right size and Save to file. Without a proxy of its own, Tiger follows the system proxy (Windows and macOS settings, PAC).
+  • Code tab：fetch and Python snippets include multipart fields, generated curl never reads a local file the request did not ask for, and a new "curl (Windows cmd)" target runs in cmd.exe. The history no longer stores an API key sent in the query string.
+  • Export：a Postman export keeps request, folder and collection auth, scripts, docs and file fields, and never writes secret values. The save dialog proposes a file name Windows accepts.
+  • AI assistants (MCP)：the server shown in Settings > AI assistants now starts in the installed app, with Tiger itself (no Node needed); it applies folder auth, sends multipart bodies, lists only requests, names the URL that failed, and only reads files inside the collection. The installed app is about 13 MB smaller.
+  • Scripts written for Postman and Bruno run as they do there (an undeclared assignment such as data = ..., or a variable named module, no longer fails).
+  • Team sync works with folders and requests named in any language (Chinese, Hindi, Arabic, accented letters), conflicts included.
+  • Display：long response lines scroll sideways instead of being cut off; request tabs keep room for their name; Arabic indents the sidebar on the reading side (a click in the middle of a row no longer duplicates the request); method labels on highlighted rows, the Set active icon and disabled buttons are readable; the update banner shows its whole message and toasts appear above it; the response keeps its height at the minimum window size; section tabs wrap instead of hiding Load test; hovering a sidebar row no longer moves the rows below (thanks to ChemaCLi for PR #5), and folder rows show their actions on hover; Send and Cancel have the same width; focus rings are no longer cut off. Error messages no longer start with "Error invoking remote method".
+
+  ## Which file do I download?
+
+  | Platform | File | Notes |
+  |---|---|---|
+  | Windows | **Tiger-Setup-0.8.1-windows-x64.exe** | Recommended. Graphical installer, Start menu + desktop shortcut. |
+  | Windows (no install) | Tiger-Portable-0.8.1-windows-x64.exe | Single exe, no install, run from anywhere. |
+  | Windows (portable zip) | Tiger-Portable-0.8.1-windows-x64.zip | Portable (zip)：unzip and run Tiger.exe. |
+  | macOS (Apple Silicon) | Tiger-0.8.1-mac-arm64.dmg | M1 and later. |
+  | macOS (Intel) | Tiger-0.8.1-mac-x64.dmg | Intel Macs. |
+  | macOS (zip) | Tiger-0.8.1-mac-arm64.zip / Tiger-0.8.1-mac-x64.zip | Unzip and drag Tiger.app to Applications. |
+  | Linux | Tiger-0.8.1-linux-x64.AppImage | Portable, updates itself in the app. |
+  | Linux (Debian/Ubuntu) | Tiger-0.8.1-linux-amd64.deb | `sudo apt install ./Tiger-0.8.1-linux-amd64.deb` |
+  | Linux (tar.gz) | Tiger-0.8.1-linux-x64.tar.gz | tar.gz：extract and run ./tiger-api-client |
+
+  Stable links that always point at the latest release (no version number to update):
+  [Tiger-Setup-windows-x64.exe](https://github.com/jtaoufi
+ReleaseNotesUrl: https://github.com/jtaoufik/tiger/releases/tag/v0.8.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

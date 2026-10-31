@@ -1,0 +1,117 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.9.2
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-agent-core
+  Changed
+  - Improved context caching for repeat turns, reducing redundant prompt processing and making subsequent turns faster when the system prompt is unchanged.
+  @oh-my-pi/pi-ai
+  Breaking Changes
+  - Renamed TypeSafeJudge to NativeJudge and TypeSafeApiError to JudgmentApiError, including their associated option types. JUDGMENT_ROUTES has been removed; use isJudgmentApi or create a judge for catalog models with createNativeJudge(model, { apiKey }).
+  Added
+  - Added native judge support for OpenAI’s Decisions API and Cloudflare Workers AI decision models, including the openai-decisions and workers-ai-systemone APIs. The auth gateway’s System One route supports both providers.
+  - Added createNativeJudge(model, { apiKey, headers, fetch }) for creating judges from catalog models with their configured request model IDs and question limits.
+  - Added Cloudflare Workers AI authentication with loginCloudflareWorkersAi, storing the API token and account ID; logging in again with the same token replaces the existing credential.
+  - Added automatic question batching to NativeJudge for endpoints with question limits, with up to four concurrent batches and merged answers and usage reporting. Usage from successful batches is reported through partial-usage callbacks and both session and auth-gateway usage ledgers, even if another batch fails.
+  Changed
+  - Improved Anthropic prompt caching for long conversations, reducing memory usage while selecting cache breakpoints.
+  Fixed
+  - Fixed Devin-routed OpenAI models returning invalid_argument on every turn after an existing session was switched from openai-codex.
+  @oh-my-pi/pi-catalog
+  Removed
+  - Removed parseCloudflareAiGatewayCredential, serializeCloudflareAiGatewayCredential, and CloudflareAiGatewayCredential from @oh-my-pi/pi-catalog/wire/cloudflare-ai-gateway. Use the equivalents from @oh-my-pi/pi-catalog/wire/cloudflare instead.
+  @oh-my-pi/pi-coding-agent
+  Fixed
+  - Improved responsiveness when adding assistant text after tool calls in long transcripts.
+  - Fixed apply_patch handling of context-free hunks when the target text appears multiple times.
+  - Fixed find filename ranking and sketch scoring with judge endpoints that limit the number of questions per request.
+  - Fixed omp gc --apply leaving temporary session files after an interrupted save.
+  - Fixed omp auth-gateway serve handling of OpenRouter routing variants such as :floor and :nitro.
+  - Improved validation errors for computer helpers with missing or non-string text arguments by identifying the helper and argument involved.
+  - Fixed /tan forks incorrectly inheriting the parent task's subagent spending while preserving token counts.
+  - Fixed omp:// documentation links so they open the corresponding files in source checkouts.
+  - Fixed bare model IDs in models.yml incorrectly resolving to auto-discovered Ollama, llama.cpp, or LM Studio providers.
+  - Added warnings when configured Ollama, llama.cpp, or LM Studio endpoints cannot be reached, identifying the relevant environment variable.
+  @oh-my-pi/pi-natives
+  Fixed
+  - Fixed stalls when highlighting Markdown tool previews containing many inline spans or backslash escapes.
+  @oh-my-pi/pi-tui
+  Added
+  - Added native TSP rendering support for Tern terminal sessions running inside tmux, with automatic session detection and safe title-setting behavior.
+  Fixed
+  - Improved responsiveness when inserting assistant messages after tool calls in long transcripts.
+  @oh-my-pi/pi-utils
+  Changed
+  - Improved streaming JSON parsing performance for tool arguments containing many string values.
+  Fixed
+  - Fixed parsing of long strings that contain closing delimiters other than double or single quotes.
+  What's Changed
+  - fix(natives): register corrected Markdown grammar at build time by @iliaal in https://github.com/can1357/oh-my-pi/pull/15272
+  - perf(natives): vendor the Markdown grammar without exponential backtracking by @sjawhar in https://github.com/can1357/oh-my-pi/pull/13838
+  - perf(utils): avoid bulk scan setup for short escaped runs by @iliaal in https://github.com/can1357/oh-my-pi/pull/15273
+  - perf(coding-agent): defer highlighter initialization by @iliaal in https://github.com/can1357/oh-my-pi/pull/15299
+  - perf(read): compact directory metadata spacing by @MikeeI in https://github.com/can1357/oh-my-pi/pull/9062
+  - perf(tui): keep the transcript entry mirror in step on insert-after-anchor by @F0Rextasy in https://github.com/can1357/oh-my-pi/pull/14344
+  - perf(coding-agent): compact Read directory metadata for 18.9 by @iliaal in https://github.com/can1357/oh-my-pi/pull/15352
+  - perf(tui): keep transcript insertions synchronized on 18.9 by @iliaal in https://github.com/can1357/oh-my-pi/pull/15353
+  - fix(coding-agent): prefer models.yml providers over implicit local discovery by @H4vC in https://github.com/can1357/oh-my-pi/pull/15360
+  - docs(readme): use nix profile add instead of deprecated install by @akai-hana in https://github.com/can1357/oh-my-pi/pull/15297
+  - chore(ci): pin Bun 1.4.3 in the runner and docs images by @yuzu-octopus in https://github.com/can1357/oh-my-pi/pull/15324
+  - fix(edit): apply_patch binds hunks to the first match like Codex by @Ikaleio in https://github.com/can1357/oh-my-pi/pull/15340
+  - fix(find): cap judgment requests at 16 questions by @yuzu-octopus in https://github.com/can1357/oh-my-pi/pull/15160
+  - refactor(ai): one waitForRetry helper for the provider retry-wait hook by @yuzu-octopus in https://github.com/can1357/oh-my-pi/pull/15307
+  - refactor(config): one json config-source stack for dap and lsp by @yuzu-octopus in https://github.com/can1357/oh-my-pi/pull/15306
+  - perf(ai): fuse three index walks into the transform passes by @yuzu-octopus in https://github.com/can1357/oh-my-pi/pull/15330
+  - perf(ai): pick anthropic cache breakpoints in one backward walk by @yuzu-octopus in https://github.com/can1357/oh-my-pi/pull/15219
+  - perf(agent): stop joining the system prompt and re-rendering tool keys per build by @yuzu-octopus in https://github.com/can1357/oh-my-pi/pull/15218
+  - perf(scrapers): collapse the youtube metadata and subtitle spawns into one by @yuzu-octopus in https://github.com/can1357/oh-my-pi/pull/15334
+  - feat(coding-agent): add computer element doubleClick and name the pick when element calls hit find()'s array by @will-bogusz in https://github.com/can1357/oh-my-pi/pull/15312
+  - fix(computer): name the helper and argument a malformed call passes, and take menu paths as separate titles by @will-bogusz in https://github.com/can1357/oh-my-pi/pull/15309
+  - fix(coding-agent): reset inherited nested task billing in forks by @anatoli-tsinovoy in https://github.com/can1357/oh-my-pi/pull/15039
+  - fix: link omp:// docs to the on-disk file in source checkouts by @danzaio in https://github.com/can1357/oh-my-pi/pull/15086
+  - fix(edit): bind single apply_patch hunks to the first normalized repeat by @H4vC in https://github.com/can1357/oh-my-pi/pull/15367
+  - perf(coding-agent): load deferred code on demand by @iliaal in https://github.com/can1357/oh-my-pi/pull/15298
+  - fix(judgment): cap System One questions only for judge models that need it by @H4vC in https://github.com/can1357/oh-my-pi/pull/15368
+  - fix(catalog): sent Groq only the request fields it accepts by @Robinbinu in https://github.com/can1357/oh-my-pi/pull/15322
+  - fix(judgment): apply question caps in auth-gateway and bound chunk fan-out by @H4vC in https://github.com/can1357/oh-my-pi/pull/15373
+  - fix(ai/devin): normalized foreign tool-call ids on cascade replay by @roboomp in https://github.com/can1357/oh-my-pi/pull/15237
+  - fix(coding-agent): reclaimed orphaned session staging temps in gc by @roboomp in https://github.com/can1357/oh-my-pi/pull/15355
+  New Contributors
+  - @akai-hana made their first contribution in https://github.com/can1357/oh-my-pi/pull/15297
+  - @Ikaleio made their first contribution in https://github.com/can1357/oh-my-pi/pull/15340
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.9.1...v18.9.2
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.9.2
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

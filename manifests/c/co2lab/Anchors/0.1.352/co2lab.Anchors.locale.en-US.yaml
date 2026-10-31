@@ -1,0 +1,47 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: co2lab.Anchors
+PackageVersion: 0.1.352
+PackageLocale: en-US
+Publisher: co2lab
+PublisherUrl: https://github.com/co2-lab
+PublisherSupportUrl: https://github.com/co2-lab/anchors/issues
+PackageName: Anchors
+PackageUrl: https://github.com/co2-lab/anchors
+License: Elastic License 2.0
+LicenseUrl: https://github.com/co2-lab/anchors/blob/HEAD/LICENSE
+ShortDescription: Spec-first continuity framework for AI-assisted development
+Description: Anchors ties spec, feature and test together through a shared identity code, then confronts each artifact against the rules declared in anchors.yaml. It maps the project as a graph, propagates change from the anchor outward, and gates every step — so work guided by AI stays anchored to what was decided.
+Moniker: anchors
+Tags:
+- ai
+- ai-agents
+- cli
+- developer-tools
+- golang
+- spec-first
+ReleaseNotes: |-
+  Fix: mock doubles of another workspace's modules are measured again
+  v0.1.351 lost doubles whose specifier uses an alias the project declares for a different
+  workspace. For example, @/lib/x in apps/landing-page, with @/ declared for
+  apps/mobile/. mock-typed and mock-stamped took them for third-party modules and stopped
+  measuring them, without saying so.
+  Now, when the aliased path is not a file of the map, the tail after the alias's prefix is
+  matched by its suffix.
+  New: aliases scoped per workspace
+  dialect.import_resolve.scoped declares aliases that hold only for the importers a glob
+  matches. Use it for each workspace's own tsconfig paths:
+  dialect:
+    import_resolve:
+      aliases: {"@/": "apps/mobile/"}
+      scoped:
+        - files: 'apps/landing-page/**'
+          aliases: {"@/": "apps/landing-page/src/"}
+  An importer's scoped aliases win over the global ones for the same prefix.
+  Everything in the v0.1.351 notes still applies: run anchors migrate once, crossing format 8.
+  Changelog
+  - c7c54fa fix(gate): a declared alias that misses the map still names the project's module by its tail
+ReleaseNotesUrl: https://github.com/co2-lab/anchors/releases/tag/v0.1.352
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

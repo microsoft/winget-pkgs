@@ -1,0 +1,68 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: docmirror.dev-sidecar
+PackageVersion: 2.3.3
+PackageLocale: zh-CN
+Publisher: Greper
+PublisherUrl: https://github.com/docmirror
+PublisherSupportUrl: https://github.com/docmirror/dev-sidecar/issues
+PackageName: dev-sidecar
+PackageUrl: https://github.com/docmirror/dev-sidecar
+License: MPL-2.0
+LicenseUrl: https://github.com/docmirror/dev-sidecar/blob/HEAD/LICENSE
+Copyright: Copyright © 2020-2026 Greper, WangLiang
+ShortDescription: 开发者边车，命名取自 service-mesh 的 service-sidecar，意为为开发者打辅助的边车工具，通过本地代理的方式将 HTTPS 请求代理到一些国内的加速通道上
+Tags:
+- 代理
+- 网络
+ReleaseNotes: |-
+  一、更新内容：
+  【摘要】
+  v2.3.3 修复了开启 npm 加速时代理进程因无限递归而崩溃的问题，并集中处理了安装、更新与证书信任三块：安装器和卸载器现在每次都会给出「是否删除用户数据」的选项；Windows 增量更新遇到 Program Files 不可写时会请求 UAC 提权；CA 环境变量改为指向「系统根证书 + DS CA」的合并包，不再只信任 DS 自己的证书。功能上新增了 Xget 加速插件和一键反馈（打包日志、运行参数并预填 issue），并修复了网页诊断页报错、npm 缺失时的错误提示等问题。
+  【新特性】
+  - Xget 加速插件：启用并填写 Xget 实例地址后，会把 Xget 的平台加速规则合并进配置。实例地址支持子路径、http 与端口；规则按用户本地配置的优先级合并，用户自己的同名规则仍然优先；关闭插件即移除规则。
+  - 一键反馈（#42）：帮助中心「反馈问题」按钮和托盘菜单都能一键打包 ~/.dev-sidecar/logs 下的日志、running.json 与环境信息，生成 年-月-日-时-分-秒 Logs.zip。打包前对 token/password/authorization 等字段打码；running.json 与日志一起打进压缩包，打包完成后自动打开所在目录并选中文件，用户把压缩包拖入 issue 页面即可。issue 标题和正文按模板预填。
+  - 安装选项常显：安装器每次都会显示「安装选项」页，用户可选择是否删除已有的 ~/.dev-sidecar。升级安装默认不勾选，保留原配置。
+  - 彻底卸载：卸载器新增「卸载选项」页，勾选后一并删除 ~/.dev-sidecar，完成彻底卸载。静默卸载和升级时的旧卸载器不会显示该页，也不会删除数据。
+  【优化】
+  - Windows 增量更新请求 UAC：安装目录不可写时，不再直接失败或强制下载完整包，而是请求管理员权限，由提权进程结束应用、解压增量包并重启。
+  - 增量包补齐：CI 现在上传 linux-arm64 和 linux-armv7l 的增量包，更新器也支持 armv7l；增量包缺失或写入失败时仍会回退完整安装包。
+  - CA 环境变量改为合并包：REQUESTS_CA_BUNDLE、SSL_CERT_FILE、CURL_CA_BUNDLE 指向 ~/.dev-sidecar/ca-bundle.pem，内容为 Windows 证书存储（Root，排除 Disallowed）/ macOS 系统钥匙串 / Linux 系统 CA 包，加上 DS CA；每次开启系统代理时重新生成。合并包不做 CRL/OCSP 吊销检查，详见 doc/caroot.md。
+  - 预发布版本比较按 semver：修复 beta.100 < beta.99、alpha.10 < alpha.9 这类按字符串比较导致的误判，数字段现在按数值比较。
+  - 反馈信息更可读：issue 里的系统版本改为 Windows 11 10.0.26300 (x64)、macOS 14.7.2 (arm64)、Ubuntu 24.04 … 这类名称。
+  - fork 的 CI 发布标记为 alpha：非官方仓库构建出的 Release 标题带 -alpha.<run_number> 并标记 prerelease，不会占用 latest（对普通用户无影响）。
+  - 默认窗口更大：默认尺寸改为 1200×860，最小 960×640，启动居中，并限制在当前屏幕工作区内，小屏不会被挤出可见范围。
+  - 更新检查与下载改用 Electron 网络栈：GitHub 资产会跨域重定向到 release-assets.githubusercontent.com，原 request 客户端经本地代理会挂起或报 Parse Error；改用 Chromium 网络栈后跟随重定向、代理与证书校验都更稳。
+  - 版本规则文档化：新增 doc/versioning.md，记录 alpha/beta/dev/rc/正式版的优先级与更新策略。
+  【问题修复】
+  - 修复开启 npm 加速时代理进程栈溢出：npm 插件的包装函数 runNpm 内部把自己也替换成了 runNpm，导致无限自递归，开启 npm 加速时代理进程报 Maximum call stack size exceeded 并停止工作；现已恢复为调用 shell.exec。
+  - 修复网页诊断页报 l.loadURL is not a function：主窗口未开启 webviewTag，<webview> 只是普通元素；现已开启。
+  - 修复 macOS 打开 npm 页面报 Api invoke error（#427）：系统找不到 npm 时不再直接抛 /bin/sh: npm: command not found，改为提示安装 Node.js 或把 npm 命令填成绝对路径。
+  - 修复安装器没有「全新安装」选项：之前检测到旧安装就跳过安装选项页，现在每次安装都会显示。
+  - 修复卸载器没有「彻底卸载」选项：改为独立的卸载选项页，勾选后删除用户数据。
+  - 修复 Windows 增量更新写入失败：Program Files 下 resources 普通权限不可写，现走 UAC 提权解压。
+  - 修复安装包构建失败：卸载页误用了 include 阶段尚未定义的 isUsed 宏，导致 makensis 编译报错。
+  - 修复 Linux/macOS 安装根证书必失败：@vscode/sudo-prompt 的 name 只接受字母数字和空格，原来的 dev-sidecar 含连字符，在校验阶段就被拒绝；同时装有 p11-kit 的 Debian/Ubuntu 被 hasCmd('trust') 误判为 Arch。现在名称改为 devsidecar，Arch 只按 /etc/arch-release 或 pacman 源判断。
+  - 修复检查更新/自动更新报 Parse Error 或卡在 0 字节：更新流程不再使用 request，检查更新和下载都改走 Electron 网络栈；下载增加 60 秒无数据超时与 404 提示。
+  【其他】
+  - 新增安全报告流程：说明支持版本范围、报告渠道（GitHub 私密报告 / PGP 加密邮件）与 PGP 指纹，并处理代码扫描告警。
+  - 添加 .dockerignore，把 node_modules 与构建产物排除出 Docker 构建上下文。
+  二、安装前请仔细阅读安装说明
+  各平台安装说明
+  win10/macOS Monterey 以下版本的用户参见 electron 升级说明
+  从 2.3.2 升级：2.3.2 自带的更新器在下载 GitHub 资产时可能报 Parse Error 或卡在 0 字节，若自动更新失败请直接手动下载安装包；安装 2.3.3 之后，后续版本才会使用修复后的更新链路。2.3.3 起 Windows 支持 UAC 提权的增量更新。
+  三、贡献者列表
+  非常感谢以下朋友们的贡献。
+  - @cute-omega
+  另外专门感谢以下群友的赞助打赏：（排列按时间先后顺序）
+  赵不言 ￥20
+  匿名人士 ￥20
+  李耳不好摸 ￥12
+  匿名人士 ￥20
+  也感谢反馈 #427、#42 并提供日志与建议的朋友们。
+  四、Full Changelog
+  v2.3.2...v2.3.3
+ReleaseNotesUrl: https://github.com/docmirror/dev-sidecar/releases/tag/v2.3.3
+ManifestType: locale
+ManifestVersion: 1.12.0

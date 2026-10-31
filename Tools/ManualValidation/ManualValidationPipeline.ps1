@@ -3983,14 +3983,32 @@ Function Invoke-GitHubRequest {
 		[Parameter(Mandatory)][string]$Uri,
 		[string]$Body,
 		[ValidateScript( { $_ -in (Get-Keys $Enum.PRRequestMethods)} )][string]$Method = $Enum.PRRequestMethods.Get,
-		$Headers = @{$Enum.GitHubRequestHeaders.AuthorizationKey = "Bearer "+(Get-GHT); $Enum.GitHubRequestHeaders.AcceptKey = $Enum.GitHubRequestHeaders.AcceptValue; $Enum.GitHubRequestHeaders.ApiKey = $Enum.GitHubRequestHeaders.ApiValue},
+		$Headers = @{$Enum.GitHubRequestHeaders.AcceptKey = $Enum.GitHubRequestHeaders.AcceptValue; $Enum.GitHubRequestHeaders.ApiKey = $Enum.GitHubRequestHeaders.ApiValue},
 		[switch]$JSON,
 		$out = $Enum.Char.Blank
 	)
 	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Invoke-GitHubRequest $Uri"};
+	$RequestUri = $null
+	if (![uri]::TryCreate($Uri, [System.UriKind]::Absolute, [ref]$RequestUri) -OR
+		$RequestUri.Scheme -notin @("http", "https")) {
+		return "Error: Invalid URI: $Uri"
+	}
+	$IsGitHubUri = $RequestUri.Scheme -eq "https" -AND $RequestUri.Port -eq 443 -AND
+		$RequestUri.UserInfo -eq $Enum.Char.Blank -AND
+		$RequestUri.Host -in @("api.github.com", "github.com", "raw.githubusercontent.com")
+	if ($null -eq $Headers) {
+		$Headers = @{}
+	} else {
+		$Headers = @{} + $Headers
+	}
+	if (!$IsGitHubUri) {
+		$Headers.Remove($Enum.GitHubRequestHeaders.AuthorizationKey)
+	} elseif (!$PSBoundParameters.ContainsKey("Headers")) {
+		$Headers[$Enum.GitHubRequestHeaders.AuthorizationKey] = "Bearer "+(Get-GHT)
+	}
 	if ($Body) {
 		try {
-			$out = (Invoke-WebRequest -Method $Method -Uri $Uri -Headers $Headers -Body $Body -ContentType application/json -ProgressAction SilentlyContinue)
+			$out = (Invoke-WebRequest -Method $Method -Uri $Uri -Headers $Headers -Body $Body -ContentType application/json -PreserveAuthorizationOnRedirect:$false -ProgressAction SilentlyContinue)
 		} catch {
 			# Write-Output ("Error: $($error[$Enum.Index.First].ToString()) - Uri $Uri - Body: $Body")
 			$out = ("Error: $($error[$Enum.Index.First].ToString()) - Uri $Uri - Body: $Body")
@@ -4001,7 +4019,7 @@ Function Invoke-GitHubRequest {
 		}
 	} else {
 		try {
-			$out = (Invoke-WebRequest -Method $Method -Uri $Uri -Headers $Headers -ProgressAction SilentlyContinue)
+			$out = (Invoke-WebRequest -Method $Method -Uri $Uri -Headers $Headers -PreserveAuthorizationOnRedirect:$false -ProgressAction SilentlyContinue)
 		} catch {
 			$out = ("Error: $($error[$Enum.Index.First].ToString()) - Uri $Uri - Body: $Body")
 			if ($out -match $Enum.Strings.ApiRateLimitExceeded) {
@@ -4031,7 +4049,7 @@ Function Check-PRInstallerStatusInnerWrapper {
 	)
 	if (($FunctionTrace) -OR ($WhatIf) -OR ($Display)) {Write-FunctionTrace "Check-PRInstallerStatusInnerWrapper $Uri"};
 	try {
-		$Out = (Invoke-GitHubRequest $Url -Method $Enum.PRRequestMethods.Head -ErrorAction SilentlyContinue -ProgressAction SilentlyContinue).StatusCode
+		$Out = (Invoke-WebRequest -Uri $Url -Method $Enum.PRRequestMethods.Head -ErrorAction SilentlyContinue -ProgressAction SilentlyContinue).StatusCode
 	} catch {}
 	return $Out
 }

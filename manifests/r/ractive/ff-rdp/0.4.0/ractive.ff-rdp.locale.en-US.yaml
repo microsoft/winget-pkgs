@@ -1,0 +1,82 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ractive.ff-rdp
+PackageVersion: 0.4.0
+PackageLocale: en-US
+Publisher: ractive
+PublisherUrl: https://github.com/ractive
+PublisherSupportUrl: https://github.com/ractive/ff-rdp/issues
+Author: James Bergamin
+PackageName: ff-rdp
+PackageUrl: https://github.com/ractive/ff-rdp
+License: MIT
+LicenseUrl: https://github.com/ractive/ff-rdp/blob/HEAD/LICENSE
+ShortDescription: Use Firefox's Remote Debugging Protocol via a CLI
+Description: CLI for Firefox Remote Debugging Protocol — inspect, test, and automate Firefox from the terminal. Supports navigation, DOM queries, screenshots, accessibility audits, performance analysis, network monitoring, and more. Designed for both human users and AI agents.
+Moniker: ff-rdp
+Tags:
+- agentic-skills
+- agentic-workflow
+- cli
+- firefox
+- firefox-rdp
+ReleaseNotes: |-
+  The connection daemon is gone: every command opens its own Firefox connection, nothing to start or stop. New since 0.3.0: --with-page on every action, --query on every read command, a bare ff-rdp home view with a SessionStart hook, and fixes for Firefox 152 through 157.
+  Background on the reset: kb/research/step-back-2026-10-02.md.
+  Breaking / Removed
+  ───────────────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────────────────────────────
+  Removed                                                        │Use instead
+  ───────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────
+  daemon status, daemon stop, --no-daemon, --daemon-timeout      │nothing; run commands directly
+  ───────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────
+  cross-command event capture via the daemon                     │navigate URL --with-network, or network --follow > net.ndjson & started first
+  ───────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────
+  throttle command                                               │navigate/reload --throttle slow-3g|fast-3g --block PATTERN (that load only)
+  ───────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────
+  emulate command                                                │screenshot --color-scheme light|dark --media print|screen, navigate --user-agent
+                                                                 │UA
+  ───────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────
+  network --since                                                │network --follow
+  ───────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────
+  inspect <actor-id>                                             │inspect <js-expression> [--depth N]
+  ───────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────
+  --wait-timeout on wait and navigate                            │--timeout-ms (no alias)
+  ───────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────
+  screenshot --viewport-height, --dppx                           │screenshot --window-size WxH or launch --window-size WxH
+  ───────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────
+  meta.route, meta.daemon_fallback, eval meta.eval_path, click   │gone from the envelope
+  entered                                                        │
+  ───────────────────────────────────────────────────────────────┴──────────────────────────────────────────────────────────────────────────────────
+  Also:
+  - Refs (e<N>) are stamped on elements and numbered per document. A ref from an earlier page fails with error_type: "stale_ref" instead of clicking the wrong thing.
+  - page-text is capped at 8000 characters (--full lifts it); storage values at 2048 (--max-value-chars 0).
+  - --fields / --sort with an unknown name exit 1.
+  - launch: results.auto_consent is now results.auto_consent_extension_installed; --replace only stops Firefoxes that ff-rdp launched.
+  - Bare ff-rdp exits 0 with the home view, not usage exit 2.
+  - ff-rdp-core: fronts/ merged into actors/; ObjectActor::own_property_names and set_custom_viewport_size removed.
+  Added
+  - Act and see: --with-page on navigate, click, type, reload, back, forward, scroll returns the resulting page (headings, reader excerpt, interactive refs, page.facts from infoboxes). --query TEXT narrows it.
+  - Find, don't guess: --query / --query-regex on page-text, snapshot, a11y summary, dom.
+  - Ambient context: bare ff-rdp shows browser, tabs and the current page; install-hook --claude|--codex adds a SessionStart hook.
+  - Network: navigate --with-network --headers/--security; network --source watcher|performance-api.
+  - Consent: consent accept / navigate --auto-consent handle Sourcepoint, BBC and consentmanager; click --frame / eval --frame reach cross-origin iframes.
+  - Launch: --window-size WxH, --launch-timeout SECS, --english-language-pack; FF_RDP_PORT honoured everywhere.
+  - a11y --native, click/type --visible|--index N, wait --sleep-ms, eval top-level await, profiles prune --all --dry-run, cookies --fields/--sort/--limit.
+  Changed
+  - navigate reports the real HTTP status; DNS and certificate errors fail with exit 7 / 8 on every nav verb and --with-page.
+  - click hit-tests first (click_obscured / click_offscreen), and waits for the navigation it starts.
+  - eval gives each call its own scope (--no-isolate opts out); --stringify awaits Promises; rejected Promises are errors.
+  - perf vitals/audit report null for unmeasurable LCP/CLS/TBT instead of a fabricated good score.
+  - JS exceptions and --jq errors land in the JSON envelope as error_type: "User".
+  Fixed
+  - Firefox 152: cookies enumeration, navigate events budget. 153: screenshots, a11y tree. 155: full-page screenshots. 156/157: protocol contracts, greeting.
+  - reload / back / forward resolve in milliseconds instead of a 21 s fallback.
+  - network --headers returned empty headers; one-shot network hung on noisy pages.
+  - styles --layout reported zeros for px values; --full-page screenshots froze fixed elements.
+  - Launch leaks: stale profiles, recycled PIDs, orphaned Firefoxes.
+  Internal
+  Nightly live sweep, one required ci check, discipline gates and the Codex supervisor layer deleted, 178k to 156k Rust lines.
+ReleaseNotesUrl: https://github.com/ractive/ff-rdp/releases/tag/v0.4.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
