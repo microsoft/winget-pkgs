@@ -1,0 +1,20 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: hongfaqiu.StrataManager
+PackageVersion: 0.2.33
+PackageLocale: zh-CN
+ShortDescription: 面向 Strata 本地推理的桌面工作台。
+Description: Strata Manager 是一款面向 Niko1221/Strata 本地大模型推理引擎的开源桌面管理工具，将运行环境准备、模型配置、服务控制、聊天、监控、调优与基准测试整合到同一工作台，降低使用门槛。已下载的模型权重不会被改动。
+Tags:
+- 人工智能
+- 大模型
+- 大语言模型
+- 本地大模型
+ReleaseNotes: |-
+  - 下载模型时 Step 4 不再「卡住」：这一步上游脚本要从 GitHub 下载 llama.cpp 源码包（约 38MB），国内直连很慢，而且脚本用回车原地刷新进度、Manager 以前只按换行读取，界面一直不动。现在进入这一步前，Manager 先按「下载来源」把这个包下好，核对 SHA-256 后放到脚本认的位置，脚本直接跳过下载；下载时显示字节进度、速度和当前来源。提前下载失败时显示黄色提示，交给上游脚本自己从 GitHub 下。setup 输出也改为按回车分行，进度能正常刷新。
+  - 下载来源默认「自动（测速选最快）」：gh-proxy.org、ghproxy.net 和 GitHub 一起测速，从最快的开始，失败按顺序换下一个，GitHub 兜底。没改过来源的用户自动用上新默认，手动选过的保持不变，「恢复默认」回到自动；引擎下载、应用更新和 Step 4 共用这套设置。在「应用更新」里手动选「官方」后只走 GitHub。
+  - Intel 显卡（SYCL）引擎 0.1.54「显存放不下」一键修复（上游 #4731）：0.1.54 按注意力批量 128 分配显存、却只按 32 预算，单卡首个请求可能报 do not fit。「一键提速 → 体检」在 SYCL + 引擎 0.1.54 且日志出现 do not fit 时显示提示卡，一键把 env.STRATA_ATTN_BATCH 设为 32（另存新版本并切换）；已设置时显示「恢复默认」一键删除。CUDA、HIP 等其他后端不显示。
+  - 12 GB N 卡提速开关（上游 #4735，0.2.8 起默认关闭）：Qwen + CUDA + 不超过 13 GiB 的独立 NVIDIA 显卡时，体检里多一个开关；打开写 env.STRATA_ROUTE_PRIOR=1.5，关闭删除该项（旧版写的 0 视为关闭）。说明代价：长对话可能重复文字。只手动开关，不进入自动校准。文案覆盖全部 10 种界面语言。
+ManifestType: locale
+ManifestVersion: 1.28.0
