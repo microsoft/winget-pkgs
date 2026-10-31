@@ -1,0 +1,66 @@
+# Created with deja-vu release workflow using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: vshulcz.deja-vu
+PackageVersion: 0.22.0
+PackageLocale: en-US
+Publisher: vshulcz
+PublisherUrl: https://github.com/vshulcz
+PublisherSupportUrl: https://github.com/vshulcz/deja-vu/issues
+PrivacyUrl: https://vshulcz.github.io/deja-vu/guide/privacy.html
+PackageName: deja-vu
+PackageUrl: https://vshulcz.github.io/deja-vu/
+License: MIT
+LicenseUrl: https://github.com/vshulcz/deja-vu/blob/HEAD/LICENSE
+ShortDescription: Search Claude Code, Codex and Cursor session history locally
+Tags:
+- aider
+- claude-code
+- cli
+- codex
+- cursor
+- mcp
+- memory
+ReleaseNotes: |-
+  Bare deja at a terminal now opens a search screen over every agent's
+  history: type to search, read a session at the hit, resume it, or carry it
+  into another agent. It opens on the sessions behind your uncommitted change.
+  Junie and JetBrains AI Assistant are read, deja rules sync writes to 42
+  agents instead of 8, and recall called by an agent puts the project it works
+  in first, which took a planted answer from 20 to 43 of 56 real queries. A
+  transcript its agent deleted no longer makes every search answer stale. The
+  index version is now 69, so the store rebuilds once on the first run after
+  upgrading.
+  Added
+  - Bare deja at a terminal opens a search screen over every agent's history. Type to search, read a session at the hit, resume it, or carry it into another agent with ctrl-o. It opens on the sessions behind your uncommitted change, and on a first run it builds the index behind the screen instead of before it. Pipes, TERM=dumb and DEJA_TUI=0 keep the text summary.
+  - The first run of a new version says once what it brings: the top three changes in the terminal, one line in the session-start note.
+  - An empty search in a terminal shows the surprised cat, and the first search that finds something shows the ready one, once per index.
+  - An interactive command says, at most once a day, when a newer deja release is out, with the upgrade command for whatever installed it (deja update, brew, npm, scoop). The look at GitHub runs in a detached process and the next interactive command prints what it found, so no command waits on the network. Hooks, the MCP server, pipes, dev builds, deja update, deja doctor and deja version never start it, and DEJA_OFFLINE=1 or DEJA_NO_UPDATE_NOTICE=1 turns it off with no request made (#4622).
+  - After a search that finds something, in a terminal, deja shows one short tip at most once a day, naming a command you may not have met: blame, fix, how or view, in rotation. It goes to stderr and never appears in a pipe, a script, a hook or --json (#4629).
+  - Kimi Code and Kiro get the line about a file before an edit, and CodeWhale the fix pair for a failed command. None of them shows the model what that hook prints, so the line waits for the next hook that does: the next prompt on Kimi and Kiro, the next tool call or message on CodeWhale. CodeWhale also hands over the pre-tool line of a call that failed to run, which it sends back without it.
+  - deja resume <id> --write-back puts a session the agent deleted back where the agent can reopen it, rebuilt from deja's index in the agent's own format. The file holds the user and assistant turns; tool calls and their output stay in deja, which keeps them and reads only what the agent appends later. Works for Claude Code, Codex, Gemini CLI, Qwen Code, pi, omp, gjc, Kimchi, Senpi, Kimi, Copilot CLI, CodeBuddy, Command Code, CodeWhale, Cline, OpenClaw, Continue, Grok Build and Kiro CLI, each checked by resuming the written file in the real CLI. For agents that keep sessions in a database, or whose format needs something the index lacks, it says what is missing. It never replaces a file and writes only inside the agent's store (#4617).
+  - aider edits record both sides, read from the SEARCH/REPLACE block, unified diff or patch in the reply once aider says it applied them, so deja restore and line-level deja blame answer for aider sessions (#595).
+  - VS Code Copilot Chat edits record the replaced text, read from the edit call's arguments, so deja restore and line-level deja blame answer for them. On one machine's store that is 638 spans where there were none. The extension's agent transcripts record both sides of an edit and its file (#595).
+  - Junie and JetBrains AI Assistant are read. Junie gets junie and junie-auto (hooks, MCP, skill, /deja, rules, resume); AI Assistant gets jetbrains, the MCP server in ~/.ai/mcp/mcp.json. Agent chats that run Junie, Claude, Codex or another agent with its own store are left to that store (#3104).
+  - deja rules sync writes to 42 agents, up from 8. The new ones are Copilot CLI and Chat, Cline, Roo, Continue, Kilo, Zed, Crush, Junie, Kiro, CodeBuddy, WorkBuddy, Cherry Studio, CodeWhale, Command Code, ZCode, Amp, TRAE CLI, TRAE IDE (~/.trae/user_rules), Hermes, aider, Antigravity, pi, omp, Senpi, gjc, prime-agent, Kimchi, dsh, Reasonix, Muse, Devin (~/.config/devin/AGENTS.md), OpenClaw (its workspace AGENTS.md) and Cursor CLI (~/.cursor/rules, which it reads only for projects under the home directory). A stand or the host's source showed each file reaching the model. Where a host loads only the first of several files, the block goes into the one already loaded, so opencode and Kilo no longer lose a ~/.claude/CLAUDE.md they were reading (#4805).
+  - The harnesses page has a table of every hook surface per harness (digest, per-prompt, pre-tool, after-failure, compaction, MCP, handoff, session end, rules, statusline, reader), each with how it was checked and why a missing one is missing. A test installs every target and fails when the table and the wiring disagree (#4801).
+  - deja recall <words> prints the page the MCP recall tool answers, for a skill or script that runs deja through the shell. deja search --json was the only option there and ran to 1-2 MB, which harnesses truncate to nothing (#4781).
+  - New targets kimchi-auto, codewhale, codewhale-auto and cherrystudio-auto. kiro-auto also writes ~/.kiro/hooks/deja.json, which the IDE and kiro-cli --v3 run in every chat, and deja install kiro the skill. ZCode gets the shared skill and /deja (#4802).
+  - A hook whose answer the host drops now hands it to the next hook of that session that reaches the model, once: Grok's session start and prompt ride its next tool hook, and Kimi's and Kiro's fix pair for a failed command rides the next prompt. goose gets the fix pair through a Stop hook that blocks once, the one hook answer it shows the model.
+  - Antigravity, Crush and goose, which have no compaction event, get the compaction packet on the next hook that reaches the model, read from the turns their stores keep before the summary. Antigravity also gets the pre-edit line for the file a planner step edited.
+  - Command Code, ZCode, CodeWhale and Amp get the compaction packet. None of them has a compaction hook; each keeps the turns before the summary (the transcript, the CLI database, a saved history, the full thread), and the next hook that reaches the model catches it up.
+  - commandcode-auto writes a mod: the question's recall goes into its model calls, the session's end clears its live stamp, and the footer shows deja statusline. Amp's plugin writes each thread it runs to the thread store so deja can read it, and shows a status item.
+  - deja aider recalls on every message on macOS and Linux. aider has no hooks, but it reads its read-only files right after it logs a message, so the wrapper serves one of them from a named pipe and answers with the recall for that message (#4801).
+  - Crush's one hook carries the per-prompt recall and the previous command's fix pair, and Command Code's tool hook answers the newest question, since neither host fires a per-prompt hook.
+  - deja statusline in the status line of Cursor CLI, Copilot CLI, Qwen Code, CodeBuddy Code, Grok Build, Kimi Code (0.30 and later) and TRAE CLI, from their -auto targets. opencode and Kilo CLI get it through a TUI plugin, VS Code through a local extension vscode-auto adds to the status bar, dsh under the web composer, and OpenClaw as a deja tab in the Control UI. A status line already set up there is left alone and install prints the line that runs both. The line finds the session from a session_id or sessionId when the host sends no transcript path.
+  - goose's Stop block also carries the pre-edit line for each file the turn edited, and its SessionStart hook prints deja's status line as the banner goose shows when an interactive session opens. antigravity-auto puts deja statusline in agy's statusLine, stacked under agy's own line; the line finds an agy session by session_id, since every agy transcript is named transcript.jsonl.
+  Changed
+  - deja doctor folds the stores that are simply not on this machine into one line, so the agents you use are not lost among thirty-odd missing rows. A store that was found, cannot be read, is excluded or unplugged, holds indexed sessions or carries advice (aider's) keeps its row. deja doctor --all lists every store (#4625).
+  - deja index says how long the build took: the summary after a rebuild reads deja: indexed 3 sessions, 5 messages in 0.04s, and the first-index greeting ends in 0.05s too, whichever command built the index: deja index, deja search, deja warmup or bare deja (#4630).
+  - Agents look up past decisions before the first edit in a task and before calling a change done, not only when asked about history. The skill, the MCP server instructions and the other agent-facing texts now say what deja holds: rules, banned or already-tried tools, checks required before merge, preferred values, owners. On a stand with ~1800 real sessions and 30 other skills, Claude Code applied the planted decision in 28-30 of 33 tasks, up from 14-15. opencode stayed at 15-17 (#4791).
+  - The agent-facing blame answers in the same framed text as recall, fix and how instead of a JSON array: a numbered row per session in the [harness] project · id form, its title, the files it also worked on and its excerpts. The same 8 KB answer now carries all ten sessions where it carried five to seven, and a decision that was later taken back says so, which the JSON had no field for. deja blame --json is unchanged (#4634).
+  Fixed
+  - One transcript its agent deleted made every search after it answer from the index as it was and start a background pass with nothing to do, and deja handoff printed the kept notice twice. A kept transcript is now marked in the index and no longer reads as a change.
+ReleaseNotesUrl: https://github.com/vshulcz/deja-vu/releases/tag/v0.22.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,72 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: JGraph.Draw
+PackageVersion: 31.4.4
+PackageLocale: en-US
+Publisher: JGraph
+PublisherUrl: https://www.drawio.com/
+PublisherSupportUrl: https://github.com/jgraph/drawio-desktop/issues
+PrivacyUrl: https://www.diagrams.net/trust
+Author: JGraph Limited
+PackageName: draw.io
+PackageUrl: https://github.com/jgraph/drawio-desktop
+License: Apache-2.0
+LicenseUrl: https://github.com/jgraph/drawio-desktop/blob/HEAD/LICENSE
+Copyright: © 2005-2026 JGraph Ltd, Artisans' House, 7 Queensbridge, NN4 7BF, Northampton, England. Company
+CopyrightUrl: https://www.diagrams.net/trust
+ShortDescription: A diagramming desktop app based on Electron that wraps the core draw.io editor.
+Tags:
+- chart
+- design
+- diagram
+- draw
+- gantt
+- graph
+- graphics
+- mind-map
+- mind-mapping
+- mindmap
+- uml
+ReleaseNotes: |-
+  Release Notes for 31.4.4
+  Windows Installer
+  Windows No Installer (zip)
+  macOS - Universal
+  Linux - deb, AppImage or rpm
+  ChangeLog:
+  - Uses electron 44.2.0
+  - Restricts renderer file reads to paths the user has authorised, so opening and exporting a crafted diagram can no longer read arbitrary local files through the file IPC [GHSA-fjgc-8xgj-rvh4]
+  - Corrects the AppImage compression method, so AppImageLauncher and other tools that expect gzip can read the image again [#2538]
+  - Updates to draw.io core 31.4.4. All changes from 31.4.2 to 31.4.4 are added in this build.
+  Testing:
+  Verified against the packaged, signed macOS build. Linux and Windows packaging changes were verified from the produced release artifacts.
+  Base checks
+  - Launch, open a file passed on the command line, add and edit shapes, undo and redo, save, insert and delete pages
+  - Copy and paste through the system clipboard, which changed with Electron 44
+  - Export to PNG, SVG and PDF from the app and from the command line
+  - Diagram round trip in exported PNG, SVG and PDF, including reopening an exported PDF
+  - Command line page selection with -p, and --size page against the default --size diagram
+  - Quick Look preview on macOS renders the diagram
+  - The macOS bundle is signed with a Developer ID certificate under the hardened runtime and is notarised, and the Quick Look app extension is sandboxed and separately signed
+  - The x86_64 and arm64 AppImages are gzip compressed
+  - 153 unit tests pass
+  Read authorisation [GHSA-fjgc-8xgj-rvh4]
+  - readFile, fileStat, isFileWritable, watchFile, getFileDrafts, getBkpFile and checkFileExists all refuse paths the user has not authorised, including a symlink planted inside an authorised folder
+  - A crafted diagram whose font source points at a local file exports with nothing embedded, checked by scanning the export for the file contents in both plain and base64 form
+  - The font URL check rejects the evasions the URL parser would otherwise strip, being leading spaces, tabs and newlines in the scheme, uppercase schemes, and absolute, UNC and protocol relative paths, while still accepting http(s), data: and relative URLs
+  Checks around the read authorisation change
+  - Libraries and templates declared in the configuration still load, and their shapes still appear in the sidebar
+  - The configuration widens what may be read and not what may be written, checked by a write to a configured path being refused
+  - Custom libraries added in earlier versions keep working after upgrading to this build
+  - Drafts, backups, external change detection and the save conflict check still work
+  - Authorisations survive a restart, so Recent Files keeps working
+  - Saving a shape library opened from a file still writes without reopening the save dialog [#2518] [#2521]
+ReleaseNotesUrl: https://github.com/jgraph/drawio-desktop/releases/tag/v31.4.4
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://www.drawio.com/docs/
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/jgraph/drawio-desktop/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

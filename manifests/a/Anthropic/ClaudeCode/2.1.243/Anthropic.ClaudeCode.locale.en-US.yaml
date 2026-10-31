@@ -1,0 +1,102 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Anthropic.ClaudeCode
+PackageVersion: 2.1.243
+PackageLocale: en-US
+Publisher: Anthropic PBC
+Author: Anthropic PBC
+PackageName: Claude Code
+License: Proprietary
+Copyright: © 2026 Anthropic PBC
+ShortDescription: Unleash Claude’s raw power directly in your terminal. Search million-line codebases instantly. Turn hours-long workflows into a single command. Your tools. Your workflow. Your codebase, evolving at thought speed.
+Description: |-
+  Claude Code is Anthropic’s agentic coding tool that lives in your terminal and helps you turn ideas into code faster than ever before.
+  What Claude Code does for you
+  - Build features from descriptions: Tell Claude what you want to build in plain English. It will make a plan, write the code, and ensure it works.
+  - Debug and fix issues: Describe a bug or paste an error message. Claude Code will analyze your codebase, identify the problem, and implement a fix.
+  - Navigate any codebase: Ask anything about your team’s codebase, and get a thoughtful answer back. Claude Code maintains awareness of your entire project structure, can find up-to-date information from the web, and with MCP can pull from external datasources like Google Drive, Figma, and Slack.
+  - Automate tedious tasks: Fix fiddly lint issues, resolve merge conflicts, and write release notes. Do all this in a single command from your developer machines, or automatically in CI.
+  Why developers love Claude Code
+  - Works in your terminal: Not another chat window. Not another IDE. Claude Code meets you where you already work, with the tools you already love.
+  - Takes action: Claude Code can directly edit files, run commands, and create commits. Need more? MCP lets Claude read your design docs in Google Drive, update your tickets in Jira, or use your custom developer tooling.
+  - Unix philosophy: Claude Code is composable and scriptable. tail -f app.log | claude -p "Slack me if you see any anomalies appear in this log stream" works. Your CI can run claude -p "If there are new text strings, translate them into French and raise a PR for @lang-fr-team to review".
+  - Enterprise-ready: Use Anthropic’s API, or host on AWS or GCP. Enterprise-grade security, privacy, and compliance is built-in.
+Moniker: claudecode
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claude
+- claude-code
+- claudecode
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  - Added a Loops breakdown to /usage: per-loop run count, total tokens, tokens per run, and last run, so runaway or chatty /loop tasks are easy to spot
+  - Added modelPicker setting: curate the /model picker with an ordered, labeled list of models (any id spelling, including Vertex/Bedrock ids), appended to or replacing the built-in lineup
+  - Added promptCacheTtl and subagentPromptCacheTtl settings so API-key and cloud-provider users can keep a 1-hour prompt cache on the main conversation while subagents stay at 5 minutes
+  - Added modelPricing managed setting so an organization's contracted per-model rates and discount multiplier are used for /cost, the status line, and telemetry cost figures instead of list price
+  - Added a keyless sign-in under /login → Anthropic Console: "Sign in with your Console account" (recommended) alongside creating an API key, so organizations that don't allow API keys can sign in
+  - Added a Skipped sources line to /status that lists managed settings sources (for example managed-settings.json) present but not applied because a higher-precedence managed source is active
+  - Added a managed marker in /mcp and /plugins on claude.ai connectors whose authentication is managed by your organization
+  - Added a tip pointing claude.ai users who haven't connected GitHub for Claude Code on the web to /web-setup
+  - Added a /status line showing whether GitHub is connected for Claude Code on the web (Pro/Max), pointing to /web-setup when it isn't
+  - Added the model (and effort level) each subagent ran on to /tasks and the agent detail dialogs
+  - Fixed remote MCP servers in non-interactive (-p) and SDK sessions never recovering after a dropped connection; they now reconnect automatically or report as failed
+  - Fixed MCP server sign-in started from the desktop app failing with "Invalid redirect URI" on servers that support client ID metadata documents (for example Linear)
+  - Fixed auto mode staying unavailable at startup when a temporary server-side disable was cached and later flag fetches failed
+  - Fixed auto mode tool calls being denied as "temporarily unavailable" after about a minute of waiting when the API was briefly overloaded and asked the client to retry
+  - Fixed the /model picker silently ignoring an Ultracode selection; picking Ultracode now applies it to the current session
+  - Fixed /resume only listing the 50 most recent sessions; the picker now loads more as you scroll
+  - Fixed cloud sessions resuming after a mid-turn restart with a pending hook or background-task notification re-sent as the prompt instead of the normal continuation message
+  - Fixed cross-session messaging silently turning off inside user namespaces and rootless containers after the 2.1.232 socket-directory hardening
+  - Fixed text that hangs outside its container (for example the sign-in URL in /login) losing its leading columns when another part of the screen repaints
+  - Fixed spellcheck not underlining a misspelled word typed directly after an emoji
+  - Fixed background subagents not waking when their last background Bash task completes
+  - Fixed sessions going silent for 10+ minutes when the Anthropic API never starts a response: the request now times out after ~3 minutes, retries once, then shows API Error: No response from API
+  - Fixed auth, model-availability, and other client-generated error messages rendering like model output instead of as error lines
+  - Fixed workload identity federation in CI: processes in one job share the exchanged token instead of re-exchanging the single-use token; a rejected exchange fails fast with the server's message
+  - Fixed server-managed companyAnnouncements not showing at startup in a session that began with signing in (for example the first launch after /logout)
+  - Fixed hook if conditions like Bash(cat *) firing on unrelated Bash commands when the command contained $() or backtick command substitution followed by more arguments
+  - Fixed plugin dependencies declared with a marketplace field never resolving when both plugins are loaded together via --plugin-dir
+  - Fixed /reload-plugins keeping the LSP tool after the last LSP plugin is disabled; it now also warns before an LSP plugin change that would re-read the conversation
+  - Fixed --agents silently ignoring invalid JSON or invalid agent definitions; it now exits with a clear error, like --mcp-config
+  - Fixed /status showing "Found invalid entries in: ." with no filename when ~/.claude.json has an invalid MCP server entry
+  - Fixed /clear removing the /rename session name from the prompt bar even though the name was kept for the new session
+  - Fixed Ctrl+R history search and up-arrow history breaking when ~/.claude/history.jsonl contains a malformed entry
+  - Fixed Ctrl+[ not leaving vim INSERT mode in terminals that encode modified keys (modifyOtherKeys / kitty protocol)
+  - Fixed the local IDE connection being routed through HTTPS_PROXY (and sometimes failing) when localhost was listed in NO_PROXY but not lowercase no_proxy; both casings are now honored
+  - Fixed sandbox network-violation details being dropped from the Bash tool result when the blocked command still exited 0 (for example curl printing the proxy's 403 page)
+  - Fixed the status line rate_limits fields and /usage still showing a rate-limit window's pre-reset usage percentage after the window reset while the session was idle
+  - Fixed claude --teleport <session> exiting on uncommitted changes instead of offering to stash them and continue, as the session picker already does
+  - Fixed /web-setup repeatedly asking you to log in when an older GitHub CLI (without gh auth token) was already authenticated
+  - Fixed Claude in Chrome losing its connection to Claude Code after an auto-update cleaned up the version it was set up with; the native host now launches via the stable claude launcher
+  - [VSCode] Fixed sessions started before feature flags were first fetched (for example right after install) opening in the default permission mode instead of auto mode or your configured default mode
+  - [VSCode] Fixed Focus view sections you expanded collapsing on their own during subagent tool activity
+  - Improved startup time: sandbox and MCP bring-up no longer block the first frame, bare launches skip subcommand registration, and workflow discovery, settings, and trust-store work is cheaper
+  - Improved native install and auto-update download size: the binary is now zstd-compressed (about 75 MB instead of 340 MB on Linux x64)
+  - Improved attribution of usage telemetry to your organization for sessions that authenticate with ANTHROPIC_AUTH_TOKEN directly against the Anthropic API, so its data-handling settings apply
+  - Improved native binary size: about 2 MB smaller by storing the bundled skill and prompt text more compactly
+  - Improved memory usage of native builds: code is now loaded on demand instead of keeping the whole bundle resident (roughly 40–70 MB less memory per session)
+  - Improved peak memory usage in long-running sessions (the runtime now garbage-collects sooner as the heap grows)
+  - Improved /login over SSH: the sign-in URL appears immediately, pressing c reports how the URL was copied instead of always claiming success, and a hint explains how to select text in fullscreen
+  - Improved the error when effort xhigh/max is used with thinking turned off: it now names the level, the setting that disabled thinking, and /effort high as the fix
+  - Improved /loop: consecutive wake-ups where Claude has nothing to do now fold into a single line in the terminal instead of printing each one
+  - Changed the sandboxed Bash tool prompt to no longer list allowed network hosts, so Claude attempts requests (and you can approve new hosts) instead of assuming unlisted hosts are blocked
+  - Updated the /model picker and the bundled claude-api skill to show Sonnet 5's $2/$10 per Mtok pricing as its standard list price rather than a limited-time promo
+  - Changed computer use on macOS so clicking the desktop, Dock, or a Finder window requires granting Finder via the access dialog, like any other app
+  - Changed /model, /fast, and /effort to also run immediately instead of queueing until the turn ends on Bedrock, Vertex, and Foundry and when telemetry is disabled
+  - Fixed claude remote-control exiting and stranding attached Remote Control sessions when the server drops its environment mid-session; it now recovers
+  - Fixed Remote Control sessions served by claude remote-control sometimes getting stuck after it was stopped and restarted, for Team and Enterprise members without an admin or owner role
+  - Changed the cross-session messaging inbox socket to close connections that send no complete line within 30 seconds; scripts posting to it should connect once their data is ready
+  - Improved the notice when resuming a conversation whose Remote Control is held by another terminal: it now says sessions on other machines can't be seen from, or reach, this one
+  - [VSCode] Improved history trimming in long sessions: older tool-activity rows are dropped first so your messages and Claude's replies stay visible
+  - [VSCode] Improved attribution of the extension's own usage telemetry to your organization when you are signed in with a Claude account, so its data-handling settings apply
+ReleaseNotesUrl: https://github.com/anthropics/claude-code/blob/HEAD/CHANGELOG.md#21243
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

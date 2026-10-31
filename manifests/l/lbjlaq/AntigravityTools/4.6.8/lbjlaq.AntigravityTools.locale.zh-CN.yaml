@@ -1,0 +1,41 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.6.8
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+Tags:
+- account-manager
+- antigravity
+ReleaseNotes: |-
+  - [核心修复] 彻底修复冷启动无条件 VACUUM 导致磁盘 I/O 饱和与日志保留时间戳单位错误 (Issue #3386):
+    - 对齐保留清理时间戳毫秒单位：修复此前因清理函数 cleanup_old_logs 使用秒级时间戳（timestamp()）计算 30 天截断点，而请求日志存储使用毫秒时间戳（timestamp_millis()），导致过期判断永远无法命中、旧日志从未被清理且数据库只增不减的缺陷。统一基准为毫秒级计算（now.timestamp_millis() - days * 24 * 3600 * 1000）。
+    - 按需门槛式 VACUUM 碎片整理：移除了应用启动初始化 ProxyMonitor 时对 SQLite 数据库无条件执行全量 VACUUM 的行为。改为仅在实际删除行数达到合理门槛（deleted >= 500）时才进行空间整理，且容忍整理过程中的非致命错误；彻底解决大容量日志库（数 GB）在冷启动时即使清理 0 条记录仍无休止全盘重写导致 SSD/NVMe 磁盘持续 100% 占满与系统卡顿的问题。
+  - [功能优化] 账号表格支持点击表头按周配额重置时间与最后使用时间排序 (Issue #3387):
+    - 支持重置时间与使用时间双维度升降序：允许用户直接点击「周配额/模型配额」或「最后使用」表头切换排序模式（升序 -> 降序 -> 恢复默认）。在周配额视图下自动提取 Gemini / Claude 模型组的最快配额恢复时间点，帮助用户快速将即将恢复额度的账号排到最前。
+    - 列排序与手动拖拽智能互斥保护：激活表头列排序时，自动挂起 @dnd-kit 的手动拖拽事件并为抓手图标提供明确提示态，避免排序覆盖与交互冲突。
+  - [Linux 修复] 修复 niri / Hyprland 等独立合成器上窗口全黑问题 (Issue #3388, PR #3389):
+    - 取消仅因 DISPLAY 存在即强制切 X11 行为：niri / Hyprland / sway / river / labwc / wayfire 常年挂载 Xwayland 兼容层，此前因检测到 DISPLAY 被强行切入 X11 导致 WebKitGTK 主界面图层全黑。调整为上述合成器保持原生 Wayland，GNOME / KDE 的历史 X11 兼容回退保持不变。
+    - 按需动态禁用 WebKit DMA-BUF 渲染器：在 Wayland 环境且（上述合成器或本机加载了 NVIDIA 专有驱动）时，若用户未自行设置，自动注入 WEBKIT_DISABLE_DMABUF_RENDERER=1 避免黑屏；GNOME + AMD/Intel 核显保留 DMA-BUF 硬件加速快路径。已有环境变量严格尊重不覆盖。
+  - [核心修复] 彻底修复 OpenAI 接口下非 -thinking 后缀 Claude 模型多轮对话报 400 thinking.signature 错误 (Issue #3391):
+    - 扩展 Claude 思维模式识别范围：修复此前仅依据 -thinking 后缀识别 Claude 思考模式，导致 claude-sonnet-4-6 等基础模型在显式启用 thinking: { type: "enabled" } 时漏判、从而绕过历史签名校验防御机制的缺陷。
+    - 缺失思考历史安全降级与杜绝伪造思考块：当多轮对话中存在缺少 reasoning_content 且无法提供有效签名的历史 Assistant 消息时，针对 Claude 模型无条件安全降级为关闭思考，并杜绝注入上游无法校验的伪造思考占位块，彻底消除 400 messages.N.content.0.thinking.signature: Field required。
+    - 400 签名错误重试彻底关闭思考配置：在捕获到签名失效触发 400 重试时，显式将 openai_req.thinking 置空并剥除模型 -thinking 后缀，保证下一次重试请求彻底以纯文本模式构造，杜绝多次重试均重复报 400 的死循环。
+  - [核心修复] 修复 Anthropic 协议代理 SSE 超时卡顿、工具调用内容泄漏及思考中断 Loop 缺陷 (Issue #3393):
+    - Anthropic 协议流式代理超时收紧与僵尸流熔断：将 peek 首包探测等待超时由 300s 显著收紧至 30s，外层 SSE 空闲保活超时由 300s 降至 120s；内层 SSE 心跳等待由 60s 降至 20s，并新增最多连续 5 次无数据心跳（100s）主动终止保护，彻底消除响应迟缓及上游卡死引发的下游连接长时间挂死问题。
+    - 杜绝无参数工具调用导致输入泄露与客户端报错：修复流式 process_function_call 在处理无参数或空参数工具（如 EnterPlanMode）时，因跳过 input_json_delta 导致工具输入块不完整、进而引发部分客户端报错或将工具内容错误回显为正文文本的问题，现在始终保证发送完整的 input_json_delta（partial_json: "{}"）。
+    - 修复思考链中断恢复路径缺少结束事件导致客户端死循环：修复思考链被意外中断并触发恢复逻辑时，因依赖受 message_stop_sent 状态守卫的间接调用导致未真正发送结束帧的问题；改为直接向客户端显式输出 message_delta 与 message_stop 事件，彻底避免 Claude 等客户端一直等待响应而陷入无限 loop。
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.6.8
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

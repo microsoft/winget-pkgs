@@ -1,0 +1,79 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.68.0
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Improved
+  - wt switch preview tabs fill on demand: Navigating to a preview tab (e.g. alt-3, the branch diff) could show "Loading…" for ~10 seconds in a large repo while the tab waited its turn in the background precompute queue. A local-git tab (working tree, log, branch diff, upstream) now computes as soon as it's viewed: a cold tab costs its own git command, and a previously computed one fills from the disk cache in milliseconds. An alt-r refresh also discards in-flight results from before the refresh rather than letting them repopulate the cleared cache. (#3439)
+  - wt config state flags a stale default-branch cache: The detected default branch is cached and not re-validated on every command, so a later change to origin/HEAD (a rename followed by git remote set-head origin -a) went unnoticed. wt config state now flags the cache when it differs from the remote's local HEAD; set adopts the new branch and clear re-detects. (#3478, closes #3471, thanks @starlightromero for reporting)
+  - Branch-worktree path mismatch demoted to a dim note: wt list flagged a worktree whose path doesn't match its templated location in red, alarming for the agent-harness worktrees that routinely park at non-standard paths. The mismatch now renders as a dim informational note, and only in wt list: the inline notices on wt switch, wt remove, wt merge, and wt step prune are removed. (#3419, for #3389, thanks @dmsmidt for raising it)
+  - wt config update writes the upcoming [list] json-schema = 2: With the key unset, update previously pinned the current default (= 1), entrenching the schema being retired; it now writes = 2, moving JSON consumers forward. The default is unchanged: schema 1 applies until the key is set. (#3436)
+  - wt step promote --format text|json: Parity with the other step subcommands (rebase, push, …). (#3424, thanks @fuleinist)
+  Fixed
+  - Bare-repo project config survives the default branch being checked out nowhere: When no worktree had the default branch checked out (e.g. a linked worktree parked on another branch, common in agent-driven workflows), wt found no on-disk .config/wt.toml and silently ran with no project config and no project hooks. It now reads the default branch's committed config from the object store, and wt config show reports that source. (#3462, #3466, #3477, closes #3461, thanks @shuntaka9576 for reporting)
+  - Relative WORKTRUNK_PROJECT_CONFIG_PATH anchors to the worktree root: A relative override resolved against the process's current directory, so running wt from a subdirectory silently disabled it. It now resolves from the worktree root, like the default .config/wt.toml. (#3460, thanks @indexzero for reporting in #3454)
+  - Misplaced nested config keys name the file they belong in: A key valid only in the other config file (e.g. list.columns, user-config only, set in the project config) was flagged only as an unknown field; the warning now says which file it belongs in. (#3473, thanks @KieranP for reporting in #3469)
+  - Shell integration detects the shell that invoked wt: wt switch could tell a fish user "shell integration requires a restart" because $SHELL names the login shell, not the shell in use. Detection now walks the process tree to find the enclosing shell, falling back to $SHELL when the walk can't resolve one. (#3455)
+  - Claude plugin's WorktreeCreate hook runs from the project directory: The hook inherited the session shell's working directory, so a session that had cd'd outside the repository failed every worktree creation with "not a git repository". (#3453, thanks @silvanshade)
+  - Codex plugin installs ship skills: codex plugin add copies the plugin via a mechanism that doesn't follow symlinks, so the skills symlink shipped no skills to Codex installs; Windows checkouts, where symlinks materialize as plain text files, had the same gap. The plugin now carries a generated real-file mirror of the skills. (#3440)
+  - LLM prompt size bounded for long diffs: Commit-message, squash, and branch-summary generation could exceed the model's context window on a large diff. Diffs and squash commit lists now truncate within a fixed budget. (#3438)
+  - wt list task-failure warnings show git's full message: A failure was truncated to its first line, dropping git's own recovery guidance (e.g. the index.lock advice). Warnings now render the whole message, and the summary footer no longer restates the warning header's failure count in different vocabulary. In buffered (piped) output the ○ Showing … summary line also moves to stderr, so stdout ends after the last row. (#3435, #3442, #3467)
+  - Watchdog status lines name the running operation: A long wait read "Waiting for the commit message (4s)", as if blocked on user input; it now reads "Waiting for the commit generation command (4s)", and likewise for version checks and PR/MR lookups. (#3443)
+  - Carriage returns normalized in captured stdout: A failing command with progress output on stdout (e.g. git's Receiving objects: 42%\r…) could return the cursor to column 0 and corrupt the rendered error block. stdout is now normalized as stderr already was, and the failure sites that bypassed the standard error renderer (git plumbing, plugin CLI calls, LLM commands) now route through it, so every failed command shows the canonical ✗ <command> failed (exit N) header and output gutter. (#3459, #3474, #3483)
+  - PowerShell wrapper no longer leaks a stray exit-code line to stdout. (#3425)
+  Internal
+  - MSRV bumped to 1.96. (#3428)
+  - Dropped the ragged-table panic workaround; the upstream termimad fix ships in 0.35.1. (#3422)
+  Install worktrunk 0.68.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/max-sixty/worktrunk/releases/download/v0.68.0/worktrunk-installer.sh | sh && wt config shell install
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/max-sixty/worktrunk/releases/download/v0.68.0/worktrunk-installer.ps1 | iex"; git-wt config shell install
+  Install prebuilt binaries via Homebrew
+  brew install worktrunk && wt config shell install
+  Download worktrunk 0.68.0
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+  Install via Cargo
+  cargo install worktrunk && wt config shell install
+  Install via Winget (Windows)
+  winget install max-sixty.worktrunk && git-wt config shell install
+  Install via AUR (Arch Linux)
+  paru worktrunk-bin && wt config shell install
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.68.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

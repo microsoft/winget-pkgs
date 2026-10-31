@@ -1,0 +1,65 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Anthropic.ClaudeCode
+PackageVersion: 2.1.78
+PackageLocale: en-US
+Publisher: Anthropic PBC
+Author: Anthropic PBC
+PackageName: Claude Code
+License: Proprietary
+Copyright: © 2026 Anthropic PBC
+ShortDescription: Unleash Claude’s raw power directly in your terminal. Search million-line codebases instantly. Turn hours-long workflows into a single command. Your tools. Your workflow. Your codebase, evolving at thought speed.
+Description: |-
+  Claude Code is Anthropic’s agentic coding tool that lives in your terminal and helps you turn ideas into code faster than ever before.
+  What Claude Code does for you
+  - Build features from descriptions: Tell Claude what you want to build in plain English. It will make a plan, write the code, and ensure it works.
+  - Debug and fix issues: Describe a bug or paste an error message. Claude Code will analyze your codebase, identify the problem, and implement a fix.
+  - Navigate any codebase: Ask anything about your team’s codebase, and get a thoughtful answer back. Claude Code maintains awareness of your entire project structure, can find up-to-date information from the web, and with MCP can pull from external datasources like Google Drive, Figma, and Slack.
+  - Automate tedious tasks: Fix fiddly lint issues, resolve merge conflicts, and write release notes. Do all this in a single command from your developer machines, or automatically in CI.
+  Why developers love Claude Code
+  - Works in your terminal: Not another chat window. Not another IDE. Claude Code meets you where you already work, with the tools you already love.
+  - Takes action: Claude Code can directly edit files, run commands, and create commits. Need more? MCP lets Claude read your design docs in Google Drive, update your tickets in Jira, or use your custom developer tooling.
+  - Unix philosophy: Claude Code is composable and scriptable. tail -f app.log | claude -p "Slack me if you see any anomalies appear in this log stream" works. Your CI can run claude -p "If there are new text strings, translate them into French and raise a PR for @lang-fr-team to review".
+  - Enterprise-ready: Use Anthropic’s API, or host on AWS or GCP. Enterprise-grade security, privacy, and compliance is built-in.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claude
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  - Added StopFailure hook event that fires when the turn ends due to an API error (rate limit, auth failure, etc.)
+  - Added ${CLAUDE_PLUGIN_DATA} variable for plugin persistent state that survives plugin updates; /plugin uninstall prompts before deleting it
+  - Added effort, maxTurns, and disallowedTools frontmatter support for plugin-shipped agents
+  - Terminal notifications (iTerm2/Kitty/Ghostty popups, progress bar) now reach the outer terminal when running inside tmux with set -g allow-passthrough on
+  - Response text now streams line-by-line as it's generated
+  - Fixed git log HEAD failing with "ambiguous argument" inside sandboxed Bash on Linux, and stub files polluting git status in the working directory
+  - Fixed cc log and --resume silently truncating conversation history on large sessions (>5 MB) that used subagents
+  - Fixed infinite loop when API errors triggered stop hooks that re-fed blocking errors to the model
+  - Fixed deny: ["mcp__servername"] permission rules not removing MCP server tools before sending to the model, allowing it to see and attempt blocked tools
+  - Fixed sandbox.filesystem.allowWrite not working with absolute paths (previously required // prefix)
+  - Fixed /sandbox Dependencies tab showing Linux prerequisites on macOS instead of macOS-specific info
+  - Security: Fixed silent sandbox disable when sandbox.enabled: true is set but dependencies are missing — now shows a visible startup warning
+  - Fixed .git, .claude, and other protected directories being writable without a prompt in bypassPermissions mode
+  - Fixed ctrl+u in normal mode scrolling instead of readline kill-line (ctrl+u/ctrl+d half-page scroll moved to transcript mode only)
+  - Fixed voice mode modifier-combo push-to-talk keybindings (e.g. ctrl+k) requiring a hold instead of activating immediately
+  - Fixed voice mode not working on WSL2 with WSLg (Windows 11); WSL1/Win10 users now get a clear error
+  - Fixed --worktree flag not loading skills and hooks from the worktree directory
+  - Fixed CLAUDE_CODE_DISABLE_GIT_INSTRUCTIONS and includeGitInstructions setting not suppressing the git status section in the system prompt
+  - Fixed Bash tool not finding Homebrew and other PATH-dependent binaries when VS Code is launched from Dock/Spotlight
+  - Fixed washed-out Claude orange color in VS Code/Cursor/code-server terminals that don't advertise truecolor support
+  - Added ANTHROPIC_CUSTOM_MODEL_OPTION env var to add a custom entry to the /model picker, with optional _NAME and _DESCRIPTION suffixed vars for display
+  - Fixed ANTHROPIC_BETAS environment variable being silently ignored when using Haiku models
+  - Fixed queued prompts being concatenated without a newline separator
+  - Improved memory usage and startup time when resuming large sessions
+  - [VSCode] Fixed a brief flash of the login screen when opening the sidebar while already authenticated
+  - [VSCode] Fixed "API Error: Rate limit reached" when selecting Opus — model dropdown no longer offers 1M context variant to subscribers whose plan tier is unknown
+ReleaseNotesUrl: https://github.com/anthropics/claude-code/blob/HEAD/CHANGELOG.md#2178
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

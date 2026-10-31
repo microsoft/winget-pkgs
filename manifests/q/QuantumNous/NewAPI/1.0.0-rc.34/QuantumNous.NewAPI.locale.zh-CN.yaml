@@ -1,0 +1,65 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: QuantumNous.NewAPI
+PackageVersion: 1.0.0-rc.34
+PackageLocale: zh-CN
+Publisher: Quantum Nous
+PublisherUrl: https://www.newapi.ai/
+PublisherSupportUrl: https://www.newapi.ai/support/
+Author: 锟腾科技（杭州）有限公司
+PackageName: New API
+PackageUrl: https://www.newapi.ai/
+License: AGPL-3.0
+LicenseUrl: https://github.com/QuantumNous/new-api/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Quantum Nous. All Rights Reserved.
+ShortDescription: 新一代大模型网关与 AI 资产管理系统
+Description: New API 是一个新一代大模型网关与 AI 资产管理系统，基于 One API 进行二次开发。该项目旨在提供一个统一的接口来管理和使用各种 AI 模型服务，包括但不限于 OpenAI、Anthropic、Gemini和 Midjourney 等。
+Tags:
+- anthropic-api
+- openai-api
+- openai-response
+- 人工智能
+- 大语言模型
+- 聊天机器人
+ReleaseNotes: |-
+  Important
+  Account Security / 账户安全功能完善
+  本版本补齐账户安全能力：登录与敏感操作共用校验流程；已登记的 TOTP 与 Passkey 可作为互备因子；系统访问令牌支持查看、轮换、撤销与访问记录；新增独立审计日志。注销账户、绑定、改密、Passkey/2FA 登记与渠道密钥查看均需作用域一次性证明，并绑定到发起会话。
+  Telegram 登录已迁到统一 OAuth。管理员须在 BotFather Login Widget 中登记 /oauth/telegram，并填写 Client ID / Client Secret 后重新启用；已有绑定会保留。密码存储改为默认 Argon2id（兼容历史 bcrypt），是本次安全加固的一部分，而非单独的升级动作。
+  This release completes account security: login and sensitive operations share one verification flow; enrolled TOTP and Passkey are alternative factors; system access tokens support status, rotation, revocation, and access history; and a dedicated audit log is added. Account deletion, bindings, password changes, Passkey/2FA enrollment, and channel-key access require scoped, single-use proofs bound to the initiating session.
+  Telegram login now uses unified OAuth. Administrators must register /oauth/telegram in BotFather’s Login Widget and enter the Client ID / Client Secret before re-enabling it; existing bindings are preserved. Password storage now defaults to Argon2id (with bcrypt-compatible reads) as part of this hardening, not as a standalone upgrade.
+  Warning
+  Experimental Plugin System / 实验性插件系统
+  自 v1.0.0-rc.27 起引入的实验性插件系统仍处于测试阶段，并涉及较大的架构调整。如遇问题，请及时反馈。
+  从 v1.0.0-rc.26 或更早版本升级的用户，必须重新配置所有视频模型价格；已完成该配置的用户无需重复操作。本版本仍不推荐用于生产环境。
+  The experimental plugin system introduced in v1.0.0-rc.27 remains under testing and includes major architectural changes. Please report any issues promptly.
+  Users upgrading from v1.0.0-rc.26 or earlier must reconfigure all video model prices. Users who have already completed this step do not need to repeat it. This release is still not recommended for production use.
+  New Features
+  - Reworked model and vendor management: catalog metadata validation, vendor management, batch delete with channel/pricing cleanup, model pricing snapshot editing with optimistic concurrency, and upstream ratio sync with price cells. The models page is organized around vendors and model connections, with dedicated pricing and vendor-management dialogs.
+  - Moved account security settings to a dedicated page, with system access-token status, rotation, revocation, and access history. Generate and revoke require scoped, single-use verification.
+  - Added a dedicated audit log page (audit.read). Successful and failed API token and quota operations are recorded with role snapshots and safe metadata, correlated with top-up records. Model, vendor, and pricing mutations are also audited.
+  - Unified login and sensitive-operation verification: enrolled TOTP and Passkey are alternative factors. Every primary login transport is gated before a session is issued; WebAuthn requires user verification; login challenges are consumed atomically with session creation.
+  - Required a scoped, single-use proof for account deletion, rechecked the session inside the deletion transaction, and revoked all sessions afterward. Bindings, password changes, Passkey/2FA enrollment, and channel-key access are likewise bound to the initiating session and action.
+  Security
+  - Completed the account-security surface: shared verification UI, session-bound proofs, last usable login method preservation, and audit of security operation outcomes. OAuth callback secrets are redacted from logs.
+  - Applied Unicode-aware password length limits (8–128). New passwords default to Argon2id; existing bcrypt hashes remain valid. Profiles return has_password from the existing SELECT without extra queries.
+  - Migrated Telegram login, binding, and security verification to the unified OAuth flow (authorization code + PKCE + ID tokens). Legacy widget / bind endpoints have been removed. A custom OAuth provider must not use the reserved telegram slug.
+  Fixes and Improvements
+  - Fixed OpenAI Chat capability detection: match gpt-<n> by major version (n >= 5) so later generations such as gpt-6-astra use max_completion_tokens and drop unsupported temperature / top_p / logprobs. gpt-4.1, gpt-4o, gpt-oss, gpt-image, and gpt-realtime are unchanged (#7211).
+  - Upgraded the SQLite GORM driver to distinguish unique indexes from constraints, and normalized equivalent MySQL decimal defaults and PostgreSQL CHAR metadata. Unchanged databases no longer emit redundant DDL on restart.
+  - Bulk-copied RawMessage fields to reduce request deep-copy cost (#7221).
+  - Collapsed the completed setup guide by default so it no longer occupies the dashboard.
+  - Upgraded the ClickHouse driver to v2.46.0.
+
+  Full Changelog: v1.0.0-rc.33...v1.0.0-rc.34
+ReleaseNotesUrl: https://github.com/QuantumNous/new-api/releases/tag/v1.0.0-rc.34
+Documentations:
+- DocumentLabel: 使用指南
+  DocumentUrl: https://www.newapi.ai/guide/
+- DocumentLabel: 维基百科
+  DocumentUrl: https://www.newapi.ai/wiki/
+- DocumentLabel: 接口文档
+  DocumentUrl: https://www.newapi.ai/api/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

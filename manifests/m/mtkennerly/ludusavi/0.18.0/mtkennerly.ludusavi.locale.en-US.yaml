@@ -1,0 +1,93 @@
+# Created using wingetcreate 1.2.5.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.4.0.schema.json
+
+PackageIdentifier: mtkennerly.ludusavi
+PackageVersion: 0.18.0
+PackageLocale: en-US
+Publisher: mtkennerly
+PublisherUrl: https://github.com/mtkennerly
+PublisherSupportUrl: https://github.com/mtkennerly/ludusavi/issues
+Author: Matthew T. Kennerly
+PackageName: ludusavi
+PackageUrl: https://github.com/mtkennerly/ludusavi
+License: MIT
+LicenseUrl: https://github.com/mtkennerly/ludusavi/blob/master/LICENSE
+Copyright: Copyright (c) 2020 Matthew T. Kennerly (mtkennerly)
+CopyrightUrl: https://github.com/mtkennerly/ludusavi/blob/master/LICENSE
+ShortDescription: Backup tool for PC game saves
+Moniker: ludusavi
+ReleaseNotes: |-
+  * Added:
+    * You can now upload backups to the cloud.
+      This integrates with [Rclone](https://rclone.org), so you can use any cloud system that it supports,
+      and Ludusavi can help you configure some of the more common ones:
+      Google Drive, OneDrive, Dropbox, Box, FTP servers, SMB servers, and WebDAV servers.
+
+      For the GUI, refer to the "cloud" section on the "other" screen.
+      For the CLI, use the `cloud` command group (e.g., `ludusavi cloud upload`).
+    * The Lutris launcher is now supported as a root type.
+      Ludusavi can find saves from Wine prefixes configured in Lutris.
+    * The EA app is now supported as a root type.
+    * On the restore screen, you can lock a backup
+      so that it is kept indefinitely regardless of your retention settings.
+    * Progress bars now show additional information (operation label, elapsed time, exact progress count).
+    * Backups now record the operating system on which they were created.
+      For the GUI, this is shown as a badge on the restore screen if you select a non-native backup.
+      For the CLI, this is included in the output of the `backups` command.
+    * Ludusavi now supports Flatpak IDs (if present in the manifest)
+      in order to infer the correct `XDG_DATA_HOME` and `XDG_CONFIG_HOME`.
+      At this time, the primary manifest does not specify Flatpak IDs for any games,
+      but any such additions can be supported transparently in the future.
+    * GUI: You can use (shift+)tab to cycle through text fields.
+    * GUI: Input fields show an error icon for paths like `http://` and `ssh://`
+      since these are not supported and will be mangled into a local path.
+    * CLI: A standalone `manifest update` command.
+  * Changed:
+    * The "merge" option has been removed, and merging is now always enforced.
+      This option made sense before Ludusavi supported differential and cloud backups,
+      but there was not much reason to turn off merging anymore.
+
+      The CLI `backup` command's `--merge`/`--no-merge` flags are now ignored and will be removed in a future release.
+    * CLI: The `backup` command's `--update`/`--try-update` flags are deprecated and will be removed in a future release.
+      It was confusing because Ludusavi could still update the manifest without either flag,
+      and other commands would also update the manifest but without equivalent flags to adjust the behavior.
+
+      To simplify this and for consistency with the GUI, now the CLI will update the manifest automatically by default.
+      To disable this, use the new `--no-manifest-update` global flag, which works across commands.
+      To ignore errors in the update, use the new `--try-manifest-update` global flag.
+    * CLI: The deprecated `--by-steam-id` option has been removed from the `backup`, `backups`, and `restore` commands.
+      You can use the `find` command to replicate this functionality.
+    * CLI: Using `--api` mode would silence some human-readable errors that would otherwise go on stderr.
+      Since the API output itself goes on stdout, there's no harm leaving the other messages on stderr,
+      so they are now allowed to print.
+      In the future, these messages may be integrated into the API output directly.
+    * GUI: If you try to close the program while an operation is ongoing,
+      Ludusavi will cancel the operation cleanly first before closing.
+      To skip the cleanup and force an immediate close (like in previous versions),
+      you can simply try to quit a second time, but this isn't recommended if you can help it.
+    * GUI: Subsections now have a slightly distinct background color to help tell them apart.
+    * GUI: Adjusted some spacing/padding. A few more scanned games can fit on screen now.
+    * Log files now include timestamps.
+    * Some obsolete fields were removed from the config file.
+      This won't have any effect on you unless you were using a version older than v0.14.0.
+      If so, then just update to v0.17.1 first so that Ludusavi can migrate the affected settings.
+      Fields: `manifest.etag`, `backup.recentGames`, `restore.recentGames`, and `restore.redirects`.
+    * Some config fields weren't serialized if they matched the default value.
+      Now they're serialized anyway in case the default value were to ever change.
+      Fields: `backup.filter.excludeStoreScreenshots`, `scan.showDeselectedGames`, `scan.showUnchangedGames`, and `scan.showUnscannedGames`.
+    * Updated translations.
+      (Thanks to contributors on the [Crowdin project](https://crowdin.com/project/ludusavi))
+  * Fixed:
+    * Significantly improved performance of zip file extraction.
+      Ludusavi had been unnecessarily reopening the zip for each file inside.
+      In the most extreme case tested (40,864 files and 8.70 GB for a single game),
+      the time was reduced from 12+ hours to 4 minutes.
+    * In secondary manifests, relative paths (beginning with `./` and `../`) were not correctly resolved.
+    * GUI: In some cases, the scroll position would be set incorrectly
+      when changing screens or when closing a modal.
+    * CLI: A bare `manifest` command was allowed, even though it did nothing.
+      You can still use `manifest --help` for subcommand info.
+    * The log message "ignoring unrecognized Heroic game" could be recorded incorrectly when doing partial scans.
+ReleaseNotesUrl: https://github.com/mtkennerly/ludusavi/releases/tag/v0.18.0
+ManifestType: defaultLocale
+ManifestVersion: 1.4.0

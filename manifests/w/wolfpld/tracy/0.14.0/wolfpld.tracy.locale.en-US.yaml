@@ -1,0 +1,95 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: wolfpld.tracy
+PackageVersion: 0.14.0
+PackageLocale: en-US
+Publisher: wolfpld
+PublisherUrl: https://github.com/wolfpld
+PublisherSupportUrl: https://github.com/wolfpld/tracy/issues
+Author: Bartosz Taudul
+PackageName: Tracy Profiler
+PackageUrl: https://github.com/wolfpld/tracy
+License: BSD-3-Clause
+LicenseUrl: https://github.com/wolfpld/tracy/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2017-2026, Bartosz Taudul <wolf@nereid.pl>
+ShortDescription: A real time, nanosecond resolution, remote telemetry, hybrid frame and sampling profiler for games and other applications.
+Description: 'Tracy supports profiling CPU (Direct support is provided for C, C++, Lua, Python and Fortran integration. At the same time, third-party bindings to many other languages exist on the internet, such as Rust, Zig, C#, OCaml, Odin, etc.), GPU (All major graphic APIs: OpenGL, Vulkan, Direct3D 11/12, Metal, OpenCL, CUDA.), memory allocations, locks, context switches, automatically attribute screenshots to captured frames, and much more.'
+Moniker: tracy
+Tags:
+- gamedev
+- gamedev-library
+- gamedevelopment
+- library
+- performance
+- performance-analysis
+- profiler
+- profiling
+- profiling-library
+ReleaseNotes: |-
+  For a more detailed change list, see https://github.com/wolfpld/tracy/blob/v0.14.0/NEWS.
+  Automated capture
+  Added two new CLI tools: tracy-capture-daemon and tracy-merge. The daemon automatically discovers Tracy clients over UDP and captures each to its own file. The merge tool combines multi-process traces into one view.
+  In the current implementation, the merge tool preserves zones, messages, and plots only. GPU zones, memory events, and call stacks are lost.
+  Sections: mark program execution phases
+  Use the TracySectionEnter and TracySectionLeave macro pair to mark high-level phases of the application (e.g., game levels). Sections can overlap freely, may be assigned to user-defined categories for filtering, and can be used to set time range limits.
+  Zone call stack reconstruction
+  Tracy will now perform heuristic reconstruction of call stacks for zones captured without them (requires sampling to be enabled). Such call stacks are indicated with a magic-wand icon.
+  This, along with the "parent zones" list, replaces the previous "zone trace" functionality, which was too inconvenient to be useful.
+  Frame image playback improvements
+  The playback can now be looped, and the frame range can be limited either by setting the ranges manually or by copying the range from annotations/sections/time ranges.
+  Timeline UX
+  The sample markers on the timeline are now color coded. Green markers show that your code was executing. Blue markers indicate that execution was in an external library code. Red markers are for time spent in kernel.
+  The order of threads can now be sorted in the trace settings window.
+  In-profiler user manual
+  The embedded user manual, previously experimental, has received many improvements. The manual sections are now separated, with a tree navigation available. The rendering quality has been vastly improved. The cross-section navigation links are now working as intended.
+  Data consistency
+  It's a bit embarrassing, but previously the timing data displayed in the sampling statistics window, in the sample entry stacks window, and in the symbol view window didn't really match, with each window having its own opinion on how the time should be calculated. This has been fixed, and now each window displays matching time data.
+  The sample entry stacks window now has a control for what should be counted. The modes of operation are: count the symbol if it was executing (on top of stack), which was the only option available previously. The two new options are to count if the symbol was reached somewhere on the stack (i.e., also count if the symbol made a function call), either skipping or including recursion.
+  Flame graph improvements
+  The sampling flame graph no longer skips unknown symbols, which are crucial in understanding what the program does. These frames are now aggregated by the executable image name.
+  It is now possible to group sampling flame graph entries by name instead of the symbol address. A practical example of when this could happen would be inline expansion of the same function at multiple call sites within the enclosing symbol.
+  The flame graph can now be zoomed and panned with the mouse.
+  https://github.com/user-attachments/assets/915ef7ef-625e-4d53-bc96-ea50dda54947
+  Frame statistics
+  The frame statistics view, previously available in the Trace Info window, has been moved to its own window. There's now a full array of statistical data displayed. The frame range can now be narrowed down not only to the timeline view, but also to a specific time range, matching other places in the profiler where you can limit time range.
+  Compare traces improvements
+  The comparison between two traces now has full statistical parity with the Find Zone window (including the newly added coefficient of variation), in both the Zone and Frames comparison modes. The more/less markers are now color-coded to indicate the amount of change, with greater disparity making the color of the text more saturated to show importance.
+  It is now possible to limit time ranges in the two compared traces using either the newly added sections feature, or manually created annotations.
+  Call stack window improvements
+  The external frames are now hidden by default (except in the wait stacks) and are dimmed when they are turned on. The originating thread is now displayed in the window. Optional LLM description of the call stack can be generated either manually or automatically.
+  Call stacks are now also displayed in various tooltips.
+  Settings sidecar overhaul
+  Handling of trace-specific settings was reworked. Now, everything is stored in a single file. By default, this file is still stored deep in the profiler configuration directory, but the configuration sidecar can now be made public in the Trace Information window.
+  This will move the settings file to the directory where the trace is stored. Both files can then be easily copied to another machine.
+  Bonus feature: it is now possible to generate a random trace name.
+  Symbol view improvements
+  The child call list can now be resized.
+  https://github.com/user-attachments/assets/3f6c59d9-b6de-430f-8a35-a1fabd8a8b56
+  The child-call time percentage is now shown as a percentage of calls (as it was before), and also as a percentage of total symbol time.
+  Display of the HW sample statistics is now disabled by default.
+  Message window improvements
+  Added support for setting message's source and severity with the TracyLogString macro.
+  Multi-line messages are now properly trimmed to a single line on the list, with full message content available in the tooltip.
+  Added context menu for each message, with an option to copy to clipboard.
+  Visible threads list UX
+  The list of visible threads in various windows is now a scrollable multi-column view.
+  Annotations improvements
+  Improved the way annotations are rendered on the timeline. Annotations can be hidden.
+  Newly created annotations are assigned a randomly generated nonsense name.
+  Tracy Assist
+  The LLM assistant integration has been vastly improved, bringing support for modern llama.cpp model integration and protocol. This rework makes small (4B) models usable for simple tasks; the time on the screenshot below is for pure on-CPU calculation.
+  Tracy exposes data it captured to the LLM, which allows it to perform analysis of the code. Here we have a crash call stack that was intercepted by Tracy:
+  This call stack can be attached to the chat with the assistant by clicking on the robot icon. Better yet, open the context menu of that icon and choose one of the preset queries. Tracy will even suggest the next question you may want to ask! The screenshot below shows a 31B model that you can fit on a mid-high-tier gaming GPU.
+  With the amount of data exposed by Tracy, you can even ask "How can I optimize my program?" and get an answer like on the screenshot below. This reply was generated in 2 min 44 s with a model that you can fit on a workstation GPU.
+  As a reminder, Tracy does not support paid AI providers. You have to use a local model running on your own hardware.
+  MCP server
+  The new Model Context Protocol server lets AI coding assistants load .tracy captures, run arbitrary analysis via the Worker bindings, and compare traces. For example, to verify that an optimization actually reduced frame time.
+  Extended platform support
+  Added support for profiling WebGPU, and for Windows on ARM64. Experimental system tracing has been added on Apple devices.
+  Ready-made binaries: macOS + Linux
+  Binary releases are now available on macOS. Manual quarantine handling is required.
+  Binary releases are now available on Linux. The build baseline is Ubuntu 24.04. Profiler GUI is delivered as an AppImage with the Wayland requirement.
+ReleaseNotesUrl: https://github.com/wolfpld/tracy/releases/tag/v0.14.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

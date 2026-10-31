@@ -1,0 +1,139 @@
+# Created with komac v2.10.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: jtroo.kanata_gui
+PackageVersion: 1.8.0
+PackageLocale: en-US
+Publisher: jtroo
+PublisherUrl: https://github.com/jtroo
+PublisherSupportUrl: https://github.com/jtroo/kanata/issues
+Author: jtroo
+PackageName: Kanata GUI
+PackageUrl: https://github.com/jtroo/kanata
+License: LGPL-3.0
+LicenseUrl: https://github.com/jtroo/kanata/blob/HEAD/LICENSE
+ShortDescription: Improve keyboard comfort and usability with advanced customization
+Tags:
+- cross-platform
+- interception-driver
+- keyboard
+- keyboard-layout
+- linux
+- macos
+- mouse
+- mouse-emulation
+- rust
+- windows
+ReleaseNotes: |-
+  Configuration guide
+  Link to the appropriate configuration guide version: guide link.
+  Changelog (since v1.7.0)
+  BREAKING CHANGE (macOS): v5 of the karabiner driver is now used instead of v3. See macOS instructions for install details.
+  BEHAVIOUR CHANGE (Linux): defcfg to include device names now disregards mouse-like/keyboard-like check, now grabbing more devices than previously.
+  BEHAVIOUR CHANGE: defoverrides will eagerly release the non-modifier key on release of a modifier or on the next action.
+  Change log
+  - Added: clipboard actions
+  - Added: use-defsrc action
+  - Added: zippychord, yet another chording implementation intended primarily for text expansion
+  - Added: chordsv2 is no longer marked experimental; using -experimental now generates a warning
+  - Added: macro variant that cancels on another press
+  - Added: hold-for-duration action for virtual keys
+  - Added: one-shot-pause-processing action
+  - Added: all-except configuration for process-unmapped-keys
+  - Added: template-expand is now allowed within deftemplate
+  - Added(macOS): now uses the v5 karabiner driver
+  - Added(macOS): macos-dev-names-exclude
+  - Fix(Windows): keypad enter now works when passed through without remapping
+  - Fix(macOS): mouse drag now works
+  - Fix(Linux): improve device identification
+  - Fix(Linux): fix unbounded reading of an endless device event stream
+  Sample configuration file
+  The attached kanata.kbd file is tested to work with the current version. The one in the main branch of the repository may have extra features that are not supported in this release.
+  Windows
+  Instructions
+  NOTE: All Windows binaries are compiled for x86-64 architectures only.
+  Download kanata.exe. Optionally, download kanata.kbd. With the two files in the same directory, you can double-click the exe to start kanata. Kanata does not start a background process, so the window needs to stay open after startup. See this discussion for tips to run kanata in the background.
+  You need to run kanata.exe via cmd or powershell to use a different configuration file:
+  kanata.exe --cfg <cfg_file>
+  NOTE: The kanata_winIOv2.exe variant contains an experimental breaking change that fixes an issue where the Windows LLHOOK+SendInput version of kanata does not handle defsrc consistently compared to other versions and other operating systems. This variant will be of interest to you for any of the following reasons:
+  - you are a new user
+  - you are a cross-platform user
+  - you use multiple language layouts within Windows and want kanata to handle the key positions consistently
+  This variant contains the same output change as in the scancode variant below, and also changes the input to also operate on scancodes.
+  NOTE: The kanata_legacy_output.exe variant has the same input defsrc handling as the standard kanata.exe file. It uses the same output mechanism as the standard kanata.exe variant in version 1.6.1 and earlier. In other words the formerly experimental_scancode variant is now the default binary. The non-legacy variants contain changes for an issue; the fix is omitted from this legacy variant. The legacy variant is included in case issues are found with the new output mechanism.
+  Linux
+  Instructions
+  NOTE: All Linux binaries are compiled for x86 architectures only.
+  Download kanata.
+  Run it in a terminal and point it to a valid configuration file. Kanata does not start a background process, so the window needs to stay open after startup. See this discussion for how to set up kanata with systemd.
+  chmod +x kanata   # may be downloaded without executable permissions
+  sudo ./kanata --cfg <cfg_file>`
+  To avoid requiring sudo, follow the instructions here.
+  macOS
+  Instructions
+  WARNING: feature support on macOS is limited.
+  Install Karabiner driver for macOS 11 and newer:
+  - Install the V5 Karabiner VirtualHiDDevice Driver.
+  To activate it:
+  sudo /Applications/.Karabiner-VirtualHIDDevice-Manager.app/Contents/MacOS/Karabiner-VirtualHIDDevice-Manager activate
+  Then you need to run the daemon. You should run this in the background somehow or leave the terminal window where you run this command open.
+  sudo '/Library/Application Support/org.pqrs/Karabiner-DriverKit-VirtualHIDDevice/Applications/Karabiner-VirtualHIDDevice-Daemon.app/Contents/MacOS/Karabiner-VirtualHIDDevice-Daemon'
+  Install Karabiner driver for macOS 10 and older:
+  - Install the Karabiner kernel extension.
+  After installing the appropriate driver for your OS
+  Download a kanata_macos variant.
+  Run it in a terminal and point it to a valid configuration file. Kanata does not start a background process, so the window needs to stay open after startup.
+  Example
+  chmod +x kanata_macos_arm64   # may be downloaded without executable permissions
+  sudo ./kanata_macos_arm64 --cfg <cfg_file>`
+  If the above shows Kanata running but keys are not being sent, you may need to add permissions: #1211.
+  cmd_allowed variants
+  Explanation
+  The binaries with the name cmd_allowed are conditionally compiled with the cmd action enabled.
+  Using the regular binaries, there is no way to get the cmd action to work. This action is restricted behind conditional compilation because I consider the action to be a security risk that should be explicitly opted into and completely forbidden by default.
+  wintercept variants
+  Explanation and instructions
+  Warning: known issue
+  This issue in the Interception driver exists: oblitum/Interception#25. This will affect you if you put your PC to sleep instead of shutting it down, or if you frequently plug/unplug USB devices.
+  Description
+  These variants use the Interception driver instead of Windows hooks. You will need to install the driver using the release or from the copy in this repo. The benefit of using this driver is that it is a lower-level mechanism than Windows hooks. This means kanata will work in more applications.
+  Steps to install the driver
+  - extract the .zip
+  - run a shell with administrator privilege
+  - run the script "command line installer/install-interception.exe"
+  - reboot
+  Additional installation steps
+  The above steps are those recommended by the interception driver author. However, I have found that those steps work inconsistently and sometimes the dll stops being able to be loaded. I think it has something to do with being installed in the privileged location of system32\drivers.
+  To help with the dll issue, you can copy the following file in the zip archive to the directory that kanata starts from: Interception\library\x64\interception.dll.
+  E.g. if you start kanata from your Documents folder, put the file there:
+  C:\Users\my_user\Documents\
+      kanata_wintercept.exe
+      kanata.kbd
+      interception.dll
+  kanata_passthru.dll
+  Explanation and instructions
+  The Windows kanata_passthru.dll file allows using Kanata as a library within AutoHotkey to avoid conflicts between keyboard hooks installed by both. You can channel keyboard input events received by AutoHotkey into Kanata's keyboard engine and get the transformed keyboard output events (per your Kanata config) that AutoHotkey can then send to the OS.
+  To make use of this, download kanata_passthru.dll, then the simulated_passthru_ahk folder with a brief example, place the dll there, open kanata_passthru.ahk to read what the example does and then double-click to launch it.
+  sha256 checksums
+  Sums
+  d3644a07164be46c3d507cffed5e3b2838dc08dcdd9b2e62f5906ce8b5ea0578  kanata
+  e279508bfce6471b5fd62c8848fce7fd9785b8d2d40c1cd6c08152ee2d17161d  kanata.exe
+  83fd9419c3976fe289a302a946eb3ab0a08aa185f13fe09451e819e48c93a9ab  kanata.kbd
+  1466e42d1c6e3e164e6bb6899167c03e424a2d5aea8ff136e114591d0569129c  kanata_cmd_allowed
+  7bfbd1f846c8fae3df535b09c6a8cbebd2ca63003fb6546327fff39ee751e532  kanata_cmd_allowed.exe
+  1092c18f0da75c58147a19d379ee2796e0554b467d6715f873fd065e1c42cd8b  kanata_gui.exe
+  8d6105b28948000b5fb00c7b7975947cd8c18456806198f3972faf81ab66bc5e  kanata_gui_cmd_allowed.exe
+  88fbc52cd780bede22582bf1c47a49da33aa5c4967015bb4ce2b7566b0e9105f  kanata_gui_wintercept.exe
+  413d0e363cc8bb868e5a29efaca3a22724a624b11bccd5e74ea15ef35b7b76f8  kanata_gui_wintercept_cmd_allowed.exe
+  f17460094da93b88f0d83fafa2ac10487427bfc46f065b004d10986873c3c5d2  kanata_legacy_output.exe
+  a072296f51ef8b78095189d82565c6b3540fa077ab756080d7e6c78c6e10010e  kanata_macos_arm64
+  47991e5e3fd642c80a3177fbf2986b4b27c4b350ded571b33e449f7ffdbe9d5d  kanata_macos_cmd_allowed_arm64
+  29b539ad798dd15eeb80f068d7266c9bda7cf56406528706666f6cb14764517c  kanata_macos_cmd_allowed_x86_64
+  e69eca4744d69829c38ca474af6cd3eeae80bbc4ba88daf9c60b62b6a041c19f  kanata_macos_x86_64
+  f6758d594512d01edc4ea85a720dfbba2ab3bb6fbccd49e8c855792fa9b3be1d  kanata_passthru.dll
+  20a7de0e8e20215de8bc0ee69fbc9bb6d6b6a43212064cc16f89b5f6b51d5a9e  kanata_winIOv2.exe
+  be9eb15feec1acee2b977d466417fe0ad99e3627ce0bf08dfc80756d30b8712c  kanata_wintercept.exe
+  30c0cd520073f96742a96580e8d90276bf1d92e53fb65e19f96a3e401b9e605b  kanata_wintercept_cmd_allowed.exe
+ReleaseNotesUrl: https://github.com/jtroo/kanata/releases/tag/v1.8.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

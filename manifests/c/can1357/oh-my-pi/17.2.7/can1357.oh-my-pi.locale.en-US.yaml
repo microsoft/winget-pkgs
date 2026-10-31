@@ -1,0 +1,84 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 17.2.7
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Changed
+  - Replaced arktype with @oh-my-pi/omptype for schema validation, delivering up to 100x faster schema construction and 60-100x faster validation while maintaining full compatibility with existing type/Type exports and the isArkSchema contract.
+  Fixed
+  - Fixed OpenAI-Codex (ChatGPT OAuth) requests failing with an Unsupported service_tier: auto error on default or legacy sessions by omitting the implicit auto service tier on the wire.
+  - Fixed an issue where Cursor kimi-k3 sessions would break permanently when a same-model assistant turn was persisted without thinking blocks, replacing hard errors with graceful warnings.
+  @oh-my-pi/pi-catalog
+  Fixed
+  - Fixed an issue where setting thinking-level: off failed to disable reasoning on direct DeepSeek V4 requests.
+  @oh-my-pi/pi-coding-agent
+  Changed
+  - Replaced arktype with @oh-my-pi/omptype for tool parameter and config schemas, significantly improving startup performance with ~100x faster schema construction. Config schema errors are now reported via OmpErrors using the same path/problem structure.
+  Fixed
+  - Fixed an issue where custom, extension, or hook tool wrappers stripped schema methods off parameters, causing wire-schema detection failures and status-line token estimator crashes.
+  - Fixed a bug where agent() calls in evaluation cells ignored turn cancellation and continued running indefinitely.
+  - Fixed the built-in tail command to exit silently with code 141 (SIGPIPE) instead of failing with a "Broken pipe" error when a downstream pipeline reader exits early.
+  - Fixed the in-process ps shell builtin to support common procps/BSD format specifiers, including tpgid, pri, flags, real/effective user/group columns, wchan, fault counters, sz, and the STAT + foreground flag.
+  - Fixed install.sh falsely reporting success on musl-based systems (such as Alpine Linux) when the binary fails to start; the installer now smoke-tests the binary, exits non-zero on failure, and provides remediation steps.
+  - Fixed Codex config.toml discovery incorrectly importing MCP servers that are configured with enabled = false.
+  - Fixed bash.patterns allow rules rejecting valid commands when quoted arguments contained shell metacharacters (such as Cargo benchmark regex filters).
+  @oh-my-pi/pi-natives
+  Added
+  - Added missing procps/BSD output format specifiers and aliases to the in-process ps shell builtin, including support for columns like tpgid, pri, flags, wchan, and various user/group/time fields.
+  - Updated ps -j to include the TPGID column, ps -l to display the single-character S column, and the STAT column to support the + foreground process group flag.
+  @oh-my-pi/omptype
+  Added
+  - Introduced omptype, an ArkType-compatible schema validation library featuring a lazy JIT runtime that compiles specialized validators on the third call for ultra-fast hot-path validation and low construction overhead.
+  - Added support for a rich string definition DSL (primitives, literals, unions, arrays, bounds, inline defaults, and optional keys), object definitions (including index signatures and strict key rejection/deletion), and comprehensive composition methods (.or, .and, .array, .pipe, .narrow, .describe, .default, .allows, .assert).
+  - Added TypeBox-style (@oh-my-pi/omptype/typebox) and Zod-style (@oh-my-pi/omptype/zod) authoring adapters that produce native omptype schemas.
+  - Added support for recursive named scopes, modules, runtime generics, fixed/optional/variadic tuples, Date literals/bounds, disjointness-aware intersections, separate input/output inference, and draft-2020-12 JSON Schema emission.
+  - Shipped transpiled ESM and TypeScript declarations in the npm package to support plain Node.js environments, while preserving TS source resolution for Bun consumers.
+  Changed
+  - Optimized the lazy JIT compiler to support tuples, refinements, morphs, intersections, instances, and recursive aliases, while reducing schema construction overhead.
+  Fixed
+  - Fixed a TypeScript compiler error (TS2589: "type instantiation is excessively deep") when using generic fluent composition methods on nested schemas.
+  - Fixed type.raw() results (BaseType) to correctly expose fluent composition methods like .array(), .or(), and .pipe().
+  - Fixed an issue in the TypeBox adapter where keyword-carrying schemas (e.g., uniqueItems arrays) would throw an error during JSON Schema emission.
+  What's Changed
+  - fix(ai): stop forwarding auto service tier to codex by @roboomp in https://github.com/can1357/oh-my-pi/pull/7520
+  - fix(setup): verify musl binary starts before reporting install success by @roboomp in https://github.com/can1357/oh-my-pi/pull/7546
+  - fix(cursor): degrade K3 same-model history missing thinking by @roboomp in https://github.com/can1357/oh-my-pi/pull/7518
+  - fix(discovery): honor disabled codex mcp servers by @roboomp in https://github.com/can1357/oh-my-pi/pull/7540
+  - fix(coding-agent): allow quoted metacharacters in bash patterns by @roboomp in https://github.com/can1357/oh-my-pi/pull/7553
+  - fix(catalog): honor disabled DeepSeek thinking by @roboomp in https://github.com/can1357/oh-my-pi/pull/7561
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v17.2.6...v17.2.7
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v17.2.7
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

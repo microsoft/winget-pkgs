@@ -1,0 +1,133 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: rullerzhou-afk.clawd-on-desk
+PackageVersion: 0.11.0
+PackageLocale: en-US
+Publisher: rullerzhou-afk
+PublisherUrl: https://github.com/rullerzhou-afk
+PublisherSupportUrl: https://github.com/rullerzhou-afk/clawd-on-desk/issues
+PackageName: Clawd on Desk
+PackageUrl: https://github.com/rullerzhou-afk/clawd-on-desk
+License: MIT
+LicenseUrl: https://github.com/rullerzhou-afk/clawd-on-desk/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 rullerzhou-afk
+ShortDescription: A pixel desktop pet that watches Claude Code, Codex, Cursor & other AI coding agents — so you don't have to.
+Description: |-
+  Clawd lives on your desktop and reacts to what your AI coding agent is doing — in real time. Start a long task, walk away, come back when the crab tells you it's done.
+  Thinking when you prompt, typing when tools run, juggling subagents, reviewing permissions, celebrating when tasks complete, sleeping when you step away. Ships with two built-in themes: Clawd (pixel crab) and Calico (三花猫), with full support for custom themes.
+  Supports Windows 11, macOS, and Ubuntu/Linux. Requires Node.js. Works with Claude Code, Codex CLI, Copilot CLI, Gemini CLI, Cursor Agent, CodeBuddy, Kiro CLI, and opencode.
+  Features
+  Multi-Agent Support
+  - Claude Code — full integration via command hooks + HTTP permission hooks
+  - Codex CLI — automatic JSONL log polling (~/.codex/sessions/), no configuration needed
+  - Copilot CLI — command hooks via ~/.copilot/hooks/hooks.json
+  - Gemini CLI — command hooks via ~/.gemini/settings.json (registered automatically when Clawd starts, or run npm run install:gemini-hooks)
+  - Cursor Agent — Cursor IDE hooks in ~/.cursor/hooks.json (registered automatically when Clawd starts, or run npm run install:cursor-hooks)
+  - CodeBuddy — Claude Code-compatible command hooks + HTTP permission hooks via ~/.codebuddy/settings.json (registered automatically when Clawd starts, or run node hooks/codebuddy-install.js)
+  - Kiro CLI — command hooks injected into custom agent configs under ~/.kiro/agents/, plus an auto-created clawd agent that is re-synced from Kiro's built-in kiro_default whenever Clawd starts, so you can opt into hooks with minimal behavior drift via kiro-cli --agent clawd or /agent swap clawd (registered automatically when Clawd starts, or run npm run install:kiro-hooks). State hooks have been verified on macOS.
+  - opencode — plugin integration via ~/.config/opencode/opencode.json (registered automatically when Clawd starts); zero-latency event streaming, permission bubbles with Allow/Always/Deny, and building animations when parallel subagents are spawned via the task tool
+  - Multi-agent coexistence — run all agents simultaneously; Clawd tracks each session independently
+  Animations & Interaction
+  - Real-time state awareness — agent hooks and log polling drive Clawd's animations automatically
+  - 12 animated states — idle, thinking, typing, building, juggling, conducting, error, happy, notification, sweeping, carrying, sleeping
+  - Eye tracking — Clawd follows your cursor in idle state, with body lean and shadow stretch
+  - Sleep sequence — yawning, dozing, collapsing, sleeping after 60s idle; mouse movement triggers a startled wake-up animation
+  - Click reactions — double-click for a poke, 4 clicks for a flail
+  - Drag from any state — grab Clawd anytime (Pointer Capture prevents fast-flick drops), release to resume
+  - Mini mode — drag to right edge or right-click "Mini Mode"; Clawd hides at screen edge with peek-on-hover, mini alerts/celebrations, and parabolic jump transitions
+  Permission Bubble
+  - In-app permission review — when Claude Code, CodeBuddy, or opencode request tool permissions, Clawd pops a floating bubble card instead of waiting in the terminal
+  - Allow / deny / agent-native extras — one-click approve or reject, plus permission rules / Always actions when the source agent supports them
+  - Global hotkeys — Ctrl+Shift+Y to Allow, Ctrl+Shift+N to Deny the latest permission bubble (only registered while bubbles are visible)
+  - Stacking layout — multiple permission requests stack upward from the bottom-right corner
+  - Auto-dismiss — if you answer in the terminal first, the bubble disappears automatically
+  - Per-agent toggle — open Settings… → Agents, pick an agent, and turn off Show pop-up bubbles to keep prompts in that agent's own terminal/TUI
+  Session Intelligence
+  - Multi-session tracking — sessions across all agents resolve to the highest-priority state
+  - Subagent awareness — juggling for 1 subagent, conducting for 2+
+  - Terminal focus — right-click Clawd → Sessions menu to jump to a specific session's terminal window; notification/attention states auto-focus the relevant terminal
+  - Process liveness detection — detects crashed/exited supported agent processes and cleans up orphan sessions
+  - Startup recovery — if Clawd restarts while any supported agent is still running, it stays awake instead of falling asleep
+  System
+  - Click-through — transparent areas pass clicks to windows below; only Clawd's body is interactive
+  - Position memory — Clawd remembers where you left it across restarts (including mini mode)
+  - Single instance lock — prevents duplicate Clawd windows
+  - Auto-start — Claude Code's SessionStart hook can launch Clawd automatically if it's not running
+  - Do Not Disturb — right-click or tray menu to enter sleep mode; all hook events are silenced until you wake Clawd. Permission bubbles are suppressed during DND — opencode falls back to its built-in TUI prompt, while Claude Code and CodeBuddy fall back to their built-in permission flow
+  - Sound effects — short audio cues on task completion and permission requests (toggle via right-click menu; 10s cooldown, auto-muted during DND)
+  - System tray — resize (S/M/L), DND mode, language switch, auto-start, check for updates
+  - i18n — English, Chinese, and Korean UI; switch via right-click menu or tray
+  - Auto-update — checks GitHub releases; Windows installs NSIS updates on quit, macOS/Linux git pull + restart when running from a cloned repo
+Tags:
+- claude-code
+- codebuddy
+- codex
+- copilot-cli
+- cursor
+- desktop-pet
+- gemini-cli
+- kiro
+- opencode
+ReleaseNotes: |-
+  v0.11.0
+  v0.11.0 is a user-facing release focused on first-run setup, desktop behavior,
+  Codex reliability, and release hardening. It adds the first-run onboarding
+  wizard, free-roam idle movement, the dizzy spin reaction, Windows fullscreen
+  overlay handling, Codex official-hook health surfacing, Remote SSH
+  connect-on-launch, safer hook settings backups, and a broad set of fixes around
+  completion celebrations, low-power wake recovery, Reasonix, Telegram approvals,
+  and Ghostty focus.
+  This release also welcomes seven first-time contributors.
+  New Features
+  - First-run onboarding tutorial (#524) - New users, and existing users who have never seen the tutorial, get a one-time setup wizard covering language, agent install/cleanup, shortcuts, and key features. Any dismissal marks it seen so it does not reopen on later launches.
+  - Free roam mode (#467, #570) - When enabled, the pet can wander around the desk while idle, with cancellation on state changes, mini-mode guards, hit-window/HUD/bubble sync during movement, and target-selection hardening. Thanks to first-time contributor @zhaoxv210, with a follow-up flake fix from first-time contributor @Git-creat7.
+  - Dizzy spin reaction (#507) - Rapidly circling the cursor around Clawd can trigger the existing dizzy animation on themes that support it, with cooldowns and theme-capability gating so unsupported themes keep normal idle behavior. Thanks to first-time contributor @IatomicreactorI.
+  - Windows fullscreen overlay mode (#538, #562) - Clawd can float over foreground fullscreen apps while keeping the hit window non-activating, so borderless-fullscreen games are not kicked out by clicks or drags. The old settings toggle was removed because it could not reliably force the pet behind borderless games; the hidden pref remains as an escape hatch.
+  - Codex official hook health (#571) - Since Codex approval awareness now depends on official PermissionRequest hooks, the Agents tab and startup nudge now surface disabled, unreviewed, missing, or broken Codex hook states using the same detector as Doctor.
+  - Remote SSH connect-on-launch (#561) - Remote SSH profiles can now connect silently at startup after the local hook server is actually listening, so reverse tunnels target the real bound port even if Clawd had to drift away from 23333. Thanks to first-time contributor @undownding.
+  - Settings UI cleanup (#521, #539, #541) - Settings uses consistent inline SVG sidebar icons, reorganizes General by usage frequency, moves Claude hook management into Agents, spells out Chinese language labels, and folds Animation Map into Animation & Sound.
+  - Context and tray menu cleanup (#523) - The pet right-click and tray menus are grouped into clearer state/work/display/app sections, the dangerous auto-approval entry is renamed to Auto-approve all requests, and New Session is clarified as New Claude Session across supported languages.
+  Bug Fixes And Hardening
+  - Hook settings backups before injection (#531) - Clawd now backs up settings.json before injecting hooks and keeps the backup set bounded by a rolling window. Thanks to first-time contributor @chrono-meta.
+  - Codex JSONL approval heuristic removed (#571) - JSONL fallback no longer guesses approval prompts from shell calls. It remains for state and metadata fallback events such as web search, compaction, aborted turns, and stuck local-turn rescue. Official PermissionRequest is the only approval path.
+  - Codex Desktop approval inference fixed (#543) - Codex Desktop sessions no longer synthesize passive approval notifications from JSONL activity. Thanks to first-time contributor @quantai1314.
+  - CJK Stop payload byte-fit (#567) - Long Chinese/Japanese/Korean completion text no longer overflows /state byte limits and drops the happy completion animation; hook payloads byte-fit assistant_last_output while preserving structural completion fields.
+  - Completion happy fixes (#548, #555, #567) - Short completions, background-only Claude stops, and busy Stop deliveries now reliably trigger the completion celebration instead of being swallowed by debounce, 413, or timeout edges.
+  - Windows crash/startup recovery and keep-size DPI freeze (#554, #560, #408) - Startup recovery, renderer crash recovery, display metrics debounce, and keep-size frozen work-area handling were hardened for Windows sleep/wake and DPI changes.
+  - Low-power eye tracking after resume (#557) - Low-power eye tracking rebuilds and reattaches after Windows resume/unlock, waits for renderer receipt, and accepts one late success after timeout. Thanks to @YOIMIYA66.
+  - Cloudling and low-power sleep polish (#526, #527) - Low-power idle mode reclaims hidden HUD resources, fixes a wake-poll start-timer leak, reduces sleep power, renames the scripted badge to fine motion, and adds Cloudling static sleep fallback assets.
+  - Reasonix Windows compatibility (#503) - Reasonix hook install now resolves the current config home and uses PowerShell -EncodedCommand when Windows paths need it, avoiding cmd /c quoting failures in the Go CLI. Encoded Clawd hook entries are also recognized during reinstall so repeated startup syncs update/dedupe stale hooks instead of appending duplicates. Thanks to @sLingli.
+  - Telegram approval outcome status (#466) - Telegram approval cards now show the final outcome for decisions made on Telegram or resolved elsewhere, with atomic claim handling to avoid racey rewrites. Thanks to @zxypro1 (Zone Tome).
+  - Ghostty cross-Space focus (#461) - macOS Ghostty focus now switches Spaces through a verified stepping-stone terminal instead of yanking windows to the current desktop, with follow-up latency reductions. Thanks to first-time contributor @serenNan.
+  - Renderer SVG cache-busting (#522) - Object-channel SVG loads now get the same cache-bust behavior as image-channel SVGs, so one-shot animations replay instead of sticking on their last frame.
+  Upgrade Notes
+  - Release metadata is bumped to 0.11.0 in both package.json and package-lock.json.
+  - prefs migrates v11 → v12 on first launch. The migration only backfills showDock=true for pre-v12 files missing the key, preserving existing macOS users' Dock behavior while fresh installs default to a pet/menu-bar accessory with no Dock tile.
+  - tutorialSeen is intentionally not migration-backfilled. Existing users who have never seen the onboarding tutorial will see it once after upgrading; Finish, Skip, or closing the window marks it seen permanently.
+  - Codex approval notifications now require official PermissionRequest hooks. If the Codex hook is disabled, not reviewed, missing, or broken, use Settings → Agents or Doctor to repair/review it.
+  - The Windows fullscreen overlay pref defaults on and no longer has a Settings row. If a fullscreen app should hide the pet, use Hide Pet; DND remains the way to silence permission bubbles.
+  - Hook installers may create bounded backup copies of settings files before injecting Clawd-managed entries.
+  Contributors
+  Huge thanks to everyone who shipped code, tests, docs, QA, or release polish for v0.11.0 - and welcome to this release's seven first-time contributors:
+  - @rullerzhou-afk (鹿鹿 · creator) - Onboarding, Settings cleanup, Codex hook health and JSONL approval-path cleanup, Windows fullscreen/startup/recovery hardening, CJK byte-fit, completion-happy fixes, Cloudling/low-power polish, release work, and follow-up reviews.
+  - @zhaoxv210 - Free roam mode and review follow-ups (#467). First-time contributor.
+  - @serenNan - Ghostty cross-Space focus and latency improvements (#461). First-time contributor.
+  - @IatomicreactorI - Dizzy spin reaction and theme support gating (#507). First-time contributor.
+  - @quantai1314 - Codex Desktop approval inference fix (#543). First-time contributor.
+  - @Git-creat7 - Free-roam target-selection flake fix (#570). First-time contributor.
+  - @undownding - Remote SSH connect-on-launch (#561). First-time contributor.
+  - @chrono-meta - Bounded settings backup before hook injection (#531). First-time contributor.
+  - @sLingli - Reasonix Windows cmd /c / EncodedCommand compatibility and current config-home fix (#503).
+  - @zxypro1 (Zone Tome) - Telegram approval outcome status and race hardening (#466).
+  - @YOIMIYA66 - Windows resume / low-power eye-tracking recovery (#557).
+  - @Bynlk - Continued core ownership of the Mobile / PWA companion line.
+  Known Limitations
+  - Codex terminal focus is still unavailable because official hooks and JSONL fallback do not carry a usable terminal PID.
+  - Codex JSONL fallback still has polling latency for hook-uncovered events such as web search, compaction, and aborted turns; approval prompts are not inferred from JSONL.
+  - Windows fullscreen overlay is best for borderless fullscreen. Exclusive fullscreen behavior is still platform/game dependent and must be smoke-tested on real hardware.
+  - macOS Ghostty cross-Space focus has unit coverage and contributor validation, but macOS real-machine release smoke should still verify the packaged artifact.
+  - macOS and Linux packaged auto-update remain manual-download only; git checkout users can still update through the git-mode updater.
+ReleaseNotesUrl: https://github.com/rullerzhou-afk/clawd-on-desk/releases/tag/v0.11.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

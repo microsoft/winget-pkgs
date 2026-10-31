@@ -1,0 +1,64 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: xLightsSequencer.xLights
+PackageVersion: '2026.15'
+PackageLocale: en-US
+Publisher: xLightsSequencer
+PublisherUrl: https://github.com/xLightsSequencer/
+PublisherSupportUrl: https://github.com/xLightsSequencer/xLights/issues
+PackageName: xLights
+PackageUrl: https://github.com/xLightsSequencer/xLights
+License: GPL-3.0
+LicenseUrl: https://github.com/xLightsSequencer/xLights/blob/HEAD/License.txt
+ShortDescription: xLights is a free and open source program that enables you to design, create and play amazing lighting displays through the use of DMX controllers, E1.31 Ethernet controllers and more.
+ReleaseNotes: |-
+  2026.15 — August 4, 2026
+  Enhancements
+  - dkulp — Layout: controllers can be shown as a movable, resizable box in the 2D or 3D preview so they can be placed where they physically sit. Set via Show on Layout on the Controllers tab (Off by default); Off / Controller Tab Only / Layout Panel / Always control where the box appears. Position, size and rotation are editable in the controller properties alongside an optional name label (off by default)
+  - cybercop23 — Added a View > Toolbars menu to independently show/hide each dockable toolbar (Main, Play, Windows, Paste, AC, View, Effects); visibility persists across restarts. The old standalone AC Lights Toolbar checkbox now lives here, grouped next to Show AC Ramps
+  - cybercop23 — Preferences: the Random Effects and Toolbars pages now show each effect's icon beside its name
+  - cybercop23 — Layout: the Import Previews/Models/Groups dialog can now also import named Viewpoints (2D/3D camera presets).
+  - cybercop23 — Layout: setting a model's shadow target automatically links the target model's start channel to the shadow model (@SHADOWMODEL:1) and clears its controller.
+  - cybercop23 — Layout: added ability to freeform draw node selection and deselection for SubModels, Model Faces, and Model States panels
+  - cybercop23 — Bulk Controller Upload: added controller upload status
+  - cybercop23 — All Controller Columns dialog: reopens with the controller you last worked on selected
+  - cybercop23 — Select Directories dialog now closes automatically after a successful change to the temporary or permanent show folder, or after opening the base show folder.
+  - cybercop23 — Sequence Settings: the media trim fields accept longer values
+  - heffneil — Replace Model(s): a Model Groups option decides what happens to the groups the replaced models belonged to - leave them alone, replace them with the source model's groups, or merge the two
+  - heffneil — Tools - Test: every tab now has a live name filter
+  - AGFazio — Layout: a Controllers-tab preview right-click entry selects every model that has no controller assigned and highlights it in the preview
+  - scott — Controller layout print preview: paper size and orientation are now chosen in the preview dialog itself rather than through the OS page-setup dialog
+  - derwin12 — MovingHead: add save/recall presets for the Pattern tab, matching the existing Position and Dimmer presets
+  - derwin12 — MovingHead: Left and Right join All/None/Evens/Odds for choosing which fixtures an edit applies to
+  - derwin12 — Add an Other Preferences option for what double-clicking a model in the layout does.
+  - derwin12 — The log now records how long a batch render took, whether it finished or was cancelled
+  - mpl1337 — Node Layout grids can be zoomed from 10–300% or fitted to the window
+  - dkulp — Fire effect has a new Style setting, and new Fire effects now default to "New Render Method". It carries the flame from frame to frame so it rises and drifts like real fire instead of flickering in place, and renders roughly 10x faster again because the whole flame updates at once on the GPU (Metal on macOS/iPad, Vulkan on Windows/Linux). Existing sequences are migrated to "Old Render Method" so their look is unchanged
+  - dkulp — FPP: support several LED panel matrices on one controller driven different ways at once. New "LED Panel Matrix - Hat/Cap/Cape" and "LED Panel Matrix - ColorLight" protocols name which kind a model targets, and the port number is the matrix number the controller's LED Panels page shows. The original "LED Panel Matrix" still works and matches whatever is on that port
+  - dkulp — Automation API: added getMedia, embedMedia and extractMedia so a script can inventory a sequence's media and embed or extract it in bulk
+  - dkulp — Automation API: added getMediaIssues and convertMedia so a script can find and convert media that isn't playable on all platforms, without opening each sequence by hand
+  - dkulp — Windows video decode: hardware decoding and the DirectX11 reader are now the default, and that reader converts and scales on the GPU with the colour space stated explicitly instead of leaving it to the system. Video-heavy sequences render 2-3x faster (the weaker the CPU, the bigger the gain); formats the reader cannot open still fall back to FFmpeg automatically
+  - dkulp — Sequences open several times faster when they contain many file-based effects (Pictures, Video, Text, Shader, ...): the per-effect file existence checks are now cached per load. On macOS each check was a round trip to the iCloud file provider, so picture-heavy sequences paid seconds re-checking the same files.
+  - dkulp — Sequence load: file-based effects resolve their media once through the sequence's media list, and the images are decoded in parallel on the background thread pool rather than one at a time. Images embedded in the .xsq are included, and an embedded multi-frame image no longer decodes every frame while the file is still being parsed. A sequence with a few hundred picture effects opens about twice as fast; rendered output is unchanged.
+  - dkulp — Sequence load: embedded media no longer does a file-system path search per entry, which dominated the open of a sequence with a few thousand images
+  - dkulp — Video: the decoder's scaled-frame cache is now sized by a memory budget instead of a fixed 48 entries, so a clip reused by several effects at the same output size is decoded once rather than once per effect. Rendered output is unchanged.
+  - dkulp — MacOS Video: a single large effect on a file made the decode-scale anti-alias headroom overshoot the source, so the file decoded at full native size and the scaling bought nothing, however small every other effect using it was. Such files now decode at the size actually rendered, and both decoder frame caches are bounded in bytes as well as frame count so a 4K file cannot cost 8x a 1080p one per cached frame. A sequence with 164 video effects over nine files, one of them 4K: peak memory 22GB -> 8GB, render CPU -35%
+  - dkulp — Render: throttle frame concurrency when memory use approaches the limit the OS will kill the process at, and XL_RENDER_MEM=1 reports what a render is spending memory on
+  - dkulp — Frame rendering, per-model buffers and every parallel_for now share one round-robin worker pool instead of running three pools of their own. The render nests all three, so the separate pools put about three times as many threads on the machine as there are cores, and the extra threads cost context switches rather than adding throughput. How much that was costing depends on the platform: macOS gains the most (render CPU down 20-30%, system time roughly halved), Windows a few percent. Output is byte-identical.
+  - dkulp — Render: a row rendering frames in parallel now farms its whole run of frames to a round-robin worker pool instead of fixed-size windows with a barrier between them, so it is no longer resynchronised every few frames and clone memory follows the row's concurrency, not the run length
+  - dkulp — Render: a row carrying an effect whose state cannot be recomputed per frame (Strobe, Snowstorm, Fireworks and the like) no longer has its parallel run cut short - the state capture is now the head of a pipeline rather than a serial pre-pass, and the memory it needs is a fixed bound instead of one snapshot per frame. Output is unchanged.
+  - dkulp — Model load, parallel output transmission and FPP Connect frame upload spread their work across the pool by index rather than by walking a linked list behind a lock, so they no longer serialise every worker on that lock. Output is byte-identical.
+  - dkulp — Windows: Text and Shape effects now render through Direct2D/DirectWrite directly instead of via wxWidgets, roughly 3.6x faster on text-heavy sequences. Text using a font not installed on the machine may pick a different substitute than before
+  - dkulp — Text effect renders much faster where the same text repeats: rendered text is now cached across rows and frames instead of per render buffer, so it survives the parallel render split (measured up to 4x faster on prop-heavy sequences on Windows). Output is unchanged.
+  - dkulp — Pictures effect renders much faster: the image path is no longer re-resolved on every frame. On macOS that resolve reached iCloud and dominated prop-heavy sequences (one measured 7.7s -> 1.1s, and a 56-sequence show -5.9%). Output is unchanged
+  - dkulp — Meteors: the Implode and Explode styles render several times faster on large buffers, use far less memory while rendering, and draw their trails across cores again (the other styles already did). Output is unchanged
+  - dkulp — Ripple renders about 9x faster, and drawing to the render buffer got cheaper for every effect - VU Meter, SingleStrand, Marquee, Shape and Kaleidoscope all gained 10-38%. Output is unchanged.
+  - dkulp — SingleStrand renders 15-25% faster. The settings it reads that cannot change during an effect are now decoded once instead of on every frame of every model, and the chase draw writes whole buffer columns directly. Output is unchanged.
+  - dkulp — Shader: on Vulkan (Windows/Linux) the input upload now rides the frame's own command buffer and the GPU wait is deferred until the pixels are actually needed, so rows overlap on the GPU instead of serializing. Renders a shader-heavy test sequence ~30% faster with identical output
+  - dkulp — Sped up the number-aware name sort used by the model, group, view and import lists - it no longer copies and re-splits both names on every comparison (~2.3x on its own), and the Import Effects mapping tree no longer converts each name through wxString twice per comparison. Both showed up as multi-minute freezes while sorting a large mapping tree.
+  - derwin12 — Replace Model(s): the candidate list is built once and filtered by hiding rows, instead of destroying and recreating every checkbox on each keystroke
+    - the dialog was unusably slow on a large show
+ReleaseNotesUrl: https://github.com/xLightsSequencer/xLights/releases/tag/2026.15
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

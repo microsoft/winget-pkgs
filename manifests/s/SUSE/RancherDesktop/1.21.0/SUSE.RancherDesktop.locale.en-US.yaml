@@ -1,0 +1,90 @@
+# Created with komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: SUSE.RancherDesktop
+PackageVersion: 1.21.0
+PackageLocale: en-US
+Publisher: SUSE
+PublisherUrl: https://github.com/rancher-sandbox/rancher-desktop
+PublisherSupportUrl: https://github.com/rancher-sandbox/rancher-desktop/issues
+Author: rancher-sandbox
+PackageName: Rancher Desktop
+PackageUrl: https://rancherdesktop.io/
+License: Apache-2.0
+LicenseUrl: https://github.com/rancher-sandbox/rancher-desktop/blob/HEAD/LICENSE
+CopyrightUrl: https://github.com/rancher-sandbox/rancher-desktop/blob/main/LICENSE
+ShortDescription: Kubernetes and container management to the desktop.
+Description: |-
+  Rancher Desktop is an open-source project to bring Kubernetes and container management to the desktop.
+  Windows, macOS and Linux versions of Rancher Desktop are available for download, though do note that the Linux version is considered a tech preview.
+Moniker: rancher-desktop
+Tags:
+- k3s
+- nerdctl
+- rancher
+ReleaseNotes: |-
+  This is the 1.21.0 release of Rancher Desktop, an open source desktop application to bring Kubernetes and container management to macOS, Windows, and Linux.
+  Installers
+  - Windows
+  - macOS x86_64
+  - macOS aarch64
+  - Linux install notes
+  Release Notes for 1.21.0
+  What's New
+  rdctl info command
+  rdctl has a new info command that lists the Rancher Desktop version and the IP address of the VM:
+  ❯ rdctl info
+  Version:   v1.21.0
+  IPAddress: 192.168.205.2
+  You can query individual fields for use in scripts:
+  ❯ rdctl info --field ip-address
+  192.168.205.2
+  Increasing disk size (Linux and macOS)
+  Rancher Desktop by default reserves 100GB of disk space for the VM (it is a sparse file, so only the portion in use actually takes up disk space on the host).
+  It is now possible to increase the maximum size of the VM disk using rdctl:
+  ❯ rdctl set --experimental.virtual-machine.disk-size 120G
+  Status: reconfiguring Rancher Desktop to apply changes (this may take a while).
+  This will restart Rancher Desktop, at which time the volume will expand to the larger size. Please note that it is not possible to reduce the maximum size. Unused space in the VM disk will be returned for host usage every time Rancher Desktop is restarted (via fstrim).
+  There is no GUI mechanism to change the maximum disk size.
+  Update checker only checks once a day
+  Rancher Desktop will only check for updates once per day now instead of every hour. This interval is not configurable but the update checks can be disabled completely via both rdctl and the GUI.
+  Online checker frequency is configurable
+  By default, Rancher Desktop checks every 5 seconds to update the "online" indicator. It does this by checking for the right redirect response from http://docs.rancherdesktop.io (to https). This also detects when the computer is caught inside a captive portal, like airport or hotel wifi.
+  You can now change the frequency of this check to a longer value (in milliseconds) or disable it completely by setting it to 0:
+  ❯ rdctl set --diagnostics.connectivity.interval 0
+  Status: settings updated; no restart required.
+  Electron will still perform its own online checks (which will also update the Rancher Desktop indicators) but those checks are somewhat unreliable.
+  There is no mechanism in the GUI to change this setting.
+  Container Info page with logs
+  @tylercritchlow has moved the container logs to a container info page. You get to the info page either by clicking the container name or through the menu at the end of the line.
+  moby now uses containerd snapshotter by default
+  On new installations, or after a factory reset, Rancher Desktop will now use the containerd snapshotter for storing container images by default. This snapshotter provides additional functionality, such as storing/pushing/pulling multi-platform images. It is also needed for using Wasm containers with docker. This means Rancher Desktop will no longer switch between snapshotters when turning Wasm support on or off, so local images will remain visible to both configuration options.
+  Updated extensions
+  The "SUSE Application Collection" extension can now display the collection without having to log in first.
+  Bug fixes
+  UDP port forwarding fixed on Linux and macOS
+  It was already working on Windows. Thanks to @toshs for finding and fixing the issue.
+  Shadows on macOS 26 Tahoe
+  Window shadows had a performance issue on macOS 26. This has been fixed by upgrading the Electron version.
+  Updates to Bundled Utilities (from Rancher Desktop 1.20.1, as of 1.21.0)
+  - amazon-ecr-credential-helper 0.10.1 → 0.11.0
+  - docker 28.3.3 → 29.0.2
+  - docker-buildx 0.26.1 → 0.30.1
+  - docker-compose 2.39.2 → 2.40.3
+  - docker-credential-helpers 0.9.3 → 0.9.4
+  - helm 3.18.6 → 3.19.1
+  - kuberlr unchanged 0.6.1
+  - moby/buildkit 0.21.1 → 0.25.2
+  - nerdctl 2.1.3 → 2.2.0
+  - spin 3.3.1 → 3.5.1
+  - spin-shim 0.20.0 → 0.22.0
+  - spin-operator unchanged 0.6.1
+  - trivy 0.65.0 → 0.67.2
+  Connect with the developers
+  - The issue queue
+  - Rancher Users Slack in the #rancher-desktop channel
+  Changelog
+  The full version changelog, from v1.20.1, can be found using GitHub compare and the details of the release can be found in the v1.20.0 milestone.
+ReleaseNotesUrl: https://github.com/rancher-sandbox/rancher-desktop/releases/tag/v1.21.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

@@ -1,0 +1,60 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jerrywu001.cc-sessions-viewer
+PackageVersion: 0.3.1
+PackageLocale: en-US
+Publisher: wuchao
+PublisherUrl: https://github.com/jerrywu001
+PublisherSupportUrl: https://github.com/jerrywu001/cc-sessions-viewer/issues
+PackageName: cc-sessions-viewer
+PackageUrl: https://github.com/jerrywu001/cc-sessions-viewer
+License: Freeware
+ShortDescription: Support cc/codex/gemini sessions viewer, token usage statistics, global search, resume, and export to html
+Description: |-
+  A native desktop browser for Claude Code, Codex, and Gemini CLI — read, search, and manage local session transcripts from all three in one place.
+  Faithful replay — thinking chains, tool-call pairings, structured diffs, inline screenshots.
+  Fast search — cross-project global hit (⌘⇧F) jumps to the exact message; one-click resume in Terminal.
+  Deep stats — aggregate token spend and cost; slice by project, model, or tool.
+  Read-only safety — original JSONL is never touched; delete is a move to shared trash, never rm.
+  Flexible export — single session or batches to offline-readable Markdown or HTML.
+
+  Features
+  - 🗂 Unified project view — group sessions by working directory across both CLIs
+  - 💬 Faithful chat replay — text, thinking blocks, tool calls, structured diffs, inline images
+  - 🔎 In-session search with scope — search across the whole conversation or scope to user messages, agent replies (incl. edits), or tool noise; prev / next jump + match counter
+  - 🌐 Global search (⌘⇧F / Ctrl+Shift+F) — Algolia-style overlay over the current agent, scoped to session titles and your own messages; click a hit to jump straight to that message with a flash highlight; recent queries with single-item removal
+  - 🔃 Session list search & sort — keyword search runs on the Rust side, matching session titles and your message text (cancellable mid-typing); sort by recency / size / message count, or show only ones with an ID
+  - 🪗 Collapse / expand all tool calls — one click to hide tool-call clutter and focus on the conversation
+  - 📤 Export session — save a single session to Markdown or HTML (native Save-As, offline-renderable HTML with inlined avatars / styles)
+  - 🧰 Multi-select & batch ops — pick sessions in bulk to move them to the trash or export them into a single export-YYYYMMDD-HHMMSS-{md,html}/ folder
+  - 🔄 Resume or start fresh — open Terminal in a project to resume an existing session (claude --resume <id> / codex resume <id>) or start a brand-new one
+  - 📡 Live tail — opened session auto-refreshes as the CLI appends new messages; an "● Live" indicator shows the watcher is active, and a "N new ↓" pill surfaces additions when you've scrolled up
+  - 🗑 Shared trash — soft-delete, preview a deleted session's transcript, restore one or many (multi-select); survives across both agents
+  - 🏠 Welcome screen — recently opened projects per agent with one-click reopen + per-entry removal
+  - 📌 Pin / sink projects — color-coded pins on the sidebar; sunk projects go to the bottom
+  - ✏️ Rename sessions — your new title syncs back to the CLI, so claude / codex resume pickers show it too
+  - 🌗 Light / dark / system theme — Codex-inspired neutral palette with brand-color accents
+  - 🌐 i18n with auto-detect — English / 简体中文 / 繁體中文 / 日本語；first launch matches the OS language, falls back to English
+  - ⚡️ Custom tooltip & agent brand icons — no out-of-place native chrome
+  - 🖼 Image lightbox for screenshots embedded in transcripts
+Tags:
+- antigravity-cli
+- claude-code
+- codex
+- gemini-cli
+ReleaseNotes: |-
+  Features
+  - Ctrl+Del delete line in chat composer — pressing Ctrl+Del in the GUI chat input deletes the entire line at the cursor position, matching common editor behavior.
+  - Shift+Enter newline in TUI terminal — Shift+Enter now inserts a newline (\n) instead of submitting (\r) in both TUI and shell terminal tabs, matching native terminal behavior.
+  - Keyboard shortcuts reorganized — Settings → Shortcuts now splits chat-specific shortcuts (Ctrl+S stash, Ctrl+Del delete line, Shift+Enter newline, ⌘U attach files, ⌘J side chat) into a dedicated "Chat (GUI)" group, separate from session-level shortcuts.
+  Bug Fixes
+  - Text selection floating at small font sizes — font sizes below 14px caused selected text to visually "float" away from the cursor due to CSS body.style.zoom coordinate mismatch in WKWebView. Replaced with Tauri's native webview.setZoom() which keeps selection, right-click menus, and mouse events aligned at all zoom levels.
+  - Right-click context menu position offset — native Tauri menu popups in the terminal strip appeared offset from the click position when font size was not 14px. LogicalPosition coordinates are now multiplied by the zoom factor to compensate.
+  - Split/close pane key repeat blocked — holding down ⌘D / ⌘⇧D / ⌘⇧W no longer rapid-fires split or close pane actions; only the initial keypress is honored.
+  - Windows CLI environment check found zero installs — the diagnosis used a bare where, which in PowerShell is an alias for Where-Object, so where claude matched nothing and every CLI showed as "not installed". Now uses where.exe; the --version probe invokes quoted paths via the & call operator (a bare '…' --version is a PowerShell parse error); the several launcher shims one npm install drops (codex, codex.cmd, codex.ps1) collapse to a single install; and package-manager detection reads the shim for a node_modules reference instead of guessing from the install directory (the old hard-coded \nvm\ match only worked on one machine's layout).
+  - Duplicate version line in CLI environment card — the per-install version is now shown only when multiple conflicting installs exist; with a single install it no longer duplicates the version already in the card header.
+  - Codex resume — friendly hint on stale model provider — resuming an older Codex session whose recorded model_provider is no longer defined in ~/.codex/config.toml (e.g. renamed) failed inside the embedded TUI with a raw Model provider \…` not found` dump. The terminal now appends a localized, actionable hint (naming the missing provider and noting the transcript stays fully viewable) whenever a Codex resume exits non-zero on a config/provider load failure.
+ReleaseNotesUrl: https://github.com/jerrywu001/cc-sessions-viewer/blob/HEAD/CHANGELOG.md#v031
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

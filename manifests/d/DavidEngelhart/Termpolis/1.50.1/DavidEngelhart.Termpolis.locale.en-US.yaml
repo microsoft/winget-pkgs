@@ -1,0 +1,62 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: DavidEngelhart.Termpolis
+PackageVersion: 1.50.1
+PackageLocale: en-US
+Publisher: Termpolis
+PublisherUrl: https://github.com/codedev-david
+PublisherSupportUrl: https://github.com/codedev-david/termpolis/issues
+PrivacyUrl: https://github.com/codedev-david/termpolis/blob/HEAD/PRIVACY.md
+Author: David Engelhart
+PackageName: Termpolis
+PackageUrl: https://termpolis.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/codedev-david/termpolis/blob/HEAD/LICENSE
+Copyright: Copyright 2026 David Engelhart
+ShortDescription: The open-source multi-agent terminal where Claude, Codex, Gemini, and Qwen work together as a team — without your source code leaving the machine.
+Description: |-
+  Termpolis is a cross-platform desktop terminal manager (Windows, macOS, Linux) built on Electron + React + TypeScript with node-pty powering the underlying shells. It ships as a native app, code signed on Windows, notarized on macOS.
+  What makes it different:
+  - Secure AI-assisted development. Built-in AI Security Center auto-scans every AI prompt against 70+ secret patterns, enforces Gemini paid-tier mode, and keeps an auditable JSONL log of every AI-agent terminal launch — every check runs locally.
+  - Multi-agent swarm. Claude Code, Codex, Gemini CLI, and Qwen Code work together on a task. A dedicated Claude Code instance acts as the conductor.
+  - MCP server baked in. AI agents control Termpolis via Model Context Protocol, open terminals, run commands, send messages.
+  - Transparent routing. Every subtask shows which agent got it, why, and what it cost.
+  - Activity observability. Every token, every tool call, every message from every agent is visible in real time.
+  - Intervention controls. Pause, cancel, or steer any agent mid-task without leaving the feed.
+  - Shared memory. A RAG-backed memory store that any agent can read and write via MCP.
+  - MCP-native end to end. All four agents speak MCP — no terminal-output parsers, no glue scripts, no bridge code paths.
+  - Share-ready output. One shortcut from terminal to Slack, Teams, or a PR — see Copy for Slack / Teams / PRs.
+Tags:
+- ai
+- command-line
+- console
+- terminal
+ReleaseNotes: |-
+  sudo works again after updates on Linux
+  On Linux, sudo, su and pkexec could fail in every Termpolis terminal with "The 'no new privileges' flag is set". Updates installed from inside Termpolis caused it: the way the app reopened itself after an update made Linux mark it "no new privileges", and every terminal it opened inherited the mark.
+  Updates no longer do that. If Termpolis starts with the flag anyway, it tells you and offers to restart itself properly.
+  Updating from 1.50.0 or earlier (Linux .deb): if you've updated from inside Termpolis before, the window you have open probably has the flag, and a window with the flag can't install updates either, because installing needs the administrator password. So:
+  1. Quit Termpolis and open it again from your applications menu.
+  2. Install the update.
+  3. If Termpolis says sudo won't work in this window when it reopens, click Restart Termpolis once.
+  From then on, updates keep sudo working. The AppImage, macOS and Windows builds were never affected.
+  Agents can use sudo (Linux and macOS)
+  An agent runs its commands without a terminal, so plain sudo had nowhere to ask for your password. Termpolis now tells the agents it launches to use sudo -A, and asks for the password in a dialog that shows the whole command about to run.
+  - Type your password only for a command you expected: whatever you approve runs as administrator.
+  - A command too long to show in full is refused rather than shown in part.
+  - On Linux the dialog uses zenity, kdialog or ssh-askpass, whichever is installed. macOS uses the system dialog.
+  - A SUDO_ASKPASS you set yourself is left alone.
+  Memory: fewer junk lessons
+  Termpolis reads finished sessions for problems that got fixed, decisions and gotchas, and stores them as lessons. Its rules read many ordinary sentences as problems and decisions. In one real store, most recent lessons were like "Problem: …checking the email notification → Fix: I added the release notes", and they ranked first in recall.
+  - The rules are tighter: error codes must look like error codes, a fix must say something was fixed (not "not resolved", not a question), and a decision must have been made (not "decide whether…").
+  - Once, after the update, Termpolis demotes the lessons it stored by mistake. Nothing is deleted: a demoted lesson is still found when nothing better matches, and memory_correct can undo it.
+  - Agents are now told that a search hit from a past conversation is an excerpt they can read on from, and that memory records what was said on this computer, not what is true now.
+  The docs have a new section, What memory can and can't tell an agent.
+  Full Changelog: https://github.com/codedev-david/termpolis/compare/v1.50.0...v1.50.1
+ReleaseNotesUrl: https://github.com/codedev-david/termpolis/releases/tag/v1.50.1
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://termpolis.com/docs.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

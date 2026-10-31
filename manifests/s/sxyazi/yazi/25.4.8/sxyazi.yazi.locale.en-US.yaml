@@ -1,0 +1,111 @@
+# Created with WinGet Releaser using komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: sxyazi.yazi
+PackageVersion: 25.4.8
+PackageLocale: en-US
+Publisher: sxyazi
+PublisherUrl: https://github.com/sxyazi
+PublisherSupportUrl: https://github.com/sxyazi/yazi/issues
+PackageName: Yazi
+PackageUrl: https://github.com/sxyazi/yazi
+License: MIT
+LicenseUrl: https://github.com/sxyazi/yazi/blob/HEAD/LICENSE
+ShortDescription: Blazing fast terminal file manager written in Rust, based on async I/O
+Tags:
+- android
+- asyncio
+- cli
+- concurrency
+- file-explorer
+- file-manager
+- helix
+- linux
+- macos
+- productivity
+- rust
+- terminal
+- tui
+- vim
+- windows
+- yazi
+ReleaseNotes: |-
+  Breaking Changes
+  - Supported wraparound navigation and enabled it by default. #2485
+  - Replaced tasks_show and close_input with tasks:show and input:close. #2530
+  - frag, name, stem, ext, and parent on Url, name on tab::Tab, and is_hovered on fs::File are now properties. #2572
+  - Swapped the default key bindings for z (zoxide) and Z (fzf). #2546
+  - Used the new @sync peek annotation instead of the previewer's sync = true. #2487
+  Deprecated
+  - ui.Padding and ui.Rect:padding() are deprecated. #2574
+  Packaging
+  - SVG preview backend switched from ImageMagick to resvg and implemented as a new svg previewer. #2533, #2581
+  Custom Search Engine Lua API
+  With #2452, you can create custom search engines via the Lua API, meaning that plugins can serve as the source for search view file lists.
+  A new plugin vcs-files.yazi is available to display the list of files changed in Git within Yazi:
+  420258569-465b801b-3516-4f57-be09-8405da21e34d.mp4
+  Platform-Specific Key Binding
+  #2526 adds a new optional for field to key bindings to specify the platform the key binding applies to.
+  For example:
+  { on = [ 'g', 'd' ], run = 'cd ~/dev',  desc = 'Go dev',    for = 'unix' },
+  { on = [ 'g', 'd' ], run = 'cd C:\dev', desc = 'Go C:\dev', for = 'windows' },
+  Performance Improvements
+  This version brings several performance enhancements:
+  - Configuration parser has been rewritten to double the startup speed. #2508
+  - AVIF, HEIF, and JPEG XL previews have seen significant performance improvements. #2533, thanks @ze0987
+  - Compiled and cached the Lua bytecode to enhance the overall performance of the plugin system. #2490
+  Enhance fzf Integration
+  Now, you can select multiple files in fzf, and the selected files will also be selected in Yazi.
+  Also, you can now view, navigate, and deselect the file selection list from Yazi within fzf.
+  428400784-c120282b-a029-4cde-9092-699115318491.mp4
+  See #2546 for more details.
+  Use Yazi File Manager Directly in Helix, Without Zellij or tmux
+  #2461 adapted Yazi to support Helix's :insert-output, which means you can now run Yazi directly within Helix – it even supports image and video previews!
+  420651139-17a370d5-ee50-4cfa-8292-ed3159058ac6.mp4
+  New prev and next Arguments to arrow for Wraparound Navigation
+  Circular navigation is one of the long-requested features, and is now supported via the new arrow prev and arrow next commands in #2485.
+  New follow Command to Follow Files Pointed to by Symlinks
+  #2543 adds support for following files pointed to by symlinks.
+  A new key binding, g => f (follow hovered symlink), has been added to use this feature.
+  Allow Initializing Input When Opening It with Commands Like rename, create, find, filter, etc.
+  With #2578, you can now customize the input box opened by commands such as create, rename, cd, filter, find, search, and shell. For example:
+  { on = "r", run = [ "rename", "input:escape" ] }
+  This will open the rename input box and exit insert mode, meaning that the default state will be normal mode.
+  What's Changed
+  - feat: new <C-A> and <C-E> keybindings to select entire line for the input component by @sxyazi in #2439
+  - fix: reserve a hack for Zellij to force an image adapter by @sxyazi in #2441
+  - feat: new rt.term exports terminal emulator information by @sxyazi in #2442
+  - fix: always show the size in the status bar even in empty directories by @sxyazi in #2449
+  - feat: allow tab_swap to cycle tabs by @sxyazi in #2456
+  - feat: support using Yazi in Helix directly without Zellij or tmux by @sxyazi in #2461
+  - refactor: prefer WriteConsoleW for Windows console output by @sxyazi in #2464
+  - ci: add label only if not removed manually by @sxyazi in #2470
+  - fix: force ANSI for keyboard progressive enhancement on Windows by @sxyazi in #2474
+  - feat: new fs.expand_url API by @sxyazi in #2476
+  - feat!: file navigation wraparound with new arrow prev and arrow next commands by @sxyazi in #2485
+  - feat!: new @sync peek annotation for sync previewers by @sxyazi in #2487
+  - perf: lazy compile and cache lua plugins as binary bytecode by @sxyazi in #2490
+  - feat: new base field for the Url userdata by @sxyazi in #2492
+  - feat: allow repositioning the cursor in the rename DDS event by @sxyazi in #2521
+  - feat: new symlink_target to style the target of symbolic links by @sxyazi in #2522
+  - feat: platform-specific key binding by @sxyazi in #2526
+  - feat: show error message when directory fails to load by @sxyazi in #2527
+  - feat: allow bulk renaming to include trailing content in addition to the required new names by @MikuGeek in #2494
+  - refactor!: remove unnecessary tasks_show and close_input commands by @sxyazi in #2530
+  - perf!: faster image preview with optimized magick arguments by @ze0987 in #2533
+  - feat!: support arrow prev and arrow next for more components by @XOR-op in #2540
+  - feat: clear terminal before displaying EXIF data by @Integral-Tech in #2541
+  - feat: new follow command to follow files pointed to by symlinks by @sxyazi in #2543
+  - fix: always check whether the cursor exceeds the upper bound to guard against unexpected values by @sxyazi in #2551
+  - feat!: enhance fzf integration by @sxyazi in #2553
+  - feat: support Warp terminal image preview by @sxyazi in #2571
+  - feat: allow initializing input when opening it with commands like rename, create, find, filter, etc. by @sxyazi in #2578
+  - fix: ignore XQuartz $DISPLAY variable by @sxyazi in #2586
+  - fix: don't fail on videos with embedded images by @ze0987 in #2590
+  New Contributors
+  - @MikuGeek made their first contribution in #2494
+  - @ze0987 made their first contribution in #2533
+  Full Changelog: v25.3.2...v25.4.8
+ReleaseNotesUrl: https://github.com/sxyazi/yazi/releases/tag/v25.4.8
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

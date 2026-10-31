@@ -1,0 +1,71 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: syedinsaf.otaripper
+PackageVersion: 2.3.0
+PackageLocale: en-US
+Publisher: Syed Insaf
+PublisherUrl: https://github.com/syedinsaf
+PublisherSupportUrl: https://github.com/syedinsaf/otaripper/issues
+Author: Syed Insaf
+PackageName: otaripper
+PackageUrl: https://github.com/syedinsaf/otaripper
+License: Apache-2.0
+LicenseUrl: https://github.com/syedinsaf/otaripper/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Syed Insaf
+ShortDescription: 'Fast, safe, and reliable Android OTA partition extractor '
+Description: otaripper is a high-performance, multi-threaded partition extractor for Android OTA packages (payload.bin and full OTA .zip files). Built in Rust, it features SIMD-accelerated memory operations and robust fail-safe behavior.
+Moniker: otaripper
+Tags:
+- android
+- aosp
+- cli
+- payload
+- terminal
+ReleaseNotes: |-
+  What’s New in v2.3.0
+  A massive performance and reliability overhaul. v2.3.0 introduces "Zero-Copy" extraction for ZIP-based payloads and deep kernel-level I/O optimizations that push the limits of NVMe and high-speed storage.
+  Highlights
+  - Zero-Copy ZIP Extraction: By utilizing direct memory mapping for STORED entries within ZIP files, otaripper now bypasses traditional extraction buffers entirely. This leads to near-instantaneous mapping and extreme throughput for modern Android OTA zips.
+  - Kernel-Level Zero-Fill Bypass: Optimized the handling of empty blocks by bypassing user-space zeroing. On supported filesystems, this drastically reduces CPU cycles and disk wear when encountering sparse partitions.
+  - Atomic Pipeline Refactor: The extraction engine has been decomposed into focused, method-driven stages. This architectural change hardens error recovery, ensuring that partial extractions are cleaned up gracefully and diagnostics are more precise.
+  - Enhanced I/O Caching: Implemented OS-level sequential caching hints. This pre-warms the system's page cache during extraction, resulting in significantly faster SHA-256 validation passes.
+  Performance & Core Improvements
+  Pushing I/O Boundaries
+  - posix_fallocate Integration: On Linux, we now use posix_fallocate to pre-allocate disk space. This eliminates file fragmentation and reduces write contention on highly-parallel extraction tasks.
+  - Modernized Dependencies: Updated sysinfo to v0.39.0 for more accurate hardware detection and thread-scaling logic.
+  - Hardened Recovery: Improved lock-poisoning handling and transactional cleanup logic to ensure the filesystem remains consistent even if a process is interrupted.
+  What's Changed
+  - feat: instant zip extraction via direct memory mapping by @ArKT-7
+  - perf: bypass user-space zeroing for empty blocks by @ArKT-7
+  - perf: add OS-level sequential caching to speed up I/O and SHA-256 validation by @ArKT-7
+  - perf: use posix_fallocate on Linux to fix write contention by @ArKT-7
+  - refactor: decompose extraction pipeline into focused methods with hardened error recovery by @syedinsaf
+  - build(deps): update sysinfo to 0.39.0 by @syedinsaf
+  Full Changelog: v2.2.2...v2.3.0
+  Download Guide — Pick the Right Build
+  ───────────────────┬──────────────────────┬────────────────────────────────────────────────┬──────────────────────────────────────────
+  Platform           │Architecture          │Download                                        │Notes
+  ───────────────────┼──────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────
+  🪟 Windows         │x86_64 (MSVC)         │⬇️ otaripper-2.3.0-windows-msvc-x86_64.zip      │⭐ Recommended for most Windows users
+  ───────────────────┼──────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────
+  🪟 Windows         │x86_64 (MinGW / GNU)  │⬇️ otaripper-2.3.0-windows-gnu-x86_64.zip       │Only if you explicitly need MinGW
+  ───────────────────┼──────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────
+  🐧 Linux           │x86_64 (glibc)        │⬇️ otaripper-2.3.0-linux-x86_64.tar.gz          │Standard dynamic Linux build
+  ───────────────────┼──────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────
+  🐧 Linux           │x86_64 (static / musl)│⬇️ otaripper-2.3.0-linux-static-x86_64.tar.gz   │Fully portable, works on almost any distro
+  ───────────────────┼──────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────
+  🐧 Linux           │ARM64 (aarch64)       │⬇️ otaripper-2.3.0-linux-arm64.tar.gz           │ARM servers, SBCs, phones
+  ───────────────────┼──────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────
+  🍎 macOS           │Intel (x86_64)        │⬇️ otaripper-2.3.0-macos-x86_64.tar.gz          │Intel-based Macs
+  ───────────────────┼──────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────
+  🍎 macOS           │Apple Silicon (ARM64) │⬇️ otaripper-2.3.0-macos-arm64.tar.gz           │M1 / M2 / M3 Macs
+  ───────────────────┼──────────────────────┼────────────────────────────────────────────────┼──────────────────────────────────────────
+  🤖 Android / Termux│ARM64                 │⬇️ otaripper-2.3.0-android-arm64.zip            │Termux-only environment
+  ───────────────────┴──────────────────────┴────────────────────────────────────────────────┴──────────────────────────────────────────
+  Integrity & Verification
+  All releases include .sha256 checksum files so you can verify downloads before running.
+  sha256sum -c otaripper-2.3.0-<build>.sha256
+ReleaseNotesUrl: https://github.com/syedinsaf/otaripper/releases/tag/v2.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

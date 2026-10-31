@@ -1,0 +1,61 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: viswajith275.envseal
+PackageVersion: 5.0.0
+PackageLocale: en-US
+Publisher: Viswajith M P
+PublisherUrl: https://github.com/viswajith275
+PublisherSupportUrl: https://github.com/viswajith275/EnvSeal-CLI/issues
+Author: Viswajith M P
+PackageName: envseal
+PackageUrl: https://github.com/viswajith275/EnvSeal-CLI
+License: MIT
+LicenseUrl: https://github.com/viswajith275/EnvSeal-CLI/blob/HEAD/LICENSE
+ShortDescription: Zero-trust secrets engine that replaces dangerous .env files. AES-256 encrypted vaults, least-privilege tokens for CI/CD, and instant DEK rotation, without ever putting your master password on a runner.
+Description: An encrypted vault for your API keys and secrets, because .env files have never once kept a secret.
+Moniker: envseal
+Tags:
+- command-line-tool
+- developer-tools
+- encryption-decryption
+- enviornment-setup
+- envseal
+- hmac-sha256
+- rust
+ReleaseNotes: |-
+  EnvSeal v5.0.0
+  Zero-trust secrets for local development and production CI/CD.
+  EnvSeal just grew up. What started as “a better way to stop committing .env files” is now a full cryptographic secrets engine with least-privilege tokens, instant revocation, and a design that assumes your CI runner is already compromised.
+  No more sharing the master password with the pipeline. No more hoping expiration will save you. No more plaintext secrets sitting in process lists.
+  Highlights
+  - Zero-trust bearer tokens — Mint short-lived, least-privilege tokens that can decrypt specific secrets (or an entire tag) without ever seeing the master password, KEK, or signing key.
+  - DEK rotation — One command (envseal rotate) regenerates the Data Encryption Key for a scope and instantly invalidates every existing token for that scope.
+  - Cryptographic hierarchy — Master password → Argon2id → KEK → Master DEK → HKDF Scope DEKs → per-variable Entry Keys. Secrets are never encrypted directly under the password. Every vault mutation is Ed25519-signed.
+  - Anti-snooping token ingestion — Tokens are accepted only via file, environment variable, or stdin. No CLI flag that ends up in ps aux.
+  - Faster sessions — The OS keyring now caches derived cryptographic material instead of the raw password. Subsequent commands drop from ~500 ms to ~2 ms.
+  - Cleaner storage — MessagePack with deterministic ordering and raw binary payloads. Atomic writes via the standard filesystem.
+  New Commands
+  ──────────────┬──────────────────────────────────────────────────────────────────────────────────────────────────
+  Command       │What it does
+  ──────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────
+  envseal token │Mint a zero-trust bearer token with optional name, description, expiration, and key-level scoping.
+  ──────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────
+  envseal rotate│Rotate the DEK for a group or tag and revoke all tokens that depended on the old key.
+  ──────────────┴──────────────────────────────────────────────────────────────────────────────────────────────────
+  Existing commands (run, get, export, load, etc.) now accept --token-file so the same workflows work with tokens.
+  Security Notes You Should Actually Read
+  Token expiration (--exp) is a convenience, not a security boundary. Clocks drift. Tokens get copied. “It expires in an hour” is not a revocation strategy.
+  If a token is compromised (or even just suspected):
+  1. Rotate the DEK for the affected scope (envseal rotate --tag prod).
+  2. Rotate the actual credentials that token could reach (database passwords, API keys, etc.).
+  Do both. Always.
+  Platform Support
+  - Linux (x86_64 / ARM64)
+  - macOS (Apple Silicon only — Intel Macs are no longer supported)
+  - Windows
+  Installation
+  curl -sSfL https://raw.githubusercontent.com/viswajith275/EnvSeal-CLI/master/scripts/install.sh | bash
+ReleaseNotesUrl: https://github.com/viswajith275/EnvSeal-CLI/releases/tag/v5.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

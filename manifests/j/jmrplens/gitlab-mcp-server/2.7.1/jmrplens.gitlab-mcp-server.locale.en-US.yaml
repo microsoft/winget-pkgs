@@ -1,0 +1,62 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: jmrplens.gitlab-mcp-server
+PackageVersion: 2.7.1
+PackageLocale: en-US
+Publisher: José M. Requena Plens
+PublisherUrl: https://github.com/jmrplens
+PublisherSupportUrl: https://github.com/jmrplens/gitlab-mcp-server/issues
+PrivacyUrl: https://github.com/jmrplens/gitlab-mcp-server/blob/main/PRIVACY.md
+PackageName: GitLab MCP Server
+PackageUrl: https://github.com/jmrplens/gitlab-mcp-server
+License: MIT
+LicenseUrl: https://github.com/jmrplens/gitlab-mcp-server/blob/HEAD/LICENSE
+ShortDescription: GitLab MCP server exposing the REST v4 and GraphQL APIs as tools for AI assistants.
+Description: A Model Context Protocol (MCP) server that connects AI assistants (Claude, Cursor, VS Code + Copilot, and any MCP client) to GitLab.com or self-managed GitLab instances. Covers the full REST API v4 and GraphQL with automatic edition gating — roughly 850 to 1070 tools depending on the GitLab tier — plus 45 MCP resources, 37 prompts, argument completions, and progress notifications. Single static binary, stdio and HTTP transports, read-only and safe (mutation-preview) modes, and an interactive setup wizard (gitlab-mcp-server --setup) that auto-configures most MCP clients.
+Moniker: gitlab-mcp-server
+Tags:
+- ai
+- ci-cd
+- claude
+- devops
+- gitlab
+- graphql
+- llm
+- mcp
+- model-context-protocol
+- rest-api
+ReleaseNotes: |-
+  Conformance and discoverability release：everything the server answers, advertises, and refuses is now aligned with the ratified MCP **2026-07-28** specification — cross-reviewed both ways with the sibling [libgen-mcp](https://github.com/jmrplens/libgen-mcp) server.
+
+  ## Server Card discoverability (#303)
+
+  • The card at `/.well-known/mcp/server-card.json` now carries the **negotiated `capabilities`** (live from the same handshake `serverInfo` comes from) and a machine-readable **`subscriptions` block**：per-method availability (`subscriptions/listen`, and `resources/subscribe` with `available: false` plus a `requires` note on stateless HTTP) and the full `subscribable_uri_templates` list — a directory can learn all of it without connecting.
+  • Every subscribable resource template also declares itself in-band：a marker sentence in its description and the vendor-namespaced `_meta` key `io.github.jmrplens/subscribable: true` (the spec's sanctioned per-object extension point).
+  • Cross-origin reads work end to end：`Access-Control-Allow-Origin` on GET, an OPTIONS preflight that echoes `Access-Control-Request-Headers`, and `Access-Control-Max-Age` so scanners preflight once an hour, not once a fetch.
+
+  ## Full-surface conformance round (#303)
+
+  • **No deprecated capability advertised**：every server this repository constructs pins `capabilities` explicitly, so the SEP-2577-deprecated `logging` capability never appears in a handshake, the card, or generated manifests.
+  • **Capability/method consistency** (`internal/capguard`)：`logging/setLevel` answers `-32601` on every surface, and on `CAPABILITY_SURFACE=minimal` so do `prompts/list`/`prompts/get` — no more successful empty answers for features the handshake never declared.
+  • **OAuth HTTP mode hardened**：`--public-url` is now required and validated (RFC 9728 resource identifier, metadata served at the path-inserted well-known location), only `Authorization: Bearer` is accepted (`PRIVATE-TOKEN` is rejected with 401 in this mode), and token **scopes are introspected** (`/personal_access_tokens/self`, `/oauth/token/info`) instead of assumed.
+  • **Stateless HTTP fixed for long streams**：the server-initiated keepalive ping is off on stateless transport (the spec forbids it there, and the SDK kills the stream on the first failed ping), and SSE responses carry `X-Accel-Buffering: no` so proxies deliver progress as it happens.
+  • **Strict elicitation schemas**：integer selections are offered as string enums (the elicitation subset defines enums for strings only) with lenient parsing kept for numeric answers, and the legacy `elicitationId` is only sent to pre-2026-07-28 clients.
+
+  ## Deliberate error codes (#304)
+
+  Every refused stateful `resources/subscribe` now reaches the wire as a proper JSON-RPC error instead of the accidental `code：0`: `-32602` for a non-subscribable URI or an unreadable resource, `-32000` (transient, retry) for rate limiting, a full watcher cap, or shutdown, `-32603` for a transient GitLab failure, and `-32600` for the legacy method on stateless HTTP. Messages keep the upstream detail verbatim; the code table lives in the [subscriptions reference](https://jmrp.io/docs/gitlab-mcp-server/reference/capabilities/subscriptions/).
+
+  ## Fixes
+
+  • `gitlab_instance_variable_*` descriptions no longer claim the value is "redacted when masked"：GitLab's API returns raw values to admins (masking redacts CI job logs), and the payload mirrors the API — the markdown view is what masks.
+  • `mcpb/manifest.json` moved to manifest format **0.4** and its `$schema` points at a URL that exists again (the upstream schemas moved out of `dist/`).
+  • `make publish-lobehub` uses the LobeHub CLI's `update` verb for the existing listing (#302).
+
+  Full spec receipts, the vendor-surface inventory, and the cross-review record are in [#303](https://github.com/jmrplens/gitlab-mcp-server/pull/303) and [#304](https://github.com/jmrplens/gitlab-mcp-server/pull/304).
+ReleaseNotesUrl: https://github.com/jmrplens/gitlab-mcp-server/releases/tag/v2.7.1
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://jmrplens.github.io/gitlab-mcp-server/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

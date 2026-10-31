@@ -1,0 +1,73 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Anthropic.ClaudeCode
+PackageVersion: 2.1.224
+PackageLocale: en-US
+Publisher: Anthropic PBC
+Author: Anthropic PBC
+PackageName: Claude Code
+License: Proprietary
+Copyright: © 2026 Anthropic PBC
+ShortDescription: Unleash Claude’s raw power directly in your terminal. Search million-line codebases instantly. Turn hours-long workflows into a single command. Your tools. Your workflow. Your codebase, evolving at thought speed.
+Description: |-
+  Claude Code is Anthropic’s agentic coding tool that lives in your terminal and helps you turn ideas into code faster than ever before.
+  What Claude Code does for you
+  - Build features from descriptions: Tell Claude what you want to build in plain English. It will make a plan, write the code, and ensure it works.
+  - Debug and fix issues: Describe a bug or paste an error message. Claude Code will analyze your codebase, identify the problem, and implement a fix.
+  - Navigate any codebase: Ask anything about your team’s codebase, and get a thoughtful answer back. Claude Code maintains awareness of your entire project structure, can find up-to-date information from the web, and with MCP can pull from external datasources like Google Drive, Figma, and Slack.
+  - Automate tedious tasks: Fix fiddly lint issues, resolve merge conflicts, and write release notes. Do all this in a single command from your developer machines, or automatically in CI.
+  Why developers love Claude Code
+  - Works in your terminal: Not another chat window. Not another IDE. Claude Code meets you where you already work, with the tools you already love.
+  - Takes action: Claude Code can directly edit files, run commands, and create commits. Need more? MCP lets Claude read your design docs in Google Drive, update your tickets in Jira, or use your custom developer tooling.
+  - Unix philosophy: Claude Code is composable and scriptable. tail -f app.log | claude -p "Slack me if you see any anomalies appear in this log stream" works. Your CI can run claude -p "If there are new text strings, translate them into French and raise a PR for @lang-fr-team to review".
+  - Enterprise-ready: Use Anthropic’s API, or host on AWS or GCP. Enterprise-grade security, privacy, and compliance is built-in.
+Moniker: claudecode
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claude
+- claude-code
+- claudecode
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  - Added self-hosted environments: claude self-hosted-runner turns your own machines or containers into a place Claude Code web, mobile, and desktop sessions can run, on Team and Enterprise plans
+  - Added archive plugin source: install plugins from a zip over HTTPS without git or npm, with optional SHA-256 pinning
+  - Added a cancel-and-confirm step when removing an unavailable paste changes a command's text
+  - Added ANTHROPIC_BEDROCK_REGION_PREFIX env var for Bedrock to prefer a specific cross-region inference profile over the AWS_REGION-derived one
+  - Added crossSessionInbound and dialogExpiry settings: cross-session messages sent to a session running with bypassed permissions are held for your approval, and messages to other sessions auto-deliver
+  - Added sandbox credential-masking options: extract and onExtractNoMatch for structured env values, decode: "jwt" with maskClaims for JWT-aware masking, and awsPairs/sigv4 for AWS SigV4 re-signing; these need network.tlsTerminate and are honored only from user, managed, or --settings settings
+  - Added cross-session SendMessage: Claude Code sessions can now message each other, on any of your machines, with ListAgents to discover them (macOS and Linux)
+  - Fixed long (>200 char) project paths resolving to another project's session directory under a shared sanitized prefix; session list, rename, fork, delete and /resume no longer cross projects
+  - Fixed SendMessage reporting "Message sent" when the write to a teammate's inbox had actually failed; failed deliveries are now reported as errors
+  - Fixed sandbox filesystem deny entries written with a trailing slash (e.g. denyRead: "~/.aws/") being silently bypassable on Linux and macOS
+  - Fixed sandbox violation details never appearing in Bash tool results; Claude now sees which file or network access was denied and why
+  - Fixed MCP tools that connect mid-turn being deferred for tool search without their names announced to the model
+  - Fixed plugin install records being silently corrupted when the same plugin is installed in multiple projects
+  - Fixed recalled or restored paste content occasionally attaching wrong data or silently losing text when the paste had aged out or placeholder numbers collided
+  - Fixed copy-on-select on Wayland sometimes not reaching the clipboard; the two selection writes no longer race
+  - Fixed the feedback survey's transcript share silently failing on long sessions; a failed share now shows an error instead of a success message
+  - Fixed Remote Control auto-start intermittently failing with "Remote credentials fetch failed" on a cold start with a stale login token
+  - Fixed Remote Control and SDK clients showing a blank "(no content)" message after /clear and other output-less commands
+  - Fixed a Remote Control session recreated after its server session expired uploading prior local conversation history into the new session
+  - Improved fullscreen mode to keep the full pre-compaction history in scrollback across repeated compactions, instead of only the most recent interval
+  - Improved Remote Control: attached web and mobile clients now see compaction progress and the post-compaction boundary instead of a silent pause; /clear resets now propagate to attached clients
+  - Improved Remote Control: connection failures now show a persistent failure indicator with details and a reconnect shortcut, instead of only an 8-second toast
+  - Removed the 200-subagent-per-session spawn cap; long-running sessions no longer refuse new agents (concurrency and depth limits still apply)
+  - Changed managed settings: the approval prompt no longer re-appears after re-login or org switching when the organization's settings are unchanged
+  - Changed the feedback-survey transcript share: with your consent it now also uploads the last request's model settings — the system prompt (which includes your CLAUDE.md instructions), tool definitions, and model parameters. Secrets are redacted as before, and these fields are dropped first if the share is too large
+  - Changed the Bash tool description to always note that command output is displayed to the model, not reliably to the user
+  - Changed recalled paste placeholder numbers to renumber when accepted into the input
+  - Changed Remote Control to archive the stale server session instead of leaving a dead one listed when a fresh session is minted after compaction or /resume
+  - [VSCode] Fixed the extension showing Remote Control as connected after the connection failed
+  - Fixed a session resume silently reconnecting Remote Control after the user turned it off (--resume, SDK hosts, and the VS Code extension)
+  - [VSCode] Fixed sessions not honoring remoteControlAtStartup when explicitly enabled
+ReleaseNotesUrl: https://github.com/anthropics/claude-code/blob/HEAD/CHANGELOG.md#21224
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,78 @@
+# Created with WinGet Releaser using komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: pnpm.pnpm
+PackageVersion: 10.14.0
+PackageLocale: en-US
+Publisher: pnpm
+PublisherUrl: https://github.com/pnpm/pnpm
+PublisherSupportUrl: https://github.com/pnpm/pnpm/issues
+Author: pnpm contributors
+PackageName: pnpm
+PackageUrl: https://pnpm.io/
+License: MIT
+LicenseUrl: https://github.com/pnpm/pnpm/blob/HEAD/LICENSE
+Copyright: Copyright (c) Zoltan Kochan and other contributors
+CopyrightUrl: https://github.com/pnpm/pnpm/blob/main/LICENSE
+ShortDescription: Fast, disk space efficient package manager.
+Moniker: pnpm
+Tags:
+- dependency-manager
+- install
+- javascript
+- modules
+- node
+- nodejs
+- npm
+- package-manager
+ReleaseNotes: |-
+  Minor Changes
+  - Added support for JavaScript runtime resolution
+    Declare Node.js, Deno, or Bun in devEngines.runtime (inside package.json) and let pnpm download and pin it automatically.
+    Usage example:
+    {
+      "devEngines": {
+        "runtime": {
+          "name": "node",
+          "version": "^24.4.0",
+          "onFail": "download" // we only support the "download" value for now
+        }
+      }
+    }
+    How it works:
+    1. pnpm install resolves your specified range to the latest matching runtime version.
+    2. The exact version (and checksum) is saved in the lockfile.
+    3. Scripts use the local runtime, ensuring consistency across environments.
+    Why this is better:
+    1. This new setting supports also Deno and Bun (vs. our Node-only settings useNodeVersion and executionEnv.nodeVersion)
+    2. Supports version ranges (not just a fixed version).
+    3. The resolved version is stored in the pnpm lockfile, along with an integrity checksum for future validation of the Node.js content's validity.
+    4. It can be used on any workspace project (like executionEnv.nodeVersion). So, different projects in a workspace can use different runtimes.
+    5. For now devEngines.runtime setting will install the runtime locally, which we will improve in future versions of pnpm by using a shared location on the computer.
+    Related PR: #9755.
+  - Add --cpu, --libc, and --os to pnpm install, pnpm add, and pnpm dlx to customize supportedArchitectures via the CLI #7510.
+  Patch Changes
+  - Fix a bug in which pnpm add downloads packages whose libc differ from pnpm.supportedArchitectures.libc.
+  - The integrities of the downloaded Node.js artifacts are verified #9750.
+  - Allow dlx to parse CLI flags and options between the dlx command and the command to run or between the dlx command and -- #9719.
+  - pnpm install --prod should removing hoisted dev dependencies #9782.
+  - Fix an edge case bug causing local tarballs to not re-link into the virtual store. This bug would happen when changing the contents of the tarball without renaming the file and running a filtered install.
+  - Fix a bug causing pnpm install to incorrectly assume the lockfile is up to date after changing a local tarball that has peers dependencies.
+  Platinum Sponsors
+  ────────────
+  Bit
+  ────────────
+  Gold Sponsors
+  ─────────────────────────┬─────────────────────────┬───────────────────────
+  Discord                  │CodeRabbit               │Workleap
+  ─────────────────────────┼─────────────────────────┴───────────────────────
+  Stackblitz               │Vite
+  ─────────────────────────┴─────────────────────────
+ReleaseNotesUrl: https://github.com/pnpm/pnpm/releases/tag/v10.14.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://pnpm.io/motivation
+- DocumentLabel: FAQ
+  DocumentUrl: https://pnpm.io/faq
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

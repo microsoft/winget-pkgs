@@ -1,0 +1,96 @@
+# Created with komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 0.97.0
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  ⚒️ Breaking Changes
+  The --queue-strict-include flag is deprecated
+  Terragrunt no longer automatically includes dependencies of included units. As such the --queue-strict-include flag is no longer useful in the Terragrunt CLI.
+  The flag has been deprecated, and no longer does anything. This flag will not be removed before 2.0.
+  Run report no longer reports --queue-exclude-dir as a reason for exclusion
+  Run reports no longer report on units excluded from runs as a consequence of the --queue-exclude-dir flag.
+  The --units-that-include flag is deprecated
+  The --units-that-include flag is now an alias for the reading= attribute filter, just like the --queue-include-units-reading flag.
+  Given that the two flags no longer differ in functionality, and that the functionality of the --units-that-include is no longer strictly including units that are included, the flag has been deprecated.
+  The double-star strict control is complete
+  The globbing behavior of Terragrunt in CLI flags has been updated to match all paths when ending with a trailing ** .
+  🧪 Experiments Completed
+  The filter-flag experiment is completed
+  The filter-flag experiment is completed, and the --filter flag is now generally available.
+  You can use filter expressions as a single unified API for controlling the Run Queue, replacing the need to use the following CLI flags:
+  ──────────────────────────────────────┬──────────────────────────────
+  Legacy —queue flag                    │Equivalent —filter expression
+  ──────────────────────────────────────┼──────────────────────────────
+  —-queue-include-dir=path              │—-filter='{./path}'
+  ──────────────────────────────────────┼──────────────────────────────
+  —-queue-exclude-dir=path              │—-filter='!{./path}'
+  ──────────────────────────────────────┼──────────────────────────────
+  --queue-include-units-reading=root.hcl│--filter='reading=root.hcl'
+  ──────────────────────────────────────┼──────────────────────────────
+  --units-that-include=root.hcl         │--filter='reading=root.hcl'
+  ──────────────────────────────────────┼──────────────────────────────
+  --queue-include-external-dependencies │--filter='{./**}...'
+  ──────────────────────────────────────┼──────────────────────────────
+  --queue-excludes-file=excludes.txt    │--filters-file='filters.txt' *
+  ──────────────────────────────────────┼──────────────────────────────
+  --graph                               │--filter='...{.}'
+  ──────────────────────────────────────┴──────────────────────────────
+  - Note that the file used for the --queue-excludes-file does not directly translate to the kind of file you can use for a --filters-file. To learn more, see the documentation.
+  The table above also explains the aliasing that has been done internally to replace queue flags with their filter equivalents. The aliasing for these queue flags is present purely for backwards compatibility purposes, but they are not going to emit deprecation warnings, and will not be removed before the Terragrunt 1.0 release.
+  You are heavily encouraged to adopt the new --filter flag for your infrastructure targeting needs as soon as feasible in your workflows. It will offer a significantly more flexible and powerful experience.
+  To learn more see the Filters feature documentation.
+  🐛 Bug Fixes
+  The get_original_terragrunt_dir() function is now supported in terragrunt.stack.hcl files
+  When authoring explicit stacks, using the get_original_terragrunt_dir() HCL function in terragrunt.stack.hcl files will now return the directory where the terragrunt.stack.hcl file lives, even when the configuration is read from another stack/unit using read_terragrunt_config().
+  Using Git-based expressions with the --out-dir flag is fixed
+  When using Git-based expressions using the --filter flag, the relative path of units relative to their respective Git worktree roots is used for determining where the plan file will be saved, rather than a path in the relevant Git worktree.
+  Color for output fetching is suppressed more reliably
+  Terragrunt will use tofu output -json / terraform output -json more reliably when users expect a lack of colors (like when colors are suppressed for Terragrunt).
+  What's Changed
+  - fix: Using testing/synctest to make TestWriteUnitLevelSummary more reliable by @yhakbar in #5253
+  - fix: Fixing report run duplication error by @yhakbar in #5252
+  - fix: improved log error messages by @denis256 in #5256
+  - fix: get_original_terragrunt_dir during stack generate by @philipmckenna-symphony in #5176
+  - fix: saving of plan in git based filtering by @denis256 in #5288
+  - fix: add no color for dependency fetching by @denis256 in #5285
+  - fix: added git worktree cleanup on errors by @denis256 in #5254
+  - docs: Adding ambassador by @karlcarstensen in #5261
+  - docs: Adding ambassador by @karlcarstensen in #5259
+  - docs: Adding announcement banner by @karlcarstensen in #5260
+  - docs: Documenting backport of queue flags into filter flags by @yhakbar in #5263
+  - docs: Adding ambassador by @karlcarstensen in #5266
+  - chore: Cleaning up test symlinks resolution by @yhakbar in #5251
+  - chore: Dropping ListContains and ListEquals and using standard library instead by @yhakbar in #5221
+  - chore: Adding debug log for assume already applied by @yhakbar in #5198
+  - chore: Removing latest Terraform OSS workflows by @yhakbar in #5262
+  - chore: Backporting queue flags into filter flags by @yhakbar in #5241
+  - chore: on demand no proxy build execution by @denis256 in #5277
+  - chore: opentelemetry and aws dependencies update by @denis256 in #5279
+  New Contributors
+  - @philipmckenna-symphony made their first contribution in #5176
+  Full Changelog: https://github.com/gruntwork-io/terragrunt/compare/v0.96.1..v.0.97.0
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.97.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

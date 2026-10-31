@@ -1,0 +1,79 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.50.0
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Improved
+  - Experimental Azure DevOps support: wt switch pr:<N> resolves Azure DevOps pull requests via the az CLI — auto-detected from dev.azure.com / ssh.dev.azure.com / *.visualstudio.com remotes, or pinned with [forge] platform = "azure-devops". wt list --full surfaces Azure DevOps PR and pipeline CI status, and wt config show --full reports az install/auth state when Azure DevOps is the detected platform. Requires the azure-devops CLI extension. GitHub still wins in mixed-remote setups. (#1256, thanks @mikeyroush; thanks @dlecan for #1144)
+  - Experimental Gitea support extended to wt list and wt config show: wt switch pr:<N> already resolved Gitea PRs via the tea CLI; wt list --full and wt config show --full now recognize Gitea repos too — wt list --full shows a CI indicator (open-PR conflicts plus the PR head commit's combined status, falling back to the branch's latest status when no PR exists) linked to the PR, and wt config show --full reports tea install/auth state. (#1320, thanks @SjB; #2702, #2707, #2732)
+  - Hooks resolve project config from the worktree they act on — no primary-worktree fallback: Previously pre-remove read the primary worktree's .config/wt.toml rather than the worktree being removed, and post-remove / post-switch read the post-removal working directory's config, so a pre-remove (or post-remove) you added on a feature branch never fired when removing that branch's worktree. Now every hook reads the .config/wt.toml of the worktree it acts on — pre-remove / post-remove read the removed worktree's config (snapshotted before removal), post-switch reads the destination worktree's — and the approval prompt collects hook commands from that same worktree, so a branch-local pre-remove always appears in the prompt before it runs. A worktree with no .config/wt.toml runs no project hooks; a present-but-malformed config aborts the operation with the parse error instead of silently using the primary's. (Breaking: removing a worktree no longer runs the primary worktree's pre-remove / post-remove hooks unless they're also defined in the removed worktree's .config/wt.toml. For an existing worktree that predates a hook added on the default branch, copy the hook into that worktree's .config/wt.toml to restore the previous behavior; new worktrees branched off the default branch pick it up as before.) (#2690, #2703, #2714, #2717, #2701, #2708, #2727, #2736, #2748)
+  - wt config alias show with no name lists every alias: wt config alias show <name> shows one alias's full definition; with no name it now prints that same ○ Alias <name> (<source>): block for every configured alias, in name order. wt --help (and wt step --help) drop the inline aliases table for a compact names-only list that points here. (#2684, #2691, #2688)
+  - wt switch picker validates hook templates before creating the worktree: Creating a branch from the picker (Alt-C) now runs the same template pre-flight that wt switch --create does, so a project config with a broken hook template (syntax error, undefined variable) fails before git worktree add instead of after — no orphaned worktree left blocking a re-run with the same name. (#2712)
+  - wt list --branches skips a serial graph walk on warm runs: Branch ahead/behind counts for the main↕ and Remote⇅ columns are now cached SHA-keyed, so a warm wt list --branches no longer pays the single-threaded git for-each-ref --format='%(ahead-behind:…)' walk that ran before the parallel task pool opened — on a large repo (rust-lang/rust) that walk was ~40% of wt list's wall time. The push-remote URL is cached and the local-branch scan is shared with capture_refs, removing two more duplicate for-each-ref invocations per render. (#2704, #2718, #2673)
+  - Claude Code plugin ships the wt-switch-create skill: Installing the worktrunk Claude Code plugin now provides /wt-switch-create <branch> [task], which calls EnterWorktree to create (or re-enter — it's idempotent) a worktree in worktrunk's sibling layout (<repo>.<branch>/) and re-roots the current Claude session into it; anything after the branch name runs as the task there. (#2737, thanks @onetom for #2631)
+  - Paths in warning messages are bold: Config-file-not-found, the legacy-fish-config removal warning, completions-not-configured, and outdated-shell-extension warnings now bold the path they mention, matching the convention used elsewhere. (#2677)
+  Fixed
+  - Ctrl-C against a concurrent alias reports exit code 130, not 143: wt step <concurrent-alias> interrupted by Ctrl-C could exit with 143 (SIGTERM) instead of 130 (SIGINT) when, under load, wt's SIGINT→SIGTERM escalation timer (200ms) fired before the child finished dying from the SIGINT. wt now records the user's originating signal and reports that as its exit code. (#2724)
+  - Branch names starting with - no longer confuse git: A branch literally named -foo (creatable via git update-ref refs/heads/-foo HEAD) could be misparsed as an option by the git subcommands wt invokes — most visibly the hook-approval gate wt switch runs before creating a worktree at such a ref, which reads .config/wt.toml via git show <ref>:…, and wt step relocate's git worktree add. User-controllable refs now pass --end-of-options (and --verify for rev-parse) so git treats them as data. (#2711, #2725, #2738)
+  - wt switch picker's alt-r removal no longer runs unapproved project hooks: The picker's removal path was a parallel reimplementation of wt remove's teardown that ran pre-remove / post-remove / post-switch hooks unconditionally, bypassing the approval gate every other removal path goes through. The picker now routes through the shared handle_remove_output (with a silent flag for the in-skim case) and consults the existing approval state read-only — unapproved hooks are skipped, approved ones run. Removing the current worktree via alt-r also registers post-switch hooks against the home worktree now, matching wt remove / wt merge / wt step prune. (#2746)
+  - Nushell and PowerShell shell-extension label: wt config show and the --dry-run uninstall preview labeled Nushell and PowerShell inconsistently; they now read shell extension & completions like Bash and Zsh — Fish is the only supported shell whose completions live in a separate file. (#2699, #2705)
+  - Bash hook syntax highlighting no longer corrupts paths: format_bash_with_gutter swapped Jinja {{ }} delimiters for internal placeholders that could collide with text in the command (e.g. a Windows tempdir path), splitting it mid-stream in --help and snapshot output. The placeholders are now chosen to be collision-free. (#2722)
+  Internal
+  - Foreground signal forwarding (Ctrl-C handling for hook pipelines, wt step for-each, concurrent alias groups) is unified into one module. (#2734)
+  - CiPlatform moved to the library crate and is cached on RepoCache; the "override" framing around [forge] platform is dropped. The "invalid CI platform in config" warning is also deduplicated to once per wt list run instead of firing per branch. (#2692, #2686)
+  - The remove-hook approval helper is shared across wt remove / wt merge / wt step prune, and the for-each-ref scan primitive is shared with the remote-inventory cache populated from the snapshot path. (#2709, #2735)
+  - CI fails the build if tests leave files behind in the working tree; LLVM_PROFILE_FILE defaults to a temp-dir path when not inherited, keeping coverage runs from dropping *.profraw at the repo root. (#2719, #2730, #2713)
+  - codename_index keeps its hash in u64 before narrowing, so the codename filter picks the same word on 32-bit and 64-bit builds (no-op on 64-bit). (#2667)
+  Install worktrunk 0.50.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/max-sixty/worktrunk/releases/download/v0.50.0/worktrunk-installer.sh | sh && wt config shell install
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/max-sixty/worktrunk/releases/download/v0.50.0/worktrunk-installer.ps1 | iex"; git-wt config shell install
+  Install prebuilt binaries via Homebrew
+  brew install worktrunk && wt config shell install
+  Download worktrunk 0.50.0
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+  Install via Cargo
+  cargo install worktrunk && wt config shell install
+  Install via Winget (Windows)
+  winget install max-sixty.worktrunk && git-wt config shell install
+  Install via AUR (Arch Linux)
+  paru worktrunk-bin && wt config shell install
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.50.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,150 @@
+# Created with YamlCreate.ps1 v2.4.3 $debug=AUSU.CRLF.7-4-6.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: AviSynth.AviSynthPlus
+PackageVersion: 3.7.1.3593
+PackageLocale: en-US
+Publisher: The Public
+PublisherUrl: https://avs-plus.net/
+PublisherSupportUrl: https://github.com/AviSynth/AviSynthPlus/issues
+# PrivacyUrl:
+Author: qyot27
+PackageName: AviSynth+
+PackageUrl: https://avs-plus.net/
+License: GPL-2.0
+LicenseUrl: https://github.com/AviSynth/AviSynthPlus/blob/master/distrib/gpl.txt
+Copyright: |-
+  © 2000-2015 Ben Rudiak-Gould, et al.
+  http://avisynth.nl
+  © 2013-2022 AviSynth+ Project
+# CopyrightUrl:
+ShortDescription: An improved version of the AviSynth frameserver, with improved features and developer friendliness.
+Description: 'AviSynth+ is a fork of the well-known frameserver, but with community contributions that avoided mainline inclusion until now. In the hope of modernizing AviSynth to meet present day needs and expectations, the project encourages everybody to help reach our goals: add long-sought features, energize the community, and improve developer and user friendliness. AviSynth+ is fully compatible with plugins and scripts written for AviSynth.'
+# Moniker:
+Tags:
+- avisynth
+- avs
+- avs+
+- frameserver
+ReleaseNotes: |-
+  Additions:
+  - Linux: Show more information when dlopen fails
+  - Expr: allow auto scaling effect on pixels obtained from relative addressing
+  - New array manipulators: ArrayDel, ArrayAdd, ArrayIns, ArraySet with accepting multi dimensional indexes
+  - ExtractY/U/V/R/G/B/A, PlaneToY: delete _ChromaLocation property. Set _ColorRange property to "full" if source is Alpha plane
+  - Add new AEP (Avisynth Environtment Property) constants to directly query Avisynth interface main and bugfix version and system endianness:
+  - AEP_HOST_SYSTEM_ENDIANNESS, AEP_INTERFACE_VERSION, AEP_INTERFACE_BUGFIX (c++)
+  - AVS_AEP_HOST_SYSTEM_ENDIANNESS, AVS_AEP_INTERFACE_VERSION, AVS_AEP_INTERFACE_BUGFIX (c)
+  - Interface: introduce AVISYNTHPLUS_INTERFACE_BUGFIX_VERSION.
+  - New interface functions env->MakePropertyWritable/VideoFrame::IsPropertyWritable.
+  - Expr: allow 'f32' as internal autoscale target (was: i8, i10, i12, i14, i16 were accepted, only integers)
+  - Expr: LUT mode! 'lut'=1 or 2 for 1D (lut_x) and 2D (lux_xy) support
+  - xPlaneMin/Max/Median/MinMaxDifference to accept old packed formats (RGB24/32/48/64 and YUY2) by autoconverting them to Planar RGB or YV16
+  - New runtime function: PlaneMinMaxStats returns an array and/or set global variables.
+  - Language syntax: accept arrays in the place of "val" script function parameter type regardless of being named or unnamed.
+  - Histogram "Levels": more precise drawing when bit depth is different from histogram's resolution bit depth, plus using full/limited flag.
+  - Expr: no more banker's rounding when converting back float result to integer pixels. Using the usual truncate(x+0.5) rounding method
+  - ColorYUV: More consistent and accurate output across different color spaces, match with ConvertBits fulls-fulld conversions
+  - ColorYUV: set _ColorRange frame property
+  - ColorYUV: when no hint is given by parameter "levels" then it can use _ColorRange (limited/full) frame property for establishing source range for gamma
+  - ColorYUV "showyuv_fullrange"=true: fix shown U and V ranges. E.g. for bits=8: 128 +/- 127 (range 1..255 is shown) instead of 0..255
+  - propShow: display _Matrix, _ColorRange and _ChromaLocation constants with friendly names
+  - Expr: new function "sgn". Returns -1 when x is negative; 0 if zero; 1 when x is positive
+  - Expr: add "neg": negates stack top: a = -a
+  - ConvertBits: Support YUY2 (by autoconverting to and from YV16), support YV411
+  - ConvertBits: "bits" parameter is not compulsory, since bit depth can stay as it was before. Call like ConvertBits(fulld=true)
+  - ConvertBits: much nicer output for low bit depth targets such as dither_bits 1 to 7.
+  - ConvertBits: allow dither down from 8 bit sources by giving a lower dither_bits value
+  - ConvertBits: dither=1 (Floyd-S) to support dither_bits = 1 to 16 (similar to ordered dither)
+  - ConvertBits: dither=0 (ordered) to allow odd dither_bits values. Any dither_bits=1 to 16 (was: 2,4,6,8,..)
+  - ConvertBits: dither=0 (ordered) allow larger than 8 bit difference when dither_bits is less than 8.
+  - ConvertBits: Correct conversion of full-range chroma at 8-16 bits. Like 128+/-112 -> 128+/-127 in 8 bits
+  - ConvertBits: allow dither from 32 bits to 8-16 bits
+  - ConvertBits: allow different fulls fulld when converting between integer bit depths (was: they must have been the same)
+  - ConvertBits: allow 32 bit to 32 bit conversion
+  - frame property support: _ChromaLocation in various filters (e.g. ConvertToYUV422)
+  - Support additional chroma locations "top", "bottom_left", "bottom"
+  - New syntax for "matrix" parameters (e.g. in ConvertToYUV444 old:"rec601" new "170m:l") which separate matrix and full/limited marker.
+  - Old syntax is still valid but does not support all new matrix values.
+  - frame propery support: _Matrix and _ColorRange in various filters. New "matrix" string constants
+  - RGB<->YUV (YUY2) conversions: frame property support _Matrix and _ColorRange (_Primaries and _Transfer is not used at all yet)
+  - ConvertBits: use input frame property _ColorRange to detect full/limited range of input clip
+  - ColorBars, ColorBarsHD, BlankClip: set frame properties _ColorRange and _Matrix
+  - New function: propCopy to copy or merge frame properties from one clip to another.
+  - xxxPlaneMin xxxPlaneMax, xxxPlaneMinMaxDifference for 32 bit float formats:
+  - when threshold is 0 then return real values instead of 0..1 (chroma -0.5..0.5) clamped histogram-based result
+  - Allow propGetXXX property getter functions called as normal functions, outside runtime. Frame number offset can be used.
+  - YUY2 RGB conversions now allow matrix "PC.2020" and "Rec2020"
+  - 4:2:2 conversions: allow ChromaInPlacement and ChromaOutPlacement:
+  - Valid values: left/mpeg2, center/mpeg1/jpeg
+  - 4:2:0 conversions: new ChromaInPlacement and ChromaOutPlacement values:
+  - top_left, left (alias to mpeg2), center (alias to mpeg1), jpeg (alias to mpeg1) (see http://avisynth.nl/index.php/Convert)
+  - Expr: atan2 (SIMD acceleration as well)
+  - Expr: sin and cos SIMD acceleration (SSE2 and AVX2) port from VapourSynth (Akarin et al.)
+  - Expr: x.framePropName syntax for injecting actual frame property values into expression
+  - Script functions to supports arrays with _nz type suffix. (one or more)
+  - Expr: arbitrary variable names (instead of single letters A..Z), up to 128 different one.
+  - Expr: add 'round', 'floor', 'ceil', 'trunc' operators (nearest integer, round down, round up, round to zero)
+  - Acceleration requires at least SSE4.1 capable processor or else the whole expression is running in C mode.
+  - Recognize \' and \b and \v in escaped (e"somethg") string literals (see http://avisynth.nl/index.php/The_full_AviSynth_grammar#Literals)
+  - Expr: allow TAB, CR and LF characters as whitespace in expression strings
+  - Clip types for propSet, propGet, add propSetClip, propGetClip
+  - Clip content support for propGetAsArray, propSetArray and propGetAll
+  - RGBAdjust: analyse=true 32 bit float support
+
+  Build environment, Interface:
+  - Added stubs for compiling on RISC-V and SPARC
+  - Visual Studio 2022: Add /fp:contract to compilation parameters (addition to /fp:precise)
+  - Check Visual Studio 2022, add build examples to documentation. Recognized: it has still an option to use v141_xp toolkit
+  - CMake build environment: older GCC can be used which knows only -std=c++-1z instead of c++17
+  - AviSynth programming interface V8.1 / V9:
+  - Add 'MakePropertyWritable' to the IScriptEnvironment (CPP interface), avs_make_property_writable (C interface)
+  - Add 'VideoFrame::IsPropertyWritable' (CPP interface), avs_is_property_writable (C interface)
+  - Info on Windows XP compatibility (must revert to an older Visual C++ Redistributable)
+  - CMake/source: Intel C++ Compiler 2021 and Intel C++ Compiler 19.2 support
+  - experimental! Fix CUDA plugin support on specific builds, add CMake support for the option.
+  - Fixes for building the core as a static library
+
+  Fixes:
+  - Fix: "Text" filter would crash when y coord is odd and format has vertical subsampling
+  - Fix: MinMax runtime filter family: check plane existance (e.g. error when requesting RPlaneMinMaxDifference on YV12)
+  - Fix: prevent x64 debug AviSynth builds from crashing in VirtualDub2 (opened through CAVIStreamSynth)
+  - Expr: fix conversion factor (+correct chroma scaling) when integer-to-integer full-scale automatic range scaling was required
+  - ColorYUV: fix 32 bit float output
+  - ColorYUV: fix display when showyuv=true and bits=32
+  - ConvertBits: "dither" parameter: type changed to integer. Why was it float? :)
+  - ConvertBits: Fix: fulls=true -> fulld=true 16->8 bit missing rounding
+  - Fix: Planar RGB 32 bit -> YUV matrix="PC.709"/"PC.601"/"PC.2020" resulted in greyscale image
+  - SelectRangeEvery: experimental fix on getting audio part (TomArrow; #232)
+  - Fix: Overlay "blend" 10+ bit clips and "opacity"<1 would leave rightmost non-mod8 (10-16 bit format) or non-mod4 (32 bit format) pixels unprocessed.
+  - Fix: Overlay "blend" with exactly 16 bit clips and "opacity"<1 would treat large mask values as zero (when proc>=SSE4.1)
+  - Parser: proper error message when a script array is passed to a non-array named function argument
+  - (e.g. foo(sigma=[1.1,1.1]) to [foo]f parameter signature)
+  - Fix: Expr: wrong constant folding optimization when ternary operator and Store-Only (like M^) operator is used together.
+  - ColorBars: fixed studio RGB values for -I and +Q for rgb pixel types
+  - ColorBarsHD: use BT.709-2 for +I (Pattern 2), not BT.601.
+  - Also fixed Pattern 1 Green.Y to conform to SMPTE RP 219-1:2014 (133, not 134).
+  - Overlay mode "multiply": proper rounding in internal calculations
+  - Fix: ConvertAudio integer 32-to-8 bits C code garbage (regression in 3.7)
+  - Fix: ConvertAudio: float to 32 bit integer conversion max value glitch (regression in 3.7)
+  - Fix: Crash in ColorBars very first frame when followed by ResampleAudio
+  - Fix: frame property access from C interface
+  - Fix: StackVertical and packed RGB formats: get audio and parity from the first and not the last clip
+
+  Optimizations:
+  - Quicker ClearProperties and CopyProperties filters (by using MakePropertyWritable instead of MakeWritable).
+  - ConvertBits: AVX2 support
+  - ConvertBits: Special case for: 8->16 bit fulls=true, fulld=true
+  - Expr: consume less bytes on stack. 48x Expr call in sequence caused stack overflow
+  - xxxPlaneMin xxxPlaneMax, xxxPlaneMinMaxDifference for threshold 0 became a bit quicker for 8-16 bit formats (~10% on i7-7700)
+  - Speedup: Overlay mode "multiply": overlay clip is not converted to 4:4:4 internally when 420 or 422 subsampled format
+  - (since only Y is used from that clip)
+  - Speedup: Overlay mode "multiply": SSE4.1 and AVX2 code (was: C only)
+  - SSE4.1: ~1.2-2.5X speed, AVX2: ~2-3.5X speed (i7700 x64 single thread, depending on opacity full/not, mask clip yes/no)
+  - ConvertAudio: Add direct Float from/to 8/16 conversions (C,SSE2,AVX2)
+ReleaseNotesUrl: https://github.com/AviSynth/AviSynthPlus/releases/tag/v3.7.1
+# PurchaseUrl:
+# InstallationNotes:
+# Documentations:
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

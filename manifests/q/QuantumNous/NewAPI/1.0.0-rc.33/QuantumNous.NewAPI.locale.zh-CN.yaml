@@ -1,0 +1,73 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: QuantumNous.NewAPI
+PackageVersion: 1.0.0-rc.33
+PackageLocale: zh-CN
+Publisher: Quantum Nous
+PublisherUrl: https://www.newapi.ai/
+PublisherSupportUrl: https://www.newapi.ai/support/
+Author: 锟腾科技（杭州）有限公司
+PackageName: New API
+PackageUrl: https://www.newapi.ai/
+License: AGPL-3.0
+LicenseUrl: https://github.com/QuantumNous/new-api/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Quantum Nous. All Rights Reserved.
+ShortDescription: 新一代大模型网关与 AI 资产管理系统
+Description: New API 是一个新一代大模型网关与 AI 资产管理系统，基于 One API 进行二次开发。该项目旨在提供一个统一的接口来管理和使用各种 AI 模型服务，包括但不限于 OpenAI、Anthropic、Gemini和 Midjourney 等。
+Tags:
+- anthropic-api
+- openai-api
+- openai-response
+- 人工智能
+- 大语言模型
+- 聊天机器人
+ReleaseNotes: |-
+  Warning
+  Experimental Plugin System / 实验性插件系统
+  自 v1.0.0-rc.27 起引入的实验性插件系统仍处于测试阶段，并涉及较大的架构调整。如遇问题，请及时反馈。
+  从 v1.0.0-rc.26 或更早版本升级的用户，必须重新配置所有视频模型价格；已完成该配置的用户无需重复操作。本版本仍不推荐用于生产环境。
+  The experimental plugin system introduced in v1.0.0-rc.27 remains under testing and includes major architectural changes. Please report any issues promptly.
+  Users upgrading from v1.0.0-rc.26 or earlier must reconfigure all video model prices. Users who have already completed this step do not need to repeat it. This release is still not recommended for production use.
+  Important
+  OpenRouter Compatibility / OpenRouter 兼容性说明
+  OpenRouter 渠道不再将任意以 -thinking 结尾的模型名自动解释为思考模式别名，以避免错误改写 kimi-k2-thinking 等真实模型 ID。
+  依赖旧行为的用户应改用 some-model@thinking:on，或通过渠道模型映射保留原有公开名称：{"some-model-thinking":"some-model@thinking:on"}。符合模型家族识别规则的 Claude 与 Gemini 旧式思考后缀仍受支持。
+  OpenRouter channels no longer interpret arbitrary model names ending in -thinking as reasoning aliases, preventing real model IDs such as kimi-k2-thinking from being rewritten.
+  If you relied on the old behavior, use some-model@thinking:on, or preserve the old public name with channel model mapping: {"some-model-thinking":"some-model@thinking:on"}. Recognized Claude and Gemini family thinking aliases remain supported.
+  New Features
+  - Added gpt-6-astra to the OpenAI model list with built-in expression pricing for standard and long-context requests, including input, output, cache-read, and cache-write usage. Existing administrator pricing overrides take precedence.
+  - Added explicit trailing @key:value model modifiers for non-pass-through relay requests:
+    - @thinking:on, @thinking:off, @thinking:adaptive, or @thinking:<budget>
+    - @effort:none|minimal|low|medium|high|xhigh|max
+    - @temperature:<number> and @topp:<number>
+  - Model modifiers override corresponding request-body fields and remain effective across channel model mapping. Modifiers on the mapped model take precedence over those on the requested model; repeated keys use the rightmost value.
+  - Added administrator-visible conversion diagnostics for modifier conflicts, duplicates, and provider-specific adjustments.
+  - Added re:-prefixed Go regular expressions to Models that skip thinking suffix processing, allowing real model names containing @key:value to bypass modifier parsing and validation. Unknown modifier keys and invalid values otherwise return HTTP 400.
+  Billing and Routing
+  - Added canonical billing names such as base@effort:high@thinking:on and base@thinking:on, with fallback to the base model when no matching variant price is configured.
+  - Equivalent modifier variants share canonical pricing names. Numeric thinking-budget values, temperature, and topp do not create separate canonical pricing variants.
+  - Updated pricing settings and pricing synchronization to expose the effective built-in billing defaults used at runtime.
+  - Improved channel selection, model mapping, and token model-limit matching for models with modifiers or supported legacy aliases.
+  - Preserved existing legacy alias pricing and Gemini thinking-budget wildcard entries.
+  Fixes and Improvements
+  - Fixed implicit reasoning-effort remapping: max and xhigh now remain distinct through OpenAI Chat and Responses conversion paths.
+  - Preserved native reasoning controls when no model modifier or protocol conversion requires adaptation, avoiding unnecessary normalization or rejection of provider-native values.
+  - Restricted generic legacy suffix parsing to recognized GPT/o-series, Claude, and Gemini model families, protecting real model names such as qwen-max and kimi-k2-thinking.
+  - Applied thinking-suffix exemptions consistently across DeepSeek, Volcengine, and xAI adaptors.
+  - Improved Claude reasoning conversion by adapting unsupported combinations where possible and recording diagnostic warnings.
+  - In global or channel-level pass-through mode, model modifiers are forwarded unchanged without local parsing or validation.
+  - Improved HTTP 503 messages for models claimed by task plugins: errors now identify the claiming plugin and explain when it has no enabled channel in the selected group. Plugin model ownership remains unchanged (#7185).
+  - Fixed release builds selecting an incorrect version by resolving the version from the triggering Git tag.
+
+  Full Changelog: v1.0.0-rc.31...v1.0.0-rc.33
+ReleaseNotesUrl: https://github.com/QuantumNous/new-api/releases/tag/v1.0.0-rc.33
+Documentations:
+- DocumentLabel: 使用指南
+  DocumentUrl: https://www.newapi.ai/guide/
+- DocumentLabel: 维基百科
+  DocumentUrl: https://www.newapi.ai/wiki/
+- DocumentLabel: 接口文档
+  DocumentUrl: https://www.newapi.ai/api/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

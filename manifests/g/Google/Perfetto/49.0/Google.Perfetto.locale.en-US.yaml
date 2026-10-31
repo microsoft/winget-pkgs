@@ -1,0 +1,82 @@
+# Created with komac v2.10.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Google.Perfetto
+PackageVersion: '49.0'
+PackageLocale: en-US
+Publisher: Google
+PublisherUrl: https://github.com/google
+PublisherSupportUrl: https://github.com/google/perfetto/issues
+PackageName: Perfetto
+PackageUrl: https://github.com/google/perfetto
+License: Apache-2.0
+LicenseUrl: https://github.com/google/perfetto/blob/HEAD/LICENSE
+ShortDescription: Performance instrumentation and tracing for Android, Linux and Chrome.
+ReleaseNotes: |-
+  v49.0 - 2025-01-06:
+    Tracing service and probes:
+      * Add `--clone-by-name` to the perfetto command line. This allows cloning a
+        tracing session by its unique_session_name.
+      * Fixed a bug that would delay the trace start acknowledgement, resulting
+        in a 30s when using --background-wait, if an Android producer process is
+        frozen, as it would be considered unresponsive.
+      * Added basic support for kprobes with ftrace.
+    SQL Standard library:
+      * Removed the `type` column from all non-track tables. Please see
+        https://perfetto.dev/docs/analysis/perfetto-sql-backcompat#change-in-semantic-of-code-type-code-column-on-track-tables
+        for more information.
+      * Changed the semantic of `type` column from all track tables. Please see
+        https://perfetto.dev/docs/analysis/perfetto-sql-backcompat#removal-of-code-type-code-column-from-all-non-track-tables
+        for more information.
+      * Removed the `linux_device_track` table. Linux RPM (runtime power
+        management) tracks formerly in this table now can be found in the `track`
+        table with `type` `linux_rpm`.
+      * Removed the `energy_counter_track` table. Android energy estimate
+        breakdown tracks formerly in this table now can be found in the `track`
+        table with `type` `android_energy_estimation_breakdown`.
+      * Removed the `energy_per_uid_counter_track` table. Android energy estimate
+        breakdown tracks formerly in this table now can be found in the `track`
+        table with `type` `android_energy_estimation_breakdown_per_uid`.
+      * Moved the `gpu_work_period_track` table into the `android.gpu.work_period`
+        standard library module and renamed it to `android_gpu_work_period_track`.
+      * Removed the `irq_counter_track` table. Irq counter tracks formerly in this
+        table now can be found in the `track` table with `type`
+        `irq_counter`.
+      * Removed the `softirq_counter_track` table. Softirq counter tracks formerly
+        in this table now can be found in the `track` table with `type`
+        `softirq_counter`.
+      * Removed the `uid_counter_track` table. It was redundant as no data was
+        inserted directly into it.
+      * Removed the `uid_track` table. It was redundant as no data was
+        inserted directly into it.
+      * Removed `common` package. It has been deprecated since `v42` and most
+        functionality has been moved into other packages. Notably, the time
+        conversion functions can be found in `time.conversion` module, and
+        `thread_slice` is available with `slices.with_context`.
+      * Deprecated UINT and INT integer types in Perfetto SQL. Please use LONG in
+        Perfetto SQL schema.
+      * Deprecated FLOAT flating type in Perfetto SQL. Please use DOUBLE in
+        Perfetto SQL schema.
+      * Added TIMESTAMP, DURATION, ID and JOINID types to Perfetto SQL schema.
+        TIMESTAMP and DURATION refers to time columns in nanoseconds. ID column
+        is a primary key for the column and JOINID is referencing ID
+        column of other table.
+      * Removed the `experimental_sched_upid` table. Prefer the joining `sched`
+        and `thread` tables directly instead.
+      * Removed the experimental_counter_dur table. Prefer using the
+        `counter_leading_intervals` macro from the `counters.intervals` standard
+        library module.
+    UI:
+      * Introduced `Open table:` command which would open any Perfetto Standard
+        Library table in a new tab.
+      * Various improvements to timeline rendering performance.
+      * Added workspace switcher and menu to move tracks between workspaces.
+      * Completely overhauled recording page.
+      * Improved area selection UX.
+      * Improved fuzzy search.
+      * Hide 'Open with legacy UI' by default.
+    SDK:
+      * Added `NamedTrack`, it allows creating arbitrarily named tracks.
+ReleaseNotesUrl: https://github.com/google/perfetto/releases/tag/v49.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

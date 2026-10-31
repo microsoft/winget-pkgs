@@ -1,0 +1,42 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: hellowind777.hellogrok.CLI
+PackageVersion: 0.1.1
+PackageLocale: en-US
+Publisher: hellowind777
+PublisherUrl: https://github.com/hellowind777
+PublisherSupportUrl: https://github.com/hellowind777/hellogrok/issues
+PackageName: hellogrok-cli
+PackageUrl: https://github.com/hellowind777/hellogrok
+License: MIT
+LicenseUrl: https://github.com/hellowind777/hellogrok/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 hellowind777
+ShortDescription: Console-only CLI of hellogrok, a local proxy that makes Grok Build custom model channels work with common API formats, native Web tools, isolated authentication, and automatic configuration recovery.
+Description: 'Grok Build can use custom model endpoints, but real-world providers do not all expose the same protocol, response shape, authentication method, or Web-search behavior. hellogrok provides one local compatibility layer for those custom channels: it prepares the required Grok configuration while running, keeps each channel tied to its own endpoint and credentials, supports Grok Build native Web workflows, and restores the original configuration when stopped. This console-only build runs the same proxy from the terminal without the tray application; run `hellogrok help` for the full CLI reference (start, version, routes, restore, autostart, log, logview).'
+Tags:
+- grok
+- grok-build
+- proxy
+ReleaseNotes: |-
+  Added
+  - Explicit search model selection via [models].web_search config key and GROK_WEB_SEARCH_MODEL environment variable, with env taking precedence over config.
+  - Hosted search capability auto-detection for Grok relay channels at startup (web_search + x_search probing).
+  - Chat Completions search dialect auto-detection (search_parameters vs web_search_options).
+  - CC Switch takeover detection before config rewrite — start is refused when CC Switch already owns Grok Build.
+  - Single-instance enforcement for both tray and foreground modes via OS-level lock.
+  - Windows log window application icon display in title bar and taskbar.
+  - Search route resolution logging at startup, visible in hellogrok routes and the log window.
+  Changed
+  - Tray now defaults to proxy-enabled on first launch.
+  - Tray quit defers exit when a config-ownership conflict exists, preventing orphaned proxy URLs.
+  - SIGINT/SIGTERM handlers retry stop on deferred errors instead of leaving the process inconsistent.
+  - BackendSearchSet field distinguishes explicit supports_backend_search declarations from Build's false default, enabling runtime probing for unset values.
+  - Route now carries HostedSearchKnown, HostedWebSearch, HostedXSearch, and HostedChatSearchDialect for capability-aware request normalization.
+  - Tool choice normalization is now capability-aware — only confirmed hosted search declarations are injected.
+  Fixed
+  - Managed search flag now placed after channel settings in config rewrites, preventing key-ordering issues.
+  - Client search wire alias properly hidden from upstream requests.
+ReleaseNotesUrl: https://github.com/hellowind777/hellogrok/blob/HEAD/CHANGELOG.md#011-2026-08-07
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

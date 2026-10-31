@@ -1,0 +1,67 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 15.9.5
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-agent-core
+  Fixed
+  - Surfaced Anthropic stream failures whose message starts with Output blocked by conten as normal assistant error lifecycle events, so interactive clients render content-filter blocks instead of silently dropping the streaming bubble at agent_end.
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added a persistent error banner pinned above the editor when an assistant turn ends on a provider error (e.g. Anthropic's "Output blocked by content filtering policy"). The transcript Error: … line scrolls away as the conversation grows, so terminal turns that ended on a stream error could pass unnoticed; the banner stays in the fixed region above the input and is cleared when the next turn starts.
+  - Added bold, underlined, clickable [Image #N] placeholders in the draft editor and sent user-message bubbles, backed by extension-bearing blob-store sidecar files so terminal file:// links open in image viewers.
+  - Added the active model identifier (provider/id) to the system prompt's <workstation> block so the agent knows which model it is running as. Gated by the new includeModelInPrompt setting (default on); the base prompt is rebuilt on a mid-session model switch so the surfaced identifier stays current.
+  - Added OLLAMA_HOST support for implicit local Ollama discovery when OLLAMA_BASE_URL is unset, so OMP picks up the same host setting used by Ollama.
+  - Added OLLAMA_CONTEXT_LENGTH as a positive-integer context-window override for implicit local Ollama discovery, so users can correct OMP context budgeting without writing per-model overrides.
+  Changed
+  - Changed tools.discoveryMode to default to auto, which keeps discovery off for small tool sets and automatically switches to MCP-only tool discovery when more than 40 tools are registered.
+  Fixed
+  - Fixed user-message rendering to materialize image links from embedded image blocks when rebuilding chat output, so image placeholders remain clickable after replayed or restored messages
+  - Fixed queued/steering user messages carrying a pasted image rendering out of order — sometimes dropping the user bubble below the very tool output it was sent to steer. EventController.#handleMessageStart awaited async image-link materialization between the user message_start and addMessageToChat; since AgentSession.#emit dispatches TUI listeners fire-and-forget, that mid-handler yield let the next synchronously-handled events (assistant message_start, tool execution start/end) append their components first, scrambling transcript order and live-region block boundaries. The bubble is now appended synchronously, with clickable image links still materialized via the synchronous blob-store fallback.
+  - Fixed tool execution cards to finalize promptly when a turn is abandoned or completed so stale streaming previews and frozen spinner frames no longer keep transcript rows in the live region
+  - Fixed read and search TUI rendering to emit OSC 8 hyperlinks for HTTP URLs, local:// resources backed by files, and filesystem search targets, including line-specific links for search match rows.
+  - Fixed aborted streaming assistant messages staying frozen before their red "Operation aborted" label when status rows were appended underneath on ED3-risk terminals.
+  - Fixed omp / omp -c stacking a fresh welcome screen and transcript on top of the previous run's leftover terminal scrollback. The cold-launch transcript render was the only session-load path that did not pass clearTerminalHistory, so the TUI's scrollback-preserving initial paint left the prior run's welcome + conversation above the new one; the cold launch now clears native scrollback before painting, matching every in-process session switch.
+  - Fixed a long streamed assistant reply dropping its earlier lines on ED3-risk terminals (Ghostty/kitty/iTerm2) once it grew past the viewport — the head scrolled off the top and never reached scrollback, so the reply rendered as a ~viewport-tall circular buffer of only its latest lines. AssistantMessageComponent now reports itself as an append-only transcript block and TranscriptContainer surfaces the resulting commit-safe boundary, so the renderer commits the scrolled-off head to native scrollback instead of discarding it (volatile tool previews stay deferred as before).
+  Security
+  - Blocked OSC 8 hyperlink wrapping for URI targets containing terminal control bytes to avoid rendering malformed control-sequence links
+  @oh-my-pi/pi-tui
+  Changed
+  - Changed terminal resize handling so any width or height change always performs a clean reset + redraw: the renderer now unconditionally clears the viewport and native scrollback (CSI 2 J / CSI 3 J) and replays the full transcript at the new geometry, replacing the previous matrix of conditional viewport-repaint / history-rebuild / deferred-mutation branches. Multiplexer panes still repaint the visible window in place (pane scrollback cannot be erased), but a resize during active ED3-risk foreground streaming now performs the same clean rebuild rather than downgrading to a non-destructive viewport repaint: the terminal already re-wrapped its saved lines at the old width, so the rebuild must erase them (ED 3) instead of leaving the mis-wrapped history on screen. As a deliberate tradeoff this drops the prior no-overflow and confirmed-scrolled guards on resize: a reader scrolled into history snaps back to the bottom and preexisting shell scrollback above the UI is cleared.
+  Fixed
+  - Fixed ED3-risk foreground streaming dropping the scrolled-off head of an append-only live block that alone overflows the viewport (a long streamed assistant reply). The live-region pin again committed native scrollback only up to the live-region start, so once the live block grew past the viewport its earlier rows scrolled above the viewport top but were committed nowhere and repainted nowhere — they vanished, leaving the reply looking like a ~viewport-tall circular buffer. The NativeScrollbackLiveRegion seam now also reports an optional append-only getNativeScrollbackCommitSafeEnd, and the pinned commit boundary is the deeper of the sealed start and that append-only end: rows in [liveRegionStart, commitSafeEnd) above the viewport top commit to scrollback, while volatile live blocks (tool previews that collapse) omit the boundary and keep their mutable rows deferred — preserving the pending-box-above-running-box fix.
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v15.9.4...v15.9.5
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v15.9.5
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

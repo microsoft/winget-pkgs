@@ -1,0 +1,105 @@
+# Created using wingetcreate 1.12.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Mickem.NSClient
+PackageVersion: 0.24.0
+PackageLocale: en-US
+Publisher: MySolutions NORDIC
+PublisherUrl: https://nsclient.org/
+PublisherSupportUrl: https://github.com/mickem/nscp/issues
+Author: Michael Medin
+PackageName: NSClient++
+PackageUrl: https://nsclient.org/
+License: Apache-2.0 OR GPL-2.0-only
+LicenseUrl: https://github.com/mickem/nscp/blob/main/COPYING
+Copyright: Copyright (c) Michael Medin
+ShortDescription: A simple, secure and powerful monitoring agent for Windows.
+Description: |-
+  NSClient++ (a.k.a. NSCP) is a free and open-source monitoring agent originally
+  built for Nagios/Icinga and now usable with most modern monitoring systems.
+  It exposes a wide range of system, performance and event-log checks via NRPE,
+  NSCA, NRDP, REST and Prometheus-compatible endpoints, and can run external
+  scripts in PowerShell, Python, Lua, Visual Basic and many more languages.
+Moniker: nscp
+Tags:
+- nagios
+- icinga
+- naemon
+- monitoring
+- nrpe
+- nsca
+- nrdp
+- prometheus
+- agent
+- sysadmin
+ReleaseNotes: |-
+  # Host facts, NSClient++ on macOS, and new checks from Active Directory to Kubernetes
+
+  0.24.0 is a big release, and most of it is about the agent knowing more: what the host it runs on actually is, and what the services on it are doing.
+
+  The headline is **host facts** — an opt-in inventory the agent keeps about its host. The OS and hardware, network interfaces, volumes, installed software, services, scheduled tasks, Docker, MySQL, SQL Server and Hyper-V each become a fact set you turn on in the module that already checks that thing. The collected document is served over REST behind two new grants, shown on a new *Facts* page in the web UI, readable from a remote agent with `check_nsclient nsclient facts show`, and uploaded to the fleet server by an enrolled agent — as a hash on every poll, and as the document only when the server says it holds a different one. Every set is off until you enable it.
+
+  Alongside that, NSClient++ runs on **macOS** for the first time (an experimental Apple silicon package, with `CheckSystem` ported to Darwin), and there is a wave of new, experimental checks: Active Directory, Hyper-V, Kubernetes, Windows Failover Clusters, NPS and RADIUS, domain registration expiry, and eight more SQL Server checks.
+
+  The hardening pass continues. One request can no longer cost the agent without bound — command nesting, `check_multi` fan-out, regular-expression matching and log-file reads all have limits now. The shared default password is stored hashed, `nscp web install` sets up HTTPS on its own, a module can only be named by a file name, the Linux service runs sandboxed under its own group, every DLL the Windows installer ships is signed, and a failing background thread can no longer take the whole agent down. Several of these have an upgrade note worth reading — `NSCAServer` users in particular.
+
+  ## ✨ Highlights
+
+  - 🏷️ **Host facts: an opt-in inventory of the host.** `os`, `hardware`, `network.interfaces`, `storage.volumes`, `software.installed`, `services.installed`, `tasks.scheduled`, `agent`, `docker`, `mysql`, `mssql` and `hyperv.vms` sets, each produced by the module that already checks it and each off until enabled. CheckSystem also publishes three new selector tags — `os_family`, `arch` and `virtualization` — that mean the same thing on every platform. (#1559, #1583, #1589, #1594)
+  - 📤 **Facts over REST, in the web UI and on the fleet server.** `GET /api/v2/facts` and `POST /api/v2/facts/commands/refresh` sit behind the new `facts.get` and `facts.refresh` grants, which only the `full` role carries. An enrolled agent uploads its document only when the server's hash differs. (#1559, #1590)
+  - 🍎 **NSClient++ on macOS.** An experimental, self-contained Apple silicon `.pkg` and `.tar.gz`, running as a launchd daemon. `CheckSystem` carries all 21 of its Linux commands on macOS, with `check_service` checking launchd jobs. The package is not signed or notarized yet. (#1578, #1593)
+  - 🧪 **New experimental modules: `CheckActiveDirectory`, `CheckHyperV` and `CheckKubernetes`.** AD replication, the machine secure channel and a real Kerberos probe of each KDC; Hyper-V host capacity, hypervisor CPU and per-VM health; and a Kubernetes cluster's API, pods, nodes and workloads, read over HTTPS with a service-account token and no `kubectl`. (#1601, #1586, #1587)
+  - 🪟 **More Windows server checks.** Failover Cluster groups, resources, nodes and networks that follow a role across nodes; NPS authentication, accounting and counters; and eight new SQL Server checks — availability groups, blocking, counters, integrity, sessions, tempdb, transactions and waits. (#1600, #1598, #1398)
+  - 🌐 **`check_domain` and `check_radius` in CheckNet.** Domain registration expiry over RDAP with an optional WHOIS fallback, and an authenticated RADIUS probe that validates the response authenticator and reads its credentials from a protected file. (#1599, #1598)
+  - 🛡️ **Bounded work per request.** A deeply nested `check_multi` could exhaust a thread's stack, a backtracking regular expression could pin a worker for minutes, and `check_logfile` could read a whole multi-gigabyte file into memory — each reachable by any caller allowed to pass arguments. Nesting stops at 16 levels, `check_multi` at 128 commands, regex matching at 30 s per check, and `check_logfile` reads at most `max-size` (64 MiB) per call. (#1554)
+  - 🔒 **The shared default password is stored hashed**, and `NSCAServer` no longer inherits it. `NSCAClient` — how almost everyone uses NSCA — is unaffected, but a host that *receives* NSCA through `NSCAServer` with the key in `/settings/default` must move the key before upgrading. A new `nscp nsca install` sets either side. (#1567)
+  - 🔐 **Hardening across the agent.** `nscp web install` serves HTTPS and generates its certificate; a `[/modules]` entry must be a file name; settings are never migrated *to* a remote store; credential-looking keys are redacted even for unloaded modules; the Linux unit is sandboxed under `Group=nsclient`; every shipped Windows DLL is Authenticode-signed; and a worker thread that throws is contained and logged instead of ending the process. (#1553, #1577, #1582, #1584)
+  - 📦 **Releases you can verify.** After some antivirus products flagged 0.22.0 and 0.23.0 with generic detections, every shipped binary including DLLs and the MSI is now signed, dependencies are pinned, and each release ships an SBOM and GitHub build attestations. (#1581, #1582)
+
+  ## 🦠 Antivirus detections and build security
+
+  Some antivirus products have flagged earlier NSClient++ releases (0.22.0 and 0.23.0) with generic detections, such as `Trojan.Gen.MBT` and `Evo-gen`. These are heuristic or reputation-based verdicts rather than matches against known malware, and I believe they are false positives. Major engines such as Microsoft, Kaspersky, ESET and BitDefender have consistently reported the releases as clean.
+
+  0.22.0 was also the first release to ship OpenSSL as separate DLLs (`libcrypto`/`libssl`) instead of linking it into every module. Those DLLs were unsigned, which is a likely trigger for reputation-based detections; in 0.24.0 they are signed like everything else.
+
+  Scan results for 0.24.0 are clearly better, but one detection remains: `Win64:Evo-gen`, reported by several scanners. It comes from `NSCANgClient.dll`, which, unlike the other modules, drives OpenSSL directly to speak the TLS-PSK dialect NSCA-NG uses. I have reported it to AVG, whose engine is the upstream source of this detection, but I cannot say whether that will be acted on. If it is not, a follow-up release will ship without `NSCANgClient`.
+
+  To make releases easier to trust and verify, 0.24.0 includes:
+
+  - **Full code signing.** All shipped binaries, including the DLLs and the MSI, are now Authenticode-signed. Previously only the executables were. This covers modules, NSClient++ libraries and bundled third-party libraries, so an AppLocker or App Control publisher rule now covers them too. Signing credentials are only available to the release build.
+  - **Pinned dependencies.** Every third-party download the build makes is checked against a recorded digest or commit before use.
+  - **SBOM.** Each Windows release publishes a CycloneDX 1.6 software bill of materials (`NSCP-<version>-<platform>.cdx.json`, and `sbom.cdx.json` plus `SHA256SUMS` inside the zip).
+  - **Build provenance.** Every release artifact carries a GitHub attestation. You can verify that a file was built from this repository with:
+
+    ```bash
+    gh attestation verify <file> --repo mickem/nscp
+    ```
+
+  False-positive reports have been submitted to the affected vendors. If your antivirus still flags this release, please [open an issue](https://github.com/mickem/nscp/issues) with the product name, the detection name and the file's SHA-256 hash.
+
+  ## ⚠️ Upgrade notes
+
+  - 🔒 **If you run `NSCAServer` (the NSCA *listener*) and its key came from `/settings/default/password`, set it under `[/settings/NSCA/server]` before upgrading**, or with `nscp nsca install --server --password <key>`. Otherwise the module refuses to start. `NSCAClient` is unaffected.
+  - **A `check_logfile` that reads a file over 64 MiB without a bookmark now returns UNKNOWN.** Add `bookmark=auto`, `max-lines`, or raise `max-size`. A `check_multi` running more than 128 commands must be split.
+  - **`nscp web password --display` cannot show a hashed password.** Tooling that read the shared password back out of `nsclient.ini` now sees a `pbkdf2-sha256$…` string.
+  - **A `[/modules]` entry that is a path rather than a file name is refused.** Move the module into the module folder and name it.
+  - **Settings dumps show `***`** for every key whose name reads as a credential, including those of modules that are not loaded.
+  - **On Linux, external scripts inherit the service's `UMask=0027`.** A script that writes a file for another account to read should set the mode itself. If you created the service account by hand, make sure an `nsclient` group exists. If a script escalates with `sudo`, keep the package installed — the DEB no longer pulls it in.
+  - **If you alert on the agent process disappearing**, a dying worker thread no longer ends the process. Alert on the log line `Thread '<name>': terminated by an uncaught exception` instead.
+  - **A fleet renewal can no longer rotate the signing key unendorsed.** A host whose server rotated its key without signing the new one with the old must be re-enrolled.
+  - **Enabled fact sets on an enrolled host now reach the fleet server.** Nothing is sent while no set is enabled, which is the default.
+  - **Give `facts.get` to any non-admin web role that should read the inventory**; only the `full` role carries it.
+  - **If you parse the warn/crit fields of perfdata yourself**, treat an empty field as "no threshold" rather than expecting `0`.
+  - **A script that calls `core.reload(...)` from inside a check** and reads its settings straight after should read them a moment later: the reload now applies after the check returns.
+
+  [...] (truncated)
+ReleaseNotesUrl: https://github.com/mickem/nscp/releases/tag/0.24.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://nsclient.org/docs/
+- DocumentLabel: Upgrading
+  DocumentUrl: https://nsclient.org/docs/setup/upgrading/
+- DocumentLabel: Security notices
+  DocumentUrl: https://nsclient.org/docs/security/notices/
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

@@ -1,0 +1,134 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: IbrahimDursun.jjui
+PackageVersion: 0.9.8
+PackageLocale: en-US
+Publisher: Ibrahim Dursun
+PublisherUrl: https://idursun.com/
+PublisherSupportUrl: https://github.com/idursun/jjui/issues
+Author: Ibrahim Dursun
+PackageName: Jujutsu UI
+PackageUrl: https://github.com/idursun/jjui
+License: MIT
+LicenseUrl: https://github.com/idursun/jjui/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025 ibrahim dursun
+ShortDescription: Jujutsu UI (jjui) is a Text User Interface (TUI) designed for interacting with the Jujutsu version control system.
+Moniker: jjui
+Tags:
+- jj
+ReleaseNotes: |-
+  Release Summary
+  This release includes experimental Lua scripting support for custom commands, several bug fixes, and UI improvements. The streaming command handler has been reworked to remove the 100ms delay incurred on every refresh (you should feel the difference), and issues with leader keys, parser colour handling, and preview panel focus have been resolved.
+  Key Highlights
+  🚀 Major Features
+  - Lua Scripting in Custom Commands (#415): Experimental support for writing custom commands using Lua scripts.
+  Initial version includes API for revision navigation, JJ command execution, clipboard operations, revset manipulation and displaying flash messages.
+  These are the currently available functions but expect the list to grow and change with each release.
+  Available Functions (v1):
+  - revisions.current() - Get currently selected change ID
+  - revisions.checked() - Get list of checked change IDs
+  - revisions.refresh({keep_selections?, selected_revision?}) - Refresh revisions view
+  - revisions.navigate({by?, page?, target?, to?, fallback?, ensureView?, allowStream?}) - Navigate revisions
+  - revisions.start_squash({files?}) - Begin squash workflow
+  - revisions.start_rebase({source?, target?}) - Start rebase operation
+  - revisions.open_details() - Open revision details view
+  - revisions.start_inline_describe() - Open inline describe editor
+  - revset.set(value) - Set custom revset
+  - revset.reset() - Reset to default revset
+  - revset.current() - Get active revset string
+  - revset.default() - Get default revset string
+  - jj_async({...}) - Run JJ command asynchronously
+  - jj({...}) - Run JJ command synchronously (returns output, err)
+  - flash(message) - Display flash message
+  - copy_to_clipboard(text) - Copy text to clipboard
+  Here are a couple of examples:
+  - Appends | ancestors(<change id of the current revisions>, 2) to the end of revset and bumps the number with each execution
+  [custom_commands.append_to_revset]
+    key = ["+"]
+    lua = '''
+    local change_id = revisions.current()
+    if not change_id then return end
+
+    local current = revset.current()
+    local bumped = false
+    local updated = current:gsub("ancestors%(" .. change_id .. "%s*,%s*(%d+)%)", function(n)
+      bumped = true
+      return "ancestors(" .. change_id .. ", " .. (tonumber(n) + 1) .. ")"
+    end, 1)
+
+    if not bumped then
+      updated = current .. "| ancestors(" .. change_id .. ", 2)"
+    end
+
+    revset.set(updated)
+   '''
+  - Inserts a new commit after the selected one and then starts inline describe on the new revision.
+  [custom_commands.new_then_describe]
+    key = ["N"]
+    lua = '''
+    jj("new", "-A", revisions.current())
+    revisions.refresh()
+
+    local new_change_id = jj("log", "-r", "@", "-T", "change_id.shortest()", "--no-graph")
+    revisions.navigate{to=new_change_id}
+    revisions.start_inline_describe()
+    '''
+  - Copy to clipboard example
+  [custom_commands.copy_to_clipboard]
+    key = ["X"]
+    lua = '''
+    local selections = revisions.checked()
+    if #selections == 0 then
+      flash("none selected")
+    end
+    local content = table.concat(selections, ",")
+    copy_to_clipboard(content)
+    '''
+  ✨ Enhancements
+  - Key Sequences for Custom Commands (#420): Custom commands can now be triggered with multi-key sequences using key_sequence property. Also adds desc property for command descriptions. An overlay shows available sequences after pressing the first key.
+    Example:
+    [custom_commands.bookmark_list]
+      key_sequence = ["w", "b", "l"]
+      desc = "bookmarks list"
+      lua = '''
+      revset.set("bookmarks() | remote_bookmarks()")
+      '''
+  - Faster Refresh (#412): Improved streaming command handling, eliminating 100ms delay and making refreshes instant. Previously jjui would fail to launch or get stuck when jj emitted warning messages (e.g., deprecated config options like git.push-new-bookmarks).
+  - Quick Search Highlighting (#414): Case-insensitive search with visual highlighting of all matches in the revisions view
+  - Remember Unsaved Descriptions (#417): Descriptions are now preserved when you cancel, preventing accidental loss of work. Addresses the common frustration of accidentally hitting ESC and losing long commit messages with no way to recover them.
+  - Squash Operation Toggle (#405): New --use-destination-message option for squash operations
+  🐛 Bug Fixes
+  - Preview Panel Focus Issue (#390): Fixed preview panel showing full commit diff instead of selected file diff when terminal regains focus
+  - EOF Error Handling (#418): Proper error messages when revset contains no revisions instead of getting stuck
+  - Parser Color Agnostic (#413): Fixed parsing issues when users configure ChangeID/CommitID/IsDivergent with same colors.
+  - Leader Key Timing (#416): Fixed leader key processing to prevent race conditions. Leader keys were completely non-functional in versions after v0.9.3 - the options would appear in the UI but do nothing when selected.
+  🎨 UI/UX Improvements
+  - Clear selected revisions with ESC key when not in editing/overlay/focused operations (#419)
+  - Better menu spacing for git and bookmarks
+  - Reduced preview debounce time back to 50ms for snappier response (#410). The 200ms debounce made the UI feel sluggish when navigating between revisions.
+  ⚙️ Internal Improvements
+  - Introduced intent-based architecture for better separation of concerns (only implemented for revisions, flash for now)
+  - Moved flash intents to dedicated package
+  - Simplified details view rendering
+  - Better configuration organisation
+  What's Changed
+  - operation: Add use destination message to squash operation by @woutersmeenk in https://github.com/idursun/jjui/pull/405
+  - Preview panel shows whole commit diff instead of selected file's diff when terminal regains focus by @abourget in https://github.com/idursun/jjui/pull/390
+  - fix(streamer): handle warning messages by @idursun in https://github.com/idursun/jjui/pull/412
+  - parser: stringify log/evolog prefixes to be color agnostic by @baggiiiie in https://github.com/idursun/jjui/pull/413
+  - revisions: add highlight to QuickSearch, make search case insensitive by @baggiiiie in https://github.com/idursun/jjui/pull/414
+  - feat: Lua scripting in custom commands by @idursun in https://github.com/idursun/jjui/pull/415
+  - revisions: handle EOF error for revset without revisions by @baggiiiie in https://github.com/idursun/jjui/pull/418
+  - revisions: clear selected revisions on cancel by @baggiiiie in https://github.com/idursun/jjui/pull/419
+  - feat: custom commands with sequence keys by @idursun in https://github.com/idursun/jjui/pull/420
+  New Contributors
+  - @woutersmeenk made their first contribution in https://github.com/idursun/jjui/pull/405
+  - @abourget made their first contribution in https://github.com/idursun/jjui/pull/390
+  Full Changelog: https://github.com/idursun/jjui/compare/v0.9.7...v0.9.8
+ReleaseNotesUrl: https://github.com/idursun/jjui/releases/tag/v0.9.8
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/idursun/jjui/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

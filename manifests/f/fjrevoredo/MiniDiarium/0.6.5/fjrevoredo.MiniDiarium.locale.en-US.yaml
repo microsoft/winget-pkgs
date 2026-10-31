@@ -1,0 +1,61 @@
+# Created using wingetcreate 1.12.8.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: fjrevoredo.MiniDiarium
+PackageVersion: 0.6.5
+PackageLocale: en-US
+Publisher: fjrevoredo
+PublisherUrl: https://mini-diarium.com/
+PublisherSupportUrl: https://github.com/fjrevoredo/mini-diarium/issues
+PrivacyUrl: https://github.com/fjrevoredo/mini-diarium/blob/master/docs/PRIVACY.md
+Author: Francisco J. Revoredo
+PackageName: Mini Diarium
+PackageUrl: https://github.com/fjrevoredo/mini-diarium
+License: MIT
+LicenseUrl: https://github.com/fjrevoredo/mini-diarium/blob/master/LICENSE
+Copyright: Copyright (c) 2026 Francisco J. Revoredo
+ShortDescription: Encrypted, local-first journaling app
+Description: A local-first journal with serious encryption. Free, open source, and never touches the internet.
+Moniker: mini-diarium
+Tags:
+- privacy
+- journaling
+- journal
+- diary
+- foss
+- open-source
+- rust
+ReleaseNotes: |-
+  What's Changed
+
+  This release makes the minimum OS requirements visible to users before download and fixes broken
+  title-bar buttons on Linux with Wayland.
+
+  Added
+  - Published minimum supported OS versions: the minimum version for each platform (Windows 10 1809+,
+    macOS 10.15 Catalina+, Linux with glibc 2.31+ / WebKitGTK 4.1) was only recorded in
+    tauri.conf.json and appeared nowhere a user could find it. It is now stated in the README download
+    section, a new "System requirements" section in docs/INSTALLATION.md (docs/INSTALLATION.md), the
+    Getting Started documentation page, and on each platform card in the website download section.
+    Requested in issue #241 (https://github.com/fjrevoredo/mini-diarium/issues/241) by a user who
+    could not tell whether the app would run on their Mac before downloading it.
+
+  Fixed
+  - Title-bar buttons did nothing on Linux/Wayland (issue #238
+    (https://github.com/fjrevoredo/mini-diarium/issues/238), reported on Arch + KDE Plasma 6 +
+    Flatpak): the minimize, maximize, and close buttons were drawn but ignored every click, and the
+    only way to make them work was to double-click the title bar first, which had to be repeated on
+    every launch. The cause is upstream in tao, the windowing library Tauri uses: on Wayland it draws
+    its own title bar and covers it with a transparent input layer that intercepted the clicks before
+    the buttons could see them. That layer is re-applied every time the window is shown, and Mini
+    Diarium deliberately starts hidden so your saved window position is restored before the window
+    appears, which is why it was broken from the first frame. The app now removes the layer after
+    showing the window. The fix is Linux-only, turns itself off on X11, and will be dropped once a
+    Tauri release includes the upstream fix (tao#1218 (https://github.com/tauri-apps/tao/pull/1218),
+    TODO-0097).
+ReleaseNotesUrl: https://github.com/fjrevoredo/mini-diarium/releases/tag/v0.6.5
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/fjrevoredo/mini-diarium/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,86 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Fleet.fleetctl
+PackageVersion: 4.72.0
+PackageLocale: en-US
+Publisher: Fleet Device Management Inc.
+PublisherUrl: https://fleetdm.com/
+PublisherSupportUrl: https://github.com/fleetdm/fleet/issues
+PrivacyUrl: https://fleetdm.com/legal/privacy
+Author: Fleet Device Management Inc.
+PackageName: fleetctl
+PackageUrl: https://github.com/fleetdm/fleet
+License: MIT
+LicenseUrl: https://github.com/fleetdm/fleet/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2020-present Fleet Device Management Inc
+ShortDescription: A command line interface (CLI) tool for managing Fleet from the command line.
+Description: |-
+  fleetctl (pronounced "Fleet control") is a command line interface (CLI) tool for managing Fleet from the command line. fleetctl enables a GitOps workflow with Fleet.
+  fleetctl also provides a quick way to work with all the data exposed by Fleet without having to use the Fleet UI or work directly with the Fleet API.
+Tags:
+- fleet
+ReleaseNotes: |-
+  Security Engineers
+  - Added support for issuing host identity certificates through SCEP (Simple Certificate Enrollment Protocol) that fleetd can use with TPM 2.0 hardware to cryptographically sign all HTTP requests.
+  - Added flag --fleet-managed-host-identity-certificate to generate fleetd packages for linux that use TPMs to sign HTTP requests.
+  - Added sso_server_url configuration option to support SSO setups with separate URLs for admin access vs agent/API access. When set, SSO authentication will only work from the specified URL. This fixes SSO authentication errors for organizations using dual URL configurations.
+  IT Admins
+  - Added support for Apple Account Driven User Enrollment for iOS/iPadOS when end user authentication is configured.
+  - Added support for MS-MDE2 v7.0 Windows MDM Enrollments.
+  - Added the following Fleet-maintained apps for macOS: iTerm2, Yubikey Manager, VNC Viewer, Beyond Compare.
+  - On the host details > software > library page and Fleet Desktop > Self-service page, show installer status and installer actions based on what software is detected in software inventory.
+  - On the host details > software > library page and Fleet Desktop > Self-service page, show user's when a software can be updated, allowing users to easily trigger a software update and see fresh data after an update completes.
+  - Updated VPP apps reported by osquery to retain their last install information when viewed in host software library.
+  - Switched to more comprehensive UpgradeCode based uninstall scripts when an UpgradeCode can be extracted from an MSI custom package.
+  Other improvements and bug fixes
+  - Added support for fleetd TUF extensions on Linux arm64 and Windows arm64 devices.
+  - Added a fallback to package install path for extracting app names from uploaded PKG packages.
+  - Added special handling for version extraction of Fleet-maintained app manifests that reference a download URL that isn't version-pinned.
+  - Improved fleetctl gitops type error mesages.
+  - Improved accuracy of auto-install queries for custom MSI packages by using a better identifier.
+  - Label created_at no longer factored in when scoping software packages by "exclude any" manual labels.
+  - Refactored AddHostsToTeam method to fix race condition introduced by global var.
+  - Changed enable_software_inventory to default to true if missing from gitops config.
+  - Modified backend for GET /api/v1/fleet/commands when filtering by host_identifier to address performance concerns and exhausting database connections when API is called concurrently for many hosts.
+  - Allowed users of Fleet in Primo mode to access Software automations and failing policy ticket & webhook automations.
+  - Update UI to support personally enrolled MDM devices.
+  - Removed DEB and RPM installers from installable software lists on hosts with incompatible Linux distributions (e.g. Ubuntu for an RPM).
+  - Revised MSI uninstall scripts to wait for an uninstall to complete before returning and avoid restarting after an uninstall.
+  - Added back software mutation on ingestion to fix non-semver-compliant software versions, starting with DCV Viewer.
+  - Increased timeouts on /fleet/mdm/profiles/batch to better support customer workflows with large numbers of profiles.
+  - Made consistent and update the Install and Uninstall detail modals for VPP and non-VPP apps across the Fleet UI.
+  - Updated go to 1.24.6.
+  - Fixed issue with package ids ordering causing software installers' scripts to be inconsistently generated.
+  - Fixed incorrectly displayed status in controls OS Settings page, if a host was only pending or failing on declaration for removal.
+  - Fixed bug with mdm_bridge Orbit table that caused panics due to invalid COM initialization.
+  - Fixed bug where a certificate Distinguished Name (DN) parser did not allow forward slashes in the value which resulted in parsing error.
+  - Fixed an issue where the detected date for software vulnerabilities was not being pulled correctly from the database.
+  - Fixed missing empty host lists on manual labels in gitops.
+  - Fixed an issue where two banners would sometimes be displayed on the host details page.
+  - Fixed missing webhook url in automations tooltip.
+  - Fixed an issue where using ESCAPE in a LIKE clause caused SQL validation to fail.
+  - Fixed error when trying to escrow a linux disk key multiple times.
+  - Fixed silent failure when passing flags after arguments in fleetctl.
+  - Fixed wrongly formatted URL for EULA when accessing from Fleet UI and when shown in the iFrame for SSO callback.
+  - Fixed stale pending remove apple declarations, if the host was offline while adding and removing the same declaration.
+  - Fixed a case where a vulnerability would show up twice for a given operating system.
+  - Fixed specification of policy software automations via GitOps when referring to software by hash from a software YAML file.
+  - Fixed cases where the vulnerabilities list endpoint would count the same CVE multiple times for the count field returned with a result set.
+  - Fixed an issue where SSO URLs with trailing slashes would cause authentication failures due to double slashes in the ACS URL. Both regular SSO and MDM SSO URLs now properly handle trailing slashes.
+  - Fixed an issue during the DEP sync where errors such as 404 from the DEP API could result in devices never being assigned a cloud configuration profile.
+  - Fixed server panic when listing software titles for "All teams" with page that contains a software title with a policy automation in "No team".
+  Fleet-maintained app updates and vulnerability fixes are applied, whether or not you upgrade.
+  Fleet's agent
+  The following version of Fleet's agent (fleetd) support the latest changes to Fleet:
+  1. orbit-v1.45.1
+  2. fleet-desktop-v1.45.1 (included with Orbit)
+  3. fleetd-chrome-v1.3.2
+  While newer versions of fleetd still function with older versions of the Fleet server (and vice versa), Fleet does not actively test these scenarios and some newer features won't be available.
+ReleaseNotesUrl: https://github.com/fleetdm/fleet/releases/tag/fleet-v4.72.0
+PurchaseUrl: https://fleetdm.com/pricing
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://fleetdm.com/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

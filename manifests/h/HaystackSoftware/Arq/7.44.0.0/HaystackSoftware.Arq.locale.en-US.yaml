@@ -1,0 +1,34 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: HaystackSoftware.Arq
+PackageVersion: 7.44.0.0
+PackageLocale: en-US
+Publisher: Haystack Software LLC
+PublisherUrl: https://arqbackup.com/
+PrivacyUrl: https://arqbackup.com/privacy/
+Author: Haystack Software LLC
+PackageName: Arq
+PackageUrl: https://arqbackup.com/download/
+License: Proprietary
+Copyright: Copyight © 2009-2026 Haystack Software LLC. All rights reserved.
+ShortDescription: A backup software for your Mac or Windows PC.
+Tags:
+- backup
+ReleaseNotes: |-
+  Improvements
+  - When a cloud-files sync provider (OneDrive, Dropbox) is offline and Arq cannot enumerate a cloud-placeholder directory, the failure is now handled per the backup plan's dataless-files policy: "Ignore" silently skips the directory, "Error" records a per-directory error, and "Materialize" logs that the directory could not be materialized. (There is no Windows API to force-populate a dataless directory beyond the enumeration call itself, so "Materialize" on a failed enumeration is best-effort and reports an error.)
+  - Added "Skipped dataless file" and "Skipped dataless directory" lines to the activity log when the dataless-files policy is set to "Ignore", so users can audit what was omitted from a backup.
+  - When a pCloud upload fails with a size or sha1 mismatch (pCloud occasionally stores fewer bytes than were sent) or a transient network error, Arq now retries the upload (up to 8 non-transient attempts) instead of failing the whole backup record. Cancellation is honored within one retry iteration.
+  Bug Fixes
+  - Fixed OneDrive and Dropbox folders being silently skipped when the backup plan's dataless-files policy was set to "Ignore", even when every file inside was fully downloaded locally. Arq now always recurses into cloud-managed (CFAPI) directories regardless of the folder's cloud-placeholder reparse tag; the per-file dataless-files policy still governs whether individual dataless files are skipped, errored, or materialized. Behavior change: users on "Ignore" who previously had whole OneDrive/Dropbox subtrees omitted from their backup will now see the locally-present files inside those trees backed up. Note: backing up a OneDrive folder that has never been opened locally may stall up to 60 seconds while OneDrive populates the placeholder listing.
+  - Fixed reading reparse points (directory junctions, symbolic links, cloud placeholders) at paths longer than 260 characters failing with "The system cannot find the path specified." (HRESULT 0x80070003).
+ReleaseNotesUrl: https://arqbackup.com/download/arqbackup/arq7windows_release_notes.html
+PurchaseUrl: https://arqbackup.com/pricing/
+Documentations:
+- DocumentLabel: Learn
+  DocumentUrl: https://arqbackup.com/learn/
+- DocumentLabel: Documentation
+  DocumentUrl: https://arqbackup.com/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

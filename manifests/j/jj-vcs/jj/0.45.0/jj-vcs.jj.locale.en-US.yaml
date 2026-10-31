@@ -1,0 +1,121 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jj-vcs.jj
+PackageVersion: 0.45.0
+PackageLocale: en-US
+Publisher: jj-vcs
+PublisherUrl: https://github.com/jj-vcs
+PublisherSupportUrl: https://github.com/jj-vcs/jj/issues
+PackageName: jj
+PackageUrl: https://github.com/jj-vcs/jj
+License: Apache-2.0
+LicenseUrl: https://github.com/jj-vcs/jj/blob/HEAD/LICENSE
+ShortDescription: A Git-compatible VCS that is both simple and powerful
+Description: A Git-compatible VCS that is both simple and powerful
+Moniker: Jujutsu
+Tags:
+- cli
+- git
+- mercurial
+- vcs
+ReleaseNotes: |-
+  About
+  jj is a Git-compatible version control system that is both simple and powerful. See
+  the installation instructions to get started.
+
+  Release highlights
+  - A new jj converge command was added to help automatically resolve divergent
+    commits by combining them appropriately.
+
+  Breaking changes
+  - jj config {edit,set,unset} --user now targets the first loaded user
+    configuration file (e.g. ~/.config/jj/config.toml or the first file in
+    conf.d/) instead of prompting interactively when multiple files exist.
+    Use --file <PATH> to target a specific config file.
+  - jj git import in non-colocated repositories no longer imports commits from a
+    detached Git HEAD branch.
+
+  Deprecations
+  None
+
+  New features
+  - The new jj converge command attempts to automatically resolve divergence by
+    creating a new commit that replaces the divergent commits. It applies
+    heuristics to try to automatically come up with a good solution, and falls
+    back to prompting the user if the heuristics are inconclusive. It can also run
+    in non-interactive mode, which aborts if prompting would be needed.
+  - jj bisect will now mention when it cannot unambiguously find the first bad
+    revision due to skips in evaluation.
+  - Git HEAD state is now tracked per worktree internally. This prepares
+    colocated repositories for support of multiple Git worktrees, where each
+    jj workspace can have its own Git HEAD. Existing repositories are migrated
+    automatically.
+  - jj config {edit,set,unset} now support a --file <PATH> option to
+    target a specific configuration file (such as files inside a conf.d/
+    directory or loaded via --config-file). This allows precise file targeting
+    and avoids interactive prompts when multiple config files exist.
+
+  Fixed bugs
+  - The default immutable_heads() set
+    now includes untracked_remote_tags().
+  - jj arrange now scrolls the viewport to keep the selected commit visible
+    when the commit stack is taller than the terminal.
+    #9033.
+  - The default pager flags now include -K (--quit-on-intr), so pressing
+    Ctrl+C in less exits cleanly instead of leaving the terminal in a
+    corrupted state (raw mode, visible escape sequences, broken input).
+  - A side of a conflict whose contents end with a carriage return no longer loses
+    that byte when the materialized conflict is parsed back, such as when a
+    conflicted file is snapshotted from the working copy.
+    #9868
+  - In colocated workspaces, jj workspace update-stale now correctly resets the
+    Git HEAD to the parent of the fresh working-copy commit.
+    #9936
+  - jj run no longer runs against the remaining revisions if a process exits
+    with a nonzero exit code.
+  - Fixed crash in jj log involving hidden revisions and the
+    log-graph-prioritize revset.
+    #9975
+  - In colocated repos, an external git add after a jj command no longer
+    produces a tree with duplicate entries (git fsck: duplicateEntries). jj
+    was leaving a stale cache-tree behind in .git/index. Repositories already
+    corrupted this way are not repaired by the fix.
+    #9711
+    #8884
+
+  Contributors
+  Thanks to the people who made this release happen!
+  - Aaron Bies (@slerpyyy)
+  - aaronabbott (@aabmass)
+  - Alexander Chen (@alexuser)
+  - Austin Seipp (@thoughtpolice)
+  - Baptiste Girardeau (@baptiste0928)
+  - Caleb White (@calebdw)
+  - Daniel Danner (@dnnr)
+  - David Rieber (@drieber)
+  - Gaëtan Lehmann (@glehmann)
+  - Gasper Stukelj (@mirkomartn)
+  - hexbinoct (@hexbinoct)
+  - Joseph Lou (@josephlou5)
+  - Keane Nguyen (@keanemind)
+  - LOG (@logarithmone1128)
+  - Martin von Zweigbergk (@martinvonz)
+  - OlshaMB (@OlshaMB)
+  - Philip Metzger (@PhilipMetzger)
+  - Priyanka Mandloi
+  - Remo Senekowitsch (@senekor)
+  - Riccardo Mazzarini (@noib3)
+  - Scott Sudharsan (@scott2000)
+  - sofia (@badp)
+  - Stephen Jennings (@jennings)
+  - Vaghinak Vardanyan (@vaghinak-vardanyan)
+  - Vincent Ging Ho Yim (@cenviity)
+  - Wang Yuantao (@0WD0)
+  - Yuya Nishihara (@yuja)
+ReleaseNotesUrl: https://github.com/jj-vcs/jj/releases/tag/v0.45.0
+Documentations:
+- DocumentLabel: Homepage
+  DocumentUrl: https://jj-vcs.github.io/jj/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

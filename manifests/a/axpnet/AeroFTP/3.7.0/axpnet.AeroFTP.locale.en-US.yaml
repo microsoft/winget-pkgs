@@ -1,0 +1,67 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 3.7.0
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [3.7.0] - 2026-05-01
+  AeroRsync session batch + Crypto overlay + Server Health Check + CLI/MCP parity
+  Big-batch release closing the P3-T01 wave (AeroRsync streaming + batch transport) and shipping three parallel workstreams: a new crypto overlay layer (rclone-crypt + AeroVault session model), a real-time Server Health Check engine wired into IntroHub Pro, and the CLI/MCP parity wrap-up. The standalone aerovault crate is bumped to 0.3.4 with the new overlay-session API.
+  Added
+  - AeroRsync session-cached batch transport — new AerorsyncBatch trait (W3.1) + russh implementation with channel + raw stream + key auth (W3.2) + generic do_upload / do_download helpers (W3.2 b2). A single SSH session now amortizes many consecutive delta transfers.
+  - AeroRsync batch surface end-to-end — open_delta_batch + try_delta_transfer_with_batch wired into sync_tree_core (W4.1 + W4.2). SyncReport exposes delta_files and bytes_on_wire; SyncPanel surfaces the new batch counters.
+  - Rclone-crypt provider session — rclone-style crypto overlay with deterministic filename obfuscation, streaming chunk-based encrypt/decrypt, rclone_crypt_provider_* Tauri commands and a RcloneCryptUnlock dialog for interactive unlock.
+  - AeroVault overlay session model — open/list/upload/download routed transparently through an active encrypted overlay, status badge in App.tsx, aerovault_overlay_* commands wired in lib.rs, spec updated in docs/AEROVAULT-V2-SPEC.md. The aerovault crate is bumped to 0.3.4 with the overlay API + KEK derivation polish.
+  - Server Health Check engine — health_check.rs runs real DNS / TCP / TLS / HTTP probes with latency measurements, 0-100 health scoring, and a per-protocol capability matrix. useProviderHealth hook does parallel batch refresh with auto-cleanup, HealthRadial SVG gauge is wired to the live results, MyServersPanel + ServerCard show contextual badges and a right-click context menu.
+  - CLI/MCP parity wrap-up — aeroftp-cli and mcp/tools.rs align argument shapes and output schemas with wave-5 (cross-profile transfer) and wave-6 (Gap 4 caps + 6 ops tools) so an LLM can use either surface interchangeably.
+  - MCP wave-5 — cross-profile transfer tools (tool count 25 → 27): aeroftp_transfer / aeroftp_transfer_tree (and remote_transfer / remote_transfer_tree aliases). Single-file or recursive copy between two saved profiles, source and destination provider opened once and reused across the whole batch. Path validation rejects .., null bytes, leading -, empty paths and >4096 chars on both sides; identical src/dst profiles refused by id and canonical name; audit log includes profile ids, paths, bytes, duration. Progress streaming throttled at every ~5 files or 2% delta.
+  - MCP wave-6 — Gap 4 caps + 6 ops tools (tool count 27 → 39): aeroftp_check_tree gains per-group caps (max_match, max_differ, max_missing_local, max_missing_remote, all falling back to max_entries_reported) plus omit_match to drop the noise bucket entirely from groups while keeping the counter in summary. Six new ops tools wrapping CLI semantics: aeroftp_touch (create empty file or report exists), aeroftp_cleanup (BFS for orphan .aerotmp, dry-run by default, caps 100k entries / depth 100), aeroftp_speed (random-payload upload+download+SHA-256 throughput probe, 4 MiB default / 64 MiB max, 1..3 iterations), aeroftp_sync_doctor (preflight risk summary with suggested_next_command), aeroftp_dedupe (SHA-256 dup detection grouped per size, modes newest/oldest/largest/smallest/list, dry-run by default), aeroftp_reconcile (categorized size-only diff variant of check_tree with elapsed_secs and suggested_next_command). Each new tool ships with a remote_* alias.
+  Changed
+  - MEGA Native crypto polish — non-regressive cleanup on top of the v3.6.10 canonical-layout fix (less log noise, nonce/key edge cases, listing pagination).
+  - B2 native v4 hardening — auth/list/upload/download retry surface aligned with provider-trait expectations; coverage extended in integration_b2.rs.
+  - aerovault 0.3 → 0.3.4 — new overlay-session API, refreshed KEK derivation, three crypto helpers exposed via the aerovault_overlay_* commands.
+  - i18n GLM batch cleanup — leftover [NEEDS TRANSLATION] placeholders removed across all propagated locales; i18n:validate is clean (0 errors, 0 warnings, 0 placeholders). New keys: deltaBatchSummary, deltaBytesOnWire, storageQuotaUnavailable, IntroHub probe states (unknown, clickToRetry).
+  - P3-T01 live smoke validated — on the real SSH MyCloud HD profile, the two reference runs (initial 100x10KB upload and one-mutation resync: 1 uploaded, 99 skipped) confirm consistent file-level incremental behavior.
+  - AeroRsync UI — SyncPanel shows the batch summary (Delta: X files in Y session(s) + bytes_on_wire); types.ts aligned with the new SyncReport shape.
+  Internal
+  - P3-T01 closure docs consolidated under Appendix C-Y-D (final report and handoff with i18n / typecheck / live small+large smoke evidence on a real target).
+  - Three clippy fixes on the new modules: impl Default for RcloneCryptState, collapsed nested if in the archive prefix matcher in lib.rs, #[allow(clippy::too_many_arguments)] on cmd_rclone_crypt_put (10 args, idiomatic for the CLI handler).
+  Downloads:
+  - Windows: .msi installer, .exe, or .zip portable (no installation required)
+  - macOS: .dmg disk image
+  - Linux: .deb, .rpm, .snap, or .AppImage
+  Download AeroFTP
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v3.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

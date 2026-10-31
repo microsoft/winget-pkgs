@@ -1,0 +1,66 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: athrvk.Vayu
+PackageVersion: 0.27.0
+PackageLocale: en-US
+Publisher: Atharva Kusumbia
+PublisherUrl: https://github.com/athrvk
+PublisherSupportUrl: https://github.com/athrvk/vayu/issues
+Author: Atharva Kusumbia
+PackageName: Vayu
+PackageUrl: https://github.com/athrvk/vayu
+License: AGPL-3.0
+LicenseUrl: https://github.com/athrvk/vayu/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Atharva Kusumbia
+ShortDescription: Open-source API client with a native C++ load-testing engine - Postman-style requests and k6-level load tests in one local app.
+Description: Vayu is a free, open-source desktop app for Windows, macOS, and Linux that combines a full REST and GraphQL request builder - with collections, environments, and scripting - and a high-throughput load tester powered by a C++20 engine, with all data staying on your machine.
+Moniker: vayu
+Tags:
+- api
+- api-client
+- api-testing
+- benchmark
+- developer-tools
+- graphql
+- http
+- insomnia
+- load-testing
+- performance
+- postman
+- rest
+ReleaseNotes: |-
+  0.27.0 - 2026-09-08
+  Two things to read before updating: this release fixes a macOS bug that stopped 0.26.0 from starting at all on most Macs, and it converts your saved scripts to the new element model in a one-way database migration, so a workspace opened by 0.27.0 cannot be opened by 0.26.0 again. Beyond that, the collection run gains most of what a JMeter test plan does: extracts, assertions, timers, controllers and transactions you attach to a request or a folder, plus custom metrics, pass/fail thresholds on every run mode, and setup/teardown scripts that run once per run.
+  Added
+  - Elements: typed behaviours you attach to a request or a folder. Extract a value into a variable, assert a status or a JSONPath, wait between steps, loop or branch, record a metric - each added, reordered and switched off on its own, inherited by everything under the folder it sits on, and disabled on a single request without deleting it from the parent. Requests and collections each get an element list with a form per kind. Scripts are elements too, which is what the migration under Changed is about.
+  - Controllers. control.if runs a step only while a condition on a variable holds, control.once runs it on that user's first iteration only, and control.throughput runs a share of the occurrences by percentage or every Nth pass. On a folder, control.loop repeats its requests a set number of times, control.switch jumps to the member a variable names, and control.transaction sums its requests into one named transaction that the report carries with its own count, errors and latency percentiles. control.switch and control.loop are sequential-only: a load run declaring either is refused with a message naming it, since a virtual user has no way to jump backwards.
+  - Timers. timer.think waits a fixed time, a uniform random range, or a normal distribution around a mean, between steps - so the wait never counts against either step's latency. timer.pacing holds a request, a folder or a whole collection to a steady start-to-start cadence whatever the step's own duration was, per virtual user or shared across all of them. Both are reproducible from a run's elements.seed, and a Stop lands during a wait instead of after it.
+  - script.setup and script.teardown, which run once at the start and end of a run rather than per step - the place for a login that should happen once, or a cleanup that should happen even after a failure.
+  - Custom metrics. pm.metrics.trend, .counter and .rate in a script, or the metric.record element without one, record your own numbers alongside the built-in ones. The run report shows them as a card with the distribution for a trend, the total for a counter and the percentage for a rate.
+  - Pass/fail thresholds on collection runs, not just load runs. A run declaring thresholds is judged against its budgets and the report carries a verdict per budget. New in this release: maxAssertionFailureRatePct, a ceiling on the share of assertions and pm.test calls that failed however they ran, and thresholds.failRun, which makes a missed budget mark the run failed rather than merely reporting it. A budget whose metric got no samples is reported as unevaluated instead of silently passing.
+  - MCP agents can read and write elements. The request and collection tools carry them, run_request takes ad-hoc elements for one call without saving them, and an elements/kinds resource lists every kind with its schema so an agent can build a valid one without guessing.
+  - pm.cookies is readable from inline load-run scripts.
+  - The Run Collection dialog can override timers and scripts for one run, and the same override is available on the MCP run tools.
+  - Engine logs are structured. Every line in the log file is one JSON object with a timestamp, level, category and message, and values that used to be baked into the sentence are fields. Values are redacted by key, so a token in a logged object does not reach the file. The console rendering is unchanged in spirit and still governed by -v.
+  Changed
+  - Your pre-request and post-response scripts are now script.pre and script.post elements, converted once when 0.27.0 first opens your workspace. The old fields are gone with no alias behind them. This is one-way: the database records its new schema version, and 0.26.0 refuses to start on it rather than reading it wrongly, so take a snapshot with Workspace backup in Settings first if you may want to go back. The migration writes <db>.pre-migration.bak beside your database before it rewrites a single row.
+  - The app ships only what the main process needs, so the installed application is smaller. The MCP server binds its port at launch and loads the rest on the first request, so an agent's first call no longer waits for startup. Vayu no longer lets Chromium cache engine responses to disk.
+  - The macOS floor is now 13.3 (Ventura), where it was 13.0. The engine is built against libc++'s floating-point formatting, which Apple ships from 13.3, so it cannot be built for an earlier one. If you are on Ventura and have not taken its point updates, take them before updating Vayu.
+  - /health reports the worker count the engine is configured with rather than the machine's core count.
+  - Internal: the September round of review fixes across the elements landing, compiler false positives on release builds and MSVC, engine write paths audited for lock scope, faster clang-tidy in the pre-commit hook, and documentation kept in step with all of the above.
+  Fixed
+  - macOS: Vayu could not start its engine. 0.26.0's engine was built against a newer macOS than it targeted, so on any Mac older than the build machine it aborted at launch with a Symbol not found dialog and the app was unusable. The release now pins the macOS version it is built for, and CI fails if a build ever drifts off it again. If 0.26.0 failed this way for you, this release is the fix and no reinstall dance is needed.
+  - Unsaved work is harder to lose. Quitting or closing a window asks first when a save has not reached the engine. A failed auto-save is retried, shows in the Dock while it is pending, and is flushed when the engine comes back.
+  - Imports keep more of what you gave them, and tell you what they dropped. Pasting a curl command picks the URL by its shape rather than by which bare word came first, and reports the fields it could not map. The Postman importer no longer drops OAuth 2 state, token name and access token, and no longer mangles an invalid % in a query. An OpenAPI operation's own security is imported as that request's auth, and unmapped security cases are counted by kind. Exporting no longer writes two parameter objects for a key that appears in both Params and Headers, and a repeated export/import cycle no longer accretes a status prefix.
+  - The URL bar's parsed query is merged into your params instead of replacing them, an auto-written Content-Type is marked on the row that carries it, a body keeps its mode when you empty its content, and switching the body panel to JSON writes the Content-Type for you.
+  - Duplicate copies the whole request instead of a hand-picked set of fields, so nothing is quietly left behind.
+  - Any run can be pinned, not only a load run. A collection's Auth tab has one save button that reports through the Dock like everything else. The variables editor merges onto the freshest map rather than its own stale copy, a bulk-edit round trip no longer re-enables and re-trims rows, and deleting a row clears its conflict instead of leaving it dangling.
+  - A collection draft you are editing survives a background refetch, and the notification Preview button follows the system-notifications switch instead of posting when notifications are off.
+  - Large values no longer bloat the database. Stored JSON fields are capped when they are written, a row truncated that way is marked as truncated rather than silently short, and a design run's stored config snapshot has its own cap.
+  - Load runs report what they skipped: unresolved {{tokens}} are counted on both the fast and the scenario path, a pre-request script that did not run is reported as skipped, and an unknown scenario key is refused rather than ignored. A script whose pm.test calls partly passed is tallied per test instead of collapsing to one opaque failure, and a throw after a passing test still counts as a failure.
+  - Concurrent writes to config, client certificates, the inbox and the other resource endpoints hold one lock from read through write, so two writes arriving together can no longer lose one of them.
+  - A load run records the compression policy it negotiated, so a later baseline comparison is against a run that measured the same thing.
+ReleaseNotesUrl: https://github.com/athrvk/vayu/releases/tag/v0.27.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,86 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Ollama.Ollama
+PackageVersion: 0.35.0
+PackageLocale: en-US
+Publisher: Ollama
+PublisherUrl: https://ollama.com/
+PublisherSupportUrl: https://github.com/ollama/ollama/issues
+PackageName: Ollama
+PackageUrl: https://ollama.com/
+License: MIT
+LicenseUrl: https://github.com/ollama/ollama/blob/HEAD/LICENSE
+Copyright: Copyright (c) Ollama
+ShortDescription: Get up and running with large language models locally.
+Tags:
+- ai
+- chatbot
+- deepseek
+- large-language-model
+- llama
+- llm
+- mistral
+- qwen
+ReleaseNotes: |-
+  Decision models
+  Ollama now supports decision models through /v1/systemone, based on TypeSafe’s Jev API.
+  Decision models return choices, probabilities, and scores instead of text. Use them for tasks such as ticket triage, model routing, and content classification.
+  Available models:
+  - Nimble from Bespoke Labs
+  - Tev1 from Together AI
+  ollama pull nimble
+  Send context and one or more questions:
+  curl http://localhost:11434/v1/systemone \
+    -H 'Content-Type: application/json' \
+    -d '{
+      "model": "nimble",
+      "state": "Our checkout has returned 500 errors since 9am.",
+      "questions": {
+        "label": {
+          "type": "choice",
+          "instructions": "Which label fits this ticket?",
+          "criteria": {
+            "billing": "Payments and refunds",
+            "bug": "Software errors",
+            "account": "Login and account access"
+          }
+        }
+      }
+    }'
+  Example response:
+  {
+    "model": "nimble",
+    "answers": {
+      "label": {
+        "type": "choice",
+        "choice": "bug",
+        "probabilities": {
+          "billing": 0.0125,
+          "bug": 0.9781,
+          "account": 0.0093
+        },
+        "confidence": 0.8906
+      }
+    },
+    "usage": {
+      "input_tokens": 174,
+      "output_tokens": 1
+    }
+  }
+  The API supports three question types:
+  - choice: Select an option and return probabilities for each.
+  - noul: Return the probability that a condition is true.
+  - score: Return a score across an ordered set of criteria
+  What's Changed
+  - Settings now opens without waiting for model discovery.
+  - Fixed the macOS update menu and icon not reflecting an available update at startup.
+  - Fixed stalled MLX model downloads hanging indefinitely.
+  - Requests containing the deprecated typical_p parameter now log a warning instead of failing.
+  Full Changelog: https://github.com/ollama/ollama/compare/v0.34.4...v0.35.0
+ReleaseNotesUrl: https://github.com/ollama/ollama/releases/tag/v0.35.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://docs.ollama.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

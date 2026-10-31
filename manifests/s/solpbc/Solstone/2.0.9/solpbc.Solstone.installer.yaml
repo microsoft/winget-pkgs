@@ -1,0 +1,42 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
+
+PackageIdentifier: solpbc.Solstone
+PackageVersion: 2.0.9
+MinimumOSVersion: 10.0.18362.0
+Scope: user
+InstallerType: exe
+InstallModes:
+  - silent
+  - silentWithProgress
+InstallerSwitches:
+  Silent: --silent
+  SilentWithProgress: --silent
+  InstallLocation: --installto "<INSTALLPATH>"
+  Log: --log "<LOGPATH>"
+UpgradeBehavior: install
+ProductCode: Solstone
+ReleaseDate: 2026-09-23
+# The Settings/About UI is a WebView2 surface; the app relies on the OS Evergreen
+# WebView2 runtime (not bundled). Declaring it lets winget resolve the runtime from
+# its own catalog first on the rare machine that lacks it (older Win10/LTSC/Server).
+Dependencies:
+  PackageDependencies:
+    - PackageIdentifier: Microsoft.EdgeWebView2Runtime
+# Correlation for `winget upgrade`: released 0.2.11 registers ARP DisplayName `sol`;
+# the next package registers `solstone`. The stable ProductCode `Solstone` (Velopack
+# --packId, capital S; not --packTitle `solstone`) spans that transition, so DisplayName
+# is omitted here. Keep ProductCode at installer scope and in this section (winget 1.12).
+AppsAndFeaturesEntries:
+  - ProductCode: Solstone
+InstallationMetadata:
+  DefaultInstallLocation: '%LocalAppData%\Solstone'
+Installers:
+  # x64: the Setup.exe stub is a 32-bit Velopack shim, but the application it
+  # installs (solstone-windows-app.exe) is PE32+ x86-64. Architecture describes the
+  # app's applicability, not the stub -- tools that sniff the stub guess x86. Do not
+  # let one "correct" this to x86.
+  - Architecture: x64
+    InstallerUrl: https://github.com/solpbc/solstone-windows/releases/download/v2.0.9/solstone-setup-2.0.9.exe
+    InstallerSha256: 4F3CF205D9BEB463782FFA02D0ABADF339972E133060EF9629421969F12FACA5
+ManifestType: installer
+ManifestVersion: 1.12.0

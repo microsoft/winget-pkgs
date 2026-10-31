@@ -1,0 +1,65 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: rullerzhou-afk.clawd-on-desk
+PackageVersion: 0.8.0
+PackageLocale: zh-CN
+ShortDescription: 一款像素桌宠，替你监视 Claude Code、Codex、Cursor 及其他 AI 编程助手。
+Description: |-
+  Clawd 住在你的桌面上，实时感知 AI 编程助手正在做什么。发起一个长任务，起身去做点别的，等螃蟹告诉你任务完成了再回来。
+  你提问时它思考，工具运行时它打字，子代理工作时它杂耍，审批权限时它弹卡片，任务完成时它庆祝，你离开时它睡觉。内置两套主题：Clawd（像素螃蟹）和 Calico（三花猫），支持自定义主题。
+  支持 Windows 11、macOS 和 Ubuntu/Linux。需要 Node.js。支持 Claude Code、Codex CLI、Copilot CLI、Gemini CLI、Cursor Agent、CodeBuddy、Kiro CLI 与 opencode。
+  功能特性
+  多 Agent 支持
+  - Claude Code — 通过 command hook + HTTP 权限 hook 完整集成
+  - Codex CLI — 自动轮询 JSONL 日志（~/.codex/sessions/），无需配置
+  - Copilot CLI — 通过 ~/.copilot/hooks/hooks.json 配置 command hook
+  - Gemini CLI — 通过 ~/.gemini/settings.json 配置 command hook（Clawd 启动时自动注册，或执行 npm run install:gemini-hooks）
+  - Cursor Agent — Cursor IDE hooks，配置在 ~/.cursor/hooks.json（Clawd 启动时自动注册，或执行 npm run install:cursor-hooks）
+  - CodeBuddy — 通过与 Claude Code 兼容的 command hook + HTTP 权限 hook 集成，配置写入 ~/.codebuddy/settings.json（Clawd 启动时自动注册，或执行 node hooks/codebuddy-install.js）
+  - Kiro CLI — command hooks 注入到 ~/.kiro/agents/ 下的自定义 agent 配置中，并自动创建一个 clawd agent；Clawd 每次启动时都会重新从内置 kiro_default 同步它，尽量保持与默认 agent 一致。macOS 上状态动效已验证可用；需要时可用 kiro-cli --agent clawd 或在会话内执行 /agent swap clawd 启用 hooks（Clawd 启动时自动注册，或执行 npm run install:kiro-hooks）
+  - opencode — plugin 集成，写入 ~/.config/opencode/opencode.json（Clawd 启动时自动注册）；零延迟事件流、Allow/Always/Deny 权限气泡、task 工具分派并行子代理时自动播放建筑动画
+  - 多 Agent 共存 — 多个 Agent 可同时运行，Clawd 独立追踪每个会话
+  动画与交互
+  - 实时状态感知 — 通过 Agent hook 和日志轮询自动驱动动画
+  - 12 种动画状态 — 待机、思考、打字、建造、杂耍、指挥、报错、开心、通知、扫地、搬运、睡觉
+  - 眼球追踪 — 待机状态下 Clawd 跟随鼠标，身体微倾，影子拉伸
+  - 睡眠序列 — 60 秒无活动 → 打哈欠 → 打盹 → 倒下 → 睡觉；移动鼠标触发惊醒弹起动画
+  - 点击反应 — 双击戳戳，连点 4 下东张西望
+  - 任意状态拖拽 — 随时抓起 Clawd（Pointer Capture 防止快甩丢失），松手恢复当前动画
+  - 极简模式 — 拖到右边缘或右键"极简模式"；Clawd 藏在屏幕边缘，悬停探头招手，通知/完成有迷你动画，抛物线跳跃过渡
+  权限审批气泡
+  - 桌面端权限审批 — 当 Claude Code、CodeBuddy 或 opencode 请求工具权限时，Clawd 会弹出浮动卡片，无需切回终端
+  - 允许 / 拒绝 / Agent 原生扩展项 — 一键批准或拒绝；如果该 Agent 支持，还会显示权限规则 / Always 一类的额外操作
+  - 全局快捷键 — Ctrl+Shift+Y 允许、Ctrl+Shift+N 拒绝最新的权限气泡（仅在气泡可见时注册）
+  - 堆叠布局 — 多个权限请求从屏幕右下角向上堆叠
+  - 自动关闭 — 如果你先在终端回答了，气泡自动消失
+  - 按 Agent 单独关闭 — 打开 设置… → Agents，选中对应 Agent，关闭 显示弹窗，权限提示就会回到该 Agent 自己的终端 / TUI 里处理
+  会话智能
+  - 多会话追踪 — 所有已支持 Agent 的会话统一解析到最高优先级状态
+  - 子代理感知 — 1 个子代理杂耍，2 个以上指挥
+  - 终端聚焦 — 右键 Clawd → 会话菜单，一键跳转到对应会话的终端窗口；通知/注意状态自动聚焦相关终端
+  - 进程存活检测 — 检测已崩溃/退出的受支持 Agent 进程，并在 10 秒内清理孤儿会话
+  - 启动恢复 — 如果 Clawd 重启时仍有受支持的 Agent 在运行，它会保持清醒等待后续事件，而不是直接睡觉
+  系统
+  - 点击穿透 — 透明区域的点击直接穿透到下方窗口，只有角色本体可交互
+  - 位置记忆 — 重启后 Clawd 回到上次的位置（包括极简模式）
+  - 单实例锁 — 防止重复启动
+  - 自动启动 — Claude Code 的 SessionStart hook 可在 Clawd 未运行时自动拉起
+  - 免打扰模式 — 右键或托盘菜单进入休眠，所有 hook 事件静默，直到手动唤醒。免打扰期间不弹权限气泡——opencode 会回退到终端内置确认，Claude Code 和 CodeBuddy 会回退到各自内置的权限确认流程
+  - 提示音效 — 任务完成和权限请求时播放短音效（右键菜单可开关；10 秒冷却，免打扰模式自动静音）
+  - 系统托盘 — 调大小（S/M/L）、免打扰、语言切换、开机自启、检查更新
+  - 国际化 — 支持英文、中文和韩文界面，右键菜单或托盘切换
+  - 自动更新 — 检查 GitHub release；Windows 退出时安装 NSIS 更新包，macOS/Linux 源码运行时通过 git pull + 重启自动更新
+Tags:
+- claude-code
+- codebuddy
+- codex
+- copilot-cli
+- cursor
+- gemini-cli
+- kiro
+- opencode
+- 桌宠
+ManifestType: locale
+ManifestVersion: 1.12.0

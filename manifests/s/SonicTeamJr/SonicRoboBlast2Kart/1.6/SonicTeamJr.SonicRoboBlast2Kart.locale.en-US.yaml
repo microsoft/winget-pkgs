@@ -1,0 +1,111 @@
+# Created with Komac v1.6.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: SonicTeamJr.SonicRoboBlast2Kart
+PackageVersion: '1.6'
+PackageLocale: en-US
+Publisher: SonicTeamJr
+# PublisherUrl: https://www.srb2.org
+PackageName: Sonic Robo Blast 2 Kart
+PackageUrl: https://github.com/STJr/Kart-Public
+License: GPL-2.0
+LicenseUrl: https://github.com/STJr/Kart-Public/blob/master/LICENSE
+ShortDescription: SRB2Kart is a classic styled kart racer, complete with beautiful courses, and wacky items.
+ReleaseNotes: |-
+  Headline changes
+  - Reduced visual jitter under unstable network conditions.
+  - The software renderer has gotten a significant performance boost!
+  - Specifically beneficial on maps with busy visuals (many objects, midtextures, and segs visible at once).
+  - One playtester with a slower computer reported "Avant Garden Classic", a community-created map with a reputation for bad performance, went from unplayable to a little under 35fps!
+  - Controller input has been updated to use the SDL Game Controller API.
+  - The game now supports a wider selection of controllers, including Xinput and Switch.
+  - Controller axes now have easier-to-identify names.
+  - D-Pad buttons are now considered hat switches.
+  - Known issue:
+    Mayflash GameCube controller adapters are not correctly supported.
+  - Delay measurements are now more accurate.
+  - If the client has caught up to the server (say, during a screen transition), don't report an extremely large delay.
+  - Fix an off-by-one error that slightly underestimated client delay.
+  - Don't include holepunch time when measuring server ping.
+  - The in-game server browser has been improved.
+  - Retries getting info multiple times; consistently reaches a few more servers in testing.
+  - Clear the server list when entering the menu and when refreshing.
+  - Create a "status line" that displays:
+  - When the game is checking for an update or loading the server list from the master server (removed the blue message box)
+  - How many servers are available and how many the game is trying to contact.
+  - If there are no servers available (no longer displays below the horizontal line)
+  - Slide the server list left and right when switching pages.
+  - The map command now supports using level titles, whether partial or in full.
+  - This feature was previously available in multiple community-created builds.
+  Interpolation changes
+  - Fix a number of circumstances which could cause the screen to violently vibrate in Software mode.
+  - Visual portals, such as in Fakery Way.
+  - First-person mode in replays.
+  - Player teleports will now adjust camera interpolation as needed.
+  - Custom Lua HUDs will no longer flicker with both splitscreen and interpolation.
+  Changes for online servers
+  - Client timeout has become a little stricter.
+  - If a client has fallen so far behind that the server is about to freeze (approximately 8 seconds), assume the lagging player is unlikely to recover and remove them.
+  - Reduce the grace period where lagging clients won't get kicked to 10 seconds (from 30).
+  - Adjust antigrief.
+  - Instead of not running for server or admin, run for ALL players, but only avoid kicking local or admin players.
+  - Don't run when there's only one player on the server.
+  - Fixes a bug where having a non-interacting splitscreen player could take down your server.
+  - Adjust the voting screen again.
+  - If kartvoterulechanges is set to Always, the third option is always the opposite gametype, even if Encore is unlocked - that will now be present on the second option instead.
+  - This is both for consistancy with having Encore inaccessible on your gamedata, and a response to community feedback.
+  - The kartencore cvar being turned on will now be reflected in gametype rule changes from Battle to Race.
+    This plugs one last hole in its area of effect for Race tracks.
+  - For -dedicated servers:
+  - No longer immediately crash with a SIGFPE on startup.
+  - No longer usurped by multiple clients joining on the same tic. (Ashnal)
+  - You can now type underscores into the console on Windows, which should make runtime file additions and cvar setting much easier.
+  - Enters a less-intensive idle state if no clients are present and no net commands have been issued.
+  - We've tried to make it as automatic as possible, and it'll still handle incoming commands, but this feature is relatively experimental.
+    If it gets stuck on something, a simple say hi into the console should be enough to make it all better.
+  - Works around the issue where dedicated servers waiting around for too long could crash due to passive netreplay recording.
+  Changes for file loading
+  - Maximum file and skin counts have been increased. (X.organic)
+  - 255 files, including the base resources.
+  - 255 characters, including the base five.
+  - PK3 loader code has been improved. (X.organic)
+  - PK3s created with basically any archiver are now supported.
+  - PK3s that contain only "unimportant" entries (such as music and HUD graphic replacements) can now be added to a client or server without the other(s) needing that file.
+  - Server file loading has been sped up significantly. (X.organic)
+  - Some asset setup checks all added files - only do this once when joining a server, rather than once per file.
+  - Files containing "unimportant" entries get to skip the above asset setup.
+  - In-game file downloading has recieved improvements, too.
+  - The client can now see whether a given download is direct from the host or over HTTP.
+  - If you download a file over http and it doesn't match the server's md5, fall back to direct download.
+  - If the direct file downloader fails at the first hurdle, let the would-be joiner know.
+  Map changes
+  - Finish lines have been adjusted across multiple maps to reduce the likelihood of players missing laps.
+  - Bridge skip in Aurora Atoll is finally gone.
+  - The fountain in Diamond Square will now kill those unlucky to fall in.
+  - Tinkerer's Arena and Dried Battledune now have spring panel effects on their borders to prevent camping.
+  Miscellaneous changes
+  - A whole heaping of memory mismanagement bugs have been corrected, too numerous to individually note. (X.organic, Ashnal)
+  - Notable example: maps that use an Encore executor linedef to change the weather no longer crash.
+    Community map "Killer Skies" no longer has a killer sky!
+  - Hole punching is more performant, updating internal socket less freqeuntly.
+  - Fix an issue where Discord Rich Presence joins during a title demo could short-circuit the client's ticking.
+  - Polyobjects that rotate objects on top of them now netsync properly.
+  - Seperate x and y deadzones for analog controller inputs. (Lonsfor)
+  - Prevent "Offline" multiplayer from connecting to the Master Server if advertise on were turned on in that session.
+  - Prevent all the join/leave sound effects from stacking super loud during major net interruption or multiple splitscreen player joins.
+  - Fix spectators spawning at world origin.
+  - Spectator HUD now snaps to the bottom left of the viewport.
+  - V-Sync (vid_wait) can now be toggled at runtime.
+  - Microsoft Windows:
+    The game now reports itself as "DPI aware" - this will mean a less blurry screen on screens with high pixel density, although windowed mode will be consistently smaller; you can change the DPI mode in program properties if you wish to revert this.
+  - Microsoft Windows:
+    The game now prioritises the OpenGL backend for Software mode (distinct from the OpenGL renderer), replacing 1.4 and 1.5's use of Direct3D 11 due to a reported performance hit.
+  - Codebase:
+    CMake build system has had a number of fixes.
+ReleaseNotesUrl: https://github.com/STJr/Kart-Public/releases/tag/v1.6
+Tags:
+- videogame
+- games
+- racing
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

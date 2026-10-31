@@ -1,0 +1,68 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: vriesdemichael.bb
+PackageVersion: 4.0.0
+PackageLocale: en-US
+Publisher: vriesdemichael
+PublisherUrl: https://github.com/vriesdemichael
+PublisherSupportUrl: https://github.com/vriesdemichael/bitbucket-server-cli/issues
+PackageName: bb
+PackageUrl: https://github.com/vriesdemichael/bitbucket-server-cli
+License: Apache 2
+LicenseUrl: https://github.com/vriesdemichael/bitbucket-data-center-cli/blob/HEAD/LICENSE
+ShortDescription: Bitbucket server (not cloud) command line tool. The 'gh' of bitbucket server.
+ReleaseNotes: |-
+  v4.0.0
+  bb v4.0.0 delivers a stabilized JSON machine contract, credential security hardening, interactive terminal safety guardrails, and full behavioral parity with Bitbucket Data Center.
+  This release represents a comprehensive overhaul of the CLI's testing and contract foundation (ADR-079). By replacing internal unit simulation mocks with live integration verification against real Bitbucket Data Center instances, dozens of latent defects have been resolved across pull request lifecycles, result pagination, and permission models.
+  Key Architectural Highlights
+  - Native Server CODEOWNERS Evaluation (ADR-080): Rather than relying on an internal regex-based parser that drifted from Bitbucket's rules, bb now queries Bitbucket's native UI evaluation endpoint (/rest/ui/latest/.../code-owners). This guarantees 100% parity with reviewer assignments in the Bitbucket Web UI.
+  - Unified Paging Engine (ADR-074): All 18 internal service packages now walk pages through a unified engine (openapi.PageThrough). --limit now strictly caps the total number of items returned across all commands (permissions, comments, diffs, commits, branches), and --all is available to fetch entire sets.
+  - Global Dry-Run Confidence Tiers (ADR-078): All 41 mutating commands report dry-run predictions tagged with a declared confidence tier (certain, projected, or unsupported), validated against real permission matrices.
+  - Full Webhook Field Parity (#522): Webhook commands now support all 9 Bitbucket API fields (including SSL verification, active status, and secrets) with automatic secret redaction on stdout.
+  Upgrading to v4: Automation & Scripting Checklist
+  If you consume bb inside CI/CD pipelines, shell scripts, or AI agent toolchains, review this checklist before upgrading:
+  1. Audit JSON Parsers (jq, Python) for camelCase & Envelope Changes:
+     - All machine output fields now match Bitbucket REST API camelCase (e.g. pullRequestId, projectKey, repoSlug).
+     - meta.contract and contract version numbers have been removed; the CLI binary version is now reported under meta.version.
+     - On failure, --json emits only a single error envelope to ensure clean stream decoding (ADR-075).
+  2. Migrate Command-Line Credential Flags:
+     - --token and --password CLI flags are retired to prevent secret exposure in process tables and shell histories.
+     - Supply credentials via environment variables (BB_TOKEN, BITBUCKET_TOKEN), the system keyring (bb auth login), or standard input (--token-stdin, --password-stdin).
+  3. Account for Non-Interactive Guardrails in CI/CD:
+     - Destructive commands (bb repo delete, bb auth gpg-key clear) now fail immediately if run in a non-interactive pipeline without --yes.
+     - bb repo delete requires an explicit repository argument (PROJECT/slug or --repo) and will not delete a git-inferred working repository.
+     - Implicit stdin reads now require an explicit - (e.g. bb repo edit file.txt --content -). Pass --no-input to guarantee scripts never hang on prompts.
+  4. Update Exit Code Handling:
+     - Invalid arguments and missing required flags now return exit code 2 (validation), rather than exit code 1 (internal).
+     - Transient network failures in --dry-run return exit code 10 (transient), matching real executions.
+  5. Update Go Module Import Paths (Go Developers):
+     - The Go module path has been renamed to github.com/vriesdemichael/bitbucket-data-center-cli (#459).
+  The complete list of breaking changes, commit references, and full change ledger is itemized below.
+  Changes since v3.5.2.
+  Compare: v3.5.2...v4.0.0
+  ⚠ Breaking Changes
+  - refuse a default branch that does not exist (0ccc14f) — branch default set and branch model update now fail with exit 2 when the named branch does not exist in a repository that has branches. Previously the value was accepted and written.
+  - stop counting a --dry-run invocation as live command reach (874989b) — docs/quality/command-reach.json is version 2. It gains known_dry_run_only and summary.dry_run_only_commands, and covered_commands drops from 233 to 217 for the same tests, because the sixteen dry-run-only commands were never covered in the first place.
+  - keep the reviewers when updating a pull request (14eb92b) — pr update now issues a GET before its PUT, so it costs one extra request. A caller that relied on the previous behaviour to clear reviewers must now pass an empty reviewer set explicitly, and no such caller could have been relying on it deliberately -- there was no flag for it.
+  - register --limit and --all on the commands that page (653e91b) — --limit and --all no longer exist on the 75 commands that never consumed them. An invocation like bb repo delete --limit 5 was previously accepted and the number ignored; it now fails with exit 2. The flags remain on the 38 commands that page.
+  - retire --token and --password in favour of stdin and the environment (8be1a1c) — --token and --password no longer exist on bb auth login, and --token no longer exists on bb ai mcp serve. Pipe the secret to --token-stdin or --password-stdin, or set BITBUCKET_TOKEN. For the MCP server, set BITBUCKET_TOKEN in the client env block -- "env": { "BITBUCKET_TOKEN": "${BB_MCP_TOKEN}" } -- which also keeps the agent on a narrower PAT than the one your own shell uses.
+  - stop replaying POST and PATCH after a lost response (f3263bb) — POST and PATCH are no longer retried after a transport error or a 5xx. A mutation that previously succeeded on a second attempt now surfaces the failure, with a message saying the request may or may not have been applied. A 429 is still retried for every method.
+  - derive a preview's confidence from a stated tier (74c4907) — 43 dry-run items now report confidence partial where they reported full. Nothing about those predictions changed except the honesty of the label: they are derived from partial state and never checked what they claimed. Automation gated on confidence == full will stop for those commands. Items also carry a new tier field naming how the prediction was reached.
+  - cap the three list commands the first --limit pass left out (72f0033) — --limit now truncates on build status get, pr build-status and pr activity, which previously returned every result whatever the flag said. Pass --all to keep receiving the complete set.
+  - classify the archive stream failure as transient (642d810) — repo archive now reports kind transient and exit 10 when the server is unreachable, instead of kind internal and exit 1.
+  - classify the twenty-two errors commands raise themselves (759a8ed) — 22 error paths across the permission, reviewer and reviewer-group commands now report kind validation and exit 2 instead of kind internal and exit 1 -- a missing project key, --project combined with --repo, and an unreadable config file or stdin among them.
+  - require --matcher-type on restriction update, in both scopes (84d052a) — branch restriction update and project branch-restriction update now require --matcher-type, and the project-scoped one also requires --type and --matcher-id. Omitting --matcher-type previously defaulted it to BRANCH and rewrote the restriction's matcher, so the value has to be stated.
+  - plan every repository in a project, not the first hundred (519c2b2) — bulk plan now covers every repository a selector matches rather than the first 100. A plan over a project with more than 100 repositories will contain more targets and therefore a different hash, and bulk apply will act on all of them -- which is what the policy asked for and what the previous plan silently omitted.
+  - --limit limits on the commands whose service pages to exhaustion (df25e22) — --limit now truncates on the project and repository permission listings, repo comment list, build required list and insights report list. Those commands previously returned every result and used --limit only as a page size, so a caller that relied on receiving everything must pass --all.
+  - a dry run and a real run agree that an unreachable host is transient (1547358) — A --dry-run that cannot reach Bitbucket now reports kind transient and exit 10 instead of kind internal and exit 1, matching what the same command already reported without --dry-run.
+  - a forgotten required flag is validation, not a defect in bb (bf9f13d) — A missing required flag now reports kind validation and exit 2 on 16 commands that reported kind internal and exit 1. reviewer condition create reports validation for malformed JSON for the same reason.
+  - require --count on update-approvers instead of defaulting to 2 (c51f7db) — repo settings pull-requests update-approvers now requires --count. Omitting it previously wrote a required-approvers count of 2, silently lowering branch protection configured for more.
+  - apply-suggestion needs write access, not read (2ed217f) — pr comment apply-suggestion --dry-run now pre-flights REPO_WRITE rather than REPO_READ, because applying a suggestion writes a commit. A read-only caller's dry run now fails with exit 3 instead of predicting success for an operation the server would refuse.
+  - name every output field in camelCase, matching the API (381949f) — machine output field names are now camelCase throughout. In the envelope, meta.bb_version is meta.bbVersion, meta.limit_reached is meta.limitReached, and error.exit_code is error.exitCode. Command payloads change as each is modelled.
+  - drop meta.contract, which never varied either (c2345b1) — meta.contract is gone from the machine envelope. It was the constant string "bb.machine" in every response; a consumer asserting on it should assert on the envelope's shape instead -- meta.bb_version is present, and exactly one of data or error.
+  - remove the contract version, report the binary version instead (ad63272) — the bb.machine envelope no longer carries a version field on either the success or failure path; meta.bb_version reports the binary that produced the document instead, and compatibility is now signalled by the release major, so pin the installed version to pin the contract.
+ReleaseNotesUrl: https://github.com/vriesdemichael/bitbucket-data-center-cli/releases/tag/v4.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,113 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: medialab.xan
+PackageVersion: 0.54.0
+PackageLocale: en-US
+Publisher: médialab Sciences Po
+PublisherUrl: https://medialab.sciencespo.fr/
+PublisherSupportUrl: https://github.com/medialab/xan/issues
+Author: médialab Sciences Po
+PackageName: xan
+PackageUrl: https://github.com/medialab/xan
+License: Unlicense, MIT
+LicenseUrl: https://github.com/medialab/xan/blob/HEAD/COPYING
+Copyright: Copyright (c) 2015-2025 Andrew Gallant, Guillaume Plique
+ShortDescription: The CSV magician
+Description: |-
+  xan is a command line tool that can be used to process CSV files directly from the shell.
+  It has been written in Rust to be as fast as possible, use as little memory as possible, and can very easily handle large CSV files (Gigabytes). It leverages a novel SIMD CSV parser and is also able to parallelize some computations (through multithreading) to make some tasks complete as fast as your computer can allow.
+  It can easily preview, filter, slice, aggregate, sort, join CSV files, and exposes a large collection of composable commands that can be chained together to perform a wide variety of typical tasks.
+  xan also offers its own expression language so you can perform complex tasks that cannot be done by relying on the simplest commands. This minimalistic language has been tailored for CSV data and is way faster than evaluating typical dynamically-typed languages such as Python, Lua, JavaScript etc.
+  Note that this tool is originally a fork of BurntSushi's xsv, but has been nearly entirely rewritten at that point, to fit SciencesPo's médialab use-cases, rooted in web data collection and analysis geared towards social sciences (you might think CSV is outdated by now, but read our love letter to the format before judging too quickly).
+  xan therefore goes beyond typical data manipulation and expose utilities related to lexicometry, graph theory and even scraping.
+  Beyond CSV data, xan is able to process a large variety of CSV-adjacent data formats from many different disciplines such as web archival (.cdx) or bioinformatics (.vcf, .gtf, .sam, .bed etc.). xan is also able to convert to & from many data formats such as json, excel files, numpy arrays etc. using xan to and xan from. See this section for more detail.
+  Finally, xan can be used to display CSV files in the terminal, for easy exploration, and can even be used to draw basic data visualisations.
+Tags:
+- csv
+- data
+- datascience
+- diagram
+- graph
+- graphics
+- plot
+- statistics
+- stats
+ReleaseNotes: |-
+  The SIMD update.
+  Breaking
+  - Bumping MSRV to 1.83.0.
+  - Dropping xan plot -Y/--add-series. It is now possible to select multiple columns as <y> in xan plot <x> <y> instead.
+  - Dropping the -C/--force-colors flag in flatten, heatmap, hist, plot and view in favor of the more standardized and flexible --color=(auto|never|always) flag.
+  - xan join will now automatically drop joined columns from one the files when it is obviously safe to do so.
+  - xan behead & xan rename do not normalize the output anymore to be as fast as possible.
+  - The new SIMD CSV parser might not deal with CSV irregular cases the same way rust-csv did. In any case, xan input will still continue to use rust-csv.
+  - xan slice -B/--byte-offset & xan slice -A/--accumulate are now mutually exclusive.
+  - xan input has been overhauled.
+  - Dropping xan count --sample-size.
+  - Overhauling xan fixlengths to accept streams by shifting default from double-pass read to buffering the whole stream into memory.
+  - xan plot --x-scale log & --y-scale log are now natural log. Use log10 for the base10 log as before.
+  - Dropping xan reverse -m/--in-memory flag. Behavior is now automatically detected.
+  - Dropping xan shuffle -m/--in-memory flag. Loading the file into memory is now the default. The xan shuffle -e/--external flag has been added if
+    you want the old default behavior.
+  - xan bins now outputs <empty> values instead of <nulls>.
+  - Overhauling xan bins. The default is now to find nice boundaries for the bins. Use -e/--exact to revert to the old behavior. The default number of bins is now 10, and won't use Freedman-Diaconis rule by default. A -H/--heuristic flag has been added if you want to automatically select a suitable number of bins.
+  Features
+  - Adding xan flatten -F/--flatter.
+  - xan pivot can now target multiple columns.
+  - Adding the xan grep command for fast but coarse filtering.
+  - Adding xan search -f/--flag.
+  - Adding xan map -F/--filter.
+  - xan search -B/--breakdown now consolidates the results when multiple patterns have a same name.
+  - Adding xan flatten --row-separator.
+  - Adding xan flatten --csv.
+  - Adding xan headers --color.
+  - Adding the xan join <columns> <input1> <input2> arity as a convenience when joined column names are the same in both inputs.
+  - Adding xan join -D/--drop-key=(none|both|left|right).
+  - Adding xan fuzzy-join -D/--drop-key=(none|both|left|right).
+  - Adding xan plot -A/--aggregate.
+  - Adding support for plural selection clauses in both xan select -e & xan map e.g. xan map 'full_name.split(" ") as (first_name, last_name).
+  - Adding xan search -P/--add-pattern.
+  - Adding xan groupby -M/--along-matrix.
+  - Adding xan groupby -T/--total.
+  - Adding support for .ndjson & .jsonl files. Those are considered as headless TSV files with null byte quoting so you can easily use them with xan commands.
+  - Adding out-of-the-box support for .vcf, .sam, .bed, .gtf & .gff2 files.
+  - Adding a xan cat cols alias to xan cat columns.
+  - Adding zstd support.
+  - Adding earliest & latest moonblade functions.
+  - Adding xan dedup -f/--flag.
+  - Adding -k short flag for xan dedup --keep-duplicates, and -C short flag for xan dedup --choose.
+  - Adding xan fixlengths -H/--trust-header.
+  - Adding xan separate.
+  - Adding full log scale support to xan plot.
+  - Adding xan hist --scale.
+  - xan window is now able to run total aggregations.
+  - Adding thousands_sep, comma and significance kwargs to numfmt moonblade function.
+  Fixes
+  - Fixing xan dedup --check bug where the first record was ignored.
+  - Fixing xan hist -D when a same date is found multiple times.
+  - Fixing xan from -f xls datetime conversion.
+  - Fixing xan flatten & xan view when column names contain line breaks.
+  - Fixing invalid argument parsing error being printed to stdout instead of stderr.
+  - Fixing xan progress SIGINT corrupting output.
+  - Fixing xan enum -A/--accumulate.
+  - Fixing xan from -f tar when tarball archive is not gzipped.
+  - Fixing min & max moonblade function when passing a list of numbers.
+  - Fixing xan flatten -H edge cases.
+  - Fixing commands requiring seekable streams accepting unindexed compressed files by error.
+  - Fixing xan plot --count --y-scale log.
+  Performance
+  - Wildly improving performance of most of xan commands by leveraging a novel SIMD CSV parser/writer.
+  - Improving performance of xan from -f txt & xan from -f npy.
+  - Improving memory footprint of hash-based commands (e.g. frequency, groupby, dedup etc.).
+  - Improving performance of xan progress, xan range, xan enum, xan behead, xan rename.
+  Quality of Life
+  - xan parallel cat now flushing more consistently.
+  - Better highlighting of problematic strings in xan flatten, xan view & xan headers.
+  - xan parallel will now generally stop as soon as an error is detected in a subprocess and cleanly report errors.
+  - Better argv parsing error UX in general.
+  - The -p flag will now avoid going further than 16 to avoid issues on server with many CPUs where hogging the resources is an issue and where using too much threads at once could hurt performance. The -t flag remain available to tweak the number of threads.
+  - xan hist will now dim bars having a 0 count so you can easily distinguish them from non-empty bars.
+ReleaseNotesUrl: https://github.com/medialab/xan/releases/tag/0.54.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

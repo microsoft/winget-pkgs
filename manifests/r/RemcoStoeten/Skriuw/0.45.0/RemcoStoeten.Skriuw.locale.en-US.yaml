@@ -1,0 +1,66 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: RemcoStoeten.Skriuw
+PackageVersion: 0.45.0
+PackageLocale: en-US
+Publisher: Remco Stoeten
+PublisherUrl: https://github.com/remcostoeten
+PublisherSupportUrl: https://github.com/remcostoeten/skriuw/issues
+Author: Remco Stoeten
+PackageName: Skriuw
+PackageUrl: https://skriuw.com/
+License: MIT
+LicenseUrl: https://github.com/remcostoeten/skriuw/blob/HEAD/LICENSE
+Copyright: Copyright (c) Remco Stoeten
+ShortDescription: Fast, local-first desktop app for notes, journaling, and knowledge work.
+Description: Skriuw is a fast, local-first desktop app for notes, journaling, and knowledge work. Version 2 keeps the workspace in local SQLite storage with portable archives and Git-backed history.
+Moniker: skriuw
+Tags:
+- journal
+- knowledge-base
+- local-first
+- markdown
+- note-taking
+- notes
+- obsidian-alternative
+- open-source
+- productivity
+ReleaseNotes: |-
+  Everything since v0.44.0. This release is about notes that stay private, an editor you can drive without leaving the home row, and a browser build you can install on a phone.
+  Private by construction
+  - End-to-end encrypted sync (ADR-0043, #363). Note titles, bodies, tags, people, properties, tasks, media, and even the operation type are sealed on the device before push and opened after pull. The service orders and accounts for opaque bytes. One per-workspace key is derived from a recovery code that is shown once and never stored; a second device joins by typing the code alone.
+  - Locked notes (ADR-0044, #373). Lock a note behind a workspace PIN or passphrase with a one-time recovery code. This is real encryption at rest: no snapshot, archive, search row, task, reference, or history capture carries a locked body, and locked notes replicate as ciphertext. Losing both the secret and the recovery code makes locked bodies unreadable for good, and the setup dialog says so. Migration 0027_note_lock.sql.
+  Modal Vim editing
+  One vimMode setting (mod+alt+i, or Toggle Vim mode in the palette) makes both editors modal (ADR-0042, #367).
+  - The rendered editor gets a Vim layer built for the block document: normal, insert, visual, and visual-line modes, counts, operators with motions and text objects, f/t and / search, registers including the system clipboard, dot repeat, macros, and :w, :q, :N, :noh, :s.
+  - The raw Markdown view moves to CodeMirror and runs its Vim extension with the same : commands. j/k move by wrapped screen rows.
+  - Jump to line counts what you see (#372). "Line N of M", :N, and NG count wrapped rows in the rendered editor, so the same number lands on the same content in both editors. Very large, virtualized documents still count Markdown lines.
+  Diagrams
+  - Rendered Mermaid fences (ADR-0045, #374). Sequence, state, class, and ER fences, plus flowcharts the editable block does not claim, render a themed read-only preview inside the code block, with a Preview/Source toggle (mod+alt+p), a full-viewport expand with pinch and pan, and a visible error line that keeps the last good render. /sequence, /state, /class, and /er insert a template. The fence stays the only stored form, and the renderer loads as a lazy chunk.
+  - AI Diagram action (#375). Select text and have AI draw a flowchart, sequence, state, class, or ER diagram from it; Insert diagram places the fence below the selection. A reply that does not render is sent back once for repair. Every AI result now draws its Mermaid fences in the run card, and the card itself is restyled: state dot in the header, a filled primary action with key caps, quiet secondary actions.
+  Search
+  - Full-text content search (ADR-0041, #362, closes #341). The SQLite FTS5 index now projects prose instead of raw Markdown, ranks title hits above body hits, highlights matches in the palette, detects when it has drifted from the workspace, and can rebuild itself in one transaction. Verified in the browser build too.
+  Phone and tablet
+  - Installable browser build (ADR-0040, #366). /app/ is now an installable, offline-capable app. A new build is offered as a reload, never swapped under a running session, and persistent storage is requested once the workspace opens.
+  - Compact touch shell (ADR-0041, #366, #368). Below 900px the app is one content column over a bottom tab bar; the tree and inspector become edge drawers that follow your finger 1:1 with rubber-band overscroll, settle on a flick, and close on a scrim tap or a note pick.
+  Journal
+  - Start from a template (#376). An empty entry offers the built-in and personal templates; the pick is remembered, so the next empty day is a single press. Browsing days never creates an entry.
+  - On this day (#376). Under the editor: entries from a week ago, a month ago, and the same date in earlier years, with mood and an excerpt.
+  - Phone day view (#376). Previous/Next day buttons, a horizontal swipe across the heading to step a day, and the five moods on one row.
+  - Faster navigation (#370). Step by week (shift+[/]), month (alt+[/]), and year (alt+shift+[/]), plus a Go to date dialog (d) that accepts input like next week thursday, 312, or dec 2025 and previews the resolved date before confirming. All rebindable.
+  History
+  - Side-by-side diff (#371, closes #272). A Unified / Side by side toggle in the history view; the choice persists per workspace.
+  - Revision scrubber (#368). Drag, pinch, scroll, or use the keys to move through a note's revisions.
+  Shell and polish
+  - Tab overflow (#368). Tabs keep a readable width and the rest move behind an "N more" menu; pinned and active tabs always stay visible.
+  - Splash and single instance (#368). A frameless splash shows until first paint, and launching Skriuw twice focuses the running window instead of starting a second process against the same database.
+  - Cover gradients (#361). A note can carry a theme gradient instead of an image, without storing a blob. The media library gains per-asset reveal.
+  - A keyboard and accessibility pass across menus, pickers, and panels (#368). Midnight's focus ring is visible again.
+  Fixes
+  - The shortcut recorder never committed a new binding and stayed on "Press keys…" (#371, closes #262).
+  - Brand icons resolve correctly, the command palette is roomier, and Empty trash confirms inline (#360).
+  Full Changelog: v2-v0.44.0...v2-v0.45.0
+ReleaseNotesUrl: https://github.com/remcostoeten/skriuw/releases/tag/v2-v0.45.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

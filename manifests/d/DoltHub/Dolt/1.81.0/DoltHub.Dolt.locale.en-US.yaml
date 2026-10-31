@@ -1,0 +1,80 @@
+# Created with WinGet Updater using komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: DoltHub.Dolt
+PackageVersion: 1.81.0
+PackageLocale: en-US
+Publisher: DoltHub
+PublisherUrl: https://github.com/dolthub/dolt
+PublisherSupportUrl: https://github.com/dolthub/dolt/issues
+Author: DoltHub
+PackageName: Dolt
+PackageUrl: https://www.dolthub.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/dolthub/dolt/blob/HEAD/LICENSE
+CopyrightUrl: https://raw.githubusercontent.com/dolthub/dolt/master/LICENSE
+ShortDescription: Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+Description: |-
+  Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+  Connect to Dolt just like any MySQL database to run queries or update the data using SQL commands.
+  Use the command line interface to import CSV files, commit your changes, push them to a remote, or merge your teammate's changes.
+Moniker: dolt
+Tags:
+- cli
+- data
+- git-for-data
+- versioning
+ReleaseNotes: |-
+  Merged PRs
+  dolt
+  - 10341: go/store/nbs: Fix possible data loss from Dolt CLI utilization when executing against a running server that was in the process of writing to its journal file.
+    Since Dolt v1.78.5, Dolt has truncated the journal file to the latest successfully loaded record when it successfully loads a database. This is the correct behavior when the CLI is operating as the exclusive writer to the database. However, Dolt also has a mode where it can load the database in read-only mode. Due to a bug, Dolt was also truncating the journal file when it was operating in this mode. The end result was the running something like dolt sql -r csv -q ... against a Dolt database that was running a sql-server and was currently accepting writes could incorrectly truncate the journal file. The Dolt sql-server process would go ahead writing into the journal at its previously extended offset and the space between the truncation and the next write offset would be 0 filled by the operating system. Attempting to load the database later or accessing the chunks located at that corrupted portion of the journal file would result in checksum errors or failure to load messages.
+    This change correctly updates Dolt to only Truncate the journal file when we are loading it in read-write mode.
+  - 10327: go/cmd/dolt: Make movable temp file configuration lazy.
+    Previously, early in the process life-cycle after dolt was run, dolt would immediately check if a file created in os.TempDir() was able to be os.Renamed into a subdirectory of the dolt process's data directory, by default $PWD/.dolt. If the rename failed, it would configure Dolt to use .dolt/temptf as the movable temp file directory instead.
+    This meant that for many dolt invocations, Dolt would do some local filesystem writes, including potentially Mkdir(.dolt) before it it was fully loaded. With the advent of things like dolt accessing the running server through sql-server.info and dolt --host ... sql this behavior was not ideal. It creates races with concurrently run dolt processes that try to use the .dolt directory, and it creates odd behavior when running something like dolt sql in a non-Dolt directory but on a filesystem mount where this rename from os.TempDir() does not work.
+    This PR changes the check and the configuration of a potential .dolt/temptf directory to be delayed until the first temporary movable file is actually requested by Dolt. At that point we know that we have a need for a renamable temp file and it is OK to go ahead and create .dolt/temptf if we need it.
+    This PR changes the error handling around some edge cases like permissions errors on the calling process creating temptf within .dolt. In particular, some errors which were previously early and fatal are now delayed until use site and may end up being persistent but non-fatal to the process, depending on the operation.
+  - 10326: go: Add some error checks for previously dropped errors in Filesys.Iter calls.
+  - 10322: .github/workflows/ci-check-repo.yaml: Make the action step which updates Godeps/LICENSES look more like update.sh.
+  - 10319: go/store/nbs: file_manifest.go: Always make manifest writes crash safe. Remove optional async manifest write support.
+    Online GC could write new tale files to oldgen, and the manifest write was not crash safe. This could result in data loss depending on filesystem settings if there was an inopportune crash.
+  go-mysql-server
+  - 3383: When applying indexes from outer scopes, resolve references to table aliases
+    The previous implementation of the applyIndexesFromOuterScopes optimization uses the getTablesByName function to map table name references onto tables. But this function only locates ResolvedTables, and other optimizations rely on this behavior.
+    I've split getTablesByName into two different functions: getResolvedTablesByName, which has the original behavior, and getNamedChildren, which takes a parent node and identifies all nameable nodes in its children, including both ResolvedTables and TableAliases.
+  - 3382: Ensure join correctness for enums of different types
+    fixes #10311
+    branched from #3381
+    Enums of different types join based on their string value, not their underlying int value. Ensures join correctness for enums of different types by doing the following:
+    - use type-aware conversion with enum origin types to properly convert enums to their string values
+    - disable Lookup joins for enums of different types. Lookup joins should not work here because enums are indexed based on their int values.
+    - disable Merge joins for enums of different types. Merge joins should not work here because enums are sorted based on their int values.
+  - 3381: Use key type for memory table index filter range
+    part of #10311
+    This change allows avoiding unnecessary type conversions when filtering by index and also simplifies some range filter expressions.
+    This causes foreign keys, particularly enums and sets, to be compared based on their internal values, instead of based on the generalized converted type.
+  - 3380: Generate index lookups for filters that appear in lateral joins
+    This PR enhances the "applyIndexesFromOuterScope" analysis pass to transform filters on tablescans into indexed table lookups, when the table's column is being compared with a column visible from a lateral join.
+    An example of a query that can be optimized with this change: select x, u from xy, lateral (select * from uv where y = u) uv;
+    Users don't often write lateral joins, but the engine can transform WHERE EXISTS expressions into lateral joins, and this lets us optimize those too.
+  - 3376: Add IsExpr case to replaceVariablesInExpr
+    Stored procedures containing IS expressions that referenced a procedure variable were breaking.
+  - 3369: Added DISTINCT ON handling
+    Related PRs:
+    - dolthub/vitess#446
+    - dolthub/doltgresql#2181
+  vitess
+  - 447: Parse NATURAL FULL JOIN
+    Part of #10268
+    Part of #10295
+    Any join with the NATURAL prefix that was not a LEFT or LEFT OUTER JOINwas getting parsed as aNATURAL RIGHT JOIN. This PR allows for NATURAL FULL JOINto be parsed correctly and also prevents invalid joins using theNATURAL` prefix from getting parsed.
+  - 446: Added DISTINCT ON expressions
+    Related PRs:
+    - dolthub/go-mysql-server#3369
+    - dolthub/doltgresql#2181
+  Closed Issues
+  - 1621: Missing index for foreign key error
+ReleaseNotesUrl: https://github.com/dolthub/dolt/releases/tag/v1.81.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

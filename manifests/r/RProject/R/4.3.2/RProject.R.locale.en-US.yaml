@@ -1,0 +1,78 @@
+# Created with YamlCreate.ps1 v2.4.3 $debug=AUSU.CRLF.7-4-6.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: RProject.R
+PackageVersion: 4.3.2
+PackageLocale: en-US
+Publisher: R Core Team
+PublisherUrl: https://www.r-project.org
+PublisherSupportUrl: https://www.r-project.org/help.html
+# PrivacyUrl:
+# Author:
+PackageName: R for Windows
+PackageUrl: https://cloud.r-project.org
+License: GPL-2.0-or-later
+LicenseUrl: https://www.r-project.org/Licenses
+Copyright: Copyright (C) 2023 The R Foundation for Statistical Computing
+# CopyrightUrl:
+ShortDescription: R is a free software environment for statistical computing and graphics.
+Description: |-
+  R is a language and environment for statistical computing and graphics. It is a GNU project which is similar to the S language and environment which was developed at Bell Laboratories (formerly AT&T, now Lucent Technologies) by John Chambers and colleagues. R can be considered as a different implementation of S. There are some important differences, but much code written for S runs unaltered under R.
+  R provides a wide variety of statistical (linear and nonlinear modelling, classical statistical tests, time-series analysis, classification, clustering, …) and graphical techniques, and is highly extensible. The S language is often the vehicle of choice for research in statistical methodology, and R provides an Open Source route to participation in that activity.
+  One of R’s strengths is the ease with which well-designed publication-quality plots can be produced, including mathematical symbols and formulae where needed. Great care has been taken over the defaults for the minor design choices in graphics, but the user retains full control.
+  R is available as Free Software under the terms of the Free Software Foundation’s GNU General Public License in source code form. It compiles and runs on a wide variety of UNIX platforms and similar systems (including FreeBSD and Linux), Windows and MacOS.
+Moniker: r
+Tags:
+- data
+- datascience
+- diagram
+- graph
+- graphics
+- plot
+- rstats
+- statistics
+- stats
+ReleaseNotes: |-
+  NEW FEATURES
+  - The default initialization of the "repos" option from the ‘repositories’ file at startup can be skipped by setting environment variable R_REPOSITORIES to NULL such that getOption("repos") is empty if not set elsewhere.
+  - qr.X() is now an implicit S4 generic in methods.
+  - iconv(to = "ASCII//TRANSLIT") is emulated using substitution on platforms which do not support it (notably Alpine Linux). This should give a human-readable conversion in ASCII on all platforms (rather than NA_character_).
+  - trans3d() gains options continuous and verbose addressing the problem of possible “wrap around” when projecting too long curves, as reported by Achim Zeileis in PR#18537.
+  - tools::showNonASCII() has been rewritten to work better on macOS 14 (which has a changed implementation of iconv()).
+  - tiff(type = "quartz") (the default on macOS) now warns if compression is specified: it continues to be ignored.
+
+  INSTALLATION on a UNIX-ALIKE
+  - There is some support for building with Intel's LLVM-based compilers on ‘x86_64’ Linux, such as (C) icx, (C++) ipcx and (Fortran) ifx from oneAPI 2023.x.y.
+  - There is support for using LLVM's flang-new as the Fortran compiler from LLVM 16.0.x (preferably 17.0.0 or later).
+
+  UTILITIES
+  - R CMD check reports the use of the Fortran 90 random number generator RANDOM_NUMBER() and the subroutines to initialize it.
+    ‘Writing R Extensions’ has example code to use R's RNGs from Fortran.
+
+  BUG FIXES
+  - substr(x, n, L) <- cc now works (more) correctly for multibyte UTF-8 strings x when L > nchar(x), thanks to a report and patch by ‘Architect 95’.
+  - contrib.url(character()) now returns 0-length character() as documented, which also avoids spurious warnings from available.packages() et al. in the edge case of an empty vector of repository URLs.
+  - readChar(., 4e8) no longer fails, thanks to Kodi Arfer's report (PR#18557).
+  - lapply(<list>, as.data.frame) no longer warns falsely for some base vector components.
+  - Communication between parent and child processes in the multicore part of parallel could fail on platforms that do not support an arbitrarily large payload in system functions read()/write() on pipes (seen on macOS where a restriction to INT_MAX bytes is documented, without doing a partial read unlike Linux). The payload is now split into 1Gb chunks to avoid that problem. (PR#18571)
+  - qqplot(x,y, conf.level=.) gives better confidence bounds when length(x) != length(y), thanks to Alexander Ploner's report and patch proposal (PR#18557).
+  - norm(<0-length>, "2") now gives zero instead of an error, as all the other norm types, thanks to Mikael Jagan's PR#18542.
+  - Build-stage Rd macros \packageAuthor and \packageMaintainer now process ‘Authors@R’, fixing ‘NA’ results when the package ‘DESCRIPTION’ omits ‘Author’ and ‘Maintainer’ fields.
+  - Formatting and printing complex numbers could give things like ‘0.1683-0i’ because of rounding error: ‘-0i’ is now replaced by ‘+0i’.
+  - postscript() refused to accept a title comment containing the letter “W” (PR#18599).
+  - isoreg(c(1,Inf)) signals an error instead of segfaulting, fixing PR#18603.
+  - tiff(type = "Xlib") was only outputting the last page of multi-page plots.
+  - tools::latexToUtf8() again knows about ‘\~{n}’ and other letters with tilde, fixing a regression in R 4.3.0, and about ‘\^{i}’ as an alternative to ‘\^{\i}’ (similarly with other accents). Furthermore, LaTeX codes for accented I letters are now correctly converted, also fixing related mistakes in tools::encoded_text_to_latex().
+  - tar(*, tar = "internal") no longer creates out-of-spec tar files in the very rare case of user or group names longer than 32 bytes, fixing PR#17871 with thanks to Ivan Krylov.
+  - When using the “internal” timezone datetime code, adding a fraction of a second no longer adds one second, fixing PR#16856 from a patch by Ivan Krylov.
+  - tools::checkRd() no longer produces spurious notes about “unnecessary braces” from multi-line Rd results of \Sexpr macros.
+ReleaseNotesUrl: https://cloud.r-project.org/bin/windows/base/old/4.3.2/NEWS.R-4.3.2.html
+# PurchaseUrl:
+# InstallationNotes:
+Documentations:
+- DocumentLabel: Manual
+  DocumentUrl: https://cran.r-project.org/manuals.html
+- DocumentLabel: FAQ
+  DocumentUrl: https://cran.r-project.org/faqs.html
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

@@ -1,0 +1,83 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.65.17
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.65.17] - 2026-08-18
+  A safety fix for how SysManager saves its own small settings and history files. Under a specific bit of
+  bad timing, a setting you changed could quietly fail to save — no error, it just would not stick. Most
+  people would never have hit it, but "most" is not "none", and a save that loses your data without saying
+  so is exactly the kind of thing this app must never do.
+  Fixed
+  - A setting or history entry could silently fail to save if two saves of the same file overlapped.
+    SysManager writes these files safely — to a temporary file first, then swaps it into place, so a crash
+    mid-write can never leave a half-written file. But every save of a given file used the same fixed name
+    for that temporary file, and cleaned it up afterwards. If two saves of the same file ran at once — for
+    example the About screen recording its update-check time in the background while you toggled the
+    "check for updates" box — one could delete the other's temporary file mid-swap, and both saves were
+    lost with nothing written and nothing reported. Each save now uses a temporary name only it knows, so
+    overlapping saves can no longer interfere; the last one simply wins. Applied to the shared save helper
+    and to the two Hosts-file writers, which had the same pattern.
+  Verify the download
+  Get-FileHash .\SysManager-v1.65.17.exe -Algorithm SHA256
+  Expected SHA256: FB4FD659C53DFAAC6556E26752E71B3534302B2DC55BCAB8A695B4D09EF0AE75
+  This build is not code-signed, so Windows will warn on first launch. That is
+  expected for a small independent app: see what the warning says and what to
+  click.
+  Code signing is planned through the SignPath Foundation,
+  which provides free certificates to open-source projects, with signing performed by
+  SignPath.io. Until then, the SHA256 above and the build
+  attestation below are what establish that a download is the genuine build.
+  Code signing policy
+  This release is not code-signed. The team roles, release-approval process and
+  privacy policy required by the SignPath Foundation programme
+  are documented in advance under Code signing
+  policy. That
+  documentation is a prerequisite for applying, not evidence of a certificate. The
+  attribution line naming SignPath as the signing provider will appear here once a
+  certificate is actually issued.
+  This program will not transfer any information to other networked systems unless
+  specifically requested by the user or the person installing or operating it. Full
+  privacy policy.
+  Verify where this binary came from
+  This exe was built by GitHub Actions from this public source, and the build is
+  recorded in the Sigstore public transparency log. With the
+  GitHub CLI:
+  gh attestation verify .\SysManager-v1.65.17.exe --repo laurentiu021/SystemManager
+  That proves which commit and workflow produced this exact binary, something the
+  SHA256 file cannot show, since it is published alongside the exe it describes.
+  Each release also ships SysManager-v1.65.17.sbom.json, a CycloneDX inventory of
+  every dependency resolved for this build.
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.65.17
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

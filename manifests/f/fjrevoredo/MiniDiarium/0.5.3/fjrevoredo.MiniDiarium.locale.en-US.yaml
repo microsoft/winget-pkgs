@@ -1,0 +1,75 @@
+# Created using wingetcreate 1.12.8.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: fjrevoredo.MiniDiarium
+PackageVersion: 0.5.3
+PackageLocale: en-US
+Publisher: fjrevoredo
+PublisherUrl: https://mini-diarium.com/
+PublisherSupportUrl: https://github.com/fjrevoredo/mini-diarium/issues
+PrivacyUrl: https://github.com/fjrevoredo/mini-diarium/blob/master/docs/PRIVACY.md
+Author: Francisco J. Revoredo
+PackageName: Mini Diarium
+PackageUrl: https://github.com/fjrevoredo/mini-diarium
+License: MIT
+LicenseUrl: https://github.com/fjrevoredo/mini-diarium/blob/master/LICENSE
+Copyright: Copyright (c) 2026 Francisco J. Revoredo
+ShortDescription: Encrypted, local-first journaling app
+Description: A local-first journal with serious encryption. Free, open source, and never touches the internet.
+Moniker: mini-diarium
+Tags:
+- privacy
+- journaling
+- journal
+- diary
+- foss
+- open-source
+- rust
+ReleaseNotes: |-
+  What's Changed
+
+  Your journal images are now stored once and shared across entries — paste the same photo into ten
+  different days and it counts as one. Browse every image you've ever saved with the new visual media
+  picker, then insert any of them back with a double-click. Fonts also get a major upgrade: each entry
+  can have its own font family and size, independent of the app default, and the toolbar font controls
+  now format whatever text you've selected. Links finally work the way you'd expect — custom display
+  text, auto-prefixed URLs, and an "Open link" button to preview before applying. This release turns
+  your journal into a true rich-media notebook.
+
+  Added
+  - Image deduplication: images are now stored once in a content-addressed encrypted store inside
+    diary.db and referenced by ID. Inserting the same image into multiple entries shares one encrypted
+    copy. All export paths (JSON, Markdown, Rhai plugins) resolve image references back to data URLs
+    before exporting, preserving full compatibility. Legacy entries that still embed data URLs
+    continue to display and export correctly; existing saved entries migrate on their next save, and
+    Mini Diarium JSON imports now normalize embedded data:image/... content into the encrypted image
+    store during import.
+  - "Insert existing image" media picker: browse and reuse any image previously saved in the journal
+    through a visual thumbnail picker with sort, month filter, preview metadata, load-more pagination,
+    explicit Insert action, and double-click insertion. The picker loads encrypted thumbnail summaries
+    first and decrypts full image data only for the image being inserted. Inserted images are reused
+    verbatim (no canvas re-encode), ensuring the stored copy is deduplicated correctly.
+
+  Changed
+  - save_entry now extracts embedded data-URL images atomically into the image store on each save,
+    reducing stored entry size for entries with images. All writes (image extraction, link update,
+    entry text rewrite) are committed in a single database transaction.
+  - Link dialog now has a Display text field: you can override the visible label of a link directly in
+    the dialog (instead of the URL always being the label). Bare domains like example.com are
+    auto-prefixed with https://, email addresses become mailto: links, and phone numbers become tel:
+    links. The dialog also includes an "Open link" button so you can verify a URL before applying it.
+  - Editor toolbar font controls apply inline formatting: the font family and font size dropdowns in
+    the toolbar now apply inline marks to the selected text, instead of changing the global
+    preference. Preferences still controls the app-wide defaults that appear when an entry has no
+    entry default and no inline formatting on the selection.
+
+  Fixed
+  - External link opening now enforces safe protocols consistently: editor link opening paths now
+    normalize and allow only http, https, mailto, and tel targets. Unsafe stored or imported protocols
+    are ignored instead of being passed to the opener plugin.
+ReleaseNotesUrl: https://github.com/fjrevoredo/mini-diarium/releases/tag/v0.5.3
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/fjrevoredo/mini-diarium/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

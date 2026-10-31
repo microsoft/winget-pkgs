@@ -1,0 +1,70 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jdx.usage
+PackageVersion: 6.11.1
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://jdx.dev/
+PublisherSupportUrl: https://github.com/jdx/usage/issues
+Author: Jeff Dickey
+PackageName: usage
+PackageUrl: https://usage.jdx.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+ShortDescription: A specification for CLIs
+Description: |-
+  Usage is a spec and CLI for defining CLI tools. Arguments, flags, environment variables, and config files can all be defined in a Usage spec. It can be thought of like OpenAPI (swagger) for CLIs. Here are some potential reasons for defining your CLI with a Usage spec:
+
+  - Generate autocompletion scripts
+  - Generate markdown documentation
+  - Generate man pages
+  - Generate type-safe SDK client libraries for TypeScript, Python, and Rust
+  - Use an advanced arg parser in any language
+  - Scaffold one spec into different CLI frameworks-even different languages
+  - [coming soon] Host your CLI documentation on usage.sh
+Moniker: usage
+Tags:
+- cli
+- spec
+ReleaseNotes: |-
+  The help, completion, parse-error and metadata code that usage-argv adds to a #[derive(Cli)] binary is substantially smaller, with byte-identical output, and coloured help pages no longer colour author text that happens to look like a heading or a flag row.
+  Fixed
+  - (help) Coloured help colours only the structure the renderer itself writes (#1480, @jdx). Colour used to be applied by matching every finished line against the page's headings, synopsis and row usages, so a line reading Flags: in after_help/before_help/about, or heading prose that began with a flag's spelling such as -f, --force overrides the *lock*, came out styled as a heading or a flag row. Headings, the synopsis, row usages and command names are now coloured as they are written, and the remaining pass over the page applies only Markdown emphasis (**bold**, *italic*, `code`, ~~strike~~), still skipping $ example lines. Plain (non-TTY) output was never affected and is unchanged.
+
+  Changed
+  - (argv) Less code and static data per derived CLI (#1469, #1471, #1476, #1475, #1477, #1478, @jdx). Help rows for -h and --help go through one renderer, coloured-help structure is collected while the page is written instead of by a second metadata walk, the __complete_word__ handler and the value-binding/error-exit code that the derive used to expand into every CLI now live in the runtime, the parse-error renderer builds messages from data instead of per-error formatting code, and cold-path lists (help rows, completion candidates, "did you mean" suggestions) share one stable sort instead of six monomorphised quicksorts. View-related branches fold away entirely for CLIs that declare no views. Help, error, spec and completion output was compared byte for byte before and after each change and is identical; a completion request now also walks the command line once instead of twice.
+  - (argv) Smaller metadata tables (#1470, #1472, #1474, @jdx). Rarely declared flag fields (relations, deprecation, validation, bounds, hidden aliases, spec-only metadata) moved into FlagExtra behind FlagMeta::extra, and rarely declared command fields (deprecation, help prose, examples, headings, outputs, layout settings, clause, exit codes) into CommandExtra behind CommandMeta::extra; every flag or command that declares none of them points at one shared static. Clauses are stored by reference and display_order, variadic bounds and terminal widths are narrowed to u32/u16. A FlagMeta shrinks from 664 to 168 bytes and a CommandMeta from about 600 to 472. Declared values too large for the narrower types now saturate rather than wrap (a display_order above u32::MAX sorts last; term_width = 0 still disables wrapping).
+    Measured on oxlint and oxfmt with their release profile (opt-level 3, fat LTO, one codegen unit, linux x86_64), the first two changes alone cut what usage-rs adds over bpaf from about 219 KB to 138 KB for oxlint (from 169 KB to 114 KB for oxfmt), and each of the remaining changes took a further 1 to 14 KB off.
+
+  Breaking Changes
+  Only code that reads or hand-writes usage-argv metadata tables directly is affected; CLIs built with #[derive(Cli)], Args or ArgGroup need no changes.
+  - Fields moved off FlagMeta and CommandMeta are reached through extra (#1470, #1472):
+    // before
+    if let Some(reason) = meta.deprecated { /* … */ }
+    // after
+    if let Some(reason) = meta.extra.deprecated { /* … */ }
+    // hand-written table
+    static META: CommandMeta = CommandMeta {
+        cmd: &CMD,
+        about: Some("…"),
+        extra: &CommandExtra {
+            deprecated: Some("use `new`"),
+            ..CommandExtra::EMPTY
+        },
+        ..CommandMeta::EMPTY
+    };
+    ..FlagMeta::EMPTY and ..CommandMeta::EMPTY already point at the shared NO_FLAG_EXTRA/NO_COMMAND_EXTRA, so entries with no extras keep working unchanged.
+  - Command::clause is now Option<&Clause> and CommandMeta::clause (now under extra) is Option<&ClauseMeta>, so hand-written tables borrow the clause: clause: Some(&TASKS). display_order, var_min/var_max and value_var_min/value_var_max are Option<u32>, and term_width/max_term_width are Option<u16>; integer literals need no change, but code that read them as usize needs a conversion (#1474). Event::ClauseSeparator still carries the Clause by value.
+
+  💚 Sponsor usage
+  usage is built and maintained by @jdx, an open source developer at entire.io, the title sponsor of his open source work.
+  If usage powers CLI specs, docs, or completions for a tool you maintain or use, please consider becoming an individual or company sponsor. Your support funds ongoing development and helps keep usage fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/usage/releases/tag/v6.11.1
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://usage.jdx.dev/cli/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

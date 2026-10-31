@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.6.0.schema.json
+# Installer-Manifest fuer das MSI aus dem Release-Workflow.
+# Zielort: manifests/l/LeonAchteresch/l8db/<PackageVersion>/LeonAchteresch.l8db.installer.yaml
+#
+# Artefaktname: Tauri/WiX benennt das MSI "<productName>_<version>_<arch>_<language>.msi",
+# der Windows-Job in .github/workflows/release.yml baut ohne --target, also x64:
+#   l8db_<version>_x64_en-US.msi
+# (Der NSIS-Installer l8db_<version>_x64-setup.exe wird zwar ebenfalls gebaut und
+#  vom Updater bevorzugt (updaterJsonPreferNsis: true), fuer winget ist das MSI aber
+#  die robustere Quelle: feste ProductCode-/Upgrade-Semantik statt NSIS-Heuristik.)
+#
+# PRO RELEASE ZU AKTUALISIEREN: PackageVersion, InstallerUrl, InstallerSha256, ReleaseDate.
+# InstallerSha256 unten ist ein PLATZHALTER. Ermitteln mit:
+#   Get-FileHash .\l8db_0.1.0_x64_en-US.msi -Algorithm SHA256
+# oder komplett automatisch:
+#   wingetcreate update LeonAchteresch.l8db --version 0.1.0 --urls <installer-url>
+
+PackageIdentifier: LeonAchteresch.l8db
+PackageVersion: 0.4.1
+InstallerLocale: en-US
+MinimumOSVersion: 10.0.17763.0
+InstallerType: wix
+Scope: machine
+InstallModes:
+  - interactive
+  - silent
+  - silentWithProgress
+UpgradeBehavior: install
+ReleaseDate: 2026-09-09
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/Leon-Achteresch/l8db/releases/download/v0.4.1/l8db_0.4.1_x64_en-US.msi
+    InstallerSha256: 12fd1ce7377fa7b1a7ede191ab7f3def8ca7d71878314ba6d16bd5b2d8822dde
+    ProductCode: '{995CD394-8102-4AAC-B3F9-821CEE96B707}'
+ManifestType: installer
+ManifestVersion: 1.6.0

@@ -1,0 +1,95 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: DavidEngelhart.Termpolis
+PackageVersion: 1.53.0
+PackageLocale: en-US
+Publisher: Termpolis
+PublisherUrl: https://github.com/codedev-david
+PublisherSupportUrl: https://github.com/codedev-david/termpolis/issues
+PrivacyUrl: https://github.com/codedev-david/termpolis/blob/HEAD/PRIVACY.md
+Author: David Engelhart
+PackageName: Termpolis
+PackageUrl: https://termpolis.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/codedev-david/termpolis/blob/HEAD/LICENSE
+Copyright: Copyright 2026 David Engelhart
+ShortDescription: The open-source multi-agent terminal where Claude, Codex, Gemini, and Qwen work together as a team — without your source code leaving the machine.
+Description: |-
+  Termpolis is a cross-platform desktop terminal manager (Windows, macOS, Linux) built on Electron + React + TypeScript with node-pty powering the underlying shells. It ships as a native app, code signed on Windows, notarized on macOS.
+  What makes it different:
+  - Secure AI-assisted development. Built-in AI Security Center auto-scans every AI prompt against 70+ secret patterns, enforces Gemini paid-tier mode, and keeps an auditable JSONL log of every AI-agent terminal launch — every check runs locally.
+  - Multi-agent swarm. Claude Code, Codex, Gemini CLI, and Qwen Code work together on a task. A dedicated Claude Code instance acts as the conductor.
+  - MCP server baked in. AI agents control Termpolis via Model Context Protocol, open terminals, run commands, send messages.
+  - Transparent routing. Every subtask shows which agent got it, why, and what it cost.
+  - Activity observability. Every token, every tool call, every message from every agent is visible in real time.
+  - Intervention controls. Pause, cancel, or steer any agent mid-task without leaving the feed.
+  - Shared memory. A RAG-backed memory store that any agent can read and write via MCP.
+  - MCP-native end to end. All four agents speak MCP — no terminal-output parsers, no glue scripts, no bridge code paths.
+  - Share-ready output. One shortcut from terminal to Slack, Teams, or a PR — see Copy for Slack / Teams / PRs.
+Tags:
+- ai
+- command-line
+- console
+- terminal
+ReleaseNotes: |-
+  Linked machines: fixes from a security review
+  - Plain ws:// relays are refused.
+    - Termpolis reaches a relay only over wss://. Plain ws:// works only for a relay on this computer (localhost or 127.0.0.1).
+    - A ws:// address an older version saved is kept but not used, so phones and linked computers stay offline until you change it. Settings ▸ Remote and ▸ Linked machines say so, and Settings ▸ Remote offers Use the default relay.
+  - Vendor tokens and private-key blocks are taken out of prompts and answers.
+    - Both computers screen what crosses. A token whose own shape names it (sk-ant-…, ghp_…, AKIA…, xox…) is replaced with [REDACTED:<rule>]. So is a private-key block written as lines or as \n escapes (as in a JSON file), once it holds key material.
+    - Anything else that looks like a credential is left in, and your agent is told which rules matched.
+    - The AI Security audit log counts both (Linked: removed / Linked: possible).
+  - Edit permission is never granted with a code.
+    - A new computer starts read-only. Edit goes on only from its row, after you confirm, with Allow edit. Edit that 1.50–1.52 granted with a code is dropped when you confirm that computer.
+    - Codex edit jobs now run with the network off in Codex's sandbox, so a job that needs the network fails. On Windows, treat a Codex edit job as full access, like Claude and Gemini.
+  - You see what other computers run here.
+    - Each job another computer starts here shows a notification (on by default, where the system can show them). It is also listed under Job history on this computer, which is kept across restarts.
+    - A running job can be stopped with Stop under Activity.
+    - The job's first line is shown with possible credentials masked.
+  - Delegated jobs stay out of memory. A job another computer ran here no longer becomes this computer's memory. What 1.50–1.52 already stored from such jobs is demoted once: still stored and still found, but ranked lower.
+  - Keys are never replaced behind your back.
+    - If the keychain can't open this computer's keys, Termpolis no longer makes new ones over them. Before 1.53 that lost every pairing.
+    - Instead, no phone or linked computer connects, and links can't be made or changed, until the keychain opens them again. Both panes say why.
+    - Start over… makes new keys and sets the old files aside, never deleting them. Every phone and linked computer then has to pair again; if only the links file is locked, only the links.
+    - On Linux without a keyring, both panes warn you. Encrypt keys now encrypts the keys once one is available after a restart.
+  - Safer pairing.
+    - The confirm card and the "No answer" message say that no words, or different words, on the other screen mean someone else used the code.
+    - The Remote and Linked machines handshake now uses a random counter and accepts at most one greeting a second. That closes a nonce reuse a hostile relay could have used to forge a greeting. Phone app 1.1.0 keeps working.
+  - Workflow Skill steps are rate-limited and audited.
+    - A Skill step's tool call counts against the MCP rate limits, in limits of its own so a looping workflow can't block your agents, and is written to the MCP audit log. linked_machines is the exception: agents and workflows share its 30 calls a minute.
+    - A Skill step whose tool answers with an error now fails (1.52 marked it succeeded), and a step's own Timeout (ms) is now enforced.
+  Memory
+  - The memory key is never overwritten or deleted.
+    - If this computer can't open it, memory comes up locked: nothing is lost and no new memory is saved.
+    - The Memory panel says why, and Memory & Learning says "Memory is locked" instead of calling your brain empty.
+    - An agent whose memory write is refused is told that memory is locked, why, and to open the Memory panel.
+  - Start a new memory key… sets the old key aside and starts a new one, so memory saves again.
+    - Older memories stay on disk but can't be read until the old key works again; Termpolis retries it at every launch.
+    - This needs a working OS keychain.
+  - Turning Store vectors as int8 on or off no longer reloads memory without its key. In 1.52 an encrypted brain then read as empty, and history was re-indexed in plain text.
+  - Memories archived from now on are encrypted under the memory store's key, when memory is encrypted. Entries an earlier version archived stay plain text for now.
+  - Headless runs (termpolis-cli exec, agent_exec) no longer store the recalled project memory back into memory.
+  - Windows: a memory file that an interrupted swap left only as its .replaced copy is put back at launch, not recreated empty.
+  - Cross-machine sync is unavailable in this version. The old shared-folder design could lock or overwrite a computer's memory, so it is being rebuilt. A sync an earlier version switched on can still be turned off. Each computer keeps its own memory.
+  Fixes
+  - Settings toggles now slide their knob to the right when on. Before, only the colour changed.
+  - Windows: your private files are locked to you, whatever your account name.
+    - Termpolis now grants your account full control of mcp-token, mcp-port and the workspace-trust stores in one step, by its full DOMAIN\name. An account whose name has a space or an accent, or that shares its name with a local account, is no longer locked out.
+    - A trust list or set of import approvals that an older version locked you out of is read again. Before, it read as empty and the next save overwrote it.
+    - If the token can't be written, the rest of Termpolis still starts, and the app log says [mcp-token] could not write.
+  - The git mark
+    - It no longer takes the ~ in an ssh or WSL prompt for your own home folder, unless that prompt looks like your own shell's.
+    - In Git Bash on Windows with shell integration off, it follows cd again; that was broken in 1.52.0.
+  Under the hood
+  - Tailwind CSS 4, set up to produce the CSS Tailwind 3 did, with a CI check on the built CSS. The documented screens were compared pixel by pixel before and after, and the only visible change is the toggle knobs.
+  - npm audit reports nothing for the app.
+  - Windows end-to-end tests now gate every release.
+  Full Changelog: https://github.com/codedev-david/termpolis/compare/v1.52.0...v1.53.0
+ReleaseNotesUrl: https://github.com/codedev-david/termpolis/releases/tag/v1.53.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://termpolis.com/docs.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

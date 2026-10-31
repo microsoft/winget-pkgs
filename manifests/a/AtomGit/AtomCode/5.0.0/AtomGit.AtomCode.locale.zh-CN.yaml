@@ -1,0 +1,209 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AtomGit.AtomCode
+PackageVersion: 5.0.0
+PackageLocale: zh-CN
+Publisher: 重庆开源共创科技有限公司
+PublisherUrl: https://atomgit.com/
+PublisherSupportUrl: https://atomgit.com/atomgit_atomcode/atomcode/issues
+PrivacyUrl: https://docs.gitcode.com/docs/help/home/protocol/privacy-policy
+Author: 重庆开源共创科技有限公司
+PackageName: AtomCode
+PackageUrl: https://atomcode.atomgit.com/
+License: MIT
+LicenseUrl: https://atomgit.com/atomgit_atomcode/atomcode/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Yubang Xu
+CopyrightUrl: https://docs.gitcode.com/docs/help/home/protocol/ai-privacy-policy
+ShortDescription: AI 编程助手 在你的终端中运行
+Description: Claude Code / Cursor Agent 的开源平替，住在你的终端里。连接任意 OpenAI 兼容大模型，自主读文件、改代码、跑测试、自我验证 —— 用 Rust 构建。
+Tags:
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  AtomCode v5.0.0 Release Notes
+  发布日期：2026-07-17
+  v5.0.0 是 AtomCode 的重大版本更新，引入了用量统计（/usage）、离线模式、持久化任务面板、底部审批面板、模式切换系统、插件管理器重构、记忆工具、并发只读工具执行等核心新能力，以及多项终端渲染优化。
+
+  ⚠️ Behavior Changes（注意行为变化）
+  - /cost 命令替换为 /usage：旧的 /cost 显示已退役，由功能更全面的 /usage 用量统计命令替代
+  - todo 工具合并到 todowrite：todo 和 todowrite 合并为单一工具，两种调用形态（对用户无直接影响，但模型行为统一）
+  - /issue 和 fixissue 功能移除：删除了核心中的 atomgit 相关功能和 /issue 命令
+  - 工具输出上限降至 64KB：单个工具输出上限从 256KB 降至 64KB，超出部分头尾截断，有助于减轻长会话上下文膨胀
+  - v1 引擎完全退役：移除遗留的 v1 AgentLoop 引擎、DaemonTurnExecutor、v1 工具脚手架，--engine 标志不再需要
+
+  ✨ 新增功能（Features）
+  /usage 用量统计
+  - 用量统计命令：/usage 命令打开用量统计弹窗，替代旧的 /cost 显示
+  - 用量概览：60 天用量统计摘要，包含连续使用天数、总对话数、总 Token 消耗等指标
+  - 热力图日历：Claude Code 风格热力图，展示每日活动强度，支持深浅色主题
+  - 折线图趋势：盲文折线图展示每日 Token 用量趋势
+  - 进度条总览：用量进度条展示当前周期的使用量
+  - 分模型统计：按模型分别展示用量统计表格
+  - Ctrl+C 一键复制：用量数据一键复制到剪贴板
+  - 国际化支持：完整中英文文案
+  离线模式
+  - 自动离线检测：web_search 连接失败时自动切换为离线模式
+  - 手动离线配置：ATOMCODE_OFFLINE=on 环境变量或 OfflineMode 配置项
+  - 离线工具裁剪：离线时自动移除 web_fetch、web_search 工具
+  - 离线环境提示：TUI 和守护进程启动时显示离线环境标识
+  - 跳过自动更新：离线时跳过插件市场和二进制自动更新
+  - 禁用遥测：离线模式下自动禁用遥测上报
+  持久化任务面板
+  - 底部任务面板：任务面板固定在输入框上方，实时显示当前任务列表
+  - 持久化状态：任务列表面板跨会话持久化，支持 resume 后恢复
+  - 增量更新：todowrite 支持增量更新单条任务，弱模型也能正确维护
+  - 自动续跑：未完成任务自动触发续跑，防止模型中途漂移
+  - 完成即标记：任务完成后自动标记为完成，不再重复提示
+  - /todo clear：一键清空所有任务
+  - 任务对账：每轮注入待办锚点，对账兜底弱模型漂移
+  插件管理器重构
+  - 插件详情页：支持查看已安装插件的详细信息、版本、作用域
+  - 市场详情页：查看市场详情，包含自动更新开关、卸载等操作
+  - 搜索过滤：插件列表支持搜索框过滤，类似 HTML 输入框的交互
+  - 已安装标识：市场中已安装的插件显示绿色勾选标记
+  - 安装作用域：显示插件安装的作用域（用户/项目）
+  - 更新插件：支持强制重新安装/克隆插件以更新
+  - 卸载确认：卸载插件时弹出黄色确认框，防止误操作
+  - 移除市场：移除市场时自动卸载该市场下的所有插件
+  - 禁止移除官方市场：保护官方市场不被误移除
+  - 扁平列表布局：2 行展示，包含描述和状态，取消星级评分改用分类标签
+  - 安装即关闭：安装成功后自动关闭插件管理器弹窗
+  底部审批面板
+  - 输入框下方审批：审批面板从独立弹窗改为输入框下方紧凑面板
+  - 方向键选择：支持方向键上下选择审批选项，回车确认
+  - Esc/Yan 操作：支持 Esc 取消、Y 确认等快捷键
+  - 审批标题：审批卡片显示正在审批的操作名称
+  - 目录级授权：工作区外写入的"总是允许"改为目录级授权（类似 Codex grant_root），工作区外破坏性 Bash（rm/mv/cp/dd/重定向）弹审批
+  模式切换系统
+  - 统一模式枚举：新增统一的执行模式（Mode）枚举，包含 Build、AcceptEdits、Auto、Plan 四种模式
+  - Tab 切换：运行中也能用 Tab/Shift+Tab 切换模式
+  - /auto 命令：新增 /auto 命令，切换到 Auto 模式（自动 bypass 审批）
+  - 模式徽标：统一左侧模式徽标显示（⏸ Plan / ⏵⏵ Auto）
+  - i18n 标签：完整中英文模式标签
+  - accept edits 模式：编辑免审批，仅 bash 仍询问，对齐 Claude Code（对应 AcceptEdits 模式变体，通过 Tab 循环切换进入）
+  并发只读工具
+  - 并行执行：只读工具（如 read_file、grep、glob）并发执行，最多 4 个并行
+  - 智能分类：parallel_safe() 分类系统，自动判断工具是否可并行
+  - 只读 Bash 并行：cd <path> && <read-only> 等只读 Bash 命令也支持并行
+  - 批次标签：并行批次显示 in parallel 标签，实际并发时才显示
+  - Steer 机制：中间轮次产生的工具调用自动折叠到当前轮次显示，长任务续跑时上下文更清晰
+  LLM 记忆工具
+  - 新 memory 工具：模型可调用 memory 工具（remember/forget/list）持久化学习
+  - 自动去重：append_deduped 跳过完全重复的记忆条目
+  - /remember /forget 命令：用户可直接在 TUI 中管理记忆
+  - Persona 提示：系统提示引导模型使用记忆工具记录非显而易见的发现
+  /init 智能初始化
+  - LLM 驱动初始化：/init 改为由 LLM 分析仓库后自动生成 AGENTS.md，替代静态生成器
+  - INIT_PROMPT：提示模型分析仓库结构、约定和配置，写出高质量的项目指令文件
+  桌面应用 /desktop
+  - /desktop 命令：检测并启动 AtomCode 桌面应用，未安装时显示下载链接
+  - 跨平台检测：支持 macOS 和 Windows 桌面应用检测
+  - open_file 支持 URL：open_file 工具新增支持 http:// / https:// URL 打开
+  终端渲染优化
+  - 像素风吉祥物：欢迎页新增像素风吉祥物，支持 9 格宽 + 右上瞳孔
+  - 数据驱动欢迎页：双栏欢迎页，左侧吉祥物，右侧数据驱动使用提示
+  - 智能提示池：欢迎页随机展示使用提示，包含 15 条命令说明
+  - Bash 命令折行：Bash 命令按 shell 边界智能折行渲染，洋红 $ 前缀
+  - Diff 渲染优化：新增行号列、+N −M 紧凑摘要、⋮ hunk 间隔、25 行截断，红绿按主题色柔化，整体类似 GitHub 风格差异展示
+  - 工具块呼吸感：工具块前留 1 空行，增加视觉呼吸感
+  - 限速 spinner：限制 spinner 帧率，不再随 Token 洪水乱转
+  引擎稳定性
+  - Kernel 原生路径：守护进程新增 kernel 原生运行时路径（ATOMCODE_DAEMON_ENGINE=kernel）
+  - 流空闲重连：流空闲超时自动重连（最多 5 次），Codex 对齐
+  - 超窗应急压缩：超窗请求发送前先应急压缩，而非只警告后硬发
+  其他新增
+  - WebUI 改进：边栏显示 MCP 服务器状态、登录状态指示器
+  - Bash 安全增强：AST 树解析的 is_read_only_bash 分类器，替代手写规则；系统临时目录视为可写；git 丢弃未提交工作的命令触发审批
+  - MCP 权限增强：destructiveHint:true 覆盖 readOnlyHint（审批不跳过）
+  - Plan 模式 MCP 授权持久化：跨 respawn 保留
+  - Hook 测试命令：atomcode hook test 命令行，支持完整 hook 执行
+  - JetBrains 插件本地化：齿轮菜单标签本地化
+  - 跨 Agent 技能发现：~/.agents/skills 和 .agents/skills 目录支持
+  - 窄窗口适配：超宽 Token 簇级折断 + 路径 ~/ 缩短
+  🛠 修复（Fixes）
+  TUI 渲染
+  - 修复浅色主题 Markdown 行内代码/标题颜色丢失问题
+  - 修复 256 色 SGR（38;5;N / 48;5;N）解析支持
+  - 修复 Solarized Dark 等深色主题下模态标签栏颜色异常
+  - 修复 diff 中未变化 Context 行颜色暗淡问题
+  - 修复 input caret 在 Windows Terminal 上满行时超出右边缘
+  - 修复欢迎页提示在 resize 时重新滚动的问题
+  - 修复吉祥物半块透明显示 + 非 Unicode 终端省略
+  - 修复 plan 模式徽标 ⏸ 前的残留字形
+  - 修复 thinking spinner 半月圆太大问题
+  - 修复多行 diff 中 dashes 开头的行不被删除的问题
+  - 修复 resize 时 stale approval_block_rows 计数吃掉正文的问题
+  - 修复实时 bash 在 commit 时渲染块绕过静态分支路径
+  插件管理器
+  - 修复 Add Marketplace 输入框光标列偏移
+  - 修复插件子页面之间 Tab 切换问题
+  - 修复插件安装作用域选项在安装过程中保持可见
+  - 修复安装作用域在控制台输出中的显示
+  - 修复已安装插件列表不在 Browse 界面排除的问题
+  - 修复安装异步完成后自动关闭弹窗
+  - 修复 relay-client 下载和查找路径问题
+  任务面板
+  - 修复 Esc 取消后 Todo 面板消失不再出现的问题
+  - 修复 Todo 头部 ☑ 偶发顶掉后一字（"Todos"→"To os"）
+  - 修复切换空白会话时 Todo 面板未重置
+  - 修复 /bg 后台化时未重置 Todo 面板
+  - 修复 Todo 面板使用 done-count 折叠替换为窗口最近项
+  - 修复 TodoHook 注册进生产路径（之前只在测试/示例跑）
+  审批
+  - 修复审批拒绝的错误消息回显整条工具参数的问题
+  - 修复审批面板在 todo 面板下方的绘制位置
+  - 修复 plain 模式审批提示文本恢复
+  - 修复审批面板在 resize 时清除 menu 状态丢帧
+  Bash 安全
+  - 修复 >&file 重定向被错误识别为 fd-dup（改为写操作，拒绝）
+  - 修复 &N 后台化 fd-dup 漏洞
+  - 修复裸数字重定向目标写入文件（> 9 写文件）
+  - 修复 cd 参数中反斜杠的安全问题
+  - 修复 sort/uniq/tree 通过 flag 写文件的问题
+  - 修复 open() FFI 声明在 TTY-detach 中的问题
+  - 修复 cd <path> && <write> 绕过只读分类的问题
+  - 修复进程内权限授予跨引擎 respawn 丢失的问题
+  内存 / 压缩
+  - 修复压缩后持久化前报告成功的问题
+  - 修复压缩空闲恢复丢失问题
+  - 修复压缩锚定摘要中的提示注入
+  - 修复跨 reload 和 sync 的压缩状态过期
+  Provider / 网络
+  - 修复 stream_timeout 在剩余 provider 站点（acp/clix/review）的传递
+  - 修复开流瞬态失败时自动重建 client 清池（解除"需 /login 才能用"）
+  - 修复 TimedOut 归类为瞬态传输错误
+  - 修复 SseDecoder 中退化流的提前终止
+  - 修复认证 windows-sys 缺少 Win32_Foundation
+  WebUI
+  - 修复 /live 自动重连，防止空闲后提示丢失
+  - 修复刷新中断轮丢会话 — 落盘加净丢失守卫防旧状态覆盖
+  - 修复边栏显示远程 HTTP MCP 服务器状态
+  - 修复代码块渲染（守护进程剥离为 artifact 事件时）
+  - 修复登录状态指示器反映真实 Token 有效性
+  - 修复 VSCode 按工作区过滤会话
+  其他修复
+  - 修复 prompt 提示优先级：AGENTS.md/全局规则 > 内置 persona
+  - 修复每轮状态提醒去掉分秒时钟，只保留日期
+  - 修复假完成护栏：去掉每轮回合倒计时，防止上下文压力下模型提前结束
+  - 修复 memory.md 规则在系统提示中的优先级
+  - 修复 hooks list 显示所有 hook 类型计数
+  - 修复 open_url Windows 平台 URL 引号保护
+  - 修复 HarmonyOS PC 平台徽章 URL 中的空格编码
+  - 修复 save 中相对导出从活动目录解析
+  - 修复 sync 模式工作目录不同步和 tokio 阻塞写 panic
+  - 修复 verify cadence 提示仅在工作区内编辑时触发
+  - 修复 MCP 注册表 RwLock 中毒恢复
+  - 修复 daemon 过滤系统临时目录和无会话目录
+  - 修复 docs 英文页面 lang 属性错误（zh-CN → en）
+ReleaseNotesUrl: https://atomgit.com/atomgit_atomcode/atomcode/releases/v5.0.0
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://atomcode.atomgit.com/docs/zh/index.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

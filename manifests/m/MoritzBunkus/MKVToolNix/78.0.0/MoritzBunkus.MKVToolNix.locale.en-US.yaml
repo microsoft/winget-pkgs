@@ -1,0 +1,48 @@
+# Created using wingetcreate 1.2.7.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.4.0.schema.json
+
+PackageIdentifier: MoritzBunkus.MKVToolNix
+PackageVersion: 78.0.0
+PackageLocale: en-US
+Publisher: Moritz Bunkus
+PublisherUrl: https://www.bunkus.org/
+PublisherSupportUrl: https://mkvtoolnix.download/community.html
+PrivacyUrl: https://mkvtoolnix.download/privacy-policy.html
+Author: Moritz Bunkus
+PackageName: MKVToolNix
+PackageUrl: https://mkvtoolnix.download/
+License: GPL-2.0
+LicenseUrl: https://gitlab.com/mbunkus/mkvtoolnix/-/blob/main/COPYING
+Copyright: © 2002 – 2023 Moritz Bunkus
+ShortDescription: MKVToolNix is a set of tools to create, alter and inspect Matroska files under Linux, other Unices and Windows.
+Tags:
+- mkv
+ReleaseNotes: |-
+  New features and enhancements
+  - MKVToolNix GUI: header editor: for files that only contain legacy track language elements but no IETF language elements the header editor will now derive the IETF language elements from the legacy elements. See #3557.
+  - AppImage: the AppImage is now built on AlmaLinux 8 with Qt 6.5.1. This means that the minimum glibc version this AppImage is compatible with has also been bumped, to v2.28. The oldest Debian coming with this version is Debian 10 "Buster"; for Ubuntu it's 18.10 "Cosmic Cuttlefish".
+  - Windows installer: the installer will now remove the file dataportable-app if it's present in the installation directory as its presence would signal to the app to run in portable mode, requiring write access to its base directory. This fixes some installation issues that could occur when a user extracted a portable app archive into a folder like C:Program FilesMKVToolNix. Also added an installation check for the same issue. See #3558.
+
+  Bug fixes
+  - all: Linux: if initializing the locale system based on the system's settings fails, e.g. if environment variables such as LC_ALL have been set to fr_FR.UTF-8 but the locale for fr_FR.UTF-8 hasn't been built, MKVToolNix will try to fall back to en_US.UTF-8 first & C.UTF-8 second. If neither of the three succeeds, an error message will be shown, and the program will abort. This fixes the programs not catching an exception from the boost::filesystem library which doesn't cope with mis-configured locale systems well. Workaround for #3574.
+  - mkvmerge: sorting tracks by type did not work properly when some tracks weren't copied. Part of the fix of #3567.
+  - mkvmerge: track numbers in the destination file were assigned out-of-order when the track order in the source files differs from the one in the destination file. Now they're assigned sequentially in the order the tracks appear in the destination file again. Part of the fix of #3567.
+  - MKVToolNix GUI: under certain circumstances the GUI would try to display error messages from a secondary thread, which isn't allowed in Qt, causing to program to either hang or outright crash. Part of the fix of #3556 & #3561.
+  - MKVToolNix GUI: the GUI will check for several potential installation issues wrt. to having write access to certain directories (system's temporary directory, MKVToolNix's file identification cache directory and others) & display proper error messages if not. Part of the fix of #3556 & #3561.
+  - MKVToolNix GUI: header editor: fixed the application crashing whenever you change a property below the "segment information" node. This bug was introduced in v77. Fixes #3556.
+  - MKVToolNix GUI: header editor: when reading files that only contain legacy track language elements but no IETF track language elements, the header editor was showing all tracks as having "English" as the language. This bug was introduced in v77. Fixes #3557.
+  - MKVToolNix GUI: header editor: when a legacy track language element contains a country code (e.g. fr-CA), the header editor was wrongfully using und = "undetermined" as the language for that element. Now it'll use the language from the language/country pair, which would be fr in the earlier example. Part of the fix of #3557.
+  - MKVToolNix GUI: header editor: the keyboard shortcuts from the "modify selected track" sub-menu didn't work right after opening a file. They only started working after opening the "header editor" menu. Fixes #3573.
+  - AppImage: fixed the GUI resources (e.g. icons) not being found.
+  - AppImage: the Qt plugins required for using compose key/dead keys are now included. Fixes #3577.
+
+  Build system changes
+  - The compilation database (compile_commands.json) is now always built. The variable BUILD_COMPILATION_DATABASE is not evaluated anymore.
+ReleaseNotesUrl: https://mkvtoolnix.download/doc/NEWS.md
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://mkvtoolnix.download/docs.html
+- DocumentLabel: FAQ
+  DocumentUrl: https://gitlab.com/mbunkus/mkvtoolnix/-/wikis/FAQ
+ManifestType: defaultLocale
+ManifestVersion: 1.4.0

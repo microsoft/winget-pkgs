@@ -1,0 +1,87 @@
+# Created with komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: kunobi-ninja.kache
+PackageVersion: 0.12.0
+PackageLocale: en-US
+Publisher: Kunobi Ninja
+PublisherUrl: https://kunobi.com/
+PublisherSupportUrl: https://kunobi.com/contact
+Author: Zondax AG
+PackageName: kache
+PackageUrl: https://github.com/kunobi-ninja/kache
+License: Apache-2.0
+LicenseUrl: https://github.com/kunobi-ninja/kache/blob/HEAD/LICENSE
+Copyright: 2026 Zondax AG
+ShortDescription: Content-addressed zero-copy build cache for Rust, C/C++ and more
+Description: kache is a content-addressed, zero-copy build cache for Rust, C/C++ and more. It avoids file copies and wasted disk by hardlinking artifacts locally and sharing them via S3-compatible object storage.
+Moniker: kache
+Tags:
+- build
+- build-cache
+- cache
+- ci
+- compiler
+- developer-tools
+- rust
+- rustc
+ReleaseNotes: |-
+  kache 0.12.0 — pluggable storage backends, and a cache that knows what things cost
+  kache is a content-addressed build cache that plugs in as a RUSTC_WRAPPER (and a C/C++ compiler wrapper). 0.12.0 opens up where the cache can live (OpenDAL-backed S3 and filesystem remotes), teaches garbage collection what an entry actually costs to rebuild, and makes "why did this miss?" point at the crate that really changed.
+  Why
+  Two of the cache's oldest simplifications were starting to hurt. The remote layer was welded to one S3 SDK, so "put the cache on a plain shared filesystem" or "use a different object store" meant a rewrite. And eviction ranked entries purely by size — but on a real 52k-entry store, size correlates only loosely with rebuild cost (log-log 0.73), and the value-per-byte of an entry spans roughly 48x between crates, so size-only eviction throws away expensive-to-rebuild artifacts to keep cheap ones. 0.12.0 fixes both, and sharpens the diagnostics you reach for when a hit you expected turns into a miss.
+  What's new
+  - Pluggable remotes via OpenDAL. New S3 and filesystem remotes built on OpenDAL sit alongside the original backend, so the cache can live on a shared filesystem or a non-AWS object store without a bespoke integration — the payoff of the RemoteBackend trait extracted in 0.11.0.
+  - Cost-aware eviction. GC now indexes each entry's compile_time_ms (already recorded in its metadata) so eviction can weigh what an artifact costs to rebuild, not just how big it is; it also records post-eviction demand via tombstones to learn from what it dropped.
+  - why-miss points at the real culprit. When one crate's artifact changes, its extern:<name>=<hash> re-keys every crate above it, and the old report blamed all of them equally. why-miss now walks the extern chain to the crate that actually changed, instead of making you trace forty downstream crates by hand.
+  - Lossless recovery from a corrupt index. The index is derived state — blobs plus each entry's meta.json are the source of truth — so a corrupt index is now quarantined and rebuilt from the store rather than discarded.
+  - Executables cached by default on Linux. Linux embeds DWARF in the binary, so a restored executable debugs exactly like a freshly linked one; the old skip-by-default was paying a macOS-specific debuggability tax (Mach-O N_OSO) that doesn't apply on Linux.
+  - Also: a Nix flake (checks, devShell, formatter, module), more cc flags classified so aws-lc-sys TUs cache, and a fix for RUSTSEC-2026-0213 (ammonia).
+  These notes were drafted with LLM assistance and edited by the maintainers (@jleni, @emmanuelm41).
+  What's Changed
+  - fix(bench): tolerate CRLF-ified patch payloads and pin byte-exact checkouts by @jleni in #571
+  - fix(remote): enforce max_bytes when Content-Length is unavailable by @Ysh204 in #547
+  - fix(config): expand bare "~" in shellexpand by @Ysh204 in #545
+  - Update ammonia to 4.1.4 (RUSTSEC-2026-0213) and drop a stale advisory ignore by @jleni in #574
+  - Add [cache] storage_layout_advice to mute copy-restore layout advisories by @jleni in #573
+  - ci(package-publish): trigger Scoop bucket autoupdate on release by @emmanuelm41 in #576
+  - docs: add Scoop (Windows) install instructions by @emmanuelm41 in #575
+  - ci(package-publish): publish kache to Chocolatey on release by @emmanuelm41 in #577
+  - docs: add Chocolatey (Windows) install instructions by @emmanuelm41 in #578
+  - ci(aur): publish official kache-bin to the AUR by @emmanuelm41 in #579
+  - fix(wrapper): avoid following symlinks for warning marker files by @Ysh204 in #546
+  - feat(daemon): prefetch P0.5 measurement closure (#583) by @jleni in #584
+  - In-flight build observability: heartbeat, ETA, stuck detection, miss diagnostics, monitor panel by @jleni in #585
+  - feat(daemon): experimental daemon-assisted local hits (#565 milestone 1) by @jleni in #587
+  - Never gate daemon startup on tmutil addexclusion by @jleni in #589
+  - perf(local-hit): never wait to fill a pin batch by @jleni in #591
+  - feat: add OpenDAL S3 and filesystem remotes by @jleni in #593
+  - refactor(gc): decouple eviction selection from removal mechanism by @jleni in #596
+  - chore(nix): drop flake-utils input by @meskill in #597
+  - feat(gc): index compile_time_ms so eviction can see rebuild cost by @jleni in #598
+  - fix(tests): stop leaking ~2 GB target dirs per test run (#599) by @jleni in #601
+  - fix(remote): never fail a build on remote config, restore legacy prefixes by @jleni in #600
+  - feat(nix): flake checks, devShell, formatter, and a standalone module by @jleni in #605
+  - feat(gc): record post-eviction demand via tombstones by @jleni in #604
+  - feat(cache): cache executables by default on Linux by @jleni in #603
+  - chore: bump kache to v0.12.0 by @jleni in #612
+  - feat(why-miss): walk the extern chain to the crate that actually changed (#609) by @jleni in #611
+  - fix(daemon): claim prefetch keys at download time, not plan install (#613) by @jleni in #621
+  - fix(cc): classify --include=, -fwrapv and --param so aws-lc-sys TUs cache (#580) by @jleni in #607
+  - fix(store): cache units whose .rmeta is legitimately empty (#624) by @jleni in #625
+  - feat(store): warn when the cache dir is not on host-local storage (#415 Part A) by @jleni in #623
+  - fix(prefetch): merge planner sources; stop inferring whole-bucket warms (#614, #615) by @jleni in #622
+  - fix(e2e): enforce gate integrity by @jleni in #628
+  - feat(store): rebuild the index from the store after corruption (#415) by @jleni in #630
+  - feat(report): surface compiles that failed to store (#629) by @jleni in #632
+  - feat(prefetch): bound a plan by keys, bytes, and time (#616 stage 1) by @jleni in #633
+  - test: add staged mutation testing by @jleni in #634
+  - perf(restore): avoid redundant create_dir_all on restore hot path by @Ysh204 in #592
+  - Improve the monitor tui scroll state management by @AzureZee in #636
+  New Contributors
+  - @meskill made their first contribution in #597
+  - @AzureZee made their first contribution in #636
+  Full Changelog: v0.11.0...v0.12.0
+ReleaseNotesUrl: https://github.com/kunobi-ninja/kache/releases/tag/v0.12.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

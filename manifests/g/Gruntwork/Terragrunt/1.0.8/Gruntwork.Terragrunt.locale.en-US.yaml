@@ -1,0 +1,106 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 1.0.8
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  🏎️ Performance Improvements
+  Faster read-file tracking with the mark-many-as-read experiment
+  With the mark-many-as-read experiment enabled, Terragrunt records every module file it marks as read during parsing. The bookkeeping for that record scaled quadratically: each new path was checked against every path recorded so far, which got expensive for units with large local module sources, and monorepos paid that cost again for every unit and every command.
+  Recording a path now takes constant time no matter how many paths came before it, and re-marking already-recorded files is cheaper still. The reading lists reported by find and list are unchanged.
+  🐛 Bug Fixes
+  assume_role: preserve commas inside list expressions
+  Terragrunt previously failed to correctly parse assume_role attributes containing list values such as transitive_tag_keys or policy_arns. Commas inside nested list expressions were incorrectly treated as top-level separators, causing generated configurations to fail with parsing errors.
+  assume_role = {
+    role_arn            = "arn:aws:iam::123456789012:role/test-role"
+    transitive_tag_keys = ["Project", "Projects"]
+  }
+  This resulted in errors similar to:
+  Missing item separator; Expected a comma to mark the beginning of the next item.
+  Terragrunt now preserves commas inside nested list and object expressions when parsing assume_role blocks, allowing configurations containing array attributes to be processed correctly.
+  Thanks to @Rahul-Kumar-prog for contributing this fix!
+  Completed experiments now evaluate as permanently enabled
+  Features gated behind a completed experiment were treated as disabled instead of permanently enabled, so functionality that graduated out of experiment status could silently stop working.
+  The one affected code path was hcl validate --inputs with a git filter expression such as --filter '[HEAD~1...HEAD]': after the filter-flag experiment completed, the command stopped preparing git worktrees for the filter. Git filter expressions now work with hcl validate --inputs again, matching find, list, and the other commands that accept filters.
+  Exposed-include resolution errors now name the include block, file, and failing field
+  When resolving an include block with expose = true, Terragrunt surfaced low-level parsing or conversion errors with no indication of which include block, file, or field was at fault. This was especially hard to debug for errors that carry no source location, such as:
+  unsuitable value: a bool is required
+  The error is now annotated with the include block name, the included (parent) file path, and a single dotted locator for the failing field — the top-level config field (dependency, inputs, locals, or feature) plus the attribute path within it when go-cty can determine one:
+  exposed include "root" (/path/to/root.hcl): dependency.outputs["enabled"]: unsuitable value: a bool is required
+  When go-cty cannot resolve a precise attribute path, the locator degrades to just the field name:
+  exposed include "root" (/path/to/root.hcl): dependency: unsuitable value: a bool is required
+  Errors that originate in HCL parsing already carry a source range (file:line:column) and are preserved unchanged. This narrows the search from the entire configuration tree to a specific file and field.
+  Intersecting a graph traversal with another filter no longer drops the traversed components
+  A graph traversal combined with an intersected filter dropped the components reached in discovery.
+  e.g., ...a-dependent | type=unit (the dependents of a-dependent, intersected with type of units) returned only a-dependent itself instead of its dependents, and git-change traversals such as ...[HEAD~1...HEAD] | type=unit lost the dependents of the changed units.
+  A component that matched both a graph expression target and a positive filesystem or git filter was classified as discovered before the graph traversal ran, so the traversal never expanded from it. Terragrunt now checks graph expression targets first, so intersecting a traversal with another filter keeps the dependencies and dependents it reaches.
+  generate blocks now honor hcl_fmt
+  Terragrunt now accepts hcl_fmt on generate blocks and preserves the setting when configurations are parsed, written, and parsed again. This lets generated .tf, .hcl, and .tofu files opt out of automatic HCL formatting by setting hcl_fmt = false, matching the existing generate = { ... } attribute-map behavior.
+  Telemetry resource now honors OTEL_SERVICE_NAME and OTEL_RESOURCE_ATTRIBUTES
+  Terragrunt previously hardcoded the service.name resource attribute to terragrunt for every emitted trace and metric, ignoring the standard OpenTelemetry environment variables. Multiple Terragrunt invocations could not be distinguished in an OpenTelemetry backend without an intermediate collector to rewrite the attribute.
+  The resource is now composed via resource.New with WithFromEnv() placed after Terragrunt's defaults, so OTEL_SERVICE_NAME and OTEL_RESOURCE_ATTRIBUTES are honored on every span and metric. Per the OpenTelemetry specification, OTEL_SERVICE_NAME takes precedence over a service.name entry in OTEL_RESOURCE_ATTRIBUTES. The default service.name remains terragrunt when neither variable is set.
+  s3:: sources: support virtual-hosted-style URLs
+  s3:: source URLs using the virtual-hosted-style S3 endpoint format were rejected:
+  terraform {
+    source = "s3::https://my-bucket.s3.us-west-2.amazonaws.com/terraform/modules/myapp.zip"
+  }
+  This resulted in errors like:
+  ERROR downloading source url s3::https://my-bucket.s3.us-west-2.amazonaws.com/...
+  * URL is not a valid S3 URL
+  Terragrunt now accepts every AWS S3 endpoint form, including virtual-hosted-style URLs (<bucket>.s3.<region>.amazonaws.com) and modern path-style URLs (s3.<region>.amazonaws.com).
+  Windows console mode is restored when Terragrunt exits
+  On Windows, running a Terragrunt command from Nushell could leave the shell unable to read input afterward, with keystrokes such as the arrow keys appearing as raw escape sequences instead of being interpreted.
+  While it runs, Terragrunt reconfigures the console it shares with the parent shell so that terminal escape sequences are processed, but it did not put the original mode back when it exited. PowerShell reapplies its own console settings on every prompt and recovers on its own, so the problem surfaces only in shells that keep the inherited mode, such as Nushell. Terragrunt now records the console mode at startup and restores it on exit, returning the shell to the state it was in beforehand.
+  Reported in #6245.
+  📖 Documentation Updates
+  Clean Markdown is available for every docs page at <url>.md
+  Every docs page is now served as clean Markdown at the same URL with .md appended. For example, /getting-started/install is also available at /getting-started/install.md.
+  curl https://docs.terragrunt.com/getting-started/install.md
+  The .md version contains the page content without the site navigation or other surrounding HTML, which makes it well suited as context for LLMs and AI tooling: it is smaller and carries only the documentation itself. Coverage includes every page, including the CLI command reference and the changelog.
+  This complements the existing llms.txt and llms-full.txt files by providing a per-page Markdown source.
+  🧪 Experiments Added
+  optional-hooks — Add experimental --no-hooks flag support for terragrunt run
+  The terragrunt run command now supports an experimental --no-hooks flag for disabling hook execution during command runs.
+  The feature is gated behind the optional-hooks experiment and skips execution of before_hook, after_hook, and error_hook blocks when enabled.
+  TG_EXPERIMENT=optional-hooks terragrunt run --no-hooks plan
+  This feature is currently experimental because disabling hooks changes Terragrunt execution semantics and may evolve in future releases.
+  Using --no-hooks without enabling the optional-hooks experiment will return an error.
+  hook-context-env experiment exposes additional TG_CTX_* env vars to hooks
+  Enable the new hook-context-env experiment to surface three additional environment variables to every before_hook, after_hook, and error_hook:
+  - TG_CTX_HOOK_TYPE — before_hook, after_hook, or error_hook, identifying which lifecycle phase invoked the hook.
+  - TG_CTX_SOURCE — the resolved terraform source URL (CLI --source override, else evaluated terraform.source with source-map applied, else .).
+  - TG_CTX_TERRAGRUNT_DIR — the directory of the current Terragrunt config.
+  terragrunt run --all --experiment hook-context-env -- apply
+  These variables make it easier to share a single hook script across lifecycle phases and to access the unit's source and config directory without threading them through hook arguments.
+  🧪 Experiments Updated
+  cas: fallbacks now emit telemetry
+  When the cas experiment is enabled and a CAS operation cannot complete, Terragrunt falls back to a slower path (the standard download client, or a temporary clone when the shared git store is unavailable) and keeps going. Until now the only record of a fallback was a warning in the logs, which made it impractical to measure how often CAS degrades across a fleet.
+  Each fallback now also emits a cas_fallback telemetry event whose reason attribute identifies the cause: init_error, getter_error, git_store_unavailable, probe_failure, or stack_generation_error. Operators collecting OpenTelemetry traces or metrics from Terragrunt can count and alert on these events to judge CAS health before relying on it by default.
+  CAS flags for the catalog command
+  The catalog command now accepts the --no-cas and --cas-clone-depth flags, which were already available on run, stack generate, and stack run. When --no-cas is set, catalog repositories are cloned with plain Git even if the cas experiment is enabled. --cas-clone-depth controls the git clone --depth value the CAS uses when cloning catalog repositories.
+  terragrunt catalog --experiment cas --cas-clone-depth=-1
+  cas — update_source_with_cas requires a literal source string
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v1.0.8
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,99 @@
+# Created with deja-vu release workflow using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: vshulcz.deja-vu
+PackageVersion: 0.21.6
+PackageLocale: en-US
+Publisher: vshulcz
+PublisherUrl: https://github.com/vshulcz
+PublisherSupportUrl: https://github.com/vshulcz/deja-vu/issues
+PrivacyUrl: https://vshulcz.github.io/deja-vu/guide/privacy.html
+PackageName: deja-vu
+PackageUrl: https://vshulcz.github.io/deja-vu/
+License: MIT
+LicenseUrl: https://github.com/vshulcz/deja-vu/blob/HEAD/LICENSE
+ShortDescription: Search Claude Code, Codex and Cursor session history locally
+Tags:
+- aider
+- claude-code
+- cli
+- codex
+- cursor
+- mcp
+- memory
+ReleaseNotes: |-
+  This release is mostly about what reaches the model, and when. After a
+  compaction, opencode, Kilo, Hermes and Gemini CLI now get the recovery packet
+  Claude Code already had, and the packet carries the user's standing
+  instructions and first request. deja handoff builds from the end of a
+  session instead of the start, and agents can fetch it over MCP. Hermes and
+  Copilot CLI get the after-failure fix line. The per-prompt hooks send less:
+  spawned agents get a one-line pointer, the line before a Bash command is now
+  opt-in with DEJA_COMMAND_HINTS=on, and the file line before an edit speaks
+  only when it has something about the file. Telegram bot tokens are redacted,
+  and a secret ending in punctuation is masked whole. The index version is now
+  64, so the store rebuilds once on the first run after upgrading.
+  Added
+  - Compaction recovery packet for opencode, Kilo, Hermes and Gemini CLI: after a compaction the next turn gets the commands, errors and state from before it, as in Claude Code. Run the matching deja install <client>-auto again to update the plugin. Also fixes a Gemini parser bug where a resume dropped earlier commands (#4641).
+  - The compaction packet carries the user's standing instructions from any turn ("never", "do not", "always", "use X instead of Y", "не трогай" and the like, up to 8 lines), and the session's first request when the latest one is just a step. On 60 days of real transcripts, 276 of 2,486 sessions get rules (#4656).
+  - deja handoff takes its body from the compaction packet, so conclusions come from the end of the session (median position 0.88-1.00 on 12 real sessions, was 0.00-0.37). The MCP tool has a handoff mode, and a session whose first prompt asks to continue another one by id or harness name gets the packet (#4674).
+  - After a failed terminal command, Hermes and Copilot CLI get the fix this machine found for the same error before, through Hermes' transform_tool_result and a Copilot postToolUse hook. Run deja install hermes-auto or copilot-auto again to get it (#4660).
+  - deja doctor follows every hook, plugin and MCP entry to the deja binary it runs and prints one row per binary older than the one running doctor, with the update command (#4658).
+  - show, resume and handoff accept a Claude Code remote-control id (session_01…) or its claude.ai/code URL (#4668).
+  Changed
+  - The line before a Bash command is off unless DEJA_COMMAND_HINTS=on, and a spawned agent gets the one-line pointer instead of the full digest. On 200 real Task prompts that went from 257,769 B to 67,217 B (#4644).
+  - The file line before an edit only speaks when it carries something about the file: a note or decision naming it or its directory, or a command that passed there. On 480 replayed edits, 20 lines (7,290 B) went to 2 (659 B) (#4646).
+  - Full per-prompt digests are capped at four per session, later matches get the pointer line. On 120 real prompts, 129.8 KB to 50.5 KB injected (#4637).
+  - The opencode session digest goes after opencode's system prompt, so the provider cache reuses the base prompt. Uncached input on the first request went from 3,988 to 1,941 tokens (median) (#4650).
+  - MCP calls run in parallel (up to 4 read the index at once), honour cancel, and a call still running at 20 s (DEJA_MCP_DEADLINE) returns a note instead of a client timeout. p95 on batches of 4 went from 11.4 s to 6.3 s (#4639).
+  - Claude Code compaction summaries and Gemini state snapshots are filed under the summary role, as opencode and Hermes already were, so recall stops quoting them as the user's words (#4678).
+  - Install resolves far fewer paths: a 39-target install goes from 2,435 to 268 symlink walks, uninstall from 857 to 312 (#4635).
+  Fixed
+  - Telegram bot tokens are redacted and named in deja secrets. On a rebuilt real store, raw tokens in the index went from 11 copies to 0. The Russian filler rule no longer re-masks an earlier marker into [redacted:[redacted:credential]] (#4676).
+  - A key-value secret that ends in punctuation is masked whole. --password=Sup3rS3cretValue!!xyz was stored with !!xyz after the marker, and the same for #, $, ^, ~, @ and * tails. The index rebuild drops tails already stored (#4683).
+  - After command not found, No module named or zsh's == not found, deja fix and the after-failure hook answer with the same command in a form that ran, another program doing the job, or an install, and stay silent otherwise. On 231 real repeat failures, unrelated answers from the hook went from 95 to 15 and useful ones from 0 to 44 (#4666).
+  - Recall on a session with 20+ user turns takes its conclusions from around the quoted turns. Hand-checked on 60 pages, blocks about other work went from 47 to 15 (#4664).
+  - The session-start digest, recall and recap skip conclusion lines that say nothing on their own ("Waiting for CI.", "работает", a bare number). On 212 real session starts, 152 such lines dropped (#4672).
+  - The compaction packet closes an issue when its PR merges, keeps its delivery mark across a forked agent's compaction, and its objective skips status polls, bare slash commands and harness notices (#4670).
+  - opencode's store is read under $XDG_DATA_HOME/opencode on every OS, and OPENCODE_DB is honoured (#4648).
+  Changelog
+  Features
+  - feat: after-failure fix line in Hermes and Copilot CLI (#4660)
+  - feat: carry standing instructions and the first request in the compaction packet (#4656)
+  - feat: compaction recovery packet for opencode, Kilo, Hermes and Gemini CLI (#4641)
+  - feat: doctor names an older deja the wiring runs (#4657) (#4658)
+  - feat: doctor suggests a smaller compaction window for sessions past 400k (#4652)
+  - feat: handoff carries the session's latest state, and agents can fetch it over MCP (#4674)
+  Fixes
+  - fix(mcp): answer calls in parallel, honour cancel, reply with a note at a 20s deadline (#4639)
+  - fix(recall): read a long session's conclusions around the quoted turns (#4664)
+  - fix(redact): mask the punctuated tail of a key-value secret (#4683)
+  - fix(release): ClawHub plugin publish waits for npm to serve the release (#4662)
+  - fix: a refused command is answered by itself corrected, not the next edit (#4666)
+  - fix: compaction packet closes an issue with its PR and keeps delivery marks (#4670)
+  - fix: digest and recall skip conclusion lines that say nothing (#4672)
+  - fix: file Claude and Gemini compaction summaries under the summary role (#4678)
+  - fix: read opencode's store under XDG_DATA_HOME on every OS (#4648)
+  - fix: redact Telegram bot tokens and list them in deja secrets (#4676)
+  - fix: resolve Claude remote-control session ids to the local session (#4668)
+  Performance
+  - perf(hook): cap full per-prompt digests at four per session, later matches get the pointer line (#4637)
+  - perf(install): resolve only same-named created files and snapshots, 2,435 to 268 walks for a 39-target install (#4635)
+  - perf: file line before an edit only says what is about the file (#4645) (#4646)
+  - perf: pointer for spawned agents, command hints opt-in (#4643) (#4644)
+  - perf: put the opencode session digest after the system prompt (#4649) (#4650)
+  Documentation
+  - docs(readme): open on the problem it solves, and label the claims by what they measure (#4685)
+  - docs: changelog for 0.21.6 (#4687)
+  - docs: deja-vu is in the Hermes plugin catalog (#4614)
+  Other
+  - chore: pin the manifests to 0.21.5 (#4607)
+  - ci: cut each test job from 19-24 min to under 6 by sharding cmd/deja (#4610)
+  - revert: drop doctor compaction window hint (#4652) (#4654)
+  Install
+  curl -fsSL https://raw.githubusercontent.com/vshulcz/deja-vu/main/install.sh | sh
+  go install github.com/vshulcz/deja-vu/cmd/deja@v0.21.6
+  brew install deja-vu
+ReleaseNotesUrl: https://github.com/vshulcz/deja-vu/releases/tag/v0.21.6
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

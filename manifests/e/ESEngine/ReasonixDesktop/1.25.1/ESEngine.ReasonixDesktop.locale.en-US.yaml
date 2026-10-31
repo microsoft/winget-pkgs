@@ -1,0 +1,75 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ESEngine.ReasonixDesktop
+PackageVersion: 1.25.1
+PackageLocale: en-US
+Publisher: reasonix
+PublisherUrl: https://esengine.cn/
+PublisherSupportUrl: https://github.com/esengine/DeepSeek-Reasonix/issues
+PackageName: Reasonix
+PackageUrl: https://esengine.github.io/DeepSeek-Reasonix/
+License: MIT
+LicenseUrl: https://github.com/esengine/DeepSeek-Reasonix/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Reasonix Contributors
+ShortDescription: A DeepSeek-native coding agent, for your terminal.
+Description: Reasonix talks straight to api.deepseek.com. The loop is append-only, engineered around DeepSeek's byte-stable prefix cache — long sessions hold 90%+ cache hit and input-token cost collapses to ~1/5. Terminal-first, leave it running.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- deepseek
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  此补丁版本修复了多个桌面端对话记录、侧边栏和会话恢复问题，改进了与 DeepSeek 和 Anthropic 网关的提供商兼容性，并优化了 Goal 模式的验证行为。
+  发布渠道：稳定版 · v1.25.1
+  English → · 网页版完整更新日志 →
+  使用攻略
+  - Goal 强制执行 — 已更新，描述未验证检查的完成路径和重复完成停止。
+  - 指南 — 已更新，描述未验证检查的完成路径和重复完成停止。
+  - 指南（中文） — 已更新，描述未验证检查的完成路径和重复完成停止。
+  - 规范 — 已更新，描述官方 DeepSeek 384K 输出上限行为。
+  - 规范（中文） — 已更新，描述官方 DeepSeek 384K 输出上限行为。
+  - 工具契约 — 已更新，描述未验证检查的完成路径和重复完成停止。
+  概览
+  Reasonix v1.25.1 — 桌面端稳定性与提供商兼容性修复
+  此补丁版本修复了多个桌面端对话记录、侧边栏和会话恢复问题，改进了与 DeepSeek 和 Anthropic 网关的提供商兼容性，并优化了 Goal 模式的验证行为。
+  发布日期：2026-08-13
+  重点内容
+  - 恢复升级后的侧边栏和对话记录行为 — 修复了升级后侧边栏可能为空、旧会话反复显示未读点、打开恢复的对话只显示前半段的问题。现在会正确打开最新的覆盖叶子。 (#8728, #8694)
+  - 改进流式输出中的历史记录加载 — 打开正在运行或流式输出的会话时，现在会在实时回合前加载历史页面，使之前的回合和工具卡片立即可见。 (#8696, #8727)
+  - 与 DeepSeek 和 Anthropic 网关的提供商兼容性 — 官方 DeepSeek 现在遵循文档化的 384K 输出上限，而不是自定义自动阶梯；省略 message_stop 但提供 stop_reason 的 Anthropic 兼容网关不再被视为中断。 (#8779, #8756)
+  改进
+  - Goal 模式验证循环预防 — Goal 模式在诚实申报 update_goal(complete) 后不再陷入相同的验证循环。Light/Balanced 上会尊重未验证的检查，并且当仅剩检查缺口时接受第二次相同的完成申报。 (#8693)
+  - 搜索结果独立卡片并保留脚注 — 提供商执行的 web_search 现在显示为可折叠的过程卡片，而不是直接写入助手回答。确认的标题和链接列表恢复为回答下方的脚注。 (#8674)
+  - 会话收件箱隔离与恢复 — 恢复了桌面会话收件箱，使排队的指导保留在创建它的会话上，可以查看/编辑/删除，并可在回合中途生效。Composer 收件箱快照按会话路径隔离。 (#8701)
+  - 密文搜索回放不计入 compact 估算 — Compact、溢出和中断使用估算不再将加密的 web_search 回放负载计为普通提示文本，避免不必要的提前压缩。 (#8718)
+  修复
+  - 历史会话滚动到原生底部 — 历史桌面会话现在可以通过鼠标滚轮和跳到底部控件到达最后几行，而不仅仅是通过拖动原生滚动条。 (#8760)
+  - 归档后不再在侧栏显示空白会话 — 点击归档会移除对话，并且不会添加可见的空白行。归档后丢弃残留的空或未索引的默认标题会话文件。 (#8766)
+  - 关闭待办写入会话文件 — 关闭已完成的桌面待办事项现在会跟随会话文件，因此在升级重新挂载对话或重置 WebView2 配置文件后仍保持隐藏。 (#8758)
+  - 关闭待办后会话画面保持固定 — 关闭已完成的待办事项不再使可见聊天跳回之前的待办列表。重试和清除失败的水合不再用较短的快照替换较长的实时记录。 (#8731)
+  - 点活会话时附着当前 runtime，不再打开旧副本 — 点击已在运行或暂停的侧边栏主题现在会附着该实时运行时，而不是打开目录代表。 (#8736)
+  - 交付检查暂停单独标记 — 在 Goal/交付检查门处停止的侧边栏会话现在显示“待交付检查”/“need checks”，而不是复用恢复暂停徽章。 (#8730)
+  - 恢复中途历史并隐藏 Auto Guard 引导 — 打开回合已在运行或流式输出的会话现在会在前面添加历史页面。主机 Auto Guard 指导从用户侧记录中隐藏，并保留在失败的工具结果中供模型使用。 (#8727)
+  - 旧会话不再反复变成未读 — 未读状态现在基于逻辑主题，设置一次性已读基线，目录/边车维护不再伪造“现在”活动。 (#8694)
+  升级提醒
+  本版本无需手动迁移。
+  风险提示
+  当前没有需要额外操作的已知风险。
+  致谢
+  感谢本版本的贡献者：@SivanCola、@yingziisme
+  下载与安装
+  - 官网按平台下载
+  - 查看完整差异
+ReleaseNotesUrl: https://github.com/esengine/DeepSeek-Reasonix/releases/tag/desktop-v1.25.1
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://esengine.github.io/DeepSeek-Reasonix/index.html#faq
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

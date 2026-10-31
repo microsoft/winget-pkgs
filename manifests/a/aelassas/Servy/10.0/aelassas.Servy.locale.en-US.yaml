@@ -1,0 +1,133 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: aelassas.Servy
+PackageVersion: '10.0'
+PackageLocale: en-US
+Publisher: Akram El Assas
+PublisherUrl: https://github.com/aelassas
+PublisherSupportUrl: https://github.com/aelassas/servy/issues
+Author: Akram El Assas
+PackageName: Servy
+PackageUrl: https://servy-win.github.io/
+License: MIT
+LicenseUrl: https://github.com/aelassas/servy/blob/HEAD/LICENSE.txt
+Copyright: Copyright (c) 2026 Akram El Assas
+ShortDescription: Servy lets you run any app as a native Windows service with full control over the working directory, startup type, process priority, CPU affinity, logging, health checks, hooks, and parameters.
+Description: |-
+  Servy lets you run any app as a native Windows service with full control over the working directory, startup type, process priority, CPU affinity, logging, health checks, environment variables, dependencies, pre-launch and post-launch hooks, pre-stop and post-stop hooks, and parameters.
+
+  Servy is digitally signed with a code-signing certificate provided by the SignPath Foundation. The signature verifies the publisher, enables Windows to detect any modification of the released binaries and installers, and prevents SmartScreen warnings.
+
+  Servy offers a desktop app, a CLI, and a PowerShell module that let you create, configure, and manage Windows services interactively or through scripts and CI/CD pipelines. It also includes a Manager app for easily monitoring and managing all installed services in real time.
+
+  Features:
+  - Clean, simple UI
+  - Monitor and manage all installed services with Servy Manager
+  - Real-time CPU and RAM monitoring with live performance graphs for installed services
+  - Real-time service stdout and stderr output preview in Servy Console
+  - Service dependency tree visualization with status indicators
+  - CLI and PowerShell module for full scripting and automated deployments
+  - Run any executable as a Windows service
+  - Set service name, description, startup type, priority, CPU affinity, working directory, environment variables, and dependencies
+  - Environment variable expansion supported in parameters, process paths, and startup directories
+  - Run services as Local System, local or domain accounts, Active Directory accounts, or gMSAs
+  - Redirect stdout/stderr to log files with automatic size-based and date-based rotations
+  - Run pre-launch hooks before starting the service, with retries, timeout, logging and failure handling
+  - Run post-launch hooks after the application starts successfully
+  - Run pre-stop and post-stop hooks before and after the application stops
+  - Supports Ctrl+C for command-line apps, close-window for GUI apps, and force kill if unresponsive
+  - Supports Ctrl+C propagation to descendant processes of the wrapped process
+  - Prevent orphaned/zombie processes with improved lifecycle management while ensuring resource cleanup
+  - Health checks and automatic service recovery
+  - Browse and search logs by level, date, and keyword for faster troubleshooting from Servy Manager
+  - Export/Import service configurations for easy backups and automation
+  - Service Event Notification alerts on service failures via Windows notifications and email
+  - Compatible with Windows 7 SP1 through 11 (x64/ARM64) and Windows Server editions
+
+  Who is it for?
+  - Developers: Run development servers, scripts, or custom tools as services without extra setup.
+  - Sysadmins & IT professionals: Ensure critical background processes stay alive, monitored, and properly logged.
+  - Teams or organizations: Automate background services reliably across multiple machines.
+Moniker: servy
+Tags:
+- admin
+- automation
+- background-service
+- cli
+- devops
+- dotnet
+- nssm
+- powershell
+- scm
+- service-manager
+- service-supervisor
+- service-wrapper
+- watchdog
+- windows-service
+- windows-tools
+- winsw
+ReleaseNotes: |-
+  This major release includes new backup and restore features, a hardened PowerShell module, bug fixes, security patches, code quality improvements, and documentation updates. The full changelog is listed below.
+  Full Changelog
+  Click to expand release notes!
+  - feat: add Servy-Dump.ps1 and Servy-Restore.ps1 PowerShell backup and recovery scripts
+  - fix(security): break inheritance and enforce read-only ACLs on configuration files
+  - fix(security): Set-ServyExePermissions.ps1 - Grant Delete permission strictly to restarter executable
+  - fix(security): Set-ServyExePermissions.ps1 - binaries absent at run time are skipped in grey text, reported as "complete", and inherit Modify when Servy creates them later (#6201)
+  - fix(security): Set-ServyExePermissions.ps1 - a present-but-FAILED binary lands in the same skipped bucket as a missing one, and a wholly missing directory exits 0 (residual of #6201) (#6397)
+  - fix(security): Set-ServyExePermissions.ps1 - explicit ACEs of third-party principals survive hardening and ResourceHelper re-applies them on every re-extract (sibling of fixed #1291) (#6398)
+  - fix(security): Set-ServyExePermissions.ps1 - explicit Deny ACEs for the target survive the purge the comment claims, and the audit prints them under [Target Granted] (#6412)
+  - fix(security): Set-ServyExePermissions.ps1 - the step-5 audit translates ACEs to NTAccount in bulk, so one orphaned SID reports a successfully hardened binary as FAILED (#6411)
+  - fix(security): Set-ServyExePermissions.ps1 - -TargetAccount SYSTEM or Administrators makes step 4 replace the FullControl step 3 just granted (#6438)
+  - fix(security): Set-ServyExePermissions.ps1 - the unconditional owner rewrite is absent from both the header and the step-5 audit (#6439)
+  - fix(security): Set-ServyExePermissions.ps1 - the [Target Granted] if-guard wraps an already empty-safe foreach, unlike its two header-gating siblings (sibling of #6421) (#6440)
+  - fix(security): Set-ServyExePermissions.ps1 - the [Owner] replaced audit line prints before Set-Acl commits, so a failed hardening still logs an owner replacement that never happened (#6465)
+  - fix(security): Set-ServyExePermissions.ps1 - the SID-to-name translate-with-fallback expression is maintained twice, once per audit fix (#6467)
+  - fix(security): Set-ServyExePermissions.ps1 - -TargetAccount Everyone, Users or Authenticated Users makes step 4 re-grant the broad group step 2 just purged (sibling of #6438) (#6468)
+  - fix(security): Set-ServyExePermissions.ps1 - the ARM64 probe reads process-architecture env vars, so an emulated x64 shell on ARM64 hardens the wrong handle binary and exits 2 forever (#6472)
+  - fix(security): Set-ServyExePermissions.ps1 - an unresolvable -TargetAccount leaves through throw and exits 1, the code the header reserves for 'Privilege Error' (sibling of #6466) (#6536)
+  - fix(security): Set-ServyExePermissions.ps1 - a target account that is a MEMBER of Administrators keeps FullControl through the group, and the audit reports the ReadAndExecute ACE as if it were the effective access (#6680)
+  - fix(security): Set-ServyExePermissions.ps1 - Test-ServyAdminGroupMember's ADSI fallback returns $false for a nested-group admin, so the #6680 warning never fires (#6697)
+  - fix(core): clarify CPU affinity error messages
+  - fix(core): AppConfig.cs - ServyServiceCLIFileName and AppFolderName are still static readonly after #3181 converted every other plain literal to const (#5501)
+  - fix(core): AffinityHelper.cs - ValidateAffinity returns the raw exception message, so every CPU affinity validation error shows "(Parameter 'affinityInput')" to the user (#5502)
+  - fix(core): Helper.cs - IsValidPath and ParseVersion null-check their argument but declare it non-nullable, unlike the seven siblings in the same file that do the same guard (#5510)
+  - fix(core): ProcessHelper.cs - Math.Max(totalCpu, 0.0) in GetProcessTreeMetrics is provably a no-op; every GetProcessMetrics path returns a non-negative CpuUsage (#5513)
+  - fix(core): ProcessKiller.cs - KillProcessTreeAndParents(int) catches only ArgumentException from GetProcessById where its string sibling also catches InvalidOperationException, turning an exited target into a logged failure (#5514)
+  - fix(core): ResourceHelper.cs - a failed host-exe timestamp probe always trips the #4803 downgrade warning, so the log reports a version downgrade that did not happen (#5516)
+  - fix(core): ResourceHelper.cs / Service.cs (Core) / LogTailer.cs - the last seven unsuffixed async methods in src/; CopyEmbeddedResource is bare while its sync sibling is named ForceSync (#5517)
+  - fix(core): Helper.cs / ServiceDependenciesValidator.cs - a service name Servy will install can be un-referenceable as a dependency; the charset rules diverge (residual of #5038) (#5518)
+  - fix(core): EventLogLogger.cs - the constructor prefix bypasses SanitizePrefixSegment, so a top-level prefix can still forge bracket nesting (residual of #2166) (#5521)
+  - fix(core): EventLogReader.cs - SafeToOffset guards the near-MinValue overflow but not its near-MaxValue mirror, so west-of-UTC hosts can still abort the whole enumeration (residual of #2170) (#5522)
+  - fix(core): Logger.cs - FormatException's depth cap prunes the exception tree silently while its length cap marks the cut, so a truncated chain reads as complete (residual of #1260) (#5524)
+  - fix(core): RotatingStreamWriter.cs - Dispose and Flush skip the _rotationInProgress gate WriteInternal waits on, so Shutdown returns mid-rotation and Flush silently no-ops (residual of #1357) (#5526)
+  - fix(core): NativeMethods.cs - the #3224 fix removed CreateFile and the std-handle imports but left their five constants, LOGON32_LOGON_INTERACTIVE and the single-part 'partial' modifier behind (#5536)
+  - fix(core): NativeMethods.cs - PROCESSENTRY32 is still CharSet.Auto after #3223 pinned its two functions to the W exports, the two QueryServiceConfig2 overloads bind one export with two CharSets, and CloseHandle carries one it cannot use (#5537)
+  - fix(core): Strings.resx (Servy.Core) - the #5163 fix lowercased three sentence openers and added its terminal periods only to the four entries it quoted (#5538)
+  - fix(core): Strings.resx (Servy.Core) - the #5370 fix removed the only consumer of Msg_ImportReadFailure but left the string and its generated accessor shipped (#5539)
+  - fix(core): Strings.resx (Servy.Core) - the 18 Msg_Security* values announce one outcome with five different prefixes (#5540)
+  - fix(core): IEventLogService.cs / LogsViewModel.cs - the tailored 'run as Administrator' and 'Event Log service not running' messages never reach the user; the interface documents no exceptions and the handler shows Msg_UnexpectedError (#5548)
+  - fix(core): AppConfig.cs / Servy.Core.csproj - the missing-BuiltWithFramework error tells the developer to add an item, but the project declares it as an with _Parameter1/_Parameter2 (#5551)
+  - fix(core): ServiceManager.cs - OpenSCManager/CreateService results carry an unreachable null term at five sites while the five OpenService results, same non-nullable SafeHandle contract, carry none (#5553)
+  - fix(core): ServiceManager.cs - the uninstall ChangeServiceConfig passes eleven positional arguments, six of them null, where its install sibling and CreateService name every one (#5555)
+  - fix(core): ImportServiceCommand.cs / ServiceValidationRules.cs - the CLI import ignores [ServicePath].ErrorResourceKey that all 12 ServiceDto properties declare, so 11 of 12 path failures get a generic, half-localized message (#5569)
+  - fix(core): AppFoldersHelper.cs - a relative Data Source or AES path override is anchored to the current working directory, so the CLI and the service silently use different vaults (#5912)
+  - fix(core): Helper.cs - a failed WriteFileAtomic leaves the destination with its ReadOnly attribute stripped; PrepareDestinationForMove clears it and nothing restores it (#5916)
+  - fix(core): ProcessKiller.cs - a third dead term #5515 missed: exactStartTime == DateTime.MinValue cannot fire because line 533 reads StartTime directly, not through SafeStartTime (residue of #3205) (#5920)
+  - fix(core): SecurityHelper.cs - ApplySecurityRules takes IdentityReference but compares against SecurityIdentifier-typed rules, so an NTAccount argument silently disables the anti-squatting purge while the grant still lands (#5959)
+  - fix(core): IServiceControllerProvider.cs - GetServices hands the caller several hundred IDisposable wrappers holding live SCM handles, and neither the returns nor the remarks says the caller owns them (#5969)
+  - fix(core): ServiceManager.cs - QueryServiceConfigString's 'return null' is unreachable: a size probe that sets ERROR_INSUFFICIENT_BUFFER always reports a positive bytesNeeded, so the outer guard and the inner test cannot both hold (#5971)
+  - fix(core): AppFoldersHelper.cs - rootVaultPath is the one path parameter EnsureFolders does not guard, so a blank value reaches SecurityHelper and fails with ParamName 'path' (#6103)
+  - fix(core): NativeMethodsHelpers.cs - ForbiddenGroupIdentities pairs every name with an NT AUTHORITY\ form but carries no BUILTIN\ form, so BUILTIN\Administrators reaches LogonUser and is reported as a wrong password (#6122)
+  - fix(core): ProcessKiller.cs - WalkAndKillChildren logs a benign exited-child race as a kill failure, unlike the string overload's handle-open path (sibling of #5514) (#6344)
+  - fix(core): RotatingStreamWriter.cs - EnforceMaxRotations null-coalesces two NotNullIfNotNull Path APIs and comments a GetFileName null that cannot occur (#6349)
+  - fix(core): NativeMethods.cs - SERVICE_QUERY_STATUS and SERVICE_QUERY_CONFIG sit in the SCM Access Rights region their prefix and usage contradict (residual of #3227) (#6363)
+  - fix(core): Strings.resx (Servy.Core) - three pre-launch/pre-stop validation messages start lowercase against every capitalized sibling (#6365)
+  - fix(core): Strings.resx (Servy.Core) - Msg_ImportXmlFailed carries a trailing period its JSON twin and the ': {0}' template family do not (#6366)
+ReleaseNotesUrl: https://github.com/aelassas/servy/releases/tag/v10.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/aelassas/servy/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

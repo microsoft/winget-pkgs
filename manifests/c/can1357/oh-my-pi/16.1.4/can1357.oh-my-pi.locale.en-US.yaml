@@ -1,0 +1,65 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 16.1.4
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Added
+  - Added bounded auto-retry for empty assistant completions specifically to the OpenAI Responses provider
+  - Added bounded auto-retry for empty assistant completions across the OpenAI Chat Completions, OpenAI Responses, and Anthropic Messages providers. A benign terminal stop that streamed no content and billed no output tokens — the signature of a flaky OpenAI-/Anthropic-compatible gateway that intermittently 200s with an empty body — is now retried up to twice with exponential backoff (honoring providerRetryWait) before being surfaced, instead of silently stalling the agent loop. Retries fire only before any content streams, so live streaming (including thinking) is never delayed, retried, or duplicated.
+  Fixed
+  - Fixed the Antigravity (google-antigravity) request builder dropping labels.model_enum when the wire profile does not declare one. Required for Claude 4.6 ids whose AntigravityModelWireProfile carries only maxOutputTokens (no captured model_enum); the label is now emitted only when the catalog defines it. (#3067)
+  @oh-my-pi/pi-catalog
+  Fixed
+  - Fixed Claude 4.6 routing on the google-antigravity (and google-gemini-cli) Cloud Code Assist providers, whose backend exposes the models asymmetrically: claude-sonnet-4-6 has no -thinking twin and claude-opus-4-6 has only the -thinking twin. The shared thinkingPair family was routing thinking efforts on claude-sonnet-4-6 to a non-existent claude-sonnet-4-6-thinking wire id (404 Requested entity was not found); replaced both 4.6 entries with bespoke single-wire families so every effort and off resolve to the live wire id. Added claude-sonnet-4-6 and claude-opus-4-6-thinking entries to ANTIGRAVITY_MODEL_WIRE_PROFILES capped at the backend's 64000-output-token limit (over-cap requests 400'd with Request contains an invalid argument); modelEnum is now optional on AntigravityModelWireProfile since the Claude wire ids are accepted without a captured labels.model_enum. (#3067)
+  @oh-my-pi/pi-coding-agent
+  Fixed
+  - Fixed omp bench and omp dry-balance failing to resolve models from extension providers
+  - Improved error reporting for omp bench runs that return no output or tokens
+  - Cache-miss marker no longer fires on a cold turn whose predecessor only wrote the prompt cache (never read it back). The session's opening request always writes the prefix with cacheRead 0, so a long-running first tool call (e.g. gh run watch) that outlived the provider's cache TTL surfaced a spurious ⊘ cache miss divider right under the opening message. The marker now requires the previous turn to have actually read a warm prefix, so it flags only a demonstrably working cache going cold — and collapses a run of consecutive cold turns to a single marker at the moment the cache broke.
+  - Fixed omp bench and omp dry-balance failing to resolve models from extension-registered providers (pi.registerProvider(...)). Both commands build a one-shot ModelRegistry that previously only knew built-in catalog providers, so a provider/model selector for a provider contributed by an extension under ~/.omp/agent/extensions/ errored with "Model not found". A new loadCliExtensionProviders helper loads the session's extensions, drains their provider registrations into the registry, and discovers dynamic provider catalogs before resolving selectors — mirroring the interactive session and omp models paths.
+  - omp bench now reports a run that streamed no content and measured no output tokens as a failure ("provider returned no output") instead of a misleading green check with tokens 0 / TPS 0.0.
+  - Cleared stale pending-preview gates when resolve finds no runnable handler, and forwarded the missing peekPendingInvoker and clearPendingInvokers hooks on the production session so staged previews actually reach the resolve tool and the gate drains on dispatch failure. (#3061)
+  - Deferred status-line usage refreshes off the render path and timeboxed the startup fetch so slow Anthropic quota lookups no longer block interactive startup. (#3057)
+  - Fixed image paste placeholders falling through to terminal hyperlink settings before Settings.init(), so early editor rendering falls back to plain text instead of crashing. (#3064)
+  - Fixed omp plugin install github:owner/repo silently keeping the user on a stale commit when re-run on an already-installed GitHub plugin. bun install <spec> respects the existing bun.lock pin when the spec is unchanged and never re-resolves the remote ref, so the manager now follows a git re-install with bun update <name> to refresh the lockfile pin against the upstream. The install transaction also snapshots bun.lock up front and routes feature validation, extension validation, and runtime-config save through one rollback path so a failed install can never leave the rejected commit pinned in the active tree or lockfile. First-time installs are unaffected. (#3063)
+  What's Changed
+  - fix(coding-agent): timebox status usage refresh by @roboomp in https://github.com/can1357/oh-my-pi/pull/3058
+  - fix(agent): clear stale pending preview gates by @roboomp in https://github.com/can1357/oh-my-pi/pull/3062
+  - fix(tui): guard hyperlinks before settings init by @roboomp in https://github.com/can1357/oh-my-pi/pull/3066
+  - fix(coding-agent): refresh GitHub plugin lockfile pin on re-install by @roboomp in https://github.com/can1357/oh-my-pi/pull/3069
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v16.1.3...v16.1.4
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v16.1.4
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

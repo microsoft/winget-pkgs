@@ -1,0 +1,102 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: jdx.mise
+PackageVersion: 2026.10.5
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/jdx/mise
+Author: jdx
+PackageName: mise-en-place
+PackageUrl: https://mise.en.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+ShortDescription: Your dev env, already prepped.
+Description: Your dev env, already prepped. One tool to manage languages, env vars, and tasks per project, reproducibly.
+Moniker: mise
+Tags:
+- cli
+- dev-tool
+- env
+- environment
+- task
+ReleaseNotes: |-
+  Java versions without a vendor prefix now install Eclipse Temurin builds. Dotfiles gain per-machine and local-only history, a merge = "missing" mode, and a secret check before mise dot sync publishes anything. Packslip tools can be pinned to the workflow that signs their releases. Several features documented as experimental now actually require experimental = true. The rest of the release is fixes across tasks, shims, config loading, bootstrap and backends.
+  Breaking Changes
+  - java@21, java@lts and java@latest now install Temurin. The default of java.shorthand_vendor changes from openjdk to temurin. The jdk.java.net OpenJDK builds stop at the next feature release, so java@21 was stuck on 21.0.2 from January 2024. Vendor-prefixed requests (openjdk-21, corretto-21, ...) are not affected. Installed OpenJDK versions keep working, and mise upgrade offers the Temurin build. Shorthand versions now include Temurin's build suffix (for example 21.0.12+101.0.LTS). Temurin has no builds of Java 9, 10 or 12–15, so use openjdk-12 and similar for those. #14146
+    - Lockfiles: existing shorthand lock entries record shorthand_vendor = "openjdk". Without that setting, mise install --locked fails with java@21 is not in the lockfile. Either keep OpenJDK:
+      [settings]
+      java.shorthand_vendor = "openjdk"
+      # or per project: java = "openjdk-21"
+      or switch to Temurin with mise lock --bump java and commit the result.
+  - Some experimental features now require experimental = true (or MISE_EXPERIMENTAL=1) when you use them. Config that only mentions them still loads. #14114
+    - Running a task with a git:: remote file, including through mise run --dry-run, mise watch, or as a dependency. Commands that only inspect tasks (tasks ls, tasks info, tasks deps, generate task-docs) show the task from its TOML and warn once that the file wasn't fetched. These were documented as experimental but were missing the check in the codebase.
+    - git:: and oci:: entries in task_config.includes. These are skipped with a warning.
+    - OpenTelemetry export of mise run when an OTLP endpoint is set.
+    - Installing spinel: tools.
+  - mise.local.toml now overrides mise.<env>.toml in the same directory, as the docs already said. Before, the committed environment file won in project directories, and also in ~/.config/mise when the walk up from the cwd reached it. Within each directory the order is now, highest first: mise.<env>.local.toml, mise.local.toml, mise.<env>.toml, mise.toml. If you relied on the environment file winning, move those keys into mise.<env>.local.toml. #14148
+  - MCP: in the mise://tasks resource, env is now an array of env directive strings, the same format as mise tasks ls --json. It was always an empty object before. #14111
+  - mise settings set and add refuse writes that would have no effect. This covers early-init settings (env, ceiling_paths, env_conf_d, ...) written to a config file, and global-only settings (yes, paranoid, trusted_config_paths, ...) written with --local. The error says where the setting has to go: miserc.toml, the global config, or the MISE_* variable. #14126
+
+  Added
+
+  Dotfiles
+  - Per-machine tracked files. Some files describe the machine, such as a monitor layout. Use variants = [{ machine = true }] or mise dot track --machine to keep a separate history for each machine. Sync pushes every machine's version to the origin but never applies one machine's version on another. Each machine gets a generated name, which you can set with [history] machine = "desk". A machine variant must be the entry's only variant and can't be combined with encrypt. Upgrade every machine that shares a setup before using it. #14062
+    [dotfiles]
+    "~/.config/hypr/monitors.lua" = { mode = "track", variants = [{ machine = true }] }
+  - mode = "track-local" (or mise dot track --local) keeps a file's history in a separate store on this machine, with no origin. The file never reaches the shared manifest, a commit or a push. Commands that name a path use the history that holds it. Use mise dot --local history or mise dot --local undo to work with the local history directly. save, capture and watch cover both histories. #14082
+  - merge = "missing" sets only the keys the target file doesn't have yet. Values an app writes itself, such as the model picked with /model in Codex or Claude Code, are left alone. Works with TOML, YAML and JSON. #14081
+    [dotfiles]
+    "~/.codex/config.toml/shared" = { merge = true }
+    "~/.codex/config.toml/defaults" = { source = "codex/defaults.toml", merge = "missing" }
+  - Merge entries can leave out source. mise then reads the target's path under dotfiles.root. Switching an entry from symlink to merge now replaces a link that points at the merge source with a writable copy, so the app's own keys survive. #14076
+  - mise dot sync refuses to publish saved versions that look like secrets. It checks for provider tokens, private key blocks, and *_KEY/*_TOKEN/*_SECRET/*_PASSWORD assignments. Only versions the origin doesn't have yet are checked. The error names the file, line and version, never the value. --allow-plaintext-history skips the check. #14171
+  - mise bootstrap --adopt <url> --take-remote-all takes the repository's version of every file that differs, in one step. Combined with --replace-history, it also adopts the repository on a machine that already has history of its own. #14065
+  - mise doctor shows the dotfiles history repo path and the connected origin (URL, branch, sync mode), in both text and --json output. #14173
+
+  Bootstrap
+  - [bootstrap.files] and [bootstrap.directories] accept the same os selector as packages. Entries that don't match the host are skipped completely. #14058
+    [bootstrap.files."/etc/docker/daemon.json"]
+    os = "linux"
+    source = "./files/docker-daemon.json"
+  - fish = "auto" in [bootstrap.mise_shell_activate] writes a block that runs mise activate fish in interactive shells and --shims everywhere else. #14172
+  - [bootstrap] is now allowed in config includes. It merges below the including file, so a shared baseline can declare packages, hooks and services, and the project still wins on any key it sets itself. #14176
+  - Systemd units accept state = "absent", which stops, disables and deletes the matching mise-managed service and timer. mise bootstrap unapply now also removes the units an environment added. #14139
+
+  Tools and backends
+  - Packslip workflow option. It accepts only releases signed by the named GitHub Actions workflow on tags. It takes one workflow or a list, and an entry can name a ref (release.yml@refs/heads/main). It can't be combined with pubkey, identity, identity_prefix or issuer. #14075, #14093
+    [tools]
+    "packslip:github.com/aubepkg/aube" = { version = "latest", workflow = ["release-plz.yml", "release.yml"] }
+    - Registry entries for dagu, timoni, helmfile, fnox, hk, usage, communique, mr-boxington, pitchfork, aube and worktrunk are now pinned to the workflow that signs their releases. A workflow or pubkey you set yourself replaces the registry pin. #14092, #14091, #14073 (@max-sixty)
+  - MCP install_tool is implemented. It installs the requested version, or the configured version, or latest, and returns the resolved version and install path. install_tool and run_task now refuse to act on untrusted config instead of trusting it on the client's behalf. #14111
+  - mise installs migrate no longer fails on installs it can't reinstall, such as withdrawn releases, signer changes or no network. It moves them into the identity layout as they are and leaves a link at the old path. It also handles lockfile-suffixed ~aube~/~uv~ directories correctly. #14079
+  - Registry: mprocs is renamed to dekit to match upstream, and mprocs stays as an alias. From v0.10.0 the binary is dekit. #14169
+
+  Changed
+  - Dotfile operations you can undo no longer ask for confirmation after showing their plan. This covers dot pull, dot track, undo, rollback, connect and bootstrap --adopt. Destructive ones still ask, such as --replace-history, dot recover --keep-current and implode. --yes and MISE_YES are still accepted. #14077, #14071, #14067
+  - Safe mode (MISE_SAFE=1) now ignores a project's [bootstrap], [dotfiles] and [dotfile_groups]. Before, an untrusted repo could link files into $HOME or clone repositories. Global and system config still apply. #14110
+  - Node downloads are checked against the GPG signature for every version that publishes one. Before, only versions starting with 2 were checked. Set node.gpg_verify = false for mirrors without signatures. #14132
+  - mise generate github-action now uses actions/checkout@v7 and jdx/mise-action@v5 and no longer sets MISE_EXPERIMENTAL. mise generate devcontainer now adds "postCreateCommand": "mise install". #14145
+
+  Deprecated
+  - task.cache.stats_report, sops.age_recipients and plugin_autoupdate_last_check_duration never had any effect. Setting one now prints a warning, and they will be removed in 2027.10.5. #14112
+  - mise bootstrap launchd|systemd|macos-defaults, the old --only/--skip part names (launchd, systemd, defaults, shell) and mise direnv now print a warning that names the replacement. They will be removed in 2027.10.4. #14113
+
+  Fixed
+
+  Tasks
+  - A raw or interactive task with cache enabled is now skipped when its sources are fresh and its cache key hasn't changed. Before, it ran every time. #14121
+  - A typo in sources that matches no files now prints a warning. mise tasks deps <task> now shows depends_post tasks. Scripts in $MISE_CONFIG_DIR/tasks load even without a global config file. #14122
+  - mise run ./script resolves relative to the current directory. #14120
+  - Script extensions are stripped only from file task names. #14159
+  - Requests to the remote task cache include the mbx-cache headers. #14147
+  - mise generate task-stubs skips hidden and global tasks. #14127
+
+  Shims and exec
+  - Shims, mise x and mise env no longer look up remote versions for lazy tools that aren't installed. With 20 lazy tools and no network, running an installed tool went from about 42s to 0.09s. #14063
+ReleaseNotesUrl: https://github.com/jdx/mise/releases/tag/v2026.10.5
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

@@ -1,0 +1,71 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Amazon.AthenaODBCDriver.2
+PackageVersion: 2.5.0.0
+PackageLocale: en-US
+Publisher: Amazon.com Services LLC
+PublisherUrl: https://aws.amazon.com/
+PublisherSupportUrl: https://console.aws.amazon.com/support/home/
+PrivacyUrl: https://aws.amazon.com/privacy/
+Author: Amazon Web Services, Inc
+PackageName: Amazon Athena ODBC Driver
+PackageUrl: https://docs.aws.amazon.com/athena/latest/ug/odbc-v2-driver.html
+License: Proprietary
+LicenseUrl: https://aws.amazon.com/agreement/
+Copyright: © 2026, Amazon Web Services, Inc. or its affiliates. All rights reserved.
+CopyrightUrl: https://aws.amazon.com/agreement/
+ShortDescription: Athena ODBC 2.x driver
+Description: Use an ODBC connection to connect to Athena from third-party SQL client tools and applications.
+Tags:
+- athena
+- aws
+- odbc
+ReleaseNotes: |-
+  This release of the Amazon Athena ODBC 2.x driver includes changes made since version 2.4.0.0. Review the breaking changes before you upgrade. Connection parameter values that earlier versions ignored now fail the connection.
+  Breaking changes
+  - AuthenticationType validated – The driver now rejects any AuthenticationType value that is not one of the documented values and fails the connection with HY000 instead of falling back to IAM credentials. Default is now accepted as a shorter form of Default Credentials. For more information, see Authentication options.
+  - UseSingleCatalogAndSchema validated – The driver now accepts only 0 or 1 for UseSingleCatalogAndSchema. Any other value fails the connection with HY000. For more information, see Use single catalog and schema.
+  - LogLevel validated – The driver now fails the connection with HY000 for a LogLevel value that it does not recognize, and a driver-wide LogLevel other than OFF now requires LogPath. For more information, see Logging options.
+  - AWS Glue catalog listing errors reported – When multi-catalog browsing cannot list AWS Glue catalogs for a reason other than access denied or entity not found, such as throttling, the catalog function now fails with HY000 and a message that begins with [AmazonAthena][GlueClientError] instead of returning a shorter list. For more information, see AWS Glue endpoint override.
+  - Single catalog and schema mode enforced – With UseSingleCatalogAndSchema=1, catalog functions now return only the configured Catalog and Schema without calling Athena or AWS Glue. This also prevents the Power BI error "cannot convert the value null to type Record". To list every catalog and schema, set UseSingleCatalogAndSchema=0. For more information, see Use single catalog and schema.
+  - Catalog search patterns disabled under SQL_ATTR_METADATA_ID – If you set SQL_ATTR_METADATA_ID to SQL_TRUE on the connection, catalog function arguments on its statements are now treated as identifiers rather than search patterns, so wildcard arguments no longer match.
+  Improvements
+  - AWS Glue endpoint override – Added the GlueEndpointOverride parameter to set the endpoint for the AWS Glue calls used in multi-catalog browsing. For more information, see AWS Glue endpoint override.
+  - Binary column length – Added the BinaryColumnLength parameter to set the column size the driver reports for varbinary columns. For more information, see Binary column length.
+  - Connection caching – Added the EnableConnectionCaching parameter. When set to 1, the driver caches the result of the GetWorkGroup call that it makes when you connect for five minutes per driver process. For more information, see Enable connection caching.
+  - IAM profile credentials – Connections that use the IAM Profile authentication plugin now reload credentials when the AWS credentials or config file changes for the selected profile. For more information, see IAM profile.
+  - SQLGetInfo additions – Added SQL_ODBC_VER, SQL_XOPEN_CLI_YEAR, SQL_ODBC_SAG_CLI_CONFORMANCE, and the SQL_CONVERT_WCHAR, SQL_CONVERT_WVARCHAR, and SQL_CONVERT_WLONGVARCHAR conversion masks.
+  - Query error messages – When an Athena query fails with an empty error message, the driver now reports the state change reason that Athena returns for the query.
+  - SQLBrowseConnect keywords – SQLBrowseConnect now lists AuthenticationType, AwsProfile, Catalog, Schema, SessionToken, and Workgroup as optional keywords.
+  - Specific SQLSTATEs – Unsupported or unknown attributes and SQLGetInfo types, SQLDescribeParam, and conversion errors now return specific SQLSTATEs instead of a bare SQL_ERROR or a generic code.
+  - Connection failure SQLSTATEs – A connection failure from the GetWorkGroup call made when you connect now returns 28000 for credential errors, 08004 for request errors such as a missing workgroup, 08S01 for network and request timeout errors, and 08001 otherwise.
+  - Wide character catalog metadata – With UseWCharForStringTypes=1, SQLColumns and the catalog result sets now report wide character types and byte lengths. For more information, see Use WCHAR for string types.
+  - Licensing update – The driver license now permits redistribution of the compiled driver when it is embedded in your product.
+  Fixes
+  - Fixed an issue that could cause a result block downloaded from Amazon S3 to contain stale bytes from an aborted attempt. The driver now checks each block against the requested byte range and fails a short block with HY000 and the message "Result set is incomplete".
+  - Fixed an issue that caused SQLColumns to fail on tables with a varbinary column. The column size now comes from BinaryColumnLength.
+  - Fixed an issue that caused SQLColumns to fail on tables and views with an interval year to month or interval day to second column.
+  - Fixed an issue that caused SQLSetConnectAttrW to store an empty catalog name when SQL_ATTR_CURRENT_CATALOG was set with SQL_NTS.
+  - Fixed an issue that caused SQLRowCount to crash when RowCountPtr was null.
+  - Improved SQL_C_WCHAR output to write characters outside the Basic Multilingual Plane as surrogate pairs. Chunked SQLGetData is now supported on SQL_WVARCHAR columns, including a change of target type between calls.
+  - Fixed an issue that caused SQL_C_DEFAULT in SQLBindCol, SQLFetch, and SQLGetData to be passed through unresolved.
+  - Fixed an issue that caused a binary value read as hexadecimal text to end in the middle of a byte.
+  - Fixed an issue that caused the sign of a negative interval to overwrite its first digit. Interval fraction digits now follow the column precision.
+  - Fixed an issue that caused the SQLParamData token to be truncated to 32 bits on 64-bit platforms.
+  - Fixed an issue that caused SQLTables with SQL_ATTR_METADATA_ID set to SQL_TRUE to reject a null TableType argument.
+  - Fixed an issue that caused the octet length of time with time zone and timestamp with time zone result columns to be reported as if the columns were VARCHAR instead of equal to the column size when UseWCharForStringTypes is 0.
+  - Fixed an issue that caused date and timestamp values with an impossible day, such as February 30, to be accepted instead of returning 22018.
+  - Fixed an issue that caused SQL_DESC_AUTO_UNIQUE_VALUE and SQL_DESC_CASE_SENSITIVE to be written as 2-byte values instead of 4-byte integers.
+  - Fixed an issue that caused SQL_COLUMN_PRECISION for floating point types to return the bit length instead of decimal digits.
+  - Fixed an issue that caused a prepared REAL column to be named real while the executed result set named it float.
+  - Fixed an issue that caused VARBINARY literals to use the 0x'...' form instead of X'...'.
+  - Fixed an issue that caused SQLNumParams to report a stale count after a catalog function.
+  - Fixed an issue that caused a malformed varbinary value to fail the whole row instead of only that value.
+  - Fixed an issue that caused a SQL_C_BINARY buffer that is too small for a string or binary value to fail instead of returning the data across SQLGetData calls.
+  - Fixed an issue that caused chunked SQLGetData to report SQL_NO_TOTAL instead of the remaining byte count.
+  - Fixed an issue that caused the driver to report asynchronous execution support that it does not provide.
+  To download the new ODBC v2 driver, see ODBC 2.x driver download. For connection information, see Amazon Athena ODBC 2.x.
+ReleaseNotesUrl: https://docs.aws.amazon.com/athena/latest/ug/odbc-v2-driver-release-notes.html
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

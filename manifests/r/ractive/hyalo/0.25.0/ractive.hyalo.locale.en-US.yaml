@@ -1,0 +1,170 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ractive.hyalo
+PackageVersion: 0.25.0
+PackageLocale: en-US
+Publisher: '@ractive'
+PublisherUrl: https://github.com/ractive
+PublisherSupportUrl: https://github.com/ractive/hyalo/issues
+Author: Jean-Pierre Bergamin
+PackageName: hyalo
+PackageUrl: https://github.com/ractive/hyalo
+License: MIT
+LicenseUrl: https://github.com/ractive/hyalo/blob/HEAD/LICENSE
+ShortDescription: CLI for exploring and managing Markdown knowledge bases with YAML frontmatter
+Description: Hyalo is a fast command-line tool for searching, filtering, and mutating collections of Markdown files with YAML frontmatter. It supports property queries, tag filtering, regex search, wikilink tracking, and bulk metadata updates. Compatible with Obsidian vaults, Zettelkasten systems, and any structured Markdown documentation.
+Moniker: hyalo
+Tags:
+- agent-skill
+- agentic-workflows
+- cli
+- knowledge-base
+- knowledge-management
+- markdown
+- obsidian
+- rust
+- zettelkasten
+ReleaseNotes: |-
+  Highlights
+  hyalo 0.25.0 turns ranked search into a small query language, adds section-level hits, facets and an incremental index, and closes the findings of two dogfood rounds on MDN, GitHub Docs and two Obsidian vaults.
+  Search
+  - find PATTERN has a grammar: implicit AND, OR (binds tighter), "phrase"~N, prefix*, -term, ( ) groups. hyalo find --help opens with a ten-line FIND 101.
+  - --granularity section returns the paragraph, not the file; --facet tags|property:K|type|dir counts the whole match set; hyalo terms [PREFIX] lists the stemmed dictionary.
+  - BM25F ranking (title, headings and tags outweigh body), a proximity bonus, accent folding, identifier splitting, did-you-mean on zero results.
+  - create-index is incremental and skips the write when nothing changed; an --index read repairs drifted files in memory and says so.
+  Breaking changes
+  - Snapshot format 7. Indexes written by 0.24.x are refused with a warning; rebuild with hyalo create-index.
+  - Ranked search results change: a b OR c now means a AND (b OR c), and scores and order differ under BM25F.
+  - read --lines A:B is file-relative, the same numbering find, lint and section hits print.
+  - A [schema] that fails to load refuses lint, find --strict and views run; an enum constraint must list its values. Under an unusable .hyalo.toml, previews (--dry-run, links fix without --apply) refuse like the write they preview.
+  - YAML 1.2 core integers: 1_000, 0X1F and 0b101 read as strings; 0x1F, 0o17 and 01234 are integers.
+  - summary.links.broken counts a bare [[alias]] link, as find --broken-links and HYALO006 already did.
+  Notable fixes
+  - links fix --apply writes heading text into wikilink anchors (Obsidian cannot resolve a slug there) and slugs into markdown links.
+  - --jq works when SIGINT is ignored (background jobs, nohup); 0.24.x failed every such call.
+  - mv rewrites bare attachment and embed links on a cross-directory move.
+  - A note with invalid UTF-8 no longer breaks vault-wide listings and is never rewritten.
+  The full changelog for this version follows.
+  [0.25.0] - 2026-10-05
+  Added
+  - Explicitly opt-in Jev classification in the hyalo-tidy skill for Codex,
+    Claude Code, and Pi. Selected documents can receive suggestions for missing
+    types, approved tags, and existing folders. The bundled helper uses Bun or
+    Node.js and a Typesafe API key; ordinary tidy needs neither. Agents review
+    suggestions and preview changes through Hyalo before applying them.
+  - Ranked search query language (DEC-333): conf* prefix terms matched against
+    the stemmed dictionary (capped at 256 terms with a -q-proof warning);
+    each term is stemmed in every language present in the vault, so a language: de note is found by its German inflection; a zero-result query names close
+    dictionary terms, hints the corrected query and reports them under a
+    top-level suggestions key.
+  - hyalo terms [PREFIX] lists the BM25 dictionary (stemmed terms) with
+    document frequency, most frequent first; --limit (default 50, 0
+    unlimited), --index/--index-file, --jq and --count work as
+    elsewhere.
+  - find PATTERN --granularity section returns one ranked hit per matching
+    section ({file, section: {heading, level, line_start, line_end, path}, score, matches}) instead of per file (DEC-334). A section must satisfy the
+    query's positive words on its own; negated terms are
+    decided once per file and hold for all its sections. Scores use the corpus IDF with section-length normalisation,
+    --limit counts sections, --section restricts eligible sections, and each
+    hit hints a hyalo read that shows it. Same answer with --index.
+  - find --facet tags|property:K|type|dir (repeatable) adds a top-level
+    facets key with per-value file counts over the full match set, computed
+    before --limit, at most 50 buckets per facet with truncated (DEC-335).
+    Property buckets resolve dot-paths and fold case like --property K=V.
+    Text mode prints a block per facet, hints drill into the largest buckets,
+    and --jq sees .facets.
+  - Search tokenizer v4 (DEC-336): accents fold before stemming (résumé
+    finds resume); an identifier written as getUserName, get_user_name or
+    get-user-name is indexed as its whole plus its parts, so user finds it,
+    and prose spellings (error handling) still match error-handling.
+    [search] code_blocks = "skip" leaves fenced code blocks out of search,
+    section scores and snippets (default "index").
+  - BM25F field weighting (DEC-337): [search.weights] title = 3.0,
+    headings = 2.0, tags = 2.0 (frontmatter tags and aliases), body = 1.0,
+    applied at query time. Invalid values warn and keep the default.
+  - Phrase slop "a b"~N (in order, at most N extra words, max 64) and a
+    proximity bonus for documents whose query terms sit close together
+    ([search] proximity_bonus = 0.5, 0 disables; top 200 candidates).
+    Snippets prefer the line where the terms are closest (DEC-338).
+  - Incremental create-index (DEC-339): files with unchanged size and mtime
+    keep their entries and search postings are patched instead of rebuilt.
+    --force rebuilds from scratch; the result reports reused, refreshed,
+    skipped, removed and rebuilt. A racily clean file (mtime not older
+    than the previous snapshot) is always re-scanned.
+  - An --index read against a drifted snapshot re-scans only the drifted files
+    in memory and prints a -q-proof note naming how many (and up to three);
+    a drifted file that cannot be scanned is left out with a -q-proof warning,
+    as a disk scan would, and the snapshot file is never written by a read
+    (DEC-339). [search.weights] and proximity_bonus accept 0 to 1000.
+  - hyalo config reports results.search (language, code_blocks,
+    weights, proximity_bonus).
+  - npm API: typed terms(), tags() (tags summary) and backlinks()
+    wrappers returning Envelope<TermsResult>, Envelope<TagsResult> and
+    Envelope<BacklinksResult>, with options and results generated from Rust.
+  - Lint rule HYALO008 (broken-heading-anchor): a same-file or cross-file
+    heading fragment that matches no heading in the resolved target, including
+    configured frontmatter wikilinks. Warning by default, promoted by --strict
+    unless its severity is configured explicitly. HYALO006 stays target-only,
+    so one link never reports both.
+  - links fix repairs heading anchors: a broken slug that matches exactly one
+    heading after removing its leading decimal section number (#success-metrics
+    → #6-success-metrics) is planned in the dry run and written by plain
+    --apply together with safe target repairs. Ambiguous, stale, reference
+    definition and frontmatter cases are deferred with a reason. JSON reports
+    anchor_fixable/anchor_fixes, anchors_applied/applied_anchor_fixes and
+    anchors_deferred/deferred_anchor_fixes beside the target-repair fields.
+  - Search discoverability (DEC-367). find --help now opens with a 10-line
+    FIND 101 block covering the query operators, section mode, facets and
+    terms. The same block appears verbatim in the shipped skill and rule.
+    hyalo --help names the operators on its PATTERN line, and its cookbook
+    gains hyalo terms config. New find hints:
+    - a ranked query of 3+ words with 100+ matching files hints
+      --granularity section;
+    - a PATTERN-less --section matching 10+ files hints section mode with
+      the heading's words;
+    - an unfiltered zero-result AND of words that all exist says no file holds
+      them all;
+    - a plain AND of 2+ words matching 10+ files is offered "a b"~5.
+    An error envelope whose hint points at a --help section also carries a
+    runnable hyalo <cmd> --help entry in a new hints array, in text and
+    JSON. Like every hints array, it is empty under --no-hints and --jq.
+  Fixed
+  - --jq works when SIGINT is ignored — a shell background job
+    (cmd & in a non-interactive shell), nohup, trap '' INT — instead of
+    failing every filter with "cannot install jq cancellation handler"
+    (DEC-369). Ctrl-C still cancels a running filter when it can be caught.
+  - A note whose frontmatter holds invalid UTF-8 no longer makes properties,
+    tags and find --fields file/--count exit 2 with no file named: every
+    scan reads it lossily, on disk and under --index alike, and the summary
+    line says "N files contain invalid UTF-8 — read lossily" instead of
+    "skipped N unreadable files". A named write (set bad.md) or
+    read bad.md --frontmatter exits 1 naming the file (DEC-370).
+  - prefix* and terms PREFIX fold accents and case like a bare word:
+    résumé* = resume*, terms rés = terms res; terms also drops a
+    trailing * and an identifier's separators (get_user), warning when a
+    PREFIX loses more than a trailing * (c++ → c) (DEC-371). A negated
+    -title:x gets the migration notice too.
+  - find -snapshot index (a -s…/-t… word read as a flag, followed by a
+    PATTERN) now prints the hyalo find -- '-term' tip. It is -q-proof when
+    the swallowed filter matched nothing; a deliberate -sTasks/-tproject
+    that matches gets an ordinary note -q silences (DEC-371, completes
+    DEC-356).
+  - find --index --file <deleted> and find --index PATTERN <deleted> exit 1
+    "file not found" like a disk scan instead of serving the stale snapshot
+    entry (exit 0) or failing while reading snippets (exit 2); --files-from
+    under --index counts a deleted file as missing (DEC-371).
+  - links fix --apply writes a target repair and an anchor repair in the same
+    file in one run; the anchor used to be deferred to a second run while the
+    first reported "Applied: yes".
+  - set --property p=9223372036854775808 writes the exact integer (a larger
+    integer literal is kept as quoted text) instead of a lossy float.
+  - No false "no files matched --property map.b; did you mean: map?" warning
+    when the dot-path exists; an operator-only or dash-only query says the
+    query is empty instead of "negating every word"; a --facet drill-down no
+    longer duplicates the generic "Narrow by tag" hint.
+  - Help: read --help says size/lines are whole-file numbers, terms --help says a tag-only term counts, find --help no longer names a
+    snapshot format, group -h footers say --count(listing-only), and
+ReleaseNotesUrl: https://github.com/ractive/hyalo/releases/tag/v0.25.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

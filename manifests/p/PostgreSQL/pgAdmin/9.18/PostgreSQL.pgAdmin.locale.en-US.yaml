@@ -1,0 +1,67 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: PostgreSQL.pgAdmin
+PackageVersion: "9.18"
+PackageLocale: en-US
+Publisher: The pgAdmin Development Team
+PublisherUrl: https://www.pgadmin.org/
+PublisherSupportUrl: https://www.pgadmin.org/support/
+PrivacyUrl: https://www.pgadmin.org/privacy_policy/
+Author: The pgAdmin Development Team
+PackageName: pgAdmin 4
+PackageUrl: https://www.pgadmin.org/download/pgadmin-4-windows/
+License: PostgreSQL
+LicenseUrl: https://www.pgadmin.org/licence/
+Copyright: Copyright © 1996-2026 The PostgreSQL Global Development Group
+CopyrightUrl: https://www.postgresql.org/about/policies/trademarks/
+ShortDescription: Open Source administration and development platform for PostgreSQL
+Description: |-
+  pgAdmin is designed to answer the needs of all users, from writing simple SQL queries to developing complex databases.
+  The graphical interface supports all PostgreSQL features and makes administration easy.
+  The application also includes a syntax highlighting SQL editor, a server-side code editor, an SQL/batch/shell job scheduling agent, support for the Slony-I replication engine and much more.
+  Server connection may be made using TCP/IP or Unix Domain Sockets (on *nix platforms), and may be SSL encrypted for security.
+  No additional drivers are required to communicate with the database server.
+Moniker: pgadmin
+Tags:
+- pgsql
+- postgres
+- postgresql
+- sql
+ReleaseNotes: |-
+  The pgAdmin Development Team is pleased to announce the release of pgAdmin 4 version 9.18. This release of pgAdmin 4 includes 29 bug fixes and new features, including fixes for four security vulnerabilities (CVE-2026-86861 through CVE-2026-86864). For more details, please see the release notes.
+  pgAdmin is the leading open-source graphical management tool for PostgreSQL. For more information, please see the website.
+  Notable changes in this release include:
+  Features:
+  - Collapse and restore the Object Explorer by re-clicking the current workspace icon, in the manner of the VS Code side bar, remembering the choice across refreshes. A keyboard shortcut, Ctrl+Alt+B by default, does the same thing and can be changed through the new toggle_object_explorer preference.
+  - Harden the default Content-Security-Policy so inline scripts run under a per-request nonce rather than a blanket 'unsafe-inline', and drop 'unsafe-eval'. style-src keeps 'unsafe-inline', because MUI and React inject runtime styles and inline style attributes that cannot carry a nonce, and development bundles have 'unsafe-eval' re-added automatically when DEBUG is set.
+  Security Fixes:
+  - Fix an authentication bypass in Webserver authentication mode, where get_user() fell back to reading the configured WEBSERVER_REMOTE_USER name from the inbound request headers when it was absent from the WSGI environment. Because a header is written by whoever sends the request, any client that could reach pgAdmin could assert any identity, including an administrator's, without presenting a credential. A header-asserted identity is now opt-in, restricted to a configured list of trusted proxies with an optional shared secret, and refused for accounts whose authentication source is not webserver (CVE-2026-86863).
+  - Fix argument and connection-string injection in the Backup tool, where the client-supplied database name was appended to the pg_dump argument vector as a bare positional value. Because getopt_long permutes arguments, a value beginning with a dash supplied further options such as --file, overriding the storage-confined output path; and because libpq expands a database name containing an equals sign into a full connection string, the same field could redirect the connection, and the password exported in PGPASSWORD, to a host of the caller's choosing. The database name is now passed through the PGDATABASE environment variable, which libpq never expands (CVE-2026-86864).
+  - Fix connection-string injection in the Restore and Maintenance tools, where the client-supplied database name was passed straight to --dbname and could likewise redirect the connection, and the exported password, to a server of the caller's choosing (CVE-2026-86862).
+  - Fix a time-of-check to time-of-use flaw in the File Manager's save_file endpoint, which backs saving from the Query Tool and ERD: the requested path was validated with check_access_permission() and then opened with a plain open(), so a symbolic link planted in between was followed, writing outside the user's storage directory. This is the write sink that CVE-2026-7819's hardening of the separate upload path did not cover (CVE-2026-86861).
+  - Refuse HTTP redirects on LLM API requests, rather than following a Location header on to a destination the ALLOWED_LLM_API_URLS check was never applied to. This is hardening rather than a fix for an exploitable flaw, since returning the redirect at all requires control of a host already on the allowlist.
+  - Reject an empty or null Username when importing a non-shared server, which previously imported cleanly and left a server that libpq would silently authenticate as the OS account running pgAdmin rather than reject outright.
+  Bugs/Housekeeping:
+  - Fix login being impossible against Flask-Security-Too 5.8.2, which corrected a long-standing inversion in UserMixin.is_locked() that pgAdmin's own is_locked() had been written against.
+  - Fix inherited columns in the Table dialog being editable and deletable, and the Data type dropdown on the expanded Definition tab offering every type rather than honouring the allowed-type restriction applied inline.
+  - Reinstate dependency ordering of the script Schema Diff generates, which had been lost since the React port left dependLevel unset.
+  - Fix Schema Diff reporting false differences for SERIAL and BIGSERIAL columns, duplicating any column that also differs when recreating a foreign table, losing a foreign table column's collation, injecting whitespace into an applied function or procedure body, generating SQL that PostgreSQL rejects when a sequence's MINVALUE is raised above its current value, and reporting a comparison that fails part way through as a success.
+  - Share concurrent identical GET requests behind getNodeAjaxOptions() so a wide table's Columns tab no longer fires one duplicate get_types request per column row.
+  - Fix the argument grid on the Definition tab of a user-defined function or procedure refusing to delete, or add, a row in edit mode.
+  - Omit the redundant TABLESPACE pg_default clause from generated index SQL, which was invalid on a partitioned table.
+  - Fix a crash when a per-server Password Exec Command is used with a service-only (pg_service.conf) connection, which leaves host, port and username unset.
+  - Accept SharedUsername when importing a shared server from a servers.json definition, instead of insisting on Username for every server.
+  - Render the Validate binary path dialog as HTML, instead of showing the raw markup.
+  - Remove a trailing quote from the Windows installer's ProductVersion, and fix the existingSecret path in the Helm deployment template.
+  - Skip importing and initialising the Kerberos, LDAP, MFA, OAuth2 and Webserver authentication providers unless SERVER_MODE is set, leaving desktop mode with internal authentication alone.
+  - Bump JavaScript and Python third-party dependencies, and update the message catalogs, including a fix for the Korean catalog that had not been recompiled since November 2025.
+  Builds for Windows and macOS are available now, along with a Python Wheel, Docker Container, RPM, DEB Package, and source code tarball from the download area.
+ReleaseNotesUrl: https://www.pgadmin.org/docs/pgadmin4/9.18/release_notes_9_18.html
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://www.pgadmin.org/docs/
+- DocumentLabel: FAQ
+  DocumentUrl: https://www.pgadmin.org/faq/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

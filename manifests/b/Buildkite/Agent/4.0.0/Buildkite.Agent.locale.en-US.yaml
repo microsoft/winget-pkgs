@@ -1,0 +1,90 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Buildkite.Agent
+PackageVersion: 4.0.0
+PackageLocale: en-US
+Publisher: Buildkite Pty. Ltd.
+PublisherUrl: https://buildkite.com/home/
+PublisherSupportUrl: https://forum.buildkite.community/
+Author: Buildkite Pty. Ltd.
+PackageName: Buildkite Agent
+PackageUrl: https://buildkite.com/docs/agent
+License: MIT
+LicenseUrl: https://github.com/buildkite/agent/blob/HEAD/LICENSE.txt
+Copyright: Copyright (c) 2026 Buildkite Pty Ltd
+CopyrightUrl: https://github.com/buildkite/agent/blob/HEAD/LICENSE.txt
+ShortDescription: The Buildkite Agent is an open-source toolkit written in Go for securely running build jobs on any device or network
+Description: The buildkite-agent is a small, reliable, and cross-platform build runner that makes it easy to run automated builds on your own infrastructure. It's main responsibilities are polling buildkite.com for work, running build jobs, reporting back the status code and output log of the job, and uploading the job's artifacts.
+Moniker: buildkite-agent
+Tags:
+- buildkite
+- cd
+- ci
+- ci-cd
+- continuous-delivery
+- continuous-deployment
+- continuous-integration
+ReleaseNotes: |-
+  Buildkite Agent v4.0.0
+  Buildkite Agent v4 is now stable. Most features and fixes developed since v3 and v4 diverged were backported to v3, so this changelog focuses on behaviour that differs from v3.
+  Review the v3 to v4 upgrade guide before upgrading.
+
+  Breaking changes
+
+  Job handling
+  - Removed the deprecated built-in Docker integration. The docker and docker-compose plugins remain supported.
+  - Cancelled Windows jobs now return exit status 1 instead of 0.
+  - Replaced cancel-grace-period and signal-grace-period-seconds with cancel-signal-timeout and cancel-cleanup-timeout, defaulting to 10 and 5 seconds respectively.
+
+  Job logs
+  The agent now always emits ANSI timestamp codes. Plaintext timestamps and the option to disable ANSI timestamps have been removed.
+
+  Checkout
+  - BUILDKITE_COMMIT is resolved to a commit hash after checkout.
+  - Replaced built-in SSH key scanning and known-hosts management with OpenSSH host-key-checking options.
+  - Git commit verification now defaults to strict and accepts only strict or off. Replace previous empty or warn values before upgrading.
+
+  Agent parallelism
+  spawn-with-priority now accepts static, ascending, or descending. Boolean values are no longer accepted.
+
+  Observability
+  - Removed OpenTracing, direct DogStatsD support, and Datadog-specific tracing workarounds. Use OpenTelemetry instead.
+  - Renamed tracing-service-name to telemetry-service-name.
+  - Trace-parent propagation is now always enabled.
+  - Replaced jobs.success and jobs.failed with jobs.finished.
+  - Replaced jobs.duration.success and jobs.duration.error with jobs.duration.
+  - Use the exit_code attribute to distinguish successful and failed jobs.
+  - The standard Prometheus job metrics now include priority and queue labels, replacing the separate _with_labels_total metrics.
+
+  Pipeline uploads
+  - Pipeline uploads now reject interpolated secrets by default. Use allow-secrets to permit them.
+  - Secret detection now includes trigger-step build.env values.
+
+  Artifacts
+  - Windows artifact paths are now stored with / separators.
+  - Removed artifact upload --follow-symlinks; use -glob-resolve-follow-symlinks.
+  - Artifact downloads now unconditionally prevent path traversal.
+
+  Plugins and hooks
+  - Removed deprecated plugin configuration environment-variable aliases that collapsed consecutive underscores.
+  - post-checkout, post-command, and pre-exit hooks now run in reverse setup order: plugins last-to-first, repository, then agent.
+  - Enable the legacy-post-hook-order experiment to temporarily restore v3 ordering.
+
+  Command behaviour
+  - oidc request-token now exits with status 77 for definitive API refusals using HTTP status 400, 401, 403, 404, 410, or 422. Other failures continue to exit with status 1.
+  Several deprecated flags, environment variables, configuration aliases, and experiments have also been removed. Consult the upgrade guide for their replacements.
+
+  Other changes
+  - Added Linux systemd watchdog support based on successful Buildkite heartbeat activity.
+  - Added an Ubuntu 26.04 agent Docker image.
+
+  New Contributors
+  - @JoeColeman95 made their first contribution in #4232
+  - @Temikus made their first contribution in #4239
+ReleaseNotesUrl: https://github.com/buildkite/agent/releases/tag/v4.0.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://buildkite.com/docs/agent
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

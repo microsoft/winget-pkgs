@@ -1,0 +1,100 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: t8y2.DBX
+PackageVersion: 0.6.1
+PackageLocale: en-US
+Publisher: t8y2
+PublisherUrl: https://github.com/t8y2
+PublisherSupportUrl: https://github.com/t8y2/dbx/issues
+Author: t8y2
+PackageName: DBX
+PackageUrl: https://github.com/t8y2/dbx
+License: Apache-2.0
+LicenseUrl: https://github.com/t8y2/dbx/blob/HEAD/LICENSE
+ShortDescription: 15MB，lightweight, cross-platform database client. Supports MySQL, PostgreSQL, SQLite, Redis, MongoDB, DuckDB, ClickHouse, SQL Server and more.
+Tags:
+- clickhouse
+- database
+- database-client
+- database-management
+- duckdb
+- gui
+- mongodb
+- mysql
+- postgresql
+- redis
+- rust
+- sql-server
+- sqlite
+- tauri
+- vue
+ReleaseNotes: |-
+  新功能
+  - etcd v2 API 连接 — 新增 etcd 2.0–2.3 及开启 --enable-v2 的 3.x 连接类型（etcd2），可直接浏览旧集群的键值与历史；etcd v3 连接的 Agent 同步重写为 Go 原生实现，无需下载 JRE。 (commit 72dcd8355)
+  - 表 DDL 在线编辑 — 「DDL」页签不再只读：编辑内容按语句拆分进入 SQL 预览，「应用」时沿用既有批量执行通道（生产库二次确认、执行历史、缓存失效），带未保存提示与「恢复数据库 DDL」按钮；同时修复切换页签后 DDL 空白的问题。 (contributed by @onenewcode) (PR #7836)
+  - AI 对话 Schema 上下文 — AI 上下文栏新增可搜索的 Schema 选择器，选中的 Schema 同步作用于元数据检索与 Agent 工具，目标表不在默认 Schema 时无需每次手动说明。 (contributed by @zipg) (PR #7802)
+  - AI 模板按数据库类型记忆 — 提示词模板按连接的数据库类型记忆默认模板与最近使用，打开 AI 面板自动套用，不再每次重复选择。 (contributed by @Abeautifulsnow) (PR #7924)
+  - Kimi AI 预设 — 新增 Kimi（Moonshot OpenAI 兼容接口）AI 提供商，支持模型列表、流式对话与 API Key 校验；同时支持删除当前或默认激活的 AI 配置。 (contributed by @eryajf) (PR #7772)
+  - MCP 按数据库覆盖执行权限 — MCP 授权支持按数据库单独配置，优先级为单库设置 > 连接默认 > 全局默认，授权向导可预览实际生效策略。 (contributed by @eryajf) (PR #7808)
+  - 更新失败切换下载源 — 更新检查失败时可在弹窗中切换官方源、CNB 与 AtomGit 并立即重新检查，GitHub 访问不稳定时无需手动改配置。 (contributed by @zipg) (PR #7868)
+  - 隧道维护 SSH Agent 认证 — 设置中的「隧道维护」支持 SSH Agent 登录方式，与连接编辑的 SSH 隧道能力对齐。 (contributed by @0verme) (PR #7888)
+  - 编辑器匹配项选择 — 新增「添加下一个匹配项」与「选中所有匹配项」操作，默认快捷键 Ctrl+G / Ctrl+Mod+G，可在右键菜单与快捷键设置中使用。 (contributed by @doersa) (PR #7909)
+  - 补全字段拖拽多选 — 字段补全列表支持按住拖拽连续勾选或取消勾选，列表边缘自动滚动并实时显示已选插入数量。 (contributed by @eryajf) (PR #7889)
+  - Nacos 状态恢复 — Nacos 标签页切换或重新打开时恢复上次选中的配置与编辑器滚动位置。 (contributed by @eryajf) (PR #7926)
+  - 文档 JSON 复制 — 文档预览工具栏新增一键复制按钮，预览区支持文本选择。 (contributed by @eryajf) (PR #7867)
+  - 侧边栏悬浮提示开关 — 设置 → 导航新增「侧边栏悬浮提示」开关（默认开启），关闭后连接/数据库树的悬浮详情与截断名称提示不再弹出。 (contributed by @sxhjlzl) (PR #7848)
+  改进
+  - 超大 SQL 表名着色性能 — 表名语义着色改为按括号深度单遍扫描，约 2.4 万行的大型 SQL 着色从约 33 秒降至毫秒级，编辑器不再长时间阻塞。 (contributed by @zipg) (PR #7911)
+  - InfluxDB 表快捷打开时间窗 — 侧边栏点表预览改用 SELECT * 并自动注入滚动时间窗口，避免无时间谓词触发全分片/全 Parquet 扫描，大表预览即时返回；抽样与导出路径保持原语义。 (contributed by @Clarence404) (PR #7809)
+  - InfluxDB 新建查询时间窗 — 「新建查询」预填 SQL 同样注入默认时间窗口（WHERE time > now() - 5m）并按时间倒序限样，直接执行不再全量扫描。 (contributed by @Clarence404) (PR #7887)
+  - 比较弹窗连接树选择 — 架构对比与数据对比弹窗改用连接树选择器，支持按侧边栏文件夹层级展示、按连接名称与文件夹路径搜索。 (contributed by @hanxuanyu) (PR #7833)
+  修复
+  - 多结果集编辑保留兄弟结果 — 同一标签页多个结果集中编辑其中一个并提交后，只刷新当前结果集，其余结果集不再被清空。 (contributed by @0verme) (PR #7886)
+  - DISTINCT JOIN 删除行 — 多表关联 + DISTINCT 的查询结果在唯一来源表且主键列完整时恢复「删除行」操作；无完整主键或复杂表达式保持只读。 (contributed by @zipg) (PR #7806)
+  - 筛选视图面板开关 — 条件/文本筛选视图下保留筛选按钮，可展开或收起筛选工作台，不再无法进入筛选编辑。 (contributed by @eryajf) (PR #7794)
+  - Explain 变量参数 — 含模板变量的 SQL 执行 Explain 前同样弹出参数对话框完成替换，不再直接发送 :var 报语法错误。 (contributed by @0verme) (PR #7903)
+  - 折叠节点全局搜索 — 全局搜索可找到折叠的数据库、Schema 与对象分组中的对象，清空搜索后恢复原折叠状态。 (contributed by @zipg) (PR #7795)
+  - 生成 SQL 滚动保持 — 对象浏览器滚动到底部后执行「生成 SQL」，滚动位置不再跳回顶部。 (contributed by @0verme) (PR #7837)
+  - 非 SQL 文本文件打开保存 — 修复 v0.6.0 自定义过滤器显示的非 .sql 文本文件无法打开的回归；支持打开、保存、重命名与删除，保存不再误执行 SQL 格式化。 (contributed by @zipg) (PR #7804)
+  - 更新日志 Markdown 渲染 — 设置面板「更新日志」条目按 Markdown 渲染，链接与格式正常显示。 (commit 069b84daf)
+  - Agent 补全协议兼容 — 兼容 Agent 返回大写的补全对象类型，修复由此导致的未知错误（SQL 保存与执行失败）。 (commit 01ce303f4)
+  - Windows 剪贴板历史 — WebView2 内复制的内容可出现在 Windows 剪贴板历史（Win+V），粘贴行为不变。 (contributed by @githubasda) (PR #7825)
+  - 本地数据文件权限 — 本地数据库文件 dbx.db 及 WAL 权限收紧为仅所有者可读写，避免连接凭据被同机其他账户读取。 (contributed by @omerfarukalkilic) (PR #7796)
+  - 传输栈溢出 — 单表传输移入独立任务栈，Debug 构建或较小线程栈环境下大数据量传输不再栈溢出导致应用退出。 (contributed by @CN-Scars) (PR #7761)
+  - 导入选择已有表 — 从数据库/Schema 范围发起导入时加载物理表并允许选择已有目标表，复用既有追加/覆盖映射流程。 (contributed by @1320209572) (PR #7890)
+  - 压缩备份删除 — 备份历史支持删除 .sql.gz 压缩备份文件，安全校验保持不变。 (contributed by @zipg) (PR #7787)
+  - 表结构 DDL 页签保持 — 表结构面板切到其他页签再切回后 DDL 内容保持显示，不重复请求数据库。 (contributed by @1320209572) (PR #7800)
+  - Elasticsearch DSL 补全 — REST 查询编辑器 JSON 体内直接输入关键字不再被误判为 HTTP 方法导致无补全；新增 term/match/exists 查询模板，多行模板自动继承缩进。 (contributed by @zipg) (PR #7858)
+  - MongoDB MCP 索引 TTL — MCP getIndexes() 返回 expireAfterSeconds，TTL 索引的过期配置不再丢失。 (contributed by @0verme) (PR #7813)
+  - GROUP BY 位置排序 — 含 GROUP BY 的查询中位置 ORDER BY 1,2 只按分组列处理，ClickHouse 聚合等查询不再报错。 (contributed by @Tssshhhh) (PR #7773)
+  - MySQL SELECT INTO 变量 — SELECT ... INTO @var 与 SELECT ... FROM ... INTO @var 两种写法的用户变量不再被误当客户端模板参数替换，不再报 Undeclared variable。 (contributed by @zipg) (PR #7923)
+  - MySQL 5.7 ADD COLUMN IF NOT EXISTS — 5.7 返回 1064 时经 information_schema 预检后移除兼容子句重试，重复执行保持幂等，新版原生路径不变。 (contributed by @zipg) (PR #7805)
+  - PolarDB-X 索引元数据 — 连接 PolarDB-X 后查看与编辑索引不再异常，字典元数据不可用时自动回退。 (commit 032c05d6c)
+  - PostgreSQL 大字段预览内部列 — 表数据大字段预览不再把 __DBX_LARGE_VALUE_BYTES_* 内部辅助列当普通字段显示，Kingbase 兼容连接同步修复。 (contributed by @0verme) (PR #7812)
+  - PostgreSQL 本地化函数源码 — 使用非英文错误消息的 PostgreSQL 仍能识别 prokind 缺失并自动回退，函数源码可正常查看。 (commit 91b462327)
+  - KingbaseES 旧连接兼容 — 升级前保存的空数据库连接恢复 postgres 默认值，不再把登录用户名当作目标数据库导致连接失败。 (contributed by @zipg) (PR #7914)
+  - Oracle 物化视图 DDL — 物化视图改为从元数据加载 DDL，可正常查看，不再无法编辑或报错。 (commit 877421e59)
+  - Oracle SDE 空间字段 — 查询包含 ArcGIS SDE.ST_GEOMETRY 字段时 Agent 协议不再失败，结果正常返回。 (commit 8b4b83658)
+  - 旧 Oracle Agent 只读查询 — 旧版 Agent 不支持手动事务时只读 SQL 自动回退自动提交，升级旧客户端后仍可查询；写入与 DDL 继续保留错误以保安全。 (contributed by @zipg) (PR #7816)
+  - SQL Server 展开全部 — 分页元数据查询补充列命名，表节点「展开全部」在对象超过 1000 时恢复生效。 (commit 55a21f8e9)
+  - SQL Server legacy 条件查询 — legacy 通道 sql_variant 探测 SQL 不再被截断，添加条件查询后不再报错。 (commit ad98bef16)
+  - MongoDB shell 正则 — find、updateMany 等命令支持 /pattern/flags 正则字面量并正确转换为 BSON Regex，保留转义与字符类语义。 (contributed by @CN-Scars) (PR #7928)
+  - MongoDB shell 只读识别 — find、findOne、countDocuments、只读聚合、distinct 等 shell 命令识别为只读，不再误弹写确认；$out/$merge 与写命令的保护保持不变。 (PR #7925)
+  - MongoDB 传输日期保留 — 传输时 BSON 日期按日期类型传递，不再转为字符串引发读取类型转换错误。 (commit 245ea3b64)
+  - HANA 字符字段长度 — NVARCHAR/NCHAR 列在表头类型与 DDL 中正确显示长度，如 NVARCHAR(100)。 (contributed by @zipg) (PR #7879)
+  - HANA 结果排序 — 查询结果点击列排序不再生成派生表列别名列表，不再报 JDBC 257 错误。 (contributed by @zipg) (PR #7828)
+  - 达梦分页兼容 — 表分页 SQL 改用全版本兼容的 ROWNUM 语法，DM6 等不支持 FETCH FIRST 的版本不再报语法错误。 (contributed by @StaravenX) (PR #7515)
+  - Vastbase 多语句超时 — 多条查询连续执行时不再因首条结果保留分页游标占用连接而超时，单条 SQL 分页行为不变。 (contributed by @zipg) (PR #7927)
+  - IoTDB Tree Model 计数 — 「加载全部」总数统计不再把查询包进派生表触发语法错误，单设备/单时间序列查询正常分页加载。 (contributed by @zipg) (PR #7892)
+  - 虚谷主键匹配 — 约束目录与列目录大小写不一致时主键仍可正确匹配，行编辑与删除正常。 (PR #7902)
+  - IRIS 表预览 — 点击表预览不再生成带引号标识符的 SQL，不再报语法不兼容。 (commit bd7ed6346)
+  - IRIS LIST 字段 — 含 LIST 类型字段的表可正常查询，%List 值经 JDBC 对象读取。 (commit 51ca40e86)
+  - 星环 Inceptor DDL — 原生 ArgoDB 按 database → schema → 默认库查询 system.procedures_v/functions_v 读取存储过程与函数源码；JDBC 连接补齐视图 DDL 查看。 (contributed by @Mo-Moore) (PR #7861)
+  安装
+  - Windows 7 专用安装包 — 修复 v0.6.0 Win7/Server 2012 R2 专用安装包启动失败的问题（dbx.exe 误静态链接新版 WebView2 Loader，在内核 6.3 上报 ERROR_NOT_SUPPORTED）；发布构建停用 sccache 并新增二进制审计，杜绝该问题回归。 (commit 11ff1c29a)
+  - 旧系统安装指引 — 标准 Windows 安装器在 Win7/Server 2012 R2 上启动时给出明确提示并直达专用包下载地址，静默安装返回不支持的退出码；官网下载菜单区分标准包、Windows 10 内网包与 Win7 专用包，合并 Linux 浏览器版 x64/ARM64 入口并补充启动与端口指引。 (contributed by @zipg) (PR #7872)
+  > 国内下载：如果 GitHub 下载较慢，可从 CNB 镜像 下载桌面端安装包，Docker 镜像从 docker.cnb.cool/dbxio.com/dbx:v0.6.1 拉取。
+ReleaseNotesUrl: https://github.com/t8y2/dbx/releases/tag/v0.6.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

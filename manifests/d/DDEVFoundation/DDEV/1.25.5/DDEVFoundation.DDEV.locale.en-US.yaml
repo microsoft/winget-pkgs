@@ -1,0 +1,97 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: DDEVFoundation.DDEV
+PackageVersion: 1.25.5
+PackageLocale: en-US
+Publisher: DDEV Foundation
+PublisherUrl: https://github.com/ddev
+PublisherSupportUrl: https://github.com/ddev/ddev/issues
+PackageName: DDEV
+PackageUrl: https://github.com/ddev/ddev
+License: Apache-2.0
+LicenseUrl: https://github.com/ddev/ddev/blob/HEAD/LICENSE
+ShortDescription: Docker-based local PHP+Node.js web development environments
+Tags:
+- backdrop
+- craftcms
+- ddev
+- development
+- docker
+- drupal
+- laravel
+- linux
+- local-development
+- macos
+- magento
+- magento2
+- mariadb
+- moodle
+- nodejs
+- php
+ReleaseNotes: |-
+  ## Installation
+
+  See the [installation instructions](https://docs.ddev.com/en/stable/users/install/ddev-installation/) for details, but it's easy:
+
+  • macOS：`brew install ddev/ddev/ddev` or just `brew upgrade ddev`.
+  • Linux：Use `sudo apt-get update && sudo apt-get install ddev`, see [apt/yum installation](https://docs.ddev.com/en/stable/users/install/ddev-installation/#linux)
+  • Windows and WSL2：Download the [Windows Installer](https://ddev.com/download/); you can run it for install or upgrade.
+  • Consider `ddev delete images` or `ddev delete images --all` after upgrading to free up disk space used by previous Docker image versions. This does no harm.
+  • Consider `ddev config --auto` to update your projects to current configuration.
+
+  ## Highlights
+
+  Blog announcement：https://ddev.com/blog/release-v1-25-5/
+
+  • **Initial [PHP 8.6](https://docs.ddev.com/en/stable/users/configuration/config/#php_version) support** (8.6.0 RC3, some extensions not available yet)
+  • **A rebuilt [`ddev tui`](https://docs.ddev.com/en/stable/users/usage/commands/#tui)** with a new layout, clickable links, and more project actions
+  • **Use your existing SSH agent** (e.g. macOS, 1Password, `ssh -A`) with [`ssh_agent_upstream`](https://docs.ddev.com/en/stable/users/usage/cli/#using-an-existing-ssh-agent)
+  • **[`ddev restart -s <service>`](https://docs.ddev.com/en/stable/users/usage/commands/#restart)** restarts only the services you name
+  • **QR codes** for [`ddev share`](https://docs.ddev.com/en/stable/users/usage/commands/#share) and [`ddev launch --qr`](https://docs.ddev.com/en/stable/users/usage/commands/#launch)
+  • **zstd** for [`ddev import-db`](https://docs.ddev.com/en/stable/users/usage/commands/#import-db), [`ddev import-files`](https://docs.ddev.com/en/stable/users/usage/commands/#import-files), and [`ddev export-db`](https://docs.ddev.com/en/stable/users/usage/commands/#export-db)
+  • **[Global hooks](https://docs.ddev.com/en/stable/users/configuration/hooks/#global-hooks)**, and [`global_config.*.yaml` files](https://docs.ddev.com/en/stable/users/configuration/config/#environmental-overrides) that extend `global_config.yaml`
+
+  ## PHP Security Fixes
+
+  See [PHP2Shell：What DDEV Users Need to Know](https://ddev.com/blog/php2shell-what-ddev-users-need-to-know/) for who is affected and how to update PHP without upgrading DDEV.
+
+  • `ddev-webserver` ships PHP 8.5.12, 8.4.27, 8.3.36, and 8.2.35, which fix CVE-2026-109618 and CVE-2026-109619, see the [PHP announcement](https://www.php.net/archive/2026.php#2026-10-21-5). deb.sury.org [also patched PHP 5.6 through 8.1](https://codeberg.org/oerdnj/deb.sury.org/issues/145#issuecomment-25974932), and upgrading DDEV rebuilds those projects' web images with the fixed packages
+  • PHP 8.6 is still 8.6.0 RC3, which has neither fix, because deb.sury.org hasn't packaged RC4 yet. DDEV applies the php.net mitigations for CVE-2026-109619 (`session.upload_progress.enabled = 0` and `fatal_error_backtraces = 0`), but CVE-2026-109618 stays open, so don't expose a PHP 8.6 project
+  • PHP 8.4.27 and 8.5.12 have an upstream SimpleXML regression that can crash with `zend_mm_heap corrupted`, see [php-src#24488](https://github.com/php/php-src/issues/24488)
+
+  ## ⚠️ Breaking Changes
+
+  • `session.upload_progress.enabled` is `0` in every PHP version, as [php.net recommends](https://www.php.net/archive/2026.php#2026-10-23-1), and `fatal_error_backtraces` is `0` in PHP 8.6. Few applications use session upload progress, and the PECL `uploadprogress` extension that Drupal uses isn't affected. To turn either back on, add it under `[PHP]` in `.ddev/php/overrides.ini`, see [Custom PHP Configuration](https://docs.ddev.com/en/stable/users/extend/customization-extendibility/#custom-php-configuration-phpini), and run `ddev restart`
+  • The default nginx configurations for Drupal, Backdrop, Magento 1/2, Maho, and Silverstripe changed slightly, and now deny PHP in upload directories. If you removed `#ddev-generated` from `.ddev/nginx_full/nginx-site.conf`, merge the changes from the new template into your copy
+  • WP-CLI, Drush 8, the Backdrop Drush extension, magerun, magerun2, and Symfony CLI are installed only in the project types that use them. To use one in another project type, add it in a `web-build` Dockerfile, see [Project-Specific Utilities](https://docs.ddev.com/en/stable/users/extend/customizing-images/#project-specific-utilities)
+  • `ddev export-db --file=x.sql` writes plain SQL. Before, it wrote gzip data to a file named `.sql`
+  • A custom service or add-on whose `container_name` isn't `ddev-<project>-<service>` is renamed, with a warning. Anything that reached it by its old name should use the service name
+  • DDEV assigns host ports itself instead of leaving it to Docker or Podman. Unconfigured db, web, and Mailpit host ports move to 20000-29999 the next time their containers are created, and the router's fallback ports ("Port 443 is not available, using ... instead") move to 30000-32000. Configured `host_*_port` values don't change
+  • `--profiles` replaces `COMPOSE_PROFILES`, as in Compose, so on a stopped project `ddev start --profiles=x` no longer starts the profiles in `COMPOSE_PROFILES` as well, see [Optional Services](https://docs.ddev.com/en/stable/users/extend/custom-compose-files/#optional-services)
+  • `ddev delete` exits with an error and keeps the project listed when it can't remove a volume. Before, it reported success
+  • Any `global_config.*.yaml` file in `~/.ddev`, such as a leftover `global_config.old.yaml`, is now merged into the global configuration. Rename or remove files you don't want applied
+  • In `ddev tui`, `R` restarts and `r` refreshes, swapped from before, and only `enter` opens the project view
+  • `DDEV_DEBUG` no longer shows image download progress per layer or routine start messages. Use [`DDEV_VERBOSE`](https://docs.ddev.com/en/stable/users/usage/troubleshooting/#debug-environment-variables) to see them
+
+  ## Features
+
+  • [PHP 8.6](https://docs.ddev.com/en/stable/users/configuration/config/#php_version) can be selected. deb.sury.org doesn't package every extension for it yet, and enabling Xdebug, XHProf, or Blackfire on 8.6 gives a clear error
+  • [`ddev tui`](https://docs.ddev.com/en/stable/users/usage/commands/#tui) has a new layout that fits any window size, shows the project list before Docker responds, and adds database addresses, snapshots, published ports, and available add-on updates to the project view
+  • `ddev tui` shows paths and URLs as clickable links, and `o`, `v`, and `p` open a project in the file manager, VS Code, or PhpStorm. URLs printed by other commands are clickable too
+  • `D` in `ddev tui` deletes a project, thanks to @MitraKumar
+  • Up and down wrap around the `ddev tui` project list, so the last project is one key away from the first
+  • [`ssh_agent_upstream`](https://docs.ddev.com/en/stable/users/configuration/config/#ssh_agent_upstream) lets containers use an SSH agent running on the host or forwarded to it, so keys that exist only in an agent work without `ddev auth ssh` key files. See [Using an Existing SSH Agent](https://docs.ddev.com/en/stable/users/usage/cli/#using-an-existing-ssh-agent). It also follows a symlinked agent socket, such as VS Code Remote's `/tmp/vscode-ssh-auth-sock-*`, and `ddev auth ssh` reports an agent socket that's gone after a reconnect in a single message
+  • [`ddev restart -s solr,redis`](https://docs.ddev.com/en/stable/users/usage/commands/#restart) recreates only those services and leaves the rest running. `ddev restart --profiles=x` replaces `ddev restart && ddev start --profiles=x`, and [`ddev utility rebuild -s`](https://docs.ddev.com/en/stable/users/usage/commands/#utility-rebuild) accepts several services
+  • Ctrl-C, SIGTERM, or closing the terminal no longer leaves temporary containers like `start-chown-*` holding project volumes. Interrupting `ddev import-db`, `ddev export-db`, or `ddev snapshot` leaves no partial dump, snapshot, or temporary directory, and Ctrl-C stops a shell loop that runs `ddev`
+  • [`ddev share`](https://docs.ddev.com/en/stable/users/usage/commands/#share) prints a QR code for the tunnel URL, and [`ddev launch --qr`](https://docs.ddev.com/en/stable/users/usage/commands/#launch) prints the project URL with its QR code. This replaces the ddev-qr add-on, which `ddev start` now removes. thanks to @tyler36, who started this in [ddev-qr](https://github.com/ddev/ddev-qr)
+  • [`ddev import-db`](https://docs.ddev.com/en/stable/users/usage/commands/#import-db) and [`ddev import-files`](https://docs.ddev.com/en/stable/users/usage/commands/#import-files) accept zstd files. [`ddev export-db --compression`](https://docs.ddev.com/en/stable/users/usage/commands/#export-db) chooses gzip, bzip2, xz, zstd, or none, and without the flag the format comes from the file extension, as in `ddev export-db -f db.sql.zst`
+  • [Global hooks](https://docs.ddev.com/en/stable/users/configuration/hooks/#global-hooks) in `global_config.yaml` run for every project, before the project's own hooks. [`global_config.*.yaml` files](https://docs.ddev.com/en/stable/users/configuration/config/#environmental-overrides) in `~/.ddev` are merged over `global_config.yaml`, as `config.*.yaml` files are in a project
+  • `ddev config global` with flags prints only the settings you changed, instead of the whole global configuration
+  • New [`pre-delete` and `post-delete` hooks](https://docs.ddev.com/en/stable/users/configuration/hooks/#supported-command-hooks) can remove files a project created, without doing it on every `ddev stop`, thanks to @wazum
+  • [`ddev start`](https://docs.ddev.com/en/stable/users/usage/commands/#start) in a directory that looks like a web project but has no `.ddev` configuration shows what `ddev config --auto` would create, and lets you accept it, change it, or cancel
+  • `ddev list`, `ddev describe`, and `ddev tui` respond faster, and the difference grows with the number of running projects
+  • `ddev start` shows each st
+ReleaseNotesUrl: https://github.com/ddev/ddev/releases/tag/v1.25.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

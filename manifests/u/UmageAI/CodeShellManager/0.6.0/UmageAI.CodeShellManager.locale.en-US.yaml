@@ -1,0 +1,64 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: UmageAI.CodeShellManager
+PackageVersion: 0.6.0
+PackageLocale: en-US
+Publisher: umage.ai
+PublisherUrl: https://umage.ai/
+PublisherSupportUrl: https://github.com/umage-ai/CodeShellManager/issues
+PackageName: CodeShellManager
+PackageUrl: https://github.com/umage-ai/CodeShellManager
+License: MIT
+LicenseUrl: https://github.com/umage-ai/CodeShellManager/blob/HEAD/LICENSE
+ShortDescription: A Windows desktop app for running multiple AI coding agents side-by-side in a tabbed and grid-layout terminal host.
+Description: CodeShellManager is a WPF desktop application that hosts multiple pseudo-terminal sessions in a configurable grid layout. It is built for managing many parallel CLI tool sessions — Claude Code, Codex, GitHub Copilot, ssh remotes, or any shell — with full-text search across every session's output, alert detection when an agent is waiting for input, per-session git status, sleep/wake to park sessions without losing them, and full session persistence across restarts.
+Tags:
+- claude
+- cli
+- conpty
+- copilot
+- developer-tools
+- pseudo-terminal
+- terminal
+- xterm
+ReleaseNotes: |-
+  Multi-session quality-of-life release: undo an accidental close, fit nine terminals on screen, and give run commands a real shell. Plus a noticeably snappier terminal under load.
+  Highlights
+  Recently closed sessions — Ctrl+Shift+T reopens the session you just closed, browser-style. The New Session dialog also lists the last 10 closed sessions for one-click revival. Reopened sessions get a fresh id, so you can close and reopen the same one repeatedly.
+  > ⚠️ Ctrl+Shift+T used to duplicate the active session. Duplicate has moved to Ctrl+Alt+T.
+  3×3 grid layout — nine panes for when four isn't enough. Persists across restarts like the other layouts.
+  Run commands grew up
+  - PowerShell mode — per-command toggle between a bare process and a PowerShell host. Use it when your command needs pipes, redirection, $env: or cmdlets. Runs via pwsh where available, falling back to powershell.exe.
+  - Post-run URL — optionally open a URL in your browser when a command exits 0. npm run dev → http://localhost:5173, no alt-tab.
+  - Output no longer leaks ConPTY's [?9001h bootstrap escape into the drawer.
+  Launch & shutdown spinners — starting sessions show Starting <cmd>… (or Connecting to <host>… over SSH) until the shell's first output, with an 8-second fallback so a silent command never locks the pane. Closing the window now shows a shutdown overlay instead of freezing.
+  Faster typing under load — chatty background sessions used to flood the shared UI queue and make the foreground terminal's keystrokes lag behind. Output is now coalesced into a single scheduled post, so the keystroke path stays clear no matter how noisy the other panes are.
+  Fixes
+  - --resume now honours CLAUDE_CONFIG_DIR. If you'd set it, resume was reading session ids from a stale ~/.claude and failing with "No conversation found with session ID".
+  - Fixed a Win32 race where a session's exit could be reported before the child process had actually exited.
+  - Post-run URLs are now restricted to http/https. They fire automatically with no confirmation, and ShellExecute would otherwise launch a local executable or protocol handler — see #87.
+  - Updated Microsoft.Data.Sqlite to clear a high-severity advisory (GHSA-2m69-gcr7-jv3q) in a transitive dependency.
+  - Binaries now report the correct File version. Every release through v0.5.0 stamped 0.3.4.0 regardless of the actual version.
+  Upgrading
+  Drop-in over v0.5.0 — your state.json loads unchanged, and the new per-command fields default to previous behaviour. Verified against a real 40-session profile.
+  Install
+  winget install UmageAI.CodeShellManager
+  # or
+  choco install codeshellmanager
+  Or grab the MSI or portable ZIP below.
+  What's Changed
+  - feat(release): publish to Chocolatey on release by @AThraen in #49
+  - fix(chocolatey): pass community verification (log path + PNG icon) by @AThraen in #61
+  - feat(bundle): low-hanging fruit + tests, refactor, docs by @AThraen in #63
+  - docs: spinner design spec + doc refresh by @AThraen in #64
+  - fix(claude): honor CLAUDE_CONFIG_DIR when resolving the resume session id by @AThraen in #85
+  - perf(terminal): coalesce PTY output posts and unblock the keystroke path by @AThraen in #83
+  - chore(release): clear NU1903 advisory and silence CS8123 warnings by @AThraen in #86
+  - fix(run): only ShellExecute http/https post-run URLs by @AThraen in #87
+  - chore(deps): bump the actions group across 1 directory with 3 updates by @dependabot[bot] in #80
+  - chore(release): set version to 0.6.0 and unpin FileVersion by @AThraen in #89
+  Full Changelog: v0.5.0...v0.6.0
+ReleaseNotesUrl: https://github.com/umage-ai/CodeShellManager/releases/tag/v0.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

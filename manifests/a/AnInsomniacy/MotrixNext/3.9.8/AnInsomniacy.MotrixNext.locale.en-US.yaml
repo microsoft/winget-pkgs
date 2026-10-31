@@ -1,0 +1,82 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AnInsomniacy.MotrixNext
+PackageVersion: 3.9.8
+PackageLocale: en-US
+Publisher: motrix
+PublisherUrl: https://github.com/AnInsomniacy
+PublisherSupportUrl: https://github.com/AnInsomniacy/motrix-next/issues
+PackageName: MotrixNext
+PackageUrl: https://github.com/AnInsomniacy/motrix-next
+License: MIT
+LicenseUrl: https://github.com/AnInsomniacy/motrix-next/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025-present AnInsomniacy
+ShortDescription: A full-featured download manager — rebuilt from the ground up
+Description: |-
+  Motrix by agalwood was one of the best open-source download managers available — clean UI, aria2-powered, cross-platform. It inspired thousands of users and developers alike.
+  However, the original project has been largely inactive since 2023. The Electron + Vue 2 + Vuex + Element UI stack accumulated technical debt, making it increasingly difficult to maintain, extend, or package for modern platforms.
+
+  What we kept
+  We owe a great deal to the original Motrix and its community. The following were gratefully adopted and continue to serve as the foundation for parts of Motrix Next:
+  - Aria2 error code system and RPC client — the error handling conventions and JSON-RPC communication layer for the aria2 engine
+  - Internationalization — 25+ community-contributed locale files covering Chinese, Japanese, Korean, Arabic, French, German, and many more
+  - Download utilities — tracker list management, cURL command parsing, and other protocol-level helpers
+
+  What we rebuilt
+  Motrix Next is not a fork — it is a complete rewrite. Every other layer of the application has been redesigned and reimplemented from scratch:
+  | Layer        | Motrix (Legacy)         | Motrix Next                     |
+  | ------------ | ----------------------- | ------------------------------- |
+  | Runtime      | Electron                | Tauri 2 (Rust)                  |
+  | Frontend     | Vue 2 + Vuex            | Vue 3 Composition API + Pinia   |
+  | UI Framework | Element UI              | Naive UI                        |
+  | Language     | JavaScript              | TypeScript + Rust               |
+  | Styling      | SCSS + Element theme    | Vanilla CSS + custom properties |
+  | Engine Mgmt  | Node.js `child_process` | Tauri sidecar                   |
+  | Build System | electron-builder        | Vite + Cargo                    |
+  | Bundle Size  | ~80 MB                  | ~20 MB                          |
+  | Auto-Update  | electron-updater        | Tauri updater plugin            |
+
+  Design & Motion
+  The overall UI layout stays true to Motrix's original design — the sidebar navigation, task list, and preference panels all follow the familiar structure that made Motrix intuitive from day one.
+  What changed is everything underneath. Every transition and micro-interaction has been carefully tuned to follow Material Design 3 motion guidelines:
+  - Asymmetric timing — enter animations are slightly longer than exits, giving new content time to land while dismissed content leaves quickly
+  - Emphasized easing curves — decelerate on enter (cubic-bezier(0.2, 0, 0, 1)), accelerate on exit (cubic-bezier(0.3, 0, 0.8, 0.15)), replacing generic ease curves throughout the codebase
+  - Spring-based modals — dialogs use physically-modeled spring animations for a natural, responsive feel
+  - Consistent motion tokens — all durations and curves are defined as CSS custom properties, ensuring a unified rhythm across 12+ components
+Tags:
+- download
+- downloader
+ReleaseNotes: |-
+  Important
+  Engine transition: This release replaces the legacy transfer backends and resume formats. Finish important in-progress downloads before upgrading from v3.9.7; legacy .aria2 control files and old engine resume state are not imported. If incompatible session state prevents startup, Reset Engine State clears unfinished-task session data while retaining downloaded files, preferences, and download history. FTP support has been removed; SFTP remains supported.
+  What's Changed
+  Motrix Next 3.9.8 brings the complete 3.9.8 beta series to stable. It upgrades the bundled engine from Aria2 Next 2.5.5 to 2.7.1, replaces the legacy BitTorrent and stream-transfer implementations with libtorrent and libcurl, adds tab-free browser activation, and reworks task recovery, file selection, sharing controls, localization, and database recovery. All six desktop builds include the updated engine and browser launcher.
+  ✨ New Features
+  - Browser-to-desktop activation — Chrome, Edge, and desktop Firefox can launch or activate Motrix Next without opening an intermediate browser tab. The bundled Native Messaging launcher accepts only an allowlisted activate request, opens the fixed motrixnext:// protocol, replies, and exits. It does not run as a background service or receive download URLs, cookies, headers, or commands. Downloads continue through the existing authenticated local HTTP API.
+  - Explicit magnet file selection — Choose Download All, Open File Selector, or Select Manually for newly added magnet tasks. Automatic selection prompts are the default. Changing this preference leaves existing tasks unchanged. Torrent metadata inspection and file selection now use the engine's native interfaces.
+  - Unified sharing controls — Pause, resume, or finish BitTorrent seeding and ED2K sharing, including a confirmed bulk action to finish all eligible sharing tasks. Seeding and sharing durations remain available in task details without continuously ticking on task cards.
+  - Engine recovery workflow — A centralized supervisor coordinates startup, readiness checks, bounded retries, restarts, and runtime recovery. The recovery dialog provides failure details, manual retry, cancellation, and an explicit engine-state reset.
+  - Database recovery without blocking launch — The window opens before database initialization. If the database is damaged or unavailable, the app remains accessible and offers Reset and Restart or Not Now. Reset is also available in settings; it clears download history and saved website credentials while preserving downloaded files and preferences. Initialization failures never delete the database automatically.
+  🛠 Improvements
+  - Rebuilt BitTorrent core — Aria2 Next 2.7.1 uses libtorrent 2.1.1 for peer communication, piece scheduling, disk I/O, trackers, DHT, TCP/uTP, encryption, file priorities, and fast resume. Magnets retain one task ID through metadata retrieval, selection, downloading, and seeding. Native state persistence restores paused progress and DHT routing data, and private torrents are isolated from global tracker injection.
+  - Rebuilt HTTP and SFTP transport — libcurl 8.21.0 and nghttp2 handle stream transfers, HTTP/2, TLS, cookies, authentication, and proxies. Adaptive byte-range scheduling, bounded connection concurrency, server-directed retry delays, and slow-tail assistance retry unfinished data while preserving completed ranges. Certificate validation uses platform trust integration where supported.
+  - Managed recovery state — Stream and ED2K state use SQLite-backed persistence, and BitTorrent metadata and resume data have a dedicated state store. Engine-owned recovery data stays in the managed state directory instead of creating adjacent .aria2 files in download folders.
+  - Clearer task management — Task views are organized as All, In Progress, Failed, and Completed, with consistent sidebar counts. Failed tasks have a dedicated retry action, and retry/redownload handling preserves the options needed to resubmit each task. Batch operations reuse native engine operations where available and report partial failures.
+  - Redesigned User-Agent manager — Separate saved profiles from ordered domain rules, edit them in a list-and-detail layout, drag rules to change priority, and choose whether a matching rule preserves or overrides the browser-provided User-Agent.
+  - Consistent motion and feedback — Added reduced-motion preferences, refined update-button label and background transitions, and improved User-Agent list insertion, deletion, and drag interactions. Protocol-association changes now report success, failure, unchanged results, and system-required manual action through the shared toast system.
+  - Localization and diagnostics — Consolidated all 27 locales into structured message catalogs, adopted standard locale matching and i18n tooling, and strengthened checks for missing, duplicate, and unused translation keys. Diagnostic exports combine application logs, engine logs, and runtime state in one archive.
+  - Integrated launcher packaging — Installers and updates carry the launcher alongside the app. Startup repairs browser registration after path changes, Windows installation and uninstallation manage registry entries, and AppImage builds provide a stable launcher path outside the temporary mount.
+  🐛 Bug Fixes
+  - Fixed forwarding of browser Accept-Encoding headers that could interfere with engine-owned transfer handling and downloaded-file integrity.
+  - Fixed range-response accounting, retry handling, and slow-tail recovery paths that could lose track of unfinished HTTP data or restart work unnecessarily.
+  - Fixed paused stream progress restoration and URL-encoded automatic filenames; explicit output filenames remain unchanged.
+  - Fixed BitTorrent file-selection, verified-progress, resume, tracker, and task-removal inconsistencies across the engine transition.
+  - Fixed stale task counts and incorrect classification around task removal, seeding, and sharing.
+  - Replaced Windows shell-based engine cleanup with native process and TCP-listener APIs, avoiding dependence on command availability and localized command output.
+  - Unified frontend and native history database paths, fixing Linux history inconsistencies, and prevented database initialization errors from terminating app startup.
+  🌐 Browser Extension
+  Use Motrix Next Extension 1.3.7 or a compatible newer release for Native Messaging activation. Its companion updates coordinate desktop readiness and improve Chromium download takeover and diagnostic reporting. The extension is installed and updated separately; open Motrix Next once after installation or relocation to register the launcher.
+ReleaseNotesUrl: https://github.com/AnInsomniacy/motrix-next/releases/tag/v3.9.8
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

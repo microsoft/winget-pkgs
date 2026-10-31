@@ -1,0 +1,77 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.69.0
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Improved
+  - wt switch statusline links in Claude Code: The Claude Code statusline suppressed OSC 8 hyperlinks, so its CI segment printed colored but inert and its dev-server URL printed in full. Claude Code renders OSC 8, so both segments now link, matching wt list. (#3550)
+  - wt merge --no-rebase accepts merge-shaped histories: --no-rebase previously required a strictly linear rebased history and rejected a branch carrying a merge commit, even when the target could already fast-forward to its tip. It now accepts any history the target can fast-forward to, so wt merge --no-commit --no-rebase preserves an exact commit graph — merge commits and all. (#3509, thanks @reneleonhardt)
+  - -v variable blocks name their template and render consistently: The four -v template-variable listings (foreground/background hooks, aliases, wt step eval) now label each block with the template it belongs to, and eval renders through the shared formatter — curated help-table order rather than its own alphabetical layout. (#3495, #3536)
+  Fixed
+  - wt merge measures the squash/rebase span against the target's upstream: When the primary checkout's local default branch was behind its upstream (e.g. local main behind origin/main) and the branch descended from the newer upstream tip (created with --base origin/main), wt merge — and wt step squash / wt step rebase — measured the commit span against the stale local ref and swept in commits already upstream, folding them into the squash and corrupting the local default branch (duplicating upstream content under new SHAs if later pushed). The span is now measured against the target's upstream (a local-only check, no fetch), and a target that has genuinely diverged from its upstream is refused up front. Fixes #3519. (#3549, thanks @starlightromero for reporting)
+  - Ctrl-C during a rebase surfaces as an interrupt, not a conflict: A git rebase killed by a signal (SIGINT/SIGTERM) mid-operation left the worktree in REBASING state, which wt classified as a merge conflict — printing conflict-resolution guidance and the wrong exit code. A signal-killed rebase now exits cleanly with the signal's conventional code (130 for SIGINT, 143 for SIGTERM). (#3539)
+  - wt switch picker responsiveness: Accepting a row could stall for ~10s on a large repo (indefinitely under sustained background traffic) while the switch queued behind per-row preview diffs; the foreground thread now bypasses the command-concurrency semaphore. Separately, an idle picker with pending background work — a slow CI fetch, or an LLM branch summary ([list] summary = true) — spun 100% of a CPU core; the reader now exits once the last row batch lands. (#3544, #3534)
+  - Clear error when a new branch name collides with an existing branch namespace: Creating feat while feat/x exists (or the reverse) failed with git's raw ref-lock error; wt switch --create now explains the namespace conflict. (#3528)
+  - wt switch picker no longer shows another row's branch name in an empty diff preview: The branch-diff and upstream-diff caches are keyed by SHA, so branches parked at the same commit (common after merged branches reset to the default branch's tip) shared one entry — and the cached pane had the first row's branch name baked into its "no file changes" headline. The cached value is now branch-agnostic and the headline renders per row. (#3481)
+  - WorktreeRemove plugin hook no longer strands a completed session: Claude Code fires the hook on session teardown for the recorded worktree path, which may already be gone (removed by wt merge or wt remove). In that case the hook exited non-zero, which Claude Code read as a failed removal, leaving the completed session row undeletable; it now exits 0 when the worktree is already gone (#3493, closes #3488). Separately, the hook now anchors at the project directory rather than inheriting the session's working directory (#3489). Thanks @judewang for reporting #3488 and for #3489.
+  - WorktreeCreate plugin hook surfaces wt failures: The hook piped wt switch --create … --format=json into jq without set -o pipefail, so a failed wt (e.g. a branch collision after a partial creation) took jq's exit status — 0 on empty input — and Claude Code saw a successful hook that returned no path. The hook now sets pipefail. (#3546, closes #3545, thanks @avdi for reporting)
+  - Picker no longer crashes on the legacy Windows console: skim 5.3.1 drives keyboard-enhancement handling the legacy Windows console API doesn't support, crashing the picker at startup; skim is held at 5.1.0 until the upstream regression is resolved. (#3538)
+  - Non-ASCII and non-UTF-8 content handled throughout: Diagnostics no longer panic slicing a config or log at a non-UTF-8 byte boundary, the shell-integration config scan no longer truncates at a non-UTF-8 line, and wt step copy-ignored handles non-ASCII filenames (git's quotePath escaping). (#3514, #3499, #3487)
+  - -vv output cleanup: The end-of-run block names only diagnostic.md, dropping the redundant trace.jsonl/subprocess.log gutter lines the report body already links; and the startup pointer uses @ before the log directory, matching the rest of wt's path output. (#3521, #3543)
+  Internal
+  - Windows release binaries are submitted to SignPath for code signing: Signed with a test certificate for now, while the project's OSS-program application is under review, and non-blocking so a signing failure can't hold up publishing to crates.io, Homebrew, winget, or AUR. (#3553, #3556)
+  - wt list runs its merge analysis in a read-only object database: When the git object store is read-only, wt list and wt list statusline redirect their object-writing merge/conflict probes into a temporary object database layered over the real one, so the full analysis still runs. Mutating commands keep the persistent store and fail loudly on a read-only one. (#3535)
+  - wt step relocate preserves your subdirectory position: Routed through the shared subdir-resolution helper, so relocate follows the cwd into the moved worktree like switch, remove, and merge already do. (#3346)
+  Install worktrunk 0.69.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/max-sixty/worktrunk/releases/download/v0.69.0/worktrunk-installer.sh | sh && wt config shell install
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/max-sixty/worktrunk/releases/download/v0.69.0/worktrunk-installer.ps1 | iex"; git-wt config shell install
+  Install prebuilt binaries via Homebrew
+  brew install worktrunk && wt config shell install
+  Download worktrunk 0.69.0
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+  Install via Cargo
+  cargo install worktrunk && wt config shell install
+  Install via Winget (Windows)
+  winget install max-sixty.worktrunk && git-wt config shell install
+  Install via AUR (Arch Linux)
+  paru worktrunk-bin && wt config shell install
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.69.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
