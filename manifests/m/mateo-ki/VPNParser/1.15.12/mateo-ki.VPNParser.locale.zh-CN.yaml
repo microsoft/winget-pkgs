@@ -1,0 +1,29 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: mateo-ki.VPNParser
+PackageVersion: 1.15.12
+PackageLocale: zh-CN
+ShortDescription: Windows 桌面程序：采集订阅、解析成节点、跑代理，并把代理质量实测出来。
+Description: VPN Parser 是用 Rust + egui 编写的 Windows 桌面程序，负责采集免费或自建订阅、解析成节点、跑代理，并把代理质量实测出来。订阅入口包括带 `YYYY-MM-DD` 日期占位符的订阅 URL、Gist 搜索页发现，以及 Telegram 频道预览（裸节点链接和订阅链接两类都取，节点只增不删）。解析支持 `ss` `vmess` `vless` `trojan` `hysteria2/hy2` `socks5` `http(s)` 分享链接，以及 Clash / Clash Meta YAML、Base64 与混合文本。延迟以经内核访问 Google `generate_204` 的真实握手为准，24 小时出口健康条按实测绘制，而不是看内核上报的状态。Windows 上它同时管理系统代理、TUN（提权交接后只保留一个实例）和终端 `HTTP_PROXY` 环境变量，按 exe 路径添加防火墙允许规则，支持单实例互斥与托盘，记录出口切换历史并按天统计规则命中，同时提供强制 bearer 鉴权的本地 HTTP API 与 mihomo / sing-box / xray 配置导出。安装包不含内核，内核缺失时由程序按需下载。
+Tags:
+- clash
+- sing-box
+- 代理
+- 出口健康
+- 测速
+- 节点解析
+- 订阅
+ReleaseNotes: |-
+  🚀 VPN Parser v1.15.12 发布说明 / Release Notes
+  🎉 欢迎使用 VPN Parser v1.15.12！本版支持系统代理免停秒级热切（0 重启内核、零断流）、根治模式切换后刷新跳回关闭与竞态问题，并全面调优高延迟海外节点连通性体验：
+  ⚡ 系统代理免停秒级热切（0 重启内核、零断流）
+  - 无感秒级开关：运行中开启或关闭系统代理不再重启内核进程，仅通过 WinINET 注册表原子操作与系统广播即时生效（5~10ms），所有已建立连接零中断。
+  - 状态即时联动：开关状态与底栏、状态卡毫秒级双向同步，避免无谓的内核重置开销。
+  🛡 根治开关跳回与刷新关闭（P0 竞态消除）
+  - 消除保存竞态：修复 ProxyConfigSaved 回调中提前触发 reload_proxy() 导致内存中旧模式反向覆盖 UI 的严重竞态缺陷。现在仅在热切换或应用完成后同步配置，杜绝开关拨动后反弹跳回。
+  - 仪表盘开关键防抖：底栏模式开关增加忙状态拦截守卫，防止连续快速点击造成并发任务冲突。
+  🌐 海外高延迟节点连通性验证调优
+  - 延长时间预算：将后台连通性验证超时从 3s 提升至 6s，并加入握手重试保护，有效解决 300ms+ 海外高延迟节点因初始握手未完误入降级/失败状态的问题。
+ManifestType: locale
+ManifestVersion: 1.28.0
