@@ -1,0 +1,58 @@
+# Created with WinGet Updater using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: CycloneDX.cdxgen
+PackageVersion: 13.6.0
+PackageLocale: en-US
+Publisher: OWASP Foundation
+PublisherUrl: https://owasp.org/
+PublisherSupportUrl: https://github.com/CycloneDX/cdxgen/issues
+Author: CycloneDX
+PackageName: CycloneDX Generator (cdxgen)
+PackageUrl: https://github.com/CycloneDX/cdxgen
+License: Apache-2.0
+LicenseUrl: https://github.com/CycloneDX/cdxgen/blob/HEAD/LICENSE
+ShortDescription: A polyglot tool and a library for generating various Bill of Materials in CycloneDX specification.
+Description: Generate Software Bill of Materials (SBOM) for most applications and container images with a single command. Generate Operations Bill of Materials (OBOM) for Linux and Windows hosts. Integrate with any CI/CD pipeline. Automatically submit the generated BOM to your dependency track server for analysis.
+Moniker: cdxgen
+Tags:
+- bom
+- cbom
+- containers
+- cyclonedx
+- docker
+- oci
+- owasp
+- package-url
+- purl
+- saasbom
+- sbom
+- sca
+- software-bill-of-materials
+- supply-chain
+ReleaseNotes: |-
+  cdxgen 13.6.0
+  cdxgen 13.6.0 answers a question that no scan could answer a week ago: which machines have the modified Claude Code extension that Cursor's marketplace served. The IDE scan now reads where VS Code and its forks really install extensions, on every platform, and records enough about each copy to tell a registry install from a planted folder. The release also finds the Brotli decoders hidden inside runtimes and binaries for CVE-2026-111497, names the Ruby interpreter so its own CVEs can be matched, brings pnpm 12 lockfiles and the Gradle dependency tree up to date, and makes Node.js 26 the primary runtime for the images and binaries.
+  IDE and VS Code extension inventory: finding the modified Claude Code build in Cursor
+  On October 29, 2026, Cursor published a notice about a modified anthropic.claude-code 2.1.313 in its extension marketplace. Before this release, none of -t vscode-extension, -t os or -t agentic could say which hosts had that build installed. On macOS and Windows, the IDE scan looked under ~/Library/Application Support/<IDE>/User/extensions and %APPDATA%\<IDE>\User\extensions, folders that hold only settings, so a real Cursor install produced an empty BOM. VS Code and every fork actually install extensions into <home>/<dataFolderName>/extensions on all three platforms. osquery's vscode_extensions table, which the OBOM used, reads a fixed set of editors and has no rows for Kiro, Positron, VS Code Server or OpenVSCode Server.
+  The IDE scan (-t vscode-extension, now also -t ide) reads the extension folders of VS Code, VS Code Insiders, VSCodium, Cursor, Windsurf, Devin Desktop, Positron, Kiro, Trae, Antigravity, Qoder, Void, PearAI and Theia, along with the remote servers these editors install on SSH hosts (~/.vscode-server, ~/.cursor-server, ~/.kiro-server and so on), code-server, OpenVSCode Server and Codespaces. It also accepts a copied extensions folder or a single extension, which is useful for triage on an image or a backup. Each editor becomes a pkg:generic/cdxgen-ide/<id>@<version> component, with the version read from its product.json, and depends on the extensions in its folder.
+  Each extension now keeps the platform qualifier of its build, so the affected build is pkg:vscode-extension/anthropic/claude-code@2.1.313?platform=darwin-arm64 rather than a version with -darwin-arm64 glued to it. The component records the install source and earliest install time from the editor's extensions.json, whether the copy is registered with the editor at all, whether it is pending removal, and whether its folder is a symlink. The entry files of every copy are hashed with SHA-256 and kept as nested file components, and a .vsix carries its own SHA-256, which is the hash security notices publish. When two copies of one build run different code, each digest becomes its own component and the extension is marked cdx:vscode-extension:entryHashMismatch. Every absolute folder path stays in evidence.occurrences, because removing a bad build needs the exact location.
+  Three new audit rules turn those facts into findings: VSC-010 flags an extension folder the editor never registered, VSC-011 an install from a local .vsix, and VSC-012 two copies of one build whose entry files differ. To check a workstation or a fleet image for the build in the notice:
+  cdxgen -t ide -o ide.json --bom-audit
+  jq -r '.components[] | select(.purl // "" | startswith("pkg:vscode-extension/anthropic/claude-code@"))
+    | [.purl, (.evidence.occurrences // [] | map(.location) | join(" "))] | @tsv' ide.json
+  -t os now adds the editors and the extensions osquery does not report, with the same purls as the IDE scan, for the current user or for every user when run as root, and the osquery rows carry the platform qualifier too. -t agentic covers the AI editors plus Qwen Code, Factory Droid, Auggie, Continue, Cline CLI and Claude Desktop, reads the Claude Code and Codex versions from their release links, counts MCP servers in more config files, and names an editor only when the editor is installed. It no longer reports Kiro CLI on a host that has only the Kiro editor.
+  Everything an extension folder holds is attacker-controlled, so every file is read as a bounded regular file. A FIFO, a device, or a symlink that leaves the extension folder is never read, and a root scan follows no symlink a user could have planted. Values copied into the BOM are limited to enumerated install sources, UUID gallery ids, valid timestamps, length-bounded manifest strings and sanitized URLs, and audit messages are built in one pass so a name taken from the BOM cannot expand placeholders. The scan was checked against real installs of Cursor, VS Code, VS Code Server, VSCodium, Devin Desktop, Kiro, Positron, Trae, code-server and OpenVSCode Server on Linux and a Kiro install on macOS, and trimmed copies of those layouts are now the fixtures under test/data/ide-extensions. Node.js, Bun and Deno produce identical output for them. (#4698, #4699, #4701)
+  Brotli decoders inside runtimes and binaries (CVE-2026-111497)
+  CVE-2026-111497 is an out-of-bounds write in Google's Brotli decoder, and most copies of that decoder are not packages. cdxgen 13.5.0 produced identical BOMs for node:24.22.0, which is vulnerable, and node:24.22.1, which is fixed, and it could not see the private copies inside PHP and Ruby extensions, the .NET runtime, static binaries or vendored third_party/brotli trees. A version number cannot settle this either, because Node.js 24.22.1 still reports process.versions.brotli as 1.2.0 after the fix.
+  cdxgen now reads the fix state from the decoder itself. The upstream fix added an error code named BLOCK_SWITCH, so a decoder whose error-name table contains it is patched. Container, rootfs and OBOM scans probe unpackaged executables, libraries and language extension modules, and record cdx:brotli:c:blockSwitchFix or cdx:brotli:go:blockSwitchFix on each file that embeds a decoder, with the C library and the Go port (andybalholm/brotli) told apart. When a linker has dropped the error-name table the state is reported as unknown rather than guessed. Files that an OS package owns are left to the vulnerability database, which knows the distro's backports. The probe is capped by file count and bytes, and when a cap leaves files unread a binary.brotli-probe.capped degradation is recorded, so a clean result is never a silent partial one.
+  Source scans cover the same ground. vcpkg manifests are read without atom, taking a port's version from the installed tree first and keeping a version>= constraint as a minimum. Meson wraps contribute versions. Vendored brotli, zlib, zstd, lz4, libpng, sqlite and expat trees are versioned from their own headers, and brotli trees get their fix state. Bazel git_override and archive_override modules name their real source instead of the BCR. The new brotli-security rule category (BROTLI-RCE-001 to 003 and BROTLI-DOS-001) turns these into findings, and cdxgen's own HTTP client stops asking servers for br when the runtime it runs on, including Bun 1.4.3, carries an unpatched decoder. (#4557, #4558)
+  OBOM: unpackaged runtimes on the host
+  An OBOM now finds Node.js that no package manager owns, from release tarballs, /opt, nvm, fnm, volta, asdf, mise and %ProgramFiles%\nodejs, and names each as pkg:generic/node@<version> with a CPE, the version read from the release URL compiled into the binary. Packages installed in Python virtual environments and pyenv interpreters are read from their dist-info metadata, each package as one component with an occurrence per environment. On Windows, Chocolatey and Windows Installer ownership is honoured, and Chocolatey rows, which never had a purl because of an absolute .nuspec subpath, now do. On macOS the probes never enter the privacy-protected home folders.
+  Ruby
+  Ruby 3.3.13, 3.4.12 and 4.0.9 fix CVEs in the interpreter core and in the default gem resolv, and until now cdxgen never recorded the interpreter's version, so none of them could be matched. A Ruby project that pins its interpreter now gets pkg:generic/ruby@3.3.6 with cpe:2.3:a:ruby-lang:ruby:3.3.6, read from Gemfile.lock, .ruby-version, .tool-versions, mise.toml or the Gemfile ruby directive, in that order. JRuby and TruffleRuby get their own names, and pregen no longer reads 3.4.0preview2 as 3.4.0 or starts an MRI install for a JRuby project. Container scans read unpackaged Rubies from rbconfig.rb without running them, and a distro Ruby keeps its deb, rpm or apk purl while also getting its upstream identity, without a CPE, since distros backport fixes. The OBOM gains a Ruby host probe covering rbenv, rvm, asdf, mise, chruby, frum, rv, the toolcache and the RubyInstaller, and lists the gems of every gem home, attributed to their OS packages where one owns them. Container scans also drop the phantom components that development files inside installed gems produced (55 phantom gems in ruby:3.3.6-slim, 168 phantom npm packages in a Debian Ruby image), and container and rootfs formulation no longer records the scanning host's own toolchains. (#4645)
+  JavaScript and TypeScript
+  pnpm 12 can write a boot document at the top of pnpm-lock.yaml listing config dependencies, which pnpm installs before anything else and which can run hooks. They are now components marked cdx:pnpm:configDependency, and the pinned pnpm version goes into the formulation. A package changed with pnpm patch carries cdx:pnpm:patched, cdx:pnpm:patchHash and cdx:pnpm:patchFile, so the BOM shows that its code differs from upstream, and cdx:pnpm:catalog names the catalog that pinned each version. A monorepo root now links its devDependencies and workspace: packages, so its dependsOn is no longer empty. (#4606, #4609, #4612)
+ReleaseNotesUrl: https://github.com/cdxgen/cdxgen/releases/tag/v13.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

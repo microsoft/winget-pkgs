@@ -1,0 +1,67 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: yhirose.culebra
+PackageVersion: 0.8.0
+PackageLocale: en-US
+Publisher: Yuji Hirose
+PublisherUrl: https://github.com/yhirose
+PublisherSupportUrl: https://github.com/yhirose/culebra/issues
+PackageName: culebra
+PackageUrl: https://github.com/yhirose/culebra
+License: MIT
+LicenseUrl: https://github.com/yhirose/culebra/blob/master/LICENSE
+ShortDescription: Programming language with a bytecode VM, JIT, and AOT compiler
+Moniker: culebra
+Tags:
+- bytecode-vm
+- jit-compilation
+- language
+- llvm
+- programming-languages
+ReleaseNotes: |-
+  Highlights
+  - Audio: a namespace of its own for sound, with or without a window. Tones, samples, streamed music and Audio.PCM (samples a script computes), Audio.Graph (native parts, worked out as they play), Audio.Capture (the microphone), and functions that measure a sound: Audio.decode, spectrum, stft/istft, resample, pitch, harmonics, loudness, integrated_loudness.
+  - Kauai, a language for writing music as a band plays it: a lead sheet of chords and melody, and grooves written against the chord. culebra play song.kau plays one, --wav writes it to a file, --from/--to render a part, --watch plays it again whenever a file is saved. Instruments made from recordings (a soprano and an alto saxophone) play phrase by phrase from real notes, with the tools to make more.
+  - LLM: a client for large language models in the standard library (LLM.ask, a conversation that keeps its history and runs the tools the model asks for, and a request sent as it is), and Http reads Server-Sent Events.
+  - Isolates send more: a @value or @derive instance, a class, an enum's constructor and a bound method now cross an isolate boundary, and a child's throw that cannot cross back fails the join with an error that says so.
+  - Dir: one trait over the places files come from. Dir.disk, Dir.memory, Dir.zip (read ZIP archives; Compress.zip writes them) and Dir.embedded; Http serves any Dir.
+  - XML namespace and Encoding.utf16; String.pack/String.unpack for numeric arrays and @packable records.
+  Changes
+  Breaking
+  - Embed.dir(name) is now Dir.embedded(name), a Dir like the others; the Embed namespace is gone. exists(""), exists(".") and exists("sub") are true for a directory that holds a file.
+  - Sound moved out of Canvas into Audio: Canvas.tone, Canvas.Sound, Canvas.music and the rest are now Audio.tone, Audio.Sound and Audio.music, and play with no window. Canvas forwards none of them.
+  - Time.parse is strict: the whole string must match, with one date, and Time.from_parts has defaults. UTC is now computed directly from the calendar in both directions.
+  Language / interpreter
+  - Names and scopes: a read that nothing visible declares is a NameError at load; if, cond and ?: arms are scopes of their own; a declaration or a defer takes no trailing if/unless; fn is declared nowhere, however a binding spells it; a typed static field is a static field.
+  - Types: a field's annotation is checked on every write; a built-in type's name in an annotation means that type; a Function type pattern takes a callable instance; an error's kind is a type name that takes it.
+  - @value and @packable classes: a field may hold the standard library's own value classes, a write that throws leaves the field as it was, and a flat class's layout is its declaration's.
+  - Effects and generators: a lowered body's variables get a slot each by scope; handle bodies leave only through their value; an empty handler clause is nil; fn inside a lowered frame, a defer or an effect fn names the function the user wrote.
+  - Errors name what went wrong more often: an unterminated string, a call on a method that is not there, a surplus positional told the keyword it was written for.
+  - fmt lays an array of numbers out as a table, and keeps parentheses that change meaning.
+  JIT / AOT / VM
+  - A cached JIT object is reached by a second key that holds across builds, and a hit skips the IR pipeline as well as the backend.
+  - The VM keeps the receiver a frame was called with, compiles MoveRetain in place of Op::Retain, and several slot and scope fixes remove lifetime bugs in closures, defaults and destructuring.
+  - GC: pins are counted, an object whose edges are in flux is a root, and the object registry is never more than 5/8 full.
+  Standard library
+  - Audio (above), Dir (above), XML (XML.parse, XML.events, paths with predicates, and element methods that survive isolates), LLM, Encoding.utf16, String.pack/String.unpack.
+  - Http: events: reads any request's answer as Server-Sent Events; srv.static serves any Dir; a streamed response is routed where it is sent.
+  - FS: a failed step of a directory walk no longer ends it silently, a glob character is a code point, and FS.glob backtracks past a character class that missed.
+  - Concurrency: Shared trees are flat arrays that keep an Object's entry order and answer get, contains and index_of; a message is owned from the moment it exists; an IsolateCore cancels and joins its own thread; a SharedBuffer view is a handle that holds its buffer.
+  - Args: a spec with only subcommands has a help (--help used to crash), and a Long or Float that does not parse is an ArgParseError.
+  - Desktop.run's server listens on the loopback only (it listened on every interface).
+  - Channel.fan_in: join() re-raises a producer's thrown Object intact (it used to hand back a freed value).
+  - Sound keeps how loud it is and gives back the bytes it was made from.
+  - Canvas and Scene check the sizes a program picks (an image, a font atlas) and refuse an unreasonable one with a ValueError.
+  Tooling
+  - culebra play (above).
+  - lint: a match arm after one that takes every value is unreachable; scope checks read a module as written, before the lowerings.
+  - Embedding: a Value off the stack is a root, and items() walks an Object's own entries.
+  - The Playground's engine is rebuilt with all of the above.
+  Kauai tools
+  - kauai/tools/ measure and check an instrument made from recordings: measure (pitch, loudness, harmonics and breath every 10 ms), make_data, check (what measuring finds before anyone listens: pitch, dropouts, dips, bumps, edges, clicks, clipping), coverage (what the recordings cover, and what a song asks of them), sweep, envelope, compare, fit_style, listen (two versions of a passage heard blind) and make_sounds (an instrument's sounds made beforehand, for a program or the browser).
+  - A skill (make-instrument) and a harness of roles for making an instrument from royalty-free recordings, using these tools.
+  Full diff: v0.7.0...v0.8.0
+ReleaseNotesUrl: https://github.com/yhirose/culebra/releases/tag/v0.8.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

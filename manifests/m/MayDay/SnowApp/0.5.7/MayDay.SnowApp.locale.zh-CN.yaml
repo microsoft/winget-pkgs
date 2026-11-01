@@ -1,0 +1,43 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: MayDay.SnowApp
+PackageVersion: 0.5.7
+PackageLocale: zh-CN
+Copyright: 版权所有 (c) 2026 MayMay
+ShortDescription: 面向开发者的桌面应用，将 AI 对话、终端模拟、SSH 远程管理、Git 工具和内置浏览器面板整合到统一的工作空间中。
+Description: Snow App 是一款面向开发者的桌面应用，将 AI 对话、终端模拟、SSH 远程管理、Git 工具和内置浏览器面板整合到统一的工作空间中。它通过 Rust 原生模块处理性能关键型操作，包括 SQLite 存储、AI 流式传输、文件监控和 HTTP 请求。此外还支持 MCP 集成、AI 图像生成、技能系统、Hooks、子代理、代码库语义搜索与 AI 驱动的终端会话。
+Tags:
+- ai
+- codex
+- git
+- mcp
+- ssh
+- 终端
+- 聊天
+ReleaseNotes: |-
+  新功能
+  - WorkFlow 手动编排：开启 WorkFlow 模式后，输入框工具栏可打开编排弹窗，在画布上绘制节点与连线并填写节点提示词；图以 JSON 载荷随消息发出，本轮强制进入 WorkFlow 模式并原样转交 workflow-workflow-generate，复用既有 Workflow 卡片与执行链路。
+  - 子代理并发上限：新增两层上限——跨所有会话的全局上限（0 表示不限）与会话级上限（不会超过全局值）；容量校验同时统计该会话占用与全局运行总数，设置面板可分别调整。
+  - 浏览器历史分页：浏览器历史从「加载更多」改为分页，列表撑满可用高度并在内部滚动；删除当前页最后一条自动回退上一页，清空后回到第一页。自动滚动偏好默认开启。
+  - 检查点快照回收：删除检查点时不再保留全部内容对象，而是记录其引用交由后台线程回收，写入租约避免与快照捕获竞争；启动时执行一次全量清理，仅删除超过保留期且未被使用的对象，较新的内容继续作为缓存复用。远端检查点扫描超时与快照保留天数改为可配置项。
+  - 插件会话 API 档案绑定（恢复）：v0.5.6 移除的 conversations.setApiProfile 与 conversations.create 的 apiProfile 选项回归（可写动作 210 → 212）。create 可在创建时把会话绑定到档案名，未知档案在创建会话前即被拒绝；setApiProfile 用于重新绑定已有的顶层会话（传空字符串解除绑定，从下一次请求生效，子代理 / WorkFlow 节点会话会被拒绝）。
+  改进
+  - HTML 文件预览按钮会反映卡片的展开状态。
+  - 加载旋转动画改为在 inline-flex 包裹层上合成，而非直接动画 SVG 元素，高 DPR 下更流畅。
+  - 存在已配置提示词时降低子代理内置提示词权重；被放弃的子代理运行收尾期间失败提示条保持可见。
+  - 输入区插件插槽 chat.input.actions 移入聊天输入视图，并新增输入区分层堆叠样式。
+  破坏性变更
+  - 移除 Plan 模式：其系统提示词、审批工具、会话存储列与写入闸门一并删除，相关界面、多语言、文档与手机远控入口同步清理。
+  修复
+  - 暂停控制器：会话键迁移与暂停控制器同步，按钮不再卡在暂停态；恢复时控制器缺失会清除暂停显示状态。
+  - WorkTree：开启但发送前无有效绑定时改为 fail-closed 并提示，不再回退脏模式；执行失败保留可读的 WorktreeBindingError 原因；回滚时若目标未提交则取其之后第一个持久边界，存在检查点时禁止下沉到项目根目录；本地回滚前校验边界是否因保存而变化，避免截断错位。
+  - Anthropic 工具调用 ID 满足服务商字符集要求。
+ReleaseNotesUrl: https://github.com/MayDay-wpf/snow-app/blob/HEAD/RELEASE_NOTES_ZH.md#v057
+Documentations:
+- DocumentLabel: 快速开始
+  DocumentUrl: https://github.com/MayDay-wpf/snow-app/blob/main/docs/zh-CN/1-快速开始.md
+- DocumentLabel: 文档
+  DocumentUrl: https://github.com/MayDay-wpf/snow-app/blob/main/docs/README.md
+ManifestType: locale
+ManifestVersion: 1.28.0

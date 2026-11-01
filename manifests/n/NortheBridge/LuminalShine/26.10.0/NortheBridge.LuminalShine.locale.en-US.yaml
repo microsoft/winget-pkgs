@@ -1,0 +1,96 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: NortheBridge.LuminalShine
+PackageVersion: 26.10.0
+PackageLocale: en-US
+Publisher: NortheBridge Foundation
+PublisherUrl: https://github.com/NortheBridge
+PublisherSupportUrl: https://apps.northebridge.com/en/luminalshine
+Author: NortheBridge Foundation
+PackageName: LuminalShine
+PackageUrl: https://github.com/NortheBridge/luminalshine
+License: GPL-3.0
+LicenseUrl: https://github.com/NortheBridge/luminalshine/blob/HEAD/LICENSE
+Copyright: Copyright (c) NortheBridge Foundation
+ShortDescription: A Modern Self-hosted High Performance Sunshine-compatible game stream host for Moonlight designed for Windows 11 and Windows 11 Insider Preview. Maintained by the NortheBridge Foundation.
+Description: Modern Self-Hosted High Performance Sunshine-compatible game streaming host for Moonlight clients designed for Windows 11 and Windows 11 Insider Preview.
+Moniker: luminalshine
+Tags:
+- amdgpu
+- blackwell-gpu
+- contributions-welcome
+- contributors-welcome
+- cpp
+- game-stream
+- game-streaming
+- game-streaming-server
+- geforce-experience
+- intelgpu
+- moonlight
+- nvidia-gpu
+- python
+- remote-desktop
+- windows-insiders
+- windows11
+ReleaseNotes: |-
+  LuminalShine 26.10.0
+  Important
+  Bundled virtual display driver: LuminalVGD v0.1.0-alpha.9
+  Signed driver 0.1.0.27 · protocol 0.10 · Build 27 — unchanged from 26.10.0-beta.1 and 26.09.1.
+  LuminalShine 26.10.0 Gold adds a host-persisted WebUI changelog, replaces the ViGEm gamepad backend with Nonary's VHF virtual gamepad driver, and fixes an encoder-probe inconsistency that could prevent streaming even when the requested codec worked. These notes cover the packaging baseline at e2662a44 through the Gold release commit. The PyroWave, Borealis compatibility, pairing, and reconnect improvements introduced in 26.10.0-beta.1 remain included; WebRTC remains enabled in the Windows build.
+  Changelog in Mission Control
+  - New Update Available! The WebUI displays eligible newer releases with their notes and a download link. Prerelease visibility follows the host's existing update-notification setting.
+  - Read the installed release once per user and host. On the first authenticated visit for an unseen installed version, a Changelog screen shows that version's notes. The acknowledgement is saved on the LuminalShine host, so it survives browser storage clearing, another browser, restarts, and normal upgrades. Reading a newer release before installing it does not mark the installed-version notes as read.
+  - Open and close the changelog whenever needed. Desktop navigation and the mobile menu provide access to release history. Notes are acknowledged only after content renders; unavailable notes are not marked as read.
+  - Featurebase and GitHub stay connected. Published GitHub releases are imported into Featurebase as drafts, with matching based on the dedicated original-release citation (#207, #208). Release timestamps are reconciled, and a public changelog feed supplies the WebUI. Until a corresponding Featurebase update is published, the feed uses the public GitHub release notes. Cached notes support offline reading.
+  VHF virtual gamepads and Xbox Bluetooth Helper
+  - New virtual gamepad backend. LuminalShine now uses Nonary's libvirtualgamepad UMDF/VHF driver, as implemented in Vibepollo, instead of ViGEmBus. The pinned package is v0.1.0-beta.9, driver 0.1.0.53, protocol 2; it requires x64 Windows 10 version 2004/build 19041 or newer, including Windows 11.
+  - Controller recovery and feedback. The backend preserves controller input, battery state, and supported feedback during recovery. DualShock 4 maintenance retains report cadence and gyro-stream recovery. Mission Control exposes the new driver health and controller profiles.
+  - Xbox Bluetooth Helper follows the new backend. The opt-in helper detects physical Bluetooth Xbox arrivals and briefly creates a VHF controller to trigger XInput enumeration. Allocation is coordinated with streaming and recovery to avoid competing for controller slots.
+  - Signed driver packaging. Release CI verifies the pinned package and signs its catalog and setup executable with the LuminalShine release identity. Installation validates the package and signer. Where needed for unattended installation, it enrolls that verified production signing certificate in Windows' machine-wide TrustedPublisher store; this also trusts other packages signed by that certificate. INSTALL_VHF_GAMEPAD=0 skips the MSI driver action and publisher enrollment.
+  - Shared drivers are retained. A compatible driver installed by Vibepollo can be reused; equal/newer active drivers and newer staged packages are preserved. ViGEmBus is not removed because other applications may still need it. The shared VHF driver remains installed when LuminalShine is uninstalled.
+  See the virtual gamepad driver guide for installation, signing behavior, portable setup, and troubleshooting.
+  Encoder probing and connection reliability
+  - A failed codec no longer invalidates working codecs (#210, issue #209). Failed HEVC or AV1 validation now clears stale capability flags. Previously, those flags could make the isolated video worker reject the entire encoder snapshot, including sessions requesting working H.264 or HEVC.
+  - Codec settings invalidate the probe cache. Changing HEVC or AV1 mode forces a fresh probe instead of reusing capability results from the previous settings.
+  - Clearer startup diagnostics. Rejected encoder snapshots and worker-start messages record specific reasons, with logs flushed before the worker exits. Successful startup paths and network protocols are unchanged.
+  - Hardware limitation. The issue report was identified and the PR was merged for 26.10.0 Gold, but no RTX 4080 was available to reproduce or verify the reported GPU-specific failure. Snapshot tests validate consistency; they do not substitute for hardware streaming tests.
+  Thanks to @magalz for the encoder-probe fix and diagnostics, and Nonary for the virtual gamepad implementation.
+  LuminalVGD driver
+  The virtual display driver is separate from the new virtual gamepad driver. This release retains the same LuminalVGD package:
+  ───────────────┬────────────────────────────────────────────────────────────
+  Bundled release│v0.1.0-alpha.9
+  ───────────────┼────────────────────────────────────────────────────────────
+  Driver version │0.1.0.27 (DriverVer 08/07/2026, 0.1.0.27)
+  ───────────────┼────────────────────────────────────────────────────────────
+  Protocol       │0.10 (handshake build 27, capabilities 0xfe5)
+  ───────────────┼────────────────────────────────────────────────────────────
+  Watchdog       │10-second lease watchdog
+  ───────────────┼────────────────────────────────────────────────────────────
+  Signing        │NortheBridge Foundation OV certificate, RFC 3161 timestamped
+  ───────────────┴────────────────────────────────────────────────────────────
+  Build 27 retains the D3D12 timeline-fence transport and teardown/drain protections. Upgrading from 26.09.1 or 26.10.0-beta.1 does not normally require replacing this display driver.
+  Project, tests and release engineering
+  - The packaging baseline (#206, e2662a44) explicitly retains the optional libatomic runtime and recognizes truncated Vue content hashes in MSI upgrade checks.
+  - Release CI pins the build timestamp across CMake reconfiguration so packaging does not rebuild already-signed executables.
+  - Release validation corrected the gamepad probe to pass the owning input handle, fixing a Windows compiler error in the VHF integration.
+  - New coverage includes host changelog acknowledgements, the public feed and WebUI behavior, VHF controller policy and recovery, Bluetooth-helper coordination, signed-package validation, publisher-enrollment rollback, and MSI compatibility.
+  - Release CI results (run): signing, signed-payload integrity, MSI compatibility, installer invariants, GameStream readiness self-tests, PyroWave/connection-path tests, and configuration consistency passed. The advisory suite recorded 842 passed, 12 failed, and 10 skipped (864 total). The 12 failures exactly match the beta baseline: an authentication error-text expectation, eight Playnite tests, and three locale-consistency tests. All new changelog state, VHF policy/recovery/maintenance, Xbox helper, and encoder snapshot tests passed. This is not an all-tests-green release.
+  - Windows release CI builds the installer, portable archive, and debug symbols; signing and packaging checks must pass before publication. Hardware driver loading, Bluetooth reconnect, and GPU streaming require validation on a Windows host.
+  Upgrading
+  - Install 26.10.0 over the previous release with the installer. Settings and pairings are retained; an active stream ends during the upgrade and can be restarted after the service returns.
+  - Check the WebUI's gamepad driver status after installation, and restart Windows if requested. Driver installation errors are logged without rolling back the application; a working VHF driver is required for virtual gamepad input.
+  - Portable users can install the bundled gamepad driver using elevated 64-bit PowerShell as described in the driver guide.
+  - Hard-refresh Mission Control (Ctrl+F5) if old assets remain cached. Use Changelog in navigation to reopen these notes.
+  - PyroWave remains experimental and opt-in with a compatible client. WebRTC remains available from the Play page; regular Moonlight sessions continue to negotiate H.264, HEVC, or AV1.
+  Checksums
+  SHA-256:
+  178b8fe2d95d0e8e217a968f08f4d976ff0bb3349aedac56518c1cba1af23644  LuminalShine_x64-debuginfo.7z
+  b770a0143cc1e1c8b674959ad3e85241500a8e3c347a24a10983252c5101f36c  LuminalShine_x64-installer.exe
+  78041f1dc85cfc495382060e612c896f7ad78eac183775b5e045bbef1116bf16  LuminalShine_x64-portable.zip
+  The same hashes are attached as SHA256SUMS.
+  Changes since the beta packaging baseline: e2662a44…a9928254
+ReleaseNotesUrl: https://github.com/NortheBridge/luminalshine/releases/tag/26.10.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,184 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: athrvk.Vayu
+PackageVersion: 0.45.0
+PackageLocale: en-US
+Publisher: Atharva Kusumbia
+PublisherUrl: https://github.com/athrvk
+PublisherSupportUrl: https://github.com/athrvk/vayu/issues
+Author: Atharva Kusumbia
+PackageName: Vayu
+PackageUrl: https://github.com/athrvk/vayu
+License: AGPL-3.0
+LicenseUrl: https://github.com/athrvk/vayu/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Atharva Kusumbia
+ShortDescription: Open-source API client with a native C++ load-testing engine - Postman-style requests and k6-level load tests in one local app.
+Description: Vayu is a free, open-source desktop app for Windows, macOS, and Linux that combines a full REST and GraphQL request builder - with collections, environments, and scripting - and a high-throughput load tester powered by a C++20 engine, with all data staying on your machine.
+Moniker: vayu
+Tags:
+- api
+- api-client
+- api-testing
+- benchmark
+- developer-tools
+- graphql
+- http
+- insomnia
+- load-testing
+- performance
+- postman
+- rest
+ReleaseNotes: |-
+  0.45.0 - 2026-10-22
+  Read before updating: this version upgrades the workspace database in a way
+  earlier versions refuse, changes which files a request may send from disk, and
+  makes a collection run carry on after a script error or a failed connection.
+  Vayu now sends a request-body file only when you picked it in Vayu on this
+  machine or it lies under a folder allowed in Settings > Files, and nothing else
+  can claim a file was chosen. New: the real uuid, lodash, moment,
+  csv-parse and xml2js libraries in scripts, Postman's legacy script globals,
+  and History charts that open quickly on a 24-hour run.
+  Added
+  - require() runs the libraries Postman scripts use. require('uuid'),
+    require('lodash') with the _ global, require('moment'),
+    require('csv-parse/lib/sync') and require('xml2js') with xml2Json run
+    the real npm libraries (#2650, #2651, #2652, #2653, #2654).
+    require('crypto-js') and the CryptoJS global cover the MD5, SHA-1 and
+    SHA-2 hashes, their HMACs and the Hex, Latin1, Utf8 and Base64 encoders
+    (#2578). Any other module, and any other CryptoJS member such as AES, still
+    throws and is named in the import notice.
+  - Postman's legacy script API runs (#2577): tests[...], postman.*,
+    responseBody, setTimeout and the other timers, and await at the top of
+    a script. These scripts used to throw at their first line.
+  - pm.environment, pm.globals and pm.collectionVariables accept a third
+    argument to set (#2664). set(name, value, { secret: true }) creates a
+    secret variable, and a type string ('string', 'number', 'boolean',
+    'json') sets the type. A secret is masked from the next run on, not inside
+    the run that created it.
+  - pm.variables.set, unset and clear write a run-local scope that is never
+    stored (#2564). pm.request.url.addQueryParams and removeQueryParams work
+    (#2662).
+  - Import tells you what will not run. The preview names the Postman
+    requests whose scripts use APIs Vayu does not run (#2576), and the notice
+    follows CryptoJS members reached through an alias or a destructure (#2628).
+    It also names the GET body Postman never sends, and the Data file picker has
+    Read numbers as numbers to match Newman's CSV reading (#2540). The
+    "file changed since this run" hint also notices a different number reading
+    (#2644).
+  - A Postman OAuth 2.0 collection keeps its audience, resource and other
+    token request parameters (#2536). The OAuth 2.0 token and refresh tables
+    choose per row whether it goes in the body, the query or a header (#2571).
+  - MCP agents can follow and steer a run. get_run reads a run's state, and
+    a running run's report is marked partial (#2436). run_request sends a saved
+    request by id when url is omitted (#2435). start_load_run states the
+    shape it runs (#2437) and sets which response samples get_run_samples
+    reads (#2447).
+  Changed
+  - The workspace database moves to schema version 7 (#2356, #2535). Once
+    0.45.0 opens a workspace, earlier versions refuse it, so going back to 0.44
+    means restoring a backup. The upgrade writes a copy of the database beside
+    it first.
+  - Data Safety Mode now defaults to Normal (#2419). The workspace database
+    used to run with Off, which can lose recent writes or corrupt the database
+    on a power cut or a crash. Installs that never changed the setting move to
+    Normal once, when 0.45.0 first opens the workspace; Settings > Data Safety
+    Mode sets it back to Off.
+  - A collection's folders and requests are numbered in one order (#2535).
+    The upgrade renumbers each collection's requests to follow its folders,
+    including folders in the trash, so every collection lists and runs exactly
+    as it did before. Like the rest of this upgrade it is one-way: an earlier
+    engine refuses the workspace afterwards. A new folder or request, or one
+    moved into a collection without a position, now goes after everything
+    already in it, folders and requests alike. A Postman collection imports in
+    the order Postman runs it: a request listed before or between folders stays
+    there in the sidebar, the import preview and a run, instead of every folder
+    moving above every request. A JMeter test plan and an Insomnia export (v4
+    or v5) do the same (#2573): a plan's samplers and controllers import in the
+    order the plan lists them, and an Insomnia folder's requests and sub-folders
+    in the order Insomnia sorts them. Exporting to Postman or to OpenAPI writes that order back, so a round trip keeps it.
+    For API clients, POST /reorder renumbers a parent's folders and requests
+    together: a normalize entry is {"parentId": <collection id or null>}, and
+    the old {"type", "parentId"} / {"type", "collectionId"} entries are refused with
+    a 400.
+  - A file is sent only once it is picked on this machine or sits under an
+    allowed folder (#2356). Files you chose before updating are carried over if
+    they still exist. A file on a drive or network share that is not connected
+    when 0.45.0 first opens the workspace is not carried over, even once the
+    drive is back; the engine log names each one. A request naming any other
+    file outside an allowed folder, or one of those, says Not chosen on this
+    machine and is refused at Send until you pick the file again (Relink) or
+    allow its folder.
+  - Typing a path no longer counts as choosing the file. A path typed into a
+    binary body is sent only after you pick the file or allow its folder; the
+    editor says so as you type.
+  - Settings > Files adds folders through the folder picker only. The field
+    for typing a folder path is gone, and the import preview's Allow folder
+    opens the picker at the folder it suggests.
+  - An engine already running when the app starts is replaced. The app no
+    longer adopts one it did not start this session, including one started by
+    hand in development; it is shut down and a new one started on the same port.
+  - Allowing or removing a folder, and recording a picked file, need the app's
+    grant secret. The app passes its engine a fresh secret in
+    VAYU_GRANT_SECRET at every start. Without it, POST and DELETE on
+    /file-roots and /file-grants answer 403, so an engine run by hand, by
+    the CLI or in CI cannot change which files are sent; folders and files
+    already allowed still apply.
+  - unresolved in a request body is ignored. The engine works out whether a
+    file may be sent and reports it as unresolved when it returns a request; a
+    value sent by a script, an MCP agent or an older client is dropped.
+  - [*] and ..name in a JSON extractor, assertion or metric follow the
+    response's own member order (#2459), where they used to sort by key. A
+    matchNo of 1 now picks the member the server wrote first, and -1
+    numbers the matches in that order.
+  - A URL is sent as Postman sends it (#2465). Send, load and collection
+    runs, MCP and pm.sendRequest now put out the same request line for the
+    same URL: ", < and > are percent-encoded in the path, query and
+    fragment, a backtick in the path and fragment, { and } in the path, and
+    ' in the query. A backslash before the query becomes /, and the host is
+    lowercased and a non-ASCII one sent by its punycode name. An escape already
+    in the URL and every other byte go out unchanged, so a pre-signed URL still
+    matches its signature. To send a URL exactly as typed, turn on Send URL
+    without encoding for that request.
+  - A script error or a failed connection no longer ends a collection run's
+    iteration (#2526). The step is reported as errored and the run moves on to
+    the next request, as Postman and Newman do. Before, every step after the
+    error in that iteration was skipped. The Run Collection dialog has a Stop
+    the iteration on a script error switch, off by default, that restores the
+    old behaviour for every kind of error; with it on, the run header says how
+    many steps did not run. The error rate and any threshold on it now count the
+    steps that used to be skipped. API clients send stopOnError.
+  - Run history keeps design Sends under their own cap (#2429). 200 quick
+    Sends used to push last week's load and collection runs out of History. Those
+    keep maxRunsRetained (200); Sends have maxDesignRunsRetained (100, 0 for
+    no limit). Clear run history now keeps pinned runs, and runs still in
+    progress, and the dialog says how many it keeps.
+  - Timeouts and requests with no response count in the latency figures
+    (#2384, #2412). A load run where 5% of requests timed out used to report a
+    fast p99 and could pass a latency budget. A timed-out request is stored with
+    the time it waited rather than 0 ms, and a URL refused before connecting is
+    not counted as a timed sample.
+  - A text body is sent as text/plain, and a POST with no body sends no
+    Content-Type (#2464). Both used to go out as
+    application/x-www-form-urlencoded, which a server that parses by type read
+    as form fields.
+  - Every enabled header row is sent, in the order typed (#2466). Three
+    X-Dup rows used to collapse into one, and repeated headers such as Link
+    or two Cookie rows could not be sent. Header names and credentials are
+    trimmed, and a name that is not a valid header name is refused (#2467).
+  - Large uploads no longer carry Expect: 100-continue unless sendExpectContinue is on
+    (#2468). It added up to a second to
+    every transfer over 1 MiB, and load-run comparisons now flag two runs that
+    differ in it (#2516).
+  - A credential set by a pre-request script reaches the wire (#2473). A Basic
+    auth password set there used to go out as the literal {{password}}. Auth
+    is now applied after the script, as in Postman.
+  - A pm scope set ticks the row it writes (#2479), and a value a script sets
+    keeps its type for the run (#2529, #2568). `pm.environment.set('n', get('n')
+    - 1)used to give"01", and an object set on a json variable stored [object Object]`.
+  - pm.expect and pm.response assertions follow Postman and chai (#2523,
+    #2524, #2528, #2581, #2582). .to.be.true needs a real boolean (below),
+    .to.have.property(name) moves the chain to the property's value, and
+ReleaseNotesUrl: https://github.com/athrvk/vayu/releases/tag/v0.45.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

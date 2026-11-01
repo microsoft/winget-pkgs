@@ -1,0 +1,71 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.ArWen
+PackageVersion: '2.9.9'
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/arwen/issues
+Author: Fahrenheit Research
+PackageName: ArWen
+PackageUrl: https://github.com/FahrenheitResearch/arwen
+License: Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+Copyright: Copyright © Fahrenheit Research
+CopyrightUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+ShortDescription: 'ArWen: GPU-native WRF-ARW-class regional weather model, verified against WRF v4.6.1'
+Description: "ArWen is an independent, GPU-native implementation of a WRF-ARW-class regional atmospheric model. It is not affiliated with or endorsed by NCAR or UCAR. The name is a wordmark for \"the ARW solver, GPU-native\"; the Python package is currently named gpuwm. Safety. ArWen is a research and educational tool. It is never a substitute for official forecasts and warnings from your national meteorological service. Do not use it to make safety decisions. Regional numerical weather prediction at convective scale has mostly required institutional clusters, which means most of the world runs on global-model guidance at 10-25 km. ArWen's aim is to put a verified, kilometer-scale limited-area model on a single consumer GPU: pick a point, size a nest ladder to your card, pull public analysis data, and run a 1 km (or 500 m) simulation of your own area on hardware you own -- especially in places where no national convection-permitting model exists."
+Moniker: arwen
+ReleaseNotes: |-
+  New
+  - A built-in hurricane map theme, woof-light-tc: 10 m wind bands with edges at 34, 50, 64, 83, 96, 113 and 137 kt up to 180 kt, and isobars every 4 hPa from 880 hPa. Themes can set per-product colour boundaries, and gpuwm.rustwx.RENDER_THEMES lists the built-in themes.
+  - rw_probgrid draws a precomputed probability field on a fixed ladder; --scale low gives steps from 0.5 to 30 % for hourly probabilities. It is fetched on demand: gpuwm fetch-bridges --partial --artifact rw_probgrid.
+
+  Fixed
+  - Forecasts that start a RUC or Noah land surface from another model's soil (ERA5, GFS, GEFS, IFS and others) map its soil moisture onto the land model's own scale, and RUC runs over CONUS take HRRR's RUC soil, so the surface no longer starts too wet and too cold.
+  - gpuwm go no longer waits up to five minutes on a stuck kernel warm-up before the forecast starts.
+  - gpuwm go --restart continues a checkpoint taken while GFS boundaries were still streaming.
+  - Ensemble members no longer fail at a checkpoint when another process hard-links their restart files.
+  - Earth-2 runs from a recent GFS cycle find their GDAS donor analysis when it is fetched whole from AWS.
+  - Earth-2 model construction and loader preparation run on Windows.
+  - StormCast reads sea-level pressure under either Earth2Studio name; AIFS starts from the IFS analysis, takes ERA5 for hindcasts and refuses a source that lacks a model input; Aurora 1.5 fetches only its checkpoint and statics.
+  - Earth-2 ensemble noise is scaled to each channel, so SFNO and the other perturbed models no longer start from noisy winds.
+  - Runs of 48 h or longer with sea ice on the grid start again, and the ice's ocean heat flux leaves the PWP or mixed-layer column.
+  - An analyzed vegetation fraction a rounding step past 100 %, or with missing cells, is repaired cell by cell instead of refusing the run.
+  - Sensitivity and member-roster ensembles whose window ends between source times fetch the times on both sides.
+  - A run with a quick-look stream accepts its own default history cadence.
+  - Every physics choice the catalog offers runs: the gsd_41 cloud merge on every radiation scheme, PBL scalar mixing for every microphysics, and PBL choices bring their surface layer.
+  - Kernel compiler pools follow the container's CPU quota.
+  - HRRR-recipe preparations write their stock-WRF companion files, and gpuwm prep --source hrrr passes --no-stock-wrf-export.
+  - CPU preprocessing no longer opens a CUDA context on the card.
+  - Time-lagged HRRR members take their own run's soil at the start, and gpuwm ensemble --prepare-only runs without CuPy.
+  - Isobars through a grid point exactly on a contour level are drawn whole.
+  - Ensemble roster seals link checkpoint sets instead of copying them.
+  - gpuwm source-intermediate --member selects one member's frame.
+  - gpuwm go reuses idx-subset HRRR folders ([fetch] mode), HRRR-native bridges are hashed on every core, and GPUWM_PIPELINE_WORKERS sets the HRRR decoder workers on a shared host.
+  - gpuwm go --no-verify-visuals (or GPUWM_VERIFY_VISUALS=0) no longer starts the post-run verification worker, so the card is free when the forecast ends.
+  - Member restart archives are checksummed on every core.
+  - HRRR preparation workers exit when their parent is killed, so none is left holding card memory.
+  - Runs that write hourly checkpoints and keep one set no longer stop on a missing checkpoint: older sets are retired on the stepping thread after the new set is written.
+  - An HRRR configuration edited after gpuwm domain wrote its namelists (for example turning on gsd_diagnostics) now runs what the configuration says instead of being refused after preparation.
+  - A moving step-down writes one nest history across its segments, so hourly window products such as qpf_1h are drawn on moving grids.
+  - On the tiled (streamed) forecast path, IAU forcing, its dry-mass share and the balance record act on the windows that step.
+  - Analysis member legs hash each input file once, beside their work, read the increment once and keep the leg server's pinned memory between legs.
+  - The any-point column store is written on every core instead of one.
+  - ArWen forecasts wait for the card with blocking sync instead of spinning a CPU core.
+  - GFS preparation runs its host passes on every core and decodes the WIF climatology once, and a CUDA preparation on a host with several cards takes the least-busy card.
+  - Resuming an HRRR fetch in another --mode no longer mixes whole files and subsets; the receipt records each file's mode.
+  - gpuwm domain --recipe hrrr_v4_gsd41 --source hrrr on an HRRR cycle before 2020-12-02 sets the model top at that era's source top instead of refusing after the download.
+  - gpuwm go X.toml --prepare-only followed by gpuwm go X.toml --prepared-root RUN/prepared runs with the same configuration instead of being refused.
+  - With full history every few hours, the column store takes only the frames that carry the 3-D state instead of warning on every frame in between.
+  - Analysis bundles write the analysis once and run their field loops, balance and digests on several threads.
+  - The tiled analysis leg plans its tiles after the analysis increments are on the card, so it no longer runs out of memory on its first step.
+  - Hourly rain on a moving step-down grid now covers ground the grid reached during the hour, not only ground it covered all hour.
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/arwen/releases/tag/v2.9.9
+InstallationNotes: |-
+  This application requires an NVIDIA GPU with CUDA support to run.
+  Will not function on integrated graphics or non-NVIDIA hardware.
+  Without compatible hardware, the application will fail to launch.
+ManifestType: defaultLocale
+ManifestVersion: '1.28.0'

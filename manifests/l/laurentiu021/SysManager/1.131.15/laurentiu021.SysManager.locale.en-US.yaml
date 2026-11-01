@@ -1,0 +1,89 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.131.15
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.131.15] - 2026-10-28
+  The command line's error output is valid JSON again when the error message itself contains a line
+  break or a tab, and four background timers no longer measure time against the wall clock.
+  Fixed
+  - The command line's --json error output was built by hand for one fault path, escaping only
+    backslashes and quotes. A message containing a carriage return, line feed or tab produced a
+    document a JSON parser rejects, on the exact branch whose own comment says it keeps the output
+    machine-readable. It now goes through the same serializer as every other --json error.
+  - Four places measured an interval by subtracting DateTime values instead of a monotonic clock: the
+    notification area's 4-hour cooldowns (a clock set back kept them silent for longer than intended, not
+    shorter), Process Manager's CPU-percent sampling window, Ping's per-sample timestamp, and Bandwidth
+    Monitor's 5-second history throttle, which lost up to an hour of saved history during the repeated
+    autumn daylight-saving hour because the subtraction went negative. All four now use a monotonic
+    timestamp for the interval itself.
+  Changed
+  - EtaCalculator's one remaining plain-object lock target is now the dedicated Lock type the rest
+    of the app's locks already use, and an automated check keeps it that way. (#2855)
+  Verify the download
+  Get-FileHash .\SysManager-v1.131.15.exe -Algorithm SHA256
+  Expected SHA256: 87A08B93E647773F6A7E12535AD8BF018B7FC6AB8BDDAD0C94ACB127EE06F2A8
+  This build is not code-signed, so Windows will warn on first launch. That is
+  expected for a small independent app: see what the warning says and what to
+  click.
+  Code signing is planned through the SignPath Foundation,
+  which provides free certificates to open-source projects, with signing performed by
+  SignPath.io. Until then, the SHA256 above and the build
+  attestation below are what establish that a download is the genuine build.
+  Code signing policy
+  This release is not code-signed. The team roles, release-approval process and
+  privacy policy required by the SignPath Foundation programme
+  are documented in advance under Code signing
+  policy. That
+  documentation is a prerequisite for applying, not evidence of a certificate. The
+  attribution line naming SignPath as the signing provider will appear here once a
+  certificate is actually issued.
+  This program will not transfer any information to other networked systems unless
+  specifically requested by the user or the person installing or operating it. Two checks
+  run on their own when SysManager starts: the version check against the GitHub Releases
+  API, at most once a day, and the Dashboard's app-updates alert, which asks winget. The
+  About tab can switch off either. Everything else that uses the network runs only when you
+  use it. Full
+  privacy policy.
+  Verify where this binary came from
+  This exe was built by GitHub Actions from this public source, and the build is
+  recorded in the Sigstore public transparency log. With the
+  GitHub CLI:
+  gh attestation verify .\SysManager-v1.131.15.exe --repo laurentiu021/SystemManager
+  That proves which commit and workflow produced this exact binary, something the
+  SHA256 file cannot show, since it is published alongside the exe it describes.
+  Each release also ships SysManager-v1.131.15.sbom.json, a CycloneDX inventory of
+  every dependency resolved for this build.
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.131.15
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
