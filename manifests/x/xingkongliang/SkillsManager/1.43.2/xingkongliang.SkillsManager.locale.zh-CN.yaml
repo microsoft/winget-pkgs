@@ -1,0 +1,35 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: xingkongliang.SkillsManager
+PackageVersion: 1.43.2
+PackageLocale: zh-CN
+ShortDescription: 一个应用，统一管理所有 AI 编码工具的 Skills。
+Description: |-
+  Skills Manager 是一个桌面应用，将 AI Agent 技能集中保存在一个中央技能库中，并可安装到 Claude Code、Codex、Cursor、Copilot、Gemini CLI 等编码工具。技能可以从 Git 仓库、本地文件夹、.zip 或 .skill 归档或 skills.sh 市场安装，然后分组为 Preset、添加标签和筛选，并跟踪上游更新。
+  全局工作区和项目工作区展示每个 Agent 实际看到的技能，技能可通过软链接或复制同步到任意支持的工具。Skills Manager 还支持将技能库备份到 Git 远程仓库以实现多设备同步，并通过活动日志记录每次安装、移除、更新和同步操作。
+Tags:
+- skills
+- 人工智能
+- 大语言模型
+- 技能
+- 智能体
+- 自主智能
+ReleaseNotes: |-
+  发布日期：2026-11-01
+  递交范围：v1.43.1...v1.43.2
+  发布概览
+  - 在较旧的 macOS 上打开 Skill 不再黑屏；启动和 CLI 命令不再每次重读所有 Skill 的文件；Skill 预览会隐藏以 Windows 换行保存的元数据头。
+  用户可见更新
+  - 较旧的 macOS 上打开 Skill 不再黑屏 — 在 Safari 16.4 之前的 WebKit 上（例如没升级 Safari 的 macOS Monterey），显示 SKILL.md 时用到了这个引擎不支持的正则特性，整个窗口变黑，只能退出应用。现在这类系统改用普通 Markdown 显示：表格、清单和删除线显示为纯文本（#627、#613）。
+  - 大 Skill 不再拖慢启动和 CLI 命令 — 每次启动、每条 skills-manager-cli 命令，都会把每个 Skill 的所有文件重读一遍来判断是否改动；一个 13,000 个文件的 Skill 在 Windows 上要约 90 秒。现在只有文件的名称、大小或修改时间变了才重读。更新后第一次启动仍会完整读一遍（#628、#623）。
+  - Skill 预览隐藏 Windows 换行的元数据头 — 用 Windows 换行保存的 SKILL.md，或元数据头一直写到文件末尾时，元数据会显示在预览里；空的元数据头还会把下一行 --- 之前的说明一起藏掉。感谢 @Jiandong7（#620）。
+  开发者与治理更新
+  - 数据库 schema 升到 v9，新增本地缓存表 skill_content_stamps，记录每个 Skill 的文件指纹和记录时对应的哈希。只有全部文件读取成功、读取期间没有变化时才写入；Skill 记录里的哈希一变，这份指纹就作废。已接受的边界：大小和修改时间都被保留的改写会被当成没变；macOS 和 Linux 上 inode 的变更时间能兜住，Windows 不能。和以往的 schema 变更一样，升级后的数据库旧版本无法打开（#628）。
+  - SkillMarkdown 在加载时探测一次是否支持正则后行断言。Vite 7 的构建目标是 safari16，esbuild 会把 remark-gfm 里的后行断言字面量改写成运行时的 new RegExp，要到渲染文档时才报错（#627）。
+  当前校验状态
+  - ✅ 跨平台构建通过（macOS Intel / macOS ARM / Windows x64 / Linux x64 / Linux ARM64）
+  - ✅ TypeScript typecheck 通过
+ReleaseNotesUrl: https://github.com/xingkongliang/skills-manager/releases/tag/v1.43.2
+ManifestType: locale
+ManifestVersion: 1.28.0
