@@ -1,0 +1,73 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: amrali-eg.EncodingChecker
+PackageVersion: 3.15.1
+PackageLocale: en-US
+Publisher: amrali-eg
+PublisherUrl: https://github.com/amrali-eg
+PublisherSupportUrl: https://github.com/amrali-eg/EncodingChecker/issues
+PackageName: File Encoding Checker
+PackageUrl: https://github.com/amrali-eg/EncodingChecker
+License: MPL-2.0
+LicenseUrl: https://github.com/amrali-eg/EncodingChecker/blob/HEAD/LICENSE
+Copyright: Copyright © Jeevan James 2011, amrali-eg 2020
+ShortDescription: A GUI tool that allows validating the text encoding of one or more files.
+Tags:
+- endianconverting
+- euc-jp euc-kr
+- fileencodingchecker
+- iso-2022-jp iso-2022-kr
+- iso-8859
+- shift-jis shift_jis shiftjis
+- textencodingsconverter
+- textfiles
+- unicode
+- us-ascii
+- utf-16 utf16 utf-16-bom utf-16be utf16be
+- utf-32 utf32 utf-32be utf32be
+- utf-7 utf7
+- utf-8 utf8 utf-8-bom utf8bom utf-8-sig
+- windows-1252
+- x-mac-ce x-mac-cyrillic
+ReleaseNotes: |-
+  EncodingChecker v3.15.1
+  One reporting fix: a preview no longer calls files Converted. What EC detects, converts
+  and refuses is unchanged.
+
+  A preview says WouldConvert
+  -WhatIf, -Plan, and the GUI’s preview followed by Export all results as CSV…
+  wrote Converted in the CSV Result column for each file a real run would convert,
+  although nothing was written. On the command line, only the journal marked the run as a
+  preview. The -Verbose breakdown counted those files as Converted too.
+  A file that a preview only decided to convert is now WouldConvert, in the CSV (on
+  stdout, written with -Report, or exported from the GUI) and in the -Verbose
+  breakdown. Converted appears only for a file EC wrote. A file the run never reached
+  still reads NotAttempted. The reverse does not hold: an Error row may still have been
+  replaced, which the journal records.
+
+  Compatibility
+  The CSV Result column has a new value. A script that counted Converted rows in a
+  preview or a -Plan run to learn what would change must now match WouldConvert, and a
+  script that checks for a fixed set of Result values will meet a new one. Rows from a
+  real run are unchanged.
+  The journal, the exit codes, conversion semantics (8), the plan schema (6) and the
+  journal schema (6) are unchanged. Plans written by v3.15.0 still apply.
+
+  Verification
+  - 987 tests pass, none skipped; release build with no warnings.
+  - docs/Test-DefectBacklog.ps1 passes: 87 findings, 76 fixed, 7 open.
+  - The Shared Unicode detector parity check is unaffected: neither shared detector
+  file changed.
+  - The four-corpus audit was not run. It applies to detection and conversion-policy
+  changes, and this release changes only how a preview is reported.
+  - The executables are not code-signed. The signing secrets are not configured, so
+  the release workflow skips signing. Shipping unsigned is a decision for this release,
+  not a passed check.
+
+  Known open issues
+  Recorded in DEFECT-BACKLOG.md: a file name with an unpaired UTF-16 surrogate cannot be
+  planned or backed up (BL-43); it never changes a file’s bytes.
+ReleaseNotesUrl: https://github.com/amrali-eg/EncodingChecker/blob/v3.15.1/docs/RELEASE-NOTES-v3.15.1.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

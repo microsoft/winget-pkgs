@@ -1,0 +1,172 @@
+# Created with px publish.yml using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: genotrance.px
+PackageVersion: 0.13.0
+PackageLocale: en-US
+Publisher: genotrance
+PublisherUrl: https://genotrance.com/
+PublisherSupportUrl: https://github.com/genotrance/px/issues
+Author: Ganesh Viswanathan
+PackageName: Px
+PackageUrl: https://github.com/genotrance/px
+License: MIT
+LicenseUrl: https://github.com/genotrance/px/blob/HEAD/LICENSE.txt
+Copyright: Copyright (c) 2017-2025 Ganesh Viswanathan
+CopyrightUrl: https://github.com/genotrance/px/blob/HEAD/LICENSE.txt
+ShortDescription: An HTTP proxy server to automatically authenticate through an NTLM proxy
+Description: Px is a HTTP(s) proxy server that allows applications to authenticate through an NTLM or Kerberos proxy server, typically used in corporate deployments, without having to deal with the actual handshake. Px leverages Windows SSPI or single sign-on and automatically authenticates using the currently logged in Windows user account. It is also possible to run Px on Windows, Linux and MacOS without single sign-on by configuring the domain, username and password to authenticate with.
+Moniker: px-proxy
+ReleaseNotes: |-
+  Improvements
+  - Px now requires pymcurl 8.23.0.2 or newer, which provides the keepalive,
+    low-speed timeout, and auth-retry APIs used by Px.
+  - PAC dnsResolve() (and so isResolvable()/isInNet()) and IP-based
+    --noproxy matching use a cached, bounded DNS resolver: successful and
+    failed lookups are cached, concurrent lookups of one name are shared, and
+    slow resolvers no longer stall unrelated requests (#273).
+  - px --test now reports every connectivity check as passed or failed and
+    completes all checks before returning a failure status (#274).
+  - Release binaries and Docker images bundle the newest CPython 3.13 patch
+    available to the build tools (uv's python-build-standalone,
+    actions/setup-python, python.org's Windows embed zips, and the
+    python:3.13-alpine image), and log the bundled version (#275).
+  - Installation docs now cover uninstalling Px for winget, pip and standalone
+    binary installs, including removing the Windows auto-start entry first.
+  New features
+  - Switched to libuv-based event loops: winloop on Windows, uvloop on
+    Linux/macOS. These replace Python's default asyncio event loop with libuv,
+    providing significantly improved throughput for CONNECT tunnels and fixing
+    px randomly becoming unresponsive on Windows after network disruptions
+    (CPython bug #93821). Falls back to the default event loop gracefully if
+    the libuv library is not available (#268).
+  - New --event-loop=auto|asyncio option (PX_EVENT_LOOP, event_loop in
+    px.ini) to run on Python's default asyncio event loop instead of
+    winloop/uvloop.
+  - New --authretry=<seconds> option (PX_AUTHRETRY, authretry in
+    px.ini) takes a float number of seconds (fractions allowed) and lets Px
+    probe an upstream proxy again after it has been blocked for repeated 407s.
+    For example, --authretry=300 retries every 5 minutes. Once blocked, one
+    request is let through per interval and all other requests are refused until
+    that probe succeeds. A successful response unblocks the proxy immediately;
+    another 407 re-blocks it. Default 0 keeps blocked proxies blocked until
+    Kerberos ticket renewal or restart. Thanks to #276 (enkunkun) for identifying
+    the problem.
+  Bug fixes
+  - The macOS binary no longer links Homebrew's OpenSSL by absolute path, which
+    made SSL and pyspnego fail to load on Macs without that exact Homebrew
+    version. It is now built with a self-contained python-build-standalone
+    CPython. The release build scans every bundled Mach-O file and rejects
+    /opt/homebrew or /usr/local references before publishing.
+  - Fixed macOS Nuitka binaries omitting pyspnego's NTLM dependencies, which
+    prevented authenticated proxy use. Missing dependency messages now show the
+    original import error, and binary builds smoke-check those imports before
+    artifact tests run.
+  - px --quit now flushes its successful shutdown response before exiting, so
+    Nuitka and Windows embedded binaries reliably stop instead of leaving their
+    proxy port bound.
+  - PAC DNS helpers no longer hold up all PAC evaluation during slow name
+    resolution. Failed or timed-out dnsResolve() requests now return null,
+    so isResolvable() and isInNet() correctly reject unresolved hosts;
+    myIpAddress() no longer depends on hostname DNS (#273).
+  - IP-based --noproxy checks now use the bounded DNS resolver and reuse its
+    cached results instead of performing a new unbounded DNS lookup per request
+    (#273).
+  - --idle now also applies to plain-HTTP transfers: a response that sends no
+    data for that long is aborted.
+  - Listen backlog raised from 128 to 2048, avoiding ~1 second SYN-retransmit
+    stalls at 200+ concurrent connections.
+  - TCP_NODELAY is now set on accepted client connections on the plain asyncio
+    loop, removing ~40 ms per round trip on CONNECT tunnels.
+  - Fixed --kerberos crashing Px at startup with OSError: [Errno 9] Bad file descriptor on hosts where kinit is not installed; Px now logs
+    Kerberos: kinit not found and keeps running.
+  Internal
+  - macOS test jobs (the CI test and benchmark jobs and test-binary) now run on
+    uv-managed CPython instead of setup-python's. On the macOS 15+ runners
+    (macos-latest is macos-26) Python from setup-python or Homebrew stalls
+    every reverse lookup of 127.0.0.1 for about 35 seconds because it lacks
+    the Local Network permission. Every px start, px --quit and stdlib test
+    server (http.server, pytest-httpbin) paid that stall, so each macOS
+    3.10-3.14 suite took about 19m31s against 15s once the interpreter was
+    unaffected. uv-managed CPython is not affected.
+  - The test suite now fails fast on macOS CI: a session-start probe times
+    gethostbyaddr, urllib.request.getproxies and px's parse_config in fresh
+    interpreters, prints the timings in the pytest header, and stops the run if
+    one takes over 10 seconds. tests/test_startup.py also bounds px start and
+    --quit. Test servers no longer reverse-resolve loopback addresses.
+  - test-binary launches the extracted binary (smoke_binary: --help, the
+    auth import check and, on macOS, the portability check) on the clean test
+    runner before any tox environment, so a missing library fails in seconds.
+  - macOS release builds fail early if the build interpreter's _ssl or
+    _hashlib links Homebrew or /usr/local libraries, and fail after the build
+    if any Mach-O file in px.dist references either path. The frozen-binary
+    smoke check imports ssl and spnego before artifact tests.
+  - A manual build.yml dispatch now calls the full ci.yml matrix as the
+    complete pre-release gate. Linux Nuitka and uv container caches persist
+    safely between release runs, and artifact testing now runs each offline wheel
+    on Python 3.10–3.14 plus the compiled binary once rather than repeating the
+    binary suite for every Python environment.
+  - New tools/release-check.sh replays build.yml's Linux x86_64 release jobs
+    (sdist, wheels, Nuitka binary and binary tests for glibc and musl) locally
+    with Docker; it is the required check before dispatching build.yml on
+    devel.
+  - The binary test job's tox driver environment is now pinned to Python 3.14.
+    In the glibc ubuntu test container, which has no Python, uv picked the
+    newest release (3.15) and the binary environment failed to install uvloop
+    (found by the local release check).
+  - Added a weekly automatic patch-release workflow that prepares dependency and
+    CPython updates from master, gates the exact candidate through the existing
+    CI matrix, and only then fast-forwards master to start release builds.
+    Manual dry runs report candidates without pushing or publishing, and failed
+    CI runs update a single auto-release blocked issue.
+  - Changed the release-build CPython freshness guards to warn rather than fail
+    when python.org has published a newer 3.13 patch than uv's
+    python-build-standalone, actions/setup-python, the Windows embed zip
+    index, or the python:3.13-alpine image provides. This blocked all 6 binary
+    jobs in release-build dry run 40266792761 the day 3.13.18 appeared. Builds
+    still reject a missing, unparsable, or wrong-minor interpreter, bundle and
+    log the newest patch each tool offers, and rely on automatic releases to
+    keep that patch current.
+  - The test helper now starts every Px instance with an explicit empty config
+    file so a px.ini that test_config temporarily writes next to the px
+    script under pytest -n auto can no longer leak into other tests' Px
+    processes (this caused sporadic "Px didn't start" failures).
+  - New px/resolver.py module with a bounded DNS worker pool, positive and
+    negative TTL caches and in-flight de-duplication, used by px.pac and
+    px.wproxy (#273).
+  - New tools/bench_dns_stalls.py benchmark measuring PAC and --noproxy
+    latency and throughput under slow or failing DNS (#273).
+  - Release builds refresh quickjs-ng to the latest PyPI version and log the
+    resolved version rather than using an older locked release.
+  - Added the reviewed uv.lock dependency lockfile so CI, developer checkouts,
+    and ORC verification use identical dependency versions.
+  - Added a slow pytest marker (pyproject.toml) for tests that are
+    inherently slow — --authretry tests that assert real retry intervals, and
+    the full chained-proxy auth matrix in test_proxy_auth_upstream/
+    test_proxy_auth_chain. pytest tests and make test still run them, but
+    pytest tests -m "not integration and not benchmark and not largedata and not slow" skips them for a fast inner-loop run (~6s vs ~21-27s for the
+    full suite, measured with -n auto). Also fixed two tests that were slow
+    only because of an avoidable wait rather than what they verify:
+    test_pac.py's dnsResolve tests now mock getaddrinfo instead of making
+    a real DNS lookup (previously bounded by a 3s timeout per lookup, and prone
+    to platform-dependent resolution differences); and
+    test_network.py::test_allow_specific_subnet no longer tears down through
+    --quit, which --allow=10.0.*.* makes impossible for --quit to target
+    (get_listen() has no local IP to pick), so the test was paying for 3
+    doomed --quit retries plus a 10s kill timeout (~17s) every run for an
+    outcome that was never in doubt.
+  - Split ci.yml into a fast mode and a full mode so push/PR feedback no longer
+    waits on the 19-minute macOS jobs (baseline wall time was about 20 minutes
+    for 24 jobs). Push and pull request runs execute a small matrix (quality,
+    Kerberos, Ubuntu Python 3.10 and 3.14, Ubuntu asyncio, Windows Python 3.14
+    and asyncio, musl x86_64 Python 3.14) with slow tests deselected. The full
+    matrix (every Python, OS, architecture, event loop, musl variant, macOS,
+    large-data, benchmarks and slow tests) runs on workflow_dispatch, a weekly
+    schedule, and workflow_call, and auto-release.yml explicitly dispatches
+    it with full=true. The matrices come from the new tools/ci_matrix.py
+    (tested by tests/test_ci_matrix.py) through a plan job, so each job kind
+    has one definition. Every pytest invocation in CI now passes
+    --durations=30 to report the slowest tests. See docs/testing.md.
+ReleaseNotesUrl: https://github.com/genotrance/px/releases/tag/v0.13.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

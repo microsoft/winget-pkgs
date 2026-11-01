@@ -1,0 +1,130 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ggml.llamacpp
+PackageVersion: b12000
+PackageLocale: en-US
+Publisher: ggml
+PublisherUrl: https://github.com/ggml-org
+PublisherSupportUrl: https://github.com/ggml-org/llama.cpp/issues
+PackageName: llama.cpp
+PackageUrl: https://github.com/ggml-org/llama.cpp
+License: MIT
+LicenseUrl: https://github.com/ggml-org/llama.cpp/blob/HEAD/LICENSE
+ShortDescription: LLM inference in C/C++
+Tags:
+- ggml
+- llama
+ReleaseNotes: |-
+  Quant: OCP FP8 E4M3 support (#27512)
+  - WIP OCP FP8 E4M3 support
+  - Fix python type-checker
+  - Materialize input_scales also for FP8 when converting
+  - Fix conversion of https://huggingface.co/RedHatAI/Qwen3.8-27B-NVFP4
+  1. Per row FP8 wrongly fell to NVFP4 conversion, as NVFP4 checked on
+     dims alone. Also check on dtype for FP8
+  2. Need to reshape FP8 QKV projections scales in the same way that
+     weights are reshaped
+  - Allow remaining FP8 tensors to be dequantized during conversion
+  - Allow tensor-strategy for FP8-only compressed-tensor ckpts
+  - Fix and test gguf-py behavior for FP8_E4M3
+  - Disallow QKV-fusion for FP8 temporarily
+  - Fix conversion of fused qkvz & FP8 for Qwen3-Next
+  - Avoid fusing FP8 for --fuse-gate-up-exps as we may have different ws
+  - Emit warnings when not fusing FP8 during conversion
+  - More FP8 conversion fixes
+  - Add supported for strided copies to/from FP8 in CPU
+  - remove unneeded scratch buffer from FP8 cpu cpy/dup path
+  - add explanatory comments and TODOs
+  - Add dedicated encoder and decoder tests for FP8
+  - Whitelist ggml_op_get_rows in metal instead of blacklisting
+  required to fix failing CI, and white-listing should be more
+  future-proof than adding FP8 to the black-list
+  https://github.com/ggml-org/llama.cpp/actions/runs/38433916498/job/115422880633?pr=27512
+  - Fix more conversion bugs
+  - Defer weight materialization during conversion
+  - Blacklist fp8 in metal backend instead of white-list
+  - Adjust indents
+  - Fix lint + execute tests
+  - Add fast CPU kernel for F8_E4M3
+  - Conversion fixes
+  - Fix remaining gaps
+  - Enable tied weights with shared scales
+  - Make mandatory-F32 rules apply to FP8 during conversion
+  - Fix python type checks
+  https://github.com/ggml-org/llama.cpp/actions/runs/39765670052/job/119780379595?pr=27512
+  - Fix kaleidai unit-test failures
+  https://github.com/ggml-org/llama.cpp/actions/runs/39765670125/job/119780383150
+  - Relax numeric precision constraints for pre-check
+  - Leave fast-FP8 CPU on RISC-V for follow-up
+  We already exclude arm from the fast-path
+  - Allow output scale tensors to be located in any gguf shard
+  - Move test_conversion_fp8.py test execution to behavior-check.yaml
+  - Apply batched suggestions from code review
+  Co-authored-by: Sigbjørn Skjæret sigbjorn.skjaeret@huggingface.co
+  - Move mixed compressed-tensor logic into dequant_fp8 + add unit-tests for it
+  - Install all requirements also on Windows for behavior-check
+  Fixes https://github.com/ggml-org/llama.cpp/actions/runs/40535852590/job/122300758223?pr=27512
+  - Unmap lazy tensors before clean-up in Windows
+  Should fix https://github.com/ggml-org/llama.cpp/actions/runs/40539797824/job/122314782459?pr=27512
+  - LF line endings
+  https://github.com/ggml-org/llama.cpp/actions/runs/40539798168/job/122314791118?pr=27512
+  - Extract FP8 tests from llama-arch to its own test-fixture
+  See #27512 (comment)
+  - Update gguf-py/gguf/scripts/gguf_convert_endian.py
+  Co-authored-by: Sigbjørn Skjæret sigbjorn.skjaeret@huggingface.co
+  Co-authored-by: Sigbjørn Skjæret sigbjorn.skjaeret@huggingface.co
+  Website:
+  - https://llama.app
+  Attestations:
+  - https://github.com/ggml-org/llama.cpp/attestations/61605392
+  macOS/iOS:
+  - macOS Apple Silicon (arm64)
+  - macOS Apple Silicon (arm64, KleidiAI enabled) DISABLED
+  - macOS Intel (x64)
+  - iOS XCFramework
+  Linux:
+  - Ubuntu x64 (CPU)
+  - Ubuntu arm64 (CPU)
+  - Ubuntu s390x (CPU)
+  - Ubuntu 26.04 s390x (CPU)
+  - Ubuntu 26.04 s390x (zDNN)
+  - Ubuntu x64 (Vulkan)
+  - Ubuntu arm64 (Vulkan)
+  - Ubuntu x64 (CUDA 12) - CUDA 12.8 libraries
+  - Ubuntu x64 (CUDA 13) - CUDA 13.4 libraries
+  - Ubuntu arm64 (CUDA 13) - CUDA 13.4 libraries
+  - Ubuntu x64 (ROCm 10.0)
+  - Ubuntu x64 (OpenVINO)
+  - Ubuntu x64 (SYCL FP32)
+  - Ubuntu x64 (SYCL FP16)
+  - Linux arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide
+  Android:
+  - Android arm64 (CPU)
+  - Android arm64 (Snapdragon: CPU, Adreno GPU, Hexagon NPU) - setup guide
+  Windows:
+  - Windows x64 (CPU)
+  - Windows arm64 (CPU)
+  - Windows arm64 (OpenCL Adreno)
+  - Windows x64 (CUDA 12) - CUDA 12.4 DLLs
+  - Windows x64 (CUDA 13) - CUDA 13.4 DLLs
+  - Windows arm64 (CUDA 13) - CUDA 13.4 DLLs
+  - Windows x64 (Vulkan)
+  - Windows arm64 (Vulkan)
+  - Windows x64 (OpenVINO)
+  - Windows x64 (SYCL)
+  - Windows x64 (ROCm 10.0)
+  openEuler:
+  - DISABLED
+  - openEuler x86 (310p)
+  - openEuler x86 (910b, ACL Graph)
+  - openEuler aarch64 (310p)
+  - openEuler aarch64 (910b, ACL Graph)
+  UI:
+  - UI
+ReleaseNotesUrl: https://github.com/ggml-org/llama.cpp/releases/tag/b12000
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/ggml-org/llama.cpp/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
