@@ -1,0 +1,45 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: HenryXiaoYang.realtime-tex
+PackageVersion: 0.0.6
+PackageLocale: en-US
+Publisher: Henry Yang
+PublisherUrl: https://henryyang.net/
+PublisherSupportUrl: https://github.com/HenryXiaoYang/realtime-tex/issues
+PackageName: realtime-tex
+PackageUrl: https://github.com/HenryXiaoYang/realtime-tex
+License: MIT
+LicenseUrl: https://github.com/HenryXiaoYang/realtime-tex/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Henry Yang and the realtime-tex contributors
+ShortDescription: Re-typesets only the LaTeX paragraph you are editing in about a millisecond with an unmodified LuaTeX.
+Description: 'rtex is a typesetting engine for editors. When you type, it re-typesets only the paragraph being edited through a LuaLaTeX process that has already loaded your preamble, and hands the editor the new lines to draw. A full background compile takes care of what really is global: page breaks, floats, the table of contents, references and bibliographies. The result is exactly what LuaLaTeX produces — the same line breaks and the same glyphs at the same positions to 1/65536 pt — because rtex uses an unmodified LuaTeX from TeX Live and exported PDFs are identical to a normal LuaLaTeX build. Time from keystroke to updated paragraph is about a millisecond and does not depend on document length. The archive contains the `rtex` command, the C library and header, and rtex TeX support files.'
+Tags:
+- latex
+- lualatex
+- luatex
+- tex
+- texlive
+- typesetting
+ReleaseNotes: |-
+  Thank you @Steve-Li-1998, @SDDKKK and @leo1oel for the fixes, and @ACG-j for the security and robustness reports!
+  Fixed
+  - Live editing keeps going. Errors disappear once a compile of the fixed source succeeds, and a paragraph that crashed the live engine (often a half-typed command) goes live again when you edit it. (#11, #12) Typing a paragraph with no text (only a \label, \vspace or \noindent) no longer stops live edits until the engine restarts. (#13, #16)
+  - Run-in headings (\paragraph, \subparagraph, IEEEtran's \subsubsection) and the paragraphs after them are live. The IEEEtran corpus paper now has 27 of 27 units live. (#14, #15, #17)
+  - Main files in a subfolder (cv/sop/sop.tex) read \input, figures, \graphicspath and \bibliography{../../references} from their own folder, like latexmk -cd. Documents that read another document's .aux (\externaldocument) find it. (#18, realtime-tex-vsc-plugin#6)
+  - float package. Documents that load float no longer report "Unknown float option" for every figure and table. (realtime-tex-vsc-plugin#8)
+  - Broken preambles. A preamble that ends before \begin{document} (a \stop, a half-typed preamble) no longer restarts the engine every second, and the full compile reports the failure instead of showing the old pages. (realtime-tex-vsc-plugin#10)
+  - Runaway compiles. A compile that never ends is stopped after 5 minutes (pass_timeout) and reported as failed; one killed by a signal (CPU limit, out of memory) is reported as failed too. (#22)
+  - rtex serve input checks. An edit whose range falls inside a UTF-8 character, runs backwards or goes past the end gets an error reply instead of crashing the server. set_document refuses new files outside the project. (#25, #26)
+  Other
+  - lopdf 0.42 (from 0.36), which fixes a stack overflow on deeply nested PDF objects (RUSTSEC-2026-0187). (#24)
+  - The embedding docs now say that rtex is not a sandbox for untrusted documents. (#23)
+ReleaseNotesUrl: https://github.com/HenryXiaoYang/realtime-tex/releases/tag/v0.0.6
+InstallationNotes: rtex needs a TeX Live installation that provides LuaLaTeX with a LaTeX kernel from 2021 or later; pdfLaTeX and XeLaTeX are not supported. Run `rtex doctor` to check that rtex finds its support files and your LuaLaTeX.
+Documentations:
+- DocumentLabel: Live Editing
+  DocumentUrl: https://github.com/HenryXiaoYang/realtime-tex/blob/HEAD/docs/live-editing.md
+- DocumentLabel: Benchmarks
+  DocumentUrl: https://github.com/HenryXiaoYang/realtime-tex/blob/HEAD/docs/benchmarks.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
