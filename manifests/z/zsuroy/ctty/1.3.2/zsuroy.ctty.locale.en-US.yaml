@@ -1,0 +1,44 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: zsuroy.ctty
+PackageVersion: 1.3.2
+PackageLocale: en-US
+Publisher: zsuroy
+PublisherUrl: https://suroy.cn/
+PublisherSupportUrl: https://github.com/zsuroy/ctty/issues
+PackageName: ctty
+PackageUrl: https://github.com/zsuroy/ctty
+License: MIT
+LicenseUrl: https://github.com/zsuroy/ctty/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 zsuroy
+ShortDescription: Terminal UI that manages SSH, serial, telnet, SFTP, FTP, WebDAV and S3 connections.
+Description: |-
+  ctty is a single-binary terminal connection manager. It reads an existing OpenSSH configuration
+  and adds serial, telnet, SFTP, FTP, WebDAV and S3 clients beside it, so hosts already configured
+  for ssh can be browsed, searched and connected to from one interface.
+
+  Saved sites are stored as separate JSON files and passwords are kept in a local AES-256-GCM
+  credential vault under %APPDATA%\ctty. Each protocol also has a non-interactive subcommand with
+  JSON output for use from scripts. This package installs the Windows console binary, so it runs in
+  Windows Terminal, PowerShell, cmd, or any other terminal rather than in its own window.
+Tags:
+- ftp
+- sftp
+- ssh
+- telnet
+- terminal
+- tui
+- webdav
+ReleaseNotes: |-
+  Fixed
+  - 🧩 TUI frames render cleanly on JetBrains and VS Code embedded terminals — several compounding defects corrupted frames there, most visibly in the FTP site manager on PyCharm, where the tag drawer appeared with list content beside it:
+    - Canvas rows were truncated by the wrong metric — RenderCanvas / fillTerminal cut and padded rows with ansi.StringWidth, which over-counts glyphs that advance one column narrower on IDE terminals (⚫, ⚡, ⏳, ✅ in JediTerm). Affected rows came out one column short, leaving cells from the previous frame visible next to freshly drawn frames. Rows are now padded by the real terminal advance, using the same deficit tables placeBox already applied.
+    - The 🏷️ drawer title overhung its card border — the title glyph is U+1F3F7 plus the emoji variation selector U+FE0F, a two-codepoint grapheme that renders one column wider than ansi.StringWidth counts on PyCharm's JediTerm and VS Code's xterm.js (the selector takes a visible cell there). Compensating for it as if it were narrow pushed the row past the terminal width, soft-wrapping it and desyncing the whole frame; the tables were even keyed on the bare codepoint — measuring the wrong string. It is now probed and counted as its exact sequence, with a mirrored excess table that alignJetBrainsBox trims back.
+    - List table rows misaligned by one column — the site/device tables (FTP, S3, WebDAV, serial, telnet) are budgeted by bubbles with ansi.StringWidth, so every row carrying the ⚫ status circle came out one column short of the emoji-free header row. The rendered tables now go through alignJetBrainsBox after the border is drawn — any earlier, and lipgloss pads block lines to the widest one by ansi.StringWidth, undoing the correction.
+    - Glyph widths are now measured, not guessed — on JetBrains/VS Code terminals ctty measures the real column advance of every layout-critical glyph at startup via cursor-position reports (ESC[6n) and builds the deficit/excess tables from the measurement, falling back to the static per-terminal values when the terminal does not answer. The hidden ctty probe-terminal command prints the same measurements.
+    - Stale cells are cleared by the terminal itself — canvas rows on compensation terminals are emitted trailing-space-free with an explicit EraseLineRight, so the terminal clears the row tail. Trailing padding is never relied on to fill the canvas (the FTP table is budgeted to the full terminal width, so its right border is the last column and must never be trimmed), and RenderCanvas keeps a hard clamp so no row can exceed the canvas width and soft-wrap.
+    Other terminals are unchanged. Regression tests cover all five drawers (SSH / FTP / S3 / WebDAV / Telnet) in both languages on JetBrains-pattern, VS Code and standard terminals; every table row's right border landing on one shared column (FTP and telnet); an adversarial case that re-introduces a wrong deficit and proves the frame still cannot wrap; and the startup calibration against a fake terminal (measured deltas, override precedence, silent-terminal fallback).
+ReleaseNotesUrl: https://github.com/zsuroy/ctty/blob/HEAD/CHANGELOG.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
