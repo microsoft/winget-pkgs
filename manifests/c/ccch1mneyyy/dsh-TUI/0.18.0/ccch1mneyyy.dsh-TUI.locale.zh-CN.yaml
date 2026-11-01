@@ -1,0 +1,62 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: ccch1mneyyy.dsh-TUI
+PackageVersion: 0.18.0
+PackageLocale: zh-CN
+ShortDescription: DeepSeek Harness 官方首推的终端界面：高性能、低占用。
+Description: dsh-TUI 是 DeepSeek Harness（DSH）的交互式终端界面，支持全屏会话、像素鲸鱼伴侣、流畅鼠标交互和低占用，并提供供脚本驱动的独立 headless 命令 dst。
+Tags:
+- deepseek
+- deepseek-harness
+- dsh
+- harness
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  自 v0.17.0 以来，dsh-TUI 跟上 DSH 0.2.1-rc.5 验证线，修好升级 DSH 后 TUI 被拒绝加载的问题，
+  让首次启动引导可以直接登录或加 key，接入官方 Git 工作树实验包，并让插件授权跟随插件的安装、启用与卸载。
+  亮点
+  - 适配 DSH 0.2.1-rc.5，0.2.1-rc.4 列为兼容线 — v0.17.0 只声明支持到 0.2.1-rc.3；npm 上的 DSH 升到 rc.4 / rc.5 后，DSH 的插件兼容检查会拒绝加载它，表现为升级 DSH 后 TUI 打不开。本版把 rc.4 / rc.5 加入验证线与 peer 范围，dst 自动化适配器的验证版本同步加入。按发布包逐文件比对，TUI 用到的上游代码在 rc.3 到 rc.5 之间只改了版本号，宿主复刻指纹不变。(#1806 by @AdamPlatin123)
+  - 首次启动引导可以直接登录或加 key — 引导第一步现在能登录订阅账号、添加模型提供方（API key）、重新检查或跳过这一步；订阅登录带回的新模型按 0/1/N 处理：只报结果、直接设为默认，或在内联选择器里挑一个。「添加模型提供方」沿用 /provider 向导，向导的切换题会逐项列出本次启用的模型，并保留「保持当前模型」。(#1647 by @AdamPlatin123)
+  - 官方 Git 工作树实验包 — /plugin list 里可以直接开启 DSH 官方的 create_worktree；工具卡标题显示分支名，结果用两行写明检出位置和起点。Minimal 与随包的 liangshen 预设不提供这个工具：Minimal 的持久 shell 不跟随目录，liangshen 为跨平台统一规则一并隐藏。工作树不会自动清理，分支需要另外删除。(#1745 by @MomentDerek)
+  - 插件授权跟随插件生命周期 — 安装或启用时按包内声明授予，关闭时撤销，卸载时删除该组件的授权条目，复用同一组件 id 的新包不会静默继承旧授权；确认清单按终端高度折叠，放不下时显示剩余条数。(#1747 by @Lucas2011wastaken)
+  需要留意的行为变化
+  - /plugin enable 一并授予声明的权限 — 确认页逐行列出包内声明的权限，确认后启用并按声明授予，写入的范围不会超出声明；不想授予就按 Esc 放弃。(#1747 by @Lucas2011wastaken)
+  - @~/… 在任意深度都指向家目录 — 与 shell 一致；工作区里真有一个叫 ~ 的目录时，改写成 @./~/… 引用。裸 @~ 的行为不变。(#1739 by @AdamPlatin123)
+  修复
+  - 会话：DSH 内核上 dsh-tui 行随 agents 服务卸载时，屏幕不再停在「回合进行中」，而是显示会话已结束；没送达的输入暂存、不自动重发，行恢复后重新挂接并重开会话，/restart 会带回排队的文字。(#1759 by @MomentDerek)
+  - 输入：@~/ 补全选中子目录后不再消失，发送的 @~/… 不再落进 missing；侧栏聚焦时 Ctrl+V / Alt+V 粘贴进 btw 输入框而不是主聊天草稿，全屏 btw 也能粘贴。(#1739 by @AdamPlatin123；#1785 by @Lucas2011wastaken)
+  - 面板与渲染：待办侧栏按宽度完整折行显示长目标、可滚动查看全部条目；展开的工具卡保留用户设置的「工具卡背景」。(#1748 by @Lucas2011wastaken；#1782 by @baobaolaodie)
+  - 宿主与插件：带额外第三方 bundle 的 profile 启动时，慢 core 行恢复后的官方 Remote service 注册不再被 root guard 误拒（宿主在装 guard 时物化 root-owned invocation accessor，guard 判定面不变）；desktop/web profile 下插件 activation 的根事件派发与服务解析也不再被守卫拒绝，设置保存、模型增删与插件卸载恢复可用。结构性的 root 操作仍被拒绝。(#1732 by @Lucas2011wastaken；#1804 by @MomentDerek)
+  兼容与升级
+  - DSH 主适配线：0.2.1-rc.5；0.2.1-rc.4、0.2.1-rc.3、0.2.1-rc.2、0.2.0-rc.1、0.2.0-rc.2 以及更早的验证线仍在契约内，契约外版本打漂移警告。
+  - 升级 DSH 后 v0.17.0 打不开的用户：TUI 进不去时用不了程序内的 /update，请直接运行下面的 npm 命令升级到 v0.18.0。曾用 dsh plugin allow-version 给 v0.17.0 加过豁免的，升级后不再需要。
+  - 从 v0.17.0 升级：程序内 /update，或
+    npm install -g @deepseek-ai/dsh @deepseek-harness-tui/dsh-tui@0.18.0。
+  - Windows 离线安装器：DSH 验证范围随契约更新到 0.2.1-rc.5。已装 rc.5 直接保留，rc.4 升到 rc.5，不再像 v0.17.0 的安装器那样降回 rc.3。
+  安装
+  npm install -g @deepseek-ai/dsh @deepseek-harness-tui/dsh-tui@0.18.0
+  偏好一键安装的用户可下载 Release 中的 dsh-tui-setup.zip（解压后 macOS / Linux 运行 sh install.sh，Windows 双击 install.bat）
+  或 Windows 离线安装程序 dsh-tui-setup-win-x64.exe；便携包解压即用。
+  What's Changed
+  - feat(plugin): adopt the official Git worktree experimental plugin by @MomentDerek in https://github.com/ccch1mneyyy/dsh-TUI/pull/1745
+  - fix(panels): wrap long goals and scroll the todo side panel by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1748
+  - feat(plugin): follow grants through the plugin lifecycle by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1747
+  - fix(mentions): expand ~/ and ~\ for @ completion and attachments by @AdamPlatin123 in https://github.com/ccch1mneyyy/dsh-TUI/pull/1739
+  - fix(channel): settle and hold a DSH session whose listener context unloads (#1651) by @MomentDerek in https://github.com/ccch1mneyyy/dsh-TUI/pull/1759
+  - chore(deps): adapt the validated line to DSH 0.2.1-rc.5 by @AdamPlatin123 in https://github.com/ccch1mneyyy/dsh-TUI/pull/1806
+  - fix(btw): route paste to the panel column instead of the main draft by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1785
+  - fix(tool-card): keep the configured background when expanded by @baobaolaodie in https://github.com/ccch1mneyyy/dsh-TUI/pull/1782
+  - feat(onboarding): sign in or add a key in the first step, then adopt models 0/1/N by @AdamPlatin123 in https://github.com/ccch1mneyyy/dsh-TUI/pull/1647
+  - fix(host): materialize the root-owned invocation accessor with the guard (#1616) by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1732
+  - fix(dsh-adapter): keep root event dispatch and registry reads open to plugins by @MomentDerek in https://github.com/ccch1mneyyy/dsh-TUI/pull/1804
+  Full Changelog: https://github.com/ccch1mneyyy/dsh-TUI/compare/v0.17.0...v0.18.0
+ManifestType: locale
+ManifestVersion: 1.28.0
