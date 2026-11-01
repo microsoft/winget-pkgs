@@ -1,0 +1,57 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: dpaulat.supercell-wx
+PackageVersion: 0.6.2
+PackageLocale: en-US
+Publisher: Dan Paulat (dpaulat)
+PublisherUrl: https://github.com/dpaulat
+PublisherSupportUrl: https://github.com/dpaulat/supercell-wx/issues
+PackageName: Supercell Wx
+PackageUrl: https://github.com/dpaulat/supercell-wx
+License: MIT
+LicenseUrl: https://github.com/dpaulat/supercell-wx/blob/HEAD/LICENSE.txt
+Copyright: Copyright (c) Dan Paulat
+ShortDescription: Free and open source advanced weather radar viewer.
+Description: Supercell Wx is a free, open source application to visualize live and archive NEXRAD Level 2 and Level 3 data, and severe weather alerts. It displays continuously updating weather data on top of a responsive map, providing the capability to monitor weather events using reflectivity, velocity, and other products.
+Moniker: supercell
+Tags:
+- radar
+- weather
+ReleaseNotes: |-
+  Supercell Wx v0.6.2
+  v0.6.2 adds layer opacity, radar beam-height units, Windows on Arm, and Mobile Radar Research Lab (MRRL) Level 2 data. Windows install and update now go through an NSIS bootstrapper instead of launching the MSI directly.
+
+  🎚️ Layer Opacity
+  Fade radar so satellite and streets show through, and set the same control on overlay layers.
+  - Radar Opacity in Radar Toolbox → Map Settings fades the live radar product
+  - Layer Manager has an Opacity column and slider for overlay layers (alerts, placefiles, markers, and similar). Map underlay and map symbology stay fully opaque
+  Settings persist in layers.json.
+  — @dpaulat (#682)
+
+  📡 Radar Data & Tooltips
+  - ARL / MSL beam height — Shift+hover now labels beam height as above radar level (ARL) or mean sea level (MSL). Choose the reference under Settings → Units → Radar Beam Height (MSL is the default). ARL is useful near the site, especially at high-elevation radars where MSL includes the tower height — @dpaulat (#683)
+  - MRRL Level 2 — Launch with --level2-provider https://feeds.mrrl.net/polling/ to use the Mobile Radar Research Lab feed. The MRRL site list loads automatically. Only one Level 2 provider can be active at a time; this replaces the default AWS source for that session. See the command-line options — @dpaulat (#704)
+  - Custom radar sites — --custom-radars-gis points at a GIS file of extra sites. Data must still come from the active Level 2/3 provider — @dpaulat (#697)
+
+  💻 Windows on Arm
+  Native Windows arm64 builds and installers are available. Use the arm64 package on Windows 11 on Arm (OpenGL 3.3 required); x64 and arm64 installers are not interchangeable. Some Arm VMs do not provide a usable OpenGL context — if the main window is blank, try physical Arm hardware or disable 3D acceleration in the VM.
+  — @dpaulat (#442)
+
+  📦 Windows Installer (NSIS)
+  The recommended Windows download is now supercell-wx-v*-windows-<arch>.exe. The NSIS bootstrapper installs the Visual C++ Redistributable, then the MSI. The in-app updater launches that same .exe (so UAC elevation works) instead of msiexec. Updates no longer remove the Start Menu shortcut, which was breaking taskbar pins.
+  The MSI is still published for environments that require it; it does not install the redistributable.
+  On the components page you can add Start Menu shortcuts that launch with the Iowa State Mesonet or MRRL Level 2 providers. The default shortcut is always installed. Silent installs can pass /NOPROVIDERSHORTCUTS to skip the extras.
+  — @dpaulat (#678, #684, #708)
+
+  Bug Fixes
+  - Fix radar range rings ignoring the new opacity setting (#698) — @dpaulat
+  - Fix map style not saving when panes are set to match map style (#706) — @dpaulat
+
+  Maintenance
+  - Extract ProductDatastore from RadarProductManager (#643) — @F1r3w477
+  - NixOS packaging and version generation without a Git checkout (#676, #686, #687) — @dpaulat
+  Thanks to @dpaulat and @F1r3w477 for the changes in this release.
+ReleaseNotesUrl: https://github.com/dpaulat/supercell-wx/releases/tag/v0.6.2-release
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

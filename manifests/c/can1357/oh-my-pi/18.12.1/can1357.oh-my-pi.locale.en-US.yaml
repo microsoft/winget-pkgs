@@ -1,0 +1,73 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.12.1
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Fixed
+  - Fixed every request failing behind a TLS-inspecting proxy that refuses compressed uploads: a 400/403/415 whose body is not JSON, or the Anthropic API's "request body is not valid JSON" after a proxy drops Content-Encoding, now resends the body uncompressed and stops compressing for that host (#16108 by @alphastorm)
+  @oh-my-pi/pi-catalog
+  Fixed
+  - Anthropic's request-encoding-rejection now also matches the API's "request body is not valid JSON" 400, which a gzip body gets when a proxy drops its Content-Encoding header (#16108 by @alphastorm)
+  @oh-my-pi/pi-coding-agent
+  Breaking Changes
+  - Removed display() from eval in both Python and JavaScript; print (and console.log in JavaScript) covers it
+  Added
+  - Added advisor.continueSeverity (nit, concern, blocker) to choose the minimum advisor note severity that wakes the agent after it finished with a final answer; lower-severity notes stay as a card at the end of the transcript
+  - Printed DataFrames/Series render as tables, large dicts/lists and objects as JSON trees, and Markdown objects as Markdown for the user, while the model sees the printed text
+  - Printing a figure or image in eval attaches the image to the result
+  Changed
+  - An advisor concern raised after the agent's final answer now continues the run by default instead of waiting at the end of the transcript; set advisor.continueSeverity to blocker for the previous behavior
+  Fixed
+  - Fixed context-file @ imports failing to load paths containing backslash-escaped spaces (#16090)
+  @oh-my-pi/pi-natives
+  Fixed
+  - Fixed native memory growing without bound, and eventually crashing the process, when files in a downloaded (WASM) grammar language such as C# were parsed repeatedly (#16067)
+  @oh-my-pi/pi-tui
+  Breaking Changes
+  - numberedCode, readContentCode and nativeDiff take the file's path (path) instead of a language, and describeGroupedOutput drops its lang option: Tern picks the grammar of file contents from their path
+  Changed
+  - Advisor notes in Tern read as a callout tinted by their worst severity: its icon and a tally (Concern, 1 blocker · 2 concerns) head the card with the advisor's name at the end, and several notes each lead with their own severity icon
+  Fixed
+  - Fixed images rendering blank inside tmux on Kitty-capable terminals when tmux's allow-passthrough is off (the default); omp now falls back to SIXEL or the text placeholder instead of sending Kitty graphics tmux drops
+  - Fixed Tern drawing tool cards' file contents (write, read, edit, grep, find, ast-grep, ast-edit) plain or in the wrong language when omp did not know the file's extension (.ptx) or mapped it to a neighbor (.cu as C++); omp now sends the file's path and Tern picks the grammar
+  What's Changed
+  - fix(ai): resend uncompressed when a proxy rejects a compressed request body by @alphastorm in https://github.com/can1357/oh-my-pi/pull/16108
+  - fix(tui): answered allow-passthrough in fake tmux client fixture by @roboomp in https://github.com/can1357/oh-my-pi/pull/16112
+  - fix(ast): retired per-thread wasm parser store after a byte budget by @roboomp in https://github.com/can1357/oh-my-pi/pull/16078
+  - fix(coding-agent): support escaped spaces in context imports by @roboomp in https://github.com/can1357/oh-my-pi/pull/16091
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.12.0...v18.12.1
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.12.1
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

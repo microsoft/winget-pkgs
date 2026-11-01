@@ -1,0 +1,42 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: MayDay.SnowApp
+PackageVersion: 0.4.17
+PackageLocale: zh-CN
+Copyright: 版权所有 (c) 2026 MayMay
+ShortDescription: 面向开发者的桌面应用，将 AI 对话、终端模拟、SSH 远程管理、Git 工具和内置浏览器面板整合到统一的工作空间中。
+Description: Snow App 是一款面向开发者的桌面应用，将 AI 对话、终端模拟、SSH 远程管理、Git 工具和内置浏览器面板整合到统一的工作空间中。它通过 Rust 原生模块处理性能关键型操作，包括 SQLite 存储、AI 流式传输、文件监控和 HTTP 请求。此外还支持 MCP 集成、AI 图像生成、技能系统、Hooks、子代理、代码库语义搜索与 AI 驱动的终端会话。
+Tags:
+- ai
+- codex
+- git
+- mcp
+- ssh
+- 终端
+- 聊天
+ReleaseNotes: |-
+  新功能
+  - OAuth 订阅账号登录：API 设置新增「OAuth 登录」，把订阅账号直接接入为 LLM 渠道——支持 Codex（ChatGPT 订阅）、Anthropic（Claude 订阅）、Antigravity（Google 订阅）与 xAI（Grok 订阅）；在浏览器完成授权后本地回调自动返回（也支持手动粘贴回调地址），渠道自动创建并启用，模型列表由服务商接口拉取，令牌在过期前自动刷新。
+  - 文件审阅标注：文件阅读器新增审阅面板，可对选中文字添加标注（工具栏与右键入口），支持保存、编辑、复制、定位高亮与二次确认删除，单条或全部标注一键填入聊天草稿而不自动发送；标注独立持久化、不写入源文件（SSH 文件标注同样只存本机），以 UTF-16 偏移、选中文字、前后上下文与正文 SHA-256 锚定，内容变化后仅在上下文唯一匹配时重新定位，无法定位时保留标注并禁用定位。
+  - 选区与标注引用进会话：文件阅读器右键「添加到会话」把选中原文连同文件路径与行号编码为引用标签，资源管理器右键「添加到输入框」支持文件与文件夹（Ctrl / Shift 多选）；发送时标签展开为「文件：行号 + 引用原文 + 标注正文」的可读文本，模型直接看到用户选中的内容，而不必自行读取整行；手机远控同步展示这些引用。
+  - 本地文档正文预览：文件阅读器可直接提取 PDF、Word、Excel / ODS 与 PPT 正文阅读（输入 20 MiB、正文 2 MiB 上限，超限明确报错）；读取时校验原编码与 BOM 往返，无法无损回写的文本与文档正文标记为只读预览，保存回调再次拦截，避免预览内容覆盖源文件。
+  - 插件阅读导航与任务历史插槽：插件新增 panels.openFile、panels.openFileDiff 导航动作，消息 Footer 获得生命周期受限的阅读与只读 Diff 导航能力；contributions.messageFooters 可声明 taskHistory，把持久任务结束回复与原始 assistant / tool 记录关联，重开会话时重建只读快照，旧卡片在下一任务运行时保留。
+  - 忙碌发送：任务排队与安全插话：Agent 运行中区分「排队发送」（本轮完整结束后按 FIFO 逐条处理）与「插话发送」（在安全边界追加要求，不中断工具、不另起并行循环），通用设置可选默认行为（默认插话）；发送菜单与快捷键可单次反选，待发送区域限高滚动。
+  改进
+  - 统一流式请求通路：会话摘要与代码库审查复用主对话的 Responses 通路，OAuth 档案的协议头在摘要等辅助请求中同样生效；传输层补全环境变量与系统代理解析。
+  - 终端选区「添加到输入框」浮动按钮跟随鼠标落点，并按面板边界收拢，不再固定停在一角。
+  - 文件变更追踪的租约等待有界：终端命令窗口不被其他会话等待，长时间命令不阻塞其他会话的采集。
+  - 紧凑主题对比度与交互状态优化（#183）。
+  - 插件可声明 panels[].chatInputSettings，独立控制输入工具栏配置齿轮的默认显示与右侧面板开关的存储键。
+  修复
+  - 修复 Responses WebSocket 连接复用串台：同一连接上属于其他响应的迟到事件被丢弃，不再混入当前流；上下文用量快照正确写入用户消息，恢复会话后可回填。
+  - 修复终端工具卡片永久停留在「执行中」：命令写入会话阶段与超时 / 取消同场竞速，管道写满或上一条命令卡住时按超时 / 取消 / 失败收口并终止会话。
+ReleaseNotesUrl: https://github.com/MayDay-wpf/snow-app/blob/HEAD/RELEASE_NOTES_ZH.md#v0417
+Documentations:
+- DocumentLabel: 快速开始
+  DocumentUrl: https://github.com/MayDay-wpf/snow-app/blob/main/docs/zh-CN/1-快速开始.md
+- DocumentLabel: 文档
+  DocumentUrl: https://github.com/MayDay-wpf/snow-app/blob/main/docs/README.md
+ManifestType: locale
+ManifestVersion: 1.12.0

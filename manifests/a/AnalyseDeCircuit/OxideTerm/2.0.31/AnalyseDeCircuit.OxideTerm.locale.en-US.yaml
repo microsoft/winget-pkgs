@@ -1,0 +1,127 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AnalyseDeCircuit.OxideTerm
+PackageVersion: 2.0.31
+PackageLocale: en-US
+Publisher: AnalyseDeCircuit
+PublisherUrl: https://github.com/AnalyseDeCircuit
+PublisherSupportUrl: https://github.com/AnalyseDeCircuit/oxideterm/issues
+Author: AnalyseDeCircuit
+PackageName: OxideTerm
+PackageUrl: https://github.com/AnalyseDeCircuit/oxideterm
+License: GPL-3.0
+LicenseUrl: https://github.com/AnalyseDeCircuit/oxideterm/blob/HEAD/LICENSE
+ShortDescription: Local-first SSH workspace for local shells and remote machines.Zero Electron, zero OpenSSL, zero telemetry, and no app subscription for core SSH workflows.
+Tags:
+- agent
+- ai-terminal
+- bring-your-own-key
+- filemanager
+- mcp
+- rag
+- russh
+- rust
+- sftp
+- ssh-client
+- tauri
+- terminal
+- terminal-emulator
+- tool-calling
+- wslg
+- xterm-js
+ReleaseNotes: |-
+  English
+  OxideTerm 2.0.31 adds independent terminal sync groups and standalone FTP/explicit FTPS connections, moves quick commands into a resizable bottom panel, and improves terminal history, AI interaction, and native window behavior.
+  ⌨️ Terminal Sync Groups and Commands
+  - Replaced global interactive broadcasting with groups of individual terminal panes. Multiple groups can run or pause independently, and input from a pane outside an enabled group no longer broadcasts to that group's members. Separate terminals connected to the same host can belong to different groups; each pane belongs to at most one group.
+  - Added per-pane isolation and resume controls, with the group name and syncing, paused, or isolated state shown above member terminals, including detached windows. Isolation stops both outgoing and incoming synchronized input without removing membership or replaying input afterward.
+  - Kept saved connection groups as templates for initial pane selection. Selecting a template does not start synchronization; new panes are not automatically recruited into an initialized group. Reconnected panes retain their group but remain isolated until manually resumed, and closing the last member disables the group.
+  - Routed quick commands through the invoking pane's active sync group while retaining per-target parameter expansion. The batch sender keeps its explicit target selection; its saved connection groups still select matching terminals independently of interactive isolation, with an explanatory hint in the interface.
+  - Moved quick commands from a floating card into a resizable panel below the terminal toolbar. Preserved categories, search, management, pinning, and parameter entry while keeping the terminal visible above; quick commands and the batch sender retain separate panel state.
+  - Added fuzzy history suggestions, match highlighting, a scrollable candidate list, and visible navigation hints. Selecting candidates keeps them in view; clicking fills the command line without executing, and accepting a fuzzy match replaces the query while handling Unicode input.
+  - Isolated terminal search state and focus per pane so searches in split or detached terminals do not share the wrong query or input target.
+  📁 FTP, FTPS, and File Transfers
+  - Added standalone FTP and explicit FTPS connection creation, saving, editing, and opening through the existing file-transfer interface. Supported directory browsing, file and directory upload/download, file preview and editing, directory creation, renaming, and deletion.
+  - Added direct, global-proxy, and custom-proxy routing for FTP control and passive data connections. Used EPSV with a supported-server fallback to PASV, and kept data connections directed to the configured host. This release supports plain FTP and explicit TLS, not implicit FTPS or active-mode transfers.
+  - Validated FTPS certificates against system trust. Saved passwords use the existing credential store; FTP profiles and selected credentials participate in cloud synchronization and encrypted .oxide import/export under file-transfer connections.
+  - Added cancellation and timeout handling for FTP operations. Uploads use temporary remote files before renaming, downloads stage local data before replacement, and a failed remote rename does not delete the existing destination.
+  - Updated the SFTP dependency to russh-sftp 3.0.0 while retaining OxideTerm's maintained transport patches.
+  🤖 OxideSens and AI Interaction
+  - Made the AI sidebar honor the configured AI submit shortcut, including custom modifier bindings. Plain Enter remains available for newlines when another send binding is selected; composition and visible completion selection do not accidentally submit a message.
+  - Added a sticky question header with a “Back to question” action while reading long conversations. Expanding or collapsing reasoning and tool details preserves the reading position; chat, model-selection, and tool-call controls received more consistent spacing and styling.
+  - Made command approval previews readable and clarified execution guidance to continue authorized work while respecting requests for diagnosis only and the existing approval policy.
+  - Bounded each visible-terminal observation to 30 seconds so missing completion signals no longer hold a single observation open for an extended period. Returning a shell prompt or captured output is distinguished from a confirmed command exit; observation does not interrupt the running command.
+  - Distinguished the local application's operating system from the selected terminal's environment, including SSH, Mosh, Telnet, and serial targets, to avoid treating remote devices as the local machine.
+  🪟 Navigation and Native Interface
+  - Added command-palette searches using multiple keywords in any order, with matching across connection details. Widened the palette as space permits and added a full connection preview for identifying similar entries.
+  - Refined active-session navigation, session-manager search and actions, the welcome screen and shortcut hints, and plugin-manager spacing. Simplified batch-sender controls and improved panel transitions.
+  - Unified floating surfaces and added theme-aware transitions for sidebars, disclosures, menus, tooltips, and segmented controls, respecting reduced-motion settings. Kept connection forms opaque for readability over background images and rendered Markdown blockquotes as one rounded surface.
+  - Fixed detached-window input and window styling, including routing RDP/VNC keyboard and clipboard shortcuts to the window's own session. Fixed an entity re-entry failure while detaching tabs.
+  - Fixed scrolling in the terminal-trigger connection picker.
+  🛠️ Platform Fixes and Validation
+  - Fixed Wayland startup sizing to preserve restored floating-window dimensions while respecting compositor-controlled maximized, fullscreen, and tiled states; state changes are recorded even when pixel dimensions stay the same.
+  - Stopped macOS frame callbacks during window teardown to avoid late rendering against a closed window.
+  - Compressed bundled MapleMono fonts with Zstd and reused application font assets for SVG rendering. Improved missing-character fallback and reduced diagnostics for successful font fallback.
+  - Updated affected interface text across all 11 supported languages. The maintainer ran the GUI before approving release. Before the version bump, application tests passed 775 cases with 7 ignored, and terminal tests passed 218 with 1 ignored; formatting, locale consistency, application checks, and the build also passed. These checks do not establish a complete cross-platform or multi-host runtime matrix.
+  中文
+  OxideTerm 2.0.31 新增独立终端同步组及独立 FTP／显式 FTPS 连接，将快捷命令移至可调整高度的底部面板，并改善终端历史建议、AI 交互和原生窗口行为。
+  ⌨️ 终端同步组与命令
+  - 将全局交互广播改为按具体终端窗格组成的同步组。多个组可独立启用或暂停，组外窗格输入不再广播给该组成员。同一主机的不同终端可加入不同组，每个窗格最多属于一个组。
+  - 新增单窗格隔离与恢复操作，成员终端上方显示组名及同步中、已暂停或已隔离状态，分离窗口同样适用。隔离同时停止发送和接收同步输入，保留成员归属，恢复后不补发隔离期间的输入。
+  - 保留已保存的连接分组作为首次选择窗格的模板。选择模板不会立即开始同步，已初始化的组不会自动吸收新窗格。重连后的窗格保留分组但先隔离，需手动恢复；最后一个成员关闭后停用该组。
+  - 快捷命令按发起窗格所属的活动同步组分发，保留每个目标独立的参数展开。批量发送器继续使用显式目标选择，其已保存连接分组仍匹配对应终端，不受交互同步隔离影响，界面增加了说明。
+  - 快捷命令由悬浮卡片改为终端工具栏下方可调整高度的面板，保留分类、搜索、管理、固定及参数填写，终端内容在上方保持可见；快捷命令与批量发送器分别保留面板状态。
+  - 新增模糊历史建议、匹配高亮、可滚动候选列表和操作提示。键盘选择时保持候选可见，点击只填入命令而不执行；接受模糊匹配时替换查询内容，并处理 Unicode 输入。
+  - 按窗格隔离终端搜索状态与焦点，避免分屏或分离终端共用错误的查询内容或输入目标。
+  📁 FTP、FTPS 与文件传输
+  - 新增独立 FTP 和显式 FTPS 连接的创建、保存、编辑及打开，复用现有文件传输界面。支持目录浏览、文件和目录上传下载、文件预览与编辑、创建目录、重命名及删除。
+  - FTP 控制连接与被动数据连接支持直连、全局代理及自定义代理。优先使用 EPSV，在服务器明确不支持时回退到 PASV，数据连接仍指向配置的主机。本版支持普通 FTP 和显式 TLS，不支持隐式 FTPS 或主动模式传输。
+  - FTPS 使用系统信任验证证书。保存的密码进入现有凭据存储；FTP 配置及选定凭据通过“文件传输连接”参与云同步和加密 .oxide 导入导出。
+  - FTP 操作接入取消及超时处理。上传先写远端临时文件再重命名，下载先写本地临时文件再替换目标；远端重命名失败时不会删除已有目标文件。
+  - 将 SFTP 依赖升级至 russh-sftp 3.0.0，并保留 OxideTerm 维护的传输补丁。
+  🤖 OxideSens 与 AI 交互
+  - AI 侧栏遵循配置的 AI 发送快捷键，支持自定义修饰键组合。选择其他发送组合后，普通回车可用于换行；输入法组字和可见补全项选择不会误发消息。
+  - 阅读长对话时新增问题吸顶栏及“返回问题”操作。展开或折叠思考过程、工具详情时保持阅读位置，并统一聊天、模型选择和工具调用控件的间距与样式。
+  - 改善命令审批预览的可读性，调整执行指引，使 AI 在已有授权范围内继续完成工作，同时遵守仅诊断的请求和现有审批策略。
+  - 将每次可见终端观察限制在 30 秒内，避免缺少完成信号时单次观察长时间不返回。区分提示符恢复、已取得输出和已确认命令退出；观察操作不会中断运行中的命令。
+  - 区分本地应用的操作系统与所选终端环境，包括 SSH、Mosh、Telnet 和串口目标，避免把远端设备当作本机。
+  🪟 导航与原生界面
+  - 命令面板支持任意顺序的多关键词搜索，并匹配连接详情。根据可用空间加宽面板，新增完整连接预览，便于区分相似条目。
+  - 调整活动会话导航、会话管理器搜索与操作、欢迎页和快捷键提示，以及插件管理器间距。简化批量发送器控件并改善面板切换动画。
+  - 统一浮动界面材质，为侧栏、折叠区、菜单、提示和分段控件加入遵循主题及减少动态效果设置的过渡。连接表单保持不透明，改善背景图片上的可读性；Markdown 引用块按完整圆角区域渲染。
+  - 修复分离窗口的输入与窗口样式，包括将 RDP／VNC 键盘及剪贴板快捷键发送到该窗口自身的会话；修复分离标签时的实体重入错误。
+  - 修复终端触发器连接选择器的滚动问题。
+  🛠️ 平台修复与验证
+  - 修复 Wayland 启动时浮动窗口恢复尺寸的问题，同时遵循合成器对最大化、全屏和平铺窗口的尺寸控制；即使像素尺寸不变，也记录窗口状态变化。
+  - macOS 窗口销毁时停止帧回调，避免窗口关闭后继续渲染。
+  - 使用 Zstd 压缩内置 MapleMono 字体，并让 SVG 渲染复用应用字体资源；改善缺字回退，减少成功字体回退产生的诊断信息。
+  - 同步更新涉及的全部 11 种语言文案。维护者已运行 GUI 并批准发布。版本升级前，应用测试通过 775 项、忽略 7 项，终端测试通过 218 项、忽略 1 项；格式、语言一致性、应用检查及构建亦通过。这些检查不代表完成了全部平台及多主机运行场景验证。
+  📥 Download for your system
+  ────────────────┬─────────────────────────────────┬─────────────────────────────────
+  Operating system│x64                              │ARM64
+  ────────────────┼─────────────────────────────────┼─────────────────────────────────
+  Windows         │Setup (.exe)                     │Setup (.exe)
+  ────────────────┼─────────────────────────────────┼─────────────────────────────────
+  macOS           │DMG (Intel)                      │DMG (Apple Silicon)
+  ────────────────┼─────────────────────────────────┼─────────────────────────────────
+  Linux           │AppImage · DEB · RPM             │AppImage · DEB · RPM
+  ────────────────┴─────────────────────────────────┴─────────────────────────────────
+  Portable archives, signatures, and sha256sums.txt remain available in the release assets below.
+  📌 Installation Tips / 安装提示
+  macOS
+  Downloaded .dmg files may be quarantined by Gatekeeper. Run in Terminal:
+  xattr -cr ~/Downloads/OxideTerm_*.dmg
+  # or after install / 或安装后
+  xattr -cr /Applications/OxideTerm.app
+  Windows
+  If SmartScreen warns, click More info -> Run anyway.
+  若 SmartScreen 弹出警告，点击 更多信息 -> 仍要运行。
+  Linux
+  # AppImage
+  chmod +x OxideTerm_*_linux_*.AppImage && ./OxideTerm_*_linux_*.AppImage
+  # Debian/Ubuntu
+  sudo dpkg -i OxideTerm_*_linux_*.deb && sudo apt-get install -f
+ReleaseNotesUrl: https://github.com/AnalyseDeCircuit/oxideterm/releases/tag/v2.0.31
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,47 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.9.1
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+Tags:
+- account-manager
+- antigravity
+ReleaseNotes: |-
+  - [Model Routing & Deprecated Model Seamless Redirect] Fix Stale gemini-3.1-flash-lite Redirect, Restore Layer-3 Background Summary, and Route Retired 2.5 Family to gemini-3.6-flash-medium (Fixes #3577, Thanks to @Xyloz3n):
+    - Correct gemini-3.1-flash-lite Direct Passthrough: Permanently removed the hardcoded redirect that sent healthy gemini-3.1-flash-lite requests to the retired gemini-2.5-flash-lite. Restored 1:1 passthrough to upstream's active 1M-context MODEL_PLACEHOLDER_M50, eliminating upstream 429/503 errors and serving requests as 200 OK.
+    - Revive internal-background-task: Retargeted the internal virtual model internal-background-task and background task constants in OpenAI/Gemini handlers from dead 2.5 models to the fast, healthy gemini-3.1-flash-lite (1M context), fully restoring Layer-3 conversation history compression and background summarization.
+    - Purge Dead Models from Advertised Catalog: Removed the entirely retired 2.5 family (gemini-2.5-pro, gemini-2.5-flash, gemini-2.5-flash-thinking, gemini-2.5-flash-lite) and gemini-3.5-flash-lite from get_supported_models(), is_model_compliant_with_baseline, and frontend menus to eliminate dead options, while adding gemini-3.1-flash-lite to the compliant catalog.
+    - Seamless In-Flight Redirects for Deprecated Names: Retained internal backwards-compatible routing rules for legacy clients and scripts: gemini-2.5-flash, gemini-2.5-flash-thinking, and gpt-3.5-turbo smoothly redirect to gemini-3.6-flash-medium; gemini-2.5-flash-lite and gemini-3.5-flash-lite redirect to gemini-3.1-flash-lite; and gemini-2.5-pro redirects to gemini-pro-agent.
+  - [Downstream SSE Heartbeat Tightening] Reduce SSE Keep-Alive Interval to 3s During Deep Thinking (PR #3578, Thanks to @EricZhou05):
+    - 3s Stream Heartbeat: Tightened downstream OpenAI-compatible SSE heartbeat interval to 3 seconds, preventing client-side read timeouts and connection drops during extended reasoning and deep-thinking phases.
+  - [Documentation & Metadata Alignment] Fix README Typos and Synchronize Bilingual Content (PR #3579, Thanks to @EricZhou05):
+    - Bilingual Sync: Fixed typos in documentation, aligned Chinese and English README content, and refreshed metadata.
+
+  - [模型路由治理与淘汰模型平滑重定向] 修复 3.1-flash-lite 误重定向、拯救 Layer-3 后台摘要与压缩并将已退役 2.5 系列平滑重定向至 3.6-flash-medium (Fixes #3577, Thanks to @Xyloz3n):
+    - 纠正 gemini-3.1-flash-lite 错误降级与健康直传：彻底移除核心映射表中将健康存活的 gemini-3.1-flash-lite 错误重定向至已故 gemini-2.5-flash-lite 的硬编码。恢复为其自身标准直传（出站 1:1 透传上游具备 1M 上下文的 MODEL_PLACEHOLDER_M50），彻底消除由此引发的 429 与 503 报错，上游实测 200 OK。
+    - 拯救 internal-background-task 后台任务：将内部虚拟模型 internal-background-task 以及 OpenAI/Gemini 适配器中的后台任务模型常量从已下线的 2.5 系列重定向至健康高效且具备 1M 上下文的 gemini-3.1-flash-lite，彻底恢复因 2.5 系列退役而瘫痪的 Layer-3 对话历史摘要与长上下文压缩功能。
+    - 宣传目录与合规基准线净化：从内置模型列表 get_supported_models()、基准线过滤器 is_model_compliant_with_baseline 及前端模型菜单中彻底剔除上游已全线 503 的 2.5 全系列（gemini-2.5-pro、gemini-2.5-flash、gemini-2.5-flash-thinking、gemini-2.5-flash-lite）以及 gemini-3.5-flash-lite，杜绝死菜单项与无效暴露；同时将健康的 gemini-3.1-flash-lite 纳入支持列表与合规基准线。
+    - 已淘汰模型内部平滑重定向：内部完整保留对已淘汰旧模型的重定向兜底，保障历史客户端与自动化脚本平稳运行：gemini-2.5-flash、gemini-2.5-flash-thinking 与 gpt-3.5-turbo 重定向至 gemini-3.6-flash-medium；gemini-2.5-flash-lite 与 gemini-3.5-flash-lite 重定向至 gemini-3.1-flash-lite；gemini-2.5-pro 重定向至 gemini-pro-agent；前端路由预设同步对齐。
+  - [下游 SSE 心跳保活收紧] 缩短流式思考心跳间隔至 3 秒防止长推理连接中断 (PR #3578, Thanks to @EricZhou05):
+    - 3 秒流式心跳注入：将下游 OpenAI 协议流式输出中的 SSE 心跳保活间隔缩短至 3 秒，防止客户端在长思考/深度推理期间因长久无响应而提前断开连接。
+  - [文档与元数据排版校准] 修复 README 错别字并对齐中英双语内容 (PR #3579, Thanks to @EricZhou05):
+    - 双语文档对齐：修复 README 文档排版错别字，对齐中英双语内容并更新相关元数据。
+  What's Changed
+  - docs: fix README typos, align bilingual content and update metadata by @EricZhou05 in https://github.com/lbjlaq/Antigravity-Manager/pull/3579
+  - fix(proxy): reduce downstream SSE heartbeat interval to 3s to prevent client disconnect during deep thinking by @EricZhou05 in https://github.com/lbjlaq/Antigravity-Manager/pull/3578
+  Full Changelog: https://github.com/lbjlaq/Antigravity-Manager/compare/v4.9.0...v4.9.1
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.9.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

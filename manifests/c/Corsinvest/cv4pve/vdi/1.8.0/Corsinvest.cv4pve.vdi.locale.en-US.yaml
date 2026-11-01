@@ -1,0 +1,115 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Corsinvest.cv4pve.vdi
+PackageVersion: 1.8.0
+PackageLocale: en-US
+Publisher: Corsinvest Srl
+PublisherUrl: https://www.corsinvest.it/
+PublisherSupportUrl: https://www.corsinvest.it/cv4pve
+PrivacyUrl: https://www.corsinvest.it/privacy
+Author: Corsinvest Srl
+PackageName: cv4pve-vdi
+PackageUrl: https://github.com/Corsinvest/cv4pve-vdi
+License: MIT
+LicenseUrl: https://github.com/Corsinvest/cv4pve-vdi/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2025 Corsinvest Srl
+CopyrightUrl: https://github.com/Corsinvest/cv4pve-vdi/blob/master/LICENSE.md
+ShortDescription: VDI client for Proxmox VE — SPICE and RDP remote console launcher
+Description: |-
+  cv4pve-vdi is a desktop VDI client for Proxmox VE that provides a graphical
+  interface to browse, filter and connect to virtual machines and containers
+  via SPICE and RDP — without opening the Proxmox web UI.
+
+  Features:
+  - Card and list view for VM/CT browsing
+  - SPICE console launch via remote-viewer
+  - RDP launch via mstsc or xfreerdp
+  - VM/CT power control (Start / Shutdown)
+  - Real-time CPU and RAM usage bars
+  - Auto-refresh every 10 seconds
+  - Filter by node, status, type and tags
+  - Multi-host support for multiple clusters
+  - Light and Dark themes
+Moniker: cv4pve-vdi
+Tags:
+- corsinvest
+- proxmox
+- proxmoxve
+- rdp
+- remote-desktop
+- spice
+- vdi
+- virtualization
+ReleaseNotes: |-
+  Added
+  - Simplified and Traditional Chinese UI translations, in the language picker of the login window (#42)
+  Documentation
+  - Documentation site. The documentation moved from Markdown files in the repository to corsinvest.github.io/cv4pve-vdi: getting started, permissions, how it connects, the main window, SPICE and VNC, services, launchers, guest setup, kiosk mode, settings and languages. Every page was checked against the code
+  - New product icon for the documentation site and the README
+  - Services and Settings pages follow the code: the IP address of containers and the NIC matching, the backup of an unreadable configuration
+  - No em or en dashes in the documentation, the code comments and the interface texts (window titles use a middle dot); documentation theme 2.6.1
+  Fixed
+  - A node, pool or tag filter whose resource no longer exists kept its checkbox and its active selection, so the list stayed filtered by something that is gone: stale checkboxes and filters are now removed at the next refresh. Pool and tag checkboxes are built from the same guests the list shows, so a stopped guest you can start keeps its pool and tag filters, and gets its checkboxes too (#66, thanks @skygunner)
+  - An unreadable configuration file was silently replaced by the defaults on the next save, losing clusters, VM services and stored credentials: it is now kept as config.bak-<timestamp> and the login window says so. The configuration is written to a temporary file and moved into place, so a crash mid-write no longer truncates it; on Linux and macOS the temporary and backup files are created readable only by the user (#48, thanks @skygunner)
+  - View documentation in Settings → Kiosk opened docs/KIOSK.md on GitHub, removed with the move to the documentation site; it now opens the Kiosk mode page. Documentation in the ⋮ menu opens the documentation site instead of the README
+  - The viewer path pointed to virt-viewer, installed next to remote-viewer by the same package, and every console opened the misleading No running virtual machine found dialog: cv4pve-vdi now uses the remote-viewer in the same folder, and warns only when it is missing. A SPICE viewer that fails to start is reported instead of ignored (#41)
+  - The command line of a launcher, with the password it may contain, is no longer printed to the console; the temporary Windows Credential Manager entry is removed also when the program fails to start (#44)
+  - Add selected and Cancel in the Discover dialog did not close it (#45)
+  - Editing a built-in launcher lost its icon, and changing only the icon was not saved (#46)
+  - A failing Start or Shutdown closed the application; now the error is shown. A failed guest agent ping no longer skips the update of that VM (#47)
+  - An IP address from the guest agent or the IP override that is not a host name or address is rejected before starting a launcher, so a guest cannot inject arguments into its command line (#49)
+  - The folder button next to the viewer path showed the raw text SelectSpiceViewer (#50)
+  - The viewer messages are translated in every language, and point to Settings → Launchers, where the viewer path is set
+  - Editing a cluster in Settings → Clusters deleted the services configured on its VMs, with their credentials
+  - Reset all built-ins to default in Settings → Launchers also deleted the custom launchers, although the confirmation says they are kept
+  - Leading and trailing spaces were removed from the password of a service with Manual credentials
+  - Services on a container never found its IP address: it was asked to the QEMU guest agent, which containers do not have. It now comes from the container interfaces (VM.Audit is enough)
+  - The IP address of a guest running Docker could be a Docker bridge (172.17.0.1, ...) instead of the real NIC: the interface with the MAC of a NIC configured in Proxmox VE is now used first
+  - The tag filter kept every guest without tags
+  - Login with two-factor authentication (TOTP or a recovery key) never worked on Proxmox VE 7 and later: the code is now sent as the answer to the TFA challenge (Corsinvest.ProxmoxVE.Api.Extension 9.2.4)
+  - The SPICE audio and USB badges never showed for VMs configured from the Proxmox VE web interface, which can leave out the audio driver (SPICE is the default) and writes a SPICE USB port as a bare spice; a stopped VM with a VirtIO-GPU display was not recognised as SPICE
+  - A privilege removed on a guest or pool (for example with the NoAccess role) still counted when a parent path granted it: cv4pve-vdi now uses the privileges of the most specific path, as Proxmox VE does
+  - The SPICE proxy of a cluster accepted host:port and https:// addresses that Proxmox VE rejects at every SPICE console: it now takes only an IP address or a host name, as its hint says
+  - A node with no guest left by the filters still showed its header, and the "no results" message never appeared
+  - After Switch user the previous window stayed in memory, with its session and password, and kept checking for updates: N switches meant N update checks. The update menu item opened the release page once per check (part of #51)
+  - The launcher list was read from disk once per guest at every redraw (part of #51)
+  Changed
+  - The application and window icon is the cv4pve-vdi product icon, as on the documentation site, instead of the Corsinvest logo
+  - Updated Corsinvest.ProxmoxVE.Api.Extension to 9.2.4, whose SPICE helpers read the display, audio, USB, folder sharing and monitors of a VM
+  - Status, guest agent and SPICE are icon pills on one row of the card and of the list, with the details in the tooltip. The SPICE pill shows audio, USB, folder sharing and the number of monitors; the guest agent is grey, not red, for a stopped VM
+  - Faster filtering on large clusters: the search box filters once typing pauses instead of on every keystroke, Reset rebuilds the view once, and a refresh redraws at most twice a second while SPICE and OS details load
+  - Project metadata, symbols (Source Link) and code style aligned with the other cv4pve tools
+  What's Changed
+  - ci: use shared cv4pve-tools CI workflow and declare publish permissions by @franklupo in #43
+  - docs: documentation site with the shared cv4pve theme by @franklupo in #52
+  - ci: use shared cv4pve-tools docs workflow by @franklupo in #53
+  - Align project metadata and symbols with the cv4pve tools by @franklupo in #54
+  - fix: point the documentation links to the documentation site by @franklupo in #55
+  - docs: new screenshots of cv4pve-vdi 1.7.1 by @franklupo in #56
+  - fix: remove credential-leaking launcher log and harden temporary vault cleanup by @skygunner in #44
+  - fix: close discover-services dialog when Add/Cancel is clicked by @skygunner in #45
+  - fix: preserve launcher icon through merge and override detection by @skygunner in #46
+  - fix: handle power action failures and faulted agent pings by @skygunner in #47
+  - fix: reject non-host {ip} values before launcher interpolation by @skygunner in #49
+  - fix: add missing SelectSpiceViewer localization key by @skygunner in #50
+  - fix: validate viewer path and surface real viewer launch errors by @skygunner in #41
+  - fix: translate the viewer messages and point them to Settings → Launchers by @franklupo in #57
+  - feat: add Simplified and Traditional Chinese UI localization by @skygunner in #42
+  - fix: keep VM services on cluster edit and custom launchers on reset by @franklupo in #58
+  - chore: use the cv4pve-vdi product icon for the application by @franklupo in #59
+  - fix: container IP, NIC matching, filters and window lifetime by @franklupo in #60
+  - ci: drop the ignored build input from the shared CI call by @franklupo in #62
+  - chore(docs): theme 2.3.0 by @franklupo in #63
+  - perf: filter once typing pauses and rebuild less during refresh by @franklupo in #64
+  - fix: atomic config saves and backup of unreadable config by @skygunner in #48
+  - docs: remove em dashes from docs, comments and UI texts; theme 2.6.1 by @franklupo in #67
+  - fix: SPICE, agent and status pills; permissions and SPICE proxy (SDK 9.2.4) by @franklupo in #68
+  - fix: remove filter checkboxes whose node/pool/tag no longer exists by @skygunner in #66
+  - chore: release 1.8.0 by @franklupo in #65
+  New Contributors
+  - @skygunner made their first contribution in #44
+  Full Changelog: v1.7.1...v1.8.0
+ReleaseNotesUrl: https://github.com/Corsinvest/cv4pve-vdi/releases/tag/v1.8.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

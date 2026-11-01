@@ -1,0 +1,103 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Mozilla.sccache
+PackageVersion: 0.18.0
+PackageLocale: en-US
+Publisher: Mozilla
+PublisherUrl: https://github.com/mozilla
+PublisherSupportUrl: https://github.com/mozilla/sccache/issues
+PackageName: sccache
+PackageUrl: https://github.com/mozilla/sccache
+License: Apache-2.0
+LicenseUrl: https://github.com/mozilla/sccache/blob/HEAD/LICENSE
+ShortDescription: Sccache is a ccache-like tool. It is used as a compiler wrapper and avoids compilation when possible. Sccache has the capability to utilize caching in remote storage environments, including various cloud storage options, or alternatively, in local storage.
+ReleaseNotes: |-
+  sccache 0.18.0
+
+  Summary
+  sccache 0.18.0 is a broad correctness and coverage release: a lot of compiler flags that used to
+  force a cache miss are now understood, several cache-key and multi-level storage bugs are fixed,
+  and the Azure backend gained passwordless authentication.
+  Highlights:
+  - Cache-key correctness: the assembler gcc/clang would actually invoke is now part of the cache
+    key, so two toolchains with different binutils can no longer hand each other the wrong object
+    file (#2843). SCCACHE_BASEDIRS now also strips base directories from the compiler arguments,
+    so flags like -ffile-prefix-map=/home/user/project=. stop tying an entry to one checkout
+    (#2840).
+  - MSVC/clang flag coverage: support for /openmp:llvm, the /fsanitize*, /fsanitize-coverage*
+    and /fno-sanitize* families, /feature, arm64EC and fastfail, /d20bforceinline, and a large
+    batch of other flags (#2807, #2830, #2831, #2832), plus more clang CLI options (#2834). gcc now
+    marks flags as TooHard when they would require caching something else (#2833).
+  - CUDA: nvcc dryrun parsing works with CUDA 13.3 (#2722), escaped quotes in Windows dryrun
+    lines are protected before backslash flattening (#2811), and the
+    --diag-error/--diag-suppress/--diag-warn family is accepted (#2816).
+  - Multi-level cache: a chain with any writable level is writable again — a single read-only
+    level no longer makes the whole storage read-only (#2778) — and reads are no longer issued twice
+    (#2835).
+  - Azure: Microsoft Entra ID (passwordless) authentication for the Azure Blob backend, for
+    storage accounts that disable shared-key access (#2802).
+  - Distributed compilation: rlibs are no longer trimmed from crates that also emit a cdylib,
+    which made those jobs fail on the build server (#2839).
+  - Process handling: the jobserver is no longer handed to children that can't use it, which
+    restores the posix_spawn fast path for child spawns (#2827), and daemonization now uses an
+    allow-list for inherited file descriptors, fixing make deadlocks caused by leaked jobserver FDs
+    (#2841).
+  - MSRV is now 1.91.0 (#2793).
+  Welcome to 11 new contributors!
+
+  Features
+  - feat: add Microsoft Entra ID (passwordless) auth for the Azure Blob backend by @babrekel in #2802
+  - gcc, clang: make the assembler part of the cache key by @glandium in #2843
+  - Strip basedirs from the compiler arguments too by @avikivity in #2840
+  - cache: allow skipping capability checks by @Xuanwo in #2822
+  - Optimize child process spawns by skipping job server configs by @rnk in #2827
+
+  Compiler support
+  - feat: add support for MSVC's /d20bforceinline. by @AJIOB in #2807
+  - msvc: support arm64EC and fastfail flags by @AJIOB in #2830
+  - msvc: backport flags support by @AJIOB in #2831
+  - msvc: support lots of flags by @AJIOB in #2832
+  - clang: support more CLI options by @AJIOB in #2834
+  - gcc: mark flags as TooHard if need to cache something else by @AJIOB in #2833
+  - nvcc: accept the --diag-error/--diag-suppress/--diag-warn family by @Kataglyphis in #2816
+
+  Fixes
+  - Fix nvcc dryrun parsing for CUDA 13.3 by @mbrobbel in #2722
+  - nvcc (Windows): protect escaped quotes in dryrun lines before flattening backslashes by @Kataglyphis in #2811
+  - multilevel: a chain with any writable level is writable by @tycho in #2778
+  - cache: avoid duplicate multilevel reads by @zfaustk in #2835
+  - Resolving always-false conditional making some compilers miss for preprocessor checks by @Joldiges in #2824
+  - dist: refuse to trim rlibs from crates that also emit a cdylib by @gaetschwartz in #2839
+  - daemonize: use an allow-list approach to inherited FDs by @schopin-mozilla in #2841
+
+  Dependencies
+  - Bump opendal to 0.58.1 and fix fallout (fixes local GCS cache usage) by @flip1995 in #2715
+  - Update shlex dependency to version 2 by @musicinmybrain in #2836
+  - Bump MSRV to 1.91.0 by @flip1995 in #2793
+
+  Tests & CI
+  - Fixed hardcoded binary path in test by @ranger-ross in #2790
+  - ci: dump sccache logs on integration failures by @JalenBuildsHub in #2851
+  - tests/integration: replace MinIO with Silo by @avikivity in #2853
+
+  Cleanup
+  - Add an agent file by @sylvestre in #2812
+  - chore: fix typo in comment by @AJIOB in #2829
+  - Release 0.18.0 by @sylvestre in #2848
+
+  New Contributors
+  - @mbrobbel made their first contribution in #2722
+  - @flip1995 made their first contribution in #2793
+  - @babrekel made their first contribution in #2802
+  - @Kataglyphis made their first contribution in #2811
+  - @schopin-mozilla made their first contribution in #2841
+  - @Joldiges made their first contribution in #2824
+  - @tycho made their first contribution in #2778
+  - @JalenBuildsHub made their first contribution in #2851
+  - @zfaustk made their first contribution in #2835
+  - @gaetschwartz made their first contribution in #2839
+  - @rnk made their first contribution in #2827
+ReleaseNotesUrl: https://github.com/mozilla/sccache/releases/tag/v0.18.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

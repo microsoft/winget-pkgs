@@ -1,0 +1,72 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: muutot.Clipboard
+PackageVersion: 1.6.0
+PackageLocale: zh-CN
+Publisher: muutot
+PublisherUrl: https://github.com/muutot
+PublisherSupportUrl: https://github.com/muutot/Clipboard/issues
+PackageName: Clipboard
+PackageUrl: https://github.com/muutot/Clipboard
+License: AGPL-3.0
+LicenseUrl: https://github.com/muutot/Clipboard/blob/HEAD/LICENSE
+ShortDescription: 高性能 · 本地优先 · 全平台剪贴板管理器。
+Description: Clipboard Desktop 是一款高性能、跨平台、本地优先的剪贴板管理工具。它在后台静默运行，持续记录剪贴板历史；通过全局热键（默认 Alt+V）一键唤起，支持全文搜索（含中文分词）、图片 OCR 文字识别、收藏、编辑、快速粘贴等操作。支持文本、链接、图片、文件四种内容类型，智能内容识别与富文本带格式粘贴，Tantivy 全文检索引擎与 N-gram 中文分词，PP-OCR 本地离线文字识别。所有数据存储在本地，不包含任何遥测或上传行为，OCR 完全离线运行，无需联网。
+Tags:
+- 剪贴板
+ReleaseNotes: |-
+  Clipboard Desktop v1.6.0
+  悬浮速贴面板、自动标签规则、快捷键集中管理与一轮稳定性修复
+  Released: 2026-09-16
+
+  悬浮速贴面板
+  - 后端托管窗口 — 悬浮窗由后端创建管理，主窗/悬浮窗切换与全局热键联动 | 3a9f61d 5572465
+  - 速贴面板 — 常置顶窄条，全部/收藏快速复制，默认位置与切换快捷键可配置 | f611f41 5c26014
+  - 首绘与拖拽 — 隐藏构建后挂载揭示避免白屏卡死，透明窗口由主题 CSS 绘制，手动 header 拖拽（pointer capture、空隙 startDragging、按钮感知命中）| 350f5ce e8886bd d93e914 2f6dc46 0e6f1e6 150a21b
+  - 行为对齐 — 悬浮切换镜像主窗显隐，构建前先隐藏主窗以匹配托盘条件，列表加载时保持可见并丢弃过期加载，切换筛选清空列表、按行守卫复制 | 2ec1005 20f1d9b fe7a211 c070ffc 4aaf24f
+
+  快捷键与托盘
+  - 默认绑定集中管理 — 默认键位收敛到共享 keyboard-defaults.json，主窗切换默认 Alt+C、悬浮切换默认 Alt+V，缺失默认动作自动回填 | 6209014 1cfb348 8b96fe5 fdfefc2 965c818
+  - 被占用组合键可视 — OS 拒绝的组合键跳过并记日志，经 hotkey-registration-failed 事件在设置 UI 提示冲突；单个失败不再拖垮全部全局热键 | 95dc881 0480772
+  - 热键管线 — 全局/窗口分发统一到动作注册表，消息循环就绪握手后再 stop-join，stop 等待与超时收敛 | 71d2e58 09f0343 4043fb2 440c8ca 9bc8067 0e94c0a 79f2fb6
+  - 托盘 — 最近条目快速复制子菜单，历史分页填满文本子菜单，菜单刷新移出主线程，暂停状态多源同步，剪贴板 burst 下防抖重建 | a0ada8d 8a4ba53 a0fdbcb 7ccd105 8ba9233 da340b6
+
+  自动标签与复制
+  - 自动标签规则 — 设置新增可配置的自动标签规则区，采集时按配置打标，规则按持久化形态校验 | 4d10866 70fc153 f38dd9c 7569d42
+  - 复制 — 媒体源文件复制与复制路径动作，粘贴恢复原始文件名，重拷内容保留上次文件名，批量复制全文而非截断标题 | c020bc5 fd5fb0f b80b91b bd272a5
+  - 平台 — macOS 从粘贴板读取 Finder 文件路径，Linux 经 freedesktop 解析应用图标，非 Windows 监控支持图片/文件采集，文件 URI 解码并跳过远端主机 | 4889d27 16b8914 e48a1a7 cf58947 cfd4552
+  - 本地 API — 进程内 CLI 复制先标记自触发，Unix 下本地 API token 文件仅属主可读写 | 96e6257 137f2da
+
+  稳定性修复
+  - 采集与缩略图 — 监控线程 panic 落盘日志并丢弃已死的隐私事件，静默死亡后允许重启，缩略图队列先排序再启动并始终停止 worker，spawn 错误返回而非 panic | 0c35125 d9dfd60 615ac4e 6c6c84f b306d9f
+  - 关闭流程 — 毒化锁可恢复以保证每个 worker 停止，自动同步 stop 等待收敛，锁状态消息不再重复 poison 后缀 | 7e960c9 0879b52 756c835 9a7ab77
+  - 存储 — 容量与截断告警仅统计可驱逐行，VACUUM INTO 路径不再翻倍反斜杠，数据目录迁移可重试，读写改用 immediate 事务，tagged 插入保持 item_tags 对齐，编辑文本清陈旧富内容，手动清理沿用孤儿文件宽限期 | b49b66a 7a988d0 956afbc 616e636 361559b c36af68 c9454c6 149857e f5c9dd5
+  - 搜索与列表 — 日期区间按日历算术处理 DST，本地日期边界失效缓存，列表偏移与单页上限解耦，虚拟高度复用前校验签名，分页到 trim 上限即停 | e6f4829 ad05ff8 68b9b54 5e44f1e 4551daa
+  - OCR — 详情页到达终态即停轮询，轮询按派生 id 与类型守卫，状态加载脱钩止 IPC 循环，模型选择同步配置变体，安装检查校验摘要，OAR_HOME 串行化，tesseract 识别加超时，worker 重启前先放配置锁 | d45078b deb3d2d 60e6a17 254ebc1 d9513d3 9f53890 d0c1828 4b80254 8c000b0
+  - 同步 — 资源字节上下限收敛到可用窗口，空文件路径回退 resource_path，历史 GC 跳过非 segment 键 | 87f99d6 a476324 de0cdbf
+  - 前端状态 — 条目更新扇出到详情视图与搜索缓存，删除/批量走 four-copy 漏斗，批量流保持搜索缓存与详情，方向键不出可编辑区，空选落首行，详情 tab/文件重置按条目 id，DatePicker 月份与星期头对齐 | 059b0b3 8b1e37b 8c9355f ec3ff19 2259476 156b9e0 44ae534 b89830a 3e957ca
+  - 审计 — 2026-09-14 审计的高/中项、低危确认项与存疑可复现项均已处理 | 345a96f 77c817a 3c4cd5b
+  - 构建修复 — 悬浮窗 transparent 仅在非 macOS 启用，修复 macOS E0599 编译失败 | b831691
+
+  设置面板重构
+  - 通用面板拆分 — 巨型 GeneralSettingsPanel 拆为通用/条目/搜索/窗口四个懒加载子面板，启动与托盘开关收敛到窗口 tab，录制暂停开关归入敏感内容面板 | a505ed4 f824a5d cf4b639 c8f30db
+  - 存储/标签/采集 — 存储上限与工具抽为懒加载面板，采集大小限制归入采集 tab，自动标签规则独立为第二个标签页 | 61f0787 a3c856c 42f41c1 0b4ea40
+  - 反馈打磨 — 同步测试结果进面板反馈而非 toast，测试中禁用按钮并复位状态，窗口配置保存后刷新缓存，开关保存中不再闪烁，主题 tab 描述指向正确 key，搜索结果指向真实渲染面板，子对话框 Esc 不再关窗 | 33e10e9 373d4cc bc2acf2 9050dae e63088e 263acaf df0e7ed 2021641 eb79061 4c507f5 d30dcbd ae65181 2b8c777
+  - 非 Windows 提示 — 录制开关下标注非 Windows 轮询限制 | 9ee7f4a
+
+  前后端重构
+  - 前端 — 主路由拆出 SearchHeader、HistoryList、Toolbar、StatusBar、BulkBar，卡片经单一 snippet 渲染，过滤参数与回收站合并抽为 helper，搜索输入/全局按键走纯动作表，键盘目标守卫抽为带测试 utils，four-copy 同步抽为已测试 utils，粘贴回前台应用逻辑收敛到 clipboard service，invoke 经守卫 helper 漏斗，面板反馈经工厂共享 | ff78f09 abefa2e 162aee3 f81dd8f 8d66ecd c8e7c4d af55d97 892bb63 2590f23 9dc1a74 e76d02f df3d76d 77ecebf 550681e f55ffd7
+  - 详情与卡片 — 日期弹窗与动作行抽为 CardDateDialog/CardActions，快捷动作类型判定收敛到 patterns utils，详情页拆出图片预览/文件预览/详情 tab/OCR tab/编辑动作行，文本编辑补丁经纯 helper 推导 | b8f8fcd 5e927c9 f8106ac 8ae2ec6 d56dce6 7d1c3b2 13db3f6 dbf37ac c0a4e8d
+  - 后端 — 锁样板收敛到 lock_state helper，setter 落盘失败回滚内存值，ppaste 导入 id 按内容哈希派生防跨包覆盖，CSV 导入保留差异媒体行，重命名记录改写托管路径 | 1b393ae 728910d 2a96c19 18d0e40 f5c9dd5
+
+  工程与文档
+  - 文档 — 同步 tombstone 有意不裁剪的原因落盘，设置重构后 skill 引用更新，新窗口须注册 capabilities 记入 pitfalls，悬浮位置/快捷键/拖拽跟进事项与完成态归档，MAINT-01/MAINT-03 经验收标记完成 | 646da63 41d8633 043e0f2 3fd6a44 e15bbb5 2690ebf fb2a31f a73d1e5 018f668
+  - 杂项 — 本地审计产物与 stray 日志纳入 git 忽略，大写 scheme URL 判为链接，macOS 图标提取解析 .app 包 | 0d24a58 61ba019 cfd4552
+
+  构建产物
+  - MSI 安装包：Clipboard_1.6.0_x64_en-US.msi
+  - NSIS 安装包：Clipboard_1.6.0_x64-setup.exe
+ReleaseNotesUrl: https://github.com/muutot/Clipboard/releases/tag/v1.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

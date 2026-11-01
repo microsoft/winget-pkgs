@@ -1,0 +1,45 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: teoslayer.shell.online
+PackageVersion: 0.24.1
+PackageLocale: en-US
+Publisher: Calin Teodor
+PublisherUrl: https://github.com/TeoSlayer
+PublisherSupportUrl: https://github.com/TeoSlayer/shell.online/issues
+Author: Calin Teodor
+PackageName: shell.online
+PackageUrl: https://github.com/TeoSlayer/shell.online
+License: MIT
+LicenseUrl: https://github.com/TeoSlayer/shell.online/blob/main/LICENSE
+Copyright: Copyright © Calin Teodor
+CopyrightUrl: https://github.com/TeoSlayer/shell.online/blob/main/LICENSE
+ShortDescription: A live browser link for any terminal process. Developed by Pilot Protocol.
+Description: Share any terminal process in one command. The process stays on your machine. The CLI prints a browser link, password, and QR code. Terminal traffic is end-to-end encrypted by default. An agent can also observe a session through scoped MCP grants and, when specifically authorized, send input with host acknowledgement, human priority and duplicate protection. See MCP access and its decryption boundary. Control is off by default.
+Moniker: shell-online
+Tags:
+- cli
+- cloudflare-workers
+- collaboration
+- pilot-protocol
+- remote-access
+- terminal
+- tui
+- xterm
+ReleaseNotes: |-
+  A security patch. Upgrade if you share sessions from a machine that runs other programs as you, such as coding agents, MCP servers or install scripts.
+  Security
+  - A session's browser password no longer sits in any process's environment. The machine daemon handed a browser-started session its password in SHELL_ONLINE_E2EE_PASSWORD, and every background session kept it there for its whole life. Any program running as the same user could read it (ps -E, /proc/<pid>/environ). It now goes between shell's own processes over a pipe. Setting SHELL_ONLINE_E2EE_PASSWORD yourself still works as before.
+  - The program a session shares no longer inherits the session's password, name, command or browser request. A shell run inside a browser-started session silently reused the parent's browser password and published the parent's command and name as its own, and shell password rotate run from inside rotated to the same password. The accounts service now also lets only one session claim a browser request.
+  Sessions that are already running keep their old environment until they restart. After upgrading, restart the machine daemon so browser-started sessions use the new handoff.
+
+  Removed
+  - The agent-record transcript added in 0.24.0 is withdrawn. It found a record by the directory the session started in, so sessions started from the same directory could resolve to the same file. The chat reads the screen again. The relay still accepts the reserved opcode, so hosts running 0.24.0 keep their connection.
+
+  Fixed
+  - Chat renderer: messages no longer arrive with a screenful of blank space, new output arrives again after leaving the chat and coming back, a reconnecting device no longer draws the conversation twice, headings with a running clock hold still, and a tool's result is no longer read as part of the prompt above it.
+  - shell ls no longer shows a session whose machine is gone as still running. Its uptime now stops when the machine was last seen.
+  Full notes: CHANGELOG.md
+ReleaseNotesUrl: https://github.com/TeoSlayer/shell.online/releases/tag/v0.24.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

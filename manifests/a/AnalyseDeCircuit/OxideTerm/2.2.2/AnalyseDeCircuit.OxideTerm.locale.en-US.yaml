@@ -1,0 +1,127 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AnalyseDeCircuit.OxideTerm
+PackageVersion: 2.2.2
+PackageLocale: en-US
+Publisher: AnalyseDeCircuit
+PublisherUrl: https://github.com/AnalyseDeCircuit
+PublisherSupportUrl: https://github.com/AnalyseDeCircuit/oxideterm/issues
+Author: AnalyseDeCircuit
+PackageName: OxideTerm
+PackageUrl: https://github.com/AnalyseDeCircuit/oxideterm
+License: GPL-3.0
+LicenseUrl: https://github.com/AnalyseDeCircuit/oxideterm/blob/HEAD/LICENSE
+ShortDescription: Local-first SSH workspace for local shells and remote machines.Zero Electron, zero OpenSSL, zero telemetry, and no app subscription for core SSH workflows.
+Tags:
+- agent
+- ai-terminal
+- bring-your-own-key
+- filemanager
+- mcp
+- rag
+- russh
+- rust
+- sftp
+- ssh-client
+- tauri
+- terminal
+- terminal-emulator
+- tool-calling
+- wslg
+- xterm-js
+ReleaseNotes: |-
+  中文 | English
+  中文
+  OxideTerm 2.2.2 将 ACP 代理适配器、RDP/VNC 引擎和 Mosh 传输移入独立插件，新增 FIDO 安全密钥认证，并启用可持续扩展的 v2 插件市场。语言识别和嵌入语法由插件动态声明，同时完善插件安装、AI 对话、文件预览和连接交互。
+  🧩 插件市场与独立更新
+  - 插件市场切换到 v2：先加载插件摘要，再按需获取各插件的版本历史并校验内容；继续按应用版本和平台选择最高兼容版本。
+  - 新增按名称、最近更新、最近上架排序，记住用户选择。排序作用于完整筛选结果，再进行分页；切换排序时回到第一页，保留搜索和分类条件。
+  - 安装采用队列和单插件状态，分别显示安装中、排队、失败重试和取消排队入口；安装期间仍可搜索、筛选、翻页和添加其他安装任务。
+  - 市场与已安装插件的展开详情显示许可证；插件提供相应地址时，可查看许可证和第三方许可说明。
+  - 缺少、禁用或不兼容的 ACP、RDP、VNC、Mosh 插件会提供明确说明和插件管理入口，避免旧连接升级后只显示“提供器不可用”。
+  🔌 ACP 与远程连接插件
+  - Codex、Claude Code 的 ACP 适配器，以及 RDP、VNC 和 Mosh 的运行程序改为从市场插件加载，独立于主程序更新。原生聊天、远程桌面、终端、连接配置和认证流程继续由应用提供。
+  - ACP 代理通过标准 ACP 直接与主程序通信；RDP/VNC 和 Mosh 也使用各自的专用通信协议。停用、更新或卸载插件时会停止其相关进程和会话。
+  - 删除设置中的 ACP 页面。安装并启用 ACP 插件后自动创建代理配置，无须填写启动命令；工作目录、额外参数和环境变量仍可按需设置。
+  - 支持复用本机已安装的 OpenCode、Antigravity、Cursor、Grok Build、GitHub Copilot CLI、Qwen Code 和 Kimi CLI。此类插件负责发现和启动程序，用户需要先安装对应官方命令行程序并完成登录。
+  - 接入 Cursor 的提问选择和计划确认，支持单选、多选、批准、拒绝及取消，避免代理等待这些交互时停滞。
+  - RDP/VNC 连接底栏与工作区状态栏对齐；SSH 活动会话的展开箭头与其他连接类型统一。Nix 打包同步移除已外置的远程桌面程序。
+  🔐 FIDO 安全密钥认证
+  - 新增 FIDO Security Key 插件入口，支持使用现有 ed25519-sk、ecdsa-sk 私钥文件进行 SSH 认证；应用提供原生 PIN 输入、触摸提示和取消操作。
+  - 签名程序按认证请求启动，通过私有管道通信，校验协议版本和签名，并在取消、超时或插件停用后停止并回收。PIN 和凭据句柄不写入设置或日志，临时缓冲区使用后清理。
+  - 插件不生成安全密钥、不导出设备私钥、不缓存 PIN；请先通过支持 FIDO 的 OpenSSH 生成密钥并将公钥配置到服务器。协议和软件签名路径已有验证，真实设备的触摸、PIN 和 SSH 登录仍需硬件实测。
+  🎨 动态语言支持
+  - 语言插件可声明语言名称、扩展名和精确文件名；宿主动态识别并提供安装入口，后续新增语言不再需要逐个修改主程序中的语言名单。
+  - 安装、启用、停用或更新语言插件后，已打开的编辑器和本地、SFTP 代码预览会刷新语言支持。
+  - 支持插件携带嵌入语法，供 Vue、Svelte 等混合语言文件分别高亮脚本、样式与标记内容。
+  - 市场新增 XML、DTD、INI、Kotlin、Dart、Nix、Julia、Vue、Svelte、Slint，以及 AWK、jq、Justfile、Groovy、Clojure/ClojureScript、Erlang、OCaml、OCaml Interface 和 Typst 等语言插件。Lua、TOML、YAML 继续内置。
+  💬 AI 与工作区体验
+  - AI 工具活动改为紧凑的平面列表，聚合相关工具调用，展示状态、数量和耗时，并可展开查看具体调用与结果；减少逐项卡片占用的空间。
+  - ACP 上下文用量使用代理报告的数据，不再用普通模型对话历史的估算值代替，避免过早显示接近上限的提示。
+  - 动态运行观察放在固定提示前缀之后，保留最新目标、状态和时间信息，同时减少固定提示内容的变化。
+  - 开始页的连接、终端、导入和管理入口统一为按钮，保留最近连接和快捷键入口。
+  - 本地 PDF 预览上限放宽至 100 MiB，本地音视频直接使用原文件播放。其他本地预览仍保留原有大小限制，SFTP 预览限制不变。
+  🛠️ 连接与输入修复
+  - 本地与 SFTP 路径栏按 Enter 默认进入输入的路径；只有方向键明确选择候选后才进入候选目录，Tab 仍可接受补全，避免候选加载快慢改变导航结果。（Issue #659）
+  - 终端右键菜单按实际渲染尺寸定位，在窗口边缘正确调整位置，覆盖缩放显示和插件菜单。（Issue #658）
+  - SSH 交互式认证弹窗使用不透明遮罩，并在等待输入期间暂停连接动画，减少光标和倒计时重绘触发的图形工作。（Issue #612）
+  📌 升级说明
+  - 从旧版升级后，请在插件市场安装并启用需要的 ACP、RDP、VNC、Mosh 插件；原连接配置继续使用。各插件的平台支持与外部程序要求以详情为准。
+  - FIDO 和新增动态语言能力需要 OxideTerm 2.2.2 或更高版本；原生进程插件仍需用户确认本机代码权限。
+  - 插件市场 v1 已永久冻结，原地址、索引内容和对应安装包继续保留。后续插件及版本只更新 v2，旧客户端需升级主程序才能获取新的插件和更新。
+  English
+  OxideTerm 2.2.2 moves ACP adapters, RDP/VNC engines, and Mosh transport into independently updated plugins, adds FIDO security-key authentication, and introduces the extensible v2 marketplace. Plugins can now declare language associations and embedded grammars dynamically, alongside improvements to plugin installation, AI conversations, file previews, and connection interactions.
+  🧩 Marketplace and independent updates
+  - Switched the marketplace to v2: plugin summaries load first, with individual version histories fetched and verified on demand. The client continues to select the highest release compatible with the application and platform.
+  - Added sorting by name, recently updated, and newly listed, with the selection saved. Sorting applies to the complete filtered result before pagination; changing it returns to the first page while preserving search and category filters.
+  - Added an installation queue with individual installing, queued, retry, and cancel-queued states. Search, filters, pagination, and additional installation requests remain available during installation.
+  - Expanded marketplace and installed-plugin details display the license, with links to license text and third-party notices when provided by the plugin.
+  - Missing, disabled, or incompatible ACP, RDP, VNC, and Mosh plugins now show explicit guidance and a plugin-management entry, replacing ambiguous provider-unavailable messages after upgrades.
+  🔌 ACP and remote connection plugins
+  - Codex and Claude Code ACP adapters, plus RDP, VNC, and Mosh executables, now load from marketplace plugins and update independently. The application retains its native chat, remote desktop, terminal, connection profiles, and authentication flows.
+  - ACP agents communicate directly with the application using standard ACP; RDP/VNC and Mosh use their dedicated protocols. Disabling, updating, or uninstalling a plugin stops its associated processes and sessions.
+  - Removed the ACP settings page. Installing and enabling an ACP plugin automatically creates its agent configuration without a startup-command form. Working directory, additional arguments, and environment variables remain optional settings.
+  - Added launchers for locally installed OpenCode, Antigravity, Cursor, Grok Build, GitHub Copilot CLI, Qwen Code, and Kimi CLI. These plugins discover and start the program; users must install and sign in to the corresponding official CLI first.
+  - Integrated Cursor question selection and plan confirmation, including single choice, multiple choice, approval, rejection, and cancellation, so agents can complete these interactions.
+  - Aligned the RDP/VNC footer with the workspace status bar and the SSH session expansion arrow with other connection types. Nix packaging also stops bundling the extracted remote desktop executables.
+  🔐 FIDO security-key authentication
+  - Added integration with the FIDO Security Key plugin for SSH authentication using existing ed25519-sk and ecdsa-sk private-key files, with native PIN, touch, and cancellation prompts.
+  - Starts the signing provider on demand through private pipes, verifies protocol versions and signatures, and stops and reaps it on cancellation, timeout, or plugin retirement. PINs and credential handles are excluded from settings and logs, and temporary buffers are cleared after use.
+  - The plugin does not enroll keys, export device private keys, or cache PINs. Generate keys with FIDO-capable OpenSSH and configure the public key on the server first. Protocol and software-signing paths have been verified; real-device touch, PIN, and SSH login still need hardware validation.
+  🎨 Dynamic language support
+  - Language plugins can declare language names, extensions, and exact filenames. The host discovers these associations and installation entries dynamically, allowing future languages without adding each one to a host-side list.
+  - Open editors and local or SFTP code previews refresh language support when plugins are installed, enabled, disabled, or updated.
+  - Plugins can include embedded grammars so mixed-language files such as Vue and Svelte highlight scripts, styles, and markup separately.
+  - Added marketplace plugins for XML, DTD, INI, Kotlin, Dart, Nix, Julia, Vue, Svelte, Slint, AWK, jq, Justfile, Groovy, Clojure/ClojureScript, Erlang, OCaml, OCaml Interface, and Typst. Lua, TOML, and YAML remain built in.
+  💬 AI and workspace experience
+  - Replaced individual AI tool cards with compact flat activity lists that group related calls, show status, count, and duration, and expand to reveal calls and results.
+  - ACP context usage now uses agent-reported data instead of ordinary model-history estimates, avoiding premature context-limit warnings.
+  - Placed changing runtime observations after the stable prompt prefix, retaining current targets, state, and timestamps while reducing changes to the fixed prompt.
+  - Unified the start page's connection, terminal, import, and management entries as buttons, retaining recent connections and shortcut entries.
+  - Raised the local PDF preview limit to 100 MiB. Local audio and video play from the original files. Other local previews retain their existing limits, and SFTP preview limits are unchanged.
+  🛠️ Connection and input fixes
+  - Enter in local and SFTP path bars now opens the typed path by default. A completion is opened only after explicit arrow-key selection; Tab still accepts completion, so suggestion timing no longer changes navigation. (Issue #659)
+  - Terminal context menus use their rendered size for positioning and correctly adjust at window edges, including scaled displays and plugin menus. (Issue #658)
+  - SSH interactive-authentication dialogs now use an opaque overlay and pause connection animations while awaiting input, reducing graphical work triggered by cursor and countdown redraws. (Issue #612)
+  📌 Upgrade notes
+  - After upgrading, install and enable the ACP, RDP, VNC, or Mosh plugins you need from the marketplace. Existing connection profiles remain usable; consult plugin details for platform support and external-program requirements.
+  - FIDO integration and the new dynamic-language capabilities require OxideTerm 2.2.2 or later. Native process plugins still require approval to run local code.
+  - Marketplace v1 is permanently frozen, with its original URL, index contents, and packages retained. Future plugins and releases are published only to v2; older clients must upgrade the application to receive them.
+  📥 Download for your system
+  ────────────────┬─────────────────────────────────┬─────────────────────────────────
+  Operating system│x64                              │ARM64
+  ────────────────┼─────────────────────────────────┼─────────────────────────────────
+  Windows         │Setup (.exe)                     │Setup (.exe)
+  ────────────────┼─────────────────────────────────┼─────────────────────────────────
+  macOS           │DMG (Intel)                      │DMG (Apple Silicon)
+  ────────────────┼─────────────────────────────────┼─────────────────────────────────
+  Linux           │AppImage · DEB · RPM             │AppImage · DEB · RPM
+  ────────────────┴─────────────────────────────────┴─────────────────────────────────
+  Portable archives, signatures, and sha256sums.txt remain available in the release assets below.
+  插件市场兼容说明
+  插件市场 v1 已冻结，原地址、索引内容和对应安装包持续保留。旧客户端仍可使用冻结目录中的插件，但不会看到后续的新插件和更新；请升级到支持 v2 目录的主程序版本。后续插件、新版本和版本历史仅发布到 v2。
+  Plugin marketplace compatibility
+ReleaseNotesUrl: https://github.com/AnalyseDeCircuit/oxideterm/releases/tag/v2.2.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

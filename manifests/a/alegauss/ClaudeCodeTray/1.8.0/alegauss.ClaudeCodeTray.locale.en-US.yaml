@@ -1,0 +1,66 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: alegauss.ClaudeCodeTray
+PackageVersion: 1.8.0
+PackageLocale: en-US
+Publisher: Alexandre Oliveira
+PublisherUrl: https://github.com/alegauss
+PublisherSupportUrl: https://github.com/alegauss/claude-tray/issues
+Author: Alexandre Oliveira
+PackageName: Claude Code Tray (unofficial)
+PackageUrl: https://github.com/alegauss/claude-tray
+License: Apache-2.0
+LicenseUrl: https://github.com/alegauss/claude-tray/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Alexandre Oliveira
+ShortDescription: Unofficial native Windows tray monitor for Claude Code usage — a crisp DPI-aware icon shows your rate-limit %, projects when you'll run out, turns red before the limit, and celebrates quota resets with on-brand toasts.
+Description: "Claude Code Tray is an unofficial, community-built Windows system-tray monitor for your Claude Code rate-limit usage. It draws a crisp, DPI-aware vector icon showing the current usage percentage with a Task Manager-style fill bar, and projects when you'll hit 100% — a proportional pace line for the weekly window and a burn-rate regression for the 5h session and extra windows — turning the bar vivid red when you're on track to run out before the window resets. Switch which window the icon tracks (session 5h, week 7d, or extra) from the right-click menu. When a window hands your quota back, a bespoke color-coded toast slides up to announce it: Surprise! (early weekly reset), Bonus! (mid-window credit), New week!, and Fresh session! — each toggleable in Settings. A Usage insights (24h) submenu shows a local, price-weighted breakdown of your usage (from subagents, large-context share, and a by-model split) computed from your own Claude Code session transcripts — no extra API calls and never reading message content. The app reuses the OAuth token Claude Code already stores, so there is nothing to configure, and it self-updates from GitHub Releases."
+Moniker: claude-tray
+Tags:
+- anthropic
+- claude
+- claude-code
+- developer-tools
+- dotnet
+- system-tray
+- usage-monitor
+- windows
+ReleaseNotes: |-
+  ## What's new in v1.8.0
+
+  One new notification, plus a window that fits smaller screens.
+
+  ### 🔴 A warning before a limit runs out
+
+  The icon has always turned red when your pace would use up a window before it resets. That only helps if you happen to look at the tray. Now a **red toast says it once**, titled *On pace to run out*. It tells you how long until the window runs out at this pace and when it resets.
+
+  • **Once per window, per reset.** The 5-hour session and the weekly window each get at most one warning per cycle. It does not repeat every poll, and restarting the tray mid-cycle does not send it again.
+  • **The same verdict as the icon.** The toast and the red bar use the same pace line, so you never get a toast without the red icon, or a red icon without the toast.
+  • **Quiet when it would be noise.** No warning in the first tenth of a window, when a pace has nothing behind it yet. No warning for a window that has already hit its limit either, because the icon already says it is blocked.
+  • **On by default**, under **Settings → Notifications → On pace to run out**. Unlike the reset toasts, this one is plain red, with no confetti.
+
+  ### 🖥️ Fits smaller screens
+
+  • **The window fits screens shorter than 960 pixels**, down to 720p. On a short screen it now opens sized and centred to the work area instead of running off the bottom of the screen.
+  • **The Statistics charts size to the window.** The pace and throughput charts grow with a tall window and shrink with a short one, down to a minimum height. Below that the page scrolls, so the axis labels are never clipped.
+
+  ### 🔬 Under the hood
+
+  Nothing here changes what the app does. It changes what can ship broken.
+
+  • **The UI checks drive the real window.** The 3,004-line interaction harness is gone. Every claim it made is now a case run by [winwright](https://github.com/alegauss/winwright)：keyboard input under the tray's own message loop, the right-click menu, the profile switch, the linking plan, the session rows and what each control announces to a screen reader.
+  • **Previews are drawn by the app, not copied off the screen**, so nothing on top of the window can end up in a screenshot, and a popup can be photographed at all.
+  • **The local release script says it did not submit to winget**, and how to submit it, instead of looking like it had.
+
+  ### 🌐 The site
+
+  The site at [alegauss.github.io/claude-tray](https://alegauss.github.io/claude-tray/) now uses the shared alegauss design system, in the same clay colours. Once it is redeployed, Google Analytics loads only if you allow it. The sponsor block uses Viglet's new logos and product names.
+
+  **Install or update:** `winget install alegauss.ClaudeCodeTray`, or download `ClaudeTray-Setup.exe` below. Installed copies offer the update from the tray menu.
+
+  ---
+
+  Unofficial community project, not affiliated with, endorsed by, or sponsored by Anthropic.
+ReleaseNotesUrl: https://github.com/alegauss/claude-tray/releases/tag/v1.8.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

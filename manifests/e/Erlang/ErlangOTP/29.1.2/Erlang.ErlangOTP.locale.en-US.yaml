@@ -1,0 +1,174 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Erlang.ErlangOTP
+PackageVersion: 29.1.2
+PackageLocale: en-US
+Publisher: Ericsson AB
+PublisherUrl: https://www.erlang.org/
+PublisherSupportUrl: https://github.com/erlang/otp/issues
+PackageName: Erlang OTP
+PackageUrl: https://www.erlang.org/downloads
+License: Apache-2.0
+LicenseUrl: https://github.com/erlang/otp/blob/HEAD/LICENSE.txt
+CopyrightUrl: https://github.com/erlang/otp/blob/master/LICENSE.txt
+ShortDescription: Erlang is a programming language and runtime system for building massively scalable soft real-time systems with requirements on high availability.
+Description: Erlang is a programming language and runtime system for building massively scalable soft real-time systems with requirements on high availability.
+Moniker: erlang
+Tags:
+- erlang
+- otp
+- programming-language
+ReleaseNotes: |-
+  Patch Package:           OTP 29.1.2
+  Git Tag:                 OTP-29.1.2
+  Date:                    2026-10-14
+  Trouble Report Id:       OTP-20359, OTP-20360, OTP-20385, OTP-20392,
+                           OTP-20394, OTP-20408, OTP-20415, OTP-20418,
+                           OTP-20420, OTP-20423, OTP-20426, OTP-20427,
+                           OTP-20428, OTP-20437, OTP-20438, OTP-20439,
+                           OTP-20440, OTP-20442, OTP-20444, OTP-20445,
+                           OTP-20447, OTP-20456
+  Seq num:                 CVE-2026-105236, CVE-2026-42789,
+                           CVE-2026-48856, CVE-2026-94200,
+                           CVE-2026-96596, ERIERL-1362, ERIERL-1367,
+                           GH-11620, GH-11691, GH-11702, GH-11709,
+                           GH-11724, GH-11735, GH-11748, GH-11762,
+                           GH-SA-m75x-4vwg-ggjh, GH-SA-q7cq-pfgf-5hr7,
+                           OTP-20155, OTP-20346, PR-11474, PR-11561,
+                           PR-11623, PR-11662, PR-11692, PR-11707,
+                           PR-11708, PR-11719, PR-11720, PR-11727,
+                           PR-11753, PR-11755, PR-11763, PR-11767,
+                           PR-11768, PR-11773, PR-11791, PR-11808,
+                           PR-11823, PR-11824, PR-11825
+  System:                  OTP
+  Release:                 29
+  Application:             compiler-10.0.7, dialyzer-6.0.4, erts-17.1.1,
+                           inets-9.8.1, mnesia-4.27.1, odbc-2.17.2,
+                           public_key-1.21.8, snmp-5.20.6, ssh-6.0.7,
+                           ssl-11.7.8, stdlib-8.1.1
+  Predecessor:             OTP 29.1.1
+  Check out the git tag OTP-29.1.2, and build a full OTP system including documentation. Apply one or more applications from this build as patches to your installation using the 'otp_patch_apply' tool. For information on install requirements, see descriptions for each application version below.
+  POTENTIAL INCOMPATIBILITIES
+  - When the max_channels limit is reached for a port-forwarding channel (direct-tcpip or forwarded-tcpip), the SSH daemon now refuses the individual channel with SSH_MSG_CHANNEL_OPEN_FAILURE and keeps the connection alive, instead of terminating the whole SSH connection. Port-forwarding channels now behave like session channels, which already survived the limit, and this matches OpenSSH. Applications that relied on the connection being closed when the channel limit was reached must instead handle the channel-open failure.
+    Own Id: OTP-20420
+    Application(s): ssh
+    Related Id(s): PR-11708
+
+  compiler-10.0.7
+  The compiler-10.0.7 application can be applied independently of other applications on a full OTP 29 installation.
+
+  Fixed Bugs and Malfunctions
+    Own Id: OTP-20415
+    Related Id(s): GH-11691, PR-11719
+  - Compilation of a function with thousands of clauses would be very slow.
+    Own Id: OTP-20437
+    Related Id(s): GH-11735, PR-11767
+  - Sometimes compiling with deterministic would not guarantee generation of identical BEAM files for every build.
+    Own Id: OTP-20438
+    Related Id(s): GH-11748, PR-11753
+  - A crash in sys_core_fold on native record patterns has been eliminated.
+    Own Id: OTP-20440
+    Related Id(s): GH-11724, PR-11768
+  > __KOMAC_HEADER__ Full runtime dependencies of compiler-10.0.7
+  >
+  > crypto-5.1, erts-13.0, kernel-8.4, stdlib-8.0
+
+  dialyzer-6.0.4
+  The dialyzer-6.0.4 application can be applied independently of other applications on a full OTP 29 installation.
+
+  Fixed Bugs and Malfunctions
+  - Dialyzer will now avoid an infinite loop when multiple nominal types with the same structure are analyzed together.
+    Own Id: OTP-20444
+    Related Id(s): GH-11762, PR-11763
+  > __KOMAC_HEADER__ Full runtime dependencies of dialyzer-6.0.4
+  >
+  > compiler-10.0, erts-12.0, kernel-8.0, stdlib-5.0, syntax_tools-2.0
+
+  erts-17.1.1
+  The erts-17.1.1 application can be applied independently of other applications on a full OTP 29 installation.
+
+  Fixed Bugs and Malfunctions
+  - Two trace sessions that trace garbage_collection on the same process crash the emulator on the first collection.
+    trace_gc() in erl_trace.c builds the GC info list on a temporary heap for the first session and frees it inside the session loop. The next session reuses msg, which now points into freed memory.
+    The memory is now freed after the session loop, which removes the use-after-free.
+    Own Id: OTP-20385
+    Related Id(s): PR-11623
+    Own Id: OTP-20415
+    Related Id(s): GH-11691, PR-11719
+  > __KOMAC_HEADER__ Full runtime dependencies of erts-17.1.1
+  >
+  > kernel-9.0, sasl-3.3, stdlib-4.1
+
+  inets-9.8.1
+  The inets-9.8.1 application can be applied independently of other applications on a full OTP 29 installation.
+
+  Fixed Bugs and Malfunctions
+  - Credentials supplied in the userinfo component of a request URI (http://user:password@host/path) were still sent to the redirect target when httpc followed a cross-origin redirect. The userinfo component is now cleared together with the sensitive headers whenever the redirect target differs in host or port from the original request. Redirects that stay within the same origin are unaffected and still carry the credentials.
+    Own Id: OTP-20456
+    Related Id(s): GH-SA-m75x-4vwg-ggjh, PR-11825, CVE-2026-48856, OTP-20155
+  > __KOMAC_HEADER__ Full runtime dependencies of inets-9.8.1
+  >
+  > erts-14.0, kernel-9.0, mnesia-4.12, public_key-1.13, runtime_tools-1.8.14, ssl-9.0, stdlib-5.0, stdlib-6.0
+
+  mnesia-4.27.1
+  The mnesia-4.27.1 application can be applied independently of other applications on a full OTP 29 installation.
+
+  Fixed Bugs and Malfunctions
+  - Fixed the type specification for mnesia:restore/2, which incorrectly listed the operation restore_tables instead of recreate_tables, causing Dialyzer to reject valid calls and accept invalid ones.
+    Own Id: OTP-20442
+    Related Id(s): PR-11755
+  > __KOMAC_HEADER__ Full runtime dependencies of mnesia-4.27.1
+  >
+  > erts-9.0, kernel-5.3, stdlib-5.0
+
+  odbc-2.17.2
+  The odbc-2.17.2 application can be applied independently of other applications on a full OTP 29 installation.
+
+  Fixed Bugs and Malfunctions
+  - Fix error handling to avoid possible memory issues that could cause odbc port program to fail.
+    Own Id: OTP-20439
+    Related Id(s): PR-11808
+  > __KOMAC_HEADER__ Full runtime dependencies of odbc-2.17.2
+  >
+  > erts-6.0, kernel-3.0, stdlib-2.0
+
+  public_key-1.21.8
+  The public_key-1.21.8 application can be applied independently of other applications on a full OTP 29 installation.
+
+  Fixed Bugs and Malfunctions
+  - Enforce the RFC 5280 basic-constraints CA checks for X.509 version 1 and version 2 certificates during certificate path validation. A v1/v2 certificate carries no extensions and therefore no basicConstraints, so it must never be accepted as a CA; such a certificate is now rejected in issuer position with {bad_cert, missing_basic_constraint} while remaining valid as a leaf. This closes the version-1 path left uncovered by the earlier CVE-2026-42789 fix.
+    Own Id: OTP-20423
+    Related Id(s): PR-11727, CVE-2026-42789
+  > __KOMAC_HEADER__ Full runtime dependencies of public_key-1.21.8
+  >
+  > asn1-5.0, crypto-5.8, erts-13.0, kernel-8.0, stdlib-4.0
+
+  snmp-5.20.6
+  The snmp-5.20.6 application can be applied independently of other applications on a full OTP 29 installation.
+
+  Fixed Bugs and Malfunctions
+  - The SNMP agent no longer fails to answer an SNMPv3 message whose msgUserName matches the configured terminating-discovery trigger_username (by default the empty string) and whose msgAuthoritativeEngineID is the agent's own engine ID. Such a message is not a stage-1 discovery request, but the agent treated it as one and then failed while generating the report, logging a configuration error and discarding the request without responding. The agent now answers it with a usmStatsUnknownUserNames report, as prescribed by RFC 3414, section 3.2. As a consequence of the same change, a message carrying the trigger user name together with an unknown, non-empty engine ID is now answered with a usmStatsUnknownEngineIDs report instead of being silently discarded.
+    Own Id: OTP-20427
+    Related Id(s): ERIERL-1362, PR-11823
+  - The byte-length bounds added in OTP-20346 for varbind values now apply to every integer field decoded by snmp_pdus: the v3 header fields msgID, msgMaxSize and msgSecurityModel, the USM security parameters msgAuthoritativeEngineBoots and msgAuthoritativeEngineTime, and the PDU fields request-id, error-status, error-index, non-repeaters, max-repetitions, generic-trap and specific-trap. Each field accepts at most the number of BER content octets that its type requires, instead of an arbitrary number of octets that were converted into a large integer. An over-long integer is now signalled with an exit rather than a throw. Code that calls the exported snmp_pdus decode functions inside a catch will receive {'EXIT', Reason} where it previously received the thrown term directly. Inside the agent and manager, such a message is now discarded and counted in snmpInASNParseErrs; previously it caused a case_clause failure during message processing.
+    Own Id: OTP-20428
+    Related Id(s): GH-SA-q7cq-pfgf-5hr7, PR-11824, OTP-20346
+  > __KOMAC_HEADER__ Full runtime dependencies of snmp-5.20.6
+  >
+  > asn1-5.4, crypto-4.6, erts-12.0, kernel-8.0, mnesia-4.12, runtime_tools-1.8.14, stdlib-5.0
+
+  ssh-6.0.7
+  The ssh-6.0.7 application can be applied independently of other applications on a full OTP 29 installation.
+
+  Fixed Bugs and Malfunctions
+  - Fixed a bug where SSH CLI sessions using {shell, {shell, start, []}} did not handle latin1-encoded put_chars messages from the Erlang shell. This caused exception output (e.g. "** exception error: ...") to not be displayed on the SSH client, and {unhandled_request, ...} messages to appear on the daemon host.
+    Own Id: OTP-20359
+    Related Id(s): PR-11474
+  - Fixed the following bugs in the SSH application:
+ReleaseNotesUrl: https://github.com/erlang/otp/releases/tag/OTP-29.1.2
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/erlang/otp/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

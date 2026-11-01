@@ -1,0 +1,48 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.10.0.schema.json
+
+PackageIdentifier: Kuddev.Pebrel
+PackageVersion: 1.8.2
+PackageLocale: zh-CN
+ShortDescription: 一款 GPU 加速的 Windows 终端：关闭窗口不杀会话，重新打开，你的 claude 对话原样回来。
+Description: Nebula 是一款 Windows 上的终端模拟器，以 Rust 编写，构建在 GPU 加速渲染内核之上，并围绕一个理念设计：终端会话太宝贵，不该随窗口一起消失。它把 tmux 式的常驻会话模型、玻璃质感界面、AI CLI 感知侧边栏和无需额外配置的 shell 体验组合在一起。
+Tags:
+- claude
+- codex
+- ssh
+- 终端
+ReleaseNotes: |-
+  新增
+  - 新增：Windows 资源管理器可选择已注册的 WSL 发行版打开目录；文件夹及文件夹空白处的右键菜单均提供随 Pebrel 安装注册的发行版选项。
+  - 新增：--shell <id> 可为新终端指定 Shell 或已保存的终端配置；首次启动和已运行实例都能接收该选择。本次明确指定的目录覆盖配置保存的目录，保存的配置本身保持不变。
+  - 新增：可持久保存的命令分组，支持拖动分配、右键移入其他分组或移回“未分组”；删除分组会保留其中的命令。本次完成分组部分，默认折叠及按工具自动分类仍待实现。对应 #149。
+  - 新增：内置命令配方支持持久删除；重新打开命令管理器或从另一窗口修改后，被删除的配方仍保持隐藏，用户保存的命令予以保留。
+  修复
+  - 修复：Windows 换行符混入内置 Shell 脚本后，WSL 在 __pebrel_connection() { 处反复输出 PROMPT_COMMAND 语法错误的问题。共享脚本在注入前统一换行，保留命令退出码及用户已有的 SSH 函数。对应 #188。
+  - 修复：Git Bash 在按字节处理字符的语言环境中，编辑或清空折行输入后残留行首字符的问题；受管理的提示符在需要时使用 ASCII 标记，在 UTF-8 环境中保留 Unicode 标记。
+  - 修复：集成已上报正在运行的后台命令或监控任务，却因后台任务统计遗漏而提前弹出完成通知的问题。
+  - 修复：已启用 Hook 的 AI 会话仍在工作时，因屏幕被推断为空闲而弹出完成提示的问题；完成通知改为依据集成上报的回合事件。对应 #162。
+  - 修复：Windows 后台操作短暂弹出控制台窗口的问题，覆盖进程探测、Git 操作及 SSH 辅助命令等路径。
+  - 修复：调整窗口或窗格尺寸后，SSH 终端仍保持初始网格大小的问题；可见网格与远端终端同步接收新的尺寸。
+  - 修复：Windows 路径含空格时，“在文件管理器中显示”打开错误目录的问题；现在会打开所在目录并选中目标文件。对应 #167。
+  - 修复：将最后一个标签移动到另一窗口、原窗口随之关闭时触发工作区更新冲突的问题。对应 #150。
+  - 修复：已保存的 SSH 连接名称被远端目录或程序标题替换的问题；侧栏和顶部标签布局均保留配置中的连接名称。对应 #164。
+  - 修复：Windows SSH 配置及密钥文件路径含空格或引号时的处理问题；主机发现与连接解析使用同一份用户配置文件。
+  - 修复：SSH 连接测试中的主机密钥确认和取消处理；关闭或编辑连接会取消该测试，旧测试结果不能覆盖修改后连接的状态。
+  - 修复：多行命令编辑器收缩、无法保持可用编辑高度的问题。
+  - 修复：Windows 任务栏和重新启动入口的图标属性，并在保留启动参数的同时刷新匹配的已固定快捷方式。
+  改进
+  - 改进：快捷键搜索统一接入设置页全局搜索，支持动作名称和按键组合；搜索快捷键设置分类时仍展示完整页面。
+  - 改进：选项较少且固定的设置直接显示为分段按钮，覆盖标签布局、新标签位置、显示密度和补全样式等选项。
+  - 改进：终端标签悬停提示展示连接、工作目录及当前程序或 AI 任务，同时保留稳定的标签名称。
+  - 改进：系统 SSH 客户端无法展开配置时，对简单 SSH 配置提供回退处理；需要 OpenSSH 的高级指令会明确报错，避免静默使用不完整的连接配置。
+  - 改进：将内置命令配方精简为选定的 Docker／Conda 操作及 Python／Git 安装命令，保留用户保存的命令和已持久保存的删除选择。
+  Windows 提供 Pebrel 安装器和 ZIP 便携包；Linux x64 包以及 macOS Apple Silicon／Intel DMG 继续标记为 Preview。macOS 最低运行版本为 14。分子结构渲染仍处于禁用状态。
+ReleaseNotesUrl: https://github.com/Kuddev/pebrel/releases/tag/v1.8.2
+Documentations:
+- DocumentLabel: 安装指南
+  DocumentUrl: https://github.com/Kuddev/pebrel/blob/main/INSTALL.md
+- DocumentLabel: Lua 配置
+  DocumentUrl: https://github.com/Kuddev/pebrel/blob/main/docs/lua-configuration.md
+ManifestType: locale
+ManifestVersion: 1.10.0

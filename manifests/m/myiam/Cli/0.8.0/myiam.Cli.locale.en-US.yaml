@@ -1,0 +1,61 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: myiam.Cli
+PackageVersion: 0.8.0
+PackageLocale: en-US
+Publisher: MyIAM
+PublisherUrl: https://github.com/myiam-io
+PublisherSupportUrl: https://github.com/myiam-io/homebrew-tap/issues
+PackageName: MyIAM CLI
+PackageUrl: https://github.com/myiam-io/homebrew-tap
+License: MIT
+LicenseUrl: https://github.com/myiam-io/homebrew-tap/blob/HEAD/LICENSE
+ShortDescription: CLI for managing MyIAM services
+ReleaseNotes: |-
+  v0.8.0 (2026-09-24)
+  이전 버전: v0.7.1
+  추가
+  - whoami 추가 — 지금 어떤 계정으로 로그인돼 있고 어떤 서비스를 관리 중인지(내 역할 포함) 확인. 로그인이 아직 살아 있는지도 같이 확인됨
+  - console [page] 추가 — 웹 콘솔을 브라우저로 열기. 서비스 만들기, API Key·Client Secret 발급처럼 CLI에 명령이 없는 작업을 할 때 사용하며, 로그인할 때와 같은(이미 로그인돼 있는) 브라우저로 열림
+  - 콘솔 페이지 이름은 CLI 명령 이름을 그대로 사용 — new-service api oauth2-client(oc) information(info) ui login-type(lt) field term policy tier user tenant docs home. 이름이 없는 페이지는 /service/term/<uid>/detail처럼 주소를 그대로 넘기면 됨
+  - MYIAM_BROWSER 추가 — 로그인·로그아웃·콘솔·미리보기를 어떤 브라우저로 열지 지정 (none, chrome, safari, firefox, edge, brave, arc, terminal-browser, custom). custom일 때 실행할 명령은 MYIAM_BROWSER_COMMAND로 지정
+  - 주소는 화면에도 함께 출력되므로 MYIAM_BROWSER=none으로 두면 브라우저를 열지 않고 주소만 얻을 수 있음
+  - myiam-cli schema에 에러 코드 목록(errors) 추가 — 에러 코드, 종료 코드, 어떤 에러가 다시 시도하면 되는 것인지 확인 가능
+  수정
+  - 여러 명령을 동시에 돌리면 갑자기 다시 로그인하라고 하거나 다른 기기의 로그인이 끊기던 문제 수정
+  - 로그인이 멀쩡한데도 명령을 실행할 때마다 세션을 새로 만들던 문제 수정
+  - 로그인 도중 네트워크가 잠깐 끊기거나 서버가 불안정하면 바로 실패하던 문제 수정 (제한 시간까지 다시 시도)
+  - 에러 메시지에 내 PC의 파일 경로(계정 이름 포함)가 그대로 찍히던 문제 수정
+  - service ui preview 화면이 디자인 없이 깨져 보이던 문제 수정
+  - service ui preview가 실패해도 이유(로그인 만료 등)를 알려주지 않던 문제 수정
+  - 약관·정책의 버전 번호나 순서 값이 0이면 조회 결과에서 아예 빠지던 문제 수정 — 읽어서 고쳐 쓰는(read | jq | update) 과정에서 값이 사라지지 않음
+  - 에러 안내가 실제로 없는 명령(myiam login)을 알려주던 문제 수정
+  변경
+  - 로그인이 만료돼도 알아서 갱신 — 다시 로그인하라는 안내(AUTH_REQUIRED)는 갱신까지 거부됐을 때만 나옴
+  - 갱신 과정에서 로그인 개수 한도에 걸려 가장 오래된 로그인이 끊기면 그 사실을 화면에 알림
+  - login은 새로 로그인하기 전에 기존 로그인을 정리하고, 서버가 알려준 인증 주소가 실제 서버 주소와 다르면 열지 않음
+  - logout은 세션을 새로 만들지 않고 저장된 정보로 바로 로그아웃
+  - 에러 원인별로 코드와 종료 코드 구분 — AUTH_REQUIRED(종료 1, 다시 로그인), FORBIDDEN(2, 권한 부족), NOT_FOUND(4), REQUEST_INVALID(4, 요청이 잘못됨), SERVER_ERROR(3, 서버 문제)
+  - 서버에 연결조차 못 한 경우를 따로 구분 (REQUEST_ERROR, 종료 코드 3) — 예전에는 로그인 문제로 잘못 안내돼 불필요하게 다시 로그인했음
+  - 에러 메시지에 서버가 보낸 설명을 먼저 표시
+  - 출력에 섞일 수 있는 보이지 않는 제어 문자 제거 (터미널 화면이 깨지지 않도록)
+  - ~/.myiam 폴더 권한을 본인만 열어볼 수 있게 조정
+  - 보안 취약점이 보고된 내부 라이브러리 업데이트
+  문서
+  - 무엇을 약관(term)으로, 무엇을 정책(policy)으로 만들어야 하는지 안내 추가 — 동의를 받아야 하면 약관, 공개만 하면 정책(개인정보처리방침은 정책)
+  - 제3자 제공·마케팅·민감정보·국외 이전처럼 상황에 따라서만 필요한 동의, 동의가 아닌 처리 위탁, 선택 동의를 필수로 묶지 않기, 만 14세 미만 법정대리인 동의는 MyIAM에 기능이 없다는 점 추가
+  - 가입한 뒤에 선택 동의를 철회하는 사용자 화면은 없다는 점 명시
+  - 약관 예시의 이름을 개인정보처리방침에서 개인정보 수집·이용 동의로 정정 (처리방침은 동의 항목이 아니라 공개 문서)
+  - 약관·정책 버전을 만들 때 이름(label)과 버전 번호(version_code)를 꼭 넣어야 함을 명시 — 서버가 막지 않아 이름 없는 버전이 그대로 만들어지고, 버전 번호가 전부 0이면 어느 본문이 보일지 정해지지 않음
+  - 버전을 만들면 기본값이 바로 공개(NORMAL)라는 점과, 초안(DRAFT)으로 만들어야 하는 경우 안내
+  - 사용자에게 실제로 보이는 버전이 어떻게 정해지는지 정정 — 약관은 같은 언어 → 한국어 → 아무 언어 순으로 가장 최신 공개 버전, 정책은 언어를 대신 찾지 않고 공개 시각이 지난 공개 버전
+  - service ui preview는 초안(DRAFT)까지 그대로 보여주므로 "공개됐는지" 확인용으로는 쓸 수 없음을 명시
+  - 서비스를 처음 만들고 API Key를 발급받는 절차, 발급받은 키를 서버·웹(SPA)·모바일 중 어디에 넣어야 하는지 안내 추가
+  - 앱 종류별 OAuth2 클라이언트 설정값 안내 추가 — Client Secret은 서버 앱에만 필요함을 정정
+  - oc update에 없는 --json 예시 삭제, 실제로 쓸 수 있는 플래그(--grant-types, --auth-methods, --meta, --token-preset) 안내 추가
+  - service policy update는 --from-stdin 없이도 stdin을 읽는다는 점 정정
+  - Windows 설치 명령의 역슬래시가 빠져 보이던 문제 수정
+ReleaseNotesUrl: https://github.com/myiam-io/homebrew-tap/releases/tag/myiam-cli-v0.8.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

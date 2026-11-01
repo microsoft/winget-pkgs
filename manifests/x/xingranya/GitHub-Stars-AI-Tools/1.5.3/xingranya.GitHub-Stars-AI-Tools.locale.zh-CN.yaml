@@ -1,0 +1,80 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: xingranya.GitHub-Stars-AI-Tools
+PackageVersion: 1.5.3
+PackageLocale: zh-CN
+Publisher: xingranya
+PublisherUrl: https://github.com/xingranya
+PublisherSupportUrl: https://github.com/xingranya/GitHub-Stars-AI-Tools/issues
+PackageName: GitHub-Stars-AI-Tools
+PackageUrl: https://gsat.xingranya.cn/
+License: PolyForm-Noncommercial-1.0.0
+LicenseUrl: https://github.com/xingranya/GitHub-Stars-AI-Tools/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 xingranya
+ShortDescription: 本地优先的 GitHub Stars AI 桌面应用，可 AI 检索、解析已 Star 项目。
+Description: |-
+  GitHub-Stars-AI-Tools 是一款本地优先的 GitHub Stars AI 桌面应用（Tauri 2 + React + Rust），把 GitHub Stars 变成可搜索、可总结、可继续追问的本地 AI 知识库。
+  用户可以将自己已 Star 的仓库导入本地知识库，通过 AI 搜索、向量检索（本地 Embedding + zvec 索引）和 AI 总结快速定位项目、理解代码与文档，并对已收藏的项目继续追问。应用支持配置自己的模型服务，检索与索引均在本地完成，可断网使用。
+Tags:
+- github
+- star
+- 人工智能
+- 向量检索
+- 总结
+- 搜索
+- 收藏
+- 知识库
+ReleaseNotes: |-
+  GitHub-Stars-AI-Tools v1.5.3
+  v1.5.3 完成本地 Embedding 与 zvec 检索流程的稳定性修复，并重新整理 AI 搜索的结果生成方式。用户首次启用向量检索时可以清楚看到模型下载和建库进度；搜索结果则会等 AI 完成筛选后再展示，避免用尚未核对的候选仓库误导用户。
+  本地向量检索
+  - 新用户默认使用本地 Embedding，首次打开“向量检索”开关时会确认约 490 MB 模型下载。
+  - 下载阶段展示真实文件进度、已下载大小和总大小，不再只有状态文字或长时间停留在 100%。
+  - 下载完成后自动执行文件校验、模型加载、向量生成和 zvec 建库；准备完成后可断网检索。
+  - 设置页可以识别已经下载的模型，关闭向量检索不会删除模型、索引或用户数据。
+  - 修复首次启用时开关无响应、状态瞬间闪动后恢复，以及未下载模型用户缺少引导的问题。
+  zvec 建库稳定性
+  - 修复复合仓库编号包含 : 时触发 Invalid doc: contains invalid characters，导致整批 zvec 索引构建失败的问题。
+  - zvec 主键改用稳定哈希，原始仓库编号采用可逆编码保存，检索返回时仍能正确映射到 SQLite 仓库。
+  - 建库失败会正确结束进度状态并保留可重试信息，不再让界面一直显示 100%。
+  - SQLite 继续作为向量事实源；zvec 索引损坏或不一致时可以重新生成，不影响 Stars、README、标签、笔记和 AI 摘要。
+  AI 搜索结果一致性
+  - 搜索改为“两阶段筛选”：本地向量索引先召回最多 30 个候选，再由 AI 选出真正相关的 0 到 10 个仓库。
+  - AI 回答和右侧仓库列表使用同一份结构化结果，回答中不会再出现右侧列表没有的项目。
+  - AI 不允许补充候选池之外的仓库；相关项目不足 10 个时不会为了填满列表而加入无关结果。
+  - 兼容 MiniMax 等 OpenAI 兼容模型返回的普通 Markdown；应用会从回答中匹配真实候选仓库。
+  - AI 筛选失败时自动回退到严格的本地证据结果，并给出可操作提示，不直接展示宽召回噪声或内部错误。
+  - 保留短英文缩写精确门控、问候语零结果、最多 10 条结果和个人笔记不发送给远程 AI 的边界。
+  更清晰的搜索过程
+  - 发起新搜索后立即清空上一轮结果，右侧不会提前展示未经 AI 核对的候选仓库。
+  - 搜索中依次展示“理解问题、向量召回、核对证据、AI 筛选”阶段，完成后才显示最终仓库。
+  - 进度、空结果、降级和失败状态重新设计，用户可以明确区分“仍在搜索”和“已经得到结果”。
+  增量 AI 解析
+  - “批量 AI”升级为“增量 AI”，只处理尚无 AI 摘要、README 新增或 README 内容已经变化的仓库。
+  - 已经是最新状态的仓库会在 SQLite 查询阶段直接排除，不再每次把全部 Stars 重新提交给 AI。
+  - README 内容哈希会在调用 AI 前再次校验，避免任务执行期间的重复解析。
+  - 失败仓库可以单独重试，已有摘要和本地数据不会回滚。
+  设置体验
+  - 向量检索移动到设置页顶栏的独立 Tab，常用开关、运行状态、索引数量和模型占用集中展示。
+  - 本地向量设置与远程 Embedding 高级配置分层显示，减少首次使用时的配置负担。
+  - AI 服务卡片重新整理信息层级，连接配置、模型选择和功能开关更容易查看。
+  - 首次下载确认框使用设置页面范围内的背景模糊和居中布局，不会只遮挡开关区域或覆盖整个应用。
+  验收与兼容性
+  - 使用 510 个真实 Stars 完成本地模型、SQLite 向量和 zvec 文档一致性验收。
+  - 实测覆盖中文、英文和跨语言查询，并新增真实仓库检索验收文档。
+  - 发布平台为 macOS Apple Silicon、Windows x64 和 Linux x64；macOS Intel 继续停留在最后兼容版本。
+  - 三个平台安装包继续携带对应 zvec 原生运行库，应用内更新使用公开 GitHub Release 下载地址和 updater 签名。
+  使用说明
+  1. 连接 GitHub 账号并完成 Stars 同步。
+  2. 打开“设置 → 向量检索”。
+  3. 打开向量检索开关并确认首次模型下载。
+  4. 等待下载、校验、加载和索引构建完成。
+  5. 进入 AI 搜索，使用中文或英文描述需要查找的项目。
+  首次建库耗时取决于网络速度、CPU 性能和 Stars 数量。模型下载完成后的日常向量检索不依赖网络；AI 最终筛选仍取决于用户配置的 AI 服务。
+ReleaseNotesUrl: https://github.com/xingranya/GitHub-Stars-AI-Tools/releases/tag/v1.5.3
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/xingranya/GitHub-Stars-AI-Tools/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
