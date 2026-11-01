@@ -1,0 +1,57 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.12.1
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  0.12.1 让 TeX 可以边写边看，论文库能直接看到发表状态和期刊指标，MCP 也能整理多个本地 Vault。拖入论文不再带上暂存文件名前缀，复制公式会保留 Markdown 源码，缺少 Node.js 时 Agent 安装会先引导补齐环境，macOS 也可以使用系统窗口平铺。
+  新功能
+  - LuaLaTeX 实时预览：引擎选 LuaLaTeX 后，可从「实时编译」或 .tex 工具栏打开预览。当前段落由常驻引擎重排并画到画布，整页、分页和交叉引用由后台完整编译更新；保存或重新打开窗口仍停留在实时预览。需要本机 lualatex，且只对本地 Vault 可用，正式 PDF 仍走 latexmk。（#743 by @Phil-Fan）
+  - 发表状态与期刊指标：论文库的「发表 / 投稿」列显示已发表、投稿或预印本，以及 EasyScholar 指标。「同步出版信息」会一次刷新元数据、期刊标签和指标。Tags 列只保留你自己的标签，应用不再把 #venue 写进标签。（ebc0ffa7 by @Phil-Fan）
+  - BibTeX 打开 Scholar: 光标停在 .bib 条目上时会显示 Scholar 按钮，悬停时带有文字标签。检索优先使用题名，没有题名时才用 DOI 或 arXiv；检索词不加引号，题名标点或副标题不一致时仍能找到论文。（27634775 by @Phil-Fan）
+  - MCP 整理多个 Vault: vault_list 列出打开过的本地 Vault，其它工具可用 vault 切换。可以移动文件（同步更新可解析的双链和 catalog 路径）、把文件放入回收站或永久删除（永久删除前需确认），也可以查看论文路径、在 papers/ 内移动论文，以及替换用户标签或列出全库标签。（#792, #795 by @Phil-Fan）
+  - Zotero 独立笔记：迁移时，没有挂在论文下的笔记会写成 Vault 里的 Markdown：未归类的放在 notes/，按分类建文件夹时跟分类路径走。挂在论文下的子笔记仍写入该论文的 NOTES.md；独立笔记自己的子笔记并进同一篇。重名另存，不覆盖已有文件，再次迁移会跳过已导入的笔记。空笔记和回收站里的笔记不会导入。（#789 by @qychen2001）
+  - 笔记阅读位置：重新打开应用后，Markdown 笔记回到上次的滚动位置。文档仍够高时用原来的像素；窗口变矮或首屏还没撑开时，按上次可滚动范围的比例落点。（#802 by @ffy6511）
+  改进
+  - 主窗口最小宽度：主窗口最小宽度从 960px 降到 700px。13 英寸 MacBook 上不再占掉大约三分之二的逻辑宽度，三栏布局仍然放得下。（5fdc95f0 by @Phil-Fan）
+  - PDF 滚动出图：阅读时整页底图固定为低分辨率，不随缩放重绘；高清瓦片只覆盖当前视口，并改用 BMP 快速路径。旋转、设备像素比和滚动布局的修正仍然保留。（7e104368 by @qychen2001）
+  修复
+  - 拖入论文的文件名：从没有暴露路径的拖放导入时，论文标题、id、目录名和 NOTES 标题不再带上 Host 暂存戳。只有暂存目录里符合该格式的文件名会被剥掉，普通本地文件名保持不变；已经入库的条目不会自动改名。（#812 by @Fengsuid）
+  - 复制含公式的选区：选区里有公式时，复制和剪切会保留 $…$ / $$…$$ 源码，而不是 KaTeX 渲染后的字形。没有公式的选区仍复制纯文本；右键可以强制「复制为 Markdown」。（#806 by @Fengsuid）
+  - 缺少 Node.js 时安装 Agent: 设置 → Agent 会在缺少 Node.js 或 npm 时提示安装。依赖 npm 的 ACP 适配器，以及只能用 npm 安装的 Agent，不会再启动注定失败的安装或升级；卸载仍然可用。（#811 by @Fengsuid）
+  - macOS 窗口平铺：macOS 15 及以上可以使用系统的 Window → Move & Resize，以及 Fn + Ctrl + 方向键做半屏和四分屏。应用不再把纯 Ctrl 快捷键当成 ⌘，分屏快捷键不会被侧栏折叠截走。（#794 by @Immortal-Fates）
+  - Antigravity 登录：Antigravity 尚未选择认证方式时，设置里不再显示为已登录。诊断会说明需要在 ~/.gemini/antigravity-acp/settings.json 中选择认证，并提供写入 oauth-personal 的引导登录；已有手写配置不会被覆盖。（#748 by @Phil-Fan）
+  - Embedding 批大小：arXiv Daily 的向量请求每批最多 20 条。供应商拒绝批大小时会自动对半再试，单次超限不再让整次刷新失败。（#796 by @Phil-Fan）
+  - 布局菜单点击：悬停已经打开布局菜单时，第一次点击会把它固定打开，再次点击或点到外面才关闭。（36167669 by @Phil-Fan）
+  - 论文库页数：补页数时每次探测都会关闭自己打开的 PDF 并释放缓冲，热力图逐篇统计不再累积文档。（5a7f9167 by @qychen2001）
+  - 工作区拖放与 PDF 跳转：取消拖放后可以再次把面板拖入，在面板外松手也不会被当成放下。PDF 引用跳转会等到版面就绪，并只采用最新一次请求。（#808 by @qychen2001）
+  已知限制
+  - 实时预览范围：仅 LuaLaTeX 和本地 Vault。预览画布暂不能选择或搜索文本；TikZ、旋转页、从右向左排版或缺少字体时，该页改用版面 PDF。需要这些能力时切回编译出的 PDF。（#743 by @Phil-Fan）
+  - PDF 滚动仍待复测：低清底图、BMP 和去掉重复瓦片缓存减少了已确认的出图开销。原报告环境（Linux / WebKitGTK）上的滚动帧率还没有复测，#798 仍开放。（7e104368 by @qychen2001）
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.12.1
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
