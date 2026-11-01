@@ -1,0 +1,44 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: tonythethompson.numan
+PackageVersion: 0.3.0
+PackageLocale: en-US
+Publisher: Anthony Thompson
+PublisherUrl: https://github.com/tonythethompson
+PublisherSupportUrl: https://github.com/tonythethompson/numan/issues
+PackageName: numan
+PackageUrl: https://github.com/tonythethompson/numan
+License: MIT
+LicenseUrl: https://github.com/tonythethompson/numan/blob/HEAD/LICENSE
+ShortDescription: Cross-platform package manager for Nushell
+Description: Numan installs plugins, modules, scripts, and completions from signed registries, pins immutable artifacts in a lockfile, and activates them with Nu only when you run numan activate.
+Moniker: numan
+Tags:
+- cli
+- nushell
+- package-manager
+ReleaseNotes: |-
+  [0.3.0] - 2026-10-24
+  Added
+  - Optional terminal workbench (numan tui, --features tui): interactive package workbench with a Clap-derived command catalog and generic executor, guided command forms, visual theme, and a Commands section. Install-only package types are labelled as such and self-update is gated in the TUI. The default build still excludes the TUI dependencies (Ratatui/Crossterm); CI asserts this and runs parity coverage between the TUI executor and the CLI.
+  - Overlay activation (#17): overlay data model distinguishing persistent activation from session/project overlay activation, overlay use / overlay hide for eligible packages, and interactive overlay session transactions (P3) with fail-closed handling of unresolved reservations and metadata. Installation remains inert; neither activation mode is implied by install.
+  - Hook profiles (#16): hook profile data model with structured bindings (id, event, handler, optional filter) and a deliberately small allow-list of supported hook events, plus explicit hook profile activation (P2) as a separate opt-in step from ordinary package activation.
+  - Invisible activation via a single generated numan_init.nu (#32): Numan owns one generated file, <root>/nu_state/numan_init.nu, sourced from config.nu exactly once. It aggregates the per-kind autoload files and is regenerated atomically on activate/deactivate/rollback/init. numan doctor detects a missing/stale init file or missing config.nu source line (nu_init.drift, nu_init.config_source) and --fix repairs both.
+  - One-touch numan migrate for nupm adopters (#31): migrates existing nupm installations to Numan in a single command.
+  - Enhanced numan setup loader:
+    - Configuration isolation: separates user tool configurations into loader-config.nu so that updating the loader engine (numan setup loader --force) preserves custom tool definitions.
+    - Direct GitHub release binary installer: downloads prebuilt binaries for CLI tools (Starship, Zoxide, Carapace, Atuin, Mise, Direnv, Oh-My-Posh) into $NUMAN_ROOT/tools/bin/, verifying SHA-256 integrity when release metadata or a checksum asset is available, with --install / --install-missing and persistence to the user's PATH.
+    - Tool management flags: --status (inspect health, config, PATH status, and cached autoload files), --detect (discover PATH tools), --add <tool> (preset or custom), --remove <tool> (with cache purge), and --clean (invalidate cached init files).
+  - Bundled Nushell plugins in numan setup nu: setup now extracts the full Nushell release archive (nu plus all bundled nu_plugin_* binaries) by default and records them in the lockfile; --minimal restores the previous binary-only behaviour.
+  - Upstream release and Nu-gap watcher (report-only): scheduled detection of upstream package releases and Nushell version gaps (scripts/watch_upstreams.py, watch-upstreams workflow), failing closed on comparison operators with wildcard bounds.
+  - Nushell 0.116.1 tracking: release ledger and CI catch-up for the official Nushell 0.116.1 release; real-Nu acceptance baseline raised to 0.115.0 with a Nushell release watcher.
+  Changed
+  - numan setup nu extracts bundled plugins by default (see above); use --minimal for the old binary-only install.
+  - Registry archive entries without cargo_name are now tolerated: SourceInfo.cargo_name is optional (archive intake packages carry source {git, rev} provenance instead), and numan info omits the line when absent.
+  Fixed
+  - UUID disclosure: package UUIDs are no longer exposed in CLI output.
+  - Windows test PATH pollution (#70): acceptance tests can no longer persist temporary paths into the Windows User PATH (follow-up hardening of the 0.2.2 fix).
+ReleaseNotesUrl: https://github.com/numan-cli/numan/releases/tag/v0.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
