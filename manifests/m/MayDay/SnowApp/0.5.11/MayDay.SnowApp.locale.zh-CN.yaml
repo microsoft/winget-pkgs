@@ -1,0 +1,48 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: MayDay.SnowApp
+PackageVersion: 0.5.11
+PackageLocale: zh-CN
+Copyright: 版权所有 (c) 2026 MayMay
+ShortDescription: 面向开发者的桌面应用，将 AI 对话、终端模拟、SSH 远程管理、Git 工具和内置浏览器面板整合到统一的工作空间中。
+Description: Snow App 是一款面向开发者的桌面应用，将 AI 对话、终端模拟、SSH 远程管理、Git 工具和内置浏览器面板整合到统一的工作空间中。它通过 Rust 原生模块处理性能关键型操作，包括 SQLite 存储、AI 流式传输、文件监控和 HTTP 请求。此外还支持 MCP 集成、AI 图像生成、技能系统、Hooks、子代理、代码库语义搜索与 AI 驱动的终端会话。
+Tags:
+- ai
+- codex
+- git
+- mcp
+- ssh
+- 终端
+- 聊天
+ReleaseNotes: |-
+  新功能
+  - 团队协作改为数据库 + WebSocket：团队、项目、记录与附件存入本地数据库，主机设备通过 WebSocket 广播同步，不再依赖 Git 仓库；成员凭邀请链接加入，首次加入需主机审批，支持重连令牌、邀请码重置与成员黑名单，创建团队时自动导入旧 Git 团队数据。
+  - 右侧面板会话并排：侧边栏会话行可拖入右侧面板（落点居中并入当前分组、落在边缘拆出新分组），标签可在分组间移动，分隔条可拖拽、双击平分，面板宽度自动记忆；会话标签标题改为下拉，可在根会话、子代理与 WorkFlow 节点之间切换。
+  - 问界（Wenjie）主题：还原老无界（Horizon）配色。
+  - 检查点差异按需分页：变更列表与回滚预览只返回文件摘要，选中文件后分页读取 unified diff（桌面滚动加载、手机下拉首页），SSH 大文件标记为不可预览。
+  - 工具结果图片落盘：MCP 工具返回的 base64 截图不再常驻内存、渲染进程与数据库，结果只保留占位符与相对路径，桌面经 img-proxy、手机经 /api/upload-images 按需读取，并新增远控拍照端点。
+  - 浏览器帧级观察：网络、控制台与对话框按 frame 会话捕获，浏览器工具支持指定 frame。
+  - 技能引用与预加载：聊天输入框支持 # 唤起技能补全，选中的技能在模型请求前加载。
+  - 拒绝原因支持图片与长文本：工具授权与敏感命令确认共用富文本输入，可粘贴图片与长文本片段。
+  改进
+  - 团队主机服务改用固定端口（默认 17880，可在团队设置中修改），创建团队后立即启动，可选注册为登录时自启服务。
+  - OAuth 插件 fetch hook 对 2xx 的 text/event-stream 响应逐块解析，保留打字机输出。
+  - 决策模型请求被判定为无效时回退到 GA 之前的请求表单，并记住该端点。
+  - Skills 目录扫描支持符号链接 / junction。
+  - 每次 run 结束记录结构化原因（completed、user_abort、superseded、timeout、provider_error、tool_denied 等），日志附带耗时、请求数与重试次数并传给 onStop hooks；长会话内存收敛：会话记录只留 id/role，后台会话使用更小窗口，流式输出只保留尾部。
+  修复
+  - 用户消息搜索不再被输入法候选窗打断（输入态锁定 + IME 组合保护），浮层改为固定高度并隔离全局快捷键。
+  - 拖拽标签或会话行时不再被内嵌 webview/iframe 吞掉事件，浏览器面板下方区域也可作为落点。
+  - 切换仓库时提交历史与检查状态不再错乱：丢弃在途分页响应，切换时清空列表并归零滚动偏移。
+  - 删除或归档会话会清理完成通知，打开已完成的会话也会清除通知，跨项目通知缓存不再残留。
+  - schema 66 回填子代理派发身份，历史上缺少 host interactionId 的 activate / continue 调用不再让整轮无法回滚；API 设置中编辑 OAuth 插件文件保留原始 source 与 oauthPlugin 标记。
+  - 文件芯片名称不再过早截断为省略号，压缩失败提示不再残留，MCP 工具名显示本地化名称。
+ReleaseNotesUrl: https://github.com/MayDay-wpf/snow-app/blob/HEAD/RELEASE_NOTES_ZH.md#v0511
+Documentations:
+- DocumentLabel: 快速开始
+  DocumentUrl: https://github.com/MayDay-wpf/snow-app/blob/main/docs/zh-CN/1-快速开始.md
+- DocumentLabel: 文档
+  DocumentUrl: https://github.com/MayDay-wpf/snow-app/blob/main/docs/README.md
+ManifestType: locale
+ManifestVersion: 1.28.0
