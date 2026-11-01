@@ -1,0 +1,45 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.13.0
+PackageLocale: en-US
+ShortDescription: Agent-friendly reference management.
+Description: 'Traditional reference managers are not agent-friendly: highlights and notes stay locked inside single files, making it hard for agents to reuse knowledge across papers; every conversation starts from scratch without a stable local knowledge map; PDFs are human-friendly but not the most comfortable reading material for agents. Agentero aims to build an agent-friendly, agent-native way to manage references, exploring how humans and agents collaborate on reference management. Connect your local agent via ACP (BYOA), select-text chat, import papers and Skills, stay compatible with the Zotero ecosystem, and get paper translation, bidirectional links with a knowledge graph, and deep PDF reading.'
+Tags:
+- academics
+- agent
+- article
+- literature
+- paper
+- pdf
+- reference
+- research
+- thesis
+- zotero
+ReleaseNotes: |-
+  This release adds a sidebar for compiling and navigating a LaTeX project, local plugins that are authorized per Vault, and the same MCP tools from the CLI without the desktop app. Git sync can leave out PDFs, sources, and attachments, HTML files in a Vault open in a sandbox, and a paper can keep a manually entered OpenReview link. A PDF beside notes now gets sharp tiles for the area that is actually visible, and the Linux scroll stall caused by a full-page shadow is improved.
+  Features
+  - LaTeX project sidebar: When the active file belongs to a LaTeX project, the left sidebar shows the outline and can compile, force a rebuild, open the PDF, or toggle live preview; toggling live preview does not change the engine used for the compiled PDF. Project settings choose the root file, output directory, and named recipes, and each recipe tool runs with its own working directory and environment; the outline, citation completion, and library citation picker jump within the project and can write bibliography entries, and live-preview status beside a tab remains when the editor is split. (0da6256e, ee696c94 by @qychen2001)
+  - Local plugins: Settings → Plugins installs a JavaScript plugin from a folder; it stays off until enabled, and permission is saved separately for each local Vault. Plugin commands can appear in the command palette and on library rows, file-tree rows, and the PDF selection menu, and they run in the bundled agentero-plugin-host process rather than relaunching the app; iOS, Android, and remote Vaults do not include that host. (e2a613b2, 9a34e0ad by @qychen2001)
+  - CLI MCP: agentero mcp serve exposes the same MCP tools as the desktop app on a loopback address without opening the app, and it requires an explicit Vault. PDF text stays unavailable unless you pass --expose-paper-text; the ChatGPT tunnel and stdio transport remain desktop-only. (#816 by @qychen2001)
+  - Git sync scope: Git sync uses the same PDF, source, and attachment switches as object storage and WebDAV. Turned-off categories are written into a marked block in the repository .gitignore and removed from the index with git rm --cached, while the files stay on disk; the policy is one per repository, and files already in history are not purged. (f0998179 by @qychen2001)
+  - Local HTML preview: .html files in a Vault open through agentero-html in a sandbox, so images and styles beside the file can render without using the app's own origin. Remote scripts, forms, popups, and paths outside that directory are not loaded, and selection actions and translation do not apply to this preview. (01d2f75f by @qychen2001)
+  - OpenReview link: More fields in paper info can set or clear an OpenReview URL, and a valid HTTP(S) link is shown as a button; a value without a scheme is displayed with https:// while the stored text stays unchanged. The app does not look the link up from a DOI or arXiv id, identifier refresh and Zotero sync keep the manual value, and remote Vaults hide the field. (#828 by @qychen2001)
+  Improvements
+  - Vault root folder names: The sidebar labels the Vault-root folders notes/, thesis/, and data/ as Notes, Thesis, and Data, with icons, while the directory names on disk stay the same. Only those three root folders are relabeled; the rename field still shows the disk name, and a folder with the same name deeper in the tree is unchanged. (5be6c851 by @qychen2001)
+  Fixes
+  - Split-view PDF sharpness: When a PDF sits beside notes, the viewport uses its real visible size so sharp tiles also cover the side next to the notes. Space reserved for the comment column is removed only from the zoom calculation, so fit-width and the zoom anchor stay the same. (#827 by @qychen2001)
+  - Selection toolbar placement: The selection toolbar aligns the divider after the highlight palette with the top center of the selection; without a palette, the whole bar is centered. Placement uses the measured menu and divider, recalculates for language, optional actions, plugin buttons, and window width, and keeps the bar and the expanded palette inside the window when it can. (#822 by @qychen2001)
+  - Copying math in AI replies: Copying a selection that contains math in an AI reply writes the equations as $…$ or $$…$$ source. A selection that starts inside an equation is expanded to the whole equation first; a selection without math still uses the system copy. (#829 by @Fengsuid)
+  - macOS fullscreen: On macOS, Ctrl+Cmd+F toggles system fullscreen, and PDF, Markdown, and find-and-replace do not treat that chord as search. The View menu has the same native fullscreen command. (#818 by @Sagecheni)
+  - Linux PDF scroll stalls: Page shells for the paper and the two-column translation no longer draw a full-page blur shadow; the thin border, corner radius, and paper theme remain. The Linux / WebKitGTK stall confirmed on an affected setup is lighter after this change. (#815 by @learner-ui)
+  Known Limitations
+  - Remaining PDF scroll cases: Removing the full-page shadow addresses the confirmed Linux / WebKitGTK stall. The default configuration did not reproduce it, the combination with the bitmap changes has not been retested in that environment, and #798 remains open. (#815 by @learner-ui)
+  https://github.com/poco-ai/Agentero/compare/v0.12.1...v0.13.0
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.13.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: locale
+ManifestVersion: 1.12.0
