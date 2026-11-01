@@ -1,0 +1,87 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: athrvk.Vayu
+PackageVersion: 0.47.0
+PackageLocale: en-US
+Publisher: Atharva Kusumbia
+PublisherUrl: https://github.com/athrvk
+PublisherSupportUrl: https://github.com/athrvk/vayu/issues
+Author: Atharva Kusumbia
+PackageName: Vayu
+PackageUrl: https://github.com/athrvk/vayu
+License: AGPL-3.0
+LicenseUrl: https://github.com/athrvk/vayu/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Atharva Kusumbia
+ShortDescription: Open-source API client with a native C++ load-testing engine - Postman-style requests and k6-level load tests in one local app.
+Description: Vayu is a free, open-source desktop app for Windows, macOS, and Linux that combines a full REST and GraphQL request builder - with collections, environments, and scripting - and a high-throughput load tester powered by a C++20 engine, with all data staying on your machine.
+Moniker: vayu
+Tags:
+- api
+- api-client
+- api-testing
+- benchmark
+- developer-tools
+- graphql
+- http
+- insomnia
+- load-testing
+- performance
+- postman
+- rest
+ReleaseNotes: |-
+  0.47.0 - 2026-10-30
+  Read before updating: this version upgrades the workspace database to version 10, which earlier versions refuse (details under Changed), and the engine now refuses element settings it used to accept and ignore, so a saved request or an MCP or API client that sent one gets a 400 (the list is under Changed). A step's extractor that finds nothing now clears its variable instead of leaving the old value. New: a Contract section in the Markdown and HTML run reports, and a Sync dialog that lists the operations whose request you deleted instead of re-creating them.
+  Added
+  - Sync does not bring back a request you deleted. Delete a request that came from a bound OpenAPI spec and the next sync lists its operation apart from the new ones, unticked. Tick it to create the request again. The MCP diff_spec reports the same group, and sync_spec skips it (#3031).
+  - The Markdown and HTML run reports have a Contract section for a run bound to a spec: operations covered, how many responses were checked, valid and failed, the commonest reasons a response went unchecked, and a per-operation table (#3036).
+  - A required extractor that finds nothing is shown as a failure. The Elements list reads "missing (required)" in the failure colour, and the exported step row counts it as failed (#3051). A load run's element tally rows name their element and the collection it came from, and show missing and error counts of their own.
+  - A step shows how many extractors found nothing, on collection runs and scenario load runs, live and in History and the export (#3053).
+  - Send shows which elements it left out. A draft element that is switched off or still needs a field is not sent, and the response's Elements section lists it as "Not run" with what it needs. The element's own row shows the same reason, collapsed or open, so an assertion you have not finished configuring no longer reads as a check that passed (#3066).
+  - Element fields are checked as you type. A value outside a field's limits, or a JSONPath the engine cannot read, is flagged on its own field, and the rest of the request still saves while one element is held back (#3048).
+  - A single-request load run accepts extract.header (#3070).
+  Changed
+  - The database is now version 10. Version 10 adds the record of operations whose request you deleted (above). Once this version opens a workspace, earlier versions refuse it. Vayu copies the workspace to backups/ before upgrading; to go back, install the older release and restore backups/vayu-<stamp>-pre-v9.db, which does not hold anything written after the update.
+  - The engine refuses element settings that did nothing. These now answer 400 naming the field, from the request editor, POST /requests, POST /runs, POST /execute and the importers (an importer drops the element and tallies it): control.throughput with neither or both of percent and everyN; timer.think with no ms, gaussian or minMs and maxMs; assert.contains with empty text; assert.status with neither in nor range; assert.jsonpath with none of expected, regex or exists, or exists beside expected or regex; a regular expression the engine cannot compile; an extractor variable no {{name}} can read (a brace, edge whitespace, the data. prefix, $vu, $iteration) (#3055, #3043, #3049). A JMeter import that used a Java-only regular expression, or an empty Substring assertion, is tallied as unmappable. To fix a refusal, give the element the missing setting or switch it off. A request already stored with such an element still runs, and the step now fails where it used to pass.
+  - POST /execute validates inline elements the way POST /requests does. A misspelled kind or a bad setting used to answer 200 with the element dropped; it is now a 400 (#3052).
+  - failOnSchemaError on a single-request or scenario load run is a 400 (invalid_run_config). Only a collection run reads it, so on a load run it decided nothing. Remove it from the load run's payload (#3039).
+  - A single-request load run is refused for an enabled timer.pacing, timer.throughput, control.* or metric.record element, the request's own or inherited, and the message names the collection it comes from. A switched-off one no longer blocks the run. The Load Test panel disables Start, names the elements and says to run the collection instead (#3050). A load run's requestElements also leave out a collection's setup and teardown scripts, and the MCP start_load_run does the same (#3070).
+  - An extractor that finds nothing clears its variable unless it has a default, so a later {{name}} stays unresolved instead of using the value an earlier step or iteration saved. A script that unsets a variable under load keeps it unset (#3053, #3088).
+  - A body the engine cannot read now fails. A response that is not JSON, is empty, nests too deeply or exceeds the element body limit fails an assert.jsonpath and a required extract.json (even one with a default) where it used to skip them (#3041).
+  - assert.jsonpath with exists: false passes when the path is absent. It used to assert the path existed (#3049).
+  - A scenario load run's virtual user keeps the variables its steps saved across iterations. Only its cookies and its script-local variables reset. A login step guarded by control.once no longer sends Bearer {{token}} from the second iteration on (#3044).
+  - A response schema is judged against the status the spec declares. A 200 with no schema is no longer checked against default or 4XX, and an operation whose responses all lack schemas is no longer read as not in the spec (#3028).
+  - Binding, matching and syncing a spec follow the server base path and stay inside the collection's own spec. Requests written as full URLs under https://host/v1 match an operation /pets under that server, a segment such as /users/{id}.json matches /users/42.json, and a folder bound to a different spec is left alone (#3030, #3085, #3034).
+  - Internal: Electron is updated to 44.9.3, the engine is formatted with clang-format 22, and tests, documentation and CI were tidied.
+  Fixed
+  - An imported OpenAPI base URL ending in / sent every request to //path (#3029). The trailing slash is stripped, for OpenAPI 3 and Swagger 2.
+  - The coverage chip was green when an operation got no response, for example when every send failed to connect. It now takes the warning tone and says how many operations got no response (#3035).
+  - Choosing a multi-file spec in the Spec tab stored it with its relative references unresolved, so Sync then saw a change on every check. The references are bundled first, and Choose file and Bind wait for that to finish (#3032).
+  - A control.switch could not be saved from the editor because its cases were a text box. They are now key and value rows (#3047).
+  - Assert status code lost digits while you typed several codes ("200," became "200", then "2002") (#3042).
+  - A typed number in an assert.jsonpath expected value or a metric.record condition was stored as text and never matched. It is stored as the number.
+  - A cleared number field in the Load Test panel refilled itself with 0.
+  - An x- extension key under an operation's responses was listed as a status that was never seen (#3084).
+  - A control.transaction whose last request was skipped or failed early never closed, so iterations reported a count of 1 or none, and its error count missed 4xx replies and failed assertions (#3054).
+  - A load test of a request whose collection and own elements shared an id was refused as a duplicate, and its report merged the two rows (#3101).
+  - The element rows in an export and in History merged two elements that shared an id across levels (#3051).
+  - A History resend failed with a 400 when the recorded run had a blank script part (#3066).
+  - An element's form showed a default the engine does not use (#3045).
+  - A schema failure listed 60 problems for 30 bad items, and the failure examples were all from the first failing step. Response-body failures no longer talk about settings or elements (#3033, #3038, #3037).
+  - A control.loop that outgrew its step limit was reported as setNextRequest cycling. The message now names every source of a jump (#3056).
+  - A single-request load run refused an inherit.disable entry (#3070).
+  - A duplicated element is named "X copy 2", "X copy 3" rather than "X copy copy" (#3056).
+  Every asset except the .sha256 checksums carries a build-provenance attestation: gh attestation verify <asset> --repo athrvk/vayu.
+  Which file do I download?
+  - macOS (Apple Silicon and Intel): run bash -c "$(curl --proto '=https' --tlsv1.2 -fsSL https://athrvk.github.io/vayu/install.sh)". The .dmg and .zip are the same universal build, unsigned.
+  - Windows (x64): winget install athrvk.Vayu, or Vayu-x64.exe.
+  - Linux (x86_64 only, there is no arm64 build): the .AppImage, or sudo apt install ./Vayu-amd64.deb.
+  - The .yml, .blockmap and .sha256 files are for the auto-updater and for checking a download. You do not need them.
+  If your OS warns you
+  Vayu is not code-signed, so the OS can stop a downloaded file on first launch. Nothing is wrong with the file.
+  macOS says an app downloaded from this page (.dmg or .zip) is "damaged", because Vayu is not notarized. This command installs it without the warning:
+  bash -c "$(curl --proto '=https' --tlsv1.2 -fsSL https://athrvk.github.io/vayu/install.sh)"
+  Windows shows "Windows protected your PC". Choose More info, then Run anyway. winget install athrvk.Vayu skips it.
+ReleaseNotesUrl: https://github.com/athrvk/vayu/releases/tag/v0.47.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
