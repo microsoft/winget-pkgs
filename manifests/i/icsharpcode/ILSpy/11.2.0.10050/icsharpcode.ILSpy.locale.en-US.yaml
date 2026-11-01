@@ -1,5 +1,5 @@
-# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
-# Created with winmatsch
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: icsharpcode.ILSpy
 PackageVersion: 11.2.0.10050
@@ -25,10 +25,97 @@ Tags:
 - mono
 - pdb
 - unity
-ReleaseNotes: "In this point release, we kept focussing on improving decompilation accuracy and performance (raw performance as well as memory usage) across the board. This is why again a lot of work went in the category Testing / Infrastructure.\n\nOne major performance win to point out is that we now ship `ilspycmd` with native AOT packages for linux-x64 and win-x64. Measured on win-x64 against the same 3 MB input (`ICSharpCode.Decompiler.dll`), medians of five runs:\n\n| Call shape | managed tool | AOT package |\n|---|---|---|\n| `--version` | 219 ms | 45 ms |\n| `-l c` (list classes) | 384 ms | 93 ms |\n| `--type` one large class | 1,446 ms | 199 ms |\n| `--type` one small class | 1,797 ms | 315 ms |\n| `-p` whole project (881 files) | 6.3 s | 2.9 s |\n\nFor an agent loop that spawns ilspycmd per question that is a 4x to 7x reduction per call! \n\n# New Features\n\n• PR #4248：Add a search box to the Options tab\n• PR #4241：Add opt-in RID-specific and Native AOT packages for ilspycmd\n• PR #4197：Add cross-platform PDB dumping to ilspycmd\n\n# Enhancements\n\n• PR #4268：Native AOT fidelity follow-up: resolver lookup, culture independence, gate coverage\n• PR #4259：Native AOT fidelity for the ICSharpCode.Decompiler package\n• PR #4256：Make ilspycmd -il honor the --type and --member selection\n• PR #4247：Report ilspycmd usage mistakes instead of crashing\n• PR #4236：Transform `value.<Clone>$()` into `value with {}` even if there are no initializers\n• PR #4222：Improved decompilation support for VB.NET closures\n• PR #4201：Rewrite VB WithEvents WinForms initialization\n• PR #4160：Decide extension method syntax in CallBuilder\n• PR #4188：Detect generated closure cache types\n• PR #4185：Handle required members on record copy constructors\n• PR #4179：Include member context in decompilation error comments\n• PR #4171：Recognize metadata property backing fields\n\n# Testing / Infrastructure\n\n• PR #4285：Fix decompdiff platform reference staging\n• PR #4283：Improve Debug Steps and decompdiff workflows\n• PR #4276：nugetfuzz: add parallelization + report caught exceptions\n• PR #4274：Migrate ILSpy.sln to the SLNX solution format\n• PR #4269：Cut the ILSpy.Tests wall clock: cheap fixtures, dead waits, duplicate tests, and process sharding\n• PR #4261：Keep tests off the network unless a toolset download is actually needed\n• PR #4255：Add top 500 NuGet package list\n• PR #4254：Reenable LiftedOperators tests\n• PR #4230：Add allocation trace viewer\n• PR #4240：Use local .NET Framework assemblies in nugetfuzz\n• PR #4235：Fallback from unsupported netcoreapp assets in nugetfuzz\n• PR #4205：Clean up package restore (Diasymreader)\n• PR #4187：Let decompdiff reports use full width\n• PR #4184：Separate obfuscated names in nugetfuzz\n• PR #4183：Stream nugetfuzz HTML report generation\n• PR #4177：Index NuGet assemblies by contained name in decompdiff\n\n# Contributions\n\n• PR #4253：Fix #3702: Don't rewrite GetValueOrDefault() to == true in ?. chains — @dualfroz, thank you!\n• PR #4251：Fix #4017: Look through LdObjIfRef on the operand of await — @dualfroz, thank you!\n• PR #4231：Fix #4135: Keep bool-to-int conditional in its local — @dualfroz, thank you!\n• PR #4216：Add option to highlight usages of the symbol at the caret — @pieroviano, thank you!\n• PR #4228：Fix #4153: keep foreach when a named argument inlines the loop variable — @LiquidSnake0, thank you!\n• PR #4232：Fix #4137: Keep nint in conditionals with mixed native int branches — @dualfroz, thank you!\n\n# Performance\n\n• PR #4266：Start the startup warm-ups before Avalonia's setup\n• PR #3963：Substring optimizations: eliminate hot-path allocations (audit top 8)\n• PR #4229：Avoid cloning settings for every method\n• PR #4164：Coalesce the global command re-query\n• PR #4157：Coalesce the assembly tree's selection and removal fan-out\n\n# Bug Fixes\n\n• PR #4286：Apply type transformations to fake member signatures\n• PR #4288：Fix exceptions on obfuscated code\n• PR #4250：Fix #4245: Ignore find-panel clicks when resolving reference clicks\n• PR #4249：Fix #4246: Scope prefixes no longer leak into search keywords\n• PR #4225：Fix #2829: Emit continue for leave through try-finally\n• PR #4223：Fix ResXResourceWriter empty output and type names\n• PR #4220：Fix #3180: avoid invalid null-conditional extension calls\n• PR #4206：Fix startup binding errors and background load sweep failure\n• PR #4204：Keep package entry selections decompilable\n• PR #4202：Fix mixed array initializers\n• PR #4200：Reserve captured local names in declaring scope\n• PR #4194：Fix UTF-8 literal span initializers\n• PR #4181：Ignore missing runtime files in XML doc ref-pack lookup\n• PR #4163：Ignore detached tree rows when showing selection\n• PR #4178：Handle expression-tree null conversions\n• PR #4182：Fix #4180: Parenthesize negated negative constants\n• PR #4165：Do not apply cancelled decompilation output\n\n\nFor a full list of changes click [here](https://github.com/icsharpcode/ILSpy/compare/v11.1...v11.2).\n\nThis release is based on [.NET 10.0](https://dotnet.microsoft.com/en-us/download/dotnet/10.0). Please make sure that you have it installed on your machine beforehand.\n\nNote for Mac users：see https://github.com/icsharpcode/ILSpy/wiki/Build-Artifacts#running-the-macos-artifact because the ILSpy.app is neither signed nor notarized.\n  \nWant to learn how we do PR reviews these days? Check out [Stampeded](https://github.com/icsharpcode/stampeded)."
+ReleaseNotes: |-
+  In this point release, we kept focussing on improving decompilation accuracy and performance (raw performance as well as memory usage) across the board. This is why again a lot of work went in the category Testing / Infrastructure.
+  One major performance win to point out is that we now ship ilspycmd with native AOT packages for linux‑x64 and win‑x64. Measured on win‑x64 against the same 3 MB input (ICSharpCode.Decompiler.dll), medians of five runs:
+  ────────────────────────────┬────────────┬───────────
+  Call shape                  │managed tool│AOT package
+  ────────────────────────────┼────────────┼───────────
+  --version                   │219 ms      │45 ms
+  ────────────────────────────┼────────────┼───────────
+  ‑l c (list classes)         │384 ms      │93 ms
+  ────────────────────────────┼────────────┼───────────
+  --type one large class      │1,446 ms    │199 ms
+  ────────────────────────────┼────────────┼───────────
+  --type one small class      │1,797 ms    │315 ms
+  ────────────────────────────┼────────────┼───────────
+  ‑p whole project (881 files)│6.3 s       │2.9 s
+  ────────────────────────────┴────────────┴───────────
+  For an agent loop that spawns ilspycmd per question that is a 4x to 7x reduction per call!
+
+  New Features
+  - PR #4248: Add a search box to the Options tab
+  - PR #4241: Add opt‑in RID‑specific and Native AOT packages for ilspycmd
+  - PR #4197: Add cross‑platform PDB dumping to ilspycmd
+
+  Enhancements
+  - PR #4268: Native AOT fidelity follow‑up: resolver lookup, culture independence, gate coverage
+  - PR #4259: Native AOT fidelity for the ICSharpCode.Decompiler package
+  - PR #4256: Make ilspycmd -il honor the --type and --member selection
+  - PR #4247: Report ilspycmd usage mistakes instead of crashing
+  - PR #4236: Transform value.<Clone>$() into value with {} even if there are no initializers
+  - PR #4222: Improved decompilation support for VB.NET closures
+  - PR #4201: Rewrite VB WithEvents WinForms initialization
+  - PR #4160: Decide extension method syntax in CallBuilder
+  - PR #4188: Detect generated closure cache types
+  - PR #4185: Handle required members on record copy constructors
+  - PR #4179: Include member context in decompilation error comments
+  - PR #4171: Recognize metadata property backing fields
+
+  Testing / Infrastructure
+  - PR #4285: Fix decompdiff platform reference staging
+  - PR #4283: Improve Debug Steps and decompdiff workflows
+  - PR #4276: nugetfuzz: add parallelization + report caught exceptions
+  - PR #4274: Migrate ILSpy.sln to the SLNX solution format
+  - PR #4269: Cut the ILSpy.Tests wall clock: cheap fixtures, dead waits, duplicate tests, and process sharding
+  - PR #4261: Keep tests off the network unless a toolset download is actually needed
+  - PR #4255: Add top 500 NuGet package list
+  - PR #4254: Reenable LiftedOperators tests
+  - PR #4230: Add allocation trace viewer
+  - PR #4240: Use local .NET Framework assemblies in nugetfuzz
+  - PR #4235: Fallback from unsupported netcoreapp assets in nugetfuzz
+  - PR #4205: Clean up package restore (Diasymreader)
+  - PR #4187: Let decompdiff reports use full width
+  - PR #4184: Separate obfuscated names in nugetfuzz
+  - PR #4183: Stream nugetfuzz HTML report generation
+  - PR #4177: Index NuGet assemblies by contained name in decompdiff
+
+  Contributions
+  - PR #4253: Fix #3702: Don't rewrite GetValueOrDefault() to == true in ?. chains — @dualfroz, thank you!
+  - PR #4251: Fix #4017: Look through LdObjIfRef on the operand of await — @dualfroz, thank you!
+  - PR #4231: Fix #4135: Keep bool‑to‑int conditional in its local — @dualfroz, thank you!
+  - PR #4216: Add option to highlight usages of the symbol at the caret — @pieroviano, thank you!
+  - PR #4228: Fix #4153: keep foreach when a named argument inlines the loop variable — @LiquidSnake0, thank you!
+  - PR #4232: Fix #4137: Keep nint in conditionals with mixed native int branches — @dualfroz, thank you!
+
+  Performance
+  - PR #4266: Start the startup warm‑ups before Avalonia's setup
+  - PR #3963: Substring optimizations: eliminate hot‑path allocations (audit top 8)
+  - PR #4229: Avoid cloning settings for every method
+  - PR #4164: Coalesce the global command re‑query
+  - PR #4157: Coalesce the assembly tree's selection and removal fan‑out
+
+  Bug Fixes
+  - PR #4286: Apply type transformations to fake member signatures
+  - PR #4288: Fix exceptions on obfuscated code
+  - PR #4250: Fix #4245: Ignore find‑panel clicks when resolving reference clicks
+  - PR #4249: Fix #4246: Scope prefixes no longer leak into search keywords
+  - PR #4225: Fix #2829: Emit continue for leave through try‑finally
+  - PR #4223: Fix ResXResourceWriter empty output and type names
+  - PR #4220: Fix #3180: avoid invalid null‑conditional extension calls
+  - PR #4206: Fix startup binding errors and background load sweep failure
+  - PR #4204: Keep package entry selections decompilable
+  - PR #4202: Fix mixed array initializers
+  - PR #4200: Reserve captured local names in declaring scope
+  - PR #4194: Fix UTF‑8 literal span initializers
+  - PR #4181: Ignore missing runtime files in XML doc ref‑pack lookup
+  - PR #4163: Ignore detached tree rows when showing selection
+  - PR #4178: Handle expression‑tree null conversions
+  - PR #4182: Fix #4180: Parenthesize negated negative constants
+  - PR #4165: Do not apply cancelled decompilation output
 ReleaseNotesUrl: https://github.com/icsharpcode/ILSpy/releases/tag/v11.2
 Documentations:
 - DocumentLabel: Wiki
   DocumentUrl: https://github.com/icsharpcode/ILSpy/wiki
 ManifestType: defaultLocale
-ManifestVersion: 1.12.0
+ManifestVersion: 1.28.0
