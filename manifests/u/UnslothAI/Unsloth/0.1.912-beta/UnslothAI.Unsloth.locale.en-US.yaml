@@ -1,0 +1,74 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: UnslothAI.Unsloth
+PackageVersion: 0.1.912-beta
+PackageLocale: en-US
+Publisher: Unsloth AI
+PublisherUrl: https://unsloth.ai/
+PublisherSupportUrl: https://github.com/unslothai/unsloth/issues
+Author: Unsloth AI
+PackageName: Unsloth
+PackageUrl: https://unsloth.ai/download/windows
+License: Apache-2.0
+LicenseUrl: https://github.com/unslothai/unsloth/blob/HEAD/LICENSE
+Copyright: Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+ShortDescription: The first desktop app to run and train AI models locally.
+Description: Unsloth Desktop is the first desktop app to run and train AI models locally, with research, export and deployment from the same open-source app on Windows, macOS and Linux. Run and train LLMs and diffusion models including Kimi K3, MiniMax-H3, Gemma 4, Qwen3.8 and DeepSeek-V4 Flash 0731, with self-healing tool calling, sandboxed code execution, private web search, Deep Research, RAG, MCP and an OpenAI-compatible API.
+Tags:
+- ai
+- deep-learning
+- diffusion
+- fine-tuning
+- large-language-model
+- llm
+- machine-learning
+ReleaseNotes: |-
+  Halloween 👻 is here. Through October, a Trick or treat row in the sidebar opens eleven Halloween themes, spooky greetings and a few spiders and bats.
+  This release also speeds up the first launch, Linux tool calls and model loading, and trains compatible fine-tuning jobs together with multi-LoRA.
+
+  Highlights
+  - Trick or treat: 🎃 new Halloween themes - until Nov 1
+  - Faster Unsloth: 2x faster first launch, plus speedups for tool calls, model lists, dataset prep and MiniMax-H3 loads
+  - Multi-LoRA batching: up to 4 compatible queued fine-tuning jobs train together
+  - SGLang thinking + auto-compact: Resume and JSON output now work on vLLM and SGLang too
+  - Browser use switch: let models control the built-in browser from its new tab page
+  Optimizations
+  - Setup now precompiles Python files, so the first launch is about 2x faster.
+  - On Linux, tool calls start in 1 to 2 ms instead of 84 to 174 ms with a 2 GB server process.
+  - With 497 cached models, the model list uses about a third of the CPU time it did.
+  - Preparing a 1,000-row chat dataset for Gemma 3 4B took 1.75 s instead of 6.6 s in our test.
+  - MiniMax-H3 loaded in 49 s instead of 61 s on a Linux A100.
+  Multi-LoRA + API
+  When several compatible jobs wait in the fine-tuning queue, Unsloth now trains them together, each with its own LoRA adapter on a shared base model.
+  - Jobs sent while the GPU is busy queue up in order, and each can be cancelled on its own.
+  - Load a job's fine_tuned_model name to chat with its trained adapter.
+  - /v1/videos requests now queue while a clip renders, and matching /v1/images/generations requests are batched.
+  How it works
+  - New Triton kernels run the base layer once per batch, while each adapter learns only from its own tokens with its own loss and learning rate.
+  - With 4 adapters, a 4096x4096 layer's forward and backward pass ran 1.52x faster than one adapter at a time (A100, bf16, rank 16).
+  Chat + tools
+  - Local models skip tool calls that hit the output limit, so a half-written cat > app.py can't overwrite a file.
+  - Before, cut-off rewrites shrank a 175-line test file to as few as 6 lines on an RTX 3090.
+  - Thinking models such as Qwen3 and DeepSeek R1 now show their reasoning and the Think toggle on SGLang.
+  - With Auto-compact on, long SGLang chats drop their oldest turns and keep answering.
+  - On vLLM and SGLang, you can resume a reply cut off at Max Tokens and request JSON with response_format.
+  Browser + Desktop
+  - The browser's new tab page has a Browser use switch that lets models control the browser.
+  - On Desktop, a browser agent working for a temporary chat no longer adds pages to your history.
+  - On macOS with Safari 18.4 or earlier, Desktop browser tabs and their close buttons work again.
+  - Log out is now in the Unsloth Desktop user menu.
+  Trick or treat
+  The Trick or treat… row sits above More in the sidebar and opens a Halloween menu.
+  - Pick one of eleven themes, such as Pumpkin, Coven and Ghost Ship, each with a light and dark mode.
+  - Turn on Spooky greetings and new chats open with a Halloween line and sloth.
+  - With Spiders and bats on, Halloween themes get the odd spider and bats crossing the window.
+  - Not sure which theme? Trick or treat! picks one at random.
+  Unsloth returns to normal at midnight on November 1, or right away with Remove now.
+  Training
+  - Gemma 4 E2B and E4B now keep a dataset's thinking text in training instead of dropping it.
+  - New chat training setups turn on sequence packing and Assistant completions where the model and data support them.
+  - Local JSON and JSONL datasets load even when later rows add new keys.
+ReleaseNotesUrl: https://github.com/unslothai/unsloth/releases/tag/v0.1.912-beta
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

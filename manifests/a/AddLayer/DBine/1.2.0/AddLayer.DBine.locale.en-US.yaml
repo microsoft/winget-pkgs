@@ -1,0 +1,94 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AddLayer.DBine
+PackageVersion: 1.2.0
+PackageLocale: en-US
+Publisher: AddLayer
+PublisherUrl: https://dbine.com/
+PublisherSupportUrl: https://github.com/addlayer-io/dbine/issues
+Author: AddLayer
+PackageName: DBine
+PackageUrl: https://dbine.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/addlayer-io/dbine/blob/HEAD/LICENSE
+ShortDescription: Manage SQL, NoSQL and analytical databases in one app
+Description: |-
+  DBine is a desktop database manager for relational, analytical, document, key-value, graph, time-series and search databases. One workbench connects to PostgreSQL, SQL Server, MySQL, MariaDB, SQLite, Oracle, MongoDB, Redis, Cassandra, ClickHouse, DuckDB, Snowflake, BigQuery, Elasticsearch, Neo4j, InfluxDB and many more engines.
+
+  Explore and query:
+  - A tree per connection and database, with saved queries kept inside each database
+  - A SQL editor with each engine's dialect, completion of tables and columns, and script execution
+  - A fast results grid with cell editing, filters, sorting, charts and a JSON tree view
+  - Graphical execution plans, a visual query builder and query optimization hints
+  - Search across object names, columns and stored code, and run code on several databases at once
+
+  Design and move data:
+  - Table designer, ER diagrams and script generation
+  - Compare schemas and data, then migrate, clone or sync databases between engines
+  - Import CSV, JSON, XLSX and XML; export results in many formats; generate test data and data subsets
+  - Rename objects with an impact analysis of everything that depends on them
+
+  Administer:
+  - Server monitor, live processes and a profiler of the queries clients run
+  - Users and permissions, backups, health checks and database properties
+  - SSH tunnels, including chains of bastions and the SSH agent
+  - Read-only connections and production safeguards
+
+  Assistant and integrations:
+  - An AI assistant that writes and explains queries with a local built-in model or Ollama; it never runs anything by itself
+  - A local MCP server so AI coding assistants can work with your connections, with every write approved in DBine
+  - End-to-end encrypted cloud sync of connections, queries and settings to your own account
+  - A script library and projects backed by git
+
+  Passwords are stored encrypted with a key kept in the system keychain, and never go into the state file or the logs.
+Moniker: dbine
+Tags:
+- clickhouse
+- database
+- database-manager
+- duckdb
+- mariadb
+- mongodb
+- mysql
+- nosql
+- oracle
+- postgresql
+- redis
+- sql
+- sql-client
+- sqlite
+- sqlserver
+ReleaseNotes: |-
+  DBine v1.2.0 installers.
+  New
+  - Ukrainian and Polish: DBine and the phone app are available in Українська and Polski, including server messages and the AI assistant. Pick the language in Settings › General › Language, or DBine follows the system's.
+  - Indonesian: DBine and the phone app are available in Bahasa Indonesia, including server messages and the AI assistant. Pick the language in Settings › General › Language, or DBine follows the system's.
+  Improvements
+  - Completion across databases: on engines where one query can read another database of the same connection (ClickHouse, MySQL and MariaDB, SQL Server, Snowflake, Databricks, Trino, BigQuery, Oracle and more), the editor offers the other databases' names, their tables after other_db. and their columns after a table or an alias, also in joins between databases. Each database's tables are read the first time you type its name with a dot.
+  - DuckDB engine updated to 2.0.0: local DuckDB files and DataFrame SQL in notebooks now run on DuckDB 2.0.0 (up from 1.5.5). New database files use DuckDB 2.0's storage format, which older DuckDB versions cannot open; existing files continue to open and remain readable by the version that created them.
+  - Connection encryption for SQL Server, PostgreSQL and MySQL: the connection form shows each engine's own TLS options, with the names its tools use: Encrypt (Optional, Mandatory, Strict), TrustServerCertificate, ServerCertificate and HostNameInCertificate for SQL Server and Azure SQL; sslmode and sslrootcert for PostgreSQL and its family; ssl-mode and ssl-ca for MySQL and its family; ssl, ssl-verify-server-cert and ssl-ca for MariaDB and OceanBase. New connections are encrypted and check the server's certificate, and each setting can be turned off. Saved connections keep working exactly as before. Through an SSH tunnel the certificate is checked against the real server's name, and a certificate failure says which option to change. MySQL's PREFERRED falls back to an unencrypted connection only when the server doesn't offer TLS, before any password is sent.
+  - Connection encryption for InfluxDB, IoTDB, ksqlDB, TDengine, Phoenix, Arrow Flight SQL and the cloud services: the connection form shows each engine's own TLS options: ssl and unsafeSsl for InfluxDB 1, the URL scheme with skip-verify (InfluxDB 2) or tls-no-verify and tls-ca (InfluxDB 3), use_ssl and ca_certs for IoTDB and TimechoDB, useTls, verifyHost and trustStore for ksqlDB, useSSL for TDengine, the URL scheme, hostname_verification and truststore for Phoenix and Avatica, useEncryption and tlsRootCerts for Flight SQL, and DisableServerCertificateValidation for the Cosmos DB emulator; where an engine's tools have no name for skipping the check or for the CA file, curl's insecure and cacert. New connections are encrypted and check the server's certificate, and each setting can be turned off. Saved connections keep working exactly as before. Through an SSH tunnel the certificate is checked against the real server's name, and a certificate failure or a server without TLS is reported as such. BigQuery, Spanner, DynamoDB, Athena, Snowflake, Databricks and libSQL always use verified HTTPS, except an emulator endpoint typed as http://.
+  - Keyboard and screen readers: a visible focus ring shows where the keyboard is; list rows, cards, sortable headers and collapsible sections can be reached with Tab and used with Enter or Space; context menus work with the arrow keys; icon-only buttons have names a screen reader reads; the result of a query (finished, or failed with its error) is announced; animations stop when the system asks for reduced motion; and secondary text has more contrast in both themes.
+  Fixes
+  - "Don't verify" now pins the server's certificate, security: a connection that doesn't verify the server's certificate (sslmode=require, insecure, bolt+ssc, validate=false…) accepts the certificate the server presents the first time and from then on only that one, on PostgreSQL and its family, the HTTP engines (ClickHouse, Elasticsearch and OpenSearch, CouchDB, Trino, InfluxDB and more), Neo4j, Neptune, Redis and Cassandra. If the certificate changes, the connection stops and shows both fingerprints, with Trust the new certificate for a server that renewed it; the SSL/TLS tab shows the pinned fingerprint, with Forget. Saved connections pin on their next connect. verify-ca and the options that skip only the host name now check the whole chain against the CA instead of accepting any certificate. SQL Server, MySQL, MariaDB, MongoDB and SAP HANA keep their clients' own behaviour.
+  - New databases show up without reconnecting: a database created with CREATE DATABASE in a query (or dropped, or renamed) appears in the explorer and the database lists at once, and opening a database list (migration, compare, subset, backups, permissions, the query's database picker…) reads it again, so one created from another tool shows up too.
+  - Importing from SQL Server Management Studio: besides the registered servers, DBine now imports the servers SSMS's Connect dialog remembers (its connection history), with their login, database and encryption settings, from SSMS 18 to 20 and the new folders of SSMS 21 and later. On macOS and Linux, the file dialog now accepts RegSrvr.xml, UserSettings.xml and .regsrvr files (and DataGrip's dataSources.xml); before, only JSON files could be picked.
+  - Importing connection strings keeps their encryption settings: a pasted or imported string now brings its TLS options as the engine's own: SQL Server's Encrypt (including Strict) and HostNameInCertificate, PostgreSQL's sslmode as written (require no longer becomes a verified connection), MySQL's ssl-mode and Connector/J's useSSL, MariaDB's sslMode, and the rediss://, bolt+s:// and bolt+ssc:// schemes. A string without TLS settings imports as its own client would connect. The same applies to connections imported from DBeaver, DataGrip and the other JetBrains IDEs, DbGate and Azure Data Studio.
+  - Certificate errors on macOS and Windows: a server certificate the system doesn't trust ("The certificate was not trusted", "issued by an authority that is not trusted", "The target principal name is incorrect") is now recognized as such, and the message says which TLS option to change instead of showing a generic TLS error.
+  - ClickHouse 22.8 and older: connecting no longer fails with Unknown setting http_write_exception_in_output_format; DBine stops asking for that setting on servers that don't have it.
+  - Notebooks, Python export: a PostgreSQL connection that checks the server's certificate is exported with sslmode=verify-full, as Copy connection string does, instead of require, which doesn't check it.
+  - HashiCorp Vault, security: a password source's Vault address must be https://; plain http:// is accepted only for a Vault on this computer, as for the other secret managers, so the Vault token never travels in clear over the network.
+  Downloads
+  - Windows: -setup.exe (requires WebView2, included in Windows 10/11).
+  - macOS: .dmg; aarch64 for Apple Silicon, x64 for Intel.
+  - Linux: .AppImage (portable), .deb or .rpm.
+  - Android: the phone app that pairs with DBine on your computer. Install it from dbine.com or with the -android.apk below; the first time, Android asks to allow installing apps from that source (the browser or the files app).
+  - Linux (Flatpak): .flatpak (x86_64 or aarch64), for flatpak install --user ./dbine-….flatpak; it doesn't update itself. Built by the flathub workflow, it appears here a while after the other files.
+  Version 0.1.4 and later receive it through the automatic update.
+  - macOS: signed with an Apple Developer ID and notarized by Apple, so it opens without warnings.
+  - Windows: the -setup.exe installer is signed (Open Source Developer Marcos Panichella, Certum). While the certificate builds its reputation, SmartScreen may still ask for "More info" › "Run anyway".
+  - Each engine's driver (except SQLite) is downloaded the first time you connect.
+ReleaseNotesUrl: https://github.com/addlayer-io/dbine/releases/tag/v1.2.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
