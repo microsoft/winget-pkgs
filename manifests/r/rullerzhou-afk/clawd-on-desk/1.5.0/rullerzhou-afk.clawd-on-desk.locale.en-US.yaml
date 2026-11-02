@@ -1,0 +1,174 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: rullerzhou-afk.clawd-on-desk
+PackageVersion: 1.5.0
+PackageLocale: en-US
+Publisher: rullerzhou-afk
+PublisherUrl: https://github.com/rullerzhou-afk
+PublisherSupportUrl: https://github.com/rullerzhou-afk/clawd-on-desk/issues
+PackageName: Clawd on Desk
+PackageUrl: https://github.com/rullerzhou-afk/clawd-on-desk
+License: AGPL-3.0-only
+LicenseUrl: https://github.com/rullerzhou-afk/clawd-on-desk/blob/v1.5.0/LICENSE
+Copyright: Copyright (c) 2026 rullerzhou-afk
+ShortDescription: A pixel desktop pet that watches Claude Code, Codex, Cursor & other AI coding agents — so you don't have to.
+Description: |-
+  Clawd on Desk is an open-source desktop pet that shows the activity of AI coding agents, including Claude Code, Codex, Cursor, and others. It reacts to working, permission requests, and task completion with animations and supports multiple concurrent sessions.
+
+  It includes Clawd, Calico, and Cloudling themes, custom themes, a sessions dashboard, optional permission bubbles, and a local activity recap.
+Tags:
+  - claude-code
+  - codebuddy
+  - codex
+  - copilot-cli
+  - cursor
+  - desktop-pet
+  - gemini-cli
+  - kiro
+  - opencode
+ReleaseNotes: |-
+  v1.5.0
+  Clawd v1.5.0 gives each phone its own pairing, moves Linux .deb updates to an
+  official APT source, and animates the pet while Codex delegated subagents work.
+  It also tidies the AI Coding Tools and Permissions & approval settings, adds
+  support for community themes with author credits, shows Codex plan progress, and
+  keeps Clawd's local server running when its default ports are unavailable.
+  Linux updates
+  - Official APT source (#1255, #1288; related #1221) — .deb installations
+    keep update notifications, but the button now reads "Update with APT" and opens
+    the setup guide instead of running a privileged installer, which could fail
+    when no desktop authorization window was available. The opt-in source at
+    https://apt.clawdondesk.com/ supports Debian 12/13 and Ubuntu 22.04/24.04 on
+    amd64. Its signing key is limited to this source through Signed-By, and a pin
+    limits the source to Clawd's two packages. A release notification can arrive a
+    few minutes before the source has the new version. AppImage keeps its in-app
+    updater, including when the folder it unpacks into is reached through a
+    symbolic link. Other packaged Linux installs, such as an unpacked directory,
+    show "Open Downloads" instead. Thanks to @Kris20030907 for reporting the failed
+    update.
+  > Linux .deb updates now use APT. Existing users can add the official source once using the migration guide, even if the old in-app update failed. Quit Clawd before updating, then reopen it. AppImage keeps its in-app updater.
+  > Linux .deb 改用 APT 更新。 旧用户可按迁移指南接入一次官方软件源，无需先修好旧版应用内更新。更新前请退出 Clawd，完成后重新打开。AppImage 保留应用内更新。
+  Phone pairing
+  - One token per phone (#1279; issues #487, #1281) — each phone now has its
+    own token, so locking the phone or restarting Clawd no longer leaves it holding
+    a token that was replaced while it was away and forces a new pairing. To pair,
+    open the pairing link on the phone and type the 8-character code from
+    Settings → Permissions & approval → LAN approval. The code is single-use and
+    valid for 10 minutes; "Refresh pairing code" makes a new one. A Safari tab and
+    an "Add to Home Screen" app pair separately and count as two devices, up to 20
+    including phones that have not connected yet. Not tested on a real iPhone.
+    Thanks to @Bynlk, whose real-iPhone testing in #663 showed why the old shared
+    token could not be rotated safely.
+  - Paired devices list (#1280) — the same card lists paired phones with their
+    last-seen time. "Revoke" removes one phone, and "Revoke old token" cuts off
+    every phone still using a link from before the update. "Regenerate Token" is
+    now part of "Reset phone access".
+  - Safer phone connections (#1289) — a phone connection that Clawd rejects,
+    for example because of a wrong token, could raise an unhandled error in Clawd's
+    main process if it sent a malformed or oversized message while closing. Such
+    connections are now handled safely, and a message from a phone may be at most
+    4,096 bytes (the limit was about 100 MiB). Phone preview is off by default, and
+    this needed a misbehaving device on your network.
+  Codex
+  - Delegated subagents animate the pet (#1270, #1283, #1284) — while a local
+    Codex session has delegated subagents working, the pet shows the subagent
+    animation (headphones for one, juggling for two or more in the default theme)
+    and the HUD row shows the session as running. If the parent turn ends first, its
+    completion cue (sound, taskbar flash, happy animation) is held back and plays
+    once, when the last subagent really finishes or the parent exits. It is dropped
+    if the parent starts a new turn or is interrupted first, and a subagent that
+    stays silent for 20 minutes is released. Clawd also reads recently active
+    session logs first, which cut the delay before a subagent shows up from about
+    6–10 seconds to 0.09–1.38 seconds in a small macOS measurement. This covers
+    local sessions only; WSL and Remote SSH Codex sessions are unchanged. Known
+    difference: only the pet and the HUD wait for subagents. The Dashboard,
+    Telegram and Slack completion messages, phone notifications and Discord
+    presence follow the parent session's own state and treat its Stop as done.
+    These changes were tested with real Codex sessions on Windows and macOS. Thanks
+    to @200780381.
+  - Temporary chats (#1258; related #1254) — confirmed temporary Codex Desktop
+    threads no longer try to resume through a link that fails. Clicking one
+    activates the already-open Codex app on Windows and macOS; it does not select
+    the exact side chat, and Linux is not supported. Two switches in Settings →
+    Sessions → Session HUD, both off by default, collapse completed or active
+    temporary chats from the HUD; they can also hide ordinary side chats. Completion
+    sounds and animations still play, and phone previews are not affected. Thanks to
+    @200780381.
+  - Plan progress (#1193; issue #1190) — while Codex has a valid step plan, the
+    HUD row shows a thin progress bar (hover for "Plan 3/5 · 60%") and the Dashboard
+    shows the same line. Only the step counts are used, never the step text. Thanks
+    to @daijx-ai.
+  - Untitled Desktop chats (#1171; related #1103) — untitled Codex Desktop
+    chats from the same folder now show <folder> · <short tag> so they can be told
+    apart; before, they all showed the bare folder name. Thanks to @200780381.
+  Claude Code
+  - "Handling tools" status (#1274; related #1018) — while the main local
+    Claude Code session is calling a tool, the HUD can show "Handling tools" and the
+    phone preview shows the same state; Discord presence counts it as working.
+    Themes can give it its own animation (states.executing) and otherwise keep
+    "working". It is a hint about the tool-call phase, which starts before the
+    permission check, so it does not mean a command was approved or is running.
+    Remote, WSL, headless, subagent and other agents' sessions are unchanged. Thanks
+    to @Swcmb for the request in #1018.
+  Settings
+  - AI Coding Tools layout (#1230, #1227) — each card has a status sentence and
+    one main control (the master switch, or Install). Expand a card for its
+    settings, grouped as Approvals, Alerts, Connection, WSL, Quota and Info, with
+    explanations behind an (i) toggle. A "Disconnect …" link at the bottom of a card
+    reveals the Uninstall button, and uninstalling now uses Clawd's own confirmation
+    dialog. A broken hook states its cause next to a "Fix it" link that opens
+    Doctor. Under Discover and add, "Detected locally" offers "Install all" when two
+    or more tools are found. No setting or command was removed, but four controls
+    were renamed (see Upgrade Notes). Thanks to @YOIMIYA66 for the refinements in
+    #1227.
+  - Permissions & approval layout (#1231) — the Telegram, Feishu / Lark and
+    Slack cards show a status sentence. Until a channel is set up, only its "Start
+    setup" steps are shown; its enable switch and notification options appear once
+    it is configured, and the test link appears only when a test can run. The LAN
+    approval card follows the same layout. No preference, command or confirmation
+    changed.
+  - Update diagnostics (#1227) — when an update fails, the error details now
+    include the error code, HTTP status, syscall, host and related fields, and the
+    repair advice is labeled "Repair suggestion (for reference only)".
+  - Disable hardware acceleration on Windows (#1211, #1277; issue #1183) — a
+    Windows-only switch in Settings → General → Startup & system for machines where
+    the pet turns into a black square at a screen edge. It uses a bit more CPU and
+    applies after a restart: while the saved setting differs from the running one,
+    the row says "Not applied yet. Restart Clawd to switch." and offers a "Restart
+    Clawd" button. The reporter confirmed that the switch removes the black square.
+    Thanks to @Mouren-Lee for the report and testing.
+  Agent integrations
+  - ZCode questions (#1266; issue #1264) — ZCode's AskUserQuestion now opens a
+    Clawd question bubble, and your answer goes back to ZCode. Questions are never
+    answered automatically. Requests Clawd cannot answer, such as ExitPlanMode,
+    flash a short notification and stay in ZCode, and approvals ZCode does not send
+    to hooks also stay there. Tested with ZCode 3.16.3 on macOS. Thanks to
+    @xiaoshidefeng, and to @tianxingjian2406 for the report.
+  - OpenCode serve sessions on Windows (#1194; issue #1134) — the Dashboard adds
+    a separate "Open in new terminal" action for local OpenCode v1 serve sessions.
+    It needs Windows Terminal. Thanks to @hanzhe-one, and to @Hatsunemiku533 for the
+    report.
+  - Reasonix on Windows (#1199, #1239; issue #1198) — the state hooks now leave
+    more of Reasonix's five-second limit free and start Node directly when the path
+    is safe. On the reporter's slow Windows host a hook went from 5.7–6.3 seconds to
+    2.6–2.7 seconds. When no safe direct path exists, for example with non-ASCII
+    profile paths or volumes without 8.3 short names, the previous launcher is still
+    used. State delivery is best effort: if Clawd is too slow to answer, the hook
+    gives up rather than delay Reasonix. Thanks to @200780381 for the report and the
+    retests, and to @sLingli for the compatibility pointers.
+  - DeepSeek Harness (#1242, #1224) — session rows keep the current title,
+    including after Clawd restarts or when the title changed while Clawd was closed.
+    On Windows, Clawd no longer holds the desktop app's app.asar open, which could
+    stop DeepSeek Harness from updating itself. Thanks to @Free-LZJ.
+  - WorkBuddy (#1207; related #634) — hook processes now share a per-session
+    process cache, so most tool events no longer trigger a Windows process
+    snapshot. Thanks to @eugenewang5425.
+  - Installation detection (#1262) — product files count as evidence that
+    ZCode, CodeBuddy or Qoder is installed only when they are the expected file or
+    directory type. A directory where a file is expected, or a file where a directory
+    is expected, no longer counts. Thanks to @200780381.
+  Themes
+ReleaseNotesUrl: https://github.com/rullerzhou-afk/clawd-on-desk/releases/tag/v1.5.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

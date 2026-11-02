@@ -1,0 +1,57 @@
+# Created with WinGet Updater using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: CycloneDX.cdxgen
+PackageVersion: 13.5.0
+PackageLocale: en-US
+Publisher: OWASP Foundation
+PublisherUrl: https://owasp.org/
+PublisherSupportUrl: https://github.com/CycloneDX/cdxgen/issues
+Author: CycloneDX
+PackageName: CycloneDX Generator (cdxgen)
+PackageUrl: https://github.com/CycloneDX/cdxgen
+License: Apache-2.0
+LicenseUrl: https://github.com/CycloneDX/cdxgen/blob/HEAD/LICENSE
+ShortDescription: A polyglot tool and a library for generating various Bill of Materials in CycloneDX specification.
+Description: Generate Software Bill of Materials (SBOM) for most applications and container images with a single command. Generate Operations Bill of Materials (OBOM) for Linux and Windows hosts. Integrate with any CI/CD pipeline. Automatically submit the generated BOM to your dependency track server for analysis.
+Moniker: cdxgen
+Tags:
+- bom
+- cbom
+- containers
+- cyclonedx
+- docker
+- oci
+- owasp
+- package-url
+- purl
+- saasbom
+- sbom
+- sca
+- software-bill-of-materials
+- supply-chain
+ReleaseNotes: |-
+  cdxgen 13.5.0
+  cdxgen 13.5.0 turns the hardware BOM toward Windows, puts PHP runtimes on the record, and reworks how certificates in a CBOM are identified, linked and judged. Go projects get service and module evidence that finally matches what the Go toolchain does, OS scans draw on osquery 5.24.0 with new package tables for pacman, snap, flatpak and MacPorts, and several ways a scan could run the scanned project's own code are now closed. The bundled plugins move to 4.2.0, and the container images ride the October 2026 Node.js security releases.
+  Hardware BOMs on Windows
+  The hbom command now inventories Windows machines. It reads the platform facts, host, CPU, memory, board, firmware and chassis, along with storage and network adapters, display adapters, monitors, audio devices and cameras, PnP devices with USB and PCI topology and driver signing state, and the machine's trust, power and privileged state. Everything is collected over CIM and PowerShell with serials, instance GUIDs and hardware identifiers redacted, and where PowerShell is missing or locked down by constrained language mode, a fallback that avoids the registry keeps the core inventory working. On the cdxgen side, the compliance and performance rules understand Windows, the secure-mode preflight plans the right Windows commands, volumes are joined to osquery logical drives in merged host views, and the permission-denied finding now says which elevation is actually missing. Real captures from Windows hardware back the test suite, and the Windows troubleshooting guide documents the permissions each collector needs, with a matrix measured on real sessions down to what a standard user loses when smphost is not running.
+  PHP runtimes, finally on the record
+  PHP was the one runtime a BOM never named. Scans now probe php and composer alongside the other toolchains and record both in the formulation as platform components with their CPEs. The PHP_CMD and COMPOSER_CMD environment variables select the binaries, the same as the other probes. OS scans go further and look for PHP that no package manager installed, in the usual source-build locations such as /usr/local, the Apache module directories and Homebrew, skipping every file a package database owns, and container scans read the build version out of unpackaged PHP binaries. Composer lock files contribute their platform requirements, the PHP version and the extensions they name, kept as cdx:composer properties. Two new audit rules, PHP-RCE-001 and PHP-RCE-002, flag versions exposed to the current PHP remote code execution issues, and the rule message says plainly that a distribution backport can make this a false positive. The PHP images used for the release binaries were rebuilt on 8.3.36, 8.4.27 and 8.5.12 for CVE-2026-109618 and CVE-2026-109619.
+  CBOM: identity you can verify
+  Certificates in a CBOM are now keyed by their own DER SHA-256 rather than the file they were found in. The same certificate found in two stores is one component with two occurrences, cross-signed certificates share a single public-key component, and verified issuer edges connect a leaf to the CA that actually signed it instead of trusting whatever order the file came in. The audit rule set grew to CBC-001 through CBC-007, with GO-TLS-001 and four golem trust rules covering certificate expiry, the Go CVE-2026-111943 distrust list and post-quantum readiness. tracebom now records the chain each server presented during a TLS handshake, kept deliberately untrusted: a presented chain is the server's claim, so it is recorded as observed evidence without issuer edges being inferred from it. Rootfs scans parse certificates themselves when the plugin is unavailable, Kubernetes TLS secrets and Android SPKI pins are discovered, keystores are emitted as their own components linked to the certificates they hold, date-only validity dates parse as the end of that UTC day, and OCI layer whiteouts are applied during extraction so a certificate deleted in a later layer stays deleted.
+  Moving the plugins to 4.2.0 put trustinspector's new report-2 format to work, and the release check caught three regressions that are fixed here. PEM public keys and OpenPGP keys are inventoried again rather than silently dropped, a certificate without a common name is named by its subject instead of the country that happened to be first in the DER order, and container BOMs that link keystores to their certificates pass validation.
+  Go evidence, honestly
+  evinse now reports services for Go projects, with endpoints shaped the way Go routers accept them and percent-encoded safely for every language, so a service entry can no longer smuggle extra semantics through an unencoded character. go.mod is read the way the Go toolchain reads it, replace, exclude and workspace semantics included, so replaced, vendored and workspace modules are reported as the build actually resolves them, and dependency edges that drifted between go.mod and the module graph are kept. golem evidence now matches module paths regardless of case.
+  OBOM: more of the machine, honestly named
+  The OS inventory borrows osquery 5.24.0 from plugins 4.2.0 and gains a batch of new tables. Linux hosts report pacman, snap, flatpak and MacPorts packages, with Homebrew now appearing on Linux as well. AI agent skills are inventoried as components keyed by the SHA-256 of their SKILL.md, so a skill installed in several locations is one component with an occurrence each. GPUs appear as device components carrying the driver version, and browser search engines are captured per profile. The BitLocker query now reports protector types, and a new rule, OBOM-LNX-023, flags snaps installed in devmode, where the sandbox is not enforced.
+  Naming got a correction pass. Firefox add-ons, Chromium extensions and VS Code extensions no longer carry a profile folder or a home-directory path inside their purl, the same extension installed for several profiles or editors is one component with an occurrence each, and a VS Code extension is named the way the dedicated VS Code scan names it, not with the publisher's display name folded in. npm and pypi packages in an OBOM likewise lost the host path from their purls, apk packages carry their SPDX license ids, the apk database is read with a single bounded reader, and the distribution is derived from os-release exactly the way container scans do it.
+  Safer scanning
+  Secure mode with dependency installation disabled no longer executes code from the scanned project. Maven's .mvn configuration and build extensions, Poetry and PDM export configuration including Poetry 2 plugins, dotnet's Directory.Build.rsp and Directory.Build.targets, and SwiftPM manifests are all skipped, and cdxgen-secure has its own entry point so bun and Windows reliably run in secure mode too. In server mode, the git source check now resolves the host exactly the way git, curl and ssh do, closing a family of parser differences, a backslash or a ? in the wrong place, a second @, brackets in the user name, where a request could clone from any host while the allowlist believed it had checked an allowed one. file:// remotes are held to the path allowlist, ls-remote runs outside the scanned repository so its url.insteadOf or core.sshCommand cannot redirect it, and a server request can no longer switch on dependency installation or deep scanning.
+  Plugins, images and evidence tooling
+  The release bundles @cdxgen/cdxgen-plugins-bin 4.2.0: osquery 5.24.0, trustinspector with report-2 certificate identity and rootfs coverage, golem's trust-customisation findings, and the rusi and cdxrs fixes, with dosai at 4.1.0. The container images ship Node.js 24.22.1 and 26.12.1 from the October 2026 security releases, undici 8.12.3, and safer-exec 1.2.1. On deep .NET runs, dosai accepts a --sections request, the methods report is trimmed when no evidence analysis ran, the .NET 8-10 images carry dosai full and .NET 11 images carry the dosai tool, and when a host refuses to start it the error names the runtime dosai needs. The dosai that produced a piece of evidence is now named in metadata.tools.
+  Everything else
+  Multi-project .NET scans name each project the way its project.assets.json does, keep the assembly name distinct from the package id, and honor versions set in Directory.Build.props. Trivy's non-spec Bottlerocket purls are rewritten to pkg:rpm/bottlerocket and keep their component types. Component authors only receive valid email addresses, and contact addresses are validated the same way cdxrs validates them. Cache roots are judged by the rules of the platform being scanned rather than the host running the scan. Ubuntu 26.x codenames and Debian point releases are recognized, and the predictive audit matches the command basename the way the default audit categories do.
+  Full Changelog: v13.4.0...v13.5.0
+ReleaseNotesUrl: https://github.com/cdxgen/cdxgen/releases/tag/v13.5.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

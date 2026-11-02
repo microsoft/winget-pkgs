@@ -1,0 +1,128 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: JanMesarc.GodMan
+PackageVersion: 1.4.0
+PackageLocale: en-US
+Publisher: Jan Mesarc
+PublisherUrl: https://github.com/jame581/GodotManager/
+PublisherSupportUrl: https://github.com/jame581/GodotManager/issues
+Author: Jan Mesarc
+PackageName: GodMan
+PackageUrl: https://github.com/jame581/GodotManager/
+License: MIT
+LicenseUrl: https://github.com/jame581/GodotManager/blob/HEAD/LICENSE
+Copyright: Jan Mesarc
+ShortDescription: GodMan is a console/TUI tool to install, manage, and activate Godot Engine builds (Standard and .NET) on Windows.
+Description: CLI/TUI for installing, managing, and activating Godot Engine builds on Windows and Linux. Supports Standard and .NET editions, user/global scope installs, version fetching, activation, and cleanup.
+Tags:
+- godot
+- tool
+ReleaseNotes: |-
+  godman 1.4.0
+  Global installs moved to /usr/local/lib/godman (Linux)
+  Global installs used to live in /usr/local/bin/godman — a directory with the exact
+  name the godman binary needs in /usr/local/bin for sudo godman to work. They now
+  live in /usr/local/lib/godman.
+  - The move happens automatically on the first privileged run of a godman command that
+    sets up its paths — list, doctor, install, fetch and the like; for example
+    sudo ~/.local/bin/godman list (see below for why the full path). version and
+    --help do not trigger it. With GODMAN_GLOBAL_ROOT set, the same move runs inside
+    that prefix (see below). Unprivileged commands keep working in the meantime and still
+    see your global installs.
+  - The global godot shim, and the env.sh it sources, are rewritten as part of the move
+    so godot keeps working. Under a HOME-resetting sudo (the default on
+    Fedora, Debian and Ubuntu) that env.sh is root's (/root/.config/godman/env.sh), the
+    one the global shim was written to source. godman doctor
+    now checks what the shim actually points at and tells you if it is broken; for a global
+    install the fix is sudo ~/.local/bin/godman activate <id> (doctor prints the exact
+    command for your machine).
+  - User installs that still sit in ~/.local/bin/godman move to
+    ~/.local/share/godman/installs the same way.
+  Breaking (Linux): GODMAN_GLOBAL_ROOT is now a prefix, as it already was on
+  Windows: the shim goes to <prefix>/bin and installs to <prefix>/lib/godman. It used to
+  name the shim directory, with installs in <value>/godman. If you set it:
+  - /usr/local/bin (the old default): set it to /usr/local, or unset it. The move
+    above then runs as usual.
+  - Another shim directory, <X>/bin: set it to <X>. The next run that can write
+    there moves <X>/bin/godman to <X>/lib/godman, rebases the recorded install paths
+    and rewrites the global shim, as above. For a system directory that run is under
+    sudo, and sudo drops GODMAN_GLOBAL_ROOT from the environment by default, so pass it
+    through: sudo GODMAN_GLOBAL_ROOT=<X> ~/.local/bin/godman list (or sudo -E, if your
+    sudoers allows it). A plain sudo ~/.local/bin/godman list would migrate /usr/local
+    instead. Every sudo command godman prints already includes the variable. A
+    restricted sudoers rule without SETENV rejects the VAR=value form ("sorry, you are
+    not allowed to set the following environment variables"); in that case add
+    GODMAN_GLOBAL_ROOT to env_keep and run a plain sudo with the variable exported.
+  - Any other value <V>: godman cannot move <V>/godman for you, since it only moves
+    <prefix>/bin/godman. Pick a prefix <P>, set GODMAN_GLOBAL_ROOT=<P>, move
+    <V>/godman to <P>/lib/godman, and update the install paths recorded in its
+    installs.json (or reinstall those versions); then re-run activate for the active
+    one so the shim follows.
+  If you keep a pre-1.4.0 value, godman takes it as a prefix and finds nothing: while
+  <value>/godman still holds installs and <value>/lib/godman/installs.json does not
+  exist, list and doctor warn and say what to set, and global install, activate
+  and remove refuse to run (changing nothing) until the variable is fixed. godman does
+  not create <value>/bin or <value>/lib/godman while the old value is set.
+  An empty GODMAN_GLOBAL_ROOT counts as unset. A relative one is used for paths as
+  before, but godman never migrates or creates directories under it.
+  When sudo godman says "command not found"
+  sudo only searches its own secure_path — on Fedora, Debian and Ubuntu
+  /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin — which never includes
+  ~/.local/bin, where the installer puts godman. Until the migration
+  has run, /usr/local/bin/godman is also still a directory. Run godman by its full path:
+  sudo ~/.local/bin/godman list
+  After that, on most distributions (Fedora, Debian, Ubuntu) you can install the binary to
+  /usr/local/bin (GODMAN_INSTALL_DIR=/usr/local/bin, run as root) so that plain
+  sudo godman works. RHEL-family systems (RHEL, Rocky, Alma) leave /usr/local/bin off
+  secure_path: install to /usr/bin (the RPM package does) or keep using the full path.
+  Check yours with sudo grep secure_path /etc/sudoers. The remedies doctor prints use
+  the full path unless godman sits in /usr/bin (or /usr/sbin, /sbin, /bin), which
+  every default secure_path includes — so a godman in /usr/local/bin is still shown as
+  sudo /usr/local/bin/godman …, which works everywhere.
+  Global commands on Linux stop before changing anything
+  A global-scope install, activate, remove or clean that you can't write now stops
+  before it touches anything, and prints the exact sudo command to run instead. That
+  command uses the full path to godman unless godman is on every secure_path, and passes
+  GODMAN_GLOBAL_ROOT through when it's set. Before, an unprivileged remove --delete of a
+  global install could delete the install's files and then fail to unregister it.
+  What counts is whether godman can write to the global locations, not whether you're
+  root. So a GODMAN_GLOBAL_ROOT you own works without sudo.
+  Switching away from an active global install, or deactivating one, doesn't need sudo.
+  sudo would reset HOME and act on root's own registry instead of yours. The command
+  goes ahead, and if it couldn't remove the global godot shim, it tells you which file
+  is still there and how to remove it.
+  Launcher entries for every install
+  - Every install now gets its own application-menu entry (a .desktop file on Linux, a
+    Start Menu shortcut on Windows), named after its version and edition.
+  - godman install --no-shortcut skips it.
+  - remove and clean delete the entries they own.
+  - Installs made before 1.4.0 have no entry. godman doctor lists how many there are;
+    godman activate <id> adds one (and makes that install the active one). For a global
+    install on Linux, run it elevated; doctor prints the exact command.
+  - Windows: deactivate no longer removes the Start Menu entry — it belongs to the
+    install now, not to the active version. It still removes the desktop shortcut. The
+    desktop shortcut belongs to the active install alone: removing a different install
+    never deletes it, even one of the same version.
+  Other changes
+  - New godman version command: prints the godman, .NET runtime and OS versions.
+  - godman doctor also reports:
+    - a shim that points at a missing binary,
+    - an active install whose directory is missing,
+    - old install directories, and whether each one is safe to delete or still in use.
+      With GODMAN_HOME set, it says godman won't move an old user directory, rather than
+      offering a move that never happens.
+  - godman clean also removes global installs that haven't moved to the new location yet.
+    Run unprivileged, it stops if it can't remove them.
+  - Commands godman suggests (sudo …, rmdir …, sudo rm …) quote paths that contain
+    spaces or shell characters, so they can be pasted as they are.
+  - TUI: if the install dialog installs a version but can't activate it (for example, you
+    cancel the UAC prompt), it shows one "Installed, not activated" message instead of an
+    error followed by "Success".
+  What's Changed
+  - v1.4.0 — global root out of the shim dir, launcher entries, godman version by @jame581 in #2
+  - docs: README, release notes and PLAN for 1.4.0 by @jame581 in #8
+  Full Changelog: v1.3.0...v1.4.0
+ReleaseNotesUrl: https://github.com/jame581/GodotManager/releases/tag/v1.4.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

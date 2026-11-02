@@ -1,0 +1,87 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: bodaay.hfdownloader
+PackageVersion: 3.4.0
+PackageLocale: en-US
+Publisher: bodaay
+PublisherUrl: https://github.com/bodaay
+PublisherSupportUrl: https://github.com/bodaay/HuggingFaceModelDownloader/issues
+PackageName: HuggingFace Model Downloader
+PackageUrl: https://github.com/bodaay/HuggingFaceModelDownloader
+License: Apache-2.0
+LicenseUrl: https://github.com/bodaay/HuggingFaceModelDownloader/blob/HEAD/LICENSE
+ShortDescription: Simple go utility to download HuggingFace Models and Datasets
+Description: The HuggingFace Model Downloader is a utility tool for downloading models and datasets from the HuggingFace website. It offers multithreaded downloading for LFS files and ensures the integrity of downloaded models with SHA256 checksum verification.
+Moniker: hfdownloader
+Tags:
+- huggingface
+ReleaseNotes: |-
+  Export, Windows Links & Smarter Quantization Picking
+  Highlights
+  Copy what you already downloaded out as plain files for LM Studio, Ollama or
+  llama.cpp without re-downloading, a cache that works on Windows without
+  Developer Mode, download huge sharded models in batches, and pick EXL2/EXL3
+  bitrates that live on separate branches.
+  Export & Flat Files (#83, #91)
+  - hfdownloader export <repo> <dest> copies a cached repo out as plain
+    files in its own layout — nothing is re-downloaded, and the export is
+    independent of the cache. -F exports only some weights (tokenizers and
+    configs always come along), -b picks a revision, and --mode hardlink
+    shares the cache's disk space instead of copying (same drive only).
+  - Web UI: "Export as real files" on any cached repo, copied to
+    <export-dir>/<owner>/<name>. Enabled with serve --export-dir <folder>;
+    without it the API refuses, so it can't write anywhere else.
+  Windows: Hardlinks Instead of Missing Links
+  - Without Administrator/Developer Mode, Windows used to skip the cache's
+    links entirely — files ended up only as blobs/<sha256>, invisible to
+    Python, the HF CLI and you. hfdownloader now uses hardlinks there
+    (no extra disk space). On drives without any links (FAT/exFAT) it copies,
+    asking once first in an interactive terminal.
+  - New --link-mode auto|symlink|hardlink|copy (download and serve, config
+    key link-mode).
+  - hfdownloader rebuild repairs caches written by older Windows builds
+    (recreates the missing snapshot entries from the download manifest).
+  Downloading
+  -  --shards 1-100 (or 1-50,120-185) downloads only those shards of
+    split files, so a huge model can be fetched in batches (#90).
+  - Quantizations on branches (#94): EXL3/EXL2 repos that keep each
+    bitrate on its own branch (turboderp/...-exl3: 4.00bpw,
+    SC_6.00bpw_H6_V6; bartowski exl2: 4_25, 6_5) are listed with bits,
+    head bits and size; analyze recommends one and -b <branch> downloads it
+    (CLI, analyze -i and the web UI).
+  - Weight-format choice for every model type (safetensors, PyTorch, ONNX,
+    TensorFlow, TFLite, Flax, OpenVINO, Rust) — e.g. whisper-tiny's
+    recommended download is 148 MiB instead of 580 MiB of four formats.
+  - GGUF repos offer every mmproj precision; diffusers LoRAs are detected.
+  Web UI & API
+  - Pause button now appears on jobs that waited in the queue; download speed
+    is shown; skipped files show as "skipped".
+  - Saving settings no longer wipes other config keys (cache-dir,
+    stall-timeout, ...), validates values (bad values used to break every
+    later job) and writes the config file privately (0600).
+  - A second download of the same repo with different filters is its own job;
+    deleting a repo's cache while it downloads is refused (409).
+  - Analyze and plan honor your proxy, return 404/401 for missing or gated
+    repos, and no longer cut off slow analyses of huge repos.
+  - Request bodies are capped at 1 MiB; --auth-user requires --auth-pass.
+  Security
+  - Revisions are validated wherever they become paths (download, export, web
+    API): ..-style revisions could read files outside the cache through the
+    new export endpoint during this release cycle (fixed before release).
+  Behavior Changes
+  - Go 1.25 is now the minimum for building from source (security fixes in
+    golang.org/x/net require it; Go 1.24 is no longer supported upstream).
+    Release binaries and the Docker image are built with Go 1.26.8.
+  - On Windows, cache entries are hardlinks instead of missing.
+  - Filtered GGUF downloads also skip large LFS .imatrix files.
+  - list/info show sizes as KiB/MiB/GiB.
+  Internal
+  - golang.org/x/net v0.56.0 / x/sys v0.46.0: govulncheck finds no
+    vulnerabilities; staticcheck clean; the codebase is gofmted.
+  - Docs (docs/CLI.md, docs/API.md, README) were checked flag by flag and
+    endpoint by endpoint against the binary.
+  Full Changelog: https://github.com/bodaay/HuggingFaceModelDownloader/compare/v3.3.0...v3.4.0
+ReleaseNotesUrl: https://github.com/bodaay/HuggingFaceModelDownloader/releases/tag/v3.4.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

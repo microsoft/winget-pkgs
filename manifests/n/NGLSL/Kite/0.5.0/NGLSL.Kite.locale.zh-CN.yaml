@@ -1,0 +1,67 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: NGLSL.Kite
+PackageVersion: 0.5.0
+PackageLocale: zh-CN
+Publisher: NGLSL
+PublisherUrl: https://github.com/NGLSL
+PublisherSupportUrl: https://github.com/NGLSL/Kite/issues
+Author: Leixinxin
+PackageName: Kite
+PackageUrl: https://github.com/NGLSL/Kite
+License: Apache-2.0
+LicenseUrl: https://github.com/NGLSL/Kite/blob/HEAD/LICENSE
+ShortDescription: 按下快捷键即可快速搜索并启动应用的 Windows 轻量启动器，支持拼音搜索。
+Description: Kite 是一款面向 Windows 的轻量应用启动器，使用 Rust 和 Iced 构建原生桌面应用，无需 WebView2 或 Node.js。通过全局快捷键唤起搜索窗口，输入应用名称、别名或拼音即可快速筛选并启动目标程序；支持扫描开始菜单、桌面、注册表 App Paths 和 Windows 打包应用，提供启动历史、固定结果、系统托盘以及可选的 Everything 文件搜索。
+Tags:
+- 启动器
+- 快速启动
+ReleaseNotes: |-
+  Kite v0.5.0
+  版本重点
+  让搜索结果更容易调整，也让未被自动收录的应用有明确的添加入口。现在可以直接给应用设置 Alias、隐藏不需要的启动入口、清除某个查询的配对学习，并手动添加和管理 EXE 或快捷方式。
+  插件设置页同时改为更紧凑的布局，Windows 中的产品名称统一为 Kite。
+  新功能
+  - 选中搜索结果后按 Shift+F10，或右键打开同一个操作面板；上下键选择、Enter 执行、Esc 取消。面板记住打开时的结果和查询，后台结果重排不会改换操作目标；过期目标会拒绝执行。
+  - 从应用结果直接「设置 Alias」，保存后立即参与搜索；同名 Alias 已指向其他应用时，可取消或明确确认替换。中文输入法组合态不会误保存或误启动。
+  - 「隐藏此入口」按目标和参数形成的稳定启动身份生效，过滤普通查询、Alias、最近区和固定区；在设置中查看并恢复。隐藏保留 Alias、固定与历史记录，不扩大到同组的其他启动入口，明确路径访问仍可使用。
+  - 「忘记此查询的学习记录」只移除打开面板时该规范化查询的配对学习；其他查询、全局使用记录、Alias、固定、降低优先级、隐藏和手动登记均保留，后续成功启动可重新学习。
+  - 设置 → 应用索引支持手动添加、改名和移除单个 EXE/LNK；有效绝对路径的结果也可选择「添加到 Kite」。手动项参与原有扫描归并，用户名称优先，同身份自动入口不重复；移除登记保留原文件和独立存在的自动入口。
+  - 手动快捷方式沿用已验证的目标、静态参数、工作目录和图标来源。目标暂失时保留管理记录并标记不可用；恢复后重扫可再次使用。外部改换快捷方式目标或语义参数会形成新身份，不把旧偏好赋给新目标。
+  修复与界面调整
+  - 插件开关原先在 40×22 的内部控件上叠加按钮默认 padding，实际达到 60×32；现在恢复为 40×22。
+  - 插件示例和「说明 / 重载」共用一行，长示例自动换行且不挤掉管理按钮。718×518 原生离屏渲染中，官方插件卡片从约 139 px 降至 101 px，三张卡片可完整显示。
+  - 修复手动登记改动后，空查询首页仍可能采用旧索引快照的问题；完整重扫结果现在会被正确采用。
+  - 补齐面板中的 Alt+数字隔离，修改 Alias 文本会使旧冲突确认失效，避免启动错目标或替换错误映射。
+  - 手动父目录与原扫描根重叠时保留原监听模式；监听根随后成为便携目录时会更新为递归监听。
+  - 搜索在没有隐藏记录时沿用轻量路径，避免为新过滤逻辑付出无必要的遍历成本。
+  - Windows 文件说明和产品名称使用 Kite，任务管理器不再显示较长的 Kite Windows launcher。
+  升级影响
+  - 首次启动会把 SQLite schema 从 2 前向迁移到 3，新增隐藏记录和手动登记表；迁移采用事务，保留原有设置、Alias、固定、Usage、Query 配对和降低优先级。
+  - 整体清空启动历史只清除 Usage/Query 学习，不删除隐藏选择或手动登记。
+  - 官方插件协议和插件版本无需改变；既有 Commands 来源的终端选择与 home 工作目录规则保持。手动快捷方式按其已验证的导入元数据启动。
+  - 未新增运行时依赖。
+  - 回退到旧版本后的新功能状态未做完整验证，不承诺降级后的隐藏或手动登记行为。
+  验证与限制
+  - 本地 cargo check、全套 cargo test（622 通过、11 忽略）、release 和 NSIS 安装器构建通过；官方插件 14 项测试通过。发布 CI、安装器大小和 SHA-256 由下方构建报告列出。
+  - 与固定 v0.4.3 起点比较，53 个搜索样本的 Top1、Recall@5、MRR 均保持 1.000；发现的无隐藏项空查询额外成本已定位修正。耗时仍有运行波动，不宣称所有查询都更快。
+  - 开发候选实际验证了 Alias 保存与冲突取消/替换、隐藏后重启和恢复、手动管理、EXE/LNK 启动参数及中文/空格工作目录、按 Query 清理后重新学习、真实 Microsoft 拼音输入，以及 Base64 长文本。插件页深浅色和长示例使用实际 Iced/tiny-skia 离屏渲染检查。
+  - 上述开发候选操作不是最终发布安装版的完整证明：最终版本的覆盖安装/升级后全功能、缺失目标时的搜索身份过滤、外点取消 Alias 后输入焦点、稳定空闲采样，以及 Hash/JSON 长文本桌面检查仍待补充。多屏及不同 DPI 下的完整操作链也尚未验收。
+  - 安装包未做 Authenticode 数字签名。
+  构建与验证
+  - 发布 tag：v0.5.0
+  - tag 提交：8aa7ae7727f3affe216d96967b9279085f6e1a64
+  - 上一个发布：v0.4.3
+  - 提交数量：4
+  - 构建环境：GitHub Actions windows-latest
+  - 验证步骤：cargo test、cargo build --release、NSIS 安装包构建
+  - 构建记录：Release #26
+  本次提交范围
+  - test: normalize native shortcut fixture paths (8aa7ae7)
+  - chore(release): prepare v0.5.0 (abf2bf6)
+  - fix: compact plugin settings cards and switches (5df922f)
+  - feat: add result actions and manual application management (c21c250)
+ReleaseNotesUrl: https://github.com/NGLSL/Kite/releases/tag/v0.5.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

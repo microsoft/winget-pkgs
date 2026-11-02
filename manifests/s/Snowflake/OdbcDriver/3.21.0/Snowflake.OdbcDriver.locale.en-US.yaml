@@ -1,0 +1,48 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Snowflake.OdbcDriver
+PackageVersion: 3.21.0
+PackageLocale: en-US
+Publisher: Snowflake Computing
+PublisherUrl: https://www.snowflake.com/
+PublisherSupportUrl: https://www.snowflake.com/en/support/
+PrivacyUrl: https://www.snowflake.com/en/legal/privacy/privacy-policy/
+Author: Snowflake, Inc.
+PackageName: Snowflake ODBC Driver
+PackageUrl: https://www.snowflake.com/en/developers/downloads/odbc/
+License: Proprietary
+LicenseUrl: https://sfc-repo.snowflakecomputing.com/odbc/Snowflake_ODBC_Driver_License_Agreement.pdf
+Copyright: © 2026 Snowflake Inc. All Rights Reserved
+CopyrightUrl: https://sfc-repo.snowflakecomputing.com/odbc/Snowflake_ODBC_Driver_License_Agreement.pdf
+ShortDescription: Driver for connecting to Snowflake using Open Database Connectivity (ODBC) and using SQL for accessing the data.
+Moniker: snowflake-odbc
+Tags:
+- database
+- snowflake
+- sql
+ReleaseNotes: |-
+  New features and updates
+  - Added the wif_host connection parameter to override the STS/IAM endpoint used for AWS and GCP Workload Identity Federation. This is independent of the WORKLOAD_IDENTITY_AUDIENCE parameter removed in this release.
+  - Added CRL cache cleanup so expired CRLs no longer accumulate in long-lived processes. New environment variables control cache validity and cleanup:
+    - SF_CRL_CACHE_CLEANUP_INTERVAL (default 3600 seconds; set to 0 to disable)
+    - SF_CRL_CACHE_VALIDITY_TIME (default 86400 seconds)
+    - SF_CRL_ON_DISK_CACHE_REMOVAL_DELAY (default 604800 seconds)
+  - Migrated Azure storage from azure-storage-cpplite to Azure SDK for C++ (azure-storage-blobs 12.18.0).
+  - Updated curl to v8.21.0.
+  - Upgraded libsnowflakeclient to version 2.10.0.
+  Changes
+  - Restored SigV4 GetCallerIdentity as the default AWS Workload Identity Federation attestation method. The STS GetWebIdentityToken (JWT) flow introduced in version 3.18.0 is no longer used. Version 3.21.0 doesn’t provide a connection parameter to keep the JWT flow. If your IdP trust policy requires GetWebIdentityToken, stay on version 3.20.x until a later driver release exposes an opt-in.
+  - Removed the WORKLOAD_IDENTITY_AUDIENCE connection parameter added in version 3.20.0. The configurable attestation audience was withdrawn; it isn’t replaced by wif_host. The driver now always uses the default audience snowflakecomputing.com. If you still set WORKLOAD_IDENTITY_AUDIENCE, the driver ignores it and logs a warning for an unexpected connection key.
+  Bug fixes
+  - Fixed credentials appearing in diagnostic trace output.
+  - Fixed the HTTP retry path so the request buffer is reset correctly.
+  - Fixed a delay in the AWS identity detector.
+  - Tightened string copy bounds checking after the Azure SDK migration to prevent a buffer overflow.
+ReleaseNotesUrl: https://docs.snowflake.com/en/release-notes/clients-drivers/odbc-2026.html
+InstallationNotes: |-
+  Please visit the following link for further installation process:
+
+  - https://docs.snowflake.com/en/developer-guide/odbc/odbc-windows#step-2-configure-the-odbc-driver
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

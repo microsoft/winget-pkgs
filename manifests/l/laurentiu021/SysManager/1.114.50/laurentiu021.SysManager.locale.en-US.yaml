@@ -1,0 +1,91 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.114.50
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.114.50] - 2026-09-29
+  Closing SysManager mid-change can now name it on five more tabs. Tweaks Hub, Privacy & Telemetry,
+  Defender Tweaks, Edge/OneDrive Remover and Services took no operation lock, so the question SysManager
+  asks before closing while something is still running could not see them.
+  Fixed
+  - Tweaks Hub, Privacy & Telemetry, Defender Tweaks, Edge/OneDrive Remover and Services took no
+    operation lock. Closing SysManager, or choosing Exit from the tray, while one of them was mid-change
+    said nothing about it — the warning SysManager shows before an exit that would cut something off reads
+    from the same lock every other tab already registers with, and an operation that takes none is invisible
+    to it. Each of the five now takes the same lock the tabs that change other Windows settings already do
+    (Performance Mode, Gaming Profile, Environment Variables, Preinstalled Apps), and refuses to start a
+    second change with "Cannot start — X is already running." while another of the five, or one of those
+    four, is mid-change.
+    - Overlap between any two of these five is not itself dangerous — none of them restarts Windows or reads
+      files another is writing, the way an SFC repair racing a Windows feature change is. The lock exists
+      mainly so closing can name what it would cut off; that it also serialises the five is a side effect of
+      sharing the one category, not the reason for it.
+    - Tweaks Hub and Defender Tweaks and Edge/OneDrive Remover already route every one of their changes
+      through a single shared method, so the lock is taken once, there, for all of them. Services takes it
+      in each of Start, Stop, Disable and Enable individually, the way it already has its own confirmation
+      in each.
+    - Present since v1.51.0 (Tweaks Hub), v1.5.0 (Privacy & Telemetry), v1.39.0 (Defender Tweaks), v1.53.0
+      (Edge/OneDrive Remover) and v0.13.0 (Services).
+  Verify the download
+  Get-FileHash .\SysManager-v1.114.50.exe -Algorithm SHA256
+  Expected SHA256: DBFAFF36534F37FBB6E18D9E120E34587E4B4068731CA2E688B8963BCA7716F1
+  This build is not code-signed, so Windows will warn on first launch. That is
+  expected for a small independent app: see what the warning says and what to
+  click.
+  Code signing is planned through the SignPath Foundation,
+  which provides free certificates to open-source projects, with signing performed by
+  SignPath.io. Until then, the SHA256 above and the build
+  attestation below are what establish that a download is the genuine build.
+  Code signing policy
+  This release is not code-signed. The team roles, release-approval process and
+  privacy policy required by the SignPath Foundation programme
+  are documented in advance under Code signing
+  policy. That
+  documentation is a prerequisite for applying, not evidence of a certificate. The
+  attribution line naming SignPath as the signing provider will appear here once a
+  certificate is actually issued.
+  This program will not transfer any information to other networked systems unless
+  specifically requested by the user or the person installing or operating it. Full
+  privacy policy.
+  Verify where this binary came from
+  This exe was built by GitHub Actions from this public source, and the build is
+  recorded in the Sigstore public transparency log. With the
+  GitHub CLI:
+  gh attestation verify .\SysManager-v1.114.50.exe --repo laurentiu021/SystemManager
+  That proves which commit and workflow produced this exact binary, something the
+  SHA256 file cannot show, since it is published alongside the exe it describes.
+  Each release also ships SysManager-v1.114.50.sbom.json, a CycloneDX inventory of
+  every dependency resolved for this build.
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.114.50
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,57 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Technicalflight.CCHarness
+PackageVersion: 0.2.0
+PackageLocale: zh-CN
+Publisher: ccharness
+PublisherUrl: https://github.com/Technicalflight
+PublisherSupportUrl: https://github.com/Technicalflight/CCHarness/issues
+PackageName: CCHarness
+PackageUrl: https://technicalflight.github.io/CCHarness/
+License: AGPL-3.0-or-later
+LicenseUrl: https://github.com/Technicalflight/CCHarness/blob/HEAD/LICENSE
+ShortDescription: 把多个大模型装进同一个桌面工作台的本地优先 AI 聊天应用。
+Description: |-
+  CCHarness 是一款本地优先的多模型 AI 聊天桌面应用（Tauri 2 + React 18 + Rust），基于 AGPL-3.0 开源，把多个大模型装进同一个桌面工作台。
+  它提供七种工作流模式（智能体、规划、目标、深度推理、审阅、生图、自定义状态机）、多智能体协作（竞技场对比、圆桌群聊、具名子智能体）、向量长期记忆与自动反思，并把请求侧前缀缓存命中率作为一级指标持续优化。内置 16+ 工具、MCP、Skills、Guardrails 安全护栏与多模态输入，支持 DeepSeek、GLM、Kimi、OpenAI、Anthropic、Ollama 及任意 OpenAI 兼容端点；API Key 在系统级加密存储。
+Tags:
+- 人工智能
+- 大模型
+- 大语言模型
+- 智能体
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  CCHarness v0.2.0 更新说明。
+  CCHarness 是一款本地优先的多模型 AI 聊天桌面应用（Tauri 2 + React 18 + Rust），基于 AGPL-3.0 开源：
+  - 七种工作流模式：智能体 / 规划 / 目标 / 深度推理 / 审阅 / 生图 / 自定义状态机
+  - 多智能体协作：竞技场对比、圆桌群聊、具名子智能体
+  - 记忆系统：向量长期记忆、自动反思、AuxMemo 辅助记忆
+  - 前缀缓存工程：三区上下文分区 + 指纹链 + 命中率遥测与 miss 归因
+  - 16+ 内置工具、MCP、Skills、Guardrails 安全护栏、Worktree 隔离、多模态输入与生图
+  - 模型支持：DeepSeek / GLM / Kimi / OpenAI / Anthropic / Ollama 及任意 OpenAI 兼容端点
+  v0.2.0 更新（深度审计两轮全项闭环 + 协议与网络专项）：
+  - Anthropic 请求侧修复：多轮对话历史（含工具调用链）以原生 tool_use / tool_result 块完整重放进 Claude 上下文——此前该协议臂只发送当轮消息，多轮对话静默失忆、工具链被剥成纯文本
+  - 智能体与并发：圆桌群聊回读修复（此前第 2 位起成员发言读不到）、同会话并发发送 stop 守卫、SSE 工具调用增量索引上界（畸形上游不再可撑爆内存）、工具完成判定对 legacy finish_reason 兜底、stopped 回合 live 与重启重建字节一致
+  - 持久化纪律：改名 / 置顶 / 归档 / 工作区 / 隔离开关 / 删除会话等元数据写入全部纳入保存锁（与流式落盘互斥）、落盘 rename 重试、配置文件读损坏先备份 .broken 再兜底（不再覆盖原配置）、memo 水位与 in-history 系统提示更新改为「落地后记账」（失败回合重新注入而非静默丢失）
+  - 网络与 SSRF：Base URL 主机名解析后逐 IP 分类（nip.io / sslip.io 型公网域名指向内网被拒）、网页抓取逐跳重放沙箱网络策略并解析后锁定、git 远程 URL 传输白名单（ext:: 等命令执行形拒绝）
+  - 工具与 MCP：workspace 遍历强制 canonical 边界（目录符号链接 / junction 不再越界读）、写路径识别 NTFS reparse point、MCP stdio 写超时与响应行上限、子代理工具结果纳入 guardrails 围栏、任务清单会话 ID 消毒、ccswitch 导入不回吐明文密钥、会话导入 64MB 上限
+  - 会话生命周期：子任务（subagent）会话随父会话级联清理（会话文件 / 前缀缓存条目 / 附件不再无限累积），启动时自动清扫孤儿记录
+  - 界面体验：流式中删除会话先停流清态、# 菜单回车取过滤后首项、粘贴转附件受大小上限约束、遥测 / 审阅页慢响应守卫、编辑重发输入法组合键防误触、浏览器 confirm 全部迁至自绘对话框、mermaid 图随明暗主题切换重渲染、文件预览过期响应丢弃、标题栏窗口监听器卸载竞态修复、CSP img-src 收紧（去除明文 http）
+  - 目标模式：验收清单计数容忍 Markdown 列表前缀（- / * / 1. 开头的 ✅ ⬜ 行不再漏计）
+  - 安全加固（第一批）：工具写路径符号链接逃逸防护（最深已存在祖先逐级校验 + 写侧拒绝）、网页抓取重定向逐跳「解析后锁定」（防 DNS 重绑定，IPv4 映射地址归一分类）、glob 工具拒绝根分隔符 / 相对上跳 / 盘符模式、沙箱命令提取包装器内层程序（cmd / pwsh / bash / wsl 递归识别）、git 远程名与选项前缀校验
+  - 稳定性（第一批）：停轮遗留未配对工具调用自动修复（中断会话重启后不再报协议错误）、清理 / 回滚覆盖全部泳道（含缓存指纹水位）、后台命令移入阻塞线程池 + 进程树整体击杀（Windows taskkill /T /F、Unix 进程组信号）、MCP 服务进程生命周期治理（退出自愈、超时摘除等待者、连接失败有界重试）
+  - Anthropic 协议适配修复：流式工具调用参数分片正确组装（此前参数可能静默丢失）、工具定义注入请求体（此前未携带）、历史内系统提示更新不再被丢弃、连续助手消息自动合并（避免角色交替报错）
+  - 网络健壮性：流式响应改用空闲读超时（长生成不再被固定总时长上限掐断）、模型列表拉取超时收敛
+  - 生命周期治理：辅助记忆台账自动裁剪（防无限增长）、隐私替身库与超大输出溢出目录随会话删除一并清理、主密钥文件权限收紧、Files API 文件索引过期驱逐 + 每供应商上限
+  - 配置兼容：旧版或缺字段配置文件无损加载（顶层字段全默认），并修复旧配置可能发出空推理档位字段的问题
+  - 前端体验：流式期间历史消息零重渲染（组件级 memo + 逐字段订阅，长会话打字更顺滑）、输入法组合键防误触发送、审批卡本地超时与停止即清、隔离 / 遥测慢响应跨会话守卫、git 推送 / 拉取 / 抓取转异步不再冻结界面
+ReleaseNotesUrl: https://github.com/Technicalflight/CCHarness/releases/tag/v0.2.0
+Documentations:
+- DocumentLabel: 指南
+  DocumentUrl: https://technicalflight.github.io/CCHarness/guide/index.html
+- DocumentLabel: 下载安装
+  DocumentUrl: https://technicalflight.github.io/CCHarness/guide/install.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

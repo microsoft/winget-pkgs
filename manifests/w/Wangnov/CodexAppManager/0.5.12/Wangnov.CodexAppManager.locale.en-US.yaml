@@ -1,0 +1,69 @@
+# Created with Codex App Manager release workflow using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Wangnov.CodexAppManager
+PackageVersion: 0.5.12
+PackageLocale: en-US
+Publisher: Wangnov
+PublisherUrl: https://github.com/Wangnov
+PublisherSupportUrl: https://github.com/Wangnov/Codex-App-Manager/issues
+PackageName: Codex App Manager
+PackageUrl: https://github.com/Wangnov/Codex-App-Manager
+License: MIT
+LicenseUrl: https://github.com/Wangnov/Codex-App-Manager/blob/HEAD/LICENSE
+ShortDescription: Installer, updater, and uninstaller for the official Codex desktop app.
+Description: A cross-platform desktop client to install, incrementally update, and cleanly uninstall the official Codex desktop app, with built-in self-update.
+Moniker: codex-app-manager
+Tags:
+- codex
+- installer
+- openai
+- tauri
+- updater
+ReleaseNotes: |-
+  Codex App Manager
+  > 修复 Windows 便携版的双击启动，并完善协议入口和任务栏快捷方式。
+  > Fix Windows portable launchers and their protocol and taskbar integration.
+  🐛 修复 · Fixes
+  - 直接双击启动：便携安装目录中的 Codex.exe、ChatGPT.exe 和 LaunchCodex.exe 现在都通过原生入口启动，并带上正确的 CLI 路径和工作目录。
+    All three entry points in the portable install folder now launch with the correct CLI path and working directory.
+  - 兼容旧便携安装：更新或重新安装时，旧的平铺目录自动迁移到新布局；迁移失败会恢复原来的文件。
+    Updates and reinstalls migrate older flat layouts automatically, restoring the previous files if migration fails.
+  - 协议链接入口：Windows 默认应用中新增「Codex (Portable)」，选中后通过便携入口处理 codex:// 链接；卸载时清理该注册。
+    Select “Codex (Portable)” in Windows Default apps to open codex:// links through the portable launcher. Uninstalling removes its registration.
+  - 任务栏与中文路径：开始菜单快捷方式关联到便携入口；请从更新后的开始菜单项重新固定到任务栏。中文、空格和特殊字符路径也能正确保存，较长安装路径不会重复嵌入卸载命令。
+    Start-menu shortcuts identify the portable launcher correctly; recreate taskbar pins from the updated Start-menu entry. Shell metadata preserves Unicode and special characters, and uninstall commands avoid duplicated encoding on long paths.
+  验证范围： 自动回归、真实 x64/ARM64 MSIX 提取和安装器检查已通过。协议唤起、任务栏重新打开与登录后的浏览器联动仍需受影响机器复测。
+  Verification scope: Automated regression, real x64/ARM64 MSIX extraction and installer checks passed. Protocol activation, reopening taskbar pins and signed-in browser actions still need confirmation on affected machines.
+  📦 安装与升级 · Install & Upgrade
+  已经安装? 打开应用即可收到本次更新——macOS 只下载版本间的增量,校验失败自动回滚。
+  Already installed? The app offers this update in-app — macOS pulls only the delta, with automatic rollback.
+  ─────────────────────┬───────────────────────────────────────────
+  平台 · Platform      │下载 · Download(国内直连 · China-reachable)
+  ─────────────────────┼───────────────────────────────────────────
+  macOS · Apple Silicon│CodexAppManager_aarch64.dmg
+  ─────────────────────┼───────────────────────────────────────────
+  macOS · Intel        │CodexAppManager_x86_64.dmg
+  ─────────────────────┼───────────────────────────────────────────
+  Windows · x64        │CodexAppManager_x64-setup.exe
+  ─────────────────────┼───────────────────────────────────────────
+  Windows · ARM64      │CodexAppManager_arm64-setup.exe
+  ─────────────────────┴───────────────────────────────────────────
+  Windows 签名状态: 本版安装器没有 Authenticode 代码签名,首次运行可能出现 SmartScreen 提示。.sig / latest.json 的 Tauri updater 字节签名用于验证更新文件,不代表 Windows 发行者身份。SignPath Foundation 申请已不再推进,项目改为采用付费云 HSM 证书;证书配置完成前发布保持未签名。参见 代码签名政策与 Windows signing and verification。
+  Windows signing status: This release's installers are not Authenticode-signed, so SmartScreen may warn on first run. Tauri updater signatures in .sig / latest.json verify update files and do not establish Windows publisher identity. The SignPath Foundation application is no longer being pursued; the project is moving to a paid cloud-HSM certificate, and releases stay unsigned until one is configured. See the code signing policy and Windows signing and verification.
+  隐私 · Privacy: 隐私政策 · Privacy policy
+  核验下载: 本页 Assets 带有 SHA256SUMS;Windows 用 Get-FileHash .\CodexAppManager_x64-setup.exe -Algorithm SHA256 或替换为 ARM64 文件名,macOS 用 shasum -a 256 CodexAppManager_aarch64.dmg,再与 SHA256SUMS 比对。
+  Verify downloads: This release includes SHA256SUMS in Assets; on Windows run Get-FileHash .\CodexAppManager_x64-setup.exe -Algorithm SHA256 or swap in the ARM64 filename, and on macOS run shasum -a 256 CodexAppManager_aarch64.dmg, then compare with SHA256SUMS.
+  # macOS · Homebrew
+  brew install --cask wangnov/tap/codex-app-manager
+  > 镜像直链恒指向最新版本;如需本页对应的历史版本,请使用下方 Assets。.app.tar.gz / .sig / latest.json 是自动更新器的工件,手动安装请选 .dmg / .exe。
+  > Mirror permalinks always resolve to the latest release — for this exact version use the assets below. .app.tar.gz / .sig / latest.json belong to the auto-updater; pick the .dmg / .exe for manual installs.
+  What's Changed
+  - 修复未启用 Certum action 导致正式发布无法启动 by @Wangnov in #397
+  - fix(windows): make portable root executables launch Codex by @Wangnov in #400
+  - fix(windows): wire portable protocols and taskbar shortcuts by @Wangnov in #401
+  - chore(release): bump version to 0.5.12 by @Wangnov in #402
+  Full Changelog: v0.5.11...v0.5.12
+ReleaseNotesUrl: https://github.com/Wangnov/Codex-App-Manager/releases/tag/v0.5.12
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

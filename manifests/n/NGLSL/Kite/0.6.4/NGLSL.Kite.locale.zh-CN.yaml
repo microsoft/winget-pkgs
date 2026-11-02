@@ -1,0 +1,65 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: NGLSL.Kite
+PackageVersion: 0.6.4
+PackageLocale: zh-CN
+Publisher: NGLSL
+PublisherUrl: https://github.com/NGLSL
+PublisherSupportUrl: https://github.com/NGLSL/Kite/issues
+Author: Leixinxin
+PackageName: Kite
+PackageUrl: https://github.com/NGLSL/Kite
+License: Apache-2.0
+LicenseUrl: https://github.com/NGLSL/Kite/blob/HEAD/LICENSE
+ShortDescription: 按下快捷键即可快速搜索并启动应用的 Windows 轻量启动器，支持拼音搜索。
+Description: Kite 是一款面向 Windows 的轻量应用启动器，使用 Rust 和 Iced 构建原生桌面应用，无需 WebView2 或 Node.js。通过全局快捷键唤起搜索窗口，输入应用名称、别名或拼音即可快速筛选并启动目标程序；支持扫描开始菜单、桌面、注册表 App Paths 和 Windows 打包应用，提供启动历史、固定结果、系统托盘以及可选的 Everything 文件搜索。
+Tags:
+- 启动器
+- 快速启动
+ReleaseNotes: |-
+  Kite v0.6.4
+  版本重点
+  修复日常大量文件变动导致文件搜索停止同步、要求重建索引的问题。待处理身份与搜索变化层改为磁盘承载，移除 65,536 个存活变更对象、64 MiB 变化层和单次会话 512 MiB 日志的累计容量失败条件。
+  本版包含 v0.6.3 候选的全部修复。v0.6.3 在正式发布门禁被拦截，未上传公开安装包；其原 tag 保留，正式发布顺延至 v0.6.4。
+  修复与恢复
+  - 待补读对象按文件身份在 SQLite 中合并，使用固定大小的读取页和刷新批次，大量新增、重命名、安装、解压及临时文件清理可以持续处理。
+  - 文件路径、目录映射、基库影子位和完整提交的全卷恢复游标在同一事务持久化；重启接续已提交位置，未提交的轮次重新读取。
+  - 分块传输保持整轮两阶段提交，先处理旧状态的目录变换，再统一提交本轮当前路径，避免后续目录事件破坏已经刷新的路径。
+  - 查询通过独立只读连接读取最后完整提交的视图，后台大轮次提交无需长期占用查询锁；目录处理与磁盘迭代可以响应取消。
+  - 状态统计随事务维护固定计数，变化对象累计增多后，定时轮询也无需遍历整张变化表。
+  - 同步日志按段轮转，消费确认后回收旧段；已删除记录复用数据库空闲页并整理 WAL。变化层自身可以直接查询，本版没有周期性全盘重扫或全基库重写。
+  升级影响
+  - 文件索引读取组件协议升级为 3。安装器更新已经安装的读取组件；旧组件与新主程序混用时提示更新，授权后重连。文件搜索继续默认关闭。
+  - 现有基库、索引格式和受保护的卷身份起点可以复用；升级前尚无持久恢复位置，且原始 USN 起点已经过期时，需要重建一次。卷或 journal 身份变化、实际日志连续性丢失仍要求重新建库。
+  - 排除目录、应用设置、Alias、固定项和启动历史继续保留。SQLite 变化数据仅保存在本机。
+  - 新增面向维护的 --kite-file-index-session <data-directory> 诊断入口，复用生产控制器，提供逐行 JSON 状态、查询、重建和停止操作。它只使用明确指定的数据目录，不自动安装读取组件或打开搜索结果。
+  验证与发布
+  - 本机完成必要编译、定向格式和差异检查；使用原有工具回放 3,255,185 条路径基库与 8,433 项真实变化，22 个关键词的完整查询、限量查询及原报告结果一致。
+  - 同一份真实变化转换为新逻辑轮次分块后，提交与查询结果同样一致，无 stale 或 rebuild_required。未新增 Rust 测试用例。
+  - 正式构建、官方插件、NSIS 打包、独立 Windows runner 的安装与文件同步验收统一由 GitHub Actions 执行；具体提交、安装包 SHA-256 和实际验收结果由下方自动报告提供。
+  - 安装验收覆盖全新安装、同版本覆盖、卸载、用户数据保留及读取组件的注册、实际替换和移除。专项同步验收覆盖超过 65,536 个存活变化对象、退出期间变化、同基库重启续读及日志切段回收。
+  - 正式门禁显式检出 tag 引用，保留注释对象，并核对 tag 提交、检出提交和触发事件 SHA 一致，再验证 main 包含关系及该提交的完整 CI。
+  验证边界
+  - 磁盘满、写入失败和实际 USN 连续性丢失会保留最后完整提交的数据并明确报错。
+  - 同版本覆盖验收不等于全部旧版本迁移验收；人工 UAC 拒绝、多屏、快捷键交互和长期在线观察单独记录。
+  - 安装包未做 Authenticode 数字签名。
+  构建与验证
+  - 发布 tag：v0.6.4
+  - tag 提交：3cb3840f4c25a3ee61a79ba2b9e5a1b70bfd9b1d
+  - 上一个发布：v0.6.3
+  - 提交数量：1
+  - 构建环境：GitHub Actions windows-latest
+  - 检查与构建：精确 main 提交 CI、cargo test --locked、cargo build --release --locked、官方插件与 NSIS 打包
+  - 独立 Windows runner 安装验收：全新安装、同版本覆盖、卸载、负载哈希、注册表、用户数据保留、按需读取组件注册／更新／卸载
+  - 真实 NTFS 补读：停机期间创建 70002 个存活文件，查询变化层实际 70027 个对象；新增／改名／删除哨兵查询通过
+  - 分段与恢复：实际生成 2 个 32 MiB feed 段，确认首段已回收；同一 generation 重启从已提交游标续读
+  - 产物核对：发布 job 重新计算安装器大小和 SHA-256，与验收报告及校验和文件一致后才上传
+  - 验收报告：installer-validation.json
+  - 验证边界：同版本覆盖不包含旧版本迁移；未验证人工 UAC 拒绝、桌面交互、强制崩溃或磁盘满恢复
+  - 构建记录：Release #31
+  本次提交范围
+  - fix: preserve annotated release tags and prepare v0.6.4 (3cb3840)
+ReleaseNotesUrl: https://github.com/NGLSL/Kite/releases/tag/v0.6.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

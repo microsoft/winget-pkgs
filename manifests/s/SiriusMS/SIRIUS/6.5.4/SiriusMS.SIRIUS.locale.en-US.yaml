@@ -1,0 +1,71 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: SiriusMS.SIRIUS
+PackageVersion: 6.5.4
+PackageLocale: en-US
+Publisher: SIRIUS
+PublisherUrl: https://github.com/sirius-ms
+PublisherSupportUrl: https://github.com/sirius-ms/sirius/issues
+Author: Böcker group and Bright Giant GmbH
+PackageName: SIRIUS
+PackageUrl: https://github.com/sirius-ms/sirius
+License: AGPL-3.0
+LicenseUrl: https://github.com/sirius-ms/sirius/blob/HEAD/LICENSE.txt
+Copyright: Copyright (C) 2013-2026 Kai Dührkop, Markus Fleischauer, Marcus Ludwig, Marvin Meusel, Martin A. Hoffmann, Fleming Kretschmer, Sebastian Böcker, Chair of Bioinformatics, Friedrich-Schiller University.
+ShortDescription: A software framework for the de-novo identification of metabolites using tandem mass spectrometry
+Description: SIRIUS is a Java-based software framework for the analysis of LC-MS/MS data of metabolites and other small molecules of biological interest. It integrates a collection of tools, including CSI:FingerID (with COSMIC), ZODIAC and CANOPUS. Both the graphical user interface and the command line version seamlessly integrate the CSI:FingerID, CANOPUS and MSNovelist web services, and the packaged Windows version includes the Java Runtime Environment.
+Tags:
+- bioinformatics
+- mass-spectrometry
+- metabolomics
+ReleaseNotes: |-
+  - feature: Searchable projects & advanced filtering. Projects now carry a full text search index over their features, which is the basis for the new query and filter capabilities.
+    - Smart query Bar: Located above the feature list with auto-complete suggestions for fields, operators, and known values (e.g., adduct spellings, lipid class abbreviations, compound class ontologies, and tags). Press Enter to apply. (GUI)
+    - Unified filtering: Manual panel filters and typed search queries merge into a single filter. The standard filter dialog remains accessible via the funnel icon. (GUI)
+    - Bulk cleanup: Delete all non-matching features from a project in a single step in the GUI or directly by query in a single API request--eliminating the need to fetch and send back IDs.
+    - Index management: The search index builds automatically during data import and can be rebuilt anytime from Project Settings if out of sync. (GUI)
+    - Lucene query syntax: Paged listing endpoints accept searchQuery strings supporting field-specific terms, phrases, ranges, regex, and boolean operators. (API)
+    - Query metadata endpoint: The searchable-fields endpoint exposes queryable fields, value types, word-search support, and sortability. (API)
+    - Filter quantification tables directly using search queries. (API)
+    - Legacy support: Existing CLI feature filter flags (--mzmin, --rtmax, --quality, etc.) remain unchanged and run independently of the search index. (CLI)
+    - Projects created with older SIRIUS versions automatically migrate and index upon first open.
+    - Single-click "Restore Defaults" button for feature filters. New single-adduct filter preset.
+  - feature: Build custom structure databases using reaction rules. Choose from built-in reaction library or create own reactions. Support for multi-product reactions. Inclusion of intermediate products in the final database. (GUI)
+  - feature: Inspect and browse the contents of custom-built structure databases directly within the GUI.
+  - feature: Tag objects within a project to group data and compute fold changes. Tagging is used for blank subtraction and to mark PFAS candidates. Custom tag management is currently API-only (these endpoints are still experimental and may change)
+  - feature: PFAS and special element detection: Integrated specialized PFAS candidate detection automatically detects strong polyfluorination signatures. Elements are now predicted for both de novo formula generation and exclusions in database/bottom-up searches. Detected elements are stored in the project.
+  - feature: Added dedicated instrument profile for electron-activated dissociation (EAD) QTOF fragmentation tree computation.
+  - feature: Assign custom sample and run names during LC-MS data import to easily trace results back to input files.
+  - improvement: Improved GUI responsiveness. Background computations now yield processing priority to the user interface, preventing the GUI from freezing during heavy multi-core processing. (GUI)
+  - improvement: Upgrading project files from older SIRIUS versions is now faster using all available CPU cores (but may still take a while on large projects). A real-time progress bar replaces previous static screens (appearing frozen). (GUI/API)
+  - improvement: Online PubChem name lookups are now cached and bound by a timeout, preventing external network outages or slow API responses from stalling searches. (GUI)
+  - improvement: Added smooth loading animations for embedded web views, enforced minimum web view sizes, introduced borderless icon buttons, and faster rendering for the feature list and its annotations. (GUI)
+  - improvement: Enhanced filters: Replaced feature quality checkboxes with an intuitive range slider. Results can be sorted by quality. Added a three-state selector PFAS filter. Converted the lipid filter into a clearer three-state selector. (GUI)
+  - improvement: Significantly improved table loading speeds for quantification tables (API). Made run columns optional. Quantification table endpoints are now stable.
+  - improvement: API Pagination Standard: Large result lists (features, compounds, formula/structure candidates, spectral matches, and jobs) are now served via paged endpoints. Unpaginated endpoints are deprecated and will be removed in the next major version. (API)
+  - improvement: API documentation now details potential errors codes (API)
+  - change: Reaction Editor and Structure Sketcher require an active subscription including these modules and will only display if covered by your license. (GUI)
+  - fixed: Fixed pop-up windows from web-based panels (e.g., Reaction Editor, Database Viewer) getting trapped behind parent dialogs. (GUI)
+  - fixed: Embedded web views (including the LC-MS panel) no longer flash black on load; software rendering is now enabled by default to prevent graphics driver glitches. (GUI)
+  - fixed: Resolved an issue where jumping to a related feature could freeze the interface. (GUI)
+  - fixed: Corrected the layout of the LC-MS view inside integrated web panels. (GUI)
+  - fixed: Blank filter checkbox now properly resets alongside all other filters. (GUI)
+  - fixed: Open-ended m/z and retention time filters no longer silently cap values at 5000 m/z or 10000 s, and numerical spinners operate correctly past 1000. (GUI)
+  - fixed: Exclusion-only search queries (e.g., NOT term) now correctly return matching results instead of returning empty sets. (GUI)
+  - fixed: Eliminated run-to-run variances and invalid isotope trace masses in LC-MS data preprocessing. Results are now fully reproducible. (GUI, CLI, API)
+  - fixed: Resolved an issue where freshly imported features were occasionally omitted from the search index until a manual rebuild. (GUI, API)
+  - fixed: Projects from older SIRIUS versions are now migrated to the latest schema prior to search index generation. (GUI, API)
+  - fixed: Fixed temporary errors appearing in the feature list while background data imports or calculations were actively running. (GUI)
+  - fixed: Using --database now properly disables de novo and bottom-up formula generation as documented, rather than running them in parallel. (CLI)
+  - fixed: Resolved an issue where explicitly disabling element detection had no effect on the run. (CLI)
+  - fixed: Corrected an invalid citation parameter in the login command. (CLI)
+  - fixed: Fixed API errors when attempting to quantify features that do not belong to an explicit LC-MS run. (API)
+  - fixed: Suppressed noisy error logs triggered when a spectral library match refers to an uninstalled custom database. (GUI)
+  - fixed: Corrected typos and refined unclear phrasing across GUI labels, CLI help text, and API documentation.
+ReleaseNotesUrl: https://v6.docs.sirius-ms.io/changelog/
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://v6.docs.sirius-ms.io/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

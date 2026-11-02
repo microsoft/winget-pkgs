@@ -1,0 +1,96 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: seakee.CPAManagerPlus
+PackageVersion: 1.14.6
+PackageLocale: en-US
+Publisher: seakee
+PublisherUrl: https://github.com/seakee
+PublisherSupportUrl: https://github.com/seakee/CPA-Manager-Plus/issues
+PackageName: CPA Manager Plus
+PackageUrl: https://github.com/seakee/CPA-Manager-Plus
+License: MIT
+LicenseUrl: https://github.com/seakee/CPA-Manager-Plus/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Seakee
+ShortDescription: A self-hosted CLIProxyAPI management panel and AI gateway observability dashboard
+Description: |-
+  A self-hosted CPA / CLIProxyAPI management panel and AI gateway observability dashboard for requests, usage, cost, quota, failures, and account health.
+
+  What Can CPAMP Help You Answer?
+  - Why are requests failing? Inspect failure rates, status codes, affected models/accounts, and redacted evidence in persistent request history.
+  - Where is the cost going? Break down tokens and estimated cost by model, provider, account, API key, project, channel, and time range.
+  - Are accounts and quotas healthy? Review credential state, quota windows, reset evidence, and controlled automation for Codex and xAI accounts.
+
+  Core Capabilities
+
+  CPA Gateway Management
+  - Manage CPA provider configurations, including Gemini, Codex, Claude, Vertex, xAI, and OpenAI-compatible providers.
+  - Maintain auth files, OAuth logins, API keys, model aliases, priorities, plugins, logs, and system settings.
+  - Import official Sub2API OpenAI OAuth exports and split multiple accounts into separate CPA Codex auth files.
+
+  Request Monitoring And Failure Diagnosis
+  - Persist requests from the CPA usage queue in local SQLite and search account, client API key, and realtime request views.
+  - Inspect status, latency, token, cache, trace, and redacted failure evidence without exposing raw failure bodies.
+  - Export or import request history as JSONL.
+  - Open the Monitoring Demo.
+
+  Cost And Usage Analytics
+  - Break down calls, tokens, cost, latency, and failures by model, provider, account, credential, API key, project, channel, and time range.
+  - Track input, output, reasoning, cache, service tier, and long-context pricing semantics.
+  - Sync model prices from models.dev first, with LiteLLM and OpenRouter fallbacks plus local overrides for aliases or internal models.
+  - Open the Usage Analytics Demo.
+
+  Account Health, Quota, And Automation
+  - Inspect Codex and xAI accounts locally or on a Manager Server schedule.
+  - Read quota windows, reset evidence, credential state, workspace state, and provider-specific health signals when available.
+  - Apply controlled quota cooldowns and route credential failures into an account action queue for review and recovery.
+  - Open the unified Accounts Demo.
+
+  Production Operations
+  - Run CPAMP Full Mode as one Docker container or a native Linux, macOS, or Windows package for amd64/arm64; the full stack can run alongside CPA.
+  - Keep request history, Manager configuration, automation state, and model prices in local files with no account registration or telemetry SDK.
+  - Back up SQLite files together with data.key to preserve encrypted CPA Management Keys.
+
+  Want to preview the interface first? Open the Live Demo. The demo uses fictional data only. It is not a deployment or runtime mode and cannot connect to, manage, or monitor a real CPA instance.
+  CPAMP manages and observes traffic through CPA / CLIProxyAPI. It is not a replacement proxy and does not forward model traffic by itself.
+
+  Data, Privacy, And Security
+  - CPAMP does not phone home, include analytics SDKs, or require account registration.
+  - External calls are limited to the CPA gateway and integrations you explicitly configure or trigger, such as OAuth, provider checks, plugin releases, and model price sync.
+  - Request history, configuration, model prices, inspection history, and automation state stay in local files.
+  - CPA Management Keys are encrypted before SQLite persistence; backups require the SQLite files and data.key.
+  - Normal APIs and JSONL exports expose redacted failure summaries, never raw failure bodies or stored raw JSON.
+  - CPAMP is intended for traffic and credentials you are authorized to operate.
+Tags:
+- ai
+- api-gateway
+- dashboard
+- llm
+- proxy
+ReleaseNotes: |-
+  Overview
+  v1.14.6 is a maintenance patch after v1.14.5, limited to three already-merged fixes: Codex workspace spend-control limits (#935 / #938), retained monitoring data protection during usage archive cleanup (#939 / #945), and cache-token double counting for otherwise-unknown events with strict CPA v2 accounting evidence (#941 / #946).
+  This release does not introduce new features, polling, or timers, and it does not change CPA management APIs, credential privileges, or the SQLite schema.
+  Highlights
+  Fixes
+  - Codex workspace spend control (#935 / #938): Correctly interpret structured spend_control.individual_limit while retaining legacy scalar and persisted browser quota-cache compatibility. Preserve budget, used/remaining amounts, units, time windows, and reset evidence. An exhausted spend-control limit remains a limited/quota-risk state, even if standard 5-hour or weekly quotas have headroom.
+  - Explain zero-budget 0 / 0 cases as a workspace-budget restriction rather than a misleading generic “100% used” limit. Suggest reviewing the workspace budget only when complete spend-control evidence is the sole limitation; preserve the existing quota-refresh recommendation when other quota signals compete. No background provider probing or polling is added.
+  - Archive cleanup integrity (#939 / #945): Before each bounded raw-event deletion batch, verify that the corresponding retained Monitoring projection rows exist and have matching timestamps. Repair only missing/mismatched rows from still-live raw data and verify the handoff within the same SQLite transaction; fail closed and roll back if integrity cannot be established.
+  - On cleanup resume, verify retained projections for events deleted earlier in the same run before allowing more deletion. This prevents future losses of this kind but does not reconstruct already permanently deleted raw history.
+  - CPA v2 canonical cache accounting (#941 / #946): For previously unclassified events, use canonical cache semantics only when CPA v2 accounting_version=2 and token_breakdown.schema_version=2 provide a complete, internally consistent breakdown across input, cache, output, reasoning, and total tokens. This prevents counting cache-read tokens twice.
+  - Preserve existing explicit and known provider/executor/model precedence; incomplete, ambiguous, unknown-version or inconsistent evidence keeps the previous fallback. Standard JSONL imports/exports distinguish upstream-declared cache modes from CPAMP-derived accounting hints rather than promoting derived values into raw upstream evidence.
+  - Automatically reconcile eligible historical online usage_events through the existing accounting-semantics migration path and rebuild affected usage/pricing aggregates. No manual SQLite edits or offline cleanup command are needed.
+  Upgrade Notes
+  - A normal upgrade and restart is sufficient. There is no SQLite schema or configuration format migration, but eligible historical events undergo an automatic accounting-semantics correction and corresponding usage/cost rollups may change.
+  - Keep a consistent database and archive backup before upgrading. If exact pre-upgrade historical accounting must be restored after the automatic rewrite, restore the matching pre-upgrade database/archive backup instead of manually reversing derived fields.
+  - Strict canonical cache accounting is used only when complete CPA v2 evidence exists; other events preserve previous compatibility behavior. The minimum CPA baseline for full Muse / Meta functionality remains v7.3.4+.
+  - Archive deletion may incur a small bounded verification cost; cleanup fails closed if retained material coverage cannot be proven.
+  - No new background polling, timers, or manual maintenance commands are introduced.
+
+  Full Changelog: https://github.com/seakee/CPA-Manager-Plus/compare/v1.14.5...v1.14.6
+ReleaseNotesUrl: https://github.com/seakee/CPA-Manager-Plus/blob/HEAD/docs/release-notes/v1.14.6-en.md
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://seakee.github.io/CPA-Manager-Plus/docs/en/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
