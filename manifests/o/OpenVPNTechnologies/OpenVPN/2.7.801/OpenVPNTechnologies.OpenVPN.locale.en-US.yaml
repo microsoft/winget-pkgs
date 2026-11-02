@@ -1,0 +1,86 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: OpenVPNTechnologies.OpenVPN
+PackageVersion: 2.7.801
+PackageLocale: en-US
+Publisher: OpenVPN, Inc.
+PublisherUrl: https://openvpn.net/
+PublisherSupportUrl: https://support.openvpn.com/
+PrivacyUrl: https://openvpn.net/privacy-policy/
+Author: OpenVPN, Inc.
+PackageName: OpenVPN
+PackageUrl: https://openvpn.net/community/
+License: GPL-2.0
+LicenseUrl: https://github.com/OpenVPN/openvpn/blob/HEAD/COPYING
+Copyright: © 2002-2026 OpenVPN Inc <sales@openvpn.net>
+CopyrightUrl: https://openvpn.net/legal/
+ShortDescription: Create secure VPN connections over the internet with this VPN software.
+Description: OpenVPN provides flexible VPN solutions to secure your data communications, whether it's for Internet privacy, remote access for employees, securing IoT, or for networking Cloud data centers.
+Moniker: openvpn
+Tags:
+- network
+- open-vpn
+- virtual-private-network
+- virtualprivatenetwork
+- vpn
+ReleaseNotes: |-
+  Security fixes:
+  - Check for NULL-Bytes in certificate subjects - refuse all such certificates
+    now as "invalid" (CVE-2026-84790).
+    (Bug reported by Vivek Parikh)
+  - TLS handshake with tls-crypt-v2: do not try to add a wrapped client key
+    if no key material is available (client bug in response to an ill-behaving
+    server).
+    (No CVE assigned as "a malicious server can stop the client from working
+    properly" is not considered a CVE-worthy security issue according to the
+    CRA guidelines)
+  - options: fix unsigned underflow when clearing domain_search_list
+    (CVE-2026-88964)
+    (Bug reported and fix contributed by Cole Munz)
+  - win32: stop cmd.exe from expanding variables in quoted arguments
+    (CVE-2026-84256)
+    (Bug reported by Darren Carreras)
+  User-visible Changes:
+  - Certificate validation is now stricter regarding NULL bytes in strings
+    (see above). This might break existing installations if such certificates
+    exist and OpenSSL builds are used. mbedTLS builds always rejected this.
+  - On a certificate with duplicate fields (multiple CN, for example) OpenSSL
+    builds would use the last one, mbedTLS builds use the first one - changed
+    in the mbedTLS build so behaviour is identical.
+  Bugfixes:
+  - DCO: remove installed iroutes at client exit time, not at delayed
+    multi instance cleanup time - otherwise there is a race with reconnecting
+    clients, possibly ending up having "no iroutes installed in the system
+    at all". Bug reported by OpenVPN Inc Access Server team.
+  - DCO Linux: fix remaining races between synchronous netlink operations
+    and incoming asynchronous notifications, by adding a second netlink socket
+    and strictly separating sync/async operations.
+  - Client: refuse incoming pushed option combination of epoch data format
+    with non-AEAD ciphers (restart session instead of aborting with a fatal
+    error).
+  - DCO (Linux and Windows): on failures to set up a new peer or install
+    key materials for a peer, do not exit OpenVPN with a fatal error. Instead,
+    signal the error up the call-chain and restart the (multi) instance.
+    The handshake is inherently racy when a peer is removed kernel-side
+    due to transport errors or timeouts, and userland does not yet know this
+    and wants to, for example, install new keys. This is fatal for the
+    particular client instance, but must not end the whole server process.
+  - DCO: stop fetching peer stats during client disconnect
+    The intention of the original code was to ensure reported counters
+    are always correct, but it did not work (because at query time, the peer
+    in kernel is already gone, so we only got an error message) - and very
+    inefficiently so (because we queried all the peers all the time).
+    End-of-session final counter values will be implemented properly by a
+    followup patch leveraging counters piggybacked on the kernel's
+    "DEL_PEER" notification message.
+  - p2mp server: improve handling of mbuf lists in the face of broadcast
+    or multicast traffic, and fix a bug on client exit that could lead
+    to a server queue deadlock in very particular scenarios.
+  Full Changelog: https://github.com/OpenVPN/openvpn/compare/v2.7.7...v2.7.8
+ReleaseNotesUrl: https://github.com/OpenVPN/openvpn/releases/tag/v2.7.8
+Documentations:
+- DocumentLabel: Community Resources
+  DocumentUrl: https://openvpn.net/community-resources/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
