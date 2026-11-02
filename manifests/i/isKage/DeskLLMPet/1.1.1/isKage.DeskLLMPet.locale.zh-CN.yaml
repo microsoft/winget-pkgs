@@ -1,8 +1,8 @@
 # Created with YamlCreate.ps1 Dumplings Mod
-# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: isKage.DeskLLMPet
-PackageVersion: 1.1.0
+PackageVersion: 1.1.1
 PackageLocale: zh-CN
 Publisher: isKage
 PublisherUrl: https://github.com/isKage
@@ -43,12 +43,18 @@ Tags:
 - 桌宠
 - 桌面宠物
 ReleaseNotes: |-
-  这一版把桌宠升级成可插件化扩展的桌宠：新增 API 余额气泡、双击互动 + 自定义语句、窗口裁剪，重做了右键菜单，AI 对话改造为内置插件。
-  ✨ 更新内容
-  - 🧩 插件化架构：菜单 / 托盘 / 设置页 / IPC / 独立窗口 / 独立存储都可被插件扩展；插件出错只跳过它，本体照常运行
-  - 💰 API 余额气泡：独立气泡窗口，双击桌宠查询并展示 DeepSeek 余额卡片；支持定时展示、气泡大小与位置调节、失败提示
-  - 💬 双击互动 + 自定义语句：单击只播反应动画，双击才弹气泡；关闭余额展示后，双击随机说一句你自己写的语句（设置 → 宠物设置 → 余额气泡，可编辑可预览）
-  - ✂️ 窗口裁剪：窗口只保留动画主体，宠物大小不变，桌面占用更小（支持画面偏移）
-ReleaseNotesUrl: https://github.com/isKage/desk-llm-pet/releases/tag/v1.1.0
+  🐾 DeskLLMPet v1.1.1
+  发布日期：2026-11-02 ｜ 对比 v1.1.0 的完整变更
+  这一版是两个社区贡献的修复，没有新增功能，建议所有用户升级：Windows 高 DPI 缩放下拖动桌宠会越来越大的问题，以及右键菜单偶尔跳到屏幕左上角的问题。
+  🐛 修复
+  - 🪟 Windows 非整数 DPI 缩放下拖动桌宠尺寸累积增大（#1 / #2，感谢 @fine259）
+    150% 等缩放下，拖动时复用系统取整后的实际窗口尺寸会产生累积误差，拖几次宠物就明显膨胀。现在每次移动都按 scale/crop 重新计算尺寸，连续 200 次移动后窗口仍保持原尺寸。
+  - 🖱 右键菜单跳到屏幕左上角（#4，感谢 @kudoumakoto6523-design）
+    首次展示后菜单锚点被清空，迟到的尺寸回报或 250ms 兜底定时器会把菜单定位到 (0,0)。现在保留本次打开的锚点，只有尺寸真正变化时才重新贴回鼠标位置。
+  🧪 工程化
+  - 新增 scripts/check-menu-anchor.js 回归测试并接入 npm run check（反向验证：还原修复后测试会失败）。
+  - 新增 GitHub Actions：PR 自动执行 npm run check；推送 v* tag 自动构建 macOS / Windows 安装包并发布 Release。
+  - 新增 CONTRIBUTING.md 与 Issue / PR 模板。
+ReleaseNotesUrl: https://github.com/isKage/desk-llm-pet/releases/tag/v1.1.1
 ManifestType: defaultLocale
-ManifestVersion: 1.12.0
+ManifestVersion: 1.28.0
