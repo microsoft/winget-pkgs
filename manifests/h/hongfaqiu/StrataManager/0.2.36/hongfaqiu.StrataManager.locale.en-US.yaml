@@ -1,0 +1,36 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: hongfaqiu.StrataManager
+PackageVersion: 0.2.36
+PackageLocale: en-US
+Publisher: strata
+PublisherUrl: https://github.com/hongfaqiu
+PublisherSupportUrl: https://github.com/hongfaqiu/strata-manager/issues
+Author: hongfaqiu
+PackageName: Strata Manager
+PackageUrl: https://hongfaqiu.github.io/strata-manager/
+License: MIT
+LicenseUrl: https://github.com/hongfaqiu/strata-manager/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Strata Manager contributors
+ShortDescription: 'A desktop workspace for local inference with Strata: prepare the runtime, manage models and services, and monitor your local API.'
+Description: Strata Manager is an open-source desktop app for managing Niko1221/Strata, a local LLM inference engine. It bundles runtime setup, model downloads, service controls, streaming chat, hardware and API usage monitoring, task-based tuning, and benchmarking into a single workspace. Model weights already on your machine stay untouched.
+Tags:
+- ai
+- large-language-model
+- llm
+- local-llm
+ReleaseNotes: |-
+  - Fixed engine updates on Windows AMD defaulting to an old package (#194): when download settings had saved a specific package from an older release (such as strata-engine-0.1.47-windows-x86_64-hip-rdna3.tar.gz), the update dialog reused that name, which the new release does not have, so the list showed the old package and Confirm stayed disabled. It now switches to the same kind of package in the target release and says so; if the target has none, it falls back to automatic matching and explains why.
+  - Shared chat settings are no longer wiped when switching back to an older engine: upstream engines up to v0.2.9 drop all shared chat settings at startup when .shared-settings.json has a single key they do not know (upstream #4934). When .shared-settings.json is copied to such an engine, only the 8 keys it knows are kept (reasoning effort, temperature, top_p, top_k, seed, max tokens, reasoning budget, speed projection). Engines that accept new keys, and files that cannot be parsed, are left unchanged.
+  - Intel Arc discrete GPUs are no longer treated as AMD: with an unsupported AMD iGPU beside an Intel discrete GPU, engine updates reported an AMD error. The Intel GPU is now recognised, the iGPU is ignored, and the message says engine updates do not offer the Intel (SYCL) package yet and that you can reinstall with the Intel (SYCL) backend on the setup page.
+  - The Windows AMD single-GPU notice also shows with the Automatic backend: it used to appear only when HIP was chosen. It now also shows on Windows when several AMD GPUs are selected.
+  - "Faster on 12 GB NVIDIA" is renamed "Faster on small-VRAM NVIDIA (≤12 GB)" and notes that accuracy may drop slightly; it stays off by default.
+  - The website, README and download guide list macOS (Apple Silicon) as a supported platform: the "experimental" label is gone. They say the DMG is signed and notarized by Apple and list the current limits: the engine is the upstream prebuilt Metal package, pinned to 0.1.47 until upstream #4634 is fixed; DeepSeek-V4.1-Flash is not available on Mac; there is no Intel Mac build.
+  - DeepSeek V4.1 Flash support for Strata 0.2.9 (upstream #4814): the disk check and "Use existing model" now recognise 0.2.9's six-shard ISTA layout next to the old four-shard one, check both against upstream's pinned sizes, and use files already on disk instead of counting them as downloads. The Unsloth 1-bit sets UD-IQ1_S (about 241 GB) and UD-IQ1_M (about 258 GB) are offered on Strata 0.2.9 and later only, as manual choices that are never recommended automatically; with an ISTA set already present their Engram is reused, saving about 111 GB. Their notes give upstream's 61-task results (53 for UD-IQ1_S and UD-IQ1_M, 56 for ISTA 2.25) and say they are untested on Windows and Strix Halo. DeepSeek uses no MTP file, so "Use existing model" no longer asks for one. Ryzen AI Max (Strix Halo) has no DeepSeek engine package on Linux yet; the download page and engine selection now say so and suggest running DeepSeek on Windows or Qwen on Linux.
+  - Engine 0.1.55 parallel defaults (upstream #4841): from engine 0.1.55 the engine turns on STRATA_BATCH_ATTN_ROWS / STRATA_BATCH_GDN_GROUPS itself only on Linux + NVIDIA (CUDA) when serving 2 or more requests at once (not for DeepSeek, nor with AMD/HIP, Intel/SYCL, Vulkan or Metal). On such machines with engine 0.1.55 or newer, the concurrency card and the concurrency comparison no longer offer or write these two switches and explain that the engine decides; a value already in the config still applies (0 turns it off) and keeps its switch so it can be removed. Windows, AMD and other platforms where upstream does not turn them on keep both switches and the experimental comparison, with a note that the engine leaves them off there.
+  - Recalibrate prompt after an engine upgrade (upstream #4841): when the last Speed Boost calibration was measured on an older engine, the tuning page says the new engine's defaults may have changed and offers a one-click recalibration, or "Not now" (remembered per calibration and engine version).
+  - Multi-GPU all-cards default explained (upstream #4841): with GPU selection on Automatic and 2 or more discrete cards actually detected on this machine (nothing for one card or a dGPU plus iGPU), the selector explains the Strata 0.2.9 defaults: DeepSeek uses every AMD card on Linux, Intel Arc fills all cards, an iGPU beside a dGPU is left out; AMD on Windows still uses one card and Qwen on several AMD cards still needs them named; strata launch --gpu N is remembered. The GPU selector no longer shows two simulated cards when none are detected.
+ReleaseNotesUrl: https://github.com/hongfaqiu/strata-manager/releases/tag/v0.2.36
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
