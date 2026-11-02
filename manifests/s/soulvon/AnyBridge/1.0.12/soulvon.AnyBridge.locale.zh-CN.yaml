@@ -1,0 +1,30 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: soulvon.AnyBridge
+PackageVersion: 1.0.12
+PackageLocale: zh-CN
+Publisher: anybridge
+PublisherUrl: https://github.com/soulvon
+PublisherSupportUrl: https://github.com/soulvon/AnyBridge/issues
+PackageName: AnyBridge
+PackageUrl: https://soulvon.github.io/AnyBridge/
+License: MIT
+LicenseUrl: https://github.com/soulvon/AnyBridge/blob/HEAD/LICENSE
+ShortDescription: AI 编程工具的本地 BYOK 模型接入与配置管理客户端。
+Description: AnyBridge 是一款简单方便的本地 BYOK（自带渠道 / Key）模型接入与配置管理客户端，解决各类 AI 编程工具无法自由配置模型或手写配置麻烦的问题。无需手写配置文件、无需搭建复杂环境，在图形界面中即可把第三方中转站（OneAPI / NewAPI 等）、自建网关以及 DeepSeek、Claude、GPT 等自定义模型快捷接入常用的桌面 IDE 与终端 CLI 工具，支持 Claude Code、Codex、Windsurf、Cursor、Devin 等 12 款以上的工具。
+Tags:
+- byok
+- claude-code
+- codex
+- cursor
+- 人工智能
+ReleaseNotes: |-
+  - 改进（issue #39 收尾）：子代理跑完后主代理自动继续，不再需要用户再发一句。
+    - 原因：run_in_background 会让客户端在子代理收尾前就结束父轮，而父轮一结束、SSE 通道断开，服务端就没有任何办法再把它叫起来（官方是靠客户端自己的 startHostOwnedBackgroundWakeupTurn，BYOK 侧走不到那条路径）。所以此前的唤醒消息只能进父会话 pending 队列，等用户开口才被消费。
+    - 做法：Task 工具一律按前台下发给客户端（忽略模型给出的 run_in_background）。前台路径下客户端会在子代理收尾时回传 tool_result，父轮自然继续——用户看到的就是「子代理跑完，主代理接着说」。
+    - 实测：发一个明确要求 run_in_background=true 的任务，不再发任何提示，主代理直接输出子代理产物（文件路径 + 实现方式）；runs 表可见 subagent completed → root completed。
+  - 保留：服务端收尾唤醒链路（run_kind 识别 + background_task 反查 + wakeup_message 投递）作为兜底，覆盖前台回传缺失的极端情况。
+ReleaseNotesUrl: https://github.com/soulvon/AnyBridge/releases/tag/v1.0.12
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
