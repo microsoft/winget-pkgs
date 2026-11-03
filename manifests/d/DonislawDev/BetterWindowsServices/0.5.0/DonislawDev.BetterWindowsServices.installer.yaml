@@ -1,0 +1,69 @@
+# Rendered by packaging/build-feeds.ps1 - do not edit the generated copy.
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.28.0.schema.json
+
+PackageIdentifier: DonislawDev.BetterWindowsServices
+PackageVersion: 0.5.0
+ReleaseDate: 2026-11-03
+# Windows 10 1809 and Windows Server 2019, the oldest Windows the README promises.
+MinimumOSVersion: 10.0.17763.0
+# Two installers, and their ORDER is load-bearing.
+#
+# Only the Windows installer puts the window in the Start menu. A portable
+# package cannot have a shortcut at all: the manifest schema has no field for
+# one, WinGet's portable installer makes none, and microsoft/winget-cli#2299
+# asking for it has been open since 2022. The installer comes FIRST because
+# that is what decides a fresh install: recent clients prefer it over portable
+# when the user has set no preference (microsoft/winget-cli#6123), and older
+# ones keep the first installer that applies when nothing else tells two apart.
+#
+# The archive comes SECOND, with no scope, for --scope user: a person without
+# administrator rights, for whom the installer is out of reach because it is
+# for the whole machine. The description says that such an install gets no
+# Start menu entry. Keep it once it is published: WinGet upgrades only within
+# the kind that is installed, and portable is compatible with nothing but
+# portable, so a manifest without it would leave every such install where it
+# is for good.
+Installers:
+- Architecture: x64
+  InstallerType: wix
+  Scope: machine
+  # Windows Installer asks for elevation itself.
+  ElevationRequirement: elevatesSelf
+  InstallerUrl: https://github.com/donislawdev/BetterWindowsServices/releases/download/v0.5.0/BetterWindowsServices-win-x64.msi
+  InstallerSha256: 7B391756F88DE01E071CAD597492FE0C1CE879653E9A399779F7A44F94712939
+  # The ProductCode of THIS release's installer, read out of it - every build
+  # gets a new one. WinGet finds an installed program for a manifest by the
+  # installer's ProductCode and never by AppsAndFeaturesEntries
+  # (SearchSourceUsingManifest in winget-cli, read 2026-11-03). Without it an
+  # upgrade or an uninstall from a manifest found nothing: "No app found
+  # matching input criteria" in 5 of 5 cases on Windows Server 2025 that day.
+  ProductCode: '{EF08C3AE-BCFD-4AB3-8B80-7AD303094D6C}'
+  # How WinGet recognises the installed program from one release to the next,
+  # an install made from the release page by hand included: the UpgradeCode
+  # never changes, while every build gets a new ProductCode.
+  AppsAndFeaturesEntries:
+  - UpgradeCode: '{FD038501-7A2F-49C9-A587-E8DF3EFB9718}'
+  # The installer puts its folder on the machine PATH, and both programs are in it.
+  Commands:
+  - BetterWindowsServices
+  - bws
+- Architecture: x64
+  InstallerType: zip
+  NestedInstallerType: portable
+  NestedInstallerFiles:
+  - RelativeFilePath: BetterWindowsServices\BetterWindowsServices.exe
+  # WinGet then makes no link in its own links folder and puts the folder the
+  # window is in on PATH instead (PortableInstaller.cpp in winget-cli, read by
+  # the sibling project 2026-11-02). That folder holds the window, its licence
+  # and its notices and nothing else, so nothing on PATH can be loaded by
+  # another program. And the window always runs from its own file: it restarts
+  # itself as administrator from the path it was started by
+  # (Environment.ProcessPath in src/Bws.Gui/Elevation.cs), which through a link
+  # would be the link.
+  ArchiveBinariesDependOnPath: true
+  InstallerUrl: https://github.com/donislawdev/BetterWindowsServices/releases/download/v0.5.0/BetterWindowsServices-win-x64.zip
+  InstallerSha256: A96423AC6F1574C479A8D5CDD6B5D892FE00099519F51A689E8395C4BEE750A2
+  Commands:
+  - BetterWindowsServices
+ManifestType: installer
+ManifestVersion: 1.28.0
