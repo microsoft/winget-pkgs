@@ -1,0 +1,73 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.6.0.schema.json
+
+# Installer manifest.
+#
+# Two fields must be filled in before this can be submitted, because they
+# describe a file that has to be publicly downloadable first:
+#
+#   InstallerUrl     a permanent public URL - a GitHub release asset is what
+#                    almost every winget package uses
+#   InstallerSha256  the hash of that exact file
+#
+# Get the hash with:
+#   certutil -hashfile release\Sada-Setup-1.0.1.exe SHA256
+# or:
+#   winget hash release\Sada-Setup-1.0.1.exe
+#
+# Then validate and test locally before opening a pull request:
+#   winget validate --manifest winget
+#   winget install --manifest winget
+
+PackageIdentifier: MohammedKhaled.Sada
+PackageVersion: 1.1.1
+
+# Inno Setup. Declaring the type lets winget apply the right silent switches and
+# find the uninstall entry without being told how.
+InstallerType: inno
+
+# Installs under the user profile and needs no elevation, so winget can install
+# it without a UAC prompt.
+Scope: user
+InstallerLocale: en-US
+
+InstallModes:
+  - interactive
+  - silent
+  - silentWithProgress
+
+# winget knows Inno's switches already; they are spelled out so that a change in
+# the installer cannot silently break unattended installs.
+#   /VERYSILENT        no window at all
+#   /SUPPRESSMSGBOXES  never stop on a dialog
+#   /NORESTART         never reboot - winget rejects an installer that does
+#   /SP-               skip the "this will install..." prompt
+InstallerSwitches:
+  Silent: /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+  SilentWithProgress: /SILENT /SUPPRESSMSGBOXES /NORESTART /SP-
+
+# Run the new installer over the old one; it stops the running copy, replaces
+# the files, and leaves the downloaded model and settings alone.
+UpgradeBehavior: install
+
+# How Inno registers itself for uninstall: the AppId from Sada.iss with Inno's
+# _is1 suffix. winget uses this to match an installed copy to this package.
+ProductCode: '{8E2C1F4A-9D3B-4A77-B5E1-2C9F6A0D1B83}_is1'
+
+ReleaseDate: 2026-11-02
+
+# Files the installer leaves behind that winget should know about.
+AppsAndFeaturesEntries:
+  - DisplayName: Sada
+    Publisher: Mohammed Khaled
+    DisplayVersion: 1.1.1
+    ProductCode: '{8E2C1F4A-9D3B-4A77-B5E1-2C9F6A0D1B83}_is1'
+    UpgradeCode: '{8E2C1F4A-9D3B-4A77-B5E1-2C9F6A0D1B83}'
+    InstallerType: inno
+
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/Mohammedkhaled96/sada/releases/download/v1.1.1/Sada-Setup-1.1.1.exe
+    InstallerSha256: 7B5F2822AA7A289A63CA1CD58C942785F09CA2537E205DE75BAAA78CA0070517
+
+ManifestType: installer
+ManifestVersion: 1.6.0
