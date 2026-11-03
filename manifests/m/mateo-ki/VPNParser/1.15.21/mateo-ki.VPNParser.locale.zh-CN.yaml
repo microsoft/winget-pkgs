@@ -1,0 +1,38 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: mateo-ki.VPNParser
+PackageVersion: 1.15.21
+PackageLocale: zh-CN
+ShortDescription: Windows 桌面程序：采集订阅、解析成节点、跑代理，并把代理质量实测出来。
+Description: VPN Parser 是用 Rust + egui 编写的 Windows 桌面程序，负责采集免费或自建订阅、解析成节点、跑代理，并把代理质量实测出来。订阅入口包括带 `YYYY-MM-DD` 日期占位符的订阅 URL、Gist 搜索页发现，以及 Telegram 频道预览（裸节点链接和订阅链接两类都取，节点只增不删）。解析支持 `ss` `vmess` `vless` `trojan` `hysteria2/hy2` `socks5` `http(s)` 分享链接，以及 Clash / Clash Meta YAML、Base64 与混合文本。延迟以经内核访问 Google `generate_204` 的真实握手为准，24 小时出口健康条按实测绘制，而不是看内核上报的状态。Windows 上它同时管理系统代理、TUN（提权交接后只保留一个实例）和终端 `HTTP_PROXY` 环境变量，按 exe 路径添加防火墙允许规则，支持单实例互斥与托盘，记录出口切换历史并按天统计规则命中，同时提供强制 bearer 鉴权的本地 HTTP API 与 mihomo / sing-box / xray 配置导出。安装包不含内核，内核缺失时由程序按需下载。
+Tags:
+- clash
+- sing-box
+- 代理
+- 出口健康
+- 测速
+- 节点解析
+- 订阅
+ReleaseNotes: |-
+  🚀 VPN Parser v1.15.21 发布说明 / Release Notes
+  🎉 欢迎使用 VPN Parser v1.15.21！本版针对现代代理内核架构演进与网络双栈路由进行了全面升级，彻底修复 Mihomo 1.19+ 链式代理与跨源节点预热注入 (#7)，并补齐 VP-Core Hysteria2 IPv6 双栈与 UDP 转发支持 (#6)：
+  🔗 代理路由：Mihomo 1.19+ 链式代理架构重构与跨源节点注入 (#7)
+  - 适配 Mihomo 1.19+ dialer-proxy 链式代理体系：
+    - 彻底淘汰已在 Mihomo v1.19+ 中被废弃并导致内核报错崩溃的 type: relay 策略组定义（unsupported type: The group [CHAIN-2HOP] with relay type was removed）；
+    - 全面迁移至现代 dialer-proxy 架构：在代理列表中动态生成带有 "dialer-proxy": "<入口节点>" 属性的出口代理 "链式代理"，并自动将其注入至 PROXY 选择器首位（Index 0），实现优雅原生的二跳中继转发；
+  - 跨源双节点预热与智能 Priming 注入：
+    - 修复链式代理的前置与后置节点来自不同订阅、或不在测速优选子集时被编译器遗漏丢弃的问题；
+    - 运行时自动根据节点 UUID 从底层 SQLite 数据库精准加载实体对象并预热注入，确保跨订阅节点 100% 编译进候选池；
+  - 智能名称去重与节点复用：
+    - 链式代理入口/出口节点若与当前主选节点相同时，自动复用既有节点名称，杜绝生成冗余的 Node #2 重复后缀副本。
+  🌐 内核编译：VP-Core Hysteria2 IPv6 双栈与 UDP 转发补齐 (#6)
+  - IPv6 双栈路由全面打通：
+    - VP-Core 编译器全面注入根级 ipv6: true、TUN 虚拟网卡 ipv6: true、address6: "fdfe:dcba:9876::1/64" 以及 fake-ip-range6: "fc00::/18"；
+    - DNS 模块支持 IPv6 upstream 与 IPv6 Fake-IP 范围，彻底修复 ipv6.1ms.dog 等纯 IPv6 双栈站点的路由访问；
+  - 协议级显式 UDP 代理标记：
+    - 为 Hysteria2、Hysteria、Tuic、WireGuard、VMess、VLESS、Trojan 等基于 UDP 或支持 UDP 转发的协议节点显式注入 udp: true，彻底根除 VP-Core 对 UDP 数据包静默丢弃的缺陷；
+  - Hysteria2 端口跳跃 (Port Hopping) 支持：
+    - 订阅解析与导出全面支持 mport / ports（如 20000-30000），无缝绕过 ISP 针对 UDP 的 QoS 限速。
+ManifestType: locale
+ManifestVersion: 1.28.0
