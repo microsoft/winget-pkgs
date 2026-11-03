@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: isKage.DeskLLMPet
-PackageVersion: 1.1.1
+PackageVersion: 1.2.0
 PackageLocale: zh-CN
 Publisher: isKage
 PublisherUrl: https://github.com/isKage
@@ -43,18 +43,20 @@ Tags:
 - 桌宠
 - 桌面宠物
 ReleaseNotes: |-
-  🐾 DeskLLMPet v1.1.1
-  发布日期：2026-11-02 ｜ 对比 v1.1.0 的完整变更
-  这一版是两个社区贡献的修复，没有新增功能，建议所有用户升级：Windows 高 DPI 缩放下拖动桌宠会越来越大的问题，以及右键菜单偶尔跳到屏幕左上角的问题。
-  🐛 修复
-  - 🪟 Windows 非整数 DPI 缩放下拖动桌宠尺寸累积增大（#1 / #2，感谢 @fine259）
-    150% 等缩放下，拖动时复用系统取整后的实际窗口尺寸会产生累积误差，拖几次宠物就明显膨胀。现在每次移动都按 scale/crop 重新计算尺寸，连续 200 次移动后窗口仍保持原尺寸。
-  - 🖱 右键菜单跳到屏幕左上角（#4，感谢 @kudoumakoto6523-design）
-    首次展示后菜单锚点被清空，迟到的尺寸回报或 250ms 兜底定时器会把菜单定位到 (0,0)。现在保留本次打开的锚点，只有尺寸真正变化时才重新贴回鼠标位置。
-  🧪 工程化
-  - 新增 scripts/check-menu-anchor.js 回归测试并接入 npm run check（反向验证：还原修复后测试会失败）。
-  - 新增 GitHub Actions：PR 自动执行 npm run check；推送 v* tag 自动构建 macOS / Windows 安装包并发布 Release。
-  - 新增 CONTRIBUTING.md 与 Issue / PR 模板。
-ReleaseNotesUrl: https://github.com/isKage/desk-llm-pet/releases/tag/v1.1.1
+  这一版的核心是插件框架：插件可以打包成 .dlmpet，在设置页选择或拖入即可安装，安装后立即生效，不需要改项目代码。
+  例如：多桌宠克隆（dlp-multi-pets），支持克隆多个桌宠、共享主程序设置、右键删除克隆体；该插件不随主程序内置，需单独安装。见插件市场 dlp-multi-pets-v1.0.0, 或下载当前 release 的 dlp-multi-pets-1.0.0.dlmpet 文件。
+  新增
+  - 🧩 插件框架：内置/用户插件双目录发现、启用/禁用、热重载、安装/卸载、旧数据迁移。
+  - 📦 一键安装插件：设置 → 🧩 插件，选择或拖入 .dlmpet 插件包；也可以放进插件目录后点「重新扫描」自动安装。
+  - 📚 插件开发与打包：新增插件开发/安装/打包文档与 npm run pack:plugin，可选插件可以独立打包装进主程序。
+  下载与升级
+  - 安装包：GitHub Release v1.2.0
+    - macOS（Apple Silicon）：DeskLLMPet-1.2.0-arm64.dmg
+    - macOS（Intel）：DeskLLMPet-1.2.0.dmg
+    - Windows x64：DeskLLMPet.Setup.1.2.0.exe
+  - Windows：双击新版 .exe 原地覆盖升级；macOS：双击 .dmg，把应用拖进「应用程序」选 替换。
+  - 配置、内置插件数据与已安装插件都会保留；升级前先在托盘「退出」旧版本（应用是单实例）。
+  - 安装包仍未做代码签名 / 公证：macOS 首次打开需右键 → 打开，Windows 可能弹 SmartScreen。
+ReleaseNotesUrl: https://github.com/isKage/desk-llm-pet/releases/tag/v1.2.0
 ManifestType: defaultLocale
 ManifestVersion: 1.28.0
