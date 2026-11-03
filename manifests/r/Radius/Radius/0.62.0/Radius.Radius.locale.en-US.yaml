@@ -1,0 +1,118 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: Radius.Radius
+PackageVersion: 0.62.0
+PackageLocale: en-US
+Publisher: Radius Project
+PublisherUrl: https://github.com/radius-project/radius
+PublisherSupportUrl: https://github.com/radius-project/radius/blob/main/SUPPORT.md
+PackageName: Radius
+PackageUrl: https://github.com/radius-project/radius
+License: Apache-2.0
+LicenseUrl: https://github.com/radius-project/radius/blob/HEAD/LICENSE
+Copyright: Copyright 2023 The Radius Authors
+ShortDescription: Radius is a cloud-native application platform that enables developers and the platform engineers that support them to collaborate on delivering and managing cloud-native applications.
+Description: Radius is a cloud-native application platform that enables developers and the platform engineers that support them to collaborate on delivering and managing cloud-native applications that follow organizational best practices for cost, operations and security, by default. Radius is an open-source project that supports deploying applications across private cloud, Microsoft Azure, and Amazon Web Services, with more cloud providers to come.
+Moniker: radius
+ReleaseNotes: |-
+  ## Announcing Radius v0.62.0
+
+  Today we're happy to announce the release of Radius v0.62.0. Check out the [highlights](#highlights) below, along with the [full changelog](#full-changelog) for more details.
+
+  We would like to extend our thanks to all the [new](#new-contributors) and existing contributors who helped make this release possible!
+
+  ## Intro to Radius
+
+  If you're new to Radius, check out our website, [radapp.io](https://radapp.io), for more information. Also visit our [getting started guide](https://docs.radapp.io/getting-started/) to learn how to install Radius and create your first app.
+
+  ## Highlights
+
+  ### Radius.Core is now the default for the CLI
+
+  `rad env`, `rad app`, `rad init`, `rad workspace create`, and `rad resource list` now target the Radius.Core resource model without the `--preview` flag. The legacy `rad recipe register/unregister/list/show` commands are removed. Update any scripts that pass `--preview` or use those commands.
+
+  ### Version-pinned Helm chart images
+
+  The Helm chart now pins Radius component images to the full release version. Restarting pods no longer picks up later patches implicitly. Upgrade the chart to receive patched images. See [Upgrading](#upgrading-to-radius-v0620-rc1) for override behavior.
+
+  ### Default Kubernetes recipe pack
+
+  Radius now embeds a pinned Kubernetes Recipe Pack from the `/resource-types-contrib` repo and builds the default recipe pack from it, so new environments get a working set of Recipes out of the box. See the [Kubernetes Recipe Pack](https://github.com/radius-project/resource-types-contrib/tree/main/recipe-packs/kubernetes) in the repo for more details.
+
+  ### Store Terraform recipe state in S3 or Azure Blob Storage
+
+  Radius can now store Terraform recipe state in your own S3 bucket or Azure Blob Storage container instead of only in Kubernetes secrets. Learn more in the [Terraform state docs](https://docs.radapp.io/management/terraform-state/).
+
+  ### Reliability improvements
+
+  Many retry and robustness fixes make the CLI and deployments more resilient to transient failures. They cover Bicep recipe downloads, Terraform provider discovery, API server reads, and managed secret deletion. Azure resource deletion now selects supported API versions and deletes in dependency order. Radius type version skew warns before deployment. Digest-pinned Bicep recipe sources are supported.
+
+  ## Breaking changes
+
+
+  • Remove legacy Azure Container Instances support (#13293) by [@radius-release[bot]](https://github.com/apps/radius-release) in [#13483](https://github.com/radius-project/radius/pull/13483)
+  • Remove unused --preview helpers and stale preview wording by [@lakshmimsft](https://github.com/lakshmimsft) in [#13326](https://github.com/radius-project/radius/pull/13326)
+  • Require gated promotion of external channel tags by [@DariuszPorowski](https://github.com/DariuszPorowski) in [#13333](https://github.com/radius-project/radius/pull/13333)
+  • Make rad resource list target Radius.Core without --preview by [@lakshmimsft](https://github.com/lakshmimsft) in [#13317](https://github.com/radius-project/radius/pull/13317)
+  • Make rad init and rad workspace create target Radius.Core without --preview by [@lakshmimsft](https://github.com/lakshmimsft) in [#13316](https://github.com/radius-project/radius/pull/13316)
+  • Make rad app commands target Radius.Core without --preview by [@lakshmimsft](https://github.com/lakshmimsft) in [#13306](https://github.com/radius-project/radius/pull/13306)
+  • Make rad resource expose and logs target Radius.Compute/containers without --preview by [@lakshmimsft](https://github.com/lakshmimsft) in [#13319](https://github.com/radius-project/radius/pull/13319)
+  • Retire legacy paths and consume snapshots by [@DariuszPorowski](https://github.com/DariuszPorowski) in [#12956](https://github.com/radius-project/radius/pull/12956)
+  • Pin chart images to full release versions by [@DariuszPorowski](https://github.com/DariuszPorowski) in [#12953](https://github.com/radius-project/radius/pull/12953)
+  • Make rad env commands target Radius.Core without --preview by [@lakshmimsft](https://github.com/lakshmimsft) in [#13290](https://github.com/radius-project/radius/pull/13290)
+  • Remove rad recipe register/unregister/list/show commands by [@lakshmimsft](https://github.com/lakshmimsft) in [#13236](https://github.com/radius-project/radius/pull/13236)
+
+
+  ## New contributors
+
+  Welcome to our new contributors who have merged their first PR in this release!
+
+
+  • [@radius-release[bot]](https://github.com/apps/radius-release) made their first contribution in [#13519](https://github.com/radius-project/radius/pull/13519)
+  • [@itpropro](https://github.com/itpropro) made their first contribution in [#13327](https://github.com/radius-project/radius/pull/13327)
+  • [@allexistence](https://github.com/allexistence) made their first contribution in [#13318](https://github.com/radius-project/radius/pull/13318)
+
+
+  ## Upgrading to Radius v0.62.0
+
+  **Helm image pinning:** This release's Helm chart pins Radius component images to the full release version. Restarting pods no longer picks up later patches implicitly; upgrade the chart to receive patched images. Existing channel aliases remain available, and explicitly configured `global.imageTag`, component tags, or image references keep overriding chart defaults. To adopt version-pinned defaults while retaining other settings, clear tag overrides and restore image overrides to their default names; an empty image value is invalid.
+
+  You can upgrade to this release by upgrading your Radius CLI then running `rad upgrade kubernetes`. Only incremental version upgrades are supported. Consult the [upgrade documentation](https://docs.radapp.io/guides/operations/kubernetes/kubernetes-upgrade/) for full details.
+
+  ## Full changelog
+
+  [0.62.0](https://github.com/radius-project/radius/compare/v0.61.1...v0.62.0) - 2026-10-27
+
+  ### Breaking changes
+
+  • Remove legacy Azure Container Instances support (#13293) by [@radius-release[bot]](https://github.com/apps/radius-release) in [#13483](https://github.com/radius-project/radius/pull/13483)
+  • Remove unused --preview helpers and stale preview wording by [@lakshmimsft](https://github.com/lakshmimsft) in [#13326](https://github.com/radius-project/radius/pull/13326)
+  • Require gated promotion of external channel tags by [@DariuszPorowski](https://github.com/DariuszPorowski) in [#13333](https://github.com/radius-project/radius/pull/13333)
+  • Make rad resource list target Radius.Core without --preview by [@lakshmimsft](https://github.com/lakshmimsft) in [#13317](https://github.com/radius-project/radius/pull/13317)
+  • Make rad init and rad workspace create target Radius.Core without --preview by [@lakshmimsft](https://github.com/lakshmimsft) in [#13316](https://github.com/radius-project/radius/pull/13316)
+  • Make rad app commands target Radius.Core without --preview by [@lakshmimsft](https://github.com/lakshmimsft) in [#13306](https://github.com/radius-project/radius/pull/13306)
+  • Make rad resource expose and logs target Radius.Compute/containers without --preview by [@lakshmimsft](https://github.com/lakshmimsft) in [#13319](https://github.com/radius-project/radius/pull/13319)
+  • Retire legacy paths and consume snapshots by [@DariuszPorowski](https://github.com/DariuszPorowski) in [#12956](https://github.com/radius-project/radius/pull/12956)
+  • Pin chart images to full release versions by [@DariuszPorowski](https://github.com/DariuszPorowski) in [#12953](https://github.com/radius-project/radius/pull/12953)
+  • Make rad env commands target Radius.Core without --preview by [@lakshmimsft](https://github.com/lakshmimsft) in [#13290](https://github.com/radius-project/radius/pull/13290)
+  • Remove rad recipe register/unregister/list/show commands by [@lakshmimsft](https://github.com/lakshmimsft) in [#13236](https://github.com/radius-project/radius/pull/13236)
+
+  ### Added
+
+  • Add expression evaluator for direct module recipe parameters (#13297) by [@radius-release[bot]](https://github.com/apps/radius-release) in [#13486](https://github.com/radius-project/radius/pull/13486)
+  • Create the Deployment Engine tag after release approval by [@DariuszPorowski](https://github.com/DariuszPorowski) in [#13384](https://github.com/radius-project/radius/pull/13384)
+  • Add manual authz trust-boundary test kit by [@sk593](https://github.com/sk593) in [#13216](https://github.com/radius-project/radius/pull/13216)
+  • Fail functional tests on authz dry-run would-deny logs by [@sk593](https://github.com/sk593) in [#13215](https://github.com/radius-project/radius/pull/13215)
+  • Make the async worker dequeue interval configurable by [@itpropro](https://github.com/itpropro) in [#13327](https://github.com/radius-project/radius/pull/13327)
+  • Add authorization error codes by [@sk593](https://github.com/sk593) in [#13213](https://github.com/radius-project/radius/pull/13213)
+  • Add authorization mode setting (off/dryRun/enforce) by [@sk593](https://github.com/sk593) in [#13212](https://github.com/radius-project/radius/pull/13212)
+  • Always write bicepconfig.json in rad init --preview by [@willdavsmith](https://github.com/willdavsmith) in [#13164](https://github.com/radius-project/radius/pull/13164)
+  • [stack 2/3：default k8s recipe pack] build the default recipe pack from the embedded Kubernetes pack by [@nithyatsu](https://github.com/nithyatsu) in [#13249](https://github.com/radius-project/radius/pull/13249)
+  • [stack 1/3：default k8s recipe pack] sync and embed the pinned Kubernetes recipe pack by [@nithyatsu](https://github.com/nithyatsu) in [#13248](https://github.com/radius-project/radius/pull/13248)
+  • Publish release SBOMs by [@DariuszPorowski](https://github.com/DariuszPorowski) in [#12869](https://github.com/radius-project/radius/pull/12869)
+  • Support S3 and Azure Blob backends with registered credentials by [@lakshmimsft](https://github.com/lakshmimsft) in [#13078](https://github.com/radius-project/radius/pull/13078)
+  • Add flaky-test investigation skill and automation by [@nico
+ReleaseNotesUrl: https://github.com/radius-project/radius/releases/tag/v0.62.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
