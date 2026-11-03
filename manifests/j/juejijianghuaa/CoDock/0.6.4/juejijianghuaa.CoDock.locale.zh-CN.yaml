@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: juejijianghuaa.CoDock
-PackageVersion: 0.6.3
+PackageVersion: 0.6.4
 PackageLocale: zh-CN
 Publisher: CoDock
 PublisherUrl: https://github.com/juejijianghuaa
@@ -26,16 +26,20 @@ Tags:
 - 人工智能
 - 终端
 ReleaseNotes: |-
-  v0.6.3 (2026-11-02)
-  这一版把「最近在干什么」变成 MCP 能直接回答的问题：搜索工具不再强制要关键词。
+  v0.6.4 (2026-11-02)
+  这一版让关键词搜索能翻到底：结果按会话分页，命中密集的会话不再把其它会话挤出去。
   新功能
-  - codock_search_history 可以按时间列出最近的会话：query 改为可选，省略时不搜正文，
-    直接按会话最后更新时间倒序列出窗口内的条目，连同项目路径、会话 ID、消息数一起返回。
-    外部 Agent 想回答「最近一星期都在做什么」这类问题时本来也给不出一个能覆盖全部会话的
-    关键词——硬编一个只能命中标题或正文里恰好提到它的那几条。新增的 days（1–365）带
-    query 时是匹配的时间下界，不带 query 时是列表窗口，默认 7 天，并写进输出抬头，
-    免得把「只看了一周」读成「一共只有这些会话」。列表模式 limit 默认 20；来源仍按
-    「已启用」过滤，停用的工具立刻不出现在列表里。
-ReleaseNotesUrl: https://github.com/juejijianghuaa/CoDock-Release/releases/tag/v0.6.3
+  - 关键词搜索按会话分页，侧栏可以「加载更多」：原来搜索的条数上限计的是命中的消息，
+    一个会话命中几十条就能把结果占满，侧栏默认 60 条命中之后的会话永远看不到，界面上也没有
+    任何提示。现在先按会话排序取一页（相关度模式取会话里最相关的那条，短词模式取最新命中时间），
+    再给这一页的会话取片段，每页 20 个会话，桌面侧栏与手机端末尾都有「加载更多」；「还有 N 条
+    命中」按会话的真实命中总数计算。
+  - codock_search_history 支持 offset 翻页：带不带 query 都能翻，limit 统一按会话计；
+    输出在还有下一页时直接给出下一个 offset，每个会话标出命中总数，短词退化为按时间排序时
+    也会写明。
+  - 命中片段更长：片段从约 16 个字符放宽到 64，能看到命中词前后的上下文，不再只剩命中词本身。
+  调整
+  - codock_search_history 去掉 project 参数。
+ReleaseNotesUrl: https://github.com/juejijianghuaa/CoDock-Release/releases/tag/v0.6.4
 ManifestType: defaultLocale
 ManifestVersion: 1.28.0
