@@ -1,0 +1,22 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: hongfaqiu.StrataManager
+PackageVersion: 0.2.38
+PackageLocale: zh-CN
+ShortDescription: 面向 Strata 本地推理的桌面工作台。
+Description: Strata Manager 是一款面向 Niko1221/Strata 本地大模型推理引擎的开源桌面管理工具，将运行环境准备、模型配置、服务控制、聊天、监控、调优与基准测试整合到同一工作台，降低使用门槛。已下载的模型权重不会被改动。
+Tags:
+- 人工智能
+- 大模型
+- 大语言模型
+- 本地大模型
+ReleaseNotes: |-
+  - Qwen3.8 可手动「下载 DFlash2」，带确认和进度：上游启动时从不下载 DFlash2 预测器，未下载时“自动”实际用 MTP。现在「预测（投机解码）」在 Qwen3.8 上显示「下载 DFlash2」：确认框写明来源 incoai/Qwen3.8-Flash-Next-DFlash2（Apache-2.0）、下载约 1.2 GB、打包后约占 0.52 GB 磁盘、运行时约多用 0.72–0.89 GB 显存；下载时显示进度，可取消，失败会显示原因。原先「首次下载约 1.2 GB」的说法不对，已改正。Unsloth 量化的 Qwen3.8-Flash-Next（如 qwen3.8-flash-next-unsloth-ud-q4_k_xl）也可选 DFlash2。
+  - 模型页显示实际在用的预测器：受管服务的「详情」里新增「实际预测」，读取已核验的引擎命令行（DFlash2 / MTP / 关）；与配置不同时注明配置值，例如「MTP（配置为自动）」。
+  - CPU 不支持 AVX2 时拦下引擎更新，可「只更新代码」：官方预编译引擎需要 AVX2；在不支持的 CPU 上更新弹窗会拦下引擎更新，并提供「只更新代码」：只替换同一版本的源码，保留当前引擎。
+  - 只有 Intel 显卡的 Windows 明确提示「没有匹配的官方引擎」：官方 Windows 引擎只有 NVIDIA（CUDA）和 AMD（HIP）版本；以前会默认选 CUDA 13 包，现在说明没有匹配的引擎，需要时可手动选择更新包。
+  - 改名的本地模型副本不再运行同尺寸的已装模型（上游 #5052）：上游 setup.py 只按大小找已有的 pack，改了名的 GGUF（如微调版）会运行同量化的官方模型。现在改名副本放到自己的数据目录 <数据目录>/local/<名称>-<量化>，配置名为 strata-local-<名称>-<量化>.json，并恢复该尺寸的官方配置。
+  - 专家会溢出到 SSD 时，智能体和多人场景推荐单路并发：多路并发会让专家缓存放不进内存和显存时，推荐一次处理一个请求（原因：会溢出到 SSD）；已保存的多路配置会提示，并可一键修正。
+ManifestType: locale
+ManifestVersion: 1.28.0
