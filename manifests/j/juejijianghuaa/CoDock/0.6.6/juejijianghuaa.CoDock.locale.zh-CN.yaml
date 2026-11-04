@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: juejijianghuaa.CoDock
-PackageVersion: 0.6.5
+PackageVersion: 0.6.6
 PackageLocale: zh-CN
 Publisher: CoDock
 PublisherUrl: https://github.com/juejijianghuaa
@@ -26,14 +26,18 @@ Tags:
 - 人工智能
 - 终端
 ReleaseNotes: |-
-  v0.6.5 (2026-11-03)
-  这一版只修分享页的两个按键，但都是「顺手就按」的那种。
+  v0.6.6 (2026-11-04)
+  新功能
+  - 侧栏可以按文件夹归档 / 恢复：目录的右键菜单多了一项「归档整个文件夹」，一次收走该目录下的
+    全部会话（含 worktree 子组）；归档面板里对应项变成「恢复整个文件夹」。搜索过滤与置顶只是视图，
+    不会缩小归档范围，少量会话失败时会提示「 条会话失败，其余已完成」。
+  - 全屏 TUI 的终端滚轮按位移滚动：TUI 开了鼠标跟踪时，滚轮不再一格翻一整页，而是每滑过一段
+    距离发一条 SGR 滚轮事件，交给 TUI 自己逐步滚动；没开鼠标跟踪的程序仍按翻页兜底，非 SGR 编码
+    交回 xterm 原生处理。
+  - 侧栏首刷不再先闪「暂无会话」：历史首次加载时先画骨架占位，拿到数据后再渲染列表。
   修复
-  - 分享页的 Ctrl+V / Ctrl+C 改用访客自己的剪贴板：Windows/Linux 访客在局域网分享页按 Ctrl+V 时，
-    xterm 发出的是裸 \x16，Claude 会拿它去读主机剪贴板里的图片——访客看到的是「粘贴没反应」，
-    顺手再按 Ctrl+Z 撤销就把 Claude 挂起了；有选区时按 Ctrl+C 发出 \x03，复制直接变成中断。
-    现在这两种按键交还浏览器原生粘贴/复制，剪贴板是访客自己的。局域网 http 不是安全上下文，
-    没有 navigator.clipboard，所以复制仍由 xterm 按选区填 clipboardData。
-ReleaseNotesUrl: https://github.com/juejijianghuaa/CoDock-Release/releases/tag/v0.6.5
+  - 关闭会话时回收子进程：Close() 杀完进程树后补上 cmd.Wait()，Unix 上不再每关一个会话
+    留一个 <defunct>，Windows 上也不再泄漏 ConPTY attrs 与 waitOnContext goroutine。
+ReleaseNotesUrl: https://github.com/juejijianghuaa/CoDock-Release/releases/tag/v0.6.6
 ManifestType: defaultLocale
 ManifestVersion: 1.28.0
