@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
 
 PackageIdentifier: Victor-Quqi.Axiopera
-PackageVersion: 0.3.1
+PackageVersion: 0.3.2
 PackageLocale: zh-CN
 ShortDescription: 把 Claude Code、Codex 和 Grok Build 互相编排成子 agent 的协作工具，一个可执行文件加一个 skill 即可接入。
 Description: |-
@@ -27,19 +27,16 @@ Tags:
 - 聊天机器人
 - 自主智能
 ReleaseNotes: |-
-  Codex 可以看到子任务的实时进展，已取消的任务可以续接，agent 说明也更清楚了。
-  新增
-  - axiopera watch --status 跟踪正在执行和排队的任务，每 2 秒检查一次，输出状态和进度的变化，任务全部结束后退出。Codex 的 guide 会让它在后台终端运行，方便查看子任务进展。
-  改进
-  - guide 和子 agent 说明补充了几点：任务默认共用当前工作目录，--cwd 可另行指定，并行写入的任务应各用一个 git worktree；回答送入所属任务的主会话；Grok 的 read 档会限制 shell 命令。
-  - 拒绝消息会写明原因：read 档不允许、审批通道已关闭，或后端没有提供单次批准选项。
-  - daemon 版本持续不匹配时，报错会说明 axiopera daemon stop --force 会中断所有会话中正在运行的任务。
-  - 发布归档只包含二进制和 LICENSE，不再套一层目录。
+  agent 沙箱在 macOS 上不能再启动 daemon，在 Windows 上不能再冒充 daemon，子 agent 也不能再停止 daemon。
   修复
-  - 已取消的任务可以用 send 或 reply 续接。取消时保留会话和未交付输入。续接父任务不会重启已取消的子任务，需要逐个续接。
+  - macOS：在 agent 的沙箱中（例如 Claude Code 的命令沙箱），axiopera 不再启动 daemon，而是提示到沙箱外重新运行。此前在沙箱中启动的 daemon 会一直留在沙箱里，它启动的每个子 agent 也都受沙箱限制，并沿用沙箱的网络代理设置。
+  - Windows：Codex 沙箱中的进程不能再为 daemon 的命名管道另建实例、接收其他客户端的请求，包括 spawn 携带的环境变量。客户端也会拒绝由沙箱进程提供的管道。
+  - 数据目录只读或无权写入时，提示到 agent 沙箱外重新运行，不再只报系统错误。
+  - Linux：daemon 在几毫秒内连续两次更新同一任务时，axiopera top 不再漏掉后一次更新。
   其它说明
-  - 客户端与 daemon 的通信协议有变化，替换程序前先执行 axiopera daemon stop。
-  - 降低父任务档位时，已取消的子任务也会参与检查，需要先降低它们的档位。
+  - 子 agent 不能再执行 axiopera daemon stop、skill install 和 plugin cleanup，请在主会话或终端中运行。子 agent 遇到版本不一致时，报错不再建议 daemon stop --force。
+  - Linux 客户端不检查自身是否在沙箱中。使用 Grok 的 --sandbox workspace 且沙箱可写数据目录时，仍可能在沙箱中启动 daemon。
+  - 替换程序前先执行 axiopera daemon stop。
   - 更新 Codex 插件后可能需要重新信任插件。
 ReleaseNotesUrl: https://github.com/Victor-Quqi/Axiopera/releases/tag/v0.3.1
 Documentations:

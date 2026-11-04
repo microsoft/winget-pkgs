@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: Victor-Quqi.Axiopera
-PackageVersion: 0.3.1
+PackageVersion: 0.3.2
 PackageLocale: en-US
 Publisher: Victor-Quqi
 PublisherUrl: https://github.com/Victor-Quqi
@@ -34,20 +34,16 @@ Tags:
 - programming
 - subagent
 ReleaseNotes: |-
-  Live sub-task progress for Codex, resumable cancelled tasks, and clearer agent guidance.
-  Added
-  - axiopera watch --status follows your running and queued tasks, checks every 2 seconds, prints status and progress changes, and exits when none remain. The Codex guide runs it in a background terminal so you can follow sub-task progress.
-  Improved
-  - The guide and sub-agent instructions now say that tasks share your working directory unless --cwd selects another, and that parallel writers need separate git worktrees. They also explain that answers reach the task's main session and how Grok's read tier limits shell commands.
-  - Refusal messages say why a request was refused: the read tier, a closed approval channel, or no one-time approval option.
-  - The persistent version-mismatch error explains that axiopera daemon stop --force interrupts active tasks from all sessions.
-  - Release archives contain only the binary and LICENSE, without a top-level directory.
   Fixed
-  - Cancelled tasks can be resumed with send or reply. Cancelling keeps the session and undelivered input. Resuming a parent does not restart its cancelled sub-tasks, so resume each one separately.
+  - macOS: inside an agent's sandbox, such as Claude Code's command sandbox, axiopera no longer starts the daemon and asks you to re-run the command outside the sandbox. A daemon started there stayed in the sandbox, passed it on to every sub-agent, and gave them the sandbox's network proxy settings.
+  - Windows: a process in the Codex sandbox can no longer add an instance of the daemon's named pipe and receive other clients' requests, including the environment that spawn sends. Clients also refuse a pipe served by a sandboxed process.
+  - If the data directory is read-only or not writable, axiopera asks you to re-run the command outside the agent sandbox instead of reporting only the system error.
+  - Linux: axiopera top no longer misses a task update that the daemon saves within a few milliseconds of the previous one.
   Other notes
-  - The client-daemon protocol changed. Before replacing the executable, stop the daemon with axiopera daemon stop.
-  - Cancelled sub-tasks now count when lowering a parent's tier. Lower their tier first.
+  - Sub-agents can no longer run axiopera daemon stop, skill install or plugin cleanup; run them from the main session or a terminal. Version-mismatch errors shown to sub-agents no longer suggest daemon stop --force.
+  - On Linux the client does not check whether it runs in a sandbox. With Grok's --sandbox workspace and a data directory the sandbox can write, it can still start the daemon inside the sandbox.
+  - Stop the daemon with axiopera daemon stop before replacing the executable.
   - Updating the Codex plugin may require trusting it again.
-ReleaseNotesUrl: https://github.com/Victor-Quqi/Axiopera/releases/tag/v0.3.1
+ReleaseNotesUrl: https://github.com/Victor-Quqi/Axiopera/releases/tag/v0.3.2
 ManifestType: defaultLocale
 ManifestVersion: 1.28.0
