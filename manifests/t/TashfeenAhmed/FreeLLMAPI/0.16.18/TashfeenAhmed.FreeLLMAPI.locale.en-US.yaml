@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: TashfeenAhmed.FreeLLMAPI
-PackageVersion: 0.16.17
+PackageVersion: 0.16.18
 PackageLocale: en-US
 Publisher: tashfeenahmed
 PublisherUrl: https://tashfeen.me
@@ -27,15 +27,21 @@ Tags:
 - proxy
 - router
 ReleaseNotes: |-
-  NovAI daily-free chat support
-  - Add chat and streaming support for GLM 4.6V Flash and GLM 4.1V Thinking Flash through the existing NovAI provider.
-  - Normalize leading reasoning and nested answer envelopes while preserving streaming, tool deltas and retry information.
-  - Reject mismatched model identities so the router can fail over safely.
-  - Keep existing NovAI video support and the Premium-immediate / Free-after-30-days catalog policy unchanged.
-  The separately published catalog enables the two NovAI chat entries and disables three retired onomeo free routes: codestral-latest, ministral-14b-latest and qwen-flash-character. Net enabled change: -1. Existing rows are retained.
-  NovAI free models share a daily allowance. GLM 4.6V Flash passed live adapter checks in both modes. The thinking model returned the correct answers and identity in both modes; final formatting normalization is regression-tested, but a post-fix live repeat was blocked by the account's daily quota.
-  Upgrade desktop or pull the stable Docker image to use the new adapter.
-ReleaseNotesUrl: https://github.com/tashfeenahmed/freellmapi/releases/tag/v0.16.17
+  NovAI image generation
+  - Add the tested free cogview-3-flash image route to the existing NovAI provider. Use your NovAI API key with /v1/images/generations for one 1024×1024 image.
+  - Validate downloaded image data and return PNG base64, including when the upstream labels JPEG bytes as PNG. Output downloads never receive the API key and are restricted to approved HTTPS hosts.
+  - Package the native image decoder in desktop builds; unsupported installations fail only this image route and retain existing media failover.
+  Catalog update
+  The separately published catalog adds six tested routes and disables five retired routes: net +1 enabled entry. It also corrects Router9 allowance descriptions and Cohere embedding input limits.
+  Premium receives the live catalog immediately. Free retains the existing 30-day release delay. No release-gating code or existing model ages were changed. Catalog data is published to Oracle, not embedded in this release.
+  Validation
+  - 79 targeted NovAI tests and a successful live image-generation test.
+  - Full workspace tests: 5,470 passed; seven existing skips.
+  - Desktop tests: 79 passed; one existing skip.
+  - Workspace builds, lint, migrations and desktop bundles passed locally.
+  - Signed catalog dry-runs verify Premium/Free routing and the day-0/day-29/day-30 boundary.
+  PR: https://github.com/tashfeenahmed/freellmapi/pull/1814
+ReleaseNotesUrl: https://github.com/tashfeenahmed/freellmapi/releases/tag/v0.16.18
 PurchaseUrl: https://freellmapi.co/pricing
 InstallationNotes: Open the app, then copy the unified API key shown in the tray popover and add your provider keys on the Keys page before pointing a client at the local /v1 endpoint.
 Documentations:
