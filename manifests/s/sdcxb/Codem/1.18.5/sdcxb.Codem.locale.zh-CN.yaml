@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: sdcxb.Codem
-PackageVersion: 1.18.4
+PackageVersion: 1.18.5
 PackageLocale: zh-CN
 Publisher: codem
 PublisherUrl: https://github.com/sdcxb
@@ -24,10 +24,10 @@ Tags:
 - 聊天机器人
 - 自主智能
 ReleaseNotes: |-
-  Codem v1.18.4
+  Codem v1.18.5
   发布日期：2026-11-04
   类型：稳定版（Windows x64）
-  下载：Codem_1.18.4_x64-setup.exe（NSIS 安装包）· Codem_1.18.4_x64_en-US.msi（MSI）· Android 预览包见下方
+  下载：Codem_1.18.5_x64-setup.exe（NSIS 安装包）· Codem_1.18.5_x64_en-US.msi（MSI）· Android 预览包见下方
   Android 真机验证包
   - Codem-Mobile-1.0.0-arm64.apk：真机（arm64-v8a）安装包。
   - Codem-Mobile-1.0.0-x86_64.apk：x86_64 模拟器包。
@@ -35,24 +35,25 @@ ReleaseNotes: |-
   - 安装：手机允许“安装未知应用”后打开 APK；与已装同包名版本会覆盖升级。
   - 连接：PC 保持 Codem 运行，并执行 tailscale serve --bg 41873；手机与 PC 登录同一 tailnet 后，在手机「添加电脑」填 https://<machine>.<tailnet>.ts.net，配对码留空即可。
   本版要点
-  1. 水位提示不再“重启才出现”：新建或切换会话时主动预热消息索引镜像。此前只在启动时预热当时的活跃会话，之后新建/切换的会话镜像未加载，水位与自动压缩在当前进程里持续按“未知”处理，重启后才突然显示已满。
-  2. 水位/面板/自动压缩回到同一份权威口径：镜像加载完成后，水位条、上下文面板和自动压缩读取同一份可见消息集合，不需要重启才能看到真实占用。
-  3. 不改阈值与提示策略：仍然只在临界水位弹出提示；本轮修的是“读数就绪时机”，不是把提示调得更频繁。
+  1. 纯文档任务不再被误催测试/构建（续）：上一版按扩展名区分文档与代码，但文档任务通过 Python/脚本生成 .docx 时，命令里的 .py 仍会被误判为产品代码；任务描述出现「接口 / Word / 验证」也可能误触发。本版补上文档生成命令、强文档词与最终交付物兜底。
+  2. 不透明脚本不再直接判成代码：bash 里出现 .py 不再单独作为“必须跑测试/构建”的依据；明确 write/edit 到代码文件、或任务本身是代码/修复/构建/测试时，验证门保持不变。
+  3. 最终回复点明 .docx / .md 交付物时，不再补“未经证实”。
   变更
   修复
-  - ChatPanel 在 active session 变化时调用 warmSessionMessageMirror，触发该会话消息索引镜像加载。
-  - 新增 warmSessionMessageMirror 作为唯一预热入口，复用既有 isHiddenStateAuthoritative 的权威判据。
-  - 新增判据：异步加载窗口内预热后权威状态转为 true；ChatPanel 接线有源码棘轮。
+  - 文档识别扩展到 python-docx / docx / openpyxl / python-pptx / pandoc / Word / WPS / LibreOffice / Markdown 等命令标记。
+  - 强文档词（文档/方案/报告/分册/章节/Word/按同体例）优先于「接口/测试/验证」等泛词。
+  - bash 的不透明改动记为 unknown，收尾时结合用户描述与最终交付文本判断；明确代码文件仍要求验证。
+  - 新增 VERIF-5/6 行为判据，覆盖“任务描述有接口/Word/验证”和“用户只说继续、最终文本列出 docx/md”两种现场。
   升级说明
   - 可直接覆盖安装，无需手动迁移数据；会话、设置、项目与已配对设备都会保留。
-  - 升级后打开旧会话，水位应在数秒内按真实占用出现，不再需要重启验证。
-  - 手机 APK 与 v1.18.3 相同，本版未重新构建移动端。
+  - 本版只调整收尾提示的对象识别，不改变完成门、回归门、红判据门或工具执行。
+  - 手机 APK 与 v1.18.4 相同，本版未重新构建移动端。
   已知问题
   - 手机 APK 仍为 1.0.0 debug 签名预览包。
   - 完整 12 任务跨实现评测仍未重跑；长尾单任务的两轮结果只作为方向性参考。
   校验
   - 附更新器签名 .sig；latest.json 平台键为 windows-x86_64-nsis、windows-x86_64。
   - 安装包与 MSI 均由同一版本源码构建。
-ReleaseNotesUrl: https://github.com/sdcxb/codem/releases/tag/v1.18.4
+ReleaseNotesUrl: https://github.com/sdcxb/codem/releases/tag/v1.18.5
 ManifestType: defaultLocale
 ManifestVersion: 1.28.0
