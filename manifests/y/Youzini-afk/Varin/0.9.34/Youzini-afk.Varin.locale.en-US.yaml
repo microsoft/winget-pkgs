@@ -1,0 +1,55 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: Youzini-afk.Varin
+PackageVersion: 0.9.34
+PackageLocale: en-US
+ShortDescription: An independent agent workspace and full harness for coding, research, and other project work.
+Description: 'Varin is an independent agent workspace and full harness for coding, research, and other project work, centered on local and desktop experiences. It bundles the Pi runtime: the model and provider stack, session tree, package manager, and extension model remain Pi-owned, while Varin owns the surrounding tool environment, working state, recovery, retrieval, context policy, task governance, and workbench surfaces. Varin ships two first-party working shapes: an Agent Workspace centered on sessions, tasks, and context, and an IDE Workbench centered on editors, search, Git, diagnostics, and debugging with the agent as a dockable panel.'
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- pi
+- pi-agent
+- programming
+- research
+ReleaseNotes: |-
+  Varin 0.9.34 brings external agent harnesses into the workspace, introduces versioned workspaces for on-demand isolation, and improves the continuity of chat scrolling. It also addresses retrieval startup failures, pauses when opening child conversations, process-output handling, and several Office and tool-contract issues. Android joins the release build with a signed APK.
+  External agents in the Varin workspace
+  - Connect Codex, Claude Code, Pi, or an ACP-compatible program installed on the execution Host. Detect and enable backends in Settings → External Agents, then choose one when starting a conversation. Each backend keeps its own models, accounts, tools, and project configuration.
+  - Bind external backends to agent presets so Varin can delegate work through the existing child-task controls. Directed messages, final reports, status, waiting, cancellation, and file exchange remain attached to the original delegated task.
+  - Present external conversations through the shared chat layouts, thinking previews, tool disclosures, file previews, work overview, and collaboration bubbles. Reconnect conversations created in Varin without automatically replaying an input whose outcome is unknown.
+  Versioned workspaces and responsive execution
+  - Add versioned file trees and private file changes to the Rust Storage engine. Managed workspaces can fork from a retained version while unchanged content is shared; partial edits retain the changed ranges instead of requiring a complete file copy at every fork or flush.
+  - Keep delegation shared by default. Explicit isolated_write checks the execution Host's filesystem backend before expensive preparation and reports missing dependencies or permissions directly.
+  - Connect file tools, editors, terminals, recovery points, code integration, and external harnesses to the same selected source. Move file I/O and process preparation off the Storage control thread, and reclaim derived workspaces according to their actual readers, processes, and retained references.
+  - Stop an idle maintenance wake loop and index temporary run-grant cleanup. These fixes address accumulated bookkeeping and long interface pauses when opening child conversations. Conversation switches also cancel stale reads and show failures for the selected conversation.
+  Chat, scrolling, and model controls
+  - Smooth discrete mouse-wheel input across chat, settings, and work overviews. Consecutive input carries its momentum; reversing direction takes over immediately. Trackpads retain native scrolling, and scrollbar dragging follows the pointer directly.
+  - Make live-output following and returning to the latest reply interruptible. Long returns use a transition confined to the chat viewport. Preserve reading positions through disclosure changes, reflow, and revisiting a conversation whose task continued in the background.
+  - Fade the outer chat scrollbar after user inactivity, keep its thumb synchronized with content, and avoid repeatedly revealing it for background output. Show a new-reply hint while the reader stays in history.
+  - Add independent thinking-level controls for auxiliary models and quick retrieval. Preserve each task's selected model settings through request preparation and budgeting. Improve model-brand recognition for channel-prefixed names.
+  - Add an immediate-send action to queued messages, distinguish composer shortcuts with the theme accent, preserve child avatars after reopening history, and stabilize inline HTML sizing to reduce scrollbar flicker.
+  Retrieval and tool reliability
+  - Fix quick-retrieval startup after a model request is rebound: retain the originating run's exact child-model bindings and preserve the underlying preparation error when a request cannot start.
+  - Make tool discovery return concise group/search results and focused operation contracts. Continue complete entries through pagination instead of truncating a large disclosure table; discovery does not change invocation permissions or register additional model functions.
+  - Coordinate file leases when file writes and process launches run together. Allow independent readers to revisit retained process output, align text pages to complete characters, improve mixed UTF-8/Windows-code-page decoding, and resolve direct shell program names using the execution environment.
+  - Let an explicit process wait cover both exit and output finalization. Distinguish a running process, output still finishing, complete output, and an output error.
+  - Keep Linux commands alive when their temporary launcher thread exits. Repair isolated-source backend checks and ordinary-user Windows mounting, standard path resolution and shell execution. Release a finished Run's own workspace leases during grant retirement, and admit native workspace sources in structural code reading. Preserve directory metadata through child-file integration and undo.
+  - Honor the Linux FUSE connection's actual synchronization capabilities instead of waiting for callbacks that ordinary mounts do not provide. Fix shared-source settlement and immutable-result continuation, Windows mounted-directory creation, and scoped file authority during code exchange. Normalize equivalent Windows attribute/security representations while preserving their permissions, and retain the original cause when integration preparation aborts. Run file-exchange reservation queries outside the Storage control thread so mounted-path callbacks can complete. Fix file-attribute round trips when returning isolated work to ordinary Unix project directories. Normalize root metadata paths when recording captured resource coverage without broadening descendant access.
+  - Repair the Office/download file-lease request contract. Improve export-argument errors, script binding diagnostics after a failed cell, nested tool-validation results, and child-report byte-range errors. Improve code-unit selection feedback and import-unit extraction.
+  - Remove raw native file metadata from model-facing file/follow-up receipts while retaining it for recovery. Search material titles and source identifiers as well as text, balance multi-directory listings, and make detailed desktop window inventories opt-in.
+  - Update ip-address to 10.7.5 for IPv6 classification, subnet-comparison and parser fixes. Repair deepmerge object-prototype handling in build tooling, with behavior checks through the actual PWA consumer before excluding its patched version's advisory.
+  Android and upgrade notes
+  - Android: the release workflow now builds Varin-0.9.34-android.apk with a persistent release signing key and publishes its SHA-256 checksum. The app bundles the mobile interface and connects to an existing Varin Host; it does not run the Agent backend on the phone. Firebase is not configured for this release, so native push registration is unavailable.
+  - Isolated workspaces: Windows uses optional WinFsp and supports ordinary user accounts after installation. A local UNC filesystem preserves standard path resolution; workspaces share one per-user drive alias for command execution, while each source keeps its original Storage Session and lifecycle. No system-wide mount setting is changed. Linux requires an available FUSE backend; macOS can use an enabled FSKit extension on macOS 26+ or an installed compatible macFUSE backend. Ordinary project conversations and shared tasks use the original directory. A physical project's first import still requires a stable capture; managed forks reuse the captured state.
+  - Private data format: the Agent Catalog changes from format 78 to 79. Automatic migration of unsupported private stores is not provided. Incompatible stores are preserved and rejected; an installation using an older format may require a separate data directory. Keep important existing data when upgrading.
+  - Desktop targets remain Windows x64/ARM64, Linux x64/ARM64, and macOS Apple Silicon; macOS Intel is optional. Windows installers are unsigned, and macOS packages are unsigned/not notarized. Android APKs use their own configured signing key. npm extension-authoring packages retain their separate version stream.
+ManifestType: locale
+ManifestVersion: 1.28.0
