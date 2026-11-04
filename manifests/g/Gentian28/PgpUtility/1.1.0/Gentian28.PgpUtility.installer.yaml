@@ -1,0 +1,33 @@
+﻿# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.6.0.schema.json
+PackageIdentifier: Gentian28.PgpUtility
+PackageVersion: 1.1.0
+
+# Velopack's Setup.exe is a custom installer, so "exe" with explicit switches. --silent is what
+# it actually accepts; winget's validation pipeline installs unattended, so getting this wrong
+# fails submission. Same installer machinery as Gentian28.ResumeBuilder.
+InstallerType: exe
+InstallerSwitches:
+  Silent: --silent
+  SilentWithProgress: --silent
+
+# Velopack installs per-user under %LocalAppData%, never machine-wide.
+Scope: user
+InstallModes:
+  - interactive
+  - silent
+
+# The app updates itself through Velopack, so winget should reinstall over the top rather than
+# expect an uninstall/install cycle it does not control.
+UpgradeBehavior: install
+ReleaseDate: 2026-08-01
+
+# Pinned to the exact release. Deliberately NOT /releases/latest/download/ - the hash below is
+# only valid for this build, and a floating URL would break validation the moment a new version
+# ships.
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/Gentian28/pgp-utility/releases/download/v1.1.0/PgpUtility-win-Setup.exe
+    InstallerSha256: CCDA40923A93041254FD59BB112CCB748B100E80056B247454AC4368747C26D8
+
+ManifestType: installer
+ManifestVersion: 1.6.0

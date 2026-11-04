@@ -1,0 +1,57 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: afonsojramos.discrakt
+PackageVersion: 4.0.0
+PackageLocale: en-US
+Publisher: afonsojramos
+PublisherUrl: https://github.com/afonsojramos
+PublisherSupportUrl: https://github.com/afonsojramos/discrakt/issues
+PackageName: Discrakt
+PackageUrl: https://github.com/afonsojramos/discrakt
+License: MIT
+LicenseUrl: https://github.com/afonsojramos/discrakt/blob/HEAD/LICENSE
+ShortDescription: Trakt to Discord Rich Presence
+Description: Discrakt bridges your Trakt.tv watching status to Discord Rich Presence. It runs silently in your system tray and automatically updates your Discord status when watching movies or TV shows tracked by Trakt.tv.
+Tags:
+- discord
+- media
+- plex
+- rich-presence
+- trakt
+ReleaseNotes: |-
+  v4.0.0 — Plex & Jellyfin support 🎉
+  Discrakt is no longer Trakt-only. This major release turns it into a multi-source Rich Presence bridge: mirror what you're watching to Discord directly from Plex or Jellyfin (your own server, no third-party scrobbler needed), alongside the existing Trakt flow. It also ships a completely rebuilt setup wizard and properly signed & notarized macOS releases.
+  Pick your source in the setup wizard — each gets a native login (Trakt OAuth, Login with Plex, Jellyfin Quick Connect) and automatic artwork + localized titles.
+  What's Changed
+  ✨ New sources
+  - Add a source-agnostic Source trait, decoupling Discord rendering from Trakt
+  - Plex: PlexSource backed by Plex Media Server sessions, with "Login with Plex" (PIN flow), TMDB artwork via library metadata, and reachability probing during server discovery
+  - Jellyfin: JellyfinSource with Quick Connect auth, config + dispatch wiring, and a dedicated wizard tab
+  - Select the active tracking source from config and dispatch accordingly
+  🪄 Setup wizard
+  - Replace the inline HTML wizard with an embedded Vite+ / React app
+  - Brand logos beside each source tab, served from the bundle
+  - Collapsible "Advanced" options for each source (incl. public Trakt profile, no login)
+  - Drop the required Trakt username; add a post-setup success countdown
+  - Jellyfin: link straight to the Quick Connect page with the code prefilled
+  - Detect auth completion and hold the close countdown until the tab is refocused
+  🎨 Rich Presence
+  - Presence buttons now link to TMDB (the movie/show page), falling back to IMDB, plus an always-present Discrakt project link — consistent across all sources
+  🐛 Fixes
+  - jellyfin: request ProviderIds when resolving a series TMDB id (restores episode artwork & localized titles)
+  - Cache resolved TMDB ids only on success, so a transient failure no longer pins a title to "no artwork"
+  - Widen season/episode numbers to u16 (large/absolute-numbered episode counts no longer drop the session)
+  - jellyfin: fetch the series poster even when the season is unknown; treat a session without play state as not playing; URL-encode the Quick Connect secret
+  - setup: reuse the in-flight Quick Connect code on restart and free the slot on expiry; close the success tab reliably; poll status immediately on the auth screen
+  - plex: address source-layer review findings
+  🔧 Internal & CI
+  - Model Quick Connect expiry as an explicit poll variant; bound the series TMDB cache with an LRU; add Jellyfin window-math & TMDB-fallback tests
+  - macOS releases are now Developer ID signed + notarized (DMG), and the Homebrew binaries are Developer ID signed too
+  - Provision Node and pnpm via mise for crate builds; lint Tailwind classes with better-tailwindcss
+  - Docs updated for Plex and Jellyfin throughout
+  - Dependency bumps
+  Full Changelog: v3.4.5...v4.0.0
+ReleaseNotesUrl: https://github.com/afonsojramos/discrakt/releases/tag/v4.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

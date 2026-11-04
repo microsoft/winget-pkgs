@@ -1,0 +1,54 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: co2lab.Anchors
+PackageVersion: 0.1.355
+PackageLocale: en-US
+Publisher: co2lab
+PublisherUrl: https://github.com/co2-lab
+PublisherSupportUrl: https://github.com/co2-lab/anchors/issues
+PackageName: Anchors
+PackageUrl: https://github.com/co2-lab/anchors
+License: Elastic License 2.0
+LicenseUrl: https://github.com/co2-lab/anchors/blob/HEAD/LICENSE
+ShortDescription: Spec-first continuity framework for AI-assisted development
+Description: Anchors ties spec, feature and test together through a shared identity code, then confronts each artifact against the rules declared in anchors.yaml. It maps the project as a graph, propagates change from the anchor outward, and gates every step — so work guided by AI stays anchored to what was decided.
+Moniker: anchors
+Tags:
+- ai
+- ai-agents
+- cli
+- developer-tools
+- golang
+- spec-first
+ReleaseNotes: |-
+  New: section-required, the spec sections your code calls for
+  A layer can declare the spec sections its code calls for. Each section comes with a trigger
+  that Anchors already measures:
+  layers:
+    component:
+      requires_sections:
+        - section: "Test IDs"
+          when: {exposes: test_handles}           # the code exposes a handle
+        - section: "Data Contract"
+          when: {depends_on_layer: [hook, store]} # the code depends on these layers
+        - section: "Navigation"
+          when: {flag: "@navigates"}              # the code carries the flag
+        - section: "User Messages"
+          when: {code_matches: 'showToast\('}     # your own pattern
+  The new gate section-required fails a spec that lacks a section its code triggers. The
+  message names the section, the file and what triggered it.
+  A section is found by its heading, at any level and in any case. When the unit has none of
+  what the section covers, write the section anyway and say so and why.
+  The gate is blocking by default. While you write the sections over an existing tree, set
+  blocking: false on the gate, or declare a skip with its reason in the commit message.
+  New: anchors check --show-skips
+  Lists every indeterminate result (~), grouped by gate and then by reason, the commonest
+  reason first. Each reason shows its count and the addresses it covers. Use it to tell "does
+  not apply" from "should have been measured" without reading the gate's source.
+  Everything in the v0.1.351 notes still applies: run anchors migrate once, crossing format 8.
+  Changelog
+  - 75d39a2 feat(gate): section-required charges the spec sections a unit's code calls for; check --show-skips
+ReleaseNotesUrl: https://github.com/co2-lab/anchors/releases/tag/v0.1.355
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

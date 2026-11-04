@@ -1,0 +1,105 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: astral-sh.ruff
+PackageVersion: 0.17.0
+PackageLocale: en-US
+Publisher: Astral
+PublisherUrl: https://github.com/astral-sh
+# PublisherSupportUrl:
+# PrivacyUrl:
+# Author:
+PackageName: Ruff
+# PackageUrl:
+License: MIT
+LicenseUrl: https://github.com/astral-sh/ruff/blob/HEAD/LICENSE
+# Copyright:
+# CopyrightUrl:
+ShortDescription: An extremely fast Python linter, written in Rust.
+# Description:
+# Moniker:
+Tags:
+- linter
+- pep8
+- python
+- python3
+- ruff
+- rust
+- rustpython
+- static-analysis
+- static-code-analysis
+- styleguide
+- style-guide
+ReleaseNotes: |-
+  Released on 2026-10-09.
+
+  The executables in our macOS and Windows release archives and `ruff` wheels are now code-signed. macOS executables are signed with an Apple Developer ID certificate and notarized by Apple. Windows executables have timestamped Authenticode signatures from Azure Artifact Signing. This enables verification of the release publisher and binary integrity, supports publisher-based allowlisting, and should reduce security warnings and antivirus false positives.
+
+  Breaking changes
+  - Update the default and latest Python versions for 3.15 (#28792)
+
+      Ruff now defaults to Python 3.11 instead of 3.10 when no Python version is configured through `target-version` or `requires-python`. When checking for syntax errors without a configured Python version, Ruff now defaults to Python 3.15 instead of 3.14.
+
+  - Update the default rule set (#28786)
+
+      Several of the `flake8-datetimez` rules (DTZ001, DTZ005, DTZ006, DTZ007, DTZ011, DTZ012, and DTZ901) are no longer enabled by default, while `undefined-local-with-nested-import-star-usage` (F406), which corresponds to a syntax error, is now enabled by default.
+
+  - Update Rust crate quick-junit to 0.8.0 (#27295)
+
+      JUnit output now uses a `skipped` attribute instead of `disabled` on `<testsuite>` elements and includes a `skipped` attribute on the root `<testsuites>` element.
+
+  - [flake8-import-conventions] Add `datetime as dt` as a conventional alias (ICN001) (#28790)
+
+  - Support Unicode dummy variable names (#28722)
+
+      The default `lint.dummy-variable-rgx` now recognizes underscore-prefixed Unicode names, such as `_次`, as dummy variables.
+
+  - Update to Unicode 17 (#21229, #28784)
+
+      Ruff now uses Unicode 17 data for identifier normalization and named character escapes (`"\N{...}"`).
+
+  - Always show unsafe and display-only fixes in the CLI (#27810)
+
+      The default `full` output format now shows unsafe fixes and suggestions requiring manual review, regardless of the `unsafe-fixes` setting. Actually applying unsafe fixes still requires explicit opt-in.
+
+  - Remove the Python dependency from conda-forge builds (conda-forge/ruff-feedstock#361)
+
+      The conda-forge build no longer depends on Python, now supports linux-riscv64, win-arm64, and linux-ppc64le platforms, and now includes shell completions. However, no longer depending on Python means that `python -m ruff` and `import ruff` will no longer work. Use `ruff` directly from `PATH` instead. PyPI installations and those from the standalone installer are unaffected.
+
+  - Remove support for ruff-lsp (#28750)
+
+      Support for `ruff-lsp`, the legacy Python language server deprecated in Ruff v0.9.5, has been removed. The Ruff VS Code extension now always uses the native language server; `ruff.nativeServer` is deprecated and ignored. See the migration guide.
+
+  Stabilization
+  The following rules have been stabilized and are no longer in preview:
+
+  - `lazy-import-mismatch` (TID254)
+  - `lazy-import-immediately-resolved` (TID255)
+  - `os-path-commonprefix` (RUF071)
+
+  The following behaviors have been stabilized:
+
+  - The formatter, `unsorted-imports` (I001), `line-too-long` (E501), and `doc-line-too-long` (W505) now consistently ignore trailing pragma comments when computing line length. This resolved several bugs involving interactions between these rules (#27313) but may also cause existing imports to be reformatted and was thus classified as a breaking change.
+
+  Preview features
+  - [flake8-bugbear] Report the method name and a more precise range (B005) (#27050)
+  - [refurb] Mark fix unsafe and move to `suspicious` (FURB152) (#28405)
+  - [ruff] Allow docstrings in strict mode (RUF067) (#28679)
+
+  Bug fixes
+  - [flake8-builtins] Expand checks in class scopes (A001) (#29076)
+  - [flake8-self] Allow private access on `object.__new__(cls)` instances (SLF001) (#29001)
+  - [flake8-tidy-imports] Skip `lazy-import-mismatch` in stubs (TID254) (#29095)
+  - [flake8-type-checking] Add the notion of runtime-ambiguous references (#26508)
+  - [flake8-type-checking] Never flag annotations in function scopes (#29183)
+  - [pyflakes] Mark the fix as unsafe when it creates a docstring (F541) (#28258)
+  - [pylint] Preserve trailing comments in `useless-return` fix (PLR1711) (#29180)
+  - [ruff] Avoid false positive when `pytest.raises` is used in a `with` statement (RUF061) (#28186)
+
+  Rule changes
+  - [pyupgrade] Suggest `typing.TypeForm` on Python 3.15 (UP035) (#29084)
+ReleaseNotesUrl: https://github.com/astral-sh/ruff/releases/tag/0.17.0
+# PurchaseUrl:
+# InstallationNotes:
+# Documentations:
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

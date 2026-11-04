@@ -1,0 +1,106 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Xiaomi.MiMoCode
+PackageVersion: 0.1.6
+PackageLocale: en-US
+Publisher: Beijing Xiaomi Mobile Software Co., Ltd.
+PublisherUrl: https://mimo.xiaomi.com/
+PublisherSupportUrl: https://github.com/XiaomiMiMo/MiMo-Code/issues
+Author: Beijing Xiaomi Mobile Software Co., Ltd.
+PackageName: MiMoCode
+PackageUrl: https://mimo.xiaomi.com/mimocode
+License: MIT
+LicenseUrl: https://github.com/XiaomiMiMo/MiMo-Code/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2026 MiMo Code, Xiaomi Corporation
+  Copyright (c) 2025 opencode
+CopyrightUrl: https://platform.xiaomimimo.com/docs/terms/user-agreement
+ShortDescription: A next-generation AI coding assistant for developers. Unlimited context lets you understand, build, and collaborate more efficiently.
+Description: |-
+  MiMoCode is a terminal-native AI coding assistant. It can read and write code, run commands, manage Git, and use a persistent memory system to keep a deep understanding of your project across sessions while continuously improving itself.
+  MiMo Auto is built in as a free-for-limited-time channel, so you can start with zero configuration. MiMoCode also supports connecting to any mainstream LLM provider API.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- mimo
+- programming
+ReleaseNotes: |-
+  Summary
+  Slash skills are now enabled by default and support multi-skill orchestration — referencing 2+ /skill-name in a single message auto-loads their contents and injects an orchestration plan. /skip-permissions adds a runtime toggle for unattended runs — forced-ask operations (destructive bash, etc.) auto-reject after 60s with actionable feedback, while other non-deny permissions auto-allow.
+  Agent mode is now locked after first message: Build and Plan can still switch between each other, but entering Compose isolates the session to that mode. Many models tend to ignore tools that appear mid-conversation, so keeping the skill/tool set fixed from session start significantly improves tool-call reliability.
+  Custom provider compatibility: /modalities command lets users configure multimodal support (image, audio, video, pdf) for custom models directly in the TUI without manual config editing; system prompt is now sent as a single {role:'system'} message instead of two, fixing vLLM and other backends that expect exactly one system message; Moonshot/Kimi tool calling no longer 400s on discriminated-union schemas; oversized images are now compressed and area-averaged downscaled before sending, preventing permanent 400 failures.
+  Other highlights: orchestrator mode improvements (liveness tracking, fan-in aggregation, stall watchdog, structured notification cards); workflow meta.permissions manifest for up-front permission declaration; /rebuild command to manually rebuild context from checkpoint; file hooks hot-reload from any external editor without restart; builtin skills gated by CLI availability; broken custom tools no longer crash the session.
+
+  Slash skills 默认开启，支持多技能编排——一条消息里引用多个 /skill-name 会自动加载对应技能内容并生成编排计划。新增 /skip-permissions 命令，适合无人值守跑任务——危险操作 60s 无响应自动拒绝，其余非 deny 权限自动放行。
+  模式锁定：发送第一条消息后 agent 模式不可切换（Build/Plan 之间仍可互切，但 Compose 进入后隔离）。很多模型不喜欢中途出现的新工具、倾向于不调用动态插入的 skill，锁定模式让 skill/tool 集合从会话开始就固定，显著提升工具调用成功率。
+  Custom Provider 兼容性改进：新增 /modalities 命令，可以直接在 TUI 里为自定义模型设置多模态支持列表（图片、音频、视频、PDF），不用手动改配置文件；system prompt 合并为单条消息发送，修复 vLLM 等后端因双 system message 导致的指令重复问题；Moonshot/Kimi tool calling 不再因 discriminated-union schema 报 400；超大图片发送前自动压缩和面积均值缩放，不再因尺寸超限导致 400 永久卡死。
+  其他：orchestrator 模式改进（存活状态跟踪、fan-in 聚合、卡顿监控、结构化通知卡片）；workflow 支持 meta.permissions 清单用于前置权限声明；新增 /rebuild 命令手动从 checkpoint 重建上下文；文件 hooks 支持外部编辑器热重载；内置 skill 按 CLI 可用性自动门控；自定义 tool 文件有语法错误不再导致整个 session 崩溃。
+  Features
+  - tui: slash skills enabled by default with multi-skill orchestration — /skill-name triggers autocomplete anywhere in input, 2+ skills auto-load with orchestration prompt; compose: prefixed skills correctly filtered to compose agent only by @MiMoHardFather, @yanyihan-xiaomi in #1654, #1656
+  - tui: add /modalities command to configure per-model input capabilities (image/audio/video/pdf) with multi-select dialog, persistent config and live-reload by @JinyuXiang-Mimo in #1650, #1651
+  - permission: add /skip-permissions runtime toggle for unattended runs — auto-allows non-deny permissions; forced-ask permissions auto-reject after 60s with actionable CorrectedError feedback instead of hanging forever by @JinyuXiang-Mimo in #1645
+  - session: agent mode locks after first message — Build/Plan freely switch between each other, Compose isolated once entered; fixes models ignoring dynamically injected skills mid-session by @yanyihan-xiaomi in #1725
+  - orchestrator: liveness tracking (progressing/stalled), fan-in aggregation, stall watchdog notifications, reliable relay into idle peers, grant persistence, and structured notification cards in TUI by @wqymi in #1681, #1699, #1691, #1711
+  - workflow: meta.permissions manifest for up-front permission declaration + engine-level agent retry by @wqymi in #1686
+  - session: /rebuild command to manually rebuild context from the latest checkpoint; fixes large-session wedge when a checkpoint writer is in-flight by @wqymi in #1647
+  - provider: area-averaging image downscale (better than nearest-neighbor) + automatic compression of oversized images before send by @wqymi in #1679
+  - plugin: hot-reload file hooks via mtime staleness check — edits from any external writer (editors, git, other processes) now detected without restart by @JinyuXiang-Mimo in #1638
+  - skill: gate builtin skills by CLI availability — skills requiring specific CLI tools only show when the tool is installed by @MiMoHardFather in #1743
+  - skill: add drive-mimo builtin skill for programmatically driving a separate mimo process — supports headless JSON events and interactive TUI via tmux by @wqymi in #1603
+  - session: expose full system prompt on session.post/userQuery.post hooks by @MiMoHardFather in #1717
+  - build: include commit short SHA in version string for traceability by @wqymi in #1723
+  Bug Fixes
+  - session: system prompt collapsed from two {role:'system'} messages to one — fixes vLLM and other self-deployed backends that only accept a single system message; memory instructions scoped to checkpoint owners only by @wqymi in #1636
+  - provider: fix Moonshot/Kimi 400 errors on tool calls — strip parent type from discriminated-union tool schemas by @mvalentsev in #1665
+  - provider: never send a provider-rejected assistant prefill; drop only incomplete trailing assistants + reactive backstop by @wqymi in #1703
+  - provider: make prompt image size cap provider-aware instead of hardcoded 4.5MB; compress or strip oversized images so they no longer 400 and permanently wedge the session by @wqymi in #1679
+  - session: halt on repeated empty/no-op tool calls — model-loop guard prevents infinite empty-action cycles by @wqymi in #1706
+  - session: truncate compaction input at previous compaction/checkpoint boundary — fixes context corruption on long sessions by @JinyuXiang-Mimo in #1695
+  - session: session ask answers from a child's persisted history — isolated/idle children no longer report no-activity by @wqymi in #1701
+  - permission: background subagents inherit parent grants instead of re-prompting or failing closed by @wqymi in #1700
+  - permission: force re-allow skill dirs after user config merge — external_directory: "deny" no longer blocks builtin/compose skills from loading by @yanyihan-xiaomi in #1632
+  - tui: session list no longer shows internal subagent/worker child sessions; fetch limited to root sessions so the 100-slot budget is fully available for user-visible sessions by @JinyuXiang-Mimo in #1627, #1642
+  - tui: fix slash autocomplete mid-message bugs; support colon in multi-skill mention regex for compose:* skills; include hidden skills in free-text mention detection by @yanyihan-xiaomi in #1697, #1715, #1716
+  - tui: save/restore scroll position when switching between agent views by @yanyihan-xiaomi in #1685, #1694
+  - tui: fix sticky scroll timing race via opentui _hasManualScroll by @yanyihan-xiaomi in #1718
+  - tui: skip app-level right-click paste on Windows Terminal to avoid double-insert by @wqymi in #1729
+  - tui: hide sidebar toggle strip when sidebar auto-collapses on narrow terminals (width ⇐ 120) by @JinyuXiang-Mimo in #1637
+  - plugin: gracefully skip broken file tools (.mimocode/tools/*.ts) instead of crashing the entire session by @JinyuXiang-Mimo in #1635
+  - plugin: fix file hook reload — use Bun.build for cross-platform reliability; wire file hooks' event handlers to bus by @JinyuXiang-Mimo in #1638
+  - task: prevent subagents from stealing task ownership via task start — keep original owner to avoid system-reminder re-entry loops by @JinyuXiang-Mimo in #1616
+  - task: rewrite main-session gate prompt to prevent self-answering by @yanyihan-xiaomi in #1738
+  - prompt: memory-flush nudge reworded to not stop the turn; added explicit "CONTINUE current task" directive; debounced to checkpoint-boundary dedup instead of per-turn nagging by @wqymi in #1613
+  - mcp: handle standard tool result fields; preserve attachments on tool errors; route tool attachments by provider support; cap synthetic error images safely by @wqymi in #1704
+  - actor: make instanceID a process-level singleton to prevent false orphaning on layer rebuild by @wqymi in #1724
+  - instance: release worktree resources at boundaries by @wqymi in #1709
+  - workflow: robust args handling, actionable validation; fix brief-phase file write in dynamic workflows; wire parseArgsAsQuestion for deep-research bare string args by @wqymi in #1683, #1686
+  - tui: session-list subagent exclusion, 429 rate-limit normalization, CJK/multibyte text in tool args, structured error render by @wqymi in #1680
+  - tui: change provider connect placeholder from mimorouter to openrouter by @JinyuXiang-Mimo in #1610
+  - config: correct config schema doc URLs from opencode.ai to mimo.xiaomi.com by @yanyihan-xiaomi in #1677
+  - config: add .cron-lock to auto-generated .mimocode/.gitignore; ensure .gitignore is created when cron-lock acquires the directory by @yanyihan-xiaomi in #1629, #1714
+  Docs
+  - update modern-python-toolchain skill to current best practices by @yanyihan-xiaomi in #1662
+  - add theme font pitfall to docx skill, clarify pptx script deps by @yanyihan-xiaomi in #1742
+  - improve pptx skill with visual QA subagent + live preview server by @yanyihan-xiaomi in #1628
+  - add uv/PEP 723 support to docx-official skill by @yanyihan-xiaomi in #1739
+  - migrate theme schema URLs to mimo.xiaomi.com by @yanyihan-xiaomi in #1692
+  - add i18n descriptions for codex and claude-code skills by @MiMoHardFather in #1744
+  Internal / CI
+  - replace internal gateway name with neutral placeholder in transform tests by @wqymi in #1708
+  - skip flaky woken-turn notification test; skip flaky two-level workflow resume test by @yanyihan-xiaomi in #1740, #1634
+  New Contributors
+  - @mvalentsev made their first contribution in #1665
+  Full Changelog: https://github.com/XiaomiMiMo/MiMo-Code/compare/v0.1.5...v0.1.6
+ReleaseNotesUrl: https://github.com/XiaomiMiMo/MiMo-Code/releases/tag/v0.1.6
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://mimo.xiaomi.com/mimocode/start
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

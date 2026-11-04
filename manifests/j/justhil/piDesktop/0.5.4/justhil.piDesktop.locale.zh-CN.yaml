@@ -1,0 +1,62 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: justhil.piDesktop
+PackageVersion: 0.5.4
+PackageLocale: zh-CN
+Publisher: pi-desktop
+PublisherUrl: https://github.com/justhil
+PublisherSupportUrl: https://github.com/justhil/pi-app/issues
+PackageName: pi Desktop
+PackageUrl: https://github.com/justhil/pi-app
+License: 免费软件
+ShortDescription: 面向个人开发者的 pi 桌面 GUI
+Description: |-
+  面向个人开发者的 pi 桌面 GUI：在 Electron 里跑 pi SDK，复用 ~/.pi/agent 的认证、配置与会话 JSONL，用时间线、工具卡片、改动审查和扩展兼容层替代终端里那套 TUI 交互。
+
+  核心思想
+  1. 会话以 pi 为准
+  - 对话内容、工具调用记录、分支与压缩信息，都以 pi 写在 ~/.pi/agent/sessions/ 里的 JSONL 会话文件为准。
+  - 桌面端不另建一套「聊天记录数据库」来替代 pi；本地只存窗口布局、最近项目、扩展开关、适配器覆盖等应用偏好。
+  - 好处：终端 pi 与桌面 pi 可以接着同一条会话用；卸载桌面也不丢对话历史。
+  2. 配置与认证与终端共用
+  - 模型账号、settings.json、扩展包列表（packages）、项目下 .pi/ 资源，与你在终端用的 pi 同一套路径与规则。
+  - 桌面在 设置 → Pi 里改的项会写回全局 settings.json（与终端一致）；Skills 开关等也落在全局配置里，而不是只在桌面私有文件里「假启用」。
+  3. 扩展：兼容层 + 适配器，而不是改插件源码
+  - 扩展在终端里常用 TUI（选择、确认、问卷、工具结果卡片、/命令 进配置）。桌面没有终端画布。
+  - 兼容层：在应用内部统一接收扩展的 UI 请求，转成 Electron 对话框、时间线卡片、设置表单。
+  - 适配器：每个扩展一份「在桌面上怎么显示、怎么配、哪些命令特殊处理」的说明（内置在应用里，高级用户可用 JSON 覆盖）。
+  - 原则：不动扩展 npm 包、不 fork pi；差异写在适配器说明和文档里。
+  - 给 AI 写适配器：见仓库 doc/（adapter-authoring-guide.md 可整份发给模型定制 adapter.json）。
+Tags:
+- pi
+- pi-agent
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  pi Desktop v0.5.4
+  修复
+  - 模型配置与 SDK 环境切换：供应商配置恢复可保存，并兼容当前与旧版 Pi SDK 的校验接口；独立 / 全局 SDK 切换会等待 Main 与 Worker 确认，失败时明确提示并回滚，不再出现假成功或无效操作
+  - 模型目录与当前会话模型：设置页从 active SDK 读取完整模型目录，Composer 只展示已登录或已配置的可用模型；当前会话切换以 Worker 实际状态为准，包含 / 的模型 ID 与新会话首条消息也能使用正确模型
+  - 设置页清空 Composer 草稿：打开设置再返回后，未发送文字与附件顺序仍保留；草稿按会话隔离，发送或手动清空后不会错误恢复
+  - 历史查看误报回退：单击历史节点只查看，双击、Enter 或明确按钮才执行回退；查看、回退和 Fork 不再混淆
+  - 启动语言与设置页文案：补强首屏语言恢复回归门禁，确保已保存语言仍在 React 挂载前生效；移除设置页标题前多余圆点和重复标题
+  - Windows 系统托盘：恢复 Tray 图标，支持左键显示并聚焦窗口，右键显示 / 隐藏窗口或退出应用
+  优化
+  - macOS 双架构安装包：Release 同时构建 Intel x64 与 Apple Silicon arm64 的 DMG / ZIP
+  - 模型选择可信度：无法确认当前鉴权状态时不再用完整模型目录冒充可用列表，避免选到未登录 Provider
+  - 发布门禁：修正 IPC schema、UI store 持久化与平台相关测试契约，并拆分过大的 UI store 壳状态，确保类型检查、单元测试、脚本契约与构建通过
+  - README 赞助入口：中英文 README 增加项目赞助二维码
+  注意
+  - 设置页的模型目录用于浏览和配置，可包含尚未登录的 Provider；Composer 模型选择器只显示 Pi SDK 明确认定为可用的模型
+  - macOS unsigned 构建仍可能被 Gatekeeper 拦截；签名与公证取决于 Release 环境是否配置 Apple 凭据
+
+  安装包见本页 Assets。更新说明以本正文为准（应用内「发现新版本」弹窗会展示）。
+ReleaseNotesUrl: https://github.com/justhil/pi-app/releases/tag/v0.5.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

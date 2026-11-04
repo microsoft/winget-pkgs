@@ -1,0 +1,54 @@
+# Created using wingetcreate 1.2.6.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.4.0.schema.json
+
+PackageIdentifier: MoritzBunkus.MKVToolNix
+PackageVersion: 77.0.0
+PackageLocale: en-US
+Publisher: Moritz Bunkus
+PublisherUrl: https://www.bunkus.org/
+PublisherSupportUrl: https://mkvtoolnix.download/community.html
+PrivacyUrl: https://mkvtoolnix.download/privacy-policy.html
+Author: Moritz Bunkus
+PackageName: MKVToolNix
+PackageUrl: https://mkvtoolnix.download/
+License: GPL-2.0
+LicenseUrl: https://gitlab.com/mbunkus/mkvtoolnix/-/blob/main/COPYING
+Copyright: © 2002 – 2023 Moritz Bunkus
+ShortDescription: MKVToolNix is a set of tools to create, alter and inspect Matroska files under Linux, other Unices and Windows.
+Tags:
+- mkv
+ReleaseNotes: |-
+  New features and enhancements
+  - mkvmerge: tracks in the destination file will now be sorted by their type automatically unless the track order is specified with the --track-order option. The order is as follows: video tracks first followed by audio & subtitle tracks with other rarely used types of tracks last. Tracks of the same type will be sorted in the same order as their source files occur in the command-line arguments. Note that this doesn't affect file identification. Implements #3545.
+  - MKVToolNix GUI: multiplexer: the default list colors used for distinguishing source files does not include the darkest tier anymore (the ones where one or two components are set to the value 0x3f) as they're hard to distinguish from each other. Only affects new installations, or when the user presses the "reset to default colors" button. Implements #3533.
+  - MKVToolNix GUI: multiplexer: the GUI will now check the state of the 'track enabled' flag of all video, audio & subtitle tracks when starting to multiplex or adding a job to the job queue. If there's no track with its flag turned on for a type, the GUI will turn on the flag for the first track of the type. This behavior can be turned off in the preferences. Implements #3535.
+  - MKVToolNix GUI: header editor: the columns in the tracks/attachments view and the values on the "track type" page will now be updated each time a corresponding property is changed (e.g. when a track's name is changed) instead of showing what's in the file on disk. Implements #3554.
+  - MKVToolNix GUI: macOS: when you install the application from the DMG it'll register itself as an alternate handler for its supported file types. This allows the use of the "Open with" context menu action in Finder.
+  - MKVToolNix GUI: Windows: a new settings in the preferences lets the user chose whether to use the light or the dark color palette, or to follow the system settings. Part of the fix for #3528.
+
+  Bug fixes
+  - Fixed compilation with fmt v10.0.0.
+  - mkvmerge: fixed several instances of wrong format strings for fmt::format used in debug messages. Fixes #3548.
+  - mkvmerge: AV1 packetizer: the packetizer did not honor the aspect ratio (factor) given on the command-line via the --aspect-ratio or --aspect-ratio-factor options.
+  - mkvmerge: JSON identification: cropping parameters are reported again even if some of the four values are not present in the file or set to 0. Fixes #3534.
+  - mkvmerge: Windows: when writing to a network share connected via SMB1 mkvmerge was aborting with a error about create_directory() failed with existing directories. This was due to a bug in recent versions of the Boost.Filesystem library. The Windows version of MKVToolNix will be built with Boost 1.82.0 from now on which includes the fix. Fixes #3547.
+  - MKVToolNix GUI: the defunct "disable the dark mode" checkbox was removed from the preferences.
+  - MKVToolNix GUI: language dialog: under certain conditions the controls for the individual components remained disabled when the dialog is opened even though editing of individual components is selected. Part of the fix of #3532.
+  - MKVToolNix GUI: language dialog: the controls for the individual components weren't re-initialized properly after opening the dialog for the second & all following times, potentially leaving previously selected/entered entries intact, primarily when editing multiple tracks at once. Part of the fix of #3532.
+  - MKVToolNix GUI: header editor: using the actions from the "modify selected track" context menu only worked if the user right-clicked on the first column in the view. They now work for clicks on any of the columns. See also #3554.
+  - MKVToolNix GUI: header editor: some of the actions toggling specific flags from the "modify selected track" did not work correctly if the flag wasn't currently present in the file, especially if the underlying value has a default value in the Matroska specs.
+  - MKVToolNix GUI: Windows: the GUI will now always use its own implementation of light & dark palettes instead of relying on Qt. This circumvents two issues with the palette support in Qt 6.5.0:
+  - 1. if Windows 11's dark application mode is active, links were displayed in a hard-to-read dark blue.
+  - 2. for unknown reasons the the dark palette was not chosen on some Windows 11 installations even though Windows 11's color mode was set to "dark". This is a workaround for #3528.
+
+  Build system changes
+  - The bundled fmt library was updated to v10.0.0.
+  - MKVToolNix GUI now uses an external Qt resource file instead of compiling it into the executable. The resource file has reached a size at which the C++ compiler exhausts available virtual memory on some 32-bit architectures. On Windows & macOS the GUI will look for the file in <folder_with_executables>/data/qt_resources.rcc, and in the directory set with configure's --datadir parameter on other systems (which usually means /usr/share/mkvtoolnix). The install build system commands installs it into that folder.
+ReleaseNotesUrl: https://mkvtoolnix.download/doc/NEWS.md
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://mkvtoolnix.download/docs.html
+- DocumentLabel: FAQ
+  DocumentUrl: https://gitlab.com/mbunkus/mkvtoolnix/-/wikis/FAQ
+ManifestType: defaultLocale
+ManifestVersion: 1.4.0

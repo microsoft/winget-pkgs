@@ -1,0 +1,90 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: CognitionAI.DevinCLI
+PackageVersion: 3000.11.92
+PackageLocale: en-US
+Publisher: Cognition AI, Inc.
+PrivacyUrl: https://cognition.ai/privacy-policy
+Author: Cognition AI, Inc.
+PackageName: Devin CLI
+PackageUrl: https://cli.devin.ai/docs
+License: Proprietary
+LicenseUrl: https://cognition.ai/terms-of-service
+ShortDescription: A fast and minimal agent that lives both in your terminal and in the cloud.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+ReleaseNotes: |-
+  Added
+  - New /goal <objective> command: Devin keeps working on the objective across turns, continuing automatically each time a turn ends, until it reports the goal complete or blocked. /goal shows its status, /goal resume continues after an interrupt, and /goal clear drops it. A run pauses itself after 50 turns. Not available on prompt-based plans.
+  - Added steering support: a message typed while Devin is working is handed to the running turn instead of waiting in the queue: Devin reads it at its next step, with nothing cancelled. Cmd+Enter (Ctrl+Enter on other platforms) queues the message until the turn ends instead.
+  - Provider billing: when your account can pay for a provider’s models with a provider plan such as your ChatGPT plan, the model picker marks those models with an asterisk. Press Ctrl+S in the picker or use /billing (/billing on|off) to switch the plan on or off for your account.
+  - Press Alt+Enter in the model picker (/model, Alt+M) to switch models for the current session only. Enter still saves the pick as the default for new sessions. Rebind it with model_picker.confirm_for_session.
+  - New config.json settings:
+    - typewriter: set it to false to show streamed text as soon as it arrives
+    - agent.subagent_model: the model for subagent_explore and custom subagents that don’t set their own
+    - local_tools_bypass_permissions: start every local-tools connection, such as devin connect, with Bypass Permissions on; deny and ask rules still apply
+  - devin plugins install owner/repo accepts repositories that ship only skills/<name>/SKILL.md and no plugin manifest, such as anthropics/skills.
+  - DEVIN_SESSIONS_DIR moves the session history database to another directory, for example a local scratch disk when your home directory is on NFS.
+  - Plugins can declare where they apply with platforms (cloud, local, or both) in the plugin manifest, and plugin hooks can use PLUGIN_ROOT for bundled files and PLUGIN_DATA for data that survives plugin updates.
+  - PreCompact and PostCompact command hooks run before and after context compaction, with manual and auto trigger matchers. Hook failures do not block compaction, and the existing PostCompaction hook remains supported.
+  - MCP improvements:
+    - Added support for MCP servers on protocol revision 2026-07-28.
+    - devin mcp list and devin mcp get show a Source: line for each server, naming the config file or plugin it was loaded from.
+    - HTTP and SSE requests to MCP servers send a User-Agent: Devin-CLI/<version> (<ide>) header unless the server’s configured headers set one.
+    - [Private Preview] Devin CLI can now connect to remote MCPs configured in Devin Cloud. Only enterprise-level MCPs will be reached.
+    - When an MCP server rejects its saved OAuth sign-in and it cannot be refreshed, the credentials are removed and you are told once; the server asks you to sign in again the next time it is used.
+  - The REPL reports its status (idle, working, blocked on a prompt, done, or failed) to the terminal with OSC 7501, so terminals that support it can show which Devin sessions need you. disable_osc turns it off.
+  - Sandbox permission prompts can offer to let every run of a command (for example go build) run outside the sandbox, which saves it to sandbox.excluded.allow.
+  - devin connect: cloud sessions can view image files on the local machine and copy files between the local machine and the session VM. When a rule forces an approval for a command a cloud session runs on your machine, the approval card names the rule and where it comes from.
+  - In a multiline prompt, Ctrl+U at the start of a line removes the line break, so repeated Ctrl+U clears the prompt line by line.
+  - Added the ability to force open sessions that are currently open elsewhere/held by a stale process.
+  - Ctrl+C clears a non-empty draft, including image attachments, without interrupting the running task. Press it with an empty input to cancel the task.
+  - devin cloud with no subcommand opens a Devin Cloud session, the same as devin --cloud, and devin --cloud no longer warns about running from your home directory or asks you to trust the current directory.
+
+  Changed
+  - Permission prompts forced by an organization-managed “ask” rule now say so.
+  - Changing the thinking effort of the current model mid-session no longer discards the prompt cache on models that support per-message effort (Claude Opus 5, Opus 5.5, Fable 5.1, and GPT-6).
+  - In ACP clients, /normal is an alias of /code, /context shows a table of tokens and percent per section, and a /bug report that fails to submit fails the request with the reason.
+  - Session search results are ordered by relevance instead of recency, and the /model picker lists recommended models right after your recently used ones.
+  - Visual polish: Markdown headings follow one color hierarchy, muted text in the light theme meets WCAG AA contrast, warnings are marked with a triangle (▲), pending tool calls use a yellow dot, command cards no longer show the Session: and Timeout: lines, /login-status lists its fields in aligned columns, the login flow is cleaner, and the devin update progress bar is a solid bar.
+
+  Fixed
+  - Smart mode asks less often, with routine commands auto-approved. Destructive Git comands, requests that send data, and writes outside your project still require approval.
+  - Improved performance:
+    - Deferred background tasks during startup to make the CLI even faster to start.
+    - Switched to gzip for all API requests. Set "proxy": { "gzip": false } in config.json if a proxy cannot handle compressed requests.
+    - Reduced redraw/rendering overhead for long sessions.
+    - Optimized parsing for repos many skills
+  - A plugin with a non-semver version (for example v2 or 2024.01) loads instead of being rejected, and a marketplace that lists plugins from its own repository at a branch is downloaded once per install instead of twice.
+  - devin --cloud and devin --cloud -p report the failure at once when the Devin API refuses the connection or the host does not resolve, instead of hanging or retrying for about 31 seconds, and -p prints the server’s reason when the cloud session cannot start.
+  - Cloud WebSocket connections (/org, /handoff, devin connect) and plugin bundle downloads go through the configured proxy like every other API call.
+  - Re-authenticating from inside a session opens the deployment you signed in to (Fed, EU, or a dedicated tenant) instead of app.devin.ai.
+  - Sessions on a model router such as Adaptive no longer get stuck on “Authentication failed: an internal error occurred” once the cached model assignment expires, for example after the machine slept overnight.
+  - In devin acp, a session no longer picks up another repository’s rules, skills, or repo plugins after running a command, and agent messages streamed live carry a timestamp.
+  - Choosing “Yes, switch to bypass mode” (or “switch to accept edits”) on one permission prompt also approves the session’s other open prompts that offered the same switch.
+  - In autonomous (sandbox) mode, Write(...) allow rules auto-approve matching file edits.
+  - Sandboxed commands on Linux no longer fail with “Couldn’t connect to server” when they open a connection before the sandbox’s network proxy is ready.
+  - read_config_from in a project’s .devin/config.json holds for everything loaded from that project, even when your user config turns the provider on, and skills from a provider that is turned off can no longer be invoked by name or found by skill search.
+  - Rules: .devin/global_rules.md and .devin/rules/ still load with read_config_from.windsurf = false, devin rules list honors read_config_from, a rule that is both always-on and path-triggered is injected once, and rule files in a directory created mid-session are loaded.
+  - Hooks: a hook file that declares Claude Code’s Notification or SubagentStop events no longer loses all of its hooks, and Windsurf-format command and write hooks fire on GPT models.
+  - Plugins: optional plugins pinned to a branch and marketplace plugins with nested agent profiles in a private repository load, and one unreadable plugin no longer hides the others offered alongside it.
+  - Session history on a network filesystem (NFS, SMB, Lustre, AFS) no longer fails with session/list failed, disk I/O error, or database is locked.
+  - Command output containing terminal escape sequences (such as OSC 8 hyperlinks) no longer leaks into your terminal, and non-ASCII model output no longer occasionally turns into �.
+  - A background shell the agent kills disappears from the shell tray, and an environment variable whose value contains a NUL byte no longer makes every shell command fail to start.
+  - /usage refreshes the account’s ACU total and limit instead of showing the values from startup.
+  -  --model <slug> no longer fails with Unknown model when the server is slow to return the model list on a cold start.
+ReleaseNotesUrl: https://cli.devin.ai/docs/changelog/stable
+PurchaseUrl: https://devin.ai/pricing
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://cli.devin.ai/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

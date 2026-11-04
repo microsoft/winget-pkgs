@@ -1,0 +1,122 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: IcyHotY2K.QuickImageViewer
+PackageVersion: 3.0.0.368
+PackageLocale: en-US
+Publisher: IcyHotY2K
+PublisherUrl: https://github.com/icyhoty2k
+PublisherSupportUrl: https://github.com/icyhoty2k/QuickImageViewer/issues
+PackageName: QuickImageViewer
+PackageUrl: https://github.com/icyhoty2k/QuickImageViewer
+License: AGPL-3.0
+LicenseUrl: https://github.com/icyhoty2k/QuickImageViewer/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 All rights reserved, Ivan Hristov Yanev
+ShortDescription: Fast native Windows image viewer.
+Tags:
+- cpp
+- fast-image-viewer
+- image-viewer
+- lightweight-app
+- native-cpp
+- no-install
+- performance-optimized
+- portable-exe
+- webp
+- win32
+ReleaseNotes: |-
+  qIV 3.0
+  QuickImageViewer now has a phone. qIV Remote
+  is on Google Play — free, no ads, no account. It turns any phone or tablet into a remote
+  control, a second screen, or a photo frame this app drives, as many at once as you have
+  devices lying around.
+  The desktop side gets two new features, a long list of fixes, and one silent data-loss
+  bug that had been there a while.
+  Find duplicate pictures — Ctrl+D
+  Scans every folder qIV knows and lists the pictures you have more than one copy of.
+  - Identical copies only. Files are grouped by size first, so almost nothing is read;
+    only files that share a size are opened, hashed, and then compared byte for byte
+    before anything is reported. A re-encoded or rotated version is a different file and is
+    deliberately not listed.
+  - You can see them. Results are numbered by group — 1. 1. 1. 2. 2. — so it is
+    obvious which copies belong together, and clicking a row shows every copy in that
+    group side by side with the selected one framed. Identical files usually differ only
+    in name; looking at them together is the only way to be sure.
+  - You can act on them. Right-click a row or a thumbnail to open it, show it in
+    Explorer, or send it to the Recycle Bin — never a straight delete. A choice made at
+    speed from a list has to be undoable.
+  - A listing is also written to qivDuplicates.txt beside qIV.
+  Nothing is ever deleted on its own.
+  Search every folder, not just this one — Ctrl+Shift+F
+  Ctrl+F still searches the folder on screen. Ctrl+Shift+F searches every folder qIV
+  knows — the whole history — so you can find a picture by name without remembering where
+  you put it, and open it straight from the result.
+  Press it while Find is already open and it widens the search you are typing instead of
+  closing the panel; Ctrl+F narrows it back. The panel header says which scope you are in
+  and how many pictures are indexed.
+  Your folders on the taskbar
+  Right-click qIV's taskbar button and Windows lists your folders — favourites first, then
+  the most recent — each one opening that folder directly, whether or not qIV is running.
+  Built from the same history the Tab panel shows, so the two cannot disagree, and rebuilt
+  whenever you navigate or star a folder. Clearing the history clears it too.
+  Fixed
+  🔥 Folders with non-Latin names truncated your history file
+  Writing a path containing Cyrillic, Greek or accented characters failed silently and
+  discarded every folder after it in the file. qivHistory.txt and qivFavorites.txt are
+  written as UTF-8 now, they keep their CRLF line endings, and existing files read back
+  unchanged.
+  If your history has been mysteriously short, this is why.
+  A mistyped password no longer bans you permanently
+  Five failed connections from one address used to write a permanent entry in
+  qivRemoteServerBlacklist.ini. They now cost fifteen minutes, and only five more
+  earn a permanent one. The temporary block lives in memory, so restarting qIV lifts it —
+  mistyping your own password on a phone should not need a file edited to undo.
+  -remote did nothing when qIV had nothing to show
+  Launched with no picture, no remembered folder and no history, qIV opened its file chooser
+  and stopped there — the remote listener never opened its socket, and -full,
+  -slideshow and -hideMouse never applied. The chooser now opens after the rest of
+  startup has run.
+  And
+  - -monitorNum#N picks the screen you meant. It used the display driver's order,
+    which bears no relation to the numbering Ctrl+M, the Statistics panel and every other
+    message in the program use.
+  - File lists sort naturally. promo2 came after promo10 in several places that
+    claimed to match Explorer — including the promotion playlist and four
+    history-maintenance lists, which also sorted case-sensitively.
+  - A settings import no longer turns an exported "Off" into 100 MB.
+  - The image cache can no longer overcommit graphics memory. It bounded itself by a
+    count of pictures, so a handful of large animations could hold several gigabytes.
+    There is a byte ceiling now, and evicting against it is linear rather than quadratic.
+  - Duplicate results stay correct after you delete one. Sending a copy to the Recycle
+    Bin left the remaining rows reading their neighbour's group — which showed copies of a
+    different picture as if they were this one's.
+  - Four leaks and a race, all on paths that only run when something else has already
+    gone wrong: the SVG payload and the queued remote call when their message cannot be
+    posted, the write queue draining its maps by move instead of swap, the transfer
+    temp-name counter racing between socket threads, and a failed duplicate scan leaving
+    Ctrl+D dead for the rest of the session.
+  Also new
+  - The thumbnail cache can be turned off, and knows how much graphics memory you have.
+    The budget accepts 0, and its maximum is your card's own VRAM, which the dialog
+    shows when it can read it.
+  - The Statistics panel reports graphics memory and the thumbnail budget.
+  Under the hood
+  The test suite went from 320 checks to 459, in 22 groups. The parts worth being sure
+  about are now pure and tested rather than buried in a window procedure — what counts as
+  the same picture, what a wrong password costs, the hygiene every hand-edited history line
+  passes, and which thumbnail a click landed on.
+  Download
+  Windows 10 & 11 — one portable executable, no installer, no Visual C++ Redistributable
+  to install. Unblock it if SmartScreen asks, put it anywhere, run it. To remove qIV, delete
+  the file.
+  Android 13+ — qIV Remote on Google Play.
+  It is a companion app and does nothing on its own, the way a TV remote does nothing
+  without the TV: you need qIV running on a Windows PC with its Local Server enabled (F9)
+  and the phone on the same network. Its demo mode runs every screen before you connect it
+  to anything.
+ReleaseNotesUrl: https://github.com/icyhoty2k/QuickImageViewer/releases/tag/v3.0.0.368
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/icyhoty2k/QuickImageViewer/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

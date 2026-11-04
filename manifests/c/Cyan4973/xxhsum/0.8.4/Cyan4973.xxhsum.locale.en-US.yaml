@@ -1,0 +1,108 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Cyan4973.xxhsum
+PackageVersion: 0.8.4
+PackageLocale: en-US
+Publisher: Cyan4973
+PublisherUrl: https://fastcompression.blogspot.com/
+PublisherSupportUrl: https://github.com/Cyan4973/xxHash/issues
+Author: Cyan4973 (Yann Collet)
+PackageName: xxhsum
+PackageUrl: https://xxhash.com/
+License: BSD-2-Clause
+LicenseUrl: https://github.com/Cyan4973/xxHash/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2012-2021 Yann Collet. All rights reserved.
+CopyrightUrl: https://github.com/Cyan4973/xxHash/blob/HEAD/LICENSE
+ShortDescription: Command-line utility for creating or verifying checksums using the fast non-cryptographic algorithm xxHash.
+Description: |-
+  Command-line utility for creating or verifying checksums using fast non-cryptographic algorithm xxHash.
+
+  xxHash is an Extremely fast Hash algorithm, processing at RAM speed limits. Code is highly portable, and produces hashes identical across all platforms (little / big endian). The library includes the following algorithms:
+  - XXH32: generates 32-bit hashes, using 32-bit arithmetic
+  - XXH64: generates 64-bit hashes, using 64-bit arithmetic
+  - XXH3 (since v0.8.0): generates 64 or 128-bit hashes, using vectorized arithmetic. The 128-bit variant is called XXH128.
+
+   All variants successfully complete the SMHasher test suite which evaluates the quality of hash functions (collision, dispersion and randomness). Additional tests, which evaluate more thoroughly speed and collision properties of 64-bit hashes, are also provided.
+Moniker: xxhsum
+Tags:
+- c
+- dispersion
+- hash
+- hash-checksum
+- hash-functions
+- smhasher
+- xxhash
+ReleaseNotes: |-
+  xxHash v0.8.4 is a general maintenance update, offering broader hardware acceleration, command line enhancements, and more predictable builds across platforms. No change to the API entry points.
+  Faster performance with vectorization
+  This release adds several vectorized implementations: for the RISC-V Vector extension and LoongArch LASX, together with improvements to the existing LSX implementation.
+  On aarch64, XXH3 now prefers NEON over SVE. On tested processors, this improves performance by 25–40%. XXH3 streaming performance has also been improved for workloads made of small updates.
+
+  Command-line enhancements
+  xxhsum can now receive a full 64-bit seed through -s or --seed.
+  Command-line parsing is more flexible: options may appear anywhere, even after filenames, while -- explicitly terminates option processing.
+  When processing a list of files, read errors no longer prevent subsequent files from being processed.
+  Windows support received a substantial update, notably for long paths, UNC paths and filenames containing components that require extended Win32 path handling.
+
+  Build and integration
+  Runtime dispatch detection has been corrected for cross-compilation and non-x86 targets.
+  make builds now isolate object files by configuration, avoiding accidental reuse across incompatible flag sets and allowing parallel test builds.
+  The cmake integration moved from cmake_unofficial to build/cmake. Projects referring directly to the previous directory must update that path.
+  Low-level integrations can now redirect XXH_memcpy(), XXH_memset() and XXH_memcmp(). A new XXH_NO_EXTERNC_GUARD macro is also available for projects that need to manage C++ linkage themselves.
+
+  Correctness and portability
+  A strict-aliasing issue that could cause gcc to miscompile some unaligned reads has been fixed. This release also addresses combinations involving XXH_INLINE_ALL, namespaces and x86 runtime dispatch, system headers included from an extern "C" block, and MSVC link-time optimization with warnings enabled as errors.
+  Portability improvements include compatibility with ARM builds using GCC versions older than 8, C++ compilation on Solaris and illumos, and improved installation metadata and paths on Windows and FreeBSD.
+
+  Detailed changelist
+  - perf : added RISC-V Vector extension (RVV) implementation, by @zijianli1234, @BoBoDai and @camel-cdr
+  - perf : added LoongArch LASX implementation and improved LSX, by @24bit-xjkp
+  - perf : prefer NEON over SVE on AArch64, improving XXH3 speed by 25–40%, by @Nicoshev
+  - perf : improved XXH3 streaming speed for very small updates, suggested by @aleksazr
+  - api : XXH_memcpy(), XXH_memset() and XXH_memcmp() can be redirected at compile time
+  - api : new XXH_NO_EXTERNC_GUARD build macro for complex C++ integration
+  - cli : added 64-bit seed support (-s, --seed), by @d06i
+  - cli : options can appear after filenames; -- terminates option parsing, #1098 reported by @unterkomplex
+  - cli : continue processing subsequent files after read errors, #1064 reported by @ZoomRmc
+  - cli : support long and special Windows paths, #1060, based on #1061 by @t-mat
+  - cli : improved benchmark accuracy, error handling and unit labels, #1051 reported by @calgray
+  - fix : unaligned reads could be miscompiled by GCC under strict aliasing, #1013 by @lassipulkkinen
+  - fix : XXH_INLINE_ALL compatibility with XXH_NAMESPACE and x86 runtime dispatch, by @pps83, #1071 reported by @Dr-Hex
+  - fix : avoid including system headers inside an extern "C" block, #1122 reported by @andreas-schwab
+  - fix : compilation with MSVC link-time optimization and warnings as errors, #1038 reported by @mi2think
+  - build: improved runtime dispatch detection for cross-compilation and non-x86 targets, with help from @eworm-de, #1081 reported by @PotMJ
+  - build: LIBXXH_DISPATCH=1 now applies to static and dynamic libraries, #1058 reported by @xiota
+  - build: Make builds now isolate objects by configuration and support parallel test builds
+  - build: moved CMake integration to build/cmake and improved cross-compilation detection
+  - install: improved package metadata and installation paths on Windows and FreeBSD, by @iwamatsu, @chitao1234 and @sunpoet
+  - portability: fixed compilation on ARM with GCC < 8, by @mstorsjo
+  - portability: fixed C++ compilation on Solaris and illumos, by @luqmana
+  - doc : expanded xxhsum documentation and clarified the algorithm specification files
+  - doc : documented non-cryptographic collision properties, notably for XXH3's mid-size path, #1127 by @thomasahle
+
+  New Contributors
+  - @sunpoet made their first contribution in #994
+  - @24bit-xjkp made their first contribution in #996
+  - @walterdejong made their first contribution in #993
+  - @chitao1234 made their first contribution in #1008
+  - @Schell-HAR made their first contribution in #1009
+  - @musvaage made their first contribution in #1021
+  - @iwamatsu made their first contribution in #1024
+  - @Nicoshev made their first contribution in #1023
+  - @zijianli1234 made their first contribution in #1043
+  - @lassipulkkinen made their first contribution in #1013
+  - @YexuanXiao made their first contribution in #1052
+  - @eworm-de made their first contribution in #1055
+  - @stefan-sedlak made their first contribution in #1068
+  - @BoBoDai made their first contribution in #1069
+  - @camel-cdr made their first contribution in #1066
+  - @FatihBAKIR made their first contribution in #1073
+  - @luqmana made their first contribution in #1093
+  - @marcusmueller made their first contribution in #1096
+  - @mstorsjo made their first contribution in #1092
+  - @d06i made their first contribution in #1088
+  - @NexusXe made their first contribution in #1101
+ReleaseNotesUrl: https://github.com/Cyan4973/xxHash/releases/tag/v0.8.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

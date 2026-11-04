@@ -1,0 +1,63 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Hugo.Hugo
+PackageVersion: 0.154.0
+PackageLocale: en-US
+Publisher: The Hugo Authors
+PublisherUrl: https://gohugo.io/
+PublisherSupportUrl: https://discourse.gohugo.io/
+PackageName: Hugo
+PackageUrl: https://gohugo.io/
+License: Apache-2.0
+LicenseUrl: https://github.com/gohugoio/hugo/blob/HEAD/LICENSE
+Copyright: Copyright 2025 The Hugo Authors.
+ShortDescription: The world’s fastest framework for building websites
+Description: |-
+  Hugo is one of the most popular open-source static site generators.
+  With its amazing speed and flexibility, Hugo makes building websites fun again.
+Tags:
+- blog
+- blog-engine
+- cms
+- content-management-system
+- documentation
+- documentation-tool
+- static-site
+- static-site-generator
+ReleaseNotes: |-
+  Hugo v0.154.0 is the 14th release this year (not counting patch releases) and introduces partial decorators, or “partials with a twist.” This is a very powerful construct that I, @bep, have always wanted to have in Hugo, but I could never wrap my head around an implementation. Until now.
+  A small and not very useful example:
+  {{ with partial "b.html" "World" }}Hello {{ . }}{{ end }}
+  {{ define "_partials/b.html" }}<b>{{ inner . }}</b>{{ end }}
+  The above renders to:
+  <b>Hello World</b>
+  - The new inner keyword can be used zero or more times in a partial template, typically with different data (e.g. pages in a range), and its presence signals a reversal of the execution -- the callee becomes the caller.
+  - Decorators can be deeply nested, see this PR for an example.
+  This release also brings some new utility funcs in the reflect package to identify the core types in Hugo. For example, to identify an processable image hasn't been trivial, now it is:
+  {{ $obj := . }}
+  {{ if reflect.IsResource $obj }}
+     {{ if reflect.IsImageResource $obj }}
+          // It has width/height and we can process it.
+     {{ else }}
+         // Just link to it.
+     {{ end }}
+  {{ end }}
+  Bug fixes
+  - tpl/collections: Fix apply to work with built-in funcs like len 5c7fad23 @bep #13418
+  - Revert "resources/page: Fix slugorcontentbasename for section pages" bf1d20d7 @bep #14104 #14325
+  Improvements
+  - helpers: Limit verbose watch output for better readability d3b5d47a @majiayu000 #14277
+  - tpl/reflect: Make the IsImageResource implementation less technical 86cd1838 @bep
+  - internal/warpc: Increase WebP memory limit to 384 MiB 871da337 @jmooring #14309
+  - Update tpl/reflect/reflect.go 1deec99b @bep
+  - Add reflect.Is{Page,Site,Resource,ImageResource} b7bb557c @bep #14307
+  - Allow partials to work as decorators 7c19c196 @bep #13193
+  Dependency Updates
+  - build(deps): bump github.com/tetratelabs/wazero from 1.10.1 to 1.11.0 2637aa15 @dependabot[bot]
+ReleaseNotesUrl: https://github.com/gohugoio/hugo/releases/tag/v0.154.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://gohugo.io/documentation
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

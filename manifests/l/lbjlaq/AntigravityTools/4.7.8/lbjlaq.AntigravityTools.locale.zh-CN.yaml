@@ -1,0 +1,35 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.7.8
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+Tags:
+- account-manager
+- antigravity
+ReleaseNotes: |-
+  - [配额展示与融合逻辑修复] 修复 5H 配额错误显示周配额及重置时间 (PR #3479, Fixes #3477):
+    - 配额桶忠实展示：修正多维度配额桶融合逻辑，周配额未耗尽时始终展示 5H 滚动窗口的实际剩余百分比与小时级倒计时，杜绝日常周期周配额误覆盖 5H 视图。
+    - 周配额熔断边界明确：仅当周配额彻底耗尽（remaining_fraction <= 0.001）时才受制于周配额置为 0% 并继承周重置时间，根除 429 轮询死循环的同时不再误污染 5H 配额。
+    - 视图行为统一：网关与卡片视图（AccountCard）补齐 getModelEffectiveQuota 统一判定，确保网格卡片与表格视图展示逻辑完全一致。
+  - [Claude 协议与思考块签名修复] 修复 Claude 全系列多轮工具调用思考块签名失效报错 (PR #3479, Fixes #3478):
+    - 全系列通用兼容匹配：泛化 common_utils::is_model_compatible 规则，全面支持 Claude 4/5 及衍生变体模型，防止签名被误判剥离。
+    - 合法签名权威透传与反向入库：客户端携带合法签名时绝对信任并直接采纳，自动反向同步至 ThinkingStore。
+    - 禁绝伪造哨兵注入：明确区分 Claude 家族模型，严禁向上游注入 skip_thought_signature_validator 伪签名，避免触发 Anthropic 400 校验错误。
+    - 思考块字节级哈希保护：携带真实签名的思考文本严格禁止任何 .trim() 截断，并在 PromptSanitizer 中跳过思考块处理，确保哈希校验完全一致。
+  - [监控日志与报文优化] 统一日志响应报文为满血简要版并支持权威签名回填 (PR #3479):
+    - 响应报文规范化：监控日志统一以精简且完整的信息记录各协议响应，避免冗余大字段溢出，同时完整收集流式传输事件与权威思考签名。
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.7.8
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

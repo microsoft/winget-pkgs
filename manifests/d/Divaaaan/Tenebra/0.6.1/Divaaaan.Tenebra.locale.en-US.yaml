@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: Divaaaan.Tenebra
+PackageVersion: 0.6.1
+PackageLocale: en-US
+Publisher: Divaaaan
+PublisherUrl: https://github.com/Divaaaan
+PublisherSupportUrl: https://github.com/Divaaaan/tenebra/issues
+PackageName: Tenebra
+PackageUrl: https://github.com/Divaaaan/tenebra
+License: GPL-3.0
+LicenseUrl: https://github.com/Divaaaan/tenebra/blob/main/LICENSE
+ShortDescription: Open-source VPN client for Windows built on sing-box
+Description: Tenebra is an open-source VPN client for Windows built on the sing-box core. It provides a simple desktop interface for managing secure network connections.
+Moniker: tenebra
+Tags:
+- vpn
+- proxy
+- sing-box
+- network
+- privacy
+- security
+- tunnel
+ReleaseNotes: "<!-- tenebra-promotion-sha256:0e37bee00a3e5e0948d1c41d5720096d7674f01cce2dac9fb329de15a6dcc058 -->\n# Tenebra 0.6.1\n\nThis desktop hotfix prevents failures in Tenebra's on-connect,\nmulti-destination node validation from being reported as an\nall-servers-unreachable result. It also makes failures in the server list's\nseparate direct TCP status checks visible and prevents one incompatible\nsubscription node from invalidating the shared sing-box configuration.\n\n• The on-connect validation reserves a free contiguous block of loopback ports\n  instead of relying on a fixed range that another local process may already\n  own.\n• Its temporary SOCKS listeners use fresh credentials, and readiness is\n  confirmed with an authenticated SOCKS negotiation. A foreign listener can\n  no longer be accepted as Tenebra's probe merely because it answers on the\n  expected port.\n• The core watches this validation's probe process throughout startup and\n  measurement. Detected startup failures, bind races and early process exits\n  now stop validation with a local error rather than returning an\n  all-servers-unreachable verdict.\n• Probe stdout and stderr are retained in a bounded tail for diagnosis and are\n  scrubbed before being logged or returned through the control interface.\n• Imported VLESS URLs with unsupported stream transports, including `xhttp`,\n  are excluded before the shared probe or tunnel configuration is built.\n  VLESS nodes using QUIC without its required TLS are excluded for the same\n  reason, while compatible VLESS QUIC nodes remain supported. Other usable\n  nodes in the profile stay available.\n• Separately, the server list shows whether its direct TCP status checks are in\n  progress, ready or failed and provides a retry action. An earlier successful\n  RTT may remain visible while a refresh runs or fails, but it is marked stale\n  and is not counted or rendered as a current signal-strength result.\n\n## Verification scope\n\nAutomated tests cover the on-connect validation's probe ownership, lifecycle\nand port races, authenticated readiness, bounded log capture and the bundled\nsing-box configuration, builder-level unsupported-transport isolation and\ncompatible VLESS QUIC, plus the server list's direct TCP states. The affected\nprofile reproduced the original failure in a retained Windows VM：one `xhttp`\nentry made the bundled sing-box reject the shared configuration with `unknown\ntransport type：xhttp`, blocking otherwise usable nodes. Native installation,\nservice, ordinary-user UI and tunnel checks of the exact rebuilt signed\ncandidate remain required before publication."
+ReleaseNotesUrl: https://github.com/Divaaaan/tenebra/releases/tag/v0.6.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

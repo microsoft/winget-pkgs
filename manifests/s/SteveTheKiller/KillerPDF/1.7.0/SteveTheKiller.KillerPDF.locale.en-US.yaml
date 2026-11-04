@@ -1,0 +1,56 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: SteveTheKiller.KillerPDF
+PackageVersion: 1.7.0
+PackageLocale: en-US
+Publisher: Steve the Killer
+PublisherUrl: https://github.com/SteveTheKiller
+PublisherSupportUrl: https://github.com/SteveTheKiller/KillerPDF/issues
+Author: Steve the Killer
+PackageName: KillerPDF
+PackageUrl: https://github.com/SteveTheKiller/KillerPDF
+License: GPL-3.0
+LicenseUrl: https://github.com/SteveTheKiller/KillerPDF/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Steve the Killer
+ShortDescription: PDF editor for Windows. Install or run portable. GPLv3. No account, no subscription, no telemetry.
+Description: KillerPDF is a lightweight PDF viewer and toolkit for Windows. View, merge, split, and manage PDF files. Runs portable or installs to your user profile - no admin rights required. No account, no subscription, no telemetry. Open source under GPLv3.
+Moniker: killerpdf
+Tags:
+- dotnet
+- gplv3
+- opensource
+- pdf
+- pdf-editor
+- portable
+- windows
+- wpf
+ReleaseNotes: |-
+  1.7.0 is the split-pane release - two documents side by side in one window - plus the family file dialogs replacing every stock Windows one, a themed system menu, night mode that spares pictures, and two deep text fixes: non-Latin scripts now save correctly, and annotations land where you put them on rotated pages.
+  Added
+  - Split pane: F10 shows two documents side by side in one window. Each pane is a card of its own, and the focused one carries an accent ring so it is obvious which pane the toolbar, sidebar and page list are acting on - click either pane to move focus. The boundary between them has a handle on each side: grab the left one to size the left pane, the right one to size the right, and neither pane can be squeezed below a readable width from either direction. F10 again closes the split, and the rail button's icon follows along - a pane pushed out when pressing it will open one, pulled back in when it will close. It is one window, not a second window - each pane has its own tab strip, while the toolbar, sidebar and page list are shared and follow whichever pane has focus. Drag a tab from one pane's strip to the other to move it across, and F10 on a maximized or snapped window splits it evenly instead of squeezing the second pane down to its minimum.
+  - Every Open and Save dialog is KillerPDF's own now, instead of the stock Windows one: the same themed window as the rest of the app, with a places rail, a folder tree, list/icon/details views, sortable columns, pinnable folders and recent locations. That covers opening and saving PDFs, merging, extracting pages, flatten, image export, image import, signature and certificate picking, OCR output and the zip export - including picking several files at once where that applies. Shared with the other Killer Tools apps, so the file dialog looks and behaves the same across the family.
+  - Install for everyone on this computer. The Install button on the portable badge now opens a proper confirmation with two choices - add a desktop shortcut (on by default, as before) and install for all users (off by default, since it needs an administrator). An all-users install puts KillerPDF in Program Files with a Start menu entry for every account, and removes the per-user copy so there is a single entry in Add/Remove Programs rather than two. Declining the administrator prompt leaves the app running portable exactly as it was. There is also a /silent switch that performs the machine-wide install with no interface at all, for winget, Chocolatey and RMM deployment. Matches Killendar and KillerShell. Your PDF file association is still registered for you alone, never for other accounts on the machine - the all-users install deliberately does not change what PDFs open with for anyone else.
+  - "Confirm before opening links" is back, on the About card beside the recent-files toggle. It asks before a link in a PDF opens in your browser, and it is off by default so links stay immediate unless you want the check. The prompt's own "Don't ask again" now simply switches the same option off, so the two can no longer disagree. The setting had no home after the Settings panel was dissolved; About is where the safety and data-hygiene controls live.
+  - Ctrl+Shift+W closes every tab except the current one, alongside Close Tab on the tab's right-click menu - both now line their keyboard shortcuts up in a real column instead of each item sizing its own.
+  - Right-clicking the title bar (or Alt+Space) shows a themed system menu that matches the app instead of the stock white Windows one. Same items, same behavior, in all ten languages.
+  Changed
+  - Internal: the document view is now a self-contained control rather than part of the main window - the page rendering, zoom, annotations, text editing, crop, forms, links and text selection all moved into it, about 8,700 lines. Every function moved verbatim, verified line by line against the previous version, and no behavior change is intended. This is groundwork for showing two documents side by side in one window.
+  - The document area is a rounded, lifted card like the rest of the Killer Tools apps, instead of a squared pane running flush into the window edges: rounded corners, an 8px inset on its outer side, and a real drop shadow that falls across the status bar. The sidebar's five-dot gripper is gone, replaced by the family divider - a thin line that lights up in the accent color when you hover or drag it. Full screen still fills the display edge to edge.
+  - Night mode no longer inverts pictures (#135, thanks dmantisk). Photos and figures keep their real colors while the page around them goes dark - the behavior the request pointed at in Okular. Right-click the moon (or press Shift+N) for "Invert images too" if you want the old full inversion back - useful on scanned documents, where the whole page is one image. Night mode only changes what you see on screen: saving, printing and exporting still produce the document's original colors.
+  - The Settings panel and its gear are gone: every section moved to where the thing it configures lives, matching the rest of the Killer Tools apps. Theme and language are flyouts on new rail buttons (below the night-mode moon, with a ? button for the shortcuts overlay); the theme flyout stays open across a pick so themes can be compared.
+  - Toolbar appearance is a right-click menu on the toolbar itself, and it is two independent choices now instead of one list of five: icon size (small/large) and text placement (none/beside/under/text only) - so large icons with captions is finally possible. Fresh installs default to large icons with text underneath; existing installs keep their setting. Ctrl+Shift+1-6 pick the options directly.
+  - Internal: the codebase has been reorganized into the Killer Tools family layout - document logic in service classes, the About/CLI/OCR/search features behind controllers, the window partials under Shell/. Every moved function is verbatim and no behavior change is intended; the repo root now holds only the entry files.
+  - New app icon. The old one - the document with the red bar across the bottom - now marks PDF files instead, so a KillerPDF window and a PDF sitting in a folder are no longer the same picture. Explorer caches icons aggressively, so a PDF may keep showing the old art until the cache refreshes.
+  - View mode is a rail button wearing four view tiles, one per layout: click for a flyout (each mode with its F-key beside it), roll the wheel over it to step through the views, or press F9 to jog from the keyboard - F5-F8 still jump straight to one, and Ctrl+, is retired. All the new shortcuts are on the F1 overlay, in all ten languages.
+  - Internal: the tab strip and split-pane drag/focus model were rewritten to match KillerShell's implementation, the family's reference for both, replacing the original hand-built version.
+  - The sidebar's left/right choice sits at the bottom of the sidebar's right-click menu, which now opens from any part of the sidebar; Ctrl+Shift+B flips the side, pairing with Ctrl+B's collapse.
+  - The content pane's border is a shade lighter in every theme, so the edge between the pane and the chrome reads more clearly - the same value the other Killer Tools apps use.
+  - The prompt offering to make KillerPDF your default PDF viewer is translated now; it was English-only in every interface language.
+  - The sidebar's page list fades into the background at its top and bottom edges while there are pages scrolled past them - the same treatment KillerShell's folder tree and the killerpdf.net sidebar use. Each fade ramps in over its own height as a row slides under it, so nothing pops, and neither shows when the list is flush at that end.
+  Fixed
+  - Japanese and other non-Latin text no longer saves as empty boxes (#168, thanks terada-d). The editor is a Windows text box, which quietly borrows glyphs from any installed font, so what you type always looks right; the save path resolved a single font and wrote a box for every character that font lacked. Two things were wrong. Nearly every CJK font on Windows ships as a collection file (Yu Gothic, MS Gothic, Meiryo, YaHei, JhengHei), and the save path could not read collections at all - so even picking a Japanese font by hand did not help. And nothing checked whether the chosen font could carry the text. KillerPDF now reads collection fonts, and when your font cannot render something it picks one that can, preferring the same faces Windows itself falls back to. Your own font is always used when it covers the text. This affects Bengali, Korean, Chinese, Thai, Arabic and Indic scripts too, and applies to page numbers and watermarks as well as placed text. Embedded fonts are subset, so a line of Japanese adds tens of KB to the file rather than the whole typeface. In the rare case that nothing installed can draw a character - two different non-Latin scripts in one box, or a script with no font on the PC at all - KillerPDF now says so when the text is placed, listing the characters, instead of leaving it to be discovered after saving and reopening.
+  - Punctuation shortcuts work on keyboard layouts that need Shift for those characters (#153, thanks Mr-Update). Shortcuts were matched by key position, which is a US-layout assumption: on a German keyboard "?" lives on Shift+ss and "=" on Shift+0, so Ctrl+? and Ctrl+= pressed keys the app was not listening for, and the extra Shift broke the match a second time. Zoom and the shortcuts overlay now respond to the key that TYPES the character, whatever position it occupies, so they work on German, French, Nordic and other layouts rather than being fixed one at a time. The shortcuts overlay also prints the spelling that is right for the keyboard in use instead of always showing the US one.
+ReleaseNotesUrl: https://github.com/SteveTheKiller/KillerPDF/releases/tag/v1.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

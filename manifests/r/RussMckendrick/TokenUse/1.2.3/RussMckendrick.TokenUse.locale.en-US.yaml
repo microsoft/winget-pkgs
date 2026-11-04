@@ -1,0 +1,52 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: RussMckendrick.TokenUse
+PackageVersion: 1.2.3
+PackageLocale: en-US
+Publisher: Russ McKendrick
+PublisherUrl: https://github.com/russmckendrick
+PublisherSupportUrl: https://github.com/russmckendrick/tokenuse/issues
+Author: Russ McKendrick
+PackageName: Token Use
+PackageUrl: https://www.tokenuse.app/
+License: MIT
+LicenseUrl: https://github.com/russmckendrick/tokenuse/blob/HEAD/LICENSE
+ShortDescription: Desktop app for local AI coding tool token and cost usage
+Description: Desktop app for local AI coding tool token and cost usage
+Moniker: tokenuse-desktop
+Tags:
+- ai-agents
+- claude-code
+- codex
+- copilot
+- cursor
+- tokens
+ReleaseNotes: |-
+  tokenuse 1.2.3, named Back Pay, teaches the pricing books about Claude Opus 5 and then settles the bill for the calls that were already made. Opus 5 matched no pricing row until now, so every Opus 5 call quietly fell through to the Claude Sonnet 4.6 fallback and was billed at $3/$15 per MTok instead of $5/$25 — an under-count of roughly 40% that no warning surfaced, because an unpriced model is indistinguishable from a cheap one once the fallback has done its work. This release prices the model properly, names it across every surface, and includes a one-shot archive repair that puts the missing cost back into history.
+  Highlights
+  - Claude Opus 5 is priced and named: $5/MTok input and $25/MTok output, with 5-minute cache writes at $6.25, cache reads at $0.50, and fast mode at 2x base. It appears as "Opus 5" in the Opus family across the dashboard, reports, and model pages.
+  - History is repaired automatically: archive schema v8 corrects Opus 5 costs already frozen into archive.db, once, the first time this version starts. Existing Opus 5 totals will rise; nothing else is touched.
+  - Copilot coverage too: GitHub's Opus 5 rate is tracked under the copilot tool scope, alongside the existing per-provider Copilot rows.
+  - A broken pricing refresh is fixed: Cursor restructured its documentation and removed the table the refresh keyed on, which was failing the entire refresh run rather than just that one source.
+  Opus 5 pricing
+  The curated Anthropic rows now carry Claude Opus 5 with a 2x fast_multiplier, matching Claude Code fast mode's published $10/$50 per MTok. The LiteLLM import needed no change: the existing claude-opus- filter picked up claude-opus-5 and its Bedrock and Google Cloud regional variants on the next refresh. The shared model registry gains an Opus 5 rule ahead of the claude-opus-4* prefixes, so the point-release-free id is not shadowed by its predecessors, and dated or vendor-prefixed ids fold into it as usual.
+  Claude Opus 4.7 fast mode was removed upstream on July 24, 2026. Its 6x fast_multiplier row is deliberately kept so archived fast-mode calls from before the removal still price correctly.
+  Repairing archived costs
+  Archived costs are frozen at import time on purpose — the archive inherits import-time cost precisely so that history is never silently repriced — so this correction is a deliberate, versioned migration rather than an ongoing reprice pass. It runs once, gated on the schema version, and cannot re-run.
+  The repair rescales affected rows rather than recomputing them. Opus 5's input, output, cache-write, and cache-read rates are each exactly 5/3 of the Sonnet 4.6 rates the calls were charged at, so a single factor restores the true cost. That approach is not just simpler than a recompute, it is more accurate: the 1-hour cache-write premium scales with the cache-write rate but is never persisted on the row, so a recompute would silently drop it. Web-search requests bill at $0.01 under both rows and are held out of the rescale, and speed = 'fast' rows additionally pick up the 2x multiplier the fallback row never carried.
+  Every row is checked before it is touched. A row whose stored cost already reflects Opus 5 pricing is skipped, so anyone who downloaded corrected pricing books before upgrading the binary cannot be double-charged. Model ids are matched through the shared canonicalization, so dated and vendor-prefixed ids are included while a distinct neighbour such as claude-opus-5-fast is not.
+  Pricing refresh maintenance
+  Cursor folded its standalone "Auto pricing" table into the combined "Model pricing" table on the same documentation page. Because a markdown source whose heading no longer exists fails the whole refresh rather than only its own rows, this had taken --refresh-prices out of service entirely. Cursor Auto is now read from that table's Auto Cost row; its rates are unchanged at $1.25 input and cache write, $0.25 cache read, and $6 output.
+  Upgrade notes
+  - The archive schema moves from v7 to v8. The migration runs on first launch and rewrites only the cost of Opus 5 calls that were priced at the fallback rate; no table, column, or row is added or removed.
+  - Expect Opus 5 spend to increase across every period that contains Opus 5 usage. This is the correction, not new usage.
+  - Older binaries can still open a v8 archive: the schema is unchanged, so only the corrected cost values differ.
+  - Pricing books downloaded through the Config page are separate from the books embedded in the binary and take precedence over them. Re-download them after upgrading, or newly ingested Opus 5 calls will keep using the stale rates.
+  - Local usage analysis remains local. Network use stays limited to confirmed Config-page downloads, opt-in quota sync, Windows/Linux update checks, and maintainer refresh or release paths.
+  - The release tag should be v1.2.3 and must match the root Cargo package, desktop Cargo package, desktop package.json, and Tauri config versions.
+  Full Changelog: v1.2.2...v1.2.3
+  Full Changelog: v1.2.2...v1.2.3
+ReleaseNotesUrl: https://github.com/russmckendrick/tokenuse/releases/tag/v1.2.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

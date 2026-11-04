@@ -1,0 +1,69 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 4.1.3
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [4.1.3] - 2026-07-11
+  Archive Encryption and Compression at a Glance, Crypt-Overlay Scope with Keyfile 2FA, Safer CLI Deletes, Faster SFTP Listing and macOS Stable
+  A polish-and-hardening release: AeroFTP surfaces archive encryption, real compression method and AeroVault generation at a glance in both the local and remote file browsers without downloading anything, the crypt overlay now shows plaintext outside its bound subtree and decrypts only inside it across the GUI, CLI and MCP and gains an optional keyfile second factor, the destructive CLI delete verbs get a real dry-run preview with recursion now opt-in, recursive SFTP listing is about three times faster, macOS is promoted from beta to stable, and a broad security audit runs the length of the cycle. Pre-tag commit audit: PASS, the final pre-release audit closed six integrity, fail-open and race residuals; 47 languages translated.
+  Added
+  - Optional keyfile second factor for native AeroCrypt: a "something you have" file mixed into the key derivation (stronger than rclone's password2) with no change to the on-disk object format; generate a transfer-safe keyfile from the GUI or CLI, make a vault keyfile-only (an empty password is legal), and the keyfile path travels through profile export/import as a re-pointable pointer that resolves fail-closed at connect across GUI, CLI and MCP (@EhudKirsh, #272).
+  - Archive encryption, compression and AeroVault generation surfaced at a glance in the local file browser: a padlock next to the Type (closed emerald for a strong cipher, amber for weak ZipCrypto, open grey for a detectable but unprotected archive) for password-protected zip, 7z and RAR showing the real detected cipher (AES 256/192/128, ZipCrypto, RAR5 AES-256, RAR4 AES-128), an optional Encryption column, a Compression column with the real method (Deflate, BZip2, LZMA, LZMA2, PPMd, Zstd, or Store for an uncompressed archive), and an AeroVault generation chip (v2/v3/v4) on our own .aerovault, .aeroftp and .aeroftp-keystore containers; detection reads only the archive header lazily and never downloads or opens the file, and a locked archive gets a dedicated draggable unlock modal that names the real cipher.
+  - New Date format setting (Settings > General): choose how dates render app-wide (Localized, ISO 8601, DD/MM/YYYY or MM/DD/YYYY), applied live to the file browser and every other date with no restart; localized dates now follow the selected app language instead of the OS locale.
+  - The same encryption and AeroVault surfacing on the remote panel: an .aerovault, .aeroftp or .aeroftp-keystore on a remote, plus password-protected third-party zip and 7z, show the padlock, Encryption column and AeroVault chip without downloading the file, reading only the header via provider ranged reads; scoped to the range-capable transports (SFTP, FTP/FTPS, S3, WebDAV, Backblaze B2, Koofr, and now Azure Blob, Uploadcare, Cloudinary and ImageKit) and degrading to no badge where a transport cannot serve byte ranges.
+  - The crypt overlay now shows plaintext outside its bound subtree and decrypts only inside it, from the CLI and MCP too (CWP-20C): ls, tree, lsjson and the MCP listing tools were reporting a scoped-overlay remote whose root is not the vault as empty or as only its encrypted items; the read path is now scope-aware (decrypt strictly below the anchor, pass everything at or outside it through as raw plaintext) while every write stays fail-closed so plaintext can never land where ciphertext is expected, verified live on Filen and lab SFTP (@EhudKirsh, #369, #266).
+  - CLI --no-crypt connect flag to bypass a bound crypt overlay and connect raw, mirroring the GUI crypt button and closing a CLI-parity gap (#390).
+  - Full S3 trash and version management: browse soft-deleted objects and delete markers under a prefix, undelete, copy-forward an older version to current, purge a single version, and empty the trash with a dry-run preview, from the GUI, the CLI (versions trash / versions purge / versions empty-trash) and MCP; the crypt overlay is peeled to the concrete S3 provider so names decrypt while every operation round-trips on the raw key, and mkdir no longer writes a zero-byte directory marker that rendered as a phantom empty file on some gateways (@EhudKirsh, #266).
+  - A real dry-run for the destructive CLI delete verbs: aeroftp-cli rm --dry-run and purge --dry-run print the exact files and directories that would go plus the bytes reclaimed and delete nothing, the MCP aeroftp_delete / aeroftp_delete_many tools take the same dry_run returning would_delete: true with the byte total, and rm / purge now honour the global filters (--include, --exclude-global, --min-size / --max-size, --min-age / --max-age, --files-from) so a filtered recursive delete removes only the matching files and the directories it empties in doing so.
+  - New aeroftp-cli inventory subcommand: the authoritative, drift-proof inventory of every CLI subcommand and MCP tool read straight from the in-code registries, emitted as JSON, a Markdown table or a --check CI drift gate, with a committed snapshot at docs/COMMAND-INVENTORY.json (the real counts: 90 CLI subcommands, 73 MCP tools, 39 agent tools).
+  - lsjson --ndjson streaming and a listing spinner: a recursive lsjson -R can stream one compact JSON object per line as each entry is discovered, and a stderr progress spinner names the directory being listed on a TTY; the default sorted-array output is unchanged byte for byte and a pipe or redirect stays pure JSON.
+  - profile-import --dry-run and native export aeroftp / import aeroftp aliases: preview which profiles a .aeroftp bundle would add or skip as duplicates without touching the vault or keyring, and reach our own format from the export / import families next to the foreign ones.
+  - profile-add can seed the credential in one step: --password-stdin plus new --credential-json / --credential-json-file write into the same vault key the GUI Edit modal uses, so a CLI-created profile is immediately connectable; the sources are validated before the profile is persisted, so a malformed blob fails fast with no orphan profile.
+  - First-run host-config import for the Flatpak: a consent-gated, copy-only import of the native ~/.config/aeroftp on first run (nothing is overwritten and the vault still needs its password), from the GUI first-run prompt and aeroftp-cli flatpak-import, so a user moving from the .deb does not see an empty app (#310).
+  Changed
+  - macOS promoted from beta to stable: it boots and runs cleanly on Intel and Apple Silicon, so the release dmg drops the -beta suffix (now AeroFTP_<ver>_<arch>.dmg) and the README badge and Platform Status row read stable alongside Linux and Windows; the dmg is still not Apple-signed, so Gatekeeper needs the documented xattr workaround.
+  - Recursive listing over SFTP is about three times faster: SftpProvider::list was issuing one serial LSTAT per directory entry purely to test the symlink bit, which the READDIR reply already carried, and this dominated every recursive walk (the GUI panel, sync scan, ls -R, tree, size, rmdirs, the delete plan); the mode now comes from the attributes already in hand and the few real per-entry follow-ups (attr-less recovery, symlink resolution) are pipelined over the one SFTP channel, measured at roughly 42s down to 16s on a 620-entry walk and 37s down to 12s on a symlink-heavy one, with byte-identical output.
+  - DEFLATE level 1 now stays in the native tools' size band: on this build flate2 resolves to the zlib-rs backend whose level 1 is a speed-first preset that ran about 40% larger than gzip -1 on text, so user level 1 is now pinned to backend level 2 at every DEFLATE entry point (zip, tar.gz, standalone gz and the size estimator), which comes out smaller and still faster than gzip -1; 7z level 1 was evaluated and deliberately left as-is, byte-identical to xz -1 (#406).
+  - Shared 6-box TOTP input across the 2FA Quick Connect pages: the Two-Factor Code entry is now one digit-only, paste-and-autofocus 6-box component reused on every 2FA page, and the kDrive Drive ID field is narrowed to its 10-digit numeric shape (@EhudKirsh, #369).
+  - Connection and profile edit polish: a duplicated profile now appends at the tail instead of jumping to the top, editing a saved OAuth or API profile can save a name or local-path change without re-running the sign-in (a Save/Cancel pair disabled until a field actually changes, applied to the live session immediately), and the FileLu Native API entry now shows the FILELU MODES tab bar like the S3 and WebDAV entries.
+  - The MCP listing tools now return one entry shape: aeroftp_tree routes every entry through the same entry_json chokepoint as list_files, search_files and file_info and adds only its depth field, so a recursive listing is exactly a flat listing plus depth; the CLI lsjson field names are frozen with a doc comment so no future cleanup can quietly break the scripts that parse them.
+  - The --checkers help is now honest: it promised parallel metadata probes, but the --no-traverse stat sweep runs sequentially today, so the help now says so and points at the provider-pool refactor as where it becomes a real concurrency gate.
+  Fixed
+  - Filen local S3 and WebDAV bridges auto-detect HTTP/HTTPS at connect: a mismatch between the profile and the protocol chosen in the Filen app no longer blocks the connection, the loopback IP is pinned to avoid a local.*.filen.io DNS failure on Windows, and the Filen WebDAV Quick Connect drops the manual selector for an auto-detect note (#389).
+  - Ejecting a removable drive while AeroFile is inside it steps the view back to Home instead of leaving a stale view of the removed drive, matching the system file explorer (@EhudKirsh, #351).
+  - The Filen Quick Connect no longer prints LOCAL twice: the local bridge modes read WebDAV and S3 under a single LOCAL badge, as the MEGA page already did (@EhudKirsh, #369).
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v4.1.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

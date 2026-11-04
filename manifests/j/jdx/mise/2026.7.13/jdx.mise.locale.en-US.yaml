@@ -1,0 +1,72 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jdx.mise
+PackageVersion: 2026.7.13
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/jdx/mise
+Author: jdx
+PackageName: mise-en-place
+PackageUrl: https://mise.en.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+ShortDescription: Your dev env, already prepped.
+Description: Your dev env, already prepped. One tool to manage languages, env vars, and tasks per project, reproducibly.
+Moniker: mise
+Tags:
+- cli
+- dev-tool
+- env
+- environment
+- task
+ReleaseNotes: |-
+  This release expands archive backends to rename multiple binaries from a single release, adds Homebrew cask shell completions and go.mod version-file support, and fixes a broad batch of task, install, lockfile, and language-plugin correctness issues.
+  Added
+  - backend: rename_exe now accepts a table mapping source patterns to target names, so an archive that ships several executables can expose all of them cleanly on PATH instead of only one. The existing string form is unchanged. (#11231 by @jdx)
+    [tools."github:DanielGavin/ols"]
+    version = "latest"
+    rename_exe = { "ols-*" = "ols", "odinfmt-*" = "odinfmt" }
+  - brew: brew-cask now installs shell completions (declared bash_completion/fish_completion/zsh_completion files and generate_completions_from_executable for bash, zsh, fish, and pwsh) instead of skipping them, tracking them in cask receipts and installed-state checks. (#11198 by @jdx)
+  - go: go.mod can now be used as an idiomatic version file. A toolchain goX.Y.Z directive resolves as an exact pin, while a go X.Y minimum resolves to the latest matching patch. It is opt-in and unchanged unless enabled per-tool. (#11213 by @JamBalaya56562)
+    mise settings add idiomatic_version_file_enable_tools go
+  - task: PowerShell task shells (pwsh/powershell) now run with -NoProfile by default, matching how mise spawns POSIX shells, so a profile that mutates PATH (such as a mise activation snippet) can no longer shadow a task's own tools and cause confusing "cannot find binary path" errors. Opt out with the new windows_powershell_no_profile setting (MISE_WINDOWS_POWERSHELL_NO_PROFILE=false). (#11199 by @jdx)
+
+  Fixed
+  - env: _.path/_.file/_.source directives within a single [env]._ block are now resolved in written order, so a _.path can reference a variable exported by a _.source written before it. (#11163 by @JamBalaya56562)
+  - install: failed installs no longer print a contradictory "installed but not activated" hint before the real error. (#11227 by @jdx)
+  - install: logical state mutations during install are now serialized to avoid races. (#11207 by @risu729)
+  - lockfile: upgrading a locked github: tool to a newer version that is already installed on disk no longer triggers a false supply-chain "provenance regression" error. (#11230 by @jdx)
+  - npm: aube install failures now surface the full cause chain instead of an opaque "failed to resolve dependencies" message, with mise-native remediation guidance (trust_policy_excludes or npm.shell_out) for trust-downgrade errors. (#11226 by @jdx)
+  - task: inline task definitions now follow a consistent first-wins precedence model across local, conf.d, and monorepo configs, so lower-precedence metadata no longer leaks into script tasks and the winning config's context is preserved. (#11103 by @risu729)
+  - task: source freshness now tracks files correctly for workspace-rooted sources patterns used in nested subproject tasks, so edits inside a subproject trigger a rerun. (#11202 by @rabadin)
+  - brew: cask upgrades handle structured preflight_steps/postflight_steps for move/remove operations, and cleanup-only zap pkgutil IDs are no longer treated as install receipts (which could leave pkg cask status permanently missing). (#11197 by @jdx)
+  - brew: cask upgrades no longer fail when removing a protected app backup (e.g. docker-desktop) hits "Permission denied", recovering permissions the way Homebrew does before retrying. (#11219 by @jdx)
+  - python: a python3 executable is now provided on Windows. (#11212 by @jdx)
+  - ruby: custom ruby.precompiled_url = "owner/repo" sources now fetch release metadata directly from GitHub instead of the restricted versions host, avoiding 403 warnings. (#11154 by @risu729)
+  - ruby: Gemfile version pins with multi-digit segments (e.g. ruby "3.4.10") are now parsed correctly. (#11229 by @capnregex)
+  - bootstrap: ./-prefixed relative [bootstrap.repos] paths no longer display with a leading ./ component. (#11214 by @lilienblum)
+  - http: invalid URLs now return an error instead of panicking. (#11160 by @Marukome0743)
+  - settings: avoid a panic when a parent settings key is an inline table. (#11184 by @Marukome0743)
+  - self-update: the updater's TLS backend now matches the feature it was built with, fixing failures when compiled with native-tls. (#10834 by @bltavares)
+
+  Deprecated
+  - python: the legacy virtualenv tool option is deprecated in favor of the _.python.venv env directive. It now emits a warning and is scheduled for removal around 2027.7.0. (#11234 by @JamBalaya56562)
+
+  Documentation
+  - python: clarify that uv_venv_auto requires a uv.lock file. (#11223 by @jdx)
+  - Fix dead links in the contributing guide and the aqua-registry/pipx installation docs. (#11123, #11167 by @Bartok9)
+
+  New Contributors
+  - @capnregex made their first contribution in #11229
+  - @rabadin made their first contribution in #11202
+
+  💚 Sponsor mise
+  mise is maintained by @jdx, an open source developer for entire.io, the title sponsor of the jdx.dev open source tools. Development is funded by sponsors.
+  If mise saves you or your team time, please consider sponsoring at jdx.dev. Individual and company sponsorships keep mise fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/mise/releases/tag/v2026.7.13
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

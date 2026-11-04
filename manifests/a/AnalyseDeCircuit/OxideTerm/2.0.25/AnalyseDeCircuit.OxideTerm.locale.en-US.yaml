@@ -1,0 +1,125 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AnalyseDeCircuit.OxideTerm
+PackageVersion: 2.0.25
+PackageLocale: en-US
+Publisher: AnalyseDeCircuit
+PublisherUrl: https://github.com/AnalyseDeCircuit
+PublisherSupportUrl: https://github.com/AnalyseDeCircuit/oxideterm/issues
+Author: AnalyseDeCircuit
+PackageName: OxideTerm
+PackageUrl: https://github.com/AnalyseDeCircuit/oxideterm
+License: GPL-3.0
+LicenseUrl: https://github.com/AnalyseDeCircuit/oxideterm/blob/HEAD/LICENSE
+ShortDescription: Local-first SSH workspace for local shells and remote machines.Zero Electron, zero OpenSSL, zero telemetry, and no app subscription for core SSH workflows.
+Tags:
+- agent
+- ai-terminal
+- bring-your-own-key
+- filemanager
+- mcp
+- rag
+- russh
+- rust
+- sftp
+- ssh-client
+- tauri
+- terminal
+- terminal-emulator
+- tool-calling
+- wslg
+- xterm-js
+ReleaseNotes: |-
+  English
+  OxideTerm 2.0.25 refreshes the native GPUI desktop runtime, adds shared and independently authenticated SSH terminal splitting, aligns reconnect behavior across standalone protocols, improves session and SFTP organization, and resolves several Windows pointer, text-selection, editor-font, and native-window regressions while further increasing terminal throughput.
+  ⚡ Terminal Performance and Pane Workflows
+  - Retained physical terminal rows across scroll damage, reused generation-aware glyph data, batched native rendering work, and reduced repeated snapshot and paint preparation while preserving the existing fast path when no extra projection is needed.
+  - In the current reproducible 16 MiB benchmark, median process-to-PTY throughput reached 89.959 MiB/s for plain text, 94.358 MiB/s for ANSI output, 77.642 MiB/s for Unicode output, and 100.820 MiB/s for long CSI sequences. Compared with the published 2.0.24 release results, these are further gains of 8.6%, 3.0%, 10.9%, and 1.2% respectively.
+  - The benchmark used one warm-up and the median of three measured runs. It measures process-to-PTY throughput rather than completed rendering or input latency.
+  - Added the normal split controls to eligible SSH terminals, removed the distracting active-pane background highlight, and made split dividers visible at 3 px when idle, 4 px on hover, and 5 px while dragging without enlarging the layout footprint.
+  - Preserved tmux split dimensions, restored the cursor to the home position after clearing the buffer, kept Ctrl+L shell clearing intact, and stopped OxideTerm history suggestions from consuming Up/Down when the shell's own completion UI should handle them.
+  🔗 Shared Connections and Reconnect
+  - Added multiple SSH terminals on one registry-owned physical transport. Closing one pane no longer disconnects sibling terminals, SFTP, port forwards, or monitoring consumers that still hold the node.
+  - Added an SSH profile option for independently authenticated new terminals while retaining the same split workflow and stable saved-connection identity. Shared and dedicated channels now use explicit consumer leases and clean up failed consumers without transferring node ownership to a pane.
+  - Reworked Serial, Telnet, Mosh, RDP, and VNC session records so disconnected sessions retain their original profile identity and can use the same explicit reconnect model instead of being replaced by another target.
+  - Coalesced repeated reconnect requests, cancelled stale retries cleanly, and prevented restored SSH node identifiers from colliding with live nodes. Serial device-open failures are now surfaced instead of leaving an apparently connected but unusable session.
+  🗂️ Session and File Management
+  - Added drag-and-drop organization for saved connections and groups, including nested folders, group-wide drop regions, explicit child-group creation, rename and delete actions, and context menus located beside the group being changed.
+  - Simplified the Session Manager toolbar to one top-level New Group action; group-specific maintenance remains in each folder's context and overflow menus, while the shared editor continues to handle creation and renaming consistently.
+  - Optimized recursive SFTP deletion and transfer progress delivery with bounded scheduling, less per-entry coordination, cancellable work, and coalesced progress updates; restored keyboard focus for SFTP file-row navigation.
+  - Reordered connection forms so transport and endpoint fields appear before optional name, group, and notes metadata, and removed the retired standalone connection-monitor and macOS Launchpad entries from the application chrome.
+  🖥️ Native Desktop and Editor Reliability
+  - Updated the vendored GPUI runtime and completed the application migration across macOS, Linux, and Windows, including refreshed text, scene, input, accessibility, scheduling, and native-window integration.
+  - Linux client titlebars now respect the desktop button side and order, hide unsupported minimize or maximize controls, maximize on double-click, open the compositor window menu on right-click, activate buttons on completed clicks, and route Close through the normal close-request flow.
+  - Repaired Windows pointer-capture and cursor reconciliation when mouse-up or capture-loss messages are missing, restored scenes after window blur, completed edge and corner resize hit testing, and cleared stale caption-button state. This prevents the persistent I-beam cursor and application-wide click lock seen after interacting with selectable text and controls.
+  - Constrained selectable text to measured glyph hitboxes, stopped zero-length selections from swallowing unrelated clicks, and prevented page headers, empty states, and controls from entering read-only text-selection ownership.
+  - Restored the configured terminal/code font in the editor on Windows, bundled the code-font resources needed by the refreshed runtime, and retained UI-font fallback for non-Latin glyphs. Static AI tool-call names are now localized consistently across all 11 supported languages.
+  🔒 Security, Sync, and Portable Runtime
+  - Sandboxed Kitty local-file transmission behind an explicit per-session approval. Approved sessions receive a private transfer directory whose path is copied only after confirmation; the permission and directory lifetime end with the terminal session.
+  - Restored Cloud Sync and encrypted .oxide compatibility for authenticated archives created before SSH algorithm-preference fields were added, while continuing to reject payloads whose protected connection data was actually modified.
+  - Added opt-in portable automatic unlock using the current device's system credential manager. The portable password remains required after moving the folder to another device, and stale device credentials are removed before falling back to normal password entry.
+  - The maintainer completed GUI validation for this release; localization catalogs, registered tool-name coverage, release metadata, and composed bilingual notes are validated by the release preparation checks.
+  中文
+  OxideTerm 2.0.25 更新原生 GPUI 桌面运行时，新增共享连接及独立认证两种 SSH 终端分屏模式，统一独立协议的断联重连行为，改进会话与 SFTP 管理，并修复多项 Windows 指针、文本选择、编辑器字体和原生窗口回归，同时继续提升终端吞吐量。
+  ⚡ 终端性能与窗格工作流
+  - 在滚动损伤期间保留终端物理行，复用带代次标记的字形数据，批量执行原生绘制工作，并减少重复快照与绘制准备；未启用额外投影时继续沿用原有快速路径。
+  - 在当前可复现的 16 MiB 基准中，纯文本、ANSI 输出、Unicode 输出及长 CSI 序列的进程到 PTY 吞吐量中位数分别达到 89.959、94.358、77.642 和 100.820 MiB/s。相较已发布的 2.0.24 数据，分别进一步提升 8.6%、3.0%、10.9% 和 1.2%。
+  - 基准采用一次预热及三次测量的中位数。该结果衡量进程到 PTY 的吞吐量，不代表绘制完成耗时或输入延迟。
+  - 为符合条件的 SSH 终端补齐与本地终端一致的分屏控件，移除干扰视觉的活动窗格背景高亮，并将分隔线调整为静止时 3 px、悬停时 4 px、拖动时 5 px，同时不扩大布局占用。
+  - 保留 tmux 分屏尺寸，清空缓冲区后将光标恢复到起始位置，维持 Ctrl+L Shell 清屏行为，并避免 OxideTerm 历史建议在 Shell 自身补全界面应处理上下键时抢占按键。
+  🔗 共享连接与重连
+  - 支持在一个由连接注册表持有的物理 SSH 传输上创建多个终端。关闭单个窗格不会再断开仍由其它终端、SFTP、端口转发或监控消费者使用的节点。
+  - 新增为每个 SSH 新终端单独认证的配置，同时保留相同的分屏工作流和稳定的已保存连接身份。共享与独立通道均使用明确的消费者租约，并会在创建失败时清理消费者，而不会把节点所有权交给窗格。
+  - 重构串口、Telnet、Mosh、RDP 和 VNC 会话记录，使断联会话保留原始配置身份，并通过与 SSH 一致的明确重连模型恢复，而不是被其它目标替换。
+  - 合并重复重连请求并正确取消过期重试，防止恢复的 SSH 节点标识与活动节点冲突；串口设备打开失败现在会直接显示，不再留下看似已连接但无法使用的会话。
+  🗂️ 会话与文件管理
+  - 为已保存连接和分组新增拖拽整理，支持嵌套文件夹、覆盖整个分组范围的放置区域、明确的新建子分组、重命名与删除操作，以及位于目标分组旁的右键菜单。
+  - 将会话管理器顶部收敛为一个“新建分组”入口；具体分组的维护继续由对应文件夹的右键及更多菜单承担，统一编辑器仍一致处理创建与重命名。
+  - 通过有界调度、更少的逐条目协调、可取消任务及合并进度更新优化 SFTP 递归删除和传输进度交付，并恢复 SFTP 文件行的键盘焦点导航。
+  - 调整连接表单顺序，使传输类型与目标端点字段位于可选名称、分组和备注之前；同时从应用界面移除已经退役的独立连接监控入口和 macOS 启动台。
+  🖥️ 原生桌面与编辑器可靠性
+  - 更新内置 GPUI 运行时并完成 macOS、Linux 和 Windows 上的应用迁移，覆盖文本、场景、输入、可访问性、调度及原生窗口集成。
+  - Linux 客户端标题栏现在遵循桌面按钮所在侧及顺序，隐藏不支持的最小化或最大化按钮，支持双击最大化和右键打开合成器窗口菜单，在完整点击后才执行按钮操作，并让关闭按钮经过正常关闭请求流程。
+  - 修复 Windows 在缺少鼠标松开或捕获丢失消息时的指针捕获与光标协调，恢复窗口失焦后的场景，补齐窗口边缘及四角缩放命中测试，并清理过期标题栏按钮状态；这可避免与可选文本或控件交互后鼠标持续显示工字形且整个应用无法点击。
+  - 将可选文本命中范围限制到实际测量的字形区域，避免零长度选区吞掉无关点击，并阻止页面标题、空状态及控件进入只读文本选择所有权。
+  - 恢复 Windows 编辑器对终端及代码字体配置的使用，为新运行时打包所需代码字体资源，并为非拉丁字符保留界面字体回退；全部静态 AI 工具调用名称现已在 11 个支持语言中保持完整本地化。
+  🔒 安全、同步与便携运行时
+  - 将 Kitty 本地文件传输限制在逐会话明确授权之后。获准会话会得到私有传输目录，只有确认后才复制目录路径；权限及目录生命周期均在终端会话结束时终止。
+  - 恢复 Cloud Sync 和加密 .oxide 文件对新增 SSH 算法偏好字段之前所创建认证归档的兼容，同时继续拒绝受保护连接数据确实被修改的内容。
+  - 新增可选的便携模式自动解锁，通过当前设备的系统凭据管理器保存派生解锁密钥。将文件夹移动到其它设备后仍需便携密码，过期设备凭据会先被删除，再回退到正常密码输入。
+  - 维护者已完成本版本的 GUI 验证；发布准备检查同时验证语言目录、已注册工具名称覆盖、发布元数据及合成后的双语说明。
+  📥 Download for your system
+  ────────────────┬─────────────────────────────────┬─────────────────────────────────
+  Operating system│x64                              │ARM64
+  ────────────────┼─────────────────────────────────┼─────────────────────────────────
+  Windows         │Setup (.exe)                     │Setup (.exe)
+  ────────────────┼─────────────────────────────────┼─────────────────────────────────
+  macOS           │DMG (Intel)                      │DMG (Apple Silicon)
+  ────────────────┼─────────────────────────────────┼─────────────────────────────────
+  Linux           │AppImage · DEB · RPM             │AppImage · DEB · RPM
+  ────────────────┴─────────────────────────────────┴─────────────────────────────────
+  Portable archives, signatures, and sha256sums.txt remain available in the release assets below.
+  📌 Installation Tips / 安装提示
+  macOS
+  Downloaded .dmg files may be quarantined by Gatekeeper. Run in Terminal:
+  xattr -cr ~/Downloads/OxideTerm_*.dmg
+  # or after install / 或安装后
+  xattr -cr /Applications/OxideTerm.app
+  Windows
+  If SmartScreen warns, click More info -> Run anyway.
+  若 SmartScreen 弹出警告，点击 更多信息 -> 仍要运行。
+  Linux
+  # AppImage
+  chmod +x OxideTerm_*_linux_*.AppImage && ./OxideTerm_*_linux_*.AppImage
+  # Debian/Ubuntu
+  sudo dpkg -i OxideTerm_*_linux_*.deb && sudo apt-get install -f
+  # Fedora/RHEL-compatible systems
+  sudo dnf install ./OxideTerm_*_linux_*.rpm
+  🔗 Links
+  - Documentation: https://oxideterm.app
+  - GitHub Issues: https://github.com/AnalyseDeCircuit/oxideterm/issues
+  - Changelog: https://github.com/AnalyseDeCircuit/oxideterm/blob/main/.github/release-notes/stable-changelog.md
+ReleaseNotesUrl: https://github.com/AnalyseDeCircuit/oxideterm/releases/tag/v2.0.25
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

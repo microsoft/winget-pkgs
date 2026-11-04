@@ -1,0 +1,30 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: hellowind777.hellogrok.CLI
+PackageVersion: 0.1.25
+PackageLocale: en-US
+Publisher: hellowind777
+PublisherUrl: https://github.com/hellowind777
+PublisherSupportUrl: https://github.com/hellowind777/hellogrok/issues
+PackageName: hellogrok-cli
+PackageUrl: https://github.com/hellowind777/hellogrok
+License: MIT
+LicenseUrl: https://github.com/hellowind777/hellogrok/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 hellowind777
+ShortDescription: Console-only CLI of hellogrok, a local proxy that makes Grok Build custom model channels work with common API formats, native Web tools, isolated authentication, and automatic configuration recovery.
+Description: 'Grok Build can use custom model endpoints, but real-world providers do not all expose the same protocol, response shape, authentication method, or Web-search behavior. hellogrok provides one local compatibility layer for those custom channels: it prepares the required Grok configuration while running, keeps each channel tied to its own endpoint and credentials, supports Grok Build native Web workflows, and restores the original configuration when stopped. This console-only build runs the same proxy from the terminal without the tray application; run `hellogrok help` for the full CLI reference (start, version, routes, restore, autostart, log, logview).'
+Tags:
+- grok
+- grok-build
+- proxy
+ReleaseNotes: |-
+  Fixed
+  - Responses streams no longer fail when an upstream reuses one item ID across output slots (observed on sub2api-style gateways that share a single reasoning ID per response). The colliding later slot is remapped to a fresh unique ID that keeps the provider's type prefix (rs_, ws_, msg_, …), and every later item_id event for that slot — reasoning summary deltas, function-call argument deltas, and the final response.completed snapshot — is rewritten consistently. Affected turns previously exhausted Grok Build's retry budget and ended as Server error (500).
+  - Chat Completions streams now assign a unique call_ ID to any tool_call whose upstream ID was already used by another call in the same response, keeping the next round's tool history valid instead of tripping request-side history validation.
+  - The per-stream remap count is logged (remapped N duplicate upstream item id(s)) so a defective upstream remains visible in diagnostics.
+  Changed
+  - Responses stream identity validation distinguishes two failure classes: cross-slot ID reuse (remapped, stream survives) and same-slot identity conflicts (still rejected). Request-side tool-history validation is unchanged.
+ReleaseNotesUrl: https://github.com/hellowind777/hellogrok/blob/HEAD/CHANGELOG.md#0125-2026-09-12
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

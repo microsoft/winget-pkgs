@@ -1,0 +1,61 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 17.1.3
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Fixed
+  - Fixed Cursor sessions exposing ast_edit (and other staged-preview xd:// devices) without a reachable resolver: the built-in write tool — which carries the xd://resolve / xd://reject transport that finalizes a staged preview — was filtered out of Cursor's forwarded catalog, so previews could never be resolved and the session aborted after three forced write turns. write is now re-included in the forwarded catalog whenever pi-agent devices are advertised (#6536).
+  - Fixed OpenAI Responses and chat-completions streams honoring per-model first-event watchdog policy, allowing local llama.cpp-style backends to process arbitrarily large prompts without a premature client cancellation (#6524).
+  @oh-my-pi/pi-catalog
+  Fixed
+  - Disabled the first-event watchdog for local OpenAI-compatible backends while retaining the 300-second inter-event watchdog, so long llama.cpp prompt prefill is not canceled and retried (#6524).
+  @oh-my-pi/pi-coding-agent
+  Fixed
+  - Fixed the in-process find builtin's -exec/-execdir children inheriting the omp process's real stdout/stderr, so commands like find … -exec ls -ld {} \; spammed their output straight into the terminal (corrupting the TUI) instead of the tool's captured output, and bypassed shell redirects. Exec children now stream stdout/stderr back through the shell's scope streams (matching xargs/ifne) and run with the shell's exported environment (env_clear + scope snapshot) instead of the host process environment.
+  - Fixed ast_edit erroring with "lang is required" — an argument that no longer exists in the tool schema — when paths resolved to files of multiple languages (e.g. a crate directory with .rs + .toml). Mixed-language paths now rewrite per file: each file is parsed in its own inferred language, patterns are compiled per language, and a pattern that doesn't parse in some matched language simply skips those files.
+  - Fixed the retain tool's TUI renderer crashing when streaming arguments temporarily expose a non-array items value (#6528).
+  - Fixed Edit and Write tools failing with Settings not initialized in isolated sessions by using each tool session's settings for generated-file guards, with safe schema defaults for standalone guards and inline-image rendering (#6549).
+  @oh-my-pi/pi-natives
+  Changed
+  - astEdit without an explicit lang now rewrites mixed-language paths per file (each file parsed in its own inferred language, patterns compiled per language) instead of erroring when the path/glob spans multiple languages. A pattern that parses in no discovered language is still reported (or fails the call under failOnParseError); files whose language cannot be inferred surface as per-file parse errors instead of aborting the whole call.
+  What's Changed
+  - fix(cursor): forward write transport so xd:// previews resolve by @roboomp in https://github.com/can1357/oh-my-pi/pull/6538
+  - fix(coding-agent): use session settings in file guards by @roboomp in https://github.com/can1357/oh-my-pi/pull/6551
+  - fix(ai): disable local first-event watchdogs by @roboomp in https://github.com/can1357/oh-my-pi/pull/6525
+  - fix(coding-agent): guard retain renderer streaming args by @roboomp in https://github.com/can1357/oh-my-pi/pull/6529
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v17.1.2...v17.1.3
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v17.1.3
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

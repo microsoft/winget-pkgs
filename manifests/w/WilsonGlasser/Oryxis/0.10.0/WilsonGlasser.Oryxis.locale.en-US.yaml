@@ -1,0 +1,61 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: WilsonGlasser.Oryxis
+PackageVersion: 0.10.0
+PackageLocale: en-US
+Publisher: Wilson Glasser
+PublisherUrl: https://github.com/wilsonglasser
+PublisherSupportUrl: https://github.com/wilsonglasser/oryxis/issues
+Author: Wilson Glasser
+PackageName: Oryxis
+PackageUrl: https://github.com/wilsonglasser/oryxis
+License: AGPL-3.0
+LicenseUrl: https://github.com/wilsonglasser/oryxis/blob/HEAD/LICENSE
+Copyright: AGPL-3.0-or-later
+ShortDescription: Modern SSH client built in Rust — terminal, SFTP, and host management.
+Description: Modern SSH client built in Rust — terminal, SFTP, and host management.
+Moniker: oryxis
+Tags:
+- rust
+- sftp
+- ssh
+- terminal
+ReleaseNotes: |-
+  Oryxis 0.10.0: an agent for the whole system, keys that live in hardware, and a terminal with more power under the hood
+  Disclosure: this release note was drafted with assistance from Claude (Anthropic's LLM) and edited by Wilson Glasser, the project author. The engineering decisions and the code are mine; the LLM helped turn the changelog into prose.
+  Oryxis is a Rust-native SSH client built on iced with a russh engine. Where 0.9.0 pushed outward (Telnet, serial, two more clouds, files in every tab), 0.10.0 pushes down into the parts that make an SSH client trustworthy: Oryxis now serves your keys to the rest of the system as a standard ssh-agent, authenticates with OpenSSH certificates and FIDO2 security keys, generates keys in-app, and tunes its own vault key derivation to your machine. The terminal grows the power features long-time users keep asking for, scrollback search, broadcast input, a command palette, clickable hyperlinks, and your session recordings finally play back and export as GIFs. Privacy Mode became a system you can tune. And underneath, the whole message and dispatch layer was rebuilt so the compiler proves every message is handled.
+  Your keys, available to everything (safely)
+  Oryxis now runs a standard ssh-agent (#54), so git, VS Code, WSL and anything else that speaks the agent protocol can authenticate with your vault keys, no exporting, no copying a private key to disk. The design is deliberately careful: vault keys are read-only over the wire and decrypted per signature, never held in memory for the whole unlocked window, and a per-key "Expose via agent" flag decides what the agent even offers. It works the other way too, opt-in: tools like KeePassXC can push keys in over the protocol, and those keys live in memory only, never touch the vault, and are swept the moment you lock, toggle off, or quit. Every signature can require a confirmation, and keys added with a CONFIRM constraint always prompt.
+  On Linux and macOS it listens on a unix socket; on Windows, a named pipe with a per-user DACL so only you can reach it, and an opt-in second name (\\.\pipe\openssh-ssh-agent) so tools with a hardcoded target like stock ssh.exe or KeePassXC in OpenSSH mode work with zero configuration. It has its own section in Settings.
+  Certificates and security keys
+  Two authentication methods that hardware-and-fleet shops depend on. Oryxis now offers OpenSSH user certificates during publickey auth, with a certificate-only method that never silently falls back to the bare key, a certificate editor and viewer in the keychain, a badge on keys that carry one, and an optional principal / host hint. And FIDO2 security keys (sk-ssh-ed25519, sk-ecdsa-sk) plus PKCS#11 / smartcard identities are usable through your system agent: import the public key, get a "Security key" badge, optionally pin it to a specific agent identity and host. The touch or PIN is handled by the platform, so the hardware-backed private material never enters a place Oryxis can read it.
+  Generate a key without leaving the app
+  The keychain grows a Generate flow next to Import: Ed25519, RSA (2048 / 3072 / 4096) or ECDSA (P-256 / P-384 / P-521), with an optional passphrase that also rides the portable export. No more dropping to ssh-keygen in a terminal to make a key you immediately import.
+  A vault that tunes itself
+  Key derivation is now calibrated to your machine. At vault creation, and whenever you change the master password, the Argon2id parameters are tuned to target roughly one second to unlock and stored next to the salt, so a fast laptop and a slow one both land near the same wall-clock cost without you touching a knob. Existing vaults keep their parameters until a rotation re-derives them; the sync and portable-export key derivations are deliberately frozen so unlocking on another device or importing on another machine never changes.
+  The terminal grows up
+  The features power users have been asking for, all landing together:
+  - Scrollback search (Ctrl+F): find-in-buffer with an amber highlight, an N / M counter and step forward / back. It hands the shortcut to full-screen apps, so vim, less and htop keep their own Ctrl+F.
+  - Broadcast input across split panes (Ctrl+Shift+U): arm a tab and every keystroke and paste fans out to all its panes at once, for driving a fleet from one prompt. Mute panes individually; a border marks an armed tab; secret sends stay single-pane.
+  - Command palette (Ctrl+Shift+P): fuzzy search over every action and every Settings section.
+  - OSC 8 hyperlinks: escape-sequence links are clickable now, with a scheme allowlist (javascript: and file: refused), a reveal chip so a link's real target can't be spoofed by its label, and an underline that follows a link wrapped across rows.
+  - Legacy keyboard modes: per-host backspace (^H / ^?), rxvt Home / End, function-key styles, and toggles to disable mouse reporting, remote resize, title changes or OSC 52 clipboard access, plus an SSH rekey limit, all in an "Advanced terminal" section. Defaults are byte-identical to before; this is for the network appliances that need the old encodings.
+  International keyboards, fixed
+  Composed input from AltGr (Windows / Linux) and Option (macOS) now produces the character your layout intends instead of being swallowed as a Meta chord. This fixes dead keys and symbols on bépo, German and other non-US layouts where, for example, AltGr+Space should send _.
+  One deliberate behavior change comes with it: on macOS, Option now composes by default (Option+n then n gives ñ), which is what the platform expects. If you relied on Option as Meta, a per-host "Option as Meta" quirk in the Advanced terminal editor brings it back, with four modes (both, left only, right only, off).
+  Your recordings, played and shared
+  The encrypted session recordings that 0.9.0 taught to capture timing now do something with it. An in-app player on the History screen replays a session on the real terminal engine, no second emulator, with play / pause (Space), restart, seek and speed control. It is read-only by construction: there is no path for a replay to type anything, and it stops and clears itself on vault lock. And GIF export renders any recording into a shareable GIF through an optional agg plugin, downloaded on first use through the same signed pipeline as the MCP server, so the encoder and its fonts stay out of the core binary. Colors come straight from the theme embedded in the recording.
+  Privacy Mode, now a system (#78)
+  Masking used to be a terminal-render trick. In 0.10.0 it is a system you configure. Labels redact everywhere they render, host cards, the tab strip and its drag ghosts, the tab-jump modal, the Ctrl+K picker, the status bar, and even the tray menu and Windows JumpList. A session override (Ctrl+Shift+M, with a chip) reveals for the current session only. Vault-derived terms plus explicit always / never mask lists decide what is masked, per-class gates turn each masking category on or off, and the visual is a span-level eye-slash with a one-time hint the first time something masks. A leak where a version-shaped dotted quad (1.2.3.4 in a banner) slipped past the IP mask is closed, it is now redacted with the same rules as an address.
+  Files, archives, and SFTP polish
+  The SFTP surface gains archive operations: compress and extract zip and tar.gz straight from the context menu, the remote side running tar / unzip / zip over the live connection with safe quoting on POSIX and Windows shells, the local side using native Rust codecs, and a zip's contents browsable in place over ranged reads without a full download. On top of that, the hybrid Files surface now remounts cleanly after a reconnect (#63, the "session closed" retry loop is gone), local listings are async so a cold folder no longer freezes the UI, drag-and-drop drops land reliably, and the row context menu opens with the Menu key and is fully keyboard-navigable (#52), with Windows-style type-ahead cycling.
+  Sync: re-pair required
+  Sync's wire protocol moved to v7. The certificate and security-key work added record shapes that an older peer literally cannot parse, and rather than let that cause silent divergence, the bump makes it a clean, loud version reject like every prior break. Both devices must run 0.10.0, and paired devices need to re-pair. Nothing is lost: the SFTP-snapshot format moves in lockstep but asymmetrically, so a 0.10.0 device still reads your existing snapshot blobs and writes the new format. In the same area, the hosted relay is no longer a default, fresh installs are LAN-only until you pick an internet backend, while existing users who were syncing through the old hosted URL are grandfathered onto it automatically, and a setup wizard now generates the compose / systemd / Caddy files for your own relay and adopts it after a health check.
+  Faster, safer transfers, and a nicer connect
+  ZMODEM transfers now stream instead of stop-and-wait windows, much faster on high-latency links, with download resume, multi-file upload and sz -e. Crucially, sz now returns to the shell after a successful send (#77), the final handshake is flushed and the prompt behind the "OO" sign-off is no longer swallowed. On Windows, closing the window no longer quits the app when close-to-tray is on (#74): every close verb routes through the tray handler, the icon appears when the window hides, and the stray background processes that could linger after exit are swept.
+  The connection screen was redesigned around a living vertical timeline: one animated disc per step (resolve, dial, proxy, jump, auth, channel), a centered title, Termius-style logs, and a single clean error line on failure instead of a dumped stack.
+  For mainland China
+ReleaseNotesUrl: https://github.com/wilsonglasser/oryxis/releases/tag/v0.10.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

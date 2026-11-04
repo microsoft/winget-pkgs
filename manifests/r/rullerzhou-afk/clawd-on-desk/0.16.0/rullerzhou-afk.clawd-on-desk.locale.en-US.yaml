@@ -1,0 +1,210 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: rullerzhou-afk.clawd-on-desk
+PackageVersion: 0.16.0
+PackageLocale: en-US
+Publisher: rullerzhou-afk
+PublisherUrl: https://github.com/rullerzhou-afk
+PublisherSupportUrl: https://github.com/rullerzhou-afk/clawd-on-desk/issues
+PackageName: Clawd on Desk
+PackageUrl: https://github.com/rullerzhou-afk/clawd-on-desk
+License: AGPL-3.0-only
+LicenseUrl: https://github.com/rullerzhou-afk/clawd-on-desk/blob/v0.16.0/LICENSE
+Copyright: Copyright (c) 2026 rullerzhou-afk
+ShortDescription: A pixel desktop pet that watches Claude Code, Codex, Cursor & other AI coding agents — so you don't have to.
+Description: |-
+  Clawd lives on your desktop and reacts to what your AI coding agent is doing — in real time. Start a long task, walk away, come back when the crab tells you it's done.
+  Thinking when you prompt, typing when tools run, juggling subagents, reviewing permissions, celebrating when tasks complete, sleeping when you step away. Ships with two built-in themes: Clawd (pixel crab) and Calico (三花猫), with full support for custom themes.
+  Supports Windows 11, macOS, and Ubuntu/Linux. Requires Node.js. Works with Claude Code, Codex CLI, Copilot CLI, Gemini CLI, Cursor Agent, CodeBuddy, Kiro CLI, and opencode.
+  Features
+  Multi-Agent Support
+  - Claude Code — full integration via command hooks + HTTP permission hooks
+  - Codex CLI — automatic JSONL log polling (~/.codex/sessions/), no configuration needed
+  - Copilot CLI — command hooks via ~/.copilot/hooks/hooks.json
+  - Gemini CLI — command hooks via ~/.gemini/settings.json (registered automatically when Clawd starts, or run npm run install:gemini-hooks)
+  - Cursor Agent — Cursor IDE hooks in ~/.cursor/hooks.json (registered automatically when Clawd starts, or run npm run install:cursor-hooks)
+  - CodeBuddy — Claude Code-compatible command hooks + HTTP permission hooks via ~/.codebuddy/settings.json (registered automatically when Clawd starts, or run node hooks/codebuddy-install.js)
+  - Kiro CLI — command hooks injected into custom agent configs under ~/.kiro/agents/, plus an auto-created clawd agent that is re-synced from Kiro's built-in kiro_default whenever Clawd starts, so you can opt into hooks with minimal behavior drift via kiro-cli --agent clawd or /agent swap clawd (registered automatically when Clawd starts, or run npm run install:kiro-hooks). State hooks have been verified on macOS.
+  - opencode — plugin integration via ~/.config/opencode/opencode.json (registered automatically when Clawd starts); zero-latency event streaming, permission bubbles with Allow/Always/Deny, and building animations when parallel subagents are spawned via the task tool
+  - Multi-agent coexistence — run all agents simultaneously; Clawd tracks each session independently
+  Animations & Interaction
+  - Real-time state awareness — agent hooks and log polling drive Clawd's animations automatically
+  - 12 animated states — idle, thinking, typing, building, juggling, conducting, error, happy, notification, sweeping, carrying, sleeping
+  - Eye tracking — Clawd follows your cursor in idle state, with body lean and shadow stretch
+  - Sleep sequence — yawning, dozing, collapsing, sleeping after 60s idle; mouse movement triggers a startled wake-up animation
+  - Click reactions — double-click for a poke, 4 clicks for a flail
+  - Drag from any state — grab Clawd anytime (Pointer Capture prevents fast-flick drops), release to resume
+  - Mini mode — drag to right edge or right-click "Mini Mode"; Clawd hides at screen edge with peek-on-hover, mini alerts/celebrations, and parabolic jump transitions
+  Permission Bubble
+  - In-app permission review — when Claude Code, CodeBuddy, or opencode request tool permissions, Clawd pops a floating bubble card instead of waiting in the terminal
+  - Allow / deny / agent-native extras — one-click approve or reject, plus permission rules / Always actions when the source agent supports them
+  - Global hotkeys — Ctrl+Shift+Y to Allow, Ctrl+Shift+N to Deny the latest permission bubble (only registered while bubbles are visible)
+  - Stacking layout — multiple permission requests stack upward from the bottom-right corner
+  - Auto-dismiss — if you answer in the terminal first, the bubble disappears automatically
+  - Per-agent toggle — open Settings… → Agents, pick an agent, and turn off Show pop-up bubbles to keep prompts in that agent's own terminal/TUI
+  Session Intelligence
+  - Multi-session tracking — sessions across all agents resolve to the highest-priority state
+  - Subagent awareness — juggling for 1 subagent, conducting for 2+
+  - Terminal focus — right-click Clawd → Sessions menu to jump to a specific session's terminal window; notification/attention states auto-focus the relevant terminal
+  - Process liveness detection — detects crashed/exited supported agent processes and cleans up orphan sessions
+  - Startup recovery — if Clawd restarts while any supported agent is still running, it stays awake instead of falling asleep
+  System
+  - Click-through — transparent areas pass clicks to windows below; only Clawd's body is interactive
+  - Position memory — Clawd remembers where you left it across restarts (including mini mode)
+  - Single instance lock — prevents duplicate Clawd windows
+  - Auto-start — Claude Code's SessionStart hook can launch Clawd automatically if it's not running
+  - Do Not Disturb — right-click or tray menu to enter sleep mode; all hook events are silenced until you wake Clawd. Permission bubbles are suppressed during DND — opencode falls back to its built-in TUI prompt, while Claude Code and CodeBuddy fall back to their built-in permission flow
+  - Sound effects — short audio cues on task completion and permission requests (toggle via right-click menu; 10s cooldown, auto-muted during DND)
+  - System tray — resize (S/M/L), DND mode, language switch, auto-start, check for updates
+  - i18n — English, Chinese, and Korean UI; switch via right-click menu or tray
+  - Auto-update — checks GitHub releases; Windows installs NSIS updates on quit, macOS/Linux git pull + restart when running from a cloned repo
+Tags:
+- claude-code
+- codebuddy
+- codex
+- copilot-cli
+- cursor
+- desktop-pet
+- gemini-cli
+- kiro
+- opencode
+ReleaseNotes: |-
+  v0.16.0
+  v0.16.0 is an agent-integration, remote-notification, accessory-geometry, and
+  macOS release-hardening update. It adds the first experimental DeepSeek Harness
+  bridge, manual ZCode permission approval, Slack notifications, Kimi quota
+  visibility, and a Spanish interface. It also hardens OpenCode/Codex integration,
+  preference recovery, Windows fullscreen detection, and Developer ID packaging.
+  Agent Integrations And Permissions
+  - DeepSeek Harness bridge (#876) — adds a Windows-first experimental,
+    plugin-only integration for the web profile, with managed immutable
+    generations, state events, and manual Allow Once / Deny handling for ordinary
+    approval requests. ask_user_question, automation, foreign packages, unknown
+    mutations, and unsupported DSH versions remain fail-closed. Thanks to
+    first-time contributor @RS-Nocsi.
+  - Manual ZCode approval (#880) — adds the blocking PermissionRequest hook
+    and desktop Allow/Deny bubble while deliberately keeping ZCode outside global
+    and per-session permission automation. Foreign hooks remain the sole owner,
+    and no-decision paths fall back to ZCode's native UI. Thanks to @liugou27.
+  - OpenCode JSONC and Desktop bridge support (#899, #900) — writes the plugin
+    into the effective JSON/JSONC configuration and supports OpenCode Desktop's
+    Node utility-process bridge. Permission forwarding now requires the live,
+    owner-only Clawd runtime identity instead of sending reverse-bridge credentials
+    to scanned ports, while preserving no-decision fallback to the native
+    permission flow when Clawd is unavailable or intentionally silent.
+  - Codex and Gemini detection fixes (#897) — installation discovery now
+    distinguishes real CLI evidence from directories created by other products or
+    by Clawd itself.
+  - Codex hook review stability and Claude hook repair (#870, #873) — keeps
+    official-hook trust stable across builds and safely handles environment-based
+    worktree hook paths.
+  Remote Approval, Notifications, And Quota
+  - Slack notification-only channel (#836, recovered and hardened in #909) —
+    sends bounded, ordered completion/error and permission-request announcements
+    by Incoming Webhook or bot token. Slack never makes approval decisions, link
+    unfurling is disabled, secrets remain outside prefs, and outbound summaries
+    avoid raw sensitive search content. Thanks to first-time contributors
+    @wang4433 and @shengmai-justin.
+  - Feishu/Lark approver lookup by email (#750) — resolves an approver through
+    the selected platform and binds the saved identity to that platform and App.
+    Thanks to first-time contributor @Cobb04.
+  - Safe Feishu/Lark upgrade guidance — configurations saved before platform
+    and approver provenance binding stay fail-closed. A one-time startup notice
+    and Doctor warning now explain the required repair instead of letting remote
+    approval disappear silently.
+  - Kimi subscription quota rings (#881) — adds bounded local quota refresh and
+    shared Dashboard/Orbit presentation for Kimi Code CLI.
+  - Safer session labels in remote output (#905, #909) — notifications use the
+    snapshot-owned display tag and suppress opaque internal workspace identifiers.
+  Desktop Runtime And Reliability
+  - Accessory-aware drag hitboxes (#866) — moving and animated accessories now
+    participate in the canonical geometry handshake, including mini mode and
+    holiday/accessory changes, so the interactive surface follows what is drawn.
+    Thanks to first-time contributor @CheeseAgent.
+  - Subagent activity tiers (#877) — juggling intensity follows live subagent
+    lifecycle identities instead of aggregate session count.
+  - Windows fullscreen detection (#889) — distinguishes maximized normal windows
+    from fullscreen applications so ordinary maximization no longer triggers the
+    fullscreen overlay policy. Thanks to @KaiC5504.
+  - Unreadable or damaged preferences are visible and still safe (#888, #891)
+    — Clawd no longer overwrites a prefs file it could not read. If readable
+    contents are malformed, it preserves the original as clawd-prefs.json.bak
+    and repairs the primary file, but agent gates remain closed for that launch.
+    If the backup cannot be created, the primary file and Settings writes remain
+    locked instead of risking the only copy. Startup and Doctor explain the exact
+    recovery path and required restart. Thanks to @chrono-meta.
+  - Completion and accessory lifecycle cleanup — closes stale completion and
+    geometry state that could otherwise survive into later activity.
+  Packaging, Localization, And Diagnostics
+  - Developer ID signing and notarization (#915) — official macOS tag builds
+    require the complete signing secret set, validate PKCS#8 input, lock the
+    certificate to the configured Apple Team, assert required entitlements are
+    true, notarize, mount both DMGs, and verify the exact bundled apps. A partial
+    secret set or ad-hoc tag build fails closed.
+  - Five-target native release gate — manual and tag release workflows now
+    require target-native packaged Koffi calls on Windows x64/ARM64, macOS
+    Intel/Apple Silicon, and Linux x64 before a draft can be created.
+  - No eager macOS Keychain access (#914) — Remote SSH identity remains lazy so
+    ordinary startup does not request Keychain access.
+  - Spanish UI and README (#890) — adds complete es locale coverage. Thanks
+    to first-time contributor @Zamaniego.
+  - Theme validator exit semantics (#892, #903) — distinguishes invalid themes
+    from a validator that could not run. Thanks to @chrono-meta.
+  - WinGet release-process clarification (#896) — keeps submission
+    prepare-only and records the architecture-validation boundary.
+  - Release diagnostics repaired — DSH ownership now compares canonical paths,
+    including symlinked homes and managed roots, and Windows-only filesystem tests
+    no longer create impossible Windows paths on POSIX runners.
+  Contributors
+  Six first-time contributors landed changes in this release:
+  - @CheeseAgent — accessory-aware hitboxes and geometry validation (#866)
+  - @RS-Nocsi — DeepSeek Harness integration (#876)
+  - @Cobb04 — Feishu/Lark approver lookup by email (#750)
+  - @wang4433 — Slack notification channel (#836, #909)
+  - @shengmai-justin — Slack transport, reliability, and documentation (#836, #909)
+  - @Zamaniego — Spanish localization (#890)
+  Returning contributors include @chrono-meta (#888, #892), @KaiC5504 (#889),
+  @PeterShanxin (#859), and @liugou27 (#880).
+  Upgrade Notes
+  - Launch Clawd once after upgrading so installed and enabled integrations can
+    reconcile their packaged hooks, plugins, and extensions.
+  - Existing Feishu/Lark users must open Settings → Remote Approval, select the
+    correct platform, save App ID / App Secret again, and then save the
+    approver again. Until both bindings are refreshed, the client intentionally
+    stays off; the desktop approval bubble remains the local fallback.
+  - DeepSeek Harness is experimental, disabled by default, and limited to the
+    supported @deepseek-ai/dsh@0.1.0-rc.6 web profile. API-backed session and
+    approval smoke is not yet claimed as Windows-verified.
+  - Slack is notification-only. Answer permission requests in Clawd, Telegram, or
+    Feishu/Lark; Slack cannot Allow or Deny.
+  - Packaged macOS and Linux builds still do not perform in-app updates. Download
+    future versions manually from GitHub Releases.
+  Validation Status
+  Local source-tree validation passed on August 23, 2026: verify:release,
+  Electron installation verification, and all 8,621 automated tests completed
+  with 8,591 passes, zero failures, and 30 platform/dependency skips. The asset
+  audit reported zero errors and one warning because the 52.40 MiB tracked tree is
+  above its 50 MiB warning budget.
+  The final code-bearing candidate at
+  119257ebad54dbcd8b24df178397e83341cbcc9e passed the manual
+  Build & Release workflow
+  on August 23, 2026. The run completed the release validator, Developer ID
+  signing and notarization, Windows/macOS/Linux full test and packaging jobs, and
+  target-native package audits for Windows x64/ARM64, macOS Intel/Apple Silicon,
+  and Linux x64. This release-note-only follow-up must pass the same workflow on
+  the final main head before the tag is created.
+  Separate real-device evidence was collected before the final release-note and
+  Windows DSH canonical-path repairs: required Windows hardware checks passed on a
+  real x64 machine after upgrading from v0.15.0, and the available macOS hardware
+  checks passed with the signed pre-final candidate. The recommended Windows
+  DPI/display-scale change was not run. The final draft assets still require the
+  downloaded-package smoke checks below before publication.
+  Any later commit must rerun the exact-tree manual workflow. This candidate is
+  not publish-ready until a tag creates the draft release, its downloaded assets
+  pass smoke testing, and the remaining applicable platform/agent evidence in the
+  release checklist is recorded. Skipped tests and source-only checks are not
+  substitutes for those gates.
+ReleaseNotesUrl: https://github.com/rullerzhou-afk/clawd-on-desk/releases/tag/v0.16.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

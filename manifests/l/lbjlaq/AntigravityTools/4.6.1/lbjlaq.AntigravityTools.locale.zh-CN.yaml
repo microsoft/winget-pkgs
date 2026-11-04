@@ -1,0 +1,33 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.6.1
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+Tags:
+- account-manager
+- antigravity
+ReleaseNotes: |-
+  - [核心修复] 修复多轮对话思考内容与图片堆积引发 1M Token 溢出，并增加报错时输入 Token 本地估算回退 (Token 1M Overflow & Monitor Token Estimation Fallback):
+    - 历史思考内容自动剪枝：在转换为 Gemini contents 时，仅保留最近窗口内 assistant 消息的思考文本，历史轮次仅保留工具调用关联的 thoughtSignature 占位，防止 Agent 长对话下思考内容滚雪球堆积触发 1M Token 限制。
+    - 监控日志 Token 本地估算回退 (Fallback Token Estimation): 当请求在上游 Google 报错拒绝（如 400 错误响应无 usageMetadata）时，中间件自动调用本地 Token 估算引擎计算 input_tokens，彻底解决报错时后台监控显示输入 Token 为空/0 的问题。
+    - 相关 Issue: 修复 #3325。
+  - [核心修复] 修复 OpenAI/Responses 转 Gemini 时 JSON Schema const 兼容性问题，解决 Computer Use MCP 报 400 INVALID_ARGUMENT (JSON Schema Const Normalization Fix):
+    - 规范化 const 关键字：在公共 Schema 清洗器 clean_json_schema 中增加对 const 关键字的自动规范化与类型推断，自动将 {"const": "value"} 转换为 Gemini / Vertex Schema Proto 支持的标准 {"type": "...", "enum": ["value"]} 格式。
+    - 深度嵌套与联合类型支持：完整兼容 anyOf / oneOf 联合类型及嵌套对象内部的 const 字段，杜绝非法字段结构导致 Google 上游判定为非法的错误。
+    - MCP 与 Agent 生态兼容提升：完美解决 ZCode Computer Use MCP、浏览器自动化等复杂 Agent 工具在通过 OpenAI/Claude 兼容接口调用 Gemini 系列模型时触发 400 INVALID_ARGUMENT 的问题。
+    - 相关 Issue: 修复 #3327。
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.6.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

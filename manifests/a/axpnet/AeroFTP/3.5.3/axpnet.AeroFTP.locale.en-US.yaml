@@ -1,0 +1,81 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 3.5.3
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [3.5.3] - 2026-04-16
+  Continuous Sync, MCP Integration & CLI Expansion
+  Added
+  - CLI sync --watch: continuous sync with native filesystem watcher (inotify/FSEvents/ReadDirectoryChangesW). Watches a local directory for changes and re-syncs automatically in a foreground loop, stopped with Ctrl+C. Six new flags: --watch (enable), --watch-mode auto|native|poll (backend selection), --watch-debounce-ms (event batching, default 1500), --watch-cooldown (min seconds between syncs, default 15), --watch-rescan (full reconciliation interval, default 300s), --watch-no-initial (skip startup sync). Anti-loop protection: events suppressed during active syncs and within cooldown window, editor temp files filtered (.swp, .tmp, ~, .aerotmp, .DS_Store). Incremental local scan on watcher triggers (skips full walkdir, merges changed paths with snapshot). Full rescan on timer for remote change detection. Text output: [HH:MM:SS] Sync #N (trigger) -- X up, Y down, Z del (Xs). JSON output: NDJSON with cycle/trigger/uploaded/downloaded/deleted/skipped/errors/elapsed_secs/timestamp per cycle. Works with all sync features (bisync, conflict resolution, --delete, --track-renames, --max-delete, --backup-dir). First CLI file transfer tool with native continuous bidirectional sync - rclone does not offer this
+  - CLI SyncCycleStats: cmd_sync now returns a structured stats object (uploaded/downloaded/deleted/skipped/error_count) instead of a bare exit code. Watch mode uses these stats for enriched per-cycle output. Non-watch callers unaffected (extract .exit_code)
+  - MCP Server dialog: new informational modal (Help > MCP Server...) with VS Code extension install command, Command Palette shortcut, manual JSON configuration, and config file paths for Claude Code, Claude Desktop, Cursor, and Windsurf
+  - MCP VS Code extension: published axpdev-lab.aeroftp-mcp on the VS Code Marketplace. One-click MCP server registration with multi-target support, status bar indicator, and 4-step diagnostics
+  - MCP documentation: new docs.aeroftp.app/mcp/overview page with setup guide, tool reference, rate limits, security model, and troubleshooting
+  - CLI --files-from: transfer only files listed in an external file (one path per line, # comments). Works with get -r, put -r, and sync. --files-from-raw variant preserves whitespace and empty lines
+  - CLI --immutable: never overwrite existing files on destination. Applies to get -r (skip if local exists) and sync (skip uploads/downloads that would overwrite)
+  - CLI --no-check-dest: skip remote directory listing during sync, assuming destination is empty. Accelerates initial uploads to known-empty targets
+  - CLI --max-depth: global flag to limit recursion depth on get -r, put -r, sync, and find (default: 100)
+  - CLI bisync --conflict-mode rename: new conflict resolution mode that keeps both versions during bidirectional sync. The remote version stays as-is, the local version is uploaded with a .conflict-{timestamp} suffix. Also adds newest/oldest as aliases for newer/older, and largest/smallest as aliases for larger/smaller
+  - CLI dedupe 7 new modes: newest (keep most recent), oldest (keep oldest), largest (keep biggest), smallest (keep smallest), rename (rename duplicates with numeric suffix), interactive (prompt per group, TTY-only with skip fallback), list (list duplicates without action). All modes display mtime alongside size in output
+  - CLI --suffix-keep-extension: when using --backup-dir with --suffix, places the suffix before the file extension (file.bak.txt instead of file.txt.bak)
+  - CLI --default-time: configurable fallback mtime when backend returns None. Accepts ISO 8601 or now. Applied in sync comparisons to avoid false-positive mismatches
+  - CLI --inplace: skip .aerotmp temp file pattern and write downloads directly to the final path. Faster on network filesystems but interrupted downloads produce corrupt files
+  - CLI cleanup command: scan remote directory for orphaned .aerotmp files from interrupted downloads. Dry-run by default, --force to delete. JSON output with bytes freed
+  - CLI --compare-dest / --copy-dest: skip sync uploads when file exists in a local reference directory with matching size and mtime. --copy-dest copies from reference instead of downloading, saving bandwidth
+  - CLI --fast-list (S3 only): recursive listing via single ListObjectsV2 call without Delimiter. Reduces API calls from O(directories) to O(files/1000) for large S3 buckets. Falls back to BFS for non-S3 providers
+  - Azure Blob directory markers: mkdir now creates zero-byte marker blobs with trailing /, matching S3 behavior. Preserves empty directories on Azure
+  - 11 unit tests: should_exclude_watch_path (5 tests covering OS metadata, VCS dirs, temp extensions, temp patterns, normal files), incremental_local_scan (4 tests: new file, deleted file, snapshot preservation, exclude patterns), SyncCycleStats (2 tests: From trait, Default)
+  - 8 i18n keys: MCP dialog and menu label translated in all 47 languages
+  Fixed
+  - FTP listing path construction (critical): parse_unix_listing() and parse_dos_listing() used the FTP CWD (/) to build entry.path instead of the directory being listed. Caused rmdir_recursive, cleanup --force, and any recursive operation to target wrong paths on non-MLSD FTP servers (vsftpd, older servers). Fixed to use the actual listed directory path via join_remote_path(base_path, name). MLSD servers were unaffected (already correct). Full audit of all 26 providers confirmed the bug was isolated to FTP and WebDAV
+  - WebDAV listing path construction: same bug class as FTP. parse_propfind_response() used self.current_path instead of the base_path parameter. Caused cleanup --force and rmdir_recursive to fail on WebDAV subdirectories
+  - CLI --immutable coverage gap: put -r (recursive upload) did not check --immutable, allowing overwrites of existing remote files. Added stat() pre-check in upload_transfer_task() covering all upload code paths. Reports "skipped": N in JSON output
+  - CLI --default-time RFC 3339 rejection: resolve_default_time() only accepted naive ISO 8601 (YYYY-MM-DDTHH:MM:SS), rejecting valid timezone forms like 2026-04-16T12:30:00Z and 2026-04-16T12:30:00+02:00. Now parses RFC 3339 first and normalizes to UTC
+  - CLI skip message mismatch: shared --no-clobber || --immutable code path always printed --no-clobber in the skip message. Now displays the actual flag that triggered the skip
+  - Bisync rename order (preserve-first): conflict rename now preserves the local variant before downloading the remote version. Prevents data loss when both sides are modified
+  - Extreme mode theme leak: AeroAgent Extreme mode now resets to Normal automatically when leaving Cyber theme, preventing unintended auto-approval in non-Cyber themes
+  - Extreme mode menu visibility: the Extreme option in the AeroAgent mode dropdown is only shown when Cyber theme is active, instead of appearing grayed out in all themes
+  - Google Drive OAuth setup: clarified that Desktop app type is recommended over Web for OAuth client configuration
+  Changed
+  - IntroHub S3 filter: Azure Blob now included in the "S3/Object Storage" filter chip
+  - Connection form layout: FileLu, Drime Cloud, and Jottacloud now use 2-column form layout for better field organization
+  Downloads:
+  - Windows: .msi installer, .exe, or .zip portable (no installation required)
+  - macOS: .dmg disk image
+  - Linux: .deb, .rpm, .snap, or .AppImage
+  Download AeroFTP
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v3.5.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

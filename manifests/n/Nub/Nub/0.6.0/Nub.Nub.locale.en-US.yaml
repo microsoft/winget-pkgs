@@ -1,0 +1,86 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Nub.Nub
+PackageVersion: 0.6.0
+PackageLocale: en-US
+Publisher: nub contributors
+PublisherUrl: https://nubjs.com/
+PublisherSupportUrl: https://github.com/nubjs/nub/issues
+Author: nub contributors
+PackageName: Nub
+PackageUrl: https://nubjs.com/
+License: MIT
+LicenseUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 nub contributors
+CopyrightUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+ShortDescription: The all-in-one JavaScript toolkit that augments Node.js instead of trying to replace it.
+Description: "An all-in-one toolkit for Node.js. One Rust binary to run your files and scripts, install dependencies, and manage Node itself — a Bun-like modern DX on top of the node you already have. There's no new runtime to adopt and no lock-in: every augmentation rides on Node's own public extension surfaces."
+Moniker: nub
+Tags:
+- javascript-runtime
+- node-version-manager
+- nodejs
+- package-manager
+- script-runner
+ReleaseNotes: |-
+  Nub 0.6.0 runs every package.json script body through a POSIX shell on all three platforms, makes the 24-hour install trust floor fail closed, and adds a canary release channel.
+  Important
+  Two changes affect existing projects on upgrade.
+  Windows script bodies now run under a POSIX shell instead of cmd.exe. A script written in cmd syntax — set NODE_ENV=production && node build.js, rd /s /q dist, %VAR% — no longer works. Rewrite it in POSIX syntax (which then works on every platform), or opt back out with script-shell=cmd in .npmrc or --script-shell cmd.
+  The minimumReleaseAge cooling window now fails closed. When every version satisfying a range was published less than 24 hours ago, the install errors instead of falling back to the lowest satisfying version. Set minimumReleaseAgeStrict=false in .npmrc to restore the previous fallback.
+  The first install after upgrading also re-links node_modules once and rebuilds native addons once, because the install caches are now keyed on the Node engine. Nothing is re-downloaded.
+  Script bodies run through a POSIX shell
+  One script body now behaves the same on macOS, Linux, and Windows — &&, pipes, $(…), ${PORT:-3000}, and globs included. macOS and Linux use the system /bin/sh. Windows has no POSIX shell, so Nub ships busybox next to its binary and uses it by default in place of cmd.exe; this adds about 700 KB to the Windows artifacts only.
+  Extra arguments are now escaped for the target shell and spliced onto the unescaped script body, matching how npm does it, so a multi-word argument reaches the script as a single token while the body's own expansions still run. (#559, closes #399)
+
+  The install trust floor fails closed
+  Nub pins both halves of the release-age floor at its own tier: a 24-hour window, and a hard failure when no version in range is old enough. The documented posture was already a hard gate; the implementation now matches it. Explicit user configuration still overrides both — the values are defaults, not policy. (#544)
+
+  Canary channel
+  Every code push to main now publishes a full 8-platform build under a rolling canary release and the npm canary dist-tag.
+  curl -fsSL https://nubjs.com/install.sh | bash -s canary   # macOS, Linux
+  npm install -g --ignore-scripts=false @nubjs/nub@canary
+  A script install switches channels in place with nub upgrade --canary; nub upgrade --stable returns to the latest stable release. On a canary build, a plain nub upgrade stays on canary. (#551, #557, #558)
+
+  Interactive update picker
+  nub update -i replaces the pre-selected multiselect with a per-row keep-or-update table. Pressing enter with nothing selected now updates nothing rather than everything, and -i --latest folds into the same picker. Non-interactive nub update is unchanged. Minor-version rows in nub outdated moved from cyan to yellow. (#512, closes #483)
+
+  Package manager fixes
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────────────────────
+  Fix                                                                                                                                                                                                                                                                                                                │PR
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────
+  Install caches — global virtual store, side-effects cache, freshness and delta gates — are keyed on the project's Node engine, so switching Node versions no longer reuses artifacts built for another one. Dependency build scripts in a workspace member now anchor to the workspace root, matching npm and pnpm.│#530, #537, #538, #542, #548
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────
+  nub approve-builds lists and approves dependencies installed from a local source, which install warned about but the command could not previously approve.                                                                                                                                                         │#534
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────
+  The catch-up integrity rewrite no longer re-emits a time: block the main lockfile write had already stripped.                                                                                                                                                                                                      │#531
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────
+  Environment variables in a repo-controlled .npmrc are no longer expanded during package-manager provisioning (GHSA-3qhv-2rgh-x77r). Dependency-install authentication is unaffected.                                                                                                                               │#370
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────
+  The peer pass runs in the engine's own import path, and the bun lockfile parser is covered by it.                                                                                                                                                                                                                  │#458
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────
+  The default-trust build warning drops its machine-readable fields and collapses to a single line naming the package.                                                                                                                                                                                               │#541
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────────────────────
+
+  Runner and scaffold fixes
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬───────────────────
+  Fix                                                                                                                                                                                            │PR
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────
+  nub init --name @scope/pkg preserves the scope instead of flattening it to scopepkg; malformed scoped names now error rather than silently mangling. The scaffolded .gitignore keeps           │#515, #544
+  .env.example.                                                                                                                                                                                  │
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────
+  The development preload resolves from the source root, closing a gap in the augmentation seam. Release builds were unaffected.                                                                 │#533
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴───────────────────
+
+  Internal
+  The vendored engine gained an explicit version and provenance and split its embedder Node paths (#532). Dependency and toolchain updates now pass through a 7-day soak window (#442). Building from source requires Rust 1.95 (#553).
+
+  Commits in this release
+  - blog: v0.5.0 release post (5bfca6733e)
+ReleaseNotesUrl: https://github.com/nubjs/nub/releases/tag/v0.6.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://nubjs.com/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

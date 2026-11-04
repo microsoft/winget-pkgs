@@ -1,0 +1,255 @@
+# Created with komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: SST.OpenCodeDesktop
+PackageVersion: 1.1.1
+PackageLocale: en-US
+Publisher: opencode
+PublisherUrl: https://sst.dev/
+PublisherSupportUrl: https://github.com/sst/opencode/issues
+PackageName: OpenCode
+PackageUrl: https://opencode.ai/
+License: MIT
+LicenseUrl: https://github.com/anomalyco/opencode/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 opencode
+ShortDescription: OpenCode is an open source agent that helps you write and run code with any AI model. It''s available as a terminal-based interface, desktop app, or IDE extension.
+Description: |-
+  opencode is an AI coding agent. It features:
+  - A responsive, native, themeable terminal UI.
+  - Automatically loads the right LSPs, so the LLMs make fewer mistakes.
+  - Have multiple agents working in parallel on the same project.
+  - Create shareable links to any session for reference or to debug.
+  - Log in with Anthropic to use your Claude Pro or Claude Max account.
+  - Supports 75+ LLM providers through Models.dev, including local models.
+Tags:
+- ai
+- code
+- coding
+- develop
+- development
+- programming
+ReleaseNotes: |-
+  This is a major change that overhauls the permissions system in OpenCode.
+  Tools Merged into Permission
+  The tools configuration has been deprecated and merged into the permission field. Previously, you could enable/disable tools like this:
+  {
+    "tools": {
+      "bash": true,
+      "edit": false
+    }
+  }
+  Now, this should be configured using permission:
+  {
+    "permission": {
+      "bash": "allow",
+      "edit": "deny"
+    }
+  }
+  The old tools config is still supported for backwards compatibility and will be automatically migrated to the permission system.
+  Granular Permissions with Object Syntax
+  Permissions now support granular control using an object syntax with pattern matching. When you specify a permission as an object, you can set different rules for different patterns:
+  {
+    "permission": {
+      "bash": {
+        "npm *": "allow",
+        "git *": "allow",
+        "rm *": "deny",
+        "*": "ask"
+      },
+      "edit": {
+        "*.md": "allow",
+        "*.ts": "ask",
+        "*": "deny"
+      }
+    }
+  }
+  Each key in the object is a glob pattern that matches against the tool's input, and the value is the action to take:
+  - "allow" - automatically approve
+  - "deny" - automatically reject
+  - "ask" - prompt the user for approval
+  You can also set a blanket permission using a simple string:
+  {
+    "permission": {
+      "bash": "allow",
+      "edit": "ask"
+    }
+  }
+  Or set all permissions at once:
+  {
+    "permission": "allow"
+  }
+  Breaking Changes for SDK Users
+  The permission events have changed significantly. The new PermissionNext module (permission/next.ts) has a different event structure compared to the old Permission module (permission/index.ts):
+  Old Event Structure (Permission.Event):
+  - Updated: { id, type, pattern, sessionID, messageID, callID, message, metadata, time }
+  - Replied: { sessionID, permissionID, response }
+  New Event Structure (PermissionNext.Event):
+  - Asked: { id, sessionID, permission, patterns, metadata, always, tool: { messageID, callID } }
+  - Replied: { sessionID, requestID, reply }
+  Key differences:
+  - Event name changed from permission.updated to permission.asked
+  - type renamed to permission
+  - pattern is now patterns (array of strings)
+  - message field removed
+  - response renamed to reply
+  - permissionID renamed to requestID
+  - New always field contains patterns that would be approved for future requests if user selects "always"
+  The reply values are the same: "once", "always", or "reject"
+  Server Changes
+  - New endpoint: POST /permission/:requestID/reply for responding to permission requests
+  - Old endpoint POST /session/:sessionID/permissions/:permissionID is now deprecated
+  - GET /permission now returns PermissionNext.Request[] instead of Permission.Info[]
+  - Added CORS whitelist support via server.cors config option
+  - Added Content-Type headers for proxied static assets
+  - mDNS service name now includes port for uniqueness
+  Other Changes
+  - Agent tools field is deprecated - use permission instead
+  - Agent maxSteps is deprecated - use steps instead
+  - Unknown agent properties are now collected into options
+  - Mode and plugin globs no longer search subdirectories (simplified to top-level only)
+  Core
+  - Add development scripts for better debugging workflow in TUI
+  - Ensure @opencode-ai/plugin exists only on first run
+  - Add MCP resources support (@paoloricciuti)
+  - Initialize config in worktree
+  - Prioritize free GPT-5-mini for small model in GitHub Copilot
+  - Remove hardcoded .env read block and use new permissions model instead
+  - Prevent duplicate plugin function initialization (@ShpetimA)
+  - Update GitHub Copilot model priority list
+  - Add variant field to chat message input
+  - Update AGENTS.md documentation (@aryasaatvik)
+  - Fixed dependency installation and git worktree branch creation
+  - Fixed an issue in the codebase
+  - Add sandbox support for git worktrees to allow working in multiple directories per project
+  - Add timeout to MCP client connection calls (@RhysSullivan)
+  - Add per-project MCP config overrides (@jknlsn)
+  - Improve root detection for Gradle multi-project builds in Kotlin language server (@JBou)
+  - Improve plugin loading to handle builtin plugin failures gracefully
+  - Add reject message support to permission dialogs for better user feedback
+  - Wrap queued user messages with reminder to stay on track
+  - Add managed git worktrees
+  - Upgrade OpenTUI to v0.1.68 using GPA
+  - Add escape key handling to permission dialogs for better keyboard navigation
+  - Add TUI session selection API endpoint for navigation (@code-yeongyu)
+  - Add Kotlin LSP integration (@tjg184)
+  - Merge instructions arrays across config files instead of overriding them (@elithrar)
+  - Add variant support for minimal mode
+  - Fix Cloudflare AI Gateway SDK chat undefined error (@englishm)
+  - Handle NotFoundError for non-shared sessions in sync (@Hona)
+  - Improve plugin loading to handle builtin plugin failures gracefully
+  - Update CI configuration
+  - Add reload functionality and improve lazy utility with reset capability
+  - Remove memory leak fixes documentation after implementation
+  - Fix memory leaks in session management and improve permission error handling
+  - Fix TUI permission tests for new evaluate function signature
+  - Improve permission error handling and evaluation logic in TUI
+  - Ignore
+  - Add assistant metadata to session export (@dmmulroy)
+  - Ensure new permissions changes work for special case bash commands like rm, cd, etc
+  - Rework permission system
+  - Remove outdated Haiku filter for GitHub Copilot (@alcpereira)
+  - Make install dependencies non-blocking
+  - Use --no-cache flag when behind proxy to prevent connection hangs
+  - Check for context overflow mid-turn in finish-step (@aryasaatvik)
+  - Display error if invalid agent is used in a command (@Leka74)
+  - Add Content-Type headers for proxied static assets (@monotykamary)
+  TUI
+  - Add missing theme list keybind in TUI (@aspiers)
+  - Handle duplicate PR creation when agent creates PR (@elithrar)
+  - Fix system theme diff highlighting in TUI
+  - Add --variant flag to run command (@shuv1337)
+  - Remove OpenRouter provider from priority list
+  - Make LSP status icon muted when no LSPs are active (@itsrainingmani)
+  - Make MCP status icon muted when no MCP servers are enabled (@itsrainingmani)
+  - Pass attach directory to SDK client in TUI (@shuv1337)
+  - Handle actions/checkout v6 credential storage change (@elithrar)
+  - Use Bun.sleep instead of Promise with setTimeout (@edlsh)
+  - Add Osaka Jade theme (@st-eez)
+  - Add heap snapshot option to system menu for debugging memory usage
+  - Fixed Windows fallback for "less" command in session list (@itsrainingmani)
+  - Fix import command regex to properly handle file paths
+  - Fix stats command day calculation and time filtering
+  Desktop
+  - Fix scroll position restoration in app
+  - Don't override Ctrl+A on Windows
+  - Improve auto-scroll behaviors in the application
+  - Fixed editing projects in desktop application (@dbpolito)
+  - Update server URL normalization to retain path (@OpeOginni)
+  - Add image preview support in session viewer (@shuv1337)
+  - Add /compact session command to compress conversation history
+  - Adjust window drag region layout for desktop application
+  - Relax request timeouts
+  - Properly decode session ID for permission context in desktop app (@OpeOginni)
+  - Work in progress on application features
+  - Improve application startup time
+  - Add work in progress desktop functionality
+  - Add file context feature to app
+  - Improve desktop window resize handle (@dbpolito)
+  Thank you to 30 community contributors:
+  - @monotykamary:
+    - fix(server): add Content-Type headers for proxied static assets (#6587)
+  - @Leka74:
+    - fix: display error if invalid agent is used in a command (#6578)
+  - @aryasaatvik:
+    - fix(session): check for context overflow mid-turn in finish-step (#6480)
+    - docs: update AGENTS.md (#6800)
+  - @alcpereira:
+    - fix: remove outdated Haiku filter for GitHub Copilot (#6593)
+  - @dbpolito:
+    - Desktop: Improve Resize Handle (#6608)
+    - Desktop: Edit Project Fix (#6757)
+  - @itsrainingmani:
+    - fix: windows fallback for "less" cmd in session list (#6515)
+    - fix(tui): make mcp status icon muted when no mcp servers are enabled (#6745)
+    - fix(tui): make lsp status icon muted when no lsps are active (#6773)
+  - @dmmulroy:
+    - feat: add assistant metadata to session export (#6611)
+  - @Hona:
+    - fix(share): handle NotFoundError for non-shared sessions in sync (#6634)
+  - @OpeOginni:
+    - fix(desktop): Properly decode session id for permission context (#6580)
+    - fix(server): update server URL normalization to retain path (#6647)
+  - @albingroen:
+    - fix(ui): fix slight vertical overflow in project selector (#6589)
+  - @st-eez:
+    - feat(theme): add Osaka Jade theme (#6609)
+  - @edlsh:
+    - refactor: use Bun.sleep instead of Promise setTimeout (#6620)
+  - @englishm:
+    - fix: cloudflare-ai-gateway sdk.chat undefined error (#6407)
+  - @elithrar:
+    - fix: handle actions/checkout v6 credential storage change (#6667)
+    - fix: merge instructions arrays across config files (#6663)
+    - github: handle duplicate PR creation when agent creates PR (#6777)
+    - docs: add logging best practices for plugin authors (#6833)
+  - @spoons-and-mirrors:
+    - docs: add subtask2 to ecosystem page (#6704)
+  - @tjg184:
+    - feat: Add kotlin lsp integration (#6601)
+  - @code-yeongyu:
+    - feat(plugin): add tui.session.select API endpoint for TUI navigation (#6565)
+  - @shuv1337:
+    - fix(tui): pass attach directory to sdk client (#6715)
+    - feat(app): add image preview support in session viewer (#6678)
+    - feat: add --variant flag to run command (#6805)
+  - @JBou:
+    - fix(kotlin-ls): improve root detection for Gradle multi-project builds (#6717)
+  - @jknlsn:
+    - feat: add per-project MCP config overrides (#5406)
+  - @sin4ch:
+    - docs: enhance MCP servers documentation with a tip (#6713)
+  - @RhysSullivan:
+    - fix(mcp): add timeout to client.connect() calls (#6760)
+  - @jerilynzheng:
+    - docs: Add Vercel AI Gateway to provider docs (#6790)
+  - @benjaminshafii:
+    - docs: Add opencode-scheduler plugin to ecosystem (#6804)
+  - @ShpetimA:
+    - fix(plugin): prevent duplicate plugin function initialization (#6787)
+  - @johnconnor-sec:
+ReleaseNotesUrl: https://github.com/anomalyco/opencode/releases/tag/v1.1.1
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://opencode.ai/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

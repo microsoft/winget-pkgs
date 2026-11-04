@@ -1,0 +1,75 @@
+# Created with WinGet Updater using komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: pbek.QOwnNotes
+PackageVersion: 26.2.13
+PackageLocale: en-US
+Publisher: pbek
+PublisherUrl: https://github.com/pbek/QOwnNotes
+PublisherSupportUrl: https://github.com/pbek/QOwnNotes/issues
+Author: https://github.com/pbek
+PackageName: QOwnNotes
+PackageUrl: https://github.com/pbek/QOwnNotes
+License: GPL-2.0
+LicenseUrl: https://github.com/pbek/QOwnNotes/blob/HEAD/LICENSE
+ShortDescription: QOwnNotes is the open source notepad with markdown support and todo list manager
+Tags:
+- markdown
+- notes
+- notetaking
+- qownnotes
+- todo
+ReleaseNotes: |-
+  26.2.13
+  - Fixed indented fenced code blocks (with tabs or spaces before the opening fence) showing
+    raw CODEBLOCK placeholders instead of the actual code in the note preview
+    (for #2671)
+  - Fixed a backtick-fenced code block nested inside a 4-space/tab indented code block
+    causing highlight spans to be injected into verbatim content, making raw HTML like
+    <span class="code-keyword">test1</span>=test2 appear in the preview
+    (for #2671)
+  - Fixed a backtick-fenced code block nested inside a tilde-fenced code block causing raw
+    HTML span tags (e.g. <span class="code-keyword">test1</span>=test2) to appear as
+    visible literal text in the note preview (for #2671)
+  - Fixed angle-bracket content inside code blocks (also 4-Spaces fence) and inline code
+    (e.g., <stdio.h>) being incorrectly converted to file links in the note preview
+    (for #3084)
+    - This also fixes regex preview issues (for #2952)
+  - Fixed Markdown highlighter incorrectly formatting a tab-indented list subitem as a heading when
+    followed by a lone - on the next line (for #3086)
+    - isParagraph() now treats tab-indented lines starting with - , + , or * as list items,
+      so they are no longer considered paragraph text eligible for setext heading detection
+  - Added search filtering for scripts in the settings Scripting panel, matching name and details
+    (for #3471)
+  - Fixed clicking a Nextcloud Deck link not opening the Nextcloud Deck dialog anymore
+    (for #3357)
+    - The note editor's openUrl method now routes Nextcloud Deck card URLs (https://…/apps/deck/#/board/…/card/…)
+      through UrlHandler instead of handing them off to QDesktopServices
+    - The note preview's anchor-click handler (onNotePreviewAnchorClicked) now also recognises Deck card URLs
+      and routes them through UrlHandler so the dialog opens correctly from the preview pane as well
+    - The card ID is now parsed directly from the URL path instead of requiring a pre-configured board ID
+      that exactly matches the clicked link, so the dialog opens regardless of which board the card belongs to
+    - Removed the isEnabled() gate from the link-click handler so the Nextcloud Deck dialog opens even when
+      the Deck integration is not fully configured for card creation
+    - Fixed Ctrl+clicking a Deck link in the note editor not opening the Nextcloud Deck dialog;
+      the ignored-click URL regexp for Deck card links was causing openLinkAtCursorPosition()
+      to swallow the click before it could reach openUrl()
+  - Added strikeout support to the QLiteHtml preview widget so that ~~strikeout~~ text
+    is rendered with a line-through decoration in the note preview
+    (for #3466)
+    - QLiteHtml's built-in CSS has no rule for <del> or <s> elements, so the CSS
+      del, s, del *, s * { text-decoration: line-through; } is now injected into the HTML
+      head before passing it to the widget
+    - Descendant elements such as links (<a>) inside ~~strikeout~~ are also struck out;
+      the del * selector is required because text-decoration is not an inherited CSS
+      property and the preview stylesheet's a { text-decoration: none; } would otherwise win
+  - Improved multi-note selection preview styling in the QLiteHtml preview widget for dark mode
+    (for #3466)
+    - Colors are now derived from the active editor schema instead of hardcoded light/dark fallback
+      values, so the preview correctly respects any user-configured theme
+    - Body background, foreground, and link colors all follow the schema's NoState and Link states
+    - The alternating row background and muted date text are computed by blending the schema
+      background toward the foreground, keeping contrast consistent across all themes
+ReleaseNotesUrl: https://github.com/pbek/QOwnNotes/releases/tag/v26.2.13
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

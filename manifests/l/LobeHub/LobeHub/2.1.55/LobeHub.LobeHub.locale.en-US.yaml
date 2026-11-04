@@ -1,0 +1,61 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: LobeHub.LobeHub
+PackageVersion: 2.1.55
+PackageLocale: en-US
+Publisher: LobeHub
+PublisherUrl: https://lobehub.com/
+PublisherSupportUrl: https://github.com/lobehub/lobe-chat/issues
+PrivacyUrl: https://lobehub.com/privacy
+Author: LobeHub LLC
+PackageName: LobeHub-Beta
+PackageUrl: https://github.com/lobehub/lobe-chat
+License: Apache-2.0
+LicenseUrl: https://github.com/lobehub/lobe-chat/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026/06/17 - current LobeHub LLC. All rights reserved.
+CopyrightUrl: https://lobehub.com/terms
+ShortDescription: An open-source, modern-design AI chat framework. Supports Multi AI Providers (OpenAI / Claude 4 / Gemini / Ollama / DeepSeek / Qwen), Knowledge Base (file upload / knowledge management / RAG), Multi-Modals (Plugins/Artifacts) and Thinking.
+Tags:
+- ai
+- chatbot
+- chatgpt
+- claude
+- deepseek
+- doubao
+- gemini
+- kimi
+- large-language-model
+- llama
+- llm
+- mistral
+- ollama
+- qwen
+- rag
+ReleaseNotes: |-
+  This release was automatically published from PR #14284.
+  Changes
+  See PR description: https://github.com/lobehub/lobehub/pull/14284
+  Commit Message
+  Hotfix Scope: Topic preservation across cold chat-entry routes
+  Keeps newly created Topics visible when a first message is sent before the destination chat route has fully hydrated.
+  🐛 What's Fixed
+  - Page Agent empty-session regression — Sending the first message in an empty Page Agent panel no longer clears the newly created Topic and returns the panel to an empty state. (Resolves LOBE-8351)
+  - Home cold-route send regression — Sending from the Home default Chat Input now routes to the newly created Inbox Topic even when /agent/:aid has never been opened and the route chunk has no warm cache.
+  - Page-scoped Copilot consistency — Page Copilot and File Copilot share the same provider-level topic reset behavior, so stale Topics are cleared only when entering or switching the scoped Agent.
+  - Regression coverage — Added focused unit coverage for Home default sends, route parity coverage remains intact, and added an E2E scenario for the no-cache Home send path.
+  ✅ Verification
+  - bunx vitest run --silent='passed-only' 'src/routes/(main)/home/features/InputArea/useSend.test.ts' 'src/spa/router/desktopRouter.sync.test.tsx' 'src/routes/(main)/agent/features/Conversation/ChatHydration/index.test.tsx' 'src/routes/(main)/agent/_layout/AgentIdSync.test.tsx'
+  - BASE_URL=http://localhost:3007 DATABASE_URL=postgresql://postgres:postgres@localhost:5433/postgres bun run test -- --tags '@HOME-CHAT-COLD-001' from e2e/
+  ⚙️ Upgrade
+  - Self-hosted: pull the new image and restart. No schema or environment changes.
+  - Cloud: ships through the normal hotfix deployment after merge.
+  👥 Owner
+  @Innei
+  Fixes LOBE-8351
+ReleaseNotesUrl: https://github.com/lobehub/lobehub/releases/tag/v2.1.55
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://lobehub.com/docs/usage/start
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

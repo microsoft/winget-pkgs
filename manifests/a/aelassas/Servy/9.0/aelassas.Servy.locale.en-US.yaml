@@ -1,0 +1,98 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: aelassas.Servy
+PackageVersion: '9.0'
+PackageLocale: en-US
+Publisher: Akram El Assas
+PublisherUrl: https://github.com/aelassas
+PublisherSupportUrl: https://github.com/aelassas/servy/issues
+Author: Akram El Assas
+PackageName: Servy
+PackageUrl: https://servy-win.github.io/
+License: MIT
+LicenseUrl: https://github.com/aelassas/servy/blob/HEAD/LICENSE.txt
+Copyright: Copyright (c) 2026 Akram El Assas
+ShortDescription: Servy lets you run any app as a native Windows service with full control over the working directory, startup type, process priority, CPU affinity, logging, health checks, hooks, and parameters.
+Description: |-
+  Servy lets you run any app as a native Windows service with full control over the working directory, startup type, process priority, CPU affinity, logging, health checks, environment variables, dependencies, pre-launch and post-launch hooks, pre-stop and post-stop hooks, and parameters.
+
+  Servy is digitally signed using a trusted code-signing certificate provided by the SignPath Foundation. This ensures that all Servy binaries and installers are verified and secure, prevents SmartScreen warnings, and guarantees that the software has not been tampered with.
+
+  Servy offers a desktop app, a CLI, and a PowerShell module that let you create, configure, and manage Windows services interactively or through scripts and CI/CD pipelines. It also includes a Manager app for easily monitoring and managing all installed services in real time.
+
+  Features:
+  - Clean, simple UI
+  - Monitor and manage all installed services with Servy Manager
+  - Real-time CPU and RAM monitoring with live performance graphs for installed services
+  - Real-time service stdout and stderr output preview in Servy Console
+  - Service dependency tree visualization with status indicators
+  - CLI and PowerShell module for full scripting and automated deployments
+  - Run any executable as a Windows service
+  - Set service name, description, startup type, priority, CPU affinity, working directory, environment variables, and dependencies
+  - Environment variable expansion supported in parameters, process paths, and startup directories
+  - Run services as Local System, local or domain accounts, Active Directory accounts, or gMSAs
+  - Redirect stdout/stderr to log files with automatic size-based and date-based rotations
+  - Run pre-launch hooks before starting the service, with retries, timeout, logging and failure handling
+  - Run post-launch hooks after the application starts successfully
+  - Run pre-stop and post-stop hooks before the application stops and after the application stops
+  - Supports Ctrl+C for command-line apps, close-window for GUI apps, and force kill if unresponsive
+  - Supports Ctrl+C propagation to descendant processes of the wrapped process
+  - Prevent orphaned/zombie processes with improved lifecycle management while ensuring resource cleanup
+  - Health checks and automatic service recovery
+  - Browse and search logs by level, date, and keyword for faster troubleshooting from Servy Manager
+  - Export/Import service configurations for easy backups and automation
+  - Service Event Notification alerts on service failures via Windows notifications and email
+  - Compatible with Windows 7 SP1 through 11 (x64/ARM64) and Windows Server editions
+
+  Who is it for?
+  - Developers: Run development servers, scripts, or custom tools as services without extra setup.
+  - Sysadmins & IT professionals: Ensure critical background processes stay alive, monitored, and properly logged.
+  - Teams or organizations: Automate background services reliably across multiple machines.
+Moniker: servy
+Tags:
+- admin
+- automation
+- background-service
+- cli
+- devops
+- dotnet
+- nssm
+- powershell
+- scm
+- service-manager
+- service-supervisor
+- service-wrapper
+- watchdog
+- windows-service
+- windows-tools
+- winsw
+ReleaseNotes: |-
+  - fix(core): ServiceValidationRules.cs - the shared validator hardcodes the 12 [ServicePath] fields that the CLI-import and service-startup validators reflect over, so a new path property is silently unvalidated for the Manager and desktop app (#4401)
+  - fix(core): AppFoldersHelperTests.cs / AppFoldersHelper.cs - EnsureFolders_ValidPaths looks temp-dir scoped but EnsureFolders unconditionally re-ACLs the real C:\ProgramData\Servy vault plus its recovery and logs folders (#4491)
+  - fix(core): InstallServiceOptions.cs (Core) - HeartbeatUrl and its two companions omit the 'Only used when EnableHealthMonitoring is true' caveat their five siblings carry, and the gate silently drops every ping (#4498)
+  - fix(core): NativeMethodsHelpers.cs / NativeMethodsHelpersTests.cs - AtomicSecureMove guards with IsNullOrWhiteSpace but its message says 'null or empty' and neither theory has a whitespace row; ValidateCredentials in the same file does all three correctly (#4506)
+  - fix(core): ServiceDependenciesValidator.cs - Validate emits one error per duplicate occurrence while Parse de-duplicates the same token stream (#4513)
+  - fix(core): SecurityHelper.cs - the breakInheritance:true non-admin fallback cannot fall back: both downstream catch filters require !breakInheritance (#4556)
+  - fix(core): EventLogService.cs - a whitespace-only sourceName disables both provider filters and skips the allowlist (IsNullOrWhiteSpace at line 55 vs IsNullOrEmpty at line 130) (#4561)
+  - fix(core): IServiceManager.cs / ServiceManager.cs - GetDependencies checks cancellation before its argument guard, so the documented ArgumentException becomes an OperationCanceledException; its three sibling reads do the opposite (#4564)
+  - fix(core): SafeWinProcessHandle.cs - DangerousGetHandle hides the non-virtual base member with 'new', so the documented "IntPtr.Zero when closed" guarantee is bypassed through any base-typed reference (#4640)
+  - fix(manager): PerformanceViewModel.cs - AddPoint takes both the history queue and the MetricType that already selects it; a mismatched pair compiles and silently renders the wrong graph (#4374)
+  - fix(manager): MainViewModel.cs (Manager) - five minor items: ServiceCommands setter (null guard / notification / field placement), ServicesView private set, Refresh() naming, cursor reset on early returns, no disposed guard on CreateAndStartTimer (#4369)
+  - fix(manager): ServiceRowViewModel.cs - ConfigureCommand is the only one of the ten row commands built without the shared CanExecuteServiceCommand predicate (#4594)
+  - fix(cli): BaseCommand.cs - a failed service operation with a blank OperationResult.ErrorMessage logs nothing at all; the #3387 fix hardened only the user-facing path (residual) (#4701)
+  - ci(publish.yml): $env:SEVEN_ZIP assignment in the install step is a no-op; only the GITHUB_ENV export on the next line reaches the packaging step (#4664)
+  - ci(publish.yml): setup/servy.iss and setup/servy-arm64.iss are 575 of 582 lines identical; the 7 differing lines are all expressible with an Inno /DArch define, which both callers already use for /DMyAppVersion (#4688)
+  - ci(dependabot.yml): schedule.interval is inert while open-pull-requests-limit is 0, so the nuget/github-actions daily-vs-weekly split implies a cadence difference that does not exist (#4662)
+  - ci(scoop.yml): the Extras branch probe is wrapped in Invoke-Git, which exits on non-zero; 'rev-parse --verify --quiet' always exits 1 on a fresh clone, so run_extras_pr:true can never succeed (#4667)
+  - ci(changelog.yml): 'git add' runs before the porcelain check, so the following 'git diff --staged' else branch is unreachable; choco.yml and bump-version.yml order the same two guards the other way (#4659)
+  - ci(wiki.yml): the 'workspace files are present' guard uses 'ls -A .', which always lists .git after actions/checkout, so the empty/inaccessible branch is unreachable (#4678)
+  - ci(security.yml): the concurrency group falls back to github.sha for push/schedule/dispatch, making it unique per run and inert; all five sibling workflows key on github.ref (residual of #1098) (#4673)
+  - ci(download-with-retry/action.yml): output_path is run through ExpandString, which evaluates $(...) subexpressions as code; no caller uses the environment-variable expansion it was added for (#4657)
+  - fix: various robustness, security, inconsistency, and code quality issues (check GitHub Issues for more details)
+ReleaseNotesUrl: https://github.com/aelassas/servy/releases/tag/v9.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/aelassas/servy/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

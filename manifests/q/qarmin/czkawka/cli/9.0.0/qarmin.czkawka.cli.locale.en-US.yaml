@@ -1,0 +1,85 @@
+# Created with WinGet Updater using komac v2.10.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: qarmin.czkawka.cli
+PackageVersion: 9.0.0
+PackageLocale: en-US
+Publisher: Rafał Mikrut
+PublisherUrl: https://github.com/qarmin
+PublisherSupportUrl: https://github.com/qarmin/czkawka/issues
+Author: Rafał Mikrut
+PackageName: Czkawka
+PackageUrl: https://github.com/qarmin/czkawka
+License: Proprietary
+Copyright: Copyright (c) Rafał Mikrut
+ShortDescription: Multi functional app to find duplicates, empty folders, similar images etc.
+Tags:
+- cleaner
+- duplicates
+- gtk-rs
+- multiplatform
+- rust
+- similar-images
+- similar-music
+- similar-videos
+ReleaseNotes: |-
+  Version 9.0.0 - 16.03.2025r
+  Breaking changes
+  - Video, Duplicate (smaller prehash size), and Image cache (EXIF orientation + faster resize implementation) are incompatible with previous versions and need to be regenerated.
+  Core
+  - Automatically rotating all images based on their EXIF orientation - #1368
+  - Fixed a crash caused by negative time values on some operating systems - #1369
+  - Updated vid_dup_finder; it can now detect similar videos shorter than 30 seconds - #1425
+  - Added support for more JXL image formats (using a built-in JXL → image-rs converter) - #1425
+  - Improved duplicate file detection by using a larger, reusable buffer for file reading - #1425
+  - Added an option for significantly faster image resizing to speed up image hashing - #1458
+  - Logs now include information about the operating system and compiled app features(only x86_64 versions) - #1458
+  - Added size progress tracking in certain modes - #1458, #1464
+  - Ability to stop hash calculations for large files mid-process - #1458
+  - Implemented multithreading to speed up filtering of hard links - #1458
+  - Reduced prehash read file size to a maximum of 4 KB - #1458
+  - Fixed a slowdown at the end of scans when searching for duplicates on systems with a high number of CPU cores - #1460
+  - Improved scan cancellation speed when collecting files to check - #1460
+  - Added support for configuring config/cache paths using the CZKAWKA_CONFIG_PATH and CZKAWKA_CACHE_PATH environment variables - #1464
+  - Fixed a crash in debug mode when checking broken files named .mp3 - #1464
+  - Catching panics from symphonia crashes in broken files mode - #1466
+  - Printing a warning, when using panic=abort(that may speedup app and cause occasional crashes) - #1466
+  Krokiet
+  - Changed the default tab to "Duplicate Files" - #1368
+  GTK GUI
+  - Added a window icon in Wayland - #1400
+  - Disabled the broken sort button - #1400
+  CLI
+  - Added -N and -M flags to suppress printing results/warnings to the console - #1464
+  - Fixed an issue where messages were not cleared at the end of a scan - #1464
+  - Ability to disable cache via -H flag(useful for benchmarking) - #1466
+  Prebuild-binaries
+  - This release is last version, that supports Ubuntu 20.04 - github actions drops this OS in its runners
+  - Linux and Mac binaries now are provided with two options x86_64 and arm64
+  - Arm linux builds needs at least Ubuntu 24.04
+  - Gtk 4.12 is used to build windows gtk gui instead gtk 4.10
+  - Dropping support for snap builds - too much time-consuming to maintain and testing(also it is broken currently)
+  - Removed native windows build krokiet version - now only the cross-compiled version from Linux is available (there should be no difference)
+  VirusTotal
+  (it seems that some lesser-known antivirus programs don’t like Rust with LTO – if you're unsure, you can compare the hashes of this binaries with artifacts from - 5dc8d38)
+  - https://www.virustotal.com/gui/file/c1afc7d82720cb3551550c921dcc1180cfe46bdc00fe6e5d0d317d6598d7e369
+  - https://www.virustotal.com/gui/file/d91c05d0d33b9891038658d5d90a6a46567c15eb6be823521b32b628e0805d4f
+  - https://www.virustotal.com/gui/file/3ad932d347d986be523c8fc646aef2a159799ed21c616e90ac05a4055493a5b2
+  - https://www.virustotal.com/gui/file/f3753322ce16a43d5938f50694237c0b56902f230d24328a9753d0e9baf91603
+  - https://www.virustotal.com/gui/file/ba07838fd1ac29a9483bfc8a015d79948b1108fdcdfd0fcd63bb2a112e103689
+  - https://www.virustotal.com/gui/file/a44869b8bb58854d0383558d1c7b50d0a306bd05f13164e62417aafbb33ccbc2
+  Legend:
+  - libraw in name - app is compiled with libraw feature and require libraw package sudo apt install libraw on ubuntu
+  - heif in name - require libheif-dev to be installed to be able to read use heif images
+  - gtk_gui - gtk version of app
+  - cli - command line version of app
+  - krokiet_gui - slint version of app
+  - console - windows version, that shows console in background - usable to find problems
+  - gtk_46, gtk_412 - gtk version used to build the app. It is provided as two separate packages, giving a choice in case one of them does not work for them (gtk 4.16 is available which may fix some bugs, if you are interested in it, please contribute and docker in - https://github.com/MGlolenstine/gtk4-cross)
+  - minimial appimage - this version does not contain gtk-related libraries and they are taken from the system, so it has requirements almost identical to the regular version. Use only if you have problems with the regular version or know what you are doing
+  You can read more about this version on Medium:
+  - English article - https://medium.com/@qarmin/czkawka-krokiet-9-0-find-duplicates-faster-than-ever-before-c284ceaaad79
+  - Polish article - https://medium.com/@qarmin/czkawka-krokiet-9-0-wyszukiwarka-duplikat%C3%B3w-szybsza-ni%C5%BC-kiedykolwiek-6276f23d4eb9
+ReleaseNotesUrl: https://github.com/qarmin/czkawka/releases/tag/9.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

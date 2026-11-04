@@ -1,0 +1,73 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Gouryella.Drip
+PackageVersion: 0.6.0
+PackageLocale: en-US
+Publisher: Gouryella
+PublisherUrl: https://github.com/Gouryella
+PublisherSupportUrl: https://github.com/Gouryella/drip/issues
+PackageName: Drip
+PackageUrl: https://github.com/Gouryella/drip
+License: BSD-3-Clause
+LicenseUrl: https://github.com/Gouryella/drip/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025, Gouryella
+ShortDescription: Self-hosted tunneling solution to expose localhost securely - unlimited bandwidth, no third-party servers
+Tags:
+- ethernet
+- intranet
+- network
+- network-switch
+- switch
+ReleaseNotes: |-
+  Highlights
+  This release focuses on performance optimization and concurrency safety improvements, significantly enhancing throughput and stability under high-load scenarios.
+  ⚠️ Breaking Changes
+  - Removed manual GC tuning configuration in main.go, replaced with automatic tuning mode
+  ✨ New Features
+  Connection Pool Optimization
+  - Implemented connection pool preheating to eliminate cold start delay
+  - Optimized pool scaling logic with burst load batch expansion support
+  - Concurrent data session creation to accelerate scaling
+  - Added ping loop keep-alive mechanism for each session
+  - Introduced GetSessionStats method for detailed session statistics
+  Tunnel Management & Security
+  - Implemented IP-based tunnel count and registration rate limits
+  - Added rate limiter to prevent malicious registration behavior
+  - Client IP address tracking for access control
+  Concurrency Safety Enhancement
+  - CAS loop implementation for atomic operations on global tunnel counter
+  - Added rollback mechanism to ensure proper resource release on registration failure
+  - Combined atomic operations with locks for thread-safe IP rate limiting
+  ⚡ Performance Improvements
+  Core Performance
+  - Optimized session selection using min-heap, reducing time complexity from O(n) to O(log n)
+  - Added bufio.Reader pool and buffer pool to reduce memory allocation
+  - Implemented sharded lock manager for improved high-concurrency performance
+  - Updated yamux with unified optimized configuration for better throughput
+  - Added patterned GC tuning
+  HTTP Server
+  - Used sync.Pool to reuse bufio.Writer, reducing GC pressure
+  - Enabled TCP_NODELAY for improved response speed
+  - Adjusted HTTP server timeout configuration to balance performance and security
+  Resource Management
+  - Optimized stream open timeout control using context to prevent goroutine leaks
+  - Improved shutdown process to ensure proper cleanup coroutine exit
+  - Reduced maximum frame size from 10MB to 1MB to mitigate DoS risk
+  - Used stack arrays instead of heap allocation for frame header reading
+  🔧 Other Changes
+  - ID generator now exclusively uses crypto/rand, removed timestamp fallback
+  - Added TryGenerateID for non-panic error handling
+  - Upgraded test scripts from Python to Go implementation
+  - Added nginx WebSocket proxy header configuration documentation
+  Upgrade Guide
+  This release primarily contains performance optimizations. When upgrading:
+  1. Remove any custom GC configuration code if present
+  2. Thoroughly test in high-load environments before production deployment
+  Full Changelog: https://github.com/Gouryella/drip/compare/v0.5.3...v0.6.0
+  What's Changed
+  - Perf/pool scaling and latency fix by @Gouryella in https://github.com/Gouryella/drip/pull/12
+  Full Changelog: https://github.com/Gouryella/drip/compare/v0.5.3...v0.6.0
+ReleaseNotesUrl: https://github.com/Gouryella/drip/releases/tag/v0.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

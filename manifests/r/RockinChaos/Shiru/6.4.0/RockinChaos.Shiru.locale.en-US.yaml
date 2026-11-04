@@ -1,0 +1,164 @@
+# Created with komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: RockinChaos.Shiru
+PackageVersion: 6.4.0
+PackageLocale: en-US
+Publisher: RockinChaos
+PublisherUrl: https://github.com/RockinChaos/Shiru
+PublisherSupportUrl: https://github.com/RockinChaos/Shiru/issues
+Author: RockinChaos
+PackageName: Shiru
+PackageUrl: https://github.com/RockinChaos/Shiru
+License: GPL-3.0
+LicenseUrl: https://github.com/RockinChaos/Shiru/blob/HEAD/LICENSE
+Copyright: Copyright © 2025 RockinChaos
+ShortDescription: Manage your personal media library, organize your collection, and stream your content in real time, no waiting required!
+Description: |-
+  A pure JS BitTorrent streaming environment, with a built-in list manager.
+  Imagine qBit + Taiga + MPV, all in a single package, but streamed real-time.
+  Completely ad free with no tracking/data collection.
+  Unlike qBit's sequential approach, seeking into data that hasn't been downloaded yet will prioritise downloading that data, instead of simply closing MPV.
+Tags:
+- anime
+- streaming
+- torrent
+ReleaseNotes: |-
+  - feat: overhaul history navigation with sidebar support
+    - Complete rewrite of the navigation/history system to unify back/forward behavior.
+    - Adds full desktop support through clickable sidebar buttons.
+    - Parent page/view restoration now ensures consistent UX without unexpected closures.
+    - Fixes bad navigation behavior on Android with anime details view changes.
+  - feat: macOS x64 codecs
+    - The universal build now supports codecs on x64 and arm64.
+  - feat: show cached torrents in modal
+    - The torrent modal will now show the respective cached torrents for the series while offline and regardless of the results returned by any extensions.
+    - Adds copy magnet button to torrent details.
+  - feat: show my anime
+    - Alt-clicking (right click or tap and hold) the hide my anime button in the search will now show only your anime.
+    - Useful for only showing your anime on the airing schedule page.
+  - feat: new app icon
+    - A big thanks to Ashtaka on Discord for designing the icon and logo.
+  - feat: torrent provider filtering
+    - You can now add preferred torrent providers; these are considered equally for your best result.
+    - The torrent order and preferred audio language will be prioritized over the preferred provider.
+  - feat: expandable lists on Android
+    - Adds a toggle to enable or disable expandable lists. Lists default to scrolling.
+  - feat: preset themes
+    - Adds the Default (AMOLED) theme.
+    - Buttons, inputs, and toggles are now all properly reactive.
+    - Fixes color issues with the Default (Dark) theme and many transparency issues.
+    - Improves accessibility with tooltips on icon-only buttons.
+  - feat: Spanish (Latin American) subtitle language
+  - fix: showing media when changing torrents
+    - When changing torrents, we should show the new torrents info while it is loading, or nothing at all if it wasn't previously resolved. Helps prevent confusion on seeing the previous torrents file name.
+    - Also should now buffer more.
+  - fix: subbed progress check
+    - Fixes an edge case for when preferred dubs are enabled and a dubbed series finishes airing. This edge case resulted in the dub getting removed from the dubbed releases feed.
+  - fix: handle missing subtitle style blocks
+    - The subtitle parser occasionally received headers without any style blocks, causing the track to not appear at all.
+  - fix: dub schedule error handling
+    - Now properly uses cache as fallback data when queries fail.
+  - fix: resolver failed fallback
+    - Fixes the secondary resolving check, allowing the detected media to be properly mapped.
+    - Fixes the fallback for when all resolving attempts failed. Now properly sets as failed and attempts to get the detected season and episode.
+  - fix: allow changing episode
+    - Allows the episode to be set or changed if the media failed to resolve and there isn't any media currently set.
+  - fix: aggressive title matching
+    - Fixes certain series not being labeled Dual Audio.
+  - fix: show multi-header release in episode list
+    - Multi-Header releases like "May I Ask for One Final Thing?" will now show properly in the Episode List.
+    - Dubs are also now considered for this, overriding any sub dates, as a dubbed episode wouldn't release before the sub.
+  - fix: zero episode air date
+    - Fixes "Dusk Beyond the End of the World" showing 1 episode ahead as already released due to the presence of the zero episode.
+    - Fixes detecting the description of zero episodes.
+  - fix: zero episode behavior
+    - Torrent details now properly show zero episodes.
+    - The previous episode button is now visible in the player when playing episode 1.
+    - Clicking the watch button now plays the correct episode.
+  - fix: showing duplicate or array resolution
+    - Torrent cards were showing duplicate resolutions or multiple, but didn't get their own badge.
+  - fix: Android drag scroll
+    - Prevents interactable touch elements from triggering drag scroll.
+  - fix: infinite scroll
+    - Search page scrolling is now more consistent.
+    - If you scroll to the bottom before the current batch query loads, it will automatically load the next batch after the current batch resolves.
+  - fix: get hash preference
+    - When checking for existing torrents in the cache, there is now a priority of which hash to fetch if multiple downloaded torrents exist for a series.
+  - fix: check file progress
+    - Streamed download should respect file progress not the entire torrent, this causes issues with batches.
+  - fix: error looping when restoring progress
+    - It was possible for the video to get stuck in an error state due to the video progress being saved at the corrupted segment. This fix resets the video time and progress to the beginning.
+  - fix: more chapter edge cases
+    - This round of chapter edge cases covers overlapping chapters, slicing out ones that overlap between two valid chapters. Also ensuring that the first chapter starts at 0.
+  - fix: auto file select on rss feeds
+    - Fixed RSS feeds incorrectly prompting for torrent selection when Auto-File Select was disabled.
+  - fix: subtitles missing cjk glyphs
+    - Noto Sans will now be used as the default font for subtitles whenever there are missing glyphs in the provided subtitle attachments.
+  - fix: exclude trailers
+    - Fixes trailers incorrectly being in the playable files list.
+  - fix: focus preview cards
+    - Improves the expected reactivity of preview cards, whether they should be shown or not, based on certain events..
+  - fix: don't always verify OVA match
+    - Verification when resolving OVA media will now fail if the file name is missing OVA or if the file name has OVA and the media is not an OVA.
+  - fix: missing NCED and NCOP
+    - Can't filter these out unless it's actually specified as an anime_type.
+  - fix: start at the lowest unwatched id
+    - Lowest unwatched was previously determined based on the format of the series, which would result in weird issues like OVA being before the main series.
+    - We now get the lowest media id as ids are typically sequential.
+  - fix: preserve episode and season when failing to resolve
+    - Ensure files that initially failed to resolve keep their known episode and season values instead of relying on torrent name parsing, preventing misdetections like "1080p" as an episode number.
+  - fix: failing to detect playable episodes
+    - Series that are releasing but do not have an air date for the next episode would end up failing to detect how many episodes have already aired.
+  - fix: check media status
+    - Check if the media is marked as finished before stating X episode hasn't released.
+  - fix: show episodes for movies
+    - If a movie has multiple episodes, they will now be detailed rather than listing each as "Movie".
+  - fix: replace timestamp-like chapter names
+    - Better to use a placeholder than a confusing timestamp.
+  - fix: resolving My Gift Lvl 9999 Unlimited Gacha
+    - Resolves issues with release groups using the Mugen Gacha synonym.
+  - fix: resolving Mr. Ginpachi's Zany Class
+    - Was primarily an issue with subbed release groups using an incorrect Romaji title.
+  - fix: resolving Mobile Suit Zeta Gundam
+    - Some release groups used Z instead of Zeta for shorthand.
+  - fix: verified series marked as failed
+    - Fixes the verification button not removing the failed tag from the series until the app is restarted.
+    - Fixes the verification button being missing when it shouldn't be.
+    - Fixes undefined values in the episode field.
+  - fix: missing subtitles
+    - Primarily fixes missing subtitles from release groups like Yameii.
+  - fix: external player autoplay
+    - Fixes external player autoplay not functioning when loading a file or switching episodes.
+    - Fixes external player reopening when clicking to play the episode before autoplay is triggered.
+  - fix: file manager sorting and reactivity
+    - Files in the file manager will now be properly grouped by series, sorted by season, and episode number.
+    - Files that had their series change will immediately be reflected in the File Manager without having to re-open it.
+  - fix: episode list scaling and summary
+    - Fixes issues on Android where lines were partially cropped due to exceeding the summary size.
+    - Summary is now properly limited to the max lines denoted by ellipsis.
+  - fix: Android hover buttons
+    - Buttons that change state when hovering on desktop should not be highlighted after clicking them on Android. Now they are properly deselected after performing the button action.
+  - fix: airing series triggering section update
+    - Series that are airing have a countdown to the episode, which would cause the section to update when they didn't need to after a new query was completed.
+    - All unnecessary keys have been removed from media data to prevent section updates.
+  - fix: indefinite dub delays
+    - Dubbed series that have production suspended but have the sub finished will now properly show Dub production as suspended.
+  - fix: stale schedule data
+    - Fixes a very rare edge case that would result in the episode feeds or schedule not updating, resulting in stale data as the manifest is saved.
+  - fix: incorrect regex
+    - Resulted in torrent cards showing incorrect tags.
+  - fix: janky overlay check
+    - Each time a file is loaded to the player any active overlays were closed.
+  - fix: dual audio torrent results
+    - The exact audio type will now be the highlighted best result instead of Dual Audio. Dual Audio will only be used as a fallback if the exact audio type isn't found.
+    - English Dub terms will now be properly filtered out if there is no English Dub for the series.
+    - Adds Chinese Audio term and preferred audio type.
+    - Fixes incorrectly detecting Chinese Dub as an English Dub.
+  - fix: incorrectly detecting dual track as dual audio
+    - Dual Track typically doesn't refer to multiple audio tracks and causes accuracy issues if we assume it does.
+  - fix: filter media title before term mapping
+    - Some media titles resulted in incorrect term mapping.
+ReleaseNotesUrl: https://github.com/RockinChaos/Shiru/releases/tag/v6.4.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

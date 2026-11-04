@@ -1,0 +1,123 @@
+# Created with komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: ChiaNetwork.GUIforChiaBlockchain
+PackageVersion: 2.5.5
+PackageLocale: en-US
+Publisher: Chia Network
+PublisherUrl: https://github.com/Chia-Network/chia-blockchain
+PublisherSupportUrl: https://github.com/Chia-Network/chia-blockchain/issues
+Author: Chia Network
+PackageName: Chia
+PackageUrl: https://www.chia.net/
+License: Apache-2.0
+LicenseUrl: https://github.com/Chia-Network/chia-blockchain/blob/HEAD/LICENSE
+Copyright: Copyright 2021 Chia Network
+CopyrightUrl: https://raw.githubusercontent.com/Chia-Network/chia-blockchain/main/LICENSE
+ShortDescription: Chia blockchain python implementation (full node, farmer, harvester, timelord, and wallet)
+Description: Chia is a modern cryptocurrency built from scratch, designed to be efficient, decentralized, and secure.
+Tags:
+- blockchain
+- blockchain-network
+- chaia
+- chia-blockchain
+- farmer
+- full-node
+- harvesters
+- peer
+- proof-of-space
+- proof-of-time
+- timelord
+- vdf
+- wallets
+ReleaseNotes: |-
+  2.5.5 Chia blockchain 2025-08-19
+  Note that protocol changes between node, farmer, and harvester will require all entities to be upgraded
+  at the same time to 2.5.5. On a simple one machine setup, this will be handled by the installer.
+  But if you have more complicated topologies with remote farmers or harvesters, you will need to upgrade
+  all components.
+  2.5.5 will also make changes to the blockchain database that are incompatible with previous versions. If you
+  run 2.5.5 but later wish to downgrade to an earlier version, you will need to downgrade your database schema by
+  running the following command:
+  python -c "import sqlite3, sys, os; conn = sqlite3.connect(os.path.expanduser(sys.argv[1])); cursor = conn.execute('UPDATE coin_record SET spent_index = 0 WHERE spent_index = -1'); print(f'Updated {cursor.rowcount} records'); conn.commit(); conn.close()" <path to the db>
+  Replacing <path to the db> with your actual database path.
+  What's Changed
+  Added
+  - Add chia dev mempool CLI commands to import, export, and benchmark the mempool
+  - Add new error logging if the block cost fails to compute
+  - Add dicts to streamable
+  - Add independant Full Node RPC Validation Tool (tools\validate_rpcs.py)
+  - Add Revocable CAT support to wallet (Chip 38)
+  - Add mempool optimizations and fixes in spend deduplication and singleton fast forward.
+  - Add mempool vault fast forward support
+  - Add unit tests to cover singleton fast forward dynamics
+  - Add new optional block creation algorithm to maximize transactions (set config.yaml full_node:block_creation to 1)
+  - Add new config setting for block creation timeout (full_node:block_creation_timeout)
+  - Add preparation for new plot format and expected hard fork (Chip 48)
+  - Add canonical CLVM serialization requirement after expected hard fork
+  Changed
+  - Harvester<->Farmer protocol change: compute plot filter on the harvester (Chip 48 prep)
+  - Farmer<->Node protocol change (Chip 48 prep)
+  - Backwards incompatible schema change for mempool fast-forward support
+  - Remove problematic coins_added_at_height_cache cache
+  - Remove no longer needed item_inclusion_filter in the mempool
+  - Significantly speedup mempool manager tests by not forcing them to request unneeded fixtures
+  - Refactor and add test for WSM puzzle hash endpoints
+  - Removed unneeded call to compute block cost
+  - Add puzzle hash generation to action scopes
+  - Remove direct secret key access from pool wallet
+  - Add ContextManager to FullNodePeers
+  - Simplify DB checks in invariant_check_mempool
+  - log how long it took to call peak_post_processing_2
+  - move chia.types.aliases to chia.server.aliases
+  - move tx processing queue entry classes
+  - Improve the serialisation of AddressManager
+  - Remove the dependency of chia.consensus on the module chia.types
+  - Adapt test_check_removals_with_block_creation to cover both block generator creation versions
+  - Use upstream miniupnpc 2.3.3
+  - Don't return addition coin records in CoinStore's new_block
+  - Avoid recomputing coin record names in rollback_to_block when we have access to them
+  - move sp broadcast outside of blockchain mutex
+  - use pyproject.toml [project] section (again)
+  - Simplify test_set_spent
+  - Leverage execute_fetchall in CoinStore's rollback_to_block
+  - Insert DB values in CoinStore's new_block without creating coin records
+  - Also log the VDF field being compacted (thanks @xearl4)
+  - Avoid recomputing coin IDs in run_new_block_benchmark
+  - Simplify test_rollback
+  - Extract _add_coin_records out of CoinStore and simplify it
+  - Simplify test_num_unspent
+  - Simplify test_basic_coin_store
+  - Optimize rolled back state construction in _reconsider_peak
+  - Leverage CoinStore's new_block in SpendSim's farm_block instead of custom coin store manipulation
+  - Port NFT, pooling, DID, and Datalayer RPCs to @marshal decorator
+  - Simplify SpendSim's farm_block
+  - Migrate away from clvm imports
+  - Pass coin IDs from Blockchain's _reconsider_peak to CoinStore's new_block to avoid recomputing them
+  - Unify fork peak and reward coins handling between ForkInfo's include_spends and include_block
+  - Replace CATWallet.create_new_cat_wallet in test_cat_wallet.py
+  - Change minimium node version to 20 and npm version to 10
+  - Timelord: dont skip same peak if in unfinished cache
+  - Set app minimum macos version to macOS 13
+  - Bump chia-rs to 0.27.0
+  - Bump chiavdf to 1.1.11
+  - Bump clvm to 0.9.14
+  - Bump clvm-tools-rs to 0.1.48
+  Fixed
+  - Enable keccak softfork in the wallet (fixes #19480)
+  - Add some checks when trying to join the same pool already joined (fixes #7592)
+  - Allow DIDs from other wallets with NIL recovery lists (fixes #18947)
+  - Set AGG_SIG_ME_ADDITIONAL_DATA in config.yaml for simulator
+  - use index when fetching SP
+  - redact daemon websocket message logging
+  - less response failure error consumption
+  - Fixed some typos in comments (thanks @timesince)
+  - Fixed more typos in comments (thanks @racerole)
+  - Fixed yet more typos in comments (thanks @yetyear)
+  - Fixed typo in CONTRIBUTING.md (thanks @ctrlaltdel)
+  Removed
+  - Testing and support for Ubuntu LTS 20.04
+  - Testing and support for Debian 11 "Bullseye"
+ReleaseNotesUrl: https://github.com/Chia-Network/chia-blockchain/releases/tag/2.5.5
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

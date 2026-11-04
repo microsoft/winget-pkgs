@@ -1,0 +1,72 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: JetBrains.DataGrip.EAP
+PackageVersion: 263.5153.34
+PackageLocale: en-US
+Publisher: JetBrains s.r.o.
+PublisherUrl: https://www.jetbrains.com/
+PublisherSupportUrl: https://www.jetbrains.com/support/
+PrivacyUrl: https://www.jetbrains.com/legal/docs/privacy/privacy/
+Author: JetBrains s.r.o.
+PackageName: DataGrip (EAP)
+PackageUrl: https://www.jetbrains.com/datagrip/nextversion/
+License: Freeware
+LicenseUrl: https://www.jetbrains.com/legal/docs/toolbox/user_eap/
+Copyright: Copyright © 2000-2026 JetBrains s.r.o.
+ShortDescription: The Cross-Platform IDE for Databases & SQL by JetBrains
+Description: A powerful IDE from JetBrains for SQL on macOS, Windows, and Linux.
+Tags:
+- database
+- db2
+- develop
+- development
+- ide
+- mssql
+- mysql
+- postgres
+- programming
+- sql
+- sqlite
+ReleaseNotes: |-
+  Cross-database queries
+  We're starting this EAP with the release of a long-awaited feature: cross-database queries. You can now query data across different data sources, even when they use different DBMSs, and view the results directly without copying the data beforehand.
+  To make this possible, we're introducing the Workspace data source, which is based on DuckDB and runs in memory by default, so it does not require a database file.
+  Each project can have one Workspace data source. In its query console, you can reference tables from other data sources using a special syntax. To add this data source, click Add on the Database Explorer toolbar and select Workspace Data Source. Its default query console opens automatically, and you can create additional ones as needed.
+  In the Workspace query console, you can reference tables from other data sources using the following syntax:
+  - To reference a table directly, specify its data source and table name. Add the database and schema when needed:
+    #data_source[.database.schema].table
+  - To filter a table, add #filter(...) to the reference:
+    #data_source[.database.schema].table.#filter('condition')
+  - You can also use #query(...) to run a query against a data source:
+    #data_source[.database.schema].#query('query')
+  In #filter(...) and #query(...), you can use $$...$$ dollar-quoted strings instead of single quotes: #filter($$condition$$) and #query($$query$$).
+  Type # to select a data source using code completion. Here are a few examples of the syntax in use:
+  - Filter rows in a referenced table:
+    SELECT * FROM #PostgreSQL.guest.public.customer.#filter
+                   ('customer_id > 100');
+  - Run a query against a referenced data source:
+    SELECT * FROM #PostgreSQL.guest.public.#query($$
+                    SELECT customer_id, amount
+                    FROM payment WHERE amount > 5
+                $$);
+  - Join data from PostgreSQL and MySQL data sources:
+    SELECT c.first_name, c.last_name, p.amount
+                FROM #PostgreSQL.guest.public.customer c
+                    JOIN #MySQL.sakila.payment p
+                        ON c.customer_id = p.customer_id;
+  DuckDB support
+  DataGrip now offers full support for DuckDB, including a dedicated SQL dialect, DuckDB-specific syntax and functions, code completion, and database object introspection. To add a DuckDB data source, click Add on the Database Explorer toolbar and select Data Source | DuckDB.
+  Three connection types are available: default, In-memory, and URL only. The default option connects to a DuckDB database file specified by its path. In-memory creates a database in memory, while URL only uses the JDBC URL you provide as is.
+  Ability to pin columns in the data editor
+  We're also adding another long-requested feature that makes the data editor even easier to use. You can now pin columns to its left side. This keeps important data visible when you scroll horizontally through wide tables.
+  To pin one or more columns, select them, right-click on the header, and select Pin Column or Pin Columns. You can also select Pin Columns Up to Here to pin all columns up to the one you have selected.
+  A blue divider separates the pinned columns from the remaining ones, which you can scroll through horizontally.
+  To unpin columns, right-click a header and select Unpin Column, Unpin Columns, or Unpin All Columns.
+  Pinning actions are unavailable if the pinned section would take up too much horizontal space, leaving insufficient room to scroll the remaining columns.
+ReleaseNotesUrl: https://youtrack.jetbrains.com/articles/DBE-A-83165555
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://www.jetbrains.com/help/datagrip/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

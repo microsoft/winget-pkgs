@@ -1,0 +1,96 @@
+# Created with WinGet Updater using komac v2.11.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: DoltHub.Dolt
+PackageVersion: 1.51.0
+PackageLocale: en-US
+Publisher: DoltHub
+PublisherUrl: https://github.com/dolthub/dolt
+PublisherSupportUrl: https://github.com/dolthub/dolt/issues
+Author: DoltHub
+PackageName: Dolt
+PackageUrl: https://www.dolthub.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/dolthub/dolt/blob/HEAD/LICENSE
+CopyrightUrl: https://raw.githubusercontent.com/dolthub/dolt/master/LICENSE
+ShortDescription: Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+Description: |-
+  Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+  Connect to Dolt just like any MySQL database to run queries or update the data using SQL commands.
+  Use the command line interface to import CSV files, commit your changes, push them to a remote, or merge your teammate's changes.
+Moniker: dolt
+Tags:
+- cli
+- data
+- git-for-data
+- versioning
+ReleaseNotes: |-
+  Merged PRs
+  Minor version bump here reflects changes in background statistics management. The new statistics system tracks updates for all branches with a common backing cache that reduces memory consumption when branches have overlapping table data. See docs for the expanded interface.
+  dolt
+  - 9034: Be more flexible for missing working sets when loading db
+    Fixes: #9031
+  - 9028: Test new connection configuration in vitess
+    This PR is both a dependency bump and enabling the configuration args in the dependency.
+  - 9021: go: gcctx,dsess: Move GCSafepointController into an independent package. Make dsess.AutoIncrementTracker background database access participate in GC lifecycle callbacks.
+  - 9020: go: branch_control,sqle/dsess: Pass the *sql.Context to the GetBranch accessor. Wrap it for the branch_control.Context conversion.
+  - 9016: Remove duplicate github.com/vbauerster/mpb dependency
+  - 9006: Replace jpillora/backoff with cenkalti/backoff/v4
+    This is a drop-in replacement.
+    Both github.com/jpillora/backoff and github.com/cenkalti/backoff/v4 provide exponential backoff implementations. Since we already use github.com/cenkalti/backoff/v4 elsewhere in the codebase, this change standardizes our dependency by using a single implementation consistently.
+  - 9002: Replace golang.org/x/exp/slices with stdlib slices
+    The experimental functions in golang.org/x/exp/slices are now available in the standard library in Go 1.21.
+    Reference: https://go.dev/doc/go1.21#slices
+  - 9000: Fix spelling
+  - 8991: Remove duplicate github.com/vbauerster/mpb dependency
+    https://github.com/dolthub/dolt/blob/b7c0ddb4aac3702114c4e060651007d590a8be8c/go/cmd/dolt/cli/stdio.go#L28
+    https://github.com/dolthub/dolt/blob/b7c0ddb4aac3702114c4e060651007d590a8be8c/go/cmd/dolt/cli/stdio_test.go#L23
+    It's weird that we use the tagged v8 version in the source code but non-tagged version in the test.
+  - 8815: [stats] Rewrite stat management to use single threaded event loop
+    Reference statspro/doc.go for more detailed overview. Replaced stats management with a worker->scheduler->executer system. Worker does the default background job organizing, scheduler serializes background and async requests, executor calls function callbacks with a ticker delay. GC performed within a loop.
+    Early perf testing seems to have little/no impact on TPC-C when the job ticker is 100-500ms.
+    fixes: #8844
+  go-mysql-server
+  - 2907: special case for unix_timestamp
+    When the provided timestamp is in string format, we preserve the scale of the original string (assuming it is valid).
+    Additionally, we should round precision instead of truncating.
+    #9025
+  - 2902: Support ALTER TABLE ... ADD COLUMN with an inline check constraint
+    Adds support for adding a column to a table with an inline constraint declared. Previously, the inline constraint was parsing, but ignored.
+    Depends on: dolthub/vitess#405
+    Originally discovered as part of testing DoltHub's Postgres schema with Doltgres.
+  - 2901: disable_merge_join corner case
+    Disable merge join previously could only kick in if other hints were applied. We also want it to work in the absence of hints.
+  vitess
+  - 407: remove incorrect continue statement which skips handling connection
+    Caught in PR.
+  - 406: Avoid spin waits and dead connections in mysql server
+    Related (partial fix): #8943
+  - 405: Set ConstraintAction if an added column was specified with an inline constraint
+    Currently Dolt/GMS ignore an inline check constraint definition in an ALTER TABLE ... ADD COLUMN statement. This change detects if a constraint is present, and sets ConstraintAction so that GMS will add the constraint.
+  - 403: Log a warning when max connections is hit
+    Fixes: #8942
+    Tested by configuring a server with 2 max conns, then connecting to it 3 times:
+    lcl:~/Documents/data_dir_1/db3$ dolt sql-server --config ./config.yaml
+    Starting server with Config HP="localhost:3306"|T="28800000"|R="false"|L="info"|S="/tmp/mysql.sock"
+    WARN[0000] unix socket set up failed: file already in use: /tmp/mysql.sock
+    INFO[0000] Server ready. Accepting connections.
+    WARN[0000] secure_file_priv is set to "", which is insecure.
+    WARN[0000] Any user with GRANT FILE privileges will be able to read any file which the sql-server process can read.
+    WARN[0000] Please consider restarting the server with secure_file_priv set to a safe (or non-existent) directory.
+    INFO[0004] NewConnection                                 DisableClientMultiStatements=false connectionID=1
+    INFO[0006] NewConnection                                 DisableClientMultiStatements=false connectionID=2
+    WARN[0009] max connections reached. Clients waiting. Increase server max connections
+  - 401: Revert moving call to recycleReadPacket()
+    Dolt binlog tests started failing, due to the change in location of calling recycleReadPacket(). This change moves those two calls back to their original location.
+  Closed Issues
+  - 9036: Unexpected invalid type error on boolean
+  - 9037: Unexpected crash when using GROUP BY with non-column position
+  - 9031: Pushing a new branch to a running dolt sql-server remote port causes ERRO[0536] working set not found error spewed to logs
+  - 9025: unix_timestamp's precision should keep with parameter
+  - 6724: dolt merge doesn't produce deterministic hashes
+  - 8844: Panic from vector index (possibly from stats)
+ReleaseNotesUrl: https://github.com/dolthub/dolt/releases/tag/v1.51.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
+

@@ -1,0 +1,122 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: heartached.Noctis
+PackageVersion: 1.1.6
+PackageLocale: en-US
+Publisher: heartached
+PublisherUrl: https://github.com/heartached
+PublisherSupportUrl: https://github.com/heartached/Noctis/issues
+PackageName: Noctis
+PackageUrl: https://github.com/heartached/Noctis
+License: MIT
+LicenseUrl: https://github.com/heartached/Noctis/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 heartached
+ShortDescription: A music player that respects what's yours.
+Description: |-
+  Noctis is a desktop music player for your local library — fast browsing,
+  synced lyrics, metadata editing, EQ, and more.
+Tags:
+- audio
+- avalonia
+- lyrics
+- music
+- music-player
+- player
+ReleaseNotes: |-
+  What's Changed
+  🎉 New Features
+  - Custom user themes — CustomThemeDefinition with dark/light modes, 5-input color picker, live preview pane, theme editor dialog
+  - Color Picker control — reusable ColorPickerFlyout with HSV spectrum, hue slider, hex input, applied across accent + custom theme flows
+  - Artist Detail page (Apple Music style) — hero banner with artist image/name, Play/Shuffle pills, Top Songs 3-column grid, Featured/Essential Albums, Albums grid, Singles & EPs, About card with bio/metadata
+  - MusicBrainz biography service — fetches and caches per-artist data at %APPDATA%\Noctis\artist_bios, 1 req/sec TOS-gated
+  - Performer field in metadata — custom PERFORMER tag for round-trip without colliding main Artist field
+  - iTunes Search Artwork — red pill button opens flyout with up to 8 candidates from Apple's public API, Standard/Highest resolution options
+  - iTunes Search Animated Artwork — queries iTunes, scrapes Apple Music page for videoUrl, downloads MP4, stages for save with clean handling when unavailable
+  - Top Artists row on Home — 6-column circular avatars ranked by play count, Deezer image enrichment, click-through to Artist Detail
+  - Unified Add to Playlist dialog — pick existing playlist or inline-create with name + description, replaces legacy submenu flow across 11 surfaces
+  - Library/Cover Flow toggle in playlists — appears on playlist detail pages via sidebar, tile click, or back-button restore
+  - Playback bar moved to bottom — floating overlay (Apple Music style) with translucent glass look and repositioned menu
+  - Queue Popup redesign — "Currently Playing" header, now-playing track card, track count, Clear pill, sticky behavior (doesn't close on nav/outside clicks)
+  - Queue drag-to-reorder (Apple Music UX) — pointer-tracked dragging with 6px threshold, floating pill preview, drop indicator line, MoveInQueue sync
+  - Playlist drag-to-reorder — floating pill preview (cover + title + artist + duration), pointer-tracked with existing drop indicator, exclude smart playlists
+  - Lyrics page full playback bar redesign — standard PlaybackBarView instead of custom bar, new Observable flags on PlayerViewModel, lyrics-mode entries in ⋯ menu
+  - Standalone lyrics timeline slider — current/remaining time labels, draggable seek, sits below track metadata
+  - Compact lyrics-page controls-only strip — hides mini cover art, artist/title, old timeline while maintaining normal layout elsewhere
+  🔧 Bug Fixes
+  - Album-art flicker on track switch — previous artwork stays visible until new bitmap decodes; explicit clear only when no artwork
+  - Ctrl+A select-all outside Albums tab — added Focusable/Focus/OnViewKeyDown wiring to Home, Songs, Playlist, Favorites
+  - Artist detail page not rendering — added ArtistDetailViewModel → ArtistDetailView mapping in App.axaml
+  - Semantic reds tinted by accent color — restored to literal #E74856 across 8 views + TrackContextMenuBuilder
+  - Settings toggles not updating live on accent change — App.AccentApplied event with LottieToggle resubscribe on OnLoaded/OnUnloaded
+  - Lyrics page accent text not updating live — LyricsViewModel subscribes to AccentApplied, replays UpdateForegroundsForBackground
+  - Combined-name artist images falling back to silhouette — IsDeezerPlaceholderUrl detection, primary-artist fallback in ArtistImageService
+  - Click zoom animation on artist rows — Button.artist-item:pressed { scale(1) } override
+  - Empty Home section headers — Most Listened To/Recently Played hidden when no content
+  - iTunes advisory dropdown clipping — reduced width so arrow sits closer to text
+  - Artwork search returning random results — prioritizes album artwork, falls back to track title for standalone singles
+  - Animated artwork search HLS-only failure — parses Apple Music variants instead of stopping at HLS playlist
+  - Animated artwork removal not clearing preview — preview now clears immediately on remove
+  - Metadata tab hover color going gray — kept accent color on Artwork/Animated Artwork tab text
+  - Metadata popup dropdown styling inconsistent — matched Options equalizer to iTunes advisory pill style
+  - Metadata tab-strip clipped text and scrim artifact — removed mismatched-color scrim, adjusted right-chevron spacing
+  - Invalid Panel.ZIndex startup crash — fixed XAML break in panel definitions
+  - Artist clicks opening profile instead of discography — changed to full discography album grid
+  - Artist grouping including collaborations — changed to primary artists only (Bad Bunny & Bomba Estéreo → Bad Bunny)
+  - Top Artists rendering missing images — added persistent fallback icon, avoided tearing down identical rows
+  - Playlist toggle disappeared on tile click — OnPlaylistOpened now re-runs SetupGlobalViewModeToggle
+  - Cover Flow exit dumping to Playlists list — added _preCoverFlowView to stash/restore playlist VM
+  - Light theme toggle text dark-on-dark on lyrics page — forced Foreground="#FFFFFF"
+  - EQ "Custom" empty on restart — reordered load so SyncCustomInVisiblePresets runs before ComboBox binding
+  - Theme switching changing accent color — SetTheme now re-applies active accent via SetAccent after theme dictionary merge
+  - Animated artwork popup not closing after variant pick — bridged Flyout.IsOpen binding in code-behind with explicit Hide() call
+  - Artwork "Remove + Save" reappearing on album return — delete persisted PNG cache, fan out WriteAlbumArt(null) to all tracks, stop re-extracting embedded copies
+  - Track duration showing 0:00 — extended ffprobe fallback to fill stream + format duration for broken/VBR files
+  - Lyrics page player bar clipping at edges — widened left content container, reserved width for expanded volume slider
+  - Automated menu placement — TopEdgeAlignedLeft with FlipY for consistency, RightEdgeAlignedBottom with FlipX for player-bar Options (Apple Music style)
+  - Nested submenu corners not matching parent — applied OverlayCornerRadius="16" globally via resource override
+  🎨 UI Polish
+  - Settings > Advanced section — visual grouped stack instead of separate cards with red warning note on Clear Artwork Cache
+  - Settings descriptions — shortened and clarified across 12+ toggles (Discord Rich Presence, Last.fm, Lyrics providers, Library Scan, Album page tint, Animated Artwork, Transition Mode, Sound Check)
+  - Animated Artwork description — corrected to "Show animated cover art when available"
+  - Cover Flow hover zoom — removed from artist/album title buttons
+  - Artist hover overlay — trimmed bottom edge for balanced spacing
+  - Favorited albums heart overlay — 22px heart on bottom-right, also added to Cover Flow center cover
+  - Album artwork decode quality — bumped 384 → 768px with HighQuality in Albums, Home recently-played to 768px
+  - Favorites heart size — increased 16 → 22px; bumped matching hearts in Albums/Home to 18px
+  - Settings reorganization — 12 section headers → 8 (merged AUDIO/PLAYBACK, removed EQUALIZER, consolidated MEDIA FOLDERS + Library, merged STORAGE into OVERVIEW)
+  - Advanced cards unified — thin dividers match Text Animation card layout
+  - Album detail action buttons — Play/Shuffle as red pills with icon + text, reordered Play first, smaller sizing (26/22×8, icon 16, font 14)
+  - Metadata window header cover art — enlarged 72×72 → 104×104
+  - Metadata window favorited heart — red HeartFillIcon on right when track is favorited
+  - Metadata footer buttons — Cancel left, Save right, all bold, Top hairline separator restored
+  - Artwork/Animated Artwork preview — identical fixed-size 360×360 squares to prevent clipping
+  - Accent color theming — 10 curated presets (Crimson, Sunset, Tangerine, Gold, Lime, Emerald, Cyan, Azure, Indigo, Magenta) + Canva-style custom picker
+  - Runtime accent overlay — ResourceDictionary merge with SystemAccentColor + derived shades + all fanned brushes, preserving semantic reds
+  - 150 hardcoded accent values swept to {DynamicResource} or runtime resolution across 33 XAML + .cs files
+  - Artist image lookup improved — Deezer up to 10 results with exact-match ranking, prefer picture_xl/big/medium
+  - Top Artists aggregation — capped at 6, uses primary artists, persistent fallback icon, no tearing on refresh
+  - App-wide menu hover theming — MenuFlyout/MenuItem/MenuBar AccentApplied overlay with 22%/35% alpha
+  - Settings modal overlay (Apple Music style) — 780×720 rounded card, dark backdrop, restored sidebar selection after close
+  - Settings Profile section — 64px round avatar (→ %APPDATA%\Noctis\profile\avatar.<ext>) + display-name TextBox, live save
+  - Profile avatar button — profile-avatar-btn class keeps round on hover
+  - Profile name field — profile-input class strips background/border on idle/hover/focus
+  - Metadata tab-strip improved — chevron overflow UI (< / > auto-show on overflow), mouse wheel scrolling, clean appearance
+  - Nested submenu popups — 16px rounded corners matching parent context menu
+  - Queue popup background — #E61C1C1C (~90%) transparent instead of opaque
+  - Queue clear button — red rounded pill instead of icon button
+  - Queue row spacing — subtle separator lines (6% opacity), vertical spacing between rows
+  - Songs/Library/Favorites page buttons — accent-colored pill (CornerRadius="999", tight padding, hand cursor)
+  - Sort menu — reordered (Title, Album, Artist, Genre, Year, Time, Plays), Year as new sort option, checkmarks on active
+  - Shuffle icon appearance — bumped to bold, balanced with heavier text
+  - Create Smart Playlist dialog — Create button on right (swapped with Cancel)
+  - Artist discography top bar — Play/Shuffle fused into one accent pill
+  - "Add to Playlist" context menu — removed submenu arrow, leaf MenuItem opens new dialog
+  - Delete Playlist — red text + icon in all contexts
+  - "Remove from Playlist" — red text + icon
+  - Create Playlist dialog — renamed from "Create new playlist…", killed hover zoom on create pill + playlist rows, rebuilt to bind PlaylistNavItem for live cover art/title updates
+  - Sidebar PLAYLISTS header — removed standalone + button
+  - Home plays badge — centered number, "plays" word higher via StackPanel split
+ReleaseNotesUrl: https://github.com/heartached/Noctis/releases/tag/v1.1.6
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

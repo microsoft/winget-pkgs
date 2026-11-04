@@ -1,0 +1,52 @@
+# Created with komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: HydrusNetwork.HydrusNetwork
+PackageVersion: v617
+PackageLocale: en-US
+Publisher: Hydrus Network
+PublisherUrl: https://github.com/hydrusnetwork/hydrus
+PublisherSupportUrl: https://github.com/hydrusnetwork/hydrus/issues
+PrivacyUrl: https://hydrusnetwork.github.io/hydrus/privacy.html
+Author: Hydrus Network
+PackageName: Hydrus Network
+PackageUrl: https://github.com/hydrusnetwork/hydrus
+License: WTFPL
+LicenseUrl: https://github.com/hydrusnetwork/hydrus/blob/HEAD/license.txt
+Copyright: Copyright (C) 2011 Hydrus Developer
+CopyrightUrl: https://github.com/hydrusnetwork/hydrus/blob/master/license.txt
+ShortDescription: A personal booru-style media tagger that can import files and tags from your hard drive and popular websites. Content can be shared with other users via user-run servers.
+Description: |-
+  The hydrus network client is an application written for Anon and other internet-fluent media nerds who have large image/swf/webm collections.
+  It browses with tags instead of folders, a little like a booru on your desktop. Advanced users can share tags and files anonymously through custom servers that any user may run.
+  Everything is free and privacy is the first concern. Executable releases are available for Windows, Linux, and macOS.
+  The program is in python, so you can also run it straight from the source code.
+Moniker: hydrus-network
+Tags:
+- booru
+- cross-platform
+- image-database
+ReleaseNotes: |-
+  misc
+  - the 'file relationship' commands for 'dissolve duplicate group', 'dissolve alternates group', 'delete false positives', 'reset potential search', and 'remove potential pairs' are now added as mappable actions for the 'media' shortcut set. careful with these--they are advanced and powerful. all of them are wrapped in yes/no confirmation dialogs, every time
+  - disabled a 512MB/768MB backing bitmap limit on the pillow_heif library we use to render HEIF and AVIF. this allows for loading very large files (issue #1697)
+  - improved error handling during an out-of-memory problem during image conversion
+  default downloaders
+  - the new e621 parser now grabs the 'director' namespace from e6ai, parsing it as 'creator'. it looks like in many cases this will be 'creator:anonymous director', which I considered filtering out, but this appears to be a conscious 'creator is staying Anon' choice on e6ai's part rather than a 'tagme' style invitation for more work, so it has useful value for our purposes
+  default downloader options
+  - tl;dr upshot for today: if you have custom tag/note import options for e621, hit up network->downloaders->manage default import options and ensure you have options set for both 'eXXX file page api' and particularly the new 'eXXX gallery page api' entries. use the copy/paste buttons to make it easy
+  - the new e621 downloader raised an interesting issue--when a gallery parser produces direct file URLs, there is no way to set custom default tag/note import options for this import. neither file nor gallery urls can have a set default options entry, so it was defaulting to the 'file post' default settings every time--that's ok, but not what we might actually want. I've fixed this today
+  - hydrus is now smarter about how it figures out which tag and note import options to use for a particular network download. if the main URL we are going for has no default tag/note import options entry, we now always consult any referral URL as a secondary. previously, the way watcher downloads set up their options was through a hardcoded hack that swapped in the 'parent' url to check; now we check both in all cases and let the first good hit tell us what to do. this will, fingers crossed, fix a bunch of other unusual tag-adding behaviour on downloaders that have post urls that produce separate direct file import objects
+  - the default importer options panel now allows gallery url classes! extra text also explains how the system works and how you should engage it. I kind of hate it, but it works. I also don't want to make this even more complicated by enabling File URLs (that would filter and shape the metadata passed down to them by higher URLs' parsers) and then try to explain that to a user. if we find what we have now is still insufficient or just unhelpfully complicated, I think I'd like to start a conversation about converting the whole thing to domain-based instead! what a mess!
+  - network report mode now reports how this stuff is navigated, for better debug in future
+  boring cleanup
+  - continued my old multi-column list 'view' conversion, finishing it for all the remaining 34 lists: the 'move media files' locations list; the legacy file-lookup-script parsing system's node-editing panels; the edit account types list; the janitor process petitions list;the repair file storage locations list; the EXIF review list; all the lists in the login UI; the edit parsers list; the edit bandwidth rules list; the manage server services list; the manage client services list; the client api access keys list; the ipfs shares list; the lists in the options dialog; review vacuum data; review deferred table delete data; the debug job scheduler review panel; the manual local file import list; the file maintenance pending jobs list; the cookies review list; the network session review list; the review network jobs list; the review bandwidth usage list; the review http headers list
+  - with this list refactor finally done, I can think about extending lists again. I'd like to next go for hide/showing and re-ordering columns
+  - when I was poking around the AVIF stuff, I discovered regular Pillow seems to be getting native AVIF support very soon with the upcoming 11.2.0. AVIF is similarly recently deprecated in pillow_heif. hydrus now has code to navigate this situation sanely, and as soon as the new Pillow comes out, hydrus will detect this and just that instead for AVIFs
+ReleaseNotesUrl: https://github.com/hydrusnetwork/hydrus/releases/tag/v617
+PurchaseUrl: https://hydrusnetwork.github.io/hydrus/support.html
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://hydrusnetwork.github.io/hydrus/faq.html
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

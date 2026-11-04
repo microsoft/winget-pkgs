@@ -1,0 +1,68 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Mozilla.sccache
+PackageVersion: 0.17.0
+PackageLocale: en-US
+Publisher: Mozilla
+PublisherUrl: https://github.com/mozilla
+PublisherSupportUrl: https://github.com/mozilla/sccache/issues
+PackageName: sccache
+PackageUrl: https://github.com/mozilla/sccache
+License: Apache-2.0
+LicenseUrl: https://github.com/mozilla/sccache/blob/HEAD/LICENSE
+ShortDescription: Sccache is a ccache-like tool. It is used as a compiler wrapper and avoids compilation when possible. Sccache has the capability to utilize caching in remote storage environments, including various cloud storage options, or alternatively, in local storage.
+ReleaseNotes: |-
+  sccache 0.17.0
+
+  Summary
+  sccache 0.17.0 is a significant release: it introduces a new client-side architecture.
+  Until now, every compilation was handed off to the long-lived sccache server, which did the cache
+  lookup and ran the compiler. In client-side mode, the client process does that work itself - the
+  server is only consulted for the shared state it owns (compiler info, dist client, stats). This
+  removes a round-trip and the server-side bottleneck, and gives noticeably better results on
+  developer workstations.
+  Client-side mode is opt-in for now: enable it with the SCCACHE_CLIENT_SIDE environment variable
+  (or the client_side_mode config key). See docs/Architecture.md
+  for the details.
+  Other highlights:
+  - Response files: gcc/clang builds using quoted @response files are now cached and
+    distributed correctly (#2755, #2772), and Rust @argfile arguments are supported (#2782).
+  - Distributed compilation: compile tasks and their subprocesses are now aborted when a client
+    disconnects, instead of running to completion on the build server (#2761, #2774). The
+    ToolchainPackager cfg gate was fixed so the dist code builds on ppc64le and s390x (#2749).
+  - S3 SSE-KMS: server-side encryption with KMS keys is now supported (#2770).
+  - Diagnostics: gcc color diagnostics now behave the same way as rustc's (#2758).
+  - Preprocessor correctness: -ivfsoverlay is treated as a preprocessor-only argument (#2767).
+  Welcome to 4 new contributors!
+
+  Client-side mode
+  - Initial client-side implementation by @glandium in #2735
+  - doc: document client-side and direct modes in Architecture.md by @sylvestre in #2752
+
+  Features
+  - gcc/clang: cache and distribute builds using quoted @response files by @avikivity in #2755
+  - Add support for arg files in Rust by @ranger-ross in #2782
+  - feat: support S3 SSE-KMS by @jpadilla in #2770
+  - Make gcc diagnostics color output work the same as for rustc by @jwidauer in #2758
+  - Abort compile tasks and associated subprocesses when a client disconnects by @trxcllnt in #2761
+
+  Fixes
+  - Fix ToolchainPackager cfg gate to build on ppc64le/s390x by @cryptomilk in #2749
+  - treat -ivfsoverlay as a preprocessor-only argument by @glandium in #2767
+  - gcc: refine response-file tokenizer visibility and whitespace handling by @sylvestre in #2772
+  - Fix description of Unix socket-based Redis connection by @Toorero in #2769
+
+  Cleanup
+  - Simplify the code from pr #2761 by @sylvestre in #2774
+  - tests: pin libc in the dist test crate by @sylvestre in #2784
+  - Release 0.17.0 by @sylvestre in #2783
+
+  New Contributors
+  - @jwidauer made their first contribution in #2758
+  - @jpadilla made their first contribution in #2770
+  - @ranger-ross made their first contribution in #2782
+  - @Toorero made their first contribution in #2769
+ReleaseNotesUrl: https://github.com/mozilla/sccache/releases/tag/v0.17.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

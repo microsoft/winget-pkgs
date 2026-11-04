@@ -1,0 +1,107 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AzaharEmu.Azahar.MSYS2
+PackageVersion: '2126.1'
+PackageLocale: en-US
+Publisher: Azahar Emulator Developers
+PublisherUrl: https://azahar-emu.org/
+PublisherSupportUrl: https://github.com/azahar-emu/azahar/issues
+Author: OpenSauce04 & PabloMK7
+PackageName: Azahar
+PackageUrl: https://azahar-emu.org/
+License: GPL-2.0
+LicenseUrl: https://github.com/azahar-emu/azahar/blob/HEAD/license.txt
+ShortDescription: An open-source 3DS emulator project based on Citra.
+Description: |-
+  Azahar is an open-source 3DS emulator project based on Citra.
+
+  It was created from the merging of PabloMK7's Citra fork and the Lime3DS project, both of which emerged shortly after Citra was taken down.
+
+  The goal of this project is to be the de-facto platform for future development.
+Moniker: azahar-msys2
+Tags:
+- 2ds
+- 3ds
+- citra
+- emulator
+- lime3ds
+- nintendo
+ReleaseNotes: |-
+  This minor release contains many improvements and fixes which didn't make it into the base 2126.0 release.
+  Of particular focus in this release are stability improvements, eliminating potential crashes in many identified scenarios.
+  All users are encouraged to update as soon as is convenient.
+  Azahar 2126.1 Changelog
+
+  All
+  - Save states are now locked to the version of Azahar that they were created with. | @PabloMK7 #2394
+    - Attempting to load a save state from a different Azahar version will now display an error message explaining this restriction, and will also display the version of Azahar that the save state was originally created with, recommending temporarily downgrading to retrieve progress using the in-game save functionality if necessary.
+    - This does not limit save state usage compared to previous behaviour. Before this change, loading a save state from a previous version of Azahar would just crash the emulator. This change now gracefully shows a message instead.
+  - Fixed an issue where it was possible for texture surfaces to be deleted while in use, especially at larger internal resolution settings. | @Wunkolo #2407
+    - This change fixes Vulkan related crashes in many different games and situations. Most notably, when starting missions in Monster Hunter 4 Ultimate.
+  - The highest available internal resolution scaling setting has been increased from 10x (4000x2400) to 18x (7200x4320), allowing 8K displays to take full advantage of upscaling functionality. | @72374 #1906
+  - Implemented a fix for a crash in Teenage Mutant Ninja Turtles: Danger of the Ooze when using the Vulkan renderer due to inaccurate handling of the rasterizer cull mode being set to an unusual value. | @PabloMK7 #2396
+  - Fixed an issue which caused excessive lag in the character select screen for Super Smash Bros 4. | @PabloMK7 #2412
+  - Fixed an issue which caused excessive lag in Mini Mario & Friends: Amiibo Challenge when walking on diagonal surfaces. | @PabloMK7 #2412
+  - Fixed a regression which caused the 3DS friends menu to crash when opened. | @PabloMK7 #2412
+  - Fixed a crash which could sometimes occur during multiplayer sessions due to thread-unsafe logic. | @PabloMK7 #2405
+  - Implemented optimizations to GPU command list processing which save 0.5-1ms of processing time per frame on average. | @PabloMK7 #2318
+  - Implement geometry shader output register banking, which fixes a lot of SEGA 3D Classics games without the need of per-game patches. | @PabloMK7 #2338
+    - The mentioned games still present other rendering issues that need to be fixed in future versions of the emulator.
+  - Fix floating point denormal accuracy, which fixes various rendering issues in several games. | @Wunkolo #2350
+  - Fixed an issue where linear filtering was forcefully enabled with certain drivers, primarily on Android w/ Adreno. | @PabloMK7 #2445
+  - Fixed an issue where the 3DS Internet Browser would freeze due to incorrect core rescheduling behaviour. | @PabloMK7 #2370
+  - Implemented an improvement to emulated audio handling which fixes crackling sounds when an audio source's volume is changed. @Grayforz2468 #2409
+    - Most notable example is the Home Menu no longer having crackling music.
+  - Fixed an issue which caused HLE audio emulation to produce crackling in games that update looping PCM16 buffers while they are being played. | @Angelico2102 #2454
+    - This is known to address audio issues in "Inazuma Eleven 3".
+  - Fixed an issue in the Vulkan renderer related to the handling of disabled cubemap texture units. | @Wunkolo #2406
+    - This brings over a fix which was previously applied to the OpenGL renderer in a previous update.
+  - Fixed an invalid memory access issue related to uds beacons. May fix undiscovered issues in certain multiplayer games. | @PabloMK7 #2403
+  - Implemented checks to ensure that Vulkan layers the system doesn't support are not enabled, avoiding crashes on certain setups. | @Wunkolo #2511
+  - Fixed a crash which could happen during gameplay under certain circumstances while using custom textures. | @demetriospantaleao-del #2481
+
+  Windows (MXE)
+  - Fixed crash which could occur when trying to launch any app with the Vulkan renderer while using the MXE build. | @OpenSauce04 #2392
+  - Fixed an issue where frame pacing could be inconsistent when using the MXE build. | @OpenSauce04 #2392
+
+  Desktop
+  - The minimum motion control sensitivity value has been reduced from 0.01 to 0.001. | @ParadiseOfMagic #2383
+
+  Linux
+  - The Wayland and non-Wayland AppImage have now been once again merged into a single binary which includes Wayland support. This is due to the original crash issue which caused the split now being fixed. | @OpenSauce04 #2458
+  - Implemented a measure to help avoid having a missing application icon with certain desktop environment setups. | @Kyuyrii #1727
+
+  Android
+  - Upgraded target Android SDK from Android 15 (35) to Android 17 (37). | @OpenSauce04 #2416
+  - Fixed various edge-case crashes related to surface handling which could occur at game boot, during screen rotation, during app suspension, or during save state loading. | @PabloMK7 #2425
+  - Fixed an issue where debug builds of Azahar on Android would instantly crash due to a logic error relating to configuration validation. | @PabloMK7 #2398
+  - Fixed an issue where, if a 3DS application closed itself or encountered a fatal error and the user selected "Abort", the emulator would crash instead of returning to the application menu. | @PabloMK7 #2399
+  - Fixed an issue which would cause Azahar to crash if a save state was loaded after being launched from a 3rd-party frontend. | @PabloMK7 #2452
+  - Fixed an issue where Azahar would crash if it had not yet performed initial setup and a 3rd-party launcher attempted to start it. | @PabloMK7 #2452
+  - Invalid ROMs are now displayed with an "Invalid ROM" card in the game list instead of being blank. | @OpenSauce04 #2509
+  - Fixed various issues/ inaccuracies related to string translation tagging. | @OpenSauce04
+  - UI strings which indicate which region a game is for/from (e.g. "Europe, Australia") are now translatable in the frontend for non-English languages. | @OpenSauce04 #2497
+    - As with all translations, this relies on translations being provided for each language by the community, and may not be translated immediately.
+    - If you are proficient in a non-English language we support and would like to contribute, you can join our Transifex page and contribute translations here: https://app.transifex.com/azahar/azahar/dashboard/
+
+  macOS
+  - Enabled Liquid Glass interface elements on macOS 26. | @OpenSauce04 #2429
+  - Fixed an issue when using macOS 27 where connecting to local network devices such as a real 3DS would always fail (e.g. Artic Base, system files setup). | @OpenSauce04 #2428
+
+  libretro
+  - "Stereoscopic 3D Mode" and "Stereoscopic 3D Depth" settings are now available for the libretro core. | @XenuIsWatching #2339
+  - Updated NDK version used to build the Android libretro core to 29.x
+
+  Technical
+  - The MXE build is now compiled using an LLVM+Clang based build environment, replacing the previous GCC-based stack. | @OpenSauce04 #2392
+    - Huge thanks to @kleisauke, who for about a year and a half has been thanklessly maintaining an unofficial LLVM MXE plugin in a GitHub repository with only a single star. Without their work, making this happen would have taken much longer than it did.
+  - Added copyright years to all source code license headers. | @PabloMK7 #2415
+  - Implemented a workaround for a current compiler bug in MSVC. | @PabloMK7 #2410
+  - Added a new CMake option CITRA_ADDRESS_SANITIZE. | @PabloMK7 #2402
+
+  FreeBSD
+  - When building on FreeBSD, system libusb is now always used due to being bundled with the OS. | @sonphantrung #2281
+ReleaseNotesUrl: https://github.com/azahar-emu/azahar/releases/tag/2126.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

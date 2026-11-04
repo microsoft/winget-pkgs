@@ -1,0 +1,73 @@
+# Created with YamlCreate.ps1 v2.4.3 $debug=AUSU.CRLF.7-4-6.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: SUSE.RancherDesktop
+PackageVersion: 1.13.0
+PackageLocale: en-US
+Publisher: SUSE
+PublisherUrl: https://github.com/rancher-sandbox/rancher-desktop
+PublisherSupportUrl: https://github.com/rancher-sandbox/rancher-desktop/issues
+# PrivacyUrl:
+Author: rancher-sandbox
+PackageName: Rancher Desktop
+PackageUrl: https://rancherdesktop.io/
+License: Apache-2.0
+LicenseUrl: https://github.com/rancher-sandbox/rancher-desktop/blob/HEAD/LICENSE
+# Copyright:
+CopyrightUrl: https://github.com/rancher-sandbox/rancher-desktop/blob/main/LICENSE
+ShortDescription: Kubernetes and container management to the desktop.
+Description: |-
+  Rancher Desktop is an open-source project to bring Kubernetes and container management to the desktop.
+  Windows, macOS and Linux versions of Rancher Desktop are available for download, though do note that the Linux version is considered a tech preview.
+Moniker: rancher-desktop
+Tags:
+- k3s
+- nerdctl
+- rancher
+ReleaseNotes: |-
+  This is the 1.13 release of Rancher Desktop, an open source desktop application to bring Kubernetes and container management to macOS, Windows, and Linux.Updated Windows Requirements
+  This release requires a newer WSL kernel release (5.15.0.0 or higher) than previous releases. You can check the currently installed version with this command:
+
+  C:\>wsl uname -r
+  5.15.133.1-microsoft-standard-WSL2
+
+  If necessary, the installer will attempt to upgrade WSL via the Microsoft Store, but if that fails because the user doesn't have permissions, then the installation or upgrade of Rancher Desktop will fail so the user will have to upgrade WSL on their own.Installers
+  - Windows
+  - macOS x86_64
+  - macOS aarch64
+  - Linux install notes
+  Notable Features & Changes
+  WebAssembly/Wasm support (experimental)
+  Rancher Desktop can now be configured to run WebAssembly applications in addition to Linux containers. It includes the Spin runtime, and additional wasm shims can be installed manually.WebAssembly is currently supported as a stand-alone container running on the moby engine, or in Kubernetes pods running with containerd.Turning on Wasm support with the moby engine will change the location where images are stored, so all previously downloaded or built images become inaccessible. You may want to run docker system prune --all to reclaim the space (if you don't plan on disabling Wasm support again).Wasm support will be locked and disabled if the machine has a locked profile installed that uses schema version 10 or earlier. You will need to use schema version 11 to unlock.Cluster Dashboard button
+  Rancher Desktop now displays a "Cluster Dashboard" button in the navigation bar on the left side of the window. This is purely for discovery, as many users have been unaware that this functionality exists; the button performs the same action as the "Cluster Dashboard" menu item in the notification icon context menu.The button is only displayed when Kubernetes is enabled.Important Bug Fixes
+  ~/.kube/config in WSL distros (Windows)
+  Rancher Desktop up to version 1.11 used a symlink from ~/.kube/config inside WSL distributions back to the Windows version of this config file (when WSL integration is enabled).In Rancher Desktop 1.12, this symlink had to be replaced by a separate config file inside WSL because Kubernetes would use a different IP address when using the tunneling network stack (it runs inside a separate network namespace). This meant that the user had to maintain multiple config files and the kube context inside a distro could be different from the Windows side.In this 1.13 release, we are running a tunnel to the WSL network namespace; this means Kubernetes is again reachable via 127.0.0.1 from both Windows and the WSL distros. The separate ~/.kube/config files inside the distros will be converted back into a symlink, but only if it contains no other information than the Rancher Desktop cluster itself. If there is additional configuration data, then the user will have to perform the data merging manually if they want to get back to using a symlink as well.Support for QEMU on M3 machines (macOS)
+  QEMU for Apple Silicon machines has been updated to version 8.2.1 and now supports the M3 CPU architecture as well.Support for kind (macOS and Linux only)
+  This release supports kind on macOS and Linux as long as Kubernetes is either disabled or running Kubernetes 1.20.4 or higher (older Kubernetes versions require cgroups v1, which is incompatible with kind).Experimental virtiofs mount type could delete $HOME directory data (Linux only)
+  This serious bug has been fixed.Note that on Linux this setting requires the Rust implementation of virtiofsd to be installed on the host; otherwise it won't work.Experimental 9p mount type now works correctly for RPM and DEB installation (Linux only)
+  It is still not working in the AppImage install.Known Issues
+  Windows Networking
+  There is a known issue with the new network not including all aliased domains (#5239).Container Dashboard
+  The dashboard does not update automatically when container states have changed or new containers are introduced (#5775).Extensions Install - Allowed Images
+  When using the Allowed Images feature and also specifying extensions in a deployment profile, the extension images must be included in both lists (#4920).Updates to Bundled Utilities
+  - docker 24.0.7 → 25.0.4
+  - docker-buildx 0.12.0 → 0.13.0
+  - docker-compose 2.23.3 → 2.24.7
+  - docker-credential-ecr-login 0.8.0 → 0.8.1
+  - helm 3.13.3 → 3.14.2
+  - moby/buildkit 0.12.3 → 0.12.5
+  - nerdctl 1.7.1 → 1.7.3
+  - trivy 0.48.0 → 0.49.1
+  Bundled Wasm shims
+  The spin shim comes from the containerd-wasm-shims release 0.11.1.- Spin version 2.2.0
+  Connect with the developers
+  - The issue queue
+  - Rancher Users Slack in the #rancher-desktop channel
+  Changelog
+  The full version changelog, from v1.12.3, can be found using GitHub compare and the details of the release can be found in the v1.13.0 milestone.
+ReleaseNotesUrl: https://github.com/rancher-sandbox/rancher-desktop/releases/tag/v1.13.0
+# PurchaseUrl:
+# InstallationNotes:
+# Documentations:
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

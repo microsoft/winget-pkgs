@@ -1,0 +1,106 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ggml.llamacpp
+PackageVersion: b10144
+PackageLocale: en-US
+Publisher: ggml
+PublisherUrl: https://github.com/ggml-org
+PublisherSupportUrl: https://github.com/ggml-org/llama.cpp/issues
+PackageName: llama.cpp
+PackageUrl: https://github.com/ggml-org/llama.cpp
+License: MIT
+LicenseUrl: https://github.com/ggml-org/llama.cpp/blob/HEAD/LICENSE
+ShortDescription: LLM inference in C/C++
+Tags:
+- ggml
+- llama
+ReleaseNotes: |-
+  server + ui: fix stream routes for model names containing a slash (#26137)
+  - server + ui: refactor resumable stream routes to query string conv_id
+  The conversation id can embed a model name containing slashes
+  (ggml-org/...) in router mode, which the decoded path splits before the
+  :conv_id param is captured, so stop and resume never matched the
+  session. Move the id to the conv_id query string on the public routes
+  and on the internal router -> child hop, where slashes survive
+  encoding. Handlers are unchanged since query and path params land in
+  the same map. Add a regression test with a slashed model name.
+  - server: move stream route docs to server-stream.h
+  Address review: ngxson wants the main server.cpp registration code kept
+  clean and simple, with route-level explanations living in the header.
+  Move the query string rationale and the lookup ownership note next to
+  the handler declarations in server-stream.h, and shorten the wiring
+  comment to a pointer.
+  - server: cancel a pending request when its stream is stopped during model load
+  The conversation was registered in the conv map only after the blocking
+  autoload wait, so a stop issued while the model loaded found nothing to
+  cancel and the request went on to generate an orphan once the load
+  ended. Register the conversation before the wait and give the entry a
+  ticket: a stop erases the entry, and the parked request checks its
+  ticket after the wait and aborts with 400 instead of starting. A newer
+  request on the same conversation replaces the entry, so only the
+  stopped request is cancelled. Add a regression test that stops during
+  the load window.
+  - server + ui: resume a stream after a page reload during model load
+  A pending request died with the client socket when the page was
+  reloaded while its model was loading, so no session ever existed and
+  the conversation had nothing to recover. A session request that waited
+  for a load now detaches from the client socket and reaches the child
+  regardless, the session buffer receives the generation, and the resume
+  route answers 503 while the owner is loading so the client retries
+  instead of dropping its state. The WebUI persists the pending stream at
+  send time, quietly polls on 503, and attaches once the session exists.
+  Add a regression test that drops the client during the load window.
+  - ui: show the model load progress again after a page refresh
+  The resume wait was invisible, so a conversation refreshed while its
+  model was loading showed nothing until the first byte. On a 503 from
+  the resume probe, mark the conversation as loading again so the
+  assistant row persisted at send time renders the processing info, and
+  target the model frozen in the persisted stream state for the
+  progress, since the row has no model yet and the dropdown may not be
+  restored.
+  - fix CI
+  - fix CI bis
+  Website:
+  - https://llama.app
+  macOS/iOS:
+  - macOS Apple Silicon (arm64)
+  - macOS Apple Silicon (arm64, KleidiAI enabled) DISABLED
+  - macOS Intel (x64)
+  - iOS XCFramework
+  Linux:
+  - Ubuntu x64 (CPU)
+  - Ubuntu arm64 (CPU)
+  - Ubuntu s390x (CPU)
+  - Ubuntu x64 (Vulkan)
+  - Ubuntu arm64 (Vulkan)
+  - Ubuntu x64 (ROCm 7.2)
+  - Ubuntu x64 (OpenVINO)
+  - Ubuntu x64 (SYCL FP32)
+  - Ubuntu x64 (SYCL FP16)
+  Android:
+  - Android arm64 (CPU)
+  Windows:
+  - Windows x64 (CPU)
+  - Windows arm64 (CPU)
+  - Windows arm64 (OpenCL Adreno)
+  - Windows x64 (CUDA 12) - CUDA 12.4 DLLs
+  - Windows x64 (CUDA 13) - CUDA 13.3 DLLs
+  - Windows x64 (Vulkan)
+  - Windows x64 (OpenVINO)
+  - Windows x64 (SYCL)
+  - Windows x64 (HIP)
+  openEuler:
+  - DISABLED
+  - openEuler x86 (310p)
+  - openEuler x86 (910b, ACL Graph)
+  - openEuler aarch64 (310p)
+  - openEuler aarch64 (910b, ACL Graph)
+  UI:
+  - UI
+ReleaseNotesUrl: https://github.com/ggml-org/llama.cpp/releases/tag/b10144
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/ggml-org/llama.cpp/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

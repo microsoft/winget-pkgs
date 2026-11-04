@@ -1,0 +1,61 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: commercialhaskell.stack
+PackageVersion: 3.11.1
+PackageLocale: en-US
+Publisher: commercialhaskell
+PublisherUrl: https://haskellstack.org/
+PublisherSupportUrl: https://docs.haskellstack.org/en/stable/README/
+Author: Stack contributors
+PackageName: Haskell Stack
+PackageUrl: https://haskellstack.org/
+License: BSD-3-Clause
+LicenseUrl: https://github.com/commercialhaskell/stack/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2015-2022, Stack contributors
+CopyrightUrl: https://raw.githubusercontent.com/commercialhaskell/stack/master/LICENSE
+ShortDescription: Stack is a cross-platform program for developing Haskell projects. It is aimed at Haskellers both new and experienced.
+Moniker: stack
+Tags:
+- cabal-build
+- haskell
+- stack
+- stackage
+ReleaseNotes: |-
+  See https://haskellstack.org/ for installation and upgrade instructions.
+  Changes since v3.9.3:
+  Major changes:
+  - On 64-bit Windows, the default msys-environment configuration option is now CLANG64, rather than MINGW64 (which remains an option). The MSYS2 project deprecated the latter environment on 15 March 2026. The GHC project has used the former toolchain from GHC 9.4.1. No default is provided for 32-bit Windows, rather than MINGW32 (which remains an option). The MSYS2 project ceased to actively support it on 17 May 2020. 32-bit Windows is not supported by the GHC project from GHC 8.12.
+  Behavior changes:
+  - Stack's default Nix integration now includes the cacert Nix package, in order to support Stack's use of crypton-x509-system >= 1.6.8.
+  - Following a change to the Stackage project's server API, the default value of the urls key includes recent-snapshots: https://stackage.org/api/v1/snapshots.
+  - The --[no-]keep-ghc-rts flag of Stack's config env command is now enabled by default, consistent with Stack's exec command.
+  - On Windows, in the Stack environment, the MSYS2 usr/local/bin directory (if it exists) is now searched before the MSYS2 usr/bin directory, rather than after.
+  Other enhancements:
+  - Bump to Hpack 0.39.6.
+  - Experimental: Add flag --[no-]semaphore (default: disabled) to Stack's build command, to allow GHC to use a system semaphore to perform compilation in parallel when possible. Supported, by default, by GHC 9.10.1 or later. The option is considered experiemental because, on Linux only, musl and non-musl semaphores are incompatible.
+  - Add option --reach <packages> to Stack's dot and ls dependencies commands, to prune packages that cannot reach any of the specified packages in the dependency graph.
+  - Add option --test-suite-timeout-grace=SECONDS to Stack's build command to request termination of a timed-out test suite process and, after the specified grace period, force termination. Used together with the existing --test-suite-timeout=SECONDS option.
+  - In YAML configuration files, the recent-snapshots key is introduced (under the urls key), to specify the URL used by Stack's ls snapshots remote command.
+  - In YAML configuration files (stack.yaml and config.yaml), an !include <file path> directive is now supported. This allows common configuration to be shared across multiple files. For example, a project that maintains multiple project-level configuration files for testing against different snapshots can use !include to avoid duplicating shared settings.
+  - Stack's config set command raises an error if the target configuration file excludes the key being set and includes an !include directive.
+  - Stack's config set snapshot command now works with other snapshot values in addition to snapshot synonymns.
+  - Add Stack's config compiler-tools command to create (when applicable) the compiler tools directory for the specified compiler version (implies Stack's config build-files command).
+  Bug fixes:
+  - Stack's dot and ls dependencies commands no longer prune a package with dependencies only because all its direct dependencies are to be pruned.
+  - After March 2026, Hackage requires Stack's user agent to be set when applying digest authentication to a request. Stack's upload command now does that, re-establishing authentication by Hackage username and password.
+  - Stack 3.9.3 and earlier fail to construct a build plan if project package A depends on project package B and package B's executables (only) depend on package A and the name of A is before that of B, alphabetically. That bug is fixed.
+  - Stack's config set commands will recreate the global-project directory contents, if Stack needs to consult its project-level configuration file and there is no file.
+  - The output of Stack's path --bin-path command is now consistent with the Stack environment in Stack's exec command and includes the bin directory of Stack's local install root directory.
+  - Stack now builds packages that depend directly on packages with the same name as a sublibrary or foreign library of the package.
+  - On Windows, Stack's build command now accepts a build directory that is a long path.
+  Thanks to all our contributors for this release:
+  - Bryan Richter
+  - Ching Pei Yang
+  - Dan Burton
+  - David Vollbracht
+  - Mike Pilgrem
+  - Olivier Benz
+ReleaseNotesUrl: https://github.com/commercialhaskell/stack/releases/tag/v3.11.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

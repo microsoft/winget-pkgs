@@ -1,0 +1,37 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: mostlygeek.llama-swap
+PackageVersion: '265'
+PackageLocale: en-US
+Publisher: mostlygeek
+PublisherUrl: https://mostlygeek.com/
+PublisherSupportUrl: https://github.com/mostlygeek/llama-swap/issues
+PackageName: llama-swap
+PackageUrl: https://github.com/mostlygeek/llama-swap
+License: MIT
+LicenseUrl: https://github.com/mostlygeek/llama-swap/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2024 Benson Wong
+ShortDescription: Model swapping for llama.cpp
+Description: llama-swap is a light weight, transparent proxy server that provides automatic model swapping to llama.cpp's server.
+Moniker: llama-swap
+Tags:
+- golang
+- llama
+- llamacpp
+- localllama
+- localllm
+- openai
+- openai-api
+- vllm
+ReleaseNotes: |-
+  A couple of small improvements:
+  - support serving llama-swap behind a path on a reverse proxy. Helpful if you want to front llama-swap with nginx and serve it under a specific path.
+  - add support for manually defining voices for text to speech models
+  - a small kubeswap update
+  - PR #1228 ui,server: serve the UI under a reverse proxy base path: makes the browser side base-path agnostic (relative asset, redirect, favicon and PWA URLs plus an apiUrl() helper that re-attaches a stripped prefix) so llama-swap works behind a plain prefix-stripping proxy at https://host/subpath/llama-swap/ without routing /ui, /api and /v1 at the proxy root; includes an nginx and Caddy guide (#1227) by @mostlygeek
+  - PR #1225 Add voices override for speech models: adds a models.capabilities.voices capability listing the voice ids an upstream server supports, because the non-standard GET /v1/audio/voices endpoint returns unreliable responses; falls back to probing that endpoint on a best-effort basis when the list is not set (#1207) by @mostlygeek
+  - PR #1224 cmd/kubeswap: attach DRA ResourceClaims and mount NFS volumes: adds a repeatable --resource-claim name=claim flag so backends can get GPUs via the NVIDIA DRA driver (kubeswap only references the claim, pods sharing a claim share its device) and an nfs:server/export:path[:ro] kind for --volume so models can be mounted from NFS without a static PV/PVC per export (#1222) by @gabrielcosi
+ReleaseNotesUrl: https://github.com/mostlygeek/llama-swap/releases/tag/v265
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

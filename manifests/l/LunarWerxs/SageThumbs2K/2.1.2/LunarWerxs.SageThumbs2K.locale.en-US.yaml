@@ -1,0 +1,48 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: LunarWerxs.SageThumbs2K
+PackageVersion: 2.1.2
+PackageLocale: en-US
+Publisher: LunarWerx
+PublisherUrl: https://github.com/LunarWerxs
+PublisherSupportUrl: https://github.com/LunarWerxs/SageThumbs-2k/issues
+PackageName: SageThumbs 2K
+PackageUrl: https://github.com/LunarWerxs/SageThumbs-2k
+License: PolyForm Noncommercial License 1.0.0
+LicenseUrl: https://github.com/LunarWerxs/SageThumbs-2k/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2026 LunarWerx
+ShortDescription: Explorer thumbnails for 331 file types Windows can't read, plus a right-click image toolkit.
+Description: SageThumbs 2K is a modern, crash-isolated Windows 11 shell extension written in Rust that rebuilds the classic SageThumbs. It gives File Explorer thumbnails for 331 file types Windows can't preview on its own — camera RAW, HEIC/AVIF, Photoshop, DjVu, ebooks and comics, video frames, 3D-print files and a long tail of obscure formats — plus a right-click image toolkit (convert, resize, rotate, OCR, color picker, metadata strip, combine-to-PDF/CBZ) and a console/AI CLI. Free for personal use.
+Moniker: sagethumbs2k
+Tags:
+- converter
+- explorer
+- heic
+- image
+- raw
+- shell-extension
+- thumbnails
+ReleaseNotes: |-
+  ## What's changed
+  
+  ### Fixed
+  
+  - **"Build thumbnails here" only ever pre-built the smallest icon size.** It prepares three
+    sizes, one for each of Explorer's Medium, Large and Extra-large views. It turns out Windows
+    renders only the **first** size it is asked for and fills the other two in from that one, and
+    we asked for the smallest first. So the two larger views were being filled from a 96-pixel
+    picture, which Windows then threw away and rebuilt from scratch the first time you actually
+    opened the folder in one of them. The run reported success, and for those two views it had
+    genuinely done nothing.
+  
+    It now builds the largest size first, so the smaller ones come from it for free. In a 25-file
+    test, opening the folder at Extra-large afterwards dropped from 2.8 seconds to 0.1. Pre-building
+    still renders each file exactly once; it takes a little longer per file now, because that one
+    render is finally happening at the size that was actually needed.
+  
+    This also corrects something the 2.1.1 notes said: the sizes were never each re-rendering the
+    file. There was only ever one render per file. It was just happening at the wrong size.
+ReleaseNotesUrl: https://github.com/LunarWerxs/SageThumbs-2k/releases/tag/v2.1.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,88 @@
+# Created with komac v2.11.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: HydrusNetwork.HydrusNetwork
+PackageVersion: v610
+PackageLocale: en-US
+Publisher: Hydrus Network
+PublisherUrl: https://github.com/hydrusnetwork/hydrus
+PublisherSupportUrl: https://github.com/hydrusnetwork/hydrus/issues
+PrivacyUrl: https://hydrusnetwork.github.io/hydrus/privacy.html
+Author: Hydrus Network
+PackageName: Hydrus Network
+PackageUrl: https://github.com/hydrusnetwork/hydrus
+License: WTFPL
+LicenseUrl: https://github.com/hydrusnetwork/hydrus/blob/HEAD/license.txt
+Copyright: Copyright (C) 2011 Hydrus Developer
+CopyrightUrl: https://github.com/hydrusnetwork/hydrus/blob/master/license.txt
+ShortDescription: A personal booru-style media tagger that can import files and tags from your hard drive and popular websites. Content can be shared with other users via user-run servers.
+Description: |-
+  The hydrus network client is an application written for Anon and other internet-fluent media nerds who have large image/swf/webm collections.
+  It browses with tags instead of folders, a little like a booru on your desktop. Advanced users can share tags and files anonymously through custom servers that any user may run.
+  Everything is free and privacy is the first concern. Executable releases are available for Windows, Linux, and macOS.
+  The program is in python, so you can also run it straight from the source code.
+Moniker: hydrus-network
+Tags:
+- booru
+- cross-platform
+- image-database
+ReleaseNotes: |-
+  misc
+  - files with an average colour with less than 3% saturation in the HSL colour space (i.e. completely greyscale, or otherwise averaging to grey) are now propagated to the end of the Hue sort, whether red or purple first
+  - hitting ctrl+c on a taglist with no selected items now copies all items
+  - updated the system predicate parser so it can read 'number of pixels'. previously, it could only handle 'num pixels'. this means you can copy/paste a 'system:number of pixels' pred back into the autocomplete and it should all work
+  - fixed a problem with system:num file relationships - (test) "not related/false positive", which was only every returning the results of one not-related alternates group, rather than all that matched the test
+  - made some 'click below to copy to clipboard' menu labels bold
+  - the client now says 'tag mappings' explicitly, rather than 'mappings', in a bunch of UI labels like shortcut action descriptions
+  notes
+  - the 'start editing notes with the text cursor at the end' setting under options->notes now applies to all notes in an 'edit notes' panel with multiple notes
+  - clicking a new note tab in 'edit notes' now immediately focuses the underlying note so you can start typing
+  - if you have made changes, the 'edit notes' panel now confirms if you want to cancel. let me know if this produces false positives--there's some 'note cleaning' stuff I don't account for
+  file viewing statistics
+  - the new 'client api' views are now integrated into the UI for search, sort, and view
+  - the way file viewing stats are presented in the media right-click menu is simplified. the stuff under options->file viewing statistics is down from five different options to two (show the views summed with a stack of the components in a submenu, or just show the stack of separate count types up front), and there's a new checkbox list with media, preview, and client api views so you can select what you want to see
+  - sorting files by media views now obeys the above 'what you want to see' setting, summing the respective values. previously it just did media views
+  - system:file viewing statistics now allows for selection of 'client api views'
+  - system:file viewing statistics now renders itself in the form system:views/viewtime in (domains) (operator) (value), where 'domains' is a comma-separated combination of media, preview and client api. previously they were system:media/preview/all views/viewtime (operator) (value)
+  - if domains is left blank, I substitute the above 'what you want to see' option, so you can now just type system:views > 5 and you'll get something reasonable
+  - the old forms still parse but are unchanged and won't support client api
+  - added some new unit tests for this
+  - as a side thing, I did the same pixel-perfect-height update that I did for multi-column lists to most of my checkbox lists across the program, including for canvas view selection around here. they just fit better now
+  - I overhauled some file viewing stats db search code. the predicate still holds some stupid variables that I'll want to rework one day, but the meat of the db search code is now ok
+  advanced parsing logic and overhaul
+  - subsidiary page parsers have a new 'sort posts by source time' checkbox, default off, which sorts what this subsidiary parser chops up according to any parsed source time, newest first. use this if you are, obviously, parsing things that each have a source time you'd like to sort by but which come in some other order, e.g. you have two individually sorted pages of results in one document and you'd like to interleave them
+  - wrote up proper objects to hold 'parsable content description', 'parsed content', and 'parsed post'. previously this was a big mess of tuples upon tuples and 'all parse results' vs 'whole page parse results' semantic sludge
+  - refactored ClientParsing to a new parsing module, added ClientParsingResults to handle the new objects, and split off old file lookup stuff to ClientParsingLegacy
+  - all parsers now use the new objects to report what content they can parse
+  - all parsers now use the new objects all along the parsing pipeline! the whole thing is done and much nicer
+  - deleted a ton of old bad code that was navigating this before
+  - deleted some old bytes/str error-handling back from the python 2 days
+  - when a gallery url is worked, it now reports fully, in the gallery log note column, how many sub-gallery urls were parsed, and how many were previously hit this run, and how many next gallery page urls were parsed, and how many were previously hit this run, and whether a url class extrapolated next gallery page url was generated, and, the same deal, if it was previously hit this run. previously, this guy mostly just reported the latest interesting thing to happen--now it is comprehensive
+  - fixed an odd bug where the gallery worker could add a sub-gallery urls that pointed to the API redirected URL that created it
+  - fixed an odd bug where the gallery worker could skip the 'seen this url before in this parsing run?' check for an auto-generated 'next page' gallery url fallback step
+  - cleaned up the gallery url 'work' code significantly
+  - fixed a note parsing issue in the downloader where note texts were not always being cleaned on parse
+  - overhauled the subsidiary parser test panel to use the actual code as-in the subsidiary parser, rather than a facsimile
+  - got the page parser and subsidiary page parser test panels to recognise empty input rather than outputting errors on failed conversions of the empty string lol
+  - all the 'raw data'/'post conversion'/'post separation' tabs in the parser test UI now show up to 64KB of data. previously, the latter two were still capped to 1KBs
+  - fixed some bad layout in the edit subsidiary page parser panel
+  - cleaned up some lazy variable names in the subsidiary page parser code
+  - cleaned up how subsidiary page parsers initialise their edit panel
+  - fixed a layout issue in the 'edit login step' panel where there were now two nested 'content parsers' static boxes
+  some subscription logic and UI
+  - cleaned some of the subscription gallery search logic, especially the 'have we caught up to where we were despite the (large) gallery page not being finished yet?' test, which has a couple of false positive edge cases solved
+  - cleaned some duplicate code out of here
+  - subscription queries now have an editable 'compaction number', which governs how small they should trim themselves to. this was previously fixed at 250 items, but is now changeable for advanced debugging purposes under the edit subscription query panel
+  - if you have a very large periodic file limit or the site produces a huge gallery page, the compaction number will now increase dynamically to ensure the subscription maintains a healthy cache of urls to consult for the size of our job
+  - the edit subscription query panel gets a layout overhaul. the stack of widgets is now grouped into boxes
+  - the options->downloading page now specifies that the two checker options buttons are for the subscription/watcher defaults
+  - as a side thing, watcher check logs now record up to 500 entries before removing old items. used to be 100
+  weird thing
+  - the tag autocomplete searches across the program that manage a read/search context (as opposed to a write/edit one), will now pass a keyboard copy event to their top list if there is no selected text in the text input and there are no results in the search list below. actually getting into this situation is tricky, but this is really prep for a future overhaul of the write context, where no results is the default situation on an empty input but which cannot actually talk to its top list yet
+ReleaseNotesUrl: https://github.com/hydrusnetwork/hydrus/releases/tag/v610
+PurchaseUrl: https://hydrusnetwork.github.io/hydrus/support.html
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://hydrusnetwork.github.io/hydrus/faq.html
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

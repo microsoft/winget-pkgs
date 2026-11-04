@@ -1,0 +1,70 @@
+# Created with WinGet Updater using komac v2.12.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Google.Perfetto
+PackageVersion: '51.1'
+PackageLocale: en-US
+Publisher: Google
+PublisherUrl: https://github.com/google
+PublisherSupportUrl: https://github.com/google/perfetto/issues
+PackageName: Perfetto
+PackageUrl: https://github.com/google/perfetto
+License: Apache-2.0
+LicenseUrl: https://github.com/google/perfetto/blob/HEAD/LICENSE
+ShortDescription: Performance instrumentation and tracing for Android, Linux and Chrome.
+ReleaseNotes: |-
+  v51.1 - 2025-06-26:
+    Build system:
+      * Fixed issue with Bazel copts/cxxopts. Embedders are required to add a
+        default_cxxopts to their perfetto.bzl file in their repository.
+  v51.0 - 2025-06-24:
+    Tracing service and probes:
+      * Added a new data source to poll for CPU time per UID and cluster.
+    SQL Standard library:
+      * Added a new standard library table for filtering IRQ slices.
+      * Added a new standard library module for Android's Low Memory Killer.
+    Trace Processor:
+      * Reworked core database engine to be more performant and better architected
+        for future imporvements.
+      * Added new "trace summarization" functionality to trace processor as a more
+        flexible replacement to old metrics system.
+      * Added support for executing all available metrics when summarizing the
+        trace with `--summary-metrics-v2 all`.
+      * Added `trace_summary()` function to the Python API to execute the
+        trace summaries and, specifically, v2 metrics.
+      * Added support to adding SQL packages to Python API. This is the
+        counterpart to the `--add-sql-package` shell option and allow loading SQL
+        packages and modules from a filesystem path. These are then available to
+        load using `INCLUDE PERFETTO MODULE` PerfettoSQL statements.
+      * Improved handling of traces containing overlapping "complete" events
+        (i.e. events with a duration, AKA 'X' events in the JSON format).
+        While overlapping events are prohibited by the JSON spec, they do
+        appear in many synthetically generated JSON traces. Previously, such
+        events would break the data model of trace processor and cause signifcant
+        glitches in the UI. These events are now dropped, fixing all the visual
+        glitches and an error stat is emitted to make the user aware.
+      * Improved performance of parsing JSON by 7x. JSON traces should now load
+        much faster in the Perfetto UI and the trace processor.
+    UI:
+      * Improved JSON loading performance. See `Trace Processor` section above.
+      * Improved duration based slice aggregators - slices are now trimmed to the
+        width of the area selection.
+      * Added the ability for users to set a custom timezone in the UI.
+      * Added the ability to add descriptive text to tracks.
+      * Added touchscreen support. The UI can now be used from tablets and other
+        touch devices.
+      * Removed the Viz page; it was an experiment which did not go anywhere.
+    SDK:
+      * Changed the implementation of TrackEvent to only have a single data source
+        for multiple namespace; categories will be exported correctly only on
+        recent perfetto tracing services that support UpdateDataSource.
+      * Changed the priority of TrackEvent enabled/disabled category and tags.
+        The new logic ranks (in this order)
+        specific > pattern > single char "*" wildcard,
+        categories (enabled > disabled) > tags (disabled > enabled).
+    Docs:
+      * Signifcantly improved the project's documentation with a team-wide
+        collaboration to make it more user-friendly and up to date.
+ReleaseNotesUrl: https://github.com/google/perfetto/releases/tag/v51.1
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

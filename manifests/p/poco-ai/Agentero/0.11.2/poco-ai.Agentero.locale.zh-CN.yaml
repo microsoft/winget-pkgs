@@ -1,0 +1,74 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.11.2
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  本次发布聚焦阅读与写作体验：划词即可在 PDF、Markdown 和 AI 对话中插入批注；Library 标签页默认常驻；PDF 支持导出带高亮与批注的文件；编辑器新增图片组和分栏布局；Agent 生态继续扩展，支持 MiniMax Code、Claude/Codex 内置适配器与 Dsh 新 profile；同时修复了公式渲染、翻译、LaTeX 编译、侧边栏滚动和 Agent 安装稳定性等一众问题。
+  新功能
+  - 划词批注：在 PDF、Markdown 笔记和 AI 对话中选中文字后点击「加入对话」，即可就地添加、编辑、删除批注，并支持来源定位与上下文汇总。（#580 by @Miracle-0）
+  - Library 常驻标签页：Library 标签页默认 pinned，不会被误关闭；标签上显示 pin 图标，右键可 Pin/Unpin；pinned 状态随布局持久化。（a2ae0f9 by @Phil-Fan）
+  - PDF 批注导出：可将当前 PDF 连同高亮与注释一并导出为新的 PDF 文件；导出入口位于 PDF 标签右键菜单与命令面板。（d39c30d, 4e2841c, 0f16a30 by @Phil-Fan）
+  - 图片组与分栏布局：Markdown 编辑器支持将相邻图片折叠为飞书式图片组，并可通过拖拽重排；新增 /columns 分栏命令与拖拽分栏布局。（8970549, 4913b7a, 0992e7e, 4f14c14 by @Phil-Fan）
+  - MiniMax Code ACP: Agent 目录新增 MiniMax Code ACP 支持。（0dbd0f5 by @Phil-Fan）
+  - Claude/Codex 内置适配器：当系统 PATH 中未安装 Claude/Codex ACP 时，应用会 fallback 到构建时内置的 JS-only 适配器，减少首次安装失败。（1b12fa1 by @Phil-Fan）
+  - 自定义翻译提示词：设置 → 翻译新增「翻译提示词」输入框，非空时整体替换默认学术译者指令，支持 {{targetLang}} / {{sourceLang}} 变量。（5509c8d by @Phil-Fan）
+  - LaTeX 多文件项目编译：编译按钮、⌘S 保存和分屏编译现在会自动解析项目根文件（magic comment / 反向扫描），避免直接编译子文件失败。（99b8874, 2ef710b by @Phil-Fan）
+  改进
+  - MCP 隧道进程治理：修复 Windows 上 tunnel-client.exe 在停止、重建或退出时泄漏的问题；启动时自动清扫历史孤儿进程。（#588 by @Zhou1317fe5）
+  - KaTeX 渲染加速：缓存已渲染的 KaTeX HTML，显著降低包含大量公式的 Markdown 笔记的 CPU 占用。（baf42f2 by @Phil-Fan）
+  - 侧边栏滚动稳定性：修复左侧栏收起/展开或选中项揭示时文件树自动跳回顶部的问题。（7ea0069 by @Phil-Fan）
+  - Agent CLI 状态探测：将 CLI 安装状态探测移到非主线程，避免 About 面板打开时 UI 冻结约 1.5 秒。（5f0817f by @chenjiahe）
+  - Zotero 导入精度：导入单个 Zotero 文件夹时不再重建整个收藏夹树，只创建选中子树。（54e5fad by @chenjiahe）
+  - 内部重构：统一 selection、translate、ask、dnd、wiki、fs 等模块的重复逻辑，删除 dead code 与未使用依赖，提升可维护性。（多处 by @QiyuanChen）
+  修复
+  - Agent 消息公式截断：修复流式消息落定后 remend 误把 x_{<n} 中的 <n} 当作未闭合 HTML 标签截断的问题。（d382e60 by @Phil-Fan）
+  - PDF 双栏翻译：修复基于 bytes 的 PDF 在双栏翻译时因 tab id 后缀变化导致翻译窗格无法打开或自动启动失败的问题。（5c35d03 by @Phil-Fan）
+  - Vault busy 状态卡死：修复恢复 Vault 路径在 tree 加载中途被验证清除后，busy flag 无法复位的问题。（6f256c2 by @chenjiahe）
+  - Agent npm cache EPERM: 修复 Windows/macOS 上 npm cache 被 root/sudo 写入后导致托管安装失败的问题；不可写时自动隔离到 Agentero 自有缓存目录。（1c03213, 7c76448 by @chenjiahe）
+  - Windows 适配器打包：修复 bundled adapter staging 在 Windows Release 构建中因 execFileSync 无法直接执行 .cmd 批处理而失败的问题；改为在 Windows 上通过 shell 调用 npm。（a5f0034 by @Phil-Fan）
+  - Dsh ACP profile: 迁移到新版 umbrella dsh --profile acp，解决旧独立包停滞在 prerelease 导致的版本不匹配。（f09ea73 by @Phil-Fan）
+  - 坚果云图标：设置页 WebDAV 同步提供商现在使用正确的坚果云图标。（212e297 by @Phil-Fan）
+  - Paper tab 恢复：修复 Vault tree 加载完成前恢复的 paper 文件夹占位 tab 被错误识别为普通目录并翻转成 Library 的问题。（93f0494 by @Phil-Fan）
+  - PAPER.md 检测：没有 NOTES.md 的论文文件夹现在可通过 PAPER.md 被正确识别为论文目录。（6e215f8 by @Phil-Fan）
+  已解决问题
+  - 划词批注：支持在 PDF、Markdown 和 AI 对话中添加内联批注。（#579）
+  - PDF 导出批注：支持导出带有高亮和注释的 PDF。（#562）
+  - Markdown 公式渲染性能：缓存 KaTeX 渲染结果以加速重排。（#583）
+  - KaTeX 公式解析错误：修复含 < 的数学公式在消息中被截断。（#584）
+  - 侧边栏文件树跳动：切换左侧栏或揭示选中项时不再跳回顶部。（#576）
+  - LaTeX 多文件编译：自动解析根文件并编译项目根。（#575）
+  - 双栏翻译失效：修复 bytes-backed PDF 的翻译窗格状态键错误。（#574）
+  - DSH ACP 错误：迁移到新版 dsh --profile acp。（#569）
+  - 内置 Claude/Codex ACP: 提供内置适配器 fallback。（#590）
+  - 自定义翻译提示词：允许用户覆盖默认翻译提示词。（#582）
+  - ACP 安装失败：修复 npm cache 权限问题导致的安装失败。（#542）
+  - Windows 卡在进入知识库：修复 Vault busy flag 在恢复路径失效时卡住。（#560）
+  - 笔记图片功能：支持图片组与分栏布局。（#566）
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.11.2
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

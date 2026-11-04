@@ -1,0 +1,43 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: XinTaoFei.Codeg
+PackageVersion: 0.32.1
+PackageLocale: zh-CN
+ShortDescription: 在一个地方聚合并浏览 AI 编程代理会话（如 Claude Code、Codex、Gemini CLI 等）。支持桌面应用、自建服务器或 Docker 部署。
+Description: Codeg（Code Generation，代码生成）是一款企业级多代理编码工作区。它将本地 AI 编程代理（包括 Claude Code、Codex CLI、OpenCode、Gemini CLI、OpenClaw、Cline 等）统一集成于桌面应用、独立服务器或 Docker 容器中，支持通过任意浏览器进行远程开发；具备对话聚合、并行 Git 工作树开发、MCP/技能管理、聊天频道交互（Telegram、飞书、iLink 等），以及集成的 Git/文件/终端工作流。
+Tags:
+- claude-code
+- codex
+- gemini-cli
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  这一版补完了 0.32.0 向官方 ACP 2.2 运行时的迁移：智能体崩溃时会说明原因，不再留下一个看似在线、实则每条消息都失败的会话；智能体收回的权限请求会自行关闭；也不会再有智能体苦等一条永远不会到来的回复。
+  Claude Code 与 Codex 同步小版本升级，Codex 用上了 GPT-6 Sol 和 GPT-6 Luna；服务器无法就地升级时，也会在你动手之前说明原因。
+  新增
+  - Codex 可以使用 GPT-6 Sol 和 GPT-6 Luna 了——两者随 Codex CLI 0.156.1 一同到来，直接出现在输入框的模型选择器里。
+  改进
+  - 内置智能体版本更新： Claude Code ACP 0.81.1、Codex ACP 1.13.1（Codex CLI 0.156.1）、Kimi Code 2.1.0、Grok 1.0.41、Qoder 1.1.62、Cline 3.0.64。
+  - 智能体撤回的权限或提问卡片会自行关闭——比如你停掉的 Claude Code 子智能体、被中断的工具所发起的审批——不再一直挂着无法作答，也不会挡住排在后面的卡片。
+  修复
+  - 智能体崩溃时会说明原因——无论启动时还是回复途中，报错都会给出它的退出状态和最后几行错误输出，而不是一句光秃秃的「Incoming transport closed」；回复途中崩溃还会关闭连接，不再留下一个看似在线、实则每条消息都失败的会话。
+  - 智能体发来 codeg 不支持的请求时，不会再一直等不到回复——codeg 现在会明确答复「不支持」，让它继续完成这一回合。
+  - 回合中途插话后，Claude Code 的这一回合会随回复一起结束，不再偶尔一直转圈，直到你手动停止或再发一条消息。
+  - Claude Code 的 Write / Edit 卡片不再显示为空白——模型换了参数写法（比如用 path 代替 file_path）时，卡片照样显示文件路径和内容，实时和历史记录里都是如此。
+  - 批准 Claude Code 的计划后，模式选择器会切到会话实际进入的模式，不再停留在 Plan；审批卡片也可以在 Auto 之外同时提供 Bypass permissions 选项。
+  - Claude Code 的回复里只是提到「Please run /login」时，不再被误判为登录失效而让这一回合失败。
+  - Claude Code 或 Codex 会话横幅上的「去登录」按钮改为在独立窗口中打开该智能体的设置页，不再把你正在使用的工作区整个换成设置页面。
+  - Codex 在回复结束或被停止后多发的一个换行，不会再留下「加载后台活动」按钮。（#802，@Adam-Dalloul）
+  - 服务器无法写入自身安装目录时，升级不再只报一句「请关闭应用后重试」——「设置 → 系统 → 软件更新」和状态栏会在你动手之前说明是哪个目录无法写入（或磁盘已满之类的系统原因），并附上发布页链接供手动更新。（#816 由 @huzhiyun 反馈，#819，@dawNotPoi）
+  注意
+  - 如果你自定义过 Codex 的模型列表，需要在该列表里点「官方模型」旁的刷新按钮并重新保存，GPT-6 Sol 和 Luna 才会出现——自定义后的列表会整体替换 Codex 自带的模型表，新增的官方模型不会自动加入。
+  - Kimi Code 2.1.0 不再允许通过指向其工作区之外的符号链接读取、搜索或编辑文件——例如多文件夹工作区中的关联文件夹，或 codeg 安装的专家、办公技能附带的文件；报错里会给出真实路径，改用该路径即可正常访问。
+  感谢 @Adam-Dalloul、@dawNotPoi 为本次发布做出的贡献，也感谢 @huzhiyun 的反馈。
+ManifestType: locale
+ManifestVersion: 1.12.0

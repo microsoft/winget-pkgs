@@ -1,0 +1,105 @@
+# Created with komac v2.12.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 0.84.0
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  🛠️ Breaking Changes
+  Removal of legacy-all commands
+  The following commands have been removed from the Terragrunt CLI:
+  - spin-up
+  - tear-down
+  - plan-all
+  - apply-all
+  - destroy-all
+  - output-all
+  - validate-all
+  If you have been using any of these commands, see the migration guide under Removal of longstanding deprecated commands here.
+  This is the first step in the removal of deprecated features in Terragrunt on the road to Terragrunt 1.0, with more to follow. You are also advised to read the CLI Redesign migration documentation for future breaking changes.
+  See #3535 for more details.
+  ✨ New Features
+  Catalog/Scaffold now support --no-dependency-prompt
+  The catalog/scaffold commands now support a new --no-dependency-prompt flag that disables the Boilerplate dependency prompt (equivalent of --disable-dependency-prompt in Boilerplate).
+  This allows Boilerplate templates with dependencies to be used non-interactively, even when called by Catalog and Scaffold.
+  exclude block now supports no_run
+  The exclude block now supports the no_run attribute, which lets users prevent direct runs of a unit when the run matches the configuration of an exclude block.
+  e.g. When users define an exclude block like the following:
+  # foo/terragrunt.hcl
+  exclude {
+      if      = true
+      actions = ["plan"]
+  }
+  Terragrunt will only exclude the unit foo from the run queue if the user supplies a command like run --all plan. If a user uses the run plan command directly in the foo directory, it’s assumed that they are doing so intentionally, and don’t want the run to exit early.
+  Users can now specify no_run to explicitly tell Terragrunt that it should never be run, even if a user attempts to perform the run in the unit directory directly.
+  # foo/terragrunt.hcl
+  exclude {
+      if      = true
+      no_run  = true
+      actions = ["plan"]
+  }
+  💪🏽 Enhancements
+  Stacks are now fully regenerated when the --source-update flag is set
+  The .terragrunt-stack directory is now fully regenerated when the --source-update flag is set, similar to how the .terragrunt-cache directory is regenerated when the flag is set.
+  This addresses some edge-cases where changes to local sources for units and stacks didn’t result in updates to generated stack configurations.
+  🐛 Bug Fixes
+  Stack Outputs Are Now Sorted
+  To ensure consistency in the order in which outputs are displayed when using the stack output command, outputs are now sorted before they are displayed.
+  Lockfiles With Strong Constraints Normalized
+  When manually generating lockfiles from the Provider Cache Server for modules with strong constraints like the following:
+  terraform {
+    required_providers {
+      aws = {
+        source  = "hashicorp/aws"
+        version = "= 5.100.0"
+      }
+    }
+  }
+  Generated lockfiles now properly strip the = when generating the lockfile, as = constraints aren’t supported in .terraform.lock.hcl files.
+  What's Changed
+  - feat: add --no-dependency-prompt option for scaffold by @markoeremija in #4420
+  - feat: Supporting no_run in exclude block by @yhakbar in #4574
+  - feat: runner-pool destroy tests by @denis256 in #4537
+  - fix: sort output for writevalues in stack.go by @pseudomorph in #4552
+  - fix: Fixing links at the bottom of Jekyl stacks docs by @yhakbar in #4549
+  - fix: Fixing lint finding by @yhakbar in #4561
+  - fix: Stripping equals sign from constraint by @yhakbar in #4563
+  - fix: Fixing icon patch by @yhakbar in #4576
+  - docs: Updating stacks documentation by @yhakbar in #4544
+  - docs: minor stylistic change for better clarity by @Kairixir in #4557
+  - refactor: call CleanStacks before running the stacks Generate func. by @wakeful in #4446
+  - build(deps): bump the js-dependencies group across 1 directory with 4 updates by @dependabot[bot] in #4545
+  - build(deps-dev): bump nokogiri from 1.18.8 to 1.18.9 in /docs by @dependabot[bot] in #4553
+  - build(deps): bump ruby/setup-ruby from 1.245.0 to 1.253.0 by @dependabot[bot] in #4570
+  - chore: Adding auto-provider-cache-dir experiment integration test by @yhakbar in #4554
+  - chore: updated dependabot config to not update charmbracelet/x/ansi by @denis256 in #4564
+  - chore: Removing legacy-all commands by @yhakbar in #4572
+  - chore: Adding gopls cron by @yhakbar in #4594
+  New Contributors
+  - @Kairixir made their first contribution in #4557
+  - @pseudomorph made their first contribution in #4552
+  - @markoeremija made their first contribution in #4420
+  Full Changelog: v0.83.2...v0.84.0
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.84.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

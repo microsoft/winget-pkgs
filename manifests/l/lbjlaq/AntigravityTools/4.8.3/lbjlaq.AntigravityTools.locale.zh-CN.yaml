@@ -1,0 +1,54 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.8.3
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+Tags:
+- account-manager
+- antigravity
+ReleaseNotes: |-
+  - [重新逆向上游报文结构变动，彻底对齐官方] 修正签名摆动算法，根除思维断链死循环 (9.25 晚上游更新):
+    - 重新逆向 9.25 晚 Antigravity 上游报文结构变动：官方更新了工具回执（functionResponse）的承载形态——从 role: "user" 轮迁移至 role: "model" 轮（连续 Model 轮成为常态），且上游放宽了签名返回规则：任何 Model 轮的第一个非思考 part（正文或工具调用）都可能携带 thoughtSignature，不再局限于工具轮。网关原"末尾必须 User 轮""签名只挂在工具上"的旧世界观全部失效。
+    - 修正签名摆动算法：签名捕获从"仅工具轮 + 必须有思考文本"解耦为"任意轮携带真实签名即入库"；回填锚点从"仅 functionCall"扩展为"任意非思考 part"，并按 tool_id 查缓存兜底。彻底消除"签名应落在上一轮还是下一轮、正文还是工具"的摆动歧义，确定性落位到官方锚点规则。
+    - 根除思维断链死循环：修复防御节点把"末尾 Model 轮"一律误判为缺 User 轮并注入假话术的缺陷（工具轮合法中间态不再被注入），配合签名摆动修正，从根源终结"模型被假指令反复触发 → 工具链无限循环"的思维断链问题。
+    - 新版彻底对齐上游报文：移除矛盾 toolConfig 双写（官方不携带该字段）、移除对系统提示词与工具描述的注入改写，信封形状与官方逐字段对齐（实测四协议 × 多轮报文 200 通过、签名 100% 落锚点）。
+  - [出站工具信封对齐官方] 根除 Agent 工具轮死循环与报文结构偏差：
+    - 工具轮不再被误判注入假 User 话术：修复防御节点把"末尾 Model 轮"一律当作缺 User 轮的误判——当末尾轮携带 functionCall / functionResponse（合法工具中间态）时不再追加 "Please continue your analysis."，从根源消除 Agent 工具链无限循环（此前日志连续 22 次注入实锤）。
+    - 移除矛盾 toolConfig 双写：官方 Antigravity 报文不携带 toolConfig / tool_config 字段，网关历史实现同时写出 camelCase 与 snake_case 双份且 mode 值互相矛盾（AUTO vs VALIDATED），现统一在协议无关节点移除，对齐官方信封形状。
+    - 不再注入系统提示词与工具描述：移除向 systemInstruction 注入 [CRITICAL DISPATCH DISCIPLINE] 及向异步派发工具（send_mcp_msg / dispatch_task / assign_task）描述尾部追加 NOTE 的逻辑，工具 Schema 与系统提示词保持客户端原样透传。
+  - [thoughtSignature 捕获与锚点回填解耦] 任意轮签名保真，杜绝裸奔 functionCall 400:
+    - 捕获侧解耦：官方新规下任何 Model 轮的签名都可能返回（正文 / 工具 / 纯思考），纯工具轮即使无思考文本，只要携带真实签名即可入库，不再被丢弃。
+    - 回填侧解耦：锚点识别从"仅 functionCall"扩展为"任意非思考 part（正文或 functionCall）"，签名按 tool_id 查缓存兜底回填，确保"每轮第一个非思考 part"必有签名，杜绝上游 missing a thought_signature 400。
+  - [上游基建硬化] Layer-3 摘要 / 端点顺序 / 代理热更新：
+    - Layer-3 后台摘要（Gemini / Claude / OpenAI 三路径）统一走 UpstreamClient::call_v1_internal_auxiliary，复用主路径端点顺序、URL 形状与回退链；共享 HTTP 客户端改为可重建（Lazy<RwLock<SharedClients>>），上游代理热更新即时生效。
+    - 配额与 Project 端点统一为官方 Daily → Sandbox → Prod 顺序（Fixes #3523 / #3525 / #3526），sandbox 保留为显式回退项。
+    - 修复非 Windows 平台编译失败：补充缺失的 parse_where_output 与 Command 符号、还原误加下划线前缀的参数，解决 Linux / macOS 下因条件编译缺失导致的构建错误。
+  - [账号池优先级与周统计对齐] (PR #3521, #3520, Thanks to @buluw):
+    - 新增单账号优先级配置（1~100），P2C 自动选号限制在当前最高优先级候选组，限流时优雅降级回退。
+    - 周 Token 统计改按官方 reset_time 精确划分 7 天窗口，彻底消除启发式重置导致的统计清零与截断。
+  - [双通道应用内更新] Beta 尝鲜通道无感自更新：
+    - 支持正式版 / 预览版双通道分段选择器，预发布版本自动绑定 Beta 通道；SemVer 预发布版本精准比对；Release 流水线镜像同步至固定 preview Tag，Beta 用户应用内一键升级。
+  - [厂商归属声明归一化] 修复上游伪限流整池误冷却 (Fixes #3508, Thanks to @oliverhe202018-ctrl):
+    - 对第三方客户端提示词中的异构厂商归属声明智能归一化，阻断上游对非自研声明的拦截与伪 429 频控，杜绝账号池被误冷却。
+  - [全协议工具 100% 纯透传] 修复 Agent 客户端工具调用异常 (PR #3504):
+    - 拔除工具名称映射 / 参数别名改写 / 错误命令注入，工具名与实参以客户端原始语义直达上游；System Prompt 日期 / 时区 / 路径 / UUID 冻结正则移除，动态消息改以 <system-reminder> 保真下沉至 User 轮次。
+  What's Changed
+  - feat(hermes): add one-click configuration sync and safe restore by @Avlaak in https://github.com/lbjlaq/Antigravity-Manager/pull/3518
+  - fix(stats): align weekly token totals with each account official reset by @buluw in https://github.com/lbjlaq/Antigravity-Manager/pull/3520
+  - feat(accounts): add configurable account selection priority by @buluw in https://github.com/lbjlaq/Antigravity-Manager/pull/3521
+  Full Changelog: https://github.com/lbjlaq/Antigravity-Manager/compare/v4.8.0...v4.8.3
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.8.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

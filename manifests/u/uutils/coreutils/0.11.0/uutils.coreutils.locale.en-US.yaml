@@ -1,0 +1,152 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: uutils.coreutils
+PackageVersion: 0.11.0
+PackageLocale: en-US
+Publisher: uutils
+PublisherUrl: https://github.com/uutils
+PublisherSupportUrl: https://github.com/uutils/coreutils/issues
+Author: uutils
+PackageName: coreutils
+PackageUrl: https://github.com/uutils/coreutils
+License: MIT
+LicenseUrl: https://github.com/uutils/coreutils/blob/HEAD/LICENSE
+Copyright: Copyright (c) uutils developers
+CopyrightUrl: https://github.com/uutils/coreutils/blob/main/LICENSE
+ShortDescription: Cross-platform Rust rewrite of the GNU coreutils
+Tags:
+- busybox
+- command-line-tool
+- coreutils
+- cross-platform
+- gnu-coreutils
+- rust
+ReleaseNotes: |-
+  Rust Coreutils 0.11.0 Release:
+  We are happy to announce the release of Rust Coreutils 0.11.0 - a release focused on error messages, performance and GNU compatibility.
+  The big change is a new diagnostic engine built on ariadne. When a chmod mode, a cut list, a sort key or a tr set fails to parse, we now echo the arguments back with a caret under the character at fault, like a compiler does. See our blog post for more information: https://uutils.org/blog/2026-08-error-diagnostics/
+  Example with cut:
+  or test:
+  PGO release builds are enabled for Linux, macOS and Windows (up to 31% faster), and a lot of per-utility optimization work landed on top of that. We also now treat a utility being significantly slower than GNU as a bug.
+  We continued to improve the GNU compatibility and we are now at 653 passing, 22 failing, 0 errors.
+
+  GNU Test Suite Compatibility:
+  ──────┬──────┬──────┬───────────────────────┬──────────────┬──────────────┬─────────────────────────
+  Result│0.10.0│0.11.0│Change 0.10.0 to 0.11.0│% Total 0.10.0│% Total 0.11.0│% Change 0.10.0 to 0.11.0
+  ──────┼──────┼──────┼───────────────────────┼──────────────┼──────────────┼─────────────────────────
+  Pass  │645   │653   │+8                     │94.44%        │95.33%        │+0.89%
+  ──────┼──────┼──────┼───────────────────────┼──────────────┼──────────────┼─────────────────────────
+  Skip  │9     │10    │+1                     │1.32%         │1.46%         │+0.14%
+  ──────┼──────┼──────┼───────────────────────┼──────────────┼──────────────┼─────────────────────────
+  Fail  │28    │22    │-6                     │4.10%         │3.21%         │-0.89%
+  ──────┼──────┼──────┼───────────────────────┼──────────────┼──────────────┼─────────────────────────
+  Error │1     │0     │-1                     │0.15%         │0%            │-0.15%
+  ──────┼──────┼──────┼───────────────────────┼──────────────┼──────────────┼─────────────────────────
+  Total │683   │685   │+2 (new tests)         │              │              │
+  ──────┴──────┴──────┴───────────────────────┴──────────────┴──────────────┴─────────────────────────
+  > Note: 653 passing and 23 failing are both records for us, and this is the first release with no erroring test. Note that the suite grew by 2 tests this cycle (local backport). We also list the tests excluded from the pass/fail percentages now.
+
+  Highlights:
+  - Modern Error Diagnostics (new)
+    - A new diagnostic engine based on ariadne. When stderr is a terminal, a parse error is printed as a report: the arguments are echoed back as a source line, a caret marks the culprit and a help line explains the syntax. See the blog post for before/after examples
+    - Carets landed in chmod, mkdir, mkfifo, mknod, install, tr, expr, sort, numfmt, cut, env, head, tail, truncate, split, shred, stdbuf, od, seq, dd, stat, join, csplit, ls, df and du
+    - A caret can point inside a quoted argument and at a single character. The reports are localized (format, checksum and advice strings) and still print the usual Try '... --help' hint. A label is only added when it says something useful
+    - UUTILS_DIAG controls the behavior, and the caret rendering can be compiled out for size-constrained builds
+    - Diagnostics are written in a single stderr call, so concurrent writers cannot interleave them
+  - Performance
+    - PGO (profile-guided optimization) release builds: up to 31% faster - now enabled for the published Linux, macOS and Windows artifacts too.
+    - cp: opens the file only once (+32.93%) and reuses the already-open destination fd when a reflink clone falls back
+    - join: 1.37x faster on paired input, 2.5x faster than GNU, by skipping the locale comparison when it cannot change the result
+    - od --skip-bytes uses splice(2) on non-seekable input; tac uses fast_copy; dd no longer faults in the whole copy buffer before reading and page-aligns its read buffer
+    - Fewer allocations and syscalls in ptx (+4% via fxhash, plus fewer per-word allocations), nl (hoisted per-line prefix), tail (no double allocation per reverse chunk, no stat), expand/unexpand (no stat/is_dir), numfmt and sort
+    - New benchmarks for ptx, basenc and the numfmt stdin path
+    - A utility being significantly slower than GNU is now considered a bug - please report it as one
+  - GNU Compatibility
+    - 653 passing GNU tests (+8), 23 failures (-6) and no erroring test
+    - New GNU-matching options: uname -A/--all-labeled, cut -F and --whitespace-delimited, pr --columns/--join-lines/-f alias and an optional argument for -n
+    - Behavior fixes in pr (page length of exactly 10, columns that do not divide evenly, -e at the end of a cluster), numfmt (leading +, scientific notation), uniq/truncate/paste (a repeated option overrides the earlier one), join -o accumulating fields, id group ordering, unexpand/expand tab-list separators, mkdir EEXIST, more -f/-l, fold widths, sort -t=, stat nanosecond timestamps and Block size, od 16 significant digits, date trailing timezones
+    - A new gnu/usage_vs_refs.sh check verifies that every option we document also appears in GNU's texi docs
+    - More error messages carry the real OS text instead of a stripped or made up one (rm, env, od, chroot, stdbuf, tee, cut, date, tsort, pathchk, sort)
+  - Security Hardening
+    - mv/cp: xattr TOCTOU fixed by moving to file-descriptor-based operations
+    - rm: no longer follows a symlink swapped in at the -r operand
+    - chmod: uses fchmodat for recursive mode changes and no longer follows in-tree symlinks with -R --reference
+    - cp: does not chmod through the destination symlink; mv does not put a symlink in its target's hardlink group
+    - stdbuf: fixed a temporary-directory leak
+  - Robustness: Anti-Panic & Anti-Hang
+    - Hangs fixed: split endless loop, yes deadlock, sort Lines fuse when a chunk boundary lands exactly at EOF
+    - Panics and aborts fixed in stat and csplit on /dev/full, ls with an invalid QUOTING_STYLE on unwritable stderr, od on large ASCII dump widths, printf on large numeric and %s/%c field widths, nl with -w i32::MAX (rejection plus a 32-bit OOM fix), pr and csplit integer overflow, dd u64 wraparound, touch leap-second year overflow, tail -c +N past the seek limit, tac SIGBUS on a truncated mmap, who -q stdout write errors
+    - uucore::parse_size no longer overflows on a large % size
+  - Cross-platform Reach
+    - Windows: kill and uptime implementations, and test -ef, -t, -h/-L, -r, -w, -x
+    - WASI: touch timestamps, cp symlinks, expr, cleaned-up core platform abstractions and cat integration coverage
+    - df got a fallback statfs path using the mount table; uptime dropped its /proc dependency on more targets; stty and chgrp are now gated by target support; better iOS and Fuchsia handling
+  - Dependency Diet
+    - Dropped byteorder, same-file, filetime, winapi-util, file_diff, mockstream, binary-heap-plus, compare, arrayref, exacl and dns-lookup in favor of std, rustix and windows-sys
+  - Internationalization
+    - Symbolic mode parsing errors, the chmod --verbose messages and the new diagnostic strings are now translatable
+    - ls sorts names using locale-aware collation, comm compares lines with the locale collation, nl supports multibyte one-character section delimiters and cut handles multibyte fields, bytes and delimiters correctly
+    - uucore rebuilds its embedded locales when the consumer's dependencies change
+  - Contributions: This release landed 358 pull requests from 26 new contributors. We also passed 1000 people having contributed to uutils coreutils. Per our activity tracking, August 2026 was our busiest month so far, with 476 commits from 57 authors
+
+  Call to Action:
+  Try it in your browser - Online Playground powered by WebAssembly
+  Help us translate - Contribute to Rust Coreutils on Weblate
+  Sponsor us on GitHub to accelerate development: github.com/sponsors/uutils
+
+  What's Changed
+
+  base32
+  - base32: simplify loop by @oech3 in #13915
+
+  basename
+  - basename: simplify handling missing operand by @oech3 in #14202
+
+  basenc
+  - basenc: add benchmark by @myunbin in #14022
+
+  cat
+  - cat: remove unnecessary impl by @oech3 in #13819
+  - cat: reduce nest & avoid accessing by index by @oech3 in #13820
+  - cat: catch 2nd+ splice's error by @oech3 in #13847
+  - cat: always exit with 1 on error by @mtvb in #14216
+
+  chmod
+  - chmod: only report umask-curtailed modes for option-like operands by @dhruv-15-03 in #13731
+  - chmod: don't follow in-tree symlinks with -R --reference by @Angadi56 in #13842
+  - chmod: translate chmod-verbose-neither-changed much more by @oech3 in #13872
+  - chmod: use the libc fchmodat symbol for recursive mode changes by @sylvestre in #14121
+  - chmod: remove duplicate code handling symlinks by @cakebaker in #13873
+  - chmod: simplify a nested match by @Devel08 in #14234
+
+  chroot
+  - chroot: strip errno by @oech3 in #14114
+  - chroot: extract proper error message from OS by @oech3 in #13884
+
+  cksum
+  - cksum: do not guard openssl by unix for MinGW by @oech3 in #13821
+  - cksum: fix typo in comment by @cakebaker in #13871
+
+  comm
+  - test(comm): enable --check-order/--nocheck-order order-checking tests by @AH64-dll in #13969
+  - comm: add missing error-write locale by @Devel08 in #14140
+  - comm: compare lines with the locale collation by @luantaraschi in #14047
+
+  cp
+  - cp: don't chmod through the destination symlink by @Angadi56 in #13443
+  - cp: support symlinks on WASI by @DePasqualeOrg in #13804
+  - cp: reject --attributes-only self-copies (#13161) by @alexchen-sys in #13894
+  - cp: use default suffix when backup suffix is empty by @TheAdamWarlock in #13966
+  - cp: honor --reflink=never on macOS by @nagendramohan in #14076
+  - tests_cp.rs: replace filetime by std by @oech3 in #14174
+  - cp: label the destination of -Z when it is named relatively by @sylvestre in #14161
+  - cp: reuse the open dest fd when a reflink clone falls back by @sylvestre in #14136
+  - tests_cp.rs: ensure error of ioctl is catched when --reflink=always by @oech3 in #14270
+  - test_cp.rs: fix error message of ficlone on musl by @oech3 in #14273
+  - cp: open file only once (+32.93%) + add tests for mv & cp by @sylvestre in #14272
+
+  csplit
+ReleaseNotesUrl: https://github.com/uutils/coreutils/releases/tag/0.11.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

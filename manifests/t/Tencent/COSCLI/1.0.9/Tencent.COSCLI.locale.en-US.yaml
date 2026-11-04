@@ -1,0 +1,81 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Tencent.COSCLI
+PackageVersion: 1.0.9
+PackageLocale: en-US
+Publisher: Tencent Cloud
+PublisherUrl: https://www.tencentcloud.com/
+PublisherSupportUrl: https://github.com/tencentyun/coscli/issues
+PrivacyUrl: https://www.tencentcloud.com/document/product/301/17345
+Author: Tencent Cloud Computing(Beijing) Company Limited
+PackageName: COSCLI
+PackageUrl: https://www.tencentcloud.com/document/product/436/43249
+License: Apache-2.0
+LicenseUrl: https://github.com/tencentyun/coscli/blob/master/LICENSE
+Copyright: Copyright © 2013-2026 Tencent Cloud. All Rights Reserved.
+CopyrightUrl: https://www.tencent.com/en-us/statement.html
+ShortDescription: COS provides the command-line client COSCLI to allow you to upload, download, delete, and perform other operations on COS objects by using simple commands.
+Tags:
+- cos
+- tencent-cloud
+ReleaseNotes: |-
+  COSCLI v1.0.9 迭代改动点
+  一、新增能力
+  1. 新增 stat 命令（查询对象元数据）
+  - 新增文件：cmd/stat.go、util/stat.go
+  - 功能：通过 HEAD Object 接口查询对象元数据，输出 ETag、Content-Type、Content-Length、Last-Modified、Cache-Control、Content-Disposition、Content-Encoding、Content-Language、Expires、存储类型、版本号、对象类型、CRC64，以及全部自定义元数据 x-cos-meta-*。
+  - 用法：
+    - ./coscli stat cos://bucket-1234567890/test.txt
+    - ./coscli stat cos://bucket-1234567890/test.txt --version-id <version-id>
+  - 参数：--version-id 指定查询的对象版本。
+  2. 自定义域名支持写入配置文件（Bucket 级 customized）
+  - util/types.go：Bucket 结构体新增 Customized bool 字段（yaml: customized）。
+  - cmd/config_add.go：新增 --customized flag，可在添加桶时持久化自定义域名标记。
+  - cmd/config_init.go：交互式初始化时新增询问「是否对该桶使用自定义 endpoint」。
+  - cmd/config_show.go：展示桶的 Customized 字段。
+  - util/url.go GenURL：URL 生成时 --customized 命令行参数优先，未指定则回退到配置文件中桶的 customized 字段。
+  3. 新增列举存储桶的 Service 域名配置（ServiceDomain）
+  - util/types.go：Base 结构体新增 ServiceDomain string（yaml: servicedomain）。
+  - util/const.go：新增默认常量 CosServiceDomain = "service.cos.myqcloud.com"。
+  - cmd/config_set.go：新增 --service_domain flag（@ 可清空）。
+  - cmd/config_init.go：初始化时新增询问默认 service 域名。
+  - cmd/config_show.go：展示 ServiceDomain。
+  - util/url.go GenBaseURL：始终显式构造 ServiceURL，不再返回 nil，避免 SDK 回退到写死的 http://service.cos.myqcloud.com。优先级：命令行 --endpoint > 配置文件 base.servicedomain > 默认 service.cos.myqcloud.com。
+  4. 新增代理（Proxy）支持
+  - util/types.go：Base 新增 Proxy string（yaml: proxy）；Param 新增 Proxy string。
+  - cmd/config_set.go：新增 --proxy flag（@ 可清空）。
+  - cmd/config_show.go：展示 Proxy。
+  - cmd/root.go：新增全局持久化参数 --proxy，支持 http://user:pass@127.0.0.1:8080、socks5://127.0.0.1:1080 等。
+  - util/client.go：新增 getProxyFunc，优先级 命令行 --proxy > 配置文件 base.proxy；对 URL 校验 scheme 与 host，非法输入回退为不使用代理并打印 warning；Service 客户端与 Bucket 客户端均注入代理。
+  5. signurl 支持 PUT（上传预签名 URL）
+  - cmd/signurl.go：新增 --method / -m flag（默认 GET），支持 GET（下载）与 PUT（上传）；对非 GET/PUT 的 method 报错。
+  - 短描述更新为 "Gets the signed URL for upload or download"。
+  6. restore 并发重构 + 进度显示
+  - util/restore_objects.go 大幅重构：
+    - 用 restoreCounter（sync/atomic）替代包级全局计数器 succeedNum/failedNum/errTypeNum，消除多次调用间的状态残留，保证并发安全。
+    - 引入 worker pool（taskCh + sync.WaitGroup）：list 阶段生产 restoreTask，多个 worker 并发执行 HEAD/POST restore。
+    - list 与回热解耦：produceCosRestoreTasks / produceOfsRestoreTasks 只负责扫描并投递任务，回热逻辑集中在 worker。
+    - 新增单行刷新的进度条（restoreProgressLoop）：list 未结束时按已完成数展示，list 结束后切换为百分比。
+  - cmd/restore.go 新增 --routines flag（默认 3，范围 1~10000），批量 restore 时的并发数。
+  - cmd/restore.go 单对象 restore 遇到 HTTP 409（对象已在回热中）视为提交成功，不再报错。
+
+  二、性能/并发优化
+  7. 分片并发线程数推导重写（util/helper.go getThreadNumByPartSize）
+  - 默认并发上限由硬编码 12 提升至 32（defaultMaxThreadNum），覆盖 16GB+ 大文件场景。
+  - 档位表扩展：新增 partNum<=2000 → 20、default → 32。
+  - 新增带宽感知：按单连接 8MB/s（singleConnThroughputMB）估算，限速场景下收敛线程数。
+  - 新增上限封顶：受 --max-thread-num 控制；并保证 >=1 且不超过分片数。
+  - 新增命令行参数 --max-thread-num（cmd/cp.go、cmd/sync.go，默认 32），util/types.go Operation 新增 MaxThreadNum int。
+    - 语义：--thread-num（>0）显式设置时覆盖自动推导并忽略 --max-thread-num；--thread-num=0 时按文件大小自动推导，上限由 --max-thread-num 控制。
+  - 调用点同步改造：util/upload.go、util/download.go、util/copy.go 的单文件处理传入 RateLimiting 与 MaxThreadNum。
+  8. 重试逻辑去叠加（util/helper.go isSDKHandledError）
+  - SDK（cos-go-sdk-v5）已对 5xx 响应做 HTTP 级重试（默认 10 次），应用层（默认 5 次）叠加会放大到最坏 66 次。
+  - 新增 isSDKHandledError：识别 5xx 结构化错误后，upload/download/copy 不再叠加应用层重试，直接放弃并在 process.log 标注 skip coscli-retry。
+  - 网络错误（body 为 io.Reader 无法重放）仍由应用层兜底重试。
+ReleaseNotesUrl: https://github.com/tencentyun/coscli/releases/tag/v1.0.9
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://www.tencentcloud.com/document/product/436/43264
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

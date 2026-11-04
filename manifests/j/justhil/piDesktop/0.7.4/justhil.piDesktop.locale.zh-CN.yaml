@@ -1,0 +1,65 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: justhil.piDesktop
+PackageVersion: 0.7.4
+PackageLocale: zh-CN
+Publisher: pi-desktop
+PublisherUrl: https://github.com/justhil
+PublisherSupportUrl: https://github.com/justhil/pi-app/issues
+PackageName: pi Desktop
+PackageUrl: https://github.com/justhil/pi-app
+License: 免费软件
+ShortDescription: 面向个人开发者的 pi 桌面 GUI
+Description: |-
+  面向个人开发者的 pi 桌面 GUI：在 Electron 里跑 pi SDK，复用 ~/.pi/agent 的认证、配置与会话 JSONL，用时间线、工具卡片、改动审查和扩展兼容层替代终端里那套 TUI 交互。
+
+  核心思想
+  1. 会话以 pi 为准
+  - 对话内容、工具调用记录、分支与压缩信息，都以 pi 写在 ~/.pi/agent/sessions/ 里的 JSONL 会话文件为准。
+  - 桌面端不另建一套「聊天记录数据库」来替代 pi；本地只存窗口布局、最近项目、扩展开关、适配器覆盖等应用偏好。
+  - 好处：终端 pi 与桌面 pi 可以接着同一条会话用；卸载桌面也不丢对话历史。
+  2. 配置与认证与终端共用
+  - 模型账号、settings.json、扩展包列表（packages）、项目下 .pi/ 资源，与你在终端用的 pi 同一套路径与规则。
+  - 桌面在 设置 → Pi 里改的项会写回全局 settings.json（与终端一致）；Skills 开关等也落在全局配置里，而不是只在桌面私有文件里「假启用」。
+  3. 扩展：兼容层 + 适配器，而不是改插件源码
+  - 扩展在终端里常用 TUI（选择、确认、问卷、工具结果卡片、/命令 进配置）。桌面没有终端画布。
+  - 兼容层：在应用内部统一接收扩展的 UI 请求，转成 Electron 对话框、时间线卡片、设置表单。
+  - 适配器：每个扩展一份「在桌面上怎么显示、怎么配、哪些命令特殊处理」的说明（内置在应用里，高级用户可用 JSON 覆盖）。
+  - 原则：不动扩展 npm 包、不 fork pi；差异写在适配器说明和文档里。
+  - 给 AI 写适配器：见仓库 doc/（adapter-authoring-guide.md 可整份发给模型定制 adapter.json）。
+Tags:
+- pi
+- pi-agent
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  pi Desktop v0.7.4
+  新增
+  - 我的 Chrome：Agent 可以直接操作你自己的 Chrome，用上你已有的登录状态和扩展。在「设置 → 浏览器」里加载 pi 扩展、粘贴配对码即可；Agent 的标签页开在单独的 pi 窗口里，不打扰你正在用的窗口，借用你已打开的标签页需要你确认，用完交还给你。遇到 Cloudflare 这类人机验证的网站，用自己的 Chrome 更容易通过。输入框工具菜单里可以三选一：关闭 / 内置浏览器 / 我的 Chrome；右侧浏览器面板会标明当前用的是哪个
+  - Agent 请你帮忙：遇到验证码、登录或需要你拍板的操作（付款、发帖、删除等），Agent 会在浏览器面板上方（用自己的 Chrome 时显示在输入框上方，并弹出 Chrome 通知）请你处理，你点「完成」或「允许 / 拒绝」后它接着做
+  - 站点笔记：Agent 在某个网站上摸索出的经验（比如某个按钮要先悬停才出现）会记下来，下次访问同一网站时自动带上；可在「设置 → 浏览器」查看和删除
+  - 浏览器新能力：能操作跨域 iframe 里的元素、看到一闪而过的提示消息、识别并应答页面弹窗（alert / confirm）；悬停才出现的菜单可以自动探测；整页截图、按截图坐标点击、下载文件、保存 PDF、模拟手机尺寸；查看网络请求和控制台；一次调用连续执行多步操作
+  优化
+  - 浏览器更省 token：长列表自动折叠成「… 还有 N 项」，操作后只返回页面变化的部分，文章可按纯文本读取。实测 Hacker News 首页的页面内容缩到原来的约 1/7，Wikipedia 长条目缩到约 1/3（纯文本模式约 1/4）；每次请求附带的浏览器工具说明从约 1600 token 降到约 1300。长会话里较早的页面状态不再反复发给模型（会话记录仍完整保留），超大页面可以整页存成文件再按需读取
+  - 工具调用折叠：折叠后的工具组只占一行，失败的调用以数量显示在这一行上，不再在下面列出好几行
+  - 扩展适配器：按常用扩展的当前版本重写：pi-goal-x 新增适配（目标的任务列表显示在输入框上方，设置页可改自主续跑、任务、审核模型等）；pi-cache-optimizer 的开关改为写入扩展真正读取的配置文件（之前只存在桌面本地、不生效）；pi-search 搜索模式改为当前的 auto / coding_docs 等，新增 API 协议、思考等级和 Context7 缓存时长；pi-image-gen 去掉已移除的审图开关；magic-context 覆盖全部 ctx_* 工具和命令；pi-subagents 可设置默认后台运行、子代理上下文和 worktree；/context 直接打开桌面 Context 面板；带参数的扩展命令（如 /image-gen generate …、/cache-optimizer status）不再被设置页拦截
+  - MCP 工具调用：时间线里显示为「服务器/工具 · 参数摘要」并带插头图标，不再是 mcp__服务器__工具 原名；展开可看调用参数和结果（JSON 自动格式化），输出过长被截断时给出完整输出文件并可直接打开；恢复旧会话、服务器未连接时也按同样方式显示
+  修复
+  - 新对话时打开底部终端，输入框会被顶到标题上面：现在输入框按聊天区居中
+  - 长回复进行中切换会话，回来后自己发的消息不见了；向上加载历史时正在输出的消息丢失；切换会话后残留上一个会话的历史
+  - 从托盘图标或系统通知无法恢复已最小化 / 隐藏的主窗口
+  - 回复里指向本地 Markdown 文件的链接现在在工作区预览中打开；引用来源可以点开，并高亮对应的行
+  - 「活动」里跨项目的会话标题显示不对、点了跳不过去
+  注意
+  - 「我的 Chrome」需要在 Chrome 里手动加载 pi 扩展（设置页有「打开扩展文件夹」按钮），开启后 Chrome 顶部会显示「正在调试此浏览器」，这是正常的
+
+  安装包见本页 Assets。更新说明以本正文为准（应用内「发现新版本」弹窗会展示）。
+ReleaseNotesUrl: https://github.com/justhil/pi-app/releases/tag/v0.7.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

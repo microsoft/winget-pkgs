@@ -1,0 +1,47 @@
+# Created with tokenuse release workflow using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: RussMckendrick.TokenUse
+PackageVersion: 1.2.6
+PackageLocale: en-US
+Publisher: Russ McKendrick
+PublisherUrl: https://github.com/russmckendrick
+PublisherSupportUrl: https://github.com/russmckendrick/tokenuse/issues
+Author: Russ McKendrick
+PackageName: Token Use
+PackageUrl: https://www.tokenuse.app/
+License: MIT
+LicenseUrl: https://github.com/russmckendrick/tokenuse/blob/HEAD/LICENSE
+ShortDescription: Desktop app for local AI coding tool token and cost usage
+Description: Desktop app for local AI coding tool token and cost usage
+Moniker: tokenuse-desktop
+Tags:
+- ai-agents
+- claude-code
+- codex
+- copilot
+- cursor
+- tokens
+ReleaseNotes: |-
+  tokenuse v1.2.6 - Price Cut
+  tokenuse 1.2.6, named Price Cut, adds pricing for the models Anthropic and OpenAI released on September 22, 2026, both cheaper than the models they replace. It also corrects costs already archived for those models and refreshes the pricing books and dependencies.
+  New models
+  - Claude Opus 5.5 is priced at $4 input, $5 cache write, $0.20 cache read, and $20 output per MTok. Cache reads are 0.05x input, and Claude Code fast mode is 2x. The price applies to Claude Code, Cursor, and Copilot usage.
+  - Opus 5.5 now appears as its own model. Previously it was shown and grouped as Opus 5.
+  - GPT-6 Sol ($2/$10 per MTok) and GPT-6 Luna ($0.10/$0.50 per MTok) are priced for Codex and Copilot, using the default tier with 10% cache reads and 1.25x cache writes.
+  Pricing fixes
+  - Archive schema v10 corrects costs that were already stored for the new models. Opus 5.5 calls were charged at the inherited Opus 5 rates, and GPT-6 Sol, Luna, and Astra calls were charged at the Sonnet fallback rates. A row is recomputed only when its stored cost exactly matches the stale formula. Already-correct rows are left unchanged, and the hidden 1-hour cache-write premium is preserved.
+  - The v10 pass also corrects GPT-6 Astra rows in archives that reached schema v9 before the Astra repair was added to it.
+  - gpt-5-codex, gpt-5.1-codex (including Max and Mini), gpt-5.2-codex, and codex-mini-latest now use OpenAI's published rates. LiteLLM dropped their direct entries. Without this change, the regional Azure entries would have added 10%, and codex-mini-latest would have used fallback pricing.
+  - Pricing books were refreshed on September 23, 2026.
+  - Pricing refreshes now keep expired historical pinned rates without requiring their old marker text to remain on a provider's live page. Current pins still fail loudly when an entire configured source disappears.
+  Dependency updates
+  - Updated both Rust lockfiles with semver-compatible releases, including Tauri 2.11.6, the Tauri updater plugin 2.12.0, rustls 0.23.45, and ureq 3.4.2. This removes RUSTSEC-2026-0285 from the root lockfile.
+  - Updated Svelte, Vite, three.js, Motion, Lucide icons, and the Tauri CLI. TypeScript stays on 6.x. Moving to TypeScript 7 is a major upgrade and is left for a separate change.
+  Upgrade notes
+  - The first launch runs the archive v10 migration once. Totals for Opus 5.5, GPT-6 Sol, GPT-6 Luna, and affected GPT-6 Astra history go down to the correct prices.
+  - Pricing books downloaded before this release are older than the embedded books, so the embedded books are used automatically.
+  - Neither lockfile has known vulnerabilities reported by cargo-audit, and pnpm audit reported none at release preparation. RustSec still reports upstream maintenance warnings and the Linux GTK dependency's glib unsoundness warning.
+ReleaseNotesUrl: https://github.com/russmckendrick/tokenuse/releases/tag/v1.2.6
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

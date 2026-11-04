@@ -1,0 +1,100 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jcardama.LeopardWM
+PackageVersion: 0.2.9
+PackageLocale: en-US
+Publisher: jcardama
+PublisherUrl: https://github.com/jcardama
+PublisherSupportUrl: https://github.com/jcardama/LeopardWM/issues
+Author: jcardama
+PackageName: LeopardWM
+PackageUrl: https://github.com/jcardama/LeopardWM
+License: GPL-3.0
+LicenseUrl: https://github.com/jcardama/LeopardWM/blob/HEAD/LICENSE
+ShortDescription: Scroll-first tiling window manager for Windows 10 and 11.
+Description: LeopardWM is an open-source tiling window manager for Windows 10 and 11 that takes a scroll-first approach inspired by niri and PaperWM. Windows sit on a horizontal strip and the monitor acts as a viewport that scrolls over them, so navigation stays spatially consistent as windows are added — instead of constantly rebuilding split trees. Written in Rust on top of the Win32 API.
+Moniker: leopardwm
+Tags:
+- niri
+- paperwm
+- rust
+- scrollable
+- tiling
+- window-manager
+- windows
+- workspace
+ReleaseNotes: |-
+  Features
+  - Query effective hotkeys and export a PowerToys Shortcut Guide manifest.
+    lwm query hotkeys lists resolved bindings and configuration diagnostics.
+    lwm export-shortcut-guide writes YAML to stdout, --output PATH writes a
+    file, and --install atomically replaces
+    %LOCALAPPDATA%\Microsoft\WinGet\KeyboardShortcuts\LeopardWM.LeopardWM.en-US.yml.
+    Matching CLI and daemon builds are required (IPC v3). The manifest is a
+    snapshot: reload LeopardWM and export again after changing bindings. Alternative
+    bindings appear as separate shortcuts. F13-F24 used as modifiers are skipped
+    with a warning; F13-F24 used as ordinary trigger keys can be exported.
+  Documentation
+  - The README now includes the official Scoop installation and update commands.
+  - The README documents hotkey query and PowerToys Shortcut Guide export.
+  Improvements
+  - The default width preset selector matches the other Settings dropdowns. The "Default preset for new windows" control now uses the same custom combobox as Centering mode, keeping its dynamic preset list, selection tracking, and disabled empty state.
+  - Empty tiled layouts stop retrying a current physical request. A genuinely empty apply consumes stale display stamps so the next layout can take the fast path, while filtered-empty batches still wait for a later landing.
+  - Doctor reports daemon and CLI integrity separately and lists privilege-blocked windows with their admission-time reason.
+    Integrity is the observed mandatory level (Medium, High, a numeric RID, or unavailable), not an administrator proxy. Empty output says no privilege-blocked windows are currently recorded. Nonempty output keeps HWND, title, and reason; only higher-integrity windows get elevation-can-help advice.
+  Fixes
+  - The active window border follows its target in z-order. Render and cached-move paths for tiled, drag, and floating windows stack the overlay immediately above that window. Ordinary targets keep the border out of the topmost band so it is not promoted over the taskbar; a topmost target still gets a matching overlay just above it.
+  - Inactive workspace windows stay offscreen after restart. Startup parks restored tiled and floating windows on inactive workspaces after restoring each monitor's active workspace, without moving minimized windows.
+  - Inactive workspace windows stay offscreen after a monitor reconnects. Display-change reconciliation parks restored tiled and floating windows on inactive workspaces after restoring a stashed layout, using the same no-size off-screen path as startup and without moving active, minimized, application-fullscreen, or unmanaged windows. While tiling is paused, minimized flags are still resynced and native windows are left in place.
+  - Hidden inactive tabs keep a stable off-screen origin across inset-cache restarts. Zero-size tab placeholders use the layout coordinate instead of converting through warm or cold frame insets, so native dimensions stay unchanged and the parked origin does not jump after a restart. Visible and nonzero off-screen placements still apply insets.
+  - Taskbar buttons resync after display changes and after a successful resume. Display reconciliation and a successful resume now run the same taskbar synchronization as startup. A failed resume stays paused and does not park inactive windows or change taskbar buttons.
+  - Inactive workspace windows are parked again after a successful resume. Resume still applies only the active workspace, then catches up inactive tiled and floating windows. A failed resume rolls back to paused without moving those windows.
+  - Snap Layout suppression survives restarts. Saved tiled windows regain the configured Snap Layout restriction when their workspace is restored, including inactive workspaces. Floating windows remain unchanged.
+  - Off-screen recovery recognizes Windows-clamped parking coordinates. Parking now uses the native coordinate limit so cleanup can find and restore parked windows without mistaking ordinary minimized windows for parked ones. Recovery uses physical coordinates even when called from the CLI or watchdog, then restores the caller's DPI context.
+  - Partially visible tiled windows retain their requested native size. At exactly adjacent monitor edges, positive partial placements now keep the full application rectangle during scrolling and at rest, preserving requested column widths, focus, and saved layout state. Bleed onto the adjacent monitor is accepted rather than resizing or parking the application.
+  - Owned decorations remain clipped at protected owner edges. Borders and tab strips retain the conservative shared-edge projection even where their full-size application can bleed onto an adjacent monitor. Boundary-affected animation ghosts still wait for a current confirmed landing before their live source is exposed.
+  - Off-screen parking remains recoverable and current during transitions. Inactive-workspace parking uses LeopardWM's shared off-screen recovery sentinel. Inactive tabs on the active workspace use raw zero-size off-screen placeholder coordinates with no-size native movement, not that sentinel. Parking confirmation still requires a readable actual outer rectangle that clears every monitor; logical target dimensions alone are not clearance proof.
+  - Failed native landings no longer strand transitions or discard ordinary size feedback. Failed synchronous placement attempts remain unconfirmed for retry, while empty filtered batches retain that state until a later verified landing. Tracked parking suppresses size feedback; ordinary full-size placements continue to report it, and departing ghost cloaks release after their thumbnail has already been dropped.
+  - Column width changes trigger workspace saves without an unrelated layout change.
+    Save detection tracks requested widths even when a native minimum keeps the effective
+    placement unchanged, while transient native constraints do not become saved width intent.
+  - Animations preserve their final native placement even when the layout is unchanged.
+    A pending landing bypasses the unchanged-layout shortcut, and its exact endpoint is queued
+    after intermediate frames so delayed native moves cannot overwrite the resting position.
+  - Transient oversize measurements no longer immediately become native minimum sizes.
+    The existing single placement retry requires excess widths and heights to repeat
+    unchanged before recording a minimum. Fitting measurements clear older suspects, and
+    new or changing sizes on the retry remain unconfirmed rather than inflating the layout.
+  - Office Click-to-Run dialogs no longer become tiled columns. Their custom window class
+    is excluded even when Windows provides no dialog styles or owner. Restoring a saved layout
+    now honors built-in class exclusions without dropping hidden or minimized application windows.
+  - Runtime display changes preserve proportional column sizing. Resolution and work-area
+    changes recalculate column widths against the new viewport and keep the focused column in view.
+  - Native minimum sizes no longer permanently inflate column proportions. Requested widths
+    remain separate from enforced minimums, so shrinking and restoring a resolution does not
+    rebase a temporary minimum into a larger requested width. Returning to a workspace repairs
+    stale scroll bounds before its transition starts, and minimum-size changes preserve allowed
+    negative centering during animations.
+  - Activating a minimized tab restores it without stealing focus early. The tab is restored
+    before layout and foreground synchronization, while stale tab-click actions are discarded
+    instead of being redirected to a changed workspace or column.
+  - Recording a hotkey in Settings now captures Windows shortcuts. While a hotkey field is
+    recording, LeopardWM keeps its keyboard hook active and swallows the pressed combo before
+    Windows sees it, so Win+Home, Win+Arrow, and similar chords are recorded instead of
+    triggering the shell. Cancelling a recording no longer reloads the configuration.
+  - Equivalent hotkey spellings choose the same action after every reload.
+    Registration and queries share physical-chord deduplication. The first valid
+    binding in lexicographic order wins; ignored collisions identify the retained
+    binding and action in diagnostics.
+  Known limitations
+  - Adjacent-monitor bleed is not fixed. Partially visible tiled windows keep their full requested size while scrolling and after they stop at a partial position, so they can draw onto an adjacent monitor. That bleed is accepted in this release to retain full-size scrolling rather than clipping, resizing, or parking the window.
+  - Restart can change off-screen client-area and DWM frame geometry. An application's outer bounds can stay the same while its client area or DWM frame insets change after a restart. This was observed with Beeper. It is accepted for 0.2.9; repair is deferred to 0.3.x. It is not proven harmless or exclusive to that application.
+  Internal
+  - IPC protocol v3 adds QueryHotkeys and HotkeyList. Existing v1/v2
+    subscription clients remain supported; the new query/export commands require
+    a daemon implementing v3.
+  - Snap Layout remove and restore can emit numeric style-geometry diagnostics. With debug logging enabled, maximize-box remove and restore log HWND, process/thread ids, style bits, and outer/client/DWM-frame/NC-rendering measurements at before-style, after-style, and after-frame boundaries. Failed geometry or style reads log numeric HRESULT codes instead of zeros. These queries are synchronous operation-boundary measurements, not proof of delayed application layout. Placement, style-change, and no-op behavior are unchanged.
+ReleaseNotesUrl: https://github.com/jcardama/LeopardWM/releases/tag/v0.2.9
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

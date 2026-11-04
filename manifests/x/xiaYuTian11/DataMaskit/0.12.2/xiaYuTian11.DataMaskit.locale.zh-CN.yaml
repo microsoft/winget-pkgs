@@ -1,0 +1,73 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: xiaYuTian11.DataMaskit
+PackageVersion: 0.12.2
+PackageLocale: zh-CN
+Publisher: maskit
+PublisherUrl: https://github.com/xiaYuTian11
+PublisherSupportUrl: https://github.com/xiaYuTian11/maskit/issues
+PackageName: Data Maskit
+PackageUrl: https://github.com/xiaYuTian11/maskit
+License: AGPL-3.0
+LicenseUrl: https://github.com/xiaYuTian11/maskit/blob/HEAD/LICENSE
+ShortDescription: 专为大模型打造的本地隐私脱敏与还原网关。
+Description: |-
+  Data Maskit（数据面具）是一个运行在本地的隐私脱敏网关。它把开发工具发往大模型的请求自动打码成结构化占位符，并在模型回复时将占位符实时流式还原为原文。它支持 Cursor、Claude Code、Codex 等任意可配置 Base URL 的工具，全部运算在本地完成，零遥测。
+
+  💡 为什么需要 Maskit？
+  当你在使用 Cursor、Claude Code、Codex、Pi、OpenCode、ChatGPT 或任意 AI 编程助手 时，代码中的高危敏感信息往往在不知不觉中被发送到外部模型服务商：
+  - 🔑 凭据与密钥：sk-proj-...、ghp_...、云厂商 AccessKey、JWT Token、PEM 私钥证书；
+  - 🌐 内网资产拓扑：数据库连接串（mysql://root:Pass123@192.168.1.50:3306/db）、私有 IP 地址（10.x / 172.16.x / 192.168.x）；
+  - 👤 业务隐私（PII）：手机号、身份证、姓名、银行卡、企业内部代号与保密业务词。
+  Maskit 的使命：在你的开发终端与外部 AI 服务之间架设一道透明的“本地隐私防护网关”——请求出网前在本地自动打码成结构化占位符，模型回答时毫秒级流式无感还原成原文！
+
+  ✨ 核心亮点与功能全景
+  🛡️ 1. 深度脱敏与多轮会话一致性
+  - 开箱即用规则库：内置 19 类正则扫描规则（API Key/Token、PEM 私钥、数据库连接串、手机号、身份证、邮箱、银行卡、内网 IP 等），默认收敛核心隐私，低误报；
+  - 自定义敏感词与正则：支持一键按分类管理内部人名、项目代号、敏感术语；支持整词匹配边界与自定义正则扩展；
+  - 多轮会话滑动窗口复用：独创占位符复用机制。同一长对话中，“张三”在第 1 轮和第 10 轮始终映射为同一个占位符，大模型逻辑推理完全一致不串号。
+  ⚡ 2. 毫秒级 SSE 流式接管（真 · 打字机体验）
+  - 针对 OpenAI / Anthropic 的 text/event-stream 流式响应，逐事件还原下发；
+  - 智能处理跨 chunk 占位符切片与缓冲区拼接，完全保留官方原生丝滑打字机体验，不卡顿、不迟滞。
+  🔌 3. 免装根证书 + 原生直连兜底（绝不断网）
+  - 多端口反代模式：为不同模型/渠道分配独立本地端口（如 18701 对应 OpenAI、18703 对应 Anthropic），只需在工具中将 base_url 改为本地端口，无需向操作系统安装自签名 CA 根证书；
+  - Fallback Passthrough 兜底保障：哪怕你关闭了脱敏代理或退出软件，本地端口依然由轻量底层维持监听并透明直连转发明文，你的 AI 工具绝不会意外断网或报网络错误！
+  📊 4. 实时日志、安全审计与成本排行
+  - 全链路日志明细：查看每一笔请求的出网打码、上游响应、耗时分布，并提供一键高亮原文对照；
+  - 被动安全审计：实时监控模型回复中是否存在错误泄露、身份换芯、Prompt 越狱、命令执行等潜在风险；
+  - Token 用量与费用估算：支持主流大模型价格智能匹配，直观统计每日调用量与费用支出。
+  🔒 5. 100% 纯本地运行，零外部遥测
+  - 脱敏与还原全部在本地进程内运行，不收集任何用户隐私，不上传任何日志，无第三方分析统计 SDK。
+Tags:
+- 人工智能
+- 大模型
+- 大语言模型
+- 数据脱敏
+- 网关
+- 隐私保护
+ReleaseNotes: |-
+  更新摘要 / Summary
+  - 日志页不再满屏黄色告警：同一个值在别处重复出现时，不再逐条记成残留。
+  - 中文姓名识别更准：普通词不再被替换成占位符，正文和代码保持原样。
+  - 长对话里语义识别不再被整段跳过，检测结果更可靠。
+  - Fewer yellow warnings in the logs: repeated occurrences of the same value are no longer logged one by one as leftovers.
+  - Chinese names are recognised more accurately: ordinary words are no longer replaced with placeholders.
+  - Semantic detection is no longer skipped wholesale in long conversations, so results are more reliable.
+  修复
+  - 中文人名检测不再把「简洁」「边界」「项目规」这类普通词当成姓名打码：此前它们会把正文换成占位符，模型据此分析或改代码必然出错。
+  - Chinese name detection no longer masks ordinary words (common two-to-three-character terms) as personal names, which used to rewrite the text the model reads.
+  - 形如 hugging-face 的全小写英文复合词不再被当成人名打码。
+  - Lowercase English hyphenated words such as hugging-face are no longer masked as personal names.
+  - 出口复检不再对同一个长值在别处的重复出现逐条报「有残留」：本轮已判定为敏感值就全文一并遮盖。
+  - The egress recheck no longer reports a leftover for every repeat of the same long value: once a value is classified as sensitive this turn, every occurrence is masked.
+  - 修复长会话里语义识别被整段跳过的问题（已知值正向打码后坐标映射失同步），「检测不完整」告警相应减少。
+  - Fixed semantic detection being skipped entirely in long conversations (the offset map lost sync after known-value masking), which also cuts the "incomplete scan" warnings.
+
+  扩展更新提示 / Extension update notice
+  ✅ 本次发版扩展无改动：已安装的扩展无需重新加载。
+  ✅ The browser extension did not change: no need to reload it.
+  Full Changelog: https://github.com/xiaYuTian11/maskit/compare/v0.12.1...v0.12.2
+ReleaseNotesUrl: https://github.com/xiaYuTian11/maskit/releases/tag/v0.12.2
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

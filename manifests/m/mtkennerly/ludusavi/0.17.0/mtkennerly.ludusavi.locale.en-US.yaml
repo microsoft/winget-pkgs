@@ -1,0 +1,88 @@
+# Created using wingetcreate 1.2.5.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.4.0.schema.json
+
+PackageIdentifier: mtkennerly.ludusavi
+PackageVersion: 0.17.0
+PackageLocale: en-US
+Publisher: mtkennerly
+PublisherUrl: https://github.com/mtkennerly
+PublisherSupportUrl: https://github.com/mtkennerly/ludusavi/issues
+Author: Matthew T. Kennerly
+PackageName: ludusavi
+PackageUrl: https://github.com/mtkennerly/ludusavi
+License: MIT
+LicenseUrl: https://github.com/mtkennerly/ludusavi/blob/master/LICENSE
+Copyright: Copyright (c) 2020 Matthew T. Kennerly (mtkennerly)
+CopyrightUrl: https://github.com/mtkennerly/ludusavi/blob/master/LICENSE
+ShortDescription: Backup tool for PC game saves
+Moniker: ludusavi
+ReleaseNotes: |-
+  * Added:
+    * A new "removed" status (icon: `x`) is now displayed for saves.
+      This indicates that a save from the latest backup no longer exists on the system.
+      If a game has some removed saves, then that game will be marked as updated and will trigger a new backup.
+      If 100% of a game's saves are removed, then the game won't be listed, and no backup will be performed.
+    * Support for secondary manifests bundled with games.
+      If a game includes a `.ludusavi.yaml` file,
+      then it will be incorporated into the backup scan.
+    * Option to sort games by status: new -> different -> same -> unscanned.
+      This is now the default sort order for new installations of Ludusavi.
+    * Option to override the maximum threads used for scanning games in parallel.
+      You can also override this via the `LUDUSAVI_THREADS` environment variable.
+    * GUI: On the backup/restore screen, you can click on the "duplicates" badge next to a game
+      to filter the list down to just the games that conflict with it.
+      You can click the badge again to reset the filter.
+      If the badge is faded out, that means the conflicting saves have been resolved.
+    * GUI: On the backup/restore screen, you can use the filter icon to show games
+      based on whether they are enabled and whether they have duplicate or ignored saves.
+      These filters are reset when you close the program.
+    * GUI: On the other screen, there are new options to hide certain kinds of games.
+      You can now hide games that are deselected, unchanged, and unscanned.
+      These settings are saved between sessions.
+    * CLI: Backup comments are now included in the output of the `backups` command.
+    * CLI: Registry values now have the `duplicatedBy` field, like files and registry keys.
+  * Changed:
+    * The standalone Linux release is now compiled on Ubuntu 20.04 instead of Ubuntu 18.04
+      because of [a change by GitHub](https://github.com/actions/runner-images/issues/6002).
+    * When making a new backup for a game,
+      if the backup retention limits are reached for that game,
+      but your full backup limit is only 1 and you have differential backups enabled,
+      Ludusavi will now prune only the oldest differential backup and then make a new differential.
+
+      Previously, Ludusavi would prune the full backup along with its associated differentials
+      and then make a new full backup.
+      That is still the case when your full backup limit is 2 or more,
+      but there is now a special exception when it is only set to 1.
+    * GUI: In the save file hierarchy, if a folder is disabled, it will now be collapsed by default.
+      Also, when you re-scan a single game, its folders remain expanded or collapsed as you had them
+      instead of reverting to the default state.
+    * GUI: On the backup and restore screens, the search icon has been replaced with a filter icon,
+      which reveals the existing title search along with the new filters described above.
+      The sort settings are now always visible, and the "reversed" checkbox is replaced with an ascending/descending icon.
+    * GUI: On the backup screen, the gear icon is now on the top row.
+  * Fixed:
+    * Ludusavi only pruned old backups that exceeded your retention settings
+      when making a new full backup, but not when making a new differential backup.
+      Now, pruning is also performed as needed after a differential backup.
+    * The `backups` command needlessly performed a full restoration preview when determining the available backups.
+      Now, it only reads the `mapping.yaml` file for each game.
+    * When using Heroic on Linux to run Windows games,
+      save paths in the game install folders are now checked case-insensitively.
+    * When a registry key was toggled off, but one of its values was toggled on,
+      the key and value would not be backed up.
+      Now, the key will be included along with just the selected values.
+      The inverse (key toggled on and values toggled off) was working correctly.
+    * GUI: The window would lock up briefly at the start of a backup/restore.
+      This was more noticeable on slower systems.
+    * GUI: On the backup screen, in the list of saves for each game,
+      you can now toggle the file system root when it is on a line of its own.
+      Previously, it did not have a checkbox in this case.
+    * GUI: On the other screen, backup exclusions could be formatted incorrectly
+      if you tried to undo/redo before making any changes to them.
+    * GUI: On Mac, if a backup included multiple direct children of the root directory,
+      then the first entry in the list would be displayed blank.
+      It now correctly shows "/" to indicate the root directory.
+    * GUI: On Mac, undo now uses the standard shortcut cmd+z instead of ctrl+z.
+ReleaseNotesUrl: https://github.com/mtkennerly/ludusavi/releases/tag/v0.17.0
+ManifestType: defaultLocale
+ManifestVersion: 1.4.0

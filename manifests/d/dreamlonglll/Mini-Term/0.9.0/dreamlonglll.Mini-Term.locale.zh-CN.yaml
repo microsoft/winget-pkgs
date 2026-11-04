@@ -1,0 +1,78 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: dreamlonglll.Mini-Term
+PackageVersion: 0.9.0
+PackageLocale: zh-CN
+Publisher: tauri-app
+PublisherUrl: https://github.com/dreamlonglll
+PublisherSupportUrl: https://github.com/dreamlonglll/mini-term/issues
+PackageName: Mini-Term
+PackageUrl: https://github.com/dreamlonglll/mini-term
+License: 免费软件
+ShortDescription: 为 AI 时代打造的桌面终端管理器
+Description: |-
+  一个 AI 终端管理工具，支持多项目、多终端布局管理
+
+  功能特性
+  终端核心
+  - 多标签管理 — 每个项目独立标签页，拖拽排序，状态图标一目了然
+  - 递归分屏 — 横向 / 纵向任意嵌套分屏，Allotment 拖拽调整比例
+  - 高性能渲染 — xterm.js v6 + WebGL 加速，自动降级为 Canvas
+  - 10 万行滚动缓冲 — 拦截 CSI 3J（ED3）指令，Claude / Codex 等 TUI 清屏时保留上滚历史
+  - 终端缓存 — 切换标签 / 分屏不重建 xterm 实例，已有内容不丢失
+  - 复制粘贴 — Ctrl+Shift+C / Ctrl+Shift+V 快捷键 + 右键菜单，未选中时"复制"自动置灰；Windows 大段多行粘贴自动分块写入，防止 ConPTY 丢行
+  - 长文本粘贴 — 剪贴板文本 ≥10 行或 ≥2000 字符时自动转存为临时 .txt 并粘贴带引号的文件路径，避免 AI 工具直接处理超长内容引发性能与 paste bracket 问题
+  - 图片粘贴 — 剪贴板含截图时自动检测，通过 Win32 API 保存为临时 PNG 并粘贴带引号的路径，兼容 PinPix 等非标准格式
+  - 文件拖拽 — 文件拖到终端自动插入带引号的绝对路径，兼容含空格的路径
+  - 多 Shell 配置 — Windows（cmd / powershell / pwsh）、macOS（zsh / bash）、Linux（bash / sh）等，可自由增删
+  AI 进程感知
+  - 实时状态检测 — 500ms 轮询子进程名，自动识别 Claude / Codex，显示 idle / working / error 状态
+  - 状态聚合 — 面板 → 标签页 → 项目逐层聚合，优先级 error > ai-working > ai-idle > idle
+  - 完成提醒三件套 — AI 任务从 working → idle 时立刻触发：
+    - 右下角 Toast 桌面通知（仅非活跃项目弹出，同项目去重）
+    - 项目列表 DONE 徽章，点击清除
+    - 任务栏闪烁（Windows）/ Dock 跳动（macOS），窗口失焦时才触发
+    - 三个开关独立可配
+  - 会话进出检测 — 命令 echo 识别进入 AI；双击 Ctrl+C / Ctrl+D 或 exit / quit / :quit / /logout 识别退出
+  - 会话历史 — 读取本地 Claude / Codex 历史会话记录，右键复制恢复命令快速续接
+  - AI 任务标记 — AI 会话内每次用户按 Enter 自动在 xterm 打点，标签右上角 ⚑ 按钮下拉展示历史提交列表，点击或 Ctrl+Shift+↑/↓ 在标记间跳转，目标行短暂高亮提示
+  项目管理
+  - 项目列表 — 左侧边栏管理多个项目目录，一键切换工作区，重启自动恢复上次激活项目
+  - 拖拽添加项目 — 从资源管理器拖拽文件夹到项目列表即可快速添加，自动识别文件 / 文件夹 / 重复项目并给出视觉反馈
+  - 嵌套分组 — 最多 3 级项目分组，拖拽排序，折叠 / 展开
+  - 文件树 — 集成目录浏览器，嵌套 .gitignore 置灰（每层子目录的忽略规则与 !pattern 白名单都会生效，与 git 行为一致），notify 文件监听实时刷新
+  - 文件操作 — 文件树内新建文件 / 文件夹、重命名、查看内容（二进制与超大文件友好提示）
+  - VS Code 快捷打开 — 文件树右上角按钮一键用配置的 VS Code 可执行文件打开当前项目，路径可在「设置 → 系统设置 → 外部编辑器」自定义
+  Git 集成
+  - 文件状态 — 文件树显示 Git 状态颜色（修改 / 新增 / 删除 / 冲突）
+  - 变更 Diff — 工作区文件变更的详细 Diff，Hunk 行级解析，并排 / 内联双视图
+  - 提交历史 — 浏览仓库提交记录，游标分页加载（默认 30 条）
+  - 提交 Diff — 查看任意提交的文件变更，逐文件切换
+  - 分支信息 — 本地 / 远程分支列表
+  - 源码控制面板 — VS Code 风格 Changes 面板，Staged / Changes / Untracked 分组展示，支持单文件和全量 stage / unstage / discard，Ctrl+Enter 快速提交，列表与树形视图切换
+  - Pull / Push — 仓库行内按钮一键同步远端，支持刷新按钮重新加载提交记录与分支信息
+  - 多仓库发现 — 自动扫描项目目录下所有 Git 仓库（递归 5 层，跳过 node_modules 等）
+  外观与配置
+  - Activity Bar 侧边栏 — 最左侧常驻 40px 图标栏，含 Projects / Sessions / Files / Git 四个面板开关，独立控制显隐，激活态蓝色竖条指示，状态持久化
+  - 三种主题模式 — Auto（跟随系统）/ Light / Dark，深色基于 Warm Carbon 暖炭色调，自定义 CSS 变量体系
+  - 字体独立调节 — UI 与终端字号分别可调（10-20px），终端可选是否跟随 UI 主题
+  - 布局持久化 — 分屏比例、标签页、窗口大小 / 位置自动保存，重启恢复（tauri-plugin-window-state）
+  - 关闭确认 — 关闭窗口前二次确认，并 flush 所有项目布局，避免误操作
+  - 版本检查 — 启动时拉取 GitHub Release，标题栏显示新版本提示
+  - 设置中心 — 统一的 SettingsModal 管理主题、字体、Shell、AI 通知等所有开关
+ReleaseNotes: |-
+  更新内容
+  - release: 升级版本号至 v0.9.0 - 主要变更：SSH 工具从 MCP 迁移到 mt-ssh-cli + SKILL.md 注册(全机单例 daemon 持久连接池、每次调用强制携带项目能力令牌 fail closed、stdout/stderr 与退出码原样流式透传、daemon 不可用自动降级进程内直连);修复 claude 运行中 tab 状态概率性回落 idle;write_file_content 补写侧 1MB 上限 - package.json / Cargo.toml / tauri.conf.json / Cargo.lock 版本号同步升级 0.8.5 → 0.9.0 - README.md / README.en.md 重写「SSH 连接变成 AI 能调用的工具」一节：MCP 表述整体换成 CLI + Skill 架构、令牌授权与 daemon 生命周期，并标注 mt-ssh-mcp 过渡期仍随包发布；四处版本徽章同步 0.9.0 - docs/features.md / features.zh-CN.md 测试计数按合并后实测更新为 503 个 Rust 测试(桌面端 450 = tauri-app 296 + mt-core 44 + mt-ssh 26 + mt-sidecars 84,中转 53)
+  - fix: 加固 SSH CLI 授权与守护进程可靠性
+  - fix: code-review 修复 —— skill 撇号转义 / daemon 断连感知与错误分类 - SKILL.md 的 allowed-tools 行对路径撇号做 YAML 双写转义（如 O'Brien 用户目录），否则 frontmatter 断裂导致 skill 静默加载失败 - daemon 的 exec 增加读端 EOF 主动断连探测：无输出的长命令在 CLI 被杀后立即关闭 channel，不再等到下一次写帧失败或超时；serve 错误分为「端点被占让位」与「运行期故障」两类，前台模式不再把 accept 故障伪装成静默让位（exit 0 → 2） - daemon-status 退出码补注释（0/1 对齐状态探测命令语义，不受业务 exit 2 契约约束）；版本握手比对抽纯函数并补单测 - 收敛重复：Op::transfer_direction() 替代三处 if 级联，Result 帧构造 helper 消除全 None 手写，exec/transfer 审计落盘共用 append_audit_line；spec 回写 pipe 名用 SID 原文与 detach 手段的实现差异说明，手动矩阵补跨用户 IPC 一项
+  - docs: spec 回写 PR1-PR3 落地结论与剩余手动矩阵 - 取舍表补落地结论列：daemon 生命周期全项真机验证通过，开放问题 #3（allowed-tools）部分收口并补 PowerShell 双条目，#5（触发率）4/4 轮自然语言触发无忧，#2（Codex 沙箱）留待手动实测 - 新增 §11 验证记录：CLI 契约 / daemon 生命周期 / skill 端到端的自动化 e2e 明细，与四项需交互式环境的剩余手动矩阵 - SKILL.md 模板 allowed-tools 行同步实现（Bash + PowerShell 双条目）
+  - feat: 「关联 SSH」切换为 SKILL.md 注册（替代 MCP 配置） - 新增 ssh_skill_registry：启用时生成 Claude / Codex 两份 SKILL.md（内嵌 mt-ssh-cli 绝对路径与 project-id，Claude 版带 Bash/PowerShell 双 allowed-tools，整文件覆盖 + generated 头注释），gitignore 幂等追加，并自动摘除存量项目的旧 MCP 注册（.mcp.json 条目 / 项目 Codex 配置 / Claude 免审批白名单，他人条目毫发无损）；停用删净 SKILL.md 与空目录并兜底同样的迁移清理 - ssh_mcp_registry 收缩为读侧清理模块：写入路径与旧 enable/disable command 移除（已无调用方），保留 remove/trust/白名单函数供 skill 注册器迁移存量项目复用 - 前端 SshAssocModal 改调 enable_ssh_tools / disable_ssh_tools，sshAssoc 双语文案「SSH MCP」改「SSH 工具」，types 注释说明 sshMcpEnabled 字段名保留仅为存量配置兼容 - features 双语文档同步新架构（SKILL.md 注册 / CLI + daemon / 过渡期 MCP 表述）与测试计数；真机 e2e：新起 Claude Code 会话自然语言可触发 skill 并经 daemon 成功执行远程命令
+  - feat: 新增 mt-ssh-cli sidecar（CLI + daemon + IPC 池复用） - 新增 mt-ssh-cli 二进制：list/exec/upload/download 四个子命令，远程 stdout/stderr 原样流式透传、退出码透传、超时 124、CLI 错误 2 + stderr 前缀，--project-id flag 优先 env 兜底，本地路径在调用现场绝对化 - daemon 架构：全机单例守护进程持全局 SshPool（named pipe 仅当前用户 ACL / Unix socket 0600），NDJSON 帧协议（hello 版本握手、stdout/stderr 分片 base64、终帧），同一连接二次调用免 SSH 握手 - 生命周期自治：CLI 连不上自动 detached 拉起并退避重连，端点绑定互斥收敛并发竞态，空闲 10 分钟 drain 池自退，版本不符自动踢旧拉新；配套 daemon/daemon-status/daemon-stop 运维子命令 - daemon 不可达自动降级进程内 one-shot（stderr 记一行），两条路径输出与退出码契约一致；构建管线接入 stage-sidecars 与 externalBin，协议帧/退出码矩阵/生命周期均有单测与进程内集成测试
+  - refactor: SSH 业务编排下沉为 mt-sidecars 共享 service 层 - mt-sidecars 新增 lib target，ssh_service 承接连接查找、池 acquire、evict+重试、auth 冷却、审计日志、config.json 传输护栏的完整编排，错误信息不含密码、连接视图不含敏感字段的纪律随迁 - exec 输出改为流式回调（on_output），为 CLI/daemon 实时转发铺路；MCP 侧回调收集进缓冲再 100KB 封顶打包，超时清空缓冲，与迁移前返回体逐字节一致 - mt-ssh-mcp 瘦身为 rmcp 薄适配层：只留工具注册、入参 schema 与错误映射，业务全部转调 service 层，对外行为不变 - 既有 40+ 单测随代码迁入 ssh_service，MCP 侧补收集/超时清空/截断的适配层单测
+  - docs: 新增 SSH 工具 CLI + Skill 迁移方案 spec - 记录从 MCP 迁移到 mt-ssh-cli + SKILL.md 注册的完整设计：daemon 架构与 IPC 协议、service 层抽取、skill 注册器、分阶段落地与开放问题
+  - fix: 修复 claude 运行中 tab 状态有概率显示 idle 而非 ai-* 的问题 - process_monitor 删除 "hook 状态 ai-idle 且输入检测未在会话中即拆 hook 降级 idle" 的裁决分支：任务运行中双击 Ctrl+C 打断（claude 不退出）或别名启动漏检会让输入检测误判，整个会话期状态被永久打回 idle；hook 一旦启用即为权威，判定逻辑抽为 resolve_status 纯函数并补 5 个回归测试 - hook_server 新增每 pane 活跃会话集，SessionEnd 只在移除后集合为空时才清状态推 idle：防止嵌套非交互实例（Bash 工具里跑 claude -p / codex exec 继承 MINITERM_PTY_ID）结束时误杀外层会话，同时覆盖退出后立刻重开的事件乱序，取代原 session_end_is_stale 判定 - pty 新增 mark_ai_session（幂等、不重置 ai_started），hook 映射出状态的事件即调用，把误判退出/漏检启动的 AI 会话标记扶正，顺带救回这两种场景下丢失的 AI marker 与移动端会话语义；SessionEnd 丢失时徽章残留 ai-idle 为有意接受的失败模式（旧代码同样卡死，pane 下次启动 AI 会话自愈） - CLAUDE.md 修正三处过时描述：process_monitor 实际为 hook 权威 + 输入检测降级的两层判定，非"轮询子进程名"；PaneStatus 无 running 状态
+  - fix: write_file_content 补写侧大小上限与单元测试 - 写入内容超过 MAX_FILE_VIEW_SIZE(1MB) 直接拒绝：编辑器本就打不开超限文件，后端不依赖前端约束，防御绕过前端直接调 command 的路径 - 补 4 个单测：正常写入(CRLF 原样落盘)/路径逃逸拒绝/目标为目录拒绝/超限拒绝且原文件未动，对齐 fs.rs 既有测试风格
+ReleaseNotesUrl: https://github.com/dreamlonglll/mini-term/releases/tag/v0.9.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,50 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.9.7
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  本次发布让「为什么 Agent 用不了」可以自查：Settings → Doctor 新增本机运行时、Agent ACP 连通性与网络连通性三个板块，逐个重新探测已注册 Agent 并给出失败分类、登录状态与修复提示，也能经应用全局代理探测 arXiv、GitHub、Google Scholar 等论文源是否可达。配套修复了 GUI 启动未继承登录 Shell PATH 导致 Codex 等 npm 全局 Agent 检测不到的问题。Agent 历史标题改为后台预取并以首条用户提示回退；新增 Skill 导入的 GitHub 镜像回退、按 Agent / ACP 分开卸载、About 中清理日志，已安装的 CLI 也会在应用启动时自动同步到当前版本。此外修复 PDF 高亮菜单不消失、空批注退化为高亮、MinerU 解析丢图与 Windows 路径 / 终端等问题。
+  新功能
+  - Doctor 诊断三板块：Settings → Doctor 新增「本机运行时」（Node.js / npm 版本与路径）、「Agent ACP 连通性」与「网络连通性」三个板块，未打开 Vault 也可查看。Agent 探测通过 ACP initialize 重新进行（不发送提示词），失败归类为命令缺失 / 未登录 / 超时 / 启动失败 / 协议失败 / 未知，并给出对应修复提示与每个 Agent 的登录状态；网络探测走应用全局代理，逐行显示 Baidu、Google、Google Scholar、GitHub、arXiv、Semantic Scholar 的可达状态、延迟与生效代理。（64476ae0、bf6edb6d、51903395、13027456、9f890fa7 by @Phil-Fan）
+  - 按 Agent / ACP 分开卸载：卸载对话框可勾选移除 Agent CLI、移除 ACP 适配器或两者，Host 侧新增部分卸载命令并把卸载信息拆成 agent / acp 两个作用域，只清理实际选中的 npm 全局包与受管目录。（c5f3fc08、08655902 by @Phil-Fan）
+  - Skill 导入 GitHub 镜像回退：Settings → General 可从内置公开镜像列表中选择一个，当 api.github.com / codeload.github.com 不可达时 Skill 发现回退到该镜像；不改变输入识别方式与网络代理语义。（38741ad3、eec88ba1 by @Phil-Fan）
+  - 清理日志：Settings → About 新增「清理日志」，删除已轮转的归档日志，并在文件被占用时截断当前 agentero.log。（16612fdb by @Phil-Fan）
+  - CLI 随应用自动同步：应用内更新只替换 GUI 包，会让已安装的 CLI 停留在旧版本；现在主窗口启动时若检测到已安装但版本落后的受管 CLI，会重新执行安装（下载 + sha256 校验 + shim 刷新）。成功时静默，失败给出 Toast，开发模式与未安装 CLI 时跳过。（9e5173ca、#485 by @qychen2001）
+  改进
+  - 升级入口按需出现：Agent 的「升级」按钮只在确有可用更新时显示——用本地 detect --version 对比 npm latest（或 dsh 固定版本）；探测中、探测失败与无法判定的条目（如 Hermes）不显示升级。（44e89da3 by @Phil-Fan）
+  - Doctor 呈现与就地报错：Host / Agent / Vault 检查失败改为在各自卡片内展示，不再弹 Toast，诊断信息保持在上下文中；Agent 探测期间显示骨架屏而非闪现「无 Agent」空态；Agent 卡片改为版本在上、路径在下的双列布局并去掉健康态冗余的 Ready 标签；Host 卡片不再展示 npm 全局 prefix（仍用于 PATH 探测）；Host 检查改走类型化 specta 绑定，Node / npm 正常时不再误报「Host command failed」。（fdd46258、dedf8593、67beed2e、5f0a0970、0f59f18c by @Phil-Fan）
+  修复
+  - Codex 等 Agent 检测不到：GUI 启动的进程不继承登录 Shell 的 PATH，npm 全局安装的 Agent CLI 因此找不到，npm shim 即使被扫描到也可能因子进程环境中缺少 node 而无法执行。现按「描述符 → 进程 → 登录 Shell → 常见 GUI 缺失目录」顺序合并出有效 PATH，注册表扫描、可用性检查与 ACP 子进程统一在该环境中解析命令；Doctor 也会先跑目录自动注册扫描再探测，PATH 上已安装但未入库的 Agent 不必先进 Settings → Agent 或聊天才可见。（5fe0eb36、8704cddc、#488 by @Phil-Fan）
+  - 历史会话标题被 id 前缀占位：导入会话合并时不再用 session-id 前缀填充空的 ACP 标题，历史列表也不再固定追加 ses_…，使首条用户提示的回退生效；同时在后台预取所有无标题历史行（不设 5 秒预算）并把标题缓存到 localStorage，抽屉打开时补完剩余加载，Kimi 一类不返回标题的 Agent 无需逐条点开即可看到用户提示。（564df98d、0fe918c0、11126d5e、#484 by @Phil-Fan）
+  - 高亮悬浮菜单不消失：EmbedPDF 只在指针精确落在 pointer-provider 表面时才取消选中，而该表面通常被子层覆盖；在高亮批注菜单上增加捕获阶段的 pointerdown 监听，点击菜单外部即取消选中。（03a1a8c8、#490 by @Phil-Fan）
+  - 空批注退化为高亮：点击批注后未填写内容时，删除新建的空 PDF 笔记，而不是留下一个没有正文的高亮。（09222164、#491 by @Phil-Fan）
+  - MinerU 解析丢图：保留 MinerU 输出中的 images/ 资源并与 PAPER.md 一同落盘，支持带任务目录前缀的结果 ZIP；写入前校验归档条目与输出路径，避免越界写入。（#487、#467 by @LinusQiu）
+  - Windows 路径与终端：文件树复制路径与最近知识库列表不再暴露 \\?\ 前缀，「在终端中打开」也不再把扩展盘符路径误判为 UNC；显示与复制共用同一套路径格式化，内部文件读写路径保持原样。CMD 通过隐藏的 start 启动器创建独立交互控制台，目录经进程工作目录传入，支持中文、空格与 &、% 等字符，并避免继承桌面进程的标准输入输出导致终端闪退。（#486 by @Zhou1317fe5）
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.9.7
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

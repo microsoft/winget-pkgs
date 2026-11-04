@@ -1,0 +1,31 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.6.7
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+Tags:
+- account-manager
+- antigravity
+ReleaseNotes: |-
+  - [核心修复] 彻底修复多轮 Agent 对话上下文异常膨胀与 Session 历史重复追加 BUG (Issue #3382):
+    - 解除工具调用历史消息的思考链压缩阻断：修复此前因 !has_tool_calls 守卫过于严格，导致 OpenClaw 等工具调用密集的 Agent 场景下历史 Assistant 消息的长思考文本（reasoning_content）完全无法被压缩的问题。允许在保留合法工具调用及其 thoughtSignature 前提下，将历史长思考精简为占位符 ...，彻底释放数十万 Token 的冗余负担并确保 Google API 签名验证正常通过。
+    - 非保留窗口历史思考块规范占位化：优化 openai/request.rs，针对非最近窗口的历史 Assistant 思考内容，生成极简占位块 { "text": "...", "thought": true }，避免完全剥除思考块导致上游思维模型报错，同时避免重复回传成千上万 Token。
+    - Session 历史回放语义匹配与防重复翻倍：增强 prepare_session_input 的匹配算法，引入语义前缀匹配（忽略动态 ID 差异）与基于末项消息的滑动定位。增加兜底保护：当客户端携带全量历史但发生失配时，以客户端提交的完整序列为准，杜绝服务端历史与客户端历史二次硬拼（2x/4x）导致上下文笛卡尔积式爆炸。
+  - [新特性] 支持 OpenAI 兼容接口的视频多模态输入 (video_url / inlineData) (Issue #3381):
+    - OpenAI 消息内容块扩展支持 video_url: 针对 OpenAI 兼容接口（/v1/chat/completions）扩展 OpenAIContentBlock，增加 video_url 内容块解析与反序列化，彻底解决此前传入视频时报 Invalid request: data did not match any variant of untagged enum OpenAIContent 的问题。
+    - 全格式视频智能解析与 Gemini 原生多模态对齐：引入专用视频处理模块（proxy/video），全面支持 Base64 Data URL（如 data:video/mp4;base64,...）、远程视频 URL（自动转换为 fileData）、本地文件路径（file:// 或普通系统绝对路径自动读盘转内联）以及裸 Base64 格式；覆盖 mp4、webm、mov、avi、wmv、mkv 等主流格式的 MIME 归一化与尺寸超限预警，并在请求上下文分析中增加 Token 估算支持。
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.6.7
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

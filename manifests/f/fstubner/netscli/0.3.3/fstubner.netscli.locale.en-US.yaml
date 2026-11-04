@@ -1,0 +1,76 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: fstubner.netscli
+PackageVersion: 0.3.3
+PackageLocale: en-US
+Publisher: Felix Stubner
+PublisherUrl: https://github.com/fstubner
+PublisherSupportUrl: https://github.com/fstubner/netscli/issues
+Author: Felix Stubner
+PackageName: netscli
+PackageUrl: https://netscli.com/
+License: MIT
+LicenseUrl: https://github.com/fstubner/netscli/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Felix Stubner
+ShortDescription: Network scanner with CLI, TUI, desktop app, and MCP server. Written in Rust.
+Description: |-
+  netscli is an open-source network scanner written in Rust. It discovers hosts
+  on a subnet, scans TCP ports, resolves DNS (including mDNS/Bonjour), reads
+  the ARP table with vendor lookup, and optionally captures packets via Npcap.
+  The same functionality is available from a command line, a terminal UI with
+  autocomplete, a desktop app, or a Model Context Protocol (MCP) server that
+  AI agents like Claude Code and Cursor can call directly.
+Moniker: netscli
+Tags:
+- arp
+- cli
+- dns
+- mcp
+- mdns
+- network
+- port-scan
+- rust
+- scanner
+- tui
+ReleaseNotes: |-
+  Windows executables and the desktop installer are signed, so Windows no longer warns that the publisher is unknown. Connecting the MCP server to a client no longer means installing netscli first and writing the configuration by hand: npx netscli serve works, and each release carries a one-click bundle for clients that support them.
+  Added
+  - Windows executables and the desktop installer are signed. Both netscli
+    builds and the .msi now carry an Authenticode signature from a Certum
+    certificate, timestamped so it keeps verifying after the certificate
+    expires. Windows has been showing an unknown-publisher warning on every
+    download since the first release, and SmartScreen treats an unsigned
+    installer from a low-reputation domain as something to discourage rather
+    than merely flag.
+    Signing happens in one job, after the builds and before anything is
+    uploaded, so a release carries all three signed or none of them. Half a
+    signed release would be worse than none: nothing on the page would say
+    which artifacts were which.
+  - Two new ways to connect the MCP server, so it no longer has to be a
+    hand-written config file. Until now the only route was installing netscli,
+    finding where it landed, and writing the JSON yourself.
+    npx netscli serve now works: netscli is on npm as a small launcher plus
+    one prebuilt binary per platform, and npm fetches only the one that matches
+    your machine. This is the form every MCP client's documentation already uses.
+    There are also .mcpb bundles on each release, one per platform. A client
+    that supports MCP bundles installs one in a single action — the binary is
+    inside, so nothing else is needed. The install prompt carries a switch for
+    the local-network default described below, which is the first time that
+    choice has been visible to the person making it rather than buried in an
+    environment variable.
+    Anyone who already has netscli installed should keep pointing their client
+    at it. That copy is the version you chose, there is only one of it, and it
+    is the only one of the three that can capture packets — libpcap and Npcap
+    cannot be shipped inside an npm package or a bundle.
+  Documentation
+  - The MCP page now says what the local-network default is and why. The
+    server has refused targets outside your own networks since 0.3.1, and the
+    only description of that lived in a source comment, so the first anyone
+    heard of it was an error message naming a variable. It is now written down
+    next to the reason: this is the one surface where a scan can be requested by
+    something a model read rather than by the person at the keyboard.
+  Full changelog: v0.3.2...v0.3.3
+ReleaseNotesUrl: https://github.com/fstubner/netscli/releases/tag/v0.3.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

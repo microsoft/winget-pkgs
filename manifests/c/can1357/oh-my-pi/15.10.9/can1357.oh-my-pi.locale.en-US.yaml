@@ -1,0 +1,73 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 15.10.9
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Added
+  - Added antigravityRankingStrategy and registered it as the default CredentialRankingStrategy for google-antigravity, so multi-account selection consumes the per-counter Antigravity usage reports (sorted ascending by remainingFraction in fetchAntigravityUsage) before falling back to round-robin — preventing the exhausted-counter credential from being chosen first when an unblocked sibling has headroom (#2187).
+  - Added Claude Fable 5 to the first-party Anthropic catalog, seeded directly via ANTHROPIC_CURATED_FALLBACK_MODELS rather than waiting on models.dev (1M context / 128k output, adaptive thinking, $10/$50 per MTok). The model parser recognizes the fable kind so effort tiers (low→max), adaptive thinking, and Opus-4.7-style sampling restrictions apply; token limits and pricing are pinned in applyAnthropicCatalogPolicy.
+  Fixed
+  - Fixed google-antigravity not rotating to another stored OAuth account when Cloud Code Assist returns 429 You have exhausted your capacity on this model. Your quota will reset after …. parseRateLimitReason matched the literal capacity before the quota will reset suffix and downgraded the failure to MODEL_CAPACITY_EXHAUSTED (45–75 s backoff), and isUsageLimitError returned false for the same message — so markUsageLimitReached was never invoked and the agent kept hammering the exhausted credential while the retry layer bailed on the multi-hour retry-after. Both paths now treat the Antigravity phrasing as QUOTA_EXHAUSTED / usage-limit, blocking the current credential until reset and letting the session pick an unblocked sibling (#2187).
+  - Fixed OpenRouter Anthropic chat-completions requests placing cache_control on empty assistant tool-call content. The cache marker now skips empty text and attaches to the most recent non-empty text part, avoiding HTTP 400 payloads with {type:"text", text:"", cache_control:...}.
+  - Fixed Fable-only Anthropic request shaping to cover Claude Mythos 5, and added Mythos 5 to the first-party Anthropic catalog seed. Adaptive display, sampling suppression, mid-conversation system messages, forced-tool-choice downgrade, and Bedrock adaptive metadata now handle both model families.
+  - Fixed adaptive-only Claude models (Opus 4.6+, Sonnet 4.6+, Fable/Mythos 5) returning HTTP 400 "thinking.type.disabled" is not supported for this model whenever thinking was turned off (utility calls and forced-tool turns route through the disable path). These models accept only thinking.type: "adaptive"; the request builder now omits the thinking field and pins the lowest adaptive effort instead of emitting type: "disabled".
+  - Widened the OpenAI-completions first-event watchdog floor from 120s to 300s for DeepSeek V4 reasoning models hosted on the official DeepSeek API. The reasoner emits no SSE bytes until its private chain-of-thought finishes, which routinely takes longer than the generic 100s first-event budget under load — every chat then aborted with OpenAI completions stream timed out while waiting for the first event and silently retried. Mirrors the existing GLM coding-plan widening (#2177).
+  @oh-my-pi/pi-coding-agent
+  Fixed
+  - Fixed streaming thinking (and other styled assistant content) vanishing from native scrollback once it scrolled past the viewport top during a foreground turn. The transcript's append-only commit detector compared raw row bytes, so a styled paragraph wrapping onto a new row (the span-closing SGR and width padding move while the visible cells stay identical) or a streamed token pushing the last word down a line flagged the block as permanently volatile — the commit boundary froze and every later row that crossed the viewport top was committed nowhere. Rows are now compared by visible content, a wrap-shrink of the in-flight bottom line counts as append-only, and a genuine one-off interior rewrite only suspends commits until the block re-earns append-only (30 clean frames), after which the pinned emitter backfills the stalled gap contiguously. Periodically rewriting blocks (spinners, collapsing tool previews) never re-earn and stay deferred.
+  - Fixed bracketed pastes containing multiple image file paths so each image is attached in order instead of treating the whole paste as one unreadable path.
+  - Fixed MCP OAuth fallback prompts so the "Click here to authorize" label emits an auth-safe terminal hyperlink even when hyperlink auto-detection is unavailable, keeping non-browser MCP setup usable (#2196).
+  - Fixed task-spawned subagents repeating filesystem scans the parent had already completed. ExecutorOptions and the createAgentSession() call inside runSubprocess() did not forward rules, the discovered extension paths, or the discovered .omp/tools/ paths, so each subagent re-ran loadCapability<Rule>(), discoverAndLoadExtensions(), and the full .omp/tools/ walk. The toolsession now caches session.rules, session.extensionPaths, and session.customToolPaths; runSubprocess() threads them through; and createAgentSession() accepts new preloadedExtensionPaths and preloadedCustomToolPaths options backed by new exported discoverExtensionPaths() and discoverCustomToolPaths() helpers. Crucially, only path lists are forwarded — never loaded instances. Each session rebuilds its own Extension and LoadedCustomTool objects so the per-session ExtensionAPI/CustomToolAPI (cwd, eventBus, runtime, exec, pushPendingAction, UI) targets the right session; forwarding loaded instances would have routed extension handlers and custom-tool execution back through the parent. The CLI's preloadedExtensions short-circuit is preserved for same-process reuse and now shallow-clones the caller's extensions array so inline-extension augmentation (autoresearch + custom-tools wrapper) cannot bleed back into it (#2190).
+  - Fixed SSH tool cancellation hanging behind OpenSSH ControlMaster streams that stayed open after an Esc/user interrupt (#2180).
+  - Fixed Windows stdio MCP servers launched through PATH shims such as codegraph.cmd so bare commands like codegraph resolve via PATHEXT before spawn (#2174).
+  - Fixed compiled-binary extensions failing to load @oh-my-pi/pi-* packages when bun --compile quietly dropped one of the extra entrypoints (observed on macOS arm64 release builds): the legacy-pi compat shim's package-root override branch returned the bunfs path without checking the target was present, so the rewrite emitted a file:// URL to a missing module and the #1216 fallback (scoped to the throwing getResolvedSpecifier path) never ran. Override targets are now validated against the on-disk filesystem at module init, missing entries are dropped, and resolution falls through to canonical lookup so Bun resolves the import from the extension's own node_modules (#2168).
+  @oh-my-pi/pi-tui
+  Added
+  - Added a wrapDescription option to SelectListLayoutOptions. When enabled, long descriptions wrap onto continuation rows indented under the description column instead of being silently truncated. The slash-command/skill autocomplete picker now opts in so descriptions like the bundled skills' remain fully readable at normal terminal widths. maxVisible becomes the picker's visual row budget so the popup height stays bounded even when items wrap (a single 5-row description with maxVisible=3 clips with the scrollbar carrying the offscreen tail). Navigation stays item-to-item, the narrow-width fallback (width <= 40) is unchanged, and the ScrollView scrollbar tracks visual rows so the thumb stays correct when items wrap unevenly. (#2169)
+  Fixed
+  - Fixed Ghostty's first inline image in a fresh TUI session sometimes rendering as an empty placeholder block by holding the initial Kitty graphics paint until the terminal startup settle window has passed. Direct Kitty placements also keep their zero-width reservation rows non-plain so image-only transcript blocks do not collapse when blank-edge trimming runs.
+  What's Changed
+  - fix(legacy-pi-compat): validated package-root override targets before rewrite by @roboomp in https://github.com/can1357/oh-my-pi/pull/2171
+  - fix(tui): wrap long slash-command picker descriptions by @roboomp in https://github.com/can1357/oh-my-pi/pull/2172
+  - fix(mcp): resolve Windows stdio shims by @roboomp in https://github.com/can1357/oh-my-pi/pull/2175
+  - fix(ai): widen first-event watchdog for DeepSeek V4 reasoning by @roboomp in https://github.com/can1357/oh-my-pi/pull/2178
+  - fix(ssh): cancel ControlMaster stream waits on abort by @roboomp in https://github.com/can1357/oh-my-pi/pull/2181
+  - fix(ai): rotate google-antigravity accounts on capacity-exhausted 429 by @roboomp in https://github.com/can1357/oh-my-pi/pull/2188
+  - fix(task): forward parent-discovered rules, extensions, and custom tools to subagents by @roboomp in https://github.com/can1357/oh-my-pi/pull/2193
+  - fix(tui): restore MCP auth hyperlink fallback by @roboomp in https://github.com/can1357/oh-my-pi/pull/2197
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v15.10.8...v15.10.9
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v15.10.9
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,118 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: LizardByte.Sunshine
+PackageVersion: 2026.906.222525
+PackageLocale: en-US
+Publisher: LizardByte
+PublisherUrl: https://app.lizardbyte.dev/
+PublisherSupportUrl: https://app.lizardbyte.dev/#Support
+PackageName: Sunshine
+PackageUrl: https://github.com/LizardByte/Sunshine
+License: GPL-3.0
+LicenseUrl: https://github.com/LizardByte/Sunshine/blob/HEAD/LICENSE
+ShortDescription: Sunshine is a Gamestream host for Moonlight.
+Description: |-
+  Sunshine is a self hosted, low latency, cloud gaming solution with support for AMD,
+  Intel, and Nvidia GPUs.
+  It is an open source implementation of NVIDIA's GameStream, as used by the NVIDIA Shield.
+  Connect to Sunshine from any Moonlight client, available for nearly any device imaginable.
+Moniker: sunshine
+Tags:
+- gamestream
+- gaming
+- moonlight
+- stream
+- streaming
+ReleaseNotes: |-
+  ‼️ Attention
+  This release contains critical security updates. For more information see the following:
+  - GHSA-6w33-pjh7-p77c
+  - GHSA-6jvv-jqr7-m6m3
+  - GHSA-36ff-frg7-492f
+  - GHSA-26q2-58j6-qmvv
+  - GHSA-c428-87f8-rrv5
+  Please update as soon as possible!
+  ⚠️ Breaking changes and migration notes
+  - Windows NSIS (.exe) installers have been discontinued. Use the WiX-based .msi installer instead.
+  - Windows portable packages were renamed. Sunshine-Windows-{arch}-portable.zip is now Sunshine-Windows-{arch}-lite.zip. Update any fixed download URLs or automation. (#5405)
+  - Linux KMS display indices may be reordered. Configurations using a numeric output_name may need to reselect their display. Connector names such as DP-1 or HDMI-A-1 are now recommended. (#5489)
+  - Sunshine has migrated to libvirtualhid. It replaces Inputtino on Linux and ViGEmBus as the primary input backend on Windows AMD64, and also handles additional input functionality on macOS. Virtual-device names, controller identities, permissions, and application-specific mappings may change. (#5368)
+    - On Windows, full driver-backed gamepad, Raw Input keyboard, and Raw Input mouse support requires the separately installed Virtual HID Driver, an active machine license, and driver version 2026.905.2300.20 or newer. You can purchase a license from the Sunshine web-ui or our store. Lifetime and yearly subscription options are available.
+    - Existing ViGEmBus installations remain available only as a limited Xbox 360 and DualShock 4 fallback. Sunshine no longer bundles or installs ViGEmBus.
+    - Automatic gamepad emulation may now expose an Xbox Series controller instead of the previous Windows Xbox 360 or Linux Xbox One controller. Games and controller profiles may need to be reconfigured.
+    - See the Introducing libvirtualhid and Virtual HID Driver blog post for more information.
+  - The input configuration key ds5_inputtino_randomize_mac was renamed to virtualhid_randomize_mac. The old key is no longer recognized.
+  - The ViGEmBus Web API was replaced. GET /api/vigembus/status and POST /api/vigembus/install were removed. Integrations should migrate to GET /api/virtual-input/status and the new /api/virtual-input/license endpoints.
+  - Linux release filenames changed.
+    - sunshine.AppImage is now versioned and architecture-specific, for example Sunshine_2026.906.222525_x86_64.AppImage.
+    - Debian and Ubuntu packages now use native versioned filenames, for example sunshine_2026.906.222525-1+ubuntu24.04_amd64.deb.
+    - Automation using fixed GitHub release URLs must be updated.
+  - The prebuilt platform matrix changed.
+    - The minimum supported FreeBSD release increased from 14.4 to 15.1.
+    - Prebuilt FreeBSD aarch64 packages were removed; aarch64 users must compile Sunshine themselves. (#5516)
+    - Fedora 42 and openSUSE Leap 15.6 RPMs are no longer attached to GitHub releases.
+  - Sunshine no longer opens the Web UI automatically at startup. Open it manually when configuration is needed. (#5329)
+  - Log files now rotate at startup. Previous logs are retained as .1 through .5; log collectors may need rotation-aware handling. (#5485)
+  Source builders and downstream packagers
+  - The minimum required CMake version increased from 3.20 to 3.24.
+  - The system tray migrated to Qt on every platform. Downstream packages must provide the applicable Qt Widgets and SVG dependencies. (#5260)
+  - Python development dependencies moved from pip extras to uv dependency groups. Existing pip install ".[test]", .[lint], and similar workflows must migrate to uv sync and uv run. (#5222)
+  - Several build paths and submodules were removed or relocated, including Inputtino, GoogleTest, nanors, nv-codec-headers, the Flatpak shared-modules checkout, and the version-specific Ubuntu Dockerfiles. Downstream scripts and patches referencing these paths must be updated.
+  ✨ Highlights
+  - Expanded virtual input support. The new libvirtualhid integration adds Xbox 360, Xbox One, Xbox Series, DualShock 4, DualSense, Nintendo Switch Pro, and generic virtual gamepad profiles, along with broader keyboard, mouse, touchscreen, pen, and trackpad support. (#5368)
+  - Continued NVENC support for older NVIDIA GPUs on Windows. Sunshine now dynamically selects a compatible NVIDIA Video Codec SDK version at runtime, preserving hardware encoding support on older NVIDIA cards while retaining support for newer hardware. (#5451)
+  - Hardware YUV 4:4:4 and HDR encoding on NVIDIA Linux systems. CUDA and CUDA-GL capture paths can now provide higher-quality chroma reproduction, including HDR configurations. (#4965, #5315)
+  - Improved VA-API controls. New rate-control, quality, and block-level bitrate-control options provide greater control over AMD and Intel encoding behavior. (#5388)
+  - Major Wayland and PipeWire improvements. This release improves DMA-BUF modifier support, display switching, variable-rate capture, fractional refresh rates, unpaced capture, software-encoder buffers, and compatibility with KWin and other compositors.
+  - More reliable Linux display selection. Connector names such as DP-1 and HDMI-A-1 can now be used instead of unstable numeric display indices. (#5423)
+  - Qt-based system tray across all platforms. Sunshine now uses a unified, cross-platform tray implementation with improved behavior on Linux, macOS, Windows, AppImage, and Flatpak installations. (#5260)
+  - Improved macOS display management. Sunshine now uses libdisplaydevice to enumerate displays and apply or restore display changes, alongside improved scroll handling, display wake behavior, and microphone permission support. (#5338)
+  - Native aarch64 AppImage support. Linux ARM64 users can now download an official AppImage. (#5627)
+  - Better Web UI application management. The Applications page now supports filtering and searching, with refreshed Add, Edit, and Delete workflows and broader layout improvements.
+  - More resilient streaming behavior. Highlights include automatic SDR fallback when HDR is unavailable, improved video reinitialization, corrected fractional frame pacing, better modifier-key handling, and use of the configured Windows audio sink.
+  - Rotating logs and improved diagnostics. Startup logs are preserved across multiple runs, making crashes and initialization failures easier to troubleshoot. (#5485)
+  - Per-session client identification. Launched applications can read the connected client name from the new SUNSHINE_CLIENT_NAME environment variable. (#5465)
+  - Configurable RTSP packet size. The new packetsize option can improve compatibility with clients or networks that cannot configure an appropriate packet size themselves. (#5153)
+  - Easier Linux installation and updates through Cloudsmith. Official Sunshine DEB and RPM repositories are now available in stable and beta channels, allowing updates through apt, dnf, or zypper. See Introducing LizardByte's Cloudsmith repositories for setup instructions.
+  For a comprehensive list of changes, see below.
+  What's Changed
+  - build(deps): bump third-party/inputtino from f4ce2b0 to b887f6a by @dependabot[bot] in #5135
+  - fix(macos): scale remote scroll input using macOS scroll speed by @martona in #5133
+  - chore(deps): update dependency vue-i18n to v11.4.3 by @renovate[bot] in #5139
+  - chore: fixes for release automation by @ReenigneArcher in #5142
+  - chore(deps): update dependency vue-i18n to v11.4.4 by @renovate[bot] in #5143
+  - chore(deps): update dependency date-fns to v4.2.1 by @renovate[bot] in #5145
+  - chore(deps): update codecov/codecov-action action to v6.0.1 by @renovate[bot] in #5149
+  - fix(web): disconnect only the disabled client instead of all sessions by @neatnoise in #5138
+  - chore(deps): update dependency marked to v18.0.4 by @renovate[bot] in #5151
+  - chore: rename copilot-instructions.md to AGENTS.md by @ReenigneArcher in #5156
+  - fix(Windows-installer): move ViGEmBus to ThirdParty group by @ReenigneArcher in #5157
+  - feat(rtsp): add option to limit packetsize for clients that cannot configure it by @httpstorm in #5153
+  - feat(web-ui): Added Filtering & Searching to the Apps page by @Noklef in #5158
+  - build(deps): bump packaging/linux/flatpak/deps/flatpak-builder-tools from dda10aa to ee65dc7 by @dependabot[bot] in #5155
+  - chore(crowdin): set commit message by @ReenigneArcher in #5160
+  - chore(l10n): update translations by @LizardByte-bot in #5161
+  - fix(web): the packetsize upper limit is 65535 by @httpstorm in #5167
+  - chore(l10n): update translations by @LizardByte-bot in #5162
+  - chore(deps): update dependency date-fns to v4.3.0 by @renovate[bot] in #5172
+  - build(deps): bump packaging/linux/flatpak/deps/flatpak-builder-tools from ee65dc7 to 96e2fe8 by @dependabot[bot] in #5165
+  - chore(deps): update lizardbyte/actions action to v2026.522.121358 by @renovate[bot] in #5173
+  - fix(web-ui): add documentation link and version-aware URLs by @ReenigneArcher in #5176
+  - chore(deps): update lizardbyte/actions action to v2026.524.145234 by @renovate[bot] in #5177
+  - chore(deps): migrate from lucide-vue-next to @lucide/vue by @ReenigneArcher in #5179
+  - chore(l10n): update translations by @LizardByte-bot in #5178
+  - chore: Add CLion run configuration for 'sunshine' by @ReenigneArcher in #5181
+  - build(freebsd): fix npm install by @ReenigneArcher in #5182
+  - fix(linux): migrate to qt tray by @ReenigneArcher in #4907
+  - fix: explicitly check construct function error in thread_safe.h by @Kishi85 in #5184
+  - build(macos): quote SHOULD_SIGN env expansion in install script by @Nottlespike in #5185
+  - fix(macos/packaging): add NSLocalNetworkUsageDescription so Bonjour can register by @Nottlespike in #5186
+  - chore(l10n): update translations by @LizardByte-bot in #5193
+  - fix(linux/vulkan): preserve host aspect ratio in encoder output by @hebo6 in #5130
+  - fix(macos): drop max_ref_frames=1 for h264_videotoolbox and enable PARALLEL_ENCODING by @Nottlespike in #5200
+  - chore(deps): update dependency vue to v3.5.35 by @renovate[bot] in #5204
+  - chore(l10n): update translations by @LizardByte-bot in #5196
+ReleaseNotesUrl: https://github.com/LizardByte/Sunshine/releases/tag/v2026.906.222525
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

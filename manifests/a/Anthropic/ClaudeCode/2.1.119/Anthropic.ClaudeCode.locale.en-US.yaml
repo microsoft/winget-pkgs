@@ -1,0 +1,90 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Anthropic.ClaudeCode
+PackageVersion: 2.1.119
+PackageLocale: en-US
+Publisher: Anthropic PBC
+Author: Anthropic PBC
+PackageName: Claude Code
+License: Proprietary
+Copyright: © 2026 Anthropic PBC
+ShortDescription: Unleash Claude’s raw power directly in your terminal. Search million-line codebases instantly. Turn hours-long workflows into a single command. Your tools. Your workflow. Your codebase, evolving at thought speed.
+Description: |-
+  Claude Code is Anthropic’s agentic coding tool that lives in your terminal and helps you turn ideas into code faster than ever before.
+  What Claude Code does for you
+  - Build features from descriptions: Tell Claude what you want to build in plain English. It will make a plan, write the code, and ensure it works.
+  - Debug and fix issues: Describe a bug or paste an error message. Claude Code will analyze your codebase, identify the problem, and implement a fix.
+  - Navigate any codebase: Ask anything about your team’s codebase, and get a thoughtful answer back. Claude Code maintains awareness of your entire project structure, can find up-to-date information from the web, and with MCP can pull from external datasources like Google Drive, Figma, and Slack.
+  - Automate tedious tasks: Fix fiddly lint issues, resolve merge conflicts, and write release notes. Do all this in a single command from your developer machines, or automatically in CI.
+  Why developers love Claude Code
+  - Works in your terminal: Not another chat window. Not another IDE. Claude Code meets you where you already work, with the tools you already love.
+  - Takes action: Claude Code can directly edit files, run commands, and create commits. Need more? MCP lets Claude read your design docs in Google Drive, update your tickets in Jira, or use your custom developer tooling.
+  - Unix philosophy: Claude Code is composable and scriptable. tail -f app.log | claude -p "Slack me if you see any anomalies appear in this log stream" works. Your CI can run claude -p "If there are new text strings, translate them into French and raise a PR for @lang-fr-team to review".
+  - Enterprise-ready: Use Anthropic’s API, or host on AWS or GCP. Enterprise-grade security, privacy, and compliance is built-in.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claude
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  - /config settings (theme, editor mode, verbose, etc.) now persist to ~/.claude/settings.json and participate in project/local/policy override precedence
+  - Added prUrlTemplate setting to point the footer PR badge at a custom code-review URL instead of github.com
+  - Added CLAUDE_CODE_HIDE_CWD environment variable to hide the working directory in the startup logo
+  -  --from-pr now accepts GitLab merge-request, Bitbucket pull-request, and GitHub Enterprise PR URLs
+  -  --print mode now honors the agent's tools: and disallowedTools: frontmatter, matching interactive-mode behavior
+  -  --agent <name> now honors the agent definition's permissionMode for built-in agents
+  - PowerShell tool commands can now be auto-approved in permission mode, matching Bash behavior
+  - Hooks: PostToolUse and PostToolUseFailure hook inputs now include duration_ms (tool execution time, excluding permission prompts and PreToolUse hooks)
+  - Subagent and SDK MCP server reconfiguration now connects servers in parallel instead of serially
+  - Plugins pinned by another plugin's version constraint now auto-update to the highest satisfying git tag
+  - Vim mode: Esc in INSERT no longer pulls a queued message back into the input; press Esc again to interrupt
+  - Slash command suggestions now highlight the characters that matched your query
+  - Slash command picker now wraps long descriptions onto a second line instead of truncating
+  - owner/repo#N shorthand links in output now use your git remote's host instead of always pointing at github.com
+  - Security: blockedMarketplaces now correctly enforces hostPattern and pathPattern entries
+  - OpenTelemetry: tool_result and tool_decision events now include tool_use_id; tool_result also includes tool_input_size_bytes
+  - Status line: stdin JSON now includes effort.level and thinking.enabled
+  - Fixed pasting CRLF content (Windows clipboards, Xcode console) inserting an extra blank line between every line
+  - Fixed multi-line paste losing newlines in terminals using kitty keyboard protocol sequences inside bracketed paste
+  - Fixed Glob and Grep tools disappearing on native macOS/Linux builds when the Bash tool is denied via permissions
+  - Fixed scrolling up in fullscreen mode snapping back to the bottom every time a tool finishes
+  - Fixed MCP HTTP connections failing with "Invalid OAuth error response" when servers returned non-JSON bodies for OAuth discovery requests
+  - Fixed Rewind overlay showing "(no prompt)" for messages with image attachments
+  - Fixed auto mode overriding plan mode with conflicting "Execute immediately" instructions
+  - Fixed async PostToolUse hooks that emit no response payload writing empty entries to the session transcript
+  - Fixed spinner staying on when a subagent task notification is orphaned in the queue
+  - Tool search is now disabled by default on Vertex AI to avoid an unsupported beta header error (opt in with ENABLE_TOOL_SEARCH)
+  - Fixed @-file Tab completion replacing the entire prompt when used inside a slash command with an absolute path
+  - Fixed a stray p character appearing at the prompt on startup in macOS Terminal.app via Docker or SSH
+  - Fixed ${ENV_VAR} placeholders in headers for HTTP/SSE/WebSocket MCP servers not being substituted before requests
+  - Fixed MCP OAuth client secret stored via --client-secret not being sent during token exchange for servers requiring client_secret_post
+  - Fixed /skills Enter key closing the dialog instead of pre-filling /<skill-name> in the prompt
+  - Fixed /agents detail view mislabeling built-in tools unavailable to subagents as "Unrecognized"
+  - Fixed MCP servers from plugins not spawning on Windows when the plugin cache was incomplete
+  - Fixed /export showing the current default model instead of the model the conversation actually used
+  - Fixed verbose output setting not persisting after restart
+  - Fixed /usage progress bars overlapping with their "Resets …" labels
+  - Fixed plugin MCP servers failing when ${user_config.*} references an optional field left blank
+  - Fixed list items containing a sentence-final number wrapping the number onto its own line
+  - Fixed /plan and /plan open not acting on the existing plan when entering plan mode
+  - Fixed skills invoked before auto-compaction being re-executed against the next user message
+  - Fixed /reload-plugins and /doctor reporting load errors for disabled plugins
+  - Fixed Agent tool with isolation: "worktree" reusing stale worktrees from prior sessions
+  - Fixed disabled MCP servers appearing as "failed" in /status
+  - Fixed TaskList returning tasks in arbitrary filesystem order instead of sorted by ID
+  - Fixed spurious "GitHub API rate limit exceeded" hints when gh output contained PR titles mentioning "rate limit"
+  - Fixed SDK/bridge read_file not correctly enforcing size cap on growing files
+  - Fixed PR not linked to session when working in a git worktree
+  - Fixed /doctor warning about MCP server entries overridden by a higher-precedence scope
+  - Windows: removed false-positive "Windows requires 'cmd /c' wrapper" MCP config warning
+  - [VSCode] Fixed voice dictation's first recording producing nothing on macOS while the microphone permission prompt is showing
+ReleaseNotesUrl: https://github.com/anthropics/claude-code/blob/HEAD/CHANGELOG.md#21119
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

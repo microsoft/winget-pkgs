@@ -1,0 +1,77 @@
+# Created with WinGet Releaser using komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.30.0
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Improved
+  - wt merge --no-ff: Create a merge commit instead of fast-forwarding, for semi-linear history (rebased commits plus a merge commit). Also available as merge.no-ff = true in user config. Docs (#1438, thanks @siriobalmelli)
+  - wt step eval [experimental]: Evaluate template expressions from the command line. All hook variables (branch, repo, worktree_path) and filters (hash_port, sanitize, sanitize_db) are available. Designed for scripting: curl http://localhost:$(wt step eval '{{ branch | hash_port }}')/health. Docs (#1004, thanks @EduardoSimon for the feature request in #947)
+  - wt step push --no-ff: Mirrors wt merge --no-ff for manual step-by-step workflows: wt step commit && wt step rebase && wt step push --no-ff. (#1587)
+  - Worktree removal now hidden: Removed worktrees are staged in .git/wt/trash/ instead of a visible .wt-removing-* sibling directory. All worktrunk state consolidated under .git/wt/. (#1583, thanks @ortonomy for reporting #1572)
+  Fixed
+  - wt merge could remove the default branch worktree in bare repos: In bare repository layouts, merging from the default branch worktree could remove it instead of preserving it. (#1620, thanks @viicslen for reporting #1618)
+  - wt switch panicked on empty picker selection: Entering a non-existent branch name in the interactive picker caused a panic. Now returns an error message gracefully. (#1566, thanks @dlnilsson for reporting #1565)
+  - copy-ignored lost directory permissions: Source directory permissions (e.g., mode 0700 for Postgres data directories) were replaced with default 0755. (#1590, thanks @RileyMathews for reporting #1589)
+  - copy-ignored failed on broken symlinks at destination: If a gitignored file's destination was already an invalid symlink, the copy failed with "No such file or directory". (#1549, thanks @armstrjare for reporting #1547)
+  - Nushell $env.PWD errors after wt remove: Removing a worktree from inside it produced repeated $env.PWD points to a non-existent directory errors in Nushell. (#1508, thanks @mystilleef for reporting #1507)
+  - Remote URL used insteadOf rewrites: wt list and PR detection used the rewritten remote URL instead of the raw config value, causing mismatches with CI and forge detection. (#1546, thanks @volkanbicer)
+  - SIGPIPE from pager quit treated as error: Quitting a pager (e.g., q in less) during wt step diff showed "terminated by signal 13" instead of exiting cleanly. (#1559)
+  - Missing vs corrupt git config errors conflated: Missing config keys and corrupt config files both returned the same error, making corrupt configurations hard to diagnose. (#1610)
+  - Shell operator precedence in remove command: The || true for fsmonitor stop had incorrect precedence, potentially swallowing failures from the entire removal chain. (#1584)
+  - Missing shell escaping in error hints: Branch names and paths in suggested cd ... && git switch ... commands were not shell-escaped. (#1584)
+  Documentation
+  - pnpm post-create example: Added a recipe for running pnpm install after worktree creation via copy-ignored. (#1581)
+  - Hook execution order: Clarified that post-create hooks run before post-start hooks. (#1573)
+  Install worktrunk 0.30.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/max-sixty/worktrunk/releases/download/v0.30.0/worktrunk-installer.sh | sh && wt config shell install
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/max-sixty/worktrunk/releases/download/v0.30.0/worktrunk-installer.ps1 | iex"; git-wt config shell install
+  Install prebuilt binaries via Homebrew
+  brew install worktrunk && wt config shell install
+  Download worktrunk 0.30.0
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+  Install via Cargo
+  cargo install worktrunk && wt config shell install
+  Install via Winget (Windows)
+  winget install max-sixty.worktrunk && git-wt config shell install
+  Install via AUR (Arch Linux)
+  paru worktrunk-bin && wt config shell install
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.30.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

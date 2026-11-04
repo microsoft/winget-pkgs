@@ -1,0 +1,59 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Anthropic.ClaudeCode
+PackageVersion: 2.1.183
+PackageLocale: en-US
+Publisher: Anthropic PBC
+Author: Anthropic PBC
+PackageName: Claude Code
+License: Proprietary
+Copyright: © 2026 Anthropic PBC
+ShortDescription: Unleash Claude’s raw power directly in your terminal. Search million-line codebases instantly. Turn hours-long workflows into a single command. Your tools. Your workflow. Your codebase, evolving at thought speed.
+Description: |-
+  Claude Code is Anthropic’s agentic coding tool that lives in your terminal and helps you turn ideas into code faster than ever before.
+  What Claude Code does for you
+  - Build features from descriptions: Tell Claude what you want to build in plain English. It will make a plan, write the code, and ensure it works.
+  - Debug and fix issues: Describe a bug or paste an error message. Claude Code will analyze your codebase, identify the problem, and implement a fix.
+  - Navigate any codebase: Ask anything about your team’s codebase, and get a thoughtful answer back. Claude Code maintains awareness of your entire project structure, can find up-to-date information from the web, and with MCP can pull from external datasources like Google Drive, Figma, and Slack.
+  - Automate tedious tasks: Fix fiddly lint issues, resolve merge conflicts, and write release notes. Do all this in a single command from your developer machines, or automatically in CI.
+  Why developers love Claude Code
+  - Works in your terminal: Not another chat window. Not another IDE. Claude Code meets you where you already work, with the tools you already love.
+  - Takes action: Claude Code can directly edit files, run commands, and create commits. Need more? MCP lets Claude read your design docs in Google Drive, update your tickets in Jira, or use your custom developer tooling.
+  - Unix philosophy: Claude Code is composable and scriptable. tail -f app.log | claude -p "Slack me if you see any anomalies appear in this log stream" works. Your CI can run claude -p "If there are new text strings, translate them into French and raise a PR for @lang-fr-team to review".
+  - Enterprise-ready: Use Anthropic’s API, or host on AWS or GCP. Enterprise-grade security, privacy, and compliance is built-in.
+Moniker: claudecode
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claude
+- claude-code
+- claudecode
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  - Improved auto mode safety: destructive git commands (git reset --hard, git checkout -- ., git clean -fd, git stash drop) are now blocked when you didn't ask to discard local work, git commit --amend is blocked when the commit wasn't made by the agent this session, and terraform destroy/pulumi destroy/cdk destroy are blocked unless you asked for the specific stack
+  - Added a warning when the requested model is deprecated or automatically updated to a newer model, shown on stderr in print mode (-p) and now also covering models set in agent frontmatter
+  - Added attribution.sessionUrl setting to omit the claude.ai session link from commits and PRs in web and Remote Control sessions
+  - Added /config --help to list all available shorthand keys for /config key=value
+  - Changed /config toggle behavior: Enter and Space both change the selected setting, and Esc now saves and closes instead of reverting
+  - Removed the startup "setup issues" line under the logo — run /doctor to see configuration issues or use --debug
+  - Fixed thinking.disabled.display: Extra inputs are not permitted 400 errors on subagent spawns and session-title generation for affected configurations
+  - Fixed WebSearch returning empty results in subagents
+  - Fixed the terminal cursor being stranded above the prompt after navigating history in vim mode with the native cursor enabled
+  - Fixed fullscreen TUI corruption (statusline mid-screen, duplicated spinner rows, merged text) in Windows Terminal under heavy nested-subagent load
+  - Fixed turns silently completing with no visible output when the model returned only a thinking block; Claude now re-prompts once
+  - Fixed user-level skills appearing multiple times in slash-command autocomplete when multiple plugins are enabled
+  - Fixed MCP servers requiring authentication exposing auth-stub tools to the model in headless/SDK mode
+  - Fixed tmux teammate panes failing to launch when the shell has slow rc-file initialization, and keystrokes typed during agent spawn leaking into the new tmux pane instead of the leader prompt
+  - Fixed background tasks started by a teammate being killed when the teammate finishes a turn
+  - Fixed scheduled task and webhook trigger deliveries being treated as keyboard input; they now classify as task notifications and can no longer approve a pending action or set the session title in auto mode
+  - Fixed focus mode showing "Ran N PostToolUse hooks" timing lines under each response
+ReleaseNotesUrl: https://github.com/anthropics/claude-code/blob/HEAD/CHANGELOG.md#21183
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

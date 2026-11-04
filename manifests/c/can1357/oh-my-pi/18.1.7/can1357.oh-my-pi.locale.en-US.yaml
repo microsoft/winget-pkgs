@@ -1,0 +1,78 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.1.7
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Fixed
+  - Fixed DeepSeek-family Responses replay (e.g. opencode-go) rejecting a resumed thinking-mode turn with 400 The reasoning_text in the thinking mode must be passed back to the API when compaction dropped the turn's reasoning; a non-empty placeholder is now synthesized instead of an empty reasoning_text (#10690).
+  @oh-my-pi/pi-coding-agent
+  Breaking Changes
+  - Removed the Ruby and Julia eval backends and related interpreter configuration; eval now supports Python and JavaScript only.
+  - Removed the eval parallel() and pipeline() helpers. agent() and completion() now return handles immediately, and wait(handles) provides synchronization.
+  - Python eval tool calls are now asynchronous coroutines, matching JavaScript; use await tool.read() and similar calls.
+  Added
+  - Added asynchronous eval agent and completion handles with status, cancellation, messaging, waiting, and automatic result delivery for unwaited background work.
+  - Added eval workpools for queueing items onto the least context-loaded keep-alive subagent with configurable concurrency; the pool name is its async-job ID for hub wait, .peek() gives a non-consuming snapshot, per-item {key, data|error} yields finish batches incrementally, and eval.workpool.freshAgents opts into a new agent per item.
+  - Added support for defining eval tools in Python with @tool or JavaScript with tool(fn, schema), and exposing them to subagents through task, agent, and workpool calls. Configure availability with eval.tools.enabled.
+  - Added native Windows ARM64 binaries with architecture-aware installation and updates.
+  - Added an MLX backend for running local tiny models on Apple silicon. Configure providers.tinyModelDevice=mlx, or use PI_TINY_DEVICE=mlx or metal, to run title generation, memory tasks, and automatic thinking classification with MLX models, with an ONNX CPU fallback when Python is unavailable.
+  - Added Qwen3 1.7B as a local memory and thinking-classification model for the MLX backend.
+  Changed
+  - Local tiny models for titles, memory, and automatic thinking classification now share on-demand workers across omp processes, reducing redundant resource usage; workers stop automatically after inactivity.
+  - PI_TINY_DEVICE=metal now selects the MLX backend on macOS.
+  - Updated agent reactions to trigger on the opening emoji instead of requiring a newline, consuming any following whitespace.
+  Fixed
+  - Fixed transient provider retries incorrectly failing with an “Agent is already processing” error.
+  - Fixed user-scope marketplace plugins installed through omp losing their skills when the Claude plugin source was not separately enabled.
+  - Fixed hashline edits failing when targets included apply_patch markers, while rejecting ambiguous bracketed targets instead of editing the wrong path.
+  - Fixed bracketed hashline edit targets being reported as undefined to extension path allowlists.
+  - Fixed MCP tools discovered during startup disappearing after plan-mode approval or when leaving default-on plan mode.
+  - Fixed ACP clients receiving invalid file locations or updates for released terminals, preventing invalid worktree scans and terminal errors on Windows.
+  @oh-my-pi/pi-natives
+  Added
+  - Added Windows ARM64 native addon support, including platform-specific npm packages.
+  @oh-my-pi/pi-utils
+  Added
+  - Added the public getTinyWorkerRuntimeDir() utility, which returns the standard ~/.omp/run/tiny directory for tiny-worker runtime data.
+  What's Changed
+  - fix(discovery): restore omp marketplace plugin skills by @roboomp in https://github.com/can1357/oh-my-pi/pull/10666
+  - fix(acp): filter invalid read locations by @roboomp in https://github.com/can1357/oh-my-pi/pull/10680
+  - fix(coding-agent): preserve MCP tools after plan mode by @roboomp in https://github.com/can1357/oh-my-pi/pull/10685
+  - fix(coding-agent): parse bracketed hashline event paths by @roboomp in https://github.com/can1357/oh-my-pi/pull/10689
+  - fix(ai): synthesize non-empty reasoning_text on DeepSeek Responses replay by @roboomp in https://github.com/can1357/oh-my-pi/pull/10695
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.1.6...v18.1.7
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.1.7
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

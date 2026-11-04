@@ -1,0 +1,76 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: zufuliu.notepad4.AVX2
+PackageVersion: 26.01r5986
+PackageLocale: en-US
+Publisher: Zufu Liu
+PublisherUrl: https://github.com/zufuliu
+PublisherSupportUrl: https://github.com/zufuliu/notepad4/issues
+PackageName: Notepad4 (AVX2)
+PackageUrl: https://github.com/zufuliu/notepad4
+License: BSD 3-Clause License
+LicenseUrl: https://github.com/zufuliu/notepad4/blob/main/License.txt
+Copyright: Notepad4 Copyright © 2011-2024 Zufu Liu and All contributors.
+CopyrightUrl: https://github.com/zufuliu/notepad4/blob/main/License.txt
+ShortDescription: Notepad4 (Notepad2⨯2, Notepad2++) is a light-weight Scintilla based text editor for Windows with syntax highlighting, code folding, auto-completion and API list for many programming languages and documents, bundled with file browser plugin matepath.
+Moniker: notepad4-avx2
+Tags:
+- arm64
+- dark-theme
+- editor
+- matepath
+- metapath
+- noteoad2
+- notepad2-mod
+- notepad4
+- scintilla
+- syntax-highlighting
+ReleaseNotes: |-
+  * Support regex replace with JavaScript notation `$n`, `$&` and `$$` (see table below), issue #1019.
+  * Auto show menu on press `Alt` key when menu is hide, issue #1047.
+  * Add Unicode control character U+00AD (`SHY`, Soft hyphen), issue #1127.
+  * Use `%LOCALAPPDATA%\Notepad4` (e.g. `C:\Users\<username>\AppData\Local\Notepad4`) folder to store INI file for WinGet or Chocolatey installation to prevent INI overwriting on upgrading, contributed by @lostindark in PR #1069.
+  * Lexer and API updates: CSS, HTML, Lua, Perl, PHP.
+  * Fix automatic word wrap incorrectly breaks inside non-CJK word, issue #1130.
+  * Fix dialog layout after dialog been moved to monitor with different scaling settings, issue #1047.
+  * Fix GDI rendering bug for font with inaccurate `tmAveCharWidth`, issue #1118.
+  * Fix long standing bug that local INI file got accidentally overwritten when upgrade to new version by change INI file in zip to use `.ini-default` extension (copy to `.ini` on first run), issue #1142
+  * Other bug fixes and improvements.
+
+  Behavior Changes
+  * Some characters got special meaning on regex replacing and needs escaping, see following table:
+
+  | Characters | Remarks |
+  | - | - |
+  | `$n` | ⚡New in v26.01, refer to a region on replacing (same as `\n`, where `n` is 0 - 9), `$0` is whole matched text. |
+  | `$&` | ⚡New in v26.01, same as `\0` or `$0`, refer to whole matched text. |
+  | `$$` | ⚡New in v26.01, literal dollar character, U+0024. |
+  | `\0` - `\9` | Refer to a region on finding or replacing. `\0` is whole matched text, can only be used for replacing. |
+  | `\\` | Literal backslash character, U+005C. |
+  | `\a` | Alert (BEL, U+0007) |
+  | `\b` | Backspace (BS, U+0008) |
+  | `\e` | ⚡New in v26.01, Escape (ESC, U+001B) |
+  | `\f` | Formfeed (FF, U+000C) |
+  | `\n` | Newline (LF, U+000A) |
+  | `\r` | Carriage return (CR, U+000D) |
+  | `\t` | Horizonal Tab (HT, U+0009) |
+  | `\v` | Vertical Tab (VT, U+000B) |
+
+  * Transform backslash now treats `\xHH` as octet in current code page instead of UTF-16 code point, this consistent with built-in regex engine. `\uHHHH` is still treated as UTF-16 code point (for Basic Multilingual Plane only).
+  * Program INI file searching was changed:
+    * For portable package, only exe folder will be checked with hard-code INI file (`Notepad4.ini` or `matepath.ini`).
+    * For WinGet or Chocolatey installation (actually when program is found on path with `WinGet` or `Chocolatey` in the name), only `%LOCALAPPDATA%\Notepad4` folder will be checked with hard-code INI file (`Notepad4.ini` or `matepath.ini`).
+    * Dark mode theme INI file is only checked in same folder as main INI file with hard-coded name `Notepad4 DarkTheme.ini`.
+    * Folder `%APPDATA%\Notepad4` (e.g. `C:\Users\<username>\AppData\Roaming\Notepad4`) and `%USERPROFILE%\Notepad4` (e.g. `C:\Users\<username>\Notepad4`) are no longer searched.
+    * INI file with same name as program exe but different than `Notepad4.ini` or `matepath.ini` is no longer searched. system command `mklink` (see https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/mklink) can be used to make symbolic link for program exe and/or INI files.
+  * Searching for custom toolbar image was changed, when the specified path (after expanding environment variables) is relative, it's only treated as relative to program INI file, no longer treated as relative to program exe file.
+
+  Breaking Changes
+  * Support for INI redirection was removed. system command `mklink` (see https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/mklink) can be used to make symbolic link for INI file, issue #1141.
+  * Command line option `/f path` that used to specify program INI file path was removed, issue #1141.
+  * Dialog size is changed to save in dialog unit instead of screen pixel to ensure same layout when open and close dialog on monitor with different scaling settings, issue #1047. You can clear window position history to fix larger dialogs when using new program with existing INI file:
+    * Notepad4: click menu "Settings -> Window Options -> Clear Position history".
+    * matepath: right-click then open "Options..." dialog, click "Clear window position history" on "General" tab.
+ReleaseNotesUrl: https://github.com/zufuliu/notepad4/releases/tag/v26.01r5986
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

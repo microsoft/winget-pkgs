@@ -1,0 +1,152 @@
+# Created using wingetcreate 1.12.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Bennewitz.Ninja.ClaudeForge
+PackageVersion: 2026.3.916
+PackageLocale: en-US
+Publisher: Brian Bennewitz
+PublisherUrl: https://github.com/JanusMael
+PublisherSupportUrl: https://github.com/JanusMael/ClaudeForge/issues
+Author: Brian Bennewitz
+PackageName: ClaudeForge
+PackageUrl: https://github.com/JanusMael/ClaudeForge
+License: MIT
+LicenseUrl: https://github.com/JanusMael/ClaudeForge/blob/main/LICENSE
+Copyright: Copyright (c) 2024-2026 ClaudeForge Contributors
+CopyrightUrl: https://github.com/JanusMael/ClaudeForge/blob/main/LICENSE
+ShortDescription: A cross-platform desktop editor for Claude Code and Claude Desktop configuration files.
+Description: ClaudeForge is a cross-platform desktop editor for Claude Code and Claude Desktop configuration. It provides schema-validated, guided editors for settings.json, permission allow/deny/ask rules, hooks, MCP servers, environment variables, the model catalog, user-memory files, and agents/skills/slash-commands — plus backup and restore.
+Moniker: claudeforge
+Tags:
+- claude
+- claude-code
+- anthropic
+- ai
+- configuration
+- settings
+- editor
+- developer-tools
+- avalonia
+- dotnet
+ReleaseNotes: |-
+  ## Downloads
+
+  | Platform              | Architecture   | File                                                                       |
+  |-----------------------|----------------|----------------------------------------------------------------------------|
+  | Windows               | x64            | `ClaudeForge-win-x64.zip`                                       |
+  | Windows               | ARM64          | `ClaudeForge-win-arm64.zip`                                     |
+  | Linux                 | x64            | `ClaudeForge-linux-x64.tar.gz`                                  |
+  | Linux                 | ARM64          | `ClaudeForge-linux-arm64.tar.gz`                                |
+  | macOS (Intel)         | x64            | `ClaudeForge-osx-x64.tar.gz`                                    |
+  | macOS (Apple Silicon) | ARM64          | `ClaudeForge-osx-arm64.tar.gz`                                  |
+
+  The version (2026.3.916) is encoded in the release tag rather than in
+  the archive filenames — publish.ps1 produces unversioned artefact names
+  so local dev builds and CI builds share one filename pattern.
+
+  **Linux:** Extract, then run the bundled `linux-setup.sh` to install a per-user `.desktop` entry so Wayland compositors render the window icon correctly:
+  ```bash
+  tar -xzf ClaudeForge-linux-x64.tar.gz -C ~/ClaudeForge
+  cd ~/ClaudeForge
+  ./linux-setup.sh
+  ./ClaudeForge
+  ```
+
+  **macOS:** The binary is unsigned. Use the bundled `allow-app-to-run.sh` to strip the Gatekeeper quarantine xattr from every file in the extracted directory:
+  ```bash
+  tar -xzf ClaudeForge-osx-arm64.tar.gz -C ~/ClaudeForge
+  cd ~/ClaudeForge
+  ./allow-app-to-run.sh
+  ./ClaudeForge
+  ```
+
+  ---
+
+  ## What's Changed
+
+  ### Fixed
+
+  - **Skill and agent descriptions were often wrong, blank, or literally `>-`.** The
+    front-matter parser understood plain and quoted scalars, inline and block lists —
+    and nothing else. Every other shape that occurs in real skill files read back as
+    the wrong value. Three shapes mattered, found by surveying all 236 front-matter
+    files under `~/.claude`:
+    - **Folded and literal block scalars** (`description: >-`, `description: |`).
+      Nearly every skill Claude Code ships writes its description this way, because
+      the prose contains quotes and colons a plain scalar would have to escape. The
+      header token was read as the value, so the Agents & Skills list, the detail
+      pane and the editor all showed `>-`.
+    - **Multi-line flow scalars** — a value carried across indented lines with no
+      block indicator at all. Nothing follows the colon in that form, so the value
+      read as empty and the prose fell through as unparsed filler. Anthropic's own
+      `math-olympiad` plugin skill showed **"(no description)"**.
+    - **Nested mappings** (`metadata:` with indented keys beneath it) were flattened
+      into phantom top-level fields, and writing one re-rendered it at column 0 —
+      silently lifting it out of its parent. A mapping is now consumed whole and
+      re-emitted verbatim.
+
+    All three chomping indicators (`-`, `+`, none) and explicit indentation
+    indicators are handled. A description carrying newlines is flattened for the list
+    row, which is a single ellipsised line; the detail pane and editor keep the real
+    multi-line value.
+
+  - **Editing one description reformatted the whole file.** An edited field now keeps
+    the shape it arrived in — a folded description is written back folded, and a
+    value spread over several lines stays spread over several lines rather than
+    collapsing into one very long plain line.
+
+  - **Saving a Windows skill file rewrote its line endings.** Parsing stripped the
+    `\r` from each line, so a CRLF file whose block scalar came back untouched was
+    written out with LF inside the block and CRLF everywhere else. Opening a file and
+    saving it with no edits left it with mixed line endings.
+
+  - **Deep links into a tab only worked on one page.** Only Agents & Skills could
+    consume a tab segment; every settings page — Hooks, Permissions, General, all of
+    them — silently dropped it and landed on whichever tab it defaulted to, and never
+    persisted a tab, so place-keeping could not bring one back either.
+    `--deep-link claude-code/permissions/properties` had been documented as working
+    the whole time. Settings pages, Effective Settings and Backup / Restore now all
+    round-trip their tab, and a tab contributed by the per-group customizer addresses
+    exactly like a built-in one — `--deep-link claude-code/hooks/hooks.flow` opens the
+    Hooks flow diagram.
+
+  - **Plugin artifacts forgot where you were.** A remembered position is qualified as
+    `name@source`, and a plugin's source is itself a path — so the saved path split
+    into too many segments, was rejected, and every plugin artifact's position was
+    discarded on the next launch. **Copy deep link** handed out the same unusable
+    string. Path separators inside a source are now written as `:`; both spellings
+    are accepted if you type one by hand.
+
+  - **Screen readers announced every tab in the app by its class name.** Tabs are
+    focusable and selectable, so a screen-reader user lands on one — but unnamed, UI
+    Automation falls back to the bound item's type. Settings pages announced their
+    tabs as `Bennewitz.Ninja.ClaudeForge.ViewModels.GroupTab`, and Agents & Skills
+    announced its own as `Avalonia.Controls.ScrollViewer`. Every tab now announces
+    its visible name.
+
+  ### Added
+
+  - **`docs/YAML-FRONT-MATTER.md`** — a reference for which YAML tokens the editor
+    supports, which round-trip verbatim by design (nested mappings, anchors, aliases,
+    tags), and why implicit type coercion is deliberately not applied so `name: yes`
+    never becomes `name: true` in a file you only opened.
+
+  - **New deep-link targets**, documented in the README: `claude-code/hooks/hooks.flow`,
+    `effective-settings/json`, `backup-restore/restore`. Every settings page accepts
+    `properties`, `effective` and `json`.
+
+  ### Changed
+
+  - **The accessibility guard now covers tabs.** `TabItem` was absent from its list of
+    interactive controls, so that entire class of control had gone unexamined in every
+    file since the test was written. Adding it is what stops the tab-naming problem
+    returning.
+
+  - An unrecognised tab id in a deep link is now reported as a miss rather than being
+    applied silently and ignored.
+ReleaseNotesUrl: https://github.com/JanusMael/ClaudeForge/releases/tag/v2026.3.916
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/JanusMael/ClaudeForge/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

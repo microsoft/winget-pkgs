@@ -1,0 +1,87 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: xLightsSequencer.xLights
+PackageVersion: '2026.17'
+PackageLocale: en-US
+Publisher: xLightsSequencer
+PublisherUrl: https://github.com/xLightsSequencer/
+PublisherSupportUrl: https://github.com/xLightsSequencer/xLights/issues
+PackageName: xLights
+PackageUrl: https://github.com/xLightsSequencer/xLights
+License: GPL-3.0
+LicenseUrl: https://github.com/xLightsSequencer/xLights/blob/HEAD/License.txt
+ShortDescription: xLights is a free and open source program that enables you to design, create and play amazing lighting displays through the use of DMX controllers, E1.31 Ethernet controllers and more.
+ReleaseNotes: |-
+  2026.17 — September 8, 2026
+  Enhancements
+  - dkulp — Renders on sequences with many models start sooner - preparing the per model render buffers now runs across cores
+  - dkulp — Setting up a render now happens off the UI thread, so starting one on a large sequence no longer freezes the interface while it is prepared
+  - dkulp — Large shows start renders faster, most noticeably on slower machines
+  - dkulp — The render progress dialog opens faster on large sequences
+  - dkulp — Large speedup rendering the Faces effect on big matrix models
+  - bulldozer2003 — Matrix faces now support movement, positioning, and scaling controls matching the Pictures effect (direction, X/Y offset, start/end scale, wrap, pixel offsets, vector mode)
+  - derwin12 — ML stem separation (Drums/Bass/Other/Vocals) now saves each stem as an alternate audio track under Sequence Settings > Audio Tracks, so they survive closing the sequence and don't need reprocessing (#6856)
+  - derwin12 — Picking a video/picture/other media file outside the show or media folders now also offers "Copy to sequence's imported media folder", which files it under ImportedMedia// instead of the show folder root (#7013)
+  - scott — Custom Model Wiring view: added a text size slider and a "3D (drag to rotate)" mode using each node's real depth - Cube models, which now also support the Wiring view, use it by default
+  - scott — The Custom Model Wiring dialog now remembers its size and position
+  - derwin12 — House Preview's "Keep on Top" setting is now remembered across restarts and reapplied automatically when it's undocked again
+  - derwin12 — The Presets dialog now shows the count of blank rows alongside its other row counts (#6975)
+  - scott — Added an MCP (Model Context Protocol) server alongside the existing REST Automation API, so MCP-aware AI tools can drive xLights over the same xFade port (POST /mcp)
+  - derwin12 — Windows: added a TestHeadlessRenderOptions Lua script that renders the sequence(s) several times with different GPU and hardware decode options and recommends a setting (#7014)
+  - dkulp — Windows: the preview graphics "Auto" setting now falls back to Vulkan when the machine has no vendor display driver or is on Remote Desktop, where OpenGL cannot be hardware accelerated
+  - derwin12 — Increased logging around FPP Connect errors, to help diagnose upload and discovery failures (#7024)
+  - dkulp — Windows: record the graphics adapters, the OpenGL renderer and the Vulkan device in the log and in crash reports, so a machine running the generic Microsoft display driver can be identified
+  - dkulp — Linux: log the graphics adapters (name, PCI id and kernel driver), which was previously reported on macOS and Windows only
+  - dkulp — Log each display's refresh rate, the highest rate it offers at its current resolution, and whether it is variable - a sequence asking for more frames per second than the display can present cannot preview at its own rate
+  Bug Fixes
+  - dkulp — Playback no longer stalls on a render it triggered - a model that needs re-rendering mid playback is picked up on a later frame
+  - dkulp — Fix a crash rendering a model group while the layout was being edited
+  - dkulp — Fix a crash rendering a model group after models were replaced by a base show folder sync
+  - dkulp — Fix a deadlock renaming a model, or loading model groups, while a render was in progress
+  - dkulp — Fix a crash from two threads finishing renders at the same time
+  - dkulp — The Batch Render dialog no longer flashes a progress window while it scans for sequences unless the scan is actually slow
+  - dkulp — Batch Render no longer crashes when one of the selected sequences cannot be opened - it is skipped and the rest of the batch continues
+  - dkulp — The Render Progress window stays above xLights without stealing keyboard focus every time the main window is clicked
+  - AGFazio — Windows: fix xLights hanging when a sequence frame takes longer than the frame interval - most easily hit by creating a 40fps animation sequence and dropping an effect (#7002)
+  - dkulp — Fix the Ripple effect drawing garbage, or spinning, when its timing trigger Duration is no longer than one frame
+  - derwin12 — Fix the Bars effect wrapping the first row/column to the wrong color when the buffer size didn't divide evenly by the color count (#6988)
+  - derwin12 — Fix a possible crash in the Butterfly and Plasma effects when handed a palette with more than eight colors (#6999)
+  - derwin12 — Fix Windows OS-font Text effects rendering corrupted or broken glyphs on small buffers such as a 35x7 matrix (#6995)
+  - derwin12 — Fix the Text effect's Color Per Word setting not affecting the render - toggling the checkbox kept serving a stale cached image
+  - dkulp — A Pictures effect whose image file was missing is picked up again on the next render once the file is put in place, instead of staying red until the sequence is reopened
+  - dkulp — Fix a crash rendering a Moving Head effect whose colour setting held a partial colour, and no longer crash when a moving head group contains a model that is not a moving head
+  - derwin12 — Fix an Off effect on a moving head/DMX fixture with a dimmer resetting pan/tilt/color channels to black instead of just turning off the dimmer, which snapped the head out of position (#6990)
+  - derwin12 — Fix the Moving Head effect's Dimmer/Pathing/Pattern tabs staying disabled after dropping the effect on a fixture group or checking a fixture, and staying enabled after unchecking all fixtures or clicking None
+  - derwin12 — Fix the missing material on the 3D Moving Head model's head mesh
+  - derwin12 — Fix switching an effect's Render Style to "Per Preview" on a model group no longer applying the group's configured Default Camera - it was silently staying on 2D
+  - dkulp — Fix a crash releasing the mouse in the Sketch effect assist panel after the selected path changed mid-drag
+  - dkulp — macOS: uncompressed (rawvideo) .mov files no longer stop rendering after a few renders on macOS 26.7 ("no decodable frames" / blank video)
+  - dkulp — macOS: videos with B-frames (most H.264/HEVC .mp4) started two frames late and re-decoded repeatedly for each frame requested past the end of the file
+  - dkulp — Windows: a hardware decoded video no longer silently drops to software decode whenever the effect starts part way into the file
+  - dkulp — Fixed a crash rendering a Video effect when the decoder switched mid-file (hardware decode dropping back to software)
+  - dkulp — Fix a crash generating the preview for a video effect
+  - derwin12 — Fix Export House Preview Video appearing to hang when the House Preview is undocked with Keep on Top enabled - its window was covering the export dialogs (#7003)
+  - dkulp — Fixed a crash opening a show folder containing a Poly Line or Multi Point model saved with fewer than two points
+  - dkulp — A Multi Point model with a single light no longer loads as two lights
+  - derwin12 — Fix the "model perhaps flipped" warning firing on nearly every two- point model (Single Line, Matrix, Arches, Icicles, etc.) regardless of its actual orientation (#6993)
+  - derwin12 — Fix deleting a model leaving its submodels behind in any model group it belonged to, showing as invalid entries in the group's model list (#7018)
+  - derwin12 — A group no longer shows the submodels of a model that has been set to inactive (#7021)
+  - derwin12 — Face and State definition names can no longer contain commas or other characters that submodel names already disallow, whether typed in or brought in from an imported model file (#7026)
+  - dkulp — Fix a crash opening the Faces editor on a custom model that has no nodes defined
+  - dkulp — Fix a crash choosing a background image in the custom model editor when the model's grid is too large to rasterise the image behind it
+  - dkulp — Fix a crash ticking "Output to lights" in the States or Faces tab on a SuperString model with more than eight colours
+  - scott — Fix Custom Model Wiring view zoom sometimes flying off-screen or crashing when scrolled out fully, and drifting away from the mouse pointer while zooming on displays with Windows scaling above 100%
+  - derwin12 — Fix the Layout tab's Background Properties pane getting dragged to zero height and disappearing with no divider left to grab it back, which persisted across restarts; also fix Reset to Defaults not actually restoring it once collapsed (#7008)
+  - derwin12 — Fix the Layout tab model list losing its chosen column sort order (reverting to name order) after editing various model properties (#6981)
+  - derwin12 — Fix the Select Effects, Search Effects, and Effect Presets panels having no way to scroll to their controls (and, for Effect Presets, squishing buttons and text illegible) when docked or resized smaller than their contents (#6979)
+  - derwin12 — Fix the "could not calculate start channels" warning growing tall enough to scroll off screen (#6970)
+  - dkulp — Fix a crash when toggling a docked pane, loading a perspective or opening a sequence
+  - derwin12 — Fix the AC Toolbar: hiding it while AC mode is enabled now turns AC mode off instead of leaving normal sequencing controls disabled (#7034)
+  - heffneil — Check "Set Default" animation duration for validity (#6972)
+  - AGFazio — Fix importing a group from another show's rgbeffects skipping it (or importing it with the wrong membership) when its models weren't also selected for import (#7012)
+  - derwin12 — Fix Auto Map import not mapping node-level effects (Dimmer, Pan, Tilt, etc.) on DMX moving-head strings when the model's strand also had its own effects (#7000)
+  - dkulp — Kulp K16A-B is now two variants, 1.x and 2.x/3.x, as the two board revisions run different FPP string drivers and support different pixel protocols and smart receivers. Existing shows resolve to 1.x; discovery picks the right one from the cape. Uploads now take the string driver from the cape itself, so a mismatched variant no longer writes a config the controller cannot run (#6978)
+ReleaseNotesUrl: https://github.com/xLightsSequencer/xLights/releases/tag/2026.17
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

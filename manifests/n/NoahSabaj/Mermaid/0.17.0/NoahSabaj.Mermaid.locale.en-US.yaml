@@ -1,0 +1,180 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: NoahSabaj.Mermaid
+PackageVersion: 0.17.0
+PackageLocale: en-US
+Publisher: Noah Sabaj
+PublisherUrl: https://github.com/noahsabaj
+PublisherSupportUrl: https://github.com/noahsabaj/mermaid-cli/issues
+PackageName: Mermaid
+PackageUrl: https://github.com/noahsabaj/mermaid-cli
+License: Apache-2.0
+LicenseUrl: https://github.com/noahsabaj/mermaid-cli/blob/main/LICENSE-MIT
+ShortDescription: Open-source, model-agnostic AI pair programmer for the terminal.
+Description: |-
+  Mermaid is an open-source, model-agnostic AI pair programmer for the terminal.
+  It works with Ollama (local), Anthropic, Gemini, OpenAI, Groq, OpenRouter, and
+  any OpenAI-compatible endpoint, with native tool calling, subagents,
+  computer-use tools, and a clean TUI.
+Tags:
+- ai
+- cli
+- developer-tools
+- llm
+- rust
+- terminal
+ReleaseNotes: |-
+  Mermaid 0.17.0
+  Added
+  - Windows: PTY-fidelity foreground exec via ConPTY. Foreground
+    execute_command on Windows now runs on a real pseudoconsole (the same
+    portable-pty path Unix uses) instead of always degrading to pipes: the
+    child sees a console (isatty-gated color and progress tools behave),
+    and the capture reaches the model ANSI-stripped and CRLF-normalized.
+    [exec] pty = false still forces pipes, and any pre-spawn PTY failure
+    falls back to the pipe path. strip_ansi now also consumes
+    DCS/SOS/PM/APC string payloads, drops bare BEL, and applies backspace
+    erasures — artifacts ConPTY repaints emit.
+  - macOS exec sandbox (Seatbelt). --no-network and --confine-fs /
+    --sandbox now confine model-run shell commands on macOS via
+    /usr/bin/sandbox-exec, behind the same launcher that applies
+    seccomp/Landlock on Linux. The generated allow-default profile denies
+    network (sparing AF_UNIX sockets, matching Linux) and denies writes
+    outside the allowed roots, matching both the literal and canonicalized
+    path so macOS TMPDIR firmlinks work. Fail-closed: if the sandbox cannot
+    be applied the command exits 126 instead of running unconfined.
+    mermaid self-test now reports real per-platform sandbox availability
+    instead of a hardcoded "yes" off-Linux, and CI gains a macOS
+    sandbox-integration job with a Seatbelt profile-compile canary.
+  - Plan mode: headless runs + SDK visibility. mermaid run --plan enters
+    plan mode before the prompt seeds: the run explores read-only and
+    delivers a plan file (.mermaid/plans/) as its result — with no approval
+    UI the plan is accepted but implementation does not start.
+    --plan-autoaccept flows the same run straight from the approved plan
+    into implementation. RunEvent::ToolFinished gains an additive plan
+    payload (path + start/fresh/fork disposition) when the finishing call is
+    exit_plan_mode, so NDJSON streams and daemon subscribe_task
+    subscribers get first-class plan visibility without any change to
+    existing event shapes.
+  - Plan mode: clear-context execute + handoff. The approval dialog gains
+    Approve, clear context and start — execution continues in a fresh
+    conversation seeded with a handoff preamble plus the approved plan (the
+    option shows how full the context is, so the tradeoff is legible), with
+    the checklist re-seeded and the exploration transcript saved to disk —
+    and Hand off..., a two-step sub-dialog: fork of this session (carries
+    the transcript) or fresh session, then the execution model (same model,
+    a recently-used or locally-pulled model from ollama list, or any
+    free-typed provider/model). Handoffs mint a new conversation id (the
+    rewind-fork machinery), switch models per-request, and auto-start
+    implementation.
+  - Remote MCP servers over Streamable HTTP. [mcp_servers.<name>] now
+    accepts url = "https://…" instead of command, connecting to hosted MCP
+    servers (GitHub/Sentry/Linear-class) everywhere MCP works today — TUI,
+    headless, and daemon. Auth rides as headers: literal headers in config,
+    or env_headers mapping a header to an environment variable resolved at
+    request time so the secret never lands in config.toml. Register from the
+    CLI with mermaid add <name> --url https://… --header 'Name: Value' --env-header 'Authorization=TOKEN_VAR'. The transport tracks the server's
+    MCP-Session-Id, sends the negotiated MCP-Protocol-Version on every
+    request after initialize, drains SSE-streamed responses (including
+    reconnect-and-resume when the server closes a stream mid-request), and
+    DELETEs the session on shutdown. URLs must be https, or http to
+    loopback only; connections to private/link-local addresses are refused
+    unless the server entry opts in with allow_private_network = true.
+  - Run summary shows total line changes. The end-of-run
+    Worked for … · used … tokens line now appends · +N/-M — the exact
+    lines added and removed across every file mutation in the run
+    (write_file, apply_patch), so you don't have to sum each tool call's
+    diff by hand. Counts come from the tools' exact diff metadata (not the
+    display diff, which is capped at 220 lines), and the segment is omitted
+    entirely on runs that changed nothing.
+  - Plan mode: permission profile picker + plan/execute model split.
+    /plan config (or /config) opens a settings picker: a top-level
+    permissions preset (default / strict / open, showing custom when
+    granular values diverge) over per-category levels — builds/tests, web,
+    memory writes, task tools — each cyclable through allow / auto (classifier
+    -vetted) / ask (approval modal) / deny, applied live at the policy gate on
+    the very next tool call and persisted to the [plan] config table. The
+    plan-mode system prompt now derives its "what runs while planning" line
+    from the live profile so it never promises what the gate will deny. New
+    [plan] model and [plan] reasoning overrides: entering plan mode swaps
+    the session onto the plan-phase model/effort and leaving (approve or
+    cancel) restores the previous one — plan on a frontier model, execute
+    locally, or invert for privacy.
+  - Plan mode: approval flow + task seeding. The model now finishes a plan
+    by calling exit_plan_mode, which re-reads the plan file from disk (your
+    external edits win) and raises an approval dialog: Approve and start /
+    Approve and wait / Request changes (with a typed note that goes back
+    to the model verbatim). Approval leaves plan mode, restores your previous
+    safety mode, seeds the live task checklist from the plan's Tasks
+    section — re-approving a revised plan reconciles instead of resetting
+    (completed items survive) — renders the approved plan into the transcript
+    as a markdown block, and (if you chose start) auto-submits
+    Implement the plan. so approval flows straight into implementation.
+    A new enter_plan_mode tool lets the model propose planning first; each
+    plan tool is advertised only in the mode where it applies. New [plan]
+    config: auto_approve (skip the dialog entirely, default false) and
+    post_approve = "start"|"wait" (pin what approval does; unset keeps
+    both options in the dialog).
+  - Plan mode (core). Alt+P or /plan puts the session in a read-only
+    collaboration state for designing work before doing it: tool dispatch
+    floors the effective safety mode to read-only at the policy gate (hard
+    enforcement, not prompt-only), with exactly three carve-outs — the plan
+    file itself (.mermaid/plans/<slug>.md, project-local), memory writes,
+    and known-safe build/test commands (cargo check/build/test/clippy,
+    go build/test/vet, npm test, make test, …; anchored like Allow
+    overrides, so substitutions, wrappers, redirects, and mutating tail
+    segments refuse). The model gets a short plan-mode charter (three phases,
+    decision-complete quality bar, five-section plan format whose Tasks list
+    will seed the live checklist on approval) and plan-flavored denials that
+    teach instead of frustrate; leaving plan mode neutralizes stale denials
+    the way safety-mode loosening already does. The task checklist writers
+    are firewalled during planning. Status bar shows
+    plan mode on (alt+p to toggle) - restores: <mode> — the previous
+    safety mode is untouched and resumes on exit. Planning-in-progress
+    survives --resume. Approval flow, task seeding, per-category plan
+    permissions, model split, and handoff land in follow-up PRs.
+  - Per-session scratchpad. Every session now gets a private 0700 scratch
+    directory under the system temp dir
+    (<temp>/mermaid-<uid>/<project-slug>/<session-id>/scratchpad), recreated
+    on /clear, /load, and rewind forks.
+    Shell commands receive its absolute path as MERMAID_SCRATCHPAD, the
+    file tools accept absolute paths inside it, and subagents share the
+    parent session's directory. Writes there are never checkpointed and skip
+    approval gating (read-only mode still blocks them), making it the cheap
+    place for intermediate artifacts. New /scratchpad command prints a
+    bounded listing, /doctor reports the path, deleting a saved
+    conversation removes its scratchpad, and stale unlocked directories are
+    swept on session startup (mermaidd tunes the window via
+    daemon.scratchpad_retention_days).
+  - Native structured output on Anthropic. mermaid run --output-schema
+    now sends the schema as output_config.format (JSON Schema) on the
+    Anthropic formatting turn, matching the native enforcement already used
+    for OpenAI-compatible providers, Gemini, and Ollama. Anthropic accepts a
+    JSON-Schema subset and older models reject format entirely; in either
+    case the run keeps the agent's original answer, records an
+    output_schema: error, and the client-side validator remains the final
+    gate.
+  - Ctrl+J inserts a newline in the input box. Multi-line prompts can now
+    be composed directly: Ctrl+J breaks the line at the cursor (matching
+    Claude Code and Codex), Enter still submits. Works on legacy terminals
+    too — the chord needs no kitty keyboard enhancement. Listed under
+    /help keybindings.
+  - Plugin bundles: MCP servers, prompt commands, and agent types. An
+    enabled plugin's plugin.toml can now declare mcp (TOML files of
+    [servers.<name>] configs, started with your own servers and flowing
+    through tool deferral), prompts (markdown slash commands with
+    $ARGUMENTS substitution, shown in the palette as (plugin:<name>) and
+    in /help), and agents (TOML files of [types.<name>] agent types).
+    Config-defined entries always shadow plugin ones with a warning;
+    built-in slash commands can never be shadowed; ./-relative MCP
+    commands resolve inside the plugin directory with containment. Same
+    restart-to-refresh policy as skills.
+  - Live task streaming: mermaid task <id> --follow. Attach to a daemon
+    task's RunEvent stream — an ack line, then NDJSON events until the
+    terminal result. Subscribing to a still-queued task works (the
+    subscriber holds a receiver on the same channel the executor later uses);
+    an already-finished task gets one synthesized result from the persisted
+ReleaseNotesUrl: https://github.com/noahsabaj/mermaid-cli/releases/tag/v0.17.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

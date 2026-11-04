@@ -1,0 +1,116 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: rullerzhou-afk.clawd-on-desk
+PackageVersion: 0.7.0
+PackageLocale: en-US
+Publisher: rullerzhou-afk
+PublisherUrl: https://github.com/rullerzhou-afk
+PublisherSupportUrl: https://github.com/rullerzhou-afk/clawd-on-desk/issues
+PackageName: Clawd on Desk
+PackageUrl: https://github.com/rullerzhou-afk/clawd-on-desk
+License: MIT
+LicenseUrl: https://github.com/rullerzhou-afk/clawd-on-desk/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 rullerzhou-afk
+ShortDescription: A pixel desktop pet that watches Claude Code, Codex, Cursor & other AI coding agents — so you don't have to.
+Description: |-
+  Clawd lives on your desktop and reacts to what your AI coding agent is doing — in real time. Start a long task, walk away, come back when the crab tells you it's done.
+  Thinking when you prompt, typing when tools run, juggling subagents, reviewing permissions, celebrating when tasks complete, sleeping when you step away. Ships with two built-in themes: Clawd (pixel crab) and Calico (三花猫), with full support for custom themes.
+  Supports Windows 11, macOS, and Ubuntu/Linux. Requires Node.js. Works with Claude Code, Codex CLI, Copilot CLI, Gemini CLI, Cursor Agent, CodeBuddy, Kiro CLI, and opencode.
+  Features
+  Multi-Agent Support
+  - Claude Code — full integration via command hooks + HTTP permission hooks
+  - Codex CLI — automatic JSONL log polling (~/.codex/sessions/), no configuration needed
+  - Copilot CLI — command hooks via ~/.copilot/hooks/hooks.json
+  - Gemini CLI — command hooks via ~/.gemini/settings.json (registered automatically when Clawd starts, or run npm run install:gemini-hooks)
+  - Cursor Agent — Cursor IDE hooks in ~/.cursor/hooks.json (registered automatically when Clawd starts, or run npm run install:cursor-hooks)
+  - CodeBuddy — Claude Code-compatible command hooks + HTTP permission hooks via ~/.codebuddy/settings.json (registered automatically when Clawd starts, or run node hooks/codebuddy-install.js)
+  - Kiro CLI — command hooks injected into custom agent configs under ~/.kiro/agents/, plus an auto-created clawd agent that is re-synced from Kiro's built-in kiro_default whenever Clawd starts, so you can opt into hooks with minimal behavior drift via kiro-cli --agent clawd or /agent swap clawd (registered automatically when Clawd starts, or run npm run install:kiro-hooks). State hooks have been verified on macOS.
+  - opencode — plugin integration via ~/.config/opencode/opencode.json (registered automatically when Clawd starts); zero-latency event streaming, permission bubbles with Allow/Always/Deny, and building animations when parallel subagents are spawned via the task tool
+  - Multi-agent coexistence — run all agents simultaneously; Clawd tracks each session independently
+  Animations & Interaction
+  - Real-time state awareness — agent hooks and log polling drive Clawd's animations automatically
+  - 12 animated states — idle, thinking, typing, building, juggling, conducting, error, happy, notification, sweeping, carrying, sleeping
+  - Eye tracking — Clawd follows your cursor in idle state, with body lean and shadow stretch
+  - Sleep sequence — yawning, dozing, collapsing, sleeping after 60s idle; mouse movement triggers a startled wake-up animation
+  - Click reactions — double-click for a poke, 4 clicks for a flail
+  - Drag from any state — grab Clawd anytime (Pointer Capture prevents fast-flick drops), release to resume
+  - Mini mode — drag to right edge or right-click "Mini Mode"; Clawd hides at screen edge with peek-on-hover, mini alerts/celebrations, and parabolic jump transitions
+  Permission Bubble
+  - In-app permission review — when Claude Code, CodeBuddy, or opencode request tool permissions, Clawd pops a floating bubble card instead of waiting in the terminal
+  - Allow / deny / agent-native extras — one-click approve or reject, plus permission rules / Always actions when the source agent supports them
+  - Global hotkeys — Ctrl+Shift+Y to Allow, Ctrl+Shift+N to Deny the latest permission bubble (only registered while bubbles are visible)
+  - Stacking layout — multiple permission requests stack upward from the bottom-right corner
+  - Auto-dismiss — if you answer in the terminal first, the bubble disappears automatically
+  - Per-agent toggle — open Settings… → Agents, pick an agent, and turn off Show pop-up bubbles to keep prompts in that agent's own terminal/TUI
+  Session Intelligence
+  - Multi-session tracking — sessions across all agents resolve to the highest-priority state
+  - Subagent awareness — juggling for 1 subagent, conducting for 2+
+  - Terminal focus — right-click Clawd → Sessions menu to jump to a specific session's terminal window; notification/attention states auto-focus the relevant terminal
+  - Process liveness detection — detects crashed/exited supported agent processes and cleans up orphan sessions
+  - Startup recovery — if Clawd restarts while any supported agent is still running, it stays awake instead of falling asleep
+  System
+  - Click-through — transparent areas pass clicks to windows below; only Clawd's body is interactive
+  - Position memory — Clawd remembers where you left it across restarts (including mini mode)
+  - Single instance lock — prevents duplicate Clawd windows
+  - Auto-start — Claude Code's SessionStart hook can launch Clawd automatically if it's not running
+  - Do Not Disturb — right-click or tray menu to enter sleep mode; all hook events are silenced until you wake Clawd. Permission bubbles are suppressed during DND — opencode falls back to its built-in TUI prompt, while Claude Code and CodeBuddy fall back to their built-in permission flow
+  - Sound effects — short audio cues on task completion and permission requests (toggle via right-click menu; 10s cooldown, auto-muted during DND)
+  - System tray — resize (S/M/L), DND mode, language switch, auto-start, check for updates
+  - i18n — English, Chinese, and Korean UI; switch via right-click menu or tray
+  - Auto-update — checks GitHub releases; Windows installs NSIS updates on quit, macOS/Linux git pull + restart when running from a cloned repo
+Tags:
+- claude-code
+- codebuddy
+- codex
+- copilot-cli
+- cursor
+- desktop-pet
+- gemini-cli
+- kiro
+- opencode
+ReleaseNotes: |-
+  v0.7.0
+  New Features
+  - Gemini CLI hook-only integration (#224, #225, #226) - Gemini now uses the current hook path instead of the legacy session-file polling path, with agent Settings controls, installer updates, event mapping, PID detection, diagnostics, and targeted tests.
+  - Codex Pet compatibility MVP (#235) - Clawd can import Codex Pet packages, adapt their sprite atlas/state metadata into Clawd themes, sync imported pets into the theme list, refresh/remove imported pets, and switch to a newly imported pet from Settings.
+  - Fade theme switching (#237) - theme changes now fade the pet window between themes instead of snapping directly to the new asset set.
+  - Theme and animation Settings polish (#234, #236) - Settings tab switches are smoother, animation override timing sliders are easier to use, loading states are clearer, and imported Codex Pets are grouped separately from built-in and user themes.
+  - Session controls (#227, #229) - Session HUD and Dashboard now show renamed Codex session titles, expose stronger HUD display toggles, support hiding sessions, and avoid letting session cleanup push the pet into sleep.
+  - Windows Terminal focus hardening (#242) - terminal focusing now avoids ambiguous title matches, requires unique Windows Terminal tab matches, preserves direct terminal focus when it is already available, records richer diagnostics, and documents Windows Terminal's matching limits.
+  Bug Fixes
+  - General Settings switch stability (#238) - General tab switches now stay mounted during settings updates, preventing transient unmount/remount behavior while Settings patches are applied.
+  - Gemini diagnostics and event behavior - Gemini hook events now map consistently into Clawd states, installer tests isolate their home directories, and hook diagnostics are easier to interpret when setup fails.
+  - Codex runtime stability - Codex PID reachability checks are more reliable, renamed session titles are reflected in the UI, exit probe logging improves debugging, and same-named Codex Pet assets reload correctly after import or refresh.
+  - Renderer crash logging (#220) - renderer-side crash logging now guards against EIO write failures instead of letting logging errors cascade.
+  - Agent submenu toggle flash (#233) - toggling an agent from Settings no longer briefly flashes the submenu into an inconsistent state.
+  - Auto-start launch config (#240) - auto-start now shares the same Electron launch configuration path as normal startup, reducing drift between manual and automatic launches.
+  - DND permission fallbacks - Do Not Disturb now preserves agent-native permission fallback behavior instead of accidentally swallowing or auto-answering permission requests.
+  Refactoring & Tests
+  - Codex Pet importer coverage - adds importer, adapter, protocol, theme sync, and fixture coverage for atlas-based Codex Pet packages.
+  - Gemini hook coverage - adds hook and installer tests around hook-only behavior, event mapping, and isolated home directories.
+  - Windows focus coverage (#242) - adds focused regression tests for Windows Terminal title matching, direct terminal focus, ambiguous-match handling, session focus helpers, and Doctor log metadata.
+  - Settings browser coverage (#238) - expands Settings renderer tests around General tab patch paths and switch persistence during store updates.
+  - State, HUD, and Settings coverage - expands tests for session hiding, detached cleanup, notification gating, server ring buffers, animation override UI behavior, theme transitions, and Settings browser-environment behavior.
+  - Doctor and integration checks - refreshes Doctor integration descriptors and tests so the new hook/plugin paths are represented in diagnostics.
+  Docs & Contributors
+  - Release positioning - v0.7.0 is a feature release because it adds Gemini hook-only support, Codex Pet compatibility, theme transition behavior, and deeper Windows Terminal focus behavior on top of normal fixes.
+  - Windows Terminal limitations (#242) - docs now explain why Clawd only switches tabs when the target terminal title is uniquely identifiable.
+  - Contributor tables - README variants and Settings About now show all 43 listed GitHub contributors, including the new v0.7.0 contributors @YuChenYunn and @jhseo-b.
+  - Setup, state mapping, and architecture docs - docs were refreshed for Gemini hook behavior, Codex Pet/theme capabilities, imported theme handling, and current runtime boundaries.
+  Contributors
+  Huge thanks to everyone who shipped code, tests, docs, diagnostics, or release polish for v0.7.0:
+  - @rullerzhou-afk - Codex Pet compatibility MVP, Codex runtime diagnostics, session hide/cleanup behavior, Windows Terminal focus hardening (#242), auto-start follow-up (#240), docs, tests, and release preparation
+  - @YOIMIYA66 - Gemini hook-only integration and Settings controls (#224, #225, #226), agent submenu toggle polish (#233), Settings transition/animation override polish (#234, #236), General Settings switch stability (#238), and fade theme switching (#237)
+  - @jhseo-b - Codex renamed session title display (#227) and Session HUD toggle hardening (#229)
+  - @YuChenYunn - renderer crash logging guard for EIO failures (#220)
+  - Elior - co-authored the renderer crash logging fallback follow-up in #220
+  - @jinqKing - identified the Windows source-mode auto-start console-window issue and proposed the direct Electron spawning direction that led to #240
+  Known Limitations
+  - Codex hook coverage is still not complete - official hooks remain the primary path, but JSONL polling is still kept as fallback for hook-disabled sessions and events that official hooks do not fully cover yet.
+  - Gemini is hook-only in the current runtime path - the legacy Gemini session JSON monitor is retained for compatibility tests/history, but normal Gemini integration expects the hook installer path.
+  - Windows Terminal tab focus is intentionally conservative - Clawd will not switch tabs when the title match is ambiguous, so users may need to rename terminals or use direct focus paths for repeated/similar session titles.
+  - Codex Pet compatibility is an MVP - atlas import and theme adaptation are supported, but unusual pet package layouts may still fail validation or need manual theme authoring.
+ReleaseNotesUrl: https://github.com/rullerzhou-afk/clawd-on-desk/releases/tag/v0.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

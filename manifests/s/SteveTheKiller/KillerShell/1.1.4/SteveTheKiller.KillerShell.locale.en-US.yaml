@@ -1,0 +1,45 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: SteveTheKiller.KillerShell
+PackageVersion: 1.1.4
+PackageLocale: en-US
+Publisher: Steve the Killer
+PublisherUrl: https://github.com/SteveTheKiller
+PublisherSupportUrl: https://github.com/SteveTheKiller/KillerShell/issues
+Author: Steve the Killer
+PackageName: KillerShell
+PackageUrl: https://github.com/SteveTheKiller/KillerShell
+License: GPL-3.0
+LicenseUrl: https://github.com/SteveTheKiller/KillerShell/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Steve the Killer
+ShortDescription: File browser, terminal, text editor and admin toolkit for Windows. Install or run portable. GPLv3. No account, no agent, no telemetry.
+Description: KillerShell puts a file browser, a PowerShell or CMD terminal, a text editor and an admin toolkit in one window, on one tab strip and one set of keys. Search any folder by filename wildcard or by file content, streamed live with no index to build. Processes, services, performance and the registry are one key away. Runs portable or installs for you or every user - no runtime, no agent, no account. Open source under GPLv3.
+Moniker: killershell
+Tags:
+- csharp
+- dotnet
+- dual-pane
+- explorer-replacement
+- file-explorer
+- file-manager
+- file-search
+- gplv3
+- grep
+- msp
+- portable
+- powershell
+- sysadmin
+- tabs
+- terminal
+- text-editor
+ReleaseNotes: |-
+  1.1.4 fixes a crash when dragging files to external applications like Teams and Telegram, plus a ghost icon that persisted on the desktop after dragging to external apps.
+  Fixed
+  - Dragging a file to Teams, Telegram, or other external apps could crash KillerShell with an AccessViolationException - NativeDataObject did not check for NULL returns from GlobalAlloc and GlobalLock, so when either failed the code would attempt to access invalid memory. Error checking and exception handling added for all Win32 global-memory operations.
+  - NativeDataObject.GetData could throw unhandled exceptions when called from a different thread (which happens when dragging to external apps), crashing the entire drag operation - now wrapped in a try-catch to return an empty medium on error, matching the same defensive behavior for in-process calls.
+  - The HDROP structure building could overflow with very large file paths or many files - overflow checks added to prevent negative size calculations that could cause GlobalAlloc to fail.
+  - Dragging a file to an external app left a ghost icon (the drag-image layered window) permanently visible on the desktop until the app closed - IDragSourceHelper manages the drag-image window lifecycle and must stay alive for the entire DoDragDrop call. The helper was being released immediately after initializing the drag image, before the drag even started, which orphaned the window and prevented ole32 from cleaning it up. The helper is now kept alive through the entire drag and only disposed after DoDragDrop returns.
+ReleaseNotesUrl: https://github.com/SteveTheKiller/KillerShell/releases/tag/v1.1.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

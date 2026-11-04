@@ -1,0 +1,73 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.74.0
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Improved
+  - A JSON bool or null nested in a vars value renders as True, False, or None: minijinja 2.22 adopted Jinja2's spelling for all three, so {{ vars.<key>.<field> }} into an object set by wt config state vars set prints those words. A var whose whole value is true stays a string. (Breaking: the old spellings were true, false, and none.) (#3795)
+  - wt config approvals add --yes records approvals without a terminal: the command refused every non-interactive run, so a container or CI job could not pre-approve a project it had just cloned. --yes now lists what it trusts and writes it, and a save it cannot make fails the command rather than warning and exiting 0. (#3819)
+  - remote_repo names the repository as the remote spells it: repo is the directory on disk, so a renamed clone reports the new name. {{ remote_repo }} takes it from the primary remote's URL, available everywhere owner is and unset when no remote parses. (#3745, thanks @canac)
+  Fixed
+  - wt remove --force deleted a live worktree moved onto another's registered path: the ownership gate asked which repository the occupant belonged to, which a sibling worktree of this repo satisfies, so the directory went to trash with its uncommitted work. The directory and the registration must now name each other, as git worktree remove requires. Also reaches wt merge, wt step prune, and picker removal, and refuses a bare repository's path that --force previously deleted. (#3808)
+  - wt step copy-ignored skips a source file that vanishes mid-copy: the walk collects leaves, then copies them in parallel, so a file removed in between — a concurrent build rewriting target/, say — aborted the batch, under --force after deleting the destination. The source is stat'd before anything is removed now. (#3744, fixes #3743, thanks @dataders for reporting and fixing)
+  - wt step promote refuses to delete a source it did not fully copy: across filesystems the move copies then deletes, and an entry with no copy — a socket or FIFO, or a file a concurrent build rewrote mid-walk — was deleted anyway. The copy now reports what it skipped, and a non-zero count fails the move. (#3820)
+  - An ssh:// remote's host comes from the authority, not a later path segment: the search for the userinfo @ covered the whole remainder, so ssh://git@attacker.example/owner/repo@github.com/org/repo.git resolved to github.com and borrowed that repository's approvals while git dialed the attacker. Every URL form now splits the authority first, so @ in a namespace parses instead of being rejected. (#3813)
+  - WORKTRUNK_* env vars and --config-set outrank a [projects."…"] entry: layer and specificity resolved separately, so a project entry answered for the global key whichever layer set it — WORKTRUNK_WORKTREE_PATH could not override a project's worktree-path. Both invocation layers now apply at either scope, and the help text gained a precedence section. (#3790, fixes #3788, thanks @jeremy0dell for reporting)
+  - Shell completions register under the --cmd name: wt config shell init zsh --cmd wot renamed the wrapper, but clap emitted the registration under wt. Bash and zsh completed nothing and regenerated the script on every TAB, PowerShell registered the wrong command, and zsh's compdef handed worktrunk's completer to the other wt. (#3817, fixes #3816, thanks @sbarre for reporting)
+  Documentation
+  - The picker's Alt-x never forces: the keybinding table read Remove selected worktree/branch, which sent a reader looking for a force-remove that isn't there. (#3811, raised in #3809, thanks @josh-burton)
+  Internal
+  - Library API rework (Breaking library API): GitError::WorktreePathNotOurs gained an occupant_registered_at field, and WorkingTree::ensure_belongs_to_repo is now ensure_holds_this_worktree. (#3808)
+  Install worktrunk 0.74.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/max-sixty/worktrunk/releases/download/v0.74.0/worktrunk-installer.sh | sh && wt config shell install
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/max-sixty/worktrunk/releases/download/v0.74.0/worktrunk-installer.ps1 | iex"; git-wt config shell install
+  Install prebuilt binaries via Homebrew
+  brew install worktrunk && wt config shell install
+  Download worktrunk 0.74.0
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+  Install via Cargo
+  cargo install worktrunk && wt config shell install
+  Install via Winget (Windows)
+  winget install max-sixty.worktrunk && git-wt config shell install
+  Install via AUR (Arch Linux)
+  paru worktrunk-bin && wt config shell install
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.74.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

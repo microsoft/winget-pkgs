@@ -1,0 +1,84 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ESEngine.ReasonixDesktop
+PackageVersion: 1.38.3
+PackageLocale: en-US
+Publisher: reasonix
+PublisherUrl: https://esengine.cn/
+PublisherSupportUrl: https://github.com/esengine/DeepSeek-Reasonix/issues
+PackageName: Reasonix
+PackageUrl: https://esengine.github.io/DeepSeek-Reasonix/
+License: MIT
+LicenseUrl: https://github.com/esengine/DeepSeek-Reasonix/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Reasonix Contributors
+ShortDescription: A DeepSeek-native coding agent, for your terminal.
+Description: Reasonix talks straight to api.deepseek.com. The loop is append-only, engineered around DeepSeek's byte-stable prefix cache — long sessions hold 90%+ cache hit and input-token cost collapses to ~1/5. Terminal-first, leave it running.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- deepseek
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  此版本改进了模型设置持久化、运行时状态一致性、读取证据处理以及桌面界面优化，并修复了关闭、设置布局和技能诊断等问题。
+  发布渠道：稳定版 · v1.38.3
+  English → · 网页版完整更新日志 →
+  使用攻略
+  - 模型设置 — 了解模型偏好和供应商连接的保存与生效时机。
+  - 运行时状态 — 了解本地和远程会话状态如何统一。
+  - 本轮结果 — 查看每轮记录的文件改动、检查结果及其证据。
+  - 输入栏控件 — 探索优化后的输入栏控件和反馈。
+  - 能力诊断 — 了解技能工具引用诊断。
+  概览
+  Reasonix v1.38.3 — Reasonix 1.38.3
+  此版本改进了模型设置持久化、运行时状态一致性、读取证据处理以及桌面界面优化，并修复了关闭、设置布局和技能诊断等问题。
+  发布日期：2026-09-09
+  Desktop 14 · CLI 7
+  桌面端更新
+  重点内容
+  - [Desktop] 无需活动会话即可保存模型设置 — 会话尚未启动时也能保存模型偏好和供应商连接。默认模型用于新会话，已有会话保留自己的选择。已经开始的任务及其工具、重试、审批和子任务继续使用原连接，相关设置在下一次运行前生效。 (#9973)
+  - [Desktop · CLI] 同步本地与远程任务状态 — 修复任务结束后仍持续转圈的问题。本地桌面与远程 Serve 会话使用一致的运行状态，重连后重新同步；连接状态不确定时保留已知内容。任务收尾期间发送的后续消息会保留在队列中。 (#9971)
+  - [Desktop] 查看每轮实际改动与检查结果 — 本轮结果展示确认的净文件改动，以及实际执行的命令、退出码和日志。可以查看该轮固定的差异，不混入后续编辑；缺失或不完整的证据会明确标注，不会被显示为检查通过。 (#9869)
+  新增
+  - [Desktop] 工作台欢迎页与会话恢复 — 空工作台会话居中展示欢迎内容和输入栏，发送首条消息后回到对话布局。历史加载或远程连接失败时持续显示重试入口，并保留已有消息和草稿。 (#9961)
+  改进
+  - [Desktop] 更清晰的输入栏操作与运行反馈 — 计划、目标和交付选项移入添加菜单，启用后可通过模式标签移除。模型与思考强度分开选择，菜单适配窄窗口；输入栏边框动画显示运行状态，耗时等指标可在上下文浮层中查看。 (#9958)
+  修复
+  - [Desktop · CLI] 会话运行时退出前完成收件箱扫描 — 关闭或替换会话运行时时，会先等待自动收件箱扫描结束。模型刷新仍可在下一条排队请求启动前安全替换当前运行时。 (#9978)
+  - [Desktop · CLI] 准确记录文件读取进度与暂停原因 — 大文件预览不再意外触发全文读取要求；已完成的读取不会因输出去重重新变为未完成，编辑仍须满足当前文件版本的读取条件。读取未完成导致暂停时，实时与恢复后的历史都会在模型回复旁显示暂停原因。 (#9966)
+  - [Desktop · CLI] 一致的技能工具诊断 — 消除内置评审技能的 use_capability 误报。两个 doctor 入口识别一致的实际工具和插件范围内的 MCP 别名，同时保留未知名称及格式错误提示。静态诊断不会启动 MCP 服务。 (#9962)
+  - [Desktop] 避免设置搜索框和保存操作被遮挡 — 设置搜索框与滚动导航分离。Hooks 和网络设置的保存操作不再覆盖编辑器或代理输入框，窄窗口下按钮可自动换行。 (#9969)
+  - [Desktop · CLI] 提升 Windows 会话与更新恢复可靠性 — 分离会话状态使用一致的会话标识。旧版更新的并发恢复和任务快照保存能够处理 Windows 短暂文件占用，同时保留事务校验，避免暴露部分写入的快照。 (#9974)
+  - [Desktop · CLI] 让 MCP 进程正常完成关闭 — 先关闭 MCP 传输，再取消进程上下文。Windows 上在释放实例名额前清理进程作业，提升重连与关闭的可靠性。 (#9973)
+  - [Desktop] 保留正确的连接显示与提示词历史标识 — 恢复会话后，无需打开模型菜单即可显示选中的连接。仅用于显示的元数据读取不再改写进程凭据；不同提示词历史目录也不会因在同一时钟刻度打开而误用缓存。 (#9973)
+  CLI 端更新
+  重点内容
+  - [Desktop · CLI] 同步本地与远程任务状态 — 修复任务结束后仍持续转圈的问题。本地桌面与远程 Serve 会话使用一致的运行状态，重连后重新同步；连接状态不确定时保留已知内容。任务收尾期间发送的后续消息会保留在队列中。 (#9971)
+  修复
+  - [Desktop · CLI] 会话运行时退出前完成收件箱扫描 — 关闭或替换会话运行时时，会先等待自动收件箱扫描结束。模型刷新仍可在下一条排队请求启动前安全替换当前运行时。 (#9978)
+  - [Desktop · CLI] 准确记录文件读取进度与暂停原因 — 大文件预览不再意外触发全文读取要求；已完成的读取不会因输出去重重新变为未完成，编辑仍须满足当前文件版本的读取条件。读取未完成导致暂停时，实时与恢复后的历史都会在模型回复旁显示暂停原因。 (#9966)
+  - [Desktop · CLI] 一致的技能工具诊断 — 消除内置评审技能的 use_capability 误报。两个 doctor 入口识别一致的实际工具和插件范围内的 MCP 别名，同时保留未知名称及格式错误提示。静态诊断不会启动 MCP 服务。 (#9962)
+  - [Desktop · CLI] 提升 Windows 会话与更新恢复可靠性 — 分离会话状态使用一致的会话标识。旧版更新的并发恢复和任务快照保存能够处理 Windows 短暂文件占用，同时保留事务校验，避免暴露部分写入的快照。 (#9974)
+  - [Desktop · CLI] 让 MCP 进程正常完成关闭 — 先关闭 MCP 传输，再取消进程上下文。Windows 上在释放实例名额前清理进程作业，提升重连与关闭的可靠性。 (#9973)
+  升级提醒
+  - [Desktop · CLI] 升级由 Desktop 管理的旧版 Serve — 保存的配置与历史无需手动迁移。对于由 Desktop 管理的远程会话，不支持设置快照的旧版 Serve 需要在当前任务结束后升级或安全重连；保存设置不会强制终止当前任务。 (#9973)
+  - [Desktop] 状态栏首次采用图标样式 — 新配置和已有配置首次采用图标标签。可在设置中切换回文字样式，此次迁移后的手动选择会被保留。 (#9958)
+  风险提示
+  当前没有需要额外操作的已知风险。
+  致谢
+  感谢本版本的贡献者：@SivanCola、@dadgrand、@esengine
+  下载与安装
+  - 官网按平台下载
+  - 查看完整差异
+ReleaseNotesUrl: https://github.com/esengine/DeepSeek-Reasonix/releases/tag/desktop-v1.38.3
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://esengine.github.io/DeepSeek-Reasonix/index.html#faq
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

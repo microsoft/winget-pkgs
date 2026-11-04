@@ -1,0 +1,51 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jens-duttke.usage-monitor-for-claude
+PackageVersion: 1.22.0
+PackageLocale: en-US
+Publisher: Jens Duttke
+PublisherUrl: https://github.com/jens-duttke
+PublisherSupportUrl: https://github.com/jens-duttke/usage-monitor-for-claude/issues
+Author: Jens Duttke
+PackageName: Usage-Monitor-for-Claude
+PackageUrl: https://github.com/jens-duttke/usage-monitor-for-claude
+License: MIT
+LicenseUrl: https://github.com/jens-duttke/usage-monitor-for-claude/blob/HEAD/LICENSE
+ShortDescription: Lightweight Windows tray app that monitors your Claude rate limits in real time - portable single EXE, zero configuration, fully auditable
+Description: Lightweight Windows tray app that monitors your Claude rate limits in real time - portable single EXE, zero configuration, fully auditable
+Tags:
+- anthropic
+- claude
+- claude-code
+- desktop-app
+- developer-tools
+- python
+- quota
+- rate-limit
+- system-tray
+- tray-icon
+- usage-monitor
+- windows
+ReleaseNotes: |-
+  Added
+  - Linux support - the app now runs on Linux as well as Windows. The tray icon, detail popup, smart alerts, event commands, autostart and the single-instance guard all work there; see the README for the packages it needs and for the launcher that starts the app from any directory, without activating its virtual environment
+  - On Linux, the detail popup opens from the tray menu instead of a left-click, because a tray icon is drawn and driven by the desktop panel there, which handles the click itself and never passes it to the application. For the same reason there is no double-click to react to: when a quick action is configured, the tray menu offers a Run Quick Action entry instead, so it stays reachable
+  - On Linux the app needs two files where Windows uses the registry: the autostart entry (~/.config/autostart/, written only when you enable autostart) and a lock file in the session's runtime directory that keeps a second instance from starting - PRIVACY.md lists everything the app touches, per platform
+  - WinGet is now documented as an alternative way to install and update the app (winget install jens-duttke.usage-monitor-for-claude), together with a note on what the community repository verifies about a package and what it does not - the direct download stays the authoritative source
+  - Every release now lists the SHA256 of UsageMonitorForClaude.exe, so a download can be verified against the official release page - including the file WinGet installs, independently of its validation pipeline
+  Changed
+  - The autostart menu entry is now called Start at login instead of "Start with Windows" - it describes what happens on both systems, and both write their entry for the login, not for boot
+  - Breaking: The quick action (formerly the double-click command) now passes USAGE_MONITOR_EVENT=quick_action to its command instead of double_click. Only scripts that branch on that variable are affected; a script that simply runs when invoked needs no change
+  - The on_double_click_command setting is now called quick_action_command, and the tray menu names it Run Quick Action - the old name described one system's input method for something that is triggered differently elsewhere. Existing settings files keep working: on_double_click_command is still read, and quick_action_command wins when both are present
+  - A failed certificate check is now reported as such instead of as a generic "could not connect" error, so the cause is visible in the popup
+  Fixed
+  - The quick action no longer raises a "command failed" dialog when an app it started exits with an error later on - only a command that fails to start is reported, which is what the dialog is for
+  - The on_reset_command event command now runs after a quota reset - previously it was silently skipped whenever the reset quota had no new window yet, which is the usual state right after a reset, so in practice the command never ran (thanks to @cimenta for reporting #86)
+  - Corporate proxies that inspect TLS no longer block the connection to the Anthropic API - the server certificate is now verified against the Windows certificate store, so a proxy root certificate your organization installed is trusted just like in your browser (thanks to @tommapson for the report and the diagnosis)
+  Full changelog
+  README for this version
+  SHA256 of UsageMonitorForClaude.exe: DF5E3E4544D7080CAD0EE73F47B3930D050BE1F3569E08DF0859E921A93CB2E1
+ReleaseNotesUrl: https://github.com/jens-duttke/usage-monitor-for-claude/releases/tag/v1.22.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
