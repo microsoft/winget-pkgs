@@ -1,0 +1,74 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: SteveTheKiller.Killendar
+PackageVersion: 1.4.1
+PackageLocale: en-US
+Publisher: Steve the Killer
+PublisherUrl: https://github.com/SteveTheKiller
+PublisherSupportUrl: https://github.com/SteveTheKiller/Killendar/issues
+Author: Steve the Killer
+PackageName: Killendar
+PackageUrl: https://github.com/SteveTheKiller/Killendar
+License: GPL-3.0
+LicenseUrl: https://github.com/SteveTheKiller/Killendar/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Steve the Killer
+ShortDescription: Encrypted calendar for Windows. Install or run portable. GPLv3. No account, no sync, no telemetry.
+Description: Killendar keeps your appointments in a single file on your own machine, with optional SQLCipher AES-256 encryption at rest once you set a password. Month, week, day and agenda views, color categories, recurring appointments, and iCalendar import and export. Unlocked it is an ordinary SQLite database you can read, back up, or copy to another machine. Runs portable or installs for you or every user - no account, no sync, no telemetry. Open source under GPLv3.
+Moniker: killendar
+Tags:
+- calendar
+- csharp
+- desktop-app
+- dotnet
+- icalendar
+- ics
+- privacy
+- windows
+- wpf
+ReleaseNotes: |-
+  Killendar 1.4.1 closes security gaps in the command pipes and the updater, saves dates the same way on every Windows region, stops unsaved appointments from being lost without asking, fixes import, export, drag and keyboard problems, makes install, update and uninstall recover cleanly, and moves the look and controls onto the shared KillerUI template.
+  Security
+  - The calendar command pipe and the single-instance pipe accept only your own account, so another person signed in to the same PC cannot receive appointment details or stall Killendar by taking the pipe name first.
+  - Update and uninstall helpers load PowerShell modules only from Windows' own folder, so a module planted in your Documents cannot run inside them as administrator.
+  - The elevated part of an update compiles its helper code in a folder only administrators can open, so another program running as you cannot slip code into it.
+  - An update must be signed with the exact publisher name and pass a certificate revocation check. Only an unreachable revocation server falls back to an offline check. Update metadata downloads are capped at 1 MB.
+  Fixed
+  - The file picker resolves place and drive icons in the background and restores its position on any monitor. Scrollbar buttons have localized screen-reader names.
+  - Appointments are saved in a fixed date format whatever the Windows region. On a Thai or Arabic region they were saved centuries off, and on a region that writes times with dots they could not be read back; those dotted times now load too, including dates deleted from a repeating appointment, and reminders dismissed before the upgrade stay dismissed.
+  - Exported .ics files carry Gregorian dates whatever the Windows region, and a description with several lines comes back whole when the file is imported again instead of stopping at the first line break.
+  - An unsaved appointment is no longer lost without asking. Clicking a reminder, opening Manage Killendars, Update now and the Install badge all ask first, Save in that prompt actually saves, closing a locked Killendar offers to discard rather than a Save that could not work, and renaming the open Killendar more than once in Manage Killendars keeps the appointment you were writing.
+  - Editing an appointment from the day list after dragging it keeps the new time. The list now refreshes when appointments change, and Edit used to load the old copy and put the appointment back where it was.
+  - An encrypted Killendar locks on idle or with Windows even while Manage Killendars is open. It used to stay unlocked behind the dialog and reopen without asking for the password. While locked, the dialog can no longer delete or rename the locked Killendar, and a password change that went through but could not reopen the file now locks it and asks for the new password.
+  - A failed backup re-encryption keeps the original backup instead of deleting it, a password change that went through is no longer reported as failed when reopening the file stumbles, the backups of a Killendar set aside after a forgotten password stay with it, and an import that is waiting to write holds off a lock instead of losing its calendar mid-way. When the file cannot be reopened after a password change, the previous copy is kept and its location is shown.
+  - The month view no longer crashes when the open Killendar and a shown one hold the same appointment spanning several days.
+  - A calendar no longer fails to open because another account holds its native library lock.
+  - Installing for all users verifies and copies the very same file, so nothing can swap the program between the check and the copy, and installing an older copy over a newer all-users install asks first.
+  - Uninstalling while Killendar is still open, for example in the tray, now waits up to 30 seconds for it to close and otherwise stops before removing anything. It used to take away the shortcuts and file links, then fail on the running program and leave the rest behind. Uninstall also removes leftover update files, its own helper copy, the old copy that an install over a running Killendar leaves behind and the empty .kcal registry key.
+  - A per-user or portable update that fails now reopens Killendar instead of leaving it closed, including when antivirus or a locked-down PowerShell stops the update helper from loading, a published copy that fails its final check is swapped back for the previous version and never started, and update downloads stream to disk with a size cap and an overall deadline.
+  - An all-users update reopens Killendar for the signed-in user at normal rights, whether it finishes or stops early. Windows was refusing that relaunch, so the app stayed closed. Files left behind by earlier failed updates are cleared when the next update is staged.
+  - A failed uninstall reports the real reason and retries when a copy is still running, a stalled update says so instead of silently doing nothing, and the window no longer freezes while an update is handed off.
+  - An update that finished is no longer reported as failed when the app cannot be reopened afterward.
+  - Updates keep working after the publisher's code signing certificate is renewed. A release must still carry a valid signature naming the same publisher, but no longer the exact certificate of the installed copy.
+  - Self-update runs on the family update code, which keeps Killendar's signature checks inside the helper and adds pinned publication folders, a publisher check on the published copy, same-publisher replacement and stable-only releases. Installed paths, registry keys and the exe name are unchanged.
+  - An update that cannot finish because the app did not close says so in its recovery report, the Update button stays off once an update has started, and a translation file can no longer give a setting the wrong kind of value.
+  - A locked Killendar no longer leaves you stuck with its password prompt. Canceling the prompt keeps it locked instead of quitting, the Killendars button can then open or create a different Killendar, and the padlock or any key brings the prompt back. After a cancel, Tab, Space and Enter reach the title bar buttons, Alt+F4 and Alt+Space work, and a calendar file opened while locked imports once you unlock instead of being dropped.
+  - Importing an .ics file with a huge list of extra or skipped dates, or hundreds of unknown time zones, stays quick and can be canceled. CREATED is no longer overwritten by the file's export time, an appointment cut off at the end of a file is counted as unreadable, a weekly repeat whose days leave out its first date is reported, and a timed exclusion on an all-day repeat keeps that day skipped.
+  - Dragging an appointment moves it by the distance dragged. Grabbing the second day of an overnight or multi-day appointment, or a long bar in the month view away from its first day, used to throw its start by hours or days.
+  - Category chips in the appointment panel can be reached and toggled from the keyboard and are named for screen readers, Alt+Left moves an all-day appointment back a day, and filling an appointment from a template no longer starts a location lookup on its own.
+  - A date-range CSV or HTML export over an endless repeat stops at the same limit as a whole-calendar export instead of freezing, time zone definitions in exported .ics files stay small, the slash date styles print slashes on regions that use dots, and an email whose invite is attached as an .ics file imports.
+  - The command line explains a bad option on stderr and exits with code 2 instead of exiting silently, and killendar help agenda shows help for the agenda command instead of an error.
+  - The agenda command and KillerMCP's agenda list a range day by day, so a limit drops the last days instead of the first appointments when all-day items fall later in the range, and repeats that move off days off follow your saved work week and holiday calendar there too.
+  - Hiding shortcut hints removes every hint, including single keys such as (T) and translated ones such as (Strg+D).
+  - The file picker no longer stalls on a disconnected network folder when it opens, a relative path typed in the path box is refused instead of being looked up against the wrong folder, and a full path typed in the name box can be accepted even when the shown folder failed to list.
+  - File dialogs stay responsive on slow or crowded folders, cancel stale loads and identify incomplete listings.
+  - The file picker's Accept button can no longer fire twice: it stays off while a folder is loading or an accept is already running. A mistyped folder path now returns to the last folder that worked instead of leaving an empty list, and a malformed typed path says to enter a valid file name or path instead of showing an internal message name, even while a folder is still loading. Changing the file type with such a name typed no longer crashes the picker.
+  - A finished all-users uninstall clears the files earlier failed attempts kept, so they no longer hold the install folder open after the restart.
+  - The file picker's recent locations and places lists are named for screen readers, and dragging the reminders or search window by its title bar can no longer crash after a quick tap.
+  - Keyboard focus cues respect the theme, Windows contrast refreshes are coalesced and restore frame colors, and picker selections keep text and icons shadow-free.
+  - Dialog title bars match the rest of the dialog in every theme except 98SE. They had their own band, a lighter strip in Light and a gradient in several dark themes, and the title bar painted its film grain twice.
+  - The tray icon's menu opens from the pointer upward, out of the notification area, the same way in every Killer app. A short menu no longer covers the tray icons and a taller one no longer floats about 40 pixels above them.
+  - Black table headers match the content surface, and softer grain keeps dark surfaces from looking gray.
+ReleaseNotesUrl: https://github.com/SteveTheKiller/Killendar/releases/tag/v1.4.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
