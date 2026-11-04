@@ -1,0 +1,53 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: Victor-Quqi.Axiopera
+PackageVersion: 0.3.1
+PackageLocale: zh-CN
+ShortDescription: 把 Claude Code、Codex 和 Grok Build 互相编排成子 agent 的协作工具，一个可执行文件加一个 skill 即可接入。
+Description: |-
+  Axiopera 打通 Claude Code、Codex 与 Grok Build，让主 agent 把它们派生为子 agent 并接收结果。更轻量、更高效、更易用的 agent 协作，对现有配置的改动很小：一个可执行文件加一个 skill，沿用你已有的 agent 登录态和用量额度，默认不改动 agent 配置。
+  主 agent 可以请其他 agent 审阅或干活，运行中随时追加指令、改变方向，也可以在另一个终端用 axiopera top 实时查看所有子任务。任务默认共用当前工作目录，`--cwd` 可另行指定，并行写入的任务应各用一个 git worktree。后台守护进程负责协调各个会话。
+  同一个程序也是命令行：axiopera create、send、reply、watch、top、daemon、status 等子命令负责派发任务、审批和进度上报，已取消的任务还能续接。
+Tags:
+- claude-code
+- codex
+- grok
+- 人工智能
+- 代码
+- 任务编排
+- 多智能体
+- 大模型
+- 大语言模型
+- 子智能体
+- 智能体
+- 智能体协作
+- 智能体团队
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  Codex 可以看到子任务的实时进展，已取消的任务可以续接，agent 说明也更清楚了。
+  新增
+  - axiopera watch --status 跟踪正在执行和排队的任务，每 2 秒检查一次，输出状态和进度的变化，任务全部结束后退出。Codex 的 guide 会让它在后台终端运行，方便查看子任务进展。
+  改进
+  - guide 和子 agent 说明补充了几点：任务默认共用当前工作目录，--cwd 可另行指定，并行写入的任务应各用一个 git worktree；回答送入所属任务的主会话；Grok 的 read 档会限制 shell 命令。
+  - 拒绝消息会写明原因：read 档不允许、审批通道已关闭，或后端没有提供单次批准选项。
+  - daemon 版本持续不匹配时，报错会说明 axiopera daemon stop --force 会中断所有会话中正在运行的任务。
+  - 发布归档只包含二进制和 LICENSE，不再套一层目录。
+  修复
+  - 已取消的任务可以用 send 或 reply 续接。取消时保留会话和未交付输入。续接父任务不会重启已取消的子任务，需要逐个续接。
+  其它说明
+  - 客户端与 daemon 的通信协议有变化，替换程序前先执行 axiopera daemon stop。
+  - 降低父任务档位时，已取消的子任务也会参与检查，需要先降低它们的档位。
+  - 更新 Codex 插件后可能需要重新信任插件。
+ReleaseNotesUrl: https://github.com/Victor-Quqi/Axiopera/releases/tag/v0.3.1
+Documentations:
+- DocumentLabel: 使用说明
+  DocumentUrl: https://github.com/Victor-Quqi/Axiopera/blob/HEAD/docs/usage.md
+- DocumentLabel: 后端支持
+  DocumentUrl: https://github.com/Victor-Quqi/Axiopera/blob/HEAD/docs/backends.md
+- DocumentLabel: 设计说明
+  DocumentUrl: https://github.com/Victor-Quqi/Axiopera/blob/HEAD/docs/design.md
+ManifestType: locale
+ManifestVersion: 1.28.0
