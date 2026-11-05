@@ -1,0 +1,46 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: viswajith275.envseal
+PackageVersion: 6.3.0
+PackageLocale: en-US
+Publisher: Viswajith M P
+PublisherUrl: https://github.com/viswajith275
+PublisherSupportUrl: https://github.com/viswajith275/EnvSeal-CLI/issues
+Author: Viswajith M P
+PackageName: envseal
+PackageUrl: https://github.com/viswajith275/EnvSeal-CLI
+License: MIT
+LicenseUrl: https://github.com/viswajith275/EnvSeal-CLI/blob/HEAD/LICENSE
+ShortDescription: Zero-trust secrets engine that replaces dangerous .env files. AES-256 encrypted vaults, least-privilege tokens for CI/CD, and instant DEK rotation, without ever putting your master password on a runner.
+Description: An encrypted vault for your API keys and secrets, because .env files have never once kept a secret.
+Moniker: envseal
+Tags:
+- command-line-tool
+- developer-tools
+- encryption-decryption
+- enviornment-setup
+- envseal
+- hmac-sha256
+- rust
+ReleaseNotes: |-
+  New: file secrets, sealed alongside your env vars
+  envseal set KEY --file PATH seals any file up to 10 MB into the same vault as your environment variables — TLS certificates, service-account JSON, .p12 keystores, SSH keys, and kubeconfigs. --env-var sets the injected variable name and defaults to KEY.
+  # Seal a certificate and expose a private path to the app
+  envseal set TLS_CERT --file ./certs/server.pem --env-var TLS_CERT_PATH
+  # At runtime, $TLS_CERT_PATH points at a private temp copy
+  envseal run -- node server.js
+  # Need the file at a fixed path for a legacy tool?
+  envseal get TLS_CERT -o ./server.pem
+  At runtime, EnvSeal decrypts the file to a private temp path (0600, or 0700 if the source was executable on Unix), preserves its extension, and overwrites and deletes it when the process exits. Contents are zstd-compressed only when that makes them smaller.
+  list shows the binding in a terminal (TLS_CERT [file -> $TLS_CERT_PATH]), edit renders file entries read-only, and scoped CI tokens can include or exclude individual file keys. Use run or get for files; export and load remain text-only.
+  Also in this release
+  - list, get, export, and load now resolve the current branch's tag automatically when one exists, matching run — no --tag needed.
+  - remove refuses to guess when both base and a branch tag exist, and now requires --force in non-interactive mode.
+  - list verifies the vault signature before showing keys. Vault reads are capped at 64 MB, token payloads at 4 MB.
+  - git-setup surfaces failures instead of ignoring them, and safely merges the pre-commit guard with existing shell hooks.
+  No vault format changes or migration needed. Existing vaults keep working; the one behavior change is that scripts calling envseal remove without a TTY now need --force.
+  Full Changelog: v6.2.1...v6.3.0
+ReleaseNotesUrl: https://github.com/viswajith275/EnvSeal-CLI/releases/tag/v6.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
