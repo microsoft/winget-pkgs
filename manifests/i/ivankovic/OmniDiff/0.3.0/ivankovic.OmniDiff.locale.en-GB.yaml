@@ -1,0 +1,78 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: ivankovic.OmniDiff
+PackageVersion: 0.3.0
+PackageLocale: en-GB
+Publisher: Marko Ivankovic
+PublisherUrl: https://www.ivankovic.me
+PublisherSupportUrl: https://github.com/ivankovic/omnidiff/issues
+Author: Marko Ivankovic
+PackageName: OmniDiff
+PackageUrl: https://github.com/ivankovic/omnidiff
+License: AGPL-3.0-only
+LicenseUrl: https://github.com/ivankovic/omnidiff/blob/HEAD/LICENSE
+ShortDescription: Fast, robust, accurate content-aware diffing for code and other file formats.
+Description: |-
+  Fast, robust, accurate content-aware diffing.
+  OmniDiff is robust: it can diff 99.95% of code changes, and it is content-aware: 98.8% of changes are diffed using algorithms specific to what the file holds. It reads code by its syntax, and pictures, archives, fonts, cursors, message catalogues and PDFs by what they contain, so a difference report reflects the structure of the material rather than treating every file as plain text.
+  Code of another language held inside a string is diffed as a file of its own: TSX in a JSON "content" field, shell in a YAML run: or script: block, CSS and HTML in template literals, and YAML in an Ansible module's DOCUMENTATION, EXAMPLES and RETURN. Class lists are diffed class by class.
+  The terminal user interface offers two panels, light and dark themes, and per-platform refresh and highlighting controls, and it integrates with Git and jj as an external difftool.
+Tags:
+- ast-diff
+- code-quality
+- code-review
+- content-aware
+- diff
+- difftool
+- git
+- git-diff
+- git-difftool
+- structural-diff
+- syntax-aware-diff
+- terminal-user-interface
+ReleaseNotes: |-
+  Code held in strings is diffed as code, class lists class by class, the highlighting follows the
+  hand-painted ground truth more closely, and big diffs are a fifth to two fifths faster.
+  Added
+  - Code of another language held in a string is diffed as a file of its own: TSX in a JSON
+    "content" next to a "path" naming a .tsx file, shell in a YAML run:/script: block, CSS
+    and HTML in css/styled.*/html template literals, C header lists in shell '...' strings,
+    and YAML in an Ansible module's DOCUMENTATION, EXAMPLES and RETURN. The string is read as
+    its language means it - escapes resolved, a YAML block's indentation and a C# raw string's
+    closing indentation removed, ${...} and ${{ ... }} interpolations held in place - and each
+    edit inside it is highlighted where it is, instead of one span from the first change to the
+    last. A changed string with no language of its own is diffed line by line, or word by word when
+    it is one line holding several separate edits.
+  - CSS class lists are diffed class by class: a JSX className/class value, or a string
+    argument of cn, clsx, classnames, cx, twMerge, twJoin, cva or tw. A class is
+    added, removed or moved whole, never split at its :, - or /.
+  - A new highlighting option, "Whitespace between differently painted ranges" in the M panel:
+    the blank between two highlighted ranges on one row is highlighted too, so one edit does not
+    read as two. On in --full, off in --minimal.
+  Changed
+  - Highlighting follows the hand-painted ground truth more closely: --full leaves a token that
+    an edit beside it only pushed down a row unhighlighted, --minimal keeps inserted and deleted
+    punctuation, and a one-sided change inside a node shows as an insertion or deletion rather than
+    an update. Over the 1,419 hand-painted test cases, 987 (69.6%) are now highlighted exactly as a
+    human would under --minimal and 851 under --full.
+  - Matching: a statement whose value moved into a new statement stays paired with it; a changed
+    function, type or class inside a large flat container is found by its name in Rust, Go, Python,
+    Kotlin, JavaScript/TypeScript, Scala, PHP and C#; a Java built-in type replaced by another keeps
+    its declaration; if-chain clauses that swapped places, members of JS/TS classes, JSON pairs,
+    #defines and identical twins in a list are matched by what they are rather than where.
+  - Faster: a diff takes 22% less time on average and 23% less at the 99th percentile; on big files,
+    from the command line, 22% to 43% less. The two sides are parsed on two threads, the syntax
+    trees' metadata is built with fewer allocations, and the tree edit distance prices its table
+    without string comparisons.
+  - Library: ASTDiff has a public embedded field (the embedded layers, diff::embedded) and
+    RenderOptions an interior_whitespace field, so a struct literal of either needs updating.
+    New: Code::parse_only, code::build_sides.
+  Security
+  - zip 9, for RUSTSEC-2026-0367, -0368 and -0369, and libz-sys 1.1.31, for RUSTSEC-2026-0418.
+ReleaseNotesUrl: https://github.com/ivankovic/omnidiff/releases/tag/v0.3.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://ivankovic.github.io/omnidiff/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
