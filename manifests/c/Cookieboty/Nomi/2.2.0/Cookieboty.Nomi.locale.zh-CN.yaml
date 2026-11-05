@@ -1,0 +1,59 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Cookieboty.Nomi
+PackageVersion: 2.2.0
+PackageLocale: zh-CN
+Publisher: Cookieboty
+PublisherUrl: https://withnomi.app/
+PublisherSupportUrl: https://github.com/Cookieboty/nomi-ai/issues
+PrivacyUrl: https://withnomi.app/privacy.html
+PackageName: Nomi
+PackageUrl: https://withnomi.app/download.html
+License: MIT
+LicenseUrl: https://github.com/Cookieboty/nomi-ai/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Cookieboty
+ShortDescription: 桌面上的 AI 伙伴：接上任意模型，自己干活，也能把专业的活派给编程助手。
+Description: |-
+  Nomi 是住在你桌面上的 AI 伙伴：接上任意模型，自己动手干活，也会把专业的活派给专业的 AI。模型、编程助手、MCP 与本地工具都接到一处，由 Nomi 统一调度。
+  模型只接一次就能给所有 AI 使用：添加一次供应商，Nomi 自己和 Claude Code、Codex、Gemini CLI、Grok、dsh 都能用它的任意模型，也可以全部换成本地模型。本机网关自动识别并互转 Anthropic Messages、OpenAI Responses、OpenAI Chat Completions 与 Gemini generateContent，流式、工具调用、推理、图片和上下文压缩都照常工作。
+  任务可以限定能访问的文件夹，编程助手有独立的两栏工作区，桌面角色会显示台词与确认气泡。应用为 Go 内核加原生 WebView，单个安装包约 39 MB，按当前用户安装，不需要管理员权限。
+Tags:
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  Nomi· 诺米 2.2.0
+  只剩 Go 版的版本：从这一版起只发布 Go 版（Go 内核 + Wails），不再提供 Electron 版；更新改成点一下就装好并重新打开，委派给编程助手的任务默认直接在工作目录里改，并修复了供应商、用量计费、插话与任务详情的几个问题。 / The Go-only release: from this version only the Go build (Go core + Wails) ships and the Electron build is gone; updating now installs and relaunches with one click, tasks delegated to coding assistants edit the working folder directly by default, and several provider, usage pricing, steering and task detail issues are fixed.
+  新功能 / New
+  - 点「重启更新」后直接装好并重新打开：macOS 把新版 Nomi.app 换进原位置（校验 SHA-256、签名、Bundle ID 与 Team ID），不用再拖拽，只有 Nomi 不在可写位置（从 dmg 里运行、被系统隔离、目录没有写权限）时才打开 dmg；Windows 静默覆盖安装，不弹安装向导，装完自动启动。从 2.2.0 升级到之后的版本起生效 / "Restart to update" now installs and relaunches by itself: on macOS the new Nomi.app replaces the old one in place (checking SHA-256, signature, Bundle ID and Team ID) with no dragging, and the DMG opens only when Nomi isn't in a writable location (run from the DMG, quarantined, or a folder without write access); on Windows the installer runs silently and relaunches Nomi. Takes effect for updates after 2.2.0
+  - 委派给编程助手的任务默认直接在工作目录里改，不再每次都开一个工作副本；同一个仓库里并行的任务改到同一个文件时，重要程度低的让路 / Tasks delegated to a coding assistant edit the working folder directly by default instead of opening a working copy every time; when parallel tasks in one repo touch the same file, the lower-priority one yields
+  - 指定基于另一个分支做时才开工作副本，做完自动落地：改动少的拷回工作区，改动多的提交到新分支 nomi/… 由你决定是否合并；任务结束、取消或删除时清理工作副本，启动时也清理遗留的 / A working copy is opened only when a task is based on another branch, and its changes land automatically when done: small changes are copied back to the working folder, large ones are committed to a new nomi/… branch for you to merge; working copies are cleaned up when a task ends, is cancelled or deleted, and leftovers are removed at startup
+  改进 / Improvements
+  - 同一种委派（同一个对话、编程助手、目录与任务类型）接着用上一次的编程助手会话，上下文和缓存都还在，更快也更省 / The same kind of delegation (same conversation, coding assistant, folder and task type) continues the previous coding-assistant session, so its context and cache carry over: faster and cheaper
+  - 委派出去的会话只在 Nomi 里查看，不再出现在侧栏、运行中数量和编程助手的历史里 / Delegated sessions are viewed only in Nomi and no longer appear in the sidebar, the running count or the coding assistant's history
+  修复 / Fixes
+  - 委派给编程助手的任务中途失败时，工作副本里的改动全部拷回工作区（以前只拷前 50 个文件）；有拷不回去的文件时保留工作副本并写明是哪些 / When a delegated coding task fails midway, every change in its working copy is copied back (previously only the first 50 files); if some files can't be copied, the working copy is kept and the result names them
+  - 第三方供应商配了模型映射时，用量费用按公开模型设的「按哪个已知模型处理」计价，不再记为未定价 / With a model mapping on a third-party provider, usage cost uses the public model's "treat as known model" setting instead of counting calls as unpriced
+  - 编辑供应商时点「重新检测」，检测期间改的名称、Key、模型设置不再被还原；检测期间改了地址时，旧地址的结果不会套到新地址上 / Edits made while a provider re-detect runs (name, keys, model settings) are no longer reverted, and a result for an address you have since changed is not applied to the new one
+  - 添加第一个第三方供应商后，Nomi 对话的模型会自动填上推荐模型 / After adding the first third-party provider, Nomi's chat model is filled in with the recommended model again
+  - 往 Nomi 对话里插入的消息还在交付时切换到另一个对话，交付失败的消息不再被放进新对话并自动发出 / If you switch conversations while a message inserted into Nomi's running turn is still being delivered, a failed delivery is no longer moved into the new conversation and sent there
+  - 打开还没运行过的任务详情不再报「Invalid output of 'tasks.get'」 / Opening a task that has never run no longer fails with "Invalid output of 'tasks.get'"
+  - 英文界面下，定时任务与主动搭话交给模型的说明改用英文星期，句子之间不再缺空格 / With the English UI, scheduled tasks and proactive check-ins give the model the weekday in English and no longer run sentences together
+  说明 / Notes
+  - 不再提供 Electron 版安装包（Nomi-Electron-…）；装着 Electron 版的用户在应用内检查更新即可升级到 Go 版，数据在首次启动时迁移 / Electron installers (Nomi-Electron-…) are no longer provided; users on the Electron build update in-app to the Go build, and data is migrated on first launch
+ReleaseNotesUrl: https://github.com/Cookieboty/nomi-ai/releases/tag/v2.2.0
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://withnomi.app/docs.html
+- DocumentLabel: 更新日志
+  DocumentUrl: https://withnomi.app/changelog.html
+- DocumentLabel: 功能一览
+  DocumentUrl: https://withnomi.app/features.html
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
