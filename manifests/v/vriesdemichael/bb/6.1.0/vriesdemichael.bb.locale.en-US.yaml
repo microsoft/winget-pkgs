@@ -1,0 +1,75 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: vriesdemichael.bb
+PackageVersion: 6.1.0
+PackageLocale: en-US
+Publisher: vriesdemichael
+PublisherUrl: https://github.com/vriesdemichael
+PublisherSupportUrl: https://github.com/vriesdemichael/bitbucket-data-center-cli/issues
+PackageName: bb
+PackageUrl: https://github.com/vriesdemichael/bitbucket-data-center-cli
+License: Apache-2.0
+LicenseUrl: https://github.com/vriesdemichael/bitbucket-data-center-cli/blob/HEAD/LICENSE
+ShortDescription: A CLI for Bitbucket Server / Bitbucket Data Center
+Description: |-
+  bb works with Bitbucket Data Center and Bitbucket Server from the command line, the way gh works with GitHub: pull requests, repositories, branches, tags, commits, build status and permissions.
+  Every command can answer in JSON for scripts, and bb ai mcp serve exposes it to AI agents over the Model Context Protocol. It is not for Bitbucket Cloud.
+Moniker: bb
+Tags:
+- atlassian
+- bitbucket
+- bitbucket-data-center
+- bitbucket-server
+- ci
+- cli
+- devops
+- golang
+- mcp
+- pull-requests
+ReleaseNotes: |-
+  v6.1.0
+  bb v6.1.0 gives administrators who set bb's policy through Group Policy a template to do it with, and sets up shell completion for Windows PowerShell 5.1 when you run the setup from PowerShell 7.
+  It is a minor release with no breaking changes.
+  For administrators
+  - A Group Policy template for bb's Windows policy (#776):
+    bb reads its machine policy from HKEY_LOCAL_MACHINE\Software\Policies\bb, but there was no administrative template for it, so setting it through Group Policy meant writing registry items by hand. Each release now publishes bb_policy_templates.zip, holding bb.admx and en-US/bb.adml. Extract it into the PolicyDefinitions folder of your central store, and every value bb reads is a setting under Computer Configuration > Administrative Templates > bb, the Bitbucket Data Center CLI, with help that names the registry value it writes. Take the template from the release you deploy, since it offers the values that release reads. Fleet deployment has the steps.
+  Fixes worth knowing
+  - bb completion install run from PowerShell 7 sets up Windows PowerShell 5.1 as well (#819):
+    It set PowerShell 7 up, then printed a block of PowerShell error text and left Windows PowerShell 5.1 without completion. Both are set up now, and bb doctor and bb completion remove find the 5.1 profile too. If you ran the setup from PowerShell 7 before, run it again to add 5.1:
+    bb completion install --shell powershell
+  Changes since v6.0.0.
+  Compare: v6.0.0...v6.1.0
+  Features
+  - policy: publish a Group Policy template for the registry values bb reads (959a6d6)
+  Fixes
+  - completion: ask Windows PowerShell 5.1 without PowerShell 7's module path (2ad5409)
+  Refactors
+  - pr: move helpers used by one group next to it (c4db3f3)
+  - pr: build each group of pr subcommands in its own file (124eb46)
+  Docs
+  - release: write the v6.1.0 notes for the upgrader (30033a5)
+  Tests
+  - pr: hold every pr command to a configuration it cannot load and a malformed --repo (14358ec)
+  Build
+  - release: check that the local next is origin/next before a promotion (140294e)
+  CI
+  - link the rules and say how to rebase in the retarget comment (1faecc8)
+  - move a pull request opened against main to next (543112f)
+  - live: keep Bitbucket's whole log when the live job fails (9ad7101)
+  Chores
+  - deps: Bump certifi in /docs in the uv group across 1 directory (b8e3262)
+  - deps: Bump astral-sh/setup-uv from 10.3.0 to 10.3.2 (e6209fa)
+  - quality: stop counting three commit endpoints pr.go only matched by name (4a96415)
+  - deps: Bump the gomod-minor-patch group with 4 updates (780c82b)
+  - deps: Bump actions/setup-python from 7.0.0 to 7.1.0 (1014382)
+  - deps: Bump the gomod-minor-patch group with 4 updates (1004711)
+ReleaseNotesUrl: https://github.com/vriesdemichael/bitbucket-data-center-cli/releases/tag/v6.1.0
+InstallationNotes: |-
+  Set up PowerShell tab completion: bb completion install --shell powershell
+  Install the skill for coding agents: bb ai skill install --global
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://vriesdemichael.github.io/bitbucket-data-center-cli/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

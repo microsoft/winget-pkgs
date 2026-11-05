@@ -1,0 +1,62 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.11.6
+PackageLocale: en-US
+ShortDescription: Agent-friendly reference management.
+Description: 'Traditional reference managers are not agent-friendly: highlights and notes stay locked inside single files, making it hard for agents to reuse knowledge across papers; every conversation starts from scratch without a stable local knowledge map; PDFs are human-friendly but not the most comfortable reading material for agents. Agentero aims to build an agent-friendly, agent-native way to manage references, exploring how humans and agents collaborate on reference management. Connect your local agent via ACP (BYOA), select-text chat, import papers and Skills, stay compatible with the Zotero ecosystem, and get paper translation, bidirectional links with a knowledge graph, and deep PDF reading.'
+Tags:
+- academics
+- agent
+- article
+- literature
+- paper
+- pdf
+- reference
+- research
+- thesis
+- zotero
+ReleaseNotes: |-
+  This release centers on PDF reading and full-text translation: translated highlights and annotations now anchor back to the source English sentences, citations and figure/table/equation cross-references get hover previews, and new scroll-direction and page-layout settings are available. It also adds institutional-proxy downloads, Zotero collection references, MiMo Code, and a configurable decision provider, alongside a batch of fixes for PDF layout, Markdown reading performance, and agent behavior.
+  Features
+  - Institutional-proxy downloads: When every OA path misses, rewrite the DOI target through an EZProxy/WebVPN prefix and reuse the user's session cookie to fetch the PDF with their institutional access; configure the prefix and test the connection in Settings. (#685 by @dengfeng-0908)
+  - Sentence-anchored translation highlights: Full-text translation aligns text per sentence, so highlights and annotations made on the translation anchor to the matching English sentences and re-highlight those glyphs when you switch back. (#690 by @ffy6511)
+  - Citation and cross-reference previews: When structured reference metadata misses, a target-coordinate and text-rectangle fallback locates the reference entry and renders a cropped preview; figure, table, and equation cross-references are also previewable. (#707 by @bet4it)
+  - PDF scroll direction and page layout: Settings → General gains continuous-scroll direction (vertical/horizontal) and page layout (single page / two-page spreads), persisted in Host settings.json and broadcast to open PDF views. (534a5aa6 by @Phil-Fan)
+  - Zotero collection references and migration metadata: The sidebar shows Zotero collection references, migration keeps the collection metadata it discovers, and ignored item types are explained. (#637 by @JiaheChen2002)
+  - MCP paper-text switch: A new, off-by-default paper_text_get MCP tool returns a paper's PDF text to external clients only after the owner opts in via Settings. (c333e103 by @dengfeng-0908)
+  - MiMo Code agent: Adds the MiMoCode (mimo acp) template with a full silent install/update/uninstall and version-check lifecycle, and removes the OpenClaw preset. (#683 by @dengfeng-0908)
+  - Configurable decision provider: The decision layer generalizes the jEV-only transport into a configurable System One provider with jev/clef/openai/custom presets, endpoint, and model selection. (003b7301 by @Phil-Fan)
+  - Open Agent CLI in a terminal: Settings can open an installed Agent CLI in a terminal, making one-click login possible when the CLI is not authenticated yet. (4449fcce by @Phil-Fan)
+  - Unsupported desktop app detection: Settings → Agent adds a read-only "Local desktop apps" section that probes ChatGPT, QwenWork, and Tencent WorkBuddy, none of which speak ACP; onboarding lists them the same way with a "Not supported yet" label. (614cffc4 by @Phil-Fan)
+  - Command palette searches tags and aliases: Quick open now matches paper tags and note aliases. (91afe559 by @Phil-Fan)
+  Improvements
+  - Markdown reading performance: Long notes skip layout and paint for offscreen blocks while unfocused, trim remark plugins per document, and run preprocessing passes only when their trigger syntax is present, noticeably reducing jank when opening, scrolling, and dragging the side rails. (#702 by @Phil-Fan)
+  - PDF selection and first-paint performance: Text selection is armed lazily on pointer intent and visible-page selection geometry is prefetched, so opening a document no longer triggers PDFium geometry work for the whole file. (#606 by @Phil-Fan)
+  - Grouped General settings pane: Settings → General is split into Paper library / PDF reading / Plaza / Network / Integrations groups, and every pane shares the same section label. (09452b5a by @Phil-Fan)
+  - Note export watermark on by default: Exported notes include the Agentero watermark by default, with a per-export opt-out in the dialog; the redundant setting is removed. (1bc29c64 by @Phil-Fan)
+  - Proxy precheck for GitHub downloads: CLI installs and app updates check for a proxy first and surface an actionable toast that jumps to the network-proxy settings when none is configured. (6ba47f04 by @Phil-Fan)
+  - Sidebar Paper Info auto-hide: Paper Info is shown only for an active paper tab or the Library row under the pointer, and hovering a row previews that paper's metadata. (#695 by @Phil-Fan)
+  - More robust AtomGit release sync: Sync now aborts on stalled transfers instead of a fixed duration and raises the job timeout to 180 minutes, fixing the inevitable timeout for large assets on slow links. (#694 by @Phil-Fan)
+  - Antigravity brand mark: antigravity-acp gets its own brand mark instead of falling back to the generic terminal icon. (f72db937 by @Phil-Fan)
+  Fixes
+  - MinerU missing figures: Missing or cross-page captions no longer drop whole figures from the Figures sidebar; real caption geometry is used and old caches recover locally. (#705 by @llamapw)
+  - Layout line order and text-layer persistence: Same-line text is ordered by glyph baseline, fixing bold or larger words being placed to the left, and the extracted text layer is persisted and marked so a restart no longer re-reads the whole document. (#703 by @ffy6511)
+  - PDF links no longer enter annotation selection: Link interaction returns to the link layer, so clicking a citation or external link no longer shows the annotation resize box, and external links open through the Host opener. (#699 by @bet4it)
+  - Translation scroll keeps horizontal position: Scrolling the translation no longer makes the source pane's horizontal scrollbar jump elsewhere. (a52b67c7 by @JiaheChen2002)
+  - Linux native scrollbar occlusion: Native page scrollbars hide while floating layers are open and restore on close, while scrollbars inside the layers stay visible. (#693 by @bet4it)
+  - Inline math rendering and alignment: Newly inserted inline equations are no longer blank from lazy rendering, baseline alignment is restored, and $|$ is converted on commit. (9bab8b5f, 659802af by @Phil-Fan)
+  - opencode 2.0.22 model catalog: Fixes the custom model list being overwritten when newer opencode pushes its catalog in two parts. (#638 by @Phil-Fan)
+  - Zotero ignored item types: Migration now reports which item types it skips. (9558e1b2 by @JiaheChen2002)
+  - Translation failure toast: Full-text translation failures now offer an "Open translation settings" action. (5c82f693 by @Phil-Fan)
+  - Onboarding Agent step scrolling: The Agent step uses the shared scroll container, so added cards no longer push content out of the dialog. (24c9f467 by @Phil-Fan)
+  Security
+  - Dependency advisories cleared: Bumped dompurify and katex, pinned transitive undici, hono, ip-address, proxy-addr, source-map-js, postcss-selector-parser, and brace-expansion to patched releases via pnpm overrides, and upgraded rustls to 0.23.45. (334b9e51, 4cd74e8e by @Phil-Fan)
+  Full Changelog: https://github.com/poco-ai/Agentero/compare/v0.11.5...v0.11.6
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.11.6
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: locale
+ManifestVersion: 1.12.0

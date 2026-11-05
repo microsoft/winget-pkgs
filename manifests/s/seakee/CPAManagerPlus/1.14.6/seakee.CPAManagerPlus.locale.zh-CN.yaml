@@ -1,0 +1,85 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: seakee.CPAManagerPlus
+PackageVersion: 1.14.6
+PackageLocale: zh-CN
+ShortDescription: 自托管的 CPA / CLIProxyAPI 管理面板与 AI 网关可观测性仪表盘
+Description: |-
+  面向 CPA / CLIProxyAPI 的自托管管理面板与 AI Gateway 可观测性仪表盘，覆盖请求、用量、成本、配额、失败诊断和账号健康。
+
+  CPAMP 可以帮你回答什么问题？
+  - 请求为什么失败？ 在持久化请求历史中查看失败率、状态码、受影响的模型/账号和脱敏证据。
+  - 成本花在哪里？ 按模型、Provider、账号、API Key、项目、渠道和时间范围拆解 Token 与预估成本。
+  - 账号和配额是否健康？ 查看凭证状态、配额窗口、reset 证据，以及 Codex 和 xAI 的受控自动化状态。
+
+  核心能力
+
+  CPA 网关管理
+  - 管理 CPA Provider 配置，包括 Gemini、Codex、Claude、Vertex、xAI 和 OpenAI-compatible Provider。
+  - 维护认证文件、OAuth 登录、API Key、模型别名、优先级、插件、日志和系统配置。
+  - 导入官方 Sub2API OpenAI OAuth 导出，并把多账号拆分为独立的 CPA Codex 认证文件。
+
+  请求监控与失败诊断
+  - 将 CPA usage queue 中的请求持久化到本地 SQLite，并按账号、调用方 API Key 查看实时请求。
+  - 查看状态、延迟、Token、缓存、Trace 和脱敏失败证据，不暴露原始失败体。
+  - 使用 JSONL 导入或导出请求历史。
+  - 打开 请求监控演示。
+
+  成本与用量分析
+  - 按模型、Provider、账号、认证文件、API Key、项目、渠道和时间范围拆解请求、Token、成本、延迟和失败。
+  - 追踪 input、output、reasoning、cache、service tier 和长上下文计费语义。
+  - 从 LiteLLM 和 OpenRouter 同步模型价格，并为别名或内部模型保留本地覆盖。
+  - 打开 用量分析演示。
+
+  账号健康、配额与自动化
+  - 在浏览器本地或 Manager Server 定时巡检 Codex 和 xAI 账号。
+  - 在 Provider 可提供信息时展示配额窗口、reset 证据、凭证状态、工作区状态和健康信号。
+  - 对明确额度耗尽执行受控冷却，并将认证故障汇总到账号处理队列，支持复核与恢复。
+  - 打开统一的 凭证管理演示。
+
+  生产运维
+  - 使用单 Docker 容器，或 Linux、macOS、Windows 的 amd64/arm64 原生包运行；完整栈可以与 CPA 一起部署。
+  - 请求历史、Manager 配置、账号自动化和模型价格都保存在本地文件，不需要注册账号，也不包含遥测 SDK。
+  - 备份 SQLite 时同时保存 data.key，才能恢复加密后的 CPA Management Key。
+
+  想先了解界面？可以打开在线演示。演示站只使用虚构数据，不是部署或运行模式，不能连接、管理或监控真实 CPA。
+  CPAMP 管理和观测经过 CPA / CLIProxyAPI 的流量，本身不是模型代理，也不会独立转发模型请求。
+
+  数据、隐私与安全
+  - CPAMP 不会回传遥测，不包含分析 SDK，也不要求注册账号。
+  - 外部请求只限于 CPA Gateway 及你明确配置或主动触发的 OAuth、Provider 检查、插件 Release 和模型价格同步。
+  - 请求历史、配置、模型价格、巡检历史和自动化状态都保存在本地文件。
+  - CPA Management Key 入库前会加密；备份需要同时保存 SQLite 文件和 data.key。
+  - 普通 API 和 JSONL 导出只暴露脱敏失败摘要，不返回原始失败体或保存的原始 JSON。
+  - CPAMP 只应用于你有权管理的流量和凭证。
+Tags:
+- 人工智能
+- 代理
+- 仪表盘
+- 大语言模型
+- 网关
+ReleaseNotes: |-
+  Overview
+  v1.14.6 是 v1.14.5 之后的 1.x 维护补丁版本，仅收录三个已合并并通过 CI 的问题修复：Codex 工作区预算限制的识别与展示（#935 / #938）、归档清理前的历史监控投影完整性保护（#939 / #945），以及未知提供商在严格 CPA v2 计量证据下的缓存 Token 重复计算（#941 / #946）。
+  本版本不增加新功能、后台轮询或定时器，也不改变 CPA 管理 API、凭证权限或数据库 Schema。
+  Highlights
+  Fixes
+  - Codex 工作区消费预算（#935 / #938）：正确识别结构化 spend_control.individual_limit，同时兼容旧版标量数据与浏览器中已持久化的额度缓存。保留预算总额、已用、剩余额度、单位、周期及重置证据；已触发的消费限制仍显示为受限，不再被普通 5 小时或周额度余额掩盖。
+  - 对 0 / 0 等零预算场景显示具体的 workspace budget 原因，不以“已用 100%”代替解释。仅在消费限制证据完整且没有其他冲突限制时，建议检查工作区预算；同时存在其他限制时保留额度刷新建议。没有新增后台额度探测或轮询。
+  - 归档清理数据保护（#939 / #945）：清理原始请求事件前，按批次验证保留的 Monitoring 投影行确实存在且时间戳匹配。缺失或不匹配时，仅在同一 SQLite 事务内从仍存在的原始数据补齐并复核；无法证明安全交接则回滚并停止删除。
+  - 中断后恢复清理时还会检查本次任务已删除事件的保留投影，避免在已受损的清理状态下继续删除。该修复防止未来清理造成同类缺口，不会虚构或自动恢复升级前已永久丢失的历史原始事件。
+  - CPA v2 缓存计量（#941 / #946）：对原本无法归类的事件，只有当 CPA v2 的 accounting_version=2 与 token_breakdown.schema_version=2 提供完整、内部一致的输入、缓存、输出、推理及总量证据时，才采用规范化缓存语义，避免将缓存读取 Token 再计入输入。
+  - 保留既有显式规则及已知 Provider / Executor / Model 的优先级；证据缺失、歧义、版本未知或不一致时继续采用原回退逻辑。标准 JSONL 导入导出会区分上游显式计量模式与 CPAMP 派生模式，不会将派生结论伪装成上游原始声明。
+  - 对符合条件的历史在线 usage_events 自动执行缓存计量语义修正，并通过现有迁移链重建相关聚合与费用结果，不需要手动编辑 SQLite 或执行离线清理命令。
+  Upgrade Notes
+  - 正常升级并重启即可。没有数据库 Schema 迁移或配置格式变更，但会对符合条件的历史记录运行自动计量语义修正，并重建相关用量 / 费用汇总；升级后统计值可能相应变化。
+  - 建议在升级前保留一致的数据库及归档备份。若需要回退到升级前的精确历史计量状态，应恢复同一时间点的数据库与归档备份，而不是手工逆向修改派生计量字段。
+  - 新的严格缓存计量分支只在 CPA v2 规范证据完整时生效；其他事件沿用原有兼容规则。完整 Muse / Meta 功能的 CPA 最低兼容基线仍为 v7.3.4+。
+  - 归档清理的新增验证可能增加少量批次处理开销；不能验证保留投影时将优先停止清理，保护原始数据。
+  - 无需新增后台轮询、定时器或手动数据修复步骤。
+
+  Full Changelog: https://github.com/seakee/CPA-Manager-Plus/compare/v1.14.5...v1.14.6
+ReleaseNotesUrl: https://github.com/seakee/CPA-Manager-Plus/blob/HEAD/docs/release-notes/v1.14.6-zh.md
+ManifestType: locale
+ManifestVersion: 1.12.0
