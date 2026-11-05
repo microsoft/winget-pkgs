@@ -11,6 +11,7 @@ variables:
   Rebuild.SkipPausePublishPipeline: $[coalesce(variables.SkipPausePublishPipeline, 'False')]
   Rebuild.EnableContainerBackup: $[coalesce(variables.EnableContainerBackup, 'False')]
   Rebuild.ClearContainer: $[coalesce(variables.ClearContainer, 'False')]
+  Rebuild.AllowPartialRebuild: $[coalesce(variables.AllowPartialRebuild, 'False')]
 
 resources:
   repositories:
@@ -59,14 +60,15 @@ extends:
           parameters:
             type: Rebuild
 
+        # Keep the split tasks in this job: merge and index consume prepare's local workspace.
         - task: AzureCLI@2
-          displayName: 'Validate Manifests'
+          displayName: 'Prepare Repository'
           inputs:
             azureSubscription: '$(WinGetSvc.DataAccess)'
             scriptType: batch
             scriptLocation: inlineScript
             inlineScript: |
-              WinGetSvcWrapper.exe rebuild --operationId %BUILD_BUILDNUMBER%
+              WinGetSvcWrapper.exe rebuild-prepare --operationId %BUILD_BUILDNUMBER%
             addSpnToEnvironment: true
             failOnStandardError: true
           env:
@@ -79,6 +81,51 @@ extends:
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
             ExecutionEnvironment: $(WinGetSvc.ExecutionEnvironment)
             SkipPausePublishPipeline: $(Rebuild.SkipPausePublishPipeline)
+            AllowPartialRebuild: $(Rebuild.AllowPartialRebuild)
+
+        - task: AzureCLI@2
+          displayName: 'Create Merged Manifests'
+          inputs:
+            azureSubscription: '$(WinGetSvc.DataAccess)'
+            scriptType: batch
+            scriptLocation: inlineScript
+            inlineScript: |
+              WinGetSvcWrapper.exe rebuild-merge --operationId %BUILD_BUILDNUMBER%
+            addSpnToEnvironment: true
+            failOnStandardError: true
+          env:
+            ValidationStorageAccountName: $(ValidationStorageAccountName)
+            CacheStorageAccountName: $(CacheStorageAccountName)
+            WinGet:AppConfig:PrimaryEndpoint: $(AppConfigPrimaryEndpoint)
+            WinGet:AppConfig:SecondaryEndpoint: $(AppConfigSecondaryEndpoint)
+            DIApplicationInsightKey: $(DIApplicationInsightKey)
+            PackagePublisher: $(PackagePublisher)
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+            ExecutionEnvironment: $(WinGetSvc.ExecutionEnvironment)
+            SkipPausePublishPipeline: $(Rebuild.SkipPausePublishPipeline)
+            AllowPartialRebuild: $(Rebuild.AllowPartialRebuild)
+
+        - task: AzureCLI@2
+          displayName: 'Index Repository'
+          inputs:
+            azureSubscription: '$(WinGetSvc.DataAccess)'
+            scriptType: batch
+            scriptLocation: inlineScript
+            inlineScript: |
+              WinGetSvcWrapper.exe rebuild-index --operationId %BUILD_BUILDNUMBER%
+            addSpnToEnvironment: true
+            failOnStandardError: true
+          env:
+            ValidationStorageAccountName: $(ValidationStorageAccountName)
+            CacheStorageAccountName: $(CacheStorageAccountName)
+            WinGet:AppConfig:PrimaryEndpoint: $(AppConfigPrimaryEndpoint)
+            WinGet:AppConfig:SecondaryEndpoint: $(AppConfigSecondaryEndpoint)
+            DIApplicationInsightKey: $(DIApplicationInsightKey)
+            PackagePublisher: $(PackagePublisher)
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+            ExecutionEnvironment: $(WinGetSvc.ExecutionEnvironment)
+            SkipPausePublishPipeline: $(Rebuild.SkipPausePublishPipeline)
+            AllowPartialRebuild: $(Rebuild.AllowPartialRebuild)
 
       # Agentless phase. Depends on previous job. 
       - job: 'SignPackage'
