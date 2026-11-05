@@ -1,0 +1,41 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: mateo-ki.VPNParser
+PackageVersion: 1.16.2
+PackageLocale: zh-CN
+ShortDescription: Windows 桌面程序：采集订阅、解析成节点、跑代理，并把代理质量实测出来。
+Description: VPN Parser 是用 Rust + egui 编写的 Windows 桌面程序，负责采集免费或自建订阅、解析成节点、跑代理，并把代理质量实测出来。订阅入口包括带 `YYYY-MM-DD` 日期占位符的订阅 URL、Gist 搜索页发现，以及 Telegram 频道预览（裸节点链接和订阅链接两类都取，节点只增不删）。解析支持 `ss` `vmess` `vless` `trojan` `hysteria2/hy2` `socks5` `http(s)` 分享链接，以及 Clash / Clash Meta YAML、Base64 与混合文本。延迟以经内核访问 Google `generate_204` 的真实握手为准，24 小时出口健康条按实测绘制，而不是看内核上报的状态。Windows 上它同时管理系统代理、TUN（提权交接后只保留一个实例）和终端 `HTTP_PROXY` 环境变量，按 exe 路径添加防火墙允许规则，支持单实例互斥与托盘，记录出口切换历史并按天统计规则命中，同时提供强制 bearer 鉴权的本地 HTTP API 与 mihomo / sing-box / xray 配置导出。安装包不含内核，内核缺失时由程序按需下载。
+Tags:
+- clash
+- sing-box
+- 代理
+- 出口健康
+- 测速
+- 节点解析
+- 订阅
+ReleaseNotes: |-
+  🚀 VProxy v1.16.2 发布说明 / Release Notes
+  🎉 VProxy v1.16.2 正式发布！本版本全面整合了面向 macOS 平台的常驻后台与 TUN 守护能力、大幅提升了海量脏数据订阅源的容错解析效率，并完成了全工程历史兼容项清理与交互保障：
+  🍎 macOS：Dock 最小化常驻、登录恢复与 TUN 守护加固 (PR #9)
+  - Dock 优雅常驻与生命周期管理：
+    - 针对 macOS 缺乏通用系统托盘的平台特性，点击窗口关闭按钮时通过 ViewportCommand::Minimized(true) 拦截退出并最小化收进 Dock，维持代理与 TUN 路由不中断；显式退出时置位 force_quit，确保释放所有资源并平稳退出守护进程；
+  - LaunchAgent 用户级登录自动启动与节点状态持久恢复：
+    - 支持在用户登录系统后自动启动并恢复记忆的代理节点状态，无需手动打开界面重连；
+  - 独立内核看护任务与崩溃退避重试：
+    - 解决 macOS AppKit 在窗口最小化后停止重绘导致渲染主循环挂起的问题，派生独立的 Tokio 守护循环持续维护内核状态，确保崩溃重试机制（2s / 5s / 15s 退避）在后台常驻时始终可靠生效；
+  - Darwin 域套接字 O_NONBLOCK 继承机理修复：
+    - 在 Privileged Helper IPC 通信中显式配置阻塞模式与读写超时，彻底根治 macOS 内核 accept() 继承父级套接字非阻塞标志引起的 EAGAIN / EWOULDBLOCK 瞬时报错。
+  ⚡ 核心解析引擎：超大脏数据公开订阅源容错解码
+  - Base64 容错解码与 Unicode C1 控制符兼容：
+    - 彻底修复 decode_maybe_base64 在解析数兆字节超大订阅（如 14,000+ 节点的自动化抓取代理池）时，因备注或 query 参数混入个别 Latin-1 / C1 控制字符（\u{80}、\u{93}）导致整包数据被 all(!is_control) 判定为二进制而误丢弃为 0 节点的严重缺陷；
+    - 引入代理协议特征快速放行与最高 2% 的控制字符容错机制，实测公开大订阅源解析成功率提升至 100%。
+  🎯 界面交互：Tab 切换机制确认与防误触保障
+  - 全量 Tab 严格点击触发机制：
+    - 确认并固化侧边栏一级导航、设置页子面板、扩展功能、活动连接、分流规则等全部 Tab 组件的交互响应，确保界面切换严格由明确的鼠标点击（resp.clicked()）触发，鼠标移入（hover）仅改变视觉焦点样式，杜绝任何误切页。
+  🧹 工程治理与老版本平滑兼容
+  - 历史遗留硬编码收敛：
+    - 梳理并收敛工程内部遗存的 vpn-parser 命名，优先读取 VPROXY_* 环境变量（同时无缝向下兼容 VPN_PARSER_*）；
+    - 全平台打包配置、Inno Setup、deb、rpm、Scoop Manifest 同步升级至 v1.16.2。
+ManifestType: locale
+ManifestVersion: 1.28.0
