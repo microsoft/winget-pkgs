@@ -1,0 +1,154 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: AtomGit.AtomCode
+PackageVersion: 5.2.6
+PackageLocale: zh-CN
+Publisher: 重庆开源共创科技有限公司
+PublisherUrl: https://atomgit.com/
+PublisherSupportUrl: https://atomgit.com/atomgit_atomcode/atomcode/issues
+PrivacyUrl: https://docs.gitcode.com/docs/help/home/protocol/privacy-policy
+Author: 重庆开源共创科技有限公司
+PackageName: AtomCode
+PackageUrl: https://atomcode.atomgit.com/
+License: MIT
+LicenseUrl: https://atomgit.com/atomgit_atomcode/atomcode/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Yubang Xu
+CopyrightUrl: https://docs.gitcode.com/docs/help/home/protocol/ai-privacy-policy
+ShortDescription: AI 编程助手 在你的终端中运行
+Description: Claude Code / Cursor Agent 的开源平替，住在你的终端里。连接任意 OpenAI 兼容大模型，自主读文件、改代码、跑测试、自我验证 —— 用 Rust 构建。
+Tags:
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  AtomCode v5.2.6 Release Notes
+  发布日期：2026-11-05
+  v5.2.6 围绕长任务的连续性与多端使用体验展开：异常退出后可恢复已保存的部分输出与执行记录，原始任务要求可跨上下文压缩保留，新增推理复读检测与有界恢复；WebUI 新增文件、终端与 Git 项目工作台，TUI 与 WebUI 支持模型资料查看、对比及人设来源检查，同时改善技能调用、手机会话切换与 Windows 终端可靠性。
+
+  ⚠️ Behavior Changes（注意行为变化）
+  - WebUI 绑定地址：WebUI 服务默认仍绑定 127.0.0.1，但新增 /webui lan（绑定 0.0.0.0）与 --host <addr> 显式开放给其他设备访问。开放访问时请使用启动时打印的带鉴权 URL。
+  - 对话滚动条默认隐藏：TUI 对话滚动条默认不显示，鼠标滚轮与键盘滚动不受影响；可通过 /config 中的 ui.scrollbar 设为 hidden（默认）、auto 或 always。
+  - 定时/自动化任务复用同一会话：每项自动化任务固定使用一个原生会话，首次执行创建、后续触发恢复并追加新回合，上下文随之延续；绑定会话被删除、损坏或被其他运行时占用时本次执行明确失败，不再静默新建或分叉。
+  - hooks test 实际执行脚本：atomcode hooks test <NAME> 由「dry-run」改为真实执行该 hook（使用合成事件负载），返回真实退出码与有界的 stdout/stderr；交互测试超时上限为 30 秒。
+  - 会话格式前向兼容：包含新恢复记录的会话需使用 v5.2.6 或更新版本打开，旧版本无法完整读取这些新增记录。
+  ✨ 新增功能（Features）
+  会话恢复与连续性
+  - 中断回复恢复：流式回复定期保存恢复记录，重新打开会话时保留已保存的部分输出，并明确提示上一轮异常中断。
+  - 工具执行结果未知标记：未收到结果的工具调用标记为「执行结果未知」，不会在恢复时自动重跑。
+  - 恢复摘要与进度：恢复后的会话补齐已记录的任务进度摘要，避免恢复后上下文断层。
+  - 团队会话租约：改善团队成员会话的租约、停止与日志持久化，减少回合结束时成员记录丢失。
+  原始任务需求与上下文可见性
+  - 任务规范保留：支持保留用户选定的原始任务要求，上下文压缩后仍维持权威约束，不降级为摘要。
+  - 待办关联原始指导：计划条目可关联原始用户指导，便于回溯「为什么做这件事」。
+  - 上下文摘要计数：TUI 与 WebUI 在 token 用量旁展示已记录的上下文摘要次数，方便判断长任务的压缩节奏。
+  一次性后续任务（Follow-up）
+  - 同会话后续任务：--follow-up 与 /followup set/show/clear 可预设本轮正常结束后的下一项任务，在同一会话、相同模型与权限模式下执行。
+  - 新会话后续任务：/followup new <JSON>、--follow-up-new-file 支持把后续任务交给独立新会话执行，可指定目录、模型与权限模式（plan / accept_edits）。
+  - 可查询执行记录：/followup history 查看登记与执行状态，启动回执区分 accepted / failed / uncertain。
+  - 权限边界明确：独立新会话沿用无人值守审批，不继承原会话的临时授权，无法用 auto 绕过人工批准。
+  WebUI 项目工作台
+  - 项目起始页：WebUI 新增工作区入口，可在初始页直接进入文件、终端与 Git 工作面板。
+  - 会话级文件浏览：按会话打开只读文件预览，支持源码/文本/JSON/HTML、Markdown 渲染与图片查看，预览上限 2 MiB。
+  - 文件编辑与草稿保护：支持显式编辑并保存 UTF-8 文件，按会话保留草稿、光标、滚动位置与面板宽度；保存按内容版本校验，冲突时返回 409 并保留被拒草稿。
+  - 只读 Git 变更视图：展示工作区与暂存区差异及未跟踪文本文件预览，不提供 stage / commit / discard 等写操作。
+  - 会话终端：内置会话级终端窗口，与当前会话的工作目录绑定。
+  - 全屏与窄屏适配：支持工作区全屏、扩大文件阅读区域，窄屏下自动转为全宽浮层。
+  推理复读保护
+  - 精确重复检测：识别推理流中明确的连续重复循环（默认周期 32–1024 字符、至少重复 4 次），数字/空白/标点自身的重复不触发。
+  - 有界自动恢复：命中后丢弃当前推理预览并重新生成一次，界面提示「检测到推理复读，正在重新生成」；再次命中则明确报错结束，不做无限重试。
+  - 可观测量保留：已观察到的 usage 保留，已广播的推理以 ReasoningDiscarded 边界标记清理，不进入后续模型上下文。
+  - 可配置：宿主可通过 ChatOptions.reasoning_loop_guard 调整阈值或关闭检测。
+  模型能力与接入
+  - 离线模型资料卡：TUI 与 WebUI 新增模型卡与模型对比视图，展示能力与基准信息，便于选择模型。
+  - Ollama 快速接入：配置引导可探测本机 Ollama 服务，未启动时给出启动指引，而不是只报连接失败。
+  - Plan / Build 模型绑定：[modes.plan] 与 [modes.build] 可分别绑定模型与思考强度，未配置时行为与此前一致。
+  - 下一轮模型切换：支持在不打断当前回合的前提下为下一轮选择模型，并在配额与用量上按当前生效端点计算。
+  人设与系统提示
+  - 自定义人设：--system-prompt-file / --append-system-prompt 与配置字段支持覆盖助手人设与系统提示，工具与项目指令仍照常注入。
+  - 人设来源检查：/context persona 与 WebUI 可查看当前实际生效的人设片段及其来源，便于核对模型切换、会话恢复与配置重载后的行为。
+  技能
+  - 静态调试技能自动加载：在首个模型请求前确定性提供匹配的调试工作流（auto-load: debugging 声明），支持 auto-load: off 与 [no-auto-skills] 退出，不会额外消耗一次模型请求。
+  - 技能资源只读访问：read_file / list_directory 可只读访问已加载技能的配套资源，不再报「outside the world's root」。
+  - 调用保留图片：直接调用技能时随附的图片不再丢失。
+  - 目录发现治理：跳过 .venv、node_modules、.git 等依赖目录，并检测符号链接循环；技能目录预算在多技能场景下更均衡，不再静默丢失技能名。
+  补丁文件导入与应用
+  - 原始补丁导入：TUI 与 WebUI 可导入原始文本补丁文件，避免大段 diff 反复粘贴。
+  - 不可变补丁产物：补丁以不可变产物检查并应用（apply_patch / unified_patch），保留原始内容以便审计与重放。
+  Hooks 浏览与测试
+  - TUI / WebUI 浏览：/hooks 在 TUI 打开可搜索列表、WebUI 打开对话框，展示磁盘配置、来源、事件、匹配器、命令、超时以及全局/项目文件诊断与插件信任状态。
+  - 脚本测试：可对单条 hook 执行真实脚本测试，返回真实退出码与有界输出；仅浏览不会触发执行。
+  Headless CLI
+  - 后台任务轮询收敛：轮询会及时收集输出与退出状态，默认在后台任务完成时提供通知，不再需要手动反复轮询。
+  - 后续任务等待到底：--follow-up 让原任务与后续任务在一次调用内串行完成，退出状态反映最终执行终态。
+  🛠 修复（Fixes）
+  WebUI
+  - 回合运行中切换会话被拒绝时给出可操作提示，且错误不再一闪而过；切换完成后保留导航反馈。
+  - 浏览历史会话不再改绑当前执行中的会话，也不会误占运行时。
+  - @ 引用区分文件候选与会话候选，不再把会话混进文件列表。
+  - 上滚阅读优先于挂起的自动跟随，流式更新不再抢回底部。
+  - 修复展开「工作区」后主列布局错位，会话内容重新位于输入框上方。
+  - 修复工作区「文件」页的 Failed to fetch 报错与工作区失败提示不明确的问题。
+  - 长会话内存占用有界，并保留自动历史分页。
+  - 恢复技能过滤与菜单重试，移动端模式菜单不再溢出、落地页不再闪屏，空落地输入框保持展开。
+  - 后台任务状态与空闲轮询分组展示，状态区分更准确。
+  TUI / 终端渲染
+  - 推理强度轮换补充真实快捷键 F3，修正文档中不存在的 Ctrl+T。
+  - 长配置列表导航时保持可见区域，不再滚出视野。
+  - 输入光标在各面板切换后仍可见，输入法合成期间的快捷键不再误触发。
+  - 粘贴内容跨片段与分块上限时保留换行。
+  - SSH 下滚轮滚动与输入历史分离，不再互相干扰。
+  - macOS 与 Windows 上窗口标题、标签标题同步更新并可在退出后恢复。
+  - 修复 /cd 的无效最近目录仍出现在列表中的问题，缺失目录被排除。
+  - 默认隐藏对话滚动条；修复模型卡展示过繁与列表滚动位置漂移。
+  缓存与上下文
+  - 修复恢复会话后上下文摘要与实际记录不一致的问题。
+  - 优化长会话中的选择布局复用与菜单悬停开销，降低大列表操作卡顿。
+  文件索引与搜索
+  - 文件索引不再继承仓库边界之外的祖先 .gitignore 规则。
+  - 修复相对路径与符号链接下忽略边界判定不一致的问题。
+  - 取消已失效的后台扫描，并复用 WebUI 文件搜索索引，减少重复遍历。
+  - 耗时超过 1 秒的搜索在工具卡内显示范围与耗时；空结果附带同路径重试指引，超时或截断不再断言「不存在」。
+  - 修复回环代理探测超时被当作「已停用」的问题，Windows 上停用代理后可正常恢复。
+  Provider / 网络
+  - 系统代理读取失败时提供明确诊断与有限重试，并给出可操作的恢复建议。
+  - 配额与允许量按当前生效的模型端点计算，避免切换模型后仍按旧端点扣减。
+  - 探测与代理路径保留原有路由，不再因能力探测丢失自定义代理配置。
+  MCP / 权限与安全
+  - MCP 服务身份预留与提示标签做严格校验；未提供 instructions 的服务注入占位说明，避免上下文出现无名块。
+  - MCP instructions 预算计入块装饰与 preamble，避免实际注入超出预算。
+  - 组合 Bash 命令的授权匹配更完整，项目规则以精确字面量保存，减少重复询问。
+  - 工具产物目录自动生成自身的 Git 忽略哨兵，降低完整工具输出被误纳入版本控制的风险。
+  - atomgit_api 调用前引导先查阅官方文档再构造请求，单值仓库类型查询说明更清晰。
+  IDE 插件（VS Code / JetBrains）
+  - VS Code 修复本地命令历史刷新产生重复缓存条目，推理档位下拉按当前模型声明的档位渲染。
+  - JetBrains 会话历史只列当前工程目录下的会话，新建/打开会话时执行模式回到配置的默认值。
+  - JetBrains 修复停留期间反复闪屏（连接状态通知去重、欢迎页与模型下拉仅在变化时重绘）。
+  - JetBrains 斜杠命令选择器按 VS Code 体验重做，补齐 5 个内置命令与技能列表，错误提示不再一闪而过。
+  - JetBrains 模型选择器可滚动，输入区新增跟随当前模型的推理强度选择器。
+  - JetBrains 修复 macOS AppleDouble 边车文件导致的 instrumentCode 崩溃与分发包污染。
+  其他
+  - 会话被其他客户端占用时给出可操作提示。
+  - 鸿蒙 PC 上 /login 链接与「点击/自动打开链接」改用本机浏览器打开。
+  - 手机配对向导内容可滚动、底部提示常驻，缓解终端放大后二维码被截断。
+  - 手机上跨项目切换会话复用统一导航路径，修复切换失败。
+  - 增强团队成员的启动与租约归属校验，避免多运行时同时持有同一成员。
+  - 修复文件与终端后台任务状态混淆、空闲轮询分散的问题。
+  📚 文档（Docs）
+  - 新增「推理复读保护」「静态调试技能自动加载」「一次性后续任务」「自定义系统提示」「WebUI 工作台」「Plan/Build 模型绑定」等专题文档。
+  - /hooks、技能目录发现、搜索与发现、自动化、LSP 配置等文档同步更新至当前行为。
+  - README 中英文版本刷新功能清单与开发指引（含 cargo nextest、gates/compile.sh 验证流程），并新增 IDE 插件入口。
+  - 站点文档中英文同步更新 approvals、keybindings、skills、sessions、webui 等页面；JetBrains 插件「What's new」只保留本次版本变更。
+  🧹 工程 / 构建
+  - 模型资料卡数据以离线 JSON 随包分发，并提供导出脚本与测试，避免运行时联网拉取。
+  - JetBrains 插件补充图标与厂商官网链接，构建流程排除 AppleDouble 边车文件；VS Code 扩展打包同样排除。
+ReleaseNotesUrl: https://atomgit.com/atomgit_atomcode/atomcode/releases/v5.2.6
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://atomcode.atomgit.com/docs/zh/index.html
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
