@@ -1,0 +1,131 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: ZSeven-W.OpenPencil.CLI
+PackageVersion: 0.8.5
+PackageLocale: en-US
+Publisher: OpenPencil contributors
+PublisherUrl: https://github.com/ZSeven-W
+PublisherSupportUrl: https://github.com/ZSeven-W/openpencil/issues
+PackageName: OpenPencil CLI
+PackageUrl: https://op.zseven.tech/
+License: MIT
+LicenseUrl: https://github.com/ZSeven-W/openpencil/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 ZSeven—W
+ShortDescription: The command-line companion of OpenPencil, the open-source AI-native vector design tool.
+Description: |-
+  OpenPencil is an AI-native vector design tool with multi-agent workflows, a built-in MCP server, Figma import, and design-to-code export.
+
+  Why OpenPencil
+  🎨 Prompt → Canvas
+  Describe any UI in natural language. Watch it appear on the infinite canvas in real-time with streaming animation. Modify existing designs by selecting elements and chatting.
+  🤖 Concurrent Agent Teams
+  The orchestrator decomposes complex pages into spatial sub-tasks. Multiple AI agents work on different sections simultaneously — hero, features, footer — all streaming in parallel with per-member canvas indicators.
+  🧠 Multi-Model Intelligence
+  Automatically adapts to each model's capabilities. Claude gets full prompts with thinking; GPT-4o/Gemini disable thinking; smaller models (MiniMax, Qwen, Llama) get simplified prompts for reliable output.
+  🔌 MCP Server
+  One-click install into Claude Code, Codex, OpenCode, Kiro, or Copilot CLIs. Design from your terminal — read, create, and modify .op files through any MCP-compatible agent.
+  🎨 Style Guides
+  Built-in style guide library with tag-based fuzzy matching. Apply visual styles (glassmorphism, brutalist, retro, etc.) to AI-generated designs. MCP tools for external agent access.
+  📦 Design-as-Code
+  .op files are JSON — human-readable, Git-friendly, diffable. Design variables generate CSS custom properties. Code export to React + Tailwind or HTML + CSS.
+  🖥️ Runs Everywhere
+  Web app + native desktop on macOS, Windows, and Linux — one Rust core, a single self-contained binary, no browser engine. .op file association — double-click to open.
+  ⌨️ CLI — op
+  Control the design tool from your terminal. op design, op insert — batch design DSL, node manipulation. Pipe in from files or stdin. Works with desktop app or web server.
+  🎯 Multi-Platform Code Export
+  Export to React + Tailwind, HTML + CSS, Vue, Svelte, Flutter, SwiftUI, Jetpack Compose, React Native — all from one .op file. Design variables become CSS custom properties.
+  🧩 Embeddable SDK
+  op-web-sdk (vanilla) + op-web-sdk-react / op-web-sdk-vue adapters — embed a read-only .op viewer in your own app, powered by the same wasm renderer the editor ships.
+  🛡️ Design System Kit
+  Manage reusable UIKits with style switching and component composition. Import/export kits from .pen files. Built-in registry with MCP tools for external access.
+  👥 Real-Time Collaboration
+  Design together over authenticated peer-to-peer sessions with a public relay and built-in regional hubs. Join with a short pairing code, see live remote cursors, and resolve conflicts with per-edit detail and replay.
+Tags:
+- ai
+- design
+- figma
+- mcp
+ReleaseNotes: |-
+  v0.8.5 brings the Rust editor to Android and iOS, alongside a redesigned
+  Studio Home and a more complete path from a brief to an editable design and
+  exported code. This release also improves multi-screen generation, reference
+  images, interactive previews, and the tools available to external agents.
+  Highlights
+  - Android and iOS editor shells. Touch editing, native file and account
+    flows, and lifecycle-aware generation use the shared Rust engine.
+  - Studio Home and design workspaces. Start from a prompt or reference,
+    compare design directions, and inspect generation results and quality reports.
+  - More faithful AI output. Planning and repair better preserve requested
+    screens, supplied copy, image intent, and the geometry of repeated layouts.
+  - Interactive previews. Preview authored interactions, scrolling, and motion
+    alongside the editable canvas.
+  - Websites and brands as starting points. Website import and brand
+    extraction help turn existing visual material into editable design context.
+  - Code export for agents. Deterministic code export is available through
+    MCP and the CLI; a lean MCP profile exposes a focused design workflow.
+  - Kimi Code integration. Desktop and daemon hosts can run text-only
+    generation through the Kimi Code CLI, alongside existing provider integrations.
+  Android and iOS
+  The mobile shells share document rendering and editor logic with the desktop
+  app while using platform-native file pickers, sign-in screens, and lifecycle
+  handling. Touch selection, panning, pinch zoom, keyboard insets, and model-picker
+  gestures receive dedicated handling rather than relying on mouse input.
+  User-started generation can continue through supported background transitions:
+  Android uses a foreground service, and iOS uses the operating system's
+  background-processing allowance. Completion and cancellation are coordinated
+  with the engine lifecycle. These paths remain subject to system time limits,
+  power policy, and process termination; force-quitting does not preserve a
+  running generation task.
+  Android distribution uses a signed APK for direct installation and an AAB for a
+  later Play Console submission. Both are published with checksums in the GitHub
+  prerelease. The iOS release lane uploads to App Store Connect for TestFlight
+  processing. Neither lane automatically publishes an app to Google Play or
+  submits an App Store review.
+  AI Generation and Agent Workflows
+  - Multi-screen fallback planning keeps declared screens separate instead of
+    silently folding them into one composition. Image prompts carry more precise
+    subject, aspect, and label intent.
+  - Layout repair handles more repeated-row and calendar overflow cases, as well
+    as text or glyphs hidden behind shapes. These checks supplement the model's
+    output rather than treating a completed response as proof of a usable design.
+  - Chat attachments follow provider capability checks. Unsupported attachments
+    produce an actionable error while preserving the draft and its images.
+  - Mobile chat work is bound to its document, page, tab, and account session, so
+    late output from a replaced document or cancelled session is rejected.
+  - Codex sessions can continue reconnecting after a stream interruption, and
+    Kimi Code gains a dedicated generation transport.
+  - MCP and CLI users can export code directly from the document. The lean MCP
+    profile offers a smaller sequence for inspecting, generating, checking, and
+    finalizing a design.
+  Editing and Reliability
+  The home screen's recent-file rows, mobile model picker, and touch cancellation
+  paths have been refined. Collaboration verification accepts valid signed
+  policy windows up to ninety days while retaining expiry and signature checks.
+  The release also updates runtime and TLS dependencies and tightens production
+  authentication archive verification.
+  Hosted Model Availability
+  The Hosted text-model runtime is shared by desktop, daemon, Android, and iOS,
+  including account-session checks and cancellation of stale requests. Publishing
+  v0.8.5 with Hosted enabled requires a reviewed, complete, signed ABI 4
+  authentication matrix and adoption of its release policy. Release and TestFlight
+  checks must verify that matrix and the ABI selected for each final link before
+  publication.
+  Hosted use also requires an active eligible plan, an available provider route,
+  and sufficient credits. An ABI 3 archive supports sign-in and collaboration but
+  cannot enable Hosted. Local Debug authentication overrides remain limited to
+  development builds. Hosted image input remains disabled under the current
+  billing capability contract.
+  Upgrade Notes
+  - Android and iOS artifacts follow their respective GitHub Release and
+    TestFlight channels; TestFlight availability follows Apple's processing.
+  - Mobile builds use the same .op document model, but platform-specific export
+    and background-execution limits still apply.
+  - CLI-based agent integrations run on native desktop or daemon hosts; the
+    mobile engine does not launch desktop CLI processes.
+  - Source builds must use the adopted, signed authentication artifacts for
+    production login and collaboration. Missing or mismatched release inputs
+    fail validation rather than falling back to a local Debug archive.
+ReleaseNotesUrl: https://github.com/ZSeven-W/openpencil/releases/tag/v0.8.5
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
