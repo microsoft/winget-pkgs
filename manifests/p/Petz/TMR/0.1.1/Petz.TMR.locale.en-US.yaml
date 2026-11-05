@@ -1,0 +1,61 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Petz.TMR
+PackageVersion: 0.1.1
+PackageLocale: en-US
+Publisher: Jarrod Petz
+PublisherUrl: https://github.com/jlpetz
+PublisherSupportUrl: https://github.com/jlpetz/Test-Memory-R/issues
+Author: Jarrod Petz
+PackageName: TMR (Test Memory R)
+PackageUrl: https://github.com/jlpetz/Test-Memory-R
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/jlpetz/Test-Memory-R/blob/v0.1.1/README.md#license
+Copyright: Copyright (c) 2025 Jarrod Petz
+ShortDescription: Tests whether your memory, and its overclock, is stable. A remake of TM5 that runs its configs.
+Description: |-
+  TMR (Test Memory R, the R for Rust) tests whether a PC's memory, and its overclock, is stable.
+  It remakes TM5 (TestMem5 by Serj), the memory tester used by memory overclockers, for today's
+  Windows and hardware with DDR5 in mind, and loads TM5's .cfg files to run the equivalent tests.
+
+  - Each thread tests its own fixed allocation, on huge (1 GB) and large (2 MB) pages locked in
+    memory, in user mode with no driver.
+  - Most tests come in 128-bit, 256-bit (AVX2) and 512-bit (AVX-512) widths, the widest the CPU
+    has by default.
+  - TM5's test 0 becomes the seal: all memory is sealed at the start of a cycle and checked at its
+    end, so an error in memory no test is touching is still caught.
+  - A failed check is rescanned to tell a misread from a wrong stored value, failures are counted
+    by bit position, and Windows' hardware error log (WHEA) is watched.
+  - Threads are pinned to physical cores and take memory from their own NUMA node, and checks can
+    bypass the caches (non-temporal stores, CLFLUSHOPT) so they read DRAM.
+  - Switching patterns aimed at the memory bus's width (DDR4's 64-bit channel, DDR5's 32-bit
+    subchannels, LPDDR4/5's 16-bit), alongside TM5's.
+  - Built-in test plans, results saved as JSON during the run, and a console and a window in one
+    tmr.exe.
+
+  Needs a CPU with x86-64-v3 and CLFLUSHOPT (Intel 6th gen Core or AMD Ryzen, and later) and
+  Windows 11 or Server 2022 or later; the window needs Windows 11 or Server 2025. An unstable
+  overclock can freeze, crash or restart the PC while TMR runs: save your work first.
+Moniker: tmr
+Tags:
+- ddr4
+- ddr5
+- memory
+- memory-test
+- memtest
+- overclocking
+- ram
+- stability-test
+- stress-test
+- testmem5
+- tm5
+InstallationNotes: |-
+  For huge and large pages, grant the privilege once from a console run as administrator,
+  tmr --setup-large-pages, then sign out and back in. Open a new console to run tmr from the
+  PATH; tmr --help lists every setting.
+ReleaseNotesUrl: https://github.com/jlpetz/Test-Memory-R/releases/tag/v0.1.1
+Documentations:
+- DocumentLabel: User guide
+  DocumentUrl: https://github.com/jlpetz/Test-Memory-R/blob/v0.1.1/dist/docs/guide.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
