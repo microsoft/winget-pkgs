@@ -1,0 +1,57 @@
+# Rendered by packaging/build-feeds.ps1 - do not edit the generated copy.
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.28.0.schema.json
+
+PackageIdentifier: DonislawDev.ChronoMock
+PackageVersion: 0.5.0
+ReleaseDate: 2026-10-28
+# Two installers, and their ORDER is load-bearing.
+#
+# Only the Windows installer puts the window in the Start menu. A portable
+# package cannot have a shortcut at all: the manifest schema has no field for
+# one, WinGet's portable installer makes none, and microsoft/winget-cli#2299
+# asking for it has been open since 2022. The installer comes FIRST because
+# that is what decides a fresh install: recent clients prefer it over portable
+# when the user has set no preference (microsoft/winget-cli#6123), and older
+# ones keep the first installer that applies when nothing else tells two apart.
+#
+# The archive comes SECOND, with no scope, for --scope user: a person without
+# administrator rights, for whom the installer is out of reach because it is
+# for the whole machine. The description says that such an install gets no
+# Start menu entry. Keep it once it is published: WinGet upgrades only within
+# the kind that is installed, and portable is compatible with nothing but
+# portable, so a manifest without it would leave every such install where it
+# is for good.
+Installers:
+- Architecture: x64
+  InstallerType: wix
+  Scope: machine
+  # Windows Installer asks for elevation itself.
+  ElevationRequirement: elevatesSelf
+  InstallerUrl: https://github.com/donislawdev/ChronoMock/releases/download/v0.5.0/ChronoMock-app-win-x64.msi
+  InstallerSha256: 61CEE786DEC12A967216F716191EDEEDDE2ACB602511B9C3F7EF8FC9E5716C25
+  # How WinGet recognises the installed program from one release to the next,
+  # an install made from the release page by hand included: the UpgradeCode
+  # never changes, while every build gets a new ProductCode.
+  AppsAndFeaturesEntries:
+  - UpgradeCode: '{5F0CEAC5-75A7-4EE1-8C4B-B20E1012999D}'
+  Commands:
+  - chrono
+- Architecture: x64
+  InstallerType: zip
+  NestedInstallerType: portable
+  # No ArchiveBinariesDependOnPath, on purpose. WinGet then starts the window
+  # through a link in its own links folder, and the .NET host follows the link:
+  # the runtime and the window's own assemblies load from the real folder, the
+  # one the window finds its cores and catalogues in (tools/feeds/
+  # symlink-probe.ps1 on Windows Server 2025, 2026-11-02). With
+  # the field, WinGet would put the package's own folder on PATH instead, and
+  # that folder holds the whole .NET runtime, more than two hundred libraries
+  # that any program searching PATH for a library could then load.
+  NestedInstallerFiles:
+  - RelativeFilePath: ChronoMock\ChronoMock.exe
+  InstallerUrl: https://github.com/donislawdev/ChronoMock/releases/download/v0.5.0/ChronoMock-app-win-x64.zip
+  InstallerSha256: 71C3ED74E26C6FA7FC0101BB355C3D4C096B4ECC6D919E3C82B624E3447AC731
+  Commands:
+  - ChronoMock
+ManifestType: installer
+ManifestVersion: 1.28.0
