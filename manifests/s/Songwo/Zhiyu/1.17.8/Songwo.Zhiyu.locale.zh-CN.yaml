@@ -1,0 +1,61 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Songwo.Zhiyu
+PackageVersion: 1.17.8
+PackageLocale: zh-CN
+Publisher: Songwo
+PublisherUrl: https://github.com/Songwo
+PublisherSupportUrl: https://github.com/Songwo/zhiyu/issues
+Author: Zhao Qingsong
+PackageName: Zhiyu
+PackageUrl: https://songwo.github.io/zhiyu/
+License: MIT
+LicenseUrl: https://github.com/Songwo/zhiyu/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Songwo
+ShortDescription: 连接文档、账号与数字资产的个人工作空间。
+Description: |-
+  知屿 Zhiyu 是连接文档、账号与数字资产的个人工作空间，将主机、在线服务、域名、邮箱、AI 订阅、号码、密钥和证书集中到一个桌面应用中。资料保存在本机，凭据库使用 scrypt 派生密钥与 AES-256-GCM 加密；通过 SSH、DNS、TLS 和服务商 API 读取实际状态，并可通过你配置的模型进行有来源的问答。
+  主要功能包括 SSH 终端与主机指标采集、域名 WHOIS 与 TLS 证书到期提示、网站账号密码与 TOTP 动态验证码管理、IMAP/SMTP 邮箱、Markdown 图文文档、浏览器插件密码迁移，以及接入 OpenAI、Claude、Grok、Gemini 等模型进行有来源的问答并查询订阅额度。
+Tags:
+- 人工智能
+- 密码
+- 数字资产
+- 文档
+- 服务器
+- 账号
+ReleaseNotes: |-
+  知屿 Zhiyu 1.17.8
+  本次围绕资产关联、容器告警和后台任务改善日常使用，并把 Mac 双架构应用纳入每次正式发布。
+  容器监控
+  - 在服务器「端口与容器」里展开「容器告警设置」，为整台主机或单个容器设置累计重启阈值与启动宽限。
+  - Docker 重启次数是累计值。正常升级留下的历史告警可用「确认本次异常」处理；容器重建、再次启动、重启次数增加或故障变化会重新告警。采集确认恢复后也会清理旧确认。
+  - 升级前可设置 15 分钟、1 小时、4 小时或 24 小时维护静音，随时取消、到期自动恢复。静音不停止采集，不执行重启。
+  - 原始状态保留，已确认、宽限中和维护静音分开展示。启动宽限只适用于运行中容器；重启循环、异常退出和内存不足仍立即提醒。确认容器异常不会清除主机资源或 SSH 故障。
+  - Web、桌面、详情数量、主机状态与通知共用规则。
+  以关联串起资产
+  - 增加「资产关系图」入口和详情「查看完整关联链」。
+  - 聚焦邮箱、账号、主机或文档，查看直接、间接关联数量与可读路径；搜索保留相连资源。
+  - 展示号码与已绑定 AI 订阅的真实关系，号码在图中只显示尾号。
+  - 修复 Web 给服务器文档添加关联时报「关联文档已不存在」的问题。新增、解除和重载保留正文，不另建文档。
+  - 仅沿保存的关系计算路径。关联不等于已验证的登录依赖，自动建议仍需确认。
+  同步写入兼容
+  Windows 自托管服务的临时文件替换遇到短暂 EPERM、EACCES 或 EBUSY 时会有限重试；同文件按调用顺序提交，失败保留原文件并清理自身临时文件，不降级为原地覆盖。同步身份初始化失败直接返回启动错误，避免未处理的后台拒绝。Mac CI 使用临时目录真实路径，保留全部安全检查。
+  后台更新与 S3 自动备份
+  - 启动、定时及恢复焦点时检查版本；窗口内轻提示，不抢焦点。Windows 安装版可后台下载，安装仍由用户确认，不自动退出或重启。
+  - 设置「关于知屿」可关闭后台自动下载。便携版、Mac 与 Web 展示相应手动更新方式；Web 不自动刷新或操作服务器升级。
+  - 自动备份可绑定 S3 兼容存储（R2、OSS、MinIO 等），先测试写入、读取元信息与清理权限，再启用上传。
+  - 本地先生成加密备份。云密钥和自动备份密码不进入备份；仅清理本工作区创建且记录的对象，解绑保留已有备份。
+  - 备份与上传均有记录。本地保存但云上传失败会明确报告部分失败，保留本地文件。
+  - Web 需要明确同意服务器保管密码和 Key。管理员仍可能访问；建议使用独立备份密码，敏感资产优先使用桌面端。浏览器未保存草稿与仅存在浏览器的对话不在服务器自动备份范围内。
+  界面与发布
+  - 修复 Web AI 助手在安全提醒展开和窄屏下底部权限选项被裁切。
+  - 表单标签可聚焦对应控件；手机设置使用紧凑分类选择；未配置模型时提供直接入口。
+  - 正式版强制同时提供 Windows 和 Mac arm64/x64 的 DMG、ZIP，全部构建和附件核验后才公开。同步 Web 镜像、Pages、下载入口与使用说明。
+  - Mac 包未签名、未公证；双架构构建与包结构检查不代表所有设备和 macOS 版本均通过实机测试。
+  升级说明
+  先保存正在编辑的文档。Windows 安装版可在「设置 → 关于知屿」检查更新，便携版覆盖程序时保留 data。此前版本没有全局更新提示的用户，需要先手动升级一次，新提醒机制随后生效。Mac 下载对应芯片架构的包；自托管 Web 拉取同版本镜像并按原部署方式更新，保留资料卷。
+  S3 使用独立签名校验的本机 HTTP 服务验证，不等于真实 R2、OSS 或用户云账号在线验收。原生 SSH、托盘和系统更新等运行环境差异见 Web 能力对照。
+ReleaseNotesUrl: https://github.com/Songwo/zhiyu/releases/tag/v1.17.8
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
