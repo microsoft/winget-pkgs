@@ -1,0 +1,73 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: NGLSL.Kite
+PackageVersion: 0.6.0
+PackageLocale: zh-CN
+Publisher: NGLSL
+PublisherUrl: https://github.com/NGLSL
+PublisherSupportUrl: https://github.com/NGLSL/Kite/issues
+Author: Leixinxin
+PackageName: Kite
+PackageUrl: https://github.com/NGLSL/Kite
+License: Apache-2.0
+LicenseUrl: https://github.com/NGLSL/Kite/blob/HEAD/LICENSE
+ShortDescription: 按下快捷键即可快速搜索并启动应用的 Windows 轻量启动器，支持拼音搜索。
+Description: Kite 是一款面向 Windows 的轻量应用启动器，使用 Rust 和 Iced 构建原生桌面应用，无需 WebView2 或 Node.js。通过全局快捷键唤起搜索窗口，输入应用名称、别名或拼音即可快速筛选并启动目标程序；支持扫描开始菜单、桌面、注册表 App Paths 和 Windows 打包应用，提供启动历史、固定结果、系统托盘以及可选的 Everything 文件搜索。
+Tags:
+- 启动器
+- 快速启动
+ReleaseNotes: |-
+  Kite v0.6.0
+  版本重点
+  新增默认关闭的内置文件搜索：在 Kite 中搜索本机 NTFS 文件名，支持重建索引、排除文件夹和实时同步。文件搜索由 Kite 自身的低常驻索引提供，日常应用启动保持原有使用方式。
+  主界面可以立即启动，文件索引在后台独立准备；索引就绪后即可搜索，建库和追平期间仍可使用应用搜索。
+  文件搜索与交互
+  - 点击主界面的「文件」，在结果列表点击「启用文件搜索」，确认后开始准备。首次启用通过 Windows 管理员授权安装按需元数据读取组件。
+  - 输入至少两个字符按文件名匹配；空格分隔的多个关键词需同时出现。支持全部、图片、文档、视频、音频、压缩包和文件夹筛选，沿用原有键盘选择、打开和结果操作。
+  - 设置新增独立「文件搜索」页，集中展示状态、建库阶段、重建索引和排除文件夹；插件页保留开关、状态和管理入口。
+  - 建库按读取磁盘、构建索引、同步最新变化展示进度，失败提供原因与重试入口。只有完整新索引就绪后才替换旧基库。
+  - 添加排除目录后，目录自身及子树立即从搜索结果隐藏；移除后恢复，无需重建。排除按每条当前路径判断，范围外的硬链接名称仍可搜索。
+  - 精简启用入口和设置页的常驻说明，使用紧凑字号与布局；首次确认页集中说明权限和采集范围。
+  低常驻内存与启动恢复
+  - 索引共享重复名称，使用分块压缩与按需读取；采集和构建可临时使用更多内存，就绪前释放启动缓存。
+  - 新增、删除、重命名通过现有 USN 日志同步。关闭或退出时保留完整基库，下次复用并补齐退出期间的变化。
+  - 优化恢复时目录删除的快照扫描：先按卷与目录映射版本合并扫描，再在扫描组内使用临时 UTF-16 前缀结构匹配目录；组结束即释放，不增加常驻全库缓存。
+  - 日志过期、卷或日志身份变化、变化层达到上限时，明确提示重建。当前从基库原始游标补读，没有新增持久恢复点。
+  - 窗口隐藏期间继续同步，暂停无用的界面查询；恢复后使用最新文件状态。
+  权限、隐私与升级影响
+  - 文件搜索默认关闭，首次显式启用才安装组件。应用搜索、Kite 界面、索引构建、查询和打开文件保持普通用户权限。
+  - 读取组件是按需 Windows 服务，只读取本机 NTFS 名字、身份和已有 USN 元数据；不读取文件内容、不安装驱动、不修改 USN。元数据仅存本机，按已认证用户隔离。
+  - 关闭文件搜索、退出 Kite 或客户端断连会取消本轮读取；没有其他会话时服务退出。保留已安装的按需组件，供下次启用使用。
+  - 排除文件夹控制搜索结果可见性。底层仍保存完整名字元数据，以正确同步目录改名、范围间移动与硬链接。
+  - 文件模式使用内置索引，保留既有 Everything SDK 兼容入口；当前支持文件名关键词匹配，不解析 Everything 查询表达式。完整本地路径继续使用原有路径直达。
+  - 升级保留已有应用设置、Alias、固定项和启动历史。新文件搜索的使用范围、数据位置见文件搜索说明。
+  验证与限制
+  - 本地 cargo check --offline、现有全套 Rust 测试（串行运行，622 项通过、11 项忽略）、官方插件 14 项测试、Release 和 NSIS 安装包构建通过；已有安装升级静态契约检查通过。GitHub CI、Release 构建、安装器大小与 SHA-256 由下方自动构建报告列出。
+  - 开发候选在真实 C/D/E 三卷验证了完整重建、新增/删除/改名、重启补齐后继续同步、隐藏窗口期间同步、目录排除及关闭后停止读取。内核对照覆盖类型筛选和逐路径硬链接排除。
+  - 对同一份 3,255,185 条路径基库和 8,433 项真实变化，优化前后的完整状态及 22 组查询结果一致。开发候选的隔离 Release 各启动 3 次，文件搜索就绪中位数从 5.064 秒降至 3.254 秒；输入至 UI 收到结果的热查询中位数约 188 ms。
+  - 同一隔离 Release 完成 132 次查询后隐藏待机，Kite 与读取组件合计工作集约 89.95 MiB、专用驻留约 37.55 MiB。工作集含共享页，未计系统文件缓存和内核分配；此数字是该机器和状态的候选测量结果。
+  - 完整索引的 Release 首次采集耗时、集成版新的 30 分钟连续观察、文件搜索启用状态下覆盖升级/卸载、拒绝 UAC 分支、多屏及不同 DPI 的完整操作链仍未实机验收。已有索引的就绪计时不等同于首次全盘建库时间。
+  - 安装包未做 Authenticode 数字签名。完整测量口径与已知限制见验证摘要。
+  构建与验证
+  - 发布 tag：v0.6.0
+  - tag 提交：51672b6cb38fc56aa4135229998ba69cbe80be55
+  - 上一个发布：v0.5.0
+  - 提交数量：10
+  - 构建环境：GitHub Actions windows-latest
+  - 验证步骤：cargo test、cargo build --release、NSIS 安装包构建
+  - 构建记录：Release #27
+  本次提交范围
+  - chore(release): prepare v0.6.0 (51672b6)
+  - merge: integrate built-in file search into dev (5bff3fb)
+  - feat: add built-in low-memory file search (e73a59e)
+  - revert: restore Everything file search before Loci integration (73f6160)
+  - feat: import standalone plugin ZIP packages directly (fa379fd)
+  - feat: integrate independently distributed Loci plugin (101d3a9)
+  - feat: replace Everything file search with Loci service (e22716f)
+  - docs: remove cancelled Linux research (3714751)
+  - commit (275cca6)
+  - chore(skills): add 10 project workflow skills (a154fcd)
+ReleaseNotesUrl: https://github.com/NGLSL/Kite/releases/tag/v0.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
