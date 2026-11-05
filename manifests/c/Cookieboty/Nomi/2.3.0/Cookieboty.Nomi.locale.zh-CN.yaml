@@ -1,0 +1,66 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Cookieboty.Nomi
+PackageVersion: 2.3.0
+PackageLocale: zh-CN
+Publisher: Cookieboty
+PublisherUrl: https://withnomi.app/
+PublisherSupportUrl: https://github.com/Cookieboty/nomi-ai/issues
+PrivacyUrl: https://withnomi.app/privacy.html
+PackageName: Nomi
+PackageUrl: https://withnomi.app/download.html
+License: MIT
+LicenseUrl: https://github.com/Cookieboty/nomi-ai/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Cookieboty
+ShortDescription: 桌面上的 AI 伙伴：接上任意模型，自己干活，也能把专业的活派给编程助手。
+Description: |-
+  Nomi 是住在你桌面上的 AI 伙伴：接上任意模型，自己动手干活，也会把专业的活派给专业的 AI。模型、编程助手、MCP 与本地工具都接到一处，由 Nomi 统一调度。
+  模型只接一次就能给所有 AI 使用：添加一次供应商，Nomi 自己和 Claude Code、Codex、Gemini CLI、Grok、dsh 都能用它的任意模型，也可以全部换成本地模型。本机网关自动识别并互转 Anthropic Messages、OpenAI Responses、OpenAI Chat Completions 与 Gemini generateContent，流式、工具调用、推理、图片和上下文压缩都照常工作。
+  任务可以限定能访问的文件夹，编程助手有独立的两栏工作区，桌面角色会显示台词与确认气泡。应用为 Go 内核加原生 WebView，单个安装包约 39 MB，按当前用户安装，不需要管理员权限。
+Tags:
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  Nomi· 诺米 2.3.0
+  Nomi 能把长任务一口气做完：工具步数用完会自动接着做，多步任务先列计划，没装编程助手时自己写代码；聊天记录改存在应用数据里，不再受浏览器存储上限影响；对话更流畅，空闲时占用的 CPU 和内存更少。 / Nomi can now see long tasks through: it keeps going when a turn runs out of tool steps, plans multi-step work first, and writes code itself when no coding assistant is installed. Chat history now lives in the app's data instead of browser storage, and chatting is smoother with less CPU and memory used while idle.
+  新功能 / New
+  - 一轮的工具调用用完、Nomi 还要接着做时自动续轮，不用再说「继续」；续轮时较早的大段工具输出只留开头，避免撑满上下文 / When a turn's tool calls run out and Nomi still has work to do, it continues on its own instead of waiting for "continue"; older long tool outputs are trimmed when it does, so the context doesn't fill up
+  - 多步任务 Nomi 先列计划清单并逐步更新进度，自动续轮后也知道做到哪了 / For multi-step work Nomi first writes a plan and updates it step by step, so it knows where it is even after continuing on its own
+  - 本机没装编程助手（或关了委派）时，Nomi 自己读代码、小步修改、构建和跑测试，不再让你去装编程助手 / Without a coding assistant installed (or with delegation off), Nomi reads the code, makes small edits, builds and runs tests itself instead of asking you to install one
+  - 命令确认卡片上可以勾「以后不再询问以此开头的命令」（如 pnpm test、go test），之后直接执行；在「桌面权限 → 工具权限」里查看和移除 / Command confirmations offer "Don't ask again for commands starting with this" (e.g. pnpm test, go test) so they run directly afterwards; review and remove them in Desktop permissions → Tool permissions
+  - 双击桌面角色打开工作台 / Double-click the desktop character to open the workbench
+  改进 / Improvements
+  - 聊天记录改存在应用数据目录里，发消息只追加一条，不再整段重写；长会话不会再因为浏览器约 5 MB 的存储上限而悄悄存不进。首次启动会把原有会话导入一次并核对，导入时显示进度 / Chat history now lives in the app's data folder and sending a message only appends it instead of rewriting the conversation, so long histories no longer silently stop saving at the browser's ~5 MB limit. Existing conversations are imported once on first launch and checked, with progress shown
+  - 回复生成时对话窗口不再每帧整体重绘，打字、滚动更顺；侧栏搜索第一个字不再卡顿 / While a reply streams the chat window no longer redraws everything every frame, so typing and scrolling stay smooth, and the first keystroke in sidebar search no longer stalls
+  - 桌面角色空闲时降低帧率、画面没变时不重绘，说话、眨眼和动作照常流畅 / The desktop character lowers its frame rate when idle and skips unchanged frames, while talking, blinking and gestures stay smooth
+  - 用量统计占用的内存约减少一半，且不再随历史变长而增长，启动更快 / Usage tracking uses about half the memory, no longer grows with history, and starts faster
+  - 每次对话发给模型的工具说明更少：桌面角色关着时不带动作工具，没提到以后或定期做的事时不带持续任务工具，更省 token / Each turn sends fewer tool descriptions to the model: no gesture tools while the desktop character is off, and no ongoing-task tools unless the conversation is about later or recurring work, which saves tokens
+  - 诊断日志默认打开，对话的「执行轨迹」里能看到发给模型的请求正文；记录只存在本机，总量超过 256 MB 时从最旧的删，可在设置里关掉 / Diagnostic logs are on by default so a reply's execution trace shows the request sent to the model; records stay on this computer, are capped at 256 MB (oldest removed first), and can be turned off in settings
+  修复 / Fixes
+  - 编程助手或命令行工具存在本机的图片（如飞书 CLI 设备授权的二维码）能在回复里显示，不再是「不支持的图片链接」 / Images a coding assistant or CLI saved on this computer (such as the Feishu CLI device-login QR code) now show in the reply instead of "Unsupported image link"
+  - 桌面角色贴近屏幕右边或左边时，工具栏和气泡会换到另一侧 / When the desktop character sits at the right or left screen edge, its toolbar and speech bubble move to the other side
+  - macOS 上桌面角色的气泡和工具栏周围不再有一圈错位的灰边 / On macOS the desktop character's bubble and toolbar no longer show a misplaced grey halo
+  - 自动续轮在用量很大、或这一轮你拒绝过某一步时会停下，并在回复末尾说明原因 / Continuing on its own now stops when a run has used a lot of tokens or you declined a step, and the reply says why
+  - 命令白名单只认测试、构建、检查和只读查询类命令，不再压过「逐项确认」模式和单独设为「每次都询问」的工具；读过外部内容又改过文件后先暂停，等你亲手确认一次命令 / The command allowlist only accepts test, build, check and read-only commands, no longer overrides "confirm each change" or tools set to "always ask", and pauses after outside content was read and files were changed until you confirm a command yourself
+  - 聊天记录保存失败会自动重试并提示一次，退出应用前会等正在保存的内容写完 / Failed chat history saves are retried with a one-time notice, and quitting waits for pending saves
+  - 说到以后或定期要做的事但没被识别时，Nomi 会主动提出可以设成持续任务 / When later or recurring work isn't recognized, Nomi offers to set it up as an ongoing task
+  说明 / Notes
+  - 回退到 2.2.0 仍能看到升级当时的会话（之后的新消息不在里面），用量统计只看得到最近约 2 个月；再升级回来数据都在 / Downgrading to 2.2.0 still shows conversations as of the upgrade (later messages aren't there) and only about the last 2 months of usage; upgrading again brings everything back
+  - 以前记下的命令白名单里，不再符合规则的会自动去掉 / Saved allowlist rules that no longer qualify are removed
+ReleaseNotesUrl: https://github.com/Cookieboty/nomi-ai/releases/tag/v2.3.0
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://withnomi.app/docs.html
+- DocumentLabel: 更新日志
+  DocumentUrl: https://withnomi.app/changelog.html
+- DocumentLabel: 功能一览
+  DocumentUrl: https://withnomi.app/features.html
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
