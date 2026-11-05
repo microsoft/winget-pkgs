@@ -1,0 +1,60 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Stack-Cairn.LiveAgent
+PackageVersion: 2.0.10
+PackageLocale: en-US
+Publisher: Stack-Cairn
+PublisherUrl: https://github.com/Stack-Cairn
+PublisherSupportUrl: https://github.com/Stack-Cairn/LiveAgent/issues
+PackageName: LiveAgent
+PackageUrl: https://github.com/Stack-Cairn/LiveAgent
+License: MIT
+LicenseUrl: https://github.com/Stack-Cairn/LiveAgent/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Stack-Cairn
+ShortDescription: A local-first AI agent desktop client that deeply integrates large language model reasoning with local system tools.
+Description: LiveAgent is a local-first AI agent desktop client. It deeply integrates large language model reasoning with local system tools, so the AI can genuinely operate your file system, run commands, and manage scheduled tasks — while the Gateway enables remote access and collaboration.
+Tags:
+- agent
+- agentic
+- ai
+- claude-code
+- codex
+- large-language-model
+- llm
+- mcp
+ReleaseNotes: |-
+  LiveAgent v2.0.10
+  内置 K-brain v0.107.20（#1231）。
+  新功能
+  - 子代理在侧边栏实时查看（#1227）：对话里的每个子代理显示为一张卡片，上面有运行状态、耗时、token 和最新的工具调用。点开卡片，右侧会打开侧边栏，实时显示这个子代理的思考、回复和工具调用，可以单独停止它；多个子代理以标签页切换。输入框上方显示正在运行的子代理数量。
+  - WebUI 加入目标栏（#1216）：和桌面端一样，输入框上方显示当前目标、状态、轮次和耗时，可以编辑、暂停、继续或取消目标。在 WebUI 输入框里输入 /goal pause 也能用了。
+  修复
+  - 子代理和后台通知不再显示成你发的消息（#1212、#1229，修复 #1211）：
+    - 用旧版 K-brain 存下的后台通知（子代理完成、进程退出、wait 结果），以前在历史里显示成用户气泡，现在会被识别为后台通知；
+    - /goal 的每一轮续跑、“新上下文”提示和输出上限续写提醒，现在显示成灰色的一行通知，例如“目标第 2/5 轮”，不再像是你发的消息。
+  - WebUI 直连 K-brain 时功能补齐：
+    - 权限与提问（#1221）：WebUI 可以直接批准或拒绝工具权限、回答提问，以前会被自动拒绝。子代理、目标、压缩、hook 警告等事件也会送到 WebUI；
+    - 附件（#1222）：WebUI 上传的文件会发给 K-brain，以前会提示 agent offline。
+  - WebUI 通过桌面端连接 K-brain 时（#1215）：
+    - 在 WebUI 新建的对话，第二轮起不再报 session not found；
+    - 第一轮也能回退；
+    - 命令输出逐行实时显示；
+    - 轨迹、检查点等历史操作直接从 K-brain 读取。
+  - 其他（#1220）：hook 执行失败时会弹出提示；mcp__服务器__工具 形式的 MCP 工具名能正确识别。
+  性能
+  - 回复流式输出时更流畅（#1224）：输出过程中只重新解析最后几段文字，已经写完的代码块不再随每个字重新渲染；长对话里折叠起来的内容延后渲染，代码高亮排队执行，不再卡住界面。
+  内置 K-brain 的变化
+  - 后台子代理不再被提前取消，也不再占住会话（K-brain#120）：模型交给后台的子代理会在本轮结束后继续运行，完成后把结果送回对话。它运行期间，你可以照常发新消息、编辑、压缩。只有切换模型或工作区、回退代码这两件事要等它结束。手动停止、关闭或删除会话时，子代理会一起停掉。
+  - 子代理实时转录（K-brain#122）：侧边栏的数据来自这里。
+  - 更快的流式与事件写入（K-brain#124、K-brain#125）：长回复和大参数的工具调用，拼接开销从平方级降到线性；运行时事件日志不再每条都重新打开文件，断线重连后的重放更快。
+  - kn 终端界面换上新主题（K-brain#127、K-brain#133）：
+    - 统一配色，支持 NO_COLOR 和 ASCII 终端；
+    - 工具行统一显示状态和耗时；
+    - 审批与提问改成带边框的卡片，按数字键选择；
+    - 新增子代理面板；
+    - 取消回复后短时间内再按 Esc，不会误开“回退对话”。
+  完整变更：https://github.com/Stack-Cairn/LiveAgent/compare/v2.0.9...v2.0.10
+ReleaseNotesUrl: https://github.com/Stack-Cairn/LiveAgent/releases/tag/v2.0.10
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
