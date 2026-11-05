@@ -1,0 +1,30 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: heymaikol.NetworkDoctor
+PackageVersion: 2.1.1
+PackageLocale: en-US
+Publisher: Michael Placzek
+PublisherUrl: https://github.com/heymaikol
+PublisherSupportUrl: https://github.com/heymaikol/network-doctor/issues
+PackageName: Network Doctor
+PackageUrl: https://heymaikol.github.io/network-doctor/
+License: Apache-2.0
+LicenseUrl: https://github.com/heymaikol/network-doctor/blob/HEAD/LICENSE
+ShortDescription: Terminal UI that diagnoses network connectivity and explains where the connection breaks
+Moniker: network-doctor
+Tags:
+- cli
+- diagnostics
+- network
+ReleaseNotes: |-
+  Network Doctor v2.1.1 fixes DNS search-suffix disclosure in the public DNS second-opinion check.
+  - Public DNS queries no longer apply your machine's configured search suffixes. Relative multi-label names such as server.internal are queried only as server.internal.. Unqualified relative names such as printer produce N/A without contacting a public resolver. Normal system resolution keeps its search and hosts-file behavior.
+  - DNS comparisons now require explicitly absolute input, such as example.com.. This avoids misleading disagreement, name-not-found, and alternative-endpoint conclusions when system and public lookups may refer to different names. Reports, support snapshots, comparisons, and offline replay retain the lookup-scope evidence.
+  Compatibility: JSON reports add optional dns_name_scope; snapshots add optional observed.dns_name_scope. Existing snapshot schemas and CLI flags remain unchanged. Older snapshots remain readable, but replay may produce a more conservative diagnosis when name scope is unknown. Consumers that validate JSON against a fixed schema should update their schema. Relative-name runs can produce different DNS findings and warnings under the corrected policy.
+  Explicitly supplied private dotted names can still reach the selected public DNS resolver; this fix prevents added search suffixes, not disclosure of a name supplied in the input. Use --public-dns "" to disable that check when the name itself is sensitive.
+  Developer/lab changes add an isolated FRR correlation producer, evidence packager, and regression gates. They do not enable a Network Doctor importer, verified current forwarding, or BGP forwarding-impact ratings. Historical certificates remain preserved and the corrected producer candidate remains inactive.
+  Known limitation: issue #439 remains open. For relative-name input, Network Doctor can report the conservative dns_failure classification instead of the more specific system_dns_failure expected by Hunt. The failed DNS observation and DNS verdict are retained; this release does not weaken the privacy policy to make that comparison.
+ReleaseNotesUrl: https://github.com/heymaikol/network-doctor/releases/tag/v2.1.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
