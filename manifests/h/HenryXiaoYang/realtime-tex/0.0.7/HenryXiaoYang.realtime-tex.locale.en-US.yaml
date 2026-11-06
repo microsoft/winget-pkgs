@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: HenryXiaoYang.realtime-tex
-PackageVersion: 0.0.6
+PackageVersion: 0.0.7
 PackageLocale: en-US
 Publisher: Henry Yang
 PublisherUrl: https://henryyang.net/
@@ -22,19 +22,17 @@ Tags:
 - texlive
 - typesetting
 ReleaseNotes: |-
-  Thank you @Steve-Li-1998, @SDDKKK and @leo1oel for the fixes, and @ACG-j for the security and robustness reports!
+  Thank you @ACG-j for the rtex serve timeout flags and the math ownership work!
+  Added
+  - Math source ownership (opt-in). Set math_owner_attribute and rtex reports which math source each glyph and math field comes from, in math_owners display-list metadata (binary record 0x29). Empty fields, including empty unicode-math radical degrees, get zero-size anchors. Off by default; PDF output is unchanged. (#30, #31, #32)
+  - rtex serve --compile-timeout-ms and --pass-timeout-ms set the live-compile and background-pass timeouts. Defaults are unchanged. (#36)
   Fixed
-  - Live editing keeps going. Errors disappear once a compile of the fixed source succeeds, and a paragraph that crashed the live engine (often a half-typed command) goes live again when you edit it. (#11, #12) Typing a paragraph with no text (only a \label, \vspace or \noindent) no longer stops live edits until the engine restarts. (#13, #16)
-  - Run-in headings (\paragraph, \subparagraph, IEEEtran's \subsubsection) and the paragraphs after them are live. The IEEEtran corpus paper now has 27 of 27 units live. (#14, #15, #17)
-  - Main files in a subfolder (cv/sop/sop.tex) read \input, figures, \graphicspath and \bibliography{../../references} from their own folder, like latexmk -cd. Documents that read another document's .aux (\externaldocument) find it. (#18, realtime-tex-vsc-plugin#6)
-  - float package. Documents that load float no longer report "Unknown float option" for every figure and table. (realtime-tex-vsc-plugin#8)
-  - Broken preambles. A preamble that ends before \begin{document} (a \stop, a half-typed preamble) no longer restarts the engine every second, and the full compile reports the failure instead of showing the old pages. (realtime-tex-vsc-plugin#10)
-  - Runaway compiles. A compile that never ends is stopped after 5 minutes (pass_timeout) and reported as failed; one killed by a signal (CPU limit, out of memory) is reported as failed too. (#22)
-  - rtex serve input checks. An edit whose range falls inside a UTF-8 character, runs backwards or goes past the end gets an error reply instead of crashing the server. set_document refuses new files outside the project. (#25, #26)
-  Other
-  - lopdf 0.42 (from 0.36), which fixes a stack overflow on deeply nested PDF objects (RUSTSEC-2026-0187). (#24)
-  - The embedding docs now say that rtex is not a sandbox for untrusted documents. (#23)
-ReleaseNotesUrl: https://github.com/HenryXiaoYang/realtime-tex/releases/tag/v0.0.6
+  - Build files no longer fill your disk. The build directory links to the project's files instead of copying the main file's folder three times; on Windows without Developer Mode it uses junctions and hard links. A snapshot from an earlier version is replaced on the first pass. (realtime-tex-vsc-plugin#13, realtime-tex-vsc-plugin#15)
+  - Title pages. Documents whose \maketitle makes its own page (report, book, article[titlepage]) no longer restart the engine about every 0.4 s. (#37)
+  - Faster first live update. set_document applies only the bytes that differ, so opening a file no longer counts as a preamble edit. On a 300-page book the first live update comes after 8.1 s instead of 24.2 s.
+  Faster
+  - Background passes on long documents: on a 300-page book a layout after a one-character edit takes 4.8 s instead of 7.6 s, and the first layout 10.1 s instead of 16.4 s. Per-keystroke bookkeeping is cheaper too, and Linux saves a thread wake-up per live update. (#38)
+ReleaseNotesUrl: https://github.com/HenryXiaoYang/realtime-tex/releases/tag/v0.0.7
 InstallationNotes: rtex needs a TeX Live installation that provides LuaLaTeX with a LaTeX kernel from 2021 or later; pdfLaTeX and XeLaTeX are not supported. Run `rtex doctor` to check that rtex finds its support files and your LuaLaTeX.
 Documentations:
 - DocumentLabel: Live Editing
