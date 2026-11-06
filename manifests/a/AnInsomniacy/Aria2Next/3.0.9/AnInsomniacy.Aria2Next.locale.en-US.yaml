@@ -1,0 +1,67 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: AnInsomniacy.Aria2Next
+PackageVersion: 3.0.9
+PackageLocale: en-US
+Publisher: AnInsomniacy
+PublisherUrl: https://github.com/AnInsomniacy
+PublisherSupportUrl: https://github.com/AnInsomniacy/aria2-next/issues
+Author: AnInsomniac
+PackageName: Aria2 Next
+PackageUrl: https://github.com/AnInsomniacy/aria2-next
+License: GPL-2.0
+LicenseUrl: https://github.com/AnInsomniacy/aria2-next/blob/main/COPYING
+ShortDescription: Maintained aria2 fork with extensive bug fixes and modernized architecture
+Description: |-
+  aria2 is remarkable open source software. For over a decade it has been one of the most capable
+  download engines available, trusted by countless tools and users worldwide. We are deeply grateful
+  to the original authors and contributors of the aria2 project. They built something that has stood
+  the test of time, and that enduring quality is the best testament to their vision and craftsmanship.
+
+  But upstream development has slowed dramatically in recent years. Dependencies grew stale, builds
+  broke on modern platforms, and a backlog of bugs went unaddressed. We picked up the baton: migrated
+  the codebase to a modern build framework, triaged and fixed a substantial number of upstream issues,
+  and introduced ED2K protocol support for the first time. A full audit trail is preserved in
+  docs/maintenance/upstream-issue-review/matrix.csv.
+
+  Aria2 Next is an actively maintained aria2-compatible engine for everyone, and it is also the embedded
+  engine used by Motrix Next. Original interfaces, including options, configuration, sessions, JSON-RPC,
+  and libaria2, remain intact so downstream projects get a seamless upgrade. The focus is straightforward:
+  release reliability, current dependency baselines, and ongoing compatibility fixes. Same engine, renewed
+  foundation.
+ReleaseNotes: |-
+  ## Summary
+
+  Aria2 Next 3.0.9 makes HTTP downloads more reliable and faster on poor routes. A retried download no longer corrupts its file. A slow connection no longer holds back the end of a download. A broken IPv6 route no longer keeps a download at a crawl. Release assets cover the same seven platforms.
+
+  ### Fixed
+
+  • A download retried after a failure no longer treats the unwritten part of its preallocated file as received. With `--continue`, the retry resumes from the ranges the earlier attempt actually wrote ([rayburst#767](https://github.com/AnInsomniacy/rayburst/issues/767)).
+  • A server that answers HTTP 403 to additional connections while others are transferring now limits the connection count instead of failing the download. The count is probed upward again later ([rayburst#767](https://github.com/AnInsomniacy/rayburst/issues/767)).
+  • The end of a download no longer slows to a crawl behind one slow connection. Its remaining range is handed to idle connections, which take over the part the slow connection would deliver last ([rayburst#762](https://github.com/AnInsomniacy/rayburst/issues/762)).
+  • When one address family is several times slower per connection than the other, existing connections move to the faster one. Previously only new connections switched, so a slow IPv6 route could hold every connection of a download. In testing, a 156 MB download that took 26 to 120 seconds over such a route finished in 6 to 9 seconds.
+  • A connection that stays far slower than the others for several seconds is replaced by a new one. Replacements back off when the new connection is no faster.
+  • Progress is printed again when the output is not a console, such as under Scoop. A download shorter than a second still gets a progress line ([#70](https://github.com/AnInsomniacy/aria2-next/issues/70)).
+  • A paused multi-file torrent resumes without asking for its file selection again ([rayburst#754](https://github.com/AnInsomniacy/rayburst/issues/754)).
+  • Session files saved with a UTF-8 byte order mark, as Windows editors and PowerShell 5 write them, load correctly.
+
+  ### Added
+
+  • [`docs/rpc-extensions.md`](https://github.com/AnInsomniacy/aria2-next/blob/v3.0.9/docs/rpc-extensions.md) documents the RPC fields and methods added beyond aria2's interface ([#76](https://github.com/AnInsomniacy/aria2-next/issues/76)).
+
+  ### Downloads
+
+  | Platform | Download |
+  | --- | --- |
+  | Linux x86_64 | `aria2-next-3.0.9-linux-x86_64` |
+  | Linux ARM64 | `aria2-next-3.0.9-linux-aarch64` |
+  | macOS Apple Silicon | `aria2-next-3.0.9-macos-arm64` |
+  | macOS Intel | `aria2-next-3.0.9-macos-x86_64` |
+  | Windows x86_64 | `aria2-next-3.0.9-windows-x86_64.exe` |
+  | Windows ARM64 | `aria2-next-3.0.9-windows-arm64.exe` |
+  | Android ARM64 | `aria2-next-3.0.9-android-arm64` |
+  | Checksums | `aria2-next-3.0.9-checksums.sha256` |
+ReleaseNotesUrl: https://github.com/AnInsomniacy/aria2-next/releases/tag/v3.0.9
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
