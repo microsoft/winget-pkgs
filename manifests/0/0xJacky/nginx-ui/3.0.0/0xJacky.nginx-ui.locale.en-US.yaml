@@ -1,0 +1,116 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: 0xJacky.nginx-ui
+PackageVersion: 3.0.0
+PackageLocale: en-US
+Publisher: 0xJacky
+PublisherUrl: https://github.com/0xJacky
+PublisherSupportUrl: https://nginxui.com/
+Author: 0xJacky
+PackageName: Nginx UI
+PackageUrl: https://github.com/0xJacky/nginx-ui
+License: AGPL-3.0
+LicenseUrl: https://github.com/0xJacky/nginx-ui/blob/HEAD/LICENSE
+Copyright: Copyright (c) Nginx UI Team
+ShortDescription: Yet another Web UI for Nginx
+Description: Yet another WebUI for Nginx
+Tags:
+- chatgpt-app
+- code-completion
+- copilot
+- cron
+- deepseek-r1
+- docker
+- go
+- letsencrypt
+- linux
+- macos
+- mcp
+- nginx
+- self-hosted
+- vue
+- webui
+- windows
+ReleaseNotes: |-
+  🎉 Nginx UI v3 is here. It is the biggest change since v2: Nginx UI now runs plugins. DNS providers, notifications, backup storage, certificate deployment and more can come from plugins you install from a signed marketplace, while log analytics is rebuilt from the ground up and stays built in.
+  ❤️ Thank you to everyone who tested the v3 branch, and to @Hintay, who designed and built the plugin system.
+  ✨ Highlights
+  🧩 Plugin system
+  - Install, update and remove plugins from the Plugins page, from the official marketplace or catalogs of your own, or upload an offline package.
+  - Plugins can add DNS-01 providers, pages, notifications, probes, MCP tools, backup storage, certificate deployment, content and log sinks.
+  - Each plugin runs in its own process. A plugin that crashes is restarted and, if it keeps crashing, stopped, without taking Nginx UI down with it. On Linux, the system stops a plugin before Nginx UI when memory runs out, and with cgroup v2 plugins run under memory and CPU limits.
+  - Plugins ask for the permissions they need and say why. An update that asks for more waits for your approval, and plugins are kept in sync across cluster nodes.
+  📦 A lighter core
+  Moving the DNS providers out of the core makes every installation smaller, and lets the providers update on their own:
+  ───────────────────────────────────┬────────┬────────┬────
+                                     │v2.9.5  │v3.0.0  │
+  ───────────────────────────────────┼────────┼────────┼────
+  Binary (linux/amd64)               │142.4 MB│100.2 MB│−30%
+  ───────────────────────────────────┼────────┼────────┼────
+  Download (nginx-ui-linux-64.tar.gz)│45.4 MB │33.7 MB │−26%
+  ───────────────────────────────────┼────────┼────────┼────
+  Go module dependencies             │361     │205     │−43%
+  ───────────────────────────────────┴────────┴────────┴────
+  - Only a node that issues DNS-01 certificates installs the DNS-01 plugin (19.6 MB for linux/amd64), with all 222 providers lego supports.
+  - New providers and provider fixes ship as plugin releases from the marketplace, without waiting for a new Nginx UI version.
+  🛒 Official marketplace and Developer Center
+  - The official marketplace at plugins.nginxui.com is built in. Every package is signed, and each plugin shows its trust level: official, verified partner or community.
+  - The marketplace shows screenshots, why a plugin needs each permission, release notes, beta channels and earlier versions, and tells you when an installed version was withdrawn or a plugin was taken down.
+  - Plugin authors submit and manage their listings in the Developer Center.
+  🌐 DNS-01 becomes an official plugin
+  - The DNS providers move into the official DNS-01 plugin, installed automatically on nodes that issue DNS-01 certificates. The Docker image bundles it, so containers keep renewing without a download.
+  - The main node can issue DNS-01 certificates for other nodes.
+  📊 Log analytics, rebuilt on a column store
+  Bleve, a full-text search engine, kept one document per log line with an index on almost every field. Log analytics only ever filters by time, value or substring and then counts, groups or pages, so v3 stores parsed logs in a column store built for exactly that: dictionary-encoded, zstd-compressed columns in blocks the queries can skip by time range.
+  On 100k combined-format log lines (Apple M5 Pro):
+  ───────────────────────────────────────┬─────────────────────────┬──────────────────────────┬───────────
+                                         │v2 (Bleve)               │v3 (column store)         │
+  ───────────────────────────────────────┼─────────────────────────┼──────────────────────────┼───────────
+  Index on disk per line                 │1508 B (8.6× the raw log)│28.5 B (0.16× the raw log)│53× smaller
+  ───────────────────────────────────────┼─────────────────────────┼──────────────────────────┼───────────
+  Indexing CPU per line                  │134 µs                   │0.98 µs                   │136× faster
+  ───────────────────────────────────────┼─────────────────────────┼──────────────────────────┼───────────
+  Memory allocated while indexing        │9.2 GB                   │216 MB                    │42× less
+  ───────────────────────────────────────┼─────────────────────────┼──────────────────────────┼───────────
+  Log viewer page                        │1479 ms                  │19.9 ms                   │74× faster
+  ───────────────────────────────────────┼─────────────────────────┼──────────────────────────┼───────────
+  Dashboard browser, OS and device charts│75.8 ms                  │0.56 ms                   │135× faster
+  ───────────────────────────────────────┼─────────────────────────┼──────────────────────────┼───────────
+  Dashboard top 100 URLs                 │64.7 ms                  │5.7 ms                    │11× faster
+  ───────────────────────────────────────┼─────────────────────────┼──────────────────────────┼───────────
+  World map                              │84.1 ms                  │0.31 ms                   │275× faster
+  ───────────────────────────────────────┴─────────────────────────┴──────────────────────────┴───────────
+  The dashboard's hourly and daily charts over 1M lines went from 61.8 s to 0.1 s in the design benchmark.
+  - Indexing memory is bounded by one block per log file, sized to the memory of the machine.
+  - Rotated logs are followed, not indexed again: a file renamed by logrotate, copied by copytruncate or compressed to .gz is read on from where indexing stopped.
+  - A crash leaves no corrupt index behind: a torn block is cut off when the store opens.
+  - Free-text search keeps substring matching and skips every block that cannot hold the term, using a small trigram filter stored with each block. On 1M lines, a term that only appears in one window of the log is found in 16 ms, and a search for a term that is not there returns in under 0.1 ms.
+  - Error logs can be indexed and searched, the search box takes field filters such as status:5xx, ip:10.0.0.0/8, country:CN or rt:0.1..0.5, and visitors are located by country with the GeoLite2 country database built in; the city database is only needed for provinces and cities.
+  🔒 Certificates and security
+  - Redesigned certificate pages show each certificate's state, renewal method and issuer.
+  - njs and Perl directives can be applied after a two-factor step-up.
+  - /api/debug no longer exposes request traces, and audit logs redact credentials, plugin settings included.
+  🛠️ For plugin developers
+  - nginx-ui plugin scaffolds Go and Rust plugins, lints, runs conformance checks, packs and manages signing keys.
+  - SDKs for Go, Rust and web pages, and the developer guide at nginxui.com/plugin.
+  ⚠️ Upgrading from v2
+  1. DNS-01 certificates. If a certificate uses the DNS-01 challenge, Nginx UI installs the official DNS-01 plugin on its own after the upgrade: from the package bundled in the Docker image, or from the marketplace. A node that runs neither the Docker image nor has access to the marketplace can upload the package from the plugin-dns01 releases on the Plugins page. Until the plugin is installed, those certificates cannot be renewed, and Nginx UI shows a notification.
+  2. Plugin directory. Plugins are installed in plugins next to app.ini, for example /etc/nginx-ui/plugins. Keep it on persistent storage; in Docker it is inside the /etc/nginx-ui volume.
+  3. Log index. The new column store indexes your logs again after the upgrade. Large logs take a while the first time.
+  Changes since v2.9.5
+  Features
+  - A plugin system: install, update and remove plugins from the official marketplace at plugins.nginxui.com or other catalogs, upload offline packages, and keep plugins in sync across cluster nodes. Packages are signed, and each plugin shows its trust level and the permissions it asks for by @Hintay (b2610759, efa391fa, 64ada381, c74017d1)
+  - DNS providers move into the official DNS-01 plugin. It is installed automatically when a certificate needs it, and the Docker image bundles it so DNS-01 renewals keep working after an upgrade, offline nodes included by @Hintay, @0xJacky (efa391fa, 43205eb3)
+  - Plugins can add DNS-01 providers, HTTP pages, notifications, probes, MCP tools, backup storage, certificate deployment, content and log sinks, run under memory and CPU limits, and talk to the host over gRPC or, on Windows, named pipes by @Hintay (895054ae, ab22f745, ee55b623, a64e31b0, a2add0bd, bf7ddad5, c555485e)
+  - Plugin authors get nginx-ui plugin commands to scaffold Go and Rust plugins, lint, run conformance checks, pack and manage signing keys, plus a developer guide at nginxui.com/plugin by @Hintay (5a6bc9de, 9e5012a1, 8b4701e4, 798e20d4)
+  - The marketplace shows screenshots, why a plugin needs each permission, release notes, beta channels and earlier versions, partner pricing, and tells you when an installed version was withdrawn or a plugin was taken down by @Hintay (fbb30370, dc8ebe22, 125bea68, c9d77e72, 874f4ba3, ec6919da)
+  - Log analytics now runs on a built-in column store instead of Bleve, with far smaller indexes and faster dashboards; logs are indexed into the new store after upgrading by @0xJacky (3e9dd7d7, 6c305097, ed6e9496)
+  - Error logs can be indexed and searched, the log search box accepts field filters, and visitors are located by country without downloading the GeoLite2 city database by @0xJacky (8c620cb9, 71289530, 94a6c702)
+  - The main node can issue DNS-01 certificates for other nodes, and the redesigned certificate pages show each certificate's state, renewal method and issuer by @Hintay (d41c852c, 0be875b5, 88d35527, 32d68f93)
+  - Administrators can apply njs and Perl directives after a two-factor step-up instead of being blocked from editing such configurations by @0xJacky (8ba22d40)
+  - DNS credential forms follow each provider's form, including methods with fixed values or no input by @Hintay (f6c4d121, 559d69bb)
+  - Block templates from plugins appear as snippet templates by @Hintay (bc34c12e)
+ReleaseNotesUrl: https://github.com/0xJacky/nginx-ui/releases/tag/v3.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
