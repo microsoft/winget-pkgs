@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: TashfeenAhmed.FreeLLMAPI
-PackageVersion: 0.16.19
+PackageVersion: 0.16.20
 PackageLocale: en-US
 Publisher: tashfeenahmed
 PublisherUrl: https://tashfeen.me
@@ -27,15 +27,26 @@ Tags:
 - proxy
 - router
 ReleaseNotes: |-
-  FreeInference chat and embeddings
-  - Add FreeInference to the provider picker and key import flow.
-  - Support tested Qwen3.6 35B chat, including streaming, and BGE-M3 embeddings with 1,024-dimensional vectors.
-  - Validate upstream model identities and embedding shapes; preserve normal routing errors and failover.
-  - Avoid treating FreeInference's public model roster as API-key validation. Real requests establish key health.
-  The signed catalog adds two entries without removing any existing models. Premium receives the new catalog immediately; Free receives these entries through the unchanged 30-day release gate. Update the app or stable Docker image to use the new adapter.
-  FreeInference offers a shared daily research allowance. It logs prompts and responses for research, so do not send sensitive data.
-  Verification: live normal/streaming chat and embedding calls through the app adapter, full regression tests, type checks, migrations, desktop bundles, and staged day-0/day-29/day-30 catalog checks.
-ReleaseNotesUrl: https://github.com/tashfeenahmed/freellmapi/releases/tag/v0.16.19
+  FreeModel personal BYOK chat support
+  - Add FreeModel to provider selection and environment/key imports.
+  - Support text chat and streaming with strict model-identity checks, empty-response protection, and normal HTTP/backoff failover.
+  - Track the provider's shared account quota without inventing a monthly balance from rate-limit headers.
+  - Preserve signed catalog delivery: Premium receives new entries immediately; Free receives them after the existing 30-day window. No new model seeds bypass this gate.
+  FreeModel requires your own API key and Telegram verification. Its advertised
+  1M-token monthly allowance is shared across models. Keep its wallet unfunded
+  for free-only use; funded wallets can be charged after the allowance. Review
+  the provider terms before shared or commercial gateway use; this integration
+  does not establish permission for resale or a competing service.
+  The separate catalog update adds 29 tested FreeModel routes and 2 Kenari
+  routes, disables 7 retired routes without deleting them, and increases the
+  enabled catalog by 24. Text and streaming passed on all 29 FreeModel routes
+  through the shipped adapter; tools and vision are not advertised without tests.
+  Verification
+  - 22 focused FreeModel adapter tests and provider key-form coverage.
+  - Full server, CLI, and client regression suites; build, lint, and migration round trip.
+  - Signed-catalog shape/import/idempotency checks; unchanged day-0/day-29/day-30 gate.
+  Provider integration: https://github.com/tashfeenahmed/freellmapi/pull/1830
+ReleaseNotesUrl: https://github.com/tashfeenahmed/freellmapi/releases/tag/v0.16.20
 PurchaseUrl: https://freellmapi.co/pricing
 InstallationNotes: Open the app, then copy the unified API key shown in the tray popover and add your provider keys on the Keys page before pointing a client at the local /v1 endpoint.
 Documentations:
