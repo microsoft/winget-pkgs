@@ -1,0 +1,133 @@
+# Created with deja-vu release workflow using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: vshulcz.deja-vu
+PackageVersion: 0.24.0
+PackageLocale: en-US
+Publisher: vshulcz
+PublisherUrl: https://github.com/vshulcz
+PublisherSupportUrl: https://github.com/vshulcz/deja-vu/issues
+PrivacyUrl: https://vshulcz.github.io/deja-vu/guide/privacy.html
+PackageName: deja-vu
+PackageUrl: https://vshulcz.github.io/deja-vu/
+License: MIT
+LicenseUrl: https://github.com/vshulcz/deja-vu/blob/HEAD/LICENSE
+ShortDescription: Search Claude Code, Codex and Cursor session history locally
+Tags:
+- aider
+- claude-code
+- cli
+- codex
+- cursor
+- mcp
+- memory
+ReleaseNotes: |-
+  Sub-50 ms hook and MCP hot path, project X-Ray and symbol decision recall,
+  1-tool deja MCP mode guidance and argument aliases across harnesses, OpenCode
+  2.x plugin upgrade handling, and asymmetric Nemotron / NVIDIA NIM embeddings.
+  Added
+  - deja orient and PreToolUse surface co-change file pairs, symbol decisions, and verified traps. Pre-flight hooks also surface targeted test priority and command remedies before an agent edits or runs a command (#5882, #5896).
+  - PreCompact captures modified files and symbol decisions so compaction keeps the active working set. apply_patch edits are also indexed into file blame and history (#5896).
+  - deja embed supports asymmetric NVIDIA NIM and Nemotron models with automatic input_type retry. Passes "passage" when indexing and "query" when searching (#5950).
+  - Native Antigravity plugin bundle (antigravity-plugin/) and deja stats --card on first install.
+  - Configuration reference for ~/.config/deja and policy.json, plus JetBrains AI and session-deletion guides (#5869, #5943).
+  Changed
+  - Hook and MCP recall bound session record reads to tail windows and skip unused tool-output inflation. Transcript change scans prefilter by mtime, and compressed .jsonl.zst Codex rollouts stream without holding them in memory (#5901, #5907, #5908, #5927, #5928).
+  Fixed
+  - Hook leads and /deja prompts name 1-tool deja modes ("context" and "recall"), and spreadQ accepts subject aliases (session_id, file_path, output, fact). dejaCallNames also recognizes MCP-prefixed deja tool calls.
+  - deja install opencode-auto replaces the legacy OpenCode 1.x TUI status plugin with the 2.x server plugin on upgrade, and registers home_bottom before home-tips.
+  - deja doctor detects approved Codex hooks from non-primary event pins and live hook execution in .live / .hookseen (#5948).
+  - Hook concurrency, detached refreshers, and CLI flag validation handle spawn recall locks, .hookseen serialization, Windows path separators, recap --json --limit, and blank arguments in promote, remember --project, handoff, fix, view --out, and restore -o (#5899, #5904, #5909, #5910, #5911, #5915, #5929, #5930, #5931, #5932, #5933, #5945, #5949).
+  - go test ./... runs hermetically in root and minimal containers without sqlite3 or zstd installed (#5947).
+  Changelog
+  Features
+  - feat(antigravity): add native antigravity-plugin bundle for marketplace
+  - feat(embed): send input_type for asymmetric Nemotron and NVIDIA NIM models
+  - feat(hook): add symbol decision recall, targeted test priority, and pre-flight remedies
+  - feat(install): mention deja stats --card in first-install proof line
+  - feat(orient,hook): surface project X-Ray, co-change pairs, and verified traps (#5882)
+  - feat: compaction edit ledger, apply_patch file history, and recall signal filtering (#5896)
+  Fixes
+  - fix(cli): handle positional arguments after --
+  - fix(cli): quote Windows test path and tighten flag parsing and completions
+  - fix(cmd): serialize in-process hook state and restore how dash-query hint
+  - fix(cmd,sources): restore test refresher sentinel, cross-platform pid check, and fast antigravity changes
+  - fix(codex): assign err on its own line, as the linter asks (@Sora-bluesky)
+  - fix(codex): satisfy the shadow lint and cover the rest of zstdScan (@Sora-bluesky)
+  - fix(codex): stream a compressed rollout instead of holding it in memory (@Sora-bluesky)
+  - fix(doctor): detect approved Codex hooks from non-primary pins and live execution
+  - fix(dsh,usage): retain opening digest across refreshContext and update log JSON contract (#5904, #5899)
+  - fix(fix): ignore blank arguments in the error text (#5911) (@ZYZ666-RGB)
+  - fix(hook): a detached refresh takes the warmup's budget (@Sora-bluesky)
+  - fix(hook): a refresher waiting on the index lock is not replaced (@Sora-bluesky)
+  - fix(hook): normalize path separators in commandProjectCandidates on Windows (#5915)
+  - fix(hooks): bound prompt candidate reads and preserve compaction failure reasons (#5901, #5899)
+  - fix(mcp,hook): name 1-tool deja modes across leads and accept subject aliases
+  - fix(opencode): register home_bottom slot before home-tips to prevent row overlap
+  - fix(opencode): replace 1.x TUI status plugin on upgrade to 2.x
+  - fix(recap): honor --limit when encoding --json output (@ShahadatTest)
+  - fix(search): keep multi-topic and unscoped recall blocks coherent
+  - fix(sources,cli): use isRegularWalkEntry across source walks and reject blank promote arg early
+  - fix(tui,changelog): strip bold markers in release news card and tighten 0.24.0 bullets
+  - fix: hook latency, detached child reaping, shared perms, CLI flags, and day-zero funes removal (#5907, #5908, #5909, #5910, #5927, #5928, #5929, #5930, #5931, #5932, #5933)
+  - fix: reject an empty value for promote --to, view --out and restore -o (@AryanSingh2029)
+  - fix: reject blank promote prefixes (@tridev-tej)
+  Performance
+  - perf(hooks): bound session record reads to tail windows and metadata
+  - perf(mcp): skip tool-output inflation and prefilter transcript change scans
+  Documentation
+  - docs(changelog): prepare 0.24.0 release
+  - docs(guide): add a page for deleting Cherry Studio session history (@ZYZ666-RGB)
+  - docs(guide): add a page on deleting OpenClaw session history (#5869) (@calude-bot)
+  - docs(guide): add a page on deleting aider chat history (@calude-bot)
+  - docs(guide): add guide page for deleting CodeWhale session history (@Kasa-Harendra)
+  - docs(guide): add memory guide for JetBrains AI Assistant (@ZYZ666-RGB)
+  - docs(guide): add the OpenClaw page to the sidebar's delete group (#5869) (@calude-bot)
+  - docs(guide): regenerate the sidebars with the OpenClaw page, 1 of 2 (#5869) (@calude-bot)
+  - docs(guide): regenerate the sidebars with the OpenClaw page, 2 of 2 (#5869) (@calude-bot)
+  - docs: document ~/.config/deja files, policy.json keys, and DEJA_RECALL modes (#5943)
+  - docs: list the OpenClaw deletion page in the sitemaps, llms.txt and the feed (#5869) (@calude-bot)
+  - docs: surface brew/plugin/skills on README first screen and add npx fallback to skills
+  Other
+  - Check link-like session entries against file metadata (@jihtsan)
+  - Complete hook command flags in every shell (@jay23606)
+  - Merge branch 'main' into codex/5913-refuse-empty-handoff
+  - Merge branch 'main' into codex/5914-recall-completion-values
+  - Merge branch 'main' into codex/5921-verify-dirent-file-type
+  - Merge branch 'main' into tejesh/fix-blank-promote-prefix
+  - Merge pull request #5884 from ZYZ666-RGB/cursor/memory-for-jetbrains-4bb2
+  - Merge pull request #5885 from ZYZ666-RGB/cursor/delete-cherrystudio-session-history-7d4d
+  - Merge pull request #5894 from ShahadatTest/fix/5888-recap-json-limit
+  - Merge pull request #5895 from jay23606/pr-go/5893-hook-prompt-and-hook-tool-after-have-no-
+  - Merge pull request #5898 from vshulcz/fix/ci-and-cli-completions
+  - Merge pull request #5900 from sainimal1ba-hue/fix-double-dash-positionals-5890
+  - Merge pull request #5902 from vshulcz/feat/agent-magic-wave3
+  - Merge pull request #5903 from Kasa-Harendra/fix/issue-5877
+  - Merge pull request #5905 from calude-bot/docs/5873-delete-aider-chat-history
+  - Merge pull request #5906 from AryanSingh2029/fix/reject-empty-output-path-5891
+  - Merge pull request #5916 from calude-bot/docs/5869-delete-openclaw-session-history
+  - Merge pull request #5919 from Sora-bluesky/fix/codex-zst-stream
+  - Merge pull request #5920 from Sora-bluesky/fix/hook-refresh-claim
+  - Merge pull request #5922 from ZYZ666-RGB/cursor/fix-blank-fix-args-0c39
+  - Merge pull request #5923 from jihtsan/codex/5913-refuse-empty-handoff
+  - Merge pull request #5924 from jihtsan/codex/5921-verify-dirent-file-type
+  - Merge pull request #5925 from jihtsan/codex/5914-recall-completion-values
+  - Merge pull request #5926 from tridev-tej/tejesh/fix-blank-promote-prefix
+  - Reject blank explicit handoff session IDs (@jihtsan)
+  - Reject blank explicit remember projects (#5949) (@jihtsan)
+  - Release the tool-hook lock before spawn recall (#5945) (@jihtsan)
+  - Suppress recall flags while completing option values (@jihtsan)
+  - chore(deja): drop unused antigravity tail wrappers and stale nolint directives
+  - chore(release,vscode): pin vscode manifest and publish vsix on workflow_dispatch (#5883)
+  - chore: pin the manifests to 0.23.5 (#5881)
+  - test(codex): a compressed rollout is read without holding it (@Sora-bluesky)
+  - test(hook): compare the claims as bytes, as the linter asks (@Sora-bluesky)
+  - test(hook): the owner cases need a platform that can name a process (@Sora-bluesky)
+  - test(hook): the sentinel names the process that was started (@Sora-bluesky)
+  Install
+  curl -fsSL https://raw.githubusercontent.com/vshulcz/deja-vu/main/install.sh | sh
+  go install github.com/vshulcz/deja-vu/cmd/deja@v0.24.0
+  brew install deja-vu
+ReleaseNotesUrl: https://github.com/vshulcz/deja-vu/releases/tag/v0.24.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

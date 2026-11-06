@@ -1,0 +1,52 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: co2lab.Anchors
+PackageVersion: 0.1.364
+PackageLocale: en-US
+Publisher: co2lab
+PublisherUrl: https://github.com/co2-lab
+PublisherSupportUrl: https://github.com/co2-lab/anchors/issues
+PackageName: Anchors
+PackageUrl: https://github.com/co2-lab/anchors
+License: Elastic License 2.0
+LicenseUrl: https://github.com/co2-lab/anchors/blob/HEAD/LICENSE
+ShortDescription: Spec-first continuity framework for AI-assisted development
+Description: Anchors ties spec, feature and test together through a shared identity code, then confronts each artifact against the rules declared in anchors.yaml. It maps the project as a graph, propagates change from the anchor outward, and gates every step — so work guided by AI stays anchored to what was decided.
+Moniker: anchors
+Tags:
+- ai
+- ai-agents
+- cli
+- developer-tools
+- golang
+- spec-first
+ReleaseNotes: |-
+  Fixes: several --junit reports, one flag per module on a line, typeof import is a type
+  anchors ingest takes several --junit reports. Before, only the last one was ingested,
+  with no warning. Now each report is ingested in turn as a suite of its own, and the
+  --lcov and --mutation reports go with the first. A single --suite given with several
+  reports is refused: one name cannot stand for several suites.
+  One flag per module on a line. A line can hold two statements of the same module, as in
+  require('x') as typeof import('x'). The fixer wrote the flag twice
+  (// @dep: CODE // @dep: CODE). Now:
+  - the line takes one flag, which answers for both statements;
+  - dep-declared asks for that one flag, and dep-honored checks it against both statements;
+  - the flag is @dep[type]: only when every statement on the line is types only, so with the
+    require it is a value flag;
+  - a line that imports two different modules still takes a flag for each.
+  typeof import('x') is types only. The ts family example now reads
+  typeof import('…') as a statement of its own, ahead of the dynamic import('…') that took
+  the same path, and its type_import_pattern reads it as types only. The fixer flags it
+  @dep[type]:, so it no longer counts as a value edge in a test's evidence. A project that
+  copied the example into its anchors.yaml adds two things by hand:
+  - the new pattern to dialect.imports, before the require|import( one:
+    \btypeof\s+import\(\s*['"](?P<path>[^'"]+)['"]\s*\)(?:\.<ident>)?;
+  - the alternative ^\s*typeof\b| at the start of type_import_pattern.
+  Then run anchors check --fix.
+  Everything in the v0.1.351 notes still applies: run anchors migrate once, crossing format 8.
+  Changelog
+  - ca495a8 fix: several --junit reports, one flag per module on a line, typeof import is a type
+ReleaseNotesUrl: https://github.com/co2-lab/anchors/releases/tag/v0.1.364
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,92 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: seakee.CPAManagerPlus
+PackageVersion: 1.14.7
+PackageLocale: zh-CN
+ShortDescription: 自托管的 CPA / CLIProxyAPI 管理面板与 AI 网关可观测性仪表盘
+Description: |-
+  面向 CPA / CLIProxyAPI 的自托管管理面板与 AI Gateway 可观测性仪表盘，覆盖请求、用量、成本、配额、失败诊断和账号健康。
+
+  CPAMP 可以帮你回答什么问题？
+  - 请求为什么失败？ 在持久化请求历史中查看失败率、状态码、受影响的模型/账号和脱敏证据。
+  - 成本花在哪里？ 按模型、Provider、账号、API Key、项目、渠道和时间范围拆解 Token 与预估成本。
+  - 账号和配额是否健康？ 查看凭证状态、配额窗口、reset 证据，以及 Codex 和 xAI 的受控自动化状态。
+
+  核心能力
+
+  CPA 网关管理
+  - 管理 CPA Provider 配置，包括 Gemini、Codex、Claude、Vertex、xAI 和 OpenAI-compatible Provider。
+  - 维护认证文件、OAuth 登录、API Key、模型别名、优先级、插件、日志和系统配置。
+  - 导入官方 Sub2API OpenAI OAuth 导出，并把多账号拆分为独立的 CPA Codex 认证文件。
+
+  请求监控与失败诊断
+  - 将 CPA usage queue 中的请求持久化到本地 SQLite，并按账号、调用方 API Key 查看实时请求。
+  - 查看状态、延迟、Token、缓存、Trace 和脱敏失败证据，不暴露原始失败体。
+  - 使用 JSONL 导入或导出请求历史。
+  - 打开 请求监控演示。
+
+  成本与用量分析
+  - 按模型、Provider、账号、认证文件、API Key、项目、渠道和时间范围拆解请求、Token、成本、延迟和失败。
+  - 追踪 input、output、reasoning、cache、service tier 和长上下文计费语义。
+  - 从 LiteLLM 和 OpenRouter 同步模型价格，并为别名或内部模型保留本地覆盖。
+  - 打开 用量分析演示。
+
+  账号健康、配额与自动化
+  - 在浏览器本地或 Manager Server 定时巡检 Codex 和 xAI 账号。
+  - 在 Provider 可提供信息时展示配额窗口、reset 证据、凭证状态、工作区状态和健康信号。
+  - 对明确额度耗尽执行受控冷却，并将认证故障汇总到账号处理队列，支持复核与恢复。
+  - 打开统一的 凭证管理演示。
+
+  生产运维
+  - 使用单 Docker 容器，或 Linux、macOS、Windows 的 amd64/arm64 原生包运行；完整栈可以与 CPA 一起部署。
+  - 请求历史、Manager 配置、账号自动化和模型价格都保存在本地文件，不需要注册账号，也不包含遥测 SDK。
+  - 备份 SQLite 时同时保存 data.key，才能恢复加密后的 CPA Management Key。
+
+  想先了解界面？可以打开在线演示。演示站只使用虚构数据，不是部署或运行模式，不能连接、管理或监控真实 CPA。
+  CPAMP 管理和观测经过 CPA / CLIProxyAPI 的流量，本身不是模型代理，也不会独立转发模型请求。
+
+  数据、隐私与安全
+  - CPAMP 不会回传遥测，不包含分析 SDK，也不要求注册账号。
+  - 外部请求只限于 CPA Gateway 及你明确配置或主动触发的 OAuth、Provider 检查、插件 Release 和模型价格同步。
+  - 请求历史、配置、模型价格、巡检历史和自动化状态都保存在本地文件。
+  - CPA Management Key 入库前会加密；备份需要同时保存 SQLite 文件和 data.key。
+  - 普通 API 和 JSONL 导出只暴露脱敏失败摘要，不返回原始失败体或保存的原始 JSON。
+  - CPAMP 只应用于你有权管理的流量和凭证。
+Tags:
+- 人工智能
+- 代理
+- 仪表盘
+- 大语言模型
+- 网关
+ReleaseNotes: |-
+  Overview
+  v1.14.7 是 v1.14.6 之后的 1.x 维护版本，收录五项已经合并并通过 CI 的修复与性能改进：长窗口延迟分析的 SQLite 覆盖索引（#960）、Quota Snapshot 写入热路径去除历史候选读取（#981）、Antigravity Hub 客户端身份兼容修复（#986）、v1 页面后台刷新体验统一修复（#987），以及 Codex 5 小时周期切换后的首条请求计入修复（#991）。
+  本版本不新增 1.x 功能，不改变 CPA 管理 API、凭证权限、SQLite Schema 或配置格式，也不增加新的后台轮询或定时器。
+  Highlights
+  Fixes
+  - 后台刷新体验（#987）：凭证、配置、OAuth 规则、Dashboard、日志、插件、System、Provider 模型发现、Usage Analytics 与候选列表等已加载区域，在同一数据作用域内刷新时继续保留当前成功快照，不再退回整块 Loading、空白或误判空态。
+  - 后台重验证失败时保留最后一次成功内容并显示轻量错误反馈；成功返回空结果会被识别为已加载的空快照。连接、Provider、凭证或能力作用域发生变化时，旧数据、迟到请求和旧危险操作会失效，避免跨作用域回写。
+  - 已加载的凭证配置在重新读取失败时保持可见但只读，成功 Retry 后恢复编辑与保存；日志阅读位置、插件 iframe 和已加载图表在普通刷新期间保持稳定。
+  - Antigravity 配额兼容（#986）：将 CPAMP 管理请求的过时 antigravity/cli/1.0.13 身份对齐到 CPA 当前使用的 Hub 客户端身份，使 Cloud Code 不再因旧客户端门槛裁剪 retrieveUserQuotaSummary，恢复 Gemini weekly / 5-hour 等完整额度桶。请求端点、轮询策略和额度解析语义不变。
+  - Codex 5 小时周期首条请求（#991）：当旧周期已经结束、请求先于响应头确认的新周期计划起点数秒开始时，该请求现在会纳入新周期实际区间，不再同时遗漏于新旧周期；计划边界保持不变，也不会双计。
+  - Quota Snapshot 写入性能（#981）：移除 writer 热路径上随历史规模增长的历史候选读取与排序，跨请求边界归一仍由既有 lifecycle repository 负责。对外额度 API、展示语义和持久化格式不变。
+  Performance
+  - 长窗口延迟分析（#960）：在既有 deferred/offline derived-index 生命周期中新增 (timestamp_ms, latency_ms, ttft_ms) 覆盖索引，保持生产 SQL、时间戳索引和精确分位数定义不变。
+  - 在预热的 320 万条合成事件基准中，30 天原始 SQL 扫描中位数从约 3.77 秒降至约 0.43 秒；120 天精确 percentile SQL 仍受排序限制，约从 49 秒降至 25 秒。该结果用于说明索引收益边界，不代表所有真实部署的端到端延迟。
+  - 新索引会增加少量磁盘与写入成本；复杂 Provider / Model / Account 筛选仍可能回表，120 天精确 P95 等长窗口查询仍有继续优化空间，本版本不扩大到预聚合或分位数算法重构。
+  Upgrade Notes
+  - 正常升级并重启即可使用 v1.14.7 的所有正确性修复。 本版本没有数据库 Schema 或配置格式迁移，migration_required 保持为 false。
+  - 对已有非空 usage.sqlite，#960 的新 latency covering index 会沿既有机制进入 deferred/offline maintenance；未执行该维护不会阻止 Manager Server 启动或正常服务，只是暂时无法获得该索引的性能收益。
+  - 如需完成现有大库的新索引构建，请先停止 Manager Server，再运行现有离线维护命令：
+    cpa-manager-plus cleanup-derived --db-path <数据库路径>
+    完成后再启动 Manager Server。Docker 部署请使用仓库现有的停止服务 + 离线 cleanup-derived 运行方式。
+  - compact-usage 不能替代 cleanup-derived；前者用于用量压缩/清理流程，不会完成本次 deferred derived-index 构建。执行离线数据库维护前建议保留一致的数据库备份。
+  - 新建空库继续通过既有 post-listen maintenance 创建相关索引，无需单独执行上述离线步骤。
+  - #991 只修正升级后新产生并重新协调的 Codex 5 小时 rollover；已经持久化的旧历史周期不会自动回填或重写。
+  - 完整 Muse / Meta 功能的 CPA 最低兼容基线仍为 v7.3.4+；#986 不要求提高最低 CPA 版本。
+
+  Full Changelog: https://github.com/seakee/CPA-Manager-Plus/compare/v1.14.6...v1.14.7
+ReleaseNotesUrl: https://github.com/seakee/CPA-Manager-Plus/blob/HEAD/docs/release-notes/v1.14.7-zh.md
+ManifestType: locale
+ManifestVersion: 1.12.0

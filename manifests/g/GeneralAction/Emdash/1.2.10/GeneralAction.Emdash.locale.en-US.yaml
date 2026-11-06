@@ -1,0 +1,65 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: GeneralAction.Emdash
+PackageVersion: 1.2.10
+PackageLocale: en-US
+Publisher: General Action
+PublisherUrl: https://emdash.com/
+PublisherSupportUrl: https://github.com/generalaction/emdash/issues
+PrivacyUrl: https://emdash.com/privacy
+Author: General Action, Inc.
+PackageName: Emdash
+PackageUrl: https://emdash.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/generalaction/emdash/blob/HEAD/LICENSE.md
+Copyright: © 2026 General Action, Inc.
+CopyrightUrl: https://emdash.com/terms
+ShortDescription: Open-source agentic development environment for running coding agents in parallel.
+Description: |-
+  Emdash is an open-source agentic development environment for running coding agents in parallel across isolated Git worktrees.
+
+  What you can do:
+  - Run multiple coding agents at once without juggling terminals.
+  - Keep every agent isolated in its own Git worktree and branch.
+  - Send issues and tickets from Linear, GitHub, Jira, GitLab, Asana, Featurebase, Monday.com, Forgejo, Plain, or YouTrack into an agent.
+  - Review diffs, create pull requests, inspect CI checks, and merge from one place.
+  - Work locally or on your own remote machines over SSH/SFTP.
+  - Schedule recurring agent runs and preview apps in a built-in browser.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  This release lets you trust repositories that Git refuses because of their ownership, stops background processes from opening console windows on Windows, and keeps large repositories responsive. It also fixes Clean Artifacts, Git SSH configuration, credential handling, and panel sizes. Remote machines get these fixes once you update their workspace server in Settings > Machines.
+  Highlights
+  - When Git refuses a repository because another user owns it, such as a repository in a WSL folder, Add Project explains why and shows the Git command to run yourself. Trust Repository adds that one folder to your global Git configuration after confirmation, which also applies to agents and terminals. For SSH projects, the entry is written on the remote machine.
+  - On Windows, Git, agents, SSH connections, and other background processes no longer open console windows or Windows Terminal tabs.
+  - Changed-file diffs load while background Git work runs and show a loading state or error instead of a blank pane. If a reload fails, the last loaded diff stays visible and read-only until it recovers.
+  - The Workspaces tab measures disk usage much faster, counts worktrees inside their repository only once, reuses results for five minutes, and stops scanning when you leave the view.
+  - Creating tasks on large repositories, re-provisioning, deleting tasks and workspaces, updating pull request checkouts, and other long-running workspace operations no longer fail after 30 seconds while the machine is still working on them.
+  Fixes
+  - Clean Artifacts in the Workspaces tab removes ignored build output in place instead of removing the worktree. Tracked files, uncommitted and untracked changes, local .env files, files matching your preserve patterns, nested workspaces, and linked tasks all stay. Emdash won't clean a workspace while agents or terminals are running in it, and the action is available for local workspaces.
+  - Clones and other Git operations use the core.sshCommand from your Git configuration, so SSH key routers and per-host keys work.
+  - Git credential requests bypass proxy settings. When a credential read fails, for example in a tmux session reattached after Emdash restarted, Git prints the reason before prompting.
+  - New tmux tasks get their own environment and no longer inherit stale variables or credentials from earlier sessions. Credential tokens and environment values stay out of process arguments, where other users on a shared machine could read them.
+  - Creating a worktree recovers from worktrees deleted outside Emdash without running git worktree prune by hand. Git failures show Git's message instead of a bare exit code, with credential URLs and tokens removed. Deleting a worktree whose branch is already gone succeeds.
+  - The sidebars and terminal drawer keep the size you set when the window resizes, including when a tiling window manager rearranges windows, and return to it after a small window grows again.
+  - When the default branch can't be resolved, Create Task explains that you need to select a branch in workspace settings. Automations show the same reason, and changing an automation's schedule saves only the schedule.
+  - On Linux and Windows with Watchman running, Emdash watches Git metadata with the system file watcher, so Watchman no longer crawls the .git directory.
+  - Agents on Windows no longer create a stray %SystemDrive%\ProgramData folder tree in their working directory, and they receive the system and program folder variables that .NET and NuGet need.
+  - The Linux .deb and .rpm packages declare ALSA and GBM as dependencies, so the app starts on minimal installs.
+  - Crash-loop recovery shows why the most recent launch failed.
+  - Stored notifications are trimmed to the newest 500 on launch, as intended.
+ReleaseNotesUrl: https://github.com/generalaction/emdash/releases/tag/v1.2.10
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://emdash.com/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

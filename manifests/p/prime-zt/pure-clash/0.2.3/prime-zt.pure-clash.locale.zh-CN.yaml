@@ -1,0 +1,80 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: prime-zt.pure-clash
+PackageVersion: 0.2.3
+PackageLocale: zh-CN
+Publisher: prime-zt
+PublisherUrl: https://github.com/prime-zt
+PublisherSupportUrl: https://github.com/prime-zt/pure-clash/issues
+Author: prime-zt
+PackageName: Pure Clash
+PackageUrl: https://github.com/prime-zt/pure-clash
+License: GPL-3.0-only
+LicenseUrl: https://github.com/prime-zt/pure-clash/blob/HEAD/LICENSE
+ShortDescription: 使用 Rust 和 Zed GPUI 构建的轻量原生 Mihomo 桌面客户端
+Description: |-
+  Pure Clash 用清晰、快速的原生界面管理配置订阅、代理组、连接与实时流量，并安全地控制独立运行的 Mihomo 内核——不在 Rust 中重写代理协议栈或规则引擎。
+  当前支持 Windows x64 与 Linux x64（Wayland / X11）；macOS 预留了目录与资源边界，尚未实现。
+
+  功能特性
+
+  - 内核生命周期：启动前先用同版本内核执行 -t 校验配置；子进程由 Job Object（Windows）或 PR_SET_PDEATHSIG（Linux）守护，主进程异常退出时内核同步回收；支持手动启停与托盘退出前的完整清理
+  - 配置与订阅：内置默认配置（仅 DIRECT 出站）、URL 订阅与原生文件选择器导入本地 YAML；所有来源均经结构预检和内核 -t 校验后原子保存并激活
+  - 离线 Geo 数据：每个安装包内置 GeoSite.dat、GeoIP.dat 与 Country.mmdb，无需联网即可恢复，并可在设置页显式更新
+  - 代理组与延迟测试：分组展示订阅节点，规则/全局/直连三种运行模式经 controller 实时切换；支持单节点与整组延迟测试，结果按阈值分色
+  - 连接与实时流量：每秒轮询 controller 连接快照，展示进程、目标、链路、规则与上下行流量，支持单条或全部关闭；概览页实时显示网速与活动连接数
+  - 系统代理：Windows 写入当前用户 Internet Settings 并经 WinINet 广播生效。开启前原子保存用户原设置，关闭、停内核或异常退出后自动还原
+  - TUN 模式：Windows 经 UAC 提权内核并使用随包 wintun；TUN 未真实生效时自动回退并提示原因
+  - 系统集成：托盘图标（状态多语言同步）、单实例锁、关闭到托盘、深浅色主题与中英文界面
+  - 极低内存占用：桌面客户端自身内存通常在 50 MB 以内（不含 Mihomo 内核）
+Tags:
+- clash
+- clash-meta
+- mihomo
+- vpn
+- 代理
+- 网络
+ReleaseNotes: |-
+  Full Changelog: https://github.com/prime-zt/pure-clash/compare/v0.2.3...v0.2.4
+  Pure Clash v0.2.4
+  本版本新增订阅自动更新与进程匹配控制，并进一步完善配置应用、失败回滚和运行状态同步。
+  新增功能
+  - 订阅自动更新
+    - 支持为每个远程订阅单独设置自动更新间隔。
+    - 支持在添加订阅时直接设置更新间隔，也可以在配置列表中随时修改。
+    - 支持 0 或留空关闭自动更新。
+    - 正式版本支持 10～43200 分钟的更新间隔。
+    - 应用启动后自动检查到期订阅，主窗口关闭或后台自启模式下仍会继续运行。
+  - 智能配置应用
+    - 自动更新前会下载、校验订阅内容，并通过 Mihomo -t 完成最终配置检查。
+    - 订阅内容未变化时跳过配置重载，避免不必要的内核操作。
+    - 激活中的订阅优先通过 controller 热重载配置，尽量不重启内核和不中断现有连接。
+    - 热重载失败时自动回退为内核重启。
+    - 非激活订阅只更新本地文件，不影响当前运行中的内核。
+  - 强制匹配进程名
+    - 设置页新增“强制匹配进程名”开关。
+    - 开启后使用 find-process-mode: always，为每条连接匹配发起进程并显示进程名。
+    - 关闭后恢复 Mihomo 默认的进程匹配行为。
+    - 运行中的内核支持通过 controller 热切换，无需主动重启。
+  - 配置页体验改进
+    - 新增自动更新状态、最近一次更新失败提示和更新间隔显示。
+    - 新增订阅自动更新间隔的行内编辑器。
+    - 新增中英文界面文案支持。
+    - 输入框支持程序回填和语言切换后的占位文案更新。
+  修复与优化
+  - 修复强制进程匹配配置与 app.json、local.yaml、runtime.yaml 状态可能不同步的问题。
+  - 完善配置写入失败时的原子回滚处理，避免损坏当前可用配置。
+  - 修复订阅自动更新在写入 runtime 失败时仍保留新订阅内容的问题。
+  - 优化自动更新的时间记录逻辑，失败尝试会被记录并顺延下一次更新，避免短时间内重复请求订阅服务器。
+  - 优化自动更新与手动配置操作之间的互斥处理，降低并发修改配置造成状态覆盖的风险。
+  - 自动更新失败不再打断用户操作，仅在配置列表中显示失败状态并写入运行日志。
+  - 启动时自动将进程匹配开关同步到本地 Mihomo 基线配置。
+  - 增加 controller 配置热重载专用超时，适应较大的配置和 Geo 数据加载场景。
+  验证
+  - cargo test：74 个测试通过，4 个测试忽略
+  - cargo fmt --check：通过
+  - cargo check --release：通过
+ReleaseNotesUrl: https://github.com/prime-zt/pure-clash/releases/tag/v0.2.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,49 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.ArWen
+PackageVersion: 2.9.2
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/arwen/issues
+Author: Fahrenheit Research
+PackageName: ArWen
+PackageUrl: https://github.com/FahrenheitResearch/arwen
+License: Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+Copyright: Copyright © Fahrenheit Research
+CopyrightUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+ShortDescription: 'ArWen: GPU-native WRF-ARW-class regional weather model, verified against WRF v4.6.1'
+Description: "ArWen is an independent, GPU-native implementation of a WRF-ARW-class regional atmospheric model. It is not affiliated with or endorsed by NCAR or UCAR. The name is a wordmark for \"the ARW solver, GPU-native\"; the Python package is currently named gpuwm. Safety. ArWen is a research and educational tool. It is never a substitute for official forecasts and warnings from your national meteorological service. Do not use it to make safety decisions. Regional numerical weather prediction at convective scale has mostly required institutional clusters, which means most of the world runs on global-model guidance at 10-25 km. ArWen's aim is to put a verified, kilometer-scale limited-area model on a single consumer GPU: pick a point, size a nest ladder to your card, pull public analysis data, and run a 1 km (or 500 m) simulation of your own area on hardware you own -- especially in places where no national convection-permitting model exists."
+Moniker: arwen
+ReleaseNotes: |-
+  ArWen 2.9.2 is a release on the 2.9 line. The desktop stays ArWen Desktop 1.0.10, from the 2.9.0 release.
+  - Install or upgrade: pip install --upgrade "gpuwm[all-cu12]==2.9.2".
+  - Integration kit, verification records, and checksums.
+  - Node GPU gate: Stage 1 and both GPU-shard results, with the tested source revision and card identity.
+  New
+  - A gpuwm-hex run can be the initial and boundary source of an ArWen domain.
+  - Observation readers: Himawari AHI, GK-2A AMI, GOES-18 full disk and CONUS, with one geostationary fetcher.
+  - MADIS public streams (aircraft, sondes, mesonets, live feed) in the observation doors.
+  - A GLM flash-extent-density reader.
+  - European radar: live and archive feed listings (FMI, DMI), dual-PRF velocity correction and DWD split volumes.
+  - Radar readers for JMA, IRIS RAW, UF, CfRadial and DORADE, with open-archive fetch by table.
+  - The run timeline records the measured cores of every stage, and a single-core gate fails a stage that holds one core while the card or other cores wait.
+
+  Fixed
+  - Every fix in 2.9.1.
+  - Thompson microphysics (mp_physics = 8) runs straight after pip install gpuwm: the first run downloads and checks its two large lookup tables.
+  - MPAS mesh generation no longer triangulates on a single thread.
+  - Later forcing times in preparation are built side by side.
+  - The hex vertical grid writes its output in parallel.
+  - Lower GPU memory for WSM6, the MPAS column seam, the batched shortwave chain and New Tiedtke in the MPAS column batch.
+  - A missing static dataset is refused once, naming every dataset the native static builder opens.
+  - US 00Z soundings from MADIS are dated to their real release time.
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/arwen/releases/tag/v2.9.2
+InstallationNotes: |-
+  This application requires an NVIDIA GPU with CUDA support to run.
+  Will not function on integrated graphics or non-NVIDIA hardware.
+  Without compatible hardware, the application will fail to launch.
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

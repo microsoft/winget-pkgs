@@ -1,0 +1,44 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: AnywhereLabs.DSHDesktop
+PackageVersion: 2.0.22-next
+PackageLocale: en-US
+ShortDescription: A community-maintained desktop client for DeepSeek Harness; it is not an official DeepSeek product.
+Description: DSH Desktop is a community-maintained desktop client for DeepSeek Harness. It is an Electron desktop shell and is not an official DeepSeek product.
+Tags:
+- ai
+- deepseek
+- deepseek-harness
+- dsh
+- large-language-model
+- llm
+ReleaseNotes: |-
+  This Next release upgrades upstream to the release candidate DeepSeek Harness v0.2.2-rc.1, bringing on-demand macOS Computer Use (dsh-cua-bundle), OAR Subagents, LiveShare, and one-click third-party plugin updates to Next, adding embedded account top-up and usage views, native Save As, and image file drag-out, and fixing Windows sandbox command failures and idle Host exits.
+  DSH NEXT is a community-maintained open-source project, not an official DeepSeek product.
+  Upstream version: DeepSeek Harness v0.2.2-rc.1.
+  Upstream kernel breaking changes (dsh v0.2.2-rc.1)
+  DeepSeek Harness v0.2.2-rc.1 includes kernel API and runtime breaking changes that may affect third-party plugins and self-deployed environments:
+  - Third-party and custom plugin compatibility: Upstream upgrades to Cordis 4.1.0 and refactors conditional per-step tool activation, native vs. PTC tool execution, fixed per-step model routing, and asynchronous session projections; the standalone Git worktree plugin is now merged into Change requests and worktrees. Third-party plugins not yet updated for 0.2.2 may prevent startup and can be updated or disabled via Safe Mode or Plugins → Installed in the recovery assistant; on-demand official bundles from an older release are automatically cleaned up before startup and can be re-enabled in Plugins.
+  - Self-deployed PTC and remote SSH upgrade requirements: The PTC control channel now uses birpc, the SSH protocol is bumped to v3, and cancelled execution status codes now return ABORTED; self-deployed bootstraps and remote SSH helpers must be upgraded together with 0.2.2-rc.1.
+  - Runtime and default policy changes: The minimum Node.js version for running DSH externally is raised to 24.9 (packaged desktop builds already bundle Node 24.21); undeclared custom-model capacities default to 1M context / 128K output; read-before-write and external-change checks are disabled by default; web_fetch allows proxy and private-network addresses by default.
+  New and improved
+  - New macOS Computer Use (dsh-cua-bundle) and dual-version switching: Added on-demand installation of dsh-cua-bundle on macOS with a toggle on the Computer Use (Next) detail page (supported on macOS 14+ for PTC mode); enabling it automatically takes over PTC sessions and hides Computer Use (Next)’s command and tools without a restart.
+  - OAR Subagents, LiveShare, and plugin management: Added OAR Subagents (delegate independent tasks to local Claude Code or Codex CLIs with configurable default permissions), LiveShare (Experimental), Ralph, and Session Search to the Plugins page; added version checks and one-click updates for third-party market plugins under Plugins → Installed.
+  - Upstream 0.2.2-rc.1 highlights and native desktop integration: Quote chat text into the composer, copy full conversations as Markdown, keep all assistant text replies visible when steps are collapsed, upload images immediately in the composer, use unified context and keyboard menus, browse a persistent directory tree in file previews, and manage scheduled tasks at the Host level; Desktop adds embedded account top-up and usage views, native context-menu "Save as" and cross-origin image copy, and native file drag-out for conversation and preview images.
+  - Linux update checks, CLI, and "Open In": Linux builds now check for updates and open the download page, and support running the bundled CLI directly via <app> dsh <args>; "Open In" now detects Windows Terminal and apps under non-ASCII paths on Windows, plus Ptyxis and GNOME Console on Linux.
+  Fixes
+  - Windows sandbox and encoding compatibility: Fixed confined commands exiting without output, failing after temp directory cleanup, or spawning a second GUI window from the tray terminal’s dsh CLI; prevented selecting the installation directory as a workspace or data directory; fixed garbled Chinese output from Python in pwsh and UTF-8 BOMs in config files triggering recovery.
+  - Host stability and recovery diagnostics: Fixed late background bridge call timeouts while idle terminating the Plugin Host; surfaced the Host's first fatal error line at the top of recovery details; fixed accumulated browser cookies causing HTTP 431 errors after repeated restarts.
+  - UI interaction and Linux packaging: Restored clipboard access in app-origin plugin views such as Office, made the top strip of the Automation page draggable on macOS, linked "Release notes" to the installed version by default, and fixed LiveShare reader pages failing to load when certain owner plugins are enabled; added multi-size desktop icons and missing Debian audio/graphics dependencies on Linux.
+  Usage notes
+  - Quit the previous version and back up ~/.dsh (or use Back up in Settings → Desktop settings) before installing. Verify your usual plugins and workflows afterward.
+  - Before managing plugins for the desktop Profile from the bundled terminal, launch Desktop to initialize that Profile.
+  - When upgrading from 2.0.17-next or earlier, download and install manually; in-app updates in those versions may not complete the download.
+  - The Office skills install the bundled runtime under ~/.dsh/dsh-runtimes/dsh-next-primary-runtime on first use, requiring additional disk space.
+  - Defaults to the shared ~/.dsh home. Profiles do not isolate sessions, accounts, or credentials within that home.
+  - Change the data directory in Settings → Desktop settings or the recovery assistant, or set DSH_DESKTOP_NEXT_HOME to an absolute path to isolate DSH data (an in-app choice takes precedence over the environment variable); this does not isolate AA’s default shared sign-in and device-binding state.
+  Full changelog · Project website
+  DSH NEXT replaces the former Stable edition channel.
+ManifestType: locale
+ManifestVersion: 1.28.0

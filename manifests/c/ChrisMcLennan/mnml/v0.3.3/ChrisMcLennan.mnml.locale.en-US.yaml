@@ -1,0 +1,190 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ChrisMcLennan.mnml
+PackageVersion: v0.3.3
+PackageLocale: en-US
+Publisher: Chris McLennan
+PublisherUrl: https://github.com/chris-mclennan
+PublisherSupportUrl: https://github.com/chris-mclennan/mnml/issues
+Author: Chris McLennan
+PackageName: mnml
+PackageUrl: https://mnml.sh/
+License: Apache-2.0
+LicenseUrl: https://github.com/chris-mclennan/mnml/blob/main/LICENSE-MIT
+ShortDescription: A NvChad-style terminal IDE in Rust.
+Description: 'mnml is a terminal IDE: vim or standard editing, LSP, git, embedded HTTP/CDP/DAP, AI panes, headless test harness.'
+Tags:
+- editor
+- ide
+- rust
+- terminal
+- tui
+- vim
+ReleaseNotes: |-
+  Integrations add rows to each other's menus
+  - A manifest's context_menu[] rows now reach mnml's menus: a row
+    aimed at ticket, pr, pipeline, link or one pane's rows
+    (pane:<id>:<kind>) joins the right-click menu of a link of that
+    kind anywhere and of a Jira ticket row, under a muted header with the
+    contributing integration's name. Picking it runs that integration's
+    command with the clicked row's {key}, {repo}, {n}, {id} and
+    {url} filled in; a when (state=OPEN) narrows where it shows.
+    Older manifests with a plain string target still load. The sample
+    integration contributes Echo ticket key and Echo pull request.
+  Integration panes: a confirm's chips click, and hover help names the key
+  - The SDK's confirm box (confirmBox) let a click on its OK or Cancel
+    chip land on the box behind them, so neither did anything. Jira's
+    and Bitbucket's merge confirms both had it. The chips now win.
+  - A mounted pane's hover can name the command its element's click
+    runs, and the info view then ends with that command's Key: chord,
+    as the host's own controls do. Panes set it with Help.runs(id) and
+    Mount.hoverHelp; older panes and hosts are unaffected. The sample
+    integration's header shows it.
+  The setup wizard on a first launch
+  - A first launch from your home folder — the way a new terminal window
+    opens — shows the setup wizard. It used to show the "where to?"
+    picker instead, and the wizard never came; the picker returns on
+    later launches once the setup is done.
+  - A dialog that is already up on a first launch, such as the workspace
+    trust question, no longer cancels the wizard: it opens as soon as
+    that dialog closes.
+  One data root for every build; the dev profile is gone
+  - A build from source and an installed mnml now share one data root
+    (~/.config/mnml), one session file (.mnml/session.zon) and one
+    statusline. MNML_PROFILE and --profile are no longer read; the
+    dev chip, the [dev] window title, the first-launch seeding and
+    mnml profile seed are gone. --sandbox, --demo and
+    MNML_DATA_ROOT still pick a root of their own.
+  - A leftover ~/.config/mnml-dev (and .mnml/session-dev.zon) is
+    ignored. Delete it, or move what you want from it into
+    ~/.config/mnml, by hand.
+  - mnml paths prints the data root, session file, IPC mailbox and
+    running-instance marker (it replaces mnml profile; on Windows,
+    run.ps1 paths).
+  - --version reads mnml 0.3.3+g<sha> for a source build, and the
+    start page shows mnml 0.3.3 · <sha>; a release reads its version
+    alone.
+  Claude tokens renew on every system
+  - A Claude account whose token is turned down renews it with the
+    account's own refresh token — every account, on macOS, Linux and
+    Windows — and the new token is written back to that account's file.
+    On macOS the keychain is tried first when it holds that account's
+    login. The state line reads expired — refreshing… meanwhile; only a
+    refused renewal shows expired — Re-auth.
+  - Re-auth works on Linux and Windows: after claude login the login is
+    read from the CLI's credentials file (~/.claude/.credentials.json,
+    or under CLAUDE_CONFIG_DIR).
+  SESSIONS: names, states and verbs from Claude Code's registry
+  - EXTERNAL rows — sessions running in another terminal — read Claude
+    Code's live-session registry (~/.claude/sessions/<pid>.json): a
+    session the user named shows that name and its exact state (busy,
+    idle, waiting) instead of main (47c3b85c), and a running session
+    with no transcript yet is listed too. The registry is undocumented and
+    may change; an unreadable file is skipped and the transcripts stay the
+    listing. sessions.registry = false turns it off (docs/API.md).
+  - Ask what it is doing (sessions.ask_external) sends the session one
+    cross-session message asking what it is working on and whether it is
+    safe to interrupt; its reply, read from its transcript, shows as a
+    toast within 60 s. Not on Windows yet.
+  - Take over… (sessions.take_over) ends an idle or waiting session in
+    its own terminal and resumes it in a pane here, after a confirm. A
+    working session is refused; the pid must still be a claude process;
+    SIGTERM only, and one that does not exit in 10 s is left running.
+  Sessions by number
+  - sessions.focus_1 … focus_9 focus the Nth session as the SESSIONS
+    panel lists it — Space a 1 … Space a 9 under vim, Ctrl+Alt+1 …
+    Ctrl+Alt+9 under standard. A session on another tab page brings
+    that page up; in the sessions mode it is swapped into the focused
+    column; past the last card it says so.
+  - Each of the first nine cards wears its number, a muted digit in the
+    column left of the card, under the on-screen / ready mark; the sessions table has a # column with the
+    same numbers. The card's hover lists its chord.
+  - In the sessions view — the sessions mode on screen, or the SESSIONS
+    panel with the keys — plain Ctrl+1 … Ctrl+9 focus the session
+    whose card wears that number, in both profiles. Elsewhere they stay
+    the tabs'. The sessions mode's own Ctrl+1 … Ctrl+9 used to count
+    sessions without the docked ones, so the key could miss the card by
+    one; sessions.show_1 … show_9 are gone with it.
+  Claude accounts: one Re-auth per account
+  - Each account in the Claude usage pane has a state line under its
+    name: signed in · resets 3:20am, or expired, keychain holds another account, no login yet — each with a Re-auth button. Re-auth
+    (also the account's right-click menu, the Claude chip's menu and
+    ai.claude_reauth) opens claude login in a pane, watches the login
+    land in the macOS keychain, and files it under the account when its
+    email is the account's; the pane closes and the figures come back.
+    The separate R capture step is no longer needed.
+  - A login for another account on file is never filed under the one
+    being re-authed: a box says whose it is and offers File under that
+    account, or Cancel.
+  - An account whose token has expired is re-captured on its own when the
+    keychain holds that same account's login again (the CLI renews its
+    own login as it is used), with one toast.
+  - The paste-a-token prompt is behind the account menu's Advanced ▸
+    Paste a token…; adding an account no longer opens it.
+  - The compact meter's warning account shows its letter and percent in
+    yellow or red on the chip's coral, then a ! — no dark block. The
+    hover names the account and why; a click on a chip with a ! opens
+    the usage pane at that account.
+  A ticket key says what it names
+  - Hovering a ticket key that the Jira integration has lately polled —
+    in a terminal, on a session card, anywhere it links — shows
+    ACME-123 · Fix the login redirect · In Review; its right-click menu
+    leads with the same line. An old or failed poll keeps the title and
+    adds as of 3h ago. No request is made for it.
+  - The Jira integration writes what its --values poll and its pane's
+    tabs list into a shared recent-items cache,
+    recent/jira/ticket.json under the shared state dir (else the data
+    root): key, summary, status, assignee's display name, priority, type,
+    fix versions — never a description, an account id or an email.
+  - recent_items.enabled = false turns it off: mnml reads none of it
+    and the integrations it starts write none.
+  - SDK: sdk.cache — put / failed / get / query over typed
+    Ticket, Pr, Pipeline and Release records, with the file
+    format documented as a contract (docs/SDK.md, The recent-items
+    cache).
+  - Pull requests too: widget#45, a PR 45 the link ranges resolved,
+    or a link to the pull request's page hovers as
+    acme/widget#45 · Redesign the empty state · OPEN · Max Orr. The
+    Bitbucket integration writes the pull requests its --values poll and
+    its pane's tabs list, and the pipeline runs its hourly probe and its
+    Pipelines tabs see (recent/bitbucket/pr.json, pipeline.json).
+  - The Jira integration writes each project's fix versions whenever it
+    fetches them anyway — a release tab resolving its version, the Fix
+    Version picker — as releases, with the issues a release tab lists.
+    The nearest unreleased release date is current, the one after it
+    next; recent_items.current_release = "ACME/2026.10" names
+    current outright.
+  - Recent tickets and pull requests (picker.recent_items, vim
+    Space f i, standard Ctrl+K Ctrl+E) lists what the integrations
+    last polled, newest first, a stale one marked; Enter opens it where
+    its link would.
+  - mnml cache get <kind> <id>, mnml cache ls <kind> [--source S] [--limit N] and mnml cache clear [kind] [--yes] read and clear the
+    cache from a shell (docs/API.md).
+  A bare pull-request or pipeline number links
+  - Pull request 5505, PR #5505 and pipeline 10554 link to the
+    repository whose numbers hold them. The Bitbucket integration's
+    --values poll publishes, per repo, the lowest and highest pull
+    request and pipeline it has seen (pipelines asked for once an hour),
+    keeps them in cache/link-ranges.json, and mnml allows 50 above the
+    highest. Several repositories: the link opens the workspace's own
+    first and its menu lists Open in <repo> for each; none: no link.
+    Reinstall the integration (mnml-bitbucket --install) to pick up the
+    new links.
+  - SDK: a links[] entry may say .resolve = .range, .ranges = "<kind>"
+    and put {repo} in its url; Ipc.linkRanges(id, rows) publishes the
+    {repo, kind, low, high} table it reads (docs/SDK.md, Links).
+  - .test scripts: click X Y ctrl (or super, alt, shift).
+  Tables use the width they have
+  - A table no longer cuts a name with … while the right of the pane is
+    empty. sdk.pane.columns.fit takes each column's need (its longest
+    visible cell) and a fixed flag: on a wide pane the spare goes to the
+    columns being cut, in proportion to what each is short of and never
+    past its need; numbers and dates stay fixed; what is left goes to the
+    column that takes the rest, or stays blank. A narrow pane gives way
+    exactly as before. A private integration's table gets this by passing
+    need (see docs/SDK.md).
+  - Jira's Work tree and Bitbucket's tables measure their rows, so a long
+ReleaseNotesUrl: https://github.com/chris-mclennan/mnml/releases/tag/v0.3.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

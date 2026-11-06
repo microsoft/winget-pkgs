@@ -1,0 +1,49 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.11.7
+PackageLocale: en-US
+ShortDescription: Agent-friendly reference management.
+Description: 'Traditional reference managers are not agent-friendly: highlights and notes stay locked inside single files, making it hard for agents to reuse knowledge across papers; every conversation starts from scratch without a stable local knowledge map; PDFs are human-friendly but not the most comfortable reading material for agents. Agentero aims to build an agent-friendly, agent-native way to manage references, exploring how humans and agents collaborate on reference management. Connect your local agent via ACP (BYOA), select-text chat, import papers and Skills, stay compatible with the Zotero ecosystem, and get paper translation, bidirectional links with a knowledge graph, and deep PDF reading.'
+Tags:
+- academics
+- agent
+- article
+- literature
+- paper
+- pdf
+- reference
+- research
+- thesis
+- zotero
+ReleaseNotes: |-
+  This release gives Plaza a native CCF conference-deadline panel and gives the CLI external workspace control via agentero ui / paper open; the library can now infer submission venue tags from arXiv templates, and arXiv discovery gains query-first search, semantic ranking, and MCP tools. It also fixes a batch of issues around the agent proxy loopback, dual-pane translation sync, and venue tags.
+  Features
+  - CCF deadline panel: Plaza gains a native panel that reads the upstream ccf-deadlines dataset directly, listing upcoming conferences by CCF rank, official site, venue-local deadline with timezone, and remaining days, with a multi-select rank filter and a refresh on every open. (0d44f120, cefdd696, d590c0db, 2c7483e4 by @Phil-Fan)
+  - Estimated deadlines for unannounced cycles: For CCF A/B/C venues that have not published their next cycle yet, the panel merges upstream history to project the next deadline (weekday preserved; last known cycle within 18 months, projection within the next 12 months) and flags it with an "Est." badge, restoring conferences that used to disappear entirely. (2b143516 by @Phil-Fan)
+  - CLI workspace control: Adds the agentero ui open|close|window|split command group and agentero paper open to open, close, and create windows, split workspace panes, and open a specific paper in the running app from the command line. (579ec8f5, 5b4018cb, 0a53b7c3 by @Phil-Fan)
+  - arXiv submission venue tags: Scans an arXiv e-print's LaTeX templates (documentclass and bundled style packages) and projects them onto paper tags: template hits render as #submitted:<VENUE> <YEAR>, an authoritative publication replaces them with #venue:, and the library tags column offers a manual refresh. (be7c49ae by @Phil-Fan)
+  - Query-first arXiv discovery: Core and the CLI gain a vault- and embedding-free discovery primitive (agentero discover arxiv) with deterministic keyword ranking, explainable per-term matches, a novelty filter that drops papers already in the library, and shortlist export. (656faf94, 507e47b6 by @Phil-Fan)
+  - Semantic ranking and MCP discovery tool: Optionally blends an embedding cosine term into the lexical score (off by default, degrading to lexical on endpoint failure), and adds a discover_arxiv MCP tool so agents can drive arXiv discovery directly. (81f62433, 39c1d118 by @Phil-Fan)
+  - Rename agent conversation history: History rows gain a hover rename entry, and the title is persisted as a local override that ACP session updates no longer overwrite. (459aa4e4, 4d426ce8 by @ffy6511; Fix #710)
+  - Markdown selection line numbers: Markdown (Plate) selections now compute on-disk line spans so chips and prompts carry (lines A-B), matching CodeMirror, and the composer's context chips show them too. (50e063d5, 1ebc6ba2 by @ffy6511; Fix #709)
+  - Restore Plaza browsing state: Reopening a closed Cool Papers / ModelScope tab restores the in-site path, back/forward history, and scroll position, and Cool Papers replays its previously requested Kimi summaries. (#716 by @Kokeip)
+  - MCP Vault search: The built-in MCP server exposes vault_search, reusing the Host's Markdown keyword search; PAPER.md hits can return a 1-based physical page plus metadata filters. (#708 by @Zhou-Ruichen)
+  Improvements
+  - Institution proxy school presets: A verified WebVPN gateway preset dropdown (ZJU, USTC, XJTU, and more) sits beside the institution proxy prefix; picking one fills the prefix and switches the gateway type. Test status now uses the shared probe dot and redundant descriptions were removed. (672c846f, 6f5d3187, 9a2322d2, ec03061d by @Phil-Fan)
+  - EasyScholar key entry point: An external-link button next to the EasyScholar key field in Settings opens the user-center open-API page where the key is issued. (1aeee33f by @Phil-Fan)
+  - Discovery cache keyed by inputs: The Plaza recommendation cache becomes a multi-row table keyed by a hash of source / model / top_n / categories (schema v8), fixing stale reuse after switching embedding model or source and the larger-top_n-returns-smaller-list bug. (23dbba9c by @Phil-Fan)
+  - CLI reuses the shared institution proxy: The headless CLI reads the institution proxy from shared settings at startup, so import id and paper download use the same gateway config the desktop app writes. (d87bf4dd by @Phil-Fan)
+  Fixes
+  - Agent proxy bypasses loopback: Proxy injection now merges NO_PROXY=127.0.0.1,localhost,::1, fixing opencode's inability to reach its own local server, which left the model list empty whenever the network proxy was on. (f832d2cd by @Phil-Fan; Fix #638)
+  - Dual-pane translation follows layout analysis: The translation pane now enters the shared layout queue (with the queued/cancel toast) when regions are not ready and mirrors the source document's layout result, fixing a pane that stayed empty forever when opened too early. (47528699 by @Phil-Fan)
+  - Translation display mode wired up: The Translate settings now write translate.displayMode (overlay / dual pane) instead of the deprecated boolean, fixing dual-pane having no effect. (fc31b273 by @Phil-Fan)
+  - Venue tags exclude preprint repositories: Repository-type publications (arXiv, bioRxiv, OpenReview, and more) are treated as "no venue", falling through to template inference instead of producing #venue:arXiv (Cornell University), and stale repository-derived tags are cleaned up; template tags render as "Submitted to …" and #venue: / #submitted: chips drop the namespace prefix. (34a21efc, 7310a7fe by @Phil-Fan)
+  Full Changelog: https://github.com/poco-ai/Agentero/compare/v0.11.6...v0.11.7
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.11.7
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: locale
+ManifestVersion: 1.12.0

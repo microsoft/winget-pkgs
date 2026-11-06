@@ -1,0 +1,61 @@
+# Created with deja-vu release workflow using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: vshulcz.deja-vu
+PackageVersion: 0.22.1
+PackageLocale: en-US
+Publisher: vshulcz
+PublisherUrl: https://github.com/vshulcz
+PublisherSupportUrl: https://github.com/vshulcz/deja-vu/issues
+PrivacyUrl: https://vshulcz.github.io/deja-vu/guide/privacy.html
+PackageName: deja-vu
+PackageUrl: https://vshulcz.github.io/deja-vu/
+License: MIT
+LicenseUrl: https://github.com/vshulcz/deja-vu/blob/HEAD/LICENSE
+ShortDescription: Search Claude Code, Codex and Cursor session history locally
+Tags:
+- aider
+- claude-code
+- cli
+- codex
+- cursor
+- mcp
+- memory
+ReleaseNotes: |-
+  Reading a session back now shows the code it changed, each edit as the lines
+  it removed and added, for Claude Code, Codex and every harness whose
+  transcript holds its edit calls. A Codex session opens in the ChatGPT desktop
+  app with deja resume <id> --app, and the screen gets find in a session,
+  filters in the box and cards that lead with the question. Session start takes
+  0.38 s instead of 1.46 s and the per-prompt hook 0.59 s instead of 1.65 s on a
+  19k-session index, and an opencode 2.x store no longer stalls a new session's
+  first request. Secrets that slipped past redaction are masked, and the index
+  holds up under crashes and concurrent use. The index version is now 70, so the
+  store rebuilds once on the first run after upgrading.
+  Added
+  - Reading a session back shows the code it changed, each edit as the lines it removed and added. MCP recall_context and the session resource put it ahead of the conversation, deja ctx after the digest. Drafts the session rewrote are folded into their final form, the project's code comes before its tests, and the agent's reproduction scripts and notes are left out. On 48 SWE-ContextBench tasks the session that fixed the same code used to arrive with none of its fix; now 14 show most of it. Read from the transcript when asked, so the index stays the same size and keeps the written side as hashes. Claude Code, Codex and any harness whose transcript holds its edit calls as JSON, one session per file (#4935, #4950, #4955).
+  - deja resume <id> --app opens a Codex CLI session in the ChatGPT desktop app on macOS and Windows, and the screen's continue picker offers the app first for a Codex session (#4907).
+  - The screen's cards lead with the question asked, the home list is grouped by day, and dates count calendar days. The preview shows how the session went, turn by turn, with the commands and the files it edited. In the reader / finds a word in the session, n and N step through the matches, ] and [ jump between the turns you asked, and t unfolds long messages. The box takes filters: an agent with a colon (codex:), today, yesterday, week, month and in:<project>. A search that finds nothing names the other projects that have it, or the spelling your history uses. The Kept tab is now Deleted, headed "Deleted by their agent, kept by deja", and tab cycles this project, all projects and Deleted. The continue picker preselects and marks the agent used last and folds agents not installed into one line. ^k also copies the session id or project path and forgets a session, after asking, and ? lists every key (#4911).
+  Changed
+  - Reading one session back no longer walks the whole record log: a table beside it says where each session's records are, and the first line of each repeated error is kept at build time. On a 19k-session index session start takes 0.38 s instead of 1.46 s, MCP recall 0.95 s instead of 1.29 s and deja show 17% less, for 0.33% more index. A full rebuild there takes about 3 s longer to write the error lines (#4940).
+  - Hooks answer faster on a large history: on a 19k-session index the per-prompt hook takes 0.59 s instead of 1.65 s and a cold session start 0.74 s instead of 1.42 s, with the same output. Worktrees are listed once per hook instead of once per name lookup, projects are scoped once per name, long sessions are scanned on all cores, and repeated errors are read back in one pass over the record log. The session-start hook runs git status without taking the repository's optional lock (#4934).
+  - Switching tabs on the screen takes 7 ms instead of 46 for this project and 21 instead of 74 for all projects on 27k sessions, and Deleted is instant: the count of every session is read again only after the index changes, and the newest 60 are picked without sorting all of them (#4915).
+  - The screen's first run shows the index being built: the stage, a bar, each agent ticking in with its session count and the seconds so far, and it lets you in once the newest sessions are searchable. The first open after an upgrade shows what the new version brings, leaving for an agent names where you are going, and a command waiting out another deja's rebuild shows a live line with the seconds, then says the index is ready. Resume and continue picked on the screen use that exact session and no longer wait for a rebuild, so an id that prefixed another no longer hands off the wrong one. deja upgrade points at deja update instead of searching for the word (#4898).
+  - deja sources takes 2.1 s instead of 28.6 s and a full rebuild 5.7 s instead of 37 s on 27k sessions: a Claude Code folder whose transcripts record no fitting working directory was listed again for every transcript. Everyday commands run about twice as fast, deja last 0.34 s instead of 0.65 s, since they no longer stat the store roots for each file (#4902).
+  - deja stats groups its counts (27,262), and deja restore lists the newest 30 replaced spans, --all every one, and says 1 replaced span (#4904).
+  Fixed
+  - A new opencode 2.x session no longer stalls its first request while deja reads its lineage, and a background refresh no longer keeps SQLite busy for over a minute: the session is read by its exact id, and each read names the sessions it wants inside the message query, so SQLite uses the store's index instead of decoding every message. On a 475 MB store one session takes 13 ms instead of 6.3 s and an incremental pass 96 ms instead of 5.3 s. The 2.x plugin also gives a hook 10 s before the turn goes on without memory, and deja doctor reports a plugin without that limit as stale; run deja install opencode-auto again to get it (#4951).
+  - The code a session changed, read back with it, leaves out the edits its harness refused: a denied call, a file not read first, a Codex patch that failed to apply. 1.2% of edit calls on one Claude Code history came back as errors and showed as code the session never wrote (#4953).
+  - Fix pairs kept up to date pass by pass now match a rebuild: an append mined only the new turns and missed a fix whose error came before them, a promotion could not be taken back when its session was read again, and pairs of sessions no longer indexed stayed. A line an agent's store writes twice is stored and counted once (#4940).
+  - Hermes sessions carry who started them: a subagent's run folds under the session that spawned it, and a cron job's run stays searchable but is no longer offered unasked at session start or on a prompt. A Postgres Hermes store now names each session's project from the directory it ran in, as the SQLite one does (#4948).
+  - deja doctor reports a dsh plugin written before #4937 as stale, with deja install deepseek-auto to fix it: it still calls deja, so it read as wired while dsh refused its notices (#4944).
+  - On dsh (DeepSeek Harness), a turn in which deja injects a notice — the recall block, a file's note before an edit or a failed command's fix — no longer fails with "format v4 message requires a producer-owned source kind" and stops the session log from growing until a restart: the notice carried the retired v3 source wrapper, which DSH v4 refuses while encoding the append. The notice now carries the producer-owned kind DSH's own migration gives an unmapped plugin (plugin:deja), in the extension and the installer template, so an existing install picks the fix up by running deja install deepseek-auto again (#4937).
+  - On Hermes, a cron job no longer runs deja recall on every fire: the plugin hook and the memory provider skip automatic recall when Hermes says the platform is cron, and the deja tools still answer when the job calls them. Run deja install hermes-auto again to get it (#4946).
+  - --json output matches docs/json-output.md: fix, how and wip give the command as typed, without the $ prompt or the exit status, wip and recap filter bidi and tag characters like search and show, messages_total counts the whole session, blame rows carry source, undated and empty fields are left out instead of printed as year one or zeros, and a full id that starts another id reads its own session in show, with or without --json. A test checks every --json surface against its section (#4934).
+  - Titles and how a session settled stay what a rebuild gives them on append and import: a session opened with "hi" or named from the agent's words takes the first real question when it arrives, and a re-import no longer blanks a title. A transcript whose sessions were all forgotten is not kept once deleted. The random-history test now covers Codex, opencode, forget and sync (#4934).
+  - deja forget names forks that still hold a copy of the forgotten turns and the command to forget them too. deja handoff no longer hands off a remembered note, deja sources honours DEJA_STORES, stats --card prints no escape codes into a pipe, uninstall keeps the backup of someone else's [mcp_servers.deja] in Codex, Grok and TRAE, and legacy Cline tasks date each turn from its own timestamp (#4934).
+  - The docs no longer promise what deja does not do: the quickstart says what to do when ~/.local/bin is not on PATH, search sends the query to the embedding endpoint once a semantic sidecar is set up, the wipe recipe also removes notes and config, deja check covers repeated errors only, q quits from the list, and the agents page counts hook surfaces from the registry (#4934).
+  - How a session settled, the line shown under a command an agent is about to run, is updated as the session grows instead of staying at what its first pass saw, and two sessions running a command in the same second no longer name whichever was read last. A test now indexes random histories pass by pass and checks them against a rebuild (#4932).
+ReleaseNotesUrl: https://github.com/vshulcz/deja-vu/releases/tag/v0.22.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

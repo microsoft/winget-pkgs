@@ -1,0 +1,121 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Git.GCM
+PackageVersion: 3.0.1
+PackageLocale: en-US
+Publisher: GitHub
+PublisherUrl: https://github.com/git-ecosystem
+PublisherSupportUrl: https://github.com/git-ecosystem/git-credential-manager/issues
+PackageName: Git Credential Manager (User)
+PackageUrl: https://github.com/git-ecosystem/git-credential-manager
+License: MIT
+LicenseUrl: https://github.com/git-ecosystem/git-credential-manager/blob/HEAD/LICENSE
+Copyright: Copyright (c) GitHub, Inc. and contributors
+CopyrightUrl: https://github.com/git-ecosystem/git-credential-manager/blob/main/LICENSE
+ShortDescription: |-
+  Secure, cross-platform Git credential storage with authentication to GitHub, Azure Repos, and
+  other popular Git hosting services.
+Description: |-
+  Git Credential Manager (GCM) is a secure Git credential helper built on .NET that runs on
+  Windows, macOS, and Linux. It aims to provide a consistent and secure authentication experience,
+  including multi-factor auth, to every major source control hosting service and platform.
+
+  GCM supports (in alphabetical order) Azure DevOps, Azure DevOps Server (formerly Team Foundation
+  Server), Bitbucket, GitHub, and GitLab. Compare to Git's built-in credential helpers (Windows:
+  wincred, macOS: osxkeychain, Linux: gnome-keyring/libsecret), which provide single-factor
+  authentication support for username/password only.
+
+  GCM replaces both the .NET Framework-based Git Credential Manager for Windows and the Java-based
+  Git Credential Manager for Mac and Linux.
+Moniker: gcm
+Tags:
+- aad
+- authentication
+- azure-devops
+- azure-repos
+- bitbucket
+- credential
+- cross-platform
+- git
+- github
+- gitlab
+ReleaseNotes: |-
+  Git Credential Manager 3.0 brings native ahead-of-time compilation, Microsoft authentication broker support across Windows, macOS, and Linux, and a refreshed terminal experience.
+  Changes since 3.0.0
+  - (Bug fix) Prompt for default OS account on Microsoft DevBox (#2459)
+  - (Bug fix) Restore Entra broker parent window handling (#2464)
+  - (Feature) Support authtype Git capability (#2457)
+  - (Feature) Add console parent window parenting for non-Entra UI (#2465)
+  - Drop Windows x86 release binaries (#2456)
+
+  Changes since 2.9.1
+  Important
+  This release changes supported operating systems and the default Azure Repos authentication experience. Review the breaking changes before upgrading.
+
+  Breaking changes and upgrade notes
+
+  Updated platform and .NET requirements
+  GCM now targets .NET 10 on all platforms. Windows builds no longer use .NET Framework.
+  ───────────────────────────────┬─────────────────────────────────────────────────────────
+  Platform or installation method│Requirement
+  ───────────────────────────────┼─────────────────────────────────────────────────────────
+  Windows                        │Windows 10 or later; Windows Server 2016 or later
+  ───────────────────────────────┼─────────────────────────────────────────────────────────
+  macOS                          │macOS 14 or later
+  ───────────────────────────────┼─────────────────────────────────────────────────────────
+  Linux                          │A distribution supported by .NET 10
+  ───────────────────────────────┼─────────────────────────────────────────────────────────
+  .NET tool                      │Install the .NET 10 SDK before installing or updating GCM
+  ───────────────────────────────┴─────────────────────────────────────────────────────────
+  See the supported environments and .NET 10 support matrix for details. Standalone platform packages do not require a separate .NET installation.
+  Windows 7 and Windows 8.x are no longer supported by GCM 3.x. GCM 2.9.x will receive minimal, security-only maintenance for those systems, but no new features. Upgrading Windows is recommended. (git-ecosystem/git-credential-manager#2365, git-ecosystem/git-credential-manager#2367)
+
+  Azure Repos uses OAuth tokens by default
+  GCM now returns Microsoft identity OAuth tokens, rather than creating personal access tokens (PATs), by default for Azure Repos. OAuth tokens are automatically refreshed as needed.
+  Explicit credential-type settings are still respected. If you need the previous PAT behavior, set:
+  git config --global credential.azreposCredentialType pat
+  The equivalent environment variable is GCM_AZREPOS_CREDENTIALTYPE=pat. See Azure Repos users and tokens. (git-ecosystem/git-credential-manager#2449)
+
+  Microsoft authentication uses the OS broker by default
+  Broker integration is now enabled by default wherever supported, rather than requiring an opt-in. This applies to Microsoft authentication, such as Azure Repos; it does not change authentication for GitHub, Bitbucket, or GitLab.
+  On macOS, broker authentication requires Company Portal and device enrollment. On Linux, it requires the supported Intune setup, a GNOME desktop, and Microsoft Edge; headless and WSL environments do not support the Linux broker.
+  Warning
+  Depending on your organization's policies, broker sign-in can prompt you to join or enroll your device. On Windows, signing in with a personal Microsoft account can also affect the account linked to your local Windows user. Review the broker documentation before proceeding, especially on personal devices.
+  To opt out:
+  git config --global credential.msauthUseBroker false
+  The equivalent environment variable is GCM_MSAUTH_USEBROKER=false. When the broker is in use, it takes precedence over credential.msauthFlow. (git-ecosystem/git-credential-manager#2449)
+
+  Azure Repos uses a dedicated GCM Entra application
+  GCM now signs in using its own first-party Microsoft Entra application instead of the Visual Studio application. This enables broker support on macOS and Linux, in addition to Windows.
+  If you encounter a client-application configuration error, GCM provides guidance for retrying with the legacy application; it does not silently switch back. For a one-command compatibility retry:
+  git -c credential.azreposUseLegacyClientId=true fetch
+  Please report the original failure if this workaround succeeds. The legacy application does not support broker authentication on macOS or Linux. Managed identity, service-principal, and workload-identity federation flows are unaffected by the application change.
+  The undocumented developer overrides credential.azreposDevClientId and credential.azreposDevAuthorityBaseUri, and their environment-variable equivalents GCM_DEV_AZREPOS_CLIENTID and GCM_DEV_AZREPOS_AUTHORITYBASEURI, have been removed. The legacy-client setting is a focused compatibility option, not an arbitrary client-ID or authority override. (git-ecosystem/git-credential-manager#2416)
+
+  The embedded Microsoft sign-in web view has been removed
+  The Windows-only embedded web view depended on .NET Framework and is no longer available. Use the broker, system browser, or device-code flow instead. If you previously forced credential.msauthFlow=embedded or GCM_MSAUTH_FLOW=embedded, change it to auto, system, or devicecode. Disable broker integration as described above if you specifically need to force a non-broker flow. (git-ecosystem/git-credential-manager#2365)
+
+  Terminal and diagnostic output has changed
+  Terminal selection prompts now use arrow-key navigation instead of numbered input, and diagnose has a new output format. Automation that drives interactive menus or parses diagnostic text may need updating. Git's credential-protocol input and output remain separate from interactive prompts. (git-ecosystem/git-credential-manager#2377, git-ecosystem/git-credential-manager#2425)
+
+  Features and improvements
+  - Native ahead-of-time builds. Published platform packages compile GCM to native code to reduce startup overhead. The .NET tool remains a framework-dependent distribution. (git-ecosystem/git-credential-manager#2366, git-ecosystem/git-credential-manager#2367)
+  - Cross-platform Microsoft single sign-on. The authentication broker can reuse OS accounts on supported Windows, macOS, and Linux installations. When a default OS account can be used, GCM asks for confirmation unless automatic use is explicitly enabled, or enabled by default in environments such as Microsoft Dev Box. Set credential.msauthUseDefaultAccount=false to skip the default-account attempt. See the broker documentation. (git-ecosystem/git-credential-manager#2379, git-ecosystem/git-credential-manager#2416)
+  - Optional isolated Azure Repos token cache. Set credential.azreposUseMicrosoftSharedCache=false, or GCM_AZREPOS_USE_MSFT_CACHE=false, to use a GCM-specific cache. Sharing with other Microsoft developer tools remains the default. (git-ecosystem/git-credential-manager#2415)
+  - Support for Bitbucket Cloud's updated OAuth tokens. Rotating refresh tokens are now consistently saved against the resolved Bitbucket username, avoiding repeated sign-ins caused by reusing an old refresh token. Large access and refresh tokens are split across credential entries when needed, so Windows users can keep the default wincredman store without switching to another credential store. (git-ecosystem/git-credential-manager#2433, git-ecosystem/git-credential-manager#2440)
+  - Generic OAuth beyond HTTP(S). Generic OAuth configuration now works for non-HTTP credential requests, such as SMTP authentication for git send-email. Windows Integrated Authentication remains HTTP(S)-only. (git-ecosystem/git-credential-manager#2445)
+  - Refreshed terminal prompts and diagnostics. Interactive prompts use Spectre.Console, and Ctrl+C during a prompt restores the terminal and exits cleanly with status 130. git-credential-manager diagnose distinguishes passed, warning, failed, and skipped checks, reports the actual credential store, and summarizes generated logs. Add --strict to return a non-zero exit code for warnings as well as errors; without it, only errors fail. (git-ecosystem/git-credential-manager#2377, git-ecosystem/git-credential-manager#2423, git-ecosystem/git-credential-manager#2425)
+  - More complete Trace2 diagnostics. Expanded instrumentation covers command execution, configuration, credential storage, UI startup, and authentication. Entra tracing now records broker, cache, and interaction-mode decisions alongside timings, using the existing Git Trace2 settings. (git-ecosystem/git-credential-manager#2408, git-ecosystem/git-credential-manager#2450)
+  - Newer Git credential-protocol support. GCM supports capability negotiation and the state[] and continue fields introduced in Git 2.46, providing infrastructure for multi-stage authentication. Existing authentication flows and compatibility with older Git versions are preserved. (git-ecosystem/git-credential-manager#2357)
+
+  Fixes
+  - Improve dispatcher failure and shutdown handling without starting the UI framework for operations that do not need it. (git-ecosystem/git-credential-manager#2451)
+  - Respect Git configuration include and includeIf files in scoped queries, avoiding duplicate configuration entries when settings already exist in an included file. (git-ecosystem/git-credential-manager#2345)
+
+  Installation and contributor changes
+  - The install-from-source helper now supports both macOS and Linux at build/install-from-source.sh. It defaults to a trimmed, self-contained build; use --aot to opt into native compilation and its additional toolchain requirements. See the installation instructions.
+  - Source builds now use git-credential-manager.slnx, with libraries and tests directly under src/ and packaging scripts under build/. A solution build no longer runs packaging; use the per-platform distribution projects for that. See the development guide. (git-ecosystem/git-credential-manager#2367)
+ReleaseNotesUrl: https://github.com/git-ecosystem/git-credential-manager/releases/tag/v3.0.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

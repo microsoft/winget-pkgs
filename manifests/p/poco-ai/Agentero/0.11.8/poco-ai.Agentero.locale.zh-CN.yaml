@@ -1,0 +1,56 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.11.8
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  0.11.8 把批注、选区和笔记块放进对话输入框，并让大模型翻译按引擎规则只出译文。同时补上 Windows 上的桌面应用检测和 Agent 进程清理，以及远程库、同步和 Linux 拖放的几处数据问题。
+  新功能
+  - 行内引用：笔记块、选区、文字批注和视觉批注可以插在输入框光标处，发送时按出现位置写成 [Annotation N]。悬浮卡片里可以改备注、看高亮和译文，视觉裁剪图可以点开放大。（#767 by @ffy6511）
+  - 单篇版面重解析：插图侧栏可以只强制重跑当前论文的版面解析。已打开的论文会换成新结果，不用重启。（#728 by @ffy6511）
+  - 嵌入字号与栏宽：外观里可以单独设置双链嵌入字号和 Markdown 栏的最大宽度，默认仍是 13px 和全宽。文档标签可以复制磁盘路径。（#745 by @ffy6511）
+  - Qoder CLI: 设置里可以安装和卸载 Qoder CLI。（46e9424c by @ffy6511）
+  - Windows 桌面应用：Windows 上可以检测并打开 ChatGPT、千问办公、WorkBuddy 和 Dsh 桌面版。这些应用标为暂不支持直接接入 Agent。（468ad573 by @JiaheChen2002）
+  改进
+  - 大模型翻译：OpenAI 兼容和 Agent 翻译使用固定引擎规则，较短的选区按词典出译文，不再追问要翻译还是解释。设置分成系统提示词和用户模板。系统栏留空仍用内置学术风格，一行短说明只作为附加偏好。用户模板用 {{text}} 放入原文。Agent 会选该会话已声明思考档位里的最低一档；没有公布档位时保持原样。占位符只认 {{targetLang}}、{{sourceLang}} 和 {{text}}。（#724 by @ffy6511）
+  修复
+  - 全文翻译与快速对话：全文翻译保留引用、交叉引用和 URL，章节标题保持原文层级。快速对话的黄框在关掉卡片后仍在，译文页上对准划中的区域。（#751 by @ffy6511）
+  - 视觉批注缩放与点击：旋转页缩放后高亮贴住字形。对话里单击视觉引用会放大并编辑备注，链接只滚到裁剪区并闪一下定位。页边针仍打开卡片。（#760 by @ffy6511）
+  - 悬停卡与页签：图表和参考文献的悬停卡可以移上去阅读，外链地址不再被系统提示截断。逐页翻译的页签在悬停时出现在页面内侧右侧。（#745 by @ffy6511）
+  - 笔记选择与输入法：块内第一次全选停在当前块。单独成段的双链嵌入占满一行。内容送进对话后可以直接打字。代码块语言搜索和中文会话重命名不会被错误焦点或输入法回车打断。（#744 by @ffy6511）
+  - 快速配置向导：重新打开快速配置向导不会把已有主题、代理、翻译服务和 API Key 写成默认值。（#731 by @Zhou-Ruichen）
+  - 远程库元数据：远程 Vault 会带上 SQLite WAL 里已提交的元数据。列表刷新读取服务器的一致快照，未发布的本机修改不会被盖掉。（#740 by @Winfred666）
+  - Linux 拖入 PDF: Linux 主窗口可以从文件管理器拖入 PDF 并导入。窗口内的文件树拖动和标签重排保持可用。（#730 by @bet4it）
+  - 引用裁剪：把视觉裁剪发给对话时，不再把这轮提问和回复写回批注文件。从这条批注打开的会话仍会更新它。（34624811 by @ffy6511）
+  - Dsh 历史：本机 Dsh 重启后可以从本地会话日志恢复标题和正文。官方接口没有会话加载能力时，标题不再退成一串 ID。（bfea439a by @JiaheChen2002）
+  - Windows Dsh: Windows 上的 Dsh 会选用兼容的 Node 启动，避免旧 Node 上 ACP 握手静默退出。卸载时按实际安装位置移除。（725a077a by @JiaheChen2002）
+  - Windows Claude: 通过 npm 安装的 Claude Code 会解析到包内的可执行文件或 cli.js，不再把 claude.cmd 交给内置适配器直接启动。（8135417f by @JiaheChen2002）
+  - Windows Agent 进程：应用退出、连接替换或预热超时后，Windows 上的 ACP 子进程会随连接结束被回收，不再留在后台。（9d0d48a0 by @JiaheChen2002）
+  - 同步请求：已经同步的 Vault 空转时只发一次远程请求，两台设备不会因为本地修改时间来回重传。坚果云按账号计数的 WebDAV 配额不再被空转占满。（3cc1a9dd by @qychen2001）
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.11.8
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

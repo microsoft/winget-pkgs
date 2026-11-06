@@ -1,0 +1,49 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.9.0
+PackageLocale: en-US
+ShortDescription: Agent-friendly reference management.
+Description: 'Traditional reference managers are not agent-friendly: highlights and notes stay locked inside single files, making it hard for agents to reuse knowledge across papers; every conversation starts from scratch without a stable local knowledge map; PDFs are human-friendly but not the most comfortable reading material for agents. Agentero aims to build an agent-friendly, agent-native way to manage references, exploring how humans and agents collaborate on reference management. Connect your local agent via ACP (BYOA), select-text chat, import papers and Skills, stay compatible with the Zotero ecosystem, and get paper translation, bidirectional links with a knowledge graph, and deep PDF reading.'
+Tags:
+- academics
+- agent
+- article
+- literature
+- paper
+- pdf
+- reference
+- research
+- thesis
+- zotero
+ReleaseNotes: |-
+  v0.9.0 focuses on enriching library metadata, refining PDF annotation interactions, and improving Agent/external-tool connectivity. It adds a local loopback MCP server, a first-vault feature tour, Markdown block selection, and a unified right-hand annotation comment rail, while also improving publication display and bulk backfill, Agent panel refresh, and provider configuration in Settings.
+  Features
+  - Local loopback MCP server: When enabled in Settings, Agentero exposes the current Vault over Streamable HTTP to ChatGPT/Codex, with tools for paper metadata, import, NOTES.md read/write, and tag management. (74067fae by @Phil-Fan, #391)
+  - First-vault feature tour: New users see a driver.js highlight walkthrough the first time a Vault opens, covering the sidebar, magic wand, workspace, Agent panel, and title bar; it can be replayed from Settings. (e96b7773 by @qychen2001)
+  - Markdown block selection: The editor now supports block drag handles, block-level selection, and highlighting so you can select whole paragraphs or blocks by dragging. (f1a24e20 by @ffy6511, #390)
+  - Unified PDF annotation comment rail: All annotation comments now edit in-place in the right-edge comment rail; hovering a comment highlights the corresponding page region, visual marks appear in the rail, and PDF left toggles are consolidated into the new PdfLeftToolbar. (105eed53, 5d8ac1b5, ce21be7e by @Phil-Fan, #379, #385)
+  - Library publication column and bulk backfill: A dedicated publication column is added after the year column; click the column header to bulk backfill missing venues. Imports prefer arXiv journal_ref and fall back to Semantic Scholar, while backfills run in the background with 10-way concurrency. (1ba98983, 377fdc76, e3a86cd7, f889f8c6 by @Phil-Fan, #389)
+  Improvements
+  - Agent registry events via lifecycle bus: agent:registry-changed is now routed through the lifecycle bus, removing the leaky promise-based Tauri wire listener, and the Agent panel refreshes with debouncing so changes made in Settings appear immediately. (812fbd03, 6f7fadf0 by @qychen2001)
+  - Settings layout provider configuration: The Layout pane now lists every remote provider as a credential card; backend selects only include local plus providers with an API key, and defaults are prefilled instead of shown as placeholders. (0b6656ca by @qychen2001, #394)
+  - Simplified Agent citation display: Inline citation badges are removed from chat messages; only the bottom sources list remains. (da3befeb by @Phil-Fan, #378)
+  - Library refresh performance and progress: Publication refresh now runs concurrently with live UI updates, uses lower concurrency, shows per-paper stats, and starts progress at 0. (ee25385a, 90c16a67, 607c2162 by @Phil-Fan)
+  - MCP server metadata: The MCP server advertises app icon data URIs on initialize and attaches outputSchema to tools so ChatGPT clients can parse structured results. (a92067a3 by @Phil-Fan)
+  - Upgrade dsh ACP dependencies: Bumped the dsh npm stack and launcher to 0.1.1-rc.2 to maintain Agent protocol compatibility. (2202dc7e by @Phil-Fan, #374)
+  Fixes
+  - Vault tree folders first: In the default folder sort mode, organization folders now appear before paper folders, matching conventional library behavior. (ef1ce18b by @Phil-Fan, #387)
+  - Markdown H1 top spacing: Reduced the top margin on H1 headings so notes starting with # Title no longer have a large empty gap. (87df769d by @Phil-Fan, #377)
+  - ModelScope plaza tour blocked scrolling: Suppressed the antd5 onboarding tour injected by ModelScope, which set overflow-y: hidden and prevented the plaza panel from scrolling. (ae46fe72 by @Phil-Fan, #375)
+  - Hide arXiv subject tags: arXiv subject classes are now stored with an @arxiv: prefix and treated as hidden tags, so they no longer clutter normal tags, search, or filters; the CLI also hides them unless --all is used. (1074ee71 by @Phil-Fan, #380)
+  - PDF highlight coordinate normalization: Highlight rectangles are normalized to page-relative coordinates to keep annotations aligned across zoom and render modes. (8e7f3783 by @Phil-Fan)
+  - Disable text selection on comment cards: Prevents page text selection when interacting with cards in the right-hand comment rail. (2905fc70 by @Phil-Fan)
+  - Migrate legacy library column order: Existing column orders are automatically migrated so publication follows year after upgrade. (8cef7c99 by @Phil-Fan)
+  Full Changelog: v0.8.2...v0.9.0
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.9.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: locale
+ManifestVersion: 1.12.0

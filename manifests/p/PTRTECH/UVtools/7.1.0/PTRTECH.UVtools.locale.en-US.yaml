@@ -1,0 +1,129 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: PTRTECH.UVtools
+PackageVersion: 7.1.0
+PackageLocale: en-US
+Publisher: PTRTECH
+PublisherUrl: https://github.com/sn4k3
+PublisherSupportUrl: https://github.com/sn4k3/UVtools/discussions
+Author: Tiago Conceição
+PackageName: UVtools
+PackageUrl: https://github.com/sn4k3/UVtools
+License: AGPL-3.0
+LicenseUrl: https://github.com/sn4k3/UVtools/blob/HEAD/LICENSE
+Copyright: Copyright © 2020 PTRTECH
+ShortDescription: MSLA/DLP, file analysis, calibration, repair, conversion and manipulation
+Moniker: UVtools
+Tags:
+- 3d print
+- dlp
+- image analysis
+- msla
+- resin print
+- sla
+- slicer
+ReleaseNotes: |-
+  - (Change) Use NuGet mini runtimes for Windows, macOS, Ubuntu 24.04 x64 and Debian 13 (Trixie) ARM64, with custom
+    cvextern overrides from build/platforms when available.
+  - (Fix) Anycubic PWSZ: saved files could be rejected by Photon Workshop because optional resin names
+    were added to legacy user resins; omit absent names and preserve existing values (#1155).
+  - (Fix) Convert: thumbnails are now matched to the target format by size instead of by order, formats that list
+    the largest thumbnail first (CTB, Chitubox ZIP, PHZ, ...) swapped the small and large previews when converted to
+    formats that list the smallest first (GR1, GOO, CXDLP, ...), shrinking the large one and upscaling the small one
+    (#1121).
+  - (Fix) Anycubic ZIP formats (PWSZ and PW0 layers): opening high resolution files could fail with "Failed to allocate"
+    because every decoded layer image was kept in memory until the garbage collector freed it.
+  - (Fix) Image formats: saving leaked one layer image per save.
+  - (Fix) LGS: saving a file without a thumbnail leaked the generated preview image.
+  - (Improvement) Layer preview: rotate and mirror are now applied when drawing instead of rotating and flipping the full
+    resolution layer image on every change, which is faster on high resolutions. Rotating keeps the zoom and the view
+    centered on the same spot of the layer instead of zooming to fit, it still zooms to fit when the whole layer was in
+    view.
+  - (Add) Layer preview: "Real aspect ratio" toggle on the toolbar, and its "Real aspect ratio on load" setting, to show
+    the layer with the physical proportions of the printer pixels, printers with non-square LCD pixels, for example the
+    Halot Mage S, looked stretched. It is enabled by default and view only, the layer image is never resized (#918).
+  - (Improvement) Layer preview: the crosshairs, the print volume, layer and contour bounds, the enclosing circles, the
+    centroids and the triangles count are now drawn as vectors over the layer image instead of into it, they are crisp at
+    any zoom, their text stays upright when the preview is rotated, and toggling them or zooming across the crosshair fade
+    level no longer renders the layer image again. Their thickness and diameter settings are now in screen pixels, scaled
+    to half of the value (at least 1) which is the same as before at 50% zoom.
+  - (Improvement) Layer preview: the layer bitmap is reused while the layer resolution doesn't change instead of
+    allocating a new one for every layer, which is faster and reduces the memory churn on high resolution layers.
+  - (Improvement) Layer preview: layers with nothing to color (no issues, difference, outlines, masks or pixel editor
+    operations on the layer) are displayed as the 8-bit image they are, instead of being expanded to a 32-bit image
+    and bitmap. On a 13312x5120 layer it needs 142 MB instead of 598 MB, and changing the layer takes about 8 ms instead
+    of 29 ms. Layers with colored pixels still use the 32-bit image, and the pixel editor always does.
+  - (Add) Layer preview: "Layer image sampling" setting (Auto, Nearest, Smooth), Auto is the default. Zoomed out, the
+    layer is now drawn averaged instead of skipping pixels, which removed the aliasing and the shimmering of high
+    resolution layers when panning or scrolling the layers. It is still sharp pixels when zoomed in. Choose Nearest to
+    get the previous look.
+  - (Add) Layer preview: the layer difference (difference, similarity and onion skin) is drawn by the GPU ("GPU
+    rendering" in the Difference menu, and a setting, on by default). The previous and next layers are drawn over the
+    layer as tinted layers by the layer image box, which keeps the layer as the 8-bit image it is, instead of the CPU
+    mixing the layers into a 32-bit image. The difference is the same as the CPU version; in the similarity the
+    anti-aliased pixels of the other layers blend with the layer instead of replacing it; in the onion skin the ghosts
+    have the same colors and priority, but the current layer is always white: there is no yellow for pixels without a
+    layer below and no magenta for cavities. The exact CPU version is used whenever the layer has something else to
+    color, like issues, or when the setting is off.
+  - (Add) Layer preview: onion skin with 7 layers (-3 to +3) [6 ghosts], the layer +3 is drawn in dark blue.
+  - (Add) Layer preview: compare mode ("Compare" on the toolbar), the current layer is shown on the left of a split line
+    that is dragged with the mouse, and on its right the layer below or above, 10 layers below or above, or the same
+    layer before the last operation, from the undo history, to see what the operation changed.
+  - (Add) Layer preview: rulers (toolbar toggle and setting, off by default) and a scale bar (toolbar toggle and setting,
+    on by default) in millimeters, from the display size and the resolution of the file. The rulers are drawn over the
+    layer along the top and left edges, with round steps that adapt to the zoom, upright labels and a mark that follows
+    the pointer. They show the position of the layer pixels along the axes of the screen from the top-left pixel of the
+    layer, also when the preview is rotated or flipped.
+  - (Add) Layer preview: minimap (toolbar toggle and setting, on by default) in the bottom right corner, a thumbnail of
+    the whole layer with the visible part marked, shown only while the layer is zoomed in. Click or drag on it to move
+    the view. Its size and corner, and the corner of the scale bar, are set in the settings.
+  - (Change) Layer preview: the cross-section and peel curve HUD moved to the top right corner, so it doesn't cover the
+    minimap and the scale bar, and its shortcut is now [P] because [A] also pans the layer to the left.
+  - (Fix) Cross-section and peel curve HUD: in the layer preview it showed "No slice area data available" until the 3D
+    preview was opened, the layer areas are now calculated when the HUD is shown and again when the layers change.
+  - (Fix) Cross-section and peel curve HUD: files without lift speeds and heights per layer now use the global bottom
+    and normal values for the peel force, instead of empty layer values. The lift values are refreshed when the lift
+    settings or the layers change.
+  - (Fix) Layer preview: the triangulate outline drew triangles over the empty areas of concave shapes and holes,
+    now only the triangles inside the lit pixels are drawn and counted. The triangle count is shown in a fixed label at
+    the top of the layer preview instead of on the layer image, so it is visible at any zoom, rotation and flip.
+  - (Improvement) Layer preview: [Q] and [E] change the layer when the key is pressed instead of released, and repeat
+    while the key is held, like the arrow keys.
+  - (Add) Layer preview: pinch to zoom around the fingers with a two finger pan, and the magnify gesture of touchpads (
+    "Touch and touchpad gestures" setting, on by default). The mouse is not affected.
+  - AdvancedImageBox
+    - (Add) PixelAspectRatio property to show images with non-square pixels, the image is stretched vertically when
+      drawing without being resampled, with the ZoomFactorX and ZoomFactorY properties that are the zoom factor of
+      each axis. The ZoomFactor is the same as ZoomFactorX (#918).
+    - (Add) ImageRotation, FlipHorizontal and FlipVertical properties to display the image rotated in steps of 90
+      degrees and mirrored, without modifying or processing it. The image is flipped first and then rotated. The
+      coordinates of the control (PointToImage, GetOffsetPoint, CenterAt, ZoomToRegion, SelectionRegion, ...)
+      stay in pixels of the source image, PixelAspectRatio describes the source pixels, and the TrackerImage is
+      transformed like the image. GetSelectedBitmap(true) returns the selection as it is displayed.
+    - (Add) Overlays collection to draw vector items over the image: ImageBoxLineOverlay, ImageBoxRectangleOverlay,
+      ImageBoxEllipseOverlay, ImageBoxPolylineOverlay (polygon when closed), ImageBoxMarkerOverlay and
+      ImageBoxTextOverlay. The geometry is in pixels of the source image and follows the zoom, the scroll, the rotation,
+      the flips and the PixelAspectRatio exactly like the image, while the stroke thickness, the marker size and the
+      font size are in screen pixels and stay the same at any zoom, and the text is always upright. They have a stroke, an
+      optional fill, Opacity and IsVisible, changing them redraws the control, ReplaceAll() and AddRange() redraw
+      once, the items outside of the viewport are skipped, and ShowOverlays hides them all.
+    - (Add) InvalidateImage() method to redraw the control after the pixels of the same Image bitmap were modified in
+      place, which raises no change, without touching the zoom, the scroll position or the centering.
+    - (Add) BitmapSamplingMode property (Nearest by default, Auto and Smooth) to draw a zoomed out image averaged
+      instead of aliased. A WriteableBitmap is reduced by powers of two once for each content, about 15 ms for
+      13312x5120 BGRA, and the reduction is drawn, so panning and zooming cost the same as nearest sampling, while
+      Avalonia's high quality interpolation takes about 50 ms for every frame. Call InvalidateImage() after changing
+      the pixels.
+    - (Add) GrayscaleImage property and GrayscaleImage class to display an 8-bit image without expanding it to 32-bit
+      (a quarter of the memory and of the copy), with an optional 256 entry color map (SetColorMap) applied when
+      drawing. All the features work with it, GetSelectedBitmap() returns the colored selection. It is drawn with
+      Skia, falling back to a 32-bit copy for other render backends. Needs the Avalonia.Skia package to be drawn with
+      Skia, it is referenced by the control only to build, so it is not a new dependency of the NuGet package.
+    - (Add) CompositeLayers collection to draw more images over or under the main one with the same transform and the
+ReleaseNotesUrl: https://github.com/sn4k3/UVtools/releases/tag/v7.1.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/sn4k3/UVtools/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

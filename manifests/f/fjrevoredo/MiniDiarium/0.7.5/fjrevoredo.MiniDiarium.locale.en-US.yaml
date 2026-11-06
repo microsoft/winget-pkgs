@@ -1,0 +1,154 @@
+# Created using wingetcreate 1.12.8.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: fjrevoredo.MiniDiarium
+PackageVersion: 0.7.5
+PackageLocale: en-US
+Publisher: fjrevoredo
+PublisherUrl: https://mini-diarium.com/
+PublisherSupportUrl: https://github.com/fjrevoredo/mini-diarium/issues
+PrivacyUrl: https://github.com/fjrevoredo/mini-diarium/blob/master/docs/PRIVACY.md
+Author: Francisco J. Revoredo
+PackageName: Mini Diarium
+PackageUrl: https://github.com/fjrevoredo/mini-diarium
+License: MIT
+LicenseUrl: https://github.com/fjrevoredo/mini-diarium/blob/master/LICENSE
+Copyright: Copyright (c) 2026 Francisco J. Revoredo
+ShortDescription: Encrypted, local-first journaling app
+Description: A local-first journal with serious encryption. Free, open source, and never touches the internet.
+Moniker: mini-diarium
+Tags:
+- privacy
+- journaling
+- journal
+- diary
+- foss
+- open-source
+- rust
+ReleaseNotes: |-
+  What's Changed
+
+  The Esc key has a new action: you can now set it to lock your journal. Locking is also more
+  dependable in every situation. Attachments, backup restores, and tag filters are more reliable too,
+  and journals keep the exact filename you picked.
+
+  Added
+
+  - Escape can lock the journal (#313, TODO-0125): The ESC key action in Preferences → General has a
+    third choice, "Lock the journal". With it, pressing Escape locks the journal in the same way as
+    the Lock button in the header: it saves the open entry and shows the lock animation. Escape does
+    not lock while a dialog, the Preferences window, or the onboarding tour (also when minimized) is
+    shown; these keep their own Escape behavior. If you hold Escape down, the journal locks only one
+    time. "Do nothing" and "Quit the app" do not change.
+
+  Fixed
+
+  - The Lock button no longer starts a second lock while the journal is locking: The Lock button in
+    the header was disabled only during a lock that it started itself. If the lock came from Escape,
+    auto-lock, or focus loss, and the "reduce motion" system setting hid the lock animation, a click
+    on the button in the 700 ms before the lock finished started a second lock. The button is now
+    disabled during every lock.
+  - An attach error no longer shows on a different entry (TODO-0144): If you started to attach a large
+    file and then opened another entry before it finished, a failure of that attach showed on the
+    entry that was open now. The Attach button of that entry also stayed disabled until the old attach
+    ended. Now the result of an attach only shows on the entry it was started for, and the Attach
+    button of the new entry is available at once. The other picked files still go to the first entry.
+    The same applies to errors from "Save a copy" and "Remove". The tag list also keeps the newest
+    result when two tag-list loads overlap.
+  - Escape in the entry body runs the ESC key action again (#329, TODO-0150): with the ESC key action
+    set to Quit, pressing Escape while writing in the entry body quits the app again. This stopped
+    working in v0.7.4.
+  - "Open backups folder" stays inside the journal's own folder (TODO-0113): When a journal had no
+    snapshots yet, the button opened the shared backups/ folder, which also shows the backups folders
+    of other journals in the same directory. It now always opens the journal's own backups/{name}/
+    folder. When there is nothing to open yet, it shows a translated "There are no backups to show
+    yet" message, not the untranslated backend text. SECURITY.md, docs/KNOWN_ISSUES.md (KI-13), and
+    the Backups docs now say that journals sharing one folder can see each other's filenames.
+  - Restoring entries from a backup no longer leaves a half-restored entry when an attachment or tag
+    fails to copy (TODO-0133): Each entry's text, attached files, and tags are now restored as one
+    unit. If one part fails, the entry is not added at all, and no unlinked file is left in the
+    journal. Entries restored before the failing one stay.
+  - A partly failed entry restore no longer hides the entries it added (W-02): When one entry failed,
+    the restore stopped and showed only an error. The entries before it were already in the journal,
+    but the dialog did not refresh and kept them selected, so a retry added them a second time. The
+    restore now reports which entries it added and which entry stopped it. The added entries leave the
+    selection, and the calendar, tags, and open editor refresh. The failed entry and the entries after
+    it stay selected, with a translated message that the restore stopped. An entry selected two times
+    in one request is restored once.
+  - Restore and import no longer link an unrelated image (N-01): An entry image that a backup does not
+    contain kept its stored image reference, so the restored entry showed an unrelated image of the
+    live journal with the same id. Restore now finds each image by its id in the backup, so an image
+    the backup holds comes back even when its link row is missing, and an image the backup does not
+    hold is left out. Import (including plugin import) now removes stored image references
+    (image-id://) the same way it removes attachment references. Normal exports keep images as data:
+    images and are not affected.
+  - Empty-entry cleanup no longer deletes a locked blank entry (TODO-0132): When the app removes blank
+    entries (for example on auto-lock or when you close the app), it now leaves a locked entry in
+    place, even if it has no title, no text, and no attachments. It does this silently, without an
+    error. The entry lock is now enforced everywhere, so every save, delete, tag add or remove, and
+    attachment add or remove on a locked entry is refused in the same way.
+  - Late replies no longer change newer attachment lists or the tag filter (TODO-0130, review R-03): A
+    reply that arrived after the context that asked for it had changed could overwrite newer state.
+    Each request now checks, when it finishes, that you are still in the same place before it changes
+    anything:
+  - Attachments across a lock or journal switch: When the journal locked, switched, or was restored
+  while a file was being attached or removed, the late reply could change the attachment list of the
+  new journal's entry with the same id (for example, show a file name from the other journal). The
+  strip now drops that reply, with no list change and no error.
+  - Attachment list loads: A list load that started before an add or remove could finish after it and
+  replace the list with its older result, so the entry looked as if it had no attachments. The list
+  now fetches again when an add or remove happened during the load. A load that fails after you moved
+  to another entry, or after a lock or journal switch, no longer shows its error on the new entry.
+  - Clearing the tag filter: Clearing the tag filter (or locking) while its dates were still loading
+  let the filtered dates come back with no visible filter, so Ctrl+[ and Ctrl+] skipped real entry
+  days. A cleared filter now stays cleared, also when the filtered tag is deleted, and an older
+  refresh of the same tag can no longer overwrite a newer one. If the dates of a new filter cannot be
+  loaded, the filter is removed, so the Timeline, the Calendar, and day navigation always agree.
+  - Adding a journal keeps the filename you picked (TODO-0131, review R-06): The app changed the
+    filename before it saved the journal to your list. It joined double spaces, removed :, and cut
+    long names to 64 characters, which also removed the .db extension. "Open existing" then pointed at
+    a file that did not exist, and the app offered to create a new empty journal under that name. A
+    name such as Diary.DB was also saved as diary.db, which is a different file on Linux. Your
+    original file was not changed.
+  - Exact name: The app now registers the exact filename you picked, including its upper and lower
+  case. It refuses a filename that cannot be used with a clear message and never changes it.
+  - Refused names: An empty name, /, \, control characters, and names longer than 200 bytes are
+  refused on every system. The length limit leaves room for the files that SQLite and the app create
+  next to the journal. Before, names of 201 to about 247 bytes worked, and longer names failed with
+  "disk I/O error" when the journal was created. On Windows, < > : " | ? *, a trailing dot or space,
+  and device names such as CON are refused too.
+  - Journals with long names from older versions (TODO-0148): The 200-byte limit applies only to a
+  journal you add. A journal already in your list with a name of up to 233 bytes still opens. A name
+  of 234 to about 247 bytes worked before but no longer opens, because a restore from a backup can
+  fail with it. If a journal shows "Invalid journal filename", close the app, give the .db file a
+  shorter name, and add it again with "Open existing" (password and key-file journals only; see the
+  Getting Started docs).
+  - Flatpak: The Filename field removes spaces at the start and end before the app checks the file, so
+  the app checks and registers the same name.
+  - Settings from another system: When config.json comes from a different operating system and a saved
+  filename is not valid on this one, the app does not open that journal at startup and does not switch
+  to it after another journal is removed. It shows the journal list, and opening the journal shows the
+  filename error. While no journal is selected, the app refuses to create or unlock a journal at its
+  internal placeholder location.
+  - Backslash on Linux and macOS: The journal picker treats \ as a folder separator only in Windows
+  paths (a drive such as C:\ or a \\server share). On Linux and macOS a \ in a file or folder name
+  stays part of the name, so the app checks and registers the file you picked, or shows the filename
+  error. It never registers a different file.
+  - Attaching a large file, restoring entries, and exporting no longer freeze the window (TODO-0134,
+    review R-04): These commands ran on the window's event thread, so the window could not repaint
+    until they finished. In a release build, a 20 MB attachment took about 0.1 s on a fast, idle
+    desktop and up to 0.8 s when the machine was busy. Restoring an entry with a 20 MB attachment took
+    about 0.1 s, and a Markdown export with one took about 0.05 s; both grow with the number of
+    entries and files. Attaching a file, restoring entries from a backup, plugin export, and closing
+    the backup dialog now run on a background thread. The window itself was not tested end to end.
+  - Attach order: The app now reads and checks the source file before it takes the journal lock, so a
+  slow file no longer delays auto-lock. If the journal is locked, opened again, switched (also to
+  another journal and back), or replaced by a restore while the file is read, the attach is refused
+  and nothing is written. A bad file on a locked entry still reports the file error first.
+  … (truncated — see ReleaseNotesUrl for full notes)
+ReleaseNotesUrl: https://github.com/fjrevoredo/mini-diarium/releases/tag/v0.7.5
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/fjrevoredo/mini-diarium/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

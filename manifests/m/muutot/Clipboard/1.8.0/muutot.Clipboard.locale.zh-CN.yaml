@@ -1,0 +1,99 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: muutot.Clipboard
+PackageVersion: 1.8.0
+PackageLocale: zh-CN
+Publisher: muutot
+PublisherUrl: https://github.com/muutot
+PublisherSupportUrl: https://github.com/muutot/Clipboard/issues
+PackageName: Clipboard
+PackageUrl: https://github.com/muutot/Clipboard
+License: AGPL-3.0
+LicenseUrl: https://github.com/muutot/Clipboard/blob/HEAD/LICENSE
+ShortDescription: 高性能 · 本地优先 · 全平台剪贴板管理器。
+Description: Clipboard Desktop 是一款高性能、跨平台、本地优先的剪贴板管理工具。它在后台静默运行，持续记录剪贴板历史；通过全局热键（默认 Alt+V）一键唤起，支持全文搜索（含中文分词）、图片 OCR 文字识别、收藏、编辑、快速粘贴等操作。支持文本、链接、图片、文件四种内容类型，智能内容识别与富文本带格式粘贴，Tantivy 全文检索引擎与 N-gram 中文分词，PP-OCR 本地离线文字识别。所有数据存储在本地，不包含任何遥测或上传行为，OCR 完全离线运行，无需联网。
+Tags:
+- 剪贴板
+ReleaseNotes: |-
+  Clipboard Desktop v1.8.0
+  跨平台全局快捷键与快捷粘贴、命名搜索视图、条件自动标签、原生透明度特效，以及一批隐私与主线程阻塞修复
+  Released: 2026-10-11
+
+  新功能
+  跨平台能力
+  - 跨平台全局快捷键 — macOS（Carbon Event Manager）、Linux X11（XGrabKey）与 Wayland（GlobalShortcuts portal）现在注册真实的全局快捷键，不再是平台桩 | 55eaf9a dd0fd22
+  - 跨平台快捷粘贴 — macOS/X11 目标应用恢复与焦点校验，粘贴注入前确认前置应用与按住的修饰键，拒绝过期目标 | f22bad8
+  - macOS RTF 原生捕获 — 剪贴板监控读取 RTF 格式，富文本来源不再只落纯文本 | 17f1c54
+  - 已运行实例唤醒 — 二次启动通过带鉴权的本地 IPC 唤醒既有实例，而不是再起一个进程 | f6ae71b
+  - 原生窗口透明与背景特效 — 窗口不透明度与亚克力/云母等平台背景特效统一应用，macOS 映射到原生 Vibrancy 材质 | c664a5c
+  - macOS 辅助功能真实探测 — platform_info 调用 AXIsProcessTrusted 报告真实权限状态，不再无条件报告权限缺失 | 68832a8
+  搜索
+  - 命名搜索视图 — 保存搜索条件为命名视图，随时恢复 | fef37e7
+  - 全量历史过滤 — 过滤条件先作用于全量历史再套候选上限，不再只在当前候选集内过滤 | 3e2460d
+  标签与 OCR
+  - 条件自动标签 — 预览自动标签规则的命中范围后应用，批量打标在数据库锁外匹配历史 | a22bf16 6db0150
+  - OCR 文本块选择与图像匹配高亮 — 识别结果按文本块选择复制，图像内匹配位置高亮 | 2db35f6
+  同步与备份
+  - 协同取消 — 同步引擎工作与进行中的 S3 传输可协作取消，退出不再等待卡死的传输 | cbfc3c9
+  - 便携资源包备份 — 备份包校验后可跨资源根目录还原 | 55c271f a60c081
+  设置与界面
+  - 高优先级自定义 CSS — 用户自定义 CSS 以高优先级注入，可靠覆盖内置样式 | d16342d
+  - 后台任务进度与取消 — 长时间后台操作显示进度并可取消 | 2390c1f
+  - 安装器卸载清理选项 — 卸载时可选择清理用户数据、配置与资源目录，保留现有配置的重装不再误删存储 | 5355b71 3afe0b4 f546d4e
+
+  修复
+  隐私与安全
+  - CLI 与本地 API 粘贴纳入采集策略 — paste 命令与 POST /paste 端点现在经过暂停采集、敏感内容过滤与最大文本捕获上限检查，与前端采集一致 | fae9cc2
+  - 文件复制上限不可绕过 — 清空输入框不再把 max_file_copy_size_bytes 归零禁用限制 | 243000c
+  - 同步大小限制钳制 — 输入即时重算并钳制到后端窗口，切换单位保留字节数 | 6b1e960 dbbd303
+  - WebView 提供的图片路径受管 — 采集拒绝指向托管存储之外的 webview 侧图片路径 | 0d730f7
+  - 凭据代际不可变 — 保存配置不再覆盖其他 provider 的凭据代际 | ad78373
+  - 损坏配置先行保留 — 解析失败的设置文件先保留再应用默认值，修复不再吞掉用户数据 | 1ec5a13
+  主线程卡顿
+  - 阻塞操作移出主线程 — 按需物化同步条目、数据库修复与备份刷新、另存为文件复制改用阻塞线程池，不再冻结 UI | 7403734 10a25bc 17c194c
+  同步正确性
+  - 远端 head 采纳前验证内容 — 发布段内容校验通过才采纳远端 head，中断的本地提交后能恢复采纳已发布 head | 0b7c038 adebe9f
+  - 本地模式拒绝 S3 流量 — 本地-only 模式下每个 S3 条目都被门禁并取消 | 769fbfc
+  - 加密身份独立绑定 — 同步加密身份不再依赖 S3 凭据存在 | 976366a
+  窗口与热键
+  - ToggleMain 不再自粘贴 — 主窗口前置时跳过快捷粘贴目标，全局开关不再把焦点还给自己 | 54a4d25
+  - 双击连击按前台取消 — 窗口切换时取消挂起的修饰键连击判定 | cbc9650
+  - 失败保存保留新边界 — 窗口位置保存失败时保留较新的尺寸位置记录 | 9e87ff9
+  界面与交互
+  - 后台采集不再抢焦点选区 — 后台捕获不偷搜索与回收站视图的选中状态 | 20b2297
+  - 事件监听先于首次加载注册 — 修复历史页加载与事件订阅的竞态 | 8bdd058
+  - 键盘绑定操作串行化 — 增加/移除快捷键绑定串行执行，并发操作不再互相覆盖 | efdd706
+  - 细节修正 — 快速复制徽标显示真实 Ctrl 组合键、过滤器下拉可 Escape 关闭、设置内 Escape 不再误关其他弹层、悬浮窗关闭按钮无障碍标签、非图片记录隐藏 OCR 标签页、周边界按日历日期计算、内联编辑草稿跨列表卸载保留、悬浮窗跨窗口过滤后状态对账 | 9e1b7b9 60f7ba4 205b3fd b6fecbb 5e46ea9 88a3dcb 6861597 bc5f502
+  平台与存储
+  - 原生负载与分配设界 — 剪贴板原生负载、位图分配、预览文件读取、临时图片全部有上限与取消，防解压炸弹与内存失控 | 33eac0d 90086a7 8e995fa a9bbc22
+  - Linux 描述符与子进程设界 — 停止管道原子初始化不泄漏描述符，失速子进程可中断，Wayland 监视器分发可中断 | b1f5da7 213dbd7 4d6dc6b
+  - 图标与资源加固 — WEBP fourcc 校验、webp 图标可解析、符号链接图标目标拒绝、存储类型清理与重命名串行化、迁移资源冲突保留 | 3f29976 54f1e75 21085b4 baac783 d61dbac
+  - 写入失败原子回滚 — 派生标签写失败回滚记录、填充失败清理暂存、部分阶段移除 | f649b96 12fd71d
+
+  性能
+  - 复制不再解水合文本 — 原生复制跳过文本体解水合，复制更快 | 8edf425
+  - 历史按需解水合 — 列表只在需要时读文本体，配合最近使用索引与卡片高度估算缓存，滚动更顺 | 5a2a6b5 e70aedf 4091490
+  - 导出单一致快照流式读取 — 导出与快照读取流式化，大库导出不再全量载入 | 4e99c4a e1db96e
+  - 备份预览即时释放校验体 | 3d830f8
+  - 搜索输入延迟可测量 — 输入延迟度量与综合基准文档化 | caabdec
+
+  内部改进
+  - 模块化重构 — 平台适配按 OS 重组，macOS/X11/Wayland 适配拆分 live/intended 模块；设置服务、剪贴板命令、捕获、CLI 路由、同步 v1 传输、导出导入、存储仓库与同步状态均拆分为聚焦子模块 | 87acd04 175b81f c84e391 48cb85b 5967df3 f7c43ce 850483e 95481c0 d9e7685 d026082 a9d55d9 787cda4
+  - 前端懒加载设置面板 — 设置面板注册表移入懒加载描述符，搜索与快捷操作控制器抽离，组件按领域分组 | b82698f 48fcc86 84a3bf3 6ac131a
+  - 工程门禁 — pre-commit/commit-msg 钩子强制 skill 提交规则与 gitmoji 格式；CI 作业限时；Vitest 并发设界；更新存在漏洞的序列化与 source map 依赖 | 4d99c69 4441540 6f18ff9 5f08317 a07f7f1
+  - 测试补充 — 真实 S3 验证取消发布恢复、前端测试纳入本地门禁、搜索后台重建等待、捕获签名适配 | 920fa44 2eae956 0462d1d a681b68 e626e8f
+
+  文档
+  - 中英双语 README 界面画廊 — 彩色紧凑模式双语截图与清晰的搜索结果预览 | 0b547da 66d5876 462f16a a04699f
+  - 英文 README — 新增英文说明并从中文主文档链接 | 61528be
+  - 维护技能与契约记录 — 仓库审计技能、采集隐私门契约、spawn_blocking 模式、ToggleMain 自窗口守卫、设置面板尺寸同步陷阱 | b093f29 aabaf14 1ff83be 146c549 46b636a
+  - 发布纯度契约 — 六文件 release commit 规则成文并与 CI 实际契约对齐 | 82dde09 196f9a2
+
+  构建产物
+  - Windows: Clipboard_1.8.0_x64_en-US.msi / Clipboard_1.8.0_x64-setup.exe
+  - macOS (Apple Silicon): Clipboard_1.8.0_aarch64.app.tar.gz / .dmg
+  - Linux (x64): Clipboard_1.8.0_amd64.AppImage / .deb / .rpm
+ReleaseNotesUrl: https://github.com/muutot/Clipboard/releases/tag/v1.8.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -12,7 +12,7 @@ This is the **Windows Package Manager (WinGet)** community repository containing
 - **Primary Language:** YAML manifest files, PowerShell scripts for tooling
 - **Target Runtime:** Windows 10/11, Windows Package Manager client
 - **Size:** Large repository with alphabetically organized manifests
-- **Schema:** Uses multi-file YAML manifests (version 1.12.0 recommended, 1.10.0 also supported)
+- **Schema:** Uses multi-file YAML manifests (version 1.28.0 recommended, 1.12.0 also supported)
 - **Supported Installers:** msix, appx, msi, exe, zip (with nested type), portable, font (font only in `fonts/` root)
 - **Scripts are expressly prohibited** as installers (`.bat`, `.ps1`, etc.)
 
@@ -129,11 +129,11 @@ This section defines what the review agent should and should not flag. The goal 
    ```
    # yaml-language-server: $schema=https://aka.ms/winget-manifest.<type>.<version>.schema.json
    ```
-   Where `<type>` corresponds to the file's `ManifestType` and `<version>` matches the file's `ManifestVersion`. Examples for `ManifestVersion: 1.12.0`:
-   - Version file (`ManifestType: version`): `https://aka.ms/winget-manifest.version.1.12.0.schema.json`
-   - Installer file (`ManifestType: installer`): `https://aka.ms/winget-manifest.installer.1.12.0.schema.json`
-   - Default locale file (`ManifestType: defaultLocale`): `https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json`
-   - Additional locale file (`ManifestType: locale`): `https://aka.ms/winget-manifest.locale.1.12.0.schema.json`
+   Where `<type>` corresponds to the file's `ManifestType` and `<version>` matches the file's `ManifestVersion`. Examples for `ManifestVersion: 1.28.0`:
+   - Version file (`ManifestType: version`): `https://aka.ms/winget-manifest.version.1.28.0.schema.json`
+   - Installer file (`ManifestType: installer`): `https://aka.ms/winget-manifest.installer.1.28.0.schema.json`
+   - Default locale file (`ManifestType: defaultLocale`): `https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json`
+   - Additional locale file (`ManifestType: locale`): `https://aka.ms/winget-manifest.locale.1.28.0.schema.json`
 
 4. **Singleton manifest type** — Singleton manifests (`ManifestType: singleton`) are prohibited in the community repository. Only multi-file manifests are accepted.
 

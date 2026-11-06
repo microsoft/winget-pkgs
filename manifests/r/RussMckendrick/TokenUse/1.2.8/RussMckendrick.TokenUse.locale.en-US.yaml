@@ -1,0 +1,55 @@
+# Created with tokenuse release workflow using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: RussMckendrick.TokenUse
+PackageVersion: 1.2.8
+PackageLocale: en-US
+Publisher: Russ McKendrick
+PublisherUrl: https://github.com/russmckendrick
+PublisherSupportUrl: https://github.com/russmckendrick/tokenuse/issues
+Author: Russ McKendrick
+PackageName: Token Use
+PackageUrl: https://www.tokenuse.app/
+License: MIT
+LicenseUrl: https://github.com/russmckendrick/tokenuse/blob/HEAD/LICENSE
+ShortDescription: Desktop app for local AI coding tool token and cost usage
+Description: Desktop app for local AI coding tool token and cost usage
+Moniker: tokenuse-desktop
+Tags:
+- ai-agents
+- claude-code
+- codex
+- copilot
+- cursor
+- tokens
+ReleaseNotes: |-
+  tokenuse v1.2.8 - Paper Trail
+  tokenuse 1.2.8, named Paper Trail, lets you trace every Coach finding back to the sessions behind it, and stops Coach grading prompts you never typed. It also supports Anthropic's new Claude Ultra plan, which has no 5-hour limit, adds a gauge for the separate Fable weekly cap, and recognises GitHub Copilot Fusion.
+  Coach evidence you can follow
+  - Each Coach finding now keeps up to 50 evidence samples, each with the time it happened and the session it came from (issue #5).
+  - On the desktop, the Findings detail shows the samples as a scrollable list. Click one to open its session; going back returns you to the same finding.
+  - In the TUI, select a finding with Up / Down and press Enter to open its evidence. Enter on a sample opens its session, and Esc steps back.
+  - Prompt samples can be ignored, which removes that prompt from every prompt finding. Use the Ignore button on the desktop or x in the TUI. Restore everything with Restore all or Shift-X. This is meant for templated prompts sent by scripts and tools.
+  Fewer false positives
+  - Coach now leaves out scripted runs: Claude Code sessions started with claude -p or the Agent SDK, and codex exec rollouts (issue #6). They still count for spend and on every other page.
+  - Messages the agent harness writes on your behalf no longer count as your prompts. These include system reminders, subagent boilerplate, task notifications, image placeholders, compaction summaries, and skill loads.
+  - Subagent calls no longer split one of your prompts into hundreds of identical turns. Subagent transcripts share the parent session's id, so their calls used to break up the parent's turn.
+  - On real data this cut Repeated Prompts from about 6,100 to about 160 and Frustration Signals from about 600 to about 60. Prompt Quality may grade lower afterwards, because real signals such as Low Constraint Usage are no longer drowned out.
+  Plans and models
+  - Claude Ultra (formerly Max 20x) has no 5-hour limit on verified accounts, so the Claude section now shows only the weekly gauges for those accounts. If the old seven_day field is missing, the weekly gauge falls back to the new weekly_all limit.
+  - Model-scoped weekly caps from the Claude subscription sync appear as their own gauges, starting with the Fable cap on Max and Ultra plans. An unexpected cap format drops only that gauge, not the whole Claude section.
+  - Copilot Fusion turns that record only the router name now show as Copilot Fusion, Fusion Max, or Fusion Fast instead of a raw model id. Turns that record the model actually used are still priced as that model.
+  - The demo data now shows an Ultra plan with weekly and Fable gauges.
+  Security
+  - Updated rustls-webpki to 0.103.16 (RUSTSEC-2026-0382), webpki-roots to 1.0.11 (RUSTSEC-2026-0381), and ctutils to 0.4.7 (RUSTSEC-2026-0385) in both lockfiles. The desktop lockfile also gets webpki-root-certs 1.0.11 (RUSTSEC-2026-0383) and tokio 1.54.1 (RUSTSEC-2026-0386 unsoundness).
+  - Updated the desktop's Vite to 8.3.5 and the Svelte Vite plugin to 7.3.1, fixing six Vite and launch-editor advisories in the dev server.
+  - The frontend audit now ignores one advisory, GHSA-gcqx-w48m-w2h4 (low): prototype pollution in deepmerge 4.3.1. No fixed release exists, and the latest Svelte Vite plugin still depends on it. It runs only at build time, merging this project's own Svelte config, so no untrusted input reaches it and it is not shipped in the app. The ignore covers only that advisory and will be removed when a fix ships. It lives in desktop/pnpm-workspace.yaml, which is now committed so local runs and CI share it.
+  - The frontend audit now ignores one advisory, GHSA-gcqx-w48m-w2h4 (low): prototype pollution in deepmerge 4.3.1. No fixed release exists, and the latest Svelte Vite plugin still depends on it. It runs only at build time, merging this project's own Svelte config, so no untrusted input reaches it and it is not shipped in the app. The ignore is scoped to that one advisory in desktop/pnpm-workspace.yaml and will be removed when a fix ships.
+  Upgrade notes
+  - The first sync after upgrading re-parses Claude Code and Codex sessions once to tag scripted runs. Rows from session files that have since been deleted keep their old tag.
+  - Coach ignore choices are saved in your config file as coach_ignored_prompts.
+  - Pricing books and currency rates were last refreshed on October 26, 2026.
+  - At release preparation, cargo-audit reported no known vulnerabilities in either lockfile. RustSec still reports upstream maintenance warnings, the Linux GTK dependency's glib unsoundness warning, and a yanked yoke-derive. pnpm audit reported no vulnerabilities apart from the ignored deepmerge advisory. pnpm audit reported no vulnerabilities apart from the ignored deepmerge advisory.
+ReleaseNotesUrl: https://github.com/russmckendrick/tokenuse/releases/tag/v1.2.8
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

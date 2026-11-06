@@ -1,0 +1,54 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: sky32.MCPort
+PackageVersion: 0.9.3
+PackageLocale: zh-CN
+ShortDescription: 本地优先的 MCP Workspace 工具，让 AI 安全连接、理解和操作你的项目
+Description: |-
+  MCPort 是一个本地优先的 MCP 工具。它让 AI 客户端能够在你明确选择的项目目录中读取代码、搜索文件、理解符号、查看 Git、修改文件，并在授权后执行受控命令。
+  项目文件、运行状态和凭据默认留在本机。你可以只使用本地 MCP，也可以为指定 Workspace 开启 OAuth 或 Bearer Token 公网访问。
+
+  主要功能
+
+  - 让 AI 阅读和搜索项目文件、代码、图片及目录
+  - 提供代码索引、定义跳转、引用查找、Hover 和文档符号
+  - 查看 Git 状态、差异、提交记录和 blame
+  - 在 Workspace 内创建、修改、导入、复制、移动和删除文件
+  - 通过任务、Checkpoint 和验证流程跟踪修改结果
+  - 在权限允许时执行受控开发命令
+  - 将一个或多个 Workspace 连接到本地或公网 MCP 客户端
+  - 按需安装和更新常见语言的 LSP，冷门语言可手动扩展
+  - 可选的 Computer Use，通过逐次确认安全地查看屏幕和操作鼠标键盘
+
+  连接方式
+
+  本地访问默认只接受 loopback 请求。公网访问支持 Cloudflare Tunnel、TryCloudflare、FRP Client 或外部自建通道，并使用 OAuth（推荐）或 Bearer Token 认证。
+  公网地址使用 /w/<workspace>/mcp 路由，例如：
+
+  文件、代码和 LSP
+
+  MCPort 只允许在选定 Workspace 内操作文件，并会在真实路径和符号链接解析后再次检查边界。基础代码索引支持 TypeScript/JavaScript、Python、Go、Rust、Java、C/C++ 和 PHP。
+  语言服务器按语言独立管理，可以按需下载和更新。支持 TypeScript/JavaScript、HTML、CSS/SCSS/LESS、Python、JSON、YAML、Markdown、Go、Rust、Java、C、C++ 和 PHP，也可以添加自定义 LSP。
+
+  权限档位
+
+  - readonly：查看项目、搜索、代码理解、Git 只读和历史查询
+  - standard：增加文件修改、导入、Checkpoint、任务和快速验证
+  - full：增加受控命令、命令会话、操作恢复和完整验证
+  命令以 executable + args 数组执行，不使用任意 shell 字符串，并继续受全局开关、精确命令白名单、超时、输出大小和高风险确认控制。
+  Computer Use 默认关闭，开启后默认只在本地 MCP 的 full 档可用；也可以通过独立开关允许已认证、使用 full 档的公网 Workspace 调用。截图及鼠标键盘操作每次仍需要在 MCPort Desktop 明确确认。
+Tags:
+- mcp
+- 人工智能
+- 工作区
+ReleaseNotes: |-
+  修复
+
+  - 修复 FRP 进程仍在运行但远端会话失效时无法自动恢复的问题。
+  - 连续公网健康检查失败后自动重建 FRP 会话，并增加冷却避免频繁重启。
+  - 4xx、OAuth 和路由配置错误不会误触发 FRP 重建。
+  - 更新版本号至 0.9.3。
+ReleaseNotesUrl: https://github.com/sky32/mcport/releases/tag/v0.9.3
+ManifestType: locale
+ManifestVersion: 1.12.0
