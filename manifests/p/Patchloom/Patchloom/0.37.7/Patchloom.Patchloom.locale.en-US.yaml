@@ -1,0 +1,61 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Patchloom.Patchloom
+PackageVersion: 0.37.7
+PackageLocale: en-US
+Publisher: Patchloom
+PublisherUrl: https://github.com/patchloom
+PublisherSupportUrl: https://github.com/patchloom/patchloom/issues
+Author: Patchloom
+PackageName: Patchloom
+PackageUrl: https://github.com/patchloom/patchloom
+License: MIT
+LicenseUrl: https://github.com/patchloom/patchloom/blob/HEAD/LICENSE
+Copyright: Copyright (c) Patchloom contributors
+ShortDescription: Structured file editing CLI for AI agents
+Description: |-
+  Patchloom is a single-binary CLI that gives AI coding agents safe, structured
+  file editing: search and replace, unified diffs, parser-backed JSON/YAML/TOML
+  document ops, markdown section editing, AST-aware renames, multi-file
+  transactions, undo, and an MCP server for tool calls.
+Moniker: patchloom
+Tags:
+- ai
+- cli
+- developer-tools
+- mcp
+- rust
+ReleaseNotes: |-
+  Patchloom 0.37.7
+  Library refusals name the path you passed. undo will not delete an empty directory that sits outside the project.
+  Highlights
+  When append, prepend, create, delete, rename, or replace refuses a file, the error names the path you passed. A relative path stays relative. The file is not changed.
+  undo checks every directory a backup says it created. A path that leaves the project is refused, including .. and a symlink that points outside.
+  Bug fixes
+  - A binary append or prepend printed a long absolute path. You passed bin.link. The error now says bin.link. The file is not changed. The kind is still binary (#2723).
+  - Create, delete, rename, and replace did the same. Creating keep.txt when it already exists, deleting a directory, renaming onto an existing file, and replacing in a binary file name the path you passed. Creating keep.txt/child.txt when keep.txt is a file names keep.txt. Nothing is written (#2725).
+  - undo could delete an empty directory outside the project. A backup created_dirs entry with .., a path outside the workspace, or a symlink that leaves the workspace is refused. A directory the apply created inside the project is still removed (#2725).
+  - The Smithery server page linked from the README was missing. The link is the Smithery directory at https://smithery.ai/ (#2725).
+  Numbers
+  ───────┬────────────────────────────────────────────────────────────
+  Metric │Notes
+  ───────┼────────────────────────────────────────────────────────────
+  Version│0.37.6 -> 0.37.7
+  ───────┼────────────────────────────────────────────────────────────
+  Focus  │caller path in library refusals, undo of created directories
+  ───────┴────────────────────────────────────────────────────────────
+  Upgrading
+  - If you matched an absolute path inside an error such as target is a binary file, match the path you passed. The error kind is unchanged.
+  - undo of a manifest that names a directory outside the project fails instead of deleting that directory.
+  - Install from crates.io, npm, Homebrew, or Scoop after the tag ships. On Windows, Scoop is recommended. winget may need winget source update after Microsoft publishes. Chocolatey can lag while moderation runs.
+  Full changelog
+  patchloom-v0.37.6...patchloom-v0.37.7
+ReleaseNotesUrl: https://github.com/patchloom/patchloom/releases/tag/patchloom-v0.37.7
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://patchloom.github.io/patchloom/
+- DocumentLabel: Installation
+  DocumentUrl: https://github.com/patchloom/patchloom/blob/main/docs/getting-started/installation.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

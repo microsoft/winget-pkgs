@@ -1,0 +1,37 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: YichengWang.Runner
+PackageVersion: 0.19.4.20261105.1100
+PackageLocale: zh-CN
+ShortDescription: 让 Claude Code、Codex、Copilot CLI 等终端编码智能体在同一个 mission 上协同工作。
+Description: Runner 是一款原生桌面应用，让终端智能体协同工作。Claude Code、Codex、OpenCode、Cursor CLI、Grok Build、Antigravity CLI、Copilot CLI 与 pi 可以在同一个任务、同一个 mission 中配合，每个智能体都保留自己真实终端里的 TUI，由 lead 把决策带回给你。Runner 的一切能力都对应一个 `runner` 命令：mission、crew、role、project、chat、session 与 msg 都能在命令行操作，后台服务是 `runnerd`。智能体在 Windows 上原生运行，不需要 WSL，PowerShell 7 为可选。当前状态：alpha，持续发布。原生支持 macOS（Apple Silicon）与 Windows（x64，Windows 10 1809 或更高版本）；不支持 Intel Mac、Windows ARM64 与 Linux。安装程序、应用与 CLI 辅助程序均使用签发给 Open Source Developer Yicheng Wang 的 Certum 开源代码签名证书签名。
+Tags:
+- claude-code
+- codex
+- 人工智能
+- 命令行
+- 控制台
+- 终端
+ReleaseNotes: |-
+  Runner 0.19.4 是 macOS、Windows 和 Linux 上基于 0.19.3 的功能版本。
+  新功能
+  - 终端设置重新分组并新增选项。 Settings → Terminal 现在分为 Text、Colors、Cursor、Keyboard（仅 macOS）和 Scrollback & selection 几组，终端配色方案也从 Appearance 移到这里。新增四项设置：行高、光标闪烁、回滚行数和选中即复制。(#930)
+  - 终端程序可通过 OSC 52 复制。 在 Neovim、Helix 或 tmux（开启 set-clipboard）中复制的内容现在会进入系统剪贴板，通过 SSH 时也可以。程序只能写入剪贴板，不能读取，超大的内容会被忽略。(#899)
+  - 聊天菜单移到窗格标题上。 点击窗格标题即可 Rename、Fork 或 Pin 该聊天；⋯ 按钮已移除，双击标题仍可直接重命名。状态和停止/恢复按钮现在一起位于标题栏右侧。侧栏条目菜单的项目和顺序与之一致。(#1184)
+  - 最大化窗格。 在分屏 tab 中，点击分屏按钮旁新增的最大化按钮，或按 ⇧⌘↩（Windows 和 Linux 上为 Ctrl+Shift+Enter），可让一个窗格占满整个 tab，其他窗格继续运行；再按一次即按原样恢复布局。(#1184)
+  - 因 Runner 重启而中断的 mission 会明确显示。 当更新或 runnerd 重启在成员执行中途将其终止时，mission 现在会显示琥珀色暂停图标和 Interrupted，而不是进入稳定状态；动态中会指出哪个成员的那一轮被中断，关联的聊天会收到一条“被 Runner 重启中断”的提示，而不是 "settled"。给该成员发消息即可继续。(#1187)
+  - 电脑选择器移到侧栏底部。 登录 Remote access 后，用量和 Settings 之间的主机按钮会打开电脑列表，本机排在首位并突出显示。窗口显示其他电脑时，该按钮仍在底部并变为绿色。(#1118)
+  问题修复
+  - 在 Windows 和 Linux 上，单独的 Ctrl 组合键会交给终端。 终端获得焦点时，Ctrl+D、Ctrl+K、Ctrl+S 和 Ctrl+M 不再拆分窗格、打开命令面板、切换侧栏或最小化窗口。新的默认快捷键为：Ctrl+Shift+D 向右拆分、Alt+Shift+D 向下拆分、Ctrl+Shift+P 打开命令面板、Ctrl+B 切换侧栏；你自己保存的快捷键保持不变。Settings → Keyboard shortcuts 中新增的 Ctrl keys in terminals 设置可以把所有单独的 Ctrl 组合键都交给终端。(#1177)
+  - 复制后 Ctrl+C 可以再次中断。 在 Windows 和 Linux 上，用 Ctrl+C 复制选中内容后会清除选区，下一次 Ctrl+C 会作为中断信号发给终端，与 Windows Terminal 一致。(#1178)
+  - 终端 tab 的状态跟随 shell。 Working 和 Idle 现在根据 shell 提示符判断，命令结束后状态点立即变为 Idle，而不是约两秒后，在提示符处输入也不再显示 Working。(#1172)
+  - Codex 聊天不再反复重试已不存在的会话。 Resume 现在会检查 Codex 会话是否仍在磁盘上（包括压缩的 rollout），并在之前的 bug 替换了会话 key 时恢复聊天原来的会话，而不是每次 Resume 都报 "No saved session found"。(#1139)
+  - mission 成员会把结果发到动态中。 每个成员（包括用 runner mission add-role 加入的成员）现在都会被告知，完成任务时用 runner msg post 发布所做的工作，结果不再只留在它自己的终端里。(#1151)
+  - Runner 不再触发 Antigravity 的登录流程。 后台用量检查会在 agy 未登录时运行它，导致它开始登录；Runner 现在不再检查 Antigravity 的用量。(#1163)
+  - 遇到另一构建的 runnerd 时，应用会可靠地暂停。 两个竞态问题可能导致应用接管另一个 Runner 构建正在运行的 daemon，而不是暂停并显示占用提示。(#1160)
+  - 侧栏的拖动调整手柄现在位于主窗格边框的正中， 拖动时该边框始终跟随指针。(#1193)
+  Nightly 渠道
+  - 独立的 Preview Nightly 渠道。 仍在开发中的大型功能（首先是文件预览，#634）的构建现在发布到独立的 Preview Nightly 渠道，在 Settings → Updates 中显示为 Preview Nightly (sha)。来自 main 的 Nightly 渠道和正式版不受影响；手动安装 Nightly 或正式版构建即可切回。(#1166)
+ManifestType: locale
+ManifestVersion: 1.28.0
