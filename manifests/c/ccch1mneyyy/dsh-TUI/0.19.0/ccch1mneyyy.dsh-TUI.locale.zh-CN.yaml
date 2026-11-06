@@ -1,0 +1,79 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: ccch1mneyyy.dsh-TUI
+PackageVersion: 0.19.0
+PackageLocale: zh-CN
+ShortDescription: DeepSeek Harness 官方首推的终端界面：高性能、低占用。
+Description: dsh-TUI 是 DeepSeek Harness（DSH）的交互式终端界面，支持全屏会话、像素鲸鱼伴侣、流畅鼠标交互和低占用，并提供供脚本驱动的独立 headless 命令 dst。
+Tags:
+- deepseek
+- deepseek-harness
+- dsh
+- harness
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  自 v0.18.0 以来，dsh-TUI 跟上 DSH 0.2.2-rc.1 验证线，让一次 /update 同时对齐 TUI、全局 dsh 引擎与全局启动器，
+  并修好会话恢复、btw 输入、子代理失败提示与 Codex 后端命令输出等一批问题。
+  亮点
+  - 适配 DSH 0.2.2-rc.1 — npm 上的 DSH latest 已是 0.2.2-rc.1，而 v0.18.0 的精确 peer 只到 0.2.1-rc.5，升级 DSH 后 TUI 会被判 incompatible 并 skip。本版把 0.2.2-rc.1 加入验证线与 peer 范围，0.2.1-rc.5 及其之前的验证线继续保留；模型选择改用上游的会话级 Agent.model 接缝、工具限制落到每个 Agent 的作用域、适配 cordis 4.1 生命周期与固定动作审批，旧宿主继续走原来的选择引用与请求瀑布。(#1886 by @Lucas2011wastaken)
+  - 一次 /update 对齐 TUI、dsh 引擎与全局启动器 — 以前 /update 只换 profile 里的 TUI，全局 dsh 与启动器留在原地，可能出现新 TUI 的 peer 范围装不上当前引擎。现在预检为三层解析同一份计划，按 TUI → 引擎 → 启动器串行执行：引擎只选目标 TUI peer 范围内已发布的最高版本（永不降级、不选 alpha 线），装完用 profile 模块解析与 dsh --version 验证；启动器只动能证明归属的全局安装，多成员 pnpm 组、项目内依赖与有歧义的别名一律不改。TUI 已是最新时也不再短路，仍会补齐引擎与启动器；引擎安装失败后只有能证明启动的入口才允许重启，跳过原因会留在下一次挂载的屏幕与警告里。(#1847、#1849 by @Lucas2011wastaken；#1889 by @AdamPlatin123)
+  - 子代理通道整体失败会明说 — 同一 provider 的已结算运行至少失败 2 次且失败过半时，子代理列表上方出现通道降级提示，并建议切换 provider；只有可切换的 claude-code / codex 通道会提示，内建 subagent、workflow 与 teammate 行不误报。(#1794 by @MomentDerek)
+  需要留意的行为变化
+  - 权限问卷只提供固定动作 — 在 DSH 0.2.2 上，approval 类问题只提供调用方声明的选项，不再有自由文本入口；普通问卷仍可自由输入。(#1886 by @Lucas2011wastaken)
+  - /update 的拒绝语义与逃生开关 — 新 TUI 要升级、而当前运行的引擎不在它的 peer 范围内时，即使引擎可以自动升级也会先拒绝，并打印「先升级引擎，再重新 /update」的命令（官方加载校验按运行中的 dsh 判定）；引擎装完校验不通过时不重启，但保留已升级的 TUI。DSH_TUI_UPDATE_ENGINE=0 钉住引擎，DSH_TUI_UPDATE_LAUNCHER=0 跳过启动器，DSH_TUI_DSH_PM=npm|pnpm 覆盖包管理器判定。(#1849 by @Lucas2011wastaken；#1889 by @AdamPlatin123)
+  - /restart 带回图片，被后端丢弃的输入不再自动重发 — 交接文件从纯文本改为带图片的输入；被判定「确定没执行」的输入会暂存为未送达，由用户决定是否重发。(#1764 by @MomentDerek)
+  - 长会话不再重放打字动画，代价是随历史线性增长的内存 — 已完成行的记账不再有 2048 条上限（几万行量级约十几 MB），随会话释放。(#1796 by @MomentDerek)
+  - btw 输入框恒为一行 — 长草稿围绕光标开窗、被裁一侧显示 …，不再折行；只支持左右查看，不支持多行编辑。(#1866 by @Lucas2011wastaken)
+  - Linux 进程名显示为 dsh-tui — ps -o comm、top 与系统监视器不再显示 MainThread；/proc/<pid>/cmdline 保持不变。(#1841 by @Lucas2011wastaken)
+  - rio 与 Orca 启用扩展键编码 — 两者加入 CSI >1u 白名单，Shift+Enter 与修饰键组合可用；名单出问题时可用 DSH_TUI_FORCE_EXTENDED_KEYS=1 / DSH_TUI_DISABLE_EXTENDED_KEYS=1 强制或禁用（disable 优先）。(#1821 by @Plintash；#1840 by @Lucas2011wastaken)
+  修复
+  - 会话与恢复：会话管理页去掉每个 project 下方重复且容易截断的路径、全部来源统一单行列表，并修好快速连点两个 project 时第二击被当成选词的问题（多击判定现在要求同一个 onClick 祖先）；从整屏界面返回或 /resume 后历史消息不再逐条重新「打字」；会话自身收尾的回合显示「会话已停止」而不是用户中断；Linux 上被其他进程复用的旧线程 ID 不再让空闲会话被误判为被占用。(#1755 by @xuzijian2019；#1796、#1764 by @MomentDerek；#1769、#1770 by @FlameTN7)
+  - 输入与面板：窄侧栏 btw 草稿不再被挤成 0 宽或按未截断的草稿撑高，尾部和硬件光标留在框内；不带 bracketed-paste 标记的整块文本也先压平成单行。(#1866 by @Lucas2011wastaken)
+  - 子代理与后端：Codex 后端下 /usage、/diff 查询成功后会显示输出，补全菜单里按 Enter 直接执行而不用先补空格。(#1775 by @MomentDerek)
+  - 终端兼容：Orca 与 rio 的扩展键、Kitty 小键盘码位 57416–57426 补齐，CSI-u 的非打印键不再被当作文本插入。(#1840、#1841 by @Lucas2011wastaken；#1821 by @Plintash)
+  - 文档：新增「在 Orca 终端里会话内 git 全部失败」的排查与规避（env -u GIT_CONFIG_COUNT）。(#1863 by @Lucas2011wastaken)
+  兼容与升级
+  - DSH 主适配线：0.2.2-rc.1；0.2.1-rc.5、0.2.1-rc.4、0.2.1-rc.3、0.2.1-rc.2、0.2.0-rc.2、0.2.0-rc.1、0.1.7-rc.2、0.1.7-rc.1 以及更早的验证线仍在契约内，契约外版本打漂移警告。
+  - DSH 0.2.2 要求 Node >=24.9：本包自身仍声明 ^22.19 || >=24；用更旧的 Node 运行 0.2.2 宿主属于上游未支持组合，升级前请先确认 node -v。
+  - 已经升到 DSH 0.2.2-rc.1、TUI 打不开的用户：TUI 起不来时用不了程序内 /update，请直接执行下面的 npm 命令升级到 v0.19.0。曾用 dsh plugin allow-version 给 v0.18.0 加过豁免的，升级后不再需要。
+  - 从 v0.18.0 升级：程序内 /update（本版会一并把 dsh 引擎对齐到 0.2.2-rc.1、并对齐全局启动器），或
+    npm install -g @deepseek-ai/dsh @deepseek-harness-tui/dsh-tui@0.19.0。
+  - dst 自动化 CLI 的验证线未同步前移：仍验证到 0.2.1-rc.5；在 0.2.2 宿主上可用 dst dsh 原样转交官方参数。
+  - 嫡系插件清单：随包的 tui-profile/feed/first-party.json 钉到 0.19.0。
+  - Windows 离线安装器：引擎验证范围随契约前移，新装或升级到 0.2.2-rc.1；已装更高的 RC 会降回验证线。
+  安装
+  npm install -g @deepseek-ai/dsh @deepseek-harness-tui/dsh-tui@0.19.0
+  偏好一键安装的用户可下载 Release 中的 dsh-tui-setup.zip（解压后 macOS / Linux 运行 sh install.sh，Windows 双击 install.bat）
+  或 Windows 离线安装程序 dsh-tui-setup-win-x64.exe；便携包解压即用。
+  What's Changed
+  - fix(session): preserve the disposal reason in turn notices by @FlameTN7 in https://github.com/ccch1mneyyy/dsh-TUI/pull/1769
+  - fix(session): ignore reused Linux thread ids in mount ownership by @FlameTN7 in https://github.com/ccch1mneyyy/dsh-TUI/pull/1770
+  - fix(codex): show backend command output and run it on Enter by @MomentDerek in https://github.com/ccch1mneyyy/dsh-TUI/pull/1775
+  - fix(subagent): surface channel-level failures instead of one opaque sentence by @MomentDerek in https://github.com/ccch1mneyyy/dsh-TUI/pull/1794
+  - test(scripts): give composer-mounting scripts a throwaway HOME (#1788) by @MomentDerek in https://github.com/ccch1mneyyy/dsh-TUI/pull/1792
+  - fix(ink): allowlist rio for extended keys and add force/disable hatches by @Plintash in https://github.com/ccch1mneyyy/dsh-TUI/pull/1821
+  - fix(ink): allowlist Orca for extended keys by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1840
+  - fix(launcher): name the process dsh-tui on Linux by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1841
+  - fix(channel): name disposed turns, hold backend-dropped inputs and carry held images across /restart by @MomentDerek in https://github.com/ccch1mneyyy/dsh-TUI/pull/1764
+  - fix(reveal): stop re-typewriting completed history rows on remount by @MomentDerek in https://github.com/ccch1mneyyy/dsh-TUI/pull/1796
+  - docs(faq): document Orca GIT_CONFIG_* scrub breaking git by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1863
+  - fix(sessions): compact project rails across session sources by @xuzijian2019 in https://github.com/ccch1mneyyy/dsh-TUI/pull/1755
+  - fix(btw): keep the side composer on one row and window the draft around the caret by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1866
+  - fix(update): align the global launcher from /update (#1844) by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1847
+  - feat(update): align the dsh engine and launcher in one /update (#1844) by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1849
+  - fix(update): prove both boot entries and keep the engine skip report by @AdamPlatin123 in https://github.com/ccch1mneyyy/dsh-TUI/pull/1889
+  - chore(upstream): validate against dsh 0.2.2-rc.1 by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1886
+  - chore(release): prepare v0.19.0 by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1897
+  New Contributors
+  - @Plintash made their first contribution in https://github.com/ccch1mneyyy/dsh-TUI/pull/1821
+  Full Changelog: https://github.com/ccch1mneyyy/dsh-TUI/compare/v0.18.0...v0.19.0
+ManifestType: locale
+ManifestVersion: 1.28.0
