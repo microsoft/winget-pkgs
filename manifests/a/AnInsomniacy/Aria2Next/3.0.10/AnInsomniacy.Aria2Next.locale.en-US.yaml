@@ -1,0 +1,63 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: AnInsomniacy.Aria2Next
+PackageVersion: 3.0.10
+PackageLocale: en-US
+Publisher: AnInsomniacy
+PublisherUrl: https://github.com/AnInsomniacy
+PublisherSupportUrl: https://github.com/AnInsomniacy/aria2-next/issues
+Author: AnInsomniac
+PackageName: Aria2 Next
+PackageUrl: https://github.com/AnInsomniacy/aria2-next
+License: GPL-2.0
+LicenseUrl: https://github.com/AnInsomniacy/aria2-next/blob/main/COPYING
+ShortDescription: Maintained aria2 fork with extensive bug fixes and modernized architecture
+Description: |-
+  aria2 is remarkable open source software. For over a decade it has been one of the most capable
+  download engines available, trusted by countless tools and users worldwide. We are deeply grateful
+  to the original authors and contributors of the aria2 project. They built something that has stood
+  the test of time, and that enduring quality is the best testament to their vision and craftsmanship.
+
+  But upstream development has slowed dramatically in recent years. Dependencies grew stale, builds
+  broke on modern platforms, and a backlog of bugs went unaddressed. We picked up the baton: migrated
+  the codebase to a modern build framework, triaged and fixed a substantial number of upstream issues,
+  and introduced ED2K protocol support for the first time. A full audit trail is preserved in
+  docs/maintenance/upstream-issue-review/matrix.csv.
+
+  Aria2 Next is an actively maintained aria2-compatible engine for everyone, and it is also the embedded
+  engine used by Motrix Next. Original interfaces, including options, configuration, sessions, JSON-RPC,
+  and libaria2, remain intact so downstream projects get a seamless upgrade. The focus is straightforward:
+  release reliability, current dependency baselines, and ongoing compatibility fixes. Same engine, renewed
+  foundation.
+ReleaseNotes: |-
+  ## Summary
+
+  Aria2 Next 3.0.10 fixes BitTorrent tracker scheduling and multi-connection HTTP downloads from servers that rotate their entity tags. Torrents with mixed UDP and HTTP trackers announce in the right order again. Builds can now be installed through a Homebrew tap. Release assets cover the same seven platforms.
+
+  ### Fixed
+
+  • Preferring a UDP tracker on the same host as an HTTP tracker now swaps their tiers instead of moving the UDP tracker across tiers. The broken tier order could leave an overdue tracker unannounced and make the tracker timer fire repeatedly ([#77](https://github.com/AnInsomniacy/aria2-next/issues/77), [#79](https://github.com/AnInsomniacy/aria2-next/issues/79)).
+  • Trackers whose scheme this build cannot use are skipped instead of keeping the tracker timer spinning (backport of libtorrent#8957).
+  • Trackers added through `--bt-tracker` beyond tier 255 share the last tier instead of wrapping around ahead of the torrent's own trackers.
+  • A server that sends a new strong ETag with every response, while the length and Last-Modified stay the same, no longer collapses a download to one connection. Such responses are validated by date, and requests sent under an old tag are asked for again ([#82](https://github.com/AnInsomniacy/aria2-next/issues/82)).
+
+  ### Added
+
+  • macOS and Linux users can install the release binaries with `brew install aninsomniacy/aria2-next/aria2-next`. Each formula pins the published SHA-256 checksums ([#80](https://github.com/AnInsomniacy/aria2-next/issues/80)).
+
+  ### Downloads
+
+  | Platform | Download |
+  | --- | --- |
+  | Linux x86_64 | `aria2-next-3.0.10-linux-x86_64` |
+  | Linux ARM64 | `aria2-next-3.0.10-linux-aarch64` |
+  | macOS Apple Silicon | `aria2-next-3.0.10-macos-arm64` |
+  | macOS Intel | `aria2-next-3.0.10-macos-x86_64` |
+  | Windows x86_64 | `aria2-next-3.0.10-windows-x86_64.exe` |
+  | Windows ARM64 | `aria2-next-3.0.10-windows-arm64.exe` |
+  | Android ARM64 | `aria2-next-3.0.10-android-arm64` |
+  | Checksums | `aria2-next-3.0.10-checksums.sha256` |
+ReleaseNotesUrl: https://github.com/AnInsomniacy/aria2-next/releases/tag/v3.0.10
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
