@@ -1,0 +1,61 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: NGLSL.Kite
+PackageVersion: 0.6.7
+PackageLocale: zh-CN
+Publisher: NGLSL
+PublisherUrl: https://github.com/NGLSL
+PublisherSupportUrl: https://github.com/NGLSL/Kite/issues
+Author: Leixinxin
+PackageName: Kite
+PackageUrl: https://github.com/NGLSL/Kite
+License: Apache-2.0
+LicenseUrl: https://github.com/NGLSL/Kite/blob/HEAD/LICENSE
+ShortDescription: 按下快捷键即可快速搜索并启动应用的 Windows 轻量启动器，支持拼音搜索。
+Description: Kite 是一款面向 Windows 的轻量应用启动器，使用 Rust 和 Iced 构建原生桌面应用，无需 WebView2 或 Node.js。通过全局快捷键唤起搜索窗口，输入应用名称、别名或拼音即可快速筛选并启动目标程序；支持扫描开始菜单、桌面、注册表 App Paths 和 Windows 打包应用，提供启动历史、固定结果、系统托盘以及可选的 Everything 文件搜索。
+Tags:
+- 启动器
+- 快速启动
+ReleaseNotes: |-
+  Kite v0.6.7
+  版本重点
+  修复 NTFS 事务内部文件导致文件搜索持续自动重试的问题，并为手动删除软件后留下的应用结果增加右键“清除记录”。
+  文件搜索修复
+  - Windows 对部分仍存活的 TxF 内部文件按编号打开时会返回“参数错误 87”，原增量同步因此反复卡在同一记录。本版复用已有的严格 NTFS 文件名解析器，在校验完整身份、名称集合和父目录后继续刷新。
+  - 保留完整性要求：无法确认完整名称时继续报告错误并重试；已经消失的身份仍按原有机制回收。
+  - 读取组件协议继续为 4，索引基库和持久变化层格式保持兼容。安装器会更新已安装的读取组件，以应用此次内核修复。
+  清除已删除应用的记录
+  - 本地启动目标已不存在的应用结果，右键或 Shift+F10 菜单提供“清除记录”。执行前重新核对当前应用身份和目标状态。
+  - 一次清理该身份的使用历史、查询学习、固定、降权、关联 Alias 和手动登记，结果立即移出列表。
+  - 通过已有隐藏入口机制阻止残留快捷方式或旧快照带回同一个条目；重新安装后，可在设置的“已隐藏入口”中恢复显示，已清理的历史及偏好保持清理状态。
+  - 操作范围为 Kite 内的记录，应用文件、开始菜单快捷方式和系统卸载信息保持原样。
+  验证
+  - 本机使用同一真实 NTFS 记录完成改动前后对照：原代码返回错误 87，候选代码成功取得完整路径。
+  - 在现用三卷索引的隔离副本上完成真实 watcher 追平、查询、停止后改名和重启续读；最终实时就绪、无 stale、无待处理对象，持久恢复游标一致。
+  - 在隔离开发窗口实际点击“清除记录”，核对数据库清理结果，并确认重新扫描及窗口重启后不回显。
+  - 复用 8 项现有右键面板检查通过，本轮没有新增测试用例。本机未覆盖现用程序或读取组件。
+  - 完整 CI、正式构建、同版本覆盖安装、读取组件替换、文件索引专项验收和卸载验收由 GitHub Actions 执行，实际结果由本发布的自动报告提供。
+  验证边界
+  长期在线观察、全部旧版本迁移、UAC 拒绝、多屏与快捷键手感继续作为单独验证范围。安装包未做 Authenticode 数字签名。
+  构建与验证
+  - 发布 tag：v0.6.7
+  - tag 提交：a33cfef7b50ea73f1ab76cf31eaf161a39df758b
+  - 上一个发布：v0.6.6
+  - 提交数量：1
+  - 构建环境：GitHub Actions windows-latest
+  - 检查与构建：精确 main 提交 CI、cargo test --locked、cargo build --release --locked、官方插件与 NSIS 打包
+  - 独立 Windows runner 安装验收：全新安装、同版本覆盖、卸载、负载哈希、注册表、用户数据保留、按需读取组件注册／更新／卸载
+  - 真实 NTFS 补读：停机期间创建 70002 个存活文件，查询变化层实际 70238 个对象；新增／改名／删除哨兵查询通过
+  - 分段与恢复：实际生成 2 个 32 MiB feed 段，确认首段已回收；同一 generation 重启从已提交游标续读
+  - 自动恢复：一次性 runner 的 D: 卷保持原 journal 身份和容量配置，通过 11 轮真实文件改名实际越过旧游标保留范围；普通启动观测到 recovering，自动建成新 generation 并通过哨兵查询，全程没有发送手动重建命令
+  - 后台重连：独占锁定现有 current.json，实际观测第 1 次 30 秒、第 2 次 60 秒定时重试；仅释放文件锁后自动就绪，复用同一 generation、计数归零并通过哨兵查询，没有发送手动重试或重建命令
+  - 产物核对：发布 job 重新计算安装器大小和 SHA-256，与验收报告及校验和文件一致后才上传
+  - 验收报告：installer-validation.json
+  - 验证边界：同版本覆盖不包含旧版本迁移；未验证人工 UAC 拒绝、桌面交互、强制崩溃或磁盘满恢复
+  - 构建记录：Release #34
+  本次提交范围
+  - fix: recover TxF indexing and clear stale app records in v0.6.7 (a33cfef)
+ReleaseNotesUrl: https://github.com/NGLSL/Kite/releases/tag/v0.6.7
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
