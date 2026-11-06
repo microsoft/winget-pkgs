@@ -1,0 +1,65 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: sdcxb.Codem
+PackageVersion: 1.18.13
+PackageLocale: zh-CN
+Publisher: codem
+PublisherUrl: https://github.com/sdcxb
+PublisherSupportUrl: https://github.com/sdcxb/codem/issues
+Author: sdcxb
+PackageName: Codem
+PackageUrl: https://github.com/sdcxb/codem
+License: 专有软件
+ShortDescription: 对标 Codex 的 AI 编程助手桌面客户端，支持代码生成、文件操作与终端执行。
+Description: Codem 是基于 Tauri v2 + React + TypeScript 构建的 AI 编程助手桌面应用，为 MiMo Code 等 CLI 提供可视化界面，支持代码生成、项目文件读写、终端执行、子智能体协作、技能与插件扩展，以及 Git 项目与 worktree 管理。
+Tags:
+- harness
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  Codem v1.18.13
+  发布日期：2026-11-06
+  类型：稳定版（Windows x64）+ Flutter Android 本机运行
+  下载：Android 本机 APK 见下方；Windows 安装包随版
+  本版要点
+  Flutter 客户端不再只是「手机看电脑」：
+  - APK 内置 PRoot + Ubuntu + Node + Codem Host；模型、会话、工具、终端进程都在手机上运行，不依赖电脑；
+  - 本机 Host 直接读写 /storage/emulated/0/codem/workspace，文件管理器可见；
+  - 原生「本机 Host」面板：模型服务地址 / 模型名 / API Key / 项目目录 / 启动停止；
+  - AICodeWith 本机配置可用：填 sk-acw-*，Host 按 Claude / Gemini / OpenAI 协议分派；
+  - API Key 由 AndroidKeyStore AES/GCM 加密落盘，Host 通过 stdin 接收，不进 argv/环境变量/日志；
+  - 首次启动会解压运行时（约 30–60 秒），之后保留；Host 前台服务 + WakeLock 保活。
+  Android APK
+  - Codem-Mobile-1.1.0-arm64.apk：真机安装包（arm64）。
+  - Codem-Mobile-1.1.0-x86_64.apk：模拟器安装包。
+  - targetSdk=28：PRoot 需要应用数据目录 exec + ptrace 子进程，不能上架 Google Play；这是 sideload 包。
+  - 首次启动引导「所有文件访问」；拒绝可回退应用私有工作区。
+  实测（Android 15 / x86_64 模拟器）
+  - 本机 Host /healthz 200；PRoot 内 DNS/HTTPS 通（/v1/models 200）；
+  - 共享工作区 Host 参数：--workspace /storage/emulated/0/codem/workspace；
+  - Flutter 连接本机 Host 后，经 mock OpenAI 服务完成一轮真实对话：输入 hello-local-host，收到流式回复；
+  - 未授权存储时 start 不启动 Host、返回 needsPermission；授权后恢复；
+  - stop 后本 App 的 proot/node/codem_db 全部退出，不影响另一个已安装的 Codem Shell。
+  升级说明
+  - 旧 Flutter 远程主机配置保留；本机 Host 是新增主机类型。
+  - Windows 覆盖安装保留 AICodeWith key、会话、模型目录。
+  - Android 本机 APK 与 Codem Shell 是两条独立安装包；不要同时依赖两个 Host。
+  已知问题 / 后续
+  - arm64 APK 已构建，但本轮只在 x86_64 模拟器验证；真机 arm64 需再跑一轮。
+  - 真实 AICodeWith Key 的模型回合未在 Flutter 本机 APK 上跑（已用 mock 服务验证完整链路与 DNS/HTTPS）。
+  - 终端 terminal.* 仍不是本轮范围。
+  - Host token 与远程 cookie 一样存 SharedPreferences 明文（模型 Key 已 Keystore 加密）；后续可迁移到 EncryptedSharedPreferences。
+  - 单 ABI APK 约 120MB（rootfs + Node），这是无电脑依赖的体积代价。
+  校验
+  - flutter analyze：No issues；flutter test：29 用例全部通过（其中本机 Host 19 个判据）。
+  - 全仓 TypeScript 测试与版本/文档门禁见发布记录。
+ReleaseNotesUrl: https://github.com/sdcxb/codem/releases/tag/v1.18.13
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
