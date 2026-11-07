@@ -1,0 +1,60 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: LXBStudio.Envoy
+PackageVersion: 1.2.0
+PackageLocale: en-US
+Publisher: LXB Studio LLC
+PublisherUrl: https://github.com/LXBStudioLLC
+PublisherSupportUrl: https://github.com/LXBStudioLLC/envoy/issues
+Author: LXB Studio LLC
+PackageName: Envoy
+PackageUrl: https://github.com/LXBStudioLLC/envoy
+License: AGPL-3.0
+LicenseUrl: https://github.com/LXBStudioLLC/envoy/blob/main/LICENSE
+Copyright: Copyright (C) 2026 LXB Studio LLC
+ShortDescription: Spot ghost jobs before you waste time applying. A private, local app that scores job postings and shows you why.
+Description: 'Envoy is a local Windows desktop app for job seekers. It scores how likely a job posting is a waste of your time (a ghost job) and shows the evidence behind every score. It keeps a scoreboard of your hunt: ghosts dodged, hours saved, your streak, and your application-to-response rate. It also includes a human-gated apply copilot that tailors your resume and fills application forms while you review and submit, and a job search that reads public ATS feeds. Everything runs on your machine and your data stays there.'
+Tags:
+- ats
+- ghost-jobs
+- job-hunting
+- job-search
+- jobs
+- resume
+ReleaseNotes: |-
+  Envoy v1.2.0 — The Applications Escalator
+  The first release since v1.1.0. Envoy refocuses from "ghost-job detector with an apply copilot" to "one profile, one queue, maximum applications filled out with the least hassle" — and every listed item shipped behind green CI (all 17 plan items in docs/APPLY-THROUGHPUT.md).
+
+  One profile, one queue
+  - One-click apply from Find Jobs. Every result row carries APPLY (posting + ghost score travel with the click, tailoring runs without re-scraping) and QUEUE (background).
+  - The application queue. A SQLite-backed queue tailors every queued posting in the background with no browser use at all, then waits for your one-click fill. Live YOUR QUEUE panel: QUEUED → TAILORING… → READY TO FILL → …, with APPLY NOW per row. One active application per company; a daily cap protects against velocity flags (default 25/day).
+  - Multi-resume support. Queue rows carry the profile they were queued for; the worker drains rows across profiles, oldest-first. FIND JOBS gets an APPLY WITH selector; the Dashboard's per-card APPLY routes that profile into the Apply view.
+  - Full-Auto mode (off by default). The queue can submit prepared applications without asking per site — company-owned ATS boards only (a SiteClassifier decides in code; aggregators structurally excluded; unknowns fail closed), trusted hosts only (3 verified submissions or an explicit trust list), optional UTC hour window. CAPTCHAs hand off to you, never solved. The worker stands down whenever a manual fill is using the browser — the human goes first, always.
+  - Generic form auto-fill (LLM field mapper). No template? Envoy enumerates the visible widgets and maps them under strict rules: values only from your profile or a stored answer, selects match an option exactly, everything unmapped is NEEDS-HUMAN. Inventions are rejected structurally.
+
+  Honesty, everywhere
+  - Duplicate prevention (canonical URL + company/title fallback), re-apply only after an explicit prompt that defaults to no.
+  - Honest completion accounting: per-application required/filled counts, verified flag, verification note. A fill that hands the Send to you parks as NEEDS YOUR SEND — never a fake "submitted".
+  - The Scoreboard tracks verified delivery — verified vs "went out but couldn't confirm", stated separately, never folded. Ghosts dodged (with receipts), hours saved, streaks, response rate, and now taps per application — the recorded journey interactions (queued → opened → filled → confirmed) averaged over applications that finished in the last 30 days, formula on screen.
+  - Verified-delivery stats feed the scoreboard; failed captchas and duplicate blocks are never counted as submissions.
+
+  The shell of the product (first-run + tray)
+  - First-run checklist on the Dashboard with a FIX action per step (profile → LLM provider → browser bridge → templates → debug port → first application), auto-hiding when complete.
+  - Tray presence: live queue counts in the tooltip, restore-on-click, OPEN/EXIT menu; closing the window minimizes to the tray so a draining queue keeps running.
+  - Notifications: ready-to-fill, captcha needs you, press-the-site's-submit, queue finished (sent/failed), WARN/PERM public-data refresh completion — coalesced, never a wall of popups.
+  - Night Owl: set the Full-Auto UTC drain window on the Browser page; the worker wakes on the window and drains parked rows — no manual nudge.
+
+  The deep audit (six batches, #97–#104)
+  Six audit passes hardened everything above: honest drain states, page-keep for manual-handoff paths, CDP race removal, JSON-safe JS injection, queue profile stamping, debug-port consistency, profile-only browser kills, outcome-combo revert, transient duplicate blocks, apply-flow mutual exclusion, sort keys on carried data — plus a Full-Auto trust-list fix found by the Night-Owl work (bare-host entries could never match).
+
+  Install
+  - Envoy-v1.2.0-setup.exe — installer (recommended)
+  - Envoy-v1.2.0-win-x64.zip — portable, extract and run Envoy.exe
+  - SHA256SUMS.txt — checksums for both
+  Requirements: Windows 10/11 (64-bit). Chrome, Edge, Brave, Opera, or Vivaldi for the apply bridge. An LLM for tailoring (local Ollama, or a cloud key — stored DPAPI-encrypted, on your machine only).
+  Signed: every binary is Authenticode-signed by LXBSTUDIO LLC via Microsoft Trusted Signing (CN=LXBSTUDIO LLC, O=LXBSTUDIO LLC) with a Microsoft RSA timestamp. Verify with Get-AuthenticodeSignature Envoy.exe (Status: Valid) and compare SHA256SUMS.txt.
+  AGPL-3.0. Your data and logs stay on this PC (%LOCALAPPDATA%\Envoy). Public data only — no scraping behind logins.
+ReleaseNotesUrl: https://github.com/LXBStudioLLC/envoy/releases/tag/v1.2.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
