@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.9.0.schema.json
+# SPDX-License-Identifier: Apache-2.0
+# The portable x86_64 Windows archive was built and smoked on the CI
+# runner, and its real digest and release date are written below by
+# `scripts/publish-release.ps1` from the SHA256SUMS in .dist/. The
+# manifest installs only that portable archive; the aarch64 one ships in
+# the same release for the installer that asks for it. Rewriting from the
+# real archive is what stops a manifest that names one release and pins
+# another's digest from being published.
+PackageIdentifier: danalec.rgy-search
+PackageVersion: 0.1.10.0
+MinimumOSVersion: 10.0.17763.0
+InstallerType: zip
+NestedInstallerType: portable
+NestedInstallerFiles:
+  - RelativeFilePath: searchctl.exe
+    PortableCommandAlias: searchctl
+  - RelativeFilePath: searchd.exe
+    PortableCommandAlias: searchd
+  - RelativeFilePath: rgy-autostart.exe
+    PortableCommandAlias: rgy-autostart
+  # The window: the floating launcher over the daemon.
+  - RelativeFilePath: rgxy.exe
+    PortableCommandAlias: rgxy
+  # The command the project is named after: the same binary, another name.
+  - RelativeFilePath: rgy.exe
+    PortableCommandAlias: rgy
+InstallModes:
+  - silent
+  - interactive
+UpgradeBehavior: uninstallPrevious
+ReleaseDate: 2026-11-07
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/danalec/rgy/releases/download/rgy-v0.1.10.0/rgy-v0.1.10.0-x86_64-windows.zip
+    InstallerSha256: DC5DD5ABF36C8614B1BCF5A4E2A24502B2E9AA0B9DDA0AB3D4B65ADFC0004656
+ManifestType: installer
+ManifestVersion: 1.9.0
