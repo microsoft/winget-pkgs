@@ -1,0 +1,74 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: hsingjui.Pilo
+PackageVersion: 0.3.7
+PackageLocale: zh-CN
+ShortDescription: 简洁的 Pi Coding Agent 桌面客户端，在一个工作区中管理 Local、WSL 与 SSH 项目。
+Description: |-
+  Pilo 是 Pi Coding Agent 的桌面客户端，不重新实现 Agent。它负责在统一工作区中呈现 Connection、Project 与 Pi Session，而会话状态和 Agent 行为仍由 Pi 负责。
+
+  核心能力
+
+  | 能力                               | 为什么重要                                                                                            |
+  | ---------------------------------- | ----------------------------------------------------------------------------------------------------- |
+  | Local、WSL、SSH 统一工作区         | 项目保留在原本的环境中；Pilo 会在所选环境中运行 pilo-server，不需要先把远程项目复制到桌面端。         |
+  | Pi 运行在代码所在环境              | 服务端以项目目录为工作目录启动 pi --mode rpc，Local、WSL 与 SSH 使用一致的交互方式。                  |
+  | Pi 保持事实来源                    | Session 直接读取 Pi 的 JSONL 文件；SQLite 只保存可重建的索引、缓存和桌面状态。                        |
+  | Chat、工具、终端、文件与 Diff 同窗 | Pilo 展示 Pi 的思考与工具调用，并整合 PTY 终端、文件操作、预览端口以及 Git 状态/Diff。                |
+  | 并行 Agent                         | 同一项目可以运行多个 Agent 流，并分别列出、发送消息或停止。                                           |
+  | 原生桌面更新                       | Release 构建会为 Windows x64 与 macOS arm64 生成 updater 产物，Pilo 可以从 GitHub Releases 检查更新。 |
+
+  架构
+
+  Pilo 由桌面应用和运行在目标 Connection 环境中的 pilo-server 组成。Local 直接运行，WSL 通过 wsl.exe，SSH 则向远端部署匹配平台的服务端二进制。桌面端与服务端通过 crates/pilo-protocol 定义的 protobuf Envelope 帧在 stdio 上通信。
+
+  ┌──────────────────────────────┐
+  │        Pilo Desktop          │
+  │       React + Tauri 2        │
+  └──────────────┬───────────────┘
+                │ pilo-protocol / stdio
+                ▼
+  ┌──────────────────────────────┐
+  │          pilo-server         │
+  │   Local | WSL | SSH target   │
+  └──────────────┬───────────────┘
+                │ pi --mode rpc
+                ▼
+  ┌──────────────────────────────┐
+  │       Pi Coding Agent        │
+  └──────────────────────────────┘
+Tags:
+- pi
+- pi-agent
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  v0.3.7
+  新功能
+  - 桌面端新增 Git 变更 Tab，支持查看已暂存、未暂存变更和文件 Diff，移除原右侧栏
+  - 新增文件预览 Tab，支持打开聊天中的文件路径及 WSL、SSH 远程文件链接
+  - 工具活动中的文件路径支持点击打开预览
+  - 新增按需提示词增强，支持按连接配置模型，桌面端与 WebUI 均可使用
+  - 支持设置项目默认模型及思考等级
+  - 聊天新增每轮 Token 用量与费用、可折叠的思考过程及耗时、Todo 任务清单
+  - 支持 Alt+Enter 排队发送，新增桌面插件通知开关
+  - 会话侧栏菜单新增刷新操作
+  优化与修复
+  - 统一图片、文件和会话引用的附件标签，改善输入框高度、删除操作和移动端布局
+  - 改善流式回复自动滚动，减少输入和调整高度时的闪动与跳变
+  - 修复新建聊天重复草稿及会话刷新问题
+  - 修复 Windows 会话路径兼容、终端目录及控制台窗口问题，改善项目模型配置同步
+  - 修复提示词增强结果过期覆盖问题
+  - 修复退出程序时未取消待连接任务的问题
+  - 增强模型无响应保护，优化启动加载与语法高亮体积
+  致谢
+  感谢 @PeterZhang0612 和 @ruanimal 对本版本的贡献！
+  完整变更：https://github.com/hsingjui/pilo/compare/v0.3.6...v0.3.7
+ManifestType: locale
+ManifestVersion: 1.28.0
