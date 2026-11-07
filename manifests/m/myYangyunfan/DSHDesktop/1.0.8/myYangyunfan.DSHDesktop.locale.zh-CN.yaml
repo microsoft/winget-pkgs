@@ -1,0 +1,100 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: myYangyunfan.DSHDesktop
+PackageVersion: 1.0.8
+PackageLocale: zh-CN
+Publisher: deepseek
+PublisherUrl: https://github.com/myYangyunfan
+PublisherSupportUrl: https://github.com/myYangyunfan/dsh_desktop/issues
+PackageName: DSH Desktop
+PackageUrl: https://github.com/myYangyunfan/dsh_desktop
+License: MIT
+LicenseUrl: https://github.com/myYangyunfan/dsh_desktop/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 DSH Desktop contributors
+ShortDescription: 把 DeepSeek Harness (dsh) CLI 与内置 Node.js 运行时打包在一起的桌面客户端。
+Description: |-
+  DSH Desktop 把 DeepSeek Harness (dsh) CLI、完整 Node.js 运行时与全部官方插件打包为开箱即用的桌面客户端。双击即可在原生窗口中启动 dsh web，无需安装 Node.js；关闭窗口后服务在系统托盘中继续运行。提供会话管理、桌面宠物、余额小组件、插件守护与带 sha256 校验的自动更新。
+
+  ✨ 特性
+  开箱即用
+  - 零依赖 — 内置独立 Node 运行时与 npm CLI，目标机器无需安装任何环境
+  - 完整 dsh — 打包 @deepseek-ai/dsh 及全部官方插件，离线可用
+  - 一键启动 — 双击即启 dsh web，优先复用上次端口，就绪后载入原生窗口
+  - 双形态 — 便携版（免安装、可放 U 盘）+ 安装版（桌面/开始菜单快捷方式）
+  体验增强
+  - 深色玻璃无边框窗口 — 自绘标题栏、Win11 圆角，关闭默认隐藏到系统托盘
+  - 桌面宠物 — 随行小鲸鱼常驻桌面，陪伴工作（设置 → 插件可一键开关）
+  - 侧边会话浮窗 — 随时唤起独立会话窗口，与主会话互不干扰
+  - 会话管理 — 归档 / 恢复 / 删除对话，历史不再堆积
+  - 余额小部件 — 对话底部实时显示「本轮费用 · 余额」，支持 OpenCode Go 订阅额度，点击直达充值
+  - 完成通知 — 任务跑完弹系统通知，一分钟内回到主窗口自动跳到对应会话（Windows 通知无点击回调，聚焦即跳转）
+  工程韧性
+  - 守护瀑布 — 内核 boot 链逐级自愈：坏插件自动修复、坏配置自动重建、内核崩溃环原地重启，任何不兼容形态都不退出（v0.5.0 Tauri 架构核心特性）
+  - 崩溃自愈 — 渲染层假死心跳检测自动重载；内核由 supervisor 探活 + 指数退避拉起
+  - 历史兼容 — 自动修补会话事件词汇表，第三方插件写入的事件不破坏会话历史
+  - 自动更新 — 右上角 ⋯ 菜单一键检查并安装客户端更新（双源 GitHub/Gitee Releases 自动切换，sha256 校验 fail-closed，离线静默）；升级安装自动装回旧位置，零配置丢失；内核随客户端整体分发（无独立更新链）
+  - 快捷方式自愈 — 桌面与开始菜单快捷方式缺失即自动补建
+Tags:
+- deepseek
+- deepseek-harness
+- dsh
+- 大模型
+- 大语言模型
+- 智能体
+- 自主智能
+ReleaseNotes: |-
+  DSH Desktop 1.0.8（正式版 · 随包内核换代到 0.2.1-rc.4）
+  本版是正式版：进入 GitHub 的 releases/latest，客户端右上角 ⋯ 菜单的在线更新检查轮询的正是
+  latest，所以存量用户会收到推送。本版只换随包内核：0.2.1-rc.2 → 0.2.1-rc.4（跨过 rc.3），
+  Rust 壳 / 契约 / sidecar / 内置插件代码零改动，在册插件仍是 34 条。
+  🎯 本版重点
+  1. 内核换代 0.2.1-rc.2 → 0.2.1-rc.4：pin / vendor / 锁文件三线同改，353 份离线 tgz
+     （340 个 dsh 包 + 13 个框架件）。家族本轮零撤包——340 个候选包名在 registry 上全部有 rc.4 版本。
+  2. 唯一新包 @deepseek-ai/dsh-client-ui-entry-customization：rc.3 给左栏 / 会话视图 / 右栏各加了
+     一个「更多」菜单（浏览与创建插件），无额外依赖。
+  3. rc.3 修掉一个真实的丢数据路径：「切换会话后点新会话，找不回未发送的草稿」。
+  4. rc.4 只对齐一处口径：DeepSeek API Key 适配器的模型列表刷新方式与账号登录路径对齐。
+  5. 补丁层零重靶：62 项补丁全部在原锚点原位生效，没有一个需要按 rc.4 新字节重录。
+  🔁 内核换代明细
+  - pin 与 vendor：scripts/compat/kernel-pin.json 改 0.2.1-rc.4 / dsh-v0.2.1-rc.4
+    （exact pin，禁止浮动）；vendor/dsh-kernel/ = 353 份离线 tgz（340 dsh + 13 框架件）。
+    每个 tarball 入库前按 registry 的 dist.integrity 校 sha512 + 内嵌 package.json 校 name/version。
+    rc.2 的 339 个 tarball 全部移出，vendor/ 内零混版。
+  - 锁与依赖：package.json 336 条 @deepseek-ai/dsh* 依赖与 package-lock.json 同批重生成
+    （353 个 file: 条目 / 锁内 1021 个包）；validate-pin → ✓ dsh-v0.2.1-rc.4（0.2.1-rc.4，offline-tarball）。
+  - 补丁层：62 项、写入 75 处 / 失配 0 / 失败 0 / 降级 0 / 告警 0；
+    patch-surface verify → 85 个被干预文件与快照一致、零漂移。
+  - 基线锁：ta6-baseline-matrix 的版本键换 0.2.1-rc.4，判定矩阵与 rc.2 逐 id 相同
+    ——43 changed / 14 root / 5 target-absent（共 62 项），零 anchor-missing、零 already、零 THROW。
+  - 内核换代姿势的既有约束仍然有效（v1.0.6 至今）：换代必须真发一条消息才算过门——
+    {{cwd}} 这类提示词变量被上游撤掉时，静态扫描与 boot 全绿而每条 prompt 都会装配失败。
+  📦 随包内置插件
+  - 在册 34 条，本版无版本变动（v1.0.7 已把 DeepSeek-Bot 0.2.0 收进来、移除「临时对话」）。
+  - 统一入口仍在「设置 → 插件 → 内置插件」：查看、启停、检查更新（管理页把自己那一行锁成不可停用，
+    避免用户关掉后无处可开）。
+  ✅ 验证（2026-10-27 实测基线）
+  - Node 侧：scripts/test/ 202 个测试文件，npm test = 2222 例 / 0 fail / 0 cancelled
+    （pass 2213 / skip 9；skip 逐条是环境缺料，如 pristine 夹具缺第三方模型包、本机无兄弟仓库克隆）。
+  - 兼容三闸：check-syntax 全入口通过；validate-pin → ✓ dsh-v0.2.1-rc.4；
+    patch-surface verify → 85 文件零漂移；补丁层 62 项（root 14 + file 48）。
+  - Rust 侧：gnu 链配对实跑，cargo test --workspace --exclude kernel-process 551 passed / 0 failed /
+    3 ignored（30 个 target）+ kernel-process lib 半边 52 passed，合计 603 passed / 0 failed /
+    3 ignored。缺口是 kernel-process 的 4 个集成测试 exe——本机安全软件（Kaspersky）按文件名拦截
+    「未知进程执行新 exe」，属本机环境限制，CI 上补齐；壳代码本版零改动。
+  - 安装布局冒烟与隔离内核实机：换代后按既有判据复跑（boot 五步 / 34 条在册 / 真发一条消息过装配期）。
+  已知问题
+  - dsh-synapse（会话地图）：重启或切换会话时历史回填可能出现空档——宿主下线了 Session 上的
+    events 属性而插件仍读旧字段（不报错、不崩溃）。已登记在内置插件台账 §5.5，本版按裁定未处置。
+  - 两个便携包都不含内置 Node：包内 resources/dsh-desktop/vendor/node/ 是空目录，完整便携版与
+    轻量便携版实为同一份 payload（实测两包条目数与体积逐字节相同）。内核解析链因此回落「系统 Node ≥22」
+    ——用便携版请先装 Node 22+。该缺口自 v0.5.7 起长期存在，安装版不受影响。
+  - Windows ARM64：payload 内原生模块仍是 x64 prebuild，靠 Windows 11 模拟层兜底，标为实验性产物。
+  - 升级安装会先静默卸载旧版：安装器按注册表定位旧安装目录并装回原位置，用户数据（会话、配置）不动；
+    若本机有正在运行的实例，请先退出——托盘常驻时内核 node 仍持有已加载映像，覆盖同名文件可能被系统拒绝。
+  - 补丁面审计噪声（工具链，不影响使用）：scripts/compat/patch-surface.js 的 marker 正则被撇号截断，
+    快照里 49/85 个条目挂在同一条泛化 marker 上，于是每次内核换版会误报 2 个其实从未打过补丁的文件。
+    已在 changelog 登记，修法留单独提交。
+ReleaseNotesUrl: https://github.com/myYangyunfan/dsh_desktop/releases/tag/v1.0.8
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
