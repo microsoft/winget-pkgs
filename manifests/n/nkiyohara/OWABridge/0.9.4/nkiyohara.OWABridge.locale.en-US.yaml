@@ -1,0 +1,83 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: nkiyohara.OWABridge
+PackageVersion: 0.9.4
+PackageLocale: en-US
+Publisher: nkiyohara
+PublisherUrl: https://github.com/nkiyohara
+PublisherSupportUrl: https://github.com/nkiyohara/owa-bridge/issues
+PackageName: owa-bridge
+PackageUrl: https://github.com/nkiyohara/owa-bridge
+License: Apache-2.0
+LicenseUrl: https://github.com/nkiyohara/owa-bridge/blob/main/LICENSE
+ShortDescription: Local-first Outlook Web CLI and MCP server
+Description: Manage an authorized Outlook Web mail and calendar session through a guarded CLI or local MCP server without a Microsoft Graph application.
+Moniker: owa-bridge
+Tags:
+- calendar
+- cli
+- email
+- mcp
+- outlook
+ReleaseNotes: |-
+  Local-first, provider-neutral email and calendar MCP server and CLI for
+  accounts the signed-in human already controls. Verify the checksum,
+  Sigstore identity, and compatibility evidence before connecting a sensitive
+  account.
+  Corresync 0.9.4
+
+  Fixes
+  Outlook Web search previously capped each new result set at the page size,
+  then applied the requested offset. A second page could therefore be empty
+  even when more matches existed. Cross-account search could also report that
+  incomplete set as exhausted. The search window now includes the skipped
+  prefix, the requested page, and one lookahead match, while returned pages
+  remain bounded to 50 items. Contradictory terminal flags cannot hide a larger
+  reported result window; empty non-terminal responses fail explicitly.
+  Synthetic tests cover 5- and 50-item pages, shrinking one-item lookahead,
+  the union and order of 113 results, cross-account completeness, Japanese
+  quoted query preservation, exact archive folder scope, and offset bounds.
+  These regressions address #195.
+
+  Dependencies
+  Refresh the current Go module paths to their latest available versions,
+  including chromedp/cdproto, Kong, go-ical, go-smtp, go-message, Sigstore, and
+  transitive libraries. The compiler is pinned to Go 1.27.3 to satisfy current
+  dependency requirements. CI uses Go 1.27 with updated lint and vulnerability
+  analysis tools. macOS binaries require macOS 13 Ventura or later.
+  The updated segmentio/asm MIT-0 license is verified against its reviewed exact
+  text and included in the release license bundle because the license classifier
+  does not recognize that form. Changed or missing text fails the build.
+
+  Evidence and remaining limits
+  The corrected private Outlook Web request has synthetic coverage; it has not
+  yet received a revision-bound live observation. Provider indexing, ordering,
+  server-side caps, and mailbox changes between requests still affect searches.
+  The reported total may describe only the bounded search window.
+  Archive searches cover one selected folder, not recursive subfolders or a
+  separate online archive mailbox. Japanese queries and date ranges are passed
+  through unchanged. The older-mail/archive and Japanese phrase observations
+  mentioned in #195 remain separate, unconfirmed provider-behavior questions.
+  See the protocol boundary.
+  The #45 review reconfirmed
+  existing tests for service-local expiry, concurrent invalidation, browser-owner
+  loss, monitor invalidation, and no automatic write replay. General sleep/wake
+  recovery and optional elicitation remain outside this patch; #45 stays open.
+  No provider capabilities, consent, preview gates, or live-evidence claims are
+  expanded by this release.
+
+  Upgrade
+  Standalone installations can run corr update. Package-manager installations
+  should use their manager's upgrade command. Restart connected MCP hosts so
+  they load the updated executable. Configuration schema v12 and daemon protocol
+  v29 remain unchanged.
+
+  Contributors
+  Search pagination, dependency refresh, and release preparation by @nkiyohara in
+  #214.
+  Full Changelog
+ReleaseNotesUrl: https://github.com/nkiyohara/corresync/releases/tag/v0.9.4
+InstallationNotes: Run `owa login` interactively, then register your agent with `owa mcp setup <client>`. See the MCP guide for all seven clients and Kimi Code CLI configuration.
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
