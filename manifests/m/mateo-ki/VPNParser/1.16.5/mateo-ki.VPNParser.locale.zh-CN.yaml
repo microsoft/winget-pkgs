@@ -1,0 +1,37 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: mateo-ki.VPNParser
+PackageVersion: 1.16.5
+PackageLocale: zh-CN
+ShortDescription: Windows 桌面程序：采集订阅、解析成节点、跑代理，并把代理质量实测出来。
+Description: VPN Parser 是用 Rust + egui 编写的 Windows 桌面程序，负责采集免费或自建订阅、解析成节点、跑代理，并把代理质量实测出来。订阅入口包括带 `YYYY-MM-DD` 日期占位符的订阅 URL、Gist 搜索页发现，以及 Telegram 频道预览（裸节点链接和订阅链接两类都取，节点只增不删）。解析支持 `ss` `vmess` `vless` `trojan` `hysteria2/hy2` `socks5` `http(s)` 分享链接，以及 Clash / Clash Meta YAML、Base64 与混合文本。延迟以经内核访问 Google `generate_204` 的真实握手为准，24 小时出口健康条按实测绘制，而不是看内核上报的状态。Windows 上它同时管理系统代理、TUN（提权交接后只保留一个实例）和终端 `HTTP_PROXY` 环境变量，按 exe 路径添加防火墙允许规则，支持单实例互斥与托盘，记录出口切换历史并按天统计规则命中，同时提供强制 bearer 鉴权的本地 HTTP API 与 mihomo / sing-box / xray 配置导出。安装包不含内核，内核缺失时由程序按需下载。
+Tags:
+- clash
+- sing-box
+- 代理
+- 出口健康
+- 测速
+- 节点解析
+- 订阅
+ReleaseNotes: |-
+  🚀 VProxy v1.16.5 发布说明 / Release Notes
+  🎉 VProxy v1.16.5 正式发布！本版本重点提升了故障可诊断性（完整错误链透传）、修复了应用内更新的重启竞态，并适配升级内置 Shoes v0.3.5 内核 (PR #11)：
+  🔍 诊断体验：GUI 错误提示完整错误链透传
+  - anyhow 错误链全量透出：
+    - 代理启停、配置读写保存、节点切换等失败时，状态栏不再只显示顶层 context（例如干巴巴的“Mihomo Rhai 覆写失败”），而是透传完整错误链直至内核原始报错，一处报错即可定位根因；
+    - 启动/停止/热切换失败详情同步落档 startup.log，崩溃与失败留档可回溯。
+  📝 配置覆写：Rhai 脚本缺 return 精确提示
+  - unit 返回前置拦截：
+    - Rhai 覆写脚本忘写 return config; 时，不再报晦涩的执行错误，而是前置拦截并精确提示“fn main(config) 必须以 `return config;` 结尾（或改用直接操作 config 变量的扁平语句写法）”；
+    - Mihomo/YAML 覆写失败的错误提示附带修复入口指引（「代理 → 策略组 → 配置」修复或清空脚本）。
+  🔄 应用内更新：安装前体面停止内核
+  - 修复更新重启竞态：
+    - 触发应用内更新时，先体面停止代理内核再交棒安装器；此前安装器强杀进程会使内核被 Job Object 连坐终止、状态残留，导致更新重启后代理连续秒败；
+    - 更新前的停止失败不再阻断更新流程，失败详情落档 startup.log。
+  👟 Shoes 内核升级至 v0.3.5 (PR #11)
+  - client 策略组字段破坏性变更适配：
+    - Shoes v0.3.5 将 client 策略组的 strategy 字段更名为 type 且无兼容别名，编译器已同步适配，并用真实内核双向 dry-run 实证通过；
+    - 内置锁定版本 SHOES_TAG 升级至 v0.3.5，三平台离线兜底摘要与体积同步更新。
+ManifestType: locale
+ManifestVersion: 1.28.0
