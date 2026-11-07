@@ -1,0 +1,86 @@
+# Created with winget manifest schema v1.9.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+# winget locale manifest (en-US) - JHYY 4.1.4
+#
+#
+# v4.1.0 起:**不再需要 MSYS2** —— installer 自带一份最小原生 MSYS2 ucrt64
+# 工具链(gcc + binutils + CRT + 编译器自用的头文件闭包),装在
+# <INSTALLDIR>\toolchain\。装完即可 `jhyy compile hello.jhyy`。
+# 之前需要自己装 MSYS2 + ucrt64 GCC(而且 MSI 有硬门槛,没装根本装不上)。
+
+PackageIdentifier: JiHuiYiYou.JHYY
+PackageVersion: 4.1.4
+PackageLocale: en-US
+Publisher: JiHuiYiYou
+PackageName: JHYY Compiler
+License: MIT
+ShortDescription: JHYY (机会翼游) — statically-typed language + bootstrapping compiler for Windows
+Description: |-
+  JHYY (机会翼游) is a statically-typed programming language with a self-bootstrapping compiler.
+  The compiler is written in JHYY itself (self-hosting closure achieved since v1.0.0),
+  targeting amd64 Windows with its own in-memory x86-64 backend (no QBE since v4.0.0).
+
+  This installer bundles the jhyy.exe production binary, a **self-contained minimal
+  MSYS2 UCRT64 GCC toolchain** (gcc + binutils + CRT + the C headers the compiler
+  itself needs), a VSCode extension (.vsix, auto-installed if `code` is on PATH),
+  .jhyy file association, and Start Menu shortcuts.
+
+  **No MSYS2 installation required** - the toolchain ships with the compiler
+  (v4.1.0+). Set JHY_GCC=<path to gcc.exe> or put "JHY_GCC=<path>" into
+  %JHYY_HOME%\env.txt if you want to use your own GCC instead.
+
+  Build instructions and source code: https://github.com/JiHuiYiYou/JiHuiYiYou-compiler
+  Language spec: docs/abis/jhyy-lang-spec-v4.0.0.md
+Moniker: jhyy
+Tags:
+  - compiler
+  - programming-language
+  - bootstrapping
+  - statically-typed
+ReleaseNotes: |-
+  v4.1.4: the compiler stops computing the wrong answer silently - call
+  arguments past the 16th were discarded (a 20-argument sum returned 117
+  instead of 210), SysV stack arguments overwrote the caller's own locals,
+  the floating-point stack-argument path clobbered %xmm15 (callee-saved
+  under SysV), and a range pattern with identifier endpoints silently
+  matched everything while binding a symbol literally named '..'. Path
+  buffers are bounded and byte-wise, the stderr pipe no longer deadlocks,
+  a user program's stderr is no longer swallowed, and deeply nested
+  expressions are rejected with an error instead of a stack overflow. The
+  CLI tells the truth, the gates stop being green by construction, and the
+  release chain pins its ref, its actions and its tool versions.
+  v4.1.3: integer semantics fixed - u32/u64 division and remainder are
+  unsigned, signed >> is arithmetic, u32 -> i64 zero-extends, and integer
+  literals are evaluated exactly as u64 (an out-of-range literal is now a
+  compile error instead of a silent saturation); std::fmt prints
+  i64::MIN/i32::MIN and every u32 in full; module-level 64-bit globals keep
+  their value. Also: the benchmark suite (9 tasks, 4 coverage axes) and a
+  differential gate that is now a real regression gate. The fix uncovered
+  three self-hosting bugs, all fixed.
+  v4.1.2: fixes a documentation bug - "jhyy --version" never existed as a
+  command (it printed "unknown command" and exited 1). Use "jhyy --help"
+  instead; its first line is the version banner. The compiler's own banner
+  was also stale (it still said v1.8.3.2 / v2.5.0) and now matches the
+  release. Version numbers are now kept in sync automatically from a single
+  VERSION file, with a CI gate that fails on drift.
+  Also: "jhyy --help" used to describe "compile" and "build" the wrong way
+  round - "compile" is the one that links and produces the .exe, "build" only
+  compiles (.s, no link). To get an executable, run "jhyy compile x.jhyy".
+  v4.1.1: the VSCode terminal profile now points at a bash this installer
+  DETECTS (MSYS2 -> Git for Windows -> PATH) instead of VSCode's built-in
+  "bash (MSYS2)" profile, whose path is hardcoded and never falls back - users
+  whose MSYS2 lives elsewhere used to get "the terminal profile is not
+  available". New jhyy-bash.cmd launcher starts that bash with jhyy on PATH.
+  v4.1.0: the installer now ships a minimal native MSYS2 UCRT64 toolchain, so
+  MSYS2 is no longer required - installing this package is enough to compile
+  and run .jhyy programs. BREAKING CHANGE: the default gcc is now the bundled
+  one instead of the one on your machine; set JHY_GCC (or %JHYY_HOME%\env.txt)
+  to keep using your own.
+  Also: prebuilt runtime objects (link time 5045ms -> 531ms), a gcc-resolution
+  trace line on link failures, and the MSYS2 prerequisite removed from the MSI
+  (previously a machine without MSYS2 could not install the compiler at all).
+  See docs/archive/logs/v4/changelog-v4.0.0.md for the full changelog.
+ReleaseNotesUrl: https://github.com/JiHuiYiYou/JiHuiYiYou-compiler/blob/main/docs/archive/logs/v4/changelog-v4.0.0.md
+PurchaseUrl: https://github.com/JiHuiYiYou/JiHuiYiYou-compiler
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
