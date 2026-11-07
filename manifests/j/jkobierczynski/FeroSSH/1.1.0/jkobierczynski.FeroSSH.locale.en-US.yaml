@@ -1,0 +1,68 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jkobierczynski.FeroSSH
+PackageVersion: 1.1.0
+PackageLocale: en-US
+Publisher: Jurgen Kobierczynski
+PublisherUrl: https://github.com/jkobierczynski
+PublisherSupportUrl: https://github.com/jkobierczynski/FeroSSH/issues
+Author: Jurgen Kobierczynski
+PackageName: FeroSSH
+PackageUrl: https://github.com/jkobierczynski/FeroSSH
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/jkobierczynski/FeroSSH#licence
+ShortDescription: A native, sandboxed SSH client for Windows with tabs, splits, tmux integration and file transfer.
+Description: |-
+  Secure connections. Forged in Rust.
+
+  FeroSSH is a native, open-source SSH client for Windows that locks every connection in its own AppContainer sandbox, away from your keys and files. It gives you tabs, splits, tmux integration, port forwarding, snippets and file transfer in one signed exe of about 4 MB, with nothing to install. There is no runtime and no Electron, Qt or Java inside. Everything is tested in CI against real OpenSSH, tmux, Telnet, xrdp and VNC servers.
+
+  Why another SSH client
+  An SSH client reads whatever a server sends it, and on most clients the code that does that runs with all of your rights. FeroSSH is built so that a malicious or compromised server gets as little as possible:
+  - One sandbox per connection. Each connection, and each jump host on the way, runs in its own worker process inside an AppContainer. The worker can reach the network and nothing else. It cannot read your files or your keys, and it asks the window for every signature.
+  - A window that never parses network data. Workers run with no Win32k system calls, Control Flow Guard, CET shadow stacks where the CPU has them, no dynamic code and a memory cap. "ferossh --check-sandbox" shows what your Windows allows.
+  - Modern crypto first. Post-quantum mlkem768x25519-sha256 key exchange comes first. SHA-1, CBC, DSA and ssh-rsa signatures are not offered by default; older switches and routers can be allowed per host, and their tab is marked.
+  - Your keys stay where they are. Windows OpenSSH agent, Pageant, key files, FIDO2 security keys and passkeys (including your phone). Passwords come from the Windows Credential Manager, 1Password, Bitwarden, KeePassXC or your own command; FeroSSH never stores one itself.
+  - Fuzzed every night. Every parser that sees network data has a fuzz target.
+
+  What it does
+  - A quiet terminal: one pane and no tab strip until you need more. Split in any direction, drag tabs and panes, and choose font, size and one of 44 colour themes per tab and pane. Production servers can turn red and staging amber automatically.
+  - Your sessions, wherever they are now: ~/.ssh/config works as it is, including ProxyJump and ProxyCommand. Import saved sessions from PuTTY, KiTTY, WinSCP, MobaXterm, mRemoteNG and SecureCRT, give sessions names of their own, and set a start directory per host.
+  - More than SSH: serial consoles and Telnet for network gear, and remote Linux desktops tunnelled through SSH.
+  - Files and ports: SFTP in a side pane with drag and drop, a resumable queue and search; ZMODEM; local, remote and SOCKS forwards you can change while connected; X11 forwarding.
+  - tmux, natively: tmux windows and panes become real FeroSSH tabs and panes with native scrollback, and tmux's own prefix keys can drive them.
+  - Less typing: a command palette, command snippets with variables and expect steps, runs on many hosts at once, login scripts and broadcast input.
+  - It stays connected: after a Wi-Fi change or sleep the tab logs in again by itself, and forwards, tmux and transfers pick up where they left off.
+  - Logs you can trust: a log file per tab, optional timestamps, and a SHA-256 hash chain that shows whether a log was changed afterwards.
+
+  The exe is signed with a Certum Open Source code signing certificate, builds are reproducible, and each release has build provenance attestations.
+Moniker: ferossh
+Tags:
+- ssh
+- ssh-client
+- sftp
+- telnet
+- serial
+- terminal
+- tmux
+- putty-alternative
+- port-forwarding
+- sandbox
+ReleaseNotes: |-
+  FeroSSH 1.1 is about working faster in tmux and in many tabs.
+  - tmux keybindings for tabs and panes (Session > Use tmux keybindings for tabs and panes, off by default).
+  - Window > Split right/down in same directory.
+  - Find (/) and resizable sections in the file transfer view.
+  - A start directory per host (Start dir field, StartDir in ferossh.conf).
+  - Name your sessions: Window > Rename session, double-click a tab, or F2 in the Session manager.
+  - Session > Save this pane's output to a log, or the output of all panes.
+  - 30 more colour themes, 44 in all, each with text contrast of at least 4.5:1.
+  - A Tools menu for the Connection manager, Session manager, File transfer, Port forwards, Command snippets and Command palette.
+  - A complete user guide.
+  - Fixed: tmux in the Connection manager is now an on/off switch with a separate tmux name; Session manager and side pane toggles respond at once.
+ReleaseNotesUrl: https://github.com/jkobierczynski/FeroSSH/releases/tag/v1.1.0
+Documentations:
+- DocumentLabel: User guide
+  DocumentUrl: https://github.com/jkobierczynski/FeroSSH/tree/main/docs/guide
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
