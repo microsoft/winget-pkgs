@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: dividebysandwich.SDROxide
-PackageVersion: 1.6.11
+PackageVersion: 1.7.0
 PackageLocale: en-US
 Publisher: Josef Jahn
 PublisherUrl: https://github.com/dividebysandwich
@@ -42,52 +42,69 @@ Tags:
 - software-defined-radio
 - transceiver
 ReleaseNotes: |-
-  New Features
-  - Digi: JTTY, the WSJT-X 3.2 asynchronous text mode. It searches 1200-1800 Hz plus the operator's own frequency, logs one line per message and says why a TX was refused, by @madmedicnl in https://github.com/dividebysandwich/sdroxide/pull/597
-  - Translations: the interface is available in Spanish, French, German, Italian, Portuguese, Dutch, Russian, Turkish, Chinese and Japanese, with bundled fonts for Chinese and Japanese. Pick the language in Settings > UI
-  - 3D view: the date is shown beside the UTC and local clocks (#686)
-  - SSTV: ten transmit image slots, laid out in two rows (#753)
-  - Memories: CLEAR deletes every memory channel at once (#755)
-  Other Changes
-  - Wavelog: upload QSOs, sync the logbook and report radio status directly by @joscandreu in https://github.com/dividebysandwich/sdroxide/pull/666
-  - TX Audio chain for Mic by @joscandreu in https://github.com/dividebysandwich/sdroxide/pull/700
-  - Sstv image upload to FTP by @joscandreu in https://github.com/dividebysandwich/sdroxide/pull/701
-  - BUG FIX: AGC and BW filters not properly propagated to the ICOM radios by @joscandreu in https://github.com/dividebysandwich/sdroxide/pull/712
-  - Add a Hardrock amplifier panel and ELAD FDM-DUO power controls by @AJ3G in https://github.com/dividebysandwich/sdroxide/pull/717
-  - SmartSDR: settle the DAX IQ rate on the radio's packets, not the requ… by @NosDE in https://github.com/dividebysandwich/sdroxide/pull/721
-  - Add an outbound TCI client that follows the dial by @kingsqueak in https://github.com/dividebysandwich/sdroxide/pull/725
-  - Bug fix: Text not being sent over SSTV by @joscandreu in https://github.com/dividebysandwich/sdroxide/pull/757
-  - SmartSDR: built-in ATU control, an SWR bar in the tune box, and SWR/power meter fixes by @NosDE in https://github.com/dividebysandwich/sdroxide/pull/728
-  - Fix JS8 heartbeat acknowledgements for received compound frames by @erikdewildt in https://github.com/dividebysandwich/sdroxide/pull/730
-  - Record completed JS8 transmissions in conversation history by @erikdewildt in https://github.com/dividebysandwich/sdroxide/pull/731
-  - FT8: decode as the slot arrives, Deep at WSJT-X's checkpoints (mfsk-core 0.14) by @joscandreu in https://github.com/dividebysandwich/sdroxide/pull/737
-  - Implemented the option to accept self-signed certificates for wss by @joscandreu in https://github.com/dividebysandwich/sdroxide/pull/739
-  - PlutoSDR: LO power on open and between overs, no false disconnect after an over by @slomkowski in https://github.com/dividebysandwich/sdroxide/pull/747
-  - Digi: pad a short receive period before decoding it by @slomkowski in https://github.com/dividebysandwich/sdroxide/pull/748
-  - Satellites: QO-100 NB transponder spans the full 500 kHz, beacons per AMSAT-DL by @slomkowski in https://github.com/dividebysandwich/sdroxide/pull/749
-  - Band plan: optional label for a sub-segment by @slomkowski in https://github.com/dividebysandwich/sdroxide/pull/750
-  - Implement translations via fluent by @joscandreu in https://github.com/dividebysandwich/sdroxide/pull/742
+  Highlights
+  VARA HF
+  SDROxide now speaks VARA HF, the connected-mode ARQ modem that most Winlink RMS gateways and VarAC stations run. The modem is xara, an open, MIT-licensed implementation of the VARA HF protocol by its author, built right into SDROxide - there is no separate modem program to install, no virtual audio cable and no extra PTT wiring. It works with any radio SDROxide can transmit on, SDR or sound-card rig.
+  Choose VARA HF from the DIGITAL row. Two stations make a link, then trade bursts and acknowledgements, and the speed climbs and falls with the path. It is always upper sideband, centred on 1500 Hz of audio, at one of three widths: 500, 2300 (what most gateways run) or 2750 Hz.
+  There are three ways to drive it, one at a time:
+  - The VARA panel: call a station and type to it, as in VarAC's chat. STATUS shows the session state (LISTENING, CALLING, CONNECTED), TX while keyed, BUSY while someone else is heard on the channel, and the peer, width, speed level and net bit rate, the far station's S/N and the bytes moved. TUNE sends a steady tone for an antenna tuner, ABORT drops a link at once.
+  - The MAIL window: forward Winlink mail through an RMS gateway over HF - set the route to Radio (VARA HF) and name the gateway.
+  - Your own software on VARA's TCP ports: turn on TCP host and SDROxide answers on 8300 (commands) and 8301 (data) the way VARA HF does, so Pat (vara:///CALL), Winlink Express or VarAC can use this radio as their VARA modem with no change on their side. The ports listen on localhost only. While an external program holds the modem, the panel's terminal shows its commands and the modem's replies, so you can watch the session go by.
+  ⚙ SETUP holds the station call (with optional SSID), the bandwidth, Registered (unlocks the speed levels above 4, for operators who own a VARA licence), retries, CW ID at the end of a link, the transmit latency the turnaround timing depends on (Auto picks a value for SDRs and sound-card rigs), and whether to answer incoming calls.
+  While VARA HF runs, SDROxide reads the receiver in small blocks so the modem hears the far end from the moment its own over ends, which an ARQ handshake depends on. The panel and setup page are translated into every language.
+  VARA HF support is experimental and brand new. Tests and bug reports with this mode are very welcome - links to gateways and VarAC stations, sessions driven from Pat or Winlink Express, and how it behaves on your radio. Please open an issue with the log and a description of what happened. See the manual, section 3.27, and chapter 11 for Winlink.
+  Window management: undocked modules, tool windows, workspaces
+  Parts of a radio's screen can now move into OS windows of their own, ported from madmedicnl's sdroxide-brown:
+  - Undocked modules (Settings > UI): the panadapter, a second spectrum (AUX SP, with its own zoom and layers), the operating panel, the control strip and the band/mode selector can each go to their own window. Whatever stays in the main window takes the space back, and closing a module's window docks it again.
+  - Tool windows (settings, logbook, scanner, memories, spots, satellites and more) get a ⇱ in their title bar that moves them into an OS window, and remember it.
+  - Floating operating panel: the panel can float over the main window, so a tiling window manager cannot lose it.
+  - ▣ chip: shows on the System row while something is out of the main window. Left-click brings everything home, right-click lists every module and where it is.
+  - Workspaces: save a window arrangement under a name and put it back later, also with Ctrl+Alt+1…9, 0. Ctrl+Alt+W opens the window list and Ctrl+Alt+F floats or docks the panel.
+  - Every window has a stable application id for compositor window rules; the manual lists them with niri and i3 examples.
+  Your own filter presets
+  Right-click a filter preset chip in the BW popup to make it your own: give it a label and its low and high edges, or take the receiver's current filter with Use current. Each mode keeps its own presets, and Reset brings back the built-in. (#761)
+  TCI Client follows the radio
+  The outbound TCI client now also listens: turning the knob on the far radio moves SDROxide's dial, with echoes of its own tuning filtered out. (#760)
+  Upgrading a client/server station
+  The remote protocol version moves from 189 to 190 (the VARA HF mode, commands and status). Update the server and every native remote client together; the browser client is served by the server and updates with it.
+  What's Changed
+  - VARA HF: new experimental mode on the vendored xara modem, with its own panel, setup page, a Winlink route in the MAIL window and a VARA-compatible TCP host on ports 8300/8301
+  - Window management: undocked modules, tool windows in OS windows, a floating operating panel, workspaces and window keys, ported from sdroxide-brown by @joscandreu in https://github.com/dividebysandwich/sdroxide/pull/766
+  - Window management: the window keys are not read while a text field has focus, so AltGr typing (Ctrl+Alt on Windows) no longer triggers them; tool windows remember whether they were in their own window
+  - Filter presets: right-click a chip to make it your own by @kingsqueak in https://github.com/dividebysandwich/sdroxide/pull/761
+  - Filter presets: an open editor holds the BW popup and closes with it; the editor is translated into every language
+  - TCI Client: follow the radio when it is tuned from its own side by @kingsqueak in https://github.com/dividebysandwich/sdroxide/pull/760
+  - TCI Client: a heard frequency the dial has already tuned past is dropped, and sent echoes are pruned on every send
+  - Audio, receive-only modes, network buffering: fixes backported from sdroxide-brown by @joscandreu in https://github.com/dividebysandwich/sdroxide/pull/765
+    - a renamed or missing sound card is reported instead of silently becoming the default
+    - the engine refuses to key the transmitter in a receive-only mode (WEFAX, NAVTEX, ACARS, ADS-B and others) by any route, and the TX controls are hidden there (#239)
+    - the web client no longer stutters on a healthy network, and HPSDR gets a receive socket sized for I/Q
+    - SSTV, WEFAX, Hell and RF Paint are excluded from the auto-notch, which was cancelling the picture
+    - zooming the panadapter out past the window no longer shakes it
+    - a logbook shared between tabs is kept when there is no store to re-read
+  - Audio device swap: an ambiguous match between two cards of the same model is refused, and a renamed card asks to be picked again
+  - Desktop: links in the app open in the system browser by @HDZucht in https://github.com/dividebysandwich/sdroxide/pull/780
+  - Waterfall: spot labels stack above the band-plan strip and the memory marks by @HDZucht in https://github.com/dividebysandwich/sdroxide/pull/781
+  - Full-band strip: the tuned frequency is marked in magenta, with triangles on the edges by @HDZucht in https://github.com/dividebysandwich/sdroxide/pull/782
+  - FT8: the action row (CALL CQ, STOP QSO, STOP TX) stays inside the window by @HDZucht in https://github.com/dividebysandwich/sdroxide/pull/788
+  - RTL-SDR: less CPU work converting samples, which helps on a Raspberry Pi by @0xPr0ton in https://github.com/dividebysandwich/sdroxide/pull/784
   Bug Fixes
-  - Audio: reopen a microphone whose stream the host broke, so an IC-705 transmits again (#707)
-  - CW: a PTT release ends a keyed over in the keyer instead of leaving it latched, fixing CW keying and PTT state with a MIDI keyer (#716)
-  - Engine: the rig's drive report is no longer adopted while keyed, so TUNE stops overwriting the Drive setting (#741)
-  - SDRplay: empty the receive ring at unkey, so the end of every over is no longer replayed as receive (e.g. in FT8) (#697)
-  - Hermes Lite 2 IO board: tell it the dial frequency on open and resend a lost receive-input write, fixing transverter and drive issues (#444)
-  - T/R switch: pace LCUS relay frames and restate the band word while off air, so BCD band patterns work on USB serial relay modules (#627)
-  - Satellites: a 1k2 AFSK link is now tuned in APRS mode rather than USB on CAT rigs (#651)
-  - Globe: mouse-wheel zoom works straight away instead of waiting for a VIEW focus chip to be clicked (#702)
-  - Public SDRs: a search without a literal match now falls back only to close fuzzy matches instead of listing unrelated receivers (#756)
-  - SmartSDR: clear the radio's own-TX flag on reconnect
-  - Remote TLS: hand-edited certificate pins are normalised, and the openssl hint is shown as plain text
-  - Follow-up fixes to new features in this release: the TCI client no longer blocks on shutdown and limits how long it drains reads; Icom AGC is skipped in FM; the Wavelog download stops at an empty page; ELAD/Hardrock drive is scaled correctly on the USB gateway and amp band changes wait until off air; TX audio presets keep the limiter
+  - SSB/CW passband: the filter length follows the bandwidth, so a narrow CW filter has narrow skirts (#758)
+  - Band stacks: a band left by a dial move (a digital mode's band chip, a typed frequency) is now recorded on its stack (#762)
+  - (tr)uSDX: key with TX0 when the audio rides the CAT link, so the host's audio goes out instead of the mic (#724)
+  - HPSDR: fall back to a broadcast discovery when a board ignores the directed probe (#744, #789)
+  - Radio tabs: ⊞ on the only pane opens a split with the next radio instead of doing nothing (#763)
+  - TX Audio: the pages scroll under a pinned meter strip, so the window fits the screen and can be dragged shorter (#790)
+  - Memories: CLEAR stays armed for five seconds instead of disarming when the pointer leaves it (#755)
+  Documentation
+  - VARA HF: a new manual section (3.27), the Winlink chapter's VARA route and the TCP host
+  - Window management: undocked windows, the floating panel, workspaces and window rules for tiling window managers
+  - Elecraft: RX SHFT is a menu entry on the KX3 itself, not a control in SDROxide and not on a K3 (#774)
   New Contributors
-  - @AJ3G made their first contribution in https://github.com/dividebysandwich/sdroxide/pull/717
-  - @NosDE made their first contribution in https://github.com/dividebysandwich/sdroxide/pull/721
-  - @kingsqueak made their first contribution in https://github.com/dividebysandwich/sdroxide/pull/725
-  - @erikdewildt made their first contribution in https://github.com/dividebysandwich/sdroxide/pull/730
-  - @slomkowski made their first contribution in https://github.com/dividebysandwich/sdroxide/pull/747
-  Full Changelog: https://github.com/dividebysandwich/sdroxide/compare/v1.6.10...v1.6.11
-ReleaseNotesUrl: https://github.com/dividebysandwich/sdroxide/releases/tag/v1.6.11
+  - @HDZucht made their first contribution in https://github.com/dividebysandwich/sdroxide/pull/780
+  - @0xPr0ton made their first contribution in https://github.com/dividebysandwich/sdroxide/pull/784
+  Full Changelog: https://github.com/dividebysandwich/sdroxide/compare/v1.6.11...v1.7.0
+ReleaseNotesUrl: https://github.com/dividebysandwich/sdroxide/releases/tag/v1.7.0
 Documentations:
 - DocumentLabel: User Manual
   DocumentUrl: https://github.com/dividebysandwich/sdroxide/blob/HEAD/docs/USER_MANUAL.md
