@@ -1,0 +1,55 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: feigeCode.Navop
+PackageVersion: 0.18.6
+PackageLocale: en-US
+Publisher: feigeCode
+PublisherUrl: https://github.com/feigeCode
+PublisherSupportUrl: https://github.com/feigeCode/navop/issues
+Author: feigeCode
+PackageName: Navop
+PackageUrl: https://github.com/feigeCode/navop
+License: Apache-2.0 and Navop License
+LicenseUrl: https://github.com/feigeCode/navop/blob/main/NAVOP_LICENSE
+ShortDescription: A native, all-in-one workspace for databases, SSH, SFTP, terminals, remote desktop, monitoring, and AI.
+Moniker: OnetCLI
+Tags:
+- ai-agents
+- clickhouse
+- dameng
+- duckdb
+- iotdb
+- kingbase
+- markdown
+- mermaid
+- mssql
+- mysql
+- notes
+- oracle
+- port-forwarding
+- serial
+- sftp
+- sqlite
+ReleaseNotes: |-
+  更新内容
+  - 数据库对象列表支持全选与拖选。表、视图、存储过程等对象现在可以 Shift 点击或用鼠标拖选多行，Cmd/Ctrl 拖选在已有选择上继续追加，来回拖动区间可正常收缩。修掉了两处交互问题：在列表外松开鼠标时不再沿用旧锚点截出错误区间；Shift 点击只把目标行滚动到最近位置，不会再把可见行整块顶走。
+  - PostgreSQL 支持外部表和物化视图。此前 PG 连接的表目录写死只列普通表，外部表与分区表根本列不出来，物化视图也没有入口（视图列表不含它），用户已经建好的对象在 Navop 里等于不存在。现在外部表与普通表、分区表同处「表」目录，类型列分别显示 Table / Partitioned Table / Foreign Table，物化视图单独一个目录；重命名、清空、删除、转储等右键动作按对象类型分别生成 SQL，非 public schema 下也带 schema 限定名，不会把 DROP TABLE 打到外部表上。外部表不参与结构比较、数据比较、ER 图与整库 DDL 转储（数据转储仍可用）。
+  修复与优化
+  - 修复 SQL 页签无法并发执行的问题。A 页签执行时 B 页签就连不上，即使 B 连的是另一台库——根因是整张会话表共用一把锁，取到连接后要一直持有到语句执行结束，等于所有页签排队。会话池的复用与释放还有三处并发缺陷：释放与下一条语句交错时会把正在执行的会话标成空闲，随后被清理回收（报 session not found）；复用扫描一个正在跑长语句的会话会连带堵住其它页签；会话被并发摘除时会重复断开连接。现在锁粒度降到每个会话各自的连接，会话状态查询不再等待执行中的语句，复用与生命周期按引用计数同步，一条语句恰好占用与释放一次。同一会话内仍保持互斥。
+  - 修复 MySQL 文本列被显示成二进制的问题。连接某些 MySQL 兼容实现或代理时，结果列元数据里的字符集为 0，取不到解码器就一律降级成二进制，文本列在网格里显示为「二进制 · N B」，表结构元数据、自定义 SQL 与 UNION ALL 结果同样受影响，而这些字节其实是合法 UTF-8。现在字符集未知时按严格 UTF-8 兜底解码，非法 UTF-8 或含控制字符的字节仍保留二进制。
+  - 修复 SSH 目录上传小文件过慢的问题。上传每个文件固定要付 6 次控制往返（stat / open / fsync / fstat / close / rename），串行执行时吞吐由网络往返延迟决定而不是带宽，且任何时刻只有一个文件在传。现在小文件走受限并发（并发度 6），超过 512 KiB 的文件独占预算、行为与串行时一致，不会在内存里堆积未确认字节；失败语义不变，出错后不再接纳新任务、等在飞任务跑完再返回，避免残留暂存文件。进度累计改为全局原子量，并发上报时不再回跳。
+  - 修复 macOS 上关闭内置远程编辑器导致应用崩溃的问题。Intel Touch Bar 机型上关闭编辑器弹窗必现崩溃：原生窗口被销毁后，系统在显示周期里注销 Touch Bar 观察者时抛出未捕获异常，进程被直接终止。现在 macOS 上关闭不再销毁原生窗口，改为隐藏并复用，下次打开直接复用该窗口；同时把连接改为按标签持有，修掉跨会话复用会走错连接的问题，旧弹窗的确认也不会作用到复用后的新会话上。
+  国内下载：如果 GitHub 下载较慢，可从 CNB 镜像 下载桌面端安装包
+  What's New
+  - Database object lists now support select all and drag-select. Tables, views and stored procedures can be Shift-clicked or drag-selected as multiple rows, Cmd/Ctrl drag-select adds to the existing selection, and dragging back and forth shrinks the range as expected. Two interaction bugs are fixed as well: releasing the mouse outside the list no longer reuses a stale anchor and cuts out a wrong range, and Shift-click scrolls the target row just into view instead of pushing the visible rows away.
+  - PostgreSQL foreign tables and materialized views are now supported. The table catalogue for PG connections was hard-coded to ordinary tables only, so foreign and partitioned tables simply never showed up, and materialized views had no entry point at all because the view list does not include them — objects the user had already created did not exist in Navop. Foreign tables now live in the same "Tables" folder as ordinary and partitioned tables, with the type column showing Table / Partitioned Table / Foreign Table, and materialized views get their own folder. Rename, truncate, drop and dump actions generate SQL according to the object type and are schema-qualified outside public, so DROP TABLE is never issued against a foreign table. Foreign tables are excluded from schema comparison, data comparison, ER diagrams and whole-database DDL dumps (data dumps still work).
+  Fixes and Improvements
+  - Fixed SQL tabs not being able to execute concurrently. While one tab was running, no other tab could execute even when connected to a different database: the whole session table shared a single lock, held from acquiring the connection until the statement finished, so every tab queued behind it. The session pool also had three concurrency defects: releasing a session interleaved with the next statement could mark a running session as idle, which was then reclaimed by the idle sweep (surfacing as "session not found"); scanning for a reusable session blocked other tabs when it hit one running a long statement; and a concurrently detached session could be disconnected twice. Locking is now per-session on the connection itself, session state queries no longer wait for a running statement, and reuse and lifecycle are synchronized by reference counting so a statement acquires and releases exactly once. Mutual exclusion within the same session is preserved.
+  - Fixed MySQL text columns being displayed as binary. When connecting to some MySQL-compatible implementations or proxies, the character set in the result column metadata is 0, so with no decoder available every column was downgraded to binary and text columns showed up as "二进制 · N B" in the grid. Table structure metadata, custom SQL and UNION ALL results were affected in the same way, even though the bytes were valid UTF-8. Unknown character sets now fall back to strict UTF-8 decoding; bytes that are not valid UTF-8 or contain control characters still stay binary.
+  - Fixed SSH directory uploads being slow with many small files. Every uploaded file costs six control round trips (stat / open / fsync / fstat / close / rename), so serial execution made throughput depend on round-trip latency rather than bandwidth, and only one file was ever in flight. Small files now use bounded concurrency (6 in flight), while files above 512 KiB take the whole budget and behave exactly as before, so unacknowledged bytes are not piled up in memory. Failure semantics are unchanged: after the first error no new task is accepted and in-flight ones are awaited before returning, which keeps temporary files from being left behind. Progress accumulation is now a global atomic counter, so concurrent reports no longer jump backwards.
+  - Fixed the app crashing on macOS when closing the built-in remote editor. On Intel Touch Bar models closing the editor dialog crashed every time: after the native window was destroyed, the system unregistered the Touch Bar observer during a display cycle and threw an uncaught exception, terminating the process. Closing no longer destroys the native window on macOS — it is hidden and reused, and reopening reuses that window. Connections are now held per tab, fixing cross-session reuse hitting the wrong connection, and a confirmation from a previous dialog can no longer act on the reused session.
+  Full Changelog: v0.18.5...v0.18.6
+ReleaseNotesUrl: https://github.com/feigeCode/navop/releases/tag/v0.18.6
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
