@@ -1,0 +1,75 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: Concourse.Fly
+PackageVersion: 8.3.3
+PackageLocale: en-US
+Publisher: Concourse
+PublisherUrl: https://github.com/concourse
+PublisherSupportUrl: https://github.com/concourse/concourse/issues
+PackageName: Concourse Fly
+PackageUrl: https://github.com/concourse/concourse
+License: Apache-2.0
+LicenseUrl: https://github.com/concourse/concourse/blob/HEAD/LICENSE.md
+ShortDescription: Concourse CI/CD manager and controller
+Tags:
+- ci
+- ci-cd
+- concourse
+- continuous-delivery
+- continuous-integration
+- elm
+- go
+- hacktoberfest
+- pipelines
+ReleaseNotes: |-
+  ## 📦 Bundled Resource Types
+
+  <details>
+
+  • bosh-io-release：[v1.3.7](https://github.com/concourse/bosh-io-release-resource/releases/tag/v1.3.7)
+  • bosh-io-stemcell：[v1.7.2](https://github.com/concourse/bosh-io-stemcell-resource/releases/tag/v1.7.2)
+  • docker-image：[v1.13.4](https://github.com/concourse/docker-image-resource/releases/tag/v1.13.4)
+  • git：[v1.24.1](https://github.com/concourse/git-resource/releases/tag/v1.24.1)
+  • github-release：[v1.14.3](https://github.com/concourse/github-release-resource/releases/tag/v1.14.3)
+  • hg：[v1.5.7](https://github.com/concourse/hg-resource/releases/tag/v1.5.7)
+  • mock：[v0.14.8](https://github.com/concourse/mock-resource/releases/tag/v0.14.8)
+  • pool：[v1.8.4](https://github.com/concourse/pool-resource/releases/tag/v1.8.4)
+  • registry-image：[v1.19.1](https://github.com/concourse/registry-image-resource/releases/tag/v1.19.1)
+  • s3：[v2.5.7](https://github.com/concourse/s3-resource/releases/tag/v2.5.7)
+  • semver：[v2.0.5](https://github.com/concourse/semver-resource/releases/tag/v2.0.5)
+  • time：[v1.11.6](https://github.com/concourse/time-resource/releases/tag/v1.11.6)
+  </details>
+
+  <!-- Release notes generated using configuration in .github/release.yml at dd12761a4654b060d05bb7f4669ac562f5a6d200 -->
+
+  ## ⚠️ Behavior Changes
+
+  • **OIDC providers with RSA keys larger than 4096 bits.** The fix for CVE-2026-116587 makes go-jose reject RSA keys larger than 4096 bits. Concourse reads the whole key set from your provider's `jwks_uri`. If any key in that set is larger than 4096 bits, every login through the OIDC connector (`--oidc-*` / `CONCOURSE_OIDC_*`) fails with `oidc：failed to decode keys: ... modulus too large`. Large hosted providers use 2048-bit keys. Check self-hosted providers, such as Keycloak with imported keys, before you upgrade. Concourse's own keys are not affected, including the session signing key and the ID-token signing keys.
+  • **A negative `--concurrent-request-limit` now stops the web node from starting.** For example, `ListAllJobs:-1` now makes the web node exit at startup with `panic：semaphore: size < 0`. Before, a negative limit made every request to that endpoint return 503. To disable the endpoint, use `0`, which returns 501. To limit it, use a positive number. This comes from golang.org/x/sync v0.24.0, which the x/net fix requires.
+
+  ## 🛡️ Security Fixes
+
+  • `concourse` binary：CVE-2026-116587 (go-jose), CVE-2026-78669, CVE-2026-78661 and CVE-2026-97045 (golang.org/x/net), and CVE-2026-84445 (gRPC).
+  • `gdn`：CVE-2026-111943 (built with go1.27.3).
+  • Bundled resource types：CVE-2026-111497 (brotli) in every resource type except git, which already had the fix. Also CVE-2026-111943 and CVE-2026-114613 (pip) in hg, and CVE-2026-116587 (containerd) in docker-image.
+
+  ## 🔓 Known Vulnerabilities
+
+  The bundled `containerd` and `runc` binaries are built from their latest upstream releases (containerd v2.4.2, runc v1.5.2). Those releases still carry vulnerable Go dependencies. We will pick up fixed versions in a later patch release once upstream ships them.
+
+  | Binary | CVE | Dependency |
+  |---|---|---|
+  | `containerd` | CVE-2026-116587, CVE-2026-78669 | go-jose/v4 v4.1.5, golang.org/x/net v0.58.0 |
+  | `containerd-shim-runc-v2`, `ctr` | CVE-2026-78669 | golang.org/x/net v0.58.0 |
+  | `runc` | CVE-2026-46600, CVE-2026-78669 | golang.org/x/net v0.55.0 |
+
+  ## What's Changed
+  ### 🐞 Bug Fixes
+  • 8.3.x：Bump go-jose/v4, x/net and grpc to fix CVE-2026-116587, CVE-2026-78669, CVE-2026-84445 by @drich10 in https://github.com/concourse/concourse/pull/9779
+
+
+  **Full Changelog**：https://github.com/concourse/concourse/compare/v8.3.2...v8.3.3
+ReleaseNotesUrl: https://github.com/concourse/concourse/releases/tag/v8.3.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

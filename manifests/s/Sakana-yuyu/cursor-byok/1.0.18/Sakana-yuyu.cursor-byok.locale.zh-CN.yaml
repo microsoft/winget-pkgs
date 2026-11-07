@@ -1,0 +1,41 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Sakana-yuyu.cursor-byok
+PackageVersion: 1.0.18
+PackageLocale: zh-CN
+Publisher: Sakana
+PublisherUrl: https://github.com/Sakana-yuyu
+PublisherSupportUrl: https://github.com/Sakana-yuyu/cursor-byok/issues
+PackageName: Cursor助手
+PackageUrl: https://github.com/Sakana-yuyu/cursor-byok
+License: MIT
+LicenseUrl: https://github.com/Sakana-yuyu/cursor-byok/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 leookun
+ShortDescription: 面向 Cursor 的本地模型适配、代理网关、用量统计与 Agent 工作台。
+Description: 把自己的模型 API 接入 Cursor，在本地完成供应商管理、协议适配、模型路由、用量统计、自动委派和问题排查。Cursor 本身负责优秀的编辑器与 Agent 体验，Cursor助手负责把模型连接与本地运行链路整理好：你可以继续使用 Cursor 的工具调用和任务工作流，同时自由选择官方 API、兼容网关或自建服务。
+Tags:
+- byok
+- cursor
+- 代理
+ReleaseNotes: |-
+  v1.0.18
+  修复
+  - 配置保存可能永久挂起：模型「测试成功自动恢复 / 测试失败自动停用」时，保存队列里的一个自等待缺陷会让本次会话之后的所有配置保存静默挂起（界面显示已改，实际未落盘）。已修复。
+  - 应用退出丢失最近统计：退出时不再丢最近约 2 秒的 token 用量与本地响应缓存变更，关机前统一冲刷落盘。
+  - 更新包下载失败残留临时文件：Windows 上删除仍被打开的文件会失败，导致每次下载/校验失败都在 %TEMP% 残留一个完整更新包；现在先关闭句柄再删除。
+  - 识图代理异常闪退：自动识图处理单条消息发生内部异常时兜底保留原消息继续转发，不再崩掉整个后台进程。
+  - 余额汇总异常出现空白行：批量余额查询中某渠道内部异常时仍显示该渠道名称与地址。
+  安全
+  - Web 抓取内网防护加强：拦截「域名解析到内网/本机地址」的绕过（如 127.0.0.1.nip.io），并把 CGNAT 段（100.64.0.0/10）纳入拦截范围。
+  优化
+  - 统计准确性：防抖落盘窗口内的用量事件不再被重复累计（磁盘与内存快照重叠时按事件 ID 去重）；磁盘持续故障时待写队列有硬上限，不再无界增长。
+  - 流式响应更稳更快：本地响应缓存落盘移出锁外，落盘期间不再阻塞并发请求（消除偶发首字延迟毛刺）；四个 SSE 解析器的逐块读超时改为每流一个复用定时器，降低长对话下的分配与 GC 压力；外部 API 流式转发复用读缓冲。
+  - 连接与内存治理：所有 MCP 连接共享一个底层连接池（频繁断线重连不再堆积空闲 socket）；代理 Transport 注册表改弱引用，探测/测速产生的历史连接池可被正常回收；委派任务后台轮询在保存配置重建/退出时立即停止。
+  - 其他：配置档案写入改唯一临时文件 + Sync 后原子替换；模型可用性探测重置后丢弃进行中的旧结果；mitm 请求转发省两次整包拷贝；清理委派标题死代码。
+  开发
+  - 修复一个在 CI 快机上偶发失败的测试时序竞态；-tags benchmark 编译失败（方法重复声明）。
+  Windows 用户注意：安装时若被 SmartScreen 拦截，点击「更多信息」->「仍要运行」即可。
+ReleaseNotesUrl: https://github.com/Sakana-yuyu/cursor-byok/releases/tag/v1.0.18
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
