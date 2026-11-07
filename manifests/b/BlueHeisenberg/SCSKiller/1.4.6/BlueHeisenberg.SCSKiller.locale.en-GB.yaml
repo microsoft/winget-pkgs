@@ -1,0 +1,94 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: BlueHeisenberg.SCSKiller
+PackageVersion: 1.4.6
+PackageLocale: en-GB
+Publisher: The SCSKiller authors
+PublisherUrl: https://github.com/BlueHeisenberg
+PublisherSupportUrl: https://github.com/BlueHeisenberg/SCSKiller/issues
+PrivacyUrl: https://scskiller.com/privacy/
+PackageName: SCSKiller
+PackageUrl: https://scskiller.com/
+License: GPL-3.0-or-later
+LicenseUrl: https://github.com/BlueHeisenberg/SCSKiller/blob/HEAD/LICENSE
+Copyright: Copyright (C) 2026 The SCSKiller authors
+CopyrightUrl: https://scskiller.com/legal/
+ShortDescription: Compiles your games' shaders into your GPU driver's cache before you play, so the game doesn't stop to compile them mid-game.
+Description: |-
+  SCSKiller reads the shaders a game ships with, works out the pipelines it will build, and compiles them into your driver's shader cache ahead of time, from its own process and with the game closed. When you launch the game, they're already there.
+
+  Features
+  - NVIDIA and AMD. DirectX 12 games, and DirectX 11 games on NVIDIA.
+  - Finds your games in Steam, Epic Games, EA app, GOG, Ubisoft Connect, Xbox (PC), Battle.net, PURPLE, HoYoPlay and Gaijin.
+  - Knows which games stutter: the library puts known offenders on top, with the reason.
+  - Recompiles after driver updates: a driver update clears the shader cache, and SCSKiller notices and compiles again, on its own if you let it.
+  - Optional recorder for games whose pipelines cannot be worked out from their files: play a few minutes with it on, then compile.
+  - Frame times per session: with the recorder on, a game's page graphs your last session and tells the shader stutters apart from other hitches.
+  - Play button in the Library and on a game's page: starts the game through its store.
+  - Never touches anti-cheat games beyond reading their files: no launching, no injecting, no recorder.
+Tags:
+- amd
+- directx-12
+- gaming
+- gpu
+- nvidia
+- shader
+- shader-compilation
+ReleaseNotes: |-
+  This build isn't code-signed yet, so the first run will probably show SmartScreen's "Windows protected your PC".
+  Click More info, then Run anyway. Updates never show it.
+  To check the download arrived whole, compare its SHA-256 with the one at the end of these notes (PowerShell:
+  Get-FileHash <file>). These notes aren't signed, so that doesn't prove who built it. The source: https://github.com/BlueHeisenberg/SCSKiller/tree/v1.4.6.
+  Smart App Control (Windows 11) blocks unsigned apps outright, with no Run anyway.
+  Improved
+  - A compile writes far less to disk. A small top-up writes a few MB where it rewrote the whole plan, and the plan stays in
+    RAM when there's room.
+  - The question about deleting a game's old shader cache comes before a compile you start, not after it ends, and it no
+    longer recommends deleting. Keep it is the default, and a compile nobody answers for goes on.
+  - SCSKiller asks once whether you'd like to support it on Patreon, after 3 days of use and a compile that did its job,
+    never during a compile, with a game open or when signed in with Patreon.
+  Improved on Windows
+  - A game whose compile only waits for one run of the game shows as Warmed, with a line telling you to launch it once and
+    close it.
+  - A running game whose compile waits for its exit shows as Warmed with "Close the game first", and a damaged compile
+    shows as Needs rebuilding.
+  - The background shader read after a compile stays within the background memory limit.
+  Fixed
+  - A compile no longer restarts forever around one spot when memory runs short.
+  - A compile whose process is killed from outside goes on from where it stopped.
+  - Stopping a compile ends it cleanly instead of showing it as failed.
+  - A compile with plenty of free RAM no longer restarts to free memory, and a restart no longer repeats what it finished.
+  - A small plan change after an update no longer marks a compiled game Needs rebuilding. Fewer new pipelines than 1% of its
+    plan, at least 500, wait for its next compile.
+  Fixed on Windows
+  - With NVIDIA, a first compile of Hogwarts Legacy without a recording reaches the game from its first launch.
+  - With AMD, a compile with nothing to do no longer makes a working game show Needs rebuilding after its next launch.
+  - With NVIDIA, a first launch after a first compile without a recording no longer reads Stale for pipelines the compile
+    already made.
+  - An AMD game no longer stays Not compatible after one launch. It offers a compile again, and Clear cache always does.
+  - With NVIDIA driver 621 or later, a game whose compile is working no longer shows as Not compatible.
+  - With NVIDIA driver 621 or later, a lost compile shows as gone on Windows 10 and Windows 11 23H2 instead of staying
+    compiled.
+  - A shader cache restored from a backup or copied across drives no longer shows as partly gone.
+  - On Hades II, the recorder goes beside the exe Steam starts.
+  - The game page's "in use" figure no longer counts a shader cache file another process holds as full.
+  - A game whose store entry names a launcher or Epic's bootstrapper is detected by its real exe.
+  - The Cache page no longer names an old entry on a game's rows when the game now lists under another store, and deleting
+    that row keeps the old entry's own data.
+  - Remove recorders no longer warns about Vulkan registrations on a PC that never used the Vulkan recorder.
+  Fixed on Linux
+  - Clear cache removes what a compile placed in Steam's files and every set in the game's folder, and a game launched after
+    its compile keeps its own cache working.
+  - A compile goes on after pipelines hang the NVIDIA driver, where it ended with its cache half used, and the game page says
+    how many pipelines weren't compiled when a compile ends early.
+  - A compile too large for Steam's files no longer writes its whole placement twice.
+  - A Faugus game on Proton-CachyOS compiles without Steam's copy of the Steam Linux Runtime.
+  - The game page says Steam reads a game's cache only after a launch confirms it. With Steam's Shader Pre-caching off, the
+    note to turn it on shows during the launch.
+  - Turning off Steam's Shader Pre-caching no longer makes the next compile replay everything.
+  - A compile that runs out of room during Steam's pipelines counts only the ones it reached, so its coverage is no longer
+    overstated.
+ReleaseNotesUrl: https://github.com/BlueHeisenberg/SCSKiller/releases/tag/v1.4.6
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
