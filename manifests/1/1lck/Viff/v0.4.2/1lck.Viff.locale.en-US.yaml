@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: 1lck.Viff
-PackageVersion: v0.4.1
+PackageVersion: v0.4.2
 PackageLocale: en-US
 Publisher: Viff contributors
 PublisherUrl: https://github.com/1lck
@@ -21,30 +21,34 @@ Tags:
 - subversion
 - svn
 ReleaseNotes: |-
-  Viff 0.4.1 improves startup and branch actions, and fixes notifications and history reading.
+  Viff 0.4.2 adds in-app editing for working-tree text files, and fixes commit-time time zones, invalid encoding, and clock format.
   Highlights
-  This release reduces startup and background refresh waits and makes branch double-click behavior configurable.
+  This release turns the read-only file viewer into an optional editor, shows commit times in the local time zone, and lets you choose a 24- or 12-hour clock.
   ✨ New features
-  - Double-clicking a branch filters the log by default; enable checkout on double-click in settings, or use the context menu to check out.
+  - Edit UTF-8 text files in the working tree from the file viewer: press Edit (⌘E), save with ⌘S, revert with Revert, and return with Done while keeping line numbers, horizontal scrolling, and syntax colours.
+  - A save re-reads the file and refuses to overwrite an external change; line endings, a UTF-8 BOM, and file permissions stay intact.
   ⚡ Improvements
-  - Reduce startup waits for remote repository paths and version probes, and refresh less often in the background on some platforms.
-  - Name the file manager action Finder, File Explorer, or File Manager for the current system.
+  - Commit times now follow the local time zone, and settings can switch between a 24- and 12-hour clock.
+  - Welcome-screen search now also matches repositories in the workspace, and the recent-project limit rises from 20 to 50.
   🛠 Fixes
-  - Hide notification balloons while a dialog is open and show them again after it closes, so they do not cover buttons.
-  - Release the history reader process when reading finishes, reducing files held open in the repository.
+  - Invalid UTF-8 bytes in a commit message are replaced instead of making the whole log view fail.
+  - Cross-time-zone comparisons no longer show today's commit as yesterday.
   Upgrade instructions
+  - Upgrading from v0.4.1: the settings file format is unchanged, so existing settings keep working.
   - macOS: choose the Apple Silicon or Intel DMG, quit the old version, open the DMG, and replace Viff.app in Applications.
   - Windows: quit the old version and run the x64 installer.
   - Windows portable: extract the archive, enter its directory, and run viff.exe without installing.
-  - Debian/Ubuntu: run sudo apt install ./viff-v0.4.1-linux-amd64.deb.
+  - Debian/Ubuntu: run sudo apt install ./viff-v0.4.2-linux-amd64.deb.
   - Linux portable: extract the archive, enter its directory, and run ./viff after installing the required system libraries.
   - Install Git separately on PATH, and check the release guide for Linux dependencies.
   Compatibility and known issues
   - macOS requires version 13 or later; Linux needs a working graphical session, rendering backend, and the system libraries listed in the release guide.
   - The macOS app is ad-hoc signed without Developer ID signing or notarization; the Windows installer is not Authenticode signed, so the system may show a security prompt.
+  - In-app editing supports only UTF-8 text files in the working tree, up to 1 MiB for both the original file and the saved text; historical revisions, diffs, and conflicts stay read-only, and there is no completion, multi-cursor editing, or autosave.
+  - Real Windows/Linux input-method testing, saving in WSL repositories, and full desktop acceptance remain outstanding; headless CI is not a complete desktop compatibility claim.
   - On Windows and Linux, external working-tree file changes may take up to about 30 seconds to refresh; WSL repositories use a separate polling interval.
   - Subversion property editing and locking are not implemented; the integrated terminal and content search for WSL repositories still run on Windows.
   Install only files from the project release page after checking their checksums; verify the source if the operating system blocks them.
-ReleaseNotesUrl: https://github.com/1lck/viff/releases/tag/v0.4.1
+ReleaseNotesUrl: https://github.com/1lck/viff/releases/tag/v0.4.2
 ManifestType: defaultLocale
 ManifestVersion: 1.28.0
