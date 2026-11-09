@@ -1,0 +1,65 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: MoeruAI.AIRI
+PackageVersion: 0.14.0
+PackageLocale: en-US
+Publisher: moeru
+PublisherUrl: https://moeru.ai/
+PublisherSupportUrl: https://github.com/moeru-ai/airi/issues
+PackageName: AIRI
+PackageUrl: https://airi.moeru.ai/docs/
+License: MIT
+LicenseUrl: https://github.com/moeru-ai/airi/blob/HEAD/LICENSE
+Copyright: © Moeru AI 2026
+ShortDescription: Re-creating Neuro-sama, a container of souls of AI waifu / virtual characters to bring them into our worlds.
+Tags:
+- ai
+- live2d
+- vtuber
+ReleaseNotes: |-
+  v0.14.0 Highlights
+  Thanks to @chiba233, @Daeil-Jung, @louisjia2008-ux, @Weathercold, and @LemonNekoGH for their contributions this release.
+  Product updates
+  Voice
+  - You can now call your character. In the web and mobile apps, press + in the composer and choose a voice call. AIRI listens the whole time and sends each thing you say right away, with no drafts. Mute stops new input but keeps the call open. On desktop web, the call has a panel above the composer and turns into a small capsule when you minimize it. On phones, the capsule sits under the header with hang-up, a timer, and a waveform.
+  - One microphone button for every voice mode. The web and mobile composers had drifted into different voice controls, including a hover menu, a full-screen blurred hold-to-record overlay, and a separate Hearing drawer. Now there is one microphone in the composer. Tap it to use the current mode. Long-press or right-click it to switch modes or turn on Auto send.
+    - Dictation (default): the button becomes a stop button, and the waveform and timer appear beside it. Live text shows in the card above the composer and no longer jumps around inside the text field.
+    - Walkie-talkie: the text field becomes a hold-to-talk bar. Drag up to cancel.
+    - Voice message: records audio, like before.
+    - No mode covers the page with a backdrop anymore.
+  - A real "Use microphone" switch. Some of you saw the system microphone light turn on when you hadn't asked AIRI to listen. That's worrying, and the old controls only stopped listening without closing the microphone. You can now turn microphone use off from the composer voice menu, the Island controls, the mobile Hearing drawer, or Hearing settings. When it is off, every recording stops at once, and nothing can open the microphone until you turn it back on. It also blocks voice calls and ends a call in progress.
+    - We also stopped three cases where AIRI opened the microphone on its own: hovering the voice button, opening the mobile Hearing drawer, and turning on microphone input (which opened it twice).
+  - Your first words are no longer cut off. If you started talking the moment recording began, AIRI could lose the start of what you said, especially on a busy page. Recording now starts capturing much sooner.
+  Desktop app
+  - The voice card and listening capsule were hard to read over a busy desktop because their background was very see-through. They now have a solid, readable background in both light and dark mode.
+  - When the chat dock stood beside the danmaku feed, it jumped about 20px every time it opened or closed. It now stays in place. The closed bar is also wider and easier to find, and button focus rings no longer get clipped.
+  - Update channel fix: if you switched from Dev to Canary in About and installed the Canary installer, the app could still start the Dev build after restarting, with the Dev badge still showing. It now starts the build from the channel you installed.
+  Characters and stage
+  - On the Live2D stage, the presence bubble could hide behind the model, for example when you zoomed in until the head left the canvas. The bubble now always shows in front.
+  - Minecraft: when AIRI dropped an item for you, someone else picking up any item could make AIRI stop waiting and report a timeout even though you got it. AIRI now keeps waiting until you pick it up.
+  Look, language, and polish
+  - Status messages (errors, warnings, success, loading) now look the same everywhere. About 35 hand-made banners used four different warning colors, and some broke in one color mode. For example, the Discord, X, and gaming "configured" boxes stayed light green in dark mode, and extension errors were unreadable on light backgrounds. They now share one consistent style that stays readable on see-through panels.
+  - Some banner text that was stuck in English is now translated.
+  - Chinese text in settings could mix two fonts, so some characters looked bold. This happened when your system language list put Japanese first. AIRI now tells the system which language it shows, so each language gets one font.
+  - The Korean translation is fixed and up to date. The sign-in button said "sign up", and eight connection settings were still in English. The Korean README now links to the Korean blog and docs pages.
+  - The chat panel on wide screens is now a more comfortable width.
+  Under the hood
+  - Your recipes (skills) and long-term memories are now stored in IndexedDB, with one record per entry, instead of one big localStorage list that had a few megabytes of room. Existing data moves over automatically on first launch, and your recipe IDs stay the same. Changes now sync between open windows. A window that is out of date can't undo a deletion made in another window. Two memories can also no longer clash because they share a name.
+  To contributors
+  - APP_IGNORE_FOCUS=1 opens stage-tamagotchi windows without taking focus or bringing the app to the front, so Vishot, testing-audio, and agent-browser runs don't steal your keyboard. testing-audio and pnpm capture:tamagotchi turn it on by default. Set APP_IGNORE_FOCUS=0 to test focus behavior.
+  - @proj-airi/ui Alert is the shared component for status messages, with info, success, warning, and danger tones. Callout is now only for intros and tips. The stage-ui Alert, ErrorContainer, and stage-pages StatusBanner are removed. DESIGN.md documents the rule.
+  - Backdrop surfaces: a component now marks itself as a backdrop surface with useBackdropSurface(element) and paints its own fill. The desktop app draws native glass behind it. This replaces the kind-based useWindowBackdrop and the !important opacity overrides. See docs/ai/adr/2026-10-29-backdrop-surfaces.md.
+  - @proj-airi/stream-kit (internal) now has buffers, trackers, and a catch-up feed for event streams. A catch-up subscriber whose listener throws is now removed.
+  - The web voice composer and call design is recorded in docs/ai/adr/2026-10-29-web-voice-composer-and-call.md. There is a new Voice Presence Histoire story, and stories now follow Histoire's dark mode.
+  - Test reliability:
+    - The flaky voice-messages browser test is fixed (the shared capture AudioContext plus explicit timeouts), and the unneeded vitest.browser.setup.ts is removed.
+    - Static asset path tests now compare real paths.
+  - Dependencies:
+    - kirie 0.15.2 pulled in a second Vite and a second copy of vue-router. On main, airi.moeru.ai and accounts.airi.build then failed to load. kirie 0.15.3 fixes this. This bug was never in a release.
+    - @ergosphere-it/electron is updated to 0.0.16.
+    - The Nix pnpmDeps hash is updated.
+  Full Changelog: https://github.com/moeru-ai/airi/compare/v0.13.1...v0.14.0
+ReleaseNotesUrl: https://github.com/moeru-ai/airi/releases/tag/v0.14.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

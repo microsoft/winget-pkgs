@@ -1,0 +1,78 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: SteveTheKiller.KillerPDF
+PackageVersion: 1.9.0
+PackageLocale: en-US
+Publisher: Steve the Killer
+PublisherUrl: https://github.com/SteveTheKiller
+PublisherSupportUrl: https://github.com/SteveTheKiller/KillerPDF/issues
+Author: Steve the Killer
+PackageName: KillerPDF
+PackageUrl: https://github.com/SteveTheKiller/KillerPDF
+License: GPL-3.0
+LicenseUrl: https://github.com/SteveTheKiller/KillerPDF/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Steve the Killer
+ShortDescription: PDF editor for Windows. No account, no subscription, no telemetry.
+Description: KillerPDF is a free, open-source PDF editor for Windows. View, annotate, edit text and paragraphs, OCR, merge, split, sign and verify signatures, fill and build forms, redact, protect, compare, print and flatten PDFs, export them to Word, Excel, PowerPoint, HTML or Markdown, and repeat the work with macros, watched folders and the command line, all without an Adobe subscription. WinGet installs machine-wide; the downloadable installer also supports per-user installation, and a separate portable build is available. Document processing stays on your computer, with no account, no subscription, and no telemetry. Open source under GPLv3.
+Moniker: killerpdf
+Tags:
+- dotnet
+- gplv3
+- ocr
+- opensource
+- pdf
+- pdf-editor
+- portable
+- redaction
+- windows
+- wpf
+ReleaseNotes: |-
+  1.9.0 "Overkill" replaces PDFium with KillerPDF's own engine and expands document editing, conversion, security and automation.
+
+  ### Security
+
+  - Redaction removes covered vectors and sensitive descriptions from affected content, and refuses output when form values, descriptions or undecodable content cannot be safely removed. Marks survive page edits and Undo; macro approvals remain tied to the source document, and unattended runs stop when rasterization needs approval (#341, #343).
+  - Signature verification separates expiry from failed trust, checks trusted timestamps for historical validity, and reports authority identity and offline revocation evidence. Embedded certificates never become trust anchors.
+  - Legacy Office conversion disables VBA macros. Translation test files load as text, unsafe HTML-export links stay inert, and scripts can supply PDF passwords through standard input.
+  - Table exports and batch CSV reports prevent document values and filenames from becoming spreadsheet formulas.
+  - Command-line edits honor the permissions of a PDF opened with its user password, as Acrobat does; the owner password lifts them.
+  - Forwarded file opens are restricted to the same Windows account and session. Installation rejects folders containing unrelated or unverified files, and portable updates no longer run a helper script from the temp folder.
+  - Updates install only a release whose checksum line names exactly the downloaded file, whose version is the offered release and newer than the running copy, and whose valid signature names the installed copy's publisher, so updates keep working after the publisher's certificate is renewed. The installer is checked again just before it starts, and portable updates roll back when the new launcher cannot be confirmed.
+
+  ### Fixed
+  - Update and uninstall helpers load PowerShell modules only from Windows' own folder, so a module planted in your Documents cannot run inside them as administrator; a failed uninstall reports the real reason and retries when a copy is still running; a stalled update says so instead of silently doing nothing; and the window no longer freezes while an update is handed off.
+  - An update that cannot finish because the app did not close says so in its recovery report, the Update button stays off once an update has started, and a translation file can no longer give a setting the wrong kind of value.
+  - The elevated part of an update compiles its helper code in a folder only administrators can open, so another program running as you cannot slip code into it, and an update that finished is no longer reported as failed when the app cannot be reopened afterward.
+  - An all-users installation applies automatic updates again. The elevated update step opened a second copy of the app as administrator instead of installing, and the verified download was thrown away once that copy closed.
+
+  - The tray icon's menu opens from the pointer upward, out of the notification area, the same way in every Killer app. A short menu no longer covers the tray icons and a taller one no longer floats about 40 pixels above them.
+  - Saving, flattening, extraction, printing, production layouts, Data Merge and current-document macros retain pending edits and page rotations. Incremental saves rebuild damaged cross-reference chains, including compressed and encrypted documents. Protection, batch resaves and optimization report repairs to broken references without claiming missing content was recovered. Failed or canceled document writes preserve existing outputs, with recovery copies retained after failed replacements; Save As and Extract Pages enforce the PDF extension (#433, #450).
+  - Close prompts protect active text and keep documents open after cancellation or save failure, including Windows sign-out and shutdown. Saving detects outside changes even when file size and timestamp match; browser downloads ask for a destination, splitting protects the source, and Bates batches reject output collisions. Esc no longer closes the app.
+  - Saving a new blank document asks where to save it. It used to write Untitled.pdf into whatever folder KillerPDF was started from, and Compare no longer offers an unsaved new document.
+  - In Two-Page view, the second page of a newly opened document's first spread shows at full size. It used to appear at about a third of the first page's size, and stayed small after paging away and back.
+  - A tab that had not loaded yet opens its document when you drag it to the other pane or out into a new window, instead of showing an empty pane.
+  - A comparison reads the same saved file the right pane shows, and F9 no longer changes the sidebar while in full screen.
+  - New document tab names, file-type lists, the damaged-file and read-only prompts, and recent-file dates follow the app language and your region. The repair prompt on opening a file no longer says the file couldn't be added.
+  - Command-line search reports a document it cannot read instead of zero hits, batch resave refuses to write over its own input, an unusable --dpi or option value is reported as bad usage (exit 2), and --dpi reads a period as the decimal point in every region.
+  - On a computer with both a per-user and an all-users copy, answering the duplicate-installation prompt at startup no longer closes KillerPDF. The prompt now appears over the open window.
+  - A file opened once with forward slashes in its path, from a script or another program, no longer shows up twice in the recent files list.
+  - A comparison started away from the first page opens both documents on that page, with the changes marked in both panes, instead of showing the second document from its cover. A page jump made while a document is still loading also stays put.
+  - The comparison details name both documents by their file names instead of the temporary working copy's generated name.
+  - Dialog title bars match the rest of the dialog in every theme except 98SE. They had their own band, a lighter strip in Light and a gradient in several dark themes, and the title bar painted its film grain twice.
+  - A visible digital signature shows on the page. The viewer used to leave it out and draw a Sign box over the signed field instead.
+  - A new text box starts at the same width on every screen. On large or high-resolution displays it used to start a few words wide and wrap almost every word.
+  - Undo and Redo track saved content and preserve annotation identity. Failed page rotations, moves, transforms, scan straightening and file insertion leave edits and history intact and report the error. Deleting pages keeps the nearest survivor in view and cannot remove the final page. Page dialogs retain the selected split pane. Stamps belong to their document, support Undo and survive tab, pane and window transfers. Tabs from separate windows restore together with the original window's size and position, including after an update when remembering files is disabled. Manually closed tabs stay closed, and closed windows release their document resources and event subscriptions.
+  - Signing captures current edits, gives unsaved documents a durable output folder, and preserves form appearances in external readers, including blank fields. Signatures bind the certificate and record the correct time across locales. Unchanged signed copies preserve captured bytes. Co-signing chooses prepared fields without repeated tree scans; Sign and Protect confirm overwrites. Field choices honor cancellation and document changes, timestamp reads honor the request timeout, and the saved-signature library survives write failures.
+  - Fixed crashes when switching themes, restoring a maximized window, and selecting mirrored or upside-down text. Open dialogs update their captions, frames, grain and buttons when the theme changes, and their Close buttons support keyboard and accessibility actions. Search, redaction and cropping also use corrected bounds for that text (#437, #452, #453).
+  - File dialogs open correctly in packaged builds, stay responsive on slow or crowded folders, recover from missing typed folders, cancel stale loads and identify incomplete listings.
+  - Footer and toolbar tools remain reachable in narrow windows, including larger app sizes. Hover tooltips clear large pointers and keep custom placement intact.
+  - Improved source-document checks, tab ownership and cancellation for background document operations. Failed merges preserve other panes' pending edits, and completed background work keeps its owning pane visible (#329, #330, #342, #343, #436).
+  - Protected PDFs request their opening password and decrypt readable content before display. Improved damaged-PDF opening and saving, including cross-reference tables, encryption dictionaries, crop boxes, object generations and unusual dates. Recoverable repeated pages retain independent comments, widgets, tagged form graphics and tag relationships with unique registered identities while sharing form values; separate tagged pages keep their comments and identity links. Merge, Split and Extract read damaged files that open in the viewer, and accept additional Type 3/CID fonts, gradient boundaries and common font metric defects; page import errors identify the source PDF (#406, #455).
+  - Fixed truncated rendering beyond the cached page-content limit, bounded malformed JBIG2 and deeply repeated forms, and improved raster-export recovery and missing-content reports. Compatibility rendering recovers from invalid line styles, transforms, text-state commands and unsupported image or mask sizes. Printing and image export name any page whose content could not be drawn exactly instead of refusing it; the command line refuses such pages unless --allow-incomplete is passed.
+  - Corrected JPEG 2000 decoding with CoreJ2K 2.4.1, damaged JPEG filters, CCITT markers, JBIG2 refinement and clipped scan columns.
+
+  The full release notes are at https://github.com/SteveTheKiller/KillerPDF/releases/tag/v1.9.0
+ReleaseNotesUrl: https://github.com/SteveTheKiller/KillerPDF/releases/tag/v1.9.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

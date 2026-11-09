@@ -1,0 +1,126 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: armbian.imager
+PackageVersion: 2.5.0
+PackageLocale: en-US
+Publisher: Armbian
+PublisherUrl: https://github.com/armbian
+PublisherSupportUrl: https://github.com/armbian/imager/issues
+Author: SuperKali
+PackageName: Armbian Imager
+PackageUrl: https://github.com/armbian/imager
+License: GPL-2.0
+LicenseUrl: https://github.com/armbian/imager/blob/HEAD/LICENSE
+ShortDescription: Armbian’s cross-platform utility for flashing OS images to storage media.
+Description: |-
+  This tool simplifies the process of writing Armbian OS files to SD cards, USB
+  drives, or eMMC modules, featuring a user-friendly interface tailored for
+  Armbian users.
+Tags:
+- arm64
+- armbian
+- auto-updater
+- cross-platform
+- disk-imaging
+- embedded-linux
+- etcher-alternative
+- image-flashing
+- macos
+- multilingual
+- open-source
+- os-installer
+- rust
+- sbc
+- sdcard-image
+- windows
+ReleaseNotes: |-
+  Armbian Imager 2.5 sets up your board with a few answers, checks the target again right before it writes, and moves Settings to a page of its own. It also closes a few ways a write could go wrong without you noticing.
+
+  ## First-boot profiles, guided
+
+  New profile opens a guided setup that asks one thing at a time：network, user, language and time zone, how you sign in. Your answers collect in a column beside the questions. If you type a static address that can't work, like the broadcast address or a gateway outside the subnet, the app tells you right away. SSH keys from GitHub, GitLab or a URL get looked up before you flash, so a typo in the user name shows up there and not at first login.
+
+  A profile can be limited to the boards it fits, and the confirm step only offers those. Profiles now work with Armbian images you build yourself, every preset answers first login's "Connect via wireless?" prompt for you, and the Wi-Fi country list has the codes that were missing.
+
+  ## Checked again before anything is erased
+
+  The system-disk guard used to live in the UI only. The backend now rescans before writing and accepts only a whole disk it detected itself, at the size you confirmed, so a card swapped during the password prompt is refused. Images bigger than the device are refused up front, and on EDL the app flashes the board you picked instead of the first one it finds.
+
+  An empty image used to get through. On Linux and macOS the first 10 MiB of the card were zeroed, nothing was written, and the app said "Flash complete!". Empty or truncated images, and archives that decompress to nothing, are now stopped before the device is touched.
+
+  Cancel works at every stage. Before, a cancel pressed during the profile step, the password prompt or the download could still erase the card. The profile step is also about 40 seconds faster on a 9 GB image, and says "Applying your profile..." instead of sitting on a frozen write bar.
+
+  ## Settings, with a page of its own
+
+  The gear opens a full page with five sections：General, Writing, First-boot profiles, Downloads and storage, About and support, each with its own animated scene. Updates now download in the background from About and support. Click Restart Now when you're ready; if a write is running, the restart waits for it.
+
+  ## Twenty languages
+
+  Greek and Serbian (Cyrillic) are in, thanks to @igorpecovnik. On first launch the app starts in your system language.
+
+  ## A safer first-boot writer
+
+  The ext4 writer that puts the profile into the image leaked blocks when the preset file already had content, and the kernel could then remount root read-only at first boot. Official images ship that file empty, but your own builds may not. That's fixed, and layouts the writer can't handle safely are refused before anything is written. Old images built without `metadata_csum` or `64bit` can't take a profile anymore; they still flash without one.
+
+  ## If you flashed UFS images with a profile on 2.0.2 to 2.0.4
+
+  Those versions wrote the profile into the UFS image itself, passwords and Wi-Fi key included (#196), so the next flash of that image carried it again, even with no profile selected. 2.5 writes the profile into a temporary copy, and on first start it deletes the UFS images cached by those versions.
+
+  Your own local UFS `.img` files flashed with a profile on those versions carry it too. They live outside the cache, so the app can't clean them：delete or rebuild them.
+
+  ## Also in this release
+
+  • The success screen names what you wrote to：SD card, USB drive or disk. Thanks to @xsalaices.
+  • The page numbers under the manufacturer and board grids are now a small glass pager over the cards.
+  • A panel that fails to load shows the error and a Retry button instead of a skeleton that never ends. Checksum, verification and decompression errors are translated.
+  • Board photos that fill their frame are no longer clipped.
+  • Cache file names and deletes stay inside their folders, on Windows too.
+  • Debug builds have a scenarios panel that simulates devices, write errors and network failures. Every release build is checked so none of it ships.
+  • Dependency updates, and `cargo audit` now blocks CI.
+
+  ## What's Changed
+  • chore(deps-dev)：bump @humanfs/node from 0.16.7 to 0.16.8 by @dependabot[bot] in https://github.com/armbian/imager/pull/187
+  • chore(deps-dev)：bump browserslist from 4.28.2 to 4.28.9 by @dependabot[bot] in https://github.com/armbian/imager/pull/188
+  • chore(deps-dev)：bump js-yaml from 4.3.1 to 4.3.2 by @dependabot[bot] in https://github.com/armbian/imager/pull/189
+  • fix(autoconfig)：add missing Wi-Fi country codes by @hlhc in https://github.com/armbian/imager/pull/190
+  • i18n：add Greek (el) and Serbian Cyrillic (sr) translations by @igorpecovnik in https://github.com/armbian/imager/pull/169
+  • chore：add a pull request template by @SuperKali in https://github.com/armbian/imager/pull/198
+  • fix(ui)：stop data views hanging on skeletons or hiding load errors by @SuperKali in https://github.com/armbian/imager/pull/199
+  • chore(deps)：let an MCP client drive the app in dev builds by @SuperKali in https://github.com/armbian/imager/pull/197
+  • chore(deps)：clear RustSec advisories and make cargo audit blocking by @SuperKali in https://github.com/armbian/imager/pull/200
+  • fix(flash)：check the target disk in the backend before writing by @SuperKali in https://github.com/armbian/imager/pull/201
+  • refactor(ui)：move hard-coded values into config, dedupe helpers by @SuperKali in https://github.com/armbian/imager/pull/205
+  • autoconfig：decline first login's wireless prompt in every preset by @igorpecovnik in https://github.com/armbian/imager/pull/193
+  • feat(dev)：add a dev scenarios simulator for debug builds by @SuperKali in https://github.com/armbian/imager/pull/206
+  • fix(build)：repair the local build scripts by @SuperKali in https://github.com/armbian/imager/pull/207
+  • docs：sync the language count and build output with main by @SuperKali in https://github.com/armbian/imager/pull/208
+  • ci：give fork PRs working test build links by @SuperKali in https://github.com/armbian/imager/pull/209
+  • fix(qdl)：inject the UFS autoconfig into a per-flash copy by @SuperKali in https://github.com/armbian/imager/pull/210
+  • ci：lint the Rust code on Windows too by @SuperKali in https://github.com/armbian/imager/pull/211
+  • fix(custom)：keep decompressed image deletes inside their folder by @SuperKali in https://github.com/armbian/imager/pull/212
+  • fix(cache)：drop UFS images cached before the #196 fix by @SuperKali in https://github.com/armbian/imager/pull/214
+  • fix(download)：keep cache file names inside their folder on Windows by @SuperKali in https://github.com/armbian/imager/pull/213
+  • feat(settings)：full-page Settings and board-scoped first-boot profiles by @SuperKali in https://github.com/armbian/imager/pull/215
+  • fix(ui)：translate checksum, verify and decompress errors by @SuperKali in https://github.com/armbian/imager/pull/216
+  • ci：reuse main's caches and the npm Tauri CLI in PR checks by @SuperKali in https://github.com/armbian/imager/pull/217
+  • i18n：translate the rolling release labels by @SuperKali in https://github.com/armbian/imager/pull/219
+  • perf(autoconfig)：speed up the profile step and honour an early cancel by @SuperKali in https://github.com/armbian/imager/pull/220
+  • fix(autoconfig)：stop the ext4 writer from corrupting the rootfs by @SuperKali in https://github.com/armbian/imager/pull/221
+  • feat(settings)：new animated hero scenes for the Settings sections by @SuperKali in https://github.com/armbian/imager/pull/222
+  • fix(flash)：stop calling every target an SD card by @SuperKali in https://github.com/armbian/imager/pull/223
+  • chore(deps)：bump rustls and tokio to clear cargo audit by @SuperKali in https://github.com/armbian/imager/pull/227
+  • chore(deps-dev)：bump vite from 8.0.16 to 8.3.5 by @dependabot[bot] in https://github.com/armbian/imager/pull/224
+  • fix(flash)：refuse empty images before they can erase a device by @SuperKali in https://github.com/armbian/imager/pull/226
+  • fix(ui)：stop clipping board card photos that fill their frame by @SuperKali in https://github.com/armbian/imager/pull/228
+  • feat(update)：download updates in the background from Settings by @SuperKali in https://github.com/armbian/imager/pull/229
+  • feat(ui)：show a real error state when a selection panel fails to load by @SuperKali in https://github.com/armbian/imager/pull/230
+
+  ## New Contributors
+  • @hlhc made their first contribution in https://github.com/armbian/imager/pull/190
+  • @xsalaices made their first contribution in https://github.com/armbian/imager/pull/223
+
+  **Full Changelog**：https://github.com/armbian/imager/compare/v2.0.4...v2.5.0
+ReleaseNotesUrl: https://github.com/armbian/imager/releases/tag/v2.5.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

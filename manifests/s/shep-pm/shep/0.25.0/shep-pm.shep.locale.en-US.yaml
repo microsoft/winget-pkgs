@@ -1,0 +1,61 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: shep-pm.shep
+PackageVersion: 0.25.0
+PackageLocale: en-US
+Publisher: shep-pm
+PublisherUrl: https://github.com/shep-pm
+PublisherSupportUrl: https://github.com/shep-pm/shep/issues
+PackageName: shep
+PackageUrl: https://shep-pm.com/
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/shep-pm/shep#license
+Copyright: Copyright (c) TurtIeSocks
+ShortDescription: A process manager that keeps a flock of long-running processes alive
+Description: |-
+  shep is a process manager written in Rust. One binary runs a daemon called the
+  shepherd, which keeps a flock of your long-running processes alive, restarts them
+  when they die, captures what they print, and says plainly when something is wrong.
+
+  It also restarts on file changes, on a cron schedule, or over a memory limit, ships
+  a terminal dashboard, and can alert a webhook when a process misbehaves.
+
+  Three things it will not do on Windows. `shep startup` is not built, because
+  boot-time supervision there means a Service Control Manager service rather than
+  another unit template. There is nothing SIGTERM-shaped that can be delivered to an
+  arbitrary process, so `shep stop` waits out the process's whole kill_timeout unless
+  the app opts into the shepherd channel. The user and group Flockfile fields refuse
+  permanently.
+
+  Only shep.exe is linked onto PATH. The archive also carries shep-runtime.exe and
+  shep-dev.exe, which are container entrypoint aliases with no desktop use case.
+Moniker: shep
+Tags:
+- cli
+- daemon
+- process-manager
+- rust
+- supervisor
+ReleaseNotes: |-
+  Added
+  - Shep whisper types into a pty sheep, and the operator docs say how
+  - Common flags take a one-letter short form
+  - Shep attach shows a pty sheep's live terminal and sends keys in
+  - A sheep config takes a pty key that Windows refuses by name
+  - A pty sheep survives a shepherd reload
+
+  Fixed
+  - A GET decodes a chunked body, so the dog index loads
+  - Cut the whisper and stdin pump doc comments to their IR-47 limits
+  - Attach keeps reading the sheep's output while a keystroke is in flight
+  - Attach detaches during a stalled write, restores on SIGTERM and refuses Windows before dialling
+  - Attach flushes typed text when stdin closes and turns off the modes a sheep switched on
+  - The local attach arm runs on unlocked stdout and stderr
+  - Request::PtyInput carries bytes, not text
+  - Attach sends a read bigger than one frame as several requests
+  - BusEvent::PtyOut carries bytes, not text
+  - A pty sheep's output reaches attach as bytes
+ReleaseNotesUrl: https://github.com/shep-pm/shep/releases/tag/shep-v0.25.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
