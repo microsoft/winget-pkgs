@@ -1,0 +1,110 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Bitvise.SSH.Client
+PackageVersion: "9.67"
+PackageLocale: en-US
+Publisher: Bitvise Limited
+PublisherUrl: https://bitvise.com/
+PublisherSupportUrl: https://bitvise.com/contact
+PrivacyUrl: https://bitvise.com/privacy-policy
+Author: Bitvise Limited
+PackageName: Bitvise SSH Client
+PackageUrl: https://bitvise.com/ssh-client
+License: Freeware
+LicenseUrl: https://bitvise.com/ssh-client-license
+Copyright: Copyright (C) 2000-2026 by Bitvise Limited.
+CopyrightUrl: https://bitvise.com/terms-of-use
+ShortDescription: Free SSH file transfer, terminal and tunneling
+Description: |-
+  Our SSH client supports all desktop and server versions of Windows, 32-bit and 64-bit, from Windows XP SP3 and Windows Server 2003, up to the most recent – Windows 11 and Windows Server 2025.
+  Our client is free for use of all types, including in organizations.
+  Our SSH and SFTP client for Windows incorporates:
+  - One of the most advanced graphical SFTP clients.
+  - Single-click Remote Desktop forwarding.
+  - State-of-the-art terminal emulation with support for the bvterm, xterm, and vt100 protocols.
+  - Support for corporation-wide single sign-on using SSPI (GSSAPI) Kerberos 5 and NTLM user authentication, as well as Kerberos 5 host authentication.
+  - Support for ECDSA, RSA and DSA public key authentication with comprehensive user keypair management.
+  - Encryption and security: Provides state-of-the-art encryption and security suitable as part of a standards-compliant solution meeting the requirements of PCI, HIPAA, or FIPS 140-2 validation.
+  - SSH jump proxy: Connect to a final destination SSH or SFTP server by connecting through an SSH jump server. In the graphical SSH Client, this is configured in Proxy settings, on the Login tab.
+  - Obfuscated SSH with an optional keyword. When supported and enabled in both the client and server, obfuscation makes it more difficult for an observer to detect that the protocol being used is SSH. (Protocol; OpenSSH patches)
+  - Powerful SSH port forwarding capabilities, including dynamic forwarding through integrated SOCKS and HTTP CONNECT proxy.
+  - Powerful command-line parameters which make the SSH client highly customizable and suitable for use in specific situations and controlled environments.
+  - SFTP drive mapping: Access files on an SFTP server as if they were local, from any Windows application.
+  - An FTP-to-SFTP bridge allowing you to connect to an SFTP server using legacy FTP applications.
+  - An advanced, scriptable command-line SFTP client, sftpc.
+  - A scriptable command-line remote execution client, sexec, and a command-line terminal console client, stermc.
+  - A scriptable command-line tunneling client, stnlc, with support for static port forwarding rules, dynamic SOCKS-based tunneling, and FTP-to-SFTP bridge.
+  - Our .NET SSH library, FlowSshNet, with example PowerShell scripts showing how to use the SSH library for file transfer and remote program execution from PowerShell.
+  - Bitvise SSH Server remote administration features.
+  Bitvise software does not contain ads, install product bundles or collect user data for sale. We are 100% supported by users who license our software. Thank you!
+Moniker: bitvisessh
+Tags:
+- bvterm
+- file
+- file-transfer
+- forwarding
+- remote-desktop-forwarding
+- sftp
+- ssh
+- terminal
+- tunneling
+- vt100
+- xterm
+Agreements:
+- AgreementLabel: End User License Agreement (EULA)
+  AgreementUrl: https://bitvise.com/ssh-client-license
+ReleaseNotes: |-
+  - Security updates:
+    - This version fixes security issues in SSH protocol and key handling. Some issues can affect a connection before the server's host key is trusted. We recommend upgrading.
+  - Installation and compatibility:
+    - The SSH Client now requires at least Windows Vista, Windows Server 2008, or newer. Windows XP and Windows Server 2003 are no longer supported.
+    - Improved preservation of .tlp and .bscp file associations across updates.
+    - Fixed updates resumed after a Windows restart which could ignore the choices to omit WinFsp or the desktop icon. Also corrected removal of WinFsp when it is deselected during an update.
+    - The SSH Client now includes WRC 9.67, required for remote administration of Bitvise SSH Server 9.67.
+  - SSH cryptography:
+    - Bitvise software now supports hybrid post-quantum and classical signatures using MLDSA44_Ed25519 (ssh-mldsa44-ed25519). This combines ML-DSA-44 and Ed25519 for server and client authentication. The algorithm is only available when FIPS 140 cryptography mode is not enabled in Windows.
+      In new SSH Client profiles, MLDSA44_Ed25519 is now preferred in host-key algorithm settings. Existing profiles retain their preference order, with the new algorithm appended.
+    - The SSH tab now has separate Host keys and Client keys algorithm settings. Client authentication algorithms can also be configured using -ckeyAlgs and -ckeyMod, independently of host-key selection.
+      New default profiles and command lines that do not load a profile exclude RSA/SHA-1 and DSA from client authentication. RSA keys remain usable with RSA/SHA-2. Profiles from earlier versions retain their previous client-authentication behavior, including saved default profiles.
+      Command-line client connections to a server requiring RSA/SHA-1 client authentication may need this algorithm explicitly enabled, for example using -ckeyMod=ssh-rsa.
+    - SSH compression is now disabled by default in new SSH Client profiles. Existing profiles retain their configured compression algorithms.
+      The concern with zlib is that it uses a shared compression dictionary for all connection channels. If channels contain data from different users, for example when using port forwarding, a user of one channel may be able to leverage compression characteristics to discover data sent on other channels in the same SSH connection.
+      Per-channel compression could avoid this issue, but needs a specification. Bitvise would consider this if another SSH implementation has interest.
+    - Host key fingerprints can now include the key type. This information is checked during host-key verification and helps select an appropriate host-key algorithm during SSH key exchange. The -hostKeyFp parameter and jump-host fingerprint lists also support key types.
+      Profiles containing fingerprints with a specified key type cannot be loaded by earlier SSH Client versions. Profiles using fingerprints without a key type retain their existing compatibility.
+    - Corrected algorithm-list editing and command-line modifiers which could leave an algorithm enabled after it was removed, or change which algorithms were enabled when reordering them. The graphical client now also accepts the algorithm modifier parameters -kexMod, -hkeyMod, -ckeyMod, -encrMod, -macMod and -cmprMod.
+  - New Remote Desktop:
+    - One SSH Client profile can now configure multiple Remote Desktop destinations. Configure these using Destinations on the RDP tab. When more than one destination is configured, opening Remote Desktop presents a destination chooser. Destinations can also be supplied using the -rdpDest command-line parameter.
+    - Each destination can use the default RDP credentials, the SSH login credentials, or separately configured credentials. This allows access to several computers through one SSH connection without changing credentials for other destinations.
+    - Added Multi-monitor and WebAuthn overrides for the RDP profile. These are also configurable using -rdpMultimon and -rdpWebAuthn. Each option can be enabled, disabled, or left as specified by the RDP profile.
+    - The Remote Desktop window title and full-screen connection bar can now use custom text in place of the SSH server address. This is also configurable using -rdpTitle.
+    - Added Do not hide language bar, also configurable using -rdpNoHideLangBar. This can prevent Remote Desktop from hiding and restoring the Windows language indicator. When switching focus from a Remote Desktop window, this rearranges icons in the system notification area, so that the icons shift when the user attempts to click them.
+  - Graphical SFTP:
+    - Added Edit Link for symbolic links in both the local and remote file panes.
+    - Drag and drop can now be configured separately for the local and remote panes. It can be enabled, disabled, or disabled only within the same pane. The last option helps prevent accidental moves while retaining transfers between panes and drag and drop from Windows Explorer.
+    - Fixed drag and drop of files with long paths, which could previously be truncated.
+    - Fixed crashes and incorrect suggestions related to path auto-completion. Also fixed crashes associated with monitoring changes in the local directory.
+    - Fixed incorrect handling of cached remote directory listings, which could prevent the displayed contents from refreshing correctly.
+  - SFTP:
+    - The graphical SFTP client and sftpc now preserve repeated slashes for servers that distinguish paths such as //DIRECTORY and /DIRECTORY.
+    - Corrected newline conversion in text-mode transfers. Also fixed text-file auto-detection when transferring an empty file.
+    - Corrected request alignment in resumed uploads and downloads. This could cause failures where file operations require alignment, or reduce transfer efficiency.
+  - SFTP drive:
+    - The SSH Client now includes WinFsp version 2.2.26286. This includes recent WinFsp security fixes.
+    - Improved performance of large writes, particularly over connections with higher latency.
+    - Improved handling of renamed and replaced files, including files accessed through multiple open handles. Corrected error handling when replacing an existing destination during a rename.
+  - Graphical terminal:
+    - Corrected mouse-wheel and mouse-motion reporting for applications using SGR mouse mode, including tmux.
+    - Fixed rendering and stalls involving combining and wide characters at line boundaries.
+    - Double-click word selection now distinguishes automatically wrapped lines from explicit line breaks.
+  - Port forwarding and command-line clients:
+    - The graphical client and stnlc now display server-configured client-to-server forwarding rules separately from client-configured rules.
+    - sexec -git2 now correctly requests Git protocol version 2. Previously, the environment variable it sent was not effective to enable version 2.
+  - General:
+    - Fixed a regression introduced in 9.63 which could cause an internal error during SSH channel cleanup. Improved handling of channels that are starting or closing when a connection ends.
+    - Improved acquisition and recovery of the system tray icon.
+    - The installation now includes GenCountries.exe, which can generate an updated Countries.bin using either IPLocate.io or MaxMind data. The included country database now uses IPLocate.io data.
+ReleaseNotesUrl: https://www.bitvise.com/ssh-client-version-history-9-5#967
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
