@@ -2638,12 +2638,6 @@ bool ConnectionStatus = vm.Scope.IsConnected;
 		if (VM == 0) {
 			VM = NextFreeVM(OS);//.Replace("vm","");
 		}
-		if (VM == 0){
-		//Write-Host "No available OS VMs";
-			GenerateVM(OS);
-		//break;
-		}
-	RevertVM(VM);
 		//[ValidateSet("Win10","Win11")]
 		//[ValidateSet("Configure","DevHomeConfig","Pin","Scan")]
 		int lowerIndex = clipInput.IndexOf("Do not share my personal information") -1;//This is the last visible string at the bottom of the Files page on GitHub. 
@@ -2676,6 +2670,21 @@ bool ConnectionStatus = vm.Scope.IsConnected;
 		string logExt = "log";
 		string VMFolder = MainFolder+"\\vm\\"+VM;
 		string manifestFolder = VMFolder+"\\manifest";
+		string[] manifestPaths = new string[0];
+		if (!NoFiles && Operation != "Configure") {
+			try {
+				manifestPaths = GetManifestPaths(manifestFolder, clip);
+			} catch (InvalidDataException e) {
+				outBox_msg.AppendText(Environment.NewLine + e.Message);
+				return;
+			}
+		}
+		if (VM == 0){
+		//Write-Host "No available OS VMs";
+			GenerateVM(OS);
+		//break;
+		}
+		RevertVM(VM);
 		string CmdsFileName = VMFolder+"\\cmds.ps1";
 		string packageName = "";
 		string wingetArgs = "";
@@ -3015,28 +3024,15 @@ bool ConnectionStatus = vm.Scope.IsConnected;
 			FilePath = manifestFolder+"\\config.yaml";
 			OutFile(FilePath,clipInput);
 		} else {
-			List<string> Files = new List<string>();
-			Files.Add("Package.installer.yaml");
-			//Gather filenames from PR manifest in clipboard - most PRs, not all.
-			string[] FileNames = clip.Replace("\n"," ").Replace("\r"," ").Replace("/"," ").Split(' ').Where(n => n.Contains(".yaml")).ToArray();
-			//Get the last file name and chop the .yaml from it, to get the ToReplace string.
-			string replace = FileNames[FileNames.Length -1].Replace(".yaml","");
-			//Update each filename so it comes out with "Package". 
-			for (int i = 0;i < FileNames.Length; i++){
-				string string_add = FileNames[i].Replace(replace,"Package");
-				Files.Add(string_add);
-			}
 			//Split out manifest files by the Git double atpersand. 
 			string[] split_clip = clip.Replace("@@","∞").Split('∞');
 			//foreach files
-			for (int i=0;i < Files.Count;i++) {
-				string File = Files[i];
+			for (int i=0;i < manifestPaths.Length;i++) {
 				string this_split = split_clip[i*2];
 				this_split = this_split.Substring(0,this_split.IndexOf("ManifestVersion") + 22);
 				string[] inputObj = this_split.Split('\n');
 				
-				//Add the manifest folder path to the file path.
-				FilePath = manifestFolder+"\\"+File;
+				FilePath = manifestPaths[i];
 				
 				//Write-Host "Writing $($inputObj.Length) lines to $FilePath"
 				OutFile(FilePath,inputObj);
@@ -3097,6 +3093,40 @@ bool ConnectionStatus = vm.Scope.IsConnected;
 	
 	LaunchWindow(VM);
 }//end manifest
+
+public static string[] GetManifestPaths(string manifestFolder, string clip) {
+	string[] fileNames = clip.Replace("\n"," ").Replace("\r"," ").Replace("/"," ").Split(' ').Where(n => n.Contains(".yaml")).ToArray();
+	if (fileNames.Length == 0) {
+		throw new InvalidDataException("No manifest filenames were found in the clipboard.");
+	}
+	foreach (string fileName in fileNames) {
+		if (fileName.Length <= ".yaml".Length ||
+			fileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 ||
+			fileName.Contains("\\") || fileName.Contains("/") ||
+			!fileName.EndsWith(".yaml", StringComparison.OrdinalIgnoreCase)) {
+			throw new InvalidDataException("The clipboard contains an invalid manifest filename.");
+		}
+	}
+
+	string replace = fileNames[fileNames.Length -1].Replace(".yaml","");
+	if (string.IsNullOrWhiteSpace(replace)) {
+		throw new InvalidDataException("The clipboard contains an invalid manifest filename.");
+	}
+	List<string> files = new List<string>();
+	files.Add("Package.installer.yaml");
+	files.AddRange(fileNames.Select(fileName => fileName.Replace(replace,"Package")));
+
+	string root = Path.GetFullPath(manifestFolder).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+	List<string> paths = new List<string>();
+	foreach (string fileName in files) {
+		string path = Path.GetFullPath(Path.Combine(root, fileName));
+		if (!path.StartsWith(root, StringComparison.OrdinalIgnoreCase)) {
+			throw new InvalidDataException("The manifest path is outside the output folder.");
+		}
+		paths.Add(path);
+	}
+	return paths.ToArray();
+}
 
 
 
