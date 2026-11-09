@@ -142,7 +142,7 @@ using System.Web.Script.Serialization;
 namespace WinGetApprovalNamespace {
     public class WinGetApprovalPipeline : Form {
 		//vars
-        public int build = 936;//Get-RebuildPipeApp
+        public int build = 939;//Get-RebuildPipeApp
 		public string appName = "WinGetApprovalPipeline";
 		public string appTitle = "WinGet Approval Pipeline - Build ";
 		public static string owner = "microsoft";
@@ -1065,7 +1065,7 @@ namespace WinGetApprovalNamespace {
 
 							if (regex_hashPRRegex.IsMatch(title[title.Length -1])) {
 								// if ((Get-Command ValidateManifest).name) {
-									ValidateManifest();
+									// ValidateManifest();
 								// } else {
 									// Get-Sandbox ($title[-1] -replace"//","");
 								// } //end if Get-Command;
@@ -2607,498 +2607,6 @@ bool ConnectionStatus = vm.Scope.IsConnected;
 //////////////////////====================--------------------====================////////////////////
 //////////////////////////////////////////====================////////////////////////////////////////
 
-		public void ValidateManifest(int VM = 0, string PackageIdentifier = "", string PackageVersion = "", int PR = 0, string Arch = "",string Scope = "", string InstallerType = "",string OS = "",string Locale = "",bool InspectNew = false,bool notElevated = false,string MinimumOSVersion = "", string ManualDependency = "", bool NoFiles = false, string installerLine = "", string Operation = "Scan"){
-	/* Vaidation orchestration
-	Construct WinGet args string and populate script variables.
-	- if Configure - skip all of this and just add the Configure file as the WinGet arg.
-	Construct the VM script from the script variables and output to commands file.
-	- if Configure - Construct a similar script and perform the same output.
-	Construct the manifest from the files in the clipboard.
-	- if NoFiles, skip.
-	Perform new package inspection.
-	- if not InspectNew, skip.
-	Revert selected VM and launch its window.
-	*/
-		string clipInput = Clipboard.GetText();
-		// [ValidateSet("x86","x64","arm","arm32","arm64","neutral")]
-		// [ValidateSet("User","Machine")]
-		//PowerShell version passes forward Get-YamlVale's Get-Clipboard call, to get any MinimumOSVersion your clipboard. Because this is only supposed to be run during validation, when you've got the PR with manifest on your clipboard.
-		if (OS == "") {
-			try{
-				var version = YamlValue("MinimumOSVersion", MinimumOSVersion);
-				if (Version.Parse(version) >= Version.Parse("10.0.22000.0")){
-					OS = "Win11";
-				} else{
-					OS = "Win10";
-				}
-			} catch {
-				OS = "Win10";
-			}
-		}
-		if (VM == 0) {
-			VM = NextFreeVM(OS);//.Replace("vm","");
-		}
-		if (VM == 0){
-		//Write-Host "No available OS VMs";
-			GenerateVM(OS);
-		//break;
-		}
-	RevertVM(VM);
-		//[ValidateSet("Win10","Win11")]
-		//[ValidateSet("Configure","DevHomeConfig","Pin","Scan")]
-		int lowerIndex = clipInput.IndexOf("Do not share my personal information") -1;//This is the last visible string at the bottom of the Files page on GitHub. 
-		
-		string clip = clipInput;
-		if (clipInput.Contains("Do not share my personal information")) {
-			clip = clipInput.Substring(0,lowerIndex);
-		}
-		if (clip.Contains("PackageIdentifier: ")) {
-			if (PackageIdentifier == "") {
-				PackageIdentifier = YamlValue("PackageIdentifier",clip).Replace("\"","").Replace("'","");
-			}
-		}
-		if (clip.Contains("PackageVersion: ")) {
-			if (PackageVersion == "") {
-				PackageVersion = YamlValue("PackageVersion",clip).Replace("\"","").Replace("'","");
-			}
-		}
-		if (PR == 0) {
-			PR = PRNumber(clip,true).FirstOrDefault();
-		}
-		string RemoteFolder = "//"+remoteIP+"/ManVal/vm/"+VM.ToString();
-		if (installerLine == "") {
-			installerLine = "--manifest "+RemoteFolder+"/manifest";
-		}
-		string optionsLine = "";
-
-		string logLine = OS.ToString();
-		string nonElevatedShell = "";
-		string logExt = "log";
-		string VMFolder = MainFolder+"\\vm\\"+VM;
-		string manifestFolder = VMFolder+"\\manifest";
-		string CmdsFileName = VMFolder+"\\cmds.ps1";
-		string packageName = "";
-		string wingetArgs = "";
-
-		string archDetect = "";
-		string archColor = "yellow";
-		string MDLog = "";
-		
-	if (Operation == "Configure") {
-			//Write-Host "Running Manual Config build "build" on vmVM for ConfigureFile"
-		wingetArgs = "configure -f "+RemoteFolder+"/manifest/config.yaml --accept-configuration-agreements --disable-interactivity";
-		InspectNew = false;
-	} else {
-		if (PackageIdentifier == "") {
-			//Write-Host "Bad PackageIdentifier: "PackageIdentifier""
-			//Break;
-			Clipboard.SetText(PackageIdentifier);
-		}
-			//Write-Host "Running Manual Validation build "build" on vmVM for package "PackageIdentifier" version $PackageVersion"
-		
-		if (PackageVersion != "") {
-			logExt = PackageVersion+"."+logExt;
-			logLine += "version "+PackageVersion+" ";
-		}
-		if (Locale != "") {
-			logExt = Locale+"."+logExt;
-			optionsLine += " --locale "+Locale+" ";
-			logLine += "locale "+Locale+" ";
-		}
-		if (Scope != "") {
-			logExt = Scope+"."+logExt;
-			optionsLine += " --scope "+Scope+" ";
-			logLine += "scope "+Scope+" ";
-		}
-		if (InstallerType != "") {
-			logExt = InstallerType+"."+logExt;
-			optionsLine += " --installer-type "+InstallerType+" ";
-			logLine += "InstallerType $"+InstallerType+" ";
-		}
-		string[] Archs = clip.Split(' ')
-		.Where(n => !n.Contains("arm"))
-		.Where(n => n.Contains("Architecture: ")).ToArray();
-		for (int i = 0; i < Archs.Length; i++) {
-			Archs[i] = (Archs[i].Split(':'))[1].Trim();
-		} 
-
-		if (Archs != null) {
-			if (Arch != null) {
-				archDetect = "Selected";
-			} else {
-				Arch = Archs[0];
-				archDetect = "Detected";
-			}
-			archColor = "red";
-		}
-		if (Arch != "") {
-			logExt = Arch+"."+logExt;
-				//Write-Host "archDetect Arch Arch of available architectures: Archs" -f archColor
-			logLine += Arch+" ";
-		}
-		if (ManualDependency != "") {
-			MDLog = ManualDependency;
-				//Write-Host " = = = = Installing manual dependency "+ManualDependency+" = = = = "
-			ManualDependency = "Out-Log 'Installing manual dependency "+MDLog+".';Start-Process 'winget' 'install "+MDLog+" --accept-package-agreements --ignore-local-archive-malware-scan' -wait\n";
-		}
-		// if (notElevated  == true || clip.Contains("ElevationRequirement: elevationProhibited")) {
-				//Write-Host " = = = = Detecting de-elevation requirement = = = = "
-			// nonElevatedShell = "if ([bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match 'S-1-5-32-544')){& explorer.exe 'C:\\Program Files\\PowerShell\\7\\pwsh.exe';Stop-Process (Get-Process WindowsTerminal).id}";
-			//if elevated, run^^ and exit, else run cmds.
-		// }
-		packageName = (PackageIdentifier.Split('.'))[1];
-		wingetArgs = "install "+optionsLine+" "+installerLine+" --accept-package-agreements --ignore-local-archive-malware-scan";
-	}
-	List<string> cmdsOut = new List<string>();
-/*
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
-// - caret double quote = replace with backslash double quote
-// - caret dollarsign = 2nd run remove caret
-	if  (Operation == "Configure") {
-	cmdsOut.Add(""+nonElevatedShell+"");
-	cmdsOut.Add("$TimeStart = Get-Date;");
-	cmdsOut.Add("$ConfigurelLogFolder = \""+SharedFolder+"/logs/Configure/$(Get-Date -UFormat %B)/$(Get-Date -Format dd)\"");
-	cmdsOut.Add("Function Out-Log ([string]$logData,[string]$logColor='cyan') {");
-	cmdsOut.Add("$TimeStamp = (Get-Date -Format T) + ': ';");
-	cmdsOut.Add("$logEntry = $TimeStamp + $logData");
-	cmdsOut.Add("Write-Host $logEntry -f $logColor;");
-	cmdsOut.Add("md $ConfigurelLogFolder -ErrorAction Ignore");
-	cmdsOut.Add("$logEntry | Out-File \"$ConfigurelLogFolder/"+PackageIdentifier+"."+logExt+"\" -Append -Encoding unicode");
-	cmdsOut.Add("};");
-	cmdsOut.Add("Function Out-ErrorData ($errArray,[string]$serviceName,$errorName='errors') {");
-	cmdsOut.Add("Out-Log \"Detected $($errArray.count) $serviceName $($errorName): \"");
-	cmdsOut.Add("$errArray | ForEach-Object {Out-Log $_ 'red'}");
-	cmdsOut.Add("};");
-	cmdsOut.Add("Get-TrackerVMSetStatus 'Installing'");
-	cmdsOut.Add("Out-Log ' = = = = Starting Manual Validation pipeline build "+build+" on VM "+VM+" Configure file "+logLine+" = = = = '");
-	cmdsOut.Add("Out-Log 'Pre-testing log cleanup.'");
-	cmdsOut.Add("Out-Log 'Clearing PowerShell errors.'");
-	cmdsOut.Add("$Error.Clear()");
-	cmdsOut.Add("Out-Log 'Clearing Application Log.'");
-	cmdsOut.Add("Clear-EventLog -LogName Application -ErrorAction Ignore");
-	cmdsOut.Add("Out-Log 'Clearing WinGet Log folder.'");
-	cmdsOut.Add("$WinGetLogFolder = 'C:\\Users\\User\\AppData\\Local\\Packages\\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\\LocalState\\DiagOutputDir'");
-	cmdsOut.Add("rm $WinGetLogFolder\\*");
-	cmdsOut.Add("Out-Log 'Gathering WinGet info.'");
-	cmdsOut.Add("$info = winget --info");
-	cmdsOut.Add("Out-ErrorData @($info[0],$info[3],$info[4],$info[5]) 'WinGet' 'infos'");
-	cmdsOut.Add("Out-Log \"Main Package Configure with args: "+wingetArgs+"\"");
-	cmdsOut.Add("$mainpackage = (Start-Process 'winget' '"+wingetArgs+"' -wait -PassThru);");
-	cmdsOut.Add("Out-Log \"$($mainpackage.processname) finished with exit code: $($mainpackage.ExitCode)\";");
-	cmdsOut.Add("If ($mainpackage.ExitCode -ne 0) {");
-	cmdsOut.Add("Out-Log 'Install Failed.';");
-	cmdsOut.Add("explorer.exe $WinGetLogFolder;");
-	cmdsOut.Add("Out-ErrorData ((Get-ChildItem $WinGetLogFolder).fullname | ForEach-Object {Get-Content $_ |Where-Object {$_ -match '[[]FAIL[]]' -OR $_ -match 'failed' -OR $_ -match 'error' -OR $_ -match 'does not match'}}) 'WinGet'");
-	cmdsOut.Add("Out-ErrorData '"+MDLog+"' 'Manual' 'Dependency'");
-	cmdsOut.Add("Out-ErrorData $Error 'PowerShell'");
-	cmdsOut.Add("Out-ErrorData (Get-EventLog Application -EntryType Error -after $TimeStart -ErrorAction Ignore).Message 'Application Log'");
-	cmdsOut.Add("Out-Log \" = = = = Failing Manual Validation pipeline build "+build+" on VM "+VM+" for Configure file "+logLine+" in $(((Get-Date) -$TimeStart).TotalSeconds) seconds. = = = = \"");
-	cmdsOut.Add("Get-TrackerVMSetStatus 'ValidationCompleted'");
-	cmdsOut.Add("Break;");
-	cmdsOut.Add("}");
-	cmdsOut.Add("#Read-Host 'Configure complete, press ENTER to continue...' #Uncomment to examine installer before scanning, for when scanning disrupts the install.");
-	cmdsOut.Add("Get-TrackerVMSetStatus 'Scanning'");
-	cmdsOut.Add("$WinGetLogs = ((Get-ChildItem $WinGetLogFolder).fullname | ForEach-Object {Get-Content $_ |Where-Object {$_ -match '[[]FAIL[]]' -OR $_ -match 'failed' -OR $_ -match 'error' -OR $_ -match 'does not match'}})");
-	cmdsOut.Add("$DefenderThreat = (Get-MPThreat).ThreatName");
-	cmdsOut.Add("Out-ErrorData $WinGetLogs 'WinGet'");
-	cmdsOut.Add("Out-ErrorData $Error 'PowerShell'");
-	cmdsOut.Add("Out-ErrorData (Get-EventLog Application -EntryType Error -after $TimeStart -ErrorAction Ignore).Message 'Application Log'");
-	cmdsOut.Add("Out-ErrorData $DefenderThreat \"Defender (with signature version $((Get-MpComputerStatus).QuickScanSignatureVersion))\"");
-	cmdsOut.Add("Out-Log \" = = = = Completing Manual Validation pipeline build "+build+" on VM "+VM+" for Configure file "+logLine+" in $(((Get-Date) -$TimeStart).TotalSeconds) seconds. = = = = \"");
-	cmdsOut.Add("Get-TrackerVMSetStatus 'ValidationCompleted'");
-	
-	
-	
-} else if (Operation == "Scan") {
-	
-	
-	
-	cmdsOut.Add(""+nonElevatedShell+"");
-	cmdsOut.Add("$TimeStart = Get-Date;");
-	cmdsOut.Add("$explorerPid = (Get-Process Explorer).id;");
-	cmdsOut.Add("$ManValLogFolder = \""+SharedFolder+"/logs/$(Get-Date -UFormat %B)/$(Get-Date -Format dd)\"");
-	cmdsOut.Add("Function Out-Log ([string]$logData,[string]$logColor='cyan') {");
-	cmdsOut.Add("$TimeStamp = (Get-Date -Format T) + ': ';");
-	cmdsOut.Add("$logEntry = $TimeStamp + $logData");
-	cmdsOut.Add("Write-Host $logEntry -f $logColor;");
-	cmdsOut.Add("md $ManValLogFolder -ErrorAction Ignore");
-	cmdsOut.Add("$logEntry | Out-File \"$ManValLogFolder/"+PackageIdentifier+"."+logExt+"\" -Append -Encoding unicode");
-	cmdsOut.Add("};");
-	cmdsOut.Add("Function Out-ErrorData ($errArray,[string]$serviceName,$errorName='errors') {");
-	cmdsOut.Add("Out-Log \"Detected $($errArray.count) $serviceName $($errorName): \"");
-	cmdsOut.Add("$errArray | ForEach-Object {Out-Log $_ 'red'}");
-	cmdsOut.Add("};");
-	cmdsOut.Add("Get-TrackerVMSetStatus 'Installing'");
-	cmdsOut.Add("Out-Log ' = = = = Starting Manual Validation pipeline build "+build+" on VM "+VM+" "+PackageIdentifier+" "+logLine+" = = = = '");
-	cmdsOut.Add("Out-Log 'Pre-testing log cleanup.'");
-	cmdsOut.Add("Out-Log 'Upgrading installed applications.'");
-	cmdsOut.Add("Out-Log (WinGet upgrade --all --include-pinned --disable-interactivity)");
-	cmdsOut.Add("Out-Log 'Clearing PowerShell errors.'");
-	cmdsOut.Add("$Error.Clear()");
-	cmdsOut.Add("Out-Log 'Clearing Application Log.'");
-	cmdsOut.Add("Clear-EventLog -LogName Application -ErrorAction Ignore");
-	cmdsOut.Add("Out-Log 'Clearing WinGet Log folder.'");
-	cmdsOut.Add("$WinGetLogFolder = 'C:\\Users\\User\\AppData\\Local\\Packages\\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\\LocalState\\DiagOutputDir'");
-	cmdsOut.Add("rm $WinGetLogFolder\\*");
-	cmdsOut.Add("Out-Log 'Updating Defender signature.'");
-	cmdsOut.Add("Update-MpSignature");
-	cmdsOut.Add("Out-Log 'Gathering WinGet info.'");
-	cmdsOut.Add("$info = winget --info");
-	cmdsOut.Add("Out-ErrorData @($info[0],$info[3],$info[4],$info[5]) 'WinGet' 'infos'");
-	cmdsOut.Add("$InstallStart = Get-Date;");
-	cmdsOut.Add(""+ManualDependency+"");
-	cmdsOut.Add("Out-Log \"Main Package Install with args: "+wingetArgs+"\"");
-	cmdsOut.Add("$mainpackage = (Start-Process 'winget' '"+wingetArgs+"' -wait -PassThru);");
-	cmdsOut.Add("Out-Log \"$($mainpackage.processname) finished with exit code: $($mainpackage.ExitCode)\";");
-	cmdsOut.Add("$SleepSeconds = 15 #Sleep a few seconds for processes to complete.");
-	cmdsOut.Add("if (($InstallStart).AddSeconds($SleepSeconds) -gt (Get-Date)) {");
-	cmdsOut.Add("sleep (($InstallStart).AddSeconds($SleepSeconds)-(Get-Date)).totalseconds");
-	cmdsOut.Add("} ");
-	cmdsOut.Add("$InstallEnd = Get-Date;");
-	cmdsOut.Add("If ($mainpackage.ExitCode -ne 0) {");
-	cmdsOut.Add("Out-Log 'Install Failed.';");
-	cmdsOut.Add("explorer.exe $WinGetLogFolder;");
-	cmdsOut.Add("$WinGetLogs = ((Get-ChildItem $WinGetLogFolder).fullname | ForEach-Object {");
-	cmdsOut.Add("Get-Content $_ | Where-Object {");
-	cmdsOut.Add("$_ -match '[[]FAIL[]]' -OR ");
-	cmdsOut.Add("$_ -match 'failed' -OR ");
-	cmdsOut.Add("$_ -match 'error' -OR ");
-	cmdsOut.Add("$_ -match 'does not match'");
-	cmdsOut.Add("}");
-	cmdsOut.Add("})");
-	cmdsOut.Add("$DefenderThreat = (Get-MPThreat).ThreatName");
-	cmdsOut.Add("Out-ErrorData $WinGetLogs 'WinGet'");
-	cmdsOut.Add("Out-ErrorData '"+MDLog+"' 'Manual' 'Dependency'");
-	cmdsOut.Add("Out-ErrorData $Error 'PowerShell'");
-	cmdsOut.Add("Out-ErrorData (Get-EventLog Application -EntryType Error -after $TimeStart -ErrorAction Ignore).Message 'Application Log'");
-	cmdsOut.Add("Out-ErrorData $DefenderThreat \"Defender (with signature version $((Get-MpComputerStatus).QuickScanSignatureVersion))\"");
-	cmdsOut.Add("Out-Log \" = = = = Failing Manual Validation pipeline build "+build+" on VM "+VM+" for "+PackageIdentifier+" "+logLine+" in $(((Get-Date) -$TimeStart).TotalSeconds) seconds. = = = = \"");
-	cmdsOut.Add("if (($WinGetLogs -match '\\[FAIL\\] Installer failed security check.') -OR ");
-	cmdsOut.Add("($WinGetLogs -match 'Package hash verification failed') -OR ");
-	cmdsOut.Add("($WinGetLogs -match 'Operation did not complete successfully because the file contains a virus or potentially unwanted software')){");
-	cmdsOut.Add("Send-SharedError -clip $WinGetLogs");
-	cmdsOut.Add("} elseif ($DefenderThreat) {");
-	cmdsOut.Add("Send-SharedError -clip $DefenderThreat");
-	cmdsOut.Add("} else {");
-	cmdsOut.Add("Get-TrackerVMSetStatus 'ValidationCompleted'");
-	cmdsOut.Add("}");
-	cmdsOut.Add("Break;");
-	cmdsOut.Add("}");
-	cmdsOut.Add("#Read-Host 'Install complete, press ENTER to continue...' #Uncomment to examine installer before scanning, for when scanning disrupts the install.");
-	cmdsOut.Add("Get-TrackerVMSetStatus 'Scanning'");
-	cmdsOut.Add("Out-Log 'Install complete, starting file change scan.'");
-	cmdsOut.Add("$files = ''");
-	cmdsOut.Add("if (Test-Path "+RemoteFolder+"\\files.txt) {#If we have a list of files to run - a relic from before automatic file gathering. ");
-	cmdsOut.Add("$files = Get-Content "+RemoteFolder+"\\files.txt");
-	cmdsOut.Add("} else {");
-	cmdsOut.Add("$files1 = (");
-	cmdsOut.Add("Get-ChildItem c:\\ -File -Recurse -ErrorAction Ignore -Force | ");
-	cmdsOut.Add("Where-Object {$_.CreationTime -gt $InstallStart} | ");
-	cmdsOut.Add("Where-Object {$_.CreationTime -lt $InstallEnd}");
-	cmdsOut.Add(").FullName");
-	cmdsOut.Add("$files2 = (");
-	cmdsOut.Add("Get-ChildItem c:\\ -File -Recurse -ErrorAction Ignore -Force | ");
-	cmdsOut.Add("Where-Object {$_.LastAccessTIme -gt $InstallStart} | ");
-	cmdsOut.Add("Where-Object {$_.LastAccessTIme -lt $InstallEnd}");
-	cmdsOut.Add(").FullName");
-	cmdsOut.Add("$files3 = (");
-	cmdsOut.Add("Get-ChildItem c:\\ -File -Recurse -ErrorAction Ignore -Force | ");
-	cmdsOut.Add("Where-Object {$_.LastWriteTIme -gt $InstallStart} | ");
-	cmdsOut.Add("Where-Object {$_.LastWriteTIme -lt $InstallEnd}");
-	cmdsOut.Add(").FullName");
-	cmdsOut.Add("$files = $files1 + $files2 + $files3 | Select-Object -Unique");
-	cmdsOut.Add("}");
-	cmdsOut.Add("Out-Log \"Reading $($files.count) file changes in the last $(((Get-Date) -$TimeStart).TotalSeconds) seconds. Starting bulk file execution:\"");
-	cmdsOut.Add("$files = $files | ");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'AppRepository'} |");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'assembly'} | ");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'CbsTemp'} | ");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'CryptnetUrlCache'} | ");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'DesktopAppInstaller'} | ");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'dotnet'} | ");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'dump64a'} | ");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'EdgeCore'} | ");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'EdgeUpdate'} | ");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'EdgeWebView'} | ");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'ErrorDialog = ErrorDlg'} | ");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'Microsoft.Windows.Search'} | ");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'Microsoft\\\\Edge\\\\Application'} | ");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'msedge'} | ");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'NativeImages'} | ");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'Prefetch'} | ");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'Provisioning'} | ");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'redis'} | ");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'servicing'} | ");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'System32'} | ");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'SysWOW64'} | ");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'unins'} | ");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'waasmedic'} | ");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'Windows Defender'} | ");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'Windows Error Reporting'} | ");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'WindowsUpdate'} | ");
-	cmdsOut.Add("Where-Object {$_ -notmatch 'WinSxS'}");
-	cmdsOut.Add("$files | Out-File 'c:\\Users\\user\\Desktop\\ChangedFiles.txt'");
-	cmdsOut.Add("$files | Select-String '[.]exe$' | ForEach-Object {if ($_ -match '$packageName') {Out-Log $_ 'green'} else{Out-Log $_ 'cyan'}; try{Start-Process $_}catch{}};");
-	cmdsOut.Add("$files | Select-String '[.]msi$' | ForEach-Object {if ($_ -match '$packageName') {Out-Log $_ 'green'} else{Out-Log $_ 'cyan'}; try{Start-Process $_}catch{}};");
-	cmdsOut.Add("$files | Select-String '[.]lnk$' | ForEach-Object {if ($_ -match '$packageName') {Out-Log $_ 'green'} else{Out-Log $_ 'cyan'}; try{Start-Process $_}catch{}};");
-	cmdsOut.Add("Out-Log \" = = = = End file list. Starting Defender scan.\"");
-	cmdsOut.Add("Start-MpScan;");
-	cmdsOut.Add("Out-Log \"Defender scan complete, closing windows...\"");
-	cmdsOut.Add("Get-Process msedge | Stop-Process");
-	cmdsOut.Add("Get-Process mip | Stop-Process");
-	cmdsOut.Add("Get-Process powershell | where {$_.id -ne $PID} | Stop-Process");
-	cmdsOut.Add("Get-Process explorer | where {$_.id -ne $explorerPid} | Stop-Process");
-	cmdsOut.Add("Get-process | Where-Object { $_.mainwindowtitle -ne '' -and $_.processname -notmatch '$packageName' -and $_.processname -ne 'powershell' -and $_.processname -ne 'WindowsTerminal' -and $_.processname -ne 'csrss' -and $_.processname -ne 'dwm'}| Stop-Process");
-	cmdsOut.Add("#Get-Process | Where-Object {$_.id -notmatch $PID -and $_.id -notmatch $explorerPid -and $_.processname -notmatch $packageName -and $_.processname -ne 'csrss' -and $_.processname -ne 'dwm'} | Stop-Process");
-	cmdsOut.Add("$WinGetLogs = ((Get-ChildItem $WinGetLogFolder).fullname | ForEach-Object {Get-Content $_ |Where-Object {$_ -match '[[]FAIL[]]' -OR $_ -match 'failed' -OR $_ -match 'error' -OR $_ -match 'does not match'}})");
-	cmdsOut.Add("$DefenderThreat = (Get-MPThreat).ThreatName");
-	cmdsOut.Add("Out-ErrorData $WinGetLogs 'WinGet'");
-	cmdsOut.Add("Out-ErrorData '"+MDLog+"' 'Manual' 'Dependency'");
-	cmdsOut.Add("Out-ErrorData $Error 'PowerShell'");
-	cmdsOut.Add("Out-ErrorData (Get-EventLog Application -EntryType Error -after $TimeStart -ErrorAction Ignore).Message 'Application Log'");
-	cmdsOut.Add("Out-ErrorData $DefenderThreat \"Defender (with signature version $((Get-MpComputerStatus).QuickScanSignatureVersion))\"");
-	cmdsOut.Add("if (($WinGetLogs -match '\\[FAIL\\] Installer failed security check.') -OR ");
-	cmdsOut.Add("($WinGetLogs -match 'Package hash verification failed') -OR ");
-	cmdsOut.Add("($WinGetLogs -match 'Operation did not complete successfully because the file contains a virus or potentially unwanted software')){");
-	cmdsOut.Add("Send-SharedError -clip $WinGetLogs");
-	cmdsOut.Add("Out-Log \" = = = = Failing Manual Validation pipeline build "+build+" on VM "+VM+" for "+PackageIdentifier+" "+logLine+" in $(((Get-Date) -$TimeStart).TotalSeconds) seconds. = = = = \"");
-	cmdsOut.Add("Get-TrackerVMSetStatus 'SendStatus'");
-	cmdsOut.Add("} elseif ($DefenderThreat) {");
-	cmdsOut.Add("Send-SharedError -clip $DefenderThreat");
-	cmdsOut.Add("Out-Log \" = = = = Failing Manual Validation pipeline build "+build+" on VM "+VM+" for "+PackageIdentifier+" "+logLine+" in $(((Get-Date) -$TimeStart).TotalSeconds) seconds. = = = = \"");
-	cmdsOut.Add("Get-TrackerVMSetStatus 'SendStatus'");
-	cmdsOut.Add("} else {");
-	cmdsOut.Add("Start-Process PowerShell");
-	cmdsOut.Add("Out-Log \" = = = = Completing Manual Validation pipeline build "+build+" on VM "+VM+" for "+PackageIdentifier+" "+logLine+" in $(((Get-Date) -$TimeStart).TotalSeconds) seconds. = = = = \"");
-	cmdsOut.Add("Get-TrackerVMSetStatus 'ValidationCompleted'");
-	cmdsOut.Add("}");
-
-
-	}else {
-		// Write-Host "Error: Bad Function"
-	}
-/*
-
-
-
-
-
-
-
-
-
-
-
-
-*/
-		OutFile(CmdsFileName,string.Join("\n",cmdsOut));
-
-	if (NoFiles == false) {
-		//Extract multi-part manifest from clipboard and write to disk
-			//Write-Host "Removing previous manifest and adding current..."
-		string FilePath = "";
-		RemoveItem(manifestFolder,true);
-		if (Operation == "Configure") {
-			FilePath = manifestFolder+"\\config.yaml";
-			OutFile(FilePath,clipInput);
-		} else {
-			List<string> Files = new List<string>();
-			Files.Add("Package.installer.yaml");
-			//Gather filenames from PR manifest in clipboard - most PRs, not all.
-			string[] FileNames = clip.Replace("\n"," ").Replace("\r"," ").Replace("/"," ").Split(' ').Where(n => n.Contains(".yaml")).ToArray();
-			//Get the last file name and chop the .yaml from it, to get the ToReplace string.
-			string replace = FileNames[FileNames.Length -1].Replace(".yaml","");
-			//Update each filename so it comes out with "Package". 
-			for (int i = 0;i < FileNames.Length; i++){
-				string string_add = FileNames[i].Replace(replace,"Package");
-				Files.Add(string_add);
-			}
-			//Split out manifest files by the Git double atpersand. 
-			string[] split_clip = clip.Replace("@@","∞").Split('∞');
-			//foreach files
-			for (int i=0;i < Files.Count;i++) {
-				string File = Files[i];
-				string this_split = split_clip[i*2];
-				this_split = this_split.Substring(0,this_split.IndexOf("ManifestVersion") + 22);
-				string[] inputObj = this_split.Split('\n');
-				
-				//Add the manifest folder path to the file path.
-				FilePath = manifestFolder+"\\"+File;
-				
-				//Write-Host "Writing $($inputObj.Length) lines to $FilePath"
-				OutFile(FilePath,inputObj);
-				
-				//Bugfix to catch package identifier appended to last line of last file.
-				// string fileContents = GetContent(FilePath);
-				string[] fileContents = GetContent(FilePath).Split('\n');
-				int fcLen = fileContents.Length -1;
-				if (fileContents[fcLen].Contains(PackageIdentifier)) {
-					fileContents[fcLen] = (fileContents[fcLen].Replace("PackageIdentifier","∞").Split('∞'))[0];
-				}
-				fileContents = fileContents.Where(n => !n.Contains("additions & 0 deletions")).ToArray();
-				fileContents = fileContents.Where(n => !n.Contains("manifests/")).ToArray();
-				fileContents = fileContents.Where(n => !n.Contains("Viewed")).ToArray();
-				fileContents = fileContents.Where(n => !n.Contains("marked this conversation as resolved")).ToArray();
-
-				string out_file = string.Join("\n",fileContents);
-				OutFile(FilePath,out_file);
-			}
-			//Get the files just written and extract how many.
-			string[] entries = Directory.GetFileSystemEntries(manifestFolder, "*", SearchOption.AllDirectories);
-			int filecount = entries.Length;
-			// string filedir = "ok";
-			// string filecolor = "green";
-			// if (filecount < 3) { filedir = "too low"; filecolor = "red";}
-			// if (filecount > 3) { filedir = "high"; filecolor = "yellow";}
-			// if (filecount > 10) { filedir = "too high"; filecolor = "red";}
-				//Write-Host -f $filecolor "File count $filecount is $filedir"
-			// if (filecount < 3) { break;}
-
-		}//end if Configure
-	}//end if NoFiles
-
-	if (InspectNew == true) {
-			//Write-Host "Searching Winget for PackageIdentifier"
-		//Write-Host PackageResult
-		string PackageResult = FindWinGetVersion(PackageIdentifier);
-		if (PackageResult == null) {//"No package found matching input criteria."
-			OpenAllURLs(clip);
-			System.Diagnostics.Process.Start("https://www.bing.com/search?q="+PackageIdentifier);
-			string a = PackageIdentifier.Split('.')[0];
-			string b = PackageIdentifier.Split('.')[1];
-			if (a != "") {
-					//Write-Host "Searching Winget for a"
-					// string result_a = FindWinGetVersion(a);
-					//Need to refactor these - they're meant to dump into console. 
-			}
-			if (b != "") {
-					//Write-Host "Searching Winget for b"
-					// string result_b = FindWinGetVersion(b);
-			}
-		}//end if PackageResult
-	}//end if InspectNew
-		//Write-Host "File operations complete, starting VM operations."
-	Thread.Sleep(1000);
-	SetStatus(VM, "Prevalidation", PackageIdentifier,PR);
-	SetVMState("vm"+VM, 2);
-	
-	LaunchWindow(VM);
-}//end manifest
-
-
 
 //////////////////////////////////////////====================////////////////////////////////////////
 //////////////////////====================--------------------====================////////////////////
@@ -3169,13 +2677,13 @@ bool ConnectionStatus = vm.Scope.IsConnected;
 				FileName = FileName+".installer";
 			} else if (string_YamlValue == "version") {
 				if (Arch != "") {
-					ValidateManifest(VM, PackageIdentifier, "", PR, Arch,"", "","","",false,false,"", "", true);
+					// ValidateManifest(VM, PackageIdentifier, "", PR, Arch,"", "","","",false,false,"", "", true);
 				} else if (OS != "") {
-					ValidateManifest(VM, PackageIdentifier, "", PR, "","", "",OS,"",false,false,"", "", true);
+					// ValidateManifest(VM, PackageIdentifier, "", PR, "","", "",OS,"",false,false,"", "", true);
 				} else if (Scope != "") {
-					ValidateManifest(VM, PackageIdentifier, "", PR, "",Scope, "","","",false,false,"", "", true);
+					// ValidateManifest(VM, PackageIdentifier, "", PR, "",Scope, "","","",false,false,"", "", true);
 				} else {
-					ValidateManifest(VM, PackageIdentifier, "", PR, "","", "","","",false,false,"", "", true);
+					// ValidateManifest(VM, PackageIdentifier, "", PR, "","", "","","",false,false,"", "", true);
 				}
 			}
 			string FilePath = manifestFolder+"\\"+FileName+".yaml";
@@ -3987,14 +3495,13 @@ bool ConnectionStatus = vm.Scope.IsConnected;
 			IntPtr credPtr;
 			if (CredRead(target, 1, 0, out credPtr)) { //If found, returns true and adds to credPtr, else false and error. 
 				try {
-					credMem = Marshal.PtrToStructure<CredentialMem>(credPtr);
+					credMem = Marshal.PtrToStructure<CredentialMem>(credPtr); 
 					//"Marshals data from an unmanaged block of memory to a newly allocated managed object of the type specified by a generic type parameter."
 					byte[] passwordBytes = new byte[credMem.credentialBlobSize]; //Make a new byte array passwordBytes of size credentialBlobSize.
-					Marshal.Copy(credMem.credentialBlob, passwordBytes, 0, credMem.credentialBlobSize);
-					//Copies data from an unmanaged memory pointer to a managed 8-bit unsigned integer array.
-					return new Credential(credMem.targetName, credMem.userName, Encoding.Unicode.GetString(passwordBytes)); //Make a new Credential object cred.
+					Marshal.Copy(credMem.credentialBlob, passwordBytes, 0, credMem.credentialBlobSize); 
+					return new Credential(credMem.targetName, credMem.userName, Encoding.Unicode.GetString(passwordBytes)); //Return the new Credential object directly.
 				} finally {
-					//credentialBlob is an interior pointer into credPtr; free the buffer once via CredFree.
+					//credentialBlob is an interior pointer into credPtr; free the buffer once via CredFree.					
 					if (credPtr != IntPtr.Zero) { CredRelease(credPtr); }
 				}
 			} else {
@@ -4013,8 +3520,9 @@ bool ConnectionStatus = vm.Scope.IsConnected;
 			byte[] bpassword = Encoding.Unicode.GetBytes(password);
 			userCredential.credentialBlobSize = (int)bpassword.Length;
 			userCredential.credentialBlob = Marshal.StringToCoTaskMemUni(password);
-			//If write fails, emit last error. 
+
 			try {
+				//If write fails, emit last error. 
 				if (!CredWrite(ref userCredential, 0)) {
 					throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
 				}
@@ -4655,40 +4163,40 @@ bool ConnectionStatus = vm.Scope.IsConnected;
 
 		//Validate Manifest
 		public void Validate_Manifest_Action(object sender, EventArgs e) {
-			ValidateManifest();
+			// ValidateManifest();
 		}// end Validate_Manifest_Action
 		
 		public void Validate_By_Configure_Action(object sender, EventArgs e) {
-			ValidateManifest(0,"","",0,"","","","","",false,false,"","",false, "","Configure");
+			// ValidateManifest(0,"","",0,"","","","","",false,false,"","",false, "","Configure");
 		}// end Validate_By_ID_Action
 
 		public void Validate_By_ID_Action(object sender, EventArgs e) {
 			string PackageIdentifier = inputBox_User.Text;
 
-			ValidateManifest(0,PackageIdentifier,"",0,"","","","","",false,false,"","",false, "--id "+PackageIdentifier);
+			// ValidateManifest(0,PackageIdentifier,"",0,"","","","","",false,false,"","",false, "--id "+PackageIdentifier);
 //ValidateManifest(VM = 0,  PackageIdentifier = "",  PackageVersion = "",  PR = 0,  Arch = "", Scope = "",  InstallerType = "", OS = "", Locale = "", InspectNew = false, notElevated = false, MinimumOSVersion = "",  ManualDependency = "",  NoFiles = false,  installerLine = "",  Operation = "Scan")
 		}// end Validate_By_ID_Action
 
 		public void Validate_By_Arch_Action(object sender, EventArgs e) {
-			ValidateManifest(0,"","",0,"x64");
+			// ValidateManifest(0,"","",0,"x64");
 			Thread.Sleep(HyperVRateLimitDelay);
-			ValidateManifest(0,"","",0,"x86");
+			// ValidateManifest(0,"","",0,"x86");
 		}// end Validate_By_ID_Action
 
 		public void Validate_By_Scope_Action(object sender, EventArgs e) {
-			ValidateManifest(0,"","",0,"","Machine");
+			// ValidateManifest(0,"","",0,"","Machine");
 			Thread.Sleep(HyperVRateLimitDelay);
-			ValidateManifest(0,"","",0,"","User");
+			// ValidateManifest(0,"","",0,"","User");
 		}// end Validate_By_ID_Action
 
 		public void Validate_By_Arch_And_Scope_Action(object sender, EventArgs e) {
-			ValidateManifest(0,"","",0,"x64","Machine");
+			// ValidateManifest(0,"","",0,"x64","Machine");
 			Thread.Sleep(HyperVRateLimitDelay);
-			ValidateManifest(0,"","",0,"x86","Machine");
+			// ValidateManifest(0,"","",0,"x86","Machine");
 			Thread.Sleep(HyperVRateLimitDelay);
-			ValidateManifest(0,"","",0,"x64","User");
+			// ValidateManifest(0,"","",0,"x64","User");
 			Thread.Sleep(HyperVRateLimitDelay);
-			ValidateManifest(0,"","",0,"x86","User");
+			// ValidateManifest(0,"","",0,"x86","User");
 		}// end Validate_By_ID_Action
 		//Generate manifest for selected VM
 		public void Manifest_From_Clipboard (object sender, EventArgs e) {
