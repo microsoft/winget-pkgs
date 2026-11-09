@@ -2,36 +2,34 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
 
 PackageIdentifier: 1lck.Viff
-PackageVersion: v0.4.2
+PackageVersion: v0.4.3
 PackageLocale: zh-CN
 ShortDescription: 轻量、原生的 Git 与 Subversion 桌面客户端，内置只读项目浏览、中英文界面与可选的 AI 提交说明。
 Description: Viff 是基于 Go 与 Viva 工具包打造的轻量原生 Git 桌面客户端，不使用 Electron 与 WebView。它提供差异对比、提交历史、变更列表和只读的项目浏览器，界面可在英文与简体中文之间切换。Viff 调用系统中已安装的 Git 可执行文件，本身并不内置 Git。
 ReleaseNotes: |-
-  Viff 0.4.2 增加工作树文本文件的应用内编辑，并修正提交时间的时区、编码容错与格式选择。
+  Viff 0.4.3 增加通过 SSH 只读观察远程仓库，并修正欢迎页的搜索范围与变更列表的勾选保留。
   重点更新
-  这一版把只读文件查看器变成可选的编辑器，同时让提交时间按本机时区显示，并允许在 24 小时制与 12 小时制之间选择。
+  这一版可以直接打开服务器上的工作区查看状态、历史与 diff（只读），同时让欢迎页搜索回到按名称匹配，并让右键已勾选的变更行保留勾选。
   ✨ 新功能
-  - 文件查看器可直接编辑工作树中的 UTF-8 文本文件：Edit（⌘E）进入，⌘S 保存，Revert 还原，Done 返回只读，并保留行号、水平滚动与语法着色。
-  - 保存前会重新读取文件，外部改动会拒绝覆盖；行尾、UTF-8 BOM 和文件权限保留不变。
+  - 以 ssh://host/path 只读打开 Linux/macOS 服务器上的工作区：状态、历史、diff、引用、文件树与工作树文件都来自服务器上的 Git，Viff 不向服务器写入任何内容。
+  - 认证继承 ~/.ssh/config、ssh-agent 与 known_hosts，不需要在 Viff 里保存密钥；首次连接前需在终端信任主机密钥，当前不提供密码输入框。
   ⚡ 改进
-  - 提交时间按本机时区显示，设置中可在 24 小时制与 12 小时制之间切换。
-  - 欢迎页搜索同时匹配工作区里已添加的仓库，最近项目上限从 20 提高到 50。
+  - 欢迎页搜索默认只按仓库名称做子串匹配，搜索框右侧的 Name / Path 可切到完整路径（子序列）匹配，用于按父目录或路径片段筛选。
   🛠 修复
-  - 提交信息含非法 UTF-8 字节时只替换坏字符，不再让整个日志视图报错。
-  - 跨时区比较不再把今天的提交误判成昨天。
+  - 右键已勾选的文件、目录或整组打开菜单时保留现有勾选与跨组多选，折叠节点里已勾选的文件也计入批量操作，实际作用范围与勾选状态一致。
   升级说明
-  - 从 v0.4.1 升级：设置文件格式未变，原有设置在升级后继续生效。
+  - 从 v0.4.2 升级：设置文件格式未变，原有设置在升级后继续生效。
   - macOS：按机型选择 Apple Silicon 或 Intel 的 DMG，退出旧版后打开 DMG，将 Viff.app 拖入“应用程序”并替换旧版。
   - Windows：退出旧版后运行 x64 安装器。
   - Windows 便携包：解压后进入新目录执行 viff.exe，不写入安装信息。
-  - Debian/Ubuntu：执行 sudo apt install ./viff-v0.4.2-linux-amd64.deb。
+  - Debian/Ubuntu：执行 sudo apt install ./viff-v0.4.3-linux-amd64.deb。
   - Linux 便携包：解压后进入新目录执行 ./viff，并自行安装所需系统库。
   - Git 需单独安装并加入 PATH，Linux 系统库要求见发布指南。
   兼容性与已知问题
   - macOS 要求 13 或更高版本；Linux 需要可用的图形会话、渲染后端和发布指南中列出的系统库。
   - macOS 应用使用 ad-hoc 签名，未经 Developer ID 签名或公证；Windows 安装器未经 Authenticode 签名，系统可能显示安全提示。
+  - 远程仓库是只读观察模式：只支持 key/agent 认证，服务器需为 Linux/macOS 并安装 Git；fetch/pull/push、暂存与提交、应用内编辑、冲突接受、终端与外部打开都不可用，文件变化依赖每 5 秒轮询 git status。
   - 应用内编辑只支持工作树中的 UTF-8 文本文件，原始文件和保存后的内容都不超过 1 MiB；历史版本、diff 与冲突仍只读，也不提供补全、多光标或自动保存。
-  - 应用内编辑的 Windows/Linux 实机输入法、WSL 仓库保存与三平台桌面验收仍待补充；无头 CI 不代表完整桌面兼容。
   - Windows 和 Linux 上外部工作区文件变化可能需要最多约 30 秒才会刷新；WSL 仓库使用独立的轮询间隔。
   - Subversion 属性编辑和锁操作尚未实现；WSL 仓库的内置终端与内容搜索仍在 Windows 侧运行。
   仅安装来自项目发布页且已核对校验值的文件；如遇系统拦截，请先确认来源。
