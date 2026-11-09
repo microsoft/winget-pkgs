@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
 
 PackageIdentifier: anglee0323.AntigravityToolsLite
-PackageVersion: 4.10.14
+PackageVersion: 4.10.15
 PackageLocale: zh-CN
 ShortDescription: 管理 Antigravity 应用及其 agy CLI 使用的 Google 账号、模型配额与 Token 用量。
 Description: |-
@@ -18,8 +18,10 @@ Description: |-
 Tags:
 - antigravity
 ReleaseNotes: |-
-  - 适配 Antigravity IDE 2.6 统一登录：IDE 2.6 及以上改由内置扩展启动与 App 相同的后台服务，并使用 App 与 agy 共用的登录，不再从自身数据库读取账号。检测到这类 IDE 时，切换 App/CLI 与切换 IDE 变为同一操作：写入共用登录，关闭并重新打开正在运行的 App 和 IDE，同时记为两者的当前账号。IDE 自己启动的后台服务不会被 Switch 以旧参数重新拉起，重新打开的 IDE 会自行启动新的服务。自动切换中目标为 IDE 的策略也改为校验和写入共用登录。2.6 以下或无法识别版本的 IDE 保持原来的独立切换。
-  - Windows 关闭 Antigravity 改为先请求窗口正常关闭，以便客户端保存状态；在大部分关闭等待时间内仍未退出（例如在后台或托盘运行、没有可见窗口或停在确认框）时，才强制结束剩余进程，与 macOS、Linux 的处理一致。
-  - Windows 切换 App 账号前，如果默认 App 状态文件 %USERPROFILE%\.gemini\antigravity\antigravity_state.pbtxt 非空、不超过 16 MiB 且内容全为零字节，会在客户端关闭后将其原样改名备份，让 Antigravity 下次启动时重新生成。仍有 Antigravity、agy.exe 或 language_server.exe 在运行、文件被占用或备份失败时，切换会在写入凭据前停止。其他损坏形式和自定义位置不处理。
+  - 修复费用估算全部变成“未计价”的问题。Google 把 Gemini 定价页改成了新的模板格式，旧的表格解析拿不到任何价格，只能退回内置价目表。现在按官方发布的新格式解析，并改用 Anthropic 官方价格页作为 Claude 的价格来源；任一价格页解析不到模型时会明确提示，不再把内置价格当成刚解析到的官方价格。内置兜底价目表同时修正了 Gemini 3.6 Flash 与 3.5 Flash Lite 的单价。
+  - 账号卡片与列表新增配额价值折算：按已记录的用量和匹配到的模型价格，显示每个额度窗口已消耗与剩余金额（美元、人民币或双币对照）以及等效 Token 数量。估值按 Gemini、Claude/GPT、Gemini 4 Argon 三个池分别计算，不跨池混算；窗口消耗低于 3% 时不做总额外推；满额窗口使用自定义参考上限、历史校准中位数或内置套餐基准，并在行内标出来源。
+  - 新增“周期变化”入口：按账号查看各额度窗口在每个周期内的消耗、与上一周期的环比变化和窗口内的检查点记录。
+  - 修复账号卡片中长模型名与重置倒计时压住金额的问题：名称过长时省略，倒计时在窄卡片里换行显示。
+  - 新增 USD → CNY 汇率获取，默认每天自动更新一次并缓存 24 小时，也可固定为自定义汇率。
 ManifestType: locale
 ManifestVersion: 1.28.0
