@@ -1,0 +1,148 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Blockworked.Blockwork
+PackageVersion: 0.6.0
+PackageLocale: en-US
+Publisher: Blockworked
+PublisherUrl: https://blockworked.com/
+PublisherSupportUrl: https://github.com/Blockworked/Blockwork/issues
+PrivacyUrl: https://github.com/Blockworked/Blockwork/blob/master/PRIVACY.md
+Author: Blockworked
+PackageName: Blockwork
+PackageUrl: https://blockworked.com/
+License: GPL-3.0-only
+LicenseUrl: https://github.com/Blockworked/Blockwork/blob/master/LICENSE
+Copyright: 2026 Blockworked
+ShortDescription: A visual, block-based editor for creating and running macros.
+Description: Blockwork is a desktop app for visually building and running keyboard and mouse macros. It has a Scratch-style block editor for instruction sequences, variables, and hotkey-triggered playback. It runs in the background from the system tray, so your macros are available whenever you need them.
+Moniker: blockwork
+Tags:
+- automation
+- block
+- block-editor
+- hotkey
+- keyboard
+- macro
+- mouse
+ReleaseNotes: |-
+  [0.6.0] - 2026-11-09
+
+  Added
+  - "Run strand" in a strand's right-click menu (on its top block): runs just that strand from the top, without waiting for its event.
+  - "Set value" in a sidebar variable's right-click menu: sets what the variable holds, and what the next run starts with.
+  - Text with several lines:
+    - Any text box opens a bigger editor from its expand button or Shift+Enter, and text that already has line breaks shows its first line and how many more there are.
+    - The HTTP request (body and headers), JavaScript, write file and notify blocks get a text box of their own under the block that shows every line.
+    - Custom blocks can give an input the same box ("Inputs" in the Make a Block editor).
+  - Launch options for the Open app block: a gear on the block opens a panel
+    for arguments (like --incognito), a working folder, and environment variables.
+  - File blocks:
+    - Write or append to a file, read a file, check a file exists, list a folder.
+    - "When file changes" trigger.
+  - Web blocks:
+    - Send GET/POST/PUT/PATCH/DELETE requests into a variable, or fetch a URL.
+    - Read values out of JSON.
+    - Webhook trigger: an opt-in local server (Settings > Integrations) that starts macros on a web request with a token, passing the request body.
+      - Its token stays hidden as dots in Settings, so it's safe on a shared screen: copy it (or a ready-made curl example) without showing it, or show it briefly.
+  - Shell reporters: a command's output and whether it succeeded.
+  - Browser blocks, through the new Blockwork browser extension (Chrome, Edge, Firefox):
+    - Open a page, click an element, type into an element, wait for an element, and run JavaScript into a variable.
+    - Reporters for page address and title, an element's text, whether it exists and how many match.
+    - Elements are named by selectors, including focused, text= and near=, so a macro can pick the button beside the box you're typing in when a page has several alike.
+    - Opt-in local bridge in Settings > Integrations, paired with a key; macros need the new "browser" permission.
+    - The Browser category stays out of the palette until a browser has connected once (then it stays for good), or while the open macro already has Browser blocks.
+  - Notify block for desktop notifications.
+  - Dialog blocks: ask for text, ask yes or no, choose from a list, show a message.
+    - They work with the editor closed.
+    - Cancelling stops the run unless a try block catches it.
+  - Windows:
+    - Active window title/app reporters and a "when window is focused/unfocused" trigger (Windows, macOS, X11, Hyprland, Sway, KDE with kdotool).
+    - Focus, minimize, maximize, restore, close, move or resize a window, matched by title or app (picked from a dropdown), plus a "window exists?" reporter.
+  - Window detection blocks:
+    - Detect objects in a window with a local detector service, and wait for a detection.
+    - Aim one step toward a point, or at a tracked detection.
+    - "Window x/y/width/height/center" and "detection of" reporters.
+    - Detectors must run on this computer.
+  - Screen blocks, in a new Screen palette category:
+    - Color at a point, average color of a region, colors match.
+    - Text on screen (OCR): Windows/macOS built-ins, or Tesseract on Linux.
+    - Mouse position, screen size, monitor count, monitor position/size.
+  - Image blocks:
+    - Find an image on screen, click on it, and wait for it to appear or disappear, with a tolerance.
+    - Capture the image from the screen or load a PNG.
+  - Screen captures (image blocks and the region and point pickers on screen reporters) use a see-through overlay on every monitor. On Wayland they go through the desktop portal (KDE and GNOME may ask for permission once) or grim on wlroots desktops.
+  - "Wait until" block that pauses until a condition is true, with a time limit.
+  - Error handling:
+    - Try/on error, throw error, error message.
+    - A stop block that ends the whole macro, just its own strand, or the macro's other strands, including ones its other triggers started.
+    - Retry block: runs its body again after a failure, up to N attempts.
+    - Per-macro time limit and loop limit.
+  - Emergency stop hotkey (Ctrl+Alt+Shift+Esc) that stops every run and pauses triggers until resumed.
+  - Run feedback:
+    - The block each running strand is on is outlined live on the canvas.
+    - Blocks that failed in the last run get a red marker; click a logged error to jump to its block.
+    - Activity strip under the canvas shows the latest run event; click it to open the run log.
+    - Tray menu "Recent activity" lists the latest runs, triggers and errors.
+    - A fired trigger is logged by name, like Trigger fired: when key "F8" is pressed, so the activity strip, run log and tray say which one ran. One-letter keys are named in capitals, as the key block shows them, so a key's press and release read alike.
+  - Debugger:
+    - Right-click a block to toggle a breakpoint.
+    - Pause, resume, step one block at a time (F8/F10) or stop from the bar above the canvas, which shows the paused strand's variables and lists.
+  - Macros calling macros:
+    - Run macro (and continue, or wait for it to finish), stop macro by name, "macro is running?" reporter.
+    - Signals: "send signal (and wait)" starts this macro's "when I receive" strands, sharing the run's variables.
+    - "With lock" block: only one strand, across every macro, runs inside a lock of the same name at a time.
+  - Global variables:
+    - Set/change global blocks and a "global" reporter, shared by every macro and kept across restarts.
+    - Listed in Settings, where they can be deleted.
+    - Create variables, global variables and lists directly from their block dropdowns, then select the new name automatically.
+  - Secrets:
+    - Named passwords and API keys in Settings > Integrations, kept in the system keyring (Secret Service, Credential Manager, Keychain) and read with the "secret" block.
+    - Values are masked in the run log, previews and saved or exported macro files.
+    - The import review warns about macros that read them.
+  - Text and data blocks:
+    - Contains / starts with / ends with / matches regex.
+    - Replace, regex replace and find; split into a list or take one part; letters from/to; trim.
+    - Number formatting, and timestamps with date formatting, parsing and parts.
+  - Text expansion:
+    - A "when I type" trigger that fires on an abbreviation like ;addr typed anywhere, optionally erasing it.
+    - A paste block that pastes through the clipboard and puts the old clipboard back.
+    - The Text snippet template uses them.
+  - More triggers and reporters:
+    - App starts or exits, after N minutes idle, screen locks or unlocks.
+    - Network connects or disconnects, USB device plugged in or unplugged.
+    - Mouse button pressed or released (optionally with modifier keys).
+    - Reporters: "app is running?", "seconds idle", "screen is locked?", "online?", "USB device plugged in?".
+  - Schedules:
+    - "On schedule" trigger with cron expressions (*/15 9-17 * * mon-fri, @hourly); a broken expression is reported in the run log.
+    - "Once at" trigger for a single date and time.
+    - Per-macro "catch up on missed schedules" setting that runs schedules missed while Blockwork was closed or the computer slept.
+  - Per-macro conditions in Macro settings: triggers and hotkeys only start the macro while a given window is focused, on AC or battery power, between two times, or on chosen weekdays.
+  - Macro library:
+    - The macro picker is now a searchable list with folders.
+    - Open, duplicate, move to a folder, export or delete a macro from it.
+    - Import and export use the system file dialog.
+  - Importing and sharing macros:
+    - The import review shows what a macro can do (commands, web, files, input, clipboard, windows, triggers) before it's added.
+    - Bundles: export a library folder or a macro (with the macros it runs) as a .blockwork file and import it with the same review.
+    - Permissions: imported macros ask before running commands, going online, writing files, reading secrets or reading the screen, with "allow this time" and "always allow".
+    - Choose what to allow in the import review or in Macro settings > Permissions; grants are kept outside the macro file.
+  - Block library:
+    - My Blocks > Browse lists shared block packs from library indexes set in Settings > Editor; the built-in one is https://community.blockworked.com.
+    - The built-in library can't be removed, and comes back for anyone who removed it in an earlier build.
+    - Packs are checked against the SHA-256 their index pins, reviewed before they're added, and replace their older versions in place.
+    - Packs published by the Blockworked team show a blue verified badge next to their publisher in Browse library. Only the built-in library can mark packs this way.
+    - Right-click a custom block to share it, and the blocks it uses, as a .blockpack file.
+    - After saving a pack, "Send to the community library" uploads it for review.
+    - Browse draws each pack's blocks as real blocks, with search, a permissions filter, sorting (name, recently updated, newest, most discussed), Official only and Hide installed.
+    - Each pack has its own page: an overview of every block with its description and ID, a Source tab with the blocks' bodies on a read-only canvas and the pack file, earlier versions, and comments.
+    - Sign in from the app with your browser to post and delete comments.
+    - My packs lists the packs you've shared with their review status and earlier uploads. Publish update picks the pack's blocks from the open macro and bumps the version; Share a new pack sends a macro's blocks for review without leaving the app.
+  - Custom blocks:
+    - Set default values for inputs, including boolean inputs.
+    - Add optional components that callers can turn on with the block's "+" menu and remove with "x". Each component has a boolean enabled input and can contain labels and parameters.
+    - Create and edit custom reporters with body slots, and drag their parameters into the canvas.
+  - Community pack variables:
+ReleaseNotesUrl: https://github.com/Blockworked/Blockwork/releases/tag/0.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
