@@ -1,0 +1,37 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: mateo-ki.VPNParser
+PackageVersion: 1.16.9
+PackageLocale: zh-CN
+ShortDescription: Windows 桌面程序：采集订阅、解析成节点、跑代理，并把代理质量实测出来。
+Description: VPN Parser 是用 Rust + egui 编写的 Windows 桌面程序，负责采集免费或自建订阅、解析成节点、跑代理，并把代理质量实测出来。订阅入口包括带 `YYYY-MM-DD` 日期占位符的订阅 URL、Gist 搜索页发现，以及 Telegram 频道预览（裸节点链接和订阅链接两类都取，节点只增不删）。解析支持 `ss` `vmess` `vless` `trojan` `hysteria2/hy2` `socks5` `http(s)` 分享链接，以及 Clash / Clash Meta YAML、Base64 与混合文本。延迟以经内核访问 Google `generate_204` 的真实握手为准，24 小时出口健康条按实测绘制，而不是看内核上报的状态。Windows 上它同时管理系统代理、TUN（提权交接后只保留一个实例）和终端 `HTTP_PROXY` 环境变量，按 exe 路径添加防火墙允许规则，支持单实例互斥与托盘，记录出口切换历史并按天统计规则命中，同时提供强制 bearer 鉴权的本地 HTTP API 与 mihomo / sing-box / xray 配置导出。安装包不含内核，内核缺失时由程序按需下载。
+Tags:
+- clash
+- sing-box
+- 代理
+- 出口健康
+- 测速
+- 节点解析
+- 订阅
+ReleaseNotes: |-
+  🚀 VProxy v1.16.9 发布说明 / Release Notes
+  🎉 VProxy v1.16.9 正式发布！本版本重点根治了 Windows 10/11 环境下程序最小化或停放至托盘后出现的“未响应” (Not Responding) / 界面冻结卡顿 问题，全面升级了 eframe 事件循环架构，并深度优化了剪贴板大文件识别与窗口还原机制：
+  🛠️ 稳定性与架构：彻底根治 Windows 最小化“未响应”
+  - 双阶驱动事件调度重构 (App::logic 与 App::ui)：
+    - 在 eframe 底层机制中，窗口处于最小化或停放遮挡状态时，渲染器判定 show_ui == false 并完全跳过 ui() 阶段；
+    - 本版本将托盘事件消费、后台管道消息轮询 (poll_bg)、窗口还原状态机以及周期性心跳守护彻底前置移入 App::logic 驱动；
+    - 确保窗口在最小化期间，托盘交互与后台消息以毫秒级持续流转，彻底根除因消息循环停摆超 5 秒触发的 Windows DWM 幽灵窗口（标题栏 (未响应)）假死。
+  - Win32 消息泵极速唤醒 (WM_NULL)：
+    - 托盘工作线程在派发事件与触发 trigger_waker 时，主动向主窗口句柄 HWND 发送 WM_NULL 空消息；
+    - 瞬间打破阻塞在 GetMessageW / MsgWaitForMultipleObjectsEx 中的 Win32 消息循环，托盘点击唤醒延迟由原先的 10~24 秒骤降至 < 5ms 秒开。
+  - 完善任务栏常规最小化窗口唤回：
+    - 补全 unpark_from_tray 的原生还原分支，当窗口由 Windows 任务栏正常最小化（而非收起停放）时，显式调用原生 ShowWindow(hwnd, SW_RESTORE) 与 SetForegroundWindow，确保任何场景下托盘点击均可瞬间拉回主窗口并置顶激活。
+  ⚡ 剪贴板识别异步化：告别大配置阻塞
+  - 离线反序列化解耦 (tokio::task::spawn_blocking)：
+    - 将 Ctrl+V 粘贴时的 paste::intake（含数千节点与分流规则提取）移入后台线程池异步运算，运算完成后通过 BgMsg::PasteIntakeDone 回传结果；
+    - 彻底规避 22KB ~ 5MB+ 庞大 Clash YAML 配置反序列化对 UI 渲染主线程的同步阻塞，Ctrl+V 粘贴零掉帧。
+  - 启动与关闭安全拦截加固：
+    - 优化启动前 5 帧内的系统关闭消息防御，并为退出态加入前置快速返回，保障生命周期平稳收尾。
+ManifestType: locale
+ManifestVersion: 1.28.0
