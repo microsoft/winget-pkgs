@@ -1,0 +1,156 @@
+# Created with ractive/release-workflows using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ractive.hyalo
+PackageVersion: 0.26.0
+PackageLocale: en-US
+Publisher: '@ractive'
+PublisherUrl: https://github.com/ractive
+PublisherSupportUrl: https://github.com/ractive/hyalo/issues
+Author: Jean-Pierre Bergamin
+PackageName: hyalo
+PackageUrl: https://github.com/ractive/hyalo
+License: MIT
+LicenseUrl: https://github.com/ractive/hyalo/blob/HEAD/LICENSE
+ShortDescription: CLI for exploring and managing Markdown knowledge bases with YAML frontmatter
+Description: Hyalo is a fast command-line tool for searching, filtering, and mutating collections of Markdown files with YAML frontmatter. It supports property queries, tag filtering, regex search, wikilink tracking, and bulk metadata updates. Compatible with Obsidian vaults, Zettelkasten systems, and any structured Markdown documentation.
+Moniker: hyalo
+Tags:
+- agent-skill
+- agentic-workflows
+- cli
+- knowledge-base
+- knowledge-management
+- markdown
+- obsidian
+- rust
+- zettelkasten
+ReleaseNotes: |-
+  Upgrading from 0.25.x
+  - Rebuild your index once. The snapshot format is now 12 (0.25.1 wrote 7). An existing .hyalo-index is refused with a warning, and the command falls back to disk, until you run hyalo create-index.
+  - Several breaking changes, each marked Breaking below: the reader skips raw HTML, $$ math and code elements; a dry run exits 0; an invalid lint severity is refused; init/deinit protect your .hyalo.toml; new --file names a note.
+  - Highlights: bulk writes survive power loss (every note ends up whole, old or new). lint is about a third faster on large vaults (MDN: 4.97 s to 3.24 s). A create-index that changed nothing is about 30% faster and uses about 57% less memory. New opt-in [links] redirect_property setting.
+  [0.26.0] - 2026-11-09
+  Added
+  - find --fields links tells an ambiguous link from a missing one. A bare
+    [[stem]] that names two or more notes, or an alias two notes claim, carries
+    ambiguous: true and candidates (sorted, vault-relative, identical on a disk
+    scan and under --index); no other link carries either key. Text mode prints
+    (ambiguous: a/note.md, b/note.md) in place of (unresolved). The link is
+    still broken, so find --broken-links, summary.links.broken and HYALO006
+    count it as before (DEC-374).
+  - lint --fix over 200 or more files prints lint --fix: N/M files on stderr
+    every 200 files and lint --fix: M/M files, done at the end, like the other
+    bulk write phases; -q silences it (DEC-383).
+  - links fix and mv read a link target one way (DEC-384): a path suffix names a note ([[x/note]] for a/x/note.md; two notes sharing it are ambiguous) and [[./x]]/[[../x]] are relative to the source folder, so an in-vault ../x is no longer out_of_vault.
+  - [links] redirect_property = "redirect_from" (unset by default, no flag)
+    resolves a site-absolute link ([x](/old/url), [[/old/url]]) to the note
+    that lists that URL path under the property, as a last resort after every
+    file, directory-index, stem and alias match, so a real file always wins. The
+    link carries via: "redirect" and is a graph edge; a path two notes list is
+    ambiguous (DEC-374); links fix rewrites no target for such a link (a broken
+    #fragment still gets the usual anchor repair against the declaring note) and
+    mv leaves it alone, and a file created or moved onto a claimed path takes
+    over the links that resolved through the claim. A value with a #fragment or
+    ?query names part of a page and is ignored. On GitHub Docs it resolves 5,535
+    of the 6,082 broken markdown links (broken links 7,406 to 1,871; 237 of those
+    now report a broken #anchor). --index builds the map from the properties a
+    snapshot already holds, so changing the setting needs no rebuild and no format
+    bump. hyalo config reports links.redirect_property; a blank name is a
+    config error like an invalid lint severity (the gates refuse; DEC-415).
+  Changed
+  - Faster, with identical answers: a create-index rerun that changed nothing now
+    decides so before it decodes the search postings, clones the entries or resolves the
+    link graph (DEC-414). On MDN's 14,375 notes the no-op takes about 25% less wall time
+    (22.6% and 27.8% in two interleaved sets on a busy machine), 41% less CPU and less
+    than half the memory (526 MB to 226 MB); the result and the untouched snapshot are
+    byte-identical, and a rerun that does change something is level. A no-op no longer
+    re-validates the postings beyond their MessagePack framing, so a torn or truncated
+    snapshot still rebuilds, while a single damaged byte that leaves the framing intact
+    is left alone: the three warnings about an unreadable or invalid BM25 section now end
+    with "hyalo create-index --force rebuilds it".
+  - Faster, with identical answers: the per-file drift check that unscoped or
+    graph-reading --index reads (find, backlinks, summary) run, drifted or not
+    (DEC-302), now calls stat once per indexed file instead of twice, about 0.02 s
+    less system time on MDN's 14,375 notes.
+  - Breaking: the reader skips raw HTML, $$ math and code-like elements.
+    [[x]] or [x](y.md) inside a raw HTML block (<pre>, a <div> or
+    <details> with no blank line after its first line), a $$ block or span,
+    an HTML tag's attributes, or <code>, <pre>, <kbd>, <samp>, <script>,
+    <style> or <textarea> content is no longer a link, and a # x or
+    - [ ] x in such a region is no heading and no task. find --fields links,
+    backlinks, --orphan, --dead-end, --broken-links, summary.links,
+    HYALO006, links fix, mv, the promoted title, read --section and task
+    scanning all follow, so link counts and backlinks change on a note that
+    has such a region, and links fix --apply and mv stop rewriting there.
+    This is the owner's decision; Obsidian documents none of it. A <div> ends at
+    a blank line, so <div>, a blank line, [[x]] is still a link. The content of
+    <a> and <span> written inline, link labels, single-$ math, {{ }} macros
+    and frontmatter links are unaffected, and %% comments read as before. A tag
+    alone on a line after a blank line starts an HTML block (CommonMark condition 7),
+    so <a href="u">, [[x]] and </a> on three lines hide the link. MDN,
+    GitHub Docs and the Obsidian Hub hold HTML blocks and a $$ line, but no
+    link, heading or task inside one: their inventories are identical (DEC-402). A closing </pre> alone on a
+    line now starts an HTML block for lint as well, as in CommonMark.
+  - A heading ending in {#custom-id} declares that id as an explicit anchor,
+    matched case-sensitively like an HTML id; the heading text and its slug are
+    unchanged. GitHub Docs' broken anchors fall from 370 to 366 (DEC-403).
+  - CI's quality-gates job compiles the fuzz/ targets (cargo check, stable,
+    nothing runs); fuzzing and Miri stay manual (DEC-405).
+  - Breaking, hyalo-core (0.x), a diff of its public API against 0.25.1.
+    Removed: CaseInsensitiveIndex::alias_count, FilenameTemplate::matches_path,
+    FrontmatterFrame::opening_span and closing_span, and
+    discovery::reset_scan_excluded_count/reset_gitignore_dropped_count. Made
+    crate-private: ExplicitAnchorScanner (with explicit_anchor_ids_in_line and
+    fragment_matches_explicit_anchor), anchor_fix::plan_anchor_fixes (use
+    plan_anchor_fixes_filtered), bm25's heading_body_lines,
+    BodySyntax::line_is_indented_code, PartialExecuteReport::applied_paths,
+    Document::{get_property, set_property, remove_property}, ambiguous_stem_key,
+    is_scan_excluded, scan_exclude_glob, resolve_attachment_from_source and
+    SchemaBind::type_for (DEC-397). Changed in a way that breaks a caller that
+    builds or matches them: the new variant WrittenForm::ParentRelative (an
+    exhaustive match stops compiling), the new LinkInfo::ambiguous and
+    candidates fields (a struct literal stops compiling), the new
+    BrokenLinkReport::unresolved_relocations field, the new FixPlan::occurrence
+    field (a struct literal stops compiling), link_fix::EmittedTargets keyed by
+    EmittedKey, (FixPlanKey, occurrence), instead of FixPlanKey (two plans with
+    one key no longer share a slot, DEC-399), and SNAPSHOT_FORMAT_VERSION, 7 to 12. Added:
+    the modules link_target and protected;
+    CaseInsensitiveIndex::{lookup_path_suffix, stem_ambiguity, ambiguity, target_ambiguity, target_stem_ambiguity, literal_target_stem_ambiguity, ambiguous_candidates, ambiguous_stem_candidates, path_suffix_ambiguity};
+    link_fix::{EmittedKey, assign_occurrences, FixPlan::emitted_key};
+    SnapshotIndex::build_info; BodySyntax::{with_protected, for_reader, reader_line, protected, line_in_block_quote, line_in_list_item, line_is_fence_delimiter}; ProtectedRegions::opaque_ranges;
+    FileVisitor::on_markup_line (a provided method); rooted::Durability::for_rewrites;
+    WriteSession::durability;
+    anchor::suggest_heading; discovery::{scan_include_allows_dir, scan_include_patterns, ignore_stamps, set_ignore_stamps};
+    index::{peek_build, same_link_props, SnapshotBuild, RunBuild, SnapshotRefusal, IgnoreStamp}; rooted::is_portable_windows_name.
+  - Breaking: a dry run exits 0. changelog release, changelog add and
+    madr toc exited 1 on a dry run that would change the file, which is how a CI
+    step used them as a drift gate (hyalo madr toc --dry-run failing on a stale
+    table of contents). They now exit 0 like okf index, links fix and every
+    other preview, and results.changed carries the drift (DEC-307, DEC-390). A
+    gate on the exit code stops firing; read results.changed instead:
+    hyalo madr toc --dry-run --jq '.results.changed' | grep -qx false.
+    append onto a mapping now exits 1, not 2.
+  - Breaking: an invalid lint severity is refused. [lint.rules.X] severity
+    must be exactly error, warn or warning. eror or Error, which read as
+    warn before and let a CI gate pass, now make lint, find --strict and
+    views run exit 1 (like an unloadable [schema], DEC-362); hyalo config
+    reports malformed: true, set --validate refuses, and the message names
+    hyalo lint-rules set X --severity warn and --severity error for the repair.
+    Everything else keeps working, new and types included (DEC-390, DEC-399).
+  - Breaking: init and deinit protect your .hyalo.toml. init refuses a
+    .hyalo.toml that does not parse (exit 1, nothing created) instead of
+    replacing it with dir = "..." and losing its schema, views and lint rules.
+    deinit used to delete the file whatever it held; it now removes it only when
+    it is exactly the dir = "..." file init writes, and keeps one that holds
+    other settings, a comment, or any reformatting, and says so (DEC-390, DEC-399).
+  - Breaking: new --file names a note, and \ separates paths only on
+    Windows. new --file requires <stem>.md, lower-case. A backslash is a
+    separator in new, okf, changelog, madr, --files-from and dir on
+    Windows only; elsewhere it is an ordinary filename byte (DEC-363, DEC-390). It
+    still separates a link target on every platform (DEC-400).
+  - On Unix, a dot-prefixed name that merely ends in a dot (.drafts./) is now
+    hidden, as every other dot-prefixed name already was (ignore 0.4.34).
+ReleaseNotesUrl: https://github.com/ractive/hyalo/releases/tag/v0.26.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
