@@ -1,0 +1,32 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: OpenVetta.Vetta
+PackageVersion: 0.5.72
+PackageLocale: en-US
+ShortDescription: An open-source, local-first desktop AI agent built for real work.
+Description: Vetta is an open-source desktop AI agent that is local-first, extensible, and under your control. It combines models, project files, local tools, and reusable capabilities in one workspace, supporting BYOK model connections, MCP servers, skills, plugins, workflows, and local knowledge bases. Vetta can inspect workspaces, use tools with visible permission boundaries, and produce real files.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  Vetta 0.5.72
+  新增
+  - 「设置 → Agent 配置 → 图片」里可以添加自定义生图服务：填名称、Base URL、API Key 和模型名，并标注支持文生图还是图生图，保存后就会出现在两个模型下拉里，Agent 生成、编辑图片时会直接请求你填的服务。只支持兼容 OpenAI 的接口（/images/generations、/images/edits），图片请求直接从你的电脑发往该服务；API Key 加密保存在本机，界面里读不回来，编辑时留空即沿用。「自动选择」仍优先用内置服务。openvetta/open-vetta#75
+  修复
+  - 统一模型下拉选择器中的识图能力展示：通用模型下拉列表（如知识库加工、IM 设置等）以及行内模型选择器与会话模型选择器保持一致，识图能力复用会话的识图图标渲染，不再显示文字标签。修复 openvetta/open-vetta#66。
+  - 修复 OpenAI Responses 走 WebSocket 传输（设置 → 模型 → 传输方式）时，连接中途断开或握手失败不会自动重试的问题：网络错误、超时、5xx、429 等瞬时故障现在会按退避策略自动重试；认证、参数错误（401 / 403 / 400 等）和用户主动取消不会重试，已经输出过内容后断开也不会整轮重发，避免重复内容和重复计费（openvetta/open-vetta#73）。
+  - 修复对话在回合内自动压缩后，因上下文过长触发的会话续接失败（报“续接种子无效”）、新会话无法创建的问题。
+  其他
+  - 发版流水线支持开源版：开源版内置 GitHub Release 作为更新源，全部平台构建成功后自动把更新清单上传到 Release；也可以让开源版继续把清单发到原有的 R2 地址，让已安装商业版的用户升级到内置 GitHub 更新源的版本，此后更新都走 GitHub。
+  - 更新 CLI 运行时合同测试，使其正确识别回合耗时节点与摘要子调用。
+ReleaseNotesUrl: https://github.com/openvetta/open-vetta/releases/tag/v0.5.72
+ManifestType: locale
+ManifestVersion: 1.28.0
