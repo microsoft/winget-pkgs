@@ -1,0 +1,45 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: MayDay.SnowApp
+PackageVersion: 0.4.7
+PackageLocale: zh-CN
+Copyright: 版权所有 (c) 2026 MayMay
+ShortDescription: 面向开发者的桌面应用，将 AI 对话、终端模拟、SSH 远程管理、Git 工具和内置浏览器面板整合到统一的工作空间中。
+Description: Snow App 是一款面向开发者的桌面应用，将 AI 对话、终端模拟、SSH 远程管理、Git 工具和内置浏览器面板整合到统一的工作空间中。它通过 Rust 原生模块处理性能关键型操作，包括 SQLite 存储、AI 流式传输、文件监控和 HTTP 请求。此外还支持 MCP 集成、AI 图像生成、技能系统、Hooks、子代理、代码库语义搜索与 AI 驱动的终端会话。
+Tags:
+- ai
+- codex
+- git
+- mcp
+- ssh
+- 终端
+- 聊天
+ReleaseNotes: |-
+  新功能
+  - 新增主题预设：「赛博朋克」与「Notion」两套主题预设（各含明暗配色）加入主题库，Google 与 cream 主题同步微调。
+  - 图像生成并入 API 设置：原「图像生成」设置页改为 API 设置页的「生图模型」标签页，绘图面板与 openSettings 仍可直达该标签页（侧栏高亮「API 设置」）。
+  - 文件变更按文件看 diff：变更列表显示每个文件的增删行数（+N / -N），点击任意一行直接打开该文件的 diff，顶部「查看全部 diff」保留合并视图。
+  - 子代理激活摘要：sub-agents-activate 新增必填参数 summary（本次激活的简短标签），作为子代理会话的标题与摘要，出现在侧栏子代理列表、聊天头部与工具卡片头部；未提供时回退为代理名。
+  改进
+  - 大文件 diff 改为增量渲染：单列统一视图按批挂载（每批 200 行，滚动接近底部自动追加下一批），内容完整不截断，超大 diff 打开不再卡顿；DiffFile 实例预构建，避免重复克隆数据。
+  - 流式渲染管线重构：新增 memo 化的 MessageContent 组件，流式期间只有最后一条消息重渲染；chunk 按帧合并后落地，并在流结束时强制 flush，末批内容不会丢失。
+  - 流式 chunk 分发改为单一 IPC 监听器 + streamId 注册表，多路并行流不再因每个 chunk 唤醒全部在途回调。
+  - 插件运行时快照按最小间隔广播（空闲态立即推送），会话暂停标记在内容不变时复用同一引用，流式期间侧栏与插件面板不再整片重算。
+  - 用户消息定位条改用一次遍历建立 DOM 索引并限制最小计算间隔，长会话滚动更顺滑。
+  - grep-search：缓存 ripgrep 可用性检测结果；输出超过上限即停止读取并结束子进程；截断按 UTF-8 字符边界。
+  - 文件编辑模糊匹配重写空白归一化与逐行比对（词距比较 + 首行预筛），匹配更准也更快。
+  - 延迟格式化（Prettier）改写文件后补记检查点 expected，回滚门控不再把自动格式化过的文件误判为「被他人改写」。
+  - 各 API 适配层不再累积未使用的原始流事件，长流内存占用更低。
+  - 自定义命令编辑弹窗的类型选择改用统一的 CustomSelect 组件。
+  修复
+  - 修复自动格式化重排文件后，新建文件不出现在回滚预览、回滚时也不会被删除的问题。
+  - 修复隐私设置中「网页抓取」条目错显为「网页搜索」标签。
+ReleaseNotesUrl: https://github.com/MayDay-wpf/snow-app/blob/HEAD/RELEASE_NOTES_ZH.md#v047
+Documentations:
+- DocumentLabel: 快速开始
+  DocumentUrl: https://github.com/MayDay-wpf/snow-app/blob/main/docs/zh-CN/1-快速开始.md
+- DocumentLabel: 文档
+  DocumentUrl: https://github.com/MayDay-wpf/snow-app/blob/main/docs/README.md
+ManifestType: locale
+ManifestVersion: 1.12.0

@@ -1,0 +1,59 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: XinTaoFei.Codeg
+PackageVersion: 0.39.0
+PackageLocale: zh-CN
+ShortDescription: 在一个地方聚合并浏览 AI 编程代理会话（如 Claude Code、Codex、Gemini CLI 等）。支持桌面应用、自建服务器或 Docker 部署。
+Description: Codeg（Code Generation，代码生成）是一款企业级多代理编码工作区。它将本地 AI 编程代理（包括 Claude Code、Codex CLI、OpenCode、Gemini CLI、OpenClaw、Cline 等）统一集成于桌面应用、独立服务器或 Docker 容器中，支持通过任意浏览器进行远程开发；具备对话聚合、并行 Git 工作树开发、MCP/技能管理、聊天频道交互（Telegram、飞书、iLink 等），以及集成的 Git/文件/终端工作流。
+Tags:
+- claude-code
+- codex
+- gemini-cli
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  这一版可以让智能体帮你写提交信息，远程文件夹里的命令也可以放到你自己的电脑上运行，codeg-server 还可以改用 Cloudflare Access 这类登录代理来登录，不必再输访问令牌。
+  同期还有：侧栏「最近」按最近使用排序；Windows 上的更新会等你点「重启以更新」再安装，也不会再卡在「Failed to kill codeg」；Linux AppImage 不再把自带的库带给智能体和终端；手机切回页面后能看到完整的回复。
+  新增
+  - 智能体可以帮你写提交信息了——「变更」标签页和提交窗口的提交框旁新增 ✨ 按钮，会让当前会话的智能体按这次实际要提交的内容写一条提交信息，已经输入的文字会作为提示，也不会在会话列表里多出会话。（#931 由 @trueai-org、#928 由 @Time-w 提出）
+  - 有未跟踪的文件时，✨ 按钮会先问你这条提交信息包括其中哪些，回车就只提交这些文件，提交框下方也会显示将带上几个未跟踪文件。
+  - 「更多 Git 操作」菜单里的「提交信息生成设置…」决定由谁、怎么写——可以指定智能体、模型和选项，加上每次都遵循的附加说明（比如用什么语言、什么格式），还能在写好后自动提交；可以对所有文件夹统一设置，也可以给某个项目单独设置。
+  - 「管理命令」新增「在本机运行」开关——比如用本机的 VS Code 或 Zed 通过 SSH 打开当前远程文件夹，这类命令会在运行桌面版的电脑上执行；打开「在所有文件夹中显示」后，切换文件夹、工作树或远程连接都能用到它。（#974，@fengpanhe）
+  - codeg-server 可以通过 Cloudflare Access 这类登录代理来登录——设置 CODEG_AUTH=proxy-jwt 后，已经通过代理登录的浏览器不用再输访问令牌，不经过代理的 codeg-cli 和脚本照常使用令牌，具体见代理登录说明。（#985，@MagTer）
+  - Grok 设置里的自定义模型可以声明支持的推理强度，输入框里也就有了这个模型的推理强度选择。（#993 由 @HOMEFTW 提出）
+  改进
+  - 侧栏「最近」按最近使用而不是创建时间排序，每次显示 10 个，每行显示的是最近活动时间；「对话」分组的每行也改为显示最近活动时间。（#1010，@Flyneen）
+  - 在 Windows 上，更新下载完后会等你点「重启以更新」再安装，和 macOS、Linux 一样，不会再一下载完就关掉 codeg；安装失败会提示，可以重试。
+  - 「变更」标签页的提交框会随内容变高，Shift+Enter 换行，回车仍然直接提交。
+  - 点开委派卡片能看到子智能体收到的完整任务，恢复执行的子智能体也会在这里显示恢复的原因。
+  - 在 Windows、Linux 和浏览器里，侧栏可以拖得更窄，只有 macOS 版需要给窗口按钮留出位置。
+  - Pi 的模型选择器只列出 enabledModels 设置允许的模型。（#989，@xyalter）
+  - ZCode 支持粘贴和上传的图片、PDF，重新打开会话后每条回复的用量和耗时也还在。（#1003、#1005，@jackie-cqz）
+  - Claude Code 升级到 claude-agent-acp 0.94.0，CodeBuddy、Cursor、Kimi Code、Qoder、ZCode 和 Command Code 也一并更新；Claude Code 的 fork 子智能体卡片现在显示它真正的结果，而不是「Fork started」。
+  修复
+  - 在 Windows 上更新 codeg 不会再停在「Failed to kill codeg」，即使这时 Windows 或杀毒软件正在检查 codeg.exe。
+  - Linux AppImage 版里，codeg 启动的智能体、终端和其他程序改用系统自己的环境，不再沿用 AppImage 的，在 Ubuntu 26.04 上安装和启动智能体、运行 npm 和终端命令不会再报「LIBSYSTEMD_254 not found」。（#983 由 @yanvigdev 反馈）
+  - 手机在回复途中把页面切到后台，切回来后能看到完整的回复，不用再刷新页面。（#386 由 @wuzhaozhongguo 反馈）
+  - 在 Cloudflare Access 这类登录代理后面，代理登录过期时页面会显示「登录已过期」和「刷新」按钮，不会再一直尝试重新连接。（#984，@MagTer）
+  - 在无限画布里给正在回答的对话发消息，消息会留在输入框里并给出提示，不会再消失。（#991 由 @SeeSeaStar 反馈）
+  - 子智能体等你处理时，权限请求、提问或计划审批只显示在一张卡片里，不会再每查询一次状态就多出一张。
+  - 新会话发出第一条消息后不会再马上出现「加载后台活动」提示。
+  - 在 codeg 之外卸载的智能体，或者切换 Node 版本后找不到的智能体，设置里不会再显示为已安装。（#990 由 @BillyOutlast 反馈）
+  - 用 Grok 官方安装程序装在 ~/.grok/bin 的 Grok 能被识别了，Windows 上也一样。（#994 由 @HOMEFTW 反馈）
+  - Codex 设置不会再写入新版 Codex 已不认的配置，官方订阅下也不再显示会让每轮对话都失败的 WebSocket 开关；快速模式仍在输入框里切换。
+  - 代码托管面板的「打开仓库」按钮支持走 http、用自定义端口或子路径的自建 GitLab 等服务。（#997 由 @run19910607 反馈）
+  - 处理拉取请求的看板任务在对方强推后，只统计自己的改动，卡片和完成评论里不会再算上基础分支期间新增的全部内容。
+  - 项目里的 .pi/mcp.json 现在要先信任项目，Pi 才会启动其中列出的服务。
+  注意
+  - 0.39.0 运行过之后，0.38.0 就无法在同一份数据上启动了，因为这一版给 codeg 的数据库加了内容：codeg-server 的「回滚」恢复出来的 0.38.0 起不来，重新安装旧版桌面版也一样；之后可能还要退回 0.38.0 的话，更新前请先复制一份 codeg 的数据目录。
+  - 在 Windows 上，从 0.38.0 更新的这一次仍会在下载完后直接关闭 codeg 安装，因为安装时机由更新前的版本决定，之后的更新会等你点「重启以更新」。
+  - 「在本机运行」只在桌面版里可用，远程文件夹的主机也要更新到 0.39.0 才能为文件夹命令保存这个开关；在此之前，打开「在所有文件夹中显示」就能把命令保存在你自己的电脑上。
+  感谢 @MagTer、@fengpanhe、@Flyneen、@jackie-cqz 和 @xyalter 为本次发布做出的贡献，也感谢 @yanvigdev、@trueai-org、@Time-w、@wuzhaozhongguo、@SeeSeaStar、@BillyOutlast、@HOMEFTW 和 @run19910607 的反馈。
+ManifestType: locale
+ManifestVersion: 1.12.0

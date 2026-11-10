@@ -1,0 +1,59 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.ArWen
+PackageVersion: 2.9.12
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/arwen/issues
+Author: Fahrenheit Research
+PackageName: ArWen
+PackageUrl: https://github.com/FahrenheitResearch/arwen
+License: Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+Copyright: Copyright © Fahrenheit Research
+CopyrightUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+ShortDescription: 'ArWen: GPU-native WRF-ARW-class regional weather model, verified against WRF v4.6.1'
+Description: "ArWen is an independent, GPU-native implementation of a WRF-ARW-class regional atmospheric model. It is not affiliated with or endorsed by NCAR or UCAR. The name is a wordmark for \"the ARW solver, GPU-native\"; the Python package is currently named gpuwm. Safety. ArWen is a research and educational tool. It is never a substitute for official forecasts and warnings from your national meteorological service. Do not use it to make safety decisions. Regional numerical weather prediction at convective scale has mostly required institutional clusters, which means most of the world runs on global-model guidance at 10-25 km. ArWen's aim is to put a verified, kilometer-scale limited-area model on a single consumer GPU: pick a point, size a nest ladder to your card, pull public analysis data, and run a 1 km (or 500 m) simulation of your own area on hardware you own -- especially in places where no national convection-permitting model exists."
+Moniker: arwen
+ReleaseNotes: |-
+  New
+  - More WRF 4.7.1 options on the GPU, each opt-in: cumulus schemes (BMJ, multi-scale Kain-Fritsch, old SAS and cu_physics = 99), the CAM5 suite (MP11, CU7, SHCU2), more microphysics, PBL, surface-layer and land options, and dynamics options such as more advection orders, momentum_adv_opt = 3 and rk_ord = 2.
+  - Moist potential temperature (use_theta_m = 1), the SMS-3DTKE closure (km_opt = 5) and history-window averaged fluxes (do_avgflx_em = 1), opt-in.
+  - Opt-in hurricane line: HAFS starts, storm merge, cyclone surface exchange and storm-following nests.
+  - Opt-in ocean waves coupled to the forecast: wave growth, transport and ocean feedback.
+  - SPPT and SKEB stochastic physics, written from the published method (opt-in).
+  - Starts from RRFS v1, and from ECCC HRDPS and RDPS with GFS donors for deep soil and upper air.
+  - 0-1, 0-2 and 0-3 km updraft helicity maxima in history and on maps.
+  - Public monthly aerosol forcing from NASA MERRA-2 for the aerosol-aware cumulus options (opt-in).
+  - An experimental AMD (ROCm/HIP) backend, opt-in with --backend amd. CUDA stays the default.
+  - Lossless GRIB2 history export on latitude-longitude, Lambert, Mercator and polar stereographic grids.
+  - An ensemble maximum map beside the mean, spread, probability and paintball maps.
+
+  Changed
+  - hrrrv5 preparation and the after-forecast tail use every core; the history write went from 85.5 s to 64.5 s.
+  - Fast nested runs on four cards: the nest step went from 77.6 s to 53.5 s.
+  - Map drawing and comparison sheets use every core (CONUS maps at 24 threads: 23.4 s to 3.9 s), and comparison sheets read only the fields their products need.
+  - Ensemble maps import only the fields they draw: 18 members by 5 frames went from 582.7 s to 27.2 s.
+  - The RRFS static walk takes 5 s instead of 453 s, and terrain preparation walks neighbouring mesh cells together.
+  - Memory preflight prices spectral nudging buffers and FFT workspaces.
+
+  Fixed
+  - Resuming a forecast keeps the checkpoint's HAILCAST stone model.
+  - 48 h runs with --hydro on publish again.
+  - A square first slab no longer stops a forecast split across cards.
+  - Composite reflectivity draws from REFC when the frame holds parameterised convection.
+  - Mapped regions use the mesh's real coverage, and a region past the source's edge gets one plain message.
+  - Classic and aerosol Thompson use the same fetched tables.
+  - A crashed start no longer blocks the next start.
+  - Initial MYJ and QNSE surface wind diagnostics match native WRF.
+  - Derived maps (CAPE, SRH, STP and shear) carry the run's own header, with the right start and lead times.
+  - Build-machine paths are kept out of release binaries, and pinned physics tables keep their bytes through the export.
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/arwen/releases/tag/v2.9.12
+InstallationNotes: |-
+  This application requires an NVIDIA GPU with CUDA support to run.
+  Will not function on integrated graphics or non-NVIDIA hardware.
+  Without compatible hardware, the application will fail to launch.
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

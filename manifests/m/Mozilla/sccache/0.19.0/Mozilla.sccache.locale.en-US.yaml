@@ -1,0 +1,123 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Mozilla.sccache
+PackageVersion: 0.19.0
+PackageLocale: en-US
+Publisher: Mozilla
+PublisherUrl: https://github.com/mozilla
+PublisherSupportUrl: https://github.com/mozilla/sccache/issues
+PackageName: sccache
+PackageUrl: https://github.com/mozilla/sccache
+License: Apache-2.0
+LicenseUrl: https://github.com/mozilla/sccache/blob/HEAD/LICENSE
+ShortDescription: Sccache is a ccache-like tool. It is used as a compiler wrapper and avoids compilation when possible. Sccache has the capability to utilize caching in remote storage environments, including various cloud storage options, or alternatively, in local storage.
+ReleaseNotes: |-
+  sccache 0.19.0
+
+  Summary
+  sccache 0.19.0 is mostly a correctness and robustness release: multi-arch caching no longer
+  risks stale universal objects, remote storage errors are no longer hidden as cache misses, the
+  multi-level cache tolerates unavailable optional levels, and distributed compilation got a long
+  list of fixes.
+  Highlights:
+  - Cache-key correctness: with SCCACHE_CACHE_MULTIARCH, gcc/clang compilations with several
+    -arch values are now preprocessed once per architecture, so code guarded by __aarch64__,
+    __SSE2__ and the like reaches the hash. Older single-pass preprocessor cache entries are not
+    reused, and multi-arch compilations are no longer distributed (#2871). Include validation in
+    the preprocessor cache is fixed (#2740).
+  - Rust: dep-info is written locally instead of being restored from the cache, so an entry
+    produced in another checkout or on another machine no longer points cargo at paths that don't
+    exist (#2894). .rmeta artifact notifications are streamed to cargo before the compile
+    finishes, including on cache misses and in client-side mode, so pipelining isn't held back
+    (#2875). Rust outputs are computed while the rest of the hashing runs (#2465).
+  - MSVC: C++20 named modules built with clang-cl are cached (#2876), the CL and _CL_
+    environment variables are honored (#2886), /Tc and /Tp are handled as input arguments
+    (#2904), and a -Fd pointing to a directory no longer turns a successful compile into a fatal
+    error (#2933).
+  - Storage: remote read errors (credentials, network) are reported as cache errors instead of
+    silently counted as misses (#2928). A multi-level cache can start when a level that its write
+    policy treats as optional is unavailable (#2890), and client-side raw hits are backfilled into
+    faster levels with per-level stats (#2913, #2915). TLS trust roots are restored after the
+    reqwest 0.13 upgrade (#2917). WebDAV gained SCCACHE_WEBDAV_DISABLE_CREATE_DIR (#2872).
+  - Distributed compilation: Rust toolchains are packaged more selectively and work with distro
+    toolchains in lib64 (#2852), crates without a metadata hash are packaged correctly (#2921),
+    evicted toolchain archives are repackaged (#2893), job IDs no longer collide across scheduler
+    restarts (#2895), the Rust sysroot is part of the weak toolchain key (#2900), and the overlay
+    builder resolves toolchain and input paths from inside a chroot (#2908). Remote compile
+    failures now report the real exit code instead of "killed by signal" (#2932).
+  - Stats: --show-stats now shows the effective cache mode (#2914), and Rust compilations
+    that couldn't be cached are broken down by crate type (#2897).
+  Welcome to 14 new contributors!
+
+  Features
+  - feat: stream .rmeta artifact notifications for rustc by @weihanglo in #2875
+  - Calculate rustc outputs concurrently with other hashing tasks by @DaniPopes in #2465
+  - webdav: add SCCACHE_WEBDAV_DISABLE_CREATE_DIR option by @ChriFo in #2872
+  - dist: honor SCCACHE_DIST_CLIENT_CACHE_DIR by @codeandsolder in #2896
+  - stats: expose non-cacheable Rust crate types by @codeandsolder in #2897
+  - stats: expose effective cache access mode by @codeandsolder in #2914
+  - Package rust toolchain more selectively by @pprkut in #2852
+
+  Compiler support
+  - msvc: cache C++20 named modules built with clang-cl by @Kataglyphis in #2876
+  - msvc: support CL and CL env variables by @AJIOB in #2886
+  - msvc: handle /Tc and /Tp as input file arguments by @bhaskargurram-ai in #2904
+
+  Fixes
+  - gcc, clang: preprocess multi-arch compilations once per -arch by @francoisgirinon-netizen in #2871
+  - Fix preprocessor cache include validation by @fallintoplace in #2740
+  - fix(rust): write dep-info locally not restoring from cache by @weihanglo in #2894
+  - util: strip basedirs from glued values starting with a drive letter by @stemann in #2883
+  - commands: use the configured cache dir in --debug-preprocessor-cache by @devtechedge in #2881
+  - msvc: do not expect a program database next to a -Fd directory by @451891358 in #2933
+  - nvcc: report subcommand exit codes as exit codes, not signals by @bernardladenthin in #2932
+  - cache: report remote read errors instead of treating them as misses by @seungpyoson in #2928
+  - multilevel: tolerate unavailable optional cache levels by @codeandsolder in #2890
+  - cache: backfill client-side multi-level raw hits by @codeandsolder in #2913
+  - cache: record per-level stats for client-side raw reads by @codeandsolder in #2915
+  - http: restore TLS trust roots with reqwest 0.13 by @codeandsolder in #2917
+  - fix: Fix Rust dist packaging for dependencies without metadata hashes by @codeandsolder in #2921
+  - dist: reject assignments reaped during allocation by @codeandsolder in #2891
+  - dist: retry expired client state in dist-status by @codeandsolder in #2892
+  - dist: repackage toolchains after archive eviction by @codeandsolder in #2893
+  - dist: namespace job IDs across scheduler restarts by @codeandsolder in #2895
+  - dist: include Rust sysroot in weak toolchain key by @codeandsolder in #2900
+  - dist: validate the toolchain archive id format by @sylvestre in #2907
+  - sccache-dist: resolve toolchain and input paths from a chroot in the overlay builder by @sylvestre in #2908
+
+  Dependencies
+  - chore(deps): update rust crate tar to v0.4.45 by @xtqqczze in #2655
+  - Update typed-path dependency to 0.13 by @musicinmybrain in #2924
+
+  Tests & CI
+  - test: return target-libdir in rustc cache-miss mock by @weihanglo in #2885
+  - Look up true on PATH in the symlinked libdir test by @badumbatish in #2926
+
+  Cleanup
+  - Use cfg_aliases to reduce boilerplate by @Felixoid in #2644
+  - Add CacheConfigs.cache_type_by_name to reduce boilerplate by @Felixoid in #2905
+  - clippy: iterate map values directly in disk_mappings by @PHPCraftdream in #2877
+  - chore: Remove dependency status badge by @xtqqczze in #2856
+  - Direct mode stats by @badumbatish in #2844
+  - Revert "Direct mode stats" by @sylvestre in #2858
+  - Release 0.19.0 by @sylvestre in #2937
+
+  New Contributors
+  - @badumbatish made their first contribution in #2844
+  - @fallintoplace made their first contribution in #2740
+  - @ChriFo made their first contribution in #2872
+  - @francoisgirinon-netizen made their first contribution in #2871
+  - @DaniPopes made their first contribution in #2465
+  - @pprkut made their first contribution in #2852
+  - @PHPCraftdream made their first contribution in #2877
+  - @codeandsolder made their first contribution in #2892
+  - @stemann made their first contribution in #2883
+  - @bhaskargurram-ai made their first contribution in #2904
+  - @devtechedge made their first contribution in #2881
+  - @seungpyoson made their first contribution in #2928
+  - @451891358 made their first contribution in #2933
+  - @bernardladenthin made their first contribution in #2932
+ReleaseNotesUrl: https://github.com/mozilla/sccache/releases/tag/v0.19.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

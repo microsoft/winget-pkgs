@@ -1,0 +1,47 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Snowflake.OdbcDriver
+PackageVersion: 3.22.0
+PackageLocale: en-US
+Publisher: Snowflake Computing
+PublisherUrl: https://www.snowflake.com/
+PublisherSupportUrl: https://www.snowflake.com/en/support/
+PrivacyUrl: https://www.snowflake.com/en/legal/privacy/privacy-policy/
+Author: Snowflake, Inc.
+PackageName: Snowflake ODBC Driver
+PackageUrl: https://www.snowflake.com/en/developers/downloads/odbc/
+License: Proprietary
+LicenseUrl: https://sfc-repo.snowflakecomputing.com/odbc/Snowflake_ODBC_Driver_License_Agreement.pdf
+Copyright: © 2026 Snowflake Inc. All Rights Reserved
+CopyrightUrl: https://sfc-repo.snowflakecomputing.com/odbc/Snowflake_ODBC_Driver_License_Agreement.pdf
+ShortDescription: Driver for connecting to Snowflake using Open Database Connectivity (ODBC) and using SQL for accessing the data.
+Moniker: snowflake-odbc
+Tags:
+- database
+- snowflake
+- sql
+ReleaseNotes: |-
+  Security fixes
+  - Updated the bundled root certificates and distrusted compromised intermediate certificate authority (CA) certificates for TLS checks.
+  New features and updates
+  - Added the WORKLOAD_IDENTITY_AWS_USE_OUTBOUND_TOKEN connection parameter for AWS Workload Identity Federation. When set to true, attestation uses outbound STS GetWebIdentityToken instead of the default pre-signed GetCallerIdentity token. The connection parameter takes precedence over the SNOWFLAKE_ENABLE_AWS_WIF_OUTBOUND_TOKEN environment variable.
+  - Added the PrivateLinkHostnameSuffix connection parameter to override the hostname suffix that the driver uses to detect a private connectivity host.
+  - Added the DisableResponseCacheOverride connection parameter. When set to true, the driver doesn’t set SF_OCSP_RESPONSE_CACHE_SERVER_URL when it detects a private connectivity host.
+  - Updated the Simba SDK to version 10.3.8.1007.
+  - Upgraded libsnowflakeclient to version 2.12.0, which updates the AWS SDK for C++ to version 1.11.806.5 and the Azure SDK for C++ to version 12.18.0.3.
+  Changes
+  - Changed OCSP certificate revocation checking to be off by default. To turn it on, set OCSP_FAIL_OPEN in the connection string or DSN, or OCSPFailOpen in the simba.snowflake.ini file or the Windows registry: true selects fail-open and false selects fail-close. An OCSPFailOpen value left over from an earlier version still turns OCSP on. DisableOCSPCheck=false no longer turns OCSP on. See OCSP Configuration.
+  - Changed DisableOCSPCheck=true so it no longer turns off fail-close checking. When OCSP_FAIL_OPEN=false is also set, fail-close checking stays on. With OCSP_FAIL_OPEN=true or no OCSP_FAIL_OPEN value, DisableOCSPCheck=true still turns OCSP off.
+  - Changed the driver to ignore the SF_OCSP_RESPONSE_CACHE_SERVER_URL, SF_OCSP_RESPONSE_CACHE_SERVER_ENABLED, and SF_OCSP_FAIL_OPEN environment variables while OCSP is off. The driver logs a warning for each one that is set.
+  - Changed CRL_CHECK=true so it no longer requires DisableOCSPCheck=true, because OCSP is off by default. A connection that turns on both OCSP and certificate revocation list (CRL) checking still fails.
+  Customer-facing bug fixes
+  - Fixed the SSLVersion and SSLVersionMax settings so they apply to all connections the driver opens, including the cloud storage connections used by PUT and GET.
+  - Fixed single-part PUT uploads to Amazon S3 that sent an empty body when the AWS SDK retried the request.
+ReleaseNotesUrl: https://docs.snowflake.com/en/release-notes/clients-drivers/odbc-2026.html
+InstallationNotes: |-
+  Please visit the following link for further installation process:
+
+  - https://docs.snowflake.com/en/developer-guide/odbc/odbc-windows#step-2-configure-the-odbc-driver
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: Gruntwork.cloud-nuke
+PackageVersion: 0.53.0
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://github.com/gruntwork-io/cloud-nuke
+PublisherSupportUrl: https://github.com/gruntwork-io/cloud-nuke/issues
+PackageName: cloud-nuke
+PackageUrl: https://github.com/gruntwork-io/cloud-nuke
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/cloud-nuke/blob/HEAD/LICENSE.txt
+Copyright: Copyright (c) 2020, Gruntwork, Inc.
+ShortDescription: cloud-nuke was created for situations when you might have an account you use for testing and need to clean up leftover resources so you're not charged for them
+Moniker: cloud-nuke
+ReleaseNotes: |-
+  ## Fixes
+
+  • **API Gateway：cloud-nuke removes custom domain name mappings before deleting an API.** Since v0.47.0, every run failed to delete an HTTP or WebSocket API with an API mapping, or a REST API with a base path mapping. The delete failed with `BadRequestException: ... Please remove all API mappings for the API from your custom domain names`. Mappings on private custom domain names are removed too. (#1166)
+  • **KMS：include and exclude rules match the bare alias name.** Aliases carry an `alias/` prefix, so a rule such as `^my-key$` matched nothing, and an exclude rule written that way let the key be deleted. Rules now match the name with or without `alias/`, and a key is protected if any of its aliases matches an exclude rule. (#1162)
+  • **S3：`--region global` deletes buckets in every region.** Buckets outside the global region (us-east-1 by default) were skipped after a `301 PermanentRedirect`, and the run still reported nothing to nuke. (#1157)
+  • **CloudWatch log groups are deleted again.** The log group ARN's trailing `:*` made `ListTagsForResource` fail, so every log group was skipped. (#1151)
+  • **EC2 subnets：`--older-than` works again.** cloud-nuke stopped writing the tag that records when it first saw a subnet, which `--older-than` reads to age the subnet, so `--older-than` excluded every subnet. (#1154)
+  • **VPC Lattice service networks：cloud-nuke removes VPC and resource associations first.** Deletion failed with a `409 ConflictException` while either kind of association remained. (#1158, #1159)
+  • **Service-linked roles：a role IAM still lists right after its deletion no longer counts as a failure.** cloud-nuke keeps waiting for IAM to catch up instead of reporting the role as failed. (#1149)
+
+  ## Migration note
+
+  • **A run can delete more than it did before:** each fix above deletes resources that earlier versions skipped or failed to delete.
+  • **KMS include rules written against a bare alias name now select keys for deletion:** such a rule matched nothing before. (#1162)
+  • **S3 buckets in every region are deleted under `--region global`:** before, only buckets in the global region were. (#1157)
+  • **A policy that limits cloud-nuke's API Gateway access needs more permissions:** `apigateway:GET` on `/domainnames`, `/domainnames/*/apimappings` and `/domainnames/*/basepathmappings`, and `apigateway:DELETE` on those mappings. (#1166)
+
+  **Full Changelog**：https://github.com/gruntwork-io/cloud-nuke/compare/v0.52.0...v0.53.0
+ReleaseNotesUrl: https://github.com/gruntwork-io/cloud-nuke/releases/tag/v0.53.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

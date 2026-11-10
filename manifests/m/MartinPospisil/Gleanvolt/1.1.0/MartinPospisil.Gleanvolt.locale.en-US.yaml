@@ -1,0 +1,111 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: MartinPospisil.Gleanvolt
+PackageVersion: 1.1.0
+PackageLocale: en-US
+Publisher: Martin Pospisil
+PublisherUrl: https://github.com/mpospisil
+PublisherSupportUrl: https://github.com/mpospisil/gleanvolt/issues
+PrivacyUrl: https://github.com/mpospisil/gleanvolt/blob/main/docs/PRIVACY.md
+PackageName: Gleanvolt
+PackageUrl: https://github.com/mpospisil/gleanvolt
+License: PolyForm Noncommercial License 1.0.0
+LicenseUrl: https://github.com/mpospisil/gleanvolt/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Martin Pospisil
+CopyrightUrl: https://github.com/mpospisil/gleanvolt/blob/main/LICENSE
+ShortDescription: Locally hosted controller for a SolaX hybrid inverter and EV charger, over Modbus TCP.
+Description: |-
+  A standalone background service for managing and monitoring a SolaX X3-HYB-G4 PRO hybrid inverter and a SolaX X1/X3-HAC EV charger. It operates entirely within the local network over Modbus TCP, with no cloud dependency, so polling is immediate and the data stays on the premises.
+  It reads PV generation, battery state of charge and grid power flow, and uses them to drive EV charging and home-battery use from household surplus: charging the car on live solar, holding the battery back when the forecast says it will be needed, and targeting a departure time. A web UI is built in, and it can publish itself to Home Assistant over MQTT.
+  The built-in web interface requires a password. A fresh installation serves only the page that asks you to set one, and shows no history and no controls until you have; it then asks you to sign in. Authentication can be switched off deliberately for an isolated network, which is not the default. The interface speaks plain HTTP, so it belongs on a network you trust or behind a TLS proxy.
+  This build is free for any noncommercial purpose under the PolyForm Noncommercial License 1.0.0. Commercial use requires a separate licence -- see the LICENSE file.
+Moniker: gleanvolt
+Tags:
+- battery
+- ev-charger
+- home-assistant
+- inverter
+- modbus
+- solar
+- solax
+ReleaseNotes: |-
+  Install
+  Debian, Ubuntu, Raspberry Pi OS (64-bit)
+  Installs the controller and its web UI as a systemd service, started with the default
+  configuration. Run it again to upgrade; settings and data are kept.
+  curl -fsSL https://github.com/mpospisil/gleanvolt/releases/latest/download/install.sh | sudo sh
+  Or by hand, choosing amd64 or arm64:
+  wget https://github.com/mpospisil/gleanvolt/releases/download/v1.1.0/gleanvolt_1.1.0_arm64.deb
+  sudo apt install ./gleanvolt_1.1.0_arm64.deb
+  Then open http://<device>:8090 and set your inverter and charger addresses in
+  /etc/gleanvolt/gleanvolt.env.
+  Docker
+  docker pull ghcr.io/mpospisil/gleanvolt:1.1.0
+  Or download a self-contained build below and run it — no .NET installation needed.
+  gleanvolt-1.1.0-win-x64.zip for Windows, linux-arm64 for a Raspberry Pi,
+  linux-x64 for an x64 Linux host or NAS.
+  The .nupkg files are the libraries, for building on the controller directly.
+  They are attached here rather than pushed to a feed.
+  Verify your download
+  SHA256SUMS covers every file here. From the directory you downloaded into:
+  sha256sum -c --ignore-missing SHA256SUMS
+  --ignore-missing because you have probably taken one file rather than all of them.
+  On Windows, without installing anything:
+  Get-FileHash gleanvolt-1.1.0-win-x64.zip -Algorithm SHA256
+  and compare it with the line in SHA256SUMS. PowerShell prints the hash in upper case;
+  the file lists it in lower case, and they are the same hash.
+  Each zip, .deb, install.sh and .nupkg also carries a build provenance attestation, which says
+  which workflow run and which commit produced it rather than only that the bytes are
+  unchanged. That needs no trust in this page:
+  gh attestation verify gleanvolt-1.1.0-linux-arm64.zip --repo mpospisil/gleanvolt
+  Changes
+  - Release smoke test: configure a location and no password, so it is not in setup mode (#326)
+  - Supported PV systems: Dražice inverters as rebadged SolaX (#315)
+  - Supported PV systems: Manufacturer column on the inverter and charger tables (#314)
+  - Restart from the web UI applies settings without a supervisor (in-process restart) (#313)
+  - Settings and wizard: tips that say what each field means, and Reveal for typed passwords (#312)
+  - Setup 3: the command-line route (#303) (#311)
+  - API keys created on Settings: 24 letters and digits instead of 64 hex (#310)
+  - Setup 2: Home Assistant (MQTT) and the API on Settings and in the wizard (#302) (#309)
+  - Setup 2 wizard (#308)
+  - Setup 2: the weather key on Settings and in the wizard (#302) (#307)
+  - Setup 2: web setup wizard with device discovery, and the hybrid gate (#302) (#306)
+  - Setup 1: setup mode instead of a startup failure, and password reset (#301) (#305)
+  - Setup 0: no reference site in the shipped defaults (#300) (#304)
+  - Solar: a battery that stops taking charge short of the gate counts as full (#298)
+  - L10n: Czech terms for the controller, the rest level and the solar forecast (#297)
+  - L10n: simpler, correct Czech and English in the web UI (#296)
+  - L10n: the web UI in Czech (#291) (#295)
+  - i18n, part 2: the rest of the service text, and stored phrases read back (#292) (#294)
+  - The web UI is translatable; the services stay invariant (#290) (#293)
+  - Container networking: the host network, and a broker on any device (#268) (#289)
+  - Sun only on a targeted charge, from the web UI and Home Assistant (#251) (#288)
+  - Settings: the Solcast account, entered and applied without a restart (#286) (#287)
+  - Settings: the redesign's info tips, restart banner and SolaX phase names (#255) (#285)
+  - Session energy starts afresh on an unplug in Off (#283) (#284)
+  - Forecasted, until full: one session over several days (#279) (#282)
+  - Every mode waits and ends the same way (#280) (#281)
+  - Charging plan: the redesign's info tips (#255) (#278)
+  - Overview: the redesign's info tips, session card and car stats (#255) (#277)
+  - Fast and SolarGrid can wait for low tariff (#274) (#276)
+  - The grid tariff: providers, the table on Settings, and where it shows (#273) (#275)
+  - Breaking: the HTTP API carries base units only (#263, step 3) (#272)
+  - One base unit per quantity below the UI (#263, step 2) (#271)
+  - One formatter for units in the web UI (#263, step 1) (#270)
+  - Find the SolaX devices on the LAN: gleanvolt-discover (#267, step 1) (#269)
+  - A password set on /setup unlocks the settings without a restart (#254) (#266)
+  - Forecasted never arms the battery hold (#264)
+  - Seven links: Overview, and Settings for the installation and health (#255) (#262)
+  - Finish the Classical restyle on the remaining pages (#255) (#261)
+  - Show the Targeted preview as Classical's 1d dialog (#255) (#260)
+  - Lay the dashboard out as the Classical overview (#255) (#259)
+  - Restyle sign-in as Classical's centred card, with the error on the field (#255) (#258)
+  - Restyle the web UI's foundation to the Classical design system (#255) (#256)
+  - Anchor the static-assets manifest to the content root only for a single-file publish (#252 follow-up) (#257)
+  - A Nano Server smoke test for WinGet's actual install layout, not an approximation (#253)
+  Licence: free for any noncommercial purpose under the PolyForm Noncommercial
+  License 1.0.0. Commercial use requires a separate licence — see LICENSE.
+ReleaseNotesUrl: https://github.com/mpospisil/gleanvolt/releases/tag/v1.1.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
