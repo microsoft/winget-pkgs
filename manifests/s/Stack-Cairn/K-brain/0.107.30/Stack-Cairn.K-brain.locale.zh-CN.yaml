@@ -1,0 +1,45 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Stack-Cairn.K-brain
+PackageVersion: 0.107.30
+PackageLocale: zh-CN
+Publisher: Stack-Cairn
+PublisherUrl: https://github.com/Stack-Cairn
+PublisherSupportUrl: https://github.com/Stack-Cairn/K-brain/issues
+PackageName: K-brain
+PackageUrl: https://github.com/Stack-Cairn/K-brain
+License: Apache-2.0
+LicenseUrl: https://github.com/Stack-Cairn/K-brain/blob/HEAD/LICENSE
+ShortDescription: 基于 Go 构建、运行在终端里的编程 Agent。
+Description: 氪脑（K-brain）是运行在终端里的编程 Agent，用 Go 构建，也可作为其他前端的后端底座。读代码、改文件、执行命令、验证结果，在同一会话中完成任务。运行 kn 开始使用，取自“氪脑”拼音 Ke Nao。
+Tags:
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  K-brain v0.107.30
+  本版从 main 的 8fc87aa 构建，在 v0.107.29 的基础上，让 kn 终端里运行的会话能及时同步到 LiveAgent，并防止两个进程同时写同一个会话导致丢消息。
+  会话同步（#192）
+  - kn 中运行的会话在回合进行中就能看到：以前 kn 只在回合结束时保存记录，backend 要靠每 30 秒一次的全量扫描才发现，LiveAgent 往往在回合结束十几秒后才显示这个会话。现在 kn 在回合开始时和每轮模型请求之间都会保存进度（至少间隔 2 秒），backend 每 500ms 检查一次变化标记，几秒内就能在列表里看到会话和工具调用。
+  - 同一会话同时只能在一个地方运行：kn、kn run、backend 的运行和 /compact 开始前都要先取得会话的运行锁（sessions/.runs/<id>.lock 上的系统文件锁，进程退出或崩溃时自动释放）。会话正在 kn 里运行时，backend 返回 409 session is running in kn；反过来，kn 会提示会话正在 LiveAgent 中运行，并保留输入框里的内容。
+  - 不再覆盖别处写入的消息：以前 backend 缓存的会话可能按旧记录保存，把 kn 刚追加的消息覆盖掉。现在记录被其他进程改过时，backend 和 kn 都会先从磁盘重新加载，基于旧记录的保存会被拒绝。
+  - 会话摘要新增 external_run：说明会话正由哪个进程运行（client、pid、started_at），能力标记为 session_external_runs。
+  已知限制
+  - 一轮模型请求内部的流式文字不会实时同步，要等下一轮开始或回合结束。
+  - kn run 仍只在结束时保存一次；会话标题在回合结束后生成。
+  下载与校验
+  提供 macOS、Linux、Windows 的 x64/ARM64 CLI 与 computer helper；SHA256SUMS 用于校验下载文件。
+  完整变更：https://github.com/Stack-Cairn/K-brain/compare/v0.107.29...v0.107.30
+ReleaseNotesUrl: https://github.com/Stack-Cairn/K-brain/releases/tag/v0.107.30
+InstallationNotes: 在终端中运行 kn。首次使用前，请在 %USERPROFILE%\.k-brain\config.json 中配置模型提供商。
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://github.com/Stack-Cairn/K-brain/blob/main/README.zh-CN.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
