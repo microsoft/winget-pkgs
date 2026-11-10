@@ -1,0 +1,90 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.18.7
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Added
+  - LiteLLM usage adapter (@oh-my-pi/pi-ai/usage/litellm) reporting a gateway's key and user USD budgets (#17873 by @maykonmichel)
+  - UsageApi.replaceConfiguredProviders registers configuration-sourced usage providers between runtime overrides and the built-in resolver, and UsageProvider.usesRequestKey makes aggregate usage probe only the key inference would send (#17873 by @maykonmichel)
+  Changed
+  - Providers with a login-warning auth rule show their account risk before a new login and start it only after the user answers yes; any other answer or a cancel stores nothing, and their login-list entry is marked "(at your own risk)" (#18499)
+  Fixed
+  - Claude Fable launch resets now report the Fable weekly limit they clear instead of an unknown window (#18661 by @TheAifam5)
+  @oh-my-pi/pi-catalog
+  Added
+  - Added Muse Ember (muse-ember-1.0) on Meta Model API and Muse Code with the minimal–max reasoning effort ladder and its >200K long-context pricing
+  - Added the login-warning "<text>" auth rule, which makes a new login accept the stated account risk first (#18499)
+  Changed
+  - Resumed Google Antigravity behind a login warning instead of pausing it (#18499)
+  Fixed
+  - Morph (api.morphllm.com) requests now send x-session-id, keeping a conversation on the worker that holds its prompt cache (#18704 by @wolfiesch)
+  @oh-my-pi/pi-coding-agent
+  Added
+  - /usage and omp usage show LiteLLM key and user budgets for the built-in litellm provider and every models.yml provider with discovery.type: litellm, unless listed in disabledProviders (#17873 by @maykonmichel)
+  - Extensions can ask the operator before an interactive quit, or cancel it, with session_before_shutdown; a further /exit or Ctrl+D skips the pending prompts and closes (#18424 by @aw1cks)
+  Changed
+  - Saved-reset auto-redeem is set per window: codexResets.autoRedeem5h/autoRedeemWeekly and claudeResets.autoRedeem5h/autoRedeemWeekly/autoRedeemFable replace each provider's autoRedeem, whose value migrates into the 5h and weekly keys; a Claude Fable launch reset is governed by autoRedeemFable alone and spent only for a block that includes the Fable weekly cap, or before expiry when Fable usage is above zero (#18661 by @TheAifam5)
+  - Sessions without a prompt UI (such as omp -p) no longer spend saved resets while auto-redeem is unset, even ones about to expire (#18661)
+  - Google Antigravity is back in /login and omp login, marked "(at your own risk)": a new login first explains that Google may suspend accounts that sign in from third-party tools and continues only after you type yes; saved Antigravity logins work again (#18499)
+  - On Windows, the bash tool's description tells the model it runs in an emulated bash environment, not cmd or PowerShell, so it writes bash instead of dir, %VAR% and other cmd syntax
+  Fixed
+  - Extension prompts shown from session_before_* handlers no longer time out after 30 seconds while the operator is still answering (#18424 by @aw1cks)
+  - A second exit request now skips pending worktree.onExit prompts and keeps those worktrees instead of waiting for an answer (#18424 by @aw1cks)
+  - Advice that makes the agent keep working after it finished no longer comes back a second time, often as a blocker, while the agent is fixing it: advisor reviews of the earlier answer are cancelled and the advisor reviews the fix instead (#18735 by @H4vC)
+  - On Windows, the bash tool's shell resolves MSYS drive paths (/c/Users/..., /mnt/c/...) everywhere, so running /c/.../tool.exe, cd /c/..., [ -f /c/... ] and < /c/... reach drive C: like they already did for ls and other built-in utilities
+  - On Windows, cmd-style command lines such as dir | find /c /v "", sort /r, timeout /t 5 and whoami /all in the bash tool run the Windows programs they were written for, instead of pi's GNU-style find/sort/timeout/whoami (which read /c as drive C: and could walk the whole drive)
+  - Changing or unsetting PATH in the bash tool's shell now forgets remembered command locations, as bash does, so a command no longer runs from a directory that has left PATH
+  - One slow or flooding collab guest no longer ends sharing for the room: the host drops that guest's backlog and asks it to rejoin, sessions larger than the send budget can be joined, and guest questions nobody received settle as unavailable (#18629 by @iliaal)
+  @oh-my-pi/pi-tui
+  Changed
+  - grep and ast_grep results with no matches render as one line with 0 matches in the warning color, dropping the separate No matches found row (#18700 by @JustasMasiulis)
+  Fixed
+  - Saved-reset messages name the Claude Fable weekly limit as "Claude Fable weekly" instead of its raw id (#18661 by @TheAifam5)
+  What's Changed
+  - feat(extensions): add an interactive pre-shutdown hook by @aw1cks in https://github.com/can1357/oh-my-pi/pull/18424
+  - fix(tui): show grep's 0 matches in yellow on one line by @JustasMasiulis in https://github.com/can1357/oh-my-pi/pull/18700
+  - fix(shell): resolve MSYS drive paths (/c/...) in the engine on Windows by @H4vC in https://github.com/can1357/oh-my-pi/pull/18703
+  - fix(catalog): pin Morph conversations to one worker with x-session-id by @wolfiesch in https://github.com/can1357/oh-my-pi/pull/18704
+  - fix(shell): run cmd-syntax command lines through the Windows programs pi's utilities shadow by @H4vC in https://github.com/can1357/oh-my-pi/pull/18711
+  - feat(coding-agent): split saved-reset auto-redeem into 5h, weekly and Claude Fable settings by @TheAifam5 in https://github.com/can1357/oh-my-pi/pull/18661
+  - fix(advisor): stop superseded reviews from re-raising advice the primary is already fixing by @H4vC in https://github.com/can1357/oh-my-pi/pull/18735
+  - fix(collab): keep one guest from ending sharing for the room by @iliaal in https://github.com/can1357/oh-my-pi/pull/18629
+  - feat(ai): report LiteLLM key/user budgets in /usage and omp usage by @maykonmichel in https://github.com/can1357/oh-my-pi/pull/17873
+  New Contributors
+  - @TheAifam5 made their first contribution in https://github.com/can1357/oh-my-pi/pull/18661
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.18.6...v18.18.7
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.18.7
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
