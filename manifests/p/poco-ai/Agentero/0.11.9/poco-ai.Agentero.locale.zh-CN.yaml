@@ -1,0 +1,53 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.11.9
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  0.11.9 让 Quick Chat 和侧边栏共用同一套只读研究上下文：选区、当前论文与 @ 提及先变成最小证据，Agent 需要时再按标题摘要、章节和页面逐级阅读，并把用过的引用列为可点击来源。同时带来一轮覆盖 Agent 流式输出、PDF 阅读、编辑器自动保存与论文库的性能优化，以及双栏翻译、Windows ACP、文件树等一批问题修复。
+  新功能
+  - 只读研究上下文：Quick Chat 和侧边栏共用同一套只读上下文：选区、打开的论文和 @ 提及先解析成最小证据，Agent 通过本轮授权的 agentero-context MCP（context_search / context_read / paper_relations）按需展开，摘要和正文不会预先塞进 prompt；授权变化时自动新开会话并移交已有对话，用过的引文记入来源清单、可跳回原文。（#776 by @ffy6511）
+  改进
+  - Agent 流式渲染：流式分片按帧合并为一次状态更新，面板外壳与会话历史不再随每个 token 重渲染；滚动时引用 chip 的矩形测量跳过无变化的更新。（541914a3, 60bf8c51, e5e18305, 93f162ad, 83b1e208 by @qychen2001）
+  - PDF 滚动流畅度：快速滑动不再为途经页面排队字形提取（页面停留约 180ms 后才预取几何与文本矩形），上一张页面位图保留到新位图提交，翻页不再出现空白。（a9ccaa27, 9e593bbb by @ffy6511）
+  - PDF 面板与链接开销：页边批注与评论卡片布局按内容记忆，页面与引文链接跳过无变化的重建，翻译与侧栏面板不再进入查看器的更新路径。（f5cb62d4, 87d99303, 4efb53b8 by @qychen2001）
+  - 编辑器与自动保存：每次自动保存只序列化一次文档，CodeMirror 序列化延迟到落盘时机，自动保存重种不再打断编辑器 memo，Excalidraw 场景序列化并入持久化防抖；滚动完成探测只在菜单打开时运行。（5b622414, e52d6c9d, 9ee99126, 3e2aea70, 6df329b1 by @qychen2001）
+  - 论文库与命令面板：论文行构建缓存并稳定表头回调，EasyScholar 标签更新批量刷写，命令面板与参考文献筛选改用预计算文本。（5d311c8e, 9170400f, c1f22ea9, 2a74b851 by @qychen2001）
+  - 工作区与界面响应：工作区标签在无变化 patch 下保持身份，金库树派生数组保持引用稳定，设置跨窗口更新按字段合并，后台任务 hook 只订阅任务切片，选择批注徽标不再逐键触发变更。（51220633, 3914cef0, 99e1893b, aed0db79, aafe47aa, ff799cfa, 23db2a02 by @qychen2001）
+  修复
+  - 编辑器跳转与滚动记忆：大纲与链接的跳转位置不再被滚动记忆恢复覆盖。（5561f9ca by @qychen2001）
+  - 金库文件事件：应用重渲染时不再丢弃缓冲的文件事件，外部改动不会漏掉。（f7620c50 by @qychen2001）
+  已解决问题
+  - Windows ACP 启动：移除拒绝继承盘符环境变量的自定 Windows Job 传输层，恢复 SDK 进程启动，opencode 等 Agent 在 Windows 上可以正常连接。（#772 by @qychen2001）
+  - 双栏翻译滚动性能：两栏共享瓦片位图，译文测量分摊到多帧，手势结束才让另一栏跳转，双栏翻页的 CPU 占用明显下降。（#769 by @ffy6511）
+  - 双栏译文链接悬停：译文页上的引用与 URL 链接会显示引用卡、交叉引用预览和 URL 提示，与原文一致。（#755 by @ffy6511）
+  - 文件树多余 source 目录：文件树不再显示应用自建、可重建的 source/ 引用与版面 sidecar，只含这些文件的目录会被跳过。（#747 by @qychen2001）
+  - 文件树重命名输入法：新建与重命名输入在组字期间不再被回车 / 退出键打断，移动目标选择器同样处理。（#746 by @qychen2001）
+  - AtomGit 同步：发布同步改由 Release 发布事件触发，不再赌仓库镜像在构建结束时到位；发布后自动同步到 AtomGit。（#694 by @qychen2001）
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.11.9
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,57 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: aube.aube
+PackageVersion: 2.10.0
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  Added
+  - --no-include-workspace-root (#1917, @jdx): this hidden global flag leaves the workspace root out of recursive selections unless a selector names it directly. It overrides includeWorkspaceRoot: true and --include-workspace-root.
+    aube -r --no-include-workspace-root run build
+
+  Fixed
+  - npm --workspace/--workspaces in the npm shim (#1916, #1917, @jdx): the npm shim now translates these flags for run, test, start, stop, restart, and exec. Before, the flags reached the root script as arguments. A root script that called npm run build --workspaces then ran itself again and again. Like npm, --workspaces now skips the root unless you also pass --include-workspace-root. Arguments after -- are passed through unchanged.
+    npm run build --workspaces     ->  aube -r --no-include-workspace-root run build
+    npm run build -w @scope/child  ->  aube --filter @scope/child run build
+    npm run build -w packages/child ->  aube --filter ./packages/child run build
+  - npm --audit/--fund flags (#1908, @jdx): for install, add, ci, and remove and their aliases, the npm shim now drops --audit, --no-audit, --fund, --no-fund, and their =<bool> forms. Before, tools that pass these flags, such as the shadcn CLI, failed with unknown option '--no-audit'.
+  - aube audit in workspaces (#1927, @jdx): aube audit now checks the direct dependencies of every workspace package, as pnpm audit does. It also finds the workspace lockfile when run from a member directory. Before, a workspace whose root had no dependencies printed No dependencies to audit. and exited 0. Running it from a member failed with "no lockfile found". --json dependency counts now add up all workspace packages. aube audit --fix and aube sbom still check only the root.
+  - pnpm lockfile compatibility (#1904, #1914, @jdx): aube no longer writes entries that pnpm rejects:
+    - It no longer adds gitHosted: true to type: git resolutions, such as GitHub dependencies pinned to a short commit.
+    - It no longer adds gitHosted: true to GitHub Packages (npm.pkg.github.com) tarballs. It removes this field from existing GitHub Packages entries when it rewrites the lockfile.
+    - It now omits peerDependenciesMeta entries that are not optional, such as vitest's vite: {}. These entries made pnpm install --frozen-lockfile fail with ERR_PNPM_BROKEN_LOCKFILE.
+  - Yarn Classic optionalDependencies (#1922, @jdx): aube now keeps the optionalDependencies: entries in yarn.lock when it reads and writes the file. Before, aube skipped platform binaries such as @rolldown/binding-darwin-arm64, so tools like vite 8 failed at runtime. Yarn 1 doesn't record os/cpu in the lockfile, so aube may install optional packages for every platform for now.
+  - Removing a package that provides an optional peer (#1920, @Aschenbath): when you remove a direct dependency that provides an optional peer, aube now removes it from the lockfile and from hidden hoisting if nothing else needs it. Before, the package stayed resolvable through NODE_PATH. When aube reuses a lockfile, it also no longer treats a remembered optional-peer binding as a declared dependency.
+  - latest with a minimum release age (#1928, @jdx): when minimumReleaseAge is set and the latest dist-tag points to a prerelease older than the cutoff, aube now resolves to that prerelease. Before, it chose the highest stable version, and minimumReleaseAgeExclude had no effect. This affects install, add, and outdated.
+  - Vercel CLI with trustPolicy=no-downgrade (#1910, @jdx): vercel@>=58.5.1 is now in the default trustPolicyExclude. These releases are built from a private repository, so they have no provenance and failed the downgrade check. aube still checks earlier releases.
+  - HTTP/2 too_many_data_frames errors (#1912, @jdx): some registries, such as npm.flatt.tech, send large package metadata in many small HTTP/2 frames, which caused the HTTP/2 client to close the connection. When this error occurs, aube now retries over HTTP/1.1 and keeps using HTTP/1.1 for metadata requests for the rest of the process.
+  - Zero-padded tarball versions (#1926, @jdx): aube now accepts packages whose tarball package.json uses a zero-padded version, such as 2024.04.13, that matches the registry version 2024.4.13. Before, these installs failed with a content mismatch error.
+
+  Documentation
+  - The installation guide now says that shell completions don't require a separate usage install. It also lists the supported shells: Bash, Zsh, Fish, PowerShell, Elvish, and Nushell (#1915, @jdx).
+ReleaseNotesUrl: https://github.com/aubepkg/aube/releases/tag/v2.10.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

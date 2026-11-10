@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: BlackwellSystems.agent-lsp
+PackageVersion: 0.23.5
+PackageLocale: en-US
+Publisher: Blackwell Systems
+PublisherUrl: https://github.com/blackwell-systems
+PublisherSupportUrl: https://github.com/blackwell-systems/agent-lsp/issues
+PackageName: agent-lsp
+PackageUrl: https://github.com/blackwell-systems/agent-lsp
+License: MIT
+LicenseUrl: https://github.com/blackwell-systems/agent-lsp/blob/main/LICENSE
+ShortDescription: MCP server giving AI agents reliable access to language server protocol
+Description: agent-lsp is a stateful MCP server over real language servers. It keeps the language server's semantic index warm and adds a skill layer that turns multi-step code operations into single, correct workflows. 50 tools, 30 languages, persistent sessions.
+Tags:
+- ai
+- code-intelligence
+- developer-tools
+- language-server
+- lsp
+- mcp
+ReleaseNotes: |-
+  ### Fixed
+  • **A language server progress report that never ended cost every `find_references` 60 seconds**：`find_references` (and the tools built on it) waits for active `$/progress` work before querying, and unlike the other tools it repeated that wait on every call, so a token that never ended (a server bug or a hung task) made each call take the full 60 s. A token that has already made a wait time out is now skipped by later waits, so it costs one wait; new progress is still waited on. Explicit long waits (the jdtls import, `start_lsp`'s `ready_timeout_seconds`, the daemon) still wait on every token. The wait also no longer risks sleeping past its deadline when its wake-up timer fired just before it.
+  • **`indexed=true` while the language server was still indexing**：a server that starts its initial load shortly after startup (rust-analyzer, jdtls) could be marked loaded by a query that ran before its first progress report, so tools stopped waiting and reported `indexed=true` during indexing. The server's first progress report now clears that mark, so tools wait for the load and `indexed` is accurate; later background work (such as cargo check) does not. `restart_lsp_server` also reset nothing here, so `indexed` stayed true while the new server indexed; it is now reset with the server. Found in the review of [#69](https://github.com/blackwell-systems/agent-lsp/pull/69) ([#77](https://github.com/blackwell-systems/agent-lsp/issues/77)).
+  • **Gleam packages were detected and classified inconsistently** ([#78](https://github.com/blackwell-systems/agent-lsp/pull/78))：a package with both `gleam.toml` and `package.json` (common, since Gleam compiles to JavaScript) was inferred as TypeScript, Gleam documents reopened from disk were sent as `plaintext`, and `blast_radius` classified test callers by any ancestor directory named `test`. `gleam.toml` now takes precedence over `package.json` in the same directory, `.gleam` files open as `gleam`, and test callers are `_test.gleam` files and the package's own `test/` directory. Contributed by [@lostbean](https://github.com/lostbean).
+  • **Documents opened without a `language_id` were sent to the server as `plaintext`**：17 tools (including `explore_symbol`, `go_to_definition`, `call_hierarchy`, `type_hierarchy` and `get_symbol_source`) default an omitted `language_id` to `plaintext`, and that label went to the language server in `didOpen` for every file, Go and TypeScript included. A document opened as `plaintext` now takes the language its extension names (a `.tsx` file becomes `typescriptreact`); files with unknown extensions stay `plaintext`, and an explicit `language_id` is kept. Found by CodeRabbit in the review of #78.
+ReleaseNotesUrl: https://github.com/blackwell-systems/agent-lsp/releases/tag/v0.23.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

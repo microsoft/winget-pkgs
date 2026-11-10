@@ -1,0 +1,115 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Tyroger.Capiory
+PackageVersion: 0.7.0
+PackageLocale: fr-FR
+Publisher: tyroger
+PublisherUrl: https://capiory.fr/
+PublisherSupportUrl: https://github.com/tyroger/Suivora-releases/issues
+PackageName: Capiory
+PackageUrl: https://capiory.fr/
+License: Propriétaire (gratuit)
+Copyright: Copyright (c) 2026 tyroger
+ShortDescription: Poste de pilotage personnel et local pour vos projets, priorités, blocages et charge de travail.
+Description: |-
+  Capiory est un poste de pilotage personnel 100 % local pour garder le cap sur l'essentiel :
+  projets, priorités, blocages et charge de travail réunis dans une seule application de bureau.
+  Aucun compte, aucun cloud : les données restent sur votre machine, avec des sauvegardes chiffrées.
+Moniker: capiory
+Tags:
+- local
+- organisation
+- pilotage
+- priorités
+- productivité
+- projets
+ReleaseNotes: |-
+  Capiory 0.7.0
+  Version de refonte allégée : moins d'écrans, moins de champs, une seule façon de dire « j'attends quelque chose ». Détail des choix dans docs/decisions/0002-refonte-ux-allegee.md.
+
+  Ce qui change pour vous
+
+  Accueil
+  - La page Aujourd'hui affiche la date, une phrase d'état, une saisie rapide de tâche et 3 cartes : À faire, Blocages, À trier (seulement s'il reste des tâches à trier).
+  - Sous les cartes, une seule liste.
+
+  Une liste par page
+  - Chaque page présente une seule liste, sans cartes ni filtres de statut :
+    - Tâches : groupées par échéance ;
+    - Blocages : ouverts, du plus ancien au plus récent, relance et levée visibles ;
+    - Applications et Projets : triés par besoin d'attention ;
+    - Notes : groupées par période.
+  - Les éléments archivés ou terminés sont accessibles par un lien en bas de liste.
+  - Tâches et blocages se saisissent directement en haut de leur page : un champ, des sélecteurs (échéance, application, projet) au-dessus, « Formulaire complet » dessous.
+  - L'échéance, l'application et le projet choisis restent proposés pour les saisies suivantes jusqu'au soir. Ce choix est gardé en mémoire seulement, jamais en base.
+  - Applications, projets et notes se créent par un bouton et le formulaire complet.
+  - Le menu « Projets & sujets » devient « Projets ».
+
+  Fiches détail
+  - Les fiches application, projet, tâche, blocage et note suivent un modèle commun, en onglets.
+  - Depuis une fiche, une tâche, un blocage ou une note saisis sont déjà rattachés à l'élément ouvert.
+
+  Formulaires
+  - Un seul champ obligatoire par formulaire (titre ou nom).
+  - L'essentiel est visible ; le reste est replié sous « Plus de détails ».
+
+  Paramètres
+  - Une seule page, en quatre blocs, sans onglets.
+  - La capacité se saisit par jour ; la capacité de la semaine est calculée (jour × 5).
+
+  État des lieux
+  - L'aperçu est mis en forme et lisible avant export. Deux actions : Copier et Exporter.
+  - Six rubriques : projets actifs, fait sur la période, points bloquants, risques, décisions attendues, charge.
+  - Nouvelle rubrique Risques : applications en incident ou à surveiller, blocages ouverts depuis plus de 7 jours.
+  - « Décisions attendues » liste les blocages de cause « décision attendue ».
+
+  Ce qui disparaît
+  - La vue Charge et son entrée de menu. La charge du jour reste affichée sur l'accueil, la charge de la période dans l'état des lieux.
+  - Le bouton global « Ajouter » et sa fenêtre à 6 types.
+  - L'entité Décision et la case Relance des tâches. Le blocage devient la seule notion d'attente ; sa cause précise le type d'attente (à clarifier, attente de retour, décision attendue, accès, technique, éditeur, dépendance externe).
+  - Le statut de tâche Standby : ces tâches passent à « À faire ». Une tâche en pause est une tâche sans date.
+  - La charge restante saisie sur un projet : elle est désormais calculée à partir de ses tâches ouvertes.
+  - La capacité semaine saisie : elle est calculée (capacité jour × 5).
+  - Les 7 types de note sont réduits à 4 : réunion, décision, procédure, information.
+  - Le champ texte « Environnement » de l'application, doublon de la liste des environnements.
+
+  Données et sauvegarde
+
+  Migration automatique 0009
+  Au premier déverrouillage après la mise à jour, la base est convertie automatiquement :
+  - chaque décision devient un blocage de cause « décision attendue » (statut « prise » → blocage résolu, sinon ouvert) ;
+  - chaque tâche en relance donne un blocage « attente de retour » lié à la tâche, ou date la relance de son blocage ouvert existant ;
+  - la cause « arbitrage » devient « décision attendue » ;
+  - les blocages reçoivent des rattachements explicites (application, projet, tâche) ; un blocage de tâche reprend aussi l'application et le projet de la tâche ;
+  - les tâches Standby passent à « À faire », échéance inchangée ;
+  - un projet marqué bloqué passe au statut « Bloqué » ; la charge restante saisie est supprimée ;
+  - toute tâche ou tout projet au statut « Bloqué » sans blocage ouvert reçoit un blocage « à clarifier » ;
+  - le champ « Environnement » d'une application rejoint sa liste d'environnements s'il n'y figure pas déjà ;
+  - les notes « technique » deviennent « procédure » ; « retour d'expérience » et « blocage » deviennent « information ».
+  La migration se joue en une seule transaction : en cas d'échec, rien n'est modifié et la base reste dans son état 0.6.
+
+  Sauvegarde chiffrée obligatoire avant migration
+  - Juste avant la migration, Capiory écrit une sauvegarde chiffrée de la base 0.6 : capiory-backup-<date>-avant-0009.capiory.
+  - Emplacement : le dossier de sauvegarde configuré dans Paramètres. S'il n'y en a pas ou s'il est inaccessible, le dossier sauvegardes-migration/ dans le dossier de données de l'application.
+  - Le chemin du fichier écrit est indiqué après le déverrouillage.
+  - Si cette sauvegarde ne peut être écrite nulle part, la migration n'est pas appliquée : un message l'explique, les données restent intactes en 0.6. Il suffit de corriger l'accès au dossier ou l'espace disque, puis de déverrouiller à nouveau.
+
+  Restauration des sauvegardes 0.6
+  - Les sauvegardes produites par la 0.6 (et la sauvegarde avant migration) se restaurent dans la 0.7 : elles subissent les mêmes conversions que la migration 0009.
+  - Les sauvegardes produites par la 0.7 utilisent un nouveau format et ne sont pas relisibles par la 0.6.
+  La base reste locale et chiffrée. Aucun appel réseau n'est ajouté.
+
+  Points d'attention
+  - La migration est irréversible : la 0.6 ne sait pas relire une base 0.7. Le seul retour en arrière passe par la sauvegarde « avant-0009 » (réinstaller la 0.6, puis restaurer ce fichier). Conservez-la tant que la 0.7 n'est pas validée sur vos données.
+  - La charge du jour peut augmenter par rapport à la 0.6 : les tâches à trier sont désormais comptées, ainsi que les tâches dont l'échéance tombe sur la période (date de début, sinon échéance). Les tâches bloquées restent exclues de la charge du jour.
+  - Avant d'installer, une sauvegarde manuelle récente reste conseillée (Paramètres › Sauvegarde).
+
+  Côté technique
+  - Migration src-tauri/migrations/0009_blocage_unique_modele_allege.sql, testée côté Rust (conversion, sauvegarde obligatoire, refus si sauvegarde impossible, restauration d'une enveloppe 0.6).
+  - Enveloppe de sauvegarde en version 2 ; la version 1 (0.6) est convertie à la restauration.
+  - Retrait de ChargeView, QuickAdd, DecisionForm, decisionService, useDecisions et commands/decision.rs.
+  - Configuration Tauri, permissions et updater inchangés par rapport à la 0.6.0.
+ReleaseNotesUrl: https://github.com/tyroger/Suivora-releases/releases/tag/v0.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

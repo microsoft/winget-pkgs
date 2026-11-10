@@ -1,0 +1,47 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.11.9
+PackageLocale: en-US
+ShortDescription: Agent-friendly reference management.
+Description: 'Traditional reference managers are not agent-friendly: highlights and notes stay locked inside single files, making it hard for agents to reuse knowledge across papers; every conversation starts from scratch without a stable local knowledge map; PDFs are human-friendly but not the most comfortable reading material for agents. Agentero aims to build an agent-friendly, agent-native way to manage references, exploring how humans and agents collaborate on reference management. Connect your local agent via ACP (BYOA), select-text chat, import papers and Skills, stay compatible with the Zotero ecosystem, and get paper translation, bidirectional links with a knowledge graph, and deep PDF reading.'
+Tags:
+- academics
+- agent
+- article
+- literature
+- paper
+- pdf
+- reference
+- research
+- thesis
+- zotero
+ReleaseNotes: |-
+  0.11.9 gives Quick Chat and the sidebar one shared read-only research context: selections, the current paper, and @-mentions become minimal evidence first, and the agent reads further by abstract, section, and page only when needed, listing the citations it used as clickable sources. It also ships a performance sweep across agent streaming, PDF reading, editor autosave, and the library, plus fixes for dual-pane translation, Windows ACP, the file tree, and more.
+  Features
+  - Read-only research context: Quick Chat and the sidebar share the same read-only context: selections, open papers, and @-mentions are resolved into minimal evidence first, and the agent expands on demand through the per-turn agentero-context MCP (context_search / context_read / paper_relations) instead of preloading abstracts or full text into the prompt. When the grant changes, the app opens a new session and hands over the existing conversation, and every citation the agent used is listed as a clickable source. (#776 by @ffy6511)
+  Improvements
+  - Agent streaming: Stream chunks are coalesced into one store update per frame, the panel shell and conversation history no longer re-render for every token, and context-chip rects skip no-op updates while scrolling. (541914a3, 60bf8c51, e5e18305, 93f162ad, 83b1e208 by @qychen2001)
+  - PDF scrolling: A fling no longer queues glyph extraction for every page it crosses (geometry and text rects prefetch after the page has been visible for about 180ms), and the previous page bitmap stays on screen until the next one commits, so fast scrolling no longer goes blank. (a9ccaa27, 9e593bbb by @ffy6511)
+  - PDF chrome and links: Gutter and comment card layouts are memoized, page and citation links skip no-op rebuilds, and translation and sidebar panels stay off the viewer update path. (f5cb62d4, 87d99303, 4efb53b8 by @qychen2001)
+  - Editor and autosave: Each autosave serializes the document once, CodeMirror serialization is deferred to the persist flush, autosave reseeds keep the editor memo, Excalidraw scene serialization moved inside the persist debounce, and the scroll-completion probe only runs while menus are open. (5b622414, e52d6c9d, 9ee99126, 3e2aea70, 6df329b1 by @qychen2001)
+  - Library and command palette: Paper rows build from a cache with stable header callbacks, EasyScholar tag updates flush in batches, and the command palette and reference filters match against precomputed text. (5d311c8e, 9170400f, c1f22ea9, 2a74b851 by @qychen2001)
+  - Workspace and UI responsiveness: Workspace tabs keep their identity on no-op patches, derived vault-tree arrays stay referentially stable, cross-window settings updates merge field by field, the background-task hook subscribes only to the tasks slice, and selection annotation badges no longer react per keystroke. (51220633, 3914cef0, 99e1893b, aed0db79, aafe47aa, ff799cfa, 23db2a02 by @qychen2001)
+  Fixes
+  - Editor navigation and scroll memory: Outline and link jumps are no longer overridden by scroll-memory restore. (5561f9ca by @qychen2001)
+  - Vault file events: Buffered file events are no longer dropped when the app re-renders, so external edits are not missed. (f7620c50 by @qychen2001)
+  Resolved Issues
+  - Windows ACP launch: The custom Windows Job transport that rejected inherited drive environment entries is removed, restoring SDK process spawning so agents such as opencode connect again on Windows. (#772 by @qychen2001)
+  - Dual-pane translation scrolling: Both panes share tile bitmaps, translation text measurement is spread across frames, and the partner pane jumps only when the gesture settles, cutting dual-pane CPU use. (#769 by @ffy6511)
+  - Dual-pane link hover: Citation and URL links on the translated page show reference cards, cross-reference previews, and URL tips, matching the source reader. (#755 by @ffy6511)
+  - Redundant source folder: The file tree no longer shows the app's rebuildable source/ citation and layout sidecars, and a directory holding only them is skipped. (#747 by @qychen2001)
+  - File-tree rename IME: Create and rename inputs are no longer interrupted by Enter or Escape during IME composition, and the move-destination picker is guarded as well. (#746 by @qychen2001)
+  - AtomGit sync: Release sync now triggers from the Release published event instead of betting on the repository mirror by the end of the build, so releases reach AtomGit automatically after publishing. (#694 by @qychen2001)
+  Full Changelog: https://github.com/poco-ai/Agentero/compare/v0.11.8...v0.11.9
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.11.9
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: locale
+ManifestVersion: 1.12.0

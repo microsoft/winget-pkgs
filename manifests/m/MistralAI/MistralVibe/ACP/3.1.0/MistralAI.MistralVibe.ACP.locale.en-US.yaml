@@ -1,0 +1,105 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: MistralAI.MistralVibe.ACP
+PackageVersion: 3.1.0
+PackageLocale: en-US
+Publisher: Mistral AI
+PublisherUrl: https://mistral.ai/
+PublisherSupportUrl: https://github.com/mistralai/mistral-vibe/issues
+PrivacyUrl: https://legal.mistral.ai/terms/privacy-policy
+Author: Mistral AI
+PackageName: Mistral Vibe (ACP mode)
+PackageUrl: https://github.com/mistralai/mistral-vibe
+License: Apache-2.0
+LicenseUrl: https://github.com/mistralai/mistral-vibe/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Mistral AI
+CopyrightUrl: https://legal.mistral.ai/terms
+ShortDescription: Minimal CLI coding agent by Mistral
+Description: |-
+  Mistral's open-source CLI coding assistant.
+  Mistral Vibe is a command-line coding assistant powered by Mistral's models. It provides a conversational interface to your codebase, allowing you to use natural language to explore, modify, and interact with your projects through a powerful set of tools.
+Tags:
+- agent
+- agentic
+- ai
+- code
+- coding
+- develop
+- development
+- programming
+ReleaseNotes: |-
+  Added
+  - New enable_file_autocomplete setting (and VIBE_ENABLE_FILE_AUTOCOMPLETE) turns off @ file completion and its background file index.
+  - A Jump to bottom button appears over a scrolled-up conversation and returns to the latest message.
+  - Ctrl+C closes the PR/MR list, and Home, End, PageUp and PageDown move its highlight.
+  - New /context command (also opened by clicking the footer's token counter) shows what fills the context window: system prompt, tool definitions, skills, conversation, free space and the auto-compaction buffer, with per-category token estimates.
+  - A copy icon after the footer's working directory copies the whole path.
+  - The footer shows how much of your monthly Vibe Code usage is spent, turning yellow then red as it runs out, or marked PAYG when pay-as-you-go covers usage past it.
+  - The Nix flake exposes packages.mistral-vibe, an overlay and nix flake check checks
+  - The agent can open an image file with read_file and see it, on a model that reads images.
+  - Ctrl+R searches your prompt history and loads the selected prompt into the input.
+  - Experimental: the Mistral MCP built-in connector, behind the experimental_enable_mistral_mcp_connector setting
+  - New mistral-dark and mistral-light themes built from the Mistral brand palette.
+  Changed
+  - On macOS, new worktrees of a trusted repository are now cloned from a template checkout by default; set worktree_copy_on_write = false to turn this off
+  - experimental_worktree_copy_on_write is renamed to worktree_copy_on_write, and existing configs are updated on startup
+  - Connector tools meant only for their MCP App are no longer offered to the model
+  - Errors, warnings and startup config issues now appear as lines in the conversation instead of pop-ups
+  - Refused inputs show a notice above the input that stays until the next key
+  - Experimental browser sign-in now authenticates first-party CLI requests without an API key.
+  - Experimental browser sign-in reads account and tenant information from the account-context endpoint.
+  - The Rust CLI now honors file_watcher_for_autocomplete: turned off, the file index is built once without watching the filesystem.
+  - PR/MR rows lead with a dot colored by their state, and CI checks show a colored ✓, ✗ or ○ with failures first.
+  - Inside a tmux session with mouse off (the default before tmux 3.8), Vibe leaves the mouse to the terminal, so its native selection and copy work without holding a modifier key.
+  - The footer's PR/MR link now sits after the working directory, led by a dot colored by its state, and the context gauge reads ctx 23k/600k.
+  - On narrow terminals the footer first turns its gauges into one-cell levels and drops the PR status, then shortens the working directory.
+  - The footer's context window reads as a bar, and both gauges are the first to shrink to a one-cell level on narrow terminals.
+  - The input box borders stay neutral; only the mode label is colored.
+  - The plan name reads Free, Pro or Team.
+  - The model and its thinking level moved from the footer to the top border of the input box, where a click opens /model.
+  - A generic subagent now runs the instructions its parent writes for its task
+  - The Nix package no longer rebuilds when unrelated files such as tests or docs change
+  - A pull request's status counts only its required checks and their latest run; skipped and neutral checks pass
+  - A pull request whose optional checks failed no longer reads as blocked
+  - The pull requests of open sessions refresh every minute, at about one GitHub API point per minute
+  - Voice recording moved from Ctrl+R to Ctrl+T.
+  - /whoami now shows the last 4 characters of the API key instead of the first ones, matching Studio
+  - Brand accents now use the Mistral palette, and the loading animation cycles through three softer oranges.
+  - Under the ansi-dark and ansi-light themes, the input box and popup borders are dimmed so they stand out less.
+  Fixed
+  - Interrupting a ! shell command now also stops the processes it started, instead of hanging until they exit
+  - Saving a setting, an MCP server change, an agent install, or an "always allow" approval no longer erases config.toml changes made by hand or by another Vibe session.
+  - Saving settings no longer replaces a symlinked config.toml with a regular file
+  - Sessions no longer crash, or fail to start or resume, when a tool result or MCP tool schema contains an integer above 2^53.
+  - MCP servers whose sign-in is hosted elsewhere (Cloudflare Access, Keycloak, Consensus) now renew their login silently instead of asking you to sign in again each time it expires
+  - OIDC-authenticated model requests no longer forward tenant headers through redirects.
+  - OIDC refresh no longer restores cleared or replaced credentials, and rejected model tokens require renewed authentication.
+  - OIDC account and tenant switches no longer reuse another account’s cached settings or connector catalog.
+  - /retry now works after interrupting a response with Esc, and says so when there is nothing to retry instead of doing nothing.
+  - A retried response replaces the unfinished one instead of being appended to it, which showed the same text twice.
+  - Smart approve no longer asks for approval on every tool call when its model cannot turn reasoning off, such as GLM 5.3 or Mistral Large 4.
+  - On Linux, starting Vibe in a folder with symlinked directories no longer pins a CPU core and grows memory without limit.
+  - The PR/MR list keeps its height and its highlight, and its CI checks stay readable at any length and width.
+  - After /clear, /resume, a rewind or a compaction, the footer and the PR/MR list show the new session's PRs and MRs.
+  - A default_agent set in your config (for example auto-approve) is no longer replaced by smart approve when new sessions start.
+  - Starting several worktree sessions in the same repository at once no longer fails one of them with "could not lock config file".
+  - On Windows, sessions no longer fail with "Access is denied" (WinError 5) when an antivirus or indexer briefly holds a session file open.
+  - Copying inside tmux now goes through tmux's own clipboard forwarding, so it reaches the terminal clipboard without enabling passthrough and also fills the tmux paste buffer.
+  - Subagents can be spawned from a session forked with /branch.
+  - A connector connected, disconnected or revoked now reaches every open session at its next turn, without a restart
+  - Listing or opening sessions with a Vibe config that breaks a rule now says which setting to fix, instead of an internal error
+  - Mistral Large 4 turns with no thinking level set no longer fail with a 400, and its thinking picker offers Low, High and Max when its config lists no levels.
+  - nix develop builds again and ships the Rust toolchain it needs
+  - Pull request titles come from GitHub or GitLab instead of the creation command, so heredoc and variable titles show correctly
+  - A GitLab merge request with skipped or allowed-to-fail jobs no longer shows failing or pending checks
+  - Starting a queued message no longer stalls for up to a few hundred milliseconds when many MCP or connector tools are loaded.
+  - read_file refuses a binary file instead of returning it as unreadable text.
+  - Resuming a session that was closed mid-turn opens right away, and the interrupted turn keeps running so you can follow it, approve its tools or interrupt it
+  - The welcome banner cat now uses the theme's text color instead of the terminal default.
+  Removed
+  - Floating notification popups in the bottom-right corner
+  - The smart_approve_default setting: set default_agent = "smart-approve" instead.
+ReleaseNotesUrl: https://github.com/mistralai/mistral-vibe/blob/HEAD/CHANGELOG.md#310---2026-11-03
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

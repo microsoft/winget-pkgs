@@ -1,0 +1,60 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.ArWen
+PackageVersion: 2.9.11
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/arwen/issues
+Author: Fahrenheit Research
+PackageName: ArWen
+PackageUrl: https://github.com/FahrenheitResearch/arwen
+License: Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+Copyright: Copyright © Fahrenheit Research
+CopyrightUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+ShortDescription: 'ArWen: GPU-native WRF-ARW-class regional weather model, verified against WRF v4.6.1'
+Description: "ArWen is an independent, GPU-native implementation of a WRF-ARW-class regional atmospheric model. It is not affiliated with or endorsed by NCAR or UCAR. The name is a wordmark for \"the ARW solver, GPU-native\"; the Python package is currently named gpuwm. Safety. ArWen is a research and educational tool. It is never a substitute for official forecasts and warnings from your national meteorological service. Do not use it to make safety decisions. Regional numerical weather prediction at convective scale has mostly required institutional clusters, which means most of the world runs on global-model guidance at 10-25 km. ArWen's aim is to put a verified, kilometer-scale limited-area model on a single consumer GPU: pick a point, size a nest ladder to your card, pull public analysis data, and run a 1 km (or 500 m) simulation of your own area on hardware you own -- especially in places where no national convection-permitting model exists."
+Moniker: arwen
+ReleaseNotes: |-
+  New
+  - gpuwm go --wind-farms uswtdb|PATH runs Fitch wind-farm drag and turbine TKE inside the GPU MYNN step, with turbine and farm power, hub wind and TKE-source history (opt-in; WRF windfarm_opt = 1 imports too).
+  - gpuwm go --nudging spectral|grid nudges a forecast toward its source analyses (opt-in); imported WRF grid_fdda = 1/2 namelists run instead of being refused.
+  - Ocean waves: automatic preparation from public GFS winds, GFS-Wave spectra, ETOPO 2022 and the NDBC buoy registry, buoy scoring, and wave maps (Hs, Tp, Dp, wind sea and swell) in the normal render tree.
+  - Simulated radar supports C- and X-band radars (TDWR and C/X agency radars) with finite-particle scattering, melting, Kdp and beam-integrated attenuation; S-band output is unchanged.
+  - Python programs can write simulated radar volumes from history or a georeferenced in-memory state with gpuwm.simulated_radar.simulate; custom S-band sites accept beam width.
+  - Sounding-based domains can be built and stepped through the versioned gpuwm.domain Python API.
+  - Idealized flat domains can follow a constant umove/vmove moving frame.
+  - gpuwm go --smoke-radiation on|off selects smoke-aware radiation explicitly.
+  - gpuwm.tables.status, gpuwm.tables.ensure and gpuwm fetch-tables --schemes check and stage selected physics tables.
+  - rw_mpas_convert --grid-label TEXT headlines a map with the view's own name and the spacing of the cells it shows.
+  - GPUWM_WRF_LIBMVEC=1 makes WRF's original Tiedtke cumulus (cu_physics = 6) match WRF's stock gfortran vectorized build word for word.
+  - hailcast_version selects the HAILCAST stone model: NOAA's operational HRRR v4 (wrf_39_noaa, the default) or WRF 4.6.1's (wrf_461).
+
+  Changed
+  - Forecast startup uses shipped CUDA 12/13 kernel images for its first-step kernels, so a cold start no longer waits on a single-core compile.
+  - Simulated radar during a forecast scans in-memory snapshots at the quick-look cadence, and a frame's radar sites are scanned in parallel (about 2.6x faster on many-site domains).
+  - Legacy RRTMG with smoke feedback reuses full-domain aerosol optics across radiation chunks (the radiation call takes about a third of the time).
+  - Forecast entry points explain the NVIDIA GPU requirement and the tools available without one.
+  - Checkpoint format 7 carries the MF_VX_INV map-factor words; format 6 checkpoints are refused with that reason.
+  - Simulated radar, ML export, the wind-turbine table decoder and the hydro payload library are staged from the release bundle on first use (gpuwm fetch-bridges --partial --artifact NAME stages one ahead of time).
+
+  Fixed
+  - With strict numerics, the June 2021 CONUS case matches WRF 4.6.1's pinned scalar build at +1 h and +2 h: 0 of 265,734,210 common history words differ.
+  - The MYJ surface layer takes the background roughness Noah writes each step, as WRF does.
+  - Single-domain HRRR runs with a quick look prepare their quick-look inputs.
+  - Native lateral smoke forcing reads the configured boundary smoke source at later forcing times.
+  - Legacy RRTMG sizes its shortwave workspace inside the CuPy memory limit, so it no longer fails at startup on a shared card.
+  - Missing or corrupt physics tables name the file and the staging command; interrupted table downloads restart safely.
+  - HAILCAST surface hail follows NOAA's operational HRRR v4 by default, so its swaths are no longer thin and broken.
+  - Runs with terrain drag (every HRRR recipe) and a companion export no longer exit 1 after a finished forecast.
+  - A case prepares the same lake temperatures from a cold or a warm cache.
+  - rw_compare --compare hrrr hail sheets pair each hail field with the HRRR message made from it.
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/arwen/releases/tag/v2.9.11
+InstallationNotes: |-
+  This application requires an NVIDIA GPU with CUDA support to run.
+  Will not function on integrated graphics or non-NVIDIA hardware.
+  Without compatible hardware, the application will fail to launch.
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

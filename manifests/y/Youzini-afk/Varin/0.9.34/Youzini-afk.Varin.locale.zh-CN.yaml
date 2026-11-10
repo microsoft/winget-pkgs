@@ -1,0 +1,64 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Youzini-afk.Varin
+PackageVersion: 0.9.34
+PackageLocale: zh-CN
+Publisher: Youzini-afk and Varin contributors
+PublisherUrl: https://github.com/Youzini-afk
+PublisherSupportUrl: https://github.com/Youzini-afk/Varin/issues
+PackageName: Varin
+PackageUrl: https://github.com/Youzini-afk/Varin
+License: AGPL-3.0-only
+LicenseUrl: https://github.com/Youzini-afk/Varin/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Youzini-afk and Varin contributors
+ShortDescription: 面向编程与科研的独立 Agent 工作台与完整 Harness。
+Description: Varin 是一个独立的 Agent 工作台与完整 Harness，面向编程、科研和其他项目工作，以本地和桌面体验为中心。它内置 Pi 运行时；模型与提供商栈、会话树、包管理器和扩展模型仍由 Pi 提供，而 Varin 负责周围的工具环境、工作状态、恢复、检索、上下文策略、任务治理和工作台界面。Varin 自带两套官方工作形态：以会话、任务和上下文为中心的 Agent Workspace，以及以编辑器、搜索、Git、诊断和调试为中心、把智能体作为可停靠面板的 IDE Workbench。
+Tags:
+- pi
+- pi-agent
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 科研
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  Varin 0.9.34 将外部 Agent Harness 接入工作区，加入按需隔离的版本化工作区，并打磨聊天滚动的连续性。同时修复快速检索启动失败、打开子会话时长时间停顿、进程输出读取，以及 Office 和工具契约中的多处问题。本版发布构建也首次加入签名 Android APK。
+  在 Varin 中使用外部 Agent
+  - 接入执行 Host 上已安装的 Codex、Claude Code、Pi，以及兼容 ACP 的程序。在设置 → 外部 Agent 中检测并启用，再在新建会话时选择后端。各后端继续使用自己的模型、账号、工具和项目配置。
+  - 为 Agent 预设绑定外部后端，通过已有子任务入口派发工作。定向消息、最终报告、状态查询、等待、取消和文件交换继续关联原来的派发任务。
+  - 外部会话复用聊天排版、思考预览、工具展开、文件预览、工作概览和协作气泡。可重连在 Varin 中建立的会话；结果尚未确认的输入不会被自动重放。
+  版本化工作区与执行响应
+  - Rust Storage 引入版本化文件树和私有文件修改。受管工作区可从保留版本分叉，共享未变内容；局部编辑保留变化区间，减少分叉或刷新时重新复制完整文件的需求。
+  - 派发继续默认共享。显式选择 isolated_write 时，在昂贵的准备工作之前检查实际执行 Host 的文件系统能力，并直接返回缺少的依赖或权限。
+  - 文件工具、编辑器、终端、恢复点、代码整合与外部 Harness 使用同一选定来源。文件 I/O 和进程准备移出 Storage 控制线程；派生工作区按实际读者、进程与保留引用回收。
+  - 修复空闲维护的反复唤醒，并为临时运行授权清理加入索引，处理账本积累和打开子会话时界面长时间停顿的问题。切换会话也会取消过期读取，并为选中的会话呈现明确的加载失败。
+  聊天、滚动与模型控制
+  - 聊天、设置页和工作概览中的离散鼠标滚轮输入采用连续缓动，连续输入保留速度，反向立即接管。触控板保留原生滚动，滚动条拖动直接跟随指针。
+  - 流式跟随和返回最新回复均可随时打断。长距离返回使用仅作用于聊天视口的过渡；展开、收起、重新换行，以及返回后台仍在执行的会话时，保留阅读位置。
+  - 外侧聊天滚动条在用户停留后渐隐，滑块与内容同步，后台输出不反复唤醒滚动条。阅读历史时可通过新回复提示回到最新位置。
+  - 为辅助模型和快速检索加入独立思考等级，选定模型参数贯穿请求准备与预算计算。完善带渠道前缀的模型名称识别。
+  - 排队消息增加立即发送操作，输入框快捷提示使用主题强调色；保留重新打开历史后的子 Agent 头像，并稳定内嵌 HTML 的尺寸，减少滚动条闪烁。
+  检索与工具可靠性
+  - 修复模型请求重新绑定后的快速检索启动问题：保留原 Run 中准确的子任务模型绑定；无法启动时透出底层准备错误。
+  - 工具发现返回精简的分组、搜索候选和具体操作契约，通过分页续读完整条目，减少大型披露表被直接截断的问题。读取说明不改变调用权限，也不额外注册模型函数。
+  - 协调并行文件写入与进程启动的租约。不同读者可独立回读保留的进程输出，文本分页按完整字符对齐；改进 UTF-8 与 Windows 代码页混合输出，并按实际执行环境解析直接启动的 Shell 程序名。
+  - 显式进程等待同时覆盖退出与输出收尾，区分正在运行、输出仍在收尾、输出完整和输出错误。
+  - 修复 Linux 临时启动线程结束时误停命令的问题。修正隔离来源的依赖检查，支持 Windows 普通用户挂载、标准路径解析与 Shell 执行；运行授权退休时释放它自己的工作区租约，结构化代码读取接齐原生工作区来源。文件整合及撤销正确处理子文件变动带来的目录时间变化。
+  - Linux 按实际 FUSE 连接能力选择同步边界，避免等待普通挂载不会提供的回调。修复共享来源结算、固定成果续接、Windows 挂载目录创建及代码交换中的文件授权接线。统一语义相同的 Windows 属性与权限描述表示，保留实际权限；整合准备中止时保留原始原因。将文件交换的冲突路径查询移出 Storage 主线程，修复访问虚拟挂载时的自身等待。修正 Unix 新建文件的默认属性，避免隔离成果回传普通项目目录时因多余的 Windows 标志被误判失败。统一来源资源覆盖记录中的根路径表示，保留原有子目录读取范围。
+  - 修复 Office 与下载写入的文件租约请求契约。完善导出参数错误、脚本单元失败后的变量提示、嵌套工具参数校验结果和子任务报告的字节范围错误；改进完整代码单元选择反馈与 import 单元提取。
+  - 模型可见的文件、后续任务回执去除原始原生文件元数据，恢复所需信息继续保留。材料检索覆盖标题、来源标识与正文；平衡多目录列举，并将详细桌面窗口清单改为按需获取。
+  - 将 ip-address 更新至 10.7.5，修复 IPv6 分类、子网比较和解析问题；修复构建依赖 deepmerge 的对象原型处理，通过实际 PWA 消费者验证补丁后再排除对应版本告警。
+  Android 与升级说明
+  - **Android：**发布流程加入使用固定发布密钥签名的 Varin-0.9.34-android.apk 及 SHA-256 校验文件。应用包含移动界面，连接已有 Varin Host，Agent 后端仍在 Host 执行。本版尚未配置 Firebase，原生推送注册暂不可用。
+  - **独立工作区：**Windows 安装可选 WinFsp 后支持普通用户使用。本地 UNC 文件系统兼容标准路径解析，同一 Host 的工作区共享一个当前用户盘符供命令执行，各来源保留原 Storage Session 和独立生命周期，不修改整机挂载设置。Linux 需要可用的 FUSE 后端；macOS 可使用 macOS 26+ 上已启用的 FSKit 扩展，或已安装且兼容的 macFUSE 后端。普通项目会话与共享任务使用原目录。物理项目首次导入仍需稳定捕获，后续受管分叉复用已捕获状态。
+  - **私有数据格式：**Agent Catalog 从格式 78 改为 79，不提供不受支持私有存储的自动迁移。旧格式会保留原数据并明确拒绝打开；使用旧格式的安装可能需要单独的数据目录。升级时请保留重要的已有数据。
+  - 桌面目标仍为 Windows x64/ARM64、Linux x64/ARM64 和 macOS Apple Silicon；macOS Intel 可选。Windows 安装包未签名，macOS 产物未签名、未公证；Android APK 使用独立配置的发布签名。npm 扩展开发包继续使用独立版本序列。
+  Full changelog / 完整提交记录
+ReleaseNotesUrl: https://github.com/Youzini-afk/Varin/releases/tag/v0.9.34
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

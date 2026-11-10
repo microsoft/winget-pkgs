@@ -1,0 +1,76 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: FelipeSantos.VolumeLocker
+PackageVersion: '0.10.0'
+PackageLocale: en-US
+Publisher: Felipe Santos
+PublisherUrl: https://github.com/felipecrs
+PublisherSupportUrl: https://github.com/felipecrs/volume-locker/issues
+PackageName: Volume Locker
+PackageUrl: https://github.com/felipecrs/volume-locker
+License: MIT
+LicenseUrl: https://github.com/felipecrs/volume-locker/blob/HEAD/LICENSE
+Copyright: Copyright © 2025 Felipe Santos
+ShortDescription: A tray icon app that keeps the volume of your audio devices locked and manages your default audio devices based on a priority list
+Tags:
+- hacktoberfest
+- mic
+- rust
+- volume
+- volume-lock
+- windows
+ReleaseNotes: |-
+  What's New
+
+  Seamless Audio Device Migration
+  - Volume Locker now tracks your audio devices across physical connection changes.
+  - Moving a USB headset, DAC, or microphone to a different USB port preserves all your volume locks, unmute locks, and priority positions.
+  - Active temporary priority overrides are also preserved when a temporarily chosen device reconnects under a new endpoint ID.
+  - Unpairing and re-pairing Bluetooth devices no longer loses your configured settings or priority order.
+  - Audio driver updates (such as NVIDIA, AMD, or Realtek updates) no longer disconnect your saved device settings.
+
+  Intelligent Multi-Channel & Profile Protection
+  - Dual-channel headsets (with separate Game and Chat channels) are safely distinguished—settings on your Game channel will never accidentally migrate to your Chat channel.
+  - Bluetooth dual profiles (Stereo Headphones vs. Hands-Free Headset) are tracked separately without cross-migrating.
+  - Hardware bus isolation: Internal motherboard audio (Realtek/HD Audio) and external USB or Bluetooth peripherals never cross-migrate, even when sharing common default names like "Speakers".
+  - Conflicting USB VID/PID protection: Different hardware models sharing generic names (e.g. "USB Audio Device") are never misassociated.
+  - Active in-use device protection: Devices currently active in priority lists or temporary priorities are strictly shielded from being overwritten or claimed as unclaimed migration targets.
+  - If you use multiple identical audio devices without unique serial numbers, Volume Locker prevents accidental settings swapping.
+
+  Smart Rename & Reset Handling
+  - Renaming an audio device in Windows Sound Settings is now recognized immediately without needing to restart the app.
+  - If Windows resets a renamed device back to its driver default name after re-plugging, Volume Locker recognizes the underlying hardware and keeps your settings intact.
+  - Custom device names are strictly guarded so they will never accidentally match against generic default names from other devices.
+
+  Instant Wake & Sleep Volume Clamping
+  - Volume Locker now immediately wakes when your computer resumes from sleep or Modern Standby.
+  - Volume locks and unmute states are re-enforced right upon wake, preventing audio drivers from resetting your volume levels during system sleep.
+
+  Device Migration Notifications
+  - Added a new Notify on device migration option under the Preferences menu.
+  - When enabled, a desktop notification lets you know whenever settings are transferred to a reconnected device ("Device Settings Transferred: Settings for '...' were transferred to its new connection").
+
+  Purely Event-Driven Operation
+  - Device reconnections, renames, and migrations now happen instantly as Windows events occur.
+  - Rapid hardware plug-and-play event bursts are coalesced into atomic event loop updates.
+  - Auto-dismiss & seamless menu refresh: When audio devices are connected, disconnected, or changed while the tray menu is currently open on screen, the menu automatically dismisses Windows' modal loop, processes device state transitions and logging without stalling, and immediately reopens with fresh, up-to-date endpoints.
+  - Resilient default device handling: Gracefully handles transitions when all endpoints are unplugged or Windows clears a default audio role.
+  - No interaction with the tray icon or application restarts needed to catch device changes.
+
+  Clearer Priority Routing Labels
+  - Renamed the communication priority entries to Follow output device priority and Follow input device priority, making it obvious that communication audio dynamically tracks whichever device the main priority list resolves to.
+
+  Clear & Informative Activity Logs
+  - Audio device event logs now report the exact device name, ID, and transition (e.g. 'Speakers' became disconnected, 'Headphones' became active, Default Output changed to '...').
+  - Menu interactions are clearly logged (e.g. selecting temporary priorities, locking volumes, reordering priorities) making it easy to trace actions in logs.
+  - Priority switches now display human-readable device names alongside technical device GUIDs.
+  - Cleaned up confusing internal warnings on disconnected devices, replacing them with clear contextual explanations.
+  - Added full RUST_LOG environment variable support to customize logging verbosity on demand.
+
+  Pull requests
+  - feat: improve audio device id migration reliability by @felipecrs in #183
+  - feat: auto-dismiss and refresh tray menu on audio device changes by @felipecrs in #185
+ReleaseNotesUrl: https://github.com/felipecrs/volume-locker/releases/tag/v0.10.0
+ManifestType: defaultLocale
+ManifestVersion: '1.28.0'

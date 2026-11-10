@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: SERGEYDJUM.dwmEOTFrs
+PackageVersion: 0.19.0
+PackageLocale: en-US
+Publisher: SERGEYDJUM
+PublisherUrl: https://github.com/SERGEYDJUM
+PublisherSupportUrl: https://github.com/SERGEYDJUM/dwm_eotf_rs/issues
+Author: Sergey Dzhumageldiev
+PackageName: dwm_eotf_rs
+PackageUrl: https://github.com/SERGEYDJUM/dwm_eotf_rs
+License: MIT
+LicenseUrl: https://github.com/SERGEYDJUM/dwm_eotf_rs/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Sergey Dzhumageldiev
+CopyrightUrl: https://github.com/SERGEYDJUM/dwm_eotf_rs/blob/master/LICENSE
+ShortDescription: Utility that fixes Windows sRGB to scRGB "gamma" by patching DWM shaders
+Description: |-
+  An alternative implementation of the same idea that is behind dwm_eotf.
+
+  It has additional features, such as system tray controls, autostart and shader dumping. This version
+  is also more reliable, as it does not require multiple tries for it to work (as far as I can tell).
+
+  dwm_eotf_rs works by reading memory of the loaded dwmcore.dll module, patching shaders that are
+  responsible for incorrect SDR to HDR conversions there and writing it back.
+ReleaseNotes: |-
+  ## What's Changed
+  • fix：startup task used a path that didn't work for some users
+  • fix：in Tray Mode: dwm_eotf_rs caused colors to look wrong **when HDR is disabled**
+  • fix：`-n/--nits` possibly used disabled/currently SDR/wide gamut/unconnected displays for brightness calculation instead of just HDR ones
+  • ci：use GitHub Actions to build the executable from now on
+  • feat：logs are better now
+  • refactor：reworked entire tray mode logic to be more maintainable
+
+  **Full Changelog**：https://github.com/SERGEYDJUM/dwm_eotf_rs/compare/v0.17.0...v0.19.0
+
+  ## Update Instructions - IMPORTANT!
+
+  Since the task path changed, you **MUST** delete existing tasks!!! Manually, or with a command:
+  ```
+  .\dwm_eotf_rs.exe unschedule --all
+  ```
+
+  ## Notes
+  • With this release, dwm_eotf_rs will maintain proper colors when you disable HDR globally. The app cannot and will likely never handle correctly cases when some of your active monitors are SDR and some are HDR.
+  • You can confirm that the binary was really built with a GitHub runner by comparing hash with the one in the workflow run.
+  • If you haven't read ReadMe after v0.17.0 came out, I insist you do so now.
+  • Log verbosity is controlled by the `RUST_LOG` env variable. Use the `$env:RUST_LOG = "debug"` PowerShell command when reporting issues.
+
+  ### Old Notes
+  • This app requires admin rights for process memory manipulation, utilizes PowerShell for startup registration and reads/writes to registry.
+ReleaseNotesUrl: https://github.com/SERGEYDJUM/dwm_eotf_rs/releases/tag/v0.19.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
