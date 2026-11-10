@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: Fomovet.clipkeep
-PackageVersion: 0.2.2
+PackageVersion: 0.2.4
 PackageLocale: zh-CN
 Publisher: clipkeep
 PublisherUrl: https://github.com/Fomovet
@@ -24,16 +24,16 @@ Tags:
 - 剪贴板管理
 - 局域网传输
 ReleaseNotes: |-
-  clipkeep v0.2.2
-  本版本让固定窗口后可以连续粘贴多条，HEX 色值会显示颜色预览，并修复了导入大备份占用内存过多、快速连续复制时可能漏记等问题。
-  新增
-  - 固定窗口后连续粘贴：点亮右上角的图钉后，粘贴或复制条目不再隐藏窗口，可以用鼠标依次点击多条连续粘贴。窗口固定期间点了别的窗口，下一次粘贴会进入你最后点击的那个窗口。粘贴过的条目保持原位，不会跳到列表顶部 (#5)
-  - HEX 色值预览：整条内容恰好是一个 #RGB、#RGBA、#RRGGBB 或 #RRGGBBAA 色值时，列表中显示颜色方块；带透明度的颜色以棋盘格背景显示。粘贴出来的仍是原文 (#4，感谢 @Chitose11)
+  clipkeep v0.2.4
+  本版本修复资源管理器重命名文件时无法粘贴的问题，并改进固定窗口连续粘贴时的输入位置跟踪。感谢 @Chitose11 提供 #7 的修复。
   修复
-  - 复制大尺寸截图后马上复制其他内容，后一次复制可能没有被记录
-  - 导入较大的备份时一次性读入整个文件并解码全部图片，内存占用过高
-  - 导入失败时，已写入的图片文件要到下次启动才会被清理
-  - 导出备份和损坏数据库备份的文件名使用了 UTC 时间，与本地时间相差 8 小时
-ReleaseNotesUrl: https://github.com/Fomovet/clipkeep/releases/tag/v0.2.2
+  - 重命名文件时粘贴：在资源管理器文件夹中重命名文件时，呼出面板不再抢走输入焦点，避免文件名编辑框提前关闭；点击历史记录即可粘贴到文件名编辑框 (#6、#7)。
+  - 固定窗口连续粘贴：在同一窗口内切换输入框后，后续粘贴会跟随新选择的输入位置，避免恢复到上一个输入框。
+  - 重复操作与过期任务：连续点击或重复按粘贴快捷键时，避免同时执行多次粘贴；取消大图片操作后重新呼出面板，旧操作不会继续接管新一轮粘贴。
+  改进
+  - 粘贴前检查原窗口和输入控件是否仍有效，等待修饰键释放并确认焦点；无法安全恢复时停止自动粘贴并提示手动粘贴。
+  - 通过 Esc、关闭按钮或呼出快捷键收起面板时，尝试返回原输入位置；点击其他软件导致自动隐藏时保留用户新选择的窗口。
+  - 粘贴或焦点恢复失败时显示错误；面板已经隐藏的错误会在下次打开时提示。
+ReleaseNotesUrl: https://github.com/Fomovet/clipkeep/releases/tag/v0.2.4
 ManifestType: defaultLocale
 ManifestVersion: 1.28.0
