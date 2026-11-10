@@ -17,6 +17,14 @@ Installers:
 - Architecture: x64
   InstallerUrl: https://github.com/wzy-777/Mivara/releases/download/v0.12.0/Mivara-Setup-0.12.0.exe
   InstallerSha256: 04D43012FEAA77BFE880C23EDA41BC3BF27B60C961BF83E7D8784FCF90CF23FC
+  # Unattended installs must not run the VDD task: devcon install triggers the
+  # Windows Security "Would you like to install this device software?" dialog
+  # (publisher SignPath Foundation), which blocks until the validator times out.
+  # /MERGETASKS keeps the other default tasks and only deselects installvdd.
+  # The driver can still be installed later with vdd\install_vdd.ps1.
+  InstallerSwitches:
+    Silent: '/SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /MERGETASKS="!installvdd"'
+    SilentWithProgress: '/SP- /SILENT /SUPPRESSMSGBOXES /NORESTART /MERGETASKS="!installvdd"'
   AppsAndFeaturesEntries:
   - DisplayName: Mivara version 0.12.0
     Publisher: Mivara
