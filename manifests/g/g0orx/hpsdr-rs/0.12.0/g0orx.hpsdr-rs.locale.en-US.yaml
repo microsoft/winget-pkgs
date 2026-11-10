@@ -1,0 +1,77 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: g0orx.hpsdr-rs
+PackageVersion: 0.12.0
+PackageLocale: en-US
+Publisher: John Melton
+PublisherUrl: https://github.com/g0orx
+PublisherSupportUrl: https://github.com/g0orx/hpsdr-rs/issues
+Author: John Melton
+PackageName: hpsdr-rs
+PackageUrl: https://github.com/g0orx/hpsdr-rs
+License: GPL-2.0-or-later
+LicenseUrl: https://github.com/g0orx/hpsdr-rs/blob/HEAD/LICENSE
+ShortDescription: Desktop client for openHPSDR Protocol 1/2 SDR radios.
+Description: |-
+  A Rust/egui desktop client for openHPSDR Protocol 1 and Protocol 2 radios (Metis/Ozy-style and Hermes/Orion-style boards), using WDSP for DSP.
+
+  - Protocol 1 (Metis/Ozy) and Protocol 2 (Hermes/Orion) support, with standard openHPSDR UDP discovery
+  - Multiple simultaneous receivers, each with its own VFO, mode, filter width, and band memory
+  - Spectrum/waterfall display with adjustable dB range, palette, and Click-to-Tune (CTUN)
+  - SSB/CW/AM/FM/digital modes, per-mode/per-band filter width and mode memory
+  - Noise blanker (NB/NB2), noise reduction (NR/NR2/NNR), and SNB, independently switchable
+  - AGC with selectable Off/Long/Slow/Medium/Fast modes
+  - TX: mic audio through WDSP's TXA chain, ALC, TX power/SWR meter with per-band PA calibration, and a Tune button
+  - PureSignal (PA linearization/predistortion), on both Protocol 1 and Protocol 2
+  - rigctl (Hamlib-compatible), TCI (WebSocket), and CAT (Kenwood TS-2000 emulation) control servers
+  - Dual VFO (VFO A/B) with Split -- transmit on VFO B while receiving on VFO A
+  - Selectable RX output / TX input audio devices, independent of the OS default
+  - Per-radio settings persistence, keyed by the radio's MAC address
+  - FPGA firmware upload and static IP configuration
+Tags:
+- amateur-radio
+- dsp
+- ham-radio
+- openhpsdr
+- sdr
+ReleaseNotes: |-
+  Changes since v0.10.0 (0.11.0 was not released on its own; its changes are included here).
+  New
+  - Remote operation from a web browser -- a phone, a tablet (iPhone and iPad included) or another computer, with nothing to install. Start Settings → Network → Web client, then open the address it shows:
+    - The radio's spectrum and waterfall, its own band buttons, the VFO, mode, filter, AGC and noise controls, the S-meter and receive audio. Tune by tapping or sliding on the spectrum, waterfall or frequency, or with - / + and a step. On a phone, a compact layout keeps the controls behind section buttons.
+    - Transmit: MOX from the browser's microphone, with mic gain and level, the TX power setting, and power and SWR while transmitting. The radio only transmits where its own MOX would, and unkeys by itself if the connection drops or the audio stops for a second.
+    - CW:
+      - Send text as CW: type it and press Send, or press one of your saved messages from Settings → CW. Stop stops at once, and Speed is the radio's own CW speed. The radio keys itself and sends with its own timing, so network delays don't affect it.
+      - Key live with an on-screen straight key or iambic A / B paddles (squeeze with two fingers on a phone), with a sidetone in the client. The radio sends your keying a short Delay later, with its timing kept exact however unevenly the network delivers it, and unkeys after the CW Break-in delay. If the connection drops, the key is released and the radio unkeyed.
+      - Plug in a real key or paddle, through anything that looks like a USB keyboard -- e.g. a small microcontroller on a phone's USB port. Its keys are chosen in Settings → CW (Remote Paddle Keys) and shown on the pads.
+    - About 150 kbit/s, compressed (plus about 70 kbit/s while transmitting), rather than the several Mbit/s of standard TCI audio and IQ.
+    - HTTPS (needed for the microphone) with a certificate hpsdr-rs makes for itself -- the browser warns about it once -- and an optional password. Allow transmit can be turned off to let remote users listen and tune only.
+    - A Web badge next to rigctl/TCI/CAT shows when a remote client is connected, and an optional connection log (web_log.txt) records who connected and how it went. The web port can be changed, so two copies of hpsdr-rs can each run their own; if it's already in use, the error says so and suggests the next one.
+    - The same client also builds as a small native program, hpsdr-remote (from source for now: cargo run -p hpsdr-remote --release). It talks TCI plus a few hpsdr-rs extensions, described in docs/remote-protocol.md.
+    - Keep it on your own network, or set a password before making the web port reachable from outside; a VPN is safer still. See the manual's Web client section.
+  - TCI server, closer to Thetis's:
+    - Changes reach clients at once -- MOX, Tune, frequency, mode, filter, RIT/XIT, split, AGC, volume, squelch, noise controls, TX and Tune power -- instead of once a second.
+    - Controls clients can set: tune, drive, tune_drive, split_enable, rx_filter_band (the TX filter follows), volume / rx_volume, agc_mode, agc_gain, sql_enable, sql_level.
+    - Sensors: rx_sensors_enable / tx_sensors_enable -- S-meter, mic level, power and SWR at the client's interval.
+    - A second receiver, as Thetis's RX2: TCI receiver 1 is your first extra receiver, with its own frequency, mode, DSP settings, audio, IQ and S-meter. A client can open and close it with rx_enable:1.
+    - Split: tx_frequency / tx_frequency_ex report where you transmit (VFO A, or VFO B with Split/Duplex, plus XIT).
+    - CW is reported as CWL / CWU, as Thetis does.
+    - Audio block size follows the client's audio_stream_samples (e.g. 20 ms blocks).
+  - The frequency keypad now opens inside the main window, so it can't get lost behind it or an extra receiver's window. Extra receivers have it too: right-click VFO-A / VFO-B.
+  - MIDI: a MOX binding says in the log what it did, or why it was refused (#15).
+  Fixes
+  - With CTUN on, a band change from a network client (TCI, rigctl, CAT) moved the frequency for a moment and then snapped back; it now retunes the radio, as the band buttons do.
+  - A network client (web client, TCI, rigctl, CAT) asking for a frequency outside every transverter's range and the radio's own no longer sends the radio to a nonsense frequency (4294.888 MHz on QO-100); it stays on the active transverter, clamped to its range, or the request is ignored.
+  - Protocol 1 discovery: a Hermes-Lite 2 identifying itself as a Hermes is now treated as a Hermes-Lite 2 (#7).
+  - Extra receiver windows can no longer be shrunk to just their title bar (minimum 700x320).
+  Downloads
+  - Linux AppImage (x86_64 / aarch64): hpsdr-rs-0.12.0-x86_64.AppImage, hpsdr-rs-0.12.0-aarch64.AppImage. Run chmod +x on the file, then run it. USB radios still need the udev rules installed by hand; a copy is inside the AppImage under usr/share/doc/hpsdr-rs.
+  - Debian/Ubuntu (amd64): hpsdr-rs_0.12.0-1_amd64.deb. Install with sudo apt install ./hpsdr-rs_0.12.0-1_amd64.deb.
+  - Debian/Ubuntu/Raspberry Pi OS (arm64): hpsdr-rs_0.12.0-1_arm64.deb. Install with sudo apt install ./hpsdr-rs_0.12.0-1_arm64.deb.
+  - Fedora/openSUSE RPM (x86_64 / aarch64): hpsdr-rs-0.12.0-1.x86_64.rpm, hpsdr-rs-0.12.0-1.aarch64.rpm. Install with sudo dnf install ./hpsdr-rs-0.12.0-1.x86_64.rpm, or on openSUSE sudo zypper install --allow-unsigned-rpm ./hpsdr-rs-0.12.0-1.x86_64.rpm.
+  - macOS (Apple Silicon): hpsdr-rs-0.12.0-macos-arm64.tar.gz. It is built in CI, unsigned and not notarized, so Gatekeeper warns on first launch. Right-click the hpsdr-rs binary and choose Open, or run xattr -d com.apple.quarantine hpsdr-rs first.
+  - Windows (x86_64): hpsdr-rs-0.12.0-x86_64.msi
+ReleaseNotesUrl: https://github.com/g0orx/hpsdr-rs/releases/tag/v0.12.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
