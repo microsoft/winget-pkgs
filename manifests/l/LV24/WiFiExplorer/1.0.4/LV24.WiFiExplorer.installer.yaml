@@ -1,36 +1,30 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.28.0.schema.json
 #
-# Installer manifest. The asset is produced by
-# `.github/workflows/release-desktop.yml` (Windows job) and renamed to a stable,
-# URL-safe name:
-#   LV24-WiFi-Explorer-1.0.4-win-x64.exe
+# Installer manifest. The release ships two Windows variants:
+#   - LV24-WiFi-Explorer-1.0.4-win-x64.exe (NSIS, for direct download/Scoop)
+#   - LV24-WiFi-Explorer-1.0.4-win-x64.zip (unpacked app, for winget)
 #
-# electron-builder's NSIS installer is a Nullsoft installer, so `nullsoft` lets
-# winget pass `/S` itself. The switches are spelled out anyway to keep the
-# behaviour obvious and reviewable.
+# winget uses the ZIP with `NestedInstallerType: portable`: it extracts the
+# archive with the system tar and creates a portable shim instead of launching
+# the unsigned NSIS installer through ShellExecute. The NSIS installer is
+# blocked by 08. Installation Validation on the validation VM.
 PackageIdentifier: LV24.WiFiExplorer
 PackageVersion: 1.0.4
 Platform:
   - Windows.Desktop
 # Electron 33 supports Windows 10 1809 (build 17763) and later.
 MinimumOSVersion: 10.0.17763.0
-InstallerType: nullsoft
-# nsis.perMachine: false in electron-builder.yml installs into
-# %LOCALAPPDATA%\Programs, so the package is per-user and needs no elevation.
-Scope: user
-InstallModes:
-  - silent
-  - silentWithProgress
-InstallerSwitches:
-  # /currentuser keeps the NSIS assisted installer in per-user mode even in a
-  # silent, non-interactive session (the validation VM runs as a standard user).
-  Silent: /S /currentuser
-  SilentWithProgress: /S /currentuser
+InstallerType: zip
+NestedInstallerType: portable
+NestedInstallerFiles:
+  - RelativeFilePath: LV24 WiFi Explorer.exe
+    PortableCommandAlias: lv24-wifi-explorer
+# Portable packages install per user under %LOCALAPPDATA%\Microsoft\WinGet.
 UpgradeBehavior: install
 ReleaseDate: 2026-11-10
 Installers:
   - Architecture: x64
-    InstallerUrl: https://github.com/LevapVeeskela/lv24-Wifi-Explorer/releases/download/v1.0.4/LV24-WiFi-Explorer-1.0.4-win-x64.exe
-    InstallerSha256: 8465bfc14dfa878878c01a49e92f11b0af06381fffdf4243efa5934feb70ba35
+    InstallerUrl: https://github.com/LevapVeeskela/lv24-Wifi-Explorer/releases/download/v1.0.4/LV24-WiFi-Explorer-1.0.4-win-x64.zip
+    InstallerSha256: 55497720a421cf0dcd45309b42ba4e34c47863f532fa8440b719e7597b315e3a
 ManifestType: installer
 ManifestVersion: 1.28.0
