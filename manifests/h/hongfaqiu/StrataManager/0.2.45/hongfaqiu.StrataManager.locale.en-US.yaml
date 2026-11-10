@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: hongfaqiu.StrataManager
-PackageVersion: 0.2.44
+PackageVersion: 0.2.45
 PackageLocale: en-US
 Publisher: strata
 PublisherUrl: https://github.com/hongfaqiu
@@ -20,7 +20,9 @@ Tags:
 - large-language-model
 - llm
 - local-llm
-ReleaseNotes: '- Upstream 0.2.13 adaptations (W4A / W8A / W1B): the --spec hint now states that DFlash2 defaults to 6 on most GPUs and to 8 on Strix Halo and RTX PRO (Blackwell) with 48 GB or more VRAM, and that the engine may clamp the window; on pure-Intel hosts with GPU type Automatic, setup passes --backend sycl and maps upstream "no NVIDIA GPU found" to a bilingual tip (Intel can still be chosen by hand); run configs that name a future component:strata-q4-* shape engine get a friendly explanation pointing at the upstream Strata app or official terminal tools, without resolving, installing, or claiming support or that upstream has shipped it.'
-ReleaseNotesUrl: https://github.com/hongfaqiu/strata-manager/releases/tag/v0.2.44
+ReleaseNotes: |-
+  - Read every gzip member when extracting official tar.gz packages: an upstream feed may emit concatenated multi-member gzip when packing with multiple threads (not the default yet). GzDecoder only read the first member, so later files failed to extract. Extraction now uses MultiGzDecoder; single-member packages behave as before.
+  - Do not offer image input when the engine package has no strata-vision: official 0.1.59 SYCL packages (upstream #5716) ship without a picture reader. Setup, model preparation, and image settings no longer default-enable or allow turning on image input, and a short note explains that only text is supported. Such packages are still accepted; packages that include a vision binary are unchanged.
+ReleaseNotesUrl: https://github.com/hongfaqiu/strata-manager/releases/tag/v0.2.45
 ManifestType: defaultLocale
 ManifestVersion: 1.28.0
