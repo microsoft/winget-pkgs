@@ -1,0 +1,60 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: wm94i.WorkReview
+PackageVersion: 1.1.3
+PackageLocale: zh-CN
+Publisher: workreview
+PublisherUrl: https://github.com/wm94i
+PublisherSupportUrl: https://github.com/wm94i/Work-Review/issues
+PackageName: Work Review
+PackageUrl: https://github.com/wm94i/Work-Review
+License: 免费软件
+Copyright: © 2026 WorkReview
+ShortDescription: 帮你自动记录一天中使用了哪些应用、浏览了哪些网页、在每个应用上花了多少时间
+Description: |-
+  Work Review 会在后台持续记录你当天使用过的应用、访问过的网站、关键窗口和屏幕内容，再把这些离散片段整理成一条可回看、可追问、可复盘的工作轨迹。
+  - 不需要手动打卡，也不用事后回忆今天干了什么
+  - 概览、时间线、日报、工作助手共用同一份底层记录
+  - 既能看统计，也能直接追到具体页面、窗口标题和上下文截图
+  - 支持简体中文 / English / 繁體中文三种界面语言，日报会按当前语言分别生成与切换
+  - 支持轻量模式、按小时活跃度视图、日报 Markdown 导出和多屏截图策略切换
+  - 现在还提供 桌面化身 Beta，用更轻量的桌宠状态反馈陪你工作
+  全部数据本地存储，不上传任何服务器。AI 功能可选，关掉也完全可用。
+Tags:
+- 时间
+- 计时器
+- 跟踪器
+ReleaseNotes: |-
+  English → | 繁體中文 →
+
+  正式发布，汇总 1.1.3 候选版本的修复；业务代码与 rc.3 保持一致，仅同步正式版本号与发布说明。现有 rc.3 发行版和标签保留。升级前请备份数据，尤其是在迁移目录或启用历史清理前。
+  修复
+  - 隐私过滤一致性：localhost API/MCP 实时上下文遵守应用忽略、脱敏及域名排除规则，普通窗口标题也过滤敏感文本；隐私关键词自动保存时不再丢失未完成的配置改动。
+  - 域名排除规则：解析实际 URL 主机，覆盖非默认端口、子域、大小写与末尾点；采集与查询使用相同匹配语义，避免被排除的网站继续记录。
+  - 停止生成与响应超时：取消日报时同步终止后台分析并复位桌宠；助手收束阶段响应停止，响应体、重试与流式回退共用绝对截止时间。
+  - 助手切页与历史保存：后台回答完成后保存最新终态消息，避免空白或部分历史；切回页面后仍可停止在途请求。
+  - 助手问题路由：时间分布等数据问题正确进入工作复盘；“如何写日报”等概念和写作问题保持普通聊天，减少错误的权限拒绝与数据引导。
+  - Windows OCR（#175）：隐藏 PowerShell 窗口，每周期只执行一次整图识别；新建与合并活动统一按 screenshot_interval 限频，快速切换应用、标题或 URL 不再绕过冷却。切换截图仍保留，冷却期内不额外 OCR 或排队补识别；超长输入按原生引擎上限截断并映射回原图。
+  - macOS 前台窗口与浮窗（#181）：用进程内 NSWorkspace/AXUIElement 读取替代轮询启动 osascript，限制单次 AX 消息等待；浮窗按连续观察的实际间隔计时，保留不足一秒余量，避免暂停、锁屏及同应用多浮窗重复累计。
+  - macOS 打包与 SDK：AX 常量采用现代 SDK 兼容构造，移除固定 CommandLineTools SDKROOT，让 SDK 跟随所选 Xcode/xcrun，修复 Apple Silicon/Intel 打包链接错误；证书辅助脚本兼容 OpenSSL 3。
+  - 分类编辑（#178）：网站分类修改即时反映到概览及历史，回补从标题/OCR 识别的域名；无匹配记录时如实提示，自定义分类无需先应用即可重命名或删除。
+  - 目录迁移与语义索引：迁移前校验规范化路径，拒绝别名或符号链接指向的危险目标；语义索引前保存 AI 设置，改善嵌入配置错误提示。
+  - 界面与桌宠边界：恢复玻璃风格下的时间线、分类及日报浮层定位，修正紧凑 KPI 字号（#172）；桌宠定位使用目标屏幕物理像素和展开状态，小尺寸气泡受可用宽度约束。
+  - Claude Sonnet 5.5：支持自适应思考，保留签名内容块及工具往返顺序，分开累积流式思考和正文并处理空正文。
+  - 依赖安全更新：rustls 0.23 系列升级至 0.23.46，DOMPurify 升级至 3.4.17，纳入上游安全修复，保留现有 HTML 净化流程；Windows 更新使用签名的 NSIS 安装包并关闭未使用的 ZIP 解压功能，避免引入已公告的 ZIP 解压漏洞。
+  变更与安全默认
+  - 活动元数据保留策略：仅在本机明确确认启用后，于启动及每 6 小时清理到期元数据并失效关联摘要与语义索引；没有过期记录时不清空既有语义索引。
+  - 自动清理默认关闭：在“设置 → 存储”确认启用，0 天表示永久保留；截图和元数据期限独立，升级不会按旧默认值删除历史，WebDAV 同步不覆盖本机清理授权和期限。
+  - 默认 AI 模型更新：刷新各供应商默认模型，端点和默认模型统一由 AiProvider 提供。
+  - 发布门禁：版本与当前 origin/main 一致，重新构建 Windows、macOS 双架构、Linux 双架构；检查签名、更新元数据、必需附件及 Linux GLIBC 兼容性。
+  已知限制与验证边界
+  - macOS 仍使用临时签名，更新后可能需要重新授予屏幕录制、辅助功能等权限（#143）；本次没有引入 Developer ID 签名或苹果公证。
+  - #177 的卡死恢复后桌宠渲染异常缺少复现信息，本版边界修复不代表该问题已确认解决。
+  - 自动测试与构建不等同于实机验收；Windows OCR 长时间运行、安装升级、真实桌面隐私与清理边界，以及 macOS/Linux 真机交互仍缺少完整验证记录。
+  macOS 安装说明
+  首次打开可能提示「已损坏，无法打开」，请执行：
+  sudo xattr -rd com.apple.quarantine '/Applications/Work Review.app'
+ReleaseNotesUrl: https://github.com/wm94i/Work-Review/releases/tag/v1.1.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

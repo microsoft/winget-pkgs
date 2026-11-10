@@ -1,0 +1,48 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: co2lab.Anchors
+PackageVersion: 0.1.358
+PackageLocale: en-US
+Publisher: co2lab
+PublisherUrl: https://github.com/co2-lab
+PublisherSupportUrl: https://github.com/co2-lab/anchors/issues
+PackageName: Anchors
+PackageUrl: https://github.com/co2-lab/anchors
+License: Elastic License 2.0
+LicenseUrl: https://github.com/co2-lab/anchors/blob/HEAD/LICENSE
+ShortDescription: Spec-first continuity framework for AI-assisted development
+Description: Anchors ties spec, feature and test together through a shared identity code, then confronts each artifact against the rules declared in anchors.yaml. It maps the project as a graph, propagates change from the anchor outward, and gates every step — so work guided by AI stays anchored to what was decided.
+Moniker: anchors
+Tags:
+- ai
+- ai-agents
+- cli
+- developer-tools
+- golang
+- spec-first
+ReleaseNotes: |-
+  Handles built on the caller's head: measured, or pending — never green
+  A component often builds its testID from the id its caller passes in, for example
+  `${testID}-option-${opt.value}`. The exposed patterns only read a template that
+  starts with a literal, so such a unit looked like it exposed nothing. testid-consistent
+  and section-required then passed without measuring anything.
+  - The suffix group. dialect.test_handles.exposed now accepts a suffix group: the
+    segment the unit adds to its caller's head. The ts example reads it, so copy this pattern
+    into your own:
+    - 'testID[a-z]*\s*[=:]\s*\{?`\$\{[^}]*\}(?P<suffix>[^`$]*)'
+  - How a derived handle is checked. The handle becomes *-option-*:
+    - the component's spec declares it as written, in Test IDs;
+    - a test or flow queries it by naming the segment after a head, such as :pay-option-a;
+    - the caller's own handle (:pay) counts as queried through a segment that some unit of
+      the project derives. A segment that no unit derives counts for nothing, so
+      :pay-other does not query :pay.
+  - Handles built from values alone. ${prefix}${key} and ${prefix}-${i} leave the
+    segment naming nothing. The gates report them as pending, with the file and line, and
+    never pass them. Give the handle a literal segment.
+  Everything in the v0.1.351 notes still applies: run anchors migrate once, crossing format 8.
+  Changelog
+  - ac47f57 feat(gate): a handle built on the caller's head is derived; one of values alone is pending
+ReleaseNotesUrl: https://github.com/co2-lab/anchors/releases/tag/v0.1.358
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

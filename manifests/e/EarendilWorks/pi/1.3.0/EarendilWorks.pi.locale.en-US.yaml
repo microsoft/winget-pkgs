@@ -1,0 +1,71 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: EarendilWorks.pi
+PackageVersion: 1.3.0
+PackageLocale: en-US
+Publisher: EARENDIL INC.
+PublisherUrl: https://github.com/earendil-works
+PublisherSupportUrl: https://github.com/earendil-works/pi/issues
+Author: Mario Zechner
+PackageName: pi
+PackageUrl: https://github.com/earendil-works/pi
+License: MIT
+LicenseUrl: https://github.com/earendil-works/pi/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Mario Zechner
+ShortDescription: AI coding assistant with read, bash, edit, write tools
+Description: |-
+  Pi is a minimal terminal coding harness. Adapt pi to your workflows, not the other way around, without having to fork and modify pi internals. Extend it with TypeScript Extensions, Skills, Prompt Templates, and Themes. Put your extensions, skills, prompt templates, and themes in Pi Packages and share them with others via npm or git.
+  Pi ships with powerful defaults but skips features like sub agents and plan mode. Instead, you can ask pi to build what you want or install a third party pi package that matches your workflow.
+  Pi runs in four modes: interactive, print or JSON, RPC for process integration, and an SDK for embedding in your own apps. See openclaw/openclaw for a real-world SDK integration.
+Moniker: pi
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  New Features
+  - Choose where /share uploads: sessionShareDestination selects auto, gist, or radius. See Sessions and context and Export or share a session.
+  - Cache-preserving thinking level changes on OpenAI GPT-6: changing the thinking level mid-session with an API key keeps the prompt cache.
+  - Kimi Code over Chat Completions: tools added mid-conversation no longer invalidate the prompt cache. models.json base URL overrides must now include /v1. See Providers.
+  - Clean model switching: thinking from a previous model is dropped instead of being shown to the new model as text.
+  - Resumed sessions keep their active tools: --tools +name/-name applies on top of them. See Tools.
+  Added
+  - Changing the thinking level mid-session on OpenAI GPT-6 models (API key) now keeps the prompt cache (#10853)
+  - Added the sessionShareDestination setting to choose automatic, GitHub gist, or Radius uploads for /share (#10870 by @vegarsti)
+  Changed
+  - Changed the kimi-coding provider to use OpenAI Chat Completions at https://api.kimi.com/coding/v1, the protocol used by the official Kimi Code client. K3, K3-256K, and Kimi For Coding now accept tools added mid-conversation without invalidating the prompt cache. models.json overrides of the kimi-coding base URL must now include /v1 (#10720)
+  - Changed model switching to drop thinking blocks from earlier assistant messages produced by a different model, instead of sending them as plain text. The new model previously saw the old model's reasoning as part of its replies and could start writing its own reasoning into the visible answer (#10995)
+  Fixed
+  - Pinned internal Pi dependencies to exact release versions to prevent fresh installs from mixing incompatible packages (#10865)
+  - Fixed resumed sessions dropping tools activated during the session. Resume now restores the session's active tools, with --tools +name/-name entries applied to them, unless --tools with tool names, --no-tools, or --no-builtin-tools selects tools explicitly (#10785)
+  - Fixed stopping a codemode script or reaching its deadline waiting for a non-interruptible built-in to return on Bun (#10748)
+  - Fixed repeated codemode timeouts or aborts accumulating surviving workers; admission now limits live workers to two across sessions, counting cancelled workers until actual exit (#10748)
+  - Fixed --model choosing a provider by catalog order when several providers offer the match; Pi now prefers the provider with credentials and otherwise reports the ambiguity. --models and enabledModels add a model for each provider that offers it and warn about the ambiguity (#10160)
+  - Fixed read line-range labels for numeric-string or null arguments in the TUI, session tree, HTML exports, and examples (#9887)
+  - Fixed the Nix flake build failing when a provider switched APIs: the model catalog pin is now refreshed from the newest published catalog when its model API groups differ, and releases pin the newest catalog and build with it before tagging (#10985)
+  - Fixed the Nix package putting its Node.js first on PATH, which made bash tool shells use Pi's Node instead of the user's node/npm. Pi's Node is now only a fallback (#10519)
+  - Fixed prompt templates dropping empty quoted arguments ("" or ''), which shifted later positional arguments and prevented positional defaults from applying (#10867)
+  - Fixed the Nix package build failing in its install check because it still expected chord and esbuild, which Pi no longer depends on
+  - Fixed tool-call argument parsing dropping fields when a string contains an invalid \u escape such as \usepackage (#10868)
+  - Fixed Anthropic and Bedrock Claude requests failing with a 400 when an error tool result contains images; the images are now sent after the tool results of the turn, so the model still sees them (#10794)
+  - Fixed OpenCode Go Gemini models failing with a 404 by moving OpenCode Zen and OpenCode Go to the opencode.ai/inference endpoints, and added Google Generative AI support to the OpenCode Go provider
+  - Fixed OpenCode Go MiniMax M2.7 failing with "Model does not support this protocol" by using the Anthropic Messages API
+  - Fixed automatic retry not triggering for gateway Unable to forward upstream stream errors (#10920)
+  - Fixed automatic retry not triggering for The service is temporarily unavailable errors, which also made compaction fail on the first attempt (#10965)
+  - Fixed OpenAI-compatible responses showing thinking after the answer when a proxy such as LiteLLM sends reasoning and content in the same stream chunk (#10926)
+  - Fixed Gemini 4 Argon requests on Google Vertex failing with "Thinking budget is not supported", and its thinking level being ignored on the Gemini API (#10890)
+  - Fixed Xiaomi MiMo models failing with a 400 at the minimal thinking level; they now expose only the off and high levels (#10818)
+  - Fixed openai-codex/gpt-6.1-sol using a 272K context window instead of the 500K window Codex now provides (#10840)
+  - Fixed tool calls whose final arguments are malformed JSON silently running with only the fields parsed before the error; they now fail validation and show the model the raw arguments it sent (#10897)
+  - Fixed Claude Haiku 5.5 and Claude Opus 5 not supporting the off thinking level (#10753)
+  - Fixed done() of an extension's ctx.ui.custom({ overlay: true }) closing the topmost overlay instead of its own, which left the finished overlay on screen and another extension's dialog unresolved (#10648, #10999 by @masonc15)
+ReleaseNotesUrl: https://github.com/earendil-works/pi/releases/tag/v1.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

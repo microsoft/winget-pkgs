@@ -1,0 +1,50 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Stack-Cairn.K-brain
+PackageVersion: 0.107.24
+PackageLocale: zh-CN
+Publisher: Stack-Cairn
+PublisherUrl: https://github.com/Stack-Cairn
+PublisherSupportUrl: https://github.com/Stack-Cairn/K-brain/issues
+PackageName: K-brain
+PackageUrl: https://github.com/Stack-Cairn/K-brain
+License: Apache-2.0
+LicenseUrl: https://github.com/Stack-Cairn/K-brain/blob/HEAD/LICENSE
+ShortDescription: 基于 Go 构建、运行在终端里的编程 Agent。
+Description: 氪脑（K-brain）是运行在终端里的编程 Agent，用 Go 构建，也可作为其他前端的后端底座。读代码、改文件、执行命令、验证结果，在同一会话中完成任务。运行 kn 开始使用，取自“氪脑”拼音 Ke Nao。
+Tags:
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  K-brain v0.107.24
+  本版从 main 的 66408b3 构建，在 v0.107.23 的基础上让 Linux 的 Landlock 沙箱也能保护工作区里的受保护路径。
+  沙箱
+  - Landlock 模式下受保护路径不能再被改写（#170，关闭 #166）：Linux 上没有可用的 bubblewrap 时（没安装，或 Ubuntu 24.04 默认限制了非特权用户命名空间），K-brain 会改用 Landlock + seccomp。以前这种方式不能让工作区里的 .git/hooks、.git/config、core.hooksPath 指向的目录、.k-brain/、.liveagent/ 保持只读，run_sandbox.path_protection 报告为 false。现在：
+    - 通往受保护路径的目录（工作区根目录、.git）里的文件操作由一个监督进程代为执行，指向受保护路径的写入、删除、改名、硬链接、截断、chmod/chown、符号链接替换等都会被拒绝；其他文件仍由 Landlock 直接放行，速度不受影响；
+    - 还不存在的受保护路径（例如 .liveagent/）不能被创建；
+    - 第一次检测时会在临时目录里做一次真实的自检，通过后才报告 path_protection: true；
+    - 需要 Linux 6.2 以上（Landlock ABI 3+），且 Yama ptrace_scope 不高于 1。条件不满足时沿用以前的方式，继续报告 false 并在 reason 里说明原因。
+  - Ubuntu 上给出启用 bubblewrap 的提示（#170）：系统用 AppArmor 限制了非特权用户命名空间时，reason 会说明如何为 bwrap 添加 AppArmor 配置或用 sysctl 放开限制。
+  - 已知限制（仅 Landlock 模式）：
+    - 不能在工作区根目录运行 git init（.git 属于还不存在的受保护路径）；
+    - 不能在工作区根目录、.git 以及本次运行中新建的顶层目录里创建 unix socket；
+    - 文件时间戳不受保护；
+    - 任何位置都不能设置扩展属性；
+    - 用 setsid 脱离、在命令结束后仍在运行的进程，监督进程退出后相关文件操作会失败。
+  下载与校验
+  提供 macOS、Linux、Windows 的 x64/ARM64 CLI 与 computer helper；SHA256SUMS 用于校验下载文件。
+  完整变更
+ReleaseNotesUrl: https://github.com/Stack-Cairn/K-brain/releases/tag/v0.107.24
+InstallationNotes: 在终端中运行 kn。首次使用前，请在 %USERPROFILE%\.k-brain\config.json 中配置模型提供商。
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://github.com/Stack-Cairn/K-brain/blob/main/README.zh-CN.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

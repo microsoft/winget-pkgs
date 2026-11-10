@@ -1,0 +1,84 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: ChengSoon.Belfry
+PackageVersion: 0.26.0
+PackageLocale: zh-CN
+Publisher: appmakes
+PublisherUrl: https://github.com/ChengSoon
+PublisherSupportUrl: https://github.com/ChengSoon/belfry-desktop/issues
+Author: ChengSoon
+PackageName: Belfry
+PackageUrl: https://github.com/ChengSoon/belfry-desktop
+License: LGPL-3.0-only
+LicenseUrl: https://github.com/ChengSoon/belfry-desktop/blob/HEAD/LICENSE
+ShortDescription: 跨平台 AI 编程终端，托管 Codex、Claude Code 等 CLI Agent。
+Description: |-
+  Belfry 是一款支持 macOS 与 Windows 的跨平台终端，用于托管 Codex、Claude Code 等 CLI 编程智能体。它提供项目工作区、Agent 检测与状态跟踪、支持排队的提示词编辑器、服务提供商切换、SSH 会话以及 token 用量统计。没有安装 Agent 时，它依然是一个完整的终端。
+
+  功能
+  项目工作区
+  - 打开本地目录作为项目，记住最近打开过的
+  - 侧栏按项目分组，可折叠，宽度可拖拽（⌘B 整体收起）
+  - 会话自带项目归属，不同会话可以指向不同目录
+  - Quick Open（⌘K）可搜索并切换会话、打开最近项目或执行常用工作区动作
+  - 文件预览窗格可浏览当前项目目录，打开只读代码预览；终端输出中的文件路径可直接跳转，并提示磁盘变更
+  Agent 托管
+  - 自动检测 Codex 与 Claude Code：可执行文件路径、版本号，不可用时给出原因
+  - 会话状态区分进程生命周期（创建中/运行/已退出/出错）与当下行为（闲着/正在输出/等你选）
+  - 标签标题从你的第一句输入里提取，完整原文留在 tooltip
+  - 协作任务按目标 Agent 分别排队；Agent 忙碌或等待确认时暂缓投递，回到空闲后按顺序发送
+  活动通知
+  - 只有两件事值得打断你：Agent 把活干完了，或者它卡在一个非你点头不可的问题上
+  - 完成通知压 1500 ms 再发。activity 是扫屏幕文本猜出来的，正在输出 → 闲着 → 等你选 这条路很常见（spinner 先消失，权限框隔一拍才画出来），抢在中间发一条「已跑完」就是纯误报
+  - 你正盯着那条会话看的时候不弹——他已经看见了
+  - 状态放标题、身份放正文：先判断要不要现在去处理，其次才是哪条会话
+  - 未读数汇总到 Dock / 任务栏角标，回到应用自动清
+  Provider 切换
+  - 在官方端点与第三方中转之间切换 Codex / Claude Code 的路由，改的是 CLI 自己的配置文件，所以在 Belfry 之外直接敲 claude、codex 一样生效
+  - 精准字段改写：只动 ANTHROPIC_BASE_URL 这类路由键和 [model_providers.belfry] 这张表，你的 hooks、MCP 定义、项目信任记录逐字不动
+  - 首次打开时把配置文件里已有的设置收编成一条可切回的条目，不会静默覆盖
+  - 切到三方 provider 前先备份 Codex 的 ChatGPT 登录态，切回官方时原样还原
+  - 检测会盖过配置文件的 ANTHROPIC_* / OPENAI_* 环境变量并给出提示
+  终端
+  - 基于 xterm.js，WebGL renderer——块字符之间没有横缝
+  - macOS 走 Unix PTY，Windows 走 ConPTY；Shell 依次探测 PowerShell、%ComSpec%、cmd.exe
+  - SSH 会话直接拉起系统 OpenSSH 客户端：密码、主机指纹、2FA 都在终端里原生交互， ~/.ssh/config 的别名、密钥和 agent 原样继承
+    - 连接时勾选「记住密码」，密码存进系统钥匙串（macOS Keychain / Windows 凭据管理器）， 之后的连接自动填入；SSH 表单里可随时清除已保存的密码
+  - OSC 10/11 颜色查询在 Rust 侧直接应答。这件事绕不过去：Codex 这类 TUI 只给 100 ms 窗口，走一圈 PTY → IPC → xterm.js → IPC → PTY 经常超时，而 Windows 上超时的后果不是「没颜色」而是「猜错颜色」——Codex 会退回读 ConPTY 的黑色调色板，把输入框画成黑块
+  - 密码提示识别，输入不回显
+  - ⌘F 搜索当前终端内容，支持跨换行匹配；HTTP(S) 地址可点击打开；CJK、组合字符和 emoji 按正确宽度显示
+  用量统计
+  - 直接读本地 Codex / Claude 会话日志聚合，不发任何网络请求
+  - 四类 token 归一口径：input（不含缓存命中）、cachedInput、cacheWrite、output
+  - 按模型、按项目两个维度拆分；时间窗口可选近 7 天 / 近 30 天 / 全部
+  - 配额窗口与套餐类型（目前只有 Codex 的日志带这些字段，Claude 的不带）
+  外观
+  - 亮/暗主题切换，主题色同步喂给终端调色板
+  - 全应用字体与 10–20px 字号同步自定义，支持本机已安装字体
+  - 可导入多个 TTF / OTF / WOFF / WOFF2 字体，分别切换或删除，并可随时切回系统字体
+  - 内置 JetBrains Mono 与 HarmonyOS Sans SC
+  Belfry 快捷键：⌘T 新建 Shell，⌘B 折叠侧栏，⌘K 打开 Quick Open，⌘U 开关用量，⌘⇧H 开关历史， ⌘, 打开设置，⌘1–9 切换会话，⌘/ 打开快捷指令。Windows / Linux 统一使用 Ctrl+Shift 组合，避免占用 Codex 与 Claude 的原生 Ctrl 快捷键。
+Tags:
+- 人工智能
+- 命令行
+- 控制台
+- 终端
+ReleaseNotes: |-
+  新增
+  - 创建房间时选择项目：可通过文件夹选择器指定房间的项目目录，创建前校验目录是否存在及类型；成员终端在所选项目中启动，切换当前工作区不会覆盖正在选择的房间项目。
+  - 房间终端请求面板：在房间顶部查看成员正在等待的题目、命令上下文和选项说明，支持单选、确认、多选及文本输入；多选与文本草稿按房间、成员和请求保留。
+  改进
+  - 终端请求识别覆盖更多 Codex 菜单、权限确认与问题输入，保留换行说明和较长上下文；提交前重新核对目标会话与当前请求，避免重复提交或把旧答案发给新问题。
+  - 小窗口中的请求面板支持展开、内部滚动和键盘操作，保留聊天与发送空间；收起、调整窗口或切换语言后仍保留输入草稿。
+  - 浏览器启动与回归失败时保留更完整的诊断，完善 Windows 换行兼容、检查失败传递及浏览器测试超时报告。
+  修复
+  - 修复房间流程图在成员活动更新时丢失节点尺寸、节点与连线持续不可见的问题，并保留用户缩放位置。
+  - 修复长需求简报溢出房间栏、遮挡任务板的问题。
+  - 修复浏览器通信管道关闭后启动请求未及时失败、诊断信息丢失的问题。
+  使用提示
+  - 无法完整识别的请求、隐藏或过滤的多选项、截断的命令上下文仍需到终端处理；提交结果不确定时可打开终端核对，不会自动重试。
+  - 提供 macOS Apple Silicon / Intel 与 Windows 安装包、自动更新资产及 SHA256SUMS.txt；安装包签名状态与上一版相同。
+ReleaseNotesUrl: https://github.com/ChengSoon/belfry-desktop/blob/HEAD/CHANGELOG.md#0260---2026-11-10
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

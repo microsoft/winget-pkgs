@@ -1,0 +1,39 @@
+# Created with ractive/release-workflows using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ractive.ff-rdp
+PackageVersion: 0.4.4
+PackageLocale: en-US
+Publisher: ractive
+PublisherUrl: https://github.com/ractive
+PublisherSupportUrl: https://github.com/ractive/ff-rdp/issues
+Author: James Bergamin
+PackageName: ff-rdp
+PackageUrl: https://github.com/ractive/ff-rdp
+License: MIT
+LicenseUrl: https://github.com/ractive/ff-rdp/blob/HEAD/LICENSE
+ShortDescription: Use Firefox's Remote Debugging Protocol via a CLI
+Description: CLI for Firefox Remote Debugging Protocol — inspect, test, and automate Firefox from the terminal. Supports navigation, DOM queries, screenshots, accessibility audits, performance analysis, network monitoring, and more. Designed for both human users and AI agents.
+Moniker: ff-rdp
+Tags:
+- agentic-skills
+- agentic-workflow
+- cli
+- firefox
+- firefox-rdp
+ReleaseNotes: |-
+  The Windows binaries no longer need the Visual C++ runtime: ff-rdp.exe links the C runtime statically, so the zip, Scoop and winget installs start on a clean Windows. navigate no longer times out on slow pages by default, a11y summary and the home view list only elements you can see, and a Firefox started by ff-rdp launch opens without a first-run dialog or an extra tab.
+  Changed
+  - navigate waits with --wait auto by default. It still waits for the page to finish loading, but once the page has been interactive for 3 seconds without finishing (or the timeout runs out while it is interactive), it returns ready_state: "interactive" instead of failing with a timeout. A heavy page under --throttle slow-3g used to time out at any --timeout. --wait complete keeps the old strict wait. --wait-text and --wait-selector run after this wait, so by default they may start on an interactive page. (#359)
+  - a11y summary, the bare ff-rdp home view and --with-page list only visible elements. Elements hidden with display:none, visibility:hidden or content-visibility:hidden are left out and get no ref, including headings and landmarks. Elements with opacity:0 or aria-hidden are still listed, because they can still be clicked. snapshot and dom still show hidden elements. (#357)
+  Fixed
+  - Windows: no Visual C++ runtime needed. ff-rdp.exe in the release zips no longer imports VCRUNTIME140.dll or the api-ms-win-crt-* DLLs. Without the Visual C++ Redistributable, 0.4.1 to 0.4.3 could not start (exit code 0xC0000135, DLL not found). cargo install ff-rdp-cli builds still link the runtime dynamically. (#356)
+  - navigate --wait interactive no longer times out on throttled pages. Firefox sometimes never delivers the "interactive" event for a slow page; ff-rdp now also reads the page's ready state directly. (#359)
+  - ff-rdp launch opens Firefox without the Terms of Use dialog, also for a --profile that has never accepted it. Telemetry upload stays off unless your own user.js turns it on. (#358)
+  - launch --auto-consent no longer leaves a Consent-O-Matic options tab open. On the extension's first run, launch waits up to 10 seconds until that tab is closed. (#358)
+  - ff-rdp stop can stop a Firefox started with launch --profile. It removes only ff-rdp's own record of that launch, never your profile directory. (#358)
+  Internal
+  The release pipeline moves to ractive/release-workflows v0.3.2. Its winget job runs komac 2.16.0, so the winget manifest keeps PortableCommandAlias. A live test now accepts Firefox 159's handling of a repeated const declaration under eval --no-isolate (#360).
+ReleaseNotesUrl: https://github.com/ractive/ff-rdp/releases/tag/v0.4.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

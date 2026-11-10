@@ -1,0 +1,79 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Corsinvest.cv4pve.botgram
+PackageVersion: 2.0.0
+PackageLocale: en-US
+Publisher: Corsinvest Srl
+PublisherUrl: https://www.corsinvest.it/
+PublisherSupportUrl: https://www.corsinvest.it/cv4pve
+PrivacyUrl: https://www.corsinvest.it/privacy
+Author: Corsinvest Srl
+PackageName: cv4pve-botgram
+PackageUrl: https://github.com/Corsinvest/cv4pve-botgram
+License: GPL-3.0
+LicenseUrl: https://github.com/Corsinvest/cv4pve-botgram/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2019-2025 Corsinvest Srl
+CopyrightUrl: https://github.com/Corsinvest/cv4pve-botgram/blob/master/LICENSE.md
+ShortDescription: Telegram Bot for Proxmox VE management
+Description: |-
+  cv4pve-botgram is a Telegram bot for managing Proxmox VE clusters.
+  It allows you to monitor and control your virtual machines and containers
+  through Telegram chat commands with secure authentication.
+
+  Features:
+  - Manage VMs and Containers via Telegram
+  - Secure chat ID-based authentication
+  - Real-time status monitoring
+  - Start/Stop/Reboot operations
+  - Node management commands
+  - API explorer for advanced operations
+  - Custom command aliases
+  - Service and console modes
+Moniker: cv4pve-botgram
+Tags:
+- automation
+- bot
+- container
+- corsinvest
+- management
+- proxmox
+- proxmoxve
+- telegram
+- virtualization
+- vm
+ReleaseNotes: |-
+  Major release: the bot runs as a service natively, has a documentation site and many fixes. Existing systemd units and NSSM services keep working.
+  What's new
+  - Documentation site. The documentation moved from the README to corsinvest.github.io/cv4pve-botgram: getting started, creating the Telegram bot and restricting it to your chats, permissions command by command, connection, running as a service, every command, API commands with placeholders, aliases and troubleshooting. Every page was checked against the code.
+  - Native service support. Linux systemd (Type=notify) and Windows services work out of the box, as in cv4pve-metrics-exporter: the bot recognises by itself how it was started, and no NSSM is needed on Windows. systemctl start returns once the bot is logged in to Proxmox VE and to Telegram. As a Windows service the bot writes to the Event Log. See Run as a service.
+  Deprecated
+  - --service-mode is not needed anymore: the bot always runs until it is stopped. It is still accepted and ignored, with a warning in the log, and will be removed in the next major version: remove it from systemd units and NSSM services
+  Fixes
+  - The bot exits with code 1 when it cannot start or Telegram refuses the token, so a service set to restart on failure tries again; it used to exit with 0
+  - VM, container and node commands answer with the error of Proxmox VE when the action is refused; they used to answer as if it had worked
+  - /get, /set, /create and /delete without a path ask for it; they used to call the command name as a path
+  - A parameter value between double quotes keeps its spaces
+  - /alias Delete removes the alias for good and confirms it; the alias used to come back
+  - /alias Create says when the name is not valid; it used to answer "Command created!" anyway
+  - /help describes /create and /delete correctly
+  - Built-in aliases that did not work: qemu-migrate and qemu-vzdump-restore did nothing, node-shutdown sent a command Proxmox VE refuses, qemu-migrate and lxc-migrate only read the migration preconditions. node-shutdown now asks for reboot or shutdown; the migrate aliases start the migration and ask for online (VM) or restart (container)
+  Changed
+  - In a terminal the bot stops with Ctrl+C; it used to wait for Enter
+  - Corsinvest.ProxmoxVE.Api 9.2.4
+  - An API call refused by Proxmox VE is reported as an error message, also when the answer has status 200 with errors
+  - /usage lists the methods in the order get, set, create, delete
+  - Packages published with each release: deb, rpm, AUR, Homebrew and macOS pkg, besides the zips and WinGet
+  - Windows executable icon
+  - Project metadata, symbols (Source Link, .snupkg) and code style aligned with the other cv4pve tools
+  What's Changed
+  - Fix code block syntax highlighting in README by @franklupo in #12
+  - ci: use shared cv4pve-tools CI workflow and declare publish permissions by @franklupo in #13
+  - ci: publish with shared cv4pve-tools-publish workflow by @franklupo in #14
+  - docs: placeholder instead of a real bot token in the README by @franklupo in #15
+  - chore: Corsinvest.ProxmoxVE.Api 9.2.4 and project layout aligned with the cv4pve tools by @franklupo in #16
+  - Release 2.0.0: documentation site, native service, fixes by @franklupo in #17
+  Full Changelog: v1.9.0...v2.0.0
+ReleaseNotesUrl: https://github.com/Corsinvest/cv4pve-botgram/releases/tag/v2.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

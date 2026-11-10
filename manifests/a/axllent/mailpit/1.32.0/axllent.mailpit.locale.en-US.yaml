@@ -1,0 +1,69 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: axllent.mailpit
+PackageVersion: 1.32.0
+PackageLocale: en-US
+Publisher: Ralph Slooten
+PublisherUrl: https://github.com/axllent
+PublisherSupportUrl: https://github.com/axllent/mailpit/issues
+Author: Ralph Slooten
+PackageName: Mailpit
+PackageUrl: https://github.com/axllent/mailpit
+License: MIT
+LicenseUrl: https://github.com/axllent/mailpit/blob/develop/LICENSE
+Copyright: Copyright (c) 2022-Now() Ralph Slooten
+CopyrightUrl: https://github.com/axllent/mailpit/blob/develop/LICENSE
+ShortDescription: An email and SMTP testing tool with API for developers
+Description: |-
+  Mailpit is a small, fast, low memory, zero-dependency, multi-platform email testing tool & API for
+  developers.
+
+  It acts as an SMTP server, provides a modern web interface to view & test captured emails, and
+  includes an API for automated integration testing.
+
+  Mailpit was originally inspired by MailHog which is no longer maintained and hasn't seen active
+  development or security updates for a few years now.
+Moniker: mailpit
+Tags:
+- email-testing
+- go
+- golang
+- mailpit
+- pop3-server
+- smtp-relay
+- smtp-server
+- smtp-testing
+ReleaseNotes: |-
+  ## This release includes security fixes, so upgrading is strongly recommended.
+  A maliciously crafted image attached to an email could make the thumbnail generator (used by the web UI and API) spin in an infinite loop. The exif reader has been replaced with a minimal in-tree EXIF orientation reader that only reads the first block and never follows pointers.
+
+  This release also strips `<base>` and meta refresh tags from `/view/{ID}.html` output, and limits concurrent HTTP, SMTP and POP3 connections to 1000 each.
+
+  Due to timing, these security fixes have released together with new UI features in this release.
+
+  ### Security
+  • Replace goexif with minimal EXIF orientation reader ([GHSA-379p-g4f4-hq5h](https://github.com/axllent/mailpit/security/advisories/GHSA-379p-g4f4-hq5h))
+  • Strip base and meta refresh tags from /view/{ID}.html output
+  • Limit concurrent SMTP, POP3 and HTTP connections to 1000 each
+
+  ### Feature
+  • Autocomplete search suggestions and history ([#745](https://github.com/axllent/mailpit/issues/745))
+  • Open received email when clicking a browser notification ([#747](https://github.com/axllent/mailpit/issues/747))
+
+  ### Chore
+  • Add composite index on message_tags (ID, TagID) to keep inserts fast as the mailbox grows ([#750](https://github.com/axllent/mailpit/issues/750))
+  • Reject EXIF IFD0 offsets that overlap the TIFF header
+  • Update Go dependencies
+  • Update node dependencies
+
+  ### Fix
+  • Resolve data races in mailbox stats broadcast, logger init and SMTP MaxRecipients
+
+  ### Test
+  • Add JS tests for search suggestions and HTML sanitising
+  • Add e2e Playwright UI testing
+  • Add maximal APP1 and fill-byte cases for EXIF orientation reader
+ReleaseNotesUrl: https://github.com/axllent/mailpit/releases/tag/v1.32.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

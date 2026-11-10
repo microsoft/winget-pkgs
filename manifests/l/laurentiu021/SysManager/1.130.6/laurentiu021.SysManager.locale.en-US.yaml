@@ -1,0 +1,98 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.130.6
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.130.6] - 2026-10-20
+  SysManager opens even when its theme file names no theme, and Environment Variables, Traceroute, CLI Interface and
+  Right-click Menu each fix one thing they did wrong.
+  Fixed
+  - A theme file with no preset could keep SysManager from opening. Loading theme.json took the mode from the file
+    before checking that the file named a preset. A file without one, edited by hand or brought in by Profile import
+    from a profile that lacked the field, left the preset empty. In Follow Windows mode the first lookup then threw
+    while SysManager was starting, before its window existed: one error box, then a SysManager running with no window,
+    and every later start only handing over to it. In the other modes the Follow Windows button threw instead. The file
+    is checked first now. One with no preset, or with a mode SysManager never writes, is treated like any other file
+    that is not a theme: the shipped theme is used, and the file is set aside at the next change. Since 1.82.0, when
+    following Windows was added.
+  - Typing %NAME% into an existing Environment Variables value did not make it expand. A variable stored as plain
+    text (REG_SZ) kept that kind when edited, so a value that now held a token such as %SystemRoot% was saved as
+    literal text, and Windows never expanded it: a PATH folder added that way pointed at a folder that does not exist.
+    An edited plain-text value that now holds a %NAME% token is saved as expandable. One with only a percent sign,
+    such as 50% or a%20b, keeps its kind. Since 1.33.3.
+  - Traceroute waited at every hop for a name it never showed. Each hop looked up the replying address's host name,
+    for up to 800 ms and longer when the lookup could not be stopped, before the hop appeared, and auto-trace repeated
+    that for every target on every round. Nothing has displayed that name since 1.18.0. The lookup is gone, so a trace
+    takes as long as its pings.
+  - CLI Interface copied commands for a file nobody has. The example and every Copy button wrote SysManager.exe,
+    while the download is named SysManager-v<version>.exe, so the pasted line was not found from a script or Task
+    Scheduler, and copying the --json or --silent row gave a line the command line refuses. Commands are copied
+    with the full, quoted path of the file that is running now, a modifier comes with --health, which changes
+    nothing, and the tab says that PowerShell needs & in front. Since the tab was added (1.49.0).
+  - Right-click Menu changed the names programs give their entries. An entry's own menu text went through the
+    clean-up meant for registry key names, so "IntelliJ IDEA" read "Intelli J IDEA", "PyCharm" read "Py Charm" and
+    "Code - Insiders" lost its dash. That text is shown as written now, without its keyboard-shortcut marker; only key
+    names are split into words. Since 1.7.5.
+  Verify the download
+  Get-FileHash .\SysManager-v1.130.6.exe -Algorithm SHA256
+  Expected SHA256: F47B131442D1AB83D37E77B0300B3D28EB29F62B1F14AC93393F23E3DE7E1425
+  This build is not code-signed, so Windows will warn on first launch. That is
+  expected for a small independent app: see what the warning says and what to
+  click.
+  Code signing is planned through the SignPath Foundation,
+  which provides free certificates to open-source projects, with signing performed by
+  SignPath.io. Until then, the SHA256 above and the build
+  attestation below are what establish that a download is the genuine build.
+  Code signing policy
+  This release is not code-signed. The team roles, release-approval process and
+  privacy policy required by the SignPath Foundation programme
+  are documented in advance under Code signing
+  policy. That
+  documentation is a prerequisite for applying, not evidence of a certificate. The
+  attribution line naming SignPath as the signing provider will appear here once a
+  certificate is actually issued.
+  This program will not transfer any information to other networked systems unless
+  specifically requested by the user or the person installing or operating it. Full
+  privacy policy.
+  Verify where this binary came from
+  This exe was built by GitHub Actions from this public source, and the build is
+  recorded in the Sigstore public transparency log. With the
+  GitHub CLI:
+  gh attestation verify .\SysManager-v1.130.6.exe --repo laurentiu021/SystemManager
+  That proves which commit and workflow produced this exact binary, something the
+  SHA256 file cannot show, since it is published alongside the exe it describes.
+  Each release also ships SysManager-v1.130.6.sbom.json, a CycloneDX inventory of
+  every dependency resolved for this build.
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.130.6
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

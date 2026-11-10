@@ -1,0 +1,42 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: ForgeLabsSoft.DriveForge
+PackageVersion: 4.5.1
+PackageLocale: en-US
+Publisher: ForgeLabsSoft
+PublisherUrl: https://github.com/ForgeLabsSoft
+PublisherSupportUrl: https://github.com/ForgeLabsSoft/driveforge/issues
+PackageName: DriveForge
+PackageUrl: https://github.com/ForgeLabsSoft/driveforge
+License: GPL-3.0-only
+LicenseUrl: https://github.com/ForgeLabsSoft/driveforge/blob/main/LICENSE.txt
+Copyright: Copyright (C) 2026 ForgeLabsSoft
+ShortDescription: Create Windows USB drives, clone your PC, back it up, recover deleted files, and check drive health. Free and open source.
+Description: |-
+  DriveForge makes common but normally-complicated Windows disk tasks simple and safe:
+  create bootable Windows or Linux USB drives, clone a running PC to another drive,
+  back up and restore Windows to an image, recover deleted files, securely erase drives,
+  and diagnose drive health. It is a single self-contained executable with no ads,
+  no telemetry, and no accounts. Free and open source under the GPL-3.0.
+Moniker: driveforge
+Tags:
+- usb
+- bootable
+- iso
+- clone
+- backup
+- data-recovery
+- undelete
+- secure-erase
+- wipe
+- disk
+- diagnostics
+- ventoy
+- rescue
+- portable
+- open-source
+ReleaseNotes: "![DriveForge](https://raw.githubusercontent.com/ForgeLabsSoft/driveforge/v4.5.1/logo-256.png)\n\n## v4.5.1 — 2026-10-17\n\nThe same audit, carried on into the screens 4.5.0 did not reach — and this time every fix was measured on\nreal hardware before and after, not read. Nineteen changes, no new features: **updating is safe from any\n4.x, and nothing here changes a file format or a saved setting.**\n\nTwo faults in here could have cost someone data. Both were found the same way: by asking the app to do the\ndangerous thing and then checking the disk itself, rather than believing the dialog.\n\n### Fixed — a drive erased that you never chose\n\n• **The scheduled clone offered to erase a drive it was never scheduled for.** With a 1 GB drive scheduled\n  and a second drive of the same model name connected, the next start announced *\"The drive your scheduled\n  clone writes to is connected: … 32.0 MB … It ERASES this drive\"* — a different disk entirely, already\n  selected, one Yes away from being formatted. The offer matched on the model name alone and took the first\n  hit, ignoring the size and serial number recorded in the very command line it had just read. The\n  unattended run refuses to guess in exactly that situation; the offer guessed. Both now ask the same\n  question in the same place, and the offer stays quiet when it cannot be certain.\n• **\"Is this my drive?\" was answered with a tolerance wider than most drives.** The size had to be within\n  1 GiB — flat — so a 32 MB disk passed for a 1 GB one and the unattended run took it as its target. It\n  survived only because Windows does not fit on 32 MB. The margin is now one percent of the recorded size,\n  never more than 64 MiB.\n• **Two names for one file were offered as two copies.** The duplicate finder counted directory entries\n  where it had to measure distinct storage: a hard-linked pair came back as a \"duplicate set\" and pushed the\n  reclaimable total up by a whole file, when deleting either name frees nothing at all. Both finders — exact\n  and \"similar photos\" — now compare the volume serial and file index.\n• **The protected folder only counted if you picked it before the scan.** Choose it afterwards and the rule\n  ticked your master copy red and kept a different one. The deletion itself re-read the box and spared the\n  file, so the screen and the deed disagreed, and \"keep 1 per set\" quietly became keep 2.\n\n### Fixed — what the app did behind your back\n\n• **Cleaning traces swept away the code the app was running on.** A single-file .exe unpacks part of itself\n  into the temporary folder and runs from there; \"Temporary files\" cleared it out, and the next shutdown\n  threw `DllNotFoundException`. Reported by a user, reproduced here byte-for-byte, and it would have\n  happened on every clean. The sweep now leaves that folder alone — for any single-file program on the PC,\n  not only this one.\n• **A fault while the app was closing was dressed up as a lost operation.** The dialog said DriveForge \"had\n  to stop the current operation\" and invited a bug report, after the work had finished and the window was\n  already gone. It is written to the log now, where it belongs.\n• **Building one drive rewrote the host machine's disk policy.** The setting was changed to get the work\n  done and never put back.\n• **Windows-To-Go read four of its options after the image was already written.** Whatever you ticked, four\n  of them could not affect the drive you got.\n\n### Fixed — tools that refused work they could do\n\n• **Resize and Delete asked diskpart, which answered 0 and then refused everything.** On a virtual disk\n  diskpart reports no shrinkable space and `delete volume override` fails with \"The system cannot find the\n  file specified\", leaving the partition where it was — while Windows' own partition API does both. Each now\n  asks Windows first and keeps diskpart as the fallback, and a refusal is no longer reported as a crash.\n• **Every 64 GB stick was refused, under a number the image never needed.**\n• **The signature gate on the multi-boot engine could never succeed.**\n• **The size chooser offered a button that did nothing it said.**\n\n### Fixed — what the screen said\n\n• **Stop told every operation the same story about a USB.** Stopping a backup into a *file* asked *\"Stop the\n  current operation? The USB may be unfinished and need to be formatted again.\"* There is no USB in a\n  backup, and the tools page asks through the same handler — so a read-only surface test asked it too. The\n  question now names the operation it is about to stop, in its own words.\n• **The one surface that stayed on screen said your own Stop was a failure.**\n• **A reopened scan session forgot that it had been cut short**, so a partial result read as a complete one.\n• **Secure-deleting a single file skipped all three guards the folder shredder has** — alternate data\n  streams were left unwritten, and the file name stayed in the directory index for a recovery scan to list.\n  A link is refused as well, though the file picker resolves links before the app ever sees one, so that\n  guard is defence in depth rather than a path anyone can reach.\n• **Nothing held the overflow menu's positions to its labels.**\n\n### Verified on hardware\n\nEvery fix above was driven through the app on real disks, and judged by reading the disk afterwards rather\nthan the dialog: the recovery session and the duplicator, the clean-traces reproduction, the disk-image loop\n(image created, disk detached, files recovered *from the image*, byte-identical), the shredder, **all ten\npartition tools** including Move in both directions and on both partition tables, the disk-space analyser,\nthe backup screen, and the scheduled clone — including letting an unattended run actually erase its target\nand confirming that three other disks, among them a second Windows installation, were untouched.\n\nA full backup was captured end to end: 445 GB of Windows into a 331 GiB `.wim` in 1 h 44 m, verified\nindependently afterwards, with two files extracted from the image and compared byte for byte against the\noriginals.\n\nNot exercised: the shredder's overwrite pass, which needs a spinning disk and this machine has none, and\nthe destructive clean, which is deliberately only ever run in Analyze mode here.\n\n### Internal\n\n194 tests, 0 warnings. Each new rule was mutated and watched go red before it was kept — twenty mutations in\nall; one rule was caught matching the command line's own arguments rather than the disk it was supposed to\nguard, and was narrowed. One earlier claim was corrected in the open rather than rewritten: a guard that had\nbeen described as live was measured to be unreachable through the file picker, and now says so.\n\n---\n\n[Full changelog](https://github.com/ForgeLabsSoft/driveforge/blob/v4.5.1/CHANGELOG.md)"
+ReleaseNotesUrl: https://github.com/ForgeLabsSoft/driveforge/releases/tag/v4.5.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

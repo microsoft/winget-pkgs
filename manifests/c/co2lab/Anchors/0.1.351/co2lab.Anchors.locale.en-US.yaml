@@ -1,0 +1,90 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: co2lab.Anchors
+PackageVersion: 0.1.351
+PackageLocale: en-US
+Publisher: co2lab
+PublisherUrl: https://github.com/co2-lab
+PublisherSupportUrl: https://github.com/co2-lab/anchors/issues
+PackageName: Anchors
+PackageUrl: https://github.com/co2-lab/anchors
+License: Elastic License 2.0
+LicenseUrl: https://github.com/co2-lab/anchors/blob/HEAD/LICENSE
+ShortDescription: Spec-first continuity framework for AI-assisted development
+Description: Anchors ties spec, feature and test together through a shared identity code, then confronts each artifact against the rules declared in anchors.yaml. It maps the project as a graph, propagates change from the anchor outward, and gates every step — so work guided by AI stays anchored to what was decided.
+Moniker: anchors
+Tags:
+- ai
+- ai-agents
+- cli
+- developer-tools
+- golang
+- spec-first
+ReleaseNotes: |-
+  The core reads no syntax — format 8
+  Breaking. From this release Anchors knows no language by itself. Comments, a language's
+  lexicon, test names and the shapes some gates used to recognise are now declared in your
+  anchors.yaml. A gate whose field is not declared is pending and names the field.
+  anchors doctor shows the family's example to copy.
+  The map moves to format 8. A map not migrated is refused, with the message to run
+  anchors migrate.
+  Upgrade: run anchors migrate once, then commit
+  anchors migrate crosses format 8 once. Where your project declared nothing, it writes the
+  examples this binary used to apply by itself, so your check table does not change:
+  - dialect.comments — the entries covering the extensions of your map's files;
+  - your family's lexicon — exported_func, param_name, loop, cursor, http_status,
+    env_read, definition, handle_patterns, log_patterns, guard_patterns,
+    signature_end, limits, statement_end, set_promise, set_slice. With no family, only
+    set_promise and set_slice;
+  - dialect.tests — the family's, or, inside your own, its pattern (when you declared only the
+    assertion) and the block shape (block_open, block_close, empty_body);
+  - derived.route_pattern, when you declare route-exists;
+  - derived.mock_detect, mock_factory and mock_typed, when you declare mock-typed;
+  - headless: true on a test layer of YAML files (a runner's flows);
+  - monitor.runners for the tools your suites run with (jest, vitest, go test, pytest, maestro,
+    playwright, stryker, gremlins).
+  It prints each field it writes. Run anchors migrate --dry-run first to see the list.
+  By hand: what migrate cannot write
+  anchors migrate prints these as ! by hand:
+  - An extension no example covers. Its files have no header or flag read until you add a
+    dialect.comments entry for them.
+  - A dialect.tests.pattern with no title group. The title is what the pattern captures
+    now, e.g. \bit\(\s*'(?P<title>[^']*)'. Name one group per quote your language uses:
+    title, title2…
+  - env-declared with no family. Before, every family's environment reads were read
+    together. Declare dialect.env_read for your language.
+  - A section written in flow style — dialect: {family: go}. Migrate refuses to rewrite it.
+    Turn it into block style and run again.
+  Not printed by migrate, but worth checking:
+  - Test names come from derived.files. A test file is paired with its unit by the part
+    after {{name}} in a template: {{dir}}/{{name}}.test.{{ext}}, {{dir}}/{{name}}_test.go.
+    This covers the map's identities, duplicate codes, deliver, watch, work and
+    check --changed. Declare the template your tests follow if you have none.
+  - Code extensions come from your code layers. Several gates look for a spec's code file:
+    rule-implemented, unit-complete, the doctrine gates and plan-seeds-valid. They try the
+    extensions your code layers' patterns end with (*.go, *.{ts,tsx}).
+  - marker-parity reads only files whose comments you declare.
+  - No import fallback. These gates no longer read every import/require line by
+    themselves: proof-crosses-boundary, test-exercises-unit and test-ref-matches-unit.
+    With no dialect.imports they are pending. anchors doctor offers the family's example.
+  - Mock aliases. A double's module now resolves through dialect.import_resolve.aliases.
+    Doubles of your own modules written with an alias (@backend/x) are now charged by
+    mock-typed and mock-stamped.
+  - Stamps over a JSX flag. A line holding only {/* @navigates: … */} is a comment as a
+    whole now. The old reading left {} in the stamped block. A stamp covering such a module
+    diverges once: renew it with anchors stamp --refresh <module>.
+  Also in this release
+  - anchors init writes the family's lexicon and the comments of the extensions it finds.
+  - anchors doctor offers:
+    - the comments of the extensions found without an entry;
+    - the lexicon fields your declared gates presuppose.
+  - anchors stamp stamps the real module's exports that a double's call names. It reads no
+    object literal.
+  - The tests a pattern lists keep their titles as written: the core resolves no escape.
+  Changelog
+  - 1f67029 feat(dialect)!: the core reads no syntax; comments, lexicon and shapes are declared (format 8)
+  - 76daf74 fix(ingest,gate): a report takes its suite's layer; a listed used-by stays inside its comment
+ReleaseNotesUrl: https://github.com/co2-lab/anchors/releases/tag/v0.1.351
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

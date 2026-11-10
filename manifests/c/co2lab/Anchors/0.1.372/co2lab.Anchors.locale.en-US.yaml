@@ -1,0 +1,47 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: co2lab.Anchors
+PackageVersion: 0.1.372
+PackageLocale: en-US
+Publisher: co2lab
+PublisherUrl: https://github.com/co2-lab
+PublisherSupportUrl: https://github.com/co2-lab/anchors/issues
+PackageName: Anchors
+PackageUrl: https://github.com/co2-lab/anchors
+License: Elastic License 2.0
+LicenseUrl: https://github.com/co2-lab/anchors/blob/HEAD/LICENSE
+ShortDescription: Spec-first continuity framework for AI-assisted development
+Description: Anchors ties spec, feature and test together through a shared identity code, then confronts each artifact against the rules declared in anchors.yaml. It maps the project as a graph, propagates change from the anchor outward, and gates every step — so work guided by AI stays anchored to what was decided.
+Moniker: anchors
+Tags:
+- ai
+- ai-agents
+- cli
+- developer-tools
+- golang
+- spec-first
+ReleaseNotes: |-
+  Fix: pagination-honored reads each function's own text
+  Reported from MIF (packages/backend/models/adminSources.ts): two sister functions read through
+  a local readAll that walks every page, each with // @no-paginate: <reason> above its
+  signature. The first passed and the second stayed accused; only a second mark inside its body
+  made it pass. Three things were wrong, and all three are fixed:
+  - The mark above a signature is that function's. A function's body ran to the next
+    declaration, so the mark above the second function was read as the first one's. The comments
+    right above a declaration now belong to it, wherever it stands in the module.
+  - A helper of the module that drains the cursor paginates its callers. A function that
+    reads through a function the module defines (dialect.definition) whose code walks the
+    cursor in a loop now passes with no mark. The mark stays for what reads one page on purpose.
+  - A comment is no code. The gate read loops and cursors in comments too: the Portuguese
+    do of "o uso do mês" counted as a loop, and functions passed as paginating by accident.
+    Comments are now blanked before the code is read; the mark, a comment, is still read.
+  At MIF's HEAD the verdicts of the 109 files with a collection query are unchanged; the marks in
+  adminSources.ts can now be removed.
+  Everything in the v0.1.351 notes still applies: run anchors migrate once, crossing format 8.
+  Changelog
+  - 3fafddb ci(release): the Winget submission gets a second attempt a minute later
+  - 1811254 fix(pagination): a waiver above a signature is its function's; a draining helper paginates
+ReleaseNotesUrl: https://github.com/co2-lab/anchors/releases/tag/v0.1.372
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

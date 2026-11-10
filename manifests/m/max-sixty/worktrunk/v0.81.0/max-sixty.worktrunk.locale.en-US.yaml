@@ -1,0 +1,66 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.81.0
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Improved
+  - Hooks can prompt: hooks that run serially in the foreground (pre-* hooks, wt hook <type> --foreground) inherit wt's stdin, so gum confirm 'trust this worktree?' && mise trust works as a hook. Concurrent and background hooks read EOF. (Breaking: hooks no longer receive their context as JSON on stdin; pass values as template arguments, or whole objects with the new tojson filter. wt step for-each keeps its JSON.) Docs (#3129, #4451, #4524, thanks @endigma for #3093)
+  - Experimental wt switch --path: places one worktree outside the worktree-path template and keeps its branch name, as in wt switch --create feature/JIRA-1234 --path ../dark-mode. Commands reach it by branch or by path. Docs (#4317, thanks @christowiz for #1982)
+  - wt merge --branch: merges another worktree's branch without leaving the current worktree. Commit, squash, rebase, and hooks run in the source worktree, and cleanup removes it. Docs (#4360, thanks @liuyinchu)
+  - OpenCode 2 worktrees go through Worktrunk: after re-running wt config plugins opencode install, worktrees OpenCode creates and removes use wt switch --create and wt remove, as the Claude Code plugin's do. OpenCode's worktree.directory stops applying, and new branches start from the default branch. Like the Claude Code plugin, it opens an existing branch's worktree, which OpenCode's remove then removes. Docs (#4489, thanks @rzane for #4488)
+  - Faster bulk removal: removal hands files to one background deleter per repository, not one rm -rf each, and deletes read-only directories it used to leave in .git/wt/trash. wt step prune no longer stalls when two worktrees share a directory name, as Codex worktrees do. (Breaking: prune runs pre-remove hooks concurrently; hooks writing shared state must coordinate.) (#4516, #4361, #4337)
+  - wt switch - returns to the worktree it left, including a detached worktree or the second checkout of a branch, and wt remove - targets the same worktree. Pre-switch hooks see the resolved destination, so wt switch origin/feature passes branch=feature. (Breaking: from a bare repository's directory, commands given no argument act on the worktree of the branch HEAD names.) (#4497, #4496, #4521)
+  - Template errors name the variable: {{ brnch }} reports undefined variable brnch and suggests branch. (Breaking: filters such as sanitize reject an undefined input, so {{ upstream | sanitize }} needs a guard or default on a branch with no upstream.) (#4350, #4440)
+  - Templates use MiniJinja 3 (Breaking): objects and lists render Python-style ({'port': 3000}) instead of as JSON, so use | tojson where JSON is needed; round rounds half to even; title capitalizes fewer word boundaries (feat/x-y becomes Feat/x-Y); division by zero errors. (#4442, #4524)
+  - CI status shows ⚠ for any failed forge call, where some failures, such as a Gitea 404, used to leave the cell blank. A forge CLI with no login for the host still leaves it blank, and wt config show --full names the host it checked. (#4436, #4449)
+  - Removal explains itself: --force lists the changes it discards, and a refusal over untracked files suggests git stash -u. A multi-target wt remove continues past a target whose pre-remove hook or removal fails, and exits 1. A branch-only removal names the detached worktree left at the branch's path. (#4347, #4357, #3791, #4313, thanks @chachi for #3769)
+  - The picker can open without its preview: [switch.picker] preview = false hides it until Alt-p. (#4428, thanks @emacampolo for #4072)
+  - Squash backups print a recovery command: squashing staged changes prints the refs/wt-backup/<branch> ref and a wt switch --create --base <sha> command that restores them in a new worktree, even after wt merge removed the original. (#4347)
+  - Shell integration: wt merge and wt remove suggest restarting the shell when integration is installed but inactive. On Unix, the PowerShell profile comes from the installed pwsh, so a custom XDG_CONFIG_HOME works. (Breaking: installing for Nushell requires nu, and for PowerShell on Unix, pwsh.) (#4343, #4422, #4436)
+  - System config has one path per platform: /Library/Application Support/worktrunk/config.toml on macOS, %PROGRAMDATA%\worktrunk\config.toml on Windows, /etc/xdg/worktrunk/config.toml elsewhere, or WORKTRUNK_SYSTEM_CONFIG_PATH. (Breaking: $XDG_CONFIG_DIRS is ignored and macOS no longer falls back to /etc/xdg; a file there stops loading without a warning.) (#4169)
+  - expected_worktree_path_of_branch() template function: returns where wt switch --create would put a branch's worktree, even after the worktree at that path has moved to another branch. (#4502, thanks @BenJurewicz for #4480)
+  - Smaller improvements: wt switch --create reports an invalid branch name in one line instead of Git's error; hook failures name the hook's source (pre-merge user:lint failed (exit code 7)); the wt list loading footer says how many rows fit; wt step for-each labels detached worktrees by path; install-statusline keeps settings.json's key order; the Codex plugin shows the Worktrunk icon. (#4349, #4352, #4333, #4498, #4420, #4327)
+  Fixed
+  - Foreground hooks that change terminal settings: a hook that touched the terminal, such as turbo on a cache miss, was stopped by SIGTTOU and wt hung. Hooks now run in the shell's job group. (Breaking: Nushell integration requires Nushell 0.113+; on Ctrl-C wt dies by the signal instead of exiting 130, so a calling script stops too.) (#4400, #3129, thanks @user753 for #4389 and @willparsons for the turbo report)
+  - Formatter pre-commit hooks during a squash: in wt merge and wt step squash, a hook's edits missed the squash commit, and the dirty worktree blocked removal. All commit paths now stage, run the hooks, and stage again. (Breaking: wt step commit and wt merge --no-squash stage first too, so index-reading hooks like pre-commit run can block them.) (#4321, #4520)
+  - wt step copy-ignored on Linux: copied files took the copy's time, so cargo rebuilt much of a copied target/; they now keep the source's mtime, as they already did on macOS and Windows. A reflink rejected with EPERM now falls back to a copy. (#4319, #4518, #4434, thanks @dmy-gh for #4248, @paul-hansen for the repro, and @HN05 for #4433)
+  - Directory patterns in .worktreeinclude and [step.copy-ignored] exclude: a pattern such as config/ skipped ignored files that sit beside tracked files in config/, so wt step copy-ignored left out included files and copied excluded ones. It now covers them, as .gitignore does. (#4406)
+  - wt list status symbols: JSON symbols strings use the table's order (⊘_, was _⊘), and the flag for an off-template path or duplicate checkout is a dim ⚐ instead of ⚑. (Breaking: consumers matching these strings need updating.) (#4335, #4334)
+  - wt switch: --create branches from a remote-tracking default branch such as git-p4's p4/master instead of HEAD; switching by path, as the picker does, gives pre-switch hooks the destination's variables; the bare-repo warning names the configured path. (#4482, #4493, #4491, thanks @cazador481 for #4481 and @dlecan for #4492)
+  - Agent plugins: claude --worktree NAME opens the worktree of an existing branch NAME rather than failing, so a kept session can be reopened. A clean exit then runs wt remove on it, which deletes its ignored files and, if integrated, the branch. The Codex plugin's Windows hooks parse under PowerShell. (#4487, #4241, thanks @edziegle for #4486 and @wstczyw for #4239)
+  - wt switch picker: a per-project pager applies to the diff preview; a selected branch-only row no longer draws light text on the light selection bar; an orphan branch's log tab shows its commits. (#4398, #4408, #4470, thanks @willparsons for reporting the contrast bug)
+  - wt step relocate: a swap moves the shell with its worktree; relocating the main worktree leaves a shell in a nested worktree where it is; branches whose sanitized names collide no longer relocate partway. (#4325, #4256, thanks @Duang777)
+  - Aliases: --args=X and --vars=X reach {{ args }} instead of being dropped, and completion after an alias no longer offers --dry-run or --var. (#4391, #4329)
+  - Config errors: a malformed approvals.toml no longer aborts hooks, aliases, or commits run with --yes; one invalid WORKTRUNK_* override no longer discards the valid ones. (#4467, #4348)
+  - Windows: an Azure CLI installed through WinGet (az.cmd) is found, and Git Bash is found through the first git on PATH, including custom installs where it resolves under Git\mingw64\bin. (Breaking: without git on PATH, Git Bash is no longer found at its default install locations.) (#4402, #4411, #4452, thanks @wmmc88 for #4401 and @LeoWSY-hashblue for #4410)
+  - Forge fixes: Azure DevOps CI no longer shows a same-named branch's PR from another repository in the project, and pr:N suggests a dev.azure.com URL for SSH remotes; Gitea fork pushes keep the server's clone URL; tea logins in its default macOS and Windows locations are found; gh and glab protocol settings apply per host. (#4326, #4364, #4495, #4420)
+  - Fixes for unusual setups: valueless git config keys such as core.fsmonitor read as true; untracked files named like :x no longer break wt list's diff; worktree paths containing newlines or non-UTF-8 bytes; the statusline's branch label with custom worktree-path templates; zsh compinit advice names the right file; IPv6 ssh:// remotes get distinct approvals and [projects] settings (Breaking: re-save them). (#4314, #4320, #4453, #4495, #4421, #4526)
+  Documentation
+  - wt config shell --help is the shell setup reference, covering init, install, uninstall, and diagnostics. (#4344)
+  - Doc corrections: the wt config state vars clear example, wt list JSON null causes, every supported forge in CI help, --path worktrees in wt list, the bare-repo navigation example, and Alt as Option on macOS. (#4363, #4359, #4439, #4328, #4483, #4412, thanks @wmcnamee-coreweave for #4474)
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.81.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

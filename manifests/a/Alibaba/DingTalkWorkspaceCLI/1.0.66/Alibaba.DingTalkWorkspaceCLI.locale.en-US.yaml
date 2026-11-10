@@ -1,0 +1,68 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Alibaba.DingTalkWorkspaceCLI
+PackageVersion: 1.0.66
+PackageLocale: en-US
+Publisher: DingTalk (Singapore) Private Limited
+PublisherUrl: https://www.dingtalk.io/
+PublisherSupportUrl: https://github.com/DingTalk-Real-AI/dingtalk-workspace-cli/issues
+PrivacyUrl: https://terms.alicdn.com/legal-agreement/terms/suit_bu1_dingtalk/suit_bu1_dingtalk202102181006_34132.html
+Author: DingTalk (Singapore) Private Limited
+PackageName: DingTalk Workspace CLI
+PackageUrl: https://github.com/DingTalk-Real-AI/dingtalk-workspace-cli
+License: Apache-2.0
+LicenseUrl: https://github.com/DingTalk-Real-AI/dingtalk-workspace-cli/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Alibaba Group
+CopyrightUrl: https://terms.alicdn.com/legal-agreement/terms/suit_bu1_dingtalk/suit_bu1_dingtalk202010161503_40649.html
+ShortDescription: dws — DingTalk Workspace on the command line, built for humans and AI agents.
+Description: |-
+  dws — DingTalk Workspace on the command line, built for humans and AI agents.
+  Why dws?
+  - For humans — --help for usage, --dry-run to preview requests, -f table/json/raw for output formats.
+  - For AI agents — structured JSON responses + built-in Agent Skills, ready out of the box.
+  - For enterprise admins — zero-trust architecture: OAuth device-flow auth + domain allowlisting + least-privilege scoping. Not a single byte can bypass authentication and audit.
+Moniker: dws
+Tags:
+- dingding
+- dingtalk
+ReleaseNotes: |-
+  本版本将已交付的 v1.0.66-beta.2 晋级正式版，汇总两个 beta 的改进，并纳入下方列出的 beta 后变更。
+  Changed
+  - 汇总 beta 改进：新增第三方 OIDC 登录、Provider Hook、分步换票及应用与来源隔离的凭证刷新；登录错误保留公开错误码和 Trace ID，并过滤凭证与内部诊断。核心已提供 Hook，真实 SDK 适配由 overlay 接入。
+  - 汇总 beta 修复：文档创建移除与文档名重复的首个 Markdown H1；安装器在缺失可用 Skill 时明确失败；Gitee 补同步包含 OpenHarmony 归档。
+  - Pi 接入说明 — 补齐已有 Pi 适配器的配置、模型选择、会话隔离与重置、工具权限、文本回退及音视频限制说明；按实际参数解释 ask 模式，不引入新运行时行为。
+  - 数字员工类型迁移 — 本次包含 open_code → qwenwork 的破坏性输入变更，脚本及返回值消费者须同步调整；分发前仍需独立核实公共服务的新旧客户端兼容行为，CI 通过不代表服务端已兼容。
+  Changes since v1.0.66-beta.2
+  Added
+  - AI Table advanced permission role members — adds role member append/replace, role copy, and effective user-role query commands with validated member payloads and unified Agent output.
+  - 表单分享更新按 MCP 回读的权限、匿名、查看范围、通知、时间及封面配置校验终态；已回读值矛盾时返回部分失败，旧服务端缺失字段或缺少资源对应证明时继续明确标记未验证。
+  - 补齐表单分享 get/update 的返回 Schema，并在结果中保留历史成员身份不可用的安全提示。修正表单列表中 UUID 和候选链接的 Help/Skill 说明。
+  - 对齐 MCP 表单分支的封面可信域名、端口及 URL 格式限制；保留已上传封面的结构化恢复 ID，并兼容非指定成员模式清空授权后的空字符串回读。催填 Help/Schema/Skill 统一使用当前组织 userId，由 MCP 复用身份转换并兼容历史 uid；提示结果不明时不自动重发，兼容不依赖旧客户端升级。
+  本地封面上传成功后配置更新失败时，整条命令禁止自动重试并清除重试时间建议，保留错误分类、原始诊断和资源恢复 ID，避免重复上传。
+  回执中的 enabled 与 status 相互矛盾时返回不可自动重放的部分失败，避免将关闭或受处罚的状态误标为已验证成功。
+  正数提交上限回读为 0（不限制）时按终态不一致处理；仅显式清除上限才接受 0。分享链接读取复用分享配置查询的只读退避重试，读取成功后只生成一次链接和二维码。
+  - chat list-all-conversations 新增显式 --page-all 自动翻页，并支持页数、条数和页间等待边界；默认单页行为保持不变。
+  - 新增 dws mcp market search：按名称关键词搜索钉钉 MCP 市场，返回 mcpId、名称、描述、服务名、提供方、是否官方和是否收费，可直接衔接 dws mcp published tools <mcpId> 与 dws mcp url get <mcpId>。支持 --limit 单页数量与 --cursor 续页；只覆盖已上架市场的 MCP，企业内发布但未上架市场的 MCP 不在结果中。
+  - Add independent mind-map creation and topic list/create/update/delete with reviewed OpenNodes input, unified results, and separate routing from blank wiki files and minutes mind maps.
+  - Add group-number join requests and invitation-link group lookup/join with explicit pending results and invitation credential redaction.
+  - Add application scope get/set and preserve failure, pending and unknown outcomes in application lifecycle results; success guidance never executes follow-up actions automatically.
+  - Extend AI Table orchestration with bounded batch reads, build plans, chart templates/layout diagnostics, resumable AI task waits and reports, builtin AI field configuration and field-group operations. Mutations retain explicit verification and recovery facts; unavailable capabilities do not authorize write probes or blind replay.
+  - 为 Schema string 参数的精确枚举迁移增加独立审批清单与 pending/consumed 生命周期；同一个前置 MR 可提交机制与仍保持 before 的 pending 计划，旧基线仍完整比较产品且不读取新清单，新 checker 仅以空审批补查声明。本次登记四项数字员工枚举迁移供维护者审阅，不修改业务参数、不提交 consumed、不调整历史基线或跳过质量门禁。
+  Changed
+  - Dangerous command confirmation (#1096) — calendar event delete, calendar attendee delete, calendar room delete, chat group members remove, minutes replace-text, and doc permission update now require explicit confirmation and publish high risk in Schema. Event deletion and minutes text replacement also publish destructive effects. Non-interactive scripts must pass --yes after obtaining user approval; otherwise these commands return confirmation_required without calling the remote service. The mono skill's dangerous-operation table now uses the canonical calendar attendee delete path for Schema lookup.
+  - dws dingtalk-tag manage create|list|save-draft --type 使用 qwenwork / local_agent；Help、Schema、Skill 和示例同步。
+  - 创建仍须显式选择类型，响应模式默认值、人设保存、发布前更新人校验及本地 Agent 接入逻辑不变。
+  - 返回值消费者需要识别 qwenwork。在分发新 CLI 前，须独立核实公共服务支持新类型以及旧客户端所需的兼容行为；本说明不代表线上部署已完成。
+  - 更新不传类型保持原值，类型创建后不可切换。connect --channel opencode 是本地适配器名称，不属于本次改名。
+  - 先核实公共服务兼容性，并同步 MCP 工具类型枚举/描述，再使用新 CLI。旧脚本中的 --type open_code 需改为 --type qwenwork。
+  - 回滚 CLI 时需一并核对服务端返回契约；本变更不迁移员工数据。
+  - manage set-visibility 在预览和执行前校验 ALL/PARTIAL、PARTIAL 非空目标及 ALL 与指定目标互斥，非法范围不会调用 MCP；合法请求和旧参数别名兼容保持不变。
+  - run run-status 的 Help 与 Skill 按真实返回说明 result 为字符串状态文案，程序应使用 execStatus 判断执行状态。
+  - Skill 上传失败保留公开权限管理链接，不再整段误脱敏；其他 URL、签名地址与凭证仍不输出。Skill 更新仅返回裸 NO_PERMISSION 时补充条件式权限引导，保留错误码、Trace ID 和退出码，不覆盖服务端具体说明、不重试写操作。
+  Fixed
+  - npm Skill installation resilience (#1320, binary-only switch proposed in #1321) — supports DWS_NO_SKILLS=1 for binary-only installs and keeps an optional user-cache refresh failure from rolling back an otherwise successful CLI and Agent Skill installation.
+  - 限流错误提示 — 当服务返回 server_error_code=RATE_LIMIT_ERROR 时，明确说明当前请求频率过高、本次请求被限流，并引导等待 10 秒后重试；其他错误码保持原有处理。
+ReleaseNotesUrl: https://github.com/DingTalk-Real-AI/dingtalk-workspace-cli/releases/tag/v1.0.66
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

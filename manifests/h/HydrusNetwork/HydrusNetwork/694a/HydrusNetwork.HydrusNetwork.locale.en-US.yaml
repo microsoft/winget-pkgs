@@ -1,0 +1,72 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: HydrusNetwork.HydrusNetwork
+PackageVersion: 694a
+PackageLocale: en-US
+Publisher: Hydrus Network
+PublisherUrl: https://github.com/hydrusnetwork/hydrus
+PublisherSupportUrl: https://github.com/hydrusnetwork/hydrus/issues
+PrivacyUrl: https://hydrusnetwork.github.io/hydrus/privacy.html
+Author: Hydrus Network
+PackageName: Hydrus Network
+PackageUrl: https://github.com/hydrusnetwork/hydrus
+License: WTFPL
+LicenseUrl: https://github.com/hydrusnetwork/hydrus/blob/HEAD/LICENSE
+Copyright: Copyright (C) 2011 Hydrus Developer
+CopyrightUrl: https://github.com/hydrusnetwork/hydrus/blob/master/LICENSE
+ShortDescription: A personal booru-style media tagger that can import files and tags from your hard drive and popular websites. Content can be shared with other users via user-run servers.
+Description: |-
+  The hydrus network client is an application written for Anon and other internet-fluent media nerds who have large image/swf/webm collections.
+  It browses with tags instead of folders, a little like a booru on your desktop. Advanced users can share tags and files anonymously through custom servers that any user may run.
+  Everything is free and privacy is the first concern. Executable releases are available for Windows, Linux, and macOS.
+  The program is in python, so you can also run it straight from the source code.
+Moniker: hydrus-network
+Tags:
+- booru
+- cross-platform
+- image-database
+ReleaseNotes: |-
+  Important
+  AI recently discovered an important security flaw in hydrus. If you are running v691 or earlier you should update to v692 or later, such as today's release. Check here for more details.
+  misc
+  - added 'confirm add-undelete tags' to the cog icon on 'manage tags'. if you have been annoyed at the 'confirm your action' popups in the new manage tags dialog when you type in a tag that was previously deleted, please uncheck this and let me know how it feels
+  - added 'allowed actions for taglist double-click:' to this menu too. if you don't ever want to see a 'clear deletion record' option, or whatever, you can now turn things on and off here too
+  - fixed the 'clear trash' routine to delete more than one old file per run. this was the lagging logic patched last week, now improved back to what it was originally intended to do
+  - also made the clear 'trash routine' wait on 'a file was recently deleted' safety delay more intelligently (it doesn't work if a file was deleted in the past sixty seconds, as a grace period for undeletes of accidental giant deletes), and, lmao, it no longer sends this signal itself when it works (blocking itself a bunch when there's a lot of work to do)
+  - when you drag-and-drop URLs on the client, and the application source bundles non-URL data in the 'urls' metadata slot (we have evidence of one less-used browser putting the browser tab text in with the url), the hydrus drag-and-drop catcher now filters the urls from the non-urls nicely. if any urls were in there, it silently prints info to the log; if nothing was an url, it puts it in a popup for you to see
+  - fixed some login cookie handling when using the curl_cffi test. there is more work to do with the curl_cffi test, so please bear with me
+  - I fixed some issues with the 'children' tab of tag autocomplete, which looks up children of tag parents in the associated taglist, when the file domain is set to multiple file domains or 'all known files'
+
+  exe manager
+  - the new Windows 'hide terminal' tech test is now default ON for all users. the test appeared to go fine, so I am making it real. you shouldn't notice any difference, but if you are a Windows user and you suddenly get command line popups every time you import a file or do 'open externally', hit up options->external programs to switch it off, and let me know!
+
+  v693a hotfix
+  - I did a hotfix on Saturday to address some update stuff--
+  - in the 'future build' integration, the pyproject.toml accidentally did not get the intended pyopenssl, numpy, or pyside6 updates, meaning the builds missed out. it was just a copy/paste transcription failure by me. this is fixed and I'll make a script to do this automatically in future
+  - fixed a bitrot issue with the v687-to-v688 update code
+  - fixed a typo in deserialisation when updating older metadata routers from v2 to v3 (would hit old import/export folders with sidecars that hadn't been edited in about 18 months)
+  - as a side thing here, I now have a nicer test in my weekly build workflow that tests my older db updates better. I'm going to keep an older db and test current code to catch bitrot issues like the above. unfortunately, my best rich test db is currently v693, so I'm going to pin it at that version and let it get older every week until it is 50 weeks old and we have full coverage of all the updates I try to support. so, going forward I guarantee I will test anything after v693 every week
+  - I've made a plan for a serialisable update manager too and will be working on that in the future. we'll fix these legacy objects sitting around on the db for years without a resave
+
+  security
+  - I continued the recent security work. my deserialisation pipeline now has a single clean deserialisation context to hold the various trust information. it is easier to pass this through each stage, and this thing will be easier to extend in future
+  - in doing this, I was able to remove a hack that was suppressing some trusted whitelist warning logging, so whitelist warning logging is now true positive in a couple of places it was false negative before. I already fixed a couple small instances of this, although tbh I was surprised that we had so little report of legacy cruft in the local store; it was mostly just a couple of legacy 'current file service is this' on older page objects
+  - also generically cleaned some deserialisation unit tests and special deserialisation situations
+  - there's more I want to do here, including what I hope will be a big deserialisation typedef solution, so I'll keep pushing
+
+  boring stuff
+  - added help->debug->threads and processes->wake mainloops for various debug testing
+  - cleared out the 12 or so 'calling non-callable' linting issues with nicer typedefs and some stub callable juggling
+  - cleaned up all Callable type definitions across the program and updated some old deprecated typing stuff
+  - fixed some error handling for malformed objects in page session load--it was not recovering properly and raising a new error
+  - added unit tests for the new cookie serialisation and deserialisation for requests
+  - added unit tests for the new cookie serialisation and deserialisation for curl_cffi
+  - fixed an issue with the 'networking' unit test suite when it was run on its own; tldextract was not initialised properly in this case, and when it tried to load its suffix list from disk to init its cache inside the first test, the mock http wrapper gonked the load
+ReleaseNotesUrl: https://github.com/hydrusnetwork/hydrus/releases/tag/v694a
+PurchaseUrl: https://hydrusnetwork.github.io/hydrus/support.html
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://hydrusnetwork.github.io/hydrus/faq.html
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

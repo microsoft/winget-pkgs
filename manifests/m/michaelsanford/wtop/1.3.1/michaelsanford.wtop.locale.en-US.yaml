@@ -1,0 +1,49 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: michaelsanford.wtop
+PackageVersion: 1.3.1
+PackageLocale: en-US
+Publisher: michaelsanford
+PublisherUrl: https://www.michaelsanford.com/
+PublisherSupportUrl: https://github.com/michaelsanford/wtop/issues
+Author: Michael Sanford
+PackageName: wtop
+PackageUrl: https://www.michaelsanford.com/wtop/
+License: MIT
+LicenseUrl: https://github.com/michaelsanford/wtop/blob/HEAD/LICENSE
+ShortDescription: Windows re-imagining of htop, written in Go
+Description: A self-contained, single-binary system monitor for Windows — inspired by htop. CPU, memory, GPU, network, and processes. Live. In your terminal.
+Tags:
+- golang
+- htop-alternative
+- terminal-based
+- windows
+ReleaseNotes: |-
+  Fixed: wtop used ~5.7 GB of RAM from the moment it launched
+  v1.3.0 showed itself at the top of its own process list: about 5.7 GB working set and 9.8 GB private memory (around 18% of RAM on a 32 GB machine), reached within a second of launch. Upgrading is recommended for every v1.3.0 user. The bug affects all machines.
+  What was happening
+  This was not a leak. Memory jumped once at startup and then stayed flat. GODEBUG=gctrace=1 showed the Go heap doubling every ~30 ms until about 7.3 GB was live. A heap profile put 9.5 GB (99.9% of all allocations) in the per-core CPU collector.
+  wtop reads per-core CPU times with NtQuerySystemInformation(SystemProcessorPerformanceInformation). This call rejects any buffer whose length is not a whole number of 48-byte per-core entries, returning STATUS_INFO_LENGTH_MISMATCH. The buffer was sized NumCPU × 48 + 4096, with the extra 4 KB meant as headroom. That headroom made every call fail. The retry loop responded by doubling the buffer, but 4096 · 2ᵏ is never divisible by 3, so no amount of doubling could produce a valid length.
+  The loop stopped only by coincidence. The length parameter is a 32-bit ULONG, and on a 16-thread machine, after 20 doublings (4864 · 2²⁰ ≈ 5.1 GB), the value truncated to 0x30000000, which happens to be a multiple of 48. The call then succeeded, and the ~5 GB buffer was kept for reuse for the rest of the session. How far it grew before that coincidence depended on the machine's core count.
+  The fix (#45)
+  - The CPU buffer is now sized to exactly one entry per logical processor and only ever grows in whole entries. The loop uses the kernel's reported length when it is a whole number of entries, and is capped at 4,096 cores (~192 KB). Past the cap it returns an error instead of allocating.
+  - The process-table query had the same uncapped doubling loop. It wasn't misbehaving, since that info class has no entry-size rule, but it now has a 64 MB cap so it can't run away either.
+  - A new regression test (TestCPUBufferStaysBounded) checks that the buffer stays a whole number of entries, stays under the cap, and still covers every core.
+  Before / after
+  ──────┬─────────────┬────────┬────────────
+        │Working set  │Private │Live Go heap
+  ──────┼─────────────┼────────┼────────────
+  v1.3.0│5,704 MB     │9,816 MB│7,297 MB
+  ──────┼─────────────┼────────┼────────────
+  v1.3.1│~65 MB (flat)│~63 MB  │1–3 MB
+  ──────┴─────────────┴────────┴────────────
+  Allocations for the first CPU collection fell from 9.51 GB to 4.3 MB. Most of the remaining footprint is native code (GPU driver and performance-counter DLLs), not wtop's own heap.
+  What's Changed
+  - fix(verify): isolate downloads per tag and add -Clean by @michaelsanford in #43
+  - Remove Snyk scanning by @michaelsanford in #44
+  - fix(collector): stop the CPU buffer growing to ~5 GB at startup by @michaelsanford in #45
+  Full Changelog: v1.3.0...v1.3.1
+ReleaseNotesUrl: https://github.com/michaelsanford/wtop/releases/tag/v1.3.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

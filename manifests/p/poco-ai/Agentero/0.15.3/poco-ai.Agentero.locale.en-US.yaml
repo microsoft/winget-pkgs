@@ -1,0 +1,54 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.15.3
+PackageLocale: en-US
+ShortDescription: Agent-friendly reference management.
+Description: 'Traditional reference managers are not agent-friendly: highlights and notes stay locked inside single files, making it hard for agents to reuse knowledge across papers; every conversation starts from scratch without a stable local knowledge map; PDFs are human-friendly but not the most comfortable reading material for agents. Agentero aims to build an agent-friendly, agent-native way to manage references, exploring how humans and agents collaborate on reference management. Connect your local agent via ACP (BYOA), select-text chat, import papers and Skills, stay compatible with the Zotero ecosystem, and get paper translation, bidirectional links with a knowledge graph, and deep PDF reading.'
+Tags:
+- academics
+- agent
+- article
+- literature
+- paper
+- pdf
+- reference
+- research
+- thesis
+- zotero
+ReleaseNotes: |-
+  This release extends Agent replies from plain Markdown to read-only structured UI blocks, turns PDF selection translation into a pinnable floating card, and lets Plaza feed items go straight to the Agent. It also adds CLI feed subscriptions and OR keyword matching for discover, and fixes a batch of issues across Zotero migration, Plaza embedded pages, quick conversations, and the PDF translation pipeline.
+  Features
+  - Read-only UI blocks in Agent replies: A standalone openui-lang fence at the start of a line is parsed into read-only components spanning layout, text, status, data, paper reading, and flow; colors follow theme tokens, charts stay legible in the 320px rail, and the component signatures ship with the bundled skill. (#1007 by @ffy6511)
+  - Floating translation cards for PDF selections: Translations appear in a floating card that can be moved, resized, and copied, and stays visible while scrolling or zooming; Esc closes it and P pins it, the header previews the source text and jumps back to the selection, and each viewer keeps one card at a time. (#974 by @ffy6511)
+  - Add whole Plaza feed items to a conversation: The RSS list context menu and the detail toolbar gain "Add to chat", sending the whole item (title plus summary or full text) to the Composer as a reference chip. (#955 by @HenryLoveMiller)
+  - CLI feed commands: New agentero feed list/add/remove/refresh/items/read subcommands share the desktop fetch pipeline and feeds.sqlite, return stable error codes, and support incremental cron consumption. (#969 by @HenryLoveMiller)
+  Improvements
+  - Antigravity now uses native agy acp: The standalone ACP server download is gone; Agentero reuses the local agy acp and its existing login state, and the macOS Intel restriction is lifted. (#1011 by @bet4it)
+  - Markdown source toggle moved to the status bar: The rendered/source switch is pinned to the left edge of the editor status bar, the duplicate entries in both toolbars are gone, and the shortcut tooltip and pressed state remain. (163eb4ea6 by @ffy6511)
+  - OR keywords for CLI discover: --match any (MCP keywordMatch) joins multiple keywords with OR so multi-word radar scans no longer collapse to zero results; the default stays AND. (#971 by @HenryLoveMiller)
+  Fixes
+  - Plaza pages fit their panel and support zoom: Embedded pages scale to the panel width by default, the toolbar offers 25%–200% manual zoom, and clicking the percentage restores auto-fit; resizing does not remount the iframe. (#1005 by @W-RMSL)
+  - Plaza pages survive tab switches: An activated embedded page stays mounted across workspace tab switches and split-pane focus changes, keeping the iframe and in-page state; background tabs still load lazily. (#989 by @W-RMSL)
+  - Zotero migration stopped by path checks: When a new vault sits under the home directory, the ancestor probe now stops at the filesystem scope boundary instead of raising forbidden path. (#996 by @YasyaKarasu)
+  - Quick conversations stay visible and resizable: The card remains after the pointer leaves, scrolling, or zooming the PDF, can be dragged to resize, and lets long formulas scroll horizontally within window bounds. (#992 by @Aschenbath)
+  - Business journal rankings are retained: FMS and UTD24 values returned by EasyScholar survive the tag projection, and a duplicated UTD24 listing is shown once. (#1013 by @Aschenbath)
+  - Mermaid and tables in Agent replies: Mermaid fences now use the shared renderer, and table fullscreen opens an in-app overlay closed with Esc. (176bfeda2 / 4f5f2a8c5 by @ffy6511)
+  - Local skills appear in the / menu: The slash menu merges the local SKILL.md list, inserts a skill token when picked, and keeps ACP commands ahead on name collisions. (cc8e7634f by @ffy6511)
+  - ACP command prefixes are preserved: Commands are inserted and sent in the advertised $name form, so agents that only accept $skill no longer reject /skill. (21497e578 by @ffy6511)
+  - Minimized windows can be summoned again: On Windows, reopening Settings or another singleton window from the gear restores, shows, and focuses it. (1138d198a by @ffy6511)
+  - Deleting a paper no longer leaves a catalog row: Entries whose folder is already gone are removed with the delete, so the paper stops showing as missing a PDF. (75aa1fb7f by @qychen2001)
+  - Citation pills stay readable in light themes: Removing the muted text override keeps citation pills from rendering as black blocks under the Twitter light theme. (#990 by @W-RMSL)
+  - Numbered formulas can be located: Formula numbers are read from \tag{N} in the layout data, so #formula=N resolves even when an older index omits the formula. (92c4aae28 by @ffy6511)
+  Resolved Issues
+  - No progress in the dual-pane translator: The split translation panel now reports translation progress instead of leaving a blank pane on long documents. (#994 by @ffy6511)
+  - Full-text translation failed in the split view: Rendering waits for the translated display document to be ready, so full-text translation no longer errors or leaves a blank page in the split view. (#991 by @ffy6511)
+  - Quick-chat replies were lost: A marks refresh no longer replaces the live thread with a catalog snapshot, so generated replies survive the refresh. (#945 by @ffy6511)
+  Full diff: https://github.com/poco-ai/Agentero/compare/v0.15.2...v0.15.3
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.15.3
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: locale
+ManifestVersion: 1.28.0

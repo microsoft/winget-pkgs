@@ -1,0 +1,56 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: EnvBox.Aura
+PackageVersion: 0.3.15
+PackageLocale: en-US
+Publisher: EnvBox
+PublisherUrl: https://github.com/NGLSL
+PublisherSupportUrl: https://github.com/NGLSL/Aura/issues
+PackageName: Aura
+PackageUrl: https://github.com/NGLSL/Aura
+License: Apache-2.0
+LicenseUrl: https://github.com/NGLSL/Aura/blob/HEAD/LICENSE
+ShortDescription: A Windows process-level environment virtualization launcher that shows target apps virtualized locale, region, language, timezone, and DNS values.
+Description: |-
+  Aura (EnvBox) is a Windows process-level environment virtualization launcher. Target apps run on the host with full access to the filesystem, GPU, network, and user profile, but see Environment Profile values for locale, region, UI language, timezone, DNS view, environment variables, and whitelisted internationalization registry reads.
+
+  EnvBox does not provide a security boundary and is not a sandbox. It does not isolate files, registry writes, network, or privileges, and must not be used as a security control.
+
+  Principles
+  - Process-scoped: changes apply only to one runtime instance's process tree.
+  - Host-transparent: never modifies Windows global configuration.
+  - Environment-consistent: one profile keeps locale, region, language, timezone, DNS, and environment aligned.
+
+  The package includes a GUI for managing profiles and launching apps, the envbox CLI (envbox run / profile / app), and a Detours-based runtime DLL.
+Tags:
+- environment-variables
+- locale
+- localization
+- timezone
+ReleaseNotes: |-
+  Aura v0.3.15
+  本版本新增浏览器独立数据目录、实际出口与时区查询、Profile HTTP／SOCKS5 代理和两个固定检测入口，并整理环境配置、应用、运行实例三个页面的职责。
+  Changes
+  - 环境配置可查询实际网络出口并预览 IANA／Windows 时区，确认后只填入两个时区字段，保存后生效。出口 IP 为本次请求的只读结果；取消、查询失败或过期结果不会覆盖已保存配置。时区映射使用随产品提供的 Unicode CLDR 数据，不通过国家或 UTC 偏移猜测具体时区。
+  - Profile 支持无代理、HTTP、SOCKS5，以及代理服务器地址和端口。受支持 Chrome 与出口／时区查询共用该配置；SOCKS5 使用代理侧 DNS，代理连接失败不回退直连。未配置代理的旧应用保留原网络行为，Host 启动不继承 Profile 代理；不修改 Windows 全局代理，不支持认证代理或任意进程全流量代理。
+  - Chrome 应用可开启独立数据目录，按应用和实际选择的 Profile 稳定分配；Host 使用单独身份。普通启动、临时选择环境与历史工作区链路共用目录规则。已有目录占用、参数冲突或配置身份无法确认时明确拒绝，不把旧浏览器误报为新的受控实例。
+  - 应用页提供 IPPure Claude 与 Net.Coffee Claude 检测入口，可选择已保存环境或 Host。页面在对应 Chrome 中打开，不调用系统默认浏览器，不永久改写应用参数；只有启动配置可确认匹配时才复用已运行浏览器。
+  - 当前支持的全部 11 个国家和地区统一显示中文；搜索同时识别中文名称和不区分大小写的地区代码。保存值仍使用原 ISO 标识，未知旧代码保持可见。
+  - Profile 页面只负责配置，已移除“使用此配置运行”面板及查看配置时不必要的后台管理请求。启动和浏览器检测在应用页，刷新、停止及诊断集中到运行实例页。
+  - 运行实例页同时展示本次会话与 Supervisor 后台记录，按实例 UUID 去重并统一应用筛选。后台管理不依赖当前选中的 Profile 草稿；环境批量停止有明确范围，应用筛选时不提供跨应用批量停止。
+  - DNS 上游按协议、地址和操作分项显示，连接 IP 与证书策略按需查看；概览不再把多个上游挤成一串。运行技术数据默认折叠到诊断详情，保留兼容启动、跟踪中断和配置观测状态。
+  - 修复空实例列表嵌入滚动区时的布局崩溃，以及旧 UTC 时区恒等替换可能出现的死循环。
+  Validation
+  - 开发构建中实际验证了出口／时区预览、填入与保存、HTTP／SOCKS5 查询、代理失败提示、代理保存重开，以及 Chrome 参数、网页出口对照与检测页面复用。目录冲突、代理参数冲突及变更配置后拒绝复用旧根进程有实际证据。
+  - 普通 Profile、临时选择环境、Host 与工作区 Chrome 的独立目录及关闭 GUI 后继续使用已有实际浏览器证据。后台重启后的兼容实例跟踪中断、停止拒绝，以及原 Job 在线归零后的退出确认已有专项记录。
+  - 页面调整后实际验证 Profile 不再显示运行面板、应用页正常启动及打开两站、会话实例的筛选和停止；发现并修复空列表布局崩溃后重新检查了空态及非空列表。
+  - 既有 GUI 检查 62 项通过、5 项忽略；本次功能与页面调整经独立 Standards／Spec 审查。未新增测试用例；仅按用户明确许可将原有日本地区显示断言同步为中文。
+  - 发布门禁要求同一提交通过干净 Windows CI 的完整工作区、双架构 Runtime／DNS fixture、独立会话及 CPU 渲染器检查，再由正式 Release 工作流使用项目安装脚本构建并发布安装包。
+  Limitations
+  页面调整后的后台实例真实列表、诊断展开、单实例／环境批量停止及待确认启动结果查询尚未在同版本 Supervisor 下重新实机验收。本机已安装服务与开发版制品身份不匹配；用户选择保留当前 Chrome 的管理状态，因此未切换服务。该部分已有源码及既有检查复核，干净 CI 不替代这项桌面验收。
+  Chrome 工作区使用明确标识的兼容启动：强制注入并确认根进程载入匹配配置，但不提供严格 EXE 入口门禁保证，也不把 Hook 安装数量或 Job 成员数量当作全部读取入口、沙箱 renderer 已验证。Supervisor 重启后，旧兼容实例可能保持 TrackingLost，不能自动接管或停止。
+  未实际覆盖其他 Chrome 渠道、认证代理、更多 IPv6 代理端点，以及第三方服务格式变化、证书异常、超限和全部网络时序分支。相同代理配置不保证所有网站分流出口一致；第三方检测评分不是 Aura 启动成功或匿名性的保证。
+ReleaseNotesUrl: https://github.com/NGLSL/Aura/releases/tag/v0.3.15
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
