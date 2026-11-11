@@ -1,0 +1,80 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: BlueHeisenberg.SCSKiller
+PackageVersion: 1.4.7
+PackageLocale: en-GB
+Publisher: The SCSKiller authors
+PublisherUrl: https://github.com/BlueHeisenberg
+PublisherSupportUrl: https://github.com/BlueHeisenberg/SCSKiller/issues
+PrivacyUrl: https://scskiller.com/privacy/
+PackageName: SCSKiller
+PackageUrl: https://scskiller.com/
+License: GPL-3.0-or-later
+LicenseUrl: https://github.com/BlueHeisenberg/SCSKiller/blob/HEAD/LICENSE
+Copyright: Copyright (C) 2026 The SCSKiller authors
+CopyrightUrl: https://scskiller.com/legal/
+ShortDescription: Compiles your games' shaders into your GPU driver's cache before you play, so the game doesn't stop to compile them mid-game.
+Description: |-
+  SCSKiller reads the shaders a game ships with, works out the pipelines it will build, and compiles them into your driver's shader cache ahead of time, from its own process and with the game closed. When you launch the game, they're already there.
+
+  Features
+  - NVIDIA and AMD. DirectX 12 games, and DirectX 11 games on NVIDIA.
+  - Finds your games in Steam, Epic Games, EA app, GOG, Ubisoft Connect, Xbox (PC), Battle.net, PURPLE, HoYoPlay and Gaijin.
+  - Knows which games stutter: the library puts known offenders on top, with the reason.
+  - Recompiles after driver updates: a driver update clears the shader cache, and SCSKiller notices and compiles again, on its own if you let it.
+  - Optional recorder for games whose pipelines cannot be worked out from their files: play a few minutes with it on, then compile.
+  - Frame times per session: with the recorder on, a game's page graphs your last session and tells the shader stutters apart from other hitches.
+  - Play button in the Library and on a game's page: starts the game through its store.
+  - Never touches anti-cheat games beyond reading their files: no launching, no injecting, no recorder.
+Tags:
+- amd
+- directx-12
+- gaming
+- gpu
+- nvidia
+- shader
+- shader-compilation
+ReleaseNotes: |-
+  This build isn't code-signed yet, so the first run will probably show SmartScreen's "Windows protected your PC".
+  Click More info, then Run anyway. Updates never show it.
+  To check the download arrived whole, compare its SHA-256 with the one at the end of these notes (PowerShell:
+  Get-FileHash <file>). These notes aren't signed, so that doesn't prove who built it. The source: https://github.com/BlueHeisenberg/SCSKiller/tree/v1.4.7.
+  Smart App Control (Windows 11) blocks unsigned apps outright, with no Run anyway.
+  New
+  - Hookshot ports are detected as Vulkan games, and only Vulkan is offered for them.
+  Improved
+  - The game page says when a game keeps its own shader cache in its folder, which SCSKiller doesn't clear or change, such as
+    Phantom Blade Zero.
+  - The game page says when recorded pipelines alone are over the compile size limit, and that earlier compiles stay
+    until you clear the cache.
+  Improved on Windows
+  - With NVIDIA, the compile size limit counts ray tracing pipelines.
+  Fixed
+  - Reading an Unreal game's shaders in the background no longer takes gigabytes of memory.
+  - With AMD and other non-NVIDIA GPUs, Streamline games such as Dead Space and Monster Hunter Wilds record through the
+    recorder's preloader.
+  - Beat Saber mods load again with the recorder placed.
+  - With NVIDIA, Vulkan games whose shaders set float modes the GPU reports as unsupported compile all their pipelines.
+  - A game whose plan holds only upscaler or other middleware pipelines shows that no shaders were found yet instead of
+    Warmed after a compile, and its compile stays available.
+  - A launch that ends within seconds, before the game's first DirectX call, isn't reported as one where the recorder never
+    loaded.
+  - A failed take-over of another SCSKiller copy's recorder deletes only the files it wrote.
+  - After removing the recorder from all games, a game whose recorder another SCSKiller copy placed says to restart
+    SCSKiller to record again.
+  Fixed on Windows
+  - Hookshot ports that have been played once compile with no recording, through the port's own hidden shader precompile.
+  - Games that block unsigned modules, such as Dota 2, no longer offer a recording session that would stop them from
+    starting.
+  - With AMD, a compile size limit no longer leaves out most of the pipelines of games with many ray tracing pipelines.
+  Fixed on Linux
+  - A launch where the game makes its DirectX 12 device without the recorder says so instead of "The recorder never loaded".
+  - A shader that crashes vkd3d-proton's shader compiler in Maximum mode costs a few compile restarts, not one per
+    pipeline that uses it.
+  - Recording works on PCs without Steam, for games started outside Steam such as through Faugus.
+  - A DirectX game under Proton no longer stays at "start it once from Steam" after it was started from Steam. Thanks to
+    Jabors.
+ReleaseNotesUrl: https://github.com/BlueHeisenberg/SCSKiller/releases/tag/v1.4.7
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
