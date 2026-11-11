@@ -1,0 +1,54 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Victor-Quqi.Axiopera
+PackageVersion: 0.3.3
+PackageLocale: en-US
+Publisher: Victor-Quqi
+PublisherUrl: https://github.com/Victor-Quqi
+PublisherSupportUrl: https://github.com/Victor-Quqi/Axiopera/issues
+PackageName: Axiopera
+PackageUrl: https://github.com/Victor-Quqi/Axiopera
+License: Apache-2.0
+LicenseUrl: https://github.com/Victor-Quqi/Axiopera/blob/HEAD/LICENSE
+ShortDescription: Orchestrate Claude Code, Codex and Grok Build as sub-agents of each other from one executable.
+Description: |-
+  Axiopera connects Claude Code, Codex, and Grok Build so the lead agent can dispatch the others as sub-agents and receive their results. Lighter, more efficient agent collaboration with minimal setup changes: one executable plus one skill, and your existing agent sign-ins and usage allowances are reused, so agent configuration stays unchanged by default.
+  A lead agent can ask for review or work from the other agents, add instructions and change direction while they run, and follow every sub-task live in another terminal with axiopera top. Tasks share your working directory unless --cwd selects another, and parallel writers should each use their own git worktree. A background daemon coordinates the sessions.
+  The same binary is a command line: axiopera create, send, reply, watch, top, daemon and status subcommands drive tasks, approvals and progress reporting, and cancelled tasks can be resumed.
+Tags:
+- agent
+- agent-orchestration
+- agent-team
+- agentic
+- ai
+- chatbot
+- claude-code
+- code
+- codex
+- coding
+- grok
+- large-language-model
+- llm
+- multi-agent
+- programming
+- subagent
+ReleaseNotes: |-
+  Added
+  - A global --caller <agent>:<session ID> names the calling session where the host's session variable does not reach axiopera, such as over ssh, docker exec or WSL. Without it such an agent was taken for user and shared the terminal's inbox. axiopera guide tells an agent taken for user to add the option. See "指定调用方" in docs/usage.md.
+  - Each task records the model and effort it actually runs on, also when spawned without --model. status, the result line of each turn, the turn lines of log and the task title in top show them.
+  - axiopera models <agent> names in its first line what a spawn without --model runs on: the model from Axiopera's configuration, or else the one the agent's CLI picks from your own settings.
+  - Each task's events.jsonl gets a delivered event when inbox, result or a push hands something to a caller: who received it, how, and which events and results went along. Tools that read the data directory can tell from it what a command or a pushed message gave the agent. Pushes and reminders sent into Codex sessions carry a client message ID starting with axiopera:, which tells them from what the user typed.
+  Fixed
+  - Grok: --model and --effort were ignored and the task ran on Grok's default model and effort. They now apply, and an invalid value is reported with the model list.
+  - Codex: an approval request that Codex withdraws before anyone decides (network approvals, from Codex 0.167) no longer stays waiting for you, and no stale refusal reason is sent into the turn afterwards.
+  - Codex: messages pushed into a host session no longer begin with an [axiopera:<id>] mark.
+  Other notes
+  - Grok's read tier refuses models that run on another harness, such as codex: switching to one drops the read tier's tool limits. Use the work or full tier for those models.
+  - models --json: Grok's current_model is replaced by native_model and native_effort, which all three agents now report.
+  - A push that an earlier version left unconfirmed may be sent once more after the upgrade.
+  - Stop the daemon with axiopera daemon stop before replacing the executable.
+  - Updating the Codex plugin may require trusting it again.
+ReleaseNotesUrl: https://github.com/Victor-Quqi/Axiopera/releases/tag/v0.3.3
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

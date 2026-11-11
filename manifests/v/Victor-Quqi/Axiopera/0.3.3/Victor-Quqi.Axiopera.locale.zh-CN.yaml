@@ -1,0 +1,55 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: Victor-Quqi.Axiopera
+PackageVersion: 0.3.3
+PackageLocale: zh-CN
+ShortDescription: 把 Claude Code、Codex 和 Grok Build 互相编排成子 agent 的协作工具，一个可执行文件加一个 skill 即可接入。
+Description: |-
+  Axiopera 打通 Claude Code、Codex 与 Grok Build，让主 agent 把它们派生为子 agent 并接收结果。更轻量、更高效、更易用的 agent 协作，对现有配置的改动很小：一个可执行文件加一个 skill，沿用你已有的 agent 登录态和用量额度，默认不改动 agent 配置。
+  主 agent 可以请其他 agent 审阅或干活，运行中随时追加指令、改变方向，也可以在另一个终端用 axiopera top 实时查看所有子任务。任务默认共用当前工作目录，`--cwd` 可另行指定，并行写入的任务应各用一个 git worktree。后台守护进程负责协调各个会话。
+  同一个程序也是命令行：axiopera create、send、reply、watch、top、daemon、status 等子命令负责派发任务、审批和进度上报，已取消的任务还能续接。
+Tags:
+- claude-code
+- codex
+- grok
+- 人工智能
+- 代码
+- 任务编排
+- 多智能体
+- 大模型
+- 大语言模型
+- 子智能体
+- 智能体
+- 智能体协作
+- 智能体团队
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  任务现在显示实际使用的模型和推理强度，跨 ssh、容器调用时可以指明自己的会话，Grok 的 --model 和 --effort 开始生效。
+  新增
+  - 全局选项 --caller <名称>:<会话 ID>：经 ssh、docker exec、WSL 等调用 axiopera 时，宿主的会话变量传不过去，用它指明调用方会话。此前这类 agent 会被当成 user，与终端共用收件箱。axiopera guide 会提示被当成 user 的 agent 加上这个选项。详见 docs/usage.md 的「指定调用方」。
+  - 每个任务记录实际使用的模型和推理强度，不带 --model 派发的也有。status、每轮结果行、log 的轮次行和 top 的任务标题都会显示。
+  - axiopera models <agent> 首行写明不带 --model 派发时使用的模型：有 Axiopera 配置时是配置值，否则是原生 CLI 按你自己的设置选出的模型。
+  - inbox、result 或推送把内容交给调用方后，在涉及任务的 events.jsonl 中各记一条 delivered 事件：交给了谁、以哪种方式、带了哪些事件和结果。读取数据目录的工具可以据此知道一条命令或一条推送消息交给了 agent 什么。推入 Codex 会话的消息和提醒带有以 axiopera: 开头的客户端消息 ID，可据此与用户输入区分。
+  修复
+  - Grok：--model 和 --effort 此前不生效，任务仍按 Grok 的默认模型和推理强度运行。现在生效，取值无效时报错并附模型列表。
+  - Codex：Codex 在裁决前自行撤回的审批请求（0.167 起的网络审批）不再一直等你处理，之后也不会再把过时的拒绝理由送进轮次。
+  - Codex：推入宿主会话的消息不再以 [axiopera:<id>] 标记开头。
+  其它说明
+  - Grok 的 read 档拒绝运行在其他 harness 上的模型（如 codex）：切换过去会丢掉 read 档的工具限制。这些模型请用 work 或 full 档。
+  - models --json：Grok 的 current_model 改为 native_model 和 native_effort，三家现在都会报告这两项。
+  - 旧版本留下的未确认推送，升级后可能再发送一次。
+  - 替换程序前先执行 axiopera daemon stop。
+  - 更新 Codex 插件后可能需要重新信任插件。
+ReleaseNotesUrl: https://github.com/Victor-Quqi/Axiopera/releases/tag/v0.3.1
+Documentations:
+- DocumentLabel: 使用说明
+  DocumentUrl: https://github.com/Victor-Quqi/Axiopera/blob/HEAD/docs/usage.md
+- DocumentLabel: 后端支持
+  DocumentUrl: https://github.com/Victor-Quqi/Axiopera/blob/HEAD/docs/backends.md
+- DocumentLabel: 设计说明
+  DocumentUrl: https://github.com/Victor-Quqi/Axiopera/blob/HEAD/docs/design.md
+ManifestType: locale
+ManifestVersion: 1.28.0
