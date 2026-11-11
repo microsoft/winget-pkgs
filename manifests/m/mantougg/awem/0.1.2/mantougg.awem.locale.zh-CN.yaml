@@ -1,0 +1,31 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: mantougg.awem
+PackageVersion: 0.1.2
+PackageLocale: zh-CN
+ShortDescription: 跨平台 AutoWonder 执行器管理应用：单一 Go 二进制即常驻 daemon + 内嵌 Web 页 + CLI 子命令。
+Description: |-
+  awem（AutoWonder Executor Manager）是跨平台（Windows / Linux / macOS）的本机 AutoWonder 执行器管理应用。单一 Go 二进制 = 常驻 daemon + 内嵌 Web 页 + CLI 子命令；AI 用 CLI 维护，人用 Web 页维护。
+  它用结构化配置 + 进程守护 + 统一视图替代散落的手工 bash 脚本：崩溃自动拉起采用 1s→5m 指数退避，每个执行器有独立的按大小滚动日志与保留策略，总览把本地进程状态与平台 ONLINE / BUSY / OFFLINE 状态并列展示。
+  本地 API 仅绑定 127.0.0.1，使用随机 token 鉴权，校验 Host / Origin 防 CSRF，输出中令牌恒掩码。
+ReleaseNotes: |-
+  - 布局改为左树右表：左侧归属导航树（全部执行器/项目/小队/未归属，带 在线/成员 徽标、折叠记忆、选中失效回退），右侧全列表格；无归属数据时隐藏左树
+  - 表格列序调整：选择 | 名称 | 所属小队（主，副行项目）| 版本 | 本地进程 | 连接 | 平台 | 模型 | 自启 | 重启 | 操作；名称/小队两列可收缩截断，内容区最大宽 1440→1600，表格默认不出现横向滚动条
+  - 表体视口自适应限高、表头吸顶，树表同高双向撑满、底边对齐；常见分辨率无页面纵向滚动条
+  - 查询条件：名称/本地进程筛选（AND、输入即筛选、计数与空态、清除），与树选择叠加且不裁剪树
+  - 新增自绘 Select 下拉组件（卡片弹层、键盘操作、Esc/点击外部关闭），替换原生 select
+  - 新增 favicon.svg 项目图标（浏览器页签/顶栏 logo/README）
+  - 改一屏左右分栏：左列 = 进程卡片 → 运行时间带 →（有漂移时）漂移明细 → 日志卡片（填满剩余高度、内部滚动）；右列编辑卡片固定 380px、单列字段、超高内部滚动；整页按视口定高（下限 480px）
+  - 标题行换位：平台中文名为主标题（左），等宽标识名 hint（右）；无平台数据时维持等宽标识名标题
+  - 日志容器隔离滚动链，日志到顶/底不带动页面
+  - LogViewer 新增 fill 模式（默认仍固定 420px，兼容旧用法）
+  - fix(api)：静态资源缓存头——index.html 与稳定文件名 no-cache 每次重校验，assets/ 哈希文件 immutable 长缓存，避免部署后浏览器仍用旧版
+  - refactor(web)：Overview.tsx（991 行）拆分为 overview-model.ts（树构建/筛选/批量纯逻辑）+ components/NavTree.tsx + components/ExecutorRow.tsx，页面仅留容器逻辑
+  - feat：内置 autowonder-project-onboarding 技能（skills/ 目录，支持 npx skills 安装）
+  - chore：GitHub 仓库改名 mantougg/awem（与二进制/产物名对应），安装脚本与设计记录同步；README 增加界面预览图与 linux.do 关联
+  - e2e：新增/适配总览布局、筛选、详情布局等用例，Playwright 65 全绿；ui-guidelines/design/dev-guide/web-AGENTS 同步
+  - T10 的 macOS/Windows 真机验证未做（仅 Linux 真机 + 交叉编译）
+  - T11-F4 十六条决策核对表待复核
+ManifestType: locale
+ManifestVersion: 1.28.0
