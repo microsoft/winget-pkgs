@@ -1,0 +1,105 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Neokapi.KapiCli
+PackageVersion: 1.2.0
+PackageLocale: en-US
+Publisher: Neokapi
+PublisherUrl: https://neokapi.github.io/
+PublisherSupportUrl: https://github.com/neokapi/neokapi/issues
+Author: Skissefabrikken AS
+PackageName: Kapi CLI
+PackageUrl: https://github.com/neokapi/neokapi
+License: Apache-2.0
+LicenseUrl: https://github.com/neokapi/neokapi/blob/HEAD/LICENSE
+Copyright: Copyright (c) Neokapi contributors
+ShortDescription: AI-native localization framework — format-aware parsing, concurrent pipelines, and pluggable tools
+Moniker: kapi
+Tags:
+- ai-tools
+- cli
+- content-creation
+- content-engine
+- file-formats
+- go
+- i18n
+- l10n
+- multilingual
+- terminology
+- translation
+ReleaseNotes: |-
+  kapi 1.2.0
+  Changes since v1.1.0.
+  kapi 1.2.0 is the first stable release since 1.1.0. One command, kapi up, brings a project to the state its recipe declares. kapi check holds content to the voice, terms and gates the project binds, and edits are written back into the original formats. Commands, recipe keys and file names changed along the way, so read Upgrading from 1.1.0 before you upgrade an existing project.
+  Bring a project up to date
+  - kapi up runs the project's default flow over every collection and target language until each gated scope ships or parks. --plan reports the pending work, content-memory reuse and a token estimate without writing anything. --json prints one event per line, and the record whose type is result carries the outcome.
+  - In a recipe with a bowrain: block, kapi up runs the loop on the server. --local keeps it on this machine, and --server requires the server.
+  - The recipe is kapi.yaml. It declares collections:, each with its content, and profiles: that name channels and bind governance. A collection with source_only: true has no target language, and kapi up then works on the source alone.
+  - kapi status shows each locale's coverage (draft, translated, reviewed, signed off) and whether it clears its ship gate. kapi status --review lists the units awaiting review.
+  - Decisions are staged in the working store. kapi commit writes them into the committed record under .kapi/state/.
+  - A source change demotes existing translations instead of deleting them, so reuse and reviewers still see the previous target.
+  - A recipe step that runs an external command or a script runs only after someone allows it.
+  - kapi run <name> runs a flow from .kapi/flows/ with the project's bindings.
+  Check content and gate releases
+  - kapi check verifies content and prints a versioned report (kapi.check/v1) with stable rule ids, severity and the block location. Inside a project, a bare kapi check checks the project.
+  - kapi check --ship runs the project's bound gates (voice, terminology, rule-based checks) and its ship gates. --gate selects gates, and --locale scopes the target side to one language.
+  - --diff-against <rev>, --diff-range A..B, --diff-file <path> and --staged check only the blocks a change touches.
+  - A check that read no content reports the verdict did_not_run and names the cause, instead of passing. Each analyzer runs a canary first, so a checker that cannot fail is reported.
+  - Comments in source and markup files are checked at their own point: the one a content entry names with comments: {channel: ...}, else defaults.comments.channel, else the entry's own point. kapi reads Go comments itself, and the sourcecode plugin reads comments in other programming languages.
+  - A content entry with comments: {only: true} is checked for its comments alone and governs only the comment layer of its files. Their content sits at the next entry that claims the same files, or at the project's default point.
+  - A voice profile's style.comments sets the limits on sentence and comment length, and on comment density in a check scoped to a diff. A comment line that opens with a directive marker declared under comments: is set aside.
+  - kapi apply and the MCP tool apply_edits take comment edits for Go and, with the sourcecode plugin 0.3.0, for TypeScript, TSX and JavaScript. An edit in one of those three languages is written only when the project's formatter agrees with it, and that formatter runs code the project controls: kapi apply asks at a terminal or reads KAPI_TRUST_EXEC, while apply_edits never runs one. Such an edit reports that it did not run, writes nothing, and a person applies it with kapi apply.
+  - term-check, and so kapi check --ship, enforces the do-not-translate terms in the terms store. A ship state is withheld where terminology is bound but was not checked.
+  - --validate report adds the format readers' structure and encoding findings to the report.
+  Govern wording with voice profiles, terms and content memory
+  - kapi voice manages voice profiles. guide prints the guide for an assistant, check scores text, rewrite replaces forbidden terms with the approved wording, and pointer writes a pointer to the project's voice into CLAUDE.md or AGENTS.md. kapi init writes that pointer unless you pass --no-pointer.
+  - A voice profile can state prohibited patterns, rates, scopes, channel vocabulary and a compliance bar (min_score). Governance resolves at the finest point the recipe declares, such as a product, a channel or a brand, and a profile can carry a validity period.
+  - kapi terms manages the terms store. expand proposes the surface forms each term takes, validate reports structural problems, and occurrences shows where a term is used. Terms carry a do-not-translate flag, which TBX export and import keep, and declared forms such as plurals.
+  - term-check, translate and recycle take one rule shape, term_rules:, for a term and the wording to use instead. A rule's severity decides whether a violation fails or warns.
+  - kapi memory manages content memory. Reuse is decided by the kind of edit between the stored source and the new one (none, cosmetic, substantive) rather than by a fuzzy percentage, and approvals link into a version chain.
+  - kapi context search reports what the project's context says about a word or phrase.
+  - A produced target records the voice profile and the term replacements that governed it, so a later change to either shows the target as stale.
+  Read and write formats faithfully
+  - kapi inspect parses a file into anchored content blocks. kapi stats summarizes blocks, words, characters and segments by role.
+  - kdiff compares two files block by block, reading each in its own format. kconv converts several inputs into a directory.
+  - HTML and Markdown documents that nothing edited write back byte for byte, and the untouched parts of Office documents keep their source bytes.
+  - ZIP and TAR archives, including the Office documents and EPUB files inside them, are processed in one pass.
+  - Formats that support streaming are read, processed and written as a stream, so memory use follows the stream window rather than the document size.
+  - AsciiDoc is a new format.
+  - The writer settings output.bom, output.newline and output.encoding control the byte order mark, line endings and encoding of written files.
+  Extract content from PDFs, images, audio, video and source code
+  - The kapi-pdfium plugin reads PDFs, including the structure tree of a tagged PDF. The Homebrew kapi-cli formula installs it.
+  - The kapi-vision plugin reads text from images, kapi-asr transcribes speech, and kapi-av reads audio and video files. The content they extract is translated and checked like any other content.
+  - kapi downloads, verifies and caches the models these plugins use.
+  - The sourcecode plugin reads comments in source files.
+  - The image format accepts more raster image formats.
+  Translate with AI models
+  - kapi translate runs a flow: content-memory reuse, AI translation, then the checks. kapi pseudo-translate tests locale readiness with no AI keys.
+  - kapi models lists the models kapi can use, sets the default, and manages a local Ollama runtime for on-device translation.
+  - --explain-prompts prints or saves the prompts sent to the model.
+  Work from an assistant
+  - kapi mcp serves a curated tool surface. --all-tools, --all-flows and --all widen it. The MCP tools of installed plugins are served through the same server.
+  - kapi apply applies a typed change-set of content and asset edits, and --diff previews it without writing.
+  - The kapi Agent Skill installs as a Claude Code plugin or as a portable skill.
+  Kapi Desktop
+  - Bring up to date runs the same loop as kapi up, through the recipe's venue, after showing its plan.
+  - The Review page lists the units awaiting review in every language, the source language included. Per-unit AI actions (fix findings, retranslate, explain) return proposals you accept or discard, and show what was sent to the model.
+  - The Checks panel checks comment layers as kapi check does, and shows a check that did not run. A finding opens its document with the span highlighted.
+  - The Voice page edits the project's voice profile. Flows are edited as an ordered list of steps.
+  - Right-to-left content renders right to left.
+  - Kapi Desktop updates itself in place on macOS and Linux. Windows installs are offered the update once the signed Windows build is published.
+  Install and update
+  - kapi update replaces a direct install in place after verifying the download's checksum and signature. On a Homebrew install it prints the upgrade command, and --run runs it. --channel chooses stable or beta. For a local build, or an install in a directory kapi cannot write, it prints a link to the latest release instead.
+  - A final release publishes to both channels, so the beta formula (kapi-cli-beta) and cask (kapi@beta) also move to 1.2.0.
+  - kapi plugin doctor runs each installed plugin's self-checks, and kapi plugin prune removes retired plugins.
+  - The container image ghcr.io/neokapi/kapi:1.2.0 includes the bowrain plugin and sets no entry point, so a CI executor can run shell scripts in it. Call kapi by name.
+  - kapi sends anonymous usage telemetry and prints a notice on its first run. kapi telemetry off turns it off.
+  Upgrading from 1.1.0
+  kapi 1.1.0 has no kapi update command. Upgrade with brew upgrade kapi-cli, or download the archive for your platform below.
+  Project files
+  - The recipe is kapi.yaml in the project root. kapi 1.1.0 read <directory-name>.kapi, so rename the file.
+  - Recipe keys: content: is now collections: and coordinates: is profiles:, and kapi rejects those two keys by name. server: is now bowrain:. defaults.terms_source and defaults.memory_source name the committed terms and content memory, and a profile binds a terms store with termstore:.
+  - Committed sources sit in .kapi/: voice.yaml, terms.json, memory/, profiles/, and the unit state in state/. Machine state is kept in .kapi/work/, in one store.db.
+ReleaseNotesUrl: https://github.com/neokapi/neokapi/releases/tag/v1.2.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

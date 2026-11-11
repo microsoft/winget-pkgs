@@ -1,0 +1,46 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: MayDay.SnowApp
+PackageVersion: 0.4.5
+PackageLocale: zh-CN
+Copyright: 版权所有 (c) 2026 MayMay
+ShortDescription: 面向开发者的桌面应用，将 AI 对话、终端模拟、SSH 远程管理、Git 工具和内置浏览器面板整合到统一的工作空间中。
+Description: Snow App 是一款面向开发者的桌面应用，将 AI 对话、终端模拟、SSH 远程管理、Git 工具和内置浏览器面板整合到统一的工作空间中。它通过 Rust 原生模块处理性能关键型操作，包括 SQLite 存储、AI 流式传输、文件监控和 HTTP 请求。此外还支持 MCP 集成、AI 图像生成、技能系统、Hooks、子代理、代码库语义搜索与 AI 驱动的终端会话。
+Tags:
+- ai
+- codex
+- git
+- mcp
+- ssh
+- 终端
+- 聊天
+ReleaseNotes: |-
+  新功能
+  - 插件元数据目录：插件面板新增「元数据目录」，可在应用内查看插件能读取的全部元数据域——字段、参数、隐私范围与实时/轮询方式，并显示每个插件当前已获授权的域数量；插件条目可直接进入同一份详情。
+  - 记忆来源会话跳转：记忆条目显示「来自会话」徽章，点击直达来源会话（跨项目时自动切换项目并选中该会话）；来源会话已删除时降级为不可点击提示，记忆本身保留。
+  - 备忘检索与排序：备忘面板支持关键词搜索（防抖、命中高亮、预览片段围绕命中位置截取，正文深处的命中同样可见）与按创建/更新时间、升降序切换；/ 或 Ctrl/Cmd+K 聚焦搜索框。检索、排序与分页均在 Rust 侧完成。
+  - 统一滑块控件：API 设置（工具结果上限、自动压缩阈值）、主题（背景不透明度/模糊、流式光标图标大小）、请求日志保留时长、宠物大小等滑块统一为新组件——拖动时实时显示数值、松开后提交；主题预设只需覆写 CSS 变量即可改观感（奶油橙 / Google / Win95 已各自适配）。
+  - 克隆仓库后台继续：克隆弹窗可随手关闭，克隆在后台继续，进度、中止入口与失败原因改由侧边栏项目区的占位条目承载；中止会杀掉整棵 git 进程树并清理半成品目录，失败同样自动清理，重试不再被残留目录挡住。
+  改进
+  - 自动格式化改为「延迟 + 合并」：写盘后只登记待格式化，等该文件停止写入且没有写工具在途时才执行一次 Prettier，格式化不再插在同一批编辑之间让后一次编辑匹配不到内容；读取前与应用退出前强制落盘（新增 flushPendingFileFormats）。
+  - 同一文件的写入全程持文件锁并登记「在途写」，并行的编辑调用不再互相覆盖。
+  - 聊天翻页的滚动恢复新增看门狗：翻页期间持续按锚点补偿新页推挤，等待期间用户继续滚动不再被回拨，收敛后立即停止。
+  - grep-search 新增必填的 description 释义参数：模型用用户语言说明这次检索要找什么，卡片直接显示释义、原始正则移入悬停提示，用户无需解读正则；模型漏填也不影响搜索执行。
+  - bash-terminal-execute 的 workingDirectory 改为可选，缺省落到当前项目工作区（SSH 项目解析为远端路径），仅当会话未绑定工作区时才报参数错误。
+  - 子进程回收统一到 Rust 工具模块：Windows 下等待退出改为轮询，规避线程池饱和导致的挂起；bash 与 git clone 共用同一套「杀进程树」实现。
+  - 工具结果不再回传 editedContent（review 已给出编辑后的真实布局），避免重复占用上下文。
+  - 文件编辑与复制的返回字段由 formatted 改为 formatPending，聊天卡片与手机端同步为「待格式化」。
+  - API 配置列表点击配置名即可进入编辑；全局搜索弹窗支持 ESC 关闭；待发消息的撤回图标改为撤销箭头。
+  修复
+  - 修复同一批工具调用中 Prettier 格式化插在两次编辑之间、导致后一次编辑误报「找不到内容」的问题。
+  - 修复 git clone 失败后残留半成品目录、使重试被「目标目录非空」挡住的问题。
+  - 修复 Windows 下并发工具进程较多时，等待子进程退出被系统线程池回调延迟而挂住的问题。
+ReleaseNotesUrl: https://github.com/MayDay-wpf/snow-app/blob/HEAD/RELEASE_NOTES_ZH.md#v045
+Documentations:
+- DocumentLabel: 快速开始
+  DocumentUrl: https://github.com/MayDay-wpf/snow-app/blob/main/docs/zh-CN/1-快速开始.md
+- DocumentLabel: 文档
+  DocumentUrl: https://github.com/MayDay-wpf/snow-app/blob/main/docs/README.md
+ManifestType: locale
+ManifestVersion: 1.12.0

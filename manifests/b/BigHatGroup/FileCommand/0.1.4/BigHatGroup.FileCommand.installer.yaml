@@ -1,0 +1,36 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.9.0.schema.json
+#
+# Winget installer manifest template for FileCommand.
+# See winget/README.md for how to fill in 0.1.4, https://github.com/kkaminsk/FileCommand/releases/download/v0.1.4, and
+# E1A55FFAE052EEBDA30696424964B4A2C6A5932369EC7A4D72E5E8A7C84329F1 at release time, and installer/README.md for scope semantics.
+#
+# Two installer entries share the same FileCommandSetup.exe (the Burn
+# bundle embeds both scopes; see Bundle.wxs) and are distinguished only by
+# Scope + InstallerSwitches.Custom, which forwards winget's --scope choice
+# to the bundle's InstallScope variable (design.md decision D4).
+
+PackageIdentifier: BigHatGroup.FileCommand
+PackageVersion: "0.1.4"
+InstallerType: burn
+InstallModes:
+  - interactive
+  - silent
+  - silentWithProgress
+UpgradeBehavior: install
+Installers:
+  - Architecture: x64
+    Scope: user
+    InstallerUrl: "https://github.com/kkaminsk/FileCommand/releases/download/v0.1.4/FileCommandSetup.exe"
+    InstallerSha256: "E1A55FFAE052EEBDA30696424964B4A2C6A5932369EC7A4D72E5E8A7C84329F1"
+    InstallerSwitches:
+      Silent: "/quiet"
+      SilentWithProgress: "/passive"
+  - Architecture: x64
+    Scope: machine
+    InstallerUrl: "https://github.com/kkaminsk/FileCommand/releases/download/v0.1.4/FileCommandSetup.exe"
+    InstallerSha256: "E1A55FFAE052EEBDA30696424964B4A2C6A5932369EC7A4D72E5E8A7C84329F1"
+    InstallerSwitches:
+      Silent: "/quiet InstallScope=perMachine"
+      SilentWithProgress: "/passive InstallScope=perMachine"
+ManifestType: installer
+ManifestVersion: 1.9.0

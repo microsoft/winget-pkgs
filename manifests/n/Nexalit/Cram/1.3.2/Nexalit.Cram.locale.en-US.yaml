@@ -1,0 +1,64 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Nexalit.Cram
+PackageVersion: 1.3.2
+PackageLocale: en-US
+Publisher: Nexal IT
+PublisherUrl: https://github.com/lukr54
+PublisherSupportUrl: https://github.com/lukr54/cram/issues
+Author: Ulysses Horkan
+PackageName: Cram
+PackageUrl: https://github.com/lukr54/cram
+License: Apache-2.0
+LicenseUrl: https://github.com/lukr54/cram/blob/main/README.md#license
+Copyright: Copyright (c) 2026 Nexal IT
+CopyrightUrl: https://github.com/lukr54/cram/blob/main/LICENSE-MIT
+ShortDescription: Multi-format archiver. ZIP, 7z, tar, ISO and RAR in one command, mountable as folders.
+Description: |-
+  Cram creates and extracts ZIP, 7z, tar (with gzip, xz, zstd, bzip2, lz4 and brotli), ISO 9660 and
+  its own deduplicating .cram format, and reads RAR. The same four verbs work on every format, and
+  the format is detected from magic bytes rather than the file extension.
+
+  It can also mount an archive as a folder instead of extracting it, find duplicate files across
+  drives, write Reed-Solomon recovery sidecars, sign archives with ed25519, and download files over
+  several connections at once with resume and mirror failover.
+
+  This package installs two commands: `cram`, and `cram-extract`, a standalone decoder for .cram
+  files that shares no code with the main engine so a damaged archive has an independent way back.
+
+  Mounting requires the optional Windows feature Client-ProjFS, which is off by default. Every other
+  command works without it.
+Moniker: cram
+Tags:
+- 7zip
+- archive
+- backup
+- cli
+- compression
+- deduplication
+- extract
+- rar
+- rust
+- tar
+- zip
+ReleaseNotes: |-
+  Security
+  - Extraction no longer writes through a symbolic link already in the destination. If
+    out/target.txt was a link to a file elsewhere and the archive carried target.txt, extracting
+    into out truncated the link's target and wrote the entry's bytes into it, outside the
+    destination. Every release from 1.0.0 to 1.3.1 did this, in cram x, in streamed extraction and
+    in cram-extract. An existing path is now overwritten only if it is a regular file; a link, a
+    FIFO or a device is left as it is and the entry is reported as a failure naming the cause. The
+    check is made on the opened handle, so there is no window between checking and writing. A
+    pre-existing FIFO also used to hang the extraction, and now fails the entry instead. The refusal
+    is tested on Linux; on Windows, where planting the link needs symlink privilege or Developer Mode,
+    the same test has not yet run. Reported by @anish833.
+    Still followed, on purpose: a link to a directory above the final component (out/sub -> elsewhere, entry sub/x). Cram never creates a link from an archive, so one inside the
+    destination was put there by the user or another program.
+ReleaseNotesUrl: https://github.com/lukr54/cram/releases/tag/v1.3.2
+Documentations:
+- DocumentLabel: README
+  DocumentUrl: https://github.com/lukr54/cram/blob/main/README.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

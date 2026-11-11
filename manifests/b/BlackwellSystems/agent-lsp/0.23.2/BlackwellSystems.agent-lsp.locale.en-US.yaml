@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: BlackwellSystems.agent-lsp
+PackageVersion: 0.23.2
+PackageLocale: en-US
+Publisher: Blackwell Systems
+PublisherUrl: https://github.com/blackwell-systems
+PublisherSupportUrl: https://github.com/blackwell-systems/agent-lsp/issues
+PackageName: agent-lsp
+PackageUrl: https://github.com/blackwell-systems/agent-lsp
+License: MIT
+LicenseUrl: https://github.com/blackwell-systems/agent-lsp/blob/main/LICENSE
+ShortDescription: MCP server giving AI agents reliable access to language server protocol
+Description: agent-lsp is a stateful MCP server over real language servers. It keeps the language server's semantic index warm and adds a skill layer that turns multi-step code operations into single, correct workflows. 50 tools, 30 languages, persistent sessions.
+Tags:
+- ai
+- code-intelligence
+- developer-tools
+- language-server
+- lsp
+- mcp
+ReleaseNotes: |-
+  ### Fixed
+  • **`safe_apply_edit` could still apply an unverified edit with gopls**：the 0.23.1 refusal of timed-out previews never fired, because the diagnostics wait reported a timeout as success. When gopls had not yet published diagnostics for the edit, the preview compared the pre-edit diagnostics with themselves, reported `net_delta: 0` with `confidence: high`, and the edit was applied. The wait also discarded the first publication for a document that had none cached, mistaking it for a cached replay. The preview now waits for diagnostics that cover the edited document version (servers report it in `publishDiagnostics`) and reports `timeout: true` with `confidence: partial` when they do not arrive, which `safe_apply_edit` refuses. A publication for an older version never counts. Servers that publish nothing when an edit leaves the diagnostics unchanged (typescript-language-server, rust-analyzer, Dart, and clangd for text it already analysed) keep the previous behavior, since for them silence is the normal result of a clean edit; gopls publishes for every version, so silence from it means the edit was not checked.
+ReleaseNotesUrl: https://github.com/blackwell-systems/agent-lsp/releases/tag/v0.23.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

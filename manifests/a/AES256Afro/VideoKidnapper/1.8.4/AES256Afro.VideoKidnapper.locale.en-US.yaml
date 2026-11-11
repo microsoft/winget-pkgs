@@ -1,0 +1,57 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: AES256Afro.VideoKidnapper
+PackageVersion: 1.8.4
+PackageLocale: en-US
+Publisher: AES256Afro
+PublisherUrl: https://github.com/AES256Afro
+PublisherSupportUrl: https://github.com/AES256Afro/VideoKidnapper/issues
+Author: AES256Afro
+PackageName: VideoKidnapper
+PackageUrl: https://github.com/AES256Afro/VideoKidnapper
+License: Apache-2.0
+LicenseUrl: https://github.com/AES256Afro/VideoKidnapper/blob/HEAD/LICENSE
+ShortDescription: Open-source desktop app to trim, caption, GIF, and download videos from multiple platforms using yt-dlp and FFmpeg.
+Description: VideoKidnapper is a free, open-source desktop app for grabbing and editing video. Paste a link to download clips from multiple platforms via yt-dlp, then trim to a range, add captions, and export as a video or an animated GIF — all locally with the full FFmpeg toolchain, so nothing is blocked or watermarked. Runs on Windows, macOS, and Linux and is released under the Apache-2.0 license.
+Tags:
+- customtkinter
+- desktop-app
+- ffmpeg
+- gif
+- python
+- screen-recorder
+- tkinter
+- video
+- video-editor
+- yt-dlp
+ReleaseNotes: |-
+  Published to PyPI：https://pypi.org/project/videokidnapper/1.8.4/
+
+  **macOS:** `*-macos-arm64.dmg` (Apple Silicon) · `*-macos-x86_64.dmg` (Intel). Signed and notarized by Apple; FFmpeg bundled.
+
+  ---
+
+  > **Exports now look like the video you started with, and like the preview.** Phone footage no longer comes out darker and faded, and captions and stickers land where you placed them.
+
+  ### Added
+
+  • **Captions always stay on screen.** A caption wider than the exported frame now wraps onto more lines instead of running off both edges. One still too tall for the frame, from many lines or a big font on a small frame, steps its font size down until it fits. No position can push a caption off either：one dragged past an edge, or a motion path that leaves the frame, stops at the edge with its outline intact. All of this follows the export's real frame, so switching to a 9:16 preset re-fits automatically, and the preview lands on the same pixels as the export. The text you typed is never changed, and wrapping can be switched off per caption.
+
+  ### Fixed
+
+  • **Phone video exported darker and faded.** iPhones and many Android phones record HDR, and nothing converted it to normal video, so exports came out about 26 levels darker with a third of the colour. MP4s also stayed 10-bit HDR, which many phones, browsers and chat apps can't play. HDR is now tone-mapped to standard colour on the way in, and every MP4 is written as 8-bit BT.709 with its colour tagged, so every player shows it the same way. The tags are set on the frames as well as the file, because ffmpeg 7 and later ignore file-level tags that the frames contradict. If an ffmpeg build rejects the HDR conversion, the export still completes with a plain conversion rather than failing. Measured on HDR test footage, exports now match the SDR original within compression noise. The preview uses the same conversion, so it shows the colours you will get.
+  • **Captions were cut off in vertical and cropped exports.** The preview placed captions on the full frame, but the export drew them after the aspect preset, crop, blur fill or rotation had reshaped it. A centred caption that fit the 16:9 preview was sliced off at both edges of a 9:16 export, and dragged captions landed offset by the crop. The preview now shows the exported frame, dims whatever an aspect preset cuts away, and places, sizes and wraps captions exactly as the export does.
+  • **Stickers came out much larger than in the preview.** Stickers were added after the export was scaled down, so a sticker that covered a fifth of the preview covered four fifths of a Low-quality export. They are now added before the downscale.
+  • **Multi-line captions sat lower in the preview than in the export.** The preview spaced lines differently from ffmpeg, by up to 30 pixels on a four-line caption. ffmpeg itself changed its line spacing in version 6.1, so the preview now detects which spacing the installed ffmpeg uses and copies it. Checked against ffmpeg 6.0, 6.1 and the current development build.
+  • **Animated PNG stickers could hang the export forever.** On current ffmpeg, which the Windows installer and the Linux AppImage ship, looping an animated PNG made ffmpeg spin without finishing. Animated PNGs now loop through ffmpeg's own PNG reader, which works on every version tested. An animated PNG saved to play a set number of times now plays that many times instead of forever.
+  • **An aspect preset plus a 90° rotation stretched the picture.** The preset was applied before rotating, so a 9:16 preset on rotated landscape video produced a sideways strip stretched about three times too tall. The preset now applies to the rotated picture.
+  • **Smaller colour shifts.** GIFs from untagged HD video and sticker images were converted with the colour matrix meant for standard-definition video, shifting every hue slightly. Full-range video is now converted to the standard range that all players expect.
+  • **Ultra quality now means maximum quality.** With the encoder on Auto, Ultra exports used the Mac's hardware encoder, which scored noticeably worse on grainy footage. Auto now uses the software encoder for Ultra. Other presets keep hardware speed, and an encoder you pick by name is always used.
+  • **Crops are no longer upscaled.** A crop narrower than the quality preset's width was stretched up to that width. It now keeps its own resolution.
+  • **Cover art could be mistaken for the video.** Files with an embedded thumbnail listed first were measured by the thumbnail's size and colour. Cover art is now skipped.
+  • **Running from source on a Mac could not download anything.** Python from python.org ships without root certificates, so on such a Python every HTTPS connection failed：the FFmpeg download, yt-dlp, the update check. The app now uses certifi's root certificates when the interpreter has none. Only macOS is touched, only when there is no store, and a certificate path you set yourself is always respected.
+  • **FFmpeg now installs itself on a Mac.** The setup screen offered "Install and continue" on every system and then failed on macOS, because the automatic install only existed for Windows, and the reason was hidden behind "Open Setup". macOS now downloads the same static build the Mac app bundles and checks it against digests pinned in the source before installing. Where automatic install still isn't possible (Linux), the screen shows the install command instead of a button that can't work, and any failure now says why.
+ReleaseNotesUrl: https://github.com/AES256Afro/VideoKidnapper/releases/tag/v1.8.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

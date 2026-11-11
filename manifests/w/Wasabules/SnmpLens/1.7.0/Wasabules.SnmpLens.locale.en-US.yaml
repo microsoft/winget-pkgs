@@ -1,0 +1,174 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Wasabules.SnmpLens
+PackageVersion: 1.7.0
+PackageLocale: en-US
+Publisher: Wasabules
+PublisherUrl: https://snmplens.com/
+PublisherSupportUrl: https://github.com/Wasabules/SnmpLens/issues
+Author: Geoffrey Lecoq
+PackageName: SnmpLens
+PackageUrl: https://snmplens.com/
+License: MIT
+LicenseUrl: https://github.com/Wasabules/SnmpLens/blob/main/LICENSE
+ShortDescription: Free SNMP MIB browser, trap receiver and alert router. Walk devices over v1, v2c and v3, edit MIBs with diagnostics, chart OIDs and route alerts to syslog, a webhook or email.
+Description: SnmpLens is an open-source SNMP MIB browser for Windows, macOS and Linux, in a single native binary with no runtime and no agent. It walks and sets OIDs over SNMPv1, v2c and v3, renders conceptual tables as tables by splitting the INDEX per RFC 2578, receives traps and INFORMs, charts polled OIDs over time, and routes alerts to syslog over UDP, TCP or TLS, to a webhook, or to email.
+Moniker: snmplens
+Tags:
+- mib
+- mib-browser
+- network-monitoring
+- snmp
+- snmpv3
+- trap-receiver
+ReleaseNotes: |-
+  What's new in v1.7.0
+  A release about MIBs as they are actually written. The MIB editor has a new
+  editing surface, a problem table and a menu for its files; the import keeps one
+  version of each module and says why; and MIB files that load in other tools now
+  load here, or say exactly what is wrong with them.
+  What you will notice first: folders added under Settings → MIBs → MIB
+  Directories now load (they loaded nothing before), and the editor's file
+  list, the MIB settings and the import report agree on which files have a
+  problem.
+
+  Features
+  A new editor. The MIB editor is now built on CodeMirror 6. The text you see
+  is the text you edit, so underlines, search hits and the caret are always on the
+  right characters, at any scroll position, with tabs, accented or CJK characters
+  before them. Undo and redo, completion from the loaded MIBs (never inside a
+  string or a comment) and the symbol card on hover work as before. New with it:
+  search and replace with regular expressions and whole words (Ctrl+F),
+  multiple cursors, rectangular selection (Alt+drag), matching brackets,
+  highlighting of the word under the caret, Ctrl+/ to comment a line out, F8 to
+  jump to the next problem, and proper input-method support.
+  A problem table. The problems under the editor are a table, worst first,
+  sortable by any column and filterable by severity. Drag its top edge (or use
+  the arrow keys) to give it more room; the height is remembered. Copy puts
+  every problem shown on the clipboard as text. Clicking a problem puts the caret
+  on its line, and an underline's tooltip offers the same actions as its row.
+  Quick fixes. Two findings have one mechanical answer, and the editor now
+  applies it: an unused import is taken out of IMPORTS (an emptied FROM group
+  and an emptied clause go with it), and a table or row whose MAX-ACCESS is not
+  not-accessible is corrected. Per row, or Fix all for a kind that occurs
+  several times. Only the word that changes is edited, comments and alignment
+  are kept, and the whole fix is one undoable edit.
+  Advice can be muted. A style rule you do not intend to follow (tabs, a
+  missing DESCRIPTION, …) can be muted: its findings leave the table, the
+  underlines and every file's mark. Only advice can be muted, never an error and
+  never a finding that something resolves to nothing. Muted rules are listed above
+  the table, one click to bring each back.
+  One verdict per MIB, the same everywhere. Each MIB file is failed, in
+  error, in warning or fine, decided once from what the last load did with it and
+  what the analysis finds in it. The editor's file list, Settings → MIBs and
+  the import report all show that same verdict. The file list marks every file
+  with a problem and can show problem files only; the settings list every loaded
+  file worst first, counted per level. A file now opens with its full analysis,
+  so its mark no longer changes a moment after it is opened.
+  A menu for the editor's files. Right-click, the menu key or Shift+F10 on the
+  file list; F2 renames, Del deletes, Ctrl and Shift select several.
+  - Copy the name, the full path or the module name; reveal the file in the file
+    manager.
+  - Rename (or rename to the module it declares), duplicate, delete. Nothing is
+    deleted outright: a deleted MIB goes to the backups, and Restore a deleted
+    file… brings it back.
+  - Compare a modified standard MIB with the copy SnmpLens ships, or restore it;
+    compare with or restore any earlier saved version.
+  - Load at start or not; Use this version when several files declare one
+    module; diagnose; show the module in the MIB tree.
+  - What a MIB imports and what imports it, directly and indirectly; Export with
+    dependencies writes a zip of the files and every module they need that the
+    folder holds, and names those it does not.
+  - Copy a file's problems, or open it and fix it.
+  Restoring and fixing write into the editor, as one undoable edit, and save
+  nothing until you do. The standard MIBs keep their names and cannot be deleted,
+  since they would be extracted again at the next start.
+  Imports by module. An import now stores each MIB under the module it
+  declares, once. An archive holding several releases of one MIB, in folders of
+  their own, keeps one version (one that parses, then the newest LAST-UPDATED or
+  REVISION, then the shallower folder, then the later path, with 1.10 after 1.9)
+  and reports the others
+  with the reason they were set aside; Use this version imports one of them
+  instead. A module the folder already holds, under any file name, is replaced,
+  and the previous file kept in the backups. The report is one row per module,
+  problems first, with the verdict the rest of the application shows; a clean
+  import is a notification and opens nothing.
+  Encodings. A MIB that is not UTF-8 opens as Windows-1252, with a banner
+  saying so, and the editor's status bar lets you read it again as ISO-8859-1 or
+  -15, Windows-1250 or -1251, KOI8-R, Shift_JIS, EUC-JP, GBK, GB18030, Big5 or
+  EUC-KR. Saving writes UTF-8.
+  Open a MIB folder. Every folder listed under Settings → MIBs → MIB
+  Directories has a button that opens it in the file manager.
+
+  Fixes
+  - MIB folders added in the settings loaded nothing. Their files were listed,
+    each with a switch, and looked up by name in the main MIB folder instead. They
+    now load from where they are, after the main folder; a name the main folder
+    already holds is reported as shadowed, and a file there that is not a MIB (a
+    PDF, an archive, a key) is never parsed.
+  - A module was found only by its file name. A MIB stored under a product
+    name was invisible to every module importing it, and whether an import
+    resolved depended on how the files sorted. Modules are now found by the name
+    they declare.
+  - Two files declaring one module both loaded, the second silently replacing
+    the first. One is loaded and the other reported, naming which was kept and
+    why.
+  - Common mistakes in vendor MIBs were fatal: \" inside a DESCRIPTION, a
+    LAST-UPDATED or REVISION without its time, an IMPORTS module misspelt. They
+    are read leniently, each reported as a warning where it is, and the editor can
+    write the repair into the file. A valid file is never touched.
+  - A MIB that is not UTF-8 was refused by the editor and, often, by the
+    import, although it loads.
+  - Syntax errors were reported in the wrong place: a stray quote was reported
+    several lines below, at the first character that could not be read. It is now
+    reported where it is.
+  - SMIv1 imports reported as missing although the loader resolves them
+    without their module (RFC1213-MIB's names it maps to their successors, the
+    RFC1155-SMI base names, the OBJECT-TYPE and TRAP-TYPE macros). The one
+    such name that resolves to nothing whatever is loaded, ipRouteDest, is now
+    reported as that.
+  - A load that resolved nothing was green. Objects with no type and
+    definitions with no OID are now warnings on the file.
+  - The import kept whichever version was written last when an archive held
+    several, reported a success for each, let two modules shipped under one file
+    name overwrite each other, and let a standard module arriving under another
+    file name replace the bundled one.
+  - The editor's underlines were misplaced: 8 px up and to the left, gone after
+    a screen of scrolling, drifting right when the editor was opened before a
+    file, and a line too low after a CR.
+  - Dragging selected text in the editor showed the MIB import overlay, as if
+    a file were being dropped.
+  - A long MIB load error widened Settings → MIBs past the dialog, with a
+    horizontal scrollbar.
+
+  Documentation
+  - The project site and the browser demo show the new editor.
+
+  Under the hood
+  - CodeMirror 6 adds about 126 KB gzip to the interface; the hand-made editing
+    surface it replaces is gone.
+  - golang.org/x/text 0.43.0, now a direct dependency (the encodings above).
+  - Release builds restore no cache. A cache can be written by any code a CI
+    job runs on main, and the job that signs the release used to restore one.
+    The release workflow now downloads and builds everything itself, and the Linux
+    packages are built on Ubuntu 24.04, the image CI tests on, rather than on
+    ubuntu-latest.
+  - CI checks in Chrome that every problem in a test MIB underlines exactly its
+    word, at the top of the file and after scrolling.
+  - What the MIB loader copies from gosmi (the file names it finds a module by,
+    the imports it rewrites, the dates it accepts) is asserted against gosmi, so an
+    upgrade that changes one of them fails a test instead of leaving the copy
+    stale.
+  - A pull request's CI takes about 40% less time: each Go job keeps its own
+    caches, Windows builds on its workspace disk, the slowest tests were rewritten
+    and the MIB tests run in two processes. Every push to main now gets its own
+    verdict, where a busy day used to cancel some of them.
+  Binaries ship with an Ed25519-signed SnmpLens-checksums.txt, verified by the
+  in-app auto-updater before anything is applied; the manifest names the tag it
+  belongs to, so an older signed manifest cannot be replayed in place of this one,
+  and every asset carries attested build provenance:
+  gh attestation verify SnmpLens-windows-amd64.exe --repo SnmpLens/SnmpLens
+ReleaseNotesUrl: https://github.com/SnmpLens/SnmpLens/releases/tag/v1.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

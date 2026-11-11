@@ -1,0 +1,65 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.ArWen
+PackageVersion: 2.9.0
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/arwen/issues
+Author: Fahrenheit Research
+PackageName: ArWen
+PackageUrl: https://github.com/FahrenheitResearch/arwen
+License: Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+Copyright: Copyright © Fahrenheit Research
+CopyrightUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+ShortDescription: 'ArWen: GPU-native WRF-ARW-class regional weather model, verified against WRF v4.6.1'
+Description: "ArWen is an independent, GPU-native implementation of a WRF-ARW-class regional atmospheric model. It is not affiliated with or endorsed by NCAR or UCAR. The name is a wordmark for \"the ARW solver, GPU-native\"; the Python package is currently named gpuwm. Safety. ArWen is a research and educational tool. It is never a substitute for official forecasts and warnings from your national meteorological service. Do not use it to make safety decisions. Regional numerical weather prediction at convective scale has mostly required institutional clusters, which means most of the world runs on global-model guidance at 10-25 km. ArWen's aim is to put a verified, kilometer-scale limited-area model on a single consumer GPU: pick a point, size a nest ladder to your card, pull public analysis data, and run a 1 km (or 500 m) simulation of your own area on hardware you own -- especially in places where no national convection-permitting model exists."
+Moniker: arwen
+ReleaseNotes: |-
+  ArWen 2.9.0 makes correct mode the default, prepares GFS starts the way WPS and real.exe do, builds the MPAS static that MPAS-A v8.4.2 itself builds (lakes are water again), matches eight everyday WRF schemes to WRF v4.6.1 word for word, adds WRF microphysics, cumulus, radiation and lightning options, and runs a whole forecast suite from one file. ArWen Desktop 1.0.10 ships beside it.
+  - Windows desktop: extract and open ArWen.exe. Setup installs and checks the matching runtime, tables and geography.
+  - Linux desktop: follow the included installation guide. The graphical application requires x86-64 Linux with glibc 2.39 or newer.
+  - Integration kit, desktop source, verification records, and checksums.
+  - Node GPU gate: Stage 1 and both GPU-shard results, with the tested source revision and card identity.
+  Correct mode is the default
+  Two water-budget defects that WRF and MPAS carry are fixed in every default run: WSM6 and WDM6 booked rain falling below ground in a sloped layer at the flat layer mean, and New Tiedtke added moist-mass tendencies to dry-mass mixing ratios. Classic Thompson also books the cloud water that settles out of the lowest level in a new total, CLOUDNC. On a 6 h 3 km WSM6 case the corrected and uncorrected runs differ only in surface rain and canopy water in the first hour, then drift as from any tiny perturbation; 6 h domain rain stays within 1%. physics.mode = "exact" computes byte for byte what the engine computes without the corrections, and strict WRF mode (GPUWM_WRF_EXACT=1) forces it. Every forecast receipt names the mode and the corrections that reached each domain.
+
+  New
+  - gpuwm suite runs a whole forecast suite from one file: plan, run, status, halt, resume and rehearse, surviving a killed scheduler without running a cycle twice.
+  - gpuwm domain --recipe hrrr_v4_gsd41 --region NAME --spacing-km N lays out the full HRRR-style recipe for any region in the shipped table, with no per-country code.
+  - WRF physics: Purdue Lin, WSM3, WSM5, Ferrier-Aligo, WSM7 and the revised WSM6 microphysics; Grell 3D and New SAS cumulus; New Goddard radiation, icloud = 2, aerosol options 1 and 2; WRF's lightning package; MYNN TKE advection. Each new microphysics and cumulus scheme matches WRF v4.6.1 word for word on its committed columns.
+  - Mixed-physics ensembles: members may mix microphysics, boundary layer, land surface and radiation.
+  - Stochastic physics (SPPT, SKEBS, SPP, initial wind perturbations) runs with loud warnings and a receipt; with every option off the output is byte-identical.
+  - The platform wheels carry all 48 tools again, simulated radar, ML export and the globe packer included, and gpuwm fetch-bridges --partial installs only the tools you name.
+  - rw_mpas_static is one binary with its bounded, words, gwd-replace, gwd-review and verify tools, and gpuwm fetch-geog stages every dataset the native static path reads.
+  - Engine pieces for gpuwm-hex 0.4.0: the generic MPAS column-physics entry, New Tiedtke at each cell's own grid spacing, the ICON global source and the RRFS v2 preset found through an installed gpuwm-hex.
+
+  Changed
+  - Every default MPAS static changes. rw_mpas_static writes the 79-variable static MPAS-A v8.4.2 builds from an empty namelist, with MODIS land use in which a lake is water and native gravity-wave-drag statistics. On a 3 km regional mesh over the Great Lakes, 15,412 lake cells had been stored as land; the new static has none. A cached static rebuilds once.
+  - GFS starts rebuild once. RH conversion, lake skin temperature and ice, snow and the real.exe surface fields now follow WPS and real.exe. Against WPS 4.6.0 and real.exe 4.7.1 on a 3 km CONUS case, skin temperature RMS is 0.029 K (2.8.9: 0.252 K). The fetch takes a pressure level above the model top, so an older GFS subset is fetched again, and gfs_grib2_bridge must be rebuilt.
+  - Four WRF 4.7 and 4.8 correctness fixes are on by default (the solar equation of time, YSU's capped entrainment, Noah-MP night snow ageing, the urban rain-evaporation balance); each earlier generation stays selectable.
+  - The WRF namelist importer refuses by name what it used to substitute silently (ISHMAEL, radar latent heating, HAILCAST, the digital filter, an eclipse in the run window), and a namelist without top_lid gets WRF's open top.
+
+  Fixed
+  - Kain-Fritsch, WSM6, Kessler, Dudhia shortwave, RRTM longwave, MYJ, Milbrandt-Yau and WDM6 now match WRF v4.6.1 word for word on their column oracles; none had been compared with WRF in a release. Every run that selects one changes, including the wizard's default 12 km root.
+  - YSU on a calm column builds WRF's boundary layer, Noah runs land-ice points, and Noah sea-ice columns advance through WRF's seaice_noah instead of holding their starting skin temperature.
+  - Grell-Freitas continues its downdraft-origin pass as WRF does, and RUC through the WRF-file door keeps its cold-start soil water and albedo.
+  - A nested run under the strict build starts; it stopped before the first step since 2.8.9.
+  - Hex maps reduce sea-level pressure as the GFS analysis does: globe RMS against GFS went from 4.04 to 0.71 hPa.
+  - Local DA reads its observation streams without gpuwm-global, builds Thompson reflectivity and clear-air batches, and takes European radar clear air.
+  - TEMPO initializes from a pip install, a checkpointed ensemble passes its own restart check, and a failed ensemble member reports its real error.
+  - A moving nest on a statics corridor starts on the corridor's crop with one smoothing scale, so its first move is no longer refused over steep terrain.
+  - The third-party notices name seven math kernels that carry FDLIBM or Arm routines and had been left off their lists (five of them shipped in 2.8.9).
+  Answers change for WSM6, WDM6, New Tiedtke and Thompson runs (correct mode), for runs selecting any of the eight matched schemes, for every run through the four WRF 4.7/4.8 fixes, for GFS starts and for every MPAS static. Each change is declared in the changelog with its measurement. The earlier WRF generations, exact mode, the two GFS knobs (gfs_lake_skin, gfs_snow_convention) and --legacy-static (the old static stream, not byte for byte) stay selectable; the eight matched schemes and the GFS humidity and sea-ice rules have no switch back.
+  Not in this release: the rest of the exact chain (planned for a later release), correct mode for aerosol-aware Thompson and WSM3/5/7, WRF ports not yet qualified, and the MPAS full-port Rust units that landed after the intake.
+  The verification records identify completed artifact and startup checks, the short GPU forecast, and retained component evidence. They do not establish general forecast skill or whole-model parity.
+  Installation and usage | Full changelog | What's new
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/arwen/releases/tag/v2.9.0
+InstallationNotes: |-
+  This application requires an NVIDIA GPU with CUDA support to run.
+  Will not function on integrated graphics or non-NVIDIA hardware.
+  Without compatible hardware, the application will fail to launch.
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

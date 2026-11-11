@@ -1,0 +1,61 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.10.3
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  v0.10.3 聚焦 Agent 引用体验、PDF 阅读器稳定性、CLI 精简和 Zotero/Windows 适配。Agent 回复现在以内联引用 pills 直接跳转到 PDF 具体区域；PDF 双面板同步、内部链接返回、布局分析进度和翻译队列都得到改进；CLI 移除了维护成本高的子命令并新增 describe/layout/cross-vault 能力。
+  新功能
+  - Agent 内联引用 pills: 将 Agent 回复中的 Markdown 链接和 vault wikilinks 解析为可点击的引用 pills，点击后通过 agent_resolve_citation 解析 PDF 坐标并跳转到对应页面、章节或图表区域。（commit by @Phil-Fan）
+  - Markdown 导出：编辑器新增「另存为 Markdown」功能，支持将当前文档导出为 Markdown 文件。（commit by @Phil-Fan）
+  - CLI 操作目录与跨库迁移：新增 agentero describe 展示可用操作；agentero layout list --kind section 可输出章节标题；agentero paper move 支持 vault 前缀的跨库论文迁移。（commits by @Phil-Fan）
+  - MCP 工具扩展：MCP 新增 paper_set_read、layout_list 和 layout_get 等工具，并发布操作不变量。（commit by @Phil-Fan）
+  - Zotero 自动发现：onboarding 与迁移对话框现在能自动发现各平台默认的 Zotero 数据目录，并在同步设置中复用该发现逻辑。（commits by @JiaheChen2002）
+  改进
+  - 论文导入源与回退链：新增 alphaXiv 源并将 arXiv/DOI/PMID 的解析改写为 hedge 回退链：多源并发、按优先级择优、失败时优先报告 rate_limited 而非空结果，提升批量导入成功率。（commit by @Phil-Fan）
+  - PDF 双面板滚动同步：用内容坐标替代滚动比例，直接从原生滚动事件写入位置，消除 2-3 帧延迟和中间按钮平移被吞的问题；缩放手势合并为单次落点并重新对齐。（commit by @Phil-Fan）
+  - PDF 全文翻译队列：在布局分析尚未完成时点击全文翻译不再报错，而是进入 waitingLayout 队列，自动在解析完成后启动文档级或页面级翻译。（commit by @Phil-Fan）
+  - PDF 内部链接返回：点击文中内部链接（附录、图表、引用）后，左下角出现「返回跳转前」浮动按钮，可一键回到原阅读位置；落点区域会以琥珀色高亮闪烁提示。（commits by @Phil-Fan）
+  - Agent 引用解析与提示：改进图/章节解析逻辑，增加失败提示 toast，并持续精简 Host prompt envelope，将引用格式下沉到 vault AGENTS.md 与 skills。（commits by @Phil-Fan）
+  - 远程历史会话恢复：点击远程历史项目时立即显示 shimmer 占位，待会话重放完成后再原子替换为真实对话，避免空白等待。（commit by @Phil-Fan）
+  修复
+  - PDF 拖拽处理：修复在主窗口、阅读器、文档窗口和功能窗口中拖入 PDF 的处理，优先使用原生拖放路径，仅接受本地文件，归一化 Windows 路径并去重。（#514 by @langbit）
+  - Workspace PDF mode 保持：修复重启后、关闭标签页重开或文档弹出时，本地 PDF 因探测缺失被降级为空 markdown editor 的问题。（commits by @Phil-Fan）
+  - Paper body 不再误渲染为 markdown: 当 paper 元数据和水化竞争导致探测全部失败时，不再回退到可编辑但无效的空 markdown editor，而是进入 PDF 空状态并自动重试。（commit by @Phil-Fan）
+  - 魔棒网页入库 URL 双重前缀：修复 translator 返回绝对 URL 导致请求被重复拼接而 404 的问题，恢复魔棒添加网页入库功能。（commit by @Phil-Fan）
+  - 布局分析进度显示：在 Figures 面板和后台任务中正确展示 headless 布局分析的进度与状态。（commits by @Phil-Fan）
+  - Markdown 公式与目录：修复块级数学公式溢出和悬停状态问题，目录按标题层级缩进显示。（commits by @Phil-Fan）
+  - PDF 高亮文本可选：修复使用荧光笔标注后无法再次精确选中的问题。（commit by @Phil-Fan）
+  - Windows 全屏与图标：显式处理 Windows 全屏行为，并按 Windows DPI 缩放应用图标，解决任务栏/Dock 中图标过小的问题。（commits by @JiaheChen2002）
+  - Windows CLI 安装验证：统一 Windows 下 CLI 安装验证命令，支持 PowerShell/CMD 绝对路径验证并归一化 shim 可执行文件路径。（commits by @JiaheChen2002）
+  - Zotero/onboarding 流程：要求先创建 vault 才能导入 Zotero，明确区分 Agentero vault 与 Zotero 源库，保持创建 vault 后仍显示 Zotero 提示。（commits by @JiaheChen2002）
+  破坏性变更
+  - CLI 子命令移除：agentero tree 以及 agentero vault use/which/info 已移除，agentero vault 现仅保留 create 与 list；已知 vault 记录在 ~/.config/agentero/config.toml 中。（commits by @Phil-Fan）
+  compare
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.10.3
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

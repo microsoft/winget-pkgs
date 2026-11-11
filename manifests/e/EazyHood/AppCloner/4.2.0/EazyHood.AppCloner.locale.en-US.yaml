@@ -1,0 +1,97 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: EazyHood.AppCloner
+PackageVersion: 4.2.0
+PackageLocale: en-US
+Publisher: EazyHood
+PublisherUrl: https://github.com/EazyHood
+PublisherSupportUrl: https://github.com/EazyHood/AppCloner/issues
+Author: EazyHood
+PackageName: AppCloner
+PackageUrl: https://github.com/EazyHood/AppCloner
+License: Proprietary
+LicenseUrl: https://github.com/EazyHood/AppCloner/blob/main/LICENSE
+Copyright: Copyright (c) 2026 EazyHood. All rights reserved.
+CopyrightUrl: https://github.com/EazyHood/AppCloner/blob/main/LICENSE
+ShortDescription: Clone Windows apps with independent sessions - run the same app with several accounts at once.
+Description: |-
+  AppCloner runs the same Windows app several times, each clone signed in to a
+  different account: three Chromes, two Discords, two Telegrams. The original app
+  is never copied or modified - each clone is launched with its own data space,
+  using the app's official profile flag when it has one (--user-data-dir,
+  -profile, -workdir) and redirected folders when it does not.
+
+  Free to use, with no paywalls or locked features. Includes light and dark themes
+  and six languages.
+
+  It is a convenience for separating accounts, not a security boundary. Some apps
+  (single global instance, session stored in the registry) need Sandboxie mode or a
+  separate Windows account; AppCloner detects those and says so.
+Moniker: appcloner
+Tags:
+- clone
+- multi-account
+- multi-instance
+- portable
+- sessions
+ReleaseNotes: |-
+  Descarga AppCloner.exe y comprueba su SHA256 contra SHA256SUMS.txt. Si no puedes bajar el .exe, usa el zip -python.zip: descomprimelo y haz doble clic en AppCloner.py.
+  Automatic updates
+  - The app now installs new versions on its own. It checks on startup,
+    downloads the new .exe in the background, verifies its SHA256 against the
+    SHA256SUMS.txt published in the release, and installs it when you close
+    AppCloner. Nothing is ever swapped underneath you while you are using it.
+    There is a "Restart now" button if you would rather not wait, and a
+    Install updates automatically switch in Preferences.
+  - Why an external helper does the swap. The obvious approach, renaming the
+    running .exe from inside the program, was measured on Windows 11 and is not
+    reliable: two identical attempts gave different results, one renaming fine and
+    the other failing with WinError 32. And in the attempt that did rename, the
+    old process exited 1 instead of 0 (the control run, untouched, exited 0),
+    because a PyInstaller onefile executable re-launches itself as a child process
+    by path. So a short PowerShell helper waits for AppCloner's PID to
+    disappear, moves the new file over the old one, and relaunches only if asked.
+  - Nothing is destroyed if it fails. The old executable stays where it is, the
+    downloaded one stays downloaded, and the helper reopens the app either way. The
+    outcome is written to a file the app reads on the next start, so a failed update
+    is reported instead of leaving you thinking you are up to date.
+  - Nothing is installed that cannot be checked. A download whose hash does not
+    match the published one is deleted, not kept "just in case". A release with no
+    SHA256SUMS.txt is refused. To be clear about what this protects: a corrupted
+    or tampered download in transit, not a compromised GitHub account.
+  - It refuses where self-updating would be wrong, and says why: from source
+    (git pull), installed through winget (winget upgrade, so winget keeps its
+    inventory straight), or installed in Program Files, where the folder is not
+    writable. Writability is tested by writing a probe file, not guessed from the
+    path.
+  - Version comparison now pads to three numbers. Without that, (4, 1) sorts
+    below (4, 1, 0) and a release tagged v4.1 would have looked newer than the
+    installed 4.1.0, offering the same update forever.
+  - New command: appcloner --update checks, downloads and verifies; add --now to
+    install it as soon as the process exits.
+
+  A version that runs without the .exe
+  - AppCloner.py at the root of the project: double-click it. For anyone whose
+    browser blocks the executable, whose antivirus deletes it, who gets a
+    SmartScreen warning about an unsigned binary, or whose network refuses .exe
+    downloads. It checks the Python version, offers to install the two packages it
+    needs with pip into your user folder after asking, hides the console before
+    the window opens, and passes any arguments through.
+  - Every failure ends in a dialog, never in a console that vanishes. A Traceback
+    that disappears in a blink tells nobody anything.
+  - Without pystray there is no tray icon but the app still opens, so a package
+    that fails to build does not block the launcher.
+  - Releases now also ship a AppCloner-vX.Y.Z-python.zip with just what you need
+    to run it that way.
+
+  Releasing
+  - A Release workflow builds, tests, smoke-tests the exe, generates
+    SHA256SUMS.txt and the Python zip, and opens a draft release when a
+    vX.Y.Z tag is pushed. It refuses if the tag does not match __version__.
+    Automatic updates depend on the exe and its checksum coming from the same run;
+    doing that by hand invites publishing a hash that does not match the binary,
+    which breaks every user's update at once.
+ReleaseNotesUrl: https://github.com/EazyHood/AppCloner/releases/tag/v4.2.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

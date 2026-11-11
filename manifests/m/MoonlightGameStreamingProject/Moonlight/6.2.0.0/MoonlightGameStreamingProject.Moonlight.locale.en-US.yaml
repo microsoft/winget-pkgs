@@ -1,0 +1,137 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: MoonlightGameStreamingProject.Moonlight
+PackageVersion: 6.2.0.0
+PackageLocale: en-US
+Publisher: Moonlight Game Streaming Project
+PublisherUrl: https://github.com/moonlight-stream/moonlight-qt
+PublisherSupportUrl: https://github.com/moonlight-stream/moonlight-qt/issues
+Author: Moonlight Game Streaming Project
+PackageName: Moonlight Game Streaming Client
+PackageUrl: https://moonlight-stream.org/
+License: GPL-3.0
+LicenseUrl: https://github.com/moonlight-stream/moonlight-qt/blob/HEAD/LICENSE
+Copyright: Copyright (C) 2007 Free Software Foundation, Inc.
+CopyrightUrl: https://github.com/moonlight-stream/moonlight-qt/blob/master/LICENSE
+ShortDescription: Play games remotely from your NVIDIA GameStream-enabled PC
+Moniker: moonlight
+Tags:
+- client
+- foss
+- games-stream
+- gamestream
+- nvidia
+- open-source
+ReleaseNotes: |-
+  Download links:
+  - Windows Installer (Universal)
+  - Windows Portable x64 or ARM64 (for work/public PCs without the ability to install new programs)
+  - macOS (Universal)
+  - Snap (for Ubuntu-based Linux distros)
+  - Flatpak (for other Linux distros)
+  - AppImage (Linux, no installation required)
+  - Raspberry Pi
+  - Generic ARM 32-bit and 64-bit Debian packages (not for Raspberry Pi)
+  - Experimental RISC-V Debian packages
+  - NVIDIA Jetson and Nintendo Switch (Ubuntu L4T)
+  - Steam Link device
+  The Windows installer package may require an Internet connection to download the latest Microsoft Visual C++ Runtime if your PC does not already have it installed. If you do not have Internet access during installation, you can pre-install the runtime from Microsoft's website or use the portable version.
+  To update an existing installation, simply run the latest installer (for Windows) or replace the old app in your Applications folder (for Mac). For the portable Windows version, extract the ZIP into a new folder and copy the Moonlight Game Streaming Project folder from the older version to preserve your settings and paired hosts.
+  Important note for Windows Portable upgrades from v6.1.0 or earlier: If you extracted the portable Windows v6.2.0 ZIP file into the same folder as an earlier version of Moonlight, you must delete qopensslbackend.dll file in the tls folder or Moonlight will crash on startup.
+  To install on Steam Link hardware, extract the ZIP file to the root of a FAT32 flash drive, insert it into your Steam Link, then restart the Steam Link. Moonlight can run alongside official Steam Link streaming and other Steam Link apps.
+  Behavior changes:
+  - The default renderer on macOS is now libplacebo (using MoltenVK). You can change renderers on macOS in the Advanced Settings.
+  - Most video renderers now use full range color instead of limited range
+  - The cursor is now also locked to the video area in single display borderless windowed scenarios. This was previously only done in true full-screen mode.
+  - The cursor is no longer captured by default in windowed mode. Clicking on the streaming window or pressing Ctrl+Alt+Shift+Z will capture the cursor.
+  - Game Mode has been re-enabled on macOS
+  - The Metal renderer is supported on Macs with a discrete GPU. It was previously only available on Macs with an iGPU.
+  - HDR metadata is now used for tonemapping on macOS. You may need to tweak your HDR brightness in the OS, particularly for external non-Apple displays.
+  - CLI output is now displayed in the console on Windows instead of a dialog box
+  - GPUs on non-x86 Linux platforms are now assumed to be slow by default, which enables a number of optimizations for improved performance. GL_IS_SLOW=0/VULKAN_IS_SLOW=0 can be set at runtime to override this.
+  - Gamepad motion sensors are disabled on Steam Link hardware to help reduce audio glitching caused by high CPU usage. The moonlight.sh script can be edited to re-enable them.
+  - The default streaming resolution for new installs is now 1080p instead of 720p.
+  - Video bitrate no longer resets when adjusting resolution or frame rate if it's already been manually adjusted
+  Security:
+  - CVE-2026-33546, CVE-2026-33547, and CVE-2026-41210 have been fixed
+  - These vulnerabilities could allow a malicious host to crash Moonlight when connecting
+  New Features:
+  - Ctrl+Alt+Shift+K has been added to toggle system keyboard grab
+  - D3D11 renderer has been updated to enable VRR support on Nvidia GPUs and improve performance by reducing VRAM copies and allowing overlapping decoding and rendering operations
+  - KMSDRM renderer is rewritten to support atomic modesetting, overlays, VRR, ALLM, software decoding, V-sync off with atomic async flip, and more
+  - Vulkan rendering is now supported on Linux outside of a desktop environment (KMSDRM)
+  - AV1 hardware decoding is now supported on macOS (M3 and later)
+  - AppImages now support using the system libva to prevent hardware decoding failure on distros with newer libva versions
+  - Added support for DualSense adaptive triggers (requires a compatible host)
+  - Gamepads with a second trackpad can now be passed to the host (requires host support)
+  - Client identifiers are now provided to the host to allow client-specific session management
+  - Added an option to disable pre-launch warnings
+  - YUV 4:4:4 video is now supported by the DXVA2 renderer
+  - Raspberry Pi 2 and 3 are now officially supported (in addition to Pi 4 and 5 models, which were already supported). 1080p 60 FPS requires overclocking (gpu_freq_min=400) on the Pi 2.
+  Bugfixes:
+  - Reduced background CPU usage
+  - Improved startup, settings page, and stream load times
+  - Optimized the EGL/GLES renderer to improve performance on low end GPUs and embedded devices
+  - Fixed EGL/GLES renderer failures under X11 when GLX was used for the UI
+  - Removed Windows Firewall service status check in the installer, since it no longer causes installation failures when disabled
+  - Improved readability of the statistics overlay by adding an outline
+  - Improved timing accuracy in the statistics overlay
+  - Improved performance when multiple gamepads are sending input simultaneously
+  - Improved performance when recovering from dropped network packets
+  - Improved DPI scaling behavior on Windows
+  - Fixed black or green padding being rendered on the bottom or right side of the video stream when streaming from certain hosts
+  - Fixed horizontal scroll direction not being correctly inverted when requested
+  - Fixed excessive video latency on Raspberry Pi devices using the H.264 codec
+  - Fixed Moonlight not exiting after an abnormal stream termination when launched via the CLI
+  - Fixed failure to start on Linux systems where desktop OpenGL is not available
+  - Fixed broken overlay rendering on PowerVR systems using the proprietary driver
+  - Fixed automatic selection of AV1 on systems where HEVC is not available
+  - Fixed instability when using VAAPI decoding under X11
+  - Fixed small deviations in chroma co-siting and color conversion
+  - Fixed display of progress spinner and configuration warnings on KMSDRM
+  - Fixed a GEM handle leak that could cause streaming to fail on KMSDRM
+  - Fixed suboptimal format selection on some V4L2 decoders
+  - Fixed handling of some non-US keyboard layouts
+  - Fixed stale app list being displayed when using CLI commands
+  - Fixed handling of IPv6 literals that are not URL-escaped
+  - Fixed AV1 Vulkan Video decoding on newer versions of FFmpeg
+  - Fixed Ctrl+C/SIGTERM when running from the console
+  - Blocked the buggy Bandicam Vulkan layer from loading into Moonlight and crashing
+  - Fixed missing stderr output in Steam Link logs
+  - Optimized Steam Link Opus decoder for reduced audio glitching
+  - Fixed several GUI interoperability issues with Qt 6.9 and later
+  - Fixed the IME or software keyboard being unexpectedly displayed in various situations
+  - Fixed launching in a new VT while a Wayland compositor is running
+  - Fixed moving focus from the app grid into the toolbar via the gamepad or keyboard
+  - Fixed blurry overlays on the DXVA2 renderer
+  - Fixed poor scaling on the DXVA2 renderer on Intel systems
+  - Fixed a possible crash in the Vulkan renderer when disabling an overlay
+  - Added a workaround for a crash in libplacebo on Raspberry Pi with hardware decoding
+  - Fixed keyboard grab not working under sdl2-compat on Wayland compositors that lack support for keyboard-shortcuts-inhibit-unstable-v1
+  - Fixed inability to reach some controls via gamepad navigation on macOS
+  - Fixed displays not being switched to HDR mode correctly on Raspberry Pi
+  - Fixed CLI stream launch causing the saved manual address to be overwritten
+  - Fixed distinguishing between Enter and Numpad Enter keys (requires updated host software)
+  - Fixed mDNS discovering unexpected devices after running for a period of time
+  - Fixed libdecor-gtk window decorations not being displayed on the streaming window
+  - Updated community-contributed translations from Weblate
+  Build and Dependency Updates:
+  - Updated to use new FFmpeg 7.1 APIs (adding compatibility with FFmpeg 9.0)
+  - Enabled CFG, EHCont, and CET exploit mitigations in most Windows dependencies
+  - Updated Windows installer to WiX 7
+  - Qt requirement updated to 5.12
+  - AppImages are now using Ubuntu 22.04 as the base OS
+  - OpenSSL 4.0 compatibility
+  - Propagate CFLAGS/CXXFLAGS/LDFLAGS environment variables to QMake
+  - Prebuilt libraries for Windows, macOS, and Steam Link must now be downloaded via setup-deps.py/ps1 rather than via a Git submodule
+  - Removed h264bitstream submodule in favor of vendoring the few files that Moonlight requires
+  - SDL 3.4.18 is now used (via sdl2-compat) instead of SDL2
+  Known Issues:
+  - Location Services on macOS may cause periodic lag and stuttering on Wi-Fi due to background network scans. To avoid the issue, disable Location Services on your Mac by going to "System Preferences -> Security & Privacy -> Location Services"
+ReleaseNotesUrl: https://github.com/moonlight-stream/moonlight-qt/releases/tag/v6.2.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/moonlight-stream/moonlight-qt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

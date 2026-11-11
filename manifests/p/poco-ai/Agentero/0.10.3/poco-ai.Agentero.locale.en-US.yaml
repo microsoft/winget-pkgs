@@ -1,0 +1,54 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.10.3
+PackageLocale: en-US
+ShortDescription: Agent-friendly reference management.
+Description: 'Traditional reference managers are not agent-friendly: highlights and notes stay locked inside single files, making it hard for agents to reuse knowledge across papers; every conversation starts from scratch without a stable local knowledge map; PDFs are human-friendly but not the most comfortable reading material for agents. Agentero aims to build an agent-friendly, agent-native way to manage references, exploring how humans and agents collaborate on reference management. Connect your local agent via ACP (BYOA), select-text chat, import papers and Skills, stay compatible with the Zotero ecosystem, and get paper translation, bidirectional links with a knowledge graph, and deep PDF reading.'
+Tags:
+- academics
+- agent
+- article
+- literature
+- paper
+- pdf
+- reference
+- research
+- thesis
+- zotero
+ReleaseNotes: |-
+  v0.10.3 focuses on Agent citation experience, PDF viewer stability, CLI streamlining, and Zotero/Windows fit. Agent replies now render inline citation pills that jump directly to PDF regions; dual-pane scroll sync, internal link jump-back, layout-analysis progress, and translation queuing are all improved; CLI drops high-maintenance subcommands and adds describe/layout/cross-vault capabilities.
+  Features
+  - Inline Agent citation pills: Parse Markdown links and vault wikilinks in Agent replies into clickable citation pills; clicking resolves PDF coordinates via agent_resolve_citation and jumps to the matching page, section, or figure region. (commit by @Phil-Fan)
+  - Markdown export: The editor now supports "Save as Markdown" to export the current document to a Markdown file. (commit by @Phil-Fan)
+  - CLI ops catalog and cross-vault migration: New agentero describe lists available operations; agentero layout list --kind section outputs section headers; agentero paper move supports vault-prefixed cross-vault paper migration. (commits by @Phil-Fan)
+  - MCP tool expansion: MCP adds paper_set_read, layout_list, and layout_get tools, and publishes operation invariants. (commit by @Phil-Fan)
+  - Zotero auto-discovery: The onboarding and migration dialogs now discover default Zotero data directories per platform, and sync setup reuses the same discovery logic. (commits by @JiaheChen2002)
+  Improvements
+  - Paper import sources and fallback chains: Added the alphaXiv source and rewrote arXiv/DOI/PMID resolution as hedged fallback chains: sources run concurrently, results are awaited in priority order, and rate-limiting is surfaced instead of an empty result, improving batch import success. (commit by @Phil-Fan)
+  - PDF dual-pane scroll sync: Replaces scroll-ratio mapping with content coordinates, writes scroll positions directly from native scroll events, eliminating 2-3 frame lag and middle-button pan drops; zoom gestures coalesce to a single partner update and realign after relayout. (commit by @Phil-Fan)
+  - PDF full-text translation queue: Clicking full-text translate before layout analysis finishes no longer errors; the job enters a waitingLayout queue and auto-starts document- or page-scope translation once regions are available. (commit by @Phil-Fan)
+  - PDF internal link jump-back: Clicking an in-text internal link (appendix, figure, citation) now shows a floating "Jump back" chip to restore the previous reading position, and the landing region flashes amber for visibility. (commits by @Phil-Fan)
+  - Agent citation resolution and prompts: Improved figure/section resolution, added failure toasts, and continued slimming the Host prompt envelope by moving citation formats to vault AGENTS.md and skills. (commits by @Phil-Fan)
+  - Remote history session restore: Clicking a remote history item now shows a shimmer placeholder immediately and atomically swaps in the real transcript once session replay finishes. (commit by @Phil-Fan)
+  Fixes
+  - PDF drag-and-drop handling: Fixed PDF drops across the main, reader, document, and feature windows; prefers native drag paths, accepts only local files, normalizes Windows paths, and deduplicates. (#514 by @langbit)
+  - Workspace PDF mode preservation: Fixed cases where local PDFs were downgraded to an empty markdown editor after restart, tab reopen, or document popout due to transient probe misses. (commits by @Phil-Fan)
+  - Paper body no longer renders as markdown: When hydration races cause all probes to miss, the viewer now falls back to a PDF empty state and retries instead of sticking on a broken empty markdown editor. (commit by @Phil-Fan)
+  - Magic-wand web import URL double-prefix: Fixed translator resolvers returning absolute URLs that were joined to the base URL twice, causing 404s and breaking magic-wand web imports. (commit by @Phil-Fan)
+  - Layout analysis progress display: Figures panel and background tasks now correctly show headless layout-analysis progress and state. (commits by @Phil-Fan)
+  - Markdown formula and TOC: Fixed block math overflow and tall hover states; the table of contents now indents by heading level. (commits by @Phil-Fan)
+  - Highlighted PDF text selectable: Fixed being unable to precisely re-select text that had been highlighted with the marker. (commit by @Phil-Fan)
+  - Windows fullscreen and icons: Made Windows fullscreen handling explicit and scaled icons for Windows DPI, fixing icons that looked too small in the taskbar/Dock. (commits by @JiaheChen2002)
+  - Windows CLI install verification: Unified Windows CLI install verification commands, supporting PowerShell/CMD absolute-path verification and normalizing shim executable paths. (commits by @JiaheChen2002)
+  - Zotero/onboarding flow: Requires creating a vault before Zotero import, clearly separates the Agentero vault from the Zotero source library, and keeps the Zotero prompt visible after vault creation. (commits by @JiaheChen2002)
+  Breaking Changes
+  - CLI subcommands removed: agentero tree and agentero vault use/which/info have been removed; agentero vault now only keeps create and list. Known vaults are recorded in ~/.config/agentero/config.toml. (commits by @Phil-Fan)
+  compare
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.10.3
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: locale
+ManifestVersion: 1.12.0

@@ -1,0 +1,80 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: CycloneDX.cdxgen
+PackageVersion: 13.7.0
+PackageLocale: en-US
+Publisher: OWASP Foundation
+PublisherUrl: https://owasp.org/
+PublisherSupportUrl: https://github.com/CycloneDX/cdxgen/issues
+Author: CycloneDX
+PackageName: CycloneDX Generator (cdxgen)
+PackageUrl: https://github.com/CycloneDX/cdxgen
+License: Apache-2.0
+LicenseUrl: https://github.com/CycloneDX/cdxgen/blob/HEAD/LICENSE
+ShortDescription: A polyglot tool and a library for generating various Bill of Materials in CycloneDX specification.
+Description: Generate Software Bill of Materials (SBOM) for most applications and container images with a single command. Generate Operations Bill of Materials (OBOM) for Linux and Windows hosts. Integrate with any CI/CD pipeline. Automatically submit the generated BOM to your dependency track server for analysis.
+Moniker: cdxgen
+Tags:
+- bom
+- cbom
+- containers
+- cyclonedx
+- docker
+- oci
+- owasp
+- package-url
+- purl
+- saasbom
+- sbom
+- sca
+- software-bill-of-materials
+- supply-chain
+ReleaseNotes: |-
+  13.7.0
+  cdxgen can now generate, read, sign and audit CycloneDX 2.0 documents at --spec-version 2.0, a preview of the specification while it awaits ratification; the default stays 1.7. The release also reads the lockfiles JVM projects already commit, sharpens component versions for pip, cargo and npm workspaces, and makes occurrence evidence more precise.
+
+  Java and Gradle
+  cdxgen reads gradle.lockfile, including the buildscript, settings and legacy layouts, without running Gradle: opt in with --feature-flags gradle-prefer-lockfile, and it is the automatic fallback in secure mode and whenever a Gradle run resolves nothing. It also reads gradle/verification-metadata.xml for the digests and PGP key ids of every dependency, with a new INT-016 audit rule that reports a recorded digest that no longer matches.
+  Class names are read from .aar files in the Maven and Gradle caches, and Gradle 9.6 root-project substitutions resolve to the root module instead of a bogus version. The Java 27 images and CI coverage are in place.
+
+  Python and Rust
+  pip and cargo components keep manifest requirement ranges out of their versions, so a >=1.0 constraint no longer masquerades as the resolved version. A cargo path dependency is listed once, under the crate it builds, instead of once version-less and once resolved.
+
+  .NET
+  Installed runtimes get a purl and a CPE in formulation, which restores vulnerability matching for runtime components (CVE-2026-111497). A deps.slices.json older than its sources is regenerated before use, so occurrences for deleted code no longer survive.
+
+  CycloneDX 2.0
+  Every cdxgen command generates, reads, signs and audits CycloneDX 2.0 documents at --spec-version 2.0, against the pinned draft schema: attributed claims on component evidence, post-quantum migration details on cryptographic assets, and declared coding-agent behaviour in AI-BOMs. The default spec version stays 1.7 and 1.6 and 1.7 output is unchanged. The hardware mapping comes from cdx-hbom 0.8.0.
+
+  Compliance profiles
+  cdx-validate gains a CISA 2026 minimum elements rule set, and the AI-BOM output maps to the CISA and G7 minimum elements for AI SBOMs. Build inputs are recorded under formulation for supported project types.
+
+  Evidence and evinse
+  evinse reports one occurrence per use site, spells every place one way, and no longer duplicates occurrences on Windows. pnpm workspace packages under directories the import scan used to skip, such as examples/, are now scanned. npm evidence credits the version a file actually loads rather than the newest matching package.
+
+  cdx-audit
+  A report piped to jq, tee or a CI step is no longer cut off at the pipe buffer. The CLI lets stdout drain before the process ends and keeps its 0, 1 or 3 verdict.
+
+  GitHub Actions BOMs
+  cdxgen reads .github/workflows/actions.lock workflow dependency lockfiles. This is the reader groundwork; locked commits, the transitive composite-action graph and audit rules follow in 13.8.0.
+
+  Security
+  Four advisories are fixed: quadratic parsing of crafted CrewAI files, a symbolic link at bom.json in a scanned repository, Git HTTP redirects that bypassed CDXGEN_GIT_ALLOWED_HOSTS, and a config file that could make cdxgen use attacker-controlled patterns (GHSA-4v76-rxfx-x42x, GHSA-jgqw-xmhg-9rfm, GHSA-7pxf-2399-4955, GHSA-phj7-7j69-xmfh). Users on 12.x can take 12.9.1 instead.
+
+  Agents and CLI
+  The cdxgen plugin now loads in Claude Code, OpenAI Codex, GitHub Copilot and other coding agents from one source, with recipes for running cdxgen through agents in CI added to the docs. Multi-path scanning resolves each path's ecosystems from one list, which keeps the per-path scan honest.
+
+  Thanks
+  Reported the bugs fixed here:
+  - August Johansson: #4764, #4753, #4730, #4675
+  - Andreas Fehlner: GHSA-4v76-rxfx-x42x, GHSA-jgqw-xmhg-9rfm, GHSA-7pxf-2399-4955, GHSA-phj7-7j69-xmfh
+  - srxzr-ant: anthropics/oss-scanner#497 (comment)
+  - Xavier Balloy: #4716, #4717, #4713
+  - almaz045: cdxgen/cdxgen/discussions/4710
+  Helped with ideas, sample code, reproducers and investigation:
+  - August Johansson: #4766 (comment), #4693 (comment), #4693 (comment)
+  - Xavier Balloy: #4716, #4717, #4713
+ReleaseNotesUrl: https://github.com/cdxgen/cdxgen/releases/tag/v13.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

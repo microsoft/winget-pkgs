@@ -1,0 +1,124 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: antonreshetov.massCode
+PackageVersion: 6.0.0
+PackageLocale: en-US
+Publisher: Anton Reshetov
+PublisherUrl: https://github.com/antonreshetov
+PublisherSupportUrl: https://github.com/massCodeIO/massCode/issues
+Author: Anton Reshetov
+PackageName: massCode
+PackageUrl: https://github.com/massCodeIO/massCode
+License: AGPL-3.0
+LicenseUrl: https://github.com/massCodeIO/massCode/blob/HEAD/LICENSE
+ShortDescription: Open-source developer workspace for code snippets, notes, HTTP requests, and developer tools
+Description: |-
+  massCode is an open-source desktop workspace for developers. It brings together code snippets, technical notes, a full-featured HTTP client, and a collection of developer tools. Snippets, notes, and requests are stored as Markdown files on disk.
+Tags:
+- snippets
+- notes
+- markdown
+- http-client
+- api-client
+- developer-tools
+- local-first
+- mcp
+ReleaseNotes: |-
+  AI Assistant
+  The built-in AI assistant carries out tasks across Code, Notes, and HTTP. Ask it to edit and format snippets, organize notes, update tasks, or run API workflows. Attach an open record or selected text, or let it find the relevant records in your vault. One conversation stays with you as you switch spaces.
+  You can combine related steps in a single request:
+  - “Add a five-second timeout to this function, update the usage fragment and format both.”
+  - “Find overdue tasks and move them to Follow-up.”
+  - “Run this collection, explain the failed checks and save a report in Notes.”
+  Requested edits apply directly. Ask for a preview to inspect changes before applying them. Sending HTTP requests and running collections require confirmation; changes to an HTTP draft still need Save. The assistant waits for action results before continuing dependent steps. You can answer its questions, adjust an active task, queue another request, or stop it. Task Undo reverses supported changes while preserving unrelated manual edits; it cannot reverse network requests, exported files or permanent deletion.
+  Connect your own OpenAI, Anthropic, Google Gemini, DeepSeek, Mistral, or xAI account, or use a local model through Ollama or LM Studio. Actions require a model with tool calling support. Cloud providers receive the context used for the task and bill through your API account. For local processing, use a model running on your computer.
+  See the AI Assistant guide for setup and examples.
+
+  MCP Integration
+  Connect external coding agents to your massCode vault through Model Context Protocol. Search and read snippets, notes, and HTTP requests, or save a solution as a new snippet or note without leaving your coding workflow.
+  Agents can also create HTTP collections and requests, update or move saved requests, preview their settings, send them using the active environment, and inspect saved execution history. Enable API integrations and MCP access in Preferences, then connect your client with an integration token. MCP is off by default and runs locally while massCode is open.
+  See the MCP guide for setup and supported tools.
+
+  Performance
+  Searching large libraries and filtering HTTP collections now take less time. Here are the results with 10,000 items in each space.
+  ──────────────────────────────────────────┬───────────────┬────────────────┬────────┬──────────────
+  Action                                    │Library size   │Before          │After   │Time reduction
+  ──────────────────────────────────────────┼───────────────┼────────────────┼────────┼──────────────
+  First search in Code                      │10,000 snippets│13,792 ms       │1,947 ms│85.88%
+  ──────────────────────────────────────────┼───────────────┼────────────────┼────────┼──────────────
+  First search in Notes                     │10,000 notes   │4,424 ms        │876 ms  │80.20%
+  ──────────────────────────────────────────┼───────────────┼────────────────┼────────┼──────────────
+  Search after editing a snippet¹           │10,000 snippets│12,376 ms       │1.62 ms │99.99%
+  ──────────────────────────────────────────┼───────────────┼────────────────┼────────┼──────────────
+  Search after editing a note¹              │10,000 notes   │4,434 ms        │0.75 ms │99.98%
+  ──────────────────────────────────────────┼───────────────┼────────────────┼────────┼──────────────
+  Filter HTTP requests by an exact name     │10,000 requests│22,110–24,014 ms│7–13 ms │99.94–99.97%
+  ──────────────────────────────────────────┼───────────────┼────────────────┼────────┼──────────────
+  Clear the filter to show all HTTP requests│10,000 requests│18,755 ms       │11–17 ms│99.91–99.94%
+  ──────────────────────────────────────────┴───────────────┴────────────────┴────────┴──────────────
+  ¹ Search time after an edit has finished saving; saving time is excluded. First-search results include preparing the search index.
+
+  Faster startup and a more responsive app
+  Startup checks and initial search indexing now run in smaller batches. You can switch spaces while the first search is being prepared, or change your query without an older result replacing the new one. Notes also skips unnecessary startup scans when there are no legacy attachments to migrate.
+  In focused tests with 10,000 items per space, the longest measured processing pauses during first-search preparation fell from 3,224 to 33 ms in Code and from 673 to 11 ms in Notes. These measure interruptions to the app's ability to handle other work, not the total search time or input-to-screen delay.
+  Startup was measured again using the build from before the optimization work and the current build, with identical saved items and library copies. Each value is the median of three launches.
+  ────────────────────────────────┬────────────┬──────┬──────┬──────────────
+  Library size                    │Opened space│Before│After │Time reduction
+  ────────────────────────────────┼────────────┼──────┼──────┼──────────────
+  3,000 items (1,000 per space)   │Code        │1.24 s│1.07 s│13.8%
+  ────────────────────────────────┼────────────┼──────┼──────┼──────────────
+  3,000 items (1,000 per space)   │Notes       │1.26 s│1.09 s│13.9%
+  ────────────────────────────────┼────────────┼──────┼──────┼──────────────
+  3,000 items (1,000 per space)   │HTTP        │1.41 s│1.12 s│20.8%
+  ────────────────────────────────┼────────────┼──────┼──────┼──────────────
+  ~30,000 items (10,000 per space)│Code        │4.33 s│1.83 s│57.7%
+  ────────────────────────────────┼────────────┼──────┼──────┼──────────────
+  ~30,000 items (10,000 per space)│Notes       │4.44 s│1.91 s│57.0%
+  ────────────────────────────────┼────────────┼──────┼──────┼──────────────
+  ~30,000 items (10,000 per space)│HTTP        │4.86 s│2.15 s│55.9%
+  ────────────────────────────────┴────────────┴──────┴──────┴──────────────
+
+  Lower search memory usage
+  With 10,000 snippets and 10,000 notes, retained search-process JavaScript memory fell from 1,036 to 560 MiB, a 46% reduction in a focused before/after test. This measures memory after searching both spaces, not the total memory of the entire app.
+
+  Test environment
+  MacBook Pro with Apple M4 Pro (12-core CPU), 24 GB unified memory, macOS 27.0 (26A428), Electron 34.1.1. Production benchmark builds on Apple Silicon.
+
+  About these results
+  Internal tests used synthetic libraries on the machine above, without clearing the OS file cache. Search and HTTP figures compare initial and latest recorded results from separate sessions; responsiveness and memory figures come from focused before/after tests of those improvements. Search timings use three-run medians; HTTP ranges cover a small number of interactions. Memory was measured after garbage collection in one diagnostic pair.
+  Search timings measure query processing, and HTTP timings measure list updates, not full input-to-screen latency. Startup compares the original and current builds across 36 alternating launches, with a fresh copy of the same test profile and vault and an equally warmed file cache for each run. Timings run from application initialization to the selected item's open event, not actual screen paint. The larger vault includes four additional HTTP test records (30,004 total). The final Notes search includes loading content that the original version loaded in advance. Results depend on library content and hardware.
+
+  Upgrading to v6
+  v6 uses Markdown Vault storage only. SQLite support and the built-in legacy migration have been removed. Existing Markdown Vault users can continue using their vault.
+  If your library is still a v4 massCode.db, back it up and migrate it with massCode v5.12.0 before opening it in v6. Use a separate, empty target directory: the v5 migration replaces Code content in the selected vault. Verify your migrated folders, snippets, and tags, then select that vault in v6.
+  For a v3 db.json library, first convert it with v4.7.1, then migrate through v5.12.0. See the storage and migration guide for the full steps.
+
+  Workflow Improvements
+  - Reorder snippet fragments by dragging their tabs. Tabs fit their names up to a width limit, and renaming preserves focus and finishes with Enter.
+  - Permanent fragment deletion now asks for confirmation.
+  - Sidebar controls and keyboard shortcuts behave consistently across spaces. Use Cmd+L on macOS or Ctrl+L on Windows and Linux to focus the AI assistant, or close it when the chat already has focus.
+  - A new About page in Preferences brings together app information and links for sharing massCode.
+  - Replacing an API integration token now asks for confirmation before invalidating the previous token.
+
+  What's Changed
+  - fix(notes): prevent markup flicker when focusing the editor by @antonreshetov in #936
+  - perf: optimize startup, search and HTTP navigation by @antonreshetov in #937
+  - fix(ui): preserve tree drag and scroll across spaces by @antonreshetov in #938
+  - fix(notes): reset search when switching vaults by @antonreshetov in #939
+  - fix(search): reset vault-specific search state by @antonreshetov in #940
+  - feat(mcp): integrate AI agents with the massCode vault by @antonreshetov in #944
+  - fix(http): refresh descriptions when switching requests by @antonreshetov in #946
+  - fix(http): limit sidebar search to collections and requests by @antonreshetov in #948
+  - feat(ai): add integrated assistant for code, notes and HTTP workflows by @antonreshetov in #951
+  - refactor(editor): migrate code editors to CodeMirror 6 by @antonreshetov in #954
+  - feat(mcp): extend HTTP collection and request workflows by @antonreshetov in #955
+  - fix(ui): unify sidebar controls and keyboard shortcuts by @antonreshetov in #956
+  - fix(notes): preserve selected note for ambiguous internal links by @antonreshetov in #957
+  - fix(ui): prevent document-wide select all by @antonreshetov in #958
+  - feat(storage)!: drop SQLite support and legacy migration by @antonreshetov in #959
+  - feat(preferences): add about page and app referral links by @antonreshetov in #960
+  - docs(ai): clarify assistant guide and add screenshots by @antonreshetov in #961
+ReleaseNotesUrl: https://github.com/massCodeIO/massCode/releases/tag/v6.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

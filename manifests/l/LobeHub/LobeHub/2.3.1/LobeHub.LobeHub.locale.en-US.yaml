@@ -1,0 +1,94 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: LobeHub.LobeHub
+PackageVersion: 2.3.1
+PackageLocale: en-US
+Publisher: LobeHub
+PublisherUrl: https://github.com/lobehub
+PublisherSupportUrl: https://github.com/lobehub/lobe-chat/issues
+Author: LobeHub LLC
+PackageName: LobeHub
+PackageUrl: https://github.com/lobehub/lobe-chat
+License: Apache-2.0
+LicenseUrl: https://github.com/lobehub/lobe-chat/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026/06/17 - current LobeHub LLC. All rights reserved.
+ShortDescription: An open-source, modern-design AI chat framework. Supports Multi AI Providers (OpenAI / Claude 4 / Gemini / Ollama / DeepSeek / Qwen), Knowledge Base (file upload / knowledge management / RAG), Multi-Modals (Plugins/Artifacts) and Thinking.
+Tags:
+- ai
+- artificial-intelligence
+- chatbot
+- chatgpt
+- claude
+- deepseek
+- doubao
+- google-gemini
+- kimi
+- large-language-model
+- llama
+- llm
+- mistral
+- ollama
+- qwen
+- rag
+ReleaseNotes: |-
+  From PR #22188: https://github.com/lobehub/lobehub/pull/22188
+  Summary
+  Contribution source: AI-assisted
+  🚀 LobeHub Release v2.3.1
+  Promote the complete current canary snapshot to main for a normal Stable release, replacing the closed, unmerged hotfix proposal #22186. This is not a two-commit hotfix.
+  - Previous Stable: v2.3.0.
+  - Canary snapshot: 1a6ba7ad3853f140cc5795c5baf5ae37f78c9a13.
+  - Scope: 87 upstream commits/PRs, including both #22122 (auto approve) and #22069 (release publication token fix).
+  - The release branch starts directly from that Canary snapshot, plus the bot-owned version bump and the Linux packaging repair in #22190. No hotfix cherry-picks or additional application features are layered on top.
+  Highlights
+  - Approvals and agent reliability: switch to auto approve directly from the approval card; prevent duplicate approval submissions, duplicate tool execution on resume, and stuck intervention continuations. (#22122, #22058, #22060, #22068)
+  - Tasks and Linear: large-list multi-select and batch actions, Linear-style filters, task-group create actions, paged activity, Linear comment sync, completed-issue imports, and background sync reliability. (#22055, #22083, #22136, #22155, #22087, #22086, #22050)
+  - Pages, documents and files: title/body editing as one document, page-agent rewrite fixes, document favorites, drive downloads and folder ZIPs, and smoother large folders. (#22154, #22141, #22147, #22095, #22106)
+  - Projects, channels and bots: project avatars and main-agent selection, project deletion confirmation, channel member picking, restore/purge fixes, paged wake records, and nightly bot retrospectives. (#22091, #22101, #22161, #22163, #22081, #22098)
+  - Search, dashboards and models: DeepSeek search/crawling, sandboxed HTML widget cards, structured-output fixes, usage/cost accounting fixes, and official model-card metadata. (#21298, #22123, #21385, #22071, #22079, #22124)
+  - Desktop and CLI: Copy Image, desktop shortcut listings, faster desktop packaging, connector restart/update improvements, and CLI v0.0.74. (#22067, #22113, #22121, #22165, #22166, #22179)
+  - Rollouts and infrastructure: new-tier plan integration and percentage rollout support; the alternate rail layout remains behind im_layout. Release publication explicitly uses the App token so downstream publishing workflows can start. (#22115, #22143, #22003, #22069)
+  Upgrade and release sources
+  - This release includes database migration 0199_topic_analyses.sql, adding the topic-analysis table, foreign keys and indexes. Self-hosted operators should include the normal database backup/migration procedure when upgrading.
+  - Use the ordinary release initialization flow: resolve and pin the Cloud revision for this new release. Do not inherit the v2.3.0 hotfix Cloud pin.
+  - Keep the exact title 🚀 release: v2.3.1 so the version bot and tag workflow agree on the intended version.
+  Test
+  - 
+    Release-source and workflow checks run locally
+  - 
+    Fresh full-product / packaged-Stable acceptance run
+  - The initial release branch matched the selected Canary snapshot. The only subsequent changes are the version bump and the build-tool repair described below.
+  - node --test .github/scripts/desktopRelease*.test.mjs: 62 passed on the release branch.
+  - Full PR CI and release-bot checks must finish before merging. The earlier hotfix's 86-test result is not presented as verification of all 87 upstream changes.
+  - Acceptance: existing evidence is attached to the merged upstream PRs; this release promotion does not claim new execution or a blanket pass for the full release. The upstream PR bodies contain acceptance links for 43 of 87 PRs; that is a link inventory, not a coverage/pass percentage, and some other PRs are tooling/test-only.
+  - Auto-approve evidence: https://lobehub.com/acceptance/7e75521b-766a-442e-9fa3-5a7ed89b7b59 — 8/9 criteria passed upstream; the Cloud approval-takeover continuation remains uncertain and lacks its required video. This limitation is not resolved by this release PR.
+  - Representative upstream evidence for other changes:
+    - Page title/body editing (#22154): https://lobehub.com/acceptance/a7d4e45a-331b-4bc2-97ac-efbdf1f7d24f
+    - Task filters (#22083): https://lobehub.com/acceptance/57c99ab3-3e90-48a6-96ab-af5c36f0d38f
+    - Batch task actions (#22055, #22089): https://lobehub.com/acceptance/d2c58f6a-a173-488d-ad0b-0a0303bf615a
+    - Drive downloads (#22095): https://lobehub.com/acceptance/72731c4c-74c8-4368-8da7-17cafc2d21d6
+    - Desktop Copy Image (#22067): https://lobehub.com/acceptance/dce8e0e7-4e32-410d-9c56-bc7896f56ec1
+  Linux packaging repair (#22190)
+  The first Linux desktop build failed because electron-builder 26.16.1's template Snap target deleted chrome-sandbox from the shared linux-unpacked directory while AppImage was reading it. Windows passed; the macOS jobs were cancelled by matrix fail-fast.
+  - Upgraded electron-builder to 26.18.0 and updated the isolated desktop lockfile, including the upstream fix electron-userland/electron-builder#10333.
+  - Added an integration regression against the installed packager and real temporary files: fails with ENOENT on 26.16.1, passes on 26.18.0. Downloads/compressor execution are stubbed; real staging, filtering and filesystem mutations are exercised. The helper stays intact for other targets but is excluded from Snap inputs.
+  - Changed-file lint, the regression and builtin-core packaging tests (2 passed), frozen-lockfile installation and git diff --check passed.
+  - The repair was merged through #22190 because release/* branches require PRs; no branch protection was bypassed.
+  - No new UI acceptance is needed for this build-tool-only repair. Full multi-platform packaging is being rechecked by the new PR CI run; the local tests do not claim a real installer build or launch.
+  Publication checklist
+  - 
+    Release bot commits package.json version 2.3.1.
+  - 
+    Required CI and review gates pass; merge this release PR into main without bypassing protection.
+  - 
+    Auto Tag creates v2.3.1 and publishes the GitHub Release with ordinary source metadata.
+  - 
+    Desktop Stable / Docker publishing completes, including installer and update-feed delivery.
+  A merged PR or a created tag alone is not proof that publication completed. No manual tag or release workflow dispatch was performed while preparing this PR.
+  🔗 Related Issue
+  Supersedes #22186 (already closed, not merged). Includes the full Canary range, rather than only #22122 and #22069.
+  Full change range: https://github.com/lobehub/lobehub/compare/v2.3.0...1a6ba7ad3853f140cc5795c5baf5ae37f78c9a13
+ReleaseNotesUrl: https://github.com/lobehub/lobehub/releases/tag/v2.3.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

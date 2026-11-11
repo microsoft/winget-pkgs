@@ -1,0 +1,118 @@
+# Created with WinGet Updater using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: DoltHub.Dolt
+PackageVersion: 2.6.2
+PackageLocale: en-US
+Publisher: DoltHub
+PublisherUrl: https://github.com/dolthub/dolt
+PublisherSupportUrl: https://github.com/dolthub/dolt/issues
+Author: DoltHub
+PackageName: Dolt
+PackageUrl: https://www.dolthub.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/dolthub/dolt/blob/HEAD/LICENSE
+CopyrightUrl: https://raw.githubusercontent.com/dolthub/dolt/master/LICENSE
+ShortDescription: Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+Description: |-
+  Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+  Connect to Dolt just like any MySQL database to run queries or update the data using SQL commands.
+  Use the command line interface to import CSV files, commit your changes, push them to a remote, or merge your teammate's changes.
+Moniker: dolt
+Tags:
+- cli
+- data
+- git-for-data
+- versioning
+ReleaseNotes: |-
+  Merged PRs
+  dolt
+  - 12277: go: fsck: Validate everything reachable from working sets.
+    fsck now validates the working and staged roots of every working set, plus the roots and commits recorded by an in-progress merge or rebase, and reports a missing chunk against the working set and field that reference it. Remote refs were already scanned. Ghost commits no longer panic the walk, so fsck passes on a shallow clone. See #12253.
+  - 12250: Include virtual generated columns in full binlog row images
+    Emit computed virtual generated-column values in FULL row images so CDC consumers receive every column advertised by TABLE_MAP. Convert before-image fields to the target schema before evaluating generated expressions, and preserve direct serialization for nonvirtual tables to avoid repeated schema copies.
+    Includes the original contribution from #12245, with schema-change correctness and allocation fixes. Validated with physical binlog decoding, schema-reset regressions, and real MySQL replication.
+    Fixes #12243.
+  - 12249: Fix statistics lookup for branch-qualified databases
+    Fixes optimizer statistics lookup for branch-qualified databases with shared regression tests also exercised by dolthub/doltgresql#3694.
+    Fixes dolthub/doltgresql#3692
+  - 12239: sqle/index: size keyless index lookup rows by projections, not stored columns
+    A virtual column before a stored column gave the stored column an output ordinal past the end of the row, panicking the producer goroutine and crashing the server. Rows are now sized by projections, and the producer runs under errguard.Go so a panic becomes a query error.
+  - 12230: go/libraries/doltcore/remotesrv: Stop routing new multiplexed gRPC requests to grpcSrv before stopping it.
+    Previously, gRPC requests arriving on the still-open HTTP listener during shutdown could call grpcHttpReqsWG.Add concurrently with Wait, causing a WaitGroup misuse panic, and could keep grpcSrv.Stop() from ever returning. They now get a 503, which gRPC clients see as Unavailable.
+  - 12225: Fix REPLACE panic on keyless tables with unique indexes
+    Validate unique indexes before inserting rows to prevent orphaned index entries and REPLACE panics on keyless tables with multiple unique keys.
+    Fixes #12219.
+    Depends on: dolthub/go-mysql-server#4078.
+  - 12217: Import GMS enginetest/setup instead of the deprecated scriptgen/setup package.
+  - 12212: don't panic when addressing conflicts in keyless table column types.
+    Fixes: #12186
+  - 12176: go/store/nbs: journal getManyCompressed reads flushed chunks and runs callbacks outside the journal lock.
+    Close now waits for those outstanding reads to drain.
+    Fixes #12170.
+  - 12173: go/store/nbs: fsync byte sink output before it can be renamed into a table file directory.
+    Fixes GC writing unsynced table files and archives into oldgen ahead of a synced manifest (#12172).
+  - 12164: go/libraries/doltcore/sqle/enginetest: Migrate to enginetest/setup.
+    Switch imports from the deprecated go-mysql-server/enginetest/scriptgen/setup re-export package to go-mysql-server/enginetest/setup. No behavior change; the old package only aliased the new one.
+  go-mysql-server
+  - 4094: Support unary bitwise complement
+    Support unary ~ for numeric and binary operands, preserving full-width masks in mixed signed/unsigned bit operations.
+    Related to #12284.
+  - 4090: Fixed merge join ranges for literals of another extended type
+    Fixes:
+    - dolthub/doltgresql#3691
+  - 4086: Fixed CHECK constraints on tables with virtual columns
+    Fixes:
+    - dolthub/doltgresql#3680
+  - 4078: Add shared regressions for keyless unique writes
+    Add shared coverage for keyless writes with multiple unique indexes, including REPLACE retries and rejected inserts.
+    Part of #12219. Dolt fix: #12225.
+  - 4076: Skip resolving virtual columns for DROP and SHOW statements so tables with unresolvable generated expressions can be inspected and repaired.
+  - 4075: Fail queries whose generated column expressions recursively reference their own table instead of overflowing the stack.
+  - 4074: Reject subqueries, variables, and non-deterministic functions in functional index expressions.
+    A subquery reading the indexed table caused unbounded recursion and a fatal stack overflow when resolving the hidden generated column.
+  - 4072: Require SUPER to SET global and persisted variables
+    Fix #12207
+  - 4070: Allow COUNT(1) and COUNT(*) in the same SELECT
+    Use expression ID to distinguish between COUNT(*) and COUNT(1).
+    Based off of: dolthub/go-mysql-server#4066
+  - 4069: Normalize Decimal Hash Value
+    Normalize decimal strings for hashing by trimming trailing 0s and trailing decimal points. Also, normalize negative 0 to positive 0.
+    Based off of: dolthub/go-mysql-server#4068
+  - 4064: Improve functional dependency analysis when tables don't have a primary key
+    This PR fixes a bug in functional dependency analysis, where a table without a primary key would mistakenly be treated as a table with no columns in the FD key, instead of the correct interpretation where every column is in the FD key.
+    It also improves the join order planner to handle the case where the FD key requires multiple columns, provided that a single table can provide all the columns.
+  - 4062: Do not hoist filters out of the null side of a lateral join
+    fixes #11552
+    hoistOutOfScopeFilters pulls filters that only reference an outer scope out of a derived table. for a lateral derived table on the right of a join that's wrong: in LEFT JOIN LATERAL (SELECT o.id + 1 AS tag WHERE o.id = 1) AS q ON TRUE the o.id = 1 filter decides whether q has a row for that o, it shouldn't filter o itself. at the top level there was nothing to hoist it into, so the query failed with rule 'hoistOutOfScopeFilters' tried to hoist filters above root node. hoisted filters from a derived table that is a non-preserved child of a join (IsPreservedTable) now stay inside it as a filter. derived tables inside EXISTS and IN subqueries aren't join children like that, so they still get hoisted as before.
+    the new script in SubqueriesScriptTests covers the query from the issue, the same thing with an inner JOIN LATERAL, and a LEFT JOIN LATERAL over a table that mixes an inner and an outer filter. all three failed with the error above and pass now, and i checked the expected results against mysql 8.4. the rest of ./sql/... and ./enginetest/... has the same results as main under -tags gms_pure_go.
+  - 4061: Do not apply outer scope index lookups below windows and limits
+    fixes #11548
+    applyIndexesFromOuterScope turns a correlated filter like w.id = o.id into an index lookup on the matching table, but it put that lookup on the table even when a Window, Limit, TopN or Offset sat between the filter and the table. the filter itself correctly stays above those nodes, so the window or limit then only saw the one looked up row. in the query from the issue every row got rn = 1 and NOT EXISTS removed all of them, and the same happens with a derived table that uses ORDER BY ... LIMIT. the rule now stops at those nodes, like pushdown.go already does for filters.
+  vitess
+  - 502: fix(mysql): honor GTID payloads regardless of request flags
+    Debezium's MySQL binlog client sends COM_BINLOG_DUMP_GTID with flags 0 and a valid binary SID block. The parser currently discards that checkpoint unless BINLOG_THROUGH_GTID is set; Dolt consequently replays historical transactions, which can fail Debezium when old DDL is applied to its current schema snapshot. See dolthub/dolt#12241 for the wire-level reproduction and MySQL history.
+    This backports vitessio/vitess#17580:
+    - Read the GTID payload independently of the flag, before handling nonblocking EOF.
+    - Set BINLOG_THROUGH_GTID on outgoing requests.
+    - Port the SID and request-flag test changes using this fork's existing test conventions.
+      The fork requires two adaptations: retain NewMysql56GTIDSetFromSIDBlock instead of upstream's historical textual decoder, and omit upstream's filename-dependent flag branch because this sender always uses an empty filename. The backport also bounds-checks the declared payload length and adds parser regressions covering flags 0, 2, and 4, zero-length/empty SID payloads, nonblocking requests, and malformed/truncated payloads.
+      Validation on Apple Silicon macOS:
+    - Passed go test ./go/mysql -run '^(TestComBinlogDump.*|TestSIDs|TestMysql56GTIDSet.*)$' -count=1 with Go 1.27.3.
+    - Built Dolt 2.6.1 with this patch and passed the issue's isolated wire-protocol reproduction for both flags 0 and 4; each excluded the checkpoint and delivered a new row. Stock 2.6.1 fails by replaying transaction 1.
+    - The complete go test ./go/mysql -count=1 run failed TestServer, TestClearTextServer, and TestDialogServer because VT_MYSQL_ROOT is unset and mysqld is unavailable. Native Linux and full Debezium startup were not tested.
+      Dolt will need to update its Vitess dependency after this is merged.
+  - 501: Represent DROP COLUMN IF EXISTS in the DDL AST
+    Parses and formats ALTER TABLE ... DROP COLUMN IF EXISTS, with a column-level flag separate from table-level IF EXISTS. Adds parse/format round-trip coverage; the full parser test package passes.
+    Part of dolthub/doltgresql#3536.
+  Closed Issues
+  - 11595: Feature Request: MAKEDATE function
+  - 11741: git remotes: a cancelled push/fetch wedges sql-server indefinitely — CommandContext kills only the direct git child, and the orphaned transport holds the pipe Wait() reads
+  - 10448: VECTOR INDEX: batch inserts fail with NULL embeddings after ~83 rows
+  - 11771: EXISTS with a join: a correlated reference in the ON clause is dropped from the plan, and the query returns wrong rows
+  - 11886: Lookup join drops an AND conjunct when the ON clause also has an OR over indexed columns (wrong results)
+  - 11984: License link is broken
+  - 12011: sql-server: git remotes with the same URL but different --ref share one ref — a push from one database overwrites another database's data
+ReleaseNotesUrl: https://github.com/dolthub/dolt/releases/tag/v2.6.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -31,9 +31,19 @@ jobs:
           Install-Module -Name PSScriptAnalyzer -Force -SkipPublisherCheck -Scope CurrentUser
       - name: Run PSScriptAnalyzer
         run: |
-          # Run PSScriptAnalyzer on all PowerShell scripts
-          $results = @(Get-ChildItem -Recurse -Filter *.ps1 | Invoke-ScriptAnalyzer)
-          $results += @(Get-ChildItem -Recurse -Filter *.psm1 | Invoke-ScriptAnalyzer)
+          $files = @(
+            Get-ChildItem -Recurse -Filter *.ps1 -File
+            Get-ChildItem -Recurse -Filter *.psm1 -File
+          )
+
+          # These rules must run alone to avoid PSScriptAnalyzer's Export-ModuleMember metadata race.
+          $isolatedRules = @('PSProvideCommentHelp', 'PSReservedCmdletChar')
+          $results = @($files | Invoke-ScriptAnalyzer -ExcludeRule $isolatedRules)
+          foreach ($rule in $isolatedRules) {
+            $results += @($files | Invoke-ScriptAnalyzer -IncludeRule $rule |
+              Where-Object RuleName -eq $rule)
+          }
+
           if ($results) {
             Write-Output $results | Format-List -GroupBy ScriptName
           }

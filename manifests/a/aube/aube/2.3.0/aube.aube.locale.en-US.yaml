@@ -1,0 +1,56 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: aube.aube
+PackageVersion: 2.3.0
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  Embedding hosts such as mise can now bind installed Node CLIs to a specific Node executable, and a batch of fixes covers hoisted-install bin linking, aube-lock.yaml patch hashes, ignoreScripts resolution, signal delivery in dlx --shell-mode, and terminal state after failed or interrupted installs.
+  Added
+  - Bind installed CLIs to a host-managed Node runtime (#1576 by @jdx) — Installed Node CLIs previously found their interpreter through the caller's PATH, so a tool manager could not give an application its own runtime without also changing which Node its project subprocesses see. EmbedderRuntime::bind_bins_to generates launchers that invoke the supplied absolute Node executable directly while leaving the inherited PATH unchanged; it works with both embedded install and add:
+    let mut options = aube::embed::InstallOptions::new("/tools/my-cli");
+    options.runtime = Some(
+        aube::embed::EmbedderRuntime::selector("/runtimes/node/25/bin")
+            .bind_bins_to("/runtimes/node/25/bin/node"),
+    );
+    aube::embed::install(options).await?;
+    The path is kept as written (symlinks are not canonicalized), so a moving major-version path like mise's installs/node/25/bin/node works; a missing runtime fails rather than falling back to ambient Node. Changing or removing the binding regenerates launchers on the next install, including frozen ones. Bound installs always materialize locally and disable the global virtual store so runtime-specific launchers stay out of shared trees. Simple Node shebang flags are preserved; quoted shebang arguments and environment assignments are rejected. Standalone aube's runtime selection is unchanged — this is the launcher support a host needs to implement its own policy (see jdx/mise#13477).
+
+  Fixed
+  - Hoisted installs link transitive dependency bins (#1548 by @jdx) — With --node-linker=hoisted, only importers' direct dependencies were linked into node_modules/.bin, so packages whose lifecycle scripts call a binary from their own dependencies failed with errors like sh: node-pre-gyp: command not found (bcrypt, prebuild-install, napi-postinstall; see discussion #1543). Hoisted installs now follow npm's rule: each package's bins are linked into the .bin/ of the node_modules/ it sits in, and a dependency's lifecycle script sees its own nested .bin first so a version conflict no longer silently runs the hoisted winner. An importer's own bin and its direct dependencies always take precedence over transitive packages on a name collision. Isolated installs are unaffected.
+  - aube rebuild relinks the full bin surface (#1550 by @jdx) — rebuild only relinked per-dependency shims, so a command added or retargeted in package.json#bin after install stayed missing or stale until the next aube install. rebuild now uses the same bin-linking entry point as install (importer bins, workspace member bins, then dependency bins). If a workspace member manifest is unreadable, it warns and reconciles the root importer instead of aborting. aube rebuild --filter <member> is not covered by this change.
+  - ignoreScripts is honored from env, .npmrc, and aube-workspace.yaml (#1552 by @jdx, fixes #1551) — Only the --ignore-scripts flag reached the installer; AUBE_IGNORE_SCRIPTS, npm_config_ignore_scripts, ignore-scripts=true in .npmrc, and ignoreScripts: true in the workspace yaml were parsed and then discarded, so aube config get ignore-scripts printed true while the next install ran scripts anyway. All sources now apply across install, ci, add, remove, update (including its pnpm:devPreinstall hook), dlx, deploy, and the auto-install aube run performs on a stale tree — which previously had no way to skip scripts at all. An explicit flag still wins over a lower-precedence false. pack, publish, and version keep their own --ignore-scripts flags.
+  - aube-lock.yaml keeps patch hashes on re-resolve (#1577 by @jdx) — In a project with patchedDependencies, running aube add dropped the (patch_hash=…) suffix from patched entries in aube-lock.yaml, producing a spurious lockfile diff on every add and a node_modules/.aube/ directory name that varied by how the lockfile was produced (reported in jdx/mise#13456). aube-lock.yaml now records patch identities the same way pnpm-lock.yaml does — a top-level patchedDependencies: map and (patch_hash=…) in entry names — consistently after install, add, and import, and a plain aube install now detects edited, added, or removed patches. Upgrade note: existing hashless aube-lock.yaml files still pass --frozen-lockfile unchanged; the next non-frozen install or add records the hashes as a one-time diff. Projects without patches are unaffected.
+  - Lifecycle scripts get a working npm_execpath when aube is embedded (#1565 by @jdx) — Embedded aube set npm_execpath to the host's binary, so a package running ${npm_execpath} run verify-build (e.g. install-artifact-from-github, used by re2) invoked the host's own CLI and failed, causing a needless source build or a failed install (jdx/mise#13451). Embedded aube now exports a shim that re-enters aube's CLI through the host via a private __aube-cli argv token (embed::CLI_TRAMPOLINE_ARG); hosts dispatch it the same way as the existing node-gyp trampoline, and docs/embedding/rust.md now documents both. If the shim cannot be written, npm_execpath is left unset rather than naming the host. AUBE_CLI_EXE is new in the lifecycle environment, and an inherited outer npm_execpath is now cleared before stamping. Standalone aube is unchanged.
+  - aube dlx --shell-mode delivers termination signals to the tool (#1562 by @jdx) — Signaling an aube dlx --shell-mode (or aubx -c) process stopped at the intermediate sh -c, leaving the tool running and aube hung waiting on it. A shell-mode line that is a single plain command now runs without a shell (using the same strict allowlist as aube run), so the tool is aube's direct child, receives the forwarded signal, and its exit code propagates. Pipelines, redirects, expansions, quoting, and shell builtins still run under sh with unchanged behavior, and the --shell-mode help text now describes this contract.
+  - Terminal state is restored when an install fails, is interrupted, or panics (#1559, #1560 by @jdx) — A failing install (trust-policy rejection, unresolvable dependency, network error) exited without retiring the progress renderer, leaving the cursor hidden and the OSC 9;4 taskbar indicator lit in iTerm2, Ghostty, and VS Code (discussions #1557 and #1558). Every error path now restores both before the diagnostic prints, and while the progress bar is active aube also handles SIGINT/SIGTERM/SIGHUP/SIGQUIT and panics to restore the terminal before re-raising — Ctrl-C still exits 130. Signals already ignored or handled (e.g. under nohup, or by an embedding host) are left alone. Windows gets the panic restore but not the signal handling.
+
+  💚 Sponsor aube
+  aube is built and maintained by @jdx, an open source developer at entire.io, the title sponsor of his open source work.
+  If aube saves your team install time or CI minutes, please consider becoming an individual or company sponsor. Your support funds ongoing development and helps keep aube fast, free, and independent.
+ReleaseNotesUrl: https://github.com/aubepkg/aube/releases/tag/v2.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

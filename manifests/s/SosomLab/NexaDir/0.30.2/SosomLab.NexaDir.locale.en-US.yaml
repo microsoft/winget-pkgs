@@ -1,0 +1,88 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: SosomLab.NexaDir
+PackageVersion: 0.30.2
+PackageLocale: en-US
+Publisher: SosomLab
+PublisherUrl: https://github.com/SosomLab
+PublisherSupportUrl: https://github.com/SosomLab/nexa-dir3/issues
+Author: Sangyong Bae
+PackageName: Nexa Dir
+PackageUrl: https://github.com/SosomLab/nexa-dir3
+License: PolyForm Noncommercial 1.0.0
+LicenseUrl: https://github.com/SosomLab/nexa-dir3/blob/main/LICENSE.md
+Copyright: Copyright (c) 2026 SosomLab
+ShortDescription: Lightweight dual-panel file explorer that looks identical on Windows, macOS and Linux
+Description: |-
+  A lightweight dual-panel file explorer that looks and behaves the same on
+  Windows, macOS and Linux. It is a single statically linked executable written
+  entirely in Rust and draws its own UI - no Qt, WebView or Electron.
+
+  Features: tabs, inline tree, preview pane (text, images, archive listings,
+  WASM plugins), built-in terminal, batch rename, checksums, duplicate finder,
+  folder compare and sync, fast copy (CopyFileEx with parallel small files),
+  favorites, trash with restore. Settings live in %APPDATA%\nexa-dir, or next to
+  the executable in a data folder for portable use.
+
+  License: PolyForm Noncommercial 1.0.0 - free for noncommercial use only;
+  commercial use requires a license.
+Moniker: nexa-dir
+Tags:
+- cross-platform
+- dual-panel
+- file-explorer
+- file-manager
+- rust
+ReleaseNotes: |-
+  What's new in 0.30.2
+  Fixes since 0.30.1:
+  - macOS: copying or moving onto a volume that ran out of space (or hit another write error) never finished — the transfer stalled at high CPU and could only be cancelled. The error is now reported and the item fails like on other systems (GAP-049).
+  - macOS: application bundles (.app) showed "96 B" in the size column before their folder size was calculated. The cell now stays empty until the size is known, like a folder (GAP-050).
+  New setting:
+  - Appearance → "Keep the main window active while a dialog is open" (window.dialog_keeps_active, on by default). On keeps the current behavior: while one of Nexa Dir's own dialogs (modal or modeless) has focus, the main window keeps its focused transparency. Off treats the main window as inactive as soon as a dialog takes focus, so the unfocused transparency applies.
+  Behavior changes:
+  - Window transparency defaults: focused 0 % → 5 %, unfocused 20 % → 10 %. Values you already changed in settings are kept; only the defaults move.
+
+  Nexa Dir 0.30.2
+  Cross-platform lightweight dual-panel file explorer (successor of nexa-dir2; the same screen on Windows, macOS and Linux) — installers plus a Windows portable zip.
+  ───────────────────────────────────────┬────────────────────────────────────────┬─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  OS                                     │File                                    │Install
+  ───────────────────────────────────────┼────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Windows x64                            │nexa-dir-0.30.2-windows-x64.msi         │Double-click, or msiexec /i … /qn (silent; optional PATH entry)
+  ───────────────────────────────────────┼────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  macOS (Universal · Apple Silicon/Intel)│nexa-dir-0.30.2-macos-universal.pkg     │Run the installer → /Applications/Nexa Dir.app + /usr/local/bin/nexa-dir link
+  ───────────────────────────────────────┼────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  macOS (drag-to-Applications)           │nexa-dir-0.30.2-macos-universal.dmg     │Drag and drop; see the note inside the dmg for the CLI link
+  ───────────────────────────────────────┼────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Linux x86_64 (deb)                     │nexa-dir_0.30.2_amd64.deb               │sudo dpkg -i or sudo apt install ./…deb
+  ───────────────────────────────────────┼────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Linux x86_64 (rpm)                     │nexa-dir-0.30.2-1.x86_64.rpm            │sudo dnf install ./…rpm
+  ───────────────────────────────────────┼────────────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Windows x64 (portable)                 │nexa-dir-0.30.2-windows-x64-portable.zip│Unzip and run nexa-dir.exe (settings go to a data folder next to the exe if present, otherwise %APPDATA%
+  exa-dir); in a console (PowerShell) use ndir.exe, e.g. ndir
+                                         │                                        │--selfcheck
+  ───────────────────────────────────────┴────────────────────────────────────────┴─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Every package also bundles nexa-copy, the command-line copy/move tool built on the same transfer engine (nexa-copy --help: --move --verify (also verifies cross-volume moves before the source is removed) --mirror --by-content --dry-run --include/--exclude --max-bps <rate> --journal <file>/--resume <file> --job <file.json> --progress --report <file>). MSI/pkg/deb/rpm put it on PATH; the portable zip (winget/choco) exposes it as a command alias.
+  The same engine is also bundled as a C library, ndir_xfer (ndir_xfer.dll next to the exe on Windows · Contents/Frameworks/libndir_xfer.dylib on macOS · /usr/lib/nexa-dir/libndir_xfer.so on Linux) with its header include/ndir_xfer.h: ndir_xfer_run(job_json, progress_cb, user, cancel) takes the same job JSON as nexa-copy --job and returns a report JSON (ndir_xfer_abi_version() = 1).
+  Verify downloads with sha256sums.txt. Uninstall: Windows Apps & features · macOS sudo "/Applications/Nexa Dir.app/Contents/Resources/uninstall.sh" · Linux dpkg -r nexa-dir / dnf remove nexa-dir.
+  User data (settings, sessions, favorites, rename presets) lives in the settings folder and is kept on uninstall. Settings from 0.22.0 and earlier (nexa-dir2) are imported once on first start.
+
+  Package managers
+  winget install SosomLab.NexaDir            # Windows MSI (replaces the 0.22.0 Inno installer)
+  winget install SosomLab.NexaDir.Portable   # Windows portable
+  choco  install nexa-dir                    # Windows MSI
+  choco  install nexa-dir.portable           # Windows portable
+  brew install --cask kiros33/tap/nexa-dir   # macOS (Universal pkg)
+  Linux (apt/rpm repository): https://pkg.sosomlab.com
+  The winget and Chocolatey commands work once the central reviews are through; nexa-dir-0.30.2-package-manifests.zip attached here is the exact submission.
+
+  Signing
+  Builds made without a code-signing key are flagged by macOS Gatekeeper and Windows SmartScreen (signed builds on request).
+  - macOS: xattr -dr com.apple.quarantine "/Applications/Nexa Dir.app" (the brew Cask does this for you)
+  - Windows: SmartScreen → "More info" → "Run anyway"
+  Changelog: docs/DEVLOG.md (Korean, development log)
+  License: PolyForm Noncommercial 1.0.0 — free for noncommercial use only; commercial use requires a license.
+ReleaseNotesUrl: https://github.com/SosomLab/nexa-dir3/releases/tag/v0.30.2
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

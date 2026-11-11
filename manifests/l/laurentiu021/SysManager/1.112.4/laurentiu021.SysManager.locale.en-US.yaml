@@ -1,0 +1,96 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.112.4
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.112.4] - 2026-09-22
+  Cancelling a shred could destroy the file and then tell you nothing had happened. File Shredder read
+  Cancel as "stop this instant", including in the middle of overwriting a file. The file stayed on disk under
+  its own name with its contents already replaced, and the queue reported it as "Cancelled" — so the one
+  operation in the app whose entire purpose is destroying data was the one that could quietly lie about it.
+  Cancel now stops the queue: anything not started is left alone, and a file already being overwritten is
+  finished and removed rather than left as a wreck.
+  Fixed
+  - A file whose overwrite had begun was abandoned half-done. Three end states were reachable, all of them
+    reported as "Cancelled": the file fully overwritten at its original length (the token was checked at the top
+    of each pass, so pass one had already finished), the leading chunks zeroed with the rest still readable (the
+    token was also checked every 64 KB), and the file truncated to zero bytes but never deleted (the token was
+    checked by the flush that follows the final truncate). Cancellation is now decided only between passes, and
+    only while the file is still intact: once a byte has been written the pass in flight runs to completion, the
+    remaining passes are dropped, and the file is removed. The extra work is bounded by the rest of a single
+    pass.
+  - A cancelled folder is no longer reported as untouched. Cancelling mid-folder raised an error that threw
+    away the count, so the whole folder showed "Cancelled" while the files already visited were gone for good.
+    The folder now returns what it did, and says so in plain English: how many files inside were destroyed
+    before you stopped, and that the rest are still there.
+  - The summary of a cancelled run is no longer blank. Everything the run had to tell you — files left in
+    place, links deliberately skipped, a file finished with fewer passes — was collected and then discarded by
+    the cancellation path, which replaced it with the four words "Shredding cancelled." A stopped run now
+    reports the same counts and explanations a completed one does, and the items it did destroy are recorded in
+    the activity history rather than omitted.
+  Changed
+  - ShredFileAsync returns the number of passes that actually ran, so the queue can tell "shredded as
+    asked" apart from "shredded with fewer passes because you cancelled" and word the difference.
+  Verify the download
+  Get-FileHash .\SysManager-v1.112.4.exe -Algorithm SHA256
+  Expected SHA256: 4DC2F075F0660CACC9ABC2EA7CA96420AA04EDA520C97910B1F3A91119B376DA
+  This build is not code-signed, so Windows will warn on first launch. That is
+  expected for a small independent app: see what the warning says and what to
+  click.
+  Code signing is planned through the SignPath Foundation,
+  which provides free certificates to open-source projects, with signing performed by
+  SignPath.io. Until then, the SHA256 above and the build
+  attestation below are what establish that a download is the genuine build.
+  Code signing policy
+  This release is not code-signed. The team roles, release-approval process and
+  privacy policy required by the SignPath Foundation programme
+  are documented in advance under Code signing
+  policy. That
+  documentation is a prerequisite for applying, not evidence of a certificate. The
+  attribution line naming SignPath as the signing provider will appear here once a
+  certificate is actually issued.
+  This program will not transfer any information to other networked systems unless
+  specifically requested by the user or the person installing or operating it. Full
+  privacy policy.
+  Verify where this binary came from
+  This exe was built by GitHub Actions from this public source, and the build is
+  recorded in the Sigstore public transparency log. With the
+  GitHub CLI:
+  gh attestation verify .\SysManager-v1.112.4.exe --repo laurentiu021/SystemManager
+  That proves which commit and workflow produced this exact binary, something the
+  SHA256 file cannot show, since it is published alongside the exe it describes.
+  Each release also ships SysManager-v1.112.4.sbom.json, a CycloneDX inventory of
+  every dependency resolved for this build.
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.112.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

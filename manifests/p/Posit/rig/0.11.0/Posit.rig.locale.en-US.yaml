@@ -1,0 +1,169 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Posit.rig
+PackageVersion: 0.11.0
+PackageLocale: en-US
+Publisher: Posit Software, PBC
+PublisherUrl: https://github.com/r-lib
+PublisherSupportUrl: https://github.com/r-lib/rig/issues
+PackageName: rig
+PackageUrl: https://github.com/r-lib/rig
+License: MIT
+LicenseUrl: https://github.com/r-lib/rig/blob/HEAD/LICENSE
+ShortDescription: The R Installation Manager
+Description: Install, remove, configure R versions.
+Tags:
+- installation
+- r
+ReleaseNotes: |-
+  Custom repositories
+  - New rig repos add and rig repos rm commands to add and remove your
+    own CRAN-like package repositories, e.g. an internal CRAN mirror or an
+    r-universe. rig stores them in its configuration file, and they work like
+    the built-in repositories, e.g. with --with-repos.
+    rig repos add --enable --all-versions enables a repository for all
+    R versions, including the ones you install later.
+  - New rig repos enable and rig repos disable commands to turn
+    repositories, built-in or custom, on and off for each R version.
+  - rig now remembers the repositories enabled and disabled for each R
+    version, with these commands or with --with-repos / --without-repos,
+    and applies them again on rig repos setup. rig repos setup now asks
+    for administrator rights if the current user cannot update the files of
+    the R installations, e.g. in admin mode on Linux and Windows.
+  - rig pkg install, rig pkg deps, rig pkg tree, rig pkg available
+    and rig pkg info now use the repositories configured for the R
+    version, including custom ones. rig pkg deps, rig pkg tree,
+    rig pkg available and rig pkg info have a new --r-version option.
+    rig pkg search still searches CRAN only.
+  - rig pkg install, rig pkg deps, rig pkg tree, rig pkg available
+    and rig pkg info have new --with-repos and --without-repos
+    options, with aliases --index and --no-index, to use other
+    repositories for one command, without changing the setup of the R
+    version. --with-repos also takes repository URLs, or name=URL.
+  - rig pkg commands now only use Bioconductor packages if the
+    Bioconductor repositories are enabled for the R version, e.g. with
+    rig repos enable bioconductor.
+  - rig now sets up P3M by default on macOS, and on the Linux
+    distributions P3M has no binary packages for, where P3M is a CRAN
+    mirror of source packages. P3M stays off on aarch64 Windows, because it
+    only has x86_64 Windows binaries. Use
+    --without-repos=p3m or rig repos disable p3m to turn it off.
+  - --without-repos=cran (and rig repos disable cran) now turns off CRAN
+    completely.
+  - rig proj now implements [[repository]] entries of rproj.toml and repository
+    pinning. rig proj lock, rig proj sync, rig proj deps and rig proj tree
+    have new --with-repos and --without-repos options to add and remove
+    repositories for one command.
+  Bioconductor
+  - rig proj and rig pkg now install Bioconductor packages, besides CRAN
+    packages, from the Bioconductor release that belongs to the R version.
+    CRAN and Bioconductor share one package namespace, so a bioc::<package>
+    entry in Remotes: or Config/Needs/* is the same as <package>. A
+    bioc entry in the
+    [[repository]] array of rproj.toml pins the Bioconductor release, or
+    turns Bioconductor off. rproj.lock is now version 5, and records the
+    Bioconductor release of every target.
+  - rig pkg info now shows the full DESCRIPTION of the current version
+    of a Bioconductor package, e.g. its title, description and maintainer,
+    from the VIEWS file of its Bioconductor repository.
+  Inline scripts
+  - rig run now support self-contained scripts, that declare the packages
+    and the R version they need in a # /// script comment block. rig then
+    runs the script in its own environment, in the cache directory, and
+    installs R and the packages as needed. rig run --upgrade and
+    rig run --upgrade-package upgrade the packages of a script's
+    environment.
+  - New rig proj lock --upgrade-package (-P) option, to upgrade only
+    some packages, and keep the versions rproj.lock pins for the rest. It
+    also takes a version requirement, e.g. -P 'cli@>= 3.6.4', for this
+    run only (#410).
+  - rig proj lock now keeps the versions rproj.lock pins when it has to
+    solve the dependencies again, e.g. after rig proj add, as long as they
+    still fit rproj.toml. Use --upgrade to pick the latest versions.
+  - rig proj init, rig proj add and rig proj remove have a new
+    --script option, to create and edit the # /// script block of an R
+    script, instead of a project's rproj.toml (#414).
+  - New rig proj lock --script script.R to lock the dependencies of a
+    script with a # /// script block into script.R.lock, next to the
+    script. rig run then installs the R and package versions of the lock
+    file, and updates it if the block changes. rig run --locked fails
+    instead of updating it (#422).
+  - New rig system script-assoc command on Windows, to run .R files with
+    rig from cmd and PowerShell, e.g. hello.R a b.
+  System requirements
+  - rig pkg install, rig proj sync and rig run now install the system
+    requirements of R packages on Linux, like pak does. rig matches each
+    package's SystemRequirements field against the
+    r-system-requirements
+    rules, and installs the missing OS packages if it runs as root or if
+    sudo needs no password. Otherwise it prints the commands to run.
+    Source packages and distribution-specific binaries need this, manylinux
+    binaries do not. --no-sysreqs turns this off for one run; the new
+    sysreqs, sysreqs-sudo, sysreqs-update and sysreqs-rules-url
+    config entries configure it; sysreqs = "print" only shows the commands.
+  - rproj.lock now records the SystemRequirements of each package, so it
+    is version 5. Run rig proj lock to update an older lock file.
+  Other new features
+  - rig now honors the OS_type field of packages: a Unix-only package is
+    not used on Windows, and a Windows-only package is not used on macOS and
+    Linux.
+  - rig add now has a --json option. It prints information about the
+    installed R version (or the already installed version that was kept),
+    including whether it is a new installation and whether it is the default.
+  - rig rtools add now has a --json option. It prints information about
+    the installed (or already installed) Rtools versions, including whether
+    each one is a new installation.
+  - New rig pkg search command to search CRAN packages, using the same
+    web service as the pkgsearch R package.
+  - New rig pkg doctor command to find problems with the packages in a
+    library: missing or too old dependencies, and packages compiled against
+    another version of a LinkingTo dependency (#393).
+  - rig proj commands now support path dependencies.
+  - rig proj init and rig proj import do not overwrite the project's
+    .Renviron file any more. rig now only manages a marked block in it,
+    and keeps the rest of the file, so you can add your own environment
+    variables to it. An existing .Renviron is not a conflict any more,
+    either (#440).
+  - rig pkg install <path> is now supported. <path> can be a directory,
+    of a source or binary package file.
+  - rig pkg install now supports constraints. E.g. to install a specific
+    version of a package use rig pkg install '<pkg>@=<ver>'.
+  - rig proj import --force now correctly overwrites the existing project
+    files.
+  - If the root project is a package, rig proj lock now includes it in the
+    solution, with a file:// URL.It also calls rig proj export to
+    (re)create its DESCRIPTION file and rig proj sync now installs the
+    root project if it is a package.
+  - rig pkg install --no-install-project installs only the dependencies of
+    the named packages, like rig proj sync --no-install-project.
+  - rig proj lock now rewrites the lock file if the list of R versions to
+    solve for changes.
+  - New --exclude-newer option for rig proj lock, rig proj sync and
+    rig pkg install, to ignore CRAN package versions published after a
+    date, e.g. --exclude-newer 2025-06-01, or in the last few days, e.g.
+    --exclude-newer "7 days". Projects can set it in rproj.toml, with
+    exclude-newer in [tool.rig].
+  - Projects and scripts can now set prefer-binary in [tool.rig].
+    rig proj init and rig proj import have a new --prefer-binary
+    option, to write the setting into the manifest.
+  - Projects can now set the platforms and R versions rig proj lock solves
+    for in rproj.toml, with platforms and r-versions in [tool.rig],
+    e.g. r-versions = ["4.5", "4.6"]. --platform and --r-version
+    override them.
+  - rig proj lock now also solves for source packages by default
+    rig proj sync uses this target only if no other target matches the
+    machine.
+  - rig run <script> now passes every argument after the script on to the
+    script, including the ones starting with -, and --. A script that
+    starts with #!, e.g. #!/usr/bin/env -S rig run, does not need an
+    .R extension any more (#413).
+  - rig run --rscript does not pass an extra --args argument to scripts
+    and -e expressions any more, so commandArgs(TRUE) only has the
+    arguments you gave.
+  Windows specific changes
+  - The rig binaries themselves are now signed on Windows, not only the
+    rig installer.
+ReleaseNotesUrl: https://github.com/r-lib/rig/releases/tag/v0.11.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

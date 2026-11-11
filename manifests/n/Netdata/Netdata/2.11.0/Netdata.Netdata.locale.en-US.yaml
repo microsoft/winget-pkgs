@@ -1,0 +1,126 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Netdata.Netdata
+PackageVersion: 2.11.0
+PackageLocale: en-US
+Publisher: Netdata Inc.
+PublisherUrl: https://www.netdata.cloud/
+PublisherSupportUrl: https://github.com/netdata/netdata/issues
+PackageName: Netdata
+PackageUrl: https://www.netdata.cloud/
+License: GPL-3.0
+LicenseUrl: https://github.com/netdata/netdata/blob/master/LICENSE
+Copyright: Copyright (c) Netdata Inc.
+ShortDescription: Real-time infrastructure monitoring agent with per-second metrics and a built-in web dashboard.
+Description: Netdata is an open-source, real-time infrastructure monitoring agent. It collects thousands of metrics per second from the local system with minimal configuration, stores them locally and visualizes them in a built-in web dashboard. On Windows it installs as a service and can optionally be connected to Netdata Cloud for centralized, multi-node monitoring.
+Moniker: netdata
+Tags:
+- alerting
+- cncf
+- data-visualization
+- database
+- devops
+- docker
+- grafana
+- influxdb
+- kubernetes
+- linux
+- machine-learning
+- monitoring
+- mysql
+- netdata
+- observability
+- prometheus
+ReleaseNotes: |-
+  Table of Contents
+  - Summary
+  - Highlights
+    - Network Monitor Dashboard (Technical Preview)
+    - Network Flows: NetFlow, IPFIX and sFlow (Technical Preview)
+    - Network Topology and Application Dependencies (Technical Preview)
+    - SNMP Trap Listener
+    - Expanded SNMP Device Coverage
+    - Logs: OpenTelemetry Ingestion and a Unified Log Engine
+    - AWS CloudWatch Collector
+    - New Collectors
+    - Endpoint Monitoring: macOS, Windows, FreeBSD and Linux
+    - Prometheus Collector Overhaul
+    - Query Engine and API
+    - Netdata Cloud: AI Troubleshooting and MCP
+    - Netdata Cloud: Alerts and Notifications
+    - Netdata Cloud: Fleet Management and Scale
+    - Netdata Cloud: Dashboards and Charts
+    - Security Hardening
+    - End of Full Support for RHEL 7.x, CentOS 7.x, and Amazon Linux 2
+  - Acknowledgments
+  - Contributions
+    - Collectors
+    - Packaging/Installation
+    - Documentation
+    - Other Notable Changes
+  - Deprecation notice
+  - Support options
+  Release Summary
+  Netdata has always been exceptionally good at one particular thing: telling you, per second and with no configuration,
+  what is happening inside a machine. v2.11.0 is the release where that stops being the boundary.
+  Two things happen here, and together they change what Netdata is.
+  First, Netdata learns the network. A new Network Monitor dashboard brings device inventory, metrics, topology,
+  flows, traps and alerts into one place. Behind it, Network Flows receives NetFlow, IPFIX and sFlow from your routers,
+  switches and firewalls and turns raw records into a faceted view of who is talking to whom. Network Topology walks
+  your devices over SNMP and draws the Layer 2 and Layer 3 map — LLDP neighbours, forwarding databases, OSPF and BGP
+  adjacencies — while Application Dependency Mapping does the same for your software, reading your Linux hosts'
+  kernels to map what each process, container and Kubernetes workload talks to, with nothing to instrument. The SNMP Trap
+  Listener makes Netdata a trap receiver that decodes traps from 800+ vendor profiles into
+  charts and readable messages instead of raw OIDs. Feeding all of it, SNMP device coverage grew from 229 to 273
+  profiles. The usual Netdata rules still apply: the profiles are already written, collection and storage stay on your own
+  infrastructure, and there is little to configure beyond telling Netdata where the devices are. Network Monitor, Network
+  Flows and Network Topology ship as technical previews — complete enough to run today, open to every Netdata user
+  while in preview, and still moving fast.
+  Second, and just as important, logs become a first-class pillar of the platform. This release adds OpenTelemetry
+  logs — OTLP log records are ingested, stored and queried from the same Logs tab that already serves systemd journal
+  and Windows events, with journald, filelog and syslog receivers, configurable retention, log-to-metric conversion
+  and parsing for unstructured lines. The deeper change is architectural: the same faceted, high-cardinality log engine now
+  backs systemd journal, Windows events, OpenTelemetry logs, SNMP traps and network flows alike. Five very different
+  signal types, one query surface, all stored on your own infrastructure.
+  Around those two, this release completes the major-cloud set with a new AWS CloudWatch collector — the counterpart to
+  the Azure Monitor collector added in v2.10.0 — and rebuilds the Prometheus collector around a real relabeling engine
+  with application profiles. Underneath all of it sits the largest stability and memory-safety effort we have ever shipped
+  in a single release: 87 incremental parts across the database engine, streaming, ACLK, health, ML and libnetdata.
+  Netdata's strong endpoint monitoring capabilities have been enhanced. macOS monitoring was rebuilt natively: unified
+  logs through Apple's OSLog framework, GPU, SMC and IOHID sensors, fans, power and battery, thermal pressure and NVMe
+  health, none of which was reachable before without dropping to log show and powermetrics by hand. Windows added
+  Active Directory and SMB monitoring on a reworked perflib layer, FreeBSD added system-call monitoring, and
+  Linux added audit subsystem monitoring. One agent, four endpoint operating systems, per-second resolution on each.
+  In Netdata Cloud, AI troubleshooting just became more accurate and more relevant: you can now connect your own MCP servers
+  to your Netdata Space — GitHub, PagerDuty and Atlassian, and your own custom servers — and Netdata AI will use them while
+  investigating. Alongside that, new Fleet Management views render nodes as status hexagons, the Nodes and Alerts views were
+  rebuilt to stay fluent in 50,000-node rooms, silencing rules gained timezone-anchored scheduling, and the mobile app
+  opened up to everyone on free plans.
+  ─────────────────────────────────────────┬───────────────────────────────────────────────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Feature                                  │Highlights                                                 │Details
+  ─────────────────────────────────────────┼───────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Network Monitor Dashboard                │One place for the whole network                            │• Device inventory, vendors, health and top talkers at a glance
+                                           │Technical Preview                                          │• Overview, Devices, Metrics, Topology, NetFlow, Traps and Alerts sub-tabs
+                                           │                                                           │• Per-device and per-interface traffic, speed and error rates
+  ─────────────────────────────────────────┼───────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Network Flows                            │NetFlow v5/v9, IPFIX, sFlow                                │• New high-throughput flow-analysis plugin with its own four-tier journal
+                                           │Technical Preview                                          │• Cisco ASA NSEL accounting
+                                           │                                                           │• Enrichment with cloud provider IP ranges, BGP/RIPE RIS data, and private-IP labelling
+  ─────────────────────────────────────────┼───────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Network Topology                         │L2 and L3 topology discovery                               │• LLDP, FDB and STP based Layer 2 topology
+                                           │Technical Preview                                          │• L3 subnet segments plus OSPF and BGP adjacencies
+                                           │                                                           │• MAC OUI vendor lookup and reverse DNS enrichment
+  ─────────────────────────────────────────┼───────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Application Dependency Mapping           │Per-host service maps, no instrumentation                  │• What each process talks to, read from the kernel socket table
+                                           │Technical Preview                                          │• Attributed per container, image, systemd unit and Kubernetes pod/workload (Linux)
+                                           │                                                           │• Regroup the map by process name, container or PID
+  ─────────────────────────────────────────┼───────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  SNMP Trap Listener                       │800+ vendor trap profiles                                  │• Profile-based trap decoding into charts and log entries
+                                           │                                                           │• Trap enrichment and forwarding to SIEM
+                                           │                                                           │• Configurable via the Dynamic Configuration UI
+  ─────────────────────────────────────────┼───────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Expanded SNMP Device Coverage            │273 device profiles, up from 229                           │• Cisco Catalyst, Cisco Nexus, FortiGate and Check Point improvements
+ReleaseNotesUrl: https://github.com/netdata/netdata/releases/tag/v2.11.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

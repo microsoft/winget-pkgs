@@ -1,0 +1,160 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Netdata.Netdata
+PackageVersion: 2.12.0
+PackageLocale: en-US
+Publisher: Netdata Inc.
+PublisherUrl: https://www.netdata.cloud/
+PublisherSupportUrl: https://github.com/netdata/netdata/issues
+PackageName: Netdata
+PackageUrl: https://www.netdata.cloud/
+License: GPL-3.0
+LicenseUrl: https://github.com/netdata/netdata/blob/HEAD/LICENSE
+Copyright: Copyright (c) Netdata Inc.
+ShortDescription: Real-time infrastructure monitoring agent with per-second metrics and a built-in web dashboard.
+Description: Netdata is an open-source, real-time infrastructure monitoring agent. It collects thousands of metrics per second from the local system with minimal configuration, stores them locally and visualizes them in a built-in web dashboard. On Windows it installs as a service and can optionally be connected to Netdata Cloud for centralized, multi-node monitoring.
+Moniker: netdata
+Tags:
+- alerting
+- cncf
+- data-visualization
+- database
+- devops
+- docker
+- grafana
+- influxdb
+- kubernetes
+- linux
+- machine-learning
+- monitoring
+- mysql
+- netdata
+- observability
+- prometheus
+ReleaseNotes: |-
+  NOTICE
+  The v2.12.0 build of the Netdata Agent has been discovered to have serious stability issues that cause it to crash randomly on startup due to an upstream bug in some of the tooling we depend on. As such, we have removed the installer for it from the release page. A fix is expected in v2.12.1, but until that release, users are encouraged to use the latest known working version (v2.11.1), which can be downloaded here.
+  Table of Contents
+  - Summary
+  - Highlights
+    - OpenTelemetry Traces, in Early Access
+    - Redfish: Out-of-Band Server Hardware Monitoring
+    - SNMP Topology: Diagnostics, Offline Triage and Replay
+    - New Collectors: S3 Object Storage and SMBIOS Memory
+    - Ceph, Reworked as a Prometheus Complement
+    - Windows: Hyper-V, RDP and Broader Coverage
+    - Secrets and Privilege Hardening in go.d
+    - Query Engine: Correctness and Faster Weights
+    - Agent Stability: dbengine, SQLite, ACLK and ML
+    - Netdata Cloud: Infrastructure Knowledge, Node Decommissioning and AI Conversations
+    - Platform Support Changes
+  - Acknowledgments
+  - Contributions
+    - Collectors
+    - Packaging/Installation
+    - Documentation
+    - Other Notable Changes
+  - Deprecation notice
+  - Support options
+  Release Summary
+  v2.11.0 brought network topology and made logs a first-class signal next to metrics. v2.12.0 adds OpenTelemetry
+  traces, out-of-band hardware monitoring through Redfish, and a diagnostics layer that makes SNMP topology debuggable,
+  alongside a large round of collector, query and stability fixes.
+  The third observability signal arrives. Netdata already ingested OpenTelemetry metrics and logs. This release adds
+  traces: OTLP trace records are received, normalized and stored by the agent under their own retention policy, with a
+  purpose-built columnar store — trace-aware indexes, bloom filters and rollups — and an otel-traces query Function that
+  searches traces, aggregates them over a window and drives an overview heatmap. You explore them in a new Traces tab
+  of the dashboard, available today as an Early Access feature.
+  Hardware monitoring goes out-of-band. The new Redfish collector talks to the BMC — iDRAC, iLO and any
+  DMTF Redfish implementation — rather than to the operating system, so as long as the BMC stays powered and reachable it
+  keeps reporting fans, temperatures, power supplies, drives and controllers when the host itself is unhealthy, rebooting or
+  powered down. It ships with sensor and hardware
+  inventory Functions, independent per-sensor threshold health, and an on-demand BMC log viewer. Alongside it,
+  SMBIOS Memory compares the firmware's per-slot memory inventory with an accepted baseline and raises an alert when a
+  recorded DIMM goes missing or comes back smaller — memory loss that a total-RAM figure alone does not pin to a slot.
+  The network work from v2.11.0 becomes operable. The SNMP topology engine gained an entire diagnostics layer: every
+  walk records its timing, its profile decisions and its failures; the evidence is retained in bounded form, published
+  independently of whether topology collection succeeded, packaged into a portable archive, and folded into the agent's
+  support bundle. A topology graph can then be replayed hermetically from that archive and inspected offline, which turns
+  "SNMP topology is not seeing this switch" from a site visit into a file you can send us. LLDP-V2 for PAN-OS, Meraki L2,
+  IpAddressTable support and a set of reusable topology-role profiles widen what the engine can see in the first place.
+  In Netdata Cloud, Netdata AI learns your infrastructure. With Infrastructure Knowledge, your team writes down
+  what only it knows — which services matter, what is expected, what normal looks like — and Netdata AI remembers facts
+  you tell it in conversation, then reads both before every conversation, investigation and report. AI conversations now
+  survive a closed tab and no longer fail when they grow long, and nodes being retired can be decommissioned so they
+  stop sending notifications.
+  And a lot of the release is consolidation. The Ceph collector was rebuilt as a complement to the Prometheus
+  collector and migrated to the v2 collector framework, with alert coverage and Tentacle support. go.d's secret handling
+  was systematically de-privileged: file and command secret providers now run without elevated privileges and through
+  nd-run, and secret references in auto-discovered jobs are no longer resolved unless the discovery pipeline is
+  explicitly trusted. Dynamic Configuration now reports an accepted go.d change separately from whether the job,
+  discovery pipeline or secret store has started, so clients should check configuration status for the outcome. Six independent correctness fixes landed in the query engine, and a long run of dbengine, SQLite,
+  dictionary, ACLK and ML fixes closes out crashes and leaks — many of them already shipped to users in the 2.11.1 patch
+  release and consolidated here.
+  Release Highlights
+  OpenTelemetry Traces, in Early Access
+  The agent's OTLP receiver now accepts traces in addition to metrics and logs, and a new Traces tab in the
+  dashboard lets you explore them.
+  Trace records arriving on the OTLP/gRPC endpoint are normalized, written to the write-ahead log and sealed
+  into the same columnar store that serves logs, extended for spans: span-extras columns, a trace-aware row index, trace
+  bloom filters, span combination and trace rollups. Queries are served by a new otel-traces Function, which exposes
+  capability discovery plus a trace search that filters on span fields and breaks each trace's spans down by service, a
+  window aggregate embedded in the search response, and an overview heatmap that follows the page's current selections.
+  Seeing your traces. Pick a time window and the Traces tab shows you where the time goes: a heatmap of trace
+  durations, the traces themselves with the services each one touched and any errors along the way, and filters to narrow
+  things down by service, span name or minimum duration. Click a trace to see its spans laid out as a waterfall, then
+  click a span for its attributes, resource, scope, events and links. You'll find Traces under Explore in a room, and
+  right next to Logs on a node's page.
+  Note
+  Traces is still in Early Access, so it stays hidden until you switch it on: click Early Access in the sidebar
+  and flip the Traces toggle (your browser remembers the choice). Just like logs, you'll need to be signed in to
+  Netdata Cloud, with access to the node's Space, to see them.
+  Traces are stored under their own retention settings — the traces section of otel.yaml takes the same rotation and
+  retention options as logs. With remote storage enabled, trace files that local retention has already removed are read
+  back from object storage for queries, as log files are, through a download cache that both signals now share at
+  {base_dir}/remote-read. A remote file that cannot be downloaded marks the answer as partial (remote_unavailable),
+  while a query that needs more remote data than the cache can hold fails with a request to narrow the range or raise
+  remote_storage.read_cache_max_size. Offloaded files are downloaded whole and one at a time, so the first query over
+  offloaded history can be slow, and a lookup of one trace by ID without a time range searches everything kept, local and
+  offloaded, so it fails once the offloaded history is larger than the cache.
+  Related work hardened the plugin around it: the otel-plugin now binds its gRPC endpoint before declaring its
+  Functions. On a port conflict it exits once without advertising a receiver it cannot listen on, and the agent disables
+  it until the next agent restart instead of restarting it in a loop. The OpenTelemetry documentation gained a
+  known-errors section covering exactly that case.
+  (#23479, #23738,
+  #23739, #23826,
+  #23905, #24088)
+  Redfish: Out-of-Band Server Hardware Monitoring
+  The new go.d/redfish collector monitors server hardware through the DMTF Redfish API of a baseboard management
+  controller. Because it queries the BMC rather than the operating system, it keeps reporting while the host is
+  unresponsive, mid-reboot or powered off, as long as the BMC itself stays powered and reachable — which is precisely when
+  hardware questions get asked.
+  One job per BMC covers the chassis and system inventory: thermal sensors and fans, power supplies and consumption,
+  processors and memory, storage controllers and drives, and the overall health roll-up.
+  Beyond charts, it ships operator tooling:
+  - Sensor and hardware Functions — on-demand tables of the full sensor set and the hardware inventory, with enriched
+    detail (models, part and serial numbers, firmware revisions).
+  - Independent sensor threshold health — each sensor's own upper and lower thresholds, as reported by the BMC, drive
+    its health state, rather than a single collector-wide rule.
+  - An on-demand BMC log viewer — the controller's own event log, read through the same Function mechanism, without
+    logging in to the BMC's web interface.
+  (#23343, #23909,
+  #23912, #23915,
+  #23922, #23926,
+  #23929, #23933,
+  #23938, #23943,
+  #23949, #23950,
+  #23957, #23962)
+  SNMP Topology: Diagnostics, Offline Triage and Replay
+  The SNMP topology engine shipped in v2.11.0 as a technical preview. This release gives it the thing a network discovery
+  engine needs most: an account of what it did and why.
+  Every acquisition is now explained. Per-walk timing and preparation diagnostics, the profile context that was
+  selected and the failure details behind each miss, plus the topology source and processing decisions, are all recorded.
+  Crucially, diagnostics are published independently of topology collection — when the walk fails outright, the
+  diagnostics still arrive, which is the case that previously produced silence.
+  The evidence is bounded and retained. Diagnostic evidence is kept within a fixed budget, topology history is
+  retained alongside it, and per-device diagnostics recur on a schedule rather than only on the first failure.
+ReleaseNotesUrl: https://github.com/netdata/netdata/releases/tag/v2.12.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

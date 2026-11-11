@@ -1,0 +1,72 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: BenjaminLSR.HandheldCompanion
+PackageVersion: 1.3.3.1
+PackageLocale: en-US
+Publisher: BenjaminLSR
+PublisherUrl: https://github.com/Valkirie
+PublisherSupportUrl: https://github.com/Valkirie/HandheldCompanion/issues
+Author: Lesueur Benjamin
+PackageName: Handheld Companion
+PackageUrl: https://github.com/Valkirie/HandheldCompanion
+License: CC-NC-SA 4.0 License
+LicenseUrl: https://github.com/Valkirie/HandheldCompanion/blob/HEAD/LICENSE.md
+Copyright: Copyright @ BenjaminLSR
+ShortDescription: ControllerService
+Description: A touch optimized GUI to increase your handheld gaming computer experience.
+ReleaseNotes: |-
+  This update addresses several long-standing issues in the virtual controller stack, improves application shutdown so devices and managers can close cleanly, and includes fixes for library names, controller recovery, AYANEO devices and navigation state.
+
+  ## Highlights
+  ### A more reliable virtual controller stack
+  USB/IP and VIIPER handling has been reworked to resolve known virtual-controller status and attachment issues. Device transitions are now validated more carefully, failed operations are rolled back, and updates can handle both older and newer USBIPWin2 installations.
+
+  More details are available in the [[USBIP & VIIPER – Virtual controller status](https://www.patreon.com/handheldcompanion/posts/usbip-viiper-170455986)](https://www.patreon.com/handheldcompanion/posts/usbip-viiper-170455986) post.
+
+  ### Improved shutdown operation
+  Shutdown now gives device and manager cleanup enough time to complete gracefully. VirtualManager asynchronous operations no longer block or fail during application close, allowing connected devices to be closed properly and preventing shutdown from ending in a crash or leaving background managers running.
+
+  ### Cleaner library names and better device recovery
+  Library titles are now cleaned up by removing common metadata, suffixes and version markers. Controller recovery is also better synchronized during startup and power-cycle events, with additional fixes for AYANEO RGB, SuperJoy and Flip devices.
+
+  # What Changed
+  ## Virtual controller stack
+  • Improved USB/IP compatibility across older and newer USBIPWin2 versions.
+  • Updated the bundled USB/IP installer to version 0.9.8.1.
+  • Deferred legacy USB/IP updates until after a restart when required, then resumed installation through Windows RunOnce.
+  • Improved installer restart messaging, scheduled-task handling and file-copy behavior.
+  • Improved VIIPER device transitions by detaching imported devices before libVIIPER changes and reattaching them afterward, including during rollback.
+  • Refreshed the bundled libVIIPER library.
+  • Improved virtual-controller status and attachment validation.
+
+  ## Shutdown and application lifecycle
+  • Improved shutdown sequencing so device and manager cleanup can complete gracefully.
+  • Prevented close-time failures from interrupting `IDevice` cleanup.
+  • Improved shutdown handling for background managers and connected devices.
+  • Improved startup, shutdown and background-operation toasts by combining titles with status text and adding a wait prompt when shutdown is still completing.
+
+  ## Library and profiles
+  • Improved library name sanitization by removing bracketed metadata, dash-separated suffixes and dotted version markers such as `v1.2.3`.
+  • Improved adaptive navigation state when templates or pane modes change, preserving temporary grid widths and returning the correct selected Library item.
+
+  ## Controller and device handling
+  • Initialized `ProductModel` as empty when no model has been assigned instead of displaying a misleading default value.
+  • Improved controller and device transition handling across recovery operations.
+
+  ## Fixes
+  • Fixed controller recovery synchronization during startup and power-cycle restoration, including controller view-model subscriptions and busy-state notifications.
+  • Fixed AYANEO KUN RGB handling, AYANEO NEXT 2 SuperJoy handling and AYANEO Flip device support.
+  • Fixed asynchronous VirtualManager operations during application close.
+  • Fixed initial power-profile picker population and selection synchronization so startup events cannot overwrite AC/DC profile GUIDs while loading.
+
+  ## Installer and maintenance
+  • Updated installer scripts and moved setup helpers into the `InnoSetup` directory.
+
+  **Full Changelog**：https://github.com/Valkirie/HandheldCompanion/compare/1.2.1.1...1.3.3.1
+ReleaseNotesUrl: https://github.com/Valkirie/HandheldCompanion/releases/tag/1.3.3.1
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/Valkirie/HandheldCompanion/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

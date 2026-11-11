@@ -1,0 +1,59 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Stack-Cairn.K-brain
+PackageVersion: 0.107.19
+PackageLocale: zh-CN
+Publisher: Stack-Cairn
+PublisherUrl: https://github.com/Stack-Cairn
+PublisherSupportUrl: https://github.com/Stack-Cairn/K-brain/issues
+PackageName: K-brain
+PackageUrl: https://github.com/Stack-Cairn/K-brain
+License: Apache-2.0
+LicenseUrl: https://github.com/Stack-Cairn/K-brain/blob/HEAD/LICENSE
+ShortDescription: 基于 Go 构建、运行在终端里的编程 Agent。
+Description: 氪脑（K-brain）是运行在终端里的编程 Agent，用 Go 构建，也可作为其他前端的后端底座。读代码、改文件、执行命令、验证结果，在同一会话中完成任务。运行 kn 开始使用，取自“氪脑”拼音 Ke Nao。
+Tags:
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  K-brain v0.107.19
+  本版从 main 的 12db595 构建。
+  新功能
+  - 子代理实时转录与单独停止（#122）：
+    - 列表与转录：新增 GET /v1/sessions/{id}/subagents（前台与后台子代理列表），GET …/subagents/{task}（截至此刻的转录），GET …/subagents/{task}/events?after_seq=N（只含该子代理事件的 SSE）。另有单独停止某个子代理的接口；
+    - 实时事件：子代理运行时，它的文字、思考、补充指令和工具调用作为 trajectory.child.* 事件写入会话事件日志，文本按 100ms 或 8 KiB 合并发出。旧客户端会忽略这些事件，会话历史不变；
+    - 载荷：Subagent 新增 parent_tool_call_id、background、usage、tool_count、duration_ms。
+  - kn 终端界面的子代理面板（#127）：
+    - 转录中的子代理：显示一行实时状态（工具次数、最新工具、耗时、token），完成后变成一行摘要；
+    - 前台子代理：也会出现在面板里，可以打开查看；
+    - 面板：运行中的排在前面，可用 Ctrl+X 直接停止选中项；
+    - 完成通知：后台子代理完成后显示为一行弱化通知，不再显示成用户输入。
+  修复
+  - 后台子代理不会再随一轮对话结束而被取消，也不再占住会话（#120）：
+    - 问题：模型用 background=true 启动的子代理，会在本轮结束时被一起取消，报告送不回来；
+    - 现在：本轮正常结束后，子代理会继续运行，完成后把报告送回会话。用户停止本轮、/close 或删除会话时，子代理会一起停掉；
+    - 不再占住会话：子代理运行期间，用户可以照常发起新的对话，也可以编辑、分支、压缩；目标续跑、排队消息和唤醒照常进行。只有切换模型或工作区、回退代码这两件事要等子代理结束，此时返回 409 session has a running background subagent；
+    - 遗留任务：K-brain 退出时还没结束的子代理，下次加载会话时会标记为中断，不再一直挡住删除和编辑。
+  - 目标续跑轮与运行时提醒不再显示成用户消息（#130）：/goal 的每个续跑轮 [goal n/m] …、新上下文提示和输出上限续写提醒，现在带 origin: "background"，客户端会显示成通知。续跑轮也不再进入提示词回溯。/goal <目标> 本身仍是用户消息。
+  性能
+  - 事件日志写入更快（#124）：run 进行中复用同一个日志文件句柄，不再每个事件都打开、关闭一次（Windows 除外）。每 256 个事件记录一个偏移标记，断线重连后的重放直接从标记处开始，不用从文件开头读起。
+  - 长回复和大工具参数的流式拼接不再越来越慢（#125）：Chat Completions、Responses、Anthropic 三种流式回复以前每收到一段增量就把已收到的内容整体复制一遍，现在改为直接追加，开销从平方级降到线性。
+  测试
+  - 修正 TestSubscriptionRefreshWithoutDesktop 写死日期导致过期失败的问题（#128）。
+  下载与校验
+  提供 macOS、Linux、Windows 的 x64/ARM64 CLI 与 computer helper，共 12 个二进制；SHA256SUMS 用于校验下载文件。
+  完整变更
+ReleaseNotesUrl: https://github.com/Stack-Cairn/K-brain/releases/tag/v0.107.19
+InstallationNotes: 在终端中运行 kn。首次使用前，请在 %USERPROFILE%\.k-brain\config.json 中配置模型提供商。
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://github.com/Stack-Cairn/K-brain/blob/main/README.zh-CN.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

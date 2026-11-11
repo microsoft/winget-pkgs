@@ -1,0 +1,154 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AtomGit.AtomCode
+PackageVersion: 5.2.0
+PackageLocale: zh-CN
+Publisher: 重庆开源共创科技有限公司
+PublisherUrl: https://atomgit.com/
+PublisherSupportUrl: https://atomgit.com/atomgit_atomcode/atomcode/issues
+PrivacyUrl: https://docs.gitcode.com/docs/help/home/protocol/privacy-policy
+Author: 重庆开源共创科技有限公司
+PackageName: AtomCode
+PackageUrl: https://atomcode.atomgit.com/
+License: MIT
+LicenseUrl: https://atomgit.com/atomgit_atomcode/atomcode/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Yubang Xu
+CopyrightUrl: https://docs.gitcode.com/docs/help/home/protocol/ai-privacy-policy
+ShortDescription: AI 编程助手 在你的终端中运行
+Description: Claude Code / Cursor Agent 的开源平替，住在你的终端里。连接任意 OpenAI 兼容大模型，自主读文件、改代码、跑测试、自我验证 —— 用 Rust 构建。
+Tags:
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  AtomCode v5.2.0 Release Notes
+  发布日期：2026-10-01
+  v5.2.0 是本年度最大的一次版本更新，核心是全新 TUI 成为默认界面（建立在"一切皆插件"的新运行时之上）、异步 Agent 团队、后台会话、可配置的安全授权模型与多语言界面；同时在 MCP 管理、工具输出治理、Provider 连通性与启动性能上做了大量加固。
+
+  ⚠️ Behavior Changes（注意行为变化）
+  - 默认界面切换：直接运行 atomcode（不带参数）现在打开新的全屏 TUI；旧的 tuix 界面移至 --classic 参数保留，功能仍然可用。
+  - 装配链移除：coding runtime 只保留行清单（parts::prepare → runtime::mount）这一条装配路径，原先的 ATOMCODE_ENGINE 引擎选择开关与手写中间件链已删除，不存在第二套装配或引擎回退。
+  - 授权语义收紧（安全）：[permissions] allow 配置规则不再等同于"人工当场批准"。此前配置放行与人工点允许产生的授权凭据无法区分，导致在 credential_shell = "strict" 下配置化的 Bash(curl *) 放行会连带解开凭据闸门。现在便利闸门只问"是否已决"，安全边界只认"由人批准"。
+
+  ✨ 新增功能（Features）
+  全新 TUI（默认界面）
+  - 全屏新界面：基于自研布局引擎的新 TUI，支持 flex 布局、绘制原语、终端能力探测与鼠标交互；首次以 --tui 启动时在开场提示末尾列出按键说明
+  - 审批可视化：屏幕内直接完成审批（无需 yolo 模式即可真实使用）；审批答完后默认收成一行 ● bash … → 允许一次，可点击展开查看详情
+  - 工具调用折叠：写/改类工具调用不折叠、直接展开画 diff；点一个调用只展开这一个；折叠调用与在跑的一组调用共用同一套展开逻辑
+  - 后台会话面板：/bg 会话放到后台继续跑，面板分组查看、切换、召回、丢弃；状态栏显示后台在跑数量；空输入框按 → 打开后台面板；后台干完的结果回到发起它的那段对话
+  - 提问面板：完整兑现 request_user_input 承诺——多选、自己输入、纯文字题、批量分页；输入行支持光标移动就地改错
+  - 思考强度控制：/effort 改用面板自己的列表（不再是弹窗）；/model 切换后若新模型声明了思考强度则递上档位选择；角色可声明自己的思考档位
+  - 回合结束条：显示结束时刻、耗时、轮数、工具数与缓存命中（如 ✻ Nailed it 21:42 · 12.5s · 1 轮 · 0 工具 · 2.70K tokens · 98% cached）
+  - 面板化界面：/agents、/cd、/diff、/view、/proxy 不再弹窗，改为底部内联面板；引导与配对向导也画在底部
+  - 会话共享：/webui、/sync、/desktop、/app（扫码把会话给手机）在新界面中可用；经典界面专属功能会明确提示暂住 --classic
+  - 其他增强：单击对话中的链接直接在浏览器打开；发出去模型未回复时按 Esc 可把那句话撤回输入框并从对话中移除；! shell 模式对齐经典界面（框变色、底部提示、输出边跑边画）；Ctrl+T 展开档连同已答审批一起展开；Ctrl+B 中断当前轮并让排队输入立刻执行
+  "一切皆插件"运行时（plexus）
+  - 新运行时 crate：引入 atomcode-plexus——面向行的可组合运行时，每个面板、每个工具、每条命令都是一行
+  - 能力即行：工具、技能、斜杠命令、MCP 服务器、审批闸门、压缩策略、人格（persona）、code_review、tool-web 等都以行注册，可在运行中替换或卸载单个行
+  - 运行时布局：atomcode-tui 提出运行时布局词汇表，模态可在运行中替换整行插件；斜杠命令由行贡献，UI 只负责发现、显示与分发
+  - 目录收口：可按名字收口目录——卸载、替换单个工具，MCP 也能逐个挑选；会话进行中可关闭/放回单个工具
+  异步 Agent 团队
+  - 团队运行时：多角色异步并行协作，补齐产品化 14 个角色，并发上限、事件有序分发与优雅取消
+  - 角色与模型：角色声明自己的思考档位，成员按角色跑；委派子 agent 可指定 provider 与模型
+  - 安全边界：委派出去的 agent 有硬边界——不跑 shell、不再委派、敏感路径与越界写直接拒绝；Worker 作用域按参数计算
+  - 团队面板：实时展示各成员的角色、模型、活动状态与真实输出 token；队列中成员详情可见
+  - 借力 Claude Code 三条：角色是数据、同伴消息非用户来源、Worker 各得独立 worktree
+  后台会话（/bg）
+  - 会话放到后台：/bg <任务> 与 /background 让会话在后台继续跑，不占用当前对话
+  - 后台问询：后台会话挂着的问询可在前台就地答复，或按需取回；前台答掉后台问询会当场报列表
+  - 结果回落：后台干完的结果以"另一个会话"身份回到发起它的那段对话；/review 默认在后台会话里跑
+  - 退出提示：后台还在跑时退出会先问一次；未回收的后台结果在退出时留一行提示
+  安全与授权
+  - 授权说清是谁批的：ToolExec 的布尔 pre_approved 替换为三态 Authorization（No / Presumed / ByPerson），便利闸门与安全边界各自问自己该问的
+  - 凭据不外泄：Provider 错误链中的请求地址会去掉凭据，不再进入屏幕、会话日志与 atomcode.log
+  - 审批授权精确化：/live/permission 的"始终允许"只授给真正在等的那次审批涉及的工具
+  - 凭据管理：/logout 真正删除凭据（删键而非写空值）；清凭据时先把会话从共享中收掉
+  - 启动安全提示：绕过审批、root、离线、未信任插件钩子四条启动提示在默认屏上恢复显示
+  MCP 管理
+  - 面板与命令：/mcp 面板支持列表、详情、启停、认证状态展示；新增 McpAct 动作枚举与对应命令
+  - 就地写回：仅修改单个服务器的停用状态，就地写回配置文件
+  - 认证与停用状态：McpServerState 增加"需要认证"与"已停用"两个变体
+  - 未接端口提示：未挂 MCP 面板时给出明确文案，并区分"筛空了"与"本来就没配"
+  工具与配置
+  - 工具输出截断可配：[tools.output] threshold_bytes 可在 config.toml 配置截断阈值，截断提示标注"第几段/共几段"
+  - fetch_output 分页修正：按字符边界分页，中文输出的页边不再劈出乱码；limit 0 读取默认一页
+  - /config 完善：新增 ui.mouse 开关（关闭后交还终端做选择，方便复制）；支持恢复默认
+  - /todo 增强：/todo add <任务> 与 /todo clear 让用户在回合之间直接改计划，无需重写对话；列出计划清单含已完成项
+  - /loop 节奏可控：/loop 5m 由人指定节奏
+  - 工作树：/worktree <名字> 开一个自己的 checkout 再换过去干活；进入自己的 checkout 后只围写、不围读
+  - /cost 恢复：按模型分列的 token 账单（不再是 /context 别名）
+  - 工具循环熔断：默认 stop 阈值 4→5，去掉第 3 次打扰提醒，停止文案更友好可操作
+  多语言界面（i18n）
+  - i18n crate 抽取：屏幕所说的每一句话都走词表，抽出独立叶子 crate，两张表一个 locale
+  - 文案补齐：MCP 面板 24 条文案、/mcp、屏幕提示等中英文齐备
+  其他
+  - 会话桶持久标记：文件夹改名不再丢会话，/resume 跨桶时把当前文件夹钉到会话所在桶
+  - 工具输出落盘：超长工具输出落盘而非塞满上下文
+  - 敏感路径审批：只读工具在触碰凭据、密钥、.env 前先走审批闸门
+  - 系统通知：两个开关真正生效
+  - /compact 增强：摘要由对话模型按焦点撰写并计入会话用量
+  - /init 归行：失败的压缩会明确说话
+  🛠 修复（Fixes）
+  TUI / 终端渲染
+  - 一帧性能：不再走完整个会话——滚动一帧从 20.7ms 降至 0.72ms（debug）；一帧只物化屏幕那几行、只编码改动的行；结算块记住自己的行数，滚动只花一屏
+  - 布局与重叠：工具执行进度条计入布局计算，不再与正文错位或残留幽灵块；面板浮在布局上不再挤走对话
+  - 滚动与输入：滚轮/↑↓ 滚动对话、ctrl+p/n 翻历史；Ctrl+O 在每个收键阶段都能切换详细模式
+  - 折叠一致性：点一个工具调用只展开这一个；折叠调用与在跑的一组调用共用同一展开逻辑；意图行用正文色、命令行退成灰色
+  - 审批面板：矮屏时优先保住选项行，不再被长命令挤掉；审批卡画出命令全文
+  - muted 可读性：灰色文本在 Catppuccin Mocha 等配色下不再与正文一样亮；思考折叠行自带展开/收起提示，正文改用更暗一档
+  - 限流提示：对齐经典界面——等待中说中文、窗口用尽带剩余时间与去路、别家 429 不再留空
+  - 渲染细节：圆角标签间距、长任务预览换行、批量编辑 diff 显示、空答案光标位置、无 unicode 终端键名不再说错
+  - 模型与状态行：/model 记录新选择后重标 providers 列表；状态行的 provider 前缀只认会话自己的那一行；同名模型时状态行标出 provider；底栏缓存命中率按整会话累计
+  会话与恢复
+  - 会话桶根因修复：持久标记钉住会话桶，文件夹改名不再丢会话；/resume 跨桶时钉到正确桶
+  - 会话命名：/rename 的名字随会话写进日志，新界面打开不会被索引旧名改回
+  - 重放性能：切会话的重放不再全表扫块；恢复的历史回放增加有界限制，长会话恢复更流畅
+  - 后台会话归位：替对话干活的后台会话结果回家后标成 Delegated，不进 /resume 与 --continue
+  - use_command 计数：按会话计数，团队成员标签页里运行的命令计到主会话
+  Provider / 网络
+  - 凭据不泄漏：错误链里的请求地址去掉凭据，不再带进屏幕、会话日志与 atomcode.log
+  - 重试提示：带上原始错误与真实次数，不再显示成「…retrying in 3s (1/2)，0 秒后重试(0/0)」
+  - 连通检测：保存 provider 账户/模型后自动检测，base_url 少了 /v1 当场指出并给出实测可用地址
+  - 登录行为：/login 把用 AtomGit 模型的人切回服务端默认，自己配的模型一概不动
+  - 检测一致性：过时检测不覆盖新结果、200 JSON 报错可重试、403 验证页与 URL 凭据处理
+  MCP
+  - 停用写回：仅改一个服务器的停用状态，就地写回配置文件；来源到配置文件的映射收成一个函数
+  - 保留停用项：另给一条保留停用项的读取路径
+  升级与更新
+  - 回退保护：回退后不再被自动更新撤销；/upgrade 选中先展开选项、回退先确认
+  - 重启推迟：重启被推迟时不再重复升级覆盖备份，回滚结果先说再关屏
+  - 界面内升级：新版本提示进状态行，/upgrade 就地升级并重启，升级后给出提示
+  工具与编辑
+  - fetch_output 分页：按字符边界分页，中文输出页边不再劈出乱码
+  - 工具参数：缺少主参数时不再把整段参数（整个文件）倒进对话区；没有主参数的调用在"意图"行下仍写出工具名
+  - 工具输出：超长输出落盘；截断提示标注段数
+  其他
+  - 审批日志：审批提问与回答落进会话日志
+  - 目录授权：文件夹刚被创建时"本会话总是允许写入此目录"不再反复追问
+  - 后台问询键盘归属：不在人操作面板时抢键盘，答不进去明说，兜底问题说清是谁在问
+  - 工具循环熔断兜底：兜底读内核默认值，不再抄一份
+  🔧 重构（Refactoring）
+  - 装配统一：coding runtime 装配只剩行清单（parts::prepare → runtime::mount）一条路径，删除 ATOMCODE_ENGINE 开关、assemble.rs、parts::assemble 及仅供链式使用的钩子外壳
+  - 执行世界下推：执行世界（shell / 文件系统）下推到 capabilities，read/write/list/edit_file/bash 走统一缝，删除四份重复实现
+  - 产品特化移出 harness：harness 不再内含产品特化，测试改为引擎级组合保证
+  - 压缩提交收口：四处压缩提交收成 apply_compaction
+  - i18n 叶子 crate：屏幕文案抽成独立 crate，两张表一个 locale
+  📚 文档（Docs）
+  - 快捷键表补上 Ctrl+O，列出新界面与经典界面不同的按键
+  - 后台会话与快捷键文档对齐 v5.2.0 实现
+  - MCP 文档补充 server instructions 与传输行为说明
+  - 产品简介补充中英双语说明
+  🧹 工程 / 构建
+  - 构建配置：workspace 内 crate 与依赖均改为只留行号表（debug = "line-tables-only" / 依赖 debug = 0），显著减小 target/ 体积与链接时间，panic 与 backtrace 仍保留符号名
+  - 测试提速：改用 nextest 与虚拟时钟后，harness 慢测试 14.8s→4.0s，kernel 整套 570s→0.64s
+ReleaseNotesUrl: https://atomgit.com/atomgit_atomcode/atomcode/releases/v5.2.0
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://atomcode.atomgit.com/docs/zh/index.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

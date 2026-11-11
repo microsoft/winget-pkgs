@@ -1,0 +1,83 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Corsinvest.cv4pve.metrics-exporter
+PackageVersion: 2.1.0
+PackageLocale: en-US
+Publisher: Corsinvest Srl
+PublisherUrl: https://www.corsinvest.it/
+PublisherSupportUrl: https://www.corsinvest.it/cv4pve
+PrivacyUrl: https://www.corsinvest.it/privacy
+Author: Corsinvest Srl
+PackageName: cv4pve-metrics-exporter
+PackageUrl: https://github.com/Corsinvest/cv4pve-metrics-exporter
+License: GPL-3.0
+LicenseUrl: https://github.com/Corsinvest/cv4pve-metrics-exporter/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2019-2025 Corsinvest Srl
+CopyrightUrl: https://github.com/Corsinvest/cv4pve-metrics-exporter/blob/master/LICENSE.md
+ShortDescription: Metrics Exporter for Proxmox VE
+Description: |-
+  cv4pve-metrics-exporter is a Prometheus metrics exporter for Proxmox VE that provides
+  comprehensive monitoring data for your virtualization infrastructure.
+
+  Features:
+  - Prometheus metrics export for monitoring and alerting
+  - Node health and status metrics
+  - VM/Container resource usage and performance metrics
+  - Storage capacity and usage metrics
+  - Replication status monitoring
+  - High Availability (HA) resource tracking
+  - Subscription status monitoring
+  - Disk SMART health monitoring
+  - Customizable endpoint (host, port, URL path)
+  - API token support for secure authentication
+  - Multiple host support for HA configurations
+Moniker: cv4pve-metrics-exporter
+Tags:
+- corsinvest
+- exporter
+- metrics
+- monitoring
+- prometheus
+- proxmox
+- proxmoxve
+- virtualization
+ReleaseNotes: |-
+  Breaking
+  - cv4pve_replication_failed_total (counter) is replaced by cv4pve_replication_fail_count (gauge). Proxmox VE reports the failed attempts in a row, back to 0 at the first success: as a counter it never went down, and new failures after a recovery were not seen. Alert on cv4pve_replication_fail_count > 0.
+  Fixed
+  - Each scrape answered with the data of the previous one, and the first scrape after start was empty.
+  - Concurrent API calls could receive each other's answers (the shared LastResult of the API client): each call now uses its own client, sharing connection and login.
+  - A failed login or an unreachable cluster stopped the exporter. The scrape now answers HTTP 503, so Prometheus sets up to 0, and the exporter keeps running.
+  - Series of objects that no longer exist were exported forever: a deleted guest or storage, a renamed guest, old tags, the previous version of an upgraded node, a guest later covered by a backup job, an offline node's per-node metrics.
+  - Guest disk and network counters stayed frozen after a guest restarted or migrated; they now reset, and rate() works.
+  - HA: cv4pve_ha_node_state never reported the node states, and cv4pve_ha_state did not use the states of the HA manager. Both now come from /cluster/ha/status/manager_status.
+  - SMART: SAS disks, which report OK instead of PASSED, were exported as unhealthy.
+  - The standard profile did not cache backup coverage (10 min) and subscription (1 h); a setting left out of the settings file now takes its standard value.
+  - A call that failed was cached like a successful one and not retried until the cache expired.
+  - Failed backup-coverage and balloon calls were not counted in cv4pve_scrape_errors_total (balloon: section="guest"), and cv4pve_scrape_last_success_timestamp_seconds advanced even when calls failed.
+  - --debug and --log-level did not log the Proxmox VE API calls.
+  - Under systemd without a WorkingDirectory the exporter hung at start (a file watcher on /); systemctl stop ended with exit code 143 and marked the unit failed; Type=notify reported ready before the endpoint was listening.
+  - When the HTTP endpoint could not start (port taken, address not allowed) the exporter exited with code 0, so Restart=on-failure did not restart it.
+  - As a Windows service, the log was not written anywhere; it now goes to the Event Log.
+  - Help text of --settings-file.
+  Changed
+  - Documentation site: corsinvest.github.io/cv4pve-metrics-exporter, with every metric and label, the Prometheus scrape configuration, the systemd and Windows service setup, and the privileges the token needs; shorter README.
+  - The HTTP endpoint is served by the exporter itself instead of the prometheus-net MetricServer: same Host, Port and Url, and each scrape waits for its own collection.
+  - Updated Corsinvest.ProxmoxVE.Api.Extension and Api.Console to 9.2.4.
+  - Product icon (Lucide chart-spline) and Windows executable icon.
+  - Project metadata, symbols (Source Link, .snupkg) and code style aligned with the other cv4pve tools; shared cv4pve-tools CI workflow.
+  - Test project with an in-memory Proxmox VE API.
+  What's Changed
+  - ci: use shared cv4pve-tools CI workflow and declare publish permissions by @franklupo in #5
+  - Align project metadata, symbols and icon with the cv4pve tools by @franklupo in #6
+  - docs: documentation site by @franklupo in #7
+  - docs: "Options in a file" instead of "response files" by @franklupo in #8
+  - fix: fresh data on every scrape, 503 on login failure, stale series, HA, counters, service lifecycle by @franklupo in #9
+  - docs: drop the alerting page, align Permissions with cv4pve-report and cv4pve-diag by @franklupo in #10
+  - docs: remove em dashes from docs, comments and CHANGELOG; SDK 9.2.4, theme 2.6.1 by @franklupo in #11
+  - chore: release 2.1.0 by @franklupo in #12
+  Full Changelog: v2.0.0...v2.1.0
+ReleaseNotesUrl: https://github.com/Corsinvest/cv4pve-metrics-exporter/releases/tag/v2.1.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

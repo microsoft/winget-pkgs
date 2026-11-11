@@ -1,0 +1,117 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: MicroClaw.MicroClaw
+PackageVersion: 0.23.1
+PackageLocale: en-US
+Publisher: MicroClaw
+PublisherUrl: https://microclaw.ai/
+PublisherSupportUrl: https://github.com/microclaw/microclaw/issues
+PackageName: MicroClaw
+PackageUrl: https://microclaw.ai/
+License: MIT
+LicenseUrl: https://github.com/microclaw/microclaw/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 everettjf
+ShortDescription: An agentic AI assistant that lives in your chats, inspired by nanoclaw and incorporating some of its design ideas. Built with Rust
+Description: |-
+  MicroClaw is a Rust chat bot that connects LLM to your chats with agentic tool execution. It can run shell commands, read and edit files, search codebases, browse the web, schedule tasks, and keep persistent memory across conversations. It is a Rust rewrite of nanoclaw (TypeScript) with additional capabilities and a single-binary deployment model.
+
+  What makes it different
+  - Agentic loop with tool execution, not just a single API call
+  - Full file system and shell tooling from inside chat
+  - Long-lived memory backed by AGENTS.md files
+  - Built-in scheduler for cron and one-time tasks
+  - Group chat catch-up: reads all messages since last reply
+  - Multi-chat permission model (control_chat_ids) for cross-chat tool authorization
+  - Agent skills system with bundled skills (including macOS Apple Notes/Reminders/Calendar helpers)
+  - Customizable personality via SOUL.md files (global + per-chat)
+
+  How it works
+  chat message
+      |
+      v
+   Store in SQLite --> Load chat history + memory
+                           |
+                           v
+                     LLM API (with tools)
+                           |
+                      stop_reason?
+                     /            \
+                end_turn        tool_use
+                   |               |
+                   v               v
+             Send reply      Execute tool(s)
+                                |
+                                v
+                          Feed results back
+                          to LLM (loop)
+  MicroClaw enters an agentic loop for every message. LLM can call tools, inspect results, call more tools, and reason through multi-step tasks before responding. The loop is capped by MAX_TOOL_ITERATIONS for safety.
+
+  Core capabilities
+  - Agentic tool use (bash, file I/O, glob, grep)
+  - Web search, fetch, and browser automation
+  - Scheduling with cron expressions
+  - Mid-conversation messaging for progress updates
+  - Persistent memory (global + per-chat)
+  - Personality customization via SOUL.md
+  - Conversation archiving (automatic before compaction, manual via /archive)
+  - Typing indicator that stays active during tool use
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claw
+- large-language-model
+- llm
+ReleaseNotes: |-
+  Fixes found by running MicroClaw Code against real models (DeepSeek
+  deepseek-flash and deepseek-v4-pro) on the eval cases and by hand.
+  Fixed
+  - Approvals resumed later were not understood: answering a paused
+    approval with 1/2 or 3 in a later turn (mccode --session <id> -p 1,
+    the MCP run tool, and the Telegram / Discord / Slack / web option cards)
+    reached the model as a bare digit, which some models did not read as an
+    approval. The reply is now rewritten into an explicit instruction to retry
+    (or not run) the paused call.
+  - Compaction never ran with small context windows: the verbatim tail kept
+    by a Code compaction (24k tokens) did not shrink with the target, so a
+    session on a small window (a local model, an eval case) could not be
+    compacted at all and ran into a context overflow. The tail is now capped at
+    half of the compaction target.
+  - DeepSeek V4 windows: deepseek-v4-pro and deepseek-flash
+    (deepseek-v4-flash) are counted as 1M-token models instead of 128k.
+  - Language-server diagnostics:
+    - pyright never published diagnostics because MicroClaw Code did not send
+      workspace/didChangeConfiguration;
+    - a server on PATH that cannot start (rustup's rust-analyzer proxy
+      without the component) was shown as a passing check; it is now reported
+      once with an install hint and skipped;
+    - a server that sends nothing in time is reported as not checked;
+    - when diagnostics were the only check, a fix round that made them pass
+      still ended -p with exit code 1.
+  - @image mentions followed by punctuation (@shot.png?, @shot.png。)
+    were not attached.
+  - mccode export failed without a terminal ("the interactive interface
+    needs a terminal").
+  -  --worktree summary suggested git merge while the changes were still
+    uncommitted in the worktree; it now says to commit them first.
+  - Repositories without a .gitignore: review lists at most 100
+    untracked files (the rest counted per directory), and the per-turn change
+    fingerprint no longer reads every large untracked file.
+  Changed
+  - mccode eval: min_compactions in case.yaml fails a case that did not
+    compact; the long-session cases use windows above the fixed prompt size so
+    they really compact, and the compaction count no longer races the run.
+  Security
+  - hyper 1.12.0, which drops the unmaintained pin-utils
+    (RUSTSEC-2026-0441, published on release day).
+  Full Changelog: https://github.com/microclaw/microclaw/compare/v0.23.0...v0.23.1
+ReleaseNotesUrl: https://github.com/microclaw/microclaw/releases/tag/v0.23.1
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://microclaw.ai/docs/overview
+- DocumentLabel: Quick Start
+  DocumentUrl: https://microclaw.ai/docs/quickstart
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

@@ -1,0 +1,91 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Corsinvest.cv4pve.autosnap
+PackageVersion: 2.2.0
+PackageLocale: en-US
+Publisher: Corsinvest Srl
+PublisherUrl: https://www.corsinvest.it/
+PublisherSupportUrl: https://www.corsinvest.it/cv4pve
+PrivacyUrl: https://www.corsinvest.it/privacy
+Author: Corsinvest Srl
+PackageName: cv4pve-autosnap
+PackageUrl: https://github.com/Corsinvest/cv4pve-autosnap
+License: GPL-3.0
+LicenseUrl: https://github.com/Corsinvest/cv4pve-autosnap/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2019-2025 Corsinvest Srl
+CopyrightUrl: https://github.com/Corsinvest/cv4pve-autosnap/blob/master/LICENSE.md
+ShortDescription: Automatic Snapshot Tool for Proxmox VE
+Description: |-
+  cv4pve-autosnap is an automatic snapshot tool for Proxmox VE virtual machines and containers.
+  It creates snapshots with retention policies and supports flexible targeting patterns including
+  ID/name based selection, bulk operations, and pool-based selections.
+
+  Features:
+  - Automatic snapshot creation with retention policies
+  - Support for VMs and Containers
+  - Flexible VM selection (ID, name, patterns, pools)
+  - Hook script execution (pre/post snapshot)
+  - Multiple snapshot labels for different schedules
+  - Clean command to remove old snapshots
+  - Status command to view existing snapshots
+Moniker: cv4pve-autosnap
+Tags:
+- automation
+- backup
+- container
+- corsinvest
+- proxmox
+- proxmoxve
+- snapshot
+- virtualization
+- vm
+ReleaseNotes: |-
+  Added
+  - Documentation site: https://corsinvest.github.io/cv4pve-autosnap/, replaces docs/snapshot-consistency.md (#128)
+  - Skill skills/cv4pve-autosnap and an AI assistants page, to let an assistant such as Claude Code list, take and clean snapshots with a token limited to the guests concerned (#133)
+  - Label and --timestamp-format are checked at start: a name Proxmox VE would refuse (characters other than letters, digits, - and _, more than 40 characters) or a format the tool could not read back (variable length, not in time order) stops with ERROR: before any snapshot (#132)
+  - Test project Corsinvest.ProxmoxVE.AutoSnap.Api.Tests (#132)
+  - API: ResultSnap.VmsFound, PhaseEventArgs.Out, AutoSnapEngine.ValidateLabelAndTimestampFormat (#132)
+  Changed (behaviour)
+  - Guests Proxmox VE cannot snapshot (a container with a bind mount or a device mount point, a VM with a physical disk) are skipped with a message instead of failing the run, also when the mount point has backup=0 (#124)
+  - Guests on an offline node (status unknown) are listed and skipped, and the run exits with 1; they were left out without a message
+  - snap and clean exit with code 1 when --vmid selects no guest (was 0)
+  - --timeout accepts 1 to 86400 seconds; 0 and negative values made the tool stop waiting for the tasks
+  - status: TIME in local time, as the timestamp in the snapshot name (was UTC); numbers right-aligned
+  Fixed
+  - --max-perc-storage never skipped a guest: the storage usage (a fraction) was compared with the percentage
+  - A storage reporting no usage or no size skipped its guests whatever --max-perc-storage (#108): an empty storage is now valid, one with no size shows n/a and is not checked
+  - VM/CT selection, through Corsinvest.ProxmoxVE.Api 9.2.4: an excluded range (-200:299) no longer adds guests, pools combine with exclusions and duplicates (@all,-@pool-test, @pool-prod,-100), text% matches names starting with the text and %text names ending with it (they were inverted)
+  - Pool selection on Proxmox VE 9: Pool.Audit replaces Pool.Allocate in the declared privileges, and a pool that selects nothing names the privilege (#122)
+  - The exit code of the hook script was never read: a non-zero code is now printed as Script return code: N
+  - A request refused by Proxmox VE ended in Object reference not set to an instance of an object
+  - Output of hooks, task errors and removals stays in the block of its guest, also with --max-parallel
+  - clean: missing line break before Timestamp format, template message without the guest
+  - No Datastore.Audit warning when no guest is found
+  - Library: snapshot names and CV4PVE_AUTOSNAP_DURATION use the invariant culture: with a Thai, Persian or Hijri calendar the timestamp had another year
+  - Hook script comments: --script, not --script-hook, after the command
+  Changed
+  - Updated Corsinvest.ProxmoxVE.Api.Extension and Api.Console to 9.2.4
+  - README shortened, with links to the documentation
+  - Product icon (Lucide camera) and Windows executable icon
+  - NuGet package description
+  - Project metadata, symbols (Source Link, .snupkg) and code style aligned with the other cv4pve tools
+  - CI and publishing through the shared cv4pve-tools workflows
+  What's Changed
+  - Fix pool selection permission for Proxmox VE 9 (#122) by @franklupo in #123
+  - ci: use shared cv4pve-tools CI workflow and declare publish permissions by @franklupo in #126
+  - Align project metadata, symbols and icon with the cv4pve tools by @franklupo in #127
+  - Documentation site by @franklupo in #128
+  - Docs: Matomo statistics by @franklupo in #129
+  - docs: Connection page with response files, shorter Getting started, theme 2.3.0 by @franklupo in #130
+  - docs: "Options in a file" instead of "response files" by @franklupo in #131
+  - Fix storage threshold, exit codes, hooks, name checks and skipped guests by @franklupo in #132
+  - docs: AI assistants page and cv4pve-autosnap skill by @franklupo in #133
+  - docs: shorter AI assistants page, no sandbox section, theme 2.6.0 by @franklupo in #134
+  - SDK 9.2.4, docs theme 2.6.1, no em dashes by @franklupo in #135
+  - chore: release 2.2.0 by @franklupo in #136
+  Full Changelog: v2.1.1...v2.2.0
+ReleaseNotesUrl: https://github.com/Corsinvest/cv4pve-autosnap/releases/tag/v2.2.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
