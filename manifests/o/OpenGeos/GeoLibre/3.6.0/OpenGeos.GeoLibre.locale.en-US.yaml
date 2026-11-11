@@ -1,0 +1,76 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: OpenGeos.GeoLibre
+PackageVersion: 3.6.0
+PackageLocale: en-US
+Publisher: OpenGeos
+PublisherUrl: https://github.com/opengeos
+PublisherSupportUrl: https://github.com/opengeos/GeoLibre/issues
+Author: GeoLibre Contributors
+PackageName: GeoLibre Desktop
+PackageUrl: https://geolibre.app/
+License: MIT
+LicenseUrl: https://github.com/opengeos/GeoLibre/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Qiusheng Wu
+ShortDescription: Lightweight, cloud-native GIS platform for visualizing and analyzing geospatial data
+Description: |-
+  GeoLibre is a lightweight, cloud-native desktop GIS for visualizing and
+  analyzing geospatial data, built on MapLibre with deck.gl for 3D and
+  point-cloud overlays. It loads vector and raster files, web services, 3D
+  Tiles, MBTiles, and cloud-native formats, and is extensible through a plugin
+  ecosystem.
+Moniker: geolibre
+Tags:
+- gis
+- geospatial
+- map
+- maplibre
+- raster
+- vector
+ReleaseNotes: |-
+  GeoLibre v3.6.0 adds an India GIS catalog, lets external plugins add point clouds and read private S3 objects, and gives the Python API awaitable commands. You can also explore rasters and vectors in a new example notebook, edit much larger database layers, and cancel a browser COG conversion. It brings together 17 pull requests from 5 contributors, 2 of them contributing for the first time. Thank you to everyone who helped!
+
+  ## Highlights
+
+  • **India GIS**：a new catalog under Plugins → Web Services lists open boundary and municipal datasets for India, from national outlines to state and city wards. Choose a region and a portal, then add a layer to the map or download the data. See [Web Services](https://geolibre.app/user-guide/web-services/).
+  • **Point clouds and private S3 for plugins**：external plugins can add LAS, LAZ, COPC, and EPT data as regular LiDAR layers, and decode them with the host's own `maplibre-gl-lidar`. They can also read objects in private S3 buckets through presigned URLs, without receiving the secret key, so install only plugins you trust with the buckets your S3 connections cover. See the [Plugin API](https://geolibre.app/plugin-api/).
+  • **Async Python**：every blocking `Map` command now has an awaitable `*_async()` twin, such as `fly_to_async()` and `get_center_async()`, so it runs directly on the event loop in hosts such as Shiny for Python. See [Python](https://geolibre.app/python/).
+  • **A raster and vector example notebook**：`Explore_GeoLibre.ipynb` covers COGs, DEM analysis, live earthquake data, spatial joins, and 3D extrusions in the Notebook panel. New `add_tile_layer`, `add_cog`, `add_raster`, and `run_whitebox_tool` commands back it. See [Notebook Panel](https://geolibre.app/notebook/).
+  • **Larger editable database layers**：editable PostGIS and SQL Server layers now open up to 1,000,000 features by default, and `GEOLIBRE_DB_MAX_FEATURES` on the processing server changes the limit. See [Adding data](https://geolibre.app/user-guide/adding-data/).
+  • **Cancellable COG conversion**：GeoTIFF-to-COG conversion in the browser now runs in a worker, so the interface stays responsive and you can stop it at any time.
+  • **Fixes**：lower rasters no longer punch holes in upper ones on the deck.gl engine, which now also follows the Layers panel order; raster overviews average only valid pixels, so NoData no longer blends in; more EPSG codes and zipped shapefile datums resolve correctly; and Mapbox GL JS now loads from Mapbox's CDN when you open a Mapbox map, with a new [third-party licenses](https://geolibre.app/third-party-licenses/) page.
+
+  ## Download
+
+  Launch GeoLibre Web at https://web.geolibre.app, or get the desktop and mobile apps from https://geolibre.app/downloads/ (or the assets below).
+
+
+  ## What's Changed
+  • fix(postgis)：lift editable database layers past the 50k feature cap by @giswqs in https://github.com/opengeos/GeoLibre/pull/3272
+  • fix：shift the other CRSs on the datums the table lists by @GISspecialistAlejandraDuque in https://github.com/opengeos/GeoLibre/pull/3271
+  • chore(deps)：bump maplibre-gl-lidar to 0.21.1 by @giswqs in https://github.com/opengeos/GeoLibre/pull/3275
+  • feat(python)：add async variants of the blocking command methods by @cpsievert in https://github.com/opengeos/GeoLibre/pull/3276
+  • feat(plugins)：let external plugins read private S3 objects by @giswqs in https://github.com/opengeos/GeoLibre/pull/3277
+  • fix(s3)：re-probe a bucket's region after a network failure by @giswqs in https://github.com/opengeos/GeoLibre/pull/3278
+  • feat(plugins)：add India GIS open geospatial and state geoportal catalog plugin by @sutharprin098 in https://github.com/opengeos/GeoLibre/pull/3274
+  • fix：resolve EPSG:31300 with the parameters of its equivalent 31370 by @GISspecialistAlejandraDuque in https://github.com/opengeos/GeoLibre/pull/3279
+  • fix：apply the datum table to a zipped shapefile's .prj by @GISspecialistAlejandraDuque in https://github.com/opengeos/GeoLibre/pull/3280
+  • perf(raster)：move GeoTIFF-to-COG conversion into a cancellable worker by @Craun718 in https://github.com/opengeos/GeoLibre/pull/3284
+  • feat(notebook)：add a raster and vector example notebook by @giswqs in https://github.com/opengeos/GeoLibre/pull/3286
+  • fix(raster)：stop lower rasters punching holes in upper ones by @giswqs in https://github.com/opengeos/GeoLibre/pull/3289
+  • fix：strip ogc_fid in any casing before ST_Read re-reads GeoJSON by @giswqs in https://github.com/opengeos/GeoLibre/pull/3290
+  • fix(raster)：follow the Layers panel order on the deck.gl engine by @giswqs in https://github.com/opengeos/GeoLibre/pull/3291
+  • fix(map)：load Mapbox GL from its CDN instead of bundling it by @giswqs in https://github.com/opengeos/GeoLibre/pull/3294
+  • chore(deps)：bump geolibre-wasm, whitebox-wasm and layer control by @giswqs in https://github.com/opengeos/GeoLibre/pull/3295
+  • i18n：fill catalog gaps ahead of v3.6 by @giswqs in https://github.com/opengeos/GeoLibre/pull/3298
+  • chore(release)：v3.6.0 by @giswqs in https://github.com/opengeos/GeoLibre/pull/3299
+
+  ## New Contributors
+  • @GISspecialistAlejandraDuque made their first contribution in https://github.com/opengeos/GeoLibre/pull/3271
+  • @sutharprin098 made their first contribution in https://github.com/opengeos/GeoLibre/pull/3274
+
+  **Full Changelog**：https://github.com/opengeos/GeoLibre/compare/v3.5.2...v3.6.0
+ReleaseNotesUrl: https://github.com/opengeos/GeoLibre/releases/tag/v3.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

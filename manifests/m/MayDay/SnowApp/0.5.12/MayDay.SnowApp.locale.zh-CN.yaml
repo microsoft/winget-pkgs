@@ -1,0 +1,51 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: MayDay.SnowApp
+PackageVersion: 0.5.12
+PackageLocale: zh-CN
+Copyright: 版权所有 (c) 2026 MayMay
+ShortDescription: 面向开发者的桌面应用，将 AI 对话、终端模拟、SSH 远程管理、Git 工具和内置浏览器面板整合到统一的工作空间中。
+Description: Snow App 是一款面向开发者的桌面应用，将 AI 对话、终端模拟、SSH 远程管理、Git 工具和内置浏览器面板整合到统一的工作空间中。它通过 Rust 原生模块处理性能关键型操作，包括 SQLite 存储、AI 流式传输、文件监控和 HTTP 请求。此外还支持 MCP 集成、AI 图像生成、技能系统、Hooks、子代理、代码库语义搜索与 AI 驱动的终端会话。
+Tags:
+- ai
+- codex
+- git
+- mcp
+- ssh
+- 终端
+- 聊天
+ReleaseNotes: |-
+  新功能
+  - 本地数据备份：以 ~/.snowapp 为单位整体备份——SQLite 通过 Online Backup API 生成页对齐快照，资源文件按 8 MB 内容分块寻址、重复内容只存一份，后续备份只写变化块；恢复时立即写回资源文件，数据库暂存到下次未开连接时原子替换。主进程负责调度（退出时、每 N 小时或每日，可选系统唤醒后补跑），设置页提供目录、保留份数与进度。
+  - 手机 Git 面板：手机端新增 Git 芯片与「分支 / 变更」双 Tab，通过新增的 /api/git 接口读取仓库摘要、分支与工作树、变更状态、单文件 diff，并支持暂存、提交与工作树管理，分支名、路径与提交信息均做长度与格式校验。
+  - 手机消息操作与流式光标：手机端补齐桌面的消息操作栏（复制、编辑到输入框、查看原始 Markdown、fork、运行统计），六种流式光标也通过主题资源接口在手机端呈现。
+  - 后台任务标签页：detached bash 命令登记到可持久化的注册表，「后台」标签页可列出、聚焦、终止与忽略任务，bash 卡片徽标可跳转并高亮对应任务。
+  - 终端诊断输出：命令输出区分为数据与诊断，按行首规则提取 error/warning 并附带行号区间，退出码按工具语义解释（如 grep 无匹配不算失败）并记录信号终止，桌面与手机均按诊断着色。
+  - 插件市场与 HTML 预览：HTML 文件改为用内置浏览器打开，移除会话内预览卡片；社区插件按最新 GitHub Release 安装并支持版本比对更新，未发布 Release 的仓库不再展示；Skill 的全局开关成为总开关。
+  - 右侧面板布局持久化：分屏结构、各组标签与当前选中项写入本地并在重启后恢复。
+  - 进程采样日志：可从任务管理器按间隔采集进程指标与 LSP 会话数据。
+  改进
+  - 敏感操作匹配收敛为单一 Rust guard，bash、终端输入、computer-use 输入文本以及 hooks / 计划任务脚本 / MCP stdio 命令的配置写入共用同一套判定；修改敏感规则始终需要确认（YOLO 模式下也一样），确认卡片会高亮命中的关键词。
+  - 失败轮次重试改为就地重试：复用已丢弃的上下文，只替换末尾失败的辅助行，保留已完成的工具结果。
+  - SQLite 引入连接池，代码库向量改为 BLOB + 范数存储并按需迁移；仅在存在代理脚本时启用请求转发，PTY 输出合并、目录监听按变化路径增量刷新。
+  - 代码库设置可直接管理 embedding / reranking 模型，并提供跳转到 API 设置的入口。
+  - 检查点改为分块流式读取比较，远端分类只用大小 + BLAKE3 内容标识比对、不再读取对象内容；超过上限的文件不再抓取，远端恢复跳过超限旧对象。
+  - UI 字体设置全局生效（含手机端）并在多窗口间同步；WorkFlow 节点改用与主循环一致的 hook 门禁。
+  - 启动时批量校验本地项目目录，目录丢失会在侧边栏显示徽标；全局 / 项目范围切换时自动刷新 MCP 与 Skills 列表。
+  - 移除自动滚动偏好：输出始终跟随底部，仅在上翻阅读时暂停。
+  修复
+  - 输入框末尾的中文输入不再丢失组合：光标放在最后一个文本节点内部。
+  - 关闭标签页后由相邻标签接替，不再跳回分组第一个标签；单标签面板拖拽时不再出现分屏落点提示。
+  - 放弃更改支持 Windows 特殊路径与 core.quotePath 转义。
+  - 后台任务只在启动它的项目中显示；未指定模型时敏感命令判定跟随默认决策模型项。
+  - 窗口失焦后聊天项悬浮卡不再驻留；右侧会话面板内嵌待办入口且不注册全局快捷键。
+  - 社区插件数量不再包含官方仓库；宠物对话在跳过上下文时保留内联图片。
+ReleaseNotesUrl: https://github.com/MayDay-wpf/snow-app/blob/HEAD/RELEASE_NOTES_ZH.md#v0512
+Documentations:
+- DocumentLabel: 快速开始
+  DocumentUrl: https://github.com/MayDay-wpf/snow-app/blob/main/docs/zh-CN/1-快速开始.md
+- DocumentLabel: 文档
+  DocumentUrl: https://github.com/MayDay-wpf/snow-app/blob/main/docs/README.md
+ManifestType: locale
+ManifestVersion: 1.28.0

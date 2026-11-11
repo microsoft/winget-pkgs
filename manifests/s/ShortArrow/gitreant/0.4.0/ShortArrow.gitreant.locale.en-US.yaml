@@ -1,0 +1,240 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: ShortArrow.gitreant
+PackageVersion: 0.4.0
+PackageLocale: en-US
+Publisher: ShortArrow
+PublisherUrl: https://github.com/ShortArrow
+PublisherSupportUrl: https://github.com/ShortArrow/gitreant/issues
+Author: ShortArrow
+PackageName: gitreant
+PackageUrl: https://github.com/ShortArrow/gitreant
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/ShortArrow/gitreant/blob/HEAD/LICENSE-MIT
+ShortDescription: Serve git commit graphs of local repositories as a single-page web app
+Description: |-
+  A web app that shows commit graphs of multiple local git repositories side
+  by side in a single-page app. Ships as a single binary with an embedded
+  SPA: branches, merges, tags, stashes, submodule correlation graphs and
+  squash-merge links, rendered locally with no telemetry.
+Moniker: gitreant
+Tags:
+- commit-graph
+- git
+- graph
+- gui
+- repository
+- rust
+- visualization
+ReleaseNotes: |-
+  Added
+  - The Info dialog shows the versions of the git, gh and gpg that gitreant
+    runs, without where they were found.
+  - The Info dialog shows gitreant's icon beside its title.
+  - Resting the pointer on a commit row shows the rest of its message in a
+    popup, without changing the detail pane
+    (ADR 0067).
+  - Hovering a graph node fades every row, node and edge off its
+    first-parent chain
+    (ADR 0035).
+  - The keyboard moves the selection in the focused pane: ↑ / ↓ to the
+    row above or below, ← / → to the nearest commit in the next lane
+    over, Home / End to the first or last row, Enter opens every
+    file's diff and Esc clears the selection or closes the diff. A setting
+    adds hjkl and gg / G.
+  - The commit menu goes to a commit's parents and children, compares the
+    commit with the selected one, and checks it out with a detached HEAD
+    after a confirmation. A comparison lists both commits and the files
+    between them beside the diff.
+  - gitreant open opens the running server's page with its secret,
+    adding no repository.
+  - gitreant list shows the running servers, and --shutdown, restart
+    and refresh find the only one without --port; --shutdown --all
+    stops every one. A server records how each repository came, at startup,
+    from the CLI or from the browser, which list --verbose and --json
+    show
+    (ADR 0039).
+  - Right-clicking a submodule's graph, or its collapsed strip, opens the
+    submodule in a tab, here or in the right pane.
+  - A middle click closes a tab.
+  - Each row shows the lines its commit added and deleted against its first
+    parent, counted after the graph shows
+    (ADR 0041).
+  - The graph gives each counted commit a see-through thickness, green for
+    the lines it added and red for the lines it deleted, joined along its
+    edges by fainter fins; a graph setting turns it off
+    (ADR 0044).
+  - Dragging the graph's background tilts the thickness: sideways turns
+    the direction it extrudes in, up and down change its depth, and letting
+    go turns it back
+    (ADR 0045).
+  - A button in the pane's header charts the lines added and deleted along
+    HEAD's first parents, summed over time, in place of the rows
+    (ADR 0043).
+  - The chart adds candles of the net change and bars of each period's
+    lines, a day, a week or a month each, and its legend turns each series
+    on and off
+    (ADR 0047).
+  - Clicking the chart lists the commits under the cursor beside it, and a
+    listed commit's menu goes back to its row
+    (ADR 0048).
+  - A timeframe beside the chart's legend cuts its candles and bars by
+    commit, day, week or month
+    (ADR 0049).
+  - A calendar of the history under the rows shades each day by the lines
+    its commits added and deleted, and a click selects the day's commits in
+    the rows
+    (ADR 0050).
+  - A range narrows the chart of lines over time to its last years or
+    months, and its timeframe also cuts by quarter or year
+    (ADR 0051).
+  - A setting draws each row's line counts as bars, deleted left of an axis
+    and added right of it
+    (ADR 0046),
+    or leaves them out of the rows
+    (ADR 0052).
+  - The changed-files list labels a binary file "Binary" in place of its
+    +0 −0, which read the same as a text file with no line added or
+    deleted
+    (ADR 0053).
+  - The drawer's filter finds the submodules and worktrees nested under a
+    repository, a worktree also by its branch, and opens the repository to
+    them
+    (ADR 0054).
+  - A setting starts the weeks on Sunday instead of Monday, in the calendar
+    and in the chart's weekly candles and bars alike
+    (ADR 0056).
+  - The diff's line menu also copies the permalink as a Markdown or a Typst
+    link named by the file and its lines, and the file's relative or
+    absolute path; a button beside each file's name in the diff copies its
+    path.
+  - The diff shows the unchanged lines around its hunks on demand: twenty
+    more above or below a hunk at a time, or the whole file with its changes
+    marked
+    (ADR 0061).
+  - A changed file opens with one of the editors listed in config.toml in
+    the XDG configuration directory, which gitreant editor writes and the
+    settings show; on Windows the file's menu also asks the system which
+    application to use
+    (ADR 0062).
+
+  Changed
+  - Signature badges and line counts reach the rows at the top of a pane
+    sooner: the background checks and counts start with 32 commits and
+    double each batch up to 256, instead of 256 from the start
+    (ADR 0066).
+  - Running gitreant while its server runs opens the page again, as well
+    as adding the repository.
+  - The graph's thickness is drawn by depth: the added side in front of the
+    nodes and the deleted side behind the edges, each lane as one shape with
+    the lanes to the right in front
+    (ADR 0058);
+    a setting, off by default, outlines each lane's shape
+    (ADR 0059),
+    its added and deleted sides as one shape whose border takes each side's
+    color, so neither side's outline crosses the other side
+    (ADR 0065).
+  - The calendar's buttons for shading by both, added or deleted lines carry
+    diff icons and follow the button style setting like the other buttons
+    (ADR 0057).
+  - A repository is added from an "Add repository" row at the end of the
+    list, which opens into a path field (Enter adds it) and "Choose
+    folder…"; the path field, Browse and Add buttons no longer sit above the
+    filter
+    (ADR 0055,
+    ADR 0060).
+  - The settings' one-of-a-few choices (buttons, language, date format) are
+    segmented buttons instead of radio buttons.
+  - Hovering a branch badge fades the graph's nodes and edges with the rows.
+  - A stash's node is a ring around a dot, in a color of its own rather
+    than the color of the branch it sits on
+    (ADR 0036).
+  - A repository's graph shows as soon as its history is read; signatures
+    are checked after it, and a pulsing placeholder stands in for each badge
+    until its verdict arrives
+    (ADR 0037).
+  - A lane takes the lowest color no lane in use holds, so lanes side by
+    side no longer share one, and colors no longer shift as branches are
+    added above
+    (ADR 0040).
+
+  Fixed
+  - Line counts and signature verdicts no longer go missing when they are
+    announced before the page listens for them, or when an older read of the
+    view answers after a newer one.
+  - A branch that grows from a line other than the checked-out one forks to
+    the right of that line instead of the left
+    (ADR 0020).
+  - The graph's thickness tilts smoothly in a long history: only the rows
+    near the scroll are drawn thick
+    (ADR 0044).
+  - A count of one reads in the singular in English: "1 commit" over a
+    repository and in the drawer, and likewise for unpushed commits,
+    uncommitted changes and local-only branches.
+  - gitreant doctor and the check for whether signatures can be verified
+    look at the gpg git runs, named by gpg.program or found on the PATH,
+    rather than whichever gpg comes first; doctor names it and warns when
+    it is Git for Windows' own, which cannot see a GnuPG or Gpg4win keyring.
+
+  Security
+  - A changed file's menu shows the file in the file manager instead of
+    handing it to the default handler, which on Windows ran a .cmd, .exe
+    or similar in a repository. The entry now reads "Reveal in file manager".
+    Revealing a repository no longer goes through the default handler either,
+    which on macOS ran a folder named like an app, and gitreant no longer
+    runs a gpg.program named by the repository it was started in
+    (ADR 0078).
+  - On Windows the directory holding each server's record and its secret
+    gets an access list of its own, granting only the user, SYSTEM and
+    Administrators; it inherited whatever the profile granted, which on one
+    machine let a sandbox's accounts read the secret
+    (ADR 0077).
+  - The server refuses requests addressed to any name but a loopback one,
+    which DNS rebinding would need, and state changes from another site's
+    page, such as a shutdown sent from any open tab
+    (ADR 0038).
+  - Every API request carries a secret the server makes at each start, so
+    another account on the same machine can no longer reach the server
+    without one
+    (ADR 0063).
+    The page stays at http://127.0.0.1:<port>/, which is what gitreant
+    and gitreant list print, with no secret in it. gitreant opens the
+    page through a launcher file, its owner's alone, that posts the secret
+    to it, so the secret stays off the browser's command line, its address
+    bar and its history; a page opened without the secret names
+    gitreant open, which opens it again
+    (ADR 0076).
+    With --no-launcher the browser is handed the address with the secret
+    in it instead; in WSL, or where the launcher file cannot be written, the
+    browser is not opened without it
+    (ADR 0072).
+    The page keeps the secret for its own tab. A service worker or a cached
+    response another program left on the port still reads the secret, as can
+    a window of its page when gitreant's page opens in a tab that window
+    holds; all are accepted
+    (ADR 0073,
+    ADR 0079).
+  - The page reads the event stream with the secret in its header, and the
+    server no longer takes the secret from that stream's address, so records of
+    the page's requests no longer hold it in an address
+    (ADR 0082).
+  - gitreant forwards repositories to a running server, reads its list to
+    restart it, opens its page, stops it or asks it to re-verify signatures,
+    and gitreant list or a list of servers to pick from asks a server for
+    its repositories or prints its address, only once the server proves it
+    holds the secret in its record; a program that took the port after the
+    server stopped gets nothing
+    (ADR 0064,
+    ADR 0074).
+  - The uncommitted diffs no longer show a file reached through a directory
+    link or junction, or one that resolves into a .git directory or file or
+    into the repository's git directory; it is shown as binary. Such a path,
+    a junction to .git for one, showed .git/config with any credentials
+    in its remote URLs
+    (ADR 0068).
+  - A file opens with the default handler or an editor only when it lies in
+    the working tree: one reached through a directory link or junction, a
+ReleaseNotesUrl: https://github.com/ShortArrow/gitreant/releases/tag/v0.4.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

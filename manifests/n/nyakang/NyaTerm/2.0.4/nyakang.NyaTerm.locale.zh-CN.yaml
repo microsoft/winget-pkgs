@@ -1,0 +1,66 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: nyakang.NyaTerm
+PackageVersion: 2.0.4
+PackageLocale: zh-CN
+Publisher: kang
+PublisherUrl: https://github.com/nyakang
+PublisherSupportUrl: https://github.com/nyakang/nyaterm/issues
+Author: NyaKang
+PackageName: NyaTerm
+PackageUrl: https://nyaterm.app/
+License: Apache-2.0
+LicenseUrl: https://github.com/nyakang/nyaterm/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 NyaKang
+ShortDescription: 支持 SSH、RDP、VNC、串口、本地 shell、SFTP 和加密配置同步的原生桌面终端客户端。
+Description: NyaTerm 是基于 Rust 与 GPUI 的原生桌面终端客户端，把 SSH、本地 shell、Telnet、串口、RDP、VNC 会话、SFTP 文件传输、端口转发、OTP、AI 助手和加密配置同步放在同一个桌面应用中，适合日常开发、服务器维护和设备调试。
+Tags:
+- rdp
+- serial
+- sftp
+- ssh
+- terminal
+- vnc
+- 人工智能
+- 终端
+- 运维
+- 远程桌面
+ReleaseNotes: |-
+  NyaTerm v2.0.4
+  本次正式版本重点改进已保存连接的批量管理和 MobaXterm 会话导入，同时修复终端命令补全、Telnet 协商、命令高亮和多窗口解锁中的问题，并优化云同步本地数据库的空间使用。还对主题配色、连接列表与若干设置界面进行了细节调整。
+  ✨ 新增功能
+  - 连接多选与批量编辑：在已保存连接列表中，通过复选框、表头全选、Ctrl/Command 增选与 Shift 范围选择批量选中连接，并查看选中数量或清除选择。支持按协议批量修改适用配置；每个字段可选择保持不变、设置或清空，混合值和不适用字段有明确提示。跨协议批量编辑前会显示确认信息，避免误改认证或协议专属设置。（PR #1190，#536）
+  - 更完整的 MobaXterm 会话导入：除 SSH 外，新增对 RDP、Telnet、VNC 和 Serial 会话的解析；保留书签分组层级、空文件夹与原始顺序。导入窗口可分别选择或拖入会话文件和可选的密码文件，完成后提示跳过的条目及使用默认值的配置。对于无法可靠还原的协议参数，仍采用 NyaTerm 默认值，而非假定完全兼容。（PR #1190）
+  🐛 问题修复
+  - 终端命令建议：恢复完整历史命令与快捷命令的候选、模糊匹配和整条命令填充；填充只更新当前输入，不会自动执行，仍需用户确认后按 Enter。多行候选会进入粘贴预览，避免未经确认直接发送多行内容。
+  - Telnet 窗口尺寸协商：仅在对端接受 NAWS 协商后发送终端尺寸，避免不支持该能力的设备把尺寸字节显示为乱码；同时处理协商前的尺寸变化和拒绝协商的情况。（#1203，PR #1205）
+  - 多行快捷命令登录：修正 \r\p 暂停后的编辑器换行被额外作为回车发送的问题，减少设备登录或多级登录时的意外空输入；保留显式换行指令的行为。（#1203，PR #1205）
+  - 命令输出与关键字高亮：修复“应用设置”后命令输出高亮未正确保存、恢复设置后已打开终端未同步更新的问题；完整显示内置规则并理顺依赖开关的禁用状态。恢复旧版浅色和深色终端关键字配色，并使设置页色块使用终端实际生效的调色板。
+  - Shell 集成历史记录：修复 zsh 集成脚本可能干扰持久命令历史的问题，使注入过程使用独立的临时历史环境。
+  - 多窗口解锁：修复密码验证结果可能返回错误窗口的问题，确保子窗口中的解锁提示和重试结果回到发起操作的窗口。
+  - 连接批量保存：完善跨协议字段适用性、RDP 依赖选项与保存结果统计；区分已更新、未变化及跳过字段，连接数据在同一事务内提交，减少部分更新造成的不一致。
+  ⚡ 性能与稳定性优化
+  - 云同步本地副本空间管理：本地副本改用压缩存储，并对已安全应用的编辑日志进行清理；在满足空闲空间条件时执行数据库压缩回收。针对共享编辑日志、损坏记录、迁移中断与密钥轮换补充保护，后台维护不会阻塞正常启动。云端同步数据格式、备份格式与现有凭据加密方式不变，旧本地记录仍可读取。（PR #1199）
+  - 存储维护调度：将一次性迁移、日志清理和空间回收安排在启动后的空闲阶段执行，避免与界面初始化和用户操作争用资源。
+  ♻️ 重构与优化
+  - 整理桌面端连接编辑、会话状态、终端帧处理、文件传输和设置等模块，提取共用逻辑与边界清晰的子模块；属于内部代码维护，不改变对应功能的使用方式。
+  🎨 界面与交互优化
+  - 连接列表完善奇偶行底色、多选状态和固定操作列的视觉一致性；默认 RDP 与 VNC 连接图标更加容易区分。
+  - 统一浅色主题输入框的背景色和深色主题输入控件的配色，调整锁屏卡片和同步分组浮层的主题表现。
+  - 安全设置增加更明确的功能图标，优化选项卡布局和关闭交互；隧道分组的批量操作收纳到更多操作菜单。
+  - 移除云同步页面中不再适用的版本切换入口，保留冲突处理中的字段合并预览与确认流程。
+  📚 文档与国际化
+  - 更新云同步与备份使用说明、终端命令建议相关文档，并补充连接批量编辑、导入反馈及高亮选项所需的简体中文、繁体中文、英语、法语、日语、韩语界面文案。
+  👥 贡献者
+  - @fonaix：贡献连接多选与批量编辑、MobaXterm 导入增强，以及云同步本地副本压缩与空间回收。（PR #1190、PR #1199）
+  - @gzx19990101：修复 Telnet NAWS 协商及多行快捷命令的换行处理。（PR #1205）
+  ⚠️ 升级说明
+  - 已有云同步数据与备份无需转换格式；本地副本的压缩迁移和空间维护会在启动后择机进行。为避免数据丢失，升级前仍建议备份重要连接与配置。
+  - MobaXterm 的 VNC、Serial 等导入项中，部分无法可靠映射的参数会采用默认值。导入后请核对端口、串口设置及认证信息。
+ReleaseNotesUrl: https://github.com/nyakang/nyaterm/releases/tag/v2.0.4
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://nyaterm.app/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

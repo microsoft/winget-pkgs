@@ -1,0 +1,92 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Hugo.Hugo.Extended
+PackageVersion: 0.169.0
+PackageLocale: en-US
+Publisher: The Hugo Authors
+PublisherUrl: https://gohugo.io/
+PublisherSupportUrl: https://discourse.gohugo.io/
+Author: The Hugo Authors
+PackageName: Hugo (Extended)
+PackageUrl: https://gohugo.io/
+License: Apache-2.0
+LicenseUrl: https://github.com/gohugoio/hugo/blob/HEAD/LICENSE
+Copyright: Copyright 2026 The Hugo Authors.
+ShortDescription: The world’s fastest framework for building websites (with WebP encoding and Sass transpiling support)
+Description: |-
+  Hugo is one of the most popular open-source static site generators.
+  With its amazing speed and flexibility, Hugo makes building websites fun again.
+  Hugo is available in two flavors: standard and extended.
+  With the extended flavor you can:
+  - Encode WebP images (decoding is also available in the standard build)
+  - Transpile Sass to CSS using the embedded LibSass transpiler
+Tags:
+- blog
+- blog-engine
+- cms
+- content-management-system
+- documentation
+- documentation-tool
+- static-site
+- static-site-generator
+ReleaseNotes: |-
+  The main motivation behind this release is to get out a build with Go 1.27.3, which blocks trust in a small set of intermediate certificates due to specific security concerns around their operation. See the eMudhra incident for more information. This affects Hugo features that fetch remote resources over HTTPS, e.g. resources.GetRemote.
+  This release also contains some security hardening of the template functions and menu entries that can render content as HTML (see below), a deprecation of looking up reserved front matter fields via .Params (also below), a faster and more robust plainify, and a set of bug fixes.
+  Security notes
+  Templates are trusted in Hugo, but content (including front matter) is not necessarily. This release tightens a few places where values from content could end up rendered as unescaped HTML:
+  - pre and post values in menu entries defined in front matter are now HTML escaped, unless text/html is allowed in security.allowContent, which already marks HTML in /content as trusted. A warning (warning-menu-pre-post-html-escaped) is logged when a value containing HTML markup is escaped. Menu entries defined in the project configuration are not affected. f63482bf
+  - emojify and plainify now return a string unless the input is template.HTML, in which case the result is also template.HTML. Previously both always returned template.HTML, so e.g. {{ .Title | emojify }} would mark a potentially unsafe title as safe HTML. If you relied on the old behavior with trusted input, pipe the result through safeHTML. Thanks to @Reload3d for reporting this. #15452
+  Deprecations
+  Reserved front matter fields such as title, date and summary are currently also stored in .Params. Lookups such as .Params.title (and ByParam "title", where .Pages "Params.title" ... etc.) are now redirected to the corresponding Page method and logged as deprecated, unless the field was set in the params section of front matter. The content of .Params is unchanged for now. 53e1fef9
+
+  | Deprecated             | Use instead       |
+  | ---------------------- | ----------------- |
+  | .Params.date           | .Date             |
+  | .Params.description    | .Description      |
+  | .Params.draft          | .Draft            |
+  | .Params.expirydate     | .ExpiryDate       |
+  | .Params.keywords       | .Keywords         |
+  | .Params.lastmod        | .Lastmod          |
+  | .Params.layout         | .Layout           |
+  | .Params.linktitle      | .LinkTitle        |
+  | .Params.publishdate    | .PublishDate      |
+  | .Params.slug           | .Slug             |
+  | .Params.summary        | .RawSummary (new) |
+  | .Params.title          | .Title            |
+  | .Params.translationkey | .TranslationKey   |
+  | .Params.type           | .Type             |
+  | .Params.weight         | .Weight           |
+
+  Bug fixes
+  - hugolib: Fix template change detection when saving via temp file and rename 46e51f30 @bep #15484
+  - markup/goldmark: Fix auto heading ID when link text starts with a bracket c22158c1 @chanellebingham #15472
+  - urls: Fix JoinPath panic with empty slice ce5d232b @Ferdinand-MZ #15473
+  - js: Fix js.Build with browser-disabled extensionless requires 2efee511 @bep #15481
+  - Fix Site.Key used in e.g. partialCached b86e0caa @bep #15466
+  - ci: Fix Windows running out of disk space and simplify test runs 77230eba @bep
+  - hugolib: Fix build hang after too many page render errors 85fb23f1 @bep #15449
+  - tpl/cast: Fix nil pointer panic in hugo gen docshelper 8df31809 @jmooring #15444
+  Improvements
+  - Redirect .Params.title etc. to .Title etc. and deprecate it 53e1fef9 @bep
+  - ci: Revert to plain go install honnef.co/go/tools/cmd/staticcheck@latest 3e67572c @bep
+  - navigation: Escape pre/post in front matter menu entries f63482bf @bep
+  - Upgrade to Go 1.27.3 7343fc9c @bep
+  - resources: Make processed image key stable across builds ff4eab75 @bep #15467
+  - tpl: Make StripHTML (plainify) more robust and faster 7ec3a366 @bep #15462
+  - tpl/transform: Make emojify and plainify preserve template.HTML input type 895f5837 @bep #15452
+  - Make emojify return a string 87bf5858 @bep #15452
+  - Skip staticcheck in check.sh unless --full is set 9d502917 @bep #15453
+  - Delete CLAUDE.md 683a877f @bep
+  Dependency Updates
+  - build(deps): bump github.com/getkin/kin-openapi from 0.151.0 to 0.152.0 6e494d01 @dependabot[bot]
+  - build(deps): bump github.com/tdewolff/minify/v2 from 2.24.19 to 2.24.22 8c1fdcac @dependabot[bot]
+  - build(deps): bump github.com/tdewolff/parse/v2 from 2.8.16 to 2.8.18 ed22b85c @dependabot[bot]
+  - build(deps): bump github.com/getkin/kin-openapi from 0.149.0 to 0.151.0 4102d1af @dependabot[bot]
+  - build(deps): bump golang.org/x/tools from 0.51.0 to 0.52.0 ac5af664 @dependabot[bot]
+ReleaseNotesUrl: https://github.com/gohugoio/hugo/releases/tag/v0.169.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://gohugo.io/documentation
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

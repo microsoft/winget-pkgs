@@ -1,0 +1,98 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: jdx.mise
+PackageVersion: 2026.10.9
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/jdx/mise
+Author: jdx
+PackageName: mise-en-place
+PackageUrl: https://mise.en.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+ShortDescription: Your dev env, already prepped.
+Description: Your dev env, already prepped. One tool to manage languages, env vars, and tasks per project, reproducibly.
+Moniker: mise
+Tags:
+- cli
+- dev-tool
+- env
+- environment
+- task
+ReleaseNotes: |-
+  This release fixes a trust bypass: an untrusted path: tool version could put a directory on PATH. It also adds several bootstrap features: apt repositories and PPAs, macOS login items, rpm-ostree layering on Fedora Atomic, and run0/doas support. Beyond that, it improves mise dot status, adds GitHub OAuth conveniences, and fixes problems across npm, prune, brew and dotfiles sync.
+  Security
+  - path: tool versions now require trust. Before, an untrusted repository could ship node path:./local in .tool-versions or mise.toml. mise activate would then put ./local/bin ahead of your PATH on the next cd, without asking for trust, so a local/bin/git there would run in place of your real git. Configs with a path: version are now skipped until trusted, and you see the usual is not trusted, run mise trust warning. After mise trust, path: works as before. Other version forms are unaffected. Reported by Anthropic and Ada Logics. #14358
+  - mise bootstrap --adopt now rejects repository URLs that embed credentials (a user:TOKEN@ part). It used to quietly fall back to a plain clone, which left the token in .git/config. Use a Git credential helper or SSH agent. #14315
+  - Download file names decoded from URLs (for example tool%2F..%2Fpwned.tar.gz, or C: names on Windows) can no longer point outside the download directory. Ordinary escapes such as %20 still decode. #14274 (@JamBalaya56562, @hktitof)
+
+  Added
+
+  Bootstrap
+  - [bootstrap.apt.sources] declares PPAs and vendor apt repositories next to the packages that come from them. You no longer need a pre-packages hook that runs add-apt-repository. Each source is written as a deb822 file at /etc/apt/sources.list.d/mise-<name>.sources. Its signing key is fetched, trimmed to the fingerprints you declared, and stored inline in that file, so deleting the file removes both the repository and its key. PPAs need only ppa = "owner/name" and are added only on Ubuntu and Ubuntu-based distros, so the same config also works on Debian. Other repositories need uris, key and fingerprint; suites and components are optional. An unpinned apt: package that is installed from the distro is moved to the declared source. Inline keys require apt 2.4 or later (Ubuntu 22.04, Debian 12). #14306, #14348
+    [bootstrap.apt.sources]
+    git-core = { ppa = "git-core/ppa" }
+    fish = { ppa = "fish-shell/release-4" }
+    [bootstrap.packages]
+    "apt:git" = "latest"
+    "apt:fish" = "latest"
+  - macOS login items. [bootstrap.macos.login_items] declares the apps listed under "Open at Login". status and plan report missing apps, and mise bootstrap adds them. The list is additive by default, so apps that register themselves are left alone. Set exclusive = true to have the config own the whole list. #14354
+    [bootstrap.macos.login_items]
+    apps = ["/Applications/Ghostty.app", "~/Applications/Example.app"]
+  - Fedora Atomic hosts. On ostree-booted hosts (Silverblue, Bazzite, secureblue, ...), dnf: installs now stop with an explanation instead of failing inside dnf on read-only /usr. To layer packages instead, set system_packages.ostree = "layer". mise then runs one rpm-ostree install for the whole batch and reports layered packages as pending reboot until you reboot. Version pins are skipped, and upgrade points you to rpm-ostree upgrade. #14353, #14357
+  - run0 and doas for privilege elevation. On hosts without sudo, mise uses the first of sudo, run0 or doas it finds on PATH. To always use a specific one, set system_packages.elevate_with (or MISE_SYSTEM_PACKAGES_ELEVATE_WITH), for example "run0". #14351
+  - dnf package groups. Entries such as "dnf:@development-tools" = "latest" are now installed, upgraded and checked as groups. Before, status always reported them as missing. Environment groups (@^name) are not supported. #14347
+  - Templated [bootstrap.repos] paths. Repo keys can use templates, so each machine can choose its own clone location with a var answered once through mise vars prompt. Unanswered vars use their default. #14359
+    [vars.repos_dir]
+    default = "~/src"
+    prompt = "Where should repositories be cloned?"
+    [bootstrap.repos]
+    "{{ vars.repos_dir }}/project-a" = { url = "git@github.com:example/project-a.git" }
+
+  Tools and backends
+  - libc() and avx2() template functions for http: URLs. They let one entry pick -musl and no-AVX2 -baseline builds: append {{ avx2(yes="", no="-baseline") }}{{ libc(gnu="", musl="-musl") }} to the url template after {{ os() }}-{{ arch() }}. mise lock records every variant. #14298
+  - PyPI Simple indexes: when pypi.registry_url is not a /json URL, mise now asks for the PEP 691 JSON format. If the index supports it, upload times come from the index, so minimum_release_age now works with private indexes. HTML-only indexes behave as before. #14352
+  - Rust mirrors: when RUSTUP_UPDATE_ROOT is set, rustup-init is downloaded from {root}/dist/<host-triple>/rustup-init instead of sh.rustup.rs. This lets mirrors such as panamax serve the first download too. mise also forwards RUSTUP_DIST_SERVER and RUSTUP_UPDATE_ROOT from config env to rustup. #14356
+
+  GitHub OAuth
+  - github.oauth_copy_code copies the one-time device code to the clipboard during mise token github --oauth, like gh auth login --clipboard. When the setting is unset, mise asks in an interactive terminal. Only the device code is copied, never the token. #14269
+  - github.oauth_cache_get and github.oauth_cache_set keep the long-lived refresh token in a password manager or keychain, so the plaintext cache file holds only the 8-hour access token. Both settings must be set and can only go in global config. An existing cached refresh token moves into the store at the next refresh. If the store can't be read, mise keeps the cached token. If it can't be written, mise warns and keeps the token in the file. #14360
+    [settings.github]
+    oauth_cache_get = "pass show mise/github-oauth"
+    oauth_cache_set = "pass insert -m -f mise/github-oauth"
+
+  Dotfiles and skills
+  - mise dot status output is grouped into sections: Tracking, Repository, Conflicts, Automatic capture and Bootstrap, followed by a "Next steps" list of commands. The table now lists only entries that need attention and counts the rest. Use --verbose/-v to list every entry. --json and --missing are unchanged. #14361
+  - mise dot status now shows tracked entries whose variants don't match this machine as not on this machine (variants: work), instead of plain tracked. In --json, state stays tracked and a reason field is added. #14266
+  - mise skills sync now lists the skill links it creates, plus .mise-skills.json, in the repository's .git/info/exclude, so they stay out of git status. Your hand-written skills are unaffected, and nothing in the repository itself changes. #14374
+
+  Changed
+  - Registry: opencode now installs OpenCode 2 from npm (npm:@opencode/cli). opencode@latest moves to v2 on your next upgrade. opencode@1 keeps v1 from aqua. #14295
+  - Go: if go.mod or go.work has an exact go X.Y.Z line and no toolchain line, mise now uses it as the toolchain version and no longer shows the deprecation warning. This matches how Go reads the file. The old advice to add a toolchain line didn't work, because go mod tidy removes it. go X.Y lines without a patch version are still deprecated. #14308
+  - The official -debian Docker image now includes libatomic1, so Node.js 26 installs and runs without extra steps. #14303
+
+  Fixed
+
+  Tools, shims and updates
+  - auto_update now updates only tools that are already installed. Since 2026.10.7, the first shell prompt could install every lazy tool declared with auto_update. #14368 (@ryanrhughes)
+  - Downloads started by mise exec, mise x and shims now retry up to http_retries, like mise install. Before, they made a single attempt. Remote version lookups still make one attempt, so shims don't get slower. #14342
+  - npm tools installed from a lockfile in one project no longer show up as missing, or as <version>~aube~<digest>, in another config that requests latest or a version prefix without a lockfile. With install_layout = "identity", unlocked requests get their own plain install, separate from the project's lockfile-built one. The same applies to uv-locked pipx tools. #14307, #14309
+  - mise prune no longer removes tool versions used only by inline task tools. It also keeps a uv-locked pipx:/pypi: tool's installs for every Python version, not just the one in the current directory. #14334, #14335
+  - Running reshim in one project no longer deletes [wrappers] command wrappers defined in other projects. #14355
+  - With skills.auto_sync, mise upgrade now relinks agent skills to the new version. Before, the links kept pointing at the replaced install, which prune could then delete. #14373
+  - Remote tasks no longer break commits when they are fetched from a git hook. Their clone was writing over the commit's index (GIT_INDEX_FILE). Fixed by updating gix to 0.89. #14316 (@any-victor)
+  - Packslip tools whose signing workflow moved, such as aube moving from release-plz.yml to release.yml, now upgrade when both workflows are in the workflow list. mise lock also keeps the signer of a renamed or transferred project. #14338, #14362
+  - aqua packages that have no repo now print the "cannot list versions" warning once, and it tells you to pin an exact version. #14336
+  - On Windows, the tool-update service no longer opens a console window that stops the updater when you close it. #14344
+
+  Homebrew and system packages
+  - Brew bottles now install their etc/var files and run the formula's post_install_steps. For example, openssl@4 now gets its CA bundle and openssl.cnf. Existing files are kept, and the bottle's copy is saved next to them as .default. Protected copy steps (overwrite: false) are respected. #14272, #14311
+  - On Linux, Homebrew uses_from_macos dependencies are now installed. This fixes runtime errors such as libbz2.so.1.0 missing for brew:chafa. #14288 (@itskyf)
+  - mise bootstrap no longer runs chown on a Homebrew prefix owned by another non-root user. It stops with an explanation instead. #14345
+ReleaseNotesUrl: https://github.com/jdx/mise/releases/tag/v2026.10.9
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

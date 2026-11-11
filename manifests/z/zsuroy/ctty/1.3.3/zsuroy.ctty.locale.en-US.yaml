@@ -1,0 +1,41 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: zsuroy.ctty
+PackageVersion: 1.3.3
+PackageLocale: en-US
+Publisher: zsuroy
+PublisherUrl: https://suroy.cn/
+PublisherSupportUrl: https://github.com/zsuroy/ctty/issues
+PackageName: ctty
+PackageUrl: https://github.com/zsuroy/ctty
+License: MIT
+LicenseUrl: https://github.com/zsuroy/ctty/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 zsuroy
+ShortDescription: Terminal UI that manages SSH, serial, telnet, SFTP, FTP, WebDAV and S3 connections.
+Description: |-
+  ctty is a single-binary terminal connection manager. It reads an existing OpenSSH configuration
+  and adds serial, telnet, SFTP, FTP, WebDAV and S3 clients beside it, so hosts already configured
+  for ssh can be browsed, searched and connected to from one interface.
+
+  Saved sites are stored as separate JSON files and passwords are kept in a local AES-256-GCM
+  credential vault under %APPDATA%\ctty. Each protocol also has a non-interactive subcommand with
+  JSON output for use from scripts. This package installs the Windows console binary, so it runs in
+  Windows Terminal, PowerShell, cmd, or any other terminal rather than in its own window.
+Tags:
+- ftp
+- sftp
+- ssh
+- telnet
+- terminal
+- tui
+- webdav
+ReleaseNotes: |-
+  Added
+  - 🔑 Telnet automatic login (issue #46) — saved telnet devices can carry a user name and a password; on connect, ctty answers the console's login prompts automatically (login: / Username: / user: / login as: → user, Password: / passwd: → password), covering classic dev boards and lab gear such as (none) login: … + Password: …. Prompts must end the display line and start at a word boundary, so motd text or file contents containing the words cannot trigger an answer. If a user prompt and a password prompt arrive in the same read, only the user name is answered and the password waits for a genuinely later prompt. The user name is optional, so password-only devices work. Passwords are stored in the same AES-256-GCM encrypted vault as SSH/FTP/WebDAV/S3 credentials (telnet: namespace, ~/.config/ctty/credentials.json), never in telnet.json. Safety by construction: each prompt is answered at most once (a wrong password never retries in a loop and locks the account), and a session deadline stops the watcher when the device never prompts — handing the session back for manual input. Configure per device in the telnet add/edit form (a / e); both the TUI and ctty telnet <name> use it. Telnet remains cleartext: this saves typing, it does not add security.
+  Fixed
+  - 📡 Telnet list cursor position — saving an add/edit no longer snaps the list cursor up by the table's visible height; the cursor now stays on the edited item (clamped only to the filtered list bounds).
+  - 📂 SFTP private key authentication (issue #49) — the SFTP client now resolves effective SSH settings via ssh -G (with parser fallback), so IdentityFile entries from Host * / Include / merged config and multiple identity files work the same as interactive SSH; explicit key files are loaded in resolved order instead of only the single parsed host entry plus hardcoded defaults. Hosts that authenticate by key no longer fall through to the password prompt.
+ReleaseNotesUrl: https://github.com/zsuroy/ctty/blob/HEAD/CHANGELOG.md#133---2026-11-09
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

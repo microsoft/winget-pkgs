@@ -1,0 +1,182 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.6.4
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.6.4
+
+  Patch Changes
+  - #12261 19fbfb2 Thanks @dyc3! - Added the new nursery rule noConsoleSpaces, which reports a leading or trailing space in a console.log(), console.debug(), console.info(), console.warn(), or console.error() argument that sits next to another argument. These methods already put a space between arguments, so such a space prints twice.
+    console.log("abc ", "def");
+  - #12469 cd716d3 Thanks @dyc3! - Added the new nursery rule noMagicArrayFlatDepth, which reports number literals other than 1 passed as the depth of Array.prototype.flat() unless a comment inside the parentheses explains them.
+    const items = array.flat(2);
+  - #12470 92c9e81 Thanks @dyc3! - Added the nursery rule noNull, which reports uses of the null literal and suggests undefined instead. Strict comparisons such as foo === null are allowed.
+    let foo = null;
+  - #12483 9bd3527 Thanks @dyc3! - Added the nursery rule noReturnArrayPush, which reports code that uses the return value of push() or unshift(). These methods return the new length of the array, not the added item or the array.
+    function add(item) {
+      return items.push(item);
+    }
+  - #12477 a384892 Thanks @dyc3! - Added the nursery rule noUnreadableIife, which reports arrow functions that are called right where they are defined and whose body is wrapped in parentheses.
+    const foo = (bar => (bar ? bar.baz : baz))(getBar());
+  - #12447 0a963e4 Thanks @dyc3! - Added the nursery rule noUselessRecursion, which reports functions that return a call to themselves when a loop can do the same work. Too many nested calls can crash the program with a stack overflow error.
+    function findRoot(node) {
+        if (node.parent) {
+            return findRoot(node.parent);
+        }
+        return node;
+    }
+  - #12554 2eddda9 Thanks @dyc3! - Added the nursery rule noVueComputedPropertiesInData, which reports computed properties used inside the data function of a Vue component. Vue runs data before it sets up computed properties, so the value read there is undefined.
+    <script>
+    export default {
+      data() {
+        return { total: this.doubled };
+      },
+      computed: {
+        doubled() {
+          return 2;
+        },
+      },
+    };
+    </script>
+  - #12586 824df15 Thanks @dyc3! - Added the nursery rule noVueDeprecatedDeleteSet, which reports calls to the $set and $delete functions, Vue.set and Vue.delete, and set and del imported from vue. Vue 3 removed these functions, so calling them throws an error.
+    <script>
+    export default {
+      mounted() {
+        this.$set(this.user, "name", "Alice");
+      },
+    };
+    </script>
+  - #12648 6fc1a51 Thanks @dyc3! - Added the nursery rule noVueDeprecatedRouterLinkTagProp, which disallows the tag prop on RouterLink. Vue Router 4 ignores this prop, so the link still renders as an <a> element.
+    <template>
+      <RouterLink tag="li" to="/">Home</RouterLink>
+    </template>
+  - #12631 de1188f Thanks @dyc3! - Added the new nursery rule noVueDeprecatedScopeAttribute, which reports the scope attribute on <template> elements in Vue files. Vue no longer supports this attribute, so use v-slot to receive slot props instead.
+    <template>
+      <ListComponent>
+        <template scope="props">{{ props.title }}</template>
+      </ListComponent>
+    </template>
+  - #12562 5d7553b Thanks @dyc3! - Added the new nursery rule noVueMultipleSlotArgs, which disallows passing more than one argument to a Vue slot from a render function. Slot content written in a template receives only the first argument.
+    <script>
+    export default {
+      render() {
+        return this.$slots.default(item, index); // reported
+      },
+    };
+    </script>
+  - #12513 2e520d8 Thanks @dyc3! - Added the nursery rule noVueMutatingProps, which reports code that changes the props of a Vue component, in the script or in the template. Props belong to the parent component, so the child should emit an event or copy the value instead.
+    <script setup>
+    const props = defineProps({ items: Array });
+    props.items.push("new item");
+    </script>
+  - #12567 144b786 Thanks @dyc3! - Added the nursery rule noVueSideEffectsInComputed, which reports Vue computed properties that change state. Vue decides when to run a computed property, so changes made inside one happen at unpredictable times.
+    <script setup>
+    import { computed, ref } from "vue";
+    const items = ref([]);
+    // `reverse()` changes `items.value` in place.
+    const reversedItems = computed(() => items.value.reverse());
+    </script>
+  - #12603 861b288 Thanks @dyc3! - Added the new nursery rule noVueUnusedRefs, which reports template refs in Vue components that nothing reads through $refs, useTemplateRef(), or a variable of the same name in <script setup>. The rule needs html.experimentalFullSupportEnabled to be true.
+    <template>
+      <input ref="input" />
+    </template>
+  - #12285 68770e0 Thanks @dyc3! - Added the new nursery rule noYamlBooleanKeys, which disallows boolean values as keys in YAML. For example, the following key is a boolean instead of text, so it is reported:
+    true: enabled
+  - #12338 f46411b Thanks @dyc3! - Added the nursery rule useSvelteEventDispatcherTypes, which reports createEventDispatcher() calls that don't declare the types of their events in Svelte components written in TypeScript.
+    The rule accepts a call that declares its events:
+    <script lang="ts">
+      import { createEventDispatcher } from "svelte";
+      const dispatch = createEventDispatcher<{ save: string }>();
+    </script>
+  - #12615 ade9845 Thanks @dyc3! - Added the nursery rule useVueDefineOptions, which reports the default export of a plain <script> block in Vue components that also use <script setup>, and suggests setting those options with defineOptions() instead.
+    <script>
+    export default { name: "MyComponent" }; // reported
+    </script>
+    <script setup>
+    const props = defineProps(["title"]);
+    </script>
+  - #12514 e74b4dc Thanks @dyc3! - Added the nursery rule useVueDefinePropsDestructuring, which requires destructuring the props returned by defineProps() in Vue <script setup> blocks. It also reports withDefaults(), because destructured props can set their default values directly.
+    <script setup lang="ts">
+    const props = defineProps<{ foo?: string }>();
+    </script>
+  - #12559 94985ba Thanks @dyc3! - Added the nursery rule useVueTemplateRef, which requires useTemplateRef() instead of ref() or shallowRef() to access elements of the template in <script setup>.
+    <template>
+      <input ref="input" />
+    </template>
+    <script setup>
+    import { ref } from "vue";
+    const input = ref(); // reported
+    </script>
+  - #12512 6be5078 Thanks @dyc3! - Added the nursery rule useVueTypedProps, which reports Vue props declared without a type, in the props option, defineProps(), or defineModel(). Without a type, Vue accepts any value for the prop and can't warn when a component receives the wrong kind of value.
+    <script setup>
+    defineProps(["title"]);
+    </script>
+  - #12653 f307633 Thanks @dyc3! - Added the nursery rule useVueVModel, which reports a prop binding on a Vue component paired with an update: listener that only writes the new value back, and suggests v-model instead.
+    <template>
+      <MyComponent :title="title" @update:title="title = $event" />
+    </template>
+  - #12591 a810209 Thanks @dyc3! - Added the nursery rule useVueValidDefineEmits, which enforces valid usage of Vue's defineEmits macro in <script setup>.
+    For example, the following code is now reported, because defineEmits declares its events with both a type and an argument:
+    <script setup lang="ts">
+    const emit = defineEmits<(e: "notify") => void>(["submit"]);
+    </script>
+  - #12614 9308110 Thanks @dyc3! - Added the nursery rule useVueValidDefineProps, which reports defineProps() calls that Vue can't compile or that declare props incorrectly. For example, it reports a component that calls defineProps() twice, or whose defineProps() argument uses a variable declared in <script setup>:
+    <script setup>
+    const definition = { msg: String };
+    defineProps(definition);
+    </script>
+  - #12570 222a230 Thanks @dyc3! - Added the nursery rule useVueValidVIs, which reports v-is directives that have an argument or modifiers, have no value, or are used on a component instead of a native HTML element.
+    For example, the following v-is directive has no value:
+    <template>
+      <tr v-is></tr>
+    </template>
+  - #12521 4010bb7 Thanks @dyc3! - Added the nursery rule useVueValidVMemo, which reports invalid v-memo directives in Vue templates. A v-memo directive must have an array value, can't have an argument or modifiers, and doesn't work inside an element with v-for.
+    For example, the following value is an object instead of an array:
+    <template>
+      <div v-memo="{ id }"></div>
+    </template>
+  - #12597 aff42a7 Thanks @dyc3! - Added the nursery rule useVueValidVModel, which reports v-model directives that Vue can't use: on unsupported elements or file inputs, with an argument or unknown modifier on a native element, without a value, or with a value that can't be assigned to.
+    For example, the following v-model directives are invalid:
+    <template>
+      <div v-model="foo"></div>
+      <input v-model="foo + bar" />
+    </template>
+  - #12569 3058597 Thanks @dyc3! - Added the new nursery rule useVueValidVShow, which reports v-show directives that have an argument, a modifier, or no value, or that are placed on a <template> element.
+    <template v-show="isVisible"><div></div></template>
+  - #12525 e2e5a36 Thanks @dyc3! - Added the nursery rule useVueValidVSlot, which reports misplaced, duplicated, or malformed v-slot directives in Vue templates.
+    For example, the rule reports two <template> elements that fill the same slot:
+    <MyComponent>
+      <template #header>First title</template>
+      <template #header>Second title</template>
+    </MyComponent>
+  - #12472 efd16bd Thanks @dyc3! - Added the new nursery rule useWhileLoopCondition, which reports loops such as while (true) and for (;;) that start with an if statement containing only a break, and moves that condition into the while statement.
+    while (true) {
+      if (!hasMore()) {
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.6.4
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

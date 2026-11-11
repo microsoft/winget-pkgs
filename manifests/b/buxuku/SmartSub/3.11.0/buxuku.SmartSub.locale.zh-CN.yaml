@@ -1,0 +1,77 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: buxuku.SmartSub
+PackageVersion: 3.11.0
+PackageLocale: zh-CN
+Publisher: buxuku
+PublisherUrl: https://blog.linxiaodong.com/
+PublisherSupportUrl: https://github.com/buxuku/SmartSub/issues
+Author: 林晓东
+PackageName: SmartSub
+PackageUrl: https://github.com/buxuku/SmartSub
+License: MIT
+LicenseUrl: https://github.com/buxuku/SmartSub/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Lin Xiaodong
+ShortDescription: 批量为视频生成字幕，并将字幕翻译成其它语言。
+Description: |-
+  批量为视频生成字幕，并可将字幕翻译成其它语言。这是在之前的一个开源项目 VideoSubtitleGenerator 的基础上，制作成的一个客户端工具，以方便更多朋友们的使用。
+  它保留了之前 VideoSubtitleGenerator 这个命令行工具的全部特性，并新增了以下功能：
+  - 图形用户界面，操作更加便捷
+  - 源语言字幕文件和目标语言字幕文件放在视频同目录下，方便播放时任意挂载字幕文件
+  - 批量处理视频/音频/字幕文件
+  - 支持视频/音频生成字幕
+  - 支持对生成的字幕，或者导入的字幕进行翻译
+  - 支持多种翻译服务：
+    - 火山引擎翻译
+    - 百度翻译
+    - DeepLX 翻译（批量翻译容易存在被限流的情况）
+    - 本地模型 Ollama 翻译
+    - 支持 OpenAI 风格 API 翻译，如 deepseek, azure 等
+  - 自定义字幕文件名，方便兼容不同的播放器挂载字幕识别
+  - 自定义翻译后的字幕文件内容，支持纯翻译结果或原字幕+翻译结果
+  - 项目集成 whisper.cpp，对 Apple Silicon 进行了优化，有较快的生成速度
+  - 项目集成了 fluent-ffmpeg，无须单独安装 ffmpeg
+  - 支持运行本地安装的 whisper 命令
+  - 支持选择模型下载源（国内镜像源或官方源）
+  - 支持自定义并发任务数量
+Tags:
+- 字幕
+- 视频
+- 翻译
+- 音频
+ReleaseNotes: |-
+  v3.11.0 「更多设置」全新分层，字体选择更省心，翻译输出更可靠
+  feat
+  - 「高级选项」升级为「更多设置」，分「常用」「专家」两页：常用项集中在前，解码、断句精调等专家项收进「专家」页；新建任务向导也新增了入口
+    Turn "Advanced options" into "More settings" with Common and Expert pages: everyday options come first and decoder-level knobs move to Expert; the new-task wizard gets an entry too
+  - 场景按钮在改过细项后仍显示场景名，并以「已调整」小圆点提示，弹层中可查看调整了哪些项并一键恢复；每个场景新增「适合什么视频」的说明
+    The scenario button keeps its name and shows an "Adjusted" dot after tweaks; the popover lists what changed with a one-click restore, and each scenario now says what kind of video it suits
+  - 任务工具栏按「听 → 译 → 出」重新排序，「字幕格式」改称「输出」；「字幕效果」更名为「识别策略」，其中的「自定义」档改称「手动调节」
+    Reorder the task toolbar as listen → translate → output and rename "Subtitle format" to "Output"; "Subtitle effect" is now "Recognition strategy", and its "Custom" tier is now "Manual tuning"
+  - 开始任务时，若视频自带文本字幕轨，会先询问一次：使用内封字幕，还是改用语音识别；可勾选记住选择、不再提示，之后在「更多设置 › 常用」中调整
+    When you start a task and a video carries a text subtitle track, SmartSub now asks once whether to use it or run speech recognition instead; tick the box to remember your choice and change it later in More settings › Common
+  - 字体选择器按「最近使用 / 常用字体 / 全部字体」分组，并支持用中文名和拼音（全拼或首字母）搜索字体
+    The font picker groups fonts into Recent / Common / All fonts and supports searching by Chinese name and pinyin (full or initials)
+  - 合成预览会提示哪些字体缺字、已临时改用了哪款字体，并推荐已安装的、能完整显示整段字幕的字体，点击即可切换
+    Compose preview now tells you when a font lacks glyphs and which font is used instead, and recommends installed fonts that can show the whole subtitle, switchable with one click
+  fix
+  - 修复 3.9.0 起选了「仅译文」字幕里仍带原文的问题：出厂默认恢复为仅译文，新建任务不再覆盖已保存的选择（此前已保存为双语的用户需自行改一次）；向导的合成面板也会说明成片字幕内容跟随该设置
+    Fix subtitles still carrying the source text after choosing translation only since 3.9.0: the factory default is translation only again and new tasks no longer override your saved choice (users who already saved bilingual need to switch once); the wizard's compose panel also says the final video follows this setting
+  - 修复个别情况下翻译任务显示成功却只得到空字幕文件，以及译文文件名与源字幕相同时会清空源字幕的问题，现在会明确报错并保留源字幕
+    Fix translation tasks occasionally reporting success while producing an empty subtitle file, and a translated file with the same name as the source subtitle wiping the source; these now fail with a clear error and the source is kept
+  - 修复在任务页调整的参数（含「更多设置」里的项）不运行任务就不会成为下一个新任务默认值的问题，现在改完即记住
+    Fix settings changed on the task page (including More settings) not becoming the defaults of the next new task unless the task was run; they are now remembered as you change them
+  - 修复字幕含韩文等所选字体不支持的字符时，合成预览和导出直接失败的问题：现在会自动改用可用字体继续，实在没有字体的字符显示为方块并给出提示
+    Fix compose preview and export failing outright when subtitles contain characters the selected font lacks (such as Korean): a fallback font is now used automatically, and characters no installed font covers show as boxes with a warning
+  - 降低 Qwen3-ASR 对长连续语音静默失败（输出空文本或「language」）的概率：默认将单段语音限制在约 15 秒内（最多 20 秒），仍超出解码预算时会在日志中给出警告 (#549)
+    Reduce the chance of Qwen3-ASR silently failing on long continuous speech (empty text or "language"): speech segments are capped at about 15 s by default (20 s at most), and a log warning is written when a segment still exceeds the decoding budget (#549)
+  - 修复向导和「在线下载后自动转写」的仅生成字幕任务，把字幕保存成 视频名_temp.srt 的问题，现在与任务页一致，保存为 视频名.srt
+    Fix subtitle-only tasks from the wizard and from download-then-transcribe saving subtitles as <video>_temp.srt; they now match the task page and save <video>.srt
+  - 修复在「手动调节」里改过的 VAD 等参数，改选内置识别策略后仍然生效、与所选档位不一致的问题
+    Fix parameters tuned under Manual tuning (such as VAD) still applying after switching back to a built-in recognition strategy
+  - 修复全新安装后场景按钮一开始就显示「专家自定义」的问题，现在默认显示「通用均衡」
+    Fix the scenario button showing "Expert Custom" on a fresh install; it now starts at "Balanced"
+ReleaseNotesUrl: https://github.com/buxuku/SmartSub/releases/tag/v3.11.0
+ManifestType: locale
+ManifestVersion: 1.12.0

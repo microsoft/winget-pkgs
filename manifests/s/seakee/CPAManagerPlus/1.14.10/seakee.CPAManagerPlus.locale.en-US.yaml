@@ -1,0 +1,99 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: seakee.CPAManagerPlus
+PackageVersion: 1.14.10
+PackageLocale: en-US
+Publisher: seakee
+PublisherUrl: https://github.com/seakee
+PublisherSupportUrl: https://github.com/seakee/CPA-Manager-Plus/issues
+PackageName: CPA Manager Plus
+PackageUrl: https://github.com/seakee/CPA-Manager-Plus
+License: MIT
+LicenseUrl: https://github.com/seakee/CPA-Manager-Plus/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Seakee
+ShortDescription: A self-hosted CLIProxyAPI management panel and AI gateway observability dashboard
+Description: |-
+  A self-hosted CPA / CLIProxyAPI management panel and AI gateway observability dashboard for requests, usage, cost, quota, failures, and account health.
+
+  What Can CPAMP Help You Answer?
+  - Why are requests failing? Inspect failure rates, status codes, affected models/accounts, and redacted evidence in persistent request history.
+  - Where is the cost going? Break down tokens and estimated cost by model, provider, account, API key, project, channel, and time range.
+  - Are accounts and quotas healthy? Review credential state, quota windows, reset evidence, and controlled automation for Codex and xAI accounts.
+
+  Core Capabilities
+
+  CPA Gateway Management
+  - Manage CPA provider configurations, including Gemini, Codex, Claude, Vertex, xAI, and OpenAI-compatible providers.
+  - Maintain auth files, OAuth logins, API keys, model aliases, priorities, plugins, logs, and system settings.
+  - Import official Sub2API OpenAI OAuth exports and split multiple accounts into separate CPA Codex auth files.
+
+  Request Monitoring And Failure Diagnosis
+  - Persist requests from the CPA usage queue in local SQLite and search account, client API key, and realtime request views.
+  - Inspect status, latency, token, cache, trace, and redacted failure evidence without exposing raw failure bodies.
+  - Export or import request history as JSONL.
+  - Open the Monitoring Demo.
+
+  Cost And Usage Analytics
+  - Break down calls, tokens, cost, latency, and failures by model, provider, account, credential, API key, project, channel, and time range.
+  - Track input, output, reasoning, cache, service tier, and long-context pricing semantics.
+  - Sync model prices from models.dev first, with LiteLLM and OpenRouter fallbacks plus local overrides for aliases or internal models.
+  - Open the Usage Analytics Demo.
+
+  Account Health, Quota, And Automation
+  - Inspect Codex and xAI accounts locally or on a Manager Server schedule.
+  - Read quota windows, reset evidence, credential state, workspace state, and provider-specific health signals when available.
+  - Apply controlled quota cooldowns and route credential failures into an account action queue for review and recovery.
+  - Open the unified Accounts Demo.
+
+  Production Operations
+  - Run CPAMP Full Mode as one Docker container or a native Linux, macOS, or Windows package for amd64/arm64; the full stack can run alongside CPA.
+  - Keep request history, Manager configuration, automation state, and model prices in local files with no account registration or telemetry SDK.
+  - Back up SQLite files together with data.key to preserve encrypted CPA Management Keys.
+
+  Want to preview the interface first? Open the Live Demo. The demo uses fictional data only. It is not a deployment or runtime mode and cannot connect to, manage, or monitor a real CPA instance.
+  CPAMP manages and observes traffic through CPA / CLIProxyAPI. It is not a replacement proxy and does not forward model traffic by itself.
+
+  Data, Privacy, And Security
+  - CPAMP does not phone home, include analytics SDKs, or require account registration.
+  - External calls are limited to the CPA gateway and integrations you explicitly configure or trigger, such as OAuth, provider checks, plugin releases, and model price sync.
+  - Request history, configuration, model prices, inspection history, and automation state stay in local files.
+  - CPA Management Keys are encrypted before SQLite persistence; backups require the SQLite files and data.key.
+  - Normal APIs and JSONL exports expose redacted failure summaries, never raw failure bodies or stored raw JSON.
+  - CPAMP is intended for traffic and credentials you are authorized to operate.
+Tags:
+- ai
+- api-gateway
+- dashboard
+- llm
+- proxy
+ReleaseNotes: |-
+  Overview
+  v1.14.10 improves the 1.x credential workspace and addresses model-exclusion precedence, historical pricing reads, plugin configuration defaults, and in-page URL synchronization. Manager Server gains narrowly scoped read-only forwarding for CPA v8 API-key groups. No v2 architecture changes are included.
+  Changes
+  Credentials and UI
+  - Pinned credentials (#1098, #1102): Pin watched credentials in table or card view. Matching pins appear first in pin order while existing filters and the order of unpinned results remain in effect. A lightweight inline pin beside the account name avoids overlapping provider logos. Pins are browser-local and unavailable in selection mode.
+  - Effective model exclusions (#1080): Model badges, counts, actions, and editing guidance now reflect the CPA OAuth precedence for the detected version. CPA v6.10.8–v8.0.32 combines global and credential exclusions; v8.0.33+ makes a non-empty credential list override global exclusions, while an empty list inherits them. Editing avoids silently re-enabling globally excluded models, and unknown CPA versions receive conservative edit restrictions.
+  - Same-page URL state (#1099): Fix navigation updates that changed only search parameters or fragments. Credential filters, search, sorting, layout, and detail state stay synchronized with reloads, browser history, and shared links. Late URL echoes no longer overwrite newer search input.
+  - Plugin configuration defaults (#1073): When a saved field is absent, show the typed default declared by CPA without writing that default during unrelated saves. Explicit stored values such as false, 0, empty string, and null take precedence. Older CPA versions that do not expose defaults retain the prior behavior.
+  Manager Server and data reads
+  - Historical pricing recovery (#1083): Recover incomplete pricing reads from intact raw usage events when monitoring projection rows are missing or stale. This avoids some historical analytics and account-cost failures; genuinely missing historical data remains unrecoverable and is never synthesized. No price, schema, or stored-data migration.
+  - Read-only CPA v8 API-key groups (#1097): Manager Server now forwards only authenticated-admin GET /v8/management/config/api-keys requests and subpaths so plugin pages can view group names and key identifiers. Writes, other v8 management paths, and unsafe escaped paths remain blocked; CPA Panel mode is unchanged.
+  Maintenance
+  - Security tooling (#1093): Bump the development-only locked Zod dependency to resolve an audit advisory; no runtime application behavior change.
+  - Dependency update policy (#1070): Disable routine Dependabot version-update PRs in favor of deliberate development and targeted security updates; no product runtime change.
+  Upgrade Notes
+  - Upgrade normally from v1.14.9 and restart. There are no database migrations, credential recreations, or configuration-format changes.
+  - Pins are stored only in the current browser, are not synchronized between devices, and do not bypass filters. Renaming an auth file or changing its identity may leave a stale pin unmatched.
+  - The running CPA version determines OAuth exclusion precedence. Pay particular attention to non-empty credential-level lists on v8.0.33+; CPAMP now reflects upstream behavior rather than changing it.
+  - The new read-only group view requires CPA with the v8 endpoint. If Manager Server is behind a shared-domain reverse proxy, use the matching route in the reverse-proxy guide. It remains admin-only.
+  - The overall minimum CPA compatibility baseline for full Muse / Meta features remains v7.3.4+.
+  - The merged fixes and current dev head passed their respective tests and required CI checks; publication readiness remains subject to the Release Dry Run and release workflow.
+
+  Full Changelog: https://github.com/seakee/CPA-Manager-Plus/compare/v1.14.9...v1.14.10
+ReleaseNotesUrl: https://github.com/seakee/CPA-Manager-Plus/blob/HEAD/docs/release-notes/v1.14.10-en.md
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://seakee.github.io/CPA-Manager-Plus/docs/en/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

@@ -1,0 +1,106 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: NeuralNomadsAI.CodeNomad
+PackageVersion: 1.0.1
+PackageLocale: en-US
+Publisher: NeuralNomadsAI
+PublisherUrl: https://github.com/NeuralNomadsAI
+PublisherSupportUrl: https://github.com/NeuralNomadsAI/CodeNomad/issues
+PrivacyUrl: https://github.com/NeuralNomadsAI/CodeNomad/blob/v1.0.0/PRIVACY.md
+PackageName: CodeNomad
+PackageUrl: https://github.com/NeuralNomadsAI/CodeNomad
+License: MIT
+LicenseUrl: https://github.com/NeuralNomadsAI/CodeNomad/blob/HEAD/LICENSE
+ShortDescription: CodeNomad is the command center that puts AI coding on steroids.
+Description: CodeNomad is the command center that puts AI coding on steroids.
+Tags:
+- ai
+- code
+- coding
+- development
+ReleaseNotes: |-
+  CodeNomad 1.0.1 - Steadier Missions, ranked history search and Linux fixes
+  CodeNomad 1.0.1 removes the Missions project limit, makes mission states easier to read, and adds relevance-ranked search across a project's history. It also fixes transcripts and questions that could stay stale after a dropped connection, and fixes Linux AppImage display and F11 problems.
+  Missions
+  - A project is no longer limited to 20 missions, and storage limits now apply to each mission rather than the whole project. Deleted missions release their storage once their cleanup is done, and the Missions panel loads closed missions as lightweight summaries, so long mission histories stay fast (#1170, #1173, #1175, #1176, #1177, #1178, #1180).
+  - Mission colours now follow the session list: red when an answer is needed, pulsing yellow for running work, orange for interrupted or paused missions, green for an unseen completion, and blue for a prepared mission that hasn't started. The collapsed chevron only signals answers, running work and unseen completions (#1150, #1155).
+  - A coordinator can no longer end a one-time mission as failed on its own. When it can't continue, it asks you; a mission that stalls shows as Interrupted and can be resumed with Recover interrupted mission, including previously failed missions (#1150, #1151).
+  - The creation form now takes up the whole Missions panel and includes the project's subagent nesting depth. An unsent draft is kept when you switch right-panel tabs or projects (#1142, #1155).
+  - Fixed recurring missions never starting on OpenCode 2.2.0. A failed first start of a recurring run now shows a warning right away and retries after 30 seconds (#1158, #1171).
+  - Fixed missions on OpenCode Zen's free models being refused at the coordinator's first request because of the mission session identifier format (#1133).
+  - Fixed nested subagents stopping at depth 1 when a project config was left with an empty experimental block. Inherit now removes that empty block, and the shown depth matches what OpenCode applies (#1153).
+  - The help now explains that a running one-time mission keeps going in OpenCode while CodeNomad is closed, and lists what waits for the backend (#1137).
+  History and search
+  - In the transcript search window, project-wide search now ranks results by relevance (rare words weigh more, exact phrases first, one result per conversation before repeats) and highlights every term. Conversation search stays chronological (#1161, #1164).
+  - Project search scans the most recent 16,384 messages first, shows up to 40 results, and can search further back in older history (#1182).
+  - Agents can search the project's past sessions themselves with the session_search Code Mode tool, which stays limited to the calling session's project (#1161, #1182).
+  - History, cleanup and attachment views now read files stored with OpenCode 2.2.0's opt-in media blobs correctly. Before, cleanup could report a false conflict and attachments could look unavailable (#1172).
+  Transcript and connection reliability
+  - Opening a session that is already generating (after a restart, or from a subagent box) now shows its transcript and keeps streaming, instead of staying empty or frozen (#1156, #1181).
+  - Tool rows that stayed "pending" after a missed event now settle on their own, including when the turn ended during a disconnect. A queued prompt delivered during a disconnect now appears in the transcript (#1169, #1184, #1187).
+  - Missed questions now appear within seconds on unstable connections, such as a phone going through a tunnel. CodeNomad reconnects a stream that has gone silent, rechecks when the network comes back or the app returns to the foreground, and fetches a question the transcript shows as running when its form never arrived (#1162, #1165).
+  - New session now shows a spinner while it is being created on a slow network. Repeated clicks or shortcuts no longer create duplicate sessions, and a failure shows an alert (#1157).
+  - Sessions and permission requests of a repository opened as its own project no longer show up in a parent folder's project (#1174).
+  - Session alerts, such as a usage-limit error, no longer appear a second time in the Preferences window (#1163).
+  Panels and previews
+  - When the window narrows, each panel shrinks once and then hides, and widening restores the same layouts in reverse. A panel that loses its room closes and comes back when the room returns. On phones and narrow windows, picking a session from the floating session panel closes the panel (#1144, #1149).
+  - The active project tab can grow to 300 px so long project names fit (#1166).
+  - Clicking a localhost link in a conversation opens it in the session's web preview; Ctrl+click (⌘-click on macOS) or middle-click still opens your browser. Apps that use localStorage, sessionStorage or cookies now work inside the preview (#1119).
+  - Paired Remote Control devices can now use web previews, controlled by a new Web previews switch in Remote Control settings (on by default). SideCar connections now refuse requests from sandboxed pages (#1131, #1135).
+  Desktop and Linux
+  - Fixed a black window in the Linux AppImage on up-to-date systems: the AppImage now uses the system's display libraries (#1138).
+  - Fixed F11 freezing the Linux app under X11/XWayland (#1143).
+  - The CodeNomad server package now starts when installed with pnpm (#1186).
+  Upgrade
+  OpenCode 2.2.1 is now the recommended runtime; 2.1.2 remains the minimum, and 2.1.2, 2.1.4 and 2.2.0 keep working with an optional upgrade offer (#1188).
+  What's Changed
+  - fix(release): take the release notes from the PR merged into main by @pascalandr in #1129
+  - feat(remote-control): serve web previews to paired devices by @pascalandr in #1131
+  - docs(previews): describe how root-relative preview resources resolve by @pascalandr in #1132
+  - fix(missions): give mission roots OpenCode session identifiers by @pascalandr in #1133
+  - fix(sidecars): refuse opaque-origin WebSocket upgrades by @pascalandr in #1135
+  - docs(help): state that running one-time missions continue without the backend by @pascalandr in #1137
+  - fix(tauri): leave the display stack to the host in the Linux AppImage by @pascalandr in #1138
+  - feat(preview): open loopback conversation links in the web preview by @heunghingwan in #1119
+  - test(transcript): stabilize the reveal search against late Markdown and remounts by @pascalandr in #1140
+  - test(ui): expect the host opener command in Tauri link tests by @pascalandr in #1141
+  - fix(missions): keep an unsent mission draft across tabs and projects by @pascalandr in #1142
+  - test(ui): shard browser CI four ways and give every fixture an owned server by @heunghingwan in #1139
+  - fix(tauri): stop F11 from freezing the Linux app by @pascalandr in #1143
+  - feat(shell): close panels that lose their room and reveal list choices by @pascalandr in #1144
+  - test(ui): follow list choices closing the floating session panel in mission family tests by @pascalandr in #1145
+  - test(ui): share one fixture daemon per invocation across the browser suite by @heunghingwan in #1146
+  - fix(shell): hide each panel at the end of its own compression by @pascalandr in #1149
+  - fix(missions): one status palette, no agent-decided failure, resumable missions by @pascalandr in #1150
+  - fix(missions): keep the coordinator recovery nudge's opening sentence by @pascalandr in #1151
+  - test(ui): borrow the shared fixture daemon in the mission status marks test by @pascalandr in #1152
+  - fix(opencode): stop an emptied project experimental block from capping subagent depth by @pascalandr in #1153
+  - feat(missions): blue prepared missions, quiet interrupted chevron, full-panel create form by @pascalandr in #1155
+  - fix(missions): stop reading the session_pending table OpenCode 2.2.0 dropped by @pascalandr in #1158
+  - chore(missions): refer to the minimum OpenCode without its version number by @pascalandr in #1159
+  - docs(readme): link the CodeNomad 1.0 video tour by @pascalandr in #1160
+  - fix(ui): visible feedback and bounded failure when creating a session on a slow network by @heunghingwan in #1157
+  - fix(ui): keep session alerts out of the Preferences window by @pascalandr in #1163
+  - feat(history): rank past-session search and expose it to agents as session_search by @pascalandr in #1161
+  - feat(history): rank whole-project transcript search, keep conversation search chronological by @pascalandr in #1164
+  - fix(events): reconcile a recipient instead of dropping an unroutable event by @pascalandr in #1165
+  - fix(ui): recover missed questions and silently dead SSE streams on mobile by @heunghingwan in #1162
+  - fix(missions): remove the 20-mission project limit by @pascalandr in #1170
+  - fix(missions): surface a failed first recurring admission at once by @pascalandr in #1171
+  - fix(sessions): read OpenCode media blobs like native history by @pascalandr in #1172
+  - fix(missions): free journal capacity when deleted missions settle by @pascalandr in #1173
+  - refactor(missions): read one mission's journal range by @pascalandr in #1175
+  - style(ui): let the active project tab grow to 300px by @bluelovers in #1166
+  - feat(missions): keep an in-memory index of the mission journal by @pascalandr in #1176
+  - perf(missions): serve read-mostly paths from journal hints by @pascalandr in #1177
+  - feat(missions): bound journal capacity per mission, not per project by @pascalandr in #1178
+  - fix(ui): complete message.list reads under sustained session streaming by @heunghingwan in #1156
+  - fix(tauri): ship a single desktop entry in the Linux AppImage by @pascalandr in #1179
+  - fix(ui): seed an opened session's reducer from its loaded page by @pascalandr in #1181
+  - fix(ui): keep nested repositories' sessions and requests in their own project by @pascalandr in #1174
+  - fix(history): search recent history first, cover more of it and search further back by @pascalandr in #1182
+  - perf(missions): send summaries of closed missions to the panel by @pascalandr in #1180
+ReleaseNotesUrl: https://github.com/NeuralNomadsAI/CodeNomad/releases/tag/v1.0.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

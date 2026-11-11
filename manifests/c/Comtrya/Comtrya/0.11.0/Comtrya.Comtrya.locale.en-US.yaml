@@ -1,0 +1,80 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Comtrya.Comtrya
+PackageVersion: 0.11.0
+PackageLocale: en-US
+Publisher: Comtrya
+PublisherUrl: https://github.com/comtrya
+PublisherSupportUrl: https://github.com/comtrya/comtrya/issues
+PackageName: Comtrya
+PackageUrl: https://github.com/comtrya/comtrya
+License: MIT License
+LicenseUrl: https://github.com/comtrya/comtrya/blob/HEAD/LICENSE
+ShortDescription: Comtrya is a tool to help provision a fresh OS with the packages and configuration (dotfiles) you need to become productive again.
+Tags:
+- configuration-management
+- dotfiles
+- hacktoberfest
+ReleaseNotes: |-
+  The core of comtrya was rebuilt in this release: manifests are parsed in two steps, actions plan typed steps, and a new executor in the library runs them.
+  That made room for running manifests in parallel, a privileged helper with one password prompt per run, Ctrl-C that stops cleanly, and much clearer errors.
+  Most manifests keep working unchanged; read Breaking changes first.
+  Install
+  curl -fsSL https://comtrya.dev/install.sh | sh
+  Windows: irm https://comtrya.dev/install.ps1 | iex. Or cargo install comtrya.
+
+  Breaking changes
+  - A manifest that can't be loaded fails the run. A parse or template error, an unreadable file or a newer version now fails that manifest and skips the manifests that depend on it, and comtrya exits with 1, also for --dry-run and status. A depends on a manifest that doesn't exist fails that manifest. Unrelated manifests still run. (#670)
+  - directory.copy copies the contents of from into to on every platform. Before, on unix, to/<name>/ was created unless to ended with /. Copying a directory into itself now fails. (#720, #721)
+  - .toml manifests are named without .toml, like .yaml ones: tools/git.toml is tools.git (was tools.git.toml). Update depends and -m that use the old name. (#695)
+  - Comtrya.yaml in the manifest directory is no longer loaded as an empty manifest named Comtrya.
+  - Steps that can't run (target is a directory, unknown user or group, wrong passphrase, directory not empty) log a warning Skipping …: reason instead of an error. As before, they don't fail the action.
+
+  New
+  - --jobs N / -j N runs independent manifests at once, each as soon as its dependencies are done. Steps that touch the same paths, package database or terminal take turns. The default stays 1. (#739, closes #15)
+  - privileged: true (or sudo: true) on every file.* and directory.* action makes the change as root. comtrya keeps running as you and starts one helper through sudo, doas or run0, so you're asked for your password once per run. (#738, closes #502)
+  - Ctrl-C lets the step that's running finish, then stops; a second Ctrl-C quits at once. (#737)
+  - continue_on_error: true on any action: a failure becomes a warning and the manifest goes on. (#749, closes #288)
+  - default_manifests in Comtrya.yaml: what comtrya apply runs without -m. (#745, closes #237)
+  - Comtrya.yml and Comtrya.toml are read as well as Comtrya.yaml. (#746, closes #239)
+  - --log-file <path> writes the log to a file too, with timestamps, at least at -v level. (#747, closes #254)
+  - A status line shows that a long step is still running, on an interactive terminal. (#748, closes #514)
+  - Unknown keys are warned about with the key that's probably meant, also inside nested objects (`ulr` in `key` of action 1 (package.repository) is ignored, did you mean `url`?). An unknown action name suggests the closest one. (#714, #717, #733)
+  - luarocks package provider for Lua modules. (#744, closes #311)
+  - pkgin installs itself on NetBSD with pkg_add when it's missing. (#743, closes #513)
+  - git.clone accepts repository and reference (branch or tag) again. (#671)
+  - -v streams program output line by line while command.run and package managers run; a program killed by a signal says so. (#736)
+
+  Changed
+  - --dry-run shows a step that needs a file an earlier step would make, like unpacking an archive that's downloaded first (closes #128). It fails when an action can't be planned, and reports every such action. (#675, #726)
+  - Errors name the path and keep their cause, like can't create /x/y: No such file or directory or process_with `op inject` failed: Command failed with exit code: 1: bad key. A misspelled action name or a missing field is reported with the action's position and line. (#725, #727, #729)
+  - Git manifest locations (-d https://…) are updated on every run, use their branch and path (https://github.com/me/dotfiles#main:dotfiles), and fall back to the cached clone offline. (#704, #719)
+  - include_variables sources are read at the same time; one that hasn't answered after 30 seconds is left out with a warning instead of hanging comtrya. A failing source only drops its own variables. (#706, #722)
+  - pacman, yay, paru and xbps are asked once per run what's installed, not once per action. (#731)
+  - A smaller binary: octocrab is gone, and binary.github uses GITHUB_TOKEN when it's set. (#668)
+
+  Fixed
+  - command.run env no longer leaks into later actions. (#665)
+  - Every initializer and finalizer can block a step, not only the last one. (#664)
+  - Privileged commands run directly when comtrya runs as root, found by uid. (#715)
+  - user.add, user.group and group.add fail when the tool is missing or the name is empty, instead of reporting success; user.add on macOS sets the full name. (#713)
+  - Homebrew sees formulae and casks from taps (hashicorp/tap/terraform) as installed. (#710)
+  - paru and xbps skip packages that are already installed; the yay bootstrap no longer reinstalls base-devel and git. (#676, #681)
+  - binary.github never downloads an asset built for another OS. (#711)
+  - package.install with file: true fails for providers that can't install local files; ignored fields of package.install, package.repository and file.download are warned about. (#700, #702, #707)
+  - Relative manifest_paths are relative to Comtrya.yaml, and -c Comtrya.yaml without a directory works. (#712)
+  - With -m a,b, a shared dependency runs once; ./x in depends works for top-level manifests; with -m, broken manifests that weren't selected don't fail the run. (#696, #697, #741)
+  - Variables from file+yaml/file+toml includes no longer keep quotes. (#705)
+  - file.remove/directory.remove of something already gone and an in-sync file.chown no longer log errors; a command whose output isn't UTF-8 no longer fails. (#726, #727)
+  - A missing manifest directory, a repository that can't be cloned, a missing directory.copy source and file.link without source/target are reported as errors instead of crashing. (#678)
+
+  Docs
+  - New recipes: setting up a machine with cloud-init (closes #47), building software from a git clone (closes #118). (#742)
+  - The docs describe 0.11.0 behaviour throughout, and CONTRIBUTING.md explains how to add an action. (#693, #740)
+
+  For users of comtrya-lib
+  The library API changed a lot: actions plan Steps of a serializable Atom enum; Change::check returns Check::{InSync, Drift, Pending}; errors are typed (atoms::Error, actions::Error); facts are typed (Facts, PlanCx); and the run loop lives in executor::run with Options and an Observer (Sync) that receives Events.
+ReleaseNotesUrl: https://github.com/comtrya/comtrya/releases/tag/v0.11.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
