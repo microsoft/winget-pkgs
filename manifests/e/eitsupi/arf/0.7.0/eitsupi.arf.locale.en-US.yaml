@@ -1,0 +1,106 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: eitsupi.arf
+PackageVersion: 0.7.0
+PackageLocale: en-US
+Publisher: eitsupi
+PublisherUrl: https://github.com/eitsupi
+PublisherSupportUrl: https://github.com/eitsupi/arf/issues
+Author: arf authors
+PackageName: arf console
+PackageUrl: https://github.com/eitsupi/arf
+License: MIT
+LicenseUrl: https://github.com/eitsupi/arf/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2026 arf authors
+CopyrightUrl: https://github.com/eitsupi/arf/blob/HEAD/LICENSE.md
+ShortDescription: Alternative R Frontend — a modern R console written in Rust
+Description: arf is a modern, cross-platform R console written in Rust. It provides a rich interactive experience with fuzzy help search, intelligent history navigation, and syntax highlighting—all with fast startup times.
+Moniker: arf
+Tags:
+- console
+- r
+- rust
+- terminal
+ReleaseNotes: |-
+  Release Notes
+  Added
+  - arf history migrate copies history from the previous default location to the current one, skipping duplicates and leaving the old files in place. Use --dry-run to preview (#454, #455).
+  - Experimental: IPC clients can keep a connection open with attach and receive events from the session as they happen, so editors and other tools can follow it without polling (#465, #466, #468, #469, #470, #471, #472, #496, #497).
+    - arf ipc attach bridges such a connection over stdin/stdout, with optional event subscriptions. Closing stdin ends the bridge while leaving the R session running (#496).
+    - R code can publish its own events with arf_publish_event.
+    - Subscribers receive arf.execution_completed when terminal input or IPC user code finishes. Responses include an execution ID that matches it.
+    - Subscribers receive R stdout and stderr through arf.console_output, followed by the matching completion event (#497).
+    - Sessions can expose named R functions ("handlers") for IPC clients to call with JSON arguments, with --ipc-expose at startup or later with :ipc expose after the user confirms. Handlers are not subject to the code evaluation policy, so expose only functions that validate their arguments.
+  - Experimental: arf ipc interrupt [--pid] [--execution-id] and the JSON-RPC interrupt method can request interruption of an active IPC evaluation while keeping the R session alive (#489).
+  - Experimental: arf ipc r-help search searches installed R help topics and arf ipc r-help show retrieves Markdown pages without evaluating R, including while R is busy (#499).
+  - Experimental: IPC evaluate responses include status (ok, error, interrupted, or unknown), matching the execution completion event so clients can detect errors in visible evaluations (#494).
+  - Experimental: arf can start R from a Pixi environment or a rig project (#407, #411, #412, #419, #420, #423).
+    - { provider = "pixi" } in experimental.r_source_overrides uses R from the active Pixi environment, such as under pixi run arf, without requiring rig (#407).
+    - { provider = "rig-project" } uses R from a synchronized rig proj project in the current directory (#419, #420).
+    - --r-provider and ARF_R_PROVIDER select pixi or rig-project explicitly. Unlike configured overrides, an unavailable provider is an error rather than a fallback (#411, #420).
+    - arf r resolve and arf headless --json report the selected provider, where it was requested, and its details; failed explicit provider requests include a reason_code (#412, #423).
+  - Experimental: The history_runtime object in arf headless --json output includes a source field reporting where the history directory came from (default, legacy_default, explicit, or volatile) (#455).
+  Changed
+  - Breaking: The default history location has moved on Linux and Windows (#455, #456).
+    - Linux: $XDG_STATE_HOME/arf/history (~/.local/state/arf/history), previously $XDG_DATA_HOME/arf/history (~/.local/share/arf/history).
+    - Windows: %LOCALAPPDATA%\arf\history, previously %APPDATA%\arf\history.
+    - Existing history is kept. While only the old location has history, arf keeps using it and warns at startup. Run arf history migrate to copy it; arf then uses the new location. If both locations have history, the new one is used. The old files are left in place, and older arf versions keep using them.
+    - macOS and explicit history directories (--history-dir, ARF_HISTORY_DIR, history.mode = { dir = ... }) are not affected.
+  - Breaking: arf -e and arf -f now exit with status 1 when R code fails to parse or raises an error, as Rscript does. Previously they printed the error and exited with status 0 (#422).
+  - Breaking: --r-home and --with-r-version now take precedence over ARF_R_HOME and ARF_R_VERSION, and setting both environment variables without either option is an error. Unset one of them or pass the option instead (#408).
+  - Experimental/Breaking: experimental.r_source_overrides entries use the provider key instead of type. Rename type to provider in your configuration (#409).
+  - Experimental/Breaking: arf headless --json now reports only state in r_source_override. Read selection details from r_source_selection and the running R version from r_version (#476).
+  - Experimental/Breaking: Headless IPC send and eval --visible now run code through R's normal REPL, so task callbacks (addTaskCallback()), autoprinting, and .Last.value behave as in interactive R (#450).
+    - Visible eval responses leave value and error null; printed output appears in stdout and errors in stderr. Use silent eval to get a value.
+    - send returns an accepted acknowledgment instead of reporting evaluation success. Subscribe to arf.execution_completed to learn when it finishes.
+    - readline(), menus, browser(), and other nested console reads receive EOF instead of consuming further IPC requests.
+    - The session stops with a diagnostic if the main and continuation prompt options are not distinct, non-empty strings or resemble browser() prompts. --no-echo is unsupported.
+  - Experimental/Breaking: Headless IPC history records each non-whitespace code request when execution begins, including silent evaluate, and adds its exit status once known. Interactive history still records only visible send and eval --visible (#451).
+  - Experimental/Breaking: IPC now rejects code containing a NUL character with an error in both interactive and headless sessions (#451).
+  - :switch now replaces earlier R version and provider options instead of adding to them, and the new session applies rig project activation afresh (#417).
+  - R source overrides now try later entries when rig is unavailable, and show a single notice if all of them fail (#407).
+  - Checking an R installation's home directory during startup and arf r resolve now times out instead of waiting indefinitely (#407).
+  - The interactive help browser stays responsive while searching large help indexes (#404).
+  Fixed
+  - arf -e and arf -f accept R code with CRLF line endings (#422).
+  - On Windows, Renviron files are read only once at startup and are skipped with --no-environ and --vanilla (#415).
+  - R's documentation, share, and include directories are found for installations whose R script refers to ${R_HOME} (#415).
+  - On macOS, the selected R's own libraries take priority when loading, and switching R versions restores the original library search path (#416).
+  - After changing directories, :restart no longer keeps stale R directory paths from the previous R installation (#421).
+  - The help and history browsers show their header row again instead of scrolling it off the screen (#433).
+  - Ctrl+C during readline(), menu(), or browser() now follows R's interrupt behavior (#478).
+  - Experimental: On Unix, password prompts during silent arf ipc eval receive EOF instead of waiting for terminal input (#506).
+  - Experimental: The R_NOT_AT_PROMPT hint from arf ipc now points to the arf terminal instead of suggesting arf ipc send "Q", which is rejected in that state (#506).
+  - Experimental: IPC response timeouts now return TIMEOUT (-32007) with the applied timeout_ms, allowing clients to distinguish them from internal errors. Evaluation timeouts must be positive and do not interrupt R execution (#495).
+  - Experimental: Unix IPC sessions no longer delete a different file or socket that replaced theirs at the same path when they exit (#477).
+  - Experimental: On Windows, an IPC send approval prompt shown right after pressing Enter is no longer declined automatically (#429).
+  - Experimental: On macOS, arf ipc commands no longer intermittently report a transport error after the session has already handled the request (#432).
+  Install arf-console 0.7.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/eitsupi/arf/releases/download/v0.7.0/arf-console-installer.sh | sh
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/eitsupi/arf/releases/download/v0.7.0/arf-console-installer.ps1 | iex"
+  Download arf-console 0.7.0
+  ──────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                              │Platform           │Checksum
+  ──────────────────────────────────────────────────┼───────────────────┼─────────────
+  arf-console-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ──────────────────────────────────────────────────┼───────────────────┼─────────────
+  arf-console-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ──────────────────────────────────────────────────┼───────────────────┼─────────────
+  arf-console-aarch64-pc-windows-msvc.zip           │ARM64 Windows      │checksum
+  ──────────────────────────────────────────────────┼───────────────────┼─────────────
+  arf-console-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ──────────────────────────────────────────────────┼───────────────────┼─────────────
+  arf-console-aarch64-unknown-linux-gnu.tar.xz      │ARM64 Linux        │checksum
+  ──────────────────────────────────────────────────┼───────────────────┼─────────────
+  arf-console-x86_64-unknown-linux-gnu.tar.xz       │x64 Linux          │checksum
+  ──────────────────────────────────────────────────┼───────────────────┼─────────────
+  arf-console-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ──────────────────────────────────────────────────┼───────────────────┼─────────────
+  arf-console-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ──────────────────────────────────────────────────┴───────────────────┴─────────────
+ReleaseNotesUrl: https://github.com/eitsupi/arf/releases/tag/v0.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,95 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: MicroClaw.MicroClaw
+PackageVersion: 0.26.0
+PackageLocale: en-US
+Publisher: MicroClaw
+PublisherUrl: https://microclaw.ai/
+PublisherSupportUrl: https://github.com/microclaw/microclaw/issues
+PackageName: MicroClaw
+PackageUrl: https://microclaw.ai/
+License: MIT
+LicenseUrl: https://github.com/microclaw/microclaw/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 everettjf
+ShortDescription: An agentic AI assistant that lives in your chats, inspired by nanoclaw and incorporating some of its design ideas. Built with Rust
+Description: |-
+  MicroClaw is a Rust chat bot that connects LLM to your chats with agentic tool execution. It can run shell commands, read and edit files, search codebases, browse the web, schedule tasks, and keep persistent memory across conversations. It is a Rust rewrite of nanoclaw (TypeScript) with additional capabilities and a single-binary deployment model.
+
+  What makes it different
+  - Agentic loop with tool execution, not just a single API call
+  - Full file system and shell tooling from inside chat
+  - Long-lived memory backed by AGENTS.md files
+  - Built-in scheduler for cron and one-time tasks
+  - Group chat catch-up: reads all messages since last reply
+  - Multi-chat permission model (control_chat_ids) for cross-chat tool authorization
+  - Agent skills system with bundled skills (including macOS Apple Notes/Reminders/Calendar helpers)
+  - Customizable personality via SOUL.md files (global + per-chat)
+
+  How it works
+  chat message
+      |
+      v
+   Store in SQLite --> Load chat history + memory
+                           |
+                           v
+                     LLM API (with tools)
+                           |
+                      stop_reason?
+                     /            \
+                end_turn        tool_use
+                   |               |
+                   v               v
+             Send reply      Execute tool(s)
+                                |
+                                v
+                          Feed results back
+                          to LLM (loop)
+  MicroClaw enters an agentic loop for every message. LLM can call tools, inspect results, call more tools, and reason through multi-step tasks before responding. The loop is capped by MAX_TOOL_ITERATIONS for safety.
+
+  Core capabilities
+  - Agentic tool use (bash, file I/O, glob, grep)
+  - Web search, fetch, and browser automation
+  - Scheduling with cron expressions
+  - Mid-conversation messaging for progress updates
+  - Persistent memory (global + per-chat)
+  - Personality customization via SOUL.md
+  - Conversation archiving (automatic before compaction, manual via /archive)
+  - Typing indicator that stays active during tool use
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claw
+- large-language-model
+- llm
+ReleaseNotes: |-
+  MicroClaw Code becomes a fully separate product from the MicroClaw Server.
+  After upgrading, run mccode setup (or add a model profile to
+  ~/.mccode/settings.yaml); an old ~/.microclaw/code is not read.
+  Changed
+  - MicroClaw Code is fully separate from the MicroClaw Server. Its home
+    moves from ~/.microclaw/code to ~/.mccode (nothing is migrated: move the
+    old directory by hand to keep settings and sessions). Code no longer
+    borrows model credentials from MICROCLAW_CONFIG or
+    ~/.microclaw/microclaw.config.yaml: it uses --config, MCCODE_CONFIG,
+    ~/.mccode/config.yaml or a settings profile. Its variables are
+    MCCODE_HOME, MCCODE_CONFIG, MCCODE_SANDBOX, MCCODE_MANAGED,
+    MCCODE_LOCAL_SANDBOX, MCCODE_PATH_ALLOWLIST and MCCODE_REPO (the old
+    MICROCLAW_CODE_* names are no longer read), and Server variables such as
+    MICROCLAW_CONFIG, MICROCLAW_SKILLS_DIR and MICROCLAW_LOCAL_SANDBOX
+    no longer affect it. Managed settings move to /etc/mccode/managed.yaml
+    (macOS /Library/Application Support/mccode/managed.yaml, Windows
+    %ProgramData%\mccode\managed.yaml). The OS sandbox hides ~/.mccode
+    from shell commands, like ~/.microclaw.
+  - Documentation and the mccode config init template keep role models on the
+    session's profile, and say that model.roles.subagent is not used yet.
+ReleaseNotesUrl: https://github.com/microclaw/microclaw/releases/tag/v0.26.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://microclaw.ai/docs/overview
+- DocumentLabel: Quick Start
+  DocumentUrl: https://microclaw.ai/docs/quickstart
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

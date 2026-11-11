@@ -1,0 +1,85 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: ChangemakerStudios.Papercut-SMTP
+PackageVersion: 8.0.1
+PackageLocale: en-US
+Publisher: Changemaker Studios
+PublisherUrl: https://github.com/ChangemakerStudios
+PublisherSupportUrl: https://github.com/ChangemakerStudios/Papercut-SMTP/issues
+Author: Ken Robertson & Jaben Cargman
+PackageName: Papercut SMTP
+PackageUrl: https://github.com/ChangemakerStudios/Papercut-SMTP
+License: Apache-2.0
+LicenseUrl: https://github.com/ChangemakerStudios/Papercut-SMTP/blob/develop/LICENSE
+Copyright: Copyright © 2008 - 2026 Ken Robertson & Jaben Cargman
+ShortDescription: Standalone SMTP server designed for viewing received messages
+Description: |-
+  Papercut SMTP is a 2-in-1 quick email viewer AND built-in SMTP server designed for development.
+  It allows developers to safely test email functionality without risk of emails being sent to real recipients.
+
+  Features:
+  - Desktop WPF application for viewing emails
+  - Built-in SMTP server (receive-only)
+  - Full email inspection (body, HTML, headers, attachments, raw encoded bits)
+  - Support for running as a minimized tray application with notifications
+  - WebView2-based HTML email rendering
+Moniker: papercut-smtp
+Tags:
+- developer-tools
+- development
+- email
+- mail-server
+- smtp
+- testing
+ReleaseNotes: |-
+  Release Notes
+
+  Papercut SMTP v8.0.1 [2026-11-08]
+
+  Bug Fixes
+  - Messages Stuck Loading - Opening a message while the Headers, Body, Sections or Raw tab was selected left the pane on the loading spinner until the window was reloaded.
+  - Scroll Position - Opening another message now starts at the top instead of keeping the previous message's scroll position.
+
+  Papercut SMTP v8.0.0 [2026-11-08]
+  The desktop app is rebuilt. It's now a tray app that shows the same web UI as the Papercut Service, and it runs on macOS as well as Windows. Updating from v7 is a normal in-place update: your messages, SMTP IP and port, message folders, notification setting and window size all come with you.
+
+  Security
+  - Please Update - In 7.8.0 and earlier, any web page could call the Papercut Service's API, so a site you visited could read or delete your captured mail. Updating to 8.0.0 fixes this.
+
+  Before You Update
+  - Forwarding Rules Don't Carry Over - v7 kept its rules in a folder that updates replace, so they're gone by the time v8 starts, unless an installed Papercut Service has a copy, which v8 imports. Papercut shows a notice once if you need to re-create them under Rules. From v8 on, rules survive updates.
+  - Other Settings Not Carried Over - Forward dialog settings, theme, sort order and zoom go back to their defaults.
+  - If You Also Run the Windows Service - While the Windows Service is running, the desktop app uses it instead of starting its own, and the two no longer sync settings. Mail goes to the service's own SMTP port, which defaults to 2525, not the desktop's 25. Check it under Options.
+  - Web Pages on Other Origins Are Blocked - Web pages on another origin can no longer call the service. If you call it from a browser app, add that origin to CorsAllowedOrigins. Scripts, curl and MCP clients aren't affected. Behind a reverse proxy that passes neither Host nor X-Forwarded-Host, which includes nginx by default, the web UI is a blank page until you fix the proxy or set CorsAllowedOrigins. Host names a website could take over are blocked too, for every caller: anything other than an IP address, localhost, a single-word name or a private suffix such as .local needs its URL in CorsAllowedOrigins. See Calling the API from a web page.
+
+  New Features
+  - New Desktop App - A tray icon with new-mail notifications and run at startup, plus a window that shows the web UI in the system's webview. It includes its own .NET runtime, and it uses a Papercut Service already running on your machine, such as in Docker, if it finds one.
+  - macOS - Papercut now runs on Apple Silicon and Intel Macs, from the menu bar. SMTP defaults to port 2525 there. This is the first macOS release, and it isn't signed yet, so the first launch needs System Settings -> Privacy & Security -> Open Anyway. Please report any problems you find.
+  - Rebuilt Web UI - The web UI is rebuilt on Angular 21 and replaces the old desktop window. It adds rules management, an Options dialog, a live service log viewer, Forward / Delete / Delete All, ctrl/shift multi-select, virtual scrolling with a message count, a sort direction toggle, read tracking, a System / Light / Dark theme, and a collapsible message list. Message HTML is rendered on the server through a MIME-aware pipeline, and emails keep their own colors in dark mode.
+  - MCP Server - The service can expose its messages to AI assistants over the Model Context Protocol. It is off by default; see MCP in the docs.
+  - Create Messages Directly - POST or PUT to api/messages, or use the MCP create_message tool, to add a message without sending it over SMTP. The body can be markdown or HTML.
+  - SMTP Rate Limiting - Optional, configurable rate limiting for incoming SMTP messages, for testing how your app handles a throttling mail server. Addresses #199
+  - Documentation Site - New docs at papercut-smtp.com. Fixes #220 (Thanks, Carsak!)
+
+  Improvements
+  - Service Tray Notifications - The Service Tray Manager now gets new-mail notifications over SignalR. It treats any reachable service as running, and Open Web UI works for services that are not registered.
+  - Safer Message View - javascript:, data: and vbscript: links are blocked, and links open in a new tab.
+  - Bounded Memory - Reading raw messages and MIME sections no longer loads unbounded data into memory.
+  - WinGet - Fixed the package ID and PR creation for WinGet publishing, and added ProductCode and ReleaseDate to the manifests. Relates to #376 (Thanks, AntekOlszewski!)
+  - Cleanup - Removed the unused Electron.NET integration. Added an Apache 2.0 LICENSE file.
+
+  Bug Fixes
+  - Forwarding Rules Corrupting Messages - Fixed messages and attachments getting corrupted when several forwarding rules matched the same message. Each rule now works on its own copy read from disk. Fixes #379 (Thanks for the report, dpinkham6!)
+  - Duplicate New-Message Events - Each received message now raises one new-message event, not several.
+  - Web UI Under a Path Prefix - The web UI now loads correctly when the service runs under an HttpPathPrefix.
+  - SMTP Rebind in the Service - Changing the SMTP IP or port at runtime now moves the running listener. Before this fix, the old port stayed open and the new listener died.
+  - Log File Access - The log viewer opens the log file with shared access, so it no longer conflicts with the logger.
+
+  Contributors
+  Special thanks to dpinkham6, AntekOlszewski, and Carsak for their reports and suggestions!
+  Papercut SMTP is free and open source. If it saves you time, consider sponsoring the project.
+  Several features and fixes in this release were developed with the assistance of Claude Code.
+ReleaseNotesUrl: https://github.com/ChangemakerStudios/Papercut-SMTP/releases/tag/8.0.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

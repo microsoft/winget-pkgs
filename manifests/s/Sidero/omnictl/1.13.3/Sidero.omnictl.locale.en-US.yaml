@@ -1,0 +1,67 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Sidero.omnictl
+PackageVersion: 1.13.3
+PackageLocale: en-US
+Publisher: Sidero Labs
+PublisherUrl: https://github.com/siderolabs/omni
+PublisherSupportUrl: https://github.com/siderolabs/omni/issues
+PrivacyUrl: https://www.siderolabs.com/privacy-policy/
+Author: Sidero Labs
+PackageName: omnictl
+PackageUrl: https://github.com/siderolabs/omni
+License: Mozilla Public License Version 2.0
+LicenseUrl: https://github.com/siderolabs/omni/blob/HEAD/LICENSE
+ShortDescription: A command line tool for communicating with Omni
+Moniker: omnictl
+Tags:
+- k8s
+- kubernetes
+- omni
+- talos
+ReleaseNotes: |-
+  Omni 1.13.3 (2026-11-09)
+  Welcome to the v1.13.3 release of Omni!
+  Please try out the release binaries and report any issues at
+  https://github.com/siderolabs/omni/issues.
+
+  Urgent Upgrade Notes (No, really, you MUST read this before you upgrade)
+  The BoltDB storage backend (storage.default.kind: boltdb, --storage-kind boltdb) is deprecated and will be removed in a future release. It keeps working in this release and Omni logs a warning at startup when it runs on it. There is no automated migration between the two backends, so if your Omni runs on BoltDB, plan the move to etcd, which is the default, before the removal lands.
+  The metrics endpoint now listens on 127.0.0.1:2122 by default instead of 0.0.0.0:2122. If you scrape the Omni metrics from another host or from outside the Omni container (e.g., through a published Docker port), set services.metrics.endpoint (--metrics-bind-addr) to 0.0.0.0:2122 explicitly. The Helm chart still binds it to 0.0.0.0:2122 when metrics.enabled is set.
+  The embedded etcd server no longer listens on any address by default, Omni connects to it in-memory. Previously, it listened on storage.default.etcd.endpoints (http://localhost:2379 by default) without TLS, and backups taken with etcdctl relied on it. To access the embedded etcd from outside, set storage.default.etcd.embeddedCertFile and embeddedKeyFile (--etcd-embedded-cert-path, --etcd-embedded-key-path), and optionally embeddedCaFile (--etcd-embedded-ca-path). The embedded etcd server then listens on the storage.default.etcd.endpoints addresses with TLS, and only accepts clients with a certificate signed by the given CA. When no CA is set, the certificate file must contain a single certificate, which is used as the CA, so clients can use the same certificate and key.
+  Omni no longer installs Talos from the installer registry set in registries.talos (--talos-installer-registry, ghcr.io/siderolabs/installer by default). The setting is deprecated and has no effect, every install image now comes from an image factory. Machines with an invalid schematic (e.g., booted from an imager-built ISO with extensions) get an image factory schematic built from their join kernel args at their next install, without their custom extensions. If you mirrored the installer image for an air-gapped setup, make sure Omni can reach an image factory instead.
+
+  Contributors
+  - Utku Ozdemir
+  - Edward Sammut Alessi
+  - Oguz Kilcan
+
+  Changes
+  19 commits
+  - 1834114d release(v1.13.3): prepare release
+  - 2544b93a test(frontend): fix machine class scale assertion
+  - a0cc3dff test: set the Traefik service type in the key its chart reads
+  - b2bfae8a fix(frontend): report volume encryption as unknown until prepared
+  - 383bcf6e fix(frontend): show whole-disk volumes and RAID membership on disks view
+  - deab04a9 fix(frontend): update incorrect string match on cluster overview
+  - c3c62009 fix(frontend): scale header contents down for mobile
+  - 034acb2a fix(frontend): adjust mobile layout for cluster overview
+  - 0a067afb fix(frontend): fix some minor design issues
+  - 3da4eb41 fix: require list access to a type to get its label completions
+  - 96ecf27e fix: return not found when getting a support resource with a wrong ID
+  - 649b0c63 fix: register the VersionContract resource type
+  - 4ce84926 fix: check infra provider types outside their namespaces like any other type
+  - 61e08610 fix: allow only admins to register and remove infra providers
+  - 02253c5e fix: log join token fingerprints instead of tokens in the audit log
+  - af7c9bfb fix: do not send max_age in the OIDC login request
+  - 2a8a3a6e fix: prune removed bootstrap manifest objects on manifest sync
+  - 1f92d935 fix: do not fail the manifest sync dry run on missing objects
+  - d7315ef7 fix: bump COSI runtime to v1.16.5 to stop a task restart loop
+
+  Dependency Changes
+  - github.com/cosi-project/runtime v1.16.4 -> v1.16.5
+  Previous release can be found at v1.13.2
+ReleaseNotesUrl: https://github.com/siderolabs/omni/releases/tag/v1.13.3
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
