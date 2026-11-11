@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: MicroClaw.MCCode
-PackageVersion: 0.26.0
+PackageVersion: 0.29.1
 PackageLocale: en-US
 Publisher: MicroClaw
 PublisherUrl: https://microclaw.org/
@@ -35,8 +35,19 @@ Tags:
 - large-language-model
 - llm
 - programming
-ReleaseNotes: MicroClaw Code becomes a fully separate product from the MicroClaw Server. After upgrading, run mccode setup (or add a model profile to ~/.mccode/settings.yaml); an old ~/.microclaw/code is not read.
-ReleaseNotesUrl: https://github.com/microclaw/microclaw/releases/tag/v0.26.0
+ReleaseNotes: |-
+  Fixed
+  - openai-codex no longer stops working when its OAuth token expires.
+    The token from ~/.codex/auth.json was read and refreshed only when the
+    provider was created at startup, so a long-running Server or mccode
+    session kept sending an expired token and every request failed with
+    HTTP 401 until a restart. The auth file is now read before every request,
+    the token is refreshed (and written back) five minutes before it expires,
+    and a 401 triggers one refresh and retry. Concurrent refreshes are
+    serialised, so a rotated refresh token is never used twice. The startup
+    refresh also used a blocking HTTP client inside the async runtime, which
+    could panic when the token had already expired.
+ReleaseNotesUrl: https://github.com/microclaw/microclaw/releases/tag/v0.29.1
 Documentations:
 - DocumentLabel: MicroClaw Code guide
   DocumentUrl: https://github.com/microclaw/microclaw/blob/HEAD/apps/microclaw-code/README.md
