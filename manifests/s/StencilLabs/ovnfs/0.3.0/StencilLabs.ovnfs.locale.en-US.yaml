@@ -1,0 +1,76 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: StencilLabs.ovnfs
+PackageVersion: 0.3.0
+PackageLocale: en-US
+Publisher: Stencil Labs, Inc.
+PublisherUrl: https://stencil.so/
+PublisherSupportUrl: https://github.com/stencil-hq/ovnfs/issues
+PrivacyUrl: https://stencil.so/legal/privacy
+Author: Stencil Labs, Inc.
+PackageName: ovnfs
+PackageUrl: https://github.com/stencil-hq/ovnfs
+License: MIT
+LicenseUrl: https://github.com/stencil-hq/ovnfs/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Stencil Labs, Inc.
+ShortDescription: Isolated, copy-on-write checkouts of any folder for agents, served by one daemon as a single mount.
+Description: |-
+  Checkouts for agents: isolated, copy-on-write views of any folder, a git repository or not, opened without copying it. Agents work in the checkout; you review with diff and merge back with a three-way apply. Checkouts can be snapshotted, forked, and attached to another machine, where their content arrives on first read.
+
+  One daemon serves every checkout as a folder of a single mount: NFSv3 on macOS, FUSE on Linux, SMB or WinFsp on Windows. No root, and no kernel extension beyond WinFsp where you install it.
+
+  Opening a folder sorts every path into a class. source paths are captured: they are what diff, apply and snapshots see, and the only bytes that leave the machine. cache and local paths (build outputs, ignored files, secrets) show the live folder until the checkout writes them. hidden paths are absent. Writes go to the checkout's own copy-on-write layer, so the folder is never written until you apply. In a git repository the checkout gets a private git directory: commit freely, then apply --branch NAME to bring the commits back.
+
+  ovnfs reads and writes git repositories itself, so it needs no git installation; fetches use git when it is on the PATH. Verbs start the daemon when none is running, and start, stop, restart and status manage it. restart swaps in the daemon of the binary you run, e.g. after an upgrade, leaving an NFS or SMB mount and the shells inside it in place.
+
+  - new opens a checkout on a folder, git revision or snapshot; run uses a disposable checkout that is removed afterwards.
+  - snap freezes a checkout's changes into a snapshot; fork opens a second checkout on one.
+  - diff lists source changes since a snapshot, optionally as a git patch; apply merges them back with a three-way merge.
+  - grep and glob search the daemon without traversing the mount.
+  - ls, prune and rm manage checkouts and their snapshots.
+  - attach, send, pull and push move a checkout to another machine over ssh, fetching content lazily on first read.
+  - explain reports which class a path gets and which rule decided; completion provides bash, zsh and fish completion.
+
+  ovnfs isolates files, not processes: it is not a sandbox.
+Tags:
+- checkout
+- copy-on-write
+- git
+- snapshot
+- workspace
+ReleaseNotes: |-
+  Changelog
+  - 1af1ea828ccd60a0e0821009d7825d6fd1dc60da Merge branch 'main' of https://github.com/stencil-hq/ovnfs into durable-sync-stale-mount
+  - 569c46a5d7dd75e7e831d0d64ce7be70606c31d0 feat(checkout): automated snapshot cleanup on removal
+  - 064b52a981a5d833b2f75bcca1c4469424022d01 feat(export): added .metadata_never_index marker to block Spotlight indexing
+  - cfe1d40dbeace966e6fbd2703f63ea22e111d8a1 feat(git/fetch): added support for dumb HTTP and remote helpers
+  - bd61159e4a1c16b2b5eb1a6f9709b2bd63003ae0 feat: added atime flag to control mount access-time updates
+  - 6b3657cee809df2ab1f086bdb962b167359e032b feat: added colorized CLI output with automatic terminal detection
+  - 5668eebeb7e04cfa83591a29bc9bd1af1db4fb77 feat: added keep-mount option to stop and restart operations
+  - 625936d9efd34937f377c1812ebc63dfa086f364 feat: added macOS NFS Unix socket support and unified address handling
+  - a3d25c006e037ae10538e276c3058b9b06f0c130 feat: added profiling command to daemon
+  - da062c40ea028a5646e36eb6a219680d467dea9b feat: allowed user configuration of serve defaults
+  - af5f1c7b513718549a8e2d063649c487416f226c fix(apply): replaced held and read-only files with posix renames
+  - 87f796b593f29ebedc589e278457fb8861d2519f fix(checkout): failed apply when the source folder is not a directory
+  - f1fa1d12e20b3f7ce48744513e03c1c4117f0b50 fix(daemon): fixed stop and restart handling to wait for daemon process exit
+  - 031208040289099fa8f583f6b862da012bf6ecc0 fix(fuse): detached a dead mount left by a killed daemon before mounting
+  - 45c9b6bd4d2cb1e01dafe015e23782e194b37cf3 fix(git): discovered maintenance loose packs
+  - a72a3e5c6e8fcbe59ea75a63b46f4e66f79c2501 fix(git/config): fixed tilde expansion on Windows
+  - 66c16c5321bed5e99fe4f013fffcaffa0b354a94 fix(git/fetch): matched git for windows url and helper handling
+  - 4fa9d244d0a1b228cc17b9546dc23f21aa0fe950 fix(git/refs): matched git for windows file sharing for ref updates
+  - 143791f3df3c35dedcfeefa2807abdfd0a1c7f6f fix(git/refs): retried lock creation denied by a concurrent release - TestConcurrentUpdates/files failed on windows ci for v0.3.0 (both runs) with access denied from creating refs/heads/race.lock while other goroutines released the same lock, without the delete-pending status createExclusive maps to an existing lock. - createExclusive now retries access denied with Git for Windows' retry delays, sharing the loop with replaceFile; a delete-pending lock still counts as held at once.
+  - fd794251d555011c13c3923e2f979ee9db9c610c fix(git/repo): matched git for windows discovery, init and identity
+  - 1685021fab22ae1af35f85b6c3942096bca7fdb7 fix(overlay): made fsync write a memory file to its upper and sync it
+  - e5e4d27af951833df7cce6c47e2cf933a7df94aa fix(overlay): made memory fsync durability opt-in
+  - df8332bb10aaf7bc396e2eb11ed9da855192c84a fix: prevented daemon hang on keep-mount stop by syncing listener cuts
+  - 29e3cfb57d3d4ad44b36f7b9d1e81302cbfe917a merge pr #29: sync memory-tier files to their upper layer
+  - afb6ff305e14e093361a99ac0df1b5e5ea2adab7 refactor(attach): replaced the mesh with plain ssh links - Removed the mesh (QUIC nodes, the Stencil relay client, roster and join tokens), meshd and the mesh verbs and ops; attach, send and run --on now always link through ssh HOST ovnfs link. - The daemon's offer id is now a random id kept in /node_id instead of the mesh key; attaches made before this reopen as new remote checkouts. - send no longer joins the remote to a mesh: it probes ssh, installs ovnfs when missing and attaches with the binary it found. - ovnfs mesh prints a deprecation note pointing at attach, send and push. - Made sshConn.Close idempotent; concurrent Wait calls from peer's shutdown paths hung stop and restart while any ssh link was up. - Dropped quic-go, coder/websocket and x/crypto from go.mod; updated README and docs.
+  - 0fd7bcd0715777df3b98e84962a0ea904818980a refactor(overlay): optimized hard-link metadata handling
+  - 389bd1a19736cac3a6fa411682544fb5498b356d refactor: migrated CLI to kong grammar
+  - abf802ae79a16e1f7dd92940c069e36c12908b07 refactor: migrated git interaction to in-process implementation
+  - f057e2400ec3d2e217b558f3249bc27fe0679929 test(git/rev): gave git for windows timezones it can parse
+  - 0181ffc16aa68f9c8682acfdf8df7dc24c234fbc test(repo): stopped using git as oracle for compatObjectFormat - git 2.56 accepts extensions.compatObjectFormat only when built with Rust, so the comparison failed on ubuntu runners whose git has Rust enabled. - Asserted Discover's deliberate refusal directly and dropped the dead "requires Rust" error classification.
+ReleaseNotesUrl: https://github.com/stencil-hq/ovnfs/releases/tag/v0.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
