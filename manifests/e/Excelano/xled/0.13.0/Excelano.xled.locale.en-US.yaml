@@ -1,0 +1,39 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Excelano.xled
+PackageVersion: 0.13.0
+PackageLocale: en-US
+Publisher: Excelano LLC
+PublisherUrl: https://excelano.com/
+PublisherSupportUrl: https://github.com/excelano/xled/issues
+Author: David M. Anderson
+PackageName: xled
+PackageUrl: https://github.com/excelano/xled
+License: MIT
+LicenseUrl: https://github.com/excelano/xled/blob/HEAD/LICENSE
+ShortDescription: sed and awk for tabular data, regex and compute over CSV and DSV ranges
+Moniker: xled
+Tags:
+- awk
+- cli
+- csv
+- data
+- dsv
+- sed
+ReleaseNotes: |-
+  Behaviour changes
+  - Blank lines are rows. A blank line in the input is now a row with no fields, so row numbers match the file's lines (as --no-header always promised). On a file with blank lines, a script that addresses rows by number can select different rows than in 0.12.
+  - -i preserves the file. Rows a script does not change are written back byte for byte: line endings (LF, CRLF, CR), quoting, blank lines, the UTF-8 BOM and a missing final newline all survive. Previously every row was re-encoded (#27).
+  - round() edge cases: a value that rounds to zero is 0, not -0, and values too large for the requested decimals are no longer altered by float error.
+  - append is refused as out of scope, with the upstream route named.
+  New
+  - --diff prints one line per changed cell (C5 [price]: "$1,200" → "1200"). On its own it previews; with -i it records what was written. The REPL's preview uses it too.
+  - fixed(x, [decimals], [no_commas]), Excel's FIXED, for numbers as text with set decimals: fixed([amt], 2, true) gives 1234.50.
+  - Warnings when row 1 looks like a title above the real header, and when the file looks like it uses another delimiter (-d ';').
+  - Corrections that name the fix: header 1 → 1 header; [Name] → did you mean [name]; a bare header name → its bracketed form.
+  Fixes
+  - The skill and docs gave header N; the command is N header (#26).
+ReleaseNotesUrl: https://github.com/excelano/xled/releases/tag/v0.13.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,24 @@
+# Initialize Commits step for the WinGet publish pipeline.
+# Records the commits to process and, on a sparse checkout, hydrates the cone.
+
+steps:
+
+- task: AzureCLI@2
+  displayName: 'Initialize Commits'
+  inputs:
+    azureSubscription: '$(WinGetSvc.DataAccess)'
+    scriptType: batch
+    scriptLocation: inlineScript
+    inlineScript: |
+      WinGetSvcWrapper.exe initialize-commits --operationId %BUILD_BUILDNUMBER%
+    addSpnToEnvironment: true
+    failOnStandardError: true
+  env:
+    ValidationStorageAccountName: $(ValidationStorageAccountName)
+    CacheStorageAccountName: $(CacheStorageAccountName)
+    WinGet:AppConfig:PrimaryEndpoint: $(AppConfigPrimaryEndpoint)
+    WinGet:AppConfig:SecondaryEndpoint: $(AppConfigSecondaryEndpoint)
+    DIApplicationInsightKey: $(DIApplicationInsightKey)
+    PackagePublisher: $(PackagePublisher)
+    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+    ExecutionEnvironment: $(WinGetSvc.ExecutionEnvironment)

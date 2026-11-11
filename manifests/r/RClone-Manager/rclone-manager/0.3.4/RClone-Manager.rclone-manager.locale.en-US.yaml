@@ -1,0 +1,67 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: RClone-Manager.rclone-manager
+PackageVersion: 0.3.4
+PackageLocale: en-US
+Publisher: RClone-Manager
+PublisherUrl: https://github.com/Zarestia-Dev
+PublisherSupportUrl: https://github.com/Zarestia-Dev/rclone-manager/issues
+PackageName: RClone Manager
+PackageUrl: https://github.com/Zarestia-Dev/rclone-manager
+License: GPL-3.0-or-later
+LicenseUrl: https://github.com/Zarestia-Dev/rclone-manager/blob/HEAD/LICENSE
+ShortDescription: A powerful, cross-platform GUI for managing Rclone remotes with style and ease.
+Tags:
+- adwaita
+- angular
+- angular-material
+- dropbox
+- fuse
+- gnome
+- google-drive
+- onedrive
+- rclone-gui
+- s3
+- tauri
+ReleaseNotes: |-
+  RClone Manager v0.3.4
+  This release adds a standalone web server, master-password protection for settings, and a rebuilt Rust backend layout, along with fixes for rendering, Quick Run filtering, updates, navigation, and Android bisync.
+  Highlights
+  - Standalone web server. rclone-manager-server runs without Tauri, GTK, WebKit, or a desktop session. Builds are available for Linux, Windows, and macOS on x86_64 and aarch64, plus a Linux systemd service template.
+  - Configuration vault. Protect application settings and sub-settings with a master password. Includes a lock screen, manual locking, password changes, and configurable inactivity auto-lock.
+  - Backend restructure. The src-tauri layout is now a Cargo workspace under backend/, with shared core logic separated from the desktop and server hosts.
+  Added
+  - Standalone Web Server: Added rclone-manager-server, a dedicated server executable that runs without Tauri, GTK, WebKit, or a desktop session. Server archives are built independently from the tray-enabled headless installers, with Linux, Windows, and macOS builds for x86_64 and aarch64, plus a Linux systemd service template.
+  - Configuration Vault: Added master-password protection for application settings and sub-settings, with a lock screen, manual locking, password changes, and configurable inactivity auto-lock. Backup exports now explain that vault protection does not automatically encrypt exported files and offer separate backup encryption.
+  - Empty Directory Uploads: Nautilus uploads now preserve empty directories, including uploads through the web server.
+  - Optional Mount Driver Checks: Added an option to skip mount plugin checks and dismiss related setup warnings when mounting is not needed.
+  Changed
+  - Separate Rust Desktop, Server, and Shared Core: Replaced the src-tauri layout with a Cargo workspace under backend/. core owns shared application logic, desktop owns Tauri and native integrations, and server owns HTTP and standalone server startup. Native packaging lives with desktop, while server deployment documentation and service files live with server. Build scripts and CI now use the workspace paths.
+  - Embedded Release Resources: Release server binaries embed the Angular interface. Desktop, portable, and server releases also embed backend translations and shared OAuth/serve templates, so adjacent translation and template files no longer need to be distributed. Templates are materialized in the application cache when Rclone needs a file path and recreated if missing. Debug builds continue to read source assets from disk; settings, logs, and the separately managed Rclone executable remain external.
+  - Server Build and Distribution: npm run build:server now builds Angular before compiling the standalone server. Docker uses the standalone executable, and server archives no longer ship a separate browser/ directory. The tray-enabled server remains available as rclone-manager-headless, with its own release workflow.
+  - Shared Runtime Boundaries: Separated host-specific CLI options, product metadata, exit confirmation, and desktop event delivery from shared application logic. Backend events continue to reach desktop through Tauri and web clients through SSE.
+  - Frontend Maintenance: Consolidated form validators, remote-card components, operation filters, and shared styles. Expanded regression coverage for file browsing, navigation, updates, and workflow behavior.
+  Fixed
+  - Cryptcheck Task Options: Cryptcheck Quick Runs now forward task-specific Include/Exclude filters and backend options, including retry settings, to the core/command invocation. Intentionally excluded files no longer cause missing-file failures. Fixes #323.
+  - Quick Run Delete Filters: Directory Delete operations now use operations/delete instead of operations/purge, respecting Include/Exclude filters and preserving nonmatching files and directories. Fixes #322.
+  - - fix(platform): restore WebKit compositing quirk on strict Wayland compositors by @nvandamme in #306
+  - fix(mount): prevent application partition keys from leaking into rclone mount parameters by @powerAn2020 in #315
+  - fix(platform): skip compositing quirk on KWin 6.8+ where it blocks window mapping by @nvandamme in #327
+  - Update Download State: Improved application and Rclone update cancellation and concurrent request handling so update checks no longer overwrite active downloads or staged updates.
+  - Navigation and File Browser State: Fixed duplicate history entries, Back/Forward restoration, and nested overlay closing. Improved Nautilus tab dragging and detachment, preserving tabs when opening a new window fails and closing the correct tab after asynchronous reordering.
+  - Context-Aware Templates: Applying a configuration template now respects the selected editing context; VFS profile links are only offered for operations that support them.
+  - Upload Cleanup: Rejected upload requests now clean up files already staged before validation fails.
+  - Typed Server Errors: Server port conflicts now use the operating system's error kind. Rclone HTTP status codes remain structured through the transport and poller, so unrelated error text is no longer mistaken for a 401/403 authentication failure.
+  - Standalone Server Shutdown: Added bounded HTTP connection draining and shared cleanup on shutdown, including Unix SIGINT/SIGTERM handling.
+  - macOS Packaging Metadata: Consolidated the native entitlement and Info.plist configuration, fixed missing entitlement file references, and removed unused camera and microphone permissions.
+  - Android Bisync Permission Denied on Workdir: Fixed bisync operations on Android failing immediately with failed to create workdir: mkdir /data/local/tmp/rclone: permission denied. In-process librclone now routes the default bisync working directory to the application's internal writable cache storage. Fixes #307.
+  New Contributors
+  - @powerAn2020 made their first contribution in #315
+  Full Changelog: v0.3.3...v0.3.4
+ReleaseNotesUrl: https://github.com/Zarestia-Dev/rclone-manager/releases/tag/v0.3.4
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/Zarestia-Dev/rclone-manager/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,42 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: AnywhereLabs.DSHDesktop
+PackageVersion: 2.0.20-next
+PackageLocale: en-US
+ShortDescription: A community-maintained desktop client for DeepSeek Harness; it is not an official DeepSeek product.
+Description: DSH Desktop is a community-maintained desktop client for DeepSeek Harness. It is an Electron desktop shell and is not an official DeepSeek product.
+Tags:
+- ai
+- deepseek
+- deepseek-harness
+- dsh
+- large-language-model
+- llm
+ReleaseNotes: |-
+  This Next release upgrades upstream to DeepSeek Harness v0.2.1-rc.3, adds the /computer-use command for on-demand Computer Use, data directory status and backups, a standalone pre-Host first-run setup window, and sidebar footer layout settings, and fixes Windows elevated sandbox launch failures, Linux image-processing crashes, and renderer recovery.
+  DSH NEXT is a community-maintained open-source project, not an official DeepSeek product.
+  Upstream version: DeepSeek Harness v0.2.1-rc.3.
+  New and improved
+  - On-demand Computer Use: Added the /computer-use [off|message] slash command and an "On-demand command loading (/computer-use)" toggle on the Computer Use plugin detail page (enabled by default), exposing Computer Use tools and system prompt guidance only in sessions where it is enabled to avoid extra token overhead in ordinary coding sessions.
+  - Data directory management and backup: Desktop Settings now shows the active data directory and how it was chosen (chosen in app, DSH_DESKTOP_NEXT_HOME, or default), persisted under the system application-data directory across restarts. If a launch resolves a different directory while the previous one still holds data or cannot be reached, Next asks before initializing. Added a "Back up" action that pauses the Host and copies the data directory into a timestamped backup folder that can be selected directly.
+  - Standalone first-run setup: First-launch onboarding now opens in a lightweight standalone window before starting the Host process, then boots the Host once and opens the main window after completion or skip, avoiding the cold-start wait. Onboarding and Desktop Settings controls are aligned with the official Settings UI.
+  - Sidebar and Settings UI: Added "Arrange sidebar footer icons in a row" and "Balance multi-row icon layout" toggles in Desktop Settings for compact horizontal and balanced multi-row footer icons. Enabled vertical scrolling on the Settings left navigation rail and added a "Release notes" link beside "Check for updates".
+  - Linux bundled runtime: Linux packages (x64 and ARM64) now bundle primary-runtime, office-skills, and the WebAssembly Office engine for out-of-the-box Office document skills.
+  Fixes
+  - Windows sandbox launch: Packaged builds launched with an elevated split token on Windows now automatically restart with the normal desktop token (--next-keep-elevated keeps intentional elevation) so Chromium GPU and renderer sandboxes do not exit silently. If a sandboxed process still cannot launch, Next shows a native diagnostic dialog with the error code, instructions to disable Run as Administrator, and the temporary --no-sandbox workaround.
+  - Linux stability and packaging: Switched Linux image processing to WebAssembly sharp to prevent Host SIGSEGV crashes caused by GLib symbol conflicts between native libvips and Electron; unpacked landlock-run from app.asar on Linux and hid unsupported in-app update controls.
+  - Renderer recovery: When the renderer exits unexpectedly, Next now preserves the running Host and retries reloading the main document up to three times before falling back to the recovery assistant. Simplified renderer health checks to a mounted React shell so slow history loads or brief disconnects do not trigger reload loops.
+  - Plugin management and terminal commands: Upgraded bundled pnpm to 11.28.5 to fix hangs during pnpm remove; terminal dsh plugin commands now always use the bundled pnpm and suppress the misleading pnpm self-update notice. Reduced redundant plugin scans during toggles and recovery operations.
+  - Update installation and storage compatibility: Launched the staged update installer before forced exit even if Host shutdown times out during an update restart; tolerated leading UTF-8 BOMs in JSON storage files such as workspace.json rewritten by PowerShell 5.1; fixed /C:/... file-URL path opening on Windows, non-string draft values blanking the session view, and high CPU during large streamed tool arguments; pinned Electron 44.7.0 to fix slow app.asar traversal timeouts.
+  Usage notes
+  - Quit the previous version and back up ~/.dsh (or use Back up in Settings → Desktop settings) before installing. Verify your usual plugins and workflows afterward.
+  - Before managing plugins for the desktop Profile from the bundled terminal, launch Desktop to initialize that Profile.
+  - When upgrading from 2.0.17-next or earlier, download and install manually; in-app updates in those versions may not complete the download.
+  - The Office skills install the bundled runtime under ~/.dsh/dsh-runtimes/dsh-next-primary-runtime on first use, requiring additional disk space.
+  - Defaults to the shared ~/.dsh home. Profiles do not isolate sessions, accounts, or credentials within that home.
+  - Change the data directory in Settings → Desktop settings or the recovery assistant, or set DSH_DESKTOP_NEXT_HOME to an absolute path to isolate DSH data (an in-app choice takes precedence over the environment variable); this does not isolate AA’s default shared sign-in and device-binding state.
+  Full changelog · Project website
+  DSH NEXT replaces the former Stable edition channel.
+ManifestType: locale
+ManifestVersion: 1.28.0

@@ -1,0 +1,94 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Stack-Cairn.K-brain
+PackageVersion: 0.107.21
+PackageLocale: zh-CN
+Publisher: Stack-Cairn
+PublisherUrl: https://github.com/Stack-Cairn
+PublisherSupportUrl: https://github.com/Stack-Cairn/K-brain/issues
+PackageName: K-brain
+PackageUrl: https://github.com/Stack-Cairn/K-brain
+License: Apache-2.0
+LicenseUrl: https://github.com/Stack-Cairn/K-brain/blob/HEAD/LICENSE
+ShortDescription: 基于 Go 构建、运行在终端里的编程 Agent。
+Description: 氪脑（K-brain）是运行在终端里的编程 Agent，用 Go 构建，也可作为其他前端的后端底座。读代码、改文件、执行命令、验证结果，在同一会话中完成任务。运行 kn 开始使用，取自“氪脑”拼音 Ke Nao。
+Tags:
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  K-brain v0.107.21
+  本版从 main 的 9efe547 构建，在 v0.107.20 的基础上加入 Windows 原生沙箱、更多沙箱加固，并对 kn 终端界面做了一轮完整改版。
+  沙箱
+  - Windows 原生按次沙箱（#145）：Windows 上不必再装 WSL2，就能用“沙箱”命令安全模式（联网运行）。
+    - 写入只限于工作区和沙箱专用的临时目录；工作区外的文件不能写、删或改名；
+    - 工作区里的 .git/hooks、.git/config、.k-brain/、.liveagent/ 只读；
+    - ~/.ssh、~/.aws、~/.gnupg、~/.config/gh 和 K-brain 自己的数据目录（API key、会话、记忆）在沙箱里读不到也列不出；
+    - K-brain 本身和你自己运行的程序不受影响；
+    - 断网运行在 Windows 原生上仍会拒绝执行，下一版通过一次性的管理员设置提供。
+  - Linux 没有可用的 bubblewrap 时改用 Landlock + seccomp（#146）：不再直接报告“不支持”。这种方式能限制写入和网络，但不能隐藏凭据目录，/v1/health 的 run_sandbox 会如实报告（新增 path_protection 字段）。
+  - 保护路径加固（#149）：
+    - .git/hooks、.git/config 以及 core.hooksPath 指向的目录不能被改写，也不能通过改名、硬链接绕过；
+    - bubblewrap 下连不上 docker、podman、D-Bus 等运行时套接字；
+    - WSL 下不能通过互操作启动 Windows 程序。
+  - 不继承凭据类环境变量（#157）：沙箱里的命令拿不到名字里带 KEY、SECRET、TOKEN、PASSWORD、CREDENTIAL 的变量，以及 LD_PRELOAD 一类的注入变量。需要保留的变量用配置 sandbox.envKeep 放行。未开沙箱时不变。
+  - 被沙箱拦下时给出提示（#153）：命令因沙箱失败时，结果末尾多一行 [sandbox] …，说明拦截原因（写到工作区外、受保护路径、被隐藏的目录、断网），能确定时还会建议把哪个目录加为可写。/v1 的 tool.result 新增可选的 sandbox_denial。
+  kn 终端界面
+  - 对话记录（#139、#159）：
+    - 长对话只渲染可见部分，滚动和恢复会话更快；
+    - 流式回复只重绘最后一段，2000 行的回复从 27 秒降到 0.4 秒；
+    - 思考过程实时显示最后 3 行，结束后折叠为“Thought for Xs”，可展开；
+    - Alt+↑ 聚焦对话记录，逐块选择、折叠、展开，E 全部折叠或展开；v 全屏查看一个块；
+    - /find 搜索整个对话记录，n/N 跳转。
+  - 工具调用（#155）：
+    - 按工具类型显示，带退出码、超时和实时计时；
+    - diff 带语法高亮和行号，超过 30 行自动折叠；
+    - 连续的只读调用合并为一行；
+    - 计划（todo）显示为单独的面板。
+  - 输入框（#147）：
+    - Ctrl+Z 撤销、Alt+Z 重做，Alt+K 剪切到行尾；
+    - 大段粘贴折叠为一块；
+    - Ctrl+R 搜索历史，Ctrl+S 暂存草稿，Alt+M 多行模式；
+    - @ 文件补全在后台建立索引；
+    - 排队的消息可以立即发送、编辑和调整顺序。
+  - 审批与提问卡片（#162、#163）：
+    - 审批卡片显示完整命令，过长时卡片内滚动，并说明为什么需要审批；
+    - 编辑审批直接显示变更预览；
+    - “始终允许”可以用 Tab 调整范围：命令从精确命令到命令前缀再到整个程序，编辑从文件到目录再到整个项目；
+    - 一次可以问最多 4 个问题，每题一个标签页；
+    - 计划模式下可以逐行评论计划、要求修改或批准。
+    - 模式标签旁多一个徽标，显示只读、允许编辑、AI 审核等状态。
+  - 状态与用量（#141）：
+    - 状态行显示当前阶段（思考、输出、调用工具、重试倒计时、压缩）和计时；
+    - 错误按类型显示成横幅，带原因和建议；
+    - 新命令 /usage 显示 token、缓存、费用，可按模型、按子代理查看；
+    - 终端不在前台时发桌面通知，窗口标题跟随状态；
+    - 状态行可用自定义命令生成。
+  - 会话与设置（#151）：
+    - /help 打开快捷键速查表；
+    - /settings（或 F2）、/extensions、/memory 打开对应面板；
+    - 会话选择器支持筛选、搜索和删除；
+    - 回退对话时可以选择只回退对话、只回退代码或两者都回退；
+    - 首次运行和信任工作区的引导在界面内完成；
+    - 复制后会显示复制了什么。
+  协议与后端
+  - tool.result 新增可选的 exit_code、timed_out、duration_ms（#135）。
+  - permission.requested 的编辑审批新增可选的 preview（统一 diff、是否新文件、是否截断）（#135）。
+  - question 工具支持一次提多个问题（questions），旧的单问题输入不变（#162）。
+  - 以上都是新增的可选字段，旧客户端无需改动。
+  下载与校验
+  提供 macOS、Linux、Windows 的 x64/ARM64 CLI 与 computer helper；SHA256SUMS 用于校验下载文件。
+  完整变更
+ReleaseNotesUrl: https://github.com/Stack-Cairn/K-brain/releases/tag/v0.107.21
+InstallationNotes: 在终端中运行 kn。首次使用前，请在 %USERPROFILE%\.k-brain\config.json 中配置模型提供商。
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://github.com/Stack-Cairn/K-brain/blob/main/README.zh-CN.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

@@ -1,0 +1,91 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: contour-terminal.Contour
+PackageVersion: 0.8.0.9335
+PackageLocale: en-US
+Publisher: Contour Terminal Emulator
+PublisherUrl: https://github.com/contour-terminal
+PublisherSupportUrl: https://github.com/contour-terminal/contour/issues
+PackageName: Contour
+PackageUrl: https://github.com/contour-terminal/contour
+License: Apache-2.0
+LicenseUrl: https://github.com/contour-terminal/contour/blob/HEAD/LICENSE.txt
+CopyrightUrl: https://github.com/contour-terminal/contour/blob/master/LICENSE.txt
+ShortDescription: Modern C++ Terminal Emulator
+Description: |-
+  Contour is a modern and actually fast, modal, virtual terminal emulator, for everyday use. It is aiming for power
+  users with a modern feature mindset.
+Tags:
+- console
+- emoji
+- grapheme-cluster
+- hacktoberfest
+- library
+- linux
+- sixel-graphics
+- terminal
+- terminal-emulators
+- unicode
+- unicode-support
+- vte
+- windows-terminal
+- xterm
+ReleaseNotes: |-
+  Contour 0.8.0 turns the shell's command history into something you can see and act on:
+  command blocks with exit-status marks, output folding, a gutter with line numbers and
+  timestamps, a sticky command header and finish notifications, driven by OSC 133 or, on
+  recent systemd, by OSC 3008 context tracking with no setup at all. It detects URLs and file
+  paths in terminal output and opens them with Ctrl+click, replaces the search prompt with a
+  GUI-native find bar, and adds kitty graphics animation frames. Terminal output throughput
+  is up several-fold, reflow and resize keep text and the cursor where they belong, and a
+  broad round of fixes covers Windows, Flatpak, daemon mode, SSH and the settings page.
+  Tabs, splits and layouts
+  - Adds tab_color to profiles, giving newly opened tabs a default color while preserving layout, application and user overrides (#2152)
+  - Fixes closing a pane or tab keeping its session — terminal, scrollback and threads — in memory until Contour exited. A program that ignores the terminal's hangup signal is now ended 200 ms after its pane closes, as WezTerm does, and a tab no longer leaks the picture of itself it takes for the drag cursor when its window closes mid-grab
+
+  Window and desktop integration
+  - Adds remember_window_position to restore the first window’s position and monitor at startup without saving its size (#2164).
+  - Adds the global option snap_to_rows to align window heights to complete terminal rows, avoiding unused space below a bottom status line. Available in Settings and disabled by default (#2158).
+  - Adds notification_close_timeout, for the one thing the notification portal cannot do: tell an application that its notification was dismissed. Where a close cannot be observed, Contour now assumes one after this long (10 seconds by default) and reports it back over OSC 99 marked untracked, so an application that asked for close events with c=1 is answered instead of waiting forever, and can still tell a guess from an observation. A notification that states its own lifetime with w= is answered on that instead, and 0 disables the assumption entirely
+  - Extends OSC 9;4 progress indicators to the Windows taskbar, KDE Plasma launcher and macOS Dock, including while minimized, using combined progress from tabs and split panes.
+  - Changes the indicator status line to span the window's whole width: its bar reaches the window's left and right edges past the gutter and the page margins beside it, but stays its own rows' height, and its text is laid out across the gutter's columns as well as the page's, so its middle sits in the bar's centre. The host-writable status line keeps the page's width (#2139)
+  - Changes ending a shell within early_exit_threshold with a successful exit status — exit or Ctrl+D — to close the window as at any other time; the "Shell terminated too quickly" notice and its key press remain for a shell that fails, is killed, or whose exit status is unknown
+  - Changes OSC 777 and OSC 9 notifications to show only while their pane is not the focused one, as foot and Windows Terminal do, and OSC 99's o=invisible to mean while the pane is off screen: it acted as o=unfocused
+  - Fixes Windows font metrics after moving between monitors with different DPI scaling, maximized windows not filling the usable area, and resize handles remaining active while maximized or fullscreen (#2164).
+  - Fixes the Windows custom window frame growing the window and leaving a gap below the status line at startup: the client size is now preserved when the frame is applied (#2132)
+  - Fixes status-line {Command} items opening console windows on Windows and slowing down rendering: commands now run in the background at a configurable Interval= (default 10 seconds), with a 5-second timeout, and accept the {Command:<command>} shorthand (#2135)
+  - Fixes clicking an OSC 99 notification that asks for focus only raising its window: it now brings its tab and pane forward, and so does clicking a tray message off Linux. Off Linux, a notification from a pane in a background tab was dropped. In a contour client tab an application's o=always or o=invisible was lost, and OSC 99's lists of pending and shown notifications grew without limit
+  - Fixes desktop notifications never appearing in the Flatpak build. Contour asked org.freedesktop.Notifications for them directly, which a sandbox does not permit and which Flathub declines to grant a permission for; a sandboxed Contour now speaks the org.freedesktop.portal.Notification portal instead, which needs no permission at all. Outside a sandbox nothing changes — the session bus is still used, and still reports a dismissal exactly as before
+  - Fixes the window freezing for up to 25 seconds when a hyperlink, folder or configuration file is opened while the desktop's xdg-desktop-portal is not answering. Qt reaches the portal with a blocking call on the GUI thread, and since Qt 6.10 it takes that path whether or not Contour is sandboxed; Contour now speaks the portal itself, asynchronously, and falls back to xdg-open if the portal refuses. Where opening still fails, the log now says why instead of only that it did (#2075)
+
+  Command palette, settings and menus
+  - Adds a message to the settings page that says why it refused a value or could not save a change, which screen readers announce
+  - Fixes a profile the settings page saves cutting a hint pattern's name short at " #", or no longer loading when the name holds ": "; and saving a color scheme that sets a context tint failing
+  - Fixes the Rendering GPU setting never applying, while the settings page showed it as set, when settings.yml held a hand-edited renderer: value
+  - Fixes the settings page's grapheme clustering and text scaling settings being saved but never applied
+  - Fixes number fields on the settings page storing another number than the one shown or typed: in a locale that writes a decimal comma, leaving a field that showed 0.5, such as Background opacity, stored 5, and a whole number typed with the locale's thousands separator, such as 1,000, was stored as 1. A decimal field now takes a decimal point or a comma whatever the locale, and a whole-number field takes no thousands separator
+  - Fixes a malformed entry in settings.yml or in a GUI-written profile being reported without the file's name
+  - Fixes a settings.yml or a GUI-written profile file that holds a single word aborting the load of the whole configuration. Such a file is now skipped and reported, as one that does not parse already was
+  - Fixes a settings field, switch or menu whose change was refused, or could not be saved, going on showing the refused value instead of the stored one
+  - Fixes the settings page writing an override of a global setting's value already in effect, and offering a Reset for no change, when its field was left unchanged or its menu's shown entry was picked again. Escape in a field now puts the stored value back: it kept the typed text, which the next focus change saved
+  - Fixes the settings page accepting, and saving, a PTY read buffer size of zero or less, a negative number of recent commands and a negative interface font size. It now refuses them and says why
+  - Fixes the settings page's Keybindings list showing only the first action of a binding that runs several, and leaving out the built-in bindings that contour.yml leaves free, such as Ctrl+Tab and Ctrl+PageUp/PageDown switching tabs and right-click opening the context menu. They are now listed after the configured ones, marked built-in
+
+  Hyperlinks, file paths and hint mode
+  - Adds detection of URLs, file paths (with their :line:column) and patterns of your own in terminal output: they are underlined like OSC 8 hyperlinks once output goes quiet and open with Ctrl+click, the context menu or vi's gx, and ]x / [x move between them. Detection runs off the parser and its file checks on a thread of their own
+  - Adds link_detection to choose, per screen, whether URLs and file paths in output are detected; file paths are no longer detected on the alternate screen by default.
+  - Adds hyperlink_decoration.mode (always, hover, modifier, never) and makes hyperlink_decoration.normal and .hover take effect, for OSC 8 and detected links alike
+  - Adds file_opener, a command template with {path}, {line} and {column} for opening detected files, and clickable and url keys for hint_patterns; all of them are editable on the settings page
+  - Changes hint mode's Open on a match of your own pattern whose text names no URL scheme to open nothing, as a link opens only a scheme Contour knows; give the pattern url: 'file://{0}' to open the absolute path it matches
+  - Fixes hint mode freezing on long words, ending wide-character URLs early, misplacing highlights after combining characters and cutting parenthesised URLs short
+  - Fixes a file:// link's tooltip and its click naming different files: the tooltip kept a #L10 fragment that the click dropped, and file://C:/dir was opened as the network path //c/dir
+  - Fixes Ctrl+click and hint mode resolving a relative path against a working directory that another machine reported (file://otherhost/…), opening this machine's file of the same name; in a contour client pane mirroring another machine's daemon, Ctrl+click on a file path and file:// links opened this machine's file too
+  - Fixes the status line's context breadcrumb and the hyperlink tooltip showing a right-to-left override or a control character a program sent as it was, which could reverse the rest of the status line or the link shown
+  - Fixes a link staying underlined, with its tooltip up, after the pointer left the grid for the gutter or the window's edge
+  - Fixes FollowHyperlink and OpenSelection launching what they open while holding the terminal's lock, so a slow launcher froze the terminal's output
+
+  Scrolling, search and selection
+ReleaseNotesUrl: https://github.com/contour-terminal/contour/releases/tag/v0.8.0.9335
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
