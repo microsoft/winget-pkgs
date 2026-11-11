@@ -1,0 +1,58 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Stack-Cairn.K-brain
+PackageVersion: 0.107.31
+PackageLocale: zh-CN
+Publisher: Stack-Cairn
+PublisherUrl: https://github.com/Stack-Cairn
+PublisherSupportUrl: https://github.com/Stack-Cairn/K-brain/issues
+PackageName: K-brain
+PackageUrl: https://github.com/Stack-Cairn/K-brain
+License: Apache-2.0
+LicenseUrl: https://github.com/Stack-Cairn/K-brain/blob/HEAD/LICENSE
+ShortDescription: 基于 Go 构建、运行在终端里的编程 Agent。
+Description: 氪脑（K-brain）是运行在终端里的编程 Agent，用 Go 构建，也可作为其他前端的后端底座。读代码、改文件、执行命令、验证结果，在同一会话中完成任务。运行 kn 开始使用，取自“氪脑”拼音 Ke Nao。
+Tags:
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  K-brain v0.107.31
+  本版从 main 的 b78a95f 构建，在 v0.107.30 的基础上改进 kn 终端界面的目标、plan 和子代理显示，并让 kn 里运行的子代理同步到 LiveAgent。
+  kn 界面（#198）
+  - 可折叠的顶部面板：目标、plan 和子代理集中显示在对话上方。
+    - 折叠时一行摘要，例如 ▸ Goal Executing · <目标> · round 1/100 ── ☰ Plan 0/4 ── ◆ 2 running · 1 error；
+    - 展开后目标、当前 plan 步骤各一行，每个子代理一行，显示状态、正在做什么、工具次数和用时；
+    - 按 Alt+T 或点击标题切换，点击子代理行直接打开它的详情；有任务在跑时自动展开，手动折叠后不再强制打开；
+    - 高度最多占屏幕 30%（不超过 12 行），子代理多时在面板内滚动；终端太小时自动隐藏。
+    - 原来输入框下方的子代理栏、状态栏里的目标和子代理计数、对话里重复的 plan 列表都已移除。
+  - plan 不再长时间占着屏幕：全部完成后收成一行 ☰ Plan 3/3 ✓；回合取消或 plan 被拒绝后不再停留；/new 之后旧 plan 不会再出现。展开面板或 /plan 仍可查看。
+  - 子代理显示：
+    - 子代理详情视图：实时显示正文、思考和工具调用，以及状态、模型、工具次数和用时；可以直接输入插话，Esc 返回，期间主回合的更新不会丢；
+    - 对话里的子代理结果默认折叠成一行，ctrl+e 展开；400 Bad Request: {json} 这类错误归纳成一行；
+    - 已结束的子代理在切换会话前一直可以在面板里打开查看；
+    - 详情视图里的工具结果第一行标明所属工具（⎿ Grep · …），工具调用行滚出屏幕后也能看出是哪个工具的输出（#200）。
+  - 目标续跑时不再把整段续跑提示词显示在对话里，改为一行 ◎ goal check · round N/max · <目标>。
+  - 界面消息链路：后台任务变化、插话回显、唤醒等通知改为经由界面信箱合并投递。1000 次连续变化从占住 1000 个 goroutine 降到 1 个；前台子代理快照不再泄漏订阅。
+  子代理同步到 LiveAgent（#196）
+  - 修复新开的 kn 会话中后台子代理记录全部丢失的问题（记录回调在会话存储打开前就已挂接）。
+  - kn 的前台和后台子代理都会写入会话：开始时立即保存，运行中每秒最多保存一次（状态、工具次数、用量、记录），结束时保存最终结果。
+  - backend 通过每个进程的子代理租约判断子代理是否还在别的进程中运行，这类子代理显示为 running 并带 external: true，停止请求返回 409；不再被误判为已取消或中断。
+  问题修复
+  - host bridge（#194）：桌面端重启后，AI 第一次调用终端或隧道工具时，不再报 "connection reset"，而是正确报告桌面端未连接。
+  下载与校验
+  提供 macOS、Linux、Windows 的 x64/ARM64 CLI 与 computer helper；SHA256SUMS 用于校验下载文件。
+  完整变更：https://github.com/Stack-Cairn/K-brain/compare/v0.107.30...v0.107.31
+ReleaseNotesUrl: https://github.com/Stack-Cairn/K-brain/releases/tag/v0.107.31
+InstallationNotes: 在终端中运行 kn。首次使用前，请在 %USERPROFILE%\.k-brain\config.json 中配置模型提供商。
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://github.com/Stack-Cairn/K-brain/blob/main/README.zh-CN.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
