@@ -1,0 +1,40 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Macmod.ldapx
+PackageVersion: 1.3.5
+PackageLocale: en-US
+Publisher: Macmod
+PublisherUrl: https://github.com/Macmod
+PublisherSupportUrl: https://github.com/Macmod/ldapx/issues
+PackageName: ldapx
+PackageUrl: https://github.com/Macmod/ldapx
+License: MIT
+LicenseUrl: https://github.com/Macmod/ldapx/blob/v1.3.3/LICENSE
+ShortDescription: Flexible LDAP proxy for inspecting and transforming LDAP traffic
+Tags:
+- active-directory
+- ldap
+- proxy
+- security
+ReleaseNotes: |-
+  New Features
+  - Added a new filter middleware K (SortKeyFold) that disguises search values by swapping characters for look-alike Unicode variants the server still matches the same way (accented, full-width, circled letters, ligatures, and many more). K can be narrowed to chosen look-alike categories (accented, width, enclosed, script, symbols, ligatures) via FiltSortKeyFoldClasses / BDNSortKeyFoldClasses - e.g. accented alone reads like ordinary foreign-language text.
+  - The Unicode filter middlewares (U, W, K) now also disguise DN values inside filters (e.g. member=, distinguishedName=).
+  - Added three new BaseDN middlewares (N, A, K) that apply the same Unicode disguises to the BaseDN of any operation.
+  - Added interception of the LDAP Compare operation (enable with -C / --compare), so the configured middlewares now transform Compare requests as well as searches and writes.
+
+  Improvements
+  - The AltSpace middlewares (W, A) gained an IncludeVisible option (FiltAltSpaceIncludeVisible / BDNAltSpaceIncludeVisible): when enabled, spaces can also be replaced by space-folding code points that render as a visible glyph, in addition to the "invisible" ones used by default.
+  - The IgnorableUnicode middlewares (U, N) mode is now a comma-separated list of categories instead of a single value. Alongside invisible and marks, four visible-stripper categories were added - modlet, modsym, symbols, punct (all ignored by the server, but they render) - and all now means every category. The default stays invisible + combining marks, so nothing visible appears unless a visible category is named.
+  - Unknown option names are now rejected (both via -o at startup and set option in the shell) instead of being silently accepted and ignored, so a mistyped option is reported immediately.
+
+  Changelog
+  - b1ed1a6: Adding 'aurs' block to goreleaser. (@Macmod)
+  - e877bdd: Adding support to LDAP Compare. (@Macmod)
+  - ebbd3d5: Bumping version. (@Macmod)
+  - 81a8077: Improvements to Unicode obfuscation middlewares (introducing K for filter/baseDN, new possibilities for IgnorableUnicode/AltSpace, introducing N/A as U/W alternatives for baseDN obfuscation, making U/W/K also work with DN values in filters and other fixes). (@Macmod)
+  - 80801c5: Updating release workflow. (@Macmod)
+ReleaseNotesUrl: https://github.com/Macmod/ldapx/releases/tag/v1.3.5
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

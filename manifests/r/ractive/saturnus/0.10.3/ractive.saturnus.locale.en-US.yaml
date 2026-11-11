@@ -1,0 +1,88 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: ractive.saturnus
+PackageVersion: 0.10.3
+PackageLocale: en-US
+Publisher: '@ractive'
+PublisherUrl: https://github.com/ractive
+PublisherSupportUrl: https://github.com/ractive/saturnus/issues
+Author: Jean-Pierre Bergamin
+PackageName: saturnus (command line)
+PackageUrl: https://ractive.ch/saturnus/
+License: MIT
+LicenseUrl: https://github.com/ractive/saturnus/blob/HEAD/LICENSE
+ShortDescription: Command-line emulator of classic HP calculators
+Description: 'saturnus emulates the HP 48SX, 48GX, 49G, 38G, 39G, 40G, 42S, 27S, 17BII, 17B, 28S and 19BII from their own ROMs. The command line runs a calculator without a window: it presses keys listed in a text file, saves the screen as text or a PNG, serves the serial port and looks up the built-in commands. No ROM is included.'
+Moniker: saturnus
+Tags:
+- calculator
+- cli
+- emulator
+- hp48
+- hp49
+- rust
+ReleaseNotes: |-
+  Download the desktop app
+  - Mac (Apple silicon): saturnus_0.10.3_aarch64.dmg
+  - Windows (Intel or AMD): saturnus_0.10.3_x64-setup.exe
+  - Windows on ARM: saturnus_0.10.3_arm64-setup.exe
+  The Windows installers are not signed yet: if Windows says "Windows protected your PC", click "More info", then "Run anyway".
+  Linux, the .msi installers, the command-line tools and satx: see Assets at the end of this page.
+  saturnus 0.10.3 fixes what two code reviews found: quitting the desktop app
+  now saves, and failed writes, backups and directory changes clean up after
+  themselves.
+
+  Get it
+  - On the web, nothing to install: https://ractive.ch/saturnus/app/
+    (Chrome or Edge for a serial cable; every browser for the emulated
+    calculator).
+  - The desktop app saturnus_0.10.3_… (on Linux saturnus-app), with
+    a -SHA256SUMS file beside them:
+    - macOS, Apple silicon: .dmg, signed and notarised, or brew trust --cask ractive/tap/saturnus-app once, then brew install --cask ractive/tap/saturnus-app;
+    - Windows: .msi or -setup.exe for x86_64 (x64) and ARM (arm64);
+    - Linux: .deb, .rpm or .AppImage for x86_64 (amd64, x86_64)
+      and ARM (arm64, aarch64). Add yourself to the dialout group to
+      use a serial port.
+  - The command-line tools saturnus and satx: cargo install,
+    Homebrew ractive/tap, Scoop ractive, or the archives and Linux
+    packages below.
+  - Libraries on crates.io, all at 0.10.3.
+
+  Desktop app and web page
+  - Quitting the desktop app saves the calculator. Cmd+Q on a Mac now
+    saves an unsaved change, as closing the window always did.
+  - A fresh start keeps what it should. A ROM that doesn't boot no longer
+    deletes the kept state. A ROM that boots as another model reads or clears
+    that model's state, not the one you asked for.
+  - A failed save leaves the old file. The desktop app writes saved files
+    and its AI access setting to the side, then moves them into place.
+
+  satx and Files
+  - A variable name with @ is refused. The calculator reads @ as the
+    start of a comment, so satx and Files no longer take such a name.
+  - A directory that isn't there changes nothing. satx --dir, satx ls PATH and the REPL's :cd and :ls leave the calculator where it was
+    when a name in the path is missing, not part of the way down it.
+    satx xserv goes back to HOME, as XSERV can't say where it was.
+  - A backup that fails no longer leaves its copies behind. satx backup
+    and Files remove the copy in port 0 when the calculator runs out of
+    memory, and a backup of an emulated calculator whose server stops
+    answering removes what it made. A port copy it can't be sure of stays,
+    and the error says so.
+  - Files replaces a variable with a long name. The swap goes out as three
+    commands when it doesn't fit in one packet. A name too long even for that
+    is refused, and the old variable stays.
+  - satx get --force replaces a file whole. A failed write leaves the
+    old file, and a new file it could not finish is removed. In a directory
+    where satx can't create a file, --force still writes in place, so a
+    failed write there loses the old content.
+  - Smaller fixes. satx rm X X deletes X once instead of failing on the
+    second. satx repl --json sends nothing more once its reader has closed.
+
+  Emulator
+  - A transfer that fails lets go of a key it held down.
+  - A UART break that is looped back and let go early leaves the receiver
+    idle (inferred: the manual covers a full break only).
+ReleaseNotesUrl: https://github.com/ractive/saturnus/releases/tag/v0.10.3
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
