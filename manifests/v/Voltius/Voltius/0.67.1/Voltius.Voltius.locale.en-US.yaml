@@ -1,0 +1,76 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Voltius.Voltius
+PackageVersion: 0.67.1
+PackageLocale: en-US
+Publisher: Voltius
+PublisherUrl: https://voltius.app/
+PublisherSupportUrl: https://github.com/VoltiusApp/voltius/issues
+PackageName: Voltius
+PackageUrl: https://voltius.app/
+License: AGPL-3.0
+LicenseUrl: https://github.com/VoltiusApp/voltius/blob/HEAD/LICENSE
+ShortDescription: Cross-platform SSH client and terminal
+Moniker: voltius
+Tags:
+- crdt
+- credential-manager
+- homelab
+- local-first
+- plugins
+- port-forwarding
+- rust
+- serial
+- sftp
+- ssh
+- ssh-client
+- sync
+- sysadmin
+- tauri
+- teams
+- terminal
+ReleaseNotes: |-
+  Added
+  - Machine policy: IT can lock Voltius settings on a computer with a policy file (/etc/voltius/policy.json on Linux, %ProgramData%\Voltius\policy.json on Windows, /Library/Application Support/Voltius/policy.json on macOS), written by hand, by Ansible or with voltius-cli. Locked settings show "Managed by your organization" and can't be changed in the app, the command palette or over MCP. The file can also hold defaults, which apply once and stay changeable. Free on every plan (#757)
+  - voltius-cli ships with the desktop app, and Homebrew and the Windows installers put it on PATH. Besides the policy file, it sets settings (config get|set|import), plugins (plugins list|install|enable|disable|remove) and the sync server, so a machine can be set up before anyone signs in. A policy can install plugins, force them on or off, or forbid installing more (#757)
+  - On Android and iOS, Voltius reads the managed configuration your company's MDM pushes (Android Enterprise managed configurations, Apple Managed App Configuration) as the phone's machine policy, with the keys enrollment_token, server_url, server_allow_other and policy. Problems with the configuration are reported back to the MDM console. Free on every plan (#757)
+  - Team policy (Business): a team admin imports a policy.json-format document in Members › Security › Device policy, and every member's Voltius applies it while that team account is active. It can only tighten a machine policy, and locked settings show "Managed by" with the team name. The existing lock policy becomes two keys of this document (#757)
+  - Enrolment tokens (Business): a team admin creates one company-wide token in a team vault's share sheet › Links › Device enrolment, with allowed email domains, admin approval or both, and approves or denies people waiting in Members › Join requests. IT can run voltius-cli enroll <token> on each machine, and people can sign in to their company from the first launch screen, an enrol link or a token pasted into the command palette. Join requests waiting for approval show their status in notifications (#757)
+  - voltius-cli login signs in to a Voltius account from a terminal, with a two-step or recovery code when the account uses one, so IT can set up a machine without opening the app. voltius-cli whoami shows who is signed in (--json for scripts) and voltius-cli logout signs out and removes this account's data from the device. Accounts that sign in with a passkey finish in the app (#757)
+  - On Windows, Voltius only trusts a machine policy file written by voltius-cli as Administrator or SYSTEM. A file copied into %ProgramData%\Voltius by hand, or a policy folder a standard user could write to, is ignored until you re-import it with voltius-cli policy import --replace (#757)
+  - A machine policy can now lock every setting it accepts: language, proxy, terminal shell, cursor style, keyword highlight rules, SFTP refresh interval, keepalive, detached session lifetime and theme location. It can also limit a setting to a range instead, such as a session lifetime of at most 24 hours or a choice of English and French. Settings shows "Managed by your organization" or the allowed range, and greys out choices outside it. Admin keyword rules are added above the user's own. voltius-cli policy set takes --min, --max and --allow (#757)
+  - Remember master password (Settings › Account › Session security), on by default. Turn it off and Voltius never keeps your master password in the system keychain and asks for it at launch (#771)
+  - Favorite commands: star a command in the History panel to keep it in a Favorites group above Recent. Favorites have no size limit, survive Clear all, and sync to your devices with your snippets. Click the host name under a command to show only that host's history (#823)
+  - First launch now leads to a first connection: with no hosts, the home page shows an address field (user@host connects right away, an invite code joins), New Host, and an import of your ~/.ssh/config hosts when it has any. Account creation shows the password, warns that a master password can't be recovered, and asks for at least 8 characters (#759)
+  - Once you have hosts, the top of the home page is one connect field: user@host[:port] connects, an invite link or code joins, and anything else opens Ctrl+K search with your text (#763)
+  - On phones, the terminal's ⋮ menu now also opens History, Notes and Proxmox (#824)
+  - Drag the left edge of the terminal's right side panel to resize it, from 300 to 560 px. Double-click the edge to reset it (#821)
+  Changed
+  - A machine policy can no longer lock appSettings.plugins.overrides. Such an entry is now reported as an error and ignored; use plugins.enabled and plugins.disabled instead. As a default it still works (#757)
+  - Command history keeps a line only once the terminal has echoed it back, so what you type at password prompts (sudo, su, passwd, key passphrases) is never saved. Tab-completed, arrow-edited and Ctrl+R lines are no longer recorded either. A new Command history switch in Settings › Terminal turns recording off and deletes what was saved (#769)
+  - The Plan card lists only what each plan adds. Free now lists the command line, machine policy and mobile managed configuration (#757)
+  - The command palette shows clearly which row Enter will run, and host rows show user@host. Ordinary words are no longer taken for invite codes and ranked first; a failed join shows an error (#760)
+  - The home page works from the keyboard, host cards share one layout, and the live Team Sessions card shows who is sharing and since when (#762, #774)
+  - Secondary text now reaches WCAG AA contrast in every built-in theme; in Nord and Tokyo Night it was close to invisible. In Voltius Light, fields and switched-off toggles stand out from cards, and every placeholder uses the theme's dim text colour (#761, #809)
+  - Context menus and dropdowns fade in and out (#829)
+  - Tauri 2.12.5: a slow file load no longer freezes every window (#755)
+  Fixed
+  - Settings › Appearance and Settings › Terminal now use the same card background as the other Settings pages. Their cards had a different colour, most visible in light themes
+  - Dragging to select text over split tmux panes stays inside the pane you started in, and links wrapped across lines open whole (#835)
+  - On iOS and Android, signing out or deleting the account now returns to the welcome screen; the app used to keep showing the old account until restarted (#831)
+  - Android: the app now loads on devices with 16 KB memory pages (#833)
+  - A sync that fails with a server error now retries on its own (5 s, backing off to 5 min) instead of waiting for the next edit. A server answering with errors is no longer reported as synced (#780)
+  - Teammates no longer lose sight of your open team-vault terminal after your connection to the server drops and comes back (#791)
+  - AI agent file tools reopen an SFTP connection that died instead of failing until restart, and report it as lost (#766)
+  - A server that offers only SHA-1 algorithms now says to turn on Legacy Algorithms for that host, with a button that does it and reconnects, instead of a raw "No common Kex algorithm" error (#764)
+  - Quick connect understands IPv6 addresses and rejects invalid ports
+  - New hosts, folders and snippets are created in the folder you are browsing, and in that folder's vault. Every page shows the same empty-folder message (#776, #816)
+  - Members: inviting with several roles gives every role, not just the first; undoing a bulk role change only touches the members it changed; a partly failed bulk removal says so and keeps undo; a failed invitation email shows a warning
+  - A team removed from your account while a removal event was missed is now cleaned up on the next team list refresh, so its secrets don't stay on the device (#785, #790)
+  - Windows: uninstalling the NSIS build forgets its install folder, so a later MSI install no longer goes into the old per-user folder
+  Security
+  - russh 0.65.0, pageant 0.2.5 and zip 9.2 for security advisories. Windows updates are now extracted with zip 9.2, and Tauri 2.12.5 binds channel payloads to the window that created them (GHSA-w28w-mhc8-qvjv) (#754, #755)
+ReleaseNotesUrl: https://github.com/VoltiusApp/voltius/releases/tag/v0.67.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
