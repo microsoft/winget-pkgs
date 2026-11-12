@@ -1,0 +1,71 @@
+# Created using wingetcreate 1.12.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Xcomart.Rudbman
+PackageVersion: 0.3.8
+PackageLocale: en-US
+Publisher: Xcomart
+PublisherUrl: https://github.com/xcomart
+PublisherSupportUrl: https://github.com/xcomart/rudbman/issues
+Author: Dennis Soungjin Park
+PackageName: rudbman
+PackageUrl: https://github.com/xcomart/rudbman
+License: MIT
+LicenseUrl: https://github.com/xcomart/rudbman/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Dennis Soungjin Park
+ShortDescription: A multi-platform GUI database workbench that talks to any database with a JDBC driver.
+Description: |-
+  rudbman is a desktop database workbench written in Rust and drawn with gpui, the
+  GPU-accelerated UI framework behind the Zed editor. It reaches a database through
+  that database's own JDBC driver over an embedded JVM bridge, so any product with a
+  JDBC driver is a supported product: drivers come from Maven Central by coordinate or
+  from disk, the driver class is detected from the JAR, and every connection gets an
+  isolated class loader so two vendors' drivers cannot collide.
+
+  Each connection is a tab with its own work area — a schema explorer over catalogs,
+  schemas, tables, views, sequences, routines and triggers, filtered by name or condition
+  and told per connection what to hide; a SQL editor with dialect-aware
+  highlighting, statement splitting, cancellation, execution plans and a searchable
+  history of the statements it ran, over a virtualized grid that
+  scrolls a million rows without loading a million rows; ERD diagrams laid out and
+  routed automatically; a visual query builder that turns dragged tables and columns
+  into SQL; and backup of a schema to a replayable .sql script. Connections can run
+  through an SSH tunnel, and secrets live in the Windows credential store rather than
+  on disk.
+
+  No JDK is required — the installer carries a Java runtime built with jlink and
+  rudbman uses the one next to its executable. The interface is available in English,
+  Korean, Japanese, Simplified Chinese, German, Spanish, French and Russian.
+Moniker: rudbman
+Tags:
+- database
+- database-client
+- dba
+- developer-tools
+- erd
+- gui
+- jdbc
+- mysql
+- oracle
+- postgresql
+- query-builder
+- rust
+- sql
+- sql-client
+- workbench
+ReleaseNotes: |-
+  rudbman 0.3.8 — schema backups that carry sequences, views, routines and triggers and restore to the same schema on every product, a keyboard shortcut sheet in the app, a statement timeout that query tabs obey, and the reasons a transfer skipped rows.
+  - A schema backup carries the whole schema. Under Also include, the backup dialog now writes sequences, views, procedures and functions (and Oracle packages) and triggers, all on by default, in the order a replay needs: sequences, tables, routines, views, rows, foreign keys, counters, materialized views, triggers. Tables use the server's own CREATE on H2, Oracle, MySQL, MariaDB and SQLite; elsewhere the reconstruction reads PostgreSQL's and SQL Server's CHECK constraints and computed columns, keeps serial defaults and ALWAYS identities, and writes SQL Server's (max) types and seeds. Routine bodies carry each client's delimiter (DELIMITER, /, GO, --#SET TERMINATOR), identity values and sequence positions carry over, PostgreSQL extensions, enums and domains come first, unicode text is N'' on SQL Server, and DROPs take foreign keys off first. Objects whose DDL cannot be read are left out and listed on the finished card.
+  - A backup restores to the same schema on every product. Backups replayed through each product's own client and compared catalog by catalog and row by row no longer fail or restore something else. MySQL keeps DEFAULT CURRENT_TIMESTAMP columns in every row, backslashes, multi-bit BIT and YEAR values and INVOKER views, with rows under NO_AUTO_VALUE_ON_ZERO and routines and triggers under their own sql_mode. PostgreSQL keeps expression and partial indexes, bit varying lengths, view options and CHECK OPTION, materialized view indexes, deferrable keys and identity counters. SQL Server keeps uniqueidentifier, money and datetime as the server accepts them, alias types, collations, filtered and INCLUDE indexes, clustering, UNIQUE constraints, default names, indexed views, extended properties and identity and sequence counters. Oracle writes timestamps that do not depend on NLS settings, keeps materialized view indexes, leaves views valid and does not reuse deleted identity keys. Db2 keeps computed columns, identity attributes, CHECK and UNIQUE constraints, expression and INCLUDE indexes in their own schema, VARGRAPHIC lengths, binary values, line breaks in strings, TIMESTAMP(12), overloaded routine drops and counters. H2 keeps domains, ALWAYS identities, arrays and JSON, and SQLite keeps values not of the declared type and the AUTOINCREMENT mark.
+  - The app lists its keyboard shortcuts. Keyboard shortcuts in the ☰ menu and the macOS menu opens a sheet of the chords in use, grouped by window, tabs and panes, explorer, SQL editor, data grid and ERD, written from the bindings and the menus' own words. It is a dialog like the others: it holds the window's chords back while it is up, Escape puts it away and the keyboard goes back to where it was. User guide, beside it and on the sheet, opens the user guide in the browser.
+  - The statement timeout applies to query tab statements. Settings → Statement timeout was saved but never sent to the driver. A query tab now runs each statement, and each page of a paged result, under it, read at the start of every run so open tabs pick up a change.
+  - A transfer shows why it skipped rows. With Skip the row and record why, the finished card now lists the first five reasons and how many more rows were skipped, in all eight languages.
+  - CSV and template extracts carry no session settings. An extraction wrote MySQL's SET FOREIGN_KEY_CHECKS and SQL Server's SET QUOTED_IDENTIFIER lines into every file. They now go only into a SQL script: one with DDL or INSERT rows.
+  Requirements
+  - Linux: glibc 2.35 or newer: Ubuntu 22.04, Debian 12 and later, or a distribution built on them, MX Linux 23 among them.
+
+  What's Changed
+  - chore: release 0.3.8 by @xcomart in #62
+ReleaseNotesUrl: https://github.com/xcomart/rudbman/releases/tag/v0.3.8
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
