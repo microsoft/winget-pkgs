@@ -1,0 +1,121 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: MicroClaw.MicroClaw
+PackageVersion: 0.30.0
+PackageLocale: en-US
+Publisher: MicroClaw
+PublisherUrl: https://microclaw.ai/
+PublisherSupportUrl: https://github.com/microclaw/microclaw/issues
+PackageName: MicroClaw
+PackageUrl: https://microclaw.ai/
+License: MIT
+LicenseUrl: https://github.com/microclaw/microclaw/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 everettjf
+ShortDescription: An agentic AI assistant that lives in your chats, inspired by nanoclaw and incorporating some of its design ideas. Built with Rust
+Description: |-
+  MicroClaw is a Rust chat bot that connects LLM to your chats with agentic tool execution. It can run shell commands, read and edit files, search codebases, browse the web, schedule tasks, and keep persistent memory across conversations. It is a Rust rewrite of nanoclaw (TypeScript) with additional capabilities and a single-binary deployment model.
+
+  What makes it different
+  - Agentic loop with tool execution, not just a single API call
+  - Full file system and shell tooling from inside chat
+  - Long-lived memory backed by AGENTS.md files
+  - Built-in scheduler for cron and one-time tasks
+  - Group chat catch-up: reads all messages since last reply
+  - Multi-chat permission model (control_chat_ids) for cross-chat tool authorization
+  - Agent skills system with bundled skills (including macOS Apple Notes/Reminders/Calendar helpers)
+  - Customizable personality via SOUL.md files (global + per-chat)
+
+  How it works
+  chat message
+      |
+      v
+   Store in SQLite --> Load chat history + memory
+                           |
+                           v
+                     LLM API (with tools)
+                           |
+                      stop_reason?
+                     /            \
+                end_turn        tool_use
+                   |               |
+                   v               v
+             Send reply      Execute tool(s)
+                                |
+                                v
+                          Feed results back
+                          to LLM (loop)
+  MicroClaw enters an agentic loop for every message. LLM can call tools, inspect results, call more tools, and reason through multi-step tasks before responding. The loop is capped by MAX_TOOL_ITERATIONS for safety.
+
+  Core capabilities
+  - Agentic tool use (bash, file I/O, glob, grep)
+  - Web search, fetch, and browser automation
+  - Scheduling with cron expressions
+  - Mid-conversation messaging for progress updates
+  - Persistent memory (global + per-chat)
+  - Personality customization via SOUL.md
+  - Conversation archiving (automatic before compaction, manual via /archive)
+  - Typing indicator that stays active during tool use
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claw
+- large-language-model
+- llm
+ReleaseNotes: |-
+  MicroClaw Code closes four everyday gaps found by comparing it with Claude
+  Code, Codex CLI and OpenCode
+  (docs/roadmap/mccode-competitive-plan-2026-11-cn.md, N1–N4).
+  Added
+  - Ctrl+B moves a running shell command to the background. The agent's
+    bash call returns at once with the process id and the agent carries
+    on; it reads the output later with bash_output and stops it with
+    bash_kill. /jobs (terminal and Zed) lists background commands and
+    sub-agent runs, /jobs <id> shows the latest output and /jobs kill <id>
+    stops one, also while a turn runs. Foreground commands in a workspace now
+    run through the process registry for this (stdout and stderr arrive
+    interleaved, as in a terminal); a cancelled run still stops its command.
+    SDK: MicroClaw::background_running_commands, background_jobs,
+    background_job_output, kill_background_job.
+  - /rewind also rewinds the conversation. Going back to before a turn
+    restores its files and cuts the conversation back to where it stood when
+    the turn started, so the agent no longer remembers work that was undone.
+    The timeline (Esc Esc) takes Enter for both, f for files only, c for
+    the conversation only and e to just edit the prompt; /rewind <id> files|chat|both and Zed's /rewind N [files|chat] do the same. After a
+    files-only rewind, /undo or a conversation-only rewind, the next prompt
+    tells the agent that the files and the conversation may disagree. The
+    whole conversation is archived before it is cut, and a conversation that
+    was compacted since the turn is left as it is. SDK:
+    MicroClaw::session_mark and rewind_session.
+  - Sub-agents get their own model, and project agents can run as
+    sub-agents. model.roles.subagent (engine aux_models.subagent, SDK
+    MicroClawBuilder::subagent_model) now sets the model of sessions_spawn
+    runs and explore. sessions_spawn takes agent: <name> to run a task
+    as a project agent from .microclaw/agents/<name>.md with its own
+    instructions and model. A new tools: front-matter field (tool names
+    or read, write, edit, shell, search, web) narrows the tools
+    such an agent may use, for explore as well; it can never widen them.
+  - The approval reviewer can approve. permissions.reviewer: approve
+    lets the reviewer model approve, in ask mode, the high-risk calls it
+    rates SAFE (shell commands, writes outside the project, web fetches, MCP
+    tools); everything else still asks you, destructive commands and ask
+    rules always do, and a failed review asks too. The turn's receipt lists
+    what the reviewer approved and why. advise is the former
+    --review-commands behaviour (the flag still selects it), and the
+    reviewer now runs on model.roles.review.
+  Changed
+  - The side panel moves from Ctrl+B to Ctrl+] (Ctrl+5 in terminals without
+    the kitty keyboard protocol); rebind app.sidebar / app.background in
+    tui.keymap to change either.
+  - The approval reviewer's prompt says that a SAFE verdict may let a call run
+    without asking a person, so it keeps SAFE for clearly harmless calls.
+ReleaseNotesUrl: https://github.com/microclaw/microclaw/releases/tag/v0.30.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://microclaw.ai/docs/overview
+- DocumentLabel: Quick Start
+  DocumentUrl: https://microclaw.ai/docs/quickstart
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
