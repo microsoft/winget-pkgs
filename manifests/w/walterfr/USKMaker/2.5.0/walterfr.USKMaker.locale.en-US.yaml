@@ -1,0 +1,51 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: walterfr.USKMaker
+PackageVersion: 2.5.0
+PackageLocale: en-US
+Publisher: walterfr
+PublisherUrl: https://github.com/walterfr
+PublisherSupportUrl: https://github.com/walterfr/UltraStarKaraokeMaker/issues
+PackageName: USKMaker
+PackageUrl: https://github.com/walterfr/UltraStarKaraokeMaker
+License: MIT
+LicenseUrl: https://github.com/walterfr/UltraStarKaraokeMaker/blob/HEAD/LICENSE
+ShortDescription: AI-powered UltraStar karaoke package generator (lyric sync, pitch, and BPM detection)
+Description: USKMaker generates complete UltraStar Deluxe karaoke packages from a YouTube link or local audio file. It downloads/prepares the audio, separates vocals, aligns your provided lyrics to the singing using local AI (WhisperX + forced alignment), detects pitch and BPM, and writes a ready-to-play UltraStar .txt package - entirely offline after setup, no cloud APIs.
+Moniker: uskmaker
+Tags:
+- ai
+- karaoke
+- lyrics
+- ultrastar
+- whisper
+ReleaseNotes: |-
+  [2.5.0] - 2026-11-12
+  Adicionado
+  - Alinhamento Estrito por Verso (.lrc) & Proteção Anti-Colapso (Rock/Metal):
+    - Detecção e Resgate de Colapso de Linhas (detect_line_collapse): identifica quando o alinhador acústico CTC livre colapsa versos consecutivos espaçados no .lrc em menos de 0,8 s (típico em vocais com drive, screaming, Heavy Metal ou Rock com instrumentação densa). Quando detectado, o CTC re-alinha automaticamente os versos confinados em janelas (lrc_blocks), impedindo que versos inteiros se amontoem numa fração de segundo.
+    - Aprovação Automática de .lrc Manual: letras sincronizadas coladas ou carregadas manualmente na interface agora são tratadas imediatamente com prioridade máxima ([uskmapproved:1]), guiando o alinhamento como verdade humana sem serem descartadas por heurísticas de concordância prévia.
+    - Opção na Interface (Toggle Anti-Colapso): novo checkbox "Limites de linha pelo .lrc (Anti-colapso Rock/Metal)" na tela inicial (com persistência de preferências), permitindo forçar limites estritos de início e fim por verso diretamente no alinhador.
+  Corrigido
+  - Certificação Microsoft Store (MSIX / DisplayName / Offline):
+    - Unificação de <DisplayName> e <uap:VisualElements DisplayName> no AppxManifest.xml para coincidir estritamente com o nome reservado na loja (USKMaker), resolvendo a política 10.1.1.1.
+    - Habilitado default = ["custom-protocol"] no src-tauri/Cargo.toml para garantir que o bundle web de produção seja sempre embutido no executável do pacote MSIX, prevenindo o erro de página não funcional (localhost refused to connect / política 10.1.2.10).
+    - Correção de TargetDeviceFamily.MinVersion para 10.0.17763.0 no empacotador build-msix.ps1, eliminando o erro de validação de versão mínima da loja.
+  [2.5.0] — 2026-11-12
+  Added
+  - Strict Line Boundaries from .lrc & Anti-Collapse Guard (Rock/Metal):
+    - Line Collapse Detection & Automatic Rescue (detect_line_collapse): automatically identifies when unconstrained CTC alignment compresses distinct .lrc lines into under 0.8s (a frequent issue in screaming, distorted vocals, Rock and Heavy Metal). Triggers block-constrained alignment (lrc_blocks) to stop entire verses from piling up in fractions of a second.
+    - Automatic Approval for Manually Pasted .lrc: manually provided or pasted .lrc files are now immediately tagged as authoritative ([uskmapproved:1]), ensuring human-verified line timings guide the alignment without being discarded by agreement heuristics.
+    - UI Option (Anti-Collapse Toggle): new "Strict .lrc line boundaries (Anti-collapse Rock/Metal)" setting in the main screen with persistence, allowing users to strictly lock verse boundaries to .lrc markers.
+  Fixed
+  - Microsoft Store Certification Compliance (MSIX / DisplayName / Offline):
+    - Unified <DisplayName> and <uap:VisualElements DisplayName> in AppxManifest.xml to match the Store reserved listing name (USKMaker), satisfying Store policy 10.1.1.1.
+    - Enabled default = ["custom-protocol"] in src-tauri/Cargo.toml to guarantee offline production asset embedding in the MSIX executable, resolving the non-functional page error (localhost refused to connect / policy 10.1.2.10).
+    - Fixed TargetDeviceFamily.MinVersion to 10.0.17763.0 in build-msix.ps1, eliminating Store package validation errors.
+ReleaseNotesUrl: https://github.com/walterfr/UltraStarKaraokeMaker/releases/tag/v2.5.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/walterfr/UltraStarKaraokeMaker/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
