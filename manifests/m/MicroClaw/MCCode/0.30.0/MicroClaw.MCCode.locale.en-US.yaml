@@ -1,0 +1,96 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: MicroClaw.MCCode
+PackageVersion: 0.30.0
+PackageLocale: en-US
+Publisher: MicroClaw
+PublisherUrl: https://microclaw.org/
+PublisherSupportUrl: https://github.com/microclaw/microclaw/issues
+PackageName: MicroClaw Code
+PackageUrl: https://github.com/microclaw/microclaw
+License: MIT
+LicenseUrl: https://github.com/microclaw/microclaw/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 everettjf
+ShortDescription: A terminal coding agent that works directly in your repository and verifies its edits with your project's own checks
+Description: |-
+  MicroClaw Code (mccode) is a terminal coding agent. It opens the repository that contains the current directory and runs the MicroClaw Agent Engine in it: a full-screen TUI for interactive work, or -p for one non-interactive task. It reaches the engine only through the public microclaw-sdk.
+
+  Core capabilities
+  - Full-screen terminal interface with plan, ask, and auto permission modes
+  - Diffs with hunk-level review, and approvals before edits are applied
+  - Automatic build and lint verification of the changes it makes
+  - Sessions that can be continued or resumed, with checkpoints and persistent memory
+  - Themes, layered settings with allow / ask / deny rules, and Claude Code-compatible hooks
+  - Model configuration kept in ~/.mccode, separate from the MicroClaw Server
+
+  MicroClaw Code and the MicroClaw Server are separate products. Each installs, updates and uninstalls on its own, and neither reads the other's configuration, data or MICROCLAW_* / MCCODE_* variables.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  MicroClaw Code closes four everyday gaps found by comparing it with Claude
+  Code, Codex CLI and OpenCode
+  (docs/roadmap/mccode-competitive-plan-2026-11-cn.md, N1–N4).
+  Added
+  - Ctrl+B moves a running shell command to the background. The agent's
+    bash call returns at once with the process id and the agent carries
+    on; it reads the output later with bash_output and stops it with
+    bash_kill. /jobs (terminal and Zed) lists background commands and
+    sub-agent runs, /jobs <id> shows the latest output and /jobs kill <id>
+    stops one, also while a turn runs. Foreground commands in a workspace now
+    run through the process registry for this (stdout and stderr arrive
+    interleaved, as in a terminal); a cancelled run still stops its command.
+    SDK: MicroClaw::background_running_commands, background_jobs,
+    background_job_output, kill_background_job.
+  - /rewind also rewinds the conversation. Going back to before a turn
+    restores its files and cuts the conversation back to where it stood when
+    the turn started, so the agent no longer remembers work that was undone.
+    The timeline (Esc Esc) takes Enter for both, f for files only, c for
+    the conversation only and e to just edit the prompt; /rewind <id> files|chat|both and Zed's /rewind N [files|chat] do the same. After a
+    files-only rewind, /undo or a conversation-only rewind, the next prompt
+    tells the agent that the files and the conversation may disagree. The
+    whole conversation is archived before it is cut, and a conversation that
+    was compacted since the turn is left as it is. SDK:
+    MicroClaw::session_mark and rewind_session.
+  - Sub-agents get their own model, and project agents can run as
+    sub-agents. model.roles.subagent (engine aux_models.subagent, SDK
+    MicroClawBuilder::subagent_model) now sets the model of sessions_spawn
+    runs and explore. sessions_spawn takes agent: <name> to run a task
+    as a project agent from .microclaw/agents/<name>.md with its own
+    instructions and model. A new tools: front-matter field (tool names
+    or read, write, edit, shell, search, web) narrows the tools
+    such an agent may use, for explore as well; it can never widen them.
+  - The approval reviewer can approve. permissions.reviewer: approve
+    lets the reviewer model approve, in ask mode, the high-risk calls it
+    rates SAFE (shell commands, writes outside the project, web fetches, MCP
+    tools); everything else still asks you, destructive commands and ask
+    rules always do, and a failed review asks too. The turn's receipt lists
+    what the reviewer approved and why. advise is the former
+    --review-commands behaviour (the flag still selects it), and the
+    reviewer now runs on model.roles.review.
+  Changed
+  - The side panel moves from Ctrl+B to Ctrl+] (Ctrl+5 in terminals without
+    the kitty keyboard protocol); rebind app.sidebar / app.background in
+    tui.keymap to change either.
+  - The approval reviewer's prompt says that a SAFE verdict may let a call run
+    without asking a person, so it keeps SAFE for clearly harmless calls.
+ReleaseNotesUrl: https://github.com/microclaw/microclaw/releases/tag/v0.30.0
+Documentations:
+- DocumentLabel: MicroClaw Code guide
+  DocumentUrl: https://github.com/microclaw/microclaw/blob/HEAD/apps/microclaw-code/README.md
+- DocumentLabel: Docs
+  DocumentUrl: https://microclaw.org/docs/overview
+- DocumentLabel: Quick Start
+  DocumentUrl: https://microclaw.org/docs/quickstart
+- DocumentLabel: Installation
+  DocumentUrl: https://microclaw.org/docs/installation
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
