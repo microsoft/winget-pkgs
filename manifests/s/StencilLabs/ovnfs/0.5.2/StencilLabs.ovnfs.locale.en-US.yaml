@@ -1,0 +1,71 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: StencilLabs.ovnfs
+PackageVersion: 0.5.2
+PackageLocale: en-US
+Publisher: Stencil Labs, Inc.
+PublisherUrl: https://stencil.so/
+PublisherSupportUrl: https://github.com/stencil-hq/ovnfs/issues
+PrivacyUrl: https://stencil.so/legal/privacy
+Author: Stencil Labs, Inc.
+PackageName: ovnfs
+PackageUrl: https://github.com/stencil-hq/ovnfs
+License: MIT
+LicenseUrl: https://github.com/stencil-hq/ovnfs/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Stencil Labs, Inc.
+ShortDescription: Isolated, copy-on-write checkouts of any folder for agents, served by one daemon as a single mount.
+Description: |-
+  Checkouts for agents: isolated, copy-on-write views of any folder, a git repository or not, opened without copying it. Agents work in the checkout; you review with diff and merge back with a three-way apply. Checkouts can be snapshotted, forked, and attached to another machine, where their content arrives on first read.
+
+  One daemon serves every checkout as a folder of a single mount: NFSv3 on macOS, FUSE on Linux, SMB or WinFsp on Windows. No root, and no kernel extension beyond WinFsp where you install it.
+
+  Opening a folder sorts every path into a class. source paths are captured: they are what diff, apply and snapshots see, and the only bytes that leave the machine. cache and local paths (build outputs, ignored files, secrets) show the live folder until the checkout writes them. hidden paths are absent. Writes go to the checkout's own copy-on-write layer, so the folder is never written until you apply. In a git repository the checkout gets a private git directory: commit freely, then apply --branch NAME to bring the commits back.
+
+  ovnfs reads and writes git repositories itself, so it needs no git installation; fetches use git when it is on the PATH. Verbs start the daemon when none is running, and start, stop, restart and status manage it. restart swaps in the daemon of the binary you run, e.g. after an upgrade, leaving an NFS or SMB mount and the shells inside it in place.
+
+  - new opens a checkout on a folder, git revision or snapshot; run uses a disposable checkout that is removed afterwards.
+  - snap freezes a checkout's changes into a snapshot; fork opens a second checkout on one.
+  - diff lists source changes since a snapshot, optionally as a git patch; apply merges them back with a three-way merge.
+  - grep and glob search the daemon without traversing the mount.
+  - ls, prune and rm manage checkouts and their snapshots.
+  - attach, send, pull and push move a checkout to another machine over ssh, fetching content lazily on first read.
+  - explain reports which class a path gets and which rule decided; completion provides bash, zsh and fish completion.
+
+  ovnfs isolates files, not processes: it is not a sandbox.
+Tags:
+- checkout
+- copy-on-write
+- git
+- snapshot
+- workspace
+ReleaseNotes: |-
+  Changelog
+  v0.5.0 and v0.5.1 were tagged but never published (Windows tests failed), so this release carries everything since v0.4.0.
+  - de6c449089bcecf1ec83ea14ce7c45105e7ae32c fix(fuse): forced the unmount on the stop after a busy refusal
+  - 27ab2aae039ebd798a0111e6998e8f844a42765b fix(export): evicted cold derived node ids and listings
+  - d92bf85df1bd6ef460d6e3f9a17b88170cb1f4fc fix: retained protocol identities and reported node cache errors
+  - 3f5f243901161767ad95d2656dbfaf32f780fc87 feat(config): exposed the node identity cache budget
+  - 5ed281b294b36bba425332cee9960210519ef18d test: verified cold mutations and live NFSv4 state
+  - f8268a4a70e17af9ddae16578c81a186988972f7 test: exercised node eviction through mounted filesystems
+  - 6ee0ab8e8e9d3832d119dbcc3b2d0edefd858249 fix(export): recovered issued names without loading cold directories
+  - 147b81d51690ffc6d640952e070dca69997fca04 fix(cli): scope --json ls NAME to that checkout
+  - a9bf8319d35288234c116a6b27588af01c503d06 perf(export): detached and sharded cold node indexes
+  - c319541adcc38e204f84e74dda81fa7042d520ae fix(checkout): removed unwritable dirs and kept open past one leftover
+  - 912e7965122427693d1f674a51cf489335843add fix(checkout): reserved names of leftovers the sweep could not remove
+  - 3a9cd87f95d9446f7fc46456d4ccbbf9b82459c1 fix(export): kept issued node owners across clean restarts
+  - ceea71aa02c3b43b6594464b4089b292f34e48a9 fix(fuse): answered readdirplus with current attributes
+  - ef74f1b778c08fcc8630cc6e70da0ad057afc572 fix(windows): linked git objects with junctions without symlink rights
+  - 1bb889bb48bfd2d5c87b7f6f0095de0eb065a5af feat(checkout): made checkouts of jj repositories jj workspaces
+  - b13775fdf34c24aa31fe7e8f0e493e816d4bc7ee perf(fs): unified native reads and reduced filesystem overhead
+  - 5156085e0ca395460a349c3eb1d2e7a6164c33b2 perf(export): paged logged node ids out of memory
+  - 31e6c4f43b89a61c2447a065fd10411fca014d87 ci(workflows): updated GitHub actions to pinned commits and disabled Go cache
+  - c6cf8d117525abfc4b804671a5a84627c9e6f6cd perf(base): merged captured source listings with native host metadata
+  - f58c1eed0cb0d94cda517a2b0e844291e11d5ae6 perf(fs): removed allocation churn from metadata hot paths
+  - 19f7a0112ccb4486a9cbc877d630c79fd2f95ce1 fix(source): give each stat cache save its own temp file
+  - e05c6dc1acaf5797b2a2b6bb08425bf9efd1c9da test(base): allowed lagging directory mtimes in windows listings
+  - 02658f0164d5b8b730801f823ea32abc92c77c73 test(fsys): closed the child handle before renaming its parent on windows
+  - ef1dea8f06242ff9fa066e7db1ab530ee64dcb06 test(source): accepted windows refusals in concurrent stat cache saves
+ReleaseNotesUrl: https://github.com/stencil-hq/ovnfs/releases/tag/v0.5.2
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
