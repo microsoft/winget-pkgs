@@ -1,0 +1,39 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: 1lck.Viff
+PackageVersion: v0.4.6
+PackageLocale: zh-CN
+ShortDescription: 轻量、原生的 Git 与 Subversion 桌面客户端，内置只读项目浏览、中英文界面与可选的 AI 提交说明。
+Description: Viff 是基于 Go 与 Viva 工具包打造的轻量原生 Git 桌面客户端，不使用 Electron 与 WebView。它提供差异对比、提交历史、变更列表和只读的项目浏览器，界面可在英文与简体中文之间切换。Viff 调用系统中已安装的 Git 可执行文件，本身并不内置 Git。
+ReleaseNotes: |-
+  Viff 0.4.6 让提交与冲突处理更直接：勾选文件即可提交工作树内容，冲突结果栏可以直接编辑；大型 LFS 仓库的打开与刷新也不再等待文件枚举。
+  重点更新
+  这一版把“勾选文件就是提交范围”和“在冲突页签里直接修改结果”连成一步，同时把 LFS 文件统计改成按需执行，并统一了左侧 Project 与 Commit 面板的宽度。
+  ✨ 新功能
+  - 在 Changes 里勾选文件后可以直接 Commit 或 Commit and Push：提交的是这些文件当前的工作树内容，未勾选但已暂存的内容保持不变，修改、删除、未跟踪文件和已暂存的改名都能一次提交。
+  - 冲突页签中间的 Result 栏可以直接输入和编辑：逐块 Accept Ours / Theirs / Both 只修改结果栏且可撤销，⌘S 保存后才写入磁盘，Mark as Resolved 仍由用户显式确认。
+  ⚡ 改进
+  - LFS 受管文件数量改为按需统计：打开仓库和普通刷新先显示工作树状态，点击状态栏的 LFS 标记或 Git 工具窗口的「更新 LFS 统计」才枚举文件，并显示上次统计时间、过期或失败状态。
+  - 提交面板会常驻说明本次提交范围（勾选数量、未暂存、未勾选但已暂存、部分暂存），勾选文件同时存在已暂存与未暂存改动时提交前会二次确认。
+  - 合并同时到达的刷新请求时保留请求范围，减少大型仓库连续触发完整刷新。
+  🛠 修复
+  - 切换 Project 与 Commit 页签时左侧分隔线不再横移，旧设置中的两个面板宽度会迁移为一个共享宽度。
+  - Log 的引用标签被截断或折叠为 +N 时，悬停即可看到完整的本地分支、远端分支与标签名称。
+  升级说明
+  - 从 v0.4.5 升级：设置文件会在加载时迁移，旧的 projectPanelWidth / commitPanelWidth 合并为 leftPanelWidth；升级后第一次保存只写新字段，降级到旧版本时两个面板回到各自的默认宽度。
+  - macOS：按机型选择 Apple Silicon 或 Intel 的 DMG，退出旧版后打开 DMG，将 Viff.app 拖入“应用程序”并替换旧版。
+  - Windows：退出旧版后运行 x64 安装器。
+  - Windows 便携包：解压后进入新目录执行 viff.exe，不写入安装信息。
+  - Debian/Ubuntu：执行 sudo apt install ./viff-v0.4.6-linux-amd64.deb。
+  - Linux 便携包：解压后进入新目录执行 ./viff，并自行安装所需系统库。
+  - Git 需单独安装并加入 PATH，Linux 系统库要求见发布指南。
+  兼容性与已知问题
+  - LFS 文件数量只反映上次主动统计的结果；HEAD 或暂存内容变化后保留上次数字并标记过期，需要重新点击 LFS 标记或菜单项统计。
+  - 勾选提交在 merge 与 cherry-pick 进行中不可用；单击文件行也会勾选该行，因此预览 diff 会缩小提交范围；子模块、sparse-checkout 与 split index 未单独适配。
+  - 冲突结果栏暂不提供 Base 共同祖先栏与一键应用非冲突改动；保存成功后会重建视图，结果栏的撤销历史与光标位置随之清空。
+  - macOS 要求 13 或更高版本；Linux 需要可用的图形会话、渲染后端和发布指南中列出的系统库。
+  - macOS 应用使用 ad-hoc 签名，未经 Developer ID 签名或公证；Windows 安装器未经 Authenticode 签名，系统可能显示安全提示；远程仓库仍是只读观察模式。
+  - 仅安装来自项目发布页且已核对校验值的文件；如遇系统拦截，请先确认来源。
+ManifestType: locale
+ManifestVersion: 1.28.0
