@@ -1,0 +1,72 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Pinvou.PinvouAgent
+PackageVersion: 0.10.18
+PackageLocale: zh-CN
+Publisher: pinvou
+PublisherUrl: https://pinvou.com/
+PublisherSupportUrl: https://github.com/Pinvou/pinvou-agent/issues
+PackageName: pinvou3
+PackageUrl: https://pinvou.com/
+License: MIT
+LicenseUrl: https://github.com/Pinvou/pinvou-agent/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Pinvou
+ShortDescription: 开源桌面 AI 智能体工作台，覆盖工具、文件、知识与工作流。
+Description: Pinvou Agent 是一个开源的桌面 AI 智能体工作区，面向工作、设计与编程。它把日常事务、可视化设计和软件开发整合进同一个桌面工作区，让任务以真实结果收尾：可以使用工具、处理文件、积累个人知识，通过 ACP 在真实项目中引入专用编码智能体，或将提示词变成可持续编辑的可视化作品。
+Tags:
+- mcp
+- 人工智能
+- 工作流
+- 智能体
+- 知识库
+ReleaseNotes: |-
+  官方下载 / Official Downloads
+  Pinvou 已在新华三官网提供官方下载渠道：
+  - Windows x64：新华三官网 — pinvou3 for Windows
+  - macOS Universal：新华三官网 — pinvou3 for macOS
+  - H3C LinSeer MegaCube（Linux ARM64）：新华三官网 — pinvou3 for MegaCube
+  新华三官网与 GitHub Assets 均为官方分发渠道，版本同步可能存在时间差；下载前请确认页面显示的版本。v0.10.18 官网页面尚未同步更新，当前版本请优先使用本页下方 Assets。
+  新功能
+  1. Windows 系统托盘生命周期（#828）：Windows 上关闭主窗口现在隐藏到系统托盘而非退出，点击托盘图标或选择「打开」恢复既有窗口，「退出」经应用清理路径关闭——满足「关窗后应用继续驻留、并可显式恢复/退出」的诉求。托盘具备原生注册检查与 UI 线程归属，菜单文案复用共享词典（中/英/日）；仅在托盘注册成功且隐藏成功时才改变关窗行为，托盘不可用时保持原有关窗语义。退出/重启时移除托盘图标，并在等待池关闭前取消挂起的 ACP 启动，避免留下半初始化子进程。
+  2. 模型预设目录 2026-11 全量刷新（#825）：按各厂商官方文档全量刷新预设目录，并自 2026-11-03 至 2026-11-06 经 live 页面逐组复核（每个目录组、ACP 预设、Rust 侧镜像表与 en/ja/zh i18n 同一变更内同步；组注释携带逐组取证日期）。主要内容：Kimi 加入 kimi-k3.1-pro / kimi-k3.1-pro-highspeed（平台行；裸 Kimi Code 行见注意事项），K2 行携带官方停服节点（新用户 2026-10-31 截止、全量关停计划 2026 年 12 月底），预设默认仍为 kimi-k3；MiniMax M3.1-Flash GA 改名（旧 -Preview id 进 legacyAliases，已存配置经后缀容忍平滑归类）；腾讯 Token Plan 平台自 lkeap 迁移至 tokenhub.tencentmaas.com（旧地址保留为端点别名，存量配置分类不变）；火山引擎 Ark 移除已下线的 kimi-k2.7-code / minimax-m3 行并新增 deepseek-v4.1-flash-economy；MiMo v2.5 行移除（id 已硬失败）；DeepSeek deepseek-flash 自 2026-10-17 起实为 DeepSeek-V4.1-Flash-1017；OpenAI 加入 gpt-6.1-terra；OpenRouter / SiliconFlow / GLM / Qwen / Gemini / Anthropic / xAI 各组按 live 页面同步并补齐缺漏。同时补齐四个底座已支持而目录缺失的新组：Mistral、Meta Model API（muse 系列）、Together AI、Groq（均走通用 OpenAI 兼容 wire，无新 Rust preset 变体、无 wire 变化）。
+  问题修复
+  1. 多 WebView 下从托盘、重复启动与全局快捷键恢复原生主窗口（#838）：内建浏览器添加子 WebView 后，Tauri 不再将 main 识别为 WebviewWindow（原生窗口仍在），托盘激活、重复启动与全局快捷键因此全部跳过恢复，窗口看似「丢失」。现改用 get_window("main") 以原生窗口句柄解析主窗口，并在呈现层与平台适配层贯穿 tauri::Window；宠物导航、原生命中测试与启动恢复同修。保留 Linux 启动延迟、macOS 应用取消隐藏行为与 WebView 专属设置。经真实 Windows Tauri/Wry 2.12.5 探针验证：双 WebView 下旧查找/恢复分支确实不做任何事，原生查找在隐藏、最小化与组合状态循环中恢复同一 HWND 并保住两个 WebView 标签与焦点。
+  2. 恢复证据回收工具契约（#832）：产品工具准入表此前漏掉 retrieve_tool_result 与 handle_read——底座的大输出溢出回收尾注逐字点名前者、evidence_available 元数据下一轮自动激活它，子代理 worker 记录对 handle_read 同理，但两者均被准入表拒绝，导致每次大输出溢出与群体验证都退化为 1–2 步死路（静默自动激活拒绝、tool_search 只在剥离后的目录内、直调 permission-denied）。两者均为有界只读证据读取器（与 read 同风险类）且默认延迟装载，补齐准入即恢复文档化契约，首轮目录不增长。同时移除死的 revert_turn 准入（本宿主 snapshots_enabled=false 使每次调用必然失败，回滚归属应用侧 rewind_to_turn，缺席已钉入契约测试），并文档化 notes_path 死链（上游强制字段保留路径 + 披露注释）。两条证据读取现已渲染为安静单行条而非完整工具卡。
+  内部改进
+  1. CodeWhale 底座消费公共维护批次（#831）：gitlink f1eb10efc → 11cba403d（pinjou3-clean 头），消费七个公共 squash：#123（释放中断的子代理 claim、继承工作区隔离）、#124（钉住子代理任务身份与全量输出恢复；一个指纹随共享 helper 搬迁重 pin，措辞不变）、#129（回移运行完成与 GNU LLVM 绑定，Windows-GNU-LLVM-only）、#131（宿主武装护栏提示与权威转移通知；T3 注册表优先/发现指纹全部完好，forkguard_* 名 255 → 301）、#133（移除虚假的 sandboxed fetch_url 声明）、#134（locale 包过时模式文案清理）、#135（undici 7.30.1、msal-node 7.1.2，仅 CodeWhale 侧 npm lockfile）。父仓仅参考/注册更新，两个 Cargo.lock 不变；fork 政策/修改清单双语镜像同步并顺带修复 #799 遗留的搁浅短行重复。
+  注意事项
+  - Windows 关窗行为变化（#828）：关闭主窗口现在隐藏到托盘；其他平台行为不变。无数据迁移。
+  - K3.1 档位存储丢弃是单向的（#825）：本版本保存的配置不再携带 K3.1 effort 字段；旧版本读取时看到字段缺席并重新套用自己的档位/默认（数据不损坏，但先前选择的档位不可恢复）。未盖章的自定义中转端点按设计保持 effort 透传。所有 K3.1 拼写（含 [1m] 声明形式）不暴露档位控制，wire 省略该字段采用厂商默认（编码通道文档默认 high）。
+  - 裸 kimi-k3.1-pro / kimi-k3.1-pro-highspeed 行从 Kimi Coding Plan 组延迟（#825）：钉住的公共底座（11cba403d）的 reasoning replay 门尚不识别 K3.1（上游 CodeWhale#137 已修但未进该子提交），官方 .com/.ai 编码端点上裸 K3.1 id 的工具轮会因缺 reasoning_content 得到 400。带前缀的平台行走通用 kimi- 前缀臂，不受影响；自定义行仍可手动输入，底座修复随 gitlink 落地后恢复。
+  - xAI grok-4.20-multi-agent-0309 行延迟（#825）：官方多智能体指南排除 Chat Completions 传输、客户端工具与 max_tokens，而内建 xAI wire 固定 Chat Completions 且携带客户端工具/图像探针带 max_tokens，普通可选项无法运行其原生工作流；手动自定义条目仍可创建（无档位 UI）。其余 xAI 行经 2026-11-06 live 复核确认。
+  - 新增四组（Mistral / Meta / Together / Groq）均走通用 OpenAI 兼容 wire（#825）：bridge 尚无对应厂商臂，底座的 Mistral 专用方言在臂落地前不可达；Ollama Cloud、百度千帆等同因属后续项，未纳入。
+  - LoongArch64 安装包继续随发布提供（dpkg 架构 loong64，面向 UOS V25 / deepin 23/25 新世界系统）；平台降级面不变：本地嵌入不可用（知识库检索自动降级全文检索）、连接器与 Codex/Claude 原生运行时无按需安装器（PATH 已装二进制继续可用）。
+  - 官网页面版本同步可能滞后，v0.10.18 官网页面尚未更新，下载前请确认页面显示的版本。
+  - Windows 和 macOS 安装包尚未正式签名。Windows 首次安装可能出现 SmartScreen 提示；macOS 首次打开如被 Gatekeeper 拦截，可在确认安装包来源可信后解除隔离再打开。
+  - 安装包与发布产物由版本 PR 合入 main 后触发的发布工作流构建，未在本地构建。
+  - 本次为预览版本，欢迎通过 GitHub Issues 反馈问题。
+  构建来源：main @ b7a814bc8 / Actions #42377130553（五平台安装包同源构建）
+  官网更新日志
+  zh-CN
+  新功能
+  - Windows 系统托盘生命周期：关窗隐藏到托盘，点击托盘或「打开」恢复，「退出」经清理路径关闭；托盘不可用时保持原有关窗行为。（#828）
+  - 模型预设目录 2026-11 全量刷新：Kimi K3.1 Pro、MiniMax M3.1-Flash GA 改名、腾讯 Token Plan 迁移 tokenhub、Ark/MiMo/DeepSeek/OpenAI 等全组按官方文档对齐；新增 Mistral / Meta Model API / Together AI / Groq 四组；目录、ACP 预设、Rust 镜像与三语 i18n 同步。（#825）
+  修复
+  - 多 WebView（内建浏览器）下从托盘、重复启动与全局快捷键恢复原生主窗口失效的问题；宠物导航、原生命中测试与启动恢复同修。（#838）
+  - 恢复 retrieve_tool_result 与 handle_read 证据回收工具准入，大输出溢出与群体验证不再退化为死路；移除死的 revert_turn 准入并文档化 notes_path 死链。（#832）
+  内部改进
+  - CodeWhale 底座消费七个公共 squash：中断子代理 claim 释放与工作区隔离继承、子代理任务身份钉与全量输出恢复、运行完成/GNU LLVM 绑定回移、宿主武装护栏提示与权威转移通知、虚假 sandboxed fetch_url 声明移除、过时模式文案清理、undici/msal-node 升级。（#831）
+  en-US
+  New Features
+  - Windows system tray lifecycle: closing the main window now hides it to the tray; the tray icon or "Open" restores it and "Exit" shuts down through the cleanup path, with normal close behavior preserved when the tray is unavailable. (#828)
+  - Full 2026-11 refresh of the model preset catalog against vendor documentation: Kimi K3.1 Pro, MiniMax M3.1-Flash GA rename, Tencent Token Plan migration to tokenhub, plus Ark/MiMo/DeepSeek/OpenAI and more realigned; new Mistral / Meta Model API / Together AI / Groq groups; catalog, ACP presets, Rust mirrors, and trilingual i18n synced. (#825)
+  Fixes
+  - Restored native main-window recovery from the tray, repeated launches, and the global shortcut when a child WebView (built-in browser) is present; pet navigation, native hit testing, and startup restoration fixed the same way. (#838)
+  - Admitted the retrieve_tool_result and handle_read evidence-recovery tools so large-output spillover and swarm verification no longer dead-end; removed the dead revert_turn admission and documented the dead notes_path link. (#832)
+  Internal improvements
+  - CodeWhale base consumes seven public squashes: interrupted subagent claim release with worktree isolation inheritance, subagent task-identity pinning and full-output recovery, run-completion and GNU LLVM binding backports, host-armed guardrail prompts with an authority-transition notice, removal of a false sandboxed fetch_url claim, stale mode-copy cleanup, and undici/msal-node bumps. (#831)
+  Full Changelog: https://github.com/Pinvou/pinvou-agent/compare/v0.10.17...v0.10.18
+ReleaseNotesUrl: https://github.com/Pinvou/pinvou-agent/releases/tag/v0.10.18
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
