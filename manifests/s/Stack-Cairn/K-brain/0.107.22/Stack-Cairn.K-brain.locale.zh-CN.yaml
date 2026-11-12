@@ -1,0 +1,55 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Stack-Cairn.K-brain
+PackageVersion: 0.107.22
+PackageLocale: zh-CN
+Publisher: Stack-Cairn
+PublisherUrl: https://github.com/Stack-Cairn
+PublisherSupportUrl: https://github.com/Stack-Cairn/K-brain/issues
+PackageName: K-brain
+PackageUrl: https://github.com/Stack-Cairn/K-brain
+License: Apache-2.0
+LicenseUrl: https://github.com/Stack-Cairn/K-brain/blob/HEAD/LICENSE
+ShortDescription: 基于 Go 构建、运行在终端里的编程 Agent。
+Description: 氪脑（K-brain）是运行在终端里的编程 Agent，用 Go 构建，也可作为其他前端的后端底座。读代码、改文件、执行命令、验证结果，在同一会话中完成任务。运行 kn 开始使用，取自“氪脑”拼音 Ke Nao。
+Tags:
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  K-brain v0.107.22
+  本版从 main 的 7db2a37 构建，在 v0.107.21 的基础上加入 Windows 离线沙箱（提升模式），并修复后台任务关闭时的竞争。
+  新功能
+  - Windows 离线沙箱与工作区隔离（#165）：运行一次 kn sandbox setup（会弹出 Windows 管理员确认），之后 Windows 上的沙箱改为以专用的沙箱账户运行命令：
+    - 断网运行可用：离线账户的所有网络流量（包括本机回环）都被防火墙规则拦截，/v1/health 的 run_sandbox 报告 mechanism: "sandbox-user"、network_control: true；
+    - 工作区隔离：权限只授予沙箱账户，不再把用过的工作区标为低完整性。其他低完整性程序不能再写这些目录，断网运行也写不了别的工作区；
+    - 命令在独立的桌面上运行，不能访问你的桌面和进程；
+    - 保护路径、凭据目录屏蔽、凭据环境变量过滤照常生效；
+    - setup 会创建两个隐藏的本地账户（不能远程登录、不在登录界面显示）、两个本地组和一组防火墙规则，密码用 DPAPI 加密保存。kn sandbox status 查看状态，kn sandbox uninstall 全部移除；
+    - 没有运行 setup 时，沿用 v0.107.21 的低完整性沙箱（仅联网），断网运行会拒绝执行并提示运行 kn sandbox setup；
+    - 客户端可以调用 POST /v1/sandbox/setup 发起设置（需要后端 token，会弹出 UAC），run_sandbox 新增 setup_available、setup_hint，capabilities.sandbox_setup 为 1。
+  - 已知限制：
+    - 联网运行仍可写之前沙箱运行用过的任何工作区（Windows 自带的 TLS 不支持受限令牌）；
+    - 沙箱里的命令不能在会话中创建命名对象，Windows PowerShell 5.1 的 Invoke-WebRequest 会报 “Error creating the Web Proxy”，改用 curl.exe、PowerShell 7 即可；
+    - 离线时仍能解析域名（DNS 由系统服务代为查询），但不能建立连接；
+    - C:\ProgramData、C:\Users\Public 这类所有用户都可写的目录，沙箱账户也可写。
+  修复
+  - 关闭后端时等待后台工作结束（#167）：后端关闭时会先取消并等待后台子代理、唤醒派发和检查点写入完成，再关闭事件日志，不再在关闭后继续写文件。因关闭而中断的子代理在下次启动时显示为“已中断”。
+  - 后台 Bash 命令的退出只报告一次（#167）：以前同一次退出可能既出现在 Bash 的结果里，又作为单独的退出通知再发一次。
+  - 修复了多个偶发失败的测试（#167，关闭 #132）。
+  下载与校验
+  提供 macOS、Linux、Windows 的 x64/ARM64 CLI 与 computer helper；SHA256SUMS 用于校验下载文件。
+  完整变更
+ReleaseNotesUrl: https://github.com/Stack-Cairn/K-brain/releases/tag/v0.107.22
+InstallationNotes: 在终端中运行 kn。首次使用前，请在 %USERPROFILE%\.k-brain\config.json 中配置模型提供商。
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://github.com/Stack-Cairn/K-brain/blob/main/README.zh-CN.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

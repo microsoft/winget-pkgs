@@ -49,39 +49,7 @@ extends:
 
         steps:
 
-        # Allow scripts to access the system token.
-        # Fetch all history
-        # Don't fetch tags.
-        - checkout: self
-          clean: true
-          persistCredentials: true
-          fetchDepth: 0
-          fetchTags: false
-
-        # Downloads dependencies and publishes the pipeline secrets.
-        - template: /DevOpsPipelineDefinitions/templates/winget-setup.yaml@self
-          parameters:
-            type: Publish
-
-        - task: AzureCLI@2
-          displayName: 'Validate Commits'
-          inputs:
-            azureSubscription: '$(WinGetSvc.DataAccess)'
-            scriptType: batch
-            scriptLocation: inlineScript
-            inlineScript: |
-              WinGetSvcWrapper.exe validate-commits --operationId %BUILD_BUILDNUMBER%
-            addSpnToEnvironment: true
-            failOnStandardError: true
-          env:
-            ValidationStorageAccountName: $(ValidationStorageAccountName)
-            CacheStorageAccountName: $(CacheStorageAccountName)
-            WinGet:AppConfig:PrimaryEndpoint: $(AppConfigPrimaryEndpoint)
-            WinGet:AppConfig:SecondaryEndpoint: $(AppConfigSecondaryEndpoint)
-            DIApplicationInsightKey: $(DIApplicationInsightKey)
-            PackagePublisher: $(PackagePublisher)
-            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-            ExecutionEnvironment: $(WinGetSvc.ExecutionEnvironment)
+        - template: /DevOpsPipelineDefinitions/templates/commit-processing-sparse.yaml@self
 
       # Agentless phase. Depends on previous job. 
       - job: 'SignPackage'

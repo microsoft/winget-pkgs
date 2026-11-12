@@ -1,0 +1,108 @@
+# Created with deja-vu release workflow using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: vshulcz.deja-vu
+PackageVersion: 0.23.0
+PackageLocale: en-US
+Publisher: vshulcz
+PublisherUrl: https://github.com/vshulcz
+PublisherSupportUrl: https://github.com/vshulcz/deja-vu/issues
+PrivacyUrl: https://vshulcz.github.io/deja-vu/guide/privacy.html
+PackageName: deja-vu
+PackageUrl: https://vshulcz.github.io/deja-vu/
+License: MIT
+LicenseUrl: https://github.com/vshulcz/deja-vu/blob/HEAD/LICENSE
+ShortDescription: Search Claude Code, Codex and Cursor session history locally
+Tags:
+- aider
+- claude-code
+- cli
+- codex
+- cursor
+- mcp
+- memory
+ReleaseNotes: |-
+  Big stores are cheap to keep up to date. A pass that replaces a few sessions
+  appends their records instead of writing the whole log again and reads only
+  what changed: on a 40,000-session store 20 rewritten transcripts take 1.7 s
+  instead of 24 s, and peak memory drops from 7 GB to under 1 GB. A search for a
+  word most sessions hold answers in about a second instead of 24. Text taken
+  out of a transcript leaves the index on the next pass. For busy machines there
+  are DEJA_NO_AUTO_INDEX and DEJA_SEARCH_ONLY, and deja index exits 3 on a
+  partial run. Sub-agents are sessions of their own in every reader that marks
+  one, forks no longer take credit for what they copied, and recalled history
+  can no longer run a command in opencode or end a dsh turn. The index is rebuilt
+  once on upgrade.
+  A search for a word most sessions hold no longer reads all of them to show a page. Past 1,000 matches it ranks them first from the postings and the manifest, then reads the 1,000 that can reach the page and 200 more that check its length estimate; the total still counts every match, and --all scores every one as before. On a 40,000-session store a word in every session takes 1.1 s and 370 MB instead of 24 s and 2.6 GB, and MCP recall 2.5 s instead of 30 s (#5467).
+  The first index pass after a full build that rewrites, deletes or renames transcripts no longer reads the whole record log for the command-failure table: on a 40,000-session store, 20 rewritten transcripts take 4.0 s instead of 21 s, and the build leaves the table's state for that pass to start from (#5465). Renaming a transcript that shares its session with another file reads the session again only when the rename moves it past another of its files; 20 renames on the same store take 3.2 s instead of 20 s (#5466).
+  deja --re anchors ^ and $ at each line, as grep does. They anchored the whole message, so ^panic: missed a panic printed after any other tool output (#5448).
+  deja embed no longer sends a whole Cursor, Continue or Cline session again each time it grows. Those harnesses date unstamped turns from the file's modification time, and the vector identity held the time; it now holds only the session, role and text, so a session grown by one exchange embeds 2 records instead of every one. A version 2 sidecar is rekeyed on the next run without embedding again (#4976).
+  A search excerpt keeps the line that matched when it looks like tool noise. Searching assignment to entry in nil map showed the stack frames of a Go test panic and dropped the panic: line itself; panic:, goroutine N, npm ERR! and numbered lines are still left out when they do not hold the match (#5456). A --re search that finds nothing suggests a looser pattern, dropping ^/$, or plain words, instead of "try fewer words or --re" (#5457).
+  deja sync import also leaves out a peer's records for a store DEJA_EXCLUDE_HARNESSES (or a harness: line) excludes and for a project the policy ignore rule covers, and says how many; a relay no longer sends an excluded store's sessions on (#5435). The sync-timer unit carries the DEJA_* and XDG_* settings of the shell it was installed from, so a timer run syncs into the same index under the same switches (#5436).
+  A dsh turn no longer fails when recalled history contains {{...}}. dsh read deja's project digest and recall as prompt templates, so a past session quoting {{cwd}} ended every new turn with unknown prompt variable before the model was called; both contexts now pass interpolate: false and split the braces ({ {cwd} }), which dsh before 0.2.1-alpha.2 needs, in the npm plugin and in deja install dsh-auto (#5421).
+  deja sync holds a peer's records to this machine's switches: DEJA_INDEX_TOOL_OUTPUT=0, DEJA_INDEX_COMMANDS=0, DEJA_INDEX_PATHS=0, DEJA_INDEX_EDITS=0, DEJA_INDEX_WRITES=0 and DEJA_INCLUDE_SUBAGENTS=0 leave the same records out of an import as out of a local read, and the import says how many (#5425).
+  Recalled history can no longer make opencode run a command or attach a file. opencode expands !`cmd` and @path in the /deja prompt text and @path in a sub-agent's task prompt, so a past session quoting either ran it in the shell or shipped the file to the model; deja now breaks up those tokens in the recall it hands opencode and Kilo, and the model still reads every word (#5433, #5439).
+  A deleted transcript that shared its session with another file keeps every turn it held. Deleting a copy that did not own the row dropped the turns only it had, a rebuild filed shared turns under the copy still on disk, and a later rewrite of that copy took them out of the index. A renamed copy and a file that moved to another session id now give the row to the file a rebuild picks, and a new file holding only a deleted transcript's last turn is no longer taken for the transcript moved (#5441, #5442, #5443, #5444, #5445).
+  A session that says the search in its own words in one message is no longer buried by sessions that hold other forms of the same common words: on a 3,000-session Russian test store where every word is common, the 12 queries worded as the target said them find it in the top five 12 times, against 9 (first 10 against 8) (#5369).
+  Text pasted into a Claude Code prompt is indexed as the pasted text, without the <pasted_content id="…"> wrapper Claude Code puts around it. The tags titled sessions (<pasted_content id="dd73"> Set up and test…), gave the install's demo question the topic "pasted_content set" and were indexed and recalled as terms; the prompt hook no longer searches on them either. The index rebuilds once to take them out of sessions already stored, including those whose transcript Claude Code has since deleted, and a peer on an older build syncs its prompts in unwrapped.
+  A sub-agent run is a session of its own under the session that spawned it.
+  Sub-agents are now read by default as their task, answer and edits, the way
+  Claude Code's are, so deja blame names the sub-agent that wrote a line;
+  DEJA_INCLUDE_SUBAGENTS=0 leaves them out and =1 takes the whole run in
+  every reader that marks one, Gemini, Hermes, OpenClaw, Codex, opencode, Grok,
+  pi, Crush, Kiro, Devin, dsh, Muse and CodeBuddy included (#5301). A CodeWhale
+  fork is a fork, not a sub-agent, and is read whole. deja resume on a Cursor CLI
+  subagent names the parent to resume instead of saying the child left
+  cursor-agent's store; Hermes and OpenClaw children reopen as they are (#5303).
+  Copilot CLI task runs are split out of the parent's log, OpenClaw children and
+  Hermes delegates hang under their parent whatever source they ran under, and
+  Gemini, Kimi and OpenClaw sub-agents are titled by their task rather than by
+  injected context or their answer. Sub-agent runs stay out of the start digest.
+  A fork no longer takes credit for what it copied. A Codex fork_context
+  sub-agent, a Grok --fork-session copy, a Kimi /fork, a goose fork and an
+  OpenClaw fork child keep only their own turns, and Claude Code /branch,
+  Copilot /fork, Grok, Kimi, goose and OpenClaw forks name the session they came
+  from. Where a copy still holds its source's records at their original times
+  (Claude /branch, Qwen /branch, opencode --fork), blame credits the source.
+  Relative paths in opencode apply_patch, Hermes write_file and patch, Kimi
+  Write/Edit, and a Codex apply_patch run through the shell are filed under
+  the session's directory, so blame finds their writer.
+  A session is no longer recalled to itself or to its own lineage. A fork,
+  /branch, resume or sub-agent in Claude Code, opencode, Copilot, Gemini,
+  Hermes, Qwen, Kimi, Cline, Kiro, aider, Grok, pi, goose and dsh leaves out the
+  session it came from, and a dsh session's sub-agents stay out of its recall at
+  any depth. A resume gets one start digest, not two, Grok and pi included. The
+  session that just ended shows up in the next one's digest, including the first
+  session in a new project, sessions Hermes still holds in state.db-wal and
+  Kimi Code 2.x sessions, which now get their project.
+  deja install and uninstall leave the client's own config alone. A
+  "disabled": true that the client ignores is no longer read as off, Claude
+  Code and Kimi Code included, and the client's own switch, extra keys, comments
+  and empty blocks survive install and uninstall for Codex, Cursor, Gemini,
+  Hermes, Kiro, goose, dsh, pi, Qwen, Grok, aider, Kimi, Copilot, OpenClaw and
+  opencode. A read-only file is refused before anything is written, Cline and
+  Kimi included. pi 0.99 and later need no MCP adapter, and
+  PI_CODING_AGENT_DIR is followed. OpenClaw install and doctor say when
+  plugins.allow or plugins.enabled keeps deja's plugin off.
+  OpenClaw, Codex, Hermes and Grok start MCP servers with only a few
+  variables, so deja mcp there lost a moved index (DEJA_INDEX_DIR,
+  XDG_CACHE_HOME), built a second one and answered recall with the asking
+  session. Their MCP entries now name the launcher the hooks run through; a
+  one-line Hermes entry is written out as a block with its keys and comment kept.
+  An OpenClaw heartbeat poll no longer stamps the main DM as in use, which hid
+  it from recall in the user's other sessions for twenty minutes after each poll,
+  and a poll and its NO_REPLY are no longer indexed as a session.
+  openclaw chat and openclaw tui --local run no plugin or hook, so deja
+  cannot give them a digest or per-prompt recall; install and doctor now say
+  so. MCP recall there leaves out the session OpenClaw wrote to last when no
+  hook stamped one, instead of answering with the conversation asking.
+  deja resume and deja handoff --to openclaw open OpenClaw's gateway TUI
+  (openclaw tui) when a gateway answers, where deja's plugin and hooks run,
+  and say so when only the hookless local mode (openclaw chat) is there.
+  deja install openclaw and openclaw-auto refuse a section openclaw.json
+  keeps in its own file ($include) and say what to add there by hand. Writing
+  beside the $include made OpenClaw's own edits of that section land in
+  openclaw.json instead of the included file. The launcher, plugin and hook pack
+ReleaseNotesUrl: https://github.com/vshulcz/deja-vu/releases/tag/v0.23.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

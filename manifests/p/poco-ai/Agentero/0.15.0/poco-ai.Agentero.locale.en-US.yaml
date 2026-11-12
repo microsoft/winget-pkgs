@@ -1,0 +1,83 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.15.0
+PackageLocale: en-US
+ShortDescription: Agent-friendly reference management.
+Description: 'Traditional reference managers are not agent-friendly: highlights and notes stay locked inside single files, making it hard for agents to reuse knowledge across papers; every conversation starts from scratch without a stable local knowledge map; PDFs are human-friendly but not the most comfortable reading material for agents. Agentero aims to build an agent-friendly, agent-native way to manage references, exploring how humans and agents collaborate on reference management. Connect your local agent via ACP (BYOA), select-text chat, import papers and Skills, stay compatible with the Zotero ecosystem, and get paper translation, bidirectional links with a knowledge graph, and deep PDF reading.'
+Tags:
+- academics
+- agent
+- article
+- literature
+- paper
+- pdf
+- reference
+- research
+- thesis
+- zotero
+ReleaseNotes: |-
+  v0.15.0 connects writing and deep PDF reading into one workflow: writing projects can bind their own GitHub repositories, and PDFs gain section- and paragraph-level citations, shared annotations inside embedded readers, and arXiv HTML page loading. It also adds custom keyboard shortcuts, paper code-repository detection, text library properties, and a dedicated paper-reader agent seat, while fixing Windows compile and process cleanup, PDF rendering, scaling, and translation issues.
+  Features
+  - Project-based writing and GitHub sync: Writing projects move below the paper library, with project directories, sources, assets, and compiled PDFs sharing one source/preview workspace; each project can bind and sync to its own GitHub repository. (commit / commit by @qychen2001, @Phil-Fan)
+  - Section and paragraph citations: Support paper.pdf#2.1#p3 citations, with agent answers, Markdown links, and wikilinks sharing one resolver and temporary highlight. (#879 by @ffy6511)
+  - Embedded PDF readers: Embedded PDFs locate and highlight citation targets, share the original paper's annotations and comment cards, and return to the target page without reopening the document or resetting its zoom. (commit / commit / commit by @ffy6511)
+  - Custom keyboard shortcuts: Record, clear, restore, and search shortcuts from Settings; Cmd+L is separated from Add to chat, and custom bindings sync to the macOS menu. (commit by @ffy6511)
+  - Paper code-repository detection: Extract a GitHub repository from the abstract, footnotes, and final page, fill an empty code_repo, and remember values edited by hand. (commit / commit by @JiaheChen2002)
+  - CLI / MCP paper metadata editing: Update a paper's venue, title, date, DOI, arXiv ID, and authors through the CLI and MCP, writing to the catalog and metadata.json. (#875 by @bet4it)
+  - Text library properties: Custom properties gain a Text type for free-form reproduction notes and experiment settings edited directly in the cell. (#868 by @Immortal-Fates)
+  - Dedicated paper-reader seat: Settings → Agent → Paper reader can choose its own agent and model instead of inheriting the default agent or ACP model. (#867 by @hanlife02)
+  - External terminal choice: The picker shows each terminal's icon and falls back to the first installed terminal when unset; Otty windows come to the front after opening. (commit / commit / commit by @Phil-Fan)
+  - Mermaid diagrams: Mermaid blocks in notes and agent messages render as diagrams by default, follow the light/dark theme, and reveal copy and edit actions on hover. (commit / commit by @Phil-Fan)
+  - Windows Word template: Accept the official Windows Word template and write citations into the open document. (commit by @JiaheChen2002)
+  Improvements
+  - PDF rendering and lifecycle: Shorten first-screen high-resolution rendering and selection waits on complex PDFs, and fix native-link accumulation, async documents leaking across switches, and the shared layout ONNX session being destroyed when the viewer closes. (#874 by @ffy6511, commit by @JiaheChen2002)
+  - Writing compile feedback: The compile button distinguishes idle, compiling, success, failure, and cancel, and a failure can no longer be overwritten by a completion; compile errors share the problem list, and failures use the warning button instead of a toast. (commit / commit / commit by @JiaheChen2002, @Aschenbath)
+  - PDF overlay cards follow zoom: The page translate tab, comment rail, and Ask / Translate / Visual Trace cards re-layout type and icons at the PDF zoom ratio, halving at 50% and growing at 300%. (#883 by @ffy6511)
+  - Sidebar file tree: Rework row hover and selected backgrounds, icon inset, and row actions, and keep the current tree selection and Library scope when clicking a non-paper folder. (#927 by @ffy6511, @Phil-Fan)
+  - Windows compatibility: Align WebView2 and windows crate versions, and handle \\?\ extended paths, .claude/skills links, concurrent file replacement, and process-tree cleanup. (#908 / #922 by @Aschenbath, @Phil-Fan, @JiaheChen2002)
+  - Dependency security updates: Upgrade zip, the Tauri updater, and dependencies affected by RustSec and npm advisories. (commit / commit / commit by @Phil-Fan)
+  - Markdown by default for new files: New files in the tree default to .md, with the extension filled in when omitted. (#851 by @V-IOLE-T)
+  - PDF selection toolbar: Add to chat becomes the primary action with Quick chat in the menu, and the annotation entry moves into the color group with a focused note editor. (commit / commit by @ffy6511)
+  Fixes
+  - Windows TeX paths: Strip the \\?\ prefix from paths passed to latexmk, cleanup, and SyncTeX, and restore the caller's spelling for paths reported back by tools. (#922 by @Aschenbath)
+  - Compile problems with long or spaced paths: Parse wrapped TeX logs and paths so the problem list recognizes errors and jumps to the source line. (#910 by @Aschenbath)
+  - Onboarding and diagnostics: Offer a nodejs.org download when no package manager exists, and stop re-seeding onboarding notes the user deleted. (#893 / #894 by @Aschenbath)
+  - Loopback requests behind a proxy: Bypass the configured proxy for localhost and 127.0.0.1 so MinerU health checks no longer time out behind Clash or similar proxies. (#887 by @Aschenbath)
+  - arXiv metadata: Decode XML entities in Atom fields so titles, abstracts, and BibTeX no longer show < and &. (commit by @Aschenbath)
+  - ModelScope import labels: Imported rows keep showing Imported after a page reload. (commit by @JiaheChen2002)
+  - Writing and PDF selection: Dragging a selection on the PDF no longer paints the native selection back into the source pane, and double-clicking PDF text only selects a word instead of moving the source caret. (commit / commit by @Phil-Fan)
+  - PDF translation ghosting: The reflow preview's DOM selection no longer repaints translated glyphs as a second offset copy. (commit by @Phil-Fan)
+  - Papers moved outside the app: Open tabs, PDF annotations, tree selection, and Library scope follow a paper id after a CLI or file-manager move, and papers that leave the Vault close their tabs. (commit by @Phil-Fan)
+  - New-window crash: macOS window tiling returns to the main thread, so Cmd+N no longer traps in AppKit. (commit by @Phil-Fan)
+  - Vault restore and metadata: Interrupted trash restores can be retried while preserving existing metadata, and failed catalog metadata sidecar projections are retried. (commit / commit / commit by @qychen2001)
+  - Wikilink editing: Pressing Enter at the start or end of a wikilink no longer duplicates it, and Chinese brackets 【【 / ［［ trigger completions. (#853 by @V-IOLE-T)
+  - arXiv HTML reading: Load arXiv HTML pages and inline assets directly in the WebView, and distinguish a missing HTML version from network errors and invalid URLs. (commit by @JiaheChen2002)
+  - Blank chapter files: An \input of a whitespace-only .tex file no longer aborts the whole TeX document read. (commit by @Phil-Fan)
+  - Agent mentions and model catalog: Mention, skill, and slash chips survive sending, and the Grok model picker follows the full catalog pushed over ACP. (commit / commit by @Phil-Fan)
+  - Window layout presets: Reading mode stays immersive when switching or opening papers, related notes open in the background, and note and agent layouts no longer depend on the sidebar state. (#929 by @bet4it)
+  Resolved Issues
+  - Section and paragraph citations: Agent answers, Markdown links, and wikilinks resolve section and paragraph targets with a shared highlight. (#877 / #878 / #880 by @ffy6511)
+  - PDF rendering and lifecycle: High-resolution rendering, selection waits, native-link accumulation, and document release on complex PDFs are fixed. (#871 / #872 / #873 by @ffy6511)
+  - PDF card scaling: Translate and comment cards no longer grow when the page shrinks, and stay crisp when the page grows. (#883 by @qychen2001)
+  - Translation ghosting: Selecting the translated preview no longer shows a second offset copy. (#884 by @qychen2001)
+  - Onboarding notes: Deleted or renamed onboarding notes are not written back on the next Vault open. (#886 by @qychen2001)
+  - Custom shortcuts: Cmd+L no longer conflicts with Add to chat, and shortcuts can be searched and rebound in Settings. (#869 by @ffy6511)
+  - Per-project sync: First-level folders under thesis/ are recognized and synced as separate repositories. (#892 by @qychen2001)
+  - Writing compile feedback: Compile failures use the warning button instead of a toast, and the compile button state and visuals stay consistent. (#896 / #905 / #906 by @qychen2001)
+  - New windows and paper moves: Cmd+N opens multiple windows, and workspace state stays in sync after a paper is moved outside the app. (#897 / #900 by @qychen2001)
+  - Code-repository detection: The PDF's own GitHub repository is extracted without mistaking a bibliography link for the code address. (#907 by @qychen2001)
+  - Windows paths and links: TeX compilation under \\?\ paths, .claude/skills resolution, and concurrent writes work on Windows again. (#909 / #913 / #914 by @Sonder4, @Aschenbath)
+  - arXiv metadata entities: Titles and abstracts no longer show XML entities verbatim, and BibTeX export is corrected. (#916 by @Aschenbath)
+  - ModelScope import labels: Imported papers keep showing Imported after a refresh. (#924 by @cj-jssh)
+  - Sidebar interactions: Overflow, hover colors, button states, click feedback, and selection on non-paper folders are corrected. (#927 by @Phil-Fan)
+  Known Limitations
+  - Windows Word template: The official template is wired up and passes code checks; acceptance inside a real Office installation is still in progress. (commit by @JiaheChen2002)
+  Full diff: https://github.com/poco-ai/Agentero/compare/v0.14.0...v0.15.0
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.15.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: locale
+ManifestVersion: 1.28.0

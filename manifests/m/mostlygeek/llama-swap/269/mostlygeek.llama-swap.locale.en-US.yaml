@@ -1,0 +1,53 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: mostlygeek.llama-swap
+PackageVersion: '269'
+PackageLocale: en-US
+Publisher: mostlygeek
+PublisherUrl: https://mostlygeek.com/
+PublisherSupportUrl: https://github.com/mostlygeek/llama-swap/issues
+PackageName: llama-swap
+PackageUrl: https://github.com/mostlygeek/llama-swap
+License: MIT
+LicenseUrl: https://github.com/mostlygeek/llama-swap/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2024 Benson Wong
+ShortDescription: Model swapping for llama.cpp
+Description: llama-swap is a light weight, transparent proxy server that provides automatic model swapping to llama.cpp's server.
+Moniker: llama-swap
+Tags:
+- golang
+- llama
+- llamacpp
+- localllama
+- localllm
+- openai
+- openai-api
+- vllm
+ReleaseNotes: |-
+  Happy Halloween!
+  Lots of small and big treats in this release.
+  - captures can now be persisted to disk and not lost on restart.
+  - the metrics capture backend has been refactored to make it easy
+    to add support for new inference servers.
+  - the UI can show models sorted by categories, great if you have
+    many different types configured!
+  - metrics can be exported as a PNG to make sharing easier.
+  - add support for the embedding model capability
+  - small bug and UI improvements
+  Details below:
+  - PR #1274 go.mod,ui/package-lock.json: dependency updates: picks up security updates for node and moves shirou/gopsutil back to the main upstream repository by @mostlygeek
+  - PR #1275 feat(config): add embeddings capability flag: adds capabilities.embeddings, mirroring the existing reranker flag and rendered into the /v1/models capabilities map, because capability discovery reads llama-server /props which reports nothing about embeddings, so a probed embed model surfaced as plain text->text and clients and the UI could only pick them out by name prefix by @noctrex
+  - PR #1276 feat(ui): group Models list into capability-derived class sections: derives each model's class (Chat, Image, Video, Audio, Embeddings, Rerank) client-side from the capability flags and modality lists /v1/models already carries and renders one collapsible section per class with a status dot that aggregates its rows, because a long flat list is hard to scan once many models are configured; /api/events modelStatus now includes modalities: {in, out} from the same renderCapabilities call so the dashboard and the OpenAI listing cannot disagree by @noctrex
+  - PR #1279 ui: move Models display options into a dropdown menu: moves the Categories and Show unlisted models switches into a "Display options" menu pinned to the right of the Models header (with the unlisted count shown in the item) and drops flex-wrap, because the header added in #1276 wrapped onto extra rows and made the page too tall; mobile layout improved too by @mostlygeek
+  - PR #1280 Makefile: add native target for the host platform: makes native the default target so a bare make builds for the platform you are on instead of cross-compiling everything, and fixes make all to actually cover Windows and FreeBSD, with $(LDFLAGS) factored out and shared by every platform target by @mostlygeek
+  - PR #1282 internal/capcompat: detect context length from yamz servers: reads max_context from /v1/models (tried after context_length) so yamz (kyojin) servers report their context length through the default prober by @mostlygeek
+  - PR #1285 ui: export the activity table as a client-side PNG image: rasterizes the visible table in the browser with html-to-image (SVG foreignObject -> canvas) and adds Markdown / Screenshot tabs to the export dialog with clipboard copy, download and a background resolved from the nearest opaque ancestor, so exporting works without a new backend endpoint; Meta and Capture columns are excluded from the render (#1284) by @mostlygeek
+  - PR #1287 ui: make markdown code highlighting theme aware in light mode: drives highlight.js token colors from --hljs-* custom properties (with a per-theme --link color and a lighter --muted for Midnight Commander) instead of one globally imported dark-only stylesheet, because code was measured at 1.12-1.40:1 contrast and was effectively invisible in all 11 light themes; light-mode code contrast is now 10.76-13.35:1 with dark mode unchanged by @mostlygeek
+  - PR #1290 internal/capcompat: read /props fields with gjson: extracts each /props field individually with gjson, so one unexpected field no longer takes the whole probe down, because llama-server b12017 added a list to chat_template_caps alongside its booleans which broke the whole-body unmarshal and made capability discovery fail against those builds; bad fields now log a WARN and read as their zero value (#1281) by @mostlygeek
+  - PR #1292 Extract usage parsing into pluggable upstream-specific handlers: splits usage extraction into per-upstream extractors (llama-server, vLLM, Anthropic, OpenAI, TabbyAPI, oMLX and an "auto" fallback that reads every known format) fed by the new internal/hint package which carries upstream and task information through the request context, and records task type, route, peer and reasoning tokens in the activity log, so token counts and performance metrics are accurate per upstream instead of assuming one format by @mostlygeek
+  - PR #1293 ui: fix the Model page Logs panel scrolling the whole page: gives the page its own scroll container and a minimum height for the Activity/Logs tabs, so a long log scrolls inside the panel instead of pushing the whole page by @mostlygeek
+  - PR #1294 Store request/response captures in separate SQLite database: moves captures out of the in-memory internal/cache into a capture repository backed by its own SQLite database (new store.persistCaptures, captureBuffer unchanged), so captures can persist across restarts without fragmenting the metrics db, are pruned asynchronously by compressed size and are addressed by a yymmddhh-xxxx capture id that activity rows link to; internal/cache is removed (#1115) by @mostlygeek
+ReleaseNotesUrl: https://github.com/mostlygeek/llama-swap/releases/tag/v269
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

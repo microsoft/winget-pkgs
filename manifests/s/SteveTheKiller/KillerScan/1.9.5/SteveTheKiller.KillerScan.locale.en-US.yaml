@@ -1,0 +1,50 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: SteveTheKiller.KillerScan
+PackageVersion: 1.9.5
+PackageLocale: en-US
+Publisher: Steve the Killer
+PublisherUrl: https://github.com/SteveTheKiller
+PublisherSupportUrl: https://github.com/SteveTheKiller/KillerScan/issues
+Author: Steve the Killer
+PackageName: KillerScan
+PackageUrl: https://killerscan.net/
+License: GPL-3.0
+LicenseUrl: https://github.com/SteveTheKiller/KillerScan/blob/HEAD/LICENSE
+ShortDescription: Open-source network scanner for Windows with device discovery, port scanning, service identification and live monitoring.
+Description: Open-source network scanner for Windows with device discovery, port scanning, service identification and live monitoring.
+Moniker: KillerScan
+Tags:
+- arp
+- csharp
+- device-fingerprinting
+- dotnet
+- msp
+- network-discovery
+- network-scanner
+- network-tools
+- networking
+- portable
+- snmp
+- sysadmin
+- windows
+- wpf
+ReleaseNotes: |-
+  1.9.5 improves discovery recovery and reports where devices were found or filtered.
+  Fixed
+  - Scans fill the device list as soon as hosts answer again. Each host appears the moment it answers a ping and is probed right away, instead of waiting for every discovery pass to finish, so the first device shows up within about 3 seconds and a home network is fully listed in about 11. The recovery passes keep looking for late hosts in the background.
+  - Silent targets get a recovery round when the second pass or ARP sweep had to recover hosts, or when nothing has answered at all. Later rounds continue while adding devices, up to three rounds and a 30-second budget, with progress and cancellation throughout. The second pass also covers on-link addresses.
+  - mDNS and SSDP responses can discover devices independently of ping and ARP. Shared-MAC filtering retains hosts confirmed by multicast or a recovery probe, while discarding their borrowed MAC addresses.
+  - The command line reports discovery counts, multicast additions, ARP confirmations, filtered proxy answers, and recovery budget exhaustion on stderr.
+  - A network adapter that drops replies no longer leaves hosts behind. When the second pass and ARP sweep recover more than a tenth of what the first wave found, the extra rounds keep going while they still find hosts, up to eight rounds and two minutes, and the discovery summary says lossy link, longer recovery. On such a link each round also sends an ARP request to every silent address on the local network alongside the ping, so a host gets two chances per round, and keeps 32 pings in flight instead of 16. Healthy networks keep the three-round, 30-second limit.
+  - A command-line scan that stalls before it starts no longer hangs forever. If a startup step takes longer than a minute, the run ends with exit code 3 and a message on stderr that names the step.
+  Changed
+  - Refreshed the bundled MAC vendor database to 58,752 assignments.
+  - Single-line text fields are as tall as the dropdowns beside them, so form rows line up instead of the text boxes standing oversized.
+  Added
+  - The command line prints a second line after Discovery:, on stderr: the neighbor cache size before and after discovery, Windows' per-interface neighbor cache limit, and how long each pass took. For example: Discovery detail: neighbor cache 35 entries before, 34 after, limit 256 per interface; first wave 6.4 s, second pass 4.0 s, ARP sweep 5.1 s, extra rounds 0.0 s.
+  - /log <path> writes the command line's status, progress and error lines to a file as well as the console. PowerShell starts KillerScan without waiting and never passes it a 2> redirect, so /log is the way to capture those lines there. For example: .\KillerScan.exe /scan /quick /log discovery.txt. The interactive Press ENTER to exit prompt stays on the console and out of the file, and /log followed by another option instead of a path is refused with a usage error.
+ReleaseNotesUrl: https://github.com/SteveTheKiller/KillerScan/releases/tag/v1.9.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,49 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Victor-Quqi.Axiopera
+PackageVersion: 0.3.2
+PackageLocale: en-US
+Publisher: Victor-Quqi
+PublisherUrl: https://github.com/Victor-Quqi
+PublisherSupportUrl: https://github.com/Victor-Quqi/Axiopera/issues
+PackageName: Axiopera
+PackageUrl: https://github.com/Victor-Quqi/Axiopera
+License: Apache-2.0
+LicenseUrl: https://github.com/Victor-Quqi/Axiopera/blob/HEAD/LICENSE
+ShortDescription: Orchestrate Claude Code, Codex and Grok Build as sub-agents of each other from one executable.
+Description: |-
+  Axiopera connects Claude Code, Codex, and Grok Build so the lead agent can dispatch the others as sub-agents and receive their results. Lighter, more efficient agent collaboration with minimal setup changes: one executable plus one skill, and your existing agent sign-ins and usage allowances are reused, so agent configuration stays unchanged by default.
+  A lead agent can ask for review or work from the other agents, add instructions and change direction while they run, and follow every sub-task live in another terminal with axiopera top. Tasks share your working directory unless --cwd selects another, and parallel writers should each use their own git worktree. A background daemon coordinates the sessions.
+  The same binary is a command line: axiopera create, send, reply, watch, top, daemon and status subcommands drive tasks, approvals and progress reporting, and cancelled tasks can be resumed.
+Tags:
+- agent
+- agent-orchestration
+- agent-team
+- agentic
+- ai
+- chatbot
+- claude-code
+- code
+- codex
+- coding
+- grok
+- large-language-model
+- llm
+- multi-agent
+- programming
+- subagent
+ReleaseNotes: |-
+  Fixed
+  - macOS: inside an agent's sandbox, such as Claude Code's command sandbox, axiopera no longer starts the daemon and asks you to re-run the command outside the sandbox. A daemon started there stayed in the sandbox, passed it on to every sub-agent, and gave them the sandbox's network proxy settings.
+  - Windows: a process in the Codex sandbox can no longer add an instance of the daemon's named pipe and receive other clients' requests, including the environment that spawn sends. Clients also refuse a pipe served by a sandboxed process.
+  - If the data directory is read-only or not writable, axiopera asks you to re-run the command outside the agent sandbox instead of reporting only the system error.
+  - Linux: axiopera top no longer misses a task update that the daemon saves within a few milliseconds of the previous one.
+  Other notes
+  - Sub-agents can no longer run axiopera daemon stop, skill install or plugin cleanup; run them from the main session or a terminal. Version-mismatch errors shown to sub-agents no longer suggest daemon stop --force.
+  - On Linux the client does not check whether it runs in a sandbox. With Grok's --sandbox workspace and a data directory the sandbox can write, it can still start the daemon inside the sandbox.
+  - Stop the daemon with axiopera daemon stop before replacing the executable.
+  - Updating the Codex plugin may require trusting it again.
+ReleaseNotesUrl: https://github.com/Victor-Quqi/Axiopera/releases/tag/v0.3.2
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

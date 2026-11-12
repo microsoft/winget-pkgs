@@ -1,0 +1,80 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: AMD.LemonadeServer
+PackageVersion: 2026.46.2
+PackageLocale: en-US
+Publisher: AMD
+PublisherUrl: https://lemonade-server.ai/
+PublisherSupportUrl: https://github.com/lemonade-sdk/lemonade/issues
+PackageName: Lemonade Server
+PackageUrl: https://lemonade-server.ai/
+License: Apache-2.0
+LicenseUrl: https://github.com/lemonade-sdk/lemonade/blob/HEAD/LICENSE
+Copyright: © 2026 AMD
+ShortDescription: Refreshingly fast LLMs on GPUs and NPUs.
+Description: "\U0001F34B Lemonade Server is a server interface that uses the standard Open AI API, allowing applications to integrate with local LLMs. This means that you can easily replace cloud-based LLMs with private and free LLMs that run locally on your own PC's NPU and GPU."
+Tags:
+- ai
+- artificial-intelligence
+- artificialintelligence
+- chatbot
+- large-language-model
+- llm
+- local-llm
+ReleaseNotes: |-
+  Headline
+  - Container backends are now supported! Learn more: https://youtu.be/zfFuFRdyWgg
+  - Adds the Halogen container backend and 5 containers from Strix Halo Toolboxes: Gufo, strix-llama.cpp, nathanw, rocmfpx, and DwarfStar4.
+  - Benchmark results can now be submitted from lemonade bench to the public leaderboard with a single --submit flag, and a claim link lets others verify your setup.
+  - New classification and decision-model capabilities: zero-shot text classification via POST /v1/classify with a labels parameter, and SystemOne decision models for typed, image-based, or score-based questions.
+  - CUDA support added to TheNoise image generation engine.
+  Breaking Changes
+  - The native backend for DwarfStar4 has been replaced by the container backend.
+  - image_defaults and audio_defaults are no longer returned in the /models API response; their values are now nested under recipe_options, so clients reading the old keys will find them absent.
+  - A new user_configurable boolean flag on backend descriptor options may expose technical knobs such as soft_pixel_cap, pcm_sample_rate, and pcm_channels to users — filter on this flag to hide internal settings.
+  - FLM v1.0.11 returns max_tokens exactly as requested rather than max_tokens+1, so chat completions that relied on the extra token will now stop one token early.
+  - FLM v1.0.11 streams token usage counts only when stream_options.include_usage is set; without it, the /api/v1/stats endpoint records no token counts or throughput for FLM streams.
+  - FLM v1.0.11 returns 400 for previously-accepted invalid fields including invalid tool_choice, forced tool calls on small Qwen3 models (up to 1.7B), conversation history on *-flash models, and requests with no messages or prompt.
+  What's Changed
+  Thanks @Zorro-Zhang, @bitgamma, @fl0rianr, @iswaryaalex, @jeremyfowers, @kenvandine, @meghsat, @mike2307, @pwilkin for your awesome contributions to this release!
+  Click to expand changelog
+  - add --submit/--submit-file to bench by @bitgamma in https://github.com/lemonade-sdk/lemonade/pull/3284
+  - fix(gui): missing translation gaps by @fl0rianr in https://github.com/lemonade-sdk/lemonade/pull/3990
+  - fix(app): use server sync for individual and bulk model updates by @fl0rianr in https://github.com/lemonade-sdk/lemonade/pull/3957
+  - grabbing rocm versions per build by @iswaryaalex in https://github.com/lemonade-sdk/lemonade/pull/3996
+  - fix(gui): show chat readiness and automatic backend install progress by @fl0rianr in https://github.com/lemonade-sdk/lemonade/pull/3992
+  - Adding zero-shot classifier support by @meghsat in https://github.com/lemonade-sdk/lemonade/pull/3952
+  - feat(backends): add TheNoise CUDA support by @fl0rianr in https://github.com/lemonade-sdk/lemonade/pull/4001
+  - fix(app): support Firefox chatbot sidebar prompts by @fl0rianr in https://github.com/lemonade-sdk/lemonade/pull/3973
+  - fix(gui3): Chat showing the wrong model after loading one from the Models tab (issue #4011) by @meghsat in https://github.com/lemonade-sdk/lemonade/pull/4013
+  - fix(server): add missing backend args by @fl0rianr in https://github.com/lemonade-sdk/lemonade/pull/4021
+  - fix(server): Turning off saved chats will retain the already saved chat sessions by @meghsat in https://github.com/lemonade-sdk/lemonade/pull/4012
+  - fix(gui3): honor saved ctx_size when loading custom models (#4019) by @mike2307 in https://github.com/lemonade-sdk/lemonade/pull/4020
+  - fix(server): apply default_model_source to built-in model downloads by @Zorro-Zhang in https://github.com/lemonade-sdk/lemonade/pull/4002
+  - fix(gui3): Fixed bugs in Model load banners by @meghsat in https://github.com/lemonade-sdk/lemonade/pull/4030
+  - refactor(models): list every model file in server_models.json by @jeremyfowers in https://github.com/lemonade-sdk/lemonade/pull/4041
+  - chore: bump pwilkin backend versions by @pwilkin in https://github.com/lemonade-sdk/lemonade/pull/3993
+  - feat(images): support optional upscale factor for TheNoise by @fl0rianr in https://github.com/lemonade-sdk/lemonade/pull/4046
+  - feat(backends): run container backends through ContainerManager, starting with llamacpp:nathanw by @jeremyfowers in https://github.com/lemonade-sdk/lemonade/pull/3709
+  - feat(ds4): move ds4:rocm to a container backend by @jeremyfowers in https://github.com/lemonade-sdk/lemonade/pull/3710
+  - feat(rocmfpx): add the ROCm FPX container backend by @jeremyfowers in https://github.com/lemonade-sdk/lemonade/pull/3711
+  - feat(halogen): add the Halogen Flash container backend by @jeremyfowers in https://github.com/lemonade-sdk/lemonade/pull/3712
+  - ci: keep container backend images on the newest build of their tags by @jeremyfowers in https://github.com/lemonade-sdk/lemonade/pull/3713
+  - ci: Add cuda backend validation for llama.cpp on Linux using self-hosted amd64 and arm64 runners by @kenvandine in https://github.com/lemonade-sdk/lemonade/pull/3714
+  - fix(gui): align chat toolbar controls (#4051) by @fl0rianr in https://github.com/lemonade-sdk/lemonade/pull/4053
+  - feat(llamacpp): add the halobox container backend by @jeremyfowers in https://github.com/lemonade-sdk/lemonade/pull/4029
+  - feat(gufo): add the Gufo container backend by @jeremyfowers in https://github.com/lemonade-sdk/lemonade/pull/4031
+  - Add SystemOne decision models: /v1/systemone, GGUF zero-shot on /v1/classify, and the systemone router classifier by @meghsat in https://github.com/lemonade-sdk/lemonade/pull/3956
+  - Remove image_defaults and audio_defaults by @bitgamma in https://github.com/lemonade-sdk/lemonade/pull/4049
+  New Contributors
+  - @Zorro-Zhang made their first contribution in https://github.com/lemonade-sdk/lemonade/pull/4002
+  Full Changelog: https://github.com/lemonade-sdk/lemonade/compare/v2026.45.3...v2026.46.2
+
+  Windows installers are signed. Free code signing provided by SignPath.io, certificate by SignPath Foundation. See our Code Signing Policy.
+ReleaseNotesUrl: https://github.com/lemonade-sdk/lemonade/releases/tag/v2026.46.2
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://lemonade-server.ai/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

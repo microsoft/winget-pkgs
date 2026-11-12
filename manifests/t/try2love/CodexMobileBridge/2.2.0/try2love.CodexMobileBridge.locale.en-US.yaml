@@ -1,0 +1,37 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: try2love.CodexMobileBridge
+PackageVersion: 2.2.0
+PackageLocale: en-US
+ShortDescription: A local gateway that continues desktop Codex App chats in a mobile browser.
+Description: |-
+  Continue existing chats in the desktop Codex App from your phone browser, or create an empty chat in a saved project.
+  The phone and desktop use the same chat. Read replies, send messages, choose models and Skills, and respond to pending confirmations. Local tasks continue on the original computer; SSH tasks continue on the original server. Each chat keeps its model provider and authentication settings.
+  Your phone does not need to sign in to the same OpenAI account as the desktop. The gateway has its own username/password login and an explicit passwordless option. Connect over LAN, a temporary HTTPS tunnel, or your own reverse proxy.
+  Community project, not affiliated with OpenAI. Supports macOS and Windows and depends on internal Codex App IPC. See verification records for what was actually tested. App updates may require compatibility changes.
+
+  Edit, branch and copy messages
+  - Copy user messages from their action row. Choose Edit and resend on the latest user message, or Edit in new branch on an older message to keep the original conversation.
+  - Choose Branch from here under a completed answer. The new chat keeps history through that turn and waits for your next message. Chat details link back to the source.
+  - Copy complete replies as Markdown or copy an individual code block. Long replies load their full text. When clipboard access is unavailable, selectable text supports the system Copy action.
+  - In-place editing requires the turn to be stopped and generates a new answer. Editing and branching do not undo file changes; both chats share the working directory.
+  - Branching requires a Codex runtime with turn-specific forking and deferred goal continuation; older versions show an update prompt. Copying and latest-message editing do not require those fork capabilities. Creating a branch does not send a model request.
+  - If delivery is uncertain, check the chat list first; repeating the same request does not replay it. If a branch was created but could not connect, the replacement remains an edit draft for that branch.
+Tags:
+- remote
+- remote-access
+- remote-connection
+ReleaseNotes: |-
+  v2.2.0 adds ZCode to the remote workspace and improves mobile channel switching, native side chats, model selection and background resource usage.
+  - ZCode workspace: browse saved history, continue native chats, send attachments, answer questions and handle approvals. Create project chats, select models and reasoning levels, use Skills, fork and rename chats. Production packages on macOS, Windows and Linux include local connections; configured official remote access remains available. macOS ships a verified local launcher without requiring a TCP debugging port. #107 · #116 · #124 · #128 · #129
+  - Multiple routes, one computer: combine LAN, fixed HTTPS and temporary HTTPS entries, inspect latency, select a route or recover automatically. Renew trusted routes after login and preserve drafts and reading position when switching. #125
+  - Native side chats and deletion: show Codex side chats under their parent, with shared chat controls. Closing a tab preserves the native chat. Supported local Codex sessions offer explicit permanent deletion with scope confirmation and pending-operation checks. Unknown outcomes are not automatically replayed. #137 · #138
+  - Models and independent clients: choose a model before creating a chat and reuse catalogs scoped to the computer, account and configuration. Manage supported independent client profiles and release idle CLI connections owned by this gateway. #106 · #122 · #131
+  - Questions and notifications: skip individual Codex async questions without losing other answers. Android preserves separate notifications for separate events. Add a per-computer shortcut to an installed UU remote client. #113 · #118 · #119 · #121
+  - Fixes: display reasoning-only responses from third-party Codex providers and accept Unicode model IDs; recover owned Tailscale routes with bounded retries; improve Claude initialization, Windows Store discovery, DSH connector upgrades, native renaming, copy/save actions and mobile cold starts. Reduce idle polling and reuse verified caches. #110 · #112 · #114 · #115 · #120 · #127
+  Upgrade over the existing installation without uninstalling. Keep the same application identity, signing identity and data directory to retain accounts, settings, phone bindings and drafts. Update the mobile app for native route and notification changes. iOS source and unsigned IPA distributions still require your own signing.
+  Independent profiles and WSL account management remain experimental. Shared Codex runtime initialization currently applies only to the default macOS profile. Data deletion does not guarantee closing an already open native tab. Individual question skips synchronize between Bridge clients, not the native Codex app. CLI release may remain subject to upstream delayed unloading.
+  Thanks to @tiancai123123 for PR #130, @laozuzhen for PR #135, and @qybgh for PR #139.
+ManifestType: locale
+ManifestVersion: 1.28.0

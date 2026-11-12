@@ -1,0 +1,98 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.18.6
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-catalog
+  Fixed
+  - LiteLLM lists only the models the configured key can call (its authenticated /v1/models), keeping the proxy's metadata for them; a proxy whose /v1/models fails now lists no models instead of every model it serves (#18601)
+  @oh-my-pi/pi-coding-agent
+  Added
+  - In Tern, a turn's long-press menu on a phone can edit and resend a prompt, retry the turn, open the rewind page on it, or fork the session from it into a new session
+  - A rewind from the transcript says how many turns it dropped and offers Undo on its toast in Tern, which puts the turns and your draft back
+  Changed
+  - Browser role/ selectors in Chrome tabs now match the role and name Chrome's accessibility tree reports, so they reach open shadow roots and skip hidden elements; in Tern every name observe() reports selects its element again (#18632 by @will-bogusz)
+  Fixed
+  - A late usage-limit error from a previous provider no longer blocks or cools down the selected provider; when the old provider has spent its retry budget, a replay-safe turn still tries the selected model without the old quota delay (#17098, #17571 by @Bensonluo)
+  - Multi-question ask forms in Tern show Submit on the last question tab, not only on the Review tab
+  - MCP headers and stdio env values that use !command now run again on a 401/403 (the request is retried once), on /mcp reconnect and other reconnects, and on /mcp reload, so servers whose command mints short-lived tokens keep working past expiry instead of staying 401 until restart (#18631)
+  - Pausing an unapproved plan no longer tells the agent that the draft was approved or to continue executing it, and pausing with /plan closes an open plan review so it can no longer save and execute the plan (#18610).
+  - Turning off lsp.enabled now also stops write and edit from starting language servers for diagnostics or formatting; previously only the lsp tool was disabled (#18205, #18490 by @yuzu-octopus)
+  - Fixed background tabs omp borrows (relay app.target, app.cdp_url) ignoring omp's clicks and keys or timing out on hover and drag; the page reads as visible while omp drives it and hidden again once released (#17831 by @will-bogusz)
+  - Fixed the transcript jumping at the screen's top edge while scrolled back during a streamed reply, and the screen dropping two rows when a reply finished (#12307, #16117 by @galtamam-cmyk)
+  - Focusing a subagent or returning to the main session no longer loses or freezes the next assistant reply when a fast tool turn finishes before the previous reply's links finish resolving, and messages and tool runs that arrive during the switch show exactly once, in order (#18564 by @eggpeat)
+  - omp gc --strip now keeps every response of the latest replay turn (including earlier tool-call steps joined by their tool results), reference-only images, and the transcript's file permissions (#18636 by @eggpeat)
+  - Session files whose entries were written without ids are re-indexed when loaded, and migrating old sessions no longer gives two entries the same id (#18636 by @eggpeat)
+  - wait and write proc://<id>/kill now say how a settled job's result reached the caller: delivered by the call itself (it finished while the call ran), handed over by this snapshot (it superseded the job's queued completion push, so no duplicate follows), or genuinely late — the last keeps its "not auto-delivered; recovered by this snapshot" warning and adds how long before the call it had finished (#16052, #18635 by @yuzu-octopus)
+  - Fixed ask notes added with n right after picking an answer landing on the previous question instead of the one shown; a Tern click then Note still notes the answer just clicked, and the Note button names it (#18317 by @DonMikone)
+  @oh-my-pi/pi-natives
+  Fixed
+  - Fixed GTK4 apps such as Files (Nautilus) on X11: element clicks and computer.elementAt() now find their elements where they are on screen, and ax() no longer marks their enabled controls (disabled) (#18643 by @will-bogusz)
+  - grep no longer searches the file its own output is redirected into, nor standard input redirected from that same file: both are refused with input file is also the output, as GNU grep does (#14808, #16489 by @yuzu-octopus)
+  @oh-my-pi/pi-tui
+  Added
+  - The wait result's JobSnapshot now carries settledAtMs (epoch ms when the run settled, absent while it is still running), so a snapshot can tell a result that finished during the call from one recovered from an earlier, never-delivered completion (#18635 by @yuzu-octopus)
+  - Added a thinking.set composer action so Tern's phone effort menu can pick a thinking level in one tap
+  - Added All, Running, Done and Parked status scopes with counts to the agent hub's roster, so Tern's phone can filter agents by status
+  - A prompt and a turn's answer list their actions for a phone's long press (actions.hold): Copy, Edit & resend (a prompt's), Retry turn, Rewind to here… and Fork from here; the desktop keeps its hover toolbars
+  - A click or tap on a turn on the native rewind page picks it, and the rewind selector can open on a given turn (startAt)
+  - A status notice can carry a button on its native toast (StatusNoticeAction), such as the Undo after a rewind
+  Fixed
+  - Fixed streamed rows being clipped above the screen before they reached scrollback while the working row was up, so a scrolled-back terminal saw rows jump at the screen's top edge and the whole screen dropped when a run ended (#12307, #16117 by @galtamam-cmyk). Composer.setRuntimeChildren takes a billedChrome option for roots billed at their current height instead of through the floor.
+  - Fixed rows of a streaming reply, and the top rows of a table taller than the screen, going missing from both the screen and scrollback with tui.completeScrollback on; such a table now keeps the column widths it had when it outgrew the screen (#16355 by @galtamam-cmyk)
+  @oh-my-pi/pi-wire
+  Added
+  - actions.hold (TspMenuEntry[]): what a long press on a touch screen offers, beside actions.menu; and toast's action / label props for a button on the toast
+  What's Changed
+  - fix(coding-agent): keep late quota errors off the fallback provider by @Bensonluo in https://github.com/can1357/oh-my-pi/pull/17571
+  - fix(builtins): refuse to grep the file grep writes its output to by @yuzu-octopus in https://github.com/can1357/oh-my-pi/pull/16489
+  - fix(mcp): re-ran command-backed headers on 401 and reconnect by @roboomp in https://github.com/can1357/oh-my-pi/pull/18633
+  - fix(plan): prevent unapproved drafts from becoming execution references by @roboomp in https://github.com/can1357/oh-my-pi/pull/18615
+  - fix(catalog): scoped litellm discovery to virtual keys by @roboomp in https://github.com/can1357/oh-my-pi/pull/18602
+  - fix(coding-agent): gate write/edit LSP writethrough on lsp.enabled by @yuzu-octopus in https://github.com/can1357/oh-my-pi/pull/18490
+  - test(natives): unset LIBEI_SOCKET under the env lock in the Wayland no-portal test by @will-bogusz in https://github.com/can1357/oh-my-pi/pull/18649
+  - fix(coding-agent): resolve Chromium role selectors through Chrome's accessibility tree by @will-bogusz in https://github.com/can1357/oh-my-pi/pull/18632
+  - fix(coding-agent): let background relay and app.cdp_url tabs take omp's clicks and keys by @will-bogusz in https://github.com/can1357/oh-my-pi/pull/17831
+  - fix(tui): completeScrollback commits a streaming reply's rows, tall tables included, as they leave the screen by @galtamam-cmyk in https://github.com/can1357/oh-my-pi/pull/16355
+  - fix(tui): commit streamed rows as they leave the screen while the working row is up by @galtamam-cmyk in https://github.com/can1357/oh-my-pi/pull/16117
+  - fix(tui): serialize live events after focus attachment by @eggpeat in https://github.com/can1357/oh-my-pi/pull/18564
+  - fix(coding-agent): preserve the latest replay turn during gc stripping by @eggpeat in https://github.com/can1357/oh-my-pi/pull/18636
+  - fix(coding-agent): label a wait-delivered result accurately (#16052) by @yuzu-octopus in https://github.com/can1357/oh-my-pi/pull/18635
+  - fix(natives): find GTK4 app elements on X11 and stop marking them disabled by @will-bogusz in https://github.com/can1357/oh-my-pi/pull/18643
+  New Contributors
+  - @Bensonluo made their first contribution in https://github.com/can1357/oh-my-pi/pull/17571
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.18.5...v18.18.6
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.18.6
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

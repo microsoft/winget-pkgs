@@ -1,0 +1,52 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: AnywhereLabs.DSHDesktop
+PackageVersion: 2.0.20-next
+PackageLocale: zh-CN
+Publisher: Anywhere Labs
+PublisherUrl: https://github.com/anywhere-labs
+PublisherSupportUrl: https://github.com/anywhere-labs/deepseek-harness-desktop/issues
+PackageName: DSH Desktop
+PackageUrl: https://github.com/anywhere-labs/deepseek-harness-desktop
+License: MIT
+LicenseUrl: https://github.com/anywhere-labs/deepseek-harness-desktop/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Anywhere Labs
+ShortDescription: DSH Desktop 是由社区维护的 DeepSeek Harness 桌面客户端，并非 DeepSeek 官方产品。
+Description: DSH Desktop 把 DeepSeek Harness 的本地 Web UI、Host 服务和插件系统装进原生桌面应用。官方 Harness 以固定版本原样运行；Desktop 负责窗口、托盘、终端、更新和工作配置，并通过官方插件机制与 Harness 组合。
+Tags:
+- deepseek
+- deepseek-harness
+- dsh
+- 大模型
+- 大语言模型
+- 智能体
+- 自主智能
+ReleaseNotes: |-
+  本次 Next 更新升级上游至 DeepSeek Harness v0.2.1-rc.3，新增按需启用 Computer Use 的 /computer-use 命令、数据目录状态与备份、独立预启动首次设置窗口及侧栏底部图标布局设置，并修复 Windows 管理员权限沙箱启动失败、Linux 图像处理崩溃和界面恢复等问题。
+  DSH NEXT 是社区维护的开源项目，并非 DeepSeek 官方产品。
+  上游版本： DeepSeek Harness v0.2.1-rc.3。
+  新增与改进
+  - Computer Use 按需加载：新增 /computer-use [off|message] 斜杠命令和插件详情页“按需命令加载（/computer-use）”开关（默认开启），仅在当前会话按需启用时才暴露 Computer Use 工具与系统提示词，避免常规编码会话产生额外 Token 开销。
+  - 数据目录管理与备份：桌面设置显示当前数据目录及来源（应用内选择、DSH_DESKTOP_NEXT_HOME 或默认目录），应用内选择固定保存在系统应用数据目录中；启动时若目标目录变化且原目录仍有数据或无法访问，会先弹窗确认。新增“备份”操作，可暂停 Host 并生成可直接切换使用的带时间戳数据目录备份。
+  - 独立首次设置窗口：首次启动向导改为在启动 Host 前以轻量独立窗口打开，完成或跳过后再启动 Host 并进入主窗口，避免冷启动等待；向导与桌面设置控件样式同步对齐官方设置界面。
+  - 侧栏与设置界面：桌面设置新增“侧边栏底部图标横向排列”和“多行图标均衡排列”开关，支持紧凑并排与多行均分对齐；设置弹窗左侧导航栏支持纵向滚动，并在“检查更新”旁新增“更新公告”链接。
+  - Linux 内置运行时：Linux 安装包（x64 与 ARM64）现已内置 primary-runtime、office-skills 与 WebAssembly Office 引擎，开箱支持 Office 文档技能。
+  修复
+  - Windows 沙箱启动：以管理员拆分令牌启动安装版应用时自动降权重启（可通过 --next-keep-elevated 保留提权），避免 Chromium GPU／渲染进程沙箱创建失败导致无提示退出；若沙箱进程仍无法启动，会弹出原生诊断对话框说明错误码、关闭管理员运行的方法及临时 --no-sandbox 参数。
+  - Linux 稳定性与打包：Linux 改用 WebAssembly 版 sharp 处理图像与图标，修复原生 libvips 与 Electron GLib 符号冲突导致的 Host SIGSEGV 崩溃；修复 landlock-run 未从 app.asar 解包的问题，并在 Linux 下隐藏不支持的应用内检查更新入口。
+  - 界面恢复：渲染进程异常退出时保留正在运行的 Host 并先重试重新加载页面（最多 3 次），仅在重试耗尽后进入恢复助手；健康检查简化为检测页面挂载状态，避免历史记录加载较慢或短暂断连触发循环刷新。
+  - 插件管理与终端命令：升级内置 pnpm 至 11.28.5，修复卸载插件时偶发卡死的问题；应用内终端执行 dsh plugin 命令时始终使用内置 pnpm 并关闭误导性的 pnpm self-update 提示。减少插件开关切换与恢复助手操作时的重复扫描，提升响应速度。
+  - 更新安装与存储兼容：修复更新重启时若 Host 关闭超时可能跳过启动已准备好的安装器的问题；容忍 PowerShell 5.1 重写 workspace.json 等 JSON 存储文件时添加的 UTF-8 BOM，修复 Windows 下 /C:/... 文件 URL 打开路径、非字符串草稿导致空白会话页及大型工具参数流式解析高 CPU 占用的问题；固定 Electron 44.7.0 以修复 app.asar 读取缓慢导致的启动超时。
+  使用提示
+  - 请先退出旧版应用并备份 ~/.dsh（或在“设置 → 桌面设置”中使用“备份”），安装后验证常用插件和工作流程。
+  - 如需通过应用内终端管理 desktop Profile 的插件，请先启动 Desktop 完成该 Profile 的初始化。
+  - 从 2.0.17-next 或更早版本升级时，建议手动下载安装；旧版应用内更新可能无法完成下载。
+  - Office 文档技能首次使用时将随包运行时安装到 ~/.dsh/dsh-runtimes/dsh-next-primary-runtime，需要额外磁盘空间。
+  - 默认与旧稳定版共用 ~/.dsh；Profile 不隔离同一目录中的会话、账号和凭据。
+  - 可在“设置 → 桌面设置”或恢复助手中切换数据目录，也可通过绝对路径 DSH_DESKTOP_NEXT_HOME 隔离 DSH 数据（应用内选择优先于环境变量），但不会因此隔离 AA 的默认共享登录与设备绑定状态。
+  完整变更记录 · 项目网站
+  DSH NEXT 已取代原稳定版通道。
+ReleaseNotesUrl: https://github.com/anywhere-labs/dsh-desktop/releases/tag/v2.0.20-next
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

@@ -1,0 +1,57 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: msitarzewski.AgencyAgents
+PackageVersion: 0.3.2
+PackageLocale: en-US
+Publisher: msitarzewski
+PublisherUrl: https://github.com/msitarzewski
+PublisherSupportUrl: https://github.com/msitarzewski/agency-agents-app/issues
+PackageName: Agency Agents
+PackageUrl: https://github.com/msitarzewski/agency-agents-app
+License: MIT
+LicenseUrl: https://github.com/msitarzewski/agency-agents-app/blob/HEAD/LICENSE
+ShortDescription: Agency Agents is a small, native app for browsing, installing, and tracking the agent personas from msitarzewski/agency-agents across the AI coding tools you actually use.
+ReleaseNotes: |-
+  Agency Agents v0.3.2 — 2026-10-02
+  A correctness release: the agents the app installs are, once again, byte-for-byte what the catalog's own installer
+  writes, for every tool. The app's built-in renderers had drifted from the catalog since mid-August; some tools were
+  getting broken files.
+
+  Downloads
+  - macOS (Apple Silicon & Intel) — signed + notarized .dmg, launches without warnings. macOS 13+.
+  - Linux (x86_64) — .deb (Debian/Ubuntu), .rpm (Fedora/RHEL/openSUSE), or the portable .AppImage.
+  - Windows (x64 & ARM64) — .exe installer. Not code-signed yet, so SmartScreen warns on first launch →
+    More info → Run anyway.
+  Or visit agencyagents.app.
+
+  Fixes
+  Qwen Code agents can read, write and run commands again. Agents installed for Qwen listed their tools with
+  Claude Code names (Read, Write, Bash). Qwen matches subagent tools by its own names, so those grants did
+  nothing: 17 agents could edit files but not read or create them, and had no shell. Tool names are now translated
+  (read_file, write_file, run_shell_command, …), matching the catalog.
+  Valid frontmatter for every agent. Descriptions containing : were written unquoted, which made the YAML
+  invalid for three agents (ZK Steward, Developer Tooling Engineer, AI Data Remediation Engineer) in Gemini CLI,
+  OpenCode, Cursor, Qwen, ZCode and the skill-based tools. They are now quoted.
+  Agent bodies keep their horizontal rules. Every --- line in an agent's body was dropped (137 agents
+  affected); only the frontmatter fences are removed now.
+  OpenCode colours. Quoted hex colours were rejected and fell back to grey; slate and navy are recognised.
+  ZCode installs where ZCode reads them. User-level ZCode agents were written to ~/.config/zcode/agents; ZCode
+  reads ~/.zcode/agents. Updating an existing ZCode install moves it to the right place.
+  Existing installs are offered the fix. Agents installed by an older version whose catalog source hasn't changed
+  now show as Outdated, so one Update rewrites them with the corrected output.
+
+  New
+  - DeepSeek Harness joins the supported tools — agents install as Agent Skills.
+  - Mistral Vibe is listed in the Tools view; installing into it is not supported yet.
+  - The bundled starter catalog is current: 282 agents in 18 divisions (was 209), including the new Research
+    division. Healthcare and Research now show their own icons.
+
+  Quality Gates
+  - Renderer parity against the catalog's convert.sh at agency-agents d3f71c4: 282 agents × 9 tools,
+    2,538 byte comparisons, all identical.
+  - cargo test: all passing; npm run check: 0 errors.
+  - Linux and Windows release builds green on the release commit.
+ReleaseNotesUrl: https://github.com/msitarzewski/agency-agents-app/releases/tag/v0.3.2
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

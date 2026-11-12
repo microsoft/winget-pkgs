@@ -1,0 +1,68 @@
+# Created with deja-vu release workflow using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: vshulcz.deja-vu
+PackageVersion: 0.22.2
+PackageLocale: en-US
+Publisher: vshulcz
+PublisherUrl: https://github.com/vshulcz
+PublisherSupportUrl: https://github.com/vshulcz/deja-vu/issues
+PrivacyUrl: https://vshulcz.github.io/deja-vu/guide/privacy.html
+PackageName: deja-vu
+PackageUrl: https://vshulcz.github.io/deja-vu/
+License: MIT
+LicenseUrl: https://github.com/vshulcz/deja-vu/blob/HEAD/LICENSE
+ShortDescription: Search Claude Code, Codex and Cursor session history locally
+Tags:
+- aider
+- claude-code
+- cli
+- codex
+- cursor
+- mcp
+- memory
+ReleaseNotes: |-
+  deja now reads Windsurf / Devin Desktop: Cascade's encrypted conversation
+  files are decrypted, authenticated and indexed, and deja install windsurf
+  adds the MCP server, a global rule, the skill and a /deja workflow. That
+  makes 42 harnesses. Grok Build installs the plugin from this repository's own
+  marketplace, and a Spec Kit extension ships with each release. The person sees
+  more of what deja did: the first session names an error the machine keeps
+  hitting, the weekly note names the session agents used, and dsh, Hermes,
+  OpenClaw and Gemini show deja's line where the person reads it. Kimi Code and
+  Qwen Code edit calls are pinned by fixtures from @beiryu.
+  deja delete and D in the TUI erase a session from its agent and from
+  deja after asking. Claude Code sessions whose transcript is gone come back as
+  their prompts from history.jsonl, and without zstd a compressed rollout no
+  longer makes every search rewrite the index.
+  Changed
+  - deja's lines for the person fit on one line each, and a session start shows the recall receipt plus at most one once-only note (the built note, what changed, the week note, the GitHub line), so a fresh install no longer opens with four lines. The receipt drops its byte count and the docs line folds into the built note. What the model receives is unchanged.
+  Added
+  - DEJA_THEME=dracula paints the interactive screen in the Dracula palette, for terminals themed that way. light and dark work as before, and a name deja does not know still falls back to the terminal background. From @demrom (#5106).
+  - deja delete <id> and D in the TUI erase a session from its agent and from deja's index, after asking; there is no undo. --dry-run lists the files. Claude Code, Codex, Cursor CLI, Gemini CLI, Qwen Code, Copilot CLI, Cline CLI, Kimi Code, Grok, dsh, pi, Senpi, OpenClaw and Antigravity are removed as files, opencode through opencode session delete. Running sessions, shared stores and unchecked agents are refused.
+  - A guide on deleting Copilot CLI session history: find the session by the id in session.start, not the directory name, and what copilot --resume loses. From @beiryu (#4965).
+  - A guide on deleting Qwen Code chat history: the chat file, its sub-agent logs, and what qwen -r loses. From @beiryu (#4966).
+  - Claude Code sessions whose transcript is gone come back as their prompts. ~/.claude/history.jsonl keeps every typed prompt and paste with its session id after the cleanup deletes the transcript, so those sessions are searchable again, filed under the directory they ran in. Only the prompts: deja show says so, and deja resume refuses one. A session with its transcript on disk, or one deja kept after it was deleted, is left to the transcript. DEJA_CLAUDE_HISTORY_FILE moves the file (#5046).
+  - The guide on deleting old Claude Code sessions in Chinese, with the same commands and numbers: 368 of 1,320 files are older than 30 days and hold 4% of the bytes, while the ten largest hold 86%. From @beiryu (#4970).
+  - The Claude Code and Cursor memory guides in Chinese, with the same commands and numbers. From @Quartex246 (#5019, #5020).
+  - The Codex CLI history guide in Chinese: where the rollouts live, why a plain grep stops seeing sessions older than a week, the jq and sqlite3 recipes, and search and SSH sync. From @ursasi (#5085).
+  - Five more guide pages in Chinese, with their commands and paths kept verbatim: deleting Codex sessions, deleting Cursor chats, Codex resume and its two errors, the Claude Code "No conversation found with session ID", and the full context window with its measured 77% / 0.2%. From @ursasi (#5080, #5081, #5082, #5083, #5084).
+  - Shell completion for deja recall: --project, --harness with the harness names, and --limit in bash, zsh, fish and PowerShell, where it used to offer search flags recall refuses. zsh's command list now offers recall too. From @orshih6 (#5015).
+  - A Spec Kit extension: /speckit.deja-vu.recall searches past agent sessions for the current feature's spec and plan and reports what was tried, decided or failed, citing session ids. It registers an optional before_implement hook, so /speckit.implement offers it and runs nothing unless you agree. Each release attaches it as deja-spec-kit.zip: specify extension add deja-vu --from https://github.com/vshulcz/deja-vu/releases/latest/download/deja-spec-kit.zip.
+  - The weekly note names the session agents used, with an id deja show opens: agents used "fix the JWT clock skew…" (claude) — deja show e8b6eefc-fec. Used means an agent credited it this week with a déjà vu: … (deja:<id>) line; without one, the session recalled twice or more stands in. hook-context --notes can land in a group chat, so there it says agents used a claude session — deja show <id> and quotes no title. A week with nothing used reads as before, and what the model receives is unchanged (#4615).
+  - Windsurf / Devin Desktop Cascade conversations are read from ~/.codeium/windsurf/cascade/*.pb (DEJA_WINDSURF_ROOT moves it): typed prompts and the planner's replies, decrypted and authenticated first. A trajectory that fails authentication is skipped and counted, and deja doctor says how many. deja install windsurf writes the MCP server into ~/.codeium/windsurf/mcp_config.json, deja's guidance block into memories/global_rules.md (left out, with a note, when the file would pass Cascade's 6,000-character cap), the deja-history skill into skills/, and a /deja workflow into global_workflows/. Cascade hooks are not wired: none of their output reaches the model. No resume: devin-desktop --sessions opens the Sessions window, and nothing takes a conversation id. Researched by @yearth (#308).
+  - The first session after a build says one thing from the person's own history under the counts: the error this machine keeps hitting and which agents hit it, this machine has hit `command not found: timeout` in 32 sessions (claude, codex), or with no such error a question asked again days apart. hook-context --notes feeds plugin replies that can land in a group chat, so it names the error and never quotes a question. A history with neither keeps the one-line note, and what the model receives is unchanged (#4616).
+  - In a 1:1 chat with the owner on an OpenClaw channel (Telegram, Slack, Discord and the rest), a reply answered from history gets one italic line under it: ↺ you've been here: "<topic>" · Oct 4 · deja. Same deja call per prompt, same text for the model. It goes only on the final text reply of the same run, and only when every 1:1 signal agrees and the sender is the owner; anything unknown means no line. It needs a channel that sends replies whole (channels.telegram.streaming.mode: "off"); on a streaming channel deja is not asked for it. Group chats, other people's DMs, the TUI and the Control UI get nothing, and no other deja note is sent to a channel. "receipt": false in the plugin config turns it off. In the npm plugin and the one deja install openclaw-auto writes.
+  - dsh web shows the person the lines deja prints for them in Claude Code: the "you have been here" receipt, and at session start what was recalled and the build and week notes. They sit in a panel above the input. The model's text is unchanged and the receipt costs no extra deja call per prompt. tui, headless and sdk profiles have no page, so there the plugin still asks deja for plain text and leaves the notes for /deja and the next session to show (#4982).
+  - Hermes shows the person deja's lines too, with deja as the memory provider: the receipt and the session-start notes ride Hermes's own recall line, 🧠 deja · …, in the CLI, where it used to say only "recalled 1 memory". Same one deja call per hook, and the model's text is unchanged. Hermes 0.17 has no such line, hermes -z and hermes chat -Q print none, the TUI and desktop do not keep it on screen and a gateway chat may be a group, so there deja is still asked for plain text and keeps its notes.
+  - A dsh profile wired by deja install dsh-auto shows the same panel, from the same files the npm plugin ships. With both installed there is still one panel and one recall (#4983).
+  Fixed
+  - Without zstd, compressed Codex rollouts and OpenClaw archives no longer make every deja index, search and deja last rewrite the index. A file left unread for want of zstd is held as waiting until it changes or zstd is installed, and a pass looks for zstd once instead of once per file. 1,500 such rollouts beside 4,000 plain ones made each pass take 0.40 s instead of 0.09 s. From @notsubash (#5105).
+  - deja promote refuses a second id instead of promoting the last one named, so a mistyped first id no longer writes a note on another session. From @WynandVStaden (#5075).
+  - deja last and deja show answer from the index while another deja holds its lock instead of waiting it out. A session too new for that index, like the one a session-start refresh is still reading, still waits for it. From @Sora-bluesky (#5058).
+  - deja aider --help and deja goose --help print the tool's own help, as deja's help always said they would, instead of deja's page; deja help aider still shows deja's (#5060).
+  - The security model, architecture notes, JSON reference and guides say what the code does where they had drifted: the hook launcher's lookup order, every surface the <deja-recall> frame covers, the injection log among the files deja writes, redaction on sync import and origin on every sync record, the search fallback order and its six tiers, --limit defaults, and that no installer wires hook-plan (#5060).
+  - deja forget before the first deja index no longer blames an unmounted disk and writes nothing: it tombstones the matching sessions from the stores so the first build leaves them out, and says nothing was indexed yet. doctor no longer calls a DEJA_INDEX_DIR outside the home unmounted when a build would just create it (#5057).
+ReleaseNotesUrl: https://github.com/vshulcz/deja-vu/releases/tag/v0.22.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

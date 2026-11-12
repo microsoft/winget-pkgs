@@ -1,0 +1,64 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Hotovo.AiderDesk
+PackageVersion: 0.89.0
+PackageLocale: en-US
+Publisher: Hotovo
+PublisherUrl: https://www.hotovo.com/
+PublisherSupportUrl: https://github.com/hotovo/aider-desk/issues
+PrivacyUrl: https://www.hotovo.com/privacy-policy/en
+Author: Hotovo s. r. o.
+PackageName: AiderDesk
+PackageUrl: https://aiderdesk.hotovo.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/hotovo/aider-desk/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 AiderDesk contributors.
+ShortDescription: A platform for AI-powered software engineers.
+Description: AiderDesk is a platform for AI-powered software engineers. It started as a desktop GUI for the Aider CLI and evolved into an orchestration layer with project and task management, Git worktrees, tool approval gates, multi-model support, extensions, and MCP integration.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  Highlights
+  🔄 Automatic Task and Subagent Recovery After Restarts
+  Agent runs frequently perform multi-step workflows across tools and subagents. In the event of an unexpected application restart or crash, you should never lose completed progress or risk re-executing unsafe actions. AiderDesk now features automatic task and subagent recovery, durably checkpointing streamed assistant responses, tool calls, and finalized outputs as they happen directly into the local application database.
+  When your project reopens, interrupted runs resume right where they left off. Completed tool calls retain their results instead of repeating, subagents recover under their original identity to avoid duplicate tasks, and unfinished operations are handled according to configurable per-tool recovery modes (Replay safely, Notify interrupted, and Forget unfinished). Non-idempotent actions like shell commands or file edits notify the model to inspect current workspace state before retrying, preventing duplicate side effects. You can fine-tune recovery modes per tool in Settings → Agents → Tools or toggle startup resume in Settings → General → Start Up → Recovery.
+  📸 Pre-Compaction Context Snapshots Kept for Agents
+  Context compaction keeps long-running tasks responsive and within model token budgets, but earlier conversation details were previously summarized and replaced. With pre-compaction context snapshots, AiderDesk now saves the entire uncompacted context into sequentially numbered files (context.pre-compaction.001.json) within the task directory before every manual or automatic compaction.
+  These snapshots are permanently retained and never pruned. Agents running with the built-in system prompt are automatically informed of existing snapshot paths, giving them the ability to inspect earlier messages whenever historical implementation details, past reasoning, or discarded code snippets are needed later in the workflow.
+  📊 Theme-Aware Mermaid Diagrams with Pele
+  Visual architecture diagrams and sequence charts are now rendered using the pele library, bringing a substantial visual and usability upgrade to Mermaid rendering in chat. Diagrams adapt to your active theme with coordinated colors, typography, and crisp styling in both light and dark modes.
+  Diagrams also support smooth streaming updates as your agent writes Mermaid code, keeping the previous valid diagram intact during syntax generation instead of flickering or breaking. Built-in interactive zoom and reset controls make navigating large system architecture diagrams effortless.
+  🌿 Push Worktree Fixes Directly to Base Branch Upstream
+  Developing features and bug fixes in git worktrees provides clean isolation, but pushing those fixes back to the main remote previously required extra branch manipulation or switching back to the local repository. The Git push dialog in worktree tasks now includes an option to push directly to the base branch's upstream remote.
+  With a single checkbox, your worktree commits are pushed straight to the base branch's tracking remote destination, eliminating repetitive Git gymnastics when publishing patches or preparing releases from isolated workspaces.
+  🛡️ Native Tool Approval for Extension Providers
+  External agent providers and custom model extensions can now integrate seamlessly with AiderDesk's safety policies via the new ProviderToolApprovalHandler interface. When external agents execute native tools (such as OpenCode native shell or file operations), providers can check tool execution directly against AiderDesk's active approval engine.
+  This ensures task autonomy settings (Manual, Guided, Autonomous), Power tool approval policies (Always, Ask, Never), bash command deny-lists, and extension approval veto hooks (onToolApproval, onHandleApproval) are fully enforced, giving you uniform governance regardless of whether tools run natively or through AiderDesk.
+  Other Changes
+  - UI & Small Screen Responsiveness:
+    - Fixed dialog overflow on small screens with responsive widths and auto-wrapping footer action buttons.
+    - Fixed notification overflow and centering on compact displays.
+    - Improved Model Library layout on small screens with a wrapping toolbar and a horizontally scrollable models table.
+    - Matched message map scrollbar styling to the rest of the application interface.
+  - Agent & Tool Reliability:
+    - Fixed duplicated and incorrectly grouped assistant messages when streaming reasoning traces alongside tool calls.
+    - Fixed application crashes when displaying truncated tool results while preserving full tool input parameters and inspection details.
+    - Gracefully handled retired AWS Bedrock models with debug logging instead of hard errors.
+  - Internationalization:
+    - Added German (de) locale translation. (Thanks @777marvin)
+  🧩 Extensions
+  - OpenCode Free: A new experimental agent provider offering free models from OpenCode. Runs an owned, isolated OpenCode server with persistent session storage, native shell/read approvals tied to AiderDesk policies, and loopback MCP bridging for remaining AiderDesk tools.
+  - Claude Agent SDK: Added multimodal support for attaching and inspecting images and PDF documents.
+  💡 We'd love to hear your thoughts! Your feedback helps us improve AiderDesk - feel free to share any suggestions or issues. Happy coding! 🚀
+ReleaseNotesUrl: https://github.com/hotovo/aider-desk/releases/tag/v0.89.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

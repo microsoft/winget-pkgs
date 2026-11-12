@@ -1,0 +1,105 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.18.3
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-catalog
+  Changed
+  - Added a balanced delegation bias between eager and restrained; models without a delegation-bias rule now resolve to it instead of eager
+  @oh-my-pi/pi-coding-agent
+  Breaking Changes
+  - The ask tool takes one HTML form ({ html }) instead of questions[]: the model writes a <form> of radios, checkboxes, selects, text inputs and textareas with its recommendation preselected, and receives the submitted form data as JSON. AskToolDetails is now { answers: { name, question, answer }[]; timedOut? }; QuestionResult, the "Other", "Chat about this", answer-note and answer-image paths of the tool are removed, and /tree re-answer reopens the original form (NavigateTreeResult.reopenAsk carries html).
+  Added
+  - In Tern, right-clicking an ask answer offers Note, which annotates that answer without picking it (#18551 by @H4vC)
+  - task.eager (preferred/always) now shapes only the main agent's system prompt; subagents fall back to their model's own delegation policy instead of being pushed to spawn further subagents
+  - ask forms can show pictures: <img src> from an http(s) URL, a data: URI or a local file (relative to the session's working directory), and inline <svg> diagrams, drawn in the terminal form and natively in Tern
+  - ask forms give every radio and checkbox group a free-text "Other" answer: its text is the radio's value or is appended to the checkbox group's array (field-by-field fallback, collab guests and ACP elicitation included)
+  - Extension UI gains optional ui.formDialog(html, options), which renders an HTML <form> and resolves to { data, timedOut? } (undefined when cancelled). The interactive TUI renders it as a form dialog, ACP clients with form elicitation get one elicitation with a property per field, and hosts without it (RPC) answer the ask tool field by field through select/input/editor.
+  - Eval cells can run shell commands with sh: sh("git status") in Python, await sh`ls ${dir}` or await sh("make", { cwd }) in JavaScript. Commands run on the embedded bash engine to completion (never auto-backgrounded), return their output, and raise ShellError with the exit code on failure.
+  - omp zsh on Windows runs omp's builtin utilities (ls, cat, head, jq, …) for commands PATH does not have, unless a command_not_found_handler handles them (#18532 by @H4vC).
+  Changed
+  - Clarified tool and internal-URL descriptions for history:// concise transcripts, proc:// job retention and parked-agent lookups, and read JSON query text output (#18553 by @xiangnan0811)
+  - Models without a delegation rule (Claude, Gemini, …) no longer get pushed to delegate: the "map unknown code via task" rule and the "Task + scout" nudges in search tool descriptions are replaced by a light suggestion to explore unfamiliar subsystems with a scout
+  - In Tern, clicking an ask answer and then Note now annotates the answer highlighted on the question shown instead of the one just clicked (#18551 by @H4vC)
+  Fixed
+  - Fixed ask notes added with n right after picking an answer landing on the previous question instead of the one shown; a Tern click then Note still notes the answer just clicked, and the Note button names it (#18317 by @DonMikone)
+  - Fixed /export failing on Windows when saving in the current directory, including relative paths such as sub/../session.html; the export message now shows the full path of the written file (#18369, #18525 by @minhngoc25a).
+  - Todo initialization now names empty phases Tasks, so subsequent updates can address them (#18552 by @xiangnan0811)
+  - omp zsh and the bash tool on Windows: background commands without job control ignore Ctrl-C (INT, and QUIT in zsh) as zsh and bash do, so the console's Ctrl-C leaves them running (#18532 by @H4vC).
+  - omp zsh finds the system zsh's function library (compinit loads) on Debian, Ubuntu and Arch, and on Windows from an MSYS2, Cygwin or Git for Windows zsh (#18532 by @H4vC).
+  - omp zsh on Windows: typed commands no longer end in ^M, programs are found through Path, piped scripts run every line, cd takes C:\…/C:/…, .. and ~ (keeping $PWD as C:/…), >/dev/null works, the prompt is % rather than root's #, $OSTYPE is msys, and no USERNAME warning is printed (#18532 by @H4vC).
+  - omp zsh on Windows edits lines with ZLE (history, Tab completion, key bindings, $COLUMNS); Ctrl-C abandons the line, runs an INT trap, or interrupts a read that then goes on, instead of ending the shell (#18532 by @H4vC).
+  - omp zsh on Windows: Ctrl-C interrupts the foreground program, jobs, fg and bg work (a job brought back with fg gets Ctrl-C too), and process substitution reaches Windows programs (diff <(…) <(…), prog >(…)) (#18532 by @H4vC).
+  - On Windows, /dev/null works in the bash tool (>/dev/null, cat /dev/null, [ -c /dev/null ]) (#18532 by @H4vC).
+  - On Windows, /dev/tty opens the console in omp zsh and the bash tool (prog >/dev/tty), and an MSYS or Cygwin program killed by Ctrl-C reports status 130 instead of 512 (#18532 by @H4vC).
+  - omp zsh prints the [n] pid line for a background pipeline under job control, as it does for a single command (#18532 by @H4vC).
+  - omp zsh starts compinit many times faster: single array and association elements are assigned and read without copying the whole parameter, and autoload -r no longer re-reads the .zwc digests in $fpath for every function it resolves (#18533 by @H4vC).
+  - omp zsh's read -k and read -q read a key from the terminal without waiting for Enter, as zsh does, instead of reading standard input (#18533 by @H4vC).
+  - omp zsh completion listings mark file types again (dir/, exe*), print -c lays words out in columns without a terminal, and ${x?msg} ends a non-interactive shell with status 1 as zsh does (#18533 by @H4vC).
+  - omp zsh floats keep full precision in arithmetic (s=$EPOCHREALTIME; print $(( EPOCHREALTIME - s )) no longer drifts by up to a second) and still print in their -F/-E style (#18533 by @H4vC).
+  - omp zsh's typeset -U path / typeset -U fpath (and local -U path) drop repeated entries as zsh does (#18533 by @H4vC).
+  - omp zsh and the bash tool: $! of a background pipeline is its last program's pid, as in bash and zsh, so kill $! signals that program; omp zsh's [n] line for a background pipeline lists the pid of each of its processes, as zsh does (#18547 by @H4vC).
+  - omp zsh is faster: function calls, loops and arithmetic run 2–3× faster, compinit almost 4× faster, and building a large array or association one element at a time (a+=(x), h[k]=v) or reading $a[i] from a large array no longer slows down with its size (#18565 by @H4vC).
+  @oh-my-pi/collab-web
+  Changed
+  - ask tool cards show the HTML form's fieldset legends and field count while pending, and each question with its submitted answer (or "(no answer)") once answered, flagging submissions made by the timeout
+  @oh-my-pi/pi-tui
+  Breaking Changes
+  - The ask tool renderer now draws { html } form calls and AskToolDetails { answers, timedOut } results; QuestionResult and the question-list detail fields were removed.
+  Added
+  - Added a Note entry to the right-click menu of each ask dialog answer row in Tern, annotating that answer without picking it (#18551 by @H4vC)
+  - Added HtmlFormDialog, which renders an HTML form as an interactive terminal form, splits long forms into pages, and returns the answers as JSON. Single <select>s are one-row dropdowns, radio and checkbox groups get a free-text "Other" answer, <img> (URL, data: URI or local file) and inline <svg> pictures load in the background, an optional inactivity timeout submits the current values, and Tern terminals get the form natively.
+  - Added a cursor: "start" option to Editor.setText so prefilled multi-line text opens at its first line.
+  Changed
+  - The ask dialog's Note right after a pointer click now annotates the highlighted answer of the question shown instead of the answer just clicked, and the Note button no longer names a redirect target (#18551 by @H4vC)
+  Fixed
+  - Fixed the ask dialog's n right after a keyboard pick annotating the previous question's answer instead of the highlighted row shown; only a pointer click still redirects Note to the answer just picked, and the Note button then names it (#18317 by @DonMikone)
+  What's Changed
+  - fix(tui): ask note always targets the question shown by @DonMikone in https://github.com/can1357/oh-my-pi/pull/18317
+  - feat(shell): run omp zsh on Windows by @H4vC in https://github.com/can1357/oh-my-pi/pull/18532
+  - fix(tui): note an ask answer from its row menu instead of a click redirect by @H4vC in https://github.com/can1357/oh-my-pi/pull/18551
+  - fix(build): give bazel pi-shell's Windows console terminfo entry by @H4vC in https://github.com/can1357/oh-my-pi/pull/18555
+  - fix(shell): zsh engine fixes and faster compinit by @H4vC in https://github.com/can1357/oh-my-pi/pull/18533
+  - fix(shell): name a background pipeline by its last program's pid by @H4vC in https://github.com/can1357/oh-my-pi/pull/18547
+  - fix(todo): default empty init phase names to Tasks by @xiangnan0811 in https://github.com/can1357/oh-my-pi/pull/18552
+  - fix(coding-agent): work around Windows export mkdir failure by @minhngoc25a in https://github.com/can1357/oh-my-pi/pull/18525
+  - docs(coding-agent): clarify history, proc, and read JSON output contracts by @xiangnan0811 in https://github.com/can1357/oh-my-pi/pull/18553
+  - perf(shell): remove quadratic and per-access hot spots in omp zsh by @H4vC in https://github.com/can1357/oh-my-pi/pull/18565
+  New Contributors
+  - @DonMikone made their first contribution in https://github.com/can1357/oh-my-pi/pull/18317
+  - @minhngoc25a made their first contribution in https://github.com/can1357/oh-my-pi/pull/18525
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.18.2...v18.18.3
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.18.3
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

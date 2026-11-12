@@ -1,0 +1,77 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 4.2.4
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [4.2.4] - 2026-10-20
+  Native Proton Drive, Headless Profiles, and Bulk Transfers
+  Proton Drive gains a native client with browser sign-in, encrypted vault sessions, verified transfers and storage quota. Saved profiles can be created and authorized from the GUI, CLI and MCP with the same connection options. Proton CLI compatibility mode groups suitable files into bounded bulk transfers across the CLI, GUI and compatible sync operations. This release also strengthens interrupted transfers, recursive operations, profile backups and archive extraction, and repairs desktop packaging and integration issues.
+  The complete record of this cycle, including fixes, validation and remaining follow-ups, is in the 4.2.4 release tracker.
+  Added
+  - Native Proton Drive. Connect through AeroFTP's own client with browser sign-in, encrypted vault sessions, file and folder operations, revisions, verified downloads, checksums and quota. New profiles choose native mode when available; existing profiles keep official CLI mode until explicitly changed. Small transfers use a single request, large transfers overlap blocks, and revision pages are prefetched (#1293, #1302).
+  - Bulk transfers in Proton CLI mode. Suitable files share bounded native invocations across the CLI, GUI and compatible sync operations, retaining per-file outcomes, cancellation and verified download publication. Existing resume, delta, checksum and error-correction requirements keep their established paths. MEGAcmd and Filen bulk remain unsupported; remaining wrapper performance work stays open in the release tracker (Requested 71, #1317).
+  - Headless profile authorization. CLI and MCP can authorize saved profiles through supported OAuth, GitHub Device Flow and GitHub App flows, refresh expired App sessions, and consume supported structured credentials without storing unused seeds. Pending authorization stays encrypted and bound to the intended profile and user (#1305).
+  - One connection manifest for GUI, CLI and MCP. Profile creation shares aliases, presets, defaults and public options, preserving existing FTP modes and explicit native/CLI Proton choices (#1304). profile-add --proton-mode and proton sign-in, sign-out and status make native Proton profiles usable headlessly (#1296).
+  - Saved SITE templates. FTP and FTPS profiles can keep commands with text, number and secret slots and run them from the GUI, CLI and TUI. Secret slot values are never saved, and importing the glFTPd catalog preserves existing template names (@jnewing, #1109).
+  - AeroCloud from saved profiles. Choose a saved connection and the folder under it from a searchable list. Saved S3, B2, Azure, kDrive and OAuth profiles connect through the same profile loading path as the rest of the app (#1231).
+  - Incremental AeroCloud changes. Local watcher events sync the paths that changed rather than rescanning the remote tree. Providers can require a minimum interval between full scans, and unchanged KeepBoth conflicts no longer create a new conflict copy every cycle (#1283).
+  - Windows association choices. Setup and Settings independently control AeroFTP format associations and archive/Explorer integration. NSIS /NOASSOC and MSI feature maintenance preserve disabled choices and other applications' registrations (@pasha-zzz, #454, #1209).
+  - Linux tray and account details. Theme-aware tray icons, sync actions that follow AeroCloud state, saved-profile counts in the account chooser, collapsible AI model groups and a visible controller bar (#1210).
+  Fixed
+  - Cross-profile copies reuse saved sign-in and encryption settings. CLI, GUI and agent copies open profiles through their shared authentication path, keep overlay data encrypted on the remote, preserve empty directories and skip equal-size files whose destination is not older. A missing or unreadable source subtree fails the plan instead of reporting an incomplete copy as successful; setup errors and partially failed batches close the activity with the correct outcome. Profile credentials and overlay recovery retain their original account, and recursive plans omit directory symlinks (#1306, #1316).
+  - Recursive file removal uses the file operation. rm -r removes a file or symlink without treating it as a directory; remote-root refusal and guarded recursive directory deletion remain effective. Existing SFTP ancestors are accepted only when confirmed to be directories, including generic mkdir failures (#1316).
+  - Resuming a download checks its source as well as its version. A leftover from another provider, endpoint, account or remote path cannot supply the start of a new download with matching size or timestamps. Old resume records restart safely, and a short or inconsistent HTTP 206 response cannot replace the destination with an incomplete file (#1224).
+  - Long filenames transfer again. Download and delta temporary names fit filesystem component limits, including segmented sidecars, instead of failing repeatedly with "File name too long" (#1267).
+  - Temporary files retain the right owner. Cancelled downloads release their claim promptly, segmented cleanup runs while its claim is still held, and another transfer's temporary cannot be removed during cleanup. Startup reclaims recognized abandoned scratch files while preserving active staging and open remote vaults (#1217, #1284).
+  - Interrupted multipart batches abort their remote uploads. File-scoped cleanup retains the original upload handle through completion and cancellation, including when a DAG task is destroyed (#1219).
+  - FTP batches wait for a real connection before taking a transfer slot, avoiding session/slot ordering stalls; checkout deadlines and cancellation are checked without depending on runner speed (#1221).
+  - Recursive walks refuse outside paths, cycles and duplicate entries. Destructive cleanup and dedupe retain authority over the requested or explicitly resolved root; a listing cannot authorize a different absolute root. ImageKit folders retain their own path instead of redirecting recursive operations to the account root (#1232, #1255).
+  - Archive extraction preserves destination boundaries. RAR5 hardlinks and file-copy references use an earlier regular member from private staging. ZIP, 7z, TAR, single-stream and RAR publication are anchored to the selected output directory, preventing an existing destination directory link from redirecting writes outside it (#1222).
+  - AeroCloud keeps events for overlapping pairs. One pair's full scan no longer clears pending changes or renames for another idle pair; acknowledgements survive staggered cycles. Complete scans also forget records of paths absent on both sides so recreating a deleted file syncs it instead of deleting it again (#1286).
+  - Profiles keep unique names and their own credentials. Creation, import, duplicate, rename and restore choose the first available numbered name. External exports select secrets by profile identity, and colliding target names receive separate entries instead of overwriting another connection (#1269, #1276).
+  - Headless credentials survive profile lifecycle operations. Durable OAuth configuration and GitHub token/PEM entries travel through duplication and encrypted backup/restore; deletion clears transient authorization and deadlines without copying pending attempts. Native Proton copy/import, refresh, sign-out and deletion retain the captured user and serialize session mutation across processes.
+  - SITE operations remain on the intended connection. Template rendering and sending share one active operation, bind to the opening/profile/account and backend connection generation, and reject a changed session. A busy status can be refreshed manually. A delayed Proton browser result cannot overwrite a different form or profile.
+  - WinSCP and PuTTY session names round-trip correctly. WinSCP preserves Unicode names and its UTF-8 BOM, while PuTTY exports use its native Windows-code-page escaping and keep colliding names separate (#1278, #1277).
+  - CLI profile selectors and machine output are consistent. export --profiles accepts index, case-insensitive name, ID or a unique substring and explains unmatched or ambiguous selectors. --machine and --format json reach import, export, keystore and native profile backups (#1275, #1272).
+  - CLI fallback diagnostics explain serial transfers. FTP, SFTP, S3, B2, HTTP Range and pget report safe reasons for declined parallel attempts while retaining progress, cancellation and structured JSON warnings (#1212, #1216).
+  - Speed limits apply before ranged reads and to served and mounted files. Served HTTP files stream with Range support, FTP REST resumes and APPE appends correctly, and servers survive disconnects and SIGTERM without printing a supplied secret (#1295).
+  - Proton CLI transfers report quota and literal paths correctly. Full-drive failures do not launch a browser for every file, transfer errors retain the item's reason, glob characters stay literal, and sanitized downloaded names are restored to the requested name (#1298, #1303).
+  - Swift listings continue through short pages, including HTTP 204, rather than hiding entries above a server's page cap (#1213).
+  - AeroImage saves edited and cropped images in the chosen format, with exclusive per-save staging, a centered confirmation and refreshed local panels (@EhudKirsh, #1075).
+  - Encrypted overlays keep readable breadcrumbs and the correct root. Decrypted anchor labels retain the server path, and profiles with an empty Remote Path first open at the remote root (@EhudKirsh, #1077, #1211).
+  - Connected tools read the live session. Capabilities, keep-alive, terminal, Debug Panel and status bar no longer use the reset connection form; Quick Look in the right local panel previews that panel's selected file (#1251, #1228).
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v4.2.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
