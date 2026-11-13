@@ -1,0 +1,119 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Oleafly.Oleafly
+PackageVersion: 0.4.12
+PackageLocale: en-US
+Publisher: Oleafly
+PublisherUrl: https://github.com/Oleafly
+PublisherSupportUrl: https://github.com/Oleafly/Oleafly/issues
+PrivacyUrl: https://oleafly.com/privacy
+Author: Prajwal Murthy
+PackageName: Oleafly
+PackageUrl: https://oleafly.com
+License: AGPL-3.0-or-later
+LicenseUrl: https://github.com/Oleafly/Oleafly/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Prajwal Murthy and contributors
+ShortDescription: LaTeX and Typst editor with live collaboration and AI agents.
+Description: Oleafly is an open-source editor for LaTeX, Typst and Markdown aimed at research writing. It bundles the Tectonic, Biber, Pandoc, Typst and Tinymist toolchain, so documents compile without a separate TeX distribution, and offers live collaboration, SyncTeX, a template gallery and AI agent support. The Windows package installs the editor together with its bundled compilers.
+Tags:
+- collaborate
+- collaboration
+- editor
+- latex
+- markdown
+- paper
+- research
+- scientific-writing
+- tex
+- typst
+- writing
+ReleaseNotes: |-
+  What's new in 0.4.12
+  Added
+  - Notes, a knowledge base for research notes, ships in this release as an
+    experiment and is off until you turn it on in Settings > Experimentation.
+    Each note is a Markdown file you own, edited in a rich editor with
+    callouts, tables, charts, diagrams, math, notebooks, links and backlinks,
+    tags, and tasks with due dates. Notes open as tabs you can split and dock,
+    each tab with its own Back and Forward, and Notes Home lists them with
+    search, tags, a task list and a calendar. A note can start from a template,
+    live inside a project as notes/<Title>.md, be edited together through a
+    collaboration server, and take suggestions from the assistant or a CLI
+    agent that you accept or reject in place. Quick capture is a small floating
+    window for a thought you want to keep, and Notes has its own Appearance tab
+    in Settings with a live preview.
+  - A Markdown document can say what it is with type: in its front matter:
+    article, report (or thesis), book, slides, poster, letter or
+    cv. Slides build as 16:9 Beamer slides that the Present button can show, a
+    poster is one beamerposter page with its title as the header, a letter is a
+    KOMA letter built from to, from, opening and closing, and a report or
+    book starts chapters at # headings. Your own front matter still wins, LaTeX
+    and PowerPoint exports follow the type, and Document settings has a Document
+    type field for it. The same works in oleafly build.
+  Changed
+  - Windows and panels that load on demand open as soon as their code has
+    loaded, and the ones you open by hand load in the background while the app
+    is idle. Settings opens in about 90 ms the first time, down from about
+    380 ms.
+  - With no TeX installed, the engine window puts Download and use TinyTeX
+    first, marked Recommended, instead of a greyed-out Switch to pdfLaTeX
+    button that looked broken. The Keep using Tectonic card and the compile
+    failure heading now read as plain sentences, and the terminal setting is
+    called Open folders in, because the terminal panel always uses the
+    built-in terminal.
+  Fixed
+  - Web pages built by Quarto, such as format: html and reveal.js decks, show
+    in the preview pane instead of asking you to open a browser. The page runs in
+    a sandboxed frame that cannot reach the app, and Open in browser is still in
+    the preview toolbar.
+  - On macOS, pressing Left or Right at the start or end of a text field, such
+    as a file name you are renaming in the explorer, added box characters. The
+    webview typed the arrow key's hidden Apple code point as text. Every field in
+    Oleafly now drops those code points (#445).
+  - After a research project was created, New project did nothing until Oleafly
+    restarted. Setup tried to add the project's first research task while
+    research tasks were still turned off, which they are on a fresh install.
+    When that failed, the hidden setup dialog stayed open and blocked the next
+    one. A research project now skips that task while research tasks are off, and
+    setup always closes once the project opens.
+  - A latexmk project that includes files from five or more folders, such as
+    \include{Chapter1/chapter1}, builds the first time. The first build used to
+    stop at the fifth folder with "I can't write on file Chapter5/chapter5.aux'", and only a second build worked. Oleafly now makes those folders in the build folder before latexmk starts, in the app and in oleafly build`.
+  - Headings with a short title, such as \section[Short]{Full title}, show up
+    in the document outline and oleafly context, fold in the editor, and are
+    checked by Preflight and oleafly check (#425).
+  - On Windows, a Calepin code chunk with any non-ASCII text, such as
+    print("café"), failed with a Python UnicodeEncodeError, and Quarto
+    couldn't start a Python whose folder name has an accent or other non-ASCII
+    character. Python wrote to them in the Windows code page; Oleafly now has it
+    use UTF-8.
+  - On Windows, Quarto couldn't start the Python in a project's .venv and
+    failed with "Failed to spawn … File not found", because Oleafly passed the
+    path in the \\?\ form.
+  - After you changed a Quarto document's format: from a PDF format to a web
+    page, the preview kept the old PDF until you reopened the project. It now
+    shows the page as soon as it's built.
+  - An HTML export of a Quarto document that also declares another format
+    carried an "Other Formats" link to a file that doesn't exist.
+  - The "needs LaTeX" and missing-character hints for Quarto suggested
+    pdf-engine: tectonic without saying it only runs when code is allowed in
+    the project, so following them with code off ended in another error.
+  - oleafly watch reported a watcher error when a build wrote and renamed a
+    temporary file inside the project. A file that disappears while the watcher
+    scans no longer counts as an error.
+  - A long list, such as the template packs list, could crash the window with
+    a React error when its rows kept changing size while it measured them. It
+    now stops measuring after a few passes.
+  Security
+  - Oleafly now bundles SQLite 3.54. Older SQLite could hand back stale memory
+    when it opened a database next to a crafted -wal file
+    (RUSTSEC-2026-0459), and online import opens databases the app didn't
+    write, such as a browser's cookie store, which can come with a -wal
+    file.
+ReleaseNotesUrl: https://github.com/Oleafly/Oleafly/releases/tag/v0.4.12
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://oleafly.com/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
