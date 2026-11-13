@@ -1,0 +1,65 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Stack-Cairn.K-brain
+PackageVersion: 0.107.28
+PackageLocale: zh-CN
+Publisher: Stack-Cairn
+PublisherUrl: https://github.com/Stack-Cairn
+PublisherSupportUrl: https://github.com/Stack-Cairn/K-brain/issues
+PackageName: K-brain
+PackageUrl: https://github.com/Stack-Cairn/K-brain
+License: Apache-2.0
+LicenseUrl: https://github.com/Stack-Cairn/K-brain/blob/HEAD/LICENSE
+ShortDescription: 基于 Go 构建、运行在终端里的编程 Agent。
+Description: 氪脑（K-brain）是运行在终端里的编程 Agent，用 Go 构建，也可作为其他前端的后端底座。读代码、改文件、执行命令、验证结果，在同一会话中完成任务。运行 kn 开始使用，取自“氪脑”拼音 Ke Nao。
+Tags:
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  K-brain v0.107.28
+  本版从 main 的 a30254e 构建，在 v0.107.27 的基础上修复 kn 界面卡死与 backend 阻塞，并新增 host bridge、SSHManager、嵌套 skill pack、Ctrl+B 后台运行命令等能力。
+  卡死修复（#189）
+  - 修复 kn 界面永久卡死：AI 运行中发出的插入消息（steer）在工具调用结束后写入会话时，会在持有消息锁的情况下通知界面；如果此时界面正在重绘底栏的上下文占用，两边互相等待，界面和键盘都不再响应。现在先写入消息、释放锁后再通知界面，界面绘制也不再等待 agent 的锁。
+  - 界面消息改为经由信箱投递：工具输出、权限确认、提问等不会再因为界面忙碌而卡住 agent；新增的锁检查工具在 CI 中把关这一规则。
+  - backend 不再被单个请求拖住：
+    - /v1/sessions/exists 与开始运行、切换模型同时发生时的锁顺序问题已修复；
+    - 大响应改为释放锁之后再发送，客户端读得慢不会阻塞同一会话的其他请求；
+    - 远程 MCP 服务器无响应时，关闭旧连接不再占着锁；
+    - 沙箱自检只做一次，/v1/health 最多等 2 秒。
+  - kn TUI 其他卡住场景：
+    - 在 nano、emacs -nw 里编辑时能正常退出，终端无法恢复时会给出提示并退出；
+    - 交互式命令不响应 Ctrl+C 时，再按一次 Ctrl+C 结束它；
+    - 提交时的工作区快照跳过 git 签名，最多等 1 秒；
+    - 终端主题未知时直接按深色背景处理，不再向终端发出可能永远得不到回应的查询；
+    - 修复单独按 Esc 后再按 [ 被吞掉，以及坐标为 0 的鼠标报告越界。
+  - 卡死诊断：
+    - kn debug stacks <pid> 或 kill -USR1 <pid> 导出卡住的 kn 或 backend 的栈；
+    - kn debug stacks --backend 或 GET /v1/debug/stacks（需要 token，仅限本机连接）；
+    - 文件写到 ~/.liveagent/stacks-<时间>-<pid>.txt，保留最新 20 个；
+    - backend 和 TUI 各有看门狗，停顿超过 20 秒会自动导出一次（每个进程最多 3 次，在外部编辑器里的时间不计入）。
+    - 排查方法见 docs/user-guide/12-troubleshooting.md。
+  - 测试不再写入真实数据目录：测试只在临时目录里创建数据目录，CI 在三个平台上检查。
+  新功能
+  - host bridge（#179）：桌面端可以通过 PUT /v1/host-bridge 注册本机回环地址上的服务，把终端读取（ReadTerminal）、隧道管理（TunnelManager）等工具提供给 agent；同名工具由桌面端实现替换。注册只保存在内存中，能力标记为 host_bridge。
+  - SSHManager（#181）：GET/PUT /v1/settings/ssh 管理 SSH 主机、凭据和项目关联，凭据只写不读；agent 可以通过 SSHManager 在已配置的主机上执行命令、传输文件。首次连接会弹出主机指纹确认，缺少凭据时通过表单征询。能力标记为 ssh_manager。
+  - 嵌套 skill pack（#183）：skills 目录下的子目录（例如 reverse-skill/skills/...）会被识别为一个 pack，最多 4 层、200 个 skill。同名 skill 以层级最浅的为准，被覆盖的副本列在 shadowed 中。/v1/skills/settings 新增 packs 整包开关，每个 pack 的提示词预算为 12 KiB。能力标记为 skill_packs。
+  - Ctrl+B 把运行中的命令移到后台（#185）：kn 中 shell 命令运行时按 Ctrl+B，命令转为后台进程，AI 继续下一步；可以用 ProcessWait/ProcessStop 查看或结束它。backend 提供 POST /v1/sessions/{id}/runs/{run_id}/tools/{tool_call_id}/background，能力标记为 background_tool。
+  - 会话列表的归档过滤（#187）：会话列表可以按是否归档筛选，已归档的会话不会再从列表里消失。
+  - 记忆整理计划可以热更新（#187）：/v1/settings 的 memoryOrganizer 设置开关和频率，保存后立即生效，能力标记为 memory_organizer_settings。
+  下载与校验
+  提供 macOS、Linux、Windows 的 x64/ARM64 CLI 与 computer helper；SHA256SUMS 用于校验下载文件。
+  完整变更
+ReleaseNotesUrl: https://github.com/Stack-Cairn/K-brain/releases/tag/v0.107.28
+InstallationNotes: 在终端中运行 kn。首次使用前，请在 %USERPROFILE%\.k-brain\config.json 中配置模型提供商。
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://github.com/Stack-Cairn/K-brain/blob/main/README.zh-CN.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

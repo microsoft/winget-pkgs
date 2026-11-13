@@ -1,0 +1,60 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: g0orx.hpsdr-rs
+PackageVersion: 0.14.0
+PackageLocale: en-US
+Publisher: John Melton
+PublisherUrl: https://github.com/g0orx
+PublisherSupportUrl: https://github.com/g0orx/hpsdr-rs/issues
+Author: John Melton
+PackageName: hpsdr-rs
+PackageUrl: https://github.com/g0orx/hpsdr-rs
+License: GPL-2.0-or-later
+LicenseUrl: https://github.com/g0orx/hpsdr-rs/blob/HEAD/LICENSE
+ShortDescription: Desktop client for openHPSDR Protocol 1/2 SDR radios.
+Description: |-
+  A Rust/egui desktop client for openHPSDR Protocol 1 and Protocol 2 radios (Metis/Ozy-style and Hermes/Orion-style boards), using WDSP for DSP.
+
+  - Protocol 1 (Metis/Ozy) and Protocol 2 (Hermes/Orion) support, with standard openHPSDR UDP discovery
+  - Multiple simultaneous receivers, each with its own VFO, mode, filter width, and band memory
+  - Spectrum/waterfall display with adjustable dB range, palette, and Click-to-Tune (CTUN)
+  - SSB/CW/AM/FM/digital modes, per-mode/per-band filter width and mode memory
+  - Noise blanker (NB/NB2), noise reduction (NR/NR2/NNR), and SNB, independently switchable
+  - AGC with selectable Off/Long/Slow/Medium/Fast modes
+  - TX: mic audio through WDSP's TXA chain, ALC, TX power/SWR meter with per-band PA calibration, and a Tune button
+  - PureSignal (PA linearization/predistortion), on both Protocol 1 and Protocol 2
+  - rigctl (Hamlib-compatible), TCI (WebSocket), and CAT (Kenwood TS-2000 emulation) control servers
+  - Dual VFO (VFO A/B) with Split -- transmit on VFO B while receiving on VFO A
+  - Selectable RX output / TX input audio devices, independent of the OS default
+  - Per-radio settings persistence, keyed by the radio's MAC address
+  - FPGA firmware upload and static IP configuration
+Tags:
+- amateur-radio
+- dsp
+- ham-radio
+- openhpsdr
+- sdr
+ReleaseNotes: |-
+  Changes since v0.13.0.
+  New
+  - FM repeaters: in FM the transmit row now has a Shift (− / Simplex / +), the band's repeater offset, and a CTCSS tone (the 50 standard tones, or off). The TX frequency is shown alongside. While transmitting, VFO A shows the TX frequency in red, and the spectrum scale and the cursor frequency readout follow it. Offsets start at the usual European values (10m 100 kHz, 6m 500 kHz, 2m 600 kHz, 70cm 7.6 MHz, 23cm 6 MHz); a changed offset is kept for that band or transverter. From #15.
+  - Split per band: each band remembers Split and Duplex, and its FM Shift and CTCSS tone, as you left them there. To turn Split off on every band change instead, tick Split off when changing band (Settings → TX). From #15.
+  - PA OFF: shown in amber next to MOX when the transverter you transmit on has Disable PA set. From #15.
+  Changes
+  - MIDI CW Key: a CW key now sends inside a MOX that is already up, e.g. one raised by the keyer's own PTT note, and leaves MOX to whatever raised it. From #15.
+  - MIDI CW Key: the PC sidetone (Settings → CW → PC Sidetone) now follows a MIDI CW key.
+  - The spectrum's dB labels step by 20, 50 or 100 dB on a short spectrum, so they no longer overlap.
+  - Updated screenshots in the README and user manual.
+  Fixes
+  - FM always transmitted a 100 Hz CTCSS tone (WDSP turns one on by default). A tone is now only sent when one is chosen.
+  Downloads
+  - Linux AppImage (x86_64 / aarch64): hpsdr-rs-0.14.0-x86_64.AppImage, hpsdr-rs-0.14.0-aarch64.AppImage. Run chmod +x on the file, then run it. USB radios still need the udev rules installed by hand; a copy is inside the AppImage under usr/share/doc/hpsdr-rs.
+  - Debian/Ubuntu (amd64): hpsdr-rs_0.14.0-1_amd64.deb. Install with sudo apt install ./hpsdr-rs_0.14.0-1_amd64.deb.
+  - Debian/Ubuntu/Raspberry Pi OS (arm64): hpsdr-rs_0.14.0-1_arm64.deb. Install with sudo apt install ./hpsdr-rs_0.14.0-1_arm64.deb.
+  - Fedora/openSUSE RPM (x86_64 / aarch64): hpsdr-rs-0.14.0-1.x86_64.rpm, hpsdr-rs-0.14.0-1.aarch64.rpm. Install with sudo dnf install ./hpsdr-rs-0.14.0-1.x86_64.rpm, or on openSUSE sudo zypper install --allow-unsigned-rpm ./hpsdr-rs-0.14.0-1.x86_64.rpm.
+  - macOS (Apple Silicon): hpsdr-rs-0.14.0-macos-arm64.tar.gz. It is built in CI, unsigned and not notarized, so Gatekeeper warns on first launch. Right-click the hpsdr-rs binary and choose Open, or run xattr -d com.apple.quarantine hpsdr-rs first.
+  - Windows (x86_64): hpsdr-rs-0.14.0-x86_64.msi
+ReleaseNotesUrl: https://github.com/g0orx/hpsdr-rs/releases/tag/v0.14.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

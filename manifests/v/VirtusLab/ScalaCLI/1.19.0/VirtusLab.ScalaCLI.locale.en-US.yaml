@@ -1,0 +1,161 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: VirtusLab.ScalaCLI
+PackageVersion: 1.19.0
+PackageLocale: en-US
+Publisher: scala-cli@virtuslab.com
+PublisherUrl: https://virtuslab.com/
+PublisherSupportUrl: https://github.com/VirtusLab/scala-cli/issues
+PackageName: Scala CLI
+PackageUrl: https://github.com/VirtusLab/scala-cli
+License: Apache-2.0
+LicenseUrl: https://github.com/VirtusLab/scala-cli/blob/HEAD/LICENSE
+ShortDescription: Scala CLI is a command-line tool to interact with the Scala language.
+Tags:
+- functional
+- java
+- language
+- programming
+- scala
+ReleaseNotes: |-
+  Default Scala version is 3.10.1
+  Scala 3.10.1 is the new default Scala version, and the version Scala CLI itself is built with. The previous default was 3.9.0.
+  The legacy Scala 3.3 LTS line moves to 3.3.9. Tags such as 3.3.lts stay pinned to the LTS versions configured in the Scala CLI build, so a tag cannot drift ahead of that configuration.
+  scala-cli -e 'println(scala.util.Properties.versionNumberString)'
+  # 3.10.1
+  scala-cli -e 'println(dotty.tools.dotc.config.Properties.simpleVersionString)' -S 3.3.lts --with-compiler
+  # 3.3.9
+  Added by @Gedochao in #4623, #4574 and #4576
+  Built with JDK 25, GraalVM 25 for native images
+  Scala CLI is now built with JDK 25. The class files it publishes still target older Java versions, so a newer build JDK does not leak into the bytecode or the JDK API the code is allowed to call.
+  ───────────────────────────────────────────────────┬─────────────────────────────────────────┬────────
+  Code                                               │Compiler flag                            │Bytecode
+  ───────────────────────────────────────────────────┼─────────────────────────────────────────┼────────
+  Java sources in the main modules                   │--release 17 (was --release 16)          │17
+  ───────────────────────────────────────────────────┼─────────────────────────────────────────┼────────
+  Scala sources, other than the Scala 3.3 LTS modules│-java-output-version:17                  │17
+  ───────────────────────────────────────────────────┼─────────────────────────────────────────┼────────
+  runner, test-runner                                │-java-output-version:11, on Scala 3.3 LTS│11
+  ───────────────────────────────────────────────────┼─────────────────────────────────────────┼────────
+  java-test-runner                                   │--release 8                              │8
+  ───────────────────────────────────────────────────┼─────────────────────────────────────────┼────────
+  specification-level                                │-java-output-version:17, on Scala 3.3 LTS│17
+  ───────────────────────────────────────────────────┴─────────────────────────────────────────┴────────
+  runner, test-runner and specification-level stay on Scala 3.3 LTS with -Yfuture-lazy-vals. The JVM launcher still requires Java 17 or newer. Projects you compile with Scala CLI can still target older JVMs, for example with --jvm 11 or --jvm 8.
+  Native images of Scala CLI are built with GraalVM Community 25.0.2. macOS x64 uses GraalVM 25.0.1, the newest Community build published for that platform.
+  package --native-image defaults to that same GraalVM. Pass --graalvm-version or --graalvm-java-version to pick another one.
+  scala-cli --power package --help
+  Added by @Gedochao in #4593
+  fmt formats .mill files
+  scala-cli fmt formats Mill build files (.mill), alongside Scala sources and build.sbt. Pass a file or a directory.
+  version = "3.11.5"
+  runner.dialect = scala3
+  package build
+  import mill.*, scalalib.*
+  object foo    extends   ScalaModule:
+    def scalaVersion    =       "3.3.6"
+  scala-cli fmt mill-fmt
+  cat mill-fmt/build.mill
+  Added by @Gedochao in #4554
+  The config module is now built with Scala 3.9 LTS
+  As noted before, the config module was bumped to Scala 3.9.0 LTS. It used to be kept at 3.3 LTS for compatibility.
+  Added by @Gedochao in #4579
+  ⚡ Exposing ports when packaging a Docker image
+  --docker-exposed-ports and //> using packaging.dockerExposedPorts declare the ports a Docker image exposes. A value can be a single port (8080), a range (9000-9010) or a port with a protocol (53/udp; tcp is used when the protocol is omitted).
+  //> using packaging.dockerExposedPorts 8080 9000-9010 53/udp
+  object Hello:
+    def main(args: Array[String]): Unit =
+      println("Hello")
+  scala-cli --power package --docker HelloDocker.scala --docker-image-repository hello-docker --docker-exposed-ports 8080 --docker-exposed-ports 53/udp
+  Added by @Gedochao in #4586
+  ⚡JSPI for Scala.js on Wasm
+  On the Wasm backend, js.async and js.await use JavaScript Promise Integration. Since Scala.js 1.22 the linker includes them only when JSPI is enabled. Turn it on with --js-wasm-jspi or //> using wasmJspi, together with Wasm output and ES modules. The runtime has to support JSPI as well. Node.js 25 and later enable it by default.
+  //> using wasm
+  //> using jsModuleKind es
+  //> using wasmJspi
+  import scala.scalajs.js
+  object Async:
+    def main(args: Array[String]): Unit =
+      js.async {
+        val x = js.await(js.Promise.resolve[Int](21))
+        println(s"JSPI ${x * 2}")
+      }
+  scala-cli --power run Async.scala
+  # JSPI 42
+  When the Scala.js linker emits several files, the entry module is now chosen deterministically, and a multi-file linked output directory is removed recursively before the next link.
+  Added by @sideeffffect in #4550, #4548 and #4549
+  ⚡ Publishing on macOS, Linux ARM64 and Windows ARM64
+  publish setup and github secret create are now supported on MacOS (both Intel and ARM64), Linux ARM64 and Windows ARM64 platforms.
+  Added by @Gedochao in #4622
+  Linux ARM64 .deb and .rpm packages
+  Linux ARM64 already had a native launcher. This release also publishes ARM64 Debian and RPM packages next to the existing x86_64 ones:
+  - scala-cli-aarch64-pc-linux.deb
+  - scala-cli-aarch64-pc-linux.rpm
+  They are uploaded to the scala-cli-packages apt and rpm repositories, together with other Linux artifacts.
+  Added by @Gedochao in #4572
+  Windows ARM64 launcher and MSI
+  A Windows ARM64 build is now published:
+  - scala-cli-aarch64-pc-win32-jvm.zip, a jpackage app image that bundles its own JVM
+  - scala-cli-aarch64-pc-win32.msi, an installer built with WiX 3, which adds the install directory to the system PATH
+  The x86_64 Windows launcher already runs on Windows 11 ARM through emulation. Windows 10 ARM does not provide that emulation, so it needs this build. The app image is larger than the x86_64 native launcher, because it ships a JVM.
+  Added by @warcholjakub in #4595
+  Features
+  - Add --js-wasm-jspi and //> using wasmJspi to enable JSPI on Wasm by @sideeffffect in #4550
+  - Add arm64 .deb and .rpm artifacts by @Gedochao in #4572
+  - Allow exposing ports when packaging through docker by @Gedochao in #4586
+  - Build and publish a Windows ARM64 launcher and .msi package by @warcholjakub in #4595
+  - Bump libsodiumjni to 1.0.0 (was 0.0.5) & add support for publishing on arm64 runners by @Gedochao in #4622
+  Fixes
+  - Pick the Scala.js entry module deterministically when the linker emits multiple files by @sideeffffect in #4548
+  - Remove the multi-file Scala.js linked output directory recursively by @sideeffffect in #4549
+  - Prefer classic main methods over JEP 512 ones when inferring the main class by @Gedochao in #4562
+  - fix: re-pin lts tags to the Scala 3 LTS versions configured in the build by @Gedochao in #4576
+  - Fix cli scaladoc generation by @Gedochao in #4599
+  - Don't walk directories on the class path by @lrytz in #4594
+  - Don't compile .jar inputs as sources with --server=false by @sideeffffect in #4596
+  - Don't fetch a Scala compiler for --java runs with nothing to compile by @sideeffffect in #4597
+  - Don't report power-mode-only options as unrecognized arguments by @sideeffffect in #4598
+  Security
+  - Mitigate CVE-2026-91403: distrust compromised eMudhra CAs in JDKs and native launchers by @Gedochao in #4575
+  Compatibility
+  - refactor: migrate off deprecated coursier API in tests by @Gedochao in #4561
+  - config: bump Scala to 3.9.0 LTS (was 3.3.9 LTS) by @Gedochao in #4579
+  - Migrate from coursier/publish to scala/scala-publish by @Gedochao in #4588
+  - GraalVM 25.0.2, svm 25.0.5.0.3 & JDK 25 (with -release 17) by @Gedochao in #4593
+  - Bump libsodiumjni to 1.0.0 (was 0.0.5) & add support for publishing on arm64 runners by @Gedochao in #4622
+  Documentation
+  - docs: update installation methods by @Gedochao in #4567
+  - Back port of documentation changes to main by @github-actions[bot] in #4568
+  Build and internal changes
+  - Pin vedantmgoyal9/winget-releaser to a pre-bug commit sha by @Gedochao in #4540
+  - Migrate from vedantmgoyal9/winget-releaser to running komac here by @Gedochao in #4542
+  - Make mill-native-image and mill-native-image-upload source dependencies via a git submodule by @Gedochao in #4543
+  - fix: filter out JVM log lines in integration test assertions by @Gedochao in #4563
+  - Link agentskills for Claude Code, .gitignore the rest of config in .claude by @Gedochao in #4577
+  - Split LTS integration suites into 3.9 LTS and (legacy) 3.3 LTS by @Gedochao in #4587
+  - Don't fail CI when nightlies are not fetchable, only when they're wrong by @Gedochao in #4603
+  - fix: time out hung native-binary tests and make munit's per-test timeout actually fire by @Gedochao in #4608
+  Updates
+  - Bump Scala 3 Next to 3.10.0 by @Gedochao in #4536
+  - Bump shell-quote from 1.10.0 to 1.12.0 in /website by @dependabot[bot] in #4541
+  - Bump the npm-dependencies group in /website with 3 updates by @dependabot[bot] in #4551
+  - Update asm to 9.11 by @scala-steward in #4546
+  - Update sbt to 2.0.10 by @scala-steward in #4553
+  - Update jsoniter-scala-core, ... to 2.41.5 by @scala-steward in #4552
+  - Support formatting .mill inputs with fmt by @Gedochao in #4554
+  - Bump scala-js-cli to 1.22.0.3 (was 1.22.0.1) by @Gedochao in #4556
+  - Update asm to 9.11.1 by @scala-steward in #4559
+  - Update jsoniter-scala-core, ... to 2.41.6 by @scala-steward in #4558
+  - Bump Mill to 1.3.0 (was 1.1.9) by @Gedochao in #4560
+  - Bump the npm-dependencies group in /website with 6 updates by @dependabot[bot] in #4564
+  - Bump follow-redirects from 1.16.0 to 1.16.1 in /website by @dependabot[bot] in #4569
+  - Bump launch-editor from 2.14.1 to 2.14.2 in /website by @dependabot[bot] in #4571
+  - Update jsoniter-scala-core, ... to 2.41.7 by @scala-steward in #4570
+  - Bump legacy Scala 3.3 LTS to 3.3.9 by @Gedochao in #4574
+  - Update jsoniter-scala-core, ... to 2.42.0 by @scala-steward in #4578
+  - Bump Scala Next RC to 3.10.1-RC1 by @Gedochao in #4573
+  - Bump the npm-dependencies group in /website with 7 updates by @dependabot[bot] in #4580
+ReleaseNotesUrl: https://github.com/VirtusLab/scala-cli/releases/tag/v1.19.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
