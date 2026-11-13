@@ -1,0 +1,82 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: RClone-Manager.rclone-manager
+PackageVersion: 0.3.6
+PackageLocale: en-US
+Publisher: RClone-Manager
+PublisherUrl: https://github.com/Zarestia-Dev
+PublisherSupportUrl: https://github.com/Zarestia-Dev/rclone-manager/issues
+PackageName: RClone Manager
+PackageUrl: https://github.com/Zarestia-Dev/rclone-manager
+License: GPL-3.0-or-later
+LicenseUrl: https://github.com/Zarestia-Dev/rclone-manager/blob/HEAD/LICENSE
+ShortDescription: A powerful, cross-platform GUI for managing Rclone remotes with style and ease.
+Tags:
+- adwaita
+- angular
+- angular-material
+- dropbox
+- fuse
+- gnome
+- google-drive
+- onedrive
+- rclone-gui
+- s3
+- tauri
+ReleaseNotes: |-
+  RClone Manager v0.3.6
+  This release adds an RC Console, one-click resolution of Check differences and BiSync conflicts, a new Job Monitor with per-file reports, directory listings for static websites, and a round of updater fixes. It also fixes the missing tray icon on KDE Plasma and adds Start on Boot for Android.
+  Highlights
+  - RC Console. Run any rclone remote-control call from the web UI (Ctrl + Alt + R), with call and parameter suggestions, inline help, job following and a read-only start mode.
+  image
+  - Resolve Check differences and BiSync conflicts. Copy a missing file with one click, or compare both versions and pick the winner, one file or a whole selection. Implements #329.
+  image
+  - Job Monitor and File Report. One card shows the figures that matter for each kind of job, and finished sync, copy and move jobs list every new, different, missing, matching and failed file.
+  image
+  - Directory listings. Write browsable index.html, index.json or caddy.json listings into every folder of a remote, so a bucket can be served as a static website.
+  Added
+  - RC Console: Lists every call in a sidebar, suggests calls and parameters as you type, shows the help for a call and follows the jobs it starts. It starts read-only, asks before dangerous calls and masks secrets in the output. On a local backend it shows the rclone version and process ID and has a Restart engine button that picks up a rebuilt rclone.
+  - Resolve Check Differences: Each difference is labelled as new on the source, only on the destination, or different on both sides, with the direction a copy would go. A file that exists on one side is copied with one click. For a file that differs on both sides, a dialog shows both versions (path, size, modified time, newer or larger), can compare checksums and asks which one should win. Several differences can be selected and applied together. Implements #329.
+  - Resolve BiSync Conflicts: A finished BiSync run with conflicts has a Conflicts tab. Pick the version to keep, one file or a selection; the kept version gets the original name on both paths and the other copies are removed. Conflicts are read from the rclone log, so it works with any rclone version. Conflicts BiSync settled itself (--conflict-resolve, --conflict-loser delete) are not listed. Implements #329.
+  - File Report: A finished sync, copy or move job keeps the lists rclone reports (new, different, missing, matching, failed) and shows them as tabs with a status for every file.
+  - Job Monitor: One card replaces the separate job information, statistics and activity cards. It shows progress, speed with a live graph, time left or taken, files and checks for transfers; compared, matched and different files for a check; and how many files a delete removed. A failed job shows its error above the figures. The layout follows the card's width, so it works on a phone, a tablet and a wide window.
+  - Directory Listings: Uses rclone's index command to write a listing into every folder. Choose Generate directory listings… from the file manager's path menu, a remote's menu there, the dashboard or Quick Run. Pick the formats, depth, which folders to include or skip, the time shown for a folder and whether links point to dir/index.html. Unchanged listings are not rewritten. It is also an operation of a remote's profiles (schedule, auto-start and, for a local folder on a local backend, a folder watcher), a card on the dashboard, a Quick Run and a workflow node.
+  - AUR Update Instructions: AUR installs (rclone-manager, -headless, -server) show the command that updates them (paru -S or yay -S, otherwise the makepkg steps) and link to their AUR page. An update is offered once the AUR publishes it; -git packages are not offered releases.
+  - Update Status Survives Reloads: The About page shows when updates were last checked and why a check failed, including scheduled checks and checks started in another window. Rolled-back updates and the "restart the remote rclone" reminder are shown too.
+  - Start on Boot (Android): Starts RClone Manager in the background when the phone boots, so auto-start profiles and schedules run without opening the app. Off by default; some manufacturers also require allowing autostart in system settings.
+  - Live Update Status Chip (Android): The keep-alive notification shows the number of running jobs, mounts and serves in the status bar.
+  - Notification Actions (Android): A Quit action (with confirmation) and a Stop jobs action while jobs are running.
+  - Onboarding Permissions (Android): An optional first-run step to allow access to all files and exempt the app from battery optimization.
+  Changed
+  - Workflow RC Editor: Has the same call list, suggestions and hints as the RC Console, and test runs only read until you allow writes.
+  - Activity Panel: Files are cards with the folder above the name and full paths shown. Tabs (Active, Recent, File Report, Conflicts) and the search, copy and delete buttons share one row.
+  - Job Details Order: The monitor comes first, then the profile or Quick Run, then the paths and the counters.
+  - Count Badges: Counters have a minimum width and aligned digits.
+  - Background Service Runs Without the Window (Android): The backend starts and runs the keep-alive service on its own, so jobs, mounts and schedules keep working while the window is closed.
+  - Start on Startup Description: Notes that a locked configuration vault stays locked until the app is opened.
+  - Updates on Slow Connections: Update checks and downloads no longer have a total time limit; a request fails only when the connection stalls (30 s to connect, 120 s without data).
+  - Fewer Update Requests: The release list is revalidated with its ETag (not counted against GitHub's rate limit), the rclone changelog is downloaded once per version, and rclone beta builds no longer look up a GitHub release that does not exist.
+  - Translated Updater Errors: Updater errors, rollback reasons and rclone update failures are translated in all ten languages.
+  - Update Commands: Flatpak shows the product's own app ID, Docker shows docker compose pull && docker compose up -d, and AUR installs are labelled AUR.
+  - Some UI/UX improvements.
+  Fixed
+  - Tray Missing After Session Start on KDE Plasma (Linux): When started by autostart before the compositor was ready, the app crashed in GTK initialization and never showed its tray icon. It now waits up to 60 seconds for the display socket. Thanks to @nvandamme! PR #341
+  - DEB and RPM In-App Updates (Linux): Installs from the .deb or .rpm update in the app again, through the system password prompt (pkexec, zenity or kdialog); 0.3.4 had treated them as externally managed. They are only offered newer versions, since rpm refuses downgrades.
+  - Start on Startup Lost After Reinstall: If "Start on startup" is on but the autostart entry is missing (for example removed during an upgrade), the app re-creates it at startup. Development builds and Flatpak are not affected. See #340.
+  - Quick Run Jobs Shown as "Default": Job details now show the Quick Run's name. Jobs started before this update have no name to show.
+  - rclone Engine After a Failed Update: If swapping in a downloaded rclone failed, the engine stayed stopped; the original binary now starts again. A failed check before the swap no longer reports a running engine as stopped.
+  - Remote rclone Updates: Updating a remote backend's rclone no longer leaves "Restart to apply" showing, which also blocked later checks.
+  - Hidden rclone Update Errors: Failed rclone update checks are now shown on the About page.
+  - Update Notices: A finished download says the update is ready to install instead of "installed", and the pre-release badge follows the release's pre-release flag.
+  - Updater Stuck After a Stalled Request: A stalled update check could block installing, applying and cancelling until restart.
+  - Failed Restart After an Update: If the app could not restart itself after an update, it now exits so the installed version starts next.
+  - Windows Update Helper: Ending updater.exe after a successful update, for example from Task Manager, no longer closes the application.
+  - Android Update Storage: The downloaded APK is kept once instead of twice in the app cache.
+  Full Changelog: v0.3.5...v0.3.6
+ReleaseNotesUrl: https://github.com/Zarestia-Dev/rclone-manager/releases/tag/v0.3.6
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/Zarestia-Dev/rclone-manager/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
