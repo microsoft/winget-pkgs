@@ -1,0 +1,97 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.136.169
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.136.169] - 2026-11-12
+  File Shredder refuses to shred a whole drive, your profile or one of your own folders such as Downloads, and a file
+  deep in a folder tree is now removed after its overwrite instead of being left behind.
+  Fixed
+  - File Shredder refused Windows, System32 and Program Files and anything inside them, but not a folder that holds
+    them, so the root of a drive passed its check, and so did the profile folder, AppData, ProgramData and your own
+    folders (Documents, Downloads, Desktop and the rest). A shred of one of those after a question that counted one
+    item destroyed everything in it. They are now refused as a whole, together with any folder that holds one of them;
+    the files and folders inside them can still be shredded. A drive root has passed since the File Shredder came in 1.4.0.
+  - A file whose path has 260 characters or more was overwritten and then left on disk: the overwrite reached it, but
+    the shredder's own removal, its named-stream search and two of its path checks took the path in a form Windows
+    limits to 259 characters unless long paths are turned on. Every one of those calls now uses the long form when a
+    path needs it. The removal has been that way since 1.136.164 and the named-stream search since 1.131.8.
+  - A file refused partway through a folder shred, for a reason found before its first byte was written, stopped the
+    whole folder with only that reason, and the files already destroyed went unreported. It is now left in place and
+    named with the others the shred could not reach, the message says how many were destroyed, and the folders above
+    it are left as they are.
+  - A folder whose real location could not be read is refused before anything in it is touched, rather than checked
+    only by the name it was picked by.
+  Changed
+  - On a PC without long paths turned on, a folder whose path has 260 characters or more is now checked for links and
+    walked like any other: Disk Analyzer, Duplicate Finder, Large Files, the cleanup sweeps and the leftover search
+    refused it as one whose real location could not be read.
+  Verify the download
+  Get-FileHash .\SysManager-v1.136.169.exe -Algorithm SHA256
+  Expected SHA256: D6BB7B04E993E2AF347CD096873389E8557038433BA55DE95AE970A70D251B7F
+  This build is not code-signed, so Windows will warn on first launch. That is
+  expected for a small independent app: see what the warning says and what to
+  click.
+  Code signing is planned through the SignPath Foundation,
+  which provides free certificates to open-source projects, with signing performed by
+  SignPath.io. Until then, the SHA256 above and the build
+  attestation below are what establish that a download is the genuine build.
+  Code signing policy
+  This release is not code-signed. The team roles, release-approval process and
+  privacy policy required by the SignPath Foundation programme
+  are documented in advance under Code signing
+  policy. That
+  documentation is a prerequisite for applying, not evidence of a certificate. The
+  attribution line naming SignPath as the signing provider will appear here once a
+  certificate is actually issued.
+  This program will not transfer any information to other networked systems unless
+  specifically requested by the user or the person installing or operating it. Two checks
+  run on their own when SysManager starts: the version check against the GitHub Releases
+  API, at most once a day, and the Dashboard's app-updates alert, which asks winget. The
+  About tab can switch off either. Everything else that uses the network runs only when you
+  use it. Full
+  privacy policy.
+  Verify where this binary came from
+  This exe was built by GitHub Actions from this public source, and the build is
+  recorded in the Sigstore public transparency log. With the
+  GitHub CLI:
+  gh attestation verify .\SysManager-v1.136.169.exe --repo laurentiu021/SystemManager
+  That proves which commit and workflow produced this exact binary, something the
+  SHA256 file cannot show, since it is published alongside the exe it describes.
+  Each release also ships SysManager-v1.136.169.sbom.json, a CycloneDX inventory of
+  every dependency resolved for this build, and THIRD-PARTY-NOTICES.txt, the
+  licenses and notices of the open-source components the exe carries, which About
+  also opens from the exe itself.
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.136.169
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
