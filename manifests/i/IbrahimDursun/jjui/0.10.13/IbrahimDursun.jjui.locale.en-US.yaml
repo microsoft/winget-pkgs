@@ -1,0 +1,71 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: IbrahimDursun.jjui
+PackageVersion: 0.10.13
+PackageLocale: en-US
+Publisher: Ibrahim Dursun
+PublisherUrl: https://idursun.com/
+PublisherSupportUrl: https://github.com/idursun/jjui/issues
+Author: Ibrahim Dursun
+PackageName: Jujutsu UI
+PackageUrl: https://github.com/idursun/jjui
+License: MIT
+LicenseUrl: https://github.com/idursun/jjui/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 ibrahim dursun
+ShortDescription: Jujutsu UI (jjui) is a Text User Interface (TUI) designed for interacting with the Jujutsu version control system.
+Moniker: jjui
+Tags:
+- jj
+ReleaseNotes: |-
+  This release is a batch of bug fixes and little improvements. Heads up: This release requires jj 0.39 or newer.
+  Improvements
+  Select consecutive revisions with Space
+  Pressing space now toggles revision selection and moves down one row. Previously it jumped to the revision's parent, which could skip rows on branching graphs. See the notes below to restore the previous behavior.
+  File search and command suggestions
+  The file finder now loads paths asynchronously, keeping the UI responsive while loading. Scroll results with the mouse wheel or click a file or directory to apply the history filter and close the finder.
+  Command-history suggestions in the : and $ prompts also support mouse-wheel scrolling. Clicking a suggestion executes that command.
+  Fixes
+  Preserve merge-parent order
+  Checked revisions now retain the order in which you selected them. When creating a merge with n, that order determines the parent order, giving you control over the first parent. Previously jjui used graph order, which could cause unrelated history to appear in a GitHub pull request.
+  Set Parents also preserves the order of retained parents and appends new parents in selection order. Adding a parent no longer unexpectedly changes a merge's first parent.
+  (#766)
+  Use the full width for external diff tools
+  Full-screen diffs now pass terminal dimensions to tools such as difftastic, avoiding the 80-column fallback on wider terminals. This applies to diffs opened from Revisions, Details, Evolog, Diff Range, and Oplog. Loading an individual file uses the current diff viewport dimensions.
+  (#772)
+  Keep long descriptions visible while editing
+  Inline Describe now opens with the cursor visible in long descriptions and follows it as you edit. Mouse-wheel scrolling no longer leaves parts of the description hidden or stops the editor from following the cursor.
+  (#771)
+  Search across highlighted ID prefixes
+  Quick search now matches across text with different styling. Searching for a change or commit ID works even when the query spans its highlighted unique prefix and dimmed remainder.
+  (#759)
+  Filter history by directory
+  Selecting a directory in the file finder now shows revisions that touched files anywhere within that directory. Previously the directory path was treated as an exact file path and matched nothing.
+  Render menus correctly on narrow terminals
+  Git and bookmark menus truncate names by display width without splitting Unicode characters. The remotes line also stays within the menu border on narrow terminals.
+  Respect rebound help keys
+  The status bar hints now show your configured keys for expanding status help and opening full help.
+  Notes
+  Requires jj 0.39 or newer
+  The minimum supported jj version increases from 0.37 to 0.39. Snapshotting now uses the documented jj util snapshot command, replacing the deprecated jj debug snapshot command.
+  (#780)
+  Restore jump-to-parent after selection
+  To make space select a revision and jump to its parent as before, add this action override to config.toml:
+  [[actions]]
+  name = "revisions.toggle_select"
+  lua = """
+  jjui.builtin.revisions.toggle_select()
+  jjui.builtin.revisions.jump_to_parent()
+  """
+  What's Changed
+  - fix(diff): pass terminal width to full-screen diff subprocesses by @nickchomey in https://github.com/idursun/jjui/pull/772
+  - fix: switch from jj debug snapshot to documented jj util snapshot by @hey2022 in https://github.com/idursun/jjui/pull/780
+  New Contributors
+  - @hey2022 made their first contribution in https://github.com/idursun/jjui/pull/780
+  Full Changelog: https://github.com/idursun/jjui/compare/v0.10.12...v0.10.13
+ReleaseNotesUrl: https://github.com/idursun/jjui/releases/tag/v0.10.13
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/idursun/jjui/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
