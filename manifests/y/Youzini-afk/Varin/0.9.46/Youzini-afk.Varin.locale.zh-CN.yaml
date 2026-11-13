@@ -1,0 +1,55 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Youzini-afk.Varin
+PackageVersion: 0.9.46
+PackageLocale: zh-CN
+Publisher: Youzini-afk and Varin contributors
+PublisherUrl: https://github.com/Youzini-afk
+PublisherSupportUrl: https://github.com/Youzini-afk/Varin/issues
+PackageName: Varin
+PackageUrl: https://github.com/Youzini-afk/Varin
+License: AGPL-3.0-only
+LicenseUrl: https://github.com/Youzini-afk/Varin/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Youzini-afk and Varin contributors
+ShortDescription: 面向编程与科研的独立 Agent 工作台与完整 Harness。
+Description: Varin 是一个独立的 Agent 工作台与完整 Harness，面向编程、科研和其他项目工作，以本地和桌面体验为中心。它内置 Pi 运行时；模型与提供商栈、会话树、包管理器和扩展模型仍由 Pi 提供，而 Varin 负责周围的工具环境、工作状态、恢复、检索、上下文策略、任务治理和工作台界面。Varin 自带两套官方工作形态：以会话、任务和上下文为中心的 Agent Workspace，以及以编辑器、搜索、Git、诊断和调试为中心、把智能体作为可停靠面板的 IDE Workbench。
+Tags:
+- pi
+- pi-agent
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 科研
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  Varin 0.9.46 减少打开会话、更新侧栏和显示流式回复时的重复工作，修复升级后旧工具定义卡住任务恢复的问题，完善原生工作区上的定时任务，并让准备失败的原因更容易理解。
+  会话与流式响应性能
+  - 合并读取会话状态、历史与相关执行信息，并使用独立的数据库读取连接，减少无关查询排在执行写入后面等待的情况。
+  - 每个 Host 共用观察连接。会话列表、分类、上下文与用量视图按各自关心的事件更新；日常活动变化只刷新受影响的会话，减少反复重拉整个目录。
+  - 历史按新增内容追加，流式界面更新合并处理，并复用未变化的会话行和渲染内容。打开其他视图时直接调整观察范围，避免打断已有回复流。
+  - Host 与内核之间的小消息直接传输，大内容继续分块发送，减少传输开销，并保留取消与控制指令的传递。
+  - 修复 HTTP 连接暂时写满时的处理：后续进展先排队，连接恢复可写后继续发送；持续跟不上更新的连接明确请求重新同步，避免静默丢失进展。
+  恢复任务时使用当前工具
+  - 普通排队任务与恢复执行的任务重新准备当前内置工具和已启用的扩展目录。上次执行后新增、修改或禁用的工具，不再让任务困在过时的目录里。
+  - 后续执行使用当前定义，历史请求仍保留当时的工具、参数和结果。恢复沿用原有执行回执，不会为了更新工具定义而重复已经完成的操作。
+  - 修复无工具摘要任务的准备，并让父任务持续收到手动启动的上下文任务进展，包括完成与失败状态。
+  定时任务与原生工作区
+  - 修复原生工作区上的定时任务准备，包括文档视图或执行视图 ID 与所属工作区 ID 不同的情况。本地与托管准备都保留原先选中的分支和目录范围。
+  - 准备失败时显示具体阶段，为已识别的原因提供说明；技术详情可以展开查看，并保留原有重试入口。
+  稳定性与维护
+  - 设置缓存及时感知外部写入、文件替换和目录新建。未变化的文件复用缓存正文，设置读取不再长期持有目录监听器或后台定时器。
+  - 减少可信设备认证中的重复磁盘读取，并将凭据初始化放在 Host 启动准入之后，避免因离线恢复而拒绝启动时，提前创建身份文件。
+  - 会话快照保留媒体引用，让图片与文件读取继续对应原始内容。
+  - 更新 Hono 及其 Node 适配器，同步生产依赖与云端运行环境的固定版本。
+  - 在项目联系方式与桌面端“关于”页面加入 varin@astrmira.com。
+  桌面版发布目标覆盖 Windows x64/ARM64、Linux x64/ARM64 与 macOS Apple Silicon。签名 Android APK 用于连接已有的 Varin Host。标准版与 toolbelt Docker 镜像通过容器发布流程构建；可选的本地嵌入组件继续单独下载。
+  源码部署： 请一起重新构建应用与 Rust 内核，然后重启 Host。受支持的会话存储会在打开时自动升级，升级前建议保留备份。
+  完整更新记录
+ReleaseNotesUrl: https://github.com/Youzini-afk/Varin/releases/tag/v0.9.46
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
