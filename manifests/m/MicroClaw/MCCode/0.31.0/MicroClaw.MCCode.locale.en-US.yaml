@@ -1,0 +1,97 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: MicroClaw.MCCode
+PackageVersion: 0.31.0
+PackageLocale: en-US
+Publisher: MicroClaw
+PublisherUrl: https://microclaw.org/
+PublisherSupportUrl: https://github.com/microclaw/microclaw/issues
+PackageName: MicroClaw Code
+PackageUrl: https://github.com/microclaw/microclaw
+License: MIT
+LicenseUrl: https://github.com/microclaw/microclaw/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 everettjf
+ShortDescription: A terminal coding agent that works directly in your repository and verifies its edits with your project's own checks
+Description: |-
+  MicroClaw Code (mccode) is a terminal coding agent. It opens the repository that contains the current directory and runs the MicroClaw Agent Engine in it: a full-screen TUI for interactive work, or -p for one non-interactive task. It reaches the engine only through the public microclaw-sdk.
+
+  Core capabilities
+  - Full-screen terminal interface with plan, ask, and auto permission modes
+  - Diffs with hunk-level review, and approvals before edits are applied
+  - Automatic build and lint verification of the changes it makes
+  - Sessions that can be continued or resumed, with checkpoints and persistent memory
+  - Themes, layered settings with allow / ask / deny rules, and Claude Code-compatible hooks
+  - Model configuration kept in ~/.mccode, separate from the MicroClaw Server
+
+  MicroClaw Code and the MicroClaw Server are separate products. Each installs, updates and uninstalls on its own, and neither reads the other's configuration, data or MICROCLAW_* / MCCODE_* variables.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  MicroClaw Code 0.31: private project memory, Claude Code plugins and idle
+  compaction (docs/roadmap/mccode-competitive-plan-2026-11-cn.md, N5–N7).
+  Added
+  - Private project memory. Besides the shared .microclaw/memory.md
+    (in the repository), trusted projects now have a private memory in
+    ~/.mccode/projects/<repo>-<hash>/memory.md for your preferences and this
+    machine's setup. Both are in the prompt of every turn; the agent is told
+    which kind of fact goes where (a stated preference never goes to the
+    shared file), and writing the private file does not ask for the
+    outside-the-project approval. Worktrees share the main checkout's private
+    memory. /memory opens both files in $EDITOR (shared, private,
+    show). mccode import claude adds Claude Code's auto memory of the same
+    repository, mccode import codex the items of Codex's memories.
+  - Plugins in the Claude Code layout. mccode plugin add <owner/repo | git URL | path> [--plugin <name>] [--project], list, update,
+    enable, disable and remove. A plugin's commands (/name and
+    /plugin:name), agents (for explore and sessions_spawn), skills,
+    hooks and MCP servers work as in Claude Code, with ${CLAUDE_PLUGIN_ROOT}
+    resolved; marketplace repositories are followed to the plugin's own
+    repository. Installing lists every hook and MCP command and asks first
+    (--yes without a terminal); updating asks again when new commands
+    appear. Unsupported parts (output styles, LSP servers, …) are listed as
+    skipped. User plugins are copied to ~/.mccode/plugins/, project plugins
+    to .microclaw/plugins/ and load only in trusted projects. /plugins
+    shows what is in use. Engine: extra_agents_dirs, extra_skills_dirs,
+    extra_mcp_configs; SDK: MicroClawBuilder::plugin_sources.
+  - Idle compaction. The terminal UI compacts a large session (at least
+    half of the compaction budget) that has been idle for 90% of the
+    provider's prompt cache lifetime, while the cache is still warm, so the
+    next prompt does not write the whole conversation to the cache again.
+    Anthropic only (the engine reports prompt_cache_ttl in
+    ContextUsage); tui.idle_compact: false turns it off. pre_compact
+    hooks see trigger auto.
+  - MicroClaw Code desktop app (preview, macOS). A GPUI app in
+    apps/microclaw-code-desktop with onboarding, projects, sessions and a
+    streaming transcript over the same ~/.mccode home and Agent Engine as
+    the terminal UI. Build it from source with scripts/bundle.sh; it is
+    not signed or shipped as a download yet.
+  Fixed
+  - glob no longer scans the disk for hours: its fallback for hidden,
+    ignored and absolute paths walks from the pattern's literal prefix and
+    stops after 50,000 entries (saying so), off the async workers.
+  - Plan mode and read-only profiles offer activate_skill, which only reads
+    a skill's instructions.
+  - mccode -p "/unknown" reports the unknown command instead of sending an
+    empty turn.
+  - The system prompt explains the <context_budget> line, which models
+    otherwise read as text injected into tool output.
+ReleaseNotesUrl: https://github.com/microclaw/microclaw/releases/tag/v0.31.0
+Documentations:
+- DocumentLabel: MicroClaw Code guide
+  DocumentUrl: https://github.com/microclaw/microclaw/blob/HEAD/apps/microclaw-code/README.md
+- DocumentLabel: Docs
+  DocumentUrl: https://microclaw.org/docs/overview
+- DocumentLabel: Quick Start
+  DocumentUrl: https://microclaw.org/docs/quickstart
+- DocumentLabel: Installation
+  DocumentUrl: https://microclaw.org/docs/installation
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
