@@ -1,0 +1,72 @@
+# Created with WinGet Tracker using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: t8y2.DBX
+PackageVersion: 0.6.70
+PackageLocale: en-US
+Publisher: t8y2
+PublisherUrl: https://github.com/t8y2
+PublisherSupportUrl: https://github.com/t8y2/dbx/issues
+Author: t8y2
+PackageName: DBX
+PackageUrl: https://github.com/t8y2/dbx
+License: Apache-2.0
+LicenseUrl: https://github.com/t8y2/dbx/blob/HEAD/LICENSE
+ShortDescription: 15MB，lightweight, cross-platform database client. Supports MySQL, PostgreSQL, SQLite, Redis, MongoDB, DuckDB, ClickHouse, SQL Server and more.
+Tags:
+- clickhouse
+- database
+- database-client
+- database-management
+- duckdb
+- gui
+- mongodb
+- mysql
+- postgresql
+- redis
+- rust
+- sql-server
+- sqlite
+- tauri
+- vue
+ReleaseNotes: |-
+  新功能
+  - 侧边栏新增「激活数据库节点时自动展开侧边列表」开关，连接和表较多时可保留侧边树原有展开状态。 (contributed by @GuryYu) (PR #14418)
+  - 设置 → 导航新增「表节点单击定位，双击新开」选项，开启后单击已打开的表直接切换到对应标签页，双击始终新开。 (contributed by @ThugKd) (PR #14550)
+  - MongoDB 集合标签页右键菜单新增「复制标签页」，副本打开同一集合并继承筛选、排序等浏览条件，可独立修改。 (contributed by @ThugKd) (PR #14759)
+  - 数据表格条件过滤新增「不以…开始」和「不以…结束」两个筛选操作符。 (contributed by @xiaou61) (PR #14479)
+  - 插件工作台新增 copyImage 能力，可将插件生成的 PNG 图片直接复制到系统剪贴板。 (contributed by @CSXFanMeng) (PR #14719)
+  - SQL Server 自动补全在 FROM/JOIN 之后支持补全表值函数（TVF）。 (contributed by @yiqiui) (PR #13394)
+  改进
+  - 查询执行和手动、自动刷新后按当前结果重新计算自动列宽，手动调整过的列宽保持不变。 (contributed by @ThugKd) (PR #14443)
+  - 勾选部分列导出 CSV/JSON/XLSX/TXT/Markdown/SQL 时改走后端流式导出，不再退回逐页重查、整文件驻留内存的本地路径，大数据量导出明显提速。
+  - 侧边栏「Generate SQL > DDL」应用与「查看 DDL」相同的 DDL 显示偏好（紧凑 SQL、存储属性），两处生成的 DDL 保持一致。 (contributed by @jeff377) (PR #14847)
+  - 插件 manifest 可声明的网络域名上限从 8 个提升到 64 个，多域名插件的 CSP 不再被静默截断。 (contributed by @yiqiui) (PR #14305)
+  - AI 助手解析表引用时跳过虚谷的公共同义词、定时任务两个内部导航范围，减少无效元数据请求。 (contributed by @mapan0424) (PR #14712)
+  - Windows 7 专用安装包产物改名为 win7-server2008r2，安装程序、开始菜单与卸载列表注明支持 Windows 7 / Server 2008 R2。 (contributed by @zipg) (PR #14703)
+  - 下载页与安装器文案统一为「Windows 7 / Server 2008 R2+」，下载链接对齐新产物文件名。 (contributed by @zipg) (PR #14706)
+  - 不再发布 Windows ARM64 的 WebView2 离线安装包，该包内嵌的 x86 运行库无法启动应用，ARM 设备可继续使用在线安装包、MSI 与便携版。 (contributed by @zipg) (PR #14701)
+  修复
+  - MySQL 批量执行相邻写入语句时，行尾注释不再吞掉分号分隔符导致后续语句被并入而报 ERROR 1064。 (contributed by @jeff377) (PR #14749)
+  - MySQL 等扁平引擎的表搜索不再把每张匹配的表重复列出两次。
+  - SQL Server 执行带头部注释的存储过程时前置注释一并提交，重新打开源码不再丢失注释。 (contributed by @onceMisery) (PR #14720)
+  - 人大金仓 V9 表结构比较不再因 varchar || 拼接操作符不存在而报错，触发器事件列表改由客户端解码。 (contributed by @thailoc-dev) (PR #14628)
+  - 人大金仓执行含查询语句的存储过程（CALL/EXEC/EXECUTE）时返回查询结果集，不再只显示执行摘要。 (contributed by @thailoc-dev) (PR #14734)
+  - 虚谷业务库 SYSDBA 反复连接不再因控制会话口令试探触发服务端 IP 临时封禁而从第三次起报 EOF。 (contributed by @iockx) (PR #14776)
+  - Firebird 配置旧库数据编码（如 GBK）后，UPDATE 与表格编辑写入的中文不再变成问号。 (contributed by @zipg) (PR #14649)
+  - Firebird 表格新增行时允许留空由 BEFORE INSERT 触发器填充的非空列，不再被客户端提前拦截报错。 (contributed by @thailoc-dev) (PR #14731)
+  - Teradata 用户查询不再被改写附加不支持的 LIMIT 子句导致语法报错，改由驱动侧限制返回行数。 (contributed by @xiaou61) (PR #14718)
+  - Doris 新建用户时生成的授权语句修正为 Doris 的权限名与作用范围（全局管理员、整库或指定表），指定表为空时仅创建用户。 (contributed by @ThugKd) (PR #14435)
+  - SAP HANA 查看视图对象源码不再报「Object source is not supported」，视图定义可正常格式化为 CREATE VIEW 语句。 (contributed by @thailoc-dev) (PR #14730)
+  - MongoDB 仅持有数据库级角色的受限账号执行 listDatabases 不再报未授权，自动回退显示已授权的数据库列表。 (contributed by @Lan-zk) (PR #14841)
+  - Hologres 等不支持系统列的引擎从导航目标打开表不再因注入元组定位符而直接失败，自动降级重试。
+  - JDBC Agent 连接的数据库（如 Access）查询结果包含 NaN/Infinity 等非有限数值时序列化为字符串，不再整条查询报协议错误。 (contributed by @knqiufan) (PR #14792)
+  - 查询结果的表结构尚未加载时执行批量复制为 SQL 不再整批失败，等待表结构就绪后完成复制。 (contributed by @seaways1015-afk) (PR #14838)
+  - SQL 编辑器空格确认补全只接受所输入词的自然延续项，输入 on 等词后敲空格不再被排名第一的模糊匹配项整词改写。 (contributed by @dienaso) (PR #14713)
+  - 通用 JDBC 连接的表格数据新增行入口恢复可用，与更新、删除能力保持一致。 (contributed by @caiyq925-cell) (PR #14769)
+  - 插件深链接创建的一次性临时连接不再被误写入持久化保存。 (contributed by @ThugKd) (PR #14808)
+  - Windows 桌面端加密密钥缺失导致无法读取已保存凭据时，新增密钥恢复流程，可选择保留连接、分组、SQL 历史等配置并重置凭据。 (contributed by @eryajf) (PR #12751)
+  - Windows 凭据加密密钥自动镜像到 DPAPI 保护的恢复文件，凭据管理器条目被清理软件删除后下次启动自动还原，已保存密码不再全部失效。
+ReleaseNotesUrl: https://github.com/t8y2/dbx/releases/tag/v0.6.70
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

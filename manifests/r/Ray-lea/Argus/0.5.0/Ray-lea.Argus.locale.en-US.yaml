@@ -1,0 +1,71 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: Ray-lea.Argus
+PackageVersion: 0.5.0
+PackageLocale: en-US
+ShortDescription: A fast, modern and informative task manager for Windows
+Description: |-
+  Argus reads Windows' native interfaces directly from Rust, with an interface built on Tauri 2 and SolidJS. Processes, performance, services, startup apps, network connections and the last 7 days of history share one window, and the charts move smoothly at the display's refresh rate; resident in the system tray, it uses about 1% of one CPU core. It is named after Argus Panoptes, the hundred-eyed giant of Greek myth.
+
+  ✨ Features
+  🧮Processes: View by app, as a process tree or as a list, including each process's GPU usage, plus network traffic when the privileged service is enabled or Argus runs as administrator. Sort, search, end a process or its whole tree; the details pane shows the command line, user, integrity level and more.
+  ⚡Priority and efficiency mode: Set them from the context menu, or create rules that apply them every time a program starts.
+  📈Performance: CPU (per core, P-cores and E-cores, frequency, temperature, power), memory, disks, network, GPU and battery.
+  🧩Services and startup apps: Start and stop services and change their startup type; enable or disable startup apps with the same switch as Windows Task Manager.
+  🌐Connections and ports: TCP and UDP endpoints with the processes they belong to; search by exact port and close connections.
+  🔍File locks: Drop a file or folder onto the window to find the processes using it, combining Restart Manager with handle enumeration, including processes' current directories; the privileged service can check more processes.
+  🕘History: Resource charts for the last 7 days; click any moment to see the busiest processes at that time.
+  📌System tray: Show or hide the window with the global shortcut Ctrl+Alt+Esc; it uses very little while hidden.
+  🔄In-app updates: Stable and beta channels, with optional GitHub proxies; only updates that pass signature verification are installed.
+  🎨Native look: Mica background and the system accent color; dark and light themes follow Windows by default or can be chosen in Settings.
+  🌍Languages: English and Simplified Chinese, following the Windows display language by default; a welcome guide sets up the essentials on first start.
+  👤No administrator rights needed: See the path and resource usage of every process as a standard user.
+  🛡️Optional privileged service: After a single administrator approval, Argus running as a standard user can also manage system processes, apply rules automatically, measure per-process network traffic, control services and close connections; it can be uninstalled in Settings.
+Tags:
+- system-monitor
+- task-manager
+ReleaseNotes: |-
+  v0.5.0 adds process suspend and resume, process groups by user, four process information columns and column widths that fit the content. The device list on the Performance page can hide and reorder devices. The interface is now available in Traditional Chinese, Spanish, German, Japanese, French and Russian. This release also avoids requests that can freeze some Intel RST systems after Argus starts, corrects a problem that blocked the safe removal of USB disks, and decreases memory and CPU usage while the window is hidden.
+  Features
+  - Suspend and resume processes: Process and app group menus now offer "Suspend process" and "Resume process". Argus blocks suspension of critical system processes, the Desktop Window Manager and itself, and asks for confirmation before it suspends other processes. Suspended processes show a "Suspended" badge after the name. (@digital-bombyx #65)
+  - Process information columns: Four new optional columns are available: "File version", "Architecture", "Elevated" and "Command line". They are hidden by default. Enable them in the column header menu or in "Select columns". (@digital-bombyx #72)
+  - Process column widths: Automatic widths fit the content and leave unused space on the right. Drag a column border to set its width, or double-click it to restore automatic width. The new "Full width" option gives the remaining width to the Name column.
+  - Group processes by user: In Settings → Language and appearance → Group processes by user, select Automatic, Always group or Never group. With Automatic, Argus groups processes only when more than one user is signed in. The context menu of a group row has "Manage user accounts" and "Sign out".
+  - Hide system processes: The Processes and Connections pages have a new "Hide system processes" switch. It is off by default, and each page keeps its own setting. Edit the lists of programs to always show or to also hide on the Settings page. (#32)
+  - Process tree and overview band: The process tree starts collapsed, and the header menu has "Expand all" and "Collapse all". Set "Process overview band" to Automatic, Always show or Hidden. Automatic mode hides the band when the window is too short.
+  - Device list on the Performance page: Right-click a device to hide it, or select the devices to show in the "Shown devices" submenu. Drag a device to change the order. Disks can be sorted by disk number, by drive letter or in a custom order.
+  - CPU multi-core view: Each logical processor graph shows kernel time, which can be hidden from the CPU graph menu. Argus identifies Intel low-power efficiency cores (LP E-cores) with a separate color and filter. The graphs fill complete rows when possible.
+  - Hardware information: The GPU page shows the driver version, driver date and DirectX version, including the feature level. Disk details support remaining life and total data read and written for more SATA SSDs. HDD statistics now include power-on hours, start/stop counts, reallocated sectors and pending sectors.
+  - Interface languages: The interface is now available in Traditional Chinese, Spanish, German, Japanese, French and Russian. The tray, system messages and the installer are also translated. Numbers and dates use the Windows regional format. (@abc0922001 #45, @Rimuwu #51, @s0ftw4r8 #52, @khativari #55, @hayxe1 #62)
+  - Release notes: The About page and the update dialog show release notes in the interface language. In Settings → Updates, "See what's new" opens the dialog, which has "Expand all" and "Collapse all" controls. Opening, expansion and hover transitions follow "Interface animations".
+  - Icons and motion: Interface icons now come from the Lucide icon library. When the pointer moves onto a button or a navigation item, its icon plays one short animation. The animation does not play when "Interface animations" is off.
+  - Window and tray: A separate "Window transitions" switch is available. "Reopen from tray" can open the default page. The default window size is now 1000×680, and the minimum size is now 640×480. (#27, #40)
+  - Task Manager replacement: "Replace Task Manager" has a new "Open Windows Task Manager once" button. It opens the Windows Task Manager and does not change the replacement settings.
+  - Notices and reminders: The portable version explains its differences from the installed version and provides download links in the welcome guide and at the bottom right of the window. The new "Star reminder" appears at most once a day and can be turned off in Settings → Updates. The tips above "This PC" can be collapsed.
+  - Telegram channel: About → Project and support has a new "Telegram channel" item. "Join channel" opens t.me/argustask, and "Copy link" copies the channel link.
+  Performance
+  - Background memory usage: The new "Free memory when hidden" setting releases chart images and returns unused memory to Windows after the window stays minimized or hidden in the tray for the set time (10 minutes by default). CPU usage for the interface decreases when all windows are hidden or minimized. Sampling, history recording and rules continue to run. (@SpookySandwich #54)
+  Fixes
+  - System freeze: Argus no longer reads the temperature of disks behind RAID controllers such as Intel RST. Some driver versions do not respond to this request, and the system can freeze a few seconds after Argus starts. The temperature of these disks now shows as unknown. (#48)
+  - Safe removal of USB disks: Disk monitoring no longer keeps USB disks in use, so Windows can safely remove them. (#57)
+  - Disk list and performance data: Some NVMe disks showed device information but no performance data. Disks also disappeared from the list when performance counters were not available. Both problems are corrected.
+  - Disk details: The SMART table keeps values close to their attribute names and avoids large gaps between groups. Raw values fit in narrow windows. Health bars use green for normal values and threshold-based warning colors for temperature and spare capacity.
+  - Process data: When system queries are slow, Argus continues to update the process list and keeps the last valid resource readings. Exited processes no longer stay in the list. Process actions update the displayed state even when refresh is paused. (#66)
+  - Process table: Efficiency mode and pin icons appear next to the process name. Column headers align with the data columns. Process usage values include the percent sign.
+  - Connections page: Connections without an owning process now show as "No owning process".
+  - CPU readings: Hybrid CPUs now show the correct speed. Some 6-core Ryzen processors now show the correct per-core voltage and temperature. Intel internal sensor readings no longer stop at intervals, and the temperature graph no longer breaks. (#58)
+  - Authorization and uninstallation: Argus can revoke authorization and uninstall after the permissions of Program Files or the runtime folder change. Kernel sensors can use a PawnIO driver that is already running. Uninstallation no longer leaves the "Argus Sensor Setup" folder and an empty "Argus Runtime" folder. (#46)
+  - Startup permissions: After installation or an in-app update, Argus first tries to start with the desktop account's permissions, as it does from a shortcut. When Argus runs as administrator, it can restart File Explorer that already runs as administrator and keep its existing permissions.
+  - Window display: After the window size is restored, the interface fills the window again. After a cold start from the Task Manager replacement entry, a maximized window shows completely. The window background is no longer transparent on Windows 11 21H2. After a switch to another app, the Argus window no longer stays in front of other windows. (#44, #37, #35)
+  - Tray: CPU usage no longer stays high after the window closes to the tray. After an in-app update, the tray icon keeps its position and does not move to the overflow area. (#31)
+  - Interface display: The update dialog stays centered while it loads, and the file lock dialog stays in place when results appear. All content on the About page can be reached by scrolling in short windows. Text box context menus use the interface language. (#39)
+  - Numbers and rendering: Live numbers stay in place when they update. Light text on dark backgrounds has corrected edges. Small colored artifacts no longer appear below the overview band.
+  - Stability: Argus no longer exits when the display timing is not valid or when network adapter address queries fail many times. The interface no longer stops responding when graphics device recovery and window closure occur at the same time.
+  - Large fonts, process rules and startup items: Performance readings no longer overlap the specifications at large font sizes. When a program name contains non-ASCII letters, the process menu no longer adds a duplicate rule. Argus no longer crashes when it reads the startup tasks of packaged apps. (@hayxe1 #59)
+  - Build type: Settings, About and the status bar show "Development build", "Beta", "Stable" from the running program. The update channel separately selects the source for future update checks.
+  Upgrading
+  - Privileged service: This release updates the service communication protocol to version 11. An upgrade with the installer or an in-app update also updates the installed service and the Task Manager replacement copy. For the portable version, replace the executable, then select "Update service" in Settings → Permissions → Privileged service and approve the administrator prompt.
+  - Settings and history: The upgrade keeps your settings and history. At the first start, "Window transitions" uses the window transition setting of the previous "Interface animations" option.
+ManifestType: locale
+ManifestVersion: 1.28.0
