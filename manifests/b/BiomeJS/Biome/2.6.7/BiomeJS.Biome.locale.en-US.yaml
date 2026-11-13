@@ -1,0 +1,133 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.6.7
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.6.7
+
+  Patch Changes
+  - #12906 b3375d2 Thanks @dyc3! - Added the nursery rule noAsyncPromiseFinally, which reports async functions passed to a promise's .finally() method. If such a function fails, its error replaces the original result or error of the promise.
+    promise.finally(async () => {
+        await cleanup();
+    });
+  - #12894 e24da6f Thanks @dyc3! - Added the nursery rule noDuplicateTypeConstituents, which reports types listed more than once in a union or intersection type, and undefined in the type of an optional parameter.
+    type T = string | number | string;
+    function f(a?: string | undefined) {}
+  - #12899 6c15027 Thanks @dyc3! - Added the nursery rule noExcessiveSelectorComplexity, which limits how many IDs, type selectors, attribute selectors, pseudo-classes, universal selectors, compound selectors, and combinators a CSS selector can contain. It can also disallow chosen combinators, pseudo-classes, pseudo-elements, attributes, and attribute operators. The rule does nothing until an option is set.
+    For example, with "maxIds": 1, the following selector is reported:
+    #main #sidebar {}
+  - #12897 0b8f429 Thanks @dyc3! - Added the new nursery rule noInvalidFetchOptions, which reports a body in the options of fetch() and new Request() when the method is GET or HEAD. These calls throw a TypeError at runtime. When no method is given, the request uses GET.
+    await fetch("/", { method: "GET", body: "foo=bar" });
+  - #12926 9b6b9f4 Thanks @dyc3! - Added the nursery rule noNewArray, which reports new Array() calls with a single argument. Such a call creates an empty array of the given length when the argument is a number, and an array that holds the argument otherwise.
+    const array = new Array(length);
+  - #12895 739440f Thanks @dyc3! - Added the new nursery rule noRedundantTypeConstituents, which reports members of union and intersection types that have no effect, such as a literal type next to its primitive type, or never in a union.
+    type Status = "active" | string;
+  - #12810 71ab61b Thanks @dyc3! - Added the nursery rule noSvelteAsyncStore, which disallows passing async functions to the writable(), readable(), and derived() stores from svelte/store.
+    import { writable } from "svelte/store";
+    const user = writable(null, async (set) => {
+        set(await fetchUser());
+    });
+  - #12917 37d9f41 Thanks @dyc3! - Added the new nursery rule noUnresolvedDefaultImport, which reports default imports from modules that have no default export. The rule is part of the project domain.
+    // foo.js only contains `export function foo() {}`
+    import foo from "./foo.js";
+  - #12892 f16842e Thanks @dyc3! - Added the nursery rule noUselessFallbackInSpread, which reports empty object fallbacks when spreading a value into an object. Spreading null, undefined, or another falsy value into an object adds no properties, so the fallback has no effect.
+    const object = { ...(options || {}) };
+  - #12785 c198be2 Thanks @dyc3! - Added the new nursery rule noUselessParameterPropertyAssignment, which reports constructor assignments such as this.name = name when name is a parameter property. TypeScript already sets the property to the parameter's value, so the assignment does nothing.
+    class User {
+      constructor(public name: string) {
+        this.name = name;
+      }
+    }
+  - #12900 a4d1b0f Thanks @dyc3! - Added the nursery rule noUselessSpread, which reports spread syntax that has no effect. For example, [first, ...[second]] can be written as [first, second], and new Set([...items]) can be written as new Set(items).
+  - #12902 d7d755b Thanks @dyc3! - Added the nursery rule noVueExposeAfterAwait, which reports expose() and defineExpose() calls that come after an await in a Vue component's setup code. These calls run too late, so a parent component might not receive the exposed properties.
+    <script setup>
+    await fetchUser();
+    defineExpose({ reload });
+    </script>
+  - #12596 d33e56e Thanks @dyc3! - Added the nursery rule useAtomicUpdates, which reports assignments in async functions and generators that can be based on an outdated value because the function paused at an await or yield after reading it.
+    let total = 0;
+    async function addToTotal(getAmount) {
+        total += await getAmount(); // reported
+    }
+  - #12901 48e3572 Thanks @dyc3! - Added the new nursery rule useConsistentBooleanName. It requires variables, parameters, and functions that hold or return a boolean to start with a prefix such as is or has, and reports names with those prefixes that don't hold or return a boolean.
+    const completed = progress === 100;
+    const hasName = "Sindre";
+  - #12905 5b00387 Thanks @dyc3! - Added the nursery rule useConsistentFontWeightNotation, which enforces writing font weights either as numbers or as the keywords normal and bold where possible. It checks the font-weight and font properties, and its safe fix converts between normal/bold and 400/700.
+    a { font-weight: bold; }
+  - #12922 8d33c85 Thanks @dyc3! - Added the nursery rule useConsistentTupleLabels, which reports tuple type elements without a label when other elements of the same tuple have one.
+    type Point = [x: number, number];
+  - #12925 7252cbd Thanks @dyc3! - Added the new nursery rule useGlobalRegexInMatchAll, which reports calls to matchAll() with a regular expression that doesn't have the g flag. These calls throw a TypeError at runtime.
+    text.matchAll(/pattern/);
+  - #12891 e781bc3 Thanks @dyc3! - Added the nursery rule useGlobalRegexInReplaceAll, which reports regular expressions without the g flag passed to replaceAll(). These calls throw a TypeError instead of replacing text.
+    withSpaces.replaceAll(/\s+/, ",");
+  - #12896 a968e1a Thanks @dyc3! - Added the new nursery rule useValidCharacterComparison, which reports comparisons between a single character and a string that has more than one character. Such comparisons are always false, or always true with !== and !=.
+    text.charAt(0) === "ab";
+  - #13085 7a795d0 Thanks @ematipico! - Fixed withastro/compiler-rs#221 so Astro template expressions containing comment-only JSX expression children, such as <span>{<!-- x -->}</span>, parse without diagnostics.
+  - #12621 79ce388 Thanks @latin-1! - Fixed #12413 and #12414: useSortedProperties now sorts consecutive groups of properties independently, preserving the positions of nested rules, at-rules, and SCSS variable declarations.
+  - #13065 bd9faae Thanks @ematipico! - Fixed #5848: running useSortedKeys or useSortedSelectionSet as an editor source action no longer corrupts nested objects or selection sets.
+  - #13056 98f4d53 Thanks @ematipico! - Fixed #10607: noUndeclaredDependencies no longer reports imports resolved through TypeScript's compilerOptions.paths mappings.
+  - #13033 7638393 Thanks @GBra-4-669! - Fixed #12980: the CSS parser no longer panics on a composes declaration whose value contains a non-identifier token, such as composes: 1px;. It reports a diagnostic instead.
+  - #12917 37d9f41 Thanks @dyc3! - Fixed noUnresolvedImports: it now reports default imports from modules that only forward exports with export * from "...". export * never re-exports a default export, so import foo from "./barrel.js" fails when ./barrel.js contains only export * from "./foo.js".
+  - #12596 d33e56e Thanks @dyc3! - Fixed noUnreachableSuper ignoring the default values of constructor parameters. Using this in a default value is now reported, because it runs before super(), and calling super() in a default value is now recognized.
+    class Child extends Parent {
+            constructor(options = this.defaults()) { // reported
+                    super(options);
+            }
+    }
+    function process(first, second) {
+            let list = first; // reported: this value is never read
+            list = second;
+            for (const item of list) {
+                    handle(item);
+            }
+    }
+  - #12805 2468384 Thanks @vibbix! - Fixed #12332: noUnknownUnit no longer reports hex colors that start with a digit in SCSS custom properties or in unquoted legacy IE filter values. The rule now accepts --accent: #4566a8; instead of reporting the unknown unit a8.
+  - #12549 7fdb28f Thanks @pkallos! - Fixed #10464: useNullishCoalescing no longer reports a ternary or if statement that checks only null or only undefined when the type can also be the other, because ?? would change its behavior.
+  - #12952 d1896a0 Thanks @arendjr! - Added grit() queries to JavaScript plugins. A rule can now use a GritQL pattern to select the nodes passed to run() instead of listing syntax kinds with ast().
+    For example:
+    export const noConsole = defineRule({
+      query: grit("`console.log($args)`"),
+      run(element) {
+        if (element.kind !== "JS_CALL_EXPRESSION") return;
+        registerDiagnostic(element, "warning", "Unexpected console.log.");
+      },
+    });
+    Usage of Grit patterns can be particularly useful when it would take several checks to verify the shape of a snippet that involves multiple AST nodes.
+    Grit sequence patterns call run() for each matched node. Matching on leaf tokens is also supported for patterns, while patterns containing rewrites are rejected. Plugins using GritQL patterns should report diagnostics from run() as usual.
+    Plugins using Grit queries can still request the semantic model as well:
+    export const rule = defineRule({
+      query: grit("function $fn($args) { $body }", { semantic: true }),
+      run(node, { model }) {
+        // You can use `model` here similar to a query specified using `ast(..., { semantic: true })`.
+      },
+    });
+  - #13022 81d0187 Thanks @arendjr! - Fixed an issue where GritQL patterns wouldn't match snippets if they contain a trailing list separator.
+    For example, the pattern `a, b` wouldn't match the arguments in function(a, b,), whereas now they do.
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.6.7
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

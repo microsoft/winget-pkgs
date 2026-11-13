@@ -1,0 +1,68 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: cita-777.Metapi
+PackageVersion: 1.3.1
+PackageLocale: zh-CN
+Publisher: cita-777
+PublisherUrl: https://github.com/cita-777
+PublisherSupportUrl: https://github.com/cita-777/metapi/issues
+PackageName: Metapi
+PackageUrl: https://metapi.cita777.me/
+License: MIT
+LicenseUrl: https://github.com/cita-777/metapi/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Metapi contributors
+ShortDescription: 将分散的 AI 中转站聚合为一个统一网关
+Description: |-
+  现在 AI 生态里有越来越多基于 New API / One API 系列的聚合中转站，要管理多个站点的余额、模型列表和 API 密钥，往往既分散又费时。
+  Metapi 作为这些中转站之上的元聚合层（Meta-Aggregation Layer），把多个站点统一到 一个入口（可按项目配置多个下游 API Key）——下游所有工具（Cursor、Claude Code、Codex、Open WebUI 等）即可无感接入全部模型。当前支持的上游范围已经不止传统聚合面板，还包括：
+  - 聚合面板： New API、One API、OneHub、DoneHub、Veloera、AnyRouter、Sub2API
+  - 通用兼容接口：OpenAI / Claude / Gemini compatible endpoints，以及 cliproxyapi / CPA
+  - 官方预设：阿里云 / 智谱 / 豆包 Coding Plan，DeepSeek，Moonshot(Kimi)，MiniMax，ModelScope
+  - OAuth 连接：Codex、Claude、Gemini CLI、Antigravity
+Tags:
+- 人工智能
+- 代理
+- 大语言模型
+- 聊天机器人
+ReleaseNotes: |-
+  ⚠️ 重要安全更新：所有用户请务必升级到 v1.3.1
+  v1.3.1 是基于 v1.3.0 的纯安全补丁版本，修复了多个高危安全问题。只要你的实例能从公网或不受信任的网络访问，攻击者就可能在不知道管理员令牌的情况下访问管理接口，进而读取或修改站点配置、上游密钥和下游 API Key。
+  v1.3.0 及以前的所有版本都受影响，请所有用户尽快升级。 本版本只包含安全修复，不包含 main 分支上尚未发布的新功能。
+  修复内容
+  1.【高危】管理接口鉴权可被绕过：以前的鉴权检查依据原始请求 URL，某些情况下会和实际匹配到的路由不一致，导致部分管理接口可能不经鉴权就能访问。现在改为根据实际匹配的路由和规范化后的路径判断，不规范的请求目标直接返回 400。
+  2.【高危】不再执行上游返回的脚本：new-api 防护盾的挑战求解器以前会用 node:vm 执行上游页面里的脚本。node:vm 不是安全沙箱，恶意或被篡改的上游站点可以借此在服务器上执行代码。现在只把页面当作数据来解析，结果不明确时直接失败，服务端已不再使用 node:vm。
+  3.【中危】X-Forwarded-For 只信任配置过的代理：以前无条件信任转发头，任何人都能伪造来源 IP，绕过 ADMIN_IP_ALLOWLIST、伪造设置页显示的"当前管理员 IP"、绕开按 IP 的限流。现在新增 TRUSTED_PROXIES 配置（逗号分隔的 IP 或 IPv4 CIDR，默认为空），只有来自这些地址的请求才会读取转发头。
+  4. 依赖升级：fastify 升到 ^5.12.8（带 find-my-way 9.10.0），@fastify/static 升到 ^10.1.10，同时带上上游的路径规范化安全修复。
+  ⚠️ 反向代理部署的不兼容变更
+  如果 metapi 跑在反向代理后面（Nginx、Caddy、Traefik、1Panel/宝塔、Docker 桥接网络等），升级后必须设置 TRUSTED_PROXIES 为代理地址，例如 TRUSTED_PROXIES=127.0.0.1，Docker 桥接网络可用 TRUSTED_PROXIES=172.16.0.0/12。不设置的话，所有请求都会被识别成代理的 IP。
+  注意：不要把代理地址写进 ADMIN_IP_ALLOWLIST，否则等于对所有人放行。 详见 docs/deployment.md 和 docs/configuration.md。
+  如何升级
+  - Docker：先拉取 ghcr.io/cita-777/metapi:v1.3.1 或 1467078763/metapi:v1.3.1，再执行 docker compose pull && docker compose up -d 重建容器。latest 也已指向 v1.3.1。
+  - 桌面版 / 源码部署：从下方 Assets 下载对应平台的安装包，或者切到 v1.3.1 标签后重新安装依赖并构建。
+  升级后强烈建议：轮换所有密钥
+  如果你的实例在 v1.3.0 或更早版本时暴露过公网，请假设密钥可能已经泄露（已有用户反馈在没有登录记录的情况下密钥被盗用，见 #629）。升级后请尽快更换以下凭据：
+  - 上游站点的 API Key 和账号密码、OAuth 令牌、下游 API Key
+  - AUTH_TOKEN、PROXY_TOKEN、DEPLOY_HELPER_TOKEN
+  - WebDAV、SMTP、Webhook 凭据，以及数据库密码
+  同时建议检查各上游站点的用量和账单，看有没有异常调用。感谢报告问题的用户。
+
+  English
+  Security release
+  v1.3.1 is a security-only patch release on top of v1.3.0. Upgrading is recommended for all users. None of the unreleased work on main is included.
+  Fixes
+  - Admin API authentication uses the normalized path. The admin auth check now decides whether a request needs authentication from the route that was actually matched and a normalized pathname, not the raw request URL. Only origin-form request targets are accepted; anything else is rejected with 400.
+  - Upstream challenge scripts are no longer executed. The new-api shield challenge solver no longer runs upstream-supplied script through node:vm; the required value is parsed from the page as data, and the solver fails closed when the result is ambiguous. node:vm is no longer used by the server.
+  - X-Forwarded-For is trusted only from configured proxies. A new TRUSTED_PROXIES setting (comma-separated IPs / IPv4 CIDRs, empty by default) controls which peers may set forwarded headers. Fastify trustProxy is set to that list (or false when empty) instead of always true. The admin IP allowlist, the "current admin IP" shown in settings, and per-IP rate limiting use the socket peer unless it is a trusted proxy.
+  - Dependency upgrade: fastify ^5.12.8 (with find-my-way 9.10.0) and @fastify/static ^10.1.10, picking up upstream path-normalization fixes.
+  ⚠️ Breaking change for reverse-proxy deployments
+  If metapi runs behind a reverse proxy (Nginx, Caddy, Traefik, a Docker bridge network, etc.), you must set TRUSTED_PROXIES to the proxy's address, for example TRUSTED_PROXIES=127.0.0.1 or TRUSTED_PROXIES=172.16.0.0/12. Otherwise every request is attributed to the proxy's IP, which affects ADMIN_IP_ALLOWLIST, the reported admin IP, and per-IP rate limits. See docs/deployment.md and docs/configuration.md.
+  Recommended operator action
+  If you ran an internet-exposed instance on v1.3.0 or earlier, rotate secrets after upgrading: upstream site keys and account credentials, OAuth tokens, downstream API keys, AUTH_TOKEN, PROXY_TOKEN, WebDAV / SMTP / webhook credentials, DEPLOY_HELPER_TOKEN, and the database password.
+  Pull request
+  - security: v1.3.1 — fix admin auth bypass, remove node:vm upstream execution, harden X-Forwarded-For handling by @cita-777 in https://github.com/cita-777/metapi/pull/634
+  Refs #629, #631
+  Full Changelog: https://github.com/cita-777/metapi/compare/v1.3.0...v1.3.1
+ReleaseNotesUrl: https://github.com/cita-777/metapi/releases/tag/v1.3.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
