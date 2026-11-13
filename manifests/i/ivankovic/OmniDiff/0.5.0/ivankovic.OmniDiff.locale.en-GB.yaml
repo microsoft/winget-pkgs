@@ -1,0 +1,84 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: ivankovic.OmniDiff
+PackageVersion: 0.5.0
+PackageLocale: en-GB
+Publisher: Marko Ivankovic
+PublisherUrl: https://www.ivankovic.me
+PublisherSupportUrl: https://github.com/ivankovic/omnidiff/issues
+Author: Marko Ivankovic
+PackageName: OmniDiff
+PackageUrl: https://github.com/ivankovic/omnidiff
+License: AGPL-3.0-only
+LicenseUrl: https://github.com/ivankovic/omnidiff/blob/HEAD/LICENSE
+ShortDescription: Fast, robust, accurate content-aware diffing for code and other file formats.
+Description: |-
+  Fast, robust, accurate content-aware diffing.
+  OmniDiff is robust: it can diff 99.95% of code changes, and it is content-aware: 98.8% of changes are diffed using algorithms specific to what the file holds. It reads code by its syntax, and pictures, archives, fonts, cursors, message catalogues and PDFs by what they contain, so a difference report reflects the structure of the material rather than treating every file as plain text.
+  Code of another language held inside a string is diffed as a file of its own: TSX in a JSON "content" field, shell in a YAML run: or script: block, CSS and HTML in template literals, and YAML in an Ansible module's DOCUMENTATION, EXAMPLES and RETURN. Class lists are diffed class by class.
+  The terminal user interface offers two panels, light and dark themes, and per-platform refresh and highlighting controls, and it integrates with Git and jj as an external difftool.
+Tags:
+- ast-diff
+- code-quality
+- code-review
+- content-aware
+- diff
+- difftool
+- git
+- git-diff
+- git-difftool
+- structural-diff
+- syntax-aware-diff
+- terminal-user-interface
+ReleaseNotes: |-
+  Side-by-side output outside the viewer, lazygit integration, SQL parsed as code, and a diff that
+  holds up against huge or hostile input.
+  Added
+  - Headless output can be shown side by side: --layout auto|stacked|side-by-side and
+    --width N. Stacked stays the default and its output is unchanged. auto uses two columns
+    when the terminal is wide enough and most lines fit without wrapping. Rows are paired by
+    omnidiff's own matching, so a moved line names where it went (→ N, ← N).
+  - omnidiff git configure asks which layout plain git diff should use (auto, stacked or side
+    by side) and writes it into diff.external.
+  - lazygit support: as an extDiff renderer (git.diffRenderers), omnidiff tags each row with
+    the patch line it stands for (OSC 1717 v1), so lazygit can stage, navigate and open lines of
+    omnidiff's rendering. Without lazygit asking for it, the output is unchanged.
+  - SQL is diffed as code, with the tree-sitter grammar nvim-treesitter uses, when a file parses
+    without errors. Other SQL files keep the line diff and the [plain text] label.
+  Changed
+  - Matching and highlighting follow the hand-made ground truth more closely: zero visible
+    mismatches on 1,475 of 1,760 fixtures (from 1,462). The matching runs 42% fewer instructions.
+  - A file whose syntax tree has more than 300,000 nodes on a side is diffed as plain text, so a
+    huge generated file finishes in seconds instead of minutes and gigabytes.
+  - A PDF with a page inserted or removed in the middle shows one added or removed page, not every
+    later page as changed.
+  - Opening a large diff no longer stalls the viewer: syntax highlighting runs in the background
+    (a 13,000-line pair: 800 ms of UI time to under 2 ms).
+  Fixed
+  - As git's external diff, omnidiff never makes git abandon a multi-file diff. A file named like
+    a flag (-x.rs, --help) is diffed as a file, and a file omnidiff cannot diff prints one
+    omnidiff: could not diff PATH line instead of failing. git configure and jj configure now
+    write -- before the two paths.
+  - git's external-diff form (git --no-pager diff, lazygit) runs headless instead of opening the
+    full-screen viewer and blocking; --mode tui still opens it. git difftool is unchanged.
+  - Files from an untrusted commit are handled safely: a path with .. can no longer write outside
+    the review workspace, control and bidi characters in file names are shown escaped, and a file
+    name starting with + is not read as an editor command.
+  - Archives, PDFs, pictures, fonts and catalogs are decoded within fixed size and time budgets,
+    and a crash inside a decoder is reported as an error instead of ending the program.
+  - Drawing PDF pages in parallel no longer marks an unchanged page as edited now and then.
+  Library
+  - With default-features = false the library no longer pulls in clap, serde_json or libc: 185
+    crates instead of 200.
+  - tui::headless::run takes a Pair (Pair::read(before, after)) instead of two paths, plus
+    record_file (OSC 1717) and layout; tui::json_output::run takes a Pair too.
+  - diff::content::archive::Zip::new takes &[u8]. New: code::language::MAX_AST_NODES and
+    requires_clean_parse, diff::content::Budget and contained, and each decoder's MAX_*
+    limits.
+ReleaseNotesUrl: https://github.com/ivankovic/omnidiff/releases/tag/v0.5.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://ivankovic.github.io/omnidiff/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
