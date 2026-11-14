@@ -1,0 +1,72 @@
+# Created with komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: kunobi-ninja.kache
+PackageVersion: 2.0.0
+PackageLocale: en-US
+Publisher: Kunobi Ninja
+PublisherUrl: https://kunobi.com/
+PublisherSupportUrl: https://kunobi.com/contact
+Author: Zondax AG
+PackageName: kache
+PackageUrl: https://github.com/kunobi-ninja/kache
+License: Apache-2.0
+LicenseUrl: https://github.com/kunobi-ninja/kache/blob/HEAD/LICENSE
+Copyright: 2026 Zondax AG
+ShortDescription: Content-addressed zero-copy build cache for Rust, C/C++ and more
+Description: kache is a content-addressed, zero-copy build cache for Rust, C/C++ and more. It avoids file copies and wasted disk by hardlinking artifacts locally and sharing them via S3-compatible object storage.
+Moniker: kache
+Tags:
+- build
+- build-cache
+- cache
+- ci
+- compiler
+- developer-tools
+- rust
+- rustc
+ReleaseNotes: |-
+  Kache 2.0 reuses private Rust incremental state between compatible local worktrees and ships a small client with a matching companion engine. This stable release includes the three published release candidates and the fixes merged afterward.
+  Finish active builds before upgrading. Install the matching client and engine, refresh setup, then verify a real miss followed by a local hit:
+  cargo install kache --locked --version 2.0.0
+  kache init
+  kache daemon restart
+  kache doctor --probe
+  Added
+  - Worktrees: compatible local worktrees can seed private incremental state automatically with supported rustc 1.98 or later. Imports use copy-on-write clones or independent copies, so a donor's writable files are never shared. KACHE_SEED_INCREMENTAL=0 disables seeding. #1647, #1704, #1766 by @jleni, @mvanhorn and @TastyCZ.
+  - Concurrent builds: foreground requests get a queue head start while older background requests gain priority. Bounded capacity waits have recovery admission. Under sustained memory pressure, a shared ceiling reduces ordinary compiler concurrency and recovers gradually when pressure clears. #1775, #1778, #1782 by @jleni and @ainhoa-a.
+  - Configuration: config get, set, unset, list and path support scripts and JSON output. Byte-size settings accept units in TOML, environment variables and CLI edits: GB is decimal and GiB is binary. #1732, #1789 by @jleni.
+    kache config set cache.local_max_size 50GiB
+    kache config set cache.restore_max_size 12GiB
+    kache daemon restart
+  - Index policy: cache.index_mode accepts auto, conservative and off. The default auto currently selects conservative, using SQLite WAL with synchronous=NORMAL. off explicitly disables index synchronization for disposable caches; a crash can corrupt that index. CI detection never enables it automatically. #1791 by @jleni and @glebpom.
+  - Checks and cleanup: the Cargo shim and kache cargo give check and Clippy their own target/check directory by default. Explicit output directories take precedence; cache.separate_check_targets = false opts out. kache clean --cache --rustc-version selects entries by compiler version and supports a dry run. #1776 by @jleni.
+  - Terminal tools: kache init installs Bash, Zsh and Fish completions on Unix. The monitor shows selected-build details in narrow terminals. kache doctor --probe tests actual local reuse, and explain --all includes retained skips and passthroughs. Reports identify producer versions and group recognized older bugs separately. #1723, #1724, #1707, #1722, #1760 by @jleni.
+  - Optional Blaze: opt into cache.blaze for eligible local default-profile Cargo commands on Linux or Apple silicon macOS. Routing is off by default and detects an installed Blaze client at build time. CI, release builds and explicit profiles stay on Cargo. Blaze has its own compiler/cache; eligible dependency work can still use Kache. #1750 by @jleni.
+  - Windows link inputs: with executable caching enabled, validated absolute .res files and a closed application-manifest subset can join the native link key. Manifest keys include the selected mt.exe and guard its lookup. Objects, archives and unmodeled manifest forms remain passthrough cases. #1684, #1799 by @jleni and @TastyCZ.
+  Fixed
+  - Windows startup: file-hash IPC reaches the daemon through the named pipe directly. Cold MSVC runtime hashes prepare in the background by default, allowing initial units to compile without caching while preparation finishes. Set cache.native_runtime_warmup = false to wait and cache from the first compile. NTFS identity checks protect reuse after file replacement or same-size edits. #1797 by @jleni.
+  - Windows outputs: long engine handoffs avoid error 206, executable restores retain matching PDB/import-library sidecars, and worktree seeds handle Windows donor paths and Cargo lint flags. cl.exe, including cross-host tool paths, passes through uncached. #1762, #1685, #1747, #1766, #1640 by @jleni and @TastyCZ.
+  - macOS: valid multi-GiB debug bundles no longer hit the old 2 GiB extraction cap. The default restore limit is 8 GiB and can be configured. The test runner carries dynamic-library paths through the hardened runtime, fixing Bevy dynamic-linking launches. Apple deployment-target variables now change Rust library and metadata keys. #1787, #1789, #1781, #1793 by @jleni and @ainhoa-a.
+  - Build-script correctness: declared input timestamps now participate in run keys, so touching an input cannot restore generated values from its old timestamp. A fresh checkout may rerun a script even when bytes match; unchanged outputs still allow Rust compilation hits. Restored native files receive current write times so incremental C/C++ builds notice header changes. #1779 by @jleni.
+  - Cache upgrades and cleanup: incompatible prediction metadata is rebuilt while compiled entries stay in the store. Rust metadata remains writable for cargo fix and cargo clippy --fix. Target cleanup also checks running programs before removing their outputs. #1743, #1704, #1794 by @jleni and @mvanhorn.
+  - Native builds: GCC -g3 caching, source directories shared only at the filesystem root, packed macOS debug bundles and normalized OUT_DIR includes reuse the right inputs and outputs. #1757, #1759, #1758, #1753 by @jleni and @CheckPickerUpper.
+  - Remote reuse: demand timeouts no longer mark a healthy backend as failed. cache.demand_timeout_secs makes the default three-second synchronous restore budget configurable. Adaptive prefetch counts all manifest entries, and build-script results can restore from a read-only store. #1768, #1798, #1770, #1749 by @jleni.
+  - Reports: JSON rows retain wrapper phase timings, including permit and flight waits, matching trace output. Missing historical miss details remain explicit; an upgrade cannot reconstruct data that was never recorded. #1796, #1760 by @ainhoa-a and @jleni.
+  Security
+  - Restore diagnostics: archive-controlled names have control characters replaced and long text truncated before reaching events, reports or restore warnings. The underlying error chain remains available. #1800 by @jleni and @ainhoa-a.
+  Breaking Changes
+  - Install matching kache and kache-engine binaries together. Custom archives, container images and installers must copy both. Windows manual installs use the paired ZIP. #1639.
+  - Restart the daemon after upgrading for the new execution protocol. Existing compiler wrapper settings continue to name kache. #1702.
+  - Managed incremental state from older layouts starts cold once. Compatible compiled cache entries remain reusable; a blanket cache deletion is unnecessary. #1704.
+  Docs
+  The upgrade guide, worktree guide and compatibility reference cover installation, supported workflows and migration. The documentation was reviewed against releases and merged changes. #1754 by @jleni.
+  New Contributors
+  - @mvanhorn made their first contribution in #1704
+  Contributors
+  Credits include authors and coauthors of adopted contributions.
+  mvanhorn ainhoa-a Akagi201 burin-labs-agent CheckPickerUpper glebpom jleni skyf0l TastyCZ Veykril viktorius007
+  Full changelog: v1.2.2...v2.0.0
+ReleaseNotesUrl: https://github.com/kunobi-ninja/kache/releases/tag/v2.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
