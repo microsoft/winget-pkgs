@@ -1,0 +1,59 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Temporal.TemporalCLI
+PackageVersion: 1.10.1
+PackageLocale: en-US
+Publisher: Temporal Technologies Inc.
+PublisherUrl: https://temporal.io/
+PublisherSupportUrl: https://github.com/temporalio/cli/issues
+PrivacyUrl: https://temporal.io/global-privacy-policy
+Author: Temporal Technologies Inc.
+PackageName: Temporal CLI
+PackageUrl: https://github.com/temporalio/cli
+License: MIT
+LicenseUrl: https://github.com/temporalio/cli/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Temporal Technologies Inc. All rights reserved.
+CopyrightUrl: https://temporal.io/terms-of-service
+ShortDescription: Command-line interface for running Temporal Server and interacting with Workflows, Activities, Namespaces, and other parts of Temporal
+Tags:
+- temporal
+ReleaseNotes: |-
+  Highlights
+  This patch release fixes the dev server's Web UI loading as a blank page in Chrome 158 and later (stable from 2026-11-17), and fixes reported vulnerabilities in the CLI's dependencies. It has no command, flag or output changes. Users of temporal server start-dev should upgrade before Chrome 158 reaches them.
+  Fixed
+  - temporal server start-dev Web UI no longer loads as a blank page in Chrome 158+. The bundled Web UI moves from v2.56.1 to v2.56.4, whose Content Security Policy uses script-src 'self' instead of 'strict-dynamic'. Chrome 158 blocks the UI's startup script imports under the old policy. (temporalio/ui#4126; #1260, #1267)
+  Dependency updates fix the following reported vulnerabilities:
+
+  | Dependency                    | Version | Fixes                                                 |
+  | ----------------------------- | ------- | ----------------------------------------------------- |
+  | Go standard library           | 1.26.11 | CVE-2026-97054 (net/http server crash)                |
+  | github.com/klauspost/compress | v1.20.4 | CVE-2026-116591 (high)                                |
+  | github.com/labstack/echo/v4   | v4.16.4 | CVE-2026-118651, CVE-2026-118653, GHSA-3f6j-cw5h-qw9c |
+
+  The two echo CVEs had no fix when v1.10.0 shipped. They are fixed in echo v4.16.3 and later, but the Go vulnerability database doesn't list a fixed v4 version yet, so govulncheck may still report them.
+  Changed
+  - The published Docker image is built on Alpine 3.24.4. (#1264)
+  Risks
+  - klauspost/compress v1.20.4 is ahead of the v1.18.7 that Server v1.32.2 was tested with. The dev server uses it for zstd compression of Prometheus metrics. The API (go.temporal.io/api v1.63.5) still matches the server.
+  - echo v4.16.3 changed Context.RealIP() to ignore client-supplied IP headers by default. UI Server uses it only for auth log lines, which the dev server doesn't enable.
+  What's Changed
+  - Bump UI server to v2.58.1 by @tegan-temporal in https://github.com/temporalio/cli/pull/1253
+  - Use ui-server v2.56.3 (Chrome 158 CSP fix on api 1.63.5) by @tegan-temporal in https://github.com/temporalio/cli/pull/1260
+  - fix(test): Fix flaky TestDeployment_List JSON assertion by @ks-temporal in https://github.com/temporalio/cli/pull/1252
+  - gen-docs: document options of commands that have subcommands by @Duncanma in https://github.com/temporalio/cli/pull/1231
+  - chore(deps): bump the github-actions group across 1 directory with 7 updates by @dependabot[bot] in https://github.com/temporalio/cli/pull/1258
+  - Bump Go, echo, klauspost/compress and Alpine for CVE fixes by @ks-temporal in https://github.com/temporalio/cli/pull/1264
+  - chore: ignore modernc.org sqlite updates in Dependabot by @chaptersix in https://github.com/temporalio/cli/pull/1265
+  - ci: validate API and SDK versions against the server dependency by @chaptersix in https://github.com/temporalio/cli/pull/1266
+  - Bump ui-server to v2.56.4 by @tegan-temporal in https://github.com/temporalio/cli/pull/1267
+  New Contributors
+  - @tegan-temporal made their first contribution in https://github.com/temporalio/cli/pull/1253
+  - @Duncanma made their first contribution in https://github.com/temporalio/cli/pull/1231
+  Full Changelog: https://github.com/temporalio/cli/compare/v1.10.0...v1.10.1
+ReleaseNotesUrl: https://github.com/temporalio/cli/releases/tag/v1.10.1
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://docs.temporal.io/cli
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
