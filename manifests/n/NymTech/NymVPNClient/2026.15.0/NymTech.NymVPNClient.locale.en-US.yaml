@@ -1,0 +1,134 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: NymTech.NymVPNClient
+PackageVersion: 2026.15.0
+PackageLocale: en-US
+Publisher: Nym
+PublisherUrl: https://github.com/nymtech
+PublisherSupportUrl: https://github.com/nymtech/nym-vpn-client/issues
+PackageName: NymVPN
+PackageUrl: https://github.com/nymtech/nym-vpn-client
+License: GPL-3.0
+LicenseUrl: https://github.com/nymtech/nym-vpn-client/blob/develop/LICENSE
+ShortDescription: |
+  Cross-platform open source VPN client built in Rust, with mixnet anonymity and WireGuard speed. Protects metadata, not just IP addresses. Zero-knowledge payments for unlinkable online activities.
+Description: |
+  NymVPN is the most private way to be online. Open-source, cross-platform VPN client written in Rust. NymVPN routes traffic through Nym's decentralized mixnet for metadata-level anonymity, or over multi-hop AmneziaWG (WireGuard) for low-latency, censorship-resistant tunneling. Unlike conventional VPNs, no single node can correlate who you are with what you do.
+Tags:
+- amneziawg
+- android-app
+- censorship-resistance
+- cross-platform
+- decentralized
+- decentralized-vpn
+- ios-app
+- mixnet
+- mobile-app
+- networking
+- open-source
+- privacy-tools
+- rust
+- vpn
+- windows-app
+- wireguard
+ReleaseNotes: |-
+  Nym VPN v2026.15.0 application and core binaries.
+  🚀 What's New
+
+  🛠️ Core
+
+  Added
+  - Add a bridge mode (auto, on, off) in place of the QUIC on/off setting (config v14). Auto connects over plain WireGuard first and alternates with the bridge on each retry
+  - Add delete_account command that deletes the account through the VPN API and removes local account data (#6790)
+  - Add a SetBridgeMode gRPC call and vpnc tunnel set --bridge-mode to choose the bridge mode (auto, on or off), replacing the SetEnableBridges gRPC call and vpnc tunnel set --circumvention-transports, which are removed (breaking: an older desktop app calling SetEnableBridges against this daemon gets UNIMPLEMENTED)
+  - Add --wait to nym-vpnc reconnect to block until the tunnel has reconnected or failed (#6849)
+  - bridge_transports.enabled feature flag (FeatureFlags::bridge_transports_enabled, uniffi is_bridge_transports_enabled) for the v2 bridge transports (TLS and SSH after QUIC). Bridges and QUIC do not depend on it
+  - BridgeAddress in the connection data carries the bridge transport in use (transport: QUIC, TLS or SSH)
+  - When the bridge_transports.enabled feature flag is on, a bridge connection tries QUIC for 5 seconds, then races the entry gateway's TLS and SSH bridges. The firewall allows only the bridges being tried, QUIC over UDP and TLS and SSH over TCP, in both the connecting and connected states. With the flag off or unset, QUIC only as before
+  - Add support for custom secure DNS. Supported protocols: TLS, HTTPS, QUIC, HTTP/3. Currently only cli supports that. No UI support yet. (#6876)
+
+  Changed
+  - Read gateway bridge transports from transports_v2 (falling back to transports for older bridges), skipping transport types this build does not know, so gateways can advertise TLS, SSH and future transports without breaking the gateway list
+  - nym-vpnc reconnect now fails when the daemon rejects the reconnect because the tunnel is not set to connect (#6849)
+  - [iOS] Flush DNS when changing ad-block setting by reconnecting the tunnel (#6866)
+  - nym-vpnc dns set no longer removes all custom DNS. Use nym-vpnc dns clear instead (#6876)
+  - nym-vpnc dns set no longer accepts positional argument to configure plain DNS. Use one of the following arguments instead: --plain, --tcp or --udp (#6876)
+  - Count bandwidth usage locally and fetch remote gateway quota less frequently to improve mobile battery usage (#6803)
+
+  Fixed
+  - Fix the gateway mixnet score being decoded from the general score in the gRPC conversion (#6859)
+  - Fix nym-vpnc connect --wait waiting forever when the tunnel is already connected (#6849)
+  - Fix nym-vpnc --wait options missing fast tunnel state changes and reporting success when the daemon's event stream ends (#6849)
+  - SOCKS5 proxy no longer misses tunnel state updates and reacts to them immediately instead of polling every 2 seconds. Fixed the SOCKS5 proxy sometimes staying on after the VPN disconnected, or turning off right after being enabled (#6850)
+  - Stop the internal SOCKS5 mixnet client and its listener on 127.0.0.1:1081 when SOCKS5 is disabled, so the next enable starts a new mixnet client instead of reusing the first session's (#6854)
+  - Enabling SOCKS5 now fails when the SOCKS5 address is already in use, instead of reporting success while nothing listens on it (#6854)
+  - Stop emitting the same tunnel state twice while connecting the tunnel (#6852)
+  - Top-up blocking the shutdown (#6912)
+  - Respect cancellation during skew resync after registration failure (#6953)
+
+  Security
+  - [Linux] The install script now installs nym-vpnd, nym-socks5-proxy and NymVPN.AppImage as root-owned. Previously, raw installs (the default on distros other than Debian, Ubuntu and Mint) left them owned by the installing user, who could replace them and get code run as root. Existing raw installs stay affected until fixed with sudo chown root:root /usr/bin/nym-vpnd /usr/bin/nym-socks5-proxy /usr/bin/NymVPN.AppImage, or until reinstalled with ./install uninstall followed by ./install (uninstalling removes /etc/nym/nym-vpnd.toml) (#6914)
+
+  🤖 Android app
+
+  Added
+  - Hide overlay windows on sensitive screens (#6780)
+  - playtest build type for local Google Play billing testing (#6855)
+
+  Changed
+  - Open server list instantly with saved servers and updates in the background (#6799)
+  - Google Play build keeps plan selection, renewal and subscription management on Google Play billing (#6855)
+
+  Fixed
+  - Restore residential icon on exit servers list (#6793)
+  - Show connected server country before server list loads (#6858)
+  - Fix mixed "your country" subtitles after picking Auto (#6858)
+
+  🐧🪟 Windows & Linux apps
+
+  Fixed
+  - Home screen: hide the server quality bar until a gateway is selected (#6557)
+
+  📦 Core Components Overview
+  - nym-vpnd: Background daemon service managed via the UI app or CLI.
+  - nym-vpnc: Command-line interface (CLI) to control the daemon (nym-vpnd).
+  - nym-socks5-proxy: SOCKS5 proxy handling geo-exclusion routing.
+  - nym-diagnostic: System information and network troubleshooting tool.
+  - nym-setup: macOS helper tool for system service configuration.
+
+  💾 Downloads & Assets
+
+  🤖 Android
+  - nym-vpn-fdroid-2026.15.0-release.apk: Android App (F-Droid Build)
+  How to verify the build fingerprint?
+
+  Signing Certificate SHA-256 Fingerprint (4096-bit):
+  3c98a016aa4f14a3ba185c764ed363415cf7ff3c3d328a87ffff2ff1b140ff06
+
+  Verification Steps:
+  To verify the build fingerprint on your system, run:
+  apksigner verify --print-certs "nym-vpn-fdroid-2026.15.0-release.apk" | grep SHA-256
+
+  🐧 Linux
+  - Desktop App
+    - nym-vpn-app_2026.15.0_amd64.deb: Nym VPN app, debian package (x86_64)
+    - nym-vpn-app_2026.15.0_arm64.deb: Nym VPN app, debian package (arm64)
+    - NymVPN_2026.15.0_amd64.AppImage: Nym VPN app, AppImage (x86_64)
+    - NymVPN_2026.15.0_aarch64.AppImage: Nym VPN app, AppImage (arm64)
+  - CLI & Daemon
+    - nym-vpnd_2026.15.0_amd64.deb: Nym VPN daemon, debian package (x86_64)
+    - nym-vpnd_2026.15.0_arm64.deb: Nym VPN daemon, debian package (arm64)
+    - nym-vpnc_2026.15.0_amd64.deb: Nym VPN command-line tool, debian package (x86_64)
+    - nym-vpnc_2026.15.0_arm64.deb: Nym VPN command-line tool, debian package (arm64)
+
+  🍎 macOS
+  - NymVPN-2026.15.0.pkg: Desktop App Installer
+  - nym-vpnc-2026.15.0.pkg: Command-Line Tool Installer
+
+  🪟 Windows
+  - NymVPN_2026.15.0_x64-setup.exe: Desktop App Installer (x64)
+  - NymVPN_2026.15.0_arm64-setup.exe: Desktop App Installer (arm64)
+ReleaseNotesUrl: https://github.com/nymtech/nym-vpn-client/releases/tag/nym-vpn-v2026.15.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
