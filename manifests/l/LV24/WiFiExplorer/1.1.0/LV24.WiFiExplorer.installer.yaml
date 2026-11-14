@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.28.0.schema.json
+#
+# Installer manifest. The release ships two Windows variants:
+#   - LV24-WiFi-Explorer-1.1.0-win-x64.exe (NSIS, for direct download/Scoop)
+#   - LV24-WiFi-Explorer-1.1.0-win-x64.zip (unpacked app, for winget)
+#
+# winget uses the ZIP with `NestedInstallerType: portable`: it extracts the
+# archive with the system tar and creates a portable shim instead of launching
+# the unsigned NSIS installer through ShellExecute. The NSIS installer is
+# blocked by 08. Installation Validation on the validation VM.
+PackageIdentifier: LV24.WiFiExplorer
+PackageVersion: 1.1.0
+Platform:
+  - Windows.Desktop
+# Electron 33 supports Windows 10 1809 (build 17763) and later.
+MinimumOSVersion: 10.0.17763.0
+InstallerType: zip
+NestedInstallerType: portable
+NestedInstallerFiles:
+  - RelativeFilePath: LV24 WiFi Explorer.exe
+    PortableCommandAlias: lv24-wifi-explorer
+# Portable packages install per user under %LOCALAPPDATA%\Microsoft\WinGet.
+UpgradeBehavior: install
+ReleaseDate: 2026-11-11
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/LevapVeeskela/lv24-Wifi-Explorer/releases/download/v1.1.0/LV24-WiFi-Explorer-1.1.0-win-x64.zip
+    InstallerSha256: b8b1f5c883888057b7744a4a414bd8a0ec0509b0c133b316f7eaa9a33b83f078
+ManifestType: installer
+ManifestVersion: 1.28.0
