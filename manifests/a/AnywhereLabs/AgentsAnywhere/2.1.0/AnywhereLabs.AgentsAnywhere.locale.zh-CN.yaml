@@ -1,0 +1,86 @@
+# Created using wingetcreate 1.12.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AnywhereLabs.AgentsAnywhere
+PackageVersion: 2.1.0
+PackageLocale: zh-CN
+Publisher: Anywhere Labs
+PublisherUrl: https://github.com/anywhere-labs
+PublisherSupportUrl: https://github.com/anywhere-labs/Agents-Anywhere/issues
+Author: Anywhere Labs
+PackageName: Agents Anywhere
+PackageUrl: https://www.agents-anywhere.com
+License: MIT
+LicenseUrl: https://github.com/anywhere-labs/Agents-Anywhere/blob/main/README.md#%E5%BC%80%E6%BA%90%E8%AE%B8%E5%8F%AF
+Copyright: Copyright © 2026 Agents Anywhere
+ShortDescription: 跨设备的开源 Agent 工作台，可连接 Codex、Claude Code 或 DeepSeek Harness。
+Description: Agents Anywhere 是跨设备的开源 Agent 工作台。连接运行 Codex、Claude Code 或 DeepSeek Harness 的工作设备，在桌面、手机和 Web 查看会话、回复请求、管理文件与终端。
+Tags:
+- ai
+- agent
+- codex
+- deepseek
+- 智能体
+ReleaseNotes: |-
+  Agents Anywhere v2.1.0 是 2.x 系列的接口更新：接入 Codex App / IDE 插件 IPC 协议以继续操作 Codex 窗口中的会话，本机控制通道与 DSH 插件（@agents-anywhere/dsh-bridge-next）同步全面迁移到 MeshCall 并大幅提升大历史同步稳定性，桌面端启动出错时支持直接切换镜像或清空缓存重试，桌面端与 Android 支持从官网直接下载更新，管理看板也全部重做。
+
+  ## 升级须知
+  - 本机三端一起升级：Desktop、Connector 和 DSH 插件（@agents-anywhere/dsh-bridge-next）之间的本机通道改用 MeshCall，2.0.x 与 2.1.0 互不兼容。只升级一端时，2.0.x Connector 会一直停在「等待 DSH」
+  - 数据库迁移：自托管 Server 需要执行迁移 v2_42–v2_44，旧看板数据不会保留，步骤见[升级指南](https://github.com/anywhere-labs/Agents-Anywhere/blob/v2.1.0/docs/upgrading.md)。/api/v2/admin/dashboard/* 已删除，2.0.x 的 Web / Desktop 打开看板会得到 404
+  - 移除 SQLite 和 v1 导入工具：Server 不再支持 SQLite 后端，也去掉了 v1 导入工具。仍在 v1 的部署要先用 2.0.x 完成导入；部署配置里的 AGENT_SERVER_DB_BACKEND 可以删除
+  - 手机端与独立组件：Android 和 iOS 的 2.0.3 仍然可以使用，但登录续期、按供应商分组模型、「未同步」状态等需要 2.1.0；单独安装 Connector CLI（PyPI anywhere-cli）或 DSH 插件（npm @agents-anywhere/dsh-bridge-next）的用户请一起升级到 2.1.0
+
+  ## 本次更新
+  ### 会话创建与消息交付
+  - 新建会话失败后保留草稿、附件和创建请求，可以返回编辑或手动重试；重试前会重新检查模型、权限和 Agent 模式
+  - 只有 Runtime 实际收到消息才算创建成功。被明确拒绝时清理空会话、暂存附件和运行标记；结果未知时保留会话入口，避免重复创建
+  - DSH 模型目录尚未就绪时禁止提交，加载失败的目录可以重新加载
+  - 修复退出登录后迟到的创建响应、后台创建成功时抢占当前页面，以及附件预览的生命周期问题
+  - 附件下载失败时，会话里会列出没送到的文件名；正文和其他附件照常发送，即使这条提醒本身发送失败也不影响任务
+  - 下载端断开或传输过期后释放上传任务，修复本地文件中转永久阻塞
+
+  ### 桌面端
+  - 把本地文件夹拖进侧栏就能创建项目。重复目录、普通文件和一次拖入多项时会给出提示；拖拽结束或窗口失焦时，提示自动消失
+  - Connector 启动失败时显示真实原因，可以复制错误信息、打开日志目录
+  - 依赖下载失败时，可以在启动弹窗里切换 PyPI 镜像或 Python 下载镜像、重试，或者「清空缓存并重试」；所选镜像缺少的包会自动从官方 PyPI 补齐
+  - 启动之后的错误、后台进程退出、Connector 崩溃都会显示出来，后台退出后可以一键重新启动；后台起不来时立即报错，退出也不会再卡住
+  - 修复 Windows 中文用户名下首次启动卡在状态检查，以及 Node 或项目路径带空格时开发启动和打包失败
+  - 打包时排除用不到的 Router 二进制，修复 macOS universal 打包冲突，安装包也更小
+  - 「立即更新」会从官网 www.agents-anywhere.com 下载对应系统的最新安装包（macOS、Windows），不再提示「更新下载暂未开放」
+
+  ### 本机连接、所有权与日志
+  - 本机控制和 DSH 桥接改用 MeshCall：Router 意外退出后自动重启；状态和日志断线后接着上次的位置继续，不需要重启 Connector
+  - 启动、停止、重启和保存配置按顺序执行，有操作正在进行时新操作直接拒绝；取消配对后，旧流程不会再保存凭据或自动连接
+  - 插件管理锁和机器记录锁改为随机端口加连接核实，修复 Windows 保留端口导致的启动失败
+  - 插件能识别本地开发版 Desktop，并在关键阶段重新确认由谁管理 Connector，避免两边同时启动它
+  - 插件和 Desktop 的日志页统一读取集中日志，可以按来源筛选、分页查看，并展示结构化的异常信息；Connector 还没启动时也能看到本次的启动诊断
+  - 日志损坏时自动恢复，日志目录不可用时改为只在内存中记录，日志问题不再阻止 Connector 启动；日志中的 token 和认证头会被脱敏
+  - 修复代理环境下 NO_PROXY 里 IPv6 回环地址的兼容问题
+
+  ### Web 与桌面端界面
+  - 管理看板重做：
+    - 新增概览、用户、使用量、设备与 Runtime、运行质量视图；
+    - 支持选择时间范围，并显示实时指标；
+    - 统计改为按事件记录，打开看板时不再重算历史数据；
+    - 新增会话读取次数和只读会话统计
+  - 管理页和设置页改为侧栏导航，公告、身份认证、邮件和服务配置各自成页；这两类页面不再加载工作区和推送数据
+  - 在主页和管理 / 设置之间切换时，侧栏左右并排滑动
+  - 身份认证页按手机和桌面客户端分组，并修正 OAuth 回调地址
+  - 有多个供应商时，模型列表按供应商分组，同名模型也能分清来源
+  - 修复回复已经结束却一直显示「正在工作」
+  - 长会话的流式输出更流畅，减少整页重绘和输入卡顿
+  - 多个任务并行输出时，侧栏里的项目不再反复跳动
+  - 置顶 / 取消置顶、归档 / 恢复归档分别使用不同的图标
+  - 代码块统一为新样式，修复开启「减少动态效果」时 Mermaid 图异常放大、初始显示空白
+  - 登录、注册和找回密码改用原生表单，密码管理器能正确自动填充；按 Enter 和点主按钮都会提交，其他按钮不再误触发提交
+  - 浏览器标签页图标跟随系统亮暗色切换
+  - 快速设置里每种 Agent 只显示一次；删除 Runtime 输入框随软键盘上移，不再被键盘挡住
+  - Markdown 支持 LaTeX 公式；修复引用块里含代码块或公式时闪退
+  - 流式生成时保持当前的阅读位置
+  - 长会话流式输出的开销降低；模型设置里，不同供应商的同名模型不再被合成一项
+  - 「立即更新」会从官网 www.agents-anywhere.com 下载最新 APK
+
+  感谢大家对 Agents Anywhere 的支持与反馈！
+ReleaseNotesUrl: https://github.com/anywhere-labs/Agents-Anywhere/releases/tag/v2.1.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,86 @@
+# Created using wingetcreate 1.12.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: AnywhereLabs.AgentsAnywhere
+PackageVersion: 2.1.0
+PackageLocale: en-US
+Publisher: Anywhere Labs
+PublisherUrl: https://github.com/anywhere-labs
+PublisherSupportUrl: https://github.com/anywhere-labs/Agents-Anywhere/issues
+Author: Anywhere Labs
+PackageName: Agents Anywhere
+PackageUrl: https://www.agents-anywhere.com
+License: MIT
+LicenseUrl: https://github.com/anywhere-labs/Agents-Anywhere/blob/main/README.en.md#license
+Copyright: Copyright © 2026 Agents Anywhere
+ShortDescription: A cross-device open-source Agent workbench to connect Codex, Claude Code, or DeepSeek Harness.
+Description: Agents Anywhere is a cross-device open-source Agent workbench. Connect to work devices running Codex, Claude Code, or DeepSeek Harness, and view sessions, reply to requests, manage files and terminals from desktop, mobile, or web.
+Tags:
+- ai
+- agent
+- codex
+- deepseek
+- large-language-model
+ReleaseNotes: |-
+  Agents Anywhere v2.1.0 is an interface update to the 2.x series. AA now connects to the Codex app / IDE extension IPC protocol so you can continue working in sessions opened in a Codex window, migrates local control and the DSH plugin (@agents-anywhere/dsh-bridge-next) to MeshCall with much more reliable large-history sync, lets you switch mirrors or clear caches right from the desktop startup dialog when dependency setup fails, enables direct in-app update downloads from the official website on Desktop and Android, and rebuilds the admin dashboard from the ground up.
+
+  ## Before You Upgrade
+  - Upgrade all three local components together: Local communication between Desktop, Connector, and the DSH plugin (@agents-anywhere/dsh-bridge-next) now uses MeshCall. 2.0.x and 2.1.0 are incompatible; if only one side is upgraded, a 2.0.x Connector will stay stuck at "Waiting for DSH"
+  - Database migrations: Self-hosted servers must run migrations v2_42–v2_44. Old dashboard data is not retained; see the [upgrade guide](https://github.com/anywhere-labs/Agents-Anywhere/blob/v2.1.0/docs/upgrading.md). /api/v2/admin/dashboard/* has been removed, so 2.0.x Web / Desktop clients will get 404 when opening the dashboard
+  - SQLite and v1 import tool removed: The server no longer supports the SQLite backend or the v1 import tool. Deployments still on v1 must finish importing with 2.0.x first; AGENT_SERVER_DB_BACKEND can be removed from deployment configs
+  - Mobile clients and standalone packages: Android and iOS 2.0.3 continue to work, but sign-in renewal, provider-grouped models, and the "Not synced" state require 2.1.0. Users who installed the Connector CLI (PyPI anywhere-cli) or the DSH plugin (npm @agents-anywhere/dsh-bridge-next) separately should upgrade them to 2.1.0 together
+
+  ## Updates
+  ### Session Creation and Message Delivery
+  - When creating a session fails, the draft, attachments, and creation request are kept so you can return to edit or retry manually; model, permissions, and Agent mode are re-validated before retrying
+  - A session is considered created only when the Runtime actually receives the message. When explicitly rejected, empty sessions, staged attachments, and run markers are cleaned up; when the result is unknown, the session entry is kept to avoid duplicate creation
+  - Submission is blocked while the DSH model catalog is not ready; failed catalogs can be reloaded
+  - Fixed late creation responses after logout, background creation stealing the current page, and attachment preview lifecycle issues
+  - When attachment download fails, the session lists the filenames that were not delivered; the body and other attachments are sent as usual, and the task is not affected even if this notice itself fails to send
+  - Upload tasks are released after the download side disconnects or the transfer expires, fixing permanent blocking of local file staging
+
+  ### Desktop
+  - Drag a local folder onto the sidebar to create a project. Duplicate directories, regular files, and multi-item drops show a prompt that dismisses automatically when dragging ends or the window loses focus
+  - When the Connector fails to start, the actual cause is shown with actions to copy the error details or open the log directory
+  - When dependency downloads fail, you can switch the PyPI mirror or Python download mirror, retry, or Clear cache and retry directly in the startup dialog; packages missing from the selected mirror are automatically fetched from official PyPI
+  - Post-startup errors, background process exits, and Connector crashes are surfaced with a one-click restart when the background service exits; if the background service fails to start, it reports an error immediately and quitting no longer hangs
+  - Fixed first launch hanging on status checks under Chinese usernames on Windows, as well as dev launch and packaging failures when the Node or project path contains spaces
+  - Unused Router binaries are excluded during packaging, fixing macOS universal build conflicts and reducing installer size
+  - Update now downloads the latest installer for your OS (macOS, Windows) from www.agents-anywhere.com instead of showing "Update downloads are not available yet"
+
+  ### Local Connection, Ownership, and Logs
+  - Local control and the DSH bridge now use MeshCall: the Router restarts automatically on unexpected exit, and status and logs resume from the last position after disconnects without restarting the Connector
+  - Start, stop, restart, and config save run sequentially, rejecting new operations while one is already in progress; after canceling pairing, the previous flow will no longer save credentials or auto-connect
+  - The plugin manager lock and machine record lock now use random ports with connection verification, fixing startup failures caused by Windows reserved ports
+  - The plugin detects local development builds of Desktop and re-verifies who manages the Connector at key stages to prevent both sides from launching it at the same time
+  - Log pages in both the plugin and Desktop read from centralized logs with source filtering, pagination, and structured exception details; startup diagnostics for the current run are visible even before the Connector starts
+  - Corrupted log segments recover automatically and fall back to in-memory logging when the log directory is unavailable, so log issues no longer block Connector startup; tokens and authorization headers in logs are redacted
+  - Fixed compatibility with IPv6 loopback addresses in NO_PROXY under proxy environments
+
+  ### Web and Desktop Interface
+  - Rebuilt admin dashboard:
+    - New Overview, Users, Usage, Devices & Runtimes, and Quality views;
+    - Selectable time ranges and live metrics;
+    - Event-driven statistics that no longer recompute historical data when opening the dashboard;
+    - Added session read counts and read-only session statistics
+  - Admin and Settings pages now use sidebar navigation, with Announcements, Authentication, Email, and Service Configuration each on their own page; these pages no longer load workspace and push data
+  - Switching between Home and Admin / Settings slides the sidebar horizontally
+  - The Authentication page groups by mobile and desktop clients and fixes OAuth callback addresses
+  - When there are multiple providers, the model list groups by provider so same-named models are distinguishable
+  - Fixed replies that keep showing "Working" after they have ended
+  - Smoother streaming output for long sessions, reducing full-page repaints and input lag
+  - Projects in the sidebar no longer jump repeatedly when multiple tasks output in parallel
+  - Pin/Unpin and Archive/Restore now use different icons
+  - Code blocks use a unified new style; fixed Mermaid diagrams being abnormally enlarged and initially blank when "Reduce motion" is enabled
+  - Login, registration, and password recovery use native forms so password managers can autofill correctly; pressing Enter and clicking the primary button both submit, and other buttons no longer trigger submission
+  - Browser tab icons follow system light/dark mode
+  - Each Agent is shown only once in Quick Settings; the Runtime deletion input box moves up with the soft keyboard and is no longer covered
+  - Markdown supports LaTeX formulas; fixed crashes when code blocks or formulas are inside blockquotes
+  - Streaming generation preserves the current reading position
+  - Lower streaming overhead for long sessions; same-named models from different providers are no longer merged in model settings
+  - Update now downloads the latest APK from www.agents-anywhere.com
+
+  Thank you for your support and feedback on Agents Anywhere!
+ReleaseNotesUrl: https://github.com/anywhere-labs/Agents-Anywhere/releases/tag/v2.1.0
+ManifestType: locale
+ManifestVersion: 1.12.0
