@@ -1,0 +1,90 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: MichalTrojnara.osslsigncode
+PackageVersion: "2.16"
+PackageLocale: en-US
+Publisher: Michał Trojnara
+PublisherUrl: https://github.com/mtrojnar
+PublisherSupportUrl: https://github.com/mtrojnar/osslsigncode/issues
+Author: Michał Trojnara
+PackageName: osslsigncode
+PackageUrl: https://github.com/mtrojnar/osslsigncode
+License: GPL-3.0
+LicenseUrl: https://github.com/mtrojnar/osslsigncode/blob/master/LICENSE.txt
+Copyright: Copyright (C) 2005-2026 Per Allansson <pallansson@gmail.com>
+CopyrightUrl: https://github.com/mtrojnar/osslsigncode/blob/master/LICENSE.txt
+ShortDescription: OpenSSL based Authenticode signing for PE/MSI/Java CAB files.
+Description: |
+  osslsigncode is a small tool that implements part of the functionality of the Microsoft tool signtool.exe
+ReleaseNotes: |-
+  This security release fixes memory-safety vulnerabilities when processing
+  untrusted files. Users are strongly encouraged to upgrade.
+  Security fixes
+  - fixed heap overflow when extracting script signature blocks larger than
+    2 GiB (thanks to Lucidsec for reporting the issue)
+  - fixed buffer overflows in script UTF conversions on 32-bit builds, and
+    out-of-bounds reads in scripts with odd UTF-16 sizes or signature blocks
+    at the start of the file
+  - fixed double free and invalid memory reads when verifying malformed
+    PKCS#7 content with OpenSSL older than 3.5 (thanks to smaeljaish771 for
+    reporting the double free)
+  - fixed use-after-free and double free of CRLs embedded in signatures;
+    these CRLs can be added to signed files without invalidating signatures
+  - fixed invalid pointer use with non-signedData Authenticode timestamp
+    responses, MSI signatures, and "-spc" or "-certs" files
+  - fixed crashes on signatures or nested signatures with missing PKCS#7
+    content (thanks to Małgorzata Olszówka)
+  - fixed invalid pointer dereferences when processing malformed catalog
+    members, PE page hashes, or PKCS#7 certificate files without certificates
+  - fixed process memory disclosure into output files when PE or CAB
+    signature offsets overlap headers, and out-of-bounds reads when parsing
+    PE headers near the end of files approaching 4 GiB
+  - fixed out-of-bounds reads and possible memory disclosure with truncated
+    CAB headers or unterminated cabinet names; malformed names are also
+    rejected during digest calculation (thanks to Małgorzata Olszówka)
+  - fixed out-of-bounds reads in truncated MSI files and invalid sector
+    references, and stack exhaustion with long directory chains or deeply
+    nested storages
+  - fixed stack buffer overflow with oversized "-readpass" files on Windows,
+    and buffer underflow with "-askpass" input starting with a NUL character
+  - enabled ASLR in prebuilt Linux binaries through static PIE, and added
+    build metadata
+  Other user-visible changes
+  - fixed corrupted output and failed verification when signing MSI files
+    with empty or nested storages, or signing/removing signatures when the
+    output has no streams smaller than 4 KiB
+  - fixed replacing or removing duplicate MSI DigitalSignature streams
+  - fixed opening MSI files whose directory starts at the first sector, and
+    spurious sector-chain errors when reading MSI streams
+  - fixed crashes and invalid output on memory allocation failures during
+    MSI signing and script UTF conversion
+  - fixed "remove-signature" reporting success and keeping truncated output
+    for CAB files with corrupted headers
+  - fixed "-askpass" truncating passwords not terminated with a newline
+  - made warnings about ignored file-format options consistent and removed
+    duplicate warnings
+  - included license files in prebuilt binary archives
+  Downloads
+  Source and tested binaries are included for Linux (x86-64 and ARM64),
+  Windows (x86-64 and ARM64), and macOS (x86-64).
+  The macOS ARM64 binary is not included: GitHub could not allocate a hosted
+  runner, and that job never started. All five included binary build/test jobs
+  passed. Publication was not delayed further because the security fixes are
+  already public. The source is available for building on macOS ARM64.
+  Verifying downloads
+  Every archive, BUILDINFO.json, and SHA256SUMS.txt has an ASCII-armored
+  detached GPG signature (.asc), signed with Michał Trojnara's key:
+  AC91 5EA3 0645 D9D3 D4DA E4FE B104 8932 DD3A AAA3
+  Using a trusted copy of this public key, authenticate the checksum manifest
+  before checking the downloaded files:
+  gpg --verify SHA256SUMS.txt.asc SHA256SUMS.txt
+  sha256sum -c SHA256SUMS.txt
+  Individual archives can also be verified directly, for example:
+  gpg --verify osslsigncode-2.16.tar.gz.asc osslsigncode-2.16.tar.gz
+  BUILDINFO.json records the source commit, workflow commit, successful binary
+  jobs, and GitHub artifact digests. The workflow stopped before its attestation
+  job, so this release uses GPG signatures, not GitHub artifact attestations.
+ReleaseNotesUrl: https://github.com/mtrojnar/osslsigncode/releases/tag/2.16
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

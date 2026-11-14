@@ -1,0 +1,74 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: nyakang.NyaTerm
+PackageVersion: 2.0.5
+PackageLocale: zh-CN
+Publisher: kang
+PublisherUrl: https://github.com/nyakang
+PublisherSupportUrl: https://github.com/nyakang/nyaterm/issues
+Author: NyaKang
+PackageName: NyaTerm
+PackageUrl: https://nyaterm.app/
+License: Apache-2.0
+LicenseUrl: https://github.com/nyakang/nyaterm/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 NyaKang
+ShortDescription: 支持 SSH、RDP、VNC、串口、本地 shell、SFTP 和加密配置同步的原生桌面终端客户端。
+Description: NyaTerm 是基于 Rust 与 GPUI 的原生桌面终端客户端，把 SSH、本地 shell、Telnet、串口、RDP、VNC 会话、SFTP 文件传输、端口转发、OTP、AI 助手和加密配置同步放在同一个桌面应用中，适合日常开发、服务器维护和设备调试。
+Tags:
+- rdp
+- serial
+- sftp
+- ssh
+- terminal
+- vnc
+- 人工智能
+- 终端
+- 运维
+- 远程桌面
+ReleaseNotes: |-
+  NyaTerm v2.0.5
+  本次正式版本新增 Android 设备原生连接与屏幕操作、Linux 远程机器端口和系统服务管理，并扩展终端命令区块可折叠、远程文件管理与 MCP 连接能力，资源监控类的面板支持本地终端。同时集中修复终端补全、tmux、SFTP 传输、设置保存和桌面交互中的问题。
+  ✨ 新增功能
+  - Android 原生连接：支持保存 Android ADB 连接并在 NyaTerm 中打开设备 Shell；可通过现有文件侧边栏及双栏文件管理器浏览、上传和下载设备文件，并将文件拖出到本机。Android 会话标签菜单可打开对应设备的独立屏幕标签页，支持画面查看、触控与键盘交互、剪贴板粘贴、缩放和平移。发行包内集成 ADB、屏幕辅助程序及所需动态库，减少单独配置依赖的步骤。（PR #1232）
+  - 端口与服务管理面板：为本机终端及受支持的 SSH 主机提供端口（Ports）与服务（Services）视图，支持筛选、排序、查看进程或服务详情，以及经确认后执行受支持的操作；服务面板可查看日志。增加 Windows 本机服务与登录会话信息支持。主机信息采集采用按需启用方式，仅在相关面板打开时进行，提权需显式授权。（PR #1197）
+  - 终端命令区块与输出折叠：在 Shell 提供命令边界信息时，为已执行的命令显示区块辅助线，并允许折叠已完成命令的输出；输入和当前执行中的内容不会被隐藏，运行全屏程序等不适用场景仍使用常规终端显示。
+  - 远程文件临时提权：在手动 SFTP 文件管理操作中增加临时 sudo 权限入口，以便处理需要更高权限的远端目录，并提供独立的密码授权和状态反馈。
+  - MCP 使用已保存 SSH 连接：外部 MCP 工具可在授权与连接策略允许的情况下，直接以已保存的 SSH 连接为目标执行支持的命令或文件操作，无需先打开对应的终端标签页；增加独立后台连接与能力审批的约束。
+  - MobaXterm 加密凭据导入：在已有会话导入功能基础上，支持从完整的 MobaXterm.ini 中读取加密凭据；可输入 MobaXterm 主密码解密，也可跳过加密凭据，仅导入会话配置。
+  - 全局命令历史补全：增加依据历史使用情况加权的命令建议，改善历史命令的检索与排序。
+  🐛 问题修复
+  - 终端命令补全：修复切换到 su 用户后补全失效、分页输出中的空格与行首变化造成的误判、Shell 状态变化导致候选不稳定，以及建议列表跟随光标时闪烁等问题。进一步区分候选导航、插入和执行确认，减少意外接受或提交命令的情况。（PR #1227）
+  - tmux 与传输协议：加强 tmux 控制模式识别和协议切换，修复向 tmux pane 写入原始内容时的发送路径，并处理 zsh 恢复工作目录时百分号转义和 lrzsz 结束标记的兼容问题。（PR #1225、PR #1226）
+  - 文件管理与传输：修复文件浏览器多选手势、面包屑路径输入与收藏夹菜单的部分交互问题；恢复文件预览中的语法高亮。优化 SFTP 上传发生短暂故障后的重试处理，保留已有文件的覆盖或重命名选择，避免重试时重复询问或创建错误的目标文件。
+  - 云同步与备份：修复导入备份后可能导致主密码无法正常解锁的问题，改善配置恢复后的凭据可用性。
+  - 设置与窗口状态：修复切换设置面板时错误提示草稿已修改、取消设置修改影响当前布局、启动后恢复的终端失去输入焦点，以及标签页重命名和复制标签页位置不正确等问题。（PR #1227）
+  - 快捷命令分类：改进分类搜索与新建流程，输入不存在的分类名称后可直接按 Enter 创建，减少分类选择中的重复操作。（PR #1240）
+  - 多行输入：修复在支持多行文本的输入框中使用 Shift+Enter 时意外提交的问题。（PR #1220）
+  ⚡ 性能与稳定性优化
+  - Android 操作生命周期：完善设备断开、重连和多标签页并行操作时的连接绑定、取消与清理；文件上传采用临时提交和状态校验，屏幕画面按需刷新，减少隐藏画面不必要的图像传输与上传。
+  - 本机与远程管理任务：将端口、服务和后台 SSH 操作放入受限的异步执行流程，避免慢速查询或等待权限提升阻塞界面；进一步限制操作超时及后台服务误操作。
+  - 命令补全资源占用：压缩内置命令补全目录，并调整历史检索与匹配逻辑，减少不必要的索引及匹配开销。
+  ♻️ 重构与优化
+  - 进一步拆分桌面端连接、AI Agent 客户端、MCP 能力管理、文件管理、同步和远程操作模块，统一部分可复用的状态与交互逻辑，便于后续维护；此项主要为内部调整，不代表相关模块整体换代。
+  🎨 界面与交互优化
+  - AI 输入区：支持拖动输入区上边缘调整高度，同时限制其占用空间不超出可用面板；恢复模型推理强度选项的正确选中样式。（PR #1221、PR #1223）
+  - 连接与快捷操作：改善已保存连接的相关性排序；优化命令建议弹出位置、连接协议图标、操作链接的悬停提示，以及新建连接的提示文字。
+  - 面板和菜单：调整隧道、代理的分组移动子菜单及异步保存后的关闭行为；改进文件目录收藏夹、Android 连接状态、通知图标等细节。
+  📚 文档与国际化
+  - 补充 Android 连接与屏幕、主机管理工具、MobaXterm 加密凭据导入相关使用说明，并完善多语言界面提示；整理不再适用的开发验证文档和部分设置文案。
+  👥 贡献者
+  - @WerVa：实现本机与远程主机的端口、服务管理及 Windows 本机支持。（PR #1197）
+  - @fonaix：修复终端补全与快捷动作、设置草稿状态等问题。（PR #1227）
+  - @yaoxinghuo：完善 AI 输入框拖动调整、Shift+Enter 行为，以及 tmux 和 zsh 相关兼容性。（PR #1220、PR #1221、PR #1225、PR #1226）
+  - @LunaSpica：恢复 AI 模型推理强度选项的选中样式。（PR #1223）
+  - @shallFun4Learning：修复快捷命令中按 Enter 新建未匹配分类的问题。（PR #1240）
+  ⚠️ 升级说明
+  - Android 连接仍需在设备端启用相应调试方式并完成 ADB 授权；通过 USB 连接时，还可能需要操作系统的 USB 驱动或访问权限。屏幕功能使用随安装包提供的组件，请完整安装或更新应用文件。
+  - 导入 MobaXterm 加密凭据时需要正确的原主密码；若不提供密码，可选择跳过加密凭据，导入后再补充认证信息。
+ReleaseNotesUrl: https://github.com/nyakang/nyaterm/releases/tag/v2.0.5
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://nyaterm.app/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
