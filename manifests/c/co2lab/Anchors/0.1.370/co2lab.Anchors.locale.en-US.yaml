@@ -1,0 +1,43 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: co2lab.Anchors
+PackageVersion: 0.1.370
+PackageLocale: en-US
+Publisher: co2lab
+PublisherUrl: https://github.com/co2-lab
+PublisherSupportUrl: https://github.com/co2-lab/anchors/issues
+PackageName: Anchors
+PackageUrl: https://github.com/co2-lab/anchors
+License: Elastic License 2.0
+LicenseUrl: https://github.com/co2-lab/anchors/blob/HEAD/LICENSE
+ShortDescription: Spec-first continuity framework for AI-assisted development
+Description: Anchors ties spec, feature and test together through a shared identity code, then confronts each artifact against the rules declared in anchors.yaml. It maps the project as a graph, propagates change from the anchor outward, and gates every step — so work guided by AI stays anchored to what was decided.
+Moniker: anchors
+Tags:
+- ai
+- ai-agents
+- cli
+- developer-tools
+- golang
+- spec-first
+ReleaseNotes: |-
+  Fix: a scenario the spec no longer declares stops keeping it stale
+  A spec's proof is kept per suite, one entry for each report that proved its scenarios. When a
+  scenario was renamed or removed, the suite that had proven it kept that proof under the old
+  code, with the spec's revision of that time. If nobody ran that suite again, it held the
+  spec stale indefinitely: scenario-coverage reported "the spec changed since the ingestion,
+  ingest again", and ingesting other reports did not clear it.
+  The case came from MIF. An aggregate visual-regression report proved IVCHI-VR, and the
+  flow behind it had been split into IVCHI-VR-S0N.
+  Each ingestion now removes from every spec's proof the scenarios whose rule the spec no
+  longer declares. This covers every suite, including those the ingestion did not run. A suite
+  left with no scenario is removed together with its revision, and the spec's proven codes and
+  proof revision are recomputed. The next ingestion of any report cleans up a spec in this
+  state.
+  Everything in the v0.1.351 notes still applies: run anchors migrate once, crossing format 8.
+  Changelog
+  - 13c5373 fix(ingest): a scenario the spec no longer declares leaves its proof, and keeps it stale no more
+ReleaseNotesUrl: https://github.com/co2-lab/anchors/releases/tag/v0.1.370
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
