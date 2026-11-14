@@ -1,0 +1,51 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: sluicesync.sluice
+PackageVersion: 0.163.11
+PackageLocale: en-US
+Publisher: sluicesync
+PublisherUrl: https://sluicesync.com/
+PublisherSupportUrl: https://github.com/sluicesync/sluice/issues
+PackageName: sluice
+PackageUrl: https://sluicesync.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/sluicesync/sluice/blob/main/LICENSE
+Copyright: sluicesync
+ShortDescription: Open-source MySQL <-> Postgres database migration and continuous-sync (CDC) tool
+Description: sluice is an open-source database migration and continuous-sync (CDC) tool covering MySQL and Postgres in all four directions.
+Moniker: sluice
+Tags:
+- cdc
+- database
+- migration
+- mysql
+- postgres
+ReleaseNotes: |-
+  > Known issues added after publish (2026-10-29): two older CRITICAL silent defects found by this release's regression cycle, Bug 340 (a case-variant discriminator name re-stamps the shard column on MySQL targets) and Bug 339 (VStream ADD COLUMN then updates of the new column left stale). See "Not closed, stated".
+  Fix, loud: --inject-shard-column from a PlanetScale or Vitess source stopped at the first change (SHAPE-A-KEYLESS-BOUNDARY). Every per-shard stream that stamps a shard discriminator into a consolidated target (Shape A) exited with "InjectShardColumn: table … has no primary key" at its first CDC change, with or without --no-coordinate-live-ddl. Nothing was written wrongly; the stream just could not run. Affected: VStream sources (PlanetScale, Vitess), v0.156.10 (by the code, when the check landed) through v0.163.10 (measured). Drop-in: no flag, state or format change.
+  Fixed
+  - A VStream schema boundary no longer refuses Shape A for having no primary key (SHAPE-A-KEYLESS-BOUNDARY, loud, v0.156.10 through v0.163.10). v0.156.10 (GC-44) began checking each table's first schema boundary against the target. For a Shape A stream that check translates the boundary through InjectShardColumn, which folds the discriminator into the primary key and refuses a table without one. A VStream schema boundary carries the table's columns and no key, so every such boundary refused. Measured on the v0.163.10 binary: one stream per shard, each with --inject-shard-column, every stream exited rc 1 at its first change. Now, on a VStream source only (keylessBoundaries), the boundary's columns are compared with the discriminator column appended (translate.AppendShardColumn) and no key fold. On a binlog or Postgres source, whose boundaries carry the key, a boundary without one still refuses. Pinned by TestFirstBoundaryWitness_ShapeAKeylessBoundary (MySQL and Postgres targets, keyed lane still refusing) and TestAppendShardColumn.
+  - The discriminator-collision refusal is kept on that path. The first cut of this fix appended the discriminator by hand and so dropped InjectShardColumn's other refusal: a source table that already has a column with the discriminator's name. A keyless boundary carrying its own src_shard would then have matched, and the applier's shard stamp would have overwritten that source column's value on every row. The pre-tag review caught it; both functions now share one collision check, pinned on the keyless path for MySQL and Postgres targets.
+
+  Not closed, stated
+  - A primary key dropped mid-stream on a PlanetScale or Vitess table whose only key is its primary key is not re-checked (VSTREAM-PK-ONLY-MIDSTREAM-KEY-DROP, filed). The VStream boundary carries no key, and the mid-stream unique-key re-check covers only tables with a unique key besides the primary key. A key dropped while the stream is stopped is caught at the next start (UNIQUE-KEY-STOPPED-WINDOW-DOOR). Single-stream VStream had the same exposure before this release.
+  - Bugs 337/338 (open, silent): --allow-cross-shard-merge loses rows an application moves between shards when a table's primary vindex is not inside its primary key. A row whose vindex column changes keeps its id and moves shard, and the merged stream can apply the new shard's insert before the old shard's delete. Measured loss on MySQL targets; any target is exposed by the code. A refusal for this shape (CROSS-SHARD-VINDEX-NOT-IN-PK) ships in its own upcoming release. Until then, the safe topology for such tables is one stream per shard (vstream_shards=<shard> in the source DSN), each with its own --inject-shard-column value — the topology this release makes runnable. Measured exact on MySQL and Postgres targets, 701,042 of 701,042 rows with forward, insert-first and tail moves during and after the copy, on the branch carrying this fix's first cut (the collision refusal added since does not touch that path).
+  - Bugs 333/336 (open): a drained schema add-table is exact for inserts, updates and deletes made during the add; primary-key changes on the added table during the add are not covered. A fix is in review and ships in its own release.
+  - Added after publish (2026-10-29), from this release's regression cycle — two older defects, both CRITICAL and silent, open, each with a fix in progress:
+    - Bug 340: a source column whose name matches the --inject-shard-column discriminator in a different case (SRC_SHARD against src_shard) re-stamps the discriminator on a MySQL-family target. The collision refusal compares names case-sensitively, so the source's ADD COLUMN is forwarded, and on MySQL it is the same column: the backfill writes the source column's values into the discriminator. Measured: on a binlog source (v0.163.10 too) every row of that shard was re-stamped with no error, and the shard's later updates stopped matching; on a VStream source the stream exited 1, but only after 5,001 rows were re-stamped. Postgres targets are not affected. Until the fix ships, do not add a source column whose name equals the discriminator in any letter case. To check a MySQL target, look for discriminator values other than the ones your streams use (SELECT src_shard, COUNT(*) … GROUP BY src_shard).
+    - Bug 339: on a PlanetScale or Vitess source, an ADD COLUMN followed by updates that also set the new column can leave those rows stale on the target. Measured on Postgres targets (single stream and per-shard streams) and on MySQL targets with per-shard streams, 10 of 10 such rows stale on v0.163.10 and v0.163.11, whether the column was added while the stream ran or while it was stopped. Row counts stay equal, so sluice verify --depth count does not see it. The cause is still being traced, and there is no measured workaround yet. After an ADD COLUMN on a VStream source, compare the new column's values against the source key by key.
+    - The cycle also re-measured the per-shard topology recommended above on the v0.163.11 binary: exact per shard on MySQL and Postgres targets, with and without --no-coordinate-live-ddl, including cross-shard moves during and after the copy and a stop and warm resume.
+  - Test coverage on this release. The integration tests run in the per-PR CI shards and the dispatched Extended suites. The psverify (PlanetScale) and d1verify suites were not run; the change touches only the VStream Shape A boundary check, measured on vttestserver.
+
+  Compatibility
+  - Drop-in. No flag, control-table, backup-format or BackupFormatVersion change. Binlog and Postgres sources behave as in v0.163.10.
+
+  Who needs this
+  - Anyone running --inject-shard-column from a PlanetScale or Vitess source, or planning per-shard streams for the Bugs 337/338 shape above: upgrade, then start the streams as usual.
+  - Everyone else: nothing to do.
+  Install: brew install sluicesync/tap/sluice · go install sluicesync.dev/sluice/cmd/sluice@v0.163.11 · Container: ghcr.io/sluicesync/sluice:0.163.11
+  Full changelog: https://github.com/sluicesync/sluice/blob/main/CHANGELOG.md
+ReleaseNotesUrl: https://github.com/sluicesync/sluice/releases/tag/v0.163.11
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
