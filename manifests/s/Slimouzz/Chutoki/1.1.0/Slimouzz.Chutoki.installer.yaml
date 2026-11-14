@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.28.0.schema.json
+
+PackageIdentifier: Slimouzz.Chutoki
+PackageVersion: 1.1.0
+Platform:
+- Windows.Desktop
+# .NET Framework 4.7.2 is built into Windows 10 1803 (build 17134) and later, and into Windows 11,
+# so no .NET package dependency is declared; the minimum OS version covers it.
+MinimumOSVersion: 10.0.17134.0
+InstallerType: zip
+NestedInstallerType: portable
+NestedInstallerFiles:
+- RelativeFilePath: Chutoki.exe
+  PortableCommandAlias: chutoki
+# The PawnIO driver is required at runtime and is NOT bundled in the zip.
+# It exists in the winget community repository as namazso.PawnIO, so winget can install it first.
+Dependencies:
+  PackageDependencies:
+  - PackageIdentifier: namazso.PawnIO
+# ElevationRequirement describes the INSTALL step, not the app. Extracting a portable zip does not
+# need admin rights; Chutoki.exe asks for admin itself when launched (requireAdministrator manifest).
+# Therefore no ElevationRequirement is set. If a reviewer asks for one, "elevatesSelf" is the closest value.
+# ElevationRequirement: elevatesSelf
+UpgradeBehavior: install
+ReleaseDate: 2026-11-14
+Installers:
+- Architecture: x64
+  InstallerUrl: https://github.com/Slimouzz/chutoki/releases/download/v1.1.0/Chutoki-Free-win-x64.zip
+  InstallerSha256: 6A4E881612938FD0F9F9B936C3EF1CFA22561FC166EBDE5D8D1786EC292EDB98
+ManifestType: installer
+ManifestVersion: 1.28.0
