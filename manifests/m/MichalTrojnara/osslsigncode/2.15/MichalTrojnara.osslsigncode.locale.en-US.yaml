@@ -1,0 +1,67 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: MichalTrojnara.osslsigncode
+PackageVersion: "2.15"
+PackageLocale: en-US
+Publisher: Michał Trojnara
+PublisherUrl: https://github.com/mtrojnar
+PublisherSupportUrl: https://github.com/mtrojnar/osslsigncode/issues
+Author: Michał Trojnara
+PackageName: osslsigncode
+PackageUrl: https://github.com/mtrojnar/osslsigncode
+License: GPL-3.0
+LicenseUrl: https://github.com/mtrojnar/osslsigncode/blob/master/LICENSE.txt
+Copyright: Copyright (C) 2005-2026 Per Allansson <pallansson@gmail.com>
+CopyrightUrl: https://github.com/mtrojnar/osslsigncode/blob/master/LICENSE.txt
+ShortDescription: OpenSSL based Authenticode signing for PE/MSI/Java CAB files.
+Description: |
+  osslsigncode is a small tool that implements part of the functionality of the Microsoft tool signtool.exe
+ReleaseNotes: |-
+  Security fixes
+  This release fixes timestamp verification flaws and memory-safety issues
+  present in 2.14. Users processing untrusted files are strongly encouraged
+  to upgrade.
+  - fixed verification to report failure when timestamp verification fails,
+    unless "-ignore-timestamp" is used (thanks to Małgorzata Olszówka)
+  - fixed timestamp verification to use the time belonging to the verified
+    timestamp when multiple timestamp attributes are present
+  - fixed RFC 3161 timestamp verification to reject truncated or overlong
+    message imprints, preventing incorrect timestamp acceptance and
+    out-of-bounds reads
+  - fixed replacing a script signature block that starts the file or follows a
+    line with a different line ending, which crashed, deleted script content, or
+    produced unverifiable output
+  - fixed use-after-free when replacing an existing APPX signature
+  - fixed heap out-of-bounds read and possible information disclosure when
+    printing an empty PKCS#7 message digest
+  - fixed heap out-of-bounds reads when parsing malformed APPX ZIP64 extra fields
+  - fixed heap out-of-bounds reads when verifying malformed PKCS#7 signature
+    attributes
+  - fixed buffer overflows when more than 256 occurrences of either "-t" or
+    "-ts" are supplied
+  Other user-visible changes
+  - added prebuilt binaries for Linux, macOS and Windows on x86-64 and ARM64
+    (thanks to Elijah Marusawa)
+  - added support for CMS OCTET STRING-encoded Authenticode content
+    (thanks to Małgorzata Olszówka)
+  - improved PE checksum calculation performance (thanks to Francois Girinon)
+  - fixed compilation on Cygwin
+  - fixed compilation on Windows ARM64 (thanks to Elijah Marusawa)
+  - fixed signing large PE files with page hashes ("-ph"), including files with
+    large overlays (thanks to Francois Girinon)
+  - fixed MSI MsiDigitalSignatureEx digest ordering during signing and
+    verification, and validation of the metadata digest; files previously
+    signed with "-add-msi-dse" whose streams sort before MsiDigitalSignatureEx
+    must be re-signed. Corrected signatures will not verify with versions
+    older than 2.15 (thanks to Małgorzata Olszówka)
+  Verifying downloads
+  All binary archives, the preserved source archive, build metadata and checksum manifest have GitHub artifact attestations. Verify the manifest before checking the downloaded files:
+  gh attestation verify SHA256SUMS.txt --repo mtrojnar/osslsigncode \
+    --signer-workflow mtrojnar/osslsigncode/.github/workflows/release.yml \
+    --deny-self-hosted-runners
+  sha256sum -c SHA256SUMS.txt
+  BUILDINFO.json records the source tag commit and the separate workflow commit used to rebuild the binaries. The Linux binaries are fully static PIE executables, retaining ASLR.
+ReleaseNotesUrl: https://github.com/mtrojnar/osslsigncode/releases/tag/2.15
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
