@@ -1,0 +1,34 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: tonythethompson.numan
+PackageVersion: 0.4.0
+PackageLocale: en-US
+Publisher: Anthony Thompson
+PublisherUrl: https://github.com/tonythethompson
+PublisherSupportUrl: https://github.com/tonythethompson/numan/issues
+PackageName: numan
+PackageUrl: https://github.com/tonythethompson/numan
+License: MIT
+LicenseUrl: https://github.com/tonythethompson/numan/blob/HEAD/LICENSE
+ShortDescription: Cross-platform package manager for Nushell
+Description: Numan installs plugins, modules, scripts, and completions from signed registries, pins immutable artifacts in a lockfile, and activates them with Nu only when you run numan activate.
+Moniker: numan
+Tags:
+- cli
+- nushell
+- package-manager
+ReleaseNotes: |-
+  [0.4.0] - 2026-11-09
+  Added
+  - Unattended batch update (numan update --all) (#166): updates all installed packages in a single command. With --yes (-y), runs non-interactively, auto-confirming all prompts and returning exit code 0 when all packages are successfully updated or already up to date.
+  - Background autoupdate scheduler (numan setup autoupdate) (#166): platform-native scheduled extension auto-updates using host schedulers:
+    - Linux: systemd user service and timer unit (~/.config/systemd/user/numan-autoupdate-*.timer)
+    - macOS: launchd user agent plist (~/Library/LaunchAgents/dev.numan.autoupdate.*.plist)
+    - Windows: Task Scheduler task via schtasks (NumanAutoUpdate)
+    - Supports --enable [--interval daily|hourly] [--allow-active-plugin-mutation], --disable, --status, and --run-now.
+  - First-class script package activation (#14, #164): script packages whose registry entry declares activation: {kind: "nu-script", entry_points: [{name, path}, ...]} can now be activated with numan activate. Each declared name becomes a command in the Numan-managed autoload file that runs the package-relative .nu target under the activating Nu executable, forwarding arguments, stdout/stderr, and exit status (pipeline input is not forwarded; see the design spec). Command names are validated, collisions across active script packages are rejected (never shadowed), and install remains inert — package code runs only when a user invokes a declared command. Scripts without a declaration stay install-only; numan info shows declared entry points before activation.
+  - First-class completion package activation (#15, #165): completion packages whose registry entry declares activation: {kind: "nu-completion", targets: [{command, path, kind}, ...]} can now be activated with numan activate. Each declared target is composed into the Numan-managed autoload file as a use "<path>" * contribution under an ownership comment; target ownership is exclusive across active completion packages (conflicts are rejected, never shadowed), and install remains inert — completion providers are never invoked at install or activation time, and command-backed providers run only when Nushell requests a completion. numan info shows declared targets and flags command-backed targets as able to execute code during completion. Completion packages without a declaration stay install-only. This is distinct from numan completions <shell>, which generates shell completions for Numan itself.
+ReleaseNotesUrl: https://github.com/numan-cli/numan/releases/tag/v0.4.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
