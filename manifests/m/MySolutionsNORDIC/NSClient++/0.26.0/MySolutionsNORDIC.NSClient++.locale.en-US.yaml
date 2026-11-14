@@ -1,0 +1,102 @@
+# Created with komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: MySolutionsNORDIC.NSClient++
+PackageVersion: 0.26.0
+PackageLocale: en-US
+Publisher: MySolutions NORDIC
+PublisherUrl: https://medin.name/
+PublisherSupportUrl: https://github.com/mickem/nscp/issues
+Author: My Computer Solutions NORDIC KB
+PackageName: NSClient++
+PackageUrl: https://nsclient.org/
+License: GPL-2.0
+LicenseUrl: https://github.com/mickem/nscp/blob/HEAD/COPYING
+Copyright: Copyright (C) 2026 - Michael Medin
+ShortDescription: A fully fledged monitoring agent which can be used with many monitoring tools.
+Description: |-
+  NSClient++ (nscp) aims to be a simple yet powerful and secure monitoring daemon. It was built for Nagios/Icinga, but nothing in the daemon is Nagios/Icinga specific and it can be used in many other scenarios where you want to receive/distribute check metrics.
+  The daemon has 3 main functions:
+  - Allow a remote machine (monitoring server) to request commands to be run on this machine (the monitored machine) which return the status of the machine.
+  - Submit the same results to a remote (monitoring server).
+  - Take action and perform tasks.
+Moniker: nscp
+Tags:
+- icinga
+- naemon
+- nagios
+ReleaseNotes: |-
+  Nagios NCPA support, a check that finds what is filling a disk, and scripts that run from the fleet tree
+  0.26.0 adds two experimental pieces: an NCPAServer module that lets Nagios' check_ncpa.py poll NSClient++, and check_largest_files, which ranks the files or folders filling a disk and reads the NTFS Master File Table on Windows. A new script root setting lets every script module run its scripts from the fleet tree. The WEB server now uses its threads pool, keeps connections alive and no longer falls back to cleartext when its certificate does not load. Missing predefined performance counters are retried until they exist, and a fleet install stops writing local configuration.
+  ✨ Highlights
+  - 📡 NCPAServer: poll NSClient++ with check_ncpa.py. A new, experimental module serves the Nagios NCPA HTTP API on port 5693, token-authenticated and limited by allowed hosts. This release serves the plugins/ node, which runs any check, alias or script (#1633).
+  - 💾 check_largest_files finds what is filling a disk. It lists the top largest files (or, with type=folders, folders) beneath a path. On Windows it reads the NTFS Master File Table, which takes seconds where walking a large volume takes minutes (#1692).
+  - 🛰️ script root runs scripts from the fleet tree. External, Lua, Python and check_mk scripts can all load from ${fleet-folder}/scripts, a shared folder or one of your own, so a fleet bundle can ship its scripts (#1673, #1684).
+  - ⏱️ The WEB server serves requests in parallel and keeps connections alive. threads (default 10) finally sizes a real pool, so one slow REST check no longer holds up the web UI. Connections are reused, and the request body cap is now the max request size setting (#1653, #1678).
+  - 🔒 No cleartext fallback when the web certificate does not load. An unreadable or mismatched certificate or key stops the WEB server with a reason. It no longer serves plain HTTP on 8443 or fails every handshake (#1633).
+  - 📊 Late performance counters are picked up. One predefined counter that was not registered yet used to break every predefined counter until a restart. Each one is now retried on its own until it appears (#634, #1656).
+  - 🛰️ A fleet install writes no local configuration. An MSI install with FLEET_SERVER only adds the fleet include, so the fleet server's settings are no longer overridden by installer defaults (#1688).
+  🔍 Detailed changes
+  📡 NCPAServer — a Nagios NCPA endpoint (experimental)
+  The module is off until you enable it. It answers the NCPA HTTP API that check_ncpa.py speaks:
+  check_ncpa.py -H agent -t <token> -M plugins/check_cpu
+  ─────────────────────────────────┬──────────────────────────────────────────────────────────────────────────────────────────────
+  Setting ([/settings/NCPA/server])│Meaning
+  ─────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────
+  token, backup token              │The NCPA token, plus a second one for rotation. nscp ncpa token --set stores either one
+                                   │hashed.
+  ─────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────
+  allowed hosts                    │Who may connect, as with the other servers.
+  ─────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────
+  allow arguments                  │Arguments are refused unless this is true, as with NRPE.
+  ─────────────────────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────
+  threads                          │How many requests it answers at once (default 10).
+  ─────────────────────────────────┴──────────────────────────────────────────────────────────────────────────────────────────────
+  It uses the WEB server's certificate and won't start unless that certificate loads. allow insecure = true covers a missing certificate only. On Windows it is the new NCPA support installer feature. The built-in NCPA node tree (cpu/, memory/, disk/, ...) comes in a later release. The security notice explains what enabling it exposes.
+  💾 CheckDisk — check_largest_files (experimental)
+  check_largest_files path=D:\ top=10 min-size=100M
+  check_largest_files path=/var type=folders folder-depth=2
+  pattern and min-size narrow what is counted. timeout (default 30 seconds) aborts a long scan and returns UNKNOWN, or whatever timeout-state says. On Windows the check reads the NTFS Master File Table directly when it can: that needs a local NTFS volume and administrator rights, which the service has. Otherwise, and always on Linux, it walks the tree. Neither method follows symbolic links, junctions or mount points. path is gated by file access in [/settings/disk], as check_files is.
+  🛰️ Scripting — script root
+  CheckExternalScripts, PythonScript, LUAScript, CheckMKClient and CheckMKServer now all read script root, either from their own section or from [/settings/default]:
+  ────────────────────┬───────────────────────────────────────────────────────────────────────────────
+  Value               │Scripts folder
+  ────────────────────┼───────────────────────────────────────────────────────────────────────────────
+  ${scripts} (default)│the built-in layout, unchanged
+  ────────────────────┼───────────────────────────────────────────────────────────────────────────────
+  fleet               │${fleet-folder}/scripts, where the fleet sync stages a bundle's scripts/
+                      │entries
+  ────────────────────┼───────────────────────────────────────────────────────────────────────────────
+  shared              │${shared-path}/scripts
+  ────────────────────┼───────────────────────────────────────────────────────────────────────────────
+  a path              │a folder of your own
+  ────────────────────┴───────────────────────────────────────────────────────────────────────────────
+  Python and Lua read its python and lua sub-folders. External scripts start in the folder above it, the same rule the default layout always followed, so a moved scripts folder runs unchanged. On Linux and macOS the agent now sets that working directory itself instead of inheriting one. ext-scr add --import records scripts/<name> on every platform.
+  ⚙️ WEBServer — threads, keep-alive and request size
+  - Threads. The web server ran every request on one thread, so a slow check over REST held up every other request, the web UI and /api/v2/metrics. threads under /settings/WEB/server was read and never used. It now sizes the pool on both backends.
+  - Keep-alive. The Linux backend sent Connection: close on every answer. Clients now reuse their connection for up to 30 seconds between requests, on every platform.
+  - max request size. The body cap was a compile-time constant (1 MiB on Linux, 3 MiB on Windows), and a request over it was dropped without an answer. It is now a setting, default 3MiB. A larger request gets 413 Payload Too Large with a body naming the setting. On Windows the effective limit is 3 MiB, whatever the setting says.
+  - Certificate must load. If certificate or certificate key points at a file that cannot be used, the server logs why and does not start. Set certificate to empty and allow insecure = true only if you really want cleartext.
+  - nscp web install (and the NRPE equivalent) run without write access to the certificate folder now say so and how to fix it, instead of printing Invalid command line (#1660).
+  📊 CheckSystem — performance counters, facts and process keywords
+  - Predefined counters (#634). Each counter in [/settings/system/windows/counters] is added on its own. A missing one is retried in the background: quickly during the first minute, then every minute. The log says Failed to add counter <name> (<path>): ... once, then Counter <name> is now available. check_pdh reload=true, which used to do nothing, now has the collector retry on its next tick.
+  - os facts: domain or workgroup. Two new Windows fields, join (domain, workgroup or standalone) and join_name, say whether the host is joined. domain was always only the DNS suffix (#1674).
+  - check_process page file keywords. pagefile and peak_pagefile reported each other's value on Windows. They now report what their names say (#1670).
+  - Windows Server 2008 / 2008 R2. The network and temperature collectors no longer fail every second with a WMI lookup error. check_network reports the interface source there (#1681).
+  🧭 Core — unknown commands and shutdown
+  - Unknown commands name their module. check_ping without CheckNet now answers Unknown command(s): check_ping (provided by module CheckNet, which is not loaded: add "CheckNet = enabled" under [/modules] and restart). The old text is kept as the prefix (#698, #1661).
+  - Stopping waits for running tasks. A module reload, metrics round or facts round in flight when the service stops now finishes first. A task that runs longer than 30 seconds is reported by name, and the shutdown carries on without it. Scheduler checks in progress are finished the same way when the module reloads (#1676).
+  🐛 Bug fixes
+  - Crash on exit after WEBServer loaded. WEBServer left a callback installed in the mongoose library, which crashed the process at exit. The crash handler also failed while writing its report and left an empty .crash file. Both are fixed (#1677).
+  📦 Packaging
+  - Boost.JSON is now linked from the Boost build: nscp_json.dll / libnscp_json.so is gone and the MSI ships boost_json.dll instead. The Linux packages use the system library (#1561).
+  - Fleet installs. With FLEET_SERVER, the MSI ignores the configuration properties (ALLOWED_HOSTS, NSCLIENT_PWD, CONF_SET, NRPEMODE, NSCA_*, ...) with a warning in the install log, and skips the monitoring-tool pages (#1688).
+  ⚠️ Upgrade notes
+  The full list is on the upgrading page, and the security fixes are on the
+  security notices page.
+ReleaseNotesUrl: https://github.com/mickem/nscp/releases/tag/0.26.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://nsclient.org/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
