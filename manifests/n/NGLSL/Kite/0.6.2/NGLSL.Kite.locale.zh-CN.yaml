@@ -1,0 +1,62 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: NGLSL.Kite
+PackageVersion: 0.6.2
+PackageLocale: zh-CN
+Publisher: NGLSL
+PublisherUrl: https://github.com/NGLSL
+PublisherSupportUrl: https://github.com/NGLSL/Kite/issues
+Author: Leixinxin
+PackageName: Kite
+PackageUrl: https://github.com/NGLSL/Kite
+License: Apache-2.0
+LicenseUrl: https://github.com/NGLSL/Kite/blob/HEAD/LICENSE
+ShortDescription: 按下快捷键即可快速搜索并启动应用的 Windows 轻量启动器，支持拼音搜索。
+Description: Kite 是一款面向 Windows 的轻量应用启动器，使用 Rust 和 Iced 构建原生桌面应用，无需 WebView2 或 Node.js。通过全局快捷键唤起搜索窗口，输入应用名称、别名或拼音即可快速筛选并启动目标程序；支持扫描开始菜单、桌面、注册表 App Paths 和 Windows 打包应用，提供启动历史、固定结果、系统托盘以及可选的 Everything 文件搜索。
+Tags:
+- 启动器
+- 快速启动
+ReleaseNotes: |-
+  Kite v0.6.2
+  版本重点
+  文件搜索输入更跟手：及时中止过期查询，取够界面需要的结果后提前停止扫描。保留现有结果顺序、类型筛选、排除目录及硬链接路径语义，不增加输入等待或全库常驻缓存。
+  优化与修正
+  - 新输入、类型切换、退出文件模式、排除配置变化和隐藏窗口时，取消已经无用的在途查询。取消标记在 UI 线程同步建立，后台线程晚启动也不会干扰新请求。
+  - 修正连续输入时的队列时序：晚入队的旧请求会被忽略，避免它挤掉真正的新请求、使正常搜索显示“查询已更新”状态行。
+  - 界面仍取原有前 20 条结果；基础表达到原有预去重配额后停止，结果充足时跳过后续变化层扫描，不再计算界面未使用的完整命中数。
+  - 完整查询接口继续返回精确总数；新交互接口省略总数字段。两条路径共用筛选、路径变换、去重及结果合并逻辑，不改变搜索范围、顺序或原始 UTF-16 文件名处理。
+  同机 Release 实测
+  使用独立 Release 构建、同一份 3,242,698 条路径的 C/D/E 索引。两版各运行 22 个关键词的首轮及五轮热查询，共 132 次，再执行相同的 12 次逐字输入。旧版 14 次状态行回调单独记录；速度表只比较两版均正常返回结果的配对样本（热查询 99 对、逐字输入 12 对）。
+
+  | 输入至 UI 收到结果           | 优化前   | v0.6.2 实现 |
+  | ---------------------------- | -------- | ----------- |
+  | 热查询，中位数               | 201 ms   | 106 ms      |
+  | 热查询，P95                  | 259.4 ms | 135.1 ms    |
+  | 逐字输入，末字符至结果中位数 | 199 ms   | 94.5 ms     |
+
+  计时终点不含最终像素绘制。服务在窗口测量期间持续同步真实变化；固定状态的结果一致性使用另一份 3,255,185 条路径基库和同一份 8,433 项真实变化日志验证：22 词、七类筛选、两组排除配置共 308 组完整查询／限量查询，路径、顺序、原始 UTF-16 字段和目录标记全部一致。
+  相同搜索序列完成后隐藏窗口，等待 3 秒并采样 7 次，Kite 与读取服务的合计工作集为 104.58 → 90.54 MiB，专用驻留为 42.21 → 39.40 MiB。本轮没有增加常驻占用；采样差异受线程、分配器及系统状态影响，不作为固定节省量。工作集合计可能重复计算共享页，未包含系统缓存及内核分配。
+  详细口径见文件搜索验证摘要。以上数据来自本机隔离 Release 性能测量，正式安装包信息由下方自动构建报告列出。
+  升级影响
+  - 索引格式保持不变，已有索引、排除目录、应用设置、Alias、固定项与启动历史继续保留；本次升级不要求重建索引。
+  - 已有索引仍按原规则补读现有 USN。日志过期、卷身份变化或变化量触及上限时，继续提示重建；本版不调整这些恢复边界。
+  - 文件搜索继续默认关闭，首次启用按需授权；关闭功能或退出 Kite 后停止后台读取。没有新增服务、驱动、常驻缓存或依赖。
+  验证与限制
+  - 性能测量对应实现的本地既有 Rust 库检查 607 项通过、10 项忽略，默认编译检查、隔离 Release 构建与独立风险审核通过；未新增测试用例。正式版本的精确提交 CI、Release、NSIS 构建及安装包校验信息见下方自动报告。
+  - 实际查看了独立 Release 文件模式与搜索结果，布局和正常结果顺序保持原样。测量进程已退出、读取服务停止；未安装、覆盖或重启用户现用的 Kite。
+  - 本轮未重复集成版 30 分钟在线观察；文件搜索启用时的覆盖升级、卸载及拒绝 UAC 分支仍未实机验收。
+  - 安装包未做 Authenticode 数字签名。
+  构建与验证
+  - 发布 tag：v0.6.2
+  - tag 提交：32fdb73fc8cb26e6c857a6e326ee33624e38be84
+  - 上一个发布：v0.6.1
+  - 提交数量：1
+  - 构建环境：GitHub Actions windows-latest
+  - 验证步骤：cargo test、cargo build --release、NSIS 安装包构建
+  - 构建记录：Release #29
+  本次提交范围
+  - perf: optimize file search queries for v0.6.2 (32fdb73)
+ReleaseNotesUrl: https://github.com/NGLSL/Kite/releases/tag/v0.6.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
