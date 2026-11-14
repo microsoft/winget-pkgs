@@ -1,0 +1,42 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Kukisama.gh-usage
+PackageVersion: 1.2.4
+PackageLocale: en-US
+Publisher: kukisama
+PublisherUrl: https://github.com/kukisama
+PublisherSupportUrl: https://github.com/kukisama/gh-usage/issues
+PackageName: gh-usage
+PackageUrl: https://github.com/kukisama/gh-usage
+License: MIT
+LicenseUrl: https://github.com/kukisama/gh-usage/blob/master/LICENSE
+ShortDescription: Fast local GitHub Copilot usage reports from VS Code and Copilot CLI records.
+Description: A fast Rust CLI that scans local GitHub Copilot usage records from VS Code and Copilot CLI, summarizes credit usage, and exports detailed CSV or JSON reports.
+Moniker: gh-usage
+Tags:
+- cli
+- csv
+- github-copilot
+- json
+- rust
+- usage-tracking
+- vscode
+ReleaseNotes: |-
+  More complete usage totals for large multi-agent tasks, with one-command report viewing.
+  Added
+  - Generate and view with one command. gh-usage --view (short form -v, or leading -view) generates fresh HTML and opens it with the default handler on Windows, macOS, and Linux, without a keypress pause. Works with filters, custom HTML paths, stdout exports, and --merge; launch failures report the saved file path. Existing export-only behavior is unchanged.
+
+  Fixed
+  - Long-running and interrupted VS Code tasks no longer lose their recorded usage. Replay session snapshots and deltas, including standalone copilotCredits updates, instead of requiring a final credit footer. Cumulative totals already include subagents and are never added to child-tool costs or repeated snapshots.
+  - Preserve complete totals and precision across VS Code versions. Reconcile the cumulative value with the final result total (allowing for footer rounding), retain larger final totals when a context-widget value is partial, and support legacy 1 credit footers. Source links point to the selected billing value's journal line.
+  - Keep billed turns removed by rewind/retry. A stable user-request ledger preserves their cost and labels them as historical turns, rather than silently dropping already incurred usage. Unrelated tool text no longer blocks parsing of billing fields.
+
+  Changed
+  - Reports stop at user-turn granularity. One row represents one user exchange with its recorded subtask usage included. CLI model aggregates sharing a turn are combined for display; legacy session-only totals are explicitly labelled as summaries. Tools, MCP calls, and subagents are not shown as separate billing rows.
+
+  Fixed
+  - Winget submission preflight is more reliable. The release script now verifies GitHub CLI and WingetCreate tokens, detects organization authorization requirements only when GitHub reports them, safely opens validated GitHub authorization links, checks repository access, updates outdated tooling, and synchronizes a stale personal winget-pkgs fork before submission without force-resetting personal commits.
+ReleaseNotesUrl: https://github.com/kukisama/gh-usage/releases/tag/v1.2.4
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
