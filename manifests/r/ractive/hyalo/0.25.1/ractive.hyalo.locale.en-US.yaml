@@ -1,0 +1,61 @@
+# Created with ractive/release-workflows using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ractive.hyalo
+PackageVersion: 0.25.1
+PackageLocale: en-US
+Publisher: '@ractive'
+PublisherUrl: https://github.com/ractive
+PublisherSupportUrl: https://github.com/ractive/hyalo/issues
+Author: Jean-Pierre Bergamin
+PackageName: hyalo
+PackageUrl: https://github.com/ractive/hyalo
+License: MIT
+LicenseUrl: https://github.com/ractive/hyalo/blob/HEAD/LICENSE
+ShortDescription: CLI for exploring and managing Markdown knowledge bases with YAML frontmatter
+Description: Hyalo is a fast command-line tool for searching, filtering, and mutating collections of Markdown files with YAML frontmatter. It supports property queries, tag filtering, regex search, wikilink tracking, and bulk metadata updates. Compatible with Obsidian vaults, Zettelkasten systems, and any structured Markdown documentation.
+Moniker: hyalo
+Tags:
+- agent-skill
+- agentic-workflows
+- cli
+- knowledge-base
+- knowledge-management
+- markdown
+- obsidian
+- rust
+- zettelkasten
+ReleaseNotes: |-
+  Highlights
+  hyalo 0.25.1 is a packaging release for Windows and winget:
+  - The Windows binaries no longer need the Visual C++ runtime. hyalo.exe links the C runtime statically, so the zip, Scoop and winget installs start on a Windows without the VC++ Redistributable (before, they failed with STATUS_DLL_NOT_FOUND).
+  - A bare hyalo prints the help and exits 0, the same page as hyalo -h, instead of a usage error with exit 2. Any argument without a command is still a usage error.
+  [0.25.1] - 2026-11-01
+  Changed
+  - The macOS release binaries are signed with a Developer ID certificate and notarised (ractive/release-workflows v0.2.4).
+  - A bare hyalo prints the -h page on stdout and exits 0 instead of a usage
+    error with exit 2; winget's validator runs the binary without arguments and
+    fails any non-zero exit.
+  - The winget manifest is submitted with komac 2.16.0 (ractive/release-workflows
+    v0.3.2), which keeps the hyalo command alias; newer komac drops it on
+    update. The release pipeline also fails a Windows build that imports the
+    dynamic C runtime, and requires every runnable binary to exit 0 without
+    arguments.
+  - cargo deny ignores RUSTSEC-2024-0449 (unsafe-libyaml is unmaintained, no
+    known vulnerability). It comes in through mdbook-lint-core → serde_yaml,
+    which has no newer release to upgrade to.
+  Fixed
+  - The Windows binaries no longer need the Visual C++ runtime: they link the C
+    runtime statically, so hyalo.exe imports neither VCRUNTIME140.dll nor the
+    api-ms-win-crt-* DLLs. On a Windows without the VC++ Redistributable the
+    zip, Scoop and winget installs could not start (STATUS_DLL_NOT_FOUND).
+  What's Changed
+  Other Changes
+  - CI: release-workflows v0.2.4 (macOS signing and notarisation) by @ractive in #385
+  - Release workflows at release-workflows v0.3.1 by @ractive in #388
+  - Windows: static C runtime; bare hyalo prints -h and exits 0 by @ractive in #397
+  - Release 0.25.1 by @ractive in #398
+  Full Changelog: v0.25.0...v0.25.1
+ReleaseNotesUrl: https://github.com/ractive/hyalo/releases/tag/v0.25.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

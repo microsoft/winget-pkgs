@@ -1,0 +1,52 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: UmageAI.CodeShellManager
+PackageVersion: 0.11.0
+PackageLocale: en-US
+Publisher: umage.ai
+PublisherUrl: https://umage.ai/
+PublisherSupportUrl: https://github.com/umage-ai/CodeShellManager/issues
+PackageName: CodeShellManager
+PackageUrl: https://github.com/umage-ai/CodeShellManager
+License: MIT
+LicenseUrl: https://github.com/umage-ai/CodeShellManager/blob/HEAD/LICENSE
+ShortDescription: A Windows desktop app for running multiple AI coding agents side-by-side in a tabbed and grid-layout terminal host.
+Description: CodeShellManager is a WPF desktop application that hosts multiple pseudo-terminal sessions in a configurable grid layout. It is built for managing many parallel CLI tool sessions — Claude Code, Codex, GitHub Copilot, ssh remotes, or any shell — with full-text search across every session's output, alert detection when an agent is waiting for input, per-session git status, sleep/wake to park sessions without losing them, and full session persistence across restarts.
+Tags:
+- claude
+- cli
+- conpty
+- copilot
+- developer-tools
+- pseudo-terminal
+- terminal
+- xterm
+ReleaseNotes: |-
+  This release shows what Claude is doing in each session: a working indicator with progress, and exact waiting dots reported by Claude Code itself instead of guessed from its output. It also warns before you close a session that is still running, adds a Recent menu for jumping between sessions, and lets you choose which editors and IDEs open a session's folder.
+  ✨ New
+  - See which sessions are working. Claude Code now tells CodeShellManager what it is doing. A busy session shows a pulsing ⟳ working · 40% in the sidebar and on its toolbar. The waiting dots are exact: orange when Claude asks for permission, green when it asks a question. When a turn finishes or fails you get a badge and a notification. Sessions that don't report their state work as before. If a status gets stuck, for example because the program crashed mid-turn, right-click the session → Clear status.
+  - Warning before closing a running session. Closing the app, pressing Ctrl+W, clicking ✕ or using Close / Close all… now asks first if a session is busy. A session counts as busy when Claude is working or waiting mid-task, when it printed output in the last few seconds, or when it has a run command going. The dialog lists each busy session and why it is busy, and Keep running is the default. You can turn the warning off in Settings, or with "Don't warn me again" in the dialog.
+  - Recent sessions. 🕘 Recent ▾ next to New Session, or Ctrl+Shift+E, lists the sessions you used last, most recent first. Each entry shows its folder, its state and how long ago you used it. Press 1–9 / 0 to jump. Sleeping sessions are woken when you pick them, and the menu switches group tab if needed.
+  - Open with… your own editors. The { } button on the terminal toolbar now opens the folder in an editor you choose. It used to be VS Code only. On first start CodeShellManager finds what you have installed: the VS Code family, Visual Studio, JetBrains IDEs, Zed, Sublime Text and Notepad++. ▼ lists them all. You can add or edit entries, with separate command lines for local, WSL and SSH sessions, under Edit… or Settings → Open with. VS Code-family editors open WSL and SSH sessions remotely.
+  🔧 Changed
+  - Bundled terminal engine. Terminals now run on Microsoft's own ConPTY (conpty.dll + OpenConsole.exe, shipped with the app) instead of the one built into Windows. It passes some terminal replies through that the Windows one drops, and the working indicator depends on that. If the bundled one can't start, CodeShellManager falls back to the built-in one automatically.
+  🐛 Fixed
+  - Window size and position across monitors. The window now reopens exactly where you left it, at the same size, including on a second monitor with a different scale. If that monitor is gone, it moves to one that is still connected.
+  - Git operations on one repo could overlap right after launch, when two sessions in the same repo or worktree were opened together.
+  - Git status now shows merge conflicts and unusual file names (quotes, tabs, non-ASCII) correctly.
+  ⬆️ Upgrading
+  Your sessions, groups and settings carry over unchanged. If you use the portable ZIP, keep conpty.dll and OpenConsole.exe in the same folder as CodeShellManager.exe.
+  All pull requests in this release
+  - test(ui): make the FlaUI suite pass again, without the mouse or keyboard by @mortenaslo in #184
+  - feat(terminal): bundle Microsoft's ConPTY (conpty.dll + OpenConsole.exe) by @mortenaslo in #188
+  - feat(status): OSC 7501 program status — working state, exact waiting dots, heuristic fallback by @mortenaslo in #190
+  - feat(open-with): configurable editors/IDEs instead of a hard-wired "Open in VS Code" by @mortenaslo in #186
+  - fix: v0.10.0 review follow-ups — window bounds under per-monitor DPI, git busy key, unmerged/quoted status (#181) by @mortenaslo in #185
+  - feat(close): warn before closing sessions that are still running by @mortenaslo in #191
+  - feat(recent): 🕘 Recent menu + Ctrl+Shift+E to jump to recently used sessions by @mortenaslo in #192
+  - chore: v0.11.0 release prep — Recent button layout, Recent UI test by @mortenaslo in #194
+  Full Changelog: v0.10.0...v0.11.0
+ReleaseNotesUrl: https://github.com/umage-ai/CodeShellManager/releases/tag/v0.11.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

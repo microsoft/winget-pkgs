@@ -1,0 +1,48 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: co2lab.Anchors
+PackageVersion: 0.1.407
+PackageLocale: en-US
+Publisher: co2lab
+PublisherUrl: https://github.com/co2-lab
+PublisherSupportUrl: https://github.com/co2-lab/anchors/issues
+PackageName: Anchors
+PackageUrl: https://github.com/co2-lab/anchors
+License: Elastic License 2.0
+LicenseUrl: https://github.com/co2-lab/anchors/blob/HEAD/LICENSE
+ShortDescription: Spec-first continuity framework for AI-assisted development
+Description: Anchors ties spec, feature and test together through a shared identity code, then confronts each artifact against the rules declared in anchors.yaml. It maps the project as a graph, propagates change from the anchor outward, and gates every step — so work guided by AI stays anchored to what was decided.
+Moniker: anchors
+Tags:
+- ai
+- ai-agents
+- cli
+- developer-tools
+- golang
+- spec-first
+ReleaseNotes: |-
+  v0.1.407
+  Seven defects reported by MIF.
+  - anchors test selects a stale test that only a hand-ingested report timed. A test file belongs to the suite whose report timed it. A time recorded under a report no declared suite writes (anchors ingest --junit out/fx.xml) made the file belong to no suite. Every selection then left it out, and did not count it either: anchors test read "318 fresh and passing" while the commit hook refused four stale proofs. Such a time now names no suite, and the file belongs to the suite of the layer that ran it. (SLCTN-B20)
+  - A file given where a layer goes points at --changed. In anchors test unit -w backend a.test.ts, the path was read as an undeclared layer. The same happened to the second file of --changed a.ts b.ts. The error now says which arguments are files and prints the command that runs them, with one --changed per file. The flag's help says it takes one value per flag, or values separated by commas. (STPRS-E10)
+  - anchors audit <file> leaves out the gates of the whole project and the slow ones. Every audit ran the SBOM over the repository, the typecheck and the dead-code search: 10 to 30 minutes per file. The dossier now skips the gates declared scope: project or cost: slow, names them, and points at anchors check --changed <file>, which still runs them. (DTAUI-B10)
+  - A test suite can exclude: files its paths: cover. Two suites of one workspace often share a root and are told apart by the runner, as jest --selectProjects unit does. Anchors cannot read that selection. A new integration test was handed to the unit suite, which ran none of it, so every run failed with "reported a result for none". exclude: takes globs and is validated like paths:. (CNFGO-B79)
+    tests:
+      - workspace: backend
+        layer: unit
+        paths: ["packages/backend/**"]
+        exclude: ["packages/backend/__tests__/integration/**"]
+  - states-required registers a state where the spec defines it, by its name. A state counts when it is defined in one of these places:
+    - a heading that opens with the state's code (the whole heading counts);
+    - a table row whose first cell is the code (that cell and the next count);
+    - a list item that opens with the code (up to the first spaced dash or period).
+    Before, any line that cited a state's code counted, with whatever word it carried. A message row "Empty state — X-S02" registered "empty" for a screen with no empty state of its own. Specs that relied on such a mention now fail and name the missing state: give it a heading, or waive it with @no-state: <name> — <reason>. (STRQS-B03)
+  - rule-uses-implemented honours @no-uses. A rule whose line carries @no-uses: <why> is not asked what it reads, as rule-uses-declared already did. (RLUSG-B08)
+  - env-declared accepts a declared variable that the unit's dependencies read. A spec may declare a variable its own code does not read. The variable now counts as read when a code file the unit depends on reads it. The gate follows depends-on from the specified files, transitively. A shared helper's read is part of the unit's deploy contract. Variables read only by a dependency are still not asked of the spec. (ENVDC-B07)
+  Everything in the v0.1.351 notes still applies: run anchors migrate once, crossing format 8.
+  Changelog
+  - ad31a56 fix: seven defects from MIF — stale tests timed by hand, audit cost, suite exclude, gate precision
+ReleaseNotesUrl: https://github.com/co2-lab/anchors/releases/tag/v0.1.407
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

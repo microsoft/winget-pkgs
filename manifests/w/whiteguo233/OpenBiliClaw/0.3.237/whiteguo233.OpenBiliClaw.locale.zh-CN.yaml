@@ -1,0 +1,51 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: whiteguo233.OpenBiliClaw
+PackageVersion: 0.3.237
+PackageLocale: zh-CN
+Publisher: OpenBiliClaw Contributors
+PublisherUrl: https://github.com/whiteguo233
+PublisherSupportUrl: https://github.com/whiteguo233/OpenBiliClaw/issues
+PrivacyUrl: https://github.com/whiteguo233/OpenBiliClaw/blob/HEAD/docs/privacy.md
+Author: OpenBiliClaw Contributors
+PackageName: OpenBiliClaw
+PackageUrl: https://whiteguo233.github.io/OpenBiliClaw/
+License: MIT
+LicenseUrl: https://github.com/whiteguo233/OpenBiliClaw/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 OpenBiliClaw Contributors
+ShortDescription: 本地私有、开源的自进化跨平台 AI 内容发现 Agent。
+Description: |-
+  OpenBiliClaw 是一个本地私有、开源的自进化跨平台 AI 内容发现 Agent：先理解你，再主动从 B 站、小红书、抖音、YouTube、X、知乎、Reddit、微博等平台与开放 Web 寻找内容。
+  桌面应用常驻 Windows 系统托盘，数据保存在 %USERPROFILE%\OpenBiliClaw，升级与卸载都不会改动该目录。
+Tags:
+- bilibili
+- b站
+- 人工智能
+- 内容发现
+- 推荐系统
+ReleaseNotes: |-
+  - 桌面、后端和浏览器插件统一为 0.3.237。独立插件 0.3.236 的按需账号字段与连接测试改进一并交付。
+  - 安装包、容器、运行时和浏览器商店的各渠道回执见 v0.3.237 发布记录。
+  - Docker 发行补丁为 Playwright 内置 Node 补齐 libatomic1，恢复 amd64 / arm64 的 Chromium 构建；现有源码、桌面与扩展标签保留。详见 Docker 部署。
+  - 为 Apple Silicon 内置向量版补齐 DMG 卷容量，清理临时模型下载库并将 ZIP 归档延后，降低构建机磁盘峰值。桌面发布工作流可将缺失的内置向量版单独补挂到现有发行页。
+  - macOS DMG 原生验收补充。Apple Silicon 和 Intel 的 macOS 15 公证包通过安装、正常启动及真实流式请求。本机 macOS 26.5.1 Intel 用同一公证包复现菜单栏启动卡住，前台对照真实请求通过。验收记录
+  - macOS DMG 安装引导：Finder 窗口直接显示应用图标、指向「应用程序」的箭头和中英文说明，提示复制完成后从「应用程序」打开。
+  - 修复 macOS / Linux 首次打开本机 Web 误弹访问密码：主 API 在转发前鉴权，独立推荐进程只接受带内部凭据的转发，保存密码后远程推荐立即可用。桌面和手机 Web 依据主 API 的认证状态显示登录。新装默认关闭密码，终端初始化不再询问密码，桌面用户可在本机 Web「设置 → 通用」手动开启。
+  - 认知 prompt 不再重复序列化归档兴趣（issue #342）：preference_prompt_payload() 门面统一剔除只增不减的 archived_interests 台账，五个偏好 prompt builder 与 build_cognition_profile_view_v1 的 legacy / compact-v1 两条视图都不再输出它；持久化存储不变，偏好分析器仍从库内做归档别名去重与证据驱动复燃，无台账输入的 prompt 逐字节不变。真实 Provider 复测（4,752 条台账 / 109,390 条真实事件库）：同一次 soul.awareness_confusions 从 852,649 input tokens、¥0.8545 降到 25,787 tokens、¥0.0297，且 4,752 条台账与 0 条台账的出站请求逐字节相同。验收记录。
+  - 免费初始化修复合入收尾：Core 合并前回归 707 passed，Rust 81 passed，静态检查通过；临时后端停止，保留验收证据及 4B 工具协议 / 浏览器实测缺口。此次不发安装包或 SDK，后续需同步构建。合入验证。
+  - 初始化真实请求验收：两个免费模型各完成 40 条 GitHub Star 的偏好、画像与首轮推荐，流式对话、三路并发及反馈去重通过；4B 画像工具首次协议失败、两次复测成功，保留未解决项。浏览器点击因权限不可用按用户要求待续。验收边界。
+  - 初始化界面精简：首启移除重复的“准备免费组件”按钮，继续自动准备及验证；首启、PC 和插件的 Bangumi / GitHub 用户名、令牌与帮助仅在勾选对应平台后展开，重新勾选保留输入。
+  - 全流程复测补齐：免费 BGE 主动连接测试从 15 秒对齐 180 秒业务预算，PC / 插件等待 190 秒；默认链热切换规范等价语言标签，避免 zh → zh-Hans 误触发完整重建和学习排空。
+  - 真实全流程验收补充：大批历史画像后的向量请求可能占满 Rust 共享分钟额度，导致发现与聊天立即失败。普通、向量及尚未输出的流式请求遇到明确本地 RPM 拒绝后，在原预算内等待一个窗口并只重试一次；保持签名额度、权限和不重放边界不变。测试记录。
+  - 同轮真实请求补充：修复免费初始化遇到上游 TLS 提前断连时整轮终止；明确的传输断连复用一次缩批恢复，连续失败仍报错，证书、鉴权、配额、策略与内容错误不额外重试。
+  - 免费初始化修复：免费 LLM 继承全局 20 分钟默认请求预算，Rust 普通 / 流式接受有界传输超时并让 HTTP 重试共用预算；初始化按请求预算扩展等待。Embedding 保留独立 3 分钟限制。验证记录。
+  - 免费初始化修复：首次历史导入按实际 prompt 批次更新进度与时间预算；免费偏好分析限制输出、关闭隐式思考，包裹后的上下文错误可拆批，单次超时只作一层缩批恢复。真实请求验收。
+ReleaseNotesUrl: https://github.com/whiteguo233/OpenBiliClaw/blob/HEAD/docs/changelog.md#v032372026-11-10
+Documentations:
+- DocumentLabel: OpenBiliClaw 文档导航
+  DocumentUrl: https://github.com/whiteguo233/OpenBiliClaw/blob/HEAD/docs/index.md
+- DocumentLabel: 常见问题
+  DocumentUrl: https://github.com/whiteguo233/OpenBiliClaw/blob/HEAD/docs/faq.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

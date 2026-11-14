@@ -1,0 +1,73 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: 66HEX.Frame
+PackageVersion: 0.34.0
+PackageLocale: en-US
+Publisher: Marek Jóźwiak
+PublisherUrl: https://www.madebyhex.com/
+PublisherSupportUrl: https://github.com/sponsors/66HEX
+Author: Marek Jóźwiak
+PackageName: Frame
+PackageUrl: https://www.framegui.app/
+License: GPL-3.0
+LicenseUrl: https://github.com/66HEX/frame/blob/HEAD/LICENSE
+ShortDescription: Frame is a high-performance media conversion utility built on the Tauri v2 framework. It provides a native interface for FFmpeg operations
+Description: Frame is a high-performance media conversion utility built on the Tauri v2 framework. It provides a native interface for FFmpeg operations, allowing for granular control over video and audio transcoding parameters. The application leverages a Rust-based backend for concurrent task management and process execution, coupled with a Svelte 5 frontend for configuration and state monitoring.
+Moniker: frame
+Tags:
+- ffmpeg
+- ffmpeg-gui
+- macos
+- media-converter
+- rust
+- svelte
+- tauri
+- video-conversion
+ReleaseNotes: |-
+  Added
+  - Auto Crop: Detects black bars using up to five samples across the selected video range. The proposed crop can be adjusted in the preview before applying it. Resolves #210.
+  - Crop Controls: Adds more aspect-ratio presets and custom ratio or pixel dimensions, with live preview and calculated output dimensions. Applying a crop updates the output resolution; canceling preserves the previous settings. Resolves #167.
+  - Opus Audio Files: Adds .opus import and export, with variable or constant bitrate.
+  - Apply to All: Applies the current output settings to compatible pending files without saving a preset, while retaining each file's own track selections and subtitle files where supported.
+  - AV1 Presets: Exposes SVT-AV1 presets 0–13 directly and clarifies the existing 10-bit output option. Resolves #200.
+  - TS File Import: Recognizes .ts files in the file chooser and folder imports, alongside the existing M2T, MTS and M2TS support.
+  - Keyboard Controls: Adds file-queue navigation with arrow keys and Home/End, Space to toggle conversion selection, and type-to-search in select menus. Preview tooltips appear on hover and keyboard focus and can be dismissed with Escape. Resolves #176.
+  - Reduced Motion: Follows system reduced-motion preferences on macOS, Windows and Linux desktops exposing the portal setting, including changes made while Frame is running. UI transitions and preview zoom/pan respect the preference; media playback is unchanged.
+  Changed
+  - FFmpeg: Updates bundled FFmpeg and FFprobe from 8.1.2 to 9.0.2 on macOS, Windows and Linux. Flatpak and Nixpkgs installations continue to use their distribution's media tools.
+  - Application Icon: Updates the desktop icons with the new neutral colors across macOS, Windows and Linux.
+  - Interface: Refreshes both themes with Inter typography, Nucleo icons and consistent controls. The inspector now has Metadata, Output and Presets tabs, with collapsible sections for output settings.
+  - Empty and Drop Screens: Centers the no-files screen around Open file and Open folder, and simplifies drag feedback to a full-window drop target.
+  - Preview Controls: Moves playback and trimming into controls over the preview, simplifies crop and overlay toolbars, and improves resize-handle contrast. Sliders, scrollbars and editing handles have larger pointer targets.
+  Fixed
+  - Windows Console Windows: Prevents an extra console when opening Frame and when running media tools or the update helper. Resolves #237.
+  - Linux Window Frame: Removes the application-drawn outer shadow, rounded frame and surrounding margin while retaining Frame's titlebar and window controls. Tiled windows use the full available area. Resolves #64.
+  - Keyboard Focus and Menus: Keeps focus with the selected tab, reveals focused controls in long panels, and restores focus after dialogs and queue changes. Dropdowns and color pickers stay within the window and retain keyboard access after pointer interaction. Source information and update release notes can be scrolled with the keyboard.
+  - Toolbar Window Dragging: Prevents toolbar buttons and tabs from dragging the window on macOS and Linux. Empty titlebar space remains draggable, and macOS retains its configured double-click action. Resolves #175.
+  - Preview Responsiveness: Keeps playback and scrubbing responsive while settings change and prevents outdated seek or source-change results from replacing the current preview. Paused previews no longer keep polling for frames.
+  - Wayland Integration: Improves clipboard handling and displays the application icon on compositors supporting window icons.
+  - Output Geometry: Makes crop, rotation and custom dimensions agree between preview and export, including odd-sized and very small sources. Crop positioning now matches combined flips and rotation, and Source/Copy preview ignores inactive encoding transforms.
+  - Anamorphic Preview: Uses the source's sample aspect ratio to display the correct proportions and align crop and overlay controls with the image.
+  - Short Trim Ranges: Preserves subsecond selections and keeps dragged trim handles within the source duration.
+  - Format Compatibility: Rejects unsupported codec/container combinations and incompatible selected tracks before conversion. Corrects affected stream-copy outputs, including MOV codec tags and raw RGB video in Matroska.
+  - Audio Settings: Enforces single-track output where required and checks channel layouts and bitrates for each selected track. Corrects low-sample-rate MP3 handling in MP4, prevents Stereo width from silently downmixing surround audio, and restores FDK AAC selection when available.
+  - Subtitle Timing and Conversion: Keeps imported and burned-in subtitles aligned with trimmed media, clips imported cues to the exported range, and converts embedded text subtitles when the destination requires it. Subtitle filenames containing apostrophes or filter separators are handled correctly.
+  - Track Metadata: Keeps subtitle language and title tags removed in Clean and Replace modes. Preserve mode retains genuine audio track titles in MP4/MOV, and source information recognizes those containers' track-name tags.
+  - Color Precision: Preserves high bit depth during brightness, contrast, gamma and saturation adjustments. Neutral settings leave the source pixels unchanged.
+  - Image Output: Preserves overlay precision when explicit 16-bit RGB/RGBA PNG or TIFF output is selected. TIFF exports use compatible pixel formats and compression while retaining transparency.
+  - Audio Preview: Plays queued audio through its final samples instead of stopping at decoder EOF, including clips shorter than the playback prebuffer. Full queues no longer discard older samples.
+  - Audio Stream Copy: Repairs verified ALAC tail truncation when copying to MOV, MP4 or M4A, and corrects affected G.723.1 MOV and DFPWM Matroska exports.
+  - Short GIFs and Snapshots: Exports nonempty, very short GIF selections reliably and avoids dropping paused preview snapshots near the end of a clip.
+  - Encoder Controls: Uses native VP9 speed values 0–5 and hides unsupported quality/speed controls for ProRes. Quality labels no longer describe CRF 0 as lossless for x265 or SVT-AV1.
+  - Hardware Encoders: Checks whether an encoder can actually start, with failure reasons and a Check again action. VideoToolbox distinguishes hardware-only encoding from software fallback. Corrects NVENC adaptive-quantization options and hardware-decoding transfers needed by software filters.
+  - HEVC Quick Look Compatibility: Writes the hvc1 tag for HEVC videos encoded to MP4 or MOV with libx265, VideoToolbox or NVENC, fixing macOS Quick Look previews. Resolves #211.
+  - Discord Preset: Uses the broadly compatible yuv420p pixel format.
+  - Mode Changes: Suspends unsupported overlays when changing output modes while retaining their settings, and keeps incompatible subtitle selections available for explicit correction instead of silently removing them.
+  Security
+  - Filesystem I/O: Updates rustix to fix unsafe handling of empty extended-attribute buffers. Upstream advisory.
+  - Executor Shutdown: Updates async-executor to fix a use-after-free during task shutdown. Upstream fix.
+  - TLS and I/O Dependencies: Updates shipped dependencies with upstream TLS and asynchronous I/O safety fixes. TLS advisory, I/O advisory.
+ReleaseNotesUrl: https://github.com/66HEX/frame/releases/tag/0.34.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

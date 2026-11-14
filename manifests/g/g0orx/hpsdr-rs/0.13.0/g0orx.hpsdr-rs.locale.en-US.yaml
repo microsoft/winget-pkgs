@@ -1,0 +1,69 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: g0orx.hpsdr-rs
+PackageVersion: 0.13.0
+PackageLocale: en-US
+Publisher: John Melton
+PublisherUrl: https://github.com/g0orx
+PublisherSupportUrl: https://github.com/g0orx/hpsdr-rs/issues
+Author: John Melton
+PackageName: hpsdr-rs
+PackageUrl: https://github.com/g0orx/hpsdr-rs
+License: GPL-2.0-or-later
+LicenseUrl: https://github.com/g0orx/hpsdr-rs/blob/HEAD/LICENSE
+ShortDescription: Desktop client for openHPSDR Protocol 1/2 SDR radios.
+Description: |-
+  A Rust/egui desktop client for openHPSDR Protocol 1 and Protocol 2 radios (Metis/Ozy-style and Hermes/Orion-style boards), using WDSP for DSP.
+
+  - Protocol 1 (Metis/Ozy) and Protocol 2 (Hermes/Orion) support, with standard openHPSDR UDP discovery
+  - Multiple simultaneous receivers, each with its own VFO, mode, filter width, and band memory
+  - Spectrum/waterfall display with adjustable dB range, palette, and Click-to-Tune (CTUN)
+  - SSB/CW/AM/FM/digital modes, per-mode/per-band filter width and mode memory
+  - Noise blanker (NB/NB2), noise reduction (NR/NR2/NNR), and SNB, independently switchable
+  - AGC with selectable Off/Long/Slow/Medium/Fast modes
+  - TX: mic audio through WDSP's TXA chain, ALC, TX power/SWR meter with per-band PA calibration, and a Tune button
+  - PureSignal (PA linearization/predistortion), on both Protocol 1 and Protocol 2
+  - rigctl (Hamlib-compatible), TCI (WebSocket), and CAT (Kenwood TS-2000 emulation) control servers
+  - Dual VFO (VFO A/B) with Split -- transmit on VFO B while receiving on VFO A
+  - Selectable RX output / TX input audio devices, independent of the OS default
+  - Per-radio settings persistence, keyed by the radio's MAC address
+  - FPGA firmware upload and static IP configuration
+Tags:
+- amateur-radio
+- dsp
+- ham-radio
+- openhpsdr
+- sdr
+ReleaseNotes: |-
+  Changes since v0.12.2.
+  New
+  - CAT on serial ports (Settings → Network → CAT): the Kenwood CAT commands can now also be served on up to three serial ports, for an amplifier, tuner or band decoder that follows the radio over a CAT cable, or a program that only talks to a COM port. For each port:
+    - Port and Baud (4800-115200, 8N1, no handshaking). A port that can't be opened, or is unplugged, is tried again every 2 seconds, so an amplifier switched on later is picked up by itself.
+    - Auto report: sends the frequency and mode when they change, for a device that only listens.
+    - TX frequency (on by default): reports the frequency you transmit on (VFO B with Split or Duplex, plus XIT), so an amplifier is on the band you transmit on.
+    - PTT out: raises RTS or DTR while transmitting, e.g. to key an amplifier.
+    - PTT in: a footswitch or program on CTS or DSR keys the radio.
+  - TX Delay (Settings → TX): holds RF back for 0-1000 ms after keying, while the PTT output, relays and a serial port's PTT line switch at once, so an amplifier's relay has closed before power arrives. Speech, data-mode audio, Tune and CW sent by hpsdr-rs start after the delay rather than being cut off.
+  - CAT auto-reporting (AI1/AI2) now works on the network CAT server too: frequency, and with AI2 mode, are sent when they change.
+  - MIDI (Settings → MIDI), from #15:
+    - CW Key: a button or keyer bound to it keys CW from hpsdr-rs, keeping the key's timing.
+    - New knob actions: CW Sidetone Level, CW Sidetone Frequency and CW Pitch.
+    - Reverse for wheel controls, for an encoder that counts the wrong way.
+    - Send changes back to the device (off by default): when a value bound to a knob changes in hpsdr-rs, the controller is sent its new position, so motor faders, LED rings or a keyer with its own display stay in step.
+  Changes
+  - The Stop button is now at the top of the main window, under Settings... and Add Receiver.
+  - At a reduced UI Scale the main and extra receiver windows can now be made smaller, in step with the scale. With the waterfall off, the spectrum can be made shorter too.
+  - ANAN-10E/100B: Add Receiver now offers the 2 receivers these radios have (it offered 5), and the PureSignal tab isn't shown: their PureSignal feedback can't go on receivers 3 and 4 as it does on other Hermes radios. Hermes and ANAN-10/100 now offer 4 receivers, the number their firmware has.
+  Fixes
+  - A gap under the Zoom/Pan sliders at the bottom of the window.
+  Downloads
+  - Linux AppImage (x86_64 / aarch64): hpsdr-rs-0.13.0-x86_64.AppImage, hpsdr-rs-0.13.0-aarch64.AppImage. Run chmod +x on the file, then run it. USB radios still need the udev rules installed by hand; a copy is inside the AppImage under usr/share/doc/hpsdr-rs.
+  - Debian/Ubuntu (amd64): hpsdr-rs_0.13.0-1_amd64.deb. Install with sudo apt install ./hpsdr-rs_0.13.0-1_amd64.deb.
+  - Debian/Ubuntu/Raspberry Pi OS (arm64): hpsdr-rs_0.13.0-1_arm64.deb. Install with sudo apt install ./hpsdr-rs_0.13.0-1_arm64.deb.
+  - Fedora/openSUSE RPM (x86_64 / aarch64): hpsdr-rs-0.13.0-1.x86_64.rpm, hpsdr-rs-0.13.0-1.aarch64.rpm. Install with sudo dnf install ./hpsdr-rs-0.13.0-1.x86_64.rpm, or on openSUSE sudo zypper install --allow-unsigned-rpm ./hpsdr-rs-0.13.0-1.x86_64.rpm.
+  - macOS (Apple Silicon): hpsdr-rs-0.13.0-macos-arm64.tar.gz. It is built in CI, unsigned and not notarized, so Gatekeeper warns on first launch. Right-click the hpsdr-rs binary and choose Open, or run xattr -d com.apple.quarantine hpsdr-rs first.
+  - Windows (x86_64): hpsdr-rs-0.13.0-x86_64.msi
+ReleaseNotesUrl: https://github.com/g0orx/hpsdr-rs/releases/tag/v0.13.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
