@@ -1,0 +1,73 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Ariazonaa.Sonarune
+PackageVersion: 0.7.0
+PackageLocale: en-US
+Publisher: Ariazonaa
+PublisherUrl: https://github.com/Ariazonaa
+PublisherSupportUrl: https://github.com/Ariazonaa/sonarune/issues
+Author: Ariazonaa
+PackageName: Sonarune
+PackageUrl: https://github.com/Ariazonaa/sonarune
+License: GPL-3.0-or-later
+LicenseUrl: https://github.com/Ariazonaa/sonarune/blob/main/LICENSE
+Copyright: Copyright (C) 2026 Ariazonaa
+CopyrightUrl: https://github.com/Ariazonaa/sonarune/blob/main/LICENSE
+ShortDescription: Third-party music client for Jellyfin
+Description: >-
+  Sonarune is a desktop music client for a Jellyfin server. The interface is Tauri 2 and Svelte
+  5; the audio path -- decoding, DSP, gapless playback, crossfade, output device -- lives in
+  Rust, so there is no Electron and no external mpv binary. It plays your library with a queue,
+  playlists, smart views, lyrics, an equaliser, a visualizer, a mini player and media-key and
+  taskbar integration, and it keeps itself up to date.
+Moniker: sonarune
+Tags:
+  - audio
+  - flac
+  - jellyfin
+  - media
+  - music
+  - music-player
+  - player
+  - rust
+  - streaming
+  - tauri
+ReleaseNotes: |-
+  0.6.1 was never released; everything it would have brought is part of 0.7.0.
+
+  Added
+
+  - Play history. Every track you listen to is recorded on this computer (by the ListenBrainz rule: half the track or four minutes). The History page shows it by day and plays a track again on click; entries can be removed and recording switched off. A year in review is built from it.
+  - Sonic similarity, without a server plugin. Sonarune analyses how your tracks sound (Settings → Sonic similarity, off by default) and offers a sonic radio from any track, a sonic path from one track to another, and an Auto-DJ mode that continues by sound.
+  - A beta channel (Settings → Updates): betas as soon as they are out, and the stable release after them. Back on stable, the beta stays installed until a stable release is newer.
+
+  Changed
+
+  - Each track decodes on its own thread, 1.5 s ahead of the speakers: a slow connection silences only its own track, Next, Stop and a device switch act at once, and a seek in a track still downloading goes straight there.
+  - Music at another sample rate than the device sounds better: CD rips on a 48 kHz device are resampled with a band-limited filter, so the treble is no longer dulled. Gapless albums join without a trace at any sample rate.
+  - Seeking back in a long variable-bitrate MP3 (a two-hour mix) jumps straight to the target and lands on the exact sample.
+  - A limiter catches peaks that normalization, preamp or equalizer push past full scale, instead of clipping them.
+  - The audio device is released after five minutes without sound, so Windows can sleep while Sonarune waits in the tray. Play carries on where the track was paused.
+  - Sonarune remembers where the track stood after quitting, a restart or an update.
+  - Output devices are told apart by their Windows id, so two devices with the same name keep their own selection and sound profile. System default follows the Windows default device.
+  - A server is recognised by its Jellyfin id, not by its address: after a move to https or a new address, the history and sonic similarity carry on.
+  - Long playlists open at once, big download batches stay light, and the download panel can Cancel all.
+  - Errors are shown in your language.
+  - Certificates are checked by Windows' own verifier, and the Windows proxy bypass list is honoured. Signing out also removes the ListenBrainz token.
+
+  Fixed
+
+  - Sonarune starts on a Windows without the Visual C++ Redistributable; 0.6.0 quit there without a word, as on a fresh installation.
+  - The visualizer did not start in 0.6.0. Drag and drop did nothing on Windows, and clicking an artist name reloaded the app.
+  - Playback in the background survives a revoked sign-in.
+  - Jellyfin 10.11: genres were missing on music-only servers, and a playlist with a track twice did not open.
+  - The sleep timer's fade-out was lost at a track change, a broken stream could freeze playback, and 5.1 tracks on a stereo device could switch channels.
+  - Shuffle order survives a restart; Stop after this album waits for its last track.
+  - Many smaller fixes from a full code review.
+
+  Security
+
+  - Uninstalling with "Delete the application data" also removes the saved sign-in (server token, password, ListenBrainz token) from the Windows Credential Manager. Updates and a plain uninstall leave it.
+ReleaseNotesUrl: https://github.com/Ariazonaa/sonarune/releases/tag/v0.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
