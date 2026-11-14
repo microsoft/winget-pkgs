@@ -1,0 +1,40 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: mateo-ki.VProxy
+PackageVersion: 1.16.11
+PackageLocale: zh-CN
+ShortDescription: Windows 桌面程序：采集订阅、解析成节点、跑代理，并把代理质量实测出来。
+Description: VProxy 是用 Rust + egui 编写的 Windows 桌面程序，负责采集免费或自建订阅、解析成节点、跑代理，并把代理质量实测出来。订阅入口包括带 `YYYY-MM-DD` 日期占位符的订阅 URL、Gist 搜索页发现，以及 Telegram 频道预览（裸节点链接和订阅链接两类都取，节点只增不删）。解析支持 `ss` `vmess` `vless` `trojan` `hysteria2/hy2` `socks5` `http(s)` 分享链接，以及 Clash / Clash Meta YAML、Base64 与混合文本。延迟以经内核访问 Google `generate_204` 的真实握手为准，24 小时出口健康条按实测绘制，而不是看内核上报的状态。Windows 上它同时管理系统代理、TUN（提权交接后只保留一个实例）和终端 `HTTP_PROXY` 环境变量，按 exe 路径添加防火墙允许规则，支持单实例互斥与托盘，记录出口切换历史并按天统计规则命中，同时提供强制 bearer 鉴权的本地 HTTP API 与 mihomo / sing-box / xray 配置导出。安装包不含内核，内核缺失时由程序按需下载。
+Tags:
+- clash
+- sing-box
+- 代理
+- 出口健康
+- 测速
+- 节点解析
+- 订阅
+ReleaseNotes: |-
+  🚀 VProxy v1.16.11 发布说明 / Release Notes
+  🎉 VProxy v1.16.11 正式发布！本版本重点扩展 7 个新协议的解析与导出、落地 流量统计持久化（保留 30 天），并实现 XHTTP 传输层内核选路自动升级，同步整理了全套架构文档：
+  🌐 协议矩阵扩展：7 个新协议解析 + 导出
+  - 新增 URI 解析器：snell / naive(+https/+quic) / mieru / ssh / tailscale / juicity / shadowtls（shadowtls:// 支持 next= 内层 SS 链接，合并为 mihomo plugin: shadow-tls 形态）；
+  - 分享链接导出：上述协议全部支持一键重建分享链接（ShadowTLS 导出为合并后的 ss 节点链接，可直接回环再解析）；
+  - ShadowTLS 双内核导出：mihomo 走 plugin: shadow-tls 合并节点直通；sing-box 1.11+ 走 shadowtls endpoint + detour 挂载形态。
+  🚦 内核选路升级
+  - juicity 专属 VP-Core：mihomo 无此协议、sing-box 自 1.12 起移除，自动选路直指 VP-Core（客户端对齐官方 Go 实现线格式）；
+  - XHTTP/SplitHTTP 传输层自动升级：选路不再只看协议——vless/vmess/trojan + network: xhttp 命中时自动改由 VP-Core 运行（mihomo 无此传输层实现），回退与通知机制完整保留；
+  - 白名单放行：snell（Shoes 优先）、mieru、ssh（sing-box 优先）、naive（VP-Core 优先）。
+  🛠️ VP-Core 编译器与 DSL
+  - juicity 主节点完整编译支持：类型白名单放行、UDP 标记补齐、insecure / congestion-* / pinned-cert-chain 重名 alias 归一，防止 VP-Core 解析 duplicate-field 报错；
+  - 修复 alias 归一短路缺陷：or_else 链在首个 alias 命中后跳过剩余键清理的问题。
+  📊 流量统计持久化（保留 30 天）
+  - 内核每秒采样的流量增量按小时桶落库（60s 批量刷 + 跨小时/退出收尾，重启最多丢最后一分钟增量）；
+  - 流量页新增 「📈 近 30 天」 tab：按天聚合上行/下行/合计，打开或 5 分钟过期时懒加载；
+  - 超过 30 天的小时桶随启动裁剪自动清理，主库不膨胀。
+  📚 文档整理
+  - 新增 docs/architecture.md 作为现状唯一事实源（模块地图、协议 × 内核矩阵、内核偏好与回退规则）；
+  - 中英文 README 协议章节重写为 6 内核连接矩阵，新增文档索引；历史设计文档（design / requirements / tasks）标注存档定位；
+  - 全仓 cargo fmt 格式规范（含 route_trace 尾随空格修复），通过格式门禁。
+ManifestType: locale
+ManifestVersion: 1.28.0
