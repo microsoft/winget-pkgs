@@ -51,7 +51,19 @@ Tags:
 - terminal
 - terminal-emulator
 - wsl
-ReleaseNotes: ""
+ReleaseNotes: |-
+  rulogman 0.6.6 — idle Windows and WSL shells that close without asking, saves on a NAS whose SFTP view differs from its shell, a comment toggle that keeps the selection, and rugpui 0.1.17.
+  - Idle Windows and WSL shells close without asking. Closing a window asked first for every local shell on Windows, even one that had run nothing: a console has no foreground process group, and every Windows shell is started from a command line, which the close guard took for -e. cmd and PowerShell now count as idle when they have no child process and have drawn their prompt again since the last command line, which also catches a script or cmdlet running inside PowerShell itself. A WSL shell is read inside its distribution, like a remote one, and is idle while its terminal's foreground group is its own.
+  - Remote files save on a NAS whose SFTP view differs from its shell. A NAS such as Synology serves SFTP from a view of its own (/home, /photo, /usbshare1) while its shell sees /volume1/homes/<user>, /volume1/photo and /volumeUSB1/usbshare, so opening a file worked and saving it failed. A save now creates its staging directory over SFTP and asks the shell which directory holds it, and a root save matches the file by its opened bytes when the SFTP path does not exist in the shell.
+  - The comment toggle in the editor keeps the selection. The same lines stay selected, a backwards selection stays backwards, and the caret stays beside the character it was next to, instead of collapsing to a caret at the old offset.
+  - Shift+Backspace deletes backwards in editors and text fields, as Backspace does. It was bound to nothing and reached the text only through whatever the input method made of it.
+  - Shared libraries are updated to rugpui 0.1.17, and russh to 0.65 for RUSTSEC-2026-0492 and RUSTSEC-2026-0495. UI dependencies and framework patches are pinned to rugpui's published release commit.
+
+  Requirements
+  - Linux: glibc 2.35 or newer: Ubuntu 22.04, Debian 12 and later, or a distribution built on them, MX Linux 23 among them.
+
+  What's Changed
+  - chore: release 0.6.6 by @xcomart in #78
 ReleaseNotesUrl: https://github.com/xcomart/rulogman/releases/tag/v0.6.6
 Documentations:
 - DocumentLabel: Wiki
