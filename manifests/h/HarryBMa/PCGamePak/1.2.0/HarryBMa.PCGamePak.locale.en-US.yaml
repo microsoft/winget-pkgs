@@ -1,0 +1,117 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: HarryBMa.PCGamePak
+PackageVersion: 1.2.0
+PackageLocale: en-US
+Publisher: HarryBMa
+PublisherUrl: https://github.com/HarryBMa
+PublisherSupportUrl: https://github.com/HarryBMa/pc-gamepak/issues
+PackageName: PC GamePak
+PackageUrl: https://github.com/HarryBMa/pc-gamepak
+License: MIT
+LicenseUrl: https://github.com/HarryBMa/pc-gamepak/blob/main/LICENSE
+Copyright: Copyright (c) HarryBMa
+ShortDescription: Turn removable storage into physical game cartridges.
+Description: |-
+  A cartridge is a small drive in a pocketable enclosure with a game on it. Plug
+  it into a USB port and a launcher appears showing the game's cover art, with a
+  Play button and an Eject button.
+
+  A cartridge is an ordinary drive with a cartridge.conf text file at its root.
+  There are no scripts to write and nothing to allowlist, because nothing on a
+  cartridge is ever executed automatically - pressing Play is the gate.
+
+  Includes a wizard (pc-gamepak --create) that formats a drive, copies a game
+  onto it, fetches cover art, and checks every file it wrote by reading the
+  cartridge back and comparing CRC-32 sums.
+Moniker: pc-gamepak
+Tags:
+- cartridge
+- games
+- launcher
+- nvme
+- portable
+- steam
+- usb
+ReleaseNotes: |-
+  Icons you can read in the taskbar
+  The app and the wizard have new icons, drawn for their size: the six colour
+  bars of the PC-GAMEPAK mark on a navy tile for the app, and a cartridge with
+  the bars on its label for the wizard. The old ones were the logo pictures shrunk, and
+  at taskbar and notification-area sizes their lettering and thin bands turned
+  to a smudge and the deep red all but disappeared on a dark taskbar. There are
+  no letters now, and 24 px and smaller are drawn bolder, not shrunk.
+  The memory card, as a memory card
+  The memory card view is now a stage: the card itself hovers in the middle, a
+  slab of smoked plastic with its grip, label and connector, and every save on it
+  stands as a game case on a track round it, the chosen one at the front, stepped
+  forward and lit. Left and right turn the track (as do the d-pad, a scroll
+  wheel and the arrows either side); a click brings a case to the front. Opening
+  it slots the card in and fans the saves out of it. Under the stage, a panel
+  gives the save's state, when it was saved, how long it has been played and
+  what it takes on each side, with the button that state calls for. Copying,
+  deleting (still two presses) and opening the folder are as before.
+  It is CSS 3D, drawn only while something moves, with no new dependency.
+  Reduced motion puts everything straight in place, and where the webview cannot
+  really draw 3D (WebKitGTK without a GPU) the saves are laid out as a flat strip.
+  The Iced launcher is gone
+  iced-ui/ and docs/ICED.md are removed. The experiment answered its
+  question: Iced started faster but was not much lighter as built, and could not
+  draw skins or the launcher's animations without a skin format of its own.
+  Tauri is the one launcher.
+  GamePak actions: any card or barcode, any game, Play to start
+  The wizard's GamePak actions tab lists every GamePak with what it starts
+  and the cards and barcodes that start it. New GamePak listens for a tap or
+  a scan as it opens; pick a game from the ones installed here, a Moonlight
+  stream (the host's games are listed), a file, a program or a page, and save.
+  Add card puts more cards on the same game. The NFC cards tab is gone.
+  A trigger now opens the launcher at READY for every GamePak, waking its host
+  if it has one, and Play starts it. Settings → Launch directly on
+  trigger starts it on the tap instead.
+  Barcode scanners work as triggers on Linux: the watcher takes the scanner for
+  itself and submits each code, gp_ added where missing. A PN532 on a serial
+  adapter is read through libnfc when /etc/nfc/libnfc.conf names it, and a
+  card may carry its ID as a Text record (gp_stardew), as a phone writes it,
+  on NTAG or MIFARE Classic.
+  Start on tap: the game starts on the gaming PC, the stream on Play
+  Tap a GamePak card at the couch and the game starts on the gaming PC at once,
+  with no stream; the couch launcher opens at READY with the game's box art. Play
+  runs moonlight stream, which resumes the running game, and Eject runs
+  moonlight quit. The gaming PC needs nothing but Apollo or Sunshine with the
+  game in its app list: the couch PC starts the app with Moonlight's own
+  pairing, and wakes the gaming PC with the MAC address Moonlight stored. Set it
+  up under GamePak actions → New GamePak → Game on another PC, which offers
+  Moonlight's hosts and their games. See the manual's Start on tap.
+  Select GamePaks with NFC
+  A PC/SC-compatible PN532 reader can read an NDEF GamePak URI and select its host
+  registry entry. Scanning opens the launcher in READY state without starting the
+  game; press Play to use the existing launch path. Optional registry host settings
+  send Wake-on-LAN and wait for readiness before READY.
+  Emulated cartridges carry their ROM
+  Choose ROM… under Add a game by hand makes a cartridge for an emulated
+  game. The platform is set from the file type where that is unambiguous, the ROM
+  is copied into the system's folder (snes/, gba/, psx/…), and Play opens it
+  with the emulator your desktop uses for that file type. The cartridge also
+  carries a gamelist.xml and a metadata.pegasus.txt, so Pegasus and
+  ES-DE — on a PC, or on an Android phone over USB-C — list it with its art when
+  pointed at the drive.
+  Fixes
+  - No Explorer window for a cartridge. Windows' AutoPlay used to open a
+    cartridge as a folder beside the launcher, and the watcher closed it a second
+    later. It now answers AutoPlay's own "should I?" question, through the
+    documented IQueryCancelAutoPlay, so the window never opens — for cartridges
+    and memory cards only. Every other drive behaves as AutoPlay is set to.
+  - Eject after formatting. The wizard ejects and records the drive where it
+    was remounted after a format, not where it was before.
+  - Readable dropdowns on a light desktop theme. They used to draw light text
+    on the system's light menu.
+  - The launcher opens on Linux after a desktop restart. The watcher skips
+    display variables left over from a session that has gone, instead of handing
+    them to the launcher, which then could not open a window.
+ReleaseNotesUrl: https://github.com/HarryBMa/pc-gamepak/releases/tag/v1.2.0
+Documentations:
+- DocumentLabel: README
+  DocumentUrl: https://github.com/HarryBMa/pc-gamepak/blob/main/README.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
