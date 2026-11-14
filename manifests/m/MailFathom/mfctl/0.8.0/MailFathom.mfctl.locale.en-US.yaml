@@ -1,0 +1,177 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: MailFathom.mfctl
+PackageVersion: 0.8.0
+PackageLocale: en-US
+Publisher: MailFathom
+PublisherUrl: https://fathomise.github.io/MailFathom/
+PublisherSupportUrl: https://github.com/fathomise/MailFathom/issues
+Author: Krzysztof Kasprowicz
+PackageName: MailFathom CLI
+PackageUrl: https://github.com/fathomise/MailFathom
+License: Apache-2.0
+LicenseUrl: https://github.com/fathomise/MailFathom/blob/main/LICENSE
+Copyright: Copyright © 2026 Krzysztof Kasprowicz
+CopyrightUrl: https://github.com/fathomise/MailFathom/blob/main/LICENSE
+ShortDescription: The administrative command-line client for MailFathom, a self-hosted AI-native mail service.
+Description: |-
+  mfctl administers a MailFathom deployment over HTTP. It signs in against the deployment's administrative endpoint,
+  keeps a profile for each deployment you administer, checks that a stored credential still works, and completes the
+  OAuth authorization a mailbox needs — without ever reading the service's configuration, opening its database, or
+  touching its secret store.
+
+  MailFathom itself runs on Linux, as a container or as a native process, and synchronizes IMAP mailboxes into a
+  PostgreSQL database you own, indexes them, and serves them to AI agents over the Model Context Protocol. mfctl is
+  the client you administer such a deployment from, which is why it ships for Windows as well.
+
+  No mfctl binary carries a code signature. Every release publishes a checksum file covering all of them, and the hash
+  in this manifest is the one winget verifies the download against.
+Moniker: mfctl
+Tags:
+- ai
+- cli
+- email
+- imap
+- mail
+- mcp
+- model-context-protocol
+- self-hosted
+ReleaseNotes: |-
+  The eighth release, and the one in which MailFathom stops being one person's mailbox described in a configuration file.
+  The people a deployment serves, their mail accounts, the credentials they sign in with, and what each of them may do
+  are now records in PostgreSQL, written through mfctl and the administrative endpoint while the deployment runs. One
+  deployment serves several people, shares a mailbox between them, groups them into organizations, and runs as more than
+  one replica.
+  It is also the first release that carries MailFathom's own client, and the client is an alpha. It is in the image,
+  off until you serve it, and published as a desktop application beside the release. It is there to be tried, it is
+  incomplete, and nothing about it is promised to the next release. The MCP tools remain the supported way to reach your
+  mail.
+  This release does not upgrade in place — plan it as a new installation over a backup. The schema artifact applies
+  to a 0.7.0 database, and applying it discards the stored mail and everything recorded against a mail account;
+  synchronization fetches the mail again. Nothing imports the users, mailboxes, or credentials your configuration
+  declared: each is recorded again. The Changed entries below say what, and
+  Getting started is the path a deployment
+  follows afterwards. Do not leave a 0.7.0 build running against the migrated schema: there is no rolling upgrade
+  across this release, and the way back is the backup.
+  The terms change too. Every artifact from this release on is published under AGPL-3.0-only where earlier
+  releases were Apache-2.0, and from the fathomise organization rather than from a personal account.
+  The twenty-one MCP tools keep their names and arguments. What moves on that surface is an account identifier, two
+  result shapes, and three permission names, each named below.
+  Added
+  - Several users, and mail accounts as records of their own. A user and a mail account are each a record, and an
+    account is assigned to the users it serves, so one shared mailbox is one copy of its mail read by several people.
+    Users can be grouped into organizations, whose members sign in as SHORTNAME/username. mfctl user, mfctl account, mfctl credential, and mfctl organization administer all of it, and a change is served without a
+    restart (#2000,
+    #1992,
+    #2013).
+  - Roles at a scope. What a user may do comes from the roles assigned to them — over the deployment, one
+    organization, or their own mail — and three are built in: Administrator, Organization administrator, and Mail user. An administrator is a user like any other, and a credential can be confined to the endpoints it may be
+    presented on and the networks it may come from (#2328,
+    #2333,
+    #2341).
+  - Signing in with a user name and a password, over HTTP Basic, on any endpoint whose Authentication list names
+    password (#1328).
+  - Settings you change while the deployment runs. A deployment's own settings are persisted in PostgreSQL and read
+    as one more configuration source, below environment variables and above your files; mfctl config reads and edits
+    them, and every replica follows a change. A settings policy held at the deployment or at an organization can force a
+    value, or withhold one, for every user and mail account beneath it
+    (#1280,
+    #1311,
+    #2361).
+  - Configuration in YAML beside JSON, for provisioned files and for a mail account's declaration
+    (#2031).
+  - More than one replica. Work that must not run twice — an account's synchronization, a backfill, a delivery
+    pass — is divided between replicas through PostgreSQL alone. The Helm chart renders a rolling update and a
+    PodDisruptionBudget, and an optional RESP backplane, Valkey in every deployment asset, carries live updates to a
+    client from whichever replica produced them (#1925,
+    #1923).
+  - Stored mail content in an S3-compatible bucket, chosen with ContentStorage:Backend and off by default, with a
+    bounded, verified move of what the database already holds (#1219,
+    #1266).
+  - Attachments are searched and cited. search_emails and ask_mail find what was sent as a file — the text of a
+    PDF, a document, a spreadsheet, or a presentation, and a description of a picture — and name the file and the page,
+    slide, or sheet. Both results gain fields and neither loses one. Reading attachments and describing pictures are
+    bounded per period and off until configured (#1714,
+    #1735).
+  - Several chat models. Chat:Models declares them under aliases, each AI capability can name its own, and a
+    model can name a fallback (#1934,
+    #2047).
+  - Holding the only copy of a mailbox. An account can be set to have MailFathom hold its mail rather than mirror
+    it, emptying the source once each message is durably stored, and custody can be returned to the server afterwards. A
+    mailbox exports as a Maildir archive (#2026,
+    #2160,
+    #2024).
+  - MailFathom's own client, as an alpha. A web client travels in the image and is served from /app/ once
+    ClientEndpoint:Application:Enabled is on; the same client is attached to the release as a .deb, an .rpm, and a
+    Windows installer. It reads, searches, composes, and files mail, and carries first versions of an assistant, a
+    calendar, tasks, and an address book. It talks to a deployment over the HTTP API under /api/client, which is off
+    until ClientEndpoint:Enabled and is expected to change between releases while the client is unfinished
+    (#1436,
+    #1444).
+
+  Changed
+  - Breaking (configuration schema, database schema): nothing a 0.7.0 configuration declared about mailboxes is
+    read, and the mail stored for them is discarded. MailSynchronization:Accounts is gone and a configuration still
+    carrying it does not start. Applying the schema artifact removes stored mail, drafts, queued and recurring sends,
+    rule and spam-classification history, the audit trails, and the OAuth refresh tokens of every mailbox. Your
+    action: back up, apply the schema, remove the section, then record each person with mfctl user add, each mailbox
+    with mfctl account add — a declaration now states EmailAddress and no AccountId — assign the role they should
+    hold, and let synchronization refill the mail. Re-consent every OAuth mailbox, and state spam classification and
+    sensitive-content scanning on each account's own record, where they now live
+    (#1861,
+    #2000,
+    #2011).
+  - Breaking (configuration schema): credentials are provisioned, not configured. ApiKey, PublicKey, and
+    Permissions no longer exist under McpEndpoint:Authentication or AdminEndpoint:Authentication, and a section
+    carrying one fails startup naming the command that replaces it. An entry names only the methods the endpoint
+    accepts. Your action: create each credential with mfctl credential create and move every client onto what it
+    reports (#1339).
+  - Breaking (deployment contract): the administrative endpoint is signed in to as a user, and it is where a
+    deployment is set up. The first start records a user admin holding the Administrator role, and the
+    environment-only MAILFATHOM_ADMIN_PASSWORD sets its password once. Compose and Quadlet set it to admin; the Helm
+    chart sets nothing and reads a Secret you name. Your action: mfctl login --mode password, change that password
+    at once — every start warns until you do — and set your own value before the first start wherever the endpoint is
+    reachable from another machine (#2333).
+  - Breaking (MCP tool contract): three permission names, and what a credential's list means.
+    mailfathom.mail.ask is mailfathom.assistant.use, mailfathom.mail.contacts.read and .write are
+    mailfathom.contacts.read and .write, and asking about mail needs mailfathom.mail.read beside the first. A
+    permission written on a credential now narrows what its user's roles grant rather than granting anything, and a user
+    with no role holds nothing. Your action: assign a role to every user, and write the new names wherever a script
+    or an authorization server states one (#2374,
+    #2332).
+  - Breaking (MCP tool contract): an account identifier is a generated UUID rather than the name you chose, and it
+    resolves only among the accounts assigned to the caller. A client that stored one reads list_accounts again.
+    set_mail_flags gains a required applied in its result
+    (#2000,
+    #2006).
+  - Breaking (configuration schema): the Chat section is an array. Every key describing an endpoint moves under
+    Chat:Models:<n>, and Chat:Model becomes Chat:MainModel:Alias. A start on the old shape is refused naming the
+    key. MaxOutputTokens now defaults to 4096 where it defaulted to 1024; write 1024 to keep the previous cost
+    (#1934,
+    #2185).
+  - Breaking (configuration schema): deleting defaults to deleting. An account that states neither
+    AuthoredDeleteEmailDisposition nor RemotelyDeletedEmailDisposition now erases its local copy when a message is
+    deleted through MailFathom and when its server loses one. Write RetainLocalCopy and RetainTombstone to keep what
+    0.7.0 did (#2028).
+  - Breaking (configuration schema): request limits are per user. Every endpoint gains
+    MaxConcurrentRequestsPerUser, default 8, which must be below MaxConcurrentRequests; a deployment that set the
+    latter to 8 or less fails startup until it sets both. The defaults rise to 48 concurrent requests and a bucket of
+    120, and every credential of one user shares one allowance
+    (#1985).
+  - Breaking (deployment contract): where artifacts are pulled from. The image is ghcr.io/fathomise/mailfathom
+    and docker.io/fathomise/mailfathom, and the chart is oci://ghcr.io/fathomise/charts/mailfathom; earlier releases
+    stay where they were published. The server's name in the MCP Registry is io.github.fathomise/mailfathom
+    (#2389,
+    #2395).
+  - Breaking (deployment contract): attachment download links are served beneath /mcp/attachments/. A reverse
+    proxy that forwarded only the exact /mcp path forwards the prefix, and a rule for /attachments/ can go
+    (#1987).
+ReleaseNotesUrl: https://github.com/fathomise/MailFathom/releases/tag/v0.8.0
+Documentations:
+- DocumentLabel: Administering a deployment
+  DocumentUrl: https://fathomise.github.io/MailFathom/docs/operations/admin-endpoint.html
+- DocumentLabel: Installation
+  DocumentUrl: https://fathomise.github.io/MailFathom/docs/users/installation.html
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
