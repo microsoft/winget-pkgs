@@ -1,0 +1,52 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Stack-Cairn.K-brain
+PackageVersion: 0.107.34
+PackageLocale: zh-CN
+Publisher: Stack-Cairn
+PublisherUrl: https://github.com/Stack-Cairn
+PublisherSupportUrl: https://github.com/Stack-Cairn/K-brain/issues
+PackageName: K-brain
+PackageUrl: https://github.com/Stack-Cairn/K-brain
+License: Apache-2.0
+LicenseUrl: https://github.com/Stack-Cairn/K-brain/blob/HEAD/LICENSE
+ShortDescription: 基于 Go 构建、运行在终端里的编程 Agent。
+Description: 氪脑（K-brain）是运行在终端里的编程 Agent，用 Go 构建，也可作为其他前端的后端底座。读代码、改文件、执行命令、验证结果，在同一会话中完成任务。运行 kn 开始使用，取自“氪脑”拼音 Ke Nao。
+Tags:
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  K-brain v0.107.34
+  本版从 main 的 66a0e3f 构建，在 v0.107.33 的基础上新增跨会话用量统计接口。
+  用量统计接口（#209）
+  - 新增 GET /v1/usage/stats?days=N&tz=IANA，/v1/health 增加 capabilities.usage_stats。
+  - 汇总所有工作区会话最近 N 天（默认 371 天）的 token 用量，按指定时区分日。返回：
+    - 总量与费用估算（只计能计价的模型，订阅计费的 provider 不计价）；
+    - 按天明细（含各模型）、按模型明细；
+    - 活跃天数、当前与最长连续活跃天数、最常用模型、最长会话。
+  - 统计口径与 kn 的 /usage 卡片一致：输入已包含缓存读写，总量 = 输入 + 输出。
+  - 子代理用量只计一次；分支和历史复制的消息按 id 去重；旧会话没有逐条用量时按会话合计计入最后活动那天。
+  - 按会话文件缓存解析结果，重复调用开销小；统计不占用会话锁，不影响正在运行的回合。
+  - kn /usage 卡片的计价逻辑与该接口共用。
+  修复
+  - Windows：会话保存改名时，如果文件正被其他程序（杀毒软件、索引服务、用量统计）短暂打开，会重试约 4 秒，不再直接报 “Access is denied”。
+  已知限制
+  - 没有落成消息的模型调用（压缩、审阅、失败请求）不在逐条统计里，统计值可能略低于会话合计。
+  - 运行中的子代理在结束、转录保存后才计入。
+  下载与校验
+  提供 macOS、Linux、Windows 的 x64/ARM64 CLI 与 computer helper；SHA256SUMS 用于校验下载文件。
+  完整变更：https://github.com/Stack-Cairn/K-brain/compare/v0.107.33...v0.107.34
+ReleaseNotesUrl: https://github.com/Stack-Cairn/K-brain/releases/tag/v0.107.34
+InstallationNotes: 在终端中运行 kn。首次使用前，请在 %USERPROFILE%\.k-brain\config.json 中配置模型提供商。
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://github.com/Stack-Cairn/K-brain/blob/main/README.zh-CN.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
