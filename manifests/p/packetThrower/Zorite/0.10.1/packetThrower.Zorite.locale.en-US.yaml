@@ -1,0 +1,86 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: packetThrower.Zorite
+PackageVersion: 0.10.1
+PackageLocale: en-US
+Publisher: packetThrower
+PublisherUrl: https://github.com/packetThrower
+PublisherSupportUrl: https://github.com/packetThrower/zorite/issues
+Author: packetThrower
+PackageName: Zorite
+PackageUrl: https://github.com/packetThrower/zorite
+License: GPL-3.0
+LicenseUrl: https://github.com/packetThrower/zorite/blob/HEAD/LICENSE
+Copyright: © 2026 packetThrower / Zorite contributors
+CopyrightUrl: https://github.com/packetThrower/zorite/blob/main/LICENSE
+ShortDescription: A local-first outliner and daily-journal note app (Logseq-style).
+Description: |-
+  Zorite is a cross-platform (macOS + Windows + Linux) local-first
+  daily-journal and outliner note app. Logseq-style: an infinite-scroll
+  journal of daily pages plus linked [[wiki-link]] pages, written in
+  Markdown and stored in a local SQLite database.
+
+  Embed and annotate PDFs, drop in images, and search across
+  everything — no cloud, no account; your notes stay on your machine.
+Moniker: zorite
+Tags:
+- journal
+- knowledge-base
+- local-first
+- logseq
+- markdown
+- note-taking
+- notes
+- outliner
+- pdf
+ReleaseNotes: |-
+  Highlights
+  A security release, from a four-domain audit of the codebase. If you use a
+  password on your notebook, update before changing that password — see the
+  first item.
+  Fixed
+  - Edits made after a password change could be lost (introduced in 0.10.0).
+    Changing or removing your database password left the app writing to the
+    database file it had just replaced, so anything you wrote afterwards was
+    gone at quit. Your notes on disk were always correctly encrypted and
+    intact — only that session's later edits were affected. Also fixes the
+    password staying in memory after locking.
+  - A note could no longer trick the app into launching a file. A link to a
+    non-PDF opened the PDF viewer anyway, and its "open externally" button then
+    handed the file to the OS — so a shared or imported note could get an
+    executable run in two clicks. Only real PDFs open the viewer now.
+  - Imports and exports stay inside their folders. Crafted references in an
+    imported vault could write outside the notebook, read files from elsewhere
+    on your disk, or — on the next export — overwrite files outside the folder
+    you picked. Every one of those paths is now checked. Symlinks are no longer
+    followed into or out of a vault, and malformed vault files can no longer
+    crash the app mid-import.
+  - Links only open the web. Clicking a link in reading view handed any
+    address to the operating system, including ones that reach Windows file
+    shares or launch other apps. Now http, https, and mailto open;
+    everything else is ignored — matching what editing view already did. The
+    same applies to links inside PDFs.
+  - Oversized or malformed images fail on their own instead of taking the app
+    down with them.
+  - The notebook database and data folder are created private to your user
+    account (Linux and macOS).
+  - A failed encrypt/decrypt no longer leaves a scratch copy of the notebook in
+    the data folder.
+  Changed
+  - The set-password dialog now says plainly that images and PDFs are stored as
+    ordinary files and are not encrypted — only the note database is.
+  What's Changed
+  - docs(changelog): the 0.10.1 security section (86a5223)
+  - fix(security): audit findings — data loss, path traversal, link schemes (a024cb2)
+  - refactor(split): scene, geometry, paint, input out of whiteboard lib.rs (1e7ecfa)
+  - refactor(split): persistence + dialogs out of app.rs (791659d)
+  - refactor(split): find, math, stores, importing out of app.rs (c465fec)
+  - refactor(split): tables + element out of editor lib.rs, blockrefs out of app.rs (f702be1)
+  Full Changelog: v0.10.0...v0.10.1
+ReleaseNotesUrl: https://github.com/packetThrower/zorite/releases/tag/v0.10.1
+Documentations:
+- DocumentLabel: Project page
+  DocumentUrl: https://github.com/packetThrower/zorite
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

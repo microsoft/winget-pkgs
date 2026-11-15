@@ -1,0 +1,100 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: zerx-lab.FluxDown
+PackageVersion: 0.5.3
+PackageLocale: en-US
+Publisher: FluxDown
+PublisherUrl: https://github.com/zerx-lab
+PublisherSupportUrl: https://github.com/zerx-lab/FluxDown/issues
+Author: zerx-lab
+PackageName: FluxDown
+PackageUrl: https://github.com/zerx-lab/FluxDown
+License: AGPL-3.0
+LicenseUrl: https://github.com/zerx-lab/FluxDown/blob/HEAD/LICENSE
+ShortDescription: Rust 驱动的多协议下载管理器，支持 HTTP/FTP/BitTorrent 磁力链接及 HLS/DASH 流媒体，智能多线程加速与浏览器无缝集成。精美界面，极致性能，永久免费，零广告。
+ReleaseNotes: |-
+  📦 下载与安装说明（服务器 / CLI）· 文件校验见 SHA256SUMS.txt
+  📦 Headless 服务器：直接下载运行（免 Docker）
+  ──────────────────────────────────────────────────┬─────────────────────────────────────────────────────────────────
+  平台                                              │资产
+  ──────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  Windows x64 / ARM64                               │FluxDown-Server-0.5.3-windows-{x64,arm64}.zip
+  ──────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  macOS Intel / Apple Silicon                       │FluxDown-Server-0.5.3-macos-{x64,arm64}.tar.gz
+  ──────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  Linux x64 / ARM64（musl 静态链接，任意发行版可用）│FluxDown-Server-0.5.3-linux-{x64,arm64}.tar.gz
+  ──────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  OpenWrt 软路由（x86_64 / aarch64 各子架构）       │fluxdown-server_0.5.3_<arch>.ipk +
+                                                    │luci-app-fluxdown_0.5.3_all.ipk
+  ──────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  QNAP NAS（QTS x86_64 / ARM64）                    │FluxDown-Server-0.5.3-qnap-{x64,arm64}.qpkg
+  ──────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  群晖 NAS（DSM 7 / DSM 6，x86_64 / ARM64）         │FluxDown-Server-0.5.3-synology-{dsm7,dsm6}-{x64,arm64}.spk
+  ──────────────────────────────────────────────────┴─────────────────────────────────────────────────────────────────
+  解压后运行 fluxdown-agent --server（Windows 为 fluxdown-agent.exe --server），浏览器访问 http://127.0.0.1:17800。
+  包内两个可执行文件必须放在同一目录：fluxdown-agent（含 Web 控制台，已编译进二进制）与 fluxdownd（下载 daemon，由 agent 自动拉起、退出时一并关停），无需附带任何静态资源目录。
+  首次启动请在浏览器里完成「初始化 FluxDown Server」向导设置访问密钥（无人值守部署可用 FLUXDOWN_TOKEN 预置）。
+  OpenWrt：opkg install fluxdown-server_*.ipk luci-app-fluxdown_*.ipk，LuCI「服务 → FluxDown」页管理，Web 界面在 http://路由器IP:17800。agent 二进制含完整 Web UI，另附 fluxdownd，需 overlay 空间充足的软路由设备。
+  QNAP：App Center → 手动安装 .qpkg（需在设置中允许安装未经验证的应用），装完点应用图标直达 Web 界面。
+  群晖：套件中心 → 手动安装 .spk（需在「设置 → 信任来源」允许任何发行者）。DSM 7.x 装 dsm7 包（以套件专属用户运行），DSM 6.x 装 dsm6 包；Intel/AMD 机型选 x64，ARM 机型（rtd1296/rtd1619b 等）选 arm64。装完在套件中心点「打开」直达 Web 界面（端口 17800）。
+  🐳 Headless 服务器：Docker（linux/amd64 · linux/arm64）
+  docker pull ghcr.io/zerx-lab/fluxdown-server:0.5.3
+  docker run -d -p 17800:17800 -v fluxdown-data:/data \
+    ghcr.io/zerx-lab/fluxdown-server:0.5.3
+  Compose 部署见仓库 docker/docker-compose.yml。首次打开 Web 界面时按向导设置访问密钥，或用 -e FLUXDOWN_TOKEN=... 预置。
+  📦 命令行 CLI
+  ──────────────────────────────────────────────────┬───────────────────────────────────────────
+  平台                                              │资产
+  ──────────────────────────────────────────────────┼───────────────────────────────────────────
+  Windows x64 / ARM64                               │FluxDown-CLI-0.5.3-windows-{x64,arm64}.zip
+  ──────────────────────────────────────────────────┼───────────────────────────────────────────
+  macOS Intel / Apple Silicon                       │FluxDown-CLI-0.5.3-macos-{x64,arm64}.tar.gz
+  ──────────────────────────────────────────────────┼───────────────────────────────────────────
+  Linux x64 / ARM64（musl 静态链接，任意发行版可用）│FluxDown-CLI-0.5.3-linux-{x64,arm64}.tar.gz
+  ──────────────────────────────────────────────────┴───────────────────────────────────────────
+  解压后得到 fluxdown（Windows 为 fluxdown.exe），放入 PATH 即可使用；也可从源码安装：
+  cargo install --git https://github.com/zerx-lab/FluxDown fluxdown_cli。
+  fluxdown ping                         # 探活（需 FluxDown App / server 运行中）
+  fluxdown add https://example.com/f.zip
+  fluxdown ls
+  服务地址经 --url 或 FLUXDOWN_URL（默认 http://127.0.0.1:17800），管理 token 经 --token 或 FLUXDOWN_TOKEN。
+  0.5.3 - 2026-10-03
+  ⚠️ 注意事项
+  - 本机通信协议升级到 v7：桌面客户端、agent 与 daemon 必须同步更新并一起重启，请勿混用新旧版本。
+  🚀 新功能
+  - 账户支持编辑个人资料与邮箱。
+  - 设备在线状态与云连接恢复更可靠：断线重连前会先处理已收到的控制命令，切换账号时不会再被旧账号的响应干扰，桌面端与 Web 对连接状态、未知设备状态和手动重试的表现保持一致。
+  - 桌面端支持热切换 API 服务端口：新端口验证通过并保存成功后才会替换旧服务，桌面客户端与局域网发现会自动使用新端口；设置页可一键复制并注入当前端口与访问令牌的油猴脚本。
+  - 下载进度窗口可调整大小，并会记住窗口尺寸与位置，不再随内容自动缩放；完成窗口的展示改为读取全局偏好。
+  - 下载列表新增「宽松」行密度（共三档，桌面端与 Web 均可持久化），行高更大、双行内容间距更舒展，悬浮与选中背景样式也更统一。
+  - 支持清理选中范围内的无效任务。
+  - 可从系统托盘直接打开设置窗口。
+  - 桌面端完善字体设置、系统通知与多平台兼容性。
+  - 浏览器扩展新增连接诊断日志导出，便于排查与本机客户端的连接问题。
+  🐛 问题修复
+  - 修复桌面端退出时可能丢失正在处理的请求，并避免 agent 积累僵尸进程。
+  - 修复部分 Unix 系统上因磁盘空间字段宽度不同而导致的兼容问题。
+  ⚡ 性能优化
+  - 官网下载默认使用 GitHub 直链，并保留逐文件的备用下载入口，同时减少对象存储请求。
+  0.5.3 - 2026-10-03
+  ⚠️ Notes
+  - The local protocol has been upgraded to v7: the desktop client, agent and daemon must be updated together and restarted. Do not mix old and new versions.
+  🚀 Features
+  - Accounts now support editing your profile and email address.
+  - Device online status and cloud connection recovery are more reliable: received control commands are processed before reconnecting, responses from a previous account no longer interfere after switching accounts, and the desktop app and Web console now behave consistently for connection status, unknown device status and manual retry.
+  - The desktop app can hot-switch the API service port: the old service is replaced only after the new port is verified and saved successfully, and the desktop client and LAN discovery pick up the new port automatically. The settings page can copy a userscript with the current port and access token injected.
+  - The download progress window is now resizable and remembers its size and position instead of auto-resizing with its content; the completion window now follows the global preference.
+  - Added a "relaxed" row density to the download list (three persistent levels on both desktop and Web), with taller rows, roomier two-line content, and more consistent hover and selection backgrounds.
+  - You can now clean up invalid tasks within the current selection.
+  - The settings window can be opened directly from the system tray.
+  - Improved font settings, system notifications and cross-platform compatibility on the desktop app.
+  - The browser extension can now export connection diagnostic logs to help troubleshoot connection issues with the local client.
+  🐛 Bug Fixes
+  - Fixed requests in progress possibly being lost when the desktop app exits, and prevented the agent from accumulating zombie processes.
+  - Fixed a compatibility issue on some Unix systems caused by differing disk-space field widths.
+  ⚡ Performance
+  - Website downloads now use direct GitHub links by default, with a per-file fallback source, and make fewer object-storage requests.
+ReleaseNotesUrl: https://github.com/zerx-lab/FluxDown/releases/tag/v0.5.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

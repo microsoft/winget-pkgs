@@ -1,0 +1,70 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Excelano.slipcase-cli
+PackageVersion: 0.3.11
+PackageLocale: en-US
+Publisher: Excelano LLC
+PublisherUrl: https://excelano.com/
+PublisherSupportUrl: https://github.com/excelano/slpc-rust/issues
+Author: David M. Anderson
+PackageName: slipcase
+PackageUrl: https://github.com/excelano/slpc-rust
+License: MIT
+LicenseUrl: https://github.com/excelano/slpc-rust/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Excelano LLC
+ShortDescription: 'Attaches metadata to a file: a .slpc container holds the payload and its TOML description together'
+Description: 'slipcase attaches metadata to a file without changing it. A .slpc container is a ZIP archive holding one payload file of any type together with a TOML document describing it, so that copying, moving, or sending the payload carries its metadata along. Five verbs: pack, unpack, repack, info, and validate. The format is specified independently of this tool, and ordinary ZIP utilities can read a container without it. This is the command-line tool; Slipcase Desktop is a separate application for the same containers.'
+Moniker: slipcase-cli
+Tags:
+- cli
+- file-format
+- library
+- metadata
+- rust
+- slipcase
+- toml
+- zip
+ReleaseNotes: |-
+  Release Notes
+  Added
+  - Container::payload_crc, the CRC-32 the ZIP central directory already
+    records for the payload member. Read in the same pass as the name, the size
+    and the kind, so it decompresses nothing and needs no &mut, and it refuses
+    the way payload_size does for a container declaring a version this build
+    does not implement.
+    It answers one question: whether a file on disk is the one that came out of
+    this container. A caller that extracted a payload earlier and wants to know
+    whether it has been edited since had no way to ask without keeping a record of
+    what it wrote — a second copy of a fact, which can drift from the fact, and
+    which is least trustworthy at the moment such a record is usually consulted:
+    after something went wrong. The container's own value needs nothing
+    maintaining it, because repacking recomputes it.
+    Documented as the ZIP field it is. SPEC 5 defines no checksum or fixity
+    key, and this is not one arriving by another road. A format library exposing a
+    checksum invites the reading the specification declined to license, so the doc
+    comment says what it does not answer as plainly as what it does.
+  Install slipcase 0.3.11
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/excelano/slpc-rust/releases/download/v0.3.11/slipcase-installer.sh | sh
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/excelano/slpc-rust/releases/download/v0.3.11/slipcase-installer.ps1 | iex"
+  Install prebuilt binaries via Homebrew
+  brew install excelano/tap/slipcase
+  Download slipcase 0.3.11
+  ──────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                          │Platform           │Checksum
+  ──────────────────────────────────────────────┼───────────────────┼─────────────
+  slipcase-aarch64-apple-darwin.tar.xz          │Apple Silicon macOS│checksum
+  ──────────────────────────────────────────────┼───────────────────┼─────────────
+  slipcase-x86_64-apple-darwin.tar.xz           │Intel macOS        │checksum
+  ──────────────────────────────────────────────┼───────────────────┼─────────────
+  slipcase-x86_64-pc-windows-msvc.zip           │x64 Windows        │checksum
+  ──────────────────────────────────────────────┼───────────────────┼─────────────
+  slipcase-aarch64-unknown-linux-gnu.tar.xz     │ARM64 Linux        │checksum
+  ──────────────────────────────────────────────┼───────────────────┼─────────────
+  slipcase-x86_64-unknown-linux-gnu.tar.xz      │x64 Linux          │checksum
+  ──────────────────────────────────────────────┴───────────────────┴─────────────
+ReleaseNotesUrl: https://github.com/excelano/slpc-rust/releases/tag/v0.3.11
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

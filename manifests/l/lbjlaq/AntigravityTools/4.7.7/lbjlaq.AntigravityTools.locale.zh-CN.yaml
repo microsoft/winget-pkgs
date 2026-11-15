@@ -1,0 +1,43 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.7.7
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+Tags:
+- account-manager
+- antigravity
+ReleaseNotes: |-
+  - [缓存优化与消息管线重构] 重构消息构建方式，大幅提高 Cache Hit 保持率 (PR #3476):
+    - 顶层系统指令绝对冻结：仅首部连续 system 消息进入 systemInstruction，中途动态出现的 system 消息就地转为 <system-reminder> 置于 user 轮次，杜绝动态消息破坏 KV Cache，实测在多轮交互中缓存命中率可稳定在 80% ~ 90%+。
+    - 3D 正交会话隔离 (Fixes #3467): 融合租户身份、客户端 Session 请求头（x-session-id、session-id 等）、Query 与 Body 派生确定性 UUID 注入上游，传输与存储两端彻底杜绝多用户/子 Agent 并发请求时的思考串话和跨会话污染。
+  - [Responses 协议与思考保全] 修复 Process Commentary 进度说明与思考块被抹除 (PR #3476):
+    - 双重保全与拓扑保序：思考块强制置顶，Process Commentary 进度文本独立保留为正文并紧跟 tool_calls，彻底消灭历史轮次丢失进度或误将工具排在首位引发的 400 校验错误。
+    - 历史前缀绝对冻结：多轮带工具调用的 Responses 请求中，已提交给客户端的历史思考签名与前缀在后续轮次中永久保持静止，绝不被后续轮次覆盖。
+  - [思维链解耦与防错配法则] 思考文本与 Thought Signature 彻底解耦 (PR #3476):
+    - 签名法则：纯文本无工具轮次强制使用哨兵（sentinel）占位，不进入工具签名库；工具签名严格以 tool_id 锚定，彻底杜绝纯文本数千字节的大思考签名错配给简单工具调用。
+    - 思考文本法则：有思考文本填思考，无思考文本填 ... 占位，两者完全解耦，纯文本轮次思考过程 100% 完整还原。
+  - [Gemini 工具链与参数清洗] 确定性合成 Tool ID 与 Shell 参数清洗 (PR #3476, Fixes #3474):
+    - 确定性合成 Tool ID: 基于 canonical_json_hash 与因果锚点两端对称合成唯一 tool_id，配合正向拓扑单调保序漏斗消灭修剪后的相位错位。
+    - Shell 参数清洗：向上游发送终端 Schema 时剔除 description 参数，消灭命令被误写进描述的幻觉，下游自动规范化回填；终端工具无命令时直接返回 exit 1 触发上层 Agent 自愈。
+  - [存储演化与多语言管理] ThinkingStore 优化、一键清空思考块与日志滑动窗口 (PR #3476):
+    - 一键清空思考块：设置页双层滑动窗口栏新增「清空思考块」功能与二次确认弹窗，仅清空 RAM 缓存与 SQLite 思考数据，绝对不触碰 request_logs 请求日志；完整支持 12 种语言（zh, zh-TW, en, ja, ko, es, pt, ru, ar, tr, vi, my）。
+    - 日志安全滑动窗口：废除 24h 定时掏空报文机制，引入容量与行数 FIFO 滑动窗口淘汰，历史报文 100% 原始保留。
+    - SQLite 极速索引升级：新增针对 primary_tool_id、session_key、id 的正向/倒序覆盖索引，单次点查与淘汰提速至微秒级。
+  - [系统兼容与配额防御] 周配额耗尽熔断与 Linux 无桌面环境凭据回退 (PR #3476, Fixes #3472, Fixes #3473):
+    - 周配额熔断：周配额耗尽（0%）强制锁定退出可用轮换池，解除 429 死循环轮询重试。
+    - Linux Keyring 容灾回退：在无桌面环境（缺少 secret-tool / D-Bus）时，自动降级回退至写入本地 SQLite state.vscdb 以及 ~/.gemini/oauth_creds.json，解决无法切换账号的报错。
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.7.7
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

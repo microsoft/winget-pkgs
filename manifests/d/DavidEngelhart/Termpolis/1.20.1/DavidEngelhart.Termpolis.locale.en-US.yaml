@@ -1,0 +1,55 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: DavidEngelhart.Termpolis
+PackageVersion: 1.20.1
+PackageLocale: en-US
+Publisher: Termpolis
+PublisherUrl: https://github.com/codedev-david
+PublisherSupportUrl: https://github.com/codedev-david/termpolis/issues
+PrivacyUrl: https://github.com/codedev-david/termpolis/blob/HEAD/PRIVACY.md
+Author: David Engelhart
+PackageName: Termpolis
+PackageUrl: https://termpolis.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/codedev-david/termpolis/blob/HEAD/LICENSE
+Copyright: Copyright 2026 David Engelhart
+ShortDescription: The open-source multi-agent terminal where Claude, Codex, Gemini, and Qwen work together as a team — without your source code leaving the machine.
+Description: |-
+  Termpolis is a cross-platform desktop terminal manager (Windows, macOS, Linux) built on Electron + React + TypeScript with node-pty powering the underlying shells. It ships as a native app, code signed on Windows, notarized on macOS.
+  What makes it different:
+  - Secure AI-assisted development. Built-in AI Security Center auto-scans every AI prompt against 70+ secret patterns, enforces Gemini paid-tier mode, and keeps an auditable JSONL log of every AI-agent terminal launch — every check runs locally.
+  - Multi-agent swarm. Claude Code, Codex, Gemini CLI, and Qwen Code work together on a task. A dedicated Claude Code instance acts as the conductor.
+  - MCP server baked in. AI agents control Termpolis via Model Context Protocol, open terminals, run commands, send messages.
+  - Transparent routing. Every subtask shows which agent got it, why, and what it cost.
+  - Activity observability. Every token, every tool call, every message from every agent is visible in real time.
+  - Intervention controls. Pause, cancel, or steer any agent mid-task without leaving the feed.
+  - Shared memory. A RAG-backed memory store that any agent can read and write via MCP.
+  - MCP-native end to end. All four agents speak MCP — no terminal-output parsers, no glue scripts, no bridge code paths.
+  - Share-ready output. One shortcut from terminal to Slack, Teams, or a PR — see Copy for Slack / Teams / PRs.
+Tags:
+- ai
+- command-line
+- console
+- terminal
+ReleaseNotes: |-
+  🧭 Code graph: deeper, more languages, and actually used
+  A fast-follow to v1.20.0's native code graph — driven by dogfooding it on Termpolis's own source, which surfaced real issues the unit tests couldn't.
+  More languages (all native-free — regex rule sets, no new deps)
+  - Deep (symbols + methods + call edges): now C#, Ruby, and Swift join TypeScript/JavaScript, Python, Go, Rust, and Java.
+  - Surface (symbol discovery for code_search/code_explore; IaC dependencies are dot-paths, not calls, so edges are intentionally thin): Terraform and Bicep.
+  Deeper — the three limitations, fixed
+  - Class methods are now indexed, not just top-level symbols. On this repo that took the graph from 1,972 to 2,163 symbols and grew call edges 63% — so code_explore now resolves a component's render(), and blast-radius reaches method callers.
+  - Typed-signature bug fixed (found by dogfooding): inline object types in TS parameter/return annotations were truncating functions to their signature line and losing every call below — recovered ~35% more edges on its own.
+  - Less edge noise: an interface/type name is no longer resolved as a call target (you can't call an interface), removing a class of false edges.
+  Agents actually reach for it
+  The code_* tools were already exposed over MCP, but MCP tools are offered, not forced. Termpolis now nudges the agents it launches — via the invisible context primer — to prefer the code graph for structural questions (who-calls, blast-radius, where-defined) over grepping. Combined with the automatic, per-session background indexing, the graph builds and gets used with no clicks.
+  Quality
+  Every language, the method extraction, the noise fix, and the primer nudge ship with tests, and the fixes were verified on real source, not just snippets. Full suite green; lint + typecheck + build clean; coverage gate green.
+  Full Changelog: https://github.com/codedev-david/termpolis/compare/v1.20.0...v1.20.1
+ReleaseNotesUrl: https://github.com/codedev-david/termpolis/releases/tag/v1.20.1
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://termpolis.com/docs.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

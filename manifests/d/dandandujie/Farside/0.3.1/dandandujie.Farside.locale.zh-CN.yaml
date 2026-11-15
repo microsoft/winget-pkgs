@@ -1,0 +1,74 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: dandandujie.Farside
+PackageVersion: 0.3.1
+PackageLocale: zh-CN
+Publisher: dandandujie
+PublisherUrl: https://github.com/dandandujie
+PublisherSupportUrl: https://github.com/dandandujie/Farside/issues
+PackageName: Farside
+PackageUrl: https://github.com/dandandujie/Farside
+License: MIT
+LicenseUrl: https://github.com/dandandujie/Farside/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Farside Contributors
+ShortDescription: 面向 Kimi Code 的桌面 Agent 客户端。
+Description: Farside（月背）是面向 Kimi Code 的桌面 Agent 客户端，基于 Electron、React 与 TypeScript 构建。Farside 不把编程任务表现成普通聊天：月相表示 Agent 状态（朔=空闲、上弦=思考、盈凸=执行、满月=等待批准、残月=收尾），会话是一条轨道时间线（思考 / 工具 / 子代理 / 用户指令）。支持项目与会话管理（置顶、归档、分叉与导出）、多模态与文件上下文、工具审批与结构化提问、⌘K 命令面板、真实终端、实时文件树与 Git 状态、内置预览舱（Markdown / HTML / SVG / 图片）、多种账户接入（Kimi OAuth、Moonshot 官方 API 与 OpenAI 格式的第三方 Kimi 服务）、会员用量展示，以及 MCP、Skills、Plugins 扩展管理；默认中文与暗黑主题，可切换英文或明亮模式。
+Tags:
+- kimi
+- kimi-code
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  Farside 0.3.1 · 崩溃兜底、审批提醒与发布链补全
+  本版本集中解决"静默失败"：界面与进程崩溃不再无声白屏，Agent 等待审批时会主动把用户叫回来，排队指令在异常退出后可恢复；Linux 首次进入正式发布渠道。建议所有用户升级。
+  升级亮点
+  - 界面崩溃不再白屏：此前任一组件抛错会卸载整棵 React 树，只能重启应用。现在轨迹区域出现畸形事件时只损失自己那块视图（可点"继续"恢复）；整窗级异常提供双语降级卡片与一键重载。主进程未捕获异常会记录并弹窗提示，渲染进程崩溃在短窗口内自动重载，反复崩溃才升级为人工处理提示。
+  - 审批等待会"叫你回来"：此前切到别的应用后，等待批准的工具调用不会有任何窗口外提醒，Agent 可能无限期挂起。现在窗口不在前台时发送系统通知（点击直接回到窗口）、闪烁任务栏并显示 dock 角标计数；回到窗口自动清除。系统通知按 1 秒合并，不会刷屏。
+  - 跨会话审批可见：此前审批卡只渲染当前会话的队列，B 会话的审批在 A 会话里无处可寻。现在标题栏出现"满月 · N 待处理"徽标，一键跳转到等待确认的会话；设置页/目标页停留期间的待处理项同样计入。
+  - 断线全局可见：此前连接状态埋在遥测面板里。现在标题栏在链路中断时显示"链路中断 · 重连中"红点指示。
+  - 排队指令不再丢：崩溃或误退后重新打开 Farside，排队未发送的指令自动恢复到队列（附件二进制不落盘，纯附件条目会丢弃并保留文本）。
+  - Linux 正式交付：AppImage 随 Release 发布并支持应用内更新；所有安装包附带 SHA256SUMS.txt 供校验。
+  - 长会话更流畅：轨迹分组改为 Turn 级复用，流式输出期间已完成的轮次不再重渲染；Markdown 解析与渲染 memo 化；隐藏的 Mission Panel tab 不再空转 git_status 轮询。
+  新增与改进
+  可达性
+  - 命令面板（⌘K）：role="dialog"/aria-modal 语义、Tab 焦点圈定、listbox/aria-selected、输入法组词期 Enter 不再误执行命令。
+  - Provider 引导层：Esc 可跳过、对话框语义与初始焦点。
+  - 提问卡：单题支持数字键直接选择，选项带选中态语义，与审批卡键盘体验对齐。
+  - 设置页：Esc 返回会话视图（配置编辑器有未保存改动时不劫持）。
+  - 次要文本对比度全部校准到 WCAG AA（≥4.5:1）：环境摘要中的 git 错误提示此前以约 1.8:1 显示、几乎不可见，现已修复。
+  - 尊重系统"减弱动态效果"：JS 平滑滚动与 CSS scroll-behavior 一并降级。
+  桌面体验
+  - 窗口位置与尺寸持久化（含最大化状态）；启动时按显示器工作区钳制，拔掉副屏后窗口不再落在屏幕外。
+  - 面板宽度保护：会话栏与 Mission Panel 同时拖宽时，主内容区保底 340px，不再被压成零宽死局；窗口缩小时面板自动收窄。
+  - 应用内更新下载增加 60 秒停滞看门狗，弱网下不再无限挂起，失败自动清理半截安装包。
+  问题修复
+  - 修复登出后个人画像仍显示旧账户用户名的问题（OAuth 身份缓存未随登出清理）。
+  - 修复中文输入法组词期间按 Shift+Tab 误触计划模式、命令面板 Enter 误执行的问题。
+  - 修复设置页一次 Esc 既中断运行中任务又返回会话的双重动作冲突。
+  - 修复思考计时器以 10fps 无谓重渲染的问题（展示精度不变）。
+  Runtime 与兼容性
+  - 唯一 current Runtime 保持 Kimi Code 0.39.1，无协议变化，无本地数据迁移。
+  - 新增 IPC 通道 app:notify-attention（审批/提问注意力引导），其余契约不变。
+  下载与安装
+  - Windows：.exe
+  - macOS Apple Silicon：.dmg
+  - Linux：.AppImage（新增）
+  - 全部安装包的 SHA-256 见 Release 附件 SHA256SUMS.txt。
+  升级前请结束正在执行的 Agent 任务。安装包不会主动删除本地项目、Kimi 配置或会话数据。
+  发布验证
+  - 72/72 自动化测试通过（新增轨迹分组、composer 会话态、prompt 队列、斜杠命令注册表四组渲染层纯逻辑测试）；TypeScript 类型检查与生产构建通过。
+  - GitHub Actions 负责 Windows / macOS / Linux 安装包构建和发布。
+  已知限制
+  - macOS 安装包仍未签名与公证，首次打开需在系统设置中放行；签名与公证列入后续版本。
+  - 无 node-pty 的环境仍使用管道降级后端：无窗口尺寸同步能力，终端体验为降级形态。
+  完整变更
+  https://github.com/dandandujie/Farside/compare/v0.3.0...v0.3.1
+ReleaseNotesUrl: https://github.com/dandandujie/Farside/releases/tag/v0.3.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

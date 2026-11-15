@@ -1,0 +1,114 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Windscribe.Windscribe
+PackageVersion: 2.24.12
+PackageLocale: en-US
+Publisher: Windscribe Limited
+PublisherUrl: https://windscribe.com/
+PublisherSupportUrl: https://windscribe.com/knowledge-base/
+PrivacyUrl: https://windscribe.com/privacy/
+Author: Windscribe Limited
+PackageName: Windscribe
+PackageUrl: https://windscribe.com/
+License: GPL-2.0
+LicenseUrl: https://github.com/Windscribe/Desktop-App/blob/HEAD/LICENSE
+Copyright: © 2026 Windscribe Limited
+CopyrightUrl: https://windscribe.com/terms/
+ShortDescription: Windscribe encrypts your browsing activity, blocks ads, and unblocks entertainment content
+Tags:
+- network
+- privacy
+- proxy
+- security
+- vpn
+ReleaseNotes: |-
+  Added
+  - Custom SNI support for stunnel/wstunnel anti-censorship connections.
+  - Cross-platform diagnostics for API connectivity login failures so logs can better distinguish DNS, routing, proxy, IPv4/IPv6, and local security-policy failures.
+  - A SECURITY.md document.
+  Improved
+  - The Windows IKEv2 connector. A complete rewrite of the code to improve connection setup speed and connection robustness.
+  - Anti-censorship startup and failover by supporting parallel backup domain testing in wsnet.
+  - Firewall behavior consistency across platforms and firewall modes.
+  - Always On/Always On+ firewall handling with Allow LAN Traffic by disabling risky LAN allowance on mode enable and warning when LAN traffic is explicitly re-enabled.
+  - Hardening for elevated executables using Windows process mitigation APIs where applicable.
+  - Windows compiler and linker security hardening, including Control Flow Guard and related mitigation settings.
+  - Windows build targeting to Windows 10 2004 so newer Windows APIs can be used without changing the minimum install version.
+  - macOS installer/update code paths and installer flow.
+  - Split tunneling error handling so startup failures can show the usual Split Tunneling failed alert on macOS.
+  - CLI-only behavior by automatically watching config file changes instead of requiring windscribe-cli preferences reload.
+  - Custom SNI handling by keeping Custom SNI Domain visible/editable independently of the Protocol Tweaks mode, while still applying it only to Stealth/stunnel and WSTunnel connections.
+  - wsnet/desktop hardening by validating values received from wsnet and applying wsnet security-audit fixes for URL construction, TLS/network handling, logging, parsing, and failover robustness.
+  - DNS leak firewall setup by de-duplicating DNS server entries before adding Windows firewall filters on Windows.
+  - Split tunneling so non-tunneled apps can preserve native ISP IPv6 on dual-stack networks while tunneled apps remain leak-protected on Linux.
+  - Installer and uninstaller logging on Windows.
+  - The ConnectionManager sub-system.
+  - WireGuard stale-handshake detection.
+  - Connection failed messaging when IKEv2 (RAS) services are unavailable.
+  - API retry access to use bounded per-resource exponential back-off, starting at 1 second and doubling to a 5-minute cap with jitter.
+  - Belarusian translations in the GUI, installer and CLI from GitHub user dubovy-achvelak.
+  - Dependency build integrity by pinning or verifying wstunnel and AmneziaWG prebuilt source dependencies.
+  - Logging when modifications to the Windows hosts file fail during IKEv2 connect/disconnect.
+  - Networking-service handling so installers avoid force-enabling NetworkManager/systemd-resolved and nmcli-dependent features degrade gracefully when unavailable on Linux.
+  - Linux firewall/routing fwmark handling by centralizing fwmark use and avoiding incorrect WireGuard mark behavior.
+  - Linux firewall implementation by replacing iptables shell calls with libnftables.
+  - Linux split tunneling so non-tunneled apps can preserve ISP IPv6 on native dual-stack networks while tunneled apps remain leak-protected.
+  - Objective-C memory management consistency by enabling ARC uniformly across the project.
+  Fixed
+  - Local privilege escalation vulnerability caused by a race condition in the staged macOS updater bundle.
+  - Local privilege escalation vulnerability caused by a replaceable installer archive on macOS.
+  - Local privilege escalation vulnerability caused by inherited SUID/SGID bits in staged updater bundle on macOS.
+  - Local privilege escalation vulnerability caused by SGID helper descriptor reuse and OpenVPN custom config parser differences on Linux.
+  - Local privilege escalation vulnerability caused by OpenVPN inline-parser differences and root-execution-capable directives in custom OpenVPN configs.
+  - Local privilege escalation vulnerability caused by an embedded NULL in a custom config coercing OpenVPN to load a malicious plug-in.
+  - Local privilege escalation vulnerability caused by handling of OpenVPN's dhcp-option parameter in custom configs on macOS and Linux.
+  - Local privilege escalation vulnerability caused by cgroups-down script on Linux.
+  - File disclosure vulnerability in the Windows helper.
+  - Security audit findings covering macOS signature validation, Windows WireGuard config permissions, local IPC robustness, AmneziaWG input validation, and sensitive logging paths.
+  - Insecure OpenVPN management interface behavior that could allow local management-port hijacking, spoofed VPN state, or credential capture.
+  - WireGuard connection mode unavailable when Always On+ firewall mode is enabled and cached WireGuard connection information is available.
+  - c-ares Windows DNS server detection regression that could leave only 127.0.0.1:53 and cause DNS resolution failures.
+  - The Windscribe service getting stuck in the stop pending state when a stop is requested while the desktop app is running on Windows.
+  - A possible crash when enabling Secure Hotspot after connecting the VPN on Windows.
+  - A rare crash when launching at startup before macOS screen information is available.
+  - Linux firewall block rule ordering so Windscribe's kill-switch block path takes precedence over UFW/third-party allow rules.
+  - Allow LAN traffic not applying correctly to IPv6 LAN and multicast traffic while connected on Windows.
+  - Allow LAN traffic IPv6 behavior on macOS so ULA and multicast traffic are blocked on the VPN interface while remaining reachable on the physical LAN.
+  - Missing warning when split tunneling is enabled while the macOS split tunneling extension has been manually disabled.
+  - Inclusive split tunneling with WireGuard on Windows tunneling non-included traffic through the VPN.
+  - Inclusive split tunneling on Windows blocking native ISP IPv6 for non-included apps on dual-stack networks.
+  - HTTP Proxy settings rejecting valid high port numbers in the 63536-65535 range.
+  - Always On+ firewall mode skipping WireGuard when a valid cached WireGuard config is available.
+  - Always On+ unsecured-network handling disconnecting during WireGuard-to-OpenVPN fallback when no cached WireGuard config is available.
+  - Split tunneling extension lifecycle bugs and improved cleanup on macOS.
+  - Connected DNS split-DNS reachability to internal RFC1918 DNS servers while the VPN is active.
+  - Cached WireGuard config is not cleared when its keys are invalidated.
+  - WireGuard may fail to connect if IPv6 is disabled in the Linux kernel.
+  - OpenVPN adapter creation failure insufficiently reported to the user on Windows.
+  - First click on Rotate IP may not rotate IP.
+  - Line-wrapped resolvectl output omits resolvers from DNS leak protection on Linux.
+  - App startup/shutdown delay when IKEv2 (RAS) services are unavailable on Windows.
+  - macOS app may hang indefinitely on launch due to delays while constructing the Split Tunneling application picker.
+  - CLI-only app is missing a dependency for libbrotli.
+  - App skips symlinks and some common app folders when constructing the Split Tunneling application picker on macOS.
+  - Failed captcha treated as something to failover on and retry.
+  - Network name does not refresh after waking on a different network on Windows.
+  - App may get stuck on the logging in screen.
+  - Hashed-login failures caused by user accidentally including leading/trailing whitespace in their input.
+  - Static IP OpenVPN/TCP connections prompting for credentials instead of supplying stored Static IP credentials internally.
+  - Remembered credentials for external .ovpn custom configs not being persisted immediately across restart/reboot.
+  - Account tab Add Email text may overlap when account has no email and language is non-English.
+  - Polish free-data counter text overlapping the upgrade CTA and locations-list chevron.
+  - Help/About->Jobs link referencing stale URL.
+  - openSUSE Tumbleweed RPM install failure related to the libcap-progs dependency path.
+  - openSUSE Tumbleweed SSL/API validation failures caused by missing Debian-style CA bundle path.
+  - openSUSE packaging missing libdbus-1-3.
+  Updated
+  - cURL 8.21, c-ares 1.34.7, OpenVPN 2.7.5, and OpenSSL 4.0.1.
+  - WireGuard for Windows to 1.1.
+  - wireguard-go 0.0.20250522 for macOS and Linux.
+ReleaseNotesUrl: https://github.com/Windscribe/Desktop-App/releases/tag/v2.24.12
+PurchaseUrl: https://windscribe.com/upgrade
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

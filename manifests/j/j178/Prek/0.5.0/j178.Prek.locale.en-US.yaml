@@ -1,0 +1,129 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: j178.Prek
+PackageVersion: 0.5.0
+PackageLocale: en-US
+Publisher: j178
+PublisherUrl: https://github.com/j178
+PublisherSupportUrl: https://github.com/j178/prek/issues
+Author: j178
+PackageName: Prek
+PackageUrl: https://github.com/j178/prek
+License: MIT
+LicenseUrl: https://github.com/j178/prek/blob/HEAD/LICENSE
+ShortDescription: ⚡ Better `pre-commit`, re-engineered in Rust
+Moniker: prek
+Tags:
+- git
+- git-hooks
+- pre-commit
+- prek
+ReleaseNotes: |-
+  Release Notes
+  Released on 2026-08-27.
+  Highlights
+  Choose where hook toolchains come from
+  language_version now accepts a source preference alongside the version
+  request, letting you control where prek looks for a compatible toolchain when
+  it creates a hook environment. Use managed (the default) or system to choose
+  which source prek tries first while still allowing fallback and downloads. Use
+  only-managed or only-system to require one source.
+  For example, this local Ruff hook requires a Python 3.12 toolchain managed by
+  prek:
+  repos:
+    - repo: local
+      hooks:
+        - id: ruff
+          name: ruff
+          language: python
+          entry: ruff check
+          additional_dependencies: [ruff]
+          language_version:
+            request: "3.12"
+            preference: only-managed
+  With only-managed, prek reuses a compatible toolchain from its managed store
+  or downloads one when needed. It never falls back to Python from PATH, an OS
+  package manager, or a version manager, so toolchain selection does not depend on
+  the developer or CI machine's external environment.
+  Existing scalar values such as language_version: "3.12" continue to work. See
+  toolchain management and language_version
+  for the full source-selection behavior. (#2613)
+  Breaking changes
+  The breaking changes in this release are mostly small cleanups, and most users should not be affected.
+  - Group names can no longer start with @. This prefix is now reserved for special group selectors such as the new @ungrouped selector. (#2617)
+  - PREK_MAX_CONCURRENCY has been removed. Use PREK_CONCURRENT_HOOKS and PREK_CONCURRENT_BATCHES to control hook and per-hook batch concurrency separately. (#2620)
+  - The top-level prek init-template-dir command has been removed. Use prek util init-template-dir, or prek init-templatedir for drop-in compatibility with pre-commit. (#2623)
+  - prek auto-update has been removed. Use prek update, or prek autoupdate for drop-in compatibility with pre-commit. (#2619)
+  Enhancements
+  - Add configurable toolchain source preferences (#2613)
+  - Allow explicit language: python to opt out of fast-path hooks (#2608)
+  - Group run and update options in CLI help (#2629)
+  - Preserve terminal theme contrast for status labels (#2592)
+  - Add @ungrouped group selector (#2617)
+  - Retry uv installation with static musl binary (#2600)
+  - Support {hook_repo} placeholder in hook entry (#2602)
+  Bug fixes
+  - Expose the git work tree to hooks running outside the git root (#2579)
+  - Isolate local hook environment installation (#2615)
+  - Preserve hook config deserialization error locations (#2573)
+  - Resolve hook log files from their config directory (#2580)
+  - Track explicit config paths as absolute paths (#2574)
+  Documentation
+  - Document prek run architecture (#2630)
+  - Publish versioned documentation (#2626)
+  Contributors
+  - @jeromeheissler
+  - @gurgeous
+  - @j178
+  Install prek 0.5.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/j178/prek/releases/download/v0.5.0/prek-installer.sh | sh
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/j178/prek/releases/download/v0.5.0/prek-installer.ps1 | iex"
+  Install prebuilt binaries via Homebrew
+  brew install prek
+  Download prek 0.5.0
+  ───────────────────────────────────────────────┬────────────────────────────┬─────────────
+  File                                           │Platform                    │Checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-aarch64-apple-darwin.tar.gz               │Apple Silicon macOS         │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-x86_64-apple-darwin.tar.gz                │Intel macOS                 │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-aarch64-pc-windows-msvc.zip               │ARM64 Windows               │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-i686-pc-windows-msvc.zip                  │x86 Windows                 │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-x86_64-pc-windows-msvc.zip                │x64 Windows                 │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-aarch64-unknown-linux-gnu.tar.gz          │ARM64 Linux                 │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-i686-unknown-linux-gnu.tar.gz             │x86 Linux                   │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-riscv64gc-unknown-linux-gnu.tar.gz        │RISCV Linux                 │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-s390x-unknown-linux-gnu.tar.gz            │S390x Linux                 │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-x86_64-unknown-linux-gnu.tar.gz           │x64 Linux                   │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-armv7-unknown-linux-gnueabihf.tar.gz      │ARMv7 Linux                 │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-aarch64-unknown-linux-musl.tar.gz         │ARM64 MUSL Linux            │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-i686-unknown-linux-musl.tar.gz            │x86 MUSL Linux              │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-x86_64-unknown-linux-musl.tar.gz          │x64 MUSL Linux              │checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-arm-unknown-linux-musleabihf.tar.gz       │ARMv6 MUSL Linux (Hardfloat)│checksum
+  ───────────────────────────────────────────────┼────────────────────────────┼─────────────
+  prek-armv7-unknown-linux-musleabihf.tar.gz     │ARMv7 MUSL Linux            │checksum
+  ───────────────────────────────────────────────┴────────────────────────────┴─────────────
+  Verifying GitHub Artifact Attestations
+  The artifacts in this release have attestations generated with GitHub Artifact Attestations. These can be verified by using the GitHub CLI:
+  gh attestation verify <file-path of downloaded artifact> --repo j178/prek
+  You can also download the attestation from GitHub and verify against that directly:
+  gh attestation verify <file-path of downloaded artifact> --bundle <file-path of downloaded attestation>
+ReleaseNotesUrl: https://github.com/j178/prek/releases/tag/v0.5.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

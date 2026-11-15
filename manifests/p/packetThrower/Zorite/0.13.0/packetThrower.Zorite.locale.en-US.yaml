@@ -1,0 +1,140 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: packetThrower.Zorite
+PackageVersion: 0.13.0
+PackageLocale: en-US
+Publisher: packetThrower
+PublisherUrl: https://github.com/packetThrower
+PublisherSupportUrl: https://github.com/packetThrower/zorite/issues
+Author: packetThrower
+PackageName: Zorite
+PackageUrl: https://github.com/packetThrower/zorite
+License: GPL-3.0
+LicenseUrl: https://github.com/packetThrower/zorite/blob/HEAD/LICENSE
+Copyright: © 2026 packetThrower / Zorite contributors
+CopyrightUrl: https://github.com/packetThrower/zorite/blob/main/LICENSE
+ShortDescription: A local-first outliner and daily-journal note app (Logseq-style).
+Description: |-
+  Zorite is a cross-platform (macOS + Windows + Linux) local-first
+  daily-journal and outliner note app. Logseq-style: an infinite-scroll
+  journal of daily pages plus linked [[wiki-link]] pages, written in
+  Markdown and stored in a local SQLite database.
+
+  Embed and annotate PDFs, drop in images, and search across
+  everything — no cloud, no account; your notes stay on your machine.
+Moniker: zorite
+Tags:
+- journal
+- knowledge-base
+- local-first
+- logseq
+- markdown
+- note-taking
+- notes
+- outliner
+- pdf
+ReleaseNotes: |-
+  Highlights
+  The Windows release: a full pass of testing on Windows turned up crashes,
+  hangs and slow spots, all fixed here, along with the editing keys Windows
+  users expect. Zorite also moves to GPUI Kit 0.8, and you can now copy text
+  out of PDFs.
+  Added
+  - Copy text from PDFs. Drag over text in the PDF viewer to select it, then
+    press ⌘C (Ctrl+C on Windows and Linux). Line breaks are kept. Highlight mode
+    works as before.
+  - Windows and Linux editing keys. Ctrl+← / Ctrl+→ move by word (with Shift
+    to select), Ctrl+Backspace and Ctrl+Delete delete a word, Ctrl+Home and
+    Ctrl+End jump to the start or end of the note, and Shift+Home / Shift+End
+    select to the start or end of the line. On a Mac, ⌥⌫ and ⌥⌦ delete a word.
+  Changed
+  - Moved to GPUI Kit 0.8.0 (gpui-pre 0.3.9), in step with Baudrun,
+    PortFinder and etch341. Zorite's Linux fix for Arabic dots and other
+    combining marks (#108) is carried over to the new version.
+  - Whiteboards draw faster, especially on modest graphics hardware: text,
+    the dot grid and pen strokes are prepared once and reused while you pan,
+    instead of being rebuilt every frame.
+  - Spell-check is faster, most noticeably on Windows: Zorite keeps one
+    system spell checker instead of starting a new one for every check.
+  - Security updates to the TLS libraries (rustls, rustls-webpki,
+    webpki-roots) used by the update check, and to the PDF libraries (hayro 0.8,
+    lopdf 0.46).
+  Fixed
+  - Typing Japanese or other IME input no longer crashes Zorite on Windows
+    when the note has text before the caret. Text you're still composing is now
+    underlined, as in other apps (#119).
+  - Undo no longer crashes Zorite on Windows when the page has Korean,
+    Japanese or other multibyte text after the edit. Undo and redo are also
+    saved right away and re-run spell-check, instead of waiting for the next
+    keystroke.
+  - Whiteboards no longer freeze when Windows is set to scroll one screen
+    at a time, and dashed lines no longer stall and run out of memory while
+    zooming.
+  - Thin whiteboard lines stay visible when zoomed out, instead of vanishing
+    or blinking.
+  - Whiteboard text in Korean, Hebrew, Arabic and other scripts now draws
+    from a system font when the board's font lacks it, instead of empty boxes.
+    This covers uploaded board fonts too.
+  - Changing the notebook password can't lose your writes when a second
+    window has the notebook open. If the encrypted copy can't replace the old
+    file, Zorite now keeps using the original and reports the error.
+  - The journal no longer creeps while you move the mouse on Windows in
+    the editing view.
+  - Colors in HTML (<span style="color: #e03e3e">) are no longer read as
+    tags, so they don't create empty pages named after the color.
+  - Cleaning up unused images keeps images referenced with different
+    capitalization (Pic.PNG vs pic.png), which Windows and macOS treat as
+    the same file.
+  - Opening a PDF in the system viewer works for any file name on Windows,
+    including names with &, % or ^.
+  - Settings → Notebooks buttons show proper labels (Switch, Rename,
+    Reveal, Remove) instead of raw translation keys.
+  - Shortcut hints on Windows and Linux in the PDF viewer and whiteboard
+    tooltips and menus read Ctrl+Shift+Z instead of Mac's ⌘⇧Z.
+  What's Changed
+  - docs: release prep for v0.13.0 (bef1361)
+  - test: skip the tab-click UI test without debug assertions (dca99c0)
+  - feat(pdf): select and copy text (73ba495)
+  - chore(crates): gpui-pdf 0.7.0, gpui-whiteboard 0.5.2, zorite-markdown 0.10.1, zorite-editor 0.11.3 (72d23ce)
+  - build(deps): hayro 0.8 (7094909)
+  - chore(deps): Bump oxidize-pdf (d1ff5ac)
+  - chore(deps): Bump lopdf from 0.45.0 to 0.46.0 (cd1f40d)
+  - fix: Ctrl+= zoom-in hint off macOS; hide Font tooltip while its flyout is open (f75b743)
+  - fix: whiteboard font fallback; platform shortcut hints (4dc2652)
+  - fix: undo crash on Windows with multibyte text; notebook button labels (b38feeb)
+  - build(deps): move to GPUI Kit 0.8.0 (gpui-pre 0.3.9) (14c112c)
+  - fix(linux): re-apply the combining-mark offset fix to gpui-pre-wgpu 0.3.9 (#108) (e5fbed3)
+  - vendor: gpui-pre-wgpu 0.3.9, unmodified (b7c31e8)
+  - chore(deps): Bump the actions-all group with 2 updates (b5f5a86)
+  - perf(whiteboard): cache pen-stroke tessellation, move it on pan (b5e9121)
+  - perf(whiteboard): cache glyph tessellation; draw the dot grid as one path (c963c3c)
+  - chore(deps): rustls-webpki 0.103.16, webpki-roots 1.0.11 for RUSTSEC-2026-0381/0382 (6f264b2)
+  - fix(images): match image references case-insensitively in the cleanup (65ed31c)
+  - perf(spellcheck): reuse one OS spell checker instead of one per check (15a16dd)
+  - chore(deps): Bump the cargo-minor group across 1 directory with 9 updates (8e8f107)
+  - chore(deps): Bump the actions-all group across 1 directory with 5 updates (9a853b0)
+  - fix(editor): widen the scroll-anchor rounding margin to 1.5 device px (5d7ba7c)
+  - fix(editor): ignore device-pixel rounding in scroll anchoring (3469e12)
+  - chore(deps): rustls 0.23.46 for RUSTSEC-2026-0346..0349; ignore zbus split advisories (910aa90)
+  - fix(whiteboard): floor strokes at 1 screen px so thin lines don't vanish (077cd9a)
+  - fix(whiteboard): dashed lines could stall and exhaust memory while zooming (7c11533)
+  - fix(links): don't treat CSS #hex in HTML tags as #tags (140e363)
+  - feat(editor): Windows word and document editing keys (c11ab6a)
+  - fix(pdf): open the external viewer without going through cmd.exe (5449525)
+  - fix(db): don't lose writes when a password change can't swap the file (6ae986e)
+  - fix(whiteboard): bound wheel scroll and camera pan so the dot grid can't hang (3586a48)
+  - chore(crates): zorite-editor 0.11.2 (5cfddfc)
+  - feat(editor): underline IME marked text while it's being composed (f741c71)
+  - fix(editor): IME composition caret counted within the composed text (#119) (1d08daa)
+  - chore(deps): Bump heic_decoder from 2017f4d to 89aea8b (6bacd08)
+  - chore(deps): Bump the cargo-minor group with 2 updates (fdf15db)
+  - chore(deps): Bump taiki-e/install-action (d8efc4e)
+  - docs(changelog): 0.12.1 — state the AppImage fix accurately (24d2492)
+  Full Changelog: v0.12.1...v0.13.0
+ReleaseNotesUrl: https://github.com/packetThrower/zorite/releases/tag/v0.13.0
+Documentations:
+- DocumentLabel: Project page
+  DocumentUrl: https://github.com/packetThrower/zorite
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

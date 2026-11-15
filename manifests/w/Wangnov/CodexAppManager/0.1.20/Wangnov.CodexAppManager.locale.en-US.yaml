@@ -1,0 +1,58 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Wangnov.CodexAppManager
+PackageVersion: 0.1.20
+PackageLocale: en-US
+Publisher: Wangnov
+PublisherUrl: https://github.com/Wangnov
+PublisherSupportUrl: https://github.com/Wangnov/Codex-App-Manager/issues
+PackageName: Codex App Manager
+PackageUrl: https://github.com/Wangnov/Codex-App-Manager
+License: MIT
+LicenseUrl: https://github.com/Wangnov/Codex-App-Manager/blob/HEAD/LICENSE
+ShortDescription: Installer, updater, and uninstaller for the official Codex desktop app.
+Description: A cross-platform desktop client to install, incrementally update, and cleanly uninstall the official Codex desktop app, with built-in self-update.
+Moniker: codex-app-manager
+Tags:
+- codex
+- installer
+- openai
+- tauri
+- updater
+ReleaseNotes: |-
+  Codex App Manager
+  > 这一版修复 Windows 免商店更新在镜像短链下被过早拒绝的问题。
+  > This release fixes Windows non-Store updates being rejected too early when the mirror serves a stable short URL.
+  🐛 修复 · Fixes
+  - Windows 更新短链可用:/latest/win 这类稳定镜像地址不再因为路径本身不以 .msix 结尾而失败;管理器会继续读取 manifest/checksums,下载后再做 SHA256、OpenAI 签名和包身份校验。
+    Windows short update URLs now work — stable mirror URLs such as /latest/win are no longer rejected just because the path itself does not end in .msix; the manager still binds manifest/checksums and verifies SHA256, OpenAI signature, and package identity after download.
+  - 保留直链错包保护:如果自定义更新源直接给出 .msix 文件名,管理器仍会检查文件名里的 package moniker 是否和 manifest 匹配,避免 x64/arm64 或其他包混用。
+    Direct artifact protection stays in place — when a custom source exposes a direct .msix filename, the manager still checks that its package moniker matches the manifest to avoid mixing x64/arm64 or unrelated packages.
+  📦 安装与升级 · Install & Upgrade
+  已经安装? 打开应用即可收到本次更新——macOS 只下载版本间的增量,校验失败自动回滚。
+  Already installed? The app offers this update in-app — macOS pulls only the delta, with automatic rollback.
+  ─────────────────────┬───────────────────────────────────────────
+  平台 · Platform      │下载 · Download(国内直连 · China-reachable)
+  ─────────────────────┼───────────────────────────────────────────
+  macOS · Apple Silicon│CodexAppManager_aarch64.dmg
+  ─────────────────────┼───────────────────────────────────────────
+  macOS · Intel        │CodexAppManager_x86_64.dmg
+  ─────────────────────┼───────────────────────────────────────────
+  Windows · x64        │CodexAppManager_x64-setup.exe
+  ─────────────────────┴───────────────────────────────────────────
+  Windows 签名状态: CodexAppManager_x64-setup.exe 当前没有 Authenticode 代码签名,首次运行可能出现 SmartScreen 提示;.sig / latest.json 里的 Tauri updater 签名只用于应用内自更新的字节校验,不代表 Windows 发行者信任。详情见 Windows signing and verification。
+  Windows signing status: CodexAppManager_x64-setup.exe is not Authenticode-signed yet, so SmartScreen may warn on first run; the Tauri updater signature in .sig / latest.json verifies in-app update bytes only and is not Windows publisher trust. See Windows signing and verification.
+  核验下载: 本页 Assets 带有 SHA256SUMS;Windows 用 Get-FileHash .\CodexAppManager_x64-setup.exe -Algorithm SHA256,macOS 用 shasum -a 256 CodexAppManager_aarch64.dmg,再与 SHA256SUMS 比对。
+  Verify downloads: This release includes SHA256SUMS in Assets; on Windows run Get-FileHash .\CodexAppManager_x64-setup.exe -Algorithm SHA256, and on macOS run shasum -a 256 CodexAppManager_aarch64.dmg, then compare with SHA256SUMS.
+  # macOS · Homebrew
+  brew install --cask wangnov/tap/codex-app-manager
+  > 镜像直链恒指向最新版本;如需本页对应的历史版本,请使用下方 Assets。.app.tar.gz / .sig / latest.json 是自动更新器的工件,手动安装请选 .dmg / .exe。
+  > Mirror permalinks always resolve to the latest release — for this exact version use the assets below. .app.tar.gz / .sig / latest.json belong to the auto-updater; pick the .dmg / .exe for manual installs.
+  What's Changed
+  - fix: allow Windows short MSIX update URLs by @Wangnov in #89
+  - chore(release): bump version to 0.1.20 by @Wangnov in #90
+  Full Changelog: v0.1.19...v0.1.20
+ReleaseNotesUrl: https://github.com/Wangnov/Codex-App-Manager/releases/tag/v0.1.20
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

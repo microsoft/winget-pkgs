@@ -1,0 +1,44 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.9.2
+PackageLocale: en-US
+ShortDescription: Agent-friendly reference management.
+Description: 'Traditional reference managers are not agent-friendly: highlights and notes stay locked inside single files, making it hard for agents to reuse knowledge across papers; every conversation starts from scratch without a stable local knowledge map; PDFs are human-friendly but not the most comfortable reading material for agents. Agentero aims to build an agent-friendly, agent-native way to manage references, exploring how humans and agents collaborate on reference management. Connect your local agent via ACP (BYOA), select-text chat, import papers and Skills, stay compatible with the Zotero ecosystem, and get paper translation, bidirectional links with a knowledge graph, and deep PDF reading.'
+Tags:
+- academics
+- agent
+- article
+- literature
+- paper
+- pdf
+- reference
+- research
+- thesis
+- zotero
+ReleaseNotes: |-
+  This release focuses on import, RSS reading, and Agent integration: local PDF imports no longer block on metadata parsing — recognition happens in the background; Plaza RSS full-text extraction and LaTeX math rendering are more reliable; arXiv Daily gains full-category search and embedding endpoint health probing; Settings adds a built-in ChatGPT Secure MCP Tunnel; and several PDF/editor issues are fixed.
+  Features
+  - ChatGPT Secure MCP Tunnel: Start/stop the built-in tunnel client from Settings → General → MCP server and manage the Tunnel ID and runtime API key in the UI; the key is passed only via environment variables and the tunnel stops on app exit. (commit by @Phil-Fan)
+  - Background PDF metadata recognition: PDFs imported via picker or drag-and-drop commit instantly with placeholder metadata, then a background job probes, recognizes, and resolves it — renaming the folder to the canonical ID with link rewrites, merging into existing library entries, and always letting your manual edits win. (commit by @qychen2001)
+  - arXiv Daily category autocomplete: A search popover in the panel header lets you pick from the full arXiv taxonomy (~150 categories); selections render as removable chips and persist locally. (commit by @Phil-Fan)
+  - Plaza source show/hide on cards: Hover a Plaza card to hide or restore a source with the eye toggle; hidden sources stay visible but dimmed. (commit by @Phil-Fan)
+  Improvements
+  - Library refresh updates all metadata fields: The refresh action in the library now updates every metadata field instead of only publication info. (commit by @Phil-Fan)
+  - Chain resolver for title metadata: Title-based metadata resolution now walks S2 → Crossref → OpenAlex → S2 → arXiv in order for better hit rates. (commit by @Phil-Fan)
+  - arXiv Daily embedding endpoint probing: The panel probes the embedding endpoint before showing results; a dead endpoint now surfaces an unreachable state with Retry / Open Settings instead of stale cached rows, and Agent settings add a Test connection button. (commit by @Phil-Fan)
+  - Virtualized long chat transcripts: Agent conversations switch to virtualized rendering past 80 lines, keeping long chats responsive with working stick-to-bottom streaming. (commit by @qychen2001)
+  - More reliable RSS full-text extraction: Article extraction now uses DOM Readability scoring instead of string matching and always attempts the original article page; JS-challenge 403 responses are retried with cookies. (commit by @Phil-Fan)
+  - Better RSS math rendering: LaTeX block environments render as display math, document-wide \newcommand macros are expanded, HTML artifacts from extraction are cleaned up, placeholder mix-ups with many equations are fixed, and stale cached bodies re-resolve automatically. (commit by @Phil-Fan)
+  Fixes
+  - PDF plain-text links: http(s) URLs without link annotations are now clickable, arXiv IDs map to their abstract pages, and multiple links in one text region are supported without conflicting with native annotations. (#422 by @July-h5kf3)
+  - Fenced code keeps HTML attributes: Markdown round trips no longer drop class/for attributes in fenced HTML code; JSX/TSX fences stay untouched. (#423 by @Gelly52)
+  - Grok Build uses the native CLI: Detection and launch now use the local grok agent stdio command instead of an npx wrapper, preventing silent agent downloads during auto-probing and migrating stale registry entries. (commit by @Phil-Fan)
+  - RSS card height overflow: Fixed a large empty gap below clamped summary text caused by a WebKit line-clamp layout bug. (commit by @Phil-Fan)
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.9.2
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: locale
+ManifestVersion: 1.12.0

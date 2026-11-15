@@ -1,0 +1,79 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: alegauss.ClaudeCodeTray
+PackageVersion: 1.7.2
+PackageLocale: en-US
+Publisher: Alexandre Oliveira
+PublisherUrl: https://github.com/alegauss
+PublisherSupportUrl: https://github.com/alegauss/claude-tray/issues
+Author: Alexandre Oliveira
+PackageName: Claude Code Tray (unofficial)
+PackageUrl: https://github.com/alegauss/claude-tray
+License: Apache-2.0
+LicenseUrl: https://github.com/alegauss/claude-tray/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Alexandre Oliveira
+ShortDescription: Unofficial native Windows tray monitor for Claude Code usage — a crisp DPI-aware icon shows your rate-limit %, projects when you'll run out, turns red before the limit, and celebrates quota resets with on-brand toasts.
+Description: "Claude Code Tray is an unofficial, community-built Windows system-tray monitor for your Claude Code rate-limit usage. It draws a crisp, DPI-aware vector icon showing the current usage percentage with a Task Manager-style fill bar, and projects when you'll hit 100% — a proportional pace line for the weekly window and a burn-rate regression for the 5h session and extra windows — turning the bar vivid red when you're on track to run out before the window resets. Switch which window the icon tracks (session 5h, week 7d, or extra) from the right-click menu. When a window hands your quota back, a bespoke color-coded toast slides up to announce it: Surprise! (early weekly reset), Bonus! (mid-window credit), New week!, and Fresh session! — each toggleable in Settings. A Usage insights (24h) submenu shows a local, price-weighted breakdown of your usage (from subagents, large-context share, and a by-model split) computed from your own Claude Code session transcripts — no extra API calls and never reading message content. The app reuses the OAuth token Claude Code already stores, so there is nothing to configure, and it self-updates from GitHub Releases."
+Moniker: claude-tray
+Tags:
+- anthropic
+- claude
+- claude-code
+- developer-tools
+- dotnet
+- system-tray
+- usage-monitor
+- windows
+ReleaseNotes: |-
+  ## What's new in v1.7.2
+
+  The biggest release since profiles arrived — **33 commits** — and one theme：**two Claude Code profiles, made one setup.**
+
+  ### 🔗 One setup across profiles
+
+  A fresh profile starts genuinely empty：no user `CLAUDE.md`, no settings, no skills, plugins or project history. That isolation is the point when the two accounts are two jobs. It is in the way when they are one person changing subscription — and the fix by hand is a dozen `mklink` commands in an order where the wrong one loses a folder.
+
+  **Settings → Claude Code → One setup across profiles** now picks which profile keeps its files and shows you, folder by folder, what sharing them would mean:
+
+  • **merged** — `projects`, `file-history` and the things you wrote yourself (`skills`, `agents`, `commands`, `output-styles`) are unioned first, so neither side loses anything, and each row says how many folders would be copied over. `history.jsonl` is merged line by line, ordered on each line's timestamp.
+  • **adopted** — `plugins` and your `CLAUDE.md` are taken whole from the profile that keeps its files. A plugin records where it was installed, so merging those entry by entry would leave half of them pointing at a folder that is no longer there.
+  • **not offered** — `settings.json` *could* be merged, and that is exactly why it isn't：the union would widen the other account's permission allowlist, which is your call. **So it shows you what you are deciding** — how many rules would arrive on each side, which lists they land in, and the first few by name. Rules arriving in `deny` are counted apart, because those take capability *away* and folding them in would make the safe half look like the risky one. Hooks are listed per event with a count each side, because a hook is a command line that runs and no total answers that.
+  • **never** — `.claude.json` and `.credentials.json`. Your sign-in and the file that makes this a separate account are not part of "one setup", and no button here will touch them.
+
+  **And it says what it has no opinion about.** The list above is a list of opinions, so the plan closes by naming everything else sitting at the top level of either folder — not because those are safe to share and not because they are not, but because nothing here has a view. Per-machine caches and snapshots are counted rather than named.
+
+  **The button writes a script; nothing else happens.** Claude Code Tray has no way to write into a configuration folder and isn't growing one — so **Write script…** saves a PowerShell file where you point it and opens the folder. Read it, then run it. Even then a bare run only *prints* what it would do：it takes a second run with `-Apply` to change anything, it never asks for administrator rights, and it never deletes — every original is renamed beside its link so you can put it back. If the plan needs a file symlink and Windows has no Developer Mode, it says so **before** it moves anything rather than half-way through.
+
+  **One consequence, stated before you decide.** Sharing `projects` is most of the point — and it also means both profiles report the same "last turn", so **Follow the active profile** can no longer tell which of them you are in and stops moving the icon between that pair. The script's header says so, in those two profiles' names, before you run it.
+
+  ### 🧭 Auto-follow knows when it cannot help
+
+  • **It no longer flips between two profiles that share one folder.** A junction can put two config directories behind one `projects` tree, and then the newest write is the same fact twice — evidence about neither of them. Both are taken out of the running, so the icon stays where you put it instead of being pushed back and forth by whichever was scanned second.
+  • **And the setting says so.** When every profile it could follow reads the same project history as another one, **Follow the active profile**'s own description tells you it can do nothing right now, rather than leaving you a switch that looks on and never moves the icon. The **Profile** submenu says the same when nothing is being followed.
+
+  ### 🌍 Counted text reads properly in all five languages
+
+  `1 rule(s) would grant something new` is gone. A counted string is now written in both forms and picked by the number, so Portuguese, Spanish and French agree on the verb and the pronoun as well as the noun — *"1 outro item fica ao lado destes … então continua separado"*. `(s)` was an English convention that four of the five shipped languages do not have, and nothing can reintroduce it：the self-check now refuses a parenthesised plural in any language file.
+
+  ### 🌐 A rebuilt site
+
+  The marketing page is a prerendered Vite + React workspace：six routes, each with a Markdown twin for agents to read, a generated sitemap and a rasterised social card. The theme follows your OS and no font is fetched from anywhere.
+
+  ### 🔬 Under the hood
+
+  Nothing here changes what the app does — it changes what can be shipped broken.
+
+  • **The linking script is executed, not just inspected.** The self-check writes it, runs it under Windows PowerShell 5.1 against throwaway config directories and asserts the resulting tree. That found two defects no amount of reading would have：`ResolveLinkTarget` does not exist on .NET Framework, and `New-Item -ItemType SymbolicLink` fails with *requires administrator privilege* on a machine whose Developer Mode was just checked for. It links with `mklink` for that reason.
+  • **A script is composed per branch, and the coverage is asserted.** Thirty assertions used to run against one plan; a guard written to catch a defect passed on it, because that plan's two `settings.json` files happened to be identical. Six plans now, and a branch no fixture produced is named.
+  • **Screenshots are framed by name.** `--capture-settings … card=<name>` scrolls that element into view and reports whether the viewport held it — where framing one card used to be five captures of trial and error on a magic number.
+  • **The self-check no longer reports a failure on an installed copy**, where its twenty-nine repository-reading claims stand down and say why. One of them guarded its own precondition instead, which was correct in a checkout and red everywhere else — invisible to CI, which runs from inside the tree.
+  • **The interaction suite passes when run all together**, not only one case at a time. Five cases share one window on the strength of an invariant two of them had quietly stopped honouring; it is reset in one place now, and asserted.
+  • **The suite itself is seven files instead of one 9,330-line file** — same 1,052 assertions, nothing lost.
+
+  **Upgrading.** Nothing to do — existing installs pick this up automatically, or grab `ClaudeTray-Setup.exe` below (per-user install, no admin) or `winget upgrade alegauss.ClaudeCodeTray`. Settings, profiles and history carry over.
+
+  **Full Changelog**：https://github.com/alegauss/claude-tray/compare/v1.7.1...v1.7.2
+ReleaseNotesUrl: https://github.com/alegauss/claude-tray/releases/tag/v1.7.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

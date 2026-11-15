@@ -1,0 +1,79 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: tonhowtf.OmniGet
+PackageVersion: 0.8.1
+PackageLocale: en-US
+Publisher: tonhowtf
+PublisherUrl: https://github.com/tonhowtf
+PublisherSupportUrl: https://github.com/tonhowtf/omniget/issues
+Author: tonhowtf
+PackageName: OmniGet
+PackageUrl: https://github.com/tonhowtf/omniget
+License: GPL-3.0
+LicenseUrl: https://github.com/tonhowtf/omniget/blob/HEAD/LICENSE
+ShortDescription: Desktop app to download videos, courses, and media from 50+ platforms.
+Description: Desktop app to download videos, courses, and media from 50+ platforms. YouTube, Instagram, TikTok, Bilibili (哔哩哔哩), Douyin (抖音), 小红书, 快手, 优酷, Hotmart, Udemy, Kiwify, Telegram, and 1000+ more via yt-dlp. Download torrents and send files between devices over P2P.
+Tags:
+- bilibili-downloader
+- course-downloader
+- download-manager
+- hotmart-downloader
+- instagram-downloader
+- media-downloader
+- reddit-downloader
+- rust
+- tauri
+- tiktok-downloader
+- twitter-downloader
+- udemy
+- udemy-downloader
+- video-downloader
+- youtube-downloader
+- yt-dlp
+ReleaseNotes: |-
+  League of Legends is now part of OmniGet itself — no plugin to install. Plus download rules, deduplication, and a queue that survives a crash.
+  League — native, not a plugin
+  Champ select, on your terms. Auto accept with a delay you choose instead of instantly. Auto pick that either declares only, locks immediately, or locks at the last second. A ban guard that will not take a champion an ally already called, and the option to delay a ban. ARAM reroll that keeps the champion you already have.
+  Read the lobby before the game starts. Premades are grouped by the party id the game itself reports, not guessed. Players you have noted before are flagged, and so are five-stacks with hidden profiles. Player ratings wait for a minimum number of games before judging — three matches do not become a verdict.
+  In game and after. Objective timers with an estimate of what each one is worth. A build reference with ability order and items by phase. Match history filtered by queue, with a summary of the filter. A notification when a match is found and the window is not focused. Restart the client interface without losing your place in queue. Custom icon, profile background and status. Role preference in the lobby.
+  Features that are unavailable now say why, instead of silently doing nothing.
+  Client detection falls back to the lockfile when reading the command line fails — one less "client not detected".
+  Downloads
+  Rules. Say it once: links from this channel go to this folder, in this quality. Conditions are host, "URL contains", or platform; actions are folder, quality and audio-only. The first rule that matches wins, so order is priority and rules can be reordered. A link tester shows which rule catches a URL before you find out on a wrong download. Rules never override a choice made in the session — they only fill in what was left alone.
+  Point yt-dlp, FFmpeg or PDFium at your own binary. The file is referenced in place, never copied, so updating your own copy takes effect immediately. Previously only PDFium accepted a custom file, and it made a copy that then aged silently. "Use the managed one again" is in the same menu.
+  Threads. threads.net and threads.com — single posts, images, carousels and shared posts, through a native extractor, since yt-dlp still has none. Thanks @ManoloZocco.
+  The queue survives a crash. It used to rewrite the whole queue file on every change, so a crash mid-write could take the entire queue. Each change now appends one record and is flushed on its own, so a crash can damage at most the last one. Verified with a real SIGKILL mid-write: 202 records intact, exactly 1 truncated. An existing queue is migrated automatically, keeping its order.
+  Deduplicate downloads. The same file in two places stops occupying space twice. It runs after downloading, never during — saving disk space is not worth touching the file you just waited for.
+  A changed video is reported before it overwrites the old one. Re-edited, re-uploaded or censored: you hear about it at the only moment the warning is still useful.
+  Silence map. One FFmpeg pass finds the silent stretches of a lecture and remembers them.
+  Torrents: when can you actually press play? "50% downloaded" does not mean watchable, because torrents fetch the rarest pieces first. OmniGet now answers whether enough of the playhead is on disk. Piece ordering stays with the torrent engine, which already does it well.
+  Fixes
+  Ctrl+K on Windows and Linux. The shortcut label was hardcoded to the macOS key everywhere. On Windows and Linux that key does not exist, so the hint could not be acted on at all — the shortcut itself always accepted both.
+  Window buttons no longer collide with the app's own. The title bar reserved 78px for macOS window controls on every platform, and placed the app's buttons exactly where Windows and Linux draw minimise/maximise/close.
+  The command-line binary ships again. omniget-cli is attached to this release for Linux, Windows, and both macOS architectures. It failed to build in 0.8.0 for two separate reasons, both fixed.
+  Known gaps
+  - Silence skipping during playback is not wired to the player yet. This release measures and stores the map; the skipping itself is still to come.
+  - Dedupe savings cannot be measured on Windows. There is no cheap way there to tell a hard link from a copy, so the app says "cannot be measured" rather than showing a zero that looks measured.
+  - Portable mode is fully covered on Windows and Linux, not macOS. wry does not allow redirecting the WebView data directory on WKWebView, so the app warns instead of pretending.
+  - Nothing in this release was manually clicked. Everything is covered by tests and by CI that launches the app on Windows and Linux; the interface paths are listed in docs/VALIDACAO-0.8.1.md.
+  Downloads
+  Windows: .exe installer or portable.
+  macOS: .dmg (Apple Silicon aarch64 or Intel x86_64).
+  Linux: .AppImage (universal) or .deb (Debian/Ubuntu).
+  Debian/Ubuntu users — AppImage compatibility
+  Debian 12+ ships without FUSE 2 by default, which AppImage requires.
+  If ./omniget.AppImage fails with a libfuse error, run:
+  sudo apt install libfuse2
+  …or use ./omniget.AppImage --appimage-extract-and-run.
+  Easier alternative: download the .deb instead — works out of the
+  box on Debian 12+ and Ubuntu 22.04+.
+  macOS users — "OmniGet is damaged and can't be opened"
+  The app is not notarized with Apple yet, so Gatekeeper quarantines it.
+  After moving the app to /Applications, run:
+  xattr -cr /Applications/omniget.app
+  Then open it normally. If it still refuses, allow it under
+  System Settings → Privacy & Security.
+ReleaseNotesUrl: https://github.com/tonhowtf/omniget/releases/tag/v0.8.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,44 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.52.92
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.52.92] - 2026-07-11
+  Fixed
+  - The Bulk Installer launched winget by bare name from a hand-built process with no pinned working directory, enabling binary-planting privilege escalation, and interpolated the raw search box text into the winget arguments (argument injection). MarkInstalledAppsAsync (runs automatically on tab open) and the package search both built their own ProcessStartInfo { FileName = "winget", UseShellExecute = false } with no WorkingDirectory. With UseShellExecute=false, Win32 CreateProcess searches the calling process's own directory before resolving the real winget App Execution Alias — so an attacker-planted winget.exe beside SysManager's portable .exe (often run from a user-writable folder, sometimes elevated) would run with the app's privileges. Separately, the search argument was built as $"search \"{query}\" …" from the unvalidated search box — the one process-launch trust boundary in the app without input validation — so a query containing a double-quote could break out and inject extra winget arguments. Both winget calls now route through BulkInstallerService (the IPowerShellRunner seam), which launches winget with WorkingDirectory pinned to System32 (removing the CWD from the search order, matching every other winget call in the app), and the search query is sanitized (double-quotes and control characters stripped) before interpolation. This also brings the two calls into Gate-ARCH conformance — external process launches route through the single runner seam instead of a bespoke ProcessStartInfo.
+  Verify the download
+  Get-FileHash .\SysManager-v1.52.92.exe -Algorithm SHA256
+  Expected SHA256: EF9DD4C7B9FFD95DAE0FFA81A65690191DFC9EF1B7577423B987DB8E9C09D723
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.52.92
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

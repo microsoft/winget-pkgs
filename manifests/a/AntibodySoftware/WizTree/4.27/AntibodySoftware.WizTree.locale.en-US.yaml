@@ -1,0 +1,78 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: AntibodySoftware.WizTree
+PackageVersion: "4.27"
+PackageLocale: en-US
+Publisher: Antibody Software
+PublisherUrl: https://antibody-software.com/
+PublisherSupportUrl: https://antibody-software.com/contact
+PrivacyUrl: https://diskanalyzer.com/privacy-policy
+Author: Antibody Software Limited
+PackageName: WizTree
+PackageUrl: https://diskanalyzer.com/
+License: Proprietary
+LicenseUrl: https://diskanalyzer.com/eula
+Copyright: Copyright © 2025 Antibody Software Limited. All Rights Reserved.
+ShortDescription: WizTree is a hard drive disk space analyser similar to WinDirStat but is MUCH faster.
+Moniker: wiztree
+Tags:
+- disk-analyzer
+- file-scanner
+- space-analyzer
+- storage-scanner
+ReleaseNotes: |-
+  - Seer / QuickLook integration added
+    Seer and QuickLook both provide a quick and easy way to preview files by simply pressing the space bar when a file is selected in Windows File Explorer. If you have either Seer or QuickLook active (running in the background), press space to quickly view the contents of the currently selected file within WizTree. Press space again to close the view.
+
+  - Filtering/searching by time now supported
+
+    Example 1: To find files modified at exactly 1pm (any day):
+    =13:00:00
+    or use am/pm like this:
+    =1:00pm
+
+    Example 2: To find files modified at 3am or earlier (any day):
+    <=3am
+
+    Use the "NOW" filter variable for the current date/time.
+
+    Example 3: To find files modified in the last 5 minutes, use filter:
+    >NOW-5
+    (find all files with modified date greater than time now minus 5 minutes)
+    Use a 's', 'm' (default) or 'h' suffix to indicate seconds, minutes or hours.
+
+    Example 4: To find files modified in the last 1 hour:
+    >NOW-1h
+
+    Example 5: Find files modified more than one hour ago, but less than 4 hours ago:
+    <NOW-1h &ht;NOW-4h
+
+    Similar results can be achieved by subtracting seconds, minutes or hours from the "TODAY" filter variable:
+    >TODAY-5m
+    This will show all files modified in the last 5 minutes. Use an 'h', 'm' or 's' suffix to indicate hours, minutes or seconds
+
+  - WizTree would incorrectly display "internal corruption detected" error if running from a path containing non ansi characters (e.g. Chinese or Japanese) - fixed
+  - Config folder override registry setting was not working when WizTree not running in admin mode - fixed
+  - CSV export can now be configured to export UTC date/times instead of local system date/times. Use command line parameter:
+    /exportUTCTime=1
+  - Setting the license key (supporter code) and configuring auto update checking via the installer will now work for all users on the PC regardless of which user ran the installer. Previously these settings were user specific which could cause confusion
+  - Fixed allocated size calculation bug that could occur on drives formatted with large cluster sizes
+  - Most of WizTree's configuration options can now be set via the registry - useful for mass deployments (installed version only)
+    Add settings to the HKEY_LOCAL_MACHINE\Software\Antibody Software\WizTree\ConfigOverride\frmWizTreeMain key.
+    Setting names should match those used in the WizTree3.ini file and all value types should be of type "REG_SZ" (string).
+    e.g. to set the "run as admin" option to false create a "REG_SZ" value named "actRunAsAdmin_Checked" in the
+    HKEY_LOCAL_MACHINE\Software\Antibody Software\WizTree\ConfigOverride\frmWizTreeMain registry key and set the value to "FALSE"
+    To make a setting "read only", prefix the name in the registry with an exclamation point (!), e.g. !actRunAsAdmin_Checked
+    When the installed version of WizTree starts (does not matter which user is logged in), it will first look to the registry and set its settings accordingly. If WizTree is being run by a user with admin rights, it will also update these registry settings when it's closed unless the registry setting is "read only" (!).
+    From WizTree 4.27 onwards, the installer will automatically create the necessary registry entries if it's run with command line parameters /supportercode=xxxx-xxxx-xxxx-xxxx, /runasadmin=TRUE/FALSE, or /checkforupdates=TRUE/FALSE
+    To set runasadmin / checkforupdates to read only, use:
+    /!runasadmin=TRUE/FALSE, or /!checkforupdates=TRUE/FALSE
+ReleaseNotesUrl: https://diskanalyzer.com/whats-new
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://diskanalyzer.com/faq
+- DocumentLabel: User Guides
+  DocumentUrl: https://diskanalyzer.com/guide
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

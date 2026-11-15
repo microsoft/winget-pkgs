@@ -1,0 +1,66 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 4.1.6
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [4.1.6] - 2026-07-25
+  AeroRsync Closes the Gap With rsync, a Stabilised DAG Transfer Engine, and MTP Portable Devices
+  The longest-running thread in the project lands: AeroRsync gains the negotiated checksums, end-to-end symlinks and streaming signatures that were the remaining distance to stock rsync, and the legacy parallel server stack retires so production has exactly one path, the one that is tested byte-identical against rsync --server. The DAG transfer engine stops being a promising core and becomes the engine: a process-global hierarchical governor, durable multipart checkpoints, a streaming work frontier, endpoint-aware adaptive AIMD and SizeFair scheduling, with five more providers promoted onto native multipart workers. Measured against rclone on the lab, multi-file FTPS moved from 8-18% behind to parity and the FTPS single-stream default is now 41% ahead. A new protocol arrives with it: MTP/WPD portable devices, phones and cameras that the OS never gives a drive letter, with their own profile type keyed to a device fingerprint. AeroCrypt gains v4 keyslots, so a vault can be unlocked by more than one credential without re-encrypting it. A sync stack audit closes the release's most serious finding - a crafted remote filename reached the remote login shell through rsync-over-SSH - along with a class of scan-completeness holes where a truncated remote listing could steer a sync into deleting local data. 47 languages translated.
+  Added
+  - Portable devices over MTP and WPD, a new protocol with its own profile type: attached phones, cameras and media players that the OS never mounts as a drive now appear under PLACES > Portable devices and browse and transfer through the same dual-panel fabric as every other provider, via a Linux libmtp backend and a Windows WPD backend. Devices are saved as real profiles keyed to a stable device fingerprint (mtp:serial=… where the device reports one, otherwise vid/pid plus model), so a saved phone reconnects as itself rather than as whatever happened to be on that USB port; the Add Services catalog gains a Devices category and an MTP save form, the device card carries a red/green attach indicator with click-to-connect, and aeroftp-cli can open a saved device by fingerprint. USB hotplug is wired on both platforms, so unplugging a device flips the attach dot and degrades the open session honestly instead of leaving a dead panel (@EhudKirsh, #347).
+  - AeroFTP takes the MTP claim from the desktop instead of losing to it: only one program can hold a phone over MTP at a time, so on Linux Connect now soft-releases the system gvfs/Nautilus mount (with a settle poll, a clean gio unmount with timeout, and a SIGSTOP of the gvfs volume monitors across the open) rather than failing with an error that blamed the user for having a file manager open. Disconnect drops only the claim AeroFTP took. Where the desktop mount is the better path, PLACES rides it instead of fighting it.
+  - AeroRsync: md4 and sha1 as first-class negotiated checksums (Y-RSC.3): both were advertised in negotiation but never implemented, so a negotiated md4 or sha1 win silently degraded a delta transfer to all-literal traffic and skipped the reconstruction verify entirely. Both roles - the block-strong signature hash and the whole-file trailer - are now implemented in both directions, and the reconstruction is genuinely verified. The seeding mirrors the builtin-versus-EVP split of rsync 3.2.7 checksum.c: block-strong md4 appends the four-byte seed, sha1 prepends it, and the whole-file trailer is unseeded for both. Verified against stock rsync 3.2.7 by forcing each algorithm through the live lane-3 upload path for a byte-identical reconstruction, which proves our md4 and sha1 are accepted by rsync's own receiver verify.
+  - AeroRsync: symlinks transferred end-to-end on unix (Y-RSC.4): a source symlink is detected by lstat and never followed, emitted as an S_IFLNK file-list entry carrying the link target under rsync's F_LENGTH convention, with no signature, delta or data phase; the receiver materialises it create-temp-then-rename, replacing an existing file and leaving no temp behind on failure. On non-unix targets a symlink entry fails closed with a typed error instead of silently creating a regular file.
+  - AeroRsync: streaming download signatures (Y-RSC.5): the signature phase no longer reads the whole baseline into RAM. Production downloads open a FileBaseline and walk it block by block for the Adler-32 rolling and negotiated strong hash, closing the O(file) memory cost left open by the earlier streaming work. Byte-identical parity tests against the bulk path, plus an RSS acceptance run over a 4 GiB sparse baseline holding peak growth under 128 MiB.
+  - A process-global hierarchical transfer governor: concurrency is now arbitrated across the whole process rather than per transfer, with a priority device-endpoint governor beneath it, so a large batch and an interactive single-file transfer no longer bid against each other blindly for the same device and endpoint capacity.
+  - Durable multipart checkpoints and a journal-aware commit path: a multipart upload writes durable per-part receipts, so an interrupted upload resumes against the parts that genuinely landed instead of restarting, and VerifyChecksum and CommitTemp read that journal so a session is finalized only after a durable verified fact. A cancelled multipart upload now keeps its provider session for resume rather than aborting it.
+  - A streaming work frontier for multi-file transfers: the multi-file source streams work into the DAG instead of materialising the full graph up front, with a bounded ready-frontier dispatch window; peak graph memory stays bounded over ten million items, which is now a test.
+  - Endpoint and workload-aware adaptive AIMD, plus SizeFair scheduling: the congestion profile adapts to the endpoint and the shape of the workload, and SizeFair scheduling stops a queue of large files from starving small ones. Normal sync files are pooled with an exclusive delta lane so a delta transfer no longer contends with plain copies.
+  - Five more providers promoted onto native multipart workers: Drime, Uploadcare, Dropbox, Box and Filen now upload through real per-part wire I/O rather than a single-stream fallback. pCloud was evaluated and deliberately retained on LockedSingle after its live gate.
+  - A reusable buffer pool with a streaming multipart part body, plus directional resources and byte-buffer credits with an exact credit ceiling, so the engine's memory ceiling is a number it enforces rather than a hope.
+  - Runtime transfer capabilities and capability-aware settings: the engine probes what an endpoint can actually do once and binds the effective settings to that single probe, so the settings surface stops offering choices the provider cannot honour.
+  - SFTP performance presets, persisted per profile, with opt-in read-ahead: russh-sftp awaits one SSH_FXP_READ per poll (upstream #70), so an SFTP download ran far below the link (measured 2.8 MiB/s against 16 upload on the same session). An in-tree read-ahead over the public API - no crate fork - stripes chunks across several cheap file handles into one writer, byte-identical to the serial loop with strict short-read as a hard error. In the lab over a 1 Gb link at 37.7 ms RTT: about 2.5-3x on a single connection, 14.25 MiB/s at 4 connections (beating 8 serial connections), peaking at 27.47 MiB/s at 12 connections, about 58% ahead of rclone. This stays opt-in via the per-profile preset, --sftp-concurrency on the CLI or AEROFTP_SFTP_READAHEAD; no default changed, pending the team audit before any default flip.
+  - AeroCrypt v4 keyslots: a vault key can now be unlocked by more than one credential. A v4 keyslot core (slot types, per-slot key derivation, AAD-wrapped OMK) is joined by crypt migrate-v4 and slot management on the CLI, a GUI keyslot manager, and a recovery slot with an Emergency Kit v4. Migration derives a single schedule for the master key and each slot wraps it, so adding or revoking a credential never re-encrypts the vault.
+  - An unlocked-key cache for instant crypt overlay re-toggle, with an explicit hard lock: toggling an AeroCrypt or rclone-crypt overlay off and on on the same connection re-derived the key from scratch every time (Argon2id, or scrypt for rclone-crypt). Keys are now cached for the life of the connection - every copy still zeroizes on drop - with an explicit hard-lock action to drop them on demand.
+  - Security Tools as a first-class launcher in the AeroTools panel, with Hash Forge reaching BLAKE3-demo parity (XOF output length, auto-calculate, the full encoding set, drag and drop) and Password Forge output masked behind an eye reveal toggle. The titlebar button remains a Cyber-theme easter egg (@EhudKirsh, #369).
+  - A startup resume banner for the transfer queue with smart auto-connect (TQ-7c), turning the restored-queue work from v4.1.5 into a prompt that can actually reconnect and resume.
+  - A dual-panel breadcrumb path bar reusing the AeroFile breadcrumb, and the Compare view now shows what percentage of items and bytes are out of sync rather than only counts (@EhudKirsh, #347).
+  - Copy or duplicate a user from the Manage Users GUI (@EhudKirsh, #347), and the --tui inline action menu now works on groups and users, not only on servers (@EhudKirsh, #311).
+  - Premium-gated Permanent Delete and Empty Trash for Dropbox in the trash manager, with tooltips that spell out the difference between the two (@EhudKirsh, #397, #347).
+  - Benchmarks reach agents and every transport: --all-protocols expands a profile into one run per transport mode, results carry distinct Type and Protocol columns and MiB units with a single-file progress bar, and the many-files and per-protocol benchmarks are reachable from an MCP agent (@EhudKirsh, #277).
+  - Windows volume hotplug in PLACES via a WM_DEVICECHANGE watcher and a GetLogicalDrives mask diff, so an attached drive appears without waiting for the 30s poll.
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v4.1.6
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

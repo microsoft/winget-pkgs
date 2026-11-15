@@ -1,0 +1,71 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: AnInsomniacy.Aria2Next
+PackageVersion: 2.8.3
+PackageLocale: en-US
+Publisher: AnInsomniacy
+PublisherUrl: https://github.com/AnInsomniacy
+PublisherSupportUrl: https://github.com/AnInsomniacy/aria2-next/issues
+Author: AnInsomniac
+PackageName: Aria2 Next
+PackageUrl: https://github.com/AnInsomniacy/aria2-next
+License: GPL-2.0
+LicenseUrl: https://github.com/AnInsomniacy/aria2-next/blob/main/COPYING
+ShortDescription: Maintained aria2 fork with extensive bug fixes and modernized architecture
+Description: |-
+  aria2 is remarkable open source software. For over a decade it has been one of the most capable
+  download engines available, trusted by countless tools and users worldwide. We are deeply grateful
+  to the original authors and contributors of the aria2 project. They built something that has stood
+  the test of time, and that enduring quality is the best testament to their vision and craftsmanship.
+
+  But upstream development has slowed dramatically in recent years. Dependencies grew stale, builds
+  broke on modern platforms, and a backlog of bugs went unaddressed. We picked up the baton: migrated
+  the codebase to a modern build framework, triaged and fixed a substantial number of upstream issues,
+  and introduced ED2K protocol support for the first time. A full audit trail is preserved in
+  docs/maintenance/upstream-issue-review/matrix.csv.
+
+  Aria2 Next is an actively maintained aria2-compatible engine for everyone, and it is also the embedded
+  engine used by Motrix Next. Original interfaces, including options, configuration, sessions, JSON-RPC,
+  and libaria2, remain intact so downstream projects get a seamless upgrade. The focus is straightforward:
+  release reliability, current dependency baselines, and ongoing compatibility fixes. Same engine, renewed
+  foundation.
+ReleaseNotes: |-
+  ### Breaking Changes
+
+  `--continue` no longer adopts an existing file solely because its name or size matches. Stream recovery requires the original task GID, URL, output path and valid saved ranges. Preserve the saved session and recovery database when resuming interrupted tasks. Re-adding the URL as a new task follows the configured collision policy：rename, fail, or explicitly overwrite an inactive file.
+
+  ## Summary
+
+  Aria2 Next 2.8.3 isolates concurrent downloads that resolve to the same filename and keeps recovery records tied to their owning tasks. It also adds a filename-resolution RPC for clients that need to preview names before creating a download.
+
+  ### Fixed
+
+  • **Same-name downloads:** check active task reservations when selecting an output path or automatic suffix. Explicit overwrite permission no longer bypasses another active task's reservation.
+  • **Existing-file protection:** use exclusive file creation for new outputs when overwrite is disabled, preventing a file created between path selection and opening from being truncated.
+  • **Incorrect completion and resume:** remove file-size-based adoption, which could treat an unrelated file as complete or append downloaded bytes to it. Restore progress only from matching task recovery data.
+  • **Recovery isolation:** remove recovery records by task GID during failures, restarts, media handoffs and cleanup, preventing one task from deleting another task's state merely because they share a path.
+
+  ### Added
+
+  • `aria2.resolveFilename(url, contentDispositionBytes)` returns a suggested basename using the engine's existing filename resolver. It accepts a URL and the original `Content-Disposition` header bytes, creates no task and makes no network request. Clients can detect support through `filename-resolution` in `aria2.getVersion().downloadFeatures`.
+
+  ### Downloads
+
+  The release workflow builds the following standalone executables and uploads SHA-256 checksums:
+
+  | Platform | Asset |
+  | --- | --- |
+  | Linux x86_64 | `aria2-next-2.8.3-linux-x86_64` |
+  | Linux ARM64 | `aria2-next-2.8.3-linux-aarch64` |
+  | macOS Apple Silicon | `aria2-next-2.8.3-macos-arm64` |
+  | macOS Intel | `aria2-next-2.8.3-macos-x86_64` |
+  | Windows x86_64 | `aria2-next-2.8.3-windows-x86_64.exe` |
+  | Windows ARM64 | `aria2-next-2.8.3-windows-arm64.exe` |
+  | Android ARM64 | `aria2-next-2.8.3-android-arm64` |
+  | SHA-256 checksums | `aria2-next-2.8.3-checksums.sha256` |
+
+  Full changelog：[v2.8.2...v2.8.3](https://github.com/AnInsomniacy/aria2-next/compare/v2.8.2...v2.8.3)
+ReleaseNotesUrl: https://github.com/AnInsomniacy/aria2-next/releases/tag/v2.8.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

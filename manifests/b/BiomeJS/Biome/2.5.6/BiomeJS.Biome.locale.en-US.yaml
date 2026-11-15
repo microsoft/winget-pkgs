@@ -1,0 +1,125 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.5.6
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.5.6
+
+  Patch Changes
+  - #11035 0e4b03b Thanks @ematipico! - Fixed a performance regression in noMisusedPromises that caused type inference to run repeatedly while linting a file.
+  - #11043 22ec076 Thanks @denbezrukov! - Fixed CSS formatting for multiline function arguments preceded by comments:
+     .example {
+       value: outer(
+         1,
+         /* comment */
+         nested(
+    -      first,
+    -      second
+    -    )
+    +        first,
+    +        second
+    +      )
+       );
+     }
+  - #11007 c9acb25 Thanks @BTF-Kabir-2020! - Fixed #9195: useHookAtTopLevel no longer reports hooks in named forwardRef components that receive a ref parameter.
+  - #10152 50a9bd8 Thanks @Zelys-DFKH! - Fixed #10131: Biome now correctly parses curried arrow functions in ternary consequents when the inner arrow's parameters use a destructuring pattern, e.g. cond ? (x) => ({ a, b }) => body : alt.
+  - #11105 8ffe2b9 Thanks @dadavidtseng! - Fixed #11092: The noUselessTernary quick fix now preserves operator spacing when simplifying or inverting boolean ternary expressions.
+  - #10533 5809875 Thanks @Mokto! - Fixed #10515: biome check --write was not idempotent on Svelte files — multi-line template literals in <script> blocks and block comments in <style> blocks gained an extra indent level on every run.
+  - #11040 0abb620 Thanks @Mokto! - Fixed an issue where the HTML formatter would duplicate a comment placed directly before a Svelte {@const ...} or {@debug ...} block. The duplication compounded on every subsequent --write, causing the file to grow exponentially.
+  - #10858 6d18204 Thanks @ruidosujeira! - Fixed #10839: Svelte {#each} array destructuring no longer includes spaces inside square brackets, and multiline bind function expressions now indent their getter, setter, and function body correctly.
+  - #11009 2c36626 Thanks @ematipico! - Improved the accuracy of type-aware lint rules by resolving more inferred types. For example, noFloatingPromises now detects floating Promises returned by aliased callbacks and arrays of Promises created by async mapping callbacks.
+    The following statements are now reported:
+    type AsyncCallback = () => Promise<void>;
+    declare const callback: AsyncCallback;
+    callback();
+    [1, 2, 3].map(async (value) => value);
+  - #10973 9cb044c Thanks @ematipico! - Fixed false positives in noMisleadingReturnType when generic-constraint, normalization, substitution, or structural return-type comparison cannot complete. The rule now suppresses diagnostics rather than suggesting a return type derived from partial information. For example, this unresolved return type is no longer reported:
+    function unresolvedReturnType(): MissingType {
+      return "value" as const;
+    }
+  - #11071 15047a2 Thanks @dyc3! - The HTML parser now accepts mixed-case doctype declarations.
+  - #11030 cc90e65 Thanks @marschattha! - The rdjson reporter now populates the severity field of each diagnostic (ERROR, WARNING, or INFO), so tools consuming Reviewdog Diagnostic Format output no longer need to assume a default severity.
+  - #11009 2c36626 Thanks @ematipico! - Fixed a performance regression in type-aware JavaScript lint rules by inferring only requested types and memoizing export resolution.
+  - #11056 903b177 Thanks @dyc3! - Added support for Svelte declaration tags using let and const. Biome can now parse, format, and lint bindings declared in these tags.
+  - #11045 89c27c6 Thanks @ematipico! - Improved the performance of Biome formatter up to ~7% across the board.
+  - #9806 781d68d Thanks @dyc3! - Added the nursery rule noJsRestrictedProperties, which ports ESLint's no-restricted-properties rule. Biome now flags restricted member access and object destructuring, and biome migrate eslint preserves the rule's options.
+
+  What's Changed
+  - refactor(lint): extract return type relation by @ematipico in #10973
+  - refactor(inference): separate raw type collection by @ematipico in #11003
+  - fix(linter): recognize forwardRef named components with ref params by @BTF-Kabir-2020 in #11007
+  - fix(html_formatter): match prettier for svelte each as destructuring … by @ruidosujeira in #10858
+  - fix(cli): populate severity in rdjson reporter output by @marschattha in #11030
+  - refactor(inference): add structural type mapping by @ematipico in #11004
+  - refactor(inference): add canonical inferred globals by @ematipico in #11005
+  - feat(css): support preserved SCSS custom property by @denbezrukov in #11029
+  - refactor(inference): port Salsa module inference by @ematipico in #11006
+  - fix(css_formatter): preserve escaped attribute newlines without breaking parent groups by @denbezrukov in #11027
+  - feat(useSortedClasses): order same-utility values in sort_v4 by @johncarmack1984 in #11016
+  - fix(linter): inference regression by @ematipico in #11035
+  - fix(html): stop duplicating leading comments before Svelte {@const}/{@debug} blocks by @Mokto in #11040
+  - fix(inference): handle import cycles by @ematipico in #11008
+  - chore: tidy up skills by @ematipico in #11047
+  - fix(css_parser): parse SCSS parent selector hyphens by @denbezrukov in #11042
+  - fix(parser): allow nested destructured arrow functions inside ternary-consequent bodies by @Zelys-DFKH in #10152
+  - fix(css_formatter): indent commented SCSS function arguments by @denbezrukov in #11043
+  - ci: add e2e benchmarks for lint rules by @ematipico in #11048
+  - feat(format/yaml): flow mappings by @dyc3 in #11011
+  - perf(fmt): inline print_element, fast path for printable ASCII chars by @ematipico in #11045
+  - feat(lint/js): add noRestrictedProperties by @dyc3 in #9806
+  - feat(format/yaml): block scalars by @dyc3 in #11019
+  - refactor(analyzer): cut over inferred type consumers by @ematipico in #11009
+  - test(format/html): enable prettier's vue snapshot tests by @dyc3 in #11070
+  - fix(parse/html): accept mixed case doctype declarations by @dyc3 in #11071
+  - feat(useSortedClasses): order by name and resolve dashed statics in sort_v4 by @johncarmack1984 in #11041
+  - feat(svelte): support for {let}/{const} syntax by @dyc3 in #11056
+  - feat(format/yaml): flow scalar content by @dyc3 in #11050
+  - feat(format/yaml): indent comments per their block structure by @dyc3 in #11051
+  - feat(format/yaml): keep node properties on the entry line by @dyc3 in #11052
+  - fix(html): skip reindenting template literal and block-comment continuations in embedded code by @Mokto in #10533
+  - chore(xtask): migrate Symbol global types by @minseong0324 in #11034
+  - chore(deps): update rust crate jiff to 0.2.35 by @renovate[bot] in #11085
+  - chore(deps): update rust crate libc to 0.2.189 by @renovate[bot] in #11086
+  - chore(deps): update rust crate proc-macro2 to 1.0.107 by @renovate[bot] in #11089
+  - chore(deps): update rust crate regex to 1.13.1 by @renovate[bot] in #11090
+  - feat(useSortedClasses): sort sort_v4 candidates by property signature by @johncarmack1984 in #11076
+  - feat(inference): add structured inference requests by @ematipico in #11091
+  - fix: build bench by @ematipico in #11097
+  - chore(xtask): migrate WeakMap global type by @minseong0324 in #11084
+  - feat(css_syntax): allow SCSS variables in rule lists by @denbezrukov in #11103
+  - fix(lint): remove double space in noUselessTernary quick fix by @dadavidtseng in #11105
+  - ci: release by @github-actions[bot] in #11022
+
+  New Contributors
+  - @BTF-Kabir-2020 made their first contribution in #11007
+  - @marschattha made their first contribution in #11030
+  - @dadavidtseng made their first contribution in #11105
+  Full Changelog: https://github.com/biomejs/biome/compare/@biomejs/biome@2.5.5...@biomejs/biome@2.5.6
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.5.6
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

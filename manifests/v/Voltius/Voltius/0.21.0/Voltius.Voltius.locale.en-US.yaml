@@ -1,0 +1,75 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Voltius.Voltius
+PackageVersion: 0.21.0
+PackageLocale: en-US
+Publisher: Voltius
+PublisherUrl: https://voltius.app/
+PublisherSupportUrl: https://github.com/VoltiusApp/voltius/issues
+PackageName: Voltius
+PackageUrl: https://voltius.app/
+License: AGPL-3.0
+LicenseUrl: https://github.com/VoltiusApp/voltius/blob/HEAD/LICENSE
+ShortDescription: Cross-platform SSH client and terminal
+Moniker: voltius
+Tags:
+- crdt
+- credential-manager
+- homelab
+- local-first
+- plugins
+- port-forwarding
+- rust
+- serial
+- sftp
+- ssh
+- ssh-client
+- sync
+- sysadmin
+- tauri
+- teams
+- terminal
+ReleaseNotes: |-
+  Added
+  - Published container ports are now clickable everywhere Docker lists them —
+    the container list, the stack view and the mobile screen. Clicking one opens
+    it in your browser, or copies the address; a port on a remote host is
+    tunnelled to this machine first, automatically, and an existing tunnel is
+    reused.
+  - The MCP server gained eleven verbs, taking its own surface to 37 (52 with the
+    bundled plugins' tools). An agent can now organise your vault, not just read
+    and write inside it: vault_list/create/rename/delete,
+    folder_list/create/rename/delete, object_move and object_copy — the same
+    cut/copy-and-paste the pages do, including whole folder subtrees — and
+    key_add_to_host, which appends a saved key's public half to a host's
+    authorized_keys over SSH. Deleting a vault or folder cascades, moving
+    objects into a different vault has to be asked for explicitly, and team vaults
+    are refused throughout.
+  - Plugins gained four new gated namespaces mirroring that surface: api.vaults,
+    api.folders, api.objects and api.ports.reach. Object moves are gated per
+    object type rather than wholesale — a plugin allowed to file snippets cannot
+    move your keys — and snippets and port forwarding rules now have their own
+    write permissions. Every new permission ships with plain-language consent
+    copy, and the install dialog now distinguishes read-only grants (a container
+    list, a vault name) from the destructive ones.
+  Fixed
+  - Ad-hoc port forwarding tunnels no longer die when their host reconnects, and
+    tunnel channels now open on the session's current SSH handle — after a sleep
+    or a dropped link, forwarding kept using the handle that was already gone.
+  - File panes keep working after the SSH link behind them is replaced, instead
+    of failing every operation until the tab is reopened.
+  - The titlebar no longer swallows clicks on the close and new-tab buttons.
+  - Docker no longer lists the same published port twice when it is bound on both
+    IPv4 and IPv6, and pressing Enter on a port chip in the mobile view acts on
+    the chip instead of the row behind it.
+  - ssh_exec_command now reports a command's exit code and stderr rather than
+    presenting a failed command as a success — this silently affected Proxmox
+    actions.
+  - An MCP tool call that the app refuses is now returned to the client as an
+    error instead of a successful result carrying a refusal message.
+  Security
+  - Pinned js-yaml to 4.3.1 or later, clearing CVE-2026-59870.
+ReleaseNotesUrl: https://github.com/VoltiusApp/voltius/releases/tag/v0.21.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

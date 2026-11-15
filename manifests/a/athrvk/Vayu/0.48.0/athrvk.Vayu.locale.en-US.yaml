@@ -1,0 +1,88 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: athrvk.Vayu
+PackageVersion: 0.48.0
+PackageLocale: en-US
+Publisher: Atharva Kusumbia
+PublisherUrl: https://github.com/athrvk
+PublisherSupportUrl: https://github.com/athrvk/vayu/issues
+Author: Atharva Kusumbia
+PackageName: Vayu
+PackageUrl: https://github.com/athrvk/vayu
+License: AGPL-3.0
+LicenseUrl: https://github.com/athrvk/vayu/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Atharva Kusumbia
+ShortDescription: Open-source API client with a native C++ load-testing engine - Postman-style requests and k6-level load tests in one local app.
+Description: Vayu is a free, open-source desktop app for Windows, macOS, and Linux that combines a full REST and GraphQL request builder - with collections, environments, and scripting - and a high-throughput load tester powered by a C++20 engine, with all data staying on your machine.
+Moniker: vayu
+Tags:
+- api
+- api-client
+- api-testing
+- benchmark
+- developer-tools
+- graphql
+- http
+- insomnia
+- load-testing
+- performance
+- postman
+- rest
+ReleaseNotes: |-
+  0.48.0 - 2026-11-01
+  Read before updating: a load run whose monitor.url host is outside its targetPolicy is now refused at start, a Prometheus monitor series name containing { or a space is a 400, a mock example with a 1xx status is refused, and a webhook inbox now answers 400 to a malformed request instead of capturing it (all under Changed). New: load runs report why an inline script failed and what it logged, scripts under load see their iteration, virtual user and data row, and the mock server marks a route that another request shadows. Webhook inboxes now capture binary, multipart and large form bodies whole.
+  Added
+  - Load runs report why an inline script failed and what it logged. The Elements card shows the thrown message, each failing pm.test and the console lines under the script's tally: the first 10 distinct of each, with x3 against one seen three times and a count of the occurrences left out (#3127).
+  - The deferred replay's console lines and failures show in Test validation and under each scenario step. Each distinct failure is listed once with how often it failed, where one broken assertion over three sampled responses used to read "Failed tests (3)" with the same line three times. Console lines are kept the same way as the inline ones (#3127).
+  - Binary webhook bodies are captured. A body that is not UTF-8 is stored as it arrived and shown in the capture's Raw section as binary, with Download body and Copy as base64. It used to make GET /inbox/:id/requests answer 500 for the whole inbox (#3109).
+  - The mock server marks a shadowed route. The mock drops the query, so GET /q?kind=a and GET /q?kind=b are one route, and the first in sidebar order answered both even when only the second had an example. A route with an example now wins the tie, the other is marked shadowed with the request that answers instead, and the mock server control counts them (#3115).
+  - A collection run's step card shows the step's console lines and script errors under Tests (#3126).
+  - The script editor warns on a bare Intl. The script runtime has none, so new Intl.DateTimeFormat(...) passed the editor and threw at send time. A script that declares its own Intl gets no warning (#3129).
+  - A monitor scrape that gets a 2xx answer carrying none of your series names is counted apart from a failed scrape. History says the endpoint answered but carried none of the names, and a failed scrape shows its cause (timed out, unreachable, HTTP 503) (#3120).
+  Changed
+  - A load run's monitor.url is judged against its targetPolicy. A host the policy left out was refused for the run's requests and still scraped every interval. It is now a 400 naming monitor.url (#3121).
+  - A Prometheus monitor series is a bare metric name. One holding { or whitespace, such as http_requests_total{code="500"}, could never match, and the run recorded nothing. The Load Test panel and POST /runs refuse it. A JSON-format key may still hold either (#3120).
+  - A mock example takes a status from 200 to 599. Create and update refuse a 1xx with a 400, and the Postman and OpenAPI importers drop one and tally it. A 204 or 304 example is served with no body and no Content-Length (#3117).
+  - A script's console output is bounded. A line over 64 KiB is cut, and past 1 MiB or 1000 lines the rest is dropped with a final warning. A 20 MiB console.log used to be stored whole (#3134).
+  - A webhook inbox answers 400 to a request it cannot read unambiguously, and records nothing. That covers a request line whose parts are not separated by single spaces, a target holding a #, an HTTP/1.1 request with no Host or with more than one, and a Host with a stray byte. A request carrying both Transfer-Encoding and Content-Length is still captured, and the connection is then closed. The request line and headers must arrive within 5 seconds.
+  - The Postman import notice names more of the APIs Vayu does not run, such as fetch, pm.cookies.set and console.debug, which used to import with a clean preview and throw on the first run (#3132).
+  - Internal: cpp-httplib is updated to 0.63.0 and SQLite to 3.54.1, and tests and documentation were tidied.
+  Fixed
+  - An inline script on a data-driven load run could not see its row. pm.iterationData, bare columns and replaceIn("{{data.col}}") answered nothing, and on a single-request run pm.info.iteration and pm.info.vu were unset (#3124).
+  - Two script.post scripts that declare the same top-level const lost every test under load, the usual const json = pm.response.json(); at collection and request level. Each deferred script now replays on its own (#3125).
+  - pm.request.auth = {...} is honoured. It was accepted and dropped, so the request went out without the credential. Basic, bearer, API key and no-auth work; other types are refused by name in the Console. pm.request.addHeader, upsertHeader, removeHeader, forEachHeader, getHeaders, addQueryParams, removeQueryParams, toJSON and body.update({ mode, raw | urlencoded }) run instead of throwing not a function (#3131).
+  - pm.environment.replaceIn, pm.globals.replaceIn and pm.collectionVariables.replaceIn threw not a function. They resolve against their own scope, and the editor recognises {{name}} inside them (#3133, #3147).
+  - console.log prints an Error, Map, Set or Date the way Node does. catch (e) { console.log(e) } showed {} (#3130).
+  - The script editor no longer marks toSorted, findLast, Object.groupBy or Promise.withResolvers as errors; the runtime runs them (#3128).
+  - An OAuth token endpoint is judged as it is dialed. targetPolicy read http://evil.example\@idp.example/token as idp.example, and the token request, client secret included, went to evil.example (#3162).
+  - A webhook posted as multipart/form-data was captured with no body, and one posted as application/x-www-form-urlencoded over 8,192 bytes got a bare 413 and recorded nothing. Both are captured whole, cut at the inbox body limit like any other (#3110, #3111).
+  - A webhook path is recorded as the sender wrote it: /hooks/a%20b was stored as /hooks/a b, so a signature over the path or the URL copied from a capture no longer matched (#3113).
+  - An inbox started on all interfaces reported http://0.0.0.0:PORT/, which no sender can use. It reports this machine's first non-loopback IPv4 address and lists the rest (#3114).
+  - A body holding a zero byte (protobuf, msgpack) was read back cut at it: a webhook capture, a mock example (#3112) and a load-run sample body (#3159). Sample bodies that are not text now show as their bytes, and a non-UTF-8 byte in one no longer fails the whole samples page.
+  - A HEAD to a mocked GET path answered 404 mock_method_mismatch. It is answered like the GET, without a body; a stored HEAD request still wins (#3118).
+  - The mock issuer's /authorize demanded the client secret it can never receive, so the authorization-code flow failed with invalid_client for a client configured with one. It checks the client id only (#3116).
+  - Undo in one request's body restored another request's text, marked it dirty and autosaved it. Each request has its own undo history (#3136).
+  - {"limit": {{n}}} was painted as a JSON error in the request body, and hid the real errors after it (#3137).
+  - A JSON response with a leading byte-order mark showed Pretty equal to Raw. It is indented (#3140).
+  - Read-only editors stopped drawing a line after 10,000 columns, so a minified response was cut off on screen. Long lines are drawn in full (#3140).
+  - A JavaScript, CSS or CSV response downloaded as response-<stamp>.text. The file takes its extension from the Content-Type (#3140).
+  - The response body follows Settings > Editor > Font size, as every other editor does (#3139).
+  - The Raw tab built the whole of a large response on every render and stalled the window. It shows the first 2 MB with a notice, as the Body tab does (#3138).
+  Security
+  - The script engine is updated to quickjs-ng 0.18.0. It fixes memory-safety bugs a script could reach from plain JavaScript, among them a use-after-free finalising a WeakMap that holds its own symbol keys, and a reference-count bug in Promise.withResolvers. A long Array method call can now be stopped by the script deadline.
+  - Lodash for scripts is updated to 4.18.1, which closes three advisories: _.unset and _.omit deleting from a built-in prototype through a crafted path, and _.template code injection through imports names.
+  Every asset except the .sha256 checksums carries a build-provenance attestation: gh attestation verify <asset> --repo athrvk/vayu.
+  Which file do I download?
+  - macOS (Apple Silicon and Intel): run bash -c "$(curl --proto '=https' --tlsv1.2 -fsSL https://athrvk.github.io/vayu/install.sh)". The .dmg and .zip are the same universal build, unsigned.
+  - Windows (x64): winget install athrvk.Vayu, or Vayu-x64.exe.
+  - Linux (x86_64 only, there is no arm64 build): the .AppImage, or sudo apt install ./Vayu-amd64.deb.
+  - The .yml, .blockmap and .sha256 files are for the auto-updater and for checking a download. You do not need them.
+  If your OS warns you
+  Vayu is not code-signed, so the OS can stop a downloaded file on first launch. Nothing is wrong with the file.
+  macOS says an app downloaded from this page (.dmg or .zip) is "damaged", because Vayu is not notarized. This command installs it without the warning:
+  bash -c "$(curl --proto '=https' --tlsv1.2 -fsSL https://athrvk.github.io/vayu/install.sh)"
+  Windows shows "Windows protected your PC". Choose More info, then Run anyway. winget install athrvk.Vayu skips it.
+ReleaseNotesUrl: https://github.com/athrvk/vayu/releases/tag/v0.48.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

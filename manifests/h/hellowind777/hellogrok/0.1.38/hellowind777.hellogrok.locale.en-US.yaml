@@ -1,0 +1,29 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: hellowind777.hellogrok
+PackageVersion: 0.1.38
+PackageLocale: en-US
+Publisher: hellowind777
+PublisherUrl: https://github.com/hellowind777
+PublisherSupportUrl: https://github.com/hellowind777/hellogrok/issues
+PackageName: hellogrok
+PackageUrl: https://github.com/hellowind777/hellogrok
+License: MIT
+LicenseUrl: https://github.com/hellowind777/hellogrok/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 hellowind777
+ShortDescription: Cross-platform local proxy that makes Grok Build custom model channels work with common API formats, native Web tools, isolated authentication, and automatic configuration recovery.
+Description: 'Grok Build can use custom model endpoints, but real-world providers do not all expose the same protocol, response shape, authentication method, or Web-search behavior. hellogrok provides one local compatibility layer for those custom channels: it prepares the required Grok configuration while running, keeps each channel tied to its own endpoint and credentials, supports Grok Build native Web workflows, and restores the original configuration when stopped.'
+Tags:
+- grok
+- grok-build
+- proxy
+ReleaseNotes: |-
+  Added
+  - Usage rectifier that repairs provider token-usage measurements before they reach Grok Build's token ledger and auto-compaction meter. Stringly-typed counts ("prompt_tokens": "12345"), whole floats, and json.Number values are normalized to integers; invalid optional decorations (null detail values, non-map detail containers, fractional cost_in_usd_ticks) are removed without poisoning the core measurement; unrecoverable core counts (negative, fractional, overflowing, non-numeric) are deleted so the downstream validator drops the measurement instead of trusting corrupt data. Applied across Chat Completions, Responses, and Messages, in streaming and non-streaming responses, and in protocol-translation paths, with repairs logged as usage rectified proxy notes.
+  - streamFrameRectifier interface unifying the three frame-rewriting stream rectifiers (Chat tool calls, Messages tool blocks, Responses function calls) under a single contract, so future protocol rectifiers plug into the same pipeline without touching dispatch logic.
+  Fixed
+  - Channels whose relays report usage with non-standard JSON types (GLM and potentially other one-api/new-api-style gateways) no longer have their entire usage measurement silently dropped on format defects. Grok Build now receives real provider token counts instead of falling back to a byte-based estimate that overshoots by 25% or more on Chinese and JSON-heavy content, which previously fired auto-compaction at roughly 50% real usage instead of the configured threshold. The premature compaction dropped all tool results, the model re-read files it had already processed, context ballooned again, and a second compaction stalled the session entirely.
+ReleaseNotesUrl: https://github.com/hellowind777/hellogrok/blob/HEAD/CHANGELOG.md#0138-2026-09-16
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

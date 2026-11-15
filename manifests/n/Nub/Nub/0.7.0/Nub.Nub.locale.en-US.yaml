@@ -1,0 +1,78 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Nub.Nub
+PackageVersion: 0.7.0
+PackageLocale: en-US
+Publisher: nub contributors
+PublisherUrl: https://nubjs.com/
+PublisherSupportUrl: https://github.com/nubjs/nub/issues
+Author: nub contributors
+PackageName: Nub
+PackageUrl: https://nubjs.com/
+License: MIT
+LicenseUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 nub contributors
+CopyrightUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+ShortDescription: The all-in-one JavaScript toolkit that augments Node.js instead of trying to replace it.
+Description: "An all-in-one toolkit for Node.js. One Rust binary to run your files and scripts, install dependencies, and manage Node itself — a Bun-like modern DX on top of the node you already have. There's no new runtime to adopt and no lock-in: every augmentation rides on Node's own public extension surfaces."
+Moniker: nub
+Tags:
+- javascript-runtime
+- node-version-manager
+- nodejs
+- package-manager
+- script-runner
+ReleaseNotes: |-
+  Nub 0.7.0 adds nub.jsonc, a typed configuration file for the runtime, installs, and temporary package runs; hands environment loading to Varlock when a project has an @env-spec schema; and fixes a hoisted-linker defect that deleted build output.
+  Important
+  Five changes affect existing projects on upgrade.
+  - Adding a package now challenges unfamiliar names. A public npm name first registered in the last 30 days prompts in a terminal and fails without one, and a name closely resembling a popular package is challenged the same way. Both gates are new in this release. Lockfile entries are exempt; pass --allow-low-downloads for one invocation, or set minimumPackageAge=0 in .npmrc.
+  - The release-age gate now fails closed. A registry that serves no publish times silently disabled the 24-hour cooling window, including under the default minimumReleaseAgeStrict=true. Nub now falls back to the package's last-modified time, and refuses when even that cannot establish an age — so a registry without publish metadata will block where it previously installed. Ways through: minimumReleaseAgeExclude, minimumReleaseAge=0, or the new per-invocation flag.
+  - The allowBuilds field is no longer read from .npmrc. Set it in pnpm-workspace.yaml or package.json instead. A project that kept its build allowlist in .npmrc will see those dependencies need approval again.
+  - A bunfig.toml [install].linker value is no longer read. Nub cannot reproduce Bun's linker modes from that setting, so a Bun-owned project gets Nub's default layout. Choose one explicitly with install.linker in nub.jsonc or node-linker in .npmrc. Yarn's nodeLinker is unaffected.
+  - Scripts now receive the node-options field from .npmrc, matching npm and pnpm. A project that set it for other tools will see those options reach its scripts for the first time.
+  The first install after upgrading re-bootstraps two caches once, because their on-disk paths were renamed. Nothing is re-downloaded.
+  Project configuration
+  A project can now carry a nub.jsonc at its root — one typed file for the runtime, installs, and dlx, in JSON with comments and trailing commas. Nub finds the nearest one by walking up from the working directory.
+  {
+    "$schema": "https://nubjs.com/schema/latest.json",
+    "preload": ["./instrumentation.ts"],
+    "conditions": ["development"],
+    "loader": { ".graphql": "text" },
+    "install": {
+      "linker": { "strategy": "global-virtual-store", "eject": ["electron"] },
+      "minimumReleaseAge": "3d"
+    }
+  }
+  Settings resolve most-specific-first: a command-line option, then an environment variable, then the project file, then a global ~/.config/nub/nub.jsonc, then the built-in default. The two files take the same fields and are validated differently on purpose — the project file is checked in and shared, so an unknown key stops the command; the global file applies to every project on your machine, so an unrecognized section is ignored rather than taking the rest of your defaults down with it.
+  Read and write any field with nub config, which validates against the same rules that read the file and rewrites it in place. Comments, blank lines, and key order survive an edit. Keys that are not fields of this file keep their existing meaning and still read and write .npmrc.
+  nub config set install.linker hoisted
+  nub config set preload '["./setup.ts"]'
+  nub config set --location user envFile false   # personal default, everywhere
+  nub config path
+  The full field list is in the config reference. A JSON Schema ships at https://nubjs.com/schema/latest.json for editor completion. (#587)
+
+  Schema-driven environments
+  An @env-spec schema — conventionally .env.schema — describes an environment as types, validation, which variables are secret, and where their values come from. Varlock implements that format. Install it, and Nub hands the environment over rather than loading .env* itself.
+  nub add -D varlock
+  nub server.ts
+  Nub does not resolve the schema, inject values, or redact anything. It runs Varlock in front of Node, so type generation, providers, validation, and secret redaction happen on Varlock's own terms. Explicit envFile in nub.jsonc or --env-file still wins, and --node turns the whole path off with the rest of Nub's augmentation.
+  The hand-over covers a file run, nub run, nub watch, nubx, and lifecycle scripts. In a workspace, Nub looks for the schema in the project root and then the workspace root, so a member without one uses the root's. Because dotenv-extended has claimed the same filename since 2016 for an incompatible format, Nub only stands down when the file is actually @env-spec and no rival tool is a declared dependency. When Varlock is not installed, Nub keeps loading .env* and warns once; when it is declared in package.json but not installed, the run stops rather than starting with no values at all. (#659)
+
+  Package manager
+  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────
+  Fix                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   │PR
+  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────
+  Under the hoisted layout, every relink wiped and refilled each placed package, restoring published tarball contents only — so an unrelated nub add deleted whatever a postinstall had produced, such as a downloaded binary or a compiled addon, and the delta filter then skipped rebuilding it. A package directory is now reused when the previous link ran to completion and its contents are unchanged. Only projects that opted into the hoisted layout were affected. Build output already lost this way is not restored by upgrading — reinstall to rebuild   │#616
+  it.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   │
+  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────
+  Auditing queried the advisory endpoint using the alias name for any npm:-aliased package, so those packages came back clean no matter how many advisories they had. The same root cause made dedupe --check report a phantom removal on every run against an unchanged lockfile, and left outdated and approve-builds unable to see aliased dependencies.                                                                                                                                                                                                             │#609
+  ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────────────────────
+  Binaries in node_modules/.bin were symlinked by absolute path, so a moved or copied node_modules arrived with dangling links, and one project's path could be written into the shared store and repoint another project's binary.                                                                                                                                                                                                                                                                                                                                     │#596
+ReleaseNotesUrl: https://github.com/nubjs/nub/releases/tag/v0.7.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://nubjs.com/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

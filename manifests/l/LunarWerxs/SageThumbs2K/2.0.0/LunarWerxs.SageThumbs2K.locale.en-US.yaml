@@ -1,0 +1,129 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: LunarWerxs.SageThumbs2K
+PackageVersion: 2.0.0
+PackageLocale: en-US
+Publisher: LunarWerx
+PublisherUrl: https://github.com/LunarWerxs
+PublisherSupportUrl: https://github.com/LunarWerxs/SageThumbs-2k/issues
+PackageName: SageThumbs 2K
+PackageUrl: https://github.com/LunarWerxs/SageThumbs-2k
+License: PolyForm Noncommercial License 1.0.0
+LicenseUrl: https://github.com/LunarWerxs/SageThumbs-2k/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2026 LunarWerx
+ShortDescription: Explorer thumbnails for 331 file types Windows can't read, plus a right-click image toolkit.
+Description: SageThumbs 2K is a modern, crash-isolated Windows 11 shell extension written in Rust that rebuilds the classic SageThumbs. It gives File Explorer thumbnails for 331 file types Windows can't preview on its own — camera RAW, HEIC/AVIF, Photoshop, DjVu, ebooks and comics, video frames, 3D-print files and a long tail of obscure formats — plus a right-click image toolkit (convert, resize, rotate, OCR, color picker, metadata strip, combine-to-PDF/CBZ) and a console/AI CLI. Free for personal use.
+Moniker: sagethumbs2k
+Tags:
+- converter
+- explorer
+- heic
+- image
+- raw
+- shell-extension
+- thumbnails
+ReleaseNotes: |-
+  ## What's changed
+  
+  ### Added
+  
+  - **Flash video (`.flv`) files now get thumbnails.** Windows has no way to open an FLV at
+    all, so these have always shown a blank icon, whatever was inside them. All three of the
+    codecs people actually have now work:
+    - **H.264** is handed to Windows as a single frame in a form it already understands.
+    - **VP6** and **Sorenson Spark**, the older Flash codecs, are decoded by SageThumbs
+      itself, using the same pure-Rust decoders the Ruffle Flash emulator ships.
+  
+    Nothing is unpacked to disk, and the rest of the file is never read. The two older
+    decoders run in a separate, short-lived helper process, so even a corrupt or deliberately
+    malformed video can only lose you that one thumbnail; it cannot disturb File Explorer.
+    Raised by @taylor-p-mason (#26).
+  - **HDR video thumbnails (VP9 Profile 2 and 3).** 10-bit and 12-bit VP9, the kind used for
+    HDR and 4K streaming, never produced a thumbnail: Windows decodes only the ordinary 8-bit
+    kind, and that is still true even with Microsoft's free VP9 extension installed and a
+    graphics card that can do it in hardware. SageThumbs now decodes those itself.
+  
+    Ordinary 8-bit VP9 is untouched and still goes to Windows, which is faster and uses your
+    graphics card. The built-in decoder only runs when Windows has already declined, and it
+    runs in a separate short-lived process, so a corrupt file costs you one thumbnail rather
+    than disturbing File Explorer. Raised by @taylor-p-mason (#26).
+  - **Android app packages now show their real icon.** `.apk` files, and the split-bundle
+    wrappers `.xapk`, `.apks` and `.apkm`, get the launcher icon the app actually declares
+    rather than a generic file icon. An APK is a zip, so simply picking an image out of it
+    would have grabbed an arbitrary graphic from somewhere inside the app; instead the app
+    manifest is read to find which icon it nominates, and the highest resolution version of
+    that icon is used. Apps that only ship an adaptive icon (one Android assembles from
+    separate layers at runtime) fall back to the best plain image in the package.
+    Requested by @SamRohod (#24).
+  - **A setting for which frame a video thumbnail comes from.** Settings, Appearance, "Video
+    frame at (% in)". Films that open on a black distributor card or a slow fade used to
+    thumbnail as a black rectangle, which looks exactly like SageThumbs failing. The default
+    is 30% of the way in, unchanged from before, so nothing moves unless you move it.
+    Raised by @taylor-p-mason (#26).
+  - **Bigger thumbnails are now allowed.** The maximum in Settings, General goes up to 2560
+    pixels instead of 1024. The old limit was historical rather than technical. The default
+    stays at 1024 deliberately: larger thumbnails cost memory, generation time and cache
+    space, so this is a ceiling you opt into rather than one everybody pays for. Note that it
+    controls the size SageThumbs generates, not how large Explorer chooses to draw a tile.
+    Raised by @taylor-p-mason (#26).
+  - **Very large images get thumbnails now.** Pictures too big to load into memory, such as
+    AI-upscaled wallpapers running to hundreds of megabytes and tens of thousands of pixels
+    across, previously showed a plain file icon. They are now read straight off the disk a
+    strip at a time and shrunk as they are read, so a 340-megapixel photograph produces a
+    thumbnail in about two seconds without ever being held in memory whole. The default size
+    limit in Settings, General has been raised to match; if you had lowered it yourself, your
+    choice is still respected.
+  
+  ### Changed
+  
+  - **Settings no longer freezes the defaults when you press Save.** Previously, opening
+    Settings and saving wrote down every value on the page, whether or not you had touched
+    it. That quietly pinned each one forever, so any later improvement to a default could
+    never reach you. Values you have not changed are now left alone and continue to follow
+    the default; values you deliberately set are stored and honoured exactly as before.
+  
+  ### Fixed
+  
+  - **Some transparent AVIF images showed no thumbnail at all.** An AVIF and a video can share
+    the same underlying file structure, and they are told apart by a short code near the start
+    of the file. One of the codes that image editors write was missing from the list, so those
+    pictures were treated as videos, produced no frame, and were given up on rather than being
+    handed to the picture decoders. They now thumbnail correctly, and the check reads every
+    format marker the file declares rather than only the first, so an unusual encoder cannot
+    cause this again.
+  - **Photographs from Canon cameras thumbnailed about thirteen times slower than they needed
+    to.** A Canon raw file stores its sensor data in a form that, from the outside, is
+    indistinguishable from an ordinary photo, and SageThumbs was picking that instead of the
+    preview picture the camera saved alongside it. Since nothing can display sensor data as an
+    image, the whole shortcut was wasted and the file took the slow route.
+  - **Large photographs thumbnailed far slower than necessary.** A big JPEG was decoded at full
+    size and then shrunk, rather than asked for a small version to begin with. A folder of
+    large wallpapers now pre-builds in around a tenth of the time it used to.
+  - **"Build thumbnails here" did nothing on a drive root.** Right-clicking a whole drive
+    (`E:\`) appeared to do nothing at all, while the same entry worked on any ordinary folder.
+    A drive root ends in a backslash, and that backslash was being swallowed by the quoting
+    rules Windows uses to pass the folder to the program, so what arrived was not a path that
+    could exist. Reported by @taylor-p-mason (#26).
+  - **That same menu entry was labelled `(?)`.** The caption is written into the registry when
+    SageThumbs registers itself, and it was being looked up in a list that the shell extension
+    ships only a trimmed copy of, so the text came back empty. It now says what it should, in
+    every language, and corrects itself when you update. Reported by @taylor-p-mason (#26).
+  - **The File Types columns can be resized again.** Extension and Category were fixed at a
+    width too narrow for their own labels in several languages, and widening the window did
+    not help because only the Description column grew. Reported by @taylor-p-mason (#26).
+  - **The Quick preview window could close when you pressed a selection key on an empty pane.**
+    Selecting text with the keyboard first asks which line is currently at the top of the view.
+    When the pane had no text in it there was no such line, and the calculation was asked for a
+    value between zero and minus one, which stops the program rather than answering "none". It
+    now answers "none". Only the preview window was ever affected by this; File Explorer itself
+    was not.
+  - **Thumbnails are no longer randomly smaller than the files next to them.** Explorer centres
+    a thumbnail rather than enlarging it, so any file whose source picture was smaller than the
+    icon size drew as a visibly smaller tile. Photoshop files showed this worst, because the
+    preview Photoshop bakes into a PSD varies in size depending on the app and version that
+    wrote it, so two PSDs side by side could get different tile sizes for no visible reason.
+    Reported by @eddy593 (#25).
+ReleaseNotesUrl: https://github.com/LunarWerxs/SageThumbs-2k/releases/tag/v2.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

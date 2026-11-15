@@ -1,0 +1,130 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: zerx-lab.FluxDown
+PackageVersion: 0.5.5
+PackageLocale: en-US
+Publisher: FluxDown
+PublisherUrl: https://github.com/zerx-lab
+PublisherSupportUrl: https://github.com/zerx-lab/FluxDown/issues
+Author: zerx-lab
+PackageName: FluxDown
+PackageUrl: https://github.com/zerx-lab/FluxDown
+License: AGPL-3.0
+LicenseUrl: https://github.com/zerx-lab/FluxDown/blob/HEAD/LICENSE
+ShortDescription: Rust 驱动的多协议下载管理器，支持 HTTP/FTP/BitTorrent 磁力链接及 HLS/DASH 流媒体，智能多线程加速与浏览器无缝集成。精美界面，极致性能，永久免费，零广告。
+ReleaseNotes: |-
+  📦 下载与安装说明（服务器 / CLI）· 文件校验见 SHA256SUMS.txt
+  📦 Headless 服务器：直接下载运行（免 Docker）
+  ──────────────────────────────────────────────────┬─────────────────────────────────────────────────────────────────
+  平台                                              │资产
+  ──────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  Windows x64 / ARM64                               │FluxDown-Server-0.5.5-windows-{x64,arm64}.zip
+  ──────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  macOS Intel / Apple Silicon                       │FluxDown-Server-0.5.5-macos-{x64,arm64}.tar.gz
+  ──────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  Linux x64 / ARM64（musl 静态链接，任意发行版可用）│FluxDown-Server-0.5.5-linux-{x64,arm64}.tar.gz
+  ──────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  OpenWrt 软路由（x86_64 / aarch64 各子架构）       │fluxdown-server_0.5.5_<arch>.ipk +
+                                                    │luci-app-fluxdown_0.5.5_all.ipk
+  ──────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  QNAP NAS（QTS x86_64 / ARM64）                    │FluxDown-Server-0.5.5-qnap-{x64,arm64}.qpkg
+  ──────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  群晖 NAS（DSM 7 / DSM 6，x86_64 / ARM64）         │FluxDown-Server-0.5.5-synology-{dsm7,dsm6}-{x64,arm64}.spk
+  ──────────────────────────────────────────────────┴─────────────────────────────────────────────────────────────────
+  解压后运行 fluxdown-agent --server（Windows 为 fluxdown-agent.exe --server），浏览器访问 http://127.0.0.1:17800。
+  包内两个可执行文件必须放在同一目录：fluxdown-agent（含 Web 控制台，已编译进二进制）与 fluxdownd（下载 daemon，由 agent 自动拉起、退出时一并关停），无需附带任何静态资源目录。
+  首次启动请在浏览器里完成「初始化 FluxDown Server」向导设置访问密钥（无人值守部署可用 FLUXDOWN_TOKEN 预置）。
+  OpenWrt：opkg install fluxdown-server_*.ipk luci-app-fluxdown_*.ipk，LuCI「服务 → FluxDown」页管理，Web 界面在 http://路由器IP:17800。agent 二进制含完整 Web UI，另附 fluxdownd，需 overlay 空间充足的软路由设备。
+  QNAP：App Center → 手动安装 .qpkg（需在设置中允许安装未经验证的应用），装完点应用图标直达 Web 界面。
+  群晖：套件中心 → 手动安装 .spk（需在「设置 → 信任来源」允许任何发行者）。DSM 7.x 装 dsm7 包（以套件专属用户运行），DSM 6.x 装 dsm6 包；Intel/AMD 机型选 x64，ARM 机型（rtd1296/rtd1619b 等）选 arm64。装完在套件中心点「打开」直达 Web 界面（端口 17800）。
+  🐳 Headless 服务器：Docker（linux/amd64 · linux/arm64）
+  docker pull ghcr.io/zerx-lab/fluxdown-server:0.5.5
+  docker run -d -p 17800:17800 -v fluxdown-data:/data \
+    ghcr.io/zerx-lab/fluxdown-server:0.5.5
+  Compose 部署见仓库 docker/docker-compose.yml。首次打开 Web 界面时按向导设置访问密钥，或用 -e FLUXDOWN_TOKEN=... 预置。
+  📦 命令行 CLI
+  ──────────────────────────────────────────────────┬───────────────────────────────────────────
+  平台                                              │资产
+  ──────────────────────────────────────────────────┼───────────────────────────────────────────
+  Windows x64 / ARM64                               │FluxDown-CLI-0.5.5-windows-{x64,arm64}.zip
+  ──────────────────────────────────────────────────┼───────────────────────────────────────────
+  macOS Intel / Apple Silicon                       │FluxDown-CLI-0.5.5-macos-{x64,arm64}.tar.gz
+  ──────────────────────────────────────────────────┼───────────────────────────────────────────
+  Linux x64 / ARM64（musl 静态链接，任意发行版可用）│FluxDown-CLI-0.5.5-linux-{x64,arm64}.tar.gz
+  ──────────────────────────────────────────────────┴───────────────────────────────────────────
+  解压后得到 fluxdown（Windows 为 fluxdown.exe），放入 PATH 即可使用；也可从源码安装：
+  cargo install --git https://github.com/zerx-lab/FluxDown fluxdown_cli。
+  fluxdown ping                         # 探活（需 FluxDown App / server 运行中）
+  fluxdown add https://example.com/f.zip
+  fluxdown ls
+  服务地址经 --url 或 FLUXDOWN_URL（默认 http://127.0.0.1:17800），管理 token 经 --token 或 FLUXDOWN_TOKEN。
+  0.5.5 - 2026-10-09
+  🚀 新功能
+  - 新增「启用 BitTorrent」总开关：关闭后不再监听 BT 端口、不建立 peer 连接；此时新建或恢复 BT 任务会明确提示原因，排队中的 BT 任务会被暂停而不是报错失败。桌面、Web、Android、iOS 设置页均可设置，并随云同步
+  - 新增应用内更新：关于页与顶栏/菜单可查看更新状态，支持下载、安装与取消（桌面与 Web 控制台）
+  - 「文件已存在」处理新增「询问」选项：遇到同名文件时弹出冲突窗口让你逐个选择处理方式（桌面、Web、Android、iOS）
+  - 新增可切换的文件图标包，内置 Lucide / Material / Catppuccin 三套，可在外观设置中选择，并随云同步
+  - 下载列表的「宽松」密度视图将大小、进度、速度、剩余时间与元信息并入主列，桌面与 Web 显示一致
+  - 桌面活动栏改为显示账户头像（含会员徽标），点击进入账户设置；明暗主题切换仍可在命令面板中使用
+  - 桌面侧栏导航加入滑动高亮与颜色过渡动效，系统开启「减弱动态效果」时自动关闭
+  - Android 补全原生设置页与下载通知，新增 RSS 编辑面板，并支持接收系统分享、外部链接和 .torrent 文件创建下载
+  - Android / iOS 的下载列表现在会合并显示其他设备上的远程任务
+  - iOS 新建下载支持「下载到」当前主机、云端其他设备或局域网已配对设备
+  - Android / iOS 新增启动揭幕动画；iOS 下载列表加载占位行带有呼吸动画
+  - 移动端退出登录前增加确认弹窗，删除确认统一锚定在触发它的控件上
+  - 移动端本机设备名优先使用系统设备名
+  - 视频音视频合并 MP4 时，在不兼容的音轨上增加 AAC 回退，合并期间会显示进度
+  - fluxdown:// 深链支持 download/?url= 形式并可携带文件名
+  🐛 问题修复
+  - 修复部分站点下载失败：遇到 Cloudflare 等反机器人质询时自动换用中性 UA 重试，不再误判为「文件不存在」；对因 UA 或防盗链返回 403 的站点（如 NVIDIA 驱动下载）自动适配浏览器 UA 与来源 Referer
+  - 修复在 ImDisk 等虚拟磁盘卷上所有 HTTP 下载在写入前失败的问题
+  - 统一下载文件名推断：正确解码 Content-Disposition 与旧式编码，下载完成时按实际响应修正自动推断的文件名；探测遇到非 2xx 响应不再用 URL 片段占位命名；手动输入的链接允许包含空格
+  - 支持 Chrome Dev、Edge Dev、Edge Canary 的浏览器扩展通信路径，并修复未安装 Firefox 时诊断误报错误
+  - 修复 Edge 扩展包缺少 manifest.json 的问题
+  - ED2K 服务器订阅默认源改用 https，并自动迁移旧版默认的 http 地址（你手动填写的地址不受影响）
+  - 修复冷启动由扩展唤起新建下载时，保存目录与线程数等默认值未生效的问题
+  - 修复跨过零点后按日期分组的下载列表不自动刷新
+  - 修复跟随系统主题时，系统明暗切换后窗口主题不更新
+  - 修复设置加载失败后反复重试、切换语言后搜索框占位未更新的问题
+  - 修复主窗口系统标题显示不稳定的问题，固定为 FluxDown
+  - 修复 iOS 滑动删除任务可能导致崩溃，以及全局搜索出现时的界面跳动
+  - 修复 Docker 镜像构建因缺少补丁目录而失败
+  - 扩展页与 RSS 页不再因无关的下载进度事件频繁重绘，降低界面开销
+  - 桌面界面渲染核心升级为按需复用未变化视图的 gpui-fast，减少空闲时的重绘
+  0.5.5 - 2026-10-09
+  🚀 Features
+  - New "Enable BitTorrent" master switch: when off, FluxDown stops listening on BT ports and making peer connections. Creating or resuming a BT task then reports a clear reason, and queued BT tasks are paused instead of failing. Available in desktop, Web, Android and iOS settings, and synced via the cloud
+  - In-app updates: the About page and the top bar/menu show update status, with download, install and cancel support (desktop and Web console)
+  - New "Ask" option for the "file already exists" behavior: a conflict window lets you choose how to handle each duplicate (desktop, Web, Android, iOS)
+  - Switchable file icon packs, with Lucide / Material / Catppuccin built in; choose one in Appearance settings, synced via the cloud
+  - The relaxed-density download list now merges size, progress, speed, remaining time and metadata into the main column, consistent between desktop and Web
+  - The desktop activity bar now shows your account avatar (with membership badge) and opens account settings on click; the light/dark toggle remains in the command palette
+  - Desktop sidebar navigation gains a sliding highlight and color transitions, disabled automatically when the system "reduce motion" setting is on
+  - Android gets complete native settings pages and download notifications, a new RSS editor, and can create downloads from shared text, external links and .torrent files
+  - Android / iOS download lists now also show remote tasks from your other devices
+  - iOS new-download sheet supports "Download to" the current host, other cloud devices, or paired LAN devices
+  - Android / iOS add a launch reveal animation; the iOS download list shows breathing placeholder rows while loading
+  - Mobile apps now ask for confirmation before logging out, and delete confirmations are anchored to the control that triggered them
+  - The local device name on mobile now prefers the system device name
+  - Added an AAC fallback when muxing separate video/audio tracks into MP4, with progress shown during muxing
+  - fluxdown:// deep links support the download/?url= form and can carry a filename
+  🐛 Bug Fixes
+  - Fixed downloads failing on some sites: anti-bot challenges such as Cloudflare now trigger a retry with a neutral UA instead of being treated as "file not found", and sites that return 403 for UA or hotlink reasons (e.g. NVIDIA driver downloads) are handled by adapting the browser UA and same-origin Referer
+  - Fixed all HTTP downloads failing before writing on ImDisk and similar virtual volumes
+  - Unified filename inference: Content-Disposition and legacy encodings are decoded correctly, auto-inferred names are refined from the actual response on completion, non-2xx probe responses no longer produce URL-segment placeholder names, and manually entered links may contain spaces
+  - Added native messaging paths for Chrome Dev, Edge Dev and Edge Canary, and fixed a false error in diagnostics when Firefox is not installed
+  - Fixed the Edge extension package missing manifest.json
+  - The default ED2K server subscription source now uses https, and the old http default is migrated automatically (addresses you entered yourself are left untouched)
+  - Fixed defaults such as save directory and thread count not applying when the new-download form is opened by the extension on a cold start
+  - Fixed the date-grouped download list not refreshing after crossing local midnight
+  - Fixed windows not updating when the system light/dark theme changes while following the system theme
+  - Fixed settings loads retrying repeatedly after a failure, and the search box placeholder not updating after a language change
+  - Fixed the main window's system title being inconsistent; it is now always FluxDown
+  - Fixed a possible crash when swiping to delete a task on iOS, and layout jumping when opening global search
+  - Fixed Docker image builds failing due to a missing patch directory
+  - The Extensions and RSS pages no longer redraw on unrelated download progress events, reducing UI overhead
+  - The desktop UI now runs on gpui-fast, which reuses unchanged views to cut idle redraws
+ReleaseNotesUrl: https://github.com/zerx-lab/FluxDown/releases/tag/v0.5.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

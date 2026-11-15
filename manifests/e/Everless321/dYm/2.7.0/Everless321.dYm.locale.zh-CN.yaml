@@ -1,0 +1,48 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Everless321.dYm
+PackageVersion: 2.7.0
+PackageLocale: zh-CN
+Publisher: example.com
+PublisherUrl: https://github.com/Everless321
+PublisherSupportUrl: https://github.com/Everless321/dYm/issues
+PackageName: dYm
+PackageUrl: https://github.com/Everless321/dYm
+License: 免费软件
+Copyright: Copyright © 2026 example.com
+ShortDescription: 抖音视频下载与智能分析管理工具
+Tags:
+- 下载
+- 抖音
+- 视频
+- 解析
+ReleaseNotes: |-
+  1. 宽屏下视频浏览/用户管理等页面右侧大片空白
+     容器的 max-w-6xl（1152px）上限是空白来源，媒体网格改为 xl 以上
+     auto-fill 自适应列数（卡片最窄 220px），1280 及以下保持原有断点不变。
+     1920/2560/3440 实测零空白。
+  2. 标签管理「总视频数」下左右键只能在同作者内跳转
+     无筛选时 query 为空串，详情页分不清「没有筛选」和「不是从列表进来的」，
+     于是退化成同作者队列。工作台跳转时补 from=list 标记，返回时剥离
+     （列表位置缓存以 query 为 key，标记不能漏回去）。
+     顺带去掉队列 2000 条上限、改为只取 id（整行含长文本，全库上万条时
+     每次进详情页要几 MB 走 IPC），并修掉换作者会重查整个队列的问题。
+  3. 播放时方向键行为不一致、长按会狂跳作品
+     xgplayer 的按键节流在重复事件里提前 return，未 stopPropagation，
+     长按 1 秒 33 次重复中有 28 次漏给页面监听器，每次都触发一次切换。
+     改为分层：↑/↓ 恒为切换作品，←/→ 归当前内容（图集翻页/视频快进），
+     与网页版播放器已有的约定一致。同时修复图集翻页快捷键——它挂在从未
+     获得焦点的 div 的 React onKeyDown 上，此前一直是死代码。
+  4. 搜索不到视频标签
+     关键词此前只匹配标题/描述/作者，搜「音乐」命中的是描述里自带的
+     #音乐。改为同时匹配 AI 标签与手动标签，桌面端两处搜索与网页版
+     /api/feed 共用的两处 SQL 全覆盖。
+  5. 筛选栏折叠状态返回后丢失，且顺序不可调
+     折叠状态原本是组件内 state，页面进详情页时卸载即丢失。改为存本地，
+     并支持上移/下移调整分组顺序（悬停显示）。
+  Closes #16
+  Full Changelog: https://github.com/Everless321/dYm/compare/v2.6.0...v2.7.0
+ReleaseNotesUrl: https://github.com/Everless321/dYm/releases/tag/v2.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

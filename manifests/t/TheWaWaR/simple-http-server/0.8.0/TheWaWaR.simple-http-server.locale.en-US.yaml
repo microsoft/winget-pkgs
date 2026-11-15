@@ -1,0 +1,61 @@
+# Created with komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: TheWaWaR.simple-http-server
+PackageVersion: 0.8.0
+PackageLocale: en-US
+Publisher: TheWaWaR
+PublisherUrl: https://github.com/TheWaWaR
+PublisherSupportUrl: https://github.com/TheWaWaR
+Author: TheWaWaR
+PackageName: simple-http-server
+PackageUrl: https://github.com/TheWaWaR/simple-http-server
+License: MIT
+LicenseUrl: https://github.com/TheWaWaR/simple-http-server/blob/HEAD/LICENSE
+ShortDescription: Simple HTTP(s) Server
+Description: Command line utility to serve directories and files, very extensible
+Moniker: simple-http-server
+Tags:
+- file
+- http
+- rust
+- server
+- simplehttpserver
+- static
+ReleaseNotes: |-
+  • Compared to the previous Iron-based version, this release changes the server in these ways:
+  Core
+  - Replaced the old iron stack with an axum + tokio implementation.
+  - Kept the CLI mostly compatible, but moved the codebase to a modern async HTTP stack.
+  - Reorganized the implementation into separate modules for config, server setup, handlers, and utilities.
+  TLS
+  - TLS support is now behind a single tls feature and is disabled by default.
+  - --cert and --certpass still accept PKCS#12 files, but they only work when the binary is built with --features tls.
+  - On Linux and macOS, TLS uses system OpenSSL.
+  - On Windows, TLS uses vendored OpenSSL to avoid CI and toolchain issues.
+  User-visible behavior changes
+  - --upload-size-limit now supports human-readable values such as 30K, 50M, and 1G.
+  - Size suffixes are interpreted in powers of 1024.
+  - Upload limit errors are clearer: oversized uploads now return a readable 413 message instead of low-level stream errors.
+  - Invalid multipart requests now return proper client errors instead of collapsing into 500 responses.
+  - Internal 500 errors are now printed to stderr for easier debugging.
+  - --open now uses https:// automatically when TLS is enabled.
+  - --base-url is normalized consistently.
+  - --try-file behavior is explicit: relative paths resolve against the server root, absolute paths are used as-is.
+  - CORS preflight OPTIONS requests are handled directly.
+  - Error pages escape injected text.
+  Performance and resource usage
+  - File responses are streamed instead of being buffered in full.
+  - Compressed responses are streamed.
+  - Uploads are streamed to temporary files instead of being fully buffered in memory.
+  - Temporary upload files are cleaned up on multipart failures, including size-limit failures.
+  Behavioral compatibility notes
+  - Most existing flags and main server behavior remain aligned with the old version.
+  - Colored request logging from the old implementation was removed.
+  - Some historical edge-case behavior from the Iron middleware chain, especially around HEAD + compression, was intentionally cleaned up rather than preserved exactly.
+  Quality
+  - Added black-box HTTP tests for directory listing, try-file, basic auth, range requests, cache revalidation, CORS preflight, uploads, and gzip compression.
+  - The new implementation passes tests and clippy in both default and tls builds.****
+ReleaseNotesUrl: https://github.com/TheWaWaR/simple-http-server/releases/tag/v0.8.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

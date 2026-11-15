@@ -1,0 +1,122 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.5.12
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.5.12
+
+  Patch Changes
+  - #11440 b88f1ea Thanks @Princesseuh! - Fixed Astro attribute expressions rejecting TypeScript and JSX syntax that is accepted in text expressions.
+    <Component icon={<Icon />} count={total as number} onSelect={(e: Event) => e} />
+  - #11440 b88f1ea Thanks @Princesseuh! - Fixed Astro attribute names being split on : and . inside an expression, such as {x && <button x-on:keyup.enter={go} client:load.foo />}.
+  - #11440 b88f1ea Thanks @Princesseuh! - Fixed a bare > in the children of an Astro expression being treated as markup, such as {x && <div>a > b</div>}.
+  - #11440 b88f1ea Thanks @Princesseuh! - Fixed HTML comments inside an Astro expression failing to parse. They are now read as trivia, wherever they appear among the children.
+    {x && <div><!-- first -->text<!-- last --></div>}
+    {cond && <a></a><!-- c --><b></b>}
+  - #11440 b88f1ea Thanks @Princesseuh! - Fixed is:raw children inside an Astro expression being read as JSX, such as {x && <div is:raw>{not js} < & text</div>}.
+  - #11440 b88f1ea Thanks @Princesseuh! - Fixed an apostrophe or quote in the text of a JSX element inside an Astro expression ending the expression early, such as {items.map((i) => <li>it's {i}</li>)}.
+  - #11440 b88f1ea Thanks @Princesseuh! - Fixed the children of a <script> or <style> inside an Astro expression being read as JSX. Their contents are text, so braces and comparisons no longer have to be escaped.
+    {cond && <style>a { color: red }</style>}
+    {cond && <script>let x = {a: 1};</script>}
+  - #11440 b88f1ea Thanks @Princesseuh! - Added support for template literal attribute values inside an Astro expression, such as {x && <C data-x=`t${x}` />}.
+  - #11440 b88f1ea Thanks @Princesseuh! - Fixed unquoted attribute values being rejected inside an Astro expression, such as {x && <a class=foo maxlength=255 href=/about>go</a>}.
+  - #11440 b88f1ea Thanks @Princesseuh! - Fixed a template literal nested inside ${} breaking the rest of an Astro file, such as const href = `/blog${page === 0 ? '' : `/${page + 1}`}`;.
+  - #11440 b88f1ea Thanks @Princesseuh! - Fixed a quote inside a regex character class breaking the rest of an Astro file, such as const unsafe = /[/"]/;.
+  - #11508 54f3a2e Thanks @dyc3! - Added the nursery rule useFlatMathMinMax. Because Math.min() and Math.max() accept any number of arguments, the rule reports unnecessary nested calls to the same method:
+    Math.max(Math.max(a, b), c);
+    The fix flattens this expression to Math.max(a, b, c).
+  - #11585 c5c8315 Thanks @Netail! - Fixed #11475: noUnresolvedImports no longer reports Bun runtime built-in modules (bun, bun:bundle, bun:ffi, bun:jsc, bun:sqlite, bun:test).
+  - #11368 52a57b3 Thanks @Austin1serb! - Fixed #6830: Biome now reports a diagnostic for excessively deep syntax instead of overflowing the native stack while releasing the parsed tree.
+  - #11596 1fc42ed Thanks @dyc3! - Added the nursery rule noThisOutsideOfClass. The rule reports this outside class members and TypeScript functions with an explicit this parameter.
+    function Person(name) {
+        this.name = name;
+    }
+  - #11555 2516335 Thanks @dyc3! - Fixed #11529, where noFloatingPromises missed unhandled Promise chains when the imported function's module belonged to an import cycle. Cyclic modules now preserve types for exports that do not participate in recursive type dependencies.
+  - #11518 0fee70c Thanks @HarperZ9! - Fixed #11500: the formatter now prints the declare modifier before accessibility modifiers on class properties. private declare readonly name: string is now formatted as declare private readonly name: string, matching Prettier and TypeScript's canonical modifier order.
+  - #11580 1277af2 Thanks @ematipico! - Fixed #5091: Biome no longer moves comments next to the < of a generic, which causes invalid TypeScript syntax:
+    - Generic<// a comment
+    + Generic<
+    +   // a comment
+  - #11577 42995d2 Thanks @ematipico! - Fixed #4592. Biome no longer crashes while parsing malformed delete expressions.
+  - #11590 67963b4 Thanks @ematipico! - Fixed #6427 so Grit plugins can use function = ... as a node argument.
+  - #11600 a689cb5 Thanks @ematipico! - Fixed #6644: noUnusedVariables now recognizes all interface declarations in a TypeScript declaration-merging group when the interface is referenced.
+    The following snippet no longer triggers the rule.
+    interface Things {
+        foo: string;
+    }
+    interface Things {
+        bar: string;
+    }
+    export type Key = keyof Things;
+    interface Things {
+        baz: string;
+    }
+  - #11591 d4a0716 Thanks @ematipico! - Fixed #6615. noDuplicateProperties no longer reports declarations nested in block at-rules as duplicates of declarations in their parent block.
+  - #11492 f2a07aa Thanks @santichausis! - Fixed #11454: noMisplacedAssertion now recognises @fast-check/vitest's test.prop(...) (and .concurrent.prop, .skip.prop, etc.) as a test function, the same way it already recognises test.each. The JS formatter picks up the same recognition, so a curried test.prop(...)(...) call is now formatted with the regular breakable argument layout used for test.each/test.for, instead of the single-line-hugging layout used for plain it/test calls.
+    For example, Biome no longer reports the assertion below as misplaced:
+    import { fc, test } from "@fast-check/vitest";
+    test.prop([fc.string()])("round-trips", (s) => {
+      expect(s).toBe(s);
+    });
+  - #11589 65742b3 Thanks @ematipico! - Fixed #4928: noUnusedVariables no longer reports a value declaration as unused when its merged namespace is referenced.
+  - #11559 472dbc2 Thanks @levrik! - Fixed a false positive in noVueDuplicateKeys where a <script setup> variable initialized from props was reported as a duplicate of the prop it derives from. Biome now exempts any variable whose initializer references props, instead of only recognizing defineProps() and toRefs(props).
+    For example, Biome no longer reports foo below as a duplicate key:
+    <script setup>
+    import { toRef } from 'vue';
+    const props = defineProps(['foo']);
+    const foo = toRef(props, 'foo');
+    </script>
+  - #11571 85b197d Thanks @ematipico! - Fixed #10838: useSortedAttributes no longer corrupts JSX attributes when nested JSX elements also require sorting.
+  - #11533 97e76c0 Thanks @ematipico! - Fixed #11520, where the Biome scanner would start analysing dependencies multiple times, leading to long and unresponsive sessions.
+  - #11564 18a0e1f Thanks @Netail! - Fixed the diagnostic range of noInferrableTypes so it now highlights only the type instead of including the leading : colon, spaces and comments.
+  - #11540 124fdaa Thanks @ematipico! - Fixed #11537: noShorthandPropertyOverrides now compares declarations only within the same block. The rule no longer reports @supports feature queries and correctly checks nested, @keyframes, and @page blocks.
+  - #11532 7ceb0ee Thanks @dyc3! - Fixed #11528: noFloatingPromises no longer reports statement-level await expressions that handle Promise values, including overloaded calls returning Promise aliases. Awaited values that resolve to arrays of Promises remain reported because their element Promises are not handled by await.
+  - #11474 3c6412e Thanks @dyc3! - Fixed #10241. Biome no longer reports unsupported text expression diagnostics for double-curly text in vanilla HTML, and the formatter preserves adjacent curly-brace text.
+  - #11593 6c7fd27 Thanks @dyc3! - Added the nursery rule noVueDeprecatedScopedSlots. It reports deprecated $scopedSlots references in Vue templates and component objects, and offers an unsafe replacement with $slots. For example, Biome now reports this.$scopedSlots.default inside a Vue component.
+  - #11440 b88f1ea Thanks @Princesseuh! - Fixed the formatter crashing on an Astro or Svelte expression spanning several lines in a file with CRLF line endings, such as <p>{a +
+   b}</p>.
+  - #11581 f4e5ebb Thanks @dyc3! - Added the nursery rule useModernMathApis. The rule reports legacy mathematical patterns that have direct modern Math equivalents.
+    Math.sqrt(a * a + b * b);
+  - #11597 a20f44a Thanks @Netail! - Added the nursery rule noBunModules, which forbids the use of Bun builtin modules (e.g. bun:sqlite, bun:ffi).
+  - #11545 7d54688 Thanks @dyc3! - Fixed #11542: Biome now reports HTML comments between Svelte tag attributes as parse errors.
+  - #11582 b6611dd Thanks @ematipico! - Fixed #3862. Biome now parses legacy Internet Explorer filter and -ms-filter values such as progid:DXImageTransform... and alpha(opacity=40).
+  - #11575 65da251 Thanks @dyc3! - Improved the Tailwind parser's ability to recover from parsing failures. Whitespace now always allows the parser to recover and start parsing a new class.
+  - #11576 0f78499 Thanks @ematipico! - Fixed #3515 and #10395, where Biome could corrupt Unicode characters while writing source received through standard input to standard output. Characters such as ⚠ and ✔ are now preserved.
+  - #11539 0fca643 Thanks @ematipico! - Fixed #11512, where style/noDescendingSpecificity missed lower-specificity selectors after a later higher-specificity selector with the same tail selector.
+  - #11544 040f867 Thanks @dyc3! - Fixed #11541: formatting a Svelte render tag followed by an HTML comment no longer duplicates the comment.
+     <div>
+       {@render children?.()}
+       <!-- comment -->
+    -  <!-- comment -->
+     </div>
+  - #11565 ee69e0e Thanks @ematipico! - Fixed #11525. Now the configuration schema correctly provides auto-completion for linter domains.
+  - #11583 b19390c Thanks @dyc3! - Fixed #11352: useExplicitLengthCheck no longer reports length-like properties used as value-producing || fallbacks or optional chains, and it no longer offers fixes for value-producing && checks or unsafe negations.
+  - #11562 753e955 Thanks @ematipico! - Fixed an issue where the Biome Language Server would start with logging level set to debug. This would cause logs to grow exponentially in long sessions.
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.5.12
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

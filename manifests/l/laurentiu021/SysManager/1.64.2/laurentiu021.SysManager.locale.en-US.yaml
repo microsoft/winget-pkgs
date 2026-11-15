@@ -1,0 +1,71 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.64.2
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.64.2] - 2026-08-12
+  Two ways the built-in updater could be tricked into damaging your PC are now closed off. Nothing about
+  normal updating changes.
+  Security
+  - SysManager could be told to overwrite the wrong file. When SysManager installs an update, it starts the newly downloaded copy with a hidden instruction naming the file to replace. That instruction was only checked for the right shape, not for what it actually pointed at — so anyone who could start SysManager with a crafted command line (a shortcut, a scheduled task, a script someone talked you into running) could name any file on your PC and have SysManager write over it. If you were running SysManager as administrator at the time, that meant almost any file, including ones Windows needs. SysManager now refuses unless the file it is told to replace really is an existing copy of SysManager itself, outside protected system folders, and writes a note in its log saying why it refused. Normal updates are unaffected; they always pointed at the right file.
+  - "Go back to the previous version" now checks the saved copy before starting it. SysManager keeps one copy of your previous version so you can go back after a bad update, and that copy sits in your own user folder where other programs can also write. Starting it was previously based only on the file being there — so anything running on your PC could have swapped that copy for something else and had SysManager launch it, with administrator rights if SysManager was elevated. SysManager now records a checksum when it saves the copy and verifies it right before starting it, keeping the file locked in between so it cannot be swapped in the meantime. If the copy has changed, or was saved by a version before this one and has no checksum, the button is not offered and you are told why instead of it happening silently. Installing an update already worked this way; going back now does too.
+  Verify the download
+  Get-FileHash .\SysManager-v1.64.2.exe -Algorithm SHA256
+  Expected SHA256: ACC1D3ECC419E86577CB9711A0042A0678B24198F865876BBA0F134E8F290874
+  This build is not code-signed, so Windows will warn on first launch. That is
+  expected for a small independent app: see what the warning says and what to
+  click.
+  Code signing is planned through the SignPath Foundation,
+  which provides free certificates to open-source projects, with signing performed by
+  SignPath.io. Until then, the SHA256 above and the build
+  attestation below are what establish that a download is the genuine build.
+  Code signing policy
+  Free code signing provided by SignPath.io, certificate by
+  SignPath Foundation. Team roles, the release-approval process
+  and the privacy policy are documented under Code signing
+  policy.
+  This program will not transfer any information to other networked systems unless
+  specifically requested by the user or the person installing or operating it. Full
+  privacy policy.
+  Verify where this binary came from
+  This exe was built by GitHub Actions from this public source, and the build is
+  recorded in the Sigstore public transparency log. With the
+  GitHub CLI:
+  gh attestation verify .\SysManager-v1.64.2.exe --repo laurentiu021/SystemManager
+  That proves which commit and workflow produced this exact binary, something the
+  SHA256 file cannot show, since it is published alongside the exe it describes.
+  Each release also ships SysManager-v1.64.2.sbom.json, a CycloneDX inventory of
+  every dependency resolved for this build.
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.64.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

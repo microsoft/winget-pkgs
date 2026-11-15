@@ -1,0 +1,44 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Mockzilla.Mockzilla
+PackageVersion: 2.8.1
+PackageLocale: en-US
+Publisher: Mockzilla
+PublisherUrl: https://github.com/mockzilla
+PublisherSupportUrl: https://github.com/mockzilla/mockzilla/issues
+PackageName: Mockzilla
+PackageUrl: https://github.com/mockzilla/mockzilla
+License: MIT
+LicenseUrl: https://github.com/mockzilla/mockzilla/blob/HEAD/LICENSE
+ShortDescription: Generate API mocks with meaningful responses, configurable latency, error codes and more
+Description: Mockzilla is an OpenAPI mock engine that generates API mocks with meaningful responses, configurable latency, error codes and more.
+Moniker: mockzilla
+Tags:
+- api
+- mock
+- mocking
+- openapi
+- testing
+ReleaseNotes: |-
+  What's Changed
+  Take response values from the incoming request by @jbn2336mz in #56
+  Context values can be pulled out of the request being answered, using a dotted path into its payload:
+  charge:
+    currency: "request:order.payment.amount.currency"
+    amount: "request:order.payment.amount.value"
+  Post an order with EUR and 10.5 and the mock answers with EUR and 10.5 instead of random data. Array elements are addressed by index: request:order.amounts[0].currency.
+  - Works wherever contexts work: service context.yml, the X-Mockzilla-Context header, the UI context editor, and inside area blocks such as in-response.
+  - JSON and form-encoded requests are both read; the Content-Type header decides. Form bodies keep their nesting, so order[payment][currency]=EUR is reached with request:order.payment.currency.
+  - A path that matches nothing falls back to generated data, and the value has to fit the schema of the field it fills.
+  Fix response header generation by @jbn2336mz in #57
+  An in-response-header block used to be ignored, so headers meant to carry a fixed request id or trace id came back as random words. Those blocks now take effect, and in-response applies to response headers too.
+  Headers declared readOnly in the spec were dropped and sent as the literal text <nil>; they now appear with their value. Headers declared writeOnly were sent as <nil> as well; they are now omitted.
+  The documented area priority never matched the actual behavior, for requests as well as responses. The real chain is:
+  in-request-header > in-request > in-header > root
+  in-response-header > in-response > in-header > root
+  A header falls back to its direction (in-request / in-response) before the direction-agnostic in-header.
+  Full Changelog: v2.8.0...v2.8.1
+ReleaseNotesUrl: https://github.com/mockzilla/mockzilla/releases/tag/v2.8.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

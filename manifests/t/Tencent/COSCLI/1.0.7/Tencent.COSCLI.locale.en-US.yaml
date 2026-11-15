@@ -1,0 +1,257 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Tencent.COSCLI
+PackageVersion: 1.0.7
+PackageLocale: en-US
+Publisher: Tencent Cloud
+PublisherUrl: https://www.tencentcloud.com/
+PublisherSupportUrl: https://github.com/tencentyun/coscli/issues
+PrivacyUrl: https://www.tencentcloud.com/document/product/301/17345
+Author: Tencent Cloud Computing(Beijing) Company Limited
+PackageName: COSCLI
+PackageUrl: https://www.tencentcloud.com/document/product/436/43249
+License: Apache-2.0
+LicenseUrl: https://github.com/tencentyun/coscli/blob/master/LICENSE
+Copyright: Copyright © 2013-2024 Tencent Cloud. All Rights Reserved.
+CopyrightUrl: https://www.tencent.com/en-us/statement.html
+ShortDescription: COS provides the command-line client COSCLI to allow you to upload, download, delete, and perform other operations on COS objects by using simple commands.
+Tags:
+- cos
+- tencent-cloud
+ReleaseNotes: |-
+  一、新增命令
+  1. object-tagging 命令
+  功能：管理对象标签
+  ​​参数​​：
+  -  --method
+    ：操作类型（必选）
+    - put：设置对象标签
+    - add：添加对象标签
+    - get：获取对象标签
+    - delete：删除对象标签
+  -  --version-id：操作对象的特定版本
+  示例：
+  # 设置对象标签
+  ./coscli object-tagging --method put cos://examplebucket/exampleobject tag1#test1 tag2#test2
+
+  # 添加对象标签
+  ./coscli object-tagging --method add cos://examplebucket/exampleobject tag3#test3
+
+  # 获取对象标签
+  ./coscli object-tagging --method get cos://examplebucket/exampleobject
+
+  # 删除所有对象标签
+  ./coscli object-tagging --method delete cos://examplebucket/exampleobject
+
+  # 删除指定对象标签
+  ./coscli object-tagging --method delete cos://examplebucket/exampleobject tag1#test1 tag2#test2
+
+  2. object-acl 命令
+  功能：管理对象 ACL
+  ​​参数​​：
+  -  --method
+    ：操作类型（必选）
+    - put：设置对象 ACL
+    - get：获取对象 ACL
+  -  --version-id：对象版本号
+  -  --acl：预设 ACL（如 default, private, public-read）
+  -  --grant-read：赋予读取权限
+  -  --grant-read-acp：赋予读取 ACL 权限
+  -  --grant-write-acp：赋予写入 ACL 权限
+  -  --grant-full-control：赋予完全控制权限
+  示例：
+  # 设置对象 ACL
+  ./coscli object-acl --method put cos://examplebucket/exampleobject --grant-read="id=\"100000000013\",id=\"100000000012\""
+
+  # 获取对象 ACL
+  ./coscli object-acl --method get cos://examplebucket/exampleobject
+
+  3. bucket-acl 命令
+  功能：管理存储桶 ACL
+  ​​参数​​：
+  -  --method
+    ：操作类型（必选）
+    - put：设置存储桶 ACL
+    - get：获取存储桶 ACL
+  -  --acl：预设 ACL（如 private, public-read）
+  -  --grant-read：赋予读取权限
+  -  --grant-write：赋予写入权限
+  -  --grant-read-acp：赋予读取 ACL 权限
+  -  --grant-write-acp：赋予写入 ACL 权限
+  -  --grant-full-control：赋予完全控制权限
+  示例：
+  # 设置存储桶 ACL
+  ./coscli bucket-acl --method put cos://examplebucket --grant-read="id=\"100000000013\",id=\"100000000012\""
+
+  # 获取存储桶 ACL
+  ./coscli bucket-acl --method get cos://examplebucket
+
+  4. bucket-policy 命令
+  功能：管理存储桶策略
+  ​​参数​​：
+  -  --method
+    ：操作类型（必选）
+    - put：设置存储桶策略
+    - get：获取存储桶策略
+    - delete：删除存储桶策略
+  -  --policy：存储桶策略（JSON 格式或直接指定文件路径，如/data/policy.txt 需要指定为 file:///data/policy.txt）
+  示例：
+  # 设置存储桶策略
+  ./coscli bucket-policy --method put cos://examplebucket --policy="{\"Statement\":[...]}"
+
+  # 获取存储桶策略
+  ./coscli bucket-policy --method get cos://examplebucket
+
+  # 删除存储桶策略
+  ./coscli bucket-policy --method delete cos://examplebucket
+
+  5. bucket-encryption 命令
+  功能：管理存储桶加密策略
+  ​​参数​​：
+  -  --method
+    ：操作类型（必选）
+    - put：设置加密策略
+    - get：获取加密策略
+    - delete：删除加密策略
+  -  --sse-algorithm：加密算法（AES256, SM4, KMS）
+  -  --kms-master-key-id：KMS 主密钥 ID
+  -  --kms-algorithm：KMS 加密算法（AES256, SM4）(目前 gosdk 暂不支持这个参数，先跳过)
+  示例：
+  # 设置存储桶加密
+  ./coscli bucket-encryption --method put cos://examplebucket --sse-algorithm AES256
+
+  # 获取存储桶加密策略
+  ./coscli bucket-encryption --method get cos://examplebucket
+
+  # 删除存储桶加密策略
+  ./coscli bucket-encryption --method delete cos://examplebucket
+
+  6. inventory 命令
+  功能：管理存储桶清单
+  ​​参数​​：
+  -  --method
+    ：操作类型（必选）
+    - put：设置存储桶清单
+    - get：获取存储桶清单
+    - delete：删除存储桶清单
+    - list：列出所有存储桶清单
+    - post：发起一次性清单
+  -  --task-id：清单任务 ID
+  -  --configuration：清单配置（JSON 格式、XML 格式或直接指定文件路径，如/data/configuration.txt 需要指定为 file:///data/configuration.txt）
+  示例：
+  # 设置存储桶清单
+  ./coscli inventory --method put cos://test6 --task-id list4 --configuration "<InventoryConfiguration>...</InventoryConfiguration>"
+
+  # 获取存储桶清单
+  ./coscli inventory --method get cos://test6 --task-id list4
+
+  # 删除存储桶清单
+  ./coscli inventory --method delete cos://test6 --task-id list4
+
+  # 列出所有存储桶清单
+  ./coscli inventory --method list cos://test6
+
+  # 发起一次性清单
+  ./coscli inventory --method post cos://test6 --task-id list4 --configuration "<InventoryConfiguration>...</InventoryConfiguration>"
+
+  二、修改命令
+  1. 通用参数
+  新增参数：
+  -  --disable-log：禁用 coscli.log 日志记录（默认 false）
+  -  --bucket-type：指定桶类型（COS/OFS）
+
+  2. cp 命令
+  新增参数：
+  -  --process-log：记录传输日志（默认 true）
+  -  --process-log-path：指定传输日志路径(默认在执行当前路径下 coscli_output 下)
+  -  --skip-dir：跳过文件夹上传（等 sdk 修复）
+  -  --acl：对象 ACL 属性
+  -  --grant-read：赋予读取权限
+  -  --grant-read-acp：赋予读取 ACL 权限
+  -  --grant-write-acp：赋予写入 ACL 权限
+  -  --grant-full-control：赋予完全控制权限
+  -  --tags：对象标签集合，最多可设置 10 个标签（例如，--tags="Key1=Value1&Key2=Value2"）
+  -  --forbid-overwrite：禁止覆盖同名对象
+  -  --encryption-type：服务端加密方式（SSE-COS/SSE-C）
+  -  --server-side-encryption：SSE-COS 加密算法
+  -  --sse-customer-algo：SSE-C 加密算法
+  -  --sse-customer-key：用户自定义密钥
+  -  --sse-customer-key-md5：密钥 MD5 值
+  -  --check-point：是否开启断点续传，默认 ture，开启断点续传
+  修改参数：
+  -  --disable-checksum：默认值改为 true（只校验分块 CRC64）
+
+  3. sync 命令
+  新增参数：
+  -  --process-log：记录传输日志（默认 true）
+  -  --process-log-path：指定传输日志路径
+  -  --skip-dir：跳过文件夹上传
+  -  --update：仅更新修改时间较新的文件
+  -  --ignore-existing：仅上传不存在的文件
+  -  --acl：对象 ACL 属性
+  -  --grant-read：赋予读取权限
+  -  --grant-read-acp：赋予读取 ACL 权限
+  -  --grant-write-acp：赋予写入 ACL 权限
+  -  --grant-full-control：赋予完全控制权限
+  -  --tags：对象标签集合，最多可设置 10 个标签（例如，--tags="Key1=Value1&Key2=Value2"）
+  -  --forbid-overwrite：禁止覆盖同名对象
+  -  --encryption-type：服务端加密方式
+  -  --server-side-encryption：SSE-COS 加密算法
+  -  --sse-customer-algo：SSE-C 加密算法
+  -  --sse-customer-key：用户自定义密钥
+  -  --sse-customer-key-md5：密钥 MD5 值
+  -  --check-point：是否开启断点续传，默认 ture，开启断点续传
+  修改参数：
+  -  --disable-checksum：默认值改为 true
+  -  --delete：优化镜像同步流程
+    之前的逻辑：
+    ​ 1.先拉取源端和目地端文件列表，对比出需要删除的文件
+    ​ 2.重新拉取源端列表，边拉边传输
+    ​ 3.传输完成后删除多余文件
+    修改之后的逻辑：
+    ​ 1.先拉取源端和目地端文件列表，根据用户所选参数对比出要删除的文件和要传输的文件（如--update 或 --ignore-existing）
+    ​ 2.根据筛选出的要传输的文件，直接进行传输（不再重新拉取源端列表）
+    ​ 3.传输完成后删除多余文件
+
+  4. config set 命令
+  新增参数：
+  -  --disable_auto_fetch_bucket_type：禁用自动获取桶类型
+    可选值 true | false
+  ​ 若不设置或值为 false，则会自动获取桶类型（需要 cos:HeadBucket 权限）。
+  ​ 若设置为 true，则不自动获取桶类型，会使用用户配置文件中的桶类型（Bucket.Ofs 为 true，则桶类型设置为 ofs，若为 false，则设置为 cos）
+
+  5. bucket-tagging 命令
+  新增参数：
+  -  --method add：添加桶标签
+  示例：
+  # 设置桶标签
+  ./coscli bucket-tagging --method put cos://examplebucket tag1#test1 tag2#test2
+
+  # 添加桶标签
+  ./coscli bucket-tagging --method add cos://examplebucket tag3#test3
+
+  # 获取桶标签
+  ./coscli bucket-tagging --method get cos://examplebucket
+
+  # 删除所有桶标签
+  ./coscli bucket-tagging --method delete cos://examplebucket
+
+  # 删除指定桶标签
+  ./coscli bucket-tagging --method delete cos://examplebucket tag1#test1 tag2#test2
+
+  6. mb 命令
+  新增参数：
+  -  --acl：存储桶 ACL 属性
+  -  --grant-read：赋予读取权限
+  -  --grant-write：赋予写入权限
+  -  --grant-read-acp：赋予读取 ACL 权限
+  -  --grant-write-acp：赋予写入 ACL 权限
+  -  --grant-full-control：赋予完全控制权限
+  -  --tags：存储桶标签集合，最多可设置 10 个标签（例如，--tags="Key1=Value1&Key2=Value2"）
+ReleaseNotesUrl: https://github.com/tencentyun/coscli/releases/tag/v1.0.7
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://www.tencentcloud.com/document/product/436/43264
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

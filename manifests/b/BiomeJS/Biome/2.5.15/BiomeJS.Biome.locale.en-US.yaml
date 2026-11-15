@@ -1,0 +1,126 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.5.15
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.5.15
+
+  Patch Changes
+  - #10634 b436ba0 Thanks @subaru-hello! - Added the new nursery rule noReactObjectTypeAsDefaultProp, which disallows array, object, and function values as default props in React components.
+    For example, the following snippet triggers the rule.
+    function Component({ items = [] }) {
+      return items;
+    }
+  - #11956 faa8b37 Thanks @dyc3! - Added the nursery rule noSvelteExportLet, which disallows declaring Svelte component props with the legacy export let syntax. Use the $props() rune instead.
+    <script>
+      export let name;
+    </script>
+  - #10816 1b9479e Thanks @Th3S4mur41! - Added a new nursery rule useLogicalProperties that enforces the use of logical properties in CSS, promoting better internationalization and accessibility practices. The rule supports a direction option with "ltr" as the default and "rtl" as the alternative.
+    This is a first rule covering parts of #9034
+    {
+      "linter": {
+        "rules": {
+          "nursery": {
+            "useLogicalProperties": {
+              "level": "warn",
+              "options": {
+                "direction": "rtl"
+              }
+            }
+          }
+        }
+      }
+    }
+  - #11960 1fdb5c2 Thanks @dyc3! - Added the nursery rule useSvelteKitRuneImports, which reports imports from the deprecated $app/stores module and suggests $app/state instead.
+    import { page } from "$app/stores";
+  - #11723 3b429d1 Thanks @m1handr! - Fixed #11656: noAstroSetHtmlDirective now correctly reports set:html directives inside Astro template expressions.
+  - #12023 874d5ae Thanks @codspeed! - Improved the performance of the HTML formatter up to 4x.
+  - #11761 a3462fe Thanks @saberoueslati! - Fixed #11351: useSimplifiedLogicExpression no longer reports boolean literals on the right side of || and && outside boolean contexts, because removing them can change the result of the expression. For example, y = x || false is no longer reported, while if (x || false) still is.
+  - #11732 ff4c4dd Thanks @dyc3! - Added the nursery rule noMeaninglessVoidOperator, which reports unnecessary uses of void, such as void log() when log returns void. The rule allows discarded call results, thenables, void 0, and calls returning never.
+  - #11975 40dd3fb Thanks @ematipico! - Fixed the indentation of multiline Astro expressions, in templates and attribute values, when running biome check --write. Biome now formats Astro expressions with biome format too, and places them at the column of the surrounding markup.
+     <div>
+            {items.map((item) => (
+    -       <span>{item}</span>
+    -))}
+    +               <span>{item}</span>
+    +       ))}
+     </div>
+  - #12016 09d4000 Thanks @codspeed! - Improved the performance of indexing and analysis of big files up to 2x. The improvements are mostly visible in projects that make use of project and types lint rules.
+  - #11750 089bde0 Thanks @dyc3! - Added the nursery rule useStrictBooleanExpressions, which reports ambiguous truthiness checks such as if (value) when value has type number | undefined. Non-nullable strings and numbers and nullable objects are allowed; the rule has no options.
+  - #11494 ad5b362 Thanks @jp-knj! - Added the nursery rule noAstroConflictingSetDirectives, which reports Astro elements with multiple content sources, such as set:html, set:text, and child content.
+    For example, <div set:html={html}>content</div> triggers the rule.
+  - #11878 84d1b3b Thanks @dyc3! - Fixed #11748: useExhaustiveSwitchCases now reports missing cases for values created with the mapping overload of Array.from, including arrays imported from another module.
+  - #11802 7d1f37e Thanks @dyc3! - Tailwind classes will now be detected in Svelte, Vue, and Astro class attribute expressions that don't use a class merging function.
+  - #11910 9e50ea2 Thanks @ematipico! - Fixed #11504, a regression where Biome would silently ignore errors in the configuration file. Now errors are correctly retained and checked before executing any command.
+  - #11921 d568632 Thanks @hirehamir! - Fixed #10846: when plugins fail to load, Biome now prints each failing plugin's path on its own line, instead of concatenating bare messages like Cannot read file.Cannot read file..
+  - #11930 82ea5a6 Thanks @dyc3! - Fixed #11927: The HTML formatter no longer duplicates comments around Svelte blocks. This affected a comment after a block such as {#if} or {#each} at the end of an element, and a comment on the same line as the last element inside a block, before {:else}, {/if}, or a similar tag.
+  - #11931 0cc46d8 Thanks @dyc3! - Fixed the indentation of comments at the end of a Svelte block's contents. A comment before {:else}, {:then}, {/if}, or a similar tag is now indented with the block's contents instead of with the tag.
+     {#if condition}
+            <span>Text</span>
+    -<!-- comment -->
+    +       <!-- comment -->
+     {/if}
+  - #12031 ef0edd4 Thanks @dyc3! - Fixed #12027: Biome's test rules no longer mistake regular method calls named test, it, or describe for tests. For example, useValidTestTitle used to report the following regular expression check as a test with an invalid title:
+    const isComment = /^\s*#/.test(line);
+  - #11959 8477e61 Thanks @dyc3! - Fixed #11950: noUnusedVariables now reports arrow functions with expression bodies that only reference themselves, such as let h = () => h();.
+  - #11915 3260602 Thanks @ematipico! - Fixed #11841, where suppression comments had no effect on some parts of HTML-ish files and on snippets embedded in JavaScript files.
+    Now the following suppression works as expected:
+    <!-- biome-ignore lint/correctness/noUndeclaredVariables: intentionally external -->
+    <div :title="missingValue"></div>
+  - #11952 b51040e Thanks @dyc3! - Fixed #11951: the GritQL formatter no longer inserts a space after a within pattern without an until clause.
+    -$arg <: within `bar($_)` ,
+    +$arg <: within `bar($_)`,
+  - #11794 429cf95 Thanks @dyc3! - Added the nursery rule noTailwindRawColors for JavaScript and HTML. It disallows Tailwind palette colors such as bg-pink-500 and text-white, encouraging design system color utilities such as bg-primary.
+  - #11837 f5e249b Thanks @dyc3! - Fixed #11836: biome check --write no longer adds invalid parentheses around Svelte {@const} declarations when experimental HTML support and formatting are enabled.
+  - #11978 8be0b9e Thanks @dyc3! - Fixed #11817: Biome no longer crashes when its output is piped to a program that exits early, such as head. Output to the closed pipe is now discarded and Biome exits normally.
+  - #11868 3841c26 Thanks @ematipico! - Fixed #8986: Biome's language server now scopes all watched-file patterns to each workspace folder, falling back to the deprecated rootUri when no workspace folders are provided. Clients without relative-pattern support receive compatible absolute glob patterns.
+  - #11928 0015681 Thanks @dyc3! - Restricted access to the Unix daemon socket to the user running Biome. The socket now lives in a biome-daemon directory inside Biome's cache directory that only this user can access, and the socket itself has mode 0600.
+  - #11835 589ca1a Thanks @dyc3! - Updated useReactCompiler: Biome now reports React Compiler diagnostics regardless of the React version declared in package.json.
+  - #11907 b7d9037 Thanks @posido! - Fixed withastro/compiler-rs#194: the HTML parser no longer treats a regex literal that starts with > as the end of a self-closing tag. Astro frontmatter such as const escaped = s.replace(/>/g, "&gt;"); no longer swallows the closing --- fence, and the same regex inside a template expression no longer runs past its closing }. A regex literal after a keyword such as return, as in return />'/.test(s), is now recognized too.
+  - #12021 59cc595 Thanks @dyc3! - Type inference performance has been significantly improved. Some popular libraries like Zod, Valibot, Arktype, Effect, Kysely, and Drizzle have gained a ~2-240x speedup in our benchmarks. This improvement affects all rules that use type information.
+  - #12044 c73fb91 Thanks @dyc3! - Fixed #12042: the HTML formatter no longer removes the space between text and an inline element on the next line when it joins the lines.
+    - <p>a <em>b</em> c<u>d</u></p>
+    + <p>a <em>b</em> c <u>d</u></p>
+  - #11965 f90bf38 Thanks @ematipico! - Fixed module resolution in long-running workspaces so imports reflect package manifest and TypeScript path-mapping changes without requiring the importing file to be edited.
+  - #11860 0884e29 Thanks @dyc3! - Removed the attributes and functions options from the nursery rule noTailwindArbitraryValue. The rule now uses the same Tailwind detection as useTailwindShorthandClasses.
+  - #11969 865cd30 Thanks @AlbinoGeek! - Fixed #11962: noUnknownTypeSelector no longer reports view transition names inside view transition pseudo-elements, such as page in ::view-transition-group(page).
+  - #11914 06ff47b Thanks @dyc3! - Fixed #11897: the safe fix for noUselessStringConcat now escapes embedded double quotes when combining literals, preserving valid JavaScript and existing escape sequences.
+  - #11997 af7825f Thanks @github-actions! - The noRestrictedDependencies rule has been updated with new module replacement data, it should now detect for more relevant replacements.
+  - #11827 31bb662 Thanks @dfedoryshchev! - Fixed #11566: useNamingConvention no longer reports a namespace declared inside declare global or inside an external module declaration. Both positions are documented as always ignored, and the rule offered a safe fix, so biome check --write renamed the declaration:
+    export {}
+    declare global {
+        // no longer renamed to `Jsx`
+        namespace JSX {}
+    }
+  - #11814 23ba25f Thanks @siketyan! - Fixed type inference through generic type aliases that instantiate another generic type with a nested generic argument, such as type Nested<T> = Box<Wrapper<T>>. Type-aware rules now resolve members of such types:
+    declare const nested: Nested<number>;
+    // noUnnecessaryConditions now reports that `??` is unnecessary.
+    const inner = nested.value.inner ?? 1;
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.5.15
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

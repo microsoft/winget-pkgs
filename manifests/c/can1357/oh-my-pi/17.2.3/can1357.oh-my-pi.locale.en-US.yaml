@@ -1,0 +1,68 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 17.2.3
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Added
+  - Added the ai& (aiand) provider registry entry with API-key paste login validated against https://api.aiand.com/v1/models.
+  Fixed
+  - Fixed Anthropic OAuth (Claude Pro/Max subscription) requests hard-429ing (Usage credits are required for long context requests) on every beta-gated 1M model — e.g. claude-sonnet-4-6, which the default task/smol/scout subagent roles resolve to — regardless of prompt size, breaking all subagents. The 17.2.1 cowork request profile reintroduced the context-1m-2025-08-07 beta for any model with a 1M catalog window, but subscription credentials have no long-context credit balance so Anthropic rejects the request outright. The beta is no longer advertised on OAuth requests; subscription accounts transparently get the standard 200k window. (#7238)
+  - Fixed OpenAI Codex Responses ignoring disabled cache retention when deriving prompt_cache_key, while preserving transport session identity (#7219).
+  @oh-my-pi/pi-catalog
+  Added
+  - Added support for the ai& provider (aiand), an OpenAI-compatible inference API with dynamic model discovery (context windows, capabilities, reasoning efforts, and USD pricing from /v1/models) and API-key authentication via the AIAND_API_KEY environment variable.
+  @oh-my-pi/pi-coding-agent
+  Changed
+  - Tightened the system prompt notation: the legend now defines ⟺, ≠, ∉/∌, and operator binding order; replaced undefined symbols (⊭, ≢) in prompt bodies; removed delegation guidance duplicated between the eager-tasks preamble and the delegation gates.
+  Fixed
+  - Fixed headless browser launch storms and orphaned Chromium process trees: omp processes now attach to one project-shared Chromium owned by the daemon broker (tabs per session; Chrome dies with the last omp client in the project), concurrent browser opens in one process share a single launch, and concurrent daemon start requests for one name can no longer spawn duplicate untracked processes.
+  - Fixed Bash auto-background leaving a live Bun.sleep threshold timer scheduled after a command completes (or abort/steering wins) first, which could keep the event loop alive and delay SDK/headless shutdown until the threshold expired (#7235).
+  - Fixed ephemeral side turns and native compaction bypassing an explicit or fork-inherited prompt cache key (#7218).
+  - Fixed the live Ask dialog crashing the whole session with a replaceTabs TypeError when a question reached AskDialogComponent without a string question field; questions are now normalized at dialog entry, mirroring the transcript renderer (#7211).
+  - Fixed Codex web search collapsing backend errors to Codex error (): Unknown error; the SSE error parser now preserves the backend code and message from top-level, nested error, and response.error envelopes (#7200).
+  @oh-my-pi/pi-mnemopi
+  Fixed
+  - Stripped <think>…</think> reasoning blocks from remote LLM output in cleanOutput, so reasoning-model responses no longer leak into consolidated memories or corrupt fact extraction (the reasoning wrapper previously survived parsing and every stored fact became reasoning prose). (#7231)
+  What's Changed
+  - fix(coding-agent): preserve Codex web search backend error diagnostics by @roboomp in https://github.com/can1357/oh-my-pi/pull/7201
+  - fix(coding-agent): normalize ask dialog questions to prevent render crash by @roboomp in https://github.com/can1357/oh-my-pi/pull/7212
+  - fix(coding-agent): reuse effective prompt cache key by @roboomp in https://github.com/can1357/oh-my-pi/pull/7220
+  - fix(ai): honor disabled cache retention in Codex Responses by @roboomp in https://github.com/can1357/oh-my-pi/pull/7221
+  - fix(mnemopi): strip reasoning blocks from summaries by @roboomp in https://github.com/can1357/oh-my-pi/pull/7234
+  - fix(coding-agent): clear bash auto-background threshold timer by @roboomp in https://github.com/can1357/oh-my-pi/pull/7236
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v17.2.2...v17.2.3
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v17.2.3
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,65 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: RussMckendrick.TokenUse
+PackageVersion: 1.2.4
+PackageLocale: en-US
+Publisher: Russ McKendrick
+PublisherUrl: https://github.com/russmckendrick
+PublisherSupportUrl: https://github.com/russmckendrick/tokenuse/issues
+Author: Russ McKendrick
+PackageName: Token Use
+PackageUrl: https://www.tokenuse.app/
+License: MIT
+LicenseUrl: https://github.com/russmckendrick/tokenuse/blob/HEAD/LICENSE
+ShortDescription: Desktop app for local AI coding tool token and cost usage
+Description: Desktop app for local AI coding tool token and cost usage
+Moniker: tokenuse-desktop
+Tags:
+- ai-agents
+- claude-code
+- codex
+- copilot
+- cursor
+- tokens
+ReleaseNotes: |-
+  tokenuse` 1.2.4, named Price Check, refreshes the rate card across OpenAI, Anthropic, Cursor, and GitHub Copilot after a busy run of model launches and pricing changes. It adds exact identities and prices for the newest models, keeps dated price schedules from rewriting older usage, and strengthens the maintainer refresh so regional uplifts, non-chat placeholders, and incomplete rows cannot quietly become the default. A guarded archive migration corrects the small set of historical calls that can be proven to have used a stale or fallback rate.
+  This release also adds WinGet as the supported package path for the Windows desktop app. New releases continue to ship the usual GitHub assets and now automatically open the matching microsoft/winget-pkgs manifest pull request for the MSI.
+  Highlights
+  - Current model coverage: exact rows and friendly identities now cover GPT-6 Astra, Claude Fable 5.1 and Mythos 5.1, Grok 4.5/4.6, Gemini 3.6/3.7/3.8 Flash, MAI-Code-1.1-Flash, Kimi K2.7 Code/K3, and GLM 5.2 across the tools that expose them.
+  - Time-aware rates: GPT-5.6 Sol switches to its August 21 $4/$20 promotion and 1.25x cache-write charge without repricing earlier calls; unsuffixed gpt-5.6 usage resolves to Sol. Luna falls to $0.20/$1.20 and Terra to $2/$12 per MTok. GPT-6 Astra uses $10 input, $1 cached input, $12.50 cache write, and $50 output per MTok.
+  - Claude corrections: Fable/Mythos 5.1 cache reads use $0.25/MTok instead of the $1 predecessor rate, while Sonnet 5 keeps its permanent $2 input/$10 output launch price rather than the canceled September increase.
+  - Safer local upgrades: a newer embedded pricing book wins over an older downloaded pair, so stale Config-page files no longer force new models such as GPT-6 Astra through fallback pricing.
+  - Guarded history repair: archive schema v9 fixes only rows whose stored cost exactly proves one of the known bad schedules; ambiguous, already-correct, and unrelated calls stay untouched.
+  - Windows package management: winget install --id RussMckendrick.TokenUse -e installs the desktop MSI, and the release workflow submits each new version to WinGet automatically.
+  Provider and model updates
+  OpenAI's official model Markdown is now a first-class refresh source. GPT-6 Astra receives an exact row instead of inheriting the fallback, GPT-5.6 Sol carries its effective-dated promotional schedule, GPT-5.6 Luna drops to $0.20 input and $1.20 output per MTok, and GPT-5.6 Terra drops to $2 input and $12 output. GPT-5.4's existing $2.50 input, $0.25 cached input, and $15 output rates are now pinned to its official model page rather than changed. Dated model snapshots remain separate whenever their rate differs, so a newer family price never leaks backward into archived usage.
+  Anthropic's live pricing table supplies current Claude rows and corrects the historical Claude 3.5 Haiku schedule for newly imported or rebuilt history. Fable 5.1 and Mythos 5.1 are named independently from their 5.0 predecessors and use their published cache-read discount. Sonnet 5's canceled September 1 increase is not represented as a live schedule.
+  Cursor's first-party table is scraped again rather than carried only as a static emergency pin. Grok 4.6, Cursor-specific Gemini 3.8, GLM 5.2, Kimi K2.7 Code, and GPT-5 Fast pricing are included, while removed Composer prices remain available as historical rows. Explicit Fast rows cover GPT-5.4 at 2x, GPT-5.5 at its published $12.50 input/$75 output rate, and GPT-5.6 Luna/Sol/Terra at 2x including cache writes; the fixed web-search fee stays $0.01. Structured Cursor ids with a numeric context above 272K select the matching GPT-5.4/5.6 long-context rate, while exactly 272K stays on the default tier. The legacy $1.25/$6 Enterprise Auto schedule expires on September 7, 2026; newer unresolved default calls are marked fallback-priced because Cursor bills the routed model and the local artifact does not reliably identify it. Plan-specific token, regional, and legacy Max uplifts remain excluded when local evidence cannot select them.
+  GitHub Copilot's provider tables now import the current default-tier rows and retain the last known prices of removed models for historical sessions. Outside Cursor's numeric bracket ids, long-context threshold tiers remain an explicit estimate gap: the local rows do not currently carry enough request context to prove which tier applied.
+  The historical Gemini 1.5 Flash rate is retained as a source-backed pin for newly imported or rebuilt history after its live row disappeared, and incomplete or misclassified non-chat entries no longer enter the generated pricing book.
+  Pricing refresh reliability
+  The broad JSON import now requires usable input and output token rates, prefers direct-provider prices over regional platform uplifts, and preserves separately priced dated snapshots. Table extractors fail loudly when required columns disappear rather than generating a plausible-looking partial row. Retired rows that are intentionally kept for history are checked separately from models expected to remain live.
+  Local pricing selection is also date-aware. A valid downloaded pair still wins when it is as new as or newer than the embedded books, but an older pair no longer masks corrected pricing shipped in the binary. Missing, malformed, or half-downloaded local books are not selected as active pricing.
+  Archive schema v9
+  Usage costs remain frozen at import time by default. Schema v9 is a deliberately narrow exception for four errors that can be identified from the archived model, token buckets, date, speed, and exact stored cost:
+  - Fable 5.1 and Mythos 5.1 calls charged the predecessor cache-read rate;
+  - Sonnet 5 calls charged the canceled September schedule;
+  - GPT-5.3-Codex Spark calls imported while its token prices were zero;
+  - GPT-6 Astra calls whose total exactly matches the old fallback formula.
+  The migration scans existing history once. The same guards then inspect newly inserted primary-key ranges and exact older Cursor rows whose authoritative token reconstruction updated their cost, preventing a stale local book from reintroducing a known error without turning startup into a general reprice pass. One-hour cache-write premiums and web-search charges are preserved where the archive has enough evidence; rows that cannot be reconstructed unambiguously are left unchanged.
+  WinGet
+  The Windows desktop app is available as RussMckendrick.TokenUse. The release workflow validates the configured classic PAT, synchronises the maintainer's winget-pkgs fork, and submits only tokenuse-desktop-windows-amd64.msi; the standalone TUI executable and NSIS installer cannot be mistaken for the package payload. WinGet pins the MSI checksum and should remain the update path for WinGet installations.
+  Upgrade notes
+  - The archive schema moves from v8 to v9. The database tables do not change, but older binaries reject a v9 archive; finish any work on v1.2.3 before opening the archive with v1.2.4 if you expect to downgrade.
+  - Existing totals may change where a row exactly matches one of the guarded repair formulas. This is a pricing correction, not new usage.
+  - Older downloaded pricing files no longer override a fresher embedded book. Same-date or newer valid downloads still take precedence.
+  - Fable 5.1 and Mythos 5.1 now appear as separate model identities instead of folding into the broader Fable 5 / Mythos 5 families.
+  - Bundled reference exchange rates are refreshed from July 20 to August 31, 2026.
+  - Local usage analysis remains local. Network use stays limited to confirmed Config-page downloads, opt-in quota sync, Windows/Linux update checks, and maintainer refresh or release paths.
+  - The release tag should be v1.2.4 and must match the root Cargo package, desktop Cargo package, desktop package.json, and Tauri config versions.
+  Full Changelog: v1.2.3...v1.2.4
+  Full Changelog: v1.2.3...v1.2.4
+ReleaseNotesUrl: https://github.com/russmckendrick/tokenuse/releases/tag/v1.2.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,103 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: GPSoftware.DirectoryOpus
+PackageVersion: "13.15"
+PackageLocale: en-US
+Publisher: GPSoftware
+PublisherUrl: https://www.gpsoft.com.au/
+PublisherSupportUrl: https://support.gpsoft.com.au/
+Author: GP Software (Redbrook Pty Ltd)
+PackageName: Directory Opus
+PackageUrl: https://www.gpsoft.com.au/
+License: Proprietary
+LicenseUrl: https://docs.dopus.com/doku.php?id=licence
+Copyright: Copyright © 2024 GP Software. All rights reserved.
+CopyrightUrl: https://docs.dopus.com/doku.php?id=copyrights
+ShortDescription: A complete replacement for Explorer, with far more power and functionality than any other file manager available today.
+Moniker: dopus
+Tags:
+- archive
+- blake3
+- directory
+- duplicate
+- explorer
+- file
+- folder
+- ftp
+- hash
+- management
+- manager
+- md5
+- rename
+- sha1
+- zip
+ReleaseNotes: |-
+  Preferences
+  - Added Preferences / File Displays / Mouse / Double-click group headers to expand/collapse option. By default single-clicking a group header selects its contents, and double-click expands/collapses it - but in order to see whether a click is going to be a single or a double, Opus needs to wait for the double-click period after the first click before performing the file selection. If this option is turned off, clicking a group header will select the files within it immediately (and double-click will do nothing).
+  - Added Miscellaneous / Advanced: [Behavior] go_usequalkeys_eval Preferences option. This lets you provide an evaluation clause to override the default behavior of the Go USEQUALKEYS argument. The eval clause is given "shift", "ctrl" and "alt" variables it can use to tell what qualifiers were down. It should return a string corresponding to additional arguments for the Go command, or false for the default behavior. E.g., if (shift) return "NEW";.
+  - Preferences / Miscellaneous / Sounds now lets you assign a sound to script errors.
+
+  Commands
+  - Added Go FORMATPATH command. Reads the path that the current folder format was set for (if any).
+  - Added Go REFRESH=state option. The state keyword causes things like file selections and scroll position to be remembered when the folder is refreshed. Note that expanded folder state is not remembered by default - this can be enabled by adding the expanded keyword, or turning on the option in Preferences. If expanded folder state is remembered then the other state elements are also remembered automatically - so the state keyword is only effective if folder expansion is not being remembered.
+  - Added Set HIDEFOLDERTABS command. Lets the folder tab bar(s) in a Lister be temporarily hidden.
+  - Printing folder contents to a file now offers an option to append to an existing file instead of overwriting it. The Print command has a new WHENEXISTS argument to automate this.
+  - Added noload keyword for Go TABSELECT command, allowing the active tab to be changed without triggering "auto-load on tab activation" behaviour.
+  - Added "noclose" option for Prefs LAYOUTTHISLISTER=paths,noclose. Loads tabs from the Lister without closing existing ones.
+  - Added "includestart" keyword for Go FOLDERCONTENT. Makes the generated content list begin at the specified folder rather than starting with its contents.
+  - The GetSizes HASH command can now be used without a specified hash type to forcibly calculate the hash for any columns that are displayed in the file display but haven't been calculated yet because the file size is too large.
+  - Added /nofocus argument for the dopusrt.exe command which, if it results in Opus being launched, tells it to avoid taking the window focus while starting up. This argument must appear first on the command line, e.g. dopusrt.exe /nofocus /cmd Set NOOP.
+
+  Undo
+  - Added File Operations / Options / Sequential undo Preferences option. When this is enabled, undoing an operation no longer adds the undone action at the top of the undo list. Instead, it adds it to a new "redo" list. This lets you undo multiple actions in sequence, and optionally redo them in reverse order if needed. This is turned on for new configurations but existing configurations will need to enable it manually, and add the "Redo" command to the toolbar (see below).
+  - The new Undo REDO command is used to redo the previous action, as long as Sequential undo is enabled.
+  - The Undo LIST command accepts the keywords "redo" and "both" to make it list undo items, redo items or both.
+  - The default Menu toolbar has the Redo command in the Edit menu by default. Reset the toolbar or drag the command out of the Customize / Default Toolbars tab to get this command easily.
+  - The Undo LIST command also accepts the keyword "max:X" to control the maximum number of items listed (default is 10).
+
+  Evaluator
+  - Evaluator columns that are set to not cache their values can now be told to auto-refresh periodically (via a field in the column configuration Preferences).
+  - The evaluator Val() function now takes an optional second parameter; if set to true, it causes the variable (if any) named by the first value to be dereferenced and returns its value instead of the value of the named value. For example,
+    a = "b";
+    b = "c";
+    Output(Val(a)); // -> "b"
+    Output(Val(a, true)); // -> "c"
+  - Status bar sections can now be hidden using the evaluator, with the {h=...=} code. Return true to hide the section.
+  - Added evaluator RecycleBin() function. Lets you query various things about the state of the recycle bin (full/empty, size, number of items), either for the bin as a whole or for individual drives. If a drive is specified and the recycle bin is not enabled for that drive, it returns -1.
+
+  Scripting
+  - Script dialogs can now use a "list edit" control. This is a custom Opus control that allows lists of paths or arbitrary strings to be edited by the user. Unlike a listview the control handles almost everything itself - a script simply initialises it with a list of paths/strings (if applicable), and then retrieves the new list when it wants to update its configuration.
+    methods/properties:
+    - AddItem (single path or string)
+    - RemoveItem (individual item, -1 to clear)
+    - value (set/get - vector or single - path or string)
+    - count
+    - mode ("text" / "buttons")
+    events:
+    - click (data == 1) - reset button
+    - click (data == 2) - option button
+    - editchange
+    control options:
+    - Read-only - disables built-in editing functions. In this mode, clicking an entry button sends a "click" notification rather than editing it. Messages are now sent when switching in and out of text edit mode, and also when the text is edited in text mode.
+    - Notify delete - causes delete buttons to be displayed for each item even in read only mode, and clicking a delete button sends a "delete" notification to the script's message loop.
+  - Added ScriptCommand.flags property. Lets you set various flags which affect how your script command runs. If not provided, the default is "sd".
+    s - want source folder (will still run without one)
+    S - need source folder (will not run without one)
+    d - want destination folder
+    D - need destination folder
+    L - need Lister
+    f - want selected files
+    F - want selected folders
+    N - need selected entries (either files/folders or both depending on other flags)
+    w - don't swap source/destination folder if command run against destination
+  - Added ScriptStrings.GetEscaped script method. Works the same as the Get method but interprets Javascript-style embedded escape characters in the string. E.g. \n in the string is converted to a new line.
+  - Added Format.format_path script property to retrieve the format path from a script.
+  - Added Item.expanded script property. Returns true for folders that are currently expanded in the file display.
+ReleaseNotesUrl: https://resource.dopus.com/t/directory-opus-13-15/55656
+PurchaseUrl: https://www.gpsoft.com.au/#buynow
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://docs.dopus.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

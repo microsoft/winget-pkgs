@@ -1,0 +1,119 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 16.0.0
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-agent-core
+  Breaking Changes
+  - Renamed owned tool-calling options from toolCallSyntax/exampleSyntax to dialect/exampleDialect.
+  - Changed compaction conversation serialization to use the target model's native dialect turn, thinking, tool-call, and tool-result envelopes when a dialect is selected.
+  - Renamed the owned dialect environment variable from PI_OWNED_TOOLS to PI_DIALECT.
+  Added
+  - Added onTurnEnd hook support (setOnTurnEnd/onTurnEnd) to run awaited per-turn bookkeeping with current messages before the next model request and skip callback execution for aborted or error turns
+  Changed
+  - Renamed toolCallSyntax option to dialect in AgentOptions and AgentLoopConfig
+  - Updated conversation serialization to use dialect's native transcript rendering when a dialect is selected
+  - Changed internal references from ToolCallSyntax type to Dialect type across agent loop and compaction modules
+  @oh-my-pi/pi-ai
+  Breaking Changes
+  - Renamed the public dialect entrypoint from @oh-my-pi/pi-ai/grammar to @oh-my-pi/pi-ai/dialect.
+  - Renamed grammar dialect identifiers from ToolCallSyntax to Dialect, renamed the Grammar interface to DialectDefinition, and renamed Grammar.syntax to DialectDefinition.dialect.
+  - Added DialectDefinition.renderThinking and DialectDefinition.renderTranscript so dialect implementations serialize complete native chat transcripts, not just tool call/result blocks.
+  Added
+  - Added renderTranscript method to dialect definitions for serializing complete native chat transcripts
+  - Added renderThinking method to dialect definitions for rendering thinking/reasoning blocks
+  - Added support for 11 dialect implementations: Anthropic, DeepSeek, Gemini, Gemma, GLM, Harmony, Hermes, Kimi, Pi-native, Qwen3, and XML
+  - Added createInbandScanner factory function to instantiate dialect-specific scanners
+  - Added getDialectDefinition function to retrieve dialect implementations by name
+  - Added renderToolCatalog and renderInbandToolPrompt functions for tool catalog rendering
+  - Added renderToolInventory function to generate human-readable per-tool documentation with examples
+  - Added renderToolExamples function to render tool usage examples in the model's native dialect
+  - Added encodeInbandToolHistory function to encode tool call history in dialect-specific format
+  - Added wrapInbandToolStream function to process streaming responses with in-band tool call parsing
+  - Added ThinkingInbandScanner for parsing thinking/reasoning blocks across dialects
+  - Added OwnedStream class for managing dialect-aware streaming with tool call events
+  - Added in-band thinking channels to every dialect that was missing one: gemini (a ```thinking fence mirroring ```tool_code), gemma (its native <|channel>thought…<channel|> reasoning channel), kimi (<think>…</think>), and pi (<thinking>…</thinking>). Each scanner now parses reasoning into thinking events instead of leaking chain-of-thought into the visible reply, and every dialect's renderThinking is a real channel that round-trips back through its scanner (no passthrough renderers).
+  Changed
+  - Moved public dialect entrypoint from @oh-my-pi/pi-ai/grammar to @oh-my-pi/pi-ai/dialect in package exports
+  - Updated internal imports in stream-markup-healing.ts to use new dialect module path
+  - Changed renderToolInventory to demote a tool description's own markdown headers by one level when it contains a top-level # header, so they nest under the wrapping # Tool: <name> heading instead of reading as sibling sections. Descriptions that already start at ## and headers inside fenced code blocks are left untouched.
+  Fixed
+  - Fixed Gemini, Gemma, Kimi, and Pi in-band scanners to respect parseThinking: false, leaving private reasoning markers in visible text when parsing is disabled
+  - Fixed thinking-channel parsing for streaming Gemini, Gemma, Kimi, and Pi outputs so split or partial <thinking> blocks no longer leak into visible replies
+  - Fixed in-band thinking finalization and Kimi stream-healing interactions so leaked <think> blocks are preserved when structured tool calls are present, not duplicated when explicit reasoning is present, and closed on stream flush.
+  Removed
+  - Removed src/grammar/factory.ts (replaced by src/dialect/factory.ts)
+  - Removed src/grammar/rendering.ts (functionality moved to src/dialect/rendering.ts)
+  - Removed src/grammar/xml.ts (replaced by src/dialect/xml.ts)
+  @oh-my-pi/pi-catalog
+  Breaking Changes
+  - Renamed the catalog-owned tool syntax API from ToolCallSyntax/FALLBACK_TOOL_SYNTAX/preferredToolSyntax to Dialect/FALLBACK_DIALECT/preferredDialect.
+  @oh-my-pi/pi-coding-agent
+  Breaking Changes
+  - Renamed the SDK tool format type and resolver from ToolCallFormat/resolveToolCallSyntax to DialectFormat/resolveDialect, and the agent option from toolCallSyntax to dialect.
+  - Changed /dump transcript output to render messages with the selected model's native dialect turn and thinking envelopes instead of markdown role headings.
+  Added
+  - Added advisor.syncBacklog setting (off, 1, 3, 5) to pause turn completion until advisor review backlog drops below the threshold, with a maximum 30-second wait
+  - Added advisor backlog synchronization at turn end when enabled so the main session stays aligned with the advisor's pending review turns
+  - Added automatic discovery of WATCHDOG.md files from user and project locations so advisor guidance from local watchdog instructions is appended to its system prompt
+  - Added /advisor on, /advisor off, /advisor status, and /advisor dump [raw] slash-command subcommands to manage the advisor at runtime
+  - Added advisor.enabled and advisor.subagents settings to enable the advisor and extend it to spawned task/eval subagents
+  - Added advisor status badge (++ in success color) to the status line when an advisor is active
+  - Added /dump [raw] flag to toggle between compact and legacy uncompact transcript output formats
+  - Added /advisor on, /advisor off, and /advisor status slash-command subcommands to enable or disable the advisor at runtime and view advisor status metrics
+  - Added a passive advisor: assign a second model to the advisor role and enable advisor.enabled to have it silently review each primary turn and inject severity-tagged advice notes via the advise tool. A nit rides the non-interrupting aside queue (batched into one card at the next step boundary), while a concern or blocker interrupts the running agent through the steering channel — aborting in-flight tools, or resuming the agent when it has already yielded — so high-severity advice is acted on immediately. Advice renders in the primary transcript as a distinct Advisor card, and the advisor gets hard-isolated read-only read/search/find access — bound to its own ToolSession so its reads never touch the primary's snapshot/seen-lines caches — to investigate the workspace before weighing in. The status line shows a ++ badge (in the success color, kept distinct from the model name) after the model name while an advisor is active, and /advisor dump copies the advisor's own transcript to the clipboard. Advisors are created only for the top-level session by default; enable advisor.subagents to extend them to spawned task/eval subagents.
+  - Animated "thinking" pulse (·‥…‥) shown in place of a hidden thinking block while the model is actively reasoning, so streaming progress is visible even with hideThinkingBlock enabled.
+  Changed
+  - Changed advisor prompting guidance to emit at most one advise per update and to prefer silence when the agent is on track
+  - Changed /dump default output to compact markdown format; use /dump raw for the legacy uncompact format
+  - Changed /dump and /advisor dump to default to compact transcript output and accept an optional raw flag for the legacy uncompact format
+  - Session dump output now renders message history using the model's native dialect turn envelope instead of markdown role headings
+  - Changed RPC, RPC-UI, and ACP hosts to default the advisor settings off instead of inheriting a user's interactive-session advisor preference.
+  Fixed
+  - Fixed advisor backlog tracking so failed advice prompts do not stall catch-up indefinitely by dropping pending backlog after repeated consecutive failures
+  - Fixed backlog accounting to decrement only after successful advisor prompts so sync waits correctly reflect advisor progress
+  - Fixed advisor context batching to still send pending review updates when context maintenance fails instead of dropping the batch
+  - Fixed explicit advisor enablement to clear protocol-default overrides so enabling the advisor applies immediately
+  - Fixed advisor message card notes getting truncated to two lines when the card is collapsed.
+  - Fixed advisor context handling to maintain its token budget by promoting or compacting/restarting advisor context while preserving advisor reasoning-off settings.
+  - Fixed startup.quiet leaving MCP and LSP startup status events visible during launch (#2639).
+  - Registered the Advisor group in the model settings tab so advisor settings render correctly in the settings panel.
+  - Fixed Windows bash path handling so MSYS/Git-Bash drive aliases like /d/project and WSL-style /mnt/d/project normalize to native drive paths consistently across the bash tool cwd validation and brush filesystem builtins (#2634).
+  What's Changed
+  - fix: align tool cache paths with XDG dirs by @Parsifa1 in https://github.com/can1357/oh-my-pi/pull/2637
+  - fix(coding-agent): respect startup.quiet for startup statuses by @roboomp in https://github.com/can1357/oh-my-pi/pull/2640
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v15.13.3...v16.0.0
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v16.0.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

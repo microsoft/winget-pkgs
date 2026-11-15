@@ -1,0 +1,47 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.56.3
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.56.3] - 2026-07-30
+  Security
+  - Prevented per-user backup data from authorizing elevated machine-wide registry changes. Environment restore, introduced in v1.33.3, kept both User and Machine snapshots in a LocalAppData JSON file. An unprivileged process could edit that file and, when SysManager was later restored as administrator, choose valid Machine variable values and which Machine variables were deleted. New User snapshots now live under HKCU, while System snapshots are stored under an owner- and ACL-validated HKLM\SOFTWARE\SysManagerEnvironmentBackup key. Only that protected snapshot can drive HKLM restore; legacy LocalAppData data remains read-only compatibility input for User restore, and its Machine section is never migrated or trusted.
+  Fixed
+  - Rejected malformed environment backups before any restore write. User and protected Machine snapshots are now parsed with bounded file, entry-count, name, value-length, and registry-kind validation. Null or missing sections, wrong JSON types, null values, duplicate names, unsupported registry kinds, and oversized content produce a safe invalid-backup result instead of a NullReferenceException or a partial restore.
+  - Preserved pristine backups across partial and scope-specific operations. Present-but-invalid snapshots are never mistaken for missing data or overwritten, restore validates every present scope before its first write, and a System-only change no longer creates a User snapshot. Existing valid User files remain compatible, while new registry values publish atomically without an elevated write into a user-controlled filesystem path.
+  Verify the download
+  Get-FileHash .\SysManager-v1.56.3.exe -Algorithm SHA256
+  Expected SHA256: 10C32C134BA3FF208972B722860C4199BD399B101E2DBEF22AD8E0A04A10D81E
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.56.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,66 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jdx.usage
+PackageVersion: 6.9.0
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://jdx.dev/
+PublisherSupportUrl: https://github.com/jdx/usage/issues
+Author: Jeff Dickey
+PackageName: usage
+PackageUrl: https://usage.jdx.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+ShortDescription: A specification for CLIs
+Description: |-
+  Usage is a spec and CLI for defining CLI tools. Arguments, flags, environment variables, and config files can all be defined in a Usage spec. It can be thought of like OpenAPI (swagger) for CLIs. Here are some potential reasons for defining your CLI with a Usage spec:
+
+  - Generate autocompletion scripts
+  - Generate markdown documentation
+  - Generate man pages
+  - Generate type-safe SDK client libraries for TypeScript, Python, and Rust
+  - Use an advanced arg parser in any language
+  - Scaffold one spec into different CLI frameworks-even different languages
+  - [coming soon] Host your CLI documentation on usage.sh
+Moniker: usage
+Tags:
+- cli
+- spec
+ReleaseNotes: |-
+  Flags belonging to a default subcommand can now select it without typing its name, a derived Args type can be parsed on its own, help colours can be remapped, and a series of help-rendering changes trims binary size for usage-rs adopters. Bash completion also stops mangling colon-separated candidates.
+  Added
+  - (parse) Opt-in default-subcommand flag routing (#1413, @jdx). With default_subcommand_flags, leading flags that belong only to the configured default subcommand route to it, so em -ua @world parses as em install -ua @world. Explicit command names and aliases still win, parent-only flags and bare invocations stay on the parent, a mixed short bundle such as -pua keeps the parent's -p, and -- or an unknown flag stops the lookahead. Completion also offers the default command's flags at the root. Supported in KDL specs, the Rust derive, and the Go runtime; existing routing is unchanged without the opt-in. usage lint reports default_subcommand_flags declared without a default_subcommand.
+    default_subcommand "install"
+    default_subcommand_flags #true
+    #[usage(default_subcommand = "install", default_subcommand_flags)]
+  - (parse) Parse a derived Args type without an enclosing CLI (#1419, @jdx). usage::parse_args_from::<T> treats the slice as that command's words; usage::parse_args_from_argv::<T> strips argv0 first. Both reuse the command's compiled flags, positionals, defaults, validation, and nested subcommands, and return the ordinary parse errors, including help and version requests. Available behind the spec feature.
+    let install = usage::parse_args_from::<Install>(&args)?;
+  - (help) Remap semantic help colours with a Palette (#1414, @lu-zero). The heading, option, metavar, and command roles were previously fixed SGR colours. help::Palette remaps any of them using the existing {$…} tag vocabulary (for example "cyan+bold"), and Style::palette applies it; role names expand once, so mapping metavar to "heading" uses the built-in heading colour. Hosts that own the exit path get embedded_outcome_paletted / embedded_outcome_into_paletted (and embedded::outcome_paletted); parse() and plain rendering are unchanged.
+    let palette = usage::help::Palette::DEFAULT.metavar("cyan+bold");
+    match Ex::embedded_outcome_paletted(&argv, palette) { /* … */ }
+
+  Changed
+  - (cli) Smaller binaries and faster help rendering (#1396, #1399, #1400, #1401, @jdx). Help sorting and rendering do less work and share more code, plain (uncoloured) help skips colour-span analysis, and the flag diagnostics share one formatter. Help output is byte-identical; on the oxc binaries used for measurement this removed roughly 360 KiB combined, and plain --help rendered about 18% faster locally. Two new opt-ins let CLIs trim further:
+    - Flattened subcommand pages, HelpAll, and recursive render_all now live behind a help-advanced feature (enabled by default in usage-rs and usage-argv). A CLI that uses none of them can disable defaults and omit it:
+      usage = { package = "usage-rs", version = "6", default-features = false, features = ["help", "diagnostics", "completions"] }
+    - #[usage(spec_endpoint_file = "cli.usage.kdl")] answers __usage_spec__ from a KDL file included at compile time, keeping the endpoint without linking the runtime serializer. to_kdl() still generates from live metadata, so regenerate the file after CLI changes and test the two for drift.
+    Compatibility note: dependents that already set default-features = false and declare flatten_help or a HelpAll flag must add help-advanced; the derive now rejects those declarations at compile time, and hand-written metadata requesting advanced help panics when rendered instead of being silently ignored.
+
+  Fixed
+  - (bash) Preserve colon-prefixed completion words (#1405, @jdx). When : is in COMP_WORDBREAKS, Readline replaces only the fragment after the last colon, so candidates such as update:deps:no-cooldown were inserted with a duplicated update:deps: prefix. The generated Bash script now forwards the current Readline word and COMP_WORDBREAKS to the __complete_word__ request, and the binary reports the prefix Readline keeps so the script can trim it; escaped colons, consecutive colons, and a cursor on a colon are handled. Path candidates are unaffected. Regenerate Bash completion scripts to pick up the fix (reported in jdx/mise#12970).
+
+  New Contributors
+  - @lu-zero made their first contribution in #1414
+
+  💚 Sponsor usage
+  usage is built and maintained by @jdx, an open source developer at entire.io, the title sponsor of his open source work.
+  If usage powers CLI specs, docs, or completions for a tool you maintain or use, please consider becoming an individual or company sponsor. Your support funds ongoing development and helps keep usage fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/usage/releases/tag/v6.9.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://usage.jdx.dev/cli/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,44 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: GasTownHall.Beads
+PackageVersion: 1.2.2
+PackageLocale: en-US
+Publisher: Steve Yegge
+PublisherUrl: https://github.com/gastownhall
+PublisherSupportUrl: https://github.com/gastownhall/beads/issues
+Author: Steve Yegge
+PackageName: Beads
+PackageUrl: https://github.com/gastownhall/beads
+License: MIT
+LicenseUrl: https://github.com/gastownhall/beads/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Beads Contributors
+ShortDescription: A memory upgrade for your coding agent
+Description: Beads provides a persistent, structured memory for coding agents. It replaces messy markdown plans with a dependency-aware graph, allowing agents to handle long-horizon tasks without losing context.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  Recovery release
+  v1.2.0 and v1.2.1 were published by accident on 2026-08-11 without release testing. v1.2.2 supersedes them by re-releasing the tested 1.1 line — it is the v1.1.2 code under a higher version number, so every install channel moves forward onto tested code. The 1.2.x-only features (work leases, the events journal, sync federation, the HTTP API server, provenance events) are not in this release; they will return in a properly tested future release.
+  If you ran v1.2.1 and see a "schema version mismatch" error
+  Running the v1.2.1 binary even once migrated your local database schema from v53 to v65, and this binary stops with:
+  schema version mismatch: database is at v65, binary knows up to v53 (12 migrations ahead)
+  The fix takes about two minutes — see the recovery guide: docs/RECOVERY-1.2.1.md
+  - Recommended: roll the schema cursor back to v53 (one dolt sql command; the guide has copy-paste steps; works even for databases created by 1.2.1).
+  - Need bd this minute: BD_IGNORE_SCHEMA_SKEW=1 bd <command> is a verified-safe stopgap for this schema range.
+  - Upgrade every machine/clone to v1.2.2 before recovering — a leftover 1.2.1 binary will silently re-migrate the database.
+  Other changes vs v1.1.2
+  - The schema-mismatch error now recognizes the accidental-release window and points at the recovery guide instead of advising "install the latest release."
+  - go.mod retracts v1.2.1, v1.2.0, and v1.1.1 so go install github.com/steveyegge/beads/cmd/bd@latest resolves here.
+  Validated by the v1.2.2-rc.1 pipeline run plus a 21-point release verification (scripts/release-verification-1.2.2.sh) against real v1.2.1-migrated databases.
+ReleaseNotesUrl: https://github.com/gastownhall/beads/releases/tag/v1.2.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

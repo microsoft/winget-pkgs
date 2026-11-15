@@ -1,0 +1,62 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 3.7.2
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [3.7.2] - 2026-05-06
+  AeroCrypt overlay, IntroHub & community polish, CLI security hardening, 2 new image-CDN providers
+  A wide release that consolidates the v3.7.2 community wishlist (#161), promotes the rclone-crypt overlay to a first-class encryption layer next to AeroVault, ships an external GPT 5.5 high audit pass on the CLI / MCP / AI core dispatcher with 17 paired security fixes, adds two new native image-CDN provider integrations (ImageKit and Uploadcare, taking the protocol grid from 22 to 24), restructures the custom titlebar around an explicit 3-cluster layout, surfaces SFTP idle-reconnect transparently, and clears every shippable item EhudKirsh and Tom raised on the wishlist thread. The bundled aerovault crate moves to 0.3.5 (routine maintenance, no format change). Cryptographic primitives are otherwise untouched.
+  Added
+  - AeroCrypt overlay (rclone-crypt) as a first-class encryption layer: closes the rclone-crypt overlay (APPENDIX-S) as a first-class layer alongside AeroVault. Folder transfers now traverse encrypted directory trees end to end via two new backend commands (rclone_crypt_provider_download_folder, rclone_crypt_provider_upload_folder) with BFS depth 64 and per-level dirIV resolution. Filename obfuscation (bucket-based, ASCII + Latin-1) is wired through obfuscate_name / deobfuscate_name. A new rclone_crypt_provider_create_remote command initialises the dirIV in an optional subpath. The toolbar gains an AeroCrypt button next to the AeroVault overlay button, the remote path bar shows an AEROCRYPT badge while the overlay is active, and the post-connect banner auto-detects rcloneCryptEnabled from imported configurations. The unlock dialog, renamed "AeroCrypt Rclone Crypt overlay", supports both Open existing and Create new with an obfuscate-filenames toggle. 15 new tests cover obfuscate roundtrip and end-to-end smoke (standard, off, obfuscate) on empty, single-chunk, and multi-chunk content; 42/42 cargo test rclone_crypt pass on release profile. CLI parity ships with the RcloneFilenameEncryption::Obfuscate variant.
+  - ImageKit (23rd protocol): native REST API integration as a first-class StorageProvider. Auth via private key (HTTP Basic), endpoint api.imagekit.io. Full trait surface (list, upload, download, delete, mkdir, rename, move, search), plus media-CDN passthrough for transformations and folder operations. 20 GB media + 20 GB bandwidth/month free tier. Visible in IntroHub Discover under Photo & Media, exposed in CrossProfile, IconPicker (Media category) and SessionTabs.
+  - Uploadcare (24th protocol): native REST + Upload API integration. Auth via public + secret key, endpoints api.uploadcare.com (REST) and upload.uploadcare.com (multipart). Cursor-based listing, store-once semantics mapped to AeroFTP's directory model. EU-based, GDPR-friendly. Same surfaces wired as ImageKit.
+  - Custom titlebar 3-cluster layout (T-TOPBAR-3-CLUSTER, carry-over from #133, recap in #161): the right side of the unified VS Code-style titlebar is now grouped into three explicit clusters. Cluster 1 (page nav) holds Connect / Disconnect with a fixed minimum width, eliminating the click-shift drift reported in #129 (clicking Disconnect, then the new Connect button, shifted icons enough that a fast aimed click could land on Lock or Settings). Cluster 2 (utility) holds Cyber Toolkit (cyber theme only), AeroVault, Lock and Settings without internal separators. Cluster 3 (window) holds Minimize, Maximize, Close. No new props, no new i18n keys, no behaviour changes outside the layout fix.
+  - About > Technical: library version check: a new "Check Updates" button in the Linked Libraries section queries crates.io for each of the 12 tracked libraries (russh, russh-sftp, suppaftp, reqwest, keyring, aerovault, aes-gcm, argon2, zip, sevenz-rust, quick-xml, oauth2). Each row shows current version, an inline upgrade arrow when a newer release exists, and a colour-coded status badge (green check, yellow up-arrow, red triangle for major bumps). Reuses the existing check_crate_versions Tauri command, no extra backend cost. The aerovault crate is now part of the tracked set.
+  - Support modal Reviews section: the heart-icon Support dialog grows a new "Leave a Review" block between the fiat donation grid and the crypto section. Two side-by-side buttons: the existing SourceForge review link (relocated from the About > Support tab where it was harder to discover), and a new entry pointing at the axpdev-lab.aeroftp-mcp listing on Visual Studio Marketplace. Both render with their official brand SVG inline (no external asset). Translated in all 47 locales.
+  - My Servers table per-column alignment (Ehud, #161): the column manager popover (gear icon in the table header) gains three small L / C / R buttons next to each column toggle. Default alignment is sentence-aware (numerics like Used / Total / % default to right, icon-based columns default to centre, text columns default to left), but each column can be overridden. The override persists in the same vault entry that already stores visibility, order and width. Applies to both the <th> / <td> text-* class and the inner flex justify so labels and content stay coherent.
+  - Sticky header in the My Servers table (Ehud, #161): the table header was already styled sticky top-0 but the inner overflow-x-auto wrapper was capturing sticky positioning, so it drifted away with the rows. Removed the wrapper, horizontal scroll now lives on the panel container, header stays pinned during vertical scroll.
+  - Ctrl+T cycles theme everywhere outside text inputs (#171): the menu label and the toolbar tooltip have advertised Ctrl+T for a while, but the binding was never actually registered. Now wired through useKeyboardShortcuts with the global isTextEditingTarget() guard so the shortcut works on the connection screen, the file panels, IntroHub, AeroSync, AeroVault, and any other surface, while focus inside Monaco / xterm / form fields still preserves their native semantics. Cycles light -> dark -> tokyo -> cyber -> auto.
+  - Ctrl+S saves inside the Monaco editor (#171): the editor button tooltip has shown Ctrl+S for a while but it was a placebo. Registered as a Monaco editor.addAction (so it does not collide with the global keyboard hook, which by design suppresses Ctrl combos inside .monaco-editor for terminal SIGINT compatibility). The keybinding writes through the live handleSave closure via a ref pattern, so it always sees the latest onSave prop and originalContent. Works in DevTools editor, AeroFile editor, and any future Monaco mount.
+  - AeroFile -> Editor -> Terminal drag-to-run (T-EDITOR-DRAG-RUN, carry-over from #147): drag a .ps1, .sh or .py from AeroFile into AeroTools Editor to open and edit, then drag from the Editor header into the Terminal area to stage the run command. Extension mapping is automatic (.ps1 -> pwsh <quoted-path>, .sh -> bash <quoted-path>, .py -> python <quoted-path>). Path validation runs before command composition; shell quoting is applied to defeat filename-injection edge cases. The command is inserted into the prompt without auto-pressing Enter so the user can review before running. Visual drop-target highlight on Editor and Terminal tab buttons and panel surfaces; inline feedback after the Terminal drop reads Command inserted in terminal. Press Enter to run. Translated in all 47 locales.
+  Fixed
+  - SFTP silent reconnect on idle session disconnect (T-AUTO-RECONNECT-IDLE, #161): Tom reported that AeroFTP threw Failed to change directory: Path not found: Directory not found: session closed after the SFTP session sat idle for ~10 minutes, forcing a manual disconnect and reconnect with loss of the cwd context. Two changes ship together. (a) Error classification: russh emits session closed when the server's idle reaper kills the SFTP channel, both cd and cd_up were wrapping this under ProviderError::NotFound, producing the misleading prefix Tom saw. All russh call sites in providers/sftp.rs now route through classify_russh_err, which upgrades transport-level error strings to a new ProviderError::ConnectionLost variant. (b) Auto-recovery: provider_change_dir, provider_go_up and provider_list_files retry once after a silent reconnect when the live op returns ConnectionLost. The reconnect reuses the in-memory SftpConfig (no vault hit, no UI prompt) and best-effort restores the previous cwd before replaying the user's click. Lifecycle is surfaced via the new provider-session Tauri event, which the frontend converts into an info+success toast pair (Session expired, reconnecting... then Reconnected to server). Translated in all 47 locales.
+  - Codex CLI security audit (CLI-AUDIT-01..17): an external GPT 5.5 high audit on 2026-05-06 surfaced 17 findings on the CLI and AI core / MCP dispatcher surface. All resolved in this release. Highlights (full report and per-finding evidence in docs/security-evidence/AEROFTP-CLI-AUDIT-2026-05-06.md):
+    - GUI tool execution now enforces backend approval: execute_ai_tool in ai_tools.rs now runs the same allowed-tools check and per-tool approval validators that the CLI / MCP path runs, instead of relying on UI-only gating (CLI-AUDIT-01).
+    - MCP / AI core remote dispatcher path validation: local upload / download paths now go through the strict validators (null bytes, traversal, control chars, option-like forms, length cap), and remote paths share the same validation layer (CLI-AUDIT-02).
+    - server_exec is strictly read-only: rejects get / put / mkdir / rm / mv with an explicit-use error pointing at the documented mutative tools, restoring the contract documented in AGENTS.md (CLI-AUDIT-03).
+    - MCP profile lookup requires exact id / name or a unique substring: ambiguous matches return a structured error listing candidates instead of silently picking the first substring match (CLI-AUDIT-04).
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v3.7.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

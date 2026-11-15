@@ -1,0 +1,56 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.20.20
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.20.20] - 2026-06-12
+  Fixed
+  - Much better screen-reader support across the app. Many buttons, toggles, drop-downs, search/filter boxes, data grids, and per-row actions had no accessible name, so screen readers announced them generically (or not at all). Added clear, specific accessible names to interactive controls across 21 tabs — including destructive actions (Delete, Shred, Clear History), per-row buttons (now named after the item they act on), and unlabeled inputs. No visual change.
+  Fixed
+  - Activity history can no longer be corrupted by concurrent updates. The recent-actions log saved its data outside the lock that protects it, so two actions logged at the same time could clash and produce a "collection modified" error or a truncated file. It now writes a consistent snapshot taken under the lock.
+  - The in-app updater fails gracefully when the download location can't be determined. Installing an update now checks the downloaded file's folder up front and shows a clear message instead of risking a crash.
+  Fixed
+  - More resilient reading of battery, memory, and app-list data. Unexpected values from Windows (battery stats, memory-module details) could throw a conversion error and interrupt a scan; those conversions now fall back safely. The winget output parser also no longer throws when the tool reports columns in an unusual order.
+  Fixed
+  - Plugged several resource leaks. The system-tray icon's underlying graphics handle was never released on shutdown; the elevated-relaunch helper left a process handle open; and a memory-module query left a WMI result set undisposed. All are now released properly. Also added handling for a WMI namespace being unavailable when reading drive media/bus details, so that case fails quietly instead of surfacing an error.
+  Fixed
+  - Starting or stopping a Windows service no longer crashes the app on failure. If a service couldn't be started or stopped (access denied, a dependency problem, or the service state changing mid-operation), the underlying error escaped unhandled. Those failures are now caught and shown as a clear status message.
+  - Privacy toggles no longer crash on a registry write error. Applying a privacy toggle only handled permission errors; a registry I/O error or an invalid key/value now logs a warning instead of bringing down the app.
+  - Disabling Xbox Game Bar no longer crashes on a registry I/O error. The Performance tab's Xbox Game Bar action now handles I/O failures the same way it already handled permission and state errors.
+  - A misbehaving UI subscriber can no longer permanently lock an operation category. If a property-change notification threw while acquiring an operation lock, the category could stay locked forever (blocking all future disk/network/system operations of that kind). The lock is now rolled back cleanly if that happens.
+  Verify the download
+  Get-FileHash .\SysManager-v1.20.20.exe -Algorithm SHA256
+  Expected SHA256: A22D117CF203853EB0050071395BA1E0E62B73387115A1AB01FA150ABF8EED08
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.20.20
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

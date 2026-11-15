@@ -1,0 +1,102 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Xiaomi.MiMoCode.Baseline
+PackageVersion: 0.1.10
+PackageLocale: en-US
+Publisher: Beijing Xiaomi Mobile Software Co., Ltd.
+PublisherUrl: https://mimo.xiaomi.com/
+PublisherSupportUrl: https://github.com/XiaomiMiMo/MiMo-Code/issues
+Author: Beijing Xiaomi Mobile Software Co., Ltd.
+PackageName: MiMoCode (Baseline)
+PackageUrl: https://mimo.xiaomi.com/mimocode
+License: MIT
+LicenseUrl: https://github.com/XiaomiMiMo/MiMo-Code/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2026 MiMo Code, Xiaomi Corporation
+  Copyright (c) 2025 opencode
+CopyrightUrl: https://platform.xiaomimimo.com/docs/terms/user-agreement
+ShortDescription: A next-generation AI coding assistant for developers. Unlimited context lets you understand, build, and collaborate more efficiently.
+Description: |-
+  MiMoCode is a terminal-native AI coding assistant. It can read and write code, run commands, manage Git, and use a persistent memory system to keep a deep understanding of your project across sessions while continuously improving itself.
+  MiMo Auto is built in as a free-for-limited-time channel, so you can start with zero configuration. MiMoCode also supports connecting to any mainstream LLM provider API.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- mimo
+- programming
+ReleaseNotes: |-
+  Summary
+  The biggest theme this release is orchestrator and multi-session reliability. Orchestrator now routes to an existing session instead of spawning a new one (with a roster, tool-result affordances, and guards behind it), child liveness is derived from last activity rather than last completed step — so a child blocked mid-step is no longer mistaken for a dead one — and spawn became the default in the actor tool prompt. Worktrees and bash commits now inherit the repo's real git identity instead of inventing one.
+  Context and checkpoint handling got a round of hard fixes: per-model early-compaction budgets, honoring the configured context limit, no more duplicate context rebuilds, manual /rebuild now does an on-the-spot rebuild with writer-freshness and a waiting UI, and the checkpoint writer's blind failure counter was replaced by proper failure classification with bounded recovery.
+  Providers are more resilient: never send a message with empty content (the long-standing Bedrock/Anthropic 400), replay unsigned Anthropic reasoning, retry OpenAI stream server errors and internal request timeouts, DeepSeek reasoning-effort variants, and strict: false for function tools on OpenAI Responses. Also new: Vivid and Minimal visual modes in the TUI, exec with MCP dispatch + live sub-call trace, token-aware request-scoped MCP tool discovery, client-side MCP sampling with audio, and new skill bundles (Playwright CLI automation, Grok Build CLI).
+
+  本次发布的主线是 Orchestrator 与多会话可靠性。Orchestrator 现在会路由到已有会话而不是新建(配套 roster、工具结果提示与相应守卫);子会话的存活判定改为依据"最后活动时间"而非"最后完成的步骤"——卡在某一步中间的子会话不会再被误判为已死；actor 工具提示里 spawn 成为默认。worktree 和 bash 提交现在继承仓库真实的 git 身份，不再自行编造。
+  上下文与 checkpoint 做了一批硬修复：按模型的提前压缩预算、尊重配置的上下文上限、不再重复重建上下文、手动 /rebuild 改为即时重建(带写入新鲜度判断和等待 UI),并把 checkpoint writer 的"盲计数失败"换成了明确的失败分类 + 有界恢复。
+  Provider 健壮性同步提升：不再发送空内容消息(修掉长期存在的 Bedrock/Anthropic 400)、重放未签名的 Anthropic reasoning、重试 OpenAI 流式服务端错误与内部请求超时、DeepSeek 的 reasoning effort 变体、OpenAI Responses 的 function tool 显式 strict: false。另有新特性：TUI 的 Vivid / Minimal 视觉模式、exec 支持 MCP 分发与实时子调用轨迹、按 token 感知的请求级 MCP 工具发现、支持音频的客户端侧 MCP sampling,以及新技能包(Playwright CLI 自动化、Grok Build CLI)。
+  Features
+  - tui: add Vivid and Minimal visual modes by @yanyihan-xiaomi in #2031
+  - exec: restore MCP dispatch with request-scoped gating, structured results, and live sub-call trace by @JinyuXiang-Mimo in #1951
+  - mcp: add token-aware request-scoped tool discovery by @MiMoHardFather in #1923
+  - mcp: support client-side sampling with audio by @wqymi in #1972
+  - compaction: per-model early-compaction budget, and fix the Codex context clamp by @yanyihan-xiaomi in #1930
+  - provider: replay unsigned Anthropic reasoning by @MiMoHardFather in #1906
+  - session: render Claude environment dynamically by @MiMoHardFather in #1990
+  - skill: add Playwright CLI automation bundle by @MiMoHardFather in #1917
+  - skill: add Grok Build CLI guide + localize its metadata by @MiMoHardFather in #1911, #1927
+  - skill: separate model reachability from authorization by @yanyihan-xiaomi in #2026
+  - cli: add local install script by @MiMoHardFather in #1910
+  - config: disable auto-dream and auto-distill by default by @JinyuXiang-Mimo in #1919
+  Bug Fixes
+  - orchestrator: route to an existing session instead of creating one — roster, tool-result affordances, and the guards that back them by @wqymi in #1741
+  - actor: derive liveness from last activity, not last completed step — a child blocked mid-step was indistinguishable from a dead one by @wqymi in #1965
+  - actor: make spawn the default and run the exception in the tool prompt by @wqymi in #1942
+  - worktree,bash: propagate the repo's git identity into worktrees and bash commits — never invent one by @wqymi in #1825
+  - provider: never send a message with empty content (the Bedrock/Anthropic 400) — producer + backstop + inbox invariant by @wqymi in #1948
+  - provider: enable reasoning effort variants for DeepSeek models, scoped to the official API by @anandlo, @MiMoHardFather in #1895, #1913
+  - provider: send function tools to OpenAI Responses with explicit strict: false by @clyfish in #2028
+  - provider: retry internal request timeouts by @MiMoHardFather in #1989
+  - session: retry OpenAI stream server errors by @MiMoHardFather in #2029
+  - session: honor the configured context limit; prevent duplicate context rebuilds; remove the context pressure nudge by @yanyihan-xiaomi in #1997, #2032, #1998
+  - session: inject every skill mentioned in a slash-command message; send skill instructions as user reminders by @yanyihan-xiaomi, @MiMoHardFather in #1929, #1988
+  - session: persist missing-model assistant errors by @peipeiwang-xiaomi in #2024
+  - rebuild: make manual /rebuild perform an on-the-spot rebuild with writer-freshness + waiting UI by @wqymi in #1752
+  - checkpoint: delete the writer's blind failure count, classify the failure, and give the final threshold a bounded recovery; don't count a timed-out writer wait as a failure by @wqymi in #1945, #1938
+  - mcp: negotiate per-turn lifecycle notifications by @wqymi in #1851
+  - codex: cap imported GPT context at 300K by @MiMoHardFather in #1926
+  - tui: render actor-hosted transcripts, refuse only runtime-spawned agent hosts; keep the transcript alive after a directory switch by @wqymi in #1964, #1953
+  - tui: stop context readout showing a stale figure after /rebuild; make post-rebuild pending-detection independent of message order by @wqymi in #1999, #2002
+  - tui: render exec like bash — collapsed state caps output instead of hiding it by @yanyihan-xiaomi in #1941
+  - tui: add force-switch mode hotkey bypassing the mid-session lock by @wqymi in #1881
+  - tui: keep completed actor actions terminal; restore recent model on startup; keep agent on declined plan entry by @yanyihan-xiaomi, @MiMoHardFather in #1903, #1908, #1996
+  - tui: stop the sidebar surviving a shrink, and stop scrollbar drags firing adjacent controls by @yanyihan-xiaomi in #2021
+  - tui: repair orphaned running tool parts; stop a directory 403 from killing the TUI by @wqymi in #1960
+  - log: isolate writers and flush safely on exit; keep log records off the TUI terminal by @yanyihan-xiaomi in #1904, #1928
+  - workflow: read built-in workflow scripts through a build-time macro, not an import by @yanyihan-xiaomi in #2023
+  - server: stop emitting a dangling $ref, unbreaking SDK codegen by @yanyihan-xiaomi in #2027
+  - release: retry failed npmmirror syncs and report unsynced packages by @yanyihan-xiaomi in #1902
+  Refactor
+  - tool: remove plan_enter so only the user enters plan mode by @yanyihan-xiaomi in #2018
+  - session: revert the empty-step guard that mis-flagged no-arg tool calls by @wqymi in #1782
+  Docs
+  - add TUI rendering troubleshooting by @yanyihan-xiaomi in #2033
+  - simplify Claude Code skill trigger description by @MiMoHardFather in #1912
+  Internal / CI
+  - make three environment-dependent test suites deterministic by @yanyihan-xiaomi in #1933
+  - localize Playwright slash command; ignore Playwright CLI artifacts by @MiMoHardFather in #1934, #1918
+  New Contributors
+  - @anandlo made their first contribution in https://github.com/XiaomiMiMo/MiMo-Code/pull/1895
+  - @peipeiwang-xiaomi made their first contribution in https://github.com/XiaomiMiMo/MiMo-Code/pull/2024
+  Full Changelog: https://github.com/XiaomiMiMo/MiMo-Code/compare/v0.1.9...v0.1.10
+ReleaseNotesUrl: https://github.com/XiaomiMiMo/MiMo-Code/releases/tag/v0.1.10
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://mimo.xiaomi.com/mimocode/start
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

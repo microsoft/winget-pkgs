@@ -1,0 +1,41 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: ZMGID.Kivio
+PackageVersion: 2.8.5
+PackageLocale: zh-CN
+ShortDescription: 轻量桌面 AI 客户端与屏幕级 Agent：聊天、工具、翻译、OCR、视觉问答，放进一个小应用。
+Description: |-
+  Kivio 是一个小体积桌面 AI 客户端，内置 Agent 运行时。常驻托盘或菜单栏，需要时再出现，比浏览器里的 AI 工作台更轻。
+  - Kivio Agent —— 聊天、项目、助手、记忆、文件/图片附件、MCP、Skills、本地工具（文件操作、终端、网页抓取/搜索、Pyodide run_python）。
+  - Lens —— 基于截图的视觉问答、OCR、公式提取、文本优化，可选联网来源回答。
+  - 快速翻译 —— 输入文本、选中文本、窗口、任意屏幕区域。
+  - 自带模型选择权 —— 支持 OpenAI 兼容接口与 Anthropic Messages，可按功能分别路由模型，多 Key 故障转移。
+  - 文档可直接用 —— PDF / Word / Excel 工作流跑在随包的离线 Pyodide 沙箱，不依赖首次运行从 CDN 下载。
+  - 默认安静 —— 无遥测；API Key 与对话数据留在本机
+Tags:
+- 人工智能
+- 大语言模型
+- 聊天机器人
+ReleaseNotes: |-
+  Kivio Desktop v2.8.5
+  桌面 AI 助手 · macOS (Apple Silicon) + Windows。Desktop AI assistant for macOS (Apple Silicon) and Windows.
+  下载 / Downloads
+  - Windows — Kivio.Desktop_2.8.5_x64-setup.exe（NSIS 安装包 / installer）
+  - macOS — Kivio.Desktop_2.8.5_aarch64.dmg（Apple Silicon，未签名 / unsigned）
+    - 首次启动：右键 → 打开，或运行 xattr -cr "/Applications/Kivio Desktop.app"
+    - First launch: right-click → Open, or run xattr -cr "/Applications/Kivio Desktop.app"
+  新版本亮点 / What's New
+  - 输入区、快捷键与「一 agent 一对话」 / Composer, hotkeys, and one-agent-per-conversation — 输入框上的选择器改为紧凑、按钮锚定的弹层（助手 / 多模型 / 来源三处统一），上下文指示器与代码块外框重做；快捷键页新增「关闭聊天窗」，并补上恢复默认与占用检测；set context 现在像项目一样显示。内置 Agent 的会话一旦有消息就锁定 agent 切换 —— 此前只有本地 CLI 这么锁，内置的换完等于换了个大脑接着同一段上下文。顺带修掉空项目建文件夹失败与 Windows caption 关闭字形。The pickers above the composer are now compact, button-anchored popovers (assistant / multi-model / sources share one spec), and the context indicator and code-block chrome were reworked. The hotkeys page gains "close chat window" plus restore-defaults and conflict detection, and set context is displayed like projects are. A built-in-agent conversation locks its agent once it has messages — previously only local CLIs did, so switching mid-conversation swapped brains under one context. Also fixes folder creation in an empty project and the Windows caption close glyph.
+  - 思考等级：不再被协议静默降档，可逐模型覆盖 / Reasoning effort: no more silent protocol-level downgrade, and per-model overrides — 选 xhigh 却发出 high 的根因是按 api_format 做的第二层白名单：但「认哪几档」是逐模型的（同一个 OpenAI 端点，xhigh 在 gpt-5.6 上可用、传给 gpt-5-codex 就 400），按协议粒度卡必然错，还静默改档。现在四个适配器原样下发用户所选档位，选错就吃 provider 的 400；能选哪几档由模型库逐模型门控，并按各家文档补齐（gpt-5.6 全家加 max、Anthropic 按 4.6 分界、GLM-5.x 只 high/max 等）。模型详情抽屉里可以逐模型覆盖，全关即不下发等级字段。Picking xhigh but sending high came from a second whitelist keyed on api_format — but which levels a model accepts is per-model (on the same OpenAI endpoint, xhigh works on gpt-5.6 and 400s on gpt-5-codex), so protocol-granularity gating is wrong by construction and silently rewrote your choice. All four adapters now send exactly what you picked and let the provider's 400 speak; the model database is the only gate, filled in per vendor docs (max across the gpt-5.6 family, an Anthropic 4.6 cutoff, high/max only for GLM-5.x, and so on). The model-detail drawer can override the list per model, and clearing it drops the field entirely.
+  - 消息列表部分虚拟化，底部跟随不再抢滚动 / Partially virtualized message list that no longer fights your scroll — 只虚拟化更早的历史，最近一段始终实挂载，流式气泡与落库消息高度一致。钉底在第二帧前重新确认跟随状态：此前流式中几乎每帧都在钉底，用户上滚会被排队的 rAF 拽回底部。用户脱离跟随时冻结虚实边界，正在读历史时脚下不再跳。Only older history is virtualized; the recent window stays really mounted, so streaming bubbles and persisted messages measure the same. Pin-to-bottom re-checks follow state before its second frame — streaming used to pin almost every frame, so scrolling up got yanked back by a queued rAF. Leaving follow mode freezes the virtual/mounted boundary, so the ground stops shifting while you read history.
+  - macOS 图标适配系统外观 / macOS icon follows the system appearance — 感谢 @HappyDIY（#22）。Thanks to @HappyDIY (#22).
+  - 界面细节 / UI details — macOS 顶栏那条分隔线改为量一次交通灯真实中心（灯的 y 由 AppKit 决定、随系统版本变，写死常数必然「这台对了那台错」）；顶栏第一枚按钮与侧栏卡片对齐同一条竖线；上下文圆环从 conic-gradient 换成 SVG 描边（半透/点阵底上不再是一坨实白）；内嵌设置页与首次引导也变成浮起卡片；扩展中心页互切、以及任何弹层展开的第一帧都不再闪；矮窗口下设置左栏底部的「返回对话」不再被裁。The macOS titlebar divider now measures the real traffic-light center once (AppKit decides that y and it moves between OS versions, so any constant is right on one machine and wrong on the next); the first titlebar button lines up with the sidebar card; the context ring moved from conic-gradient to an SVG stroke (no more solid-white blob on translucent backdrops); embedded settings and first-run onboarding became floating cards too; switching between extension pages and opening any popover no longer flashes on the first frame; and in short windows the settings sidebar's "back to chat" is no longer clipped.
+  - 窗口材质与帧率 / Window materials and frame rate — 台前调度切窗掉帧修好：macOS Menu 材质此前按焦点手动增删 NSVisualEffectView（等于在切窗动画中途整窗重绘 + 实时模糊重算），改为常驻并把焦点交给 AppKit；材质没生效时窗口设回 opaque，不再白付合成开销。Win10 上没有 Mica（build < 22000），但 tauri 的 set_effects 丢掉了失败结果，前端误判材质生效把外壳设成透明 —— 直接透出桌面；现在由后端回报真实结果，只有成功才允许透明。Stage Manager no longer drops frames: the macOS Menu material used to add and remove an NSVisualEffectView on focus changes (a full-window repaint plus live blur recompute mid-animation) and is now permanent with focus left to AppKit; when no material is active the window goes back to opaque instead of paying compositing for nothing. On Windows 10 there is no Mica (build < 22000), but tauri's set_effects discarded the failure, so the frontend made the shell transparent and you saw straight through to the desktop; the backend now reports the real result and only success unlocks transparency.
+  - 运行时选择：Kivio Agent 与本机 CLI 同列 / Runtime picker: Kivio Agent sits with the local CLIs — 「内置 / 本地 CLI」分段器和下面的代理网格表达的是同一件事，去掉一级：Kivio 作为第一张卡片直接排进列表。The built-in/local-CLI segmented control and the agent grid below it said the same thing twice; the segmented control is gone and Kivio is simply the first card in the list.
+  - 引导与文档 / Onboarding and docs — 首次引导的功能卡按现在的产品面貌重写（AI 客户端 / 本地 CLI Agent / 扩展 / 知识库 / Lens 与翻译 / 工作区），官网补上「右侧 Dock」与「生命周期 Hooks」两页。The first-run feature cards were rewritten to match what the app is today (AI client / local CLI agents / extensions / knowledge base / Lens and translation / workspace), and the website gained pages for the right dock and lifecycle hooks.
+
+  完整变更 / Full changelog: https://github.com/ZMGID/kivio/compare/v2.8.4...v2.8.5
+ReleaseNotesUrl: https://github.com/ZMGID/kivio/releases/tag/v2.8.5
+ManifestType: locale
+ManifestVersion: 1.12.0

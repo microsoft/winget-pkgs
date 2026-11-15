@@ -1,0 +1,63 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: aube.aube
+PackageVersion: 2.8.2
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  v2.8.2 brings aube's rewrites of Yarn Classic, npm and pnpm lockfiles closer to each tool's own output. It also stops large tarball downloads from failing after 5 minutes while data is still arriving, and fixes several install and resolution differences from pnpm.
+  Fixed
+
+  Lockfiles
+  - Yarn Classic yarn.lock (#1802): re-resolving no longer rewrites every entry. aube now keeps resolved URLs, including the #sha1 fragment, and quotes keys only where Yarn does. Block headers list only the ranges that consumers declare, and blocks are sorted the way Yarn sorts them. As a result, bumping one dependency changes only that package's entries:
+    -"accepts@1.3.8", "accepts@~1.3.8":
+    +accepts@~1.3.8:
+       version "1.3.8"
+    +  resolved "https://registry.yarnpkg.com/accepts/-/accepts-1.3.8.tgz#0bf0be125b67014adcb0b0921e62db7bffe16b2e"
+  - npm package-lock.json (#1814): aube add and other rewrites leave unchanged entries byte-identical to npm's output.
+    - Keys are now sorted the way npm sorts them, so "dev": true no longer moves.
+    - funding values are kept exactly as written, including type and arrays with more than one URL.
+    - New entries still record funding only as {"url": …}.
+  - pnpm 11 peer suffixes (#1805): when a dependency needs a peer resolved from higher in the tree, the parent package's snapshot key now includes that peer even if the parent declares its own peers, as pnpm 11 does. For example, aube now writes @ai-sdk/react@4.0.138(react@19.3.1)(zod@4.6.7). The peer is also listed under transitivePeerDependencies:. Snapshot keys for affected packages change once on the next resolve; frozen installs read existing lockfiles unchanged.
+  - catalog: dependencies with ranged overrides (#1816): an override with a version range, such as "is-odd@^3": "catalog:", no longer applies to a dependency declared as catalog:. This matches pnpm. The importer keeps specifier: 'catalog:', so pnpm install --frozen-lockfile no longer fails with ERR_PNPM_OUTDATED_LOCKFILE. Catalog entries that are referenced only by an override value are no longer written to catalogs:. Lockfiles that older aube versions wrote for this setup are reported as outdated until the next aube install rewrites them.
+
+  Install and resolution
+  - Slow tarball downloads (#1804): a large tarball on a slow connection no longer fails with operation timed out after fetchTimeout (default 5 minutes) while data is still arriving. For tarballs, fetchTimeout is now the longest time a download can go without receiving data; a stalled download still fails and is retried. Registry metadata requests still use fetchTimeout as a limit on the whole response.
+  - Colliding npm aliases in frozen installs (#1812, @chrismatix): aube install --frozen-lockfile could install the wrong package when an npm alias shared a name and version with an ordinary package or another alias. For example, compiler: npm:@test/compiler@1.0.0 in one workspace member and compiler: 1.0.0 in another. Each member now gets the correct package and its binaries.
+  - Hidden hoisting (#1815): when a package has several versions in the graph, node_modules/.aube/node_modules now gets the version closest to an importer, as with pnpm. Ties are broken by dependency path. In the default layout, the root project's direct dependencies are no longer hidden-hoisted because Node already finds them in the root node_modules/. Previously, an undeclared import from a package could resolve to a different version than under pnpm. In one reported case, Vite+ bundled the wrong rolldown version.
+  - supportedArchitectures platform lists (#1813): pnpm-workspace.yaml can now use pnpm 12.5's list form, which previously failed with invalid type: sequence:
+    supportedArchitectures:
+      - darwin-arm64
+      - linux-x64-manylinux_2_28
+    Entries can be <os>-<cpu>[-<libc>], Rust target triples or current. aube merges the OS, CPU and libc values from all entries, so it can allow a few more combinations than pnpm. For example, darwin-arm64 plus linux-x64 also allows darwin-x64.
+  - aube outdated / aube update warnings (#1807): aube no longer warns "updates hidden by minimumReleaseAge" when the hidden version is a prerelease latest outside the manifest range that is older than the cutoff (for example elm-test@0.19.3-0).
+
+  💚 Sponsor aube
+  aube is built and maintained by @jdx, an open source developer at entire.io, the title sponsor of his open source work.
+  If aube saves your team install time or CI minutes, please consider becoming an individual or company sponsor. Your support funds ongoing development and helps keep aube fast, free, and independent.
+ReleaseNotesUrl: https://github.com/aubepkg/aube/releases/tag/v2.8.2
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

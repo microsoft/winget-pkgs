@@ -1,0 +1,115 @@
+# Created with komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: OpenAI.Codex
+PackageVersion: 0.66.0
+PackageLocale: en-US
+Publisher: OpenAI, Inc.
+PublisherUrl: https://github.com/openai
+PublisherSupportUrl: https://github.com/openai/codex/issues
+Author: OpenAI, Inc.
+PackageName: Codex CLI
+PackageUrl: https://github.com/openai/codex
+License: Apache-2.0
+LicenseUrl: https://github.com/openai/codex/blob/HEAD/LICENSE
+Copyright: Copyright 2025 OpenAI
+CopyrightUrl: https://github.com/openai/codex/blob/HEAD/NOTICE
+ShortDescription: Codex CLI is an open‑source local coding agent that runs in your terminal, letting you write, edit, and understand code without leaving the command line.
+Moniker: codex
+Tags:
+- agent
+- ai
+- cli
+- llm
+- openai
+ReleaseNotes: |-
+  Highlights
+  - Execpolicy: TUI can whitelist command prefixes after an approval, sandbox denials propose an amendment you can accept, shell MCP now runs execpolicy so MCP tools follow the same rules, and
+    fallback checks inspect each pipeline segment so unsafe tails (e.g., | rm -rf) are still caught (#7033, #7543, #7609, #7653, #7544).
+  - Unified exec & shell stability: status line shows clearer progress, Windows unified-exec crash fixed, long commands wrap without breaking layout, and SSE/session cleanup reduces stuck or
+    dangling sessions after tool calls (#7563, #7620, #7655, #7594, #7592).
+  - TUI updates: cross-platform shortcut handling is consistent (Ctrl+N/P and list selection now work everywhere), so navigation matches between overlays, lists, and text areas (#7583, #7629).
+  - Apply-patch: Windows CRLF line endings are preserved, new e2e scenarios cover more patch shapes, and Windows-specific test coverage reduces regressions in patch flows (#7515, #7567, #7554). Thanks to @cnaples79 who contributed the core part of this fix!
+  - Cloud exec: codex cloud exec accepts --branch for remote runs and now exposes status/diff/apply flows so you can inspect and apply changes from the cloud path (#7602, #7614).
+  - Signing: Linux artifacts are signed via sigstore. (#7674).
+  - General fixes: parallel tool-call chat now returns correctly, ghost snapshot tokens aren’t billed, missing tool names no longer crash the litellm proxy, and migration prompts use HTTPS links
+    (#7634, #7638, #7724, #7705).
+  PRs Merged
+  - #6793 FIX: WSL Paste image does not work @Waxime64
+  - #6846 feat(core) Add login to shell_command tool @dylan-hurd-oai
+  - #6918 Add Enterprise plan to ChatGPT login description @ae-openai
+  - #7033 whitelist command prefix integration in core and tui @zhao-oai
+  - #7310 Inline response recording and remove process_items indirection @aibrahim-oai
+  - #7515 fix(apply-patch): preserve CRLF line endings on Windows @dylan-hurd-oai
+  - #7543 execpolicy tui flow @zhao-oai
+  - #7544 Refactor execpolicy fallback evaluation @zhao-oai
+  - #7547 Use shared check sandboxing @pakrym-oai
+  - #7554 chore(core): test apply_patch_cli on Windows @dylan-hurd-oai
+  - #7561 Do not emit start/end events for write stdin @pakrym-oai
+  - #7563 Slightly better status display for unified exec @pakrym-oai
+  - #7567 chore(apply-patch) scenarios for e2e testing @dylan-hurd-oai
+  - #7571 remove model_family from `config @aibrahim-oai
+  - #7580 feat: update sandbox policy to allow TTY @jif-oai
+  - #7583 Fix handle_shortcut_overlay_key for cross-platform consistency @448523760
+  - #7588 chore: default warning messages to true @jif-oai
+  - #7591 chore: tool tip for /prompt @jif-oai
+  - #7592 fix: release session ID when not used @jif-oai
+  - #7593 chore: review in read-only @jif-oai
+  - #7594 fix: sse for chat @jif-oai
+  - #7595 Update execpolicy.md @zhao-oai
+  - #7602 add --branch to codex cloud exec @nornagon-openai
+  - #7603 Add models endpoint @aibrahim-oai
+  - #7605 fix(app-server): add duration_ms to McpToolCallItem @owenlin0
+  - #7609 feat: exec policy integration in shell mcp @zhao-oai
+  - #7610 fix: taking plan type from usage endpoint instead of thru auth token @zhao-oai
+  - #7611 fix(app-server): add will_retry to ErrorNotification @owenlin0
+  - #7614 cloud: status, diff, apply @nornagon-openai
+  - #7615 chore: refactor to move Arc concern outside exec_policy_for @bolinfest
+  - #7616 Call models endpoint in models manager @aibrahim-oai
+  - #7617 fix: add integration tests for codex-exec-mcp-server with execpolicy @bolinfest
+  - #7620 Fix unified_exec on windows @pakrym
+  - #7621 Wire with_remote_overrides to construct model families @aibrahim-oai
+  - #7626 fix typo @zhao-oai
+  - #7629 fix(tui): add missing Ctrl+n/Ctrl+p support to ListSelectionView @pppp606
+  - #7634 fix: chat completion with parallel tool call @jif-oai
+  - #7638 fix: ignore ghost snapshots in token consumption @jif-oai
+  - #7645 Also load skills from repo root. @xl-openai
+  - #7648 Add remote models feature flag @aibrahim-oai
+  - #7651 fix: OTEL HTTP exporter panic and mTLS support @asm89
+  - #7652 Move justfile to repository root @joshka-oai
+  - #7653 proposing execpolicy amendment when prompting due to sandbox denial @zhao-oai
+  - #7654 fix: exec-server stream was erroring for large requests @bolinfest
+  - #7655 fix wrap behavior for long commands @zhao-oai
+  - #7660 Restore status header after stream recovery @joshka-oai
+  - #7665 docs: fix documentation of rmcp client flag @JaySabva
+  - #7669 fix(doc): TOML otel exporter example — multi-line inline table is invalid @448523760
+  - #7672 docs: Remove experimental_use_rmcp_client from config @JaySabva
+  - #7673 docs: point dev checks to just @voctory
+  - #7674 feat: linux codesign with sigstore @shijie-oai
+  - #7675 feat: windows codesign with Azure trusted signing @shijie-oai
+  - #7678 fix: clear out space on ubuntu runners before running Rust tests @bolinfest
+  - #7680 fix: ensure macOS CI runners for Rust tests include recent Homebrew fixes @bolinfest
+  - #7685 fix: refine the warning message and docs for deprecated tools config @gameofby
+  - #7705 fix: update URLs to use HTTPS in model migration prompts @rakleed
+  - #7709 Enhance model picker @aibrahim-oai
+  - #7711 Add formatting client version to the x.x.x style. @aibrahim-oai
+  - #7713 chore(deps): bump ts-rs from 11.0.1 to 11.1.0 in /codex-rs @dependabot[bot]
+  - #7714 chore(deps): bump derive_more from 2.0.1 to 2.1.0 in /codex-rs @dependabot[bot]
+  - #7715 chore(deps): bump insta from 1.43.2 to 1.44.3 in /codex-rs @dependabot[bot]
+  - #7716 chore(deps): bump wildmatch from 2.5.0 to 2.6.1 in /codex-rs @dependabot[bot]
+  - #7722 load models from disk and set a ttl and etag @aibrahim-oai
+  - #7724 Fixed regression for chat endpoint; missing tools name caused litellm proxy to crash @etraut-openai
+  - #7729 feat: add is-mutating detection for shell command handler @jif-oai
+  - #7745 Make the device auth instructions more clear. @mzeng-openai
+  - #7747 updating app server types to support execpoilcy amendment @zhao-oai
+  - #7748 Remove legacy ModelInfo and merge it with ModelFamily @aibrahim-oai
+  - #7749 fix: pre-main hardening logic must tolerate non-UTF-8 env vars @bolinfest
+  - #7753 Revert "feat: windows codesign with Azure trusted signing" @shijie-oai
+  - #7754 override instructions using ModelInfo @aibrahim-oai
+  - #7756 use chatgpt provider for /models @aibrahim-oai
+ReleaseNotesUrl: https://github.com/openai/codex/releases/tag/rust-v0.66.0
+Documentations:
+- DocumentLabel: README
+  DocumentUrl: https://github.com/openai/codex/blob/HEAD/README.md
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

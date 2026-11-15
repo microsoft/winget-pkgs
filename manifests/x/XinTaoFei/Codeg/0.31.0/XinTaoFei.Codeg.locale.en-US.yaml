@@ -1,0 +1,67 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: XinTaoFei.Codeg
+PackageVersion: 0.31.0
+PackageLocale: en-US
+Publisher: codeg
+PublisherUrl: https://github.com/xintaofei
+PublisherSupportUrl: https://github.com/xintaofei/codeg/issues
+PackageName: codeg
+PackageUrl: https://github.com/xintaofei/codeg
+License: Apache-2.0
+LicenseUrl: https://github.com/xintaofei/codeg/blob/HEAD/LICENSE
+ShortDescription: Aggregate and browse AI coding agent sessions (Claude Code, Codex, Gemini CLI, etc.) in one place. Desktop app, self-hosted server, or Docker.
+Description: Codeg (Code Generation) is an enterprise-grade multi-agent coding workspace. It unifies local AI coding agents (Claude Code, Codex CLI, OpenCode, Gemini CLI, OpenClaw, Cline, etc.) in a desktop app, standalone server, or Docker container — enabling remote development from any browser — with conversation aggregation, parallel git worktree development, MCP/Skills management, chat channel interactions (Telegram, Lark, iLink, etc.), and integrated Git/file/terminal workflows.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claude-code
+- code
+- codex
+- coding
+- gemini-cli
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  codeg has a browser now. A link in a conversation, a tool result or the terminal opens as a tab beside your files — with profiles, downloads, find in page and a locked-down preview for local HTML — instead of throwing you into another app.
+  It is also a surface you and an agent can share: hand a page, an element, a screenshot or a console error straight into the conversation, or let an agent read and drive a page you have shared, with everything it does written on the tab where you can watch it.
+  Alongside it: the blocking question card folds away to its header, qoder sessions finally report what they cost, and a cancelled task put back on the board starts over cleanly.
+  Built-in browser
+  - Links open in a tab beside your files instead of leaving the app — from a conversation, a tool result, the terminal, the editor or a notification, on macOS, Windows and Linux; ⌘/Ctrl-click uses your system browser just that once, and Settings → Built-in browser sets the destination per source, per site, or turns the whole thing off. (#723)
+  - A tab is a real browser — back, forward, reload and the address bar in one row, find in page with ⌘F, downloads into your downloads folder, pop-ups that say why they were blocked and offer to open anyway, and an error page that names what went wrong and offers Retry.
+  - Tabs come back after a restart, and can hand their memory back after half an hour in the background if you would rather have the memory than the page's state.
+  - Profiles keep two sign-ins apart — separate cookies, storage and logins, a choice of which profile new tabs use, the same page re-openable in another, and browsing data clearable one profile at a time; signing in with Google from a tab works too, which embedded browsers are normally refused.
+  - A server you start in a terminal comes to you — codeg notices the address it prints and offers it in a toast (or opens a background tab, or stays quiet — your choice), only ever for addresses on this machine, and the “+” at the end of the tab strip lists the local servers running right now.
+  - HTML files preview in a locked-down document view — no scripts until you press Enable, and even then only over files in the document's own folder with no way to reach the network; the old inline preview stays one switch away.
+  - Hand what you are looking at to the conversation — the page, an element you pick on it, a screenshot, or the errors its console printed, each landing in the composer as a badge you can still take back before sending.
+  - Let an agent work on the page in front of you — with the "Read and drive the built-in browser" tool group switched on (it is off for every agent until you do), an agent can list your open tabs, read a shared page's structure, click, type, press keys, choose options, screenshot it, read its console, and open, navigate or close tabs.
+  - And see exactly what it did — each tab's address bar says what it is sharing and takes it back in one press, every action an agent takes is written on the tab itself with refusals included, sharing ends the moment the page leaves that site, and the standing level for new pages (read and act, read only, or nothing) is yours to set.
+  - An agent running its own JavaScript is a separate switch, off by default — each snippet is shown to you for approval before it runs, and approving one never approves the next.
+  - Platform notes — on Linux a tab is a window of its own rather than a pane inside the workspace, and the locked-down HTML document view is macOS and Windows only. Favicons, download progress and background preloading are not in this first release.
+  New
+  - Collapse the blocking question card to its header — one click gives the message list its space back while the question stays pending, and the card re-opens itself if the agent replaces the question set or your answer comes back failed. (#622, #623, @yunsheng111)
+  - The composer's token popover shows your cache hit rate — one row under Total, to one decimal, with the Token Usage dashboard and its share card now printing the same number instead of rounding to a whole percent; a session that reports no cache counters at all leaves the row out rather than claiming a confident 0.0%. (#771, @gongcavalry)
+  - Every model is captioned the way its own agent names it — codeg records the id/name pairs an agent's model picker advertises, so the reply footer, the session details and the sidebar hover chip say Qwen3.8-Flash where a qoder transcript records the account-internal qfmodel.
+  - Adding an MCP server offers the official Chrome DevTools server by name — one press fills the form with the right package, which matters because the registry carries same-named copies from other owners; you still pick the agents and press Create.
+  Improved
+  - Updated bundled agents: Claude Code ACP 0.79.0, CodeBuddy 2.155.0, Kimi Code 2.0.2, Cursor 2026.09.15, Qoder 1.1.57.
+  - An agent asking you a question no longer costs two dialogs — under a permission mode that consults you before every MCP tool call (Claude Code's default), the real question card was preceded by a raw "run this tool?" approval that dumped the questions as JSON; codeg now recognizes its own ask tool and answers that one for you, for that turn only.
+  - Pi reads each model's context window from its own models.json — resolved by provider and id, and honoring pi's 128K default for a listed model that declares none, so a self-hosted or proxied model shows a real percentage instead of a raw token count or a window pi is not running with. (#771, @gongcavalry)
+  - A shell approval on Claude Code 0.79 keeps its explanation — the new adapter turns the card's heading into the raw command, which would have printed the command twice and dropped the one-line description of what it does.
+  - Cursor's new build keeps codeg's retry fix — Cursor's ACP sessions retry nothing on their own, and the 2026.09.15 build renamed the internals the fix patches, which would have left new installs silently unpatched and ended a turn on the first transport blip.
+  Fixed
+  - Qoder sessions report what they actually cost — qoder zeroes its own token counters unless told otherwise, so every session read 0 tokens and drew no context ring; codeg now turns the counters on and reads qoder's own occupancy signal, so sessions recorded before this release get a gauge too, and a cached prefix is no longer counted twice (a measured turn read 39,384 of 200,000 against qoder's own 10.26%).
+  - A PowerShell call renders as a terminal card — with its command line and its output, live and reopened, instead of a raw JSON dump under a terminal icon; Claude Code and pi both.
+  - An approval for a command starting with { or [ — [ -f x ] && y, { npm test; }, a patch-writing heredoc — shows the command again instead of an approval card with no command in it at all.
+  - A requeued task starts over instead of resuming the run you cancelled — the requeue kept the cancelled run's conversation, so the next start loaded the killed session, settled the task as canceled, and that task never ran again. (#649 reported by @ijry, #714, @Adam-Dalloul)
+  - A requeued run keeps the feedback you returned with it — review → "rework this" → cancel → requeue replayed the original order alone, into a worktree that already holds the stopped run's work, and a returned question arrived carrying a licence to commit; the prompt now carries the returned turn first and your note after it, and says the worktree is not empty.
+  - Closing the window while macOS is in fullscreen works — hide, minimize-to-tray or exit left a black blank with leftover toolbar chrome; the fullscreen Space is now torn down first, and only when the window is really being dismissed, so answering "cancel" to the close prompt keeps your fullscreen. (#507 reported by @Lparksi, #767, @Frank-zhu0404)
+  - A session tab no longer sticks to the pointer — a click whose release never reached the window left the tab latched to the cursor, and with it a global drag lock that stopped every other drag in the app until reload. (#769, #770, @turingcat)
+  Thanks to @yunsheng111, @gongcavalry, @Adam-Dalloul, @Frank-zhu0404 and @turingcat for contributing to this release, and to @ijry and @Lparksi for the reports.
+ReleaseNotesUrl: https://github.com/xintaofei/codeg/releases/tag/v0.31.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,84 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: argoproj.argocd
+PackageVersion: 3.5.4
+PackageLocale: en-US
+Publisher: Argo Project
+PublisherUrl: https://argoproj.github.io/
+PublisherSupportUrl: https://github.com/argoproj/argo-cd/issues
+Author: Argo Project
+PackageName: ArgoCD
+PackageUrl: https://github.com/argoproj/argo-cd
+License: Apache-2.0
+LicenseUrl: https://github.com/argoproj/argo-cd/blob/HEAD/LICENSE
+ShortDescription: A command line tool for communicating with ArgoCD
+Moniker: argocd
+Tags:
+- argocd
+- k8s
+- kubernetes
+ReleaseNotes: |-
+  ## Quick Start
+
+  ### Non-HA:
+
+  ```shell
+  kubectl create namespace argocd
+  kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/v3.5.4/manifests/install.yaml
+  ```
+
+  ### HA:
+
+  ```shell
+  kubectl create namespace argocd
+  kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/v3.5.4/manifests/ha/install.yaml
+  ```
+
+  ## Release Signatures and Provenance
+
+  All Argo CD container images are signed by cosign.  A Provenance is generated for container images and CLI binaries which meet the SLSA Level 3 specifications. See the [documentation](https://argo-cd.readthedocs.io/en/stable/operator-manual/signed-release-assets) on how to verify.
+
+  ## Release Notes Blog Post
+  For a detailed breakdown of the key changes and improvements in this release, check out the [official blog post](https://blog.argoproj.io/argo-cd-v3-0-release-candidate-a0b933f4e58f)
+
+  ## Upgrading
+
+  If upgrading from a different minor version, be sure to read the [upgrading](https://argo-cd.readthedocs.io/en/stable/operator-manual/upgrading/overview/) documentation.
+
+  ## Changelog
+  ### Security fixes
+
+  • CRITICAL：A Kustomize remote ref can run commands in the repo-server ([GHSA-9v9p-x54c-58gc](https://github.com/argoproj/argo-cd/security/advisories/GHSA-9v9p-x54c-58gc))
+  • CRITICAL：A Kustomize Helm config home can run commands in the repo-server ([GHSA-fw5c-w8rc-j7fx](https://github.com/argoproj/argo-cd/security/advisories/GHSA-fw5c-w8rc-j7fx))
+  • CRITICAL：A Jsonnet import can read files from the repo-server ([GHSA-m3vr-7329-44ww](https://github.com/argoproj/argo-cd/security/advisories/GHSA-m3vr-7329-44ww))
+  • CRITICAL：AppProject restrictions bypassed by PreDelete/PostDelete resource hooks ([GHSA-fmxq-cgp8-87wp](https://github.com/argoproj/argo-cd/security/advisories/GHSA-fmxq-cgp8-87wp), CVE-2026-77459)
+  • HIGH：Login failure rate limit can be bypassed via concurrent requests ([GHSA-4439-h7jw-5cjj](https://github.com/argoproj/argo-cd/security/advisories/GHSA-4439-h7jw-5cjj), CVE-2025-61560)
+  • HIGH：Command injection via a repository proxy URL on SSH Git repositories ([GHSA-j6cw-g6p4-7hch](https://github.com/argoproj/argo-cd/security/advisories/GHSA-j6cw-g6p4-7hch), CVE-2026-55797)
+  • MODERATE：Extension proxy RBAC ignores application namespace when applications-in-any-namespace is enabled ([GHSA-g3ff-q88g-chrj](https://github.com/argoproj/argo-cd/security/advisories/GHSA-g3ff-q88g-chrj))
+  • MODERATE：An oversized OCI manifest can exhaust repo-server memory ([GHSA-w996-f2wq-x9c6](https://github.com/argoproj/argo-cd/security/advisories/GHSA-w996-f2wq-x9c6))
+
+  ### Potentially-breaking changes
+
+  • Kustomize builds that render Helm charts no longer honor `helmGlobals.configHome`. Ordinary `http`, `https`, and `oci` chart repositories still work. Builds that depended on a Helm plugin registered from that directory will not ([GHSA-fw5c-w8rc-j7fx](https://github.com/argoproj/argo-cd/security/advisories/GHSA-fw5c-w8rc-j7fx)).
+  • An OCI manifest larger than 4 MiB is now rejected ([GHSA-w996-f2wq-x9c6](https://github.com/argoproj/argo-cd/security/advisories/GHSA-w996-f2wq-x9c6)).
+
+  ### Features
+  • f37dc0c742724e1b5f2393839a24d9664f31ede7：feat(server): log username on login attempts (cherry-pick #29841 for 3.5) (#29861) (@argo-cd-cherry-pick-bot[bot])
+  ### Bug fixes
+  • 5c8aa4620c0a606e9fe5e03a07e3dcaabe81fbe6：fix(cmp): clean up tgz stream temporary directories (#29148) (cherry-pick #29156 for 3.5) (#29773) (@argo-cd-cherry-pick-bot[bot])
+  • 7f0a05834b05103d69d7c150e1ee36541b314696：fix(security): coordinated security fixes (release-3.5) (#30038) (@crenshaw-dev)
+  • 482c71a558b3001e028316232fe2f86c25becb09：fix(ui): manifest viewer jumpiness (#29691) (cherry pick 3.5) (#29725) (@crenshaw-dev)
+  • 1f8100a3db64fdc520b768c5606b6fca4e4ad09c：fix: cherry-pick #29737 (release-3.5) (#29749) (@blakepettersson)
+  • 9886fc1363e92a517b811375505317912cdb82b9：fix: use ObjectMeta in session login test (release-3.5) (#29919) (@crenshaw-dev)
+  ### Other work
+  • a9d0b9684a6470741a9ee61a05d4f70eb76c85d6：fix(manifest-generate-paths): do not report changes on cache miss without path updates (cherry-pick #29442 for 3.5) (#29849) (@argo-cd-cherry-pick-bot[bot])
+  • fc2d94d906db9e0a4650e7936036022cc9fe232d：fix(repo-server): cherry-pick health check timeout resulting in CrashLoopBackOff to release-3.5 branch (#29901) (@aali309)
+  • f0de0be59114d7eb3bfb3b4c2793b65ba013ad1f：test(flaky): accept connection reset by peer as valid mTLS rejection (cherry-pick #28367 for 3.5) (#29850) (@argo-cd-cherry-pick-bot[bot])
+
+  **Full Changelog**：https://github.com/argoproj/argo-cd/compare/v3.5.3...v3.5.4
+
+  <a href="https://argoproj.github.io/cd/"><img src="https://raw.githubusercontent.com/argoproj/argo-site/master/content/pages/cd/gitops-cd.png" width="25%" ></a>
+ReleaseNotesUrl: https://github.com/argoproj/argo-cd/releases/tag/v3.5.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

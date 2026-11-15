@@ -1,0 +1,128 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AtomGit.AtomCode
+PackageVersion: 5.0.7
+PackageLocale: zh-CN
+Publisher: 重庆开源共创科技有限公司
+PublisherUrl: https://atomgit.com/
+PublisherSupportUrl: https://atomgit.com/atomgit_atomcode/atomcode/issues
+PrivacyUrl: https://docs.gitcode.com/docs/help/home/protocol/privacy-policy
+Author: 重庆开源共创科技有限公司
+PackageName: AtomCode
+PackageUrl: https://atomcode.atomgit.com/
+License: MIT
+LicenseUrl: https://atomgit.com/atomgit_atomcode/atomcode/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Yubang Xu
+CopyrightUrl: https://docs.gitcode.com/docs/help/home/protocol/ai-privacy-policy
+ShortDescription: AI 编程助手 在你的终端中运行
+Description: Claude Code / Cursor Agent 的开源平替，住在你的终端里。连接任意 OpenAI 兼容大模型，自主读文件、改代码、跑测试、自我验证 —— 用 Rust 构建。
+Tags:
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  AtomCode v5.0.7 Release Notes
+  发布日期：2026-08-19
+  v5.0.7 聚焦于 WebUI 交互体验与模型管理能力、推理强度（reasoning effort）配置、凭据安全策略加固、Docker/NAS 部署方案，以及大量终端渲染、流式同步与跨端稳定性修复。
+
+  ⚠️ Behavior Changes（注意行为变化）
+  - 默认回合上限调整：普通 coding 回合的默认模型轮次上限由 200 调整为不设上限（[coding] max_rounds = 0）；精确无进展防护仍然独立生效，需要额外保护时可通过 [coding].max_rounds 或 ATOMCODE_TURN_MAX_ROUNDS 显式设置。
+  - Goal 模式轮次/时长默认值调整：goal 模式独立轮次上限默认由 200 调整为 300（并按套餐调用额度调整），墙钟时长上限默认关闭（0）。
+
+  ✨ 新增功能（Features）
+  WebUI 图形界面
+  - 任务完成浏览器通知：任务结束时在浏览器弹出系统通知，支持最短时长、仅后台提醒与跨标签页去重等配置
+  - 可安装浏览器应用（PWA）：支持将 WebUI 安装为独立应用（含应用图标与 manifest）
+  - 持久化 Todo 进度面板：新增常驻 todo 进度面板，跨回合展示任务清单状态
+  - 回合统计与产物展示：聊天布局展示回合耗时统计，并列出回合生成的产物文件
+  - 模型与供应商管理：在设置中管理供应商账号、发现并添加模型、复用已有账号、查看内置预置配置
+  - 会话侧边栏增强：项目内会话扁平化分组、会话预览与列表刷新优化
+  - 版式与字号可调：优化视觉层次，字号改为 rem 缩放、支持调节
+  - 消息时间展示：展示用户/助手消息的发送时间（持久化每回合 started_at）
+  Provider / 模型
+  - 推理强度（reasoning effort）配置：可为模型配置推理强度（low / medium / high / max），并按端点能力声明可选等级
+  - /provider 推理强度多选：TUI 的 /provider 支持按端点支持的等级多选配置
+  - 每模型重试次数配置：支持在 config.toml 中配置 provider 429 重试次数（retry_max_attempts）
+  - CodingPlan 模型策略：强制管理 CodingPlan 模型的策略与推理强度等级
+  TUI 终端界面
+  - 会话预览：在会话选择器中直接预览选中会话的内容
+  - 语义化转录选择：新增语义化的转录文本选择与操作
+  - 鼠标交互增强：支持指针（鼠标）选择、命中现有选择器动作、保守鼠标终端能力
+  - 软换行感知导航：Up/Down 支持软换行感知的视觉行导航
+  - 重复粘贴展开长文本：连续粘贴时自动展开长文本输入
+  Docker / 部署
+  - docker-compose 一键部署：新增 docker-compose 方案，支持 NAS（群晖 / 威联通等）/服务器常驻运行 daemon，含崩溃自动重启、健康检查、数据与项目目录持久化
+  - 多架构镜像构建：支持 amd64 + arm64 双架构镜像构建与推送（build-multiarch.sh）
+  - 安全默认：容器默认仅绑定本机端口，并补充反向代理 + TLS + token 鉴权安全警告
+  安全
+  - 可配置凭据 Shell 防护策略：新增 credential shell guard 策略（off / prompt / strict），支持持久化「始终允许」授权与审批谓词
+  - 敏感路径传播：敏感路径子块阻断传播，同时保留同级正常输出
+  其他
+  - /init 本地化提示：/init 支持按语言生成本地化提示（中/英），并可配置自定义提示文件
+  - 退出码区分：区分命令退出码失败与用户中断，向模型传递准确的结果语义
+  - 子代理路由改进：改进子代理的模型路由与故障恢复
+  - Review 范围钉住：review 的 path confine 支持 review-scope allowlist，将检查范围钉住在变更文件集上
+
+  🛠 修复（Fixes）
+  WebUI
+  - 修复侧边栏列表刷新闪烁、会话切换闪动与作用域切换跳级问题
+  - 修复 IME 输入法组合输入被覆盖、组合状态丢失的问题
+  - 修复忙碌回合缺少加载指示、首个输出前无等待动画的问题
+  - 修复删除会话后工作区计数不更新的问题
+  - 修复回合统计在回合完成前即显示的问题
+  - 修复历史回合时间戳丢失的问题
+  - 修复浏览器通知权限未主动请求的问题
+  - 修复中文相对时间标签不完整的问题
+  - 修复 todo 面板生命周期、用户输入响应按传输通道路由的问题
+  TUI 终端渲染
+  - 修复旧终端上 provider 菜单标记与面板样式降级问题
+  - 修复终端 resize 后 footer 不稳定、命中图未重新发布、拖拽未中止的问题
+  - 修复输入焦点恢复后未重绘的问题
+  - 修复模态搜索导航语义、文本字段光标编辑对齐问题
+  - 修复暗色主题下有序列表标记对比度、复选框标记样式问题
+  - 修复 Windows 上 markdown 表格渲染不稳定的问题
+  - 修复 prompt 历史未按项目隔离的问题
+  - 修复会话恢复缺少上限约束与取消能力的问题
+  - 修复 Orca 终端下 OSC 背景查询跳过的问题
+  Agent / 运行时
+  - 修复并发编辑冲突：同一文件的编辑串行化，防止互相覆盖
+  - 修复流式超时后安全续跑、部分流恢复的边界问题
+  - 移除模型可见的轮次压力提示，避免弱模型被轮次倒计时误导
+  - 修复用户取消后活动计划未退出、steer 确认未协调的问题
+  - 修复空 evaluator 响应被误判为失败的问题
+  - 修复显式 no-verification 请求未被遵守的问题
+  Provider / 网络
+  - 修复 system 消息顺序未归一化的问题（兼容 Qwen / vLLM 等严格模板，多 system 消息正确合并前置）
+  - 修复 OpenAI 工具 schema 归一化问题
+  - 修复 loopback 流量被错误发送到代理的问题
+  - 修复代理配置未从当前发行版配置读取的问题
+  - 修复 reasoning_effort_levels 仅在选择器生效、未在请求值上强制的问题
+  Plugin / Skills
+  - 修复 home 目录下插件 scope 重复枚举的问题（Issue #1400）
+  - 修复别名去重时丢失 scope 身份的问题
+  - 修复迁移后的配置树被误判为第三方而非产品原生的问题
+  - 修复插件重载提示文案错误的问题
+  编辑器集成
+  - 修复 VSCode 会话标签页标题过长挤压关闭按钮的问题
+  - 修复 JetBrains 模型切换下拉框默认项缺少背景高亮的问题
+  其他
+  - 修复 daemon 无法打开会话工作区之外产物文件的问题
+  - 修复图像粘贴在用户输入响应中未预处理的问题
+  - 修复代码检视 serde_json map 键顺序断言、覆盖脚手架过滤器等内部问题
+
+  📚 文档（Docs）
+  - 更新架构文档（core 退役后的模块图与说明）
+  - 新增 NAS docker-compose 一键部署文档与多架构镜像构建文档
+  - 更新官网文档站中英文页面（配置、登录方式、WebUI、常见问题、快捷键等）
+  - 更新配置示例（retry_max_attempts、默认回合上限说明）
+ReleaseNotesUrl: https://atomgit.com/atomgit_atomcode/atomcode/releases/v5.0.7
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://atomcode.atomgit.com/docs/zh/index.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

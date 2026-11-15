@@ -1,0 +1,49 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AIDotNet.OpenCowork
+PackageVersion: 1.3.5
+PackageLocale: en-US
+Publisher: example.com
+PublisherUrl: https://github.com/AIDotNet
+PublisherSupportUrl: https://github.com/AIDotNet/OpenCowork/issues
+PackageName: OpenCoWork
+PackageUrl: https://github.com/AIDotNet/OpenCowork
+License: Apache-2.0
+LicenseUrl: https://github.com/AIDotNet/OpenCowork/blob/HEAD/LICENSE
+Copyright: Copyright 2026 AIDotNet
+ShortDescription: Open-source desktop platform for multi-agent collaboration. Empowering AI agents with local tools, parallel teamwork, and seamless workplace integration.
+Description: |-
+  Traditional LLM interfaces are often "environment-isolated islands." Developers spend 50% of their time copy-pasting code, terminal logs, and file contents between the chat and their IDE.
+  OpenCowork solves this by providing:
+  - Local Agency: Agents can directly read/write files and execute shell commands with your permission.
+  - Context Awareness: No more manual context feeding. Agents explore your codebase and logs autonomously.
+  - Task Orchestration: Complex tasks (like "Refactor this module and update tests") are broken down and handled by specialized sub-agents.
+  - Human-in-the-loop: You stay in control with a transparent tool-call approval system.
+Tags:
+- agent
+- agentic
+- ai
+- large-language-model
+- llm
+ReleaseNotes: |-
+  Added
+  - Added non-interactive CLI print mode (cowork -p / --print) with text, json, and stream-json output, optional --timeout / --max-turns, and stdin prompt support for CI pipelines.
+  - Added CLI session continue/resume flags (-c / --continue, --resume <session-id>) so a folder’s stored CLI session can be restored before entering the UI or print mode.
+  - Added cowork update --repair to reinstall the platform Native Worker binary without a full package reinstall.
+  - Added CLI /mcp and /skills commands, plus a CLI-side MCP host that syncs ~/.open-cowork/mcp-servers.json and serves Worker reverse requests (mcp:call-tool, mcp:read-resource).
+  - Added Native Worker session-host routes (agent/session-open, agent/session-send, agent/session-close) so a hosted session keeps the run template and canonical conversation inside the Worker.
+  - Added shared Native Worker wire-protocol helpers (src/shared/native-worker-protocol.ts) and cli/scripts/sync-shared.mjs to vendor those contracts into the CLI package before typecheck/build.
+  - Added CLI host-adapter registry for reverse-request surfaces (permissions, AskUserQuestion, plan mode, skills, MCP) so unregistered methods fail explicitly instead of hanging the Worker.
+  - Added fullscreen transcript windowing by estimated message height, SGR mouse wheel/click scrolling, bracketed paste, and a user-overridable keymap (~/.open-cowork/cli-keymap.json).
+  - Added PTY golden snapshot tests (cli/test/) with a deterministic fixture runtime (OPENCOWORK_CLI_FIXTURE=1) across the documented width matrix, plus a session-host smoke script.
+  - Added a first-run provider onboarding flow that recommends Routin AI, opens the API-key page in the system browser when available, and keeps a manual-link fallback for SSH/containers (OPENCOWORK_CLI_NO_BROWSER=1).
+  Changed
+  - Desktop and CLI Native Worker clients now share the same frame decoder, heartbeat constants, and protocol framing instead of maintaining duplicate socket parsers.
+  - Expanded the provider setup panel with grouped catalogs (configured / presets / custom), multi-step progress, and clearer review/save messaging.
+  - Wired npm run cli:sync-shared into CLI typecheck/build, and added npm run cli:test for the golden suite.
+  Fixed
+  - Hardened doctor output around MCP config parse failures and missing custom skills directories so readiness checks report actionable status instead of silent gaps.
+ReleaseNotesUrl: https://github.com/AIDotNet/OpenCowork/releases/tag/1.3.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

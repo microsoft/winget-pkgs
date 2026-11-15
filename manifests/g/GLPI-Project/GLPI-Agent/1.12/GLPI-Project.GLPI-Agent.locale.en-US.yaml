@@ -1,0 +1,139 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: GLPI-Project.GLPI-Agent
+PackageVersion: "1.12"
+PackageLocale: en-US
+Publisher: Teclib'
+PublisherUrl: https://glpi-project.org/
+PublisherSupportUrl: https://github.com/glpi-project/glpi-agent/issues
+PrivacyUrl: https://glpi-project.org/privacy-policy/
+Author: Teclib'
+PackageName: GLPI Agent
+PackageUrl: https://github.com/glpi-project/glpi-agent/releases/
+License: GPL-2.0
+LicenseUrl: https://github.com/glpi-project/glpi-agent/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright 2006-2010 OCS Inventory contributors
+  Copyright 2010-2019 FusionInventory Team
+  Copyright 2011-2024 Teclib Editions
+ShortDescription: The GLPI Agent is a generic management agent. It can perform a certain number of tasks, according to its own execution plan, or on behalf of a GLPI server acting as a control point.
+Description: |-
+  The GLPI Agent is a generic management agent. It can perform a certain number of tasks, according to its own execution plan, or on behalf of a GLPI server acting as a control point.
+  This agent is based on a fork of FusionInventory agent and so works mainly like FusionInventory agent. It introduces new features and a new protocol to communicate directly with a GLPI server and its native inventory feature. Anyway it also keeps the compatibility with FusionInventory for GLPI plugin.
+Moniker: glpi-agent
+Tags:
+- glpi
+ReleaseNotes: |-
+  core:
+  * fix #780: Avoid module loading path check error on windows if path includes a
+    parenthesis
+  * fix #789: Avoid warning on commandline about possible confusion when reading quoted
+    configuration value including a dash from configuration file
+  * fix #790: Fix server URL parsing when it doesn't include scheme
+  * Add glpi-version configuration support to handle inventory_format dependent features
+  * Handle /now request as an event. If inventory task run is triggered, it will now
+    always by default generate a full inventory. /now supports a query string with the
+    following possible values:
+    - partial=yes or partial=1 to force a partial inventory
+    - full=yes or full=1 to force a full inventory (the default)
+    - task=all (the default) or "all" replaced by a comma-separated list of tasks
+    - delay=0 (the default) can be set with the number of seconds to delay the tasks run
+  * Changes to index page from httpd interface:
+    - "Force an inventory" link text is replaced by "Force running all targets planned tasks"
+      to reflect the real behavior of the related action
+    - Added a "Force an inventory" to only trigger inventory task for all targets
+    - Targets list also show target planned tasks for trusted clients
+  * Refacto: Add Logger api to register a callback permitting to collect journaling events
+  * Fix ToolBox job events support
+  * Support ssl-keystore=system-ssl-ca on MacOSX to force using system known public CAs
+  * Cleanup server url in log and server vardir with automatic migration
+
+  inventory:
+  * Fix rare windows perl error during drives, ipv6 network or videos inventory
+  * Always keep disabled network interface on windows if it includes "vpn" string
+    in description
+  * Add glpi-version configuration support to handle inventory_format dependent features
+    - Remove check alerting on invalid storage interface for GLPI >= 10.0.4
+  * fix #811: Fix network interface inventory on lxc linux container, but also fix
+    few other cases where more interfaces are found due to interface name aliasing
+  * Fix --partial option when used with glpi-agent script
+  * Update getProcesses() API to permit filtering and report processes only in the same
+    namespace to not list containers processes. Refacto inventory module using this API.
+  * Add support for Trellix/McAfee agent as Antivirus on windows
+  * fix #827: Fix usb devices inventory on linux which have 0002 as PRODUCTID and are not root hub
+  * fix #652: Fix usb printers serialnumber on windows stripping leading zeros
+  * Updated pci.ids to 2025.01.13 version
+  * Updated usb.ids to 2025.01.14 version
+  * Bump Inventory task version to 1.19
+
+  remoteinventory:
+  * Store remote inventory part checksums in dedicated state files and support maintenance
+    event to cleanup state files older than 30 days
+  * Bump RemoteInventory task version to 1.6
+
+  netdiscovery/netinventory:
+  * fix #768: Added Aerohive devices support
+  * fix #769: Added Intelbras devices support
+  * don't send discovery xml to server target for remoteinventory task event initiated
+    from toolbox
+  * fix #781: Filter invalid firmware date on HP peripherals
+  * Added Raritan PDU devices support
+  * Updated sysobject.ids
+  * Added Avaya J100 series IP Phones support
+  * Updated Lexmark printers support
+  * Added Bachmann PDU devices support
+  * Added RNX PDU devices support
+  * Updated sysobject.ids
+  * Bump NetDiscovery task version to 6.5
+  * Bump NetInventory task version to 6.5
+
+  deploy:
+  * Fix checks on command run and clarify reason of success or failure. This fixes
+    "return code is not" and "command output doesn't contain" checks which was always
+    failing.
+  * fix #804: Don't scan network and broadcast addresses when using P2P
+  * Fix sha512 file checks to also accep provided digest in upper case
+  * Bump Deploy task version to 3.4
+
+  collect:
+  * Fix sha512 file check to also accep provided digest in upper case
+  * Change 'checkSumSHA2' file check meaning to compute sha256
+  * Add 'checkSumSHA256' params support for file checking to replace 'checkSumSHA2' one
+    and it is mandatory over its alias 'checkSumSHA2'
+  * Bump Collect task version to 2.10
+
+  esx:
+  * Support reporting of ESX virtualmachines ip and operating system. It requires
+    inventory_format schema v1.1.36 on server-side included in GLPI v10.0.17.
+  * Add --glpi-version option support to glpi-esx script
+  * Add guessed Total ESX memory size as memory component
+  * Bump ESX task version to 2.12
+
+  toolbox:
+  * Fix task log reset for enabled tasks
+  * Fix enabled jobs start up
+  * Fix event logger support to update counters even when debug is not enabled
+  * Bump ToolBox plugin version to 1.5
+
+  packaging:
+  * Update Windows MSI packing building process to use:
+    - OpenSSL 3.4.0
+    - libssh2 1.11.1
+    - libxml2 2.13.5
+    - libiconv 1.18
+  * Update MacOSX packages to use OpenSSL 3.4.0
+  * fix #816: Support --delaytime option in linux perl installer
+  * fix #797: Use option to disable local package gpg check when installing with dnf
+    in linux perl installer
+ReleaseNotesUrl: https://github.com/glpi-project/glpi-agent/blob/HEAD/Changes
+PurchaseUrl: https://glpi-project.org/prices/
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://glpi-agent.readthedocs.io/
+- DocumentLabel: FAQ
+  DocumentUrl: https://glpi-project.org/faq/
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/glpi-project/glpi-agent/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

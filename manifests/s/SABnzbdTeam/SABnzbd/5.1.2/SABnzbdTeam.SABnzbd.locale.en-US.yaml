@@ -1,0 +1,143 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: SABnzbdTeam.SABnzbd
+PackageVersion: 5.1.2
+PackageLocale: en-US
+Publisher: The SABnzbd Team
+PublisherUrl: https://github.com/sabnzbd/sabnzbd
+PublisherSupportUrl: https://github.com/sabnzbd/sabnzbd/issues
+Author: The SABnzbd Team
+PackageName: SABnzbd
+PackageUrl: https://sabnzbd.org/
+License: GPL2/GPL3
+LicenseUrl: https://github.com/sabnzbd/sabnzbd/blob/HEAD/LICENSE.txt
+Copyright: (c) Copyright 2007-2021 by "The SABnzbd-team" <team@sabnzbd.org>
+CopyrightUrl: https://github.com/sabnzbd/sabnzbd/blob/develop/LICENSE.txt
+ShortDescription: SABnzbd is an Open Source Binary Newsreader written in Python.
+Tags:
+- binary-newsreader
+- python
+- usenet
+ReleaseNotes: |-
+  Release Notes - SABnzbd 5.1.2
+  SABnzbd 5.1.1 and 5.1.2 resolved 3 serious vulnerabilities.
+
+  Critical remote code execution vulnerability resolved in 5.1.2 (GHSA-rgqj-28c2-gxwp)
+  You are only affected if an untrusted party can reach the web interface.
+  By default, SABnzbd is only accessible from your own device and External internet access
+  is set to No access. If either of those is still at its default, or if you use a proxy
+  service for authentication, you are not affected.
+  In version 5.1.1 and earlier, an attacker who can reach the web interface could bypass
+  authentication on configuration endpoints, even when SABnzbd is protected with a username
+  and password. By changing SABnzbd's settings this way, an attacker could ultimately execute
+  arbitrary commands on the system running SABnzbd, with the same permissions as SABnzbd itself.
+  This also means that all information in SABnzbd would be exposed.
+  See GHSA-xrfq-jhgh-wqch below for actions and mitigations.
+  More information: https://sabnzbd.org/5-1-vulnerabilities
+
+  High-severity path traversal vulnerability resolved in 5.1.2 (GHSA-75g3-96fr-7p2r)
+  You are affected if SABnzbd processes NZBs or downloads from a source you do not fully
+  trust, such as a public indexer.
+  In version 5.1.1 and earlier, a maliciously crafted PAR2 or SFV file inside a download
+  could cause SABnzbd to move downloaded content outside of the job's own folder during
+  post-processing. By using this to plant a file in another job's internal administration,
+  an attacker could ultimately execute arbitrary commands on the system running SABnzbd,
+  with the same permissions as SABnzbd itself.
+  The only mitigation is to update, there is no configuration change that prevents this.
+  More information: https://sabnzbd.org/5-1-vulnerabilities
+
+  Critical authentication vulnerability resolved in 5.1.1 (GHSA-xrfq-jhgh-wqch)
+  You are only affected if an untrusted party can reach the web interface.
+  By default, SABnzbd is only accessible from your own device and External internet access
+  is set to No access. If either of those is still at its default, or if you use a proxy
+  service for authentication, you are not affected.
+  If the SABnzbd login page is reachable from outside your network, an attacker could
+  obtain a valid session in version 5.1.0 and earlier, even when SABnzbd is protected with
+  a username and password. This means that all information in SABnzbd would be exposed.
+  If you rely on the SABnzbd username and password to keep out other users on your
+  network or the internet, it is recommended that you change the following
+  sensitive information after applying the update:
+  - SABnzbd username and password.
+  - SABnzbd API-key.
+  - Usenet server passwords.
+  - API-keys from indexers used within RSS-feeds.
+  - Authentication information for notification services.
+  If you cannot update right away, the only mitigations are to ensure the web interface is not
+  reachable by untrusted parties, or to lower External internet access to Full API or below.
+  More information: https://sabnzbd.org/5-1-vulnerabilities
+
+  Other bug fixes in 5.1.2
+  - RSS filters were not applied directly.
+
+  Other bug fixes in 5.1.1
+  - Styling cache issues could occur after updating.
+  - RSS items were removed too eagerly from RSS-history after download.
+  - The RSS-feed Clear Downloaded button did not do anything.
+
+  Changelog 5.1.0
+  This release brings a fundamental improvement to "Retry": instead of
+  re-downloading any files with missing data, only the articles that were actually
+  missing are fetched again. RSS got an overhaul under the hood, the interface is
+  refreshed, and we added quite a long list of long-requested features and bugfixes.
+
+  New features in 5.1.0
+  - Refreshed the interface.
+  - When Retrying a job, only the actually missing articles are tried again.
+    This only works for jobs downloaded in 5.1.0 (or newer).
+  - RSS items are now stored in the database instead of on disk.
+  - New RSS Age rule to filter jobs based on their age.
+  - Downloaded RSS items are cleared from the RSS database after 3 days.
+  - Added support for filename and path pattern matching to the Cleanup List.
+  - Unwanted extensions will also be removed after unpacking.
+  - Allow job setting changes directly from Extra queue columns.
+  - Added support for unpacking .tar files during post-processing.
+  - Improved anonymization of the logs when using Show Logging.
+  - Added SAB_FILES environment variable to Post-processing scripts,
+    listing all files that resulted from the job.
+  - New Servers will default to 16 connections instead of 8.
+  - Use media duration as part of Ignore Samples detection.
+  - Added option to (auto) sort the queue by Remaining Percentage.
+  - Improved support for screen readers.
+  - Parsing of header-encrypted RARs will use significantly fewer resources.
+  - Add Ayatana AppIndicator tray support on GNOME.
+  - Removed redundant INSTALL.txt file.
+  - Dropped support for Python 3.9.
+  - Windows and macOS: Updated Python to 3.14.6, Unrar to 7.23 and 7zip to 26.02.
+
+  Bug fixes in 5.1.0
+  - Prevent incorrect warnings about non-writeable directories.
+  - Files unrelated to job could get removed by the Cleanup List logic.
+  - Prevent path traversal in orphaned job APIs.
+  - Disk Full errors from unrar were not handled gracefully during unpacking.
+  - Memory leak could occur during article decoding.
+  - In containers (like Docker), the Article Cache could exceed the memory limit.
+  - Diskspace checks would be too strict when unpacking to different disk.
+  - Prevent deadlock when a second signal arrives during shutdown procedure.
+  - Verification using SFV-checks could fail, even though files were correct.
+  - Don't log Warning during clean shutdowns.
+  - Windows: Uninstall would not remove Settings or Windows Service.
+  - Windows: Warn for OS-limit if more than 1024 connections are configured.
+  - macOS: AppleDouble files could result in failures in Moving stage.
+  - macOS: Restarting the application resulted in Terminal window.
+  - macOS: Included par2cmdline-turbo will now use all available CPU-features.
+
+  Upgrade notices
+  - You can directly upgrade from version 3.0.0 and newer.
+  - Upgrading from older versions will require performing a Queue repair.
+
+  Known problems and solutions
+  - Read ISSUES.txt or https://sabnzbd.org/wiki/introduction/known-issues
+
+  Code Signing Policy
+  Windows code signing is provided by SignPath.io using a SignPath Foundation certificate.
+
+  About
+  SABnzbd is an open-source cross-platform binary newsreader.
+  It simplifies the process of downloading from Usenet dramatically, thanks to its web-based
+  user interface and advanced built-in post-processing options that automatically verify, repair,
+  extract and clean up posts downloaded from Usenet.
+  (c) Copyright 2007-2026 by The SABnzbd-Team (sabnzbd.org)
+ReleaseNotesUrl: https://github.com/sabnzbd/sabnzbd/releases/tag/5.1.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

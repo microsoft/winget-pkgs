@@ -1,0 +1,175 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: openwong2kim.wmux
+PackageVersion: 3.38.2
+PackageLocale: en-US
+Publisher: openwong2kim
+PublisherUrl: https://github.com/openwong2kim
+PublisherSupportUrl: https://github.com/openwong2kim/wmux/issues
+PackageName: wmux
+PackageUrl: https://github.com/openwong2kim/wmux
+License: MIT
+LicenseUrl: https://github.com/openwong2kim/wmux/blob/HEAD/LICENSE
+ShortDescription: Windows terminal multiplexer with MCP server for AI agents
+Description: |-
+  wmux is a Windows terminal multiplexer built for AI coding agents.
+  Run Claude Code, Codex, and Gemini CLI side by side with split terminals,
+  browser automation, and MCP integration. Features include session persistence,
+  dangerous command detection, real-time token cost tracking, and cross-workspace
+  terminal control via MCP tools.
+Moniker: wmux
+Tags:
+- ai-agent
+- developer-tools
+- electron
+- mcp
+- multiplexer
+- terminal
+- windows
+ReleaseNotes: |-
+  Added
+  - You can hand a workspace a fresh orchestrator without losing anything
+    else. A New session control now sits with the other orchestrator
+    controls at the top of the deck. It retires the current orchestrator and
+    starts a new one that reads your project files again and takes a fresh look
+    at your panes, which is what you want once a long conversation has drifted or
+    a turn has wedged. There was no way to do this before: restarting wmux
+    deliberately resumes the same conversation, quitting the orchestrator's own
+    terminal just reopens it on that conversation, and deleting the workspace
+    takes every pane with it. Your panes, worktrees and conversation history all
+    stay, and loops and schedules keep running. It asks for a second click before
+    it commits, and stays available even mid-turn — a stuck turn is usually
+    exactly when you need it. (#711)
+  - You can set a dependent child task loose without stopping it. A Detach
+    from parent action now sits in the context menu of a child workspace that a
+    fan-out spun up. Detaching releases that task from its parent — the parent
+    stops tracking it and its mission channel folds away into Archived — while the
+    workspace itself, its worktree, branch, terminals and running agent all keep
+    going, now on their own. Before this, a child task was tied to its parent for
+    its whole life: the only way to end the relationship was to close it, which
+    tears down the worktree and the work along with it. Detach keeps everything
+    and simply cuts the leash. The cleanup scanner knows a detached worktree is
+    still live, so it is never offered up for deletion, and detaching something
+    twice is harmless. (#715)
+  Changed
+  - The orchestrator now runs on the terminal brain by default. The Command
+    Deck drives your own claude binary in an embedded terminal instead of the
+    Agent SDK, so it needs no API key and picks up its per-workspace CLAUDE.md
+    from disk every time it starts. The SDK brain has not gone anywhere: it stays
+    selectable under Settings › Orchestrator, and wmux still falls back to it
+    automatically when daemon mode is unavailable. Existing installs move over on
+    the next launch. The move is reversible and costs no history — each brain
+    keeps its own conversation, so switching back in Settings picks your SDK
+    conversation up exactly where it was. (#710)
+  - The workspace mode now says how Claude is started, not how chatty the
+    orchestrator is. The three modes never reached the Claude process at all,
+    so "Off" quietly meant "wakes less often" while the orchestrator kept
+    running. Now: Off does not start it (and stops one that is already
+    running), Assist starts it with edits accepted automatically while every
+    other permission prompt still stops and asks, and Danger — the mode
+    previously called Auto, renamed for what it does — starts it in bypass mode.
+    How often the orchestrator wakes on its own is now a separate setting, and
+    every existing workspace keeps the wake behaviour it already had. (#735)
+  Fixed
+  - A pane running a TUI that asks the terminal about its own modes no longer
+    freezes. opencode probes six terminal modes the moment it starts, and each
+    probe hit a miscompiled xterm handler that threw. The throw killed that pane's
+    parser for good: the process kept running and its title kept updating, but the
+    screen never painted again and every agent read of it came back
+    RPC timeout: input.readScreen (5000ms) — with nothing to explain why. The
+    renderer bundle is now built at a target that stops mangling the handler.
+    (#708)
+  - Reading a pane can no longer hang. The read path waited on the pane's
+    parser without a deadline, so a stalled pane took the whole read down with it
+    and the caller got nothing. Reads now wait a bounded moment and return what
+    the pane has, which is worth far more than a timeout. (#708)
+  - The orchestrator model picker now applies to the terminal brain. The
+    model only ever reached the orchestrator when you typed into the deck
+    composer, and the terminal brain has no composer — you type into its terminal.
+    Choosing a model therefore did nothing for it, and scheduled or event-driven
+    turns ran on whatever model your last typed message happened to leave behind.
+    The picker now applies on every path. (#710)
+  - A workspace that started without a running daemon no longer loses its
+    terminal conversation. With no daemon the deck quietly serves the SDK brain
+    instead, but it filed that conversation under the terminal brain's name. The
+    terminal conversation could not be resumed afterwards, the substitute brain
+    was told it had no memory to write to, and the workspace stayed on the
+    substitute even after the daemon came back. (#710)
+  - Full-power mode no longer looks available when it cannot do anything. It
+    only applies to the SDK brain, so under the terminal and Hermes brains the
+    toggle now explains that instead of silently ignoring the click. (#710)
+  - A dev build no longer reads the production config to decide the CDP gate.
+    The CDP decision in the main process ran before the instance-isolation
+    (WMUX_DATA_SUFFIX) block, so a -dev build consulted ~/.wmux instead of
+    ~/.wmux-dev. Moved after the suffix block so each instance reads its own
+    config. (#613)
+  - A pane that finished its command no longer reports running forever.
+    Clearing a pane back to idle sat behind a 30-second window built to suppress
+    a "Task may have finished" notification that had since been removed. A
+    workspace switch (any pty:resize) inside that window made the clear vanish,
+    and nothing retried it — the activity monitor consumes its state transition
+    before invoking callbacks, and a quiet pane never produces another burst. For
+    a plain shell, where no agent is detected, that clear is the only path there
+    is, so the pane sat at an idle prompt reporting running until it was closed.
+    The window also blocked the correction for the false running a resize
+    redraw raises in the first place. Agent panes are unaffected: their precise
+    hook and detector statuses still outrank byte silence. (#733)
+  - The orchestrator can no longer close a pane to clear its status. When a
+    wedged pane held the Stop gate open, the terminal brain read "resolve these
+    panes" as "end these panes" and ran exit, then Ctrl+D, in a live shell the
+    user owned. The refusal text now names the prohibition, and session-terminating
+    input is refused outright when it targets a pane the caller's own turn is
+    currently blocked on. The scope is exactly that intersection — an orchestrator
+    that is not gate-held closes shells as before, and even a gate-held one may
+    close panes it is not blocked on. (#733)
+  - A request the orchestrator was working on no longer comes back to life
+    after you quit. wmux remembers what it was asked to do so a restart does
+    not lose your request — but that memory used to be permission to act, with no
+    expiry. Reopening wmux could hand the orchestrator an hours-old objective and
+    set it loose on your panes seconds after launch, even in a workspace set to
+    Off. A request that outlives the app is now parked: it is still recorded,
+    still shown to you, and still stops the orchestrator from claiming it
+    finished — but it drives nothing on its own. On the next launch you are asked
+    whether to resume it or drop it. Only your own message can wake it up again.
+    (#733, #735)
+  - The orchestrator is told not to close your panes in the one case where it
+    used not to be. The refusal that holds a turn open already warned it never
+    to close or kill a pane to clear a status. That warning was missing from the
+    refusals raised by a durable request — which is exactly the case a leftover
+    request lands on. (#735)
+  - What you ask for now is what the orchestrator works on. If a request was
+    already on the books, anything you typed afterwards was recorded as a note
+    underneath it rather than as the thing to do — so a message sent after
+    reopening wmux could end up filed under an objective from hours earlier, with
+    the old one still leading. Now, speaking to an orchestrator whose request
+    predates this session replaces that request with yours. A request it is
+    actively working on still collects your message as a follow-up, so nothing
+    running is abandoned, and answering "resume it" on the startup prompt still
+    resumes the original untouched. (#733, #736)
+  - Dropping a request no longer abandons the agents working on it in
+    silence. Starting a new session, or replacing a stale request, can discard
+    one that still has work delegated to other agents. Those agents kept running
+    with nobody waiting on them. wmux now tells you, and asks what to do about
+    them, whenever a discarded request still had something outstanding. (#736)
+  - The New session button no longer promises to keep the conversation it
+    discards. Its tooltip listed the conversation history among the things that
+    stay, when starting a fresh session is precisely what clears it — the reverse
+    of what happens, on the one control you reach for when the orchestrator is
+    stuck on stale context. It now says the orchestrator forgets the conversation
+    and the #commander transcript remains as the record. (#737)
+  - The unread count no longer vanishes the moment you minimise wmux. On
+    Windows and Linux the tray tooltip is the only place an unread count shows
+    once the window is hidden — and hiding the window was itself what erased it,
+    because the "background sessions running" note and the unread badge each
+    overwrote the whole tooltip. They now share it, so a hidden wmux shows both.
+    A count that arrives while wmux is still starting up is no longer dropped
+    either. (#729, #738)
+  Security
+  - The CDP remote-debugging port is now closeable from config. Browser
+    automation runs over Electron's CDP port on loopback, and unlike the other
+    same-user attack surfaces it only needs a loopback socket — no filesystem or
+    process access — to reach full renderer control. Set
+ReleaseNotesUrl: https://github.com/openwong2kim/wmux/releases/tag/v3.38.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

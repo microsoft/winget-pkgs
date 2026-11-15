@@ -1,0 +1,53 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Proma.Proma
+PackageVersion: 0.17.46
+PackageLocale: zh-CN
+Publisher: ErlichLiu
+PublisherUrl: https://proma.cool/
+PublisherSupportUrl: https://github.com/proma-ai/Proma/issues
+PackageName: Proma
+PackageUrl: https://proma.cool/download
+License: 免费软件
+Copyright: Copyright © 2024-2026 Proma
+ShortDescription: 把最丝滑的通用 Agent 体验带进你的工作流，为 100x 专业用户而生的未来产品，正在实现 proactive Agent 阶段。基于 Claude Agent SDK 的完整开源实践，原生支持飞书群聊调用、灵活接入任意大模型供应商 —— 让顶级 Agent 能力真正跑在你每天用的地方。
+Description: |-
+  Proma 是一个本地优先的 AI 桌面应用，把多模型 Chat、通用 Agent、工作区、Skills、MCP、远程机器人和记忆能力放在同一个开源客户端里。
+  它不是只面向闲聊的聊天框，而是一个可以长期沉淀个人工作流的 Agent 工作台：简单问题用 Chat，复杂任务交给 Agent，数据和配置尽量留在本地。
+
+  现在能做什么
+  - Chat 模式：多模型对话、附件解析、图片输入、Markdown / Mermaid / KaTeX / 代码高亮、并排对话、系统提示词、上下文管理。
+  - Agent 模式：基于 @anthropic-ai/claude-agent-sdk 的通用 Agent，支持工作区隔离、权限模式、文件操作、长任务流式输出、计划确认和用户追问。
+  - SubAgent / Tasks：复杂任务可以通过 Claude Agent SDK 的 Agent 工具拆分为子 Agent / Task，并在消息流中展示调用过程和结果。
+  - Skills & MCP：每个工作区可以独立配置 Skills、MCP Server 和工作区文件，适合沉淀可复用能力。
+  - 远程机器人：支持飞书 / Lark 机器人桥接，并已提供钉钉、微信桥接入口，用手机或群聊触发本机 Agent 工作流。
+  - 记忆与工具：Chat 和 Agent 可共享记忆能力，并支持联网搜索、内置 Chat 工具、Agent 推荐等辅助能力。
+  - 本地优先：会话、工作区、附件、配置、Skills 等默认存储在 ~/.proma/，使用 JSON / JSONL 文件组织，不依赖本地数据库。
+  - 桌面体验：自动更新、代理设置、文件预览、全局快捷键、快速任务窗口、语音输入、亮色 / 暗色 / 跟随系统主题。
+Tags:
+- 人工智能
+- 大语言模型
+- 智能体
+- 自主智能
+ReleaseNotes: |-
+  Proma v0.17.46 更新
+  新功能
+  - 受管浏览器可最小化、后台会话自动回收 — 浏览器新增最小化操作，保留页面与标签状态随时恢复（关闭仍为真正销毁）；全局最多保留 8 个后台浏览器 session，按 LRU 自动回收最久未使用的，前台或正在操作的 session 不会被回收，浏览器面板与主界面切换更从容。
+  - 受管浏览器地址栏支持直接搜索 — 地址栏输入普通文本时自动转为 Google 搜索，明确 URL 与可识别主机名仍保持直达；已确认风险提示后打开浏览器默认进入搜索页，不再面对空白页。
+  - 火山方舟渠道更新与自动迁移 — 内置渠道重命名：火山方舟 Coding Plan → 火山方舟 Agent Plan、豆包 → 火山方舟 Coding Plan、豆包 API → 火山引擎 API，并新增独立豆包 API 渠道类型；预设模型移除 GLM-5.2，保留 GLM-5.3 与 Doubao Seed 2.0 系列；升级后旧配置自动迁移，用户自定义名称不受影响。
+  - 通义千问渠道合并为单一入口 — qwen 与 qwen-anthropic 合并为「通义千问」，默认走 Anthropic 协议；旧 OpenAI 协议渠道标记为「通义千问 (OpenAI 协议 · 旧版)」，存量渠道继续工作、编辑时仍可选，新建渠道不再出现重复入口。
+  - Kimi API 渠道简化 — 渠道名从「Kimi API (Anthropic 协议)」简化为「Kimi API」，预设模型 ID 由 k3 统一为 kimi-k3。
+  Bug 修复
+  - 停止卡住的 Agent 更可靠 — 停止生成后若底层运行迟迟未退出，会再次下发中断请求，超时后强制关闭卡住的运行时并给出提示，停止按钮不再一次点击后就失效，Agent 不再无限转圈。
+  - 自动任务参数桥接修复 — 修复部分模型渠道创建/编辑定时任务时可选参数被物化导致校验失败的问题：桥接层按调度类型自动清理不适用字段，maxRuns=0 视为不限次数，定时任务创建更稳定。
+  - 上下文整理完成态修正 — 仅当主 Agent 已成功结束且无需自动续跑时才将上下文整理阶段显示为 completed；运行中压缩、CompactContext 续跑与异常结束保持 running，状态不再误报。
+  - 流式输出与思考块渲染优化 — 流式最终输出脱离过程区，降低布局压力；思考块流式显示更平滑，不再生硬跳变。
+  - 上下文压缩后保持会话时长 — 上下文整理后会话运行时长不再被重置，统计保持准确。
+  - GLM-5.3 推理档位修复 — 恢复 GLM-5.3 的低/高/最大推理强度选项，保持始终推理与 1M 上下文注册，各传输渠道行为一致。
+  - 输入框 Markdown 切换不丢内容 — 切换 Markdown / 富文本模式时保留草稿与编辑器状态，快捷键改用当前编辑器实例，不再因旧实例被销毁而失效。
+  - 工作区文件变更归属修复 — 防止跨会话的文件变更被错误归属到当前会话；忽略 Python 环境与缓存目录，不影响通用构建产物与覆盖率输出。
+  - 受管浏览器面板精简 — 移除冗余的 Agent 活动状态栏，保留浏览器控制与操作反馈，面板更清爽。
+ReleaseNotesUrl: https://github.com/proma-ai/Proma/releases/tag/v0.17.46
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

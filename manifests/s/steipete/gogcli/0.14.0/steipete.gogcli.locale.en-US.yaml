@@ -1,0 +1,98 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: steipete.gogcli
+PackageVersion: 0.14.0
+PackageLocale: en-US
+Publisher: Peter Steinberger
+PublisherUrl: https://steipete.me/
+PublisherSupportUrl: https://github.com/steipete/gogcli/issues
+Author: Peter Steinberger
+PackageName: gogcli
+PackageUrl: https://gogcli.sh/
+License: MIT
+LicenseUrl: https://github.com/steipete/gogcli/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Peter Steinberger
+CopyrightUrl: https://github.com/steipete/gogcli/blob/HEAD/LICENSE
+ShortDescription: gog unifies Gmail, Calendar, Drive, Contacts, Tasks, Sheets, Docs, Slides, and People under one CLI — with JSON output and sane defaults.
+Description: |-
+  gog unifies Gmail, Calendar, Drive, Contacts, Tasks, Sheets, Docs, Slides, and People under one CLI — with JSON output and sane defaults.
+
+  Features
+  - Gmail
+    - Search threads, send mail, manage labels, drafts, filters, settings, and watch (Pub/Sub push).
+  - Calendar
+    - List/create/update events, respond to invites, detect conflicts, and check free/busy.
+  - Drive
+    - List/search/upload/download, export Docs formats, permissions, folders, URLs.
+  - Sheets / Docs / Slides
+    - Read/write Sheets; export Docs/Slides/Sheets to PDF/DOCX/PPTX/XLSX/CSV via Drive.
+  - Contacts / People
+    - Personal contacts, “other contacts”, Workspace directory, and your profile.
+  - Tasks
+    - Tasklists + tasks: add/update/done/undo/delete/clear with paging and JSON output.
+Moniker: gogcli
+Tags:
+- gcal
+- gcontacts
+- gdrive
+- gmail
+- google
+ReleaseNotes: |-
+  0.14.0
+
+  Added
+  - Backup: add gog backup with age-encrypted Git shards, Gmail labels/raw message export, Calendar/Contacts/Tasks/Drive metadata adapters, manifest status, full decrypt-and-verify, shard cat, local plaintext export, docs, and security-focused regression coverage.
+  - Backup: expand gog backup push --services all with Drive content export/download, Gmail settings, native Workspace Docs/Sheets/Slides/Form data, Apps Script projects, Chat, Classroom, best-effort optional service error shards, and plaintext Drive file export.
+  - Backup: extend --services all with Drive permissions/comments/revisions, Calendar ACL/settings/colors, contact groups, Cloud Identity groups, Workspace Admin Directory users/groups/members, Keep notes, and local Gmail message caching for resumable full-mailbox fetches.
+  - Backup: add gog backup export --gmail-format markdown for local readable Gmail mirrors with Markdown notes and extracted attachment files.
+  - Gmail: add gmail messages search --body-format html for returning HTML message bodies when --include-body is used. (#520) — thanks @alexknowshtml.
+  - Contacts: add contacts export for vCard 4.0 .vcf exports by resource, email/name search, or all contacts, including best-effort label categories. (#519, #500) — thanks @dinakars777.
+  - Docs: add experimental docs export --tab / drive download --tab to export a single Google Docs tab as PDF, DOCX, text, Markdown, or HTML. (#535) — thanks @johnbenjaminlewis.
+  - Slides: add slides insert-text and slides replace-text for editing existing slide text elements and replacing template tokens. (#521) — thanks @chrissanchez-iops.
+  - Drive: add drive search --drive and --parent for scoping search to a shared drive or folder. (#525) — thanks @LeanSheng.
+  - Calendar: add --start-timezone / --end-timezone to calendar create and calendar update for preserving named IANA event timezones when RFC3339 inputs only carry numeric offsets. (#422)
+  - Contacts: include birthdays in contacts list and contacts search text and JSON output. (#441)
+  - Auth: add gog auth doctor to diagnose keyring backend/password drift, unreadable file-keyring tokens, and refresh-token failures such as Workspace invalid_rapt. (#377, #338)
+  - Backup: bound individual Drive content exports with --drive-content-timeout so one stuck Google export records an encrypted error row instead of blocking the full backup.
+  - Backup: add Gmail message-list checkpoints, streaming shard construction, and stderr progress counters so full-mailbox backups can resume cleanly after interruption without keeping every raw message in RAM.
+  - Backup: push encrypted incomplete Gmail checkpoint commits during long cached fetches so day-scale mailbox backups have offsite progress before the final manifest is committed.
+  - Backup: push Gmail checkpoint commits through a single ordered background queue so cached fetches continue while GitHub uploads run.
+  - Slides docs: document the Markdown structure accepted by slides create-from-markdown. (#497)
+  - Google API: expose a reusable authenticated HTTP client for commands that need custom HTTP policies. (#534) — thanks @johnbenjaminlewis.
+
+  Fixed
+  - Auth: keep gog auth list and gog auth tokens list useful when one file-keyring token cannot be decrypted; unreadable entries are now reported instead of aborting the whole listing. (#377)
+  - Auth: time out Linux D-Bus keyring write operations and report when OAuth completed but saving the refresh token failed, so manual auth no longer looks like a stuck paste when token persistence is blocked. (#130)
+  - Auth: store Google OIDC sub claims with OAuth tokens and migrate matching subject-keyed accounts when a Google email rename is reauthorized. (#504)
+  - Gmail: build outbound Date headers with the configured timezone so replies do not inherit a wrong host-local offset. (#514, #472) — thanks @dinakars777.
+  - Gmail: auto-fill draft reply subjects from the original message when gmail drafts create --reply-to-message-id omits --subject. (#488) — thanks @jbowerbir.
+  - Gmail: fall back to the People profile name for primary-account From headers when Gmail send-as settings omit a display name. (#431) — thanks @moeedahmed.
+  - Gmail: expose reply threading headers in default gmail get --format metadata output and fail explicit reply targets that cannot provide a Message-ID. (#528, #512) — thanks @solomonneas.
+  - Gmail: apply Gmail system-label filters for searches like in:spam is:unread so thread, message, and batch message searches do not return read spam. (#449)
+  - Gmail: preserve renewed watch expiration fields when a long-running gmail watch serve process records push delivery state after gmail watch renew runs separately. (#526)
+  - Gmail: reuse the shared paginated list runner for thread and message search so --all, --page, text, and JSON output stay consistent.
+  - Gmail: clarify that gmail batch delete is permanent and point default-scope workflows at gmail trash. (#151)
+  - Drive/Docs/Sheets/Slides: treat --out - as stdout for downloads and exports instead of creating -/-.ext files; reject --json --out - to keep byte streams parseable. (#286)
+  - Docs: deprecate editing-command --tab-id in favor of --tab, and resolve tab titles to canonical tab IDs before mutations. (#533) — thanks @johnbenjaminlewis.
+  - Docs: convert Markdown formatting for docs write --append --markdown instead of appending raw Markdown syntax. (#530, #272) — thanks @eric-x-liu.
+  - Docs: include available tab names when docs cat --tab / structure lookup cannot find the requested tab. (#532) — thanks @johnbenjaminlewis.
+  - Docs: size remote Markdown images consistently for docs write --replace --markdown by reusing the Docs image insertion path after Drive conversion, and return a clear error for local image paths that the Docs API cannot fetch directly. (#518) — thanks @vinothd-oai.
+  - Drive: print large upload progress to stderr while keeping JSON output parseable. (#529)
+  - Drive: include hasThumbnail and thumbnailLink in drive ls, drive search, and drive get JSON responses. (#486) — thanks @gtapps.
+  - Drive: include driveId in drive ls, drive search, and drive get field masks so Shared Drive files can be identified in JSON output. (#524) — thanks @LeanSheng.
+  - Calendar: display calendar events times and JSON local fields in the calendar timezone instead of preserving arbitrary event offsets. (#493)
+  - Email tracking: add versioned tracking-key rotation so new pixels use the current key while old tracking ids keep decrypting through prior keys. (#293)
+  - Email tracking: deduplicate repeated pixel opens and cap recorded opens per IP per hour to reduce D1 abuse from replay or high-volume requests. (#294)
+  - Email tracking: add daily Worker retention cleanup for open rows older than 90 days and cap admin /opens responses at 500 rows. (#292)
+  - Email tracking: make gmail track setup --deploy reusable with existing D1 databases and valid temporary Wrangler configs.
+  - Backup: split Gmail checkpoint commits by row count and plaintext byte size so large messages stay below GitHub's blob limit.
+  - Secrets: time out macOS Keychain read/write/list operations with a clear recovery hint instead of hanging indefinitely when a permission prompt cannot surface. (#515, #513) — thanks @sardoru.
+  - Secrets: encode file-backend key names so stored tokens work on Windows, while still reading/removing legacy raw entries. (#527, #502) — thanks @solomonneas.
+  - CLI: show direct Google Cloud API enablement links and matching auth add --services ... hints when Google returns API-not-enabled errors.
+  - Install docs: document Windows release ZIP/PATH setup and clarify that source builds require the Go version declared in go.mod, not Ubuntu 24.04's Go 1.22 package. (#157, #135)
+  - Auth docs: clarify that consumer Gmail refresh tokens expire after 7 days when the OAuth app remains External + Testing, and that publishing the personal OAuth app is the long-lived-token path. (#121)
+  - CI: pin GitHub Actions workflow dependencies to immutable commit SHAs. (#288)
+ReleaseNotesUrl: https://github.com/steipete/gogcli/releases/tag/v0.14.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

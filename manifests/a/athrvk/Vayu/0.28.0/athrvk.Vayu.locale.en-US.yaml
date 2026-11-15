@@ -1,0 +1,65 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: athrvk.Vayu
+PackageVersion: 0.28.0
+PackageLocale: en-US
+Publisher: Atharva Kusumbia
+PublisherUrl: https://github.com/athrvk
+PublisherSupportUrl: https://github.com/athrvk/vayu/issues
+Author: Atharva Kusumbia
+PackageName: Vayu
+PackageUrl: https://github.com/athrvk/vayu
+License: AGPL-3.0
+LicenseUrl: https://github.com/athrvk/vayu/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Atharva Kusumbia
+ShortDescription: Open-source API client with a native C++ load-testing engine - Postman-style requests and k6-level load tests in one local app.
+Description: Vayu is a free, open-source desktop app for Windows, macOS, and Linux that combines a full REST and GraphQL request builder - with collections, environments, and scripting - and a high-throughput load tester powered by a C++20 engine, with all data staying on your machine.
+Moniker: vayu
+Tags:
+- api
+- api-client
+- api-testing
+- benchmark
+- developer-tools
+- graphql
+- http
+- insomnia
+- load-testing
+- performance
+- postman
+- rest
+ReleaseNotes: |-
+  0.28.0 - 2026-09-10
+  Vayu can now import a JMeter .jmx test plan directly. The sidebar is reorganized into a left activity rail and a right context rail, replacing the single bottom dock. Pre- and post-request scripts get {{variable}} hover, click-to-edit and autocomplete back - on requests, and now on a collection's own script elements too. Controllers and timers that were sequential-only in 0.27.0 (control.switch, control.loop) now run under load, and a single-request load run gets the same setup/teardown scripts and per-request elements a full collection run has.
+  Added
+  - Import a JMeter test plan. A .jmx file maps onto Vayu's own elements: HTTP samplers, JSON/regex/boundary extractors, all five assertion kinds, all four timer kinds, and six logic controllers become folders. A component the importer does not map (a listener, CookieManager, CSVDataSet) is counted by name rather than silently dropped.
+  - Elements round-trip through OpenAPI export and import, in the spec's x-vayu-elements extension - previously dropped on export, so a request's extracts, assertions and scripts survived only inside Vayu.
+  - extract.boundary: reads the text between a left and a right marker out of the response body into a variable.
+  - timer.throughput: waits to hold a request, folder or collection to a rate ("N per minute") instead of a fixed gap - the rate-based sibling of timer.pacing.
+  - Custom metric budgets, from the run dialogs. Both the Run Collection and Load Test dialogs get a repeatable "Custom metric budgets" list beside the built-in pass/fail budgets - a metric name, a stat (p50/p95/p99/max/value/rate) and a ceiling. A run that recorded no custom metrics shows no chart for them; one that did gets a chart live during the run and in its history entry.
+  - Scripts show their variable references again, in place. pm.environment.get("token") and its pm.*.get siblings, and every {{name}} inside a pm.variables.replaceIn(...) template, are painted in the variable colour with a hover card (current value, source scope) and ⌘-click or ⇧⌘D to edit - the same affordance the request/response body editors already had. A bare {{name}} elsewhere in a script is muted, since the engine never interpolates one there, and its hover explains why and names pm.variables.replaceIn as the fix. This now also works on a collection's own script elements, which can write global, collection and (whenever one is selected) environment variables the same way a request's own script can.
+  - A settings entry can depend on another being on. correlationIdHeader is spliced right under correlationIdEnabled, indented and disabled with a "Turn on Correlation ID to use this" hint until the parent is switched on.
+  - Open logs folder, in Settings → General, opens the app's log directory in the OS file manager. Renderer errors (an uncaught render error, an unhandled rejection) now reach the same log file engine events do.
+  - maxElementBodyBytes is a real, adjustable engine setting bounding how much of a response body an element can read - previously fixed at 1 MiB regardless of what the docs claimed.
+  - A single-request load run can declare lifecycleElements (script.setup/script.teardown, run once at the run's start and end) and requestElements - the same extract/assert/timer/script elements a design-mode request has. GET /runs/:id reports that run's own element pass/fail/skip tally, shown in a new card on the Overview tab.
+  - The History sidebar shows a warning triangle beside a run's baseline chip when the run has warnings.
+  Changed
+  - The sidebar is a left activity rail plus a right context rail, replacing the single bottom dock's mix of view switchers and a context-bar toggle. The rail's six buttons switch views; the context rail holds one icon per applicable section - click to open, expand or scroll to it, click again to collapse.
+  - control.switch and control.loop now run under a load test, capped by the existing per-iteration step limit - both were refused there in 0.27.0. control.throughput with perUser: false now shares one counter across every virtual user in a run instead of counting per user, and control.transaction can fold a between-step timer's wait into its own reported latency (includeTimers).
+  - POST /runs no longer accepts tests, preRequestScript(s) or postRequestScript(s) on a single-request load run - requestElements is the only accepted form now, matching every other run shape. LoadTestConfigDialog and the start_load_run MCP tool build it directly, and LoadTestConfigDialog gains the same Scripts override (as-marked / all inline / all deferred) the collection dialog already had.
+  - The element list is a card per element: a family icon, a one-line collapsed summary (or "Needs <field>" when a required field is blocking save), and a menu for rename, move, duplicate and delete. Field labels, groups and units come from the kind's own schema, five kinds that offer several mutually-exclusive strategies get one mode picker instead of every strategy's fields at once, and adding one is a searchable, category-grouped picker with a "Recently used" section. An empty list offers quick-add chips instead of a bare empty-state line.
+  - Internal: the September elements/logging push's remaining review fixes, a database.cpp split into one file per table family, the config seed split into one file per category, and documentation kept in step with all of the above.
+  Fixed
+  - elements.timers: "off" now actually silences timer.pacing and timer.throughput under load - the override used to apply after the load path had already scheduled the wait, so a run still paced at full rate and only reported zero afterward.
+  - The Run Collection dialog's Timers override now applies to every run, not only a load run.
+  - A collection run's transaction percentiles, which the engine already computed, are now shown in the app (Overview tab, collection scenario view) instead of only in the raw report.
+  - An inline script.pre's own assertions used to run and then be silently dropped from the report; a script element's config.inline used to fail schema validation everywhere it appeared. Both now work.
+  - A blank (or whitespace-only) script element is treated as absent everywhere - not dispatched, not counted toward "N elements will run," and no longer seeded by default on a new item.
+  - Revealing a setting via search no longer scrolls it out of view of the Save/Reset buttons.
+  - Fixed an intermittent crash during a load run with concurrency of 2 or more using inline pre/post scripts.
+  - A paced or timer-throttled load run no longer pins a full CPU core while its virtual users wait on the timer.
+  - Fixed a migration bug affecting an upgrade of a database from before elements existed.
+ReleaseNotesUrl: https://github.com/athrvk/vayu/releases/tag/v0.28.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

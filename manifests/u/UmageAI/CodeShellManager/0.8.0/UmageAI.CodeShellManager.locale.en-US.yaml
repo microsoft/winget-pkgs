@@ -1,0 +1,95 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: UmageAI.CodeShellManager
+PackageVersion: 0.8.0
+PackageLocale: en-US
+Publisher: umage.ai
+PublisherUrl: https://umage.ai/
+PublisherSupportUrl: https://github.com/umage-ai/CodeShellManager/issues
+PackageName: CodeShellManager
+PackageUrl: https://github.com/umage-ai/CodeShellManager
+License: MIT
+LicenseUrl: https://github.com/umage-ai/CodeShellManager/blob/HEAD/LICENSE
+ShortDescription: A Windows desktop app for running multiple AI coding agents side-by-side in a tabbed and grid-layout terminal host.
+Description: CodeShellManager is a WPF desktop application that hosts multiple pseudo-terminal sessions in a configurable grid layout. It is built for managing many parallel CLI tool sessions — Claude Code, Codex, GitHub Copilot, ssh remotes, or any shell — with full-text search across every session's output, alert detection when an agent is waiting for input, per-session git status, sleep/wake to park sessions without losing them, and full session persistence across restarts.
+Tags:
+- claude
+- cli
+- conpty
+- copilot
+- developer-tools
+- pseudo-terminal
+- terminal
+- xterm
+ReleaseNotes: |-
+  ⚠️ Security — please upgrade from v0.7.0
+  v0.8.0 fixes a command-injection vulnerability present in v0.7.0.
+  When a session's working folder was inside WSL, CodeShellManager ran git through
+  wsl.exe … -- git …. The -- form passes the command line to the distro's default login
+  shell, so shell metacharacters in values CSM did not control were executed rather than
+  treated as text.
+  Two ways to reach it:
+  - Opening a hostile repository. Git branch names legally contain $, `, (, ),
+    ;, & and |. Creating a worktree from such a branch executed its contents inside the
+    distro. Reproduced end to end: a branch named evil$(id > /tmp/PWNED)x created the file.
+  - A directory name. The git status poll runs on a timer with no user action, so a folder
+    named proj$(…) was enough.
+  Also fixed in the same class: the ssh remote folder, host and user fields — all read from
+  state.json, which ImportExportService will load from any file you open — could inject
+  extra ssh options. -oProxyCommand= runs locally, so that one didn't even need a
+  remote host.
+  And dropped files: a drag payload could contain a newline, and a newline written to a
+  terminal is Enter. A single drop could run a command with no keystroke.
+  Every git and ssh command line is now built as an argument array rather than by string
+  concatenation, and wsl.exe is invoked with -e, never --. If you are on v0.7.0, upgrade.
+  Typing no longer freezes with many sessions
+  If you run a lot of sessions, typing could stop echoing for seconds and then arrive all at
+  once. Traced at 47 sessions: the UI thread was blocked 42 times, worst case 28.5 seconds.
+  The cause was not terminal output, which is what everyone assumed. git was being launched
+  on the UI thread — roughly 94 process creations every 10 seconds. And it was nearly all
+  overhead: git --version, which touches no repository at all, costs 42ms against
+  git branch --show-current at 41ms. The work was free; the process launching was the bill.
+  - The git pipeline now runs off the UI thread entirely
+  - A .git watcher replaces most polling — branch changes appear faster than before, not slower
+  - Sessions you are not looking at back off from 10s to 120s
+  - Sidebar rows repaint once per change instead of three times per poll
+  WSL sessions
+  First-class WSL sessions alongside Local and SSH. Pick a distro, optionally a user and a
+  working folder, and CSM launches a shell inside it with the same session management, git
+  status, run commands and worktree support as a local session.
+  Shell integration (OSC 9001)
+  Programs running in a CSM terminal can push state to the UI:
+  printf '\e]9001;color=#a6e3a1;git-branch=feat/foo;git-dirty=1;title=my-repo\e\\'
+  Sets the session accent colour, the sidebar git label and the session title. Full integrator
+  reference with bash, PowerShell, Python, Node, Rust and Go snippets in
+  docs/shell-integration.md.
+  All values are treated as untrusted — length-capped, control characters stripped.
+  Startup and shutdown you can actually see
+  - A determinate restore bar with a 7 / 25 counter, because a 25-session restore takes ~131s
+    and an indeterminate spinner reads the same at session 2 as at session 22
+  - The shutdown overlay is now visible. It was being composited behind every terminal pane
+    — WebView2 is an HwndHost, and native child windows draw on top of WPF regardless of
+    ZIndex. All you saw was a stray line between panes
+  - Sessions are named and ticked off as they close, and force-disposed ones are marked, not
+    hidden
+  Also
+  - Edit any session's configuration after creation — folder, command, appearance, SSH and WSL
+    fields — through the same dialog used to create it
+  - state.json is written atomically with a backup, and recovers from it
+  - Clicking or typing in a pane makes it the active session
+  - Shutdown no longer force-disposes healthy sessions; the budget was sized from idle sessions
+    and busy ones need 2.3–4.7s each
+  Under the hood
+  - The solution builds at zero warnings for the first time
+  - 597 unit tests, up from 314 — and CI now actually runs them, which it never did before
+  - Hostile inputs are round-tripped through the real Win32 CommandLineToArgvW and a real
+    /bin/sh, rather than compared against strings we wrote
+  Install
+  winget install UmageAI.CodeShellManager
+  choco install codeshellmanager
+  Or the signed MSI below. Windows 10 (1903+) or Windows 11; WebView2 runtime required
+  (pre-installed on Windows 11).
+ReleaseNotesUrl: https://github.com/umage-ai/CodeShellManager/releases/tag/v0.8.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

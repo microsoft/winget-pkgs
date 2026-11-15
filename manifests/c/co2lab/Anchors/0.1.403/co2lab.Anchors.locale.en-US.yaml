@@ -1,0 +1,38 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: co2lab.Anchors
+PackageVersion: 0.1.403
+PackageLocale: en-US
+Publisher: co2lab
+PublisherUrl: https://github.com/co2-lab
+PublisherSupportUrl: https://github.com/co2-lab/anchors/issues
+PackageName: Anchors
+PackageUrl: https://github.com/co2-lab/anchors
+License: Elastic License 2.0
+LicenseUrl: https://github.com/co2-lab/anchors/blob/HEAD/LICENSE
+ShortDescription: Spec-first continuity framework for AI-assisted development
+Description: Anchors ties spec, feature and test together through a shared identity code, then confronts each artifact against the rules declared in anchors.yaml. It maps the project as a graph, propagates change from the anchor outward, and gates every step — so work guided by AI stays anchored to what was decided.
+Moniker: anchors
+Tags:
+- ai
+- ai-agents
+- cli
+- developer-tools
+- golang
+- spec-first
+ReleaseNotes: |-
+  v0.1.403
+  Three fixes reported by MIF. The first two are in anchors test: a run that proved nothing no longer reads as success.
+  - The project root is written as the disk names it. On macOS the shell's working directory may differ in case from the folder (.../mif for .../MIF). Anchors built every path from it, so jest --findRelatedTests got paths it did not know, found no test and exited 0, in five suites. The root now takes the disk's case, read on macOS from the kernel and on Windows from each folder's listing; a part under a symbolic link keeps the link as written. (PRRPR-B04)
+  - A run that proved none of its files fails. When a suite reports a result for none of the files handed to it, the run fails, naming the count and the first path, whatever the suite's exit code. When only some files come back without a result, they are listed as unproven, as in v0.1.401. (SLCTN-B19)
+  - A @contract stamp holds across a change only to comments. mock-stamped hashed the stamped block with its comments, so a rule's mark edited in a comment broke the stamp. In MIF, // RPBTR-B02: → // RPBTR-B02/RPBTR-A01: broke 81 stamps, and 122 in all, each asking a stamp --refresh that reconfirms nothing. When the hash no longer matches, the gate now finds the version the stamp was taken at in the module's recent history. If the block's code is the same today, with comments out and blank lines left out, the stamp holds. The comment can be edited, added at a line's end, or added on a line of its own. A change to the code still fails, as before. Stamps written before this version need nothing. Reported by MIF. (MCSTM-B24)
+  Everything in the v0.1.351 notes still applies: run anchors migrate once, crossing format 8.
+  Changelog
+  - f369cc8 fix(config): the root takes the disk's case on Windows too
+  - 762ebff fix(config): the root's link-free parts are compared ignoring case, as Windows resolves both
+  - eaa58b8 fix(gate): a @contract stamp holds across a change only to comments
+  - 1c545fe fix(test): the root takes the disk's case, and a run that proved none of its files fails
+ReleaseNotesUrl: https://github.com/co2-lab/anchors/releases/tag/v0.1.403
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

@@ -1,0 +1,81 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: txn2.kubefwd
+PackageVersion: 1.25.16
+PackageLocale: en-US
+Publisher: txn2
+PublisherUrl: https://github.com/txn2
+PublisherSupportUrl: https://github.com/txn2/kubefwd/issues
+Author: Craig Johnston
+PackageName: kubefwd
+PackageUrl: https://github.com/txn2/kubefwd
+License: Apache-2.0
+LicenseUrl: https://github.com/txn2/kubefwd/blob/master/LICENSE
+Copyright: Copyright (c) 2018-2025 txn2
+ShortDescription: Kubernetes bulk port forwarding for local development.
+Description: kubefwd is a command line utility for bulk forwarding Kubernetes services to your local workstation. Each service gets its own unique loopback IP (127.x.x.x), eliminating port conflicts. Access cluster services by name exactly as in-cluster with automatic /etc/hosts management.
+Moniker: kubefwd
+Tags:
+- cli
+- development
+- devops
+- k8s
+- kubectl
+- kubernetes
+- port-forwarding
+ReleaseNotes: |-
+  kubefwd v1.25.16
+  This release modernizes the interactive Terminal UI by moving it onto the Charm v2 library line, hardens API-key startup logging, and rolls up routine dependency and CI maintenance.
+
+  Highlights
+
+  TUI migrated to Charm v2 (#527, closes #517)
+  The entire interactive TUI (--tui) has been migrated from the v1 Charm libraries to their v2 equivalents under the charm.land/... module path:
+  ──────────────────────────────────────────┬────────────────────────────────────────
+  Before                                    │After
+  ──────────────────────────────────────────┼────────────────────────────────────────
+  github.com/charmbracelet/bubbletea v1.3.10│charm.land/bubbletea/v2 v2.0.7
+  ──────────────────────────────────────────┼────────────────────────────────────────
+  github.com/charmbracelet/lipgloss v1.1.0  │charm.land/lipgloss/v2 v2.0.4
+  ──────────────────────────────────────────┼────────────────────────────────────────
+  github.com/charmbracelet/bubbles v1.0.0   │charm.land/bubbles/v2 v2.1.0
+  ──────────────────────────────────────────┼────────────────────────────────────────
+  github.com/evertras/bubble-table v0.19.2  │github.com/evertras/bubble-table v0.22.3
+  ──────────────────────────────────────────┴────────────────────────────────────────
+  These are distinct, incompatible type systems, so this was a full API migration rather than a version bump. Notable changes handled under the hood:
+  - View() returns tea.View - alt-screen and mouse capture moved from the removed tea.WithAltScreen() / tea.WithMouseCellMotion() program options to the AltScreen / MouseMode fields on the returned view, applied on every render path.
+  - Keys - tea.KeyMsg is now an interface; all handlers (services, logs, detail, browse, and help) dispatch on the concrete tea.KeyPressMsg.
+  - Mouse - tea.MouseMsg split into tea.MouseWheelMsg / tea.MouseClickMsg, with renamed button constants; all wheel-scroll and click-to-focus behavior preserved.
+  - Styling - lipgloss.Color is now a function returning image/color.Color; viewport sizing moved to SetWidth() / SetHeight() and option-based construction.
+  No user-facing behavior changes. All keyboard shortcuts (j/k, Enter, Tab, /, r, b, ?, q), traffic metrics, log streaming, theme switching, and auto-reconnect work exactly as before. The dark/light theme workaround was re-validated under lipgloss v2. Verified on ubuntu + macOS with go build, go vet, golangci-lint (0 issues), and the full test suite.
+
+  API-key authentication: docs and safer startup logging (#526)
+  Follow-up to the API-key auth feature (#508):
+  - Security: the API key is now only printed at startup when kubefwd generated it. A user-supplied KUBEFWD_API_KEY is referenced by name and never echoed to logs.
+  - Docs: the Authentication sections of openapi.yaml, api-reference.md, and mcp-integration.md were rewritten to cover the Bearer header, KUBEFWD_API_KEY / kubefwd mcp --api-key, the /api/health exemption, and the 401 response.
+
+  Dependency updates
+  - k8s.io/streaming 0.36.1 -> 0.36.2 (#523)
+  - k8s.io/kubectl 0.36.1 -> 0.36.2 (#525)
+  - k8s.io/cli-runtime 0.36.1 -> 0.36.2 (#522)
+  - golang.org/x/sys 0.45.0 -> 0.46.0 (#518)
+  - github.com/txn2/txeh 1.8.0 -> 1.8.1 (#516)
+  - github.com/quic-go/quic-go bump (#511)
+
+  CI / build
+  - codecov/codecov-action 6.0.1 -> 7.0.0 (#521)
+  - github/codeql-action 4.36.0 -> 4.36.1 -> 4.36.2 (#512, #520)
+  - actions/checkout 6.0.2 -> 6.0.3 (#514)
+  - docker/setup-qemu-action 4.0.0 -> 4.1.0 (#513)
+
+  Install / upgrade
+  # Homebrew (macOS / Linux)
+  brew install txn2/tap/kubefwd
+  brew upgrade kubefwd
+  # Or download a binary for your platform from the assets below.
+  Run it (requires root for /etc/hosts and loopback aliases):
+  sudo -E kubefwd svc -n <namespace> --tui
+ReleaseNotesUrl: https://github.com/txn2/kubefwd/releases/tag/v1.25.16
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

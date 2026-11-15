@@ -1,0 +1,71 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: UniRound-Tec.HRack
+PackageVersion: 0.4.4
+PackageLocale: en-US
+ShortDescription: A desktop terminal for multi-agent coding workflows that keeps every CLI's native TUI intact.
+Description: |-
+  HRack — short for Harness Rack — is a desktop terminal for multi-agent coding workflows. It keeps every CLI's native TUI intact, then adds the layer that is usually missing around it: session status, attention cues, a floating monitor, quick launch, and a read-only workspace viewer.
+
+  The problem
+  Different coding agents are useful for different jobs, so one terminal quickly becomes several. The friction is not starting them — it is keeping track of them:
+  - You switch away, come back later, and discover that an agent has been waiting on a permission prompt the whole time. Codex and Gemini CLI users have both asked for better attention signals (Codex, Gemini CLI).
+  - Once several agents run in parallel, you start hunting through tabs for the one that needs you. The same problem shows up in multi-agent workflow discussions and tools such as tmux-claude-session-manager.
+  - A notification alone is not enough if it never fires (Codex #8929), cannot tell that the agent is waiting for an answer (Codex #13478), or misses an interactive shell waiting for input (Gemini CLI #19527).
+  HRack keeps those sessions together, tells you which one needs attention, and takes you back to the right place. The original CLI still does all the work; HRack simply means you do not have to stare at it.
+
+  How it works
+  On first launch, HRack discovers compatible CLIs on the host and in WSL. The result is cached for fast startup and can be rescanned manually. Each supported harness has an adapter that turns its official Hooks, SSE stream, extension API, or runtime events into a small shared vocabulary:
+
+  thinking · tool call · needs you · completed · error
+
+  Those facts drive the sidebar, the floating window, and the history view without touching terminal bytes:
+
+  CLI ── PTY ──────────────────────────────> native TUI
+  └── Hooks / SSE / extension events ──> adapter ──> status and alerts
+
+  workspace ── read-only access ──────────> file tree and viewer
+
+  If an observer fails, the PTY keeps running. HRack degrades the status display instead of breaking the CLI session.
+
+  Highlights
+  Know what every agent is doing
+  Run different agents side by side and see which one is thinking, using a tool, waiting for you, finished, or no longer fully observed.
+  Collapse the shell, keep the signal
+  The main sidebar can collapse into a compact rail. The built-in monitor still shows every followed session and brings you back to the correct one.
+  Make the floating window yours
+  The default floating monitor is itself a built-in renderer. Custom renderers use the same public interface and can be built with HTML, CSS, JavaScript, animation libraries, canvas, or Live2D. Settings include a short built-in skill that you can copy and give to your coding agent to create and install a renderer.
+  Read the workspace without leaving the session
+  Open a read-only file tree beside the terminal, inspect highlighted source, and preview Markdown while the agent keeps its native TUI.
+  Themes, fonts, and layout
+  Choose independent application and terminal themes, adjust terminal fonts and sizing, switch navigation modes, and configure the floating renderer from one settings page.
+  Fast launch across runtimes
+  Start a shell or detected coding CLI from the Home screen or quick-launch panel. HRack supports host installations and compatible WSL distributions. DeepSeek Harness appears only after a local or WSL install is found.
+
+  Supported harnesses
+  | Harness          | Integration                           | Status available to HRack                         | Runtimes  |
+  | ---------------- | ------------------------------------- | ------------------------------------------------- | --------- |
+  | DeepSeek Harness | Official Web surface + runtime bridge | Followed session and lifecycle                    | Host, WSL |
+  | Claude Code      | Official Hooks                        | Thinking, tools, approvals, completion            | Host, WSL |
+  | Codex CLI        | Stable Hooks                          | Turns, tools, approvals, compaction               | Host, WSL |
+  | OpenCode         | Server + SSE                          | Sessions, thinking, tools, questions, permissions | Host, WSL |
+  | Pi               | Extension API                         | Thinking, responses, tools, turns                 | Host, WSL |
+  | Kimi Code        | Official Hooks                        | Turns, thinking, tools, approvals                 | Host, WSL |
+  | Grok Build       | Official Hooks                        | Turns, thinking, tools, approvals                 | Host, WSL |
+
+  HRack can also discover and launch Devin CLI, Cline, Qwen Code, Amp, Aider, Goose, Kiro CLI, GitHub Copilot CLI, and other registered CLIs. Launch-only integrations do not expose the same level of status detail yet.
+Tags:
+- agent
+- agent-team
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- multi-agent
+- programming
+ManifestType: locale
+ManifestVersion: 1.12.0

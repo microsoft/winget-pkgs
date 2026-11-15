@@ -1,0 +1,40 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Iewnfod.LuminaTerminal
+PackageVersion: 0.4.2
+PackageLocale: en-US
+Publisher: iewnfod
+PublisherUrl: https://github.com/iewnfod
+PublisherSupportUrl: https://github.com/iewnfod/lumina-terminal/issues
+Author: Iewnfod
+PackageName: Lumina Terminal
+PackageUrl: https://github.com/iewnfod/lumina-terminal
+License: MPL-2.0
+LicenseUrl: https://github.com/iewnfod/lumina-terminal/blob/HEAD/LICENSE
+ShortDescription: A modern, cross-platform terminal emulator built with Tauri, React, and Xterm.js.
+Description: Lumina Terminal is a modern, cross-platform terminal emulator built with Tauri, React, and Xterm.js, featuring a sleek UI, a command palette, and customizable profiles. Each tab runs a real shell process with multi-tab support, tear-off tabs, find-in-terminal, configurable shells (PowerShell, WSL, Git Bash, or any executable), an optional WebGL renderer, and session save and restore.
+Tags:
+- console
+- shell
+- terminal
+ReleaseNotes: |-
+  🐛 Bug Fixes
+  - Terminal stability under load — A blocked PTY write no longer holds the shared terminals-map lock, so one slow tab can't stall or panic the others; dead-PTY (EIO) writes and resizes now degrade to warnings instead of panicking, kill_terminal runs outside the lock, and a re-check under the insert lock stops concurrent starts from orphaning a PTY
+  - zsh exit-code tracking — The zsh hook now captures $? before user precmd hooks and prepends its own, so theme frameworks no longer corrupt every per-command exit code shown in tab subtitles and MCP output
+  - Shell completion fixes — OSC 1337 payloads above 32 KiB are no longer truncated (TAB completion works with large candidate sets), emitted candidates are capped at 200 so ls /usr/bin no longer builds a multi-hundred-KB payload, and PageUp no longer computes a negative selection index
+  - Key bindings — Modifiers now match exactly: Ctrl+Alt+T no longer fires a plain ctrl+t binding. The held-key set is also cleared on window blur so a key released outside the window doesn't stay "stuck"
+  - Config hot reload & session — Stale config snapshots no longer overwrite live tabs, updateConfig writes are drained/awaited so a stale merge can't win on disk, window-geometry persistence is debounced, and the session save dialog got a duplicate-close guard
+  - System proxy — macOS scutil ExceptionsList entries lose their N : index prefix, the env-pair lookup implements the documented lowercase-wins two-pass, and failed env-file writes retry on the next poll instead of busy-looping
+  - Windows launchers — .lnk arguments now quote per token, so launchers with spaced titles work again; the rpm miss heuristic no longer rejects noto-* packages
+  - MCP server token — Regenerated only when missing/empty, so a transient read error no longer silently breaks already-configured client URLs
+  - Misc hardening — xterm/WebGL contexts are disposed on unmount (StrictMode-safe), write_atomic uses a pid-suffixed temp name so two Lumina processes can't interleave, and macOS file-manager launches surface non-zero exits
+  🎨 Polish
+  - Moved the update modal's scrollbar inside the card so it reads as part of the surface
+  🔧 Chores
+  - Release-note generation in scripts/release.sh now runs through opencode with DeepSeek V4.1 Flash instead of the claude CLI, with output discipline that keeps stdout to the note alone
+  - Internal cleanup from the logic review: extracted exeBasename (lib/exe.ts) and CommandAction (types/commandAction.ts), added .catch to fire-and-forget promises, and normalized formatting per .editorconfig
+  Full Changelog: https://github.com/iewnfod/lumina-terminal/compare/v0.4.1...v0.4.2
+ReleaseNotesUrl: https://github.com/iewnfod/lumina-terminal/releases/tag/v0.4.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

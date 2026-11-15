@@ -1,0 +1,266 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+PackageIdentifier: Tropibyte.cshw
+PackageVersion: 1.0.8.4
+PackageLocale: en-US
+Publisher: Tropibyte, Inc.
+PublisherUrl: https://www.tropibyte.com
+PublisherSupportUrl: https://www.tropibyte.com/bugs.html
+Author: Tropibyte, Inc.
+PackageName: C Shell for Windows
+PackageUrl: https://www.tropibyte.com/cshw.html
+License: PolyForm Small Business 1.0.0
+LicenseUrl: https://polyformproject.org/licenses/small-business/1.0.0
+Copyright: Copyright (c) 2024-2026 Tropibyte, Inc.
+CopyrightUrl: https://www.tropibyte.com/cshw.html
+ShortDescription: A native Windows command shell with csh/tcsh-flavored syntax, 248+ builtins, real concurrency primitives, arbitrary-precision math, and built-in AI.
+Description: |-
+  cshw is a native Windows command shell with csh/tcsh-flavored syntax. Familiar Unix
+  shell ergonomics meet first-class Win32 access -- no WSL, no Cygwin, no compatibility
+  layer. 248+ builtin commands cover file ops, text processing (grep with PCRE2, sed,
+  awk, sort with -t/-k, head/tail with -f), real concurrency primitives (coroutines,
+  mutex, semaphore, barrier, channel), Win32 calls (rundllproc, winapi, dllimport),
+  and built-in AI (OpenAI, Anthropic, Azure, Ollama, LM Studio). Runs your existing
+  .bat, .cmd, and .ps1 scripts unchanged. The bc/dc commands offer arbitrary-precision
+  arithmetic with an opt-in exact-rational tier (bc -x) including complex numbers and
+  small exact matrices. As of 1.0.8.0, cshw ships a signed server family: the tsrvd
+  supervisor runs out-of-process protocol handlers -- native SMTP, POP3, and IMAP over
+  a shared Maildir, FTP, and a real HTTP/HTTPS/CGI server (http.dll) that speaks
+  HTTP/1.1 and HTTP/2 -- and the new quicsrv worker serves HTTP/3 over QUIC through the
+  same serving core. The fetch client gains native HTTP/2 (--http2) and HTTP/3
+  (--http3) modes that guarantee the protocol. Ships with a 22-chapter user guide.
+Moniker: cshw
+Tags:
+  - shell
+  - csh
+  - tcsh
+  - command-line
+  - cli
+  - terminal
+  - unix
+  - win32
+  - scripting
+  - developer-tools
+PurchaseUrl: https://www.tropibyte.com/cshw.html
+PrivacyUrl: https://www.tropibyte.com
+ReleaseNotes: |-
+  The theme of this release is **silent success** — the shell accepting something,
+  reporting 0, and doing something other than what was asked. An alias that did
+  nothing. An unterminated `if` that ran its body. A `$dir/$file` that came out as
+  `$dir`. A `-n` that was accepted and ignored, so a syntax check *ran* the script.
+  A `--help` that hung. Most of what follows is one of those.
+  
+  245 built-in commands; 159 test suites.
+  
+  ### ⚠️ Behaviour change: `==` and `!=` compare text
+  
+  This is the one most likely to change what an existing script does, so it is
+  first.
+  
+  In csh, `==` and `!=` compare **strings**; `<`, `>`, `<=` and `>=` compare
+  **numbers**. That split is the whole of the language's type system. cshw
+  honoured the second half and not the first: it tried a numeric comparison
+  first whenever both operands looked like numbers. Measured against tcsh
+  6.24.13, every one of these disagreed:
+  
+  ```
+                   tcsh    cshw was    cshw now
+  5 == 05          false   true        false
+  0 == 00          false   true        false
+  10 == 010        false   true        false
+  007 == 7         false   true        false
+  -5 == -05        false   true        false
+  1e2 == 100       false   true        false
+  ```
+  
+  It reads as a convenience — `if ($day == "07")` matching day 7 — right up to
+  the moment the same rule makes `if ($ver == "1.0")` and `if ($ver == "1.00")`
+  disagree about the same version, or decides two zero-padded ids are the same
+  id.
+  
+  It is not theoretical. Turning it on found five assertions in cshw's own test
+  suite that were passing *because* of it: two expected `100^20` with one zero
+  too many, and both sides overflowed a 64-bit parse to the same value, so a
+  numeric `==` called a wrong answer right. Three more compared a byte count
+  against `"0"` and passed on an **empty** string, because empty counted as
+  numeric zero — a missing file read as a passing test.
+  
+  **If you want the numeric reading, say so.** Three cast keywords, on either
+  operand, set the comparison for the whole expression:
+  
+  ```
+  if ( num $month == "01" )    # 1 == 1        true
+  if ( @   $month == "01" )    # same, spelled the way @ already means
+  if ( str $month == "01" )    # "1" vs "01"   false -- the default, said aloud
+  ```
+  
+  `@` is spelled that way because it is already cshw's arithmetic tier; the cast
+  is that same idea pulled into a condition. It compares as a float when either
+  side has a fraction or an exponent, so `@ 5 == 5.0` is true and
+  `@ 0.5 == 0.4` is not.
+  
+  A numeric comparison has **no range limit**. Two whole numbers are compared as
+  decimal text -- sign, then length, then digits -- so nothing overflows:
+  
+  ```
+  num 100000000000000000000 == 100000000000000000001    false
+  100000000000000000000 < 100000000000000000001         true
+  ```
+  
+  This matters more than it looks. Going through a 64-bit parse SATURATES, so
+  every value past that range collapses onto one number and compares equal --
+  which is the exact defect `==` became a string comparison to remove. It is
+  what let two of cshw's own tests expect `100^20` with one zero too many and
+  still pass.
+  
+  Radix prefixes read the same here as everywhere else in the shell, so `base`,
+  `@` and a comparison agree on what a number says:
+  
+  ```
+  num 0x100 == 256     true      0b and 0o too
+  0x100 < 100          false     it reads 256, not 0
+  0x100 == 256         false     plain == is still TEXT
+  ```
+  
+  `str` also works on the relational operators, where it makes them
+  lexicographic — so the keyword means one thing on all six rather than being
+  silently ignored on four:
+  
+  ```
+  if ( str "10" < str "9" )    # true
+  if ( "10" < "9" )            # false -- numeric, as before
+  ```
+  
+  A cast keyword is only a cast when something follows it to cast. `num` and
+  `str` remain ordinary words otherwise, so none of these changed meaning:
+  
+  ```
+  if ( num == 5 )              # the WORD "num", compared with 5
+  if ( numeric == numeric )    # a longer word is untouched
+  set num = 5
+  if ( $num == 5 )             # a variable named num reads normally
+  ```
+  
+  One deliberate divergence: `@ x = ( 5 == 05 )` stays **numeric** in cshw,
+  where tcsh routes `@` through the same string-comparing parser. Inside `@`
+  everything is a number — that is what `@` is, and what makes it readable as
+  the numeric cast.
+  
+  ### ⚠️ Behaviour change: awk and sed run commands through cshw, not cmd.exe
+  
+  `system()`, `print | "cmd"`, `"cmd" | getline` and sed's `e` used to go to
+  `cmd.exe`. They now go to **cshw** -- the same build that is interpreting the
+  script, found by module path rather than by PATH.
+  
+  This is the point of the shell, and it is what a ported Unix script needs:
+  
+  ```
+  awk 'BEGIN { print "abc" | "rev" }'      # cba -- rev is a cshw builtin
+  awk 'BEGIN { system("rm -f " tmp) }'     # rm is a cshw builtin; cmd.exe has none
+  ```
+  
+  Before, those answered `'rev' is not recognized as an internal or external
+  command` -- cmd.exe's error, for commands cshw has built in.
+  
+  **If a program of yours relied on cmd.exe syntax inside those constructs, it
+  will now run under cshw instead.** `dir /w` in an awk pipe reaches cshw's
+  `dir`. Name the shell explicitly to get the old behaviour:
+  
+  ```
+  awk 'BEGIN { system("cmd", "dir /w") }'
+  ```
+  
+  `system()` takes an optional first argument naming the shell --
+  `cshw`/`csh`/`cshell`/`tcsh`, `cmd`/`command`, `ps`/`powershell`/`pwsh`,
+  `bash`/`sh` -- case-insensitively. `bash` fails if it is not installed rather
+  than falling back, because running bash syntax under another shell would not
+  report an error, it would run something else.
+  
+  Running a `.bat` or `.cmd` still uses cmd.exe, which is not a routing decision:
+  that IS asking for cmd.
+  
+  ### ⚠️ Behaviour change: mv now honours -i and -n
+  
+  `mv` passed `MOVEFILE_REPLACE_EXISTING` unconditionally and read no switches at
+  all, so `-i` never prompted and `-n` overwrote the file it exists to protect --
+  and reported success. Both were documented in `man mv` and recommended in the
+  book.
+  
+  A script that relied on the old behaviour was relying on `mv` ignoring what it
+  was told. `mv` still overwrites by default, so only scripts that passed `-i` or
+  `-n` see a change, and for those the change is that the flag now works.
+  
+  `mv project\ archived\project\` also works for the first time. A trailing
+  slash on a destination that does NOT exist names the destination itself; mv
+  appended the basename anyway and tried to create `archived\project\project`.
+  That example had been in `man mv` for two years without ever running.
+  
+  `mv` also gained the rest of GNU's flag set -- `-b`, `--backup=CONTROL`, `-S`,
+  `-t`, `-T`, `-u`, `-v`, `--strip-trailing-slashes` -- and every remaining
+  `MoveFileEx` mode: `--write-through`, `--no-copy`, `--delay-until-reboot`,
+  `--fail-if-not-trackable`, and `--hardlink`. (Windows reserves
+  `MOVEFILE_CREATE_HARDLINK` and does nothing with it, so `--hardlink` is
+  implemented directly.)
+  
+  ### ⚠️ Behaviour change: command names now fold case
+  
+  `DIR`, `Dir` and `dir` are one command. So are `COPY`, `TYPE`, `SET`, `CLS` and
+  everything else.
+  
+  Command lookup used to be case-sensitive, which on Windows is surprising in a
+  way that costs real time. `DIR` missed cshw's builtin entirely and fell through
+  to PATH -- where it found either a FOREIGN program of the same name (Git ships
+  `dir.exe`, whose output looks nothing like cshw's) or nothing at all. The same
+  command behaved differently on two machines depending on what else was
+  installed. `COPY`, `TYPE`, `SET` and `CLS` simply failed, though every one of
+  them works in cmd.exe.
+  
+  **Switches are still case-SENSITIVE, and deliberately so.** There, case is the
+  flag: `mv -t` is target-directory and `mv -T` is no-target-directory; `-s` and
+  `-S` differ across half of coreutils. Folding those would silently merge two
+  different options.
+  
+  This also removed `isWindows`'s second registration. It was the only camelCase
+  name among all the commands and carried a duplicate `iswindows` purely so the
+  lowercase spelling would resolve; folding case made the duplicate redundant.
+  
+  ### ⚠️ Behaviour change: `dir` hides hidden files, and the banner is now a setting
+  
+  Three changes, plus a bug that had been there the whole time.
+  
+  **`dir C:\Windows` listed `C:\`** with a single entry named `Windows`, instead
+  of listing Windows. The directory test existed only in the branch handling
+  paths WITHOUT a separator, so anything containing a backslash was assumed to be
+  directory-plus-pattern. `dir sub` worked, which is why nobody caught it -- the
+  broken form is the one with a path in it.
+  
+  **`dir *.cpp` listed one file of sixty.** The shell expands a glob before the
+  command sees it, so `dir` received sixty separate filenames -- and read only
+  the first. Quoting the pattern worked, because then `dir` did its own
+  `FindFirstFile` over it, which is exactly why this survived: the broken form is
+  the one everybody types. Every operand is enumerated now, so `dir a.txt b.txt`
+  also works.
+  
+  **Hidden and system files are now omitted unless asked for**, as in cmd.exe.
+  `dir` in a home directory used to bury the answer under `NTUSER.DAT`,
+  `ntuser.dat.LOG1`, `Cookies`, `NetHood` and a dozen more. `/a` shows
+  everything; `/ah`, `/as`, `/ad` and `/a-h` are unchanged and take over
+  completely when given.
+  
+  **The banner and summary can now be turned off**, per session or per listing:
+  
+  ```
+  set nodirbanner      # drop the " Directory of C:\path" line
+  set nodirsummary     # drop the "N File(s) ... bytes free" block
+  
+  dir /-banner         # or per invocation
+  dir /-summary
+  dir /banner          # a switch beats the setting, both directions
+  ```
+  
+  Both are ON by default, matching cmd. The settings are spelled negatively
+  because that is how csh names anything you disable -- `noclobber`, `noglob`,
+  
+  (truncated -- full release notes: https://github.com/tropibyte/cshw-releases/releases/tag/v1.0.8.4)
+ReleaseNotesUrl: https://github.com/tropibyte/cshw-releases/releases/tag/v1.0.8.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

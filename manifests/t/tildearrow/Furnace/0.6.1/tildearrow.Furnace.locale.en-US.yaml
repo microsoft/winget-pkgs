@@ -1,0 +1,177 @@
+# Created with komac v2.1.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+
+PackageIdentifier: tildearrow.Furnace
+PackageVersion: 0.6.1
+PackageLocale: en-US
+Publisher: tildearrow
+PublisherUrl: https://github.com/tildearrow
+PublisherSupportUrl: https://github.com/tildearrow/furnace/issues
+PackageName: Furnace
+PackageUrl: https://github.com/tildearrow/furnace
+License: GPL-2.0
+LicenseUrl: https://github.com/tildearrow/furnace/blob/HEAD/LICENSE
+ShortDescription: a multi-system chiptune tracker compatible with DefleMask modules
+Tags:
+- chiptune
+- emulator
+- music
+- tracker-music
+ReleaseNotes: |-
+  this release fixes several bugs which were present in 0.6.
+  there are also a couple other things we've added - check out the change log.changes
+  - fixed .mod import for songs with 128 patterns
+  - fix chan osc oscilloscope bounds
+  - fixed loop region in Orders not being updated when editing the song
+  - fixed loop region in Orders not being updated after loading a song
+  - fix the clock overflowing after 68 years
+  - fix compilation with latest Mesa versions
+  - fix issues with samples:
+      - 0Cxx not working properly in some chips after the sample has ended
+      - 0Cxx not working on ES5506 at all
+      - sample map totally messing portamento and legato up
+  - fix possible crash when loading instruments
+  - fix gap at the end in audio export
+  - attempt fixing "Furnace is damaged" problem on macOS
+  - fix ADPCM-A global volume effect not working
+  - fix crash when loading song with no chips
+  - fix description of 88xy effect
+  - fix instrument with sample loading
+  - fix glitched playback after starting playback past loop point
+  - fix -subsong parameter being ignored when using -output
+  - fix potential crash when importing a layout
+  - fix AdLib drum preset not in drums mode...
+  - fix the note combo box in sample editor being too annoying
+  - fix Apperarance having a never-disabling Apply
+  - fix "move cursor between channels" actions being swapped
+  - fix ability to go out of bounds when using next/prev channel binds
+  - fix paste overflow undo stack corruption
+  - fix possible crash with colorize instrument option
+  - fix a bug when right-clicking in sample list
+  - fix sample view not updating after load-replacing
+  - fix wave drawing (it was slightly off)
+  - fix moving assets not marking the song as modified
+  - fix "play from start" not disabling "repeat pattern"
+  - fix sample view not updating when changing color scheme
+  - fix input latch being lowercase
+  - Namco WSG: fix volume macro scaling
+  - Generic PCM DAC linear interpolation possible overflow fix
+  - fix compilation due to IconFontCppHeaders
+  - fix SNES channel invert effect
+  - Sound Unit fixes
+      - fix forceIns
+      - fix sample map
+  - update AppStream metadata to make the AppStream checker happy
+  - fix possible PCM crash when using VERA
+  - YM2612 fixes:
+      - fix panning view on ExtCh channel 5
+      - fix arp issue when using non-linear pitch
+  - added a couple song flags:
+      - Volume scaling rounds up: makes volume scaling round up (ceil) rather than being rounded down. useful for NES triangle.
+      - Reset arpeggio effect position on new note: resets the arpeggio effect's position on each note.
+  - improve NES DPCM sample mapping
+      - now it resembles FamiTracker more
+      - each note has DPCM pitch and initial delta counter value settings
+  - improve icons for ADSR/LFO macro types
+  - display chevrons if certain values are out of view in macro view
+  - come on Furnace can do Game Boy
+  - changed macOS license text so it tells you about "Furnace is damaged"
+  - add effect to restart a macro (F7xx)
+  - don't change the instrument type if it is unknown once it is loaded in the instrument editor
+  - ZSM export: remember last sample played so that async pitch changes work
+  - Virtual Boy changes
+      - fix forceIns not working well
+      - add static wave storage mode (only 5 waves)
+          - it is unknown whether it is possible to change waveforms on the fly...
+  - wavetable creation improvements
+      - now it defaults to best size for current chip
+      - displays a list of recommended sizes if there's more than one chip that supports waves
+  - add "make me a drum kit" option
+      - right click a sample in the sample list and select the option to make an instrument with sample map set to all samples
+  - new export dialog
+      - as of now the export options are displayed on a dialog by default
+      - you can change this back to the previous look by going into Settings
+  - make "change" button more notorious in chip manager
+  - re-arranged some of the tabs in instrument editor
+  - macOS: better default shortcuts
+  - added "default author name" setting
+  - PC speaker: added option to reset phase when the frequency changes
+      - this option was added after determining that many recent motherboards do so :<
+  - add a preliminary safe mode
+      - is your graphics card not working? Furnace fails to start? Furnace crashes on start-up because you loaded the wrong font, your sound/graphics card's driver is buggy or something? then this mode is for you!
+      - pass the -safemode parameter to Furnace, which starts it in safe mode (software rendering, no audio and fallback font only).
+      - alternatively, pass -safeaudio if you still want audio output.
+      - I was planning to make this mode automatic (start in safe mode after failed start-up) but testers ran into issues (especially when launching more than one Furnace instance). I will improve this and make it fully automatic soon...
+  - pattern view improvements
+      - the ++ button now allows you to have both effect columns buttons and pattern name fields visible.
+      - channel group hints, which display which channels are tied together (e.g. for 4-op mode, pitch modulation and more).
+      - channel status hints, displaying note on/off, vibrato/tremolo, slides, and other status.
+  - make it more obvious when trying to preview an instrument which cannot be previewed when the song doesn't have a chip which takes in that instrument type
+  - MIDI improvements
+      - added a button in Settings to re-scan MIDI devices
+      - finally: velocity response
+      - the velocity curve power is now 2.0 by default, to match General MIDI velocity standard
+      - program change pass-through: now you can use Furnace as a MIDI player of sorts
+      - many MIDI input bug fixes, such as input not working if the MIDI device's output channel is too high
+  - C64 improvements
+      - ADSR macros
+      - global volume and cutoff macros are now separate
+      - unified Special macro, with test/gate/ring/sync settings
+          - note: if you were using the former ring/sync and gate macros crazily (different loop points and all), this might break your song.
+      - default envelope reset time is now 2 instead of 1
+      - relative macros are now fine and less Mask-y
+      - 1Exy effect now updates envelope immediately
+      - 20xy/21xy effects to set AD or SR with a single effect
+  - a brand-new X-Y oscilloscope
+      - this displays two output channels (e.g. left and right) in a plot.
+  - C140: added bank types (for VGM export)
+  - "loop crossfade" option in sample editor
+  - default not to write instrument name when saving instrument to a file
+      - this way you don't end up with too many "Instrument 0"s
+  - new color scheme "guru mode"
+      - now you can edit every single color in the UI
+  - color scheme import/export improvements
+      - now it saves a couple related settings as well
+      - no more having to manually set color scheme type after importing
+  - added "select asset on load" setting
+  - added stereo 86PCM presets
+      - it is uncertain whether PC-9801-86 DACs were hard-panned or in mono
+  - added ability to hide channels in the per-channel osc independently of the pattern
+  - added option to disable DC offset correction
+  - paste from OpenMPT!
+  - add new FreeType font renderer
+      - it has more settings than the current one
+  - added early text export feature
+      - still incomplete
+  - Amiga accuracy improvements
+      - now AM/PM work correctly
+      - don't stop DMA until period timer is done
+  - new OPL sound cores:
+      - YM3812-LLE: low-level emulation of the OPL2 chip. very CPU intensive but 100% accurate.
+      - YMF262-LLE: like YM3812-LLE but for OPL3. even more CPU intensive.
+      - these cores are made by nukeykt based on die shots of the original chips.
+      - ymfm: why not? this core is made by Aaron Giles.
+  - added ESFM chip
+      - this chip is like OPL3, but adds many features on top of it, like 4-op on all channels, detune and per-operator panning.
+  - added PowerNoise chip
+      - a fantasy sound chip created by The Beesh-Spweesh! and jvsTSX for the Hexheld fantasy video game console, employing LFSR-based synthesis.
+  - many doc updates
+  - demo song updates
+      - including songs from the Virtual Boy and ESFM demo song contests!
+  note for macOS users
+  this release comes with a possible fix to the "Furnace is damaged" problem that's been plaguing (especially) Apple chipset Macs.however, this fix is not guaranteed to work. if you happen to run through this issue, open Terminal and type the following:
+
+  xattr -d com.apple.quarantine /path/to/Furnace.app
+
+  (replace /path/to/ with the path where Furnace.app is located)afterwards, reboot.thanks
+  - everyone who participated in the Virtual Boy and ESFM demo song contests in the Discord place
+  - akumanatt for Cielos ESFuMados and ESFM assembly optimizations
+  - AshKirby for cheering Furnace development
+  - Kagamiin~ for ESFM implementation
+  - LTVA and freq-mod for C64 improvements and planning
+  - LTVA again for several other fixes
+  - nadiaholmquist for the "Furnace is damaged" fix
+  - you for using Furnace and/or contributing to it
+ReleaseNotesUrl: https://github.com/tildearrow/furnace/releases/tag/v0.6.1
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

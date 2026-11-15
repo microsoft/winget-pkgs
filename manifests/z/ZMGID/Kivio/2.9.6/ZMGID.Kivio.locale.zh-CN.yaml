@@ -1,0 +1,74 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: ZMGID.Kivio
+PackageVersion: 2.9.6
+PackageLocale: zh-CN
+ShortDescription: 轻量桌面 AI 客户端与屏幕级 Agent：聊天、工具、翻译、OCR、视觉问答，放进一个小应用。
+Description: |-
+  Kivio 是一个小体积桌面 AI 客户端，内置 Agent 运行时。常驻托盘或菜单栏，需要时再出现，比浏览器里的 AI 工作台更轻。
+  - Kivio Agent —— 聊天、项目、助手、记忆、文件/图片附件、MCP、Skills、本地工具（文件操作、终端、网页抓取/搜索、Pyodide run_python）。
+  - Lens —— 基于截图的视觉问答、OCR、公式提取、文本优化，可选联网来源回答。
+  - 快速翻译 —— 输入文本、选中文本、窗口、任意屏幕区域。
+  - 自带模型选择权 —— 支持 OpenAI 兼容接口与 Anthropic Messages，可按功能分别路由模型，多 Key 故障转移。
+  - 文档可直接用 —— PDF / Word / Excel 工作流跑在随包的离线 Pyodide 沙箱，不依赖首次运行从 CDN 下载。
+  - 默认安静 —— 无遥测；API Key 与对话数据留在本机
+Tags:
+- 人工智能
+- 大语言模型
+- 聊天机器人
+ReleaseNotes: |-
+  Kivio Desktop v2.9.6
+  桌面 AI 助手 · macOS (Apple Silicon) + Windows。Desktop AI assistant for macOS (Apple Silicon) and Windows.
+  下载 / Downloads
+  - Windows 安装包 / Installer — Kivio.Desktop_2.9.6_x64-setup.exe（NSIS）
+  - Windows 便携版 / Portable — Kivio.Desktop_2.9.6_x64-portable.zip，解压后运行 Kivio Desktop.exe / unzip and run.
+    - 需要 Edge WebView2，设置和对话与安装版共用。Requires Edge WebView2; settings and conversations are shared with the installed app.
+    - 应用内更新仍下载安装包。In-app updates download the NSIS installer.
+  - macOS — Kivio.Desktop_2.9.6_aarch64.dmg（Apple Silicon，未签名 / unsigned）
+    - 首次启动：右键 → 打开，或运行 xattr -cr "/Applications/Kivio Desktop.app"。
+    - First launch: right-click → Open, or run the command above.
+  新版本亮点 / What's New
+  以下按功能整理 v2.9.5 → v2.9.6 的完整版本差异，涵盖这两个发布标签之间的新增功能、体验改进与修复。重复合并、中途回退和内部整理不单列为新功能。
+  This changelog covers the full v2.9.5 → v2.9.6 release range, grouped by feature. Duplicate merges, reverted intermediate changes and internal cleanup are not counted as new features.
+  聊天输入与日常操作 / Composer and everyday chat
+  - 提示词一键优化 / Prompt optimization — 输入框新增提示词优化，可在 Mixer 中单独选择优化模型、配置优化提示词；优化结果直接替换草稿，并以过渡动画呈现。Rewrite a composer draft in place, with a separately configurable model and optimization prompt in Mixer and an animated text transition.
+  - 输入历史 / Input history — 支持用上下方向键回看并复用此前输入的内容。Recall and reuse previous inputs with the up/down arrow keys.
+  - 信息来源与专家入口 / Sources and experts — 将信息来源和专家选择收进加号菜单，减少输入框周围的常驻按钮。Access sources and experts from the plus menu, reducing persistent composer controls.
+  - 会话切换 / Conversation switching — 恢复切换会话时的加载动画，并修复加载中无法继续切换的问题。Restore the conversation-loading animation and allow switching again while a conversation is still loading.
+  - 多模型并排 / Multi-model layout — 并排回答充分利用主区域宽度，单列回答保留适合阅读的最大宽度。Side-by-side responses use the available main-panel width, while single-column responses retain a readable width limit.
+  图片生成、编辑与附件 / Images and attachments
+  - 参考图生成与改图 / Reference-image generation and editing — Mixer 和直接生图流程可传递附件或已有图片产物作为参考图，避免带图请求退化为纯文字生图；支持读取同一轮尚未落盘到主会话的图片草稿继续改图。Mixer and direct image generation now pass attachments or existing image artifacts as references, including current-turn draft images for further edits.
+  - 图片方向与体积 / Image orientation and size — 图片读入时进行缩放与压缩，减少批量读图的上下文占用；按 EXIF 校正手机照片方向，也覆盖无需大幅缩小的小图。Resize and compress images on ingestion to reduce batch-image context usage, and apply EXIF orientation to both large photos and smaller images.
+  - 参考图限制与错误提示 / Reference limits and errors — 参考图超过模型支持数量时明确报错，避免静默丢图；批量读取中遇到不存在的图片路径时给出提示。Report excess reference images instead of silently dropping them, and report missing paths in batch image reads.
+  - 附件和图片展示 / Attachment and image previews — 生成文件改用紧凑卡片，读图预览可折叠，生成图片保持小尺寸并自动换行；隐藏产物工具未完成的参数草稿。Use compact file chips, collapsible image-read previews and small wrapping image tiles, and hide unfinished artifact-tool argument dumps.
+  - 会话文件体积 / Conversation storage — 修复产物卡片将完整图片数据重复写入会话 JSON 的问题，避免聊天记录随图片累积而膨胀。Prevent artifact cards from embedding full image payloads into conversation JSON and unnecessarily enlarging saved chats.
+  模型接入与思考能力 / Providers and reasoning
+  - 三类 OAuth 账号 / OAuth sign-in — 新增 Codex、Kimi、Antigravity OAuth 供应商，支持账号登录、模型发现、令牌自动刷新和断开授权；可通过 Kivio 内置模型调用使用，无需安装对应 CLI。Add Codex, Kimi and Antigravity OAuth providers with sign-in, model discovery, token refresh and local disconnection, usable through Kivio without their CLIs installed.
+  - 账号身份与额度 / Account identity and quota — 增加账号身份、上游返回的套餐信息、剩余额度和重置时间展示，支持手动刷新。Show account identity, plan information, remaining quota and reset times where supplied by the service, with manual refresh.
+  - OpenCode Free — 新增无需 API Key、账号或 CLI 的免费模型供应商，支持刷新模型列表；补齐免费模型的上下文、输出限制、价格、思考档位及图标，避免误套付费模型信息。Add anonymous OpenCode Free access and model discovery, with dedicated limits, pricing, reasoning choices and icons for free models.
+  - 模型目录更新 / Model catalog refresh — 更新聊天、编程和图片模型目录，补充模型别名与供应商匹配，包括 Kimi Code、Qwen、Mistral、Grok 等相关条目。Refresh chat, coding and image model entries and provider-specific alias matching, including Kimi Code, Qwen, Mistral and Grok.
+  - 思考开关与摘要 / Reasoning controls and summaries — 修正 Gemini 3.x、DeepSeek 和 Kimi 的思考请求；主动请求 Responses 推理摘要，并保留多段摘要的换行。Correct reasoning requests for Gemini 3.x, DeepSeek and Kimi, request Responses reasoning summaries and preserve paragraph boundaries.
+  - 工具调用间的推理连续性 / Reasoning across tool calls — Responses 模型在工具调用轮次间保留加密推理条目，减少执行工具后重新开始规划的问题。Preserve encrypted Responses reasoning items across tool rounds so the model can continue its reasoning after tool execution.
+  - Antigravity 档位冲突 / Antigravity effort conflicts — CLI 与 OAuth 中已按 Low、Medium、High 区分的模型保留档位名称，隐藏重复的 effort 控件，并避免旧设置覆盖模型自身档位。Keep effort-specific Antigravity model names, hide duplicate effort selectors and prevent stale settings from overriding the selected variant.
+  外部 CLI 兼容 / External CLI compatibility
+  - Antigravity CLI — 新增官方 CLI 接入，支持流式会话、模型探测、斜杠命令目录、Skills 适配和命令结果面板；改善探测较慢时的处理与错误提示。Add the official CLI with streaming, model discovery, slash commands, skill adaptation and command-result panels, with better handling of slow discovery and errors.
+  - Cursor — 对接提问与计划审批请求，显示待办、子任务和生成图片事件，修复阻塞请求未获正确回应导致的会话卡住。Handle questions and plan approvals, render todo/task/image events and prevent turns from stalling on unanswered blocking requests.
+  - Pi — 停止时先清理排队消息并将未执行文本写回输入框，避免下轮意外执行或丢失；修正思考配置下发和未知 RPC 响应处理。Clear queued messages on cancellation and restore unsent text, fix reasoning configuration and handle unknown RPC responses without hanging.
+  - Codex CLI — 适配 0.152 的 clock 工具事件，并妥善回应新的 elicitation 请求，避免事件消失或会话挂起。Handle clock tool events and new elicitation requests from Codex 0.152 to avoid missing cards and stalled turns.
+  - Gemini 与 Grok CLI / Gemini and Grok CLI — Gemini 改用正式 ACP 启动参数，Grok 补齐 Windows 安装入口。Use Gemini's stable ACP launch flag and add the Grok installer entry for Windows.
+  插件与工作流 / Plugins and workflows
+  - 通用插件包 / Plugin packages — 新增 Kivio Plugin v1，支持从本地目录或 HTTPS Git 仓库导入、启停和移除插件；加载 Skills、命令、子代理、MCP 与 Hooks，并支持 Claude/Codex 格式兼容组件。Add Kivio Plugin v1 with local-directory and HTTPS Git imports, enable/disable/remove controls, and support for skills, commands, agents, MCP and hooks, including compatible Claude/Codex package components.
+  - 工作流 Hooks / Workflow hooks — 新增会话启动、用户提交、子代理启动及工具调用前后的脚本钩子，可注入上下文、调整工具参数、参与审批；设置页可单独编辑工作流配置。Add hooks for session start, prompt submission, subagent start and tool execution, with context injection, input rewriting, approval decisions and a dedicated settings editor.
+  界面与稳定性 / Interface and reliability
+  - 岚岚互动 / Lanlan interactions — 新增形态变化、表情和闲置小动作，偶尔搭配一句短话；随后调低触发概率、拉长间隔，减少打扰。Add changing shapes, expressions and occasional idle motions or short quips, tuned to occur less frequently with longer intervals.
+  - 流式回答与过程详情 / Streaming and process details — 修复生成中及结束时的回答闪动、格式跳变和高度抽动，平滑展开过程详情，改善消息渲染交接和滚动稳定性。Fix response flicker, formatting changes and height jumps during streaming and completion, and smooth process-detail expansion and scrolling.
+  - Windows 与独立窗口 / Windows and popout windows — 收紧窗口外沿、面板与顶栏间距；重做窗口控制图标，修复最大化后不切换还原图标的问题；统一独立窗口顶栏背景并补齐标题拖动区域。Reduce frame and panel spacing, refine Windows controls and maximize/restore state, and align popout titlebar backgrounds and drag regions.
+  - 设置页文本编辑 / Settings text editing — 多行文本框使用统一滚动条，增加剪切、复制、粘贴和全选的右键菜单。Give multiline settings fields consistent scrollbars and a context menu for cut, copy, paste and select all.
+  - 命令等待与停止 / Command waiting and cancellation — 前台命令等待实际进程结束后再返回，后台输出读取可等待新输出或退出；停止生成时清理前台进程树，减少子进程残留。Wait for foreground commands to exit, allow background-output reads to wait for progress, and terminate foreground process trees when generation is stopped.
+  - 草稿恢复与审批 / Draft recovery and approvals — 修复会话仓库尚未就绪时恢复遗留草稿的问题，并统一计划审批与排队消息事件处理。Delay orphan-draft recovery until the conversation repository is ready and unify plan-approval and queued-message handling.
+  - 发版资源检查 / Release resource checks — 在 Windows 安装包和 macOS DMG 构建后核验内置文档与 Obsidian Skills；修正 macOS 进程存活测试的跨平台实现。Verify bundled document and Obsidian skills in Windows installers and macOS DMGs, and fix the macOS process-liveness test.
+  完整变更 / Full changelog: https://github.com/ZMGID/kivio/compare/v2.9.5...v2.9.6
+ReleaseNotesUrl: https://github.com/ZMGID/kivio/releases/tag/v2.9.6
+ManifestType: locale
+ManifestVersion: 1.12.0

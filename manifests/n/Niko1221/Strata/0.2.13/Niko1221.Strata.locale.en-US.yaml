@@ -1,0 +1,88 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Niko1221.Strata
+PackageVersion: 0.2.13
+PackageLocale: en-US
+Publisher: strata
+PublisherUrl: https://github.com/Niko1221
+PublisherSupportUrl: https://github.com/Niko1221/Strata/issues
+PrivacyUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/SAFETY.md
+Author: Niko1221
+PackageName: Strata
+PackageUrl: https://github.com/Niko1221/Strata
+License: MIT
+LicenseUrl: https://github.com/Niko1221/Strata/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Niko1221 and the Strata contributors
+ShortDescription: Runs AI models on your own computer for chat, coding and image work.
+Description: |-
+  Strata runs powerful AI models on your own computer. Chat, code and work with images locally, with an OpenAI and Anthropic compatible API served on localhost. No account is needed.
+
+  The installer carries the app, the App Host, Node and Strata Control. On first start the app shows the inference engine for your graphics card with its size and one Download button, and then fetches the model you choose.
+Tags:
+- ai
+- large-language-model
+- llm
+- local-llm
+ReleaseNotes: |-
+  Strata 0.2.13: new DFlash2 defaults per card, a faster app start, a fix for the Strix Halo Terminal launch, and Qwen4 groundwork
+  The app and the Terminal are 0.2.13. Control and every engine package are 0.1.59. The update feed is sequence 123.
+  The DGX Spark (linux-aarch64) gets 0.2.13 too.
+  Highlights
+  - DFlash2 drafting, new defaults per card: Strix Halo, UD-Q4_K_XL, 46.6 to 49.1 tokens per second (+5.2%). RTX PRO 5000 72 GB, IQ3_S, 256-261 to 263-265 (+2.8%).
+  - Strix Halo (Windows): the Terminal launch of UD-Q4_K_XL with pictures off starts. Setup writes a 700 MB reserve, and the engine no longer applies its 2,560 MiB Windows floor on integrated graphics.
+  - Intel Arc: the same prompt gives the same answer on every run. 50 of 50 runs were identical on an A750, against 3 to 5 different answers in 5 runs before.
+  - App start: the main file went from 3.12 MB to 0.76 MB, and the start screen from 248.5 ms to 143.4 ms (headless Chrome, median of 10).
+  - Linux: the expert store loads again when free memory, the file cache or a reserved huge-page pool can hold it (#5327, PR #5531 by pjgmobile).
+  - Qwen4 groundwork: the signed update feed can carry a model list, and a model of a new shape gets its own engine download beside the Strata engine.
+  Speed against 0.2.12
+  Tokens per second, 0.2.12 to 0.2.13, on the DFlash2 defaults that changed. Other machines and models were not measured again.
+
+  | Machine, model            | Output                     | Output text                                                    |
+  | ------------------------- | -------------------------- | -------------------------------------------------------------- |
+  | Strix Halo, UD-Q4_K_XL    | 46.6 to 49.1 (+5.2%)       | differs from 0.2.12 on 30 of 36 prompts, the same on every run |
+  | Strix Halo, UD-IQ4_XS-v31 | +2.0%                      | identical                                                      |
+  | RTX PRO 5000 72 GB, IQ3_S | 256-261 to 263-265 (+2.8%) | identical                                                      |
+
+  How it was measured: the 0.2.12 settings and the 0.2.13 settings side by side through the Terminal's own flags, 3 interleaved rounds, a fresh engine start per run, greedy answers of 300 tokens. Speeds were not measured again on the final 0.1.59 packages.
+  What changed for you
+  - DFlash2 window and confidence per card. Strix Halo: window 5 to 8. Blackwell cc 12.0 with 48 GB or more (the RTX PRO 5000 72 GB class): window 6 to 8, and confidence 0.35 to 0.55 for IQ3_S. The DGX Spark and other cards keep their 0.2.12 values.
+  - The app's Load fetches the tuned DFlash2 drafter by itself when Auto picks it (as on the RTX PRO 5000 72 GB), as the Terminal does. On an RTX PRO 5000 with IQ3_S (3 rounds of 12 prompts per kind): agent +10.1%, chat +4.8%, all +6.1%, output identical 72 of 72.
+  - Windows RX 9070 / R9700 (gfx1201) and RX 7900 (gfx1100): the hipBLASLt table is no longer used by default. This restores the 10-19 rule of gfx1151 only, which the engine had overridden since 0.2.10. STRATA_HIPBLASLT_TABLE=on uses the table.
+  - Settings the launcher used to write are now the engine's own defaults, so a plain engine start matches the app and the Terminal: the parallel stack on Linux CUDA with 2 or more slots, the GDN settings on Linux CUDA, the chunked GDN scan on Linux with all cards gfx12, the gfx1151 hipBLASLt table, the Q8_0 hyper-connection read for Unsloth UD files on CUDA, and fp16 decode windows on the Mac for a resident IQ3_S or Q2_0 pack.
+  - One fit label in the app and the Terminal: "fits" when the model files without the lookup table fit graphics memory plus RAM, otherwise "may run slower". The Unsloth sets used to be measured against RAM only, which showed "too big" on a V100 32 GB with 31 GB of RAM. DeepSeek's Needs column shows its whole size. NVFP4-QAD is sized at 76.8 GB, the pack that runs.
+  - Strix Halo (Windows): on UD-Q4_K_XL with pictures off, 22,991 expert-cache slots against 17,556 on 0.2.12, because the engine's reserve floor no longer applies. Configs saved before the fix work after the update.
+  - Linux: a data folder on an external drive (/run/media/..., /media/..., /mnt) is accepted. Real system folders are still refused. The doubled "Nothing was downloaded or changed." line is gone.
+  - Intel Arc: the prompt path's small bf16 matrix products run on Strata's own fixed-order kernel, because oneMKL's result changed from launch to launch for them. Prompt speed is 0.995 to 1.004 of before on an A750. STRATA_SYCL_BF16_DET=0 brings oneMKL back.
+  - Qwen4 groundwork:
+    - A model of a new shape gets its own engine download (strata-q4-<shape>) beside the Strata engine, which stays as it is. The engine reports its shape with strata --geometry, and Control checks it against the signed manifest at install.
+    - Models listed in the signed feed install through setup, checked by installing a real synthetic model file from a test feed.
+    - 0.2.12 and older versions ignore the new feed members. The 0.2.13 feed has neither a model list nor a shape engine yet.
+  - Removed opt-in switches from finished experiments: STRATA_METAL_ROUTE, STRATA_METAL_PARTIAL, STRATA_METAL_WPF_MIB, STRATA_MMVQ_PF, STRATA_MMVQ_SG, STRATA_GR_Q32_PL, STRATA_DF2_GATE, STRATA_DF2_ROW_MS.
+  - Docs: a new page, docs/SETTINGS.md, lists every setting.
+  Fixed
+  - Strix Halo (Windows): the Terminal launch of UD-Q4_K_XL with pictures off was not ready after 308 seconds in one 0.2.12 test and took 594.8 seconds in another, on the same PC. With 0.2.13 it starts in 60 to 85 seconds, also from a config saved before the update.
+  - Linux, #5327 (PR #5531, pjgmobile): an expert-arena shortfall that the file cache can cover loads through the file cache again.
+  - Feed models: a model without a picture reader no longer stops the install with KeyError 'mmproj'; a model with no draft layer no longer fetches the Flash-Next one; a model of another shape gets a neutral expert profile; the low-RAM mode no longer writes a second copy of the experts.
+  - Mac: a model of its own shape installs on a Mac too. The app host no longer signals its caller's process group when a child never started.
+  - Builds: the engine sources are split by backend (cmake/backends), and the ggml sources the engines build sit in third_party/strata-ggml, so an engine build needs no llama.cpp download.
+  Known problems
+  - A first launch of a fresh install can take about 5.5 minutes in the one-time "Preparing your model" step. On a Windows PC with an RTX 5070 the first launch took 398 to 406 seconds, and on a Strix Halo 337 to 411 seconds. The same install with 0.2.12 took 398 and 595 seconds the same day, and 107 to 118 seconds on 11-07. We did not find the cause.
+  - On cards where Auto picks the MTP drafter (for example 12 GB cards), the first load from the app's setup screen runs without a drafter. The next Load from the Models page fetches it. 0.2.12 did the same.
+  - Intel Arc in the desktop app: setting up a model stops with "no NVIDIA GPU found". The app finds the card and downloads the Intel engine, but its model setup does not pass the Intel choice on. Use the Terminal (strata launch) on Arc for now. 0.2.12 did the same. A fix will come as an update through strata update, or Settings > Updates in the app, and it takes effect when the app starts again.
+  - Linux (AppImage): after the in-app update, Strata closes and does not open again by itself. The new version is installed; start Strata again. Updating from 0.2.12 does this because the 0.2.12 app does the restart. Your chats and settings stay.
+  - Peer mode (--peer-device, two cards) can fault on its first request, in about 4% of fresh starts. Not looked at again in 0.2.13.
+  - Radeon gfx1201: DFlash2 chosen by hand can stall on the prompt (11 of 50 engines on 0.2.11). Not looked at again in 0.2.13.
+  - Mac: the final files were not run with a model. They passed Apple's notarisation and the start-up self-test only.
+  Thanks
+  - pjgmobile: PR #5531 (#5327), the expert store on Linux; their 1M-context measurement went from 47 to 124 tokens per second.
+ReleaseNotesUrl: https://github.com/Niko1221/Strata/releases/tag/v0.2.13
+Documentations:
+- DocumentLabel: Installation guide
+  DocumentUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/INSTALL.md
+- DocumentLabel: Supported models
+  DocumentUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/MODELS.md
+- DocumentLabel: Troubleshooting
+  DocumentUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/TROUBLESHOOTING.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

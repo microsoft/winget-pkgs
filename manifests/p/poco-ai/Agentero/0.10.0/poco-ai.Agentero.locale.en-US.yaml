@@ -1,0 +1,50 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.10.0
+PackageLocale: en-US
+ShortDescription: Agent-friendly reference management.
+Description: 'Traditional reference managers are not agent-friendly: highlights and notes stay locked inside single files, making it hard for agents to reuse knowledge across papers; every conversation starts from scratch without a stable local knowledge map; PDFs are human-friendly but not the most comfortable reading material for agents. Agentero aims to build an agent-friendly, agent-native way to manage references, exploring how humans and agents collaborate on reference management. Connect your local agent via ACP (BYOA), select-text chat, import papers and Skills, stay compatible with the Zotero ecosystem, and get paper translation, bidirectional links with a knowledge graph, and deep PDF reading.'
+Tags:
+- academics
+- agent
+- article
+- literature
+- paper
+- pdf
+- reference
+- research
+- thesis
+- zotero
+ReleaseNotes: |-
+  This release ships an official built-in model provider for zero-config translation (Hunyuan-MT), embedding, and PDF body OCR—the key is compiled into the Host only, never crosses IPC, and never lands in settings. The UI picks up Apple-style materials and motion, a compacting library header on scroll, and an Agent composer with inline @ / $skill / /command chips plus a short-window compact mode. PDF selection moves Add to chat to a corner pill and lets the annotate rail expand on hover. Fixes cover Windows console flashes on startup and Doctor probes, actionable Antigravity sign-in, sidebar blanking, multi-panel figure merge, and several selection-chrome glitches.
+  Features
+  - Built-in model provider: Official installers can compile in the agentero provider—translation uses a dedicated Hunyuan-MT template (segmented requests, no [[n]] batch protocol), and embedding plus PDF body OCR work with zero user credentials. The key stays Host-only (option_env!), never crosses IPC, and never reaches settings.json; Settings / onboarding select it only after availability resolves, and unkeyed builds hide or disable the option. (d50228f5, 50dfa67b, 3f089832, a50ef860, 5080349b, a68340f2, 849befec, b9cfb969 by @qychen2001)
+  - Inline Agent context chips: @ mentions, $skill, and /command insert as inline composer chips; block-level context chips live beside the input with a short-label strip above that expands on hover. (0696564f, b2b98c25, 93e97f43, 4e971317, 5e5935f3 by @Phil-Fan)
+  - PDF selection corner pill and annotate rail: Add to chat leaves the floating toolbar for a text pill at the selection's bottom-right (shown only when the Agent rail is open or Agent is in its own window); Ask uses the configured PDF Ask agent icon. The right-rail annotate chip expands for in-place edit on hover, collapses when left empty, and creates the highlight on pointerdown before EmbedPDF clears the selection. (8dc60ebe, f01faeec, 5c61a43a, 4d2b336e, 1c88d754 by @Phil-Fan)
+  - Compact composer on short windows: When the main window is under 600px tall the Agent rail forces compact mode; the input hugs content and the waiting-send queue floats above without clipping the single-line field. (00c7baae, 357f4212, 43d8adea, 409a22bd, b530c039 by @Phil-Fan)
+  - Code-block interaction in chat: Agent message fences use PlainCodeBlock aligned with table chrome (hover copy/download, no outer card) and show a language label; Mermaid stays on the default diagram path. (ad8c069b, 656143f9 by @Phil-Fan)
+  - Inline TeX in paper titles: TeX math fragments in paper titles render as inline formulas instead of raw text. (a0a23724 by @Phil-Fan)
+  - Compacting library header on scroll: Scrolling the paper library compresses the sticky header and fades search/actions; after ~450ms idle they fade back in, with instant hide to avoid trails. (c6cf6eaf, bc023c43, e64dd7c8, 728ef2c2 by @Phil-Fan)
+  Improvements
+  - Shell and Settings materials: Main shell and System Settings follow Apple Design—sidebar material with sliding highlight, inset grouped cards, type hierarchy, press feedback, and reduced-transparency / reduced-motion affordances; the default palette retunes to system gray. (f2681bad, 60b0db18, b8f0c16b, cc294cdb, f9188899, c4a919ae by @Phil-Fan)
+  - PDF floating chrome and Paper Info: Selection menus and translate cards match shell materials/type; the page-translate tab moves to the left edge and shrinks; selection translate opens on the left by default; Paper Info flattens its header and animates collapse height. (f01faeec, 461fc2b5, 36b9f73b, 2e75dca4, 01008f60 by @Phil-Fan)
+  - Soft-probe catalog agents at startup: Catalog Agents are soft-probed when the app launches so unavailability shows up before the first chat open. (d23c73fe by @Phil-Fan)
+  Fixes
+  - Windows console flashes on startup and Doctor: The GUI release lacked CREATE_NO_WINDOW for the startup device-model reg query and Settings → Doctor probes, so visible consoles appeared; both paths now hide the console without changing command content or collected results. (#494 by @Zhou1317fe5)
+  - Antigravity sign-in and session recovery: auth-required maps to actionable sign-in copy with a Toast action that opens a system terminal at <command> --login, resolving the login command against the merged Agent PATH. Prompt failures containing "File not found" retry once with a fresh session on the same ACP connection. Invoke rejections and prefixed error strings are hardened for heterogeneous machines. (97cff57d, 377f891e, #492 by @JiaheChen2002)
+  - Multi-panel figure merge near captions: Caption merge anchors connected panel groups near the caption so full-width captions no longer swallow the whole vertical band and narrow unreadable captions no longer steal panels from known titles; confidently mislabeled body-text captions are recovered. (e459a16d, #223 by @qychen2001)
+  - Import layout race: Magic-wand import no longer enqueues layout analysis before the local PDF exists; the analyzer soft-skips when the file is still missing so the task panel does not fail with "No local PDF". (20f0826c by @Phil-Fan)
+  - Blank vault file tree: Drop per-row translateY compositor layers and resync the virtualizer scroll offset on viewport resize so WKWebView does not leave the left rail unpainted after opening papers or refreshing the tree. (2102df10 by @Phil-Fan)
+  - Selection chrome sticks while scrolling: Recompute floating menu and Add-to-chat pill anchors on viewport scroll and zoom; dim and clamp the chrome when the selection leaves the viewport. Citation previews stay suppressed only during drag-select, then hover works again after the selection ends. (b03d1728, ad45b412, 732802be by @Phil-Fan)
+  - macOS main window min size: Restore the main window minimum size after config merge so it is not crushed too small. (e13f84d3 by @Phil-Fan)
+  - Cmd+A selecting chrome labels: Select-all no longer highlights sidebar and shell labels along with editor content. (32a1eb50 by @Phil-Fan)
+  - Raw translate error codes: Only known Host markers are surfaced to users, so internal codes such as io / json / sqlite no longer appear verbatim in toasts. (533a3801 by @qychen2001)
+  Full Changelog: https://github.com/poco-ai/Agentero/compare/v0.9.7...v0.10.0
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.10.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: locale
+ManifestVersion: 1.12.0
