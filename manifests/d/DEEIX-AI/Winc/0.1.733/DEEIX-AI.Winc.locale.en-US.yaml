@@ -1,0 +1,78 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: DEEIX-AI.Winc
+PackageVersion: 0.1.733
+PackageLocale: en-US
+Publisher: DEEIX
+PublisherUrl: https://deeix.com
+PublisherSupportUrl: https://github.com/DEEIX-AI/Winc/issues
+PackageName: Winc
+PackageUrl: https://winc.si/
+License: Apache-2.0
+LicenseUrl: https://github.com/DEEIX-AI/Winc/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Chenyme and DEEIX AI
+ShortDescription: A lighter, faster desktop code and text editor built in Rust with its own rendering engine.
+Description: |-
+  A lighter, faster, more comfortable desktop editor.
+  winc is built with Rust and its own rendering engine: it starts in 0.1 seconds and uses just 52 MB of memory with 100,000 lines open. Multiple cursors, find and replace, and side-by-side diffs are all there, and every keystroke and scroll responds instantly. Measured results include 119 ms cold start to first frame and a 1 GB file editable and highlighted in 220 ms.
+  Editing covers multiple cursors, find and replace, native input methods and smooth scrolling in gigabyte-scale files. Highlighting covers common programming, markup, data and configuration formats, with lightweight go-to-definition and find-usages that need no language server. Whole files can be formatted through external tools such as rustfmt, Prettier, Black, Ruff and gofmt. Preview covers Markdown, images, SVG and spreadsheets, with a switch back to source at any time.
+  Git integration provides side-by-side diffs with word-level highlighting, staging by hunk, committing and pushing, a commit graph and line-by-line blame. Projects get a file tree, quick open and .gitignore-aware project search, and a terminal is docked at the bottom of the window. Light and dark themes, complete English and Simplified Chinese interfaces, and signed in-app updates on all three platforms.
+Tags:
+- code-editor
+- diff
+- editor
+- markdown
+- search
+- syntax-highlighting
+- terminal
+- text-editor
+ReleaseNotes: |-
+  ✨ Feature
+  - Accept comma-separated font lists for the editor, terminal and UI fonts, falling back per character, so English can use a coding font and Chinese a text font (#188)
+  - Let a maximized terminal fill the whole editor column, with the editor hidden, the state saved across restarts, and a maximize button on the panel header (#189)
+  - Filter long menus by typing, and pick the file language from the quick open panel with Ctrl+K M, ranked by extension and name with matches highlighted (#182)
+  - Find enum members, typedefs, local struct variables, pointers and parameters in go to definition, and list them in the outline (#218)
+  - Highlight WeChat mini program WXML, WXSS and WXS files, colouring as script and sharing find-usages with HTML, CSS and JavaScript (#192)
+  - Unfold a long file name in the search results under the mouse, drawing the part that extends past the sidebar above the editor (#197)
+  - Keep the differing tail of the path for recent folders that share a name, so a/src and b/src are told apart on the start page and in the recent panel (#172)
+  - Place files dropped from Explorer where the pointer is, and accept file drops on X11 (#198)
+  - Preview EPUB books: chapters converted to Markdown in reading order, the table of contents in the outline, links inside the book turned into anchors, and clear messages for encrypted, DRM-protected, zip64 and oversized files (#221)
+  - Show the PDF outline in the sidebar and jump to bookmarks, reading the outline from the file itself so Windows behaves like the other platforms (#220)
+  - Rework the commit view: select files with checkboxes backed by the real Git index, stage and unstage a whole file or just its hunks, and switch the staging area on as an optional view instead of the only way to commit (#216)
+  - List every repository found in the workspace as its own section in the commit view, so changes, staging and commits of other repositories are visible and actionable in one place (#156, #185)
+  - Add commit checks: a subject length counter, a hint when the blank line after the subject is missing, a warning when new code contains TODO or FIXME, and an option to reformat changed files before committing
+  - Add recent commit messages, co-authors, Signed-off-by, and a per-commit "skip hooks" option to the commit form
+  - Add Commit and Sync, which commits, pulls and then pushes in one action
+  - Confirm pushes in a dialog that lists the target remote, the branch, the commits to send and the count for other repositories, with an editable branch name and a "push all tags" option
+  - Show the current line's blame after the end of the line, and open the history of the selected lines as a log filtered to that range
+  - Fetch from the remote in the background every 3 minutes, and pause it while an operation is running
+  - Add date, path and branch filters to the Git log, multi-select for those filters, a "me" shortcut in the author filter, configurable author, date and hash columns, and edge folding for long subjects
+  - Add a branch panel beside the log and a shared layout with the branch picker, with the "recent" group hidden while filtering by branch
+  - Add branch actions to the log: check out, check out in a new worktree, cherry-pick onto a branch, and reset the branch to a commit
+  - Add "copy as patch" and "compare with local" to the commit menu, with merge commits excluded from patches
+  - List the branches a commit belongs to in its details, showing a count when there are more than a few
+  - List tags in the branch picker and confirm before checking one out
+  - Mark branch and tag refs with separate icons in the log, label the log button, and refresh the log after operations
+  - Add "skip this commit" to rebase and cherry-pick operations, partial stash of selected files, and "add to .gitignore" for a file, its extension or its folder
+  - Go to a hash, branch or tag from the commit menu, replacing the earlier typed-ID comparison with one that reuses the log's pin path (#201)
+  - Group the editor settings by section and tighten their wording in both languages
+  ⚡ Optimization
+  - Keep only on-screen images in memory in the Markdown preview: they load in the background, draw at their display size, and release once scrolled away
+  - Split source and test files that exceed 1500 lines, and make xtask fail when one does
+  - Group the fields of App into editor, preview, disk, motion, frame, pointer, panels, overlays, store, link, metrics, bars, jumps, scroll, opening and history state
+  - Keep the clipboard in one type instead of five App fields, and the composing text in the input method state
+  - Narrow the visibility of App state fields after the grouping, and split four long functions
+  - Refine the wording of the Git views, settings and menus in both languages
+  🐛 Fixed
+  - Fix the drawn title bar's minimize, maximize and close buttons acting on mouse down, which closed the window underneath as well (#204)
+  - Fix a macOS zoom or restore animation being remembered as the window's normal size, by waiting 500 ms after resizing settles (#191)
+  - Fix the in-app update being blocked by security software, by running the PowerShell script with -Command and environment variables instead of -ExecutionPolicy Bypass (#217)
+  - Fix remote terminal shell integration failing on a Windows build machine, because CRLF was baked into the embedded wsl.sh and dash rejected it
+  - Fix the expanded Markdown heading list closing when the pointer crossed a wide table's horizontal scrollbar (#196)
+  - Fix field editing: place the caret on character boundaries, wrap between words, and follow the standard movement keys in dialog and settings inputs
+  - Fix the sync arrows not being square, and simplify the worktree icon
+  - Fix the AppImage not naming its architecture in the build (#211)
+ReleaseNotesUrl: https://github.com/DEEIX-AI/Winc/releases/tag/v0.1.733
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
