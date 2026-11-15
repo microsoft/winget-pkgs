@@ -1,0 +1,33 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: mateo-ki.VProxy
+PackageVersion: 1.16.13
+PackageLocale: zh-CN
+ShortDescription: Windows 桌面程序：采集订阅、解析成节点、跑代理，并把代理质量实测出来。
+Description: VProxy 是用 Rust + egui 编写的 Windows 桌面程序，负责采集免费或自建订阅、解析成节点、跑代理，并把代理质量实测出来。订阅入口包括带 `YYYY-MM-DD` 日期占位符的订阅 URL、Gist 搜索页发现，以及 Telegram 频道预览（裸节点链接和订阅链接两类都取，节点只增不删）。解析支持 `ss` `vmess` `vless` `trojan` `hysteria2/hy2` `socks5` `http(s)` 分享链接，以及 Clash / Clash Meta YAML、Base64 与混合文本。延迟以经内核访问 Google `generate_204` 的真实握手为准，24 小时出口健康条按实测绘制，而不是看内核上报的状态。Windows 上它同时管理系统代理、TUN（提权交接后只保留一个实例）和终端 `HTTP_PROXY` 环境变量，按 exe 路径添加防火墙允许规则，支持单实例互斥与托盘，记录出口切换历史并按天统计规则命中，同时提供强制 bearer 鉴权的本地 HTTP API 与 mihomo / sing-box / xray 配置导出。安装包不含内核，内核缺失时由程序按需下载。
+Tags:
+- clash
+- sing-box
+- 代理
+- 出口健康
+- 测速
+- 节点解析
+- 订阅
+ReleaseNotes: |-
+  🚀 VProxy v1.16.13 发布说明 / Release Notes
+  🎉 VProxy v1.16.13 正式发布！本版本重点打磨订阅源页与流量统计页的交互细节（操作列、状态列、命中修复），配合 VP-Core 1.7.8 内核三修复（per-连接流量计数 / UDP 记账 / 中断丢账），并落地提交门禁与 release 体积优化：
+  📊 流量统计页清爽化
+  - 节点 / 域名 / 软件三个流量排行移除行内「运行中」「SS/VMESS」状态胶囊（与订阅源页同质重复）；
+  - 数据源由 VP-Core 1.7.8 内核修复兜底：per-连接计数实时可见 + UDP（QUIC/HTTP3）流量首次进统计 + 中断连接不丢账。
+  🛡️ 内核更新体验
+  - 内核运行中允许更新：更新内核不再要求先停代理——下载落盘后自动重启代理生效（Windows 运行中 exe 可改名特性 + 提权交接同一套 3 秒轮询）。
+  🔍 解析修正
+  - insecure 开关全协议如实解析（ss/vmess/vless/trojan/hysteria2/tuic 等别名写法归一）；
+  - vless / trojan 导出补标准 tls 段与 ws-opts（此前导出的链接在第三方客户端缺 TLS 配置）。
+  ⚙️ 工程化
+  - 提交门禁：AGENTS.md（实测纪律历史教训）+ pre-commit 钩子（fmt / clippy -D warnings / 无头编译门 / 全量测试，本地完整复现 CI）；
+  - 237 条 clippy 债务清零（-D warnings 从此常绿）+ 全仓 fmt 漂移修复；
+  - release 构建优化：lto = "fat" + codegen-units = 1（对齐 VP-Core 内核配置），安装体积 48.5 → 41.0 MB（−15.5%）。
+ManifestType: locale
+ManifestVersion: 1.28.0
