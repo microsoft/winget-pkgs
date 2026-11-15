@@ -1,0 +1,52 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: NanmiCoder.ClaudeCodeHaha
+PackageVersion: 0.7.8
+PackageLocale: en-US
+ShortDescription: A local-first desktop workspace for Claude Code with multi-agent, Git worktrees, and diff review.
+Description: Claude Code Haha is a desktop Claude Code workspace for macOS, Windows, and Linux. It offers multi-session workspaces, global search, branch and Worktree launching, diff review, a built-in browser preview, and GUI permission approval. Any model works, including Claude, ChatGPT, Grok, presets, or local endpoints, alongside image generation, visual MCP and SubAgent managers, an Agent Teams workbench, dynamic workflow orchestration, model tracing, Computer Use, a skill marketplace, color themes, desktop pets, H5 remote access, IM integration, and scheduled tasks.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claude
+- claude-code
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  This release keeps your phone connected to the computer while you are away: the computer no longer sleeps during a connection, a service restart reuses the same tunnel address, and the phone finds the new address automatically when it changes. A new P2P direct connection works in the packaged app, and returning to the foreground resumes the session in place with only incremental updates. On the desktop you can switch the permission mode while a turn is running, long thinking no longer stalls or breaks Markdown, and fixes address cross-session message leakage, silently lost oversized messages, and provider edits quietly rerouting active sessions. Claude Fable 5.2 is added, and WeChat gains media delivery and connection recovery. The phone app updates to 0.1.4.
+  Highlights
+  - More reliable away-from-home connection (#1862): Settings → Phone connection → Away connection adds a "Keep the computer awake while away" toggle, on by default, so the computer does not sleep during connection and reconnection (the screen can still turn off). Restarting the desktop service reuses the original cloudflared tunnel and address, so the phone does not need to re-scan; when the tunnel address really changes, phones on the same Wi-Fi switch to the new address automatically, and iPhones get a "Computer address updated" push.
+  - Phone P2P direct connection (#1844, #1859): the away-connection page adds an "Allow phone direct connection (P2P)" toggle and status line. When on, the phone connects directly and the chat menu shows "Direct / LAN direct" instead of "via Cloudflare"; packaged builds previously could not load the direct-connection module and always fell back to the tunnel, and now they connect directly too. Backgrounding or locking the phone for a few seconds and returning resumes the session in place with only incremental updates instead of re-fetching the whole history. Requires the new phone app (0.1.4).
+  - Switch permission mode mid-turn (#1851): while a task is running, the shield selector in the composer toolbar switches between ask and skip permissions and takes effect immediately; subsequent tool calls use the new mode, and approval cards already on screen still wait for your answer.
+  - Claude Fable 5.2 (#1874): adds claude-fable-5-2 with 1M context and 128K output. The fable alias now resolves to Fable 5.2; explicitly pinned Fable 5 / 5.1 are never rewritten and Fable 5.1 stays selectable. Claude Code defaults Fable 5.2 to medium effort.
+  - Per-model context windows for ChatGPT Official (#1869): when ChatGPT Official is the default, each model in the mapping panel gets an optional "Context window" field; empty uses the official default, values above the model's limit are rejected, and the setting applies to new sessions and drives auto-compaction.
+  - WeChat media delivery and recovery (#1819): WeChat adds a channel status panel showing online / reconnecting / auth-expired and recent send/receive times; local images and files in replies are delivered within limits (30MiB files, 10MiB images, up to 5 per turn), and failed inputs and replies are kept for review and can be retried with /delivery and /retry. Thanks @yuehua-meng.
+  Fixes
+  - Long thinking rendering (#1858): streaming thinking blocks no longer re-parse the whole block on every delta, so the UI stays responsive and pasted image attachments appear immediately; tables with headers, nested reference links and quadruple-backtick code blocks stay correct throughout streaming, and the final render matches a full parse.
+  - Cross-session message leakage (#1843): when concurrent tools or subagents produce duplicate message IDs, switching sessions no longer carries messages from the previous session or shows duplicate rows.
+  - Oversized messages no longer vanish (#1811): sending a message over the 16 MB limit (for example several pasted 4K screenshots) now shows a clear size error and suggests adding large images from disk; the text and attachment cards stay in the composer and can be edited and resent, instead of the whole message disappearing silently.
+  - Provider edits isolated from active sessions (#1835): saving a non-default provider no longer overwrites the default provider's runtime settings, so running sessions are not quietly rerouted to another endpoint and key; if the default changes while the dialog is open, saving asks you to reconfirm.
+  - Better error classification (#1870, #1868, #1836): an invalid saved API key fails immediately with the upstream message instead of retrying for a long time; exhausted provider quota or balance (sometimes returned as 401/403) shows "quota or balance exhausted" with the vendor's message instead of being mistaken for an auth failure that prompts sign-in, and the error card survives a session reload.
+  - Versioned base URLs (#1852): OpenAI-compatible providers with a Base URL ending in /v3 or /v4 (such as Volcano /api/v3 or Zhipu /api/paas/v4) request that version path directly instead of having /v1 appended and returning 404.
+  - One bad image no longer stalls a session (#1853): when history contains an image whose dimensions cannot be verified, later requests replace just that image with a text note and the session continues, instead of failing every turn with an image-size error.
+  - Memory reload (#1834, #1867): in Settings → Memory, Refresh or clicking the current file again reloads the body from the latest disk content instead of only refreshing the list; an unsaved draft asks before discarding, and Refresh is disabled while saving.
+  - Worktree session resume (#1854): after a session enters a worktree mid-conversation, resumes triggered by switching models or restarting the app no longer report "conversation not found"; the session keeps working in the worktree and the badge matches the actual directory.
+  - Composer attachment tray (#1850, #1867): adding many selected-text, file or diff-comment references keeps the tray height-limited and scrollable instead of pushing the transcript away or the send button off screen; new cards scroll into view.
+  - Archived session menu (#1848): right-clicking a lower archived session opens the Restore menu exactly at the pointer instead of offset or clipped.
+  - Answer a team member from its page (#1849): when a member asks a question, you can answer and submit directly on that member's tab and the member continues, without returning to the lead session.
+  - Security and sign-in (#1821): Glob approval and deny rules for absolute paths are judged by the real search directory and can no longer be bypassed; concurrent OAuth token refresh between the desktop and CLI no longer overwrites tokens and causes unexpected sign-out, and a genuinely revoked authorization clearly prompts re-login; Notebook edits refuse partially read or externally modified files instead of silently overwriting. Thanks @yuehua-meng.
+  - Plugin marketplace list (#1792): Settings → Plugins correctly shows configured marketplaces' name, source, install count and update time instead of an empty list.
+  - IM connection reliability (#1815): the shared connection layer for Telegram, Feishu, DingTalk and WeChat fixes duplicate approval pushes, lost messages on disconnect, and lost replies and state across concurrent operations; half-open connections reconnect and resume the original session, approvals answered elsewhere disappear, and failed messages can be resent. Thanks @yuehua-meng.
+  - Phone (#1857, #1855): removing an unreachable computer is no longer blocked and succeeds within a few seconds; Android shows the test notification banner even in the foreground; sent text no longer returns to the composer.
+  Other
+  - Windows installer unsigned by default: the SignPath signing application is still pending, so this release's Windows installers are unsigned and SmartScreen may warn; see the installation notes below.
+  - Phone app 0.1.4: includes P2P direct connection, in-place session resume and the phone fixes above, and requires desktop v0.7.8 or later.
+ReleaseNotesUrl: https://github.com/NanmiCoder/cc-haha/releases/tag/v0.7.8
+ManifestType: locale
+ManifestVersion: 1.28.0

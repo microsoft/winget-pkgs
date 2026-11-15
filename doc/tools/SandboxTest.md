@@ -46,6 +46,7 @@ Run the script with the full path to the manifest as an argument. This validates
 | **-MapFolder**               | Folder to map in Sandbox (default: current directory)                      |
 | **-WinGetVersion**           | Specify the version of WinGet to use in Sandbox                            |
 | **-WinGetOptions**           | Additional options for the `winget install` command                        |
+| **-Unattended**              | Wait up to the specified number of minutes for the Sandbox run to finish, then write its output to the host |
 | **-SkipManifestValidation**  | Skip `winget validate -m <manifest>` if already validated                  |
 | **-Prerelease**              | Use preview release versions of WinGet                                    |
 | **-EnableExperimentalFeatures** | Enable WinGet experimental features                                     |
@@ -77,6 +78,35 @@ Run the script with the full path to the manifest as an argument. This validates
 ```powershell
 .\SandboxTest.ps1 -WinGetVersion 1.9 -Script {winget install <PackageIdentifier> --accept-source-agreements}
 ```
+
+---
+
+## Unattended Mode
+
+By default the script starts the Sandbox and returns immediately; the output of the session running inside the Sandbox stays inside the Sandbox. The `-Unattended` option makes the script wait for that session to finish and then write its output to the host, which is useful for automation.
+
+`-Unattended` requires a value, which is the number of minutes to wait before giving up. 15 is a good starting point.
+
+```powershell
+.\SandboxTest.ps1 <path-to-manifest> -Unattended 15
+```
+
+The Sandbox is left open after the run finishes.
+
+### Results
+
+The Sandbox session writes its results to `%LOCALAPPDATA%\Packages\Microsoft.DesktopAppInstaller_8wekyb3d8bbwe\SandboxTest\Results`:
+
+| Item             | Description                                                              |
+|------------------|--------------------------------------------------------------------------|
+| `transcript.log` | Full PowerShell transcript of the Sandbox session                        |
+| `metadata.json`  | WinGet version, OS build, manifest folder name, `winget install` exit code (decimal and hexadecimal), `-Script` exit status, and start/end timestamps |
+| `WinGetLogs\`    | WinGet diagnostic logs copied from the Sandbox                           |
+| `done`           | Marker file written once the Sandbox session has finished                |
+
+This folder is deleted at the start of every run, so copy anything you want to keep before running the script again.
+
+The transcript and the metadata are also written to the host output once the run finishes. If the run does not finish within the given number of minutes, the script writes whatever the transcript contains so far and exits with code 5.
 
 ---
 

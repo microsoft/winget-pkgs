@@ -1,0 +1,77 @@
+# Created with WinGet Updater using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Sidero.omnictl
+PackageVersion: 1.13.0
+PackageLocale: en-US
+Publisher: Sidero Labs
+PublisherUrl: https://github.com/siderolabs/omni
+PublisherSupportUrl: https://github.com/siderolabs/omni/issues
+PrivacyUrl: https://www.siderolabs.com/privacy-policy/
+Author: Sidero Labs
+PackageName: omnictl
+PackageUrl: https://github.com/siderolabs/omni
+License: Mozilla Public License Version 2.0
+LicenseUrl: https://github.com/siderolabs/omni/blob/HEAD/LICENSE
+ShortDescription: A command line tool for communicating with Omni
+Moniker: omnictl
+Tags:
+- k8s
+- kubernetes
+- omni
+- talos
+ReleaseNotes: |-
+  Omni 1.13.0 (2026-10-28)
+  Welcome to the v1.13.0 release of Omni!
+  Please try out the release binaries and report any issues at
+  https://github.com/siderolabs/omni/issues.
+  Urgent Upgrade Notes (No, really, you MUST read this before you upgrade)
+  The BoltDB storage backend (storage.default.kind: boltdb, --storage-kind boltdb) is deprecated and will be removed in a future release. It keeps working in this release and Omni logs a warning at startup when it runs on it. There is no automated migration between the two backends, so if your Omni runs on BoltDB, plan the move to etcd, which is the default, before the removal lands.
+  The metrics endpoint now listens on 127.0.0.1:2122 by default instead of 0.0.0.0:2122. If you scrape the Omni metrics from another host or from outside the Omni container (e.g., through a published Docker port), set services.metrics.endpoint (--metrics-bind-addr) to 0.0.0.0:2122 explicitly. The Helm chart still binds it to 0.0.0.0:2122 when metrics.enabled is set.
+  The embedded etcd server no longer listens on any address by default, Omni connects to it in-memory. Previously, it listened on storage.default.etcd.endpoints (http://localhost:2379 by default) without TLS, and backups taken with etcdctl relied on it. To access the embedded etcd from outside, set storage.default.etcd.embeddedCertFile and embeddedKeyFile (--etcd-embedded-cert-path, --etcd-embedded-key-path), and optionally embeddedCaFile (--etcd-embedded-ca-path). The embedded etcd server then listens on the storage.default.etcd.endpoints addresses with TLS, and only accepts clients with a certificate signed by the given CA. When no CA is set, the certificate file must contain a single certificate, which is used as the CA, so clients can use the same certificate and key.
+  Omni no longer installs Talos from the installer registry set in registries.talos (--talos-installer-registry, ghcr.io/siderolabs/installer by default). The setting is deprecated and has no effect, every install image now comes from an image factory. Machines with an invalid schematic (e.g., booted from an imager-built ISO with extensions) get an image factory schematic built from their join kernel args at their next install, without their custom extensions. If you mirrored the installer image for an air-gapped setup, make sure Omni can reach an image factory instead.
+  Client Address in Audit Logs
+  Audit log entries now record the address of the client that made the request. This includes requests to the Kubernetes proxy. The audit log page shows the address next to the actor.
+  Install Image Changes in Change History
+  Pending updates and the history of a machine now show changes of the install image (Talos version, schematic and image factory host) next to the config diff. The audit log records them too.
+  Client Address Behind Proxies
+  Omni now reads the client address from X-Forwarded-For only through proxies that connect from a private address, and ignores the entries a client sends itself. New public key registrations (each login of the UI, the CLI or the workload proxy) are limited per client address: 100 at once, then 10 per minute. If a proxy in front of Omni connects from a public address (e.g., a GCP load balancer), Omni sees every client at that address, so they share this limit and the audit log records the proxy's address.
+  Config Changes Applied in Try Mode
+  On machines running Talos 1.14 or later, Omni now applies config changes in try mode. It confirms a change only when the machine is still reachable after it. When a config patch cuts a machine off from Omni (e.g., incorrect network configuration), Talos rolls it back, and the machine does not stay unreachable.
+  After 2 rolled back attempts, Omni stops and reports the error on the machine. Changing the config starts over. The first config, which takes a machine out of maintenance mode, is still applied without try mode.
+  Errors when applying a config to a machine in maintenance mode are now shown in the machine list and on the machine details page.
+  Default Version Label
+  The TalosVersion and KubernetesVersion resources that Omni uses as its defaults now carry the omni.sidero.dev/default-version label. Clients can find the default versions with a label query.
+  Upgrades Between Unsupported Talos Versions in Maintenance
+  A machine in maintenance mode that runs a Talos version Omni no longer supports can now be upgraded to another unsupported version. This way, an old machine can go through the intermediate versions Talos requires (e.g., 1.7 to 1.8 to 1.9) until it reaches a supported one.
+  EULA Acceptance
+  The EULA page in the UI is removed. The End User License Agreement is now accepted with the --eula-accept-name and --eula-accept-email flags (eulaAccept in the config file, config.eulaAccept in the Helm chart).
+  Omni does not start until the EULA is accepted. Once accepted, it stays accepted, so a new installation needs the flags only on its first start. Setting them again with different values updates the stored name and email. Installations that already accepted the EULA need no changes.
+  UI Improvements
+  The UI marks the Talos versions served from an enterprise image factory. The enterprise label is also shown on the cluster overview and in the Talos update, upgrade and install dialogs.
+  The cluster security page now says why scans are not available: either the cluster does not run enterprise images, or the factory has no scan report for its schematic yet. Its scan results show the VEX annotations next to the CVE descriptions. Installation media downloads show a loading state, and a message when the enterprise factory does not support the selected Talos version.
+  Every page has its own browser tab title, e.g., "Overview · my-cluster · Clusters · Omni". The version selectors group Talos versions by minor version. Users with no avatar from the identity provider get one generated from their name or email.
+  Install Image in the Machine Configuration
+  Omni no longer sets .machine.install.image in the configuration of machines with Talos installed, nor of the machines it installs over the Talos LifecycleService (Talos 1.13 or later), where the install request carries the image. Talos reads the field only when it installs from the configuration, and upgrades always get their image from Omni, so it was never used for these machines. It looked like the image Talos upgrades with, which it is not. Deploying this release removes the field from the configuration of the cluster members, a config update without a reboot.
+  Config patches can no longer set machine.install.image. New patches carrying it are rejected. The existing ones keep working, and the field has to be removed the next time such a patch is edited.
+  SideroLink Join Configuration in the Schematic
+  Every machine's schematic now carries its SideroLink join configuration, so an install or a Talos upgrade no longer loses the connection to Omni when the join args were only on the machine's kernel command line. From Talos 1.12 on, the join configuration is embedded machine configuration instead of kernel args, also in new installation media. Existing machines move to the new schematic at their next install or upgrade. Deploying this release does not install, upgrade or reboot any machine.
+  If you give Talos 1.12+ machines their configuration through another source, such as cloud user-data, the talos.config URL, or the talos.config.early and talos.config.inline kernel args, include the join documents in it (omnictl jointoken machine-config prints them), since that configuration replaces the embedded one.
+  The new omni_machine_siderolink_join_config metric counts the machines by where their SideroLink join configuration is: embedded_config, kernel_args, machine_config or unknown. It shows how many machines already have the join configuration in their schematic.
+  Machine Labels Through Join Tokens
+  A join token can now carry machine labels, set with omnictl jointoken machine-config|kernel-args --set-labels key=value. A machine that joins with such a token gets these labels as user labels, so they can be changed later like any other user label. A machine that already has user labels keeps them.
+  Local Resource Service Removal
+  The local resource service, which served Omni resources on a local listener, is removed. Consumers should reach Omni through its regular API with a service account instead. Its services.localResourceService settings and flags have no effect.
+  Minimum Talos Version
+  New clusters now require Talos 1.10.0 or later. The minimum was 1.9.0 before.
+  OIDC Identity Labels and Roles
+  OIDC logins now get identity labels, like SAML logins. The groups and roles claims of the ID token become labels on the identity, e.g., oidc.omni.sidero.dev/groups/devs. They are synced on every login. The existing SAMLLabelRule resources apply to these labels too, so a rule assigns a role to an OIDC user the same way it does to a SAML user.
+  By default, OIDC users are still not created on their first login. To create them like SAML users, set auth.oidc.autoCreateUsers (--auth-oidc-auto-create-users). Only do this when every account of the identity provider belongs to the organization.
+  The labels are shown in the users list of the UI and in omnictl user list.
+  Identity Provider Session Reuse
+  Every new public key (for the UI, the CLI or the workload proxy) requires a fresh login at the identity provider. Setting auth.requireReauthForNewKeys: false lets the identity provider reuse its existing session instead, while the first login after an Omni logout still requires a fresh one. This lowers security, so only turn it off when the identity provider limits how long its sessions last.
+  With the setting on, Omni logs a warning when an OIDC or SAML identity provider ignores the request for a fresh login. Additionally, with OIDC, Omni now only accepts an ID token issued in the last few minutes to confirm a new key.
+  Resource Browser
+ReleaseNotesUrl: https://github.com/siderolabs/omni/releases/tag/v1.13.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

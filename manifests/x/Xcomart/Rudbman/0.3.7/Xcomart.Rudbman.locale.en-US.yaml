@@ -1,0 +1,72 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Xcomart.Rudbman
+PackageVersion: 0.3.7
+PackageLocale: en-US
+Publisher: Xcomart
+PublisherUrl: https://github.com/xcomart
+PublisherSupportUrl: https://github.com/xcomart/rudbman/issues
+Author: Dennis Soungjin Park
+PackageName: rudbman
+PackageUrl: https://github.com/xcomart/rudbman
+License: MIT
+LicenseUrl: https://github.com/xcomart/rudbman/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Dennis Soungjin Park
+ShortDescription: A multi-platform GUI database workbench that talks to any database with a JDBC driver.
+Description: |-
+  rudbman is a desktop database workbench written in Rust and drawn with gpui, the
+  GPU-accelerated UI framework behind the Zed editor. It reaches a database through
+  that database's own JDBC driver over an embedded JVM bridge, so any product with a
+  JDBC driver is a supported product: drivers come from Maven Central by coordinate or
+  from disk, the driver class is detected from the JAR, and every connection gets an
+  isolated class loader so two vendors' drivers cannot collide.
+
+  Each connection is a tab with its own work area — a schema explorer over catalogs,
+  schemas, tables, views, sequences, routines and triggers, filtered by name or condition
+  and told per connection what to hide; a SQL editor with dialect-aware
+  highlighting, statement splitting, cancellation, execution plans and a searchable
+  history of the statements it ran, over a virtualized grid that
+  scrolls a million rows without loading a million rows; ERD diagrams laid out and
+  routed automatically; a visual query builder that turns dragged tables and columns
+  into SQL; and backup of a schema to a replayable .sql script. Connections can run
+  through an SSH tunnel, and secrets live in the Windows credential store rather than
+  on disk.
+
+  No JDK is required — the installer carries a Java runtime built with jlink and
+  rudbman uses the one next to its executable. The interface is available in English,
+  Korean, Japanese, Simplified Chinese, German, Spanish, French and Russian.
+Moniker: rudbman
+Tags:
+- database
+- database-client
+- dba
+- developer-tools
+- erd
+- gui
+- jdbc
+- mysql
+- oracle
+- postgresql
+- query-builder
+- rust
+- sql
+- sql-client
+- workbench
+ReleaseNotes: |-
+  rudbman 0.3.7 — several explorer rows and detail-panel columns picked at once and copied as names or as SELECT and INSERT statements, dated save names that always end in .sql, a selection run one statement at a time, and Shift+Backspace that deletes with the completion list open.
+  - The explorer takes several rows at once. Ctrl/Cmd-click adds a row to the selection or takes it out, and Shift-click and Shift+Up/Down select a run of rows; a plain click or arrow narrows it back to one. Ctrl/Cmd+C, or Copy names on the right-click menu, puts the names of the picked tables, views, routines, schemas and catalogs on the clipboard, one per line; folders are passed over. A right-click on one of several picked rows keeps the others, so the menu acts on all of them.
+  - A table's menu copies its SELECT and INSERT statements. Copy SELECT statement (tables and views) and Copy INSERT statement (tables) read the columns of every picked table and copy one statement per table, a blank line between them, laid out in the Format SQL river with one column to a line. The INSERT gives each value a :column placeholder on the same line as its column, and names that need quoting are quoted for the connection's dialect. A toast says when the copy is done, and nothing is copied if a table's columns cannot be read.
+  - The detail panel's column list picks rows too. Click, Ctrl/Cmd-click and Shift-click pick columns, Ctrl/Cmd+A picks them all, and Ctrl/Cmd+C copies their names; the right-click menu also copies them comma-separated, ready for a select list, or as whole tab-separated rows.
+  - Saving a query tab suggests a dated name and always writes .sql. The first save offers the tab's name with today's date after it (Query 3_20261108.sql), and a name typed without an extension is saved with .sql after it; when a file of that longer name already exists, the save dialog asks again over it.
+  - Run selection runs each statement on its own. The selected text is split the way Run all splits the script, each statement keeping its place in the editor so a failure selects it, so CREATE USER; GRANT …; FLUSH PRIVILEGES runs on MySQL and MariaDB without allowMultiQueries and every statement's result is shown. A procedural block or a MySQL executable comment standing as its own statement is still sent whole.
+  - Shift+Backspace deletes while the completion list is open. With Shift still held from a capital, the first Backspace over an open completion popup did nothing on Windows and Linux; it now deletes like Backspace.
+  - Shared libraries are updated to rugpui 0.1.16. UI dependencies and framework patches are pinned to its published release commit, bringing the multi-row tree selection and the Shift+Backspace binding in the editor and text inputs.
+  Requirements
+  - Linux: glibc 2.35 or newer: Ubuntu 22.04, Debian 12 and later, or a distribution built on them, MX Linux 23 among them.
+
+  What's Changed
+  - chore: release 0.3.7 by @xcomart in #61
+ReleaseNotesUrl: https://github.com/xcomart/rudbman/releases/tag/v0.3.7
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

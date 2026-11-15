@@ -1,0 +1,73 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Beulea.EveContracts
+PackageVersion: 0.4.4
+PackageLocale: en-US
+Publisher: Beulea
+PublisherUrl: https://github.com/beulea/eve-contracts-releases
+PublisherSupportUrl: https://github.com/beulea/eve-contracts-releases/issues
+PackageName: Beulea's EVE Contracts
+PackageUrl: https://github.com/beulea/eve-contracts-releases
+License: Freeware
+Copyright: EVE Online and all related trademarks are the property of CCP hf. This is an unofficial fan tool, not affiliated with or endorsed by CCP hf.
+ShortDescription: Search EVE Online public contracts by what is inside them - blueprint ME/TE/runs, abyssal module rolls, and multi-item pack appraisal against Jita prices.
+Moniker: beulea-eve-contracts
+Tags:
+- abyssal
+- blueprints
+- contracts
+- eve
+- eve-online
+- market
+- trading
+ReleaseNotes: |-
+  Fixed
+  - MutaMarket estimates are back. Every abyssal module read as unpriced, the
+    estimate showing a dash and the appraisal footnote blaming MutaMarket for it.
+    MutaMarket rebuilt their site in early September and the module moved one
+    level down in their reply, while we went on reading the old level. A reply we can't
+    read now retries the next time you open the contract, instead of being
+    remembered as an unpriced roll for six hours.
+  - The unpriced-lines note no longer blames MutaMarket for a roll it was never
+    asked about. "Rolls MutaMarket hasn't priced" is their answer; a lookup that
+    failed now says so in its own words, and the estimate's tooltip says it too.
+    That sentence is what made the outage above look like an ordinary quiet day.
+  - Estimates remembered during the outage are not trusted after the update.
+    Anything looked up while the reading was broken was stored as "no price", and
+    it would have kept saying so for up to six hours after you updated. Contracts
+    you opened recently are asked about again instead.
+
+  Changed
+  - A price source that answers with nothing is treated as unavailable rather
+    than as free items. Fuzzwork replies about every item it is asked, so a
+    reply naming none of them is one we could not read: those prices now come from
+    EVE's own order books, the way they already do when Fuzzwork is down.
+  - A snapshot missing a column we read is refused, with the reason. Refresh
+    used to load it and leave the column blank everywhere, so a renamed field
+    upstream would quietly empty the blueprint search instead of failing. The
+    previous snapshot stays loaded and readable, and a refresh can be retried.
+
+  Download
+  ─────────────────────┬────────────────────────────────────────────────
+  OS                   │File
+  ─────────────────────┼────────────────────────────────────────────────
+  macOS (Apple Silicon)│Beulea.s.EVE.Contracts_0.4.4_aarch64.dmg
+  ─────────────────────┼────────────────────────────────────────────────
+  Windows              │Beulea.s.EVE.Contracts_0.4.4_x64-setup.exe
+  ─────────────────────┼────────────────────────────────────────────────
+  Linux                │Beulea.s.EVE.Contracts_0.4.4_amd64.AppImage
+  ─────────────────────┴────────────────────────────────────────────────
+  Neither the macOS nor the Windows build is code-signed - that needs a paid
+  certificate - so the first launch takes one extra step. macOS: open it,
+  Done, then System Settings → Privacy & Security → Open Anyway. Windows:
+  More info → Run anyway. Linux: chmod +x the AppImage (some distros
+  also need FUSE).
+  After that the app updates itself from this page: every build is minisign-signed
+  and the updater checks that signature before replacing anything. The .sig
+  files and latest.json are what makes that work - you don't need to download
+  them.
+  All releases · Report a problem
+ReleaseNotesUrl: https://github.com/beulea/eve-contracts-releases/releases/tag/v0.4.4
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

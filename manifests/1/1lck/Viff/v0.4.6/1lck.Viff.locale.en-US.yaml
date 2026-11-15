@@ -1,0 +1,54 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: 1lck.Viff
+PackageVersion: v0.4.6
+PackageLocale: en-US
+Publisher: Viff contributors
+PublisherUrl: https://github.com/1lck
+PublisherSupportUrl: https://github.com/1lck/viff/issues
+PrivacyUrl: https://github.com/1lck/viff/blob/HEAD/docs/privacy.md
+Author: 1lck
+PackageName: Viff
+PackageUrl: https://github.com/1lck/viff
+License: MIT
+LicenseUrl: https://github.com/1lck/viff/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Viff contributors
+ShortDescription: A lightweight, native Git and Subversion desktop client, with a read-only project browser, an English/Chinese interface, and optional AI-written commit messages.
+Description: Viff is a lightweight native Git desktop client written in Go with the Viva toolkit, without Electron or a WebView. It shows diffs, commit history and changelists, offers a read-only project browser, and switches between an English and a Simplified Chinese interface. Viff drives the Git executable already installed on the system; it does not bundle Git.
+Tags:
+- git
+- subversion
+- svn
+ReleaseNotes: |-
+  Viff 0.4.6 makes committing and conflict handling more direct: checked files can be committed from the working tree without staging first, and the conflict result pane is now editable; opening and refreshing large LFS repositories no longer waits for a file listing.
+  Highlights
+  This release joins "checked files are the commit scope" and "edit the conflict result in place" into one step, makes LFS file statistics run on demand, and gives the Project and Commit panels one shared width.
+  ✨ New features
+  - Checking files in Changes now enables Commit or Commit and Push directly: their current working-tree content is committed, already-staged content in unchecked files stays staged, and modifications, deletions, untracked files, and staged renames all work in one commit.
+  - The middle Result pane of a conflict tab is editable: Accept Ours / Theirs / Both edits only the buffer as an undoable change, ⌘S writes it to disk, and Mark as Resolved remains an explicit user action.
+  ⚡ Improvements
+  - LFS managed-file counts are now on demand: opening a repository and ordinary refreshes show the working-tree state first, and clicking the LFS marker or Git tool window's "Refresh LFS Statistics" lists the files and reports the last count time, staleness, or failure.
+  - The Commit panel always states the commit scope (checked files, unstaged content, unchecked staged content, partial staging) and asks for confirmation when a checked file has both staged and unstaged changes.
+  - Coalesced refresh requests keep their metadata scope, so a large repository triggers fewer consecutive full refreshes.
+  🛠 Fixes
+  - The left splitter no longer jumps when switching between the Project and Commit tabs; the two panel widths in older settings migrate to one shared width.
+  - Hovering a truncated reference label or its +N fold in the Log shows the complete local branch, remote branch, and tag names.
+  Upgrade instructions
+  - Upgrading from v0.4.5: the settings file migrates on load, folding projectPanelWidth / commitPanelWidth into leftPanelWidth; the first save writes only the new field, and older versions fall back to their own defaults if you downgrade.
+  - macOS: choose the Apple Silicon or Intel DMG, quit the old version, open the DMG, and replace Viff.app in Applications.
+  - Windows: quit the old version and run the x64 installer.
+  - Windows portable: extract the archive, enter its directory, and run viff.exe without installing.
+  - Debian/Ubuntu: run sudo apt install ./viff-v0.4.6-linux-amd64.deb.
+  - Linux portable: extract the archive, enter its directory, and run ./viff after installing the required system libraries.
+  - Install Git separately on PATH, and check the release guide for Linux dependencies.
+  Compatibility and known issues
+  - LFS file counts reflect the last explicit count only; when HEAD or staged content changes, the previous number stays with a stale marker until the LFS marker or the menu action is used again.
+  - Checked-file commits are unavailable during a merge or cherry-pick; clicking a row also checks it, so previewing a diff narrows the commit scope; submodules, sparse-checkout, and split index have no separate handling.
+  - The conflict result pane does not yet offer a base-ancestor pane or one-click application of non-conflicting changes; a successful save rebuilds the view and clears the result pane's undo history and caret position.
+  - macOS requires version 13 or later; Linux needs a working graphical session, rendering backend, and the system libraries listed in the release guide.
+  - The macOS app is ad-hoc signed without Developer ID signing or notarization; the Windows installer is not Authenticode signed, so the system may show a security prompt; remote repositories remain read-only observation.
+  - Install only files from the project release page after checking their checksums; verify the source if the operating system blocks them.
+ReleaseNotesUrl: https://github.com/1lck/viff/releases/tag/v0.4.6
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

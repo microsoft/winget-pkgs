@@ -1,0 +1,62 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: MoeruAI.AIRI
+PackageVersion: 0.13.1
+PackageLocale: en-US
+Publisher: moeru
+PublisherUrl: https://moeru.ai/
+PublisherSupportUrl: https://github.com/moeru-ai/airi/issues
+PackageName: AIRI
+PackageUrl: https://airi.moeru.ai/docs/
+License: MIT
+LicenseUrl: https://github.com/moeru-ai/airi/blob/HEAD/LICENSE
+Copyright: © Moeru AI 2026
+ShortDescription: Re-creating Neuro-sama, a container of souls of AI waifu / virtual characters to bring them into our worlds.
+Tags:
+- ai
+- live2d
+- vtuber
+ReleaseNotes: |-
+  v0.13.1 Highlights
+  A small release that mostly fixes things: updater fixes, a security runtime bump, Linux packages, and fewer surprises when you turn modules off.
+  New Contributors
+  - @louisjia2008-ux made their first contribution in https://github.com/moeru-ai/airi/pull/3108
+  Bug fixes
+  - The desktop app could get stuck on "Loading..." after an update. After a page-only update, the main window could stay on the loading screen for up to five minutes. The broken update was also never rolled back. The window now loads right away after the update, and a build that fails to load is rolled back.
+  - Some update channels always failed. The About page offered seven update channels, but only four exist. If you picked latest, alpha, or beta, every update check failed. We now show only Stable, Canary, Nightly, and Dev, and we move your old choice to the matching channel. "Auto" also now finds the right channel for nightly and release-candidate builds. Before, it fell back to Stable.
+  - Some installs were stuck on "up to date". Some 0.12 installs never got the full installer that v0.13.0 needed, and some nightly and dev installs had the same problem. They now get new installers. When an update has to be installed by hand, the About page tells you so and links to the download page.
+  - Turning off Hearing, Speech, or Vision no longer clears its settings. You can now switch these modules off and back on without losing your provider, model, voice, or credentials. Provider selectors also offer None now. With Speech off, AIRI stops speaking but still replies in text and still uses tools.
+  - The wake word on the web could stay on "preparing" forever. In that state, no voice input started. Voice input now starts as expected.
+  - Minecraft chest actions now move the right amount. Before, the agent moved only the first matching stack but reported the full amount. For example, it moved 64 items but said it had moved 96. A failed transfer could also leave the chest open. Transfers now count all matching stacks and report what really moved, and the chest closes every time.
+  Product updates
+  Desktop
+  - You can now turn off automatic update downloads. This helps on a metered connection. When it is off, the About page shows the new version, and the download starts only when you click Download Update.
+  - The About page is easier to read. Your version now shows as badges: the release, a sub-version, and a color-coded channel. The update button sits next to them and stays there in a narrow window. The repeated "you're on the latest version" text is gone.
+  - The message feed fits better next to your character. When the chat sits beside the character with the feed on, the dock now stands along the side as a slim bar, like a phone's home indicator. It opens when your cursor comes near. A free-floating chat still has the dock across the top.
+  - New Linux packages. Each release now also builds an AppImage and a .pacman package, next to the .deb and .rpm packages. Arch users can install with pacman -U, and an AUR -bin package can use it as its source. Users of other distributions can run the AppImage without installing anything.
+  Web and mobile
+  - The voice draft card is gone for now. It covered the stage on mobile and was never really designed. Voice input from the composer microphone works as before. A redesigned voice draft experience comes in a later release.
+  Polish
+  - Error panels look better. The buttons no longer cover the message, the panel fits its content, and only stack traces use the monospace font. That font is now Maple Mono.
+  - Colors that were tinted by hand now follow your theme hue, including the dynamic hue animation and dark mode.
+  Security
+  - We updated Electron to 43.8.4 and Node.js to 26.12.1 / 24.22.1 to fix CVE-2026-111497, a flaw in the Node.js Brotli decoder. This is a runtime update, so the desktop app must install a full new installer to get it (see Upgrade notes).
+  To developers
+  - The ContainerError component in @proj-airi/ui has a new API for titles and actions. ErrorBoundary uses it. If you used ContainerError with its old absolutely positioned buttons, check your layout.
+  - VoiceDrafts no longer has a variant prop. The composer layout is now its only layout.
+  To contributors
+  - Release routing: every GitHub pre-release now publishes to canary. When it is marked as released, it is promoted to stable without a rebuild. Release runs now register installers. Dev and nightly builds are versioned as prereleases of the next version, for example 0.13.1-dev.45.1bf946f, so the installers are ordered correctly. Their installers are hosted on R2.
+  - The updater log moved to {userData}/logs/updater-log.txt. Test builds with their own user data directory no longer write into the installed app's log. The old file is not removed.
+  - The CI Node.js requirement is now ^26.12.1, .tool-versions is 26.12.1, and check-latest is on for actions/setup-node. The release-age exemption for electron@43.8.4 expires after 2026-10-30.
+  - pinia-plugin-synced is now 0.1.7, and chromatic is now 2.0.1. Hand-made tints were moved to theme() colors, and fallback.css keeps only --chromatic-hue.
+  - The CI skip of the wake word cases in testing-audio is removed, so they run in CI again.
+  - Test fixes: Pinia leaks between disposed test instances, the UnoCSS preflight in the motion workbench test, the orbit text drag test, and path, line ending, and locale assumptions in tests.
+  - Histoire stories no longer throw getActivePinia() errors.
+  - The Vishot browser scenarios now cover the v0.13 release areas. We also updated the README release artifacts and the Nix pnpmDeps hashes.
+  Upgrade notes
+  - Desktop: this release needs a full installer, because the Electron runtime changed. The app downloads it for you. If the About page says a manual install is required, download v0.13.1 from the releases page.
+  Full Changelog: https://github.com/moeru-ai/airi/compare/v0.13.0...v0.13.1
+ReleaseNotesUrl: https://github.com/moeru-ai/airi/releases/tag/v0.13.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

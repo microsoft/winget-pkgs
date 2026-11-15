@@ -1,0 +1,43 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: NorseHorse.PGPony
+PackageVersion: 3.1.0
+PackageLocale: en-US
+Publisher: NorseHorse
+PublisherUrl: https://pony.norsehor.se/
+PublisherSupportUrl: https://github.com/norsehorse-dev/PGPonyDesktop/issues
+PrivacyUrl: https://pgpony.app/privacy.php
+PackageName: PGPony
+PackageUrl: https://pgpony.app/
+License: Apache-2.0
+LicenseUrl: https://github.com/norsehorse-dev/PGPonyDesktop/blob/HEAD/LICENSE
+Copyright: © 2026 PGPony
+CopyrightUrl: https://pgpony.app/terms.php
+ShortDescription: OpenPGP for macOS, Linux and Windows.
+Description: PGPony for Desktop brings the same OpenPGP engine the PGPony phone apps ship to Windows, macOS and Linux, with post-quantum keys, hardware security keys and encrypted backups. Signed, notarized and published with SHA-256 hashes.
+Tags:
+- encrypt
+- encryption
+- gpg
+- openpgp
+- pgp
+ReleaseNotes: |-
+  PGPony Desktop 3.1.0
+  New
+  - App lock. Settings > App lock locks PGPony with a PGPony PIN of 6 to 16 digits, the same lock PGPony Android 4.7.0 has. PGPony then opens on the PIN screen, and it locks again after a set time without use (1, 5, 15, 30 or 60 minutes, or never), when the computer locks or sleeps, and by hand from File > Lock PGPony, Cmd+L or Ctrl+L, or the tray. While it is locked the window shows only the PIN screen, the ssh-agent offers no keys and signs nothing, and the git signing shim refuses with "PGPony is locked". The pgpony command asks for the PIN in the terminal and refuses to run without one, so a script that calls pgpony needs the lock off. pgpony sop never touches your keyring and is not affected. Wrong PINs are counted, with a growing wait after the fifth. The PIN itself is never stored: PGPony keeps an Argon2id hash of it in its data folder.
+  - Duress PIN. With the app lock on, you can add a second PIN. Entering it at the lock screen deletes every key (Recently Deleted included), your settings, watch folder rules and the app lock itself, with no prompt and nothing on screen that says so, and PGPony reopens as a fresh install. You can also have PGPony do the same after 5, 10 or 20 wrong PINs in a row. This is off by default. Keys on a hardware key and backups you saved somewhere else are not touched. On an SSD or a copy-on-write file system (APFS, btrfs), overwriting a file does not guarantee the old data is gone from the disk, so a secret key without a passphrase may still be recoverable by someone who has the disk. Keys with a passphrase stay protected by it. The setup screen says all of this before you choose a duress PIN. Requested by a user for PGPony on every platform.
+  - Portable mode. PGPony can run from a USB drive with nothing installed. Put a folder named PGPony-data beside the app and PGPony keeps its keyring and its settings in that folder, not on the computer. New downloads come ready to use: PGPony-windows-portable.zip, PGPony-macOS-portable.zip, PGPony-macOS-intel-portable.zip, PGPony-linux-x86_64-portable.tar.gz and PGPony-linux-aarch64-portable.tar.gz. The plain Linux tarball and the AppImage turn portable the same way, and --data-dir <folder> points the app or the command line anywhere else. Because whoever has the drive has the keyring, a portable copy will not store a secret key without a passphrase: generating, importing, restoring or receiving one asks you to set a passphrase first, or keeps only the public key. The database itself is not encrypted, so keep the folder on an encrypted drive if that matters to you. On a Mac, the portable app works from a quarantined download too. Requested by a user.
+  Fixed
+  - Encrypting and signing a large file with an ML-DSA key failed with "ML-DSA signing reads the whole file into memory and is limited to 512 MB" (#14). The post-quantum signature is now computed while the file streams, so files and folders of any size can be signed, and detached signatures and verification stream as well. Decrypting a large file signed with an ML-DSA key works the same way. PGPony Android fixed the same limit in 4.7.0.
+  - On some Linux systems the file chooser opened blank, with "error occurred in libfreetype" in the terminal (#12). The release packages start PGPony with the system FreeType loaded first, but a menu entry or shortcut that pointed straight at the program skipped that step. PGPony now checks for itself when it opens a window and restarts once with the system FreeType loaded if it is missing. The packaged launchers also used to pick a 32-bit FreeType on some systems that have both, which did nothing; they now pick the one for your architecture.
+  - A failure with no message of its own could show a raw Java class name such as "IOException". It now shows a sentence in your language. The proxy and .onion refusals and the RSA errors from generating keys on a hardware key were in English in every language, and are now translated. Korean error messages that showed in English are translated too.
+  The encryption engine is now the one in PGPony Android 4.7.3.
+ReleaseNotesUrl: https://github.com/norsehorse-dev/PGPonyDesktop/releases/tag/v3.1.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://pgpony.app/docs.php
+- DocumentLabel: FAQ
+  DocumentUrl: https://pgpony.app/#faq
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
