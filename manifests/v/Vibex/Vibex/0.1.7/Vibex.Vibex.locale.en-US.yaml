@@ -1,0 +1,59 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Vibex.Vibex
+PackageVersion: 0.1.7
+PackageLocale: en-US
+Publisher: Vibex
+PublisherUrl: https://github.com/vibex-ai
+PublisherSupportUrl: https://github.com/vibex-ai/vibex/issues
+Author: Vibex contributors
+PackageName: Vibex
+PackageUrl: https://vibex.peatboy.com
+License: AGPL-3.0
+LicenseUrl: https://github.com/vibex-ai/vibex/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Vibex
+ShortDescription: Local-first AI coding workbench built on the Agent Client Protocol
+Description: Vibex is a native, local-first AI coding workbench built on the Agent Client Protocol. Your agents run in your own workspace from prompt to commit, on desktop, in the terminal and on your phone. It works with Codex, Claude Code, OpenCode, Pi, Grok, DeepSeek Harness, Antigravity and other agents through ACP.
+Tags:
+- acp
+- agent
+- agentic
+- ai
+- chatbot
+- claude
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  🚀 Highlights
+  - The Agent can react to your message: vibex_react lets an Agent attach any emoji to a user message, and the desktop draws it on that bubble. A reaction is the Agent's own choice rather than an automatic mark: the random receipt and its epoch are gone, and a short runtime instruction opens every human turn to say a reaction is welcome on a question, a report, an instruction, an image, a correction or a remark — not only on greetings, confirmations and thanks.
+  - Attachments sit above the message: a user message now shows its pictures as thumbnails and its files as attachment cards in a right-aligned strip over the bubble, and both open what the inline label opens. The order follows the body, the strip wraps into lanes, and a decoded data: thumbnail is cached instead of re-decoded every frame.
+  - Folders are no longer tied to one Worktree: folder nesting is an organization choice, so moving a folder under a parent in another workspace is allowed and survives reconcile. Compact mode draws the stored tree; detailed mode lifts a folder whose parent is outside the column to that column's root instead of hiding it.
+  - A scrolled-up reader keeps their place: a lagged refetch used to replace the whole timeline with the newest window, dropping the rows the reader had scrolled up through and clamping the next layout to the newest row. The replacement now reaches back to the anchored turn one page at a time, and lands on the oldest row it holds when history or budget stops it.
+  - A session that could never send a message is repaired: a Profile switch whose Model publishes a narrower effort scale recorded the requested value as the effective selection while the binding had converged without it, so every later turn was refused with message_submission_runtime_binding_mismatch. The commit now settles the selection on what the binding applied, and startup reconciliation repairs the rows already committed that way.
+  🖥 Desktop
+  - Message attachments are read before the text: a user message draws its pictures as 64 px thumbnails and its files as the library's medium attachment card, stacked in two right-aligned rows above the bubble and wrapped into lanes at the column width. A picture resolves to a local file or a decoded inline data: payload, kept in a bounded memo so a redraw does not pay for the decode again; a file card carries its name and a short type word taken from the extension and then from the MIME subtype. The strip and the inline label in the body resolve through one action, so clicking a thumbnail previews the image and clicking a file card opens it in the code preview, including files attached from outside the workspace. A picture with no path and no decodable payload falls back to its inline label rather than drawing a hole, and the strip's height estimate counts the same lanes the layout will use.
+  - A reaction lives on the bubble's edge: the emoji the Agent attached is drawn in the bubble's lower-edge reaction region, in the same pill as the /goal badge and the queued-delivery accent, with a tighter inset when it stands alone. The runtime records a reaction as a hidden system notice whose provider correlation names the target item; the conversation projection drops the notice from the rows, and the renderer reads the newest notice for that item, so a changed reaction replaces the old one instead of accumulating. Because the mark sits in the edge region rather than the body, a row does not change height when a reaction arrives, and an edited draft stops showing it.
+  - A replaced window covers the reader's place: both a lagged refetch and a session switch that re-opens its newest window replace the row table. That read now walks back one page at a time until it reaches the sequence the preserved anchor names, bounded by the resumed-load item budget, and asks for the cover only where the window is replaced. If the anchor still cannot be honoured — the history is gone or the budget is reached — the view lands on the oldest row it does hold and moves the anchor there, instead of leaving an offset from a longer window for the virtual list to clamp to the newest row. A page that belongs to another session, arrives empty or runs into rows already held is refused rather than prepended.
+  - Folders cross Worktree scopes: move validation now requires only a shared project, and reconcile no longer detaches a folder whose parent lives in another workspace. Detailed mode projects one Worktree at a time, so a cross-scope child is lifted to the projected column's root; the stored arrangement is left untouched, so compact mode still shows the nesting and switching back restores it. No folder or session disappears from a column because its parent is elsewhere.
+  🤝 Agent reactions
+  - vibex_react is the twenty-third vibex_use tool: it takes an emoji and an optional sequence, defaults to the newest user message, and accepts any short expression up to 64 characters with no control characters. The tool appends a hidden system notice correlated as vibex-reaction:<item-id> and publishes it to the timeline, so a client that does not know the convention still reads the emoji as harmless text, while the desktop finds the notice and paints it. The reply reports the session, the target message id, its sequence and the emoji.
+  - The model is invited, not instructed: every human turn opens with a short runtime guideline ahead of the team block and the caller's own context. It names the kinds of turns a reaction suits — a question, a report, an instruction, an image, a correction, a remark — and says plainly that a reaction must never replace the answer and should be skipped when it would be distracting. Delegated and system prompts never carry the guideline, so a child working a task is not told to decorate a synthetic prompt.
+  - One switch decides both halves: Settings → Session → Reactions carries Message reactions, on by default. Turning it off removes vibex_react from the catalogue, suppresses the per-turn guideline and rejects a call made from a cached tool list. The desktop pushes the preference into the runtime at startup and on every toggle, so the catalogue, the prompt and the executor never disagree. The switch gates creation, not rendering: notices already recorded stay visible on their bubbles.
+  ⚙️ Runtime reliability
+  - The committed selection describes what the binding applied: a switch to a Profile whose Model publishes a narrower effort scale carried max from the previous Profile. The apply loop dropped the field because the Agent could not express it, the binding converged with effectiveReasoningEffort = null, but the commit still recorded the requested max as the effective selection. is_converged() treats null == null as converged, so the switch committed while the two halves disagreed and every later turn was refused with message_submission_runtime_binding_mismatch on an otherwise idle session. The commit transaction now reads the target binding's confirmed configuration, reconciles the effective selection against it, and settles the desired side with it, because turn admission also requires desired == effective. Settling is not a new user selection, so selection_revision does not move.
+  - An unconfirmed configuration is not evidence of absence: reconciliation ignores a binding state the apply path never marked for a generation, because an empty state means nobody has answered yet, not that the Agent refuses the dimension. Startup reconciliation repairs rows already committed in the broken shape, since fixing only the write path would leave those conversations unable to send forever. A substituted Model is deliberately not reconciled: the Agent's answer is recorded on both halves of the configuration rather than rewritten.
+  ⌨️ Terminal
+  - A window that fits the band still reaches the history above it: a failed turn's answer is now its conclusion, so the turn folds its work and the loaded window can end up shorter than the transcript band. With every row on screen there is no scroll position to move — top and bottom are both zero, the view stays in follow mode, and older-history prefetch refused — so the wheel and page-up could never load the page above. A window that already fits the band now counts as standing at its own top, which makes the upward gesture ask for the page before it.
+  - A scroll step starts from an offset the transcript can hold: visible_lines clamps the offset it draws without writing the clamp back, so a parked offset could sit past the end after a prepend re-measured a block shorter, an expansion collapsed or a summary replaced a detail. Stepping from it left the new offset past the end too, the bottom branch re-followed the tail, and an upward gesture moved the view nowhere. The clamp is now resolved before the step, and a prepend anchor keeps its row inside the block it names instead of carrying the excess past the transcript.
+  ⬆️ Upgrading
+  Install 0.1.7 over 0.1.6 as usual: sessions, workspaces, Provider configuration, Skills, remote hosts and drafts carry over. Desktop packaging and the updater manifest format are unchanged. A session already committed with the mismatched runtime selection is repaired during startup reconciliation, so it accepts messages again without a re-selection. Message reactions is on by default; turning it off stops new reactions while the ones already recorded stay visible, and vibex_react returns to the catalogue when it is turned back on.
+ReleaseNotesUrl: https://github.com/vibex-ai/vibex/releases/tag/v0.1.7
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://vibex.peatboy.com/docs/en
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
