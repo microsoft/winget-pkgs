@@ -1,0 +1,78 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: JGraph.Draw
+PackageVersion: 32.4.1
+PackageLocale: en-US
+Publisher: JGraph
+PublisherUrl: https://www.drawio.com/
+PublisherSupportUrl: https://github.com/jgraph/drawio-desktop/issues
+PrivacyUrl: https://www.diagrams.net/trust
+Author: JGraph Limited
+PackageName: draw.io
+PackageUrl: https://github.com/jgraph/drawio-desktop
+License: GPL-3.0
+LicenseUrl: https://github.com/jgraph/drawio-desktop/blob/HEAD/LICENSE
+Copyright: © 2005-2026 JGraph Ltd, Artisans' House, 7 Queensbridge, NN4 7BF, Northampton, England. Company
+CopyrightUrl: https://www.diagrams.net/trust
+ShortDescription: A diagramming desktop app based on Electron that wraps the core draw.io editor.
+Tags:
+- chart
+- design
+- diagram
+- draw
+- gantt
+- graph
+- graphics
+- mind-map
+- mind-mapping
+- mindmap
+- uml
+ReleaseNotes: |-
+  - Uses electron 44.7.0
+  - Asks before reading a local file named in Extras > Configuration (libraries, templates or fonts) for the first time, and reads the configuration once when a window opens, so script in the page can no longer make other files on the computer readable by changing it. Files already configured before this update keep working without a prompt
+  - Reads urlParams.json from the installation folder or the draw.io user data folder only, no longer from the folder draw.io was started in, which on Windows is the folder of a diagram opened from Explorer. A urlParams.json kept elsewhere needs to move to the user data folder (~/Library/Application Support/draw.io on macOS, %APPDATA%\draw.io on Windows). The file can no longer override settings the app manages itself, such as Google Fonts and spell checking
+  - Takes the value of a short option at the end of a group from the next argument on the command line, so drawio -xf png diagram.drawio exports a PNG instead of looking for an input file named png
+  - Updates to draw.io core 32.4.1. All changes from 32.3.0 to 32.4.1 are added in this build.
+  Testing:
+  Verified against the packaged, signed macOS build. Windows and Linux packages were verified from the produced release artifacts, their sizes and update manifests, rather than by running them.
+  Base checks
+  - Launch, open a file passed on the command line, add and edit shapes, change styles, undo and redo, copy and paste, save, insert, rename and delete pages, and zoom
+  - Export to PNG, JPEG, SVG, PDF, XML and HTML from the command line, covering scale, border, transparency, cropping, page selection with -p and --size page, and PNG and PDF export from the app
+  - Diagram round trip in an exported PDF, including reopening the exported PDF and recovering both pages and their contents
+  - Mermaid and CSV import and the --layout and --normalize options from the command line
+  - Shape search, stencils and shape libraries, the export dialog and the print dialog
+  - Drafts of unsaved changes are written next to the file and read back, and saving keeps a backup of the previous version
+  - A second window opens and reads the files it was given
+  - Settings survive a restart
+  - The macOS bundle is signed with a Developer ID certificate under the hardened runtime, is notarised and stapled, and the Quick Look app extension is sandboxed, separately signed and registered for this build
+  - The Electron security fuses are applied, so RunAsNode, the NODE_OPTIONS variable and the node inspect arguments are disabled and the app only loads from the asar
+  - 285 unit tests pass
+  Files named in the configuration
+  - A library configured in Extras > Configuration on 32.3.0 still loads after the update to this build, without a prompt, on the first and the second launch
+  - A configured library that was allowed before loads without asking again
+  - Changing the configuration from script in the page, including every key that can name a file, no longer makes a file readable: reads, stats, writability and existence checks and file watching of that file are all refused, where 32.3.0 returned the file's contents
+  - Files that are not configured, and system files, stay unreadable
+  urlParams.json
+  - A urlParams.json in the folder draw.io is started from is ignored, also when it would hide the editor's open and save functions, where 32.3.0 applied it to every window
+  - A urlParams.json in the user data folder is applied, and cannot change the Google Fonts or spell checking settings
+  Command line
+  -  -xf png, -xf png -o file and -xtb 10 -f png export as expected, where 32.3.0 reported an input file named png or 10, and -xfpng still works
+  Core changes checked in the desktop app
+  - From Text opened from the search box with Cmd+Enter has the focus in its text box, typing goes into it and Tab stays inside the dialog, where 32.3.0 left the focus on the diagram [jgraph/drawio-desktop#2577]
+  - The mouse wheel zooms without a modifier, trackpad scrolling does not zoom, Alt with the mouse wheel scrolls, and the zoom hints name Ctrl+Mousewheel
+  - Containers with the older tree, flow and organic child layouts still arrange their contents, and the older flow, tree and organic layout names in --layout and the CSV tree and organic layouts still lay out the diagram from the command line
+  - Visio .vsdx files open and convert from the command line as before, and older Visio XML files are refused with a message without being sent anywhere
+  Checks around the changes
+  - The functions the app exposes to the editor page are unchanged and give it no access to Node
+  - Reads, stats and writes of paths the user has not authorised are still refused, while an authorised file still reads and saves
+  - File and javascript links are still refused rather than opened externally
+  - Every update manifest names 32.4.1, and the Windows x64 and arm64 manifests each list only their own installer
+ReleaseNotesUrl: https://github.com/jgraph/drawio-desktop/releases/tag/v32.4.1
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://www.drawio.com/docs/
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/jgraph/drawio-desktop/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

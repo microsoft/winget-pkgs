@@ -1,0 +1,79 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: SerZhyAle.FastMediaSorter.Server
+PackageVersion: "26.10.25.1830"
+PackageLocale: en-US
+Publisher: SerZhyAle
+PublisherUrl: https://github.com/SerZhyAle
+PublisherSupportUrl: https://github.com/SerZhyAle/FastMediaSorter_Lite/issues
+Author: Serhii Zhyhunenko
+# FROZEN once published: it must keep matching the ARP DisplayName written by
+# FastMediaSorterServer.iss, which is how `winget upgrade` correlates this package.
+# It is deliberately NOT the User edition package's frozen PackageName - sharing that name
+# would make the two indistinguishable to winget. The wizard and shortcut text of this
+# edition is "Fast Media Sorter & Sharing: Folder Share Server" (ticket 111, Q-3); the
+# frozen PackageName below is the Add/Remove Programs name and does not follow it.
+PackageName: Fast Media Sorter Folder Share Server
+PackageUrl: https://serzhyale.github.io/FastMediaSorter_Lite/server.html
+License: MIT
+LicenseUrl: https://github.com/SerZhyAle/FastMediaSorter_Lite/blob/main/LICENSE
+Copyright: Copyright (c) 2025 SZA
+ShortDescription: Always-on folder sharing to Android over SFTP - a Windows service that starts at boot and serves with nobody signed in. Administrator rights required.
+Description: |-
+  Fast Media Sorter & Sharing: Folder Share Server is the Server edition of the folder sharing of
+  Fast Media Sorter & Sharing for Windows. It publishes the folders you choose to an Android phone
+  over SFTP and keeps them reachable whenever Windows is running - from boot, before anyone logs
+  on, through logoff, and after a crash (the service restarts itself).
+
+  Install this only if the machine's job is to stay available: a dedicated server, a VPS, a
+  NAS-like Windows box, an always-on home server. On an ordinary PC the regular package
+  (SerZhyAle.FastMediaSorter) already shares folders while you are signed in, and needs no
+  administrator rights.
+
+  This is not a different protocol or a second Android app. SFTP, the QR / .fmscfg pairing format
+  and the phone-side reconnect behaviour are identical - only the host differs: the Windows Service
+  Control Manager runs the worker instead of your desktop session. The two editions never run at
+  the same time; installing this one migrates the existing setup and keeps the same host-key
+  fingerprint, so phones already paired do not have to be paired again.
+
+  What the installation does, all of it visible and administrator-approved: registers the
+  FastMediaSorterCompanionSFTP service (delayed automatic start, running as LOCAL SERVICE),
+  creates a machine state directory with a restricted ACL for the host key and credentials, and
+  adds one program-scoped inbound firewall rule for the worker. Nothing is shared until you pick
+  the folders - the service never guesses. Uninstalling stops and deletes the service and removes
+  the firewall rule; your host key is kept unless you delete it yourself.
+
+  The folder-sharing service leads in this package. The media viewer and sorter is inside it as an
+  optional component that stays unticked unless you choose it on the components page (a silent
+  install does not add it). FileDO virtual-disk hosting, a capability of sharing, is the other
+  optional extra and is ticked by default on that page. This package installs the folder-sharing
+  service only: it does not install the Media Exchange Server, which is still in development and
+  is in no package.
+
+  Setup requires administrator rights and Windows 10 version 1607 or newer, Windows 11, or
+  Windows Server 2016 or newer. The management console is available in 13 languages.
+Moniker: fastmediasorter-server
+Tags:
+- android
+- backup
+- file-server
+- file-sharing
+- headless
+- lan
+- media
+- server
+- service
+- sftp
+- share
+- windows-service
+ReleaseNotesUrl: https://github.com/SerZhyAle/FastMediaSorter_Lite/releases/tag/v26.10.25.1830
+# INSTALL-TRUST 1.1 rule 7 (item H): the builds are unsigned, so winget tells the user
+# where the SmartScreen page lives. Ships with the next manifest version bump.
+InstallationNotes: "This package is unsigned - Windows may show a SmartScreen warning on first run. What to expect and click: https://serzhyale.github.io/FastMediaSorter_Lite/trust.html"
+Documentations:
+- DocumentLabel: Server setup guide
+  DocumentUrl: https://serzhyale.github.io/FastMediaSorter_Lite/server.html
+- DocumentLabel: Windows warning (SmartScreen)
+  DocumentUrl: https://serzhyale.github.io/FastMediaSorter_Lite/trust.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

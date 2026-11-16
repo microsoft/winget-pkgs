@@ -1,0 +1,38 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ractive.ff-rdp
+PackageVersion: 0.4.1
+PackageLocale: en-US
+Publisher: ractive
+PublisherUrl: https://github.com/ractive
+PublisherSupportUrl: https://github.com/ractive/ff-rdp/issues
+Author: James Bergamin
+PackageName: ff-rdp
+PackageUrl: https://github.com/ractive/ff-rdp
+License: MIT
+LicenseUrl: https://github.com/ractive/ff-rdp/blob/HEAD/LICENSE
+ShortDescription: Use Firefox's Remote Debugging Protocol via a CLI
+Description: CLI for Firefox Remote Debugging Protocol — inspect, test, and automate Firefox from the terminal. Supports navigation, DOM queries, screenshots, accessibility audits, performance analysis, network monitoring, and more. Designed for both human users and AI agents.
+Moniker: ff-rdp
+Tags:
+- agentic-skills
+- agentic-workflow
+- cli
+- firefox
+- firefox-rdp
+ReleaseNotes: |-
+  A small release from one user session's feedback: perf can bypass the HTTP cache with --cold, perf compare no longer hangs after the first URL and names the URL and step when it does time out, and navigate gained --wait-idle. No flags were removed or renamed.
+  Added
+  - perf summary|vitals|audit|compare --cold: bypasses the HTTP cache for that command's loads (Firefox's cacheDisabled, scoped to the command's connection), so total_transfer_size and the vitals reflect a network load instead of zeros. The envelope carries meta.cache: "bypassed". It does not touch service worker caches or warm TCP/TLS/DNS state. The non-compare subcommands reload the current page first.
+  - navigate --wait-idle [--idle-ms N] (default 500 ms, floor 200 ms): after the document commits, waits until no network event has arrived for the quiet window, then until in-viewport and non-lazy images are complete, all within --timeout-ms. Adds results.idle = {idle_at_ms, requests_observed, images_complete, lazy_images_deferred}. Runs before --wait-for/--wait-text/--wait-selector; conflicts with --no-wait and --with-network. Off-screen loading="lazy" images are never fetched by Firefox and are counted, not waited for. reload --wait-idle shares the same drain loop.
+  Changed
+  - perf compare: --help now says --timeout bounds each step (connect, navigate, readystate, collect), not the whole run. A readyState timeout is now a Timeout error (exit 124) instead of a User error.
+  - a11y --help describes a11y summary output as the object it actually returns (landmarks, headings, interactive), matching a11y summary --help.
+  Fixed
+  - perf compare hung on the second URL even at the default timeout: after navigateTo it read document.readyState on the old page (already complete) and sent the collect eval to that page's dead console actor. Each URL now uses the same commit wait as navigate, and timeouts name the URL and the step instead of a bare phase: recv.
+  Internal
+  - Mock-server fixtures can now be cached (Cache-Control: no-store is only the default); new live tests live_295_perf_cold and live_295_navigate_wait_idle; new recorded cacheDisabled fixture. Plan: kb/iterations/iteration-295-feedback-quick-fixes.md.
+ReleaseNotesUrl: https://github.com/ractive/ff-rdp/releases/tag/v0.4.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

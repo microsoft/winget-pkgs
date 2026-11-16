@@ -1,0 +1,100 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: MicroClaw.MicroClaw
+PackageVersion: 0.27.1
+PackageLocale: en-US
+Publisher: MicroClaw
+PublisherUrl: https://microclaw.ai/
+PublisherSupportUrl: https://github.com/microclaw/microclaw/issues
+PackageName: MicroClaw
+PackageUrl: https://microclaw.ai/
+License: MIT
+LicenseUrl: https://github.com/microclaw/microclaw/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 everettjf
+ShortDescription: An agentic AI assistant that lives in your chats, inspired by nanoclaw and incorporating some of its design ideas. Built with Rust
+Description: |-
+  MicroClaw is a Rust chat bot that connects LLM to your chats with agentic tool execution. It can run shell commands, read and edit files, search codebases, browse the web, schedule tasks, and keep persistent memory across conversations. It is a Rust rewrite of nanoclaw (TypeScript) with additional capabilities and a single-binary deployment model.
+
+  What makes it different
+  - Agentic loop with tool execution, not just a single API call
+  - Full file system and shell tooling from inside chat
+  - Long-lived memory backed by AGENTS.md files
+  - Built-in scheduler for cron and one-time tasks
+  - Group chat catch-up: reads all messages since last reply
+  - Multi-chat permission model (control_chat_ids) for cross-chat tool authorization
+  - Agent skills system with bundled skills (including macOS Apple Notes/Reminders/Calendar helpers)
+  - Customizable personality via SOUL.md files (global + per-chat)
+
+  How it works
+  chat message
+      |
+      v
+   Store in SQLite --> Load chat history + memory
+                           |
+                           v
+                     LLM API (with tools)
+                           |
+                      stop_reason?
+                     /            \
+                end_turn        tool_use
+                   |               |
+                   v               v
+             Send reply      Execute tool(s)
+                                |
+                                v
+                          Feed results back
+                          to LLM (loop)
+  MicroClaw enters an agentic loop for every message. LLM can call tools, inspect results, call more tools, and reason through multi-step tasks before responding. The loop is capped by MAX_TOOL_ITERATIONS for safety.
+
+  Core capabilities
+  - Agentic tool use (bash, file I/O, glob, grep)
+  - Web search, fetch, and browser automation
+  - Scheduling with cron expressions
+  - Mid-conversation messaging for progress updates
+  - Persistent memory (global + per-chat)
+  - Personality customization via SOUL.md
+  - Conversation archiving (automatic before compaction, manual via /archive)
+  - Typing indicator that stays active during tool use
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claw
+- large-language-model
+- llm
+ReleaseNotes: |-
+  Fixes found by testing MicroClaw Code 0.27.0 in Zed and in the terminal
+  with Anthropic's claude-opus-5, including image prompts.
+  Fixed
+  - Anthropic usage left out prompt-cache tokens (all products).
+    Anthropic's input_tokens excludes cache reads and writes, so with
+    prompt caching a request counted only a few input tokens. Token counts
+    and costs were too low, /context and the context meter showed 0%, and
+    mid-turn context-pressure compaction measured the wrong number. Cache
+    reads and writes now count as input, streamed and not, as they already
+    did for OpenAI-compatible providers. A final message_delta that carries
+    only output_tokens no longer drops the input count.
+  - MicroClaw Code's model pickers (Zed's model selector and the TUI
+    /model list) offered preset family names such as claude-sonnet,
+    claude-opus and claude-1m. These are not model names, and choosing
+    one failed with not_found_error. The pickers now offer only presets
+    that are real model names (ModelPreset::model_name).
+  - In Zed, a shell command that needed approval kept the title
+    "Allow bash?" after the answer. The permission request now keeps the
+    call's own title, the command; only an approval with no visible call is
+    titled "Allow ?".
+  - A failed run in mccode acp, such as an unknown model or a provider
+    error, was reported as a thought or an info notice, so the turn looked
+    empty. It is now part of the reply ("Error: …").
+  - Tool titles in mccode acp are Markdown code spans, so a path like
+    calc/__init__.py no longer renders as bold "init".
+ReleaseNotesUrl: https://github.com/microclaw/microclaw/releases/tag/v0.27.1
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://microclaw.ai/docs/overview
+- DocumentLabel: Quick Start
+  DocumentUrl: https://microclaw.ai/docs/quickstart
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

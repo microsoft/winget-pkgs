@@ -1,0 +1,96 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: DayuanJiang.NextAIDrawio
+PackageVersion: 0.5.0
+PackageLocale: en-US
+Publisher: Dayuan Jiang
+PublisherUrl: https://github.com/DayuanJiang
+PublisherSupportUrl: https://github.com/DayuanJiang/next-ai-draw-io/issues
+Author: Dayuan Jiang
+PackageName: Next AI Draw.io
+PackageUrl: https://github.com/DayuanJiang/next-ai-draw-io
+License: Apache-2.0
+LicenseUrl: https://github.com/DayuanJiang/next-ai-draw-io/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Dayuan Jiang
+ShortDescription: A next.js web application that integrates AI capabilities with draw.io diagrams. This app allows you to create, modify, and enhance diagrams through natural language commands and AI-assisted visualization.
+Tags:
+- ai
+- chart
+- design
+- diagram
+- draw
+- gantt
+- graph
+- graphics
+- mind-map
+- mind-mapping
+- mindmap
+- uml
+ReleaseNotes: |-
+  What's New in v0.5.0
+  The first release since May. The web UI is rebuilt around the canvas, draw.io is bundled with the app, the settings dialog is redone, and the MCP server reaches feature parity with the web app. Desktop users get every fix that landed on main over the last five months.
+  New Features
+  - Canvas-first UI with a bundled draw.io: the canvas fills the window and the chat floats on its right. draw.io v32.0.2 is served from the app's own origin (no separate draw.io container, works offline), so the app drives the editor directly: every AI change is a version card with a thumbnail that can be compared, restored or undone; an AI change is one Ctrl+Z step; changed shapes are highlighted; selected shapes are sent to the model; draw.io's own toolbar, menus (auto layout, Mermaid, CSV import) and page tabs are available. New start screen, session rename and switcher, and opening .drawio files (#957, #962)
+  - Settings dialog rebuilt: tabs for Models, General, Drawing and About. Adding a provider is three numbered steps (connection, models, test), with a searchable provider picker, one status line per provider, Bedrock sign-in by API key or access keys with a session token, and a model picker that lists every model as working, untested or failed (#958)
+  - MCP server 0.3.0, feature parity with the web app: the drawing guide and 30 icon libraries over MCP, screenshot_diagram for visual checks, all-or-nothing edit_diagram, sessions auto-saved to .drawio files (DRAWIO_DATA_DIR), preview themes and dark mode, editable SVG export. The web app now reuses the MCP server's diagram code (#951)
+  - Multi-page documents in the MCP server: add_page, edit a page by id, name or index, export specific pages (#862)
+  - load_diagram MCP tool: load a .drawio file from disk into the session, including draw.io's compressed format (#893)
+  - Admin panel at /admin: manage server settings in a web UI instead of environment variables, enabled by setting ADMIN_PASSWORD; secrets are masked, serverless hosts get a read-only view (#866). Its copy is rewritten in plain words in all four languages (#963)
+  - Model lists and catalog: 18 providers can fetch their model list into a searchable picker; a models.dev snapshot flags models without tool calls, which cannot draw; the Test button checks all models at once and shows response times (#951)
+  - New providers: AIHubMix (#865), Atlas Cloud (#896) and MiMo by Xiaomi (#887); MiniMax default model upgraded to M3 (#857)
+  - Comma-separated AI_MODEL: AI_MODEL=a,b,c is enough for a quick multi-model server setup (#870)
+  - Quota by the CDN's client IP: CLIENT_IP_HEADER and ORIGIN_SECRET stop quota bypass through a faked X-Forwarded-For header (#956)
+  Improvements
+  - Claude 4.7 and later, GPT 6: requests retry without sampling settings and with adaptive thinking on models that reject temperature; GPT 6 models show their reasoning; suggested models updated to Claude 5 and GPT 6; Bedrock model ids fixed to use inference profiles (#951)
+  - Provider error hints: provider errors are classified into 12 kinds, each with a hint the user can act on and an "Open model settings" button (#951). When the server's own key is refused, the chat shows a quota hint instead of two unhelpful lines (#953)
+  - Output token budget: maxOutputTokens is always sent (#915) and the default is raised to 64000 with a retry at the provider's limit, so reasoning models reach the tool call instead of ending without a diagram (#927)
+  - Self-hosted deployments: the MCP server card is hidden when NEXT_PUBLIC_SELFHOSTED is true (#711); ANTHROPIC_AUTH_TOKEN is accepted as an alternative to ANTHROPIC_API_KEY (#853); suggested models refreshed for all providers (#863); env.example lists every provider (#881)
+  - Accessibility: the viewport no longer blocks pinch zoom on phones (#881)
+  Security
+  - SSRF in /api/parse-url: private and internal URLs are blocked (#845), including private IPv6 (#858), DNS rebinding and redirects (#878). Advisory GHSA-wqcv-5qvx-vx75
+  - MCP preview page XSS: the session id is validated and the history panel no longer uses innerHTML (#951). Advisories GHSA-jx8r-j32j-q3mq and GHSA-rv7m-56x2-7q2c
+  - Chat route hardening: file parts only accept data: URLs, server credentials only run server models, a client base URL for Vertex only works with the client's own key; helper routes share the access code check and have body size limits (#951)
+  - Admin settings: the settings file target is validated before it is reported writable (#894)
+  - Dependencies: vulnerable packages updated (#804), esbuild security update (#867)
+  Bug Fixes
+  - Image input: the name-based "model does not support images" check is removed, so vision-capable models such as Qwen and Kimi are no longer blocked (#326, #877); DeepSeek V4 Vision receives images after the SDK update (#934, #951)
+  - MCP exports: export replies are tagged by request, so an autosave SVG is never saved as the PNG export and parallel page exports no longer write the wrong image (#795, #951)
+  - Model test: validation uses the same client as chat, including Azure OpenAI's createAzure, and its output budget is raised from 20 to 1024 tokens so models that think before answering pass the test (#820, #884, #951)
+  - Ollama: chat requests go to Ollama's /api path again (#954); the desktop server bypasses the system proxy for localhost (#951)
+  - Multi-page diagrams: autosave, history and .drawio download keep every page after an export (#895)
+  - Stop button: a stop or a closed tab reaches the provider even after a garbage collection pause (#965)
+  - Streaming edits: cut-off cell XML is refused in edit_diagram operations, so the canvas no longer jumps out of view while an edit streams (#960)
+  - MCP edit_diagram freshness: the 30 second time gate is replaced by a content comparison (#890)
+  - Sessions and canvas: restoring a session no longer replays the last drawing over the saved diagram, a failed or stopped edit restores the canvas, XML repair no longer corrupts valid diagrams, storage errors are reported and chats are never deleted silently (#951)
+  - Chat input: template dialogs no longer send the message, sending waits for file extraction, an IME Enter no longer sends (#951)
+  - Desktop app: API keys are decrypted after ready so Windows and Linux get them, config writes are atomic with a backup of a corrupt file, navigation away from the app is blocked (#951)
+  - Bedrock: tool streaming works under Zod v4 (#860)
+  - Model selector: long labels no longer overflow (#910)
+  - Validation retry: the retry counter is cleaned up when the visual check throws (#881)
+  Developer Experience
+  - E2E tests run in six shards (#959); the MCP server is published to npm through OIDC trusted publishing (#891); the Docker image carries provenance and SBOM attestations (#902)
+  - Biome pinned and public/ excluded from formatting (#869, #912); the MCP package check reads npm 12's pack output (#952)
+  - Dependency updates (#856, #903, #904, #932, #948); the unused base-64 dependency is removed (#881)
+  Documentation
+  - README restructured around the new promo video (#961); LM Studio with the OpenAI provider (#897); Atlas Cloud sponsorship (#919); a new example drawing (#966)
+  Contributors
+  - @DayuanJiang
+  - @NgoQuocViet2001
+  - @binyangzhu000-sudo
+  - @bnevis-i
+  - @chaochaoweb3
+  - @CharlesJay01
+  - @fix2015
+  - @JoeGlenn1213
+  - @kobihikri
+  - @marvikomo
+  - @octo-patch
+  - @Siddhant0507Shekhar
+  - @waterystone
+  - @xiajiadi
+  - @xinyang20
+  - @YOYO-do
+ReleaseNotesUrl: https://github.com/DayuanJiang/next-ai-draw-io/releases/tag/v0.5.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

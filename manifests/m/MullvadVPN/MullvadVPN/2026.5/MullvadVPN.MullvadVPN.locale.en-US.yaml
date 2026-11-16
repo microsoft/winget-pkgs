@@ -1,0 +1,74 @@
+# Created with komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: MullvadVPN.MullvadVPN
+PackageVersion: '2026.5'
+PackageLocale: en-US
+Publisher: Mullvad VPN
+PublisherUrl: https://mullvad.net/
+PublisherSupportUrl: https://mullvad.net/help
+PrivacyUrl: https://mullvad.net/en/help/privacy-policy
+Author: Mullvad VPN
+PackageName: Mullvad VPN
+PackageUrl: https://mullvad.net/
+License: GPL-3.0
+LicenseUrl: https://github.com/mullvad/mullvadvpn-app/blob/HEAD/LICENSE.md
+Copyright: Copyright (C) 2024 Mullvad VPN AB
+CopyrightUrl: https://github.com/mullvad/mullvadvpn-app/blob/main/README.md
+ShortDescription: Mullvad is an open-source commercial virtual private network service based in Sweden.
+Description: Mullvad is an open-source commercial virtual private network service based in Sweden.
+Tags:
+- network
+- open-source
+- privacy
+- private
+- private-network
+- security
+- vpn
+ReleaseNotes: |-
+  This release is for desktop only.
+  Here is a list of all changes since last stable release 2026.4:
+  Added
+  - Add explicit log levels for mullvad log set-level command: off, error, warn, info,
+    debug and trace.
+  Changed
+  - Do not show dialog when rendering the map fails due to disabled GPU acceleration.
+  - Clicking on the tray icon will toggle the window instead of just showing it.
+  - Old mullvad log set-level command has been renamed to mullvad log set-rust-log.
+  Linux
+  - Make all timestamps embedded in .deb and .rpm packages deterministic by deriving them from
+    the git commit being built instead of the time of the build. Required for reproducible builds.
+  - Set the BUILDHOST header of .rpm packages to a fixed value instead of the hostname of the
+    build machine. Required for reproducible builds.
+  - De-couple mullvad-daemon.service "After=" dependencies from systemd.resolved and NetworkManager.
+  - Start mullvad-early-boot-blocking.service before network-pre.target instead of basic.target.
+  Windows
+  - Sign the uninstaller, Electron binaries, and native modules. Some NSIS binaries are still
+    unsigned.
+  - Switch winreg out for windows_registry.
+  - Add timeout to device cleanup tasks during installs.
+  - Increase timeout on flushing DNS cache.
+  Removed
+  Windows
+  - Stop removing leftover Wintun adapters during installation. Wintun dropped support for adapter
+    pools, so this has not been necessary since 2022.5-beta1.
+  Fixed
+  - Reject invalid DAITA fraction limits in tunnel config responses before starting the tunnel.
+  - Ignore DAITA tunnel config responses unless DAITA was requested.
+  - Fix infinite loop of account checks when account ran out of time.
+  - Fix IPv6 obfuscation relay selection when the relay's WireGuard endpoint only has IPv4.
+  - Fix the device sometimes being incorrectly marked as revoked when the API rejects an expired
+    access token.
+  - Fix daemon crashing on startup when migrating settings that contain no WireGuard entry location.
+  Windows
+  - Preserve the app's own theme colors when Windows high contrast (forced-colors) mode is
+    enabled in order to prevent toggle switches and other custom-styled controls from becoming
+    invisible.
+  - Fix the installer UI from looking blurry by making the installer DPI-aware.
+  - Wait for the tunnel routes to become usable, and retry the connection to the tunnel config
+    service if the tunnel is not ready yet. This may help with connection failures that occur
+    immediately after the tunnel is set up, when using quantum-resistant tunnels or DAITA.
+ReleaseNotesUrl: https://github.com/mullvad/mullvadvpn-app/releases/tag/2026.5
+PurchaseUrl: https://mullvad.net/en/account/create
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

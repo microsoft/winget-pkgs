@@ -1,0 +1,68 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: juejijianghuaa.CoDock
+PackageVersion: 0.6.8
+PackageLocale: zh-CN
+Publisher: CoDock
+PublisherUrl: https://github.com/juejijianghuaa
+PublisherSupportUrl: https://github.com/juejijianghuaa/CoDock-Release/issues
+PackageName: CoDock
+PackageUrl: https://codock.pages.dev/
+License: MIT
+LicenseUrl: https://github.com/juejijianghuaa/CoDock-Release/blob/HEAD/LICENSE
+ShortDescription: 本地 Coding Agent 桌面工作台与终端集成中心。
+Description: |-
+  CoDock 是一个面向专业开发者的本地 Coding Agent 桌面工作台与终端控制台：
+  - 多 Agent 并行执行：支持在一个窗口内多 Tab 运行 Claude Code、Codex、Gemini CLI、Antigravity、Grok Build、Pi、Opencode 等，告别杂乱的独立黑窗口。
+  - 全历史与用量看板：本地直接解析各 Agent 的原生日志与 SQLite/JSONL 数据，聚合按项目、模型、日期的 Token 用量与成本统计。
+  - 专为 Coding 打造的终端增强：基于 xterm.js 与原生 ConPTY 封装，支持滚轮穿透、图片快速粘贴、拖拽文件注入绝对路径、全局快捷键呼出。
+  - Markdown Composer 独立浮窗：专为长提示词编写设计的全功能 Markdown 输入层，支持模板复用、提示词优化与一键投递。
+  - 手机/平板与局域网协同：自适应移动端 Web 交互、配对令牌安全门禁与受控只读/可写会话分享。
+Tags:
+- claude-code
+- codex
+- gemini-cli
+- 人工智能
+- 终端
+ReleaseNotes: |-
+  v0.6.8 (2026-11-11)
+  这一版重做了观感和用量两块：外观设置补齐终端配色、光标、行高、字体与界面缩放，工作区背景能吃视频和
+  GIF；用量统计加上项目维度，时间范围对全部维度生效。分享页与远程设备的几处别扭也一并修了。
+  新功能
+  - 外观设置补齐终端参数：配色方案（CoDock / One Half / GitHub / Solarized / Tokyo Night，各带亮暗
+    两版，桌面与手机端共用）、光标样式与闪烁、行高 1.0–1.6、自定义终端字体（检测是否已安装、是否等宽）、
+    界面缩放 90–120%（只作用于主界面与输入窗口）。改字体与行高会重新 fit 并上报尺寸。
+  - 工作区背景支持视频与 GIF：MP4/WebM 上限 80MB，静音循环播放，窗口不可见时暂停；GIF 走图片线但
+    不进 canvas 重绘，否则动图会被压成第一帧。
+  - 用量统计加上项目维度：时间范围（预设、自定义双月日历、全部）现在对总数、项目、模型、来源、会话
+    排行一并生效，此前只裁剪按天序列；新增项目筛选（linked worktree 归到主仓）、来源占比、消耗最多的
+    会话、环比、53 周活跃日历、按天来源拆分与成本，趋势图按跨度自动按周/月分桶。
+  - 远程设备点终端链接指向本机：从另一台设备访问时，CLI 打印的 localhost/127.0.0.1 链接改指向访问
+    CoDock 用的主机名，裸 URL 与 OSC 8 两条通道都改。
+  - 远程设备可用本机的 IDEA 打开文件路径：设置「系统集成」新增仅远程设备可见的开关（默认关，只存
+    本机），开启后 Ctrl/Cmd+点击路径交给本设备的 JetBrains Toolbox，行列按 IDEA 口径换算。
+  - 主机熄屏后远程仍可访问：远程访问区块新增「让这台电脑保持唤醒」（默认开，可关）：macOS 起
+    caffeinate -i、Windows 调 SetThreadExecutionState，Linux 不支持；macOS 桌面版同时豁免 App Nap，
+    后台不再被降频。只防闲置睡眠，手动合盖/休眠不受影响。
+  - 输入窗口改为专注写提示：顶栏变成目标条（Agent、会话标题、目录、连接状态），去掉 Markdown 预览
+    与排版工具栏；底栏收拢片段、历史、插入与发送。页内浮层跟随当前 Tab，切到系统终端时禁用并保留草稿。
+  调整
+  - 外观设置回到一行一项，界面缩放、行高、光标样式收进末尾默认收起的「更多选项」；开着背景时配色方案
+    照样生效。
+  - 输入窗口的页内浮层与 macOS 独立窗口统一画用户选的背景色/图，去掉原生毛玻璃。
+  - 用量趋势图与活跃日历改为最新的排最左。
+  - 去掉用量明细 CSV 导出：数据都在弹窗里，按时间、项目、工具都能筛。
+  - 壁纸为图片/视频时去掉侧栏背景模糊。
+  修复
+  - 分享页主机离线不再当成「链接失效」：区分离线（保留画面并自动重连）、会话已结束（点「重新打开」
+    才拉起）、失效三种状态；重启恢复中返回 503 并按退避重试。
+  - WebGL 终端回到前台后字形错乱：显示器睡眠、锁屏、GPU 驱动重置会悄悄弄坏字形图集且不触发
+    webglcontextlost，现在应用后台待满 10 秒再回前台时重建一次。
+  - WebGL 终端中文缺字：字形图集的页合并后各终端仍按旧纹理作图，改为发现页对象变化就重传。
+  - 手机/分享页的上下文卡片花费改读用量账本，与用量统计同口径，不再用前端写死的单价估算。
+  - 开关的开/关状态更明显（滑块与轨道反色）；环比徽标不再被长提示挤压折行；趋势图 tooltip 不再被卡片
+    裁掉。
+ReleaseNotesUrl: https://github.com/juejijianghuaa/CoDock-Release/releases/tag/v0.6.8
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

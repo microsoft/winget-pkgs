@@ -1,0 +1,97 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: seakee.CPAManagerPlus
+PackageVersion: 1.14.8
+PackageLocale: en-US
+Publisher: seakee
+PublisherUrl: https://github.com/seakee
+PublisherSupportUrl: https://github.com/seakee/CPA-Manager-Plus/issues
+PackageName: CPA Manager Plus
+PackageUrl: https://github.com/seakee/CPA-Manager-Plus
+License: MIT
+LicenseUrl: https://github.com/seakee/CPA-Manager-Plus/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Seakee
+ShortDescription: A self-hosted CLIProxyAPI management panel and AI gateway observability dashboard
+Description: |-
+  A self-hosted CPA / CLIProxyAPI management panel and AI gateway observability dashboard for requests, usage, cost, quota, failures, and account health.
+
+  What Can CPAMP Help You Answer?
+  - Why are requests failing? Inspect failure rates, status codes, affected models/accounts, and redacted evidence in persistent request history.
+  - Where is the cost going? Break down tokens and estimated cost by model, provider, account, API key, project, channel, and time range.
+  - Are accounts and quotas healthy? Review credential state, quota windows, reset evidence, and controlled automation for Codex and xAI accounts.
+
+  Core Capabilities
+
+  CPA Gateway Management
+  - Manage CPA provider configurations, including Gemini, Codex, Claude, Vertex, xAI, and OpenAI-compatible providers.
+  - Maintain auth files, OAuth logins, API keys, model aliases, priorities, plugins, logs, and system settings.
+  - Import official Sub2API OpenAI OAuth exports and split multiple accounts into separate CPA Codex auth files.
+
+  Request Monitoring And Failure Diagnosis
+  - Persist requests from the CPA usage queue in local SQLite and search account, client API key, and realtime request views.
+  - Inspect status, latency, token, cache, trace, and redacted failure evidence without exposing raw failure bodies.
+  - Export or import request history as JSONL.
+  - Open the Monitoring Demo.
+
+  Cost And Usage Analytics
+  - Break down calls, tokens, cost, latency, and failures by model, provider, account, credential, API key, project, channel, and time range.
+  - Track input, output, reasoning, cache, service tier, and long-context pricing semantics.
+  - Sync model prices from models.dev first, with LiteLLM and OpenRouter fallbacks plus local overrides for aliases or internal models.
+  - Open the Usage Analytics Demo.
+
+  Account Health, Quota, And Automation
+  - Inspect Codex and xAI accounts locally or on a Manager Server schedule.
+  - Read quota windows, reset evidence, credential state, workspace state, and provider-specific health signals when available.
+  - Apply controlled quota cooldowns and route credential failures into an account action queue for review and recovery.
+  - Open the unified Accounts Demo.
+
+  Production Operations
+  - Run CPAMP Full Mode as one Docker container or a native Linux, macOS, or Windows package for amd64/arm64; the full stack can run alongside CPA.
+  - Keep request history, Manager configuration, automation state, and model prices in local files with no account registration or telemetry SDK.
+  - Back up SQLite files together with data.key to preserve encrypted CPA Management Keys.
+
+  Want to preview the interface first? Open the Live Demo. The demo uses fictional data only. It is not a deployment or runtime mode and cannot connect to, manage, or monitor a real CPA instance.
+  CPAMP manages and observes traffic through CPA / CLIProxyAPI. It is not a replacement proxy and does not forward model traffic by itself.
+
+  Data, Privacy, And Security
+  - CPAMP does not phone home, include analytics SDKs, or require account registration.
+  - External calls are limited to the CPA gateway and integrations you explicitly configure or trigger, such as OAuth, provider checks, plugin releases, and model price sync.
+  - Request history, configuration, model prices, inspection history, and automation state stay in local files.
+  - CPA Management Keys are encrypted before SQLite persistence; backups require the SQLite files and data.key.
+  - Normal APIs and JSONL exports expose redacted failure summaries, never raw failure bodies or stored raw JSON.
+  - CPAMP is intended for traffic and credentials you are authorized to operate.
+Tags:
+- ai
+- api-gateway
+- dashboard
+- llm
+- proxy
+ReleaseNotes: |-
+  Overview
+  v1.14.8 is a 1.x maintenance release after v1.14.7. It includes four merged frontend fixes: background-refresh data continuity (#1001), provider-aware source attribution in request monitoring (#1014), quota-window presentation (#1020), and xAI OAuth subscription-plan and observed-quota handling (#1006).
+  This release contains no v2 architecture work and does not change the Manager Server, CPA management APIs, database schema, credential format, or configuration format. There are no new user settings or migration steps.
+  Fixes
+  - Background-refresh continuity (#1001): Keep loaded credential history, quota usage, Usage Analytics data, and model-price rows visible while refreshing within the same connection and data scope, including temporary request failures. Avoid flashing, blank content, or false empty states.
+  - Credential replacement invalidates historical and quota-usage evidence belonging to the previous credential identity without discarding unaffected rows. Rolling-range day changes and changed filters still invalidate out-of-scope data.
+  - Request-monitoring source attribution (#1014, fixes #1013): Disambiguate shared API keys and host ordinals across providers using the event provider where available. Preserve configured upstream labels; fall back to an unattributed source rather than guessing when the provider is missing or candidates remain ambiguous. Raw API keys are not displayed.
+  - Quota-window presentation (#1020): Show up to five principal Antigravity quota windows in both cards and table rows, including a separate Gemini 4 Argon group. Distinguish confirmed empty model usage from unknown, stale, partial, or unavailable quota data.
+  - xAI OAuth subscriptions (#1006, fixes #1005): When a CPA auth file lacks plan information, resolve the subscription in the background through CPA's existing api-call endpoint. Display a confirmed SuperGrok Heavy plan where available, and continue showing observed quota even when subscription status cannot be confirmed.
+  - Keep xAI quota observations separate from account-health entitlement decisions: stale plan evidence cannot establish availability or cross connection/credential boundaries. Subscription lookups are deduplicated through a low-priority serial lane after quota refresh; no periodic polling is added.
+  Upgrade Notes
+  - Upgrade from v1.14.7 and restart normally. No database migration, configuration rewrite, or credential recreation is needed; migration_required remains false.
+  - The subscription lookup in #1006 uses the existing CPA api-call capability and upstream subscription endpoints. If these are unavailable, the plan can remain unknown while observed quota stays visible; old plan labels alone do not establish availability.
+  - The retained snapshots in #1001 are scoped to the same connection and credential/filter identity. Scope changes still invalidate previous evidence.
+  - The minimum CPA baseline for full Muse / Meta functionality remains v7.3.4+; this release does not raise it.
+  - The existing v1.14.7 offline-maintenance guidance for the latency-analytics covering index on populated databases still applies. This release introduces no further indexes or maintenance commands.
+  Acknowledgements
+  - @M1nt-Ch0c0 - Fixed xAI OAuth subscription-plan recognition with background lookup and preserved observed quota when the plan is unknown (#1006).
+  - @imrooki - Fixed missing Antigravity quota windows and clarified confirmed-empty versus unknown model-usage states (#1020).
+
+  Full Changelog: https://github.com/seakee/CPA-Manager-Plus/compare/v1.14.7...v1.14.8
+ReleaseNotesUrl: https://github.com/seakee/CPA-Manager-Plus/blob/HEAD/docs/release-notes/v1.14.8-en.md
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://seakee.github.io/CPA-Manager-Plus/docs/en/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

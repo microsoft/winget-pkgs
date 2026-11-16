@@ -1,0 +1,68 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: DavidEngelhart.Termpolis
+PackageVersion: 1.53.1
+PackageLocale: en-US
+Publisher: Termpolis
+PublisherUrl: https://github.com/codedev-david
+PublisherSupportUrl: https://github.com/codedev-david/termpolis/issues
+PrivacyUrl: https://github.com/codedev-david/termpolis/blob/HEAD/PRIVACY.md
+Author: David Engelhart
+PackageName: Termpolis
+PackageUrl: https://termpolis.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/codedev-david/termpolis/blob/HEAD/LICENSE
+Copyright: Copyright 2026 David Engelhart
+ShortDescription: The open-source multi-agent terminal where Claude, Codex, Gemini, and Qwen work together as a team — without your source code leaving the machine.
+Description: |-
+  Termpolis is a cross-platform desktop terminal manager (Windows, macOS, Linux) built on Electron + React + TypeScript with node-pty powering the underlying shells. It ships as a native app, code signed on Windows, notarized on macOS.
+  What makes it different:
+  - Secure AI-assisted development. Built-in AI Security Center auto-scans every AI prompt against 70+ secret patterns, enforces Gemini paid-tier mode, and keeps an auditable JSONL log of every AI-agent terminal launch — every check runs locally.
+  - Multi-agent swarm. Claude Code, Codex, Gemini CLI, and Qwen Code work together on a task. A dedicated Claude Code instance acts as the conductor.
+  - MCP server baked in. AI agents control Termpolis via Model Context Protocol, open terminals, run commands, send messages.
+  - Transparent routing. Every subtask shows which agent got it, why, and what it cost.
+  - Activity observability. Every token, every tool call, every message from every agent is visible in real time.
+  - Intervention controls. Pause, cancel, or steer any agent mid-task without leaving the feed.
+  - Shared memory. A RAG-backed memory store that any agent can read and write via MCP.
+  - MCP-native end to end. All four agents speak MCP — no terminal-output parsers, no glue scripts, no bridge code paths.
+  - Share-ready output. One shortcut from terminal to Slack, Teams, or a PR — see Copy for Slack / Teams / PRs.
+Tags:
+- ai
+- command-line
+- console
+- terminal
+ReleaseNotes: |-
+  Swarm on Windows: the conductor starts, and you can see it (GitHub #36)
+  - A task with double quotes no longer stops the conductor on Windows.
+    - Termpolis now sends the conductor its task on stdin, not on its command line. Windows PowerShell 5.1 split the task at every ", and words like --watch reached Claude Code as options, so it exited before doing anything. The built-in conductor prompt has quotes of its own, so part of it was lost on every Windows run.
+    - The task is read as UTF-8, so em dashes, arrows and ✓ arrive intact. A task longer than Windows's 32,767-character command line works too.
+  - When the conductor exits, the dashboard says so. It shows Conductor exited (code N) with the conductor's last lines, raises a notification and ends the swarm. When it exits cleanly after creating its tasks, the swarm carries on and ends when they do.
+  - The stall warning can fire. If the conductor has created no task and posted nothing a minute after launch, the dashboard says it seems stuck. Before, Termpolis's own launch messages kept it quiet.
+  - Debug shows the conductor. It opens a read-only view of the conductor's output inside the dashboard, while the swarm runs and after it ends.
+  - Trace fills without Debug. It starts within 15 seconds of the conductor's first message or task. Before, it stayed empty until Debug had unhidden the conductor's terminal.
+  - Only the conductor completes a task. A worker printing "done" no longer marks its task complete or ends the swarm. A task is completed only through swarm_update_task (or Done / Fail in the Tasks tab), and the swarm ends when every task is, or when the conductor posts its SWARM COMPLETE summary.
+  - Messages from workers are what their screen settled on, without spinner frames or half-drawn lines.
+  - Usage limits and menus are reported. When a worker stops on Claude Code's, Codex's, Gemini CLI's or Antigravity's usage limit, or on a menu that waits for an answer, the dashboard says why and the conductor is told once. The conductor checks the worker's screen first, then gives a stopped task to another installed agent, or picks the menu's option. Only what the CLI itself draws at the bottom of its screen counts, never the same words in an answer, a file or a log.
+  - write_to_terminal can press Enter for the agent. With submit: true it waits until the agent is ready, types the text, presses Enter, and says whether the agent took it. It types nothing at a shell prompt when the agent has exited, and presses no Enter behind other text already in the agent's input. It reads the screen at the terminal's real size, so wide and narrow panes work too. Without submit, it writes exactly what it is given, as before.
+  Linux .deb: updates no longer freeze Termpolis
+  - Restart now closes Termpolis at once. Your desktop then asks for your administrator password once, installs the update, and Termpolis opens again by itself: on the new version, or on the one you had if nothing was installed.
+  - Quitting never installs an update and never asks for your password. Before, a plain quit could ask for it after the window had gone.
+  - The update banner says what happened when the update didn't go in: the password dialog was cancelled, Termpolis couldn't get administrator rights (it then gives you the sudo apt install command), or the dpkg error, with the full output in update-install.log in the data directory.
+  - Where there is no pkexec, Termpolis asks through sudo -A with its own password dialog. A Termpolis you open by hand while an update installs says so and closes again, so an update is never installed twice.
+  - The update from 1.53.0 to 1.53.1 still runs 1.53.0's installer, so it freezes one last time. Click Wait in the "not responding" dialog, and Termpolis restarts on 1.53.1. Cancelling the password dialog brings a second one; cancel both to stay on 1.53.0. Or quit Termpolis and run sudo apt install ./termpolis_1.53.1_amd64.deb.
+  Linked machines
+  - A long answer is screened before it is cut. A job's answer is cut to its last 200,000 characters (an error to its last 4,000). Both computers now look for credentials before the cut, with up to 65,536 characters before it in view, so a key block or token the cut runs through is removed whole. Before, the cut came first and such a key could cross without its first line, which no rule recognises. This needs 1.53.1 on the computer doing the job.
+  Fixes
+  - Claude Code activity is read in more folders. For a folder whose path has a dot, a space or an underscore in it (C:\Users\john.smith\my_app), Termpolis looked for Claude Code's transcripts under the wrong name and found none, so such terminals showed no activity. It now names the folder as Claude Code does.
+  - A dropped connection to the update server is no longer reported as a crash (GitHub #37). net::ERR_SOCKET_NOT_CONNECTED, and the SOCKS and HTTP/2 forms of the same thing, now count as being offline: the next check retries.
+  Under the hood
+  - The secret rule for Azure connection strings no longer slows down on a crafted answer.
+  - On Windows, the conductor's run script looks for claude only among programs and scripts, which is about 4 seconds faster when it isn't on PATH.
+  Full Changelog: https://github.com/codedev-david/termpolis/compare/v1.53.0...v1.53.1
+ReleaseNotesUrl: https://github.com/codedev-david/termpolis/releases/tag/v1.53.1
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://termpolis.com/docs.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

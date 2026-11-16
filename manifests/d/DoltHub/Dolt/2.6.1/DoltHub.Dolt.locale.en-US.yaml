@@ -1,0 +1,82 @@
+# Created with WinGet Updater using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: DoltHub.Dolt
+PackageVersion: 2.6.1
+PackageLocale: en-US
+Publisher: DoltHub
+PublisherUrl: https://github.com/dolthub/dolt
+PublisherSupportUrl: https://github.com/dolthub/dolt/issues
+Author: DoltHub
+PackageName: Dolt
+PackageUrl: https://www.dolthub.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/dolthub/dolt/blob/HEAD/LICENSE
+CopyrightUrl: https://raw.githubusercontent.com/dolthub/dolt/master/LICENSE
+ShortDescription: Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+Description: |-
+  Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+  Connect to Dolt just like any MySQL database to run queries or update the data using SQL commands.
+  Use the command line interface to import CSV files, commit your changes, push them to a remote, or merge your teammate's changes.
+Moniker: dolt
+Tags:
+- cli
+- data
+- git-for-data
+- versioning
+ReleaseNotes: |-
+  Merged PRs
+  dolt
+  - 12203: nbs: deduplicate archive dictionaries by content
+    Fix #12177
+  - 12198: Build virtual merge bases in UTC
+    Column defaults that read the time, like CURRENT_TIMESTAMP, give it in the session's time zone, so a virtual merge base built with a non-deterministic timestamp. This matters because dolt_merge_bases orders by time stamp. Since no one
+    actually sees the virtual commit, we'll build it with the session time zone set to UTC, and restore the session's own afterwards.
+  - 12194: nbs: allocate chunk journal write buffers and index maps on demand
+    - Lazily allocate journalWriter.buf on write and retain a 64 KB baseline (journalWriterMinBuffSize) across flushes to minimize idle journal footprint while preventing allocation churn.
+    - Initialize rangeIndex.novel with zero initial capacity to eliminate static map overhead and scale lookup memory strictly with indexed chunks.
+    - Add cross-platform get_memory_kb bats helper to get PID memory usage.
+      Fix #12179
+  go-mysql-server
+  - 4062: Do not hoist filters out of the null side of a lateral join
+    fixes #11552
+    hoistOutOfScopeFilters pulls filters that only reference an outer scope out of a derived table. for a lateral derived table on the right of a join that's wrong: in LEFT JOIN LATERAL (SELECT o.id + 1 AS tag WHERE o.id = 1) AS q ON TRUE the o.id = 1 filter decides whether q has a row for that o, it shouldn't filter o itself. at the top level there was nothing to hoist it into, so the query failed with rule 'hoistOutOfScopeFilters' tried to hoist filters above root node. hoisted filters from a derived table that is a non-preserved child of a join (IsPreservedTable) now stay inside it as a filter. derived tables inside EXISTS and IN subqueries aren't join children like that, so they still get hoisted as before.
+    the new script in SubqueriesScriptTests covers the query from the issue, the same thing with an inner JOIN LATERAL, and a LEFT JOIN LATERAL over a table that mixes an inner and an outer filter. all three failed with the error above and pass now, and i checked the expected results against mysql 8.4. the rest of ./sql/... and ./enginetest/... has the same results as main under -tags gms_pure_go.
+  - 4059: Apply sql_select_limit to simple selects and DISTINCT
+    fixes #11549
+    a non-default sql_select_limit was ignored in two places. the simple-select batch in getBatchesForNode (a Project over a ResolvedTable, with or without a Filter) did not run applyDefaultSelectLimit, so set @@sql_select_limit = 2 followed by select * from t or select x from t where y > 1 returned every row. the rule now runs in that batch too. separately, applyLimit did not handle a Distinct root, which is what the query from the issue plans to:
+    select distinct row_number() over (order by x) as rn from t order by rn;
+    an explicit LIMIT is still planned above the Distinct, so it keeps taking precedence over the session limit.
+  - 4058: execute multiple statements in stored procedure exit handlers
+    Currently, the stored procedure handler logic assumes there is exactly one statement for exit handlers.
+    This PR fixes the handler to execute all the queries within a stored procedure handler.
+    However, like other parts of the stored procedure logic, the result set is discarded.
+    Related:
+    - #7454
+    - #12199
+  - 4057: Skip costed index scan for non MATCH...AGAINST filters on fulltext indexes
+    fixes #12175
+    Costed index scans should only work on full text indexes with a MATCH...AGAINST filter. However, we should not be erroring out when the filter is not a MATCH...AGAINST; the filter should instead work like a regular filter.
+    This PR removes emitting an error when a non MATCH...AGAINST filter is on a fulltext index. It also skips calculating the cost in the first place for fulltext indexes with non MATCH...AGAINST filters.
+  - 4056: Fix accidentally dropping filters in complex joins
+    Dolt PR: #12193
+    The join order planner did not properly check that all joins were actually included in the new plan. This PR fixes that.
+    There's potential room for improvement here, both in detecting when filters are redundant and what to do when the current join order planning fails. But this fixes a potential correctness issue.
+  - 4054: create larger decimal precision during comparisons
+    We were choosing the wrong decimal scale/precision when comparing column decimals against literals.
+    Fixes #12185
+  - 4047: Fix type coercision for GREATEST and LEAST functions
+    This PR fixes the resulting and comparing types for GREATEST and LEAST functions to more closely follow MySQL. Combinations of types result in string type output, which we defaulted to DOUBLE in many cases. The presence of DATE/DATETIME/TIMESTAMP types causes other types to be converted and compared as the corresponding temporal type, and then converted to the appropriate output type (usually string).
+    Passing Dolt bump: #12187
+  Closed Issues
+  - 11548: Dolt mis-evaluates a correlated anti-join over a derived ROW_NUMBER() result
+  - 11552: Dolt reaches an analyzer internal error for a legal correlated LEFT JOIN LATERAL
+  - 11549: Dolt drops sql_select_limit
+  - 12177: DOLT_GC duplicates archive dictionaries once an archive has more than 256, pinning ~137 KB of C memory per duplicate
+  - 12175: Full-Text index is selected for ordinary equality and IS NULL filters, causing unknown expression errors
+  - 12185: DECIMAL comparison precision against literals isn't converted correctly
+  - 12179: sql-server holds about 7.3 MB of memory per open database (chunk journal buffers), limiting how many databases one server can hold
+  - 12050: Merge and three-dot diff use only the tallest of several merge bases, which breaks the schema-branch pattern
+ReleaseNotesUrl: https://github.com/dolthub/dolt/releases/tag/v2.6.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

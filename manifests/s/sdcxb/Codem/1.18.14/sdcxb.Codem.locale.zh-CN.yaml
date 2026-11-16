@@ -1,0 +1,53 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: sdcxb.Codem
+PackageVersion: 1.18.14
+PackageLocale: zh-CN
+Publisher: codem
+PublisherUrl: https://github.com/sdcxb
+PublisherSupportUrl: https://github.com/sdcxb/codem/issues
+Author: sdcxb
+PackageName: Codem
+PackageUrl: https://github.com/sdcxb/codem
+License: 专有软件
+ShortDescription: 对标 Codex 的 AI 编程助手桌面客户端，支持代码生成、文件操作与终端执行。
+Description: Codem 是基于 Tauri v2 + React + TypeScript 构建的 AI 编程助手桌面应用，为 MiMo Code 等 CLI 提供可视化界面，支持代码生成、项目文件读写、终端执行、子智能体协作、技能与插件扩展，以及 Git 项目与 worktree 管理。
+Tags:
+- harness
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  Codem v1.18.14
+  发布日期：2026-11-10
+  类型：稳定版
+  下载：Windows 安装包（NSIS / MSI）见下方 Assets
+  本版要点
+  - Context OS 段式上下文：显式开启 segmentEpochs 后，完成任务达到阈值会在同一 Session 内换段，旧消息保留；默认关闭，不改变默认行为。
+  - 分层记忆：platform / project / team / conversation 四种作用域；团队记忆接入现有 AgentTeam，TaskCenter 提供团队记忆入口；自动提取按空闲批次延迟执行，支持审批、撤销批次与跨会话检索。
+  - 团队协同：文档任务、长程 Goal 与 Agent Teams 复用现有会话、任务中心、任务 DAG、claim/attempt、mailbox 与协调者。
+  - 文档与工作集：文档流水线、Goal 文档同步、工作集标记与压缩保护。
+  - 手机与多设备：会话读取、远程新建项目/会话、Tailscale Serve 零配对码、设备级 cookie 鉴权与同步账本。
+  修复
+  - 显式 segmentEpochs 的完成回合不再被首拍预防性压缩吃掉阈值；首拍在安全余量内推迟压缩，完成态直接写 switch，不新建 Session、不删旧消息。
+  - 切换会话时输入草稿不再被重置逻辑删除：草稿按会话 key 冲刷，切回时恢复目标会话自己的草稿。
+  - 上下文溢出/压缩失败不再建议「开启新对话」；改为中性错误、保留 Session、允许重试，并给出可执行的下一步。
+  - 修复网关白名单测试的陈旧断言（用调用前快照判断“未实现方法不转发”，不再写死转发数）。
+  升级说明
+  - 直接覆盖安装即可；数据目录与会话保持兼容。
+  - 段式上下文默认关闭；需要连续长会话时在上下文设置中显式开启 segmentEpochs。
+  已知问题
+  - 真实手机浏览器验证仍受设备条件限制；本版只完成本机 HTTP 网关协议验证，未把其写成手机通过。
+  - 真实公网模型验证以 DeepSeek 为主，其他 provider 未逐项复验。
+  - 手机 session.get 仍受 200/500 条上限与 hasMore=false 约束，超大历史会截断。
+  校验
+  - 安装包与 latest.json 的签名、sha256 由发布流程校验；latest.json 同时包含 windows-x86_64-nsis 与 windows-x86_64 两个平台键。
+ReleaseNotesUrl: https://github.com/sdcxb/codem/releases/tag/v1.18.14
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

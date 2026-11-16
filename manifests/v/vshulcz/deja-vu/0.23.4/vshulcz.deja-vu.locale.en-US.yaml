@@ -1,0 +1,129 @@
+# Created with deja-vu release workflow using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: vshulcz.deja-vu
+PackageVersion: 0.23.4
+PackageLocale: en-US
+Publisher: vshulcz
+PublisherUrl: https://github.com/vshulcz
+PublisherSupportUrl: https://github.com/vshulcz/deja-vu/issues
+PrivacyUrl: https://vshulcz.github.io/deja-vu/guide/privacy.html
+PackageName: deja-vu
+PackageUrl: https://vshulcz.github.io/deja-vu/
+License: MIT
+LicenseUrl: https://github.com/vshulcz/deja-vu/blob/HEAD/LICENSE
+ShortDescription: Search Claude Code, Codex and Cursor session history locally
+Tags:
+- aider
+- claude-code
+- cli
+- codex
+- cursor
+- mcp
+- memory
+ReleaseNotes: |-
+  Reverse commit attribution (deja origin), shell-layer recall (deja shell)
+  for agents whose MCP or hook channel is absent or broken, full CJK recall and
+  decision extraction parity, and expanded harness wiring and session-deletion
+  guides across the 43 supported agents.
+  Added
+  - deja origin [rev|range] traces commits back to the coding agent session and
+    user prompt that produced them across all 43 harnesses, matching git author
+    timestamps and changed file paths against indexed tool edits (--json,
+    --harness, --project, --limit) (#534).
+  - deja shell adds a shell-level recall channel independent of harness MCP or
+    hook support: eval "$(deja shell zsh|bash|fish)" installs preexec/postexec
+    hooks that surface prior command warnings and post-failure fix pairs,
+    deja shell -c "<cmd>" wraps command execution directly (SHELL=deja), and
+    deja shell --verify [--json] probes live MCP stdio initialize and
+    tools/list call-through across every wired harness (#1214).
+  - Continue CLI (cn) hook wiring (UserPromptSubmit, SessionStart, Stop,
+    PreToolUse, PostToolUse, PreCompact) in ~/.continue/config.yaml and
+    ~/.continue/settings.json (#5798).
+  - Guide pages for deleting session history in Goose, Gemini CLI, Aider, Hermes
+    (with @beiryu) and Crush (with @Kasa-Harendra), plus updated deja delete
+    guides (#5571, #5643, #5645, #5646, #5647, #4968).
+  Changed
+  - CJK (Chinese, Japanese, Korean) queries, decision markers, correction cues,
+    and error signatures now tokenize and rank on par with English and Russian:
+    punctuation-free CJK prompts keep query tokens intact, CarriesDecision and
+    HasFact recognize Chinese architectural and root-cause markers (决定,
+    改成, 根因, 排查, 修复, 原因, 方案, 不能, 必须), and
+    cross-session recall surfaces Chinese decisions and fix pairs (#5777, #5791,
+    #5804).
+  - VS Code fork family (Cursor, Windsurf, Trae, Antigravity, CodeBuddy, Qoder,
+    PearAI, Void, Melty, Aide) shares unified state.vscdb and workspaceStorage
+    session discovery (#5797).
+  Fixed
+  - deja install and deja doctor handle symlinked harness config paths,
+    custom CLAUDE_CONFIG_DIR / CODEX_HOME roots, Qwen Code settings.json
+    hook coexistence, and Cursor workspace database WAL locks cleanly (#4971,
+    #3784, #4976, #528).
+  Changelog
+  Features
+  - feat(claude): ingest claude-mem SQLite observations and summaries
+  - feat(cli): add deja origin commit provenance command (#5819)
+  - feat(cli): show one-time star hint after 25 recalls in stats and install
+  - feat(docs): add install method tabs, full-guide search, and top-page index callouts (#5788)
+  - feat(embed,search): fuse vector-first RRF hits, rerank 64 pool, and skip regex (#5777)
+  - feat(hook,fix,doctor): surface co-changed companions, edit fix diffs, and stale plugin scripts (#5779)
+  - feat(hooks): carry Claude auto-memory to non-Claude sessions and fix Hermes/mcode (#5818)
+  - feat(index,sources,handoff): add shared index perms, DEJA_HOME_ROOTS, and handoff state (#5780)
+  - feat(recall): tighten prompt hook subject gates and lift marathon session-start coverage (#5781)
+  - feat(recall,search,prompt): surface code edit diffs, diversify uncovered terms, and mark touched-file supersession (#5778)
+  - feat(scripts): add amlserve HTTP adapter for AML evaluation (#5755)
+  - feat(shell): add shell-layer recall and MCP call-through verification (#1214) (#5824)
+  - feat(sources): resolve Gemini workspace for changes and refresh live-verified registry entries (#5821)
+  - feat(sources,cli): add project-scoped .deja/notes.jsonl store and --repo promotion (#5816)
+  - feat(statusline): wire status bar item across VS Code forks
+  - feat: add CJK episode classification and cross-script retrieval (#5802)
+  - feat: collapse worktree file paths and inherit Antigravity subagent projects (#5811)
+  Fixes
+  - fix(brief,recap,ci): clean recap cuts and brief noise, group codeql bumps (#5790)
+  - fix(digest): skip home and root directories in ProjectNameCandidates
+  - fix(digest,how,redact): clean handoff output and rank direct how commands first (#5787)
+  - fix(digest,sources): unwrap handoff prompts, scope standing rules, and drop denied Antigravity tool calls (#5814)
+  - fix(index,tui): clamp relative month shifts and read full index on agent filter (#5764)
+  - fix(magpie): package @vshulcz/magpie-deja and use hook-prompt with cwd scope (#5822)
+  - fix(redact,antigravity): keep rebuild redaction idempotent and read antigravity subagents (#5766)
+  - fix(search): drop stop words when centring and highlighting snippets
+  - fix(sources): send long sqlite3 reads over stdin, not argv (#5760) (@beiryu)
+  - fix(sources,index): index Codex subagent code-mode threads and share sidecar permissions (#5815)
+  - fix(statusline): fit standalone usage to the bar and stack opencode sidebar
+  - fix: resolve .claude/worktrees to repo project and match Chinese questions (#5806)
+  - fix: resolve home-started sessions to repo project and parse agy file tools (#5809)
+  - fix: scope blame standing decisions, surface blame conclusions, and combine file hook hints (#5804)
+  - fix: tighten fix, secrets, wip, recap, and plan check filters (#5798)
+  Performance
+  - perf(index): mine sidecars before indexing and free session messages (#5571) (#5820)
+  Documentation
+  - docs(guide): add a page on deleting Hermes session history (#5805) (@beiryu)
+  - docs(guide): add guide page for deleting Crush session history (#5645) (#5817) (@Kasa-Harendra)
+  - docs(guide): add guide page for deleting pi session history (#5644) (#5744) (@Kasa-Harendra)
+  - docs(guide): add memory-for-devin page for Devin CLI (#5762) (@beiryu)
+  - docs: add Russian guide pages, GEO Q&A and conversion callouts (#5791)
+  - docs: add live deja view demo, README badges and coverage check (#5797)
+  - docs: fix hermes catalog name (deja-memory) and add Magpie/CC Switch to zh README (#5825)
+  - docs: polish site layout and tighten documentation across pages (#5803)
+  - docs: tighten README and remove duplicate sections (#5801)
+  - docs: use Trendshift #1 Go Repository of the Day gold medal badge (#5800)
+  - docs: use full Trendshift medal badge and drop Go Report Card (#5799)
+  Other
+  - Merge pull request #5757 from vshulcz/fix/home-scope-and-statusline
+  - chore(deps): bump actions/attest-build-provenance from 3.0.0 to 4.2.2 (#5784) (@dependabot[bot])
+  - chore(deps): bump actions/download-artifact from 8.0.1 to 8.0.2 (#5786) (@dependabot[bot])
+  - chore(deps): bump actions/setup-node from 7.0.0 to 7.1.0 (#5795) (@dependabot[bot])
+  - chore(deps): bump actions/upload-artifact from 7.0.1 to 7.0.2 (#5793) (@dependabot[bot])
+  - chore(deps): bump anchore/sbom-action/download-syft (#5796) (@dependabot[bot])
+  - chore(deps): bump github/codeql-action/upload-sarif (#5785) (@dependabot[bot])
+  - chore(deps): bump goreleaser/goreleaser-action from 7.2.3 to 7.3.0 (#5794) (@dependabot[bot])
+  - chore(deps): bump hashgraph-online/ai-plugin-scanner-action (#5783) (@dependabot[bot])
+  - chore(deps): bump ossf/scorecard-action from 2.4.4 to 2.5.0 (#5792) (@dependabot[bot])
+  - chore: pin the manifests to 0.23.3 (#5754)
+  Install
+  curl -fsSL https://raw.githubusercontent.com/vshulcz/deja-vu/main/install.sh | sh
+  go install github.com/vshulcz/deja-vu/cmd/deja@v0.23.4
+  brew install deja-vu
+ReleaseNotesUrl: https://github.com/vshulcz/deja-vu/releases/tag/v0.23.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

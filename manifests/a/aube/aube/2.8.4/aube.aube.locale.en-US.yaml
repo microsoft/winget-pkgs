@@ -1,0 +1,67 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: aube.aube
+PackageVersion: 2.8.4
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  Lockfiles that aube rewrites now pass npm ci, pnpm install --frozen-lockfile, Bun frozen installs and yarn install --immutable in many more cases. This release also fixes --lockfile-dir with workspaces, fixes how bins of link: and workspace dependencies are linked, and puts workspace root bins on PATH for member scripts.
+
+  npm package-lock.json
+  - npm ci no longer fails after an unrelated aube add (#1851, #1863): aube no longer drops or changes entries npm already wrote. It keeps auto-installed peer entries ("peer": true), hoisted required peers such as @emnapi/*, bundleDependencies and their nested placements, workspaces and engines on existing entries, and leftover nested optional entries. Before this fix, npm ci could fail with errors like Missing: @emnapi/core@1.11.3 from lock file.
+  - New entries match what npm writes: hasInstallScript is now recorded, so npm ci runs the package's install scripts (#1846). deprecated is written and kept on rewrite, and a scoped package's string bin uses the unscoped command name (#1858). libc is written only if the lockfile already uses it or packageManager is npm@11.11.0 or later, which stops churn for teams on older npm (#1874).
+  - Workspace members with no dependencies are recorded (#1876): before this fix, aube reported "Already up to date" and npm ci failed with Missing: <member> from lock file. Member entries also now copy os/cpu from the member's package.json and omit name when it matches the folder name, as npm does.
+  - Local dependencies: when a local package declares its own file: dependencies, aube now writes the declared spec instead of an internal file+<hash> key, so the next clean --frozen-lockfile install no longer fails (#1855). Absolute file: directory targets are written as root-relative keys with "link": true, which fixes an EUSAGE error from npm ci (#1853).
+  - Lockfiles with entries outside node_modules can be read again (#1878): this covers a symlinked member's real path or an extraneous deleted member. Before this fix, aube failed with ERR_AUBE_LOCKFILE_PARSE ... could not determine package name. aube still drops these entries when it rewrites the lockfile.
+
+  pnpm pnpm-lock.yaml
+  - pnpm metadata is kept on rewrite: aube now keeps the leading packageManagerDependencies/configDependencies document that pnpm 12 writes (#1842). It also keeps settings entries it doesn't model, such as peersSuffixMaxLength, and local tarball version, integrity and bundledDependencies (#1857). Bundled children of a local tarball are no longer resolved from the registry. Together these fix ERR_PNPM_FROZEN_LOCKFILE_WITH_OUTDATED_LOCKFILE and ERR_PNPM_LOCKFILE_CONFIG_MISMATCH errors after aube add.
+  - Peer keys match pnpm, so pnpm and aube stop rewriting each other's lockfiles: peer suffixes now use the registry name of aliased providers, and an optional peer that is actually provided is included even when its version is out of range (#1849). Peer-cycle providers are written bare (#1859). A package's own declared peers are left out of its transitivePeerDependencies (#1860).
+
+  Bun bun.lock
+  - When the root and a member need different versions of a peer provider, the member keeps its own version after a clean --frozen-lockfile install. For example, a member on React 19 no longer loads the root's React 18 (#1847).
+  - Hoisted local tarballs whose paths are relative to the member that declares them now resolve from that member, not from the project root (#1844).
+  - Folder identifiers for absolute file: directories inside the project are written relative to the lockfile (child@file:assets/child), which Bun's frozen install accepts (#1854).
+
+  Yarn Berry yarn.lock
+  - Rewritten Yarn 4 lockfiles now pass yarn install --immutable (no more YN0028 error) (#1862). Block headers list only the descriptors that are actually requested, peerDependencies ranges are quoted only when YAML requires it, and optional dependencies keep their dependenciesMeta: optional: true flags.
+
+  Install, linking and scripts
+  - --lockfile-dir works with workspaces (#1856): before this fix, a clean --frozen-lockfile install failed with lockfile already records importers from other projects, and a relocated package-lock.json or bun.lock was rejected. aube and pnpm lockfiles now record every importer relative to the lockfile directory, as pnpm does.
+    - Upgrade note: the next normal install migrates relocated workspace lockfiles written by older aube versions. A --frozen-lockfile install that would need this migration fails and asks you to run aube install --no-frozen-lockfile once.
+  - Workspace root bins are on PATH in member scripts (#1845): <root>/node_modules/.bin is now added after the member's own .bin, as pnpm does. This applies to aube run (including -r, --filter and --parallel), the test/start shortcuts and aube exec.
+  - Bin changes in link: and workspace dependencies are picked up (#1839, @JamBalaya56562): before this fix, aube reported "Already up to date" and kept old commands in node_modules/.bin until --force. aube now checks bin and directories for changes, and a link: target that gains a package.json is linked on the next install.
+  - A dependency's link: deps get their bins linked into its .bin (#1873, @JamBalaya56562): the dependency's lifecycle scripts can now call those commands.
+  - file: dependencies:
+    - A peer satisfied by a file: dependency now links to the directory aube actually creates, instead of a link that points nowhere. With the global virtual store, dependents of file: packages now stay in the project's virtual store instead of the shared one (#1850).
+    - A file:-linked directory in a package-lock.json project can now require its own dependencies (#1848).
+    - Absolute file:/link: children of local tarballs now resolve when block-exotic-subdeps=false (#1852).
+
+  Registry
+  - No more false "0 downloads last week" warnings (#1881): if npm's downloads API returns a stats window that is more than 7 days old, aube treats the count as unknown. Before this fix, aube add flagged legitimate new packages as suspicious during npm's stats outage.
+ReleaseNotesUrl: https://github.com/aubepkg/aube/releases/tag/v2.8.4
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

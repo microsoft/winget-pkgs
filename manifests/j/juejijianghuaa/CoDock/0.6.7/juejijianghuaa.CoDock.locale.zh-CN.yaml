@@ -1,0 +1,66 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: juejijianghuaa.CoDock
+PackageVersion: 0.6.7
+PackageLocale: zh-CN
+Publisher: CoDock
+PublisherUrl: https://github.com/juejijianghuaa
+PublisherSupportUrl: https://github.com/juejijianghuaa/CoDock-Release/issues
+PackageName: CoDock
+PackageUrl: https://codock.pages.dev/
+License: MIT
+LicenseUrl: https://github.com/juejijianghuaa/CoDock-Release/blob/HEAD/LICENSE
+ShortDescription: 本地 Coding Agent 桌面工作台与终端集成中心。
+Description: |-
+  CoDock 是一个面向专业开发者的本地 Coding Agent 桌面工作台与终端控制台：
+  - 多 Agent 并行执行：支持在一个窗口内多 Tab 运行 Claude Code、Codex、Gemini CLI、Antigravity、Grok Build、Pi、Opencode 等，告别杂乱的独立黑窗口。
+  - 全历史与用量看板：本地直接解析各 Agent 的原生日志与 SQLite/JSONL 数据，聚合按项目、模型、日期的 Token 用量与成本统计。
+  - 专为 Coding 打造的终端增强：基于 xterm.js 与原生 ConPTY 封装，支持滚轮穿透、图片快速粘贴、拖拽文件注入绝对路径、全局快捷键呼出。
+  - Markdown Composer 独立浮窗：专为长提示词编写设计的全功能 Markdown 输入层，支持模板复用、提示词优化与一键投递。
+  - 手机/平板与局域网协同：自适应移动端 Web 交互、配对令牌安全门禁与受控只读/可写会话分享。
+Tags:
+- claude-code
+- codex
+- gemini-cli
+- 人工智能
+- 终端
+ReleaseNotes: |-
+  v0.6.7 (2026-11-06)
+  这一版把终端和浏览器访问都补了一轮：终端换 WebGL 渲染、文件路径可点开、剪贴板与滚轮在各宿主上
+  统一；Server 版补上开机自启，发布产物也齐了。
+  新功能
+  - 终端改用 WebGL 渲染：xterm 默认的 DOM 渲染把整行当文本排版，中文字形取自回退字体、宽度不
+    正好两格，表格右边框逐行错开。桌面终端与手机/分享页现在共用同一个渲染层，WebGL 上下文被回收或
+    浏览器不支持时退回 DOM，不黑屏。
+  - 终端里的文件路径可以点：已配对设备在浏览器里点路径直接打开或下载（主机本机仍用编辑器打开）；
+    分享页访客只能点回放缓冲里出现过的完整路径，只给普通文件、50MB 上限，响应带 CSP sandbox。
+  - 侧栏宽度可拖动：250–640px，双击恢复 300px；项目组默认只露 5 条会话，「显示更多」每次 +10，
+    当前会话总在视野里。
+  - 新任务弹窗改版：目录置顶、回车即建，Agent 改成图标条（⌘/Ctrl+点击多选）；worktree 选项不再
+    把弹窗撑高。
+  - 输入窗口默认页内浮层，桌面版可弹出独立窗口；提示词优化暂时隐藏。
+  - 设置页与用量页的 Agent 选择统一成图标条，新任务里的「工具」改称 Agent。
+  - 浏览器里用页内目录浏览选工作目录：远程设备不再让对话框弹在主机屏幕上。
+  - Server 版支持开机后台运行；远程设备可以只读查看主机设置（Agent、hook、终端 shell、编辑器等），
+    不再是一行 403。
+  - 归档面板可按文件夹删除归档会话，只删本子树里已归档的会话，不碰磁盘目录。
+  - 跳过权限确认可以按工具关闭，默认开启。
+  调整
+  - 分享页滚轮按位移发 SGR 滚轮事件，只读分享也能滚全屏 TUI。
+  - codock_search_history 恢复 project 过滤，过滤与分页落在同一条 SQL 里。
+  - 发布工作流新增全平台 Server 版产物（macOS、Linux、Windows）。
+  修复
+  - 终端里点办公文档 / PDF / 图片改用系统默认应用打开，只认白名单扩展名，可执行形态永不进白名单。
+  - 鼠标跟踪的 TUI 里，右键全选或 Shift/Option 拖出的选区不再一挪鼠标就消失。
+  - TUI 自己复制的内容（OSC 52）写进浏览器所在电脑的剪贴板，远程设备不再复制落空。
+  - 浏览器访问时复制粘贴恢复可用：没有 navigator.clipboard 时同步退回 execCommand，不再误读
+    主机剪贴板。
+  - Server 版启动时读登录环境不再卡 15 秒，未安装的 CodeBuddy 不再每次轮询刷「读取失败」。
+  - 对话框关闭时不再闪一下；新任务弹窗交互时不再下滑，图标条不再跳动。
+  - 用量统计修正计价与计数：Claude 按模型牌价与缓存分档、读取子代理记录；Codex 不再重复计 token；
+    超长行不再截断其后的记录。
+  - Windows 副屏最大化不再跑出屏幕。
+ReleaseNotesUrl: https://github.com/juejijianghuaa/CoDock-Release/releases/tag/v0.6.7
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

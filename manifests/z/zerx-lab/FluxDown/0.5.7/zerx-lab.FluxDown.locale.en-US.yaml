@@ -1,0 +1,142 @@
+# Created with WinGet Tracker using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: zerx-lab.FluxDown
+PackageVersion: 0.5.7
+PackageLocale: en-US
+Publisher: FluxDown
+PublisherUrl: https://github.com/zerx-lab
+PublisherSupportUrl: https://github.com/zerx-lab/FluxDown/issues
+Author: zerx-lab
+PackageName: FluxDown
+PackageUrl: https://github.com/zerx-lab/FluxDown
+License: AGPL-3.0
+LicenseUrl: https://github.com/zerx-lab/FluxDown/blob/HEAD/LICENSE
+ShortDescription: Rust 驱动的多协议下载管理器，支持 HTTP/FTP/BitTorrent 磁力链接及 HLS/DASH 流媒体，智能多线程加速与浏览器无缝集成。精美界面，极致性能，永久免费，零广告。
+ReleaseNotes: |-
+  📦 下载与安装说明（服务器 / CLI / Android）· 文件校验见 SHA256SUMS.txt
+  📦 Headless 服务器：直接下载运行（免 Docker）
+  ──────────────────────────────────────────────────┬─────────────────────────────────────────────────────────────────
+  平台                                              │资产
+  ──────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  Windows x64 / ARM64                               │FluxDown-Server-0.5.7-windows-{x64,arm64}.zip
+  ──────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  macOS Intel / Apple Silicon                       │FluxDown-Server-0.5.7-macos-{x64,arm64}.tar.gz
+  ──────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  Linux x64 / ARM64（musl 静态链接，任意发行版可用）│FluxDown-Server-0.5.7-linux-{x64,arm64}.tar.gz
+  ──────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  OpenWrt 软路由（x86_64 / aarch64 各子架构）       │fluxdown-server_0.5.7_<arch>.ipk +
+                                                    │luci-app-fluxdown_0.5.7_all.ipk
+  ──────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  QNAP NAS（QTS x86_64 / ARM64）                    │FluxDown-Server-0.5.7-qnap-{x64,arm64}.qpkg
+  ──────────────────────────────────────────────────┼─────────────────────────────────────────────────────────────────
+  群晖 NAS（DSM 7 / DSM 6，x86_64 / ARM64）         │FluxDown-Server-0.5.7-synology-{dsm7,dsm6}-{x64,arm64}.spk
+  ──────────────────────────────────────────────────┴─────────────────────────────────────────────────────────────────
+  解压后运行 fluxdown-agent --server（Windows 为 fluxdown-agent.exe --server），浏览器访问 http://127.0.0.1:17800。
+  包内两个可执行文件必须放在同一目录：fluxdown-agent（含 Web 控制台，已编译进二进制）与 fluxdownd（下载 daemon，由 agent 自动拉起、退出时一并关停），无需附带任何静态资源目录。
+  首次启动请在浏览器里完成「初始化 FluxDown Server」向导设置访问密钥（无人值守部署可用 FLUXDOWN_TOKEN 预置）。
+  OpenWrt：opkg install fluxdown-server_*.ipk luci-app-fluxdown_*.ipk，LuCI「服务 → FluxDown」页管理，Web 界面在 http://路由器IP:17800。agent 二进制含完整 Web UI，另附 fluxdownd，需 overlay 空间充足的软路由设备。
+  QNAP：App Center → 手动安装 .qpkg（需在设置中允许安装未经验证的应用），装完点应用图标直达 Web 界面。
+  群晖：套件中心 → 手动安装 .spk（需在「设置 → 信任来源」允许任何发行者）。DSM 7.x 装 dsm7 包（以套件专属用户运行），DSM 6.x 装 dsm6 包；Intel/AMD 机型选 x64，ARM 机型（rtd1296/rtd1619b 等）选 arm64。装完在套件中心点「打开」直达 Web 界面（端口 17800）。
+  🐳 Headless 服务器：Docker（linux/amd64 · linux/arm64）
+  docker pull ghcr.io/zerx-lab/fluxdown-server:0.5.7
+  docker run -d -p 17800:17800 -v fluxdown-data:/data \
+    ghcr.io/zerx-lab/fluxdown-server:0.5.7
+  Compose 部署见仓库 docker/docker-compose.yml。首次打开 Web 界面时按向导设置访问密钥，或用 -e FLUXDOWN_TOKEN=... 预置。
+  📦 命令行 CLI
+  ──────────────────────────────────────────────────┬───────────────────────────────────────────
+  平台                                              │资产
+  ──────────────────────────────────────────────────┼───────────────────────────────────────────
+  Windows x64 / ARM64                               │FluxDown-CLI-0.5.7-windows-{x64,arm64}.zip
+  ──────────────────────────────────────────────────┼───────────────────────────────────────────
+  macOS Intel / Apple Silicon                       │FluxDown-CLI-0.5.7-macos-{x64,arm64}.tar.gz
+  ──────────────────────────────────────────────────┼───────────────────────────────────────────
+  Linux x64 / ARM64（musl 静态链接，任意发行版可用）│FluxDown-CLI-0.5.7-linux-{x64,arm64}.tar.gz
+  ──────────────────────────────────────────────────┴───────────────────────────────────────────
+  解压后得到 fluxdown（Windows 为 fluxdown.exe），放入 PATH 即可使用；也可从源码安装：
+  cargo install --git https://github.com/zerx-lab/FluxDown fluxdown_cli。
+  fluxdown ping                         # 探活（需 FluxDown App / server 运行中）
+  fluxdown add https://example.com/f.zip
+  fluxdown ls
+  服务地址经 --url 或 FLUXDOWN_URL（默认 http://127.0.0.1:17800），管理 token 经 --token 或 FLUXDOWN_TOKEN。
+  📱 Android
+  ─────────────────────────────┬──────────────────────────────────────
+  设备                         │资产
+  ─────────────────────────────┼──────────────────────────────────────
+  不确定架构（通用包）         │FluxDown-0.5.7-android-universal.apk
+  ─────────────────────────────┼──────────────────────────────────────
+  64 位 ARM（绝大多数手机）    │FluxDown-0.5.7-android-arm64-v8a.apk
+  ─────────────────────────────┼──────────────────────────────────────
+  32 位 ARM                    │FluxDown-0.5.7-android-armeabi-v7a.apk
+  ─────────────────────────────┼──────────────────────────────────────
+  x86_64（模拟器 / Chromebook）│FluxDown-0.5.7-android-x86_64.apk
+  ─────────────────────────────┴──────────────────────────────────────
+  ⚠️ 从旧版（Flutter 版）升级：新版 Android 客户端换用了新的签名证书，不能直接覆盖安装旧版（系统会提示「应用未安装」或签名冲突）。
+  请先在旧版中记下需要保留的下载任务与设置，卸载旧版后再安装新版；卸载会清除旧版的本地数据，已下载到公共目录的文件不受影响。
+  0.5.7 - 2026-10-15
+  🚀 新功能
+  - 新建下载支持大批量导入：链接分块提交，下载页显示进度条并可随时取消，已建任务保留；失败或未提交的链接会放回输入框。桌面端、Web 与 Android 均已支持
+  - 多选删除任务同样分块执行，显示进度并可取消，大批量删除更快更稳
+  - 新建下载时，输入单条 http(s) 链接后自动探测并显示文件名与大小；支持直接粘贴 aria2c 命令（自动提取镜像地址、-o、--checksum、Cookie / UA / 请求头等），并可识别 thunder:// 迅雷链接
+  - 支持修改任务的线程数和更换下载链接（右键菜单、应用菜单与详情「常规」页均可操作）；失败任务换链后自动重试
+  - 设置中线程数与 CDN 节点数新增「自动 / 自定义」模式选择
+  - 新版本提醒改为独立的「发现新版本」窗口，支持跳过此版本、24 小时后再提示与立即更新，不再依赖主窗口
+  - 桌面端与 Web 在任务列表中悬停行首图标即可切换为复选框进入多选模式；右键菜单新增「选择 / 全选」
+  - 托盘菜单新增「重启」
+  - Android 最低支持版本降至 Android 8.0
+  - 诊断新增 Windows ComSpec 检测与一键修复：避免 Chrome / Edge 因环境变量损坏而报 “Failed to start native messaging host”
+  - OpenWrt LuCI 页面显示服务运行状态与访问密钥，支持设置访问密钥并提供中文界面
+  - 主队列始终保持运行，不可停止或设置定时；旧版本中被停止或带定时的主队列会在启动时自动恢复
+  - 状态栏「全部暂停 / 全部恢复」仅在存在可操作任务时可用，并提示原因
+  - 新增台湾繁体中文（zh-TW）界面语言，覆盖桌面端、Web、Android、iOS 与浏览器扩展
+  - Windows / Linux 标题栏不再显示应用菜单（macOS 原生菜单不变）
+  🐛 问题修复
+  - 修复批量新建任务时已完成任务可能被改回下载中、卡在 99% 的问题
+  - 修复批量导入中断、与「全部暂停」联动异常及总速度统计不准的问题
+  - 修复多段下载在刚开始几秒内暂停后进度显示为 0% 的问题
+  - 更换下载链接后按新文件大小校验：文件大小变化时从头下载，避免拼接出损坏文件或持续 416 卡住
+  - 全局下载速度更平滑，小文件下载时不再剧烈跳动
+  - 修复 Windows 下写入来源标记会覆盖服务器文件时间的问题
+  - 修复完成提醒在快速完成或无主窗口时遗漏的问题；多个任务复用同一完成窗口
+  - 修复多显示器、小工作区下窗口位置恢复异常
+  - 开机自启在托盘可用时仅驻留托盘，不再弹出主窗口；托盘「显示窗口」连续点击只启动一个进程
+  - 修复程序常驻不重启时无法发现后续新版本的问题
+  - 修复内置队列名（主队列 / 稍后下载）在多处显示为英文的问题
+  - 修复 Android 主界面任务从最近任务列表中消失的问题
+  - 修复 Android 打开已下载文件时（如 mkv、ts、flv）无法选到播放器的问题
+  - 修复官网 Android APK 下载失败的问题
+  0.5.7 - 2026-10-15
+  🚀 Features
+  - Large batch imports in New Download: links are submitted in chunks, the Downloads page shows a progress bar and you can cancel at any time (tasks already created are kept); failed or unsubmitted links are put back in the input box. Available on desktop, Web and Android
+  - Deleting many selected tasks also runs in chunks with progress and cancellation, making large deletions faster and more reliable
+  - New Download now probes a single http(s) link and shows the file name and size; you can paste an aria2c command directly (mirror URIs, -o, --checksum, Cookie / UA / headers are extracted), and thunder:// links are recognized
+  - Change a task's thread count or download link (right-click menu, app menu and the Details "General" page); failed tasks retry automatically after the link is changed
+  - Thread count and CDN node count in Settings now offer an "Auto / Custom" mode
+  - New-version prompt is now a standalone "New version available" window with Skip this version, Remind me in 24 hours and Update now, independent of the main window
+  - On desktop and Web, hover the icon at the start of a task row to turn it into a checkbox and enter multi-select mode; the context menu gains "Select / Select all"
+  - Tray menu gains "Restart"
+  - Android minimum supported version lowered to Android 8.0
+  - Diagnostics can now detect and fix a broken Windows ComSpec, which caused Chrome / Edge to report "Failed to start native messaging host"
+  - OpenWrt LuCI page shows service status and access key, supports setting the access key, and is available in Chinese
+  - The main queue now always runs and cannot be stopped or scheduled; a stopped or scheduled main queue from older versions is restored automatically at startup
+  - The status bar's Pause all / Resume all are enabled only when there are tasks they can act on, with a tooltip explaining why
+  - Added Traditional Chinese (Taiwan, zh-TW) across desktop, Web, Android, iOS and the browser extension
+  - The Windows / Linux title bar no longer shows the application menu (macOS native menu unchanged)
+  🐛 Bug Fixes
+  - Fixed tasks being reverted to downloading and stuck at 99% after batch task creation
+  - Fixed batch imports getting interrupted, misbehaving with Pause all, and inaccurate total speed
+  - Fixed progress showing 0% when pausing a multi-segment download within its first seconds
+  - After changing a task's link, the new file size is now verified: if the size differs the download restarts from scratch, avoiding corrupted files or being stuck on repeated 416 errors
+  - Global download speed is smoother and no longer jumps wildly with small files
+  - Fixed the Windows origin mark overwriting the server's file modification time
+  - Fixed missed completion notifications for fast downloads or when no main window is open; multiple tasks now reuse one completion window
+  - Fixed window position restore on multi-monitor setups and small work areas
+  - With launch-at-login, the app now stays in the tray only when the tray is available; repeatedly clicking "Show window" starts only one process
+  - Fixed newer versions not being discovered when the app stays running without restarting
+  - Fixed built-in queue names (Main queue / Download later) showing in English in several places
+  - Fixed the Android main screen task disappearing from Recents
+  - Fixed Android being unable to pick a video player when opening downloaded files such as mkv, ts or flv
+  - Fixed Android APK downloads failing from the website
+ReleaseNotesUrl: https://github.com/zerx-lab/FluxDown/releases/tag/v0.5.7
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

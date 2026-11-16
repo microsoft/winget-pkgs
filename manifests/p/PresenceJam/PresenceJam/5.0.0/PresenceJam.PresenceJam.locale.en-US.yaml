@@ -1,0 +1,82 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: PresenceJam.PresenceJam
+PackageVersion: 5.0.0
+PackageLocale: en-US
+Publisher: PresenceJam
+PublisherUrl: https://github.com/Carme99/PresenceJam-Desktop
+PublisherSupportUrl: https://github.com/Carme99/PresenceJam-Desktop/issues
+Author: PresenceJam
+PackageName: PresenceJam
+PackageUrl: https://github.com/Carme99/PresenceJam-Desktop
+License: MIT
+LicenseUrl: https://github.com/Carme99/PresenceJam-Desktop/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 PresenceJam
+ShortDescription: Spotify to Teams Status Sync
+Description: Automatically syncs your currently playing Spotify track to your Microsoft Teams status message. Set a custom status message using placeholders like {artist}, {track}, {album}, and {emoji}.
+Moniker: presencejam
+Tags:
+- microsoft
+- presence
+- productivity
+- spotify
+- status
+- teams
+ReleaseNotes: |-
+  PresenceJam now knows more about whether you are busy than you do.
+  That is the whole release, really. In 4.7 the app watched Spotify and wrote a
+  status. In 5.0 it watches a calendar, a meeting, a full-screen slide deck, your
+  idle timer, a profile you switched from the tray, and a rule set you can
+  interrogate after the fact — and it can tell you which of those fired, and
+  why.
+  ─────────────────────────────┬────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Profiles                     │Named overlays of every rule, gate and format setting. Switch from the tray, a hotkey, or presencejam --profile <id>.
+  ─────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Rules that explain themselves│Match on album, show, device, playlist or duration; act with suppress / replace / snooze / profile / presence; then ask why did this not fire? and get a per-rule reason chain.
+  ─────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  A calendar that can veto     │Outlook busy blocks the write, and the un-gate lands within one poll of the meeting ending instead of whenever the cadence next elapses. Working hours import straight into quiet-hours rules, previewed before anything is written.
+  ─────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Headless                     │--daemon runs the same poller with no window and no tray, supervised, with packaging units for systemd, launchd and Task Scheduler.
+  ─────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  An Activity feed             │Every presence decision is recorded, shown on the Dashboard, and pasteable into a diagnostics snapshot.
+  ─────────────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Polish plurals               │few and many render as themselves, not as other.
+  ─────────────────────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  What it cost to build
+  lib.rs was 4,900 lines. It is now four modules and a 34-line registry.
+  poll_once.rs was 11,988 lines. It is now ten files sharing one PollState.
+  config.rs was 8,313. It is now seven slices behind a re-export header that
+  kept every crate::config::X path stable, so nothing downstream had to move.
+  You will not notice any of that. It is the reason the things above were
+  possible without a rewrite, and it is why the next four of these releases will
+  be boring in the way this one was not.
+  One thing 5.0.0 does not yet have
+  A localhost control API. --serve exists and is documented in
+  docs/API.md, but two of its four mutating routes accept a
+  request, validate it, and change nothing, and the bearer token that guards all
+  four has no supported way to be read back. Rather than headline a control
+  surface that cannot be driven, --serve is documented as a preview in 5.0.0
+  and lands properly in 5.1.
+  Why these notes are so long
+  Because they are the record, not the pitch. One hundred and thirty-five
+  entries and one hundred and forty-six issues sit between 4.7.0 and here, kept
+  verbatim with their issue numbers so that anyone can go and argue with any of
+  them. Read the table above, skim Added, and leave the rest alone until
+  something breaks — at which point search for it.
+  One honest footnote
+  5.0.0 was cut once already, on 6 October. The section was written, the six
+  version literals were bumped, and no tag was ever pushed — so the notes were
+  folded back into Unreleased and 5.0.0 sat there looking shipped for five
+  days. The version numbers are unchanged; this section is what was missing.
+  Added
+  - Five more UI locales with follow-system language (#984). The webview ships Spanish, Italian, Polish, Brazilian Portuguese (pt, with the regional tag pt-BR resolving to it longest-tag-first) and Dutch alongside en/de/fr — the shared Dict type keeps all eight at key parity, and the Rust tray/menu tables carry the same eight so native surfaces render the same language. First-run detection prefix-matches every supported code (so es-ES no longer falls back to English), and a Settings "Follow the system language" toggle re-resolves from the OS language on every boot and on change. en stays the documented fallback for unknown tags. Provenance: the five new locales are model-written with human review pending (see CONTRIBUTING) — usable, but no native-speaker read yet.
+  - OS presentation-state gate (#872). SHQueryUserNotificationState is now folded into the existing presence gate through a new PresentationState enum behind a swappable trait in src-tauri/src/platform/focus.rs. A new opt-in teams.gate_when_presenting toggle pauses the Teams status write while a full-screen app, slide deck or Windows Focus Assist Quiet Time is on; the toggle defaults to OFF and is a no-op on Linux/macOS (where the probe answers Unknown). The new reason sits at the lowest precedence of the presence-class reasons so it can never outrank busy or in a call.
+  - Desktop-idle gate (#873). A second probe in src-tauri/src/platform/idle.rs::seconds_since_last_input() reports seconds since the last keyboard/mouse event — GetLastInputInfo on Windows, None on Linux/macOS — and feeds a new teams.idle_away_after_seconds threshold (0 = off, clamped to 60..=3600 by clamp_teams). The first iteration after the gate clears forces exactly one status write via a force_resume_write clock that overrides the #384 byte-identical dedup; a Dashboard chip and a Settings card expose both new opt-ins in en/de/fr.
+  - A user-opt-in setUserPreferredPresence integration (#866). The Teams config now carries teams.preferred_presence { enabled, availability, activity, expiry_minutes }. When the user opts in and respect_manual_status is OFF, a matching rule that does not name its own presence pair (or a freshly-armed snooze) drives Graph setUserPreferredPresence with the configured Busy/DND/BeRightBack/Away pair; the resulting session is cleared at the configured expiry, at the next snooze-end, and on RunEvent::Exit. National-cloud note: setUserPreferredPresence is a commercial-Graph surface that sovereign clouds have historically rejected; the call goes through the same /users/{oid} fallback the other Graph POSTs use.
+  - A user-composed manual Teams status with an expiry (#870). A Dashboard composer + tray "Recent statuses" submenu + --set-status <message> / --clear-status CLI flags let the user post a one-off Teams status (bounded to MAX_RULE_STATUS_CHARS, profanity-filtered, with an expiry_minutes clamped to 5..=720). The status expires locally and on Teams at the same instant, the Dashboard chip shows the active window, and the tray "Clear manual status" entry only appears while one is armed. The recent-statuses ring is capped at 5 entries and dedupes on identical messages.
+  - Volume, seek, and the documented playback capability flags (#871). TrackInfo now carries the active device's volume_percent, supports_volume, and actions fields (the latter as a typed DeviceActions struct mirroring Spotify's documented device.actions object). New player_set_volume and player_seek helpers join the existing player_* family; the Dashboard renders a volume slider and a click-to-seek progress bar; the tray gains a Volume submenu (0/25/50/75/100) and a Seek submenu (+/- 30 s) — both disabled when the active device refuses the capability, and the existing shuffle/repeat/previous/next items get the same disable treatment. The capability gate is the same on the Rust side (commands/playback::set_volume / seek) and on the tray rebuild, so a stale-capabilities click never reaches Graph.
+  - Bounded status-decision history with a Dashboard "Activity" card (#877). A new history module records every presence-updated, presence-gated, snooze-start, snooze-end, preferred-presence-armed, and preferred-presence-cleared decision into a VecDeque<PresenceHistoryEntry> ring capped at 200. The Dashboard's "Activity" card renders the newest 20 entries; the Diagnostics snapshot surfaces the same ring as redact_sensitive-passed lines (so a credential-shaped note cannot reach a public paste); an opt-in JSONL mirror lands in the same app_log_dir() folder the tauri-plugin-log already targets, gated by logging.presence_history (OFF so a noisy rule set cannot grow the log without bound).
+ReleaseNotesUrl: https://github.com/Carme99/PresenceJam-Desktop/releases/tag/v5.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

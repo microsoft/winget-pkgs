@@ -1,0 +1,75 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: RProject.R
+PackageVersion: 4.6.2
+PackageLocale: en-US
+Publisher: R Core Team
+PublisherUrl: https://www.r-project.org
+PublisherSupportUrl: https://www.r-project.org/help.html
+PackageName: R for Windows
+PackageUrl: https://cloud.r-project.org
+License: GPL-2.0-or-later
+LicenseUrl: https://www.r-project.org/Licenses
+Copyright: Copyright (C) 2026 The R Foundation for Statistical Computing
+ShortDescription: R is a free software environment for statistical computing and graphics.
+Description: |-
+  R is a language and environment for statistical computing and graphics. It is a GNU project which is similar to the S language and environment which was developed at Bell Laboratories (formerly AT&T, now Lucent Technologies) by John Chambers and colleagues. R can be considered as a different implementation of S. There are some important differences, but much code written for S runs unaltered under R.
+  R provides a wide variety of statistical (linear and nonlinear modelling, classical statistical tests, time-series analysis, classification, clustering, …) and graphical techniques, and is highly extensible. The S language is often the vehicle of choice for research in statistical methodology, and R provides an Open Source route to participation in that activity.
+  One of R’s strengths is the ease with which well-designed publication-quality plots can be produced, including mathematical symbols and formulae where needed. Great care has been taken over the defaults for the minor design choices in graphics, but the user retains full control.
+  R is available as Free Software under the terms of the Free Software Foundation’s GNU General Public License in source code form. It compiles and runs on a wide variety of UNIX platforms and similar systems (including FreeBSD and Linux), Windows and MacOS.
+Moniker: r
+Tags:
+- data
+- datascience
+- diagram
+- graph
+- graphics
+- plot
+- rstats
+- statistics
+- stats
+ReleaseNotes: |-
+  Bug Fixes
+  - In plain-text help (Rd2txt), paragraphs are again recognized even when started with a non-indented Rd comment, fixing a regression in R 4.4.0.
+  - rhyper(N, m, n, k) now switches to the “large” scenario when m + n is larger than .Machine$integer.max, preventing integer overflow, thanks to Jonathan Blood's report on R-devel.
+  - Fix long standing (Fortran compiler optimization related) bug in nlminb with constraints, thanks to Kasper Kristensen's PR#19086 report and patch.
+  - Fix for PR#19100: seq.int was not handling non-vector along.width arguments properly. Thanks to Mitchell O'Hara-Wild.
+  - Wrappers now duplicate even a wrapped object that might be shared before returning a read-only pointer. This prevents cached read-only pointers from becoming invalid. Reported by Ivan Krylov.
+  - dummy.coef() becomes more robust to non-syntactic variable names, fixing PR#18468. Thanks to Bill Dunlap and ‘R Dev Day’ participants Vincent Arel-Bundock, Cynthia Huang, Tina Rozsos and Marina Marinelli.
+  - Now PROTECT() in SubassignTypeFix, fixing PR#19110 thanks to Kevin Ushey.
+  - writeChar() in a multibyte locale counts characters and bytes consistently and no longer overflows, thanks to Kevin Ushey's report and patch in PR#19112.
+  - dim(a) <- vec now checks for too large prod(vec), thanks to Kevin Ushey's report and patch in PR#19109.
+  - Tweaks (including to the parsers) for the C23 behaviour (preserving const) of strchr, strrchr and strstr. (By Brian Ripley and Duncan Murdoch.)
+  - make check-devel now works without recommended packages.
+  - <matrix>[[i, j]] with negative i occasionally gives no error but accesses previous content; thanks to Kevin Ushey's report and very simple fix in PR#19116.
+  - Quartz device now correctly draws long paths (work-around for Quartz built-in stroker breaking long paths). Thanks to R Dev Day @ useR! 2026 contributors, notably Tomek Gieorgijewski, report in PR#18680.
+  - strptime(ch, "...%OS<n>...") now disregards contiguous digits in "<n>", for symmetry with strftime(), fulfilling Frederick Eaton's wish in PR#17209, thanks to a patch by Suharto Anggono.
+  - strptime() now also returns NA for out of range "%OS" and a correct error message in some wrong multibyte cases, fixing PR#19117 comment #1 and PR#19122 by Michael Chirico; additionally, some overflow to Inf times no longer result in NA.
+  - strptime("0", "%w") in a "C" locale now works in valid cases, returning NA for invalid week numbers ("%U" or "%W"), fixing PR#19124 thanks to Michael Chirico's report and notably Suharto Anggono's analysis, also correctly fixing PR#15195.
+  - ksmooth(x,y, x.points=NULL) now returns an empty (x,y) pair instead of crashing R, fixing PR#19153.
+    Additionally, also by Adam Berkeš, x <- rep(999,0); ksmooth(x, x, x.points = 1) no longer writes out of bounds, fixing PR#19171. Ditto for ksmooth(x, x, n.points = 0), PR#19219.
+  - besselI(1, 1e11) and besselK(..) now signal a warning and return NaN instead of typically segfaulting, fixing PR#19175 thanks to Ben Bolker.
+    Further, besselK(1, -1e11) and similar warn about too large |nu|, returning NaN rather than segfaulting, fixing PR#19196 thanks to Adam Berkeš.
+  - text.default(.., col = numeric(0)) and similar no longer segfault in "instrumented" versions of R, fixing PR#19178 thanks to Jiang Yuancheng's fusion-fuzz and Ivan Krylov.
+  - R CMD rtags (on Unix-alikes) no longer fails from a bad escape if sh is bash or busybox.
+  - capabilities("X11") no longer incorrectly returns TRUE on a Unix-alike where X11 is not actually available when built by a C compiler without C23 enum base types, thanks to Trevor Davis' report and patch in PR#19180.
+  - predict(smooth.spline(..), deriv = -99) and similar invalid deriv values now signal errors instead of segfaulting, thanks to Adam Berkeš' report and proposal in PR#19190.
+  - format(x, width = 2^31 -1) for an non-ascii character x such as x = "\u00e9" now signals an error as the required width is too large, rather than segfaulting, thanks to Adam Berkeš' report in PR#19188.
+  - influence.measures() inadvertently wasn't updated along with dffits(), dfbetas(), covratio(). PR#19167 by Amal Tawfik.
+  - If wilcox.test(..., exact=TRUE)'s p-value is close to the 0 or 1 boundaries, the calculation no longer suffers severely from cancellation, thanks to Tasuku Kobayashi's reports and Ahmed Sattar Jabbar's suggestion in PR#19144.
+  - Long stringed error messages are now protected from premature garbage collection, fixing PR#19210, reported and analyzed by Yuancheng Jiang.
+  - strsplit(str, perl=TRUE, bytes=TRUE) no longer accesses invalid memory in case str is an invalid UTF-8 string, fixing PR#19212, thanks to Kevin Ushey.
+  - isoreg(numeric(0)) no longer returns unallocated component yc, fixing PR#19224 thanks to Kevin Ushey.
+  - KalmanLike(1:5, list(1,2)) and similar no longer segfault, fixing PR#19217 thanks to Kevin Ushey and Adam Berkeš.
+  Bug Fixes (Windows)
+  - path.expand("~") and similar now should work correctly on Windows when the user name is not in ASCII and neither %HOME% nor %USER% environment variables are set, fixing PR#18949 thanks to the report and patch from Ivan Krylov and Mauricio Vargas's R Dev Day work.
+  - file.copy(*, date=TRUE) no longer opens files for exclusive access when copying the file time. Consequently, the time is copied now and concurrent attempts to open the source file should work reliably, thanks to Kevin Ushey's report and patch in PR#19187.
+ReleaseNotesUrl: https://cloud.r-project.org/bin/windows/base/old/4.6.2/NEWS.R-4.6.2.html
+Documentations:
+- DocumentLabel: Manual
+  DocumentUrl: https://cran.r-project.org/manuals.html
+- DocumentLabel: FAQ
+  DocumentUrl: https://cran.r-project.org/faqs.html
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

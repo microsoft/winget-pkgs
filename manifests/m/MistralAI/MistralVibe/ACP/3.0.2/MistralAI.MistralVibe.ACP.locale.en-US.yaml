@@ -1,0 +1,73 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: MistralAI.MistralVibe.ACP
+PackageVersion: 3.0.2
+PackageLocale: en-US
+Publisher: Mistral AI
+PublisherUrl: https://mistral.ai/
+PublisherSupportUrl: https://github.com/mistralai/mistral-vibe/issues
+PrivacyUrl: https://legal.mistral.ai/terms/privacy-policy
+Author: Mistral AI
+PackageName: Mistral Vibe (ACP mode)
+PackageUrl: https://github.com/mistralai/mistral-vibe
+License: Apache-2.0
+LicenseUrl: https://github.com/mistralai/mistral-vibe/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Mistral AI
+CopyrightUrl: https://legal.mistral.ai/terms
+ShortDescription: Minimal CLI coding agent by Mistral
+Description: |-
+  Mistral's open-source CLI coding assistant.
+  Mistral Vibe is a command-line coding assistant powered by Mistral's models. It provides a conversational interface to your codebase, allowing you to use natural language to explore, modify, and interact with your projects through a powerful set of tools.
+Tags:
+- agent
+- agentic
+- ai
+- code
+- coding
+- develop
+- development
+- programming
+ReleaseNotes: |-
+  Added
+  - enable_mouse_capture setting (or VIBE_ENABLE_MOUSE_CAPTURE=false) to leave text selection and copy to your terminal; depending on the terminal, some other mouse interactions such as clicks are disabled too.
+  - Added max_subagents and max_concurrent_subagents settings to control how many subagents can be alive and running at once
+  - In VS Code, connectors that need no login, such as DeepWiki, show as Not connected and connect in one click, instead of asking an admin to set them up.
+  Changed
+  - An image sent to a model that does not support image input no longer fails the turn. The model gets the text "[image]" in place of the image, and the session continues.
+  - Shortened the copy hint so it fits in narrow terminals.
+  - The model's reasoning now shows by default, as a collapsible "Thought" row.
+  - The starting mode your organization sets now applies even when Vibe would otherwise have started you in smart-approve.
+  - Using --agent to pick a mode your organization disabled now opens your default starting mode (your organization's, if it sets one) and shows a notice.
+  - Raised the default subagent limits to 32 alive and 32 running concurrently (previously 8 and 4)
+  Fixed
+  - Copying on Linux now falls back to xclip or xsel when wl-copy fails, and suggests Shift+select or installing xclip when no clipboard tool works.
+  - Hooks from hooks.toml now run for tool calls made inside subagents, including post_agent hooks, as they do for the main agent.
+  - A custom subagent's [tools.*] permission, allowlist and denylist now apply to its tool calls, on top of the main agent's rules, instead of being ignored.
+  - A custom subagent's enabled_skills and disabled_skills now limit which skills it can load, instead of being ignored.
+  - Long context compactions no longer fail behind proxies or VPNs that close idle connections.
+  - Sessions that could not be resumed after a turn was stopped during a tool approval open again.
+  - Sessions saved during a tool call by Vibe 3.0.0 or earlier open again instead of failing with "Invalid Unified session store".
+  - ACP clients get a cancelled stop reason instead of an error when a turn is stopped during a pending approval or question.
+  - Sessions now start with your organization's enforced settings from the first message.
+  - When your organization's settings cannot be fetched, sessions now use the last fetched copy (up to 7 days old) instead of dropping them.
+  - /reload now stops enforcing settings your organization has removed.
+  - Moving a session into a worktree where its current mode is unavailable no longer fails: the session continues in another available mode and shows why.
+  - @ file completion no longer misses files and folders in large workspaces
+  - The selected row of the completion popup no longer scrolls out of view when moving up
+  - Idle sessions in large folders no longer pin a CPU core while the file index watches for changes.
+  - Desktop's new-session picker now loads your organization's settings, experiment models and catalog models when nothing is cached yet, so the first session starts in your organization's default mode.
+  - The built-in vibe skill and the README now document the current hook payload: qualified tool names, success or failure status only, the bash result shape, background commands, and subagent spawning.
+  - Rapid clicks on a tool group or collapsible section now toggle it every time instead of selecting a word or line
+  - Installing from source on Linux without the ALSA development files no longer fails and builds the terminal UI without voice mode.
+  - Long tool-call headers keep their status tag, such as "(running)", after the ellipsis when collapsed and after the last word when expanded, instead of wrapping and breaking the border.
+  - Rust CLI: Mouse selections are copied to the clipboard even when the button is released outside the terminal window.
+  - Rust CLI: Tables inside list items render their cells instead of an empty grid with the text glued to the item.
+  - Vibe now warns that [tools.grep] settings and a tools/prompts/task.md description override have no effect, instead of ignoring them silently.
+  - Collapsed tool-call summaries count distinct files read, edited, or written instead of one per call
+  - The trusted folder prompt now ignores Enter for a moment after it appears, so keys typed during startup no longer trust a folder by accident
+  - Subagents whose last turn failed stay in the subagent list as failed instead of disappearing.
+  - Headless runs given a prompt with -p or --prompt-file no longer hang when stdin is left open.
+ReleaseNotesUrl: https://github.com/mistralai/mistral-vibe/blob/HEAD/CHANGELOG.md#302---2026-10-22
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,57 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: walterfr.USKMaker
+PackageVersion: 2.8.0
+PackageLocale: en-US
+Publisher: walterfr
+PublisherUrl: https://github.com/walterfr
+PublisherSupportUrl: https://github.com/walterfr/UltraStarKaraokeMaker/issues
+PackageName: USKMaker
+PackageUrl: https://github.com/walterfr/UltraStarKaraokeMaker
+License: MIT
+LicenseUrl: https://github.com/walterfr/UltraStarKaraokeMaker/blob/HEAD/LICENSE
+ShortDescription: AI-powered UltraStar karaoke package generator (lyric sync, pitch, and BPM detection)
+Description: USKMaker generates complete UltraStar Deluxe karaoke packages from a YouTube link or local audio file. It downloads/prepares the audio, separates vocals, aligns your provided lyrics to the singing using local AI (WhisperX + forced alignment), detects pitch and BPM, and writes a ready-to-play UltraStar .txt package - entirely offline after setup, no cloud APIs.
+Moniker: uskmaker
+Tags:
+- ai
+- karaoke
+- lyrics
+- ultrastar
+- whisper
+ReleaseNotes: |-
+  [2.8.0] - 2026-11-14
+  Adicionado
+  - Modo Verificação (opcional, desligado por padrão):
+    - Nova caixa "Modo verificação" nas opções (e --verify-alignment na CLI). Quando o CTC é mantido sem arbitragem, roda também um alinhamento simples do Whisper só para conferir o início de cada linha: a linha que discorda dele em mais de 1 s ganha a marca de suspeita. Os tempos das notas e a escolha do alinhador não mudam, só o aviso na Revisão; se o Whisper falhar, a geração segue com a marca de antes.
+    - Medido em 33 músicas com chart feito à mão (as do lote em que o CTC é mantido, com o Whisper large-v3 do app): a marca de linha suspeita encontra 80% das linhas erradas, contra 66% sem o modo, e a precisão sobe de 0,44 para 0,50. Linhas em que os dois alinhadores concordam (62% delas) têm só 2,6% de erro. Custa cerca de 20 s a mais por música com GPU, bem mais sem GPU.
+  Corrigido
+  - Capa, Fundo e Ano de Outra Música: iTunes, Deezer, MusicBrainz e Discogs pegavam o primeiro resultado da busca sem conferir. Agora o resultado só é aceito quando artista e título batem com a busca (ignorando acento, pontuação, "The" inicial e participações como "feat."). Sem resultado parecido, o pacote segue sem aquela fonte: nenhuma capa é melhor que a capa de outra música. Ideia vinda do Karaokiza (MIT).
+  - Arquivos de Fila: salvar e carregar fila só aceita arquivos .json, e a leitura recusa arquivos acima de 5 MB.
+  - Log Certo no Erro "Sidecar Encerrou": quando o sidecar morre logo ao iniciar, a mensagem apontava um _process_output.log que nem chegava a ser criado. Agora aponta o _server_session.log da pasta de dados, onde o erro fica registrado.
+  Segurança
+  - Content Security Policy na Janela do App: a janela tinha a CSP desligada. Agora scripts e estilos só vêm do próprio app, imagens e mídia só pelo protocolo de arquivos locais do Tauri, e conexões só para o próprio app (a busca no LRCLIB passa pelo lado Rust).
+  - CI: as actions do GitHub passam a ser fixadas pelo commit (o workflow de release assina as atualizações automáticas), e os testes do frontend (npm test) passam a rodar no build do Windows.
+  Nota
+  - Números da v2.7.0 Revistos: a melhora da marca de linha suspeita publicada na v2.7.0 (precisão 0,42 → 0,55, recall 0,61 → 0,74) foi medida com o Whisper medium, que não é o que o app usa. Remedida com o large-v3 do app e o código atual: o recall sobe de 0,58 para 0,66, com precisão igual (0,45 → 0,44). O ganho é real, mas menor. Com o Whisper large-v3 o app também ficou melhor no geral do que os números antigos mostravam: na base de 55 músicas, w_1s médio 0,838 → 0,878, mediana 0,881 → 0,923, colapsos 3 → 1.
+  [2.8.0] - 2026-11-14
+  Added
+  - Verification Mode (optional, off by default):
+    - New "Verification mode" checkbox in the options (and --verify-alignment in the CLI). When CTC is kept without arbitration, it also runs a plain Whisper alignment only to check where each line starts: a line that disagrees with it by more than 1 s gets the suspicious mark. Note timings and the aligner choice do not change, only the warning in the Review; if Whisper fails, generation goes on with the previous mark.
+    - Measured on 33 songs with hand-made charts (those where CTC is kept, with the app's Whisper large-v3): the suspicious-line mark finds 80% of the wrong lines, against 66% without the mode, and precision rises from 0.44 to 0.50. Lines where both aligners agree (62% of them) are wrong only 2.6% of the time. Costs about 20 s more per song with a GPU, much more without one.
+  Fixed
+  - Cover, Background and Year from Another Song: iTunes, Deezer, MusicBrainz and Discogs took the first search result without checking it. A result is now accepted only when artist and title match the search (ignoring accents, punctuation, a leading "The" and credits such as "feat."). With no similar result the package goes on without that source: no cover is better than another song's cover. Idea from Karaokiza (MIT).
+  - Queue Files: saving and loading a queue only accepts .json files, and loading refuses files over 5 MB.
+  - Right Log in the "Sidecar Exited" Error: when the sidecar dies right at startup, the message pointed to a _process_output.log that was never created. It now points to the _server_session.log in the data folder, where the error is recorded.
+  Security
+  - Content Security Policy for the App Window: the window had CSP turned off. Scripts and styles now come only from the app itself, images and media only through Tauri's local file protocol, and connections only to the app itself (the LRCLIB search goes through the Rust side).
+  - CI: GitHub actions are now pinned by commit (the release workflow signs the automatic updates), and the frontend tests (npm test) now run in the Windows build.
+  Note
+  - v2.7.0 Numbers Revised: the suspicious-line improvement published in v2.7.0 (precision 0.42 → 0.55, recall 0.61 → 0.74) was measured with Whisper medium, which is not what the app uses. Re-measured with the app's large-v3 and the current code: recall rises from 0.58 to 0.66 with the same precision (0.45 → 0.44). The gain is real, but smaller. With Whisper large-v3 the app was also better overall than the old numbers showed: on the 55-song baseline, mean w_1s 0.838 → 0.878, median 0.881 → 0.923, collapses 3 → 1.
+ReleaseNotesUrl: https://github.com/walterfr/UltraStarKaraokeMaker/releases/tag/v2.8.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/walterfr/UltraStarKaraokeMaker/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

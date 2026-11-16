@@ -1,0 +1,74 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Niko1221.Strata
+PackageVersion: 0.2.15
+PackageLocale: en-US
+Publisher: strata
+PublisherUrl: https://github.com/Niko1221
+PublisherSupportUrl: https://github.com/Niko1221/Strata/issues
+PrivacyUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/SAFETY.md
+Author: Niko1221
+PackageName: Strata
+PackageUrl: https://github.com/Niko1221/Strata
+License: MIT
+LicenseUrl: https://github.com/Niko1221/Strata/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Niko1221 and the Strata contributors
+ShortDescription: Runs AI models on your own computer for chat, coding and image work.
+Description: |-
+  Strata runs powerful AI models on your own computer. Chat, code and work with images locally, with an OpenAI and Anthropic compatible API served on localhost. No account is needed.
+
+  The installer carries the app, the App Host, Node and Strata Control. On first start the app shows the inference engine for your graphics card with its size and one Download button, and then fetches the model you choose.
+Tags:
+- ai
+- large-language-model
+- llm
+- local-llm
+ReleaseNotes: |-
+  Strata 0.2.15: fixes in the app and the Terminal
+  The app and the Terminal are 0.2.15. Control is 0.1.61. The engines stay at 0.1.60: the same files as in 0.2.14, which the update feed downloads from the 0.2.14 release. The update feed is sequence 127.
+  The Intel Arc engine and the DGX Spark engine stay at 0.1.59; the DGX Spark keeps its update feed (sequence 123).
+  What changes for you
+  - Nothing to do. Update as usual (see Updating below). Your models, chats and settings stay.
+  - The engine is not downloaded again: strata update and the app replace the app and the Terminal only.
+  - There are no new settings.
+  Fixed
+  The app
+  - The app no longer starts llama.cpp's llama-server. In 0.2.14 a model added with "Use a local GGUF…" could load through a llama-server program found on the PC (in STRATA_LLAMA_SERVER, on PATH, or in /opt/homebrew/bin or /usr/local/bin), and the app loaded it again by itself at its next start. Strata now loads models only on its own engine. Such a model shows: "Strata runs models only on its own engine, so this model can't load here. Open Models and choose a model there, or use "Use a local GGUF…" for a file you already have." Checked on the packaged Linux app with a stand-in llama-server named in STRATA_LLAMA_SERVER and first on PATH: 0.2.14 started it after Load (1 start); 0.2.15 started it 0 times, at Load and at its next start.
+  - Drafting Off in the app no longer downloads the draft layer. In 0.2.14 the app's install asked for the MTP draft layer (about 5 GB) even with Drafting set to Off, on a Mac too. (Checked by the app's tests; not timed on a PC.)
+  - A Drafting choice made on the app's Models screen is kept after the app restarts. In 0.2.14 the app saved the choice at the start of a Load and wrote the model's settings back without it once the model was ready. After a restart the Models screen showed "Auto (recommended)", and a model set to Off loaded with the DFlash2 drafter. On a Linux PC (Tesla P100, IQ3_XXS) with no MTP draft layer on disk, each choice was made, loaded, and loaded again after an app restart: Off (no drafter, ready in 104 s after the restart), DFlash2 (113 s) and MTP (116 s); the Models screen showed the choice each time.
+  - The app's note "There is no internet connection, so the draft layer can't be downloaded now" appears only when the model starts without a drafter. In 0.2.14 it could stay on screen after a drafter had been found or downloaded.
+  - Qwen3.6 35B-A3B on a first run. On a clean Linux PC (2x RTX A6000, 77 MB/s), the first-run install of UD-Q4_K_XL downloaded 23.75 GB and finished in 320 to 340 s, and the bar never stood at 99%. In 0.2.14 this install stopped after 4 seconds.
+    - The download no longer stops with "this engine (99.0.0) does not run Qwen3.6-35B-A3B yet" while the engine is still being downloaded beside it, and a failed install no longer cancels the engine download.
+    - Pictures stay on: with no engine on the PC yet, the app now installs the engine first and then the model, so the picture reader (mmproj-F16.gguf, 899,283,584 B) is downloaded with it. On the same PC the install took 350 s, the model loaded with pictures on, and a picture of a red square was answered "It is a red square." (the picture reader started in 0.8 s, using 1,325 MiB of graphics memory).
+    - The progress bar no longer stops at 99% after the last file. It reaches 100% when every file is in. While the 22.85 GB model file is checked, the bar shows that check ("Preparing files…") instead of a download figure.
+    - The picture reader's part of the bar counts what has arrived. In 0.2.14 it showed 98 to 99% when 16 to 48% of it had arrived.
+    - When every file is in but the engine for the PC is not ready, the setup screen now says so: "Your model is downloaded, but the engine for this PC isn't ready yet. Open Settings > About to install it."
+  The Terminal
+  - A drafter you choose stays chosen. After a restart without a drafting word, a saved MTP or DFlash2 now holds, as Off already did in 0.2.14.1, and a saved Auto stays Auto. On Strix Halo and on a Tesla P100, all 8 starts below ran the drafter that was chosen (see the table under Updating).
+  - strata update --backend amd on a PC with an NVIDIA and an AMD card picked nothing ("The feed has no engine package for this PC"). It now reads the AMD card and picks its package (seen with an RTX 3080 and an RX 6700 XT). strata components engines no longer marks an installed engine for the PC's other card "not for this computer"; switching to it says "Engine is now in use. Models you start from now on run on it."
+  - When the engine's test start fails because Linux lacks a system library, the update now names it: "The engine needs the system library , and this computer does not have it.", followed by the install command for that Linux (apt, dnf or pacman). The engine's output is kept in .updates/logs/test-start-<version>.log. Before, the update said only "The engine program did not run on this computer". (See Known problems for the Linux AMD engines and libatomic.)
+  - The drafter lookup checks the feed sequence this PC has already accepted, so an older feed cannot hand it an older drafter. Without internet the lookup stays silent.
+  For people who build Strata
+  - The GitHub checks are green again on Windows and macOS: the CPU CMake preset builds with MSVC, the Python tool tests pass on a Windows checkout (line endings) and on a Mac, and the Windows config snapshot gets twice the time.
+  Known problems
+  The engines are the 0.2.14 files, so the engine items of the 0.2.14 notes still hold:
+  - Radeon on Linux (R9700): the driver pauses the card at times, for 115 to 810 ms in engine starts. The engine prints "the graphics driver paused the GPU for N ms". Count on 11-14: 22 such lines in 25 starts.
+  - Radeon R9700 on Linux: one engine start stalled on its first prompt and the driver reset the card (IQ3_S, 4 KiB memory pages). The engine stopped itself after 60 seconds without progress. It happened once on 11-14, and we have not found the cause.
+  - Radeon 780M on Linux (experimental opt-in): the GPU can reset on the first request after a start ("MES failed to respond", then "GPU reset"; it recovers). With 0.2.14's setting: 2 resets in 43 starts on the test PC.
+  - Linux, AMD Radeon RX 6000, RX 7900 and RX 9000 engines: they need the system library libatomic.so.1, which the engine's bundled librocm_sysdeps_numa.so.1 loads. On a Linux system without it (seen in a container), the engine does not start. 0.2.15's update names the missing library and the package to install, for example sudo apt install libatomic1. The next engine build bundles the library. The Strix Halo and NVIDIA engines do not need it.
+  - Mac: for a model whose list entry has no draft layer, the plan and the start say "Drafting: MTP" while nothing drafts. The fix comes in the next release.
+  - Peer mode (--peer-device, two cards) can fault on its first request, in about 4% of fresh starts.
+  - Radeon gfx1201: DFlash2 chosen by hand can stall on the prompt (11 of 50 engines on 0.2.11). Auto picks MTP on these cards.
+  - The first launch of a fresh install takes minutes while the model and its drafter are prepared: 221 s on Strix Halo with DFlash2, and 762 s when MTP is chosen there (it includes the 5.2 GB MTP download and about 11 minutes of preparing it). Later launches took 51 to 59 s on that PC.
+  - Not measured in 0.2.15: the app's in-app update on Windows and on the Mac (measured on Linux); a model on the Mac app and Terminal 0.2.15 (both are signed and notarised by Apple, and the app's self-test passed 12 of 12 steps); the Qwen3.6 first-run install through the app's window (it ran through the app's own install interface, on a Linux PC with no desktop).
+ReleaseNotesUrl: https://github.com/Niko1221/Strata/releases/tag/v0.2.15
+Documentations:
+- DocumentLabel: Installation guide
+  DocumentUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/INSTALL.md
+- DocumentLabel: Supported models
+  DocumentUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/MODELS.md
+- DocumentLabel: Troubleshooting
+  DocumentUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/TROUBLESHOOTING.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
