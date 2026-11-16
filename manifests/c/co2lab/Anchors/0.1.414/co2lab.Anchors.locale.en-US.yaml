@@ -1,0 +1,44 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: co2lab.Anchors
+PackageVersion: 0.1.414
+PackageLocale: en-US
+Publisher: co2lab
+PublisherUrl: https://github.com/co2-lab
+PublisherSupportUrl: https://github.com/co2-lab/anchors/issues
+PackageName: Anchors
+PackageUrl: https://github.com/co2-lab/anchors
+License: Elastic License 2.0
+LicenseUrl: https://github.com/co2-lab/anchors/blob/HEAD/LICENSE
+ShortDescription: Spec-first continuity framework for AI-assisted development
+Description: Anchors ties spec, feature and test together through a shared identity code, then confronts each artifact against the rules declared in anchors.yaml. It maps the project as a graph, propagates change from the anchor outward, and gates every step — so work guided by AI stays anchored to what was decided.
+Moniker: anchors
+Tags:
+- ai
+- ai-agents
+- cli
+- developer-tools
+- golang
+- spec-first
+ReleaseNotes: |-
+  v0.1.414
+  - New verdict level: awaiting a decision (⏸). It is a choice registered on purpose that a person decides and no agent can clear. Before, these were counted as divergences (⚠) and sat in the pile of what to fix: 12 of some 440 in MIF. Now they have their own level:
+    - a ⏸ column in the table of gates and a line in the legend;
+    - a list after the findings, with what each one does, the gate, the target and who decides;
+    - a line under the verdict counting them.
+    They are not counted as divergences. (GTENG-B38, CGPCH-B100)
+    - open-questions-resolved: an identified open decision is now ⏸ and names who decides, read from the third cell of its row in the Open Decisions table. It still becomes a decision issue. An item with no code and a spec with no section stay ⚠, because they have a mechanical way out. (OPQSP-B09)
+    - doctrine-realized: a doctrine whose unrealized rules are all @TBD is now ⏸. It is declared, so it informs and never bars. (DCTRN-B12)
+  - severity: { awaiting: block | inform | ignore }. The new level takes a state like the others, per gate or as the project default. When unset, it blocks on a blocking gate and informs on an informative one. (CNFGO-B80)
+    Behaviour change: on a gate declared blocking: true, an open decision now bars the commit. Before, the default severity of a divergence (inform) won over the gate's own mark, and an open decision did not bar. The default gate the framework generates is not blocking and is unaffected. To keep open decisions listed without barring:
+    - name: open-questions-resolved
+      blocking: true
+      severity:
+        awaiting: inform
+  Everything in the v0.1.351 notes still applies: run anchors migrate once, crossing format 8.
+  Changelog
+  - 0214a1e feat(gate): awaiting verdict (⏸) — a choice registered on purpose that a person decides
+ReleaseNotesUrl: https://github.com/co2-lab/anchors/releases/tag/v0.1.414
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
