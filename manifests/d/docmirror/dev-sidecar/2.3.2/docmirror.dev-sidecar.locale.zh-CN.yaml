@@ -1,0 +1,57 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: docmirror.dev-sidecar
+PackageVersion: 2.3.2
+PackageLocale: zh-CN
+Publisher: Greper
+PublisherUrl: https://github.com/docmirror
+PublisherSupportUrl: https://github.com/docmirror/dev-sidecar/issues
+PackageName: dev-sidecar
+PackageUrl: https://github.com/docmirror/dev-sidecar
+License: MPL-2.0
+LicenseUrl: https://github.com/docmirror/dev-sidecar/blob/HEAD/LICENSE
+Copyright: Copyright © 2020-2026 Greper, WangLiang
+ShortDescription: 开发者边车，命名取自 service-mesh 的 service-sidecar，意为为开发者打辅助的边车工具，通过本地代理的方式将 HTTPS 请求代理到一些国内的加速通道上
+Tags:
+- 代理
+- 网络
+ReleaseNotes: |-
+  一、更新内容：
+  【摘要】
+  v2.3.2 在 v2.3.1 的基础上补齐了界面侧的大块改动：新增「服务分组」「网页诊断」两个页面，底栏支持切换共享/个人远程配置的历史版本；安装器增加可选的「全新安装 / 完全卸载」。这一版也集中修了更新链路和网络解析上的问题：代理未开启时不再误报检查更新失败，更新检查更快也更省流量，ECH 失败的回退与 DNS 兜底都更稳，Steam 商店图片这类不支持 ECH 的站点不会再因握手失败而加载不出来。
+  【新特性】
+  - 服务分组：加速服务页新增「服务分组」页面，内置 391 个常用服务的分组开关，按分组批量启用/禁用，并保留配置文件里的注释与自定义顺序。名单支持通配符与正则，改动直接写回配置，不需要手工编辑 json5。
+  - 网页诊断：新增「网页诊断」页面，记录并展示经过代理的请求与错误，支持刷新、清空和一键导出日志，排查某个网站为什么加速失败时不用再去翻日志文件。
+  - 远程配置版本切换：底栏新增「共享远程版本」「个人远程版本」下拉，可在最新配置与历史快照之间切换；每次远程配置下载成功都会留一份快照，选错了可以随时切回。
+  - 全新安装 / 完全卸载（可选）：安装器新增「删除 dev-sidecar 数据目录」选项，卸载时也会询问是否一并删除 ~/.dev-sidecar。默认不勾选，需要彻底清理时再选。
+  【优化】
+  - 更新检查更快、更省流量：releases 接口只取最近 10 个版本，并开启 gzip，响应体从约 900KB 降到约 100KB；检查请求增加 15 秒超时，界面不会一直停在「检查更新中」。
+  - GitHub 限流有明确提示：未登录请求按出口 IP 限流时，会直接提示「GitHub API 请求频率超限，请稍后再试」，不再显示一段英文错误。
+  - 代理未开启时不再误报：检查更新不再硬编码 31181 端口，改为读取实际配置；代理未开启且没有外部代理时直接提示「代理未开启，请先在首页开启加速服务」，不再发请求、也不会尝试直连（issue #732）。
+  - ECH 回退更稳：ECH 握手失败后的原生 TLS 回退改用系统 DNS 重新解析，不再复用 ECH 专用 DNS 的 IP；服务端明确拒绝 ECH 时按域名拉黑 10 分钟，减少反复失败握手带来的卡顿。
+  - DNS 兜底：系统 DNS 失败（如 EAI_AGAIN）时，先用配置里的其它 DNS 提供方解析，全部失败才回退系统解析，减少必须手动刷新的情况。
+  - CA 环境变量修正：设置页的证书路径选项改为写入 REQUESTS_CA_BUNDLE 与 SSL_CERT_FILE 两个变量，Python requests 与 OpenSSL 系程序都能用上；旧版本写错的 REQUEST_CA_BUNDLE 会被自动清理。
+  - 依赖与构建：Electron 升级至 42，显式声明 webpack 依赖，修复 pnpm 下的安装链路；本地打包版本号继续使用工作区指纹。
+  【问题修复】
+  - 修复 Steam 商店图片加载失败：访问 store.st.dl.eccdnx.com 时报 SSLV3_ALERT_HANDSHAKE_FAILURE（alert 40）。原因是该域名命中了 ECH 名单，而 Steam CDN 不支持 ECH；现在 ECH 失败后的回退会重新解析，服务端拒绝 ECH 时也会延长负缓存。
+  - 修复检查更新报 ECONNREFUSED 127.0.0.1:31181（#732）：代理未开启时不再用硬编码端口发起请求。
+  - 修复配置里显式 null 的删除语义：高优先级配置中的 null 会正确删除低优先级对应项，不再被占位 null 压掉。
+  - 修复空响应 guard 误杀流式响应：流式接口不会再被提前中断。
+  - 修复 macOS 更新包下载与资源匹配：更新包命名与下载地址匹配正确，自动更新可以正常拿到安装包。
+  - 修复 Linux 全局快捷键抢占系统设置页（#701）：快捷键已被占用时跳过注册，不再反复弹出桌面快捷键设置。
+  - 修复打包后 extra/ 的 rootDir 解析（#728）。
+  - 修复更新就绪弹窗报 TypeError: e is not a function。
+  - 修复 Linux 上安装根证书说明缺失：补充火狐浏览器导入根证书的步骤（#720）。
+  - 修复 P2P 证书 identity 并发竞态：并发初始化时不再误报 private key not loaded。
+  二、安装前请仔细阅读安装说明
+  各平台安装说明
+  三、贡献者列表
+  非常感谢以下朋友们的贡献。
+  - @cute-omega
+  也感谢反馈 #732、#720、#701、#728 等问题并提供日志的朋友们。
+  四、Full Changelog
+  v2.3.1...v2.3.2
+ReleaseNotesUrl: https://github.com/docmirror/dev-sidecar/releases/tag/v2.3.2
+ManifestType: locale
+ManifestVersion: 1.12.0

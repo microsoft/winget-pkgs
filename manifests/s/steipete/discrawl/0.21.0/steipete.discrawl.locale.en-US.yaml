@@ -1,0 +1,84 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: steipete.discrawl
+PackageVersion: 0.21.0
+PackageLocale: en-US
+Publisher: Peter Steinberger
+PublisherUrl: https://steipete.me/
+PublisherSupportUrl: https://github.com/steipete/discrawl/issues
+Author: Peter Steinberger
+PackageName: discrawl
+PackageUrl: https://github.com/steipete/discrawl
+License: MIT
+LicenseUrl: https://github.com/openclaw/discrawl/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Peter Steinberger
+CopyrightUrl: https://github.com/steipete/discrawl/blob/HEAD/LICENSE
+ShortDescription: CLI for Discord with SQLite backend
+Description: |-
+  discrawl mirrors Discord guild data into local SQLite so you can search, inspect, and query server history without depending on Discord search.
+
+  It is a bot-token crawler. No user-token hacks. Data stays local.
+
+  What It Does
+  - discovers every guild the configured bot can access
+  - syncs channels, threads, members, and message history into SQLite
+  - maintains FTS5 search indexes for fast local text search
+  - builds an offline member directory from archived profile payloads
+  - extracts small text-like attachments into the local search index
+  - records structured user and role mentions for direct querying
+  - tails Gateway events for live updates, with periodic repair syncs
+  - exposes read-only SQL for ad hoc analysis
+  - keeps schema multi-guild ready while preserving a simple single-guild default UX
+Moniker: discrawl
+ReleaseNotes: |-
+  0.21.0 - 2026-11-15
+  Highlights: Preserve more Discord content and exact search filters, add resumable native delivery, and fix Go standard-library security issues.
+  - Preserve complete guild and archived-thread pagination, sync media-channel posts, and index forwarded snapshot text. Thanks @saariuslystoned.
+  - Keep channel-ID filters exact and author filters limited to authors across search modes, including users without display names. Thanks @saariuslystoned.
+  - Preserve bot-synced thread metadata during Desktop imports, retain role mentions, and index poll and embed fields from the cache. Thanks @saariuslystoned.
+  - Include retained direct forum threads in sync --include-stored-threads when live catalog discovery cannot list them, preserving individual history permission checks and bounded coverage receipts.
+  - Add delivery cycle and inactive Linux timer templates for five-minute
+    delivery. Resume pending bytes before capturing new changes, stop visibly on
+    failure, and reuse the qualified outbox without starting upstream acquisition.
+  - Add delivery prepare-seed to create a private whole-guild report snapshot,
+    sorted ownership stream and matching native baseline in one read transaction.
+    Existing collectors continue running; no remote binding or schedule is enabled.
+  - Add explicit delivery init, capture, and drain commands for qualified
+    native report changes. Resume persisted batches after failure without loading
+    collector configuration, migrating the source, or enabling a schedule.
+  - Add inactive Linux service and five-minute timer templates for bounded
+    latest-only Discord acquisition, reusing native supervision and source locks
+    without requesting a full-history rebuild or changing delivery schedules.
+  - Reconcile channel checkpoint scope changes using complete native evidence
+    and bounded outbox ownership ranges. Withdraw absent or excluded checkpoints
+    without rescanning messages; retain the hold for unresolved guild dependencies.
+  - Capture complete, bounded checkpoint dependencies for changed channels in
+    the native read snapshot, including checkpoints retained after channel deletion.
+    This prepares reconciliation without scanning messages or enabling delivery.
+  - Add bounded delivery of the pending native change capture through the shared
+    HTTP client. Failed sends or receipt writes stop without advancing the source
+    baseline; the next invocation replays persisted bytes. No delivery job is enabled.
+  - Add a private SQLite delivery outbox that verifies the qualified seed's owned
+    keys, persists exact bounded change batches, and applies ownership/cursor
+    updates only with the final receipt. Interrupted delivery reuses stored bytes;
+    no sender or schedule is enabled.
+  - Add private service projection for native report changes, with whole-guild
+    scope, baseline-bound ownership and same-snapshot checkpoint evidence. Scope
+    exits retract previously delivered rows; catalog changes that affect dependent
+    rows require reconciliation before advancing. Reuse Crawlkit's shared change
+    protocol without enabling a delivery job.
+  - Add bounded, read-only native report capture from the existing change feed,
+    preserving typed values and removals at one snapshot head. This local API
+    validates source identity and cursor continuity; delivery and source-scope
+    admission remain separate.
+  - Add change-feed contract 3 for sync_state, so coverage proofs and checkpoint
+    edits/deletions can reach backend readers incrementally. Existing contract
+    table lists and generations remain unchanged; older checkpoint history still
+    requires a consistent baseline.
+  - Use Go 1.27.4 for the standard-library fix for GO-2026-6859; retain the Go 1.27.0 minimum.
+  - Refresh provider SDKs, search helpers, and Go analysis dependencies; update SQLite/libc together and align optional helper builds with Go 1.27.4 while retaining their Go minimums and the crypto security pin.
+  - Match CI's buildable-package security scan in make lint, excluding standalone fixtures and nested modules.
+ReleaseNotesUrl: https://github.com/openclaw/discrawl/releases/tag/v0.21.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

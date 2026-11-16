@@ -1,0 +1,75 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: SUSE.RancherDesktop.2
+PackageVersion: 2.0.0-alpha.2
+PackageLocale: en-US
+Publisher: SUSE
+PublisherUrl: https://github.com/rancher-sandbox/rancher-desktop
+PublisherSupportUrl: https://github.com/rancher-sandbox/rancher-desktop/issues
+Author: rancher-sandbox
+PackageName: Rancher Desktop
+PackageUrl: https://rancherdesktop.io/
+License: Apache-2.0
+LicenseUrl: https://github.com/rancher-sandbox/rancher-desktop-2/blob/HEAD/LICENSE
+CopyrightUrl: https://github.com/rancher-sandbox/rancher-desktop/blob/main/LICENSE
+ShortDescription: Kubernetes and container management to the desktop.
+Description: |-
+  Rancher Desktop is an open-source project to bring Kubernetes and container management to the
+  desktop.
+
+  Windows, macOS and Linux versions of Rancher Desktop are available for download, though do note that
+  the Linux version is considered a tech preview.
+Moniker: rancher-desktop
+Tags:
+- k3s
+- nerdctl
+- rancher
+ReleaseNotes: |-
+  This is the 2.0.0-alpha.2 release of Rancher Desktop 2.0, the second public preview of a ground-up rewrite of Rancher Desktop for macOS, Windows, and Linux.
+  This is still an early alpha not meant for production use. There is no upgrade path between previews, so run rdd svc delete to remove the Alpha 1 backend before you install this one; installing replaces the old app in place. It can be installed alongside Rancher Desktop 1.x without touching that version. For what Rancher Desktop 2.0 is, how it differs, and how to try it, start with these blog posts:
+  - Welcome to Rancher Desktop 2.0
+  - Installing and Running Rancher Desktop 2.0
+  ...and subscribe to the RSS feed for updates.
+  Installers
+  The full application, the GUI, and a set of bundled command-line tools are available here:
+  - Windows
+  - macOS x86_64
+  - macOS aarch64
+  - Linux: install from the RPM or DEB repositories or run the AppImage (see the installation post)
+  If you only want the backend, download the stand-alone rdd binary for your platform from the Assets below and run rdd start. The installation post walks through the steps to get the backend-only mode running.
+  What's new since Alpha 1
+  - The Preferences dialog is back. Alpha 1 had no settings screen, so everything went through the command line. The dialog has three sections: Application, to turn automatic update checks on or off; Virtual Machine, to set CPUs and memory; and Kubernetes, to enable it and pick a version.
+  - Choose your Kubernetes version. The daemon now publishes the k3s versions it supports, so the GUI and the command line both offer the same list. This build includes k3s 1.32 through 1.35, plus the stable and latest channel aliases. Enable Kubernetes without picking a version and you get stable, currently 1.34.6.
+  - Set the VM's CPUs and memory. Change them from the Virtual Machine tab, or set virtualMachine.cpus and virtualMachine.memory on the App resource. The daemon rejects anything below 1 CPU or 2 GiB, or above what the host has.
+  - The app reports an incompatible daemon. Pointed at a daemon it doesn't understand, the GUI used to sit on the starting screen forever. Now it shows an error.
+  - Your ~/.kube/config stays intact. Two writers could collide, tearing that file into invalid YAML or reading it empty mid-rewrite and silently dropping the clusters you use with other tools. Every write now goes through one lock and replaces the file atomically.
+  - Linux: Rancher Desktop 2.0 installs beside 1.x. The RPM and DEB claimed the same file names as Rancher Desktop 1.x, so installing both failed on file conflicts. The 2.0 launcher we shipped also ran the 1.x binary and looked for its icon. Both packages now name the executable and desktop files after the 2.0 package.
+  - Linux: the chrome-sandbox helper ships correctly. The RPM left it out and the DEB installed it without the setuid bit. Both packages now install it with setuid root.
+  - Windows: host networking stops with the VM. The host-switch network bridge ran inside the long-lived daemon, so its host ports, vsock listeners, and gvisor network outlived the VM and needed explicit teardown. It now runs in the per-VM host agent and the OS reclaims all of it when that process exits. If the bridge fails, the host agent retries it and leaves the VM running.
+  - Preview builds have a striped icon. The app icon and the selected item in the left-hand navigation carry diagonal stripes, so you can tell an alpha from a release at a glance.
+  What's in this alpha
+  - One shared backend: rdd (the Rancher Desktop Daemon), across macOS, Windows, and Linux, which is built on Lima.
+  - Run it with or without the GUI. The daemon exposes a Kubernetes API that your existing tools can drive.
+  - Build and run containers with the Docker (moby) engine.
+  - Optional Kubernetes (k3s 1.32 through 1.35) that can be enabled from Preferences or the command line.
+  - A Preferences dialog for automatic updates, VM hardware, and Kubernetes.
+  - A built-in dashboard for containers, images, and volumes.
+  - The guest VM runs openSUSE Leap.
+  Known limitations
+  - On Windows, WSL2 ignores the CPU and memory settings in the Virtual Machine preferences tab. Set them in .wslconfig instead.
+  - moby is the only container engine.
+  - Preferences covers only automatic updates, VM hardware, and Kubernetes. Other settings you know from Rancher Desktop 1.x, such as WSL integrations and allowed images, are not available yet.
+  - The list of Kubernetes versions ships inside the build, so k3s releases newer than this preview show up only in the next one.
+  - Previews have no upgrade path, so each new build starts from a clean slate.
+  - This is alpha software. Expect rough edges, and please tell us what breaks.
+  Connect with the developers
+  - GitHub Discussions for questions and feedback, including comments on the blog posts
+  - Issue queue for bug reports and feature requests
+  - Rancher Users Slack in the #rancher-desktop channel
+ReleaseNotesUrl: https://github.com/rancher-sandbox/rancher-desktop-2/releases/tag/v2.0.0-alpha.2
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/rancher-sandbox/rancher-desktop/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

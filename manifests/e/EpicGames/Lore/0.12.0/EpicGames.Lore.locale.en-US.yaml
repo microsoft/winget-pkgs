@@ -1,0 +1,44 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: EpicGames.Lore
+PackageVersion: 0.12.0
+PackageLocale: en-US
+Publisher: Epic Games
+PublisherUrl: https://lore.org/
+PublisherSupportUrl: https://github.com/EpicGames/lore/issues
+PrivacyUrl: https://legal.epicgames.com/epicgames/privacy-policy
+Author: Epic Games, Inc.
+PackageName: Lore
+PackageUrl: https://lore.org/
+License: MIT
+LicenseUrl: https://github.com/EpicGames/lore/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Epic Games, Inc.
+CopyrightUrl: https://legal.epicgames.com/epicgames/tos
+ShortDescription: Next-Generation Open Source Version Control
+Description: Lore is an open source version control system designed for unprecedented scalability of both data and teams. It is optimized for projects that combine code with large binary assets, including games and entertainment, and caters for the needs of developers and artists alike.
+Tags:
+- vcs
+ReleaseNotes: |-
+  Changes since v0.11.0.
+  Features
+  - lore service run runs the Lore service in the current process until it stops (via lore service stop or lore::service::quit); Rust only, no C API equivalent
+  - Expired OIDC access tokens are renewed with the refresh token (RFC 6749 §6) on the next operation, without a new lore auth login
+  - lore auth logout (C API: lore_auth_logout) revokes the OIDC refresh token at the provider when it advertises a revocation endpoint (RFC 7009); a failed revocation fails the logout, after the local login is removed
+  Fixes & Improvements
+  -  --dry-run is now side-effect free across the CLI: no writes to the working tree, .lore config, branch/revision/staged/layer state, local or shared store, token store, settings, or the remote. Affected commands included file reset, branch create|reset|archive, revision amend, unstage, layer add, link add, repository create|clone|gc, shared-store create, file obliterate, commit, branch merge into and auth login|logout|clear
+  - repository clone --force --dry-run, clone --dry-run --vfs swfs and clone --dry-run --use-shared-store (when it would create the store) now fail instead of acting
+  - repository verify --heal --dry-run reports without healing
+  - Fixed a cross-process deadlock when several processes run commands on the same repository or shared store (e.g. concurrent lore history). All processes using the store must run this version
+  - lore repository verify fails on unreadable parts of the local store instead of skipping them, and heals fragments moved by a concurrent flush
+  - lore stage of several paths under a directory missing from disk stages deletes for only those paths, not the whole directory
+  - lore stage --case keep with a differently-cased directory stages files as modified under the repository's case, not as deleted, on case-sensitive file systems
+  - lore branch switch <branch> <revision> resolves a bare revision (1234, @1234) on <branch>, not the current branch
+  - TLS: reject certificates chained through compromised eMudhra intermediates (RUSTSEC-2026-0382) and drop the emSign ECC Root CA - G3, Root CA - C1 and ECC Root CA - C3 built-in roots
+  - TLS: abort on TLS 1.3 handshake messages at the wrong encryption level (RUSTSEC-2026-0285), prevent forced downgrade to classical key exchange (RUSTSEC-2026-0349), and redact secrets from client session debug output (RUSTSEC-2026-0346)
+ReleaseNotesUrl: https://github.com/EpicGames/lore/releases/tag/v0.12.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://epicgames.github.io/lore/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

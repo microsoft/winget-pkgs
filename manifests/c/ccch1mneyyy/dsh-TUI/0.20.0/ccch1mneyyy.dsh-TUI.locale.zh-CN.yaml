@@ -1,0 +1,70 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: ccch1mneyyy.dsh-TUI
+PackageVersion: 0.20.0
+PackageLocale: zh-CN
+ShortDescription: DeepSeek Harness 官方首推的终端界面：高性能、低占用。
+Description: dsh-TUI 是 DeepSeek Harness（DSH）的交互式终端界面，支持全屏会话、像素鲸鱼伴侣、流畅鼠标交互和低占用，并提供供脚本驱动的独立 headless 命令 dst。
+Tags:
+- deepseek
+- deepseek-harness
+- dsh
+- harness
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  自 v0.19.0 以来，dsh-TUI 跟上 DSH 0.2.2-rc.2 验证线（同时保留对 0.2.2-rc.1 及更早验证线的兼容），
+  把系统通知扩展到等待授权、等待提问与计划评审，让单栏 Edit/Write diff 按 git hunk 呈现，并修好一批
+  窄终端重绘、局部压缩摘要与账号通知生命周期问题。
+  亮点
+  - 适配 DSH 0.2.2-rc.2 — 主适配线前移到 0.2.2-rc.2，peer 范围同时保留 0.2.2-rc.1、0.2.1-rc.5 等旧验证线，停在上一验证线的用户也能直接装这版。rc.2 上 Agent Teams 改由 dsh-base 内置、按会话开关，成员改用具名子代理；账号通知改用新的通知 API（服务器文案卡片、展示/关闭回执、到期与语言刷新）；Search/Fetch 设置拆成独立字段；子代理目录升到 v3（每个子代理带名字与描述）。两代宿主按形状探测而不是按版本门，旧宿主继续走原有 bundle、旧设置表单与旧 bonus API。(#1951、#1959 by @Lucas2011wastaken)
+  - 通知覆盖所有等待状态 — 以前只有任务完成会发系统通知；现在等待工具授权、等待回答的提问与计划评审也会提醒，同一个「通知」开关管四类通知（/settings → 对话：taskNotifications 默认 unfocused 仅失焦，可选 always / off）。审批正文含会话名、工具名与理由；提问与计划评审只放首个问题的标题与问题，不含选项、详情或整份计划。这些正文来自模型或宿主，已去 ANSI、折叠空白并限长，但不承诺脱敏。后台会话与子代理的审批、提问只进面板不提醒；计划评审是唯一不让位给外部通知插件的一类。(#1929、#1930、#1931 by @Lucas2011wastaken)
+  - 点击通知回到发起它的窗格 — Windows Terminal 上开启 jumpBack（/settings → 对话，默认关闭）后，完成、审批、提问与计划评审的 toast 都带「跳回」目标：发送前先做一次只读探测，恰好命中一个窗格或标签标题时才承诺跳回；点击时再核验五项（同一窗格、获得键盘焦点、标题仍含标记、窗口在前台、未最小化），任一步不成立就不动作。无法核验的布局（非 Windows Terminal、suppressApplicationTitle、目标在未选中标签等）发普通 toast。开启后每条 toast 约晚半秒，第一条可能等 helper 编译一次。(#1675 by @baobaolaodie；审批/提问/计划评审的接线见 #1929、#1930、#1931)
+  - 单栏 diff 只显示变更块 — 单栏（unified）的 Edit/Write diff 不再把旧/新全文各铺一遍，而是像 git diff 一样只显示变更块与前后各 3 行上下文；行号只来自后端显式给出的真实偏移，没有偏移时不输出 @@ 头、多个 hunk 之间用 ⋯ 分隔。宽终端（≥110 列）的默认 auto 仍走双栏，观感不变。(#1957 by @Lucas2011wastaken)
+  需要留意的行为变化
+  - Agent Teams 在 0.2.2-rc.2 上的开关方式 — /team on / /team off [force] 按根会话保存选择，跨重启保持；关闭不停止子代理也不删任务，仍有子代理运行时 off 会先提示。旧宿主仍是 /plugin enable|disable @deepseek-ai/dsh-experimental-agent-team-profile，/team 只报告并给出提示。rc.2 移除了 spawn_teammate 与 Team 版控制工具，统一用具名 subagent / subagent_fork / send_message / interrupt_agent / list_agents，旧日志里的旧工具调用仍可读；历史团队会话在 rc.2 投影里没有成员快照，面板退回任务板/子代理视图，恢复出来且没有 live runtime owner 的子会话不再显示 team。
+  - 共享会话库要一起升级 — 0.2.2-rc.2 写下的子代理 catalog 是 v3，旧版 DSH 打不开；多个进程共用同一会话库时，把会加载这些会话的 DSH 都升到 0.2.2 线再用。
+  - 通知让位与投递边界 — 外部 DSH 通知插件已启用且 active 时，任务完成、审批与提问让位；计划评审不让位（外部插件只映射审批与普通提问）。原生 toast 排队期间会复检：开关关闭、会话已切换或请求已处理就不再弹出。jumpBack 依赖原生 toast 通道（notificationMethod = windows，本地 Windows 的 auto 就选它），真机只在 Windows Terminal 1.24 验证过，更高版本与其他终端按普通 toast 降级。
+  - 单栏 diff 的行号与超大改动 — 后端没有给出真实位置时只显示变更块、不显示行号；整份文件改写过大时回退成旧的全文行对照。双栏 split 视图与 Codex 的 patch 卡保持原样。
+  - DSH 0.2.2 要求 Node >=24.9 — 本包自身仍声明 ^22.19 || >=24；用更旧的 Node 运行 0.2.2 宿主属于上游未支持组合，升级前请先确认 node -v。
+  修复
+  - 渲染与重绘：inline 主屏在 resize 与空闲重锚定后短帧不再停在终端中部，帧尾贴底（#1936 by @Lucas2011wastaken）；高于视口的帧收缩后不再在转录与状态栏之间留出空白带（#1924 by @MomentDerek）；分数宽度下 truncate 文本按 1 行测量，窄终端底栏不再凭空多出 6 行空白（#1922 by @MomentDerek）。
+  - 压缩摘要：Live Compact 的 spine-checkpoint 局部摘要在实时、回放与会话树中可见，且不会误套全量压缩的上下文组成重置；partial 保留启发式组成，不把摘要大小当净增量（#1943 by @T-Auto）。插件侧的联合验收在插件仓跟进。
+  - 账号通知与归属：关闭卡片会栅栏掉关闭前发起的在途轮询，迟到响应不会复活卡片或重复上报 displayed；卡片实际写屏完成后才上报展示，语言变化更新原卡片；子代理与团队按 live owner 归属，恢复出来的 detached 会话不回退猜父队；未 pin 的 Search/Fetch 密钥跟随实际读取的路由；旧宿主与外部内核保持原有 UA 归属（#1959 by @Lucas2011wastaken）。
+  - 通知投递：排队中的 toast 在开关关闭、会话切换或审批/提问/计划评审已处理时取消；关闭后的迟到响应不重新弹卡（#1929、#1930、#1931）。
+  兼容与升级
+  - DSH 主适配线：0.2.2-rc.2；0.2.2-rc.1、0.2.1-rc.5、0.2.1-rc.4、0.2.1-rc.3、0.2.1-rc.2、0.2.0-rc.2、0.2.0-rc.1、0.1.7-rc.2、0.1.7-rc.1 以及更早的验证线仍在契约内，契约外版本打漂移警告。
+  - npm 上 latest 仍是 0.2.2-rc.1：0.2.2-rc.2 走 next 标签。程序内 /update 会在目标 TUI 的 peer 范围内选已发布的最高版本，因此会把 dsh 引擎对齐到 0.2.2-rc.2。
+  - 从 v0.19.0 升级：程序内 /update（本版会一并把 dsh 引擎对齐到 0.2.2-rc.2、并对齐全局启动器），或
+    npm install -g @deepseek-ai/dsh @deepseek-harness-tui/dsh-tui@0.20.0。
+  - 已经升到 DSH 0.2.2-rc.2、v0.19.0 的 TUI 打不开的用户：TUI 起不来时用不了程序内 /update，请直接执行上面的 npm 命令升级到 v0.20.0。
+  - dst 自动化 CLI 的验证线未同步前移：仍验证到 0.2.1-rc.5；在 0.2.2 宿主上可用 dst dsh 原样转交官方参数。
+  - 嫡系插件清单：随包的 tui-profile/feed/first-party.json 钉到 0.20.0。
+  - Windows 离线安装器：引擎验证范围随契约前移，新装或升级到 0.2.2-rc.2；已装更高的 RC 会降回验证线。
+  安装
+  npm install -g @deepseek-ai/dsh @deepseek-harness-tui/dsh-tui@0.20.0
+  偏好一键安装的用户可下载 Release 中的 dsh-tui-setup.zip（解压后 macOS / Linux 运行 sh install.sh，Windows 双击 install.bat）
+  或 Windows 离线安装程序 dsh-tui-setup-win-x64.exe；便携包解压即用。
+  What's Changed
+  - feat(notifications): jump back to the exact pane that raised a completion toast by @baobaolaodie in https://github.com/ccch1mneyyy/dsh-TUI/pull/1675
+  - feat(notifications): announce waiting approvals through the existing notifier by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1929
+  - feat(notifications): announce waiting questions through the same notifier by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1930
+  - feat(notifications): announce plan reviews under their own title and keep them in-house by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1931
+  - fix(ink): measure truncating text at a fractional width as one row by @MomentDerek in https://github.com/ccch1mneyyy/dsh-TUI/pull/1922
+  - fix(ink): keep the shrink repaint flush under the scrollback by @MomentDerek in https://github.com/ccch1mneyyy/dsh-TUI/pull/1924
+  - fix(render): keep the composer anchored at narrow widths and after resize (#1919) by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1936
+  - fix(compaction): show partial checkpoint summaries（显示局部检查点摘要） by @T-Auto in https://github.com/ccch1mneyyy/dsh-TUI/pull/1943
+  - chore(upstream): adapt to dsh 0.2.2-rc.2 by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1951
+  - fix(diff): render unified Edit/Write diffs as git hunks (#1777) by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1957
+  - fix(upstream): complete rc.2 account notices and team attribution by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1959
+  - chore(release): prepare v0.20.0 by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/1964
+  Full Changelog: https://github.com/ccch1mneyyy/dsh-TUI/compare/v0.19.0...v0.20.0
+ManifestType: locale
+ManifestVersion: 1.28.0

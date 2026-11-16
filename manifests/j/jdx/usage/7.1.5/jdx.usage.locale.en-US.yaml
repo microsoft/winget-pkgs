@@ -1,0 +1,48 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: jdx.usage
+PackageVersion: 7.1.5
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://jdx.dev/
+PublisherSupportUrl: https://github.com/jdx/usage/issues
+Author: Jeff Dickey
+PackageName: usage
+PackageUrl: https://usage.jdx.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+ShortDescription: A specification for CLIs
+Description: |-
+  Usage is a spec and CLI for defining CLI tools. Arguments, flags, environment variables, and config files can all be defined in a Usage spec. It can be thought of like OpenAPI (swagger) for CLIs. Here are some potential reasons for defining your CLI with a Usage spec:
+
+  - Generate autocompletion scripts
+  - Generate markdown documentation
+  - Generate man pages
+  - Generate type-safe SDK client libraries for TypeScript, Python, and Rust
+  - Use an advanced arg parser in any language
+  - Scaffold one spec into different CLI frameworks-even different languages
+  - [coming soon] Host your CLI documentation on usage.sh
+Moniker: usage
+Tags:
+- cli
+- spec
+ReleaseNotes: |-
+  Fixed
+  - (spec) A relationship property such as conflicts="--b --c" is now rejected when the spec loads (#1599, @jdx). Previously, --b --c was read as one selector that matched no flag, so --a --b and --a --c both parsed without error. Repeating the property (conflicts="--b" conflicts="--c") also loaded, but only the last value was kept. Both forms now produce an error:
+    conflicts takes one flag or argument per property, but "--b --c" has several; write them as a child node instead: conflicts "--a" "--b"
+    conflicts is given more than once; the second would replace the first, so write several as a child node instead: conflicts "--a" "--b"
+    This check applies to conflicts, overrides, requires, required_if, required_unless and required_unless_all on flags, and to the same properties except overrides on positional args. A value is refused only if it has more than one word and at least one starts with a dash. Values like conflicts="input file" still refer to a positional named [input file].
+    Upgrading: These specs were never enforcing their relationships, so they now need to be rewritten in the child-node form. That form already worked and has not changed:
+    flag "--a" {
+      conflicts "--b" "--c"
+    }
+    The flag reference (docs/spec/reference/flag.md) now covers the child-node form and these load-time errors.
+ReleaseNotesUrl: https://github.com/jdx/usage/releases/tag/v7.1.5
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://usage.jdx.dev/cli/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

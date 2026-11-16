@@ -1,0 +1,69 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: QuantumNous.NewAPI
+PackageVersion: 1.0.0-rc.50
+PackageLocale: zh-CN
+Publisher: Quantum Nous
+PublisherUrl: https://www.newapi.ai/
+PublisherSupportUrl: https://www.newapi.ai/support/
+Author: 锟腾科技（杭州）有限公司
+PackageName: New API
+PackageUrl: https://www.newapi.ai/
+License: AGPL-3.0
+LicenseUrl: https://github.com/QuantumNous/new-api/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Quantum Nous. All Rights Reserved.
+ShortDescription: 新一代大模型网关与 AI 资产管理系统
+Description: New API 是一个新一代大模型网关与 AI 资产管理系统，基于 One API 进行二次开发。该项目旨在提供一个统一的接口来管理和使用各种 AI 模型服务，包括但不限于 OpenAI、Anthropic、Gemini和 Midjourney 等。
+Tags:
+- anthropic-api
+- openai-api
+- openai-response
+- 人工智能
+- 大语言模型
+- 聊天机器人
+ReleaseNotes: |-
+  Important
+  新增提供商插件、请求处理插件和社区插件市场。提供商插件把一个上游厂商接成一种渠道；请求处理插件在请求和回复上运行，可以按全局、分组、渠道和模型生效。
+  原敏感词设置在首次启动时迁成一个「请求过滤」实例，旧设置项会被删除。命中时返回 400 request_rejected，原来是 500 sensitive_words_detected。回滚到旧版本后敏感词检查是关闭的，需要重新填写。
+  多节点部署：设置、权限、插件、渠道等手动改动几秒内同步到所有节点。CHANNEL_UPDATE_FREQUENCY 的定时余额更新改为只在主节点运行。超过 30 天的已结束系统任务会被自动删除，需要保留更久的请先在 系统设置 → 运维 → 日志维护 里改保留天数。
+  Vertex AI 插件 1.3.1 起，视频请求发到渠道填的部署地区，不再固定发到 global。升级前请确认所用的视频模型在该地区可用。
+  Added provider plugins, request processing plugins and a community plugin marketplace. A provider plugin turns an upstream vendor into a channel type. A request processing plugin runs on requests and replies, scoped globally or to groups, channels and models.
+  On first start, the old sensitive word setting becomes a Request filter instance and the old setting is removed. A match now returns 400 request_rejected instead of 500 sensitive_words_detected. After rolling back to an older version, sensitive word checks are off until you fill them in again.
+  Multi-node deployments: manual changes to settings, permissions, plugins, channels and more reach every node within seconds. Scheduled balance updates from CHANNEL_UPDATE_FREQUENCY now run on the master node only. Finished system tasks older than 30 days are deleted automatically. To keep them longer, change the retention days in System Settings → Operations → Log Maintenance first.
+  From Vertex AI plugin 1.3.1, video requests go to the channel's deployment region instead of always to global. Before upgrading, check that the video models you use are available in that region.
+  中文
+  - 插件：提供商插件可以接入路由、协议转换、模型列表、需要登录的上游（登录与令牌刷新）、余额查询和定时维护。请求处理插件可以试运行，每处修改记入使用日志；内置请求过滤、请求脱敏、全局参数覆盖、自动推理强度、图片压缩和内容审核。插件市场新增社区来源，官方和社区插件都能按 8 位插件码安装，安装时显示使用说明和更新日志；插件下载站点可以选主站或备用站。
+  - 多节点：设置、权限、插件、登录方式、模型、订阅套餐和渠道的手动改动在各节点几秒内生效，系统信息页能看到同步进度和加载失败的节点。系统任务记录每天自动清理，默认保留 30 天。「更新全部余额」改为后台任务，列表随进度刷新。
+  - 计费：图片张数按最终发给上游的请求计算，包括 SiliconFlow 的 batch_size、Imagen 的 sampleCount（不填按 4 张）和 Replicate 的 num_outputs。插件或渠道覆盖改了张数，预扣也跟着变。
+  - 支付：易支付的签名方式可以选 MD5 或 RSA。
+  - 其他：新增 HOST 环境变量设置监听地址。DeepSeek 渠道的 Chat Completions 请求会把 developer 角色转成 system。修复了透传请求重试时，新渠道可能收到残缺请求体的问题。修复了切换渠道后，模型重定向同步把上一个渠道的模型名加进当前渠道的问题。修复了用输入法输入风险确认文字后按钮仍不可用的问题。登录页的协议同意文字现在会翻译。插件运行时升级到 MoeForge moejs v0.1.0。
+  English
+  - Plugins: Provider plugins can bring routes, protocol conversion, model lists, upstreams that need sign-in (login and token refresh), balance queries and scheduled maintenance. Request processing plugins can be dry-run, and every change they make is recorded in the usage log. Built-in ones cover request filtering, request redaction, global parameter overrides, automatic reasoning effort, image compression and content moderation. The marketplace adds a community source. Official and community plugins can be installed by their 8-digit plugin code, and the install dialog shows the usage guide and changelog. Administrators choose the main or backup download site.
+  - Multi-node: Manual changes to settings, permissions, plugins, login methods, models, subscription plans and channels take effect on every node within seconds. The system info page shows sync progress and nodes that failed to load a change. System task records are cleaned up daily and kept for 30 days by default. Update All Balances runs as a background task, and the list refreshes as it progresses.
+  - Billing: Image counts come from the final request sent upstream, including SiliconFlow batch_size, Imagen sampleCount (4 when omitted) and Replicate num_outputs. When a plugin or channel override changes the count, the pre-charge follows it.
+  - Payment: Epay can sign with MD5 or RSA, chosen in its Signature type setting.
+  - Also: Added the HOST environment variable to set the listen address. DeepSeek channels map the developer role to system in Chat Completions requests. Fixed the problem of a retried pass-through request sending an incomplete body to the next channel. Fixed the problem of model redirect sync adding the previous channel's model names after switching channels. Fixed the problem of the risk confirmation button staying disabled after typing the confirmation text with an input method. The legal consent text on sign-in pages is now translated. The plugin runtime is now MoeForge moejs v0.1.0.
+
+  What's Changed
+  - fix(web): translate legal consent text on auth pages by @seefs001 in https://github.com/QuantumNous/new-api/pull/8254
+  - feat: support HOST env to set the listen address by @feitianbubu in https://github.com/QuantumNous/new-api/pull/8269
+  - fix(deepseek): map developer role to system for chat completions by @seefs001 in https://github.com/QuantumNous/new-api/pull/8287
+  - feat(payment): 易支付支持 RSA 签名方式 by @Calcium-Ion in https://github.com/QuantumNous/new-api/pull/8291
+  - fix(channels): 切换渠道时重置模型重定向同步状态 by @scarletkc in https://github.com/QuantumNous/new-api/pull/8304
+  - perf: 升级 MoeForge moejs/moego，请求体按需流式读取 by @Calcium-Ion in https://github.com/QuantumNous/new-api/pull/8311
+  - feat(plugins): add provider plugins, request plugins and a community marketplace by @Calcium-Ion in https://github.com/QuantumNous/new-api/pull/8271
+  - chore(plugins): release vertex-ai 1.3.1 by @Calcium-Ion in https://github.com/QuantumNous/new-api/pull/8313
+  New Contributors
+  - @scarletkc made their first contribution in https://github.com/QuantumNous/new-api/pull/8304
+  Full Changelog: https://github.com/QuantumNous/new-api/compare/v1.0.0-rc.49...v1.0.0-rc.50
+ReleaseNotesUrl: https://github.com/QuantumNous/new-api/releases/tag/v1.0.0-rc.50
+Documentations:
+- DocumentLabel: 使用指南
+  DocumentUrl: https://www.newapi.ai/guide/
+- DocumentLabel: 维基百科
+  DocumentUrl: https://www.newapi.ai/wiki/
+- DocumentLabel: 接口文档
+  DocumentUrl: https://www.newapi.ai/api/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

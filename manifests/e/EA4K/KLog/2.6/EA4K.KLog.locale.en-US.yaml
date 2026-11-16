@@ -1,0 +1,52 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: EA4K.KLog
+PackageVersion: '2.6'
+PackageLocale: en-US
+Publisher: EA4K
+PublisherUrl: https://github.com/ea4k
+PublisherSupportUrl: https://github.com/ea4k/klog/issues
+Author: EA4K
+PackageName: KLog
+PackageUrl: https://github.com/ea4k/klog
+License: GPL-3.0
+LicenseUrl: https://github.com/ea4k/klog/blob/master/COPYING
+Copyright: Copyright (c) EA4K
+ShortDescription: KLog is a multiplatform free hamradio logger. It runs natively on Linux, macOS and Windows.
+Tags:
+- amateur-radio
+- dxcluster
+- free
+- gplv3
+- hamradio
+- logger
+- lotw
+- qsl
+- radiomateur
+ReleaseNotes: |-
+  Aug 2026 - 2.6
+  - New feature: DX Assistant, a tab in the upper-right panel showing a live, prioritised list of DXCluster & WSJT-X spots scored against your own log, with a Priority column, per-session spot hiding, band/spotter-continent filters, configurable max age and max number of spots (Closes #1009, #1010, #1011, #1012, #1013, #1014, #1015, #1016, #1017, #1018)
+  - New feature: Every station WSJT-X decodes feeds the DX Assistant, so the band being monitored is analysed in real time without waiting for the DXCluster to report it. The spots carry the SNR and whether the station is calling CQ, and KLog asks WSJT-X for the decodes it is already showing as soon as it starts listening (Closes #1053)
+  - Enhancement: The UDP server can join a multicast group, so it can share the WSJT-X datagrams with other programs like JTAlert or GridTracker. The group is set in Setup, in the UDP page.
+  - New feature: KLog can import many ADI files in one single operation by simply selecting them.
+  - Enhancement: The statistics count submodes. The QSOs per mode chart draws one bar per submode, so FT4 is no longer counted as MFSK nor USB as SSB, and the mode filter of the fields per band table offers modes and submodes: picking a mode covers its whole group while picking a submode covers only that one. The awards and DXCC status counters keep grouping by mode, as the award rules require.
+  - Enhancement: The submodes present in the log fill the mode box and the Setup mode list, and the mode preselected at start up is the most used submode, not just its parent mode. The map filters by submode too.
+  - Bugfix: Opening a QSO worked on a mode not selected in Setup left the mode box showing a different mode, which was then the one saved back. The mode of the QSO is now added to the list and selected (Closes #1062)
+  - Bugfix: The submode of a QSO was lost. It was never written to the DB, so a QSO entered as C4FM, USB or FT4 was stored, shown and exported as DIGITALVOICE, SSB or MFSK. The submode is now kept in its own column, the log shows Mode and Submode as separate columns and the ADIF export includes the SUBMODE field again (Closes #1062)
+  - Bugfix: The Windows package did not include the KLog translation files, so KLog was always shown in English (Closes #1054)
+  - Bugfix: Fix BAND_RX export when RX band is empty (TNX YL3GBC)
+  - Bugfix: Apply the same BAND_RX guard (skip empty, "0" and same-as-BAND values) to the Club Log real-time upload, which also fixes 2-character RX bands (6m/4m/2m) being dropped.
+  - Maintenance: The ADIF file is now always produced by a single serializer (QSO::getADIF); removed the unused per-destination ADIF writers and moved the BAND/BAND_RX "0" check into Adif::getADIFField() so it is enforced in one single place.
+  - Enhancement: The Mode and Submode lists were missing the OFDM mode (RIBBIT_PIX, RIBBIT_SMS) and the FREEDATA submode of DYNAMIC, added to the ADIF specification in version 3.1.7. The DB is updated automatically on the next start.
+  - Bugfix: Removing the satellite of a SAT QSO, or editing one so that no satellite is selected, no longer leaves the propagation mode set to SAT with an empty satellite name, nor keeps the old satellite name/mode in the database: the save query only rebound sat_name/sat_mode for SAT QSOs, so on the reused prepared statement a non-SAT QSO silently kept whatever value had last been bound (possibly from a different QSO). Selecting "Other" in the Satellite tab now enables the satellite name field, even while editing an existing QSO, and pre-fills it with "Unknown" shown in red so it draws the user's attention until edited; picking a real satellite or "No-SAT" instead clears and disables that field again (Closes #1117)
+  - Bugfix: The logview showed My_DXCC, DXCC, My_FISTS, FISTS, My_ITU, ITU, My_CQZ and CQZ as 0 instead of a blank cell when the value was unset or invalid (Closes #1128)
+  - Bugfix: Sanity checks for FREQ_RX, ALTITUDE, MY_ALTITUDE, SILENT_KEY (SK), QSO_RANDOM, FORCE_INIT, FISTS_CC and QSO_COMPLETE: the logview now shows a blank cell instead of a meaningless or negative value, and ADIF export skips these fields when they are unset or not meaningful (FREQ_RX is also skipped when equal to FREQ_TX; FORCE_INIT is only kept when PROP_MODE is EME; QSO_RANDOM is only kept when explicitly No; QSO_COMPLETE is only kept when it is one of Y/N/NIL/? and not the default Y).
+  - Bugfix: QSO_COMPLETE read from the database while exporting to ADIF was silently discarded, so that ADIF export always used the default "Y" regardless of the QSO's actual value. The database now stores the ADIF value (Y/N/NIL/?) directly instead of an internal numeric code, removing the now unnecessary conversion that caused the bug; existing databases are converted automatically on the next start.
+  - Translations: Italian (TNX IU5HIU), Spanish (EA4K).
+ReleaseNotesUrl: https://github.com/ea4k/klog/releases/tag/2.6
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/ea4k/klog/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

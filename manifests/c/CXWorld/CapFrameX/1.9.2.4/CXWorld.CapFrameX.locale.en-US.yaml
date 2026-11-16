@@ -1,0 +1,89 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: CXWorld.CapFrameX
+PackageVersion: 1.9.2.4
+PackageLocale: en-US
+Publisher: DevTechProfile
+PublisherUrl: https://www.capframex.com/
+PublisherSupportUrl: https://www.capframex.com/support
+PrivacyUrl: https://www.capframex.com/privacy
+Author: CapFrameX Team
+PackageName: CapFrameX Capture and Analysis Tool
+PackageUrl: https://github.com/CXWorld/CapFrameX
+License: MIT
+LicenseUrl: https://github.com/CXWorld/CapFrameX/blob/HEAD/LICENSE
+ShortDescription: Frametime capture and analysis tool
+Description: Frametimes capture and analysis tool based on Intel's PresentMon. Overlay provided by Rivatuner Statistics Server.
+Moniker: capframex
+Tags:
+- analysis-tool
+- benchmark
+- benchmarking
+- fps
+- frametime
+- rivatuner
+ReleaseNotes: |-
+  Build your overlay from tiles. Pay less for showing it.
+  CapFrameX 1.9.2 adds the tile overlay with its own editor and makes the CapFrameX overlay renderers cheaper for the game.
+  It also ships the PresentMon capture fixes of the 1.9.2 betas, an automatic capture target and four more UI languages.
+  ──────────────────────────────────┬─────────────────────────────┬───────────────────────────────┬────────────────────────
+  45                                │10                          │4                             │350+
+                                    │                             │                               │
+  STARTER DESIGNS                   │TILE KINDS                   │NEW LANGUAGES                  │COMMITS SINCE 1.9.1
+  ──────────────────────────────────┴─────────────────────────────┴───────────────────────────────┴────────────────────────
+
+  Important
+  Benchmarking? Use the CapFrameX in-game or RTSS renderer. The hook-free overlay is a window above the game: hiding it can still cause frametime spikes, and some AMD and Intel drivers have DWM problems with it. Check which renderer is active, because Direct3D 9, anti-cheat and blacklisted games switch to hook-free on their own.
+
+  Highlights
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Tile overlay                                                                                                            m              │Lighter renderers                                                                                                                    │Dependable captures
+                                                                                                                                         │                                                                                                                                     │
+  Arrange readings, bars, gauges, charts and images in the new tile editor, or start from one of 45 designs.                             │Hiding, showing and updating the CapFrameX overlay takes less from the game, in-game and hook-free.                                  │PresentMon fixes for long sessions and frame generation, and a capture target that is picked for you.
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  Expand a section for the details.
+  Tile overlay  ·  tile editor, 45 starter designs, charts, heatmaps, sharing
+  Open it under Overlay → Tile overlay. The in-game and hook-free renderers draw tile designs; RTSS keeps the row overlay.
+  - Tile editor with live preview, undo and a library of saved profiles: tiles on a grid or a free canvas, colors per tile, one font and tile opacity per design.
+  - Ten tile kinds: reading, bar, ring gauge, live chart, text, icon, image, sensor group (bars or a heatmap, for example every core load by core type), container and the row overlay as a block. The palette adds CapFrameX logo tiles and Ryzen 5, 7 and 9 badges.
+  - Charts: frame times, display times and frame rates per frame or counted per second, up to four lines on one axis, an adaptive stutter threshold and grid lines.
+  - 45 starter designs: everyday layouts, vertical strips, hybrid-CPU layouts and hardware themes (APEX, REDLINE, FUSION, GREENLINE, ICELINE, DUOLINE, BLUELINE), BLACKWELL THERMALS with every GDDR7 module temperature of an RTX 50 card, anime artwork, Slick Overlay (adapted from HeyOkay's RTSS overlay), OLED Minimal and the full-width Performance Strip. Hardware designs name the CPU and GPU that are installed.
+  - Layout: span the full screen width at the top or bottom, scale with the game's resolution, OLED pixel orbit, and a font of your choice for the row overlay.
+  - Share: export a design and import it on another PC. CapFrameX maps its sensors onto your hardware and lists what it could not match.
+  - AI authoring: MCP clients can create, edit, render and activate tile designs.
+  Renderer performance  ·  hide and show, partial repaints, frame generation, fewer polls
+  - Hide and show keep the renderer. The in-game hook and the Vulkan layer no longer release and rebuild their resources. Before, every capture with auto-hide began with a frame about 5 ms late and the overlay came back after a 45 ms rebuild (Mafia: The Old Country, RX 9070 XT).
+  - Hook-free repaints only what changed. Tile values update once per OSD refresh, and only the tiles that draw something new are repainted and presented. A tile design repainted the whole window 33 to 59 times in 10 s before; each repaint cost the game about 1.9 ms of GPU time (Doom: The Dark Ages, RTX 5090).
+  - Hook-free hides by present mode. Over a game on its own display plane the window is emptied instead of removed. Removing it cost 1 to 2 s of displayed frames at each capture start.
+  - Frame generation: graphs draw both frames of a pair instead of a flat line with false spikes, continue on current data after a show, and a capture no longer starts with a frame from before the start.
+  - Less background work: a tile design polls only the sensors and computes only the metrics it shows, DIMM and SATA reads are throttled, RTSS receives only the entries it can draw.
+  Capture and PresentMon  ·  CX-PresentMon 2.6.1, automatic target, PMD timing, hotkeys
+  - CX-PresentMon 2.6.1, our PresentMon build (not an Intel release), fixes: tracking data that grew CPU and memory use over long sessions (#695), capture output that stalled for up to a minute after frame generation was switched, missing display times and the missing animation error with FSR frame generation, the AMD FSR FG frame type, and a DWM flip delay that moved a game frame's screen time on NVIDIA.
+  - Correction: disabling PC Latency never worked around the tracking problem, contrary to our earlier post on X.
+  - Automatic capture target: with several processes listed, CapFrameX follows the game (foreground window, GPU load, known game folders) until you select one. Exited processes no longer linger in the list.
+  - PMD: power samples are placed by time, not by count. Before, the power curve of a 600 s capture could end 12 s early.
+  - A delayed capture starts when its delay is over, PresentMon cannot outlive CapFrameX, and the log records every hotkey press the keyboard hook misses.
+  Overlay renderers and compatibility  ·  Off renderer, hook-free stand-in, MPO warning, new entries
+  - New Off renderer for capture-only setups. Only the selected renderer draws.
+  - The hook-free overlay stands in for games the in-game renderer cannot draw in: Direct3D 9, Easy Anti-Cheat, BattlEye, VAC, Ricochet and blacklisted titles.
+  - MPO warning in the Overlay tab when the hook-free display has no free plane, and an MPO check to test it.
+  - New entries and formats: Present Mode, the graphics API in the <APP> group, percentage values as text, bar or both, storage device names.
+  - In-game compatibility: editable profile files with per-user overrides, and more robust learning (Direct3D 11 games that load d3d12.dll, games running before CapFrameX, loading screens, target switches).
+  - The portable version offers to register its Vulkan layers at startup.
+  Analysis, records and sensors  ·  faster record list, background cut, new readings
+  - The record list loads from an on-disk index and in batches; dropped records load off the UI thread.
+  - Cutting a record runs in the background and keeps its sensor data.
+  - Faster moving averages and frametime distribution, a readable axis around long stalls, and comparison charts that redraw correctly after range and theme changes.
+  - Sensors: RAM manufacturer from SPD data, AMD CCD topology and clocks per core type, AMD GPU memory total, the temperature spread across the memory modules of NVIDIA cards, Intel IGCL v306.
+  App, installer and updates  ·  languages, WiX 6, signed updates, tools
+  - Languages: German, Spanish, Russian and Korean beside English, switched live.
+  - Installer: WiX 6, 64-bit install folder, autostart kept on upgrades, and from this release on a setup can replace a newer version (in-app rollback).
+  - Updates: the publisher signature of every package is verified, then CapFrameX restarts into setup and launches again.
+ReleaseNotesUrl: https://github.com/CXWorld/CapFrameX/releases/tag/v1.9.2
+InstallationNotes: If you are using a network drive as your capture directory and having problems connecting to it on autostart, you might want to download this additional zip file (https://cxblobs.blob.core.windows.net/releases/Autostart%20using%20network%20drives.zip) too and read the info inside it.
+Documentations:
+- DocumentLabel: README for CapFrameX
+  DocumentUrl: https://github.com/CXWorld/CapFrameX/blob/HEAD/README.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

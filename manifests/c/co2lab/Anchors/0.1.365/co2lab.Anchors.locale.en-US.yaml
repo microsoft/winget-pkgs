@@ -1,0 +1,65 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: co2lab.Anchors
+PackageVersion: 0.1.365
+PackageLocale: en-US
+Publisher: co2lab
+PublisherUrl: https://github.com/co2-lab
+PublisherSupportUrl: https://github.com/co2-lab/anchors/issues
+PackageName: Anchors
+PackageUrl: https://github.com/co2-lab/anchors
+License: Elastic License 2.0
+LicenseUrl: https://github.com/co2-lab/anchors/blob/HEAD/LICENSE
+ShortDescription: Spec-first continuity framework for AI-assisted development
+Description: Anchors ties spec, feature and test together through a shared identity code, then confronts each artifact against the rules declared in anchors.yaml. It maps the project as a graph, propagates change from the anchor outward, and gates every step — so work guided by AI stays anchored to what was decided.
+Moniker: anchors
+Tags:
+- ai
+- ai-agents
+- cli
+- developer-tools
+- golang
+- spec-first
+ReleaseNotes: |-
+  Freeze a folder, and leave a frozen part's work out
+  Freezing an area that is out of scope used to mean freezing it unit by unit. Its gates went
+  quiet, but its tasks were still handed out, the progress still counted it, and impact
+  still listed its files as work to redo.
+  A folder can be frozen. anchors freeze [CODE] --path '<glob>' writes the scope to
+  anchors.yaml:
+  frozen_paths:
+    - freeze: "PLNAP-F01"     # the freeze's code, or the reason with no doctrine
+      paths:
+        - "apps/mobile/src/features/ir/**"
+  - The freeze's record stays in the doctrine. The globs only say where it applies.
+  - The map freezes every file a glob matches, as the file's own header mark would. A unit
+    whose spec falls in the folder is frozen whole, including tests that live elsewhere.
+  - A file's own mark wins over the folder's.
+  - freeze-consistent names a glob that matches no file.
+  - anchors thaw CODE removes the globs together with the marks. thaw --path '<glob>'
+    removes one glob, and freeze show lists them.
+  - The agent hook warns about a new file inside a frozen folder too.
+  The work of a frozen part is not handed out.
+  - anchors next leaves a task on a frozen file in the queue, waiting for the thaw. It claims
+    the next task instead, or, when there is none, says the queue is empty and counts the
+    tasks waiting.
+  - The cold start does not seed a frozen plan, and does not count a spec inside a frozen
+    folder as missing.
+  - In github mode, the claim runs in the pipeline. A card for a frozen unit is still handed
+    out there, with the warning.
+  anchors impact lists frozen parts apart, under their own heading with their freezes,
+  not among the parts to redo.
+  The progress leaves a frozen plan out. A demand whose plan is frozen, by its header or
+  by a frozen folder, leaves the totals of progress summary, the monitor and status, and
+  its row says it is frozen. The file's own lines are unchanged. A task names no unit, so to
+  leave out one task of a live plan, use progress cancel with a reason.
+  The freezes section follows the project's language: ## Congelamentos in a pt-BR
+  project. A document that already has the section under another language's title keeps it.
+  Run anchors map build after adding frozen_paths by hand.
+  Everything in the v0.1.351 notes still applies: run anchors migrate once, crossing format 8.
+  Changelog
+  - 5ed9728 feat(freeze): a folder is frozen by glob, and a frozen part's work is left out
+ReleaseNotesUrl: https://github.com/co2-lab/anchors/releases/tag/v0.1.365
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

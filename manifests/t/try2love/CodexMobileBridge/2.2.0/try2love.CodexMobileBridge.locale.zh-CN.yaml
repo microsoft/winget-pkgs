@@ -1,0 +1,55 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: try2love.CodexMobileBridge
+PackageVersion: 2.2.0
+PackageLocale: zh-CN
+Publisher: try2love
+PublisherUrl: https://github.com/try2love
+PublisherSupportUrl: https://github.com/try2love/codex-mobile-bridge/issues
+PackageName: Codex Mobile Bridge
+PackageUrl: https://try2love.github.io/codex-mobile-bridge/
+License: MIT
+LicenseUrl: https://github.com/try2love/codex-mobile-bridge/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 try2love
+ShortDescription: 在手机浏览器里继续电脑 Codex App 已有聊天的本地网关。
+Description: |-
+  在手机浏览器里，继续电脑 Codex App 已有的聊天，或在已保存项目中新建聊天。
+  手机与电脑打开同一个会话，查看回复、发送消息、选择模型与 Skill、回应待确认操作。本地任务继续在原电脑执行，SSH 任务继续在原服务器执行；模型请求沿用该会话的提供商与认证配置。
+  不要求手机登录与电脑相同的 OpenAI 账号。 网关提供独立的账号密码登录，也支持显式开启免密访问。可以通过局域网、临时 HTTPS 隧道或自己的反向代理连接。
+  社区项目，与 OpenAI 无隶属关系。支持 macOS 和 Windows，依赖 Codex App 的内部 IPC；各平台的实测范围见 验证记录。App 更新后可能需要适配。
+
+  消息编辑、分支与复制
+  - 用户消息下方可复制内容。最近一条选择「编辑并重新发送」；更早的消息选择「编辑并新建分支」，原会话保留。
+  - 已完成的回答下选择「从这里分支」，新会话保留截至该轮的历史，等待你继续输入。聊天详情中可返回来源会话。
+  - 回复支持完整 Markdown 复制，代码块单独复制；长回复自动读取完整正文。浏览器限制剪贴板时显示可选中的文本，支持系统复制操作。
+  - 原地编辑要求任务已停止，会重新生成回答。编辑和分支不会撤销既有文件修改；新旧会话共享工作目录。
+  - 分支需要 Codex 运行时同时支持指定轮次与目标续跑延迟；旧版会提示更新 Codex App。复制与最近消息编辑不受此分支能力限制。创建分支不会主动发送模型请求。
+  - 结果不确定时先检查聊天列表，重复提交同一请求不会再次执行。分支已创建但连接失败时，修改保留为该分支的编辑草稿。
+Tags:
+- codex
+- 远程
+- 远程访问
+- 远程连接
+ReleaseNotes: |-
+  v2.2.0 将 ZCode 加入远程工作台，完善手机多信道切换、原生侧边聊天和账号模型管理，并改善连接恢复、通知与后台资源占用。
+  新增与改进
+  - ZCode 远程工作台。 在手机和 Web 浏览已保存的历史，继续原生聊天，发送附件、回答问题与处理审批；支持新建项目聊天、模型与思考强度、Skill、分支和原生改名。提供本地连接及官方远控接入，具体方式以平台和安装包支持为准。保存自定义 API，查看并手动刷新官方账号按模型提供的额度。#107 · #116 · #124 · #128 · #129
+  - 一台电脑，多种连接入口。 将同一网关的局域网、固定 HTTPS 和临时 HTTPS 整合到一张电脑卡片，支持延迟查看、手动选择与自动切换。改善重新登录后的可信信道恢复，减少可用地址被误判不可达的情况；换线保留聊天、草稿和阅读位置。#125
+  - 原生侧边聊天归回主会话。 根据 Codex 原生父子关系显示已有侧边聊天，在主会话中以子标签打开，复用常规聊天操作。关闭标签不再等同于删除原生聊天；无法关联到可访问父会话的条目仍保留可访问入口。#137
+  - Codex 永久删除。 在支持的本机 Codex 会话中增加永久删除入口，执行前确认主会话及附属聊天范围，核验任务和未确认操作；结果不明时保留核对入口，不自动重复删除。macOS 默认 Codex 可显式初始化共享原生运行时，以支持原 App 持有会话时的创建和数据删除。#138
+  - 新建聊天前选择模型。 Codex、Claude、DSH、ZCode 共用模型与思考强度选择，创建后保留选择。新建入口、账号管理与聊天设置复用同一接入的模型缓存，按电脑、账号和配置隔离。#131
+  - 独立客户端与 CLI 管理。 可登记独立 Codex 配置及 VS Code 扩展环境，实验性支持独立 Claude、DSH 桌面配置。增加本网关持有的 CLI 连接管理，支持等待任务结束后释放，保留原会话与历史。#106 · #122
+  - 长会话与问题卡片。 在受支持接入中查看上下文、手动压缩和管理后台任务；Codex 异步问题支持逐题跳过，其他问题的未提交内容保留。跳过状态在 Bridge 手机和 Web 间共享。#118 · #119 · #121
+  - 手机通知与远控入口。 Android 按事件保留通知，同一聊天的待确认与完成提醒不再互相覆盖；重复事件继续去重。增加按电脑配置的 UU 远程入口，可调用已安装的 UU 客户端，实际能力取决于系统及 UU 支持。#113
+  修复与优化
+  - 修复第三方 Codex 接入只返回思考正文时无法展示的问题；支持含中文等正常 Unicode 字符的供应商模型 ID。#110 · PR #130 · PR #139
+  - 修复 Tailscale 遗留入口无法正确接管、规则丢失后不能恢复的问题。核验入口归属后恢复，稳定时降低检测频率，异常时退避重试，不覆盖其他服务的配置。PR #135
+  - 改善 Claude 初始化、Windows 商店版识别、DSH 连接器升级与跨客户端原生改名；修复 Codex 原连接被替换后的恢复。#120 · #127
+  - 保留长段思考及工具输出的阅读位置，改善首次复制和图片保存；修复手机冷启动样式加载及四客户端导航布局。#112 · #114 · #115
+  - 停用未启用客户端的后台观察，按需启动可选服务，复用已核验状态与模型缓存；隐藏或收起二维码后停止无意义的配对刷新，减少空闲开销。
+  贡献
+  感谢 @tiancai123123 的第三方思考内容修复（PR #130）、@laozuzhen 的 Tailscale 恢复方案（PR #135），以及 @qybgh 的 Unicode 模型 ID 支持（PR #139）。感谢所有预览版体验者提供连接、模型、会话管理与跨平台反馈。
+ReleaseNotesUrl: https://github.com/try2love/codex-mobile-bridge/releases/tag/v2.2.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

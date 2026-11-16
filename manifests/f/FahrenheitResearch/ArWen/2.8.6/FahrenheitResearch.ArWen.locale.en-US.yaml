@@ -1,0 +1,60 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.ArWen
+PackageVersion: 2.8.6
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/arwen/issues
+Author: Fahrenheit Research
+PackageName: ArWen
+PackageUrl: https://github.com/FahrenheitResearch/arwen
+License: Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+Copyright: Copyright © Fahrenheit Research
+CopyrightUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+ShortDescription: 'ArWen: GPU-native WRF-ARW-class regional weather model, verified against WRF v4.6.1'
+Description: "ArWen is an independent, GPU-native implementation of a WRF-ARW-class regional atmospheric model. It is not affiliated with or endorsed by NCAR or UCAR. The name is a wordmark for \"the ARW solver, GPU-native\"; the Python package is currently named gpuwm. Safety. ArWen is a research and educational tool. It is never a substitute for official forecasts and warnings from your national meteorological service. Do not use it to make safety decisions. Regional numerical weather prediction at convective scale has mostly required institutional clusters, which means most of the world runs on global-model guidance at 10-25 km. ArWen's aim is to put a verified, kilometer-scale limited-area model on a single consumer GPU: pick a point, size a nest ladder to your card, pull public analysis data, and run a 1 km (or 500 m) simulation of your own area on hardware you own -- especially in places where no national convection-permitting model exists."
+Moniker: arwen
+ReleaseNotes: |-
+  ArWen 2.8.6 adds the operational RAP/HRRR physics forms behind the HRRR importer and recipes, default observation verification of finished runs, nested and streamed ensembles, and a much faster start.
+  - Install or upgrade: pip install --upgrade "gpuwm[all-cu12]==2.8.6".
+  - Integration kit, verification records, and checksums.
+  - Node GPU gate: Stage 1 and both GPU-shard results, with the tested source revision and card identity.
+  New
+  - The HRRR namelist importer and the HRRR recipes select the operational RAP/HRRR WRF branch forms: sixth-order filter, microphysics zero-out and upper wind limiter (diff_6th_form, mp_zero_out, upper_wind_limiter_form), fifth-order vertical advection (v_sca_adv_order, v_mom_adv_order), Thompson microphysics (thompson_version = "wrf_39_noaa"), the GSD v4.1 MYNN boundary layer and surface layer (bl_mynn_version = "gsd_41", mynn_sfclay_variant = "gsl_wrf39"), the RUC land-surface forms, sun-angle land albedo (alb_sol = 1), aerosol optics 3 and shortwave interpolation 1. Every general default stays the WRF v4.6.1 form, and configurations that do not come through those doors emit the same bytes as before.
+  - Where the operational branch carries a known defect, the default keeps the corrected form: MYNN cloud tendencies and the melting-snow fall speed stay on WRF v4.6.1's, and the branch's own expressions are available only by explicit selection.
+  - HRRR configurations use the pinned operational CONUS static file on HRRR's grid, and a single-domain namelist whose adaptive clock is pinned (20/20/20) imports as the fixed step it integrates, with the six acoustic substeps WRF derives for it.
+  - A finished forecast is verified against observations by default: station dots and scorecards, and MRMS reflectivity and hourly rain panels. The run waits at most 2 seconds for it; downloads and scoring continue in the background, gpuwm verify-visuals RUN_DIRECTORY runs it on demand, and GPUWM_VERIFY_VISUALS=0 turns it off. A verification failure never changes a forecast's result.
+  - Packed ensembles carry a parent and its nest together, ensemble products can be reduced as members finish, and an interrupted streamed nested forecast or ensemble continues from its last checkpoint.
+  - gpuwm fetch --source 20crv3-cf starts a forecast from NOAA's 20th Century Reanalysis v3 (1836 to 2015).
+  - [physics_params] applies a named set of physics parameter values, recorded in the run's identity.
+  - Multi-card forecasts step their slabs at once under free-threaded Python 3.14.
+
+  Fixed
+  - 2 m dewpoint on HRRR-configuration runs: prescribed monthly leaf area and albedo with the operational RUC forms bring the afternoon bias from about +0.5 to +0.8 K down to HRRR's own on two full-grid cycles, with 2 m temperature error unchanged. Surface shortwave excess against HRRR fell from about +31 to +4 W/m2 on a full-grid cycle.
+  - Isobaric heights no longer read high (5.3 m at 500 hPa on a 3 km frame).
+  - A nest keeps its freshly measured CFL when an output alarm lands on a full step, instead of continuing on stale step memory. Generated adaptive nests state a maximum step growth of 5 percent, and gpuwm check names any adaptive nest set above it: a 1 km and 500 m nested forecast failed at WRF's nest value of 51 percent and completed at 5 percent with no measured cost.
+  - A nested health failure is retried at most twice from a verified checkpoint with a lowered step ceiling, and every retry is written to the run receipt.
+  - An HRRR-native start no longer refuses when the source's top level sits a fraction of a millipascal above the model top.
+  - A completed forecast keeps its exit status and final-state digest when history frames are deleted during the run.
+  - A physics template's own parameters win over its component options; the GSD v4.1 MYNN suite had been running the component's mixing length and scalar mixing instead of its own.
+  - The GPU memory watcher no longer runs nvidia-smi on the forecast's own thread: a nested forecast on a busy multi-card host went from 130 to 8 seconds per forecast hour.
+  - Process start to first forecast output on a 1797 x 1057 x 50 case fell from 113.8 to 26.6 minutes with identical output, and cases with more than a thousand prepared arrays run at the usual 1,024 open-file limit.
+  - GFS preparation budgets against host memory, not the card's, and holds a window of decoded leads: a 240 h run from 81 whole-globe leads that was killed on a 64 GiB host now prepares within it.
+  - A resumed data-assimilation step reproduces the uninterrupted run.
+  - High-resolution static preparation no longer climbs to hundreds of GiB on a full domain, and concurrent tile downloads no longer corrupt a shared cache entry.
+  - The shared NetCDF reader accepts arrays above 134,217,728 values and decodes 64-bit integer coordinates.
+  - Hex geometry, observation scoring, Noah soil initialization, health scans and ozone interpolation run in Rust with the previous bits.
+  Answers change for HRRR-configuration runs (the operational branch forms above) and for nested adaptive runs that land an output alarm on a full step. Other configurations keep their previous answers.
+  Known limits: an engine-side bound on nest step growth after an output alarm is not in this release; nests above 5 percent growth are named by gpuwm check. mp_physics = 28 (aerosol-aware Thompson) is not yet bit-parity with WRF 4.6.1 on 7 oracle cells (cloud water up to 4.9e-6 against a 2e-6 bound); the accumulation-order rework that closes it (about 0.5 percent more domain rain in the one measured case) follows in 2.8.7. Native GRIB2 export, air-quality tracers, the GSI analysis start and RRFS scoring rows are not in this release; GRIB2 export returns in 2.8.7 built on its own post-processing code. The complete HRRR namelist door with one full recipe follows in the next release.
+  The verification records identify completed artifact and startup checks, the short GPU forecast, and retained component evidence. They do not establish general forecast skill or whole-model parity.
+  Installation and usage | Full changelog
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/arwen/releases/tag/v2.8.6
+InstallationNotes: |-
+  This application requires an NVIDIA GPU with CUDA support to run.
+  Will not function on integrated graphics or non-NVIDIA hardware.
+  Without compatible hardware, the application will fail to launch.
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

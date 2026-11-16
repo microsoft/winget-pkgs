@@ -1,0 +1,41 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: MayDay.SnowApp
+PackageVersion: 0.5.10
+PackageLocale: zh-CN
+Copyright: 版权所有 (c) 2026 MayMay
+ShortDescription: 面向开发者的桌面应用，将 AI 对话、终端模拟、SSH 远程管理、Git 工具和内置浏览器面板整合到统一的工作空间中。
+Description: Snow App 是一款面向开发者的桌面应用，将 AI 对话、终端模拟、SSH 远程管理、Git 工具和内置浏览器面板整合到统一的工作空间中。它通过 Rust 原生模块处理性能关键型操作，包括 SQLite 存储、AI 流式传输、文件监控和 HTTP 请求。此外还支持 MCP 集成、AI 图像生成、技能系统、Hooks、子代理、代码库语义搜索与 AI 驱动的终端会话。
+Tags:
+- ai
+- codex
+- git
+- mcp
+- ssh
+- 终端
+- 聊天
+ReleaseNotes: |-
+  新功能
+  - 会话内用户消息搜索：用户消息导航面板支持关键词过滤，多词 AND 匹配消息摘要与 chip 标签，方向键移动、回车跳转、Esc 先清空再关闭；原本分开的标题行与搜索行合并为一行表头。
+  - 立即发送（Alt+Enter）：输入框有内容时直接发送；为空时发送排队中的第一条消息，并以软中断让正在运行的子代理 / WorkFlow 继续本轮。
+  - 决策模型提供方与工具：决策模型新增 OpenAI Decisions 提供方（与 TypeSafe Jev 并存），各自使用独立的上下文预算（Jev 48k 字符 / 50 次判定，OpenAI 200k 字符 / 50 次判定）；新增默认关闭的 decision-evaluate MCP 服务，可用文本、JSON 与本地 PNG/JPEG 图片回答谓词、选择与评分问题。
+  - 敏感命令风险等级与会话上下文：确认卡片展示模型返回的低 / 中 / 高风险等级与分数（仅用于展示与日志，不参与放行判定）；新增可选「引用最近会话」设置（默认关闭，8 条），附带已渲染的最近消息与工具调用摘要，便于模型区分用户明确要求与 AI 自发操作。
+  - 代码库审查概率阈值：配置相关度阈值后，模型改为对每条结果提问概率问题并保留达标项，概率会回传到审查结果与工具卡片。
+  - 主题设置面板重做：各分区改为独立卡片（强调色标题栏 + 阅读宽度上限），AI / 我的头像改为并排卡片，重置按钮常驻（使用默认头像时禁用）。
+  改进
+  - 决策模型调用计入用量页（request_method=decisions，按模型与请求方式分组并新增类型列），覆盖代码库审查、decision-evaluate 工具与敏感命令判定。
+  - 超长嵌入输入改为按保守 token 预算切片，接口报输入过长时先分批、再对半重试，仍过长则跳过该块并写 WARN 日志（附带失败文件与失败前进度），文件读取与 token 计数移入阻塞线程池。
+  - 浏览器截图改用帧订阅，标签页最小化或被遮挡时不再卡住；OpenAI 请求统一以 JSON 文本发送结构化数据。
+  - 工具调用失败可纠错重试，askUserQuestion 支持撤销重答；侧边栏项与集合成员在折叠动画结束后卸载，LSP 与任务路径显示去掉 Windows 扩展长度前缀（\\?\），并优化图片库菜单、日志清空确认、面板宽度与骨架屏动画。
+  修复
+  - 远端删除失败会透传原始 SFTP 原因，条目不存在视为删除成功，回滚保持幂等；恢复阶段「无法取消」提示改为幂等，不再重复触发转圈。
+  - git status 改用 porcelain -z 解析，文件名含引号或反斜杠时暂存 / 放弃不再错位；放弃改动会检查 git clean 是否真的删除了未跟踪文件，有残留则返回失败与 git 输出，前端在成功与失败时都刷新并展示 git 原文。
+ReleaseNotesUrl: https://github.com/MayDay-wpf/snow-app/blob/HEAD/RELEASE_NOTES_ZH.md#v0510
+Documentations:
+- DocumentLabel: 快速开始
+  DocumentUrl: https://github.com/MayDay-wpf/snow-app/blob/main/docs/zh-CN/1-快速开始.md
+- DocumentLabel: 文档
+  DocumentUrl: https://github.com/MayDay-wpf/snow-app/blob/main/docs/README.md
+ManifestType: locale
+ManifestVersion: 1.28.0

@@ -1,0 +1,126 @@
+# Created using wingetcreate 1.12.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: TamKungZ.ImageMerge
+PackageVersion: 2.0.2
+PackageLocale: en-US
+Publisher: TamKungZ_
+PublisherUrl: https://github.com/TamKungZ
+PublisherSupportUrl: https://github.com/TamKungZ/ImageMergePy/issues
+PackageName: ImageMerge
+PackageUrl: https://github.com/TamKungZ/ImageMergePy
+License: MIT
+ShortDescription: A GUI tool to merge images/videos from multiple folders, remove duplicates with SHA-256, and rename files into a clean sequential format.
+Tags:
+- batch-processing
+- cli
+- cross-platform
+- desktop-app
+- file-deduplication
+- file-deduplication-tool
+- file-management
+- gui
+- image-merge
+- image-processing
+- media-organizer
+- nuitka
+- pyside6
+- python
+ReleaseNotes: |
+  ## ImageMerge v2.0.2
+
+  This release replaces v2.0.1, which was released with errors. It contains every fix from
+  v2.0.1 (Launchpad PPA package, Nuitka build paths, and the Windows start-up crash) and
+  adds fixes found while reviewing the code for real-world use: files imported twice in the
+  Main folder workflow, junk files imported as photos, wrong ordering on Linux, and several
+  ways a long run could fail badly or leave files behind.
+
+  ### Highlights
+  #### New in v2.0.2
+  - Fixed Main folder importing the output folder's own files again
+    - Choosing a source folder that contains the output folder (for example the parent folder) together with "allow duplicates" copied every existing file back into the output on each run
+    - The output folder is now skipped when scanning sources
+  - Junk files are no longer imported as media
+    - macOS `._name.jpg` sidecar files (common on external drives) are skipped
+    - Thumbnail and trash folders are skipped: `@eaDir` (Synology), `.AppleDouble`, `.thumbnails`, `$RECYCLE.BIN`, `.Trash` and `.Trash-*`
+  - Fixed the order of files with UUID or hash names on Linux
+    - `getctime` is the inode-change time on Linux, not the creation time; the app now uses the creation time on Windows and macOS and the modified time on Linux
+  - A full disk now stops the job at the first error instead of failing every remaining file one by one (in safe mode the staging folder is discarded and nothing is applied)
+  - Input and output paths are now validated for every workflow
+    - A missing source folder gives a clear error instead of "found 0 files"
+    - An output path that is a file is rejected
+  - Fixed the app failing at start-up when neither the `locales` folder nor `_embedded_locales.py` is present; it now falls back to English
+  - Safe workspace folders left behind by a crash or a killed process (`.imagemerge_temp/session-*`) are removed automatically once they are older than 24 hours
+  - Closing the window while a job is still copying a large file no longer destroys the running thread; the window stays open until the job has stopped
+  - `error.log` is rotated to `error.log.old` when it grows past 1 MB
+  - Updated application version metadata to `2.0.2`
+
+  #### Carried over from v2.0.1
+  - Fixed the Windows app not opening at all (no window, no message) when installed from the MSI
+    - The process crashed with exception `0xc0000409` right after Qt loaded `qmodernwindowsstyle.dll`; Nuitka reported a segmentation fault in the native `windows11` Qt style plugin (Qt 6.12)
+    - The app now always uses the `Fusion` style (`QT_STYLE_OVERRIDE` is set before the `QApplication` is created, and `setStyle("Fusion")` is called after), which avoids that plugin and matches the app's own stylesheet and palette
+    - Setting `QT_STYLE_OVERRIDE=Fusion` on an affected 2.0.1 install makes it start, for anyone who has already installed it
+  - The GUI now writes startup problems to `%LOCALAPPDATA%\ImageMerge\error.log` (Qt messages including fatal ones, Python tracebacks, and native crash traces) and shows an error dialog on Windows if startup fails with a Python exception, instead of closing silently
+  - Fixed `exec: /opt/ImageMerge/ImageMerge: Permission denied` after installing from the PPA
+    - `extract_runtime()` used `zipfile.extractall()`, which does not restore Unix file permissions, so the `ImageMerge` executable was packaged as `0644`
+    - The runtime is now extracted file by file with permissions restored from the zip, and `ImageMerge` is always forced to `0755`
+    - Symlinks in the runtime archive are now handled safely, and unsafe paths such as `../` are still rejected
+    - The build now stops if any file from the zip is missing on disk after extraction
+  - Fixed `ImportError: /opt/ImageMerge/_opcode.so: cannot open shared object file`
+    - `dpkg-source` applies a default ignore list that silently drops `*.so`, `*.a`, `*.la`, `*.o`, and `.git*` files from the source tarball; the runtime's Python extension modules and bundled Qt libraries are all `*.so`
+    - Added `-I.imagemerge-keep-everything` to the `dpkg-buildpackage` call, which replaces the default ignore list with a pattern that matches nothing
+  - Added a source tarball integrity check: the build compares the number of regular runtime files in the build tree with the number inside the generated `.tar.xz` and refuses to upload if any file was dropped
+  - Packaging files under `debian/` and `packaging/` are now converted to LF line endings before building, so a Windows checkout with CRLF can no longer break `debian/rules` or the launcher script
+  - Added `override_dh_makeshlibs:` to `debian/rules` so `dh_makeshlibs` does not register the bundled runtime libraries as system shared libraries
+  - Fixed `app_metadata.json` not being found in compiled builds
+    - `APP_DIR` in `metadata.py` assumed the source layout (`parents[2]`), but in a standalone build the module lives in `<dist>/media_merge/`, so the path pointed outside the dist folder and the About page showed version `-`
+    - Compiled builds now detect `__compiled__` and resolve the dist folder from the module name, so it works whether the package is imported as `media_merge` or `src.media_merge`
+  - Fixed bundled fonts not loading when the app is started through `PATH` on Linux: `fonts.py` used `sys.argv[0]`, which can be a bare file name; it now uses `APP_DIR / "fonts"`
+  - The Windows signing step in `build_nuitka.py` no longer prints the certificate password in the logged `signtool` command (shown as `***`), and the password is no longer stripped. Signing only runs when `IMAGEMERGE_SIGN=1`, which the release workflows do not set
+  - Build cleanup now removes the generated `_embedded_locales.py` as well as the old `_embedded_fonts.py`, and a duplicated font-folder cleanup was removed
+  - Architecture detection in `build_nuitka.py` now reads the running Python interpreter, so a 32-bit Python on 64-bit Windows is no longer reported as x64; the log line now says "Resolved target architecture"
+
+  ### Verification
+  #### v2.0.2
+  - `python3 -m py_compile` passes for every module in `src/media_merge`
+  - `tests/test_stable_ordering.py`, `tests/test_build_nuitka.py` and `tests/test_launchpad_package.py` pass
+  - An end-to-end script ran Copy keep, Copy delete and Move, each with and without the safe workspace, and checked the added, skipped and failed counts, gapless numbering, that sources are removed or kept as expected, and that no staging folder is left
+  - The same script checked dry run, cancel, simulated disk full, a simulated single-file error, stale-session cleanup, tidy with duplicate removal, input and output validation, and the CLI (`--lang th`, prefix, missing input exits with code 2)
+  - Still to check on a real build: the GUI close-while-running behaviour (PySide6 was not available in the test environment)
+
+  #### v2.0.1
+  - `python3 -m py_compile scripts/build_launchpad_source.py` passes
+  - Reproduced the `Permission denied` cause: the zip stores `0755` but `extractall()` produced `0644`; the new extraction keeps `0755`, and a zip without the executable bit still ends up `0755`
+  - Reproduced the missing-file cause: without `-I`, `_opcode.so`, `_ctypes.so`, `PySide6/QtCore.so`, and `libfoo.a` were left out of the tarball; with `-I.imagemerge-keep-everything` they were all kept
+  - Confirmed that `../` paths in the runtime archive are rejected
+  - Checked the build-script and path changes by reading the code against the build and release workflows, and simulated the source and compiled path resolution
+  - Reproduced the Windows crash on a Windows 11 install of the MSI: exit code `-1073740791` (`0xc0000409`), with the app starting normally when `QT_STYLE_OVERRIDE=Fusion` is set and still crashing with `QT_QPA_PLATFORM=windows:fontengine=freetype`, which points at the `windows11` style rather than font loading
+  - Confirmed from source that the GUI starts offscreen with the `fusion` style active and that `error.log` is created
+  - Still to check in a real Windows build: the installed app opens without setting any environment variable
+  - Still to check in real builds on all three platforms: About page shows the correct version, window icon appears, and Thai and Japanese fonts load from the `fonts` folder
+  - Full `dpkg-buildpackage` and running `imagemerge` after install will be exercised by the publish workflow on the new tag
+
+  ### Known issues (not changed in this release)
+  - `tests/test_cli.py` and `tests/test_media_operations.py` still use the old dict-based API and fail (5 tests); they failed before this release too
+  - `src/media_merge/media_ops.py` is legacy code that only those old tests use
+  - `.ts` is treated as a video extension, so TypeScript files in a source folder are imported as videos
+  - Committing the safe workspace is not atomic, and there is no lock against two instances using the same output folder
+  - Move mode with the safe workspace needs free space equal to the size of the files being moved
+
+  ### Upgrade
+  Everyone on v2.0.1 should upgrade to v2.0.2. No settings or data changes are needed; download the new build from the Releases page and replace the previous version.
+
+  Users on `2.0.0ubuntu22.04.1` from the PPA need to upgrade; the missing files cannot be repaired on the client. Running `chmod +x` only fixes the permission error, not the missing `_opcode.so`.
+
+  ```bash
+  sudo apt update
+  sudo apt install --only-upgrade imagemerge
+  ls -la /opt/ImageMerge/ImageMerge /opt/ImageMerge/_opcode.so
+
+  (Release notes shortened for WinGet. See the full notes on the GitHub release page.)
+ReleaseNotesUrl: https://github.com/TamKungZ/ImageMergePy/releases/tag/v2.0.2
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/TamKungZ/ImageMergePy/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

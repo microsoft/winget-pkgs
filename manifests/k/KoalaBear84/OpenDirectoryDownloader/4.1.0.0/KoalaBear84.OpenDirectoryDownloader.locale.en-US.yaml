@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: KoalaBear84.OpenDirectoryDownloader
+PackageVersion: 4.1.0.0
+PackageLocale: en-US
+Publisher: KoalaBear84
+PublisherUrl: https://github.com/KoalaBear84
+PublisherSupportUrl: https://github.com/KoalaBear84/OpenDirectoryDownloader/issues
+PackageName: OpenDirectoryDownloader
+PackageUrl: https://github.com/KoalaBear84/OpenDirectoryDownloader
+License: GPL-3.0
+LicenseUrl: https://github.com/KoalaBear84/OpenDirectoryDownloader/blob/HEAD/LICENSE
+ShortDescription: Indexes open directories listings in 130+ supported formats, including FTP(S), Google Drive, Bhadoo, GoIndex, Go2Index (alternatives), Dropbox, Mediafire, GoFile, GitHub.
+Tags:
+- directory
+- http
+- https
+- indexer
+- open
+- parser
+ReleaseNotes: "## Performance and memory\n\nBig directory listings now scan several times faster and use much less memory. Scans of real servers are still limited by the \nnetwork, so the largest gains are on very large directories, long scans and `--resume`.\n                                                                                                                              \n### Benchmarks\n                                                                                                                              \nMeasured against a local test server that generates Apache- and nginx-style listings, on one Windows machine. They are single runs, so a few percent is noise. \"Before\" is the code at the start of this work.\n\n| Scenario | Before | After |\n|---|---|---|\n| One directory with 100,000 files, scan time | 23.6 s | **1.9 s** |\n| One directory with 100,000 files, peak memory | 437 MB | **251 MB** |\n| 4,681 directories / 187,000 files, scan time | 19.3 s | **7.7 s** |\n| 4,681 directories / 187,000 files, memory left after the scan | 129 MB | **90 MB** |\n| Parsing one Apache listing with 150,000 files | 82 s | **under 8 s** |\n| Memory allocated per file while scanning (nginx style) | about 27 KB | **2.6 KB** |\n| Memory allocated per file while scanning (Apache style) | not measured | **3.3 KB** |\n| Small scan (21 directories), fixed overhead | 209 ms | **33 ms** |\n| Sorting 100,000 URLs for the URL list | 3.1 s | **0.46 s** |\n| Remembering 1 million scanned directories | 209 MB | **48 MB** |\n| An empty `WebDirectory` object | 584 bytes | **264 bytes** |\n| `--resume` of a database with 200,000 directories, peak memory | 198 MB | **119 MB** |\n\n### What changed\n\n**Speed**\n• Fixed slow parsing of large Apache and nginx style listings, which grew faster than the listing size.\n• Listing lines are read without building a DOM for each one. For large pages (200 KB or more) with a plain listing, the lines\nare read straight from the HTML. Anything unusual falls back to the old path.\n• Regular nginx and Apache rows are read directly instead of through a regex, and a file's name no longer needs a second URL\nparse.\n• The finished URL list sorts much faster.\n• A response body is decoded once instead of being copied through several buffers.\n• Workers pick up new directories faster, so short scans finish sooner.\n• Release builds are now optimized.\n• SQLite is tuned for the scan database (cache size, temp storage, batch size) and for the viewer (memory-mapped reads).\n\n**Memory**\n• Scanned directories are remembered as 128-bit hashes instead of full URLs.\n• The directory content check uses a hash instead of a copy of every file name.\n• Lighter per-directory lists and locks.\n• `--resume` rebuilds the tree from one compact entry per directory instead of several copies.\n• The URL list is written line by line, without extra copies.\n• About 10x fewer allocations per file during a scan.\n\n### Also in this release\n• Fixed a crash on Copyparty listings with no files or directories, and an error when resuming a scan whose database was still being written.\n• `--resume` with nothing left to do no longer adds a new run, repeats the speedtest or uploads the URL list again.\n• The link to an uploaded URL list is now stored in the database."
+ReleaseNotesUrl: https://github.com/KoalaBear84/OpenDirectoryDownloader/releases/tag/v4.1.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
