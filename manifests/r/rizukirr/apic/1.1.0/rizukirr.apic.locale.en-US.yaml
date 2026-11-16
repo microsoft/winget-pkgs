@@ -1,0 +1,51 @@
+# Created using wingetcreate 1.12.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: rizukirr.apic
+PackageVersion: 1.1.0
+PackageLocale: en-US
+Publisher: Rizki Rakasiwi
+PublisherUrl: https://github.com/rizukirr
+PublisherSupportUrl: https://github.com/rizukirr/apic/issues
+PrivacyUrl: https://rizukirr.github.io/apic-web/privacy/
+Author: Rizki Rakasiwi
+PackageName: apic
+PackageUrl: https://github.com/rizukirr/apic
+License: GPL-3.0-only
+LicenseUrl: https://github.com/rizukirr/apic/blob/main/LICENSE
+Copyright: Copyright (c) Rizki Rakasiwi
+ShortDescription: A lightweight, Git-friendly CLI tool for designing and collaborating on API contracts.
+Description: apic is a lightweight, Git-friendly CLI for designing, validating, and collaborating on API contracts as plain text you can diff and review.
+Moniker: apic
+Tags:
+- api
+- contract
+- cli
+- rest
+- json
+ReleaseNotes: |-
+  A CLI release for scripts, CI and AI coding agents. Every command can print JSON, exit codes now tell failures apart, `apic check` tests a live server against its contracts, `apic send --dry-run` previews a request without revealing secrets, and apic ships an agent skill. apic is also on Homebrew and has an MSIX for the Microsoft Store. The GUI and the contract format are unchanged, so existing projects need no migration.
+
+  ### Added
+
+  - `--json` on every command. It can go before or after the subcommand, and the command then prints exactly one JSON document on stdout: its result, or `{"error": {"kind", "message"}}` on failure. Nothing is coloured, and warnings stay as text on stderr. `send --json` returns the status, reason, time, headers and body, with JSON bodies as JSON values, other text as a string and binary bodies as base64. COMMAND.md lists what each command prints.
+  - `apic check` sends contracts and compares each live response with the documented ones. The status must be documented, and the body must match the example's shape: every example key present, JSON types equal, and `null` matching anything. Required response headers must be present. It takes `-f` for one contract or a folder ending in `/`, or checks the whole project with no query, plus `--env`, `--var`, `--status` and `--timeout`. Folder and project runs send only GET, HEAD and OPTIONS contracts unless `--unsafe` is given, and report the rest as skipped. A mismatch exits 5 and lists each difference with a JSON path.
+  - `apic send --dry-run` prints the request `send` would build and sends nothing: the target server, method, URL, headers and body, or one line per multipart part. Every variable value shows as `$name`, so env files never leak into a terminal, a log or an agent's context. Undefined variables are listed, and the dry run refuses wherever `send` would, with the same message.
+  - An agent skill for AI coding agents. `skills/apic/SKILL.md` in the [Agent Skills](https://agentskills.io) format teaches Claude Code, Codex, Antigravity, Cursor, pi and Hermes to find, preview, send and check contracts safely, without reading `.apic/env/*.local.toml`. `apic skill` prints it, and `apic skill --install` writes it into the project's `.agents/skills/apic/` and `.claude/skills/apic/`. With `--global` it goes to `~/.agents`, `~/.claude`, `~/.gemini/config` and `~/.hermes` instead. `npx skills add rizukirr/apic` installs the same file.
+  - `apic docs command|sending|contract` prints COMMAND.md, SENDING.md or CONTRACT.md as built into the binary, so the reference always matches the installed version and works offline.
+
+  ### Changed
+
+  - Exit codes now tell failures apart: 1 for usage, setup and file errors, 2 when no contract or template matches a query or several do, 3 for an invalid contract (including `validate` failures), 4 for a network failure, and 5 for a `check` mismatch. In 1.0.0 every failure exited 1, so scripts that test for a non-zero exit need no change.
+
+  ### Packaging
+
+  - Homebrew: `brew install rizukirr/tap/apic` installs the CLI and `brew install --cask rizukirr/tap/apic-gui` the desktop app on macOS, from the `rizukirr/homebrew-tap` tap.
+  - Microsoft Store: the `msix.yml` workflow builds an unsigned MSIX of the GUI for Store submission. The MSI stays for winget.
+  - winget: submissions now set `License` and `ReleaseNotes`, and the manifests carry a `PrivacyUrl`.
+ReleaseNotesUrl: https://github.com/rizukirr/apic/releases/tag/v1.1.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/rizukirr/apic/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
