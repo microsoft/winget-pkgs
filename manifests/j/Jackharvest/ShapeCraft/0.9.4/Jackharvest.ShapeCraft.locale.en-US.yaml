@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: Jackharvest.ShapeCraft
-PackageVersion: 0.9.3
+PackageVersion: 0.9.4
 PackageLocale: en-US
 Publisher: Jackharvest
 PublisherUrl: https://github.com/jackharvest
@@ -25,16 +25,31 @@ Tags:
 - step
 - stl
 ReleaseNotes: |-
-  Offset Face no longer freezes the window on big parts or slow computers, and Windows on Arm gets its own download.
+  Big boards come in with their colours, sketching on them is fast, and editing an early import no longer means
+  waiting for it all over again.
   New
-  - Windows on Arm. Each release now has its own Arm64 download (MSI and portable zip) for Snapdragon and other Arm
-    laptops, so ShapeCraft runs natively instead of through emulation, and updates pick the Arm64 file. Thanks
+  - Imports keep colours set on single faces. STEP files and .shapr projects that colour faces one by one (a PCB's
+    solder mask, pads and sockets) come in with those colours, any number of them per body, and STEP exports write
+    them back out. Thanks @chickey (#65).
+  - Offset Edge on a face's outline. Sketching on a face, pick edges of the body lying on the sketch and Offset
+    Edge them (Chain grows them to the whole outline); clicking the lit button of the running sketch tool puts it down
+    so you can pick. Double-clicking the body there now leaves the sketch with the body selected. Thanks
+    @chickey (#67).
+  - Windows on Arm download. The native Arm64 MSI and portable zip that missed 0.9.3 are in this release. Thanks
     @Hobbesdcc (#61).
   Changed
-  - Offset Face works in the background when it takes a while. A quick offset lands at once as before; a long one
-    shows a small card with how long it has been working and Cancel, while the window keeps drawing (so the
-    desktop no longer says ShapeCraft is not responding). Its live preview is worked out in the background too and
-    gives up after 20 seconds instead of holding the window. Thanks @jan-tdy (#59, #52).
+  - Changing a History step only reruns that step and the ones after it. On a big import, changing a later
+    extrude went from about a minute (the whole file was read again) to a fraction of a second. Thanks
+    @chickey (#68).
+  - Sketching on a face of a big model is smooth, and the model stays solid while you sketch on it, its colours
+    softened, so a dark board doesn't vanish. Thanks @chickey (#67).
+  - Shell, Fillet and Chamfer work in the background with Cancel when they take a while, as Offset Face does, so
+    the window keeps drawing on a slow computer. Thanks @jan-tdy (#59).
+  Fixed
+  - .shapr import: closed walls stored as rim rings come in whole. A body whose wall lost a strip and turned
+    invalid now imports with the right volume and size. Thanks @pablohc (#63, #64).
+  - .shapr import: bodies sharing a name land in their own folders, and a hidden folder hides the bodies it holds,
+    not others. Thanks @pablohc (#66).
 
   Alpha: keep copies of anything important. ShapeCraft updates itself from here on: it downloads new
   versions in the background and installs them when you close it.
@@ -50,6 +65,6 @@ ReleaseNotes: |-
   Sideloadly or a similar tool, signed with your own Apple account (a free one re-signs every 7 days).
   Or build it from source: docs/ios.md.
   Check a download against SHA256SUMS.txt: shasum -a 256 FILE (macOS, Linux) or Get-FileHash FILE (Windows).
-ReleaseNotesUrl: https://github.com/jackharvest/shapecraft/releases/tag/v0.9.3-alpha
+ReleaseNotesUrl: https://github.com/jackharvest/shapecraft/releases/tag/v0.9.4-alpha
 ManifestType: defaultLocale
 ManifestVersion: 1.28.0
