@@ -1,0 +1,99 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.22.0
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Fixed
+  - Fixed slow streaming of Gemma tool calls with large arguments.
+  @oh-my-pi/pi-coding-agent
+  Breaking Changes
+  - Moved binary analysis from the standalone ida and ghidra tools into the backend-neutral dsm namespace (xd://eval/dsm).
+  - Replaced the ida.enabled, ida.maxOpen, and ida.idleCloseSec settings with disassembler.backend, disassembler.maxOpen, and disassembler.idleCloseSec; shared disassembler database APIs are now available under @oh-my-pi/pi-coding-agent/disasm.
+  Added
+  - Added Tern plan review editing and comments: double-click plans to edit them, select text to add Google Docs-style comments, and send comments to Refine.
+  - Added Ghidra support with automatic setup of Ghidra, JDK, and PyGhidra when analysis is explicitly requested; Auto mode uses an installed IDA Pro when available and otherwise falls back to Ghidra.
+  - Added support for sharing live analysis databases with child agents through db.handle() and dsm.open(handle).
+  - Added a Force Remove option to worktree.onExit that removes session-created worktrees without prompting, including worktrees with uncommitted changes; new commits remain on the worktree branch.
+  Changed
+  - Updated Tern plan review with a single Approve control, comment-aware Refine option, model selection, and a Save action that writes the plan while keeping review open and plan mode active.
+  - Plain executable reads now display Mach-O, ELF, and PE metadata without opening an analysis database or downloading a backend; request an overview, function details, or dsm.open() to begin analysis.
+  - Improved the model switcher (Alt+P / /switch) with provider filtering and per-switch thinking-level selection. In Tern, it now opens above the composer with integrated search, provider and Task/Main filters, and a thinking-level slider.
+  Fixed
+  - Deleting or moving large directory trees inside a project no longer stalls language-server file watching (#19490 by @H4vC).
+  - Reduced CPU and memory usage for long-running subagents as their sessions grow (#19486 by @H4vC).
+  - Fixed commit.draft() incorrectly classifying files deleted or renamed through bash or eval as “Not yours”; they now appear under Review.
+  Removed
+  - Removed the legacy standalone disassembler tools and their associated prompt instructions.
+  - Removed the Copy and Edit-in-editor buttons from the Tern plan review sheet; use selection copying and double-click editing instead.
+  @oh-my-pi/collab-web
+  Fixed
+  - Improved streaming performance in the collab viewer, preventing long replies from becoming progressively slower as they are received.
+  @oh-my-pi/pi-natives
+  Breaking Changes
+  - TtyWriter now requires a drain threshold and callback and only supports independently reopenable TTYs. Its pending UTF-8 byte bounds are reported conservatively.
+  Changed
+  - Large terminal repaints are handled more efficiently, reducing JavaScript-thread work and releasing oversized buffers after output drains.
+  Fixed
+  - Fixed stalled terminal writers continuing to emit output or leaking file descriptors after shutdown.
+  - Fixed terminal output preserving Unicode across chunk boundaries and safely replacing malformed surrogate sequences.
+  @oh-my-pi/pi-tui
+  Breaking Changes
+  - Terminals that support output backpressure must now implement onOutputDrain(callback), which returns an unsubscribe function; terminals without backpressure can omit both pendingOutputBytes and onOutputDrain.
+  - Updated PlanReviewOverlay options to use PlanReviewOverlayChoice objects and report choice IDs to onPick and selectOption. Refine and Save actions now reflect plan feedback and saving behavior; removed disabledIndices and externalEditorName, and updated describe to receive DescribeContext.
+  Added
+  - Added configurable model search placement, provider scopes, and an optional thinking-level slider to ModelPickerComponent; selected thinking levels are reported through onPick metadata. The native picker sheet now supports anchoring, scope styling, level display, and icon actions.
+  - Added a native plan review document and dock with editable and commentable plans, quote annotations, plan-edit notifications, Approve, Save, and Cancel actions, plus model selection.
+  Changed
+  - Provider scopes now show only the selected provider's models when a provider is chosen, with scope cycling able to return to the full model list.
+  - Updated thinking-level controls to use left and right arrow keys, and refreshed the slider and footer hint presentation.
+  - Retitled the plan-saving overlay to “Save plan” and updated its action label.
+  Fixed
+  - Fixed slow scrolling and typing in long agent transcripts.
+  - Fixed slow typing and cursor movement in drafts longer than 256 lines.
+  @oh-my-pi/pi-wire
+  Added
+  - Added optional picker icons for tooltips and accessible names, plus an option to control the placement of the search interface.
+  - Added buttons, menu, and document component kinds, including menu-row action state changes and document text editing, commenting, and uncommenting events.
+  What's Changed
+  - perf(coding-agent): stop copying the full message list and journal per publisher flush by @H4vC in https://github.com/can1357/oh-my-pi/pull/19486
+  - perf(tui): stop editor wrap-cache thrash and full visual-line rebuilds by @H4vC in https://github.com/can1357/oh-my-pi/pull/19488
+  - perf(ai): scan Gemma in-band tool calls incrementally by @H4vC in https://github.com/can1357/oh-my-pi/pull/19487
+  - perf(coding-agent): forget vanished directories in the LSP file watcher without full scans by @H4vC in https://github.com/can1357/oh-my-pi/pull/19490
+  - perf(collab-web): keep finished Markdown blocks' DOM while streaming by @H4vC in https://github.com/can1357/oh-my-pi/pull/19485
+  - perf(tui): reuse the agent transcript viewer's rows between paints by @H4vC in https://github.com/can1357/oh-my-pi/pull/19489
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.21.0...v18.22.0
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.22.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
