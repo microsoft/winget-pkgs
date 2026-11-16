@@ -1,0 +1,76 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Cookieboty.Nomi
+PackageVersion: 2.3.17
+PackageLocale: zh-CN
+Publisher: Cookieboty
+PublisherUrl: https://withnomi.app/
+PublisherSupportUrl: https://github.com/Cookieboty/nomi-ai/issues
+PrivacyUrl: https://withnomi.app/privacy.html
+PackageName: Nomi
+PackageUrl: https://withnomi.app/download.html
+License: MIT
+LicenseUrl: https://github.com/Cookieboty/nomi-ai/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Cookieboty
+ShortDescription: 桌面上的 AI 伙伴：接上任意模型，自己干活，也能把专业的活派给编程助手。
+Description: |-
+  Nomi 是住在你桌面上的 AI 伙伴：接上任意模型，自己动手干活，也会把专业的活派给专业的 AI。模型、编程助手、MCP 与本地工具都接到一处，由 Nomi 统一调度。
+  模型只接一次就能给所有 AI 使用：添加一次供应商，Nomi 自己和 Claude Code、Codex、Gemini CLI、Grok、dsh 都能用它的任意模型，也可以全部换成本地模型。本机网关自动识别并互转 Anthropic Messages、OpenAI Responses、OpenAI Chat Completions 与 Gemini generateContent，流式、工具调用、推理、图片和上下文压缩都照常工作。
+  任务可以限定能访问的文件夹，编程助手有独立的两栏工作区，桌面角色会显示台词与确认气泡。应用为 Go 内核加原生 WebView，单个安装包约 39 MB，按当前用户安装，不需要管理员权限。
+Tags:
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  Nomi· 诺米 2.3.17
+  派出去的子任务更靠得住了：断流和出错会自己重试，改过的文件会带回主对话；对话里提到的文件，点一下就在侧栏打开。
+  - 让模型回复在还没调用工具时断开（断流、连接重置、服务端 5xx、429 等）自动重发这一步，最多 5 次，间隔逐次拉长。鉴权、额度、上下文超长这类错误不重试。
+  - 让委派遇到瞬时错误或编程助手中途崩掉时自动重试，最多 5 次。后台委派重试后仍失败，Nomi 会在对话空闲时接手，换一个编程助手或自己完成。
+  - 把子任务改过的文件带回主对话：结果里列出改了哪些文件、各增删多少行，下面是和子任务面板同一张「已编辑 N 个文件」卡片，可以逐个打开 Diff。
+  - 让 Nomi 派出去的子代理可以接着说：在会话详情里点开一次委派，打开的是它自己的编程助手标签，可以直接继续对话。
+  - 点对话里的相对路径链接或像路径的行内代码，在侧栏打开对应文件，不再交给系统浏览器。
+  - 给侧边标签区、预览面板和内置浏览器加上切换和铺满动画。标签之间有滑动的指示条，设置页和分段控件也用同一套。
+  - 让右侧的子任务标签和主对话重新对齐：分栏时标签栏回到标题栏那一行，会话顶部和输入框底边与主对话齐平。
+  细节
+  - 带工具的 Agent 请求默认重试 5 次；计划还没做完、但一直有新进展时会继续推进，最多提醒 8 次。
+  - 上一次以失败收场的标签不再给新委派复用；出错或被停下的委派标签会一直留着，可以在里面接着回复，和其他已结束的标签一样闲置一周后才自动收起。失败或被停下的一次也会把已经改了的文件带回来，并写明改动落在哪个目录。
+  - 在子任务里接着说的那一轮、委派前就有改动的文件，现在也会算进带回的改动里。
+  - 会话详情的 Agents 按状态分组：进行中、出错、已完成，组内新的在前。标签、会话详情和悬停卡片上的图标与名字按子代理实际的来源显示。
+  - 侧边聊天、打开的文件和预览标签按会话分别记住；新开的编程助手标签拿到会话后，内容会跟过去。
+  - 打开文件页和改动页的文件树可以收起，会记住你的选择。
+  - 内置浏览器能识别不允许嵌入的网页和一直加载不出来的页面。
+  - 按文件名查找时跳过 node_modules、vendor、dist 等目录。
+  English
+  Delegated sub-tasks are more dependable: dropped streams and errors retry on their own, and the files they changed come back to the main chat. Click a file mentioned in the chat to open it in the side pane.
+  - Resend a step automatically when the model's reply breaks before any tool ran (dropped stream, connection reset, server 5xx, 429 and similar), up to 5 times with growing delays. Auth, quota and context-length errors are not retried.
+  - Retry a delegation automatically on transient errors or when the coding assistant crashes mid-run, up to 5 times. If a background delegation still fails, Nomi takes over while the chat is idle, with another coding assistant or on its own.
+  - Bring a sub-task's changed files back to the main chat: the result lists each file with lines added and removed, with the same "Edited N files" card as the sub-task pane underneath, so you can open each diff.
+  - Keep talking to sub-agents that Nomi sent out: opening a delegation from session details opens its own coding-assistant tab, where you can continue the conversation.
+  - Open relative file links and path-like inline code in the chat in the side pane instead of the system browser.
+  - Animate the side tabs, the preview pane and the built-in browser when switching and going fullscreen. A sliding indicator moves between tabs, and settings and segmented controls use the same one.
+  - Line the sub-task tabs on the right up with the main chat again: in split view the tab row sits back in the title bar, and the conversation top and the composer bottom match the main chat.
+  Details
+  - Agent requests with tools retry 5 times by default, and an unfinished plan that keeps making progress is nudged forward, up to 8 times.
+  - A tab whose last task failed is no longer reused for new delegations. Errored or stopped delegation tabs stay open so you can keep replying, and are tidied up after a week idle like other finished tabs. Failed or stopped runs also bring back the files they already edited and name the folder the changes landed in.
+  - Follow-up turns in a sub-task and files that already had changes before the delegation are now included in the changes brought back.
+  - Agents in session details are grouped by status: running, failed, then done, newest first in each group. Icons and names on tabs, in session details and on hover cards follow the sub-agent's real source.
+  - Side chats, open files and preview tabs are remembered per session, and move over once a new coding-assistant tab gets its session.
+  - The file tree on the open-file and changes pages can be collapsed, and the choice is remembered.
+  - The built-in browser detects pages that refuse to be embedded and pages that never finish loading.
+  - File lookup by name skips node_modules, vendor, dist and similar folders.
+ReleaseNotesUrl: https://github.com/Cookieboty/nomi-ai/releases/tag/v2.3.17
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://withnomi.app/docs.html
+- DocumentLabel: 更新日志
+  DocumentUrl: https://withnomi.app/changelog.html
+- DocumentLabel: 功能一览
+  DocumentUrl: https://withnomi.app/features.html
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
