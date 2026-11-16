@@ -1,0 +1,53 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: EKKOLearnAI.EkkoStudio
+PackageVersion: 0.8.25
+PackageLocale: zh-CN
+Publisher: Ekko Studio Contributors
+PublisherUrl: https://hermes-studio.ai/
+PublisherSupportUrl: https://github.com/EKKOLearnAI/ekko-studio/issues
+PackageName: Ekko Studio
+PackageUrl: https://hermes-studio.ai/
+License: BUSL-1.1
+LicenseUrl: https://github.com/EKKOLearnAI/ekko-studio/blob/HEAD/LICENSE
+Copyright: Copyright © 2026
+ShortDescription: 本地优先的 AI 工作区，支持多 Agent 聊天、编码和可视化工作流。
+Description: 本地优先的 AI 工作区，支持多 Agent 聊天、编码和可视化工作流。提供桌面应用和可自托管的 Web 控制台，支持 Hermes Agent、Ekko Agent，以及包含 Claude Code、Codex 在内的 14 种 Coding Agent 集成。在同一个工作区中管理对话、群组协作、语音、文件和设备。
+Tags:
+- hermes
+- hermes-agent
+- 人工智能
+- 大语言模型
+- 智能体
+- 自主智能
+ReleaseNotes: |-
+  Studio v0.8.25 中文更新说明
+  日期：2026-11-16
+  - Provider 改为按 Studio 账户管理，同一账户的所有 Profile 共用 Provider 池；迁移时同名项优先保留 default Profile，备份原配置并保留旧模型路由别名，已有会话续接解析到保留项 (#3831)
+  - 新增供 Hermes、Ekko、scoped Coding Agent 和插件 Agent 使用的统一模型网关，支持 Chat Completions、Responses、Anthropic Messages 和 Gemini Contents、流式回复与工具调用；模型网关接入现有 HTTP 插件钩子，保留鉴权及分享 key 的模型权限、预算约束 (#3831)
+  - 兼容旧 App 对模型凭据的校验：已配置凭据使用非秘密就绪标记，避免误报缺少密钥；为新 App 声明网关认证能力并提供脱敏元数据，回传标记在业务处理前清除 (#3834)
+  - 修复 BOT 跟随全局模型或使用已有网关投影配置时模型解析为空、无法聊天的问题，继续遵守模型隐藏与协议限制 (#3835)
+  - 修复网关迁移后 Ekko 自动及手动上下文压缩重复拼接模型路由的问题，兼容旧辅助配置与 Provider 别名，保留模型名中的斜杠、既有摘要和历史快照 (#3833)
+  - 澄清回答等待服务端确认后再关闭问题；连接重建、页面切换或发送失败时保留回答以便重试，防止重复提交，并区分超时与已接受结果，覆盖聊天及 BOT 会话 (#3829)
+  - 审批回复按目标会话的 Profile 发送，等待服务端确认后关闭；失败时保留请求并显示重试提示，连接超时后丢弃未发送决定，正确处理 BOT 私有确认与自动拒绝 (#3836)
+  - 受信任插件前端改用独立同源页面，移除 iframe 沙箱和资源加载限制，可直接联网并加载远程模块、样式、图片、字体及媒体；插件可访问宿主 DOM 和浏览器存储中的登录凭据，SDK 调用仍校验权限，浏览器策略仍适用 (#3828)
+  - 修复插件 context.transform 因宿主消息中可选字段为 undefined 而失败的问题：省略可选对象字段，保留严格 JSON 输入及插件返回值校验 (#3827)
+  - 修复原生会话事件因嵌套可选字段为 undefined 而无法送达插件的问题；补充事件权限、原生会话可见性及页面关闭后的后台刷新生命周期文档 (#3832)
+  - 移除 BOT 模型选择弹窗底部的全局模型状态及重置入口，保留搜索、Provider 列表与模型选择 (#3837)
+  涉及 PR：#3828、#3829、#3827、#3831、#3834、#3836、#3835、#3833、#3832、#3837。
+  发版准备 PR：#3838。
+  完整版本对比：https://github.com/EKKOLearnAI/ekko-studio/compare/v0.8.24...v0.8.25
+  已知限制与验收边界
+  - #3831：上游 Chat 流式请求未显式要求 usage 时，可能缺少最终 token/cost，分享 key 计费及预算覆盖仍待补齐；删除内置 Provider 尚未同步删除账户 Provider 记录。
+  - #3831：CodeBuddy + fun-claude 文件校验及群聊 Codex + fun-claude 工具执行仍有未定位问题；4 个 Provider 因凭据缺失/失效或重新登录未完成真实推理。Qoder global 原生模型选择、失效工作流模型及 Cron 原生 Gateway 服务身份/启动状态仍有环境阻塞。
+  - #3831：bedrock_converse、codex_app_server 不支持通过 HTTP 协议网关转换，返回 501；STT、移动授权、对外发送、视频和图像编辑等链路未完整验证。
+  - 同名 Provider 迁移优先保留 default；端点或凭据不同也会合并，同名旧会话转向保留端点，原模型需在该端点可用。迁移保留源备份，不代表保留多个同名端点。
+  - #3828：受信任插件前端获得同源访问能力，包括宿主 DOM 和浏览器保存的登录凭据；这是本次已合并的权限变化，日志已明确说明。
+  - 自动构建及 CI 检查不代表真实 Provider 全组合、首次启动、macOS 权限、Windows/Linux 实装升级或全部业务链路已验收；真实安装升级测试仍未覆盖。
+ReleaseNotesUrl: https://github.com/EKKOLearnAI/ekko-studio/releases/tag/v0.8.25
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://hermes-studio.ai/#/docs/getting-started
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
