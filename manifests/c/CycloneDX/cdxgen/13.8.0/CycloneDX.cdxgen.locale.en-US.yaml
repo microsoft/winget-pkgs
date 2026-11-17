@@ -1,0 +1,67 @@
+# Created with WinGet Updater using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: CycloneDX.cdxgen
+PackageVersion: 13.8.0
+PackageLocale: en-US
+Publisher: OWASP Foundation
+PublisherUrl: https://owasp.org/
+PublisherSupportUrl: https://github.com/CycloneDX/cdxgen/issues
+Author: CycloneDX
+PackageName: CycloneDX Generator (cdxgen)
+PackageUrl: https://github.com/CycloneDX/cdxgen
+License: Apache-2.0
+LicenseUrl: https://github.com/CycloneDX/cdxgen/blob/HEAD/LICENSE
+ShortDescription: A polyglot tool and a library for generating various Bill of Materials in CycloneDX specification.
+Description: Generate Software Bill of Materials (SBOM) for most applications and container images with a single command. Generate Operations Bill of Materials (OBOM) for Linux and Windows hosts. Integrate with any CI/CD pipeline. Automatically submit the generated BOM to your dependency track server for analysis.
+Moniker: cdxgen
+Tags:
+- bom
+- cbom
+- containers
+- cyclonedx
+- docker
+- oci
+- owasp
+- package-url
+- purl
+- saasbom
+- sbom
+- sca
+- software-bill-of-materials
+- supply-chain
+ReleaseNotes: |-
+  13.8.0
+  This is a security release above all. A hardening pass over every reader, parser and child process closes twenty-six advisories, described under Security below. Alongside it, the cryptographic inventory classifies digest-paired signatures correctly, child processes no longer receive what the environment removed under Deno, deep Rust scans read the build directory layout Cargo 1.100 writes, and conda packages carry their own purl type. The default spec version stays 1.7, and 1.6 and 1.7 output is unchanged.
+  Security
+  Scanned content can no longer reach files and hosts it must not: a crafted tree cannot make cdxgen read host files into the BOM (GHSA-hxx2-g8w7-cqx4), server clients cannot obtain host inventories the host-scope refusal blocks (GHSA-qx8f-v3pp-598r), OBOM probes refuse symbolic links planted in home and install directories (GHSA-8g4v-6vgc-mr38), an ASAR archive cannot write outside its extraction directory (GHSA-72jc-54pr-qq5w), Windows scans no longer run executables shadowing git, go, node or dotnet from the scanned tree (GHSA-g4w7-2q9v-h6q2), and allowlists for git hosts, server paths and registries compare what the parsers actually produced (GHSA-xmpw-48gx-8x9x).
+  Credentials stay where they belong: scanned project files no longer copy them into the BOM (GHSA-4cc7-jx94-rr7r), formulation records only allowlisted environment names (GHSA-hg24-7q3v-56qv), logs and the dry-run activity summary are redacted (GHSA-6pwr-9gq6-x9vv), network-path URLs lose theirs in BOM text (GHSA-c6q7-gww9-hr98), and registry or API tokens are spent only on requests cdxgen composed itself (GHSA-w9pw-r782-3752).
+  Build tooling runs only when the operator allowed it (GHSA-2m6r-6qmf-pj6p). A scanned repository cannot name the compiler a C or C++ scan runs (GHSA-4p2j-75xr-7vc4) or a git filter through its own .git/config (GHSA-v75x-hmmx-gm3m), evidence generation through atom no longer allows command injection (GHSA-mh5c-4cv8-gh6c), Python package names cannot arrive at pip as options (GHSA-3j5q-wq9r-59wc), Swift evidence drops compiler plugin options from a committed .build directory (GHSA-98x4-h74q-h84h), tracebom re-checks library paths after the sandbox exits (GHSA-5qmg-32jg-748j), and the --bom-audit gate cannot be made to pass by the repository being scanned (GHSA-w6h8-55ch-5h4h).
+  Denial of service is bounded: quadratic parsing and backtracking expressions are gone from the project file parsers (GHSA-246q-m53q-rj22), crafted files cannot grow memory without limit (GHSA-6pc3-x5q2-853p), container images and root filesystems cannot stall or crash a scan (GHSA-3g3f-mwj3-2p7p), repository-supplied slices and analyzer output are bounded (GHSA-wmjx-38ff-fh2w), server, git, registry and TEA requests carry deadlines (GHSA-3f44-hm6h-jhgp), Meson wrap files cannot pollute prototypes (GHSA-p8wx-9px6-7rmp), and terminal escapes can no longer forge a success line in cdx-verify output (GHSA-6f4g-m372-8939).
+  The same pass removed plain-object key lookups over scanned data, gave every scan path a single walked resolve for links, and kept manifest, lockfile and podspec credentials out of npm and pod metadata. Secure mode now turns on whenever the Node.js permission model is active.
+  Cryptographic assets
+  Signature names that carry a digest but no padding scheme now resolve to their own family: DSA names such as SHA384withDSA and the OpenSSL CCM8 suites are the two reports that led here (#4793, #4794), and the same window fixed the RSA spellings, from RSASHA256 to the 1.2.840.113549.1.1.11 object identifiers (#4804). A digest pairing a vulnerable padding scheme no longer marks the asset quantum-safe. The declaration source maps are regenerated to match.
+  Child processes and runtime isolation
+  Under Deno, spawnSync merges the parent environment under the env option, so a variable a scan removed from a child's environment reached it anyway; children now start with exactly the environment cdxgen chose, additive options keep the Node compatibility path, and shell invocations with metacharacters are refused outright (#4788). GITHUB_TOKEN is handed to the cdxrs helper per request and only for lookups cdxgen composed. Container daemon requests carry an overall deadline, pip install steps run without a shell on Windows, and the safe spawn wrapper validates the working directory on every call. safer-exec 1.3.0 provides the path resolution this builds on.
+  Rust
+  Deep mode reads dep-info from both build directory layouts: the deps/<crate>-<hash>.d layout Cargo wrote before 1.100 and the build/<package>/<hash>/out/ layout 1.100 writes now, keyed by the package name the lock file uses, so hyphenated packages such as proc-macro2 receive their files. The build directory comes from cargo metadata, which also covers CARGO_TARGET_DIR, a build.build-dir setting and per-subproject target directories in multi-project scans; several dep-info files of one package are unioned and stale artefacts are dropped (#4786).
+  Python, pixi and conda
+  conda packages carry pkg:conda purls with the build, channel, subdir and type qualifiers of the purl-spec definition, from pixi locks of versions 5 to 7, from environment.yml files, which cdxgen now parses, and from the conda-meta records of installed environments. A pixi project with a current lock no longer loses every conda package, pip installs inside a conda environment stay pkg:pypi, and INSTALLER-based attribution removes the duplicate components an installed environment used to produce (#1809). pip runs its per-package installs from a temporary directory.
+  CycloneDX 2.0 and exports
+  A failed generation no longer writes an empty BOM file at --spec-version 2.0; the manufactured document shell also stopped reaching the stdout output, the Dependency-Track and TEA submissions and the server response, and the exit codes now match 1.7 (#4771). The protobuf export translates environmentVars entries and moved to cdx-proto 2.3.1.
+  Evidence and evinse
+  The callsites slice runs for every atom language, gains --exclude and --annotate, and repotests assert its evidence (#4690, #4692). Native type maps come from atom-parsetools 2.0.0 with atom 4.0.0, and Svelte components are parsed without importing atom-parsetools (#4721, #4722).
+  Ecosystems and packaging
+  Installed npm packages are no longer reported as vendored pkg:generic directories in multi-type scans (#4796). The .NET 11 container images moved to the generally available SDK and repo tests use dosai 5.0.0 (#4576). cdxgen-plugins-bin 4.3.1 carries the per-request GitHub token capability, the JSR package publishes again under the registry size limit (#4772), and the build moved to pnpm 12.18.0 with refreshed dependencies.
+  Thanks
+  Reported the bugs fixed here:
+  - John B Joseph: #4793 (comment), #4794, #4793
+  - Haksung Jang (장학성): #4796
+  - Inanna Malick: GHSA-c6q7-gww9-hr98
+  Helped with ideas, sample code, reproducers and investigation:
+  - John B Joseph: #4794, #4793
+  - Haksung Jang (장학성): #4796 (comment)
+  The security fixes in this release were reported through GitHub Security Advisories; the reporters are credited on each advisory. The release preparation, from the milestone to these notes, was carried out by AI agents.
+ReleaseNotesUrl: https://github.com/cdxgen/cdxgen/releases/tag/v13.8.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
