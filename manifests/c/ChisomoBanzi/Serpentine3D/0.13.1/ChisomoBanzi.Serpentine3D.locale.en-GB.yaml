@@ -1,0 +1,55 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: ChisomoBanzi.Serpentine3D
+PackageVersion: 0.13.1
+PackageLocale: en-GB
+Publisher: Chisomo Banzi
+PublisherUrl: https://github.com/chisomobanzi
+PublisherSupportUrl: https://github.com/chisomobanzi/Serpentine3D/discussions
+PackageName: Serpentine3D
+PackageUrl: https://chisomobanzi.github.io/Serpentine3D/
+License: MIT
+LicenseUrl: https://github.com/chisomobanzi/Serpentine3D/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Chisomo Banzi
+ShortDescription: The open-source NURBS modeller for things that get built.
+Description: |-
+  Serpentine3D is an open-source NURBS modeller for things that get built: exact curves and surfaces, drawing sheets a workshop can build from, a command line that speaks Rhino, and an assistant that can drive all of it. It runs on Linux, Windows and macOS, and is free with no account.
+  Exact geometry comes from NURBS curves, surfaces and solids on the OpenCASCADE kernel, not meshes. Rhino .3dm, STEP, DXF, SVG, OBJ, FBX and STL files go in and out; glTF, USD and 3MF export; E57 point clouds import. The command line speaks Rhino: loft, sweep2, filletedge, booleanunion and more than 200 others, with Rhino's aliases, object snaps, layers and a gumball that pushes faces and rounds edges by hand.
+  Drawings come straight from the model: A4 to A0 sheets with live detail views, hidden-line views, dimensions, hatching and title blocks, printed to vector PDF. An assistant that can see: describe a change and it runs the commands, looks at the viewport to check its work and fixes its own mistakes, all undoable. Use Claude, a ChatGPT account, an OpenAI key, or a local, open-weight model.
+  Script it in the built-in editor, batch it with serp3d-batch, or let any MCP client drive a live session. Checks before you build include zebra stripes, curvature, draft analysis and printcheck for 3D printing.
+Tags:
+- 3d
+- cad
+- drafting
+- nurbs
+- step
+- stl
+ReleaseNotes: |-
+  Serpentine3D 0.13.1 brings a Rhino file's layout pages in as sheets, fixes three things that got in the way of working on sheets, and makes curves smooth and big Rhino files quicker to save.
+  Sheets
+  - A Rhino file's layout pages come in as sheets. Each page becomes a sheet named after it, on the paper it was set up on, with its notes, linework, leaders, hatches, dimensions and blocks, and detail views looking where Rhino's do at the same scale. Title-block fields for the page name and the document's text are filled in. Until now everything on a layout page landed in the model at paper coordinates: a film set of 379 model objects came in as more than 10,000.
+  - Top, Front, Perspective and the other views turn the detail you are in (#131), typed, from the pane's menu or as F1 to F5, as one undo step. Details can be Isometric too.
+  - Locking a detail locks its view, not its frame (#130), as in Rhino: its camera and scale stay through panning, zooming and named views, while the frame still moves, resizes and turns. The lock is a box in Properties as well as detaillock.
+  - A detail's corners snap (#129), dragged or picked, with the snap marker showing, and Scale, Scale1D, Move and the rest take their points on the paper.
+  - lock, lockother and unlockall work on sheets. A locked note, line, dimension, hatch or detail frame is still drawn and snapped to but no longer picked, so it can't be nudged by accident.
+  Drawing and speed
+  - Curves and edges are drawn smooth (#168): each drawn piece now turns at most 1 degree from the next instead of 14, so a gentle curve no longer shows corners when zoomed in. The geometry was always exact; only its picture changes.
+  - The first save after opening a big Rhino file is four times faster: meshes on hidden layers are now read from the file in one go. A 522 MB film set's first save went from two minutes to 30 seconds.
+  - A see-through object no longer slows the whole view down. On the same film set, one see-through surface among ten thousand objects took a frame from 136 ms to 88 ms on an RTX 5070.
+  - Dimensions inside a scaled block say what the block says, as in Rhino and AutoCAD, and Rhino's alternate units come in under a number that still measures.
+  File format: a drawing holding a Rhino dimension with alternate units is saved as format 10 and needs 0.13.1 to open. A sheet item's new lock is ignored by 0.13.0, which opens such a sheet whole, just unlocked. Every other drawing is saved as before.
+  Full changelog
+  Validation
+  - Linux full suite: 5,698 passed, 28 skipped; headless geometry/export smoke passed.
+  - Windows full suite: 5,681 passed, 45 skipped.
+  - Mac mini full suite (Apple Silicon, macOS 26.2): 5,677 passed, 37 skipped. 8 failures and 2 errors are the known macOS ones (account connection, SpaceMouse, text/font and Make2D checks) that also fail on 0.13.0; the other 2 are font-choice checks that fail on macOS only when the test happens to pick a hidden system font.
+  - Rhino layout pages checked on McNeel's openNURBS example and a 522 MB film set (12 sheets); every one of the film set's 168 meshes read from the file matches rhino3dm's own read.
+  - AppImage: version 0.13.1, all 150 packaged files match the release source, packaged self-test passed. 0.13.0's end-to-end run passed 15 of 15 checks in the packaged build; this release's own checks passed 5 of 5 (a layout page coming in as a sheet, meshes read from the file, curves in 1-degree pieces, sheet item locks saved and reopened); the 17 live smoke checks over the app's own controls passed.
+  - Windows installer and macOS disk image builds passed their packaged self-tests.
+ReleaseNotesUrl: https://github.com/chisomobanzi/Serpentine3D/releases/tag/v0.13.1
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://chisomobanzi.github.io/Serpentine3D/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
