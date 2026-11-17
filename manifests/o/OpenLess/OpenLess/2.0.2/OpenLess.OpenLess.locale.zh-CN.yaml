@@ -1,0 +1,82 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: OpenLess.OpenLess
+PackageVersion: 2.0.2
+PackageLocale: zh-CN
+Publisher: openless
+PublisherUrl: https://github.com/Open-Less
+PublisherSupportUrl: https://github.com/Open-Less/openless/issues
+PackageName: OpenLess
+PackageUrl: https://github.com/Open-Less/openless
+License: MIT
+LicenseUrl: https://github.com/Open-Less/openless/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 OpenLess contributors
+ShortDescription: 按住快捷键说话，松开即得润色后的文字
+Description: |-
+  OpenLess 是一个跨平台（macOS & Windows）语音输入应用，对标 Typeless、Wispr Flow、Lazy、Superwhisper 等商业语音输入工具的 完全开源 替代品。
+  把光标放在 ChatGPT、Claude、Cursor、Notion、邮件、聊天框任意输入框里，按一次全局快捷键说话——OpenLess 会录音、转写、按你选的模式润色，把结果直接插入光标位置。插入失败时会自动复制到剪贴板，尽量保证「你说过的话不丢」。
+  不像那些只把语音转成「逐字稿」的输入法，OpenLess 的核心模式是 AI prompt 模式：你只管乱讲，它自动补上结构、列出约束、整理出有上下文的 prompt，复制粘贴就能直接喂给 ChatGPT / Claude / Cursor。
+Tags:
+- 听写
+- 语音识别
+- 语音转文字
+- 转写
+- 转录
+ReleaseNotes: |-
+  OpenLess 2.0.2+build.20261115
+  本页是正式版（Stable）。源码即已发布的 v2.0.2-Beta.7-tauri（提交 e9ff403d），只把版本身份从 2.0.2-Beta.7+build.20261113-6a7b5bb 改为 2.0.2+build.20261115。版本号不含 - 预发布段，因此未手动选择更新渠道时走 Stable 更新源。没有加入该标签之后的功能或修复。
+  比较范围：上一公开正式版 v2.0.1-tauri → v2.0.2-tauri。下面汇总已发布的 2.0.2 Beta.1 至 Beta.7。不包含 2026-11-15 之后尚未进入该标签的改动。
+  macOS 用户首次安装提示
+  下载 DMG 拖入 /Applications 后，若 Gatekeeper 提示「OpenLess 已损坏」，在终端运行：
+  xattr -cr /Applications/OpenLess.app
+  当前 macOS 构建使用 ad-hoc 签名，未做 Apple 公证。Windows 安装包未签名，SmartScreen 可能提示未知发布者。
+  相对 2.0.1 的变化
+  录音、胶囊与输入
+  - 多屏胶囊可选择跟随鼠标或在所有屏幕显示，默认跟随鼠标；镜像与主胶囊共用同一识别会话。
+  - 本地模型加载与麦克风解耦：停止先释放麦克风再转写，取消不回放已取消音频。录音在识别器准备完成前开始，并用有界缓冲保留开头音频。
+  - 限制部分本地模型的空闲缓存和推理线程，降低驻留与反复重载。
+  - 可选低内存后台模式和一次性原生录音胶囊。语音处理接入 MicYou，降噪、增益、AGC 和噪声门在实验页的第三级里调整。
+  - Windows 支持本地语音唤醒、TSF 组合输入，以及纯文本插入切换（Shift+Insert）。胶囊可选择显示目标，关闭时保持无边框。
+  - 修复打开语音编辑面板后 Windows 主窗口可能卡死的问题。macOS 终稿插入不再误入复制兜底；输入目标失效时保留已完成转写并进入复制兜底。
+  - 新增 macOS 辅助功能授权浮动引导。远程输入可选转发本会话的实时识别文字。
+  - 兼容型长录音在未单独限制时默认分段，并尽量在较安静处切开；显式要求整段上传的设置不会被默认分段覆盖。
+  识别、模型与词典
+  - Android arm64 可使用本地识别，并支持云端回退、自动切换和本地/云端竞速。
+  - 支持 Gemini Live 实时逐字与智能转写、火山方舟思考开关，以及自定义服务的温度。
+  - 可使用官方 ChatGPT 计划登录渠道。渠道指针悬空导致的未配置状态可以自愈；已启用渠道的顺序与当前凭据对齐。
+  - 词典只从「新词」添加。手改纠正可恢复完整词。风格市场的赞在重复打开后仍然保留。
+  - 光标上下文在 macOS、Windows 和 Android 首次使用时默认开启。密码输入、安全输入、已知密码管理器和终端仍然排除；用户可以关闭。
+  - 实验性感知（光标上下文、手改学词、表达格式学习）集中在「高级功能 → 感知」。表达格式学习默认关闭，证据只留在本机。
+  设置、概览与用量
+  - 今日概览保持一屏，最近识别在卡片内滚动。
+  - 设置按任务分组。高级功能使用独立子页。启动诊断留在实验页卡片内。
+  - 调整界面圆角，以及缩放后的切换控件、快捷键搜索框、下拉菜单和焦点轮廓。
+  - 侧栏提供用量入口，保存服务商明确返回的 Token，并按服务、渠道、模型和协议显示可比较的缓存占比。固定提示词规则放在动态应用和光标上下文之前。该账本不覆盖全部请求，不能当作完整账单。
+  - 已经允许的麦克风在启动时不再重复请求权限。
+  同步、Android 与更新
+  - 加密同步覆盖更多设置。同步事件带服务来源，旧服务器或旧账户的事件不能覆盖当前同步服务的本地状态。
+  - 首次启动时忽略安全软件放在同步目录里的普通诱饵文件，避免误判为损坏数据而闪退。已有加密状态的恢复保护继续生效。
+  - Android 增加本地配置迁移、云笔记草稿条，以及提交失败时保留口述。英文键盘调整了上滑符号，并可以永不显示悬浮窗。设置向导中的超高卡片可以滚动。Android 与鸿蒙共用 Rime 输入法后端。
+  - Android 同时检查 GitHub 与 CDN 的同渠道更新，选择可验证的更高版本，并对同一版本和架构做有界测速。回退仍须通过签名校验。
+  - 桌面 Less Computer / 编码 Agent 和 Claude Console 已下线。
+  - 默认更新渠道由版本号是否含 - 决定。本正式版走 Stable。Beta 安装包只提供给明确加入 Beta 渠道的用户。
+  已知范围
+  - 用量统计不是完整账单。感知功能仍是实验性的。
+  - 缓存占比不能用来承诺固定命中率。
+  - Linux 安装包不随本次附带，仍须独立设备验收。
+  - 自动构建和安装检查不能代替具体设备上的实机测试。局域网输入安全、多模态听写和 macOS 提示音等在 Beta.7 发布时仍在审查的改动，不在本标签内。
+  下载与升级
+  - 发布标签为 v2.0.2-tauri，应用版本为 2.0.2+build.20261115。
+  - 已发布的 Beta.7 页面：v2.0.2-Beta.7-tauri（2.0.2-Beta.7+build.20261113-6a7b5bb）。
+  - macOS 需要 14 Sonoma 或更新版本。Apple Silicon 使用 aarch64.dmg，Intel 使用 x64.dmg。
+  - Windows 提供 x64 安装包。Android 提供四种 ABI 的签名 APK。HarmonyOS 仓库包为 OpenLess_harmony_arm64.hap。
+  - Stable 更新源在本页发布并完成清单同步后，向 2.0.1 用户提供本版本。用户已经显式选择的更新渠道保持不变。
+  来源
+  - 基线标签 v2.0.2-Beta.7-tauri，提交 e9ff403d。构建元数据中的 6a7b5bb 是该 Beta 准备提交的上一提交。
+  - 正式版提交 962705d5。相对 Beta.7 只改版本号、桌面版本契约和本说明。
+  - 上一正式版 v2.0.1-tauri（2.0.1+build.20261016）。
+  - 分项说明见仓库内 Beta.1、Beta.3、Beta.4、Beta.5、Beta.6 发布说明，以及 Beta.2、Beta.7 的 GitHub Release。Beta.5 曾作为草稿，其界面与用量改动由 Beta.6 公开发布汇总。
+ReleaseNotesUrl: https://github.com/Open-Less/openless/releases/tag/v2.0.2-tauri
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
