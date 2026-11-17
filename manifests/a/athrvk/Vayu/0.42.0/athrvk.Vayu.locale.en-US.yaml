@@ -1,0 +1,155 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: athrvk.Vayu
+PackageVersion: 0.42.0
+PackageLocale: en-US
+Publisher: Atharva Kusumbia
+PublisherUrl: https://github.com/athrvk
+PublisherSupportUrl: https://github.com/athrvk/vayu/issues
+Author: Atharva Kusumbia
+PackageName: Vayu
+PackageUrl: https://github.com/athrvk/vayu
+License: AGPL-3.0
+LicenseUrl: https://github.com/athrvk/vayu/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Atharva Kusumbia
+ShortDescription: Open-source API client with a native C++ load-testing engine - Postman-style requests and k6-level load tests in one local app.
+Description: Vayu is a free, open-source desktop app for Windows, macOS, and Linux that combines a full REST and GraphQL request builder - with collections, environments, and scripting - and a high-throughput load tester powered by a C++20 engine, with all data staying on your machine.
+Moniker: vayu
+Tags:
+- api
+- api-client
+- api-testing
+- benchmark
+- developer-tools
+- graphql
+- http
+- insomnia
+- load-testing
+- performance
+- postman
+- rest
+ReleaseNotes: |-
+  0.42.0 - 2026-10-13
+  Read Changed before updating: element patterns now use a regular
+  expression dialect with no backreferences or lookaround. New: tabs can be
+  reordered, Copy for agent puts a reference to almost anything in the app
+  on the clipboard for an MCP agent, and a data-driven run records which file
+  drove it. This release also fixes several cases where a concurrent write,
+  a purge or an update lost data.
+  Added
+  - Reorder tabs. Drag a tab along the strip, or press Alt+Arrow, Alt+Home
+    or Alt+End on a focused tab. The palette can move the active tab left or
+    right.
+  - Copy for agent. Rows, tabs, detail headers and the palette can copy a
+    one-line reference that an MCP agent resolves with its tools: a request,
+    collection, environment, run, run comparison, inbox capture, mock server,
+    trash entry, example, variable, spec operation, run sample, element or
+    threshold. The reference names the item and never copies a value.
+  - MCP agents gain get_request, which reads one request by id, and
+    get_app_focus, which reports the open tab and the active environment.
+  - A data-driven run records its data file's name and a hash of its
+    contents. History shows Data: users.csv, adds (file changed since
+    this run) or (file no longer at that path) when that applies, and
+    the dashboard header shows the row count. The file's path is not stored.
+  - Element rows in a run show how long a timer waited and a transaction's
+    name.
+  - On macOS and Linux, Vayu appears in Open With for .json, .yaml and
+    .yml files, without becoming their default app. On macOS it also accepts
+    them dropped on its Dock icon.
+  - extract.json accepts keys with a hyphen ($.data.user-id), and every
+    element JSONPath field accepts bracketed names ($['a.b']).
+  Security
+  - With Write access off, run_request no longer saves what an agent's
+    extractors or scripts set to the globals, an environment or a collection.
+    They still run and report.
+  - With Reveal secrets to agents off, run output no longer shows the value
+    of a credential-named query parameter (api_key, for instance), and a
+    refused collection or scenario run no longer repeats the resolved URL to
+    the agent.
+  Changed
+  - Element patterns use RE2. A large response could crash the engine
+    through extract.regex, assert.contains, assert.jsonpath or a
+    control.if match, taking every run with it; patterns now run in linear
+    time on any body size. A pattern with a backreference or lookaround,
+    including one from a JMeter import, reports invalid regular expression
+    when it runs. (?i), (?s) and (?m) now work. See
+    Elements.
+  - Picking a file in the Data tab, Run collection or Load test
+    declares its columns as the collection's data contract, and Remove
+    clears it. Before, the old columns stayed until Re-declare.
+  - A send that fails without a response (a timeout or refused connection)
+    keeps the response tabs, so the request sent, its headers and its timings
+    stay readable.
+  - When the tab limit is reached, the tab you used least recently closes, not
+    the one opened first.
+  - Autosave no longer retries, every minute, a save the engine refused.
+  - Match system accent no longer overwrites the scheme you picked, which
+    returns when you turn it off.
+  - The engine API refuses malformed run and send settings (a null setting,
+    an out-of-range iteration count, rate, ramp or timeout, a non-string id,
+    an integer setting with trailing text, a monitor block on a collection
+    run) with an error naming the field.
+  Fixed
+  - Purging a trashed folder could delete a live folder that had been
+    created or moved into it. A trashed collection is now refused as a
+    parent, and a purge removes only trashed items.
+  - A send, stream or collection run could revert a variable written while
+    it ran by the app, an agent or another send. Only what the run itself
+    changed is saved now.
+  - On Windows, installing an update asked to close a running Vayu and then
+    force-closed it mid-shutdown, risking unsaved edits.
+  - Two transfers sharing a cookie scope no longer drop each other's cookies.
+  - Retention no longer deletes a run pinned as a baseline during its sweep,
+    and an import no longer overwrites globals saved at the same moment.
+  - A rate-limited load run kept a CPU core busy for its whole length; a
+    constant_rps 2000 run now uses about a sixth of the CPU it did. At low
+    rates the first request after an idle spell no longer waits a full
+    interval.
+  - A load test's dashboard: a failed run shows Failed, a run whose stream
+    dropped stays live with its Stop button, a running run opened from
+    History shows progress, a run an agent started shows its mode, URL and
+    method, and the live chart keeps the retention chosen in Settings.
+  - History's type and status filters cover every run, not only the loaded
+    page; a failed chart or server-vitals fetch shows an error with Try
+    again; Save as request uses the name an agent gave the run.
+  - A custom counter recorded only with zeros counted as never recorded, so a
+    threshold on it failed the run; a negative increment is now refused.
+  - An OpenAPI 3.0 nullable reference no longer reports a valid null as
+    invalid. A Postman item whose request is a bare URL imports with that URL.
+  - A load run with inline pre-request scripts no longer warns that they were
+    skipped.
+  - Quitting with an edit the editor declined to save now asks before closing,
+    and Reset or Take theirs no longer flashes Saved.
+  - Failed environment create, rename, duplicate and delete, and a failed
+    reorder, now say so. A failed rename keeps what you typed.
+  - The sidebar's new-request button targets the same collection as the
+    palette; the collection picker shows each folder's parent path.
+  - Expanded element rows and a drawer closed with Cmd/Ctrl+B stay that way
+    across tab switches. An accent picked in Settings > Appearance is no longer
+    reverted by a theme toggle.
+  - Starting a stream no longer shows the previous response after a tab
+    switch, and code snippets refresh after an edit is saved.
+  - Loading lists show a placeholder rather than "No captures yet", "No
+    cookies stored" or a zero count; the Clear captures? prompt counts the
+    whole inbox; confirmations read correctly for one item.
+  - The Variables pane states the real precedence: environment over
+    collection over globals.
+  - Settings search finds Client certificates and Connection test.
+    Reset app settings also turns off Match system accent.
+  - On startup, an engine left hung by an earlier session is replaced instead
+    of failing with "Port 9876 is already in use"; update checks and, on
+    macOS, reopening a closed window work before the engine is ready.
+  - Accessibility: settings choices are named radio groups whose selection
+    follows the arrow keys, the tab strip and side rails keep one Tab stop,
+    the environment switcher is named by its visible text, and the info dots
+    are easier to hit. Dividers inside cards show in dark mode.
+  - install.sh retries the checksum download instead of aborting, and
+    updating with it no longer leaves the engine running when an edit fails to
+    save on quit.
+  - Internal: refactors, dependency updates and documentation kept in step with
+    all of the above.
+  Every asset carries a build-provenance attestation: gh attestation verify <asset> --repo athrvk/vayu.
+ReleaseNotesUrl: https://github.com/athrvk/vayu/releases/tag/v0.42.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

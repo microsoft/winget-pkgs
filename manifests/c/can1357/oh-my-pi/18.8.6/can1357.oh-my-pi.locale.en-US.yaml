@@ -1,0 +1,96 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.8.6
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-agent-core
+  Added
+  - Added support for warm-cache-aware conversation pruning, keeping pruned history within the model’s prompt-cache lookback window while preserving Anthropic prompt-cache efficiency.
+  - Added AgentLoopConfig.hasQueuedAsides (also available on Agent) to allow interruptible waits to detect queued asides without consuming them or signaling other tools.
+  @oh-my-pi/pi-ai
+  Fixed
+  - Fixed Google Gemini and Cloud Code Assist (Antigravity) requests failing when tool schemas contain unsupported JSON Schema keywords or fields that allow multiple types.
+  - Fixed auth broker account selection and usage-limit enforcement to consistently use the selected account’s quota when multiple accounts are present.
+  - Fixed Anthropic-family model streaming so encoded marker tokens are decoded correctly in text, tool-call updates, partial messages, and completed tool calls.
+  @oh-my-pi/pi-catalog
+  Added
+  - Added prompt-cache lookback support for Claude models across all hosts, including the public prompt-cache-lookback catalog axis and resolvePromptCacheLookback API.
+  Fixed
+  - Fixed model discovery when providers publish models before they are recognized by the catalog; unsupported models are now skipped with a warning so other available models remain discoverable.
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added per-session Git worktree support with worktree.onStart and worktree.onExit settings to create an isolated worktree for each session and clean it up when the session ends.
+  - Expanded xAI web search with X post search, including X-only and author-specific queries, author exclusions, date and recency filters, and automatic xAI routing when credentials are available.
+  - Added xAI-powered reading of X posts, threads and replies, profiles, searches, and hashtags when logged in, replacing the unavailable Nitter mirrors.
+  Changed
+  - Web search now prefers an authenticated xai-oauth login over an xai API key when both are available, unless modelProviderOrder specifies a different order.
+  Fixed
+  - Fixed judge-gated features continuing to use a stale model chain after switching judge roles.
+  - Improved Anthropic prompt-cache reuse when pruning tool results from long conversations.
+  - Fixed resumed Claude sessions losing earlier thinking context and prompt-cache reuse when extensions or MCP tools were registered before the first message.
+  - Fixed subagent advisors configured with @advisor using the built-in slow model instead of the configured advisor role.
+  - Fixed the /switch command and alternate model picker crashing when stored model speed statistics contained an unnamed model.
+  - Fixed lsp and generate_image attempting to read FIFO, terminal, or unbounded device paths, which could hang or exhaust memory.
+  - Fixed aside messages from extensions being blocked behind a running wait operation.
+  - Fixed extensions importing @oh-my-pi/pi-tui/native/* failing to load in compiled omp binaries.
+  - Fixed raw token markers appearing instead of Nerd Font icons in Anthropic idle recaps, /btw and /omfg replies, and streaming previews.
+  - Fixed sessions moved with /wt disappearing from resume lists; sessions in Git worktrees now remain discoverable and can be resumed or relocated if their worktree was removed.
+  - Fixed live config reload ignoring edits made during startup or right after a config symlink was retargeted, until the next unrelated edit.
+  @oh-my-pi/pi-tui
+  Changed
+  - Improved rendering performance for streaming long Markdown lists while preserving nested items, numbering, and reference links.
+  Fixed
+  - Added package exports for the native Tern/TSP modules, allowing extensions in compiled omp binaries to import them.
+  - Fixed the Tern /model picker's Roles tab so typing and Backspace consistently edit the search field without triggering role commands.
+  - Fixed the session picker so sessions retain and display their directory when switching between the current folder and all-project views.
+  What's Changed
+  - fix(agent): stop tool-result pruning from re-writing the whole Anthropic cache behind many small turns by @will-bogusz in https://github.com/can1357/oh-my-pi/pull/14751
+  - fix(coding-agent): keep resumed Claude sessions' thinking and cache when tools register before the first message by @will-bogusz in https://github.com/can1357/oh-my-pi/pull/14754
+  - fix(ai): stop broker clients judging an account by a sibling's usage when its own fetch fails by @will-bogusz in https://github.com/can1357/oh-my-pi/pull/14904
+  - fix(coding-agent): resolve @advisor subagent advisor against owner roles by @H4vC in https://github.com/can1357/oh-my-pi/pull/14972
+  - fix(judgment): invalidate the cached judge role chain when settings change by @alnaggar-dev in https://github.com/can1357/oh-my-pi/pull/14861
+  - feat(coding-agent): add worktree.onStart and worktree.onExit settings by @gitpushoriginmaster in https://github.com/can1357/oh-my-pi/pull/14908
+  - fix(coding-agent): skipped null model_perf keys that crashed the model picker by @roboomp in https://github.com/can1357/oh-my-pi/pull/14787
+  - fix(lsp,image): refuse FIFOs and devices instead of hanging on them by @DrFaustus-vic in https://github.com/can1357/oh-my-pi/pull/14730
+  - fix(agent): end an interruptible wait when an aside is queued by @mgpai22 in https://github.com/can1357/oh-my-pi/pull/14731
+  - fix(ai): strip uniqueItems and unsupported schema keywords for Google and CCA by @jwaldrip in https://github.com/can1357/oh-my-pi/pull/14766
+  - fix(tui): register pi-tui native/* subpaths for compiled-binary extensions by @clasalle-lila in https://github.com/can1357/oh-my-pi/pull/14835
+  - Make long streamed lists incremental by @iliaal in https://github.com/can1357/oh-my-pi/pull/13701
+  New Contributors
+  - @mgpai22 made their first contribution in https://github.com/can1357/oh-my-pi/pull/14731
+  - @clasalle-lila made their first contribution in https://github.com/can1357/oh-my-pi/pull/14835
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.8.5...v18.8.6
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.8.6
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

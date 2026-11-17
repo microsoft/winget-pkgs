@@ -1,0 +1,82 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: RongleCat.GrokApp
+PackageVersion: 0.2.22
+PackageLocale: en-US
+Publisher: RongleCat
+PublisherUrl: https://github.com/RongleCat
+PublisherSupportUrl: https://github.com/RongleCat/grok-app/issues
+PackageName: Grok App
+PackageUrl: https://github.com/RongleCat/grok-app
+License: MIT
+LicenseUrl: https://github.com/RongleCat/grok-app/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 RongleCat
+ShortDescription: Desktop workbench for Grok Build CLI — sessions, projects, media, automations (Tauri 2 · unofficial).
+Description: 'Grok App is not an official xAI product. It wraps the local Grok Build CLI (grok agent stdio) into a desktop workbench: sessions, projects, permissions, media previews, and scheduled tasks. Manage multiple projects and sessions, review permission requests, preview rich media, run scheduled tasks, and interact with the agent through a Chinese/English Tauri desktop interface.'
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- grok
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  Grok App v0.2.22
+  Highlight: Move chats between projects; a persist-mounted terminal under the chat; Russian UI; pet overlay no longer steals the first click.
+  中文 · 亮点： 会话可移到其他项目；对话栏底部常驻终端；俄语界面；宠物窗口不再抢走第一次点击。
+  Changed
+  - Pet settings nav icon has two short eyes: The hex outline now includes two short vertical strokes so the sidebar item reads as the companion, not a generic polygon.
+  - Pet menu keeps a single settings item: The overlay context menu no longer lists both Edit and Pet settings (they opened the same Settings → Pet page).
+  中文 · 变更
+  - 设置里的宠物图标加了两只短竖线眼睛：不再只是空六边形。
+  - 宠物菜单只保留「宠物设置」：右键里「编辑」和「宠物设置」进的是同一页，已去掉重复的「编辑」。
+  Added
+  - Move chats between projects (#616): Sidebar menu, multi-select, and drag-and-drop can place a chat (including Other sessions) under another folder. Confirm first — the agent reopens in the new cwd and does not reuse the old CLI session. Relative paths from the previous workspace may break.
+  - Chat-column bottom terminal and pane motion (#681): `⌘`` toggles a persist-mounted terminal under the chat. Sidebar / aside / settings / account-menu / project-list click-toggles interpolate instead of hard-cutting.
+  - Russian UI locale (#689): Settings language list and system-language detection include ru. Catalog is English-backed with translated overrides; tray / app menu follow the same locale.
+  中文 · 新增
+  - 会话可移到其他项目（#616）：侧栏菜单、多选和拖到项目上可以把对话（含「其他会话」）挂到另一个文件夹。会先确认；Agent 在新目录重开，不会把旧 CLI 会话 load 进新仓库。原先工作区的相对路径可能失效。
+  - 对话栏底部终端与分栏动画（#681）：`⌘`` 打开/收起聊天下方常驻终端。侧栏、右侧栏、设置、账号菜单、项目列表的点击开合改为插值，不再硬切。
+  - 俄语界面（#689）：设置语言列表和跟随系统可切到 ru。词库以英文兜底、常用面有俄文；托盘和原生菜单同步。
+  Fixed
+  - Project list collapse no longer snaps and leaves a leftover scrollbar (#694): Closing a project (or the L1 Projects chevron) paints the locked height, then interpolates to 0. The overlay thumb stays hidden while height is moving. Overflow is restored before the active chat scrolls into view. Open folders retarget the px lock when a chat is dropped in, so new rows are not clipped and the next close still interpolates.
+  - Pet context menu stays near the click: The menu opens at the right-click and only slides enough to stay on the visible work-area slice of the overlay (no jump to the mark or the window corner).
+  - Pet overlay no longer steals the workbench’s first click: The always-on-top pet window is not focusable (canBecomeKeyWindow = NO / WS_EX_NOACTIVATE). Tao show() still calls makeKeyAndOrderFront; if the overlay becomes key while the main window is visible, key is returned immediately so composer / list clicks land on the first press.
+  - Official login no longer breaks a working custom relay: After sign-in, Host kept calling ACP authenticate(cached_token) on custom-route processes. That RPC reads ~/.grok/auth.json, Grok Build then sends OIDC to the relay (HTTP 400 Incorrect API key / network card), and logout “fixed” it immediately. Custom routes now skip cached_token; login / account switch bind agent-home via prepare_route_auth_for_agent (official syncs, custom clears).
+  - History image chips no longer decode the full original (#692, #693): User-message paste thumbs use the same Host thumbnail path as assistant cards (#675). First paint stays empty until the ≤480px JPEG is ready, a live loopback src is not blanked on remount, and the <img> is no longer remounted on URL change. Long threads with screenshots no longer flash the window while a new reply streams.
+  - Live “思考中” timer no longer inherits another chat’s clock: A leftover turnStartedAt (or a later correction) used to stick at 50+ minutes, then jump to the real duration after remount. The live timer now follows this turn’s clock and will not start before the assistant bubble’s createdAt.
+  - New-chat first send no longer false-heals as “message never reached the agent”: Ghost-heal treated a leftover previous-session turn clock plus the __draft__ → real-id handoff as “Host idle, send finished”. The toast fired, the composer was restored, and the agent still ran the prompt. New chat now clears the clock; draft sends start/migrate it; sessionCreate moves the send claim onto the real id immediately; heal also counts the draft claim as in-flight.
+  - Composer branch chip follows in-place checkout (#690): git switch in the same working tree no longer leaves the chip stale until the menu is opened. The dirty-status poll already had HEAD; it now patches the matching worktree row.
+  - Reasoning effort survives session respawn (#682): Changing effort on an existing chat was overwritten by session/load restoring the old CLI journal. A real change now clears agent_session_id (next connect uses session/new) and the next send waits for the preference write. Custom providers with an effort catalog get supports_reasoning_effort in App agent-home only.
+  - CLI import no longer paints <system-reminder> as a user bubble (#687): Reminder-only / synthetic_reason: project_instructions envelopes in chat_history.jsonl are skipped. A wrapped <user_query> is kept.
+  - Voice/STT no longer re-copies official OIDC into a custom route's agent-home: voice_auth blind-called sync_cli_auth_to_agent_home on every token read, undoing the custom-route auth strip until the next spawn (a live relay process could lazily load the OIDC). It now goes through route-aware prepare_route_auth_for_agent; voice still falls back to ~/.grok/auth.json for official xAI endpoints.
+  - Rewind-unsupported error now takes the clean path in drop-last: The initialize-not-advertised early return is phrased as method not supported, so journal drop-last skips the pointless last-turn fallback retry and its misleading warn log.
+  - Long tool-heavy chats no longer flicker stacked replies: Collapsed thinking is no longer counted in the first-paint row estimate, and a virtual-list start that lands on a 0-height tool plateau walks back to the previous real message. A 1px height change no longer remounts a different pair of assistant bubbles (Windows WebView leftover paint looked like the transcript flashing).
+  - A refused chat move no longer kills the live agent (#616 follow-up): Host validated the target folder only after dropping the session's ACP process, so an untrusted / missing target (or a same-project no-op from a stale caller) still cost the chat its agent_session_id and forced session/new. session_move_to_project now prechecks the target and cwd change first; the agent is dropped only when the move will actually happen.
+  - Composer skill chips no longer show a tiny hammer emoji: Inline skill / tool tags in the input (and user bubbles) use 14px Tabler SVGs so the glyph matches the 12px label. Imagine uses the wand; other skills keep the tool icon.
+  中文 · 修复
+  - 收起项目列表不再硬切、也不再留下滚动条（#694）：关掉项目（或一级「项目」）会先锁住当前高度再插值到 0。动画期间隐藏 overlay 滑块；高度恢复后再把当前会话滚进视野。往已展开的文件夹里拖入会话时会改写锁定高度，新行不会被裁切，下次收起仍能插值。
+  - 宠物右键菜单贴着点击位置：菜单在右键处打开，只在会出屏时平移，不再跳到标记另一侧或窗口左上角。
+  - 宠物窗口不再抢走主窗口的第一次点击：置顶宠物窗不可成为 key（macOS canBecomeKeyWindow = NO / Windows WS_EX_NOACTIVATE）。Tao 的 show() 仍会 makeKeyAndOrderFront；若主窗口已可见，立刻把焦点还回去，输入框和列表第一次点击就能生效。
+  - 登录官方号不再把正在用的中转打挂：签入后自定义路由仍会 authenticate(cached_token)，CLI 读 ~/.grok/auth.json 后把 OIDC 打到中转（HTTP 400 Incorrect API key / 网络异常），退出登录立刻又好。现在自定义路由不再做 cached_token；登录/切号按当前路由 prepare_route_auth（官方同步，自定义清掉）。
+  - 历史里的用户附图不再解原图（#692, #693）：用户气泡里的粘贴缩略图走和助手图卡同一套 Host 缩略图（#675）。缓存未命中时先占位，已有 loopback 地址不再清成空，换地址时也不再拆掉 <img> 重挂。带截图的长对话在往外写时窗口不再整屏闪。
+  - 「思考中」不再沿用上一会话的计时：上一轮留下的 turnStartedAt 会把时长钉在 50 多分钟，滑一下或重挂载后又变成真正的几分钟。现在跟本轮时钟走，也不会早于这条助手气泡的 createdAt。
+  - 新建会话首条消息不再误报「消息没有真正发给 Agent」：上一条会话留下的计时，加上草稿 __draft__ 切到真实 session id 的空档，会被当成 Host 空闲、发送已结束。于是 toast 弹出、输入框还原，Agent 其实已经在跑。现在新建会话会清计时，草稿发送会建/迁移计时，sessionCreate 当下就把发送认领迁到新 id，heal 也会把草稿认领当成仍在发送。
+  - 输入框上的分支 chip 会跟着同目录切分支更新（#690）：同一工作树里 git switch 后不再要点开菜单才刷新。脏状态轮询本来就有 HEAD，现在会补到对应 worktree 行。
+  - 切换推理力度后不再被旧 CLI 会话盖回去（#682）：已有对话改 effort 会被 session/load 恢复成旧值。真正改过时清掉 agent_session_id（下次 session/new），下一条发送会等偏好写完。带 effort 目录的自定义渠道只在 App agent-home 写 supports_reasoning_effort。
+  - 导入 CLI 会话不再把 <system-reminder> 画成用户气泡（#687）：chat_history.jsonl 里只有 reminder / project_instructions 的信封会丢掉；带 <user_query> 的仍保留正文。
+  - 用语音不再把官方 OIDC 复制回自定义路由的 agent-home：voice_auth 每次取 token 都盲同步 auth.json，把自定义路由刚清掉的凭据又写回去（存活的中转进程可能懒加载到）。现在改走按路由处理的 prepare_route_auth_for_agent；语音本身仍会回退读 ~/.grok/auth.json。
+  - Agent 不支持 rewind 时撤回消息走干净路径：initialize 未公布 rewind 的早退错误改为 method not supported 措辞，撤回上一条不再多发一次注定失败的兜底调用、也不再打误导性的 warn 日志。
+  - 工具很多的长对话不再把两轮回复叠在一起闪：折叠的思考不再计入行高预估；虚拟列表起点落在一串 0 高工具行上时，回退到前一条真实消息。高度差 1px 不会再换一套助手气泡（Windows 上旧层清不掉，看起来像正文狂闪）。
+  - 移动会话被拒绝时不再误杀正在跑的 Agent（#616 跟进）：Host 原来先杀掉会话的 ACP 进程、后校验目标文件夹，未信任/丢失的目标（或过期调用方发来的同项目 no-op）也会让会话丢掉 agent_session_id、被迫 session/new。现在 session_move_to_project 先预检目标和 cwd 是否变化，确认真的要移动才断开 Agent。
+  - 输入框里的 skill 标签图标不再过小：工具 / skills / imagine 等标签改用 14px SVG，和 12px 文字齐平。imagine 用魔杖，其余仍用扳手。
+
+  Assets are attached below. Install help (macOS xattr / Gatekeeper, Windows SmartScreen, Linux packages, CLI): README · README 中文 · Full history: CHANGELOG.md
+ReleaseNotesUrl: https://github.com/RongleCat/grok-app/releases/tag/v0.2.22
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

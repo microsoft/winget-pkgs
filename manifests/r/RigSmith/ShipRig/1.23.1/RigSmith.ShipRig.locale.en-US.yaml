@@ -1,0 +1,34 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: RigSmith.ShipRig
+PackageVersion: 1.23.1
+PackageLocale: en-US
+Publisher: RigSmith
+PublisherUrl: https://rigsmith.dev/
+PublisherSupportUrl: https://github.com/rigsmith/rigsmith/issues
+Author: John Campion Jr
+PackageName: ShipRig
+PackageUrl: https://rigsmith.dev/
+License: MIT
+LicenseUrl: https://github.com/rigsmith/rigsmith/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 John Campion Jr
+ShortDescription: Uniform changeset -> version -> publish, across every ecosystem
+Moniker: shiprig
+Tags:
+- cli
+- developer-tools
+- dotnet
+- go
+- rust
+ReleaseNotes: |-
+  🩹 Fixes
+  - changerig: changerig add no longer overwrites an existing changeset. The random name it picks for a new changeset could already belong to a pending one, which was silently replaced while the command reported "Created"; it now picks another name instead.
+  - shiprig: publish-plan and publish now use the registry your workspace routes an npm package to: node.packageSource, else the package's publishConfig.registry, else the nearest .npmrc up to the repository root. Before, a workspace routing its scope to a private registry in the root .npmrc had published versions listed as unpublished, and publish would have sent the package to npmjs.com. A registry given as an unset or empty ${VAR} is now an error. OIDC trusted publishing is used only for npmjs.com (or node.packageSource); a package routed elsewhere publishes with npm's own auth for that registry and is never sent the CI token.
+  - shiprig: A Velopack macOS .dmg is now notarized and stapled, not only signed, when macos.notaryProfile is set (with macos.signIdentity, which a notary profile now requires: on its own it skipped notarization silently, and it is now a config error, in a --dry-build too). Before, only the .app inside was notarized, so Gatekeeper rejected the downloaded disk image as "Unnotarized Developer ID". Notarizing adds a few minutes per channel to a release build, and a failure to sign, notarize or staple the DMG now fails the build and removes the DMG instead of shipping it un-notarized. Nothing changes without a notary profile, or for --dry-build.
+  - shiprig: shiprig publish no longer reports a release that didn't happen. It publishes the versions already on disk and never versions, so it now refuses while changeset files are waiting to bump them, and says to run shiprig version and commit first, or shiprig release to do it all (--allow-pending publishes the versions on disk anyway; a dry run only warns). Before, a publish run with a changeset still pending re-pushed the last release, the feed quietly skipped the duplicate, and the run printed "published … pushed" for every package. A NuGet version the feed already holds is now reported as skipped, "already on" the feed, instead of as pushed.
+  - Install and autoload static zsh completions for rig, shiprig, changerig, and clauderig. Their completion command now skips ordinary CLI startup, and source, dev, and release installers refresh the files when binaries change.
+  - Build with Go 1.26.10 to include the crypto/x509 security fix for GO-2026-6809.
+ReleaseNotesUrl: https://github.com/rigsmith/rigsmith/releases/tag/v1.23.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

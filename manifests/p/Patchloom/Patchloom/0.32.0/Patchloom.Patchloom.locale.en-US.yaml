@@ -1,0 +1,125 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Patchloom.Patchloom
+PackageVersion: 0.32.0
+PackageLocale: en-US
+Publisher: Patchloom
+PublisherUrl: https://github.com/patchloom
+PublisherSupportUrl: https://github.com/patchloom/patchloom/issues
+Author: Patchloom
+PackageName: Patchloom
+PackageUrl: https://github.com/patchloom/patchloom
+License: MIT
+LicenseUrl: https://github.com/patchloom/patchloom/blob/HEAD/LICENSE
+Copyright: Copyright (c) Patchloom contributors
+ShortDescription: Structured file editing CLI for AI agents
+Description: |-
+  Patchloom is a single-binary CLI that gives AI coding agents safe, structured
+  file editing: search and replace, unified diffs, parser-backed JSON/YAML/TOML
+  document ops, markdown section editing, AST-aware renames, multi-file
+  transactions, undo, and an MCP server for tool calls.
+Moniker: patchloom
+Tags:
+- ai
+- cli
+- developer-tools
+- mcp
+- rust
+ReleaseNotes: |-
+  Patchloom 0.32.0
+  YAML merge-key edits keep shared mappings, sibling anchors, and
+  comments instead of rewriting the whole file. Patch deletes report
+  a change and apply hunks before unlink, so leftover lines stay on
+  disk.
+  Highlights
+  doc set on a YAML merge (<<: *shared) now keeps the merge key
+  when you grow an inherited array, delete an inherited field, or
+  write an empty object. Sibling &anchor lines stay. Empty {}
+  and [] keep comments and spacing instead of rewriting the
+  whole file.
+  apply_patch on a git delete reports changed: true and empty
+  new_content. A hunked +++ /dev/null applies the minus lines
+  first. Leftover text is written back. A stale minus is
+  error_kind: ambiguous (exit 5) and the file is left unchanged.
+  New features
+  - Library doc_keys and doc_len. Hosts can list object keys
+    and count array or object length without going through CLI or
+    MCP. Empty / "." is the document root. An array on doc_keys
+    is type_error. A wildcard or predicate (items[*]) is
+    ambiguous and names items[0] / items[1]. A missing file
+    is not_found.
+    let keys = patchloom::api::doc_keys(path, "database")?;
+    let n = patchloom::api::doc_len(path, "items")?;
+    CLI doc keys / doc len and MCP doc_query use the same
+    rules (#2282, #2284).
+  - Blank YAML is an empty object on read. doc keys, doc len, and doc get . treat an empty, whitespace-only, or
+    BOM/ZWSP-only YAML file as {}. Comment-only YAML, null,
+    and a bare --- still return type_error on keys and len (#2285, #2286).
+  - Protobuf AST kinds. ast list and ast rename on .proto
+    files include Status and enum symbols. Kind filters accept
+    message, service, and rpc as well as the tree-sitter
+    names (#2264, #2265).
+  Bug fixes
+  - YAML merge edits dumped the file or dropped <<:. Growing
+    an inherited array, deleting an inherited key, or expanding a
+    merge-only site now keeps the merge key, sibling anchors, and
+    comments. A merge-only site that becomes empty writes {} (#2270, #2271, #2272, #2273).
+  - Emptying a YAML sequence item glued the next line. Setting
+    a non-last item to {} or [] used to drop the item newline
+    (- {} - name: B) and dump the file. The item stays on its
+    own line and comments remain (#2277, #2281).
+  - Mixed flow and block aliases dumped the file. A flow
+    [*shared] next to a later - *shared no longer rewrites the
+    whole document. Merge-key walks stop at depth 128 (#2267, #2265).
+  - apply_patch delete looked unchanged. An empty-hunk git
+    delete (deleted file mode, no hunks) now reports
+    changed: true and empty new_content. Regular files are
+    snapshotted for undo. Symlink, FIFO, and socket snapshots stay
+    empty so target bytes are not copied into the result (#2287, #2289).
+  - Hunked delete unlinked first and dropped leftover lines. A
+    +++ /dev/null patch with minus hunks now applies those hunks
+    before unlink. Leftover text is written back. A stale minus is
+    ambiguous (exit 5) and the file stays (#2294).
+  - Add-only hunks wiped a symlink target. Content patches load
+    the symlink target instead of treating every special path as
+    empty. Empty-hunk delete snapshots stay empty (#2293).
+  Numbers
+  ───────┬──────────────────────────────────────────────────────
+  Metric │Notes
+  ───────┼──────────────────────────────────────────────────────
+  Version│0.31.0 -> 0.32.0
+  ───────┼──────────────────────────────────────────────────────
+  Focus  │YAML merge edits, apply_patch delete, doc_keys /
+         │doc_len
+  ───────┼──────────────────────────────────────────────────────
+  Tests  │4800+ (3268 unit + 1553 integration + 10 PTY)
+  ───────┴──────────────────────────────────────────────────────
+  Upgrading
+  - Agents: doc keys / doc len on a wildcard or predicate
+    (items[*]) is ambiguous, even when there is one match. A
+    missing file is not_found. Blank YAML keys/len/get treat the
+    document as {}.
+  - Library hosts: api::doc_keys and api::doc_len are new.
+    apply_patch empty-hunk delete now sets changed: true and
+    empty new_content. Hunked +++ /dev/null applies minus lines
+    first; leftover text is a write, not an unlink. Content patches
+    follow symlink targets. Empty-hunk delete snapshots of symlink,
+    FIFO, and socket stay empty.
+  - MCP / --contain: a leftover rewrite through a workspace
+    symlink that points outside the workspace is rejected. CLI
+    without --contain still follows the path the user passed.
+  - Install from crates.io, npm, Homebrew, or Scoop after the tag
+    ships. On Windows, Scoop is recommended; winget may need
+    winget source update after Microsoft publishes; Chocolatey can
+    lag while moderation runs.
+  Full changelog
+  patchloom-v0.31.0...patchloom-v0.32.0
+ReleaseNotesUrl: https://github.com/patchloom/patchloom/releases/tag/patchloom-v0.32.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://patchloom.github.io/patchloom/
+- DocumentLabel: Installation
+  DocumentUrl: https://github.com/patchloom/patchloom/blob/main/docs/getting-started/installation.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

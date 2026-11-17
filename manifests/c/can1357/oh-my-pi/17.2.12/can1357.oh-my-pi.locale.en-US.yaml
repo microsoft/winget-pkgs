@@ -1,0 +1,87 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 17.2.12
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Fixed
+  - Fixed account-scoped Codex cyber-policy denials bypassing sibling credential rotation; replay-safe requests now try every configured account before surfacing the error.
+  @oh-my-pi/pi-catalog
+  Fixed
+  - Fixed dynamically discovered alibaba-token-plan/qwen3.8-max metadata so thinking controls and image input are available (#8019).
+  - Routed opencode-go/deepseek-v4-flash through the OpenAI responses API — the OpenCode Go gateway does not serve this model at /zen/go/v1/chat/completions, only at /zen/go/v1/responses (deepseek-v4-pro keeps chat completions).
+  @oh-my-pi/pi-coding-agent
+  Fixed
+  - Fixed shell minimization replacing meaningful rustc --print output with OK.
+  - Fixed shell minimization altering outputs shorter than 1,000 characters; these now pass through unchanged.
+  - Fixed primary and advisor Codex sessions falling back to another provider before trying sibling accounts when an account lacks Trusted Access for Cyber approval.
+  - Fixed task subagent assistant turns being omitted from the per-model TPS/TTFT aggregates shown by /models. (#8022)
+  - Fixed terminal-title spinner writes consuming CPU during WSL/ConPTY agent waits by using the same static working separator as native Windows (#8012).
+  - Fixed long-running sessions leaking memory for every completed keep-alive task/scout subagent: a disposed (parked) subagent's AgentSession stayed pinned through the lifecycle adoption record's reviver closure, and dispose() never released the message array, append-only provider transcript, session-manager entries, or the raw-SSE debug buffer, so heavy transcripts and captured provider wire frames accumulated for the process lifetime (#8003).
+  - Fixed Z.AI web search dropping sources and exposing raw JSON when MCP responses double-encode content text (#8000).
+  - Fixed /handoff masking empty/whitespace-only generation and harness-initiated aborts as "Handoff cancelled"; manual empty generation now surfaces a logged failure, harness aborts preserve their reason (or report "Handoff aborted by session"), and auto-handoff still falls back to context-full compaction (#7993).
+  @oh-my-pi/hashline
+  Breaking Changes
+  - PUT N.=M @name over a span now throws when @name was never captured, instead of warning and deleting the range. Pasting a never-captured register over a span wrote nothing back, so a mistyped or hallucinated register name silently destroyed content. Gap pastes (PUT >N @name) keep the warned no-op behaviour from 17.2.11.
+  Added
+  - applyEdits now takes a path and uses the native tree-sitter parser to decide every boundary repair that depends on delimiter semantics. The authored edits are materialized first: if that result parses, it is returned untouched, so a } inside a regex literal, a string, or Markdown prose is never mistaken for a block closer. A closer-spare repair lands only when the repaired result is shown to parse — never on delimiter arithmetic alone — so an unrecognized language or an unprovable candidate leaves the edit exactly as authored. Wired through the patcher, recovery, section apply, and the edit tool's preview.
+  - Auto-repair for replacement ranges that start one line early on a structural closer (the } of the construct above): the closer is spared and the payload lands after it, gated on the same parse proof.
+  - Warning for balanced payloads over ranges that end mid-block (deleting opener(s) whose closer(s) survive below), pointing at the block-op remedy (PUT N*:). Raised only when the baseline parsed and the authored result does not, so it cannot fire on prose or an unknown language.
+  - Warning when a + body row is itself a valid hunk header (+CUT 5.=9). Such a row is literal content by definition and is inserted into the file as text; naming it at the moment it happens turns a silent source-file corruption into an actionable diagnostic.
+  Fixed
+  - Rejected patches whose pasted N:TEXT read-output rows repeat a source line number. Each such row is recovered as a single-line PUT N.=N:, so a body written as consecutive lines under one number collapsed through the same-range coalescer, keeping only the last row and silently dropping the rest — in one incident replacing a block opener with } and deleting the following statement. The error now names the repeated line and teaches the explicit PUT form.
+  @oh-my-pi/pi-natives
+  Changed
+  - Consolidated every shell builtin into one crate, crates/pi-builtins (the renamed and de-vendored brush-builtins fork), with one module per command. The 46 crates/vendor/uu-* crates, crates/vendor/jaq, crates/pi-uu-grep, crates/pi-uu-diff, and everything that had accumulated inline in pi-shell (fd, cmp, which, the moreutils set, and the ps/top/pgrep/pkill/pidwait/kill/sleep/timeout/nohup process builtins) now live beside the bash builtins they sit next to at runtime, and register through pi_builtins::utility_builtins() and pi_builtins::process_builtins(). pi-shell/src/shell.rs shrank by ~4,200 lines.
+  Fixed
+  - Fixed sort --compress-program spawning its compressor and decompressor without the shell's working directory or exported environment, so a program installed only on the shell's PATH was not found, and with stderr inherited from the host process, where its diagnostics could corrupt the TUI. Both children now launch through the shell's child context and their stderr is forwarded to the command's own file descriptor.
+  - Fixed realpath -q exiting 0 after a failed operand; it suppresses the diagnostic but now reports failure, matching GNU.
+  Removed
+  - Removed crates/pi-uutils-ctx. Utility builtins previously reached their stdio, working directory, and environment through a thread-local context installed around each invocation; they now receive an explicit Host value (pi-builtins/src/host.rs) carrying the command's file descriptors, the shell working directory, the exported environment, cancellation, and the accumulated exit status. The uutils entry-point plumbing (uumain, UResult/UError, set_exit_code, crate_version!) went with it; each utility is now an ordinary brush builtin implementing host::Utility.
+  @oh-my-pi/pi-tui
+  Fixed
+  - Fixed slow Loader paints exceeding their cost-aware CPU duty cycle on WSL/ConPTY when a 200 ms backpressure cap was shorter than the proportional delay (#8012).
+  - Fixed display-math ($$…$$) fractions rendering as fragmented text when the numerator and denominator are written on separate source lines: latexToBlock treated the top-level newline between \frac{num} and {den} as a row break, severing \frac from its denominator. Such argument-continuation newlines are now preserved so the fraction stays stacked (#7996).
+  What's Changed
+  - fix(session): surface empty handoff generation as failure not cancel by @roboomp in https://github.com/can1357/oh-my-pi/pull/7994
+  - fix(tui): keep display-math fractions intact across source newlines by @roboomp in https://github.com/can1357/oh-my-pi/pull/7997
+  - fix(web-search): parse double-encoded Z.AI results by @roboomp in https://github.com/can1357/oh-my-pi/pull/8002
+  - fix(agent): release parked subagent session memory on dispose by @roboomp in https://github.com/can1357/oh-my-pi/pull/8004
+  - fix(tui): bound WSL idle animation CPU by @roboomp in https://github.com/can1357/oh-my-pi/pull/8014
+  - fix(catalog): correct qwen3.8 max discovery metadata by @roboomp in https://github.com/can1357/oh-my-pi/pull/8021
+  - fix(task): record subagent model performance by @roboomp in https://github.com/can1357/oh-my-pi/pull/8023
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v17.2.11...v17.2.12
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v17.2.12
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

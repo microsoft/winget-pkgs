@@ -1,0 +1,75 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Apps2Samsung.Apps2Samsung
+PackageVersion: 2.7.0
+PackageLocale: en-US
+Publisher: Apps2Samsung
+PublisherUrl: https://github.com/Apps2Samsung
+PublisherSupportUrl: https://github.com/Apps2Samsung/Apps2Samsung/issues
+PackageName: Apps2Samsung
+PackageUrl: https://apps2samsung.madebypatrick.nl/
+License: MIT
+LicenseUrl: https://github.com/Apps2Samsung/Apps2Samsung/blob/HEAD/LICENSE
+ShortDescription: Install any app on Samsung Tizen devices — TVs, projectors and smart monitors
+Description: Cross-platform desktop installer that side-loads any app onto Samsung Smart TVs, projectors and smart monitors running Tizen OS — Jellyfin, Moonlight, Moonfin, Litefin and a community catalog, or your own WGT package. Handles device discovery, Tizen certificates and installation. Successor to Jellyfin2Samsung.Jellyfin2Samsung.
+Moniker: apps2samsung
+Tags:
+- jellyfin
+- moonlight
+- samsung
+- samsung-tv
+- sideload
+- tizen
+- wgt
+ReleaseNotes: |-
+  📦 v2.7.0 — 2026-07-23
+  The headline of this release is a brand-new Android app — Apps2Samsung now runs on your phone as a full installer head, so you can put Tizen apps on your Samsung TV without a laptop.
+  📱 New: Apps2Samsung for Android
+  - Scan & pick your TV — finds debug-ready Samsung TVs on your network (and shows your phone's own LAN IP, since that's fiddly to find on a phone). Can't see your TV? Enter its IP manually.
+  - App catalog — the same App / Version sources as the desktop (Jellyfin and its variants, Moonfin, Litefin, the Tizen Community bundle, …), plus a "?" catalog view with app previews, versions and descriptions.
+  - Install your own .wgt — a "Custom WGT file" option installs a local package straight from the phone (works offline too).
+  - Samsung sign-in + automatic certificate — logs in with your Samsung account and provisions the signing certificate for you, reusing it on later installs.
+  - Download → re-sign → install, entirely in-process over the developer protocol.
+  - Resilient installs — clear, actionable messages when something goes wrong, and automatic recovery for the common cases (removes the old copy and retries on space / certificate / overwrite failures).
+  - Jellyfin setup — in Settings → Jellyfin, set your server URL (with a Test connection button and a warning for unreliable .local addresses) and optionally sign in once so the TV app auto-logs-in; add custom CSS with a community-theme picker, and the YouTube-trailer ("error 153") fix. It's baked into the Jellyfin package at install, just like on desktop.
+  - TVApp channels — add name + m3u8 stream URL pairs in Settings; they're written into the TVApp package's channel list at install time.
+  - Custom launcher icons — give any app your own icon (Settings → App icons), applied to the package at install.
+  - Show installed apps & reclaim space — see what's on the selected TV with each app's size (biggest first) and total space used, uninstall any of them, and clear leftover/partial installs by package id. A failed fresh install now auto-cleans its own partial so it doesn't eat storage.
+  - Settings — GitHub token (avoids API rate limits), extra TV DUIDs (one cert can cover several TVs), and toggles for Remove old version, Override existing app, Open after installation, Preserve WGT file, Show all Jellyfin versions, Partner signing, and Force Samsung login.
+  - Debuggable — every session is fully logged on-device (scan → sign → install, plus errors) and can be exported from Settings → Share debug log when reporting an issue.
+  - Self-update check — offers the new APK when a newer build is available.
+  - Post-install popup with a Ko-fi QR + "🍺 Buy me a beer".
+  - Ships as a sideloadable .apk (see Assets below).
+  🔏 Signing & native packages
+  - Install native .tpk apps (.NET/native), not just web .wgt — native packages now install through the correct Tizen path.
+  - Opt-in Partner signing (advanced) — a Settings toggle; Public stays the default, so nothing changes for existing apps. Public and Partner certificates are kept as separate profiles (Jelly2Sams - Public / Jelly2Sams - Partner) and reused independently, and a package that declares a restricted privilege auto-requests Partner. ⚠️ Partner-only privileges (e.g. VPN / vpnservice) require Samsung partner enrollment and aren't granted to individual accounts on retail TVs.
+  - Sturdier certificates — a failed TV device-ID read is no longer written into the signing certificate, and a valid cert covering the TV is reused instead of regenerated every install.
+  - No more sign-in on every install — when a valid Jelly2Sams - Public/Partner profile already covers your TV it's reused silently; a Samsung login is only prompted on first run for that level, when the TV's DUID isn't covered yet, or when you force one. Desktop and mobile now share one certificate implementation, so reuse behaves identically on both.
+  - Clearer install errors — plain-language explanations instead of raw Tizen codes. A [118, -4] failure now explains it could be either an app that needs a newer Tizen or a package that needs Partner signing / a privilege your certificate doesn't grant (with a hint to try Partner signing if other apps install fine) — no more misleading "your TV is too old."
+  - Better device list — TVs that are ready to install are labelled with their model/name (not just an IP), and a found TV is never dropped from the list just because its details couldn't be read.
+  - Fixed a startup crash — with a GitHub token set, a leftover draft release could make the app fail on launch with a 404. It now always resolves the newest published helper build, so startup is reliable.
+  🧱 Under the hood
+  - Apps2Samsung.Core shared library now hosts the pieces both apps use — the TV scan, the SDB engine, certificate provisioning + reuse, install diagnostics (error-code classification, TV-capability parsing, permit-install rules, installed-apps listing), the catalog (release models + fetcher), the package-modification pipeline (TVApp channel injector, launcher-icon patcher, and the whole Jellyfin patching subsystem — server URL + auto-login + custom CSS, plus the shared JellyThemes catalog), the update checker, and the build-info / version helper behind the "?" view. One source of truth for the desktop and mobile heads.
+  - PKCS#12 certificates are now built so Android can read them too.
+  - Partner distributor-cert requests now match the official Tizen tooling byte-for-byte (lowercase privilege_level).
+  🖥️ Desktop
+  - Upgraded to .NET 10.
+  - Show installed apps & reclaim space — a button by the TV picker lists installed apps with sizes + total used, per-app uninstall, and a Remove leftover action to clear partial installs by package id (shared with the mobile head).
+  - Added an Open Logs Folder button to the error dialog (#419).
+  - Custom app-icons now cover every community app — the icon picker lists all community apps live from the packages repo instead of a curated handful, so newly-added community apps (e.g. the standalone YouTube-Tizen) show up automatically (#462).
+  > The Android app ships as a sideloaded .apk (not on the Play Store) — open it on your phone and allow installs from your browser/files app.
+  ─────────────────┬─────────┬──────────────────────────────────────────
+  Platform         │Status   │Notes
+  ─────────────────┼─────────┼──────────────────────────────────────────
+  🤖 Android (.apk)│✅ Stable│New! Sideload; your phone as the installer
+  ─────────────────┼─────────┼──────────────────────────────────────────
+  🪟 Windows       │✅ Stable│CI-built (.zip)
+  ─────────────────┼─────────┼──────────────────────────────────────────
+  🐧 Linux         │✅ Stable│x64 + ARM64 (tar.gz / .deb)
+  ─────────────────┼─────────┼──────────────────────────────────────────
+  🍎 macOS         │✅ Stable│ARM64 + Intel (.app + dmg / tar.gz)
+  ─────────────────┴─────────┴──────────────────────────────────────────
+ReleaseNotesUrl: https://github.com/Apps2Samsung/Apps2Samsung/releases/tag/v2.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

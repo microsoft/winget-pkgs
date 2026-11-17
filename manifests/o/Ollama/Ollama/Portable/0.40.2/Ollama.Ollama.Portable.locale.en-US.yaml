@@ -1,0 +1,53 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Ollama.Ollama.Portable
+PackageVersion: 0.40.2
+PackageLocale: en-US
+Publisher: Ollama
+PublisherUrl: https://ollama.com/
+PublisherSupportUrl: https://github.com/ollama/ollama/issues
+Author: Jeffrey Morgan
+PackageName: Ollama (Portable)
+PackageUrl: https://ollama.com/
+License: MIT
+LicenseUrl: https://github.com/ollama/ollama/blob/HEAD/LICENSE
+Copyright: Copyright (c) Ollama
+CopyrightUrl: https://github.com/ollama/ollama/blob/HEAD/LICENSE
+ShortDescription: Start building with open models.
+Description: Get up and running with Kimi, GLM, MiniMax, DeepSeek, gpt-oss, Qwen, Gemma and other models.
+Tags:
+- ai
+- deepseek
+- gemma
+- glm
+- gpt-oss
+- large-language-model
+- llama
+- llm
+- minimax
+- mistral
+- qwen
+ReleaseNotes: |-
+  Model upgrades
+  Models downloaded with earlier versions of Ollama are upgraded in the background the first time you run them, for better performance and compatibility when running on llama.cpp.
+  To make downgrading safe, Ollama keeps the original copy as a backup, so upgraded models are temporarily kept on disk. A future release will remove these backups automatically.
+  To remove backed up models now (requires jq):
+  curl -s localhost:11434/api/tags | jq -r '.models[].name' | while read -r m; do
+    curl -s localhost:11434/api/show -d "{\"model\":\"$m\"}" | jq -r \
+      'select(any(.manifests[]?; .runner == "llamacpp")) | .manifests[] | select(.runner == "ggml") | .digest'
+  done | sort -u | xargs -n1 ollama rm
+  This only deletes the backups. If you later downgrade to a version older than 0.40, you'll need to re-pull those models.
+  Other changes
+  - ollama list no longer shows duplicate entries for upgraded models by @dhiltgen in https://github.com/ollama/ollama/pull/18874
+  - ollama launch claude uses the model's full context length by @jberg5 in https://github.com/ollama/ollama/pull/18855
+  - README: add oxi to community integrations by @maziluiosif in https://github.com/ollama/ollama/pull/18739
+  New Contributors
+  - @maziluiosif made their first contribution in https://github.com/ollama/ollama/pull/18739
+  Full Changelog: https://github.com/ollama/ollama/compare/v0.40.1...v0.40.2-rc0
+ReleaseNotesUrl: https://github.com/ollama/ollama/releases/tag/v0.40.2
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://docs.ollama.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

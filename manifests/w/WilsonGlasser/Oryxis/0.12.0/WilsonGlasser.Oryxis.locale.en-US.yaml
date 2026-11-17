@@ -1,0 +1,78 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: WilsonGlasser.Oryxis
+PackageVersion: 0.12.0
+PackageLocale: en-US
+Publisher: Wilson Glasser
+PublisherUrl: https://github.com/wilsonglasser
+PublisherSupportUrl: https://github.com/wilsonglasser/oryxis/issues
+Author: Wilson Glasser
+PackageName: Oryxis
+PackageUrl: https://github.com/wilsonglasser/oryxis
+License: AGPL-3.0
+LicenseUrl: https://github.com/wilsonglasser/oryxis/blob/HEAD/LICENSE
+Copyright: AGPL-3.0-or-later
+ShortDescription: Modern SSH client built in Rust — terminal, SFTP, and host management.
+Description: Modern SSH client built in Rust — terminal, SFTP, and host management.
+Moniker: oryxis
+Tags:
+- rust
+- sftp
+- ssh
+- terminal
+ReleaseNotes: |-
+  Oryxis 0.12.0
+  The workspace and community release. Settings now opens as a tab beside your sessions, a dragged tab becomes a split pane right where you drop it, and community themes have a home you can contribute to on GitHub, with the first contributed pair already in. Underneath, port forwards to one host share a single SSH connection, 2FA servers authenticate properly, and the debug log can no longer record a secret.
+  Settings and themes
+  - Settings is a tab (#120). It gets a chip in the strip the first time you visit, so tuning something against live content (tab bar options, terminal theme, status bar segments) is one click back and forth. The chip drags and reorders like any other tab, each section remembers its scroll position, and closing it returns you to the tab you were on.
+  - Community themes (#118). The repo has a themes/ directory you can contribute to with a browser-only pull request, and both in-app theme galleries carry a card that opens the gallery at https://oryxis.app/themes; Copy there pastes straight into Import. First contribution: True Black OLED by @AC-Lover, a true-black UI theme with a matching terminal palette. Night Owl and Night Owl Light join the built-in set, backed by a new contrast test suite over every shipped palette.
+  - Theme galleries. The terminal and app theme grids move into scrollable gallery modals; Settings shows one card, the theme in force. Deleting a custom theme now asks first.
+  - Settings > Terminal regrouped. Appearance kept what is actually appearance; Notifications, Integration, Sidebar and Split panes got their own headers. "ZMODEM download folder" is now "Default download folder".
+  Tabs and split panes
+  - Drag a tab into the terminal (#112). Release a dragged tab over the content area and its sessions merge into the tab showing there; where you release picks the split. A grouped tab moves all its panes, and live sessions survive the move.
+  - Tab numbers, duplicate placement and host address (#110, based on work by @shideqin). Optional tab numbers with Ctrl+digit counting tabs the way the numbers read; Duplicate Tab lands next to the original (or end / start); an optional second line shows the host address, masked under Privacy Mode. Labels are measured in pixels now, so mixed Latin/CJK labels stop overflowing.
+  - Uniform tab width (#112). Sizes every tab to the widest label so the strip stops reflowing when you switch tabs, with a small / medium / large ceiling.
+  - Split panes (#113). The focused pane gets a visible accent outline (a setting can bare the inactive ones), Ctrl+Shift+Z zooms the focused pane to the whole tab and the zoom follows focus, the seam between panes is the resize handle, and an optional pane gap gives the layout air.
+  - Closing a grouped tab asks first and names how many sessions are at stake; destructive confirms now say Cancel instead of a second "Close" (#112). "Close other tabs" and "Close all tabs" tear sessions down properly instead of leaving connections and forwards running invisibly.
+  Terminal
+  - PRIMARY selection (#106). Selecting sets an X11-style buffer separate from the clipboard; middle-click pastes it, Shift+Insert is the keyboard twin, and a faint ghost band shows what the next paste will insert.
+  - Drag-and-drop upload (#106). Drop files or folders on a pane to upload to that pane's host: SFTP on the live connection when the shell's cwd is known, ZMODEM fallback otherwise, quoted paths pasted into a local shell. One progress overlay with cancel covers both.
+  - Mouse buttons as shortcuts. Middle, Back and Forward bind to actions in Settings > Shortcuts like keyboard chords; Back / Forward walk directory history on file surfaces first (#114).
+  - Typing snaps back to the live edge (#111). Now on by default, and triggered only by bytes actually reaching the PTY.
+  - Copy works over a recording, along with select-all and scrollback paging, using your own bindings.
+  - Fixed: the find bar fits a narrow pane without losing its close button; no more "New output" toast for the tab you are looking at; a pane drops its highlight when focus leaves it, so a split no longer shows three highlighted blocks; screen's ESC k title sequence on RHEL/CentOS becomes the window title instead of printing into the grid (#88); progress bars no longer render full at 0% (#107).
+  Files and SFTP
+  - Pick the editor where you open the file (#114). The row menu grows an "Open with" family: OS association, default editor, "Other application..." for this open only (the first Open with that works on Linux), and "Set default editor..." right there.
+  - Downloads ask (#114). Overwrites raise the same prompt uploads always had, with apply-to-remaining; "Download to..." picks a destination per transfer, and an optional setting makes every download ask.
+  - Move between hosts (#115). Verified before anything is removed; a move within one host is an instant rename; a relay onto the same file or into its own subtree is refused, symlinks included.
+  - Sidebar Files (#123, #114). Click selects, double-click enters, Copy path keeps your scroll position, the selection survives a refresh, and the recent-folders list now survives closing the host.
+  - Fixed: grabbing a row to drag it now hit-tests the drawn row rectangles instead of trusting hover state, which tooltips and event ordering could silently drop.
+  Port forwarding
+  - One SSH connection per host (#126). Multiple forwards to a host share a single transport and auth; one host-key prompt, one error, and the connection closes when the last forward drops. Deleting a -R rule releases its server-side bind immediately.
+  - Forwards climb back (#101). A running forward that loses its connection retries under the same auto-reconnect setting as hosts, and an ssh-agent gaining keys (KeePassXC unlocking) kicks every pending rule immediately instead of waiting out a two-minute backoff.
+  - Explained on the host. The host editor's inline forwards section says what it is (session-scoped, -L only) and lists the standalone rules that travel through the host, live status included. Rule cards get the standard kebab menu and a delete confirmation (#119).
+  - Kill the process behind a port (#96). The Monitor tab's port rows offer SIGTERM / SIGKILL behind a confirmation; the PID is re-resolved on the host before signalling, and sudo is offered only when it can actually work.
+  Authentication and security
+  - 2FA and multi-step auth (#125). Servers using RFC 4252 partial success (sshd AuthenticationMethods, Bitvise compound auth) now complete the chain instead of reading as a rejection; a stored TOTP secret answers the second factor silently, the 2FA modal prompts otherwise. Keys are re-offered when the server wants its own method order, and chained keyboard-interactive factors work.
+  - The debug log stops recording secrets. Password keystrokes and pasted clipboard text print <redacted> by construction in the diagnostics users attach to issues.
+  - The Files folder history is encrypted like the rest of the activity trail; it was readable without unlocking the vault.
+  - Command history cannot be planted. Shell-reported command lines are accepted only with a per-vault key (Copy / Rotate in Settings > Terminal), fail-closed, so nothing a host prints can put a command in your history. docs/TMUX.md covers capturing history inside tmux; Oryxis never writes to a host's dotfiles.
+  - Dependency updates: russh 0.62.5 (GHSA-m65r-rprj-r5rg and the 0.62.4 pre-auth panics) and quinn-proto 0.11.15 (GHSA-4w2j-m93h-cj5j).
+  AI chat
+  - Saved conversations (#105). Chats are stored encrypted and read back from the History timeline, host-filtered and read-only. Saving is a choice: "Save conversations" in Settings > AI, on by default, off in one click without deleting what is stored.
+  - Reasoning toggle. Chain-of-thought is billed and never displayed, so it is off by default where the provider can be told (DeepSeek, Gemini).
+  - Fixed: thinking models no longer 400 on the second message (DeepSeek reasoning_content, Gemini thoughtSignature replay), a retried answer replaces the saved one, and the error card wraps long payloads.
+  History and playback
+  - Linear transcript mode (#92). A recording that lived on the alternate screen (tmux, vim, pagers) opens as a linear rendering with every repaint in order, instead of a replay showing one final frame; a header button flips modes, and selection, copy and search work in both.
+  - The session player keeps its selection and honors your right-click scheme.
+  Fixes worth naming
+  - One in-flight connect no longer paints its progress screen over every tab, which read as a seconds-long tab-switching stall (#104); Debug logging gains a stall watchdog that names which layer stopped.
+  - An in-flight paste, a pending pane split and a parked snippet form now follow their tab by id, so a tab closed at the wrong moment can no longer land text or a command in another host's session.
+  - Closing the first pane of a split no longer leaves the tab wearing the dead pane's name, and splitting honors your configured local shells (#108).
+  - The Underline tab style stops squeezing chips and drawing stray ticks on vertical docks (#87).
+  Under the hood
+  The app state and dispatch layer were rebuilt this cycle: the god struct went from 444 fields to 244 grouped ones, the largest handlers (tabs, AI, editor, SFTP transfers, SSH, vault) became routers with one file per concern, and the terminal render path split into a grid pass and a HUD layer. A mis-routed message now logs loudly instead of being dropped, which is also what made the secret-scrubbing above safe to enforce everywhere.
+ReleaseNotesUrl: https://github.com/wilsonglasser/oryxis/releases/tag/v0.12.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

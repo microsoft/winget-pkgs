@@ -1,0 +1,34 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: hellowind777.hellogrok.CLI
+PackageVersion: 0.1.24
+PackageLocale: en-US
+Publisher: hellowind777
+PublisherUrl: https://github.com/hellowind777
+PublisherSupportUrl: https://github.com/hellowind777/hellogrok/issues
+PackageName: hellogrok-cli
+PackageUrl: https://github.com/hellowind777/hellogrok
+License: MIT
+LicenseUrl: https://github.com/hellowind777/hellogrok/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 hellowind777
+ShortDescription: Console-only CLI of hellogrok, a local proxy that makes Grok Build custom model channels work with common API formats, native Web tools, isolated authentication, and automatic configuration recovery.
+Description: 'Grok Build can use custom model endpoints, but real-world providers do not all expose the same protocol, response shape, authentication method, or Web-search behavior. hellogrok provides one local compatibility layer for those custom channels: it prepares the required Grok configuration while running, keeps each channel tied to its own endpoint and credentials, supports Grok Build native Web workflows, and restores the original configuration when stopped. This console-only build runs the same proxy from the terminal without the tray application; run `hellogrok help` for the full CLI reference (start, version, routes, restore, autostart, log, logview).'
+Tags:
+- grok
+- grok-build
+- proxy
+ReleaseNotes: |-
+  Fixed
+  - Native Chat SSE no longer lets a later empty "name" overwrite a known tool name, and no longer rewrites incomplete argument JSON per frame. Grok Build's last-write-wins Chat accumulator therefore keeps list_dir / run_terminal_command instead of reporting NotFound.
+  - Empty or vendor finish_reason values ("", GLM sensitive / network_error / model_context_window_exceeded) are dropped or mapped onto Grok Build's Chat enum so serde no longer cancels the stream.
+  - Reasoning is forwarded only as a prefix sibling. Thought after visible text is dropped on Chat, Messages, and Responses; <think> blocks are peeled out of answer text; protocol self-talk such as reply only: / 任务已全部完成 is stripped from prefix CoT. Streaming reasoning_content deltas keep leading BPE spaces.
+  - Chat history no longer replays plaintext CoT across user turns except on DeepSeek and MiMo. Intra-turn tool-loop reasoning is kept. Encrypted or signed blobs are never removed, and "tool call" placeholders are never injected.
+  Changed
+  - Ordinary Chat and Messages channels stay on Grok Build's first-party mapper. Responses projection remains search-only.
+  - Upstream Chat tool lists keep Grok Build client_name values. Claude/Codex aliases are rewritten on inbound calls instead of being cloned into every tools array.
+  - Every upstream request is presented as Grok Build (grok-shell User-Agent and X-Grok-Client-Identifier). hellogrok's own product string is never forwarded.
+  - Streaming Chat keeps stream_options.include_usage=true. GLM Chat with tools also sets tool_stream=true when omitted.
+ReleaseNotesUrl: https://github.com/hellowind777/hellogrok/blob/HEAD/CHANGELOG.md#0124-2026-09-12
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

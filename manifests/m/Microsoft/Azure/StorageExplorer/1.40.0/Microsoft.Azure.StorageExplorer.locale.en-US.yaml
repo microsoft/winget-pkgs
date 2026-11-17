@@ -1,0 +1,75 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Microsoft.Azure.StorageExplorer
+PackageVersion: 1.40.0
+PackageLocale: en-US
+Publisher: Microsoft Corporation
+PublisherUrl: https://opensource.microsoft.com/
+PublisherSupportUrl: https://github.com/microsoft/AzureStorageExplorer/issues
+Author: Microsoft
+PackageName: Microsoft Azure Storage Explorer
+PackageUrl: https://azure.microsoft.com/en-us/features/storage-explorer
+License: CC-BY-4.0
+LicenseUrl: https://github.com/microsoft/AzureStorageExplorer/blob/HEAD/LICENSE
+ShortDescription: Free tool to easily manage your Azure cloud storage resources anywhere, from Windows, macOS, or Linux.
+Moniker: storageexplorer
+Tags:
+- azure
+- azure-storage-explorer
+- explorer
+- storage
+- storage-explorer
+ReleaseNotes: |-
+  September 2025 (Version 1.40.0, build 20250925.27)
+  Welcome to Storage Explorer version 1.40.0. This release adds new features for file shares and tables. For a detailed list of all issues closed, visit our Issues page.
+  NFS File Shares
+  Storage Explorer now supports working with NFS file shares. If you have access to Premium File storage accounts, you can now manage NFS file shares in those accounts.
+  In this release, Storage Explorer supports the following operations:
+  - Create NFS file shares. Storage Explorer will ask you whether you want to create an SMB or an NFS file share after entering the name of the new file share.
+  - Copy and paste NFS file shares between storage accounts.
+  - Create, manage, and delete NFS file share snapshots.
+  - Copy and paste files and folders between NFS file shares. Transfers between NFS and SMB, SMB and NFS, NFS and blob, and blob and NFS will be available in a future release.
+  - Upload to or download from NFS file shares (Linux only; Windows and macOS support will come in a future release).
+  We've also updated the Transfers → Preserve Info and Transfers → Preserve Permissions settings to reflect the NFS changes. We recommend enabling these settings when uploading or downloading from NFS file shares. This will help prevent ownership issues when downloading files.
+  When downloading from NFS file shares, AzCopy will attempt to modify the ownership of the local file to match the ownership of the file in the NFS file share. Errors may occur if your Linux user is not the owner. You can work around ownership-related errors by copying the AzCopy command used by Storage Explorer and run it directly from the command line using sudo.
+  Azure support for NFS file shares is ongoing. We will continue to improve NFS support as more platform features become available.
+  JSON Support for Table Import/Export
+  Storage Explorer now supports the option of importing and exporting table data in JSON format. JSON is better suited for developer workflows than CSV.
+  JSON Format
+  The expected JSON format is similar to the payload format for table service operations:
+  [
+    {
+      "PartitionKey": "p1",
+      "RowKey": "r1",
+      "Value1": "1",
+      "Value1@type": "Int32",
+      "Value2": "1.4",
+      "Value2@type": "Edm.Double",
+      "Value3": "true",
+      "Value3@odata.type": "Boolean",
+      "Value4": "example",
+      "Value4@type": "Edm.String"
+    },
+    {
+      "PartitionKey": "p1",
+      "RowKey": "r2",
+      "Value1": "2",
+      "Value2": "1.5"
+    }
+  ]
+  Type annotations are optional and can be expressed using the @type or @odata.type suffixes. Type values can include the Edm. prefix.
+  To prevent data loss, Storage Explorer expects all values to be represented as JSON strings. This helps prevent precision errors when parsing numbers, such as large Int64 values or certain Double values.
+  Storage Explorer can infer data types without type annotations, but there are situations where the type cannot be unambiguously determined. For example, "123" could be an Int32 or an Int64, and "Jane" could be a Binary or a String. For this reason, we recommend providing type annotations whenever possible.
+  Using Type Annotations as a Schema
+  Table imports have also been improved to better handle data that adheres to a schema.
+  Azure Tables are inherently schemaless—they don't ensure all entities in the table have the same set of properties with the same data types. However, users often model their data using schemas. In such cases, type annotations for all entities in import/export files become redundant.
+  In this version, we've added the option to export type annotations for the first entity only. This option helps preserve important type information while reducing the size of the exported file.
+  Storage Explorer can take advantage of files that only have type annotations for the first entity. When you select an import file, the Import dialog samples the first few entities to determine the best types for each property. If you disable the "Infer types for unannotated property values" option, Storage Explorer will select property types based on the type annotations for the first entity in the file.
+  Note that type sampling might not always work as expected. Storage Explorer may select different types if the sampled data does not match the type annotations from the first entity or if type annotations are present on multiple entities. This can lead to type-related errors during import. Always verify that your data is well formatted and that types can be unambiguously determined for all values.
+  Multi-factor Authentication Enforcement
+  Multi-factor authentication (MFA) will soon be required for all create, update, and delete operations. To avoid service interruptions, ensure that MFA is enabled for your user account, or contact your administrator for assistance. Once MFA is enabled, you may need to sign in to Storage Explorer again.
+  For more information, visit Planning for mandatory multifactor authentication for Azure and other admin portals.
+ReleaseNotesUrl: https://github.com/microsoft/AzureStorageExplorer/releases/tag/v1.40.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

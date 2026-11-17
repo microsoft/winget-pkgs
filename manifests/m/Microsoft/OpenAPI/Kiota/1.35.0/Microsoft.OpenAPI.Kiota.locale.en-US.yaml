@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: Microsoft.OpenAPI.Kiota
+PackageVersion: 1.35.0
+PackageLocale: en-US
+Publisher: Microsoft
+PackageName: Kiota
+PackageUrl: https://github.com/microsoft/kiota
+License: MIT
+ShortDescription: A command line tool for generating an API client to call any OpenAPI described API you are interested in. The goal is to eliminate the need to take a dependency on a different API SDK for every API that you need to call.
+Tags:
+- microsoft-openapi-kiota
+- microsoftopenapikiota
+- microsoft.kiota
+- microsoft-kiota
+- microsoftkiota
+- requirescmd
+ReleaseNotes: |-
+  ## Added
+
+  • Added model generation for schemas used by OpenAPI 3.1 webhooks. [#6394](https://github.com/microsoft/kiota/issues/6394)
+  • Adds support for resolving JSON Schema 2020-12 `$dynamicRef` against schemas declaring `$dynamicAnchor`, so recursive types (e.g. `LocalizedCategory.children：LocalizedCategory[]`) generate correctly instead of degrading to `UntypedNode`. Phase 1 of [#7815](https://github.com/microsoft/kiota/issues/7815).
+  • Added binding-aware `$dynamicRef` resolution for `$defs` / `$dynamicAnchor` contexts, generating distinct concrete models for each active binding and preserving typed request bodies, responses, and error responses. Phase 2 of [#7815](https://github.com/microsoft/kiota/issues/7815).
+
+  ### Changed
+
+  • Go：fixed the factory reference emitted for a model whose name ends in `able` (e.g. `ProviderUnavailable`): the writer trimmed the suffix as if it were the model-interface suffix, referencing a `Create...FromDiscriminatorValue` symbol that is never generated, so the package did not compile. The suffix is now only trimmed when the type resolves to the inserted interface.
+  • Fixed query parameters whose name is escaped (e.g. `export` in TypeScript) being silently dropped from the request：the original name is now kept as the serialization name, so TypeScript emits the `queryParametersMapper` entry mapping the escaped symbol back to its wire name. [kiota-typescript#2111](https://github.com/microsoft/kiota-typescript/issues/2111)
+  • Fixed defaults primitive default-value handling during code generation for all languages
+  • Ruby：added composed type (union/intersection) support to the factory, serializer and deserializer bodies, and stopped emitting composed type wrappers as inner classes. Un-suppresses the Twitter integration test. [kiota-abstractions-ruby#73](https://github.com/microsoft/kiota-abstractions-ruby/issues/73) [#1816](https://github.com/microsoft/kiota/issues/1816)
+  • Ruby：`initialize` is now a reserved name. An API member called `initialize` previously generated a second `def initialize`, redefining the constructor; it is now escaped.
+  • Ruby：removed the blank line emitted at the start of every generated class body.
+  • Ruby：moved the runtime gem dependencies to 0.19.0, the first release able to serialize a primitive composed type member and to tell which member a payload holds.
+  • Ruby：models whose names differ only in where a separator falls (e.g. `codeScanningVariantAnalysis_status` and `codeScanningVariantAnalysisStatus`) snake-cased to the same file name, so one silently overwrote the other and the models barrel required it twice. Colliding file names are now disambiguated, leaving the generated type names unchanged. Un-suppresses the GitHub integration test. [#1816](https://github.com/microsoft/kiota/issues/1816)
+  • Ruby：fixed flattening of models nested more than one namespace deep. The separators were emitted into the class name, producing invalid constants such as `class S.v2.billingMeterEvent`, and the models namespace was itself renamed part-way through the walk, prefixing every nested model with a fragment of it (`s_v2_billing_meter_event`). Un-suppresses the Stripe integration and idempotency tests. [#1816](https://github.com/microsoft/kiota/issues/1816)
+  • Fixed plugin manifest generation to omit unsafe `oauth_card_path` file references that could resolve outside the plugin package.
+  • Bumped `Microsoft.OpenApi` and `Microsoft.OpenApi.YamlReader` to 3.10.2, and lifted the YAML reader scalar length limit so descriptions with large scalars (e.g. long markdown descriptions) can still be parsed.
+  • Numeric scalar unions with a format (e.g. `type：["integer", "string"]` with `format: int32`, as emitted by ASP.NET Core's OpenAPI 3.1 generator under System.Text.Json's default `JsonNumberHandling.AllowReadingFromString`) now map to the numeric type instead of degrading to `UntypedNode`. [#6541](https://github.com/microsoft/kiota/issues/6541)
+  • Ruby：removed `then` from multiline `unless` and skipped empty `case` blocks in factory methods to fix RuboCop and SyntaxError offenses. [kiota-abstractions-ruby#66](https://github.com/microsoft/kiota-abstractions-ruby/issues/66) [#7856](https://github.com/microsoft/kiota/issues/7856)
+  • Ruby：fixed enum default values with numeric wire names (e.g. `2.0`) to use the enum option name instead of the raw value as a Ruby symbol. [kiota-abstractions-ruby#66](https://github.com/microsoft/kiota-abstractions-ruby/issues/66)
+  • Ruby：fixed `case/when` indentation and added empty line after `attr_accessor` to resolve RuboCop offenses in generated code. [kiota-abstractions-ruby#59](https://github.com/microsoft/kiota-abstractions-ruby/issues/59)
+  • golang：generated code now always uses LF line endings, so `gofmt` no longer reports formatting differences when generating on Windows.
+  • golang：make sure all generated code adheres to golangs coding standards
+  • Fixed non-deterministic model class descriptions when a component schema is referenced from multiple properties with differing reference-level descriptions. [#7927](https://github.com/microsoft/kiota/issues/7927)
+  • Fixed generation of a spurious union type/wrapper for `oneOf` nullable reference types (e.g. `oneOf：[$ref, {type: null}]` as emitted by ASP.NET Core 10's OpenAPI 3.1 generator); these now collapse to the nullable target type, matching the existing `anyOf` behavior. [#6776](https://github.com/microsoft/kiota/issues/6776)
+  • TypeScript：fixed generation for primitive binary unions by handling `ArrayBuffer` as a primitive type, and deduplicated redundant serialization/deserialization branches when multiple union members map to the same runtime type (e.g. `binary` and `base64`).
+  • TypeScript：fixed composed type deserialization for unions that include Kiota primitive types such as `DateOnly`.
+  • C#：write `#pragma` to disable CS1591 for properties without description. [#8095](https://github.com/microsoft/kiota/issues/8095)
+  • C#：don't create `<see cref="byte[]"/>` xml doc comments [#8099](https://github.com/microsoft/kiota/issues/8099)
+  • Required array query parameters with `explode：true` (the OpenAPI default for query parameters) now use the exploded form expansion (`{?param*}`) in URL templates so each value repeats the key, instead of the required syntax `param={param}` which comma joins the values. Required scalar query parameters keep the required syntax since scalar expansion is identical either way. Note the tradeoff RFC 6570 forces here: a required exploded array left unset now disappears from the query string entirely instead of emitting a bare `param=` pair. [#8031](https://github.com/microsoft/kiota/issues/8031) [#4487](https://github.com/microsoft/kiota/issues/4487)
+ReleaseNotesUrl: https://github.com/microsoft/kiota/releases/tag/v1.35.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

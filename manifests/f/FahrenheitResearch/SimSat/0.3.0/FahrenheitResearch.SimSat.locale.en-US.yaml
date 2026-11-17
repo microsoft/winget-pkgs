@@ -1,0 +1,37 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.SimSat
+PackageVersion: 0.3.0
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/simsat/issues
+Author: Fahrenheit Research
+PackageName: SimSat Studio
+PackageUrl: https://github.com/FahrenheitResearch/simsat
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/simsat/blob/main/LICENSE-APACHE
+Copyright: Copyright © Fahrenheit Research. MIT OR Apache-2.0.
+CopyrightUrl: https://github.com/FahrenheitResearch/simsat/blob/main/LICENSE-MIT
+ShortDescription: Physically-based simulated satellite imagery from WRF model output - visible true-color, IR, water vapor, GeoColor, Sandwich, and derived fields, with a desktop studio, headless CLI, and Python bindings
+Description: 'SimSat Studio - Physically-based simulated satellite imagery from WRF model output. SimSat renders what a geostationary weather satellite would see looking at your WRF run: NASA Blue Marble ground with terrain shadows and seasonal blending, a finite-disk sun with real twilight, volumetric clouds with multiple scattering, Cox-Munk water sun-glint — and synthetic thermal infrared through the same true-Kelvin enhancement pipeline the real GOES/Himawari products use. It ships as a desktop app (simsat_studio, Rust/egui/wgpu), a headless CLI, and a numpy-returning Python binding (import simsat).'
+Moniker: simsat-studio
+ReleaseNotes: |-
+  SimSat v0.3.0 — Earth colors and satellite rendering
+  This release brings the improved cloud/surface rendering work since v0.2.1 into Windows Studio. It adds unshaded seasonal Earth maps, measured MODIS land colors, and repeatable local cases with automatic PNG export.
+  - Studio exposes the NASA unshaded monthly Earth-map source and optional MODIS NBAR land input, with the same measured reflectance and snow handling as the renderer. Natural sRGB and the established ABI display transform are selectable.
+  - Test-case JSON files appear in Open > Test cases. A case can open interactively or render/save automatically through Studio. CPU workers and CI build jobs are capped at six.
+  - The underlying visible path includes the verified ocean-glint normalization fix, terrain and low-sun lighting work, and cloud-fraction/particle-optics experiments documented in the repository.
+  - Research adds explicit per-band ABI first-order and all-order scalar Monte Carlo CLIs, official spectral-response inputs, independent transport checks, and checked-in case scoreboards. Monte Carlo remains optional, CPU-only at scene level, noisy at low sample counts, and unsuitable as the default Studio appearance.
+  - Day/night thermal products and cached-run support remain available; workspace and standalone Python versions are synchronized.
+  The measured land input is a nadir/noon MODIS RGB display proxy with strict source-grid/date checks. It is not arbitrary-angle BRDF or ABI per-band reflectance. The 1974 demonstration uses an explicitly labeled 2024 seasonal land analogue. Display intent still has appearance adjustments and must not be scored as an unmodified radiometric operator.
+  Known scientific limits: the cold-cloud IR residual remains roughly +8 to +11 K in the evaluated case, and forecast cloud placement/temperature limits remain. This release does not claim complete ABI retrieval fidelity or state-of-the-art certification. See the committed scoreboards and transport notes for the measured improvements and remaining regressions.
+  Extract the portable Windows zip. The optional Earth-map zip supplies the earth-basemap folder beside the EXE. Model simulations and personal case manifests are not bundled publicly. See docs/STUDIO-CASES.md for case creation and compatible inputs.
+  This stable release promotes the tested v0.3.0-rc.1 renderer. The release transition changes version metadata and packaging; rendering and scientific limitations are unchanged. Previous releases remain available.
+  Assets: simsat-studio-v0.3.0-windows-x86_64.exe is the standalone app. The Windows portable zip includes matching CLIs and notices. The optional NASA Earth-map zip extracts beside the EXE. The Linux CLI archive and abi3 Python wheel are built from this same source commit. Personal simulation files, case manifests, and per-case measured data are excluded.
+  Studio case guide · Diagnostic scoreboard
+  Validation: all four CI jobs passed, including strict Clippy, formatting, workspace tests, Windows/macOS engine builds, and Python import/render. All three release-artifact jobs passed. The exact published Windows EXE has version 0.3.0 and reproduced all three checked release-candidate images pixel-for-pixel. Checksums and build verification are attached.
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/simsat/releases/tag/v0.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

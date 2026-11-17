@@ -1,0 +1,47 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.8.0
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+Tags:
+- account-manager
+- antigravity
+ReleaseNotes: |-
+  - [全协议工具与参数 100% 纯透传] 彻底根除历史截断与不透明改写导致的 Agent 客户端工具调用异常 (PR #3504):
+    - 工具与参数语义无损透传：拔除 OpenAI / Anthropic Claude / Google Gemini 三套协议中工具名称映射、参数别名改写与错误命令注入等中间篡改逻辑，工具名与实参以客户端原始语义直达上游，根治 OpenClaw 等 Agent 客户端因截断与改写产生的各类诡异工具调用报错。
+    - 工具描述与结果保真：移除工具 Schema 校验阶段向 description 的写入式注入与工具输出截断压缩器，工具描述及执行结果 100% 逐字保真直达。
+    - 系统指令绝对冻结：拔除请求中对 System Prompt 日期、时区、工作路径与 UUID 的粗暴冻结正则，动态消息改以 <system-reminder> 保真下沉至 User 轮次。
+    - 死代码物理切除：切除 ToolAdapter / PencilAdapter 等无引用架构与 700+ 行 apply_patch 诊断埋点，净清理 3300+ 行冗余代码。
+  - [厂商归属声明自适应归一化] 修复提示词归属声明导致上游伪限流整池误冷却 (Fixes #3508, Thanks to @oliverhe202018-ctrl):
+    - 提示词厂商归属动态规范化：针对第三方客户端提示词中包含的异构厂商归属声明进行智能归一化，彻底阻断上游对非自研声明的严格拦截与伪 429 频控报错，杜绝账号池被误进入长时间冷却。
+  - [IDE 切号热切集成优化] 仅重启 language_server 子进程，主窗口免杀保持无感：
+    - 定向热切：优化多账号切换时的 IDE 刷新动作，精准靶向重启语言服务引擎（language_server）子进程，不再强杀主窗口，极大提升切号流畅度与开发体验。
+  - [流水线架构优化与监控审计降噪]:
+    - 架构分工固化：彻底移除出站流水线死节点，固化进站统一收敛与出站灵活发散的架构职责；风险提示词清洗与高危伪 Header 剥离统一收敛至 PromptSanitizer 节点。
+    - 审计报文按关注度重排：报文字段统一优化为（模型 → 思考 → 上下文 → 用量 → 工具），simple 模式白名单补全 Responses 协议的 instructions 与 input。
+    - GET 请求落库抑制：默认关闭捕获时抑制全部 GET 成功请求落库，杜绝高频探针与无状态调用对 SQLite 存储的消耗。
+  - [正式版与预览版双轨发版流水线及通道门禁]:
+    - 通道严格隔离：确立 main 正式版与 beta 预览版双轨体系。流水线内置 verify-release-target 门禁，拦截跨分支错位打版。
+    - 正式用户零干扰：预览版自动标记 Pre-release 且绝不进入 Latest，客户端自动更新通道与 Docker latest 标签受到 100% 物理隔离保护。
+    - 发版脚本智能分支感知：bump-version.mjs 自动识别本地分支并进行双向防呆预警。
+  What's Changed
+  - [Beta] feat(proxy): 全协议工具与参数 100% 纯透传，修复 OpenClaw 等 Agent 客户端工具调用异常 by @jeikl in https://github.com/lbjlaq/Antigravity-Manager/pull/3504
+  - fix(proxy): 归一化系统提示词中的厂商归属声明，修复上游伪限流导致的整池误冷却 by @oliverhe202018-ctrl in https://github.com/lbjlaq/Antigravity-Manager/pull/3508
+  New Contributors
+  - @oliverhe202018-ctrl made their first contribution in https://github.com/lbjlaq/Antigravity-Manager/pull/3508
+  Full Changelog: https://github.com/lbjlaq/Antigravity-Manager/compare/v4.7.13...v4.8.0
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.8.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,66 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Nub.Nub
+PackageVersion: 0.7.2
+PackageLocale: en-US
+Publisher: nub contributors
+PublisherUrl: https://nubjs.com/
+PublisherSupportUrl: https://github.com/nubjs/nub/issues
+Author: nub contributors
+PackageName: Nub
+PackageUrl: https://nubjs.com/
+License: MIT
+LicenseUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 nub contributors
+CopyrightUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+ShortDescription: The all-in-one JavaScript toolkit that augments Node.js instead of trying to replace it.
+Description: "An all-in-one toolkit for Node.js. One Rust binary to run your files and scripts, install dependencies, and manage Node itself — a Bun-like modern DX on top of the node you already have. There's no new runtime to adopt and no lock-in: every augmentation rides on Node's own public extension surfaces."
+Moniker: nub
+Tags:
+- javascript-runtime
+- node-version-manager
+- nodejs
+- package-manager
+- script-runner
+ReleaseNotes: |-
+  Supply-chain and workspace resolution fixes, plus per-invocation platform selection for cross-platform installs.
+  Release-age gate
+  Running a tool without naming a version resolves the latest tag, which narrowed to that one version — so a minimumReleaseAge window covering it left nothing to fall back to and nubx <tool> failed outright. A blocked latest now resolves to the newest release that clears the window (#682, #681).
+  $ nubx some-tool
+  + some-tool@2.3.0  latest 2.4.0
+  warn: the latest some-tool release (2.4.0) is younger than minimumReleaseAge; using 2.3.0 instead
+  help: to take the newest release anyway: `--minimum-release-age=0`, or `--minimum-release-age-exclude=some-tool`
+  The fallback stops at whatever the publisher currently tags latest, so a higher version they published and then untagged is never selected, and a latest pointing at a prerelease is refused rather than falling back onto a stable release from an older line. The same narrowing also affected the non-strict mode in the opposite direction — the blocked release was the only candidate, so it was re-selected and the window had no effect. It is now enforced there too.
+
+  Installs
+  ──────────────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬────────────
+  Area              │What changed                                                                                                                                          │Commit
+  ──────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼────────────
+  Platform selection│--os, --cpu and --libc select optional dependencies for a target other than the host, per invocation (#683)                                           │af33650
+  ──────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼────────────
+  Workspace protocol│A workspace:<path> tail naming a member directory resolves to that member instead of being read as a version range and sent to the registry (#674)    │ab7350e
+  ──────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼────────────
+  Prewarm           │The prewarm graph is host-filtered under the isolated layout, matching the linked tree (#679)                                                         │adac3af
+  ──────────────────┼──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼────────────
+  Patch application │A failing hunk reports its number and line, counted from 1, with what was searched for and that the patch needs regenerating (#674)                   │ab7350e
+  ──────────────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴────────────
+
+  Diagnostics
+  The refusal to accept a nodeOptions entry now names NODE_OPTIONS as the constraint doing the refusing (#684, c178118).
+
+  Documentation
+  The package-manager page's layout section is reworked to state the policy as neutral-surface-first, with a dead npmrc example corrected and a duplicated build-approval enumeration removed.
+
+  What's Changed
+  - fix: name NODE_OPTIONS as the constraint refusing a nodeOptions entry by @colinhacks in #684
+  - fix(install): host-filter the prewarm graph under the isolated layout too by @colinhacks in #679
+  - feat(install): --os / --cpu / --libc for per-invocation platform selection by @colinhacks in #683
+  - fix(aube): resolve workspace: specifiers, and say where a patch hunk failed by @colinhacks in #674
+  - fix(resolver): fall back to the newest mature release when the age gate blocks latest by @colinhacks in #682
+ReleaseNotesUrl: https://github.com/nubjs/nub/releases/tag/v0.7.2
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://nubjs.com/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

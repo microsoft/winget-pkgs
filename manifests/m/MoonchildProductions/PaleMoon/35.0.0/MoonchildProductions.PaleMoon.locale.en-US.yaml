@@ -1,0 +1,67 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: MoonchildProductions.PaleMoon
+PackageVersion: 35.0.0
+PackageLocale: en-US
+Publisher: Moonchild Productions
+PublisherUrl: https://www.palemoon.org/
+PublisherSupportUrl: https://www.palemoon.org/contact/
+PrivacyUrl: https://www.palemoon.org/policies/privacy.shtml
+Author: Moonchild Productions
+PackageName: Pale Moon
+PackageUrl: https://www.palemoon.org/download.shtml
+License: MPL-2.0
+LicenseUrl: https://www.mozilla.org/MPL/2.0
+Copyright: Copyright © 2009-2026 Moonchild Productions - All rights reserved
+CopyrightUrl: https://www.palemoon.org/policies/usercontent.shtml
+ShortDescription: The best browser with fast site rendering, advanced privacy, a sleek design and innovative features.
+Description: |-
+  Pale Moon is an Open Source, Goanna-based web browser available for Microsoft Windows and Linux (with other operating systems in development), focusing on efficiency and ease of use.
+  Pale Moon offers you a browsing experience in a browser completely built from its own, independently developed source that has been forked off from Firefox/Mozilla code a number of years ago, with carefully selected features and optimizations to improve the browser's stability and user experience, while offering full customization and a growing collection of extensions and themes to make the browser truly your own.
+Moniker: palemoon
+Tags:
+- browser
+- gecko
+- internet
+- web
+- web-browser
+- webpage
+ReleaseNotes: |-
+  This is a milestone release with many changes, primarily focused on web compatibility.
+
+  New features:
+  - Pale Moon now uses a number of compatibility shims/polyfills by default. This will provide compatibility bridging with the following: Document.elementFromPoint(s) with non-finite args, the GetAnimations API, image.decode(), Intl.DisplayNames API, Intl.ListFormat API, Intl.RelativeTimeFormat API, Intl.Segmenter API, in addition to pipethrough(), pipeto(), TextDecoderStream, TextEncoderStream and TransformStream methods of the Streams API. See implementation notes.
+  - Implemented the CSS revert-layer keyword.
+  - Implemented CSSStyleSheet replaceSync.
+  - Implemented the CSS :has() pseudo class.
+  - Implemented support for adoptedStyleSheets.
+  Changes/fixes:
+  - Firefox compatibility mode had its version updated to 140 by default. Of course this can still easily be overridden (globally or per-site) where necessary.
+  - JavaScript garbage collection and DOM cycle collection have been given a number of important fixes to better deal with heavy modern websites that would not properly release their resources. The "ghostbuster" workaround for lingering window objects has been removed in tandem as it is no longer necessary.
+  - Removed old and obsolete code from the platform related to ancient or completely unsupported compile targets.
+  - The uppercase version of ß (eszett/scharfes S) will now always mirror the lowercase writing method. See implementation notes.
+  - Added more updates for LoongArch64 (including full JIT) and Mac/PPC support.
+  - Linux/FreeBSD: Added a GTK2 dependency toggle to build NPAPI support without GTK2. This allows Pale Moon to build plugin support on systems with no GTK2 packages.
+  - Removed the unused "network tickler" module, an inherited component that could ping wireless networks on a regular interval.
+  - Modernized std::*<T>::value/::type to their _v and _t suffix forms, respectively, aligning with more modern C++ language standards and compiler behavior.
+  - Updated CSS aspect-ratio to be more spec-compliant.
+  - Updated flex container buttons to report a definite size (avoiding 0-sized elements on some websites).
+  - Restored the ability to compile Pale Moon on MIPS targets.
+  - Fixed an issue with possible hangs in recursive restyling calls (causing a recursive reflow storm), avoiding potentially long browser hangs/lockups.
+  - Updated several parts of the ICU code for better internationalization support.
+  - Linux: Improved typing performance on some complex pages.
+
+  Security fixes:
+  - Updated the internal json viewer for better handling of resources.
+  - Updated NSS to 3.90.14.0 (UXP) to pick up several security fixes.
+  - As usual, many potential security reports/issues were examined and ported where applicable to our code.
+  - Security issues addressed: CVE-2026-74982, CVE-2026-74969 (DiD), CVE-2026-74977 (DiD), CVE-2026-74945, CVE-2026-74964, CVE-2026-74971, CVE-2026-74943, and several others that did not have a CVE designation at the time of evaluation.
+
+  Implementation notes:
+  - Pale Moon now includes and preloads a number of compatibility shims/polyfills on web pages, to respond to the constant rapid adoption of draft specs and syntactic sugar in websites, primarily driven by top-heavy JavaScript frameworks that target primarily Chrome-based layout engines. While this isn't ideal, it's a pragmatic solution that solves major web compatibility issues with frameworks that are extremely intolerant to not having an exact expected feature set or collection of web APIs. There are a few caveats with this approach which we've adopted from a sibling project (Basilisk), primarily that it may not universally work on all sites, in particular very strict content security policies might interfere, and it's not the most performant solution imaginable (although given the heft of JS framework sites, this is likely barely noticeable).
+  - Primarily in German, the ß character (known as "eszett" or "scharfes S") can be written with its proper character or with the alternative latinized "ss". Because the uppercase version of ß was not commonly included in system fonts for a while, with historical typewriter conventions in mind, converting text to uppercase would convert ß to "SS". However, this can cause ambiguity in some wordswhere both a spelling with ß and with "ss" exist which have different meaning. Since the uppercase unicode character has been included in system fonts for a long time now and is more commonly also included in custom fonts, this conversion is an old notion. The linguistic bodies in Germany also prefer using the uppercase ẞ now when capitalizing, so Pale Moon will use the unicode character by default going forward when converting case (e.g. with CSS or JavaScript), abandoning the on-the-fly conversion to "SS".
+  - Our FreeBSD GTK3 builds are making use of the new option to build NPAPI support without GTK2 dependencies. If you need this functionality on FreeBSD, either use the GTK2 binaries or build from source yourself with the appropriate configuration for your system.
+ReleaseNotesUrl: https://www.palemoon.org/releasenotes.shtml
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

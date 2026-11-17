@@ -1,0 +1,59 @@
+# Created with komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: kunobi-ninja.kache
+PackageVersion: 0.13.0
+PackageLocale: en-US
+Publisher: Kunobi Ninja
+PublisherUrl: https://kunobi.com/
+PublisherSupportUrl: https://kunobi.com/contact
+Author: Zondax AG
+PackageName: kache
+PackageUrl: https://github.com/kunobi-ninja/kache
+License: Apache-2.0
+LicenseUrl: https://github.com/kunobi-ninja/kache/blob/HEAD/LICENSE
+Copyright: 2026 Zondax AG
+ShortDescription: Content-addressed zero-copy build cache for Rust, C/C++ and more
+Description: kache is a content-addressed, zero-copy build cache for Rust, C/C++ and more. It avoids file copies and wasted disk by hardlinking artifacts locally and sharing them via S3-compatible object storage.
+Moniker: kache
+Tags:
+- build
+- build-cache
+- cache
+- ci
+- compiler
+- developer-tools
+- rust
+- rustc
+ReleaseNotes: |-
+  kache 0.13.0 — keying the env vars a proc-macro reads, and calmer prefetch
+  kache is a content-addressed build cache that plugs in as a RUSTC_WRAPPER (and a C/C++ compiler wrapper). 0.13.0 closes a subtle cache-key soundness hole around proc macros, makes speculative prefetching opt-in and cost-aware, and sharpens a couple of diagnostics.
+  Why
+  rustc only records an env var in its dep-info when a crate reads it through env! / option_env!. But a proc macro that calls std::env::var while expanding leaves no trace at all — the command line, the source hashes, and the --extern set are byte-identical whether or not the var is set, yet the emitted artifact differs. So both compiles computed the same key, and the second one restored the first one's expansion: a silent wrong hit. Separately, speculative remote indexing had been eager by default, doing work that wasn't always worth it.
+  What's new
+  - Env vars that steer proc-macro expansion are now keyed. kache accounts for the environment a proc macro can read during expansion, so a build that changes such a var no longer restores a stale expansion from a byte-identical command line.
+  - Speculative remote indexing is opt-in. The prefetch planner no longer indexes the remote speculatively by default; when prefetch does run, it ranks candidates by cost and urgency and caps weak sources rather than warming everything it can see.
+  - A build-coalescing race is closed, and restored custom-harness test binaries keep their executable bit.
+  - Clearer diagnostics. why-miss now joins its cascade walk by compilation unit rather than crate name (so it doesn't confuse two units that share a crate name), and clean / gc detect reflinked sharing and explain when an eviction frees no space because the bytes are still shared.
+  - Packaging. A kache-git AUR package plus config-driven multi-package AUR publishing.
+  These notes were drafted with LLM assistance and edited by the maintainers (@jleni, @emmanuelm41).
+  What's Changed
+  - feat(aur): add kache-git + config-driven multi-package aur publishing by @emmanuelm41 in #637
+  - ci(aur): use the real AUR account name (kunobi) as commit author by @emmanuelm41 in #638
+  - test(core): add planner ordering properties by @jleni in #643
+  - fix(why-miss): join the cascade walk by compilation unit, not crate name (#627) by @jleni in #642
+  - feat(prefetch): rank candidates by cost and urgency, cap weak sources (#616, #617) by @jleni in #640
+  - fix(key): key env vars that steer proc-macro expansion (#635) by @jleni in #639
+  - fix(clean,gc): detect reflinked sharing and explain empty evictions (#602, #509) by @jleni in #641
+  - fix: close build coalescing race by @alecthomas in #646
+  - test(wrapper): mutation-test the coalesced-restore diagnostics replay by @emmanuelm41 in #653
+  - fix(restore): keep the executable bit on custom-harness test binaries by @glebpom in #648
+  - feat(prefetch): make speculative remote indexing optional by @jmagar in #649
+  New Contributors
+  - @alecthomas made their first contribution in #646
+  - @glebpom made their first contribution in #648
+  - @jmagar made their first contribution in #649
+  Full Changelog: v0.12.0...v0.13.0
+ReleaseNotesUrl: https://github.com/kunobi-ninja/kache/releases/tag/v0.13.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,168 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Huawei.Cangjie.STS
+PackageVersion: 1.2.0
+PackageLocale: zh-CN
+Publisher: Huawei Technologies Co., Ltd.
+PublisherUrl: https://cangjie-lang.cn/
+PrivacyUrl: https://cangjie-lang.cn/pages/privacy
+Author: Huawei Technologies Co., Ltd.
+PackageName: Cangjie (STS)
+PackageUrl: https://cangjie-lang.cn/download
+License: Apache-2.0
+LicenseUrl: https://gitcode.com/Cangjie/cangjie_build/blob/dev/LICENSE
+Copyright: Copyright Huawei Technologies Co., Ltd. 2022-2026. All rights reserved.
+ShortDescription: 面向全场景智能的新一代编程语言
+Description: 仓颉编程语言是一款面向全场景智能的新一代编程语言，主打原生智能化、天生全场景、高性能、强安全。主要应用于鸿蒙原生应用及服务应用等场景中，为开发者提供良好的编程体验。
+Tags:
+- harmonyos
+- oniro
+- openharmony
+- 编程
+- 编程语言
+- 语言
+- 鸿蒙
+ReleaseNotes: |-
+  Cangjie 1.2.0 Release Notes
+  版本介绍
+  本版本为 STS 版本，版本号 1.2.0，维护周期 6 个月；STS 1.1.x 版本计划 2026.10.30 停止维护。
+  相比 1.1.3 版本，本版本主要增强跨平台，编译器和工具链能力。
+  - 跨平台新增 Android 23 (API 23) aarch64 支持、iOS LTO 支持、跨语言互操作（ObjC/Java）增强。
+  - 优化编译器稳定性与性能：修复 broken 声明重载排除、const 函数 ICE 修复、字符串插值位置信息、synchronized 块声明拒绝等一批语义 ICE 问题。
+  - 工具链 LSP 新增跨平台跳转定义、接口提取/重命名、数组索引提取、主线程 GetArkAST 移除、cjo 字节 intern 去重等能力。
+  详见后续各部分介绍。
+
+  语言
+  语法与语义
+  - common/platform 关键字支持修饰泛型 extend 语法。
+  - platform 声明函数返回类型支持为 common 的子类型。
+  - common/platform 有初始值的变量支持不显式指定类型。
+  - 当 common class/struct/enum 或 common extend 的所有成员函数都包含实现时，支持省略 platform 声明。
+  - 支持 common abstract class 匹配 platform sealed abstract class。
+  跨平台互操作
+  - 支持 ObjC 使用 Cangjie 接口、 Cangjie 枚举类型。
+  - 支持 Java 使用 Cangjie 泛型类型、Lambda 。
+  - 支持表达式类型、元组类型。
+  - 支持 ObjC 使用 Cangjie Open class 类型、泛型类型。
+  编译器
+  新增特性
+  跨平台
+  - Android 交叉编译及运行平台支持范围扩大至 API level 23 及以上，通过 --target=aarch64-linux-android 或者 --target=aarch64-linux-android23 编译选项使能。
+  - 支持 iOS x86_64 模拟器交叉编译能力，详见 cjc 编译选项 --target 说明。
+  - LTO 支持 iOS 设备，同时支持 dylib、exe 两种方式，dylib 支持包级可见性配置。
+  - 新增 OHOS 版本仓颉 SDK，支持在鸿蒙 PC 运行。
+  调试与开发辅助
+  - 新增 --dump-ast、--dump-chir、--dump-ir、--dump-all、--dump-to-screen 选项供编译器开发者调试分析，查看编译过程中的可读形式抽象表达。
+  变更特性
+  - 加强静态变量的初始化检查，存在破坏性变更。详见 issue 105。
+
+    | 变更前                                                                   | 变更后                                               | 适配举例                                                                                                                                                                                                                                    |
+    | ------------------------------------------------------------------------ | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | 函数或者 lambda 表达式中对静态成员变量赋值认为是合法的初始化，未编译报错 | 函数或者 lambda 表达式中对静态成员变量赋值会编译报错 | 将原先在函数或者 lambda 表达式中赋值当做初始化的代码修改为在静态变量定义时或者 static init() 函数内初始化；对需要函数中赋值的情况可使用 Option 包装为 var 变量（以 None 为初值），新增 prop 与原变量名相同，在 getter/setter 中适配赋值逻辑 |
+  - common/platform 声明新增注解一致性检查；不支持修饰主构造函数；abstract platform class 不支持添加额外抽象成员；common sealed class 的所有直接子类型必须在同一个 source set；函数默认参数可在 common 或 platform 声明任一侧定义。
+  修复问题
+  - 哈希常量命名防碰撞。
+  - 避免运行时 envsetup 中出现空 LD_LIBRARY_PATH 条目。
+  - 为字符串插值 desugar 节点添加源码位置。
+  - 重载决议排除 broken 声明、明确 broken 函数查找行为。
+  - 修复 const 函数中 pattern 变量的 ICE 问题。
+  - 修复 synchronized 块中的变量声明问题。
+  - 修正 --product 选项默认值文档、Android 构建文档 macOS NDK 路径改为 Linux。
+  - 修复 devirtualization 问题。
+  - 修复运行时崩溃 SIGSEGV 问题。
+
+  运行时
+  新增特性
+  - 支持 Android 16KB 页对齐；16KB 页对齐仅应用于 android23 aarch64 及以上版本。
+  - 支持 iOS 的 trace 能力，支持 iOS 上仓颉未捕获异常处理。
+  - 仓颉运行时支持 ios-x86_64 模拟器构建以及运行。
+  - 条件编译新增 env 内置条件变量，提供目标平台 ABI 等额外信息，详见开发指南条件编译章节。
+  修复问题
+  - Android 时区数据改用 bionic property API 。
+  - loadTZData 修复 trimEnd 空字符问题。
+  - 修复 android arm32 寄存器上下文问题。
+  - 修复 finalizer 线程结束问题。
+  - 修复 gate 警告、限定 AST 解析结果类型范围。
+  - 优化 ohos cjthread 日志。
+  - 修复 --static 编译时 __gnu_cxx::__verbose_terminate_handler() 多重定义问题。
+  - 修复 Windows 平台，静态链接运行报错问题。
+  - 修复上游包兼容性更新导致运行错误问题。
+  - 修复 macOS 平台用户信号处理函数抛未捕获异常导致程序结束问题。
+  - 修复 target 所属 ExtensionDef 计算错误问题。
+  - 修复 lds 脚本合并 text section 导致链接失败问题。
+
+  标准库
+  新增特性
+  - 新增可通过反射获取包的组织名。
+  - 新增适配鸿蒙 PC。
+  - 标准库支持 ios-x86_64 模拟器构建以及运行。
+  - 跨平台开发 FFI-ObjC 支持：仓颉映射 ObjC 顶层函数、使用 init* 构造对象、Option 映射 ObjC 指针类型、映射 ObjC 的 C Struct 类型。
+  变更特性
+  - 异常链特性：Exception 预埋 private 成员变量；反射特性：TypeInfo 预埋 private 成员变量。
+
+    | 变更前                                          | 变更后                                                              | 适配举例                                                         |
+    | ----------------------------------------------- | ------------------------------------------------------------------- | ---------------------------------------------------------------- |
+    | LTS 1.0.0 之后的 SDK 版本间，编译产物二进制兼容 | 本版本与早期版本 SDK 的编译产物二进制不兼容，混用可能导致运行时错误 | 使用本版本（及更新版本）SDK 对项目代码及其依赖包代码执行全量重编 |
+  - 正则库依赖的开源 PCRE2 版本从 10.44 升级为 10.46。
+  修复问题
+  - 对 std.fs 的异常信息进行了优化，确保异常包含足够的定位信息。
+  - 对 Array 完善异常信息导致的性能和 codesize 劣化进行修复。
+  - 修复 TimerScheduler.add() 对 零/负时长 改用 >= 判断问题。
+
+  工具链
+  IDE 插件
+  新增特性
+  - 支持组织名语法高亮和补全。
+  - 支持中心仓路径，开发者可配置中心仓依赖并提供相关语言服务。
+  - 语言服务适配 cjpm combined 和 lto-combined：若模块 cjpm.toml 中配置了 combined，则子包中无法联想 root 包符号，并使用 root 包符号时提供报错提示。
+  - 跨平台支持 go to definition 能力。
+  修复问题
+  - 修复数组索引表达式无法提取的问题；优化接口提取与重命名行为。
+  - 主线程移除 GetArkAST 调用，避免长时间阻塞问题；按 .cjo 路径 intern usr cjo 字节，消除跨模块重复。
+  cjpm
+  新增特性
+  - 适配组织名新语法。
+  - 支持用户配置构建脚本产物路径。
+  - cjpm run 支持 -- 标记入参。
+  - 新增 bundle 命令，支持验证并打包本地项目；支持中心仓制品包上传/下载。
+  - 中心仓支持 semver 规范版本号、索引机制、提供开发者资料（后续统一开放）。
+  修复问题
+  - 依赖模块的编译产物类型现在可以为 executable。
+  - 修复 macOS 构建脚本运行时未添加运行时环境变量。
+  - 修复 test 输入目录为空时读取空目录。
+  - 修复 workspace 下 cjpm update 未正确生成 lock 条目。
+  cjdb
+  新增特性
+  - 开放 python 脚本能力。
+  - 适配组织名新语法。
+  - 适配 common/specific 语法。
+  - 支持 coalescing 表达式求值。
+  - 支持模式匹配表达式求值；支持问号操作符表达式求值。
+  修复问题
+  - 修复部分表达式求值不符合预期的场景。
+  - 修复 Option<T> 类型偏移错误导致的表达式计算问题。
+  cjfmt
+  - 适配支持 common/specific 语法；适配组织名。
+  cjlint
+  - 适配支持 common/specific 语法。
+  cjcov
+  - 适配支持 common/specific 语法。
+  cjprof
+  - 优化 cjprof 性能，数据采集和分析速率提升。
+
+  遗留问题
+
+  | issue | 问题描述                                                            | 影响及规避方案                 |
+  | ----- | ------------------------------------------------------------------- | ------------------------------ |
+  | NA    | Windows 平台上部分与跨平台相关的场景，cjdb 执行单步调试时不符合预期 | 暂无规避措施，计划后续版本修复 |
+  | NA    | 部分 option 场景下的 cjdb 表达式求值结果不符合预期                  | 暂无规避措施，计划后续版本修复 |
+
+  文档变更说明
+  - 新增/更新：《仓颉开发指南》跨平台章节（common/platform 增强）、仓颉-ObjC/Java 互操作章节、条件编译（env 变量）、编译选项（--dump-*、--target android23/android26）、iOS LTO dylib/exe 文档。
+ReleaseNotesUrl: https://cangjie-lang.cn/docs?url=https://cj-docs.gitcode.com/zh/1.2.0/release-notes/cangjie_1.2_release_notes.html
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://cangjie-lang.cn/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

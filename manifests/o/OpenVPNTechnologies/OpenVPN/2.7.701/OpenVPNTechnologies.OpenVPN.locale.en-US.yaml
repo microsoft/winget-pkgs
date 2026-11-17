@@ -1,0 +1,104 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: OpenVPNTechnologies.OpenVPN
+PackageVersion: 2.7.701
+PackageLocale: en-US
+Publisher: OpenVPN, Inc.
+PublisherUrl: https://openvpn.net/
+PublisherSupportUrl: https://support.openvpn.com/
+PrivacyUrl: https://openvpn.net/privacy-policy/
+Author: OpenVPN, Inc.
+PackageName: OpenVPN
+PackageUrl: https://openvpn.net/community/
+License: GPL-2.0
+LicenseUrl: https://github.com/OpenVPN/openvpn/blob/HEAD/COPYING
+Copyright: © 2002-2026 OpenVPN Inc <sales@openvpn.net>
+CopyrightUrl: https://openvpn.net/legal/
+ShortDescription: Create secure VPN connections over the internet with this VPN software.
+Description: OpenVPN provides flexible VPN solutions to secure your data communications, whether it's for Internet privacy, remote access for employees, securing IoT, or for networking Cloud data centers.
+Moniker: openvpn
+Tags:
+- network
+- open-vpn
+- virtual-private-network
+- virtualprivatenetwork
+- vpn
+ReleaseNotes: |-
+  Security fixes:
+  - reliability layer: avoid unbounded reliable TLS timeout, and ignore acks
+    for packets that cannot be outstanding (CVE-2026-84732)
+    Both reliability layer bugs found by Mark Bregman (Fox-IT)
+  - windows: fix CreateProcess() command line quoting for characters that
+    are special to cmd.exe, where a combination of validation script plus
+    rogue CA could lead to misbehavior (CVE-2026-84256)
+    Bug found by Clouditera Security
+  - windows: fix tapctl to always call netsh.exe with full path
+    (as we do elsewhere) (CVE-2026-84226)
+    Bug found by BreachX Zero Day Labs (using Typhon AI Mil v2)
+  - windows: don't use NULL DACL with system objects, namely the --service
+    exit event and the netsh.exe guard semaphore.
+    The old approach was prone to a local DoS where one user could interfere
+    with other users' openvpn processes by blocking the netsh semaphore or
+    sending events. This only affects setups not using the iservice, or
+    using the automatic service to start/stop openvpn (CVE-2026-82312)
+    Bug found by DEBRAJ BASAK
+  - openvpnserv (windows): pass correct NRPT domains size - when IDN domains
+    with UTF8 encoding were involved, a buffer overread could be achieved
+    (CVE-2026-78221)
+    Bug found by BreachX Zero Day Labs (using Typhon AI Mil v2)
+  - openvpnserv (windows): don't allow '/' in config paths.
+    The APIs windows uses for path validation do not handle '/' as path
+    separator, while the file open APIs do, so this could be used to
+    circumvent our config path validation, leading to openvpn.exe starting
+    a user-controlled config file even if administratively not allowed
+    (CVE-2026-78043)
+    Bug found by BreachX Zero Day Labs (using Typhon AI Mil v2)
+  - dhcp (windows): fix off-by-one in write_dhcp_search_str() temp buffer
+    guard - suitable DHCP options could lead to a single-byte overflow of a
+    temp buffer (CVE-2026-81738)
+    Bug found by Andre Kropp (Nexory) and ChinhNguyen
+  - linux netlink: validate netlink replies against the request
+    Suggested by Joshua Rogers as a security improvement
+  - openvpnserv (windows): fix off-by-one on input validation
+    (discovered while fixing CVE-2026-78221)
+  - openvpnserv (windows): harden CheckConfigPath() a bit more
+    (another improvement while working on CVE-2026-78043)
+  User-visible Changes:
+  - when using EPOCH data channel format, reduce the number of future keys
+    from 16 to 4 - the previous calculation was wrong, and 4 spare keys are
+    sufficient for 100+ Gbit/s links. This means less log spam in userland
+    and fewer resources used in in-kernel implementations.
+  Bugfixes:
+  - work around a pubkey-handling bug in mbedTLS 4.1.0 and 4.2.0
+    (supposedly fixed in 4.3.0)
+  - multi: don't let stale-routes-check delete permanent routes -
+    --stale-routes-check did not only delete dynamic cached routes, but
+    also routes installed by --iroute and --ifconfig-push. Fixed by
+    introducing route flags and restraining the check on them
+    (Github: OpenVPN/openvpn#1063)
+  - ssl: do not queue control ciphertext while a packet is still queued
+    (fixes problems in TCP p2p handshake when both sides try to handshake
+    at the same time)
+    (Github: OpenVPN/openvpn#1089)
+  - reenable xmit_hold when using p2p tcp-server and tls-server - in TCP
+    server mode the server is not expected to initiate the TLS handshake.
+    This was introduced by the multisocket code checking the wrong variable
+    for socket protocol
+    (Github: OpenVPN/openvpn#1089)
+  - clinat: do not adjust UDP checksum if zero (as per RFC768)
+    (Github: OpenVPN/openvpn#1037)
+  - openssl: avoid resetting the HMAC key on every packet
+    (Github: OpenVPN/openvpn#1088)
+  - openvpnserv (windows): fix log lines format string - interface names with
+    international characters printed in some error messages need to be
+    converted from UTF8 to UCS16 first.
+  - fix format string specifier for size_t (%zu)
+  - fix test_misc compile issues with -Werror
+  Full Changelog: https://github.com/OpenVPN/openvpn/compare/v2.7.6...v2.7.7
+ReleaseNotesUrl: https://github.com/OpenVPN/openvpn/releases/tag/v2.7.7
+Documentations:
+- DocumentLabel: Community Resources
+  DocumentUrl: https://openvpn.net/community-resources/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,109 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AtomGit.AtomCode
+PackageVersion: 5.0.6
+PackageLocale: zh-CN
+Publisher: 重庆开源共创科技有限公司
+PublisherUrl: https://atomgit.com/
+PublisherSupportUrl: https://atomgit.com/atomgit_atomcode/atomcode/issues
+PrivacyUrl: https://docs.gitcode.com/docs/help/home/protocol/privacy-policy
+Author: 重庆开源共创科技有限公司
+PackageName: AtomCode
+PackageUrl: https://atomcode.atomgit.com/
+License: MIT
+LicenseUrl: https://atomgit.com/atomgit_atomcode/atomcode/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Yubang Xu
+CopyrightUrl: https://docs.gitcode.com/docs/help/home/protocol/ai-privacy-policy
+ShortDescription: AI 编程助手 在你的终端中运行
+Description: Claude Code / Cursor Agent 的开源平替，住在你的终端里。连接任意 OpenAI 兼容大模型，自主读文件、改代码、跑测试、自我验证 —— 用 Rust 构建。
+Tags:
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  AtomCode v5.0.6 Release Notes
+  发布日期：2026-08-12
+  v5.0.6 聚焦于异步 Agent 团队运行时（里程碑）、基于本地语言服务器的语义代码智能（LSP）、TUI 交互式配置面板与 daemon 本地 token 安全认证，同时围绕 WebUI / TUI 交互体验、MCP 稳定性、Goal 进度保留与多项安全加固进行了全面修复。
+
+  ⚠️ Behavior Changes（注意行为变化）
+  - 模型定价估算移除：/cost 不再显示美元费用估算；provider / model 配置中的 pricing 字段不再生效（配置中残留的字段将被忽略）。
+
+  ✨ 新增功能（Features）
+  异步 Agent 团队（里程碑新功能）
+  - 异步团队运行时：新增多角色（planner / architect / implementer / reviewer / security 等 14 个角色）异步并行协作的团队模式，支持并发上限、事件有序分发与优雅取消（里程碑新功能）
+  - 团队面板：TUI 实时展示各成员的角色、模型、活动状态与真实输出 token 消耗；队列中成员的详情可见
+  - 团队健壮性：成员可跨 /model 切换存活，事件顺序串行化，worker 作用域加固
+  语义代码智能（LSP）
+  - lsp 工具：opt-in 只读语义查询，支持 definition / references / hover / diagnostics 四类操作，按需惰性启动本机已有语言服务器，不可用时优雅降级（不阻塞回合）
+  - 服务器配置：[lsp.servers] 可自定义服务器命令与参数，auto_detect 自动探测本机已安装语言服务器
+  TUI 配置面板
+  - 交互式 /config 面板：可搜索的半屏配置编辑器，支持布尔 / 枚举 / 整数设置项编辑与重置，并标注各设置的生效时机（即时 / 下回合 / 重启后）
+  - Provider 表单增强：窄屏下 provider 字段保持可编辑
+  安全
+  - daemon 本地 token 认证：daemon 生成 0600 权限的 token 文件，VSCode / JetBrains 读取后以 Authorization: Bearer 访问，加固本地 daemon 通信
+  - 凭据策略恢复：凭据拦截后提供结构化恢复动作（外部完成 / 跳过步骤 / 结束任务等），WebUI 新增策略干预卡片
+  - 凭据提取拦截扩展：新增 ssh / scp / sftp、sh / bash / zsh / perl / ruby 等命令与 *_webhook 标识符识别
+  视觉能力
+  - 可配置视觉能力：provider / model 支持 supports_vision 显式覆盖，自定义模型 ID 与兼容网关可手动指定图片输入能力（默认按模型名自动检测）
+  - VSCode 图片灯箱预览：点击用户消息图片全屏预览，支持多图导航（← / →、ESC 关闭）
+  WebUI
+  - Steer 徽章：同步模式下的 steer 在自己的气泡上显示徽章直至折叠
+  - Todo 标题：工具行展示 todo 标题
+  - 移动端换行：composer 支持移动端换行输入
+  其他
+  - /resume 回放上限配置：ui.history_replay_max_rows 控制恢复时回放到终端 scrollback 的视觉行数上限（0 = 完整回放，默认按终端自动选择）
+  - MCP server instructions：读取服务器指令，以独立不可信边界注入模型请求，不写入会话快照
+  - Provider 预设：完成小米 MiMo 预设（默认端点 + MIMO_API_KEY），新增 OpenCode Zen（OpenAI 兼容）预设
+  - Referral 周导航：邀请汇总面板支持按周前后翻页查看历史邀请 / 活跃 / 结算数据
+  - read_file 分页：默认最多返回 300 行并附续读指引，引导模型从偏移处继续读取而非重复全读
+  - Goal 模式同步：移动端 Goal 模式与 TUI 同步，daemon health check 暴露 goal 能力
+  🛠 修复（Fixes）
+  安全
+  - $ATOMCODE_HOME 迁移后，auth.toml 凭据守卫随配置目录生效，不再因路径变化漏守
+  - 新增 dd 原始设备写入门禁与紧凑形式关键重定向检测
+  - 凭据策略拒绝在终端表面结构化展示，恢复决策前后关联一致（修复拒绝路径的展示与关联一致性；新增能力部分见 Features 的「凭据策略恢复」）
+  WebUI
+  - 活跃回合 / 切换模型期间输入自动排队，不再丢失提示词
+  - 同步模式 steer 不再弹回 composer
+  - steer 保持同模型时不再反复提示切换模型
+  TUI / 终端渲染
+  - 任务面板在 agent 运行时保持可见，并发任务进度稳定
+  - 恢复的历史回放增加有界限制，长会话恢复更流畅
+  - 通用 Web 终端（如 JumpServer）默认使用传统键位上报，Kitty 键盘协议仅对兼容终端启用（可用 ATOMCODE_KITTY=1/0 强制开关）
+  - 修复提示类输入前缀保留、圆形标签间距、长任务预览换行、批量编辑 diff 显示、空答案光标位置等渲染问题
+  MCP
+  - HTTP 响应体增加 10 MB 上限，杜绝无界分配
+  - stdio 请求使用共享 deadline，断线超时恢复加固
+  - 工具调用前释放注册表锁，避免死锁
+  Goal
+  - 跨恢复 / 压缩保留目标进度，暂停时清除 held turn
+  - 恢复上下文有界、锚点来源门控、用户暂停后仍可继续
+  Telemetry
+  - 队列事件支持恢复与重试，丢弃不可发送段、共享隔离上限、回收孤儿标记
+  Session
+  - 会话自动命名与对话显示跳过注入的 system-reminder 消息，避免内部提醒混入用户视图
+  Daemon / IDE
+  - provider 重载时 mid-turn live steer 不再被拒绝
+  - /chat 会话可跨 workspace 桶继续
+  - token 文件 0600 原子创建，daemon / VSCode / JetBrains 的 token 读取与失效处理一致
+  其他
+  - 插件 hooks 兼容 Claude Code settings 风格的包装格式
+  - DeepSeek V4 不再强制工具选择，避免 provider 丢弃工具调用；规划阶段对 DeepSeek 的强制 todo 也改为温和提示，避免过度约束
+  - 工具调用 JSON 含未转义引号时仍可正确恢复
+  - 恢复启动时同步升级检查：新版本可在本次启动即应用，无需两次重启（恢复 v5.0.4 之前的同步升级检查行为）
+  📚 文档（Docs）
+  - README 中英双语版本徽章与 Kitty 键盘协议终端兼容性说明
+  - MCP 文档补充 server instructions 与 stdio / HTTP 传输行为说明
+  - config.example.toml 更新（小米 MiMo 示例、history_replay_max_rows、移除失效的 auto_copy_on_select）
+  - 项目简介补充中英双语说明，LSP 工具与权限引用同步更新
+ReleaseNotesUrl: https://atomgit.com/atomgit_atomcode/atomcode/releases/v5.0.6
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://atomcode.atomgit.com/docs/zh/index.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

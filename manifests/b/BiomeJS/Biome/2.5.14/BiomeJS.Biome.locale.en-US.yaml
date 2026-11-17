@@ -1,0 +1,124 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.5.14
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.5.14
+
+  Patch Changes
+  - #9022 0d49e24 Thanks @dyc3! - Added the nursery rule noReturnInFinally. This rule disallows return statements in Promise.prototype.finally() callbacks, including inside nested blocks and conditional branches. Returns in nested functions are ignored by the rule.
+    // Invalid: return in finally callback
+    Promise.resolve(1).finally(() => { return 2 })
+    // Valid: no return in finally callback
+    Promise.resolve(1).finally(() => { console.log(2) })
+    Returning a value from a Promise.prototype.finally() callback does not replace the original promise's fulfillment value, which can be confusing. Returned promises and thenables are awaited, and their rejection rejects the resulting promise.
+  - #11754 71eaa0d Thanks @griff-rees! - Added the nursery rule noSvelteAtDebugTags, which disallows Svelte's {@debug} tag.
+    <!-- Invalid: leftover debugging tag -->
+    {@debug user}
+    The {@debug} tag is a debugging aid and should be removed once you no longer need it, as it should not remain in production code. The rule provides a safe fix that removes the tag.
+  - #11725 5eb5f09 Thanks @m1handr! - Added the nursery rule useValidTestTitle, which enforces valid titles for unit test cases and suites.
+  - #11735 9bd70c7 Thanks @ematipico! - Fixed #8471: source.fixAll.biome ignored formatter.formatWithErrors. It now applies safe fixes without formatting files that have parse errors when the option is disabled.
+  - #11715 f05a3c3 Thanks @ematipico! - Fixed #7771: Grit plugins that use sequential no longer panic when Biome processes files.
+  - #11766 c2542c6 Thanks @dyc3! - Fixed validation of readonly and accessor modifiers: combining them in either order now reports that they cannot be used together.
+  - #11461 22e9966 Thanks @FoundDream! - Fixed #11423: Multiline template interpolations now preserve the indentation of their closing brace when the source indentation is not a multiple of tabWidth.
+     const value = `
+          ${
+            condition
+              ? "yes"
+              : "no"
+    -}
+    +     }
+     `;
+  - #11766 c2542c6 Thanks @dyc3! - Fixed #11763: TypeScript class members using override accessor, such as override accessor value = 1, now parse correctly. The reversed order, accessor override, now reports that override must precede accessor.
+  - #11790 17d0ff0 Thanks @ematipico! - Fixed #10248: noUselessFragments now allows fragments with props in Astro files, such as <Fragment slot="name">{text}</Fragment> inside template expressions.
+  - #11777 7ee3a6c Thanks @ematipico! - Fixed #7573: added the requireExplicitCase option to useExhaustiveSwitchCases. When set to true, the rule reports missing cases even when the switch has a default clause, so you can keep a runtime fallback while checking that every value in the union has its own case. The option defaults to false.
+  - #11751 d37f24b Thanks @ematipico! - Fixed #8347: the fix from useConsistentArrowReturn now parenthesizes returned expressions that begin with object literals before removing the arrow function body braces, preventing invalid output for expressions such as object property access.
+  - #11784 46e8912 Thanks @dyc3! - Fixed #11782: noUndeclaredCustomProperties could hang while checking stylesheets imported by JavaScript modules with many shared dependencies.
+  - #11731 1534885 Thanks @ematipico! - Fixed #7984: The fix from useSimplifiedLogicExpression now preserves line breaks in multiline conditions with line comments, preventing the right-hand side condition from being commented out.
+  - #11735 9bd70c7 Thanks @ematipico! - Fixed #7304: the HTML formatter now preserves authored segment breaks between CJK characters, and next to CJK punctuation, instead of replacing them with spaces.
+     <div lang="zh-Hant-TW">
+    -  這個段落是那麼長， 在一行寫不行。
+    +  這個段落是那麼長，
+    +  在一行寫不行。
+     </div>
+  - #11749 ff992a1 Thanks @ematipico! - Fixed #11747: formatting and checking large parenthesized object expressions no longer exhibit quadratic slowdowns.
+  - #11736 1dd1fc4 Thanks @dyc3! - Fixed #8177: code actions no longer modify the wrong part of Vue, Svelte, or Astro files when experimental full HTML support is disabled.
+  - #11743 3835945 Thanks @santichausis! - Fixed #10247: biome check --write/biome lint --write now correctly writes fixes for code inside an HTML attribute expression (for example a Svelte onclick={...} handler, or a mustache expression like {count}), instead of silently reporting the diagnostic as fixable and applying nothing.
+    For example, running biome lint --write --unsafe for useBlockStatements (an unsafe fix) on this Svelte component used to leave the file unchanged:
+    <button onclick={() => { if (open) close(); }}>Close</button>
+  - #11740 8ea8b4a Thanks @dyc3! - Fixed #11453: useConsistentTestIt now updates imports alongside calls, preserving the original export through an alias. The rule ignores locally declared functions and withholds fixes when the preferred name would conflict with another binding or global reference.
+  - #11355 27177ca Thanks @dyc3! - Fixed the HTML formatter incorrectly applying native HTML element formatting to PascalCase component names such as <Ul> and <Body> in Vue, Svelte, and Astro files.
+    -<Body>
+    -  <div>content</div>
+    -</Body>
+    +<Body><div>content</div></Body>
+  - #11355 27177ca Thanks @dyc3! - Fixed the HTML formatter incorrectly applying SVG block formatting to unknown elements whose names matched SVG element names.
+    -<foreignobject>
+    -  <div>content</div>
+    -</foreignobject>
+    +<foreignobject><div>content</div></foreignobject>
+  - #11741 fc69047 Thanks @dyc3! - Fixed #8893: useImportExtensions no longer suggests adding .ts to .jsx imports when a colocated .d.ts file provides type declarations.
+  - #11642 c87341c Thanks @dyc3! - Added the nursery rule useConsistentFunctionStyle, which requires a consistent style for defining functions.
+    By default, the rule reports the following declaration because it requires a function expression assigned to a variable:
+    function greet() {
+        return "Hello";
+    }
+  - #11770 ddfd622 Thanks @dyc3! - Fixed #8980: suppression comments targeting the entire assist category are now respected, including biome-ignore-all assist when running check.
+  - #11792 7a4b895 Thanks @dyc3! - Fixed dashed utility base names in the Tailwind parser, including border-bs, font-features, and scrollbar-thumb. Classes such as min-inline-[12rem] now preserve the complete base name and parse the arbitrary value separately.
+  - #11739 1fc17e3 Thanks @Netail! - The rule useIncludes now also reports lastIndexOf() comparisons and some() calls with a strict-equality callback.
+    arr.lastIndexOf(x) !== -1
+    arr.some(item => item === x)
+  - #11735 9bd70c7 Thanks @ematipico! - Fixed #6888. GritQL plugins can now use contains on import-clause metavariables such as $clause in import $clause from "module" patterns.
+  - #11790 17d0ff0 Thanks @ematipico! - Fixed #11786: useAnchorContent now reports anchors without accessible content in HTML, Astro, Vue, and Svelte even when they have an aria-label, aria-labelledby, or title attribute, matching JSX behavior.
+  - #11651 a9c4aa0 Thanks @saberoueslati! - Added the new nursery rule noVueUndeclaredDirectives, which reports custom Vue directives that are not declared by a <script setup> binding, the component's directives option, or the rule's globals option. Closes #11478.
+    <template>
+      <!-- v-highlight is not declared anywhere -->
+      <div v-highlight></div>
+    </template>
+    Aliased named imports in single-file components are now tracked under their local name, so noUndeclaredVariables recognizes vHighlight in import { highlight as vHighlight } from "./directives".
+  - #11715 f05a3c3 Thanks @ematipico! - Fixed #7795. The noJsxLiterals rule now ignores surrounding whitespace when matching literals against allowedStrings.
+  - #11780 99c7049 Thanks @ematipico! - Fixed false positives in useExhaustiveSwitchCases when numeric cases use different spellings of the same value. For example, case 0x1 now covers the numeric literal type 1.
+  - #11720 c7c4e2b Thanks @ematipico! - Fixed #7880: noUselessStringConcat no longer reports literal concatenations split across multiple lines when a numeric literal ends the chain.
+  - #11355 27177ca Thanks @dyc3! - Improved performance of the HTML formatter for documents that contain many HTML-native or SVG-native tags.
+  - #11720 c7c4e2b Thanks @ematipico! - Fixed #7949: useReadonlyClassProperties now reports static class properties that are never reassigned.
+  - #11751 d37f24b Thanks @ematipico! - Fixed #7644: useImportExtensions now resolves path aliases declared by referenced TypeScript project configurations.
+  - #11791 f88793c Thanks @dyc3! - Fixed a false positive in useTailwindShorthandClasses for strings in conditional tests, such as cn(m === "w-2 h-2" ? "bg-red-800" : "bg-red-400").
+  - #11720 c7c4e2b Thanks @ematipico! - Fixed #7783: noNoninteractiveElementInteractions no longer reports event handlers on native <dialog> elements.
+  - #11717 2107dae Thanks @ternaus! - Fixed #11716: the noUnknownAttribute rule now accepts fullscreen event handlers, the credentialless iframe property, and the SVG maskType property when the React dependency range allows React 19.3 or later. The credentialless and maskType properties are restricted to <iframe> and <mask> elements, respectively.
+  - #11737 b7e3559 Thanks @dyc3! - Fixed #11692: noFloatingPromises now detects unhandled promises returned through generic method signatures, including Playwright fixtures.
+  - #11780 99c7049 Thanks @ematipico! - Fixed #7747: useExhaustiveSwitchCases now reports missing cases for literal unions derived from const tuples with (typeof values)[number] and objects with keyof typeof object.
+    Other type-aware rules, including noFloatingPromises and noUselessTypeConversion, also recognize supported indexed-access results.
+  - #11724 a9a5e9a Thanks @dyc3! - Fixed redundant parentheses around binary and logical unary operands with leading line comments.
+     !(
+       // leading
+    -  (a || b)
+    +  a || b
+     );
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.5.14
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

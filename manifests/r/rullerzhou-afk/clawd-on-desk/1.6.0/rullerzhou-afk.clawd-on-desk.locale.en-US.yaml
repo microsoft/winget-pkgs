@@ -1,0 +1,60 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: rullerzhou-afk.clawd-on-desk
+PackageVersion: 1.6.0
+PackageLocale: en-US
+Publisher: rullerzhou-afk
+PublisherUrl: https://github.com/rullerzhou-afk
+PublisherSupportUrl: https://github.com/rullerzhou-afk/clawd-on-desk/issues
+PackageName: Clawd on Desk
+PackageUrl: https://github.com/rullerzhou-afk/clawd-on-desk
+License: AGPL-3.0-only
+LicenseUrl: https://github.com/rullerzhou-afk/clawd-on-desk/blob/v1.6.0/LICENSE
+Copyright: Copyright (c) 2026 rullerzhou-afk
+ShortDescription: A pixel desktop pet that watches Claude Code, Codex, Cursor & other AI coding agents — so you don't have to.
+Description: |-
+  Clawd on Desk is an open-source desktop pet that shows the activity of AI coding agents, including Claude Code, Codex, Cursor, and others. It reacts to working, permission requests, and task completion with animations and supports multiple concurrent sessions.
+
+  It includes Clawd, Calico, and Cloudling themes, custom themes, a sessions dashboard, optional permission bubbles, and a local activity recap.
+Tags:
+  - claude-code
+  - codebuddy
+  - codex
+  - copilot-cli
+  - cursor
+  - desktop-pet
+  - gemini-cli
+  - kiro
+  - opencode
+ReleaseNotes: |-
+  v1.6.0
+  Clawd v1.6.0 adds Windows computers as Remote SSH hosts, supports the Kiro IDE, and reminds you when Copilot CLI or Claude Desktop is waiting for your answer. The pet uses far less CPU when it is hidden, on scaled displays and while wearing accessories, and it can play small idle animations. Phones can pair by scanning a QR code, and the Windows installer, hooks and update flow got several fixes.
+  Remote SSH
+  - Windows remote hosts (#1319, #1320, #1324, #1331; issue #1316) — Clawd on macOS or Linux can now deploy to a Windows computer over SSH, so Claude Code, Copilot, Codex and the DeepSeek Harness desktop app running there report back to your local pet. Deploy, Repair and Uninstall work the same way as for other hosts, and only Clawd's own entries are touched. Limits: only the default (account-default) setup is supported; a Windows host has no Codex log fallback monitor, no Hermes and no status-line quota; DeepSeek Harness needs the same user to be signed in on that computer's desktop, and its desktop app must be restarted after the Clawd plugin changes. Linux and macOS remote hosts deploy exactly as before. Before merge, real Windows hosts covered DeepSeek Harness and Codex MCP approval round trips; a Codex CLI Bash/apply_patch approval round trip on a Windows host was not tested. Thanks to @Ken0221 for the report.
+  - Remote MCP approvals follow automation (#1337) — when Codex uses the default way of handling approvals, ordinary plugin (MCP) tool requests from a remote computer (Remote SSH or WSL) are now answered the same way as other requests that your "Permission request handling" setting would allow immediately. This overrides a plugin's own "ask every time" setting on that computer. Codex's built-in apps (codex_apps) are excluded, and so are local MCP requests, session overrides and held requests. When Clawd cannot answer, the request goes back to Codex on that computer; for Remote SSH requests, macOS also shows a read-only reminder with only a "Got it" button (WSL and local requests keep the usual pet cue). Related: #1186.
+  Agent integrations
+  - Kiro IDE (#1339) — the Kiro desktop app drives the pet through a global hook in ~/.kiro/hooks/, and appears as its own card in Settings → AI Coding Tools, separate from Kiro CLI (install it there). When Kiro waits for you to confirm something, Clawd shows a read-only reminder card with "Go to Kiro" and "Got it"; Kiro does not let a hook approve for you, so you answer inside Kiro and the card folds away. The card can be turned off with "Show a reminder when confirmation is needed". Kiro runs hooks only in trusted workspaces. Tested only on macOS (Kiro 1.4.86); Windows and Linux are not tested.
+  - Copilot CLI waiting for you (#1343, #1344) — when Copilot waits in the terminal for you to approve a path outside the workspace, confirm a web fetch or answer an ask_user question, the pet stays in its waiting pose and the HUD row shows the approval badge until you answer. Copilot does not let a hook approve these, so Clawd only reminds you to go back to the terminal. A command approval still alerts once. If you deny or press Esc, the pet keeps waiting until you send your next message (at most about two hours). Remote SSH Copilot is supported. The Copilot card has a new switch, "Alert me when it waits for input". Kiro no longer rings every few seconds while it waits for you.
+  - Claude Desktop questions (#1327, #1328; issue #1326) — when the Code tab of Claude Desktop ends a turn with a question (the next-step question box), the pet shows a read-only card with the question and the button texts, and the session row is marked as waiting. You answer in Claude Desktop; clicking the card only brings Claude to the front without opening the exact session, and for a remote session the click only closes the card. The card does not change the pet's state and makes no sound. A new setting, Settings → Notifications → "Remind me about unanswered Claude questions" (off by default; "Remind after" 1 to 120 minutes, default 5), shows the card again with a sound if the question is still unanswered, once per question. Tested only on macOS. Thanks to @Yike-Ye.
+  - Codex settings (#1338) — AI Coding Tools → Codex no longer asks you to pick between Auto and Intercept. The Approvals group is now one explanatory line, and "Send every approval to Clawd" under Advanced replaces the old Intercept choice: on means what Intercept meant. Existing settings keep their meaning.
+  - Codex titles (#1253, #1314; related #1254) — Codex Desktop threads that only exist to refresh a title no longer show up as HUD rows, and late events from an ended internal thread no longer bring one back. Ordinary side chats and other titles still show. Thanks to @200780381.
+  - Antigravity on Windows (#1271) — the Antigravity CLI status-line script now runs: the command used to carry quotes that agy could not find the script through. Install paths with Chinese user names work too. Thanks to @YOIMIYA66.
+  Pet
+  - Hidden pet costs far less (#1300, #1301, #1304; related #1303, #1305) — while the pet is hidden (manually, by full-screen auto-hide or by the system) it no longer paints animations, walks or runs accessory loops. On Mac the CPU drops by about 90%; on a Windows high-refresh screen by about 40%, and with a hat or cigarette worn from about 12% to about 1%. When shown again the pet is where it was and free roam waits 8 seconds before it starts.
+  - Lower CPU at common display scales (#1303) — at screen scales other than 100% (including Retina and a changed Windows text size), the Clawd theme's animations no longer take the main thread on every refresh: in testing on a Windows high-refresh screen with the Clawd theme and no accessories, the CPU was about halved while shown and close to zero while hidden. A few unusual scale combinations (for example 225% display scale with 110% text size) still use the old path; accessories got their own savings below.
+  - Cheaper accessories (#1305) — wearing a hat or cigarette cuts the CPU a lot: on a Windows high-refresh screen from 33–44% with both worn to 11–14%. Smoke now updates 12 times a second and the hat follows the pet's animation rhythm. Taking the cigarette off also stops its background animation, which used to keep running.
+  - Idle activities (#1302, #1309; issue #1252) — Settings → Pet → "When idle" now offers one of "Stay put", "Free roam" and "Idle activities". The default is "Stay put", and a profile that already used free roam keeps it. With "Idle activities", while no AI tool is working, the pet occasionally plays another animation from the theme (thinking, typing, juggling, sweeping, happy, carrying); "How often" can be Rarely, Sometimes or Often. Clicking or dragging the pet, or a new task, makes it stop at once. Thanks to @hanzhe-one, and to @cuentasdecorreodediego-code for the request.
+  - Eye tracking switch (#1285, #1312; issue #1276) — Settings → Pet → "Follow the mouse cursor": turn it off and the idle eyes stay looking forward (Cloudling too), effective immediately; turning it on again restores the cursor direction. The spin-the-pet-dizzy easter egg still works. Thanks to @xiaoshidefeng, and to @PGTea for the request.
+  - Keep the pet on top (#1287; issue #1275) — a new switch, "Keep the pet on top of other windows": turn it off to let other windows cover the pet. On macOS it takes effect after a restart, and the pet and the session HUD hide while a native full-screen app is in front (see Upgrade Notes). "Auto-hide in fullscreen" now works on macOS as well. Thanks to @xiaoshidefeng, and to @framefutura for the request.
+  - Right-click while dragging (#1265; issue #1260) — a right-click during a drag no longer freezes the pet and leaves clicks passing through to the desktop. Thanks to @xiaoshidefeng, and to @qxii2027 for the report.
+  Phone pairing
+  - Scan to pair (#1315; issue #1299) — Settings → Permissions & approval → LAN approval now shows a QR code next to the pairing link; scan it with the phone camera instead of typing the 8-character code. It was tested on an iPhone and an Android phone. A Home Screen app on iOS opens Safari when it scans. Thanks to @xiaoshidefeng.
+  - Phone page follows your language (#1322) — the LAN page shows in the language chosen on the computer (all seven interface languages); refresh the page on the phone after changing it. Thanks to @xiaoshidefeng.
+  - Home Screen apps and the root address (#1321, #1345) — an app added to the Home Screen shows as "· PWA" in the paired devices list so it can be told from Safari, and opening just the computer's address and port now goes to the phone page instead of a blank page. Renaming a device no longer breaks the connection if the new name cannot be saved. Thanks to @xiaoshidefeng.
+  - Expired pairing codes (#1332) — if the file cannot be written when an expired code is replaced, the LAN card no longer stays on "Unable to load connection info."; it still shows a fresh code and the reason is written to the diagnostics log.
+  Windows
+  - Update no longer says Clawd cannot be closed (#1341; issue #882) — the installer sometimes missed a single remaining Clawd process, so it did not close it and could not move the old files, and a "Clawd on Desk cannot be closed" message appeared although Clawd had already quit. It now closes that process and goes on. This takes effect on the upgrade from v1.5.0 to this version. The original ARM64 report in #882 has another cause that is still being looked into. Thanks to @moc033702-svg and @PeterShanxin for the reports.
+ReleaseNotesUrl: https://github.com/rullerzhou-afk/clawd-on-desk/releases/tag/v1.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,49 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.56.2
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.56.2] - 2026-07-29
+  Security
+  - Blocked per-user PowerShell module hijacking in administrator sessions. Since the initial v0.3.0 runner, both in-process runspaces and child powershell.exe processes inherited the caller's PSModulePath, whose first entry normally points to the current user's writable Documents folder. A planted module could therefore be auto-loaded with SysManager's administrator token when a built-in command such as Get-NetAdapter was resolved. Elevated in-process work now moves into an isolated Windows PowerShell 5.1 child whose environment contains only canonical machine-owned module roots under Program Files and System32; existing child-process execution receives the same restriction. Normal unelevated sessions retain per-user module support, and the parent process environment is never rewritten.
+  Fixed
+  - Kept optional Windows Update history installation on the correct privilege boundary. SysManager now installs PSWindowsUpdate only from a normal, non-administrator session into the current user's module directory. The installer verifies the canonical PowerShell Gallery endpoint and explicitly selects PSGallery; an elevated session refuses the install instead of consuming user-writable PowerShellGet repository state with an administrator token. Failed module imports now expose installation guidance instead of reporting a successful empty history.
+  - Handled locked-down systems without a working Windows PowerShell 5.1 host. If policy, installation damage, or a disabled executable prevents the isolated administrator runspace from starting, the runner now maps that failure to the existing unavailable/failed service states. External PowerShell launches remain pinned to the canonical system path even when the host is missing, preventing executable search-order fallback. The runner deliberately does not fall back to an elevated in-process runspace, which would weaken the module-discovery boundary.
+  - Preserved PowerShell parameter and task-result semantics. Defender mutation scripts now declare every bound parameter instead of silently receiving null variables, and Scheduled Maintenance correctly decodes unsigned high-bit Task Scheduler result codes after out-of-process serialization.
+  - Reported partial elevated operations honestly. Edge disable/restore now reports failure when its registry policy changes but scheduled-task updates cannot run, and restore-point creation returns a clean failure state when the isolated PowerShell host is unavailable.
+  Verify the download
+  Get-FileHash .\SysManager-v1.56.2.exe -Algorithm SHA256
+  Expected SHA256: F84468F0C9FDB9D6B294A971CC28D1C7E36D8F3288A044E2F23C24882B18E981
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.56.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

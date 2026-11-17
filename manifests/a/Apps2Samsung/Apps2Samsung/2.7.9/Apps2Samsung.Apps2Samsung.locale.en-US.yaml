@@ -1,0 +1,96 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Apps2Samsung.Apps2Samsung
+PackageVersion: 2.7.9
+PackageLocale: en-US
+Publisher: Apps2Samsung
+PublisherUrl: https://github.com/Apps2Samsung
+PublisherSupportUrl: https://github.com/Apps2Samsung/Apps2Samsung/issues
+PackageName: Apps2Samsung
+PackageUrl: https://apps2samsung.madebypatrick.nl/
+License: MIT
+LicenseUrl: https://github.com/Apps2Samsung/Apps2Samsung/blob/HEAD/LICENSE
+ShortDescription: Install any app on Samsung Tizen devices — TVs, projectors and smart monitors
+Description: Cross-platform desktop installer that side-loads any app onto Samsung Smart TVs, projectors and smart monitors running Tizen OS — Jellyfin, Moonlight, Moonfin, Litefin and a community catalog, or your own WGT package. Handles device discovery, Tizen certificates and installation. Successor to Jellyfin2Samsung.Jellyfin2Samsung.
+Moniker: apps2samsung
+Tags:
+- jellyfin
+- moonlight
+- samsung
+- samsung-tv
+- sideload
+- tizen
+- wgt
+ReleaseNotes: |-
+  📦 v2.7.9 — 2026-09-02
+  The release where your phone became a real installer. The Android head went from a proof of concept to something you can actually use standing in front of the TV: it shares the same SDB engine as the desktop, it's a TV remote, it speaks all 29 languages, and it can now open a debug console for an app running on the TV. Alongside that, localization went from "half the files were English" to every language complete, and Linux finally gets .rpm and AppImage.
+  📱 The Android head grew up
+  🔌 One SDB engine, shared with the desktop
+  The desktop shells out to TizenSdb.exe; the phone has no such luxury. Both heads now run the same engine through one interface — the desktop over the CLI, the phone in-process — so a fix to how we talk to a TV lands on both at once instead of drifting apart. (#580, closes #549)
+  📺 Your phone (or desktop) as a TV remote
+  Volume, navigation, playback and a live keyboard, over the TV's own remote protocol. Unlike the installer views this needs no Developer Mode and no debug port — just a TV on the same network. (#583, closes #544)
+  🐞 A debug console for an app running on the TV
+  The desktop could put an app into the TV's web-inspector debug mode and hand it to Chrome's chrome://inspect. Chrome on Android has no inspect page, so the phone now speaks the DevTools protocol itself: pick an app under TV information → installed apps, tap 🐞, and you get its live console — console.log, warnings, uncaught exceptions, and the browser's own reports of failed requests and CSP violations, which is usually what explains a blank screen when the app's own logging says nothing. There's an expression prompt too, and the transcript shares out through the share sheet.
+  Attaching restarts the app on the TV — the inspector only reports a port for the launch debug mode performs itself — so it asks first. (#628)
+  🌍 The mobile head speaks your language
+  It was English-only, because the string catalog lived inside the desktop head where a MAUI app couldn't reach it. The catalog moved into Apps2Samsung.Core, so both heads read one copy of the same 29 languages (#585), including the runtime strings and not just the chrome (#586). Switching language now also applies immediately instead of asking you to restart — and then not changing anything anyway. (#595)
+  📂 Picking a file from a cloud source stopped throwing
+  Setting a custom app icon from Google Drive, OneDrive or cloud-backed Photos died with a bare Java.Lang.RuntimeException. Underneath it was android.os.NetworkOnMainThreadException: MAUI's picker resolves the file on the UI thread, and a provider that has to fetch it over the network trips Android's main-thread network check. Picking the same file from local storage never touched the network, which is why it only reproduced on some phones and some sources. We now drive the system picker ourselves and read on a background thread. (#576)
+  🌍 Localization: 29 languages, all complete
+  Switching language did nothing useful because the supply side was broken — the Crowdin sync was writing English over half the language files. That's fixed, and the languages are actually filled: 20 languages went from 38% to 100% (#596), the sync stopped overwriting translations with English (#599), the nine languages the engine wouldn't touch were translated (#603), and the last 27 strings were filled so every language is complete (#604). Files are now named by their full locale (#617), and pt-PT/zh-CN got their own.
+  The pipeline is guarded now, so this can't quietly rot again:
+  ────────────────────────────────┬─────────────────────────────────────────────────────────────────────────────────────────
+  Guard                           │What it catches
+  ────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────
+  Localization check covers C# too│Hard-coded prose reaching a dialog or status line (#587)
+  ────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────
+  Placeholder check               │A translation that drops {0} — string.Format would name the wrong app, or throw (#612)
+  ────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────
+  Per-language report             │What Crowdin actually holds, read-only (#615)
+  ────────────────────────────────┴─────────────────────────────────────────────────────────────────────────────────────────
+  🐧 Linux: .rpm, AppImage, and no more writing next to the binary
+  The ask was .rpm for Fedora and AppImage for everything else, but shipping those formats alone would have shipped broken packages — on Linux the app wrote next to its own binary:
+  ───────────────────┬───────────────┬───────────────────────────────────────────────────────────────────
+  Path               │Used for       │Reality in a package
+  ───────────────────┼───────────────┼───────────────────────────────────────────────────────────────────
+  <basedir>/Downloads│the .wgt cache │root-owned under /opt, or a read-only AppImage mount → download
+                     │               │fails
+  ───────────────────┼───────────────┼───────────────────────────────────────────────────────────────────
+  <basedir>/Logs     │the session log│same → bug reports arrive with no log
+  ───────────────────┴───────────────┴───────────────────────────────────────────────────────────────────
+  macOS already had per-user paths for exactly this reason; Linux never did. The .wgt cache now lives in ~/.cache/Apps2Samsung/Downloads and logs in ~/.local/state/Apps2Samsung/Logs, honouring XDG_CACHE_HOME/XDG_STATE_HOME. The updater reports no in-place update inside an AppImage — it can't replace its own mount — and points at the releases page instead. The .deb no longer creates world-writable directories, because nothing writes there any more. (#590, closes #589)
+  Follow-ups: the aarch64 rpm is fixed and the PR check now packages both architectures (#591), and rpm stopped stripping the app to pieces (#592).
+  🐛 Fixes
+  🔑 "Object reference not set to an instance of an object" when signing in
+  A Samsung account with no email address on it makes the OAuth callback return a null email, which went straight into the distributor certificate request and made BouncyCastle throw while encoding it. You got a bare "Object reference not set to an instance of an object" with no hint what to fix. It's now caught at the login boundary with a popup that says what's wrong and a button that takes you to your Samsung account to add an email. Only ever fired on a path that actually logs in, which is why anyone with a cached profile never saw it. (#608, closes #606)
+  📦 Package-id renames that left services behind
+  On a [118] id conflict we gave the package a fresh id — but only rewrote the <tizen:application> element. A package id also prefixes every service component id, so a package with services came out half-renamed: the app installed and launched while its services never registered. Apps that launch their own services by literal id from JavaScript broke a second way that no manifest edit could reach. Nuvio TV is the case that surfaced it — it installed fine and its plugins were simply dead. Jellyfin never exposed this, having no service components. Renaming is now a last resort: we prefer removing the conflicting copy, and when we do rename, we rename the id everywhere it occurs. (#626)
+  🖼️ The app icon shows in the taskbar
+  The window carried no icon at all — <ApplicationIcon> only icons the executable file, not the windows it opens — so the taskbar showed a generic placeholder. All windows now carry the logo, and on Linux the desktop entry gained the StartupWMClass it needed to associate the running window with its icon. (#629, closes #627)
+  🧰 Under the hood
+  - One config.xml reader shared by both heads, instead of three separate ones (#584).
+  - The landing page and README now describe what the app actually does (#605), and NOTICE.md documents third-party attributions (#607).
+  - Pull requests are labelled automatically so release notes sort themselves (#623), and a translation-sync config change no longer cuts a beta release (#602).
+  - Dependency updates: the NuGet bumps that didn't need a migration (#588), the actions group (#581), and crowdin/github-action v3 (#611).
+  📥 Downloads
+  ─────────────────────┬─────────┬───────────────────────────────────────────
+  Platform             │Status   │Notes
+  ─────────────────────┼─────────┼───────────────────────────────────────────
+  🍎 macOS (.app + dmg)│✅ Stable│ARM64 + Intel
+  ─────────────────────┼─────────┼───────────────────────────────────────────
+  🍎 macOS (CLI)       │✅ Stable│Per-arch tar.gz
+  ─────────────────────┼─────────┼───────────────────────────────────────────
+  🐧 Linux             │✅ Stable│x64 + ARM64 — tar.gz / .deb / .rpm /
+                       │         │AppImage
+  ─────────────────────┼─────────┼───────────────────────────────────────────
+  🪟 Windows           │✅ Stable│CI-built
+  ─────────────────────┼─────────┼───────────────────────────────────────────
+  🤖 Android (.apk)    │✅ Stable│Sideload; use your phone as the installer
+  ─────────────────────┴─────────┴───────────────────────────────────────────
+  🛡️ Security notice
+  Antivirus warnings may occur and are likely false positives — the binaries are unsigned and built in the open by GitHub Actions.
+  Full changelog: v2.7.8...v2.7.9
+ReleaseNotesUrl: https://github.com/Apps2Samsung/Apps2Samsung/releases/tag/v2.7.9
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,110 @@
+# Created with komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: CaddyServer.Caddy
+PackageVersion: 2.10.0
+PackageLocale: en-US
+Publisher: Stack Holdings GmbH.
+PublisherUrl: https://github.com/caddyserver
+PublisherSupportUrl: https://github.com/caddyserver/caddy/issues
+PackageName: Caddy
+PackageUrl: https://github.com/caddyserver/caddy
+License: Apache-2.0
+LicenseUrl: https://github.com/caddyserver/caddy/blob/HEAD/LICENSE
+ShortDescription: HTTP/2 web server with automatic HTTPS
+Tags:
+- acme
+- automatic-https
+- caddy
+- caddyfile
+- go
+- golang
+- hacktoberfest
+- http
+- http-server
+- http3
+- https
+- privacy
+- reverse-proxy
+- security
+- tls
+- web-server
+ReleaseNotes: |-
+  Caddy 2.10 is here! Aside from bug fixes, this release features:
+  - Encrypted ClientHello (ECH): This new technology encrypts the last plaintext portion of a TLS connection: the ClientHello, which includes the domain name being connected to. The draft spec for ECH is almost finalized, so we can now support this privacy feature for TLS. This is a powerful but nuanced capability; we highly recommend reading the ECH documentation on our website.
+  - Post-quantum (PQC) key exchange: Caddy now supports the standardized x25519mlkem768 cryptographic group by default.
+  - ACME profiles: ACME profiles are an experimental draft that allow you to choose properties of your certificates with more flexibility than traditional CSR methods. For example, Let's Encrypt will issue 6-day certificates under a certain profile. Caddy may eventually use that profile by default.
+  - Via header: The reverse proxy now sets a Via header instead of a duplicate Server header.
+  - Global DNS provider: You can now specify a default "global" DNS module to use instead of having to configure it locally in every part of your config that requires a DNS provider (for example, ACME DNS challenges, and ECH). This is the dns global option in the Caddyfile, or in JSON config, it's the dns parameter in the tls app configuration.
+  - Wildcards used by default: Previously, Caddy would obtain individual certificates for every domain in your config literally; now wildcards, if present, will be utilized for subdomains, rather than obtaining individual certificates. This change was motivated by the novel possibility for subdomain privacy afforded by ECH. It can be overridden with tls force_automate in the Caddyfile. The experimental auto_https prefer_wildcard option has been removed.
+  - libdns 1.0 APIs: Many of you use DNS provider modules to solve ACME DNS challenges or to enable dynamic DNS. They implement interfaces defined by libdns to get, set, append, and delete DNS records. After 5 years of production experience, including lessons learned with ECH, libdns APIs have been updated and 1.0 beta has been tagged. DNS provider packages will need to update their code to be compatible, which will help ensure stability and well-defined semantics for the future. Several packages have already updated or are in the process of updating (cloudflare, rfc2136, and desec to name a few).
+  - Global dns config: Now that several components of Caddy configuration may affect DNS records (ACME challenges, ECH publication, etc.), there is a new dns global option that can be used to specify your DNS provider config in a single place. This prevents repetition of credentials for servers where all the domains are managed by a single DNS provider.
+  Thank you to the many contributors who have helped to make this possible! 🎉 🥳 🍾
+  ⚠️ While have traditionally supported the last 2 minor Go versions to accommodate some distribution / package manager policies, we now only support the latest minor Go version. The privacy and security benefits added in new Go versions (such as post-quantum cryptography) are worth making available to everyone as soon as possible, rather than holding back the entire user base or maintaining multiple code compilation configurations.
+  Encrypted ClientHello (ECH) details
+  (This is a brief overview. We recommend reading the full documentation.)
+  Typically, server names (domain names, or "SNI") are sent in the plaintext ClientHello when establishing TLS connections. With ECH, the true server name is encrypted (and wrapped) by an "outer" ClientHello which has a generic SNI of your choosing. With many sites on the same server sharing the same outer SNI, both clients and the server have more privacy related to domain names.
+  Caddy implements fully automated ECH, meaning that it generates (and soon, rotates), publishes, and serves ECH configurations simply by specifying a DNS provider, and the outer/public domain name to use.
+  Fully automated ECH requires a DNS module built into your Caddy binary. In order for a client, such as a browser, to know it can use ECH, and what parameters to use, the server's ECH configuration must be published. This config includes the public name, cryptographic parameters, and a public key for encrypting the inner ClientHello. By convention, browsers read the standardized HTTPS-type DNS record containing a ech SvcParamKey. Caddy sets this DNS record for all domains being protected, but it needs that DNS provider module plugged in and configured in order to do this. If you are already using the DNS ACME challenge, you should already have a DNS provider plugged in. If you prefer to build Caddy from source with a DNS module, it's easy with xcaddy, for example: $ xcaddy build --with github.com/caddy-dns/cloudflare
+  The minimum config needed to enable ClientHello is also the recommended config, as it maximizes privacy benefits in most situations. You just need the ech global option and a DNS provider specified. Here's an example using Cloudflare as the nameserver:
+  Caddyfile:
+  {
+          debug  # not required; recommended while testing
+          dns cloudflare {env.CLOUDFLARE_API_KEY}
+          ech ech.example.net
+  }
+  example.com {
+          respond "Hello there!"
+  }
+  This protects all your sites (example.com in this case) behind the public name of ech.example.net. (As another example, Cloudflare uses cloudflare-ech.com for all the sites it serves. We recommend choosing a single public domain and use it to protect all your sites.)
+  The outer/public name you choose should point to your server. Caddy will obtain a certificate for this name in order to facilitate safe, reliable connections for clients when needed. Without a certificate, clients may be forced to connect insecurely, or fail to connect at all, in some cases, which not only leaves them vulnerable, but also risks exposing the names of your server's sites.
+  Caddy then uses the specified DNS provider to publish the ECH config(s) for your various site names. It creates (or augments) HTTPS-type records for the domains of your sites (not your ECH public name). Note that DNS provider modules are independently-maintained, and may not have been tested for compatibility with HTTPS-type records. Please contact your module's maintainers if you experience issues.
+  If you have more advanced configuration needs, you can use the JSON configuration (more details coming soon; for now, see #6862 or look at the source code; or use caddy adapt to convert a Caddyfile to JSON).
+  Testing and verifying Encrypted ClientHello
+  First make sure Caddy runs successfully with ECH enabled (and a DNS module) in the config. You should see logs that it is generating an ECH config and publishing it to your domain name(s).
+  You will need to use a client that supports ECH. Some custom builds of curl do, and Firefox and modern Chrome-based browsers do as well, but you need to enable DNS-over-HTTPS or DNS-over-TLS first (since, obviously, querying DNS in plaintext for a protected domain name will expose the domain and defeat the purpose of ECH).
+  If reusing an existing domain name, clear your DNS cache. Firefox has a way of doing this for its cache at about:networking#dns.
+  Once you have a suitable client, use Wireshark to capture network packets as you load your site. You should see only the outer/public name as SNI (ServerName Indicator) values in the packet capture. If at any time you see the true site name, ECH is not working properly -- it could be a client or server issue. Before filing a bug, please try to pinpoint it as a server issue first. But definitely report server bugs! Thank you!
+  (Note that ECH is not automatically published for CNAME'd domains, and the domain must already have a record in the zone.)
+  Commits
+  Beta 1:
+  - 96c5c55 admin: fix index validation for PUT requests (#6824)
+  - 3644ee3 build(deps): bump github.com/cloudflare/circl from 1.3.3 to 1.3.7 (#6876)
+  - eacd772 build(deps): bump github.com/go-jose/go-jose/v3 from 3.0.3 to 3.0.4 (#6871)
+  - 9996d6a build(deps): bump github.com/golang/glog from 1.2.2 to 1.2.4 (#6814)
+  - 1115158 caddyhttp: ResponseRecorder sets stream regardless of 1xx
+  - 8861eae caddytest: Support configuration defaults override (#6850)
+  - d7764df caddytls: Encrypted ClientHello (ECH) (#6862)
+  - a807fe0 caddytls: Enhance ECH documentation
+  - bc3d497 caddytls: Fix broken refactor
+  - 7b8f350 caddytls: Fix sni_regexp matcher to obtain layer4 contexts (#6804)
+  - 2c4295e caddytls: Initial support for ACME profiles
+  - d7872c3 caddytls: Refactor sni matcher (#6812)
+  - 172136a caddytls: Support post-quantum key exchange mechanism X25519MLKEM768
+  - 066d770 cmd: automatically set GOMEMLIMIT (#6809)
+  - 1f35a8a fastcgi: improve parsePHPFastCGI docs (#6779)
+  - 22563a7 file_server: use the UTC timezone for modified time (#6830)
+  - cfc3af6 fix: update broken link to Ardan Labs (#6800)
+  - 99073ea go.mod: Upgrade CertMagic to v0.21.7
+  - 1641e76 go.mod: Upgrade dependencies
+  - 0d7c639 go.mod: remove glog dependency (#6838)
+  - 932dac1 logging: Always set fields func; fix #6829
+  - 9e0e5a4 logging: Fix crash if logging error is not HandlerError (#6777)
+  - 904a0fa reverse_proxy: re-add healthy upstreams metric (#6806)
+  - e7da3b2 reverseproxy: Via header (#6275)
+  - 9283770 reverseproxy: ignore duplicate collector registration error (#6820)
+  Beta 2:
+  - f4432a3 caddyfile: add error handling for unrecognized subdirective/options in various modules (#6884)
+  - 84364ff caddypki: Remove lifetime check at Caddyfile parse (fix #6878)
+  - adbe7f8 caddytls: Only make DNS solver if not already set (fix #6880)
+  - d57ab21 caddytls: Pointer receiver (fix #6885)
+  - 4ebcfed caddytls: Reorder provisioning steps (fix #6877)
+  - a686f7c cmd: Only set memory/CPU limits on run (fix #6879)
+  - 1987620 cmd: Promote undo maxProcs func to caller
+  - 220cd1c reverseproxy: more comments about buffering and add new tests (#6778)
+  Beta 3:
+  - b3e692e caddyfile: Fix formatting for backquote wrapped braces (#6903)
+  - 55c89cc caddytls: Convert AP subjects to punycode
+ReleaseNotesUrl: https://github.com/caddyserver/caddy/releases/tag/v2.10.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

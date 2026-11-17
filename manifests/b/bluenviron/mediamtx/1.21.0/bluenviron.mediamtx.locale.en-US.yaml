@@ -1,0 +1,59 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: bluenviron.mediamtx
+PackageVersion: 1.21.0
+PackageLocale: en-US
+Publisher: bluenviron
+PublisherUrl: https://github.com/bluenviron
+PublisherSupportUrl: https://github.com/bluenviron/mediamtx/issues
+Author: aler9
+PackageName: mediamtx
+PackageUrl: https://github.com/bluenviron/mediamtx
+License: MIT
+LicenseUrl: https://github.com/bluenviron/mediamtx/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2019 aler9
+CopyrightUrl: https://github.com/bluenviron/mediamtx/blob/main/LICENSE
+ShortDescription: |-
+  Ready-to-use SRT / WebRTC / RTSP / RTMP / LL-HLS media server and media proxy that allows to read,
+  publish, proxy, record and playback video and audio streams.
+Description: |-
+  MediaMTX is a ready-to-use and zero-dependency real-time media server and media proxy that allows
+  to publish, read, proxy, record and playback video and audio streams. It has been conceived as a
+  "media router" that routes media streams from one end to the other.
+Tags:
+- go
+- golang
+- hls
+- media-server
+- obs-studio
+- rtcp
+- rtmp
+- rtmp-proxy
+- rtmp-server
+- rtp
+- rtsp
+- rtsp-proxy
+- rtsp-relay
+- rtsp-server
+- streaming
+- webrtc
+ReleaseNotes: |-
+  New major features
+  Media-over-QUIC
+  - support forwarding streams (#6145)
+  API
+  - add /paths/static-sources/get endpoint (#6177) this allows to obtain details about static sources.
+  - add type-specific properties to forward destinations (#6178)
+  - add type-specific properties to static sources (#6184)
+
+  Fixes and improvements
+  General
+  - use internal/core/VERSION as single source of truth to get version (#6119)
+  - httpp: propagate Flush() through the response writer wrappers (#6126) handlerLogger's responseRecorder and handlerWriteTimeout's writeTimeoutWriter both wrap http.ResponseWriter but implement neither http.Flusher nor Unwrap(). Any handler that flushes mid-response has that flush silently dropped, and its output only reaches the client when the handler returns. That defeats the stated purpose of writeTimeoutWriter, whose own comment says it exists so one can "write long responses, splitted in chunks, without causing timeouts": the deadline is reset per Write(), but nothing ever leaves the buffer until the end. Found while adding a server-sent-events endpoint: events written and flushed at t=0.4s onlyreached the client at t=2.2s, when the handler returned. Adding Flush() plus Unwrap() (so http.ResponseController can reach through) fixes both. The new test drives a real listener throughboth wrappers and reads while the handler is still blocked, so it fails on the current code by hitting the read deadline.
+  - support setting read buffer size on macOS (#6128) (#6131)
+  - drop support for Debian Bullseye (#6137) Bullseye reached EOL on 31st august 2026.
+  - emit "closed" log message when a server is closed (#6152
+ReleaseNotesUrl: https://github.com/bluenviron/mediamtx/releases/tag/v1.21.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

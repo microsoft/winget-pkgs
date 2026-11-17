@@ -1,0 +1,87 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 17.3.4
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-agent-core
+  Fixed
+  - Fixed Codex-compatible V2 remote compaction with an explicit v2Endpoint by sending the required feature-negotiation header (#8524).
+  @oh-my-pi/pi-ai
+  Fixed
+  - Fixed omp usage invalidate to discard stale OAuth and API-key usage snapshots, then force a cache-bypassing, per-provider serialized refresh with a broker request budget sized for the full unfiltered account batch, so upgraded subscriptions do not silently retain pre-change quota data.
+  - Fixed quota reporting and Cookie capture guidance for China (Beijing) Alibaba Token Plan credentials (#8509).
+  @oh-my-pi/pi-catalog
+  Added
+  - Added wire constants for Codex V2 remote-compaction feature negotiation.
+  Fixed
+  - Fixed raw COPILOT_GITHUB_TOKEN credentials skipping plan-specific endpoint discovery, which routed GitHub Copilot Business model requests to the personal endpoint and returned HTTP 403. The GitHub Copilot model cache is now scoped per credential, so switching the token no longer serves another account's stale endpoint for the cache TTL (#8507).
+  - Fixed the OpenRouter deepseek/deepseek-v4-pro-0813 route silently clamping the reasoning effort to high: the dated SKU advertises (and accepts) the wire-exact low/high/max ladder, so its effort override no longer collapses to high-only. The undated deepseek/deepseek-v4-pro OpenRouter route stays high-only. (#8517)
+  @oh-my-pi/pi-coding-agent
+  Changed
+  - Replaced the MuPDF-WASM PDF document backend with pdf-inspector through @oh-my-pi/pi-natives, preserving cached text conversion and PDF line selectors while reporting pages that need OCR.
+  - Restored read <pdf>: and read <pdf>:<image>.png page rendering by automatically capturing PDF pages through the headless Chromium browser tool.
+  Fixed
+  - Fixed Streamable HTTP MCP sessions being invalidated by opening the optional GET SSE stream before sending notifications/initialized, which prevented Figma Dev Mode MCP from connecting (#8514).
+  - Fixed the /hotkeys table describing Ctrl+D (app.exit) as "Exit (when editor is empty)" when it actually exits unconditionally and saves the current prompt as a resumable draft (#8530).
+  - Fixed Ctrl+G external editors failing to launch on Windows because Bun re-quoted the embedded cmd.exe /c command line (#8544).
+  @oh-my-pi/pi-mnemopi
+  Fixed
+  - Fixed recall() silently dropping scope='global' rows whenever a channelId filter was active: buildWhere() appended a redundant hard channel_id = ? clause on top of the (session_id = ? OR scope = 'global' OR channel_id = ?) visibility clause, so global rows whose channel_id didn't match (e.g. imported rows with channel_id NULL) were excluded. Channel isolation is preserved by the visibility clause alone. This made imported/global episodic memory permanently unrecallable through callers that always pass a channel (such as the coding-agent memory backend). (#8525)
+  @oh-my-pi/pi-natives
+  Added
+  - Added the async pdfToMarkdown native API backed by pdf-inspector, with page numbering, page-count, OCR-needed-page, and encoding-issue metadata.
+  Changed
+  - Docker images (Dockerfile, scripts/install-tests/*.dockerfile) build the native addon through the cargo/napi-rs backend (OMP_NATIVE_BUILD_BACKEND=cargo) instead of Bazel: a single fixed host target gains nothing from hermetic cross toolchains, and none of those images shipped bazelisk. OMP_NATIVE_CARGO_PROFILE picks the profile for that path (images use ci, local default stays local).
+  Fixed
+  - Fixed the root Cargo workspace failing to load when a stale directory exists under crates/ — e.g. a deleted crate whose directory survived git reset --hard. members no longer globs crates/pi-*, so a directory without a Cargo.toml can no longer break every cargo and Bazel build.
+  - Fixed Docker build contexts shipping nested build output: .dockerignore patterns are anchored at the context root, so bare target/ and dist/ matched neither go-port/*/target (~1.4 GB) nor packages/*/dist (~600 MB).
+  - Fixed deviceCheckGenerateToken aborting the whole process with SIGTRAP when called from a macOS session without GUI/graphic access (SSH, a launchd LaunchDaemon, a CI runner, a service account, a sandbox), which made every openai-codex/* OAuth model unusable for such accounts. -[DCDevice isSupported] synchronously opens an XPC connection to the per-user DeviceCheck metadata daemon, which exists only in an interactive GUI login session; without one the connection setup hits _xpc_api_misuse and traps before any completion handler runs, so the promise never rejects. The binding now checks the caller's security session for the sessionHasGraphicAccess attribute first and resolves { supported: false, error: … } instead of touching DeviceCheck when it is absent (#8353).
+  @oh-my-pi/pi-tui
+  Fixed
+  - Fixed a terminal Device-Attributes reply leaking into the composer as literal text (e.g. 1;22;…;52c) when it arrived after the startup capability-probe sentinel FIFO drained, a race made observable by the added latency of an SSH/zmx PTY chain. DA1 replies (CSI ? … c) and split private-CSI responses are now consumed for the whole session lifetime, not only while a probe sentinel is outstanding (#8542).
+  What's Changed
+  - fix(catalog): discover Copilot endpoint for env tokens by @roboomp in https://github.com/can1357/oh-my-pi/pull/8510
+  - fix(ai): restore Beijing Token Plan quota reporting by @roboomp in https://github.com/can1357/oh-my-pi/pull/8513
+  - fix(mcp): initialize sessions before opening sse stream by @roboomp in https://github.com/can1357/oh-my-pi/pull/8515
+  - fix(catalog): grant low/high/max to OpenRouter deepseek-v4-pro-0813 by @roboomp in https://github.com/can1357/oh-my-pi/pull/8519
+  - fix(mnemopi): keep global rows recallable under channelId filter by @roboomp in https://github.com/can1357/oh-my-pi/pull/8526
+  - fix(agent): add Codex V2 compaction feature header by @roboomp in https://github.com/can1357/oh-my-pi/pull/8527
+  - docs: correct /hotkeys Ctrl+D copy to match save-draft-and-exit by @roboomp in https://github.com/can1357/oh-my-pi/pull/8531
+  - fix(pi-natives): guard DeviceCheck token generation on GUI session by @roboomp in https://github.com/can1357/oh-my-pi/pull/8533
+  - fix(tui): swallow late DA responses for the whole session by @roboomp in https://github.com/can1357/oh-my-pi/pull/8543
+  - fix(coding-agent): restore Windows external editor launch by @roboomp in https://github.com/can1357/oh-my-pi/pull/8546
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v17.3.3...v17.3.4
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v17.3.4
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

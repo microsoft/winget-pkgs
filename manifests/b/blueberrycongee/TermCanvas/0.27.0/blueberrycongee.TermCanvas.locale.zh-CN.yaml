@@ -1,0 +1,38 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: blueberrycongee.TermCanvas
+PackageVersion: 0.27.0
+PackageLocale: zh-CN
+ShortDescription: 一款用于可视化管理终端的无限画布桌面应用
+Description: |-
+  TermCanvas 可将你所有的终端窗口排布在无限空间画布上——无需再使用标签页，也不必拆分窗格。你可以随意拖动终端，放大即可聚焦单个窗口，缩小就能查看全局布局。
+  它采用「项目→工作树→终端」的层级结构管理所有内容，完全贴合你实际使用 Git 的习惯。添加项目后，TermCanvas 会自动检测其包含的工作树；你在终端中创建新工作树时，它也会立刻显示在画布上。
+Tags:
+- claude-code
+- codex
+- gemini-cli
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  - 终端瓦片支持鼠标自由调整尺寸：拖动节点四角或四边即时改变大小，释放后 xterm cols/rows 自动重新适配
+  - 双击终端顶部标题栏聚焦放大该终端（在自由画布重构之后补回，现在会按照 tile 当前的自由尺寸计算缩放）
+  - 在右侧会话面板点击某个 worktree 或 project 行会把它激活，接着按 cmd+t 就会在对应行下建新终端，不用再切回 canvas 点一下
+  - 右键会话面板的行时也会先激活所在行再弹出菜单，避免关闭菜单后 cmd+t 还落到之前那一行
+  - cmd+t 的新终端放置改为感知视口的行优先网格填充（左上 → 右下）：遇到用户自由 resize 出来的宽胖 tile 会跳过它继续在同一行放置，视口塞满或太小时才回退到 rightmost-sibling 锚点
+  - cmd+] / cmd+[ 和 cmd+d 关闭后的"下一个焦点"统一改成空间顺序（按 y 升序再按 x 升序，同位置用 id 做稳定 tiebreaker）,和屏幕上看到的前后关系一致，不再跟随数组创建顺序
+  Changed (zh-CN)
+  - cmd+t 不再把新终端堆到 worktree 包围盒下方；没有 parent 的情况在视口网格不可用时会锚到 rightmost sibling 的右边，而不是底部
+  - 会话面板的行点击只触发激活，折叠/展开归还给独立的 chevron 图标，两个动作不再互相干扰
+  Fixed (zh-CN)
+  - cmd+d 关闭焦点终端后的新焦点改为空间顺序上的下一个，和 cmd+] / cmd+[ 的语义对齐，不再跳到数组里的创建顺序邻居
+  - 恢复会话时如果原来的 CLI 进程已经退出，现在会自动落回一个默认 shell,而不是留下一个死 tile
+  Removed (zh-CN)
+  - 删除 cmd+1/2/3/4 的 tile-size 预设快捷键（tileSizeDefault / tileSizeWide / tileSizeTall / tileSizeLarge）：硬编码的 640x480 / 1288x480 / 640x968 / 1288x968 完全忽略自适应的 tileDimensionsStore,并且和聚焦缩放有互相干扰。自由拖拽节点手柄调整尺寸已经完整替代这套快捷键。相关的 mac 和 win/linux 键位定义、handler 循环、SettingsModal / ShortcutHints 显示行、en/zh i18n 字符串、以及无人引用的 updateTerminalSizeInScene action 全部一并删除；localStorage 里遗留的 span* / tileSize* 键会在加载时自动清理
+ManifestType: locale
+ManifestVersion: 1.12.0

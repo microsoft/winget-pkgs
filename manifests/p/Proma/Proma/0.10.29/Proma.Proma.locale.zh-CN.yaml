@@ -1,0 +1,64 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Proma.Proma
+PackageVersion: 0.10.29
+PackageLocale: zh-CN
+Publisher: ErlichLiu
+PublisherUrl: https://proma.cool/
+PublisherSupportUrl: https://github.com/proma-ai/Proma/issues
+PackageName: Proma
+PackageUrl: https://proma.cool/download
+License: 免费软件
+Copyright: Copyright © 2024-2026 Proma
+ShortDescription: 把最丝滑的通用 Agent 体验带进你的工作流，为 100x 专业用户而生的未来产品，正在实现 proactive Agent 阶段。基于 Claude Agent SDK 的完整开源实践，原生支持飞书群聊调用、灵活接入任意大模型供应商 —— 让顶级 Agent 能力真正跑在你每天用的地方。
+Description: |-
+  Proma 是一个本地优先的 AI 桌面应用，把多模型 Chat、通用 Agent、工作区、Skills、MCP、远程机器人和记忆能力放在同一个开源客户端里。
+  它不是只面向闲聊的聊天框，而是一个可以长期沉淀个人工作流的 Agent 工作台：简单问题用 Chat，复杂任务交给 Agent，数据和配置尽量留在本地。
+
+  现在能做什么
+  - Chat 模式：多模型对话、附件解析、图片输入、Markdown / Mermaid / KaTeX / 代码高亮、并排对话、系统提示词、上下文管理。
+  - Agent 模式：基于 @anthropic-ai/claude-agent-sdk 的通用 Agent，支持工作区隔离、权限模式、文件操作、长任务流式输出、计划确认和用户追问。
+  - SubAgent / Tasks：复杂任务可以通过 Claude Agent SDK 的 Agent 工具拆分为子 Agent / Task，并在消息流中展示调用过程和结果。
+  - Skills & MCP：每个工作区可以独立配置 Skills、MCP Server 和工作区文件，适合沉淀可复用能力。
+  - 远程机器人：支持飞书 / Lark 机器人桥接，并已提供钉钉、微信桥接入口，用手机或群聊触发本机 Agent 工作流。
+  - 记忆与工具：Chat 和 Agent 可共享记忆能力，并支持联网搜索、内置 Chat 工具、Agent 推荐等辅助能力。
+  - 本地优先：会话、工作区、附件、配置、Skills 等默认存储在 ~/.proma/，使用 JSON / JSONL 文件组织，不依赖本地数据库。
+  - 桌面体验：自动更新、代理设置、文件预览、全局快捷键、快速任务窗口、语音输入、亮色 / 暗色 / 跟随系统主题。
+Tags:
+- 人工智能
+- 大语言模型
+- 智能体
+- 自主智能
+ReleaseNotes: |-
+  Proma v0.10.29
+  对比基准：v0.10.27
+  这一版我们接入了更多国产模型渠道，优化了会话切换体验和文件改动面板的性能，并修复了大量 UI 交互细节。整体使用流畅度和稳定性有明显提升。
+  新功能
+  - Cmd+F 快速搜索会话消息 — 在对话视图中按 Cmd+F（Windows 为 Ctrl+F）可直接打开迷你地图搜索面板，快速定位历史消息。如果已打开预览面板，快捷键仍由预览面板优先响应
+  - 新增智谱 Coding Plan 渠道 — 新增 zhipu-coding 渠道类型，走 Anthropic 协议接入智谱大模型，默认模型 glm-5.1。同时更新了智谱 logo，供应商选择器中现在也会显示对应图标
+  - 记忆会话视图状态，切回时自动恢复 — 从 Ctrl+Tab 切换器或侧边栏切回 Agent 会话时，系统会自动恢复上次打开的预览 Tab、停留视图和滚动位置，不用每次重新翻找刚才看的地方
+  - IM 模型切换命令 /model — 飞书/钉钉/微信中的机器人新增 /model 命令，可以查看当前渠道和模型、per-chat 切换。同时支持命令简写（/h、/n、/ls、/m 等），并移除了未实现的 Chat 模式相关命令
+  - Agent 计划模式退出需用户确认 — Agent 执行计划模式任务后退出时需要用户批准才能继续，避免未经确认就直接开始执行代码修改
+  - Chat 模式 SSE 上游错误自动重试 — Chat 模式下遇到网络错误或瞬时 HTTP 错误（408/429/5xx）时，在首字节发出前会自动重试（最多 5 次、累计不超过 30 秒），指数退避加随机抖动，减少「网一抖就白屏」的体验
+  性能优化
+  - 文件改动面板不再卡顿 — 将 git-diff-service 底层的 spawnSync 全面改为异步 spawn，Git 命令在后台执行不再阻塞 Electron 主线程。同时为 stdout/stderr 显式设置 UTF-8 编码，解决中文文件名跨 chunk 切分时的乱码问题，并完善了超时与错误处理
+  - 会话切换秒开 — 新增 per-session 内存缓存（LRU 上限 20 条），切换 Agent 会话时先从缓存填充消息区、后台异步刷新，消除原来全量读盘解析 jsonl 带来的空窗延迟
+  Bug 修复
+  - 标记完成按钮防误触 — 侧边栏「标记完成」按钮改为双击确认：第一次点击变红进入确认态，3 秒未操作或鼠标离开 1.5 秒后自动恢复，第二次点击才真正执行
+  - 版本历史不再偶尔显示「暂无」 — API 失败时不再静默返回空数组，改为抛异常并在界面显示加载失败提示，区分「加载失败」和「暂无数据」两种状态；错误信息中文化
+  - 设置面板不再闪烁 — 打开设置对话框时的布局闪烁问题已修复
+  - Agent 消息加载竞态修复 — 修复消息未加载完成时发送被阻塞、乐观消息未持久化到会话缓存等竞态问题，切换会话后再切回不会丢失刚发送的消息
+  - 会话三点菜单不再被预览遮挡 — 迷你地图悬浮预览面板与三点下拉菜单层叠冲突，改为菜单打开时立即关闭预览面板，消除遮挡
+  - 最近会话列表空白处可两指滚动 — macOS 下侧边栏会话列表 tab 间距、分组标题和空白处的两指滚动被窗口拖拽手势截走，现在整个滚动容器声明为 no-drag 区域，任意位置都能正常滚动
+  - 飞书实时同步允许息屏锁屏 — 之前飞书实时同步会阻止屏幕关闭，现在改为只阻止系统休眠，允许正常息屏和锁屏，保护用户隐私
+  - 中文路径在文件改动面板不再乱码 — 为所有 git 命令注入 -c core.quotePath=false 输出原始 UTF-8 路径；之前中文文件名显示为八进制转义乱码，Windows 上点击还会因路径匹配失败导致 spawnSync 阻塞主进程卡死
+  - WSL 检测编码更健壮 — 新增 smartDecode 函数支持 UTF-16 LE / UTF-8 / GBK 多编码自动检测，解决 Windows 控制台 UTF-16 LE 输出乱码问题，精简提示文案为统一的「WSL 未就绪，如已安装 Git Bash 可不安装」
+  - 窗口失焦时角标不再漏报 — 切到其他应用后当前会话完成时不再遗漏角标计数；同时用 SVG 动态红圈数字补齐了 Windows 任务栏角标（此前 setBadgeCount 在 Windows 上直接无效果）
+  - Mermaid 渲染失败不再残留错误条 — 开启 suppressErrorRendering 防止 Mermaid 在失败时往 document.body 注入游离错误节点；同时收紧了 Mermaid 代码块检测规则，graph/flowchart 等常见英文词后必须跟方向关键字才触发渲染，避免普通代码被误判
+  - 外部唤起的会话不再抢占前台 — 飞书/钉钉/微信等外部来源触发的会话不再自动切换当前 Tab 和工作区，只在左侧边栏显示带运行指示条的条目，由用户自行决定是否切换查看
+  - mention 列表顶部项可靠选中 — 输入 / # @ 后立刻用鼠标点顶部项偶发选不中的竞态已修复，选择时机从 onClick 提前到 onMouseDown，消除异步渲染和焦点抢占的时序问题
+  - UI 细节统一 — 侧边栏「工作中」Tab 上下间距调整为对称；设置面板左侧导航和模型选择列表统一使用纤细滚动条；侧边栏指示条改为贴合边缘的包边设计，选中状态更醒目
+ReleaseNotesUrl: https://github.com/proma-ai/Proma/releases/tag/v0.10.29
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

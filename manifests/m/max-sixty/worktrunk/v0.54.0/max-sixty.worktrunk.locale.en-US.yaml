@@ -1,0 +1,72 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.54.0
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Improved
+  - Rate-limit pace segment in the Claude Code statusline: wt list statusline --format=claude-code now surfaces a yellow 1.3×pace(10am–3pm) segment when Claude Code's reported five-hour or seven-day rate-limit window is on track to be hit before its reset. The segment uses a Bayesian forecast on P(final ≥ 100%) so early-window bursts (e.g., 5% used at 3% elapsed) don't trigger spurious warnings — only the worse-projected of the two windows is shown, and the segment is hidden entirely when both are safe. The clock format inside the parentheses honors LC_ALL / LC_TIME / LANG: en_US/en_PH/en_CA get 12-hour (10am–3pm), everything else (including unset and C/POSIX) gets 24-hour (10:00–15:00). (#2899, #2911)
+  - wt step prune streams removals and never prompts mid-scan: Prune now bundles integration, removability, and age checks into a single parallel pass and starts removing candidates as soon as they qualify, instead of batching the scan and acting at the end. Dirty / locked / primary worktrees drop out before the age check, so a young + dirty + integrated worktree no longer surfaces as Skipped (younger than 1d) — the (younger than X) message now fires only when the worktree would actually have been pruned. With --yes, every project command is auto-approved as before; without --yes, a candidate whose hooks include an unapproved project command is SKIPPED with (approval required) rather than aborting the scan with an inline prompt the streaming structure couldn't accommodate. The end-of-run hint enumerates the unapproved hook templates from the invoking worktree's config and emits one copy-pasteable wt -C <path> remove line per skipped candidate, annotating candidates whose own .config/wt.toml differs from the invoking worktree's. (#2908, #2910)
+  - wt step prune default --min-age raised from 1h to 1d: A worktree just created from the default branch looks "merged" because its branch still points at the same commit; a one-day floor keeps an unattended prune from sweeping it up before its owner starts work. Explicit --min-age=0s or any other value is unchanged. (#2886)
+  - Legacy shell-wrapper deprecation warning: Users who upgrade wt without restarting their shell still run the previous release's wrapper, which sets only WORKTRUNK_DIRECTIVE_FILE instead of the new split WORKTRUNK_DIRECTIVE_CD_FILE / WORKTRUNK_DIRECTIVE_EXEC_FILE pair. That fallback used to be silent; wt now emits a one-shot per-process warning hinting at wt config shell install. bash, zsh, fish, and PowerShell pick up the new wrapper on the next shell restart; nushell is the one shell where users must rerun wt config shell install nu because its wrapper is a static file. (#2880)
+  - -vv no longer floods stderr; raw subprocess sink renamed to subprocess.log: A -vv invocation used to spray ~15K lines of stderr per command, forcing a redirect to a file even though trace.log already mirrored most of it. The debug-level log::* pipeline now writes to .git/wt/logs/trace.log at -vv; Info-level records (hook output, template expansions, the Tracing to … pointer) stay on stderr at every verbosity level. The companion raw-subprocess-bytes file is renamed from output.log to subprocess.log — the prior name read as "stuff wt printed" but actually held uncapped multi-MB subprocess bodies (git log -p, patch-id pipelines). RUST_LOG is now honored at every verbosity level: wt -v and wt -vv previously hardcoded Info / Debug and silently dropped any RUST_LOG directive (RUST_LOG=trace wt -vv was capped at Debug, RUST_LOG=worktrunk=trace wt -v was ignored); all three levels now flow through one builder shape with RUST_LOG layered on top of the flag baseline. (#2892, #2901, #2913)
+  Fixed
+  - Data-safety across the worktree merge / remove / prune lifecycle: Five TOCTOU and scoping fixes. wt merge and wt remove revalidate cleanliness and branch integration after pre-remove hooks run, so a hook (or concurrent process) that dirties the worktree or advances the branch can no longer trash the directory or trigger git branch -D against the stale pre-hook decision. The background-removal path does the same revalidation and fails closed for submodule worktrees on the fallback path instead of forcing. wt step prune runs its rename-failure fallback git branch -d synchronously under the write guard for non-current worktrees (no more race against live integration readers on .git/config), scopes hook approval to the worktrees it will actually remove (an unrelated unapproved hook can no longer abort a non-interactive prune), and prunes the stale metadata of detached worktrees whose directory was deleted outside Worktrunk. (#2870)
+  Documentation
+  - -v / -vv help and FAQ: The -v help text is split out from its 150-character parenthetical, and docs/content/faq.md gains a "What does -v / -vv do?" section with a three-level table. (#2913)
+  - Hook docs and pre-start docstring: The pre_create field docstring in HooksConfig (user-visible via generated JSON schema) read "Commands to execute before worktree creation"; pre-start actually runs after worktree creation, blocking. Restored the correct wording. The docs/content/extending.md overview is reworked to read more cleanly: parallel three-paragraph intro for hooks / aliases / custom subcommands, fewer em-dashes, and the Reference section's table no longer duplicates content covered in prose. (#2879, #2912)
+  Internal
+  - Migrated logging from env_logger to tracing-subscriber: A layered subscriber routes records structurally by target and verbosity. Existing log::* callers are bridged into tracing via tracing_log::LogTracer. [wt-trace] records emit as typed structured fields with a single formatter rendering the wire shape, so the grammar lives in one place instead of being duplicated across every emit site.
+  - UncommittedChanges error renders dirty files in the canonical gutter, matching ConflictingChanges and the project's format_with_gutter() convention. (#2887)
+  Install worktrunk 0.54.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/max-sixty/worktrunk/releases/download/v0.54.0/worktrunk-installer.sh | sh && wt config shell install
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/max-sixty/worktrunk/releases/download/v0.54.0/worktrunk-installer.ps1 | iex"; git-wt config shell install
+  Install prebuilt binaries via Homebrew
+  brew install worktrunk && wt config shell install
+  Download worktrunk 0.54.0
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+  Install via Cargo
+  cargo install worktrunk && wt config shell install
+  Install via Winget (Windows)
+  winget install max-sixty.worktrunk && git-wt config shell install
+  Install via AUR (Arch Linux)
+  paru worktrunk-bin && wt config shell install
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.54.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

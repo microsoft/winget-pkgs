@@ -1,0 +1,41 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: agentty.agentty
+PackageVersion: 0.9.7
+PackageLocale: en-US
+Publisher: agentty
+PublisherUrl: https://agentty.org/
+PublisherSupportUrl: https://github.com/1ay1/agentty/issues
+PackageName: agentty
+PackageUrl: https://agentty.org/
+License: MIT
+LicenseUrl: https://github.com/1ay1/agentty/blob/HEAD/LICENSE
+Copyright: Copyright (c) agentty contributors
+ShortDescription: Blazing-fast Claude in your terminal — a C++26 alternative to claude-code.
+Description: agentty is a native C++26 terminal coding agent and a drop-in alternative to claude-code. A single static binary with sub-millisecond cold start, sandboxed by default, and one-command SSH air-gap. No Node, Python, or Electron. Signs in with your Claude Pro/Max subscription or an ANTHROPIC_API_KEY.
+Moniker: agentty
+Tags:
+- ai
+- claude
+- cli
+- coding-agent
+- developer-tools
+- terminal
+ReleaseNotes: |-
+  All about reaching any OpenAI-compatible endpoint, and telling the truth about what happened when you do.
+  Added
+  - Type an endpoint into ^P and it offers to connect. agentty has always spoken to any OpenAI-compatible server (--provider host:port, or the "Custom host…" row), but the picker never said so: typing a hostname made every familiar provider disappear and left one muted grey row behind, which reads as "no". Now a query that looks like an endpoint — a dot, a host:port, an https:// — promotes a concrete "Use <host> as a custom OpenAI-compatible host" row to the TOP, and Enter carries the typed text straight into the connect probe instead of reopening an empty field. Saved custom hosts are searchable too (they used to vanish the moment you typed, so the only way back to one was scrolling past every built-in), the escape hatch is no longer painted in the muted style this TUI reserves for unavailable, and the footer says what Enter will actually do.
+  - The connect probe says what went wrong and what to do about it. Three very different mistakes used to arrive as the same unhelpful string. A 200 with HTML — what you get from pasting a dashboard URL instead of the API base — now reads "that's a web page, not an API — use the API base URL (usually ends in /v1)" instead of "HTTP 200, no model list at any known path". A 401/403 means the address was right, so it routes you straight to the key prompt instead of dumping you back into a URL field you typed correctly. And the probe now ranks its attempts, so a 401 on the configured path is no longer buried under a 404 from the /v1 fallback.
+  Fixed
+  - A Retry-After measured in hours is a quota, not a burst limit. A 429 carrying retry-after: 29410 (8 hours, from a provider's daily free-tier cap) was clamped to 600s in the reducer and 30s in the agent loop, then retried three times — 95 seconds of waiting to print the exact message the first response already carried. agentty now honours a server hint up to 15 minutes and treats anything beyond it as terminal: 95s → 1.5s, with the provider's own actionable text. Burst limits are unaffected, and the error is still classified RateLimit so the loop-backoff schedule is unchanged.
+  - A context window a gateway made up no longer breaks compaction. The window drives the gauge and auto-compaction, and the extraction narrowed straight to int — so 18446744073709551615 became -1, 4000000000 became -294967296, and the string "1e6" became 1. A negative window disables compaction entirely (every used < window test is false) and a window of 1 compacts every turn; both read as "agentty is broken" rather than "this gateway reported nonsense". Values are now validated before narrowing and rejected outside a plausible 1024–100M band, and a partial string parse is treated as a misread rather than a lenient read.
+  - Headless runs had an empty model catalog. agentty run and agentty acp never build a Model, so the subagent config was installed without candidates — leaving context_window at 0 on every headless turn (the Ollama transport then fell back to the daemon's ~2k/4k default, truncating exactly the long runs headless is for), cheapest_capable_model() with nothing to choose from (read-only subagent roles never routed down), and Smart Mode's role resolver with no candidates (pinned slots silently fell back to the parent model). Seeded from the same bundled catalog the TUI uses.
+  - Reasoning text no longer disappears on gateways that send both spellings. Some OpenRouter passthroughs emit an empty reasoning_content alongside a populated reasoning; taking the first key that merely exists dropped every reasoning token, silently.
+  Changed
+  - The OpenAI-compatible dialect is now observed through one table, not scattered ifs. Every way this spec-less wire spells a field — the two reasoning spellings, three error envelopes, Mistral's structured content parts, optional tool-call indices — lives in one place with the endpoint each was observed on. Two sites were separately parsing error envelopes by hand, neither knowing all three shapes; an unrecognised envelope reaches you as "the model stopped for no reason".
+  - What agentty sends, and to which endpoints, is now written down and enforced. The request body is a pure function with unit tests, so the field policy is a contract rather than a comment. Notably max_tokens is sent deliberately instead of OpenAI's newer max_completion_tokens: vLLM, llama.cpp and Together accept only the old name, and OpenAI still honours it — one spelling that works everywhere beats conformance that works on one host.
+  - The context-window toast says where the number came from — 131k ctx (advertised) when the endpoint told us, ctx: default when nothing did. A window the server promised and one we assumed used to look identical, which made a wrong window impossible to debug.
+ReleaseNotesUrl: https://github.com/1ay1/agentty/releases/tag/v0.9.7
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

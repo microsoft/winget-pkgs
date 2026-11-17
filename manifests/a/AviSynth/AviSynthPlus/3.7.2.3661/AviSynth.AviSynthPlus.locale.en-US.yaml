@@ -1,0 +1,230 @@
+# Created with YamlCreate.ps1 v2.4.3 $debug=AUSU.CRLF.7-4-6.Win32NT
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: AviSynth.AviSynthPlus
+PackageVersion: 3.7.2.3661
+PackageLocale: en-US
+Publisher: The Public
+PublisherUrl: https://avs-plus.net/
+PublisherSupportUrl: https://github.com/AviSynth/AviSynthPlus/issues
+# PrivacyUrl:
+Author: qyot27
+PackageName: AviSynth+
+PackageUrl: https://avs-plus.net/
+License: GPL-2.0
+LicenseUrl: https://github.com/AviSynth/AviSynthPlus/blob/master/distrib/gpl.txt
+Copyright: Copyright (c) 2002-2022 AviSynth developers and contributors
+# CopyrightUrl:
+ShortDescription: AviSynth+ is an improved version of the AviSynth frameserver, with improved features and developer friendliness.
+Description: 'AviSynth+ is a fork of the well-known frameserver, but with community contributions that avoided mainline inclusion until now. In the hope of modernizing AviSynth to meet present day needs and expectations, the project encourages everybody to help reach our goals: add long-sought features, energize the community, and improve developer and user friendliness. AviSynth+ is fully compatible with plugins and scripts written for AviSynth.'
+# Moniker:
+Tags:
+- avisynth
+- avs
+- avs+
+- frameserver
+ReleaseNotes: |-
+  - C interface Win32 access: fix issue by adding V8 interface function…
+    … names to avisynth.def
+
+    or else names are decorated (Issue #276)
+    e.g. DLL published _avs_get_frame_props_ro@8 instead of avs_get_frame_props_ro
+
+  - ShowRed/Green/Blue/Alpha/Y/U/V: addition to earlier fixes:
+    When clips are planar and both source and destination format have alpha plane,
+    then it will be copied instead of filled with 255d.
+    Additional checking is done for alpha plane size when ShowU/V, because when
+    source is subsampled the original alpha plane cannot be copied (larger).
+
+  - ConvertBits:
+    Does not get frame 0 in constructor for frame properties if 'fulls' is directly specified. (magiblot)
+    May make script initialization much quicker (Issue #275)
+    #275
+
+  - Trim, AudioTrim: bool 'cache' (default true) parameter.
+    Workaround for Issue #274, lower memory consumption but may be slower.
+    Benefits heavily depend on how trimmed clips are used later.
+
+  - Expr: scale_inputs to case insensitive and add floatUV to error message as an allowed value.
+
+  - propCopy: able to specify that the property list is negative.
+    bool "exclude" = false # default: "props" is positive list
+
+    propCopy(org,true,props=["_Matrix", "_ColorRange"], exclude=false) # merge only two properties
+    propCopy(org,true,props=["_Matrix", "_ColorRange"], exclude=true) # merge all, except listed ones
+    propCopy(org,props=["_Matrix", "_ColorRange"]) # erase all then copy only selected
+    propCopy(org,props=["_Matrix", "_ColorRange"], exclude = true) # erase all, then copy all, except listed ones
+
+  - Version()
+    New optional parameters
+
+    int length, int width, int height, string pixel_type, clip c
+
+    Version clip defaults:
+    length=240, width = -1, height = -1 (-1: automatically sized to fit for font size 24)
+    pixel_type = "RGB24"
+
+    When 'clip' (a format template) is specified then pixel_type, length,
+    fps data, width and height are defined from it.
+    If any additional 'length', 'width', 'height', 'pixel_type' parameter is given, it overrides defaults.
+    When width and height is given and is <= 0 then it is treated as 'automatic'
+
+    Covers feature request Issue #261
+
+  - BlankClip: allow 'colors' with array size more than the number of actual planes.
+    If an array is larger, further values are simply ignored.
+
+  - BlankClip, AddBorders, LetterBox: no A=0 check for non-YUVA
+
+  - Fade filter family new parameters
+    int 'color_yuv'
+    array of float 'colors'
+    similar to BlankClip
+
+  - MergeRGB, MergeARGB
+
+    - add MergeARGB parameter "pixel_type", similar to MergeRGB
+    - accept pixel_type other than packed RGB formats, plus a special one is "rgb"
+    - output format is planar rgb(a) (MergeRGB/MergeARGB) when
+      - pixel_type = "rgb" or
+      - pixel_type is empty and
+        - either input is planar RGB
+        - either input is different from 8 or 16 bits (no packed RGB formats there)
+      - pixel_type is explicitely set to a valid planar rgb constant e.g. "RGBP10"
+    - Accept planar RGB clip in place of input clips and the appropriate color plane is copied from them
+    - Fill alpha channel with zero when MergeRGB output pixel_type format is specified to have an alpha plane
+    - frame property source is the R clip; _Matrix and _ChromaLocation are removed if R is not an RGB clip
+
+  - PropDelete: accept a non-empty array string as list of property names to remove
+    Parameter is not optional, and has no name. It can be either a string (as before) or an array of strings
+    propDelete("_Matrix") # old syntax, still accepted
+    propDelete(["_Matrix", "_ColorRange"])
+
+  - PropCopy: new string parameter "props" as list of property names to remove
+    "props": a non-empty array of strings
+
+    old syntax, still accepted:
+    propCopy(org,true) # merge from all org's properties
+    propCopy(org,false) # erase all then copy all org's properties (exact copy)
+    new syntax
+    propCopy(org,true,props=["_Matrix", "_ColorRange"]) # merge
+    propCopy(org,props=["_Matrix", "_ColorRange"]) # erase all then copy only selected
+
+  - Histogram Levels: stop using shades of grey on top of bars.
+
+  - Histogram Levels: use bar color 255 for RGB instead of Y's 235. (and scaled eqivivalents)
+
+  - Fix: Histogram "Levels": prevent crash when factor=0.0
+
+  - Fix: Histogram "Levels": fix regression incorrect "factor" applied for U/V part drawing when format was subsampled (non-444)
+    Regression since 20160916 r2666 (commit 986e275)
+
+  - Histogram "Audiolevels" and StereoOverlay to deny planar RGB
+
+  - Histogram "Luma": support 10-16 and 32 bits
+
+  - Histogram: give parameter name "factor" and type 'float' for Histogram's unnamed optional parameter used in "Level" mode.
+    Other modes just ignore this parameter if given.
+
+  - Fix: Histogram "color" may crash on certain dimensions for subsampled formats.
+    Regression since 20180301 r2632.
+
+  - Fix: Histogram "color" and "color2" mode check and give error on Planar RGB
+
+  - Fix: missing Histogram "color2" CCIR rectangle top and bottom line (black on black)
+    Regression since 3.6.2-test1 (commit 1fc82f0)
+
+  - Fix: Compare to support 10-14 bits
+    was: factor was always using 65535 (2^16-1) instead of (2^bit depth - 1)
+    was: 16 bit luma/rgb color values were used for drawing graph
+
+  - Fix: Compare
+    'channels' parameter default to "Y" when input is greyscale;
+    instead of "YUV" which was giving error because of U and V does not exist for this format.
+
+  - ShowRed/Green/Blue/Alpha/Y/U/V
+
+    - support YUY2 input
+
+    - support YV411 output
+
+    - (not changed: ShowU/ShowV may give error for 420, 422 or 411 format outputs when clip dimensions are
+      not eligible for a given output subsampling (check for appropriate mod2 or mod4 width or height)
+
+    - Copy alpha from source when target is alpha-capable
+
+    - Fill alpha with maximum pixel value when target is alpha-capable but source ha no alpha component
+
+    - Delete _Matrix and _ChromaLocation frame properties when needed.
+
+    - More consistent behaviour for YUV and planar RGB sources.
+
+      Default pixel_type is adaptive. If none or empty ("") is given for pixel_type then target format is
+
+      - YUV444 when source is Y, YUV or YUVA
+      - RGB32/64 (packed RGB) when source is RGB24/32/48/64
+      - RGBP (planar RGB) when source is RGBP or RGBAP
+
+      When 'rgb' is given for pixel_type then then target format is
+
+      - RGB32/64 (packed) when source is RGB24/32/48/64 - old, compatible way
+      - RGB planar when source is planar RGB(A) or YUV(A) or Y - changed from rgb32/64 because all bit depth must be supported
+
+      When 'yuv' is given (new option!) for pixel_type then then target format is
+
+      - YUV444 for all sources
+
+      Also there is a new option when pixel_type is still not exact, and is given w/o bit depth.
+      pixel_type which describes the format without bit depth is automatically extended to a valid video string constant:
+
+      y, yuv420, yuv422, yuv444, yuva420, yuva422, yuva444, rgbp, rgbap
+
+      Examples:
+
+      32 bit video and pixel_type 'y' will result in "Y32"
+      16 bit video and pixel_type 'yuv444' will result in "YUV444P16"
+      8 bit video and pixel_type 'rgbap' will result in "RGBAP8"
+
+  - Fix #263. Escaping double-quotes results in error
+
+  - Allow top_left (2) and bottom_left (4) chroma placements for 422 in colorspace conversions, they act as "left" (0, "mpeg2")
+    in order not to give error with video sources which have _ChromaLocation set to other than "mpeg2"
+    See https://trac.ffmpeg.org/ticket/9598#comment:5
+
+  - Fix: Expr LUT operation Access Violation on x86 + AVX2 due to an unaligned internal buffer (<32 bytes)
+
+  - Fix: Chroma full scale as ITU Rec H.273 (e.g +/-127.5 and not +/-127) in internal converters, ColorYUV and Histogram
+
+  - Fix #257: regression in 3.7.1: GreyScale to not convert to limited range when input is RGB. Regression in 3.7.1
+    Accepts only matrix names of limited range as it is put in the documentation.
+
+  - Fix #256: ColorYUV(analyse=true) to not set _ColorRange property to "full" if input has no such
+    property and range cannot be 100% sure established. In general: when no _ColorRange for input and
+    no parameter which would rely on a supposed default (such as full range for gamma), then an
+    output frame property is not added.
+    When no _ColorRange for input and no other parameters to hint color range then
+
+    - gamma<>0 sets full range
+    - opt="coring" sets limited range
+    - otherwise no _ColorRange for output would be set
+
+  - Overlay (#255): "blend": using accurate formula using float calculation. 8 bit basic case is slower now when opacity=1.0.
+    Higher bit depths and opacity<1.0 cases are quicker.
+    Mask processing suffered from inaccuracy. For speed reasons mask value 0 to 255 were handled
+    as mask/256 instead of mask/255. Since with such calculation maximum value was not the expected 1.0 but rather 255/256 (0.996)
+    this case was specially treated as 1.0 to give Overlay proper results at least the the two extremes.
+    But for example applying mask=129 to pixel=255 resulted in result_pixel=128 instead of 129. This was valid on higher bit depths as well.
+    Note 3.7.2 Test2 has a regression of broken maskless mode for 0<opacity<1 which was fixed in 3.7.2 test 3
+
+  - Fix: Attempt to resolve deadlock when an Eval'd (Prefetch inside) Clip result is
+    used in Invoke which calls a filter with GetFrame in its constructor.
+    (AvsPMod use case which Invokes frame prop read / ConvertToRGB32 after having the AVS script evaluated)
+    Remark: problem emerged in 3.7.1test22 which is trying to read frame properties of the 0th frame in its constructor.
+    A similar deadlock situation was already fixed earlier in Neo branch and had been backported but it did not cover this use case.
+    Note: Prefetch(1) case was fixed in 3.7.2 Test3
+ReleaseNotesUrl: https://github.com/AviSynth/AviSynthPlus/releases/tag/v3.7.2
+# PurchaseUrl:
+# InstallationNotes:
+# Documentations:
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

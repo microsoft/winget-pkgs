@@ -1,0 +1,77 @@
+# Created with WinGet Releaser using komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.26.0
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Improved
+  - Summary column in wt list --full: LLM-generated one-line branch descriptions. Opt-in via [list] summary = true in config (experimental). Requires [commit.generation] config. (#1100)
+  - wt step diff command: Show all uncommitted and untracked changes that wt merge would include as a unified diff against the merge base. Pass -- --stat for a summary. Docs Closes #1043. (#1074, thanks @davidbeesley for the feature discussion)
+  - pre-switch hook: New hook that runs before wt switch validation. Use it to fetch-if-stale or run pre-flight checks before switching. Respects --no-verify. Docs (#1094, thanks @jdb8 for the use case in #1085)
+  - wt config update command: Automatically apply config migrations — detects deprecated patterns (template variables, [commit-generation], approved-commands), shows a diff preview, and applies with confirmation. Use --yes to skip the prompt. (#1083)
+  - Configurable picker timeout: New [switch.picker] timeout-ms setting (default: 200ms, 0 to disable). The [select] config section is deprecated in favor of [switch.picker] — run wt config update to migrate. (#1087)
+  - Command audit log: All hook executions and LLM commands are logged to .git/wt-logs/commands.jsonl with timestamps, exit codes, and duration. Auto-rotates at 1MB. View with wt config state logs get or query with jq. (#1088)
+  Fixed
+  - Hook CWD wrong from subdirectories: Hooks invoked from a subdirectory within a worktree ran with incorrect CWD and {{ worktree_path }}/{{ worktree_name }} template variables resolved incorrectly. (#1097)
+  - copy-ignored verbose output and error handling: -v flag was silently ignored, error messages lacked file paths, and broken symlinks from interrupted copies caused failures. Also skips non-regular files (sockets, FIFOs) instead of failing. Fixes #1084. (#1090, thanks @jdb8 for reporting)
+  - Nushell wt list piping: wt list --format json | from json failed in nushell because the wrapper's stdout capture prevented piping. Fixes #1062. (#1081, thanks @omerxx for reporting)
+  - Approved-commands lost during config migration: Running the config migration could silently discard existing approval data. Now copies approved-commands entries to approvals.toml before migration. (#1079)
+  - Deprecation messages reference wt config update: Deprecation warnings now point to the new wt config update command for one-step migration instead of manual mv instructions. (#1089)
+  Documentation
+  - wt switch help text: Updated description to "Switch to a worktree; create if needed" to surface auto-create behavior. (#1082)
+  - Docs syntax highlighting: Migrated to giallo engine with a warm theme. (#1080)
+  Internal
+  - CI reviewer improvements: File-based GraphQL queries, centralized shell quoting guidance, artifact upload path fixes. (#1091, #1098, #1099)
+  - Issue triage for external contributors: CI triage workflow now runs for all external contributor issues. (#1086)
+  Install worktrunk 0.26.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/max-sixty/worktrunk/releases/download/v0.26.0/worktrunk-installer.sh | sh && wt config shell install
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/max-sixty/worktrunk/releases/download/v0.26.0/worktrunk-installer.ps1 | iex"; git-wt config shell install
+  Install prebuilt binaries via Homebrew
+  brew install worktrunk && wt config shell install
+  Download worktrunk 0.26.0
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+  Install via Cargo
+  cargo install worktrunk && wt config shell install
+  Install via Winget (Windows)
+  winget install max-sixty.worktrunk && git-wt config shell install
+  Install via AUR (Arch Linux)
+  paru worktrunk-bin && wt config shell install
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.26.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,56 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Fedora.CoreOS.butane
+PackageVersion: 2.27.0
+PackageLocale: en-US
+Publisher: Fedora Project
+PublisherUrl: https://getfedora.org/coreos
+PublisherSupportUrl: https://github.com/coreos/ignition/issues
+PackageName: butane
+PackageUrl: https://github.com/coreos/ignition#butane
+License: Apache-2.0
+LicenseUrl: https://github.com/coreos/ignition/blob/main/butane/LICENSE
+ShortDescription: Butane translates human-readable Butane Configs into machine-readable Ignition Configs.
+Description: Butane (formerly the Fedora CoreOS Config Transpiler, FCCT) translates human readable Butane Configs into machine readable Ignition Configs.
+Moniker: butane
+Tags:
+- bash
+- cli
+- coreos
+- devops-tools
+- fcct
+- fcos
+- flatcar
+- golang
+- ignition
+- openshift
+- portable
+- r4e
+ReleaseNotes: |-
+  Starting with this release, ignition-validate binaries are signed with the
+  Fedora 44 key.
+  Breaking changes
+  - The build script now requires a subcommand (ignition, ignition-validate, or ignition-validate-cross). Sourcing the build script is no longer supported.
+  - Build and install are separate steps with explicit targets (ignition, ignition-validate, ignition-validate-cross, install, install-ignition-validate-cross, install-grub-for-bootupd).
+  Features
+  - Accept Butane YAML configs in addition to Ignition JSON, with automatic transpilation at boot (#2235)
+  - Support reading configs from /run/ignition and /etc/ignition/ in addition to /usr/lib/ignition/, searched in descending priority order (#2221)
+  - Add support for virtiofs
+  - Support loading Ignition config from a labeled device via ignition.config.device and ignition.config.path kernel command-line arguments
+  - Allow deleting a disk partition while creating another partition with number 0. (#2234)
+  Changes
+  - Merge Butane config transpiler into the Ignition repository; the butane CLI is now built from the Ignition source tree (#2235)
+  - Replace GCS client library with direct HTTP calls to the GCS JSON API, significantly reducing binary size (#2045)
+  - Refactored the Makefile and build script to match the Fedora RPM spec: separate build targets per binary, with VERSION and linker flags passed in at build time
+  - build_blackbox_tests builds a blackbox-specific ignition binary with make
+  - CI and GitHub Actions updated to build via make ignition and make ignition-validate
+  - Fix test script compatibility with Go 1.26 which removed the -go flag from go tool fix
+  - Improved documentation for the flow of Ignition across clouds.
+  Bug fixes
+  - Fix giving disk partition number 0 to get the next available slot. This caused the disks stage to fail since version 2.20.0. (#2234)
+  - Fix disk partitioning race condition where the kernel is already aware of the changes before running partx, causing a fatal error. (#2234)
+  - Add x-initrd.attach to crypttab entries to fix soft-reboot with LUKS (#2219)
+ReleaseNotesUrl: https://github.com/coreos/ignition/releases/tag/v2.27.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,68 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ErkanOzgurYilmaz.DisplayCAL
+PackageVersion: 3.9.19
+PackageLocale: en-US
+Publisher: Florian Höch, Erkan Özgür Yilmaz, Patrick Zwerschke
+PublisherUrl: https://www.erkanozguryilmaz.com/
+PublisherSupportUrl: https://github.com/eoyilmaz/displaycal-py3/issues
+Author: Florian Höch, Erkan Özgür Yilmaz, Patrick Zwerschke
+PackageName: DisplayCAL
+PackageUrl: https://github.com/eoyilmaz/displaycal-py3
+License: GPL-3.0
+LicenseUrl: https://github.com/eoyilmaz/displaycal-py3/blob/HEAD/LICENSE.txt
+Copyright: © Florian Höch, Erkan Özgür Yılmaz, Patrick Zwerschke
+ShortDescription: Display Calibration and Characterization powered by ArgyllCMS
+Description: |-
+  DisplayCAL (formerly known as dispcalGUI) is a display calibration and profiling solution with a focus on accuracy and versatility (in fact, the author is of the honest opinion it may be the most accurate and versatile ICC compatible display profiling solution available anywhere). At its core it relies on ArgyllCMS, an advanced open source color management system, to take measurements, create calibrations and profiles, and for a variety of other advanced color related tasks.
+  Calibrate and characterize your display devices using one of many supported measurement instruments, with support for multi-display setups and a variety of available options for advanced users, such as verification and reporting functionality to evaluate ICC profiles and display devices, creating video 3D LUTs, as well as optional CIECAM02 gamut mapping to take into account varying viewing conditions. Other features include:
+  - Support of colorimeter corrections for different display device types to increase the absolute accuracy of colorimeters. Corrections can be imported from vendor software or created from measurements if a spectrometer is available.
+  - Check display device uniformity via measurements.
+  - Test chart editor: Create charts with any amount and composition of color patches, easy copy & paste from CGATS, CSV files (only tab-delimited) and spreadsheet applications, for profile verification and evaluation.
+  - Create synthetic ICC profiles with custom primaries, white- and blackpoint as well as tone response for use as working spaces or source profiles in device linking (3D LUT) transforms.
+
+  This project intended to modernize the DisplayCAL code including Python 3 support.
+  Florian Höch, the original developer, did an incredible job of creating and maintaining DisplayCAL for all these years. But, it seems that, during the pandemic, very understandably, he lost his passion to the project. Now, it is time for us, the DisplayCAL community, to contribute back to this great tool.
+  This project is based on the HEAD of the Sourceforge version, which had 5 extra commits that Florian has created over the 3.8.9.3 release on 14 Jan 2020.
+  Thanks to all the efforts put by the community DisplayCAL is now working with Python 3.9+.
+Tags:
+- 3dlut
+- calibration
+- color
+- color-management
+- color-profile
+- icc
+- profiling
+ReleaseNotes: |-
+  A quick follow-up to 3.9.18, this release adds Linux AppImage/Flatpak packages and fixes 20 issues, mostly stability and crash fixes surfaced by users right after the last release, plus several latent Python 3 bytes/str bugs found during a code audit.
+  Warning
+  In MacOS, after installing DisplayCAL you need to run the following in Terminal:
+  xattr -dr com.apple.quarantine /Applications/DisplayCAL
+  ✨ Highlights
+  - AppImage and Flatpak packages are now built and published alongside the existing DEB/RPM installers. (#232 by @eoyilmaz)
+  🚀 Improvements
+  - DEB/RPM postinstall now prints progress instead of running silently, installs prebuilt wxPython wheels from the wxPython extras index, and pulls in the dbus-python build dependencies, fixing installation on Ubuntu 24.04/26.04. (#805 by @eoyilmaz)
+  🐛 Bug Fixes
+  🧩 General
+  - Fixed displaycal.ini becoming mangled and ballooning to gigabytes in size, eventually crashing the app from memory exhaustion. Config writes are now atomic and lock-protected, oversized config files are quarantined instead of parsed, and the config is explicitly read as UTF-8 so mismatched locale codepages can no longer corrupt it further. (#828, #828 by @eoyilmaz)
+  - Fixed several pip-installed console scripts (displaycal-vrml-to-x3d-converter, displaycal-scripting-client, displaycal-eecolor-to-madvr-converter and their console variants) crashing with AttributeError because their entry-point functions didn't exist. (#797 by @eoyilmaz)
+  - Fixed invalid filename characters from surviving into color profile names. (#819 by @eoyilmaz)
+  - Fixed unsupported format string passed to tuple.__format__ error when generating a cube 3D LUT. (#827 by @eoyilmaz)
+  - Fixed a TypeError crash and incorrect CTI3 file-type comparisons in measurement/profile handling caused by leftover Python 2-to-3 bytes/str bugs. (#811 by @eoyilmaz)
+  - Fixed the profile.unsupported dialog showing a raw bytes value (e.g. b'mntr') instead of the decoded text, across 12 sites. (#815 by @eoyilmaz)
+  - Fixed three latent bytes/str Python 3 port bugs in load_cal_handler/import_session_archive_producer. (#817 by @eoyilmaz)
+  - Fixed four more bytes/str bugs that made load_cal_handler's 3D LUT/profile B2A metadata-restore block unreachable dead code. (#820 by @eoyilmaz)
+  - Fixed a TypeError from str regex patterns matched against bytes content in the ReShade/MasterEffect 3D LUT install patchers. (#808 by @eoyilmaz)
+  - Fixed an Event is undefined error when the number of worker threads is 1. (#799 by @lexxxel)
+  🍎 macOS
+  - Fixed a crash when the first measurement taken after launch is a Measurement Report or Colorimeter Correction. (#822 by @ethanbrookins)
+  - Fixed an infinite black-screen ping-pong across multiple displays during VideoLUT recovery, by reloading the clobbered LUTs via CoreGraphics from a single persistent process instead of spawning dispwin. (#824 by @eoyilmaz)
+  🪟 Windows
+  - Fixed DisplayCAL.mscms.manager's logger writing to sys.stderr, which made the frozen windowed .exe falsely show an "Errors in..." dialog on every close even though nothing had actually failed. (#804 by @eoyilmaz)
+  🙏 Thanks
+  Thanks to everyone who contributed to this release, including @lexxxel for their first contribution, and @ethanbrookins.
+  Full Changelog: https://github.com/eoyilmaz/displaycal-py3/compare/3.9.18...3.9.19
+ReleaseNotesUrl: https://github.com/eoyilmaz/displaycal-py3/releases/tag/3.9.19
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

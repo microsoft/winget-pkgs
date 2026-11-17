@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: Netmaker.Netmaker
+PackageVersion: 1.7.0
+PackageLocale: en-US
+Publisher: Netmaker
+PublisherUrl: https://www.netmaker.io/
+PublisherSupportUrl: https://github.com/gravitl/netmaker/issues
+PackageName: Netmaker
+PackageUrl: https://github.com/gravitl/netmaker
+License: Apache 2.0
+LicenseUrl: https://github.com/gravitl/netmaker/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) Netmaker,Inc.
+CopyrightUrl: https://github.com/gravitl/netmaker/blob/master/LICENSE.md
+ShortDescription: " Netmaker makes networks with WireGuard. Netmaker automates fast, secure, and distributed virtual networks."
+Tags:
+- cloud
+- devsecops
+- k8s
+- kubernetes
+- mesh
+- network
+- networking
+- security
+- virtual-network
+- vpn
+- vpn-server
+- wg-quick
+- wireguard
+- wireguard-ui
+- wireguard-vpn
+- zero-trust
+ReleaseNotes: "# Netmaker v1.7.0 Release Notes 🚀\n\n## 🚀 What’s New\n\n### 🏢 Multi-Tenancy for MSPs (Organizations & Tenants)\n\nRun multiple customer environments from a single Netmaker server.\n\n• **Organizations & tenants** — Group customers under an organization; each tenant is an isolated Netmaker environment (networks, devices, users).\n• **MSP license sync** — EE/MSP installs create and update orgs/tenants from the MSP license (including teardown when a tenant is removed from the license). CE and normal Pro accounts continues to use a single local default tenant.\n• **Scoped access** — API and `nmctl` select the target org/tenant via `X-Organization-ID` / `X-Tenant-ID` (`--org_id` / `--tenant_id`), with `nmctl organization list` and `nmctl tenant list` for discovery.\n\n### 🔌 TCP Proxy / WSS Uplink\n\nGateways can publish a **TCP/WSS uplink** so clients can reach the mesh in restrictive environments when UDP is blocked.\n\n• Enable TCP proxy on the gateway/host (`tcp_proxy_enabled` and related listen/TLS settings).\n• Clients can opt into a TCP uplink to the gateway when the proxy is enabled.\n• Supports self-signed and externally terminated TLS modes for WSS endpoints.\n\n### 🛡️ EDR Integration (Pro)\n\nConnect endpoint detection and response platforms for **posture checks** from **Integrations**.\n\n• Supported providers：**Microsoft Defender**, **CrowdStrike**, **SentinelOne**, and **Wazuh**.\n• Sync managed endpoints and evaluate EDR compliance (agent health / risk level) as part of device posture.\n• Configure, test, and manage integrations via the REST API (`/api/v1/integrations/edr/{provider}`).\n\n### 📱 MDM Integration (Pro)\n\nConnect mobile device management platforms for **device compliance posture** from **Integrations**.\n\n• Supported providers：**Microsoft Intune**, **Jamf**, **JumpCloud**, and **Iru**.\n• Match devices by Entra device ID, serial number, hardware UUID, or hostname.\n• Enforce MDM enrollment/compliance checks alongside existing posture policies.\n• Configure, test, and manage integrations via the REST API (`/api/v1/integrations/mdm/{provider}`).\n\n\n---\n\n## 🗄️ Database Schema Migration\n\nThis release completes the SQL schema path and introduces **multi-tenancy (org/tenant) bootstrap** as part of the v1.7.0 migration.\n\n**Upgrade requirement (existing deployments):**\n\n• You **must** run **Netmaker v1.6.0** successfully **before** upgrading to v1.7.0.\n• v1.7.0 will **refuse to start** if `migration-v1.6.0` has not completed on a prior v1.6.0 deployment.\n• Recommended path：deploy v1.6.0 → confirm the server starts cleanly → then upgrade to v1.7.0.\n\n\n**Impact:**\n\n• Schema and data are updated automatically on successful startup.\n• Downgrades may not be supported after migration.\n\n**👉 Action Required:**\n\n• Do not jump from v1.5.x (or earlier) straight to v1.7.0 on an existing database.\n• Ensure migrations complete and validate core functionality post-upgrade.\n\nFor detailed upgrade steps, refer to the official upgrade documentation:\n\n[Server Upgrades v1.5.1+](https://learn.netmaker.io/getting-started/server-and-client-management/upgrading-your-client-and-server#server-upgrades-v1.5.1)\n\n---\n\n## 🧰 Improvements & Fixes\n\n• **Auto-relay peer reset** — Reset a specific peer-to-peer connection that is using a relay (clear/reassign auto-relay for that peer pair) without resetting the entire network’s auto-relay state.\n\n• **Migration reliability** — v1.7.0 blocks startup until v1.6.0 migration completed on existing deployments; migration failures exit cleanly instead of panicking.\n\n\n• **Host status** — Host filtering uses live check-in status (Online/Offline/Disconnected) rather than a stale DB value.\n\n• **MSP installs** — `nm-quick.sh` `-s` flag to skip nmctl/mesh/netclient on MSP server installs.\n\n\n---\n\n## 🐞 Known Issues\n\n• **IPv6-only machines**  \n  Netclients cannot currently **auto-upgrade** on IPv6-only systems.\n\n• **Multi-network join performance**  \n  Multi-network netclient joins using an **enrollment key** still require optimization.\n\n• **systemd-resolved DNS limitation**  \n  On systems using **systemd-resolved in uplink mode**, only the **first 3 entries** in `resolv.conf` are honored; additional entries are ignored. This may cause DNS resolution issues. **Stub mode is recommended**.\n\n• **Windows Desktop App + mixed gateway modes**  \n  When the Windows Desktop App is connected to both:\n  • a **Full Tunnel Gateway**, and\n  • a **Split Tunnel Gateway**\n\n  the gateway monitoring component may disconnect from the **Split Tunnel Gateway**."
+ReleaseNotesUrl: https://github.com/gravitl/netmaker/releases/tag/v1.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,73 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jdx.usage
+PackageVersion: 6.10.0
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://jdx.dev/
+PublisherSupportUrl: https://github.com/jdx/usage/issues
+Author: Jeff Dickey
+PackageName: usage
+PackageUrl: https://usage.jdx.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+ShortDescription: A specification for CLIs
+Description: |-
+  Usage is a spec and CLI for defining CLI tools. Arguments, flags, environment variables, and config files can all be defined in a Usage spec. It can be thought of like OpenAPI (swagger) for CLIs. Here are some potential reasons for defining your CLI with a Usage spec:
+
+  - Generate autocompletion scripts
+  - Generate markdown documentation
+  - Generate man pages
+  - Generate type-safe SDK client libraries for TypeScript, Python, and Rust
+  - Use an advanced arg parser in any language
+  - Scaffold one spec into different CLI frameworks-even different languages
+  - [coming soon] Host your CLI documentation on usage.sh
+Moniker: usage
+Tags:
+- cli
+- spec
+ReleaseNotes: |-
+  Help output can now mark and append the default subcommand's page, usage generate go can emit typed struct fields, and the Go runtime gains argv.RenderRequest plus fixes so generated parsers actually surface --help and --version. Embedders that parse spec text also get proper diagnostics, a path for relative includes, and environment-variable expansion in include paths.
+  Added
+  - (help) Mark the default subcommand and optionally append its help page (#1424, @lu-zero). A visible default_subcommand is now listed with (default) in the command list. The new default_subcommand_help #true setting (Rust: #[usage(default_subcommand_help)]) appends the default child's own page after the parent's, so ex --help shows the default command's flags and args without hoisting them into the root grammar. Hidden defaults are neither marked nor appended, flatten_help skips the append since it already inlines every child, and usage lint reports default_subcommand_help without a default_subcommand. Supported in the Rust and Go help renderers. Fixes #1423.
+    default_subcommand "install"
+    default_subcommand_help #true
+    cmd "install" help="Put a package on the system" {
+        flag "-u --update"
+        arg "[package]"
+    }
+  - (go) Explicitly typed fields from usage generate go (#1441, @zeitlinger). The repeatable --field-type KEY=TYPE flag binds a generated flag or argument key constant (for example FlagTimeout or FlagRunTimeout) to int, int64, uint64, float64, bool, or duration (time.Duration); variadic entries become typed slices. Conversion happens once on the final resolved value after argv/env/default precedence and validation, and invalid values return argv.CodeInvalidValue. Unknown keys, duplicate bindings, unsupported types, and valueless or count flags are rejected at generation time. Library callers get usage::go::generate_with_types and ValueType; unconfigured output is unchanged. Typed output requires the runtime from this release (argv.NativeInt).
+    usage generate go -f mycli.usage.kdl -o tables.go \
+      --field-type FlagTimeout=duration --field-type FlagJobs=int
+  - (go) argv.RenderRequest renders help and version requests (#1439, @zeitlinger). Go applications no longer need to rebuild the command chain and pick a renderer themselves: pass the parser's CodeHelp/CodeVersion error, the help metadata, root command, and the same words given to the parser, and get back the rendered text. It handles short, long, and recursive help plus short/long version (falling back to Version when LongVersion is empty), preserves invoked aliases and shared-command ancestry, and includes inherited globals from the correct route. Output, write errors, and exit status stay with the caller; ordinary errors return ("", false).
+    meta := HelpMeta
+    meta.Version = buildVersion
+    if text, handled := argv.RenderRequest(request, meta, Root, args, HelpText); handled {
+        io.WriteString(os.Stdout, text)
+    }
+  - (spec) Environment variables in include paths (#1446, @jdx). Spec::parse_str_with_path_and_env accepts an environment map so include file="$CONFIG_ROOT/shared.usage.kdl" expands $NAME and ${NAME} (with $$ for a literal dollar sign) without mutating the process environment. Undefined variables return a diagnostic, nested includes inherit the same map, and relative paths still resolve from the declaring file. Expansion applies only to include paths.
+  - (spec) Spec::parse_str_with_path (#1443, @jdx). Callers that extract spec text from a larger file (script comments, a rendered template) can now say which file it came from, so relative include paths resolve against it. FromStr still rejects relative includes since it has no path to resolve them against.
+
+  Fixed
+  - (go) Generated Go parsers return help and version requests (#1437, @zeitlinger). Generated Parse previously ignored the built-in -h/--help and -V/--version flags, so a CLI with required arguments reported a missing argument and one without could continue into normal execution. They now become CodeHelp/CodeVersion errors that preserve the selected command and short/long spelling; declared flags that shadow the built-ins still bind normally, and disabled built-ins stay disabled. Regenerate your Go code to pick this up.
+  - (go) argv.Walk keeps the full help-topic command chain (#1440, @zeitlinger). Walk(root, []string{"help", "config", "ls"}) resolved Cmd to ls but left Chain containing only the root, so the help renderers selected the wrong page and dropped the topic's ancestors. The chain now follows the actual parsed route, including through commands shared by more than one parent.
+  - (help) No repeated global flags on the appended default-subcommand page (#1436, @lu-zero). With default_subcommand_help, a root flag declared global (such as --color) appeared once under the root's Flags: and again under the appended child's Global flags:. The appended page now omits its Global flags: section, in both the Rust and Go renderers.
+  - (parse) Suggest -- when a refused flag could have been a value (#1430, @jdx). mise exec node --version only offered tip: a similar argument exists: '--verbose', even though exec can only take that value after --. Following clap's rule, the error now also prints tip: to pass '--version' as a value, use '-- --version' when the command takes positionals and no -- precedes the token, and either there is no close spelling match or a positional is double_dash = "required"/"automatic". Ordinary typos still get only the spelling suggestion, and nothing is offered once a -- has already been typed or when the command takes no positionals. Related to jdx/mise#13202.
+  - (spec) String-parsed specs get proper diagnostics (#1443, @jdx). A spec parsed via str::parse::<Spec>() had no source text attached, so errors like unsupported flag key bogus_key rendered a caret under a blank line at 1:1. The diagnostic now points at the offending line and column, which is what embedders such as mise show for a task's usage field.
+  - (spec) Include resolution is logged at debug instead of info (#1444, @jdx). It was the library's only info! call, so embedders whose loggers show info by default (mise, for every task run using a shared .usage.kdl) printed an include: /path/... line on every invocation.
+
+  New Contributors
+  - @zeitlinger made their first contribution in #1440
+
+  💚 Sponsor usage
+  usage is built and maintained by @jdx, an open source developer at entire.io, the title sponsor of his open source work.
+  If usage powers CLI specs, docs, or completions for a tool you maintain or use, please consider becoming an individual or company sponsor. Your support funds ongoing development and helps keep usage fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/usage/releases/tag/v6.10.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://usage.jdx.dev/cli/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

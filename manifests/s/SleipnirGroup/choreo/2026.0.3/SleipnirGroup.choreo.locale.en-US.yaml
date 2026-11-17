@@ -1,0 +1,71 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: SleipnirGroup.choreo
+PackageVersion: 2026.0.3
+PackageLocale: en-US
+Publisher: SleipnirGroup
+PublisherUrl: https://github.com/SleipnirGroup
+PublisherSupportUrl: https://github.com/SleipnirGroup/Choreo/issues
+Author: SleipnirGroup
+PackageName: Choreo
+PackageUrl: https://github.com/SleipnirGroup/Choreo
+License: BSD-3-Clause
+LicenseUrl: https://github.com/SleipnirGroup/Choreo/blob/HEAD/LICENSE.txt
+Copyright: Copyright (c) Choreo contributors
+ShortDescription: Time-optimal drivetrain trajectory planner for the FIRST Robotics Competition
+Description: Choreo (Constraint-Honoring Omnidirectional Route Editor and Optimizer, pronounced like choreography) is a time-optimal drivetrain trajectory planner for the FIRST Robotics Competition.
+ReleaseNotes: |-
+  This release adds ChoreoLib support for flipping trajectories left-to-right according to the driver's perspective. In the GUI, it fixes some generation issues reported where generation succeeds but the path is abnormally long or slow.
+  Java ChoreoLib Warmup Command
+  Multiple users have reported delays at the beginning of auto caused by waiting for some classes in ChoreoLib to load. To preload these classes at robot startup, call CommandScheduler.getInstance().schedule(autoFactory.warmupCmd()); in RobotContainer constructor or Robot constructor. This will create an empty AutoTrajectory and execute it in the first run of the command scheduler, moving the classloading delay to just after robot initialization, instead of on autonomous enable. No drivetrain movement will be commanded and your drive control function will not be called.
+  Changes to Flipping Utilities
+  Three transformation functions are added to SwerveSample, DifferentialSample, SwerveTrajectory, DifferentialTrajectory, and in Java, AutoTrajectory.
+  - rotateAround() (Java)/RotateAround() (C++)/rotate_around()` (Python): the current alliance-mirroring transformation, rotating 180 degrees around the field center.
+  - mirrorX() (Java)/MirrorX() (C++)/mirror_x() (Python): mirrors to the other alliance, changing the X coordinate and keeping the Y coordinate the same.
+  - mirrorY() (Java)/MirrorY() (C++)/mirror_y() (Python): Mirrors to the other "hand" from the driver's perspective, staying on the same alliance half of the field. With this transformation, you can create a left-side variant of a trajectory in Choreo, then load it and transform it in robot code to get a right-side variant of that trajectory.
+  Java-specific Changes/Examples
+  - AutoTrajectory:
+  AutoTrajectory L_Sweep = routine.trajectory("L_Sweep");
+  AutoTrajectory R_Sweep = routine.trajectory("L_Sweep").mirrorY();
+  - AutoFactory: Two new overloads for trajectoryCmd() are added, to accept a transformation function such as AutoTrajectory::mirrorY.
+  Command L_Sweep = factory.trajectoryCmd(ChoreoTraj.L_Sweep.name());
+  Command R_Sweep = factory.trajectoryCmd(ChoreoTraj.L_Sweep.name(), AutoTrajectory::mirrorY);
+  - ChoreoAllianceFlipUtil has changed somewhat significantly, but the breaking changes are limited to the system for using prior years' flipping mechanisms, which was half-complete at best. Specific references to prior fields' dimensions and symmetry have been removed, and the new system is more flexible for specifying the flipping calculation.
+    - Please see the API docs at https://choreo.autos/api/choreolib/java/choreo/util/ChoreoAllianceFlipUtil.html for the most complete demonstration of the new functionality. This will focus on
+    - ChoreoAllianceFlipUtil.Flipper: This class is constructed with the field dimensions using one of the static factories Flipper.mirroredX(fieldLength, fieldWidth), Flipper.mirroredY(fieldLength, fieldWidth), Flipper.rotatedAround(fieldLength, fieldWidth). It contains a flip method for both sample types and several of WPILib's geometry types.
+    - ChoreoAllianceFlipUtil.Flipper.FRC_CURRENT is the default Flipper used for alliance-based flipping. It is Flipper.rotatedAround(16.541, 8.0692).
+    - ChoreoAllianceFlipUtil.setFlipper(Flipper flipper) allows users to change the field dimensions being used throughout ChoreoLib.
+      - *IMPORTANT: It is best to call this as early as possible in your robot code, or else parts of your code may run before the flipper is changed.
+      - To get the currently-in-use Flipper object, or versions of it with the same field dimensions but different symmetries, use:
+        - ChoreoAllianceFlipUtil.getFlipper() Get the flipper that is currently active for alliance-based flipping.
+        - ChoreoAllianceFlipUtil.getMirrorX() Get the flipper that is currently active for mirroring to the other alliance.
+        - ChoreoAllianceFlipUtil.getMirrorY() Get the flipper that is currently active for mirroring left-to-right from the driver's perspective.
+        - ChoreoAllianceFlipUtil.getRotateAround() Get the flipper that is currently active for rotating around the field center.
+    - Left-To-Right Flipping: Use ChoreoAllianceFlipUtil.getMirrorY().flip(...), passing in the geometry object you want to transform. If you are passing in a constant value, we advise storing the flipped variant in a constant as well so that it is only constructed once.
+  Choreo Generator
+  Updating the Choreo app is not required in order to use the above ChoreoLib features. We recognize that solver changes mid-season are risky, but the fixes we have made have been tested with several users' trajectories and shown to resolve some known issues. If your autos are working well and generating reliably, there is no need to update. If you do update and find trajectories that no longer generate, please report them on GitHub or in our Discord.
+  - Account for angular acceleration limits in the swerve equation that limits how quickly the heading can change.
+  - Add a fallback routine for cases where the solver previously reported "Line search failed". If this fallback routine still fails to find a good next iteration, you will see "Feasibility Restoration failed".
+  What's Changed
+  - choreolib: Update alliance flip util docs by @spacey-sooty in #1447
+  - fix: account for angular acceleration in swerve angle kinematics constraint by @spacey-sooty in #1453
+  - Fix error reporting for split trajectories by @Daniel1464 in #1450
+  - [trajoptlib] Upgrade to Sleipnir 0.4.0 to remove max() and min() shims by @calcmogul in #1431
+  - [choreolib] Remove unused imports by @calcmogul in #1451
+  - fix: update shell.nix by @spacey-sooty in #1454
+  - [choreolib] Replace bundled rkdp() with robotpy-wpimath by @calcmogul in #1456
+  - [trajoptlib] Upgrade to Catch2 3.13.0 by @calcmogul in #1457
+  - [trajoptlib] Upgrade to Sleipnir 0.5.0 by @calcmogul in #1458
+  - Add warmup command to choreo by @Daniel1464 in #1455
+  - [choreolib] Add trajectory mirroring for x and y by @RohanBhattacharyya in #1452
+  - [trajoptlib] Upgrade to Sleipnir 0.5.1 by @calcmogul in #1460
+  - [trajoptlib] Upgrade to Catch2 3.14.0 by @calcmogul in #1461
+  - [ci] Upgrade to LLVM 22 by @calcmogul in #1462
+  - Update version to 2026.0.3 by @shueja in #1463
+  New Contributors
+  - @RohanBhattacharyya made their first contribution in #1452
+  Full Changelog: v2026.0.2...v2026.0.3
+ReleaseNotesUrl: https://github.com/SleipnirGroup/Choreo/releases/tag/v2026.0.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

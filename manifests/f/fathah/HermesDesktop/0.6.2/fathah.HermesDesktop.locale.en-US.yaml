@@ -1,0 +1,103 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: fathah.HermesDesktop
+PackageVersion: 0.6.2
+PackageLocale: en-US
+Publisher: fathah
+PublisherUrl: https://github.com/fathah
+PublisherSupportUrl: https://github.com/fathah/hermes-desktop/issues
+PackageName: Hermes Agent
+PackageUrl: https://github.com/fathah/hermes-desktop
+License: MIT
+LicenseUrl: https://github.com/fathah/hermes-desktop/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 github.com/fathah
+ShortDescription: Desktop Companion for Hermes Agent
+Description: |-
+  Hermes Desktop is a native desktop app for installing, configuring, and chatting with Hermes Agent — a self-improving AI assistant with tool use, multi-platform messaging, and a closed learning loop.
+  Instead of managing the CLI by hand, the app walks through install, provider setup, and day-to-day usage in one place. It uses the official Hermes install script, stores Hermes in ~/.hermes, and gives you a GUI for chat, sessions, profiles, memory, skills, tools, scheduling, messaging gateways, and more.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- hermes
+- hermes-agent
+- large-language-model
+- llm
+ReleaseNotes: |-
+  Release v0.6.2
+  Release date: June 18, 2026
+  A feature-packed release with chat UX improvements, security hardening, new slash commands, and contributions from 9 community members.
+
+  ✨ New Features
+  Slash Commands
+  Added slash command support in chat — type / to invoke commands directly from the input bar.
+  Profile Switcher
+  Switch between multiple Hermes profiles without restarting the app.
+  Hermes X Follow
+  Integration with Hermes X for the follow feature.
+  Chat Message Copy Button
+  A copy icon now appears on hover over each message bubble. Clicking it copies the full message content to clipboard with a brief "Copied!" confirmation. (contributed by @hankkyy)
+  Collapsible Code Blocks
+  Code blocks longer than 15 lines or 800 characters are now collapsible with "Show more" / "Show less" toggle. A DOMParser-based HTML pretty-printer also formats inspected elements inside chat. (contributed by @Nameless-Monster-Nerd)
+  Hebrew (he) Translation with RTL Support
+  Hebrew is now a fully supported interface language with all 23 namespaces translated. RTL layout is automatically applied when Hebrew is selected. (contributed by @yosef-chai)
+
+  🐛 Bug Fixes
+  Model picker no longer overwrites the global default
+  Selecting a model from the chat picker previously wrote to config.yaml, permanently changing the global default. The fix separates session-scoped model selection from persistent settings — the chat picker now only overrides the model for that conversation. (contributed by @365diascollaboration-prog, #688)
+  - Dedicated sessionModelOverride state — only set on explicit in-chat model change, not on config load
+  - modelOverride threaded through the full send pipeline — from useChatActions → IPC → sendMessageViaBestApi* → gateway/CLI fallback
+  - TUI gateway bypass guard — the gateway is skipped when a session model is active, since it has no per-request override mechanism
+  - reload() race condition fixed — loadSeqRef is now incremented on the non-persist path so concurrent reloads can't overwrite an in-session model choice
+  SSH tunnel chat fallback
+  In SSH Tunnel mode the dashboard chat WebSocket (/api/ws) was unreachable because the gateway never serves it. A sticky "dashboard unavailable" flag now triggers immediate fallback to the working legacy HTTP transport, with a one-time toast explaining the limitation. The flag resets on any connection change. (#667)
+  Context-length override leak
+  The model.context_length override was leaking onto any model when model.default was absent. Now it only applies on an exact match against model.default. Includes a regression test.
+  /btw attachment drop
+  Background /btw side-questions carrying attachments silently dropped them. Now falls back to the blocking quick-ask path which properly shows and sends attachments.
+  Webview security hardening
+  Fixed web preview security issues and auto-navigation edge cases. (contributed by @Nameless-Monster-Nerd)
+  macOS click-blocking drag region
+  Pushed .content top padding by 28px on macOS to clear the fixed window drag region.
+
+  🎨 UI Improvements
+  - Chat Avatar — updated avatar rendering in chat
+  - Message Row Update — refreshed message row layout
+  - Updated UI — general UI polish pass
+  - Text selection visibility — bumped --selection CSS opacity so highlight is clearly visible on dark backgrounds; user bubbles get a bright sky-blue override (contributed by @hankkyy)
+
+  ⚡ Performance
+  - SQLite connection caching — cache database connections and improve robustness of SSH/process termination (contributed by @saxster)
+  - Unit tests for database connection caching added (contributed by @saxster)
+
+  🌐 Internationalization
+  - Hebrew (he) — complete translation with RTL support (contributed by @yosef-chai)
+  - Spanish LATAM (es-LATAM) — synced with latest README: Discord badge, star history, Sponsors, Secrets provider (contributed by @365diascollaboration-prog)
+
+  📝 Other Changes
+  - Chat reconciliation aligned with Hermes Agent dashboard (contributed by @pmos69)
+  - Auth login handling aligned with current main (contributed by @pmos69)
+  - Memory limits now read from profile config (contributed by @jonasboos)
+  - Download link updated from hermesagents.cc to hermesone.org
+  - Telegram badge replaced with Discord badge in README
+  - lat.md integration for structured knowledge graph
+  - Updated installer, locale, and version templates
+
+  Contributors
+  Thanks to all contributors who made this release possible:
+  - Fathah KA
+  - Nazmus Samir (@Nameless-Monster-Nerd)
+  - jesus alberto cornelio (@365diascollaboration-prog)
+  - Hank Zhang (@hankkyy)
+  - pmos69
+  - saxster
+  - יוספ חי יחזקאל (@yosef-chai)
+  - Jonas Boos (@jonasboos)
+  - Imre Eilertsen
+
+  Full changelog: v0.6.1...v0.6.2
+ReleaseNotesUrl: https://github.com/fathah/hermes-desktop/releases/tag/v0.6.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,83 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Headlamp.Headlamp
+PackageVersion: 0.42.0
+PackageLocale: en-US
+Publisher: Headlamp
+PublisherUrl: https://headlamp.dev/
+PublisherSupportUrl: https://github.com/kubernetes-sigs/headlamp/issues
+PackageName: Headlamp
+PackageUrl: https://github.com/kubernetes-sigs/headlamp
+License: Apache-2.0
+LicenseUrl: https://github.com/kubernetes-sigs/headlamp/blob/HEAD/LICENSE
+ShortDescription: Kubernetes web UI.
+Description: A Kubernetes web UI that is fully-featured, user-friendly and extensible.
+Tags:
+- cncf
+- dashboard
+- headlamp
+- kinvolk
+- kubernetes
+- logging
+- monitoring
+- plugins
+- ui
+- web
+ReleaseNotes: |
+  Hitch hikers guide to Headlamp 0.42.0
+  Deep-link support was added for pod terminals (?view=exec) and log views (?view=logs), letting users bookmark or share direct links to specific UI states. Resources can now be searched by label in all list views, the Log Viewer gains a severity filter dropdown, and a delete button has been added directly to the plugins list. Node Details received two new sections for pod capacity usage and resource allocation, and the Resource Map now renders status badges on plugin-provided nodes and includes previously missing configuration resources. GRPCRoute details reach full parity with HTTPRoute, and a guided form-based resource creation UI (starting with Pods) is now available alongside the YAML editor.
+  On the reliability side, a silent cache desync that caused permanently stale cluster data was fixed, along with a lock-order inversion deadlock that could freeze WebSocket connections under load, and a wave of React hooks rule violations across more than a dozen frontend components. Several backend panics were fixed in port-forwarding, kubeconfig parsing, cache key generation, and Helm chart type handling, alongside debounced log aggregation to prevent UI freezes in All Pods mode. Security hardening includes path traversal prevention in the service proxy and dependency bumps.
+
+  ✨ Enhancements (part 1)
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────
+  Enhancements                                                                                                                                                       │
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────
+  Added deep-link support for pod exec via ?view=exec query parameter, letting users bookmark or share direct links to open a terminal into a specific pod.          │Thanks to @justinas-wix. #4941
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────
+  Added a hidden 'labels' column to all resource list views so users can search resources by label (e.g. app=test) using the existing search bar.                    │Thanks to @sniok. Also thanks to @illume for reporting the issue. #5035
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────
+  Resource map graph nodes now support optional status metadata, allowing plugin-provided nodes to display warning and error badges like built-in resources.         │Thanks to @mahmoudmagdy1-1. #5349
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────
+  Added a pod capacity usage tile to the node details view so users can see how many pods are scheduled versus the node's allocatable pod limit.                     │Thanks to @Vikaspal8923. Also thanks to @jimmyjones2 for reporting the issue. #5039
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────
+  Extended a8r.io annotation support from Services to all Kubernetes resources, letting users see human-readable service discovery metadata on any annotated         │Thanks to @mastermaxx03. #5007
+  resource.                                                                                                                                                          │
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────
+  Added a severity filter dropdown to the Log Viewer, letting users quickly filter logs by level (ERROR, WARN, INFO, DEBUG) to cut through noisy streams.            │Thanks to @Utkarshpandey0001. #5338
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────
+  Added a delete button directly to the plugins list page, so users can remove plugins without navigating to the detail page first.                                  │Thanks to @rickbrouwer. #5314
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────
+  Added ?view=logs deep-link support on Deployment, ReplicaSet, DaemonSet, and StatefulSet detail pages, letting users open the logs view directly from a URL.       │Thanks to @bhat-ganesh. #5312
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────
+  Added missing configuration resources to the Resource Map graph so they are now fully visible in the Configuration group.                                          │Thanks to @vishnukothakapu. #5223
+  ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────
+
+  Added a hidden 'labels' column to all resource list views so users can search resources by label (e.g. app=test) using the existing search bar.
+
+  Added a delete button directly to the plugins list page, so users can remove plugins without navigating to the detail page first.
+
+  Added a guided form-based UI for creating Kubernetes resources (starting with Pods), accessible from the sidebar and Pod list page alongside the existing YAML editor workflow.
+
+  ✨ Enhancements (part 2)
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────
+  Enhancements                                                                                                                                        │
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────
+  Added ephemeral storage usage chart to the Node Details view, giving users visibility into ephemeral storage consumption alongside other node stats.│Thanks to @Vikaspal8923. Also thanks to @jimmyjones2 for reporting the issue. #5169
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────
+  Added a 'Review changes' tab to the resource editor dialog so users can diff the original manifest against their edits before applying.             │Thanks to @Vikaspal8923. #5018
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────
+  Added a background janitor to evict expired Kubernetes clientsets, fixing an unbounded memory leak that could cause OOM crashes on busy clusters.   │Thanks to @Joshna907. #5286
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────
+  Wrapped the Reconnect button label in LogViewer with the translation function and added the key to all 12 locale files, enabling full i18n support. │Thanks to @NAME-ASHWANIYADAV. #5176
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────
+  GRPCRoute details view now shows rules, hostnames, matches, backendRefs, and filters, bringing it to full parity with HTTPRoute details.            │Thanks to @NAME-ASHWANIYADAV. #5174
+  ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────
+
+  Resource map graph nodes now support optional status metadata, allowing plugin-provided nodes to display warning and error badges like built-in resources.
+ReleaseNotesUrl: https://github.com/kubernetes-sigs/headlamp/releases/tag/v0.42.0
+Documentations:
+- DocumentLabel: Headlamp Documentation
+  DocumentUrl: https://headlamp.dev/docs/latest
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

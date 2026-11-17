@@ -1,0 +1,245 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Cisco.ClamAV
+PackageVersion: 1.5.0
+PackageLocale: en-US
+Publisher: Cisco Systems, Inc.
+PublisherUrl: https://www.talosintelligence.com/
+PublisherSupportUrl: https://github.com/Cisco-Talos/clamav/issues
+PackageName: ClamAV
+PackageUrl: https://github.com/Cisco-Talos/clamav
+License: GPL-2.0
+LicenseUrl: https://github.com/Cisco-Talos/clamav/blob/main/COPYING.txt
+ShortDescription: ClamAV® is an open-source antivirus engine for detecting trojans, viruses, malware & other malicious threats.
+Tags:
+- antivirus
+- clamav
+- open-source
+ReleaseNotes: |-
+  ClamAV 1.5.0 includes the following improvements and changes:
+  Major changes
+  - Added checks to determine if an OLE2-based Microsoft Office document is
+    encrypted.
+    GitHub pull request
+  - Added the ability to record URIs found in HTML if the generate-JSON-metadata
+    feature is enabled.
+    Also adds an option to disable this in case you want the JSON metadata
+    feature but do not want to record HTML URIs.
+    The ClamScan command-line option is --json-store-html-uris=no.
+    The clamd.conf config option is JsonStoreHTMLURIs no.
+    The libclamav general scan option is CL_SCAN_GENERAL_STORE_HTML_URIS
+    GitHub pull request #1
+    GitHub pull request #2
+    GitHub pull request #3
+  - Added the ability to record URIs found in PDFs if the generate-JSON-metadata
+    feature is enabled.
+    Also adds an option to disable this in case you want the JSON metadata
+    feature but do not want to record PDF URIs.
+    The ClamScan command-line option is --json-store-pdf-uris=no.
+    The clamd.conf config option is JsonStorePDFURIs no.
+    The libclamav general scan option is CL_SCAN_GENERAL_STORE_PDF_URIS
+    GitHub pull request #1
+    GitHub pull request #2
+    GitHub pull request #3
+    GitHub pull request #4
+  - Added regex support for the clamd.conf OnAccessExcludePath config option.
+    This change courtesy of GitHub user b1tg.
+    GitHub pull request
+  - Added CVD signing/verification with external .sign files.
+    Freshclam will now attempt to download external signature files to accompany
+    existing .cvd databases and .cdiff patch files. Sigtool now has commands
+    to sign and verify using the external signatures.
+    ClamAV now installs a 'certs' directory in the app config directory
+    (e.g., <prefix>/etc/certs). The install path is configurable.
+    The CMake option to configure the CVD certs directory is
+    -D CVD_CERTS_DIRECTORY=PATH
+    New options to set an alternative CVD certs directory:
+    - The command-line option for Freshclam, ClamD, ClamScan, and Sigtool is
+      --cvdcertsdir PATH
+    - The environment variable for Freshclam, ClamD, ClamScan, and Sigtool is
+      CVD_CERTS_DIR
+    - The config option for Freshclam and ClamD is
+      CVDCertsDirectory PATH
+    Added two new APIs to the public clamav.h header:
+    cl_error_t cl_cvdverify_ex(
+        const char *file,
+        const char *certs_directory,
+        uint32_t dboptions);
+    cl_error_t cl_cvdunpack_ex(
+        const char *file,
+        const char *dir,
+        const char *certs_directory,
+        uint32_t dboptions);
+    The original cl_cvdverify and cl_cvdunpack are deprecated.
+    Added a cl_engine_field enum option CL_ENGINE_CVDCERTSDIR.
+    You may set this option with cl_engine_set_str and get it with
+    cl_engine_get_str, to override the compiled in default CVD certs directory.
+    Thank you to Mark Carey at SAP for inspiring work on this feature with an
+    initial proof of concept for external-signature FIPS compliant CVD signing.
+    GitHub pull request #1
+    GitHub pull request #2
+    GitHub pull request #3
+    GitHub pull request #4
+  - Freshclam, ClamD, ClamScan, and Sigtool: Added an option to enable FIPS-like
+    limits disabling MD5 and SHA1 from being used for verifying digital signatures
+    or for being used to trust a file when checking for false positives (FPs).
+    For freshclam.conf and clamd.conf set this config option:
+    FIPSCryptoHashLimits yes
+    For clamscan and sigtool use this command-line option:
+    --fips-limits
+    For libclamav: Enable FIPS-limits for a ClamAV engine like this:
+    cl_engine_set_num(engine, CL_ENGINE_FIPS_LIMITS, 1);
+    ClamAV will also attempt to detect if FIPS-mode is enabled. If so, it will
+    automatically enable the FIPS-limits feature.
+    This change mitigates safety concerns over the use of MD5 and SHA1 algorithms
+    to trust files and is required to enable ClamAV to operate legitimately in
+    FIPS-mode enabled environments.
+    Note: ClamAV may still calculate MD5 or SHA1 hashes as needed for detection
+    purposes or for informational purposes in FIPS-enabled environments and when
+    the FIPS-limits option is enabled.
+    GitHub pull request
+  - Upgraded the clean-file scan cache to use SHA2-256 (prior versions use MD5).
+    The clean-file cache algorithm is not configurable.
+    This change resolves safety concerns over the use of MD5 to trust files and
+    is required to enable ClamAV to operate legitimately in FIPS-mode enabled
+    environments.
+    GitHub pull request #1
+    GitHub pull request #2
+  - ClamD: Added an option to disable select administrative commands including
+    SHUTDOWN, RELOAD, STATS and VERSION.
+    The new clamd.conf options are:
+    EnableShutdownCommand yes
+    EnableReloadCommand yes
+    EnableStatsCommand yes
+    EnableVersionCommand yes
+    This change courtesy of GitHub user ChaoticByte.
+    GitHub pull request
+  - libclamav: Added extended hashing functions with a "flags" parameter that
+    allows the caller to choose if they want to bypass FIPS hash algorithm limits:
+    cl_error_t cl_hash_data_ex(
+        const char *alg,
+        const uint8_t *data,
+        size_t data_len,
+        uint8_t **hash,
+        size_t *hash_len,
+        uint32_t flags);
+    cl_error_t cl_hash_init_ex(
+        const char *alg,
+        uint32_t flags,
+        cl_hash_ctx_t **ctx_out);
+    cl_error_t cl_update_hash_ex(
+        cl_hash_ctx_t *ctx,
+        const uint8_t *data,
+        size_t length);
+    cl_error_t cl_finish_hash_ex(
+        cl_hash_ctx_t *ctx,
+        uint8_t **hash,
+        size_t *hash_len,
+        uint32_t flags);
+    void cl_hash_destroy(void *ctx);
+    cl_error_t cl_hash_file_fd_ex(
+        const char *alg,
+        int fd,
+        size_t offset,
+        size_t length,
+        uint8_t **hash,
+        size_t *hash_len,
+        uint32_t flags);
+    GitHub pull request
+  - ClamScan: Improved the precision of the bytes-scanned and bytes-read counters.
+    The ClamScan scan summary will now report exact counts in "GiB", "MiB", "KiB",
+    or "B" as appropriate. Previously, it always reported "MB".
+    GitHub pull request
+  - ClamScan: Add hash & file-type in/out CLI options:
+    - --hash-hint: The file hash so that libclamav does not need to calculate
+      it. The type of hash must match the --hash-alg.
+    - --log-hash: Print the file hash after each file scanned. The type of hash
+      printed will match the --hash-alg.
+    - --hash-alg: The hashing algorithm used for either --hash-hint or
+      --log-hash. Supported algorithms are "md5", "sha1", "sha2-256".
+      If not specified, the default is "sha2-256".
+    - --file-type-hint: The file type hint so that libclamav can optimize
+      scanning (e.g., "pe", "elf", "zip", etc.). You may also use ClamAV type names
+      such as "CL_TYPE_PE". ClamAV will ignore the hint if it is not familiar with
+      the specified type.
+      See also: https://docs.clamav.net/appendix/FileTypes.html#file-types
+    - --log-file-type: Print the file type after each file scanned.
+    We will not be adding this for ClamDScan, as we do not have a mechanism in the
+    ClamD socket API to receive scan options or a way for ClamD to include scan
+    metadata in the response.
+    GitHub pull request
+  - libclamav: Added new scan functions that provide additional functionality:
+    cl_error_t cl_scanfile_ex(
+        const char *filename,
+        cl_verdict_t *verdict_out,
+        const char **last_alert_out,
+        uint64_t *scanned_out,
+        const struct cl_engine *engine,
+        struct cl_scan_options *scanoptions,
+        void *context,
+        const char *hash_hint,
+        char **hash_out,
+        const char *hash_alg,
+        const char *file_type_hint,
+        char **file_type_out);
+    cl_error_t cl_scandesc_ex(
+        int desc,
+        const char *filename,
+        cl_verdict_t *verdict_out,
+        const char **last_alert_out,
+        uint64_t *scanned_out,
+        const struct cl_engine *engine,
+        struct cl_scan_options *scanoptions,
+        void *context,
+        const char *hash_hint,
+        char **hash_out,
+        const char *hash_alg,
+        const char *file_type_hint,
+        char **file_type_out);
+    cl_error_t cl_scanmap_ex(
+        cl_fmap_t *map,
+        const char *filename,
+        cl_verdict_t *verdict_out,
+        const char **last_alert_out,
+        uint64_t *scanned_out,
+        const struct cl_engine *engine,
+        struct cl_scan_options *scanoptions,
+        void *context,
+        const char *hash_hint,
+        char **hash_out,
+        const char *hash_alg,
+        const char *file_type_hint,
+        char **file_type_out);
+    The older cl_scan*() functions are now deprecated and may be removed in a
+    future release. See clamav.h for more details.
+    GitHub pull request
+  - libclamav: Added a new engine option to toggle temp directory recursion.
+    Temp directory recursion is the idea that each object scanned in ClamAV's
+    recursive extract/scan process will get a new temp subdirectory, mimicking
+    the nesting structure of the file.
+    Temp directory recursion was introduced in ClamAV 0.103 and is enabled
+    whenever --leave-temps / LeaveTemporaryFiles is enabled.
+    In ClamAV 1.5, an application linking to libclamav can separately enable temp
+    directory recursion if they wish.
+    For ClamScan and ClamD, it will remain tied to --leave-temps /
+    LeaveTemporaryFiles options.
+    The new temp directory recursion option can be enabled with:
+    cl_engine_set_num(engine, CL_ENGINE_TMPDIR_RECURSION, 1);
+    GitHub pull request
+  - libclamav: Added a class of scan callback functions that can be added with the
+    following API function:
+    void cl_engine_set_scan_callback(struct cl_engine *engine, clcb_scan callback, cl_scan_callback_t location);
+    The scan callback location may be configured using the following five values:
+    - CL_SCAN_CALLBACK_PRE_HASH: Occurs just after basic file-type detection and
+      before any hashes have been calculated either for the cache or the gen-json
+      metadata.
+    - CL_SCAN_CALLBACK_PRE_SCAN: Occurs before parser modules run and before
+      pattern matching.
+    - CL_SCAN_CALLBACK_POST_SCAN: Occurs after pattern matching and after
+      running parser modules. A.k.a. the scan is complete for this layer.
+    - CL_SCAN_CALLBACK_ALERT: Occurs each time an alert (detection) would be
+      triggered during a scan.
+ReleaseNotesUrl: https://github.com/Cisco-Talos/clamav/releases/tag/clamav-1.5.0
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

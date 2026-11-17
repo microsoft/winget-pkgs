@@ -1,0 +1,141 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AtomGit.AtomCode
+PackageVersion: 5.1.0
+PackageLocale: zh-CN
+Publisher: 重庆开源共创科技有限公司
+PublisherUrl: https://atomgit.com/
+PublisherSupportUrl: https://atomgit.com/atomgit_atomcode/atomcode/issues
+PrivacyUrl: https://docs.gitcode.com/docs/help/home/protocol/privacy-policy
+Author: 重庆开源共创科技有限公司
+PackageName: AtomCode
+PackageUrl: https://atomcode.atomgit.com/
+License: MIT
+LicenseUrl: https://atomgit.com/atomgit_atomcode/atomcode/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Yubang Xu
+CopyrightUrl: https://docs.gitcode.com/docs/help/home/protocol/ai-privacy-policy
+ShortDescription: AI 编程助手 在你的终端中运行
+Description: Claude Code / Cursor Agent 的开源平替，住在你的终端里。连接任意 OpenAI 兼容大模型，自主读文件、改代码、跑测试、自我验证 —— 用 Rust 构建。
+Tags:
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  AtomCode v5.1.0 Release Notes
+  发布日期：2026-09-18
+  v5.1.0 聚焦于 OpenRouter 免费模型一键接入、代码回滚（Code Rewind）以 opt-in 开关重新启用、Bash 后台任务与权限预授权规则、OpenAI Responses API 支持，以及会话恢复提速、TUI 状态栏与终端渲染的大幅打磨，另修复多项 Provider 流式稳定性与安全问题。
+
+  ⚠️ Behavior Changes（注意行为变化）
+  - 代码回滚（Code Rewind）默认关闭：/rewind 相关能力现由环境变量 ATOMCODE_CODE_REWIND=1|true|on|yes 显式启用（默认关闭），需要使用时请设置该变量。
+  - 裸 bash 调用 AtomGit API 不再单独拦截：移除了 AtomgitBashGate，此类调用改由通用审批/凭证守卫覆盖。
+  - npm 平台包改为独立包名发布：平台子包更名为 @atomgit.com/atomcode-{os}-{arch} 并补齐 bin 字段；如曾遇到升级后 atomcode 命令丢失，升级到本版本即可修复。
+  ✨ 新增功能（Features）
+  OpenRouter 一键接入
+  - /openrouter [key] 命令：不带参数走浏览器 OAuth（PKCE）授权，带参数直接使用已有 API Key；授权 URL 会在终端显示，浏览器未自动打开时也可手动访问。
+  - 自动发现免费模型：接入后自动拉取并按能力过滤（tool-use + 文本输出）Top 5 免费模型落盘配置，额度用尽或新用户未领 CodingPlan 时会引导跳转。
+  - 额度用尽提示：额度耗尽时 nudge 引导接入 OpenRouter 免费模型，ESC 可取消连接流程。
+  代码回滚（Code Rewind，opt-in）
+  - 受控重新启用：捕获受磁盘下限（≥2 GiB 可用空间）与快照总预算（500 MiB）双重熔断保护；自动跳过大文件与构建/依赖目录。
+  - 存储去重：通过 Git alternates 共享真实仓库对象，不再全量复制。
+  - /rewind purge 与容量报告：支持手动清理回滚存储，超预算时自动跳过并告警；/rewind purge 需显式 opt-in 确认。
+  Bash 后台任务
+  - bash_start / bash_poll / bash_kill 三个新工具：可启动脱离前台超时上限的后台任务，跨工具调用存活，模型通过轮询获取增量输出；输出按尾部有界截断（256 KiB），并发上限 64，孤儿进程由平台进程组/作业对象兜底回收。
+  - 门控一致：后台命令与前台 bash 走同一套工作区 / 凭证 / 推送标签中间件，无法绕过审批。
+  权限预授权（[permissions]）
+  - 用户声明的 allow/deny 规则：语法与 Claude Code 的 permissions.allow/deny 兼容（如 Bash(git *)、Read(~/.zshrc)、mcp__server__tool），从 CC settings.json 复制即可用；deny 优先，allow 永不作用于敏感路径。
+  - 「总是允许所有 Bash」审批选项：审批面板新增 allow-all-bash 危险选项，会话内对前后台 Bash 一致生效；重新弹出的审批会透明展示授权原因，bash 命令支持 Tab 折叠/展开查看完整命令。
+  Provider 支持
+  - OpenAI Responses API：新增 /v1/responses wire 适配器（系统消息→instructions、工具/工具结果的 Responses 编码、response.* SSE 流解码），与 chat/completions 共享连接池、TLS 与重试语义。
+  - Ollama 上下文钉住：ATOMCODE_OLLAMA_NUM_CTX 显式钉住运行时窗口，避免声明窗口与守护进程默认不一致。
+  - OpenCode Zen 兼容：请求自动补发 x-opencode-session 头。
+  Agent / 工具
+  - 代码图谱支持 Kotlin：list_symbols / read_symbol / trace_callers 等工具新增 .kt / .kts 支持。
+  - 索引超限可操作报错：codeintel 索引扫描增加目录排除与文件数 / 字节数上限（默认 20k 文件 / 256 MiB），超限时返回明确指引而非静默空图（#1538）。
+  - edit_file 匹配失败回传现场：匹配失败时返回文件当前对应片段，帮助模型自我纠正。
+  - list_sessions 新工具：枚举本项目历史会话（标题/时间/大小），补上 recall 只搜内容的缺口。
+  - /worklog 每日工作复盘：跨项目汇总当日完成的回合、耗时与工具使用，生成固定模板的工作小结。
+  - AtomGit 工具扩展：atomgit_issue 新增 update / close 能力；atomgit_pr 新增 list_mine（列当前用户 PR）与 update（改 PR）能力。
+  - 弱模型容错：request_user_input 的 mode 可省略、按 options 自动推断；signpost 只报任务动作，静默注入内容，减少弱模型朗读系统提示。
+  会话与记忆
+  - 机器本地记忆层（local tier）：记忆新增 local 级别（global > project > local），存于 .atomcode/local/ 并自动 gitignore，适合本机独有、不希望提交的事实。
+  - 会话轨迹端点：daemon 新增只读 session transcript 端点，可回溯未压缩的完整轨迹（#1538）。
+  TUI
+  - 状态栏 cache% 命中率：实时显示当前回合缓存命中率，resume / -c 后从会话 meta 恢复累计，回合结束后持久保留上一轮比例；缓存占比改为金色高亮。
+  - 状态栏改版：左组配色 + 竖线分隔 + 宽度自适应降级；按需展示模型所属渠道（同名才显示）；推理型模型首次思考显式显示 Thinking，spinner 增加 tok/s（按当前生成阶段计算）。
+  - 运行指示灯：运行中工具圆点白↔灰呼吸灯（~1.2s），完成转绿；footer 完成的 subagent 填充空槽而非消失，始终显示全部 3 个。
+  - 无框对齐表格：低对比度分段分隔线，列对齐的表格渲染。
+  - /copy 增强：无代码块时提示用 /copy msg 复制整条回复。
+  - 模式切换键可配置：ui.mode_switch_key 支持 shift_tab / tab，鸿蒙平台默认 Tab。
+  CLI / Headless
+  - resume <id> 跨项目切换：按会话 ID 恢复时自动切入会话所属目录。
+  - 配置项扩展：network.upstream_retry_max_attempts（上游重试次数，0–20，配合 Retry-After 缓解中转站瞬时 503 断流）可经 /config 调整；整数型配置项支持清空恢复默认。
+  Daemon / 安全
+  -  --no-auth 启动选项：支持关闭 daemon 鉴权；同时新增纵深防御——「未鉴权 + 非本机绑定」默认拒绝启动，需显式设置环境变量确认。
+  - 端口占用提示：daemon 启动失败时明确指向被 IDE 插件占用的 13456 端口。
+  🛠 修复（Fixes）
+  稳定性 / 会话
+  -  -c / resume 启动提速：先只扫当前 bucket、未命中再全量，并行化 catalog 扫描使 /resume 列表提速 ~4x；跳过 sidecar 解析并收敛目录日志。
+  - 未知 context_window 兜底：模型切换后用保守窗口兜底，避免超窗 400。
+  - 空取消不再污染下一回合：preserve 模式只保留有产出的回合。
+  - todo 列表 sidecar 持久化：compaction 后模型与 VSCode 面板不再丢失 todo。
+  - 溢出压缩豁免最近的 read_file：刚读过的文件不再被折成一行摘要。
+  - 截断与工具调用同轮时 finish_reason 不再丢 length；截断续写检测在 re-dump 后不再盲目续写，避免弱模型空烧 token。
+  - /loop 熔断：空/无语义目标连续无进展时熔断，不再死循环。
+  Provider / 网络
+  - 首字节超时与逐 token idle 超时分离（phase-aware 看门狗）：prefill 阶段用 first_token 预算（慢本地模型不再被误杀），四家 provider 统一收拢到一处；子代理 / team / review / CLI provider 全部接上 first_token_timeout。
+  - 流式 index 上界防护：Anthropic content_block 与 OpenAI tool_call 的 index 加上界，防恶意 index 导致 OOM。
+  - 良性 EOF 不再误报中断：流已完成后的 close_notify EOF、stop_reason 后的良性 EOF 不再报「响应中断」。
+  - 部分响应中断提示可操作：明确告知「直接回复即可继续，无需重开会话」；流式空闲超时的重连提示指向 ATOMCODE_STREAM_TIMEOUT_SECS，prefill 重连提示指向 first_token 预算。
+  - OpenRouter 流内 429 还原 http_status：内核可自动重试；免费模型按能力过滤；使用官方 X-Title 头修复 gated 免费模型 403。
+  - 上游重试更耐心可配：认证 Retry-After，缓解中转站瞬时 503 断流。
+  - SSE 解码器丢弃没有 function.name 的工具调用；401 错误保留 provider detail。
+  - /proxy 切换就地重建客户端：CodingPlan / 新 schema 用户不再需要重启。
+  TUI / 终端渲染
+  - ⚠ 前缀残留字符（⚠g/⚠d）修复：U+26A0 字宽钉为 1，并从 wide-emoji 表移除（收口 #1368）。
+  - IME 光标修复：request_user_input 文本框光标错位、F1 长文本投影与面板互斥二修。
+  - 正文里字面 ``` 代码块不再吞掉后续回答显示；ThinkStripper 的「可见内容」判定排除 BOM/零宽字符。
+  - Alt+Tab 回来输入不回显：按键即证明聚焦，冷刷陈旧 diff 缓存（#1433）。
+  - 工具运行时光标：输入框空着才隐藏光标，打字即显。
+  - ESC 行为回滚：任务运行中 ESC 有内容先清空再停止的改动已回滚；Team strip 在回合结束/取消时隐藏，不再卡死。
+  - /context 刷新不再把 "Messages in window" 等清零；表格分隔线改用 faint 色（不被丢弃的 256 色）。
+  - 审批面板修复：「允许所有 Bash」选项去掉 ⚠️ emoji 改用宽度安全的 !；cover bash_start 与不可解析命令的 allow-all 授权，修复误导性 reason，plain backend 下正常渲染 reason。
+  WebUI / VSCode 插件
+  - 排队消息不再丢失：停止/出错时排队消息的文本回填输入框，可编辑重发（#1561 相关）；未完成回合的文案改为「已保留结果可续」而非「进度丢失」。
+  - /mcp 命令修复：login|logout 统一参数校验与未知-server 提示；tools 未知/多参数不再误报 "server not configured"。
+  - 远程 MCP OAuth 修复：发现支持带路径的 issuer（RFC 8414 §3.1 多种 well-known 形态），报错给出指路。
+  安全
+  - 凭证守卫增强：CredentialBashGate 识别 -u、cookie、query-param 中的字面凭证。
+  - skills 参数不再被 shell 执行：两阶段替换堵住命令注入。
+  - telemetry write_flag 拒绝覆盖损坏配置：不再静默清空。
+  - 「总是允许」授权粒度回归修复：bash_start 与前台 bash 共用同一套授权；删缓存不再暴露粒度回归；空的 [permissions] 不再写回用户配置。
+  缓存与 Datalog
+  - Datalog 内容寻址（v2）：消除每轮全量历史写放大（#1551）；记录每 round 请求耗时与每次工具调用耗时。
+  其他
+  - Marketplace 修复：同一次刷新的多个失败合并为一条摘要告警；summarize_git_stderr 保住 fatal 根因并按裸 \r 拆分；自动更新加 24h 节流 + git ls-remote SHA 门控，消除启动时 git.exe 风暴。
+  - daemon 会话健康探针改走 spawn_blocking：不再阻塞 tokio worker。
+  - codeintel 复用共享 is_skip_dir 排除表：删掉会误剪的 OS-temp 判断（#1538）。
+  - code_review scope schema 去 oneOf/const：兼容严格网关（DeepSeek）。
+  - 明确告知模型 read_file 可用于读取图片。
+  - trace_chain 等图谱工具索引超限回可操作错误而非静默空图（#1538）。
+  - 后台 job 环境奇偶补齐、超时文案按平台分叉且统一指向 bash_start。
+  - memory local 哨兵补齐 daemon 侧一致性，写入失败不再吞错。
+  🔧 重构（Refactoring）
+  - Phase-aware 看门狗收拢：四家 provider 的字节层 idle 看门狗统一为 retry::next_chunk_phased，prefill 用 first_token 预算。
+  📚 文档（Docs）
+  - 官网 hero 安装框展示全平台命令（curl + PowerShell irm），自动检测平台置顶并打「已检测」徽章。
+  - AtomGit 卡片改为强调内置工具（创建仓库/PR/Issue），并修正为微信扫码领 CodingPlan。
+  - config.example.toml 新增 [permissions] 预授权完整说明；/plan /build /auto 作为 Shift+Tab 切模式的替代方案写入键位文档。
+  🧹 工程 / 构建
+  - npm 平台包独立包名发布（#1515）：平台子包改为 @atomgit.com/atomcode-{os}-{arch} 并补 bin 字段，修复升级后 atomcode 命令丢失。
+  - CI 新增 pre-merge 编译门禁，cargo fmt --check 转为阻塞门禁。
+ReleaseNotesUrl: https://atomgit.com/atomgit_atomcode/atomcode/releases/v5.1.0
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://atomcode.atomgit.com/docs/zh/index.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

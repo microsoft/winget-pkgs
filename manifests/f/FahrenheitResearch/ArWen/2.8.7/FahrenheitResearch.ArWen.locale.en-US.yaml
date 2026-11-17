@@ -1,0 +1,59 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.ArWen
+PackageVersion: 2.8.7
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/arwen/issues
+Author: Fahrenheit Research
+PackageName: ArWen
+PackageUrl: https://github.com/FahrenheitResearch/arwen
+License: Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+Copyright: Copyright © Fahrenheit Research
+CopyrightUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+ShortDescription: 'ArWen: GPU-native WRF-ARW-class regional weather model, verified against WRF v4.6.1'
+Description: "ArWen is an independent, GPU-native implementation of a WRF-ARW-class regional atmospheric model. It is not affiliated with or endorsed by NCAR or UCAR. The name is a wordmark for \"the ARW solver, GPU-native\"; the Python package is currently named gpuwm. Safety. ArWen is a research and educational tool. It is never a substitute for official forecasts and warnings from your national meteorological service. Do not use it to make safety decisions. Regional numerical weather prediction at convective scale has mostly required institutional clusters, which means most of the world runs on global-model guidance at 10-25 km. ArWen's aim is to put a verified, kilometer-scale limited-area model on a single consumer GPU: pick a point, size a nest ladder to your card, pull public analysis data, and run a 1 km (or 500 m) simulation of your own area on hardware you own -- especially in places where no national convection-permitting model exists."
+Moniker: arwen
+ReleaseNotes: |-
+  ArWen 2.8.7 brings GRIB2 export back as WOOF's own clean-room post-processing, opt-in smoke, dust and air quality, coupled SFIRE fire runs, and the operational HRRR physics generation by default for HRRR configurations, with its Thompson tables published as release assets.
+  - Install or upgrade: pip install --upgrade "gpuwm[all-cu12]==2.8.7".
+  - Integration kit, verification records, and checksums.
+  - Node GPU gate: Stage 1 and both GPU-shard results, with the tested source revision and card identity.
+  New
+  - GRIB2 export is back, rebuilt clean-room under Apache-2.0 on WOOF's own post-processing (woof-post/v1): gpuwm export-grib2, gpuwm go --grib2 and gpuwm render --grib2-out write shelter, surface, pressure-level, stability, cloud, gust, visibility and simulated IR fields, and every message names WOOF as its generating process. Post-processing runs on the GPU when one is present and on the CPU otherwise.
+  - Smoke, dust and air quality, opt-in: wildfire smoke from NOAA's RAVE fire product with plume rise and HRRR-Smoke's emission timing, GOCART dust, sea salt and carbon aerosol, and CAMS composition boundaries. A run started from HRRR takes HRRR-Smoke's own 3-D smoke as its start state and boundary.
+  - Coupled WRF v4.7.1 SFIRE on a refined GPU fire grid, with fuel moisture, spotting, heat and moisture feedback and checkpoint continuation; &fire namelists import.
+  - HRRR configurations run the operational branch's Thompson generation and GSL surface layer by default. Its four lookup tables (330 MiB) are published with the release and fetched and verified automatically, so no Fortran compiler is needed.
+  - Radar latent heating for the first part of a forecast ([radar_heating]), and StormScope, WOOF, HRRR and MRMS nowcast comparison sheets (rw_nowcast_frames).
+  - High-resolution urban land cover supplies class-weighted urban fractions to the single-layer urban canopy.
+  - The data-assimilation line: fork Thompson and GSL surface layer at the HRRR door, mean-preserving species perturbation, balanced member perturbations, a Rust radar superob, and faster member jobs and analyses with identical bytes.
+
+  Fixed
+  - The shipped HRRR recipes run from their installed path: gpuwm go on any of them stopped before its first stage. They now write their WPS namelist from the recipe's own grid and fetch the HRRR CONUS static set (1.1 GB) first; a fresh install ran a recipe through preparation and a one-hour GPU forecast.
+  - HRRR runs no longer stop at preparation on cycles where NOAA publishes the analysed aerosol fields with masked points; configurations that explicitly ask for those fields are refused by name on such cycles.
+  - Aerosol-aware Thompson (mp_physics = 28) matches WRF v4.6.1 bit for bit on all 22 oracle columns.
+  - 2 m dewpoint and relative humidity products read WRF's Q2 as a mixing ratio; rendered and ensemble 2 m dewpoint read 0.1 to 0.25 K moist before.
+  - A forecast started from a separate analysis (--initial-inputs) begins its first boundary interval from its own start state, as WRF does. On two 3 km cases the hour-1 2 m temperature error in the outer 30 km fell from 1.00 to 0.70 K and from 1.16 to 0.73 K, with no change in stability.
+  - Stopping gpuwm go no longer leaves a forecast supervisor holding a card; every stage exits with its parent on Linux.
+  - gpuwm go --prepare-only stops after preparation on every route, --dry-run only prints the plan, and --outdir gets a stamped run folder.
+  - Data-assimilation cases take their surface networks and radar sites from the domain instead of a fixed regional list, and a cycle with point observations and a gated velocity-dispersion zone no longer refuses its withheld re-solve.
+  - A history that keeps grid-relative winds keeps their rotation, so station scoring scores wind again.
+  - Ensemble product maps draw through WOOF's own Rust renderer again; a check had refused this install's own renderer build.
+  - Idealized runs with radiative open boundaries advect geopotential on their outer rows exactly as compiled WRF v4.7.1 does.
+  - A lat-lon grid is refused by name on every import door instead of failing or being read as Lambert.
+  - The hex (MPAS seam) reflectivity no longer reads hot: the WSM6 wet-snow term is off there, taking 3 km 35 dBZ+ area from 0.96 to 0.095 percent against MRMS's 0.31 percent.
+  - A WRF namelist whose reference point is the grid centre imports to the same bytes on Linux and Windows.
+  Answers change for HRRR-configuration runs (the operational Thompson generation, GSL surface layer and hourly RAP boundaries), for runs started with --initial-inputs, for mp_physics = 28 runs, for idealized runs with radiative open boundaries and for 2 m dewpoint and humidity products. Other configurations keep their previous answers.
+  Known limits: a nested parent and child cannot yet start together from --initial-inputs; the HRRR route refuses fourteen namelist settings it cannot yet write when they are set off their defaults; air quality carries no gas chemistry. MYNN bit parity with WRF and rotated lat-lon grids follow in the next release.
+  The verification records identify completed artifact and startup checks, the short GPU forecast, and retained component evidence. They do not establish general forecast skill or whole-model parity.
+  Installation and usage | Full changelog
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/arwen/releases/tag/v2.8.7
+InstallationNotes: |-
+  This application requires an NVIDIA GPU with CUDA support to run.
+  Will not function on integrated graphics or non-NVIDIA hardware.
+  Without compatible hardware, the application will fail to launch.
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

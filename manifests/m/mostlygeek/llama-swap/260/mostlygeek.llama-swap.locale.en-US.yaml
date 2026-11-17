@@ -1,0 +1,40 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: mostlygeek.llama-swap
+PackageVersion: '260'
+PackageLocale: en-US
+Publisher: mostlygeek
+PublisherUrl: https://mostlygeek.com/
+PublisherSupportUrl: https://github.com/mostlygeek/llama-swap/issues
+PackageName: llama-swap
+PackageUrl: https://github.com/mostlygeek/llama-swap
+License: MIT
+LicenseUrl: https://github.com/mostlygeek/llama-swap/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2024 Benson Wong
+ShortDescription: Model swapping for llama.cpp
+Description: llama-swap is a light weight, transparent proxy server that provides automatic model swapping to llama.cpp's server.
+Moniker: llama-swap
+Tags:
+- golang
+- llama
+- llamacpp
+- localllama
+- localllm
+- openai
+- openai-api
+- vllm
+ReleaseNotes: |-
+  This release fixes a crash at startup on macOS 27 with Apple M6 hardware
+  (#1178). Hardware detection reads the CPU frequency through gopsutil, which
+  expects a voltage-states5-sram property that is missing on M6. It passed the
+  empty value straight to CFDataGetLength, which segfaulted before the server
+  could start listening.
+  As a temporary fix, gopsutil now points at a fork with the patch from
+  shirou/gopsutil#2163, which checks for the missing property. This will be
+  removed once the upstream project picks up the patch. Some Go dependencies
+  were also updated as required by the newer gopsutil.
+  - PR #1180 go.mod: use gopsutil PR #2163 to fix darwin/arm64 crash: replace gopsutil with a patched fork that guards the CPU frequency probe against a missing property on Apple M6
+ReleaseNotesUrl: https://github.com/mostlygeek/llama-swap/releases/tag/v260
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

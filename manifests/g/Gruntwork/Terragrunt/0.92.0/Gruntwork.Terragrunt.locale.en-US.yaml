@@ -1,0 +1,115 @@
+# Created with komac v2.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 0.92.0
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  🛠️ Breaking Changes
+  Internal boilerplate dependency upgraded to v0.10.1
+  The templating engine (Boilerplate) used by the Terragrunt catalog and scaffold commands has been upgraded to v0.10.1.
+  As a consequence, the default behavior of scaffolding when using the catalog and scaffold commands has changed to allow for the use of Boilerplate hooks and shell commands (see hooks and helpers in Boilerplate documentation) by default.
+  Note that Boilerplate will ask for permission interactively by default to run said hooks and shell commands, and that the interactive prompt will propagate to Terragrunt users.
+  e.g.
+  $ terragrunt scaffold github.com/gruntwork-io/terragrunt//test/fixtures/scaffold/with-shell-commands
+  ...
+  [boilerplate] 2025/10/24 13:44:56 Shell command details:
+  [boilerplate] 2025/10/24 13:44:56   Command: echo
+  [boilerplate] 2025/10/24 13:44:56   Arguments: [-n SHELL_EXECUTED_VALUE_1]
+  [boilerplate] 2025/10/24 13:44:56   Working Directory: /var/folders/x3/j561187d7bn7j25xf6hs73wr0000gn/T/scaffold3587887181/.boilerplate
+  Execute shell command? (y/a/n) :
+  $ terragrunt scaffold github.com/gruntwork-io/terragrunt//test/fixtures/scaffold/with-hooks
+  ...
+  [boilerplate] 2025/10/24 13:48:27 Hook details:
+  [boilerplate] 2025/10/24 13:48:27   Command: echo
+  [boilerplate] 2025/10/24 13:48:27   Arguments: [BEFORE_HOOK_EXECUTED]
+  [boilerplate] 2025/10/24 13:48:27   Working Directory: /var/folders/x3/j561187d7bn7j25xf6hs73wr0000gn/T/scaffold4203613613/.boilerplate
+  Execute hook? (y/a/n) :
+  When using the --non-interactive flag, Terragrunt will skip prompts and allow hooks and shell commands automatically by default.
+  $ terragrunt scaffold github.com/gruntwork-io/terragrunt//test/fixtures/scaffold/with-hooks --non-interactive
+  ...
+  [boilerplate] 2025/10/24 13:50:56 Executing hook (previously confirmed or all confirmed)
+  [boilerplate] 2025/10/24 13:50:56 Running command: echo BEFORE_HOOK_EXECUTED
+  BEFORE_HOOK_EXECUTED
+  ...
+  [boilerplate] 2025/10/24 13:50:56 Executing hook (previously confirmed or all confirmed)
+  [boilerplate] 2025/10/24 13:50:56 Running command: echo AFTER_HOOK_EXECUTED
+  AFTER_HOOK_EXECUTED
+  If you would like to explicitly prevent this behavior, you can use the --no-hooks and --no-shell flags added to catalog and scaffold to explicitly prevent usage of these features:
+  $ terragrunt scaffold github.com/gruntwork-io/terragrunt//test/fixtures/scaffold/with-hooks --non-interactive --no-hooks --no-shell
+  ...
+  [boilerplate] 2025/10/24 13:53:40 Hooks are disabled, skipping 1 hook(s)
+  ...
+  [boilerplate] 2025/10/24 13:53:40 Hooks are disabled, skipping 1 hook(s)
+  13:53:40.141 INFO   Running fmt on generated code .
+  13:53:40.143 INFO   Scaffolding completed
+  $ terragrunt scaffold github.com/gruntwork-io/terragrunt//test/fixtures/scaffold/with-shell-commands --non-interactive --no-hooks --no-shell
+  ...
+  [boilerplate] 2025/10/24 13:54:47 Shell helpers are disabled. Will not execute shell command '[echo -n SHELL_EXECUTED_VALUE_1]'. Returning placeholder value 'replace-me'.
+  [boilerplate] 2025/10/24 13:54:47 Shell helpers are disabled. Will not execute shell command '[echo -n SHELL_EXECUTED_VALUE_2]'. Returning placeholder value 'replace-me'.
+  [boilerplate] 2025/10/24 13:54:47 Hooks are disabled, skipping 0 hook(s)
+  13:54:47.356 INFO   Running fmt on generated code .
+  13:54:47.356 INFO   ./terragrunt.hcl was updated
+  13:54:47.356 INFO   Scaffolding completed
+  You can also set the no_hooks and no_shell attributes in your catalog config to have these set by default for all users of your project:
+  # root.hcl
+  catalog {
+    no_shell = true
+    no_hooks = true
+  }
+  ⚠️ Remember that IaC configurations are inherently powerful, and should not be trusted blindly. Make sure that you review and trust template sources when generating templates using Terragrunt.
+  🧪 Experiments Updated
+  filter-flag experiment now supported in hcl commands
+  The --filter flag is now supported in hcl commands (validate and fmt) (remember that you must use the filter-flag experiment to try this).
+  e.g.
+  # Filter by path with glob patterns
+  terragrunt hcl validate --filter './prod/**'
+  # Filter by name
+  terragrunt hcl validate --filter 'app*'
+  # Exclude specific configurations
+  terragrunt hcl validate --filter '!./test/**'
+  # Combine filters with intersection (refinement)
+  terragrunt hcl validate --filter './prod/** | !name=legacy'
+  # Multiple filters with union
+  terragrunt hcl validate --filter 'app1' --filter 'app2'
+  When using the --filter flag for hcl fmt, filtering applies to files instead of units / stacks. Only file path filters are supported for the hcl fmt command.
+  # Format a particular file
+  terragrunt hcl fmt --filter './prod/app1/terragrunt.hcl'
+  # Format files matching a glob
+  terragrunt hcl fmt --filter './prod/**'
+  # Exclude specific configurations
+  terragrunt hcl fmt --filter '!./test/**'
+  🏎️ Performance Improvements
+  hcl fmt Performance Improved
+  The performance of the hcl fmt command has been improved substantially.
+  Screenshot 2025-10-27 at 10 15 56
+  Formatting files is now roughly twice as fast due to parallelization of file formatting, and optimizations used in file exclusion.
+  What's Changed
+  - feat: Adding support for --filter in hcl commands by @yhakbar in #5006
+  - docs: Documenting the relationship between --external and --dependencies by @yhakbar in #5014
+  - docs: Documenting support for --filter in hcl commands by @yhakbar in #5010
+  - chore: Bumping boilerplate by @yhakbar in #4805
+  Full Changelog: v0.91.5...v0.92.0
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.92.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

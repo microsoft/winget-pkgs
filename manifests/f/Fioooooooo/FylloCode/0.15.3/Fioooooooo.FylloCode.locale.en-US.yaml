@@ -1,0 +1,98 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Fioooooooo.FylloCode
+PackageVersion: 0.15.3
+PackageLocale: en-US
+Publisher: Fio
+PublisherUrl: https://github.com/Fioooooooo
+PublisherSupportUrl: https://github.com/Fioooooooo/FylloCode/issues
+PackageName: FylloCode
+PackageUrl: https://github.com/Fioooooooo/FylloCode
+License: AGPL-3.0
+LicenseUrl: https://github.com/Fioooooooo/FylloCode/blob/HEAD/LICENSE
+ShortDescription: A desktop app that turns Coding Agents into reliable teammates — by splitting every change into Task → Proposal → Apply → Archive, with you reviewing the plan before any code is written.
+Description: |-
+  In this new era, the work that really needs our attention is no longer repetitive coding, but higher-level business understanding and architecture design. The future workflow I have in mind is: understand the business → think through the architecture → write a Proposal → review the Proposal → let the Agent implement it automatically, then move on to the next Proposal.
+  That thinking led me to build FylloCode — a step from Vibe Coding toward Agentic Coding.
+
+  How FylloCode Solves It
+  FylloCode enforces a structured workflow that separates thinking from doing:
+  ┌──────────┐     ┌────────────────┐     ┌───────────┐     ┌───────────┐
+  │   Task   │ ──→ │ Chat/Proposal  │ ──→ │   Apply   │ ──→ │  Archive  │
+  │          │     │                │     │           │     │           │
+  │ What to  │     │ Agent explores │     │ Agent     │     │ Specs     │
+  │ work on  │     │ codebase and   │     │ implements│     │ updated,  │
+  │          │     │ writes a plan  │     │ the plan  │     │ change    │
+  │          │     │                │     │           │     │ recorded  │
+  │          │     │  ➜ YOU REVIEW  │     │           │     │           │
+  └──────────┘     └────────────────┘     └───────────┘     └───────────┘
+  Task — Pick a task from your local list or synced from platforms like Yunxiao. One click sends it to Chat.
+  Chat / Proposal — The Agent explores your codebase, asks clarifying questions, and produces a structured proposal (what to change, which files, acceptance criteria). The Agent is prohibited from writing code in this stage. You review, edit, and approve the proposal before anything else happens.
+  Apply — A fresh Agent session implements the approved proposal task-by-task. It reads only the proposal artifacts — not the Chat history — so every decision must be captured in writing, not left in context-window memory.
+  Archive — Specs are updated, the change is recorded with full traceability. Your project's knowledge base grows with every shipped change.
+  Why Separating Thinking from Execution Matters
+  Most Coding Agents understand a task and write code in the same session. Any misunderstanding becomes code directly, and code is expensive to review. FylloCode physically separates understanding from execution. Misunderstandings can only become proposal text — and text is cheap to review. A 2-minute proposal review catches problems that would take 20 minutes to find in a diff.
+
+  Features
+
+  Agent Protocol (ACP)
+  FylloCode connects to any Coding Agent through ACP (Agent Client Protocol). Claude Code, Codex, or any ACP-compatible agent — one protocol, one interface, without juggling a pile of terminal windows.
+  There are currently 35 agents available in the ACP Registry, with support for parallel chats and parallel Proposal Apply runs.
+
+  System Reminders
+  Each workflow stage injects a system reminder that constrains what the Agent can and cannot do. In Chat, the Agent is instructed to explore and propose, not code. In Apply, it follows the approved task list. This isn't a suggestion — it's a hard boundary enforced at session start.
+
+  Task Panel
+  View and manage tasks from your local list or synced from external platforms. Tasks serve as the entry point to the entire workflow — select a task, start a Chat, and the Agent begins with full context.
+
+  Integration with Development Platforms
+  Connect to platforms like Yunxiao (Alibaba Cloud DevOps) at the provider level — one authentication, multiple tools across task management, source code, and CI/CD. More platform integrations (GitHub, TAPD, Jira, etc.) are planned.
+  Task integrations use APIs instead of Agent Skills by design. API calls are fast and do not spend tokens, so tokens stay focused on the work that actually needs reasoning.
+
+  Workflow Editor
+  Define and customize multi-stage workflows. Built-in templates get you started; edit the YAML to fit your team's process.
+
+  OpenSpec-Driven Proposals
+  Proposals are structured artifacts — not chat messages. Each proposal contains a design document, spec changes, and a concrete task list with file paths and acceptance criteria. The built-in fyllo-specs MCP server manages the full lifecycle: explore → create-proposal → apply-change → archive-change.
+
+  Streaming Rendering Engine
+  FylloCode uses markstream-vue as its streaming rendering engine. It is fast and smooth, with built-in integration for Monaco Editor, KaTeX, and Mermaid. While working on Proposals, it can render flowcharts and formatted specs in real time, making architecture flows and business logic easier to inspect.
+  Engineering Guardrails
+  FylloCode provides two layers of engineering guardrails:
+  - Soft constraints — Capture engineering conventions as Guidelines and continuously maintain them through the built-in fyllo-skills MCP server, without manual upkeep.
+  - Hard constraints — Agents may not always follow Guidelines perfectly, so FylloCode's health checks establish engineering-level enforcement through lint, test runners, git hooks, and CI.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  This release makes past Chat sessions easier to recover and collects an Agent's file changes from one turn into a read-only Diff view. ACP tool events, message audit metadata, and JSONL writes now follow consistent semantics, while multi-root Workspaces choose and create Proposals independently for each Project. Sidebar, timeline, and tool-detail layout changes reduce wasted space and horizontal overflow in long conversations.
+  Added
+  - Added current-Workspace session search to the Chat sidebar. It finds past sessions by title, FylloCode Session ID, or visible User and Assistant text; excludes reasoning, Tool input and output, and system reminders; orders results by match type and update time; returns at most 50 entries; and opens a result through the existing session flow
+  - Added turn-level file-change review to tool details. Changes aggregates ACP diffs from visible normal tools in the current assistant message into added, modified, and deleted files in a read-only Diff Slideover whose items start collapsed and allow several files to remain expanded; Locations opens absolute paths and line numbers through the existing local-file preview
+  Changed
+  - ACP tool-call pending, in_progress, completed, and failed states, diffs, locations, failure text, and replacement semantics now remain consistent across live messages, Main persistence, and history reload. New messages also record updatedAt and the optional model / effort used at actual Prompt dispatch, with per-file serialization and atomic rewrites protecting JSONL history
+  - Multi-root Chat now separates a goal by Project and chooses Direct, Plan, or Proposal for each owner independently. When several Projects change behavior contracts, the Agent lists owners, specific contract changes, and cross-repository dependencies for confirmation, then creates one repository-owned Proposal per owner; Projects below the threshold can still use Direct or Plan
+  - A short pinned-session group now shrinks to its content, up to 50% of the available sidebar height, while Recent Sessions uses the remainder. The prompt timeline is narrower and uses a vertically centered transparent overlay on the left, without changing its surface on hover
+  - Updated ACP, MCP, Vue, Nuxt UI, Pinia, MarkStream, Monaco, and development dependencies. stream-monaco is now 0.0.49 with a local compatibility patch that keeps Diff Editor code lines aligned
+  Fixed
+  - Fixed renaming a Session during an Assistant reply replacing the Renderer running state with server metadata and hiding the runtime indicator too early
+  - Fixed re-entering the same new-session draft cancelling an in-flight probe and losing the Agent Session configuration loaded by that first probe
+  - Removed status-suffix DOM for all four normal-tool states. In-progress tools keep shimmer, failed tools keep an error-colored icon and Error details, and expanding an Activity group no longer lets hidden suffixes widen the message column
+  - Fixed fyllo-specs Proposal creation instructions to preserve the complete .openspec.yaml, and unified metadata serialization across Create, MCP Apply, and Archive so status writes neither truncate other fields nor add unrelated quotes to ISO timestamps
+  Notes
+  - The application version is now 0.15.3.
+  - The fyllo-specs MCP server is now 0.11.1. This patch keeps tool names, inputs, outputs, transports, and storage locations compatible while adding per-Project single-owner guidance and metadata write-safety fixes.
+  - The fyllo-cortex MCP server remains at 0.7.0, and fyllo-spawn remains at 0.1.1; neither server changed in this release range.
+  - New message JSONL records can include optional updatedAt, model, effort, and tool metadata. Historical messages need no migration: missing updatedAt falls back to createdAt in memory, and other absent fields remain absent.
+  - Session search reads existing Session metadata and message JSONL on demand without creating an index, cache, or new persistence format. Large Workspaces can take longer to query; the Renderer debounces input, serializes scans, and discards stale results.
+ReleaseNotesUrl: https://github.com/Fioooooooo/FylloCode/blob/HEAD/CHANGELOG.en.md#0153---2026-08-12
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

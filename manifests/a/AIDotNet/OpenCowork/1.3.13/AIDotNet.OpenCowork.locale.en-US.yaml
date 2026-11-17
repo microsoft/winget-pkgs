@@ -1,0 +1,41 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AIDotNet.OpenCowork
+PackageVersion: 1.3.13
+PackageLocale: en-US
+Publisher: example.com
+PublisherUrl: https://github.com/AIDotNet
+PublisherSupportUrl: https://github.com/AIDotNet/OpenCowork/issues
+PackageName: OpenCoWork
+PackageUrl: https://github.com/AIDotNet/OpenCowork
+License: Apache-2.0
+LicenseUrl: https://github.com/AIDotNet/OpenCowork/blob/HEAD/LICENSE
+Copyright: Copyright 2026 AIDotNet
+ShortDescription: Open-source desktop platform for multi-agent collaboration. Empowering AI agents with local tools, parallel teamwork, and seamless workplace integration.
+Description: |-
+  Traditional LLM interfaces are often "environment-isolated islands." Developers spend 50% of their time copy-pasting code, terminal logs, and file contents between the chat and their IDE.
+  OpenCowork solves this by providing:
+  - Local Agency: Agents can directly read/write files and execute shell commands with your permission.
+  - Context Awareness: No more manual context feeding. Agents explore your codebase and logs autonomously.
+  - Task Orchestration: Complex tasks (like "Refactor this module and update tests") are broken down and handled by specialized sub-agents.
+  - Human-in-the-loop: You stay in control with a transparent tool-call approval system.
+Tags:
+- agent
+- agentic
+- ai
+- large-language-model
+- llm
+ReleaseNotes: |-
+  Added
+  - Added a Native Worker per-tool durable journal (runtime_tool_results, 3-day retention) written on the emit path the instant a tool finishes, exposed as agent/tool-results-lookup, so a tool_result that never reached the messages table is recovered from disk.
+  Changed
+  - Renderer persists the assistant row and its tool_result at every tool boundary instead of waiting for the 30s streaming checkpoint or run end, writing the assistant row first so an interrupted write leaves a healable dangling tool_use rather than an orphan tool_result.
+  - Hosted sessions snapshot their canonical history after each fully answered tool batch instead of only at loop end, so an interrupted turn does not roll back past tools that already ran.
+  - Dangling-tool_use healing and Continue consult the Worker journal before falling back to the in-memory tool-call cache, which is empty after a restart.
+  Fixed
+  - Fixed a finished tool being silently re-executed on the next turn after a crash, app kill, or worker recycle mid-turn: its unpaired tool_use was stripped from provider input, so the model forgot the call happened and re-ran it — worst case replaying a long sub-agent Task from scratch.
+  - Fixed sub-agent and context-compression child runs overwriting the parent hosted session's history, which they could do because they borrow the parent sessionId while owning an unrelated conversation.
+ReleaseNotesUrl: https://github.com/AIDotNet/OpenCowork/releases/tag/1.3.13
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

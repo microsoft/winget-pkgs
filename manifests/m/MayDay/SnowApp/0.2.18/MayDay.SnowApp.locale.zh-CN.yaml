@@ -1,0 +1,32 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.12.0.schema.json
+
+PackageIdentifier: MayDay.SnowApp
+PackageVersion: 0.2.18
+PackageLocale: zh-CN
+Copyright: 版权所有 (c) 2026 MayMay
+ShortDescription: 面向开发者的桌面应用，将 AI 对话、终端模拟、SSH 远程管理、Git 工具和内置浏览器面板整合到统一的工作空间中。
+Description: Snow App 是一款面向开发者的桌面应用，将 AI 对话、终端模拟、SSH 远程管理、Git 工具和内置浏览器面板整合到统一的工作空间中。它通过 Rust 原生模块处理性能关键型操作，包括 SQLite 存储、AI 流式传输、文件监控和 HTTP 请求。此外还支持 MCP 集成、AI 图像生成、技能系统、Hooks、子代理、代码库语义搜索与 AI 驱动的终端会话。
+Tags:
+- ai
+- codex
+- git
+- mcp
+- ssh
+- 终端
+- 聊天
+ReleaseNotes: |-
+  改进
+  - 流式渲染 CPU 优化：显著降低流式渲染期间主进程与渲染进程的 CPU 占用——Markdown 流式渲染降频至约 10fps（超过 100KB 的超长文本进一步降至 3fps）、流式指标（token 数/耗时）改为每 250ms 合并更新、用户消息栏滚动计算用 rAF 合并、大面毛玻璃移除（仅小元素保留）。
+  - 恢复后台节流：移除全局禁用后台定时器节流 / 渲染进程后台化的开关，窗口隐藏或最小化后不再全速运行 rAF 与动画（macOS 上也不再阻止 App Nap）；流式 IPC 事件仍实时到达，后台 AI 会话不受影响。
+  - 系统设置读取缓存：Rust 层为系统设置读取新增 200ms TTL 缓存，团队身份轮询、YOLO 模式检查等高频路径不再每次读取都打开数据库连接并解析 schema。
+  修复
+  - 团队身份轮询死循环：修复团队摘要 hook 中 identity 依赖导致 load 回调重建、每秒触发 7-28 次身份 IPC 的死循环，此前主进程 CPU 持续高位。
+ReleaseNotesUrl: https://github.com/MayDay-wpf/snow-app/blob/HEAD/RELEASE_NOTES_ZH.md#v0218
+Documentations:
+- DocumentLabel: 快速开始
+  DocumentUrl: https://github.com/MayDay-wpf/snow-app/blob/main/docs/zh-CN/1-快速开始.md
+- DocumentLabel: 文档
+  DocumentUrl: https://github.com/MayDay-wpf/snow-app/blob/main/docs/README.md
+ManifestType: locale
+ManifestVersion: 1.12.0

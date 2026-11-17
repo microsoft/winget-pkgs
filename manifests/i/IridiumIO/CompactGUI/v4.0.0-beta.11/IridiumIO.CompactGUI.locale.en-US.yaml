@@ -1,0 +1,88 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: IridiumIO.CompactGUI
+PackageVersion: v4.0.0-beta.11
+PackageLocale: en-US
+Publisher: IridiumIO
+PublisherUrl: https://github.com/IridiumIO
+PublisherSupportUrl: https://github.com/IridiumIO/CompactGUI/issues
+PackageName: CompactGUI
+PackageUrl: https://github.com/IridiumIO/CompactGUI
+License: GPL-3.0
+LicenseUrl: https://github.com/IridiumIO/CompactGUI/blob/HEAD/LICENSE
+ShortDescription: Transparently compress active games and programs using Windows 10/11 APIs.
+Tags:
+- compact.exe
+- compressing-folders
+- compression
+- csharp
+- disk-space
+- diskspace
+- dotnet10
+- games
+- harddisk
+- harddrive
+- standalone
+- storagespace
+- vbnet
+- wpf
+ReleaseNotes: |-
+  Changes
+  - Queue Rework
+    - The Queue is now more of a real queue with compression respecting the order of operations and with clearer live progress, estimated savings and compression modes displayed.
+    - Can be opened from any page in CompactGUI using a button on the left edge.
+    - Items can be dragged/dropped to rearrange their order of operation in the queue
+  Note
+  For the love of God, please don't try dragging items around while the queue is actively running. It will probably go about as well as you can imagine.
+  Queue View
+  - Steam Library Improvements
+    - Added proper support for filtering, multi-selection and sorting.
+    - Selecting items will now show a banner for configuration settings to add to the queue.
+      - Note if you select a game that is not recommended for compression, it will disable the "Add to Queue" button in the banner; you can still manually add it by right-clicking the item directly.
+    - Massive speedup when loading the library view - CompactGUI will show the full game list first and then analyse in the background to avoid slowdowns with large libraries.
+  Steam Library View
+  Tweaks
+  - Performance and responsiveness
+    - Improved general rendering performance, reduced GPU overhead - then promptly added some back by using transparent blurs on the overlays :P
+    - More memory checks and leak fixes
+  - UI Tweaks
+    - Improved compression workflow UI to make things clearer, and also redesigned the results page
+    - Instead of a vague “Cancelling…” status, CompactGUI indicates how many active operations are still being cancelled.
+    - When compressing/uncompressing, now shows all files that are simultaneously being worked on.
+    - Added a bunch of minor polish and animation tweaks across the user interface
+  - Safer Compression and Uncompression
+    - Checks available disk space very conservatively before starting compression or uncompression. If you do not have at least 50% of the folder's size available as FREE space on the disk, it will prevent you from compressing/uncompressing. This is to try to add protection against Windows since we cannot decide when Windows decides to clean up after compression. If you are close to this threshold, CompactGUI will force itself to run compression WITHOUT paralellism, to avoid multiple compressions occurring at the same time that could go beyond the disk's size. This may be enough to fix the various reports of losing disk space rather than gaining space. This is still a Windows issue however
+    - Skip sparse files intentionally during compression
+    - Virtual hard-disk images are forced to process one at a time - no idea why people were compressing these but anyway
+  - Languages
+    - Added Italian #657
+    - Added Korean #634
+    - Other translations that were updated are now woefully outdated again - sorry to the translators!
+    - Language updates now take into account the version of the program as well
+  Fixes
+  - Fixed a queue deadlock that could occur when pause/cancel were spam-clicked
+  - Improved cancellation handling to mitigate race conditions with files being added/removed from active work (this should fix issues where hitting cancel at the wrong time would cause up to 16 extra compression processes being created first which then must finish)
+  - Improved cancellation status display when multiple concurrent operations are winding down together.
+  - Fix issue with the Steam Library crashing when trying to add a folder to the queue if it's drive letter was stored as a lowercase (c:/ instead of C:/) by Steam. #659
+  Results Screen View
+  Installation
+  Binaries
+  CompactGUI.exe (10MB):           Smaller size, but requires .NET 10 Runtime to be installed
+  CompactGUI.mono.exe (66MB):      Fully self-contained and embeds the necessary .NET 10 libraries
+  WinGet
+  winget install CompactGUI
+  Note
+  Installing from WinGet automatically installs .NET 10 if required, however it can often take a few days for new releases to become available.
+  Checksums
+  MD5:            B52B8D71CDBBF8205136955AFD944F9C
+  SHA-256:        2079811DBF6617EA099D4CA244F2045A458205D7CAD7582772EF95BAE203EF50
+  Like this project?
+  Please consider leaving a tip on Ko-Fi :)
+  Buy Me a Coffee at ko-fi.com
+ReleaseNotesUrl: https://github.com/IridiumIO/CompactGUI/releases/tag/v4.0.0-beta.11
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/IridiumIO/CompactGUI/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

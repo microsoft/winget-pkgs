@@ -1,0 +1,88 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Basilisk.Basilisk
+PackageVersion: 52.9.2026.01.23
+PackageLocale: en-US
+Publisher: Basilisk Development Team
+PublisherUrl: https://www.basilisk-browser.org/
+PublisherSupportUrl: https://www.basilisk-browser.org/contact.html
+PrivacyUrl: https://www.basilisk-browser.org/privacy.html
+PackageName: Basilisk
+PackageUrl: https://www.basilisk-browser.org/download.html
+License: MPL-2.0
+LicenseUrl: https://www.mozilla.org/MPL/2.0
+Copyright: Copyright ©2022-Present The Basilisk Development Team. All rights reserved.
+ShortDescription: A XUL-based web-browser built on top of the Unified XUL Platform (UXP). This browser is a close twin to pre-Servo Firefox in how it operates.
+Description: Basilisk is a free and Open Source XUL-based web browser, featuring the well-known Firefox-style interface and operation. It is based on the Goanna layout and rendering engine (a fork of Gecko) and builds on the Unified XUL Platform (UXP), which in turn is a fork of the Mozilla code base without Servo or Rust.
+Tags:
+- browser
+- internet
+- web
+- web-browser
+- webpage
+- xul
+ReleaseNotes: |-
+  UXP Changes:
+  - Allow themes to detect Windows 11 usage.
+  - Implemented WeakRef.
+  - Implemented URL.canParse().
+  - Implemented the inset-block and inset-inline CSS shorthands.
+  - Added a preference (privacy.forgetaboutsite.clearPasswords) to control clearing of passwords when using "forget about this site" in the permissions manager, and disabled clearing of passwords by default, since it was considered unexpected behavior by the community.
+  - Re-landed CSS Cascade Layers support after the previous back-out.
+  - Re-landed CSS color-mix support after the previous back-out. RGB and HSL color spaces only, like previous.
+  - Implemented viewport overflow propagation logic. See implementation notes.
+  - Unprefixed CSS -moz-appearance; Basilisk now accepts the unprefixed CSS appearance keyword. For compatibility, -moz-appearance and -webkit-appearance (if enabled) have been retained.
+  - Fixed an intermittent but fairly prominent crash-to-desktop due to JavaScript garbage collection on certain modern sites.
+  - Fixed a crash on sites with certain types of CSP handling.
+  - Fixed a crash in WASM.
+  - Updated NSS to 3.90.9 (custom).
+  - Updated ICU to v78.1.
+  - Added support for building on Sparc64 hardware.
+  - Added support for building for NetBSD on DEC Alpha.
+  - Added basic support for building on Mac PowerPC (still a work in progress).
+  - Added basic support for building on LoongArch64 hardware (龍芯 CPUs).
+  - Added support for running on FreeBSD 15.
+  - Removed automatic coloring of auto-filled login fields.
+  - Restored support for in-process NPAPI plugins.
+  - Improved JavaScript IonMonkey stability on ARM and Mac SoC hardware.
+  - Built on UXP commit: f272382a9c
+  - Security issues addressed: CVE-2025-13015, CVE-2026-0879 (DiD), CVE-2026-0880 (DiD), CVE-2026-0889 (DiD), CVE-2026-0883, CVE-2026-0886 (DiD), and several others without a CVE designation.
+
+  Basilisk Changes:
+  - Change dom.always_stop_slow_scripts pref to true by default
+  - Implement internal polyfill loader based on Greasemonkey to help with compatibility when UXP does not support specific JS features.
+  - Update PDF.js to v3.11.174.
+  - Restore official branding files back to Basilisk repo.
+  - Make List All Tabs button removable and always visible.
+  - Implement Firefox's "Container Tabs" functionality.
+  - Introduced LoongArch64 builds. These are built on Slackwareloong64.
+
+  Included Polyfills:
+  - This release includes the following polyfills:
+    - image.decode
+    - Intl.DisplayNames
+    - TextEncoderStream
+    - ReadableStream pipeTo
+    - ReadableStream pipeThrough
+    - FinalizationRegistry
+
+  Basilisk Update Notes:
+  - There may be situations in which the "restore session" functionality does not correctly assign restored tabs to the container in which they were used. If this happens to you please report the exact steps to reproduce.
+  - PDF.js v3.11.174 was chosen because it is the last version not to use JS Modules.
+  - PDF.js has the following changes applied:
+    - Fix for CVE-2024-4367 (isEvalSupported set to false by default).
+    - Disabled XFA by default.
+    - Disabled execution of arbitrary JavaScript in all PDF files by default. I was just as horrified as you are to learn that this exists and is an actual spec.
+    - CSS and JS fixes as needed to make it render and work correctly in UXP-based browsers.
+  - Releases on all platforms other than Windows are now built with Clang + Thin LTO for improved performance.
+
+  UXP Implementation Notes:
+  - The WeakRef spec only allows code to hint/coerce and does not guarantee if or when dereferencing happens.
+  - A number of sites have started using overflow-x: clip without overflow-y on full-document elements. While this makes little sense, our strict implementation previously resulted in unscrollable pages. There is special viewport overflow propagation logic in the relevant drafts which we have now implemented to avoid this behavior.
+ReleaseNotesUrl: https://www.basilisk-browser.org/releasenotes.html
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://www.basilisk-browser.org/faq.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

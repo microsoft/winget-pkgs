@@ -1,0 +1,91 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Nub.Nub
+PackageVersion: 0.4.12
+PackageLocale: en-US
+Publisher: nub contributors
+PublisherUrl: https://nubjs.com/
+PublisherSupportUrl: https://github.com/nubjs/nub/issues
+Author: nub contributors
+PackageName: Nub
+PackageUrl: https://nubjs.com/
+License: MIT
+LicenseUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 nub contributors
+CopyrightUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+ShortDescription: The all-in-one JavaScript toolkit that augments Node.js instead of trying to replace it.
+Description: "An all-in-one toolkit for Node.js. One Rust binary to run your files and scripts, install dependencies, and manage Node itself — a Bun-like modern DX on top of the node you already have. There's no new runtime to adopt and no lock-in: every augmentation rides on Node's own public extension surfaces."
+Moniker: nub
+Tags:
+- javascript-runtime
+- node-version-manager
+- nodejs
+- package-manager
+- script-runner
+ReleaseNotes: |-
+  This release fixes a batch of package-manager and runtime issues — most of them around the global virtual store — and adds Node version resolution from .tool-versions.
+  Package manager
+  ────────────────────┬────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────
+  Area                │What changed                                                                                                                                                                                                                                                                │PR
+  ────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────
+  Global virtual store│Trusted packages whose build script targets the consuming project — git-hook installers such as simple-git-hooks, and similar — are now ejected from the shared store and built project-local, so their postinstall runs against your project instead of failing in the     │#475
+                      │store                                                                                                                                                                                                                                                                       │
+  ────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────
+  Global virtual store│Type-only phantom dependencies in .d.ts and Vue SFC type surfaces are now detected                                                                                                                                                                                          │#452
+  ────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────
+  Lockfile import     │Importing a bun or npm lockfile to pnpm-lock now runs the peer-context pass                                                                                                                                                                                                 │#471
+  ────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────
+  Version cache       │Incomplete version-cache entries are repaired instead of erroring                                                                                                                                                                                                           │#467
+  ────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────
+  Yarn Berry          │Frozen-install drift validation fixed for workspaces                                                                                                                                                                                                                        │#462
+  ────────────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴─────────
+
+  Runtime
+  - Async hook tier is auto-selected when a foreign loader is detected in the preload (#472).
+  - Web Locks dictionary conversion aligned to the spec (#461).
+
+  Node version management
+  - Node version resolution now reads asdf/mise .tool-versions (#474).
+  - Temporary PATH shim directories are hardened (#470).
+
+  Process and watch
+  - nub run arms PR_SET_PDEATHSIG on the script child, so a SIGKILL on the leader can no longer orphan the workload (#464).
+  - Runtime env keys are filtered across nub watch restarts (#466).
+
+  Installer
+  - The install script verifies release-archive checksums (#459).
+
+  Build and internals
+  - Rust floors raised (workspace 1.93, nub-native 1.95); a local verification target added; a redundant phantom sidecar backfill removed.
+
+  Documentation
+  - A new Deployment section (hosted builds, setup-nub, Docker), a Nub vs Vite+ comparison guide, and corrected runtime and Yarn PnP claims.
+
+  What's Changed
+  - docs: correct ShadowRealm and Yarn PnP claims by @colinhacks in #456
+  - build: set Rust 1.93 floor by @colinhacks in #455
+  - install: verify release archive checksums by @colinhacks in #459
+  - runtime: align Web Locks dictionary conversion by @colinhacks in #461
+  - fix Berry workspace frozen drift validation by @colinhacks in #462
+  - refactor(pm): remove redundant phantom sidecar backfill by @colinhacks in #465
+  - fix: filter runtime env keys across watch restarts by @colinhacks in #466
+  - fix(pm): repair incomplete version cache entries by @colinhacks in #467
+  - build: add local verification target by @colinhacks in #468
+  - build: set nub-native Rust 1.95 floor by @colinhacks in #469
+  - fix(run): arm PR_SET_PDEATHSIG on the script child so SIGKILL on the leader can't orphan the workload by @afonsojramos in #464
+  - fix(import): run peer-context pass when importing bun/npm to pnpm-lock by @colinhacks in #471
+  - fix(node): harden temporary PATH shim directories by @colinhacks in #470
+  - fix(runtime): auto-select async hook tier for a preload-detected foreign loader by @colinhacks in #472
+  - fix(phantom): detect type phantoms in the .d.ts and SFC type surfaces under GVS by @afonsojramos in #452
+  - feat(node): resolve the Node version from .tool-versions (asdf/mise) by @colinhacks in #474
+  - fix(pm): eject curated project-context packages from the global virtual store by @colinhacks in #475
+
+  New Contributors
+  - @afonsojramos made their first contribution in #464
+ReleaseNotesUrl: https://github.com/nubjs/nub/releases/tag/v0.4.12
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://nubjs.com/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

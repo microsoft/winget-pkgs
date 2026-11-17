@@ -1,0 +1,157 @@
+# Created using wingetcreate 1.12.8.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: fjrevoredo.MiniDiarium
+PackageVersion: 0.6.3
+PackageLocale: en-US
+Publisher: fjrevoredo
+PublisherUrl: https://mini-diarium.com/
+PublisherSupportUrl: https://github.com/fjrevoredo/mini-diarium/issues
+PrivacyUrl: https://github.com/fjrevoredo/mini-diarium/blob/master/docs/PRIVACY.md
+Author: Francisco J. Revoredo
+PackageName: Mini Diarium
+PackageUrl: https://github.com/fjrevoredo/mini-diarium
+License: MIT
+LicenseUrl: https://github.com/fjrevoredo/mini-diarium/blob/master/LICENSE
+Copyright: Copyright (c) 2026 Francisco J. Revoredo
+ShortDescription: Encrypted, local-first journaling app
+Description: A local-first journal with serious encryption. Free, open source, and never touches the internet.
+Moniker: mini-diarium
+Tags:
+- privacy
+- journaling
+- journal
+- diary
+- foss
+- open-source
+- rust
+ReleaseNotes: |-
+  What's Changed
+
+  This release completes the in-app navigation migration with header day controls and a ⋮ menu, adds
+  timeline display preferences and a donation page, and fixes Linux spell check. Internally, the
+  backend is now a three-crate open-core workspace with a sealed API façade, and the Microsoft Store
+  update pipeline is live.
+
+  Added
+  - Website donation page: added a donation page at mini-diarium.com/donate/
+    (https://mini-diarium.com/donate/), reachable from a "Support the project" section on the homepage
+    and a Donate link in the site-wide footer. It lists Ko-fi (card, PayPal, Apple Pay) and the
+    Monero, Bitcoin, and Bitcoin-over-Lightning addresses, each with a copy-to-clipboard button, plus
+    the same network-mismatch and traceability notes as DONATE.md. Donations were previously reachable
+    only from the GitHub repo.
+  - Day navigation in the header (TODO-0063): the header date is now flanked by previous-day (◀) and
+    next-day (▶) buttons, and clicking the date opens the Go to Date picker. These actions no longer
+    require opening the OS menu bar. The next-day button respects the "allow future entries"
+    preference, stopping at today when future entries are disabled.
+  - Statistics, Import, and Export are now always available from the app (TODO-0065): the header ⋮
+    menu always shows Preferences, Statistics, Import, and Export. None of them require a trip to the
+    OS menu bar anymore.
+  - Timeline display preferences (TODO-0072, addressing #205
+    (https://github.com/fjrevoredo/mini-diarium/issues/205)): a new Timeline section under Preferences
+    → Writing lets you shrink the timeline date column and hide the entry preview. Date format offers
+    Full ("Monday, January 15, 2024"), Long, Medium, Short, and ISO (2024-01-15). Every style except
+    ISO follows your interface language, and each option in the dropdown shows a live example using
+    today's date. Show entry preview collapses each row to just the date and title when turned off,
+    fitting more entries on screen. Both default to the previous behavior, so nothing changes unless
+    you opt in. Screen readers always hear the full date, even when the visible column uses a short
+    format.
+
+  Changed
+  - The native OS menu is now just Preferences and Exit (TODO-0065): every other native menu item
+    (Previous/Next Day, Go to Today, Go to Date, Previous/Next Month, Statistics, Import, Export,
+    About) is gone now that all of them are reachable inside the app, from the header controls and the
+    ⋮ menu. On Windows and Linux the menu bar is a single File menu. On macOS the Mini Diarium app
+    menu keeps Preferences and Quit alongside the standard Services/Hide/Show All items (Edit and
+    Window are untouched, since they back standard OS text-editing and window behavior). About now
+    opens from the ⓘ button in the header, which already did the same thing. All keyboard shortcuts
+    (Ctrl/Cmd+[, ], Shift+[, Shift+], T, G, F, ,) continue to work exactly as before.
+
+  Fixed
+  - Spell check now works on Linux (TODO-0081, addressing #227
+    (https://github.com/fjrevoredo/mini-diarium/issues/227)): the "Enable spellcheck" preference
+    silently did nothing on Linux, so misspelled words never got the red squiggly underline. It now
+    works. Mini Diarium turns on spell checking and picks a dictionary based on your interface
+    language, refined by your system locale's region when the two agree. Toggling the preference off
+    removes the underlines immediately, with no restart needed. Windows and macOS are unchanged. The
+    Flatpak build bundles dictionaries for all seven interface languages. The .deb/.rpm builds use
+    your system's installed hunspell dictionaries, or you can drop your own into your enchant config
+    directory. See Preferences → Spell check on Linux (https://mini-diarium.com/docs/preferences/) for
+    details.
+  - Missing Linux spellcheck dictionary guidance: Preferences now gives plain-language recovery steps
+    when spell checking is unavailable, including a link to Linux setup instructions and Flatpak
+    repair guidance.
+
+  Internal
+  - Native-menu removal and the JS shortcut layer (TODO-0065, closing TODO-0062/0063/0064):
+    src-tauri/src/menu.rs now builds only the Preferences item, so menu-preferences is the only menu-*
+    event the backend emits and MainLayout is its only listener. The LockableMenuItems managed state
+    and updatemenulockstate are gone (Preferences is always enabled), removing eight call sites across
+    the auth commands and the AppHandle parameters that existed only to reach them.
+    MenuLabels/updatemenu_locale shrank to the two surviving labels across all six locales. The six
+    removed accelerators are now a single keydown handler in the new src/lib/keyboard-shortcuts.ts
+    (registered by MainLayout): it matches brackets on e.code, ignoring Alt so AltGr bracket input
+    still reaches the editor. Their navigation logic moved into src/lib/day-navigation.ts (goToToday,
+    goToPreviousMonth, goToNextMonth, the latter keeping the future-clamp). The "is any overlay open"
+    guard that MainLayout used to duplicate is now a single isAnyOverlayOpen() in src/state/ui.ts,
+    shared by all three consumers.
+  - inAppMenu feature flag graduated and retired (TODO-0065): the flag is gone from the FeatureFlag
+    union and DEFAULTS, per the ADR's no-migration retirement rule. src/state/feature-flags.ts is now
+    dormant infrastructure with an empty union. The next feature needing a runtime toggle adds three
+    lines rather than rebuilding the store. Flags are declared in a FEATURE_FLAGS registry that pairs
+    each with its label's i18n key. Preferences → Advanced → Experimental Features renders from that
+    registry and hides itself entirely when it's empty, which is the case today. The inAppMenuLabel
+    translation was deleted from en.ts and all six locale files. e2e/specs/header-actions.spec.ts no
+    longer seeds the flag and instead adds a Ctrl+[ smoke check. That's the only proof the JS shortcut
+    layer really replaced the OS accelerators in a real WebView. helpers.ts keeps its now-callerless
+    setFeatureFlag helper on purpose, because the WebView2 reload gotcha it encodes is expensive to
+    rediscover. The onboarding tour's Import step no longer needs a native-menu-bar fallback, which
+    removed the last consumer of edgeHint. EdgeHint, computeEdgeHintPosition, and EdgeDot came out of
+    OnboardingOverlay.tsx (the remaining cleanup is tracked as TODO-0062-01).
+  - Core-crate distribution decided (TODO-0084, open-core M4a): recorded the decision in
+    docs/decisions/2026-07-core-crate-distribution.md, which settles how the two library crates
+    (mini-diarium-core, mini-diarium-crypto) would reach a second consumer. The choice is a tagged git
+    dependency. crates.io publication is deferred behind an explicit trigger, not rejected. A git
+    submodule is rejected outright. The reasoning is a permanence asymmetry: a crates.io yank neither
+    deletes the artifact nor frees the name, while a git dependency can always be upgraded to a
+    published crate later. No second consumer exists yet, so publishing now would create a semver
+    obligation with no matching benefit. Publishing is also transitive: shipping mini-diarium-core on
+    crates.io would require publishing mini-diarium-crypto first, which is why "publish crypto only"
+    is recorded as the fallback if a crate name ever comes under threat (all three names were
+    unclaimed as of 2026-07-24, and leaving them unclaimed is a knowingly-accepted risk). Both library
+    crates keep independent 0.x versions decoupled from the app's, stay out of bump-version.sh/.ps1,
+    the pre-release guard, and RELEASING.md, and the pre-1.0/internal API.md contract is unchanged.
+    Both API.md files, RELEASING.md, and OPENCORESTRATEGY.md were updated to match. Documentation
+    only, no code or behavior change.
+  - Filled in the Cargo manifest license and author metadata: none of the three crates declared a
+    license, despite the repo being MIT, and all three carried a placeholder authors = ["you"]. Both
+    are now correct (license = "MIT", repository, and the real copyright holder). This is a
+    correctness fix made independently of the M4a distribution decision above, not publishing prep.
+    One user-visible effect: Tauri derives the Debian package Maintainer field from the app crate's
+    authors, so .deb releases previously shipped Maintainer: you. The Windows Installer Manufacturer
+    field is unaffected, since tauri-utils derives bundle.publisher from the identifier
+    (com.minidiarium → minidiarium), not from authors.
+  - Enabled the Microsoft Store update pipeline (TODO-0078): brought the never-run msstore-publish.yml
+    to a working state and validated it end-to-end with a green dry run (draft submission created via
+    --noCommit, confirmed PendingCommit, never published). The dry runs surfaced four fixes.
+  - The msstore publish call now uses Microsoft's documented MSIX package-update form, msstore publish
+  <path-to-.msix> -id <productId>. It previously passed the product id as the positional project/URL
+  argument.
+  - scripts/build-msix.ps1 is invoked directly in the already-shell: pwsh pack step, instead of
+  through a nested pwsh that failed to resolve the script on the runner.
+  - An optional dryrunversion input lets the pipeline be validated against a branch that actually
+  contains the msix/ tooling. No released tag at or before v0.6.2 does, since it was added hours after
+  that tag, and such a tag's version wouldn't exceed the live Store package either.
+  - winget install failures are now fail-fast. PowerShell doesn't treat a nonzero winget exit code as
+  terminating, so a transient download failure was previously swallowed until a confusing error showed
+  up 15 minutes later in the pack step.
+
+  Real releases are unaffected: they omit dryrunversion and derive the version from the tag. This also
+  required a maintainer-side fix outside the codebase. The account had no Microsoft Entra tenant to
+  … (truncated — see ReleaseNotesUrl for full notes)
+ReleaseNotesUrl: https://github.com/fjrevoredo/mini-diarium/releases/tag/v0.6.3
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/fjrevoredo/mini-diarium/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

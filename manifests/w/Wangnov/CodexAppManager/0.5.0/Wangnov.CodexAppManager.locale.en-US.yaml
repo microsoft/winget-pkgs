@@ -1,0 +1,80 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Wangnov.CodexAppManager
+PackageVersion: 0.5.0
+PackageLocale: en-US
+Publisher: Wangnov
+PublisherUrl: https://github.com/Wangnov
+PublisherSupportUrl: https://github.com/Wangnov/Codex-App-Manager/issues
+PackageName: Codex App Manager
+PackageUrl: https://github.com/Wangnov/Codex-App-Manager
+License: MIT
+LicenseUrl: https://github.com/Wangnov/Codex-App-Manager/blob/HEAD/LICENSE
+ShortDescription: Installer, updater, and uninstaller for the official Codex desktop app.
+Description: A cross-platform desktop client to install, incrementally update, and cleanly uninstall the official Codex desktop app, with built-in self-update.
+Moniker: codex-app-manager
+Tags:
+- codex
+- installer
+- openai
+- tauri
+- updater
+ReleaseNotes: |-
+  Codex App Manager
+  > 皮肤管理迎来一次大升级：批量管理、详情、卡片/列表视图、按来源与自定义分组的本地整理、按题材分组的商店浏览，外加预览图缓存与完整工作台居中弹窗；同时跟上 Codex 26.707 / 26.715 的原生主题结构，Windows 更新直接安装已校验的本地包，应用菜单栏也随皮肤主题化。
+  > A big upgrade to skin management — batch actions, details, card/list views, local organizing by source and custom groups, store browsing grouped by theme, plus preview caching and a centered modal in the expanded workbench — while tracking Codex 26.707 / 26.715's native-theme internals, installing verified local packages directly on Windows updates, and theming the Windows app menu bar.
+  ✨ 亮点 · Highlights
+  - 皮肤批量管理与整理：皮肤页支持卡片 / 列表视图切换、搜索、翻页、全选与批量删除（带确认弹窗），点击可查看每款皮肤的详情。本地页现在按来源自动分区——「商店安装」与「本地」（开发目录里的皮肤）各成一组；你还能新建自定义分组、把任意皮肤归入并重命名 / 删除，分组持久保存，多选模式下一键加入分组或移出。
+    Batch management and organizing: the Skins page gains card/list views, search, pagination, select-all and batch delete (with a confirm dialog), plus a details view per skin. The Local tab auto-partitions by source — "Installed" (from the store) and "Local" (your dev directory) — and you can create custom groups, drop any skin into them, rename/delete them (persisted), and add-to-group / remove in multi-select mode.
+  - 商店按题材分组浏览：商店页顶部新增题材分类（动漫 / 影视明星 / 科技人物 / 国风原创 / 游戏等），配合标签做二级筛选；新增刷新按钮随时重新拉取目录；封面预览图缓存到本地（按皮肤版本失效），再次进入商店更快。分类数据随商店 catalog 逐步补齐。
+    Store browsing grouped by theme: theme-category chips (anime / stars / tech icons / guofeng / games…) with tags as a secondary filter, a refresh button to re-fetch the catalog, and cover previews cached on disk (invalidated by skin version) for snappier revisits. Category data fills in as the store catalog is updated.
+  - 完整工作台下的居中弹窗：在可调整大小的完整工作台窗口里，皮肤详情从底部半屏 sheet 变成真正的居中弹窗；紧凑窗口仍保留顺手的底部 sheet。
+    Centered modal in the expanded workbench: skin details open as a proper centered modal instead of a bottom sheet; the compact window keeps the bottom sheet.
+  - 适配 Codex 26.707 / 26.715 的原生主题结构：Codex 26.715 把设置存储模块挪进了懒加载模块，管理器现在按版本选择适配器读写原生配色，两个适配器都会做结构校验并互相兜底，更新期间的版本漂移也能覆盖，原生主题在新版 Codex 上重新可用。
+    Adapt to Codex 26.707 / 26.715's native-settings layout: 26.715 moved its settings storage into a lazy module, so the manager now picks an adapter by version to read/write native palettes, with structural verification and fallback on both — covering version drift during updates. Native theming works again on the newest Codex.
+  - Windows 更新直装 + 应用菜单主题化：Windows 更新现在直接安装已下载并通过 checksum + 签名校验的本地 MSIX，不再空等 Microsoft Store 重新下载；一次窄范围的 UAC 恢复 + 超时看门狗保证可靠，UAC 被拒时保留运行中的 Codex。此外，Codex 26.715+ 把 Windows 应用菜单（文件 / 编辑 / 视图 / 帮助）放到了独立的 DOM 行，现在这条菜单栏也会跟随皮肤主题化，不再露出原始顶栏。
+    Windows updates install directly + the app menu is themed: a Windows update now installs the already-downloaded, checksum-+-signature-verified local MSIX instead of waiting on the Store, with a narrowly scoped UAC recovery + timeout watchdog and the running Codex preserved if UAC is declined. And Codex 26.715+ puts its Windows app menu (File / Edit / View / Help) in a separate DOM row, which the skin now themes too — no more stock top strip.
+  🐛 修复 · Fixes
+  - 加固商店皮肤删除：删除时显式拒绝符号链接，避免 store 目录里的链接把删除引向别处；删除完成后键盘焦点落到稳定控件而非页面 body。
+    Harden store-skin deletion: refuse a symlink so a link planted in the store can't redirect the delete, and land keyboard focus on a stable control after a delete.
+  - 原生主题试穿失败时如实报错：此前 native 主题热切换失败会静默降级成「仅 CSS」，试穿看着成功、其实原生配色没生效；现在会明确报错。
+    Native try-on fails honestly: a failed native hot-swap used to silently degrade to CSS-only; it now surfaces the error.
+  - 顶部横幅可手动关闭：操作错误、守护进程错误等顶部横幅新增 ✕，可随时关掉；并修复多选勾选框在悬停时闪烁、中文输入法回车误提交、提交后键盘焦点丢失等一批交互问题。
+    Dismissible banners and interaction polish: action/daemon error banners gain a ✕, and a batch of fixes for hover-flickering select checkboxes, IME Enter mis-submits, and post-submit focus loss.
+  📦 安装与升级 · Install & Upgrade
+  已经安装? 打开应用即可收到本次更新——macOS 只下载版本间的增量,校验失败自动回滚。
+  Already installed? The app offers this update in-app — macOS pulls only the delta, with automatic rollback.
+  ─────────────────────┬───────────────────────────────────────────
+  平台 · Platform      │下载 · Download(国内直连 · China-reachable)
+  ─────────────────────┼───────────────────────────────────────────
+  macOS · Apple Silicon│CodexAppManager_aarch64.dmg
+  ─────────────────────┼───────────────────────────────────────────
+  macOS · Intel        │CodexAppManager_x86_64.dmg
+  ─────────────────────┼───────────────────────────────────────────
+  Windows · x64        │CodexAppManager_x64-setup.exe
+  ─────────────────────┼───────────────────────────────────────────
+  Windows · ARM64      │CodexAppManager_arm64-setup.exe
+  ─────────────────────┴───────────────────────────────────────────
+  Windows 签名状态: 本版 CodexAppManager_x64-setup.exe / CodexAppManager_arm64-setup.exe 没有 Authenticode 代码签名,首次运行可能出现 SmartScreen 提示;.sig / latest.json 的 Tauri updater 签名只校验更新字节,不代表 Windows 发行者身份。SignPath Foundation 申请仍在审核。参见 代码签名政策与 Windows signing and verification。
+  Windows signing status: This release's CodexAppManager_x64-setup.exe / CodexAppManager_arm64-setup.exe are not Authenticode-signed, so SmartScreen may warn on first run. The Tauri updater signature in .sig / latest.json verifies update bytes only and is not Windows publisher identity. The SignPath Foundation application is pending. See the code signing policy and Windows signing and verification.
+  隐私 · Privacy: 隐私政策 · Privacy policy
+  核验下载: 本页 Assets 带有 SHA256SUMS;Windows 用 Get-FileHash .\CodexAppManager_x64-setup.exe -Algorithm SHA256 或替换为 ARM64 文件名,macOS 用 shasum -a 256 CodexAppManager_aarch64.dmg,再与 SHA256SUMS 比对。
+  Verify downloads: This release includes SHA256SUMS in Assets; on Windows run Get-FileHash .\CodexAppManager_x64-setup.exe -Algorithm SHA256 or swap in the ARM64 filename, and on macOS run shasum -a 256 CodexAppManager_aarch64.dmg, then compare with SHA256SUMS.
+  # macOS · Homebrew
+  brew install --cask wangnov/tap/codex-app-manager
+  > 镜像直链恒指向最新版本;如需本页对应的历史版本,请使用下方 Assets。.app.tar.gz / .sig / latest.json 是自动更新器的工件,手动安装请选 .dmg / .exe。
+  > Mirror permalinks always resolve to the latest release — for this exact version use the assets below. .app.tar.gz / .sig / latest.json belong to the auto-updater; pick the .dmg / .exe for manual installs.
+  What's Changed
+  - docs(release): backfill v0.4.1 notes with pet / curl / run-state fixes by @Wangnov in #217
+  - feat(themes): skin management — views, batch delete, details, bottom-pinned actions by @Wangnov in #218
+  - fix(themes): refuse symlink store packages on delete + restore focus by @Wangnov in #221
+  - fix(windows): install verified mirror MSIX without Store wait by @Wangnov in #220
+  - fix(themes): support Codex 26.707 and 26.715 adapters by @Wangnov in #219
+  - fix(themes): cover Windows application menu by @Wangnov in #222
+  - feat(themes): skin management expansion — refresh, cache, grouping, modal by @Wangnov in #223
+  - chore(release): bump version to 0.5.0 by @Wangnov in #224
+  Full Changelog: v0.4.1...v0.5.0
+ReleaseNotesUrl: https://github.com/Wangnov/Codex-App-Manager/releases/tag/v0.5.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

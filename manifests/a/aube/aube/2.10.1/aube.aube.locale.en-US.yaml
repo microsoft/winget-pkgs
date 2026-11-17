@@ -1,0 +1,70 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: aube.aube
+PackageVersion: 2.10.1
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  v2.10.1 fixes several workspace bugs in aube update, aube remove, aube audit and aube sbom, closes more pnpm compatibility gaps, and makes network access more reliable on VPN/split-DNS setups and unstable connections.
+
+  Changed
+  - Smaller, faster store compression on APFS (#1930, @jdalton): on macOS, aube now tries LZFSE before LZVN and compresses blocks in parallel. On three ARM64 native addons (Oxlint, Rolldown, Lightning CSS), this used 5% less disk space, compressed 23% faster, and used up to 6.4 MB less memory. Decoding of zstd-packed napi addons is now bounded. File contents and store keys do not change.
+  - System CA store is authoritative (#1932, @jdx): aube no longer adds its bundled Mozilla root certificates on top of the OS trust store. A CA that an OS update or enterprise policy removes is now also distrusted by aube. On Linux and other Unix systems, aube uses the bundled roots only when it cannot load any system roots, for example in a minimal container without ca-certificates. It then prints WARN_AUBE_BUNDLED_ROOTS_FALLBACK. SSL_CERT_FILE, SSL_CERT_DIR, NODE_EXTRA_CA_CERTS, cafile and ca work as before.
+
+  Fixed
+
+  Workspaces
+  - aube remove with a shared lockfile (#1952, @jdx): removals now go through the workspace install. Before, removing a dependency from a member with a workspace: dependency failed with no version of lib matches range workspace:* after package.json had already been rewritten. Removing from other members wrote a stray member lockfile, and removing a root dependency re-resolved every member's locked versions.
+  - workspace: links after aube update (#1969, @jdx, with @ruandre): a member's workspace: dependency was written relative to the workspace root, which left its node_modules symlink broken. The path also grew longer with each update. This affected both aube-lock.yaml and pnpm-lock.yaml. To repair a lockfile that an earlier version already broke, run aube install --fix-lockfile.
+  - Optional peer bindings in the lockfile (#1941, #1970, @jdx, with @ruandre): an unrelated aube add (a regression in 2.10.0) or aube update --no-save <pkg> no longer drops locked optional-peer bindings. For example, fdir@6.5.0(picomatch@4.0.4) no longer turns into a bare fdir@6.5.0. This also covers a peer that only a different workspace member provides.
+  - Peers provided by workspace: dependencies (#1954, @jdx): a registry package whose peer comes from a workspace:* or workspace:^ dependency is now linked to that workspace package. Before, the install failed under strictPeerDependencies, or require() threw MODULE_NOT_FOUND at runtime. aube now also reads pnpm lockfiles that record these peers as link:. aube update can still drop this link in some cases.
+  - aube audit --fix=update (#1968, @jdx, with @ruandre): an advisory now stays reported, and the command exits 1, while a workspace member still uses the vulnerable version, even if the root uses a safe one.
+  - aube sbom (#1967, @jdx, with @ruandre): the SBOM now includes packages that only workspace members depend on, including with --exclude-peers.
+
+  Resolution and lockfiles
+  - aube update <transitive-dep> (#1976, @jdx): updating a package that is only a transitive dependency now moves it to the newest version its parents' ranges allow. Before, the command printed Updating: <name> but left the locked version unchanged.
+  - pnpm settings: header (#1953, @jdx): aube now writes the pnpm-lock.yaml settings header from the current configuration. Before, it copied old values, which could make pnpm install --frozen-lockfile fail with ERR_PNPM_LOCKFILE_CONFIG_MISMATCH. aube now writes addMissingPeerTypes, dedupePeers, injectWorkspacePackages and peersSuffixMaxLength where pnpm does. With lockfile.includeResolutionSettings: true, it also writes the resolution settings. aube now recognizes addMissingPeerTypes, injectWorkspacePackages, autoDedupe and dedupeInjectedDeps, but only records them in the lockfile for pnpm compatibility. Changing only these settings now refreshes the lockfile on aube install. aube-lock.yaml output is unchanged.
+  - strictPeerDependencies matches pnpm (#1940, @jdx): a prerelease now satisfies a range that its base release satisfies, so react@19.0.0-rc.1 satisfies ^19.0.0. peerDependencyRules.allowedVersions now accepts parent@range>peer keys, and a * value allows prereleases.
+    peerDependencyRules:
+      allowedVersions:
+        use-sync-external-store@1>react: "19"
+  - Patches with stripped trailing whitespace (#1939, @jdx): a patchedDependencies patch failed with error applying hunk after an editor or hook removed trailing whitespace from a context line. When an exact match fails, aube now uses pnpm's looser matching, which ignores trailing whitespace and searches up to 20 lines around the recorded position. Patches whose content really differs still fail.
+  - useDefaultTrustedDependencies in pnpm-workspace.yaml (#1965, @jdx, with @ruandre): aube ignored this setting when it was in the workspace YAML. It is now read from there, as pnpm does. Use an unquoted YAML boolean.
+
+  trustPolicy=no-downgrade
+  - Staged publish to trusted publishing (#1957, @jdx): a version with a trusted publisher and provenance is no longer rejected as a downgrade from an earlier staged-publish release. Unlike pnpm, aube accepts this switch. Switching from staged publish to provenance only, or to no trust evidence, is still rejected.
+  - Vercel CLI (#1933, @shawnyeager): the default exclusions now cover the @vercel/* packages in the vercel dependency tree that publish without provenance. Releases before each cutoff version are still checked.
+
+  Commands and networking
+  - aube exec runs commands from PATH (#1950, @jdx): aube exec node ... and aube exec bash ... no longer fail with binary not found when no project bin provides the command. Project bins still take precedence. This also applies to -r, --filter and --parallel.
+  - Activated shims stay on PATH (#1935, @jdx): after aube activate, commands started by aube exec, aube dlx/aubx and aube run <bin> now resolve npm, pnpm and yarn to aube's shims, as package scripts already did. Tools that run npm install, such as shadcn, now go through aube.
+  - DNS hangs with VPN or split DNS (#1943, @jdx): when a lookup through the built-in resolver times out, for example because /etc/resolv.conf lists a nameserver only the OS can reach, aube now falls back to the system resolver. It warns once (WARN_AUBE_DNS_HICKORY_TIMEOUT) and uses the system resolver for the rest of the run. Before, aube install and aube dlx appeared to hang.
+  - Interrupted tarball downloads (#1974, @jdx): a connection that drops partway through a tarball download is now retried with backoff instead of failing the install with end of file before message length reached.
+  - Concurrent installs with a shared global virtual store (#1949, @jdx): two projects installing at the same time no longer fail with File exists (os error 17) while linking the shared hidden hoist.
+  - aube audit with npm aliases (#1971, @jdx, with @ruandre): aliased dependencies such as "odd-alias": "npm:is-odd@3.0.1" are now checked under their real package name. Before, aube looked them up under the alias. aube audit --fix in override mode still does not fix aliased dependencies; --fix=update does.
+ReleaseNotesUrl: https://github.com/aubepkg/aube/releases/tag/v2.10.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

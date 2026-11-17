@@ -1,0 +1,106 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: jdx.mise
+PackageVersion: 2026.9.13
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/jdx/mise
+Author: jdx
+PackageName: mise-en-place
+PackageUrl: https://mise.en.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/mise/blob/HEAD/LICENSE
+ShortDescription: Your dev env, already prepped.
+Description: Your dev env, already prepped. One tool to manage languages, env vars, and tasks per project, reproducibly.
+Moniker: mise
+Tags:
+- cli
+- dev-tool
+- env
+- environment
+- task
+ReleaseNotes: |-
+  mise run can now export OpenTelemetry traces and logs (experimental), and experimental daemon providers let several projects and worktrees share one PostgreSQL, CockroachDB, or NATS server, each with its own database or account. Lockfiles no longer switch backends on their own when the registry moves a tool: the new mise backends switch command does it when you ask. [dotfiles] and [bootstrap.files] can now remove files and manage permissions, and mise bootstrap unapply removes what a module set up. The experimental pkgx: backend has been removed.
+  Highlights
+  - Observability and shared services (experimental): task runs export OTLP traces and, if you opt in, task output as logs. Global [daemon_providers] run long-lived servers, and projects attach to them with an isolated database or NATS account per checkout.
+  - Safer lockfiles: locked tools stay on their locked backend, mise lock --bump checks remote versions and fails when it can't, lockfiles no longer record versions that were never confirmed, and tool stubs lock into the project's mise.lock.
+  - Declarative cleanup: mode = "absent", remove_empty templates, permissions-only entries, removal of empty directories mise created, and mise bootstrap unapply let a config describe what should not be on a machine.
+
+  Added
+
+  Tasks
+  - OpenTelemetry export for mise run (experimental). Each run becomes one trace, with a span per task (grouped by monorepo package) that carries its exit code and redacted args. W3C TRACEPARENT is read from the environment and passed to each task, so nested mise run calls and instrumented tools appear in the same trace. Nothing is exported unless otel.enabled = true and an OTLP endpoint is set. Offline mode disables export, and each export times out after 3s by default. A separate otel.logs = true setting exports task stdout (INFO) and stderr (WARN) as log records linked to their spans, with redactions applied first. With otel.logs on, tasks in interleave/quiet modes no longer get a TTY; use --raw for tasks that need one. #13557, #13558, #13559 (built on work by @MatthiasGrandl and @zeitlinger)
+    [settings]
+    otel.enabled = true
+    otel.logs = true   # optional; exports task output too
+    export OTEL_EXPORTER_OTLP_ENDPOINT=<your OTLP/HTTP collector URL>
+    mise run build ::: test
+
+  Daemons (experimental)
+  - Shared server providers. Declare long-lived PostgreSQL, CockroachDB, or NATS servers in global config under [daemon_providers] and manage them with mise daemons providers ls|start|stop|restart. Providers have their own tools, ports, and persistent data. They run in an isolated environment and are not tied to any checkout. #13534
+  - Per-checkout databases and accounts on a shared server. A project daemon with provider = "..." gets its own database (PostgreSQL/CockroachDB) or its own NATS account with separate subjects and JetStream data. Each checkout path gets a stable name, so worktrees share the server but not the data. Give several daemons the same resource name to share data on purpose. Connection env vars point at the right database, and NATS gets an authenticated NATS_URL. #13536, #13537
+    # ~/.config/mise/config.toml
+    [daemon_providers.local-postgres]
+    preset = "postgres"
+    version = "18"
+    port = "auto"
+    # project mise.toml
+    [daemons.db]
+    provider = "local-postgres"
+    # resource = "shared_app"   # opt in to sharing data
+
+  Lockfiles and backends
+  - mise backends switch. When the registry moves a tool to a new backend (as happened with hk and communique moving to packslip:), a tool locked to the old backend now stays there. mise install and mise lock print a warning that points to the new command, which moves lock entries to the registry's backend at the same versions, relocks their platforms, and reinstalls. It supports --dry-run, --global, and TOOL@VERSION. If any relock fails, every lockfile it changed is restored. #13543
+  - Tool stubs lock into the project's mise.lock. mise generate tool-stub --lock now records the stub in the nearest project lockfile (listed under tool-stubs), so installs verify the recorded checksums and --locked/MISE_LOCKED=1 accept stubs. Previously the [lock] section written into the stub was never used, so checksums were never checked. #13502
+  - Install from a local archive. The http: backend accepts file:// URLs. It copies the archive instead of downloading it, still verifies checksum, and works offline. #13574
+    [tools]
+    "http:my-tool" = { version = "1.0.0", url = "file:///opt/archives/my-tool-v1.0.0-linux-x64.tar.gz", checksum = "sha256:..." }
+  - Checksum mismatch hints for re-uploaded GitHub assets. When a github: or aqua: install fails a checksum check, mise asks GitHub for the asset's current digest. If that digest matches the download, the error says the maintainer probably re-uploaded the asset. The install still fails. #13512
+  - vfox BackendUninstall hook. Backend plugins can define hooks/backend_uninstall.lua to clean up outside the install directory. It runs before removal on uninstall, upgrade, and prune. If the hook errors, the install directory is kept. #13522
+
+  CLI
+  - mise search checks package registries. Add a prefix to search npm, crates.io, RubyGems, or NuGet (mise search npm:typescript-language, cargo:, gem:, dotnet:). --all searches every source at once. Plain searches and shell completion still make no registry requests, and MISE_OFFLINE=1 skips them. #13550
+  - mise ls by backend. -b/--backend (repeatable) filters by backend and also works with --json. --grouped prints one section per backend. #13530
+  - Key completion for mise config get/set. Tab completes dotted keys, with descriptions, from the schema and from the target file. --file, --global, and --system are respected. #13551
+  - Coloured help and a logo. mise --help is now coloured on terminals (and respects NO_COLOR), wraps at the terminal's real width, and shows the mise logo on mise/mise --help when there's room. #13449
+  - Project URLs in the registry. Registry entries can set a url, which appears in mise tool (and mise tool <name> --url) and in mise registry --json. #13533
+
+  Configuration and hooks
+  - .miserc.local.toml. Sets per-checkout early config, such as env = ["native"], without editing the shared .miserc.toml. At each directory level it is read before .miserc.toml. CLI flags and MISE_ENV still take precedence. #13440
+  - backend and install_path in MISE_INSTALLED_TOOLS. Postinstall hooks can now see where each tool came from and exactly where it was installed. #13421 (@garysassano)
+  - A configured pnpm overrides Node's bundled pnpm, whichever order the tools are listed in. #13498 (@EMcCormack)
+
+  Dotfiles
+  - Choose what a tracked directory saves. exclude and include lists on mode = "track" entries. Exclusions always win. include = [] selects nothing. Narrowing a list does not delete the files on other machines. #13418, #13432
+    [dotfiles]
+    "~/.codex" = { mode = "track", include = ["config.toml", "rules/**"], exclude = ["*.log"] }
+  - Preview before tracking. mise dot track --dry-run and mise dot paths --preview show file counts, sizes, exclusions, and skipped nested repositories. Large trees get a warning. #13417
+  - mode = "absent" removes a file or symlink at the target, with support for OS variants. Directories and special files are refused, even with --force. #13513
+  - permissions key. Overrides the mode of copy, template, and content entries, or manages only the permissions of an existing file such as ~/.ssh/config. Status, diff, and apply report and fix drift. The key is ignored on Windows. #13514
+  - remove_empty = true on templates removes the target when the template renders empty. A file you have edited since mise last wrote it is kept unless you pass --force. #13515
+  - Empty parent directories mise created are removed along with their target on apply and unapply. This only applies inside $HOME and never to directories that already existed. #13518
+  - Warnings from background captures, such as credential-named files saved in plaintext, are now shown by the next mise dot command or mise bootstrap. Previously they only went to the watcher logs. #13483
+
+  Bootstrap
+  - mise bootstrap unapply <ENV>... removes the files, directories, user services, and dotfile entries a module added after you deselect it. Anything another environment still declares is kept. Supports --dry-run and --force. #13441
+  - Permissions-only [bootstrap.files] entries. Declare only mode/owner/group to manage a file's metadata without taking over its contents. #13511
+  - remove_empty = true on templated [bootstrap.files] removes the target when the template renders empty. #13510
+  - More systemd directives: before, binds_to, part_of, conflicts, exec_start_pre, exec_start_post, and exec_stop_post. ~ now expands after exec prefixes such as -~/bin/check. #13526
+
+  Registry
+  - Added mole (#13363, @casparbreloh), reviewdog (#13562, @takumin), and nim (#13461, @elijahr). aube now points at aubepkg/aube (#13541).
+
+  Fixed
+
+  Tools, installs, and lockfiles
+  - mise cache prune could delete files from installed tools: it followed symlinks out of the cache into install directories and left npm cache entries half-empty. It now never follows symlinks and removes stale entries as a whole. cache_prune_age = "0s" now also turns off mise cache prune. #13424
+  - mise lock --bump now checks remote versions for every selector (for example "6", not only latest) and fails when the version list can't be fetched, where it used to exit 0 with stale versions. Packslip registry tools no longer call api.github.com in normal use, which avoids rate-limit errors. #13544
+  - mise lock refuses to record an aqua version that only resolved to its own request string because the version list failed to load. When such an install fails, the error now says why. #13552
+  - mise lock --global no longer skips global tools that the project config shadows, and no longer overwrites a global pin with the project's version. #13547
+ReleaseNotesUrl: https://github.com/jdx/mise/releases/tag/v2026.9.13
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

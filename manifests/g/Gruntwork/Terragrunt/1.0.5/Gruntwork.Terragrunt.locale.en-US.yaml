@@ -1,0 +1,120 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 1.0.5
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  ✨ New Features
+  Full .terraform.lock.hcl files from the provider cache server
+  When the provider cache server is used against the OpenTofu provider registry, Terragrunt now writes .terraform.lock.hcl files containing h1: hashes for every platform the registry supports. A single terragrunt init produces a lock file that works on every platform, removing the need to run tofu providers lock -platform=... separately for each target architecture.
+  provider "registry.opentofu.org/hashicorp/null" {
+    version     = "3.2.2"
+    constraints = "3.2.2"
+    hashes = [
+      "h1:+1mRmfyz6oA00IhrrSkHK3h/Mdh032x2p0F6OMdMo5s=",
+      "h1:FjLTqvaaYo+vHN8pHZB1cOwEGiNzOj+I9kQyHmr9/7o=",
+      # ... one entry per supported platform ...
+      "zh:00e5877d19fb1c1d8c4b3536334a46a5c86f57146fd115c7b7b4b5d2bf2de86d",
+      # ... one entry per supported platform ...
+    ]
+  }
+  The hashes come from the registry's per-platform download response. When the registry does not supply them (for example, a third-party registry that has not adopted the field), Terragrunt falls back to its previous behavior of writing an h1: hash for the current platform plus zh: hashes for every platform listed in the shasums document.
+  Tip
+  Thanks to the OpenTofu team
+  This feature builds on work done by the OpenTofu team to expose per-platform hashes directly from the OpenTofu provider registry. Starting with OpenTofu 1.12, tofu init populates .terraform.lock.hcl with hashes for every supported platform out of the box, with no tofu providers lock invocation required. Users on older OpenTofu versions still get the same lock files when running through Terragrunt's provider cache server, but upgrading to 1.12 is the easiest way to get the same behavior everywhere, including when using the automatic provider cache dir.
+  🏎️ Performance Improvements
+  stack output fetches unit outputs in parallel
+  terragrunt stack output now fetches outputs from multiple units at the same time, which is noticeably faster on larger stacks. Use the existing --parallelism flag (or TG_PARALLELISM) to lower concurrency if you need to.
+  terragrunt stack output --parallelism 4
+  💡 Tips Added
+  Stack-target hint when --filter is missing | type=stack
+  run and stack generate now emit a tip when a --filter path resolves to a directory containing terragrunt.stack.hcl but the filter is not restricted to stacks. Without | type=stack, stack generate ignores the filter and run does not generate that stack.
+  The tip prints the offending filter, the suggested rewrite, and a link to the filter docs. Suppress it with --no-tip stack-target-missing-type-stack or --no-tips.
+  🐛 Bug Fixes
+  Auth provider command returning null no longer crashes Terragrunt
+  If the command configured via --auth-provider-cmd wrote the JSON value null to stdout, Terragrunt crashed with a nil pointer dereference before it could obtain credentials.
+  A null response is now treated as an empty response: no environment variables and no credentials are applied, and the run continues.
+  Auto-init now re-runs after a source change when modules are already cached
+  terragrunt plan/apply could fail with Error: Required plugins are not installed after a source-version change in any unit with a module "" block. The .terragrunt-init-required marker written on source change was being ignored because modulesNeedInit short-circuited as soon as .terraform/modules/ existed.
+  The marker check now lives at the top of needsInitRunCfg and is honored regardless of cached .terraform/modules/ contents.
+  Thanks to @arnaud-dezandee for contributing this fix!
+  --download-dir is now respected through dependency blocks and read_terragrunt_config
+  A custom download directory set via --download-dir (or TG_DOWNLOAD_DIR) was honored for the unit being run, but lost as soon as parsing crossed into another config. dependency blocks and read_terragrunt_config() would fall back to the dependency's local .terragrunt-cache next to its terragrunt.hcl, ignoring the user-set path.
+  TG_DOWNLOAD_DIR=/tmp/tg-cache terragrunt run --all plan
+  # Root unit: outputs landed in /tmp/tg-cache ✓
+  # Dependency outputs: written next to each dependency's terragrunt.hcl ✗
+  When the parsing context switches to a new config path, the download directory is now updated only if it still points at the previous module's default location. A user-supplied path never matches any module's default and is carried through every dependency hop unchanged.
+  Thanks to @maonat for contributing this fix!
+  remote_state — apply tags during DynamoDB lock table creation
+  Terragrunt previously applied dynamodb_table_tags to DynamoDB lock tables after table creation rather than during the initial CreateTable API request.
+  This caused failures in environments enforcing required AWS resource tags through SCPs or tag policies, where tags must be present at resource creation time.
+  Terragrunt now includes dynamodb_table_tags in the initial DynamoDB table creation request during remote state bootstrap.
+  remote_state {
+    backend = "s3"
+    config = {
+      bucket         = "my-state-bucket"
+      dynamodb_table = "terraform-locks"
+      dynamodb_table_tags = {
+        Environment = "prod"
+        Team        = "platform"
+      }
+    }
+  }
+  Thanks to @Rahul-Kumar-prog for contributing this fix!
+  Engine archive extraction rejects path-traversal entries
+  When Terragrunt extracted an engine archive while the engine experiment was active, entries whose target path resolved outside the extraction directory were not rejected correctly. Such an entry could overwrite files anywhere the Terragrunt process could write.
+  These entries are now rejected early with a descriptive error before any bytes are written. Engine archives produced by Gruntwork were never affected; the gap only mattered for a tampered or untrusted archive.
+  Thanks to @jackiesre721 for reporting this!
+  --filter combined with a negation no longer parses excluded units
+  When a positive path filter was combined with a negated one, Terragrunt classified any unit that matched neither expression as requiring defensive parsing before exclusion instead of being excluded early.
+  e.g.
+  $ terragrunt run --all --filter './foo' --filter '!./baz'
+  # If `./bar` existed on disk, it would be parsed before being excluded. This is no longer the case.
+  Any positive filepath filter now consistently results in units that cannot be discovered during Terragrunt discovery being excluded from parsing for evaluating candidacy of inclusion. When a sufficiently complex filter is present, like the following:
+  $ terragrunt run --all --filter './foo' --filter '!./baz' --filter 'reading=root.hcl'
+  # If `./bar` existed on disk, it will still be parsed before being excluded to determine if it reads `root.hcl`.
+  macOS and Windows binaries report the correct release version
+  The v1.0.4 macOS and Windows release binaries reported terragrunt version main and parsed as 0.0.0, breaking any terragrunt_version_constraint configured against them.
+  sign-macos.yml and sign-windows.yml included build jobs for standalone workflow_dispatch runs. During the release workflow, those jobs still saw the original workflow_dispatch event from release.yml, so the old condition evaluated to true. The redundant build used BUILD_VERSION=${{ github.ref_name }} and replaced the correctly versioned artifact uploaded by build.yml.
+  The signing workflows now skip their internal build job when invoked via workflow_call and only build when dispatched directly, so release binaries keep the version stamped by build.yml.
+  Fixed 403 Forbidden on nested private modules when using the provider cache server
+  With TG_PROVIDER_CACHE enabled, OpenTofu/Terraform sent nested module-registry lookups to the upstream registry with the cache server's API key as the bearer token, instead of the credentials configured for that host. Private registries rejected those requests:
+  Error: Error accessing remote module registry
+  Failed to retrieve available versions for module "<name>" from
+  <registry>: error looking up module versions: 403 Forbidden.
+  Terragrunt sets TF_TOKEN_<host> to the cache server's API key so the cache can front provider downloads. Module-registry requests bypassed the cache and went straight to the upstream, so the registry saw the cache key instead of the user's token.
+  The cache server now also fronts the modules.v1 endpoint for each configured registry. It drops the inbound cache-server bearer, looks up the user's credentials for the upstream host from the loaded CLI config (TF_TOKEN_<host>, ~/.terraform.d/credentials.tfrc.json, etc.), and forwards the request with that token.
+  Run report file generation no longer stalls or deadlocks with many runs
+  Generating a run report via --report-file could stall or deadlock when a queue contained many runs and some were still recording their final status as the report was written.
+  Reports now serialize each run independently, so writing a report no longer blocks status updates from runs that are still finishing.
+  Thanks to @jackiesre721 for contributing this fix!
+  Declining a run --all or --graph confirmation no longer skips cleanup
+  When terragrunt run --all destroy (or --all state, --all apply, or the equivalent --graph variants) prompted for confirmation and the user answered "no", Terragrunt terminated the process directly, skipping cleanup the run had registered.
+  Cleanup now runs before Terragrunt exits.
+  s3:: and gcs:: stack sources now download
+  Stack file source URLs starting with s3::https:// or gcs::https:// previously failed with a credentials error even when valid credentials were available. They now download. Existing stack files need no change.
+  Plain https://www.googleapis.com/storage/... URLs are now intended to download anonymously without GCP credentials, but Terragrunt continues to use GCS credentials to download them for backward compatibility, emitting a deprecation warning the first time it does so. To opt into the new behavior, enable the legacy-gcs-public-prefix strict control. To pull from a private GCS bucket explicitly, prefix the URL with gcs:: yourself.
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v1.0.5
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

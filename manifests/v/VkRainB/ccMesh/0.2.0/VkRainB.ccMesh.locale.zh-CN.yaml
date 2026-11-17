@@ -1,0 +1,69 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: VkRainB.ccMesh
+PackageVersion: 0.2.0
+PackageLocale: zh-CN
+Publisher: ccmesh
+PublisherUrl: https://github.com/VkRainB
+PublisherSupportUrl: https://github.com/VkRainB/ccMesh/issues
+PackageName: ccMesh
+PackageUrl: https://github.com/VkRainB/ccMesh
+License: Apache-2.0
+LicenseUrl: https://github.com/VkRainB/ccMesh/blob/HEAD/LICENSE
+Copyright: Copyright 2026 VkRainB
+ShortDescription: 轻量级跨平台 AI 代理网关桌面应用。
+Description: |-
+  ccMesh 是基于 Tauri 2 + Rust + React 19 的桌面端 AI 代理网关：在本机统一接入 Claude / OpenAI / Codex 等多类上游，提供协议转换、模型映射、端点轮换与熔断、请求统计与配置管理等能力。支持 Windows、macOS、Linux。
+
+  功能特性
+  仪表盘
+  - 本地代理服务启停与端口状态一览
+  - 今日 Token 用量与请求概览
+  - 实时请求监控：模型、耗时、首字延迟、Token 明细
+  端点管理
+  - 多端点 CRUD、拖拽排序、列表/网格视图
+  - 支持 claude（直通）、openai（转换）、codex（Responses） 三类转换器
+  - 模型清单维护、入站/出站模型映射、连通性测试
+  - 按模型过滤的轮换与熔断，避免无关端点被误伤
+  配置文件
+  - 以「渠道」管理 Claude Code settings.json 与 Codex auth.json + config.toml
+  - 端点写入 / 自定义写入双模式，表单与 JSON 双向联动
+  - 保存渠道与应用覆写分离，应用前自动备份
+  统计与同步
+  - 按应用、端点、模型维度查看历史用量
+  - 配置与数据备份、恢复、导出
+  设置
+  - 全局出站代理、Claude/Codex CLI User-Agent
+  - 应用内自动更新（GitHub Releases）
+ReleaseNotes: |-
+  新增
+  - 同步页 cc-switch 配置迁移：读取本机 ~/.cc-switch/cc-switch.db，预览识别 claude / codex 供应商，勾选添加
+  - 端点管理页改为中右布局：列表居中，右侧栏封装端点统计与可用模型
+  - 移植 @lobehub/icons 模型品牌图标（端点卡片、可用模型、表单清单等）
+  - 请求日志落库端点 transformer 快照（migration v11），旧记录不受后续改类型影响
+  - 请求监控列表端点列按 transformer 显示品牌图标（旧行回退入站协议）
+  - 关于页：应用信息、GitHub/发布链接、版本号展示
+  - 本地环境检查：Claude Code / Codex / OpenCode / Pi 四工具版本探测、安装/升级与冲突诊断
+  - 设置页卡片布局：General / Proxy / Startup / Advanced 四卡片
+  - 日志页卡片栈布局：LogRow 卡片化，等级 Badge 与边框语义色
+  - 仪表盘 ServiceCard 代理网关地址一键复制
+  - 导航接入「关于」页，VersionPopover 增加关于入口
+  - Mac 更新流程重构：install_update_and_restart（download → install → 停代理 → 清理托盘/单实例锁 → restart）
+  修复
+  - 仪表盘拖动排序后未及时持久化
+  - Linux AppImage 交互层问题
+  - 下载更新后自动重启以载入新版
+  - 禁用代理层 Axum 默认 2MB body 限制，大上下文请求不再 413
+  - 模型映射弹窗描述优化；统计页历史记录弹窗表格溢出
+  - 端点管理页/顶部导航隐藏滚动条；顶栏支持滚轮横向滚动
+  - 全局 toast 移至右上角；密码框隐藏浏览器原生显隐按钮
+  - EndpointCard 仅地址可复制（名称不再误触复制）
+  - Codex 多轮历史切 OpenAI Chat 端点时，function_call.arguments 残缺 JSON 导致上游 prefill failed：增加完整性校验，合法规范化、残缺降级为 {}
+  - Token 用量 cache_read 双重计算：OpenAI 风格 input 归一化为净输入
+  - 精简代理转发日志：请求热路径降噪，INFO 级别每请求仅保留入站摘要
+  - 日志页 StrictMode 双订阅导致同条日志显示两次
+  - 清空日志后切换页面又恢复旧日志（同步清空后端环形缓冲）
+ReleaseNotesUrl: https://github.com/VkRainB/ccMesh/releases/tag/v0.2.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

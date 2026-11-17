@@ -1,0 +1,113 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Corsinvest.cv4pve.diag
+PackageVersion: 2.4.0
+PackageLocale: en-US
+Publisher: Corsinvest Srl
+PublisherUrl: https://www.corsinvest.it/
+PublisherSupportUrl: https://www.corsinvest.it/cv4pve
+PrivacyUrl: https://www.corsinvest.it/privacy
+Author: Corsinvest Srl
+PackageName: cv4pve-diag
+PackageUrl: https://github.com/Corsinvest/cv4pve-diag
+License: GPL-3.0
+LicenseUrl: https://github.com/Corsinvest/cv4pve-diag/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2019-2025 Corsinvest Srl
+CopyrightUrl: https://github.com/Corsinvest/cv4pve-diag/blob/master/LICENSE.md
+ShortDescription: Diagnostic Tool for Proxmox VE
+Description: |-
+  cv4pve-diag is a comprehensive diagnostic tool for Proxmox VE that performs health checks
+  and system analysis on your virtualization infrastructure.
+
+  Features:
+  - Node health and status monitoring
+  - VM/Container diagnostics and configuration validation
+  - Storage capacity and performance checks
+  - Replication and backup status verification
+  - Snapshot age monitoring
+  - Multiple output formats (Text, HTML, JSON, Markdown)
+  - Customizable severity thresholds
+  - Support for ignore patterns
+Moniker: cv4pve-diag
+Tags:
+- corsinvest
+- diagnostic
+- health-check
+- monitoring
+- proxmox
+- proxmoxve
+- virtualization
+- vm
+ReleaseNotes: |-
+  Compliance reporting
+  cv4pve-diag can now produce compliance-aware reports alongside the usual diagnostic output. Diagnostic findings are tagged with the normative controls they satisfy — so when an admin user has no two-factor authentication, the same finding doubles as evidence of a gap against ISO 27001 A.5.17, NIS2 Art. 21(j), DORA Art. 9 and PCI DSS 8.4.2.
+  - 40+ diagnostic checks are mapped to compliance controls across 14 frameworks: ISO 27001:2022, NIS2, DORA, PCI DSS v4.0, GDPR, AgID (Italian PA), ENS (Spanish PA, RD 311/2022), BSI C5:2020 (German cloud baseline), SOC 2 (AICPA Trust Services Criteria), NIST SP 800-53 rev.5 (Moderate baseline subset), ISO/IEC 27017 (cloud), ISO/IEC 27018 (PII in cloud), CIS Controls v8 and NIST CSF 2.0. Each finding can carry several control ids — for example, the "admin user without two-factor authentication" finding now references controls across most frameworks at once.
+  - New --compliance=<standard> command-line option. When passed, the report is filtered to keep only the findings mapped to that standard, and a ControlId column is added so each finding shows the specific control identifier (e.g. A.5.17, Art.21(j)).
+  - Works with every output format: Text, Markdown, HTML, JSON, Excel. The Excel header carries the selected standard so the file is self-describing.
+  - New IncludeOkResult setting (top-level): when enabled, passing checks are also written to the report (as Ok results). Useful for full audit-style reports that need to prove a control was verified, not only that it was violated.
+  - Full explanation, list of standards, control catalog and disclaimer in the new docs/compliance.md.
+  > Important: the compliance mapping is technical and informative only — it covers the subset of each standard that can be verified from the Proxmox VE state. It does not replace a formal audit. See the disclaimer in docs/compliance.md for full scope and limits.
+  New diagnostic checks
+  Two new observability checks fill a gap on long-term monitoring evidence:
+  - IC0018 — No external metric server configured on the cluster. Without an InfluxDB / Graphite metric server, long-term monitoring relies only on the volatile per-node RRD, which is reset on reboot — auditors typically require persistent historical data for incident investigation.
+  - IC0019 — Metric servers exist but every one of them is disabled — same effect as IC0018, but worth surfacing separately because the fix is just toggling the existing configuration on.
+  - IG0016 — VM has a machine type pinned to an old version while the node already offers a newer one (e.g. pc-i440fx-6.2 while pc-i440fx-9.2 is available). Pinning is correct for stability, but old machine versions accumulate deprecated CPU / microcode behaviour and miss QEMU bug-fixes; tagged against the patch-management controls. Upgrade requires a VM stop/start.
+  - IC0020 — Pool with members but no ACL entry at /pool/<id>. The pool exists as an organisational tag but is not used as a privilege boundary, which is the point of pools.
+  - IC0021 — API token without a comment. Without a comment the token's purpose / owner cannot be attributed at audit time, making safe revocation impossible.
+  - WC0019 — Two or more enabled backup jobs run on the same storage at the same systemd-calendar schedule, causing I/O contention and longer overall runtime.
+  - WN0045 — Node clock drifts more than 5 seconds from another cluster node. Even when each node looks fine vs NTP, mutual drift is a frequent silent cause of corosync token retransmits, HA fencing instability and broken log correlation.
+  In addition, a wider set of pre-existing checks now also carries compliance tags (TFA on transitive admins, account lifecycle, firewall logging, certificate management, PVE patch level, container privileged-access checks, …) — the diagnostic logic and codes are unchanged, but findings now reference the relevant ISO 27001 / NIS2 / DORA / PCI DSS controls. The full mapping per area is in docs/compliance.md; the full list of checks is in docs/checks.md.
+  Reporting & output
+  - --compliance=<standard> (see above) adds the ControlId column to every report format.
+  - Output format inferred from --output-file extension: passing --output-file=report.xlsx (or .html / .json / .md) now produces the matching format automatically, even without an explicit --output. Previously the file would be saved with the wrong content for the extension.
+  - Excel report header now includes the selected compliance standard, when applicable.
+  Documentation
+  The README has been restructured around the most common reading paths. Long content has moved into dedicated docs so the README stays scannable:
+  - New docs/checks.md — full catalog of every diagnostic check with code, description and severity.
+  - New docs/settings.md — full settings.json reference with field-by-field defaults, performance tuning recipes and CVE scanning configuration.
+  - New docs/compliance.md — what the compliance mapping is, list of standards and controls, --compliance CLI usage, and the audit disclaimer.
+  - New docs/ignored-issues.md — full guide to suppressing accepted findings.
+  Fixes
+  - Error code collision fixed (WG0025): the code was incorrectly used both for the per-VM/CT CPU threshold check and for "HA guest has no replication job". The HA replication check now has its own code (WG0043). Ignore rules referencing WG0025 for HA replication need to be updated — WG0025 from now on means only CPU threshold breach.
+  - Error code collision fixed (WN0023): the code was used both for "TLS certificate expires within 30 days" and for "ZFS pool disk usage above threshold". The ZFS pool usage check now uses the new WN0044 code. Ignore rules referencing WN0023 for ZFS pool usage need to be updated — WN0023 from now on means only certificate expiration warning.
+  - Cross-node checks skipped on single-node setups (CN0001, CN0002, WN0005, WN0006, WN0007, WN0008, WN0009): these checks compare a node against its peers. On a host with no peers they are now skipped entirely instead of emitting empty / vacuously-true results. Single-node compliance gaps are already surfaced by IC0017, IC0002, IC0003.
+  - All remaining cluster fetches are now resilient: a failing call (access, HA, replication, firewall options/rules, pools, status, log, tasks, RRD) no longer aborts the analysis. The affected check is skipped and a WG0042 Warning is recorded, consistently with what was already in place for per-node and per-guest fetches.
+  New checks
+  Access:
+  - WC0013 — User holds Administrator role transitively via a group but has no TFA.
+  - WC0014 — Disabled user still has Administrator role on /.
+  - WC0015 — root@pam has API tokens with no privilege separation (token holds full root rights).
+  - WC0016 — User is still enabled past its expiration date.
+  - IC0010 — Administrator ACL on / with Propagate disabled — children resources do not inherit.
+  - IC0011 — External realm (LDAP / AD / OpenID) does not enforce TFA at realm level.
+  Backup:
+  - WC0017 — Enabled backup job has no schedule — it will never run automatically.
+  - WC0018 — Recent backup task ended with a non-OK status.
+  - IC0012 — Backup job is currently disabled.
+  Firewall:
+  - IC0013 — Cluster firewall has enabled rules but none configure logging — no audit trail.
+  - IC0014 — Cluster firewall has 10+ disabled rules — stale configuration.
+  Cluster:
+  - IC0015 — 10+ error-level entries in the recent cluster journal.
+  - IC0016 — 10%+ of recent cluster tasks failed — investigate recurring errors.
+  - IC0017 — Cluster has a single node — HA, quorum and replication provide no real protection.
+  Per guest:
+  - IG0015 — Running guest is not covered by any HA resource.
+  - WG0043 — HA guest has no enabled replication job — on non-shared storage the failover target will have no recent data. (Originally landed as WG0025; reassigned to fix a code collision — see Fixes above.)
+  CVE checks
+  - Removed the Debian Security Tracker check (CN0014 / WN0041) and the Cve.DebianTrackerEnabled setting. PVE's /apt/versions API only exposes a curated list of Proxmox-distributed packages (proxmox-ve, pve-manager, kernel, qemu-server, …), which is not what the Debian Security Tracker indexes. The two sets do not overlap, so the check was producing zero findings by design. For a Debian-wide audit run debsecan directly on each node.
+  - CN0015 / WN0042 (NVD) — the NVD query now uses virtualMatchString (instead of cpeName with a * version wildcard, which NVD rejects with 404), so the check actually runs and returns Proxmox VE CVEs across all versions.
+  - NVD fetch failures now emit a WG0042 warning instead of leaving the check silently empty.
+  - NVD CVE entries with no CVSS score or no description are skipped.
+  > Migration: if your settings.json contains "DebianTrackerEnabled": true, just remove that line. The rest of the Cve section keeps working as before.
+  What's Changed
+  - feat: tighter CVE checks + xUnit test project by @franklupo in #46
+  - feat: 16 new diagnostic checks derived from cv4pve-report compliance by @franklupo in #47
+  - feat(resilience): wrap remaining cluster fetches with ToSafe* by @franklupo in #48
+  - fix(cve): NVD query + remove Debian Tracker (zero-match by design) by @franklupo in #49
+  - feat(compliance): v2.4.0 — full compliance reporting, 14 frameworks, 5 new checks by @franklupo in #50
+  Full Changelog: v2.3.0...v2.4.0
+ReleaseNotesUrl: https://github.com/Corsinvest/cv4pve-diag/releases/tag/v2.4.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

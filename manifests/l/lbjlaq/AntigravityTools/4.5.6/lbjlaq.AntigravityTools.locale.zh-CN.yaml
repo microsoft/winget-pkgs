@@ -1,0 +1,40 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.5.6
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+Tags:
+- account-manager
+- antigravity
+ReleaseNotes: |-
+  - [核心优化] 账号切换时同步写入本地文件凭据 (Sync File-Based Credentials on Account Switch):
+    - 支持 SSH 与容器无头环境：修复在 SSH 远程会话、容器或无 D-Bus/Keyring 环境下使用 CLI (agy) 时，因环境探测自动回退读取 ~/.gemini/oauth_creds.json 而无法感知图形端账号切换的问题。
+    - 双通道凭据同步与权限保护：在写入系统 Keyring 的同时，自动同步更新 ~/.gemini/oauth_creds.json 和 ~/.gemini/google_accounts.json，并在 Unix 系统上强制设定 0o600 严格文件权限以保护凭据安全。
+    - 相关 PR: 详见 PR #3297。
+  - [核心修复] OpenAI Responses API 协议全流程兼容性加固 (OpenAI Responses API Hardening):
+    - 宽松输入归一化：容错解析客户端未提供 type 字段的消息项，并无缝兼容字符串或数组形式的 content（含多模态图片内容）。
+    - 末尾 Assistant 预填充防护：针对上游拒绝末尾纯文本 Assistant 预填充导致的 400 错误，进行窄范围角色重写；同时自动清洗上下文转换残留的前置孤立工具历史。
+    - 标准 Responses 格式输出：统一流式与非流式转换链路，标准化输出 output_text、refusal、reasoning 以及顶层 function_call 结构，彻底解决工具调用丢失及回复空白问题。
+    - 相关 PR: 详见 PR #3305 (修复 #3302, #3303, #3304)。
+  - [问题修复] 修复 v1internal 接口下的工具配置及混合调用 400 报错 (v1internal ToolConfig Alignment):
+    - 对齐 Google 工具配置规范：在 Claude、Gemini、OpenAI 适配器中统一补齐 includeServerSideToolInvocations (camelCase) 与 include_server_side_tool_invocations (snake_case)。
+    - 避免工具混合调用 400 异常：针对受限的 v1internal 架构禁用自定义 Function Calling 与 Google Search 联网搜索的混合调用，避免上游抛出 400 Bad Request。
+    - 相关 PR: 详见 PR #3306。
+  - [问题修复] 修复 Linux/Windows 托盘图标显示为纯黑方块缺陷 (Tray Icon Platform Isolation):
+    - 平台图标加载隔离：macOS 环境加载 tray-icon.png 并启用 icon_as_template(true) 适配暗黑/明亮菜单栏自适应；Windows / Linux 环境加载原生彩色 icon.png 并禁用 Template 模式，彻底解决任务栏渲染为纯黑色方块的问题。
+    - 相关 Issue: 详见 Issue #3286, Issue #3310。
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.5.6
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

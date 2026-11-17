@@ -1,0 +1,117 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Netbird.Netbird
+PackageVersion: 0.78.0
+PackageLocale: en-US
+Publisher: NetBird GmbH
+PublisherUrl: https://netbird.io/
+PublisherSupportUrl: https://github.com/netbirdio/netbird/issues
+PrivacyUrl: https://netbird.io/privacy
+Author: Wiretrustee UG (haftungsbeschreankt)
+PackageName: Netbird
+PackageUrl: https://netbird.io/
+License: BSD-3-Clause
+LicenseUrl: https://github.com/netbirdio/netbird/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Wiretrustee UG (haftungsbeschränkt) & AUTHORS
+CopyrightUrl: https://netbird.io/terms
+ShortDescription: Connect your devices into a secure WireGuard®-based overlay network with SSO, MFA and granular access controls.
+Description: |-
+  NetBird combines a configuration-free peer-to-peer private network and a centralized access control system in a single platform, making it easy to create secure private networks for your organization or home.
+  Connect. NetBird creates a WireGuard-based overlay network that automatically connects your machines over an encrypted tunnel, leaving behind the hassle of opening ports, complex firewall rules, VPN gateways, and so forth.
+  Secure. NetBird enables secure remote access by applying granular access policies while allowing you to manage them intuitively from a single place. Works universally on any infrastructure.
+Moniker: netbird
+Tags:
+- network
+- security
+- vpn
+- wireguard
+ReleaseNotes: |-
+  Highlights
+  - Rosenpass now works through the embedded reverse proxy (#6763). Until now the proxy ran no
+    Rosenpass at all, so peers with Rosenpass enabled failed to establish through it on a PSK
+    mismatch — an incompatibility that was never documented. The proxy now runs Rosenpass in
+    permissive mode, so it connects both to Rosenpass-enabled peers and, exactly as before, to
+    peers without it. NB_PROXY_ROSENPASS=false turns it off.
+  - Lazy connections reworked: per-peer lazy state, proxy peers lazy by default, and the lazy
+    exclusion list removed (#6762, #6763).
+  - Agent Network / LLM gateway: agentgateway integration, access roles and self-service
+    endpoints, Bedrock model discovery served from the control plane, guardrail allowlists for
+    declared model ids, and the endpoint conformed to the LLM gateway protocol
+    (#7274, #7221, #7250, #7239, #7154, #7389, #7246).
+  - DNS on Windows: a catch-all NRPT rule when NetBird is the primary resolver (#7071), closing
+    the leak/poisoning window towards the system resolvers.
+  - Local Prometheus metrics endpoint on the client (#6689).
+  - Go 1.26 and go-quic v0.62.0 across client, relay and management (#7359).
+  - Unified ACL filtering for peers and routes, with multi-source rules (#6322). An internal
+    refactor: no change is expected for standard deployments.
+  - Ukrainian localization for the desktop client (#7035).
+  Behaviour changes
+  - Remote jobs (remote debug bundle and friends) are now behind an admin opt-in, with MDM
+    support (#7153). Anyone using them without the opt-in has to enable it.
+  - Remote debug bundle jobs accept an anonymization level and an upload URL (#7147).
+  - The client stays connected during the login command (#7384).
+  - Logging out of the active profile is allowed even when profiles are disabled (#7360).
+  - Profiles resolve for the invoking sudo user rather than for root (#7238).
+  - NetBird traffic stays out of third-party fwmark rules (#7314).
+  - GUI windows are created on demand and destroyed on close (#7096).
+  - Android split tunnelling: the mode is typed rather than stored as a string, and settings are
+    kept per profile (#7387, #7349).
+  Security / hardening
+  - The cached SSH JWT is bound to the local caller that obtained it (#7378).
+  - The WireGuard key is no longer logged on a parse failure (#7379).
+  - The client asks the OS for privileges when a guarded SSH setting is changed (#7066).
+  - The proxy validates header auth (#7263).
+  - Management checks a provider's URL and credential before saving them (#7301).
+  - Clarified that X-Peer-ID on metrics ingest is not a credential (#7363).
+  - The old math/rand library is gone from management (#6836).
+  Client — fixes
+  - Fixed the ICEBind races that wedge interface creation (#7377).
+  - agentConnecting is dropped whenever the ICE session state clears (#7327).
+  - A peer offer or answer arriving before the handshaker starts listening is held rather than lost
+    (#7255).
+  - Connections are swept on network loss through a shared netevents manager (#7254).
+  - Route selection survives an invalid request and is applied on a partial one (#7292).
+  - The session-expiration dialog closes only on renewal (#7337).
+  - A still-locked updater binary is tolerated when cleaning up after an update (#7286).
+  - Fixed context cancellation during restart on iOS (#7329).
+  - iOS SSO logins reuse the profile's account (#7193).
+  - The iOS profile manager was migrated from Swift to Go (#6528).
+  - The PCP implementation moved to the go-nat fork (#7282).
+  - Reverted multi-buffer support declared for the loopback XDP program (#7303).
+  - The Android TUN is renewed only when the routes it carries actually change (#7396).
+  - Overlay listeners are rebuilt when the TUN is renewed (#7397).
+  - The remote jobs opt-in is exposed in the Android and iOS SDK preferences (#7406).
+  Management — fixes
+  - Fixed geolocation panics (#7382).
+  - Fixed private services calculation on the new db path (#7383).
+  - Fixed posture check evaluation for direct peers in policy definitions (#7348) and the affected
+    peers calculation on a posture check flip (#7347).
+  - Handled the nil pointer in sendInitialSync() when the peer has been deleted (#7315).
+  - Network map from the nmap data type (#6919).
+  Self-hosted / infrastructure
+  - Better domain, Docker Compose and license validation in the self-hosted scripts (#7339).
+  - The dashboard wasm client bump is triggered by release tags (#7277).
+  - Protobuf breaking-change checks in CI (#7305).
+  - Pinned the toolchain gomobile init needs for gobind (#7291).
+  - Removed the mobile build validation workflow (#7302).
+  Upgrade notes
+  - Remote debug bundles now require an explicit opt-in (#7153). Bundles requested by the
+    management server no longer run on a peer unless remote jobs are enabled there, with
+    --allow-remote-jobs on the client or the allowRemoteJobs managed setting. Deployments
+    relying on management-triggered debug bundles must opt in before they work again. The upload
+    destination can now be pinned by the operator, with MDM taking precedence over the
+    management-supplied value (#7147).
+  - The embedded proxy now runs Rosenpass in permissive mode (#6763). Peers with Rosenpass enabled
+    can now use the reverse proxy, which previously failed on a PSK mismatch; peers without
+    Rosenpass keep connecting exactly as before. NB_PROXY_ROSENPASS=false disables it.
+  - Proxy peers now default to lazy connections (#6762).
+  Nothing else requires action.
+  Full Changelog: https://github.com/netbirdio/netbird/compare/v0.77.1...v0.78.0
+ReleaseNotesUrl: https://github.com/netbirdio/netbird/releases/tag/v0.78.0
+PurchaseUrl: https://netbird.io/pricing
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://docs.netbird.io/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

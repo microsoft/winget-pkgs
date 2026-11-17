@@ -1,0 +1,89 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: laurentiu021.SysManager
+PackageVersion: 1.75.23
+PackageLocale: en-US
+Publisher: laurentiu021
+PublisherUrl: https://github.com/laurentiu021
+PublisherSupportUrl: https://github.com/laurentiu021/SystemManager/issues
+PackageName: SysManager
+PackageUrl: https://github.com/laurentiu021/SystemManager
+License: MIT
+LicenseUrl: https://github.com/laurentiu021/SystemManager/blob/HEAD/LICENSE
+ShortDescription: Modern Windows system toolkit — network monitor, performance tuning, cleanup, battery health, process manager, and more.
+Description: |-
+  SysManager is a modern Windows system toolkit built with WPF and .NET 10.
+  It provides a comprehensive set of tools in a single application including
+  live network monitoring, ping and traceroute, speed tests, performance tuning
+  with power plan management, deep disk cleanup, duplicate file finder, disk
+  analyzer, battery health monitoring, process manager, app uninstaller,
+  startup control, Windows services manager, Windows features manager, driver
+  information, and system health overview.
+Tags:
+- battery
+- cleanup
+- dotnet
+- network-monitor
+- open-source
+- performance
+- process-manager
+- system-utility
+- uninstaller
+- windows
+- wpf
+ReleaseNotes: |-
+  [1.75.23] - 2026-09-01
+  If the power went out or the machine was reset while SysManager was saving, a file it had just saved could come
+  back empty the next time you opened the app — your presets, gaming profiles or history gone, with nothing on
+  screen to say so. The very first save of one of those files could also quietly do nothing.
+  Fixed
+  - A power cut can no longer empty a file SysManager had just saved. Saving works by writing the new
+    contents beside the old file and then swapping the two, so that being interrupted leaves you with one
+    version or the other, never half of each. The swap was reliable, but the contents were not: Windows
+    reports a save as finished once it has the data in memory, and it may write it to the drive seconds
+    later. Pull the plug in between and the swap has happened while the contents have not, so the file
+    exists under the right name and is empty. SysManager now waits for the drive to confirm it has the data
+    before swapping, which is what the promise of "either the old file or the new one" always required.
+    It matters most for the two files you would never think about: the record of what a gaming profile
+    changed on your PC, and the snapshot taken before a performance change. If either came back empty, the
+    app concluded there was nothing to undo while your PC was still changed.
+  - The first save of a preset or profile no longer fails when something else creates it at the same moment.
+    Saving asked whether the file existed yet and then acted on the answer, and those are two separate steps.
+    Two saves arriving together for a file that did not exist yet could both be told "it does not", and the
+    second one then failed because the first had already created it. Failed saves are only recorded in the
+    diagnostic log, so that save simply vanished. Only ever the first save of a given file; every save after
+    that was already handled.
+  Verify the download
+  Get-FileHash .\SysManager-v1.75.23.exe -Algorithm SHA256
+  Expected SHA256: 623FA3612E39AAB25F94ABD50A74612A255CA26FB23EAAF660D953E8D9AE61FA
+  This build is not code-signed, so Windows will warn on first launch. That is
+  expected for a small independent app: see what the warning says and what to
+  click.
+  Code signing is planned through the SignPath Foundation,
+  which provides free certificates to open-source projects, with signing performed by
+  SignPath.io. Until then, the SHA256 above and the build
+  attestation below are what establish that a download is the genuine build.
+  Code signing policy
+  This release is not code-signed. The team roles, release-approval process and
+  privacy policy required by the SignPath Foundation programme
+  are documented in advance under Code signing
+  policy. That
+  documentation is a prerequisite for applying, not evidence of a certificate. The
+  attribution line naming SignPath as the signing provider will appear here once a
+  certificate is actually issued.
+  This program will not transfer any information to other networked systems unless
+  specifically requested by the user or the person installing or operating it. Full
+  privacy policy.
+  Verify where this binary came from
+  This exe was built by GitHub Actions from this public source, and the build is
+  recorded in the Sigstore public transparency log. With the
+  GitHub CLI:
+  gh attestation verify .\SysManager-v1.75.23.exe --repo laurentiu021/SystemManager
+  That proves which commit and workflow produced this exact binary, something the
+  SHA256 file cannot show, since it is published alongside the exe it describes.
+  Each release also ships SysManager-v1.75.23.sbom.json, a CycloneDX inventory of
+  every dependency resolved for this build.
+ReleaseNotesUrl: https://github.com/laurentiu021/SystemManager/releases/tag/v1.75.23
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,71 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Sentry.sentry-cli
+PackageVersion: 3.0.0
+PackageLocale: en-US
+Publisher: Sentry
+PublisherUrl: https://sentry.io/
+PublisherSupportUrl: https://github.com/getsentry/sentry-cli/issues
+PrivacyUrl: https://sentry.io/privacy/
+Author: Functional Software, Inc.
+PackageName: sentry-cli
+PackageUrl: https://github.com/getsentry/sentry-cli
+License: BSD-3-CLAUSE
+LicenseUrl: https://github.com/getsentry/sentry-cli/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025 Sentry (https://sentry.io/) and individual contributors. All rights reserved.
+ShortDescription: A command line utility to work with Sentry.
+Moniker: sentry-cli
+Tags:
+- sentry
+ReleaseNotes: |-
+  New Sentry Support Policy
+  sentry-cli 3.0.0 and above only officially supports Sentry SaaS and Sentry self-hosted versions 25.11.1 and higher. While many Sentry CLI features may, in practice, continue working with some older Sentry versions, continued support for Sentry versions older than 25.11.1 is not guaranteed. Changes which break support for Sentry versions below 25.11.1 may occur in minor or patch releases.
+  New Versioning Policy
+  Sentry CLI now defines a semantic versioning policy. We did not explicitly define a versioning policy before, but the new versioning policy contains some notable changes versus the previous implicit policy we had been following. The main change is that dropping support for self-hosted Sentry versions now only requires a minor version bump, although such changes will be clearly communicated in the changelog.
+  [!IMPORTANT]
+  Self-hosted users: We strongly recommend pinning your Sentry CLI version, since Sentry CLI may drop support for your self-hosted Sentry version in any future minor release. Always check the changelog before upgrading Sentry CLI.
+  Breaking Changes
+  - Removed all sentry-cli files ... and sentry-cli releases files ... subcommands (#2956). These commands provided functionality for managing release files, a feature that has been deprecated in Sentry. Users still using sentry-cli files upload to upload source maps should migrate to sentry-cli sourcemaps upload.
+  - Removed the sentry-cli sourcemaps explain command (#2947). The command had been deprecated for some time, since Sentry now has a better in-product debugging flow for source map problems via the "Unminify Code" button, which is displayed on any JavaScript issues which could not be unminified.
+  - Removed the sentry-cli send-metric ... subcommands (#3006). These commands have been deprecated, and the data they send is no longer accepted by Sentry.
+  - Removed support for the legacy API key authentication method (#2935). Sentry CLI now only supports authenticating with Auth Tokens. If you are using API key authentication via any of the following methods, you need to generate and use an Auth Token, instead:
+    - --api-key CLI flag
+    - SENTRY_API_KEY environment variable
+    - api_key configuration file field
+    - apiKey option in the JavaScript API
+  - Removed the upload-proguard subcommand's --app-id, --version, --version-code, --android-manifest, and --platform arguments (#2876, #2940, #2948). Users using these arguments should stop using them, as they are unnecessary. The information passed to these arguments is no longer visible in Sentry.
+  - Removed the --started argument from the sentry-cli releases finalize command (#2972). This argument is a no-op, so any users using it should simply stop using it.
+  - Removed the --use-artifact-bundle flag from sentry-cli sourcemaps upload (#3002). The flag was a no-op that only emitted a deprecation warning.
+  Node.js Wrapper Breakages
+  The following changes only apply when using sentry-cli via the npm package @sentry/cli:
+  - The SentryCli.execute method's live parameter now only takes boolean values (#2971). Setting live to true now behaves like 'rejectOnError' did previously, with a zero exit status resolving the returned promise with "success (live mode)" and a non-zero status rejecting the promise with an error message.
+  - The option parameter to Releases.uploadSourceMaps no longer takes a live property (#2971). We now always execute the command with live set to true.
+  - Removed the apiKey option from SentryCliOptions (#2935). If you are using apiKey, you need to generate and use an Auth Token via the authToken option, instead.
+  - Removed the useArtifactBundle option from SentryCliUploadSourceMapsOptions (#3002). This deprecated option was a no-op that users should simply stop passing.
+  - Drop support for Node.js <18. The minimum required Node.js version is now 18.0.0 (#2985).
+  - The type export SentryCliReleases has been removed.
+  - The JavaScript wrapper now uses named exports instead of default exports (#2989). You need to update your imports:
+    // Old (default import)
+    const SentryCli = require('@sentry/cli');
+
+    // New (named import)
+    const { SentryCli } = require('@sentry/cli');
+    For ESM imports:
+    // Old
+    import SentryCli from '@sentry/cli';
+
+    // New
+    import { SentryCli } from '@sentry/cli';
+  Improvements
+  - The sentry-cli upload-proguard command now uses chunked uploading by default (#2918). Users who previously set the SENTRY_EXPERIMENTAL_PROGUARD_CHUNK_UPLOAD environment variable to opt into this behavior no longer need to set the variable.
+  - We now place source map debug IDs under the source map's debugId field, per the TC39 Debug ID proposal (#3005). This change affects the sentry-cli sourcemaps inject command and, unless --no-rewrite is passed, the sentry-cli sourcemaps upload command. Sentry CLI can still read the debug_id field, but whenever the CLI writes or rewrites a source map, we always use debugId.
+  - The sentry-cli build upload command now automatically tracks Sentry plugin versions from the SENTRY_PIPELINE environment variable (#2994). When SENTRY_PIPELINE contains a recognized Sentry plugin (e.g., sentry-gradle-plugin/4.12.0 or sentry-fastlane-plugin/1.2.3), the plugin version is written to the .sentry-cli-metadata.txt file in uploaded build archives, enabling the backend to store metadata for size analysis and build distribution tracking.
+  Fixes
+  - Fixed misleading error message claiming the server doesn't support chunk uploading when the actual error was a non-existent organization (#2930).
+ReleaseNotesUrl: https://github.com/getsentry/sentry-cli/releases/tag/3.0.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://docs.sentry.io/cli/
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

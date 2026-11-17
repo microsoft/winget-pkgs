@@ -1,0 +1,72 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Nub.Nub
+PackageVersion: 0.9.2
+PackageLocale: en-US
+Publisher: nub contributors
+PublisherUrl: https://nubjs.com/
+PublisherSupportUrl: https://github.com/nubjs/nub/issues
+Author: nub contributors
+PackageName: Nub
+PackageUrl: https://nubjs.com/
+License: MIT
+LicenseUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 nub contributors
+CopyrightUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+ShortDescription: The all-in-one JavaScript toolkit that augments Node.js instead of trying to replace it.
+Description: "An all-in-one toolkit for Node.js. One Rust binary to run your files and scripts, install dependencies, and manage Node itself — a Bun-like modern DX on top of the node you already have. There's no new runtime to adopt and no lock-in: every augmentation rides on Node's own public extension surfaces."
+Moniker: nub
+Tags:
+- javascript-runtime
+- node-version-manager
+- nodejs
+- package-manager
+- script-runner
+ReleaseNotes: |-
+  The standalone loader package is renamed to @nubjs/runner and gains nubr, a command that runs a TypeScript file, a package.json script, or an installed bin.
+  Important
+  The standalone loader package moved. @nubjs/loader and its eight platform packages are now @nubjs/runner and @nubjs/runner-*. The old packages stay on the registry at 0.9.1 and stop receiving updates, so switch the dependency and any --import flag over:
+  -npm install --save-dev @nubjs/loader
+  +npm install --save-dev @nubjs/runner
+  -node --import @nubjs/loader app.ts
+  +node --import @nubjs/runner app.ts
+  Nothing else about the preload changed — the entry points, the hooks and the resolution behavior are the same.
+  The unified runner
+  The package now ships a command as well as a preload. One name covers the three things the full CLI splits across nub <file>, nub run and nubx, because a package with a single bin has to unify them:
+  nubr app.ts        # a file
+  nubr build         # a package.json script
+  nubr vitest run    # an installed node_modules/.bin entry
+  Names resolve most-specific-first — a file, then a script, then a bin. A script wins over a bin of the same name, matching npm, because a script usually wraps the bin it is named after.
+  Scripts run through the same shell npm uses, with node_modules/.bin on the path and pre/post hooks honored. A file run re-execs Node with --import rather than arming the hooks in-process, so the command is identical to the documented preload form by construction. (#840, 04929a4b9b)
+
+  Package manager
+  ─────────────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬───────────────────────────
+  Area                     │What changed                                                                                                                                       │Commit
+  ─────────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────
+  Windows lifecycle scripts│Dependency lifecycle scripts run through the bundled busybox sh, so a package whose install script assumes a POSIX shell behaves the same on       │cb0e091780 (#940)
+                           │Windows                                                                                                                                            │
+  ─────────────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴───────────────────────────
+
+  Documentation
+  ─────────────────────┬────────────────────────────────────────────────────────────────────────────────────────────────────┬───────────────────────────────
+  Area                 │What changed                                                                                        │Commit
+  ─────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────
+  Unified runner page  │Retitled, moved below the command pages it unifies, and given a nubr chip in the sidebar            │ba9c84f59a
+  ─────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────┼───────────────────────────────
+  Compiling executables│The nodeExecutable examples show an absolute path alongside the $(...) form, with the Windows       │b3b5052c2b, 0d9d201bf5
+                       │spelling                                                                                            │
+  ─────────────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────┴───────────────────────────────
+
+  Release tooling
+  - The version commit now carries crates/nub-phantom/Cargo.lock. That workspace is excluded from the root and is checked with --locked in CI, so omitting it tagged a stale tree (9fdd379ba7).
+
+  What's Changed
+  - pm: run Windows dependency lifecycle scripts through the bundled busybox sh by @colinhacks in #940
+  - run: rename the standalone loader to @nubjs/runner and give it a nubr command by @colinhacks in #840
+ReleaseNotesUrl: https://github.com/nubjs/nub/releases/tag/v0.9.2
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://nubjs.com/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

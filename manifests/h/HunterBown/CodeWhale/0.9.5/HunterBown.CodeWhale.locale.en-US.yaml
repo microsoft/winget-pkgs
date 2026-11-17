@@ -1,0 +1,57 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: HunterBown.CodeWhale
+PackageVersion: 0.9.5
+PackageLocale: en-US
+Publisher: Hunter Bown
+PublisherUrl: https://github.com/Hmbown
+PublisherSupportUrl: https://github.com/Hmbown/CodeWhale/issues
+Author: Hunter Bown
+PackageName: CodeWhale
+PackageUrl: https://github.com/Hmbown/CodeWhale
+License: MIT
+LicenseUrl: https://github.com/Hmbown/CodeWhale/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2024-2026 DeepSeek CLI Contributors
+ShortDescription: Coding agent for DeepSeek models that runs in your terminal
+Description: Terminal coding agent for DeepSeek V4. It runs from the deepseek command, streams reasoning blocks, edits local workspaces with approval gates, and includes an auto mode that chooses both model and thinking level per turn.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- deepseek
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  Codewhale v0.9.5 consolidates the terminal application into one compiled runtime while preserving the familiar codewhale and codew commands. It also expands the managed Runtime API, makes session and Fleet work easier to inspect and resume, and removes the hidden local continuation backstop that could end productive work without a final assistant response.
+  Added
+  - model = "auto" for prompt-based tier selection: When set, the dispatcher analyses the user's prompt before delegating to the TUI and selects deepseek-v4-pro for complex tasks or deepseek-v4-flash for simple tasks (PR #5257).
+  - Runtime API controls for persistent goals, bounded memory inspection, MCP server and skill lifecycle management, and durable Fleet receipt evidence.
+  - Append-only session-tree history with /tree, /branch, /fork, and /resume, plus /rc remote control and managed login.
+  - A unified Fleet roster for built-in dispatch postures and a pinned indicator that keeps active background work visible above the composer.
+  - Incremental MCP registry refreshes that return the local snapshot immediately and update it in the background.
+  - Scout and Reviewer agents can use a bounded direct-command evidence shell for read-only workspace, Git, and GitHub inspection, and can keep private working notes in their own To-do while the durable transcript retains their evidence.
+  Changed
+  - codewhale-cli now contains the terminal runtime directly. Release installers expose byte-identical codewhale and codew commands without a separate TUI executable. The v0.9.5 asset set alone retains deprecated codewhale-tui-* filenames as byte-identical compatibility copies so installed v0.9.4 clients can discover and complete this upgrade.
+  - Startup release checks cache successful lookups for one hour. The updater downloads and verifies the primary runtime once, then refreshes any existing codew or legacy codewhale-tui command paths from the same bytes.
+  - Headless codewhale exec runs and verifier benchmark rollouts no longer impose a 100-step default. --max-turns remains available as an explicit opt-in ceiling; Fleet workers retain their separately configured budget.
+  - Goal token and time budgets are telemetry rather than default stop conditions, and automatic goal continuation is unlimited unless the user explicitly configures a continuation ceiling.
+  - Command-palette and slash-completion shadowing now share one alias-aware discovery contract.
+  - The website install guidance, localized product copy, navigation controls, social metadata, and Cloudflare build pipeline now describe and deploy the same one-runtime release contract.
+  Fixed
+  - The hidden 20-step no-user-input backstop no longer ends productive turns. Tool results, queued steering, child completions, REPL feedback, and goal continuations can all reach the next provider step and a final assistant response; explicit user-configured limits and genuine stuck-loop guards remain.
+  - Complete error details are directly inspectable after a failure instead of leaving the terminal with a clipped, unrecoverable error fragment.
+  - A newly minted OAuth credential is adopted in the same provider-selection flow instead of requiring a second picker trip.
+  - Fresh session titles can replace a stale cached New Session placeholder, unknown model context limits fail loudly, and release/source-install fallbacks no longer request binaries removed by the single-runtime conversion.
+  Contributors
+  - Sh1Zuku (@SparkofSpike) fixed stale cached session titles that could pin the New Session placeholder.
+  - Paulo Aboim Pinto (@aboimpinto) built the shared alias-aware command discovery contract and acceptance coverage.
+  - Sun Zhenyuan (@bistack) contributed the background incremental MCP Registry refresh.
+  - SKY ZHAO (@skyzhao1223) contributed prompt-based model = "auto" routing in PR #5257.
+ReleaseNotesUrl: https://github.com/Hmbown/CodeWhale/blob/HEAD/CHANGELOG.md#095---2026-08-08
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

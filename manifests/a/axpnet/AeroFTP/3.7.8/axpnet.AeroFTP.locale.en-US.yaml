@@ -1,0 +1,66 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 3.7.8
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [3.7.8] - 2026-05-11
+  Full Keystore Backup v2 with zstd Compression, Security Audit Closure, and CLI Parity
+  A security and infrastructure release. The .aeroftp-keystore format is now a complete, single-file application snapshot (vault entries, the five managed SQLite databases ai_chat, agent_memory, file_tags, vault_history, speedtest_history, the plugins/ and sync_snapshots/ trees, plus a 21-key whitelisted localStorage block): encrypted with the same Argon2id / AES-256-GCM envelope as before, now compress-then-encrypted with zstd level 19. A typical power-user backup drops from ~20-25 MB to ~5-7 MB. Backups produced by earlier releases (v1, vault-only) still import unchanged via the legacy no-codec path.
+  The format and the surrounding code went through a two-pass code review (two independent LLM reviewers: Claude Opus 4.7 and GPT-5.5) and every high/medium/low finding raised was addressed before release. The hardening sweep landed alongside the format change: an authenticated copy of the metadata embedded in the encrypted payload and verified before any disk write, binary fields emitted as base64 strings instead of JSON byte arrays (eliminates a 3.6× pre-zstd memory bloat that would have OOM'd 32-bit Windows builds on a large chat-history dump), bounded zstd decompression with a 2 GiB ceiling that rejects compression bombs, a size cap on the backup file before it touches RAM, atomic writes through O_EXCL tempfiles to close a symlink-race vector, AES-GCM nonce and salt validated before the cipher sees them, SQLite snapshots captured via VACUUM INTO from a read-only connection so the live DB is never mutated, restored plugin scripts come back with the executable bit set (the previous code path lost it silently and broke the plugin loader after every restore), and the import result carries a requires_restart flag because a Linux/macOS rename underneath a live app.manage(Mutex<Connection>) strands the imported state on an unlinked inode and a Windows rename outright fails with sharing-violation. Argon2id and zstd now run on a blocking worker so the Tauri runtime stays responsive during a restore.
+  The new CLI subcommand aeroftp-cli keystore export|import|info mirrors the GUI's Settings > Backup surface, so backups can be scripted into cron and CI pipelines with structured JSON output, --password-stdin and AEROFTP_KEYSTORE_PASSWORD env-var resolution that keeps passwords out of ps, per-section --skip-* selectivity, and exit codes matching the rest of the binary (0 success, 2 file not found, 6 auth failure, 7 unsupported version, 11 I/O, 99 unclassified).
+  Added
+  - Full keystore backup v2 (#178): single-file snapshot of vault entries + 5 SQLite DBs + plugins + sync snapshots + 21-key localStorage whitelist. Encrypted with Argon2id (128 MiB, t=4, p=4) + AES-256-GCM. v1 backups still import unchanged.
+  - zstd level 19 compression promoted from optional (gated on the aerorsync feature) to a default dependency. Compress-then-encrypt order; ~500 KB binary cost. Removes the conditional and lets future AeroVault v3 work rely on the codec always being linked.
+  - Two-tier export contract: full (vault + SQLite + plugins + sync snapshots + localStorage) and vault-only (slim, vault entries only, same as pre-v3.7.8 v1 export). UI radio group in Settings > Backup; CLI --mode flag.
+  - Authenticated metadata embedded inside the encrypted payload of new v2 exports and verified before any disk write. Previously the cleartext envelope metadata was the only copy and could be tampered with by anyone who had the file at rest. Pre-password preview still uses the cleartext copy with a documented note that it is not cryptographically trusted before decryption.
+  - aeroftp-cli keystore export|import|info: CLI parity with the GUI Settings > Backup surface. --json machine-readable output, --password-stdin and AEROFTP_KEYSTORE_PASSWORD env var to keep passwords out of ps, per-section --skip-vault / --skip-sqlite / --skip-files / --skip-local-storage flags for partial restores, --config-dir override, exit codes (0 / 2 / 6 / 7 / 11 / 99). CLI cannot populate the localStorage section (no WebView2) so a CLI-produced export carries 0 localStorage keys by design.
+  - portable::cli_app_config_dir() helper so standalone binaries (aeroftp-cli, aerorsync_serve) resolve the same per-app config directory the Tauri runtime would resolve, without an AppHandle. Hard-coded identifier match validated by a unit test that breaks at compile time if tauri.conf.json drifts.
+  - Portable Windows WebView isolation (#178): <exe-dir>/data/webview/ per-folder data dir, so two co-installed portable folders never share localStorage / IndexedDB / cookies / cache through the identifier-scoped %LOCALAPPDATA% default. First-run IntroHub banner points at the resolved data folder; warns when the legacy system-wide %LOCALAPPDATA%\com.aeroftp.AeroFTP directory still exists. portable_info Tauri command exposes the resolved paths to the frontend.
+  - AeroVault v3 design notes under docs/dev/AEROVAULT-V3-NOTES.md clarifying that BLAKE3 is part of the chunking stage (chunk-id + pre-decryption integrity for ECC), not a separate step between chunking and AEAD, and records the 128-bit truncation decision for chunk ids in the manifest (full 256-bit digest retained where a stage genuinely needs it). Driven by @EhudKirsh's feedback on #162; AV3 not implemented yet, doc-only (doc-only).
+  - 15 unit tests in keystore_export::tests: v1 envelope deserialisation, base64 envelope round-trip, zstd round-trip + repetitive + random payloads + bounded-decompression cap, oversized backup file rejection, restore path-traversal guards, symlinked parent rejection, plugin executable bit, authenticated metadata mismatch, malformed crypto envelope, consistent SQLite VACUUM INTO snapshot, CLI app-config-dir matches Tauri identifier.
+  - View menu toggle for Detailed Server Cards (Ctrl+Shift+V): mirrors the existing Settings > Appearance > Detailed server cards preference so users can discover and flip the heavier card layout (per-server health probes) from the menu bar without opening Settings. Default install still resolves to compact so the probes stay explicitly opt-in on older hardware. MenuItem gains a checked field that renders a leading ✓ glyph in fixed-width column so toggle entries align with non-toggle entries.
+  - fix(s3): URL-encode copy_source + Filen S3 quota redirect (#128): server_copy was concatenating the raw source key into the x-amz-copy-source header, producing a SigV4 canonicalisation mismatch on strict bridges (Filen) when the key contained spaces, emoji or RFC-3986 reserved characters. AWS and MinIO were lenient enough to accept the unencoded form. Header now reuses the same per-segment encode_s3_key_path encoder the destination URL already applies. Quota reads against the Filen S3 bridge now follow the bridge's HTTP redirect to the live quota endpoint.
+  Changed
+  - Saved server profiles are vault-only: loadSavedServerProfiles consults the unified vault as the sole source of truth. Legacy localStorage entries are imported once on first run and then removed, so deleting a profile in one portable folder no longer propagates to a co-installed instance via shared localStorage. The write-through localStorage backup that masked this bleed-through before v3.7.8 is gone.
+  - NSIS uninstaller is install-format aware: NSIS_HOOK_PREUNINSTALL snapshots presence of $APPDATA\com.aeroftp.AeroFTP before the bundled sections run; the post-uninstall hook detects whether the user ticked "Remove application data" by comparing pre/post state. When ticked, the three legacy granular dialogs are suppressed and the two extra paths ($APPDATA\aeroftp legacy vault, %LOCALAPPDATA%\com.aeroftp.AeroFTP cache) are wiped silently. When unticked, the per-area prompts still appear.
+  - Backup file size capped at 2 GiB before any allocation. A 10 GB malicious .aeroftp-keystore would otherwise OOM the backend on the first std::fs::read().
+  - SettingsPanel import dialog surfaces the requires_restart flag in an amber-toned banner when an import touches SQLite or plugin files. The toast text suggests restarting AeroFTP before reopening AeroAgent or AeroFile so the live Mutex<Connection> is rebuilt against the new files on disk.
+  - Frontend keystore message type widened from success | error to success | error | info so the restart-required banner uses the distinct amber palette. Dead typeof filePath === 'string' ? filePath : filePath ternary in the import file picker removed; the dialog already returns string | null with multiple: false.
+  Fixed
+  - Plugin executable bit silently lost on restore: the previous restore path checked rel.starts_with("plugins/") for the 0o700 mode decision, but the plugins/ prefix had already been stripped by the grouping loop higher up, so the check was structurally unreachable and every restored script came back as 0o600. The plugin loader requires the execute bit and silently skipped them, so a "full backup, full restore" cycle hard-broke the plugin system. Now the caller passes make_scripts_executable: bool explicitly; the extension whitelist covers .sh, .bash, .zsh, .py, .js, .mjs, .rb, .pl, .ts. Live-tested via the new CLI on a synthetic plugin tree.
+  - SQLite restore corrupting the running app state: import previously rewrote ai_chat.db and friends underneath the live app.manage(Mutex<Connection>) connection. On Linux/macOS the rename succeeded but the live connection kept writing to the now-unlinked old inode (imported state invisible until restart); on Windows the rename outright failed with ERROR_SHARING_VIOLATION (import silently no-op'd). Both outcomes looked like success to the user. Fixed by returning a requires_restart flag in KeystoreImportResult plus a dedicated keystore-import-requires-restart Tauri event, surfaced as an amber banner in the import dialog.
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v3.7.8
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

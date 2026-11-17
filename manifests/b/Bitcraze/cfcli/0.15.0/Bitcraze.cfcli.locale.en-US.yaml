@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: Bitcraze.cfcli
+PackageVersion: 0.15.0
+PackageLocale: en-US
+Publisher: Bitcraze
+PublisherUrl: https://www.bitcraze.io/
+PublisherSupportUrl: https://github.com/evoggy/cfcli/issues
+Author: Marcus Eliasson
+PackageName: cfcli
+PackageUrl: https://github.com/evoggy/cfcli
+License: Apache-2.0
+LicenseUrl: https://github.com/evoggy/cfcli
+Copyright: Marcus Eliasson
+CopyrightUrl: https://github.com/evoggy/cfcli
+ShortDescription: CLI tool for Crazyflie drones
+Description: CLI tool for Crazyflie drones
+Moniker: cfcli
+Tags:
+- crazyflie
+ReleaseNotes: "### New features\n\n• **Listing the attached decks** — the new `deck list` command prints one line per\n  attached expansion deck with its board name, board revision and serial number.\n  See [docs/deck.md](docs/deck.md).\n\n  ```text\n  Name           | Rev | Serial\n  ---------------+-----+--------------------------\n  bcFlow2        | A   | 0DD07B8E0000002D\n  WiFi camera de | G   | 7E0048001250465753393020\n  ```\n\n  Both kinds of deck identity memory are covered：`OneWire` decks, where the\n  serial is the 1-wire ROM id, and `DeckCtrl` decks, where the name and revision\n  come from the info page and the serial is the deck controller's CPU id. The\n  serial is reported together with the memory listing, so a deck whose memory\n  can't be read — a 1-wire memory failing its CRC check, for instance — is still\n  listed with its serial and `?` in the fields that could not be read, with the\n  reason on stderr. `--csv` gives machine-readable output. A deck with no\n  identity memory at all is not listed, since the Crazyflie has no way of knowing\n  it is there.\n\n• **Verifying memory contents** — `mem verify` takes the same arguments as\n  `mem write`, but reads the memory back and compares it against the data you\n  give it, so a write can be confirmed:\n\n  ```bash\n  cfcli mem verify DeckMemory -s 0x10000000 -i color-led.bin\n  ```\n\n  The number of bytes read back is the length of the expected data, so the same\n  `--data`/`--input` that wrote a region verifies exactly that region. A match\n  prints a confirmation and exits **0**; otherwise the differing bytes are listed\n  with their absolute offsets and the command exits **1**, so a script can act on\n  it:\n\n  ```text\n  Offset     | Expected | Actual\n  -----------+----------+--------\n  0x00000004 | 0xFF     | 0x00\n  0x00000005 | 0xBD     | 0xBC\n  Error：Verify FAILED: 2 of 32 bytes differ\n  ```\n\n  At most 16 differing bytes are listed, the rest are summarised as\n  `... and N more`. See [docs/memory.md](docs/memory.md).\n\n### Bug fixes\n\n• **Flashing no longer fails on a deck that is already up to date** — the\n  Lighthouse deck cannot be commanded into its bootloader, and the firmware only\n  leaves it there while its bitstream is out of date. A running deck is therefore\n  already up to date, and is now skipped instead of failing the whole flash run.\n  The Crazyflie is only restarted if something was actually written.\n  ([#6](https://github.com/bitcraze/cfcli/issues/6))\n\n### Improvements\n\n• **Consistent table output** — `param list`/`get`, `log list`, `mem list`,\n  `loco display` and the new `deck list` now build their tables with\n  [tabled](https://crates.io/crates/tabled), so columns are sized to fit their\n  contents instead of being padded to a fixed width. A name longer than the old\n  fixed width no longer pushes the rest of the row out of alignment, a set of\n  short names no longer leaves a wide gap before the next column, and numeric\n  columns are right-aligned. Note that `mem list` changes shape as\n  part of this — it prints an `ID | Type | Size | Serial` table rather than one\n  formatted line per memory, so anything parsing that output should use `--csv`,\n  which is unchanged.\n\n• **Warning when a deck product name is too long** — the product name in the\n  DeckCtrl info page is stored in a 15 byte field, so `util deck-ctrl bingen`\n  and `binflash` now warn on stderr when the name in the YAML configuration does\n  not fit and say how it will be stored. The configuration is still written, so a\n  name that was already flashed keeps working.\n\n• **Arming moved to the supervisor subsystem** — `hlc arm`/`hlc disarm` now use\n  the supervisor API in crazyflie-lib, replacing a method deprecated in 0.8.2.\n  No change in behaviour.\n\n• **crazyflie-link and crazyradio are used through crazyflie-lib** — both are\n  re-exported by crazyflie-lib, so the exact versions it was built against are\n  reachable as `crazyflie_lib::crazyflie_link` and no longer have to be direct\n  dependencies kept manually in sync. `packet_capture` is enabled through the\n  crazyflie-lib passthrough feature, still on Unix targets only. Internal change,\n  no difference in behaviour."
+ReleaseNotesUrl: https://github.com/bitcraze/cfcli/releases/tag/0.15.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

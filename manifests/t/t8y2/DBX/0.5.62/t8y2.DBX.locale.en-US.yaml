@@ -1,0 +1,64 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: t8y2.DBX
+PackageVersion: 0.5.62
+PackageLocale: en-US
+Publisher: t8y2
+PublisherUrl: https://github.com/t8y2
+PublisherSupportUrl: https://github.com/t8y2/dbx/issues
+Author: t8y2
+PackageName: DBX
+PackageUrl: https://github.com/t8y2/dbx
+License: Apache-2.0
+LicenseUrl: https://github.com/t8y2/dbx/blob/HEAD/LICENSE
+ShortDescription: 15MB，lightweight, cross-platform database client. Supports MySQL, PostgreSQL, SQLite, Redis, MongoDB, DuckDB, ClickHouse, SQL Server and more.
+Tags:
+- clickhouse
+- database
+- database-client
+- database-management
+- duckdb
+- gui
+- mongodb
+- mysql
+- postgresql
+- redis
+- rust
+- sql-server
+- sqlite
+- tauri
+- vue
+ReleaseNotes: |-
+  新功能
+  - RocketMQ 管理控制台 — 新增 RocketMQ Agent 和独立连接入口，支持多个 NameServer 与 ACL 认证，并提供 Topic、消费组、消息查询、消息追踪、死信队列、ACL、Broker 和监控等管理能力；Desktop 与 Web 使用统一 MQ API，并补充快速入门文档。(contributed by @aiLi0617)
+  - MCP 集中权限策略 — 可在「设置 → MCP」统一选择允许访问的连接，并配置只读、数据读写或完全访问三级权限；SQL、MongoDB、Redis、连接管理及桌面端展示操作都会在服务端重新校验，客户端环境变量只能收紧、不能绕过 DBX 策略，配置修改无需重启 MCP Server。(contributed by @eryajf) (closes #3696, #3800)
+  - SQLite 附加数据库结构管理 — SQLite 附加数据库现可直接创建和修改表、索引、触发器等对象，查询、对象导航和结构重建会使用正确的附加 schema，不会误操作主数据库。(contributed by @eryajf) (closes #3873)
+  - Kingbase 原生 Agent — 新增基于 Go 的 Kingbase 原生 Agent，无需下载或运行 JRE，并接入正式构建、离线包和驱动下载流程；继续覆盖查询、事务、结构元数据、DDL 和多种兼容模式。
+  - MySQL 对象创建模板 — MySQL 存储过程、函数和触发器右键菜单新增创建入口，可自动生成带 DELIMITER、当前数据库及目标表名的可执行模板，同时避免向 Doris、StarRocks、TiDB 等 MySQL 协议连接错误开放入口。(contributed by @zipg) (closes #3880)
+  - SQL 参数语法扩展 — 支持 scheduler 和 MyBatis 常见的 '${date}'、"${name}"、'#{enabled}' 等整段带引号占位符，参数替换会避免重复添加引号。(contributed by @xddcode) (closes #3909)
+  - 数据网格操作增强 — 可在设置中指定打开表时的默认分页行数，并可从选中的部分列和行直接生成对应列清单的 INSERT SQL。(contributed by @eryajf) (closes #3889, #3892)
+  - 关闭其他标签页快捷键 — macOS 默认使用 Option+Command+W，Windows/Linux 默认使用 Shift+Alt+W，也可在快捷键设置中重新绑定或清除，并继续遵循未保存内容确认流程。(contributed by @serenez) (closes #3558)
+  改进
+  - MySQL 批量编辑性能 — 对具备完整主键的批量更新和删除合并 SQL，每批最多 500 行并限制语句大小；2500 行操作可从 2500 条减少到 5 批，同时压缩执行历史和回滚 SQL 占用，其他数据库及不满足安全条件的场景保持原有逐行行为。(contributed by @zipg) (closes #3896)
+  - 大规模元数据与查询性能 — TDengine 表列表改为服务端分页，显著降低大量子表场景的峰值内存和超时风险；Kingbase 大结果集使用服务端分页，并可在连接槽耗尽时安全回收同库空闲元数据连接。(contributed by @zipg) (closes #3904)
+  - SQL 编辑器交互 — 默认执行范围调整为光标所在语句，逐语句运行按钮和成功/失败状态合并到固定宽度区域，执行前后编辑区不再横向移动；VS Code 主题的多行标签边框也更易辨识。(contributed by @zipg)
+  - 应用更新安全性 — 更新安装前会检查数据传输、导出、备份、SQL 文件、查询及执行计划任务；下载期间出现新任务时会保留已下载更新包，待任务结束后再执行安装，避免更新直接中断工作。(contributed by @zipg) (closes #3751)
+  - MCP 安装兼容性 — 桌面端会读取 npm 包声明的实际 MCP 启动入口，不再依赖固定目录结构，并根据包自身的 engines.node 判断兼容性，支持 Node.js 18.18 及以上版本。
+  - 对象搜索统计 — 侧边栏搜索数据库对象时，分组数量会随当前筛选结果更新，不再继续显示未过滤的对象总数。(contributed by @eryajf) (closes #3916)
+  修复
+  - Kingbase 兼容性 — 修复普通账号因 sys_freespace 权限无法浏览对象、V8R6 字段默认值加载失败、MySQL 模式字符串长度丢失、SQL Server 模式索引查询语法错误、异常 identity 兼容视图阻断表结构加载、视图源码保存无效、反引号 SQL 误报，以及 systems、syslog 等用户 schema 被误过滤的问题。(contributed by @zipg, @SpencerZhang, @q396921921) (closes #3590, #3888, #3895, #3901, #3932, #3963)
+  - 低权限数据库元数据 — 达梦普通用户无权读取 SYS.SYSOBJECTS 时会降级到可访问目录加载 schema；Xugu 改用访问范围受控的目录读取视图、触发器、过程、函数和包源码，并重建表 DDL，避免依赖高权限或可能阻塞的元数据接口。(contributed by @zipg, @mapan0424) (closes #3954)
+  - MySQL 编辑器与导出 — DUAL 不再被当作不存在的物理表，补充 SYSDATE() 函数提示；完整导出启用删除选项时，也会为视图、存储过程和函数生成正确的 DROP ... IF EXISTS，导出文件可重复导入。(contributed by @zipg) (closes #3879, #3902)
+  - Oracle 查询与补全 — SYSDATE、SYSTIMESTAMP、CURRENT_DATE、USER 等无括号系统值可正确补全且不再产生字段误报；查询不存在的表时跳过无意义的索引和 ROWID 元数据探测，更快返回真实 Oracle 错误。(contributed by @zipg) (closes #3907, #3962)
+  - PostgreSQL 向量精度 — pgvector 的 vector 数据使用 float4 最短可往返文本显示，不再固定四舍五入到六位小数，同时避免展开无意义的浮点噪声。(contributed by @onenewcode) (closes #3931)
+  - MongoDB 点号集合补全 — 集合名包含点号时，可继续完成完整集合名，并自动生成 db.getCollection("完整名称")，普通集合的方法补全保持不变。(contributed by @zipg) (closes #3948)
+  - Excel 导入格式 — 数字单元格映射到文本字段时会保留 Excel 的补零、小数位、千分位、科学计数法、百分比、货币和区域格式；数值字段仍使用原始数值语义。(contributed by @zipg) (closes #3683)
+  - 数据网格中文输入 — WHERE 和 ORDER BY 条件输入框在中文 IME 组字期间不会因自动展开而失焦，也不会由 Enter 或 Tab 提前截断拼音。(contributed by @xddcode) (closes #3900)
+  - 自定义 JDBC 依赖提示 — 驱动缺少运行时依赖时，会提示使用 Maven 坐标或导入多个 JAR，并可从错误弹窗直接进入驱动管理。(contributed by @zipg) (closes #3899)
+  - 表结构创建 — 创建表时会统一清理名称首尾空格，建表、索引、外键和触发器等后续 SQL 使用相同的规范化名称。(contributed by @zipg)
+  安装
+  > 国内下载：如果 GitHub 下载较慢，可从 CNB 镜像 下载桌面端安装包，Docker 镜像从 docker.cnb.cool/dbxio.com/dbx:0.5.62 拉取。
+ReleaseNotesUrl: https://github.com/t8y2/dbx/releases/tag/v0.5.62
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

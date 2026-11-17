@@ -1,0 +1,52 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: lbjlaq.AntigravityTools
+PackageVersion: 4.7.9
+PackageLocale: zh-CN
+Publisher: lbjlaq
+PublisherUrl: https://github.com/lbjlaq
+PublisherSupportUrl: https://github.com/lbjlaq/Antigravity-Manager/issues
+PackageName: Antigravity Tools
+PackageUrl: https://github.com/lbjlaq/Antigravity-Manager
+License: CC-BY-NC-SA-4.0
+LicenseUrl: https://github.com/lbjlaq/Antigravity-Manager/blob/HEAD/LICENSE
+ShortDescription: 专业的 Antigravity 账号管理与切换工具。为 Antigravity 提供一键无缝账号切换功能。
+Description: |-
+  Antigravity Tools 是一个专为开发者和 AI 爱好者设计的全功能桌面应用。它将多账号管理、协议转换和智能请求调度完美结合，为您提供一个稳定、极速且成本低廉的 本地 AI 中转站。
+  通过本应用，您可以将常见的 Web 端 Session (Google/Anthropic) 转化为标准化的 API 接口，彻底消除不同厂商间的协议鸿沟。
+Tags:
+- account-manager
+- antigravity
+ReleaseNotes: |-
+  - [Gemini 报文极简瘦身与单真签名锚点法则] 彻底根除 10MB 签名打爆 1,048,576 Token 与 400 校验拦截 (PR #3482):
+    - 痛点根治：生产排查发现多轮复杂代码推理中，单次签名长达 300KB 至 509KB，旧网关单轮 3 至 5 重无脑复制累积出 9.93MB 签名（占报文 95.2%）击穿 1,048,576 上限抛出 400 崩溃。
+    - 首工具独占真签：确立全轮次有且仅有首个 functionCall 独占承载真实大签名，thought 思考块保持纯净文本，彻底打破双重镜像冗余。
+    - 并行工具哨兵占位：同轮后续并行工具统一注入 32 字节标准哨兵占位符（skip_thought_signature_validator），完美满足 Google AST 校验且绝不复制放大 500KB 签名，单轮签名体积直降 80% 以上。
+    - 工具返回纯净化：用户端回传的 functionResponse 彻底剥离签名，杜绝向 Google 传递客户端非法假签名。
+  - [Claude 双引擎思考签名全流程闭环] 彻底根除 Field required 与 Invalid signature 报错 (PR #3482):
+    - 官方契约对齐：严格遵循 Anthropic 规范，签名必须且只能挂在首位思考块上（messages[x].content[0].signature），工具调用绝不携带签名亦不注入假哨兵。
+    - 无思考过程绝不强塞占位：针对无思考过程轮次（快速连续调工具或简短回复），网关坚决不再凭空强塞空的思考占位块，彻底消除 messages.x.content.0.thinking.signature: Field required。
+    - 三态闭环状态机：客户端自带合法签名采纳反向入库；客户端被压缩从库中穿透回捞；库中无记录则纯净出站。
+    - Google Vertex Protobuf 签名正规化：网关进站时将 Claude 模型客户端签名自动包装为发往 Vertex 所需的 Base64 格式，出站响应时无损还原为 Anthropic 原生 ASCII 格式。
+  - [周配额持续熔断深度调度与周期 Token 统计] (PR #3482, Fixes #3480, #3477, Merges #3484):
+    - 配额桶隔离与硬约束：周配额与临时 429 彻底解耦独立存储，耗尽时作为系统级硬约束自动熔断。
+    - 最晚截止时间对齐：严格对齐多重耗尽的最晚重置时间，杜绝周期临近时过早解封导致的 429 连环死循环。
+    - 当周 Token 紧凑计数展示：账号卡片下方展示当周周期真实消耗的 Token 总量（K/M/B 紧凑计数，如 206.99M），输入+输出精确汇总。
+  - [局域网与公网 IPv6/IPv4 双栈监听支持] (PR #3482):
+    - 双栈通配监听：开启局域网访问时绑定 [::]:port 并关闭 IPV6_V6ONLY，支持公网 IPv6 DDNS 域名（AAAA 记录）直连，消除 Connection refused 缺陷。
+    - IPv6 CIDR 安全过滤与多语言：支持高达 128 位掩码匹配，并全量补齐 12 国多语言界面。
+  - [OpenAI / Codex 身份声明通用自适应归一化] (PR #3489, Thanks to @cuteyuchen):
+    - 通用模式自适应剥离：引入预编译正则 RE_CODEX_IDENTITY，自动捕获任意角色定语并精准截断剥离竞品大模型声明指纹（based on GPT-5/GPT-6 等），前向兼容未来变体并防御上游 WAF 伪限流。
+  - [前端安全加固与进程生命周期保护] (PR #3482, Fixes #3485, #3488, #3481):
+    - 增强协议白名单防 XSS，OAuth 同源校验，修复 Classic/IDE 版探测冲突与跨平台启动保护。
+
+  🤝 v4.7.9 核心贡献者致谢 (Contributors)
+  特别感谢以下贡献者对 v4.7.9 版本的研发与技术贡献：
+  - @jeikl (PR #3482: 主导 Gemini 报文极简瘦身、Claude 思考签名闭环、IPv6 双栈监听、周配额持续熔断深度重构)
+  - @JeikCode (全流程 AI 协同架构与代码实现，Co-authored)
+  - @buluw (PR #3484: 提出周配额独立桶隔离机制与当周周期 Token 统计核心思路)
+  - @cuteyuchen (PR #3489: 提出新版 Codex 身份声明提示词拦截排查与思路贡献)
+ReleaseNotesUrl: https://github.com/lbjlaq/Antigravity-Manager/releases/tag/v4.7.9
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

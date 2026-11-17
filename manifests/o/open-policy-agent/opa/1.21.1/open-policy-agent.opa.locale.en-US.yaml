@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: open-policy-agent.opa
+PackageVersion: 1.21.1
+PackageLocale: en-US
+Publisher: Open Policy Agent
+PublisherUrl: https://www.openpolicyagent.org/
+PublisherSupportUrl: https://github.com/open-policy-agent/opa/issues
+PackageName: Open Policy Agent
+PackageUrl: https://www.openpolicyagent.org/
+License: Apache-2.0
+LicenseUrl: https://github.com/open-policy-agent/opa/blob/main/LICENSE
+ShortDescription: Open Policy Agent (OPA) is an open source, general-purpose policy engine that enables unified, context-aware policy enforcement across the entire stack.
+ReleaseNotes: |-
+  This release fixes a compiler regression introduced in OPA v1.21.0.
+
+  ### Fix `some … in`/`every` in comprehensions nested in object and set literals ([#9280](https://github.com/open-policy-agent/opa/issues/9280))
+
+  A comprehension using `some … in` or `every` in its body, nested inside an object or set literal, was wrongly treated as ground, so the compiler skipped rewriting it. `some … in` then failed with `rego_unsafe_var_error`; `every` caused a compiler panic:
+
+  ```rego
+  package example
+
+  p := {"k"：[r.a | some r in input.xs]}           # rego_unsafe_var_error: var r is unsafe
+
+  q := {[1 | every x in input.xs { x > 0 }]}       # panic
+  ```
+
+  Array literals weren't affected, and neither were literals that contain some other non-ground term.
+
+  authored by @srenatus, reported by @tun0
+ReleaseNotesUrl: https://github.com/open-policy-agent/opa/releases/tag/v1.21.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

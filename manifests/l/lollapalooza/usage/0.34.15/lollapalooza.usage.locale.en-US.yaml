@@ -1,0 +1,47 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: lollapalooza.usage
+PackageVersion: 0.34.15
+PackageLocale: en-US
+Publisher: lollapalooza
+PublisherUrl: https://github.com/aqua5230
+PublisherSupportUrl: https://github.com/aqua5230/usage/issues
+PackageName: usage
+PackageUrl: https://github.com/aqua5230/usage
+License: AGPL-3.0-only
+LicenseUrl: https://github.com/aqua5230/usage/blob/main/LICENSE
+Copyright: Copyright (c) 2026 lollapalooza (https://github.com/aqua5230)
+ShortDescription: System tray app that pins Claude Code, Codex, and Antigravity quota to the screen
+Moniker: usage
+Tags:
+- antigravity
+- claude
+- claude-code
+- codex
+- quota
+- system-tray
+- usage
+ReleaseNotes: |-
+  Fixed
+  - The Antigravity Gemini weekly quota keeps updating on networks that only allow traffic through a proxy. The pre-launch check from 0.34.14 connected to Google directly, so behind a proxy it always looked offline and the CLI never ran. A configured HTTPS proxy now counts as online; a bare NO_PROXY setting still runs the check.
+  - The offline check can no longer hold up a refresh when DNS hangs after a wake. Its 3-second limit now covers the name lookup, not just the connection.
+  - The Antigravity auto-start window keeper now follows the Gemini quota, whichever model group the card shows. It always sends its message to a Gemini model, but decided from the displayed group, so with Claude/GPT or Argon selected it started the window at the wrong time or never.
+  - The Gemini weekly quota no longer jumps into the 5-hour row in its last five hours. When usage falls back to Google's model list, a weekly limit close to its reset was mistaken for a 5-hour one.
+  - Signing in to Antigravity again takes effect on the next refresh. After Google rejected the sign-in, usage kept retrying the rejected token for up to an hour.
+  - A damaged Antigravity quota cache no longer hides the card for good. An unreadable cache file is now moved to ~/.usage/quarantine/ and the quota is fetched fresh.
+  - On Windows, the taskbar countdown starts and clears promptly with the panel closed. It could lag up to five minutes when a quota filled or reset between refreshes.
+
+  繁體中文
+
+  修正
+  - 只能透過代理伺服器上網的網路，Antigravity 的 Gemini 本週額度也會照常更新。 0.34.14 加的啟動前檢查直接連 Google，走代理的網路永遠被判成離線，CLI 一直不跑。現在設了 HTTPS 代理就算連得上；只設 NO_PROXY 仍會照常檢查。
+  - 喚醒後 DNS 卡住時，離線檢查不再拖住刷新。 3 秒上限現在連查網址也算在內，不只算連線。
+  - Antigravity 自動開窗改看 Gemini 的額度，不管卡片顯示哪個模型組。 它一律對 Gemini 模型送訊息，卻照卡片選的組判斷，選 Claude/GPT 或 Argon 時會在錯的時間開窗，或根本不開。
+  - Gemini 本週額度在最後五小時不再跳到 5 小時那一列。 usage 改讀 Google 模型清單時，快重置的週額度會被誤認成 5 小時額度。
+  - 重新登入 Antigravity 後，下次刷新就生效。 以前 Google 拒絕登入憑證後，usage 會拿同一張被拒的憑證再試最久一小時。
+  - Antigravity 額度快取檔損壞時，卡片不再永久消失。 讀不了的快取檔會移到 ~/.usage/quarantine/，再重新抓額度。
+  - Windows 面板關著時，工作列倒數也會即時出現、即時消失。 以前額度在兩次刷新之間用滿或重置，倒數最多慢五分鐘。
+ReleaseNotesUrl: https://github.com/aqua5230/usage/releases/tag/v0.34.15
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

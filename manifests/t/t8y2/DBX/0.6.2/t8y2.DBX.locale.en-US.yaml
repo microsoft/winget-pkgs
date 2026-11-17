@@ -1,0 +1,66 @@
+# Created with WinGet Tracker using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: t8y2.DBX
+PackageVersion: 0.6.2
+PackageLocale: en-US
+Publisher: t8y2
+PublisherUrl: https://github.com/t8y2
+PublisherSupportUrl: https://github.com/t8y2/dbx/issues
+Author: t8y2
+PackageName: DBX
+PackageUrl: https://github.com/t8y2/dbx
+License: Apache-2.0
+LicenseUrl: https://github.com/t8y2/dbx/blob/HEAD/LICENSE
+ShortDescription: 15MB，lightweight, cross-platform database client. Supports MySQL, PostgreSQL, SQLite, Redis, MongoDB, DuckDB, ClickHouse, SQL Server and more.
+Tags:
+- clickhouse
+- database
+- database-client
+- database-management
+- duckdb
+- gui
+- mongodb
+- mysql
+- postgresql
+- redis
+- rust
+- sql-server
+- sqlite
+- tauri
+- vue
+ReleaseNotes: |-
+  新功能
+  - 标签页独立窗口 — SQL 与数据标签页可拖拽拆分为独立窗口，编辑器光标、选区、事务状态与查询结果完整保留；支持拖回主窗口，关闭时对未保存修改确认，独立窗口异常退出后重新打开主窗口可恢复对应标签页。 (contributed by @DengQingNian) (PR #7935)
+  - 星环 ArgoDB 专用 Agent — 星环Argo 拥有专属 Go Agent 并在驱动管理器中单独展示，存储过程与函数源码默认可浏览；同时修复前端 PL/SQL 语句拆分，CREATE OR REPLACE PROCEDURE 整体执行不再被分号截断报错，Hive 系 Agent 执行失败时显示服务器原始消息与 SQLState，不再输出 Go 指针地址。 (contributed by @wangfengxiang) (PR #7933)
+  - MCP 存储过程工具 — MCP Server 新增 dbx_list_routines 与 dbx_get_routine_source 工具，可列出 Schema 中的存储过程与函数并读取源码，重载场景可用签名区分。 (contributed by @wangfengxiang) (PR #7937)
+  - Redis 集合成员搜索 — LIST / SET / ZSET 键详情工具栏新增成员搜索框，与 HASH 一样支持服务端过滤，各自的分页游标与排序语义保持不变；搜索中切换 ZSET 排序不再丢失关键词。 (contributed by @onenewcode) (PR #7978)
+  - 网格单元格 URL 打开 — 单元格内容为完整 http/https 链接时，悬浮操作浮层提供「在浏览器中打开 URL」按钮，可直接跳转。 (contributed by @eryajf) (PR #7982)
+  - Kimi 推理强度配置 — Kimi 配置新增推理强度设置：kimi-k3 支持 low/high/max（默认 max），kimi-k2.6 支持开/关。 (contributed by @eryajf) (PR #7992)
+  - SQL 文件执行失败明细 — SQL 文件执行失败时不再只显示第一条错误，可展开「失败详情」逐条查看失败语句与对应错误，进度弹窗同步展示。 (contributed by @CN-Scars) (PR #7938)
+  - 虚谷表空间详情 — 侧边栏虚谷表空间与数据文件节点显示详情浮层，包含容量、块使用率、文件路径与尺寸等信息。 (contributed by @mapan0424) (PR #7771)
+  改进
+  - 执行报错保留原始信息 — SQL 执行失败时错误提示与执行历史保留后端原始错误详情，本地化摘要与原始信息并存，不再被通用传输失败文案覆盖或重复拼接。 (contributed by @zipg) (PR #7996)
+  - 条件筛选补全预选 — 网格 WHERE 条件编辑的字段补全列表默认高亮第一项，直接回车即可插入，无需先按方向键。 (contributed by @eryajf) (PR #7976)
+  修复
+  - 长耗时操作阻塞其他连接 — 连接池注册表锁不再跨数据库 I/O 持有，单个数据源执行长时间操作（如 MongoDB 建索引）时，其他无关连接的打开、重连与健康检查不再被连带阻塞。 (contributed by @CN-Scars) (PR #7783)
+  - 手动事务结果编辑自锁 — 手动事务模式下编辑查询结果改用当前事务会话执行，SELECT ... FOR UPDATE 持锁后保存不再自阻塞超时；保存后在事务会话内刷新，Oracle 下普通查询后编辑也能正确显示提交/回滚操作。 (contributed by @zipg) (PR #7943)
+  - 数据页头部名称截断 — 数据页顶部连接/表名/库域徽章按内容自适应宽度，仅整行空间不足时才截断，悬停可查看完整名称。 (contributed by @Abeautifulsnow) (PR #7975)
+  - Queries 节点默认折叠 — 打开连接时「Queries」节点默认折叠，已手动展开的状态保持不变。 (contributed by @sxhjlzl) (PR #7865)
+  - SQL Server 表变量作用域 — Agent 连接执行多条语句时保留批处理边界，DECLARE @t TABLE 声明的表变量可在后续语句中使用，不再报变量未声明。 (contributed by @zipg) (PR #7995)
+  - PostgreSQL delimiter 字段误判 — 字段名或别名为 delimiter 的语句不再被误判为 DELIMITER 客户端指令，含此类字段的建表等语句边界保持完整，可正常执行。 (contributed by @zipg) (PR #7871)
+  - MySQL SQL 文件导入语句边界 — 导入 MySQL/MariaDB/Doris SQL 文件时保留原始 INSERT 语句边界，不再合并相邻单行插入，依赖 LAST_INSERT_ID() 等会话语义的脚本导入结果保持正确。 (contributed by @1320209572) (PR #7770)
+  - StarRocks 物化视图语句拆分 — CREATE MATERIALIZED VIEW ... REFRESH ASYNC/MANUAL 等刷新定义不再被拆成新语句，执行当前语句与批量执行可整条完成。 (contributed by @CN-Scars) (PR #7932)
+  - openGauss 字段扩展属性 — 表结构编辑器在 openGauss 下隐藏不支持的字段扩展属性（身份列等），旧草稿遗留的扩展属性也不会在保存时提交，不再生成报错的 DDL。 (contributed by @zipg) (PR #7987)
+  - IoTDB 时间显示与 max_by — 时间列按会话时区（默认 Asia/Shanghai）渲染，修复时间偏移；max_by(x, time)/min_by(x, time) 结果按时间类型格式化，不再显示为原始数值。 (contributed by @zipg) (PR #7898)
+  - ArgoDB 默认无 SASL 认证 — 新建 ArgoDB 连接默认 auth=noSasl，未开启 Kerberos 的集群可直接连接，无需手动修改连接参数。 (contributed by @zipg) (PR #7901)
+  - 虚谷调度作业源码 — 虚谷连接支持查看调度作业（Job）的对象源码，相关对象类型不再无法识别。 (contributed by @mapan0424) (PR #7764)
+  - RocketMQ 消费组列表截断 — Topic 消费组列表分页加载全部条目，超过 200 个不再被截断。 (contributed by @0verme) (PR #7762)
+  - 补全图标字形裁剪 — 代码补全列表的图标伪元素钉定在图标框内，WebKit 系引擎不再因静态定位分歧把字形裁掉一半。 (commit e98e3157f)
+  安装
+  - Win7 专用安装包自我拦截 — 修复 v0.6.1 Win7/Server 2012 R2 专用安装包启动时误提示「不支持 Windows 7 或 Windows Server 2012 R2」的问题：fixed-runtime 模式下 NSIS 不再进入旧系统分流判断，普通在线/离线包在旧系统上的专用包引导保持不变。 (contributed by @zipg) (PR #7957)
+  - 安装包命名统一 — macOS Apple Silicon dmg 与 Linux ARM64 AppImage 由 aarch64 统一为 arm64，Windows 离线安装包文件名去掉 -webview2 标记（如 DBX_x.y.z_x64-offline-setup.exe），官网下载页、安装器内旧系统引导链接与 Homebrew Cask 同步更新。 (contributed by @zipg) (PR #7869)
+  > 国内下载：如果 GitHub 下载较慢，可从 CNB 镜像 下载桌面端安装包，Docker 镜像从 docker.cnb.cool/dbxio.com/dbx:v0.6.2 拉取。
+ReleaseNotesUrl: https://github.com/t8y2/dbx/releases/tag/v0.6.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

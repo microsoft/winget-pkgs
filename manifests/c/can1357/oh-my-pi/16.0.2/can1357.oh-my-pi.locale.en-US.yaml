@@ -1,0 +1,109 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 16.0.2
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Added
+  - Added UMANS_WEBSEARCH_PROVIDER=native|exa support for routing Umans gateway-owned web search requests.
+  Fixed
+  - A single MCP tool whose input schema can't be emitted as a valid strict tool schema for the active provider no longer fails the whole turn with HTTP 400. convertTools (openai-responses) now validates each tool's emitted parameter schema for enum/const-vs-type contradictions that pass structural JSON-Schema validation but the provider rejects — e.g. a non-null enum on a type: "null" node, or an enum on an array node — and quarantines just the offending tool with a logger.warn naming the tool and schema path, keeping every other tool usable. Adds findStrictToolSchemaViolation to @oh-my-pi/pi-ai/utils/schema (#2652)
+  - Fixed OpenAI Responses-compatible streams from Ollama/local hosts dropping arguments for parallel tool calls whose deltas use fc_<call_id> item ids, which left earlier ast_grep calls with {} and failed validation. (#2715)
+  - Fixed dialect transcript rendering so literal thinking envelopes are unwrapped before adding the dialect's own thinking tags, preventing nested <thinking> output in advisor raw dumps (#2700).
+  - Fixed Anthropic-compatible Umans requests escaping client tool names and forwarding gateway web search headers so Kimi answers normally instead of returning raw gateway search results.
+  - Fixed Google Gemini tool calls with toolChoice: "auto" serializing an explicit toolConfig AUTO mode, which can cause Gemini-3 models to leak raw planning JSON instead of executing tools. (#2776)
+  - Fixed OpenAI-compatible Ollama completions that return empty finish_reason:length after filling num_ctx so they surface an actionable context-window error instead of an empty length stop. (#2774)
+  - Fixed Codex browser login issuing credentials for the opencode OAuth originator while OMP requests identify as pi, which could make the first authenticated Codex request return 401 (#2696).
+  @oh-my-pi/pi-catalog
+  Fixed
+  - Fixed Kimi output caps for Umans AI Coding Plan and Venice so discovery metadata cannot use context-sized token ceilings as request caps.
+  - Marked Umans Anthropic-compatible models as client-tool escaped so cached and bundled metadata do not expose web_search as a provider server tool.
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added the UMANS_WEBSEARCH_PROVIDER environment variable to CLI help for Umans gateway web search backend selection.
+  Changed
+  - The eager task (task.eager: always) and eager todo (todo.eager: preferred/always) hidden reminders now re-fire on the auto-continuation turn after a compaction (context-full / snapcompact / handoff / shake). Compaction summarizes away the first-message prelude, so the agent would otherwise silently lose the delegate-via-tasks / phased-todo guidance mid-work; the post-compaction todo nudge is reminder-only and never forces the todo tool onto the resumed turn.
+  Fixed
+  - Fixed edit-tool block operations on Emacs Lisp files: .el and .emacs paths now resolve top-level forms for SWAP.BLK, DEL.BLK, and INS.BLK.POST instead of reporting an unsupported-language block-resolution error.
+  - Fixed PDF reads leaking recoverable MuPDF WASM warnings into the terminal TUI by routing MuPDF output through the file logger before markit-ai loads it (#2766).
+  - Fixed /exit and /quit waiting one shutdown timeout per hanging extension by running session_shutdown handlers within a shared shutdown window (#2736).
+  - Fixed GitHub Copilot .github/instructions/*.instructions.md discovery by loading those files as rules that honor applyTo scoping, including always-apply ** files and rule://<name> access for glob-scoped entries (#2731).
+  - Fixed Windows bash-tool child processes defaulting interpreter pipe I/O to the ANSI codepage by adding UTF-8 encoding defaults when the inherited environment is unset (#2701).
+  - Fixed /advisor dump raw so Opus 4.5 thinking content that already includes literal <thinking> tags is not rendered with nested thinking tags (#2700).
+  - The plugin-extensions-discovery test suite no longer writes fixtures into — and rm -rfs the node_modules of — the developer's real ~/.omp/plugins. Its XDG_DATA_HOME isolation was a no-op on Windows (XDG is gated to Linux/macOS) and was bypassed in XDG-migrated Linux/macOS environments, so a local run could delete installed plugins. The suite now isolates the whole config root via an os.homedir() mock plus cleared XDG_* vars, with a pre-write guard that fails if resolution escapes the temp home (#2721).
+  - Installed plugins whose extensions manifest entry points at a directory of sub-extensions (the standard pi extensions/<name>/index.ts layout, e.g. pi.extensions: ["./extensions"]) are no longer rejected at install (declared extension entry not found on disk) or silently dropped at load. The plugin manifest resolver now resolves a directory the same way as the configured-directory (-e) extension loader: the directory's own package.json omp/pi extensions (authoritative — a missing declared entry is reported instead of falling back to a decoy index), then a direct index.{ts,js,mjs,cjs}, then a one-level scan of sub-extensions (#2713).
+  - Fixed OpenRouter @upstream routing selectors whose upstream slug also appears in the model id, so openrouter/...@deepseek:high keeps openRouterRouting.only instead of being consumed by provider-scoped fuzzy matching (#2708).
+  - Fixed omp plugin list --json omitting locally linked plugins that exist only in omp-plugins.lock.json and node_modules symlinks. (#2742)
+  - Fixed task subagents to install their configured ordered model candidates as child-session retry fallback chains, so retryable provider failures can advance to the next subagent model instead of failing the worker (#2750).
+  - Fixed empty reasonless aborted assistant turns to auto-retry without switching model fallback, so transient provider-side aborts after tool results do not end headless sessions (#2685).
+  @oh-my-pi/hashline
+  Fixed
+  - Auto-repaired duplicated JSX/XML closing boundary lines at the end of single-line replacement expansions. (#2705)
+  @oh-my-pi/pi-natives
+  Added
+  - Added Emacs Lisp (.el, .emacs, emacs-lisp/elisp) support to native tree-sitter language inference, enabling astGrep/astEdit, summarizeCode, and blockRangeAt on Emacs Lisp source.
+  @oh-my-pi/pi-tui
+  Fixed
+  - Fixed VS Code integrated terminal keypad digit CSI-u input being handled as navigation instead of text.
+  - Fixed xterm-compatible terminals scrolling the native viewport to the bottom on prompt-editor keypresses by disabling ?1010/?1011 while the TUI owns the TTY and restoring the prior set modes on exit (#2732).
+  - Fixed CMUX sessions being treated as direct terminals during resize/reset because they do not set TMUX/STY/ZELLIJ and may run with TERM=dumb; the renderer now treats CMUX workspace/surface env markers as multiplexer signals and preserves pane scrollback instead of emitting ED3 (CSI 3 J).
+  - Fixed a self-sustaining resize-redraw storm in Warp: the non-multiplexer resize fast path borrows the alternate screen, and Warp re-reports a one-row-different size whenever the alt buffer is toggled, so each drag frame fed back a fresh resize event and the TUI flooded ED3 full repaints with stable geometry. Resize now repaints in place (no alt-screen borrow, no ED3 rewrap) on terminals that re-report size on alt-screen toggles, matching the multiplexer path. Overridable with PI_TUI_RESIZE_IN_PLACE=1|0.
+  What's Changed
+  - fix(ai): route prefixed Responses tool deltas by @roboomp in https://github.com/can1357/oh-my-pi/pull/2719
+  - test(plugins): isolate discovery test from real ~/.omp on all platforms by @AsafMah in https://github.com/can1357/oh-my-pi/pull/2722
+  - fix(coding-agent): load GitHub Copilot instruction rules by @roboomp in https://github.com/can1357/oh-my-pi/pull/2734
+  - fix(tui): stop Warp resize feedback-loop redraw storm by @sorphwer in https://github.com/can1357/oh-my-pi/pull/2741
+  - fix(cli): speed up exit shutdown handlers by @roboomp in https://github.com/can1357/oh-my-pi/pull/2745
+  - fix(cli): list linked local plugins by @roboomp in https://github.com/can1357/oh-my-pi/pull/2746
+  - fix(providers): handle Umans Kimi output caps and web search by @oldschoola in https://github.com/can1357/oh-my-pi/pull/2751
+  - fix(agent): retry subagent model fallback chains by @roboomp in https://github.com/can1357/oh-my-pi/pull/2753
+  - fix(tui): detect CMUX as multiplexer by @pathard1128 in https://github.com/can1357/oh-my-pi/pull/2755
+  - fix(coding-agent): route MuPDF warnings to logger by @roboomp in https://github.com/can1357/oh-my-pi/pull/2772
+  - fix(ai): omit Google AUTO toolConfig by @roboomp in https://github.com/can1357/oh-my-pi/pull/2782
+  - feat(ast): add Emacs Lisp tree-sitter support by @ryjm in https://github.com/can1357/oh-my-pi/pull/2693
+  - fix(ai): unwrap thinking envelopes in raw dumps by @roboomp in https://github.com/can1357/oh-my-pi/pull/2702
+  - fix(tool): default Windows bash children to UTF-8 by @roboomp in https://github.com/can1357/oh-my-pi/pull/2704
+  - fix(hashline): drop duplicated JSX boundary echoes by @roboomp in https://github.com/can1357/oh-my-pi/pull/2709
+  - fix(providers): preserve OpenRouter upstream routing by @roboomp in https://github.com/can1357/oh-my-pi/pull/2710
+  - fix(openai-responses): quarantine invalid tool schemas instead of failing the whole turn (#2652) by @AsafMah in https://github.com/can1357/oh-my-pi/pull/2711
+  - fix(plugins): resolve directory extension manifest entries one level deep by @AsafMah in https://github.com/can1357/oh-my-pi/pull/2714
+  - fix(tui): preserve scrollback while editing by @roboomp in https://github.com/can1357/oh-my-pi/pull/2733
+  New Contributors
+  - @sorphwer made their first contribution in https://github.com/can1357/oh-my-pi/pull/2741
+  - @pathard1128 made their first contribution in https://github.com/can1357/oh-my-pi/pull/2755
+  - @ryjm made their first contribution in https://github.com/can1357/oh-my-pi/pull/2693
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v16.0.1...v16.0.2
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v16.0.2
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

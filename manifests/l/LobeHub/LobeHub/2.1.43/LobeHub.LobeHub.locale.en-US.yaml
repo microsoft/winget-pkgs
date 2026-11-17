@@ -1,0 +1,70 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: LobeHub.LobeHub
+PackageVersion: 2.1.43
+PackageLocale: en-US
+Publisher: LobeHub
+PublisherUrl: https://lobehub.com/
+PublisherSupportUrl: https://github.com/lobehub/lobe-chat/issues
+PrivacyUrl: https://lobehub.com/privacy
+Author: LobeHub LLC
+PackageName: LobeHub-Beta
+PackageUrl: https://github.com/lobehub/lobe-chat
+License: Apache-2.0
+LicenseUrl: https://github.com/lobehub/lobe-chat/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026/06/17 - current LobeHub LLC. All rights reserved.
+CopyrightUrl: https://lobehub.com/terms
+ShortDescription: An open-source, modern-design AI chat framework. Supports Multi AI Providers (OpenAI / Claude 4 / Gemini / Ollama / DeepSeek / Qwen), Knowledge Base (file upload / knowledge management / RAG), Multi-Modals (Plugins/Artifacts) and Thinking.
+Tags:
+- ai
+- chatbot
+- chatgpt
+- claude
+- deepseek
+- doubao
+- gemini
+- kimi
+- large-language-model
+- llama
+- llm
+- mistral
+- ollama
+- qwen
+- rag
+ReleaseNotes: |-
+  This release was automatically published from PR #13032.
+  Changes
+  See PR description: https://github.com/lobehub/lobehub/pull/13032
+  Commit Message
+  This release includes a database schema migration adding BM25 full-text search indexes with ICU tokenizer across 14 tables.
+  Migration: Add BM25 Indexes with ICU Tokenizer
+  - Added BM25 indexes for 14 tables: agents, topics, files, knowledge_bases, user_memories, chat_groups, user_memories_contexts, user_memories_preferences, user_memories_activities, user_memories_identities, user_memories_experiences, user_memory_persona_documents, documents, messages
+  - All indexes use ICU tokenizer with English stemmer and stopwords for multilingual support
+  - Each index includes user_id as a keyword field with fast flag for efficient filter pushdown
+  - Enum/filter fields (type, status, memory_layer, memory_category, relationship, source_type, role) added as keyword+fast for filter pushdown into tantivy index scan
+  - chat_groups.content (system prompt) and messages.summary added as searchable text fields
+  - Large tables (documents, messages) are ordered last to avoid blocking smaller index builds
+  - All CREATE INDEX statements are preceded by DROP INDEX IF EXISTS for idempotency
+  Notes for Self-hosted Users
+  - The migration runs automatically on application startup
+  - Requires the pg_search extension (added in migration 0090)
+  - Index creation on large tables (messages, documents) may take several minutes depending on data volume
+  - No manual intervention required
+  The migration owner: @tjx666 — responsible for this database schema change, reach out for any migration-related issues.
+  Summary by Sourcery
+  Add a database migration that creates BM25 full-text search indexes with ICU tokenization across key content and metadata tables to improve search performance and filter pushdown.
+  New Features:
+  - Introduce BM25 full-text search indexes with ICU tokenizer on 14 user- and content-related tables for richer search capabilities.
+  - Make additional text fields such as chat group content and message summaries searchable via the new indexes.
+  Enhancements:
+  - Configure keyword+fast fields for user_id and other filterable enums to enable efficient filter pushdown during index scans.
+  - Order index creation so large tables are processed last and guard all index creation with DROP INDEX IF EXISTS for idempotent migrations.
+  Build:
+  - Add migration 0093 and its snapshot to the database migration system to apply the new BM25 indexes automatically on startup.
+ReleaseNotesUrl: https://github.com/lobehub/lobehub/releases/tag/v2.1.43
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://lobehub.com/docs/usage/start
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

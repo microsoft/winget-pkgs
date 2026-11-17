@@ -1,0 +1,71 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: XinTaoFei.Codeg
+PackageVersion: 0.30.10
+PackageLocale: en-US
+Publisher: codeg
+PublisherUrl: https://github.com/xintaofei
+PublisherSupportUrl: https://github.com/xintaofei/codeg/issues
+PackageName: codeg
+PackageUrl: https://github.com/xintaofei/codeg
+License: Apache-2.0
+LicenseUrl: https://github.com/xintaofei/codeg/blob/HEAD/LICENSE
+ShortDescription: Aggregate and browse AI coding agent sessions (Claude Code, Codex, Gemini CLI, etc.) in one place. Desktop app, self-hosted server, or Docker.
+Description: Codeg (Code Generation) is an enterprise-grade multi-agent coding workspace. It unifies local AI coding agents (Claude Code, Codex CLI, OpenCode, Gemini CLI, OpenClaw, Cline, etc.) in a desktop app, standalone server, or Docker container — enabling remote development from any browser — with conversation aggregation, parallel git worktree development, MCP/Skills management, chat channel interactions (Telegram, Lark, iLink, etc.), and integrated Git/file/terminal workflows.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claude-code
+- code
+- codex
+- coding
+- gemini-cli
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  Your configuration can now travel between machines — model providers, agent settings, custom agents, quick messages and task templates, as a file or through your own WebDAV server, optionally encrypted.
+  A fast reply no longer locks up the interface: the streaming window now scales with the answer it re-renders, and a two-minute reply at full speed costs about a tenth of the rendering work it used to.
+  The composer learns two shortcuts — recall a sent prompt with the arrow keys, and click a queued message into the turn that is already running — while Gemini CLI, OpenCode, Cline and Kimi all get a deep adaptation pass.
+  New
+  - Configuration sync between machines — a configuration-only snapshot of model providers (with their keys), agent settings, custom agents, quick messages, task templates and app preferences, carried by an exported file or by a WebDAV server you already own, on the desktop and in server mode alike; conversations and uploads stay out of it, applying a snapshot never deletes what the target machine has, and automatic sync only ever uploads. (#747, @galact-byte)
+  - The uploaded snapshot can be encrypted with a passphrase (AES-256-GCM), and both the WebDAV password and the passphrase live in the system keyring instead of the database.
+  - Every import and restore leaves a way back — the last ten configurations this machine had are kept, reachable from the file-actions row, and undoing one is itself undoable.
+  - Recall a sent prompt with ArrowUp / ArrowDown in the composer, the way a shell history works. (#744 requested by @evepupil, #756, @dawNotPoi)
+  - Click a queued message to insert it into the running turn — on any session with a live-feedback channel, instead of waiting for the turn to end. (#751, @leehom0123)
+  - A work task can choose the branch it is created for — the worktree starts at that branch's tip, the merge lands back on it, and a delivery opens its pull request against it, so a task no longer depends on what the project folder happens to be checked out on. (#760 requested by @wht300)
+  - OpenCode has a "Behavior & compaction" settings card — default agent, sharing, auto-update, filesystem snapshots, sub-agent depth, auto-compaction and tool-output limits, written to opencode.json, with any field left unset still following OpenCode's own defaults.
+  - Cline's provider settings now split the two ways cline actually authenticates — Cline Usage-Billing, ClinePass and ChatGPT get the cline auth <id> command to run instead of a key field, bring-your-own providers keep their key fields, and anything configured outside codeg keeps its own row.
+  - Gemini sub-agent transcripts now show up — a sub-agent's own conversation is discovered alongside the session that launched it.
+  - OpenCode's lsp is now a permission of its own, so you can decide it separately from the rest.
+  Improved
+  - Updated bundled agents: Claude Code ACP 0.78.0 (Claude Agent SDK 0.3.270), Codex ACP 1.12.0 (Codex CLI 0.154.0), Gemini CLI 0.60.0, Kimi Code 2.0.0, Grok 1.0.34, Qoder 1.1.54.
+  - A reply streaming at full speed no longer freezes the interface — the flush window now grows with the answer being re-rendered and is timed per conversation, taking a two-minute reply at 300 tokens/s from 519M re-rendered characters down to 60M while one busy tab stops holding back the others. (#589 reported by @Lparksi, #716, @Adam-Dalloul)
+  - Settings → System is now one "Data & sync" card — configuration sync, backup and restore as three tabs, with the pre-restore snapshots sitting under the restore flow they undo instead of in a card of their own.
+  - Kimi finds skills it was already loading — codeg now reads all four of Kimi's skill roots, including the shared store pi and cline install into, and writes project skills at the repository root where Kimi actually looks.
+  - A kimi-k3 session's context gauge is correct — history was measured against a 256K window on a model that has 1M.
+  - Opening a historical conversation now shows the session coming up — the composer names the agent being prepared and holds placeholders where the model and config chips will land, instead of looking dead for the several seconds the session takes to establish.
+  - Gemini transcripts are read the way Gemini CLI 0.60 writes them — sessions that showed no messages at all now open, and token usage and the context window (1M, 256K for Gemma) are counted correctly rather than reading about 5% high.
+  - A Gemini [MODE_UPDATE] line no longer lands in the conversation as a message — it switches the session's mode, which is what it was for.
+  - Gemini's run, read, search, fetch and web-search calls now render as their own cards instead of a bare title.
+  - An OpenCode tool call keeps its real name live and after a reload — glob was showing as grep, lsp_diagnostics as read and any MCP tool taking a query as web search, and a live read now keeps the line numbers the history view shows.
+  - An OpenCode session still named "New session - …" now takes its title from the first message — OpenCode's own rename fails silently when its title model is unreachable, which left the placeholder there forever.
+  - A reopened OpenCode session shows what actually happened — context-compaction dividers, sub-task summaries, assistant errors and aborts, and a question you declined no longer rendered as a red error card.
+  - A Cline backup no longer carries secrets.json or your provider keys, and its new SQLite session store is archived as a coherent database rather than as loose files that restore corrupt.
+  - An agent's per-launch temp directory is created private to you, and codeg refuses a scratch root it did not create itself, so no other local account can own the directory an agent unpacks into.
+  Fixed
+  - An agent that opens a unix socket starts again on macOS — 0.30.8's per-launch temp isolation pushed the socket path past the kernel's 104-byte limit, so the agent died during startup and the session failed after a minute with a misleading "turn off MCP support" hint. (#754 reported by @Liang-HZ)
+  - Delegating to another agent no longer fails silently — on a long temp path the broker published a socket nothing on the system could dial, while the status indicator stayed green and every companion failed to reach it; the path is now refused loudly and falls back to a short one.
+  - Cline conversations open with their messages again — cline 3.x moved its transcripts to a new session store, so every conversation resolved to zero turns, and a finished live reply also lost its model, token usage and completion time.
+  - Cline's provider dropdown in the composer is withheld when the launch pins the provider — it could only ever fail with "Cannot change provider", and a pick saved from clicking it is no longer replayed on later sessions.
+  - A ClinePass or ChatGPT sign-in is no longer billed as a plain Cline account — a leftover key could short-circuit cline's auth gate without the sign-in ever taking effect.
+  - AWS Bedrock and GCP Vertex leave Cline's key list — they need more than a single API key and never worked from here; cline auth bedrock still sets them up, and codeg now leaves such an entry alone instead of retargeting it.
+  - An OpenCode plugin loaded from a path is reported as loaded, not missing — a file:///…, absolute or relative plugin came back "not installed" behind an Install button that could only fail, and preflight raised a failure that could never clear. (#745 reported by @LiDongYang743)
+  - A Windows file://C:\… plugin path resolves instead of being read as a host name, and a plugin under a directory containing @ keeps its full name instead of being truncated or silently dropped.
+  Thanks to @galact-byte, @Adam-Dalloul, @dawNotPoi and @leehom0123 for contributing to this release, and to @Liang-HZ, @LiDongYang743, @evepupil, @Lparksi and @wht300 for the reports.
+ReleaseNotesUrl: https://github.com/xintaofei/codeg/releases/tag/v0.30.10
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

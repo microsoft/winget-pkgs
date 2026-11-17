@@ -1,0 +1,181 @@
+# Created by Anthelion using komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: uutils.coreutils
+PackageVersion: 0.7.0
+PackageLocale: en-US
+Publisher: uutils
+PublisherUrl: https://github.com/uutils
+PublisherSupportUrl: https://github.com/uutils/coreutils/issues
+Author: uutils
+PackageName: coreutils
+PackageUrl: https://github.com/uutils/coreutils
+License: MIT
+LicenseUrl: https://github.com/uutils/coreutils/blob/HEAD/LICENSE
+Copyright: Copyright (c) uutils developers
+CopyrightUrl: https://github.com/uutils/coreutils/blob/main/LICENSE
+ShortDescription: Cross-platform Rust rewrite of the GNU coreutils
+Tags:
+- busybox
+- command-line-tool
+- coreutils
+- cross-platform
+- gnu-coreutils
+- rust
+ReleaseNotes: |-
+  Rust Coreutils 0.7.0 Release:
+  We are excited to announce the release of Rust Coreutils 0.7.0 — a performance-focused release with major optimizations across dozens of utilities, continued safety improvements replacing unsafe code with safe abstractions, and a comprehensive campaign to eliminate panics on write errors. We also contributed many patches upstream to GNU coreutils, and welcomed their feedbacks and supports, strengthening both projects!
+  GNU Test Suite Compatibility:
+  ──────┬─────┬─────┬─────────────────────┬─────────────┬─────────────┬───────────────────────
+  Result│0.6.0│0.7.0│Change 0.6.0 to 0.7.0│% Total 0.6.0│% Total 0.7.0│% Change 0.6.0 to 0.7.0
+  ──────┼─────┼─────┼─────────────────────┼─────────────┼─────────────┼───────────────────────
+  Pass  │622  │629  │+7                   │96.28%       │94.59%       │-1.69%
+  ──────┼─────┼─────┼─────────────────────┼─────────────┼─────────────┼───────────────────────
+  Skip  │7    │13   │+6                   │1.08%        │1.95%        │+0.87%
+  ──────┼─────┼─────┼─────────────────────┼─────────────┼─────────────┼───────────────────────
+  Fail  │16   │23   │+7                   │2.48%        │3.46%        │+0.98%
+  ──────┼─────┼─────┼─────────────────────┼─────────────┼─────────────┼───────────────────────
+  Error │1    │0    │-1                   │0.15%        │0%           │-0.15%
+  ──────┼─────┼─────┼─────────────────────┼─────────────┼─────────────┼───────────────────────
+  Total │646  │665  │+19 (new tests)      │             │             │
+  ──────┴─────┴─────┴─────────────────────┴─────────────┴─────────────┴───────────────────────
+  > Note: The GNU test reference was updated from 9.9 to 9.10, adding 19 new tests. While the pass percentage decreased due to these newly added tests, the absolute number of passing tests increased by 7 and errors were eliminated entirely. Work is ongoing to address the new test failures.
+  Highlights:
+  - GNU Compatibility & Upstream Contributions
+    - 629 passing tests (+7 from 0.6.0), with 19 new tests added from the GNU 9.10 update
+    - Updated GNU test reference from 9.9 to 9.10
+    - Contributed numerous patches upstream to GNU coreutils, benefiting both projects
+    - New GNU compatibility fixes across date, fmt, kill, ptx, numfmt, cksum, and more
+    - Took over maintenance of num-prime, the primality testing library used by factor
+  - Performance Overhaul
+    - Faster hash maps: rustc-hash in ls, du, tsort, shuf, mv; foldhash in sort
+    - unexpand/expand: ASCII fast-path, buffered reads — 14%+ gain in unexpand
+    - shuf, split, sort, du: Reduced malloc allocations (+3–6% in du, +4% in shuf)
+    - nl: Optimized with itoa and direct writing
+    - true/false: Removed clap dependency, smaller binary, faster startup
+    - uucore: Disabled signal setup in simple utilities for binary size and startup speed
+  - Robustness: Eliminated /dev/full Panics
+    - Fixed panics when stderr is /dev/full across 20+ utilities (echo, date, sort, expr, hostname, id, comm, pr, dircolors, and more)
+    - Generic fix ensuring unrecognized options with 2>/dev/full do not abort
+  - Safety & Code Quality
+    - Replaced unsafe libc calls with safe nix crate wrappers in uucore (umask, mkdirat, and more) and mknod
+    - Eliminated TOCTOU races in ln, tac, and install -D
+    - rm: --preserve-root now works correctly on symlinks
+    - MSRV updated to 1.88
+  - Notable Bug Fixes
+    - date: Extensive fixes — -u/-s/-d flags, timezone abbreviation lookup and DST, RFC-822 format, %+/%_ modifiers, --debug, locale date_fmt
+    - cp: Readonly directories, -a/-z flags, special files, non-UTF-8 directory names
+    - mv: Preserve symlinks during cross-device moves, handle FIFOs in directories
+    - ls: Hyperlink OSC 8 format, dired reports, fd leak on deep recursion, invalid UTF-8 hidden files
+    - sort: Collator panic in worker threads, scientific notation parsing
+    - paste: Multi-byte delimiters, GNU escape sequences, bounded buffering
+    - printf: %q shell quoting with control chars and quotes
+    - ptx: -t/--typeset-mode, multibyte Unicode panic, GNU default behavior
+    - numfmt: --debug flag, empty delimiter, null byte handling, error message formatting
+    - cksum: SHAKE algorithms, --binary/--text/--tag errors
+    - cut, tac, tail, tr, uniq, od, chroot, stat, mktemp, pr, readlink, ln, kill, nproc, rm, env, sync, fmt, factor, wc: Various GNU compatibility and correctness fixes
+  - Platform Support
+    - NetBSD and PowerPC build fixes
+    - Windows: tac stdin piping, test -r/-w/-x, publish static *.exe binaries
+    - WebAssembly: Publish *.wasm artifacts
+    - stdbuf: Support libstdbuf in same directory as binary
+    - NixOS test compatibility fix; added security audit workflow
+  - Contributions: This release was made possible by 23 new contributors joining our community
+  Call to Action:
+  Help us translate - Contribute translations at Weblate
+  Sponsor us on GitHub to accelerate development: github.com/sponsors/uutils
+  What's Changed
+  cat
+  - cat: strip errno by @oech3 in #10885
+  cksum
+  - *sum: Fix locales fetching from checksum_common after installation by @RenjiSann in #10575
+  - *sum: Fix read_byte_lines discarding read errors by @RenjiSann in #10671
+  - test/cksum: implement test_signed_checksums by @0xMillyByte in #10714
+  - cksum: Accept SHAKE algorithms by @RenjiSann in #10772
+  - cksum family: Backport new errors for --binary, --text and --tag by @oech3 in #10618
+  - cksum family: Fix clippy::unnecessary_wraps by @oech3 in #11110
+  chroot
+  - chroot: fix gid being set by uid with --userspec #10307 by @cerdelen in #10465
+  - chroot: use var_os by @xtqqczze in #11070
+  comm
+  - comm /etc/pacman.conf /dev/null 2>/dev/full does not abort by @oech3 in #10746
+  - date, comm, tty: Fixing handling output to dev/null by @ChrisDryden in #10888
+  coreutils
+  - tests/misc/coreutils.sh: Fail with invalid binary name by @oech3 in #10258
+  - coreutils: output expected error for unrecognized options by @ChrisDryden in #9869
+  - coreutils: Let the name *utils valid by @oech3 in #10729
+  - coreutils: Fix 2>/dev/full aborts & drop a sed for GnuTests by @oech3 in #10740
+  - all: --typo 2>/dev/full does not abort by @oech3 in #10764
+  - Add regression test for coreutils --list by @oech3 in #10858
+  cp
+  - cp: fix recursive copy of readonly directories by @nikolalukovic in #10529
+  - cp: improve code clarity and remove redundant filesystem checks by @sylvestre in #10790
+  - cp: fixing cp -a functionality to match gnu implementation for -z flag handling and for folders by @ChrisDryden in #10207
+  - cp: Fix panic when recursively copying a directory with a non-UTF8 name by @aweinstock314 in #11148
+  - cp: handle special files by @victor-prokhorov in #11163
+  csplit
+  - refactor(csplit): use &str slices for patterns by @xtqqczze in #11013
+  - csplit: add benchmarks for line number and regex pattern splitting by @sylvestre in #10927
+  cut
+  - cut: fix -s flag for newline delimiter and optimize memory allocation by @akervald in #11143
+  - cut: two simple refactorings by @cakebaker in #11194
+  date
+  - date: fix -u flag to match GNU behavior for input parsing by @ChrisDryden in #10715
+  - date: Fix format optional argument to capture all following parameters by @cerdelen in #10914
+  - date: fix -s UTC conversion losing timezone offset by @yachi in #10828
+  - date: fix RFC-822 format to always use English names by @sylvestre in #10932
+  - date: bump parse_datetime & add test for leap-1 GNU test by @sylvestre in #10933
+  - date: add tests to match GNU's by @sylvestre in #10939
+  - date: fix double periods in Hungarian month abbreviations by @naoNao89 in #10945
+  - date: fix subfmt-up1, fill-1, pct-pct, and invalid-high-bit-set tests / implement --debug by @sylvestre in #10940
+  - date: use locale date_fmt instead of D_T_FMT for default format by @ChrisDryden in #10935
+  - date: Fix Error message missing '+' for format string after valid d flag by @cerdelen in #10982
+  - date: fix -d with relative dates and timezone abbreviations by @yachi in #10956
+  - date: fix timezone abbreviations using wrong offset outside their DST season by @aguimaraes in #11045
+  - date: fix %+ and %_ modifier edge cases by @naoNao89 in #10999
+  - date: extend tz abbreviation lookup by @cerdelen in #11229
+  - date: Remove eprintln! to avoid 2>/dev/full abort by @oech3 in #11228
+  - date, comm, tty: Fixing handling output to dev/null by @ChrisDryden in #10888
+  dd
+  - dd: simplify signal handling by removing Alarm timer thread by @ChrisDryden in #10768
+  df
+  - df: fallback when proc masked by @ChrisDryden in #10417
+  dircolors
+  - dircolors >/dev/full panics by @oech3 in #10948
+  du
+  - du: deduplicate Stat::new call by @svlv in #10584
+  - du: Use rustc-hash for du -a / performance by @oech3 in #10663
+  - du: Flags 'm', 'k', 'm' should be POSIX style overriden by @cerdelen in #10664
+  - Du size_format flag override by @cerdelen in #10743
+  - du: malloc perf +3~6% by @oech3 in #11034
+  echo
+  - echo --version >/dev/full panics by @oech3 in #10853
+  env
+  - env: fix regression of --ignore-signal=PIPE by @Ecordonnier in #9618
+  expand
+  - expand: remove read_until by @cerdelen in #10657
+  - expand: remove empty after help by @cakebaker in #10977
+  - expand: Fix performance drop with cgu=1 by ascii fast-path by @oech3 in #11104
+  expr
+  - expr --version >/dev/full panics & --help > /dev/full should fail by @oech3 in #10854
+  factor
+  - factor: add a test for a num-prime issue by @sylvestre in #11096
+  - factor: trim also null-chars by @yotam-medini in #11182
+  false
+  - false: dedup set_exit_code(1) by @oech3 in #10823
+  - true, false: Fix broken pipe by @oech3 in #11204
+  - true, false: drop Vec for binary size and perf by @oech3 in #11223
+  fmt
+  - fmt: restore GNU compatibility for tests/fmt/width by @karanabe in #11073
+  fold
+  - fold: refactor compute_col_count and add character mode tests by @ChrisDryden in #10533
+  - fold: replace truncate(0) with clear() by @xtqqczze in #11059
+  hostname
+  - hostname: fix panic on hostname > /dev/full by @WhateverAWS in #10912
+  - feat(hostname): add benchmark with large /etc/hosts by @naoNao89 in #10979
+  id
+  - Id: don't panic on write error by @FidelSch in #10769
+  install
+ReleaseNotesUrl: https://github.com/uutils/coreutils/releases/tag/0.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

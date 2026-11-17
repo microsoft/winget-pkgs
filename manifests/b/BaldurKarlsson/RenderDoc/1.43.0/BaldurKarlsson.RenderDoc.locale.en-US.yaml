@@ -1,0 +1,95 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: BaldurKarlsson.RenderDoc
+PackageVersion: 1.43.0
+PackageLocale: en-US
+Publisher: Baldur Karlsson
+PublisherUrl: https://renderdoc.org/
+PublisherSupportUrl: https://github.com/baldurk/renderdoc/issues
+Author: Baldur Karlsson
+PackageName: RenderDoc
+PackageUrl: https://renderdoc.org/
+License: MIT
+LicenseUrl: https://github.com/baldurk/renderdoc/blob/HEAD/LICENSE.md
+Copyright: Copyright © Baldur Karlsson 2026
+ShortDescription: A stand-alone graphics debugging tool
+Description: RenderDoc is a free MIT licensed stand-alone graphics debugger that allows quick and easy single-frame capture and detailed introspection of any application using Vulkan, D3D11, OpenGL & OpenGL ES or D3D12 across Windows, Linux, Android, or Nintendo Switch™.
+Moniker: renderdoc
+Tags:
+- debug
+- debugger
+- debugging
+- debugging-tool
+- graphics
+- rendering
+ReleaseNotes: |-
+  This release includes a new custom annotation system, as well as a number of other improvements and bugfixes.
+  NOTE: currently AMD's official drivers contain a reported bug that may cause any shader debugging that depends on multiple threads to fail to debug correctly. You may also encounter problems with using VK_EXT_descriptor_buffer as noted in the v1.40 release notes.
+  Binary builds with installers, zips and tarballs are available on renderdoc.org.
+  [!WARNING]
+  As mentioned in the v1.42 release notes the code signing key used to sign the windows builds in this version has changed. Windows security is unreliable and may throw errors even though everything has been set up correctly with this build. It is safe to run and if you are unsure you can use something like virustotal.com to check the file, as well as manually verifying the digital signature in the file properties. Unfortunately there is nothing else that can be done.
+  Main highlights
+  Annotations system
+  In this release RenderDoc now includes a new custom API for providing rich annotations for additional context and information especially for cases where a lot of context is lost in the graphics API work itself.
+  These can be thought of as significantly more advanced versions of the normal marker regions and object naming that graphics APIs provide. Complex structures can be built up with typed data, which is then visible on a per-event or per-object basis and can be visualised and filtered.
+  Counter-Strike 2 © Valve Corporation. Used with permission.
+  More extensive information is available in the RenderDoc documentation, when using the RenderDoc in-application API two new calls are available to manage annotations both as additional stateful information on commands and as permanent data on graphics API objects.
+  This is the initial release of this system, and more can and will be added to its functionality as it is used.
+  Information about shader debug symbols
+  In the shader viewer a new tab can be shown which details any information about shader debug symbols referenced and where they were found from, as well as the paths searched along the way.
+  This can be combined with the ability to embed these symbols within a capture to make it more easily portable to share with others.
+  Python Breaking API changes
+  - None.
+  Features/Improvements
+  - UI: Improve sorting for array members in watch and source variable displays when shader debugging, to follow natural sort rules.
+  - UI: Add correct handling of #pragma once in shader editing.
+  - UI: Add a panel to the shader viewer showing where (and if) debug info was loaded for a given shader.
+  - OpenGL: Add support for debugging shaders that use arrays of resources.
+  - D3D12: Implement querying ID3D12SharingContract from a ID3D12CommandQueue.
+  - D3D12: Edits to shaders can now be reliably saved with capture files and will work when reloaded. Previously this would fail in many cases. This fix also applies to Vulkan if using inline shader creates without shader modules.
+  - D3D12: Implement correct support for predication.
+  - Vulkan: When debugging shaders with debug info that maps some values to OpUndef display explicitly <undefined value> instead of actual undefined values.
+  - Vulkan: Add support for debugging shaders that use SPV_KHR_integer_dot_product.
+  - Vulkan: Add handling of multiview to several overlays including viewport, quad overdraw, triangle size. Also special-case handling of multiple viewports when the number of views matches the multiview count.
+  - Vulkan: Add support for extensions:
+    - VK_QCOM_multiview_per_view_render_areas
+    - VK_EXT_image_drm_format_modifier
+  Bugfixes
+  - UI: Fix some cases where marker labels in resource usage would be incorrect.
+  - UI: Fix viewing mesh preview for vertex in data not working correctly on first launch.
+  - UI: Fix a crash when adding a watch entry for cbuffer variables.
+  - UI: Fix off-by-one when displaying number of replacements in 'replace all' in shader editor.
+  - UI: Process shader source correctly as UTF-8.
+  - UI: Fix a race condition when opening the tools menu while a remote capture (e.g. on android) is open.
+  - UI: Fix a memory leak if selecting between different events quicker than mesh output can be generated.
+  - OpenGL: Fix incorrect pixel history results obtained when pipelines are used with multiple different uniform values.
+  - OpenGL: Fix some broken cases with shader debugging when using bool-typed uniforms or interpolation qualifiers on inputs.
+  - OpenGL: Fix a memory leak when picking vertices in the mesh viewer.
+  - D3D12: Fix a crash if using resolves on depth targets in the render pass API.
+  - D3D12: Fix a crash when nvidia counters plugin is installed if timing durations in the event browser without having used the perf counter viewer.
+  - D3D12: Fix missing IID checks when creating ID3D12CommandQueue1.
+  - D3D12: Fix a hang when processing debug info that includes an enum inside a struct.
+  - D3D12: Add more supported IIDs when querying via GetDevice.
+  - D3D12: Detect and avoid invalid indirect dispatches when fetching mesh shader output.
+  - D3D12: If a fatal error is hit due to out of memory or device lost during capture, do not create broken/crashing captures.
+  - D3D12: Check for and display an error when too much is generated from a mesh shader to display in mesh output.
+  - Vulkan: Fix a potential crash reading the sampler part of descriptors queried via descriptor buffer for all image descriptor types.
+  - Vulkan: Fix an issue with incorrect lifetime tracking of bufferDeviceAddress buffers that could lead to misbehaviour or problems recreating RT acceleration structures.
+  - Vulkan: Ensure image layouts are correctly tracked when application is using CPU-based image layout transitions.
+  - Vulkan: When faking backbuffers during capture for acceleration structure or descriptor buffer capture, ensure deletion of swapchains during capture doesn't cause invalid address re-use.
+  - Vulkan: Fix potential problems when descriptor buffers and normal descriptors are mixed, and make sure that partially-invalidated state between them is properly tracked.
+  - Vulkan: Fix fetching of task and mesh output when the payload structure contains arrays-of-structs.
+  - Vulkan: Fix handling of multiple entry points in the same module where only one declares needed builtins like LocalInvocationIndex.
+  - Vulkan: Fix incorrect generation of shader for fetching vertex output, with invalid contents of BaseVertex builtin.
+  - Vulkan: Fix shader debugging when loading from an MSAA subpass input.
+  - Vulkan: Fix a potential race condition if a capture is loaded and closed very quickly.
+  - Vulkan: Fix a potential crash analysing captures with multiple queues.
+ReleaseNotesUrl: https://github.com/baldurk/renderdoc/releases/tag/v1.43
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://renderdoc.org/docs/index.html
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/baldurk/renderdoc/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

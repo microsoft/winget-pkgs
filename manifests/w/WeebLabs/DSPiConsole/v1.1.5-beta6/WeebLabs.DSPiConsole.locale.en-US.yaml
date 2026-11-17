@@ -1,0 +1,40 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: WeebLabs.DSPiConsole
+PackageVersion: v1.1.5-beta6
+PackageLocale: en-US
+Publisher: WeebLabs
+PublisherUrl: https://github.com/WeebLabs
+PublisherSupportUrl: https://github.com/WeebLabs/DSPi-Console-Windows/issues
+Author: WeebLabs
+PackageName: DSPiConsole
+PackageUrl: https://github.com/WeebLabs/DSPi-Console-Windows
+License: GPL-3.0
+Copyright: Copyright (c) WeebLabs
+ShortDescription: A WinUI 3 control application for the DSPi audio processor. Supports both RP2040 and RP2350 platforms.
+Moniker: dspiconsole
+ReleaseNotes: |-
+  Beta release for testing.
+  What's new
+  - Stereo upmixer: new Upmixer window (Ctrl+Shift+U) deriving centre and surround channels from a stereo input, with Sinner and Logician engine modes, centre and surround conditioning controls, and a live telemetry strip that says why the upmixer is parked when it is. Inapplicable controls hide rather than grey out. The Matrix Mixer labels the derived rows as Upmix C/Ls/Rs while it runs. RP2350 only.
+  - Preset files: Import and Export are now submenus, with a new Preset File entry alongside Filters. A preset file holds the whole device configuration: input preamps, volumes, input source, loudness, crossfeed, the volume leveller, psychoacoustic bass, the upmixer, every channel's name, delay, gain, mute and enable state with its EQ and crossover bands, all matrix crosspoints, and the physical I/O wiring. Volume levels and I/O configuration are separate opt-ins when importing, off by default, and anything the connected device cannot accept is listed in the result instead of being dropped quietly.
+  - Control Surfaces: new bindings for the upmixer, psychoacoustic bass, per-output delay and preset reload. Channel targets now show your own channel names instead of "Output 1" and relabel live when you rename one. Enum parameters get proper labelled pickers in both the binding and IR command editors.
+  - Dashboard: cards follow renamed channels, pair correctly when a left channel is disabled (an unpaired right channel gets its own mono card), keep their gain, delay and muted text updating after an output toggle, and follow the active input set rather than a fixed stereo pair.
+  - Graph pills: dashboard channel visibility persists between sessions, and the extra inputs no longer start hidden. Opening a channel editor still narrows the graph temporarily, and backing out restores your saved configuration.
+  Known issues
+  - A channel muted from the main window rather than the matrix mixer can be written into a preset file as unmuted, until the app next re-reads the device.
+  - Output channel pairs cannot yet be linked.
+  - The routing preview for output channels currently only displays the first two routed input channels.
+  - The system master-mode sample rate setting is currently located on the I2S Configuration page, despite affecting other systems.
+  Fixes
+  - Linkwitz Transform: the settings popover no longer closes when moving between its fields. The popover now has Cancel and Apply buttons, defers edits until applied and rejects out of range entries. Switching a band into or out of Linkwitz Transform now clears the settings that cannot carry over: the transform stores its target frequency in the gain field, so a 30 Hz target used to become 30 dB of boost on the filter type you switched to.
+  - Fixed a device scan re-entrancy bug behind perpetual reconnect churn. Where opening the device takes longer than the scan interval, overlapping scans each tore down the connection the previous one had just made, so the app showed "device not connected" despite healthy USB traffic.
+  - Millisecond values in control surface bindings were encoded as plain integers, so a 5 ms output delay reached the device as 0.02 ms and the range displayed as 0 to 10752 instead of 0 to 42 ms.
+  - Signal generator: repeat 0 means infinite for sweeps as well as patterns, sweeps honour the gap setting, and the walk flag now switches the timing rows it actually affects. A device that has never staged a config no longer presents full scale as the starting level or rejects a sweep outright. Level edits commit on Enter or focus loss instead of applying part-typed values, an empty channel selection explains itself rather than failing silently, and closing the window stops the generator.
+  - Filter file export no longer loses Linkwitz Transform bands, first-order shelves and all-pass filters, or per-band bypass. Filter import can now reach input channels 3 to 8, which the exporter had been writing and the import dialog silently discarding, and it reports any channels a file carries that this device does not have.
+  - Sidebar: clicking either half of a linked input pair returns to the dashboard instead of switching to the partner's page, and the bass clef icon is sized to match the icons around it.
+  > Requires up-to-date DSPi firmware (upmixer / ADAT / psychoacoustic bass / control-surface support).
+ReleaseNotesUrl: https://github.com/WeebLabs/DSPi-Console-Windows/releases/tag/v1.1.5-beta6
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

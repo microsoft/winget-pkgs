@@ -1,0 +1,91 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: derekwisong.datui
+PackageVersion: 0.4.0
+PackageLocale: en-US
+Publisher: derekwisong
+PublisherUrl: https://github.com/derekwisong
+PublisherSupportUrl: https://github.com/derekwisong/datui/issues
+PackageName: datui
+PackageUrl: https://github.com/derekwisong/datui
+License: MIT
+LicenseUrl: https://github.com/derekwisong/datui/blob/HEAD/LICENSE
+ShortDescription: Data Exploration in the Terminal
+Description: Datui is a high-performance terminal UI for exploring and analyzing datasets.
+Tags:
+- analysis
+- cli
+- data
+- eda
+- research
+- tui
+ReleaseNotes: |-
+  What's changed
+  0.4.0 rebuilds the interface, adds a home screen, and opens many more kinds of data: pipes and logs, binary formats described in TOML, and a dozen new file types. Flags and config keys were renamed into one vocabulary; the table at the end lists what moved.
+  Highlights
+  - A new interface. One look on every screen: a status footer with the keys in effect, ? help grouped by task, Enter applies and Esc discards everywhere, type-to-narrow pickers, the mouse throughout, and an ASCII twin for every symbol
+  - Home screen. Run datui with no path for recent datasets, the current directory, cloud stores and catalogs, with rows, columns and size before you open one; a local file previews its first rows. Ctrl+O comes back from anywhere
+  - Catalogs. A TOML file of named datasets, local or remote, is a section of the home screen, and Ctrl+D adds a row to yours. The bundled examples (NOAA weather, NYC taxis, flights, earthquakes and more) open with no login and carry their publishers' documentation (Ctrl+E)
+  - Column cursor. ←/→ move a cursor across columns: [ ] sort by it, F counts its values, + - filter on its cell, H L move it
+  - Find and inspect. / finds text, a regex or letters in order, lighting matches as you type, and n N step through them; : goes to a row or runs SQL or q. Space inspects the row, stepping into structs, lists and JSON
+  - Pipes, logs and live files. cmd | datui reads CSV, JSON, Parquet, Arrow or Avro by its first bytes; logs read as lines and journalctl -o json as the journal; --follow tails a file or pipe, and --tee FILE records the stream while you view it
+  - New formats. SQLite, NumPy, WAV and AIFF, MIDI, SafeTensors and GGUF (from the header alone, remote too), NMEA and GPX, PX4 ULog and ArduPilot DataFlash, candump with DBC, FIX, VCD, SDF, ELF, Arrow IPC streams and Hugging Face datasets caches
+  - Format specs. A TOML spec reads fixed, length-prefixed or typed binary records, or a family of instrument CSV exports; datui formats check validates one. Any other local file opens in a hex view
+  - Directories as one table. Parquet, CSV and NDJSON directories open as the union of their columns; Hive partitions are read, and Delta, Iceberg and Hudi tables are recognized
+  - Cloud at scale. S3, Google Cloud, Azure and HTTP(S) stores found from the logins you have; huge prefixes list in parallel (NOAA's 842,000-file by_station in 8 seconds), and Parquet reads only the row groups a page needs
+  - Analysis on samples. Describe, Distribution, Correlation, charts and Data Quality share one sample spread across the whole dataset, and S draws one into the table. Distribution fits are calibrated and the Q-Q plot is correct
+  - Data Quality. A plain-words report of what is wrong, every finding's rows one Enter away: trends by time window, intervals between time columns, declared rules, and export to JSON or Markdown
+  - Charts. Built on shelves: Y takes an aggregate over every row, dates bucket by period, Color splits series, and x puts a crosshair on the plot. Exports go to PNG, SVG or PDF with a title, notes and source
+  - Copy. y copies a cell, a row, the screen or the whole view as TSV, CSV or Markdown, locally or over SSH; Copy as Python writes a script that rebuilds the view in Polars
+  - Queries. SQL completes column names and keeps a failed statement in the prompt with a fix; q gains time parts, text parsing, in, like, xbar, wavg and an optional from df. Enter on a grouped row drills down to its rows
+  - Views, formerly templates, save the query, filters, sort, sample and chart, and say why they match a file
+  - Command line and config. One registry for every key: -c KEY=VALUE, datui config init|path|keys, datui cache, datui views, datui theme, shell completions and man pages. Named themes, light or dark as the terminal is
+  - Installing. Linux builds run on glibc 2.28 and newer, Linux arm64 is on PyPI, cargo binstall datui works, and the install script verifies what it downloads
+  - Python. datui.view(lf, capture=True) returns what you built in the TUI as a LazyFrame; works with Polars 1.38 and later
+  Fixed
+  - Nothing freezes the screen: pivots, views, counts, the Info panel and unresponsive network shares work in the background, and Esc stops them
+  - Windows draws Unicode and 24-bit color, removes its temp files when the console closes, and expands ~
+  - Exports never truncate the file they replace, stream uncompressed CSV and Parquet, and write list, struct, binary and duration columns instead of failing
+  - Sorting and paging are stable: nulls sort last, equal keys keep one order, and SQL results no longer repeat or skip rows between pages
+  - A config file that cannot be parsed stops datui with its path, line and reason instead of loading the defaults
+  Renamed and removed
+  No old name is read. A config key datui does not know is named on stderr with the nearest current one, and datui config keys lists them all.
+  ───────────────────────────────────────────────────────────────────────────────────────────┬──────────────────────────────────────────────────────────────────────
+  Before                                                                                     │Now
+  ───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────
+  --generate-config, --clear-cache, --clear-recents, --remove-templates                      │datui config init, datui cache clear [--recents], datui views clear
+  ───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────
+  --sheet, --variant                                                                         │-t, --table
+  ───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────
+  --spec FILE                                                                                │--format ./FILE
+  ───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────
+  --fix-dict, --dbc                                                                          │--dict
+  ───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────
+  --parse-dates, --parse-strings, --no-parse-strings                                         │--infer-types[=COLS|off]
+  ───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────
+  --template, --skip-tail-rows, --comment-char, --infer-schema-length, --null-value,         │--view, --footer-rows, --comment, --infer-rows, --null, --hex-width
+  --record-size                                                                              │
+  ───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────
+  --s3-*, [cloud] s3_*                                                                       │AWS_* variables or [[cloud.connections]]
+  ───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────
+  --debug, [debug]                                                                           │DATUI_DEBUG=1, [log]
+  ───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────
+  Tuning flags such as --polars-streaming and --pages-lookahead                              │-c with the config key
+  ───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────
+  [file_loading]                                                                             │[read] and [csv]
+  ───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────
+  [data]                                                                                     │[home]; [data] directories became catalog.toml entries
+  ───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────
+  [templates], templates/                                                                    │[views], views/ (rename template_*.json to view_*.json)
+  ───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────
+  _mb, _kb and _ms keys                                                                      │One key with a unit: max_buffered = "512MiB", follow_interval =
+                                                                                             │"250ms"
+  ───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────
+  Theme slots such as str_col, row_numbers, keybind_hints                                    │type_*, table_*, chip_*, chart_1..chart_10
+  ───────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────────────────────────────────────
+  Python has_header, excel_sheet, parse_strings and others                                   │The config key names (datui.OPTION_NAMES), and config={...} for any
+                                                                                             │key
+ReleaseNotesUrl: https://github.com/derekwisong/datui/releases/tag/v0.4.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,153 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: OpenAI.Codex
+PackageVersion: 0.119.0
+PackageLocale: en-US
+Publisher: OpenAI, Inc.
+PublisherUrl: https://github.com/openai
+PublisherSupportUrl: https://github.com/openai/codex/issues
+Author: OpenAI, Inc.
+PackageName: Codex CLI
+PackageUrl: https://github.com/openai/codex
+License: Apache-2.0
+LicenseUrl: https://github.com/openai/codex/blob/HEAD/LICENSE
+Copyright: Copyright 2025 OpenAI
+CopyrightUrl: https://github.com/openai/codex/blob/HEAD/NOTICE
+ShortDescription: Codex CLI is an open‑source local coding agent that runs in your terminal, letting you write, edit, and understand code without leaving the command line.
+Moniker: codex
+Tags:
+- agent
+- ai
+- cli
+- llm
+- openai
+ReleaseNotes: |-
+  New Features
+  - Realtime voice sessions now default to the v2 WebRTC path, with configurable transport, voice selection, native TUI media support, and app-server coverage for the new flow (#16960, #17057, #17058, #17093, #17097, #17145, #17165, #17176, #17183, #17188).
+  - MCP Apps and custom MCP servers gained richer support, including resource reads, tool-call metadata, custom-server tool search, server-driven elicitations, file-parameter uploads, and more reliable plugin cache refreshes (#16082, #16465, #16944, #17043, #15197, #16191, #16947).
+  - Remote/app-server workflows now support egress websocket transport, remote --cd forwarding, runtime remote-control enablement, sandbox-aware filesystem APIs, and an experimental codex exec-server subcommand (#15951, #16700, #16973, #16751, #17059, #17142, #17162).
+  - The TUI can copy the latest agent response with Ctrl+O, including better clipboard behavior over SSH and across platforms (#16966).
+  - /resume can now jump directly to a session by ID or name from the TUI (#17222).
+  - TUI notifications are more configurable, including Warp OSC 9 support and an opt-in mode for notifications even while the terminal is focused (#17174, #17175).
+  Bug Fixes
+  - The TUI starts faster by fetching rate limits asynchronously, and /status now refreshes stale limits instead of showing frozen or misleading quota information (#16201, #17039).
+  - Resume flows are more stable: the picker no longer flashes false empty states, uses fresher thread names, stabilizes timestamp labels, preserves resume hints on zero-token exits, and avoids crashing when resuming the current thread (#16591, #16601, #16822, #16987, #17086).
+  - Composer and chat behavior are smoother, including fixed paste teardown, CJK word navigation, stale /copy output, percent-decoded local file links, and clearer truncated exec-output hints (#16202, #16829, #16648, #16810, #17076).
+  - Fast Mode no longer stays stuck on after /fast off in app-server-backed TUI sessions (#16833).
+  - MCP status and startup are less noisy and faster: hyphenated server names list tools correctly, /mcp avoids slow full inventory probes, disabled servers skip auth probing, and residency headers are honored by codex mcp-server (#16674, #16831, #17098, #16952).
+  - Sandbox, network, and platform edge cases were tightened, including clearer read-only apply_patch errors, refreshed network proxy policy after sandbox changes, suppressed irrelevant bubblewrap warnings, a macOS HTTP-client sandbox panic fix, and Windows firewall address handling (#16885, #17040, #16667, #16670, #17053).
+  Documentation
+  - The README now uses the current ChatGPT Business plan name (#16348).
+  - Developer guidance for argument_comment_lint was updated to favor getting CI started instead of blocking on slow local lint runs (#16375).
+  - Obsolete codex-cli README content was removed to avoid stale setup guidance (#17096).
+  - codex exec --help now shows clearer usage and approval-mode wording (#16881, #16888).
+  Chores
+  - codex-core was slimmed down through major crate extractions for MCP, tools, config, model management, auth, feedback, protocol, and related ownership boundaries (#15919, #16379, #16508, #16523, #16962).
+  - Rust CI and workspace guardrails were simplified by blocking new crate features and dropping routine --all-features runs (#16455, #16473).
+  - Core compile times were reduced by removing expensive async-trait expansion from hot tool/task abstractions (#16630, #16631).
+  - Bazel diagnostics and dependency wiring improved with compact execution logs, repository-cache persistence, remote downloader support, and several platform-specific build fixes (#16577, #16926, #16928, #16634, #16744).
+  Changelog
+  Full Changelog: rust-v0.118.0...rust-v0.119.0
+  - #16308 fix: one shot end of turn @jif-oai
+  - #16238 fix: ma2 @jif-oai
+  - #16317 chore: clean wait v2 @jif-oai
+  - #16318 nit: update aborted line @jif-oai
+  - #15771 feat: fork pattern v2 @jif-oai
+  - #16322 fix: update fork boundaries computation @jif-oai
+  - #16325 feat: restrict spawn_agent v2 to messages @jif-oai
+  - #16324 chore: drop interrupt from send_message @jif-oai
+  - #16345 fix: fix clippy issue caught by cargo but not bazel @bolinfest
+  - #16184 Route TUI /feedback submission through the app server @etraut-openai
+  - #16330 feat: log db better maintenance @jif-oai
+  - #15690 [codex-analytics] thread events @rhan-oai
+  - #16363 Fix PR babysitter review comment monitoring @etraut-openai
+  - #16356 Refactor external auth to use a single trait @etraut-openai
+  - #16366 Fix Windows external bearer refresh test @bolinfest
+  - #16353 ci: verify codex-rs Cargo manifests inherit workspace settings @bolinfest
+  - #16361 Refactor chatwidget tests into topical modules @etraut-openai
+  - #16201 Fix stale /status rate limits in active TUI sessions @etraut-openai
+  - #16351 ci: sync Bazel clippy lints and fix uncovered violations @bolinfest
+  - #16378 fix: suppress status card expect_used warnings after #16351 @bolinfest
+  - #16406 Use message string in v2 spawn_agent @jif-oai
+  - #16409 Use message string in v2 send_message @jif-oai
+  - #16419 Use message string in v2 assign_task @jif-oai
+  - #16424 feat: tasks can't be assigned to root agent @jif-oai
+  - #16425 nit: update wait v2 desc @jif-oai
+  - #16426 chore: interrupted as state @jif-oai
+  - #16427 nit: deny field v2 @jif-oai
+  - #16433 chore: drop log DB @jif-oai
+  - #16434 feat: auto vaccum state DB @jif-oai
+  - #16422 fix(core) rm execute_exec_request sandbox_policy @dylan-hurd-oai
+  - #16375 docs: update argument_comment_lint instructions in AGENTS.md @bolinfest
+  - #16449 fix: remove unused import @bolinfest
+  - #15772 Make fuzzy file search case insensitive @meyers-oai
+  - #16455 ci: block new workspace crate features @bolinfest
+  - #16456 cloud-tasks: split the mock client out of cloud-tasks-client @bolinfest
+  - #16457 tui: remove debug/test-only crate features @bolinfest
+  - #16467 tui: remove the voice-input crate feature @bolinfest
+  - #16379 Extract tool config into codex-tools @bolinfest
+  - #16469 otel: remove the last workspace crate feature @bolinfest
+  - #16471 Extract tool spec helpers into codex-tools @bolinfest
+  - #16473 ci: stop running rust CI with --all-features @bolinfest
+  - #16477 Extract tool discovery helpers into codex-tools @bolinfest
+  - #16480 login: treat provider auth refresh_interval_ms=0 as no auto-refresh @bolinfest
+  - #16448 fix(guardian): make GuardianAssessmentEvent.action strongly typed @owenlin0
+  - #16481 Extract update_plan tool spec into codex-tools @bolinfest
+  - #15919 Extract MCP into codex-mcp crate @aibrahim-oai
+  - #16482 Remove client_common tool re-exports @bolinfest
+  - #16495 fix: remove unused import @bolinfest
+  - #16493 Extract built-in tool spec constructors into codex-tools @bolinfest
+  - #16273 Fix regression: "not available in TUI" error message @etraut-openai
+  - #16497 Extract tool-search output helpers into codex-tools @bolinfest
+  - #16498 fix: guard guardian_command_source_tool_name with cfg(unix) @bolinfest
+  - #16499 Extract tool-suggest wire helpers into codex-tools @bolinfest
+  - #16284 Fix TUI app-server permission profile conversions @etraut-openai
+  - #16202 Fix paste-driven bottom pane completion teardown @etraut-openai
+  - #16504 core: use codex-tools config types directly @bolinfest
+  - #16503 Extract request_user_input normalization into codex-tools @bolinfest
+  - #16510 core: use codex-mcp APIs directly @bolinfest
+  - #16509 Extract code-mode nested tool collection into codex-tools @bolinfest
+  - #16512 core: remove cross-crate re-exports from lib.rs @bolinfest
+  - #16516 fix: add update to Cargo.lock that was missed in #16512 @bolinfest
+  - #16513 Extract tool registry planning into codex-tools @bolinfest
+  - #16521 Move tool registry plan tests into codex-tools @bolinfest
+  - #16523 [codex] Move config types into codex-config @bolinfest
+  - #16524 fix: move some test utilities out of codex-rs/core/src/tools/spec.rs @bolinfest
+  - #16529 [codex] Remove codex-core config type shim @bolinfest
+  - #16559 chore: memories mini model @jif-oai
+  - #16561 fix: race pending @jif-oai
+  - #16564 nit: lint @jif-oai
+  - #16566 fix: races in end of turn @jif-oai
+  - #16567 chore: rework state machine further @jif-oai
+  - #16569 nit: state machine desc @jif-oai
+  - #16571 chore: rename assign_task for followup_task @jif-oai
+  - #16577 ci: upload compact Bazel execution logs for bazel.yml @bolinfest
+  - #16581 chore: move codex-exec unit tests into sibling files @bolinfest
+  - #16590 Fix non-determinism in rules_rs/crate_git_repository.bzl @tyler-french
+  - #16604 test: deflake external bearer auth token tests on Windows @bolinfest
+  - #16606 fix: add more detail to test assertion @bolinfest
+  - #16608 fix: increase timeout to account for slow PowerShell startup @bolinfest
+  - #16591 Fix resume picker initial loading state @etraut-openai
+  - #16613 fix: increase another startup timeout for PowerShell @bolinfest
+  - #16601 Fix resume picker stale thread names @etraut-openai
+  - #16616 Fixed some existing labels and added a few new ones @etraut-openai
+  - #16588 Fix stale turn steering during TUI review follow-ups @etraut-openai
+  - #16617 fix: add shell fallback paths for pwsh/powershell that work on GitHub Actions Windows runners @bolinfest
+  - #16596 Fix fork source display in /status (expose forked_from_id in app server) @etraut-openai
+  - #16578 fix(tui): handle zellij redraw and composer rendering @fcoury-oai
+  - #16630 core: cut codex-core compile time 63% with native async ToolHandler @bolinfest
+  - #16631 core: cut codex-core compile time 48% with native async SessionTask @bolinfest
+  - #16492 Auto-trust cwd on thread start @aibrahim-oai
+  - #16633 fix: address unused variable on windows @bolinfest
+  - #16635 app-server: make thread/shellCommand tests shell-aware @bolinfest
+  - #16629 test: use cmd.exe for ProviderAuthScript on Windows @bolinfest
+  - #16634 build: fix Bazel lzma-sys wiring @starr-openai
+  - #16658 Fix deprecated login --api-key parsing @etraut-openai
+  - #16508 extract models manager and related ownership from core @aibrahim-oai
+ReleaseNotesUrl: https://github.com/openai/codex/releases/tag/rust-v0.119.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://developers.openai.com/codex/cli
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

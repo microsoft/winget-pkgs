@@ -1,0 +1,46 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: athrvk.Vayu
+PackageVersion: 0.21.0
+PackageLocale: en-US
+Publisher: Atharva Kusumbia
+PublisherUrl: https://github.com/athrvk
+PublisherSupportUrl: https://github.com/athrvk/vayu/issues
+Author: Atharva Kusumbia
+PackageName: Vayu
+PackageUrl: https://github.com/athrvk/vayu
+License: AGPL-3.0
+LicenseUrl: https://github.com/athrvk/vayu/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Atharva Kusumbia
+ShortDescription: Open-source API client with a native C++ load-testing engine - Postman-style requests and k6-level load tests in one local app.
+Description: Vayu is a free, open-source desktop app for Windows, macOS, and Linux that combines a full REST and GraphQL request builder - with collections, environments, and scripting - and a high-throughput load tester powered by a C++20 engine, with all data staying on your machine.
+Moniker: vayu
+Tags:
+- api
+- api-client
+- api-testing
+- benchmark
+- developer-tools
+- graphql
+- http
+- insomnia
+- load-testing
+- performance
+- postman
+- rest
+ReleaseNotes: |-
+  0.21.0 - 2026-08-21
+  The data-row release. Everything here was found by writing one collection that tries to exercise a data-driven run end to end, which is the cheapest way to discover that three separate layers disagreed about what a {{data.column}} token means, what a JSON body is, and whether .not negates. The script sandbox stops being the odd one out - pm.variables.replaceIn resolves the data namespace the way a URL, a header and a body already did - a JSON body finally declares itself as JSON on the wire instead of inheriting libcurl's form default, and an assertion chain with two negations in it means what it says. On the app side the data-row picker stops being a popover it could not fit in and becomes a grid you can actually read a row out of, and dragging a request past a collapsed folder no longer springs it open under the pointer. Small release, and the shape of it is corrections: three engine defects that were each invisible from inside the layer that had them.
+  Added
+  - {{data.column}} resolves inside a script. pm.variables.replaceIn was the one template resolver in the product that disagreed with the others about the data namespace: a URL, a header, a body and an auth credential all bind {{data.userId}} per iteration, and handing the same string to replaceIn returned it with its braces still on - which reads as "unresolved variable", the same output an unknown {{$typo}} gives, so nothing said the row was available and simply not consulted. It resolves now, against the row bound to the iteration, and brings the binding's own three rules with it rather than inventing softer ones. A column the row does not carry is a TypeError naming the token and the columns the row does have, not "" and not the token verbatim: the token says the value came from the file, so a name no column answers is a mistake about the column and both quiet answers hide it. With no row bound at all the token keeps its braces, unchanged, because a plain design send has no row by design and a shared script that guards with pm.iterationData has to run in both modes. And the namespace stays reserved rather than becoming another precedence tier - {{userId}} and {{data.userId}} are still different names, so a data set cannot shadow a variable or be shadowed by one. Deliberately stopping at replaceIn: pm.variables.get and .has read the variable scopes, and the row is not one of them, with pm.iterationData as its accessor. The distinction is that replaceIn resolves a template, and this is a token template syntax has.
+  Changed
+  - The data-row picker is a grid you can read a row out of. Send's caret opened a 384px popover anchored over the response pane, and every compromise in it came from that box rather than from the feature: a row was one truncated line with its column name printed in front of every value (userId=1001 email=ada@example.com plan=pro q…), the list stopped at twenty rows, and a row-number field stood in for the rows there was no room to show. Picking a row meant reading a sentence instead of scanning a column, and row 21 was reachable only by already knowing its index - which is the row a long run's failure names. Choosing a row out of tabular data is a browse, so it is a dialog now: the columns are named once in a sticky header, every row in the file is in the grid, and a filter narrows them by any value in any column. The number field survives, demoted from the mechanism to a shortcut for jumping to row 480 of 500. Clicking a row still sends outright, because the one-click loop is the whole reason the feature exists; the footer's Send row N is for a row reached by typing or by arrow keys, and it names the row so a jump is confirmable without hunting for it. Rows arrive as they are scrolled to, so a thousand-row set costs a screenful of DOM rather than a thousand rows of it - the one thing the popover was right about, kept. The grid is a real ARIA grid with a roving tabindex, so a large file is one tab stop instead of one per row. This opened a third dialog width, 2xl (672px), for the case where reading the content is the task: seven columns of ordinary CSV at the previous 576px leaves about 60px a column, which is one truncated cell per column and nothing scannable. It is deliberately the last size on the scale, because a dialog is a focus device before it is a container.
+  - Internal work with no user-visible surface. render_data_value - the rule for how a data cell is spelled into a template - moves from core/scenario_data down to http/request_composer, beside the namespace it belongs to, because the script sandbox needs it from a layer below core and the alternative was a second copy of a five-line rule. The renderer's two surfaces that print these cells (the Run dialog's file preview and the row picker) now share one formatter instead of answering separately, so a null cannot render as "" in one and "null" in the other. Docs corrected in step: the Content-Type rules in the API reference go from four to five, the scripting and pm-compatibility pages state both new behaviours and the assertion-chain rule, and the design system's dialog table grows its third row with the reason for it.
+  Fixed
+  - A JSON body went out declaring itself a form. The engine derived a Content-Type for x-www-form-urlencoded, graphql, jsonrpc and xml, and not for json - and libcurl's default for a POST carrying a body is application/x-www-form-urlencoded, so a request whose mode said JSON, whose editor highlighted JSON and whose stored bodyType was json told the server it was sending a form. The old rationale said json is the mode a user writes the header for themselves, which was true of exactly one client: the request builder does write that header row, so anything authored in the UI went out correctly and the defect was invisible from there. Every other origin - a request created over MCP, one that arrived through an import, a payload posted straight to /execute - sent the wrong type. It derives application/json now, and a Content-Type the caller declared still wins, so an application/vnd.api+json on a JSON body reaches the server unchanged. text and binary still derive nothing, and that one is a decision rather than the same gap: text/plain, text/csv, a JWT and a raw signature are all text, so there is no single answer to derive.
+  - Two .nots in one assertion chain cancelled each other out. The sandbox toggled the negation flag where chai sets it, and nothing resets that flag between assertions in a chain - so every even-numbered .not undid the one before it. pm.expect(digest).to.not.include("+").and.to.not.include("/") quietly asserted that the digest does include /, and went red on a value that was correct. It is a silent inversion in both directions, and which direction depended only on how many times the author had written .not: an even count turned a real failure green. .and was not the mechanism - a .not following a positive assertion always worked, because the flag was still false - so the fix is that .not sets rather than flips, and a second one in a chain is the no-op chai makes it.
+  - Dragging past a collapsed folder sprang it open under the pointer. Spring-loading is how you drop into a closed folder, but it armed on any drop the folder's row resolved - and a folder row's top and bottom quarters are the reorder bands, the ones that exist so a row can land between two folders. So lining up a reorder beside a collapsed folder opened it after 700ms: its children appeared under the pointer, every row below shifted mid-gesture, and the seam being aimed at moved somewhere else, which means the drop that followed was not the one the user set up. Only a drop that genuinely lands inside a folder arms the spring now, and sliding off that band cancels a countdown that has not fired - the timer used to be cleared only on reaching a different row, so moving from a folder's middle out to its own edge left it running against a target the drop no longer named.
+ReleaseNotesUrl: https://github.com/athrvk/vayu/releases/tag/v0.21.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

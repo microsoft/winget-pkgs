@@ -1,0 +1,50 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: g0orx.hpsdr-rs
+PackageVersion: 0.15.1
+PackageLocale: en-US
+Publisher: John Melton
+PublisherUrl: https://github.com/g0orx
+PublisherSupportUrl: https://github.com/g0orx/hpsdr-rs/issues
+Author: John Melton
+PackageName: hpsdr-rs
+PackageUrl: https://github.com/g0orx/hpsdr-rs
+License: GPL-2.0-or-later
+LicenseUrl: https://github.com/g0orx/hpsdr-rs/blob/HEAD/LICENSE
+ShortDescription: Desktop client for openHPSDR Protocol 1/2 SDR radios.
+Description: |-
+  A Rust/egui desktop client for openHPSDR Protocol 1 and Protocol 2 radios (Metis/Ozy-style and Hermes/Orion-style boards), using WDSP for DSP.
+
+  - Protocol 1 (Metis/Ozy) and Protocol 2 (Hermes/Orion) support, with standard openHPSDR UDP discovery
+  - Multiple simultaneous receivers, each with its own VFO, mode, filter width, and band memory
+  - Spectrum/waterfall display with adjustable dB range, palette, and Click-to-Tune (CTUN)
+  - SSB/CW/AM/FM/digital modes, per-mode/per-band filter width and mode memory
+  - Noise blanker (NB/NB2), noise reduction (NR/NR2/NNR), and SNB, independently switchable
+  - AGC with selectable Off/Long/Slow/Medium/Fast modes
+  - TX: mic audio through WDSP's TXA chain, ALC, TX power/SWR meter with per-band PA calibration, and a Tune button
+  - PureSignal (PA linearization/predistortion), on both Protocol 1 and Protocol 2
+  - rigctl (Hamlib-compatible), TCI (WebSocket), and CAT (Kenwood TS-2000 emulation) control servers
+  - Dual VFO (VFO A/B) with Split -- transmit on VFO B while receiving on VFO A
+  - Selectable RX output / TX input audio devices, independent of the OS default
+  - Per-radio settings persistence, keyed by the radio's MAC address
+  - FPGA firmware upload and static IP configuration
+Tags:
+- amateur-radio
+- dsp
+- ham-radio
+- openhpsdr
+- sdr
+ReleaseNotes: |-
+  Fixes from issue #15:
+  - CW sidetone: the PC sidetone is now generated in the audio callback, with smooth 5 ms edges. That removes the clicks and the low-level ticks.
+  - Sidetone settings: the level is shown as 0–100%, and 100% is now full volume. The frequency range is 300–1200 Hz.
+  - FM: the filter width goes up to 8 kHz (±8 kHz). There's a new FM deviation setting (Settings → TX) with a 5 kHz default. CTCSS was too weak at the old fixed 2.5 kHz deviation.
+  - AF Gain: remembered separately for each mode, so FM and SSB no longer share one level.
+  - Transmit without a mic: Enable Transmit now works without an audio input device, for example on a Raspberry Pi with no USB sound card.
+  - Windows discovery: discovery now binds any free UDP port instead of the fixed ports 5000 and 50000, which Windows can reserve for Hyper-V, WSL or Docker. It also keeps listening through Windows receive errors.
+  Also:
+  - Raspberry Pi controller: if GPIO lines are busy, the error now says which lines and what holds them (SPI, or a config.txt overlay).
+ReleaseNotesUrl: https://github.com/g0orx/hpsdr-rs/releases/tag/v0.15.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

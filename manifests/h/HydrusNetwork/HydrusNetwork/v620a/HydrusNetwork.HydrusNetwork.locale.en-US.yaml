@@ -1,0 +1,93 @@
+# Created with komac v2.11.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: HydrusNetwork.HydrusNetwork
+PackageVersion: v620a
+PackageLocale: en-US
+Publisher: Hydrus Network
+PublisherUrl: https://github.com/hydrusnetwork/hydrus
+PublisherSupportUrl: https://github.com/hydrusnetwork/hydrus/issues
+PrivacyUrl: https://hydrusnetwork.github.io/hydrus/privacy.html
+Author: Hydrus Network
+PackageName: Hydrus Network
+PackageUrl: https://github.com/hydrusnetwork/hydrus
+License: WTFPL
+LicenseUrl: https://github.com/hydrusnetwork/hydrus/blob/HEAD/license.txt
+Copyright: Copyright (C) 2011 Hydrus Developer
+CopyrightUrl: https://github.com/hydrusnetwork/hydrus/blob/master/license.txt
+ShortDescription: A personal booru-style media tagger that can import files and tags from your hard drive and popular websites. Content can be shared with other users via user-run servers.
+Description: |-
+  The hydrus network client is an application written for Anon and other internet-fluent media nerds who have large image/swf/webm collections.
+  It browses with tags instead of folders, a little like a booru on your desktop. Advanced users can share tags and files anonymously through custom servers that any user may run.
+  Everything is free and privacy is the first concern. Executable releases are available for Windows, Linux, and macOS.
+  The program is in python, so you can also run it straight from the source code.
+Moniker: hydrus-network
+Tags:
+- booru
+- cross-platform
+- image-database
+ReleaseNotes: |-
+  Hotfix!
+  Hey, I broke the manual duplicate filter in the initial v620 release on Wednesday evening. This v620a is now (Thursday afternoon) a hotfix that fixes this. Thank you for the reports, and sorry for the trouble!
+  Future Build
+  Advanced users: there is a 'Future Build' this week: https://github.com/hydrusnetwork/hydrus/releases/tag/v620-future-02
+  user gui improvements
+  - thanks to a user, we have some more UI features--
+  - the options dialog now remembers its last page (can uncheck this if you like under gui page)
+  - a checkbox under gui that says whether to save media viewer size and position on close (normally it only saves on move/resize, but if you regularly use multiple viewers, you may wish to override so a final close saves what you want)
+  - the media viewer gets a 'drag' button in the top hover. drag the button, you drag the window. useful if you are using it in the newer frameless mode
+  - if you right-click this new button, there are some neat new commands to change the fit the window size to the current mediia size too
+  - the new 'resize frame to media' commands are mappable on the 'media viewer' shortcut set. you can set the specific zoom
+  - we now have a command for 'zoom to x%', also! same deal, it is now in the 'media viewer' shortcut set
+  - the media viewer should be better about saving its position when moved by programmatic window position-setters like Windows Snap
+  - two checkboxes under gui pages let you promote 'all my files' or 'all local files' buttons to the top of the page picker (for, e.g. if you have many file domains that spill over what the dialog can show)
+  misc
+  - wrote an animated webp frame duration parser and integrated it into our file metadata stuff. animated webp files are no longer fixed to 12fps and support variable framerate (issue #1694)
+  - on update, all animated webps will be scheduled for a metadata regen to get corrected total duration times
+  - fixed some url unit tests I accidentally broke last week because of the defunct url classes I removed, and updated some of the 'how to make url classes and parsers' and client api help to use more generic url examples
+  - improved the grammar and general presentation of the 'files being parsed' message text in the 'import files' dialog. this text also tooltips itself in case it gets crazy long
+  - the 'quality info' button in the 'edit subscription' dialog is now aware of which queries actually exist on disk versus those that were generated in this 'edit subscriptions' session. it now presents info only on selected queries that actually exist, and if only new queries are selected, it disables itself
+  - the system tray checkboxes are now set to false along with being disabled if the current system does not support a system tray (e.g. Docker). the calls these settings make have an additional protection layer that checks if the current system has a system tray (issue #1569)
+  - the 'show pending and petitioned groups' and 'show whole chains' checkboxes in the manage tag siblings and parents dialogs now disable if you hit 'show all pairs'. these are inherently true with 'show all pairs'
+  - the file maintenance routine that attempts to re-queue known urls for files that are missing or damaged now double-checks that any 'Post URLs' are currently parseable. (some 'decorative' urls have 'Post URL' url classes so as to appear in the media viewer but aren't actually linked to anything)
+  - in the 'thumbnails' shortcut set, you can now set a 'select: not selected' command, to invert the current selection
+  - the display names of normal pages are now clipped to 256 characters and are better about removing accidentally included newline characters
+  - the macOS dialog double-positioning thing we added in March that fixed dialogs slowly creeping like 26 pixels down on every dialog session is now careful not to apply to the main window on boot. it seems the fix was making the main gui move ~100px sideways, no idea why
+  future build and more AVIF fun
+  - it looks like the AVIF fix last week was not reliable--some boots it would work, others it would not. I don't know if this is some random fail triggered by the deprecated status, but whatever: we should promptly move to the designated 'use this in the interim while Pillow proper figure it out their end' solution to get good AVIF rendering back (issue #1720)
+  - thus I am making another 'future build' this week. I had been planning one for a while, particularly to try out a new mpv dll, but I'm just going to keep it nice and simple this week to test out the AVIF fix. if you are an advanced user, please try it out on your platform and let me know if there are any problems. if you run from source, you can rebuild your venv, and if you select (a)dvanced, you'll get a question if you want to install the AVIF test library
+  - assuming no problems, I'll fold this into v621
+  - on boot, hydrus now imports the pillow-avif-plugin library in preference to the old pillow_heif solution
+  - as a side thing, it looks like Pillow are going to try slender AVIF binaries in their wheels for 11.3, so this all may get simpler soon
+  - also, hydrus now reports 'avif ok' and 'heif ok' separately in various errors and the help->about dialog
+  json parsing
+  - the json formula now supports two new parsing rules--
+  - first, a 'walk back up ancestors' parsing rule. it moves n steps back up the parsing stack, so if you have an Object where you need to test for one key's existence but you actually need to grab a sibling or cousin value, you can now walk back and it should work
+  - second, a 'filter strings/numbers/bools with string match' parsing rule. if you have grabbed strings or other simple variables, you can test them against a String Match. if you combine this with the 'walk back' step, you can now test Object values and then walk back up and grab a different thing
+  - wrote some unit tests for the existing and new json formula rules
+  duplicates auto-resolution
+  - fixed an issue with renaming existing rules. due to a saving bug, renaming rules was causing duplicate entries behind the scenes. you might get an update message about it--if you do, your new rule may have rolled back to a previous version. I will have paused it, to be safe, so if you were hit by this, please double-check your rule is named as you wish and the settings are all good and then set it back to semi-automatic or automatic if you are happy
+  - added a maintenance job to the cog to clear the cached pair counts that the rules use to talk about their progress. if there's ever a miscount, this will fix it
+  - when you approve/deny some pending pairs, the selection now tries to preserve to the earliest selection you had before. previously it always fell back to position 0
+  - stopped the duplicates auto-resolution work from sending unintended 'I am not idle' signals as it did file search, prohibiting idle mode from kicking in
+  - fixed a stupid typo error when you say to add a new comparator rule but cancel the 'select which type' add dialog
+  - fixed an issue where a duplicates auto-resolution table wasn't being deleted correctly on rule delete. not a big deal, just a cleanup thing
+  duplicates auto-resolution exact match detection
+  - tl;dr: I think I can do the 'A is a resize/re-encode of B' in future
+  - I did some research and bashed my head against different strategies, and I think I have figured out the core of a routine that can differentiate between resize/re-encode 'exact match' duplicates and files that have significant changes such as corrections or watermarks or recolours. It uses a bunch of math to break the images into normalised tiles, compute a weighted 'wasserstein distance' (earth-mover distance) of the tiles' Lab channel histograms, and reviews those scores, and their mean, variance, and skewness to exclude various classes of differing files
+  - I still have a bit of work to actually plug it in, since each judgment here requires a full image render for both in the pair and some of the UI isn't yet ready to handle a ~1 second delay per pair. I also need to figure out a nicer tuning/testing regime to ensure I didn't just overfit for the examples I generated. I think I'll plug it into the manual duplicate filter's comparison statements and we'll see with human eyes how it does. overall, I feel really good about it. I thought this would be a nightmare, but it looks doable. if you want to check my math and send in your own thoughts, check out the new ClientImageHistograms.py
+  boring refactoring and cleanup
+  - pulled the rich maintenance manager code out of ClientFiles to a new ClientFilesMaintenance
+  - pulled the file storage manager out of ClientFiles to a new ClientFilesManager
+  - pulled the phash code out of ClientImageHandling and moved it to a new ClientImagePerceptualHashes
+  - moved the above files and ClientFilesPhysical to new hydrus.client.files(.images) modules
+  - reworked the images, image tiles, and thumbnails caches to be explicitly named variables in the client controller, mostly to improve some type checking stuff
+  - standardised some variable names around the cache access, and made the images and image tiles caches work in media results rather than media objects
+  - removed the afaik defunct cloudscraper from the code and requirements and a weird insert we needed in the client.spec build templates
+ReleaseNotesUrl: https://github.com/hydrusnetwork/hydrus/releases/tag/v620a
+PurchaseUrl: https://hydrusnetwork.github.io/hydrus/support.html
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://hydrusnetwork.github.io/hydrus/faq.html
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

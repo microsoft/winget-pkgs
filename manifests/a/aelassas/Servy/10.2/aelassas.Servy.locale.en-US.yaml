@@ -1,0 +1,133 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: aelassas.Servy
+PackageVersion: '10.2'
+PackageLocale: en-US
+Publisher: Akram El Assas
+PublisherUrl: https://github.com/aelassas
+PublisherSupportUrl: https://github.com/aelassas/servy/issues
+Author: Akram El Assas
+PackageName: Servy
+PackageUrl: https://servy-win.github.io/
+License: MIT
+LicenseUrl: https://github.com/aelassas/servy/blob/HEAD/LICENSE.txt
+Copyright: Copyright (c) 2026 Akram El Assas
+ShortDescription: Servy lets you run any app as a native Windows service with full control over the working directory, startup type, process priority, CPU affinity, logging, health checks, hooks, and parameters.
+Description: |-
+  Servy lets you run any app as a native Windows service with full control over the working directory, startup type, process priority, CPU affinity, logging, health checks, environment variables, dependencies, pre-launch and post-launch hooks, pre-stop and post-stop hooks, and parameters.
+
+  Starting from v10.2, Servy provides enterprise-grade per-service isolation between custom accounts, DPAPI, HKDF & AES-256 HMAC authenticated encryption, and automated vault ACL hardening. All releases feature signed binaries, SBOMs, and continuous vulnerability scanning. See Security.md and Architecture.md for details.
+
+  Servy offers a desktop app, a CLI, and a PowerShell module that let you create, configure, and manage Windows services interactively or through scripts and CI/CD pipelines. It also includes a Manager app for easily monitoring and managing all installed services in real time.
+
+  Servy continuously monitors your app, restarting it automatically if it crashes, hangs, or stops. It allows non-service apps to run in the background and start automatically at system boot, even before logon, without rewriting them as services. Use it to run Node.js, Python, .NET, Java, Go, Rust, PHP, or Ruby applications; keep web servers, LLMs, background workers, sync tools, or daemons alive after reboots; and automate task runners, schedulers, or scripts in production with built-in health checks, logging, and restart policies.
+
+  Features:
+  - Clean, simple UI
+  - Monitor and manage all installed services with Servy Manager
+  - Real-time CPU and RAM monitoring with live performance graphs for installed services
+  - Real-time service stdout and stderr output preview in Servy Console
+  - Service dependency tree visualization with status indicators
+  - CLI and PowerShell module for full scripting and automated deployments
+  - Run any executable as a Windows service
+  - Set service name, description, startup type, priority, CPU affinity, working directory, environment variables, and dependencies
+  - Environment variable expansion supported in parameters, process paths, and startup directories
+  - Run services as Local System, local or domain accounts, Active Directory accounts, or gMSAs
+  - Redirect stdout/stderr to log files with automatic size-based and date-based rotations
+  - Run pre-launch hooks before starting the service, with retries, timeout, logging and failure handling
+  - Run post-launch hooks after the application starts successfully
+  - Run pre-stop and post-stop hooks before and after the application stops
+  - Supports Ctrl+C for command-line apps, close-window for GUI apps, and force kill if unresponsive
+  - Supports Ctrl+C propagation to descendant processes of the wrapped process
+  - Prevent orphaned/zombie processes with improved lifecycle management while ensuring resource cleanup
+  - Health checks and automatic service recovery
+  - Browse and search logs by level, date, and keyword for faster troubleshooting from Servy Manager
+  - Export/Import service configurations for easy backups and automation
+  - Service Event Notification alerts on service failures via Windows notifications and email
+  - Modern build (default, self-contained): Windows 10 (1809+), Windows 11 and Windows Server 2016+, on x64 and ARM64
+
+  Who is it for?
+  - Developers: Run development servers, scripts, or custom tools as services without extra setup.
+  - Sysadmins & IT professionals: Ensure critical background processes stay alive, monitored, and properly logged.
+  - Teams or organizations: Automate background services reliably across multiple machines.
+Moniker: servy
+Tags:
+- admin
+- automation
+- background-service
+- cli
+- devops
+- dotnet
+- nssm
+- powershell
+- scm
+- service-manager
+- service-supervisor
+- service-wrapper
+- watchdog
+- windows-service
+- windows-tools
+- winsw
+ReleaseNotes: |-
+  Servy v10.2 introduces full per-service security isolation (see Security.md and Architecture.md for details), a new CLI show command, automated ACL hardening, and core engine stability improvements.
+  Key Highlights
+  - Full Per-Service Security Isolation: Custom service accounts can no longer read or modify other services' configurations, runtime states, or logs. Decryption and database access are now proxied through the isolated Servy host process (Servy.Host.exe) via a DACL-restricted local Named Pipe.
+  - Per-Service Log Isolation: Each wrapped service now writes its wrapper and restarter logs to an isolated subfolder (%ProgramData%\Servy\logs\service\<ServiceName>\). Custom service accounts hold permissions strictly within their own log subfolder and cannot access or tamper with logs from other services.
+  - Automated Vault & Binary Hardening: Servy automatically enforces strict ACL lockdown rules on the %ProgramData%\Servy root vault and core binaries (.exe/.dll), removing the need for manual sysadmin hardening scripts or elevated permissions setup.
+  - CLI show Command (#7018): Inspect and print service configurations directly from the terminal in a clean, human-readable format.
+  Complete List of Changes
+  - Security & IPC Proxy: Introduced Servy.Host.exe for local IPC configuration and state requests, enforced process identity verification (GetNamedPipeClientProcessId vs SCM PID), hardened vault permissions, added per-service log folder isolation, improved NTFS hard-link safeguards, and strengthened key-vault access rules.
+  - CLI & PowerShell: Added the show command (#7018) and fixed wildcard path resolution issues in Servy.psm1.
+  - Core Engine & Process Management: Resolved concurrency race conditions in log stream rotation and handle drain timeouts, corrected environment variable line parsing, and cleaned up unused constants.
+  - Desktop App & Servy Manager: Preserved node expansion states in the Dependencies tab, fixed log-tailing scroll jumps, resolved secondary-tab automation name collisions, and localized event log level displays.
+  - Notifications & Task Scheduler: Prevented stale-read race conditions during watermark updates, improved WinRT type load error classification, and fixed bracket truncation in service message parsing.
+  - CI/CD & Release Tooling: Streamlined test coverage gates, fixed SonarCloud package caching paths, filtered stress tests out of release builds, and hardened Markdown tag escaping in changelog scripts.
+  Breaking Changes
+  1. Reserved Service Name (Servy): The service name "Servy" is now reserved for the Servy Host service (Servy.Host.exe) that manages secure IPC communication. If you previously installed a Windows service named "Servy", you must rename it prior to installing v10.2.
+  2. Fixed Vault File Locations: Custom directory paths for Servy.db and keying material are no longer supported. The configuration database and security keys must reside in %ProgramData%\Servy\db and %ProgramData%\Servy\security, where they are automatically hardened and managed by the host process.
+  Full Changelog
+  - feat(cli,psm1): Add show command to display service configuration in a human-readable format (#7018)
+  - feat(security): Add per-service security isolation through secure IPC, DACLs and ACLs
+  - feat(security): harden the vault in C# instead of Set-ServyExePermissions.ps1 and re-apply the hardening whenever a binary is extracted
+  - fix(security): Set-ServyExePermissions.ps1 - the handle64/handle64a probe is if/elseif, so a machine with both binaries present (after an architecture migration) leaves one unhardened and unreported (#6855)
+  - fix(security): Set-ServyExePermissions.ps1 - Get-Acl/Set-Acl follow NTFS hard links with no reparse/link-count check, letting the runner account redirect the admin's own hardening run onto an arbitrary file (#6866)
+  - fix(security): Set-ServyExePermissions.ps1 - the admin-membership warning condition is written twice, and the final-summary copy has already drifted (lost a space around -eq) (#6870)
+  - fix(security): Set-ServyExePermissions.ps1 - Test-ServyAdminGroupMember's S4U fast path takes a UPN, so none of the five documented -TargetAccount formats can ever reach it and the ADSI fallback always runs (#7008)
+  - fix(security): Set-ServyExePermissions.ps1 - the #6866 hard-link check fails open: a non-zero fsutil exit or empty output is treated as 'one link' and the file is hardened anyway (#7009)
+  - fix(security): Set-ServyExePermissions.ps1 - grant Modify on %ProgramData%\Servy itself and drop Delete on db\Servy.db, instead of telling users to grant Modify by hand (#7136)
+  - fix(security): Set-ServyExePermissions.ps1 - the vault Modify grant gives the runner Delete on db\ and on the vault folder itself, so it can rename db\ away and plant its own Servy.db, bypassing the #7136 no-Delete ACE on the file (#7140)
+  - fix(security): Set-ServyExePermissions.ps1 - the #7140 Deny Delete ACE on every vault folder is absent from the header, and the root audit line prints only [Modify - Allow] (#7143)
+  - fix(dump,restore): Servy-Restore.ps1 / Servy-Dump.ps1 - -WhatIf is honoured only by the SCM branch, so a what-if restore still overwrites the database and both scripts leave their plain-text staging directory behind (#7014)
+  - fix(core): grant service control and status rights on SCM handle during install and update
+  - fix(core): AppConfig.cs - four public constants have zero consumers; ConsoleSpinnerDelayMs' own call site still hardcodes the literal (residual of #1186) (#5499)
+  - fix(core): ProcessKiller.cs - two provably-unreachable defensive terms: parentStartTime's MinValue initializer (residue of #2214/#1231) and a ?? on ProcessInfoNode.Name (#5515)
+  - fix(core): ServiceDtoImportValidator.cs - TryValidate's 'errorMessage set on failure' invariant is prose-only; the #4397 fix's NotNullWhen never reached the repo's other Try-pattern (#5986)
+  - fix(core): ServiceValidationRules.cs - Validate normalizes three fields and discards the result, so the CLI and Manager import paths persist the un-normalized string that was never validated (#5987)
+  - fix(core): ServiceManager.cs - four 'repository is not initialized' guards re-check a readonly field the constructor already pinned non-null (#6375)
+  - fix(core): Domain/Service.cs - GetServiceStartupType has no caller in src, returns ServiceStartType? and documents a null for a missing service that IServiceManager's non-nullable Unknown contract never produces (#6674)
+  - fix(core): ServiceHelper.cs - StopServicesAsync has no fast-fail for a service that re-enters Running during the stop wait, unlike StartServicesAsync's Stopped fast-fail (#6806)
+  - fix(core): ProcessKiller.cs - the #6782 provenance check silently reverts to name-only trust when ExecutablePath is null, exactly the failure mode SystemProcessWrapper already documents (#6816)
+  - fix(core): HandleHelper.cs - the timeout path's unsynchronized errorBuilder read races the still-running async handler when Kill() fails to terminate within the drain window (#6842)
+  - fix(core): HandleHelper.cs - the lock-protected timeout-path errorBuilder read is atomic but can still be incomplete when Kill() does not confirm termination within the drain window (#6844)
+  - fix(core): RotatingStreamWriter.cs - the rotation wait-timeout recovery lets a writer reattach to a file PerformPhysicalRotation may still be moving, silently misdirecting writes into the archive (#6873)
+  - fix(core): Logger.cs - WriteLeveled discards a provided exception when the message argument is null or empty (#6887)
+  - fix(core): ServiceControllerProvider.cs - GetService throws ArgumentNullException for a blank-but-non-null serviceName, unlike every sibling IsNullOrWhiteSpace guard (#6890)
+  - fix(core): AppFoldersHelper.cs - rootVaultPath is the only EnsureFolders path parameter without an absolute-path guard, unlike its three siblings (#6897)
+  - fix(core): AppConfig.cs - the portable deployment's Windows Service ImagePath resolves from an unhardened, arbitrary extraction folder (#6923)
+  - fix(core): Helper.cs - WriteFileAtomicCore has no fallback for a hardened-ACL UnauthorizedAccessException, unlike its sync sibling WriteFileAtomic (#6928)
+  - fix(core): Helper.cs - the transient-retry catch's UnauthorizedAccessException arm is unreachable behind the preceding catch clause, in both WriteFileAtomic and WriteFileAtomicCore (#6932)
+  - fix(core): ServiceHelper.cs - StopServicesAsync's wait loop refreshes AFTER the delay, reintroducing the exact stale-read race #181 already fixed on the Start side (#6943)
+  - fix(core): ServiceManager.cs - two of GetAllServices' three 'details unavailable' sentinels are hardcoded English while the #5981 one reads a Strings resource (#6957)
+  - fix(core): ServiceManager.cs - ToScmStartType returns the managed enum's numeric value where UninstallServiceAsync names SERVICE_DEMAND_START for the same native parameter (#6959)
+  - fix(core): EnvironmentVariableParser.cs - the #6111 fix appends ' (record N).' to two resource messages that already end in a period, so both exceptions now read '... empty. (record 1).' (#6993)
+  - fix(core): EnvironmentVariablesValidator.cs / Strings.resx (Core) - the #6993 fix moved '(record {0})' into two resource values the validator still assigns unformatted, so Validate now reports '... (record {0}).' verbatim (#6997)
+  - fix(core): EnvironmentVariableParser.cs - the '(record N)' position is the raw split index, so CRLF-separated input reports the second line as record 3 and every later line as 2n-1 (#6999)
+  - fix(core): AppFoldersHelper.cs - the relative Data Source guard is the one check in its block that throws ArgumentException, and its ParamName names the local dbFolder (#7017)
+  - fix(core): ProtectedKeyProvider.cs - the #5953 fix deleted mutexSecurity.AddAccessRule, so the key-vault mutex is created with an empty MutexSecurity and the AuthenticatedUsers rule is built and never applied (#7061)
+ReleaseNotesUrl: https://github.com/aelassas/servy/releases/tag/v10.2
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/aelassas/servy/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,59 @@
+# Created with WinGet Updater using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: alagrede.znote
+PackageVersion: 4.5.1
+PackageLocale: en-US
+Publisher: alagrede
+PublisherUrl: https://github.com/alagrede
+PublisherSupportUrl: https://github.com/alagrede/znote-app/issues
+PackageName: znote
+PackageUrl: https://github.com/alagrede/znote-app
+License: Freeware
+ShortDescription: Markdown-based note-taking app for developers
+Tags:
+- dev
+- editor
+- electron
+- markdown
+- react
+- znote
+ReleaseNotes: |-
+  Znote 4.5.1 — MCP servers work out of the box, everywhere
+  4.5.0 shipped MCP support tested from the dev environment — where the app
+  inherits the terminal's PATH and everything resolves. The packaged app
+  doesn't get that luxury, and Windows adds quirks of its own. This release
+  makes MCP servers start reliably on a fresh machine, on all three platforms.
+  Fixes
+  macOS / Linux
+  - MCP: the packaged app couldn't find npx / uvx (GUI apps get a
+    minimal PATH that ignores your shell config — version managers and
+    keg-only Homebrew installs like node@22 were invisible). Znote now
+    captures your login shell's PATH once and resolves commands exactly like
+    your terminal does
+  - MCP: ~ in a server's command, args or cwd
+    (e.g. --db-path ~/data/app.db) is now expanded properly
+  Windows
+  - MCP: npx servers failed on a fresh Node.js install with
+    ENOENT lstat ...\AppData\Roaming\npm — npm never creates its global
+    prefix folder until the first install -g. Znote now creates it
+  - MCP: server arguments carrying cmd.exe special characters broke the
+    launch — "mcp<2" was parsed as a file redirection ("The system cannot
+    find the file specified"), and paths with spaces split apart. Arguments
+    are now properly quoted
+  - MCP: a missing runtime showed a raw localized cmd.exe message instead
+    of the install hint. Znote now probes the command first and tells you
+    exactly what to install (winget install astral-sh.uv, …)
+  - MCP: a runtime installed via winget could stay invisible to the app
+    even after a reboot. Znote now reads the user/system PATH from the
+    registry — if a fresh terminal finds it, so does Znote
+  All platforms
+  - MCP: after installing a missing runtime, hitting Test again picks it
+    up immediately — no app restart needed (on Windows the cached PATH is
+    re-read from the registry)
+ReleaseNotesUrl: https://github.com/alagrede/znote-app/releases/tag/v4.5.1
+Documentations:
+- DocumentLabel: FAQ
+  DocumentUrl: https://znote.io/faq.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

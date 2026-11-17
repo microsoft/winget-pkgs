@@ -1,0 +1,83 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.76.0
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Improved
+  - wt switch --execute takes a program, not a shell string: -x names one program, with everything after -- passed as literal argv. Worktrunk spawns it as a child rather than running it in your interactive shell, so shell functions and its cd no longer reach you. -x sh -- -c '…' recovers shell syntax, not functions. (Breaking: existing -x strings, plus WORKTRUNK_DIRECTIVE_EXEC_FILE and WORKTRUNK_SHELL.) (#3977, closes #2860, fixes #3944, thanks @omgreenfield for testing the migration path)
+  - Worktrunk decides tracking for the branches it creates: a new branch gets an upstream only when its name matches the remote branch it starts from, whatever branch.autoSetupMerge says: --create release --base origin/release tracks, --create feature --base origin/release does not. Under autoSetupMerge = false this previously exited 128 after creating the worktree. (#3913, #3950, fixes #3937, thanks @mjakl for reporting and diagnosing)
+  - Retired config keys are no longer read: commit.generation.template-file and squash-template-file are gone — put the file's contents in template or squash-template. There is no migration: the key stays, warns as unknown on every load, and the prompt reverts to the built-in default. Setting both template and template-file used to fail the load; it now loads template. switch.picker.timeout-ms likewise warns rather than being stripped. (Breaking.) (#3949)
+  - Project aliases and hooks can use wt switch --execute: their bodies previously refused it. Worktrunk now starts the program itself instead of handing shell text to your shell, and the command-approval gate remains the control on project-defined commands. (#3977)
+  - Established automation and LLM customization interfaces are now stable: wt step eval, wt step for-each, wt step prune, LLM branch summaries, wt config state vars, and commit.generation.template-append are no longer marked experimental. (#3949)
+  - wt step prune stages removals concurrently again: only the git worktree remove teardowns serialize, so dirty checks, fsmonitor shutdown, and the trash rename overlap. The prune_e2e/live benchmark median went from 377 ms to 222 ms. (#3954)
+  - wt config approvals add reads as a review rather than a warning: it opens with a cyan Review 1 command for repo: instead of a yellow ▲ … needs approval to execute. The execution-time gate is unchanged. (#3953)
+  Fixed
+  - The wt switch picker survives a preview longer than 65,535 lines: skim keeps the pane's line count in a u16, so a larger diff aborted wt with exit 101 seconds after it painted — on screen the picker looked like it closed by itself. Panes now cap at 60,000 lines and say so. (#3959, fixes #3958, thanks @sandertammesoo for reporting and diagnosing)
+  - The nushell wrapper propagates exit codes without a POSIX shell: it reported a failing wt by spawning sh, so on Windows every failing command printed a Command `sh` not found trace and exit 1 whatever the real code was. Nushell's wrapper is a static file, so rerun wt config shell install to pick this up. (#3945)
+  - The picker no longer shows one detached worktree's diff for another: previews were keyed by branch name, so every detached row shared the key (detached). Rows now key by canonical identity, which also lets wt remove feature ~/repo.feature plan that worktree once instead of failing on the second. (#3926)
+  - wt switch pr:<n> gives pre-switch hooks the real branch: branch and target held the literal pr:3933, and target_worktree_path was unset even when that branch had a worktree. pr_number and pr_url are now set for same-repo PRs, not only forks. (#3941, fixes #3934, thanks @robsonpeixoto for reporting)
+  - wt config shell install no longer replaces an rc file created while it was checking: the missing-file path refuses to clobber and fails with a rerun hint. A dangling rc symlink is preserved and rejected rather than overwritten. (#3929)
+  - wt switch --create X --base pr:<n> works when the PR branch has no local branch: the fetch writes only the remote-tracking ref, and git won't expand a bare name to one, so the command failed with No branch, tag, or commit named …. The base is now named under its remote. (#3951)
+  - wt switch --create streams git worktree add instead of stalling: where a sandbox denied the timed wait's pipe or sigaction, the command waited out git's entire run and then reported Failed to wait for command for work that had already succeeded. (#3881)
+  - Claude Code activity markers stay on the session's launch worktree: the plugin's marker hooks pass -C "$CLAUDE_PROJECT_DIR", so a cd mid-session no longer marks another repository. A session launched outside a repository gets no marker. (#3956)
+  Documentation
+  - --execute documents how to get a variable into a shell body: each position is substituted verbatim, so a variable spliced into sh -c text is re-parsed by that shell and splits on spaces. The help now shows passing it as a separate argument and referencing it positionally. (#3977)
+  - The clone-local default-branch override is documented: wt config state default-branch set writes worktrunk.default-branch to the clone's local git config — machine-local, never committed, and shared by every linked worktree. set warns when the branch isn't checked out locally, and wt list skips its comparisons until it is. (#3947, #3948, fixes #3946, thanks @danielo515 for the request)
+  - The docs site renders code with the CLI's own colors: terminal examples reproduce each snapshot's exact ANSI roles, while command references and the homepage command comparison get clap and shell syntax color from paired light/dark themes. File excerpts gain a path tab, and code wraps instead of scrolling on mobile. (#3936, #3938, #3939, #3942)
+  - The pre-start upstream example uses --base: it showed wt switch --create feature origin/feature, which wt switch rejects. (#3955)
+  Internal
+  - Library API rework (Breaking library API): cargo-semver-checks fails ten lints — RemoteRefProvider and its provider structs give way to ForgeKind dispatch, the --execute rework retires the fish and PowerShell ShellEscapeMode escapes and WORKTRUNK_SHELL_ENV_VAR, BranchRef swaps full_ref/worktree_path for id, and accessors including Branch::unset_upstream and ProjectConfig::ci_platform are gone. (#3913, #3926, #3949, #3963, #3977)
+  - Hook pipelines and wt list collection lost two indirection layers: the background pipeline carries PreparedStep directly, and 15 marker task types collapse into one exhaustive dispatch. The synthesized---force submodule path keeps its dirty re-check and destructive command under one lock, so prune's narrower locking doesn't widen that window. (#3964, #3954)
+  Install worktrunk 0.76.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/max-sixty/worktrunk/releases/download/v0.76.0/worktrunk-installer.sh | sh && wt config shell install
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/max-sixty/worktrunk/releases/download/v0.76.0/worktrunk-installer.ps1 | iex"; git-wt config shell install
+  Install prebuilt binaries via Homebrew
+  brew install worktrunk && wt config shell install
+  Download worktrunk 0.76.0
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+  Install via Cargo
+  cargo install worktrunk && wt config shell install
+  Install via Winget (Windows)
+  winget install max-sixty.worktrunk && git-wt config shell install
+  Install via AUR (Arch Linux)
+  paru worktrunk-bin && wt config shell install
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.76.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

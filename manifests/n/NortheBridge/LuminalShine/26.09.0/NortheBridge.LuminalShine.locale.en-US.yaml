@@ -1,0 +1,84 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: NortheBridge.LuminalShine
+PackageVersion: 26.09.0
+PackageLocale: en-US
+Publisher: NortheBridge Foundation
+PublisherUrl: https://github.com/NortheBridge
+PublisherSupportUrl: https://apps.northebridge.com/en/luminalshine
+Author: NortheBridge Foundation
+PackageName: LuminalShine
+PackageUrl: https://github.com/NortheBridge/luminalshine
+License: GPL-3.0
+LicenseUrl: https://github.com/NortheBridge/luminalshine/blob/HEAD/LICENSE
+Copyright: Copyright (c) NortheBridge Foundation
+ShortDescription: A Modern Self-hosted High Performance Sunshine-compatible game stream host for Moonlight designed for Windows 11 and Windows 11 Insider Preview. Maintained by the NortheBridge Foundation.
+Description: Modern Self-Hosted High Performance Sunshine-compatible game streaming host for Moonlight clients designed for Windows 11 and Windows 11 Insider Preview.
+Moniker: luminalshine
+Tags:
+- amdgpu
+- blackwell-gpu
+- contributions-welcome
+- contributors-welcome
+- cpp
+- game-stream
+- game-streaming
+- game-streaming-server
+- geforce-experience
+- intelgpu
+- moonlight
+- nvidia-gpu
+- python
+- remote-desktop
+- windows-insiders
+- windows11
+ReleaseNotes: |-
+  LuminalShine 26.09.0
+  Important
+  Bundled virtual display driver: LuminalVGD v0.1.0-alpha.9
+  Signed driver 0.1.0.27 · protocol 0.10 · Build 27 — unchanged from 26.08.4.
+  LuminalShine 26.09.0 is the Mission Control release: the Web UI has been rebuilt from the ground up as a single pane of glass, with everything you used to check across Dashboard, Clients, Applications, Troubleshooting and About visible from one Overview and every detail opening in place. Under the hood it closes the NVENC crash family that hit RTX 30-series (Ampere) hosts, keeps the streamed cursor steady on the current Windows Insider build, unlocks 5.1 / 7.1 audio over WebRTC, and teaches the installer to say when Windows needs a restart.
+  Thanks to @magalz for the RTX 30-series fixes in this release — see Encoder reliability below.
+  Mission Control — the new Web UI
+  Open the Web UI after upgrading and you land on a different application. The design goal was one screen that tells you the state of the host at a glance, with details and settings that open beside what you are looking at instead of on another page.
+  The shell
+  - A 56 px icon rail on the left replaces the top navigation: Overview, Stream, Play, Library, Clients, Display, Settings, Diagnostics. Old bookmarks keep working — every legacy route redirects to its new home.
+  - An always-on host strip across the top shows host status, active encoder, display backend, network port and address family, session monitor state and any open incidents, plus the global save indicator.
+  - Global search in the strip finds pages, settings sections, individual settings, apps and paired clients from one box. An app hit opens the Library filtered to it, a client hit opens that client, and free text jumps straight to the matching setting.
+  - A right-hand inspector column carries the details, editors and actions for whatever is selected on the page. On narrow screens it becomes a slide-in drawer with a floating toggle; Escape closes it.
+  - New design tokens throughout: dark chrome, a single gold accent, IBM Plex Sans and Mono. Bootstrap is gone from every rebuilt page.
+  Overview replaces the Dashboard. Host identity, live session, capture health, recent sessions, connected clients and a "Needs attention" list of everything the old page surfaced as banners, all on one screen.
+  Stream (replaces Stats). A session list on the left, the selected session in the middle with a live/ended header, six headline numbers, a range selector (full session / 3 / 5 / 15 min) and three charts — encode latency, actual FPS and network throughput. The inspector holds identity, connection and quality rows, and lets you disconnect an active session or delete an ended one.
+  Library (replaces Applications). A cover grid with source filters (Playnite, Steam, custom), a text filter, Playnite integration status with a force-sync action, and the full app editor for launch, prep commands, display overrides and frame generation.
+  Clients (replaces Client Management). A table of paired devices with device, display, status and last-seen columns; the inspector edits the selected client's display and stream overrides or pairs a new device by PIN. API tokens live on the same page.
+  Display (replaces the LuminalVGD Control Panel). Driver card (bundled vs installed version, signature, status), the host's physical and virtual outputs, the four configuration groups (backend and sessions, disconnect and pause behaviour, modes and refresh, HDR), the driver transition prompt, golden-snapshot export and delete, and an inspector that runs the driver diagnostic automatically, with copy and restart-driver actions.
+  Settings. A left sub-navigation of the nine sections replaces the accordion; the active section is in the URL, and search results land on and highlight the exact field. The three separate save surfaces are collapsed into one Changes panel in the inspector: last save time, pending state, validation, a needs-restart list of the settings that require a service restart (port, address family, UPnP, certificate and key), the recently changed values with before/after, Discard pending and Apply & restart. Settings still auto-save; the panel simply tells you what happened.
+  Diagnostics (merges Troubleshooting, Logs and About). Health cards for the GPU and display stack (TDR count, stack state, last reset with detail), the capture and render stack (engine, DLSS / DLAA / Frame Generation detection, tips) and drivers and buses; header actions for export logs, force close and restart; the crash-dump alert with a one-click bundle export; and the log viewer with a source selector, chunked search with context snippets, follow-the-tail and per-level tinting. The inspector holds the copyable host report (plain text or Markdown, ready to paste into a bug report) and the five reset actions. The full About page remains one click away.
+  Web links now point at the Moonlight community Discord invite, with a note that LuminalShine lives in the server's Experimental category.
+  Encoder reliability — RTX 30-series and every NVENC host
+  - AV1 probing on GPUs without AV1 encode (#156, by @magalz). On RTX 30-series / Ampere hosts (an RTX 3080 Ti in the report) the NVENC probe attempted AV1, the driver rejected it, and the failure took H.264 and HEVC down with it — the host fell back to software encoding or crashed outright. The capability check now knows which NVIDIA generations encode AV1, with regression tests for Turing, Ampere, Ada and future device-ID ranges. Fixes #147.
+  - Safe teardown of a never-initialized NVENC session (#159). The crash behind the Ampere report was general: tearing down a session that was opened but never initialized unregistered an async event that had never been registered. That path is now closed for every codec, and the terminate handler's one-shot guard no longer turns a second fault into a silent exit.
+  - A faulting codec no longer costs the whole encoder (#162). When one codec's probe faults, the next pass skips only that codec instead of discarding NVENC entirely and dropping to libx264 forever.
+  Capture
+  - Cursor held visible while the OS visibility flag flaps (#167). Windows 11 Insider build 29648 has a documented bug that makes the mouse cursor blink; the streamed cursor mirrored it. A short hold on the visibility flag keeps the streamed cursor steady without adding latency on healthy builds.
+  Audio
+  - 5.1 and 7.1 over WebRTC (#165). Surround was previously only available on the classic Moonlight path: browsers never offer multichannel Opus, so a WebRTC session could only ever be stereo. The built-in web client now adds a multichannel Opus payload to its own offer, the host selects it and restates the channel layout from the same table the native encoder uses, and a Stereo / 5.1 / 7.1 selector in the WebRTC session settings is saved with the client profile. If the peer cannot take surround the session falls back to stereo, says so in the UI, and downmixes with proper ITU-R BS.775 coefficients instead of dropping the centre channel and most of the dialogue with it. 5.1 is the well-trodden path in Chrome; treat 7.1 as the less exercised of the two.
+  Installer
+  - Restart page when the LuminalVGD driver is updated (#172). Some hosts keep the previous driver image loaded until Windows restarts. When an install or upgrade moves the bundled driver to a newer version, the installer no longer closes itself; it ends on a page naming both versions with Restart Now and Restart Later, confirms a deferral, and registers the pending restart with Windows either way (exit code 3010 for silent installs, so winget and management tools report it). Upgrading from 26.08.3 does not change the driver, so this page will not appear on this upgrade.
+  Project, tests and CI
+  - The README gains a Project Contributors section (#174), starting with @magalz.
+  - The Windows coverage gate reports real data again (#160), and the test-only Simple-Web-Server client use-after-free that crashed the coverage build was root-caused and fixed at the source (#164).
+  - The MSI upgrade-compatibility baseline advanced to the 26.09.0 table set (#175); only the renamed Web UI asset components moved, and the invariants gate (UpgradeCode, services, pinned component GUIDs) is unchanged.
+  Upgrading
+  - Install over 26.08.4 with the installer; settings, pairings and the driver are kept. A stream that is active when you upgrade ends and can be restarted a minute or two later.
+  - The Web UI's old URLs redirect. Hard-refresh once (Ctrl+F5) if the browser shows the previous interface from cache.
+  - Nothing in this release changes the streaming protocol; existing Moonlight clients pair and connect as before.
+  Checksums (SHA-256)
+  434d47183a56a51d6e59d30a914cedf30ff58b8618201a09ae7c86c891d6933a *LuminalShine_x64-installer.exe
+  9e1c376825bea4024a9925359605e332241dd8c84458fb2c3e8beecd45e0b4ec *LuminalShine_x64-portable.zip
+  e82c8f6724457c5c68085cde89e83c235627fd4668ef30b5cfed7e6b98a2c8b8 *LuminalShine_x64-debuginfo.7z
+  A SHA256SUMS file is attached to this release for sha256sum -c verification.
+ReleaseNotesUrl: https://github.com/NortheBridge/luminalshine/releases/tag/26.09.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

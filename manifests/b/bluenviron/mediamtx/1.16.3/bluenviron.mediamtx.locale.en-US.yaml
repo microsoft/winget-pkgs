@@ -1,0 +1,87 @@
+# Created by Anthelion using komac v2.15.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: bluenviron.mediamtx
+PackageVersion: 1.16.3
+PackageLocale: en-US
+Publisher: bluenviron
+PublisherUrl: https://github.com/bluenviron
+PublisherSupportUrl: https://github.com/bluenviron/mediamtx/issues
+Author: aler9
+PackageName: mediamtx
+PackageUrl: https://github.com/bluenviron/mediamtx
+License: MIT
+LicenseUrl: https://github.com/bluenviron/mediamtx/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2019 aler9
+CopyrightUrl: https://github.com/bluenviron/mediamtx/blob/main/LICENSE
+ShortDescription: |-
+  Ready-to-use SRT / WebRTC / RTSP / RTMP / LL-HLS media server and media proxy that allows to read,
+  publish, proxy, record and playback video and audio streams.
+Description: |-
+  MediaMTX is a ready-to-use and zero-dependency real-time media server and media proxy that allows
+  to publish, read, proxy, record and playback video and audio streams. It has been conceived as a
+  "media router" that routes media streams from one end to the other.
+Tags:
+- go
+- golang
+- hls
+- media-server
+- obs-studio
+- rtcp
+- rtmp
+- rtmp-proxy
+- rtmp-server
+- rtp
+- rtsp
+- rtsp-proxy
+- rtsp-relay
+- rtsp-server
+- streaming
+- webrtc
+ReleaseNotes: |-
+  Fixes and improvements
+  General
+  - fill product version of Windows executable (#5167) (#5511)
+  - improve JSON decoder performance (#5526) avoid decoding JSON twice.
+  - fix panic when setting writeQueueSize to zero (#5360) (#5527)
+  - prevent using alwaysAvailableFile and alwaysAvailableTracks together (#5529)
+  - improve playback precision of alwaysAvailable offline segment (#5530)
+  - fix MPEG-4 audio configuration not matching error (#5468) (#5533) This happened when using alwaysAvailableFile and a MPEG-4 audio track.
+  - fix corrupted video with alwaysAvailableFile (#5534) when alwaysAvailableFile points to a file with a H265 or H264 track, server is started, an online stream is published and then closed, video was getting corrupted since the online video was overriding the parameters of the offline video.
+  - fix audio from alwaysAvailableFile not being streamed (#5535)
+  - fix alwaysAvailableFile restarting when a publisher fails (#5536) when a publisher try to start an online stream and there's an error, alwaysAvailableFile restarted without any reason.
+  - revert to Go 1.25 (#5521) (#5538) It seems like Go 1.26 is causing segmentation faults, related to channels, on Windows.
+  - inherit MPEG-4 audio type from alwaysAvailableFile (#5539)
+  - mpegts: properly compute PTS of async KLV frames (bluenviron/mediacommon#291) (bluenviron/mediacommon#311) Store last valid PTS as soon as possible, by parsing PES headers in advance, then use this PTS as timestamp of KLV frames without PTS.
+  HLS
+  - client: fix initial packet loss after astits upgrade (bluenviron/gohlslib#331)
+  Dependencies
+  - Go updated from 1.26 to 1.25
+  - github.com/asticode/go-astits updated from v1.14.0 to v1.15.0
+  - github.com/bluenviron/gohlslib/v2 updated from v2.2.6 to v2.2.8
+  - github.com/bluenviron/gortsplib/v5 updated from v5.3.2 to v5.4.0
+  - github.com/bluenviron/mediacommon/v2 updated from v2.8.0 to v2.8.2
+  - github.com/gin-gonic/gin updated from v1.11.0 to v1.12.0
+  - github.com/go-git/go-billy/v5 updated from v5.7.0 to v5.8.0
+  - github.com/go-git/go-git/v5 updated from v5.16.5 to v5.17.0
+  - github.com/bytedance/sonic updated from v1.14.0 to v1.15.0
+  - github.com/bytedance/sonic/loader updated from v0.3.0 to v0.5.0
+  - github.com/cloudflare/circl updated from v1.6.1 to v1.6.3
+  - github.com/gabriel-vasile/mimetype updated from v1.4.8 to v1.4.12
+  - github.com/go-playground/validator/v10 updated from v10.27.0 to v10.30.1
+  - github.com/quic-go/quic-go updated from v0.57.0 to v0.59.0
+  - github.com/ugorji/go/codec updated from v1.3.0 to v1.3.1
+  - golang.org/x/arch updated from v0.20.0 to v0.22.0
+  - golang.org/x/net updated from v0.50.0 to v0.51.0
+  - google.golang.org/protobuf updated from v1.36.9 to v1.36.10
+  - github.com/bytedance/gopkg v0.1.3 added
+  - go.mongodb.org/mongo-driver/v2 v2.5.0 added
+  Security
+  Binaries are compiled from source code by the Release workflow without human intervention.
+  You can verify that binaries have been produced by the workflow by using GitHub Attestations:
+  ls mediamtx_* | xargs -L1 gh attestation verify --repo bluenviron/mediamtx
+  You can verify checksums of binaries by downloading checksums.sha256 and running:
+  cat checksums.sha256 | grep "$(ls mediamtx_*)" | sha256sum --check
+ReleaseNotesUrl: https://github.com/bluenviron/mediamtx/releases/tag/v1.16.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

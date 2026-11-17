@@ -1,0 +1,47 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: athrvk.Vayu
+PackageVersion: 0.22.0
+PackageLocale: en-US
+Publisher: Atharva Kusumbia
+PublisherUrl: https://github.com/athrvk
+PublisherSupportUrl: https://github.com/athrvk/vayu/issues
+Author: Atharva Kusumbia
+PackageName: Vayu
+PackageUrl: https://github.com/athrvk/vayu
+License: AGPL-3.0
+LicenseUrl: https://github.com/athrvk/vayu/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Atharva Kusumbia
+ShortDescription: Open-source API client with a native C++ load-testing engine - Postman-style requests and k6-level load tests in one local app.
+Description: Vayu is a free, open-source desktop app for Windows, macOS, and Linux that combines a full REST and GraphQL request builder - with collections, environments, and scripting - and a high-throughput load tester powered by a C++20 engine, with all data staying on your machine.
+Moniker: vayu
+Tags:
+- api
+- api-client
+- api-testing
+- benchmark
+- developer-tools
+- graphql
+- http
+- insomnia
+- load-testing
+- performance
+- postman
+- rest
+ReleaseNotes: |-
+  0.22.0 - 2026-08-21
+  The import progress release. Pointing the import dialog at an 8 MB OpenAPI document froze it: POST /import/fetch could not say a word until libcurl held the entire body, so the File tab showed its untouched dropzone for the whole of a 13-file folder pick and the URL tab changed one word on a button for the whole of a download. The phase that meant "working" was set in three places and read by nothing that renders - "written but never read" again, which is this codebase's most repeated defect. The engine now reports a download as it arrives, over the same SSE framing the run topics use, and the dialog draws it. Building that turned up the reason a large URL import failed even when you could see it working: the route inherited a 30-second bound on the whole transfer, which is a bound on a document's size rather than on its health. Roughly even split between new C++ in the engine and new React in the app.
+  Added
+  - The import dialog says what it is doing, and how far through it is. Four stages, because they are four genuinely different waits: the download from a URL, the $ref walk across disk or the network, one engine round trip per document to read it, and one atomic write per document to store it. Naming which one is running is half the report - "Importing" during a two-minute download would be a lie about what is taking the time. Every total is a real count of real work, and the one that is easiest to get wrong is the parse: its total is the documents that will actually be parsed, which is fewer than the documents picked whenever one could not be read or was inlined into another, and a total that counted those would leave the bar permanently short of itself. A download whose upstream declared no Content-Length has no denominator, so it reports bytes received against an indeterminate bar rather than a percentage of a number nobody stated - and reports itself to assistive tech as busy rather than as "0 percent", which for a half-finished download would be a fraction no one measured. Reading the picked files off disk gets a name but no counter: FileReader is local and effectively instant, and a number there would be motion without information. The counters do not change what the work does - detectBatch still bundles and parses the whole batch in one wave each, ticking as promises land, because serializing them for a tidier-looking number would trade a 13-file folder's wall time for cosmetics.
+  - POST /import/fetch can answer as a stream. With Accept: text/event-stream the route emits progress ({received, total}, total null when the upstream declared no length) and then one terminal result or error carrying exactly what the buffered form would have returned. The report comes off libcurl's write callback, which is the only place that knows a byte has arrived; streaming the engine-to-renderer hop would have changed nothing, because the wait is on the upstream download. Frames are throttled to 256 KiB or 100 ms, since libcurl reports every ~16 KiB and a 10 MB document would otherwise be ~640 frames for a bar with a few hundred pixels to cross. Two consequences of the response headers having already left: a malformed request is still a 400, decided before anything is written, and a failed fetch is an error event carrying the numeric status itself - the standard error body's code is a slug, and 413 and 404 both slug to plain error, so a client could not otherwise tell a refused-for-size document from any other failure. Every caller that sends no Accept - $ref bundling, spec re-fetch, the MCP tools - gets the byte-identical JSON it always did.
+  - Closing the dialog stops the download. The engine abandons its transfer the moment a write to the SSE sink fails, rather than reading the remaining megabytes for a listener that has gone, and the renderer's side of that is cancelling the body stream when it stops iterating. Measured against a local server: 1.31 MB served when the client hung up, and 0.25 MB more over the next two and a half seconds instead of the eight it would otherwise have read.
+  - A Progress primitive. Over @radix-ui/react-progress, which owns the ARIA; the one thing added on top is aria-busy, because Radix expresses the indeterminate state as a data attribute that styles a bar and tells a screen reader nothing. The track is the app's recessed surface and the fill follows the accent rule rather than the white-label fill token, and the indeterminate stripe animates through a class the global reduced-motion rule collapses like any other - which is safe here precisely because every caller of that state also shows a figure that keeps changing, so the information is in the text and the motion is only the hint that something is still happening.
+  Changed
+  - The import tabs keep their controls while they work. They used to be replaced outright by nothing at all; now they stay on screen and disable. The URL being downloaded is the context someone waiting on 8 MB wants most, and a disabled Fetching… button is itself part of the report. Disabling them also closes a hole the URL path already guarded and the File and Paste paths did not: a second drop mid-read raced the first exactly as a second fetch did, and neither had anything stopping it.
+  Fixed
+  - A large URL import timed out for being large. POST /import/fetch inherited the 30-second timeout_ms every request carries, which bounds a download's size rather than its health - 10 MB needed better than 340 KB/s merely to arrive. The new progress bar is what made it undeniable: a 6 MB document filled the bar to two thirds and then reported Operation timed out after 30001 milliseconds with 4177920 out of 6296254 bytes received, on a transfer that had never once stopped. A fetch is now abandoned only after 30 seconds below a trickle, so a slow link finishes slowly and a dead one still ends, and what bounds a transfer that never ends at all is maxBytes - which is the bound that was always meant, and a bound on bytes rather than on seconds is the one a hostile URL cannot wait out. Both forms of the route share one client config, deliberately: a document must not arrive on the streamed one and time out on the buffered one, and $ref bundling and spec re-fetch ride the buffered one. On the renderer side the matching change is that a streamed call's timeout is an idle one rather than a total, so a 10 MB document arriving steadily no longer races proxiedRequestTimeoutMs either - what is bounded on both sides is the stall, not the transfer.
+  - Internal work with no user-visible surface. The fetch route's request validation and its outcome shaping are extracted and shared by both forms, because two copies would be two opinions about what a valid request is and about what a refused body answers with. The renderer's engine error reading is shared between the buffered and streamed paths for the same reason - reading it twice was the defect behind #173. A response that comes back as buffered JSON where a stream was asked for is reported as such rather than failed, since the app and the engine sidecar are not updated together and an older engine answers this request the way it always has. The SSE event names are held once on each side with a drift guard reading the engine's own header: an unrecognised event is one the reader skips, so a rename would leave the bar at zero while the bytes arrived and nothing would throw. Docs updated in step - the API reference gains the streamed form and the stall bound, the app's integration and import-pipeline pages gain the reporting, and the design system and component map gain the new primitive.
+ReleaseNotesUrl: https://github.com/athrvk/vayu/releases/tag/v0.22.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

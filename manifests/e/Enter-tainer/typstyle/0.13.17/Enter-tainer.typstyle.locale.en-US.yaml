@@ -1,0 +1,79 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Enter-tainer.typstyle
+PackageVersion: 0.13.17
+PackageLocale: en-US
+Publisher: Wenzhuo Liu
+PublisherUrl: https://mgt.moe/
+PublisherSupportUrl: https://github.com/typstyle-rs/typstyle/issues
+Author: Wenzhuo Liu
+PackageName: typstyle
+PackageUrl: https://typstyle-rs.github.io/typstyle/
+License: Apache-2.0
+LicenseUrl: https://github.com/typstyle-rs/typstyle/blob/HEAD/LICENSE
+Copyright: Copyright © 2023 - 2025 Typstyle Contributors
+ShortDescription: Beautiful and reliable typst code formatter
+Tags:
+- typst
+ReleaseNotes: |-
+  Core
+  - Feature: Improved flavor detection for list-like syntaxes.
+    Previously, flavor detection checked only whether the first space contained a line break, leading to unexpected multiline layout when child expressions contained line breaks or spaces. Now, a list-like syntax is considered multiline only if there is a space containing a line break before its first child expression.
+    For example, this code was previously treated as multiline due to the line break before ), but now uses the compact layout:
+    #f(it => it
+    )
+  - Feature: Aligned equation flavor detection with other nodes.
+    For example,
+    $ a
+    $
+    was previously regarded as multiline due to the break before the closing $. Now it formats as
+    $ a $
+    enabling inline block switching by adjusting the space after the opening $.
+  - Feature: Raw blocks are combinable now.
+  - Feature: Compact layout for markup.
+    For a content block, strong, or emph node, if its opening boundary is non-breakable, contains no breaks, and has exactly one primary expression (excluding labels, break symbols, and plain text), it is rendered without indentation.
+  - Feature: Indent the body of strong or emph expressions when not using the compact layout.
+  - Fix: Corrected misplaced standalone comments in method chains.
+    In this example,
+    #(
+      foo
+        // comment
+        .bar()
+    )
+    it previously formatted as
+    #(
+      foo // comment
+        .bar()
+    )
+    Now the comment correctly stays on its own line.
+  - Fix: Prevent reflow of text segments that can be parsed as enum item markers.
+    text 01.
+    Previously formatted as
+    text
+    01.
+    which created an unintended enum item. Now it remains on one line.
+  - Fix: Do not insert an extra break at a nil boundary for headings. Now the code
+    #[= h1]
+    will not be formatted as
+    #[
+      = h1
+    ]
+    in any case.
+  Playground
+  - Feature: Use system color preference as the default theme.
+  - Feature: Persist the current state (code and options) in the URL for easy sharing.
+  - Feature: Store source code in local storage; if absent from the URL, the stored code is used as a fallback.
+  - Feature: Enable in-place formatting (full document or selection) in the source editor.
+  - Feature: Added a loading spinner and error boundary.
+  - Feature: Toggle word wrap in the source editor.
+  - Feature: Option to display only the formatted selection’s output.
+  - Feature: Reduced indentation size in the output AST/IR from 4 spaces to 2.
+  Documentation
+  - Feature: Switched documentation theme from mdBook to Starlight.
+  - Feature: Added “copy code” support.
+  Miscellaneous
+  - Moved the benchmark-results repository to the typstyle-rs organization.
+ReleaseNotesUrl: https://github.com/typstyle-rs/typstyle/releases/tag/v0.13.17
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

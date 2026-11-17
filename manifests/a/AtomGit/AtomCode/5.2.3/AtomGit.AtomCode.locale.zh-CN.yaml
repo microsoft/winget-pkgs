@@ -1,0 +1,93 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AtomGit.AtomCode
+PackageVersion: 5.2.3
+PackageLocale: zh-CN
+Publisher: 重庆开源共创科技有限公司
+PublisherUrl: https://atomgit.com/
+PublisherSupportUrl: https://atomgit.com/atomgit_atomcode/atomcode/issues
+PrivacyUrl: https://docs.gitcode.com/docs/help/home/protocol/privacy-policy
+Author: 重庆开源共创科技有限公司
+PackageName: AtomCode
+PackageUrl: https://atomcode.atomgit.com/
+License: MIT
+LicenseUrl: https://atomgit.com/atomgit_atomcode/atomcode/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Yubang Xu
+CopyrightUrl: https://docs.gitcode.com/docs/help/home/protocol/ai-privacy-policy
+ShortDescription: AI 编程助手 在你的终端中运行
+Description: Claude Code / Cursor Agent 的开源平替，住在你的终端里。连接任意 OpenAI 兼容大模型，自主读文件、改代码、跑测试、自我验证 —— 用 Rust 构建。
+Tags:
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  AtomCode v5.2.3 Release Notes
+  发布日期：2026-10-13
+  v5.2.3 聚焦于网络中断恢复与终端交互体验：回复断流自动续接、静默超时后刷新连接池并限制重试总等待，同时补齐对话滚动条、复制、SSH 显示与 WebUI 数学公式渲染，修复历史会话恢复后命令失效和配置/凭据处理问题。
+
+  ✨ 新增功能（Features）
+  Anthropic 原生缓存
+  - 原生 Prompt Caching：为工具、system 和对话历史设置最多 4 个缓存断点，跳过 thinking 块并保留签名，提升缓存命中率
+  - 用量解析补齐：正确累计流式输入与缓存用量，缺失字段保留已有数值，避免重复计数
+  回复断流自动续接
+  - 从已确认进度续接：连接重置、提前断开或 provider 流式空闲超时时，若当前请求已有正文或上一批工具已全部执行成功，且断流处没有新的工具调用或参数片段，可自动续接一次
+  - 不重复执行工具：续接中相同工具、相同参数与工作目录的已完成有副作用调用复用已确认结果
+  - 进度可见：恢复过程与超时恢复共用预算，支持取消，并在终端和 WebUI 显示恢复提示
+  静默超时连接恢复
+  - 刷新连接池：等待响应头超时且允许重试时，最多刷新一次连接池，避免继续复用已失效的连接
+  - 重试总预算：建立请求的重试与退避共用总等待预算，默认最多 180 秒，耗尽后停止自动重试；覆盖 OpenAI 兼容、Responses 和 Anthropic 请求
+  终端交互
+  - 对话滚动条：新增会话滚动条，支持点击和拖拽定位，空闲到底部时自动隐藏
+  - 复制更可靠：复制等待移出界面线程，修复 Linux 剪贴板复制、选择高亮残留与复制失败提示
+  - 置顶提问：用户消息滚出视口后，顶部固定显示当前回合提问的一行摘要，方便长对话中定位上下文；复制与导出保持原文
+  - 请求状态更明确：区分思考输出、等待重试倒计时、重新请求和持续无输出；Ctrl+O 直接展开/隐藏已收到的实时思考，展开时保持底部跟随
+  - 后台任务等待去重：同一任务连续无新输出的轮询合并为可展开的等待记录并显示检查次数，新输出、完成和失败独立保留
+  WebUI
+  - 数学公式渲染：支持行内与块级 TeX 公式（KaTeX）渲染；代码和货币文本保持原样，无法渲染的公式保留原始文本
+  - /webui --port 生效：TUI 中 /webui 支持 --port、--host、--no-open 参数，端口被占用时自动顺延探测
+  - 会话计数一致：项目侧栏计数与展开列表共用可见性规则，闲置空会话不再计数，fork 分支只计一次；添加工作区时复用已打开的会话，避免重复创建
+  记忆与偏好
+  - 完整查看记忆：/memory 在可换行、滚动、翻页的阅读面板中完整显示全局、项目和本地记忆，长工作流不再被截断；模型注入仍保留原有预算限制
+  - 模型偏好保存：按模型持久化思考开关与推理强度，重启后恢复；保存时校验模型支持的档位
+  命令与技能
+  - 命令与技能边界清晰：同名命令和技能按各自入口解析，内置命令保持优先，修复插件 command 覆盖同名 skill 的问题
+  - 斜杠命令可发现：插件命令出现在斜杠菜单中，输入历史支持召回斜杠命令
+  其他
+  - 编辑失败提示更简洁：原文未匹配时默认显示简短原因，点击展开完整错误和当前文件文本；模型仍收到完整恢复信息
+  🛠 修复（Fixes）
+  会话与命令
+  - 历史会话命令恢复：恢复历史会话后，/goal、/loop、/queue、/policy 和 /worktree 保持可用；新建会话、切换项目和重建运行时也保留同一命令入口
+  - worktree 使用当前项目：/worktree 根据当前会话目录操作 Git 仓库，避免恢复会话或 /cd 后仍操作启动时的仓库
+  Provider / 网络
+  - 静默连接恢复：等待响应头超时后刷新连接池并共享重试预算（见新增功能），改善「响应中断 / Connection reset by peer」与「网络连接失败」类问题
+  - OpenAI 兼容流续接：传输中断后从已确认的工具结果继续，不丢弃已完成的进度
+  终端渲染 / 兼容
+  - SSH 显示：恢复 Linux 和 SSH 下的吉祥物显示，清理通知中的终端控制字符
+  - 链接交互：修复 cmux 中链接悬停手形不稳定，以及选择文字后链接信息丢失
+  - 右键菜单：右键菜单不再随鼠标释放意外关闭
+  - 滚动条几何稳定：修复抓住端点滑块时跳动，以及动态任务面板导致的滚动条位置变化
+  - 显示细节：回复首尾多余空行不再占据展示空间；编辑不匹配信息折叠展开不再隐藏恢复细节
+  Windows 兼容
+  - Bash 工具优先级：优先使用 Git Bash 的 POSIX 工具，避免 find、sort 被 System32 同名程序抢占导致 GNU 语义失效
+  - 端口顺延：WebUI 默认端口落在 Windows 保留范围（错误 10013）时继续顺延探测，不再直接启动失败
+  任务与凭据
+  - 任务异常不再误报成功：one-shot Agent 的任务 panic、异常取消或缺失回合终态返回明确内部错误，保留已产生的内容和工具结果；终端、无界面、网页及 ACP 补齐失败映射
+  - 配置文件校验：显式指定的配置文件不存在时明确报错，覆盖交互、无界面和 ACP 入口；不再误报为 URL 错误
+  - 凭据脱敏：录制输出脱敏覆盖带引号的密钥内容
+  - 签名能力校验：源码构建缺少官方网关签名能力时明确拒绝请求，避免进程崩溃
+  🔧 重构（Refactoring）
+  - provider 客户端可替换：Anthropic 与 OpenAI 兼容 provider 的 HTTP 客户端支持在超时恢复时重建连接池，为静默连接恢复提供基础
+  📚 文档（Docs）
+  - README（中英文）补充 /webui --port、--host、--no-open 的用法说明与端口顺延规则
+  - 站点文档与搜索索引同步更新至 v5.2.3
+ReleaseNotesUrl: https://atomgit.com/atomgit_atomcode/atomcode/releases/v5.2.3
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://atomcode.atomgit.com/docs/zh/index.html
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

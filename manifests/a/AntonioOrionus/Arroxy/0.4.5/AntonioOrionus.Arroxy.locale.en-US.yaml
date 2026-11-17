@@ -1,0 +1,108 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AntonioOrionus.Arroxy
+PackageVersion: 0.4.5
+PackageLocale: en-US
+Publisher: Antonio Orionus
+PublisherUrl: https://github.com/antonio-orionus
+PublisherSupportUrl: https://github.com/antonio-orionus/Arroxy/issues
+Author: Antonio Orionus
+PackageName: Arroxy
+PackageUrl: https://github.com/antonio-orionus/Arroxy
+License: MIT
+LicenseUrl: https://github.com/antonio-orionus/Arroxy/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Antonio Orionus
+ShortDescription: Free open-source YouTube downloader GUI based on yt-dlp for Windows, macOS, and Linux. Download videos, Shorts, 4K, 1080p60, HDR, and subtitles with no ads, tracking, cookies, or login. Supports 9 languages.
+Description: Arroxy is a free, open-source desktop app for downloading YouTube videos and Shorts in up to 4K, 1080p60, HDR, and audio-only formats with no ads, tracking, or login required.
+Moniker: arroxy
+Tags:
+- audio-downloader
+- cross-platform
+- desktop-app
+- downloader-for-youtube
+- media-downloader
+- mp4-downloader
+- video-download
+- video-download-tool
+- video-downloader
+- youtube-4k-downloader
+- youtube-download
+- youtube-downloader
+- youtube-shorts-download
+- yt-dlp
+- yt-dlp-gui
+ReleaseNotes: |-
+  Install
+  Windows Setup Windows Portable
+  macOS Apple Silicon macOS Intel
+  Linux AppImage Linux Flatpak Linux tar.gz
+  SHA256
+  This release hands you three things Arroxy used to decide for you: how downloaded files are named, how much of your connection a download uses, and whether every video in a playlist has to share one setting. Heads-up on the first — filenames may look different from previous versions, because templates that were previously refused now work and non-Latin titles keep much more of their length on macOS and Windows. Failures that used to happen silently now tell you.
+  Highlights
+  Filename Templates
+  - You can now decide how downloaded files are named. Build a template from {title}, {uploader}, {id}, {date}, {resolution}, and {playlist_index} — for example {uploader} - {title} — and Arroxy names every download that way.
+  - Click a token to insert it, and see a live preview of the resulting filename before you save.
+  - Set one template globally, or override it for a single download profile, so an audio-only profile can name files differently from your video profiles.
+  - The file extension is always added for you, and long titles are still trimmed so paths stay valid on every platform.
+  - Tokens that don't apply simply disappear instead of leaving NA in the name — an audio download won't pick up a resolution, and a one-off video won't pick up a playlist number.
+  - Replaces the old "Add video ID to single filenames" switch, which is now just the {id} token.
+  - Heads-up: playlist "skip already downloaded" detection and .m3u playlist files both find your files by their video ID. If you remove {id} from your template, Arroxy tells you inline and turns those two features off rather than letting them quietly misbehave.
+  - Templates that used several tokens at once are no longer rejected. A template like {title} {id} {uploader} {resolution} {playlist_title} used to be refused as "too long" even though the names it produced were nowhere near any limit.
+  - Filenames are now measured the way your own system measures them. macOS and Windows count characters, Linux counts bytes — so a Japanese or Chinese title keeps roughly three times more of its length on macOS and Windows than it used to.
+  - Names that genuinely cannot fit are shortened instead of failing, and the video ID is never the part that gets cut, so playlist detection and .m3u files keep working.
+  - On Windows, Arroxy now accounts for the full path length when naming files, so downloading into a deeply nested folder no longer fails with an unhelpful error from the downloader.
+  Download Connections
+  - Arroxy can now fetch several parts of a video at once, which noticeably speeds up large downloads on a fast connection. Type a number, or leave the field empty for a single connection.
+  - The field suggests 4 as a good starting point. Higher values raise the chance a site rate-limits you, so it is deliberately yours to choose rather than on by default.
+  - This control existed before but was only reachable by switching "Gentle downloads" to Custom and editing a grid of five fields — almost nobody found it. It is now a setting in its own right, and it applies whichever pacing preset you use.
+  Downloads At Once
+  - You can now choose how many queued items download at the same time, instead of Arroxy always running one at a time. A long queue finishes considerably sooner.
+  - Changes apply immediately to a running queue — no restart, and nothing you have already started is interrupted. Lowering the limit simply stops new downloads from starting until there is room.
+  - "Pull it now" keeps working even when the queue is running at your full limit.
+  Retry Failed Downloads
+  - Arroxy can now retry a failed download on its own, waiting a little longer before each attempt. Set how many times, or leave it empty to keep deciding by hand.
+  - When the failure happened after the transfer had started, a retry picks up from the partial file rather than starting over. A retry that was waiting when you quit is still waiting when you reopen Arroxy.
+  - Only failures worth retrying are retried — a dropped connection, a server hiccup, a rate limit. Downloads blocked by the site are never retried automatically, because repeatedly asking is what turns a soft block into a hard one. Videos that are unavailable, region-locked, or DRM-protected are left alone too, since another attempt cannot help.
+  - The queue row tells you a retry is coming, so a waiting download no longer looks like a dead one.
+  Per-Item Download Profiles
+  - A playlist no longer has to download as one setting for everything. On the playlist step, "Assign profiles per item" opens a screen where you can give individual videos their own download profile — archive three talks at full quality and take the rest as MP3, in one pass.
+  - Because a profile already carries quality, subtitles, destination and the rest, this mode skips the Quality, SponsorBlock, Output and Save steps entirely rather than asking twice. Each video lands in its own profile's folder.
+  - Selecting is built for long playlists: click, Shift-click a range, ⌘/Ctrl-click to add one, or drag across rows. Filter by profile, select everything the filter shows, and pick a profile from the dropdown or right-click the selection.
+  - You can edit a profile without leaving the screen — change Podcast MP3 to 320k and every video already assigned to it updates.
+  - Videos can also be removed from the list outright instead of just unchecked, which matters when a playlist runs to hundreds of rows. Removal is undoable until you start the download.
+  - Nothing changes if you do not use it: a playlist you queue the usual way behaves exactly as before.
+  Notifications
+  - Failures that used to happen silently now tell you. If your settings can't be saved, a folder can't be opened, or a chosen folder can't be used for a playlist, Arroxy shows a message instead of leaving you to guess.
+  - Messages appear in your language and follow your light or dark theme.
+  Fixes
+  - Fixed resuming a paused download after restarting Arroxy. Previously, pausing a download, closing the app, reopening it, and pressing Resume did nothing at all — no error, no progress — and the only way forward was to cancel and add the link again.
+  What's Changed
+  - feat: customizable filename templates by @antonio-orionus in #146
+  - build: single cross-platform launcher for the fixture E2E suite by @antonio-orionus in #147
+  - i18n: localize the Download Profile editor by @antonio-orionus in #148
+  - build(deps): bump actions/checkout from 7.0.0 to 7.0.1 in the actions group across 1 directory by @dependabot[bot] in #140
+  - build(deps-dev): bump @types/node from 25.9.3 to 26.0.1 by @dependabot[bot] in #134
+  - build(deps): bump actions/checkout from 7.0.0 to 7.0.1 in the actions group by @dependabot[bot] in #150
+  - build(deps): bump vedantmgoyal9/winget-releaser from 7bd472be23763def6e16bd06cc8b1cdfab0e2fd5 to b3a5dae0047c6180023acba3f548c55fdf6b7193 by @dependabot[bot] in #151
+  - build(deps): bump the production group across 1 directory with 9 updates by @dependabot[bot] in #145
+  - chore: drop 14 dead type re-exports by @antonio-orionus in #153
+  - chore: make the setup-node contract assertion version-agnostic by @antonio-orionus in #154
+  - build(deps): bump actions/setup-node from 6 to 7 by @dependabot[bot] in #138
+  - build(deps-dev): bump the development group across 1 directory with 17 updates by @dependabot[bot] in #152
+  - feat: filename templates can create folders by @antonio-orionus in #155
+  - build(deps): bump shadcn from 4.16.0 to 4.16.1 in the production group by @dependabot[bot] in #156
+  - build(deps-dev): bump the development group with 3 updates by @dependabot[bot] in #157
+  - build(deps-dev): bump jsdom from 29.1.1 to 30.0.1 by @dependabot[bot] in #160
+  - build(deps-dev): bump electron from 42.4.1 to 43.2.0 by @dependabot[bot] in #161
+  - build(deps-dev): bump @testing-library/jest-dom from 6.9.1 to 7.0.0 by @dependabot[bot] in #162
+  - fix(filename): budget names per platform at bind time by @antonio-orionus in #163
+  - feat(notify): give silent failures a visible, localized surface by @antonio-orionus in #164
+  - fix(e2e): make the shared runtime cache safe for parallel workers by @antonio-orionus in #165
+  - feat: download connections, concurrent limit, and automatic retry by @antonio-orionus in #166
+  - fix: repair browser specs that CI never runs by @antonio-orionus in #168
+  - feat: assign download profiles per playlist item by @antonio-orionus in #167
+  Full Changelog: v0.4.4...v0.4.5
+ReleaseNotesUrl: https://github.com/antonio-orionus/Arroxy/releases/tag/v0.4.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,145 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: aelassas.Servy
+PackageVersion: '8.5'
+PackageLocale: en-US
+Publisher: Akram El Assas
+PublisherUrl: https://github.com/aelassas
+PublisherSupportUrl: https://github.com/aelassas/servy/issues
+Author: Akram El Assas
+PackageName: Servy
+PackageUrl: https://servy-win.github.io/
+License: MIT
+LicenseUrl: https://github.com/aelassas/servy/blob/HEAD/LICENSE.txt
+Copyright: Copyright (c) 2025 Akram El Assas
+ShortDescription: Servy lets you run any app as a native Windows service with full control over working directory, startup type, process priority, logging, health checks, pre-launch scripts and parameters.
+Description: |-
+  Servy lets you run any app as a native Windows service with full control over the working directory, startup type, process priority, logging, health checks, environment variables, dependencies, pre-launch and post-launch hooks, pre-stop and post-stop hooks, and parameters. It's designed to be a full-featured alternative to NSSM, WinSW, and FireDaemon Pro.
+
+  Servy is digitally signed using a trusted code-signing certificate provided by the SignPath Foundation. This ensures that all Servy executables and installers are verified and secure, giving you peace of mind when using the tool.
+
+  Servy offers a desktop app, a CLI, and a PowerShell module that let you create, configure, and manage Windows services interactively or through scripts and CI/CD pipelines. It also includes a Manager app for easily monitoring and managing all installed services in real time.
+
+  Features:
+  - Clean, simple UI
+  - Monitor and manage all installed services with Servy Manager
+  - Real-time CPU and RAM monitoring with live performance graphs for installed services
+  - Real-time service stdout and stderr output preview in Servy Console
+  - Service dependency tree visualization with status indicators
+  - CLI and PowerShell module for full scripting and automated deployments
+  - Run any executable as a Windows service
+  - Set service name, description, startup type, priority, working directory, environment variables, and dependencies
+  - Environment variable expansion supported in parameters, process paths and startup directories
+  - Run services as Local System, local or domain accounts, Active Directory accounts, or gMSAs
+  - Redirect stdout/stderr to log files with automatic size-based and date-based rotations
+  - Run pre-launch hook before starting the service, with retries, timeout, logging and failure handling
+  - Run post-launch hook after the application starts successfully
+  - Run pre-stop and post-stop hooks before the application stops and after the application stops
+  - Supports Ctrl+C for command-line apps, close-window for GUI apps, and force kill if unresponsive
+  - Prevent orphaned/zombie processes with improved lifecycle management and ensuring resource cleanup
+  - Health checks and automatic service recovery
+  - Browse and search logs by level, date, and keyword for faster troubleshooting from Servy Manager
+  - Export/Import service configurations for easy backups and automation
+  - Service Event Notification alerts on service failures via Windows notifications and email
+  - Compatible with Windows 7-11 x64 and Windows Server editions
+
+  Who is it for?
+  - Developers: Run development servers, scripts, or custom tools as services without extra setup.
+  - Sysadmins & IT professionals: Ensure critical background processes stay alive, monitored, and properly logged.
+  - Teams or organizations: Automate background services reliably across multiple machines.
+Moniker: servy
+Tags:
+- admin
+- automation
+- background-service
+- cli
+- devops
+- dotnet
+- nssm
+- powershell
+- scm
+- service-manager
+- service-supervisor
+- service-wrapper
+- watchdog
+- windows-service
+- windows-tools
+- winsw
+ReleaseNotes: |-
+  Servy 8.5 focuses on stability, security, and maintainability, with a large number of fixes across all components and full native support for ARM64. The full changelog is available below.
+  Full Changelog
+  Click to expand release notes!
+  - feat: provide ARM64 binaries (#2243)
+  - fix: Wrapper executable not found (#4134)
+  - fix: Cannot remove service with status "Not Installed" - Uninstall button greyed out (#2904)
+  - fix(core): XmlServiceValidator.TryValidate / JsonServiceValidator.TryValidate - Compares string.Length (chars) against MaxConfigFileSizeBytes (bytes), allowing 2-3x oversized payloads with multibyte UTF-8 content (#1441)
+  - fix(core): AppConfig.cs - Doc comment references non-existent constant 'MaxBulkOperationParallelism' (actual is 'DefaultMaxBulkOperationParallelism') (#1445)
+  - fix(core): AppConfig.cs - MaxPreLaunchRetryAttempts = int.MaxValue is inconsistent with bounded MaxMaxRestartAttempts (100_000); allows unbounded retry loops (#1446)
+  - fix(core): AppConfig.cs - Confusingly similar names: DefaultStopTimeout (5s) vs DefaultServiceStopTimeoutSeconds (60s) (#1448)
+  - fix(core): ProcessKiller.cs - parentProcess.WaitForExit return value ignored; inconsistent with KillProcessTree/WalkAndKillChildren which log on timeout (#1449)
+  - fix(core): ResourceHelper.cs - ShouldCopyResource XML doc lists 'targetFileName' as out parameter, but the actual signature has no such parameter (#1453)
+  - fix(core): Helper.IsServiceNameValid - missing length check inconsistent with ServiceValidationRules.Validate (allows long names through start/stop/uninstall paths) (#1457)
+  - fix(core): Logger.FormatException - 'truncation to LoggerMaxFormattedExceptionLength' overshoots by 14+ chars (writes '... [truncated]' AFTER setting Length) (#1458)
+  - fix(core): AppConfig.cs - Static constructor invariant check between two const ints is dead code (compile-time folded) (#1460)
+  - fix(core): ServiceHelper.CalculateStopTimeout - Math.Max(total, floor) is always 'total' (dead floor guard) (#1462)
+  - fix(core): Logger.Log() - log entry timestamps reuse '_useLocalTimeForRotation' flag, conflating rotation policy with log formatting (#1464)
+  - fix(core): Helper.Quote() - whitespace-only inputs are coerced to empty quotes; literal-whitespace arguments cannot be passed (#1465)
+  - fix(core): SecureData.Encrypt - plainBytes allocated outside try, not zeroed on early failure (Aes.Create / aes.Key throws) (#1488)
+  - fix(core): StringHelper.cs - unused 'using System.Text.RegularExpressions' import (#1490)
+  - fix(core): ProtectedKeyProvider.cs - defensive 'encrypted is null' branch throws FileNotFoundException with a 'failed to read' message (#1501)
+  - fix(core): ServiceHelper.StartServices - Math.Max(startTimeout, DefaultServiceStartTimeoutSeconds) is dead floor (same family as #1462) (#1502)
+  - fix(core): SecureData.Decrypt - 'Returning original input' log message contradicts the immediately-thrown SecureDataIntegrityException (#1509)
+  - fix(core): ProtectedKeyProvider.GetOrGenerate - inconsistent retry backoff between IOException (exponential) and UnauthorizedAccessException (fixed 100ms) (#1512)
+  - fix(core): AppConfig.AllowLegacyV1Decryption - documented as a runtime migration toggle but is a static-readonly hard-coded false (no runtime override) (#1517)
+  - fix(core): AppConfig.ResolveExe - XML doc claims it throws FileNotFoundException but the implementation never throws (#1518)
+  - fix(core): Helper.WriteFileAtomic / WriteFileAtomicCore - duplicated 'retries = 3' and '100ms backoff' magic numbers across sync and async (#1522)
+  - fix(core): AppConfig.cs - TargetFramework field throws unconditionally even though it is only consumed inside #if DEBUG blocks (#1525)
+  - fix(core): SecureData.Decrypt - legacy fallback path emits two redundant 'returning as plaintext' warnings on a single decrypt failure (#1526)
+  - fix(core): ProcessKiller.KillParentProcesses - parent Process handle opened twice (once for StartTime, then re-opened to Kill) (#1527)
+  - fix(core): ProcessKiller.WalkAndKillChildren / KillParentProcesses - generic Logger.Warn drops the Exception (no stack), inconsistent with Logger.Error sites in the same file (#1528)
+  - fix(core): StringHelper.cs - XML doc cref points to wrong namespace 'Servy.Core.Security.EnvironmentVariableParser' (#1534)
+  - fix(core): ServiceValidationRules.Validate - service-dependency errors are joined into one Errors entry while every other check adds individual strings (#1547)
+  - fix(core): RotatingStreamWriter.EnforceMaxRotations - 'consecutiveDeletionFailures >= 10' threshold duplicated as a magic literal across the enumerate-failure and delete-failure paths (#1555)
+  - fix(core): RotatingStreamWriter.TripCircuitBreaker - 'CooldownMs / 60000' inline magic number for ms->minutes conversion in error message (same family as #1549) (#1556)
+  - fix(core): Logger.cs fallback log entries - inconsistent timestamp format vs. main log (no TZ marker) (#1559)
+  - fix(core): NativeMethods.ValidateCredentials - 'if (username.Contains("\"))' is dead-conditional after regex pre-check, plus dead initialisations of 'domain'/'user' (#1563)
+  - fix(core): NativeMethods.ValidateCredentials - generic catch wraps Exception in SecurityException without preserving inner exception (#1575)
+  - fix(core): ProcessHelper.ResolvePath - throws InvalidOperationException but IProcessHelper XML doc declares ArgumentException (#1583)
+  - fix(core): Servy.Core Helper.IsValidPath / Helper.CreateParentDirectory - bare 'catch { return false; }' silently swallows IO/Access errors with no telemetry (same family as #1519) (#1586)
+  - fix(core): ServiceDependenciesValidator.Validate - error message '[ServiceDependencies] Invalid service name...' hardcoded in English; inconsistent with localized Strings.Msg_* in sibling validators (#1592)
+  - fix(core): XmlServiceValidator vs JsonServiceValidator - asymmetric parse-failure logging and inconsistent error wording across symmetric API pair (#1595)
+  - fix(core): ServiceDto.cs - ShouldSerialize methods redundant for properties already marked [JsonIgnore] + [XmlIgnore] (#1597)
+  - fix(core): SecureData ctor - second HKDF.DeriveKey throw leaves _v2EncryptionKey unzeroed in half-constructed instance (#1599)
+  - fix(core): ServiceValidationRules.Validate - Description-too-long uses Warnings while every other length check uses Errors (#1600)
+  - fix(core): ServiceValidationRules.Validate - paramFields length error doesn't identify which of 6 parameters exceeded the limit (#1601)
+  - fix(core): AppConfig.RecoverySchedulingDelay - missing 'Ms' suffix on a milliseconds constant, inconsistent with every other Ms-valued constant (#1603)
+  - fix(core): ServiceManager.InstallServiceAsync - Math.Max(total, floor) dead floor on totalWaitTime (same family as #1462) (#1604)
+  - fix(core): ServiceManager.StartServiceAsync - Math.Max(timeout, floor) dead floor (same family as #1462) (#1605)
+  - fix(core): ServiceManager.InstallServiceAsync - DeleteService rollback return value ignored on pre-shutdown/delayed-autostart failure (#1606)
+  - fix(core): ServiceManager.UninstallServiceAsync - ControlService(STOP) return value ignored, masking SCM stop-command failures (#1607)
+  - fix(core): EventLogLogger.SetIsEventLogEnabled - non-atomic _eventLog.Dispose()+null sequence racing with concurrent WriteEntry causes ObjectDisposedException (#1615)
+  - fix(core): ResourceHelper.CopyEmbeddedResource - returns success even when StartServices throws in finally; caller cannot detect stopped-and-not-restarted services (#1616)
+  - fix(core): Servy.psm1 / AppConfig.cs - 'SERVY_PASSWORD' env var name duplicated as a string literal in PowerShell and C# (same family as #1396) (#1631)
+  - fix(core): HandleHelper.GetProcessesUsingFile - unbounded WaitForExit() after a failed Kill can hang the caller indefinitely (#1634)
+  - fix(core): EventLogReader.MapToDto - garbled XML doc comment 'as as local on this OS' (duplicate 'as') (#1635)
+  - fix(core): EventLogReader.ParseLevel - Critical (1) silently collapsed to Error with no diagnostic (#1636)
+  - fix(core): NativeMethods.AtomicSecureMove - ERROR_NOT_SAME_DEVICE (0x11) inline magic number; Errors.cs is the central location (#1637)
+  - fix(core): NativeMethods.GetFileIdentity - 4KB prefix-digest false-negatives on files with identical headers (e.g. rotated logs with same log prologue) (#1638)
+  - fix(core): ProcessKiller.KillChildren - bypasses ancestor protection; descendants matching the Servy process chain can be killed (#1639)
+  - fix(core): ProcessKiller - '.exe' stripping logic duplicated three times with subtle skip in KillProcessesUsingFile (#1640)
+  - fix(core): EnvironmentVariableParser / EnvironmentVariablesValidator - delimiter array { ';', '\r', '\n' } duplicated between parser and validator (#1642)
+  - fix(core): ServiceControllerWrapper.BuildDependencyTree - ServicesDependedOn[] disposed twice on happy path (loop + finally) (#1643)
+  - fix(core): mlServiceValidator.TryValidate / JsonServiceValidator.TryValidate - 90% identical logic; only parser differs (#1645)
+  - fix(core): ProtectedKeyProvider - 'try { EventLog.WriteEntry... } catch (Exception) { Logger.Debug... }' block duplicated 3 times (#1646)
+  - fix(core): LoggerConfigurator.ConfigureFromAppSettings - inconsistent warning logging: LogLevel parse failure warns, every other field silently falls back (#1650)
+  - fix(core): Helper.IsRunningUnderXunit - public static method with zero callers in src/ and tests/ (dead code) (#1655)
+  - fix(core): ProcessKiller.KillParentProcesses - hardcoded '2' for PID-reuse tolerance instead of AppConfig.PidReuseToleranceSeconds (inconsistent with line 122 in same file) (#1659)
+  - fix(core): ResourceHelper.CopyEmbeddedResource - currentResourceName / currentTargetPath locals assigned but never read (dead variables) (#1660)
+  - fix(core): HandleHelper.GetProcessesUsingFile - inline magic 2000ms drain timeout inconsistent with AppConfig.HandleExeTimeoutMs/HandleExeRegexTimeout used in the same method (#1662)
+ReleaseNotesUrl: https://github.com/aelassas/servy/releases/tag/v8.5
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/aelassas/servy/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

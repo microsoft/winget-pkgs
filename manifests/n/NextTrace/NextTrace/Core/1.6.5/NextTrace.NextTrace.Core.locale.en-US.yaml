@@ -1,0 +1,47 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: NextTrace.NextTrace.Core
+PackageVersion: 1.6.5
+PackageLocale: en-US
+Publisher: NextTrace Community
+PublisherUrl: https://github.com/nxtrace
+PublisherSupportUrl: https://github.com/nxtrace/NTrace-core/issues
+PackageName: NextTrace
+PackageUrl: https://github.com/nxtrace/NTrace-core
+License: GPL-3.0
+LicenseUrl: https://github.com/nxtrace/NTrace-core/blob/HEAD/LICENSE
+ShortDescription: NextTrace, an open source visual route tracking CLI tool
+Description: An open source visual routing tool that pursues light weight, developed using Golang.
+Tags:
+- api
+- as-path
+- asn-lookup
+- geoip
+- geolocation
+- ip-lookup
+- network-analysis
+- next-trace
+- nexttrace
+- traceroute
+- utility
+ReleaseNotes: |-
+  What's Changed
+  - 新增 Deploy MCP 模式：nexttrace --deploy --mcp 会在 deploy 网络服务中挂载 Streamable HTTP MCP endpoint /mcp，供 Agent / MCP Client 直接调用 NextTrace 能力
+  - 新增 deploy token 鉴权：支持 --deploy-token 与 NEXTTRACE_DEPLOY_TOKEN；外网监听且未手动设置 token 时会自动生成 token，WebUI / REST API / WebSocket / MCP 均受保护
+  - 新增浏览器登录页 /auth/login：WebUI 可通过 HttpOnly Cookie 访问受保护页面；Agent / API / MCP 支持 Authorization: Bearer <token> 与 X-NextTrace-Token
+  - 新增共享 internal/service 层，为 Web / MCP 提供结构化能力入口，覆盖 traceroute、MTR report/raw、MTU、speed、Nali 标注、Geo lookup 与 Globalping
+  - 新增 MCP tool 集合：nexttrace_capabilities、nexttrace_traceroute、nexttrace_mtr_report、nexttrace_mtr_raw、nexttrace_mtu_trace、nexttrace_speed_test、nexttrace_annotate_ips、nexttrace_geo_lookup、nexttrace_globalping_trace、nexttrace_globalping_limits、nexttrace_globalping_get_measurement
+  - 增强 Globalping MCP 支持：支持多 location / ASN / magic location 字符串发起全球 traceroute，返回 measurement id、probe 信息、ASN / network / tags、hops 与 raw output，不再只取第一个结果
+  - 修复 Globalping MCP 默认端口与协议边界：TCP 默认 80，UDP 默认 33494，ICMP 保持无端口语义，避免 Agent 调用 ICMP 时生成无效 payload
+  - 补充 NextTrace Agent Skill：新增 skills/nexttrace/，说明 MCP 启动、客户端注册、全工具能力、Globalping 用法、CLI fallback、平台限制、校验流程与输出模板
+  - 强化 deploy / MCP 安全与稳定性：鉴权默认 fail-closed，禁止 URL query token，CORS 补齐 MCP DELETE 与鉴权 header，WebSocket / MCP / API 未授权访问均拒绝
+  - 改进取消与 shutdown 行为：修复 WebSocket 重连、Fast Trace prompt、stdin reader、目标解析等路径在 context cancel / deadline 下的日志、阻塞与退出语义
+  额外的：
+  --mcp 只能与 --deploy 同用，不提供 stdio MCP 模式。
+  本地 loopback 监听默认免 token；外网监听建议显式设置 --deploy-token 或 NEXTTRACE_DEPLOY_TOKEN，避免自动生成 token 出现在日志 / CI 输出中。
+  Globalping 是远端探针能力，不支持本地 source_address / source_device / dot_server / packet_size / tos / ttl_interval 等本机 trace 参数。
+  nexttrace-tiny / ntr 不注册 WebUI / MCP deploy 参数。
+ReleaseNotesUrl: https://github.com/nxtrace/NTrace-core/releases/tag/v1.6.5
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

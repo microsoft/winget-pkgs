@@ -1,0 +1,109 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Navidrome.Navidrome
+PackageVersion: 0.64.1
+PackageLocale: en-US
+Publisher: Navidrome
+PublisherUrl: https://github.com/navidrome
+PublisherSupportUrl: https://github.com/navidrome/navidrome/issues
+PackageName: Navidrome
+PackageUrl: https://github.com/navidrome/navidrome
+License: GPL-3.0
+LicenseUrl: https://github.com/navidrome/navidrome/blob/HEAD/LICENSE
+ShortDescription: Modern Music Server and Streamer compatible with Subsonic/Airsonic
+Tags:
+- airsonic
+- madsonic
+- media-server
+- music
+- music-server
+- navidrome
+- opensubsonic
+- raspberry-pi
+- self-hosted
+- streamer
+- streaming-api
+- streaming-audio
+- subsonic
+- subsonic-server
+ReleaseNotes: |-
+  This is a security release. It fixes five vulnerabilities reported through our GitHub Security Advisory program, covering Subsonic authentication, artwork fetching, playlist cover images, player ownership, and per-user library filtering. Upgrade as soon as you can. Thanks to the researchers credited below for reporting them privately.
+  The release also improves Jellyfin client support, with both Manet and JellyBox tested and validated against live servers. Manet used to abort its entire library sync on a single missing field and show an empty library. It now syncs end to end. JellyBox got stuck on the login screen. It now signs in and plays, confirmed on Android. Navidrome also reports itself as Jellyfin 12.1.0, accepts Quick Connect sign-in, and can announce itself on your local network so clients find it without you typing an address.
+  Smart playlists can reference another playlist by path, and the web UI now formats dates using the language you picked in Personal settings.
+  Security
+  - Unauthenticated password brute-force through the Subsonic API. Failed Subsonic logins were never throttled, so an attacker could guess passwords at full speed. Navidrome now rate limits failed authentication attempts. High, CVSS 7.4. (GHSA-p994-r776-mw52, #6185) Reported by @osageling.
+  - Authenticated SSRF through M3U external album artwork. A playlist could point #EXTALBUMARTURL at a private or loopback address, turning the server into a probe for internal network services. Navidrome now blocks private and loopback addresses in remote image fetches. Medium, CVSS 6.5. (GHSA-8hjf-6h34-82hr, #6181) Reported by @kaardeco.
+  - Cross-library file read through the M3U playlist cover. #EXTALBUMARTURL also accepted a local path, so a playlist could serve any file the server can read as its cover image. Only real image files are accepted as local artwork sources now. Medium, CVSS 6.5. (GHSA-vwq6-xrw5-phpg, #6180) Reported by @qrn12580.
+  - Player takeover by any authenticated user. Creating a player could overwrite an existing record and reassign its owner, and device registration reused another user's player without an ownership check. Both paths now check the owner. Medium, CVSS 6.4. (GHSA-37h4-53gj-cw8m, #6184) Reported by @RealFakeAccount and @qrn12580.
+  - Library filter skipped on bookmarks, playlist tracks and now-playing. These three endpoints ignored the libraries a user is allowed to see, leaking track metadata from other libraries. The filter now applies to all of them. Medium, CVSS 4.3. (GHSA-pcjv-h48m-833g, #6179) Reported by @sondt99.
+
+  Configuration Changes
+  ──────┬──────────────────────┬────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬───────
+  Status│Option                │Description                                                                                                                 │Default
+  ──────┼──────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────
+  New   │Jellyfin.AutoDiscovery│Answers Jellyfin's UDP discovery broadcasts, so clients find the server on the local network. (#6169)                       │false
+  ──────┼──────────────────────┼────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼───────
+  New   │Jellyfin.QuickConnect │Allows Quick Connect sign-in, where a client shows a code you approve from a session that is already signed in. (#6174)     │true
+  ──────┴──────────────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴───────
+  For a complete list of all configuration options, see the Configuration Options documentation.
+
+  Jellyfin API
+  - Add Quick Connect sign-in. The client shows a short code, and you approve it from a session that is already signed in, so the client never sees your password. (#6174 by @deluan)
+  - Add opt-in LAN auto-discovery, so Jellyfin clients find the server without you typing its address. Docker users need host networking for the UDP broadcast to reach the container. (#6169 by @deluan)
+  - Report Jellyfin 12.1.0 and add the 12.x features clients check for, including fillWidth and fillHeight image sizing. (#6163 by @deluan)
+  - Match Jellyfin's item payloads, so clients that decode strictly can finish a sync instead of erroring out. (#6151 by @deluan)
+  - Match Jellyfin on login SessionInfo, item types and universal streams. (#6161 by @deluan)
+
+  UI
+  - Format dates using the language selected in Personal settings, instead of always following the browser locale. (#6160 by @deluan)
+
+  Smart Playlists
+  - Reference another playlist by its path in a smart playlist rule, instead of by id. (#5187 by @davidvedvick)
+
+  Subsonic API
+  - Log a warning when a nowPlaying scrobble sends more than one id, which the API does not allow. (6b3938b5b by @deluan)
+
+  Server
+  - Fix the ExtAuth logout redirect on unauthenticated page loads, and stop the warning spam from untrusted sources. (#6176 by @deluan)
+  - Return 404 instead of 500 when a native API resource does not exist. (#6131 by @deluan)
+
+  Artwork
+  - Report a failure when the Last.fm artist page has no image. Last.fm now answers non-browser clients with a bot challenge page, which Navidrome read as "this artist has no image" and recorded as final, with nothing in the log. It now logs a warning and retries, and the other image agents still get their turn. (#6198 by @deluan)
+  - Store artwork files as group-readable (mode 0640) instead of owner-only, so other services on the same host can read the image cache. (#6189 by @kwo)
+
+  Scanner
+  - Update go-taglib to fix "permission denied" errors on shared hosts. (d00c84716 by @deluan)
+
+  Scrobbling
+  - Double-encode plus signs in artist and track names sent to Last.fm, so tracks with a + in the name scrobble correctly. (#6158 by @deluan)
+
+  Packaging
+  - Repair root-owned artwork and plugins folders on upgrade. Installs affected by this could not write their own cache. (#6143 by @deluan)
+
+  Translations
+  - Update Finnish and Dutch translations from POEditor. (#6148 by @deluan)
+  - Update missing German translations. (#6146 by @strecke)
+  - Improve the Swedish translation. (#6177 by @NickWick13)
+  - Update Chinese Simplified translations. (#6152 by @fxj368)
+  - Update Portuguese (Brazil) translations from POEditor. (#6197 by @deluan)
+
+  New Contributors
+  - @davidvedvick made their first contribution in #5187
+  - @strecke made their first contribution in #6146
+  - @NickWick13 made their first contribution in #6177
+  - @kwo made their first contribution in #6189
+  - @aerusso made their first contribution in #6190
+
+  Helping out
+  This release is only possible thanks to the support of some awesome people!
+  Want to be one of them?
+  You can sponsor, pay me a Ko-fi, or contribute with code.
+
+  Where to go next?
+  - Read installation instructions on our website.
+  - Host Navidrome on PikaPods or Zenith for a simple cloud solution.
+  - Reach out on Discord, Reddit and Twitter!
+ReleaseNotesUrl: https://github.com/navidrome/navidrome/releases/tag/v0.64.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

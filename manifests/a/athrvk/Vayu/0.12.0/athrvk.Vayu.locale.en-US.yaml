@@ -1,0 +1,51 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: athrvk.Vayu
+PackageVersion: 0.12.0
+PackageLocale: en-US
+Publisher: Atharva Kusumbia
+PublisherUrl: https://github.com/athrvk
+PublisherSupportUrl: https://github.com/athrvk/vayu/issues
+Author: Atharva Kusumbia
+PackageName: Vayu
+PackageUrl: https://github.com/athrvk/vayu
+License: AGPL-3.0
+LicenseUrl: https://github.com/athrvk/vayu/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Atharva Kusumbia
+ShortDescription: Open-source API client with a native C++ load-testing engine - Postman-style requests and k6-level load tests in one local app.
+Description: Vayu is a free, open-source desktop app for Windows, macOS, and Linux that combines a full REST and GraphQL request builder - with collections, environments, and scripting - and a high-throughput load tester powered by a C++20 engine, with all data staying on your machine.
+Moniker: vayu
+Tags:
+- api
+- api-client
+- api-testing
+- benchmark
+- developer-tools
+- graphql
+- http
+- insomnia
+- load-testing
+- performance
+- postman
+- rest
+ReleaseNotes: |-
+  0.12.0 - 2026-07-30
+  A correctness and distribution release. Its most consequential fix is one no test could have caught: the Windows engine linked against the Visual C++ redistributable but never shipped it, so on a machine that did not already have that runtime the sidecar could not start at all and the app sat on "Disconnected" with nothing to explain why. Both 0.10.0 and 0.11.0 were affected. Alongside that, the engine now owns id generation outright - a create carrying its own id is refused rather than honoured - Vayu publishes to winget on every release, and the Postman importer stopped losing auth and body detail on the way in.
+  Added
+  - Windows installs from winget. winget install athrvk.Vayu is live, and each release now submits its own manifest to microsoft/winget-pkgs automatically once the build matrix is green. A separate Publish to winget (manual) workflow covers what the automatic path cannot - a release that predates the automation, a re-submission after a manifest pull request was closed, or publishing an older tag deliberately - by submitting an existing GitHub release without rebuilding anything.
+  - A build-time guard on the Windows engine's dependencies. CI reads the built binary's import table and fails if it needs anything that does not ship with Windows itself. It allowlists the operating system rather than denylisting the runtime, so a new third-party dependency is caught the same way the missing runtime would have been.
+  - A collection can block auth inheritance. The collection Auth tab offers No Auth (blocks inheriting) alongside plain No Auth. The first means "send nothing, and stop here"; the second means "nothing is configured at this level, keep looking upwards". Vayu only had the second, which is why an imported Postman folder set to No Auth still inherited its parent collection's token. The inheritance chain and a request's inherit banner now name the collection that blocked, rather than showing an ancestor the request never actually uses.
+  Changed
+  - The engine owns every id, and a create that supplies one is rejected (breaking). POST /collections, /requests and /environments now answer a body carrying an id with a 400 instead of honouring it, so every id in the database comes from the engine. Presence alone is the trigger, null included, because accepting {"id": null} would leave a payload builder believing the field is read. PUT is unchanged except that a body id disagreeing with the path is now a 400 rather than being silently ignored - the path is the identity, and a payload naming two records should not be resolved by guessing. The app strips id before posting, so this is invisible from the UI; it affects anything driving the HTTP API directly.
+  - The Windows engine is a single self-contained binary. It builds against the static vcpkg triplet with a static MSVC runtime, so nothing is installed beside it - where previous releases shipped a directory of DLLs alongside it, including two GoogleTest libraries that had no business in a user's install directory.
+  Fixed
+  - Vayu would not work at all on a Windows machine without the Visual C++ redistributable. The engine imported MSVCP140.dll and VCRUNTIME140.dll, which are not part of a clean Windows installation and were never bundled, so Windows refused to load the binary, the sidecar died the moment it was launched, and the app showed only "Disconnected" - the engine was in the package the whole time and could not start. Every development machine and every CI runner already has that runtime, which is why building and testing the engine never revealed it. The packaging step that should have caught it was wrong in both directions: it copied every DLL it found beside the build output, which swept in the two GoogleTest libraries while missing the runtime entirely, because that never lands there. Removing the dependency rather than adding it to a copy list means there is no longer a list to get wrong.
+  - A slow import could silently duplicate everything it imported. The import mutation inherited a global retry policy, and POST /import/apply mints fresh ids on every call with no idempotency key - so if the engine committed but the response was lost to a timeout, the retry produced a second complete copy of every collection, request and environment while the modal reported one clean import.
+  - The Postman importer lost auth and body detail, and a single malformed entry could fail the whole file. AWS Signature v4 credentials were dropped outright, because the importer matched a type string Postman does not send. A folder explicitly set to No Auth was read as "nothing configured here" and inherited the parent collection's token - the opposite of what Postman means by it. GraphQL variables arrived as a JSON-encoded string rather than the object the editor writes, and a request's redirect policy was never read at all, so an import silently took the engine's default of following redirects. Three robustness gaps could take an import down or quietly corrupt it: a % in a query value (?discount=50%) threw and failed the entire file, an object-form URL whose query lived only in its raw text lost every parameter, and a null entry in a folder's item list crashed with a bare TypeError - it is now skipped and counted in the import preview. A literal {x} in a Postman or Insomnia file is also no longer rewritten as a variable; that rewrite is now something only the OpenAPI parsers ask for.
+  - pm.response.to.be asserted nothing, so a 500 passed. The chain was stubbed with a bare object, and because a paren-less assertion is just an expression statement, pm.response.to.be.ok against a failing response discarded undefined and reported PASS - a green run against a broken API, which is worse than a matcher that is plainly missing. Unknown members on all three chain links now throw a TypeError naming the chain.
+  Internal
+  Engine benchmarks were re-measured and the documentation refreshed from that session; the load-test hero screenshot was replaced with the overview shot. The scripting documentation stopped teaching pm.variables and pm.response.headers.get, neither of which the runtime implements. The documentation site gained consent-gated analytics, which is on the published site only and never in a fork, a pull-request preview or a local mkdocs serve. CLAUDE.md records the winget publishing path, both automatic and manual, and docs/engine/building.md explains why the Windows build must stay static - including that CMAKE_POLICY_DEFAULT_CMP0091 is load-bearing, since vendored QuickJS-NG declares its own minimum CMake version and would otherwise be built against a different C runtime than the rest of the engine.
+ReleaseNotesUrl: https://github.com/athrvk/vayu/releases/tag/v0.12.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

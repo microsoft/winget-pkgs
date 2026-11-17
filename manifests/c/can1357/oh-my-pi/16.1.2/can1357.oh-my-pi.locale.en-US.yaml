@@ -1,0 +1,91 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 16.1.2
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-agent-core
+  Fixed
+  - Prevented sensitive raw JSON payloads from leaking into agent events during tool validation
+  - Ensured tool validation errors are handled correctly for malformed JSON parse inputs
+  - Ensure deep-cloning of tool-call arguments respects own enumerable properties
+  - Prevent direct object references between agent message snapshots and streaming events
+  @oh-my-pi/pi-ai
+  Added
+  - Added improved JSON repair capabilities for Anthropic tool arguments
+  - Added authentication broker discovery to sync credentials between local SQLite and remote state
+  Fixed
+  - Improved error feedback and transparency for malformed Anthropic tool call arguments
+  - Added automatic fallback for unsupported OpenAI reasoning effort levels
+  - Improved reliability when handling invalid reasoning parameter errors across OpenAI-compatible APIs
+  - Fixed OpenAI-compatible Chat Completions, Responses, and Azure Responses requests to retry once with the nearest provider-supported reasoning effort when an endpoint rejects xhigh/minimal-style effort values.
+  @oh-my-pi/pi-catalog
+  Added
+  - Added support for Gemini 2.5 Flash-Lite, 3.1 Flash-Lite, and 3.5 Flash models
+  - Added support for Moonshot V1 model family
+  Changed
+  - Updated context window and token limits for various Claude, Gemini, and GPT-OSS models
+  - Refined thinking mode behaviors and routing for supported LLM families
+  Fixed
+  - Fixed GLM-5.2 reasoning_effort so the top thinking tier reaches each host's genuine maximum instead of 400ing, mapping the internal xhigh tier per host dialect (verified against live endpoints): Z.ai/Zhipu collapse onto the model's none/high/max scale (xhigh → max); Fireworks, resellers, and Ollama Cloud keep their distinct lower tiers and remap only the top xhigh → max (merged over host quirks such as Fireworks' minimal → none); and OpenRouter — whose API rejects max and treats xhigh as its own max tier — now exposes the xhigh tier and forwards it verbatim. Dialect detection keys off resolved compat.thinkingFormat, so custom OpenRouter/Z.ai-format providers are covered too.
+  - Maintained thinking effort routing when discovery only returns the base model ID
+  - Improved credential retrieval logic for Antigravity and Codex providers via auth discovery
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added a welcome-screen tip for the /advisor runtime. Tips ending in a [NEW] marker now render a bold rainbow NEW! tag (it shimmers across the welcome intro's animation frames, then settles into a still rainbow) and are weighted to surface more often in the random tip rotation.
+  Changed
+  - Renamed the search tool's i parameter to case and inverted its semantics to represent case-sensitive search.
+  - Improved session history to export empty objects as {} instead of empty strings
+  - Refined system prompt and tool documentation to improve conciseness and clarity
+  - Simplified tool input descriptions for browser, eval, find, and memory-edit operations
+  - Refactored authentication storage discovery to share logic with other pi-ai tools
+  Fixed
+  - Fixed omp bench resolving an ambiguous model selector — a bare or canonical id shared by several providers (e.g. gpt-oss-20b or openai/gpt-oss-20b) — to a provider you have no credentials for. Bench resolves against the full catalog (credentials are ignored), so the default pick was decided by provider-priority order alone. It now redirects such selectors to an equivalent model under a provider with configured auth (honoring modelProviderOrder and canonical cross-provider variants), while an explicit provider/id selector is still benchmarked verbatim so forced/unauthenticated runs keep working.
+  - Resuming a session whose project directory no longer exists (deleted or renamed worktree) no longer crashes with an unhandled ENOENT … chdir rejection. The resume now keeps the current working directory instead of trying to chdir into the missing path, across the in-session selector, the --resume startup picker, and SessionManager.open/continueRecent.
+  - Fixed streaming reflowing Markdown — a fenced mermaid diagram or a GFM table — stranding stale fragments in native scrollback once the reply scrolled past the viewport (cleared only by a full repaint / Ctrl+L). While streaming, the assistant block defaulted to commit-stable, so the transcript advertised its scrolled-off rows as durable snapshot content and the renderer committed an intermediate layout to immutable terminal history; the later re-layout (a diagram reshaping, a table re-aligning its columns) then froze that superseded fragment in scrollback. A still-streaming reply whose Markdown carries a mermaid fence or a table — detected outside fenced code blocks so ordinary code snippets are unaffected — is now commit-unstable, so it stays wholly in the repaintable live region and commits once, at its final layout, when the turn finalizes.
+  - Fixed SYSTEM.md prompt customization going through the raw system prompt override path, which dropped sections rendered by custom-system-prompt.md such as skills and rules (#3014).
+  @oh-my-pi/hashline
+  Changed
+  - Refined documentation and prompt instructions for clarity and brevity
+  @oh-my-pi/pi-utils
+  Added
+  - Added directoryExists(dir) to dirs: resolves whether a path is an existing directory, returning false on any stat failure (ENOENT, permission, non-directory). Lets callers check a directory is safe to chdir into before setProjectDir throws.
+  Removed
+  - Removed the public createAbortableStream API from @oh-my-pi/pi-utils. Consumers should use the lighter, direct-reader abortableSource async generator inside @oh-my-pi/pi-utils/stream to avoid the extra ReadableStream wrapper layer and per-chunk enqueue overhead.
+  What's Changed
+  - fix(agent): dynamically fallback from snapcompact to text summary on high CJK/non-ASCII rates by @cagedbird043 in https://github.com/can1357/oh-my-pi/pull/3053
+  - fix(prompting): render SYSTEM.md through custom prompt template by @roboomp in https://github.com/can1357/oh-my-pi/pull/3048
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v16.1.1...v16.1.2
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v16.1.2
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,90 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Byron.dua-cli
+PackageVersion: 2.39.0
+PackageLocale: en-US
+Publisher: Sebastian Thiel
+PublisherUrl: https://github.com/Byron
+PublisherSupportUrl: https://github.com/Byron/dua-cli/issues
+Author: Sebastian Thiel
+PackageName: Disk Usage Analyzer
+PackageUrl: https://github.com/Byron/dua-cli
+License: MIT
+LicenseUrl: https://github.com/Byron/dua-cli/blob/HEAD/LICENSE
+Copyright: © Sebastian Thiel
+CopyrightUrl: https://github.com/Byron/dua-cli/raw/main/LICENSE
+ShortDescription: View disk space usage and delete unwanted data, fast.
+Description: dua (→ Disk Usage Analyzer) is a tool to conveniently learn about the usage of disk space of a given directory. It's parallel by default and will max out your SSD, providing relevant information as fast as possible. Optionally delete superfluous data, and do so more quickly than rm.
+Moniker: dua
+Tags:
+- cleaner
+- disk-usage-analyser
+- disk-usage-analyzer
+- diskusageanalyser
+- diskusageanalyzer
+- duacli
+- harddisk
+- harddrive
+- requirescmd
+- space-use
+- ssd
+ReleaseNotes: |-
+  The main feature this release is parallel deletion, both for collecting files to be deleted as well as the deletion itself. On my local disk, it now reaches 144k files/s overall deletion performance.
+  New Features
+  - delete files in parallel
+    Recursive deletion now uses the same worker count selected with --threads for
+    the initial filesystem scan, to accelerate the collection of files to be deleted,
+    as well as the deletion of files.
+    When marked directories are deleted, dua now:
+    1. walks the selected tree without (following symbolic links as usual)
+    2. collects regular files and symbolic links;
+    3. removes those entries across the configured workers;
+    4. removes directories from deepest to shallowest after their contents are gone on a single thread.
+    A value of 1 keeps deletion effectively serial. Larger values allow
+    independent file removals to overlap, which is most useful for large directory
+    trees or filesystems with concurrent metadata operations.
+
+  Bug Fixes
+  - open errors and cleanup/gitignored footer labels
+
+  Refactor
+  - use jwalk for parallel, symlink-safe deletion
+    Replace the hand-rolled stack traversal in delete_directory_recursively
+    with a jwalk WalkDir (follow_links=false, skip_hidden=false). This is
+    the same walker the rest of dua uses for scanning, so deletion now
+    benefits from parallel traversal on multi-core machines.
+    Behaviour preserved:
+    - Symlinks are removed without following them (remove_file on the link).
+    - Directories are removed deepest-first so each remove_dir sees an
+      empty directory.
+    - Error counting and byte accounting unchanged.
+    Adds unit tests covering: single file, nested tree, symlink safety,
+    and missing-path error reporting.
+
+  Test
+  - Make traversal tree tests filesystem-independent
+    That way, tests will work locally.
+
+  Commit Statistics
+  - 10 commits contributed to the release over the course of 4 calendar days.
+  - 8 days passed between releases.
+  - 4 commits were understood as conventional.
+  - 0 issues like '(#ID)' were seen in commit messages
+
+  Commit Details
+  view details
+  - Uncategorized
+    - Prepare changelog for release (254ea4f)
+    - Merge pull request #353 from Solaris-star/fix/43-jwalk-parallel-deletion (0f55a5c)
+    - Delete files in parallel (b04f9f3)
+    - Review (cd82444)
+    - Make traversal tree tests filesystem-independent (48fb6df)
+    - Use jwalk for parallel, symlink-safe deletion (7e9d0a8)
+    - Merge pull request #352 from l0rush1/main (496bd78)
+    - Rustfmt annotation_message match arm (3dba5a4)
+    - Open errors and cleanup/gitignored footer labels (f2a957a)
+    - Fix: interactive exit code and footer entries/s (1b3f60d)
+ReleaseNotesUrl: https://github.com/Byron/dua-cli/releases/tag/v2.39.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,55 @@
+# Created with WinGet Updater using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: CycloneDX.cdxgen
+PackageVersion: 13.2.0
+PackageLocale: en-US
+Publisher: OWASP Foundation
+PublisherUrl: https://owasp.org/
+PublisherSupportUrl: https://github.com/CycloneDX/cdxgen/issues
+Author: CycloneDX
+PackageName: CycloneDX Generator (cdxgen)
+PackageUrl: https://github.com/CycloneDX/cdxgen
+License: Apache-2.0
+LicenseUrl: https://github.com/CycloneDX/cdxgen/blob/HEAD/LICENSE
+ShortDescription: A polyglot tool and a library for generating various Bill of Materials in CycloneDX specification.
+Description: Generate Software Bill of Materials (SBOM) for most applications and container images with a single command. Generate Operations Bill of Materials (OBOM) for Linux and Windows hosts. Integrate with any CI/CD pipeline. Automatically submit the generated BOM to your dependency track server for analysis.
+Moniker: cdxgen
+Tags:
+- bom
+- cbom
+- containers
+- cyclonedx
+- docker
+- oci
+- owasp
+- package-url
+- purl
+- saasbom
+- sbom
+- sca
+- software-bill-of-materials
+- supply-chain
+ReleaseNotes: |-
+  cdxgen 13.2.0
+  Kotlin evidence with kosi
+  The headline change is that evinse -l kotlin now works natively. cdxgen drives the new kosi companion binary, which ships with cdxgen-plugins-bin 4.0.0, to analyze Kotlin sources offline and produce real evidence instead of falling back to the generic JavaScript path. A BOM from this arm carries occurrences with true file and line positions, callstacks built from kosi's named frames, crypto flows rendered as CycloneDX cryptographic-asset components, and SaaSBOM services covering both outbound calls and inbound API endpoints with their HTTP verbs and authentication posture. Outbound services also record every call site and the function it sits in, along with how each URL was resolved.
+  The join also stays honest about what the analysis actually saw. The cdx:kosi properties record data-flow slices, trace completeness, reachability from workspace roots, and every diagnostic kosi reported, including the degraded tag kosi sets when it does not trust its own counts, for example when no JDK was available. Native interop findings, such as JNI seams, loadLibrary binding sites, and cinterop .def files, surface as security signals on the components they attach to. Alongside this, dosai's package reachability verdicts propagate into cdx:dosai:reachability properties with kind, confidence, and reasons. kosi failures never abort SBOM generation, and CDXGEN_KOSI_DISABLE=1 or --no-kosi opts out entirely.
+  Rust accuracy and scope
+  Cargo dependency kinds and platform gates are now resolved per edge, so --required-only finally filters correctly. A crate counts as dev-only only when every path from a workspace root crosses a dev edge, and an optional dependency observed in sources is promoted to required. Build dependencies and proc-macros are no longer mixed into the component list. They move to the formulation section with their bom-refs kept resolvable, and CDXGEN_CARGO_TARGET resolves the graph for a specific target triple.
+  Resolved features are recorded per component, and crates declaring links produce separate native C library components, so an OpenSSL advisory lands on OpenSSL rather than on its Rust binding. Dynamically linked native libraries are marked external per CycloneDX 1.7. Crate metadata is now read from the local cargo registry before querying crates.io, which removes minutes of waiting on large lockfiles, and a cargo audit rule pack asserts all of the above. rusi's crypto algorithm assets now resolve their OIDs from the shared table, and an algorithm the table cannot name is skipped rather than emitted invalid.
+  AI-BOM and agentic inventory
+  Model artifact inventory grows to GGUF, safetensors, ONNX, and PyTorch pickle checkpoints, the last flagged cdx:ai:unsafeDeserialization=true since loading them executes code. Agent framework and inference provider coverage expanded considerably, including local runtimes such as Ollama and LM Studio recognized by their loopback ports. MCP detection now reads more client configs (Cursor, Windsurf, Zed, Codex, and others), MCP Registry server.json manifests, MCPB and DXT bundles, and signals from the MCP 2026-07-28 protocol draft.
+  There is also a new agentic project type that inventories the agentic coding assistants installed on your machine, from Claude Code and Codex to Gemini CLI and Amazon Q. The scan is read-only, records versions and structural counts rather than configuration values, and redacts home paths.
+  New ecosystems: Elm and Svelte
+  Elm is a new project type. cdxgen parses elm.json and legacy 0.18 lockfiles, enriches components offline from the ELM_HOME cache, and can optionally query the package registry for licenses and the dependency graph. Svelte and SvelteKit projects get first-class treatment in the JavaScript analyzer. Imports in .svelte files recover true file and line evidence, SvelteKit virtual modules are attributed to @sveltejs/kit, and adapters, preprocessors, and rune usage all contribute signals. Bare owner/repo shaped paths are no longer misread as Hugging Face repositories, which previously produced an empty AI-only BOM.
+  Crypto correctness
+  Post-quantum OIDs were verified against OpenSSL and NIST registers. ML-DSA, ML-KEM, and the twelve SLH-DSA parameter sets now carry their real OIDs, parameter sets resolve from dosai call-site context, and an unresolvable family is skipped rather than emitted with a fabricated OID. SLH-DSA also requires its hash family instead of crashing on spellings like SLH-DSA-192f.
+  Kinder to registries
+  The default user agent no longer gets blocked at crates.io's CDN edge, fixing the 403s some users saw. The user agent is now registry-aware, with CDXGEN_USER_AGENT and per-registry overrides such as CDXGEN_USER_AGENT_CRATES documented in ENV.md. Maven Central requests are gated behind a per-host rate policy, since Central enforces unpublished aggregate limits with escalating bans that specifically target CI and scanners.
+  Smaller fixes worth knowing
+  The TOML parser moved from @iarna/toml to smol-toml, so pyproject.toml files using PEP 735 dependency groups now parse. Protobuf BOM helpers were simplified around the cdx-proto 2.3.0 release. A NuGet component's version and purl now stay in agreement. The docs now state accurately that atom ships as a native binary needing no JDK on most platforms, with Java only required on the jar-based triples.
+  Full Changelog: v13.1.0...v13.2.0
+ReleaseNotesUrl: https://github.com/cdxgen/cdxgen/releases/tag/v13.2.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

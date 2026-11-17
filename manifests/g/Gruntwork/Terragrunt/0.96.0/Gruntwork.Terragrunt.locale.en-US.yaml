@@ -1,0 +1,98 @@
+# Created with komac v2.14.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 0.96.0
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.68.9
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  🛠️ Breaking Changes
+  The --no-destroy-dependencies-check flag has been deprecated
+  The default behavior of Terragrunt with respect to checking dependents during destroys has been inverted. As a consequence the --no-destroy-dependencies-check has been deprecated, and a new --destroy-dependencies-check flag has been introduced.
+  Previously, Terragrunt would automatically parse all configurations that might depend on a unit being destroyed to warn users that the destroyed configuration might orphan other units that depend on it. This was frequently undesirable behavior due to the fact that it introduced additional unnecessary work (parsing all HCL configurations unnecessarily), and could introduce errors if users had unrelated invalid HCL configurations.
+  Terragrunt now requires that users opt-in to this behavior via the new --destroy-dependencies-check flag, which enables the destroy check, and will not perform the destroy check by default.
+  terragrunt run --destroy-dependencies-check -- destroy
+  To learn more, see the no-destroy-dependencies-check strict control.
+  The --disable-command-validation flag has been deprecated
+  Terragrunt no longer performs command name validation when passing commands to OpenTofu/Terraform from Terragrunt when using the run command. This makes the --disable-command-validation flag unnecessary, as the lack of validation is now the default behavior.
+  Previously, Terragrunt had no way to explicitly indicate that a command being used on the Terragrunt CLI was intended as a passthrough to the OpenTofu/Terraform CLI, so it was important that validation be done on the command being supplied on the Terragrunt CLI.
+  Since completion of the CLI Redesign, this has changed significantly. Users now have explicit shortcuts on the Terragrunt CLI for common OpenTofu/Terraform commands and an explicit interface for passing through OpenTofu/Terraform commands to the OpenTofu/Terraform CLIs using the run command. By removing this validation, Terragrunt will now automatically support new OpenTofu/Terraform commands in future versions of the tools and allow for greater flexibility in IaC Engines, as novel commands can be introduced.
+  To learn more, see the disable-command-validation strict control.
+  The --experimental-engine flag now enables the iac-engine experiment
+  The experimental IaC Engine feature was introduced in Terragrunt prior to the introduction of the experiment system. As such, it wasn’t enabled when users enabled experiment mode, and didn’t have a dedicated section in the experiments docs.
+  The --experimental-engine flag is now an alias for explicitly enabling the iac-engine experiment, and using IaC Engines will be allowed when using Terragrunt in experiment mode. This increases consistency with how experimental features are managed in Terragrunt, and reduces the surface area users have to be aware of in the Terragrunt CLI.
+  terragrunt run --experiment=iac-engine
+  Note that you can explicitly disable usage of engines now with the --no-engine flag, even when the experiment is active.
+  terragrunt run --experiment=iac-engine --no-engine
+  To learn more, see the iac-engine experiment.
+  The --dependency-fetch-output-from-state flag now enables the dependency-fetch-output-from-state experiment
+  The experimental —dependency-fetch-output-from-state flag was introduced in Terragrunt prior to the introduction of the experiment system. As such, it wasn’t enabled when users enabled experiment mode, and didn’t have a dedicated section in the experiments docs.
+  The --dependency-fetch-output-from-state flag is now an alias for explicitly enabling the dependency-fetch-output-from-state experiment, and Terragrunt will automatically attempt to fetch outputs from backend state when in experiment mode. This increases consistency with how experimental features are managed in Terragrunt, and reduces the surface area users have to be aware of in the Terragrunt CLI.
+  terragrunt run --experiment=dependency-fetch-output-from-state
+  Note that you can explicitly disable fetching output from state with the --no-dependency-fetch-output-from-state flag, even when the experiment is active.
+  terragrunt run --experiment=dependency-fetch-output-from-state --no-dependency-fetch-output-from-state
+  To learn more, see the dependency-fetch-output-from-state experiment.
+  🧪 Experiments Updated
+  The filter-flag experiment now supports the --filters-file flag
+  The --filters-file flag has been introduced to allow for the application of multiple filters as defined in a newline-delimited text file, similar to the existing --excludes-file flag (remember that you must use the filter-flag experiment to try this).
+   # custom-filters.txt
+   !./unstable/**
+   $ terragrunt find --filters-file custom-filters.txt
+   # No results in `./unstable` discovered.
+  When the filter-flag experiment is active, Terragrunt will automatically parse and apply filters found in a .terragrunt-filters file, similar to how it automatically parses and applies excludes found in a .terragrunt-excludes file.
+   # .terragrunt-filters
+   !./unstable/**
+  # Note that it only does this by default when the experiment is active.
+  terragrunt find
+  # Still no results in `./unstable` discovered.
+  To explicitly disable usage of filter files (including the automatic .terragrunt-filters file), use the --no-filters-file flag.
+   # .terragrunt-filters
+   !./unstable/**
+  # Note that it only does this by default when the experiment is active.
+  terragrunt find --no-filters-file
+  # This _will_ allow results in `./unstable` to be discovered.
+  Unlike the --excludes-file, usage of the --filters-file flag also allows for always filtering for particular configurations.
+  # .terragrunt-filters
+  ./always-include/**
+  To learn more, see the filters file documentation.
+  🐛 Bug Fixes
+  Unnecessary .terragrunt-cache directory no longer generated in run --all runs
+  Fixed a regression where run --all would create empty .terragrunt-cache directories in the current working directory, even when not needed.
+  What's Changed
+  - feat: Adding --destroy-dependencies-check by @yhakbar in #5204
+  - feat: Adding --filters-file flag by @yhakbar in #5111
+  - feat: Removing support for --disable-command-validation by @yhakbar in #5189
+  - feat: Add iac-engine experiment by @yhakbar in #5203
+  - feat: Add dependency-fetch-output-from-state experiment by @yhakbar in #5201
+  - fix: Remove unnecessary .terragrunt-cache dir at the stack level by @yhakbar in #5231
+  - docs: Documenting --filters-file flag by @yhakbar in #5112
+  - docs: Update terminology from 'module' to 'unit' in scaffold.md by @josh-padnick in #5121
+  - docs: Fix Runner Pool description in terminology section by @maddawik in #5236
+  - build(deps): bump actions/upload-artifact from 5 to 6 by @dependabot[bot] in #5233
+  - build(deps): bump actions/download-artifact from 6 to 7 by @dependabot[bot] in #5235
+  - build(deps): bump actions/cache from 4 to 5 by @dependabot[bot] in #5234
+  New Contributors
+  - @maddawik made their first contribution in #5236
+  Full Changelog: v0.95.1...v0.96.0
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v0.96.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/gruntwork-io/terragrunt/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

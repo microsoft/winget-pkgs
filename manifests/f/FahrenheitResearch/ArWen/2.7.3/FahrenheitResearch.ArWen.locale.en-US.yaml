@@ -1,0 +1,78 @@
+# Created by Anthelion using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.ArWen
+PackageVersion: 2.7.3
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/arwen/issues
+Author: Fahrenheit Research
+PackageName: ArWen
+PackageUrl: https://github.com/FahrenheitResearch/arwen
+License: Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+Copyright: Copyright © Fahrenheit Research
+CopyrightUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+ShortDescription: 'ArWen: GPU-native WRF-ARW-class regional weather model, verified against WRF v4.6.1'
+Description: "ArWen is an independent, GPU-native implementation of a WRF-ARW-class regional atmospheric model. It is not affiliated with or endorsed by NCAR or UCAR. The name is a wordmark for \"the ARW solver, GPU-native\"; the Python package is currently named gpuwm. Safety. ArWen is a research and educational tool. It is never a substitute for official forecasts and warnings from your national meteorological service. Do not use it to make safety decisions. Regional numerical weather prediction at convective scale has mostly required institutional clusters, which means most of the world runs on global-model guidance at 10-25 km. ArWen's aim is to put a verified, kilometer-scale limited-area model on a single consumer GPU: pick a point, size a nest ladder to your card, pull public analysis data, and run a 1 km (or 500 m) simulation of your own area on hardware you own -- especially in places where no national convection-permitting model exists."
+Moniker: arwen
+ReleaseNotes: |-
+  ArWen 2.7.3
+  - Windows desktop: extract the ZIP and open ArWen.exe. Graphical setup installs the matching Python, CUDA dependencies, physics tables and geography, then checks the GPU.
+  - Linux desktop: manual Python setup on x86-64 Linux with glibc 2.39 or newer. Follow the included installation guide.
+  - Integration kit, desktop source, verification records, and checksums.
+  Windows local forecasting requires a compatible NVIDIA GPU and driver. First setup downloads several gigabytes; allow at least 25 GB free disk space, plus weather inputs and forecast output. Setup progress and errors remain visible in the application.
+  The separate engine distributions and native bundles below also serve the verified publishing and manual installation paths. Most users should choose a desktop download above.
+
+  New
+  - Downscale a finished forecast that kept restart checkpoints to a finer child from My forecasts; the child is listed and opened in the run browser like any other forecast, with live progress.
+  - Draw the finer forecast on the run's map: the box you drag becomes the downscaled child's centre and size, Review prices it on this computer's card and shows the engine's exact outline, and a downscaled run can be downscaled again as many times as wanted.
+  - Choose in Settings where forecasts are written and where the runtime and geography install, each with Apply and Open folder; first run offers the install location before the download starts.
+  - downscale-plan.json carries the child's outline, its grid id and a streaming block that says whether the child runs resident or streamed and on what budget.
+  - Save a forecast configuration as a named setup and start it again at a new time, from the Saved setups tab or with gpuwm companion-setups save and start.
+  - Milbrandt-Yau (mp_physics = 9) runs under RTE+RRTMGP with its own effective radii, nests under or over other schemes, works with radar assimilation, offline children and checkpoints, and renders its precipitation products.
+  - WDM6 (mp_physics = 16) and aerosol-aware Thompson (mp_physics = 28) run on the laterally forced routes and across mixed nest edges; the mp=28 aerosol dataset is checked at every door before anything is fetched.
+  - A forecast requested from a map point is sized to a domain rather than to the card; a layout that would cross a pole shrinks instead of being refused, and the bound is stated once in the plan summary.
+  - --card on gpuwm domain, gpuwm downscale, gpuwm cyclone-setup and the starter template accepts any card spelling: a tier, a size written into the name, or a model with a recorded size.
+  - [tiles] max_redundancy sets or lifts the tile planner's halo-work limit.
+  - gpuwm check exits 6 when the run door's [tiles] walk refuses the plan, with that refusal as its last line.
+  - Every memory refusal from domain fitting names the term that bound it.
+  - gpuwm cyclone-setup writes arwen.cyclone-setup.v2 documents with --accept-fit FIT_ID; the desktop reads v1 and v2.
+
+  Fixed
+  - A nested forecast with [tiles] left on auto, the cyclone quick start included, runs resident when the whole tree fits the card instead of being refused by the tile planner's shared floor. Plan review and the run door price one admission from one estimate, so a tree the review admits is not refused again at run start, and a refusal that remains names what refused, the budget it was weighed against and the way out.
+  - A downscaled forecast draws its pictures. The child's frames are rendered into png/<domain>/<product>/<valid-day>/ through the same render stage and product catalog a forecast takes, the first while the child is still running, and gpuwm downscale --render-products LIST|all|none chooses the set. A child that does not pass publishes no picture.
+  - A downscaled child that plan review admitted no longer refuses at run start with a tile-planner sentence: the child's streaming decision is taken before preprocessing, on a card measured cold, from the same estimator the review used, and with [tiles] on auto the review's memory verdict and streaming verdict are judged on one budget.
+  - A downscaled child honours restart_interval_s and writes checkpoint sets a later gpuwm downscale --parent-domain N --parent-restart latest discovers, so a downscaled forecast can itself be downscaled.
+  - gpuwm downscale --child-size with --auto-vram prices the given extent on the measured card instead of being refused; an extent the parent cannot hold shrinks with the reason stated.
+  - Refusals whose only reason was a missing measurement, recording or validation are gone; the estimator prices from its most conservative recorded basis and says so at plan review.
+  - A nest whose microphysics differs from its parent's runs without an opt-in key; the transition receipt records the requested and the effective policy.
+  - Aerosol-aware Thompson (mp_physics = 28) forecasts reach the end of a run on both routes.
+  - A domain tree whose root streams while a child stays resident no longer fails while sizing the shared arena.
+  - Naming the same radiation engine in ra_physics and in ra_lw_physics/ra_sw_physics is admitted; only a contradiction between the two is refused.
+  - The standalone RW-WPS wheel imports again.
+  - The CLI reference page carries every 2.7.3 flag.
+  - A saved setup with a fractional-second forcing cadence is refused with the field to change.
+  - Noah-MP (sf_surface_physics = 4) is no longer refused at plan review on every card: it is priced from measured device readings for the card's compile platform, and a card with no reading is priced from the recorded ceiling with the basis named.
+  - gpuwm downscale --point --auto-vram prices a Noah-MP parent on the card it measured instead of refusing it.
+  - A streamed forecast is priced at the window its tile buffer holds, so a fitting forecast with pinned tiles is no longer refused before its inputs are fetched.
+  - Physics refusals are held to what this tree can run: 38 of 68 refusals across the configuration, plan-review and run doors were drift between scheme tables and are gone; each that remains names the breakage it prevents and the way out.
+  - Every plan-review refusal names the scheme it turns away, what would break and the way out; radar assimilation refusals land at plan review before any ensemble leg.
+  - The physics panel says why an option is closed instead of greying it out, and each repair names the exact edit it performs.
+  - A per-domain radiation change on an RRTMG template no longer passes plan review and then fails at run start.
+  - Streamed composite reflectivity is derived from the active scheme's own operator, so every scheme renders its composite from the product step.
+  - Milbrandt-Yau forecasts can be checkpointed and resumed, and plan review asks first whether a run can be checkpointed at all.
+  - A remote forecast that finished is no longer written up as a permanent failure, and a stop request is answered on every pass of the compact viewer.
+  - A domain that crosses the antimeridian is exported as two seam-cut parts instead of its wide complement; a domain that encloses a pole is refused by name at the companion doors and at plan review.
+  - The desktop controller ends once its workspace has closed and no job is running, so the next start gets a fresh controller and a freshly resolved runtime.
+  - Every exit from the terminal workspace restores the terminal, including a controller that was killed outright; panic text goes to controller.log.
+  - A run viewer opened from Runs removes its own session directory when it closes, and the controller sweeps closed sessions it finds.
+  Installation and usage | Changelog
+ReleaseNotesUrl: https://github.com/FahrenheitResearch/arwen/releases/tag/v2.7.3
+InstallationNotes: |-
+  This application requires an NVIDIA GPU with CUDA support to run.
+  Will not function on integrated graphics or non-NVIDIA hardware.
+  Without compatible hardware, the application will fail to launch.
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

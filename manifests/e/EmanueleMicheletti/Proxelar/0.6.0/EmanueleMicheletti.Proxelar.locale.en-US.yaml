@@ -1,0 +1,77 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: EmanueleMicheletti.Proxelar
+PackageVersion: 0.6.0
+PackageLocale: en-US
+Publisher: Emanuele Micheletti
+PublisherUrl: https://micheletti.io
+PublisherSupportUrl: https://github.com/emanuele-em/proxelar/issues
+Author: Emanuele Micheletti
+PackageName: Proxelar
+PackageUrl: https://github.com/emanuele-em/proxelar
+License: MIT
+LicenseUrl: https://github.com/emanuele-em/proxelar/blob/main/LICENSE-MIT
+Copyright: Copyright (c) Emanuele Micheletti
+ShortDescription: Scriptable local traffic workbench for HTTP, HTTPS, and WebSocket debugging
+Description: Proxelar is a single-binary MITM proxy for developers. Capture, inspect, intercept, replay, and rewrite HTTP/HTTPS and WebSocket traffic from a TUI, web GUI, or headless REST API, with Lua scripting, declarative rules, session persistence, and HAR/curl export.
+Moniker: proxelar
+Tags:
+- cli
+- debugging
+- developer-tools
+- http
+- mitm
+- proxy
+- rust
+- tui
+- websocket
+ReleaseNotes: |-
+  ### Added
+
+  • Add an optional `justfile` task runner for the documented build, test, lint, packaging, and coverage commands. ([#176](https://github.com/emanuele-em/proxelar/pull/176) by @byt3m4st3r)
+  • Add a native transport-neutral HTTP core with custom HTTP/1, direct HTTP/2, and ordered byte-safe headers across capture, replay, REST, and Lua. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+  • Replace captured request and response header maps with `HeaderBlock`, exposing ordered iteration, case-insensitive lookup, duplicate-value lookup, append, replacement, and removal. The native HTTP/1 parser preserves interleaved duplicates, original field-name casing, and non-UTF-8 values, addressing #170. HTTP/2 retains duplicate-value order, but its `h2` adapter does not guarantee the original global wire order across different field names. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+  • Carry ordered headers through intercept editing, TUI and web views, Lua hooks, replay, and session export. REST responses represent headers as ordered entries with text or base64 values, allowing arbitrary header bytes to survive JSON serialization without replacement characters. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+  • Enable HTTP/3 by default in official CLI artifacts for reverse and WireGuard interception, including RFC 9220 WebSockets. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+  • Add regression coverage for CONNECT backpressure in both directions, independent tunnel half-closes, cancellation and error propagation, Lua request-trailer preservation, and the exact SOCKS5 wire encoding of domain, IPv4, and IPv6 destinations. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+  • Extend protocol tests to cover plaintext and TLS interception, pinned upstream destinations, HTTP/1 reverse WebSocket upgrades, Lua WebSocket edits and failures, HTTP/3 stream resets and driver shutdown, connection reuse after rejected requests, malformed binary content, and UDP/DNS listener lifecycle and timeout capture. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+
+  ### Changed
+
+  • Remove Hyper from the `proxyapi` data path, public API, and production dependencies; it remains transitively in the CLI through Axum and as a dev-only protocol test dependency. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+  • Bump native sessions to format v2 with ordered byte-safe header lists; v1 files are rejected explicitly instead of being decoded with lossy header semantics. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+  • Compare header-value iterators directly when reconciling captured headers with hook edits, avoiding temporary header-value vectors while preserving duplicate-value order. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+  • Simplify the protocol adapters by replacing the custom ready-frame stream with `futures_util::stream::iter`, making the infallible outbound connector constructor return `Self`, and removing obsolete dead-code allowances from the active HTTP/3 certificate path. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+
+  ### Fixed
+
+  • Open a changelog attribution pull request instead of pushing directly to protected main, attribute only entries introduced by the source merge, and dispatch CI for the generated branch. ([#183](https://github.com/emanuele-em/proxelar/pull/183) by @emanuele-em)
+
+  • Cancel pending HTTP/2 handlers when the client resets its stream, releasing intercepted requests and upstream work. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+  • Frame HTTP/1 `205 Reset Content` responses with `Content-Length：0` so keep-alive clients complete the response and can reuse the connection. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+  • Validate HTTP/3 Content-Length syntax and received body lengths. Reset malformed streams with `H3_MESSAGE_ERROR`, detect truncation before trailers or FIN, and retain HEAD/304 metadata and CONNECT tunnel behavior. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+
+  • Keep the negotiated HTTP/2 GOAWAY regression test accepting replacement connections when the drained peer closes during server shutdown. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+  • Retire negotiated HTTP/2 upstream connections after GOAWAY or connection failure before dispatching the next request, while allowing existing response streams to drain. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+  • Retire closed idle HTTP/1 upstream connections before reuse, including negotiated connections, without retrying requests whose bytes were already sent. Detect HTTP/2 stream resets while upload or response bodies await data so abandoned senders release their resources. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+  • Remove IPv6 URI brackets before constructing the rustls server name for shared and negotiated HTTPS upstream connections. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+  • Make the HTTP/1 application deadline opt-in so interactive interception retains its own 300-second deadline and can deliver its timeout response. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+  • Preserve header order, casing, duplicate interleaving, and binary values in Lua short-circuit responses and their captured events. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+  • Render multi-line request and response bodies in the TUI as separate rows instead of collapsing them into a single wrapped row. ([#178](https://github.com/emanuele-em/proxelar/pull/178) by @byt3m4st3r)
+  • Upgrade `h2` to 0.4.19 and require at least 0.4.16 to address RUSTSEC-2026-0258, which allowed undrained streams to queue unbounded empty DATA frames. Refresh the yanked `chacha20` 0.10.1 dependency to 0.10.2, update `event-listener` to 5.4.2 for RUSTSEC-2026-0221, and update `lru` to 0.18.4 for RUSTSEC-2026-0253. ([#176](https://github.com/emanuele-em/proxelar/pull/176) by @byt3m4st3r; [#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+  • Replace `tokio-quiche` with a direct Tokio driver for the maintained `quiche` crate, removing Foundations and its unmaintained YAML dependencies without advisory exceptions or version pins. Keep the dependency graph publishable using released crates. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+  • Preserve received HTTP/3 informational responses and request/response trailers through the protocol adapters. The direct driver processes every HEADERS event, retains header byte values and interleaved duplicate order, and validates trailer and informational-response semantics. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+  • Drive QUIC retransmission timers, handshake deadlines, and packet pacing explicitly. Bound UDP and body queues, isolate stream resets and backpressure, cancel abandoned stream tasks, and close connection tasks when their listener stops. Replace cached connections after GOAWAY without failing the next request. Wait for peer SETTINGS before opening an extended CONNECT WebSocket. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+  • Configure HTTP/3 TLS directly from in-memory certificate material, removing temporary certificate/key files. Preserve the configured rustls upstream trust and hostname checks through BoringSSL verification, and mint cached WireGuard leaf certificates for the client's SNI. Remove URI brackets before resolving or verifying IPv6 literals and encode IPv6 certificate identities as IP subject alternative names. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+  • Prevent CONNECT tunnels from stalling when either direction encounters backpressure. Request-body forwarding and response-body forwarding now progress independently, so a full request buffer cannot block a ready response and a full response queue cannot block incoming request bytes. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+  • Preserve CONNECT half-close behavior：reaching request EOF closes only the application's read side, and closing the application's write side finishes the response body while allowing remaining request bytes to arrive. Dropping an unfinished response body cancels pending request forwarding; inbound body errors and unsupported CONNECT trailers are surfaced through the response stream while it remains open. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+  • Preserve buffered request trailers when a Lua hook leaves the wire body unchanged, including ordinary header-only edits. Lua failures continue to log and pass the original request through, including its trailers. Replacing the body still discards the original trailers so checksums or other metadata for the previous body are not forwarded with the replacement. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+  • Encode bracketed IPv6 destinations correctly when chaining through a SOCKS5 upstream proxy. URI brackets are removed before IP parsing, and IPv6 literals are sent with the SOCKS5 IPv6 address type and 16 address bytes instead of being treated as domain names; domain-name and IPv4 forwarding retain their respective wire formats. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by @emanuele-em)
+  • Respect HTTP/1.0 upstream connection lifetimes. Responses without an explicit keep-alive token now close the client connection after the response rather than leaving an implicitly closing connection available for reuse. ([#182](https://github.com/emanuele-em/proxelar/pull/182) by
+ReleaseNotesUrl: https://github.com/emanuele-em/proxelar/releases/tag/v0.6.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://proxelar.micheletti.io
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
