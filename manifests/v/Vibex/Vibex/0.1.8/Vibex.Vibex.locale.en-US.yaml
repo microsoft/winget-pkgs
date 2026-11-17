@@ -1,0 +1,65 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Vibex.Vibex
+PackageVersion: 0.1.8
+PackageLocale: en-US
+Publisher: Vibex
+PublisherUrl: https://github.com/vibex-ai
+PublisherSupportUrl: https://github.com/vibex-ai/vibex/issues
+Author: Vibex contributors
+PackageName: Vibex
+PackageUrl: https://vibex.peatboy.com
+License: AGPL-3.0
+LicenseUrl: https://github.com/vibex-ai/vibex/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Vibex
+ShortDescription: Local-first AI coding workbench built on the Agent Client Protocol
+Description: Vibex is a native, local-first AI coding workbench built on the Agent Client Protocol. Your agents run in your own workspace from prompt to commit, on desktop, in the terminal and on your phone. It works with Codex, Claude Code, OpenCode, Pi, Grok, DeepSeek Harness, Antigravity and other agents through ACP.
+Tags:
+- acp
+- agent
+- agentic
+- ai
+- chatbot
+- claude
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  🚀 Highlights
+  - Your Agent answers in chat: a Telegram or Lark / 飞书 bot can be paired with one runtime and then prompt the same Agent session the desktop shows. Ask for work, watch it run, answer a permission, and read the final answer without opening the app. This lands behind Settings → Developer → Experimental features → IM channels (beta), off by default; the guide is IM Chat Channels.
+  - A turn is visible while it runs: every assistant text block is its own message and is edited as that block streams, while one progress line — ⏳ Thinking · 12s, ⏳ Running a command · 30s, ✅ Done — reports the kind of work without its input or output. An answer too long for one message is sent as (1/3), (2/3), … and an interrupted turn leaves ⏹ Stopped. behind.
+  - Approvals resolve from the chat: the pending request is posted with one button per option — Approve, Always allow, Deny — as a Telegram inline keyboard or a Lark interactive card. Every button carries a one-shot token, so a second tap, an expired card or a forwarded card is refused, and the first tap wins even against the desktop pressing approve at the same moment. /approve <code> works wherever buttons do not.
+  - Attachments go in, not out: a photo or document sent to a paired bot becomes an attachment on the prompt, up to 10 MB, and the Agent receives the bytes rather than a provider URL. A larger file is rejected with a reason instead of being dropped.
+  - Pairing is deliberate: a channel refuses everyone until an identity is paired with a VBX-… code that expires in 10 minutes and is bound to the kind of chat it was minted for. A direct code pasted into a group is refused; a group needs its own code, minted from the command line. Anyone paired has full control of the channel — prompt, approve, and /unbind — so read-only watchers need a separate bot, not a smaller role.
+  💬 IM channels
+  - Two transports, one seam: Telegram uses long polling with HTML rendering generated from Markdown, and Lark / 飞书 uses the long connection with plain text and interactive cards. im:message, im:message:send_as_bot, im:chat:readonly, and the im.message.receive_v1 and card.action.trigger event subscriptions are what the Lark adapter asks for; no public callback URL is involved. Enterprise WeChat and personal WeChat are not implemented and are not offered.
+  - Both Lark deployments are separate apps: an app id created on open.feishu.cn does not exist on open.larksuite.com, and the token endpoint answers 10014 app id not exists when the deployment is picked wrong. The channel form now names the deployment, and 飞书 中国 is the choice for a China-registered app.
+  - The command set covers the whole loop: /pair, /help, /whoami, /status, /sessions, /use, /agent, /provider, /model, /effort, /mode, /new, /stop, /approve, /always, /deny, /say, and /unbind. Telegram publishes the table through setMyCommands, so the / picker in a client offers the same names; where a command takes a choice the reply carries buttons, and every button also prints a short code for clients without an inline keyboard. Each picker card carries the selection revisions it was read at, so a card left open while someone else changed the runtime is refused instead of overwriting the newer choice.
+  - /new uses an explicit default: it needs a workspace and an Agent, so it uses the channel's default session when one is set, and otherwise copies the workspace and runtime selection of the session the chat is bound to. With neither it answers with instructions rather than guessing.
+  - Groups are quiet until they are meant to answer: a group answers commands, and on Telegram messages that begin with the bot's @username when the mention requirement is on. An unpaired group is otherwise ignored, so the bot stays silent in a busy room.
+  - Reactions are mirrored: when message reactions are on in the desktop, the emoji the Agent attached is set on the chat message that sent the prompt. The mirror follows the provider's vocabulary: a Telegram reaction outside its own list is skipped rather than sent and refused, and a transport without reactions ignores them.
+  - Rate limits protect the channel: 20 messages per minute per identity, 40 per chat, and 5 pairing attempts per chat per 10 minutes. A refused message gets one reply with the retry delay, while approval and answer buttons are never throttled, because a press answers a card that was already delivered.
+  - Headless deployments: a desktop closes and takes its channels with it, so 7×24 service runs vibex-server on a host that stays up. vibex-server im list, im bindings, im pair, im unbind, im test, im enable, im disable, and im revoke administer channels over SSH, and --channel accepts the channel id or its display name.
+  - State and secrets stay apart: channels, pairings, bindings and cards live in the runtime SQLite database; bot tokens and app secrets go to the OS keychain, or to <home>/im-secrets.json on a headless host. Pairing and approval are audited in im_audit_logs for 180 days and delivered messages are kept in im_messages for 14 days; an approval also writes a PermissionResolution to the session timeline, which remains readable after the log entry is pruned.
+  - Diagnostics respect the reader: a bundle carries an imChannels section with one row per channel — kind, enabled, configured, connection state — and deliberately no chat id, session id, or message text.
+  🖥 Desktop
+  - Settings keeps Undo where it can be reached: the settings dialog pins the Undo action beside Close in its top-right corner, and the Beta features group is renamed Experimental features.
+  - The composer menu obeys the caret: the /, @, and $ popup re-ran its trigger scan on every key-up, mouse-up and focus event, so placing the caret inside existing text opened it and an Escape key-up reopened it immediately. Typing now opens the menu; caret movement only refreshes one that is already open, and Escape records the token it closed so the menu stays shut until the trigger changes.
+  - A typed slash is prose: text that merely began with / was sent through the Agent's slash-command path whenever the Agent advertised the capability, so a message like /status 是什么 failed with acp_slash_command_not_available and lost the draft. A draft now executes a command only when the composer menu armed one and the text still matches it; anything else reaches the Agent as written.
+  - The turn header wears the session's Agent mark: the default reasoning display mode can drop a still-streaming reasoning row, leaving the header to fall back to its own Agent · account · model string. That string names the Agent by display label, which was passed straight to the brand table, so an Agent such as "DeepSeek Harness" drew the default robot until its thought settled. The label-only fallback now resolves through the same catalogue lookup the row path and the terminal fold use.
+  - A local file link outside the workspace opens again: a local markdown link resolved only when it sat under the session workspace, so a link to another checkout on the same machine did nothing. The preview now falls back to the absolute platform path for a local file outside the workspace, while a relative destination and a non-file scheme keep their handling.
+  ⚙️ Runtime reliability
+  - Claude keeps auto when the model offers it: model-gated auto mode was normalized to default for every Provider Profile or route selection with an explicit model, even when the model-scoped probe advertised auto. The picker offered a value the switch path always refused, so the mode flipped back to Manual seconds later with no explanation. auto is now kept when the model-scoped probe advertises it, and in a real session that answers a requested auto with another mode the durable selection settles onto the Agent's answer, with one system notice naming the substitution instead of failing the convergence fence.
+  - Permission resolution keeps one responder field: the resolution literals now agree on a single responder field, so a stored outcome reads back the same shape it was written with.
+  - The IM host-file helpers stay out of test builds: the config-switch helpers that maintain the headless host file are compiled only where the runtime uses them.
+  ⬆️ Upgrading
+  Install 0.1.8 over 0.1.7 as usual: sessions, workspaces, Provider configuration, Skills, remote hosts and drafts carry over, and the updater manifest format is unchanged. The channel tables reuse the existing schema version and are created on first open when they are missing, so an existing database upgrades in place without a manual step. IM channels are new and off by default; turn them on at Settings → Developer → Experimental features → IM channels (beta), then add a channel under Settings → IM channels, test it, and pair a chat. Nothing about the feature changes how the desktop, mobile, or terminal clients behave when it is left off; turning it off again hides the entry and stops new work while the recorded pairings and audit rows stay in the database.
+ReleaseNotesUrl: https://github.com/vibex-ai/vibex/releases/tag/v0.1.8
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://vibex.peatboy.com/docs/en
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
