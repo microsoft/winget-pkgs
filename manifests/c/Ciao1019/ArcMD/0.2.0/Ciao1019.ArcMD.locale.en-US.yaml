@@ -1,0 +1,63 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Ciao1019.ArcMD
+PackageVersion: 0.2.0
+PackageLocale: en-US
+Publisher: Ciao1019
+PublisherUrl: https://github.com/Ciao1019
+PublisherSupportUrl: https://github.com/Ciao1019/ArcMD/issues
+PackageName: ArcMD
+PackageUrl: https://github.com/Ciao1019/ArcMD
+License: MIT
+LicenseUrl: https://github.com/Ciao1019/ArcMD/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 ArcMD contributors
+ShortDescription: A native Markdown rich-text editor written entirely in Go that organizes local-first notes into colorful Spaces.
+Description: |-
+  ArcMD brings Markdown's familiar writing flow onto a calm, expressive native canvas.
+  Built entirely in Go with MyGo's Native UI — windows, GPU drawing, glyph shaping, and input handling run directly from Go with no HTML, JavaScript, WebView, Electron, or cgo.
+  Spaces & live themes: colors, gradients, translucency, and dark paper
+
+  Each space maps to a local folder with its own name, icon, persistent Pinned tabs, and last-open page. Swipe with two fingers on the sidebar or press ⌃1…⌃9 to glide into the next space, while global Favorites at the top open right in place without switching spaces. Open Edit Theme Colors… to blend one to three gradient stops, dial in frosted translucency and subtle grain, or flip between Light and Feishu-inspired Dark paper (#1F2023) with balanced color remapping.
+  The Library: every space at a glance
+
+  Click the Library icon in the bottom-left corner or press ⇧⌘L. The sidebar widens into a row of space cards painted in each space's own theme colors, with folders and pages ready to jump straight into. Plugins and the 30-day Recently Deleted collection live here too.
+  A sidebar that steps aside — and peeks on demand
+
+  Press ⌘\ (or narrow the window) and your page fills the entire window. Whenever you need another file, move the pointer to the left edge: the frosted floating sidebar glides out over your page, shows live miniature page thumbnails on hover, and tucks itself away the moment you return to writing.
+  Hand-drawn marks: give your ideas a human touch
+
+  Select a phrase and pick from 12 hand-drawn stroke styles and palette colors in the floating toolbar — circle what matters, cross out hesitation, or point an arrow at the next step. Every stroke draws itself in smoothly and round-trips losslessly in .md (and legacy .arcmd) files. Try the idea journal sample, or start with a line of your own.
+  Margin bookmarks: pick up right where you left off
+
+  Hover any block to reveal a margin bookmark, or press ⌘D. Your marks appear automatically in the document outline (with rendered TeX previews for math blocks), ⌃⌘↑ / ⌃⌘↓ hop smoothly between them, and ⇧⌘D searches bookmarks across every space — without ever modifying the .md file itself.
+
+  ArcMD edits and autosaves standard .md Markdown files (.md, .markdown, .mdx) directly in place in the background — no proprietary database and no sidecar .arcmd duplicates. Every note is a plain local file with its images in a nearby assets/ folder, ready for Obsidian, Typora, VS Code, or Git.
+  - Untouched blocks stay untouched: block-level source diffing (ImportSource) preserves your original indentation, list markers, and link syntax on paragraphs you didn't edit.
+  - 100% lossless rich round-trips: text colors, highlights, hand-drawn marks, five-tone callouts (GitHub > [!NOTE] alerts), <details> toggles, merged/colored tables, custom-width two-column layouts (data-widths), and page icons/covers/word goals degrade cleanly via standard Markdown + semantic HTML + YAML frontmatter and restore completely in ArcMD.
+  - Backward compatible: existing legacy .arcmd files and history snapshots continue to open and edit seamlessly.
+Tags:
+- knowledge-base
+- markdown
+- markdown-editor
+- note-taking
+- notes
+- writing
+ReleaseNotes: |-
+  This release introduces Space Q&A—a built-in, read-only AI research agent that searches and reads a Space's notes directly without a vector database—alongside viewport-aware floating menus, smarter live Markdown and display-math input, and large-document virtualization.
+  Space Q&A
+  - Zero-index agentic search and reading: Press ⌘J (or click the toolbar Q&A icon) to open a per-Space side panel. Instead of building a vector index, the agent explores a live, line-numbered Markdown projection of the Space—including unsaved edits in open documents and registered External space files—using parallel read-only tools (glob, case-insensitive and regex grep, read, outline, and links for wiki-links, backlinks, and #tags) within a bounded 16-step budget, treating note content strictly as untrusted data rather than instructions.
+  - Interactive inline citations and gliding previews: Answers cite exact [path#L12-L18] ranges rendered as inline monogram source chips with +N multi-source badges. Hovering or focusing a chip highlights the supporting claim in the answer and floats a gliding preview card beside the panel with the document icon, section heading, line range, and recalled excerpt; expanding the stacked-monogram Sources footer syncs hover highlights bidirectionally with inline claims, and clicking any chip or source jumps straight to the cited block in the editor with a highlight glow.
+  - Paced streaming, exploration timeline, and native polish: Streamed Markdown answers (headings, lists, blockquotes, code blocks, tables, and inline marks) use adaptive balanced pacing and per-character fade-in, paired with a collapsible step-by-step search/read timeline, a Jump to latest pill while reading earlier passages, localized error states with one-click retry (plus automatic retries on transient 429/5xx/stream cutoffs before text starts), and a pointer-tracking ghost avatar.
+  - Bring-your-own Chat Completions model and CLI runner: Configure Settings › AI Q&A with presets for OpenAI, DeepSeek (with automatic reasoning_content replay across tool calls), OpenRouter, local Ollama (keyless localhost HTTP supported; remote endpoints require https://), or any custom Chat Completions service, including one-click /models fetching and a searchable model picker. API keys are stored atomically outside prefs.json and Space folders in credentials/ai-api-key (0600). Run arcmd ask in the terminal to inspect tool traces and verify citations from the command line.
+  Fixes and editor improvements
+  - Viewport-aware floating menus and submenus: Flip block-handle menus, /, [[, and :/@ completion menus, callout color/icon pickers, and code-language pickers above the anchor when bottom viewport space is tight, clamp height with inner scrolling when neither side fits full height, keep side submenus (Indent and Alignment, Color) inside horizontal and vertical window bounds, and keep /, completion, and command-bar selections scrolled into view during arrow-key navigation (#2).
+  - Reverse live Markdown and predictive display math: Prepending block prefixes (#–###### , > , - , 1. , - [ ] ) or opening inline delimiters (**, *, ~~, `) before existing text now compiles in place while preserving trailing content, with single-Backspace rollback to literal syntax. Typing $$ in an empty paragraph immediately opens a display-math card (Backspace or Esc restores literal $$), single-line $$ … $$ compiles live, and $$ opens display math even when auto-pairing is off.
+  - Large-document virtualization and O(1) dirty tracking: Virtualize offscreen paragraph shaping on documents exceeding 800 leaves or 120,000 characters with pointer-free 128-bit run fingerprints and bounded LRU caches; replace full-document JSON baseline clones with streaming digests and leaf-level dirty tracking; keep single-leaf IME composition and inline formatting clone-free; extract plain text directly from Markdown when indexing search; defer backlink/tag footer recomputation while actively typing in long documents; and ignore atomic-save temp-dotfile overwrites in the directory watcher.
+  Documentation
+  - Refresh README.md, README.en.md, AGENTS.md, docs/architecture.md, docs/plugins.md, and third_party/ notices for Space Q&A and version 0.2.0.
+  Data compatibility
+  Document (.md and legacy .arcmd format 8) and Space configuration (spaces.json format 9) formats are unchanged from 0.1.0. Preferences (prefs.json v1) add optional ai service fields (provider, baseURL, model), while the API key is stored separately in credentials/ai-api-key. Older releases ignore unknown preference fields.
+ReleaseNotesUrl: https://github.com/Ciao1019/ArcMD/releases/tag/v0.2.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
