@@ -1,0 +1,46 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: eladser.mtop
+PackageVersion: 1.6.0
+PackageLocale: en-US
+Publisher: Elad Sertshuk
+PublisherUrl: https://github.com/eladser
+PublisherSupportUrl: https://github.com/eladser/mtop/issues
+PackageName: mtop
+PackageUrl: https://github.com/eladser/mtop
+License: MIT
+LicenseUrl: https://github.com/eladser/mtop/blob/HEAD/LICENSE
+ShortDescription: htop for your local AI
+Description: A terminal dashboard for local AI servers (Ollama, llama.cpp, LM Studio, vLLM). Shows loaded models and their VRAM, the GPU, and every request with its tok/s. Unloads models that overstay.
+Tags:
+- gpu
+- llamacpp
+- local-llm
+- ollama
+- tui
+ReleaseNotes: |-
+  Watch requests while they stream, and see why a model is slow.
+  demo
+  No model server handy? mtop --demo plays a looping scenario on simulated models, traffic and a GPU.
+  Added
+  - Requests in flight show at the top of the requests pane with a ▶: elapsed time, tokens so far, live tok/s, and at 100 columns the time to first token and decode time.
+  - A why-slow line under the models table for the selected model: 38% of model on CPU, context 94% full, prompt cut to fit context, rejected: context full, 3 requests queued. Other models with a reason get a !. Queueing needs llama.cpp, vLLM or SGLang, since ollama doesn't report a queue.
+  - A hw thermal slowdown / hw power brake line in the GPU pane when the card throttles itself (NVIDIA, held for 3 polls with the card busy).
+  - mtop --demo: simulated models, traffic and a GPU. Opens no port and touches no server.
+  - llama.cpp router mode: each loaded model gets its own slots, context size and running/queued counts. The llama.cpp row also shows queued requests and draft acceptance (draft 71%).
+  - Lemonade rows show running requests and tok/s.
+  Changed
+  - tok/s for streamed OpenAI-style requests is decode only: llama.cpp's own predicted_per_second when it sends one, otherwise tokens over the time since the first token. Prompt processing and model loads no longer drag it down. -history mixes old and new numbers.
+  Fixed
+  - A llama.cpp router showed a phantom none row.
+  - llama.cpp rows read kv 0% on current builds, which dropped that gauge.
+  - Escape sequences in model names, server notes or the inspector's prompt and completion text reached the terminal.
+  - Long model names and the status line wrapped narrow terminals and pushed the status line off screen.
+  - tok/s on very short replies read too high.
+  - Bubble Tea 2.1.1 for GHSA-qc58-pfg9-7pph.
+  mtop never polls llama.cpp's /slots, so a server started with --sleep-idle-seconds still gets to sleep.
+  Install: brew install eladser/tap/mtop, scoop install mtop, winget install eladser.mtop, or a zip below. Full list in the changelog.
+ReleaseNotesUrl: https://github.com/eladser/mtop/releases/tag/v1.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
