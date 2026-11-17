@@ -1,0 +1,74 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: EpicGames.LoreServer
+PackageVersion: 0.14.0
+PackageLocale: en-US
+Publisher: Epic Games
+PublisherUrl: https://lore.org/
+PublisherSupportUrl: https://github.com/EpicGames/lore/issues
+PrivacyUrl: https://legal.epicgames.com/epicgames/privacy-policy
+Author: Epic Games, Inc.
+PackageName: Lore Server
+PackageUrl: https://lore.org/
+License: MIT
+LicenseUrl: https://github.com/EpicGames/lore/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Epic Games, Inc.
+CopyrightUrl: https://legal.epicgames.com/epicgames/tos
+ShortDescription: Next-Generation Open Source Version Control
+Description: Lore is an open source version control system designed for unprecedented scalability of both data and teams. It is optimized for projects that combine code with large binary assets, including games and entertainment, and caters for the needs of developers and artists alike.
+Tags:
+- vcs
+ReleaseNotes: |-
+  Changes since v0.13.0.
+  Breaking changes
+  - Branch metadata keys archived, restored, restoring and released are reserved for archives and restores; remove or rename values stored under them before upgrading
+  - An invalid LORE_AUTH_STORE, or a user-level config.toml that can't be read or parsed, stops every command. Commands relayed to the service without LORE_AUTH_STORE use the secure store
+  - The Lore service and its clients must come from the same build; end a running service after upgrading
+  - Requests the server or authentication service refuses fail with NotAuthenticated (16) or NotAuthorized (17) instead of an internal error (255), NotConnected (29) or a not-found code
+  - lore branch create with an invalid name and a refused lore repository instance move exit with InvalidArguments (3); lore clone --root-file with a missing file exits with 82
+  - C API: push events start with their repository and branch, and the instance-delete begin event drops dry_run. Rebuild against the new lore.h
+  - Switching, resetting or pushing to an archived branch leaves it archived; lore push restores it, other clients restore it with a branch create
+  - Mutable store plugins must remove a key swapped to zero and refuse a swap from a non-zero value on an absent key
+  - lore-server: a remote immutable store trusts its upstream and checks only payload sizes (verify = true restores full checks)
+  - lore-server: QUIC storage request failures log under the lore_server::quic target
+  Features
+  - Virtual clones on Linux with lore clone --vfs fuse, served from the shared store and supporting status, stage, commit, sync, reset and merge. --vfs default now picks FUSE on Linux
+  - lore clone --vfs fuse --prefetch <file> warms the store from an access recording (LORE_FUSE_RECORD_DIR)
+  - lore repository instance clone copies an instance on a shared store, sharing data blocks on APFS, Btrfs, XFS, ReFS and Dev Drive
+  - [auth] in the user-level config.toml chooses the token store (store, path)
+  - Per-instance ignore rules in .lore/ignore
+  -  --fast-flush writes the local store's index in place, which is faster on Windows
+  - [store] cache_payloads sets whether fetched and written content is kept in the store
+  - The Lore service closes remote connections idle for 5 minutes (idle_connection_timeout)
+  - lore-unix:// remotes reach a machine server through a Unix socket (LORE_UDS_SOCKET), which lore-server serves to containers with [server.uds]
+  - lore-server: client_credentials_scopes for OIDC providers, requested by lore auth login --client-id
+  - lore-server: round-robin read replica selection for composite stores (read_replica_selection)
+  - lore-server: HTTP range requests on the content and presigned endpoints
+  - lore-server: ThinClientService.RevisionTree can attribute entries to the revision that last changed them
+  - lore-server: server.upstream_connections sets the connections to a remote store's upstream (default 4)
+  Fixes & Improvements
+  - lore push pushes branches, layers and links up to 8 at a time, and each linked branch only once
+  - Faster lookup of the revision shared with the remote, without endless loops or wrong merge bases
+  - Fixed concurrent branch creates, restores, archives and metadata edits undoing each other
+  - Merges, cherry-picks, reverts and syncs handle case-only renames on both sides
+  - Fixed lore file dirty, lore file dirty move and lore stage move losing moves or dropping files from a commit
+  - Fixed forced stages, unstages and merges under a sparse view corrupting or losing changes
+  - Replacing a file with a folder, or the reverse, reports a merge conflict instead of failing with Not a directory
+  - Fixed several merge, resolve, reset and obliterate problems inside links
+  - Instances on a shared store keep their file times in .lore/records/, so they no longer rewrite each other's
+  - Commands that change the user-level config.toml keep settings they don't know
+  - Fixed content missing from the local store after concurrent reads or eviction, and commits failing with "leader upload failed"
+  - C API revision-tree handles are safe under concurrent deletes and moves
+  - SWFS: release builds need no dynamic C runtime, and files a sync brings back are no longer missing
+  - lore-server: fixed lore push --fast-forward-merge storing revisions with mismatched directory hashes
+  - lore-server: DynamoDB compare-and-swap fixes for zero values and refused swaps
+  - lore-server: the replicated immutable store spreads requests over several connections (num_clients)
+  - lore-server: fixed RevisionDiff and RevisionTree results around links and merges
+  - lore-server: accepts partition-scoped tokens from a separate token_exchange_issuer
+ReleaseNotesUrl: https://github.com/EpicGames/lore/releases/tag/v0.14.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://epicgames.github.io/lore/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
