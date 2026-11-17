@@ -1,0 +1,42 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: zsuroy.ctty
+PackageVersion: 1.3.4
+PackageLocale: en-US
+Publisher: zsuroy
+PublisherUrl: https://suroy.cn/
+PublisherSupportUrl: https://github.com/zsuroy/ctty/issues
+PackageName: ctty
+PackageUrl: https://github.com/zsuroy/ctty
+License: MIT
+LicenseUrl: https://github.com/zsuroy/ctty/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 zsuroy
+ShortDescription: Terminal UI that manages SSH, serial, telnet, SFTP, FTP, WebDAV and S3 connections.
+Description: |-
+  ctty is a single-binary terminal connection manager. It reads an existing OpenSSH configuration
+  and adds serial, telnet, SFTP, FTP, WebDAV and S3 clients beside it, so hosts already configured
+  for ssh can be browsed, searched and connected to from one interface.
+
+  Saved sites are stored as separate JSON files and passwords are kept in a local AES-256-GCM
+  credential vault under %APPDATA%\ctty. Each protocol also has a non-interactive subcommand with
+  JSON output for use from scripts. This package installs the Windows console binary, so it runs in
+  Windows Terminal, PowerShell, cmd, or any other terminal rather than in its own window.
+Tags:
+- ftp
+- sftp
+- ssh
+- telnet
+- terminal
+- tui
+- webdav
+ReleaseNotes: |-
+  Added
+  - 🪟 Windows console / Git Bash layout support — glyph-width compensation, per-font startup calibration (CONOUT$/CONIN$ with static ConHost fallbacks), row-tail clearing, and DBCS ambiguous-width budgeting for cmd.exe/PowerShell (ConHost) and Git Bash/mintty. Windows Terminal and IDE terminals keep the normal Unicode path.
+  Fixed
+  - 📂 SFTP on Windows cannot use the SSH agent (issue #52) — the built-in SFTP client only dialed the agent over a Unix socket (SSH_AUTH_SOCK), so it never reached the OpenSSH named pipe \\.\pipe\openssh-ssh-agent on Windows. SFTP now uses that pipe when IdentityAgent / SSH_AUTH_SOCK are unset (and still honors IdentityAgent none). Encrypted identity files prompt for a key passphrase instead of being skipped, and key load/parse failures are shown instead of falling through to a server-password prompt.
+  - 🖥️ ConHost / JetBrains / VS Code frame and border rendering — dynamic glyph advances and paint-time ASCII substitutes for characters ConHost cannot draw or advances differently, real-advance alignment for tables, cards, bordered forms and the standalone ctty browse pipeline, uniform header/body borders on DBCS code pages, and the Telnet host list's right border in JetBrains/JediTerm (a compensated status circle no longer pushes a row past the canvas).
+  - 🌐 Telnet multi-select help line — now the telnet.help_list_multi i18n key, rendered in Chinese on zh-CN.
+ReleaseNotesUrl: https://github.com/zsuroy/ctty/blob/HEAD/CHANGELOG.md#134---2026-11-17
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
