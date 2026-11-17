@@ -1,0 +1,53 @@
+# Created using wingetcreate 1.28.1.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AnywhereLabs.AgentsAnywhere
+PackageVersion: 2.2.0
+PackageLocale: zh-CN
+Publisher: Anywhere Labs
+PublisherUrl: https://github.com/anywhere-labs
+PublisherSupportUrl: https://github.com/anywhere-labs/Agents-Anywhere/issues
+Author: Anywhere Labs
+PackageName: Agents Anywhere
+PackageUrl: https://www.agents-anywhere.com
+License: Apache-2.0
+LicenseUrl: https://github.com/anywhere-labs/Agents-Anywhere/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Agents Anywhere
+ShortDescription: 跨设备的开源 Agent 工作台，可连接 Codex、Claude Code 或 DeepSeek Harness。
+Description: Agents Anywhere 是跨设备的开源 Agent 工作台。连接运行 Codex、Claude Code 或 DeepSeek Harness 的工作设备，在桌面、手机和 Web 查看会话、回复请求、管理文件与终端。
+Tags:
+- ai
+- agent
+- codex
+- deepseek
+- 智能体
+ReleaseNotes: |-
+  Agents Anywhere v2.2.0 是 2.x 系列的接口更新：在 Codex、Claude Code 和 DSH 中支持统一原生 Plan（/plan）并在输入区直接审阅，为 Codex 与 Claude Code 新增统一目标模式（/goal），新增 Pi 与 Hermes Agent 接入，支持模型网关管理与（默认关闭的）Tokens Anywhere 账号登录和链接；同时大幅优化高负载下的数据库读写与实时刷新，全面提升 DSH、Codex 和 Claude 大历史同步与网络抖动恢复的稳定性。
+
+  ## 升级须知
+  - 全端版本号统一为 2.2.0：Server、Web、Desktop、Android、iOS、Connector 和 DSH 插件（@agents-anywhere/dsh-bridge-next）的版本号均升至 2.2.0。2.1.0 客户端仍可登录并使用既有会话；使用统一 Plan、目标模式、Pi、模型网关及新同步行为时，请将相关端一起升级到 2.2.0。
+  - 数据库迁移与部署顺序（v2_45–v2_55）：自托管 Server 必须执行迁移 v2_45 至 v2_55。先停止旧 Server worker 完成迁移，再启动新版 Server，然后升级 Connector。不要让 2.1.0 Server 连接已迁到 v2_55 的数据库。
+  - 配置安全与 Tokens Anywhere：保存手动填写的模型网关 Key 或链接 Tokens Anywhere 前，部署者须将 AGENT_SERVER_SECRET 设为至少 32 个字符。Tokens Anywhere 登录功能默认关闭，需自行配置。
+  - 系统要求：Desktop 从本版起需要 macOS 13 及以上。DSH 使用 Plan 需要同时组合原生 Plan 插件。
+
+  ## 本次更新
+  ### 统一 Plan
+  - Codex、Claude Code 和 DSH 会话统一支持 `/plan`、`/plan <任务>` 与 `/plan off`；新会话首条任务即可进入原生规划。
+  - Web、Desktop、Android 和 iOS 新增流式计划卡片，直接在输入区「同意并执行／修改计划／暂不执行」。
+  - 计划按不可变版本保存，设备离线仍可查阅；旧版本在时间线中收为一行。
+
+  ### 会话创建与 Agent 接入
+  - **新增 Pi 接入**：支持附件、工具审批、运行中追加指令、浏览本机原生历史并在 CLI 退出后「继续任务」。
+  - **新增本机 Hermes Agent 接入**：支持对话、工具审批、中断与恢复；连接断开后可恢复会话。
+  - **显著降低多会话与高负载场景的数据库和内存压力**：优化了会话列表读取，修复了断线重连时写入卡住的问题。
+
+  ### Codex 与 Claude
+  - 新增统一目标模式 `/goal`，可在输入区上方编辑、暂停、恢复或清除目标。
+  - 修复 Codex 长时间运行占满文件句柄导致离线的问题。
+  - 修复接管后原客户端离线导致发送失败、停止无效和状态残留。
+
+  ### 文档与协议
+  - **项目许可证由 MIT 变更为 Apache License 2.0**，仓库及 DSH 插件 npm 包附带许可证全文与 NOTICE。
+ReleaseNotesUrl: https://github.com/anywhere-labs/Agents-Anywhere/releases/tag/v2.2.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
