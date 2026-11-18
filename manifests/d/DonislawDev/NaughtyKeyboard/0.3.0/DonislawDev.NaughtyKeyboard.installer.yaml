@@ -1,0 +1,64 @@
+# Rendered by .github/scripts/build_packages.py - do not edit the generated copy.
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.28.0.schema.json
+
+PackageIdentifier: DonislawDev.NaughtyKeyboard
+PackageVersion: 0.3.0
+ReleaseDate: 2026-10-25
+# Two installers, and their ORDER is load-bearing.
+#
+# Only the Windows installer puts the palette in the Start menu. A portable
+# package cannot have a shortcut at all: the manifest schema has no field for
+# one, WinGet's portable installer makes none, and microsoft/winget-cli#2299
+# asking for it has been open since 2022. The installer comes FIRST because
+# that is what decides a fresh install: recent clients prefer it over portable
+# when the user has set no preference (microsoft/winget-cli#6123), and older
+# ones keep the first installer that applies when nothing else tells two apart.
+#
+# The archive comes SECOND, with no scope, for --scope user: a person without
+# administrator rights, for whom the installer is out of reach because it is
+# for the whole machine. The description says that such an install gets no
+# Start menu entry. Keep it once it is published: WinGet upgrades only within
+# the kind that is installed, and portable is compatible with nothing but
+# portable, so a manifest without it would leave every such install where it
+# is for good.
+Installers:
+- Architecture: x64
+  InstallerType: wix
+  Scope: machine
+  # Windows Installer asks for elevation itself.
+  ElevationRequirement: elevatesSelf
+  InstallerUrl: https://github.com/donislawdev/Naughty-Keyboard/releases/download/v0.3.0/nkb-setup_0.3.0_windows_amd64.msi
+  InstallerSha256: C54287CD41FA2FBC4301D050C23874CD090D8C20D5C09AAB5B395A00E8DF5B16
+  # The ProductCode of THIS release's installer, read out of the published file
+  # - every build gets a new one. WinGet finds the installed program for a
+  # manifest by it. Measured on 2026-11-03 with WinGet 1.29.380: without the
+  # line, an upgrade and an uninstall from the manifest both answered "No
+  # installed package found matching input criteria", and with it both worked.
+  ProductCode: '{7A7FC4A0-783B-4D8E-A35E-985EC830232A}'
+  # How WinGet recognises the installed program from one release to the next,
+  # an install made from the release page by hand included: the UpgradeCode
+  # never changes, while every build gets a new ProductCode.
+  AppsAndFeaturesEntries:
+  - UpgradeCode: '{C64D1A47-17D7-43FE-BF82-76CC3DBA4981}'
+  # The installer puts its folder on the machine PATH, and both programs are in it.
+  Commands:
+  - nkb-gui
+  - nkb
+- Architecture: x64
+  InstallerType: zip
+  NestedInstallerType: portable
+  NestedInstallerFiles:
+  - RelativeFilePath: nkb-gui.exe
+  # WinGet then makes no link in its own links folder and puts the folder the
+  # palette is in on PATH instead (PortableInstaller.cpp in winget-cli). That
+  # folder holds the palette, its licence, the readme and its notices, and no
+  # library another program searching PATH could load. Without the field the
+  # shape would depend on the machine - a link where symbolic links are allowed,
+  # the folder on PATH where they are not - and one shape is one thing to test.
+  ArchiveBinariesDependOnPath: true
+  InstallerUrl: https://github.com/donislawdev/Naughty-Keyboard/releases/download/v0.3.0/nkb-gui_0.3.0_windows_amd64.zip
+  InstallerSha256: 3DFCE3912FA6700A6280977138603E4705DF86CE1410152FE85B3E4A17A03265
+  Commands:
+  - nkb-gui
+ManifestType: installer
+ManifestVersion: 1.28.0
