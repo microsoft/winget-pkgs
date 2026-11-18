@@ -1,0 +1,64 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: StackExchange.DNSControl
+PackageVersion: 5.9.0
+PackageLocale: en-US
+Publisher: Stack Exchange, Inc.
+PublisherSupportUrl: https://github.com/StackExchange/dnscontrol/issues
+Author: Stack Exchange, Inc.
+PackageName: DNSControl
+PackageUrl: https://dnscontrol.org/
+License: MIT
+LicenseUrl: https://github.com/StackExchange/dnscontrol/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Stack Overflow
+ShortDescription: Infrastructure as code for DNS!
+Description: DNSControl is an opinionated platform for seamlessly managing your DNS configuration across any number of DNS hosts, both in the cloud or in your own infrastructure. It manages all of the domains for the Stack Overflow network, and can do the same for you!
+Moniker: dnscontrol
+Tags:
+- dns
+ReleaseNotes: |-
+  Greetings DNS fans!
+  Release highlights
+  - NEW PROVIDER: DNSControl now supports IONOS! Thanks and welcome to @n-rodriguez who joins the project as its maintainer. We look forward to great things! (#5064)
+  - print-ir and preview --ir finally round-trip again. This was broken in v5 and has finally been fixed. It could use more testing. (#5085)
+  - D("../../example.com", ...) is no longer permitted. It shouldn't have worked before, but now its an error. https://github.com/DNSControl/dnscontrol/pull/5091
+  - BIG REFACTORING: Code that normalized and validated dnsconfig.js file data has been refactored to be cleaner and more maintainable.
+    - Valid dnsconfig.js files should still work as before with no (intentional) changes in behavior. That said, it might be worthwhile doing a little extra testing before putting this into production. A simple "dnscontrol preview" should show no differences when compared to an earlier release.
+    - Invalid dnsconfig.js files will see errors reported earlier in the pipeline (during "preview" instead of "push): Invalid CAA tags, invalid OPENPGPKEY keys, PTR records in the wrong zone
+    - The following features generate DNS records that were never checked for errors. Now they are checked: SPF splitting, IMPORT_TRANSFORM and the A record transform metadata
+    - Some error messages were output twice. Now they are only output once.
+  Valid dnsconfig.js files should see zero behavior changes. Apologies in advance if anything breaks. Please report all bugs or unexpected changes!
+  Thanks!
+  Thanks to all contributors involved in this release! This is a community project and we couldn't do it without all of your contributions!
+  Sincerely,
+  --Tom Limoncelli
+  Monthly video call!
+  Everyone is invited to the Monthly DNSControl Community Video Conference Call on the 2nd Tuesday of each month. Join whether you are a new user with questions or an experienced developer that wants to discuss DNSControl internals... or anything in between! Meeting details on
+  GitHub Discussions.
+  Experimental: Try the new D() syntax!
+  Select credential entries directly with REGISTRAR() and SERVICE() in dnsconfig.js. The legacy syntax remains supported; this revision replaces the experimental PROVIDER()/DNS_SERVICE() syntax from v5.3.0. See the examples in the conversion guide. Please test it and share feedback!
+  Changelog
+  Provider-specific changes:
+  - 7f839403dc5cbd20722d3664d757c6dd92162f56: feat(p/IONOS): new provider: IONOS hosting DNS provider (#5064) (@n-rodriguez)
+  - 83c293eedb6f37bf6c51dd07fe7ef62d32d5f689: feat(p/PORKBUN): support DS records for delegated subdomains (#5073) (@philpennock)
+  Bug fixes:
+  - d252461b7ee59ce0cfd8ff13f93b92529bd6b66e: fix(dnsconfig): reject domain names and tags that escape the zone directory (#5091) (@TomOnTime)
+  - 62af2f0ea6322552b90ffbc6922c59d4817cb047: fix: print-ir and --ir should round-trip (#5085) (@TomOnTime)
+  Refactoring:
+  - 5da338d664efde876d46f1cab6dd5dbdf59cbd6b: refactor(normalize): move CAA and OPENPGPKEY checks to their makers (#5086) (@TomOnTime)
+  - 495d2f94a8317c3d563a7476e6c51528fb109c14: refactor(normalize): move PTR magic and arpa label stripping to import (#5087) (@TomOnTime)
+  - fb55a9044f5ddad220a77c4edcc374831d0943ac: refactor(normalize): remove no-op record normalization (#5090) (@TomOnTime)
+  - 845815ae657234baeaf9943095b19f16a6ba6dee: refactor(normalize): run ValidateAndNormalizeConfig in ordered phases (#5089) (@TomOnTime)
+  - 2239ae6ebf388534f6d8f8ce67d97d965eb6c24d: refactor(normalize): split validate.go into one file per concern (#5088) (@TomOnTime)
+  Deprecation warnings
+  Warning
+
+  - REV() will switch from RFC2317 to RFC4183 sometime after v5.0 is released. This is a breaking change. Warnings are output if your configuration is affected. See https://docs.dnscontrol.org/language-reference/top-level-functions/revcompat
+  - NAMEDOTCOM, OPENSRS and SOFTLAYER need maintainers! These providers have no maintainer. Maintainers respond to PRs and fix bugs in a timely manner, and try to stay on top of protocol changes.
+ReleaseNotesUrl: https://github.com/DNSControl/dnscontrol/releases/tag/v5.9.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://docs.dnscontrol.org/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

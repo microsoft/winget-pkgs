@@ -1,0 +1,81 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: MoeruAI.AIRI
+PackageVersion: 0.15.2
+PackageLocale: en-US
+Publisher: moeru
+PublisherUrl: https://moeru.ai/
+PublisherSupportUrl: https://github.com/moeru-ai/airi/issues
+PackageName: AIRI
+PackageUrl: https://airi.moeru.ai/docs/
+License: MIT
+LicenseUrl: https://github.com/moeru-ai/airi/blob/HEAD/LICENSE
+Copyright: © Moeru AI 2026
+ShortDescription: Re-creating Neuro-sama, a container of souls of AI waifu / virtual characters to bring them into our worlds.
+Tags:
+- ai
+- live2d
+- vtuber
+ReleaseNotes: |-
+  v0.15.2 Highlights
+  A polish release. Voice input is steadier, you can tidy up chats faster, phones get better model controls, and the desktop app now shows what each update changes.
+  New Contributors
+  - @Siq5005 made their first contribution in https://github.com/moeru-ai/airi/pull/3400
+  - @mothieras made their first contribution in https://github.com/moeru-ai/airi/pull/3428
+  - @Goldloli made their first contribution in https://github.com/moeru-ai/airi/pull/3411
+  - @FoolKc made their first contribution in https://github.com/moeru-ai/airi/pull/3433
+  Product updates
+  Chat and voice
+  - You can now delete many conversations at once. Press the select button next to "New conversation", pick rows or use "Select all", then press "Delete" twice to confirm.
+  - The "Turns to remember" setting now keeps whole turns. A turn is your message plus the character's replies. Before, small limits could drop the last reply or switch between partial history and only your newest message. Now the oldest whole turns go first.
+  - Bold and italic text next to Chinese or Japanese punctuation now shows correctly. Before, text such as **测试。**测试 showed the asterisks, and text-to-speech read them aloud.
+  - If you use OpenRouter with the Responses API and a model that accepts audio, your voice messages now reach the model as audio. Before, the model got only the transcript.
+  - The official AIRI chat provider now uses the Responses API by default, with built-in web search. You can switch back to Chat Completions in the provider settings.
+  Models and stage
+  - When you upload a display model to your account, the model card now shows a percent and a progress bar. Uploads can be up to 512 MiB, so you can now see that a big upload is still moving.
+  - On phones, the model settings now support two-finger zoom. The View menu and the model settings use the same size and position rulers. We also removed the extra vertical slider.
+  - The background picker now follows your app language, in all ten supported languages.
+  Account and sync
+  - Account settings have a new Sync section. It has a switch for each kind of synced data: chats, provider settings (with API keys), character cards, and Live2D and VRM models. All four are on by default. A switch is per device. Turning one off pauses sync for that device and deletes nothing. Character card sync and model sync are no longer experimental features. If you turned one off before, it stays off.
+  - The "Capacitor" entry and page are now called Subscription, and "Install" is now Subscribe. Capacitor stays as the plan name inside the page. Purchased Flux now shows as your Flux balance.
+  Desktop app
+  - The About page now shows what an update changes. A What's new button opens the release notes for the new version. Nightly and dev builds show a link to the code changes instead. The Confirm Restart button now looks like a primary action, so it no longer blends into the card.
+  - On macOS, AIRI now asks for its own permissions, even when a terminal, Steam, or another launcher starts it. Before, Beat Sync could get only silence and show "No audio detected", even though AIRI had already been given permission. If this happened to you, give screen and system audio recording permission to AIRI itself.
+  - In the IO tracer devtools window, the top tab bars now act as the title bar. On macOS, the window buttons no longer cover the first tab, and you can drag the window by the empty part of the tab bar. On Windows and Linux, the window buttons are back.
+  Bug fixes
+  - Characters stopped replying after a wake word conflict. If a character tried to set a wake word that another character already used, the reply failed with a structuredClone error. The character now replies and tells you about the conflict.
+  - Voice input could get stuck without any error. If the speech provider never finished the transcript, the input waited forever, and nothing was sent. Now the input fails after 30 seconds with a clear error, so you can try again. A slow speculative rephrase now also stops after 10 seconds.
+  - Beat Sync did not move Live2D heads with the MAGIC motion driver on. The head now moves to the beat on top of the MAGIC pose. Head motion also follows the beat smoothly now, instead of jumping once per beat.
+  - The AIRI browser extension did not work with v0.15. It failed to connect, and its notifications never reached the desktop character. Both now work.
+  - Some account requests failed after a session refresh. In rare cases, a cloud request lost its headers or failed when AIRI retried it after refreshing your sign-in. These retries now work.
+  Polish
+  - On phones, settings pages now scroll all the way to the screen bottom instead of cutting off above the home indicator. The model editor in Settings → Models no longer shows an empty strip under its tabs.
+  - Picking a display model no longer loads it twice in the background.
+  - Settings descriptions are clearer in many languages. The built-in character is now called Iru in all translated descriptions.
+  To developers
+  - Extensions: You can now enable an Extension that needs a Kit that no one provides yet. Before, AIRI refused to enable it. Now its session waits in the pending phase and starts when a compatible Provider registers.
+  - New package @proj-airi/extension-protocol: It now owns the Extension identity types and the permission model types. Their shapes did not change. @proj-airi/plugin-sdk no longer depends on @proj-airi/plugin-protocol. If you import these types, import them from the new package.
+  - @proj-airi/core-agent:
+    - SpeechInputPorts.transcriber now gets ({ inputId, sessionId }) instead of (sessionId).
+    - VoiceController takes a new transcriptionTimeoutMs option. The default is 30 seconds.
+    - The Responses adapter now accepts audio input segments.
+  - @proj-airi/ui: SelectTab has new radius (lg, xl, full) and color (primary, neutral) props. The unused w-xs, w-sm, and w-md sizes are removed.
+  - Desktop updater contract: AutoUpdaterState has a new optional changesUrl field.
+  - Server metrics: The API server now reports GenAI metrics with the OpenTelemetry semantic convention names. If your dashboards or alerts use the old metric names, update them.
+  To contributors
+  - Extension host on injeca: The plugin-sdk host internals, the built-in desktop Kits, and Extension sessions now run on injeca (upgraded to 0.5). The Activation Planner is removed. The plugin-sdk docs now say that injeca is its lifecycle runtime.
+  - Fewer duplicate libraries: awilix, colorjs.io, debug, and @better-fetch/fetch are replaced with the libraries the repo already uses. ESLint now bans them. localforage is replaced with the shared unstorage instance, and existing browser data stays readable. We also removed the unused sponsors SVG dependency.
+  - Translation key check: CI now runs x18n. The Lint job fails when code uses a translation key that the English locale does not define. Existing issues are kept in a baseline.
+  - More reliable builds: @proj-airi/unplugin-fetch 0.2.6 now retries dropped asset downloads. A dropped download broke a v0.15.0 release build and a CI run.
+  - MediaPipe assets: We reverted the change that loaded MediaPipe assets at runtime. pnpm install again downloads the MediaPipe model files in postinstall.
+  - Fonts: Font packages now install from npm. They moved to the proj-airi/fonts repository.
+  - PR triage: A new AgentScan workflow labels pull requests and closes them when it finds that an automated or community-flagged account opened them.
+  - Tooling: We upgraded AUV to 0.0.43, which renamed its invoke command IDs. The timeline-canvas benchmark now uses the median of several runs. We added more type-safety cleanups in stream-kit, ui, stage-ui-spine, and model-driver-mediapipe. We updated the Nix pnpmDeps hashes.
+  Upgrade notes
+  - macOS users who start AIRI from a terminal, Steam, or another launcher: Give screen and system audio recording permission to AIRI itself, not to the launcher.
+  - Developers who import Extension identity or permission types: Import them from @proj-airi/extension-protocol.
+  Full Changelog: https://github.com/moeru-ai/airi/compare/v0.15.1...v0.15.2
+ReleaseNotesUrl: https://github.com/moeru-ai/airi/releases/tag/v0.15.2
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

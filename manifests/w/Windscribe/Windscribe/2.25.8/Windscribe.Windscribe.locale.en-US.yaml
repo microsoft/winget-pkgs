@@ -1,0 +1,106 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Windscribe.Windscribe
+PackageVersion: 2.25.8
+PackageLocale: en-US
+Publisher: Windscribe Limited
+PublisherUrl: https://windscribe.com/
+PublisherSupportUrl: https://windscribe.com/knowledge-base/
+PrivacyUrl: https://windscribe.com/privacy/
+Author: Windscribe Limited
+PackageName: Windscribe
+PackageUrl: https://windscribe.com/
+License: GPL-2.0
+LicenseUrl: https://github.com/Windscribe/Desktop-App/blob/HEAD/LICENSE
+Copyright: © 2026 Windscribe Limited
+CopyrightUrl: https://windscribe.com/terms/
+ShortDescription: Windscribe encrypts your browsing activity, blocks ads, and unblocks entertainment content
+Tags:
+- network
+- privacy
+- proxy
+- security
+- vpn
+ReleaseNotes: |-
+  Added
+  - Optional detailed app and helper debug tracing on Windows to help pinpoint launch and connection delays.
+  Improved
+  - App hardening from the OpenAI Daybreak Blue and Anthropic Defense Access audit.
+    - Security of WireGuard config handling on Windows.
+    - Security of the Windows installer and uninstaller.
+    - Security of in-app update staging on Windows.
+    - Security of the OpenVPN DNS scripts on macOS and Linux.
+    - Security of in-app update staging and installation on Linux.
+  - Security by running the OpenVPN daemon unelevated on Windows.
+  - Security of the OpenVPN daemon on macOS and Linux.
+  - Security by redacting VPN server credentials in debug logs.
+  - Split tunneling app selection duplicate detection on Windows and macOS.
+  - Hosts file handling for IKEv2 connections, so the app now retries when another program has the file locked on Windows.
+  - App only allows one running instance per machine. If another signed-in user is already running it, the app now explains why.
+  - Implementation of post-connect tunnel validation and connected IP state.
+  - Window installer to use libarchive rather than bundled 7z executable for extraction.
+  - App removes servers from the locations list with the force_disconnect flag set.
+  - Windows installer to return specific Windows error codes when a failure occurs.
+  - Split tunneling compatibility with other WFP redirectors to address potential system crashes on Windows.
+  - macOS Service-account creation and validation, including handling user ID conflicts and reporting creation failures.
+  - Custom Connected DNS to support scheme-prefixed DoT endpoints, including an explicit default port.
+  - Custom Connected DNS handling to avoid starting ctrld for a plain-IP upstream when Split DNS has no domains configured.
+  - windscribe-cli help to use a conventional layout with an aligned command list and per-command help, and made command output consistent.
+  - windscribe-cli help and documentation to explain how to turn on AmneziaWG with Protocol Tweaks. The app now logs a warning when the configured AmneziaWG preset is not available and it falls back to another preset.
+  - windscribe-cli locations commands to list locations in the terminal instead of opening the locations list in the app.
+  - windscribe-cli commands to report the app's actual result instead of only confirming the request was sent.
+  - windscribe-cli error messages for connection and update failures, so they describe the actual problem instead of showing a numeric error code.
+  Fixed
+  - Local privilege escalation vulnerability involving custom OpenVPN config parsing on Linux.
+  - OpenVPN-based protocols failing to connect on PCs where Windows cannot rename network adapters with netsh.
+  - OpenVPN connections failing on some Windows 11 insider builds because the app could not detect the management port.
+  - Potential app crash when connecting with a custom OpenVPN config on macOS.
+  - Custom Connected DNS failing after connection or location changes while the app showed Connected on Linux.
+  - Anti-censorship check not detecting a Chinese system language.
+  - App rewriting its whole settings file about once a minute while connected, even when nothing changed.
+  - Windows installer displaying error dialogs when -silent is specified on the command-line.
+  - ctrld being restarted before its previous instance had exited on macOS.
+  - ctrld daemon may fail to launch when Connected DNS preference is Control D on Windows.
+  - Windows tapctl.exe utility to always match OpenVPN version.
+  - Auto-Connect not triggering when a Hyper-V virtual adapter is the active network interface on Windows.
+  - AmneziaWG connections never completing when the config contains large I1-I5 packets on Windows.
+  - IKEv2 connections repeatedly showing a false "Read-Only File" hosts file prompt on Windows.
+  - Split tunneled traffic being blocked by the firewall on a secondary network interface on macOS.
+  - Split tunneled IPs going out through the primary interface instead of their original interface on Linux.
+  - A potential split tunneling extension crash caused by unsynchronized connection-table updates on macOS.
+  - Proxy Gateway retaining silent, unauthenticated connections without connection limits or a handshake timeout. Reported by Souparna Majumder.
+  - Network name and per-network settings remaining stale after waking on a different network through the same adapter on Windows.
+  - Installer starting the previous uninstaller before the helper service has finished stopping on Windows.
+  - Potential IKEv2 reconnect loop when asynchronous RAS disconnect notification fails to register with Windows.
+  - Menu bar icon not opening the app while another application is full screen on macOS.
+  - CLI-only Linux app ignoring the Launch on Startup preference when disabled.
+  - MTU detection and hotspot adapter detection failing with non-English system locales on Linux.
+  - systemd-resolved detection for additional resolv.conf symlink targets and stub-resolver configurations.
+  - Intentional ctrld shutdowns being logged as crashes.
+  - CLI from the GUI package fails on a headless environment with a no-display error.
+  - Split Tunneling Apps list accepting duplicate entries for manually added apps. Existing duplicates are now removed on load.
+  - MAC Spoofing turning off and its interface resetting to "No Interface" after suspend/resume or a NetworkManager restart on Linux.
+  - windscribe-cli login waiting forever when the login was abandoned, for example by closing the CAPTCHA, or when an email address was entered as the username.
+  - windscribe-cli help --help and version --help not showing help, and version accepting unexpected arguments.
+  - windscribe-cli logs send command reporting success before the upload finished, which hid upload failures.
+  - windscribe-cli log output appears in stdout on macOS and Linux.
+  - Declining the permission prompt during an in-app update showing an "Auto-Update Failed" error. The update window now returns to its prompt so the update can be started again.
+  - A missing space between the two sentences of the Decoy Traffic description in Preferences > Connection.
+  - Excluded apps' traffic, including IPv6 on dual-stack networks, going through the tunnel in Exclusive split tunneling mode on Windows.
+  - App not stopping an unresponsive WireGuard process after a disconnect timeout on macOS and Linux.
+  Updated
+  - The embedded API certificate bundle so it no longer trusts the compromised eMudhra intermediate certificates.
+  - Qt to 6.12.0.
+  - AmneziaWG to 3.1.20260814 (Windows) and 3.1.20260828 (macOS/Linux).
+  - ctrld to 1.5.9.
+  - cURL to 8.23.0.
+  - OpenSSL to 4.0.3.
+  - OpenVPN to 2.7.7.
+  - OpenVPN DCO driver to 2.8.7 on Windows.
+  - Third-party components from vcpkg to the latest versions for stability and security.
+  - Minimum macOS version to 14.4.
+ReleaseNotesUrl: https://github.com/Windscribe/Desktop-App/releases/tag/v2.25.8
+PurchaseUrl: https://windscribe.com/upgrade
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
