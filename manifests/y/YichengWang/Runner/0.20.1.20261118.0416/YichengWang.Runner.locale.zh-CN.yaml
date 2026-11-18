@@ -1,0 +1,31 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: YichengWang.Runner
+PackageVersion: 0.20.1.20261118.0416
+PackageLocale: zh-CN
+ShortDescription: 让 Claude Code、Codex、Copilot CLI 等终端编码智能体在同一个 mission 上协同工作。
+Description: Runner 是一款原生桌面应用，让终端智能体协同工作。Claude Code、Codex、OpenCode、Cursor CLI、Grok Build、Antigravity CLI、Copilot CLI 与 pi 可以在同一个任务、同一个 mission 中配合，每个智能体都保留自己真实终端里的 TUI，由 lead 把决策带回给你。Runner 的一切能力都对应一个 `runner` 命令：mission、crew、role、project、chat、session 与 msg 都能在命令行操作，后台服务是 `runnerd`。智能体在 Windows 上原生运行，不需要 WSL，PowerShell 7 为可选。当前状态：alpha，持续发布。原生支持 macOS（Apple Silicon）与 Windows（x64，Windows 10 1809 或更高版本）；不支持 Intel Mac、Windows ARM64 与 Linux。安装程序、应用与 CLI 辅助程序均使用签发给 Open Source Developer Yicheng Wang 的 Certum 开源代码签名证书签名。
+Tags:
+- claude-code
+- codex
+- 人工智能
+- 命令行
+- 控制台
+- 终端
+ReleaseNotes: |-
+  Runner 0.20.1 是 macOS、Windows 和 Linux 上基于 0.20.0 的修复版本：mission 消息可在更多 agent 工作中途送达，终端新增 macOS 行编辑快捷键，runner CLI 支持 git worktree，并修复了一处崩溃和一个导致整个应用卡死的问题。
+  新功能
+  - 更多 agent 可在工作中途收到 mission 消息。 mission 收件箱中的消息现在会在 Codex、pi、Antigravity 或 OpenCode 成员工作过程中直接送达（Claude Code 原本已支持），不必等到本轮结束。GitHub Copilot CLI、Cursor 和 Grok 仍在空闲时接收。 (#1369)
+  - 终端支持 macOS 行编辑快捷键。 ⌘← 和 ⌘→ 跳到行首和行尾，⌘⌫ 删除到行首；若你在 Settings → Keyboard shortcuts 中绑定了这些组合键，则以你的绑定为准。按住按键现在会连续输入，不再弹出重音字符选择框。 (#1366)
+  - 在 Changes 中选择 checkout 和比较基准。 分支行下方新增 Base 行，显示 Changes 的比较对象（默认 Auto）；通过 Compare against 选择器可改为任意本地或远程分支，并按 checkout 和分支记住选择。仓库有多个 worktree 时，Changes 和 Files 中会出现 checkout 选择器，用于在它们之间切换。 (#1345)
+  - runner CLI 支持 git worktree。 runner worktree create <branch>、runner worktree list 和 runner worktree remove <branch> 管理 .worktrees/ 下的关联 checkout；runner chat start 和 runner mission start 支持 --worktree <branch>（可选 --base），直接在其中启动。位于关联 worktree 中的聊天和 mission 会归入所属仓库的项目。恢复或继续一个 worktree 文件夹已被删除的聊天时，会从其分支重新创建 worktree；如果分支也已删除，恢复会停止，并提示主 checkout 的位置。应用内的 worktree 操作将在后续版本提供。 (#1213)
+  问题修复
+  - 单个卡住的 agent 不再冻结 Runner。 当某个 agent 停止读取输入时，向它输入或投递消息可能让整个应用和远程控制卡死，只能强制退出。现在每个会话的输入单独写入，一个卡住的会话不会再阻塞应用的其他部分。 (#1377)
+  - Codex 提示词不再停留在 Drafting。 在 Codex 中粘贴或快速输入提示词时，如果输入框上方仍能看到之前的提示词，Runner 可能一直暂扣 mission 消息，直到手动点击 Submit / clear。 (#1381)
+  - 点击关联聊天标签不再崩溃。 查看另一台电脑的 mission 时，点击 linked to 标签现在会打开对应聊天，不再导致 Runner 退出。 (#1376)
+  - 终端文字保持对齐网格。 制表符之后的文字可能偏离字符网格，表现为某处空格变宽、另一处消失，直到调整窗口大小才恢复。 (#1356)
+  - 远程终端空闲时自动接管。 无人控制的远程终端现在会自动获取控制权，无需点击，同时仍不会抢占主机或其他客户端正在控制的终端。在两个窗口中打开同一个远程聊天现在也会像本地聊天一样被识别。远程控制会在约 15 秒内察觉连接中断或从睡眠中唤醒，并重新连接。 (#1347, #1263)
+  - Windows：Changes 和 Files 中被删除的文件夹。 在 Changes 或 Files 正在显示某个 checkout 时删除它，现在会干净地回退，不再显示过期内容。Markdown 文件被以相同内容重写后，已有的选区会保留。 (#1357)
+ManifestType: locale
+ManifestVersion: 1.28.0
