@@ -37,7 +37,7 @@ Use this checklist before you open your first manifest PR to `microsoft/winget-p
 
 Most Microsoft contributions require a [Contributor License Agreement](https://cla.opensource.microsoft.com/). This is separate from the manifest's validation checks: a PR may pass the validation pipeline and still be blocked from merging until the CLA requirement is satisfied.
 
-After submitting a PR, read the Microsoft CLA bot's message or status check and follow its linked instructions. **The contributor must personally complete any required agreement**; a generic acknowledgement comment on the PR does not replace the official CLA process. Microsoft's [repository contribution guidance](../README.md#contributing) explains the requirement and notes that the agreement generally needs to be completed only once for Microsoft repositories using the same CLA.
+There is no separate signing page to visit beforehand: the `cla.opensource.microsoft.com` site only describes the process, and the agreement is completed by replying to the bot's comment on a pull request you author, so the first PR has to be opened before it can be signed. After submitting a PR, read the Microsoft CLA bot's message or status check and follow its linked instructions. **The contributor must personally complete any required agreement**; a generic acknowledgement comment on the PR does not replace the official CLA process. Microsoft's [repository contribution guidance](../README.md#contributing) explains the requirement and notes that the agreement generally needs to be completed only once for Microsoft repositories using the same CLA.
 
 Once the CLA requirement is met, continue responding to validation and maintainer review feedback as usual.
 
