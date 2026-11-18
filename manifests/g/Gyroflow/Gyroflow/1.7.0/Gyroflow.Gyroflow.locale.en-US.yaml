@@ -1,0 +1,125 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Gyroflow.Gyroflow
+PackageVersion: 1.7.0
+PackageLocale: en-US
+Publisher: Gyroflow
+PublisherUrl: https://gyroflow.xyz/
+PublisherSupportUrl: https://gyroflow.xyz/donate
+Author: AdrianEddy and Elvin
+PackageName: Gyroflow
+PackageUrl: https://gyroflow.xyz/
+License: GPL-3.0
+LicenseUrl: https://github.com/gyroflow/gyroflow/blob/HEAD/LICENSE
+Copyright: Gyroflow
+ShortDescription: Gyroflow is an application that can stabilize your video by using motion data from a gyroscope and optionally an accelerometer.
+Description: Gyroflow is an application that can stabilize your video by using motion data from a gyroscope and optionally an accelerometer. Modern cameras record that data internally (GoPro, Sony, Insta360 etc), and this application stabilizes the captured footage precisely by using them. It can also use gyro data from an external source (eg. from Betaflight blackbox).
+Moniker: gyroflow
+Tags:
+- fpv
+- gopro
+- gpu
+- gpu-computing
+- gyroscope
+- insta360
+- rolling-shutter-undistortion
+- rust
+- sony-alpha-cameras
+- stabilization
+- video
+- video-processing
+ReleaseNotes: |-
+  ✨ Improvements
+  - New cameras: Canon, Z CAM, HOVERAir, XTRA and more, see below
+  - Optical stabilization - New algorithm for stabilization without motion data that's actually good. It produces similar results to gyro-based stabilization on most videos with good tracking points and good lens profile. Enable in Motion data -> Optical correction. This fixes all O4 issues, vibrations, bad gyro, O4 Lite, DJI Neo shakes, Hero 7 on FPV, DJI with RockSteady, Sony with OSS etc. If you have a moving subject in frame, you can edit every tracked point and remove it from the solution. Valid lens profile is required.
+  - New "Optimal path" smoothing - plans the camera path for the whole clip at once: it removes much more shake than "Default" at the same zoom, never lags behind pans, and keeps the frame within the zoom limit. Select it in the "Stabilization" panel and try on your footage - it has a completely different feel than Default.
+  - GoPro now uses official calibrations - Lens profiles are more acurate and all new GoPro models are supported without changes to Gyroflow
+  - All Sony issues have been fixed, including Dynamic Active support
+  - Sony lens breathing compensation, using the data recorded by the supported lenses
+  - RED gyro data is now accurately timed, autosync is no longer needed
+  - Focal length stabilization - smooths out fast zooms and zoom "pumping" by cropping. Works with every file that records the focal length (Sony, Canon, Blackmagic, RED, Nikon, Z CAM). Enable in the "Stabilization" panel (by @Milchgsicht-star)
+  - Manual zoom level for "Static zoom" - every video is zoomed by exactly the amount you set, like in-camera stabilization, and smoothing is lowered only where the frame doesn't fit (by @anton-belkin)
+  - New horizon lock options: "Lock pitch angle" (by @Ivan1248) and "Automatic lock", which lets the horizon lean into banked turns (by @mihatsu)
+  - Reworked lens math: "Lens correction" below 100% is now exact and changes the image evenly, underwater refraction is exact across the whole frame, and Gyroflow now supports lenses wider than 180°
+  - Added "Output projection" (stereographic, equidistant, equisolid, orthographic) to show the whole picture of very wide lenses like Insta360 X4/X5 or fisheye adapters
+  - Videos open faster, and play unstabilized while the motion data loads (by @TimoLehnertz)
+  - Better support for variable frame rate and off-speed clips - every frame is matched to the motion data at its own timestamp (phones, cameras that drop frames), and off-speed recordings are timed by the rate the camera captured them at
+  - AV1 export - GPU only: NVIDIA RTX 40, AMD RX 7000, Intel Arc or newer (Windows, Linux), or Android phones with an AV1 encoder (#1140)
+  - "Preserve other tracks" now copies the camera metadata tracks and file metadata as-is, so apps like DJI Mimo recognize the export and show their dashboard overlays (#1078). For Mimo, keep "Audio codec" at AAC
+  - New autosync method "Optical analysis", now the default - new fast and acurate autosync method. The other methods are still in Synchronization -> Advanced -> Offset method
+  - Added "Copy" audio codec (falls back to AAC when the container can't store it)
+  - Added "Smooth" keyframe easing, which passes through keyframes without stopping or overshooting (#1119)
+  - Blackmagic, RED, Nikon and Z CAM now follow the recorded focal length
+  - Added "FL" timeline chart with the original and smoothed focal length
+  - Added "Lens metadata delay" for lenses that report the focal length late, e.g. some Tamron zooms on Sony (Lens profile -> Advanced, measured with "Analyze")
+  - Added "No distortion, focal length only" lens option for already undistorted videos, using the 35 mm equivalent focal length you enter
+  - Added support for Gyroflow Protobuf, an open format for embedding motion data, lens and IBIS/OIS info in video files or .jsonl sidecars
+  - Image sequences now automatically use a matching .gcsv file (by @baso53)
+  - Calibrator: added "Distortion model" selection and the "Gyroflow" calibration method, which fits all frames at once, handles fisheye lenses over 180° and skips frames that don't match the rest
+  - Calibrator: changing the model or method no longer analyzes the video again
+  - Camera data export: added iris (f/T-stop), focus distance, and gyro/accelerometer data in "One sample per frame". Fields missing in the file are greyed out
+  - Added BRAW and R3D support on Windows ARM
+  - Improved autosync with the DIS optical flow method (by @NiYien)
+  - Added "GMFlow (AI)" optical flow for autosync and "GMFlow (AI dense flow)" tracking for "Analyze image optically": an AI model that follows fast motion and weak detail, but is much slower. It needs a GPU with Vulkan (Metal on Apple), and its model (about 30 MB) is downloaded the first time it's used. Not available on Android and iOS (by @yasumorishima)
+  - Autosync's "PyrLK" optical flow now runs on the GPU
+  - Added hardware encoding on Windows on ARM through Media Foundation, for Snapdragon and NVIDIA GPUs (by @cryptofyre)
+  - The preview no longer freezes while the motion data is integrated and smoothed again, which takes seconds for long, high-rate logs
+  - Rendering checks the output before it starts: it never writes over the video it's rendered from
+  - Joining the files of one recording (split by the camera, e.g. at 4 GB) is more reliable: files with different timescales or edit lists keep the audio in sync, damaged or unfinished files are refused, an existing output is replaced only after asking, and a failed merge leaves no partial file
+  - The frame rate of CinemaDNG image sequences is read from the files
+  - DJI: the ISO, shutter speed and white balance of each frame are now read and shown in the video information, plus the aperture and focal length on the Avata 360 (by @spirokai)
+  - Blackmagic RAW: ISO, shutter, iris and white balance are now shown in the video information
+  - More accurate timing of DJI motion data in clips with dropped frames
+  - Cooke /i lens metadata (.yml): added support for LockitPlus recordings, and improved the timing of their motion data
+  - Many robustness fixes for damaged or unusual files: reading their metadata no longer crashes or takes huge amounts of memory
+  - GPU memory is now released after rendering
+  - "Apply selected settings to all items in the render queue" is now instant (by @TimoLehnertz)
+  - Files added to the render queue together are now sorted by name
+  - Added Serbian language
+  - Updated translations
+  📷 New supported cameras
+  Full support:
+  - Canon C50, C80, C400, EOS R5 Mark II, EOS R6 Mark III and EOS R6 V (MP4/MXF), including per-frame focal length, so no lens profile is needed and zooms are followed. RF lenses only for now (depends on Canon). Turn the lens image stabilizer (IS) off: Gyroflow can't stabilize clips recorded with it, and warns about them
+  - SIGMA fp with the fpSup firmware mod (CinemaDNG)
+  - Z CAM Mark II: E2-M4, E2-S6, E2-F6, E2-F8, E2-M4G, E2-S6G, E2N
+  - XTRA Edge and Edge Pro
+  - HOVERAir cameras
+  - GoPro .LRV proxies (by @ioaur) and Insta360 .lrv proxies (by @OMG648)
+  Motion data only - Gyroflow can't play these files. Open a playable copy as the video and load the original in Motion data -> Open file:
+  - Canon Cinema RAW Light (.crm)
+  - Z CAM ZRAW (.zraw)
+  - MotionCam Pro (.mcraw), including its lens calibration
+  - DJI Osmo 360 (by @Errorist79) and DJI Avata 360
+  - Insta360 X5 (by @NeYoNmoos) and Insta360 Antigravity A1
+  Playback only - no motion data in the file, use an external gyro or Optical correction:
+  - Nikon N-RAW (.nev), decoded with the RED SDK (downloaded on first use)
+  Lens metadata only - focal length, focus distance and iris, no motion data in the file:
+  - ARRI ALEXA 35, ALEXA Mini, Mini LF, LF and 65 (.mxf, ARRIRAW .ari/.arx)
+  ⌨️ New shortcuts (Ctrl is Command on macOS)
+  - Shift+Page Up, Shift+Page Down - previous/next keyframe (by @czukowski)
+  - Ctrl+click on the previous/next frame buttons - move by 10 frames (by @czukowski)
+  - Shift+click on the previous/next frame buttons - previous/next keyframe (by @czukowski)
+  - Tracked points editor: Delete - remove selected, Ctrl+Z - undo, Ctrl+A - select all in the frame, Esc - clear selection
+  ⚙️ Behavior changes
+  - Minimum macOS version is now 10.15
+  - New keyframes use the "Smooth" easing by default. Projects with "Smooth" keyframes load without any keyframes in 1.6.x
+  - Lens breathing compensation is enabled by default for Sony files with breathing data
+  - VQF integration is now used for all clips (clips shorter than 10 s used Complementary)
+  - Autosync on a file without motion data now runs the optical analysis
+  - Zooming clips may be framed slightly differently, because the recorded focal length is now interpolated between frames
+  - "Static zoom": the zoom limit now lowers the smoothing only around the moments that don't fit, not in the whole clip. Projects from older versions keep the old behavior (Stabilization -> Advanced -> Zoom limit lowers the smoothing of the whole clip)
+  - "Preserve other tracks" no longer forces .mov and audio copy. Audio uses the selected "Audio codec", and the output stays .mp4 unless that is "Copy"
+  - Autosync uses the new "Optical analysis" offset method by default, also in the CLI. The previous default, rs-sync, is in Synchronization -> Advanced -> Offset method
+  🐛 Bug fixes
+  - Fixed the horizon slowly rotating with horizon lock on some cameras, e.g. Sony a7 IV (#1233)
+  - Fixed VQF drift, which could make the result shakier than the original (#1090)
+  - Fixed "Gyro bias" being applied to the accelerometer too
+  - Fixed corners cut off by a circle when lowering lens correction on some wide lenses, e.g. DJI Osmo Nano (#1185)
+  - Fixed automatic zoom with lens correction below 100%
+  - Fixed SuperView/HyperView changing shape with the zoom level when lens correction is below 100%
+  - Fixed the "black borders in view" timeline indicator missing small borders
+  - Fixed the preview being zoomed out and shaky outside the trim ranges (by @TimoLehnertz)
+ReleaseNotesUrl: https://github.com/gyroflow/gyroflow/releases/tag/v1.7.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

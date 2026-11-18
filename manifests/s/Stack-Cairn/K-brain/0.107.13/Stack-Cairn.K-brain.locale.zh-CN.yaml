@@ -1,0 +1,60 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Stack-Cairn.K-brain
+PackageVersion: 0.107.13
+PackageLocale: zh-CN
+Publisher: Stack-Cairn
+PublisherUrl: https://github.com/Stack-Cairn
+PublisherSupportUrl: https://github.com/Stack-Cairn/K-brain/issues
+PackageName: K-brain
+PackageUrl: https://github.com/Stack-Cairn/K-brain
+License: Apache-2.0
+LicenseUrl: https://github.com/Stack-Cairn/K-brain/blob/HEAD/LICENSE
+ShortDescription: 基于 Go 构建、运行在终端里的编程 Agent。
+Description: 氪脑（K-brain）是运行在终端里的编程 Agent，用 Go 构建，也可作为其他前端的后端底座。读代码、改文件、执行命令、验证结果，在同一会话中完成任务。运行 kn 开始使用，取自“氪脑”拼音 Ke Nao。
+Tags:
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  K-brain v0.107.13
+  本版从 main 的 a215358 构建。
+  修复
+  - 压缩本身超窗时自动恢复（#93）：中转端点的实际窗口比目录登记的小时（如 input_too_large … 664630 tokens > 500000 tokens），压缩不再直接失败，而是：
+    - 采纳端点报告的窗口；
+    - 改用分块转录摘要。
+    - 这类报错措辞现在也能识别为超窗。
+    - 截断时不会再把中文切成乱码。
+  - 流式请求空闲超时（#92）：流中途连接半开时，空闲 120 秒后按可重试错误处理，不再无限挂起。Ctrl+C 取消不受影响。
+  新功能
+  - 桌面端（LiveAgent）
+    - 编辑后返回 LSP 代码诊断，并新增只读的 lsp 查询工具（#89）。
+    - 后台子代理、wait 和后台进程结束后自动开一轮新回复；agent 运行的 shell 不再继承后端访问令牌（#90）。
+  - 上下文
+    - 除 AGENTS.md 外，也读取 CLAUDE.md 和 .cursor/rules（#88）。
+    - 压缩掉的历史存成 markdown 片段，模型可以回查（#91）。
+    - 回复被输出上限截断时自动续写（#94，TUI 接入见 #98）。
+  - Hooks：新增 PostToolUseFailure、压缩前后和 SessionEnd 事件（#96）。
+  - CLI 工具
+    - 只读的 grep、glob、list（#97）。
+    - web_fetch：抓取网页并转成文本（#101）。每次都需要确认，可以按域名设为"总是允许"；跨域重定向需要重新确认；走应用代理。
+    - edit 匹配更宽容，参数解码更稳（#99）。
+  - TUI
+    - 布局更紧凑，底部信息栏只占一行（#95）。
+    - grep/glob/list 显示自己的标题行，并折叠成计数（#100）。
+  下载与校验
+  提供 macOS、Linux、Windows 的 x64/ARM64 CLI 与 computer helper，共 12 个二进制；SHA256SUMS 用于校验下载文件。
+  完整变更
+ReleaseNotesUrl: https://github.com/Stack-Cairn/K-brain/releases/tag/v0.107.13
+InstallationNotes: 在终端中运行 kn。首次使用前，请在 %USERPROFILE%\.k-brain\config.json 中配置模型提供商。
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://github.com/Stack-Cairn/K-brain/blob/main/README.zh-CN.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

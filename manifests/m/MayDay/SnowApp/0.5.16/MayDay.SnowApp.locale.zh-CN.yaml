@@ -1,0 +1,47 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: MayDay.SnowApp
+PackageVersion: 0.5.16
+PackageLocale: zh-CN
+Copyright: 版权所有 (c) 2026 MayMay
+ShortDescription: 面向开发者的桌面应用，将 AI 对话、终端模拟、SSH 远程管理、Git 工具和内置浏览器面板整合到统一的工作空间中。
+Description: Snow App 是一款面向开发者的桌面应用，将 AI 对话、终端模拟、SSH 远程管理、Git 工具和内置浏览器面板整合到统一的工作空间中。它通过 Rust 原生模块处理性能关键型操作，包括 SQLite 存储、AI 流式传输、文件监控和 HTTP 请求。此外还支持 MCP 集成、AI 图像生成、技能系统、Hooks、子代理、代码库语义搜索与 AI 驱动的终端会话。
+Tags:
+- ai
+- codex
+- git
+- mcp
+- ssh
+- 终端
+- 聊天
+ReleaseNotes: |-
+  新功能
+  - 增量上下文压缩：新增可选的「增量压缩」模式（默认关闭，可在输入框加号菜单中开启）。较早的消息折叠为分层摘要（最多 3 层），最近的消息保持原文，稳定前缀持续命中提示词缓存；原始消息仍保存在数据库中，模型可通过新增的只读工具 context-recall 按需检索与展开（仅在该模式开启时提供，且限定当前会话）。
+  - 编辑 SSH 工作区连接：SSH 工作区目录新增「编辑连接」，以编辑模式重新打开 SSH 向导，并预填当前主机、端口、用户、远程路径与已保存的凭据。重新关联支持 SSH 目标，远程草稿、文件审阅批注、差异审阅评论与自定义命令随目录迁移；连接缓存失效后按新参数重连，登录身份变更且没有其他目录使用时清理旧凭据。
+  - 团队议题投票：团队面板的代码审阅改为议题，成员投票开启或关闭，主持人可一票否决锁定结果；旧的审阅记录导入时自动迁移为议题。任务与议题支持编辑，新增支持粘贴 / 拖入图片的 Markdown 编辑器与 @ 提及文件，删除任务、议题、评论与笔记前需确认。
+  - 团队未读与头像：动态流标记未读条目并显示未读分隔线，侧边栏入口聚合动态、任务、议题与入队申请的未读角标；成员可选择头像图片，居中裁剪并压缩后随成员信息同步。
+  改进
+  - 工具合并精简，减少注入模型上下文的工具定义：
+    - 配置工具（config-list / get / set / delete / logs-read）合并为 config-manage，通过 action 区分操作；list / get / logs 免确认，set / delete 仍需确认，「始终允许」分别记录为 config-manage:set 与 config-manage:delete。日志读取的范围参数改名为 logScope，且不再默认禁用。
+    - 浏览器 MCP 工具由 43 个合并为 10 个按 action 分派的领域工具（tab、page、interact、devtools、inspect、emulate、perf、heap、page-tools、request_share）。
+    - Computer Use 的 11 个工具合并为 screen（信息 / 截图）与 act（全部动作及步骤链）；act 新增 screenshotAfter，动作与随后的截图共用一次往返。
+  - 只读结果复用取代循环守卫：参数相同且工作区状态未变的只读调用直接复用缓存结果，移除重复调用中止与无工具恢复轮；聊天、宠物聊天、Repo Wiki 与文件搜索的 Agent 循环不再受固定轮数限制，运行到模型收敛、取消或请求超时为止；子代理取消模型请求次数与活跃时长预算，单会话并发上限默认不限。
+  - 加号菜单的条目说明改为悬停提示，模式子菜单宽度随内容自适应。
+  - 团队面板的错误横幅改为自动消失的统一通知，顶栏状态指示简化。
+  - @ 文件提及弹层取消最小高度，结果较少时不再留出底部空白。
+  破坏性变更
+  - 以旧配置工具名（config-list、config-get、config-set、config-delete、config-logs-read）记录的授权不会迁移，需要重新授权；已存储的配置键与值格式不变。
+  修复
+  - 上下文压缩产生的内部续接消息不再出现在消息导航中，导航改用持久化的用户消息 id，与数据库记录一致。
+  - 团队解散时通知成员与待审申请人，并在停止主持前等待移除消息发出；区分新旧连接 ID，过期连接不再解绑新连接；按设备派生稳定的成员 ID，标记离线时不再把已移除的成员重新加回。
+  - 团队主持人与成员的媒体 ID 保持一致，附件按消息记录引用的 ID 存储，缺失时立即返回失败；未连接主持人时中止保存，界面不再无限转圈，改为可重试的失败状态。
+  - 原生构建：本地 release 配置关闭 LTO，避免 thin-local LTO 与增量编译遗留未定义的 .llvm.<hash> 符号、在调用时触发 SIGSEGV；构建后用 nm -u 检查产物，发现悬空符号时清理并重建一次，仍存在则构建失败。
+ReleaseNotesUrl: https://github.com/MayDay-wpf/snow-app/blob/HEAD/RELEASE_NOTES_ZH.md#v0516
+Documentations:
+- DocumentLabel: 快速开始
+  DocumentUrl: https://github.com/MayDay-wpf/snow-app/blob/main/docs/zh-CN/1-快速开始.md
+- DocumentLabel: 文档
+  DocumentUrl: https://github.com/MayDay-wpf/snow-app/blob/main/docs/README.md
+ManifestType: locale
+ManifestVersion: 1.28.0

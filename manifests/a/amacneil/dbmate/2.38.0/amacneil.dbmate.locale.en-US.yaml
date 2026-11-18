@@ -1,0 +1,78 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: amacneil.dbmate
+PackageVersion: 2.38.0
+PackageLocale: en-US
+Publisher: Adrian Macneil
+PublisherUrl: https://github.com/amacneil
+PublisherSupportUrl: https://github.com/amacneil/dbmate/issues
+PackageName: Dbmate
+PackageUrl: https://github.com/amacneil/dbmate
+License: MIT
+LicenseUrl: https://github.com/amacneil/dbmate/blob/HEAD/LICENSE
+ShortDescription: A lightweight, framework-agnostic database migration tool
+Tags:
+- clickhouse
+- database
+- database-migrations
+- database-schema
+- docker
+- go
+- golang
+- migration
+- migrations
+- mysql
+- nodejs
+- postgres
+- postgresql
+- python
+- sqlite
+ReleaseNotes: |-
+  Notable changes
+
+  Security
+  - Go 1.27.3, which fixes GO-2026-6809 in crypto/x509 (#874).
+  - andybalholm/brotli v1.2.8, which fixes GO-2026-6888 (#873, #879), and klauspost/compress v1.20.2, which fixes GO-2026-6865 (#884). Both are reached through the ClickHouse and BigQuery drivers. govulncheck reports 3 vulnerabilities in v2.37.0 and none in this release.
+
+  Features
+  - --migration-application-name (env DBMATE_MIGRATION_APPLICATION_NAME, off by default): on PostgreSQL, each transactional migration shows up as <application_name>[<version>] in pg_stat_activity while it runs (#853).
+  - rollback --strict fails, instead of rolling back an older migration, when the most recently applied migration has no file (#876).
+  - status lists applied migrations whose file is missing as [?] <version> (file not found), and status --strict exits non-zero when there are any. --exit-code is unchanged (#883).
+
+  Fixes
+  - A UTF-8 byte order mark at the start of a migration file is now ignored (#869), and a migration saved as UTF-16 or UTF-32 now gets an error saying so, with conversion instructions in the README (#878).
+  - npx dbmate now exits non-zero when the binary can't be started or is killed by a signal; it used to exit 0 (#875).
+  - debug=1 logging works again for ClickHouse (#866).
+
+  Release process
+  - Docker images are now built from the CI build binaries (#865), and npm publishing runs in its own job (#880). This is the first release through both, so please open an issue if anything about the published packages or images looks off.
+
+  What's Changed
+  - ci: remove Homebrew bump job from post-release workflow by @dossy in #864
+  - ci: build Docker images from the CI build matrix binaries by @dossy in #865
+  - fix: bump clickhouse-go to v2.49.0 to restore debug=1 logging by @dossy in #866
+  - fix: ignore a byte order mark at the start of a migration by @Dem1241 in #869
+  - build(deps): bump alpine from 3.24.2 to 3.24.3 by @dependabot[bot] in #871
+  - fix: bump andybalholm/brotli to v1.2.7 by @snooze26h in #873
+  - build(deps): bump golang from 1.27.2 to 1.27.3 by @dependabot[bot] in #874
+  - fix: fail npm CLI when the binary cannot complete by @pcbeingused333 in #875
+  - feat(postgres): add --migration-application-name by @AdamMagued in #853
+  - fix: fail rollback --strict when the latest applied migration file is missing by @muhadyan in #876
+  - docs: fix invalid SQL example and typos in README by @toyeshhm in #877
+  - fix: explain parse errors for UTF-16 and UTF-32 migration files by @dossy in #878
+  - fix: bump andybalholm/brotli to v1.2.8 by @dossy in #879
+  - ci: publish to npm from a separate job by @dossy in #880
+  - test: run the npm CLI tests against the published package by @dossy in #881
+  - feat: show applied migrations without a file in status by @muhadyan in #883
+  - fix: bump klauspost/compress to v1.20.2 (GO-2026-6865) by @dossy in #884
+  - v2.38.0 by @dossy in #885
+
+  New Contributors
+  - @Dem1241 made their first contribution in #869
+  - @pcbeingused333 made their first contribution in #875
+  - @muhadyan made their first contribution in #876
+  - @toyeshhm made their first contribution in #877
+ReleaseNotesUrl: https://github.com/amacneil/dbmate/releases/tag/v2.38.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

@@ -1,0 +1,89 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.15.0
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  v0.15.0 把写作与 PDF 深度阅读串成一条完整工作流：写作项目可以独立绑定 GitHub 仓库，PDF 新增章节与段落级引用、嵌入阅读器内的共享批注，以及 arXiv HTML 页面加载。同期加入自定义快捷键、论文代码仓库识别、论文库文本属性与精读 Agent 席位，并集中修复 Windows 编译与进程清理，以及 PDF 渲染、缩放和翻译相关问题。
+  新功能
+  - 项目级写作与 GitHub 同步：写作项目移到论文库下方，项目目录、源码、资源与编译后的 PDF 共用一套源码/预览工作区；每个项目可以单独绑定并同步到自己的 GitHub 仓库。（commit / commit by @qychen2001, @Phil-Fan）
+  - 章节与段落级引用：支持 paper.pdf#2.1#p3 形式的引用，Agent 问答、Markdown 链接与双链使用同一套解析和临时高亮。（#879 by @ffy6511）
+  - 内嵌 PDF 阅读器：嵌入的 PDF 可以定位并高亮引用目标、共享原论文的批注与评论卡，并在不重新打开文档或重置缩放的情况下返回目标页。（commit / commit / commit by @ffy6511）
+  - 自定义快捷键：设置页可以录制、清除、恢复和搜索快捷键，Cmd+L 与“加入对话”分开，macOS 菜单同步自定义键位。（commit by @ffy6511）
+  - 论文代码仓库识别：从论文摘要、脚注和末页提取 GitHub 仓库，写入空的 code_repo，并记住手动修改过的值。（commit / commit by @JiaheChen2002）
+  - CLI / MCP 论文元数据编辑：可以通过 CLI 与 MCP 更新论文的出版物、标题、日期、DOI、arXiv ID 与作者列表，并同步写入 catalog 与 metadata.json。（#875 by @bet4it）
+  - 论文库文本属性：自定义属性新增 Text 类型，可直接在单元格里编辑复现备注、实验配置等自由文本。（#868 by @Immortal-Fates）
+  - 精读论文独立席位：设置 → Agent → 精读论文可以单独选择 Agent 与模型，不再继承默认 Agent 或 ACP 默认模型。（#867 by @hanlife02）
+  - 外部终端选择：选择终端应用时显示各自图标，未设置时使用首个已安装终端；Otty 打开窗口后自动置前。（commit / commit / commit by @Phil-Fan）
+  - Mermaid 图表：笔记与 Agent 消息里的 Mermaid 代码块默认渲染为图表，主题色跟随明暗模式，悬停可复制源码或编辑。（commit / commit by @Phil-Fan）
+  - Windows Word 模板：接入官方 Windows Word 模板，引用会写入当前打开的文档。（commit by @JiaheChen2002）
+  改进
+  - PDF 渲染与生命周期：缩短复杂 PDF 的首屏高清渲染和框选等待，修复原生链接重复累积、连续切换文档时异步文档未释放，以及阅读器关闭后共享版面 ONNX 会话被销毁的问题。（#874 by @ffy6511, commit by @JiaheChen2002）
+  - 写作编译反馈：编译按钮区分空闲、编译中、成功、失败与取消，失败不会再被完成状态覆盖；编译错误统一进入问题列表，失败时用警示按钮展示具体错误。（commit / commit / commit by @JiaheChen2002, @Aschenbath）
+  - PDF 叠加卡片随缩放：页面翻译入口、右侧批注卡与 Ask / 翻译 / 视觉批注浮卡都按 PDF 缩放比例重新布局字号与图标，50% 时同步减半、300% 时同步放大。（#883 by @ffy6511）
+  - 侧边栏文件树：重做行的 hover 与选中背景、图标内边距和操作按钮，点击非论文文件夹时保留当前树选中与 Library 范围。（#927 by @ffy6511, @Phil-Fan）
+  - Windows 兼容性：对齐 WebView2 与 windows crate 版本，处理 \\?\ 扩展路径、.claude/skills 链接、并发文件替换与进程树回收。（#908 / #922 by @Aschenbath, @Phil-Fan, @JiaheChen2002）
+  - 依赖安全更新：升级 zip、Tauri updater 与受 RustSec / npm 公告影响的依赖。（commit / commit / commit by @Phil-Fan）
+  - 新建文件默认 Markdown: 文件树新建文件默认使用 .md，没有扩展名时自动补全。（#851 by @V-IOLE-T）
+  - PDF 选择工具栏：“加入对话”成为主按钮，“快速对话”收进菜单，批注入口移入颜色组并打开聚焦的批注编辑器。（commit / commit by @ffy6511）
+  修复
+  - Windows TeX 路径：传给 latexmk、清理和 SyncTeX 的路径去掉 \\?\ 前缀，工具返回的路径按调用方写法还原。（#922 by @Aschenbath）
+  - 长路径或空格下的编译问题：处理 TeX 日志折行与路径解析后，问题列表能识别错误并跳转到对应源码行。（#910 by @Aschenbath）
+  - 引导与诊断：没有包管理器时提供从 nodejs.org 下载 Node.js 的入口；已删除的引导笔记不会再被自动补回。（#893 / #894 by @Aschenbath）
+  - 代理下的本地请求：localhost 与 127.0.0.1 绕过系统代理，MinerU 健康检查不再被 Clash 等代理接管而超时。（#887 by @Aschenbath）
+  - arXiv 元数据：解码 Atom 字段里的 XML 实体，标题、摘要与 BibTeX 不再显示 <、& 等原文。（commit by @Aschenbath）
+  - ModelScope 入库状态：刷新页面后仍显示“已入库”，不再把已导入的行画成未导入。（commit by @JiaheChen2002）
+  - 写作与 PDF 选择：在 PDF 上拖选不再把原生选区画回源码面板；双击 PDF 只选词，不再移动源码光标。（commit / commit by @Phil-Fan）
+  - PDF 翻译重影：翻译重排预览的 DOM 选区不再把译文重绘成第二层偏移文字。（commit by @Phil-Fan）
+  - 外部移动论文：CLI 或文件管理器移动论文后，打开的标签、PDF 批注、树选中与 Library 范围跟随论文 id 更新，离开 Vault 的论文关闭标签。（commit by @Phil-Fan）
+  - 新窗口崩溃：macOS 新窗口的 tiling 设置回到主线程，⌘N 不再触发 AppKit 崩溃。（commit by @Phil-Fan）
+  - Vault 恢复与元数据：中断的回收站恢复可以重试，恢复索引时保留已有 metadata；catalog 元数据 sidecar 写入失败会重试。（commit / commit / commit by @qychen2001）
+  - 双链编辑：双链源码节点首尾按 Enter 不再重复生成链接，并支持连续输入中文括号 【【 / ［［ 触发候选。（#853 by @V-IOLE-T）
+  - arXiv HTML 阅读：直接在 WebView 中加载 arXiv HTML 页面与内联资源，并把没有 HTML 版本、网络错误和无效 URL 分开提示。（commit by @JiaheChen2002）
+  - 空白章节文件：\input 引用空白 .tex 文件时不再中断整篇 TeX 读取。（commit by @Phil-Fan）
+  - Agent 提及与模型列表：发送后保留 @、技能和斜杠 chips；Grok 的模型目录通过 ACP 通知更新后，选择器同步显示完整列表。（commit / commit by @Phil-Fan）
+  - 窗口布局预设：阅读模式下切换或打开论文保持沉浸，关联笔记在后台打开；笔记与 Agent 布局不再受左侧栏开合影响。（#929 by @bet4it）
+  已解决问题
+  - 章节与段落引用：Agent 问答、Markdown 链接与双链可以统一解析章节和段落目标并高亮。（#877 / #878 / #880 by @ffy6511）
+  - PDF 高清渲染与生命周期：复杂 PDF 的首屏渲染、框选等待、原生链接累积与文档释放得到修复。（#871 / #872 / #873 by @ffy6511）
+  - PDF 卡片缩放：缩小页面时翻译入口和批注卡不再反而变大，放大时字号与图标保持清晰。（#883 by @qychen2001）
+  - 翻译重影：选中翻译预览时不再出现第二层偏移文字。（#884 by @qychen2001）
+  - 引导笔记：删除或改名的引导笔记不会在下次打开 Vault 时被重新写入。（#886 by @qychen2001）
+  - 自定义快捷键：Cmd+L 与“加入对话”不再冲突，设置页可以搜索并重绑快捷键。（#869 by @ffy6511）
+  - 项目级同步：thesis/ 下的一级子目录按项目分别识别并同步到独立仓库。（#892 by @qychen2001）
+  - 写作编译提示：编译失败由警示按钮展示，不再弹 Toast，编译按钮状态与视觉反馈保持一致。（#896 / #905 / #906 by @qychen2001）
+  - 新窗口与论文移动：⌘N 可以正常打开多个窗口，外部移动正在阅读的论文后工作区状态保持同步。（#897 / #900 by @qychen2001）
+  - 代码仓库识别：从 PDF 提取本论文的 GitHub 仓库，避免把参考文献里的链接当成代码地址。（#907 by @qychen2001）
+  - Windows 路径与链接：\\?\ 路径下的 TeX 编译、.claude/skills 解析与并发写入在 Windows 上恢复正常。（#909 / #913 / #914 by @Sonder4, @Aschenbath）
+  - arXiv 元数据实体：标题与摘要不再原样显示 XML 实体，BibTeX 导出同步修正。（#916 by @Aschenbath）
+  - ModelScope 入库标签：刷新后已入库的论文继续显示“已入库”。（#924 by @cj-jssh）
+  - 侧边栏交互：溢出、hover 颜色、按钮状态与点击反馈动画，以及非论文文件夹的选中状态都得到修正。（#927 by @Phil-Fan）
+  已知限制
+  - Windows Word 模板：官方模板已接入并通过代码检查，真实 Office 环境中的写入验收仍在进行中。（commit by @JiaheChen2002）
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.15.0
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
