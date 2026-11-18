@@ -1,0 +1,84 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: athrvk.Vayu
+PackageVersion: 0.50.0
+PackageLocale: en-US
+Publisher: Atharva Kusumbia
+PublisherUrl: https://github.com/athrvk
+PublisherSupportUrl: https://github.com/athrvk/vayu/issues
+Author: Atharva Kusumbia
+PackageName: Vayu
+PackageUrl: https://github.com/athrvk/vayu
+License: AGPL-3.0
+LicenseUrl: https://github.com/athrvk/vayu/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Atharva Kusumbia
+ShortDescription: Open-source API client with a native C++ load-testing engine - Postman-style requests and k6-level load tests in one local app.
+Description: Vayu is a free, open-source desktop app for Windows, macOS, and Linux that combines a full REST and GraphQL request builder - with collections, environments, and scripting - and a high-throughput load tester powered by a C++20 engine, with all data staying on your machine.
+Moniker: vayu
+Tags:
+- api
+- api-client
+- api-testing
+- benchmark
+- developer-tools
+- graphql
+- http
+- insomnia
+- load-testing
+- performance
+- postman
+- rest
+ReleaseNotes: |-
+  0.50.0 - 2026-11-10
+  Read before updating: Stop now ends a run at once, cutting off a teardown script's network calls; only one load or collection run can be live at a time; Vayu no longer replaces an engine that serves another data directory; and Settings now refuses proxy bypass entries, proxy passwords and pasted CA blocks that never worked (all under Changed). New: a send can be cancelled, streaming load runs show their events live and time the first event, Vayu names each cookie it drops, and the Dock shows an engine crash with a Restart button.
+  Added
+  - A send can be cancelled. While a request is sending, Cancel sits beside the Send button. The request stops at the engine too, History records it as stopped, and variable writes its scripts made before the cancel are kept (#3379, #3391).
+  - Streaming load runs show their events live. A Stream events card shows events so far, events per second and streams open while the run goes, for a single request and for a collection load run with a streaming step. The dashboard used to stay blank until the streams ended (#3297, #3310).
+  - Time to first event for streaming load runs. First byte ends at the response headers, so a gateway that answered at once and then thought read as fast. The Stream events card and the report now have a first event row (p50, p95, p99, max), and two budgets go with it: Time to first event p95 at most and Events per second at least (#3294).
+  - The Markdown and HTML report exports have a Stream section, as the JSON export already did (#3298).
+  - Vayu says when it drops a cookie. A cookie over the size limit, past the 150 a request can carry or past the 50 a response can set was dropped with no word. A warning above the response now names each one, in a plain send, a streaming send and a collection run's step. A collection load run reports a count (#3314, #3317).
+  - The Dock shows an engine crash. The status tooltip names the cause ("Vayu's engine was stopped by signal 9.") and a Restart button sits beside it. The light used to stay on connected (#3372).
+  - An authorization-code sign-in can be cancelled from the OAuth 2.0 token row with Cancel sign-in, and one left unfinished times out after 5 minutes and frees its port (#3369, #3387).
+  - A collection run's step and a collection load run's Steps tab show how many variables did not resolve, beside the extractor misses (#3292).
+  - A collection run reports HTTP/2 fallback. The run header shows HTTP/2 not negotiated with a count, and the step says "HTTP/1.1, not HTTP/2", as single sends and load runs already did. Runs saved before this update still read 0 (#3284).
+  - Settings > Client certificates marks an entry Vayu cannot use (its file moved, for example) as Not presented, with the reason. It used to look healthy and was skipped on every send (#3318).
+  - The variables editor's conflict banner has Keep mine beside Take theirs (#3396).
+  - A failed update download says "Couldn't download Vayu X" with the reason and Retry. The progress bar used to stick (#3374).
+  - Settings > Keyboard shortcuts lists the window shortcuts (zoom, full screen, close window, quit) and the collection tree and tab strip ones (rename, delete, close tab), and a search for "zoom" finds them (#3394).
+  Changed
+  - Stop ends a run at once. A Stop, or quitting Vayu, used to wait for whatever was in flight: a collection run's current step, a script's pm.sendRequest, a token request or renewal, a monitor scrape. Each is now cut off, so a teardown script's network cleanup does not happen on a stopped run, and its card reads "Skipped". A step cut short by Stop shows as stopped, is kept out of failures and latency, and the completion toast counts it (#3370, #3399, #3412).
+  - A Stop that arrives after a load run has finished keeps the run's own result (Completed, or Failed on a budget), and the dashboard says "The run had already finished when Stop arrived." A Stop during the run's last seconds no longer waits out the drain (#3365, #3411).
+  - One live run at a time. A load run, or a collection run from the Run Collection dialog, cannot start while another is live. The dialog says so, with View run and Stop. The second run used to take the dashboard while the first kept sending unseen. A run an agent starts meanwhile goes to the background, with a toast saying it will be in History (#3378, #3413).
+  - Opening the app replaces only an engine that serves its own data directory. A standalone vayu-engine with another --data-dir, or a second profile's engine, is left running, and the app moves to the next port. If every port is taken it says "Another Vayu engine is using port 9876. Quit it and press Retry." An engine left over from 0.49.0 or earlier is not replaced either: quit it by hand (#3384).
+  - Settings refuses a Proxy bypass list entry that never matched, such as localhost:8080 or *.example.com, and names it. The host used to go through the proxy anyway. Accepted forms are an exact host, .domain, an IP, a range such as 10.0.0.0/8, or * alone. A bad entry already stored is skipped and the rest still apply (#3283).
+  - A raw @ in the proxy password is refused. Every send failed with PROXY_ERROR "Bad hostname"; write it as %40 (#3283).
+  - A pasted CA block that does not parse is refused, naming which one ("certificate 2 of 3 does not parse"). Every https:// send used to fail, public sites included. A bad block already stored is now left out (#3280).
+  - A variable name that is blank or starts or ends with a space is refused, since {{ name }} could never reach it. The variables editor trims names on save, and Postman and Insomnia imports trim names and skip blank ones (#3268).
+  - A down proxy is now PROXY_ERROR rather than CONNECTION_FAILED, and a forwarding proxy's 407 on an http:// request is PROXY_ERROR rather than the server's response (#3282).
+  - An http:// server that answers in another protocol, usually HTTP/2 without TLS, is reported as "The server answered in another protocol" with a tip to use https://, under PROTOCOL_MISMATCH rather than INVALID_URL (#3312).
+  - A cookie set during a redirect goes to the next hop only when scheme, host and port all match. It used to follow a port change and reach sibling domains through Domain= (#3309, #3311, #3313).
+  - A conflicted variable is not saved until you choose Keep mine or Take theirs; saving used to keep yours without asking. A failed variables save retries on its own (#3396).
+  - The settings connection test shows the proxy without its user and password, and says when the environment's proxy (http_proxy, https_proxy) carried the request. The MCP connection check never returns proxy credentials, even with Reveal secrets to agents on (#3291).
+  - Ctrl+Q quits on Windows (#3394).
+  - MCP stop_run on a streamed request answers the status History records, and running if the run has not settled (#3405).
+  - A variable stored through the API or MCP as a number, boolean or object is sent as that text. It went out empty, and the Postman export wrote [object Object] (#3286).
+  - A Postman environment export counts a secret typed number or boolean among the variable types left out (#3295).
+  - The Export as OpenAPI hint for Values only says operations no request claims are removed (#3277).
+  - For people driving the engine API: a raw POST /runs naming an environment or collection resolves {{variables}} from them, including in basic-auth credentials and response checks; blank environment and collection names are refused; a collection run with a top-level stream is refused; and updating a collection can only unbind its spec (#3287, #3293, #3299, #3368).
+  - Electron 44.10.0. On Linux X11, paste no longer hangs until restart (#3278).
+  - Internal: the MCP server, engine lifecycle, save status and shutdown were reworked, and tests and documentation kept in step.
+  Fixed
+  - A collection run sends a request saved with Event stream on as a stream. It went out as an ordinary request, so it hit its timeout or "succeeded" with its events counted nowhere. The Run dialog shows the stream caps and budgets when a request in it streams (#3299).
+  - A redirect to a host that needs a client certificate presents it. Redirected from http:// to an mTLS https:// host, a request failed with "certificate required". Fixed for plain sends, streams and load runs (#3309, #3311, #3313).
+  - An OAuth 2.0 refresh no longer signs you out. Two sends that found a token expired both refreshed it, and with a provider that rotates refresh tokens Vayu then deleted the token the first had saved. A 503 or 429 during a refresh also deleted it. Only the provider rejecting the refresh token clears it now (#3359, #3364).
+  - With Event stream on, a reply that was not an event stream kept its body. A 401 or 429 from an LLM API showed "No events received" and an empty Body. The Events tab now names the type the server sent and points to Body, and scripts can read it. A finished stream shows the bytes received instead of 0 B (#3272).
+  - In a collection run with sub-folders, each step uses its own folder's variables. Once a script or extractor wrote a variable, a sub-folder's {{var}} went out with its braces, and pm.collectionVariables used the run's collection (#3266).
+  - A secret variable on a sub-folder was stored in clear in the run's saved snapshot (#3275).
+  - A teardown script's pm.environment.set and pm.globals.set were dropped (#3273).
+  - After a collection run, the Variables pane and {{variable}} previews kept the old values while the next Send used the new ones (#3267).
+  - Switching tabs during a send re-enabled Send, so the request could go out twice and the slower answer won. A streamed request that finished in another tab showed an older run when you came back (#3379, #3393).
+  - A run stopped while starting could be recorded as completed, and a run's duration included its cleanup, so RPS read slightly low. A load run's report read mid-run showed rates far too high (#3362).
+ReleaseNotesUrl: https://github.com/athrvk/vayu/releases/tag/v0.50.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

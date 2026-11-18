@@ -1,0 +1,69 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Pinvou.PinvouAgent
+PackageVersion: 1.0.2
+PackageLocale: zh-CN
+Publisher: pinvou
+PublisherUrl: https://pinvou.com/
+PublisherSupportUrl: https://github.com/Pinvou/pinvou-agent/issues
+PackageName: pinvou3
+PackageUrl: https://pinvou.com/
+License: MIT
+LicenseUrl: https://github.com/Pinvou/pinvou-agent/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Pinvou
+ShortDescription: 开源桌面 AI 智能体工作台，覆盖工具、文件、知识与工作流。
+Description: Pinvou Agent 是一个开源的桌面 AI 智能体工作区，面向工作、设计与编程。它把日常事务、可视化设计和软件开发整合进同一个桌面工作区，让任务以真实结果收尾：可以使用工具、处理文件、积累个人知识，通过 ACP 在真实项目中引入专用编码智能体，或将提示词变成可持续编辑的可视化作品。
+Tags:
+- mcp
+- 人工智能
+- 工作流
+- 智能体
+- 知识库
+ReleaseNotes: |-
+  官方下载 / Official Downloads
+  Pinvou 已在新华三官网提供官方下载渠道：
+  - Windows x64：新华三官网 — pinvou3 for Windows
+  - macOS Universal：新华三官网 — pinvou3 for macOS
+  - H3C LinSeer MegaCube（Linux ARM64）：新华三官网 — pinvou3 for MegaCube
+  新华三官网与 GitHub Assets 均为官方分发渠道，版本同步可能存在时间差；下载前请确认页面显示的版本。v1.0.1/v1.0.2 官网页面尚未同步更新，当前版本请优先使用本页下方 Assets。
+  Pinvou 1.0.2 是 1.0 系列的第二个维护版本，收录 v1.0.1（#890 合入点 5b6e63aa34）之后进入 main 的 9 个 PR——即 1.0.1 Release 注意事项中预告「将随下一版本发布」的那批更新。
+  新功能
+  - 知识库：模型下载全程可取消——kb_model_cancel 完整链条（tauri/web bridge 面、domain-adapter 接线、共享 bridge helpers、契约测试），取消入口接入 KnowledgeView 进度 UI，已取消的下载收敛为中性状态（不再报红），取消标志在安装边界生效。（#861）
+  - 知识库：基于 notify 的增量索引 watcher 基础能力（仅库实现，尚未接线，由消费方决定何时驱动；接线跟踪在 #869）。（#864）
+  - 模型配置：远端自定义端点的模型发现与长度探测——模型表单（openai-compatible、openai-responses、全部 vendor preset、anthropic、gemini、local）与 ACP provider 表单（codex/kimi）新增「获取模型列表」入口（此前连接测试拉取 /models 后直接丢弃响应体），pinvou models discover 提供 CLI 镜像。（#870）
+  问题修复
+  - 会话：流式响应进行时保持文本选区与代码复制可用——此前每个流帧整体替换消息 DOM，选区与代码复制控件在点击/异步剪贴板完成前即被清除（Linux 0.10.16 复现）；改为将净化后的 Markdown reconcile 进既有 DOM，跨格式化、高亮、列表/表格重排保留源侧选区端点与复制控件，含当前正在生成的消息。（#884）
+  - pptx：不再发布空白封面缩略图——python-pptx 默认模板携带纯白占位 docProps/thumbnail.jpeg（256x192 单色）随每个生成文档出厂，叠加服务端封面注入的 macOS CJK 字体探测缺陷，使聊天 artifact 卡片上的 PPTX 徽标卡渲染为空白 16:9 区域。（#891）
+  - chat：用量仪表在工具轮次保持活性——chat:usage 此前每轮仅在 TurnComplete 发射一次，且 input_tokens 为整轮计费聚合（对轮内每个模型请求求和），导致多请求工具轮的仪表冻结在虚高读数、会话开始时长期空白。（#892）
+  - 前端：code-mode 输入框页脚的麦克风按钮回归发送按钮旁——左侧控件组缺少 flex-1 使空闲空间均分到三处、麦克风悬浮在行中间。（#893）
+  内部改进
+  - 依赖：pinvou-knowledge 对 server-only 依赖集（anyhow、calamine、chrono、encoding_rs、if-addrs、parking_lot、rusqlite、tempfile）加 feature 门，client-only 构建不再编译 server-only 依赖集；并附 CJK 宽度补丁。（#887）
+  - relay：remote-control-relay 的 ws 8.22.0 → 8.23.0（声明区间内再生成），携带 GHSA-37g9（HIGH，DoS）的修复。（#888）
+  注意事项
+  - 版本提升（#895）之后合入 main 的 3 个 PR（#858 remote_kb trash/rename 命令、#867 knowledge rename/trash/pagination API、#857 会话统计 timeline 命令）不包含在 v1.0.2 安装包中，将随下一版本发布。
+  - Windows 和 macOS 安装包尚未正式签名。Windows 首次安装可能出现 SmartScreen 提示；macOS 首次打开如被 Gatekeeper 拦截，可在确认安装包来源可信后解除隔离再打开。
+  - LoongArch64 安装包继续随发布提供（dpkg 架构 loong64，面向 UOS V25 / deepin 23/25 新世界系统）；平台降级面不变：本地嵌入不可用（知识库检索自动降级全文检索）、连接器与 Codex/Claude 原生运行时无按需安装器（PATH 已装二进制继续可用）。
+  - 官网页面版本同步可能滞后，v1.0.2 官网页面尚未更新，下载前请确认页面显示的版本。
+  - 安装包与发布产物由版本 PR（#895）合入 main 后触发的发布工作流构建，未在本地构建。
+  - 本版本 PR 附带一条依赖门豁免：RustSec 维护状态公告 RUSTSEC-2026-0543（chrono unmaintained，非漏洞、无修复版本）加入 deny.toml ignore 并附移除条件注释，与产品行为无关。
+  构建来源：main @ 7e6b65831 / Actions #44217971460（五平台安装包同源构建）
+  官网更新日志
+  zh-CN
+  新功能
+  - 知识库模型下载可取消，取消入口接入进度 UI；远端自定义端点支持一键获取模型列表（模型表单与 ACP provider 表单），CLI 提供 pinvou models discover；知识库新增增量索引 watcher 基础能力。（#861/#870/#864）
+  修复
+  - 流式响应不再打断文本选区与代码复制；用量仪表在工具轮次保持实时；修复 PPTX 空白封面缩略图；修复 code-mode 麦克风按钮位置。（#884/#892/#891/#893）
+  内部改进
+  - pinvou-knowledge server-only 依赖集 feature 门；relay ws 依赖安全更新（GHSA-37g9）。（#887/#888）
+  en-US
+  New Features
+  - Knowledge-base model downloads can now be cancelled, with the cancel entry wired into the progress UI; remote custom endpoints support one-click model discovery in the model and ACP provider forms, mirrored by pinvou models discover in the CLI; the knowledge base gains an incremental indexing watcher foundation. (#861/#870/#864)
+  Fixes
+  - Streaming responses no longer clear text selections and code-copy controls; the usage meter stays live across tool turns; PPTX no longer ships blank cover thumbnails; the code-mode microphone button is back beside the send button. (#884/#892/#891/#893)
+  Internal improvements
+  - Feature gate for the pinvou-knowledge server-only dependency set; security update of the relay ws dependency (GHSA-37g9). (#887/#888)
+  Full Changelog: https://github.com/Pinvou/pinvou-agent/compare/v1.0.1...v1.0.2
+ReleaseNotesUrl: https://github.com/Pinvou/pinvou-agent/releases/tag/v1.0.2
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

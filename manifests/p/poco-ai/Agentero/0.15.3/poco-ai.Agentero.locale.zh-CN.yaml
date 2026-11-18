@@ -1,0 +1,61 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.15.3
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  本次发布把 Agent 回复从纯 Markdown 扩展到只读结构化 UI 块，PDF 划词翻译改为可固定、可拖动的浮卡，广场订阅条目可以直接交给 Agent；同时补齐 CLI 的订阅源命令与 discover 关键词 OR 能力，并修复 Zotero 迁移、广场嵌入页、快速对话和 PDF 翻译链路的一批问题。
+  新功能
+  - Agent 回复中的只读 UI 块：助手回复里行首独立的 openui-lang 围栏会解析成只读组件，覆盖布局、文本、状态、数据、论文阅读与流程；配色跟随主题 token，图表在 320px 侧栏内仍可读，组件签名随内置 skill 下发。（#1007 by @ffy6511）
+  - PDF 划词翻译浮卡：翻译结果以浮卡显示，可拖动、缩放和复制，滚动或缩放 PDF 时保留；Esc 关闭、P 固定，顶部预览原文并可跳回选区，同一阅读器只保留一张卡片。（#974 by @ffy6511）
+  - 广场订阅条目加入对话：RSS 列表的右键菜单和详情页工具栏新增「加入对话」，整条条目（标题与摘要或全文）作为引用 chip 直接进入 Composer。（#955 by @HenryLoveMiller）
+  - CLI 订阅源命令：新增 agentero feed list/add/remove/refresh/items/read 六个子命令，与桌面端共享抓取管线和 feeds.sqlite，返回稳定错误码，支持 cron 增量拉取。（#969 by @HenryLoveMiller）
+  改进
+  - Antigravity 改用原生 agy acp: 不再下载独立的 ACP server，直接复用本机 agy acp 与已有登录态，并解除 macOS Intel 的架构限制。（#1011 by @bet4it）
+  - Markdown 源码切换收进状态栏：渲染与源码的切换固定在编辑器状态栏左端，两处工具栏的重复入口移除，快捷键提示与按下状态保留。（163eb4ea6 by @ffy6511）
+  - CLI discover 支持关键词 OR: --match any（MCP 对应 keywordMatch）把多个关键词用 OR 合并，多词雷达不再召回归零，默认仍是 AND。（#971 by @HenryLoveMiller）
+  修复
+  - 广场嵌入页适应面板并支持缩放：默认等比适配面板宽度，工具栏提供 25%–200% 手动缩放，点击百分比恢复自动适应，尺寸变化不重载 iframe。（#1005 by @W-RMSL）
+  - 切换标签不再丢广场页面：已激活的嵌入页在切换工作区标签或分屏焦点后保持挂载，iframe 与页内状态不丢，后台标签仍按需加载。（#989 by @W-RMSL）
+  - Zotero 迁移不再被路径检查中断：选择主目录下的新知识库时，父目录探测停在文件访问范围边界，不再抛 forbidden path。（#996 by @YasyaKarasu）
+  - 快速对话保持常显且可调整：指针离开、滚动或缩放 PDF 后卡片仍在，可拖拽改变大小，长公式可横向滚动并受窗口边界约束。（#992 by @Aschenbath）
+  - 经管期刊等级不再丢失：EasyScholar 返回的 FMS 与 UTD24 在标签投影时保留，同一收录值只显示一次。（#1013 by @Aschenbath）
+  - Agent 回复里的 Mermaid 与表格：Mermaid 围栏改用共享渲染器；表格全屏改为应用内浮层，Esc 关闭。（176bfeda2 / 4f5f2a8c5 by @ffy6511）
+  - 本地技能出现在 / 菜单：斜杠菜单合并本地 SKILL.md 列表，选中后插入技能 token，ACP 命令仍优先。（cc8e7634f by @ffy6511）
+  - ACP 命令前缀保持原样：按 agent 声明的 $name 形式插入和发送，只认 $skill 的 agent 不再拒绝 /skill。（21497e578 by @ffy6511）
+  - 最小化窗口可以重新唤起：Windows 下从齿轮再次打开设置等单例窗口时，先恢复、显示再聚焦。（1138d198a by @ffy6511）
+  - 删除论文不再残留 catalog 行：文件夹已不存在的条目会在删除时一并清理，不再长期显示为缺少 PDF。（75aa1fb7f by @qychen2001）
+  - 浅色主题下引用标签可读：去掉 muted 文字色覆盖，Twitter 浅色主题下引用标签不再显示为黑块。（#990 by @W-RMSL）
+  - 编号公式可以定位：公式编号从 layout 的 \tag{N} 解析，旧索引缺少公式时 #formula=N 也能找到页内公式。（92c4aae28 by @ffy6511）
+  已解决问题
+  - 分栏翻译没有进度：双栏翻译面板现在显示翻译进度，长文档翻译时不再只剩空白面板。（#994 by @ffy6511）
+  - 全文翻译分栏报错：渲染前等待译文显示文档就绪，全文翻译不再因分栏报错或出现空白页。（#991 by @ffy6511）
+  - 快速对话回复丢失：marks 刷新不再用语料库快照覆盖进行中的问答，已生成的回复在刷新后仍在。（#945 by @ffy6511）
+  Full diff: https://github.com/poco-ai/Agentero/compare/v0.15.2...v0.15.3
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.15.3
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

@@ -1,0 +1,57 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Stack-Cairn.LiveAgent
+PackageVersion: 2.0.15
+PackageLocale: en-US
+Publisher: Stack-Cairn
+PublisherUrl: https://github.com/Stack-Cairn
+PublisherSupportUrl: https://github.com/Stack-Cairn/LiveAgent/issues
+PackageName: LiveAgent
+PackageUrl: https://github.com/Stack-Cairn/LiveAgent
+License: MIT
+LicenseUrl: https://github.com/Stack-Cairn/LiveAgent/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Stack-Cairn
+ShortDescription: A local-first AI agent desktop client that deeply integrates large language model reasoning with local system tools.
+Description: LiveAgent is a local-first AI agent desktop client. It deeply integrates large language model reasoning with local system tools, so the AI can genuinely operate your file system, run commands, and manage scheduled tasks — while the Gateway enables remote access and collaboration.
+Tags:
+- agent
+- agentic
+- ai
+- claude-code
+- codex
+- large-language-model
+- llm
+- mcp
+ReleaseNotes: |-
+  LiveAgent v2.0.15
+  内置 K-brain v0.107.28（#1272）。
+  新功能
+  - AI 可以使用 SSH 主机（#1266）：「设置 → SSH」里配置的主机、凭据和项目关联会自动同步给 K-brain，AI 可以在这些主机上执行命令、传输文件。
+    - 首次连接会弹出卡片显示主机指纹，由你决定是否信任；缺少密码时会弹出登录表单，输入内容会遮挡；
+    - 密码等凭据只在新增或修改时同步，本地只保存加盐哈希用于判断是否变化，日志里不会出现明文；
+    - 设置页会显示 K-brain 是否已有每台主机的凭据、信任了哪些主机密钥；「重置信任记录」会同时清除 K-brain 和终端标签页两边的记录。
+  - AI 可以读取终端、管理隧道（#1262）：桌面端把「读取终端输出」和「隧道管理」作为工具提供给 K-brain，AI 可以查看你打开的终端标签页的最新输出，以及创建、检查、关闭网关隧道。
+  - 支持嵌套的 skill pack（#1264）：像 reverse-skill 这样在一个目录下包含多个 skill 的技能包现在可以被识别和管理。
+    - Skills 页面按 pack 分组显示，可以整包开关，也可以单独开关其中的 skill；被同名 skill 覆盖的副本会标出；
+    - 可以整包删除；单独删除 pack 里的一个 skill 时会说明原因，不会误删；
+    - 输入 / 时能看到 pack 里的 skill，并标注所属 pack。
+  - MCP 服务器状态和重新连接（#1268）：MCP 页面的每个服务器卡片显示连接状态（已连接 · N 个工具 / 连接中 / 连接失败 / 已关闭）和错误信息，顶部新增「重新连接」。
+  - 自动整理记忆（#1268）：记忆设置新增「自动整理记忆」，可以设置开关和频率（1 小时到 7 天）。
+  - 归档会话（#1270）：会话菜单可以归档会话，归档后从列表隐藏，在「已归档」视图里可以找回或取消归档。
+  问题修复
+  - MCP 的允许 / 询问 / 拒绝设置现在真正生效（#1268）：以前这个设置只保存在本地，K-brain 并不知道，调用时不会按它执行。现在会同步到 K-brain，由它在调用时检查；旧版本保存的设置会自动迁移一次。
+  - 保存 MCP 设置不再清掉 K-brain 的其他配置（#1268）：以前保存会覆盖整份配置，丢失 LiveAgent 不认识的字段和按工具设置的规则；现在先读取再合并。
+  - 工作区的 MCP 和 Skills 选择现在会生效（#1268）：在工作区里设置的「继承 / 自定义 / 关闭」以前对实际运行没有影响，现在会随每次运行发送给 K-brain。WebUI 同样支持。
+  - 上下文占用和 token 统计实时更新（#1270）：以前要等一轮结束才刷新，现在运行过程中实时变化，K-brain 压缩上下文后也会立即反映。
+  - subagent 的跟进、查看状态、插话和取消正确显示（#1270）：跟进消息会显示在原来那个 subagent 的卡片里；状态、插话、取消各自显示为一行并带结果。
+  - 开关 skill 后 / 菜单立即更新（#1264）：以前要重新加载页面才能看到变化。
+  内置 K-brain 的变化
+  - 修复 kn 界面永久卡死（K-brain#189）：AI 运行中插入消息时，有概率和界面重绘互相等待，导致界面和键盘完全无响应。同时修复了 backend 在几种情况下会被单个请求拖住的问题，并新增卡死诊断：kn debug stacks <pid> 可以导出卡住进程的调用栈，卡住超过 20 秒也会自动导出。
+  - kn 中按 Ctrl+B 把运行中的命令移到后台（K-brain#185）。
+  - 上面 host bridge、SSH、skill pack、记忆整理计划、归档会话等功能的后端支持（K-brain#179、#181、#183、#187）。
+  详见 K-brain v0.107.28 发布说明。
+  完整变更：https://github.com/Stack-Cairn/LiveAgent/compare/v2.0.14...v2.0.15
+ReleaseNotesUrl: https://github.com/Stack-Cairn/LiveAgent/releases/tag/v2.0.15
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

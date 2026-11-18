@@ -1,0 +1,104 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Pinvou.PinvouAgent
+PackageVersion: 1.0.1
+PackageLocale: zh-CN
+Publisher: pinvou
+PublisherUrl: https://pinvou.com/
+PublisherSupportUrl: https://github.com/Pinvou/pinvou-agent/issues
+PackageName: pinvou3
+PackageUrl: https://pinvou.com/
+License: MIT
+LicenseUrl: https://github.com/Pinvou/pinvou-agent/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Pinvou
+ShortDescription: 开源桌面 AI 智能体工作台，覆盖工具、文件、知识与工作流。
+Description: Pinvou Agent 是一个开源的桌面 AI 智能体工作区，面向工作、设计与编程。它把日常事务、可视化设计和软件开发整合进同一个桌面工作区，让任务以真实结果收尾：可以使用工具、处理文件、积累个人知识，通过 ACP 在真实项目中引入专用编码智能体，或将提示词变成可持续编辑的可视化作品。
+Tags:
+- mcp
+- 人工智能
+- 工作流
+- 智能体
+- 知识库
+ReleaseNotes: |-
+  官方下载 / Official Downloads
+  Pinvou 已在新华三官网提供官方下载渠道：
+  - Windows x64：新华三官网 — pinvou3 for Windows
+  - macOS Universal：新华三官网 — pinvou3 for macOS
+  - H3C LinSeer MegaCube（Linux ARM64）：新华三官网 — pinvou3 for MegaCube
+  新华三官网与 GitHub Assets 均为官方分发渠道，版本同步可能存在时间差；下载前请确认页面显示的版本。v1.0.1 官网页面尚未同步更新，当前版本请优先使用本页下方 Assets。
+  Pinvou 1.0.1 是首个正式发布的稳定版本（自 1.0.0 起不再使用「预览版」标识）。1.0.0 已合入 main 但从未创建 tag 与 GitHub Release（其 Windows 打包在配置校验即失败，根因已由 #886 修复），因此本 Release 同时包含 1.0.0 与 1.0.1 的全部内容：自 v0.10.18 以来共 32 个 PR。
+  新功能
+  1.0.1
+  - 模型配置：模型条目可编辑 base URL 指向自定义端口（自托管网关不再被迫绕道 openai_compatible 自定义模板），端点可声明免密钥（keyless）认证，对话不再强制输入占位 API Key。（#851）
+  - Monitor：新增进程级 CPU 采样（Linux procfs / macOS getrusage / Windows GetProcessTimes，共享 cpu_math 契约），CLI 人类可读输出新增 process= 与 cores= 两个示数。（#856）
+  1.0.0
+  - computer-use：在按会话隔离的虚拟显示器上驱动 computer use，截图与点击不再落在用户正在使用的物理桌面（虚拟栈不可用时按该 PR 披露回退物理桌面）。（#826）
+  - 主聊天新增手动压缩入口，可随时主动压缩上下文。（#834）
+  - 新增会话分叉与归档导入，从既有会话派生新会话并导入归档。（#835）
+  - 引擎等待用户输入时发送系统通知，长时间挂起不再被错过。（#833）
+  - 侧边栏任务行压缩为单行紧凑样式。（#854）
+  - 新增 MarketplaceToolValidation 报告，市场工具清单校验结果可见。（#862）
+  - 为计划任务移植 EngineCumulative 累计用量核算与保留匹配。（#865）
+  - 移植错误码辅助与多项修复。（#860）
+  问题修复
+  1.0.1
+  - Windows：wix 配置键 languages → language 修复——Tauri CLI schema 对 bundle.windows.wix 为 additionalProperties: false，复数键使 1.0.0 的 Windows 打包在配置校验即失败（本版 Windows 安装包已经真实构建验证）；修复保留 en-US/zh-CN/ja-JP 三语意图，并把 tauri 配置 schema 校验接进 release-contract-test 门。（#886）
+  - 会话：fork/create_new/计划任务三处生成会话 id 全部经过占用探测（时钟回拨不再静默覆盖既有记录，耗尽响亮报错），存储根的 verbatim 驱动器/UNC 拼写在出站边界全局折叠（失败原因不再泄漏 OS 用户名），并落地三轮评审修复。（#879）
+  - 引擎：计划任务引擎重启时的 token 基线读取改经门控读取器，与两条持久化路径共享同一 scheduled_mutation 临界区，修复退役引擎最后一段用量被永久少计的竞态（仅影响计划会话元数据，消息不动）。（#880）
+  - 前端四处评审跟进：ScaledHtmlPreview 消息监听过期闭包依赖修复、市场成功卡工具清单条目数/单名长度双重封顶、日期槽位注释归属修正并加宽回归钉、design-runtime 控制面仅接受父窗口消息（阻断同级 artifact frame 互控）。（#881）
+  1.0.0
+  - remote-control：落地评审修复波（rounds 15–30）。（#822）
+  - messaging：转向投递在提交时定稿，修复 steer 门控窗口。（#836）
+  - mcp：落地按布局的 pptx schema 镜像。（#837）
+  - review：pin/wu 评审预算与引擎对齐。（#841）
+  - computer-use：macOS 拒绝针对应用自身的 AX 读取。（#848）
+  - monitor：离线时保持上下文窗口。（#849）
+  - 窄视口下恢复日期槽位显示。（#871）
+  内部改进
+  1.0.1
+  - 会话：导出预扫描测试平台加固——APFS 拒绝非 UTF-8 文件名（EILSEQ）使该测试在 macOS 上必红，改为按 errno 探测文件系统后响亮跳过不可构造分支，macOS 门恢复绿色（纯测试修复）。（#878）
+  - 文档：修正四处过期评审波表述——base64 holdout 注释名单、fork-policy §0 漂移数据与头部、THIRD_PARTY_NOTICES 维护行、builtin-toolset 契约指纹语义。（#882）
+  - relay：心跳钳制测试的 ping deadline 15 s → 30 s，消除 CI 载入抖动下的不稳定。（#885）
+  1.0.0
+  - Windows：移植社区可用的 NSIS/WiX 打包管线。（#868）
+  - computer-use：钉住 #848 引入的 self-target guard 接线测试。（#874）
+  - 全仓死代码与重复代码清理（round-1）。（#846）
+  - 跟随 CodeWhale 清除 RUSTSEC 安全通告（gitlink 提升）。（#850）
+  - 跟随 CodeWhale session-reader 修复（gitlink 提升）。（#875）
+  - 依赖升级：hono 至 4.13.18（上游多项安全通告的最小版本修复）、@hono/node-server。（#855 / #852）
+  - 文档：将 6f7a3a748 follow 标记为历史条目。（#872）
+  注意事项
+  - 首个正式稳定版：v1.0.0 无 tag、无 Release 对象，从 v0.10.18 升级将一次性获得 1.0.0 与 1.0.1 的全部内容。1.0.0 当时未能发布的 Windows 打包缺陷已由 #886 修复，本版 Windows 安装包经发布工作流真实构建验证。
+  - 应用内「内测版/Beta」自品牌文案已摘除（#883）：标题栏、设置页与 Monitor 版本行不再显示「（内测版）/(Beta)/（ベータ版）」后缀，版本行直接显示「1.0.1」。
+  - Windows 和 macOS 安装包尚未正式签名。Windows 首次安装可能出现 SmartScreen 提示；macOS 首次打开如被 Gatekeeper 拦截，可在确认安装包来源可信后解除隔离再打开。
+  - LoongArch64 安装包继续随发布提供（dpkg 架构 loong64，面向 UOS V25 / deepin 23/25 新世界系统）；平台降级面不变：本地嵌入不可用（知识库检索自动降级全文检索）、连接器与 Codex/Claude 原生运行时无按需安装器（PATH 已装二进制继续可用）。
+  - 官网页面版本同步可能滞后，v1.0.1 官网页面尚未更新，下载前请确认页面显示的版本。
+  - 安装包与发布产物由版本 PR（#890）合入 main 后触发的发布工作流构建，未在本地构建。
+  - 本版本 tag 之后合入 main 的 9 个 PR（#888/#884/#861/#864/#887/#891/#893/#892/#870，含端点模型发现、知识库增量 watcher、kb_model_cancel、流式渲染选中与复制保留、pptx 封面修复等）不包含在 v1.0.1 安装包中，将随下一版本发布。
+  构建来源：main @ 5b6e63aa3 / Actions #43908626503（五平台安装包同源构建）
+  官网更新日志
+  zh-CN
+  新功能
+  - 模型配置支持自定义端口与免密钥（keyless）端点；Monitor 进程级 CPU 采样。（#851/#856）
+  - computer-use 虚拟显示器隔离、主聊天手动压缩入口、会话分叉与归档导入、等待输入系统通知、市场工具校验报告、计划任务累计用量核算、侧边栏紧凑任务行。（#826/#834/#835/#833/#862/#865/#854）
+  修复
+  - 修复 1.0.0 Windows 打包失败（wix 配置键）并加固发布契约门。（#886）
+  - 会话 id 占用探测与路径拼写折叠、计划任务 token 基线竞态、前端四处评审跟进。（#879/#880/#881）
+  - remote-control 修复波 rounds 15–30、转向投递定稿、pptx schema 镜像、评审预算对齐、macOS 自目标 AX 读取拒绝、离线保持上下文窗口、窄视口日期槽位。（#822/#836/#837/#841/#848/#849/#871）
+  内部改进
+  - 摘除「内测版/Beta」自品牌文案；全仓死代码清理；Windows NSIS/WiX 打包管线移植；依赖安全通告清除；测试与文档勘误。（#883/#846/#868/#850/#875/#852/#855/#878/#882/#885/#872/#874）
+  en-US
+  New Features
+  - Model configuration supports custom ports and keyless endpoints; per-process CPU sampling in Monitor. (#851/#856)
+  - Computer use on session-isolated virtual displays, manual compaction entry in the main chat, session fork and archive import, waiting-for-input notifications, MarketplaceToolValidation report, cumulative usage accounting for scheduled tasks, compact single-line sidebar task rows. (#826/#834/#835/#833/#862/#865/#854)
+  Fixes
+  - Fixed the 1.0.0 Windows packaging failure (wix config key) and hardened the release contract gate. (#886)
+  - Collision-probed generated session ids with path-spelling folding, scheduled-task token baseline race, four frontend review follow-ups. (#879/#880/#881)
+  - Remote-control fix waves rounds 15–30, steered delivery finalized on commit, per-layout pptx schema mirrors, review budget alignment, macOS self-targeted AX read refusal, context window kept when offline, date slot restored on narrow viewports. (#822/#836/#837/#841/#848/#849/#871)
+  Internal improvements
+  - Removed in-app Beta branding; repo-wide dead-code sweep; Windows NSIS/WiX packaging pipeline; dependency security advisory clearance; test and documentation corrections. (#883/#846/#868/#850/#875/#852/#855/#878/#882/#885/#872/#874)
+  Full Changelog: https://github.com/Pinvou/pinvou-agent/compare/v0.10.18...v1.0.1
+ReleaseNotesUrl: https://github.com/Pinvou/pinvou-agent/releases/tag/v1.0.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

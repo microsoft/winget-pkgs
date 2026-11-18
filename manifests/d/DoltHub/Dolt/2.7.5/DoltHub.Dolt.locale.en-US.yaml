@@ -1,0 +1,136 @@
+# Created with WinGet Updater using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: DoltHub.Dolt
+PackageVersion: 2.7.5
+PackageLocale: en-US
+Publisher: DoltHub
+PublisherUrl: https://github.com/dolthub/dolt
+PublisherSupportUrl: https://github.com/dolthub/dolt/issues
+Author: DoltHub
+PackageName: Dolt
+PackageUrl: https://www.dolthub.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/dolthub/dolt/blob/HEAD/LICENSE
+CopyrightUrl: https://raw.githubusercontent.com/dolthub/dolt/master/LICENSE
+ShortDescription: Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+Description: |-
+  Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+  Connect to Dolt just like any MySQL database to run queries or update the data using SQL commands.
+  Use the command line interface to import CSV files, commit your changes, push them to a remote, or merge your teammate's changes.
+Moniker: dolt
+Tags:
+- cli
+- data
+- git-for-data
+- versioning
+ReleaseNotes: |-
+  Merged PRs
+  dolt
+  - 12530: Decode each side of kv joins with its own NodeStore
+    lookup and merge joins across databases panicked with "empty chunk returned from ChunkStore" when a row had out-of-line values, because the row joiner resolved both sides through a single NodeStore.
+    Fixes: #12518
+  - 12512: Merge convergently added columns that only one side changed
+    Merges rows cleanly when both branches add the same column and only one side changes its value.
+    Fixes #10909
+  - 12508: Keep binlog table IDs stable across transactions
+    Keep binlog table IDs stable for each exact database and table name, and send a fresh table map with every row transaction. Forward rotation events so CDC readers clear their cached mappings when they catch up across a Dolt restart.
+    Fixes #12244
+  - 12494: reuse hash in archive.ChunkSource.getMany
+  - 12477: Store and enforce NULLS NOT DISTINCT for unique indexes
+    Stores a nulls_not_distinct flag on unique indexes and enforces it on writes, index builds, and merges.
+    Companion PRs: dolthub/go-mysql-server#4155, dolthub/doltgresql#3845
+  - 12476: Convert strict lookup keys of another extended type to the column's type
+    Fixes primary key lookups on Doltgres columns compared with a literal of another type by converting the literal to the column's type.
+    Companion PR: dolthub/doltgresql#3849
+  go-mysql-server
+  - 4175: Log authenticated user and client IP on new SQL connections
+    Emit the existing info-level NewConnection event after authentication and session registration. Include the authenticated SQL username and the TCP peer IP alongside the connection ID and multi-statement setting.
+    NewConnection now counts authenticated sessions. Rejected credentials continue to produce the existing authentication warning.
+  - 4173: fix case-sensitive strings in distinct op
+    DISTINCT replies on hashing, which requires type information in many cases including strings because of collations.
+    fixes: #12502
+  - 4170: sql/analyzer: scope lookup join NULL matching to the selected equality
+    Fix #12505
+    Close #4169
+  - 4163: Support aggregate FILTER clauses
+    Supports aggregate FILTER (WHERE ...) clauses set in the vitess AST.
+    Companion PRs: dolthub/vitess#508, dolthub/doltgresql#3872
+  - 4160: fix incorrect scale comparison for rounding decimals
+    apd.Decimal stored v.Exponent as a negative value.
+  - 4157: use stack allocated *apd.Decimal buffer for wire format output
+    Adds stack allocated apd.Decimal buffer for writing output to wire format, which avoids extra mallocs.
+    benchmarks: #12493 (comment)
+  - 4156: CVE GO-2026-6612: Upgrade x/net to v0.61.0
+  - 4155: Add a nulls not distinct option for unique indexes
+    Adds an index option that makes unique indexes treat NULLs as equal to each other.
+    Companion PRs: #12477, dolthub/doltgresql#3845
+  - 4152: Hash equal values the same way via a Hashable interface
+    Hashes values that compare as equal identically, including times in different locations and slices.
+    Companion PR: dolthub/doltgresql#3846
+  - 4151: Plan fewer foreign keys for UPDATE and DELETE
+    Plans only the foreign keys an UPDATE can affect, and skips planning the foreign keys of children that a referential action only restricts.
+    Companion PRs: #12470, dolthub/doltgresql#3841
+  - 4143: Don't implicitly commit statements that read a view
+    A statement that reads a view commits the open transaction. A later ROLLBACK no longer undoes writes made before the view was read, other sessions see those writes immediately, and savepoints are lost:
+    CREATE TABLE t (id INT PRIMARY KEY);
+    CREATE VIEW v AS SELECT * FROM t;
+    START TRANSACTION;
+    SAVEPOINT s;
+    INSERT INTO t VALUES (1);
+    SELECT * FROM v;          -- commits the transaction
+    RELEASE SAVEPOINT s;      -- ERROR 1105 (HY000): SAVEPOINT s does not exist
+    ROLLBACK;
+    SELECT * FROM t;          -- returns 1; MySQL returns no rows
+    The same happens when the view is read by INSERT ... SELECT, by a subquery in UPDATE or DELETE, or by a multi-table UPDATE. Reading the base table directly doesn't trigger it.
+    Cause. resolveView (sql/planbuilder/from.go) binds the view's stored CREATE VIEW statement with the builder of the statement that reads the view. buildDDL sets QFlagDDL on that builder's query flags, which belong to the outer statement. AddTransactionCommittingIter reads QFlagDDL as an implicit commit (sql/rowexec/transaction_iters.go). As a result, TransactionCommittingIter.Close commits the session's transaction and clears it, even when autocommit is off.
+    Fix. resolveView restores the outer statement's QFlagDDL after binding the view definition. Reading a view no longer marks the statement as DDL. A real DDL statement that reads a view, such as CREATE VIEW w AS SELECT * FROM v, keeps the flag and still commits implicitly. QFlagDDL is read only by the implicit commit check. Other flags set while binding the view body, such as the subquery and join flags, are left alone.
+    Tests.
+    - TestViewReferenceDoesNotSetDDLFlag in sql/planbuilder/from_test.go checks the query flags for SELECT, INSERT ... SELECT, UPDATE and DELETE with a view subquery, and a multi-table UPDATE that reads a view. None of them is DDL. CREATE VIEW ... AS SELECT ... FROM v still is. Before the fix, the six non-DDL cases fail.
+    - New transaction script queries reading views are not implicitly committed in enginetest/queries/transaction_queries.go. A second client doesn't see the writes after the view reads, RELEASE SAVEPOINT still works, and ROLLBACK undoes both the INSERT and the INSERT ... SELECT from the view. The memory harness skips transaction scripts with setup statements, so this one runs in Dolt's TestTransactions and TestTransactionsPrepared. With this branch replaced into Dolt, the script fails five assertions before the fix and passes after it.
+      Fixes #12236
+  - 4135: Fix MIN and MAX nullability in CREATE TABLE AS SELECT
+    MIN and MAX can return NULL for a group containing only NULL values or for empty input, but their generated expressions marked the result as non-nullable, causing CREATE TABLE AS SELECT to fail
+    Declare both aggregates nullable in the generator, add a CTAS regression for both cases, and refresh existing schema and plan expectations
+    Fixes #12385
+  vitess
+  - 508: Add Filter to aggregate expression nodes
+    Adds a Filter field for aggregate FILTER (WHERE ...) clauses to FuncExpr, GroupConcatExpr and OrderedInjectedExpr.
+    Companion PRs: dolthub/go-mysql-server#4163, dolthub/doltgresql#3872
+  - 506: sqlparser: accept boolean expressions in generated columns
+    Accept full expressions in generated-column definitions so AS (value < 8) works without an extra pair of parentheses. Preserve the outer ParenExpr needed for DDL formatting and the original regression coverage across CREATE/ALTER, abbreviated/full syntax, and virtual/stored columns.
+    Supersedes dolthub/vitess#503 by @sciyoshi, preserving the original commit authorship. Applied on current main and regenerated sql.go to resolve the generated-parser merge conflict.
+    The full sqlparser test suite and tools/check_make_parser.sh pass. Parser generation reports zero shift/reduce and zero reduce/reduce conflicts.
+    Fixes #12343.
+  Closed Issues
+  - 12518: Cross-database lookup join panics: "empty chunk returned from ChunkStore" when left table has out-of-line JSON
+  - 12500: Filter on a derived table with a bare COUNT(*) crashes the sql-server (stack overflow in exprsToTableFilters)
+  - 12502: EXISTS self semi-join duplicates outer rows under utf8mb4_0900_ai_ci (COUNT 20 vs 10)
+  - 11027: dolt push to git+ssh GitHub remote hangs on Linux/WSL2
+  - 12505: Unexpected Inner Join Result
+  - 12385: CREATE TABLE AS SELECT with MAX(CASE...) fails when aggregate group result is NULL
+  - 11787: Feature request : Add support for REPLICATE_WILD_DO_TABLE, REPLICATE_WILD_IGNORE_TABLE and a way to persist values between reboots.
+  - 12244: Frequent binlog table-ID reuse exposes stale mappings in Debezium with source filtering
+  - 10909: Merge: convergent ADD COLUMN flagged as conflict, silently drops DML
+  - 10534: Panic when using CASE with @@session.time_zone
+  - 10657: ON_UPDATE columns should only update if other column values have actually changed
+  - 10692: Server permanently unresponsive after client crash during CREATE/DROP DATABASE
+  - 10758: DELETE ... WHERE col < ? LIMIT N fails with 'column not found in scope'
+  - 10807: RemotesAPI push: FastForward skips working set update, causing 'target has uncommitted changes' on next push
+  - 10828: Parse error when comment precedes delimiter in a .sql file import
+  - 10892: AUTO_INCREMENT value lost after dolt backup restore
+  - 10811: Dolt clobbers GIT_SSH_COMMAND if it already exists in the environment
+  - 10897: dolt sql-server leaks one ssh child process per CALL dolt_fetch against an ssh:// remote
+  - 11180: 3-way DOLT_MERGE fails on table with VECTOR INDEX: expected prollyIndex, found: durable.proximityIndex
+  - 11166: Expose go-mysql-server's server.Config.Version in dolt sql-server (advertise a MariaDB version for client compatibility)
+  - 11209: sql-server: DOLT_CLONE from a file:// remote fails "manifest referenced table file for which there is no chunkSource" after the remote is rewritten in the same server process
+  - 11230: Select from dolt_log error When clone from repository with depth 1
+  - 11292: dolt fsck misclassifies stash list as a commit
+  - 11300: ORDER BY subquery loses effect as soon as LIMIT and OFFSET become involved
+  - 11265: Dolt INSERT … SELECT with CTE + JSON_TABLE disconnects
+  - 12309: Recursive CTE returns duplicate rows when @@dolt_override_schema is set to HEAD
+  - 11479: Wrong results: LEFT JOIN LATERAL (...) ON TRUE drops outer rows whose lateral body yields zero rows
+  - 3459: False ErrInvalidIndexPrefix on latin1 prefix index
+ReleaseNotesUrl: https://github.com/dolthub/dolt/releases/tag/v2.7.5
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

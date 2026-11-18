@@ -1,0 +1,39 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: ShareX.XerahS
+PackageVersion: 0.35.0
+PackageLocale: en-US
+Publisher: ShareX Team
+PublisherUrl: https://github.com/ShareX
+PublisherSupportUrl: https://github.com/ShareX/XerahS/issues
+Author: ShareX Team
+PackageName: XerahS
+PackageUrl: https://github.com/ShareX/XerahS
+License: GPL-3.0
+LicenseUrl: https://github.com/ShareX/XerahS/blob/HEAD/LICENSE.txt
+Copyright: Copyright (c) 2007-2026 ShareX Team
+ShortDescription: A cross-platform port of the popular ShareX screen capture and file sharing tool, built with Avalonia UI and .NET 10.
+Description: XerahS (ShareX.Avalonia) is a cross platform reimagining of the ShareX user interface built with Avalonia. It targets modern UX modular architecture and long term maintainability while preserving core workflows speed and reliability. It provides a foundation for future desktop experiences on Windows macOS and Linux with consistent accessible design.
+Moniker: xerahs
+Tags:
+- avalonia
+- sharex
+ReleaseNotes: |-
+  Features
+  - File type overrides: Destinations has a new “File type overrides” page. Choose an extension and an uploader, for example md and KovaForge Docs, and every file with that extension goes there, whether it is uploaded as text or as a file, from the app, the CLI, watch folders or OmaXerahs. Overrides come before the workflow’s destination and each uploader’s own file type settings; an uploader you pick for one upload in Upload Content still wins. If the chosen uploader fails, the upload fails instead of going somewhere else. Multi-part extensions such as tar.gz work and survive the upload naming pattern. With privacy review on, the review names and confirms the override’s uploader.
+  - xerahscli route: route list, route set <extension> <uploader>, route remove <extension> and route explain <file> [--as-file], which shows which uploader a file would go to and which rule decided it, without uploading. doctor uploaders lists the overrides.
+
+  Fixes
+  - Text file exceptions doubled on every save: An uploader’s “Except these types” list (html, htm, xhtml, xht) was written twice into uploader-instances.json each time settings were saved, because a computed copy of the list was saved and read back into it. The computed copy is no longer saved, and existing duplicates are removed on load.
+  - MCP server: Answers 503 from mcp.xerahs.com while no backend is attached, instead of a bare 500, and points clients at the local xerahs-mcp --mcp transport. HTTP clients that send only application/json get plain JSON replies, a single listed media type no longer returns 406, and the API key is compared in constant time.
+  - Subprocess helpers: Diagnostics, skill bootstrap and recording inspection drain stdout and stderr together and kill the child on timeout or cancellation, so a full stderr buffer can no longer hang them.
+
+  Internal
+  - MCP server: Now runs on the official ModelContextProtocol SDK. Tool, resource and prompt definitions are unchanged, but tool results are content blocks plus structuredContent, templated resources are listed through resources/templates/list, the non-standard initialized and shutdown methods are gone, and a stdio client must keep stdin open until it has read its replies. The mcp.xerahs.com Worker source is now tracked in the repository.
+  - .NET 11: Every project targets net11.0 (Windows projects keep the Windows 10 26100 suffix). XerahS.UploaderPluginSdk now targets net11.0, so third-party uploader plugins must too. Flathub source builds wait for a .NET 11 SDK extension.
+  - Linux: The install desktop entry points at the net11.0 output.
+  - Code cleanup: Constant regexes are source-generated, lock-only fields use System.Threading.Lock, and run-and-read subprocess calls use the .NET 11 Process.RunAndCaptureText helpers.
+ReleaseNotesUrl: https://github.com/ShareX/XerahS/blob/v0.35.0/docs/CHANGELOG.md#v0.35.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

@@ -1,0 +1,57 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.ArWen
+PackageVersion: 3.0.0
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/arwen/issues
+Author: Fahrenheit Research
+PackageName: ArWen
+PackageUrl: https://github.com/FahrenheitResearch/arwen
+License: Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+Copyright: Copyright © Fahrenheit Research
+CopyrightUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+ShortDescription: 'ArWen: GPU-native WRF-ARW-class regional weather model, verified against WRF v4.6.1'
+Description: "ArWen is an independent, GPU-native implementation of a WRF-ARW-class regional atmospheric model. It is not affiliated with or endorsed by NCAR or UCAR. The name is a wordmark for \"the ARW solver, GPU-native\"; the Python package is currently named gpuwm. Safety. ArWen is a research and educational tool. It is never a substitute for official forecasts and warnings from your national meteorological service. Do not use it to make safety decisions. Regional numerical weather prediction at convective scale has mostly required institutional clusters, which means most of the world runs on global-model guidance at 10-25 km. ArWen's aim is to put a verified, kilometer-scale limited-area model on a single consumer GPU: pick a point, size a nest ladder to your card, pull public analysis data, and run a 1 km (or 500 m) simulation of your own area on hardware you own -- especially in places where no national convection-permitting model exists."
+Moniker: arwen
+ReleaseNotes: |-
+  New
+  - WRF v4.8.0 is the reference: in strict numerics, the HRRR recipe and A071 configuration match native WRF 4.8.0 word for word through a whole forecast hour. WRF 4.7.1 behaviour stays selectable.
+  - WRF 4.8.0 physics: Grell-Freitas-Li cumulus (now the cu_physics = 3 default), YSU, the Shin-Hong rewrite, revised KIM gravity-wave drag with ELVMAX in the static step, MYNN-EDMF and MYNN-SFC 4.8.0 (opt-in), Fitch wind farms with the induction correction, dynamic lightning, and the equation-of-time sun.
+  - TEMPO microphysics follows its newest upstream release by default (the earlier release stays selectable with tempo_version), and TEMPO runs start from HRRR and RAP with their analysed number concentrations.
+  - Opt-in upstream MYNN v6.1 bug fixes (mynn_fixes_v61) on the MYNN route.
+  - Over the contiguous US the starting snowpack comes from NOHRSC's SNODAS analysis (default on; GPUWM_SNOW_ANALYSIS=off keeps the forcing's snow). In three measured cases the mean absolute error of the starting snow water at SNOTEL sites drops by 56 to 84 percent.
+  - Noah-MP snow layers start on a conduction profile between skin and soil instead of at the skin temperature (default; 1 keeps WRF's start).
+  - New opt-in Noah-MP options written from published papers rather than copied from upstream code: snow compaction (opt_snow_compact), scale-aware snow cover (opt_scf), separate surface and subsurface runoff (opt_runsrf/opt_runsub), snow thermal conductivity (opt_tksno), a wetland store with its saturated area (noahmp_wetland), and for SNICAR snow albedo the Lin 2025 fresh grains, light-absorbing particles in snow, ice and dust optical sets, incident solar spectra and a five- or 480-band choice (snicar_solarspec_opt, snicar_bandnumber_opt), and the Toon two-stream solver (snicar_solver_opt). Particle-laden snow uses the same spectral solver and choices.
+  - Noah-MP history writes surface and subsurface runoff (SFROFF, UDROFF).
+  - TEMPO runs in fast numerics at about 1.13 times the cost of Thompson per step (was about 2 times); strict numerics is unchanged.
+  - The static step writes the KIM 2026 drag statistics for MPAS meshes, used by gpuwm-hex's opt-in KIM drag.
+
+  Fixed
+  - ERA5 starts at any hour plan their boundary ladder, and the sea-surface skin is filled where the source leaves gaps.
+  - Static fields decode cached tile maps outside the cache lock.
+  - Noah-MP's snowmelt reset evaluates saturation vapour pressure at the reset ground temperature, which removes near-zero 2 m humidity at melting snow edges.
+  - SNICAR snow albedo no longer runs away to very cold skin temperatures on RTX 50-series cards, and its memory price no longer overstates what it needs several times over.
+  - Noah-MP runs take the faster resident GPU route by default.
+  - Observation downloads retry rate limits (HTTP 429) and server errors with backoff instead of failing on the first one.
+  - Ocean waves give the same answer run to run.
+  - gpuwm domain writes nested configurations with TEMPO microphysics; it stopped with an internal error before writing the file.
+  - TEMPO microphysics runs with the Grell-Freitas and Kain-Fritsch cumulus schemes and with RTE+RRTMGP radiation; the forecast stopped at its start with those combinations.
+  - The urban canopy keeps very small (subnormal) rain amounts in its water balance when its kernels are compiled by the run's compile pool; they were read as zero there.
+  - Runs on the adaptive time step reset their hourly maxima at every history write, as WRF does (2-5 km updraft helicity, 10 m wind, updraft and downdraft speed, graupel, low-level reflectivity and hail size). They were maxima since the start of the run, so the hourly updraft-helicity map and the 1 h tracks showed every track since the start.
+  - Updraft-helicity tracks (1 h, 3 h and since the start) keep the updraft-helicity colour ramp, leave out values below 25 m²/s² and outline 75 m²/s²; gpuwm sim now ends a run that drew pictures with the same end-of-run pass as gpuwm go, so its 3 h and since-start maps cover the whole run.
+  - Frames between whole hours keep the map in the same place and use the same header layout as the hourly frames, so animations no longer jump; whole-hour frames of a sub-hourly run give their time to the minute.
+  - A nest fixed inside a moving parent draws its 1 h rain at every hour, with the ground the parent newly covers taken from the parent.
+  - Regional runs from a mapped source (IFS, ERA5 model levels, GEM, ICON-EU, RAP, RRFS, AIFS and the others) accept up to 21 domains; they refused more than four. The kernel pre-warm for very fine nests no longer fails on inflow seeding.
+  - rw_mpas_init --augment-init adds the variables of every microphysics species the run declares, so gpuwm-hex starts with NSSL two-moment or P3 microphysics; they stopped with "the init file has no variable for" those species.
+  - A gpuwm-hex run on a RUC land surface (the RRFS v2 and hrrrv5 suites) can be downscaled with ArWen: its nine soil nodes have their own source profile. Preparation refused the file because the only hex-history profile named Noah's four layers.
+ReleaseNotesUrl: https://github.com/recastsystems/arwen/releases/tag/v3.0.0
+InstallationNotes: |-
+  This application requires an NVIDIA GPU with CUDA support to run.
+  Will not function on integrated graphics or non-NVIDIA hardware.
+  Without compatible hardware, the application will fail to launch.
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

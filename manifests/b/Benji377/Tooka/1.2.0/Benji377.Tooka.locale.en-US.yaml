@@ -1,0 +1,62 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Benji377.Tooka
+PackageVersion: 1.2.0
+PackageLocale: en-US
+Publisher: Benjamin Demetz
+PublisherUrl: https://github.com/Benji377
+PublisherSupportUrl: https://github.com/Benji377/tooka/issues
+Author: Benjamin Demetz
+PackageName: Tooka
+PackageUrl: https://github.com/Benji377/tooka
+License: GPL-3.0
+LicenseUrl: https://github.com/Benji377/tooka/blob/HEAD/LICENSE
+ShortDescription: A fast, rule-based CLI tool for organizing your files
+Moniker: tooka
+Tags:
+- command-line
+- organizer
+- productivity
+- sorter
+- tooka
+- utilities
+ReleaseNotes: |-
+  Release v1.2.0
+  ✨ What’s New
+  - Safe, all-or-nothing sorting: Tooka now plans every step before touching a file. If anything would go wrong, nothing changes and you get a list of the problems. If something fails during the sort, or you press Ctrl+C, everything is undone.
+  - Never overwrites files: in earlier versions, a file with the same name at the destination could be silently replaced (on Linux and macOS).
+  - New on_conflict rule setting: abort (default), skip or rename (report (1).pdf).
+  - New tooka recover command: undoes a sort that was interrupted by a crash, a killed process or a power loss.
+  - Moves to another drive or partition now work. The original is only removed once the copy is safely on disk.
+  - {{path}} placeholder for execute actions: passes the file's final location to your command.
+  - EXIF in rename templates: any EXIF field can be used, e.g. {{metadata.EXIF:Model}}.
+  - More reliable monitoring daemon: one daemon at a time, a clean stop on all platforms (an interrupted sort is undone), and no interference with manual sorts.
+  - New documentation in the docs folder, including a complete rule reference.
+  - Fixed:
+    - EXIF metadata conditions never matched.
+    - The date: filter didn't format EXIF dates.
+    - any: true matched every file.
+    - Invalid regular expressions or globs silently matched nothing.
+    - Files already in a destination inside the source folder were sorted again on every run.
+  - Switched YAML handling to the maintained serde-saphyr library, with clearer error messages for invalid rule files.
+  - Tests now run on Linux, Windows and macOS for every change.
+  ⚠️ Breaking Changes
+  - Conflicts stop the sort by default. If a destination already exists, nothing is changed and Tooka asks you to resolve it. Add on_conflict: skip or on_conflict: rename to keep the old "carry on" style.
+  - delete without trash now moves files to the trash instead of deleting them permanently. Write trash: false for permanent deletion. Rules already added with tooka add keep their stored setting.
+  - Stricter rule validation: delete must be the last action, execute must come after move/copy/rename, and invalid patterns or dates are rejected. tooka validate now always runs these checks; --deep is no longer needed.
+  - Rules may match differently: rules using any: true now match fewer files (only those meeting a condition), and rules with EXIF metadata conditions now match photos they previously missed. Check with tooka sort --dry-run.
+  - tooka template and tooka export --output no longer overwrite existing files.
+  - Building from source or cargo install now requires Rust 1.89 or later.
+  📝 Additional Notes
+  - Your existing configuration, rules and monitored folders keep working. On macOS and Windows, the monitoring settings move to the standard config folder automatically.
+  - Recommended after upgrading: run tooka sort --dry-run once to review what your rules do now.
+  🔗 Full Changelog: View Changelog
+  ✅ Attestations: View Attestations
+  Download Tooka
+ReleaseNotesUrl: https://github.com/Benji377/tooka/releases/tag/v1.2.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://github.com/Benji377/tooka/tree/main/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

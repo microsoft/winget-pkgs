@@ -1,0 +1,53 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.15.2
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  v0.15.2 围绕科研记录与写作：科研表格现在可以充当实验记录本，行有稳定注册号、时间和编辑者，人和 Agent 共用同一套校验；Markdown 面板内可直接切到源码视图编辑，并补齐工具栏、格式快捷键与光标、行号对齐。全文翻译加入字符 IR 与译文 PDF 两级持久缓存，译文页改走与原文相同的渲染路径；广场接入 Papers with Code，论文侧栏链接拆成两行并新增 Hugging Face。更新提示与关于页可以查看 Release 详情，分屏笔记不再静默覆盖，默认翻译和正文解析分别固定为腾讯交互翻译与本地引擎。
+  新功能
+  - 实验记录表格：科研表格成为实验数据的记录方式，行带稳定注册号、时间和编辑者，人和 Agent 走同一套校验；Agent 用 table_query / table_upsert / table_update_cells 按注册号和字段名读写，写入校验修订号。新建实验记录会同时生成 Markdown 笔记与内嵌的结果表，侧栏只显示名称并由图标区分类型，表格底栏显示有多少笔记在引用它。（#951 by @qychen2001）
+  - Markdown 内联源码模式：在同一面板用 ⌘/ / Ctrl+/ 在渲染视图与可编辑源码之间切换，源码直接保存原文，支持 Markdown/GFM、frontmatter、表格、公式与围栏代码高亮，复用自动保存、⌘S、保存冲突和外部改盘逻辑，切回时保留光标与视口。源码视图另有标题、引用、列表、图片、查找与导出工具栏，以及 Mod-B / Mod-I / Mod-U / Mod-Shift-X 格式快捷键。（#964 by @ffy6511）
+  - 全文翻译持久缓存：字符级 IR 与整篇译文 PDF 分两级落盘，缓存键覆盖 PDF/layout 内容、实际译文、字体与管线版本。重启后再翻译，准备阶段从约 3.1 秒降到 0.13 秒；开启译文 PDF 缓存后整篇构建也可直接复用（单篇约 25 MB）。两类缓存可在设置 → 翻译分别开关（IR 默认开、译文 PDF 默认关），关于页展示占用、提供打开缓存目录与一键清理。（#978 by @ffy6511）
+  - 译文页原生渲染：整篇翻译完成后，译文页改用与原文页相同的渲染层按显示尺寸和 DPR 绘制，缩放会重新渲染而不是拉伸固定预览图；隐藏后再显示译文也不会重走生成页面或重建 PDF。（#978 by @ffy6511）
+  - Papers with Code 广场：广场新增 paperswithcode.co 会议页面来源，论文卡片和详情操作行可直接导入；arXiv 论文保留 arXiv id 并复用现有 PDF/TeX 资产链，外部论文以 pwc-<catalog id> 入库，导入后按 arXiv id 补齐 publication、代码仓库、引用数和摘要。（commit / commit by @Phil-Fan）
+  - 论文侧栏链接与 Hugging Face: 论文信息链接拆成两行，第二行新增由 arXiv id 推导的 Hugging Face 页面；OpenReview 链接改用红色字母 O 标记。（commit / commit by @Phil-Fan）
+  改进
+  - 更新详情入口：启动更新提示、标题栏和设置 → 关于新增待更新版本的 Release 详情入口，manifest 没有 notes 时也能查看完整说明，安装入口保持不变。（#979 by @Aschenbath）
+  - 默认翻译与正文解析：新装及旧设置缺少 provider 时默认使用腾讯交互翻译，正文解析默认固定为本地引擎；用户已显式保存的有效选择保持不变。（#967 / #963 by @Aschenbath）
+  - 依赖安全补丁：升级 lodash 与 minimatch，并通过 vendored tesseract-rs、realtime-tex 把 zip 与 lopdf 移到已修复版本，清掉相关安全公告。（commit / commit by @Phil-Fan）
+  修复
+  - 分屏笔记静默覆盖：按面板区分 Markdown 保存所有权，干净的兄弟面板自动刷新；有改动的面板保留草稿并阻止保存，可明确选择保留草稿或载入磁盘版，渲染态与源码态都适用。（#970 by @Aschenbath）
+  - 选区浮窗尺寸：高 PDF 缩放下翻译与 Ask 浮窗不再跟着放大，共享浮卡固定为 UI 尺寸与字号，选区屏幕锚点、翻转与视口限位保持不变。（#948 by @Ryan119911）
+  - Markdown 工具栏闪烁：修复特定面板宽度下 ResizeObserver 自反馈导致按钮反复显隐、固定按钮左右跳动的问题；面板折叠或尚未布局时不再隐藏全部按钮。（commit by @Phil-Fan）
+  已解决问题
+  - 源码模式光标定位：源码与渲染切换时把光标映射到准确字符位置，不再重置到文档开头。（#977 by @ffy6511）
+  - 源码模式行号宽度：行号收进居中源码区并改用更小的等宽字体，不再溢出编辑器最大宽度。（#966 by @ffy6511）
+  - Windows Zcode Skill 索引：Zcode serve 模式忽略 ACP 会话 cwd 时改从进程 cwd 扫描 .agents/skills，Windows 上的 Vault skill 可正常索引。（#936 by @JiaheChen2002）
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.15.2
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

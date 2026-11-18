@@ -1,0 +1,51 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Mouseww.Prometheus
+PackageVersion: 0.28.2
+PackageLocale: zh-CN
+Publisher: prometheus
+PublisherUrl: https://github.com/Mouseww
+PublisherSupportUrl: https://github.com/Mouseww/Prometheus/issues
+Author: Mouseww
+PackageName: Prometheus
+PackageUrl: https://github.com/Mouseww/Prometheus
+License: 免费软件
+LicenseUrl: https://github.com/Mouseww/Prometheus/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Mouseww
+ShortDescription: 源码公开、可二次开发的 AI Agent 工作台：终端 / 桌面 / Web / 安卓四种入口。
+Description: |-
+  Prometheus 是一个源码公开、可二次开发的 AI Agent 工作台：同一个内核，终端 / 桌面 / Web / 安卓四种入口。
+  TUI、桌面 GUI（Tauri）、Web、安卓共用同一套服务端与协议，会话随处可续。网关、知识库、工具、命令、HTTP 路由、UI 面板全部通过 definePlugin 贡献，连内置功能也是插件。
+Tags:
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  修复
+  - 流程步骤「被运行环境拒绝」却看不出来：步骤都是无人值守运行，没人能中途点「允许」，所以权限没覆盖的调用会被直接拒绝。以前这种情况只是被 agent 在报告里提一句，运行记录仍显示「成功」，看着像跑完了其实少做了事
+    - 现在每次被拒的调用都会记录下来（工具名 + 原因），随运行结果返回
+    - 该步骤会带上被拒清单，整次运行在历史里显示一条「有步骤因权限不足被拒」的警告，写明是哪几个步骤、各被拒几次
+    - 被拒时的提示也改成说清楚「这一步需要什么权限」，不再只说 not permitted
+  - 整条流程没法一次性提权：以前只能逐个节点改权限
+    - 运行对话框新增「步骤权限」：默认「按每个步骤自己的设置」，也可以选只读 / 可编辑 / 完全，本次运行的所有步骤都用它（子流程一并继承）
+    - 定时运行不受影响，仍按各步骤自己的权限
+  - 内置模板「缺陷排查与修复」的「修复并验证」步骤权限给低了：它的指令要求跑测试，权限却只有「可编辑」（不能执行命令），必然被拒 → 改为「完全」
+  - AI 生成流程时，生成指南现在明确说明：要跑构建 / 测试 / 脚本的步骤必须给「完全」，否则命令会被拒绝；只读调研才用「只读」
+  说明
+  - 三档权限的界线没有变（只读 = 看；可编辑 = 改文件但不能执行命令；完全 = 也能执行命令）。配置文件编辑器里现在直接写出每档的能力，不再只给一个词
+  - 无人值守运行时，安装插件仍然永远需要人确认，任何档位都不会放行
+  - 若你用的是桌面安装版，需要更新到本版本才生效；源码运行的话重新构建前端与服务端即可
+ReleaseNotesUrl: https://github.com/Mouseww/Prometheus/releases/tag/v0.28.2
+Documentations:
+- DocumentLabel: 运行与部署
+  DocumentUrl: https://github.com/Mouseww/Prometheus/blob/HEAD/docs/deployment.md
+- DocumentLabel: Prometheus 架构设计
+  DocumentUrl: https://github.com/Mouseww/Prometheus/blob/HEAD/docs/architecture.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
