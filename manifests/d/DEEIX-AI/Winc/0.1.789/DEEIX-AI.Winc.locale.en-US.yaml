@@ -1,0 +1,84 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: DEEIX-AI.Winc
+PackageVersion: 0.1.789
+PackageLocale: en-US
+Publisher: DEEIX
+PublisherUrl: https://deeix.com
+PublisherSupportUrl: https://github.com/DEEIX-AI/Winc/issues
+PackageName: Winc
+PackageUrl: https://winc.si/
+License: Apache-2.0
+LicenseUrl: https://github.com/DEEIX-AI/Winc/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Chenyme and DEEIX AI
+ShortDescription: A lighter, faster desktop code and text editor built in Rust with its own rendering engine.
+Description: |-
+  A lighter, faster, more comfortable desktop editor.
+  winc is built with Rust and its own rendering engine: it starts in 0.1 seconds and uses just 52 MB of memory with 100,000 lines open. Multiple cursors, find and replace, and side-by-side diffs are all there, and every keystroke and scroll responds instantly. Measured results include 119 ms cold start to first frame and a 1 GB file editable and highlighted in 220 ms.
+  Editing covers multiple cursors, find and replace, native input methods and smooth scrolling in gigabyte-scale files. Highlighting covers common programming, markup, data and configuration formats, with lightweight go-to-definition and find-usages that need no language server. Whole files can be formatted through external tools such as rustfmt, Prettier, Black, Ruff and gofmt. Preview covers Markdown, images, SVG and spreadsheets, with a switch back to source at any time.
+  Git integration provides side-by-side diffs with word-level highlighting, staging by hunk, committing and pushing, a commit graph and line-by-line blame. Projects get a file tree, quick open and .gitignore-aware project search, and a terminal is docked at the bottom of the window. Light and dark themes, complete English and Simplified Chinese interfaces, and signed in-app updates on all three platforms.
+Tags:
+- code-editor
+- diff
+- editor
+- markdown
+- search
+- syntax-highlighting
+- terminal
+- text-editor
+ReleaseNotes: |-
+  ✨ Feature
+  - Add extra folders to a window: each shows as its own row in the file tree, and quick open, global search and Git cover them too; name a set of folders as a group and reopen it from the recent list (#69)
+  - Ask whether to add or open a folder dropped on a window that already has one open, with "Don't ask again" kept in the new dropFolder setting
+  - Add a read-only switch for one tab or the whole window, from a lock in the status bar, the tab menu and the command palette, restored with the folder (#173)
+  - Add vertical terminal tabs, and offer to load a project's .venv or venv when a terminal opens, asking once per environment (#158)
+  - Add terminal tab shortcuts, Ctrl+Shift+] / [ and Ctrl+Shift+1…9 (⌘⇧] / [ and ⌃1…9 on macOS), and pass keys to programs running in the terminal, with the new terminal.applicationPriority setting (#190, #232)
+  - Hide or show the terminal panel in one press with ⌘J / Ctrl+J wherever the focus is (#233)
+  - Add terminal conveniences: double- and triple-click across soft wraps, scroll to top and bottom, middle-click to close a tab, "Close Other Tabs", and close a tab when its shell exits cleanly
+  - Hide the PDF preview's toolbar after 2 seconds without use and show it again when the pointer comes near, and show the current page in the status bar (#253)
+  - Show CSV and XLSX tables in full, up to 1,048,576 rows and 16,384 columns, instead of cutting them off
+  - Draw the text inside foreignObject in SVG previews, so draw.io exports show their labels and stay sharp when zoomed (#266)
+  - Draw Mermaid flowchart edges as right-angled lines with small rounded corners
+  - Compose emoji sequences (skin tones, ZWJ groups, flags, keycaps) into one glyph in the editor, the Markdown preview and the terminal (#230)
+  - Highlight ==text== in Markdown, in the source and in the preview, and toggle it with Cmd/Ctrl+Shift+M (#223)
+  - Highlight log files: timestamps, levels, addresses, links, paths, exceptions and stack frames (#235)
+  - Add collapsible Worktrees and Stashes sections to the commit view, merge a worktree into the current branch, and ask whether to open a worktree in a new window or this one
+  - Add a git.path setting for the Git program, and explain where to set it when Git cannot be found (#255)
+  - Offer "Remember password" when Git asks for HTTPS credentials, saving them in the system credential store after the user's own credential helper
+  - Compare a commit in the Git log with a hash, branch or tag (#224)
+  - Add document icons on Windows, with an optional installer choice, off by default, that shows each file type's own icon in Explorer
+  ⚡ Optimization
+  - Keep long Markdown, EPUB and DOCX previews responsive while the window is resized: relayout is spread over frames, and only blocks near the viewport keep their layout, so a document of 20,000 paragraphs uses 11 MB for layout instead of 91 MB
+  - Read large CSV files row by row and XLSX sheets as a stream, store cells compactly, place out-of-order XLSX rows by their row number, and scroll tall tables without drift
+  - Render zoomed SVGs faster by skipping shapes outside the view: a 512-pixel tile of a large draw.io export takes 1–9 ms instead of 21–32 ms
+  - Make room for a pinned Markdown outline, open the heading list after a short hover, and animate opening, closing and pinning (#231, #239)
+  - Cut per-frame work in terminal find and line cache pruning
+  - Keep a spare frame buffer on macOS for intermittent redraws, and record pointer-to-frame latency in the frame log (#268)
+  - Colour C-family preprocessor lines by part instead of as one colour
+  🐛 Fixed
+  - Fix an open context menu crashing the app when the window shrank below it or was minimized (#246)
+  - Fix a crash when previewing a table with no columns (#248)
+  - Fix the main thread using a full CPU core after saving a file that Git cannot blame (#267)
+  - Fix sibling subgraph boxes overlapping in Mermaid flowcharts (#256)
+  - Fix SVG shapes turning black when a colour could not be parsed, and support light-dark() and var() fallbacks (#266)
+  - Fix missing scrollbars in CSV, XLSX and EPUB previews, and the Markdown heading list not scrolling (#263)
+  - Fix "Reveal in File Explorer" opening the default folder for paths with spaces on Windows (#263)
+  - Fix reopening a remote folder that no longer exists reporting a failed connection: the connection is kept and the folder browser opens at the nearest parent (#264)
+  - Fix notices and conflict cards being pushed against the file tree when the terminal fills the editor column (#269)
+  - Fix the thin border of floating cards letting light content show through in the dark theme
+  - Fix local-only actions being offered for files on a remote host, and copy remote code references with the path on the host (#247, #249)
+  - Fix remote folders being treated as files by "Open in Terminal" and "Find in Folder" (#240)
+  - Fix the terminal shell menu listing local shells for a remote host, and remote terminals leaving their host after a restart or reopen (#229, #241)
+  - Fix WSL workspaces using Windows paths, tools and shells instead of the distribution's
+  - Fix terminal tab state after the helper exits, the scroll position after a width change, wrapped URLs, the find bar following the wrong tab, and cleared output returning after a resize
+  - Fix long lines staying truncated with word wrap on (#243)
+  - Fix go to definition jumping to a same-named method in the current file instead of the receiver type's method (#236)
+  - Fix C++ methods and constructors with wrapped signatures missing from the outline (#245)
+  - Fix a long branch name running into the upstream text in the branch picker (#254)
+  - Fix the commit view jumping when switching repositories
+  - Fix the preview buttons missing for an untitled file switched to Markdown
+  - Fix CJK text sitting off centre in keycaps and small badges
+ReleaseNotesUrl: https://github.com/DEEIX-AI/Winc/releases/tag/v0.1.789
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
