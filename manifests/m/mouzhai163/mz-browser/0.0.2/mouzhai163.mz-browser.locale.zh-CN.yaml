@@ -1,0 +1,52 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: mouzhai163.mz-browser
+PackageVersion: 0.0.2
+PackageLocale: zh-CN
+Publisher: mzbrowser
+PublisherUrl: https://github.com/mouzhai163
+PublisherSupportUrl: https://github.com/mouzhai163/mz-browser/issues
+PackageName: MZ指纹浏览器
+PackageUrl: https://github.com/mouzhai163/mz-browser
+License: AGPL-3.0
+LicenseUrl: https://github.com/mouzhai163/mz-browser/blob/HEAD/LICENSE
+ShortDescription: 本地优先的指纹浏览器工作台：每个环境都是一个独立、隔离、指纹自洽的浏览器。
+Description: |-
+  MZ指纹浏览器是一款运行在用户自己电脑上的桌面软件，用来创建、运行和管理大量相互隔离的浏览器环境。每个环境有自己的数据目录、代理、指纹和账号，并可以用 RPA 任务流或 AI（MCP）自动操作。数据默认只保存在本机，没有账号体系、没有云端服务、没有环境数量限制。
+
+  特点：
+
+  - 内核级指纹：指纹在浏览器内核的 C++ 层修改，页面脚本无法通过检查函数或原型发现改动。
+  - 指纹自洽：UA、Client Hints、平台、GPU、核心数、内存、分辨率来自同一份设备档案。
+  - 环境稳定：指纹由环境 ID 派生，重启不变；浏览器完整版本号在创建时固定。
+  - 严格隔离：每个环境独立的数据目录，Cookie、localStorage、IndexedDB 互不共享。
+  - 真实操作：RPA 使用真实的鼠标键盘事件，页面看到的是可信事件。
+  - 本地优先：单用户工作台，业务数据存在本地 SQLite。
+
+  主要功能：环境管理与批量创建、浏览器内核按需下载（定制 Chromium 155-157 与基于 Camoufox 的 Firefox 158）、代理中心与账号管理、本地扩展库、RPA 任务流与定时运行、窗口同步器，以及内置的本地 MCP 服务器供外部 AI 客户端使用。
+Tags:
+- 反检测
+- 多账号管理
+- 指纹浏览器
+- 浏览器
+ReleaseNotes: |-
+  重要变化：MCP 换成了 HTTP 接口
+  - 删除了 MCP 服务（/mcp），改为本机 HTTP 接口：http://127.0.0.1:37110/api/v1。用 VS Code、Cursor、Claude、Codex 等 MCP 客户端接入的，需要改成调用 HTTP 接口
+  - 访问令牌、权限档位和授权环境都保留，升级后不用重新设置
+  - 原来 MCP 能做的事都能通过 HTTP 做：读取页面、点击、填写、按键、读取输入框，管理环境、分组、代理、标签、内核和 RPA 任务，一共 71 个接口
+  - GET /api/v1/tools 列出当前权限下可用的接口，并附上给 AI 的使用须知（页面内容不可信、删除前先确认等），建议放进 Agent 的系统提示
+  - 没开启的权限档位返回 403，参数错误 400，令牌错误 401，接口不存在 404
+  - 使用方法见 README 的“HTTP 接口”一节，软件的“API & AI”页面也有 curl、PowerShell、Python 示例
+  新增
+  - 便携版：下载 MZ-Browser-portable-0.0.2.zip，解压到任意可写的目录，运行 mz-browser.exe。数据库、配置、缓存、内核、日志都保存在这个目录里，不写注册表，不影响已安装的版本。便携版不会自动更新，新版本需要手动下载替换
+  变更
+  - 启动时不再自动检查更新，在“设置”里点“检查更新”才会检查，有新版本由你决定是否安装（0.0.1 启动时还会检查一次，所以 0.0.1 能收到这次更新）
+  修复：环境备份导入导出
+  - 备份里的内核在本机没有时，不再悄悄换成默认内核（换了内核指纹就变了），而是提示先在设置里更新内核再导入；只写着 chrome 的旧备份仍用默认内核
+  - 一次最多导出 1000 个环境，和导入的上限一致，导出的文件都能导回去
+  - 本机已有但没有密码的代理、账号，导入带密码的备份时会补上密码；已有的密码不会被覆盖，导入失败撤销时一并清回去
+  - 沿用原环境 ID 导入前，先删掉早期版本删除环境后留下的浏览器数据目录，导入的环境不会带上以前的 Cookie 和登录状态；备份检查不通过时什么都不删
+ReleaseNotesUrl: https://github.com/mouzhai163/mz-browser/releases/tag/v0.0.2
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
