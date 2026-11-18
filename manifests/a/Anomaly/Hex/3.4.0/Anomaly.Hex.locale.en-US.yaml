@@ -1,0 +1,86 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Anomaly.Hex
+PackageVersion: 3.4.0
+PackageLocale: en-US
+Publisher: Anomaly Innovations, Inc.
+PublisherUrl: https://anoma.ly/
+PublisherSupportUrl: https://github.com/anomalyco/hex/issues
+Author: Anomaly Innovations, Inc.
+PackageName: Hex
+PackageUrl: https://anoma.ly/hex/
+License: MIT
+LicenseUrl: https://github.com/anomalyco/hex/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Christopher Langton
+ShortDescription: Local voice dictation that transcribes on your device and pastes into whatever app you are in.
+Description: |-
+  Hex is local voice dictation for Mac, Windows and Linux. Hold a key, speak, and it pastes. Hex transcribes on your device and pastes into whatever app you are in. The first run downloads a speech model; after that nothing leaves your machine.
+  The Windows port is a tray application with WASAPI capture, local transcribe.cpp transcription, a global shortcut and generation-safe automatic paste. Its daily-use surface includes live microphone, model and shortcut settings, Hold, Tap and double-tap shortcut modes, Paste Last Dictation, recording tones, a click-through HUD, retained History, text replacements, a resident system tray and per-user Launch at login. Global and contextual Modes can rewrite completed dictation, then run ordered built-in or user-defined TypeScript transformations. Experimental features live in Labs at the bottom of the sidebar.
+  The default shortcut is Ctrl+Space. In Hold mode, hold both keys while speaking and release Space to transcribe and paste. In Toggle mode, press Ctrl+Space to start and again to finish, or press the Cancel shortcut (Escape by default) to discard the recording. Hex consumes the chord while it matches, so rebind it in Settings if you rely on that chord elsewhere. Paste Last defaults to Ctrl+Alt+V.
+Tags:
+- dictate
+- dictation
+- speech-to-text
+- stt
+- transcribe
+- transcription
+- voice
+- voice-typing
+ReleaseNotes: |-
+  Hex 3.4.0
+  windows, coming from 3.3: if hex shows "download update" instead of updating itself, download setup (x64 · arm64) and run it over your existing copy. don't uninstall first: settings, history and models stay, and later updates install themselves again.
+  hyprland, coming from 3.3: binds to the old names with the key in them (anomaly.hex:dictation-ALT-space) still work for the key you had, but switch them to the fixed names before you record another key: anomaly.hex:dictation, anomaly.hex:paste-last, anomaly.hex:capture, anomaly.hex:raw-dictation. reload your config and check hyprctl globalshortcuts. binds that run hex dictation … need no change.
+  new
+  - the first run is one story now: a bad group chat, the same conversation with hex, then your own first words
+  - the interface speaks russian (русский)
+  - new speech models: orukeet, granite speech 5.0 470m turboctc, and nb-whisper medium for norwegian. models that hear the language themselves sit under auto
+  - history's header is one "kept 7 days ▾" menu: retention, keep audio too, and clear all history…
+  - each history entry names the model and language that heard it, and replace keeps up to five earlier versions (transcribing an entry again needs its audio, kept with keep audio too)
+  - meetings (opt-in): names and summaries are one choice, off, on this mac or opencode (off or opencode on windows and linux), so a transcript never goes to opencode unless you pick it
+  - meeting rows show the call app's icon, and discord calls are detected like slack and teams
+  - toggle mode has its own cancel shortcut, escape by default, and there is no pre-roll when "while dictating" mutes, pauses or lowers other audio
+  - transcribe again asks which language to use for that run on models that take a language, and the vocabulary sheet says how many terms the selected model reads
+  - scroll bars are always visible and draggable on linux and windows, and menus take page up/down and home/end
+  - touchscreens: taps, drags and momentum scrolling work in hex's windows
+  - the window, hud and capsules have names, values and states for screen readers and voice control
+  - windows: hex.exe no longer opens a console from the start menu or login, and hex.com runs it in a terminal. logs and models move to local appdata once
+  - windows: POST /dictations uses hex's own microphone and can stream live text
+  - mac: the menu bar is ordered meeting, actions, then app, with the speech model and shortcuts in it
+  - mac: your shortcuts keep working while another app holds secure input, like a password field or a terminal's secure keyboard entry
+  labs (off by default)
+  - screenshots on mac: ⌘⇧4 draws a crosshair over any app, a thumbnail slides in, and the editor has pen, arrow, box, text, crop, copy, save and send to. recordings save at native resolution in hevc and wait in the corner until you close them
+  - mac: a notch indicator for the hud, caps lock to dictate hands-free, annotate's last 15 seconds (macos 27 and later, with annotate on and screen recording allowed), and audio files imported as meetings
+  - up to four more dictation shortcuts on mac, each with its own activation mode, and a second one on linux and windows that uses the main shortcut's activation mode
+  - a speech model and language per mode that follow the app in front on mac and windows, and "while dictating" that only applies on speakers
+  - play kept history recordings, write meeting notes to their own file, live typing through the wayland input method, and transform typed text in the focused field on linux
+  fixes
+  - mac: a microphone that goes silent or dies mid-dictation is reopened instead of losing the dictation, and an interrupted dictation is kept and copied instead of thrown away
+  - mac: the hud rejoins every space, works in the bottom position and with the notch, the live text plate no longer flashes the last dictation's words, and ⌘tab brings settings back
+  - mac: the end key works again as a lone shortcut, a remapped caps lock no longer fires a right-control shortcut, and an idle event tap or assistive technology no longer breaks the window
+  - windows: meeting recordings capture the call's audio, and for a detected call hex records the outputs the call app plays to, so a virtual mixer on another output no longer puts your own voice in "them". if hex can't tell which outputs the app uses, or can't open them, it records every output
+  - windows: an alt-based shortcut no longer opens chrome's menu, dragging the window to another display keeps its size, closing the window releases its window and gpu resources, and settings saved during a dictation apply when it finishes
+  - windows: tray and hex commands reach an idle listener at once, and the terminal-paste lab no longer breaks paste in games
+  - windows: launch at login follows a version you install by hand: setup moves it as it installs, and opening a version installed another way moves it too
+  - linux: releasing the dictation shortcut on gnome wayland stops recording, recording another key no longer breaks hyprland binds (see the note above), and hex adopts wayland behind an xwayland-only display
+  - linux: a missing wl-copy is named before paste fails, a failed paste chord releases its keys, a covered settings window no longer pins a cpu, and pipewire can no longer zero hex's realtime cpu limit
+  - linux: the hud lands on the pointer's monitor on x11 and on the focused monitor on other wayland desktops, and stays on the primary monitor on gnome and kde wayland. it comes back after its monitor is re-plugged
+  - linux: the tray's record meeting item works under gnome, and on gnome wayland the meeting offer opens the meetings pane (or floats, with its lab on and xwayland already running)
+  - dictation: unified english pads the end with silence on windows and linux, so the last words are not cut
+  - dictation: a stream that loses its opening, changes language, or drops a late phrase falls back to the whole clip
+  - dictation: the saved speech model applies to the first dictation after launch
+  - dictation: modifier-only shortcuts need a real key down, so releasing shift or caps lock can't start or lock a capture
+  - dictation: cohere french no longer appends invented subtitles, filler removal stays english, exact "sounds like" spellings are replaced, and imported models survive a reboot
+  - meetings: quitting during final transcription marks the meeting interrupted and resumes next launch, a second call in the same browser is detected, and transcribe again with another model no longer hangs
+  - annotate: half-written captures are rebuilt, the send-to list holds still, and spanish "mira" and "esto" trigger annotations
+  - new diagnostic events leave out what you dictated (updating doesn't erase words in older logs), and a settings.json that isn't a json object is left alone instead of being overwritten
+  compatibility
+  - linux: the release runs on glibc 2.36 and newer (debian 12, ubuntu 23.04, fedora 37), and the nix flake builds for arm64 linux too
+  - windows: x64 starts without a vulkan 1.2 loader and transcribes on the cpu
+  - mac: an iphone continuity microphone is no longer picked automatically as a stand-in; choosing it, or making it the system default, still works
+ReleaseNotesUrl: https://github.com/anomalyco/hex/releases/tag/v3.4.0
+Documentations:
+- DocumentLabel: Windows Guide
+  DocumentUrl: https://github.com/anomalyco/hex/blob/HEAD/docs/windows.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
