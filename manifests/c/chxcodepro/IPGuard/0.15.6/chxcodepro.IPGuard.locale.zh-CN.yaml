@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: chxcodepro.IPGuard
-PackageVersion: 0.15.0
+PackageVersion: 0.15.6
 PackageLocale: zh-CN
 Publisher: chxcodepro
 PublisherUrl: https://github.com/chxcodepro
@@ -38,13 +38,13 @@ Tags:
 - 网络安全
 - 网络防护
 ReleaseNotes: |-
-  0.15.0 - 2026-11-16
-  本机回环
-  - 受控进程树默认放行 localhost、127.* 和 ::1 的本机回环连接，覆盖 TCP、UDP、IPv4、IPv6 与本机服务入站；公网目标继续默认走受控代理。
-  - 策略表显示「本机回环默认直连」开关。开启时「本机端口」一键新增阻断例外；关闭时一键新增放行例外。已有规则完整保留，旧策略升级时备份并迁移默认值。
-  - 默认值和端口例外通过健康的 Fort 驱动热更新，保留 Claude 进程；更新期间受控连接会短暂暂停，失败时回滚旧规则。
-  验证与风险
-  共享规则及迁移的定向测试、Fort 离线编码和界面双主题／窄屏检查通过。隔离 Windows runner 的真实 Fort 验证覆盖默认回环、IPv4 / IPv6 / UDP、子进程、本机服务入站、端口阻断与关闭默认值后的热切换，原 PID 保留，驱动清理通过。全部回环放行也允许受控子进程连接其他本地代理，可能绕开 IP Guard 锁定的出口；该行为由用户明确选择。本机当前 Claude、代理和驱动未被改动，实际工具链联动仍待升级后确认。
-ReleaseNotesUrl: https://github.com/chxcodepro/claude-guard/releases/tag/v0.15.0
+  0.15.6 - 2026-11-18
+  修复
+  - 修复 Claude Desktop 更新或更换安装来源后，旧 MSIX 路径使增强切换及其恢复重复报 0x00000003 的问题。切换增强或修复过滤器前会提示「更新路径」。迁移可清理已移除的旧入口，保留原条目的名称、参数和防护开关。
+  - 修正 Edge / Chrome 的网页扩展安装和更新指引。请把 IP-Guard-Browser-0.15.6.zip 解压到「下载」等可写位置，或将桌面打开的扩展文件夹复制过去，再加载含 manifest.json 的目录。浏览器需要在该目录写入规则索引；直接加载受保护的安装目录可能报 rules.json: Internal error while parsing rules.。扩展 ID 和网页防护规则保持不变。
+  严格命令防护（实验）
+  - 合入 v0.15.3 预览中的 Fort 分阶段安装：检测到内存完整性（HVCI）启用或待启用时，只有明确确认才提交本机关闭请求。重启后重新核对 HVCI 状态，确认关闭再安装；不自动重启，也不在提交关闭请求时安装或加载驱动。检测到启用 HVCI 的组织策略或 UEFI 锁时不修改设置。
+  - Fort 仍与开启的 HVCI 不兼容。关闭内存完整性会降低 Windows 内核防护，卸载后也不会自动恢复。隔离 Windows 验证覆盖开关写入及原值恢复；Windows 11 真机从 HVCI 开启、重启到安装的完整流程尚未实测。
+ReleaseNotesUrl: https://github.com/chxcodepro/claude-guard/releases/tag/v0.15.6
 ManifestType: defaultLocale
 ManifestVersion: 1.28.0
