@@ -1,0 +1,32 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Sakana-yuyu.cursor-byok
+PackageVersion: 1.0.19
+PackageLocale: zh-CN
+Publisher: Sakana
+PublisherUrl: https://github.com/Sakana-yuyu
+PublisherSupportUrl: https://github.com/Sakana-yuyu/cursor-byok/issues
+PackageName: Cursor助手
+PackageUrl: https://github.com/Sakana-yuyu/cursor-byok
+License: MIT
+LicenseUrl: https://github.com/Sakana-yuyu/cursor-byok/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 leookun
+ShortDescription: 面向 Cursor 的本地模型适配、代理网关、用量统计与 Agent 工作台。
+Description: 把自己的模型 API 接入 Cursor，在本地完成供应商管理、协议适配、模型路由、用量统计、自动委派和问题排查。Cursor 本身负责优秀的编辑器与 Agent 体验，Cursor助手负责把模型连接与本地运行链路整理好：你可以继续使用 Cursor 的工具调用和任务工作流，同时自由选择官方 API、兼容网关或自建服务。
+Tags:
+- byok
+- cursor
+- 代理
+ReleaseNotes: |-
+  v1.0.19
+  修复
+  - GPT 思考框只显示「模型正在加密推理中」：这句提示是在上游没返回推理摘要时补上的占位，并不是模型还在思考，容易被误解。现在会请求更详细的推理摘要（reasoning.summary=detailed）；上游确实没返回摘要时，会明确说明原因（OpenAI 原始推理是加密数据，本地无法解密显示）。
+  优化
+  - Gemini 原生接口显示思考过程：开启思考时自动带上 includeThoughts，思考摘要会显示在思考框里（以前 Gemini 默认不返回思考内容）。
+  - Gemini OpenAI 兼容端点显示思考过程：用 generativelanguage.googleapis.com/v1beta/openai 接入时自动开启 include_thoughts，并识别流式返回里带 extra_content.google.thought 标记的思考内容，不再混进正文。你在额外参数里自己写过 include_thoughts 的话，以你的值为准。
+  - Claude 隐藏思考有提示：上游只返回签名（display=omitted）或返回 redacted_thinking 时，思考框会说明「上游未返回本轮可读思考内容」，不再什么都不显示。这条提示只用于界面显示，不写入历史，也不会在下一轮发回给模型，不影响前缀缓存命中率。
+  Windows 用户注意：安装时若被 SmartScreen 拦截，点击「更多信息」->「仍要运行」即可。
+ReleaseNotesUrl: https://github.com/Sakana-yuyu/cursor-byok/releases/tag/v1.0.19
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

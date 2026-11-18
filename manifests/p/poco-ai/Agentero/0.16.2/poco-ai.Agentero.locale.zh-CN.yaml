@@ -1,0 +1,55 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.16.2
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  本次发布聚焦阅读与翻译体验：内置离线词典与自动术语、Zotero 高亮导入、渲染公式复制 LaTeX，并新增 Windows ARM64 构建；同时集中修复了 PDF 全文翻译、MCP 资源发现和工作区分屏的一系列问题。
+  新功能
+  - 离线词典与自动术语：内置固定版本的 ECDICT 与 AI 术语库，划词即可查词并自动应用术语约束；新增词典模式、缓存与设置项。（#1041, #1112 · 102d1a4 by @JiaheChen2002）
+  - Zotero 高亮导入：Zotero 迁移和同步产生的 PDF 高亮与下划线现在写入 annotations.json 并显示在页面上，子笔记仍保留在 NOTES.md。（#986 · a178ab0 by @JiaheChen2002）
+  - 公式 LaTeX 复制：只读笔记、嵌入预览和 Agent 回复中的公式可单击复制不带定界符的 TeX；Agent 表格和全屏公式支持右键菜单复制，Markdown 表格导出也会保留 LaTeX。（#1100 · PR #1109 by @Aschenbath）
+  - Windows ARM64: 新增 Windows ARM64 桌面安装包与 CLI 归档，应用内 CLI 安装会解析匹配的主机三元组。（#1134 · 4dea62c by @qychen2001）
+  - 翻译进度：PDF 视图显示逐页和逐段翻译状态，等待期间保留原文的选中与复制行为。（#1128 · 933267b by @ffy6511）
+  - DOI 链接：只有 DOI 的论文会显示 doi.org 链接与可复制的 DOI，不再只提供 arXiv 入口。（6a2540c by @Phil-Fan）
+  - 云端能力设置：账户面板合并展示托管能力，并按账号开关控制是否可用。（87a45fc by @qychen2001）
+  改进
+  - 工作区分屏：⌘\ 可在 PDF 与 NOTES 之间切换；每个 PDF 面板保留自己的路径栏；分屏前先退出最大化并清理失效布局，写作项目保持普通 dock，分屏范围限定在论文与 TeX 项目且不重置列宽。（#1125 · 73f36b5 by @Phil-Fan）
+  - Windows 路径：笔记与 Vault 路径在拼接、文件 IO 和客户端边界统一分隔符与规范化根，修复混用分隔符导致的 os error 123。（#1131 · 2fb6c6e by @JiaheChen2002）
+  - 终端探测：新增 Ghostty 识别，设置页与系统默认回退共用同一份终端预设，Agent 按钮统一遵循终端偏好。（#1116 · a7d94b7 by @Phil-Fan）
+  - 移除本地插件系统：删除插件宿主、设置面板、事件与持久化，旧 plugins.json 会被忽略。（5a2d3d4 by @qychen2001）
+  修复
+  - PDF 翻译稳定性：术语词库更新不再使已有全文译文整份失效；翻译批次、IR 回填与进度页码按页面和阅读顺序调度。（#1137, #1126 · e1c07e6 by @ffy6511）
+  - PDF 翻译排版：保留目录行，修正行内公式与大括号公式的锚点，限制预览位图的内存占用，并拒绝字符归属重复的排版缓存。（c739961, 20834d7 by @ffy6511）
+  - 表格原文擦除：升级 PDFium WASM 修复多区域擦除错位，重新生成的译文不再与英文表格文字重影。（#1127 · de62eb9 by @Phil-Fan）
+  - MCP 资源发现：resources/list 与 resources/read 补上 SEP-2549 要求的 ttlMs/cacheScope，并移除每个资源重复下发的图标数据。（#1130, #1139 · 852e23c by @Phil-Fan）
+  - AppImage Agent: 清空 ACP 子进程继承的 AppImage 加载器变量，修复 Node 型 Agent 启动失败。（#1115 · 19ef0a4 by @Phil-Fan）
+  - 写作诊断行：隐藏的行内操作不再接收点击，编译问题操作改用加入对话图标并只在悬停或聚焦时显示。（897907d, a8e645c by @qychen2001）
+  - Agent 运行时发现：正确发现 Windows 桌面版 Codex 与独立运行时；新手引导不再单独安装 Node。（b863165 by @JiaheChen2002）
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.16.2
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

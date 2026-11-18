@@ -1,0 +1,35 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: YichengWang.Runner
+PackageVersion: 0.19.9.20261114.0320
+PackageLocale: zh-CN
+ShortDescription: 让 Claude Code、Codex、Copilot CLI 等终端编码智能体在同一个 mission 上协同工作。
+Description: Runner 是一款原生桌面应用，让终端智能体协同工作。Claude Code、Codex、OpenCode、Cursor CLI、Grok Build、Antigravity CLI、Copilot CLI 与 pi 可以在同一个任务、同一个 mission 中配合，每个智能体都保留自己真实终端里的 TUI，由 lead 把决策带回给你。Runner 的一切能力都对应一个 `runner` 命令：mission、crew、role、project、chat、session 与 msg 都能在命令行操作，后台服务是 `runnerd`。智能体在 Windows 上原生运行，不需要 WSL，PowerShell 7 为可选。当前状态：alpha，持续发布。原生支持 macOS（Apple Silicon）与 Windows（x64，Windows 10 1809 或更高版本）；不支持 Intel Mac、Windows ARM64 与 Linux。安装程序、应用与 CLI 辅助程序均使用签发给 Open Source Developer Yicheng Wang 的 Certum 开源代码签名证书签名。
+Tags:
+- claude-code
+- codex
+- 人工智能
+- 命令行
+- 控制台
+- 终端
+ReleaseNotes: |-
+  Runner 0.19.9 是 macOS、Windows 和 Linux 上基于 0.19.8 的功能版本，完善了 Antigravity CLI 集成，支持显示 Codex 剩余额度、随聊天一并归档关联 mission，以及在远程窗口中关联和解除关联 mission。
+  新功能
+  - Antigravity CLI 用量显示。 侧边栏底部、Usage 弹出面板、Settings → Usage 和接近限额通知现已支持 Antigravity CLI（1.5.8 或更高版本）。侧边栏底部徽标显示每周 Gemini Models 用量百分比，Usage 面板与设置页则分别列出 Gemini Models 和 Claude and GPT models 两个模型池。Runner 在读取 /usage 前会先检查登录状态，未登录时不会自动弹出浏览器登录；侧边栏较窄放不下全部徽标时，多余徽标会收起为 +N。 (#1286, #1309)
+  - 显示 Codex 剩余额度。 Usage 弹出面板和 Settings → Usage 会在 Codex 限额窗口下方显示剩余额度（Credits remaining），四舍五入到整数额度（或显示 Unlimited / Unavailable）。隐藏五小时限额窗口时额度依然保留，且不会随限额窗口重置而过期。 (#1279)
+  - 归档聊天时一并归档关联 mission。 归档带有未归档关联 mission 的聊天时，Runner 会先请求确认，并将这些 mission 一并停止和归档，同时保留关联关系，后续仍可在 Settings → Archived 中分别恢复。在 CLI 中，为 runner session archive 传入 --with-missions 即可一并归档关联 mission。 (#1290)
+  - 在远程窗口中关联与解除关联 mission。 连接其他电脑的窗口在主机为 0.19.9 或更高版本时，现可通过任务菜单中的 Link to chat、Unlink from <chat>，或将 mission 拖入、拖出聊天分组，把 mission 关联到同一项目中的 agent 聊天或解除关联。 (#1297)
+  - Antigravity CLI 原生终端状态。 Antigravity CLI 聊天和 mission（1.5.8 或更高版本）现通过 OSC 7501 终端状态而非状态 hook 报告 Working、Idle、已完成回复、失败，以及审批、提问和登录等待，会话直接在工作目录中运行，不再注入额外的 hooks 目录。恢复旧版本创建的会话时会保留原有的 hooks 空目录，确保终端命令正常运行。 (#1295, #1316)
+  - Antigravity CLI 聊天自动命名。 Antigravity CLI 聊天现在会根据对话标题和 /rename 自动更新标签页与窗格标题，同时保留你在 Runner 中手动设置的名称。 (#1292)
+  - Antigravity CLI 聊天的 Bypass 开关与软链接目录信任。 Settings → Agents → Antigravity CLI 为聊天新增 Bypass permissions 开关（默认关闭，开启后传入 --dangerously-skip-permissions）。通过 /tmp 等软链接路径启动聊天或 mission 时，Runner 会同时信任软链接路径和解析后的真实目录，不再卡在目录信任提示。 (#1288)
+  问题修复
+  - 对齐 Antigravity CLI 模型列表与 Effort 选择器。 Antigravity CLI 1.5.8 的模型发现会将带推理强度后缀的条目合并为基础模型，并在开始聊天、角色和 Crew 位置中配合独立的 Effort 选择器使用（支持 low、medium、high、xhigh 及对应模型的 max）；未选择模型或所选模型不支持强度参数时自动禁用 Effort。 (#1294)
+  - 终端支持 Windows 盘符路径与 file:// 链接。 在终端中按住 ⌘ 或 Ctrl 点击链接时，现已支持本地 file:// URL（指向本机或 localhost 的纯文本及终端超链接）、Windows 盘符路径（C:\... 和 C:/...）、UNC 路径（\\server\share\...），以及 #Lline、(line,column) 行列后缀，可在侧面板 Files 视图或所选编辑器中直接打开。 (#1300)
+  - 离开视图期间新增的远程 mission 成员标签页正常打开。 查看其他标签页或 mission 期间（或 mission 停止后重新打开时），如果远程 mission 新增或移除了成员，返回后会自动同步成员标签页，同时不会重新打开你手动关闭的标签页。 (#1106)
+  - 消除远程空 mission 消息流的闪烁。 打开尚无角色的远程 mission 时，消息流在历史加载完成前不再闪现“No events yet.”，概览更新时不再发生布局跳动，也不会在远程消息流中显示仅限主机的 Add role 卡片。 (#1306)
+  - 关闭分屏窗格后保留焦点。 在分屏标签页中用 × 或 ⌘W / Ctrl+Shift+W 关闭当前焦点窗格后，键盘焦点会稳定移到保留下来的窗格，无需点击即可继续输入。 (#1283)
+  - 启动命令预览显示已复制反馈。 在 Settings → Agents 的启动命令预览中点击 Copy 后，按钮会显示对勾和“Copied”确认状态，且在没有可用预览时保持禁用。 (#1284)
+  - 精简 agent 更新行与 Usage 行对齐。 Settings → Agents 中正在运行或已完成的更新不再在后台任务提示旁重复显示 Show output 按钮；Settings → Usage 中的单行 agent 标题与右侧开关垂直居中对齐。 (#1309, #1310)
+ManifestType: locale
+ManifestVersion: 1.28.0

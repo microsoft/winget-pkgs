@@ -1,0 +1,46 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: jdx.usage
+PackageVersion: 7.1.2
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://jdx.dev/
+PublisherSupportUrl: https://github.com/jdx/usage/issues
+Author: Jeff Dickey
+PackageName: usage
+PackageUrl: https://usage.jdx.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+ShortDescription: A specification for CLIs
+Description: |-
+  Usage is a spec and CLI for defining CLI tools. Arguments, flags, environment variables, and config files can all be defined in a Usage spec. It can be thought of like OpenAPI (swagger) for CLIs. Here are some potential reasons for defining your CLI with a Usage spec:
+
+  - Generate autocompletion scripts
+  - Generate markdown documentation
+  - Generate man pages
+  - Generate type-safe SDK client libraries for TypeScript, Python, and Rust
+  - Use an advanced arg parser in any language
+  - Scaffold one spec into different CLI frameworks-even different languages
+  - [coming soon] Host your CLI documentation on usage.sh
+Moniker: usage
+Tags:
+- cli
+- spec
+ReleaseNotes: |-
+  Fixed
+  - (complete) Completion candidates and extension filters are now handled as plain text in every shell (#1581, @jdx):
+    - bash: usage generate completion bash used to pass candidates through compgen -W, which expands them as shell input. A run= completer that printed $(touch pwned) ran that command when you pressed Tab, and a * candidate turned into the files in the current directory. The completion-init handler had the same globbing problem. Both now read one candidate per line without expanding it, so a candidate that contains a space stays one entry instead of splitting in two.
+    - zsh: extension names were inserted directly into the _files -g pattern, and zsh runs glob qualifiers as code. The pattern is now built only from plain extension names (letters, digits, _ . + -). If no usable names are left, completion falls back to unfiltered _files. This also fixes a single extension, which produced *.(toml) and matched nothing. It now produces *.toml.
+    - fish: extensions are matched as a literal suffix, so a * or ? in an extension no longer matches extra files.
+
+  Changed
+  - (complete) A command brought in by mount now uses only the completers it declares itself, in its own complete nodes or inside its arg nodes (#1581, @jdx). Before, a mounted argument that shared a name with a top-level completer (for example <tool>) used the mounting spec's completer, even when the mounted command declared its own. If you type one of the mounting CLI's flags inside a mounted command, its value still completes the same way it does outside the mount. Specs without mounts are unaffected. If a mounted command relied on a top-level completer, declare it in the spec that the mount emits instead, for example with complete "tool" run="..." inside the cmd.
+ReleaseNotesUrl: https://github.com/jdx/usage/releases/tag/v7.1.2
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://usage.jdx.dev/cli/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

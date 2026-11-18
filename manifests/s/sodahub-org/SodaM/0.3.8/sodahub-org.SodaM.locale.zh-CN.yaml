@@ -1,0 +1,51 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: sodahub-org.SodaM
+PackageVersion: 0.3.8
+PackageLocale: zh-CN
+Publisher: sodahub-org
+PublisherUrl: https://github.com/sodahub-org
+PublisherSupportUrl: https://github.com/sodahub-org/sodam/issues
+PrivacyUrl: https://github.com/sodahub-org/sodam/blob/HEAD/PRIVACY.md
+PackageName: SodaM
+PackageUrl: https://github.com/sodahub-org/sodam
+License: AGPL-3.0-or-later
+LicenseUrl: https://github.com/sodahub-org/sodam/blob/HEAD/LICENSE
+ShortDescription: 基于 GPUI + Rust 的原生汽水音乐桌面客户端。
+Description: SodaM 是一个基于 GPUI 和 libresoda 的原生汽水音乐桌面客户端，面向 Linux、macOS 和 Windows 桌面，重点提供接近官方客户端的操作手感、稳定的本地播放体验、会员账号的无损音质播放，以及干净自适应的主题系统。
+Tags:
+- 专辑
+- 播放器
+- 歌单
+- 歌手
+- 歌曲
+- 汽水音乐
+- 音乐
+- 音频
+ReleaseNotes: |-
+  SodaM 0.3.8
+  播放与失败处理
+  - 按曲目不可播（下架、无整曲授权、拿不到试听地址）改为立刻跳到下一首，不再停掉整条播放；只有登录、签名服务、缺 Cookie、磁盘这类全局故障才落闸（#106、#113）。
+  - 上游「缺登录态」的两种写法（require cookie / require logged-in user id）都归到全局故障，不再误判成这首歌不可播（#106）。
+  - 单曲循环或队列只有一首时不再谎称「已跳过」；没有真正换歌的路径只如实说明原因（#106）。
+  - 网络抖动造成的按曲目跳过只做一次性轻提示，不占常驻错误位；常驻位只留落闸与全局故障（#106）。
+  - 缓冲区欠载（蓝牙 A2DP 下几分钟一次）不再被当成输出失效：只记 WARN，播放不再中断；设备丢失等真故障行为不变（#104）。
+  音质档位与缓存
+  - 所选档位不可用时服务端会回退到更高一档，界面现在如实说出两侧（「已降档」/「高于所选」），徽章统一标记「不符」（#82、#98）。
+  - 存量旧三字段缓存纳入升级候选：档位未知不再算「已达目标」，重下一遍才知道真实档位，设置页如实报数（#89、#102）。
+  - 旧缓存换文件的底线：新流码率低于旧标签记着的码率就不换，权益过期或曲库退档时不会把好文件顶掉（#89）。
+  - 「已确认没有更高档位」的结论落盘（sidecar 第 5、6 字段，30 天后重新探测），跨会话不再重复整曲下载（#90、#99）。
+  - 批量升级只在账号权益确认后放行需要会员的档位；设置页的禁用态与执行处共用同一判定（#89）。
+  界面与官网
+  - 新增底部状态行出口：切档、详细日志开关这类确认不再「生效了却看不见」，5 秒自动消失、切页清空（#83、#94）。
+  - 官网加入深色 / 浅色 / 跟随系统三态主题，首屏绘制前解析，浅色配色满足 AA 对比度。
+  - README 增加友链 myMusic（Android 客户端，独立维护，非本项目组成部分）。
+  依赖
+  - libresoda 跟进到最新 main（44df096 → 5edd2ff，184 个提交）：取流 / 下载层与签名子进程收场的一批上游修复。
+  - 签名服务仍走 libmssdk 的 POST /sign，本版不需要改配置；公共签名服务已升级到最新 libmssdk，老版本客户端不受影响。
+  验证：scripts/check.sh 全过（cargo check + fmt --check + clippy -D warnings + test）；macOS arm64 release 真机播放，经 libmssdk 拉到整曲无损 41 MB，缓存 sidecar 试听标记为 0。
+  感谢本次 Release 涉及的贡献者 @Xxx91n：播放失败分类、状态行、档位与缓存升级；@Turing-Cat：音频欠载处理。也感谢所有提交 issue、参与 review 和测试的朋友。
+ReleaseNotesUrl: https://github.com/sodahub-org/sodam/releases/tag/v0.3.8
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

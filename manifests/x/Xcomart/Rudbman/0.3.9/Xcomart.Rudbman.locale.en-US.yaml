@@ -1,0 +1,75 @@
+# Created using wingetcreate 1.12.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Xcomart.Rudbman
+PackageVersion: 0.3.9
+PackageLocale: en-US
+Publisher: Xcomart
+PublisherUrl: https://github.com/xcomart
+PublisherSupportUrl: https://github.com/xcomart/rudbman/issues
+Author: Dennis Soungjin Park
+PackageName: rudbman
+PackageUrl: https://github.com/xcomart/rudbman
+License: MIT
+LicenseUrl: https://github.com/xcomart/rudbman/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Dennis Soungjin Park
+ShortDescription: A multi-platform GUI database workbench that talks to any database with a JDBC driver.
+Description: |-
+  rudbman is a desktop database workbench written in Rust and drawn with gpui, the
+  GPU-accelerated UI framework behind the Zed editor. It reaches a database through
+  that database's own JDBC driver over an embedded JVM bridge, so any product with a
+  JDBC driver is a supported product: drivers come from Maven Central by coordinate or
+  from disk, the driver class is detected from the JAR, and every connection gets an
+  isolated class loader so two vendors' drivers cannot collide.
+
+  Each connection is a tab with its own work area — a schema explorer over catalogs,
+  schemas, tables, views, sequences, routines and triggers, filtered by name or condition
+  and told per connection what to hide; a SQL editor with dialect-aware
+  highlighting, statement splitting, cancellation, execution plans and a searchable
+  history of the statements it ran, over a virtualized grid that
+  scrolls a million rows without loading a million rows; ERD diagrams laid out and
+  routed automatically; a visual query builder that turns dragged tables and columns
+  into SQL; and backup of a schema to a replayable .sql script. Connections can run
+  through an SSH tunnel, and secrets live in the Windows credential store rather than
+  on disk.
+
+  No JDK is required — the installer carries a Java runtime built with jlink and
+  rudbman uses the one next to its executable. The interface is available in English,
+  Korean, Japanese, Simplified Chinese, German, Spanish, French and Russian.
+Moniker: rudbman
+Tags:
+- database
+- database-client
+- dba
+- developer-tools
+- erd
+- gui
+- jdbc
+- mysql
+- oracle
+- postgresql
+- query-builder
+- rust
+- sql
+- sql-client
+- workbench
+ReleaseNotes: |-
+  rudbman 0.3.9 — schemas restored from a script, statement bodies kept whole in the editor and in runs, a run button beside each statement, and a choice of where the date goes in saved SQL file names.
+  - A schema can be restored from a script. Restore from script… on a schema or catalog takes a backup, pg_dump --inserts, mysqldump, mariadb-dump, or an SSMS or SQL Developer script, plain or gzipped, UTF-8 or UTF-16. It checks the script through once and then runs it on a session of its own opened beside the connection's, with progress, cancel and Continue past failed statements.
+  - A backup restores into the schema it is opened over. A backup names every object in full, so restoring it from another schema's menu created the objects in the schema it was taken of. The restore now reads which scope a script names and, when that is not the selected one, offers to move it: qualified names, USE and CREATE SCHEMA, and the names passed to nextval, setval, OBJECT_ID, DBCC CHECKIDENT, sp_addextendedproperty and COMPILE_SCHEMA are rewritten into the selected scope, inside routine bodies and MySQL executable comments too, while other strings are left as written. Backups now start with a comment naming the scope they were taken of.
+  - Scripts run the way each product's client reads them. Run all, and Run selection when the selection holds a client line, read a script as psql, mysql, sqlcmd, SQL*Plus, the Db2 CLP and sqlite3 do: DELIMITER, GO batches, PL/SQL units ended by /, --#SET TERMINATOR, CREATE TRIGGER … END;, MySQL executable comments, and the client commands that are skipped, end the script or are refused before anything runs.
+  - Statement bodies stay whole in the editor and in runs. The statement shaded under the caret, and the one Run statement sends, was the piece between two semicolons, so a CREATE PROCEDURE … BEGIN …; END, a PL/SQL block or package, a SQLite trigger or a PostgreSQL BEGIN ATOMIC body was cut at its first inner semicolon. Run all cut MySQL routines typed without DELIMITER, BEGIN ATOMIC bodies, SQLite triggers holding a CASE and Db2 routines the same way, and ran an Oracle unit typed without its slash together with everything after it. Both now count a body, and the editor takes its statements from the reader Run all uses, so the shading follows DELIMITER, GO and the SQL*Plus slash and Run statement sends the unit as Run all would.
+  - A run button beside each statement. The SQL editor's gutter shows a ▶ to the right of the line number on the first line of each statement; pressing it runs that statement without moving the caret.
+  - Saved SQL file names put the date where you choose. Settings → Database → SQL file name date puts today's date after the tab's name, as before, before it, or leaves it out of the name the save dialog suggests for a query tab that has never been saved.
+  - A schema backup's suggested file name is dated. The save dialog suggests <schema>_backup_<yyyyMMdd>.sql (.sql.gz with gzip), so a second day's backup does not offer to replace the first's.
+  - The comment toggle keeps the selection. The same lines stay selected, a backwards selection stays backwards, and the caret stays beside the character it was next to, instead of collapsing to a caret at the old offset.
+  - Shared libraries are updated to rugpui 0.1.17 and rudbkit 0.1.7, and russh to 0.65 for RUSTSEC-2026-0492 and RUSTSEC-2026-0495. UI dependencies, framework patches and the database toolkit are pinned to their published release commits.
+
+  Requirements
+  - Linux: glibc 2.35 or newer: Ubuntu 22.04, Debian 12 and later, or a distribution built on them, MX Linux 23 among them.
+
+  What's Changed
+  - chore: release 0.3.9 by @xcomart in #63
+ReleaseNotesUrl: https://github.com/xcomart/rudbman/releases/tag/v0.3.9
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
