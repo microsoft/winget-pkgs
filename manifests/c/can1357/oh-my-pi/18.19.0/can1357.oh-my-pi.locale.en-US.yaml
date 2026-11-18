@@ -1,0 +1,114 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.19.0
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-ai
+  Added
+  - Added the liquid-systemone judgment API for Liquid AI decision models, including validation that rejects image sets exceeding Liquid’s 10,000 32×32-patch request limit before submission.
+  Fixed
+  - Fixed Gemini CLI and Antigravity responses losing or misordering thought signatures and reply text, including responses that follow tool calls.
+  - Fixed Gemini CLI and Antigravity merging reply text around a thought signature, dropping signatures at the start of a reply or after a tool call, and placing a thought ahead of reply text that streamed before it (#18942 by @JustasMasiulis)
+  - Fixed Google Antigravity judging Gemini models by quota buckets they do not consume: Gemini 3.x requests ignore the Gemini 4 Argon weekly bucket, and Argon requests ignore gemini-weekly, so an exhausted or low bucket no longer blocks, reserves, or caps an account for the other models (#16104).
+  @oh-my-pi/pi-catalog
+  Added
+  - Added Liquid AI provider support with the d1.1 and d1-ultra judge models and Liquid authentication via /login liquid using LIQUID_API_KEY.
+  Fixed
+  - Fixed Google Antigravity Gemini 4 Argon models sharing the general Gemini quota scope instead of their dedicated weekly bucket (#16104).
+  @oh-my-pi/pi-coding-agent
+  Breaking Changes
+  - Changed the browser open API: ignore_https_errors is now insecure, allow_file_access has been removed, and file: pages can access other local files.
+  - Changed the browser open and targets app option from an object to a string or CDP endpoint/executable path. Use argv instead of app.args and the top-level target instead of app.target.
+  - Removed task.file and the task tool's taskFile field; subagent instructions must now be provided inline.
+  - Removed blocked todo tasks and the blocked status/blocker metadata. Existing blocked tasks are restored as pending.
+  Added
+  - Added systemPromptTemplates, which maps model-selector patterns to Handlebars template files for customizing system prompts. Templates re-render when switching models, with warnings and fallback to the bundled prompt for missing or invalid templates.
+  - Added ordered multi-step tasks through task.steps. Subagents receive steps sequentially, and the final step determines the task result; interrupted tasks resume with their remaining steps.
+  - Added Liquid AI judge models liquid/d1.1 and liquid/d1-ultra, including image resizing for Liquid's request limits.
+  - Added per-step progress, state, and duration reporting for GitHub Actions watches, with expandable details and native Tern Surface Protocol views.
+  - Added task.autoParallel (off, suggest, or on) to identify subtasks that can run concurrently and optionally delegate them in a single parallel task call.
+  - Added portable awk, tar, lsof, shasum, md5, and strings support to the bash tool, including Windows support and internal-URI paths.
+  Changed
+  - Browser sessions now prefer the bundled ABKit WebKit engine when available, with automatic installation and SHA-256 verification. WebKit provides headed, user-visible tabs and broader browser compatibility; Chromium remains the fallback and can be selected explicitly with app: "chromium", while app: "webkit" requires WebKit. Configure this behavior with browser.webkit and browser.webkitPath or the corresponding environment variables.
+  - Browser visibility controls now show or hide WebKit tab windows immediately. Headed WebKit tabs can be interacted with directly, while Chromium tabs retain their existing mode-switching behavior.
+  - In Tern environments with native DOM access, browser observation and interaction use trusted native input across frames and closed shadow roots, with caret-aware typing and case-insensitive text selectors.
+  - edit.modelVariants now uses the longest matching model pattern, so specific patterns take precedence over generic ones regardless of configuration order.
+  - The ask tool now submits the form's current values when its timeout expires; updated settings and documentation reflect this behavior.
+  - The read tool loads detailed format selectors and URI sub-path syntax on demand, reducing the default request description while retaining inline details when read is disabled.
+  - The default system prompt and tool descriptions have been streamlined, with guidance moved closer to the tools and detailed task/procedure references provided when relevant.
+  - The bash pseudo view renders words built from literals and expansions as f-strings (f"repos/org/{r}/rulesets") instead of concat(...) calls.
+  Fixed
+  - Fixed computer.close() so subsequent computer-control calls start a fresh desktop session instead of failing.
+  - Fixed extension providers with oauth.modifyModels so they do not load the full model catalog before login.
+  - Fixed resuming sessions so it no longer scans unrelated later session transcripts.
+  - Fixed session saving on Windows to avoid UI stalls caused by repeated session-file access.
+  - Fixed automatic chart selection so generated charts use compatible data and chart types.
+  - Fixed bash previews for env -i commands so they display the requested command rather than generated shell setup code.
+  @oh-my-pi/collab-web
+  Fixed
+  - Fixed task tool cards so spawned tasks consistently display their name, assigned agent, and instructions, with steps spawns shown as numbered stages.
+  @oh-my-pi/pi-natives
+  Added
+  - Added shellBuiltins(sessionEnv?) to list commands provided by the embedded shell, including process controls and utilities.
+  - Expanded the embedded shell with awk, tar, shasum, md5, strings, and lsof across Linux, macOS, and Windows. Destructive utilities can be disabled with PI_DISABLE_UUTILS_DESTRUCTIVE; when disabled, tar is delegated to the system.
+  Fixed
+  - Fixed macOS text entry in Chrome and other Chromium-based applications so typing followed by Return opens the entered text instead of reloading the current page.
+  @oh-my-pi/pi-tui
+  Added
+  - GitHub Actions watch cards now show current-step progress and can be expanded with Ctrl+O to display ordered step states and durations in ANSI and native Tern views.
+  Fixed
+  - Fixed comparison charts mislabeling gaps against a rival column as improvements or regressions.
+  - Fixed Tern edit diffs showing unrelated one-line hunks and incorrect line numbers around distant changes.
+  - Fixed table charts incorrectly interpreting words such as “with,” “to,” and “from” in column names as comparison conditions.
+  - Fixed chart row names containing trailing numbers, such as “EmbeddingGemma 2” and “Jev 15,” being split or incorrectly nested.
+  - Fixed read rejecting colon-separated line ranges and displaying a single requested range as multiple rows.
+  Removed
+  - Removed the blocked status from TodoStatus, the blocker field from TodoItem, and the block/unblock operations from TodoOperation.
+  @oh-my-pi/pi-utils
+  Added
+  - Added browser utilities exposing trusted browser archive extraction limits and the installed WebKit host executable path.
+  What's Changed
+  - feat(ai,catalog,coding-agent): add Liquid AI (d1-ultra, d1.1) judge provider by @SuperUserA in https://github.com/can1357/oh-my-pi/pull/18100
+  - fix(collab): isolate test home directories and guard real ~/.omp paths by @iliaal in https://github.com/can1357/oh-my-pi/pull/18811
+  - fix(ai): keep signature-only thought parts as signed thinking on Gemini CLI routes by @JustasMasiulis in https://github.com/can1357/oh-my-pi/pull/18942
+  - perf(tui): release regenerable render caches on retired tool cards by @iliaal in https://github.com/can1357/oh-my-pi/pull/18820
+  - perf(coding-agent,catalog): keep model cache reads provider-scoped and prune expired legacy rows by @iliaal in https://github.com/can1357/oh-my-pi/pull/18821
+  - feat(coding-agent): add per-model system prompt templates by @DeprecatedLuke in https://github.com/can1357/oh-my-pi/pull/17835
+  - perf(session): read only headers when looking for a session's continuations by @iliaal in https://github.com/can1357/oh-my-pi/pull/18952
+  - feat(github): show step-level Actions watch progress by @anatoli-tsinovoy in https://github.com/can1357/oh-my-pi/pull/18945
+  - fix(ai): isolate antigravity argon quota bucket by @roboomp in https://github.com/can1357/oh-my-pi/pull/16106
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.18.9...v18.19.0
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.19.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

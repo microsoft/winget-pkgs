@@ -1,0 +1,46 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: JonathanMarler.msvcup
+PackageVersion: 2026_11_02
+PackageLocale: en-US
+Publisher: Jonathan Marler
+PublisherUrl: https://github.com/marler8997
+PublisherSupportUrl: https://github.com/marler8997/msvcup/issues
+Author: Jonathan Marler
+PackageName: msvcup
+PackageUrl: https://github.com/marler8997/msvcup
+License: MIT
+LicenseUrl: https://github.com/marler8997/msvcup/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Jonathan Marler
+ShortDescription: A standalone tool for installing the MSVC toolchain and Windows SDK without Visual Studio.
+Description: |-
+  msvcup is a standalone tool for installing the MSVC toolchain and Windows SDK without Visual Studio.
+  The Visual Studio Installer manages thousands of components, modifies the registry, and can take hours to configure. msvcup treats the toolchain as a versioned asset rather than global system state. The build environment is defined by code, not a GUI.
+  - Fast: Runs in milliseconds when already installed. Put it at the start of every build script.
+  - Reproducible: Lock file ensures everyone gets the same toolchain.
+  - Isolated: Every package is installed to its own versioned directory. No registry modifications. No conflicts.
+  - Cross-compilation: Target x64, arm64, or x86 out of the box.
+  - Minimal: Download only what's needed to get a working native toolchain/SDK.
+Tags:
+- msvc
+- vc
+- vc++
+- visual-c++
+ReleaseNotes: |-
+  Highlights
+  Newer Windows SDKs now work. sdk-10.0.26100.15 installed without headers such as winapifamily.h, so anything including windows.h failed to compile. These headers moved to new packages that msvcup now installs. Packages for older SDKs don't change.
+  More reliable downloads. The Visual Studio CDN sometimes ends a download early, which used to fail the whole install. msvcup now tries up to 3 times and logs a warning for each failed attempt.
+  Bug fixes
+  - Fixed a panic when piping large output in Git Bash, such as msvcup list-payloads | grep foo.
+  - Fixed >> redirection overwriting the start of the file instead of appending.
+  - Fixed download errors and logs that left out the URL.
+  - Requesting a package that doesn't exist now fails straight away and names the package. It used to write a lock file first and then report a lock file mismatch.
+  Other changes
+  - list-payloads now shows which msvcup package owns each payload, and lists every payload in the manifest.
+  - Added -h/--help.
+  - Moved package selection from code into src/recipes.txt, one rule per line. This keeps the payload-to-package mapping as data and prepares for making it configurable.
+  Full Changelog: https://github.com/marler8997/msvcup/compare/v2026_04_08...v2026_11_02
+ReleaseNotesUrl: https://github.com/marler8997/msvcup/releases/tag/v2026_11_02
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

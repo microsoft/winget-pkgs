@@ -31,6 +31,7 @@ Our intent was not to introduce a numbers game for others to achieve and automat
 | **[@jedieaston](https://github.com/jedieaston)** |
 | **[@mdanish-kh](https://github.com/mdanish-kh)** |
 | **[@russellbanks](https://github.com/russellbanks)** |
+| **[@taras-janea](https://github.com/taras-janea)** |
 | **[@Trenly](https://github.com/Trenly)** |
 
 ## Emeritus Moderators

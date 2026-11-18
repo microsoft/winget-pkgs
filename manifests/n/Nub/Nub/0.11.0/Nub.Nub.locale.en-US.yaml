@@ -1,0 +1,85 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Nub.Nub
+PackageVersion: 0.11.0
+PackageLocale: en-US
+Publisher: nub contributors
+PublisherUrl: https://nubjs.com/
+PublisherSupportUrl: https://github.com/nubjs/nub/issues
+Author: nub contributors
+PackageName: Nub
+PackageUrl: https://nubjs.com/
+License: MIT
+LicenseUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 nub contributors
+CopyrightUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+ShortDescription: The all-in-one JavaScript toolkit that augments Node.js instead of trying to replace it.
+Description: "An all-in-one toolkit for Node.js. One Rust binary to run your files and scripts, install dependencies, and manage Node itself — a Bun-like modern DX on top of the node you already have. There's no new runtime to adopt and no lock-in: every augmentation rides on Node's own public extension surfaces."
+Moniker: nub
+Tags:
+- javascript-runtime
+- node-version-manager
+- nodejs
+- package-manager
+- script-runner
+ReleaseNotes: |-
+  Nub 0.11.0 preloads TypeScript 7.1 content mappers, adds nub add --save-types, installs one copy of a package where pnpm does, and removes the canary channel. It also fixes a broad set of correctness bugs in the runtime, the package manager and nub run.
+  Important
+  Five changes can surface in an existing project:
+  - The canary channel is gone. nub upgrade --canary and --stable are unknown flags, and install.sh and install.ps1 no longer accept canary. An existing canary install keeps working, and nub upgrade --stable still moves it to a release (#1102)
+  - A lockfile missing a required entry is broken. nub ci and nub install --frozen-lockfile exit 16 and name the entry, and a plain nub install repairs it. Both exited 0 and left a tree that could not load (#1105)
+  - nub add <pkg>@<tag> saves a prerelease exact, as pnpm does. A stable tag still saves with ^ (#1096)
+  - Some lockfiles change once. A local or URL package keeps its peers on its key, and a tree that held duplicate copies of a package collapses them on its next fresh resolve (#1093, #1089)
+  - The first install after upgrading relinks once, because the dependency scan's cache was reset (#1113)
+  Content mappers
+  TypeScript 7.1's content mappers type-check other file types, but TypeScript never runs them. Nub now preloads the ./register export of every package the tsconfig lists, with no --import and no nub.jsonc entry (#1082).
+  {
+    // ...
+    "contentMappers": [
+      { "package": "motherload", "extensions": [".toml", ".yaml"] }
+    ]
+  }
+  import config from "./config.yaml"; // loaded by motherload/register
+  extends and references are followed, the longest extension answers first, and an entry's options reach its register in CONTENT_MAPPER_OPTIONS.
+
+  Type packages on add
+  nub add --save-types <pkg> also saves the DefinitelyTyped package to devDependencies for each registry package whose installed version ships no types, picking the newest @types release on that package's major (#1110, fixes #1016).
+  nub add --save-types express
+  A package with no @types release, or only a deprecated stub, prints skipped @types/<name>: <reason>. An @types entry the project already lists is kept.
+
+  Package manager
+  ───────────────────────────────────┬─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬──────────────────────────────────────
+  Area                               │What changed                                                                                                                                                                                                             │Link
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────
+  Duplicate copies                   │A package installs once where pnpm installs it once. The Nuxt starter went from 17 duplicate copies to 0, and workspace members no longer get two module objects for one package.                                        │#1089
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────
+  Peers of local packages            │A file:, URL or git package consumed with two sets of peers loads the right peer after a lockfile install. One entry served both consumers, with no error.                                                               │#1093
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────
+  Edges to workspace members         │A registry package whose peer a workspace member satisfies links to the member, as pnpm writes it. The install succeeded and require failed with Cannot find module.                                                     │#1081
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────
+  Local packages from a pnpm lockfile│file: and link: packages read back from nub.lock or pnpm-lock.yaml get the graph a fresh resolve gives. A root peer pinned to a tarball URL no longer fails every resolve after the first with                           │#1072, #1109, fixes #1108
+                                     │ERR_NUB_BLOCKED_EXOTIC_SUBDEP.                                                                                                                                                                                           │
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────
+  Failed adds                        │A failed nub add or nub install <pkg> restores package.json, the lockfiles and the workspace yaml. The new dependency stayed in package.json.                                                                            │#1111
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────
+  --fix-lockfile                     │nub install --fix-lockfile rewrites the lockfile, keeping its pinned versions. It repairs a package-lock.json written with the dev-optional flags 0.10.0 fixed.                                                          │#1091, refs #1087
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────
+  bun.lock local paths               │A member's file: directory and a hoisted tarball install under nub ci and --frozen-lockfile, and a bun.lock Nub writes spells local packages as bun does, which bun install --frozen-lockfile accepts.                   │#1112
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────
+  Filtered installs                  │nub install --prod, --dev and --no-optional download only the dependencies they link. Every package in the graph was downloaded into the store.                                                                          │#1121, fixes #1120
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────
+  pnpm-workspace.yaml                │A # comment after a pattern or after packages:, and the flow form packages: ['a/*', 'b/*'], are read. Each found no workspace members.                                                                                   │#1113
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────
+  Repeated .npmrc keys               │The last script-shell, ignore-scripts or node-mirror:release wins, as in npm. The first won.                                                                                                                             │#1113
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────
+  packageManager paths               │A version that walks out of its package, such as pnpm@../npm/10.9.0, fails to resolve. It installed the other package into the store under the requested name.                                                           │#1113
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────
+  nub pm use                         │nub pm use nub keeps catalog and nohoist from an object-form workspaces, and nub pm use pnpm keeps the other keys under workspaces.                                                                                      │#1113
+  ───────────────────────────────────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────────────────────────
+ReleaseNotesUrl: https://github.com/nubjs/nub/releases/tag/v0.11.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://nubjs.com/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

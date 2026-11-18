@@ -1,0 +1,92 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: max-sixty.worktrunk
+PackageVersion: v0.82.0
+PackageLocale: en-US
+Publisher: max-sixty
+PublisherUrl: https://github.com/max-sixty
+PublisherSupportUrl: https://github.com/max-sixty/worktrunk/issues
+PackageName: worktrunk
+PackageUrl: https://github.com/max-sixty/worktrunk
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/max-sixty/worktrunk/blob/HEAD/LICENSE
+ShortDescription: A Git worktree manager for trunk-based development
+Description: |-
+  worktrunk (wt) is a Git worktree manager designed for trunk-based development workflows.
+  It simplifies creating, switching between, and managing Git worktrees, making it easy to
+  work on multiple features or branches simultaneously without the overhead of stashing
+  or switching branches in a single working directory.
+Tags:
+- cli
+- git
+- git-worktree
+- rust
+- terminal
+- worktree
+ReleaseNotes: |-
+  Release Notes
+  Improved
+  - Backups before forced removal: wt remove --force snapshots the worktree, including untracked files, to refs/wt-backup/<branch> and prints a recovery command. Ignored files, changes inside submodules, and separate staged versions are excluded. A failed backup stops removal; an unreadable status still permits removal without one. Docs (#4545, thanks @yajo for #4544)
+  - Codex activity hooks ship separately: skills stay in worktrunk; activity hooks move to worktrunk-markers, so skill updates don't trigger hook reapproval. (Breaking: existing installs need codex plugin add worktrunk-markers@worktrunk to retain activity markers after updating.) Docs (#4707, thanks @win5do for #4654)
+  - Claude Code /wt-diff pane: shows the branch diff for worktrees the session has worked in, including work detected from subagents. Failed worktree lookups are retried, and tool errors reach Claude's hook diagnostics. Docs (#4638, #4668, #4689, thanks @rudycelekli and @Yash2031v)
+  - Shell completion: typing wt switch origin/ completes that remote's branches. Hook names honor per-project user overrides and source-qualified filters; completion honors -C, --config, config overrides, and alias precedence over executables on PATH. PowerShell filters suggestions by the typed prefix. (#4613, #4549, #4551, #4548, #4560, #4721, thanks @Bortlesboat, and @thernstig for #4612)
+  - JSON survives later failures: commands retain confirmed results when a later step fails, while diagnostics go to stderr and the exit status signals failure. wt switch --format=json emits one result after execution. List schema 1 reports the tracked remote branch when its name differs locally. (#4345, #4574, #4584, #4756)
+  - Removal feedback: failures describe the surviving checkout and branch. --delete-branch is visible in help as the override for delete-branch = false, and the picker briefly confirms successful Alt-x removal. (#4457, #4615, #4669, thanks @Yash2031v for the picker feedback and @cazador481 for #4614)
+  - Fewer repeated Git operations: committing skips the second staging pass when no pre-commit hook ran; concurrent list tasks share identical ahead/behind counts. (#4540, #4663)
+  Fixed
+  - Copying ignored files: .worktreeinclude can select paths inside wholly ignored directories, such as .cache/types/. Copy and promotion also enforce destination containment before creating directories or moving files. (#4751)
+  - Foreground cancellation: signal handling closes races around child startup and completion, so Ctrl-C stops subsequent command steps. On Unix, wt step tether stops its supervised processes on interruption and now propagates a command's failure status. (#4596, #4609, #4623, #4598, thanks @drldavis for #4622)
+  - Hook execution and feedback: unselected templates no longer cause errors or consume arguments. Filtered background hooks retain independent user and project pipelines, and template failures identify the command. Background hooks running in different directories receive separate announcements. (#4429, #4781)
+  - Config loading: rejected environment overrides warn and fall back to file settings consistently across commands; unreadable config files are reported instead of silently ignored. System-config deprecations point to the file that needs editing. (#4358, #4564, #4767)
+  - State values: clearing a key removes all repeated values. Branch-local reads and clears exclude variables belonging to branches whose names extend with .vars.*. State tables preserve literal pipes, links, and formatting characters. (#4566, #4779, #4780)
+  - Log and terminal handling: authentication-probe output is redacted from diagnostics; Unix logs use private permissions, and permission repair leaves symlink targets unchanged. Commit subjects, PR context, and list summaries escape terminal control characters. (#4604, #4611, #4605, #4730)
+  - SSH remotes with a non-default port: port-less legacy project IDs no longer supply approvals or project settings to a different SSH server. Those repositories need port-qualified approvals and project overrides. (#4606)
+  - Removal with submodules: text-mode removal warns about submodule commits reachable from no remote; the warning does not prevent removal. Orphan cleanup preserves fsmonitor daemons serving live submodules. (#4460, #4729)
+  - Fork branch conflicts and GitHub Enterprise: GitLab and Azure DevOps use a prefixed, fetch-only branch when a fork's branch name conflicts locally. GitHub Enterprise PR lookup uses the remote’s host, or a supplied PR URL’s host, when gh is authenticated there. (#4542, #4710, #4722, thanks @anqorithm, and @pgilad-rna for #4709)
+  - Azure DevOps remotes: collection-prefixed URLs, legacy SSH URLs, and URLs omitting the project segment resolve the correct project for links and CI lookup. (#4764, thanks @owpac for #4763)
+  - Shell integration: directory changes preserve trailing spaces, and PowerShell treats paths containing brackets literally. Installation continues configuring other shells after an rc-file error; uninstall matches recognized standalone setup lines and leaves customized lines for manual removal. (#4608, #4680, #4583, #4595, thanks @dajiaohuang for the PowerShell fix and @lucasfonte21 for #4582)
+  - Agent plugins: Claude's worktree-switching skill leaves the current worktree session before entering another by path. On Windows, Pi, oh-my-pi, and OpenCode select Worktrunk rather than Windows Terminal's wt; Claude activity markers are written without launching another wt. (#4714, #4698, #4619, thanks @tian-yu200 for #4697)
+  - Branch markers: deleting a branch through Worktrunk or creating it with wt switch --create clears its marker, so reused names don't inherit stale activity. Clearing all markers preserves a state variable named marker. (#4684, #4704, #4528, thanks @wsgavin for #4683)
+  - List and picker display: headers use @ for HEAD and ^ for the default branch. Variation-selector emoji align; IPv6-only loopback servers are detected; the footer shows task progress; stale refreshes cannot overwrite removal layout. (#4682, #4694, #4620, #4708, #4732, thanks @nixpulvis for #4727, @saltcoffee for the IPv6 fix and @NorfeldtKnowit for #4681)
+  - Numeric custom columns: list-column validation accepts int and float filters on vars.* and git.branch.* values. (#4775, thanks @adrian-gierakowski for #1983)
+  - Linux process cleanup: wt remove --reap discovers process working directories through /proc, avoiding a timed-out system-wide lsof scan. (#4631, thanks @OmerFarukOruc for #4630)
+  - Aliases and custom commands: named aliases can be inspected outside a repository; project aliases display migrated template variables. Custom-command discovery excludes non-executable entries. (#4547, #4690, #4565)
+  - Fixes for unusual setups: slash-named remotes work in branch inventory; same-named tags don't affect the push range; non-UTF-8 environment entries no longer panic config loading; invalid alias arguments cannot fall through to a PATH executable; failed Git ref queries propagate as errors. (#4271, #4499, #4563, #4550, #4562, thanks @Duang777)
+  Documentation
+  - Claude desktop worktrees: clarifies that the desktop app skips the plugin’s worktree hooks, so its worktree sessions bypass Worktrunk. Docs (#4777, thanks @chatoo2412 for #4776)
+  - Interactive browser demo: a Try it page runs Worktrunk in a browser workspace. (#4280, #4546, #4579, #4581, thanks @kooler)
+  - Guides and examples: guides explain shortened list counts and the default base branch for Claude’s hook-created worktrees. Skill anchors and site icon links are repaired; the move-changes alias stops if stashing or restoring fails. (#4575, #4576, #4688, #4678, #4770, #4751, #4719, thanks @viwe-monai)
+  Internal
+  - Temporary-index cleanup reclaims abandoned scratch indexes while owner locks protect active operations, including removal backups. (#4469, thanks @jonah-osmo)
+  - Breaking Rust library changes: public types and function signatures changed; downstream crates need to update for 0.82.0.
+  Install worktrunk 0.82.0
+  Install prebuilt binaries via shell script
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/max-sixty/worktrunk/releases/download/v0.82.0/worktrunk-installer.sh | sh && wt config shell install
+  Install prebuilt binaries via powershell script
+  powershell -ExecutionPolicy Bypass -c "irm https://github.com/max-sixty/worktrunk/releases/download/v0.82.0/worktrunk-installer.ps1 | iex"; git-wt config shell install
+  Install prebuilt binaries via Homebrew
+  brew install worktrunk && wt config shell install
+  Download worktrunk 0.82.0
+  ────────────────────────────────────────────────┬───────────────────┬─────────────
+  File                                            │Platform           │Checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-apple-darwin.tar.xz           │Apple Silicon macOS│checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-apple-darwin.tar.xz            │Intel macOS        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-pc-windows-msvc.zip            │x64 Windows        │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-aarch64-unknown-linux-musl.tar.xz     │ARM64 MUSL Linux   │checksum
+  ────────────────────────────────────────────────┼───────────────────┼─────────────
+  worktrunk-x86_64-unknown-linux-musl.tar.xz      │x64 MUSL Linux     │checksum
+  ────────────────────────────────────────────────┴───────────────────┴─────────────
+  Install via Cargo
+  cargo install worktrunk && wt config shell install
+  Install via Winget (Windows)
+  winget install max-sixty.worktrunk && git-wt config shell install
+  Install via AUR (Arch Linux)
+  paru worktrunk-bin && wt config shell install
+ReleaseNotesUrl: https://github.com/max-sixty/worktrunk/releases/tag/v0.82.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
