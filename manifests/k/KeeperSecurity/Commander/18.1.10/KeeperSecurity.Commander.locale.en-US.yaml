@@ -22,5 +22,24 @@ Tags:
 - password-manager
 - secrets
 - security-tools
+ReleaseNotes: -
+  Security
+  - Closes a Nested Share Folder (NSF) ownership bypass and attacker-shared folder name collisions. An attacker could share a folder with a victim using the same name as one of the victim's own folders (or a component of its path); Commander resolved the path to the first match, so `mkdir`, `mv`, `ln` and `record-add --folder` could route the victim's new folders, records and their keys into a folder the attacker owns, exposing them to the attacker. Path resolution now prefers owned folders, rejects ambiguous matches (including Secrets Manager application lookups) instead of picking the first one, and `record-add --folder` no longer creates an unfiled record when the folder cannot be resolved.
+  Features
+  - Delinea Secret Server migration, phase one: interactive Safe selection, a `--add-thycotic-users` option that creates the Delinea users in Keeper (with a dry-run preview), support for restricted secrets, and secret-level permissions.
+  - Adds an `--include-empty-folders` option to `import` and `export` so folders that contain no records are carried over (classic folders and NSF; export to JSON, CSV or KeePass).
+  - Adds PAM project support and filtering for shared folders in the membership commands.
+  Improvements
+  - `export` now requests attachment download links in batches of 100 instead of one request per attachment, which speeds up exports with many files; it falls back to per-file requests if a batch fails.
+  Fixes
+  - Service mode now returns the correct status when a PAM project extend succeeds.
+  - `pam action rotate` now uses the PAM Configuration named in the user's rotation settings. Previously a user linked to several configurations could be matched to the wrong one and fail with "Resource UID not found for record".
+  - An SSO user who chooses "SSO User with a Master Password" on a new device is no longer sent back to the SSO login page after device approval.
+  - The enterprise loader is reset when logging in.
+  - Tunnel resources no longer have their `meta` data replaced by `jit_settings` or `ai_settings`; the `meta` edge is now read by path.
+  - Usage text for sub-commands of command groups shows the full command name (for example `pam project import`) instead of only the group name.
+  - Invalid arguments to `ksm` no longer raise an extra error (the `ksm` subprocess exit code 2 is no longer re-raised).
+  Full commit range: `v18.1.9..v18.1.10`
+ReleaseNotesUrl: https://github.com/Keeper-Security/Commander/releases/tag/v18.1.10
 ManifestType: defaultLocale
 ManifestVersion: 1.28.0
