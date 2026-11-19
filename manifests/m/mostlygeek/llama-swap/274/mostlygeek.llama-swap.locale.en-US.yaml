@@ -1,0 +1,72 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: mostlygeek.llama-swap
+PackageVersion: '274'
+PackageLocale: en-US
+Publisher: mostlygeek
+PublisherUrl: https://mostlygeek.com/
+PublisherSupportUrl: https://github.com/mostlygeek/llama-swap/issues
+PackageName: llama-swap
+PackageUrl: https://github.com/mostlygeek/llama-swap
+License: MIT
+LicenseUrl: https://github.com/mostlygeek/llama-swap/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2024 Benson Wong
+ShortDescription: Model swapping for llama.cpp
+Description: llama-swap is a light weight, transparent proxy server that provides automatic model swapping to llama.cpp's server.
+Moniker: llama-swap
+Tags:
+- golang
+- llama
+- llamacpp
+- localllama
+- localllm
+- openai
+- openai-api
+- vllm
+ReleaseNotes: |-
+  Chat history that survives pasted images, per-parameter toggles in the Playground, a realtime crash fix and healthier Docker builds.
+  Maintainer notes
+  This release has several Playground improvements in the UI and my happy
+  surprise that people are using it more.
+  Chat gained a history feature where ZERO history is now an option. History has
+  always been stored locally but now it is possible for it not to even hit the
+  disk. The params for temperature, top-p, etc can also be toggled off. Some
+  people were surprised that chat always sent the params. Reminder that the
+  stripParams filter will make sure server settings are always applied.
+  There were also some behind the scene docker container changes to tweak things
+  a bit. The ik-llama binary no longer breaks the build by taking hours to
+  complete. The build is much faster now, no more github action timeouts, but if
+  you're running it on datacenter GPUs it'll probably be less reliable or slower
+  now. The unified container also carries a custom llama.cpp that shows loading
+  progress in standalone mode. Rather than try to get it landed into the upstream
+  project its easier to maintain a fork with llama-swap tweaks. A few times a day
+  the tweaks are rebased on top so it's still llama-server.
+
+  Robot summary
+  Chat and Help conversations are now stored in IndexedDB instead of a single
+  localStorage key, so a couple of pasted images no longer fills up the ~5 MB
+  quota and silently throws away history. Chat also gets a History menu and a
+  History settings tab for going back to an earlier conversation.
+  Playground chat parameters can now be turned off one at a time, which makes it
+  much easier to send a request with only the settings you actually care about.
+  A couple of annoyances are fixed too: requests that set a Content-Type but
+  carry no body (such as the /v1/realtime websocket upgrade) are no longer
+  rewritten, which had been crashing llama-server, and model aliases that point at
+  their own model ID are rejected at startup instead of breaking the model picker.
+  The unified Docker image is back to building reliably. ik_llama.cpp is now
+  compiled for consumer CUDA architectures only, because a single upstream ggml
+  header change invalidated every cached CUDA object and blew past the build time
+  limit. The image also builds llama.cpp from mostlygeek/mg-llama.cpp so the
+  model load progress shown in the UI is available.
+  Thanks to @drone540 for the Playground layout fixes.
+  - PR #1343 ui: save chat history in IndexedDB for Chat and Help: stores saved conversations in a per-namespace IndexedDB store (images as shared blobs with orphan cleanup, limit pruning and quota retry) instead of one localStorage key, because a few pasted images hit the ~5 MB quota and wiped history; Chat gets a History menu and History settings tab (limit defaults to 1, each conversation keeps its model and parameters) and Help uses the same backend by @mostlygeek
+  - PR #1345 Fix/playground layout: keeps long unbroken chat messages inside the chat window, caps image prompt height with internal scrolling, moves SDAPI settings into a dialog to free up preview space, fits generated images to the preview frame without upscaling, and moves the expand-to-edit button beside the textarea so it no longer covers scrollbars (and stays visible on keyboard focus) by @drone540
+  - PR #1347 docker/unified: build llama.cpp from mostlygeek/mg-llama.cpp: builds the unified container's llama.cpp binaries from the fork, which carries small patches such as model load progress reporting that llama-swap displays by @mostlygeek
+  - PR #1348 docker/unified: add --consumer to narrow ik_llama.cpp CUDA archs: adds a --consumer flag (default on in the workflows) that compiles ik_llama.cpp alone for 75-virtual;86-real;89-real;120-real on cuda13 amd64, covering RTX 20xx-50xx and dropping datacenter GPUs, because an upstream ggml header change missed every cached CUDA object and overran the 285 minute compile limit; the archs used are recorded in /versions.txt by @mostlygeek
+  - PR #1354 server: filter only requests that carry a body: applies the JSON and multipart body filters only to POSTs that are not websocket upgrades, because they previously matched on Content-Type alone so realtime clients sending Content-Type: application/json on the /v1/realtime upgrade had a {"model":...} body injected that llama-server read as websocket frames and crashed on by @mostlygeek
+  - PR #1357 ui/playground: make chat parameters individually optional: adds a checkbox to each parameter header (temperature, top P, min P, top K, max tokens) so disabled ones are omitted from the request while keeping their values for later, remembering the choices in preferences and saved conversations; max tokens stays a required fallback for the messages endpoint by @mostlygeek
+  - PR #1358 internal/config: reject self aliases and deduplicate model picker rows: rejects an alias that equals its own model ID with a clear configuration error and deduplicates selector rows, because redundant model metadata produced duplicate and self-referencing entries that broke the Playground and Help model picker by @mostlygeek
+ReleaseNotesUrl: https://github.com/mostlygeek/llama-swap/releases/tag/v274
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

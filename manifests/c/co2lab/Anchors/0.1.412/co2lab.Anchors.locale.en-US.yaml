@@ -1,0 +1,42 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: co2lab.Anchors
+PackageVersion: 0.1.412
+PackageLocale: en-US
+Publisher: co2lab
+PublisherUrl: https://github.com/co2-lab
+PublisherSupportUrl: https://github.com/co2-lab/anchors/issues
+PackageName: Anchors
+PackageUrl: https://github.com/co2-lab/anchors
+License: Elastic License 2.0
+LicenseUrl: https://github.com/co2-lab/anchors/blob/HEAD/LICENSE
+ShortDescription: Spec-first continuity framework for AI-assisted development
+Description: Anchors ties spec, feature and test together through a shared identity code, then confronts each artifact against the rules declared in anchors.yaml. It maps the project as a graph, propagates change from the anchor outward, and gates every step — so work guided by AI stays anchored to what was decided.
+Moniker: anchors
+Tags:
+- ai
+- ai-agents
+- cli
+- developer-tools
+- golang
+- spec-first
+ReleaseNotes: |-
+  v0.1.412
+  - anchors impact lists who depends on the files. Before, the "Propagates to" list followed every edge outward. A depends-on edge runs from the importer to the imported file, so from a screen the list reached what the screen uses. Through the navigator the screen imports, it reached every screen of the app: in MIF, 833 items "to redo" for one screen whose evidence closure holds five tests. The command now always goes to the side that depends, whatever the edge type:
+    - whoever imports the file or declares @dep of it;
+    - whoever reads what it writes, captures it or realizes it;
+    - for a spec, the code, feature and tests it rules.
+    - Levels. Without a flag, only the direct dependents show. --propagate indirect climbs one more level, and --propagate cascade climbs to the end of the chain. Each item past the first level shows the path that ties it to the file.
+    - Large branches. An item that ten or more nodes depend on says how many it pulls, so you can judge whether that branch belongs. --stop-at <glob> lists such an item and climbs no further from it.
+    - Types-only imports. A tie the project marks with no side effect on the tests, such as an import of types, is listed and marked, but the walk does not continue past it. Its tests are not added.
+    - Tests to run again. The list holds the tests reached and those whose evidence closure holds a reached file, the same closure evidence-fresh judges. They are grouped by the layer of the suites that run them.
+    - Other output. "Validates against" still lists the spec, feature and guides that govern the file. --format files (with --layer) prints the tests for a runner, and --format json prints everything. Several files can be asked about at once. (IMANM-B06–B09, MPCTI-B07–B09, MPCTI-E03)
+  - New command: anchors dependencies <file>.... It walks the same ties the other way: everything the files depend on. That means what they import or declare @dep of, the writers of what they read, what they capture or realize, and the specs, features and guides that rule them. It takes the same --propagate, --stop-at and --format flags. (DPNDS-B01–B02)
+  check --changed keeps the slice it had. Its impact radius is unchanged.
+  Everything in the v0.1.351 notes still applies: run anchors migrate once, crossing format 8.
+  Changelog
+  - fa023bd feat(impact): impact lists who depends on the files, by level; new dependencies command
+ReleaseNotesUrl: https://github.com/co2-lab/anchors/releases/tag/v0.1.412
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

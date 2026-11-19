@@ -1,0 +1,62 @@
+# Created with komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: jmrplens.gitlab-mcp-server
+PackageVersion: 3.5.0
+PackageLocale: en-US
+Publisher: José M. Requena Plens
+PublisherUrl: https://github.com/jmrplens
+PublisherSupportUrl: https://github.com/jmrplens/gitlab-mcp-server/issues
+PrivacyUrl: https://github.com/jmrplens/gitlab-mcp-server/blob/main/PRIVACY.md
+PackageName: GitLab MCP Server
+PackageUrl: https://github.com/jmrplens/gitlab-mcp-server
+License: MIT
+LicenseUrl: https://github.com/jmrplens/gitlab-mcp-server/blob/HEAD/LICENSE
+ShortDescription: GitLab MCP server exposing the REST v4 and GraphQL APIs as tools for AI assistants.
+Description: A Model Context Protocol (MCP) server that connects AI assistants (Claude, Cursor, VS Code + Copilot, and any MCP client) to GitLab.com or self-managed GitLab instances. Covers the full REST API v4 and GraphQL with automatic edition gating, roughly 850 to 1080 tools depending on the GitLab tier, plus 45 MCP resources, 37 prompts, argument completions, progress notifications and resource subscriptions. Single static binary, stdio and HTTP transports, read-only and safe (mutation-preview) modes, and per-client configuration examples in the documentation.
+Moniker: gitlab-mcp-server
+Tags:
+- ai
+- ci-cd
+- claude
+- devops
+- gitlab
+- graphql
+- llm
+- mcp
+- model-context-protocol
+- rest-api
+ReleaseNotes: |-
+  Summary
+  3.5.0 no longer leaves a credential on a paid plan with a lower catalog when GitLab did not answer the tier detection, moves client-go from v3.30.0 to v3.49.0 and offers what that range models, takes pagination and page_token off the lists GitLab pages by offset alone, sends the empty value that clears a field where updates used to drop it, and answers a call the session cannot make with its cause on every surface.
+  - A tier detection GitLab did not finish no longer leaves a credential on the wrong catalog (#1816 to #1819). A step of the probe that got no answer (a timeout, a network failure, a 408, a 429, a redirect not followed or a 5xx after the retries, or on GitLab.com a membership query answered without its group list) used to be read as an answer, so a credential on a paid plan could be served the Free catalog for hours, until its pool entry went away. Such a step now lowers nothing and leaves the tier provisional unless the steps that answered already reached ultimate: the highest tier the other steps answered is served, and a WARN names the steps. In HTTP mode the pool asks a provisional tier again about a minute after the build, then two, four and eight minutes after each ask, and every fifteen minutes after that, whatever --revalidate-interval says and whether or not the credential holds a subscription open, and moves the credential to the tier the answer resolves. The GitLab.com membership query is retried like a read and runs on eight seconds of its own, and an instance whose edition could not be read is no longer logged as CE. On stdio the tier is still detected once at start; a provisional one is warned about and kept until the client restarts the server.
+  - A call the session cannot make is answered with its cause (#1756, #1757, #1758). On the meta surface, an action the tier, the token's scopes or read-only mode withheld was refused as a value outside the action enum, which reads as a typo; it is now answered as the dynamic surface answers it, naming what withheld it. A param the session's tier leaves out of an action's schema is refused before anything is sent, on every surface, naming the tier it needs and whether the session's tier was pinned or detected, where the meta surface used to send it and GitLab dropped it. A session authenticated by an OAuth access token no longer lists the five actions GitLab refuses such a token on every route they send (access.token_personal_revoke_self, access.token_personal_rotate_self, access.token_group_rotate_self, access.token_project_rotate_self and model_registry.download), and a call to one is answered with that cause.
+  - client-go v3.49.0, reached through #1792, #1793, #1797 and #1798 and a last bump just before the cut, with #1794 offering the params the range models. The fields client-go now models are read from it, or kept from the captured response where its plain booleans would read an absent key as false, and three new actions build on the methods it adds: group.group_upload uploads a file to a group as project.upload does to a project (GitLab 19.0 and later), group.shared_project_delete removes from the group's side a share project.share_with_group created, and environment.stop_stale stops every environment last modified or deployed to before a time, protected environments excepted. Every tier serves three more actions.
+  - New parameters:
+    - The merge request lists (merge_request.list, merge_request.list_global, merge_request.list_group and environment.deployment_merge_requests) filter by the merge user and the merge time, by assignee_username, and by seven negated filters (not_assignee_id, not_assignee_username, not_author_id, not_milestone, not_my_reaction_emoji, not_reviewer_id and not_reviewer_username); the global, group and deployment lists also by environment, deployed_after and deployed_before, the project list by in and the group list by source_project_id (#1794).
+    - Four project lists (project.list, project.list_forks, project.list_user_projects and project.list_user_starred) take topic_id, updated_after and updated_before (#1797). project.list_user_contributed accepts them as well, but GitLab's route declares none of the three and answers the list unfiltered.
+    - admin.plan_limits_change takes twenty-one more limits, package.registry_get asks for the repository's size, user.create_service_account and user.update_service_account take external, project.update takes the three GitLab Duo security workflow switches (Ultimate), and group.group_board_create_list creates an assignee, milestone or iteration column (Premium) as well as a label column (#1794).
+    - admin.topic_list and admin.topic_create take organization_id (#1798), and the project and group hook add and edit take url_variables (#1792).
+    - pipeline.list and pipeline.latest take the canceling and waiting_for_callback statuses, and a subscription to a pipeline, the latest pipeline or a job in either status is now polled as work in flight rather than as settled (#1798).
+    - user.contribution_events, user.get_status and user.ssh_keys_for_user take a username as user_id (#1795), and the four custom attribute actions and the six storage move actions take a path or a username where GitLab does (#1745).
+    - package.download takes download_mode (#1697).
+    - admin.terraform_state_lock sends the lock info GitLab requires, so a lock now succeeds, publishes the lock GitLab recorded and names the lock already held on a 409, and admin.terraform_state_unlock takes a lock_id to release the lock only when its ID matches (#1796).
+  - Lists: only a list GitLab can page by keyset takes pagination and page_token (#1673, #1674, #1675): the four project lists, a project's issues and jobs, a runner's jobs, the user and service account lists, the three audit event lists, a container repository's tags, and the lists Gitaly pages. Every other list pages with page and per_page and refuses the two before sending anything (see Breaking changes). The four project lists refuse a keyset request in any order but id, which GitLab answered with 405.
+  - Updates send the empty value that clears a field (#1805, #1806, #1807). GitLab clears these fields with an empty string, an empty list or null, and the server used to read an empty value as the field left out, so nothing could clear them; the fields are listed under Breaking changes. issue.update, issue.work_item_update and group.epic_update remove a weight sent as null, and a weight of 0 is published where it used to be left out.
+  - Fixes:
+    - project.update asks before it leaves a project's pull mirror overwriting diverged branches, as project.pull_mirror_configure has asked since 3.1.0, and both now also ask when a call sets the overwrite on a mirror it turns off, or changes the branch filter of a mirror that overwrites (#1753).
+    - Inline comments: an image or file position is no longer refused as a text line, an image position of x or y 0 is sent, and a position missing its file path or a SHA, or a text position naming no line, is refused before any request, naming the part, where a draft note used to be saved and published as a general comment (#1700, #1760). mr_review.draft_note_update keeps the draft's position when it changes only the body, and its body when it changes only the position, and repository.commit_discussion_create runs the same checks.
+    - issue.list_all and issue.statistics_get say GitLab.com may refuse scope=all, a restriction GitLab is rolling out per user, and answer that refusal with what works there; the my_issues prompt reads the caller's own issues with scope=assigned_to_me, and another user's from GitLab's GraphQL issue list when GitLab.com refuses scope=all (#1781).
+    - A stdio start that reached GitLab asks it about the token, the user and the tier within ten seconds, where each question waited out its own timeouts and retries against an instance that accepts connections and never answers, and held a tools/list sent at start meanwhile (#1824). Two waits are outside that bound: the connectivity check before it, up to ten seconds of its own, and on GitLab.com the membership query the tier check ends with, up to eight more, so a client's startup timeout should allow about 30 seconds there and about 20 on a self-managed instance.
+    - A TLS failure on a host with no CA store names the store and SSL_CERT_FILE before turning verification off, in the startup warning and in the error a call returns (#1825).
+    - In oauth mode, a client that registered itself with GitLab, which GitLab grants only the mcp scope, is refused with a pointer to the OAuth application's client ID rather than told to reauthorize (#1823).
+    - --probe asks /health under a URL that ends in a slash, and refuses a scheme it does not speak with exit status 2 (#1826).
+    - A stdio refusal whose request id cannot be read carries no id rather than "id": null, and the HTTP keep-alive comes 25 seconds after the last byte a stream wrote, where a stream could go 50 seconds without one (#1722).
+    - The Markdown of every result writes an address that is its own text once, as <url>, and the user, topic and achievement cards leave the avatar to structuredContent, which still carries every field GitLab sent (#1724).
+  - HTTP mode and telemetry: every line the credential pool writes about an entry names the credential's keyed handle, so an operator can follow one credential from creation to removal without token material in the logs (#1755, by Kashif Manzer, and #1783). A fine-grained session whose grant was read logs at start what the grant decides (#1710). gitlab_mcp.upstream.requests counts every request the process sends GitLab, by server address and with telemetry off as well, against the per-address budget GitLab.com holds traffic to (#1706). Under --telemetry-identity full a caller is recorded with gitlab_mcp.instance beside its user id and name (#1707).
+ReleaseNotesUrl: https://github.com/jmrplens/gitlab-mcp-server/releases/tag/v3.5.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://jmrp.io/docs/gitlab-mcp-server/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

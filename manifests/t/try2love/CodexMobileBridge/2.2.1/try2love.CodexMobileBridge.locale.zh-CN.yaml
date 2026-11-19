@@ -1,0 +1,61 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: try2love.CodexMobileBridge
+PackageVersion: 2.2.1
+PackageLocale: zh-CN
+Publisher: try2love
+PublisherUrl: https://github.com/try2love
+PublisherSupportUrl: https://github.com/try2love/codex-mobile-bridge/issues
+PackageName: Codex Mobile Bridge
+PackageUrl: https://try2love.github.io/codex-mobile-bridge/
+License: MIT
+LicenseUrl: https://github.com/try2love/codex-mobile-bridge/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 try2love
+ShortDescription: 在手机浏览器里继续电脑 Codex App 已有聊天的本地网关。
+Description: |-
+  在手机浏览器里，继续电脑 Codex App 已有的聊天，或在已保存项目中新建聊天。
+  手机与电脑打开同一个会话，查看回复、发送消息、选择模型与 Skill、回应待确认操作。本地任务继续在原电脑执行，SSH 任务继续在原服务器执行；模型请求沿用该会话的提供商与认证配置。
+  不要求手机登录与电脑相同的 OpenAI 账号。 网关提供独立的账号密码登录，也支持显式开启免密访问。可以通过局域网、临时 HTTPS 隧道或自己的反向代理连接。
+  社区项目，与 OpenAI 无隶属关系。支持 macOS 和 Windows，依赖 Codex App 的内部 IPC；各平台的实测范围见 验证记录。App 更新后可能需要适配。
+
+  消息编辑、分支与复制
+  - 用户消息下方可复制内容。最近一条选择「编辑并重新发送」；更早的消息选择「编辑并新建分支」，原会话保留。
+  - 已完成的回答下选择「从这里分支」，新会话保留截至该轮的历史，等待你继续输入。聊天详情中可返回来源会话。
+  - 回复支持完整 Markdown 复制，代码块单独复制；长回复自动读取完整正文。浏览器限制剪贴板时显示可选中的文本，支持系统复制操作。
+  - 原地编辑要求任务已停止，会重新生成回答。编辑和分支不会撤销既有文件修改；新旧会话共享工作目录。
+  - 分支需要 Codex 运行时同时支持指定轮次与目标续跑延迟；旧版会提示更新 Codex App。复制与最近消息编辑不受此分支能力限制。创建分支不会主动发送模型请求。
+  - 结果不确定时先检查聊天列表，重复提交同一请求不会再次执行。分支已创建但连接失败时，修改保留为该分支的编辑草稿。
+Tags:
+- codex
+- 远程
+- 远程访问
+- 远程连接
+ReleaseNotes: |-
+  建议更新以适配最新版 Codex APP 原生连接。
+  v2.2.1 新增 Antigravity 接入与聊天内交互图表，完善 CLI 连接管理、模型缓存和文件浏览，并修复新版 Codex 连接、长会话读取及手机连接恢复中的问题。
+  新增与改进
+  - Antigravity 远程工作台。 在手机和 Web 查看 App、IDE、CLI 的本机历史，通过受支持的原生连接继续聊天、新建项目聊天、切换模型、发送附件和处理审批。补充原生问题与等待交互、子任务管理、历史图片预览及添加到草稿；展示原生服务实际提供的模型额度与上下文用量。受支持的默认本机配置可保存账号副本，并在核验空闲后切换。PR #150 · PR #170
+  - 聊天内交互图表。 Codex 回复中的 visualize 内容可直接展示，支持滑块、按钮、主题适配与全屏查看；重新打开聊天时恢复图表已保存的交互状态。图表追问可放入输入框，编辑后由用户发送。#166 · PR #167
+  - CLI 连接与网络管理。 按 Agent、运行环境和配置查看连接，支持单条或配置范围释放，并展示共享服务操作的影响范围。增加受支持本机接入的账号、代理变化核验及网络恢复入口；任务、审批或发送结果不明时保留核对流程。#122
+  - 侧边聊天与宽屏阅读。 保留原生侧聊的父子关联，提供明确的临时侧聊入口，复用输入、附件、模型和审批界面。宽屏可收起聊天列表，为当前会话腾出更多阅读空间。#149
+  - 文件浏览与聊天操作。 支持经授权的宿主机目录、完整路径导航和返回项目文件夹，聊天文件链接可定位到目标。增加 / 命令入口、可选的新建聊天名称、原生交互时间及授权音视频附件播放，精简提醒入口。#160 · #154 · #161 · #148 · #158 · #141
+  - 网络与桌面体验。 自有服务器＋SSH 入口支持自定义 HTTPS 端口；macOS 菜单栏使用单色图标。#145 · PR #146 · #156 · PR #157
+  - WSL 状态与启动入口。 区分发行版停止与状态暂未确认，避免查询失败时误报停止；Codex 和 Claude 的网关及直连应用管理列表提供“启动并连接 WSL”，并修复 WSL Claude 的“查看聊天”跳转失败。
+  修复与优化
+  - 恢复新版 Codex 会话连接。 适配桌面端 v13 同步协议，并对结构兼容的后续版本进行校验后继续同步。无法识别关键任务或审批结构时，保留历史与草稿，暂停控制并提示升级。#168 · PR #169
+  - 修复 Antigravity 运行一段时间后被误判离线。 日志较大时同时读取头尾端口信息，并限制日志读取量，继续核验端口和目标进程的归属。PR #171
+  - 改善长会话读取。 限制 Antigravity 单个超长回合进入历史页的数据量；避免 Claude 已持久化的流式历史挤入最近消息页，并保留页外完成状态的关联信息。
+  - 模型列表更稳定。 复用当前账号与接入的模型缓存；列表获取失败时保留明确的手动模型选择与草稿。区分账号变化和临时获取失败，避免错误清空选项或跨账号复用旧列表。
+  - 改善连接恢复与应用启动。 修复 Windows 商店版 Codex 启动和就绪判断、Claude 初始化失败后的重试状态及部分原生运行时兼容问题；改善 DSH 连接器恢复与 ZCode 窗口识别。#153
+  - 修复手机连接与导航。 改善 iOS 进入电脑、后台恢复和连接页安全区域；Android 在信道探测过程中可返回电脑列表，完善 Cookie 迁移和网关身份保留。#159
+  - 改善更新与界面细节。 macOS 更新后通过系统启动机制重新打开 App，改善辅助功能授权身份衔接；Windows 下载更新前先检查应用占用。修复登录状态提示未完整随中英文切换的问题。
+  使用说明
+  Android 安装说明： 新版 Bridge 与旧版 v2.2.0 App 独立安装，不能直接覆盖旧版。请先安装新版、重新添加电脑并确认连接正常，保留好旧版中需要的草稿后，再卸载旧版。旧版绑定和草稿不会自动迁移。已安装 v2.2.1-preview.1 独立 Bridge Preview 的用户可直接覆盖升级，保留该预览 App 的连接和草稿。
+  手机原生导航、交互图表与连接恢复改进需要同步更新对应手机 App。iOS 源码和未签名 IPA 仍需自行签名安装。
+  Antigravity 账号切换、独立客户端及 WSL 相关能力以当前平台和接入支持为准。临时侧聊仅适用于受支持的本机桌面入口，不写入原生历史，网关重启后不会恢复。项目外文件浏览为只读；发送、审批及切换结果不明时，不自动重放操作。
+  贡献
+  感谢 @windowmmk 在 PR #150、PR #170 和 PR #171 中贡献 Antigravity 接入、账号管理、原生交互与日志发现修复；感谢 @heiqiu47 在 PR #146、PR #157、PR #167 和 PR #169 中贡献自定义 HTTPS 端口、菜单栏图标、交互图表和 Codex 协议兼容改进。
+ReleaseNotesUrl: https://github.com/try2love/codex-mobile-bridge/releases/tag/v2.2.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

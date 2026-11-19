@@ -1,0 +1,96 @@
+# Created with WinGet Updater using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: ossia.score
+PackageVersion: 3.9.0
+PackageLocale: en-US
+Publisher: ossia
+PublisherUrl: https://ossia.io/
+PublisherSupportUrl: https://github.com/ossia/score/issues
+PackageName: score
+PackageUrl: https://ossia.io/
+License: GPLv3
+LicenseUrl: https://github.com/ossia/score/blob/HEAD/LICENSE.txt
+ShortDescription: ossia score, an interactive sequencer for the intermedia arts.
+Tags:
+- art
+- creative-coding
+- digital-art
+- hacktoberfest
+- interactive
+- intermedia
+- media-art
+- midi
+- open-sound-control
+- open-source
+- osc
+- osc-messages
+- qt
+- sequencer
+ReleaseNotes: |-
+  Discord Open Collective backers and sponsors GitHub Sponsors
+  ossia score is a sequencer for audio-visual artists, designed to create interactive shows.
+  Sequence OSC, MIDI, DMX, sound, video and more, between multiple software and hardware. Create interactive and intermedia scores, script and live-code with JavaScript, ISF Shaders, Faust, PureData or C++. Leverage IoT protocols such as CoAP or MQTT, interact with joysticks, Wiimotes, Leapmotions, Web APIs and BLE sensors and integrate programs from a wealth of creative programming languages such as Structure Synth, Context-Free Art and Bytebeat. Load any kind of audio or video format and process visuals through Spout, Syphon, NDI, Shmdata or Sh4lt ; sonify large datasets with CSV and HDF5 support.
+  ossia score 3.9.0 is a large release: highlights are a complete 3D pipeline, new video capture, streaming and tracking devices, advances on custom user interfaces, a more customizable look, along with dozens of new protocols, synthesizers and objects.
+  Thanks to @edumeneses @bltzr @ogauthiersat @cbicari @samamou @darioriccio @thibaudk @aklevy for the major contributions!
+  Full Changelog: v3.8.2...v3.9.0
+  This release has been mainly developed thanks to projects happening at the Société des Arts Technologiques. It is part of the Suite SAT.
+  This release has benefited from a load-bearing sponsorship from Anthropic, granting free access to a Claude Max 20x plan during its development.
+  New features
+  - 3d: a complete 3D scene pipeline, not based on Qt Quick 3D. An Asset Loader reads glTF/GLB, FBX, STL, OFF and MagicaVoxel .vox (alongside OBJ and PLY) with their lights, cameras, glTF animations and skins, and FBX node animation. Scene-graph processes filter, tag, group, switch, duplicate and transform a scene, with material overrides and everything driven from the device tree.
+  - 3d: new objects include Camera, Camera Array, Camera Switch, Light, Environment, PBR Mesh, Material Override, Transform 3D, Instancer, Text to Mesh, Text to Texture, Cubemap Loader and Composer, Animation Player, and Scene Inspector, with point clouds and gaussian splats supported throughout.
+  3d-2026-10-15_22.07.49.webm
+  Instancing is supportd, including of glTF:
+  instancing.webm
+  The entire pipeline runs on GPU, with zero CPU readback or processing, to enable massive instanced scenes that leverage compute shaders for generation and customizable render pipelines for rendering.
+  particles.webm
+  Support for volumetric (3D) textures is extensive:
+  volumetric.webm
+  as well as for custom PBR materials.
+  3d-2026-10-15_23.23.18.webm
+  The rendering system allows to render scenes with entirely user-defined scene processors: a single score can combine deferred, forward rendering, clustered forward, etc. : the engine doesn't impose or implement any specific rendering technique, they are all shader-based and part of the scores. This has been developed to enable computer graphics research in new rendering techniques, and opens the door to e.g. studies on spectral rendering, etc. Or, for more fun stuff, implementing PS1 or N64 rendering pipelines:
+  3d-2026-10-15_23.24.44.webm
+  or gaussian splats, including less standard formats than traditional 3DGS (for instanc 2DGS etc.):
+  splats.webm
+  - about: the displayed version shows how many commits it is past the release and the branch, for example 3.8.2+42.
+  - ai: librediffusion adds StreamV2V and Flux.2 Klein (with inpainting and image editing), multi-step SDXL, img2img-turbo, ControlNet, IP-Adapter, a runtime LoRA scale, and multi-step CUDA graphs with DMD2, NitroFusion and RIFE presets (shipped in the future). See https://github.com/jcelerier/librediffusion#base-models to convert models on your own machine at the right format. Requires a NVidia GPU.
+  - ai: onnx: the pose detector tracks several people, with smoothing, box modes, RTMO, YOLO-pose models and an OpenPose palette. Also new: generic nodes for any ONNX model, Vocos vocoders, separation into stems, MHR body meshes and InstantHMR, SmolVLM, Gemma 3 and more LLMs and VLMs, tokenizers read from tokenizer.json, and WebNN in the web build.
+  - audio: a WASAPI driver through miniaudio, now the default on Windows and following the system's default devices. Thanks @ogauthiersat!
+  - automation: points snap to the timeline's magnetism (the musical grid and the points of nearby processes) while dragged or created; Ctrl disables it.
+  - avnd API: section, table and strip/detail layouts, envelope editors, folder ports, folder-backed or runtime-filled comboboxes (thanks @bltzr!), geometry auxiliary buffers and textures, per-instance semantics, keyed string lists, file and save-path pickers with host-expanded placeholders, xyzw spin boxes, cubemap and render-target texture ports, and tensor ports.
+  - avnd: new objects: Point Tracker (2D and 3D), Beat Tracker, Entity To MIDI, Midi Humanize, Midi Envelope, Regex, Enumerator, Array Best Match, Color display, Control to CV, Switch, Rendezvous, Serialize and Deserialize (JSON, CBOR, text, binary), String tool, Split string, Join strings, String to and from Bytes, Read File, Read File Line, Write File, and the utilities Spigot, Repeat, Mux inlets, Demux outlets, Flip Flop, Bang and Button.
+  image
+  - avnd: the LED view has an RGB01 mode, taking colours as floats between 0 and 1.
+  - cables: feedback is now supported in all modes, through delayed connections in the same graph: a cable that closes a loop is made a delayed cable automatically, and graphics feedback cycles render one frame late instead of blanking the output. Only a cable from a node to itself is refused. A cable's type also shows in how it is drawn, and a cable can be dragged from a port's name.
+  image
+  Example: reaction-diffusion, an effect implemented with compute shader geometry feedback.
+  - can: new DBC-driven CAN device, browsing the .dbc databases of the library and enumerating the machine's real interfaces.
+  - clap: plug-ins are also searched in CLAP_PATH, and a plug-in that marks its state dirty has it saved.
+  - comment box: an Auto-reflow option wraps the text to the box's width instead of growing it sideways.
+  - custom apps: generated launchers accept --debug (?debug on the web) to show the score editor next to the custom UI, and SCORE_VIDEO_DECODING_METHOD selects the video decoder.
+  - devices: MIDI Controller devices build their tree from a device description, to be able to address knobs and faders directly instead of looking up MIDI CCs.
+  image
+  - devices: new depth camera add-on: colour, infrared, depth and point clouds from Orbbec Femto, Gemini and Astra (also over Ethernet), Kinect v1 and v2, Azure Kinect, Intel RealSense and Luxonis OAK cameras, installable as one Depth cameras package from the package manager.
+  - devices: new openzen device: LP-Research LPMS IMUs over serial and USB.
+  - devices: new sysinfo device, exposing the local machine (CPU, GPU, memory, disks, battery, network, open file handles) as an ossia device with a settable refresh rate.
+  image
+  - devices: new trackingprotocols add-on: OpenTrackIO, OpenXR, PosiStageNet, RTTrP and TUIO devices.
+  - devices: new videoio add-on: one video input and output device for capture and playout cards, GPU-direct where the card allows it. AJA cards and V4L2 capture on Linux are built in; Blackmagic DeckLink, Magewell and NVIDIA Jetson cameras work when score is built with their respective SDKs. Deltacast, Bluefish444 will be supported later. For AJA up to 8k 60 FPs on Kona 5 has been validated.
+  - devices/processes: processes now have a "Scriptable" mode which makes their parameters accessible through custom addresses in the Local device. This is by far the most important feature of this release, check the "Process cues and automations" example to learn how to use it!
+  image
+  - embedded: Yocto support with the new meta-ossia repo. Enjoy ossia score as PID1!
+  - fx: new versions of LFO (phase and jitter in degrees, cycles that can lock to the bars), Arpeggiator, Midi quantify, Free metronome, Rate Limiter, ADSR, Flanger, Compressor and Limiter (a lookahead brickwall peak limiter), with times set by the time chooser and able to follow the tempo. The time chooser widget has been reworked to be simpler to use: click on the indicator to switch between time in milliseconds versus beat-clock.
+  image
+  - gfx: a script can render an exact number of frames, set the frame-step rate and grab frames to files, for repeatable headless renders.
+  - gfx: a new Sink process runs its input at a set rate without displaying it, so a chain whose result is data, such as an AI model's output, is computed.
+  - gfx: cubemap render targets and multiview rendering.
+  - gfx: for capture and SDI rigs: NVIDIA GPUDirect for Video, zero-copy Vulkan capture upload, high-bit-depth planar and packed GPU encoders and a V210 decoder, GPU demosaicing of Bayer sensors, cross-stream frame correlation, bt2020-10 colorimetry, and work towards genlock support.
+  - gfx: new video devices: PipeWire video input and output with zero-copy DMA-BUF, window and screen capture, GStreamer pipelines as input or output (video and audio), and gphoto2 cameras when the library is installed. The FFmpeg device (formerly Libav Output) also reads streams (RTSP, SRT), files, image sequences, cameras and screen capture, records to MP4, MKV, ProRes, DNxHD, AV1, WAV and Opus, and comes with presets.
+  - gfx: shader previews can be toggled at runtime from a new Graphics toolbar.
+  image
+  - gfx: window devices expose the cursor position in GL coordinates, next to the scaled and absolute ones.
+  - gfx: with vsync off, a Rate of 0 (set in the config file, not through the UI to prevent GPUs to inadvertentyl burn) renders frames back to back as fast as the GPU allows. Useful for benchmarking!
+  image
+ReleaseNotesUrl: https://github.com/ossia/score/releases/tag/v3.9.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

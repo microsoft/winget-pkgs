@@ -1,0 +1,80 @@
+# Created with komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: jmrplens.gitlab-mcp-server
+PackageVersion: 3.6.0
+PackageLocale: en-US
+Publisher: José M. Requena Plens
+PublisherUrl: https://github.com/jmrplens
+PublisherSupportUrl: https://github.com/jmrplens/gitlab-mcp-server/issues
+PrivacyUrl: https://github.com/jmrplens/gitlab-mcp-server/blob/main/PRIVACY.md
+PackageName: GitLab MCP Server
+PackageUrl: https://github.com/jmrplens/gitlab-mcp-server
+License: MIT
+LicenseUrl: https://github.com/jmrplens/gitlab-mcp-server/blob/HEAD/LICENSE
+ShortDescription: GitLab MCP server exposing the REST v4 and GraphQL APIs as tools for AI assistants.
+Description: A Model Context Protocol (MCP) server that connects AI assistants (Claude, Cursor, VS Code + Copilot, and any MCP client) to GitLab.com or self-managed GitLab instances. Covers the full REST API v4 and GraphQL with automatic edition gating, roughly 850 to 1080 tools depending on the GitLab tier, plus 45 MCP resources, 37 prompts, argument completions, progress notifications and resource subscriptions. Single static binary, stdio and HTTP transports, read-only and safe (mutation-preview) modes, and per-client configuration examples in the documentation.
+Moniker: gitlab-mcp-server
+Tags:
+- ai
+- ci-cd
+- claude
+- devops
+- gitlab
+- graphql
+- llm
+- mcp
+- model-context-protocol
+- rest-api
+ReleaseNotes: |-
+  Summary
+  3.6.0 asks the same question for actions that have the same effect on GitLab (#1839). An action used to be classified as destructive by its verb, so a call could do what a destructive sibling asks about and go out unasked: group.transfer moves a namespace as project.transfer does, a token rotation ends the previous token as a revocation does, a push rule edit can take away what project.push_rule_delete removes, and a note whose body is /merge merges as merge_request.merge does. Each of those now asks.
+  - A call asks before it runs when it does one of four things: it deletes something; it cannot be undone, because no call takes it back; it hands a third party something it keeps (a destination GitLab delivers to from then on, a key or a mailbox that lets someone in, or a runner that receives the project's jobs); or it replaces a secret nobody can read back, a credential included. The security guide lists every classified action with its reason, and what each guard asks about and what it leaves alone.
+  - 41 actions are now destructive on every surface, so every call to one asks:
+    - A namespace moved: group.transfer and group.transfer_project.
+    - A credential replaced: the six access.token_*_rotate actions, group.service_account_pat_rotate, project.service_account_pat_rotate, runner.controller_token_rotate, runner.reset_token, runner.reset_token_by_token, the three runner.reset_*_reg_token actions and admin.application_renew_secret.
+    - An object consumed with no way back: issue.move, project.label_promote, project.archive, group.archive, pipeline.schedule_take_ownership, pipeline.schedule_edit_variable and user.todo_mark_all_done.
+    - A merge by another route: merge_train.add.
+    - A destination GitLab delivers to: project.hook_add, group.hook_add, admin.system_hook_add, the four project.integration_set* actions and external_status_check.create_project.
+    - Access handed over: access.deploy_key_add, access.deploy_key_enable, user.add_ssh_key, user.add_ssh_key_for_user, group.ssh_cert_create, user.add_email and user.add_email_for_user.
+    - Jobs handed to a runner: runner.enable_project.
+  - 43 more actions take a confirm parameter and ask only for the calls that have the effect, so an ordinary edit goes out as before:
+    - project.push_rule_edit and group.push_rule_edit, when the call turns off a rule that is on, empties or replaces a pattern that is set, or raises or removes max_file_size.
+    - ci_variable.update, ci_variable.group_update and ci_variable.instance_update, when the call sends value.
+    - user.modify, when it sends password, email, provider or extern_uid.
+    - project.hook_edit, group.hook_edit and admin.system_hook_edit, when the URL changes or the call sends token, signing_token, or a URL variable or custom header the hook already has, and the five hook_set_url_variable and hook_set_custom_header actions when the key already exists.
+    - external_status_check.update_project with external_url or shared_secret, project.import_from_file with overwrite: true, repository.commit_create with force: true, and project.export_schedule with an upload URL.
+    - 25 of the 26 actions that send a note or a description GitLab reads for quick actions (the note, discussion and draft note writes of issues, merge requests and epics, mr_review.draft_note_publish_all, and the create and update of issues, merge requests, epics and work items; the 26th, issue.work_item_update, already took confirm), when a line begins with one of 16 commands whose effect an action here asks about, such as /merge, /move, /promote, /unassign or /remove_parent. /award and /react stay unasked, since the same command gives the reaction back at once.
+    - Among those, issue.update, merge_request.update and group.epic_update also ask when the call takes the item out of its epic or parent, or removes every assignee, as issue.work_item_update already asked for the lists it clears.
+  - issue.work_item_update, which already asked before clearing its assignee or contact list, asks two new questions: when the call sends parent_id: 0, which takes the work item out of its parent, and when its description has a line that begins with one of the 16 quick action commands above.
+  - Every guard follows the order destructive actions always had: GITLAB_MCP_YOLO_MODE (or AUTOPILOT), then confirm: true, then an elicitation, then a refusal that quotes the question and asks for the same call again with confirm: true once the user has approved it. A question never shows a secret: a variable's value, a token, a password and an external UID are left out, and a URL is shown by its origin alone.
+  - Every value a question shows (a project, a branch, a path, a key, an email address, the origin of a URL, a line of a text) is written on one line as code, with the scheme of an address written https[:]//, and without line separators or direction controls, so a value can no longer add a sentence, emphasis or a link to the question it is part of. This covers the pull mirror and work item list questions as well.
+  - The usage of each destructive action says so, and its individual tool description carries Requires confirmation.; the usage of issue.update, issue.work_item_update and group.epic_update says which calls ask and which ids are refused.
+  Breaking changes
+  A client that automates these actions meets the following (#1839):
+  - The 41 actions above carry destructiveHint: true and a confirm parameter on the individual surface, and the meta-tool gitlab_merge_train carries destructiveHint: true. A call without confirm: true from a client that cannot elicit is refused with the text that asks to send it again with confirm=true.
+  - The 43 actions above take a confirm parameter, and a call that has the effect is refused until it is sent with confirm: true, or asks through elicitation.
+  - issue.work_item_update with parent_id: 0, or with a description that carries a guarded quick action, asks under parent_removal or quick_action_effect, and from a client that cannot elicit is refused until it is sent with confirm: true. Removing a work item's parent went out unasked before.
+  - On a 2026-07-28 session the new questions arrive under eleven new elicitation keys: push_rule_relax, variable_value_replace, user_access_replace, hook_delivery_change, status_check_delivery_change, project_export_upload, project_import_overwrite, commit_force, quick_action_effect, parent_removal and assignees_clear.
+  - Question texts change: values are shown between backticks (project `42` where it said project 42, an origin as `https[:]//host/...`, a branch regex in backticks rather than quotes), the pull mirror and work item list questions included. Their keys, project_pull_mirror_overwrite and work_item_clear_lists, do not change. A webhook edit that stays on the same host is described as changing the path or the query.
+  - Refused before any request: issue.work_item_update with an id of 0 or below in assignee_ids or crm_contact_ids, and group.epic_update with one in assignee_ids, which GitLab read as emptying the list. The refusal says assignee_ids must hold the IDs of the objects to set, or be [] to remove every one, got 0 (or the same for crm_contact_ids).
+  - One more read on some calls, made only when neither confirm: true nor YOLO mode is set: an issue.update, merge_request.update or group.epic_update that removes every assignee reads the item first, a hook edit or hook key set that sends a URL or a key reads the hook, and a push rule edit that could relax a rule reads the rules. A fine-grained token needs the matching read permission for it (Webhook: Read, Push Rule: Read, Work Item: Read or Merge Request: Read); without it the read fails and the call asks. The fine-grained permissions reference says which calls.
+  Upgrading
+  1. A client or script that calls one of the 41 destructive actions, or makes a guarded call to one of the 43 or to issue.work_item_update (parent_id: 0, or a guarded quick action in the description), without a person to answer sends confirm: true once the call is approved, or runs with GITLAB_MCP_YOLO_MODE=true where nothing should ask, as before.
+  2. A hook or script that matches a question by its text matches the new text, or the elicitation key, which is stable.
+  3. Empty an assignee or contact list on issue.work_item_update or group.epic_update with [], not with an id of 0.
+  4. A fine-grained token used for hook edits, push rule edits or updates that remove every assignee holds the read permission the call reads with, or such a call asks every time.
+  Read-only and safe mode are unchanged, since every action affected was already a write.
+  Security
+  - Fixes GHSA-v9r2-48m8-49fm (high, CVSS 7.1, CWE-184, CWE-356): token rotations, runner token resets, group transfers and the other actions listed below ran without the confirmation that actions with the same effect ask for. Every release up to 3.5.0 is affected, and 3.6.0 is the fixed release. Reported by @mappygrid and @cooliscool, thank you both.
+  - Before this release, a call could do what a destructive action asks about without asking: transfer a group, rotate or reset a token or a runner credential, relax a push rule, replace a CI/CD variable's value or a user's password or email, point a webhook, an integration or a status check at a new destination, add a deploy key, an SSH key or an email address, enable a runner for a project, take a work item out of its parent, or merge, move or unlink an item through a quick action in a note or a description. Each of those now asks for confirmation through elicitation or confirm: true, on every surface (#1839).
+  - A value shown in a confirmation question could carry line breaks, Markdown or direction controls that changed how the question read; such values are now shown on one line, as code, with those characters removed, and a URL by its origin alone (#1839).
+  - Dependencies: none changed since 3.5.0.
+  Changelog
+  🐛 Bug Fixes
+ReleaseNotesUrl: https://github.com/jmrplens/gitlab-mcp-server/releases/tag/v3.6.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://jmrp.io/docs/gitlab-mcp-server/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
