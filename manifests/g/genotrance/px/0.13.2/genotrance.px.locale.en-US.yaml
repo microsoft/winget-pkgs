@@ -1,0 +1,40 @@
+# Created with px publish.yml using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: genotrance.px
+PackageVersion: 0.13.2
+PackageLocale: en-US
+Publisher: genotrance
+PublisherUrl: https://genotrance.com/
+PublisherSupportUrl: https://github.com/genotrance/px/issues
+Author: Ganesh Viswanathan
+PackageName: Px
+PackageUrl: https://github.com/genotrance/px
+License: MIT
+LicenseUrl: https://github.com/genotrance/px/blob/HEAD/LICENSE.txt
+Copyright: Copyright (c) 2017-2025 Ganesh Viswanathan
+CopyrightUrl: https://github.com/genotrance/px/blob/HEAD/LICENSE.txt
+ShortDescription: An HTTP proxy server to automatically authenticate through an NTLM proxy
+Description: Px is a HTTP(s) proxy server that allows applications to authenticate through an NTLM or Kerberos proxy server, typically used in corporate deployments, without having to deal with the actual handshake. Px leverages Windows SSPI or single sign-on and automatically authenticates using the currently logged in Windows user account. It is also possible to run Px on Windows, Linux and MacOS without single sign-on by configuring the domain, username and password to authenticate with.
+Moniker: px-proxy
+ReleaseNotes: |-
+  New features
+  - Px now diagnoses Negotiate failing because libcurl has no Kerberos credentials for the proxy's SPN, once per proxy, with guidance on registering the SPN or falling back to --server=/--auth=NTLM (#288).
+  Improvements
+  - Requires pymcurl 8.23.0.4 or newer.
+  - The bad noproxy entry debug message names the accepted .corp.example / corp.example syntax.
+  Bug fixes
+  - On Windows, Px falls back from WinHTTP auto-detect to PAC and then the Internet Options manual proxy, honouring its *.domain and <local> bypass entries (#112, #291).
+  - Px no longer turns on libcurl debug output (and its overhead) without --debug, which fixes the Windows CFFI error box (#289).
+  - auth=NONE pass-through sends the CONNECT request in one write so strict proxies do not treat headers as tunnel data (#282).
+  - --auth=NONE HTTPS CONNECT is forwarded to the upstream proxy with the client's own target instead of CONNECT http:443 (px#282).
+  - --auth=NONE HTTPS CONNECT no longer sends a duplicate success response before relaying the upstream tunnel (px#282).
+  - --auth=NONE forwards client headers upstream with their original name case instead of lowercasing them, which some proxies rejected (px#282).
+  - NTLM/Negotiate authentication to servers reached DIRECT (noproxy or PAC DIRECT) keeps the handshake on one server connection, including empty POSTs (#290).
+  - --test-auth reports a specific message when the upstream proxy rejects a client's pass-through credentials under --auth=NONE (px#282).
+  Internal
+  - Added security.yml (zizmor, actionlint, dependency review, gitleaks, Bandit) and SHA-pinned and hardened the workflows.
+  - Added an advanced-setup CodeQL workflow so the required analysis check reports on fork pull requests.
+ReleaseNotesUrl: https://github.com/genotrance/px/releases/tag/v0.13.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
