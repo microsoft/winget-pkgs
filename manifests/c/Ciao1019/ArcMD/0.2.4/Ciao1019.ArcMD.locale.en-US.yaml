@@ -1,0 +1,55 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Ciao1019.ArcMD
+PackageVersion: 0.2.4
+PackageLocale: en-US
+Publisher: Ciao1019
+PublisherUrl: https://github.com/Ciao1019
+PublisherSupportUrl: https://github.com/Ciao1019/ArcMD/issues
+PackageName: ArcMD
+PackageUrl: https://github.com/Ciao1019/ArcMD
+License: MIT
+LicenseUrl: https://github.com/Ciao1019/ArcMD/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 ArcMD contributors
+ShortDescription: A native Markdown rich-text editor written entirely in Go that organizes local-first notes into colorful Spaces.
+Description: |-
+  ArcMD brings Markdown's familiar writing flow onto a calm, expressive native canvas.
+  Built entirely in Go with MyGo's Native UI — windows, GPU drawing, glyph shaping, and input handling run directly from Go with no HTML, JavaScript, WebView, Electron, or cgo.
+  Spaces & live themes: colors, gradients, translucency, and dark paper
+
+  Each space maps to a local folder with its own name, icon, persistent Pinned tabs, and last-open page. Swipe with two fingers on the sidebar or press ⌃1…⌃9 to glide into the next space, while global Favorites at the top open right in place without switching spaces. Open Edit Theme Colors… to blend one to three gradient stops, dial in frosted translucency and subtle grain, or flip between Light and Feishu-inspired Dark paper (#1F2023) with balanced color remapping.
+  The Library: every space at a glance
+
+  Click the Library icon in the bottom-left corner or press ⇧⌘L. The sidebar widens into a row of space cards painted in each space's own theme colors, with folders and pages ready to jump straight into. Plugins and the 30-day Recently Deleted collection live here too.
+  A sidebar that steps aside — and peeks on demand
+
+  Press ⌘\ (or narrow the window) and your page fills the entire window. Whenever you need another file, move the pointer to the left edge: the frosted floating sidebar glides out over your page, shows live miniature page thumbnails on hover, and tucks itself away the moment you return to writing.
+  Hand-drawn marks: give your ideas a human touch
+
+  Select a phrase and pick from 12 hand-drawn stroke styles and palette colors in the floating toolbar — circle what matters, cross out hesitation, or point an arrow at the next step. Every stroke draws itself in smoothly and round-trips losslessly in .md (and legacy .arcmd) files. Try the idea journal sample, or start with a line of your own.
+  Margin bookmarks: pick up right where you left off
+
+  Hover any block to reveal a margin bookmark, or press ⌘D. Your marks appear automatically in the document outline (with rendered TeX previews for math blocks), ⌃⌘↑ / ⌃⌘↓ hop smoothly between them, and ⇧⌘D searches bookmarks across every space — without ever modifying the .md file itself.
+
+  ArcMD edits and autosaves standard .md Markdown files (.md, .markdown, .mdx) directly in place in the background — no proprietary database and no sidecar .arcmd duplicates. Every note is a plain local file with its images in a nearby assets/ folder, ready for Obsidian, Typora, VS Code, or Git.
+  - Untouched blocks stay untouched: block-level source diffing (ImportSource) preserves your original indentation, list markers, and link syntax on paragraphs you didn't edit.
+  - 100% lossless rich round-trips: text colors, highlights, hand-drawn marks, five-tone callouts (GitHub > [!NOTE] alerts), <details> toggles, merged/colored tables, custom-width two-column layouts (data-widths), and page icons/covers/word goals degrade cleanly via standard Markdown + semantic HTML + YAML frontmatter and restore completely in ArcMD.
+  - Backward compatible: existing legacy .arcmd files and history snapshots continue to open and edit seamlessly.
+Tags:
+- knowledge-base
+- markdown
+- markdown-editor
+- note-taking
+- notes
+- writing
+ReleaseNotes: |-
+  This patch release fixes unbounded memory accumulation when switching repeatedly across Markdown documents, sidebar hover previews, and Spaces (#33).
+  Memory and Resource Lifecycle Fixes
+  - Reclaim closed documents and decoded image bitmaps on switch (internal/app/app.go, internal/app/document.go, internal/app/opendocs.go, internal/app/split.go, internal/app/windows.go, internal/editor/images.go): Retire closed *document instances and evict non-resident entries from imgResolved and search.liveDocs whenever switching notes, closing split panes or secondary windows, reloading, or unpinning tabs so closed editors and multi-megabyte RGBA *ui.Bitmap buffers are immediately eligible for garbage collection (#33).
+  - Bounded async image decode concurrency and CPU pixel release (internal/app/document.go, internal/app/view.go): Cap concurrent background image decoders to 4 goroutines, abort queued or in-flight decodes as soon as a superseded document closes, and call Bitmap.ReleasePixels() after GPU texture upload on live windows so uncompressed RGBA/mipmap buffers do not remain duplicated in system RAM (#33).
+  - Bounded sidebar thumbnail LRU cache and scaled preview decoding (internal/app/preview.go, internal/app/document.go, internal/app/links.go): Bound preview.thumbs to an 8-entry LRU cache, drop transient open/... clones when previews close, decode sidebar thumbnail images via ui.DecodeBitmapScaled(data, 640) instead of full-resolution bitmaps, and read [[wiki-link]] hover previews directly from the search index / text extractor without allocating thumbnail editors (#33).
+  - Active Space session slot, whiteboard cache, and modal cleanup (internal/app/app.go, internal/app/whiteboard.go, internal/app/versions.go, internal/app/gitmerge.go): Clear the active Space's suspended session.doc reference upon returning to a Space, bound wbCache to 16 entries, and release retained document/diff state when the Version History, Git Changes, or 3-Way Merge modals close (#33).
+ReleaseNotesUrl: https://github.com/Ciao1019/ArcMD/releases/tag/v0.2.4
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
