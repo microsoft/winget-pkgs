@@ -1,0 +1,50 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: wnunezc.WSDD
+PackageVersion: 2.3.0
+PackageLocale: en-US
+Publisher: wnunezc
+PublisherUrl: https://github.com/wnunezc
+PublisherSupportUrl: https://github.com/wnunezc/wsdd-rust/issues
+PackageName: WSDD - WebStack Deployer for Docker
+PackageUrl: https://github.com/wnunezc/wsdd-rust
+License: MIT
+LicenseUrl: https://github.com/wnunezc/wsdd-rust/blob/main/LICENSE.md
+ShortDescription: Local Docker stack manager for PHP development on Windows.
+Description: WSDD is a Windows desktop application for provisioning and operating local Docker PHP stacks, with Classic Bind, Native Linux, Managed Native Linux, and Fast Sync storage modes, optional ngrok publishing, bundled resources, and environment helpers.
+Moniker: wsdd
+Tags:
+- development
+- docker
+- laravel
+- ngrok
+- php
+- windows
+ReleaseNotes: |-
+  WSDD 2.3.0
+  Changes since the published 2.2.0 release.
+
+  MySQL Core
+  - Replaces the single MySQL process with two MySQL 26.7.0 instances in the existing WSDD-MySql-Server container: an ephemeral Linux-filesystem primary and a persistent replica using the existing Windows NTFS bind mount. The container name, wsdd-core/database service, host port 127.0.0.1:3306, Docker network and phpMyAdmin connection remain the same.
+  - Adds replication and recovery checks before the primary accepts writes. Docker → MySQL Core now provides Deploy, Validate and Recreate with deployment stages and a copyable operation log. Recreate waits for the replica, replaces only the MySQL container and checks restored SQL state before reporting success.
+  - Adds guards against starting a legacy MySQL image on a converted datadir. Full environment backup requires a clean MySQL stop; the existing full restore action refuses this replicated layout before changing containers or data, because its file overlay is not an atomic restore.
+  - Includes the isolated WSDD-MySql-Server-Test experiment and its manual Deploy, Validate and Recreate actions. It does not replace or automatically deploy the Core service.
+
+  Existing data and storage
+  - Existing MySQL datadirs are not converted by the MSI. The new Core requires lower_case_table_names=1; a datadir initialized with 2 requires a separately verified logical migration and a preserved backup before using this layout. Do not delete or overwrite an existing bin/mysql/data directory to force startup.
+  - A fresh installation can initialize an empty datadir. The MSI does not contain or import database data.
+  - The persistent replica is an operational copy, not an independent backup. Logical mistakes and deletes replicate too. VirtioFS is not enabled by this release; the NTFS bind remains in use. Future VirtioFS compatibility and its performance require separate validation.
+
+  Performance objective and known limits
+  - The primary's active datadir runs on the container's Linux filesystem to reduce foreground I/O through the Windows bind. Performance depends on workload; this release does not claim a general speedup or a measured VirtioFS gain.
+  - Normal stop/start of the Core and an existing PHP application's database workflow still require manual verification. The full restore action remains unavailable for this layout.
+
+  Downloads
+  - wsdd-2.3.0-x86_64.msi
+  - wsdd-2.3.0-x86_64.msi.sha256.txt
+  Verify the MSI against the published SHA-256 file.
+ReleaseNotesUrl: https://github.com/wnunezc/wsdd-rust/releases/tag/v2.3.0
+InstallationNotes: WSDD requires administrator privileges and is intended for Windows desktop development environments with Docker Desktop, WSL 2 backend support, PowerShell 7.5 or newer, Chocolatey, mkcert, and a compatible desktop graphics environment for the eframe/egui UI. The MSI installs WSDD; first-run checks validate and guide the local runtime setup.
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
