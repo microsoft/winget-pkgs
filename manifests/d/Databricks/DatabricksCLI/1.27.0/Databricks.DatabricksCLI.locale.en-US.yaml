@@ -1,0 +1,67 @@
+# Created with komac v2.9.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Databricks.DatabricksCLI
+PackageVersion: 1.27.0
+PackageLocale: en-US
+Publisher: Databricks
+PublisherUrl: https://databricks.com/
+PublisherSupportUrl: https://github.com/databricks/cli/issues
+PackageName: DatabricksCLI
+PackageUrl: https://github.com/databricks/cli
+License: DB license
+LicenseUrl: https://github.com/databricks/cli/blob/HEAD/LICENSE
+ShortDescription: Databricks Command Line Interface
+Tags:
+- command-line-interface
+- databricks
+ReleaseNotes: |-
+  Notable Changes
+  - databricks aitools install, update and uninstall now exit with code 1 when they do nothing they were asked to. install fails when it sets up nothing: no coding agent is detected, every agent is skipped or fails to install, or no skill in the release can be installed (also with --path). update fails when every update or check it attempts fails, and uninstall when every removal it attempts fails. Scripts that ran these commands as a best-effort step and relied on exit code 0 should handle the new exit code. (#7481)
+  - Add file:<path> selectors to pipelines run and pipeline bundle run. --refresh and --full-refresh now use space-separated lists, such as --refresh "orders payments", instead of comma-separated lists. Single names containing spaces now require backticks, e.g. --refresh 'table:`order details`'. (#7184)
+  - The Databricks CLI is now available on PyPI as databricks: run it with uvx databricks, or install it with uv tool install databricks, pipx install databricks or pip install databricks. The package contains only the prebuilt CLI binary. Uninstall the legacy databricks-cli package first, since both install a databricks command. (#7704, #7777)
+  CLI
+  - Add databricks sandbox fs commands (cp, ls, cat, mkdir, rm) to transfer files between your local filesystem and sandboxes using <sandbox-id>:/path. (#7372)
+  - databricks fs commands retry reads (stat, list, open) and deletes on DBFS and Volumes when the server returns a transient error or does not respond within the HTTP timeout. (#7556)
+  - Retry UC Volumes file operations (fs cp, fs ls, fs rm, bundle uploads to Volumes) when the Files API returns HTTP 408, 429, 502, 503 or 504 (for example "AWS S3 is throttling requests"), or on a transient network error; this regressed in v1.10.0. (#7559)
+  - Stop warning when the host metadata request (/.well-known/databricks-config) times out; the CLI already falls back to your config, and the message is still shown with --debug. (#7752)
+  - Add databricks aitools auto-install disable and enable to turn off (or back on) the automatic installation of Databricks AI tools on CLI upgrades. A global-scope databricks aitools uninstall also turns it off. (#7701)
+  - Stop printing the Databricks AI tooling install hint on auth, configure, current-user me, version, help, and shell-completion commands. (#7452)
+  - When Codex, Cursor, GitHub Copilot CLI, OpenCode, Gemini CLI, Antigravity, Pi, Goose or Kiro run the CLI without Databricks skills installed for that agent, the CLI now prints a one-line hint to install them with databricks aitools install --agents <agent> --scope global, previously shown only to Claude Code. (#7586)
+  - databricks aitools install now rejects an unknown --agents name before it shows the scope prompt, instead of after. (#7469)
+  - databricks aitools install no longer asks "Proceed?" after the agent picker; the picker selection confirms the plan. The picker title now shows the install scope, its hint says Enter installs, --skills-only runs label plugin agents "skills" and pre-check every agent whose config dir exists, and the plan summary after it is reduced to the scope line. (#7478)
+  - databricks aitools install --output json reports more specific error_category values: SKILLS_FETCH_FAILED, RELEASE_LOOKUP_FAILED, RATE_LIMITED, MANIFEST_INVALID, STATE_INVALID and PLUGIN_CLI_TIMEOUT. A coding agent CLI that does not answer in time is now reported as timed out after <duration>, followed by any stderr it wrote before it was stopped. (#7475)
+  - databricks aitools install no longer prompts when a coding agent runs it, even in a pseudo-terminal; it uses the non-interactive defaults instead and prints a note saying so. (#7477)
+  - databricks aitools install now prints the directory it installed skills into (for example Installed 1 skill in ~/.databricks/aitools/skills.), so agents can open the installed SKILL.md files without searching for them. (#7668)
+  - databricks aitools install now ends a failed install with a step to recover, in the text output and in a new recovery field of --output json. (#7480)
+  - databricks aitools install now installs plugins for the other coding agents even when installing skill files fails. (#7479)
+  - databricks aitools install now installs skill files for a detected coding agent whose CLI is not on PATH (for example a Claude Code desktop or IDE install), unless it already has the plugin, says how to switch to the plugin later, and warns when the current project also has the plugin. databricks aitools update no longer tries to install the plugin for such an agent, and no longer writes skill files next to a plugin that such an agent already has. (#7482)
+  - Fix databricks aitools install waiting a long time on an unreachable or slow workspace while it resolves authentication for telemetry; that wait is now limited to a few seconds. (#7468)
+  - databricks aitools install, update and list now refuse a skills manifest that names a skill or file outside the skills directory, before writing any skill files. A skill whose name or file paths are not portable is skipped with a warning, and update keeps its installed copy. (#7722)
+  - databricks aitools install and databricks aitools update refresh only the marketplace the Databricks plugin is listed in, so another unreachable marketplace no longer blocks them. When that refresh fails, both commands warn, install or update the plugin from the local copy of the marketplace, and record the plugin version as unknown. (#7473)
+  - databricks aitools install and databricks aitools update now wait up to 20 seconds instead of 5 for a coding agent's CLI to answer the plugin capability check, so a slow first start is less likely to report the agent as unavailable. (#7472)
+  - databricks aitools install no longer fails a plugin-only install when the lookup of the latest skills release on GitHub fails or is rate-limited. The plugin is installed and its version is recorded as unknown. (#7474)
+  - databricks aitools commands now send usage telemetry, and the CLI records when it recommends installing Databricks AI tools. When the configured workspace is slow or unreachable, aitools install, update and uninstall can take up to about 6 seconds longer, and list, version and runs that stop early up to about 3 seconds. Set DATABRICKS_CLI_DISABLE_TELEMETRY=1 to opt out. (#7467, #7469, #7470)
+  - databricks aitools install and databricks aitools update now report a coding agent CLI shim (.cmd or .bat) on Windows that prints its plugin help and then exits with an error as shim-exited-with-error, with the command to run to see the error, instead of reporting the CLI as not on PATH. (#7476)
+  - apps init no longer suggests installing skills when every detected coding agent already has the Databricks plugin. (#7467)
+  - databricks auth login now gives up on the optional workspace lookup after about 5 seconds instead of retrying for about 5 minutes, and explains the fallback to the manual workspace ID prompt. (#7522)
+  - Throttle Claude Code's native plugin install hint separately from the text hint: it prints at most once per 10 minutes per session, so the install dialog still comes up when a subagent, a hook, or a command outside a Claude Code subprocess runs the session's first databricks command. (#7692)
+  - Print Claude Code's native plugin install hint alongside the text hint, so Claude Code offers a one-click install of the Databricks plugin. Claude Code now counts as having the tooling only when it loads it: skills only in ~/.databricks/aitools/skills don't count, and a project- or local-scope plugin counts only when the CLI runs inside that project. auth token, auth docker token and CLI subprocesses no longer print install hints. (#7585)
+  - Interactive prompts and pagers now work in Git for Windows' bash and other MSYS2 shells when they run under ConPTY (the default since Git for Windows 2.47) or directly in a Windows console. (#7699)
+  - Add the databricks feedback command to send feedback about the CLI to Databricks. (#7724)
+  - Fix shell completion in databricks fs commands for local paths typed with a leading ./ or repeated separators, which previously offered no suggestions. (#7679)
+  - Fix a panic in databricks labs commands when a non-string SDK setting such as DATABRICKS_DEBUG_HEADERS or DATABRICKS_RATE_LIMIT is set in the environment. (#7673)
+  - Fix a panic in databricks labs install for projects whose labs.yml has no install section. (#7673)
+  - NO_COLOR no longer disables prompts, spinners or the list pager; they run without color. (#7700)
+  - Add the Beta databricks pipelines test command, which runs the tests of a pipeline, and the testing property of pipelines in bundles. (#7429)
+  - Add databricks sandbox forward, which serves an app running in a sandbox at a local URL. (#7395)
+  - Bound the whole telemetry upload at exit, including config resolution and authentication, by its timeout, so a stalled auth or telemetry endpoint no longer keeps a command from exiting. (#7467)
+  - databricks version --check now suggests databricks aitools install on stderr when a coding agent is detected without the Databricks plugin or skills. (#7471)
+  AI Runtime
+  - air get -o json now reports PENDING while the run waits for compute, matching air list, and includes the run's status_message. (#7455)
+  - Wrap long failure reasons and log lines in the air list info and logs panes, keep the MLflow link (labeled with its retry) when a run's last retry failed before starting, and point air logs at earlier retries when the last one has no logs. (#7456)
+  - databricks air logs --node now reports an out-of-range node index when it can determine the run's node count, instead of looking like a successful run with no logs. (#7516)
+  - Add experiment, duration, accelerator, and dashboard metadata to air list --output json. For retried runs, started_at now reports the latest attempt, matching air get. (#7568)
+ReleaseNotesUrl: https://github.com/databricks/cli/releases/tag/v1.27.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
