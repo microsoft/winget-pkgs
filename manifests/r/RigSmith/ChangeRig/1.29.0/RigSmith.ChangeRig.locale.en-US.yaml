@@ -1,0 +1,33 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: RigSmith.ChangeRig
+PackageVersion: 1.29.0
+PackageLocale: en-US
+Publisher: RigSmith
+PublisherUrl: https://rigsmith.dev/
+PublisherSupportUrl: https://github.com/rigsmith/rigsmith/issues
+Author: John Campion Jr
+PackageName: ChangeRig
+PackageUrl: https://rigsmith.dev/
+License: MIT
+LicenseUrl: https://github.com/rigsmith/rigsmith/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 John Campion Jr
+ShortDescription: 'Changesets: capture intent, then version across every ecosystem'
+Moniker: changerig
+Tags:
+- cli
+- developer-tools
+- dotnet
+- go
+- rust
+ReleaseNotes: |-
+  🚀 Enhancements
+  - shiprig: tag --json prints every tag a run makes (or, with --dry-run, would make) and every one already present, each with the packages it covers by name, version and ecosystem. A script can read which packages a tag releases from it instead of guessing from the tag's name, so a lockstep repo sharing "tagTemplate": "v${version}", or any custom tagTemplate, reads correctly. Tag events (--output or $CHANGESETS_OUTPUT) from tag and publish now give a tag several packages share one git-tag event per package. Before, only its first package was reported, and the others looked unreleased.
+  🩹 Fixes
+  - shiprig: shiprig release no longer builds unsigned when signing is configured and a signing secret can't be read. On a terminal it used to warn and carry on unsigned; it now stops, as it already did in CI, naming the secret (never its value) and how to supply it — doppler login, or the missing name. Pass the new --unsigned flag to build unsigned on purpose. With --unsigned, and on a --dry-build, nothing signs: a Velopack app skips its own macOS and Windows signing, electron-builder runs with its documented switches to skip signing and notarization, and Tauri builds with --no-sign (which also skips the updater signature from tauri-cli 2.9.5). --unsigned reads no signing secret at all; a --dry-build still reads them, to report any it can't, but passes none to the build.
+  - self-update now updates the whole rigsmith family — rig, shiprig, clauderig, codexrig, changerig and brewrig — to the same release in one run, from whichever tool you run it in. Before, rig self-update moved only rig and left the other tools behind. It installs into the directory the running tool lives in, --check lists every tool's installed version against the latest release, and the run reports what moved, from which version to which. A Homebrew or npm install is pointed at its own package manager instead. Nothing is installed until the release checks out: self-update verifies the release's signed checksums and runs the release's own installer only if it matches them.
+  - Installing rigsmith now verifies what it downloads. Every release publishes a checksums file covering the installer and every archive, signed with Sigstore by the release workflow itself (no key to manage). The curl | sh installer, the PowerShell installer and self-update download everything first and check each file against it, and check its signature, before installing anything. A mismatch, or a missing or invalid signature, installs nothing. Checking the signature needs cosign; without it the checksums are still checked and the installer says so, and RIGSMITH_REQUIRE_SIGNATURE=1 refuses instead. rigsmith.sh now serves the installers from the latest release rather than from the main branch, so the script always matches the release it installs.
+ReleaseNotesUrl: https://github.com/rigsmith/rigsmith/releases/tag/v1.29.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

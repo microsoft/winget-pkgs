@@ -1,0 +1,56 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Youzini-afk.Varin
+PackageVersion: 0.9.49
+PackageLocale: zh-CN
+Publisher: Youzini-afk and Varin contributors
+PublisherUrl: https://github.com/Youzini-afk
+PublisherSupportUrl: https://github.com/Youzini-afk/Varin/issues
+PackageName: Varin
+PackageUrl: https://github.com/Youzini-afk/Varin
+License: AGPL-3.0-only
+LicenseUrl: https://github.com/Youzini-afk/Varin/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Youzini-afk and Varin contributors
+ShortDescription: 面向编程与科研的独立 Agent 工作台与完整 Harness。
+Description: Varin 是一个独立的 Agent 工作台与完整 Harness，面向编程、科研和其他项目工作，以本地和桌面体验为中心。它内置 Pi 运行时；模型与提供商栈、会话树、包管理器和扩展模型仍由 Pi 提供，而 Varin 负责周围的工具环境、工作状态、恢复、检索、上下文策略、任务治理和工作台界面。Varin 自带两套官方工作形态：以会话、任务和上下文为中心的 Agent Workspace，以及以编辑器、搜索、Git、诊断和调试为中心、把智能体作为可停靠面板的 IDE Workbench。
+Tags:
+- pi
+- pi-agent
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 科研
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  Varin 0.9.49 扩展了跨会话与外部 Agent 协作，让模型等待和停止过程更清楚，并修复工具结果恢复、Bot 模型更新及启动显示问题。
+  让已有会话参与协作
+  - 主任务、子任务和 Bot 会话可以在可访问的会话范围内相互发现、联系。请求与回复保留真实的发送方、接收方和分支，联系已有会话不改变其原任务归属。
+  - 通过 executors 查看可用执行后端，直接派发给 Codex、Claude Code、Pi 或已配置的 ACP Agent。默认仍使用 Varin，也可继续通过 Agent 预设绑定执行后端。
+  - 查找、读取并向已经在 Varin 中建立的外部会话发送工作，包括手动创建及其他任务派发的会话。沿原会话、目录和配置继续处理，报告回到实际发起这次工作的会话。
+  - Codex 支持通过原生插话向当前轮追加输入，也可明确排入下一轮。其他后端在尚未具备可靠插话能力时沿用下一轮队列，文字、图片和原文件附件共用原有投递链路。
+  - 外部 Agent 设置、后端选择、会话列表和消息使用对应产品图标。内置配置支持自动发现、明确启用和停用，使用实际执行 Host 上安装的程序。
+  会话工具与更清楚的协作面板
+  - 在 Bot 顶栏加入独立的 会话工具 按钮，使用会话树图标。在共用的右侧面板中查看会话树、协作、上下文和会话回退，桌面与移动端均记住所选视图。
+  - 协作流展示 Bot 与 Agent 之间的任务指令、消息和最终报告，显示真实参与者及 Bot 头像。报告关联原任务和原次执行，可直接进入成员会话。
+  - 将输入框里的引用和命令提示移入 添加 菜单，点击后在光标处插入 @ 或 /，打开已有选择器。移除常驻提示小字和菜单中的全屏入口。
+  看清等待过程，改善停止反馈
+  - 将笼统的“处理中”细分为当前真实请求阶段：准备请求、等待模型响应、思考中、正在回复、准备工具调用。重试与停止也在原状态位置显示，跟随执行端事实更新。
+  - 点击停止后按钮立即反馈正在处理取消。工具卡片在原状态位置显示正在停止或已停止，运行真正结束后恢复发送按钮；停止请求失败时可以重试。
+  恢复工具结果，应用当前 Bot 配置
+  - 修复 document_read 等工具已经执行完成，却在接收结果时触发 tool receipt lacks dispatch/no-send evidence 的问题。补充面向模型的附件引用时保留原始执行回执。
+  - 启动时结算已经保存的执行器停止回执，接续处理此前因此卡住的会话结果。已有取消请求也沿同一恢复链路完成收尾，无需重新执行已经完成的工具。
+  - 后台唤起、恢复和排队续轮在执行准备时读取当前 Bot 模型与思考配置，正确处理配置同步期间刚好结束的运行。上一轮请求已经收尾时直接准备新模型，避免删除旧渠道后后续工作仍被旧连接卡住。
+  - 记忆整理支持最大输出留空。缺少上下文容量时明确提示需要补充的模型配置，清理失败日志包含失败阶段与原始原因。
+  启动与远程桌面修复
+  - 移动网页的工作台实际挂载后，启动遮罩正常退出；登录、连接恢复和错误界面也能显示。模块加载及 React 初始化失败时提供具体错误与重试入口。
+  - 修复打开 Computer Use 后，Varin 主窗口在基于屏幕捕获的远程桌面中消失、却仍挡住鼠标操作的问题。捕获排除仅作用于 Computer 悬浮层自身。
+  源码部署： 请一起重新构建应用与 Rust 内核，然后重启 Host。受影响工具调用的恢复会在启动时读取已保存的回执完成。
+  完整更新记录
+ReleaseNotesUrl: https://github.com/Astrmira/Varin/releases/tag/v0.9.49
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

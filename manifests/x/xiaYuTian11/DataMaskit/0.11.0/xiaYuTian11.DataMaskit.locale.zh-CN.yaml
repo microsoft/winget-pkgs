@@ -1,0 +1,79 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: xiaYuTian11.DataMaskit
+PackageVersion: 0.11.0
+PackageLocale: zh-CN
+Publisher: maskit
+PublisherUrl: https://github.com/xiaYuTian11
+PublisherSupportUrl: https://github.com/xiaYuTian11/maskit/issues
+PackageName: Data Maskit
+PackageUrl: https://github.com/xiaYuTian11/maskit
+License: AGPL-3.0
+LicenseUrl: https://github.com/xiaYuTian11/maskit/blob/HEAD/LICENSE
+ShortDescription: 专为大模型打造的本地隐私脱敏与还原网关。
+Description: |-
+  Data Maskit（数据面具）是一个运行在本地的隐私脱敏网关。它把开发工具发往大模型的请求自动打码成结构化占位符，并在模型回复时将占位符实时流式还原为原文。它支持 Cursor、Claude Code、Codex 等任意可配置 Base URL 的工具，全部运算在本地完成，零遥测。
+
+  💡 为什么需要 Maskit？
+  当你在使用 Cursor、Claude Code、Codex、Pi、OpenCode、ChatGPT 或任意 AI 编程助手 时，代码中的高危敏感信息往往在不知不觉中被发送到外部模型服务商：
+  - 🔑 凭据与密钥：sk-proj-...、ghp_...、云厂商 AccessKey、JWT Token、PEM 私钥证书；
+  - 🌐 内网资产拓扑：数据库连接串（mysql://root:Pass123@192.168.1.50:3306/db）、私有 IP 地址（10.x / 172.16.x / 192.168.x）；
+  - 👤 业务隐私（PII）：手机号、身份证、姓名、银行卡、企业内部代号与保密业务词。
+  Maskit 的使命：在你的开发终端与外部 AI 服务之间架设一道透明的“本地隐私防护网关”——请求出网前在本地自动打码成结构化占位符，模型回答时毫秒级流式无感还原成原文！
+
+  ✨ 核心亮点与功能全景
+  🛡️ 1. 深度脱敏与多轮会话一致性
+  - 开箱即用规则库：内置 19 类正则扫描规则（API Key/Token、PEM 私钥、数据库连接串、手机号、身份证、邮箱、银行卡、内网 IP 等），默认收敛核心隐私，低误报；
+  - 自定义敏感词与正则：支持一键按分类管理内部人名、项目代号、敏感术语；支持整词匹配边界与自定义正则扩展；
+  - 多轮会话滑动窗口复用：独创占位符复用机制。同一长对话中，“张三”在第 1 轮和第 10 轮始终映射为同一个占位符，大模型逻辑推理完全一致不串号。
+  ⚡ 2. 毫秒级 SSE 流式接管（真 · 打字机体验）
+  - 针对 OpenAI / Anthropic 的 text/event-stream 流式响应，逐事件还原下发；
+  - 智能处理跨 chunk 占位符切片与缓冲区拼接，完全保留官方原生丝滑打字机体验，不卡顿、不迟滞。
+  🔌 3. 免装根证书 + 原生直连兜底（绝不断网）
+  - 多端口反代模式：为不同模型/渠道分配独立本地端口（如 18701 对应 OpenAI、18703 对应 Anthropic），只需在工具中将 base_url 改为本地端口，无需向操作系统安装自签名 CA 根证书；
+  - Fallback Passthrough 兜底保障：哪怕你关闭了脱敏代理或退出软件，本地端口依然由轻量底层维持监听并透明直连转发明文，你的 AI 工具绝不会意外断网或报网络错误！
+  📊 4. 实时日志、安全审计与成本排行
+  - 全链路日志明细：查看每一笔请求的出网打码、上游响应、耗时分布，并提供一键高亮原文对照；
+  - 被动安全审计：实时监控模型回复中是否存在错误泄露、身份换芯、Prompt 越狱、命令执行等潜在风险；
+  - Token 用量与费用估算：支持主流大模型价格智能匹配，直观统计每日调用量与费用支出。
+  🔒 5. 100% 纯本地运行，零外部遥测
+  - 脱敏与还原全部在本地进程内运行，不收集任何用户隐私，不上传任何日志，无第三方分析统计 SDK。
+Tags:
+- 人工智能
+- 大模型
+- 大语言模型
+- 数据脱敏
+- 网关
+- 隐私保护
+ReleaseNotes: |-
+  新增
+  - 面板日志：新增「结论」列（成功 / 有告警 / 失败 / 已取消 / 进行中 / 未完成 / 未处理 / 安全告警），一眼能看出请求成败；事件类型降为小图标。
+  - 面板日志：取消与错误事件按会话折进对应的脱敏行，一次请求只占一行，不再只看到半条链路。
+  优化
+  - 面板日志：列表由 9 列收到 8 列（入口并入上游列）；状态列显示 HTTP 码或失败归因（客户端断开 / 上游静默 / 域名解析失败），不再显示截断的英文状态码。
+  - 面板日志：耗时列区分端到端与仅脱敏耗时；类型筛选改为「按结论」优先，底层原语收进高级分组；图例改为结论颜色说明。
+  - 面板日志：显式选择筛选条件时不再被「隐藏噪声」吞掉（此前选「用户取消」只会得到空列表）。
+  Added
+  - Panel logs: new Outcome column (success / warnings / failed / canceled / in progress / incomplete / not processed / security alert) so request success is visible at a glance; the event type is now a small icon.
+  - Panel logs: cancel and error events are folded into their masking row per session, so one request is one row instead of half a chain.
+  Improvements
+  - Panel logs: 9 columns reduced to 8 (ingress merged into the upstream column); the status column now shows the HTTP code or the failure attribution (client disconnected / upstream silent / DNS failure) instead of a truncated English status.
+  - Panel logs: the duration column distinguishes end-to-end from masking-only time; the type filter is now outcome-first with raw primitives tucked into an advanced group; the legend explains outcome colours.
+  - Panel logs: an explicit filter selection is no longer swallowed by "hide noise" (previously picking "user canceled" returned an empty list).
+  修复
+  - 前端：复制回退失败时不再谎报「已复制」，设置页会正确提示复制失败。
+  - 前端：更新提示的版本号不再重复 v 前缀（Web / Docker 端 GitHub tag 自带 v，与模板叠加后实测显示成 vv0.11.0）。
+  - 引擎：还原详情区分「模型回显但未还原」与「模型未回显」，不再把后者渲染成「未还原」告警；未还原计数不再被日期串等正常文本误触发；签名/密文思考块的契约豁免在还原侧也计数可见。
+  Fixed
+  - Frontend: a failed clipboard fallback no longer reports "copied"; the settings page now shows a copy-failed toast.
+  - Frontend: the update prompt no longer doubles the v prefix on the version (on Web/Docker the GitHub tag already carries v, which stacked with the template and rendered vv0.11.0).
+  - Engine: restore details now distinguish "echoed but not restored" from "not echoed"; unresolved counting no longer fires on ordinary text such as date strings; restore-side contract skips of signed/encrypted thinking blocks are counted and visible.
+
+  扩展更新提示 / Extension update notice
+  ✅ 本次发版扩展无改动：已安装的扩展无需重新加载。
+  ✅ The browser extension did not change: no need to reload it.
+  Full Changelog: https://github.com/xiaYuTian11/maskit/compare/v0.10.1...v0.11.0
+ReleaseNotesUrl: https://github.com/xiaYuTian11/maskit/releases/tag/v0.11.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

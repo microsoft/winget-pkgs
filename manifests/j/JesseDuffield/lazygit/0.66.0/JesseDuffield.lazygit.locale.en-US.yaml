@@ -1,0 +1,101 @@
+# Created by Anthelion using komac v2.17.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: JesseDuffield.lazygit
+PackageVersion: 0.66.0
+PackageLocale: en-US
+Publisher: Jesse Duffield
+PublisherUrl: https://github.com/jesseduffield
+PublisherSupportUrl: https://github.com/jesseduffield/lazygit/issues
+Author: Jesse Duffield
+PackageName: lazygit
+PackageUrl: https://github.com/jesseduffield/lazygit
+License: MIT
+LicenseUrl: https://github.com/jesseduffield/lazygit/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2018 Jesse Duffield
+CopyrightUrl: https://raw.githubusercontent.com/jesseduffield/lazygit/master/LICENSE
+ShortDescription: Simple terminal UI for git commands.
+Moniker: lazygit
+Tags:
+- cli
+- cross-platform
+- git
+- git-client
+- open-source
+- terminal-app
+ReleaseNotes: |-
+  This is by far the biggest release since I took over maintainership from Jesse, and some of the changes deserve a bit more explanation than usual.
+  - Staging hunks is now done directly from the main view.
+    There used to be a separate staging panel that you had to enter if you wanted to stage individual diff hunks; it was limited to one file at a time, and showed the raw git diff rather than the configured diff renderer. This is gone; the main view now has a selection when you focus it, and you can act on the selected hunk or line directly there:
+    - press space to stage a hunk or range of lines
+    - navigate to the next/previous hunk with <right>/<left>, or the next/previous file with n/N
+    - press e to jump to the editor on the selected line
+    - press d to discard a hunk.
+    Many other enhancements were added to this new interactive diff view:
+    - alt-click a line to jump to that line in the diff view (this works even when a popup panel is showing above it, e.g. the commit message editor)
+    - press <ctrl-g> to see a menu with all the files in the diff, to quickly jump to one of them
+    - the files in the diffstat below the commit message are clickable hyperlinks that take you to the clicked file in the diff, like the <ctrl-g> menu does
+    - when changing the diff context using {/}, or when toggling the "ignore whitespace" option (<ctrl-w), the scroll position is preserved
+    If you use a custom diff renderer, all of this works with the renderer's output, as long as it supports the new OSC protocol that was introduced for this. Delta and Diff-so-fancy already do, so if you use one of these, be sure to update them to the latest version. There is support for difftastic too, but it hasn't been accepted upstream, so you'll have to build it yourself from this PR. If you use any other diff renderer, please file an issue so that we can add support for it.
+  - Better support for stacked branches.
+    - You can now push or force-push all branches of a stack at once, simply by pushing the topmost one. Lazygit will ask you if you want to push the others as well.
+    - Same for pulling: if a branch stack was rebased by someone else, you can pull the topmost branch and lazygit will ask you if you want to pull the other branches in the stack too, without checking them out.
+    - Branches of a stack are now listed in order in the branches panel. When rebasing a stack it is common for all branch tips to get the same committer date, in which case git sorts them alphabetically, which is confusing. We now have extra logic to preserve the stack order in this case.
+    - Unrelated to stacks (but common to show up in that case): when a branch diverges from its upstream (you see ↓3↑5) it was impossible to tell whether that was because you rebased or rewrote the branch, in which case you want to force push, or because someone else rebased the branch, in which case you want to pull it. Lazygit can now distinguish these cases, and will show the ↓3↑5 in a dimmer yellow in the latter case. What's more, in this latter case you can "pull" the branch without checking it out by pressing f, like you already could for branches showing ↓7.
+  - Dark and light themes.
+    Lazygit now determines whether your terminal has a dark or light background, and can use different color themes for each; it can also switch between the two dynamically if your terminal does. You can also pass this information on to your diff renderer if you use one that needs it, by using the new {{colorScheme}} template variable in the renderer command.
+  - Better rendering of the commit graph.
+    Since the commit graph uses box drawing characters it could only be an approximation; some graph topologies can't be rendered faithfully this way. We now make use of branch drawing characters if the terminal supports them, which solves this problem and also looks better; see #6077 for details.
+  All changes in detail
+
+  Features ✨
+  - Stage, unstage and discard changes directly from the focused main view by @stefanhaller in #6035
+
+  Enhancements 🔥
+  - Improve the Recent Repos menu by @stefanhaller in #6016
+  - List stacked branches in stack order by @stefanhaller in #6024
+  - Improve the randomly picked author colors by @stefanhaller in #6062
+  - Allow telling diff renderers whether the terminal is dark or light by @stefanhaller in #6063
+  - Add dark and light color themes by @stefanhaller in #6065
+  - Push all branches of a rebased branch stack at once by @stefanhaller in #6045
+  - Use f to "fast-forward" branches whose upstream branch was rewritten by @stefanhaller in #6067
+  - Auto-forward branches even if checked out in another worktree by @stefanhaller in #6069
+  - Offer to pull all branches in a stack when pulling the topmost one by @stefanhaller in #6070
+  - Delete or push multiple tags at once by @stefanhaller in #6071
+  - Make shift-backspace do the same as backspace in editors by @stefanhaller in #6078
+  - Improve the rendering of the commit graph for terminals that support it by @stefanhaller in #6077
+  - Select, navigate and edit diff lines in the focused main view by @stefanhaller in #6031
+  - Keep your scroll position in the diff when the diff is rendered again by @stefanhaller in #6032
+  - Copy the selected diff lines from the focused main view by @stefanhaller in #6034
+  - Build custom patches directly from a commit's diff by @stefanhaller in #6039
+  - Remove the staging and patch-building panels by @stefanhaller in #6040
+  - Alt- or shift-click a diff line to open it in your editor by @stefanhaller in #6041
+  - Open the selected diff line in the branch's pull request by @stefanhaller in #6042
+  - Jump to a file of the diff from a menu by @stefanhaller in #6043
+  - Link the file names in a diffstat to where each file's diff begins by @stefanhaller in #6044
+  - Keep copied commits when switching to another worktree or repo by @stefanhaller in #6090
+
+  Fixes 🔧
+  - Fix the Commits panel's column widths when scrolling during interactive rebase or bisect by @stefanhaller in #6022
+  - Keep the outer folder selected when a folder path in the files panel splits up by @stefanhaller in #6037
+  - Avoid showing pull request icons with a delay on startup even though they are cached by @stefanhaller in #6049
+  - Fix drawing git's diff stat after switching screen modes by @stefanhaller in #6087
+  - Fix wrong main view content in rare edge case situations by @stefanhaller in #6089
+  - Fix the rule below a pull request's header being rendered with the wrong width by @stefanhaller in #6091
+
+  Maintenance ⚙️
+  - Remove codespell again by @stefanhaller in #6028
+  - Add gopls to the nix dev shell by @stefanhaller in #6047
+  - Render diffs without a PTY on Windows by @stefanhaller in #6025
+  - Work out which file and line a row of a diff belongs to by @stefanhaller in #6026
+  - Support diff renderers that emit OSC 1717 diff line metadata by @stefanhaller in #6029
+  - Always show a file's staged changes in the "secondary" context by @stefanhaller in #6033
+
+  Docs 📖
+  - Change the demo gifs to videos and update them for the newly added features by @stefanhaller in #6073
+
+  I18n 🌎
+  - Update translations from Crowdin by @stefanhaller in #6092
+ReleaseNotesUrl: https://github.com/jesseduffield/lazygit/releases/tag/v0.66.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

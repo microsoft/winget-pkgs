@@ -1,0 +1,92 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: murray17.RovaiAI
+PackageVersion: 0.4.14
+PackageLocale: en-US
+Publisher: murray17
+PublisherUrl: https://github.com/murray17
+PublisherSupportUrl: https://github.com/murray17/rovai-ai/issues
+PackageName: Rovai AI
+PackageUrl: https://github.com/murray17/rovai-ai
+License: MIT
+LicenseUrl: https://github.com/murray17/rovai-ai/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 rovai-ai contributors
+ShortDescription: Assemble a team of AI agents that grows together
+Description: |-
+  Rovai AI is like an Agent guild of your own, where you can recruit members with different personalities and roles.
+  Together, they explore, discuss, and act on real tasks — building
+  team chemistry and collaborative memory along the way.
+
+  Core Capabilities
+
+  | Core capability                   | What it means in Rovai                                                                                                                                                           |
+  | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | Long-lived members                | Preserve each member's enduring identity, appearance, responsibilities, and working style so they can rejoin the team across Camps and Tasks.                                    |
+  | Camp collaboration                | Organize shared conversations, long-lived members, Tasks, attachments, and execution state around one objective, reducing the context users must carry between separate windows. |
+  | Role-based collaboration          | Turn paired questioning, document-informed decision-making, code review, and group discussion into repeatable ways for a team to work together.                                  |
+  | Tasks and ownership               | Give ongoing work a title, owner, and state so unfinished work remains trackable and can be picked up by another member.                                                         |
+  | Member handoffs                   | Use @mentions, the default Lead, direct replies, and A2A routing to pass questions, conclusions, and next actions to the right member.                                           |
+  | Visible execution                 | Inspect tool calls, process state, intermediate results, and final delivery in an independent execution console instead of hiding real work behind a single completion message.  |
+  | Approvals, evidence, and recovery | Require explicit approval for important actions, preserve reviewable execution evidence, and continue from existing state after interruption.                                    |
+  | Collaborative memory              | Preserve important decisions, lessons, and team habits so members gradually understand how this team has solved problems together.                                               |
+  | Native capability compatibility   | Use a generic ACP Adapter to connect Agent Runtimes that support ACP while preserving their native models, permissions, Skills, MCP, and session capabilities whenever possible. |
+
+  These capabilities are not isolated features. They are connected by one collaboration architecture:
+  src="docs/assets/readme/rovai-architecture.png"
+  alt="Rovai AI architecture showing the Principal, Desktop, Core, Runtime Adapter Layer, Agent Runtimes, user workspace, and Runtime-native capabilities"
+Tags:
+- agent
+- agent-team
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- multi-agent
+- programming
+ReleaseNotes: |-
+  本次更新优化智能体检测、文件预览和记忆工作区，补齐命令行中的 MiniMax Code、Pi 支持，并修复定时任务会话删除、Antigravity 长任务和超长输入的错误提示问题。
+  -【性能】减少智能体检测中的重复工作。 重新检测和状态检查减少重复扫描、程序启动及多余的模型探测；不同智能体可独立检查，并修复检查结束后无法再次操作的问题。
+  -【界面】调整记忆工作区和编辑表单。 使用更紧凑的列表，支持按“全部、共同、队员、队员间”查看，详情和版本历史按需展开。统一表单标签、字体和下拉菜单；在记忆页暂时关闭编辑窗口后，重新打开可继续未提交的内容。
+  -【修复】修正自动记忆提示的内容与数量。 正确区分新增和修订，显示对应的记忆范围；同一条记忆的多次修订不再重复计数。
+  -【修复】修复记忆审核面板关闭按钮无法点击的问题。 避免窗口拖拽区域拦截点击，并调整 Windows 下的顶部位置，防止与系统窗口按钮重叠。
+  -【性能】减少文件预览的重复读取。 优化大文本分页和行号定位，同一版本的 HTML 不再因重复通知反复加载；修复自动刷新期间 HTML 源码视图一直停在加载中的问题。
+  -【功能】命令行支持检查和配置 MiniMax Code、Pi。 可通过 rovai app 执行状态检查、查询模型目录和设置队员运行配置，修复此前误报“不支持该智能体”的问题。
+  -【修复】修复定时任务生成的会话无法彻底删除的问题。 删除后不再反复出现“删除未完成”的重试提醒；保留定时任务本身、后续计划及其他历史会话。
+  -【修复】修复 Antigravity 长任务在五分钟后提前结束的问题。 移除 Rovai 设置的固定五分钟限制，避免任务尚未完成却被显示为成功，或因返回空结果而报错。
+  -【修复】执行结束后，工具状态不再一直转圈。 取消执行后，未结束的工具显示为已停止；执行成功或失败但缺少工具结果时，显示“结果未知”，不误报工具成功。
+  -【修复】输入内容过大时明确显示失败原因。 原消息旁显示“输入内容过大 · 查看详情”，提供改用附件或拆分发送的建议；保留完整原文，刷新或重新进入后仍可查看原因。
+  -【优化】文件变化列表排除用于发送回复的输入文件。 通过 rovai send --input-file 成功发送的正文或请求文件，不再列入本轮 Files Changed；附件和其他文件变化不受影响。
+  -【修复】修复输入时网页链接高亮闪烁的问题。 在链接前后连续输入或使用输入法时，未修改的链接保持高亮，打开和复制仍使用最新地址。
+  -【修复】修复侧栏菜单关闭后的键盘焦点丢失。 使用 Shift+F10 打开会话或项目菜单后，按 Esc 返回原行，可继续使用键盘操作。
+  -【修复】恢复定时任务页顶部的窗口拖动。 总览和详情页的顶部留白可正常拖动窗口，不影响按钮、输入框和分隔条操作。
+  -【界面】调整上下文用量圆环配色。 改用与旁边百分比一致的中性色，统一浅色和深色模式下的显示。
+  感谢 @liangxyz 在 #786 中贡献定时任务会话删除修复，感谢 @arschlochnop 在 #810 中反馈超大输入缺少错误提示的问题。
+  也感谢 @小柒 反馈 Antigravity 长任务问题，以及 @liuqiong0319 反馈记忆页 UI 问题。
+  完整变更
+
+  This release improves agent checks, file previews, and the Memory workspace, adds MiniMax Code and Pi support to the app CLI, and fixes scheduled-conversation deletion, long Antigravity runs, and feedback for oversized inputs.
+  - [Performance] Reduce repeated work in agent checks. Rescanning and status checks perform fewer repeated scans, process launches, and unnecessary model probes. Different agents can be checked independently, and controls recover correctly when a check finishes.
+  - [UI] Update the Memory workspace and editor. Use a compact list with All, Shared, Member, and Between scopes, with details and version history expanded on demand. Form labels, fonts, and choice menus are consistent. Closing and reopening an editor on the Memory page preserves its unsubmitted draft.
+  - [Fix] Correct automatic memory notices and counts. Distinguish creation from revision and show the correct scope. Repeated revisions of one memory no longer count as separate memories.
+  - [Fix] Restore the Memory review panel's close button. Prevent the window drag region from intercepting clicks and position the panel below Windows caption controls to avoid overlap.
+  - [Performance] Reduce repeated file-preview reads. Reuse work when paging or locating lines in large text files, and avoid reloading the same HTML version for repeated notifications. Fix HTML source views that could remain stuck loading during automatic refresh.
+  - [Feature] Check and configure MiniMax Code and Pi from the CLI. Use rovai app to check availability, query models, and configure teammate runtimes without the previous unsupported-agent error.
+  - [Fix] Allow scheduled-task conversations to be deleted completely. Stop repeated deletion-incomplete retry notices while preserving the scheduled task, its future schedule, and other conversation history.
+  - [Fix] Prevent Antigravity long runs from ending after five minutes. Remove Rovai's fixed five-minute cutoff so unfinished work is not reported as successful or rejected for an empty final response.
+  - [Fix] Stop active tool indicators when an execution ends. Unfinished tools show as stopped after cancellation. When a successful or failed execution has no recorded tool result, show Unknown result instead of implying success.
+  - [Fix] Explain oversized-input failures. Show “Input too large · View details” beside the original message, with suggestions to attach a file or split the input. Keep the full original text and retain the explanation after refresh or re-entry.
+  - [Optimization] Exclude reply input files from Files Changed. Body or request files successfully sent with rovai send --input-file no longer appear in that run's file-change summary. Attachments and other file changes are unaffected.
+  - [Fix] Keep link highlights stable while typing. Unmodified links retain their highlight while typing around them or using an input method. Open and copy actions still use the current address.
+  - [Fix] Restore keyboard focus after closing a sidebar menu. After opening a conversation or project menu with Shift+F10, pressing Esc returns focus to its original row.
+  - [Fix] Restore window dragging at the top of Scheduled Tasks. Drag from the top blank area in both overview and detail views without affecting buttons, inputs, or splitters.
+  - [UI] Use a neutral color for the context-usage ring. Match the adjacent percentage in both light and dark themes.
+  Thanks to @liangxyz for contributing the scheduled-conversation deletion fix in #786, and to @arschlochnop for reporting missing oversized-input feedback in #810.
+  Also thanks to @小柒 for reporting the Antigravity long-run issue, and @liuqiong0319 for reporting Memory UI issues.
+  Full changelog
+ReleaseNotesUrl: https://github.com/murray17/rovai-ai/releases/tag/v0.4.14
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

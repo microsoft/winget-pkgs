@@ -1,0 +1,42 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: mostlygeek.llama-swap
+PackageVersion: '272'
+PackageLocale: en-US
+Publisher: mostlygeek
+PublisherUrl: https://mostlygeek.com/
+PublisherSupportUrl: https://github.com/mostlygeek/llama-swap/issues
+PackageName: llama-swap
+PackageUrl: https://github.com/mostlygeek/llama-swap
+License: MIT
+LicenseUrl: https://github.com/mostlygeek/llama-swap/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2024 Benson Wong
+ShortDescription: Model swapping for llama.cpp
+Description: llama-swap is a light weight, transparent proxy server that provides automatic model swapping to llama.cpp's server.
+Moniker: llama-swap
+Tags:
+- golang
+- llama
+- llamacpp
+- localllama
+- localllm
+- openai
+- openai-api
+- vllm
+ReleaseNotes: |-
+  Three compatibility fixes and a couple of UI improvements.
+  This release is a collection of some UI improvements, compatibility
+  enhancements and a bit of work to make content in this repo easy to import and
+  reuse in the new https://llama-swap.ai website.
+  Thanks to everyone who filed detailed bugs and contributed changes. The
+  quality of this project would not be where it is without the community.
+  - 1249e7c changelog: make into package: makes changelog/ an importable Go package with Versions(), Latest() and Get() over the embedded per-release markdown so llama-swap.ai can display the release notes by @mostlygeek
+  - PR #1315 ui: reduce ActivityTable render rate: throttles the Activity table to one render every 125 ms and skips redraws while the inflight panel is hidden, because live token/duration counters repainted on every update and burned CPU whenever several streams were active by @mostlygeek
+  - PR #1318 UI: category and a capability badge for decision models: gives models declaring the decision capability their own sidebar/list category and a matching badge, since categories were derived from capabilities but decision models fell through with neither by @sousekd
+  - PR #1319 internal/server: pass through 1xx interim responses in recorders: forwards 1xx statuses without recording them, because Expect: 100-continue (sent by curl for bodies over about 1 MiB) made the recorders latch onto the relayed 100 Continue and discard the real status, so upstream 400/500 errors arrived at the client as 200 by @mostlygeek
+  - PR #1326 Remove metadata filtering to allow custom fields alongside capabilities: stops dropping architecture, capabilities, supported_parameters, context_length and context_window from user metadata when capabilities are set, since that metadata is nested under meta.llamaswap and cannot collide with the generated top-level fields by @mostlygeek
+  - PR #1327 Add autoload=false support to /props endpoint: answers GET /props?autoload=false with 409 instead of loading a model that is not running (as llama-server's router mode does), so clients like llama.vscode that probe every listed model no longer load them one after another and evict the loaded model by @mostlygeek
+ReleaseNotesUrl: https://github.com/mostlygeek/llama-swap/releases/tag/v272
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

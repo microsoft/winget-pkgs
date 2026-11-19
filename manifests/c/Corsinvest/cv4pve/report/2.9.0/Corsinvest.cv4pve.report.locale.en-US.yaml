@@ -1,0 +1,63 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Corsinvest.cv4pve.report
+PackageVersion: 2.9.0
+PackageLocale: en-US
+Publisher: Corsinvest Srl
+PublisherUrl: https://www.corsinvest.it/
+PublisherSupportUrl: https://www.corsinvest.it/cv4pve
+PrivacyUrl: https://www.corsinvest.it/privacy
+Author: Corsinvest Srl
+PackageName: cv4pve-report
+PackageUrl: https://github.com/Corsinvest/cv4pve-report
+License: GPL-3.0
+LicenseUrl: https://github.com/Corsinvest/cv4pve-report/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2026 Corsinvest Srl
+CopyrightUrl: https://github.com/Corsinvest/cv4pve-report/blob/master/LICENSE.md
+ShortDescription: Report Tool for Proxmox VE
+Description: |-
+  cv4pve-report exports your entire Proxmox VE infrastructure to a single
+  navigable Excel file — nodes, VMs, containers, storages, users, firewall
+  rules, backup jobs, resource pools and more. Every row is a hyperlink to
+  its detail sheet.
+
+  Features:
+  - Single .xlsx file with one sheet per node, VM and storage
+  - Fully navigable — summary rows link to detail sheets
+  - Cluster: users, API tokens, TFA, groups, roles, ACL, firewall, backup jobs, replication, SDN, pools
+  - Nodes: services, network, disks, SMART, RRD metrics, APT updates, SSL certificates, tasks
+  - VMs/CTs: config, network, disks, RRD metrics, backups, snapshots, firewall, QEMU agent info
+  - Storages: content inventory, RRD metrics
+  - Three profiles: Fast, Standard, Full
+  - Works with a read-only API token, no root access required
+Moniker: cv4pve-report
+Tags:
+- corsinvest
+- excel
+- infrastructure
+- inventory
+- proxmox
+- proxmoxve
+- report
+- xlsx
+ReleaseNotes: |-
+  What's new
+  - Capacity Planning section. One row per guest, node and storage with the numbers a sizing starts from: what is allocated, what is used on average, what is used at the peak, and how fast each storage fills up. No metric server or Grafana needed: it is built on the RRD data the nodes already keep (#85).
+    - Guests: vCPUs, CPU average and peak (% and cores), memory size, average and peak, disks size and used, network average and peak.
+    - Nodes: the same usage columns, plus the vCPUs and the memory assigned to the running guests with their ratio to the node (above 1 the node is overcommitted).
+    - Storage: size, used, free, growth per day and days to full.
+    - Averages come from the RRD samples read with the Average consolidation, peaks from a second read with Maximum: the highest of the averaged samples is not the peak. One more API call per guest and per node, only when the section is on.
+    - Turned on by the new setting CapacityPlanning.Enabled: off by default, on with --full. Each table needs the RrdData.Enabled of its scope (guests, nodes, storage) and uses its time frame.
+    - It is a summary, so it comes first: after Summary and Issues in Excel and in the Contents table, under Network Diagram in the HTML sidebar. JSON: capacity-planning.json, and filters.capacityPlanning in metadata.json.
+  Changed
+  - Documentation: new Capacity Planning page; Disks, Partitions and Snapshots moved from the VMs & containers page to the Storage page, as in the sidebar of the HTML report.
+  What's Changed
+  - docs: home page title for search results by @franklupo in #83
+  - docs: theme 2.6.2 by @franklupo in #84
+  - feat: Capacity Planning section with average and peak usage by @franklupo in #86
+  - chore: release 2.9.0 by @franklupo in #87
+  Full Changelog: v2.8.1...v2.9.0
+ReleaseNotesUrl: https://github.com/Corsinvest/cv4pve-report/releases/tag/v2.9.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

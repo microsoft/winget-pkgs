@@ -1,0 +1,50 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: try2love.CodexMobileBridge
+PackageVersion: 2.2.1
+PackageLocale: en-US
+ShortDescription: A local gateway that continues desktop Codex App chats in a mobile browser.
+Description: |-
+  Continue existing chats in the desktop Codex App from your phone browser, or create an empty chat in a saved project.
+  The phone and desktop use the same chat. Read replies, send messages, choose models and Skills, and respond to pending confirmations. Local tasks continue on the original computer; SSH tasks continue on the original server. Each chat keeps its model provider and authentication settings.
+  Your phone does not need to sign in to the same OpenAI account as the desktop. The gateway has its own username/password login and an explicit passwordless option. Connect over LAN, a temporary HTTPS tunnel, or your own reverse proxy.
+  Community project, not affiliated with OpenAI. Supports macOS and Windows and depends on internal Codex App IPC. See verification records for what was actually tested. App updates may require compatibility changes.
+
+  Edit, branch and copy messages
+  - Copy user messages from their action row. Choose Edit and resend on the latest user message, or Edit in new branch on an older message to keep the original conversation.
+  - Choose Branch from here under a completed answer. The new chat keeps history through that turn and waits for your next message. Chat details link back to the source.
+  - Copy complete replies as Markdown or copy an individual code block. Long replies load their full text. When clipboard access is unavailable, selectable text supports the system Copy action.
+  - In-place editing requires the turn to be stopped and generates a new answer. Editing and branching do not undo file changes; both chats share the working directory.
+  - Branching requires a Codex runtime with turn-specific forking and deferred goal continuation; older versions show an update prompt. Copying and latest-message editing do not require those fork capabilities. Creating a branch does not send a model request.
+  - If delivery is uncertain, check the chat list first; repeating the same request does not replay it. If a branch was created but could not connect, the replacement remains an edit draft for that branch.
+Tags:
+- remote
+- remote-access
+- remote-connection
+ReleaseNotes: |-
+  Updating is recommended for native connections to the latest Codex App.
+  v2.2.1 adds Antigravity integration and interactive charts in chats, improves CLI connection management, model caching and file browsing, and fixes newer Codex connections, long-history reads and mobile recovery.
+  Features and improvements
+  - Antigravity workbench: browse local App, IDE and CLI history and use supported native connections for chats, project creation, models, attachments and approvals. Handle native questions and waiting interactions, manage child tasks, preview historical images and add them to drafts. Display model quotas and context usage supplied by the native service. Supported default local profiles can save account snapshots and switch after idle-state checks. PR #150 · PR #170
+  - Interactive charts: render Codex visualize content with controls, themes and full-screen viewing. Restore saved widget state when reopening a chat; place chart follow-up prompts in the composer for review and manual sending. #166 · PR #167
+  - CLI management: group connections by agent, runtime and profile, release individual or profile-scoped connections, and preview shared-service impact. Check supported local account and proxy changes and recover network access while retaining task, approval and uncertain-send checks. #122
+  - Side chats and wide layouts: preserve native parent-child relationships, provide explicit temporary side chats with shared controls, and collapse the chat list without leaving the conversation. #149
+  - Files and chat controls: browse authorized host directories, navigate by full path, return to the project, and locate linked files. Add a / command menu, optional new-chat names, native interaction timestamps, authorized media playback and simpler reminders. #160 · #154 · #161 · #148 · #158 · #141
+  - Desktop and network: custom HTTPS ports for SSH server entries and a monochrome macOS menu-bar icon. #145 · PR #146 · #156 · PR #157
+  - WSL status and startup: distinguish stopped distributions from unavailable status queries, and expose Start and connect WSL in gateway and direct-connection management lists for Codex and Claude, and fix navigation from WSL Claude entries to their chat list.
+  Fixes
+  - Restore Codex Desktop v13 synchronization and validate structurally compatible later versions. Preserve history and drafts while pausing controls when critical task or approval state cannot be understood. #168 · PR #169
+  - Preserve Antigravity port discovery in large logs with bounded head-and-tail reads and process ownership checks. PR #171
+  - Bound long Antigravity turns in history pages. Keep persisted Claude stream history out of recent pages while preserving completion anchors outside the page.
+  - Reuse account-scoped model caches, retain explicit manual choices and drafts during catalog failures, and distinguish account changes from temporary discovery errors.
+  - Improve Windows Store Codex startup, Claude initialization retries, native runtime compatibility, DSH connector recovery and ZCode window matching. #153
+  - Improve iOS entry, foreground recovery and safe areas. Allow Android users to return to the computer list during connection probing, and improve cookie migration and gateway identity preservation. #159
+  - Relaunch macOS updates through the system launcher to improve accessibility identity continuity. Check Windows update blockers before downloading, and refresh dynamic login messages when changing languages.
+  Notes
+  Android installation: The new Bridge app installs alongside the old v2.2.0 app and cannot replace it in place. Install Bridge, add your computers and verify the connections first. Preserve any drafts you need from the old app before uninstalling it; old bindings and drafts do not migrate automatically. Users of the separate v2.2.1-preview.1 Bridge Preview app can upgrade in place and retain that preview app’s connections and drafts.
+  Update the mobile app for native chart navigation and connection recovery improvements. iOS source and unsigned IPA packages require your own signing.
+  Antigravity account switching, independent profiles and WSL features depend on platform and integration support. Temporary side chats are limited to supported local desktop integrations, do not enter native history and do not survive gateway restart. Browsing outside the project remains read-only. Unknown sends, approvals and switches are not automatically replayed.
+  Thanks to @windowmmk for Antigravity contributions in #150, #170 and #171; and @heiqiu47 for HTTPS ports, the menu-bar icon, interactive charts and Codex compatibility in #146, #157, #167 and #169.
+ManifestType: locale
+ManifestVersion: 1.28.0

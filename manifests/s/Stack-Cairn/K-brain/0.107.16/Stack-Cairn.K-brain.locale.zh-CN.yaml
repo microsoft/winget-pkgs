@@ -1,0 +1,49 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Stack-Cairn.K-brain
+PackageVersion: 0.107.16
+PackageLocale: zh-CN
+Publisher: Stack-Cairn
+PublisherUrl: https://github.com/Stack-Cairn
+PublisherSupportUrl: https://github.com/Stack-Cairn/K-brain/issues
+PackageName: K-brain
+PackageUrl: https://github.com/Stack-Cairn/K-brain
+License: Apache-2.0
+LicenseUrl: https://github.com/Stack-Cairn/K-brain/blob/HEAD/LICENSE
+ShortDescription: 基于 Go 构建、运行在终端里的编程 Agent。
+Description: 氪脑（K-brain）是运行在终端里的编程 Agent，用 Go 构建，也可作为其他前端的后端底座。读代码、改文件、执行命令、验证结果，在同一会话中完成任务。运行 kn 开始使用，取自“氪脑”拼音 Ke Nao。
+Tags:
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  K-brain v0.107.16
+  本版从 main 的 812f4cf 构建。
+  新功能
+  - 按运行启用的工作区沙箱（#104）。运行请求可以带 options.sandbox: {mode: "workspace", network: true|false}，命令（Bash、ManagedProcess、TerminalSession 及 hooks）会在系统沙箱里执行：
+    - 可写范围：只限运行的 write 工作区、系统临时目录，以及 shell 需要的 /dev 节点；
+    - 屏蔽目录：~/.ssh、~/.aws、~/.gnupg、~/.config/gh 以及 K-brain 自己的数据（配置与 API Key、会话、记忆、权限规则），读写都被屏蔽；
+    - 只读路径：.liveagent/、.k-brain/、.git/hooks/ 即使在可写工作区内也只读；
+    - 断网：network: false 时禁止联网；
+    - 拒绝而非裸跑：平台无法隔离时（原生 Windows、没有 bwrap 等），请求返回 400 options.sandbox: …，不会在沙箱外运行；
+    - 能力上报：/v1/health 新增 capabilities.run_sandbox（supported、mechanism、network_control、read_masking 等），客户端据此启用沙箱选项。
+    macOS 用 seatbelt（/usr/bin/sandbox-exec），Linux 用 bubblewrap。
+  - 沙箱内的审批：在 normal / auto_edit 模式下，沙箱里的命令不再逐条确认。plan 模式、deny/ask 规则、auto_review 以及已配置的 AI 审查仍然优先，审查器照样会看到每条命令。文件编辑等进程内工具不受系统沙箱约束，仍按权限模式处理。
+  修复
+  - seatbelt 配置（也影响 config.sandbox）：旧配置会让写 /dev/null、TMPDIR 失败，工作区路径经过符号链接（/var → /private/var）时也写不进去。新配置修正了这些问题。
+  下载与校验
+  提供 macOS、Linux、Windows 的 x64/ARM64 CLI 与 computer helper，共 12 个二进制；SHA256SUMS 用于校验下载文件。
+  完整变更
+ReleaseNotesUrl: https://github.com/Stack-Cairn/K-brain/releases/tag/v0.107.16
+InstallationNotes: 在终端中运行 kn。首次使用前，请在 %USERPROFILE%\.k-brain\config.json 中配置模型提供商。
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://github.com/Stack-Cairn/K-brain/blob/main/README.zh-CN.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

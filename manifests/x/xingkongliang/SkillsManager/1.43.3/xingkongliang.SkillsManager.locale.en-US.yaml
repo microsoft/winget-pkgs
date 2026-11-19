@@ -1,0 +1,43 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: xingkongliang.SkillsManager
+PackageVersion: 1.43.3
+PackageLocale: en-US
+Publisher: xingkongliang
+PublisherUrl: https://github.com/xingkongliang
+PublisherSupportUrl: https://github.com/xingkongliang/skills-manager/issues
+PackageName: Skills Manager
+PackageUrl: https://skillsmanager.dev/
+License: MIT
+LicenseUrl: https://github.com/xingkongliang/skills-manager/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Tianliang Zhang
+ShortDescription: One app to manage AI agent skills across all your coding tools.
+Description: |-
+  Skills Manager is a desktop app that keeps AI agent skills in one central library and installs them into coding tools such as Claude Code, Codex, Cursor, Copilot, and Gemini CLI. Skills can be installed from Git repositories, local folders, .zip or .skill archives, or the skills.sh marketplace, then grouped into presets, tagged and filtered, and tracked for upstream updates.
+  Global and project workspaces show what each agent actually sees, and skills sync to any supported tool via symlink or copy. Skills Manager also backs the library up to a Git remote for multi-device sync and records every install, remove, update, and sync operation in an activity log.
+Tags:
+- agent
+- agentic
+- ai
+- large-language-model
+- llm
+- skills
+ReleaseNotes: |-
+  Release date: 2026-11-03
+  Commit range: v1.43.2...v1.43.3
+  Release Overview
+  - Skills deployed to Antigravity now land in the folders Antigravity reads. A network hiccup during an update check no longer marks every skill from a repository as having an update. And a project folder that several agents share stays usable when only some of them are installed.
+  User-facing
+  - Antigravity finds deployed skills — Skills Manager deployed Antigravity skills to ~/.gemini/antigravity/skills, which current versions of Antigravity do not read. Global skills now go to ~/.gemini/config/skills, which the Antigravity app, IDE and CLI all read, and project skills go to <project>/.agents/skills. At the next sync, skills already deployed to Antigravity are deployed again in the new folder. Links in the old folder are removed, and copies there move into kept-copies/antigravity/ in the library, as with any change to an agent's folder. Thanks to @ZhuYichuan (#605), and to @zhirogo, who proposed the same paths earlier in #458 (#602, #461, #409, #217).
+  - A failed comparison no longer shows as an update — For skills installed from a folder inside a repository, the update check makes a second request that compares that folder with the installed version. When that request failed, for example over a dropped connection, every such skill from the repository showed "Update", and the badge, the notifications and auto-update all acted on it. These skills now show a failed check, keep their installed version, and are checked again next time. You can still update one from its card. Thanks to @HengYangDS (#583, #582).
+  - Shared project folders stay usable — In a project workspace, agents that read the same folder share one row; Antigravity, Cline, Warp and GitLab Duo all use .agents/skills, for example. The row counted as installed and enabled only when the first agent in it was. So skills could not be added there by a Warp user without Cline, by a custom agent sharing a built-in agent's folder, or by TRAE CN with its project folder set to .trae/skills and TRAE IDE not installed. The row is now usable while any agent that reads the folder is installed and enabled. Thanks to @GoodScholar for tracking this down in #489 (#633, #431, #632).
+  Developer & Governance
+  - skills-manager-cli skills check --json reports the skills from the second item above as error, with the comparison's message in last_check_error, where it used to report update_available. Skills installed from a repository root, and subpath skills already at the remote head, are unchanged. No new status is introduced (#583).
+  - project_agent_targets_for_record takes "installed" and "enabled" from every adapter whose project folder matches the row, not only from the adapter whose key the row carries. export_skill_to_project filters on the same state. The row still carries the first adapter's key. The regression test reads that key instead of naming it, because #605 changed which adapter comes first (#633, #634).
+  Current Verification
+  - ✅ Cross-platform build passed (macOS Intel / macOS ARM / Windows x64 / Linux x64 / Linux ARM64)
+  - ✅ TypeScript typecheck passed
+ReleaseNotesUrl: https://github.com/xingkongliang/skills-manager/releases/tag/v1.43.3
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

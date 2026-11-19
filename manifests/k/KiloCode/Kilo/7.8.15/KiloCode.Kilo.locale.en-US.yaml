@@ -1,0 +1,78 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: KiloCode.Kilo
+PackageVersion: 7.8.15
+PackageLocale: en-US
+Publisher: Kilo Code Inc.
+PublisherUrl: https://kilo.ai/
+PublisherSupportUrl: https://github.com/Kilo-Org/kilocode/issues
+PrivacyUrl: https://kilo.ai/privacy
+Author: Kilo Code Inc.
+PackageName: Kilo
+PackageUrl: https://github.com/Kilo-Org/kilocode
+License: MIT
+LicenseUrl: https://github.com/Kilo-Org/kilocode/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2026 Kilo Code
+  Copyright (c) 2025 opencode
+CopyrightUrl: https://kilo.ai/terms
+ShortDescription: The open source agentic coding CLI from the Kilo engineering platform.
+Description: Kilo is the standalone agent CLI of the Kilo agentic engineering platform, the open source coding agent for building, shipping, and iterating on software. It plans, edits, and executes engineering work directly in the terminal with support for tree-sitter language parsing and sandboxed task execution.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  VS Code
+  7.8.15
+  Patch Changes
+  - #15235 c61a974 - Let the browser_open permission prompt remember your choice. The prompt now offers the current origin and all origins as always-allow rules, and Auto-Approve settings list browser_open so you can allow Integrated Browser navigation without answering each request.
+  7.8.13
+  Minor Changes
+  - #14866 f01b273 - Let a primary agent choose which agent runs an Agent Manager session it starts, so a session fanned out through Agent Manager can run a custom agent (and its edit/bash/MCP permission rules) instead of always falling back to the workspace default agent.
+  - #15119 cbdb045 - Redesign the Agent Manager New Worktree dialog. Pick the base branch next to the project, set an optional branch name next to the worktree name, and choose versions next to the Create button. The Advanced options section is gone. The base branch pick is kept as a draft until you create the worktree, and you can make it the project default from the branch picker. Branch pickers also open faster in repositories with many branches.
+  Patch Changes
+  - #14866 e703b56 - Reject internal agents when an agent starts an Agent Manager session for a named agent, and list the selectable agents on every rejection so a wrong name can be corrected without guessing.
+  - #15118 33e6701 - Align brand yellow hover colors with Anaconda.
+  - #15104 0f4936d - Keep Gemini thought signatures and other OpenRouter reasoning details that arrive late in a response, so later requests in the conversation replay them
+  - #14942 b7672ae - Show why a provider failed to load — such as rejected credentials or a network error — instead of silently hiding it from the provider list. The CLI, TUI, and VS Code model picker now surface the reason and offer to sign in again when credentials were rejected.
+  - #15041 32bc724 Thanks @hdcodedev! - Send review comments from the Changes view to the chat when the sidebar is showing History.
+  - #14774 0913273 Thanks @LEN5010! - Prevent restarted Agent Manager terminals from lingering after closing the terminal or reloading the panel.
+  - #15113 ba0410f - Update the VS Code extension brand yellow to #FFDD00.
+  - #14925 4516a48 Thanks @abdulhusainahk! - Show a dismissible hint naming the first workspace folder used by chat in multi-root windows, with guidance for working on another folder. The hint is available in all supported sidebar languages.
+  - #15045 6fcbc66 Thanks @hdcodedev! - Keep new files with accented or non-Latin names, such as résumé.txt, when moving a chat to a worktree
+  CLI
+  7.8.15
+  Minor Changes
+  - #15183 61e311c - Route kilo-auto/custom/<slug> auto routers on the client: the CLI registers
+    its own provider models as router entries (kilo auto router add|remove|list),
+    asks the auto-routing service for a decision when it can serve one of them, and
+    runs the picked model locally. kilo auto eval <router> runs the missing
+    client evals in Docker and uploads each result as it finishes.
+  Patch Changes
+  - #15235 c61a974 - Let the browser_open permission prompt remember your choice. The prompt now offers the current origin and all origins as always-allow rules, and Auto-Approve settings list browser_open so you can allow Integrated Browser navigation without answering each request.
+  - #15254 705b5d6 - Restore edit and write for subagents delegated by an agent that allows edits on specific paths. The subagent's own edit allowlist now governs instead of inheriting a blanket edit deny.
+  7.8.13
+  Minor Changes
+  - #15159 7420e70 - Share the agents a remote-controlled CLI can run, including project agents from .kilo/agents, so the Kilo mobile app can offer them when it starts or continues a session on that computer.
+  Patch Changes
+  - #15114 f1927fb - Use the Kilo brand yellow (#FFDD00) for the CLI logo and theme accent.
+  - #14866 0c8849c - Allow custom agents to delegate file edits to subagents without stripping the subagent's configured write permissions. A custom delegator's own edit rules, including path-scoped denies such as edit: { "secrets/**": "deny" }, now apply only to that agent and no longer constrain the subagents it starts, so use a session-level edit restriction to confine delegated writes. Built-in read-only modes (plan, ask, orchestrator) still block edits in their subagents, and child agents keep their own denials and approval requirements.
+  - #13722 952d2d1 Thanks @maphew! - Restore Home and End cursor movement while typing in dialog filter inputs (e.g. the provider connect, session list, and model picker dialogs) instead of jumping the list, and keep the list-jump behavior when the filter is empty.
+  - #15131 f9b632f - Refresh an expired MCP OAuth token automatically. Servers that reject an expired access token with 403 (rather than 401) no longer leave the connection stuck on "authentication required", so a new worktree or project session reconnects without asking you to sign in again.
+  - #13260 8d5c126 Thanks @waewoo! - Allow OpenAI-compatible providers that require string content for tool calls to opt in without changing the default request format.
+  - #15104 0f4936d - Keep Gemini thought signatures and other OpenRouter reasoning details that arrive late in a response, so later requests in the conversation replay them
+  - #14942 b7672ae - Show why a provider failed to load — such as rejected credentials or a network error — instead of silently hiding it from the provider list. The CLI, TUI, and VS Code model picker now surface the reason and offer to sign in again when credentials were rejected.
+  - #15124 a85b9a8 - Preserve session status timing for accurate overnight activity and blocker reporting.
+  - #15180 ec376c5 - Keep stray console output from dependencies out of the TUI. Warnings written straight to the terminal by libraries running in the session worker — for example the MCP SDK's notice about OAuth tokens saved without an issuer — used to land on top of the rendered screen and stay there until a redraw, leaving the splash screen or chat view shredded. Those writes now go to the log file instead.
+ReleaseNotesUrl: https://github.com/Kilo-Org/kilocode/releases/tag/v7.8.15
+PurchaseUrl: https://kilo.ai/pricing
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

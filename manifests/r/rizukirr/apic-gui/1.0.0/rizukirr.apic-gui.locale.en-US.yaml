@@ -1,0 +1,52 @@
+# Created using wingetcreate 1.12.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: rizukirr.apic-gui
+PackageVersion: 1.0.0
+PackageLocale: en-US
+Publisher: Rizki Rakasiwi
+PublisherUrl: https://github.com/rizukirr
+PublisherSupportUrl: https://github.com/rizukirr/apic/issues
+Author: Rizki Rakasiwi
+PackageName: apic-gui
+PackageUrl: https://github.com/rizukirr/apic
+License: GPL-3.0-only
+LicenseUrl: https://github.com/rizukirr/apic/blob/main/LICENSE
+Copyright: Copyright (c) Rizki Rakasiwi
+ShortDescription: Desktop GUI for apic — design and collaborate on Git-friendly API contracts.
+Description: apic-gui is the desktop front-end for apic, built on the shared apic-core, for designing, validating, and collaborating on API contracts with a graphical interface.
+Moniker: apic-gui
+Tags:
+- api
+- contract
+- gui
+- json
+- rest
+ReleaseNotes: |-
+  The first stable release. The desktop GUI now covers the whole loop of working on API contracts in git: edit a contract, send it, review and commit the change, pull, merge and resolve conflicts, and read the history with the new git log panel. The CLI moves to curl-style `create` and `edit`, gains `apic send` with environments, and apic is now licensed under GPL-3.0-only. The contract format is unchanged, so existing projects need no migration.
+
+  ### Added
+
+  - **Git log panel.** The clock button next to the branch dropdown opens a resizable log at the bottom of the window, remembered across launches. It shows a branch's commits with a painted graph, ref labels, author and date, 500 at a time with Load more, and filters by text or hash, branch, user, date range and path. Clicking a commit lists its changed files, and clicking a file shows that commit's diff in the main area. Right-click a commit to copy its hash or revert it after a confirmation. A conflicting revert lands in the conflict resolver.
+  - **Merge conflict popup.** When a git status finds a file newly conflicted, whether from a Pull or Merge in the branch menu, from git outside the app, or on opening a project mid-merge, a popup lists every conflicted file so the conflict is not missed. OK closes it until another file becomes conflicted.
+  - **New request and New template without a project.** With no project open, the sidebar's `+` and the Templates section's `+` ask for a folder first, set it up as a project unless it already is one, open it, and then show the dialog. Before, the dialog opened and Create only said "no project".
+  - **Pull and merge from the GUI branch dropdown.** Each branch has a ⋮ button with Pull, Merge and Delete. It replaces the right-click menu, which closed the dropdown and never showed. Pull lists remote branches and fetches every remote before merging, Merge lists local and remote branches, and both confirm in a popup naming the two branches. A branch that is not checked out is checked out first. Conflicts land in the conflict resolver, and both are refused while a contract has unsaved edits.
+  - **Sending from the GUI.** The Send button in the URL bar, or Ctrl+Enter (Cmd+Enter on macOS), sends the open contract as shown, unsaved edits included, with a 30 s timeout, and Cancel drops the reply. The environment dropdown in the app bar picks an environment per project, and every send reloads it from disk. A `{name}` path param the environment leaves empty is asked for in a popup. The right pane switches between the documented Examples and the Live reply with its status, time, size, body and headers. The URL bar and values colour `$name`, `${name}`, `{{name}}` and `{name}`, in the warning colour when the selected environment does not define the name.
+  - **`apic send`, environments and variables.** `apic send -f <query>` sends a contract's request and prints the response body, with `--env <name>`, `--var NAME=VALUE`, `-i` and `--timeout`. `$name`, `${name}` and `{{name}}` are filled from `.apic/env/<name>.toml`, overlaid by the gitignored `<name>.local.toml`. `apic env` lists the environments without printing values, and `apic vars --convert [--write]` rewrites `{{name}}` to `$name`.
+  - **JSON syntax highlighting in `apic read`.** Request and response bodies are coloured by token on a terminal: keys blue, string values green, numbers yellow, `true`, `false` and `null` magenta, and punctuation dim, using the terminal's own basic colours. Piped or redirected output stays plain.
+  - `apic read` and `apic list` honour `NO_COLOR`: when it is set and not empty, no colour is written even on a terminal.
+
+  ### Changed
+
+  - **New app icon.** The green flame is now a blue flame, in the window, the Linux launcher, the Windows installer and the macOS bundle.
+  - **apic is now licensed under the GNU General Public License, version 3 only (GPL-3.0-only)**, replacing the MIT License, starting with this release. `LICENSE`, the crate manifests, the Windows installer's license page and the AUR, Copr, Debian, Flatpak and winget metadata all say so. Releases up to and including 0.5.1 were published under MIT and stay available under it.
+  - **Curl-style CLI authoring (breaking).** `apic create -f <file> [<url>] [flags]` now writes a contract in one command instead of opening an editor. It seeds from the project template (`--use-template` picks one, and with several templates `convention.json` is used), defaults the name to the file stem, appends `.json` when missing, never overwrites, and prints `created <path>`. The new `apic edit -f <query> [<url>] [flags]` changes only the fields it is given and prints `updated <path>`. Both take the same flags: `-X` for the method, a URL whose query string is split into query params, `-H 'Name: value'` to add or replace a header and `-H 'Name:'` to remove one, `-d` with text, `@file` or `@-`, `-F name=value` or `name=@file[;type=mime]` for multipart parts, `--response CODE:DESC`, `--response-body CODE BODY`, `--response-header CODE HEADER`, `--name` and `--description`. A `-d` on a multipart body or a `-F` on a JSON body fails and points at `apic open`, a `--response-body` or `--response-header` for a missing code fails and points at `--response`, and nothing is written on any error.
+  - **`apic open` always uses your editor.** It opens the contract in `-e`, then `$VISUAL`, then `$EDITOR`, then `vi`, so the `-e` flag no longer switches away from a built-in editor.
+  - **The TUI editor and the inline picker are gone.** An ambiguous name in `open`, `edit`, `remove` or `--use-template` now fails and lists the candidates instead of prompting, and `apic create` no longer prompts for a template when several exist. `apic remove` still asks `y/N` on a terminal, and the new `-y`/`--yes` skips the question.
+  - The `ratatui` and `ratatui-textarea` dependencies were dropped with the TUI. `crossterm` stays, since it colours `apic read` and `apic list` output.
+ReleaseNotesUrl: https://github.com/rizukirr/apic/releases/tag/v1.0.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/rizukirr/apic/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

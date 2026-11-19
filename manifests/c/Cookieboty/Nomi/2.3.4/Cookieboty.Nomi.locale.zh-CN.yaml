@@ -1,0 +1,63 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Cookieboty.Nomi
+PackageVersion: 2.3.4
+PackageLocale: zh-CN
+Publisher: Cookieboty
+PublisherUrl: https://withnomi.app/
+PublisherSupportUrl: https://github.com/Cookieboty/nomi-ai/issues
+PrivacyUrl: https://withnomi.app/privacy.html
+PackageName: Nomi
+PackageUrl: https://withnomi.app/download.html
+License: MIT
+LicenseUrl: https://github.com/Cookieboty/nomi-ai/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Cookieboty
+ShortDescription: 桌面上的 AI 伙伴：接上任意模型，自己干活，也能把专业的活派给编程助手。
+Description: |-
+  Nomi 是住在你桌面上的 AI 伙伴：接上任意模型，自己动手干活，也会把专业的活派给专业的 AI。模型、编程助手、MCP 与本地工具都接到一处，由 Nomi 统一调度。
+  模型只接一次就能给所有 AI 使用：添加一次供应商，Nomi 自己和 Claude Code、Codex、Gemini CLI、Grok、dsh 都能用它的任意模型，也可以全部换成本地模型。本机网关自动识别并互转 Anthropic Messages、OpenAI Responses、OpenAI Chat Completions 与 Gemini generateContent，流式、工具调用、推理、图片和上下文压缩都照常工作。
+  任务可以限定能访问的文件夹，编程助手有独立的两栏工作区，桌面角色会显示台词与确认气泡。应用为 Go 内核加原生 WebView，单个安装包约 39 MB，按当前用户安装，不需要管理员权限。
+Tags:
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  Nomi· 诺米 2.3.4
+  Nomi 跑长任务更稳：按模型实际用掉的上下文来管理，快满时自动腾地方，计划没做完会接着做；子任务改过的文件和生成的图片都会回到对话里。 / Nomi handles long tasks more reliably: context is managed by what the model actually used and space is freed automatically before it fills up, and unfinished plans get finished; files a sub-task changed and images it generated now come back to the chat.
+  新功能 / New
+  - 设置新增「关于」页：版本与检查更新、项目主页、更新历史、近期更新和问题反馈；更新相关的开关收进「更新设置」弹窗 / Settings has a new About page with the version and update check, the homepage, release history, recent updates and feedback; update toggles move into an Update settings dialog
+  - 「知识 · 记忆 · 日程」（侧栏底部、输入框「+」菜单、Ctrl/⌘+Shift+M）改为从右侧抽屉打开，不再跳到设置页 / Knowledge · Memory · Schedule (sidebar, the input's "+" menu, Ctrl/⌘+Shift+M) now opens in a right-side drawer instead of jumping to Settings
+  - /compact 后面可以写要优先保留的重点，如 /compact 重点保留接口设计 / /compact accepts what to focus on, e.g. /compact keep the API design
+  - 执行轨迹和 /context 里能看到上一轮的提示缓存命中率 / The execution trace and /context show the last reply's prompt cache hit rate
+  改进 / Improvements
+  - 长任务不再因为上下文撑满中途失败：一轮里连续调工具时每一步按实际用量检查，快满时先缩短较早的大段工具输出，还不够就把较早的步骤压成摘要接着做；模型仍提示超长时自动压短重试一次 / Long tasks no longer fail midway because the context filled up: during a run of tool calls each step is checked against actual usage, older long tool outputs are shortened first and earlier steps are summarized if needed, and a request rejected as too long is retried once with shorter content
+  - 对话接近一半时，较早几轮的大段工具输出只留开头和结尾，对话原文能保留得更久、晚一些才需要压缩 / Once a chat is about halfway full, long tool outputs from older turns keep only their beginning and end, so the original conversation lasts longer before it has to be compacted
+  - 自动压缩按上一轮实际用掉的上下文判断；摘要分节写，并补上最近读过或改过的文件、最近的计划和用过的技能 / Auto-compaction uses the context the last reply actually used; summaries are sectioned and followed by recently read or changed files, the latest plan and loaded skills
+  - 更省钱、更快：按需提供的工具在一个对话里开过就一直提供，前几轮的思考内容不再随历史重发，提示缓存不容易被打断 / Cheaper and faster: tools offered once in a chat stay offered and earlier reasoning is no longer resent, so the prompt cache breaks less often
+  - 计划没做完就不收尾：这一轮的计划还有没做完的步骤时，Nomi 会接着做，或者说明哪步做不了；自动续做时没有实际进展就停下，不再空转 / Unfinished plans get finished: if the turn's plan still has open steps Nomi keeps going or says which step can't be done, and automatic continuation stops when it isn't making real progress
+  - 工具输出很长时 Nomi 先看开头和结尾，需要时再分页读中间；命令输出超过上限时保留结尾，报错和失败的测试不会被截掉 / Very long tool output is read by its beginning and end first and the middle in pages when needed; command output over the limit keeps its end, so errors and failing tests are no longer cut off
+  - 生图服务暂时出错（网络、超时、限流、服务端错误）时自动重试两次，图已生成只是下载失败时只重新下载 / Image generation retries twice on temporary errors (network, timeout, rate limit, server error), and only re-downloads when the image was made but the download failed
+  - 后台的 Nomi 任务按所用模型的上下文窗口计算预算，不再固定 8K / Background Nomi tasks size their context budget from the model's window instead of a fixed 8K
+  修复 / Fixes
+  - 子任务做完后，它改动的文件和生成的图片会随结果回到对话，Nomi 下一轮也能读到；派给后台 Nomi 的生图任务只出图、没写总结时不再判为失败 / When a sub-task finishes, the files it changed and the images it generated come back to the chat with the result and Nomi can read them next turn; an image task handed to background Nomi that produced images but no summary no longer counts as failed
+  - 后台的 Nomi 和知识库问答用你提问的语言回复，不再固定用中文 / Background Nomi and knowledge-base answers reply in the language you asked in instead of always Chinese
+  - 忘记记忆是真的忘记：删掉一段对话摘要时，从它整理出的「关于我」条目一起删掉，之后也不会再被整理回来 / Forgetting memory sticks: deleting a conversation summary also deletes the "About me" entries extracted from it, and they are not extracted again later
+  - 对话中途换成云端模型时，之前本地模型读到的文件内容、命令输出和网页内容会按「仅本地模型可读文件」重新判断，不再随历史发给云端 / When a chat switches to a cloud model midway, file contents, command output and web pages read earlier by a local model are checked again against "only local models can read files" instead of being sent along with the history
+  - 在「桌面权限 → 隐私保护」撤销「始终允许」后，原来授权的标签下一轮不再带着这项沙箱授权 / After revoking "Always allow" in Desktop permissions → Privacy, the tab that granted it no longer keeps the sandbox grant on its next turn
+  - 子任务栏里排队的消息只发给它自己的子任务，按发送顺序送达，切换子任务时不再发错 / Messages queued in the sub-task column go only to their own sub-task, in the order sent, and no longer go to another sub-task after switching
+ReleaseNotesUrl: https://github.com/Cookieboty/nomi-ai/releases/tag/v2.3.4
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://withnomi.app/docs.html
+- DocumentLabel: 更新日志
+  DocumentUrl: https://withnomi.app/changelog.html
+- DocumentLabel: 功能一览
+  DocumentUrl: https://withnomi.app/features.html
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

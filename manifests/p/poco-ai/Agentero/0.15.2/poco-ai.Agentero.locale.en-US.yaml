@@ -1,0 +1,47 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.15.2
+PackageLocale: en-US
+ShortDescription: Agent-friendly reference management.
+Description: 'Traditional reference managers are not agent-friendly: highlights and notes stay locked inside single files, making it hard for agents to reuse knowledge across papers; every conversation starts from scratch without a stable local knowledge map; PDFs are human-friendly but not the most comfortable reading material for agents. Agentero aims to build an agent-friendly, agent-native way to manage references, exploring how humans and agents collaborate on reference management. Connect your local agent via ACP (BYOA), select-text chat, import papers and Skills, stay compatible with the Zotero ecosystem, and get paper translation, bidirectional links with a knowledge graph, and deep PDF reading.'
+Tags:
+- academics
+- agent
+- article
+- literature
+- paper
+- pdf
+- reference
+- research
+- thesis
+- zotero
+ReleaseNotes: |-
+  v0.15.2 centers on lab records and writing. Research tables now double as experiment notebooks, with stable registration numbers, timestamps, and editors per row and one validation path for people and agents; Markdown panels can switch inline to an editable source view, with a full toolbar, formatting shortcuts, and caret and line-number alignment. Full-text translation gains two persistent caches (character IR and finished PDF) and draws translated pages through the same renderer as source pages; the plaza adds Papers with Code, and paper sidebar links split into two rows with Hugging Face. Update prompts and About can open Release details, split panes no longer overwrite each other silently, and the defaults now point to Tencent Transmart translation and the local body parser.
+  Features
+  - Experiment record tables: Research tables become the record for experiment data, with a stable registration number, timestamp, and editor per row and one validation path for people and agents; agents use table_query / table_upsert / table_update_cells by registration number and field name, with revision checks on writes. Creating an experiment note produces both the Markdown note and its embedded results table; the sidebar shows names only with type icons, and the table footer reports how many notes reference it. (#951 by @qychen2001)
+  - Inline Markdown source mode: Switch between the rendered view and an editable source view in the same panel with ⌘/ / Ctrl+/. Source saves the raw text and supports Markdown/GFM, frontmatter, tables, math, and fenced-code highlighting while reusing autosave, ⌘S, save-conflict, and external-change handling; switching back keeps the caret and viewport. The source view also has a toolbar for headings, quotes, lists, images, find, and export, plus Mod-B / Mod-I / Mod-U / Mod-Shift-X formatting shortcuts. (#964 by @ffy6511)
+  - Persistent full-text translation caches: Character-level IR and finished translated PDFs persist in two tiers, keyed by PDF/layout content, actual translations, fonts, and pipeline version. On restart the prepare stage drops from about 3.1 s to 0.13 s, and with PDF caching enabled the full build is reused as well (about 25 MB per paper). Both caches have separate switches under Settings → Translate (IR on by default, PDF off by default), and About shows usage with open-folder and clear actions. (#978 by @ffy6511)
+  - Native rendering for translated pages: After a full translation, translated pages are drawn by the same renderer as source pages at display size and DPR, so zoom re-renders instead of stretching a fixed preview; hiding and showing translations no longer regenerates pages or rebuilds the PDF. (#978 by @ffy6511)
+  - Papers with Code in the plaza: The plaza gains paperswithcode.co conference pages as a proxied source, with import actions on paper cards and the detail row. arXiv papers keep their arXiv id and reuse the existing PDF/TeX asset chain, external papers land as pwc-<catalog id>, and imports fill publication, code repository, citation count, and summary from the catalog by arXiv id. (commit / commit by @Phil-Fan)
+  - Paper sidebar links and Hugging Face: Paper info links now sit on two rows, the second adding a Hugging Face page derived from the arXiv id; the OpenReview link uses a red letter O mark. (commit / commit by @Phil-Fan)
+  Improvements
+  - Release details from updates: The update prompt, title bar, and Settings → About now link to the pending version's Release details, even when the manifest has no notes, while keeping the existing install entry. (#979 by @Aschenbath)
+  - Default translation and body parsing: New installs and legacy settings without a provider default to Tencent Transmart, and body parsing defaults to the local engine; an explicitly saved valid choice is preserved. (#967 / #963 by @Aschenbath)
+  - Dependency security patches: lodash and minimatch are upgraded, and vendored tesseract-rs / realtime-tex move zip and lopdf to fixed versions, clearing the related advisories. (commit / commit by @Phil-Fan)
+  Fixes
+  - Split panes overwriting notes: Markdown save ownership is now per panel. A clean sibling refreshes automatically; a dirty panel keeps its draft and blocks saving, with an explicit choice to keep the draft or load the disk copy, in both rendered and source modes. (#970 by @Aschenbath)
+  - Selection popover size: Translate and Ask popovers no longer scale with high PDF zoom; shared selection cards keep a fixed UI size and type, while screen anchoring, flipping, and viewport clamping stay the same. (#948 by @Ryan119911)
+  - Markdown toolbar flicker: Fixed a ResizeObserver feedback loop at certain pane widths that made buttons appear and disappear and pinned buttons jump; a collapsed or not-yet-laid-out pane also no longer hides every button. (commit by @Phil-Fan)
+  Resolved Issues
+  - Source-mode caret position: Switching between source and rendered views maps the caret to its exact character position instead of resetting to the start of the document. (#977 by @ffy6511)
+  - Source-mode gutter width: Line numbers now sit inside the centered source surface in a smaller monospace face and no longer overflow the editor's max width. (#966 by @ffy6511)
+  - Windows Zcode skill indexing: When Zcode serve mode ignores the ACP session cwd, skills are scanned from the process cwd, so Vault skills under .agents are indexed on Windows. (#936 by @JiaheChen2002)
+  Full diff: https://github.com/poco-ai/Agentero/compare/v0.15.1...v0.15.2
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.15.2
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: locale
+ManifestVersion: 1.28.0

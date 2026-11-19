@@ -1,0 +1,88 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: buxuku.SmartSub
+PackageVersion: 3.10.1
+PackageLocale: en-US
+Publisher: buxuku
+PublisherUrl: https://blog.linxiaodong.com/
+PublisherSupportUrl: https://github.com/buxuku/SmartSub/issues
+Author: Lin Xiaodong
+PackageName: SmartSub
+PackageUrl: https://github.com/buxuku/SmartSub
+License: MIT
+LicenseUrl: https://github.com/buxuku/SmartSub/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Lin Xiaodong
+ShortDescription: A powerful desktop application for batch generating subtitles for videos and translating them into other languages.
+Description: |-
+  Video Subtitle Master is a powerful desktop application for batch generating subtitles for videos and translating them into other languages. This project is an enhanced version of the open-source VideoSubtitleGenerator, redesigned as a user-friendly client tool.
+  This application retains all the features of the original VideoSubtitleGenerator command-line tool, with the following enhancements:
+  - Graphical user interface for easier operation
+  - Source and target language subtitle files are saved in the same directory as the video for convenient subtitle attachment during playback
+  - Batch processing of video/audio/subtitle files
+  - Support for generating subtitles from video or audio files
+  - Ability to translate generated or imported subtitles
+  - Multiple translation services supported:
+    - Volcano Engine Translation
+    - Baidu Translation
+    - DeepLX Translation (Note: Batch translation may be rate-limited)
+    - Local Ollama model translation
+    - Support for OpenAI-style API translations (e.g., deepseek, azure)
+  - Customizable subtitle file naming for compatibility with various media players
+  - Flexible translated subtitle content: choose between pure translation or original + translated subtitles
+  - Integrated whisper.cpp with optimization for Apple Silicon, offering faster generation speeds
+  - Built-in fluent-ffmpeg, eliminating the need for separate ffmpeg installation
+  - Support for running locally installed whisper command
+  - Option to choose model download source (domestic mirror or official source)
+  - Customizable number of concurrent tasks
+Tags:
+- audio
+- caption
+- subtitle
+- translate
+- translation
+- video
+ReleaseNotes: |-
+  v3.10.1 崩溃诊断与稳定性加固，免费翻译更快更稳
+  feat
+  - 免费翻译提速：新增有道免费翻译源，并作为「自动免费翻译」的默认首选；谷歌免费翻译新增整批通道，被限流时自动退回逐条翻译（均为非官方接口，不保证长期可用）
+    Faster free translation: add Youdao as a free source and the default first choice of Auto Free; Google gains a batch lane that falls back to line-by-line when rate limited (both are unofficial endpoints with no availability guarantee)
+  - 翻译任务支持按任务选择术语表，并可选「生成摘要」：翻译前先通读全文生成摘要并注入 AI 翻译，提升人名与上下文的一致性 (感谢 @MaurUppi #436)
+    Choose glossaries per task, and optionally generate a summary before translating to keep names and context consistent in AI translation (thanks @MaurUppi #436)
+  - 新增崩溃诊断：「关于」页可导出诊断包，异常退出后也会主动提示（仅本地生成，不会自动上传）；导致闪退的加速后端会被自动停用，可在「GPU 加速」设置中查看并重试
+    Add crash diagnostics: export a diagnostics bundle from About, also offered after an abnormal exit (created locally, never uploaded automatically); backends that cause crashes are disabled automatically and can be retried in GPU acceleration settings
+  - 新增 CPU / 显卡兼容检测：CPU 不支持内置引擎（如缺少 AVX2）时给出提示并指引下载「旧 CPU 兼容包」；算力不足的 CUDA 加速包自动跳过，避免闪退
+    Add CPU / GPU compatibility checks: warn when the CPU can't run the built-in engine (e.g. no AVX2) with a link to the legacy CPU pack, and skip CUDA packs the GPU is too old for to avoid crashes
+  - 校对数据改存到应用数据目录，不再在视频旁生成 .smartsub-proofread 文件夹，并随任务一起清理（已有数据照常可用）
+    Proofread data now lives in the app data folder instead of a .smartsub-proofread folder beside the video, and is cleaned up with its task (existing data keeps working)
+  perf
+  - 内置引擎在 Metal / CoreML / CUDA 上启用 Flash Attention，转录更快
+    Enable Flash Attention for the built-in engine on Metal, CoreML and CUDA for faster transcription
+  - faster-whisper 语音复核在超长录音上明显提速，进度不再长时间停滞
+    Speed up faster-whisper speech review on very long recordings, with progress no longer stalling
+  - 任务列表界面优化：按状态着色描边，运行中各列保持对齐，拖入文件不再抖动，移除单个文件可撤销
+    Refine the task list: state-tinted outlines, stable alignment while running, no jitter when dragging files in, and undo when removing a single file
+  - 安装包体积缩小约 14%–18%：移除未被使用的依赖、重复拷贝与调试用的 source map，功能不受影响
+    Smaller installers (about 14–18% smaller): drop unused dependencies, duplicated copies and debug source maps, with no change in functionality
+  fix
+  - 修复 Windows 用户名或路径含中文等非 ASCII 字符时，内置引擎转录得到空字幕、语音检测/降噪/声音克隆失败的问题
+    Fix empty transcripts and failing voice detection, denoising and voice cloning on Windows when the user name or path contains non-ASCII characters
+  - 修复偶发的「write EPIPE」报错弹窗，以及 Windows 合成预览中鼠标移出后视频区域变黑的问题
+    Fix the occasional "write EPIPE" error dialog, and the video area turning black in the Windows compose preview after the pointer leaves it
+  - 修复烧录硬字幕时 ffmpeg 报「Conversion failed」：WebM 来源默认输出 MP4，兼容内嵌封面与奇数分辨率视频，失败时显示真实原因 (#521)
+    Fix "Conversion failed" when burning hard subtitles: WebM sources default to MP4, embedded cover art and odd-sized videos are handled, and the real failure reason is shown (#521)
+  - 提升 AI 断句通过率：容忍复述时的细微偏差、保留最佳结果、请求不再长时间卡住，失败时给出准确原因 (#507)
+    Improve AI segmentation success: tolerate small copy drift, keep the best answer, no more long-stalled requests, and report accurate failure reasons (#507)
+  - 修复校对台两个问题：含零时长字幕的校对数据无法打开（已有数据自动修复）；播放器字幕预览缺失或编辑后不更新 (#511 #505 #520)
+    Fix two proofread issues: data with zero-length cues failed to open (existing data is repaired automatically), and the player subtitle preview was missing or not following edits (#511 #505 #520)
+  - 修复替换同路径视频后仍沿用旧音频转录的问题 (#510)
+    Fix a replaced video at the same path being transcribed from stale cached audio (#510)
+  - 修复双语字幕配音时两种语言都被朗读的问题，现只朗读译文，导出字幕仍保留双语 (#537)
+    Fix dubbing reading both languages of a bilingual subtitle: only the translation is spoken now, and the exported subtitle stays bilingual (#537)
+  - 修复 faster-whisper 模型路径指向共享的 HuggingFace 缓存时，目录被擅自移动导致其他软件无法加载的问题；删除模型时会列出将删除的目录 (#519)
+    Fix faster-whisper moving folders in a shared HuggingFace cache (breaking other tools); deleting a model now lists the folders to be removed (#519)
+  - 修复新建任务不再沿用上次所用配置的问题
+    Fix new tasks no longer starting from the last used settings
+ReleaseNotesUrl: https://github.com/buxuku/SmartSub/releases/tag/v3.10.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

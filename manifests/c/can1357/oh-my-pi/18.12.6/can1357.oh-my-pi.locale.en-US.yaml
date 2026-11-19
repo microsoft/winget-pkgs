@@ -1,0 +1,83 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: can1357.oh-my-pi
+PackageVersion: 18.12.6
+PackageLocale: en-US
+Publisher: Can Bölük
+PublisherUrl: https://can.ac/
+PublisherSupportUrl: https://github.com/can1357/oh-my-pi/issues
+Author: Can Bölük
+PackageName: oh-my-pi
+PackageUrl: https://omp.sh/
+License: MIT
+LicenseUrl: https://github.com/can1357/oh-my-pi/blob/HEAD/LICENSE
+Copyright: |-
+  Copyright (c) 2025 Mario Zechner
+  Copyright (c) 2025-2026 Can Bölük
+ShortDescription: ⌥ AI Coding agent for the terminal — hash-anchored edits, optimized tool harness, LSP, Python, browser, subagents, and more
+Description: |-
+  omp is a terminal-first coding agent that runs on your machine, talks to any provider, and treats sessions like git branches.
+  omp (pronounced “oh-em-pi”, binary omp) is a fork of Mario Zechner’s Pi. It runs as a single Bun process, drives any model provider you have credentials for, and ships a flat tool surface the model uses to read code, run commands, edit files, drive a debugger, and spawn subagents that coordinate over an in-process IRC bus.
+  Sessions persist as JSONL under ~/.omp/agent/sessions/. You resume, fork, branch, and share them. Settings, credentials, plugins, and caches all live under ~/.omp/agent/. Nothing leaves the machine unless you call a tool that does.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  @oh-my-pi/pi-catalog
+  Added
+  - Added the prompt-cache-persistent catalog axis (isPromptCachePersistent) for providers whose own endpoint never expires prompt caches; logged-in OpenAI Codex declares it
+  Changed
+  - Updated the bundled Yolo-Auto catalog to its current models, qwen3.8-27b (now the default), yolo, yolo-small, and yolo-128k, and removed the retired deepseek-flash-v4 and qwen3.8-flash
+  @oh-my-pi/pi-coding-agent
+  Added
+  - Added the _session/steering ACP extension (advertised as _meta.steering.supported), so clients such as agent-shell can steer a running turn; a steer sent while a permission dialog is open cancels that dialog, and _meta.steering.queue: "followUp" queues a follow-up instead (#15885 by @marcintustin)
+  - /mcp reauth <name> now works over ACP, RPC, and print mode (omp -p '/mcp reauth <name>'): it opens the browser, prints the authorization URL, reconnects the server in the running session, and print mode exits 1 when reauthorization fails (#16046 by @marcintustin)
+  Changed
+  - ACP session/cancel now also cancels prompts that are queued or still dispatching, and stops autonomous runs, instead of being ignored when no client turn is streaming (#15885 by @marcintustin)
+  - Idle compaction no longer runs on logged-in OpenAI Codex accounts, whose prompt cache never expires; compacting while idle only threw away a warm cache
+  - ACP sessions no longer fail to start when a client-declared MCP server cannot connect; the failure is reported in the session, and an HTTP/SSE server can be repaired with /mcp reauth (#16046 by @marcintustin)
+  - /mcp reauth, /mcp test, and /mcp unauth now pick the project entry when a server is defined in both project and user config, and skip project config when mcp.enableProjectConfig is off (#16046 by @marcintustin)
+  - /mcp reauth removes the server's stale Authorization header from its config when it writes the new OAuth binding (#16046 by @marcintustin)
+  - omp -p '/compact', /handoff, and /retry given as CLI arguments now run the command instead of sending the text to the model, and exit 1 when the command fails; slash text arriving on stdin or from @file is still sent to the model (#16387 by @marcintustin)
+  - Interactive startup no longer waits for extensions that register only tools, commands, flags, renderers, or event hooks (for example MCP bridge plugins): they load once the composer accepts input, and your first message waits for them instead. An extension is deferred only after one launch has confirmed it registers no providers, shortcuts, composer shapes, or file fallbacks. Launches that resume a session, pass --tools, or pass flags omp does not recognize still load every extension first (#16684 by @H4vC)
+  Fixed
+  - Fixed subagents whose role has an explicitly empty fallback chain falling back through the default chain when the default role uses the same model, including after a retry fallback, prewalk or context promotion briefly switched models or the subagent was revived (#16548 by @eggpeat)
+  - Fixed /usage and omp usage --json listing identity-less OAuth accounts such as Devin as missing usage beside their working reports (#16549 by @eggpeat)
+  - Fixed releasing or reaping a browser tab returning while Chromium still listed the page; the close now waits until Chromium reports the tab destroyed (#16680 by @H4vC)
+  - Fixed the advisor prompt forbidding all repeated advice, including real escalations: advisors may now re-raise a prior nit or concern as a blocker once new evidence makes it one (#13887, #16484 by @pjh890321)
+  - Fixed Esc no longer interrupting in the TUI after a second MCP OAuth login replaced an unfinished first one (#16046 by @marcintustin)
+  @oh-my-pi/pi-tui
+  Changed
+  - In Tern, centered sheets (/context, reports, keyboard shortcuts, BTW history, session info, the pause screen) fill the pane when it is narrower than 100 columns instead of floating with margins (#16676 by @H4vC)
+  Fixed
+  - Fixed the /agents and /models hubs in Tern squeezing the left sidebar as long lines (such as a streaming new-agent draft) widen the body pane
+  @oh-my-pi/pi-utils
+  Added
+  - Added RpcConnection.requestCancellable() and Client.requestPermission(params, { signal }); client connections abort a handler and answer -32800 when the peer sends $/cancel_request, while agent connections keep running the request and return its real result (#15885 by @marcintustin)
+  What's Changed
+  - fix(coding-agent): clarify blocker escalation in advisor prompt by @pjh890321 in https://github.com/can1357/oh-my-pi/pull/16484
+  - feat(coding-agent): support ACP _session/steering for mid-turn client steering by @marcintustin in https://github.com/can1357/oh-my-pi/pull/15885
+  - feat(acp): support /mcp reauth outside the TUI by @marcintustin in https://github.com/can1357/oh-my-pi/pull/16046
+  - feat(tui): fill narrow Tern panes with centered sheets and pickers by @H4vC in https://github.com/can1357/oh-my-pi/pull/16676
+  - fix(coding-agent): confirm browser tab close and repair red CI tests by @H4vC in https://github.com/can1357/oh-my-pi/pull/16680
+  - perf(coding-agent): load startup-safe extensions after the composer accepts input by @H4vC in https://github.com/can1357/oh-my-pi/pull/16684
+  - fix(coding-agent): keep explicitly empty subagent fallback chains empty by @eggpeat in https://github.com/can1357/oh-my-pi/pull/16548
+  - fix(coding-agent): stop listing identity-less OAuth accounts as missing usage by @eggpeat in https://github.com/can1357/oh-my-pi/pull/16549
+  New Contributors
+  - @pjh890321 made their first contribution in https://github.com/can1357/oh-my-pi/pull/16484
+  - @marcintustin made their first contribution in https://github.com/can1357/oh-my-pi/pull/15885
+  Full Changelog: https://github.com/can1357/oh-my-pi/compare/v18.12.5...v18.12.6
+ReleaseNotesUrl: https://github.com/can1357/oh-my-pi/releases/tag/v18.12.6
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://omp.sh/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

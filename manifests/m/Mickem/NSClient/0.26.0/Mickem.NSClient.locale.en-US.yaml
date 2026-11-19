@@ -1,0 +1,72 @@
+# Created using wingetcreate 1.12.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Mickem.NSClient
+PackageVersion: 0.26.0
+PackageLocale: en-US
+Publisher: MySolutions NORDIC
+PublisherUrl: https://nsclient.org/
+PublisherSupportUrl: https://github.com/mickem/nscp/issues
+Author: Michael Medin
+PackageName: NSClient++
+PackageUrl: https://nsclient.org/
+License: Apache-2.0 OR GPL-2.0-only
+LicenseUrl: https://github.com/mickem/nscp/blob/main/COPYING
+Copyright: Copyright (c) Michael Medin
+ShortDescription: A simple, secure and powerful monitoring agent for Windows.
+Description: |-
+  NSClient++ (a.k.a. NSCP) is a free and open-source monitoring agent originally
+  built for Nagios/Icinga and now usable with most modern monitoring systems.
+  It exposes a wide range of system, performance and event-log checks via NRPE,
+  NSCA, NRDP, REST and Prometheus-compatible endpoints, and can run external
+  scripts in PowerShell, Python, Lua, Visual Basic and many more languages.
+Moniker: nscp
+Tags:
+- nagios
+- icinga
+- naemon
+- monitoring
+- nrpe
+- nsca
+- nrdp
+- prometheus
+- agent
+- sysadmin
+ReleaseNotes: |-
+  # Nagios NCPA support, a check that finds what is filling a disk, and scripts that run from the fleet tree
+
+  0.26.0 adds two experimental pieces: an `NCPAServer` module that lets Nagios' `check_ncpa.py` poll NSClient++, and `check_largest_files`, which ranks the files or folders filling a disk and reads the NTFS Master File Table on Windows. A new `script root` setting lets every script module run its scripts from the fleet tree. The WEB server now uses its `threads` pool, keeps connections alive and no longer falls back to cleartext when its certificate does not load. Missing predefined performance counters are retried until they exist, and a fleet install stops writing local configuration.
+
+  ## ✨ Highlights
+
+  - 📡 **NCPAServer: poll NSClient++ with `check_ncpa.py`.** A new, experimental module serves the Nagios NCPA HTTP API on port 5693, token-authenticated and limited by `allowed hosts`. This release serves the `plugins/` node, which runs any check, alias or script (#1633).
+  - 💾 **`check_largest_files` finds what is filling a disk.** It lists the `top` largest files (or, with `type=folders`, folders) beneath a path. On Windows it reads the NTFS Master File Table, which takes seconds where walking a large volume takes minutes (#1692).
+  - 🛰️ **`script root` runs scripts from the fleet tree.** External, Lua, Python and check_mk scripts can all load from `${fleet-folder}/scripts`, a shared folder or one of your own, so a fleet bundle can ship its scripts (#1673, #1684).
+  - ⏱️ **The WEB server serves requests in parallel and keeps connections alive.** `threads` (default 10) finally sizes a real pool, so one slow REST check no longer holds up the web UI. Connections are reused, and the request body cap is now the `max request size` setting (#1653, #1678).
+  - 🔒 **No cleartext fallback when the web certificate does not load.** An unreadable or mismatched certificate or key stops the WEB server with a reason. It no longer serves plain HTTP on 8443 or fails every handshake (#1633).
+  - 📊 **Late performance counters are picked up.** One predefined counter that was not registered yet used to break every predefined counter until a restart. Each one is now retried on its own until it appears (#634, #1656).
+  - 🛰️ **A fleet install writes no local configuration.** An MSI install with `FLEET_SERVER` only adds the fleet include, so the fleet server's settings are no longer overridden by installer defaults (#1688).
+
+  ## ⚠️ Upgrade notes
+
+  The full list is on the [upgrading page](https://nsclient.org/docs/setup/upgrading/), and the security fixes are on the
+  [security notices page](https://nsclient.org/docs/security/notices/).
+
+  - **WEB server certificate.** If the configured certificate or key does not load, the WEB server no longer starts. Check the log after upgrading and fix the file, or deliberately opt into cleartext.
+  - **Fleet installs.** Configuration passed to an MSI install alongside `FLEET_SERVER` is now ignored. Move those values to the fleet server, and have it enable the modules it needs. Hosts that are already enrolled keep their `nsclient.ini`.
+  - **Hand-rolled Windows deployments** that copy the DLLs next to `nscp.exe` must add `boost_json.dll`.
+  - **`check_process` `pagefile` / `peak_pagefile`.** Thresholds written against the swapped values should switch keywords. Graphs of `pf_use` / `ppf_use` flip at the upgrade.
+  - **Linux and macOS external scripts** now always start in the folder above the scripts folder. The systemd unit already did this. Agents started by hand or as a container entrypoint may see a different working directory.
+  - **Log-matching rules.** A missing performance counter now logs `Failed to add counter <name> (<path>): ...` instead of `Exception in Failed to add counter`. A predefined counter read in the first seconds after startup answers `Failed to get value` instead of `0`.
+
+  **Full Changelog**: https://github.com/mickem/nscp/compare/0.25.0...0.26.0
+ReleaseNotesUrl: https://github.com/mickem/nscp/releases/tag/0.26.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://nsclient.org/docs/
+- DocumentLabel: Upgrading
+  DocumentUrl: https://nsclient.org/docs/setup/upgrading/
+- DocumentLabel: Security notices
+  DocumentUrl: https://nsclient.org/docs/security/notices/
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
