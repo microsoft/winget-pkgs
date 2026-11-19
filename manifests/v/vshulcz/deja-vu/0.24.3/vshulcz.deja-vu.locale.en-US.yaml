@@ -1,0 +1,93 @@
+# Created with deja-vu release workflow using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: vshulcz.deja-vu
+PackageVersion: 0.24.3
+PackageLocale: en-US
+Publisher: vshulcz
+PublisherUrl: https://github.com/vshulcz
+PublisherSupportUrl: https://github.com/vshulcz/deja-vu/issues
+PrivacyUrl: https://vshulcz.github.io/deja-vu/guide/privacy.html
+PackageName: deja-vu
+PackageUrl: https://vshulcz.github.io/deja-vu/
+License: MIT
+LicenseUrl: https://github.com/vshulcz/deja-vu/blob/HEAD/LICENSE
+ShortDescription: Search Claude Code, Codex and Cursor session history locally
+Tags:
+- aider
+- claude-code
+- cli
+- codex
+- cursor
+- mcp
+- memory
+ReleaseNotes: |-
+  Six new agent readers (clawcode, codearts, mimo, omnigent, orca, and
+  qoder, bringing deja to 49 harnesses), cross-harness extraction and audit
+  parity, deja audit --secrets raw credential scanning, deja stats --no-index,
+  and bounded-memory indexing across split batches and remineFixes.
+  Added
+  - Six new agent readers bring deja to 49 harnesses (#6028, #6046, #6051, #6059, #6060). Adds Claw Code (clawcode, installer hooks, claw --resume), Qoder CLI (qoder), CodeArts Desktop (codearts), MiMo-Code (mimo), Omnigent (omnigent), Orca (orca), and Zoo Code task discovery under Roo roots.
+  - deja audit --secrets and --fail-on-secrets scan raw stores for unredacted credentials without indexing (#6087). Also indexes Claude auto-memory notes and tracks all 49 registry stores (#6058, #6091).
+  - deja stats --no-index scans local agent stores with zero index writes (#6055).
+  - Standalone Orca (extensions/orca) and CodeWhale (extensions/codewhale) plugins, a deja-handoff skill, root Qwen/Codex/Skill manifests, a release .mcpb registry manifest, and an unscoped deja-vu npm wrapper (#6057, #6059, #6076, #6079, #6086).
+  - PreToolUse and PostToolUse catch post-edit signature changes, moved files, PostToolUseFailure events, and Antigravity tool failures (#6053, #6059).
+  - PromptPicker and multi-session recall ranking improve search across related sessions (#6088).
+  - 49-harness parity across all 12 README locales, agent memory config guides, llms-full.txt, and session-deletion guides for DeepSeek Harness and Devin (#6021, #6024, #6059, #6065, #6075).
+  Changed
+  - Non-Claude harnesses share Claude's worktree and scratch-path normalization (/.worktrees/, /.claude/worktrees/, /.projects/, /.jobs/), inline command/exit/edited-file extraction, and transcript fallback project resolution (#6091).
+  - Cold code guards decouple from hot-path hook execution, and MCP / OpenCode recall cuts query latency (#6051, #6062).
+  Fixed
+  - Incremental indexing holds deferred tail sessions across split sub-batches (withoutDeferred), splits batches with new files when no session crosses the midpoint, streams remineFixes one session at a time, and flushes each postings bucket during compaction before reading the next (#6078, #6089, #6090, #6091).
+  - MCP recall triggers proactively, excludes unstamped asking sessions, and deja doctor handles dead launchers and keeps live_rules.jsonl group-writable in shared indexes (#6045, #6056, #6067).
+  - Hooks scope the .hookseen lock to the current commit, add a source-hints opt-out, guard non-repo roots with edit/traceback recovery, dedupe anonymous tool calls, and measure Antigravity compactions (#6049, #6054, #6085).
+  - DefaultDir honors absolute XDG_CACHE_HOME, Windows Devin reads sessions.db from APPDATA, deja rules sync updates Hermes profile SOUL.md files, and day0bench deduplicates identical sessions across haystacks (#6050, #6064, #6083, #6084).
+  - OpenCode, Kilo CLI, and MiMo-Code TUI status plugins fit whole segments to the remaining footer width, yield when the session sidebar is open, and stay clear of built-in MCP, plugin, and shortcut hints (#6092).
+  Changelog
+  Features
+  - feat(audit): scan raw transcripts for credentials without building an index (#6087)
+  - feat(claude,audit): index auto-memory notes and speed up store audit (#6058)
+  - feat(hook): catch post-edit sig changes, moved files, and agy failures (#6053)
+  - feat(hooks,search): decouple cold code guards and improve recall/localization (#6062)
+  - feat(mcp): add registry manifest for release mcpb bundle (#6076)
+  - feat(search): extract PromptPicker and improve multi-session recall (#6088)
+  - feat(skills): add deja-handoff skill and scope standalone deja-search (#6086)
+  - feat(sources): discover Zoo Code tasks under RooRoots (#6046)
+  - feat(sources): read CodeArts Desktop sessions (#6060) (@takomitkm)
+  - feat(sources): read Qoder CLI transcripts as their own harness (#6028) (@gxgeek-n)
+  - feat(stats): add --no-index for zero-write store scans (#6055)
+  - feat: add MiMo-Code, Omnigent, Orca stores and fix OpenCode/MCP latency (#6051)
+  - feat: add clawcode source, orca and codewhale extensions, and harness guides (#6059)
+  - feat: add root Qwen/Codex/Skill manifests and pin magpie npm dependency (#6079)
+  - feat: bring non-Claude harnesses to parity and hold split-batch deferred tails (#6091)
+  Fixes
+  - fix(day0bench): deduplicate identical sessions across haystacks (#6048) (#6050)
+  - fix(devin): read Windows sessions.db from APPDATA (#5653) (#6083) (@Sombolm)
+  - fix(doctor): keep live_rules.jsonl group-writable in shared index (#6067) (@beiryu)
+  - fix(hook): dedupe anonymous tool calls and measure antigravity compactions (#6049)
+  - fix(hook): guard non-repo roots and add edit/traceback recovery (#6054)
+  - fix(hooks): scope hookseen lock to commit and add source-hints opt-out (#6085)
+  - fix(index): a compacting pass writes each postings bucket before reading the next (#6072) (#6078) (@Sora-bluesky)
+  - fix(index): honor absolute XDG_CACHE_HOME in DefaultDir (#6080) (#6084)
+  - fix(index): mine one session at a time in remineFixes (#6090)
+  - fix(index): split a batch with new files when no session crosses the halves (#6077) (#6089) (@Sora-bluesky)
+  - fix(mcp): exclude unstamped asking session from recall (#6045)
+  - fix(mcp,doctor): trigger proactive recall and handle dead launchers (#6056)
+  - fix(opencode): fit TUI statusline to footer width and prepare 0.24.3 release (#6092)
+  - fix(rules): sync Hermes profile SOUL.md files (#6064) (@beiryu)
+  Documentation
+  - docs(guide): add agent memory config guides and llms-full reference (#6075)
+  - docs(guide): add delete-devin-session-history guide page (#6024) (@beiryu)
+  - docs: add guide for deleting DeepSeek Harness session history (#6021) (@beiryu)
+  - docs: bring all 12 locales, guides, and extension docs to 48-harness parity (#6065)
+  Other
+  - build(npm): publish unscoped deja-vu wrapper and sync agent count (#6057)
+  - chore: pin the manifests to 0.24.2 (#6043)
+  - ci(workflows): sequence macos e2e after test shards and auto-close main-red (#6069)
+  Install
+  curl -fsSL https://raw.githubusercontent.com/vshulcz/deja-vu/main/install.sh | sh
+  go install github.com/vshulcz/deja-vu/cmd/deja@v0.24.3
+  brew install deja-vu
+ReleaseNotesUrl: https://github.com/vshulcz/deja-vu/releases/tag/v0.24.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
