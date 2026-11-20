@@ -1,0 +1,90 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: TaoufikJabbari.Tiger
+PackageVersion: 0.9.0
+PackageLocale: en-US
+Publisher: Taoufik Jabbari
+PublisherUrl: https://github.com/jtaoufik
+PublisherSupportUrl: https://github.com/jtaoufik/tiger/issues
+PackageName: Tiger
+PackageUrl: https://jtaoufik.github.io/tiger/
+License: MIT
+LicenseUrl: https://github.com/jtaoufik/tiger/blob/main/LICENSE
+ShortDescription: Free, open source, git-native API client. A local-first Postman alternative with a built-in MCP server.
+Description: Tiger is an open source API client where every request is a plain text .tiger file stored in Git, so teams review API changes in pull requests. It works fully offline with no account, supports REST, SOAP and GraphQL, OAuth 2.0, client certificates, proxies, request chaining, pre/post-request scripts with assertions, environments with secrets, a collection runner and a performance runner, and imports Postman, Insomnia, Bruno, OpenAPI and curl. It also ships a Model Context Protocol (MCP) server so AI assistants can run requests from a collection.
+Moniker: tiger
+Tags:
+- api
+- api-client
+- developer-tools
+- graphql
+- http
+- mcp
+- postman
+- rest
+ReleaseNotes: |-
+  ## What's new
+
+  • Tiger stays up. An error in the main process is written to logs/main.log in the profile folder instead of appearing as a "JavaScript error" dialog over the window. A window whose renderer dies (out of memory on a huge response, a graphics fault) is reloaded in place; one that stops answering offers Wait or Reload. A thrown render shows the message and a Reload button instead of a blank window. Every action that used to fail silently (open, new, duplicate, rename, import from curl, history, update check, saving a request or an environment) reports what went wrong.
+  • No edit is lost. A git sync or discard keeps requests with unsaved edits in memory and says how many; closing a collection with unsaved edits says how many go with it; a failed save leaves the request marked unsaved. settings.json, history.json, cookies.json and every saved .tiger file are written whole or not at all, so a crash mid-write never leaves a truncated file. Collections whose folder is not there at launch (an unmounted drive) stay in the saved session for three launches, with a note, before Tiger forgets them and says so.
+  • Git never touches a parent repository. A collection folder inside a larger repository used to make Commit, Sync and Discard act on that whole repository; Tiger now refuses and says why. Branch names are validated, so a name git would read as an option can no longer discard the working tree. Large diffs and thousands of untracked files no longer come back truncated as a failure, and no git command can wait on an editor or an ssh prompt nobody can see.
+  • Sending is safer. Responses are capped at 100 MB (a larger download or a compressed body that decodes past it is refused with a message instead of taking Tiger down), the timeout is clamped to a usable range, a missing multipart file clears its cancel key, and an OAuth token endpoint that never answers times out after 30 s. One damaged cookie entry no longer fails every send.
+  • Imports with nested folders work in every format and from any entry path. A Bruno collection nested inside a dropped or picked folder is read whole (each request used to become a folder named after its file), picking a parent folder finds the collection in it, two imported files with the same name keep their requests apart, and one unreadable sub-folder no longer aborts the import or makes a collection unopenable. Postman folder variables are reported, path segments given as objects and numeric names import, and a raw body without a language is typed from its Content-Type or its content instead of going out as text/plain. Bruno file rows keep their content type and asserts against {{variables}} compare the resolved value. OpenAPI 3.1 nullable types and trace operations are handled, and a WSDL import of a non-XML file says so.
+  • Saved collections reopen in the order the source tool showed：every folder records its position, a root request named like a folder no longer renames the folder, a nested folder named "environments" is a plain folder (the MCP server agrees), and editing a folder's auth or notes keeps its position and display name. Folders show the name they were given: a folder imported as "Store: front?" is saved as "Store- front-" because Windows refuses those characters, and the sidebar, the folder page, its tab and search now use the given name; renaming in Tiger keeps that record right.
+  • The .tiger format keeps every value. A name, URL or credential with spaces at either end or a line break used to come back trimmed or make the file unreadable; a header or query name holding a colon round-trips; an empty body keeps its type. Scripts assert like Chai：an unknown word such as .truthy fails instead of passing silently, keys() is exact, equal is strict, deep equality covers Date, Map, Set and arrays, and property(), length, nested, own, string, closeTo, satisfy and throw work as in Postman.
+  • Exports and snippets：the Postman export keeps multiline form values, the OpenAPI export keeps requests that share a path and method and writes valid path templates, the Python snippet quotes the URL, and multipart part names cannot inject headers.
+  • A coherent look on Linux, macOS and Windows：shared font stacks (Segoe UI, Ubuntu, Cantarell, Noto Sans; Cascadia and DejaVu Sans Mono), weights that no longer render bold on Windows and Ubuntu, one line-height, one styled scrollbar, a solid fallback where the glass effect is unavailable, no light first frame for dark-theme users, and the macOS traffic lights centred on the title row. Dialog and tool text scales with the Arabic and Hindi upscaling. The timing tooltip can be reached and dismissed with Escape, error text can be copied, danger buttons show hover, the thicker focus ring for prefers-contrast applies everywhere, the resizer has a 24 px hit box, and progress and scrollbar indicators reach 3:1.
+  • Settings numbers commit when you leave the field (typing 5000 no longer sets a 5 ms timeout), 0 redirects is allowed, a load test stops its in-flight sends on Stop and on leaving the tab, closing the runner mid-run cancels it, a revealed secret stays on its row when another row is removed, and the git diff view is capped with a Show all button.
+  • Website, README and the scoop and winget manifests state the released version, checked in CI.
+  • Tiger runs on Electron 45 (Chromium 156, Node 24) instead of the end-of-life Electron 34, with the build and test tooling (Vite 8, Vitest 5, electron-builder 26, TypeScript 6) and every library brought current; the shipped app has no known dependency advisories left. A manual run of the Release workflow keeps its installers as downloadable artifacts, so a branch can be tried before a release.
+
+  ## Which file do I download?
+
+  | Platform | File | Notes |
+  |---|---|---|
+  | Windows | **Tiger-Setup-0.9.0-windows-x64.exe** | Recommended. Graphical installer, Start menu + desktop shortcut. |
+  | Windows (no install) | Tiger-Portable-0.9.0-windows-x64.exe | Single exe, no install, run from anywhere. |
+  | Windows (portable zip) | Tiger-Portable-0.9.0-windows-x64.zip | Portable (zip)：unzip and run Tiger.exe. |
+  | macOS (Apple Silicon) | Tiger-0.9.0-mac-arm64.dmg | M1 and later. |
+  | macOS (Intel) | Tiger-0.9.0-mac-x64.dmg | Intel Macs. |
+  | macOS (zip) | Tiger-0.9.0-mac-arm64.zip / Tiger-0.9.0-mac-x64.zip | Unzip and drag Tiger.app to Applications. |
+  | Linux | Tiger-0.9.0-linux-x64.AppImage | Portable, updates itself in the app. |
+  | Linux (Debian/Ubuntu) | Tiger-0.9.0-linux-amd64.deb | `sudo apt install ./Tiger-0.9.0-linux-amd64.deb` |
+  | Linux (tar.gz) | Tiger-0.9.0-linux-x64.tar.gz | tar.gz：extract and run ./tiger-api-client |
+
+  Stable links that always point at the latest release (no version number to update):
+  [Tiger-Setup-windows-x64.exe](https://github.com/jtaoufik/tiger/releases/latest/download/Tiger-Setup-windows-x64.exe) ·
+  [Tiger-Portable-windows-x64.exe](https://github.com/jtaoufik/tiger/releases/latest/download/Tiger-Portable-windows-x64.exe) ·
+  [Tiger-Portable-windows-x64.zip](https://github.com/jtaoufik/tiger/releases/latest/download/Tiger-Portable-windows-x64.zip) ·
+  [Tiger-mac-arm64.dmg](https://github.com/jtaoufik/tiger/releases/latest/download/Tiger-mac-arm64.dmg) ·
+  [Tiger-mac-x64.dmg](https://github.com/jtaoufik/tiger/releases/latest/download/Tiger-mac-x64.dmg) ·
+  [Tiger-mac-arm64.zip](https://github.com/jtaoufik/tiger/releases/latest/download/Tiger-mac-arm64.zip) ·
+  [Tiger-mac-x64.zip](https://github.com/jtaoufik/tiger/releases/latest/download/Tiger-mac-x64.zip) ·
+  [Tiger-linux-x64.AppImage](https://github.com/jtaoufik/tiger/releases/latest/download/Tiger-linux-x64.AppImage) ·
+  [Tiger-linux-amd64.deb](https://github.com/jtaoufik/tiger/releases/latest/download/Tiger-linux-amd64.deb) ·
+  [Tiger-linux-x64.tar.gz](https://github.com/jtaoufik/tiger/releases/latest/download/Tiger-linux-x64.tar.gz)
+
+  ## Updates
+
+  Tiger installed with the Windows Setup exe, the macOS dmg or zip, or the Linux AppImage
+  downloads new versions in the background and offers **Restart now** when one is ready
+  (or installs it the next time you quit). Turn this off in Settings > About.
+
+  The Windows portable exe and portable zip, the Linux .deb and the Linux tar.gz do not
+  update themselves：Help > Check for Updates links you to the new download instead.
+  Microsoft Store installs are updated by the Store.
+
+  ## Windows says "unknown publisher" / "Windows protected your PC"
+
+  If the Setup or portable exe is not yet code-signed for this release, SmartScreen shows a
+  blue "Windows protected your PC" screen the first time you run it. This is expected for an
+  unsigned exe from a small publisher, not a sign of a problem with the file. To continue:
+
+  1. Click **More info**.
+  2. Click **Run anyway**.
+
+  You can avoid the prompt entirely with winget install jtaoufik.Tiger (once the package is live on winget.run, see packaging/winget/manifests).
+ReleaseNotesUrl: https://github.com/jtaoufik/tiger/releases/tag/v0.9.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
