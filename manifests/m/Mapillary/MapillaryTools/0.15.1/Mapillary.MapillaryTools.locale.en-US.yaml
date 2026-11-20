@@ -1,0 +1,68 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Mapillary.MapillaryTools
+PackageVersion: 0.15.1
+PackageLocale: en-US
+Publisher: Mapillary
+PublisherUrl: https://www.mapillary.com/
+PublisherSupportUrl: https://github.com/mapillary/mapillary_tools/issues
+PrivacyUrl: https://www.mapillary.com/privacy
+Author: Meta Platforms Ireland Limited
+PackageName: Mapillary Tools
+PackageUrl: https://github.com/mapillary/mapillary_tools
+License: BSD-2-Clause
+LicenseUrl: https://github.com/mapillary/mapillary_tools/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026, mapillary
+ShortDescription: A command line tool that uploads geotagged images and videos to Mapillary.
+Tags:
+- map
+ReleaseNotes: |-
+  mapillary_tools v0.15.1
+  This release makes the duplicate check fast. upload and check_upload_history no longer read every file in full
+  to tell whether it was uploaded before. It also stops counting uploads that Mapillary did not finish as uploaded,
+  and lets authenticate save organization names. Files uploaded with an earlier version are uploaded again once if
+  given again: read Backward compatibility before upgrading.
+  Important changes
+  - Duplicates are found without reading files in full. upload and check_upload_history computed a checksum
+    of every image, video and zip file first, which could take minutes to an hour for a large drop from an SD card.
+    Now a file whose size no uploaded file had is taken as new without being read. Otherwise, a fingerprint of its
+    size and of 64 KiB from its start, middle and end is looked up. Both commands use the same rule, so upload
+    skips exactly the files that check_upload_history reports as uploaded (#957). The upload history is looked up
+    in an index kept beside it, so commands start quickly even with a large history (#958).
+  - Uploads that Mapillary did not finish are no longer counted as uploaded. When finish_upload answered
+    without a cluster ID, as it did for an organization the account is not a member of, upload reported the files
+    as uploaded, exited 0 and recorded them in the upload history, so later runs skipped them. Such an upload now
+    fails with exit code 17 and is not recorded (#955, #956).
+  New
+  - authenticate saves organization names:
+    authenticate --user_name PROFILE --organization_key ID --organization_name NAME. An existing profile is not
+    logged in again (#953).
+  - Progress before the upload starts: upload and check_upload_history show progress while they load the
+    description file and find the files, which could take seconds without output for 100,000 images (#952).
+  Fixes
+  - With a large upload chunk size, image uploads no longer allocate a buffer of the chunk size for every image
+    (#833, #954).
+  - Videos and zip files are recognized as uploaded after being renamed, and a sequence is skipped when all its
+    images were uploaded before, also as part of another sequence (#957).
+  Backward compatibility
+
+  | Change                                                                                                                                                                                                                                                                                                             | What to do                                                                                                                    |
+  | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+  | The upload history now records the size and fingerprint of each file. Records written by 0.15.0 and earlier are not read, so upload and check_upload_history don't recognize files uploaded with those versions, and upload uploads them again if given again. Earlier versions don't read the new records either. | Leave out folders already uploaded with an earlier version, or accept one more upload of them; after it, they are recognized. |
+  | A sequence with any new image is still uploaded whole. A sequence uploaded as a folder is no longer recognized when uploaded as a zip file, and the other way round.                                                                                                                                               | None.                                                                                                                         |
+  | A file of the same size as an uploaded file that differs from it only outside the three sampled blocks is taken as uploaded. Captures from cameras don't differ that way.                                                                                                                                          | Upload such a file with --reupload.                                                                                           |
+  | An upload that finish_upload answers without a cluster ID fails with exit code 17 (HTTPContentError) instead of exiting 0.                                                                                                                                                                                         | Check that the account is a member of the organization given.                                                                 |
+  | check_upload_history keeps its JSON fields, but sequence_md5sum is always empty. It now writes the index in the upload history folder, and nothing else.                                                                                                                                                           | Tools that read its output should not use sequence_md5sum.                                                                    |
+  | In upload progress events (IPC), sequence_md5sum of image sequences and videos is a key of the file paths, the same in every run, not a checksum of the files. Zip files still send their checksum.                                                                                                                | Use it as a key only.                                                                                                         |
+  | --organization no longer abbreviates --organization_name in authenticate (it is ambiguous with --organization_key).                                                                                                                                                                                                | Spell out --organization_name.                                                                                                |
+
+  No command-line option was removed. Unchanged: exit code values, the config file, and the session keys used to
+  resume uploads.
+  Known issues
+  The known issues of v0.15.0
+  still apply.
+  Full Changelog: https://github.com/mapillary/mapillary_tools/compare/v0.15.0...v0.15.1
+ReleaseNotesUrl: https://github.com/mapillary/mapillary_tools/releases/tag/v0.15.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
