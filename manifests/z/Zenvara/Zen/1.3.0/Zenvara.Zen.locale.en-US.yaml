@@ -1,0 +1,79 @@
+# Created with komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Zenvara.Zen
+PackageVersion: 1.3.0
+PackageLocale: en-US
+Publisher: Zenvara
+PublisherUrl: https://zenvara.ai/
+PublisherSupportUrl: https://github.com/zenvara-platform/cli/issues
+PackageName: Zenvara CLI
+PackageUrl: https://github.com/zenvara-platform/cli
+License: Proprietary
+LicenseUrl: https://github.com/zenvara-platform/cli/blob/main/LICENSE.md
+Copyright: (c) Zenvara. All rights reserved.
+ShortDescription: Lightweight cross-platform CLI for Zenvara — one native binary to install, run, and operate Zenvara.
+Description: |-
+  zen is the cross-platform command-line tool for Zenvara. It manages the full lifecycle of a
+  Zenvara deployment (install, service/IIS hosting, updates, rollbacks) and transparently forwards
+  flow commands to a local installation or a remote server. It also registers the MCP bridge that
+  connects Claude Code, Gemini, and OpenCode to a running Zenvara. Ships as a single self-contained
+  native executable with no runtime dependencies.
+Tags:
+- cli
+- deployment
+- devops
+- mcp
+- zenvara
+ReleaseNotes: |-
+  zen is the Zenvara command-line interface — a single self-contained native binary (NativeAOT, no .NET runtime required) for installing, operating, and talking to a Zenvara instance.
+  This release adds scripting doors for chat and seat usage, a post-install zen diagnostics check,
+  and a safer zen app update. It continues the Windows install-safety work of 1.2.0. Read the
+  behaviour changes before upgrading — some of them turn something that used to succeed silently
+  into a refusal.
+  - zen seat usage --binding <env/binding> prints the seat-usage envelope of an AI-agent binding,
+    unchanged (read-connector-action, zenvara/ai-agent, action=usage). It computes no capacity
+    and duplicates no quota logic; the caller judges.
+  - zen chat post | wait | room create | room messages | room delete — fixed scripting doors onto
+    the server's chat tools. Message content is read from --content-file, never argv. wait accepts
+    1..240 seconds.
+  - zen entity fields <type> <id> [--using <connector>] reads a body-less entity (a persisted
+    value, a connector row) and prints the complete operation envelope.
+    zen entity create <type> --using <provider/name> --data <json> creates a connector entity.
+  - zen diagnostics with no subcommand runs named post-install checks (health, extensions,
+    ownership, boot-errors, optional --public-url, opt-in --restart) and exits 0 / 1 / 2 / 6 so
+    a CI step or an RMM script can act on the result.
+  - zen app update --dry-run downloads and verifies the release and prints what would be
+    replaced or removed, changing nothing. --prune removes entries an earlier release installed
+    that this one no longer carries.
+  - zen service install --force --dir <new> can now repoint an existing Windows or systemd
+    service at an application directory you have already moved, after verifying it is the same
+    installation.
+  - zen app update no longer deletes files the new release does not carry. Only entries a
+    previous release recorded in <app dir>/.zen-artifact-manifest are prunable, and only with
+    --prune or an interactive yes. Operator state (secrets.enc, appsettings*.yaml, .license*,
+    .mcp.json, data/, logs/, configured paths, …) is never pruned. Before this, update silently
+    removed every top-level file the artifact did not carry.
+  - update and rollback do not start the host without its secrets file. If the encrypted
+    secrets file existed before, or is configured explicitly, and is missing afterwards, the host stays
+    stopped and the command exits 78 with restore instructions.
+  - Prompts with nobody to answer them are refused. With redirected stdin or a non-interactive
+    session, zen refuses instead of hanging. zen login no longer reads a password piped on
+    stdin; use ZEN_API_KEY for scripted commands. The service-account password for
+    zen service install is still read from stdin.
+  - Windows zen service install resolves LocalSystem, LocalService and NetworkService by
+    SID, refuses an install whose data would stay inside the installation directory, admits owners
+    by the service's identity (not the installing user's), and decides every refusal before any
+    side effect: a refused install registers no service, grants no logon right and writes no ACL or
+    configuration. It no longer grants write access above the application or data directory.
+  - An unreadable service configuration is refused before any service change.
+  - zen entity list without a complete array exits 6 (could-not-judge) and names the supported
+    MCP route; it is never an empty listing.
+  - On Windows, a configured SecretsFile longer than the path-length limit no longer crashes
+    zen app update / rollback before the host is stopped; it is looked up as a file that does not
+    exist (ZEN-8625).
+  - winget is now published from the release workflow itself. Chocolatey publication was adjusted
+    after moderation feedback and can be re-pushed while a version is still in moderation.
+ReleaseNotesUrl: https://github.com/zenvara-platform/cli/releases/tag/1.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
