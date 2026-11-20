@@ -1,0 +1,75 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: ethan-blue.PopGlot
+PackageVersion: 0.1.44
+PackageLocale: zh-CN
+Publisher: PopGlot
+PublisherUrl: https://github.com/ethan-blue
+PublisherSupportUrl: https://github.com/ethan-blue/PopGlot/issues
+PrivacyUrl: https://github.com/ethan-blue/PopGlot/blob/HEAD/docs/PRIVACY.md
+Author: ethan-blue
+PackageName: PopGlot
+PackageUrl: https://github.com/ethan-blue/PopGlot
+License: MIT
+LicenseUrl: https://github.com/ethan-blue/PopGlot/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 PopGlot Contributors
+ShortDescription: Windows 划词与截图翻译工具，译文出现在光标旁。
+Description: |-
+  选中文字按下 Ctrl+Alt+W，译文出现在光标旁；截图框选默认用本机 Windows OCR，图片不出本机。面向在 Windows 上阅读英文技术内容的程序员：报错、注释、命令、文档。
+  - 划词：任意程序里 Ctrl+Alt+W，原剪贴板按序列号恢复。
+  - 截图：Ctrl+Alt+Space 框选，默认本机 OCR 识别。
+  - 工作台：Ctrl+Alt+O，左原文右译文，「要点」是独立视图。
+  - 查词：Ctrl+Alt+Q，输入后 Enter 翻译。
+  - 引擎：OpenAI 兼容、OpenAI Responses、Anthropic、Gemini、Ollama、LM Studio；未配置引擎时走 Google 公共翻译，可切换 MyMemory。
+  - 安全离线模式：拦截所有外发请求，本机模型地址不受影响。
+  - 主题跟随系统 / 浅色 / 深色，快捷键可在「设置 → 快捷键」重新录制。
+Tags:
+- ocr
+- 人工智能
+- 划词
+- 划词翻译
+- 截图
+- 截图翻译
+- 翻译
+ReleaseNotes: |-
+  0.1.43 曾经发布后撤回，版本号不再复用。本版是新的稳定修订版；从 0.1.42 升级会同时获得已撤回 0.1.43 的固定区域截图、查词小窗/边输边译、代理设置和引擎发现等功能。
+  新增
+  - 引擎独立分页：「公共翻译」「自定义 API」「AI 与账号」分开配置；AI 详情再分「连接」「模型」「高级与性能」，无需在一个长页面反复下滑。
+  - 自定义 JSON 翻译 API：可编辑完整 POST 地址、请求 JSON 模板、JSON Pointer 译文字段和可选密钥请求头。提供 LibreTranslate、DeepLX、DeepL 官方与彩云模板；后两者需自己的 Key/Token，不内置共享凭据，不宣称兼容所有动态签名接口。
+  - Yandex 免密钥来源：独立实现公共 form POST 适配；正文不进入 URL，复用授权、取消、缓存与发送配额。须手动选择，不因升级或手动成功偷偷扩展既有 Auto 接收方；当前接口不区分简繁，繁体目标明确拒绝。
+  - Google 官网节点：在同一提供方内加入 translate.google.com，保留原有两台主机，接收方均在隐私说明中列明。
+  变更
+  - Google 在单次 5000 字符限制内使用长文 POST，不再按 GET URL 预算拆成几十个串行请求；官网及两个备用主机均支持此路径。其他服务仍按自己的协议预算分段。
+  - Auto 在会话开始时冻结提供方，并按实际提供方预算规划；分段期间切换设置不会把后续正文静默发给另一家。
+  - 预热与正式请求共用连接池；查词设置变更使用持久化事件，避免可见窗口每 100 ms 读盘。整请求 30 秒预算覆盖响应体读取。
+  - Bing 明确标记为实验性，只有成功翻译/测速证据时才参与 Auto；本轮匿名网页接口实测 401，不把令牌页 HTTP 200 当作翻译成功。
+  修复
+  - 边输边译不触发：旧配置 Unset 与统一出网策略保持一致，仅明确 Denied 拒绝。Auto 全冷却业务异常在窗口内提示，不再令全局快捷键停用。
+  - 隐藏后仍发请求：Esc、关闭或 Hide 撤销尚未触发的 debounce；过期计时器及重开窗口不能复活旧请求。
+  - 新原文配上旧译文：编辑立即失效旧结果动作；收藏、快照与工作台转交保留正确归属，转交定位应用持有的主窗口。
+  - 系统代理误判：保持系统/PAC 的 DIRECT/null 决策，避免把翻译网站本身当成 CONNECT 代理。
+  - Google 返回格式变化：备用接口同时接受平铺字符串数组和原有嵌套形状；主机冷却后，长文仍能使用健康备用主机的 POST。
+  - 无效证书重复等待：TLS 证书故障明确提示为配置错误并停止无意义重试；不关闭 TLS 校验。连接错误不回显携带原文的请求 URL。
+  - 无效恢复提示：有道词典长内容不再提示一个实际上同样无法处理的 Enter 恢复操作。
+  迁移
+  - 无破坏性迁移。保留已有设置、历史、引擎身份及凭据；新增提供方仅追加，不改变已有序列值。
+  - 自定义接口可能收费，默认不参与自动翻译；须显式选择「所有引擎」。密钥保存在 Windows 凭据管理器并绑定接口地址，变更地址不会自动转移旧密钥。
+  验证与边界
+  - .43 修复树已通过 841 项本地自动测试；本次 .44 公开产物还须在相同 Git 标签上重新通过完整 Release 流水线后才生成和发布。
+  - Google 官网和 Yandex 已用固定句走真实应用路径获得对应中文译文；小样本时延不代表所有网络的 P50/P95 或服务 SLA。
+  - 参考 Pot 的公开 HTTP 协议事实独立实现，没有复制 GPL-3.0 模块或引入其代码依赖。DeepL 匿名接口返回的是升级告知、Lingva 当前连接失败，均未当作稳定线路接入。
+  - 外部凭据边界：官方 API 和 AI 仍需用户自己的有效账户、地址、模型及密钥；当前个人 AI 配置的证书/401 失败未冒充公网生成成功。模板/本地协议验证不能保证任意第三方服务或账户可用。
+  - 受控窗口及协议回归不等同于每种输入法、跨屏 DPI、代理和云端账户的人工矩阵已全部验收；安装包未签名，Windows 仍可能显示 SmartScreen 提示。
+ReleaseNotesUrl: https://github.com/ethan-blue/PopGlot/blob/HEAD/CHANGELOG.md#0144---2026-11-20
+Documentations:
+- DocumentLabel: 快速上手
+  DocumentUrl: https://github.com/ethan-blue/PopGlot/blob/HEAD/docs/help/getting-started.md
+- DocumentLabel: 使用帮助
+  DocumentUrl: https://github.com/ethan-blue/PopGlot/blob/HEAD/docs/help/index.md
+- DocumentLabel: 隐私与数据
+  DocumentUrl: https://github.com/ethan-blue/PopGlot/blob/HEAD/docs/help/privacy-and-security.md
+- DocumentLabel: 常见问题
+  DocumentUrl: https://github.com/ethan-blue/PopGlot/blob/HEAD/docs/help/troubleshooting.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
