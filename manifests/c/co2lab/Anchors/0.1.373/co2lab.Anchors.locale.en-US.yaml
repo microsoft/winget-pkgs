@@ -1,0 +1,45 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: co2lab.Anchors
+PackageVersion: 0.1.373
+PackageLocale: en-US
+Publisher: co2lab
+PublisherUrl: https://github.com/co2-lab
+PublisherSupportUrl: https://github.com/co2-lab/anchors/issues
+PackageName: Anchors
+PackageUrl: https://github.com/co2-lab/anchors
+License: Elastic License 2.0
+LicenseUrl: https://github.com/co2-lab/anchors/blob/HEAD/LICENSE
+ShortDescription: Spec-first continuity framework for AI-assisted development
+Description: Anchors ties spec, feature and test together through a shared identity code, then confronts each artifact against the rules declared in anchors.yaml. It maps the project as a graph, propagates change from the anchor outward, and gates every step — so work guided by AI stays anchored to what was decided.
+Moniker: anchors
+Tags:
+- ai
+- ai-agents
+- cli
+- developer-tools
+- golang
+- spec-first
+ReleaseNotes: |-
+  Fix: a package's double is not the project's file of the same name
+  Reported from MIF: jest.mock('stripe', …) in infra/stripeBalance.test.ts doubles the npm
+  package stripe, and anchors stamp stamped it against the project's own infra/stripe.ts.
+  A double's specifier the import resolution does not reach was matched by its tail, and a bare
+  name of one segment matched any file of that basename in any folder. The test was tied to a
+  file it never reads, and every edit there would have charged a divergent stamp.
+  A bare name of one segment that no alias maps (stripe, uuid) is now the project's only as
+  a file at the root. Everywhere else it is a package's: mock-typed and mock-stamped do not
+  charge it, anchors stamp does not stamp it, and the map no longer records the test as
+  doubling the file. A path with folders (src/a), a relative path and an alias resolve as
+  before.
+  At MIF's HEAD one more double changes: jest.mock('uuid') in apps/mobile/src/utils/uuid.test.ts
+  no longer names apps/mobile/src/utils/uuid.ts, so that test's proof reaches the file it tests.
+  The @contract: stamps written against uuid.ts and infra/stripe.ts for those packages are
+  no longer asked for, and can be removed.
+  Everything in the v0.1.351 notes still applies: run anchors migrate once, crossing format 8.
+  Changelog
+  - 9eed79f fix(mock): a package's double is not the project's file that shares its name
+ReleaseNotesUrl: https://github.com/co2-lab/anchors/releases/tag/v0.1.373
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

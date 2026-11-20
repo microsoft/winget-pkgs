@@ -1,0 +1,79 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: UnslothAI.Unsloth
+PackageVersion: 0.1.920-beta
+PackageLocale: en-US
+Publisher: Unsloth AI
+PublisherUrl: https://unsloth.ai/
+PublisherSupportUrl: https://github.com/unslothai/unsloth/issues
+Author: Unsloth AI
+PackageName: Unsloth
+PackageUrl: https://unsloth.ai/download/windows
+License: Apache-2.0
+LicenseUrl: https://github.com/unslothai/unsloth/blob/HEAD/LICENSE
+Copyright: Copyright 2026-present the Unsloth AI Inc. team. All rights reserved.
+ShortDescription: The first desktop app to run and train AI models locally.
+Description: Unsloth Desktop is the first desktop app to run and train AI models locally, with research, export and deployment from the same open-source app on Windows, macOS and Linux. Run and train LLMs and diffusion models including Kimi K3, MiniMax-H3, Gemma 4, Qwen3.8 and DeepSeek-V4 Flash 0731, with self-healing tool calling, sandboxed code execution, private web search, Deep Research, RAG, MCP and an OpenAI-compatible API.
+Tags:
+- ai
+- deep-learning
+- diffusion
+- fine-tuning
+- large-language-model
+- llm
+- machine-learning
+ReleaseNotes: |-
+  AMD NPU support gets a big update in Unsloth: Q4NX models you convert now load on the NPU, and every NPU model shows whether it runs. Also new: LTX-2.5 and MOSS-Image LoRA training, NVIDIA Cosmos3 FP8 video and scheduled tasks that reply in a chat.
+  Highlights
+  - AMD NPU support - See guide and official AMD blog - NPUs are 2-4x more efficient per joule per token vs GPUs
+  - Faster images on Strix Halo - FLUX.3 Klein up to 28% faster per step on Windows
+  - LTX-2.5 and MOSS-Image LoRA training in Unsloth
+  - Diffusion LoRA training up to 42% faster per step, and now on T4 GPUs too
+  - NVIDIA Cosmos3 Nano-FP8 and Edge-FP8 video models now load
+  - Scheduled tasks in a chat that reply right in that chat
+  AMD NPU
+  - Q4NX models you convert on the Export page now show as Converted in the NPU model list and load on the NPU, text only.
+  - Q4NX conversion moves to its own Convert to Q4NX tab on the Export page, next to LLM and Diffusion LoRA.
+  - Each NPU model is tagged Runs on NPU, Convert, then runs, Converts, won't run or Not supported, read from your installed FastFlowLM, so new models such as LFM3 are no longer hidden.
+  - Q4NX conversion now refuses GGUF quants that would load as garbage, such as Qwen3.5 from a Q4_0 GGUF answering only with slashes, and moves on to the next quant.
+  - The composer model picker now uses the Model hub's NPU names and order, such as Qwen3.6-35B-A3B-NPU2, with the FastFlowLM logo.
+  - The OpenAI-compatible API, unsloth run and unsloth chat accept the NPU model name the app shows, or its FastFlowLM/ repo, instead of only the lemonade: id.
+  - The new unsloth list-npu-models lists NPU models with their size, download state and whether they fit your NPU's memory.
+  - unsloth chat no longer reloads an NPU model that unsloth run already loaded with a set --context-length.
+  - Deep research works on NPU models instead of failing with HTTP 400 or "Local model never started producing output".
+  AMD GPUs
+  - On Windows with Strix Halo, FLUX.3 Klein INT8 runs up to 28% faster per step and Qwen-Image-2.1 up to 23% faster.
+  - On Strix Halo, Qwen-Image-2.1 and Wan now try INT8 attention automatically, and on Linux FLUX.3 Klein INT8 is now as fast as bf16.
+  - On Strix Halo with Vulkan, Z-Image images finish about 21% faster with much lower peak memory.
+  - On a 16 GB Vulkan card with a CPU PyTorch, MiniMax-H3-Image no longer runs out of system memory on the first image.
+  - Packed training on ROCm now uses flash varlen attention, so packing is faster than padding.
+  - On Windows, the GPU monitor now shows utilization and temperature for AMD GPUs, and Smart App Control no longer shows a blocked hipInfo.exe popup.
+  - On Windows, setup now stops with an error when ROCm PyTorch fails to install on a supported AMD GPU, instead of quietly falling back to CPU.
+  Images + video
+  - Load NVIDIA's Cosmos3-Nano-FP8 and Cosmos3-Edge-FP8 on the Video page, with no extra NVIDIA package.
+  - Train LoRAs for LTX-2.5 and MOSS-Image, and load them back on the Video and Images pages.
+  - Diffusion LoRA training runs 20 to 42% faster per step when the GPU has room to keep activations.
+  - FLUX.2-klein, Z-Image and Wan 2.2 5B LoRAs now train on T4 and other GPUs without bf16.
+  - MiniMax-H3-Image now renders on 8 GB GPUs, and the LTX-2 video decoder runs about 1.7 to 1.8x faster.
+  Chat + Desktop
+  - Add a scheduled task from a chat's title menu, and every run replies in that chat.
+  - The Translate page has a new layout with language tabs, side-by-side panes and document or image uploads.
+  - On Linux, computer use now works in Wayland sessions through the desktop portal, not just X11.
+  - Owners can set trusted folders in Settings > Security that Python and Terminal tools can read and run from without asking.
+  - Videos a model writes in the sandbox now play inline in chat.
+  Coding agents + API
+  - Each model alias in Settings > API can have its own context length, KV cache type and speculative decoding.
+  - /v1/chat/completions now applies a grammar or json_schema instead of silently ignoring it.
+  - Chats allow 50 tool calls per message by default, with no cap while MCP is on.
+  Training
+  - QLoRA training is up to 25% faster by keeping dequantized base weights in spare VRAM, as on Llama-3.1-8B on L4.
+  - bf16 full fine-tuning now uses stochastic rounding by default, so small updates are no longer lost.
+  Mac
+  - MLX models get the same Run settings as GGUF where MLX supports them.
+  - Ollama MLX-format tags such as gemma4:*-mlx and qwen3.6:*-mlx now show in the model picker and load, with their bundled drafters.
+  Thanks to our contributors for this release:
+  @danielhanchen, @LeoBorcherding, @Lyxot, @Imagineer99, @Etherll, @DimitriChrysafis, @shimmyshimmer, @NilayYadav, @oobabooga, @Max-Reisinger, @vineethsaivs, @lonexreb, @debojyoti-dev, @bezabyte, @wasimysaid, @Lluczel, @BlagonravovSL, @0xalkinun, @MohammadHijjawi97
+ReleaseNotesUrl: https://github.com/unslothai/unsloth/releases/tag/v0.1.920-beta
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

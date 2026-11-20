@@ -1,0 +1,51 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: NextTrace.NextTrace.Core
+PackageVersion: 1.7.5
+PackageLocale: en-US
+Publisher: NextTrace Community
+PublisherUrl: https://github.com/nxtrace
+PublisherSupportUrl: https://github.com/nxtrace/NTrace-core/issues
+PackageName: NextTrace
+PackageUrl: https://github.com/nxtrace/NTrace-core
+License: GPL-3.0
+LicenseUrl: https://github.com/nxtrace/NTrace-core/blob/HEAD/LICENSE
+ShortDescription: NextTrace, an open source visual route tracking CLI tool
+Description: An open source visual routing tool that pursues light weight, developed using Golang.
+Tags:
+- api
+- as-path
+- asn-lookup
+- geoip
+- geolocation
+- ip-lookup
+- network-analysis
+- next-trace
+- nexttrace
+- traceroute
+- utility
+ReleaseNotes: |-
+  What's Changed
+  - 新增 MTR JSON 输出，覆盖 full、tiny 和 ntr：--mtr --json 输出 NDJSON 事件，-r/-w --json 输出最终汇总报告，诊断信息写入 stderr by @tsosunchia in nxtrace#230
+  - 新增 --mtr-record 会话录制与 --mtr-replay 离线回放：保存探测及元数据事件，支持播放、暂停和时间定位；截断文件可恢复有效前缀并报告不完整状态 by @tsosunchia in nxtrace#237
+  - 新增 --mtr-columns，支持选择、排序 MTR 文字统计列；TUI 中可按 o/O 打开 Fields 页面编辑列及间距 by @tsosunchia in nxtrace#231
+  - 扩展 MTR 统计，新增 Drop、Gmean、Jttr、Javg、Jmax、Jint；对应字段同步加入 JSON 报告、回放 JSON 和 MCP 统计输出 by @tsosunchia in nxtrace#239
+  - 实时与回放 TUI 新增报告保存、退出摘要和快捷键帮助：按 s 保存 TXT、JSON 或独立 HTML 报告，按 ? 查看帮助；--no-mtr-summary 可关闭退出摘要 by @tsosunchia in nxtrace#240
+  - 新增 --doctor 环境自检，报告目标解析、源地址选择、路由预测和探测后端初始化结果；三个 flavor 均可使用 by @tsosunchia in nxtrace#232
+  - 新增 Linux --fwmark，支持为本地 traceroute/MTR 设置十进制或十六进制 socket 标记，并按标记与 TOS 选择源地址，保留显式 source/device 约束 by @tsosunchia in nxtrace#233
+  - 修复非零 TOS 的选源与发送配置：Linux 按对应策略路由选源；Windows amd64 非零 ICMPv4 TOS 改用 WinDivert 完整报文发送，避免原生路径将字段发成零 by @tsosunchia in nxtrace#236
+  - 新增 --no-stop-reason，隐藏传统 traceroute、Fast Trace 和文件批量探测的终端及日志停止摘要，不影响 JSON/API 中的终止原因
+  - 补强初始化、监听及发送配置错误处理，失败时中止探测并返回错误，避免误计为丢包；MTR JSON 与录制保留首个错误、事件因果顺序及信号退出状态
+  - 补齐 MTR JSON 与录制中的 TCP/UDP 逐包随机源端口支持，可使用 --source-port -1
+  - 隐藏调试日志中的 API token、deploy token、Globalping token 和代理凭据
+  - 更新依赖：github.com/mattn/go-runewidth 升级至 v0.0.29，github.com/quic-go/quic-go 升级至 v0.62.0
+  额外的：
+  本版本仍未切换默认模式；full/tiny 默认使用传统 traceroute，单独 --json 也保留传统 JSON。MTR 中 --json 与 --raw 互斥。
+  TUI 导出的 TXT/JSON/HTML 是统计快照；需要完整会话回放时使用 --mtr-record。录制与报告保存均不覆盖已有文件。
+  --doctor 不发送探测包，但 DNS/DoT 解析可能联网；自检成功不代表目标可达，Windows 自检不会安装 WinDivert 驱动。
+  --fwmark 仅支持 Linux 本地 traceroute/MTR，不支持 doctor、deploy/MCP 或 Globalping，也不会修改系统路由规则。
+  Windows amd64 非零 ICMP TOS 需要 WinDivert 及管理员权限，即使使用 --icmp-mode 1 选择 Socket 接收也一样。
+ReleaseNotesUrl: https://github.com/nxtrace/NTrace-core/releases/tag/v1.7.5
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

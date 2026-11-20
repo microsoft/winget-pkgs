@@ -1,0 +1,92 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Posit.rig
+PackageVersion: 0.11.1
+PackageLocale: en-US
+Publisher: Posit Software, PBC
+PublisherUrl: https://github.com/r-lib
+PublisherSupportUrl: https://github.com/r-lib/rig/issues
+PackageName: rig
+PackageUrl: https://github.com/r-lib/rig
+License: MIT
+LicenseUrl: https://github.com/r-lib/rig/blob/HEAD/LICENSE
+ShortDescription: The R Installation Manager
+Description: Install, remove, configure R versions.
+Tags:
+- installation
+- r
+ReleaseNotes: |-
+  - New rig proj sync --check option to check that the project
+    environment is in sync with rproj.lock. It exits with status 1 if sync
+    would install, update or remove any package, e.g. after packages were
+    installed or removed by hand, and with status 2 on other errors (#495).
+  - rig proj lock --check now exits with status 2 on errors, e.g. if there
+    is no rproj.toml, and keeps status 1 for a missing or out of date
+    rproj.lock.
+  - rig proj sync --dry-run no longer fills in a missing .Renviron or
+    .rvenvlib, it only says that sync would. It now fails if there is
+    neither an rproj.toml nor an rproj.lock, like rig proj sync does.
+  - New rig add --no-default option to install an R version without
+    making it the default when no default R version is set yet, and
+    rig add --without-path to skip putting rig's quick-link directory on
+    the PATH (the shell startup files on macOS and Linux, the user PATH on
+    Windows). Tools that run rig to install R, like RStudio, can use them to
+    leave the user's default R, quick links, PATH and IDE settings alone.
+  - rig list, rig add and other commands no longer fail on macOS in user
+    mode when ~/.local/bin does not exist yet (#491).
+  - rig system clean-registry on Windows now removes all stale R and
+    Rtools registry entries and "Add/Remove Programs" entries.
+  - rig list, rig add and other commands no longer fail with
+    on macOS in user mode when ~/.local/bin does not exist yet (#491).
+  - rig on Linux now uses an updated embedded root certificate bundle
+    (webpki-root-certs 1.0.10), which drops the compromised
+    "emSign ECC Root CA - G3" root (see GHSA-hq85-5cpj-mr62).
+  - rig pkg install and rig proj sync now install git, GitHub and
+    url:: package sources on Windows again. rig passed \\?\ paths
+    to R CMD INSTALL, which R rejected (#485).
+  - rig proj import and rig proj lock now handle Remotes and
+    Config/Needs/* entries for packages with a dot in their name, e.g.
+    Rdatatable/data.table (#476).
+  - rig proj lock now keeps relative 'path' dependencies relative in the
+    lock file. The root project is saved with path ".", if it is a package.
+  - rig proj import and rig proj export now convert all [build] entries
+    to and from the ByteCompile, NeedsCompilation, LazyData, Biarch
+    and KeepSource DESCRIPTION fields.
+  - rig proj status now reports whether rproj.lock is up to date with
+    rproj.toml, e.g. after a manual edit of rproj.toml. It runs the same
+    check as rig proj lock --check (#466).
+  - New prefer-binary and exclude-newer configuration entries (and
+    RIG_PREFER_BINARY and RIG_EXCLUDE_NEWER environment variables) set the
+    defaults of --prefer-binary and --exclude-newer for rig pkg install
+    and the rig proj commands (#441).
+  - The project .Renviron now quotes the saved R_LIBS_USER value, so it
+    works with Windows paths. Delete .Renviron and call rig proj lock
+    to recreate it with the fixed version in existing projects.
+  - rig now sends a User-Agent header with its HTTP requests, e.g.
+    rig/0.11.1 (+https://github.com/r-lib/rig).
+  - rig now supports authenticated repositories and Posit Package Manager
+    instances. See the new "Authentication" guide.
+  - New rig pkg sync [LOCKFILE] command installs the packages of a lock file
+    into a library, without touching the project environment.
+  - A new --cache-dir flag, RIG_CACHE_DIR environment variable, and
+    cache-dir configuration entry allow overriding the location of rig's cache.
+    --no-cache still takes precedence.
+  - Packages are now installed with file modes more closely aligned with those
+    left by R CMD INSTALL. Existing packages in the cache are left unchanged.
+  - An R session that runs a different R minor version than the one the
+    project was synced for now really leaves the project library alone.
+    Before, rig printed a warning, but still activated the library (#450).
+    Call rig proj sync in existing projects to update the activation code.
+  - The dependency solver now treats a dash in a package version the same as
+    a dot, like R does, so e.g. version 0.3-3 satisfies >= 0.3.3 (#453).
+  - New rig proj lock --check and rig proj sync --locked options, to fail
+    if rproj.lock is missing or out of date with rproj.toml, e.g. in CI
+    (#411).
+  - rig pkg install now calls its --no-install-project option
+    --no-install-self. The old name still works, as an alias (#442).
+    rig proj sync accepts --no-install-self as an alias of
+    --no-install-project.
+ReleaseNotesUrl: https://github.com/r-lib/rig/releases/tag/v0.11.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
