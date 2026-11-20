@@ -1,0 +1,84 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: StencilLabs.ovnfs
+PackageVersion: 0.9.0
+PackageLocale: en-US
+Publisher: Stencil Labs, Inc.
+PublisherUrl: https://stencil.so/
+PublisherSupportUrl: https://github.com/stencil-hq/ovnfs/issues
+PrivacyUrl: https://stencil.so/legal/privacy
+Author: Stencil Labs, Inc.
+PackageName: ovnfs
+PackageUrl: https://github.com/stencil-hq/ovnfs
+License: MIT
+LicenseUrl: https://github.com/stencil-hq/ovnfs/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Stencil Labs, Inc.
+ShortDescription: Isolated, copy-on-write checkouts of any folder for agents, served by one daemon as a single mount.
+Description: |-
+  Checkouts for agents: isolated, copy-on-write views of any folder, a git repository or not, opened without copying it. Agents work in the checkout; you review with diff and merge back with a three-way apply. Checkouts can be snapshotted, forked, and attached to another machine, where their content arrives on first read.
+
+  One daemon serves every checkout as a folder of a single mount: NFSv3 on macOS, FUSE on Linux, SMB or WinFsp on Windows. No root, and no kernel extension beyond WinFsp where you install it.
+
+  Opening a folder sorts every path into a class. source paths are captured: they are what diff, apply and snapshots see, and the only bytes that leave the machine. cache and local paths (build outputs, ignored files, secrets) show the live folder until the checkout writes them. hidden paths are absent. Writes go to the checkout's own copy-on-write layer, so the folder is never written until you apply. In a git repository the checkout gets a private git directory: commit freely, then apply --branch NAME to bring the commits back.
+
+  ovnfs reads and writes git repositories itself, so it needs no git installation; fetches use git when it is on the PATH. Verbs start the daemon when none is running, and start, stop, restart and status manage it. restart swaps in the daemon of the binary you run, e.g. after an upgrade, leaving an NFS or SMB mount and the shells inside it in place.
+
+  - new opens a checkout on a folder, git revision or snapshot; run uses a disposable checkout that is removed afterwards.
+  - snap freezes a checkout's changes into a snapshot; fork opens a second checkout on one.
+  - diff lists source changes since a snapshot, optionally as a git patch; apply merges them back with a three-way merge.
+  - grep and glob search the daemon without traversing the mount.
+  - ls, prune and rm manage checkouts and their snapshots.
+  - attach, send, pull and push move a checkout to another machine over ssh, fetching content lazily on first read.
+  - explain reports which class a path gets and which rule decided; completion provides bash, zsh and fish completion.
+
+  ovnfs isolates files, not processes: it is not a sandbox.
+Tags:
+- checkout
+- copy-on-write
+- git
+- snapshot
+- workspace
+ReleaseNotes: |-
+  Changelog
+  - a08959cafa885eb970ac11eb8a14ecfddeb43934 docs(nfs): documented hard-mount recovery
+  - e9fbde7e1b544cd9ce84037b0348ae265bfdcda8 docs(search): named --type dir in the nested repository example
+  - 4204313fdd39074725951317871e655399a8c9cc docs: updated documentation for new stats and cache behavior
+  - 776e36b1a79c561d83e147d4c29f750c8da24df0 feat(checkout): implemented asynchronous background trash deletion
+  - 16cf9fe9cd57c3d004020d33501e590cf2dd1ff2 feat(daemon): added ovnfs stats command and infrastructure
+  - 0a16f458dd45053693070289bdae7c033d229cc3 feat(glob): merged opt-in git marker discovery (#86)
+  - e857a15b0a13fe110a5ecbc5ba302f5186976b4c feat(search): included .git entries with --git
+  - 70833114be6d289fe66cefb674c1846b731a6fce feat(stats): implemented performance metrics recording and aggregation
+  - e5586a29eb229ebc562a9714c8c72b1bcb5c61e4 fix(base): bounded local directory snapshot copies during restart
+  - 3348f48a3655bc78563b21d5c33cd1c24b0f9c98 fix(base): honor hidden rules in --rev checkouts
+  - 326bf61d8de78720541388afdfc78b6e1dbeef8a fix(base): honored revision hidden rules for inherited paths
+  - 0ed7d06a45bdd40cfd2bc8bfee937d16af3acadc fix(base): limited file reference decoding to NTFS
+  - 04ea36a342500d02b913a4d6ae73bfebaeafc2c9 fix(base): merged hidden rules for revision checkouts (#98)
+  - a020d7373ca6b9e02b22b92f5bffd634719a9b05 fix(base): restored Windows directory entry identities
+  - 3e0fd37791079a7928a69f4d5c225574f1e5df04 fix(checkout): acknowledged completed trash passes
+  - 83b450f1c2bae2243d990ef73ff71f717290cf06 fix(checkout): merged snapshot ownership across name reuse (#89)
+  - 1aa77f8713bc2eb4e3d9a194dd27ff9bdec34f0f fix(checkout): preserve sticky snapshots across name reuse
+  - eabc11e1f8ca2223b79e5df1390ad6b58e0520d8 fix(checkout): restored and listed snapshots by checkout life
+  - 906f39b93cd3aad6a2500b1c5cce52a36bdb08bb fix(cli): accepted glob without --type
+  - 8ce25556468f19b65a5cc2a8b0a8f422d3cd1eb9 fix(cli): left an omitted glob --type nil instead of listing "" in its enum
+  - fab38f52601b34f9d930964fc180c7f3dbf81977 fix(cli): merged the optional glob type fix (#88)
+  - 36da05100a371d6c1f06fbc138be062eafd0bb51 fix(glob): limited git discovery to repository markers
+  - 1fcb7e8edc3cc14ad5fb35f5d86cd1b048f48f7e fix(nfs): flushed the backing named by stable writes and commits
+  - 81de26ffec7c2e97a89209668e8a2c9f5ebae660 fix(nfs): grant ACCESS from the file's mode bits
+  - b23b68c2220f6c32c45484dd536e957068779c97 fix(nfs): honor stable writes and COMMIT
+  - 228358720e9deae228674c29b0718d554b911eed fix(nfs): kept stable writes scoped to regular file handles
+  - d5f13995cce4458ab206dc69ebaf11d1df656783 fix(nfs): matched access masks to daemon and object permissions
+  - 03d6f3dec07502920e5c38dbe96a9d4f1dfe9187 fix(nfs): merged mode-aware access replies (#78)
+  - 04427ba6620c9489a6f8a18e6c9b39da3a2a8d55 fix(nfs): merged stable write and commit barriers (#92)
+  - d450455de8bc753f274c92c7540cd2a55a516ee9 fix(nfs): scoped paged directory state to checkout and file changes
+  - dd74be480ee4e475f0a20c63c9f83d39fe33ee2c fix(overlay): recovered interrupted Windows identity writes
+  - a469352df4523ea3bd3e76a4ad86d5c8f1b94140 perf(base): avoided per-entry work in fenced directory listings
+  - 1359ac71fbdb71b8718f6171ad8a7eb4ed833b84 refactor(base): replaced volume sharing checks with fence-based tracking
+  - 39ca41ce5ee2bc67e2ddced94eeee5be5ffbe97d refactor(internal): removed unused shared clone support and add ctime tracking
+  - d42914ec3377131341508cf85b9c1ad318087e4b refactor(overlay): improved identity tracking for copied files
+  - 8e4d8bf4b7d7bc19319f791aa526cb70fa9ebcde test(base): exercised replacement of an open fenced file on windows
+  - 5bf80f60bde38b2b7d5a410516658dad2fbb849a test(checkout): refined cache isolation tests and remove platform-dependent logic
+  - 8f63c7eabe6f9fec34a5d10106144e26c13b115d test(fuse): added regression test for unlinked cache file persistence
+ReleaseNotesUrl: https://github.com/stencil-hq/ovnfs/releases/tag/v0.9.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
