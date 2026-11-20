@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: chxcodepro.IPGuard
-PackageVersion: 0.15.9
+PackageVersion: 0.15.11
 PackageLocale: zh-CN
 Publisher: chxcodepro
 PublisherUrl: https://github.com/chxcodepro
@@ -38,16 +38,14 @@ Tags:
 - 网络安全
 - 网络防护
 ReleaseNotes: |-
-  0.15.9 - 2026-11-19
+  0.15.11 - 2026-11-20
   修复
-  - 修复增强出口周期复核首次暂时失败时，提前撤销仍有效的出口许可、切断 Claude Desktop 的 Code 和聊天在途连接的问题。同一路由重试沿用原 15 秒有效期；地址失配、许可过期、路由变化或三次复核均失败时继续封锁。
-  - 补齐 T3 / Claude Agent SDK 的思考强度、会话恢复位置、权限工具与工具列表等启动参数识别。(by @passionada)
+  - 调整 Claude Desktop 内本机 Gradle / Java 编译 APK 时的守护心跳处理：两端会话的常驻管道读取改用独立线程，减少普通工作线程池争用。
+  - 心跳超时门限由 1.8 秒调整为 10 秒，容忍短暂调度停顿；管道断开仍立即结束受控进程树，保持连接但持续无心跳时继续按期限终止。
+  - 心跳超时日志增加实际接收间隔、超时门限和门卫 PID，便于定位后续异常。
+  - 修复 Windows 构建从 PowerShell 7 继承模块搜索路径后混用压缩模块的问题，解压与扩展打包由 Windows PowerShell 自身的模块处理；解压失败立即停止构建。
   验证
-  增强出口许可的 8 项定向回归通过。本机已加载 0.15.9，普通聊天与保留完整历史的 Code 恢复分支均收到真实模型响应，Code 完成工具调用并正常结束工作回合。已结束任务的全自动续接尚未实现。
-  GitHub Actions 44679571799 四个平台构建与验收通过。Windows 的 39 项定向用例通过；正式安装器在隔离 Windows 中退出码为 0，安装后界面与原生组件握手为 0.15.9，十项附件和更新元数据已核对。
-  本机一次静默升级曾在退出时记录 0xC0000409，文件更新及后续运行正常，隔离 Windows 安装未复现该异常。
-  范围
-  Windows 严格进程树过滤继续保留实验范围；Linux / macOS 附件为受管代理预览版。
-ReleaseNotesUrl: https://github.com/chxcodepro/claude-guard/releases/tag/v0.15.9
+  三种原生入口及心跳回归程序编译通过，修改代码和清理路径已审查。心跳回归程序尚未执行；本机 APK 编译场景仍待升级后复测。
+ReleaseNotesUrl: https://github.com/chxcodepro/claude-guard/releases/tag/v0.15.11
 ManifestType: defaultLocale
 ManifestVersion: 1.28.0
