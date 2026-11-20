@@ -1,0 +1,58 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: FluxCD.Flux
+PackageVersion: 2.10.1
+PackageLocale: en-US
+Publisher: FluxCD
+PublisherUrl: https://fluxcd.io/
+PublisherSupportUrl: https://github.com/fluxcd/flux2/issues
+PackageName: Flux
+PackageUrl: https://github.com/fluxcd/flux2
+License: Apache-2.0
+LicenseUrl: https://github.com/fluxcd/flux2/blob/HEAD/LICENSE
+ShortDescription: A command line tool for communicating with FluxCD
+Tags:
+- continuous-delivery
+- gitops
+- gitops-toolkit
+- helm
+- kubernetes
+- kustomize
+ReleaseNotes: |-
+  Highlights
+  Flux v2.10.1 is a patch release that fixes credential caching across the controllers, so changes to the credential.auth.fluxcd.io/username and gcp.auth.fluxcd.io/workload-identity-provider ServiceAccount annotations take effect on the next reconcile instead of continuing to use the previously cached authenticator until it expires or the controller restarts. It also resolves the default decryption ServiceAccount lazily for Kustomizations that only use Age or PGP keys, restores authentication to registries whose token service runs on a private address and after same-host HTTP to HTTPS redirects by updating ORAS to v2.7.0, and fixes Git checkouts that deleted the target of a relative symlink or got permanently stuck when the push branch removed a file that relative symlinks point to. Users are encouraged to upgrade for the best experience.
+  ℹ️ Please follow the Upgrade Procedure for Flux v2.7+ for a smooth upgrade from Flux v2.6 to the latest version.
+  Fixes:
+  - Fix the credentials cache key so changes to the credential username or the GCP workload identity provider take effect on the next reconcile (helm-controller, kustomize-controller, source-controller, notification-controller, image-reflector-controller, image-automation-controller)
+  - Fix resolving the default ServiceAccount for providers that don't use one (source-controller, image-reflector-controller, image-automation-controller)
+  - Resolve the default decryption ServiceAccount lazily, only when a cloud KMS or Vault backend is used (kustomize-controller)
+  - Restore authentication to registries whose token service runs on a private address and after same-host HTTP to HTTPS redirects by updating ORAS to v2.7.0 (source-controller)
+  - Fix Git checkouts deleting the target of a relative symlink when the checked-out revision removes the symlink (source-controller)
+  - Fix Git checkouts getting stuck when the push branch removes a file that relative symlinks point to (image-automation-controller)
+  - Delete the reconcile duration metric series for objects that no longer exist (kustomize-controller)
+  Improvements:
+  - Remove leftover object-level workload identity log message (helm-controller, kustomize-controller, source-controller, notification-controller, image-reflector-controller, image-automation-controller)
+
+  Components changelog
+  - source-controller v1.10.2
+  - kustomize-controller v1.10.2
+  - notification-controller v1.10.1
+  - helm-controller v1.7.2
+  - image-reflector-controller v1.3.1
+  - image-automation-controller v1.3.1
+
+  CLI changelog
+  - [release/v2.10.x] Strip credentials from the push artifact source URL by @fluxcdbot in #6179
+  - [release/v2.10.x] Reject partial basic auth in secret commands by @fluxcdbot in #6185
+  - [release/v2.10.x] Paginate resource listing in flux migrate by @fluxcdbot in #6196
+  - [release/v2.10.x] Prevent infinite loop on flux migrate by @fluxcdbot in #6205
+  - [release/v2.10.x] Fix resolve-symlinks for read-only directories by @fluxcdbot in #6207
+  - [release/v2.10.x] Fix panic on unreadable kustomization file by @fluxcdbot in #6208
+  - [release/v2.10.x] Update toolkit components by @fluxcdbot in #6210
+  - [release/v2.10.x] Fix panic decoding short Helm release storage in tree by @fluxcdbot in #6211
+  - [release/v2.10.x] Allow colons in --registry-creds password by @fluxcdbot in #6212
+  - [release/v2.10.x] Fix --team parsing in bootstrap commands by @fluxcdbot in #6213
+ReleaseNotesUrl: https://github.com/fluxcd/flux2/releases/tag/v2.10.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
