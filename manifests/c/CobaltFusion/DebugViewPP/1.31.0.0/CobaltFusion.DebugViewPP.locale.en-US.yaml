@@ -1,0 +1,38 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: CobaltFusion.DebugViewPP
+PackageVersion: 1.31.0.0
+PackageLocale: en-US
+Publisher: CobaltFusion
+PublisherUrl: https://github.com/CobaltFusion
+PublisherSupportUrl: https://github.com/CobaltFusion/DebugViewPP/issues
+PackageName: DebugViewPP
+PackageUrl: https://github.com/CobaltFusion/DebugViewPP
+License: BSL-1.0
+LicenseUrl: https://github.com/CobaltFusion/DebugViewPP/blob/HEAD/LICENSE
+ShortDescription: DebugView++, collects, views, filters your application logs, and highlights information that is important to you!
+Tags:
+- dbgview
+- debugging-tool
+- debugview
+- filter
+- logfile
+- outputdebugstring
+- regular-expression
+ReleaseNotes: |-
+  What's Changed
+  - Filters use PCRE2 instead of std::regex (fixes #411). Patterns are written as before; an invalid pattern is reported in the filter dialog with the position of the problem. See the PCRE2 syntax.
+    - New regex features that std::regex (ECMAScript) does not have:
+      - lookbehind: (?<=id=)\d+ matches, and highlights, only the number after id=
+      - named groups: (?<job>\d+)
+      - atomic groups (?>...) and possessive quantifiers \d++, .*+
+    - A pattern that backtracks without end no longer freezes the window: after a million steps it counts as "no match".
+    - Token filter highlighting is case-insensitive, like the filter itself; matches with capital letters were not coloured before.
+    - CPU efficiency: PCRE2 runs with its JIT compiler. An include filter over 150,000 lines takes 60 ms instead of 205 ms, about 3.4 times faster, so filtering uses roughly 70% less CPU. Drawing token highlights also got cheaper: the old code compiled a new std::wregex for every token filter every time a line was drawn, and now the compiled pattern is reused. That saving was not measured separately.
+  - Fixed: "Reset View to this line": the offset time (the Time column when it does not show the clock time) now starts at 0.000000 at that line (fixes #282).
+  - Fixed: large UDP datagrams ended all capture. A datagram over 2000 bytes, such as a log4net UdpAppender exception with its stack trace, showed an "Exception occurred" box and stopped every source. Datagrams up to the IPv4 maximum of 65,507 bytes are received now. Contributed by Panayiotis Panayiotou in #428.
+  - Fixed: DebugViewConsole -q and -t were swapped. -q now prefixes the high-precision time offset and -t gives tab-separated output, as the help says. The message is no longer preceded by an extra separator, so -t output has no empty column.
+ReleaseNotesUrl: https://github.com/CobaltFusion/DebugViewPP/releases/tag/1.31.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
