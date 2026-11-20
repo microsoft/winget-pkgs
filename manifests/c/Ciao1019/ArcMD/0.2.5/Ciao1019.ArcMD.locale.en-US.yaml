@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: Ciao1019.ArcMD
-PackageVersion: 0.2.4
+PackageVersion: 0.2.5
 PackageLocale: en-US
 Publisher: Ciao1019
 PublisherUrl: https://github.com/Ciao1019
@@ -44,12 +44,15 @@ Tags:
 - notes
 - writing
 ReleaseNotes: |-
-  This patch release fixes unbounded memory accumulation when switching repeatedly across Markdown documents, sidebar hover previews, and Spaces (#33).
-  Memory and Resource Lifecycle Fixes
-  - Reclaim closed documents and decoded image bitmaps on switch (internal/app/app.go, internal/app/document.go, internal/app/opendocs.go, internal/app/split.go, internal/app/windows.go, internal/editor/images.go): Retire closed *document instances and evict non-resident entries from imgResolved and search.liveDocs whenever switching notes, closing split panes or secondary windows, reloading, or unpinning tabs so closed editors and multi-megabyte RGBA *ui.Bitmap buffers are immediately eligible for garbage collection (#33).
-  - Bounded async image decode concurrency and CPU pixel release (internal/app/document.go, internal/app/view.go): Cap concurrent background image decoders to 4 goroutines, abort queued or in-flight decodes as soon as a superseded document closes, and call Bitmap.ReleasePixels() after GPU texture upload on live windows so uncompressed RGBA/mipmap buffers do not remain duplicated in system RAM (#33).
-  - Bounded sidebar thumbnail LRU cache and scaled preview decoding (internal/app/preview.go, internal/app/document.go, internal/app/links.go): Bound preview.thumbs to an 8-entry LRU cache, drop transient open/... clones when previews close, decode sidebar thumbnail images via ui.DecodeBitmapScaled(data, 640) instead of full-resolution bitmaps, and read [[wiki-link]] hover previews directly from the search index / text extractor without allocating thumbnail editors (#33).
-  - Active Space session slot, whiteboard cache, and modal cleanup (internal/app/app.go, internal/app/whiteboard.go, internal/app/versions.go, internal/app/gitmerge.go): Clear the active Space's suspended session.doc reference upon returning to a Space, bound wbCache to 16 entries, and release retained document/diff state when the Version History, Git Changes, or 3-Way Merge modals close (#33).
-ReleaseNotesUrl: https://github.com/Ciao1019/ArcMD/releases/tag/v0.2.4
+  This release adds Sidebar Copy, Paste, and Duplicate for documents, folders, and multi-selections (#10, #39), streaming Responses & Chat Completions protocol support for Space Q&A (#23), crisp math formula rendering, content-aware expanding tables, narrow-window sidebar hysteresis, and an optional Autosave toggle (#32), plus targeted fixes for table row selection crashes (#34, #35) and literal plain-text clipboard copying.
+  Sidebar, Space Q&A, and Writing Workflow
+  - Sidebar Copy, Paste, and Duplicate (internal/vault/copy.go, internal/app/copy.go, internal/app/sidebar.go): Right-click or use ⌘C / ⌘V (Ctrl+C / Ctrl+V) in the sidebar to copy, paste, or duplicate documents, nested folders, multi-selections, and favorite tiles within or across Spaces. Duplicate enters inline rename and opens the copy focused in the body; cross-folder and cross-Space pastes preserve or rebase attachments and covers safely with one-click Undo via Trash (#10, #39, thanks to @tajiaoyezi).
+  - Streaming Responses and Chat Completions for Space Q&A (internal/agent/responses.go, internal/app/qasettings.go, cmd/arcmd/ask.go): Choose Automatic, Chat Completions, or Responses in Settings → AI Q&A or via arcmd ask -protocol. Automatic selects stateless streaming Responses for recognized reasoning models on OpenAI and OpenRouter while preserving pending tool-call results and encrypted reasoning replay (#23, thanks to @hyskr).
+  - Optional Autosave toggle with unsaved-changes guard (internal/prefs/prefs.go, internal/app/unsaved.go, internal/app/settings.go): Toggle background autosave in Settings → General → Writing or the command bar (⌘K). When disabled, edits remain in memory until explicitly saved (⌘S), and leaving or closing modified documents prompts Save / Don't Save / Cancel (#32).
+  Math Rendering, Tables, and Clipboard Fixes
+  - Crisp scaled math, wrapping equations, and content-aware tables (internal/editor/math.go, internal/tex/layout.go, internal/editor/virtualize.go, internal/app/app.go): Paint inline and display formulas directly at their target font size instead of raster-scaling pre-shaped glyphs, wrap long inline equations before shrinking, size table columns by natural content width and let wide formula tables expand past the standard prose column as the window widens, and add widening hysteresis so dragging a narrow window wider does not prematurely unfold the sidebar and squeeze the document (#32).
+  - Fix table row selection panic (internal/editor/table.go): Guard column-index access in the table toolbar so selecting a row whose index exceeds the column count no longer triggers an out-of-range panic (#34, #35, thanks to @Zzzt2003).
+  - Literal plain-text copy and cleaner Markdown escaping (internal/editor/clipboard.go, internal/editor/markdown.go): Copy literal characters without Markdown backslash escapes, backticks, or <p align=...> wrappers from table cells, inline code, and prose, and leave intraword underscores unescaped when exporting Markdown.
+ReleaseNotesUrl: https://github.com/Ciao1019/ArcMD/releases/tag/v0.2.5
 ManifestType: defaultLocale
 ManifestVersion: 1.28.0
