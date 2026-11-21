@@ -1,0 +1,65 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: mlcousek.ClaudeUsageTray
+PackageVersion: 0.1.6
+PackageLocale: en-US
+Publisher: mlcousek
+PublisherUrl: https://github.com/mlcousek
+PublisherSupportUrl: https://github.com/mlcousek/claude_trayapp/issues
+Author: mlcousek
+PackageName: Claude Usage Tray
+PackageUrl: https://github.com/mlcousek/claude_trayapp
+License: MIT
+LicenseUrl: https://github.com/mlcousek/claude_trayapp/blob/main/LICENSE
+Copyright: Copyright (c) 2026 mlcousek
+ShortDescription: An unofficial Windows tray app that shows your Claude usage limits at a glance.
+Description: |-
+  Claude Usage Tray shows the usage limits of your Claude subscription in the Windows system tray: a live
+  percentage rendered into the tray icon, and a dark flyout with every usage window, reset countdowns, plan tier,
+  burn rate, history charts and token and cost analytics derived from local Claude Code session logs.
+
+  It is an unofficial community project. It is not affiliated with, endorsed by, or supported by Anthropic. It
+  reads the OAuth token Claude Code already stores on this machine so it can call the same usage endpoint Claude
+  Code itself uses, and it never writes to the Claude Code configuration. No telemetry. It asks GitHub once a week
+  whether a newer release exists, which sends nothing about you and can be turned off in its settings.
+
+  Requires Claude Code to be installed and signed in at least once for the usage percentages. The local token and
+  cost analytics work offline.
+Moniker: claude-usage-tray
+Tags:
+- claude
+- developer-tools
+- monitoring
+- system-tray
+- usage
+ReleaseNotes: |-
+  > Unofficial tool. Claude Usage Tray is a community project. It is not affiliated with, endorsed by, or supported by Anthropic. It relies on an undocumented endpoint that can change or stop working at any time.
+  Downloads
+  ───────────────────────────────────┬───────────────────
+  File                               │For
+  ───────────────────────────────────┼───────────────────
+  ClaudeUsageTray-0.1.6-win-x64.zip  │Windows 11 on x64
+  ───────────────────────────────────┼───────────────────
+  ClaudeUsageTray-0.1.6-win-arm64.zip│Windows 11 on Arm64
+  ───────────────────────────────────┴───────────────────
+  Unzip anywhere and run ClaudeTrayApp.exe: no installer, no .NET runtime to install, no admin prompt. The executable is not code-signed, so SmartScreen may ask once (More info, Run anyway). Claude Code must be installed and signed in; the app reads its token and never writes to ~/.claude.
+
+  SHA256 checksums
+  ef2e616c7baf1545efe8888b2f3084e59f1b5a2db2ba9ebc2b124ee853ee70af  ClaudeUsageTray-0.1.6-win-arm64.zip
+  13e8a04189f9a9958326d9552e7e134b58dca842615035fc55ff9d51c18aad20  ClaudeUsageTray-0.1.6-win-x64.zip
+  Verify before unzipping with Get-FileHash .\ClaudeUsageTray-0.1.6-win-x64.zip in PowerShell or certutil -hashfile ClaudeUsageTray-0.1.6-win-x64.zip SHA256 in Command Prompt, and compare with the line above (SHA256SUMS.txt is attached as well).
+
+  Changes in 0.1.6
+
+  Fixed
+  - A rate-limit answer asking to retry after hours could stop polling for that long; Retry-After is now honoured
+    only up to the 30-minute backoff cap.
+  - Launching the app a second time while the first instance was still starting could do nothing at all; the second
+    launch's request to show the flyout is now kept until the first instance is ready for it.
+  - A Claude Code CLI refresh that timed out could leave an unobserved error behind in the background.
+  - The release zip's README described the pre-0.1.3 behaviour: it now mentions the automatic token refresh, Start with
+    Windows being on by default, the weekly update check and the two registry values the app writes.
+ReleaseNotesUrl: https://github.com/mlcousek/claude_trayapp/releases/tag/v0.1.6
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
