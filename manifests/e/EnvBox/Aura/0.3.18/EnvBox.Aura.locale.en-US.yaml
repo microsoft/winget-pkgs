@@ -1,0 +1,46 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: EnvBox.Aura
+PackageVersion: 0.3.18
+PackageLocale: en-US
+Publisher: EnvBox
+PublisherUrl: https://github.com/NGLSL
+PublisherSupportUrl: https://github.com/NGLSL/Aura/issues
+PackageName: Aura
+PackageUrl: https://github.com/NGLSL/Aura
+License: Apache-2.0
+LicenseUrl: https://github.com/NGLSL/Aura/blob/HEAD/LICENSE
+ShortDescription: A Windows process-level environment virtualization launcher that shows target apps virtualized locale, region, language, timezone, and DNS values.
+Description: |-
+  Aura (EnvBox) is a Windows process-level environment virtualization launcher. Target apps run on the host with full access to the filesystem, GPU, network, and user profile, but see Environment Profile values for locale, region, UI language, timezone, DNS view, environment variables, and whitelisted internationalization registry reads.
+
+  EnvBox does not provide a security boundary and is not a sandbox. It does not isolate files, registry writes, network, or privileges, and must not be used as a security control.
+
+  Principles
+  - Process-scoped: changes apply only to one runtime instance's process tree.
+  - Host-transparent: never modifies Windows global configuration.
+  - Environment-consistent: one profile keeps locale, region, language, timezone, DNS, and environment aligned.
+
+  The package includes a GUI for managing profiles and launching apps, the envbox CLI (envbox run / profile / app), and a Detours-based runtime DLL.
+Tags:
+- environment-variables
+- locale
+- localization
+- timezone
+ReleaseNotes: |-
+  Aura v0.3.18
+  Changes
+  - 升级到 Iced 0.14，支持 Windows 输入法组字和候选词提交。应用选择器在选字提交后更新搜索，并保留 CPU 渲染器的高 DPI SVG 缩放、旋转与裁剪修复。
+  - 在应用选择器选中商店版 Windows Terminal 后，可选择 PowerShell 7、Windows PowerShell、命令提示符，或填写其他 Shell。Aura 自动填写命令行和 Windows Terminal 终端宿主。
+  - PowerShell 7 可以通过 Windows 程序注册路径发现。应用选择器填入可执行文件的绝对路径，支持安装在自定义目录的 PowerShell。
+  - 补齐用户首选语言列表和默认键盘／输入法的 Profile 读取。受托管 PowerShell 中的 Get-WinUserLanguageList 能返回配置中的语言标签和对应的默认输入法。
+  - 退出 Aura 时，空闲的 Supervisor 随界面退出。如果还有托管实例，Supervisor 继续运行，等最后一个实例结束后自动退出。
+  Validation
+  - 应用选择器的组字、Shell 选择和保存，以及 CPU 渲染器的 SVG 像素回归均有自动化覆盖。
+  - 在本机的普通权限与管理员 Windows Terminal 标签页中，用 PowerShell 7.6.10 验证了 US 配置。系统区域返回 en-US / 1033，用户语言返回 en-US，时区返回 Pacific Standard Time。管理员验收从经 Windows 授权的管理员启动链发起。
+  - 使用隔离会话验证了 Supervisor 随空闲界面退出，以及在仍有实例时等待最后一个实例结束。
+  - 发布使用对应提交的 Windows CI 和正式安装包工作流。上述交互与进程行为来自发布前的本地验收构建。
+ReleaseNotesUrl: https://github.com/NGLSL/Aura/releases/tag/v0.3.18
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
