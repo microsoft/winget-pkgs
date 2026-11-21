@@ -1,0 +1,82 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: wslkit.skrog
+PackageVersion: 0.12.0
+PackageLocale: en-US
+Publisher: wslkit
+PublisherUrl: https://github.com/wslkit
+PublisherSupportUrl: https://github.com/wslkit/skrog/issues
+PackageName: Skrog
+PackageUrl: https://github.com/wslkit/skrog
+License: Apache-2.0
+LicenseUrl: https://github.com/wslkit/skrog/blob/main/LICENSE
+Copyright: Copyright (c) Skrog contributors
+ShortDescription: Run the upstream Docker Engine on Windows via WSL2, with no licence fees.
+Description: |-
+  Skrog serves the real Docker Engine API on the named pipe docker.exe already
+  talks to, backed by upstream dockerd running in a WSL2 distro it owns. Compose,
+  Dev Containers, Testcontainers, buildx and the Docker CLI work unmodified,
+  because the thing answering is genuinely dockerd.
+
+  It is headless by design: no GUI, no Kubernetes, no tray ceremony, and no
+  licence fee. A supervisor starts the engine at logon, survives crashes,
+  `wsl --shutdown` and sleep/resume, and idle-stops the engine to return its RAM.
+  `skrog lock` pins the exact dockerd, containerd, runc and BuildKit commits so a
+  laptop and a CI runner install the same engine.
+
+  Installing this package places the skrog command on PATH. It does not provision
+  anything: run `skrog install` next to set up the engine, then `skrog start`.
+  Skrog does not install a docker CLI - use Docker Desktop's, or `skrog cli install`.
+Moniker: skrog
+Tags:
+- containers
+- devcontainers
+- docker
+- docker-engine
+- dockerd
+- testcontainers
+- windows
+- wsl
+- wsl2
+ReleaseNotes: |-
+  The default engine moves to 29.10.0, built with Go 1.27.4, with runc 1.5.3 for a
+  container-escape fix on restore, and the bundled docker CLI moves with it. A corporate
+  engine.insecure-registries entry no longer cuts skrog cache off on the new engine, and
+  skrog compact now handles EFS-encrypted disks on Windows 11 23H2 and later.
+
+  Security
+
+  - The default engine is 29.10.0, built with Go 1.27.4, with runc 1.5.3. Go 1.27.4 is
+    the toolchain moby 29.10.0 itself ships with, and the first move of the rootfs onto the
+    1.27 line. runc moves from 1.5.2 to 1.5.3, as in moby's own static binaries, for
+    CVE-2026-119101 (a crafted image could make runc restore bind-mount a host directory
+    into a restored container). containerd stays at 2.3.7 and BuildKit at 0.33.1: moby
+    29.10.0 vendors newer ones, but neither has a security fix that ours lacks. Existing
+    installs move with skrog engine upgrade; 29.9.2 stays in the manifest, so skrog engine
+    rollback returns to it.
+
+  Changed
+
+  - The bundled docker CLI is 29.10.0, from 29.9.2, built with Go 1.27.4. amd64 is
+    Docker's own zip, checksum computed from the download; arm64 is built here
+    (dockercli-v29.10.0).
+  - engine.insecure-registries keeps loopback insecure. From engine 29.10.0 dockerd
+    treats loopback as insecure only while insecure-registries is unset (moby/moby#53868),
+    so setting it for one corporate registry would have cut off skrog cache (which dockerd
+    reaches at http://127.0.0.1:5000) and any plain-HTTP registry on localhost. Skrog now
+    adds 127.0.0.0/8 and ::1/128 to any list it writes, and before the engine starts to a
+    list already in daemon.json, so the key means what it did before the upgrade. Unset,
+    nothing is written and dockerd's own default applies.
+
+  Fixed
+
+  - skrog compact works on an EFS-encrypted disk on Windows 11 23H2 (build 22631) and
+    later. It refused one up front (#565), because Windows will not open an encrypted
+    .vhdx for compaction unless asked to with OPEN_VIRTUAL_DISK_FLAG_SUPPORT_ENCRYPTED_FILES.
+    compact now passes that flag, as WSL 3.0.5 does for its own compact
+    (microsoft/WSL#42008). Older builds reject the flag even for an unencrypted disk
+    (microsoft/WSL#42041), so there nothing changes: no flag, and the encrypted disk is
+    still refused before anything is stopped. Tested against a real encrypted disk.
+ReleaseNotesUrl: https://github.com/wslkit/skrog/releases/tag/v0.12.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
