@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.9.0.schema.json
+# SPDX-License-Identifier: Apache-2.0
+# The portable x86_64 Windows archive was built and smoked on the CI
+# runner, and its real digest and release date are written below from the
+# SHA256SUMS of the release. The manifest installs only that portable
+# archive; the aarch64 one ships in the same release for the installer that
+# asks for it.
+PackageIdentifier: danalec.ahk
+PackageVersion: 0.3.2
+MinimumOSVersion: 10.0.17763.0
+InstallerType: zip
+NestedInstallerType: portable
+NestedInstallerFiles:
+  - RelativeFilePath: ahk.exe
+    PortableCommandAlias: ahk
+InstallModes:
+  - silent
+  - interactive
+UpgradeBehavior: uninstallPrevious
+ReleaseDate: 2026-11-12
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/danalec/ahk/releases/download/v0.3.2/ahk-v0.3.2-x86_64-windows.zip
+    InstallerSha256: D28E7C7CEB57069AFB7C7F5D314FEC8478EB638BCD1218962BBC6DF66DECCFBC
+    # A portable install has no ARP entry, so the client has little to
+    # correlate. Naming the file it puts down gives it a deeper check
+    # without changing what is installed or where. DefaultInstallLocation
+    # is deliberately absent: WinGet unpacks a portable archive into its
+    # own managed directory, not the path the installer would have used.
+    # ArchiveBinariesDependOnPath is deliberately absent too: the
+    # PortableCommandAlias above is symlinked into the links folder, which
+    # is narrower than adding the whole unpack directory to PATH.
+    InstallationMetadata:
+      Files:
+        - RelativeFilePath: ahk.exe
+          FileType: launch
+          DisplayName: ahk
+ManifestType: installer
+ManifestVersion: 1.9.0
