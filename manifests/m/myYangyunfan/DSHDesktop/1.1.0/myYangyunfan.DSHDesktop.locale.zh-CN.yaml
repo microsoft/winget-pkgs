@@ -1,0 +1,93 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: myYangyunfan.DSHDesktop
+PackageVersion: 1.1.0
+PackageLocale: zh-CN
+Publisher: deepseek
+PublisherUrl: https://github.com/myYangyunfan
+PublisherSupportUrl: https://github.com/myYangyunfan/dsh_desktop/issues
+PackageName: DSH Desktop
+PackageUrl: https://github.com/myYangyunfan/dsh_desktop
+License: MIT
+LicenseUrl: https://github.com/myYangyunfan/dsh_desktop/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 DSH Desktop contributors
+ShortDescription: 把 DeepSeek Harness (dsh) CLI 与内置 Node.js 运行时打包在一起的桌面客户端。
+Description: |-
+  DSH Desktop 把 DeepSeek Harness (dsh) CLI、完整 Node.js 运行时与全部官方插件打包为开箱即用的桌面客户端。双击即可在原生窗口中启动 dsh web，无需安装 Node.js；关闭窗口后服务在系统托盘中继续运行。提供会话管理、桌面宠物、余额小组件、插件守护与带 sha256 校验的自动更新。
+
+  ✨ 特性
+  开箱即用
+  - 零依赖 — 内置独立 Node 运行时与 npm CLI，目标机器无需安装任何环境
+  - 完整 dsh — 打包 @deepseek-ai/dsh 及全部官方插件，离线可用
+  - 一键启动 — 双击即启 dsh web，优先复用上次端口，就绪后载入原生窗口
+  - 双形态 — 便携版（免安装、可放 U 盘）+ 安装版（桌面/开始菜单快捷方式）
+  体验增强
+  - 深色玻璃无边框窗口 — 自绘标题栏、Win11 圆角，关闭默认隐藏到系统托盘
+  - 桌面宠物 — 随行小鲸鱼常驻桌面，陪伴工作（设置 → 插件可一键开关）
+  - 侧边会话浮窗 — 随时唤起独立会话窗口，与主会话互不干扰
+  - 会话管理 — 归档 / 恢复 / 删除对话，历史不再堆积
+  - 余额小部件 — 对话底部实时显示「本轮费用 · 余额」，支持 OpenCode Go 订阅额度，点击直达充值
+  - 完成通知 — 任务跑完弹系统通知，一分钟内回到主窗口自动跳到对应会话（Windows 通知无点击回调，聚焦即跳转）
+  工程韧性
+  - 守护瀑布 — 内核 boot 链逐级自愈：坏插件自动修复、坏配置自动重建、内核崩溃环原地重启，任何不兼容形态都不退出（v0.5.0 Tauri 架构核心特性）
+  - 崩溃自愈 — 渲染层假死心跳检测自动重载；内核由 supervisor 探活 + 指数退避拉起
+  - 历史兼容 — 自动修补会话事件词汇表，第三方插件写入的事件不破坏会话历史
+  - 自动更新 — 右上角 ⋯ 菜单一键检查并安装客户端更新（双源 GitHub/Gitee Releases 自动切换，sha256 校验 fail-closed，离线静默）；升级安装自动装回旧位置，零配置丢失；内核随客户端整体分发（无独立更新链）
+  - 快捷方式自愈 — 桌面与开始菜单快捷方式缺失即自动补建
+Tags:
+- deepseek
+- deepseek-harness
+- dsh
+- 大模型
+- 大语言模型
+- 智能体
+- 自主智能
+ReleaseNotes: |-
+  DSH Pack 1.1.0（正式版 · 随包内核换代到 0.2.2-rc.3 + 便携版补全内置 Node）
+  本版是正式版：进入 GitHub 的 releases/latest，客户端右上角 ⋯ 菜单的在线更新检查轮询的正是
+  latest，所以存量用户会收到推送。Rust 壳与界面零功能改动，在册插件仍是 33 条。
+  🎯 本版重点
+  1. 内核换代 0.2.2-rc.2 → 0.2.2-rc.3：pin / vendor / 锁文件三线同改，388 份离线 tgz
+     （375 个 dsh 包 + 13 个框架件，56,530,217 字节）。相对 rc.2 是补丁级发布——保留 374、退役 0、
+     新增 1，框架件（cordis / cosmokit / schemastery / node-addon-system / libreoffice-kit）版本线一字未动。
+  2. 补丁层零重锚：60 条补丁、94 个被干预文件、87 个标记家族，rc.3 上实跑
+     「写入 72 处 / 失配 0 / 失败 0 / 降级 0 / 告警 0」，判定矩阵 60/60 与 rc.2 完全一致。
+     对照上一版（rc.1 → rc.2）是 21 项锚点失配、要按压缩字节逐条重录。
+  3. 便携版补全内置 Node（v1.0.10 的缺口）：v1.0.10 的两个便携 zip 逐字节相同（各 598,615,580 字节，
+     中央目录 118,556 条里 node.exe 0 命中）——内置运行时在大包暂存时被静默漏掉，于是 lite 的
+     「不带内置 Node」是空转，Full 也没带 Node，没装 Node 的用户一开机就撞「未找到可用的 Node.js」。
+     本版把它修成结构性判据：staging 改单文件 cp -f + stage-vendor-node-gate.mjs（≥20MB、unix 查 +x）、
+     组装期显式补位、N1 与 lite 双双 fail-closed，并新增「Full 与 Lite 体积必须差 ≥10MB」的结果面门禁。
+  🔧 用户可感知的变化（来自上游 rc.3）
+  - 新增可选 bundle：DeepSeek 官网会话导入（@deepseek-ai/dsh-deepseek-chat-import）。
+    启用后「新建会话」右侧多一个按钮，把 chat.deepseek.com 导出的 deepseek_data-*.zip 传进 Host，
+    最近的会话会存成所选工作区里的会话，保留原标题、原时间，以及提问附带文件、思考、联网搜索卡片与阅读链接。
+    这是 rc.3 唯一新增的包；上游其余改动落在包内部。
+  - 上游 rc.3 的组合文件与 rc.2 逐字节相同（dsh-web-app/cordis.patch.yml 与四个出厂预设的 sha256 全一致），
+    所以本版没有新的界面/组合行为差异，属于「修 bug + 加一个可选能力」的补丁级换代。
+  📦 体积提示
+  - Windows Full 便携包会比 v1.0.10 大约 +33MB——这不是新增负担，是那份本该在包里的 node.exe
+    （91,694,408 字节，压缩后实测 32.7MB）终于回来了。Lite 保持不变，从此真的更小。
+  - 其余平台安装包预计与 v1.0.10 持平：vendor 从 387 份 / 56,380,471 字节 变为 388 份 / 56,530,217 字节（+0.27%）。
+  ✅ 验收
+  - npm test：2254 例 / pass 2245 / skip 9 / fail 0（skip 全是环境缺料：pristine 缺可选子代理运行时、
+    无真实网络、无特权建符号链接等）。
+  - patch-deps：写入 72 处 / 失配 0 / 失败 0 / 降级 0 / 告警 0 / 共 60 项。
+  - patch-surface verify：94 文件 / 87 标记家族无漂移；pristine 闭包重出 rc.3（388 包）。
+  - validate-pin：dsh-v0.2.2-rc.3（0.2.2-rc.3，offline-tarball）通过。
+  - 锁文件核查：388 个 @deepseek-ai/* 条目全部 file: 解析，无一落到 registry（离线可复现性判据）。
+  - 隔离实机（临时 DSH_HOME，不触碰真实数据）：boot 五步全 OK（13.8s，sync 13.2s）；内核 web 正常 listen、
+    零 failed to load、零 pending (waiting for。
+  🩹 本版顺带修掉的工程问题
+  - 换代取件口径：家族清单不能按根包依赖闭包取——闭包只走得到 367 个（部分包用 ^/~ 范围声明，
+    另有 8 个只挂在 bundle/profile 上）。若照闭包裁，dsh-error 与 dsh-experimental-cua-macos 会在锁文件里
+    退化成 registry 解析，离线安装当场破功。本版改回权威穷尽枚举（replicate _all_docs 前缀扫 410 个候选名，
+    逐个查 registry 是否发布该版本），实测 present=375 / 无 rc.3 = 35 / 404 = 0，锁文件 388 条全 file:。
+  - README 信息架构重排：顶部徽章 10 → 7（删 Forks、Gitee Stars；Release CI 徽章从已退役的 release.yml
+    改指现行的 tauri-release.yml），版本号从 7 处死写收敛成 1 处，两张重复的安装包表合并成一张，
+    70 行历史 blockquote 压到 20 行，新增目录与 6 条 FAQ（白屏 / macOS「已损坏」/ 要不要装 Node /
+    覆盖安装会不会丢数据 / 为什么没收到更新提示 / Gitee 为什么滞后）。插件表 33 行逐字保留。
+ReleaseNotesUrl: https://github.com/myYangyunfan/dsh_desktop/releases/tag/v1.1.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
