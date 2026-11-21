@@ -1,0 +1,58 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Ciao1019.ArcMD
+PackageVersion: 0.2.5
+PackageLocale: en-US
+Publisher: Ciao1019
+PublisherUrl: https://github.com/Ciao1019
+PublisherSupportUrl: https://github.com/Ciao1019/ArcMD/issues
+PackageName: ArcMD
+PackageUrl: https://github.com/Ciao1019/ArcMD
+License: MIT
+LicenseUrl: https://github.com/Ciao1019/ArcMD/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 ArcMD contributors
+ShortDescription: A native Markdown rich-text editor written entirely in Go that organizes local-first notes into colorful Spaces.
+Description: |-
+  ArcMD brings Markdown's familiar writing flow onto a calm, expressive native canvas.
+  Built entirely in Go with MyGo's Native UI — windows, GPU drawing, glyph shaping, and input handling run directly from Go with no HTML, JavaScript, WebView, Electron, or cgo.
+  Spaces & live themes: colors, gradients, translucency, and dark paper
+
+  Each space maps to a local folder with its own name, icon, persistent Pinned tabs, and last-open page. Swipe with two fingers on the sidebar or press ⌃1…⌃9 to glide into the next space, while global Favorites at the top open right in place without switching spaces. Open Edit Theme Colors… to blend one to three gradient stops, dial in frosted translucency and subtle grain, or flip between Light and Feishu-inspired Dark paper (#1F2023) with balanced color remapping.
+  The Library: every space at a glance
+
+  Click the Library icon in the bottom-left corner or press ⇧⌘L. The sidebar widens into a row of space cards painted in each space's own theme colors, with folders and pages ready to jump straight into. Plugins and the 30-day Recently Deleted collection live here too.
+  A sidebar that steps aside — and peeks on demand
+
+  Press ⌘\ (or narrow the window) and your page fills the entire window. Whenever you need another file, move the pointer to the left edge: the frosted floating sidebar glides out over your page, shows live miniature page thumbnails on hover, and tucks itself away the moment you return to writing.
+  Hand-drawn marks: give your ideas a human touch
+
+  Select a phrase and pick from 12 hand-drawn stroke styles and palette colors in the floating toolbar — circle what matters, cross out hesitation, or point an arrow at the next step. Every stroke draws itself in smoothly and round-trips losslessly in .md (and legacy .arcmd) files. Try the idea journal sample, or start with a line of your own.
+  Margin bookmarks: pick up right where you left off
+
+  Hover any block to reveal a margin bookmark, or press ⌘D. Your marks appear automatically in the document outline (with rendered TeX previews for math blocks), ⌃⌘↑ / ⌃⌘↓ hop smoothly between them, and ⇧⌘D searches bookmarks across every space — without ever modifying the .md file itself.
+
+  ArcMD edits and autosaves standard .md Markdown files (.md, .markdown, .mdx) directly in place in the background — no proprietary database and no sidecar .arcmd duplicates. Every note is a plain local file with its images in a nearby assets/ folder, ready for Obsidian, Typora, VS Code, or Git.
+  - Untouched blocks stay untouched: block-level source diffing (ImportSource) preserves your original indentation, list markers, and link syntax on paragraphs you didn't edit.
+  - 100% lossless rich round-trips: text colors, highlights, hand-drawn marks, five-tone callouts (GitHub > [!NOTE] alerts), <details> toggles, merged/colored tables, custom-width two-column layouts (data-widths), and page icons/covers/word goals degrade cleanly via standard Markdown + semantic HTML + YAML frontmatter and restore completely in ArcMD.
+  - Backward compatible: existing legacy .arcmd files and history snapshots continue to open and edit seamlessly.
+Tags:
+- knowledge-base
+- markdown
+- markdown-editor
+- note-taking
+- notes
+- writing
+ReleaseNotes: |-
+  This release adds Sidebar Copy, Paste, and Duplicate for documents, folders, and multi-selections (#10, #39), streaming Responses & Chat Completions protocol support for Space Q&A (#23), crisp math formula rendering, content-aware expanding tables, narrow-window sidebar hysteresis, and an optional Autosave toggle (#32), plus targeted fixes for table row selection crashes (#34, #35) and literal plain-text clipboard copying.
+  Sidebar, Space Q&A, and Writing Workflow
+  - Sidebar Copy, Paste, and Duplicate (internal/vault/copy.go, internal/app/copy.go, internal/app/sidebar.go): Right-click or use ⌘C / ⌘V (Ctrl+C / Ctrl+V) in the sidebar to copy, paste, or duplicate documents, nested folders, multi-selections, and favorite tiles within or across Spaces. Duplicate enters inline rename and opens the copy focused in the body; cross-folder and cross-Space pastes preserve or rebase attachments and covers safely with one-click Undo via Trash (#10, #39, thanks to @tajiaoyezi).
+  - Streaming Responses and Chat Completions for Space Q&A (internal/agent/responses.go, internal/app/qasettings.go, cmd/arcmd/ask.go): Choose Automatic, Chat Completions, or Responses in Settings → AI Q&A or via arcmd ask -protocol. Automatic selects stateless streaming Responses for recognized reasoning models on OpenAI and OpenRouter while preserving pending tool-call results and encrypted reasoning replay (#23, thanks to @hyskr).
+  - Optional Autosave toggle with unsaved-changes guard (internal/prefs/prefs.go, internal/app/unsaved.go, internal/app/settings.go): Toggle background autosave in Settings → General → Writing or the command bar (⌘K). When disabled, edits remain in memory until explicitly saved (⌘S), and leaving or closing modified documents prompts Save / Don't Save / Cancel (#32).
+  Math Rendering, Tables, and Clipboard Fixes
+  - Crisp scaled math, wrapping equations, and content-aware tables (internal/editor/math.go, internal/tex/layout.go, internal/editor/virtualize.go, internal/app/app.go): Paint inline and display formulas directly at their target font size instead of raster-scaling pre-shaped glyphs, wrap long inline equations before shrinking, size table columns by natural content width and let wide formula tables expand past the standard prose column as the window widens, and add widening hysteresis so dragging a narrow window wider does not prematurely unfold the sidebar and squeeze the document (#32).
+  - Fix table row selection panic (internal/editor/table.go): Guard column-index access in the table toolbar so selecting a row whose index exceeds the column count no longer triggers an out-of-range panic (#34, #35, thanks to @Zzzt2003).
+  - Literal plain-text copy and cleaner Markdown escaping (internal/editor/clipboard.go, internal/editor/markdown.go): Copy literal characters without Markdown backslash escapes, backticks, or <p align=...> wrappers from table cells, inline code, and prose, and leave intraword underscores unescaped when exporting Markdown.
+ReleaseNotesUrl: https://github.com/Ciao1019/ArcMD/releases/tag/v0.2.5
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
