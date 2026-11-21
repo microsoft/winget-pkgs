@@ -1,0 +1,71 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: OpenAEC.OpenPointcloudStudio
+PackageVersion: 2026.45.1
+PackageLocale: en-GB
+Publisher: OpenAEC Foundation
+PublisherUrl: https://github.com/OpenAEC-Foundation
+PublisherSupportUrl: https://github.com/OpenAEC-Foundation/open-pointcloud-studio/issues
+PackageName: Open Pointcloud Studio
+PackageUrl: https://open-aec.com/open-pointcloud-studio/
+License: GPL-3.0-only AND LGPL-3.0-or-later
+LicenseUrl: https://github.com/OpenAEC-Foundation/open-pointcloud-studio/blob/HEAD/README.md#licences
+ShortDescription: Desktop application for viewing, measuring, editing and converting laser scans and other point clouds, and turning them into section drawings and meshes.
+Description: |-
+  A desktop application for viewing, measuring, editing and converting laser scans and other point clouds, and for turning them into section drawings, meshes and the flat faces of a building. It runs on Windows, Linux and macOS, is written in Rust and needs no browser or web view.
+  Open
+  - Point clouds in LAS, LAZ, E57, PLY, PCD, PTX, PTS and text formats, meshes in OBJ, PLY, OFF and STL, and the points and faces of an ASCII DXF.
+  - A whole scan project at once: every supported file in a folder, or the scans that a scan project file (.rcp) lists and that lie beside it.
+  - Several files together, each as a layer that can be hidden, shown or closed.
+  - Large files stay usable while they open: LAS and LAZ open from their header, an E57 file of 512 MiB or more shows a sample spread through the file within about a second when its layout allows that and is then decoded on several threads, and a scan that is read in full shows its points while it is read.
+  View
+  - An index on disk (an octree) supplies the detail for the current camera, up to the point budget. It is built automatically for clouds of one million points or more, and reused the next time the file is opened.
+  - Four colour modes (stored colour, elevation, intensity, classification), eye-dome lighting, and a point size from 0.1 to 20.
+  - Tabs put the 3D model, opened views, drawings and sheets, and E57 photos side by side.
+  - Scanner stations are shown as markers; panoramas and photos taken along a path in an E57 file can be viewed in place, and colour from photos gives the points of a scan the colours its photos see them with.
+  - Walk through the scene with W, A, S, D.
+  Section box and 2D drawings
+  - A box with six draggable faces limits what is shown, selected, meshed and searched for faces, and its content can be exported on its own or drawn as a 2D drawing.
+  - Section drawing makes a 2D drawing at scale 1:1 of what the section box cuts and saves it as DXF or DWG: a plan, an elevation or a vertical section, from all visible scans.
+  - Filled cut adds the walls, columns and floors that the slab goes through as filled regions with outlines, and straight CAD lines add closed, editable polylines on a layer of their own.
+  - Sheets hold paper from A4 to A0 with a border and a title block; drag views onto the paper, annotate with text, dimensions and leaders, and export the sheet as a PDF.
+  Edit and measure
+  - Box select, point picking, delete with undo, thinning, moving and scaling; none of this changes the source file. Exports write the edited result.
+  - Distance and area measuring between picked points, labelled in metres.
+  Mesh and faces
+  - Mesh Pointcloud turns the points of a scan, or the part of them inside the section box, into a terrain mesh, a 3D surface, a closed mesh of a room, or the detected flat faces and round columns.
+  - Export meshes as OBJ, PLY, STL, DXF, DWG or IFC4, and detected faces as JSON, OBJ, DXF, DWG or IFC4.
+  Export and convert
+  - Export the active scan as LAS, LAZ, E57, PLY, XYZ, PTS or CSV; an unedited LAS, LAZ or E57 file exported to its own format is copied byte for byte.
+  - Merge visible LAS/LAZ scans into one file.
+  - Export BCF 2.1: saved views with notes and pictures.
+  Extensions and automation
+  - Every window runs a command server on 127.0.0.1. The command line offers headless modes for conversion, section export, drawing, merging, meshing and face detection, and --mcp serves the commands as MCP tools.
+  - Extensions from other authors add tasks: a folder or .zip with an extension.json and a program in any language, such as a PowerShell or Python script.
+  - A built-in extension downloads building models of the Netherlands (3D BAG) for an area and shows them with a scan.
+Tags:
+- dxf
+- e57
+- las
+- laz
+- lidar
+- mesh
+- point-cloud
+- surveying
+ReleaseNotes: |-
+  - E57 exports now retain station photos, spherical and cylindrical panoramas, masks, camera poses and scan associations after filtering, section export and colouring points from photos. Edits that cannot preserve camera poses fail explicitly instead of silently dropping the images.
+  - Photo editing in Properties adds 2:1 JPG or PNG panoramas at a chosen point and camera height, and moves, turns, renames or deletes existing photos. Undo and Redo restore edits; a sidecar keeps them between sessions and E57 export embeds the image data.
+  - Scan registration fits corresponding point pairs or a manual translation and vertical rotation, then refines overlapping surfaces with bounded point-to-plane ICP. It reports residuals, RMS and p95, shows a deviation-coloured preview, exports full-resolution registered E57 scans or scenes, and saves reusable transformation matrices. A section box clips the moving scan after its coarse alignment, so fine alignment works when the two input coordinate frames differ.
+  - Merge visible scans and the command-line merge accept mixed input formats and write E57, LAS or LAZ. E57 can retain stations and images or write only points; mixed LAS/LAZ layouts normalise common attributes to LAS 1.4 while compatible LAS records keep their original attributes. Keeping stations also preserves PCD VIEWPOINT poses and individual PTX scan blocks, with their origins and orientations; non-E57 inputs without a station pose do not acquire an artificial origin station.
+  - Prepare for Autodesk ReCap exports an E57 with its images and import instructions. ReCap creates its RCP/RCS files after import; direct RCP/RCS writing still requires Autodesk SDK access and licensing arrangements.
+  - The native API and MCP add photo editing, scan registration and ReCap preparation commands at API revision 12. The command line can apply a saved registration matrix with --apply-registration.
+  - Signed Linux releases include the public signing key. Verification checks its fingerprint and signatures offline, without depending on a keyserver.
+ReleaseNotesUrl: https://github.com/OpenAEC-Foundation/open-pointcloud-studio/releases/tag/v2026.45.1
+Documentations:
+- DocumentLabel: User guide
+  DocumentUrl: https://github.com/OpenAEC-Foundation/open-pointcloud-studio/blob/HEAD/docs/guide.md
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/OpenAEC-Foundation/open-pointcloud-studio/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
