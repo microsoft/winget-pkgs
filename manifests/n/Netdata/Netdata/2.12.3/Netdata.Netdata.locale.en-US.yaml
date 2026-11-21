@@ -1,0 +1,80 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Netdata.Netdata
+PackageVersion: 2.12.3
+PackageLocale: en-US
+Publisher: Netdata Inc.
+PublisherUrl: https://www.netdata.cloud/
+PublisherSupportUrl: https://github.com/netdata/netdata/issues
+PackageName: Netdata
+PackageUrl: https://www.netdata.cloud/
+License: GPL-3.0
+LicenseUrl: https://github.com/netdata/netdata/blob/HEAD/LICENSE
+Copyright: Copyright (c) Netdata Inc.
+ShortDescription: Real-time infrastructure monitoring agent with per-second metrics and a built-in web dashboard.
+Description: Netdata is an open-source, real-time infrastructure monitoring agent. It collects thousands of metrics per second from the local system with minimal configuration, stores them locally and visualizes them in a built-in web dashboard. On Windows it installs as a service and can optionally be connected to Netdata Cloud for centralized, multi-node monitoring.
+Moniker: netdata
+Tags:
+- alerting
+- cncf
+- data-visualization
+- database
+- devops
+- docker
+- grafana
+- influxdb
+- kubernetes
+- linux
+- machine-learning
+- monitoring
+- mysql
+- netdata
+- observability
+- prometheus
+ReleaseNotes: |-
+  Release notes
+  Netdata v2.12.3 is a patch release to address issues discovered since v2.12.2.
+  This release makes the Agent detect a dead Netdata Cloud connection even while traffic keeps flowing, fixes use-after-free crashes when a stale node is removed while a child or plugin is still using it, stops children configured with parent using h2o from crashing on every connection, makes a negated IP in an access list take precedence over hostname matching, rejects malformed percent escapes in URLs, bounds MCP batch requests, removes global SQLite stalls, fixes crashes when obsolete charts are cleaned up while they are still being read, keeps the Agent from hanging at startup when a dbengine tier cannot be created, keeps Parents using the ram or alloc storage modes from shifting their children's history after a gap and from crashing on multi-node metric correlations, lets SNMP and other virtual nodes go offline again when their collector stops reporting them, makes PowerStore charts show the values the array reports instead of zeros, makes the eBPF plugins ignore directory overrides from the environment when they run with elevated privileges, and reloads host labels from the configuration file the Agent actually loaded.
+
+  Streaming and Netdata Cloud
+  - Fixed the MQTT keepalive of the Cloud connection. It was only checked when the connection was idle, so a link with steady inbound traffic never noticed an unanswered ping and could stay stalled indefinitely. The ping and acknowledgement deadlines also followed the wall clock, so a clock step caused a false ping timeout or delayed detection, and on boards without an RTC acknowledgements never timed out before the first NTP sync. Deadlines now use a monotonic clock, and a dead connection is detected 60 seconds after an unanswered ping (#24427, @stelfrag)
+  - The Agent's HTTPS client for Netdata Cloud now checks the chunk sizes of chunked responses strictly and caps such responses at 1 MiB. A malformed or very large chunk size could make the Agent exit while allocating memory for it (#24483, @stelfrag)
+  - Fixed use-after-free crashes when netdatacli remove-stale-node or the orphan and ephemeral host cleanup removed a host that was still in use, either by a child reconnecting to it or by a plugin that had it selected as a virtual node. A child that reconnects during a removal is now asked to retry, and a virtual node selected by a plugin is reported as online and left alone (#24353, @stelfrag)
+  - Removed the [stream] parent using h2o option. The h2o web server was removed in v2.7.0, and since v2.8.0 a child with this option enabled crashed on every connection attempt to its Parent. A stream.conf that still sets it is accepted and the option is ignored (#24426, @stelfrag)
+
+  Web server and APIs
+  - Access lists: a client whose IP matches a negated entry, such as !203.0.113.7 in allow connections from = !203.0.113.7 *, is now denied without its hostname being checked against the list. This applies to every access list in netdata.conf when DNS checks are enabled, including the default heuristic mode for lists with a wildcard (#24404, @ArjunD3456)
+  - URLs with malformed percent escapes are now rejected with HTTP 400. A % had to be followed by two hex digits but was not checked, and a URL that failed to decode was served using the part decoded so far, so /api/v1/info%zz was answered as /api/v1/info. A request containing a literal % that is not followed by two hex digits, such as ?x=100%, now gets 400 (#24248, @stelfrag)
+  - The MCP API key and the management API key are now compared in constant time, so response timing no longer reveals how close a guessed key is (#24418, @ArjunD3456)
+  - MCP: JSON-RPC batches are limited to 64 requests and 16 MiB of responses, and WebSocket messages to 1 MiB, the same as HTTP requests. Requests whose id is not a string, number or null are rejected (#24425, @stelfrag)
+  - X-Forwarded-For: the Agent now keeps only the first address of the header, and only when it is a valid IPv4 or IPv6 address. This is the forwarded client address shown in the access log and in the audit entries of dynamic configuration changes. Other values, such as unknown, are dropped (#24452, @ArjunD3456)
+  - Registry: the netdata_registry_id identity is now read only from the Cookie header, not from anywhere else in the request, such as the query string. This affects only Agents with the registry enabled, which is off by default (#24494, @ArjunD3456)
+  - Claiming: a request to /api/v2/claim or /api/v3/claim with a wrong key no longer regenerates the claim challenge, so it cannot interrupt a claim an administrator is making. The challenge is still regenerated at startup and after a claim with a valid key (#24531, @stelfrag)
+
+  Database
+  - Fixed SQLite stalls across the Agent. A global lock was held around SQLite calls, so one slow statement blocked every thread using SQLite, not only those using the same database connection (#24099, @stelfrag)
+  - Corruption of the metadata database that appears while the Agent is running is now marked for recovery on the first failing query, instead of only at a clean shutdown or never after a crash. The SQLite query statistics no longer count a busy retry that later succeeded as a failed query (#24225, @stelfrag)
+  - Parents using the ram or alloc storage modes no longer shift their children's streamed and replicated history after a gap. Every gap moved all older values one interval earlier and overstated retention by one interval (#24434, @stelfrag)
+  - dbengine now loads only datafiles with the exact name it writes. A copy such as datafile-1-0000000001.ndf.bak was loaded a second time alongside the real file, and a stray datafile-2-*.ndf stopped the Agent at startup. Other names are now reported as unknown files and skipped (#24436, @stelfrag)
+  - Fixed crashes when the cleanup of obsolete charts freed a chart, or its labels, while health variable lookups, Prometheus export, alert and context API requests or queries were still reading it. These include the Agent exiting on an allocation of a huge size (#24466, #24474, @stelfrag)
+  - dbengine: the Agent no longer hangs at startup when the directory of a tier cannot be created or its initialization thread cannot start. A missing tier above tier 0 now leaves the Agent running with the tiers below it, and a missing tier 0 stops startup with an error (#24435, @stelfrag)
+
+  Queries
+  - Fixed a crash in metric correlations and other weights queries over two or more nodes on Agents without a dbengine tier, such as a Parent using the ram or alloc storage modes. Such Agents now process the nodes one at a time (#24433, @stelfrag)
+  - The summary.nodes[] section of query responses now includes the query time of the last node, which was missing. With options=percentage, the anomaly rate of the dimensions view is no longer inflated. The chart_labels arrays of /api/v1/data now have one entry per dimension, with null where a chart lacks the label (#24460, #24474, @stelfrag)
+
+  Machine learning
+  - [ml] dimension anomaly score threshold is now limited to 0.01 to 1.00, with a warning in the log when the configured value is changed. Values up to 5.00 were accepted, but anything above 1.00 silently turned off anomaly detection, because a model's anomaly score cannot exceed 100. Such values now run at 1.00, the least sensitive setting (#24499, @stelfrag)
+
+  Collectors
+  - ebpf.plugin and ebpf-go.plugin are installed setuid root. When they run with elevated privileges, they now ignore the NETDATA_*_DIR environment variables and use the plugin, configuration and log directories they were built with. Standard installations are not affected. A [directories] override in netdata.conf that points these directories elsewhere no longer reaches the eBPF plugins, which log one line for each ignored variable (#24412, @stelfrag)
+  - Redfish: manager network ports exposed as standard Port resources are now collected, including their link state and speed. They were rejected, leaving the collection permanently partial (#24270, @ilyam8)
+  - PAN-OS: panos.ipsec.tunnels now counts the established IPsec tunnels instead of reporting the configured ones, and a tunnel with overlapping SAs during rekeying counts once. The remaining SA lifetime now reports the longest valid lifetime of a tunnel instead of a varying or summed value (#24385, @macmandr197)
+  - go.d.plugin: fixed collectors such as Cato Networks failing a collection cycle with a host scope conflict when a host's metadata changed while its identity stayed the same (#24415, @ktsaou)
+  - Cato Networks: the topology Function now connects each site to its devices, keeps every observed WAN tunnel instead of merging parallel ones, and marks tunnels as connected, disconnected or unknown. Sites, devices and tunnels carry more detail for troubleshooting, such as HA roles, loss, jitter, last-mile measurements and BGP sessions, and the graph notes when inventory, metrics or BGP data are missing. The collector now uses Cato SDK v1.1.0 (#24413, @ktsaou, #24362, @ilyam8)
+  - ebpf.plugin: the number of tracked PIDs in ebpf.monitoring_pid no longer keeps growing on hosts with short-lived processes. A process that exited before its /proc entry was read was released without being subtracted (#24423, @stelfrag)
+  - statsd.plugin: with [statsd] set charts as obsolete after enabled (off by default), the Agent no longer crashes the first time an idle metric is removed. Removal also no longer leaks the metric's values, and metrics used by synthetic charts are kept. The private chart count no longer wraps around and blocks every new private chart (#24440, @stelfrag)
+ReleaseNotesUrl: https://github.com/netdata/netdata/releases/tag/v2.12.3
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
