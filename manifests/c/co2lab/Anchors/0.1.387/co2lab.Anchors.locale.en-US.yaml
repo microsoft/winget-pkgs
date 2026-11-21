@@ -1,0 +1,57 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: co2lab.Anchors
+PackageVersion: 0.1.387
+PackageLocale: en-US
+Publisher: co2lab
+PublisherUrl: https://github.com/co2-lab
+PublisherSupportUrl: https://github.com/co2-lab/anchors/issues
+PackageName: Anchors
+PackageUrl: https://github.com/co2-lab/anchors
+License: Elastic License 2.0
+LicenseUrl: https://github.com/co2-lab/anchors/blob/HEAD/LICENSE
+ShortDescription: Spec-first continuity framework for AI-assisted development
+Description: Anchors ties spec, feature and test together through a shared identity code, then confronts each artifact against the rules declared in anchors.yaml. It maps the project as a graph, propagates change from the anchor outward, and gates every step — so work guided by AI stays anchored to what was decided.
+Moniker: anchors
+Tags:
+- ai
+- ai-agents
+- cli
+- developer-tools
+- golang
+- spec-first
+ReleaseNotes: |-
+  New: external files by URL, with {{branch}}
+  A field of anchors.yaml that reads a file now accepts a URL, directly or through an alias
+  (v0.1.386): governs[].from, a judgment gate's guide, changelog.template and packs. A guide
+  shared by several repositories lives in one of them:
+  aliases:
+    "@std": https://raw.githubusercontent.com/acme/standards/{{branch|develop}}
+  governs:
+    - from: "@std/SCREEN_GUIDE.md"
+      governs: ui
+  - {{branch}} is the project's current branch: the pull request's head in CI
+    (GITHUB_HEAD_REF), else the branch checked out, else GITHUB_REF_NAME. A project on develop
+    reads the standards' develop.
+  - {{branch|develop}} reads develop when the branch's mirror does not exist (a 404).
+  - A URL that answers nothing — neither the branch's nor the default's — fails every command that
+    reads it: map build and check for a governs guide, check for a judgment guide, work,
+    changelog, the packs' load.
+  - Each URL is read once per command and kept in .anchors/cache/urls/; with the server
+    unreachable, the last copy answers.
+  - A private GitHub repository is read with GH_TOKEN or GITHUB_TOKEN, sent to GitHub's hosts
+    only.
+  An external guide is a node of the map, by its URL as declared, marked external: true and
+  revised by its content: a guide changed in its repository, or read from another branch, leaves the
+  edges it governs to be confronted again. No gate confronts it, since the project neither writes
+  nor versions it. work and the judgment tasks name the URL that answered.
+  A glob (layers, frozen_paths, suites[].paths…) or a file written (derived.files,
+  changelog.path, docs.required[].path, the suites' reports) cannot be a URL: the configuration
+  refuses it, naming the field.
+  Everything in the v0.1.351 notes still applies: run anchors migrate once, crossing format 8.
+  Changelog
+  - ac3dd2e feat(pathref): files read by anchors.yaml may live at a URL, with {{branch}} mirroring the project's
+ReleaseNotesUrl: https://github.com/co2-lab/anchors/releases/tag/v0.1.387
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
