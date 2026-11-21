@@ -1,0 +1,68 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Fallow.Fallow
+PackageVersion: 3.42.0
+PackageLocale: en-US
+Publisher: Fallow B.V.
+PublisherUrl: https://github.com/fallow-rs
+PublisherSupportUrl: https://github.com/fallow-rs/fallow/issues
+PackageName: Fallow
+PackageUrl: https://fallow.tools/
+License: MIT
+LicenseUrl: https://github.com/fallow-rs/fallow/blob/HEAD/LICENSE
+ShortDescription: Analyze TypeScript and JavaScript for unused code, duplication, and complexity.
+Moniker: fallow
+Tags:
+- javascript
+- typescript
+ReleaseNotes: |-
+  Security
+  - migrate, rule-pack init, coverage setup and ci-template gitlab --vendor no longer write through a symlink that leaves the project. A cloned repository could commit a symlink at a path that one of these commands writes, and the link could point outside the project. The commands then wrote or overwrote the outside file. Now each command exits with code 2 when the target or a parent directory is a dangling symlink. The same applies to a symlink that resolves outside the project. A link that stays inside the project still works. When only the config file of rule-pack init links outside the project, the command writes the pack and does not change the config. It prints the rulePacks entry, and you add that entry by hand. Versions 3.41.0 and earlier are affected. Upgrade to 3.42.0. (#4410)
+  - The analysis caches no longer write through a symlink that leaves the project. A cloned repository could commit .fallow, a directory in it, or a cache file as a symlink to a path outside the project. An analysis run then created or overwrote the outside file, or wrote cache files into the outside directory. Now each cache writer skips its save when the path is a dangling symlink or a symlink that resolves outside the project, and the analysis continues. health --save-snapshot stops with an error in that case, and audit-cache prune does not delete through such a link. A link that stays inside the project still works, and so does a cache.dir or FALLOW_CACHE_DIR outside the project. (#4422)
+  - The MCP server requires rmcp 3.9 or later. rmcp 3.8.0 has the advisory RUSTSEC-2026-0462 in its Streamable HTTP clients. The Fallow MCP server uses stdio and does not enable these clients, so it was not exposed. The update clears the dependency audit. (#4407, #4408)
+  - The GitHub Action no longer writes its artifacts through a symlink, and it escapes a rejected dependency version in its installation diagnostics. (#4401)
+
+  Features
+  - The GitHub Action and the GitLab template can run fallow mutation. Set mutation: true (GitLab: FALLOW_MUTATION: "true"). The default scope is the changed lines of the pull request, with a 10m time budget. The inputs mutation-scope, mutation-time-budget, mutation-max-mutants and mutation-min-score control the run. A failed mutation-min-score fails the job with exit code 1. A tool failure of the run fails the job with exit code 2. The step does not run in a job that can run fork code with the secrets of the base project. The step also removes the CI tokens from the test environment. (#4368)
+  - fallow report renders mutation results in CI. The new flags --mutation-report <PATH> and --mutation-not-run <REASON> work with the pr-comment, review, github-summary, github-annotations and codeclimate formats. Survived mutants on changed lines appear with the rule fallow/mutation-survived in the new Tests category. The comment, the review summary and the job summary get a "Mutation testing" section. A fallow mutation run with --min-score or mutation.minScore writes gate_outcomes["mutation-min-score"] into its report. The Action has the new output mutation-report-rendered. (#4400)
+  - fallow mutation export writes a saved report in the open mutation-testing-report-schema format. Mutation dashboards and HTML report viewers read this format. The command runs no code, and it refuses a report whose mutated files changed after the run. (#4396)
+  - fallow mutation makes more mutants with the existing operators. An if or ? : test that is a comparison or a logical expression becomes true and false. A loop test of this kind becomes false only. An && operand that is a comparison or a !x becomes true. Such an || operand becomes false. regex-literal removes a +, * or ? quantifier, shortens {n,m} to {n}, and removes an anchor at the start or end of a group. Compound assignments, unary operators and template literals get new mutants. The operator names do not change, and an existing mutant keeps its id. (#4372)
+  - fallow mutation has nine opt-in operators. block-statement, array-literal, object-literal, method-expression, switch-case, call-expression, throw-statement, regex-constructor and regex-assertion run only when --operators, mutation.operators or the MCP operators parameter names them. The default set does not change. (#4385)
+  - New options to plan a mutation run. --time-budget now runs the cheapest mutants first. --mutants-per-line <n> (mutation.mutantsPerLine) limits the mutants on each line, and the others are pending with the reason sampled-out. --function-scope (mutation.functionScope) widens each changed line to its whole function. The run also warns about skipped and todo tests in changed test files. (#4373, #4399)
+  - fallow mutation --typecheck adds an equivalence hint to an optional-chaining survivor. When the declared type of a excludes null and undefined, the survivor of a?.b to a.b gets equivalence_hint: "type-non-nullish". The hint needs strictNullChecks and noUncheckedIndexedAccess. The hint can be wrong. The mutant stays survived and stays in the score. (#4369)
+  - New built-in plugins: gulp, n8n, unplugin-icons, vite-plugin-pages, SolidStart and dumi. The gulp, n8n, vite-plugin-pages, SolidStart and dumi plugins mark the files that their tool loads as entry points. These files and their imports are no longer unused files. The n8n plugin also credits the members that n8n reads from an INodeType or ICredentialType class. With the unplugin-icons plugin, a ~icons/... import is no longer an unlisted dependency. The import also credits the icon set packages. (#4393, #4394)
+  - fallow coverage upload-inventory --with-callers finds the entry routes of Elysia and TanStack Router projects. Fallow does not upload a route whose path or prefix is not a string literal. (#4358)
+
+  Changed
+  - The warning for a config glob that matches fewer files since 3.34.0 names the files and gives two fixes. It names up to 3 lost files and tells you how to keep the one-level meaning, for example {name1,name2} in place of *. For entry and dynamicallyLoaded, a lost file that another entry source declares does not count. (#4345)
+  - fallow mutation is faster on Vitest projects. An endless loop through a mutant now stops at a CPU-time loop budget, without a restart of the test process. The Vitest adapter keeps one worker process for many mutant runs when the dry run shows that this gives the same results. On three public Vitest libraries, the CPU time of a full run decreased by a factor of 1.6 to 3.0, and no verdict changed. A mutant that only makes a test slow can now get timeout in place of killed or survived. (#4353, #4354, #4359, #4362)
+  - arithmetic-operator skips *, / and % with a string or template operand, as it already did for + and -. (#4372)
+
+  Bug fixes
+  - fallow dead-code credits more class members. Fallow now credits a member in these cases:
+    - on a method chain with arguments on a typed parameter;
+    - on the return value of an inherited method in a class that is not exported;
+    - on an element of an array that a function returns;
+    - on the result of an awaited async static factory;
+    - on an element of a typed array field;
+    - on a Playwright page object that a fixture reaches through a property.
+    Thanks @Smrtnyk for the reports. (#4349, #4391)
+  - Plugin entry points apply again in a monorepo with 200 or more workspaces. Before, the plugin glob set did not compile at that size, and fallow dead-code reported test files, pages and config files as unused. (#4387)
+  - An import into the unbuilt output folder of a workspace package resolves to the source file. This covers deep imports such as lib/dist/util and a package main in a custom outDir. (#4398)
+  - A wildcard exports target in build output maps to its source files. With "./*": "./dist/*.js", the files under src/ are no longer unused files. Workspace entry point paths also no longer keep a ./ segment. (#4388)
+  - A test runner or a bundler in the root package.json activates its plugin in a workspace when a script of that workspace calls its binary. (#4390)
+  - React Router route files that an imported module declares are entry points. The plugin follows spreads, imports and re-exports from routes.ts, and it escapes brackets such as [workspaceSlug] in a route path. (#4392)
+  - fallow audit keeps a css-duplicate-block finding inherited when only the lines of a later occurrence move. Thanks @Smrtnyk for the report. (#4348)
+  - fallow health --css keeps a .scss or .less file with an absolute url() in css_analytics. Before, the // of url(//cdn.example.com/a.png) read as a line comment. Thanks @rezamuliawijaya for the fix. (#4340)
+  - Columns are correct with a byte order mark or non-ASCII text. The LSP, the duplication detector, extraction and fallow mutation inspect now handle a UTF-8 byte order mark the same way. The LSP now also shows diagnostics for an open file with a byte order mark. A Glimmer argument that only a <template> block reads now counts as used in such a file. Clone start_col and end_col are now byte columns. A tool that reads them as character columns must change. (#4376, #4377, #4395, #4396)
+  - The LSP offers the remove-export quick fix for a name with a combining mark. (#4375)
+  - SARIF region columns count UTF-16 code units. Before, on a line with non-ASCII text before a finding, a code scanning view showed the finding too far to the right. The fingerprints keep the byte column, so existing alerts keep their identity. JSON column fields do not change. (#4417)
+  - The changed-code scope of fallow mutation detects renamed and copied files. When Git detects the source of a copy, only the edited lines of the copy get mutants. A diff that you supply keeps its literal meaning. (#4416)
+  - fallow mutation keeps the scope of a diff that you supply. When the paths of an explicit patch do not match the project, the CLI now exits with code 2 before any test runs. Before, it used a generated Git diff in its place. (#4420)
+ReleaseNotesUrl: https://github.com/fallow-rs/fallow/releases/tag/v3.42.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://fallow.tools/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
