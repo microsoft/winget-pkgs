@@ -1,0 +1,113 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: BenjaminLSR.HandheldCompanion
+PackageVersion: 1.4.0.2
+PackageLocale: en-US
+Publisher: BenjaminLSR
+PublisherUrl: https://github.com/Valkirie
+PublisherSupportUrl: https://github.com/Valkirie/HandheldCompanion/issues
+Author: Lesueur Benjamin
+PackageName: Handheld Companion
+PackageUrl: https://github.com/Valkirie/HandheldCompanion
+License: CC-NC-SA 4.0 License
+LicenseUrl: https://github.com/Valkirie/HandheldCompanion/blob/HEAD/LICENSE.md
+Copyright: Copyright @ BenjaminLSR
+ShortDescription: ControllerService
+Description: A touch optimized GUI to increase your handheld gaming computer experience.
+ReleaseNotes: |-
+  > **Draft preparation:** The GUID-based profile storage backport from EA commit `7095656b67475d77abf9d26000d69414ae9cda25` is currently local and pending commit/push. Before publishing, update this draft's target to the commit containing that backport and remove this notice.
+
+  This update brings the Patreon 1.4.0.2 improvements to the mainline release, alongside the latest mainline fixes and an additional GUID-based profile storage backport. It introduces a chart-based motion sensitivity editor, improves gyro sampling and profile transitions, integrates overlay trackpad input, and adds ONEXPLAYER 3 support with further fixes for Steam Deck reports, device settings and application stability.
+
+  ## Highlights
+
+  ### More precise motion controls
+
+  Motion sensitivity can now be edited directly on an interactive chart using a mouse or touch, with Default, Aggressive and Precise presets and a live gyro indicator. Existing sensitivity curves from supported profiles are converted to the new format. Gyro sampling and motion accumulation have also been corrected, and timer deltas now use stopwatch tick precision.
+
+  ### More reliable profiles and settings
+
+  Profile and power-profile transitions are now serialized, avoiding intermediate profile application while switching. Profiles use stable GUID-based filenames, so duplicate display names cannot collide and renaming a parent does not move its subprofile files. Supported legacy files migrate at startup, with completed migrations preferred over leftover copies. Concurrent settings writes are better synchronized, while battery, lighting and performance controls stay in sync with their saved settings.
+
+  ### ONEXPLAYER 3 support and everyday improvements
+
+  ONEXPLAYER 3 support includes stick lighting presets, separate G-Key and logo lighting, G-Key mapping, charge-limit handling and corrected gyro axes. Pinned hotkeys are available from the tray menu, the overlay trackpad feeds controller touch reports, and the library gains collection deletion actions and a more consistent recent-games list.
+
+  # What Changed
+
+  ## Motion and controller input
+
+  • Replaced the motion sensitivity editor with an interactive chart supporting mouse and touch editing, sensitivity presets and a live gyro indicator.
+  • Converted legacy motion sensitivity curves from supported profiles to the new chart format and normalized stored curve values.
+  • Corrected gyro threshold clamping so readings retain their direction.
+  • Averaged accumulated gyro samples between updates and corrected motion accumulation.
+  • Calculated timer deltas from stopwatch ticks rather than millisecond-rounded timestamps.
+  • Integrated overlay trackpad input with controller touch reports, including touch-contact tracking and release handling.
+  • Corrected the View and Menu button bits in virtual Steam Deck reports. (#1494)
+  • Used calibrated gyro values in virtual Steam Deck reports. (#1499)
+
+  ## Library and profiles
+
+  • Serialized profile and power-profile transitions to keep switching operations consistent.
+  • Avoided applying intermediate profiles during transitions.
+  • Hardened profile loading and import handling, including a bounded wait for import confirmation.
+  • Replaced name-based filename collision prevention from the mainline fix (#1507) with stable GUID-based profile filenames. Duplicate display names and parent-profile renames no longer affect storage paths.
+  • Migrated supported legacy name-based profile files at startup, loading parents before subprofiles.
+  • Preferred completed GUID migrations and cleaned up leftover legacy copies of the same profile after interrupted migration.
+  • Deferred file-watcher events until startup migration finishes and synchronized profile deletion with file operations.
+  • Validated profile GUIDs during loading and preserved accepted imports by assigning a new GUID when needed.
+  • Saved profile replacements before removing legacy files, retained existing files when writes fail, and rejected stale saves for deleted or superseded profiles.
+  • Removed favorites-first sorting from profile lists.
+  • Limited the recent-games list to 10 entries.
+  • Refreshed library icons and formatting.
+  • Added collection deletion actions to the library.
+
+  ## Controller and device handling
+
+  • Added ONEXPLAYER 3 support, including stick LED presets, separate G-Key and logo colors, secondary-light breathing, G-Key mapping, charge-limit handling and gyro-axis configuration. (#1505)
+  • Respected firmware-fixed lighting speed on devices that do not expose an adjustable effect speed. (#1505)
+  • Added recognition for the ROG Xbox Ally X20 (2026), model RC74XA.
+  • Handled devices without adjustable battery charge percentages by using their supported limit instead of exposing unsupported changes.
+  • Kept battery charge-limit controls synchronized with settings changes. (#1495)
+  • Preserved LED colors when using the color picker and accent-color options. (#1496)
+  • Included embedded GPU temperatures in fan-control temperature readings.
+  • Corrected memory-sensor unit conversion.
+
+  ## Hotkeys, overlays and interface
+
+  • Added pinned hotkeys to the system tray menu.
+  • Opened the settings page for newly created hotkeys automatically.
+  • Persisted the OSD toggle so disabling it survives an application restart. (#1490)
+  • Refreshed the custom frame-limit slider when a performance preset is selected. (#1497)
+  • Refreshed the Quick Tools backdrop when the application theme changes. (#1501)
+
+  ## Stability and fixes
+
+  • Serialized settings writes so concurrent updates remain consistent. (#1498)
+  • Raised process events outside per-process locks to avoid lock contention and re-entrant event handling under those locks. (#1502)
+  • Cached process IDs so a disposed process cannot cause process-ID access to throw. (#1506)
+  • Limited internal assertions to debug builds.
+
+  ## Installer and maintenance
+
+  • Updated the application and installer version to 1.4.0.2.
+  • Updated libVIIPER to 0.8.2.
+  • Updated SDL3 and SDL3-CS to 3.4.18.
+  • Refreshed LibreHardwareMonitor, including AMD Fire Range support.
+  • Updated RAMSPDToolkit-NDD to 1.6.2 and Sentry to 6.12.0.
+  • Updated the AMD ADLX wrapper and GPU telemetry handling.
+
+  ## Upgrade compatibility
+
+  • Profile filenames now use GUIDs, while display names remain inside the profile JSON. Supported legacy name-based files are migrated automatically; back up the profile directory before upgrading.
+  • Unversioned profiles and profiles saved by version 0.27.0.13 or earlier are now rejected as outdated instead of being automatically migrated. Back up these profiles and migrate them with a compatible older release before updating, or recreate them in the new release.
+  • Motion sensitivity curves from supported profile versions are still imported into the new chart format.
+
+  Full Changelog：[1.3.3.1...1.4.0.2](https://github.com/Valkirie/HandheldCompanion/compare/1.3.3.1...1.4.0.2)
+ReleaseNotesUrl: https://github.com/Valkirie/HandheldCompanion/releases/tag/1.4.0.2
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/Valkirie/HandheldCompanion/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
