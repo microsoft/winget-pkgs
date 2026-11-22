@@ -1,0 +1,68 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Niko1221.Strata
+PackageVersion: 0.2.19
+PackageLocale: en-US
+Publisher: strata
+PublisherUrl: https://github.com/Niko1221
+PublisherSupportUrl: https://github.com/Niko1221/Strata/issues
+PrivacyUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/SAFETY.md
+Author: Niko1221
+PackageName: Strata
+PackageUrl: https://github.com/Niko1221/Strata
+License: MIT
+LicenseUrl: https://github.com/Niko1221/Strata/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Niko1221 and the Strata contributors
+ShortDescription: Runs AI models on your own computer for chat, coding and image work.
+Description: |-
+  Strata runs powerful AI models on your own computer. Chat, code and work with images locally, with an OpenAI and Anthropic compatible API served on localhost. No account is needed.
+
+  The installer carries the app, the App Host, Node and Strata Control. On first start the app shows the inference engine for your graphics card with its size and one Download button, and then fetches the model you choose.
+Tags:
+- ai
+- large-language-model
+- llm
+- local-llm
+ReleaseNotes: |-
+  Strata 0.2.19
+  The app and the Terminal are 0.2.19. The engines (strata-engine, the new strata-inkling shape engine, and the updated Linux SYCL strata-hy4 package) are 0.1.65, and so is Control, the program that installs and updates them. The update feeds are sequence 131 (shared) and 127 (linux-aarch64).
+  What changes for you
+  - Native Thinking Machines Lab Inkling 2 Mini support (strata-inkling 0.1.65). Run Thinking Machines Lab's 26.4B-parameter looped Mixture-of-Experts model (3.4B active per token / 5.4B looped-active across 48 virtual visits, up to 1M context, text + image inputs, OpenAI-compatible tool calling, direct non-thinking answers) locally across Windows, Linux, macOS Apple Silicon, Intel Arc, and NVIDIA DGX Spark (linux-aarch64).
+  - Three Strata Quantization packs (strata-engine/Inkling-2-Mini-Strata), starting from a 4 GiB graphics card:
+    - SQ-10 (10.47 GB / 9.75 GiB): fits 100% in VRAM on 12 GiB cards, 16 GiB Macs, and Radeon 780M / Strix Point iGPUs (and runs in hybrid RAM+VRAM mode from 4 GiB GPUs).
+    - SQ-15 (14.35 GB / 13.36 GiB): fits 100% in VRAM on 16 GiB cards and 24 GiB Macs (96.68% top-1 agreement with the original weights, 0.00889 test KL divergence).
+    - SQ-20 (19.35 GB / 18.02 GiB): bit-exact lossless native SF4+MX8 build for 24 GiB+ GPUs and 32 GiB+ unified memory (100.00% top-1 agreement and 0.00000 KL divergence on held-out test prompts and WikiText-2).
+    - Vision (Inkling-2-Mini-Vision.strata, 0.64 GB lossless BF16) and built-in W=4 Multi-Branch On-GPU Markov Beam Tree DSpark speculative decoding work out of the box in both the Desktop app and strata launch.
+    - Direct safetensors, .gguf, and Dual-GPU EP support: strata-inkling also loads official thinkingmachines/Inkling-2-Mini safetensors (+ mtp.safetensors) and community .gguf files directly, with --gpus 2 Dual-GPU Expert Parallelism and CUDA-Graph mapped-memory doorbell NUMA offload.
+  - 15 ready-made strata-inkling 0.1.65 packages in shape_engines, fetched automatically on demand when you choose Inkling 2 Mini:
+    - Windows x86_64: cuda-cuda13, cuda-cuda12, hip-strix (gfx1151), hip-rx9070 (gfx1200/gfx1201), hip-rdna3 (gfx1100–gfx1150, including Radeon 780M & Strix Point iGPUs), hip-rdna2 (gfx1030–gfx1032).
+    - Linux x86_64: cuda-cuda13, cuda-cuda12, hip-halo (gfx1151), hip-rx9070, hip-rx7900 (gfx1100–gfx1150), hip-rx6000, and unified fat sycl (Intel Arc A-series & Battlemage B-series).
+    - macOS arm64: metal (Metal 3 & Metal 4 simdgroup_matrix + barrier-free GEMV, signed & Apple-notarized).
+    - Linux aarch64: cuda-cuda13 (NVIDIA Grace Blackwell / DGX Spark GB10).
+  - Faster Qwen3.8-Flash-Next out of the box on NVIDIA Blackwell, RTX 40, RTX 30, and AMD RDNA3 (strata-engine 0.1.65, zero environment variables needed).
+  - Update as usual. Your existing Qwen, Hy4-Flash, and DeepSeek models, chats, and settings stay untouched.
+  Engine & performance highlights
+  - Inkling 2 Mini (strata-inkling 0.1.65):
+    - Sparse-MoE Bayes-Optimal W=4 On-GPU Markov Beam Tree DSpark + Zero-Logits-D2H serving (0.00000 KLD): reaches up to 250.3 tok/s solo (198.9 tok/s on lossless SQ-20), 11,306 tok/s prompt prefill, and 4,089.7 tok/s total output across 64 concurrent requests on RTX 5090; 154.4–214.5 tok/s on RTX PRO 5000; 131.6 tok/s (2,081.1 tok/s @ c=32) on 2x RTX PRO 6000 (--gpus 2 EP); 108.9–114.5 tok/s on Apple M5 Max 128 GB; 99.0–106.5 tok/s on Radeon AI PRO R9700 (+66%..+78%); 47.3–48.0 tok/s on Ryzen AI Max+ Strix Halo 128 GB (+46%..+64%); 74.3 tok/s (1,145.1 tok/s @ c=64) on DGX Spark GB10; and 159.2 tok/s on Intel Arc Pro B70 32 GB.
+  - NVIDIA Blackwell (sm_120/sm_121), Ada (sm_89), & Ampere (sm_86) (strata-engine 0.1.65):
+    - Native sm_120a dense_fp4_tc (192.6 TFLOPS), moe_fp4_tc v4, persistent INT8 Tensor Core dense_i8_tc, vhead_bitplane 2-stage LM head, row_dot2_80_sub16, and Q5_1 use_sub8 automatic defaults (0.000 pts force_check parity):
+    - RTX 5090 (Qwen3.8-Flash-Next): IQ3_S prefill +76% (3,205.9 ppts, 2.91x faster TTFT) and decode 161.6 tok/s (+19%); UD-Q4_K_XL decode 115.9–117.6 tok/s (+36%..+46%); NVFP4 prefill +36% (2.08x faster TTFT) and decode 155.5 tok/s (+15%).
+    - RTX PRO 5000 72 GB: IQ3_S prefill +72% (5,093–6,552 ppts, 2.96x faster TTFT) and agent8k decode 265.3 tok/s (+28%).
+    - RTX 4090 (sm_89): IQ3_S prefill +39% / decode +20%..+31% (117.1 tok/s); UD-Q4_K_XL prefill +42% / decode +47%..+59% (87.7 tok/s).
+    - RTX 3090 & 2x RTX A4000 (sm_86): IQ3_S / UD-Q4_K_XL / IQ2_XS prefill +12%..+26% (1.72x faster TTFT) and decode +13%..+20% (100% bit-exact).
+  - AMD RDNA3 (gfx1100–gfx1151) (strata-engine 0.1.65):
+    - NVFP4 Wave32 FP16 WMMA prefill (42–44x lower approximation error), native_h11p_kernel (PF_F16=2), discrete moe_p1a FL=3, IQ2_XS & NVFP4 single-launch bitwise-exact LDS decode (em0=8), 3.10x Wave32 WMMA DFlash2, WDDM coherent host staging, OCuLink PcieAuto, and automatic gfx1151 Strix Halo Windows defaults — delivering 1.44x–2.10x faster prefill and +17%..+22% faster decode (97.9 tok/s, peak 103.7 tok/s) on RX 7900 XT.
+  - Intel Arc SYCL (strata-hy4 0.1.65): fixes Battlemage (Arc Pro B70) XMX SYCL dispatch on Hy4-Flash.
+  Community acknowledgements
+  We gratefully thank Baptiste Rajaut (@baptisterajaut, PR #6520), @merbanan (PR #6520 stack), @cobra91 (PR #6506), @mercant1982, and Peasant Smith, OscarSheng, alesha-pro, and the Project Maya contributors whose MIT-licensed work on official safetensors / .gguf loading, InkDoorbell mapped-memory NUMA CPU offload, quantized KV modes, setup contracts, and --gpus 2 Dual-GPU Expert Parallelism helped shape Strata's unified strata-inkling support.
+ReleaseNotesUrl: https://github.com/Niko1221/Strata/releases/tag/v0.2.19
+Documentations:
+- DocumentLabel: Installation guide
+  DocumentUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/INSTALL.md
+- DocumentLabel: Supported models
+  DocumentUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/MODELS.md
+- DocumentLabel: Troubleshooting
+  DocumentUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/TROUBLESHOOTING.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
