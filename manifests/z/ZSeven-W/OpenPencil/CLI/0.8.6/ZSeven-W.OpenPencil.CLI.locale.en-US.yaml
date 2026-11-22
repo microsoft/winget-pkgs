@@ -1,0 +1,87 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: ZSeven-W.OpenPencil.CLI
+PackageVersion: 0.8.6
+PackageLocale: en-US
+Publisher: OpenPencil contributors
+PublisherUrl: https://github.com/ZSeven-W
+PublisherSupportUrl: https://github.com/ZSeven-W/openpencil/issues
+PackageName: OpenPencil CLI
+PackageUrl: https://op.zseven.tech/
+License: MIT
+LicenseUrl: https://github.com/ZSeven-W/openpencil/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 ZSeven—W
+ShortDescription: The command-line companion of OpenPencil, the open-source AI-native vector design tool.
+Description: |-
+  OpenPencil is an AI-native vector design tool with multi-agent workflows, a built-in MCP server, Figma import, and design-to-code export.
+
+  Why OpenPencil
+  🎨 Prompt → Canvas
+  Describe any UI in natural language. Watch it appear on the infinite canvas in real-time with streaming animation. Modify existing designs by selecting elements and chatting.
+  🤖 Concurrent Agent Teams
+  The orchestrator decomposes complex pages into spatial sub-tasks. Multiple AI agents work on different sections simultaneously — hero, features, footer — all streaming in parallel with per-member canvas indicators.
+  🧠 Multi-Model Intelligence
+  Automatically adapts to each model's capabilities. Claude gets full prompts with thinking; GPT-4o/Gemini disable thinking; smaller models (MiniMax, Qwen, Llama) get simplified prompts for reliable output.
+  🔌 MCP Server
+  One-click install into Claude Code, Codex, OpenCode, Kiro, or Copilot CLIs. Design from your terminal — read, create, and modify .op files through any MCP-compatible agent.
+  🎨 Style Guides
+  Built-in style guide library with tag-based fuzzy matching. Apply visual styles (glassmorphism, brutalist, retro, etc.) to AI-generated designs. MCP tools for external agent access.
+  📦 Design-as-Code
+  .op files are JSON — human-readable, Git-friendly, diffable. Design variables generate CSS custom properties. Code export to React + Tailwind or HTML + CSS.
+  🖥️ Runs Everywhere
+  Web app + native desktop on macOS, Windows, and Linux — one Rust core, a single self-contained binary, no browser engine. .op file association — double-click to open.
+  ⌨️ CLI — op
+  Control the design tool from your terminal. op design, op insert — batch design DSL, node manipulation. Pipe in from files or stdin. Works with desktop app or web server.
+  🎯 Multi-Platform Code Export
+  Export to React + Tailwind, HTML + CSS, Vue, Svelte, Flutter, SwiftUI, Jetpack Compose, React Native — all from one .op file. Design variables become CSS custom properties.
+  🧩 Embeddable SDK
+  op-web-sdk (vanilla) + op-web-sdk-react / op-web-sdk-vue adapters — embed a read-only .op viewer in your own app, powered by the same wasm renderer the editor ships.
+  🛡️ Design System Kit
+  Manage reusable UIKits with style switching and component composition. Import/export kits from .pen files. Built-in registry with MCP tools for external access.
+  👥 Real-Time Collaboration
+  Design together over authenticated peer-to-peer sessions with a public relay and built-in regional hubs. Join with a short pairing code, see live remote cursors, and resolve conflicts with per-edit detail and replay.
+Tags:
+- ai
+- design
+- figma
+- mcp
+ReleaseNotes: |-
+  This release adds motion authoring on the canvas, shared playback with Jian,
+  interactive HTML export, and browser-local MP4 export.
+  Motion authoring and playback
+  - Edit keyframes, easing and stagger in the Motion inspector and timeline.
+    Scrub the playhead to see the sampled frame directly on the canvas.
+  - Trigger named clips from interactions and author screen transitions.
+    Replay motion in Play while keeping the current screen and input values.
+  - Jian desktop and Web players use the shared motion runtime. Wheel and
+    trackpad scrolling move the rendered content, hit targets and in-view
+    animation checks together.
+  - Standalone HTML evaluates dynamic routes and runs local event chains with
+    state changes, conditions, delays, parallel branches, visibility changes
+    and named clips.
+  Export and automation
+  Export clips as GIF, APNG, a ZIP of PNG frames, or H.264 MP4. The desktop and
+  daemon use the same in-process Rust frame clock, H.264 encoder and MP4 muxer
+  as the browser WebAssembly build. The browser paints into a local CanvasKit
+  raster surface and can download the MP4 offline once the document and its
+  assets are loaded. MP4 encoding and muxing require no external encoder.
+  The CLI and MCP expose motion export, and MCP can return sampled frames
+  for an agent to inspect its own animations.
+  Verification
+  - The macOS workspace regression passed 14,999 tests with zero failures
+    and 63 ignored tests. All six previously failing CLI subprocess cases
+    passed in the parallel run.
+  - The same motion document
+    was exported from offline Chromium and from the daemon. The 16 decoded
+    frames matched sample for sample in all three Y/Cb/Cr planes. Both
+    outputs were 160×128 at 30 fps with a duration of 533.333 ms. Sample
+    timestamps, frame durations and keyframe flags matched exactly.
+    The files had the same SHA-256
+    9f320a0f1648d0cdffa6f43d2483cfbcce73a2db779a64e01291cf321ccc6eef.
+  - The optimized CanvasKit WebAssembly bundle passed its size and import
+    checks at 5,711,859 gzip bytes, below the 6 MiB limit, with zero
+    env.* imports.
+ReleaseNotesUrl: https://github.com/ZSeven-W/openpencil/releases/tag/v0.8.6
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
