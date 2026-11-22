@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: HungryDetective.DownloadCraft
-PackageVersion: 0.11.6
+PackageVersion: 0.11.8
 PackageLocale: en-GB
 Publisher: Download Craft
 PublisherUrl: https://github.com/hungry-detective
@@ -50,25 +50,35 @@ Tags:
 - torrent
 - upload
 ReleaseNotes: |-
-  Download Craft 0.11.6
+  Download Craft 0.11.8
   What's new
-  - Problem reports in the app's own style: after a crash, the next start
-    shows a window like the rest of the app, with the error, what a report
-    does for everyone, the full details on request, and Report problem. The
-    GitHub issue it opens asks what you were doing and is filled in with what
-    a fix needs: Windows version, which part of the app, renderer and look,
-    the error and where it happened, and the last steps of the latest
-    download. Web addresses only show their site and your user folder is
-    hidden; nothing is sent until you send it.
+  - yt-dlp at full speed: yt-dlp fetched a video file over one connection.
+    Now it only finds the file, and the app downloads it over every
+    connection, with resume (a 184 MB 1080p video in about 15 seconds). When
+    a site refuses the app, yt-dlp downloads it itself as before.
+  - Streams made from one file download the file: a player stream such
+    as movie.mp4/index.m3u8 is fetched as the movie file itself, over every
+    connection, with resume, and without a folder of pieces.
+  - Pick a quality for a YouTube link in Add URL: the size box shows the
+    quality; click it for Best, 4K to 360p, MP3 or M4A, and the size follows.
+    The video's name and size come straight from YouTube.
+  - Browser extension 0.11.1: videos in the extension's list are named by
+    their real title, as the button on the player names them.
   Fixes
-  - YouTube downloads at full speed: for a few seconds YouTube holds a
-    stream for the length of its ad and refuses the size check. The video
-    then came down as one stream, which YouTube slows to 1-2 MB/s. The size
-    now comes from the stream's own link, so every connection works on it: a
-    1.15 GB 4K video took 2 minutes instead of about 12.
-  - YouTube downloads resume: the same single stream kept no record of
-    its progress, so Resume after a pause began again at 0. It now continues
-    from the bytes already downloaded.
-ReleaseNotesUrl: https://github.com/hungry-detective/downloadcraft/releases/tag/v0.11.6
+  - Windows 10: windows no longer get stuck: the main window and the
+    progress windows sometimes stopped following drags and resizes until the
+    app restarted (#28). Moving and resizing now go straight through Windows.
+  - Video downloads resume after Cancel: a YouTube or Facebook video kept
+    its parts in a work folder that the resume check did not look at, so
+    Resume after Cancel or a restart started again from 0. A download that
+    yt-dlp began also continues in yt-dlp.
+  - Redownload starts again: it now removes everything the old download
+    left (yt-dlp's unfinished files included) before starting, so it no
+    longer continues the old one or saves the new file as "name (1)".
+  - Remove + delete file also removes yt-dlp's hidden parts folder.
+  - Stopping a video download stops yt-dlp completely: while yt-dlp was
+    still looking the file up, Stop left a program it had started running on
+    macOS and Linux.
+ReleaseNotesUrl: https://github.com/hungry-detective/downloadcraft/releases/tag/v0.11.8
 ManifestType: defaultLocale
 ManifestVersion: 1.28.0
