@@ -1,0 +1,43 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: juejijianghuaa.CoDock
+PackageVersion: 0.6.11
+PackageLocale: zh-CN
+Publisher: CoDock
+PublisherUrl: https://github.com/juejijianghuaa
+PublisherSupportUrl: https://github.com/juejijianghuaa/CoDock-Release/issues
+PackageName: CoDock
+PackageUrl: https://codock.pages.dev/
+License: MIT
+LicenseUrl: https://github.com/juejijianghuaa/CoDock-Release/blob/HEAD/LICENSE
+ShortDescription: 本地 Coding Agent 桌面工作台与终端集成中心。
+Description: |-
+  CoDock 是一个面向专业开发者的本地 Coding Agent 桌面工作台与终端控制台：
+  - 多 Agent 并行执行：支持在一个窗口内多 Tab 运行 Claude Code、Codex、Gemini CLI、Antigravity、Grok Build、Pi、Opencode 等，告别杂乱的独立黑窗口。
+  - 全历史与用量看板：本地直接解析各 Agent 的原生日志与 SQLite/JSONL 数据，聚合按项目、模型、日期的 Token 用量与成本统计。
+  - 专为 Coding 打造的终端增强：基于 xterm.js 与原生 ConPTY 封装，支持滚轮穿透、图片快速粘贴、拖拽文件注入绝对路径、全局快捷键呼出。
+  - Markdown Composer 独立浮窗：专为长提示词编写设计的全功能 Markdown 输入层，支持模板复用、提示词优化与一键投递。
+  - 手机/平板与局域网协同：自适应移动端 Web 交互、配对令牌安全门禁与受控只读/可写会话分享。
+Tags:
+- claude-code
+- codex
+- gemini-cli
+- 人工智能
+- 终端
+ReleaseNotes: |-
+  v0.6.11 (2026-11-22)
+  这一版把终端右侧补成了一套完整的文件工作台：内嵌编辑器、文件树、提交历史与改动查看都在同一个面板里，不再跳外部编辑器或弹窗。
+  新功能
+  - 终端右侧文件面板与内嵌编辑器：每个会话默认收起，从 Tab 栏开关展开。文件树按会话 cwd 惰性展开，顶部搜索框按文件名递归搜工作区（有上限）。点文件在左侧编辑器里打开，多标签（滚轮横向滚动、中键关闭）、行号、Ln/Col 状态栏、轻量语法高亮（按文件类型着色），不跳外部编辑器。
+  - 编辑与自动保存：直接改文件内容，停止输入 0.8 秒、失焦、关闭标签、切换会话时写回源文件，⌘/Ctrl+S 立即保存；保留 BOM、CRLF 与权限位；超过 1 MiB 或二进制文件只读。改动带冲突检测（以编辑器内容为准）。
+  - 外观与文件类型区分：开着壁纸时编辑器和文件面板默认跟随终端透明，设置页「工作区背景 → 面板底色」可加一层薄半透明底 + 背景模糊。文件树、搜索结果与编辑器标签按文件类型显示不同图标和颜色。
+  - 「改动」与「提交」直接在编辑器里看：改动页签数字来自轻量 /changes 统计（每 5 秒刷新，不必先点开），点文件直接在编辑器里显示该文件的 diff；提交页列出最近提交（可加载更多），点一条显示提交头（标题、hash、作者、时间、文件统计）、文件列表与完整 diff，可用鼠标滚轮整体滚动，标签同样中键关闭。
+  - 文件树右键菜单与状态标记：打开、新建文件/文件夹（行内输入）、重命名（F2）、删除（永久删除需确认）、复制路径/相对路径、在此打开终端、在文件管理器中显示；改名/删除后编辑器标签跟着换路径或关闭。树与搜索结果按 git 状态上色（修改黄 M、未跟踪绿 U、暂存新文件绿 A、改名绿 R），含改动的文件夹名字上色并带小圆点。
+  - 编辑器改动行标记：行号左侧按相对 HEAD 的改动画绿条（新增）、蓝条（修改）、红三角（删除）；点标记弹出这一段原来的行与现在的行，「还原」把原内容写回源文件（只在没有未保存草稿时可用）。每个会话的面板开关、打开的文件与当前文件记在本机 localStorage，切 Tab 与重启后恢复。
+  - 文件写操作接口：新增 POST /api/sessions/{id}/fs（重命名 / 删除 / 新建），名字只能是单段、拒绝同名，会话 cwd 与磁盘根受保护；与文件读写接口同在 guardLAN 之内，不对分享访客开放。
+  修复
+  - 移动端重启后认回会话：后端重启会按 resume 重新拉起会话并换内部 id，手机页面还挂在旧 id 上只会 404、画面不动；现在每次刷新列表按 resume 换成新 id 自动重连。探活改为「连续 3 次且持续 10 秒查不到」才判结束，不再一次查不到就停在「会话已结束」。
+ReleaseNotesUrl: https://github.com/juejijianghuaa/CoDock-Release/releases/tag/v0.6.11
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
