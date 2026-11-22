@@ -1,0 +1,57 @@
+# Created with komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: jmrplens.gitlab-mcp-server
+PackageVersion: 3.8.0
+PackageLocale: en-US
+Publisher: José M. Requena Plens
+PublisherUrl: https://github.com/jmrplens
+PublisherSupportUrl: https://github.com/jmrplens/gitlab-mcp-server/issues
+PrivacyUrl: https://github.com/jmrplens/gitlab-mcp-server/blob/main/PRIVACY.md
+PackageName: GitLab MCP Server
+PackageUrl: https://github.com/jmrplens/gitlab-mcp-server
+License: MIT
+LicenseUrl: https://github.com/jmrplens/gitlab-mcp-server/blob/HEAD/LICENSE
+ShortDescription: GitLab MCP server exposing the REST v4 and GraphQL APIs as tools for AI assistants.
+Description: A Model Context Protocol (MCP) server that connects AI assistants (Claude, Cursor, VS Code + Copilot, and any MCP client) to GitLab.com or self-managed GitLab instances. Covers the full REST API v4 and GraphQL with automatic edition gating, roughly 850 to 1080 tools depending on the GitLab tier, plus 45 MCP resources, 37 prompts, argument completions, progress notifications and resource subscriptions. Single static binary, stdio and HTTP transports, read-only and safe (mutation-preview) modes, and per-client configuration examples in the documentation.
+Moniker: gitlab-mcp-server
+Tags:
+- ai
+- ci-cd
+- claude
+- devops
+- gitlab
+- graphql
+- llm
+- mcp
+- model-context-protocol
+- rest-api
+ReleaseNotes: |-
+  Summary
+  3.8.0 is recorded against GitLab 19.6.1, so on a GitLab 19.6 instance a fine-grained token's grant decides 41 more actions (#1892 to #1896), and HTTP mode no longer fails a first request whose body arrives while the server waits on GitLab (#1868). Two changes refuse calls that worked, as the Breaking changes below say: project.list_user_contributed no longer offers the 23 filters its GitLab route never read (#1874), and project.pull_mirror_configure asks before auth_user re-aims a mirror that overwrites diverged branches from an SSH path that starts with ~ (#1872).
+  - The REST record, the fine-grained permission table and the release GraphQL schema are recorded from GitLab 19.6.1, and the gitlab.com GraphQL schema is pinned at 19.7.0-pre (#1892, #1893, #1896). On a GitLab 19.6 instance a fine-grained token's grant now decides 41 actions that GitLab 19.5 refused or emptied for every fine-grained token, the epic, work item, saved view and achievement actions and the target branch rules among them, since 19.6 declares the types they go through; 14 actions of 1106 remain out of every fine-grained token's reach, the CI/CD catalog, branch rule, security attribute and category, security finding, scan profile and two vulnerability summary actions.
+  - user.create_personal_access_token takes granular_scopes in place of scopes, exactly one of the two, so an administrator creates a fine-grained personal access token for another user on GitLab 19.6 and later (#1895). An older instance requires classic scopes on that route, and its refusal of a grant now says so.
+  - admin.metadata_get publishes the instance's plan, and server.status and server.health_check publish it as gitlab_plan, from GitLab 19.6, which sends it on GET /metadata (#1894).
+  - The keys GitLab 19.6 added to its answers are published where an action reads them: the Code Review Flow depth settings of groups and projects, a project's Duo scheduled automations, a group's Duo remote flows setting and lock and its ancestors' two-factor requirement, a runner's uuid, a board list's status, the too_large of the three group activity counts, nine plan limits, three member role permissions, an attestation's signing_method, and the granular_scopes and warnings an application create answers with and the warnings of a release create (#1892).
+  - A fine-grained session whose epic note, thread or reply creation GitLab answers without the note is told the note was probably created, rather than that none came back, since from GitLab 19.6 such a grant can create the note without being granted its read (#1896).
+  - In HTTP mode, the 30-second read deadline and the 60-second write deadline of a request to the MCP endpoint are held while the server verifies a new credential and builds its entry on GitLab, and start again, each counted from that moment, when the request's body is first read or its answer written (#1868). A first POST whose body was still arriving failed with failed to read body: i/o timeout once that wait passed 30 seconds, as the first build can on GitLab.com, and under --json-response the server cut its own first answer. It holds over HTTP/1.1 and over HTTP/2.
+  - From GitLab 19.5, a fine-grained token's grant is read from the answer of GET /personal_access_tokens/self, the request every session already makes, and the server no longer asks GET /personal_access_tokens/:id for it; an instance whose answer does not carry the grant keeps the read by id (#1857, #1861). In HTTP mode that self read is made under the slot the credential probe took, so builds for distinct credentials read and decode at most 16 token answers at once, and no build waits longer than before (#1887).
+  - Every GitLab client the server builds sends no body for a write client-go makes without options, where client-go sent null. No action sends such a write today; the option keeps the next one from doing so (#1859).
+  - Four lines the server writes about a pooled credential in HTTP mode outside the pool (a configuration shape that failed to register, a refused subscriptions/listen, a failed server creation and an unavailable token verification) name it by its keyed handle, credential_hash, as the pool's own lines do. Exported telemetry carries neither the field nor the handle (#1869).
+  - project.pull_mirror_configure asks before auth_user re-aims a mirror that overwrites diverged branches (#1872). Over SSH, a path that starts with ~ is resolved in the home of the account GitLab logs in as, and GitLab logs in with auth_user in place of the URL's own login, so sending auth_user alone pointed the overwrite at another account's repository unasked. Such a call is now asked, an empty auth_user included, and every question about a home-relative SSH source names auth_user as its login, the account whose home GitLab pulls from. Over HTTPS, and over SSH with an absolute path, auth_user stays an ordinary credential and asks nothing where the token can read the mirror; where it cannot, the call is asked, as the Breaking changes say.
+  - The pull mirror params of project.update, project.create and project.create_for_user say that GitLab deprecated them on those routes and name project.pull_mirror_configure, and mirror_user_id says it is the only way to run the mirror as another user. Every one of them keeps working (#1873).
+  - project.list_user_contributed offers the params GitLab's route reads, and no others (#1874, #1875). The route builds its finder without params, so 23 of the project filters it offered never filtered anything; it reads four more without declaring them, which the action keeps, and reads a false sent to them as true, so it sends them only when true.
+  - With GITLAB_MCP_META_PARAM_SCHEMA=full, a meta call that gives none of the parameters an action asks one of, or two that exclude each other, is refused by the action in words that name them (#1886). Such a call, to a snippet create, an LDAP group link, a token create that takes scopes or granular_scopes or any other action that asks for one of several parameters, was refused before the action ran with the schema validator's oneOf: did not validate against any of [<anonymous schema> <anonymous schema>] or its anyOf twin, which names none. As under opaque and compact, a destructive one of them is asked for confirmation before that refusal.
+  - The documentation site publishes a markdown twin of every page, at the page's path with index.md appended, which the site serves to a request that asks for text/markdown; each page announces its twin, and a page's date follows the data it prints (#1890, #1898). Six page titles render the code they name, among them the --public-url cautions of the HTTP server page, which named the flag with a dash (#1899). The getting started page starts the server under the name its own install steps give it (#1866), and the meta-tools page's counts are held to the catalog and corrected to it (#1854).
+  - For contributors: make test-e2e-docs runs the shell blocks the documentation marks as runnable against an ephemeral GitLab (#1865, #1866); the Orbit fixture setup and the indexer wait are the Go command cmd/orbit_fixtures, which merges the fixture merge request the shell script never merged and reads its settings from the command line, then the environment, then .env (#1877, #1878, #1879); ten request bounds are declared in the tenant policy register, with no value changed (#1858); the keep-alive test is timed on a synctest clock (#1856); and the Codex compatibility profile's comment names Codex 0.163.0 as the first release built on the fix (#1860).
+  Breaking changes
+  client-go stays on its v3 major, so the server's major stays at 3. The withdrawals from project.list_user_contributed below are the versioning policy's withdrawal row: params its GitLab route never read, which a call sent and got the unfiltered list back for. The project.pull_mirror_configure question (#1872) closes the unasked overwrite the Security section describes.
+  - project.list_user_contributed no longer offers 23 of the 27 project filters it accepted before (search, visibility, archived, topic, topic_id, min_access_level, owned, starred, membership, last_activity_after, last_activity_before, updated_after, updated_before, id_after, id_before, custom_attributes and the rest), and a call that sends one is refused as a field the input does not have. GitLab's route declares only order_by, sort, simple, page and per_page, and builds its finder without params, so it never read any of them: a call that sent one got the whole list back, unfiltered, with no error. The action takes user_id, order_by, sort, simple, page, per_page and the four the route reads without declaring them, statistics, imported, with_programming_language and with_custom_attributes (#1874).
+  - On project.list_user_contributed, statistics, imported and with_custom_attributes are sent only when true. GitLab reads them there as the text sent, so false read as true: statistics: false returned the statistics and imported: false returned only the projects the caller imported. Sent false, they now leave the list as it is without them (#1874).
+  - project.list_user_contributed no longer offers similarity as an order_by value, which GitLab's route declares but answers alone with a 500 Internal Server Error, since it orders by similarity only beside a search it does not read. The other project lists keep it (#1874).
+ReleaseNotesUrl: https://github.com/jmrplens/gitlab-mcp-server/releases/tag/v3.8.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://jmrp.io/docs/gitlab-mcp-server/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
