@@ -1,0 +1,33 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: StencilLabs.ovnfs
+PackageVersion: 0.5.2
+PackageLocale: zh-CN
+ShortDescription: 为智能体提供任意文件夹的隔离写时复制检出，由单个守护进程作为一个挂载点提供服务。
+Description: |-
+  面向智能体的检出：任意文件夹（无论是否为 git 仓库）的隔离写时复制视图，无需复制即可打开。智能体在检出中工作，您通过 diff 审阅改动，并用三方 apply 合并回去。检出可以创建快照、派生，并附加到另一台机器，其内容在首次读取时到达。
+
+  一个守护进程将每个检出作为单个挂载点中的一个文件夹提供服务：macOS 上使用 NFSv3，Linux 上使用 FUSE，Windows 上使用 SMB 或 WinFsp。无需 root，除您自行安装的 WinFsp 外不需要内核扩展。
+
+  打开文件夹时，每个路径都会被归入一个类别。source 路径会被捕获：它们是 diff、apply 和快照所看到的内容，也是唯一会离开本机的字节。cache 和 local 路径（构建产物、被忽略的文件、机密）在检出写入之前显示实时文件夹的内容。hidden 路径则不存在。写入会进入检出自己的写时复制层，因此在您 apply 之前绝不会写入原文件夹。在 git 仓库中，检出会获得一个私有 git 目录：您可以自由提交，然后用 apply --branch NAME 将提交带回来。
+
+  ovnfs 自行读写 git 仓库，因此不需要安装 git；当 PATH 中存在 git 时，抓取操作会使用它。没有守护进程运行时，各个动词会自动启动它，start、stop、restart 和 status 用于管理守护进程。restart 会切换到您所运行二进制文件的守护进程（例如升级之后），同时保留 NFS 或 SMB 挂载以及其中的 shell。
+
+  - new 在文件夹、git 修订版或快照上打开检出；run 使用一次性检出，运行结束后将其移除。
+  - snap 将检出的改动冻结为快照；fork 在快照上打开第二个检出。
+  - diff 列出相对某个快照的源改动，可选择输出为 git 补丁；apply 通过三方合并将其合并回去。
+  - grep 和 glob 在守护进程中搜索，无需遍历挂载点。
+  - ls、prune 和 rm 管理检出及其快照。
+  - attach、send、pull 和 push 通过 ssh 将检出移动到另一台机器，并在首次读取时惰性获取内容。
+  - explain 报告某个路径归入哪个类别以及由哪条规则决定；completion 提供 bash、zsh 和 fish 补全。
+
+  ovnfs 隔离的是文件，而不是进程：它不是沙盒。
+Tags:
+- git
+- 写时复制
+- 工作区
+- 快照
+- 检出
+ManifestType: locale
+ManifestVersion: 1.28.0

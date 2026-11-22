@@ -1,0 +1,113 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: OpenScreen.OpenScreen
+PackageVersion: 2.2.0
+PackageLocale: en-US
+Publisher: OpenScreen
+PublisherUrl: https://getopenscreen.com/
+PublisherSupportUrl: https://github.com/getopenscreen/openscreen/issues
+Author: OpenScreen contributors
+PackageName: OpenScreen
+PackageUrl: https://github.com/getopenscreen/openscreen
+License: MIT
+LicenseUrl: https://github.com/getopenscreen/openscreen/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025 Siddharth Vaddem
+ShortDescription: Desktop screen recorder with built-in editor
+Description: 'OpenScreen turns a raw screen recording into a finished product demo or walkthrough. Record a window or the whole screen with microphone and system audio, then edit on a timeline: automatic or manual zooms that follow the cursor, wallpapers and backgrounds, a webcam overlay, motion blur, crop, trim and speed control, and text, arrow or image annotations. Captions are transcribed on-device with no upload and remain editable, and an optional AI assistant applies edits you describe in chat using your own API key. Export to MP4 or GIF, rendered and encoded on the GPU with an automatic CPU fallback. Free for personal and commercial use, with nothing behind a paywall.'
+Moniker: openscreen
+Tags:
+- screen-recorder
+- screen-recording
+- screencast
+- video-editor
+ReleaseNotes: |-
+  OpenScreen 2.2 brings layout changes to the timeline, separate tracks for overlapping annotations, and an update button that puts you in control of installation. This release also improves recording, playback, audio timing and export across Windows, macOS and Linux.
+  ✨ Highlights
+  Change the layout throughout your video
+  The new Layouts track lets you switch between picture-in-picture, side-by-side, top/bottom, camera-only and screen-only arrangements as your video plays. Place a change at the playhead, move its boundary to adjust the timing, and let the screen and camera transition smoothly into their next positions.
+  Layout edits support undo/redo and the AI/MCP tools. Existing Full Camera sections migrate to camera-only layouts while preserving their original easing. #1404
+  Keep overlapping annotations easy to edit
+  Annotations that overlap now have their own timeline rows. You can select, move, resize or delete each annotation, even when their timing is identical. Drag vertically to change the stacking order, or horizontally to change when an annotation appears; timing and layer changes undo together. #1243
+  Overlapping annotations remain accessible on separate timeline tracks
+  Stop an AI edit and keep the work already done
+  The chat composer now has a Stop control for a running agent turn. Completed edits and the partial reply are retained, and you can continue with another message. A whole turn produces one undo step, including turns that make many edits. #1368
+  Export the audio you need
+  The CLI and MCP tools can now export the full project mix or one imported audio track to WAV or M4A, preserving its placement, trims, gain, fades and speed changes. Useful for taking narration into another audio editor or reusing a finished mix. #1383
+  openscreen export project.openscreen -o mix.m4a
+  openscreen export project.openscreen -o narration.wav --track <audioId>
+  Custom shader effects also gain footage(p): access to the recording at its source resolution, so a loupe or close-up can retain detail that has been scaled down in the composed picture. #1396
+  Update when you are ready
+  Self-updating builds check and download new versions in the background, then show a blue update button in the recording bar and editor. Installation starts on your click; an ordinary quit keeps the current version. MCP-only sessions can tell you that a newer release is available and direct you to the app. #1425
+  On Windows, declining the administrator prompt now keeps OpenScreen open and usable. Accepting it completes the update and restarts the app. Store and Nix installations continue to use their package manager. #1463
+  🛠 Fixes and improvements
+  Recording, webcam and cursor
+  - Windows screen capture: added a DXGI Desktop Duplication fallback, including recovery, adapter selection, rotation, resizing and correctly sized cursors. #1254
+  - macOS webcam: restored continuous webcam recordings and kept VP8 for recordings at 1080p or below. #1297
+  - macOS screen picker: reset Apple's picker for each request and ignore stale or unrequested selections. #1370
+  - macOS audio: start system-audio capture after the microphone and handle blocked sample queues without treating a temporary stall as a silent source or keeping a dead source alive. #1374, #1412, #1414
+  - Cursor placement: align macOS pointer samples with captured content and selected-window bounds; preserve visibility when capture bounds are rebased. #1306
+  - Cursor motion: land the flat cursor on clicks more accurately, reduce default smoothing, and handle short gaps between a click hold and the next movement. Changes
+  - Linux: start KDE window captures on their first frame, bound window-crop waits by elapsed time, and ignore a second Record press while the portal picker is open. #1351, #1353, #1413
+  - Linux cursor/webcam: keep cursor telemetry aligned across pauses, fall back to metadata cursors when embedded cursors are unavailable, and attach the webcam using the stored cursor mode. #1275, #1363
+  - Linux configuration: preserve user-supplied Wayland feature flags and support Mesa's RADV_EXPERIMENTAL Vulkan encode path. Changes, #1349
+  Editing, playback and audio timing
+  - Restart playback from the beginning after reaching the end, preserve play/pause intent, and isolate seeks between different sources. #1400
+  - Record voiceovers against the uncut source timeline so they remain aligned through trimmed sections. #1236
+  - Play imported audio continuously across its timeline region so speed changes keep it on the correct clock; stop a voiceover piece where the next one begins. #1355, #1362
+  - Preserve timeline sizing when annotation tracks reach the panel's height limit. #1243
+  - Preserve zoom framing and rounded camera corners across layout transitions, including migrated Full Camera sections. #1404
+  - Offer 3D Orbit only when the recording has cursor data. #1399
+  - Accept custom speed values with a trailing x or ×, such as 1.5x and 1.25×. Changes
+  - Accept the suggested system language with Enter and improve Japanese tooltips. Language prompt, #1375
+  Preview, video colour and export
+  - Correct macOS rendering of 10-bit HEVC/iPhone footage and full-range VideoToolbox frames; choose the colour-conversion matrix from each frame, with correct 10-bit bounds. #1408, colour follow-up
+  - Tag exported MP4s with their colour matrix, primaries, transfer function and range. #1460
+  - Export clips from mostly static recordings using the container duration and hold their available screen frame when the clip begins later. Preserve first-frame holds for offset sources. Static-recording fixes, frame hold
+  - Detect unreadable screen/camera starts, large video gaps and empty output; keep recovery bounded to normal video tails and inspect only the requested clips. #1377, #1379
+  - Validate a staged MP4 before replacing the destination, and show localized validation errors. Destination validation, #1387
+  - Improve macOS 8-bit H.264 preview decoding and shared-texture reuse. #1384, #1373
+  - Improve Linux VA-API export compatibility, restricting the extra VPP copy to Intel iHD; configure VA-API driver paths in Nix packages. #1200, #1367
+  Captions, agents and integrations
+  - Read Whisper model paths as UTF-8 on Windows and download transcription models through Chromium's network stack. #1407, #1332
+  - Allow MCP addZoom calls to supply customScale without depth; report recording-start failure when the requested camera cannot be opened. #1356, #1371
+  - Package the OpenScreen demo workflow for Claude Code and Codex, with installation guides for Claude Code, Codex and ChatGPT. Plugin and setup guide
+  - Find Microsoft Store installations when setting up the plugin, provide an openscreen execution alias for Store packages, and guide users when the installed app lacks the required MCP tools. #1354
+  - Correct active-install counting for MCP-only sessions and publish clearer documentation about AI-provider data and exported-media sharing. Usage-count fix, Privacy policy
+  Updates and packaging
+  - Keep Windows interactive when elevation is declined; prevent overlapping update attempts and recheck recording/editor readiness before handing control to the installer. #1463
+  - Simplify the supported machine-wide Windows update path to the administrator prompt; retain the installer wizard when install scope is ambiguous or cannot be established. #1439
+  - Include the correct updater configuration in macOS bundles, including object-form and platform-specific publish settings. macOS updater fix
+  - Let manual checks from release candidates discover newer candidates. Changes
+  - Improve release-version synchronization, Nix hash handling, Intel Mac test coverage and resilience to transient Apple stapling/validation failures. The complete maintenance, test and documentation history is included below.
+  Compatibility
+  - The Layouts track replaces the Full Camera lane. Existing sections migrate with their camera envelopes and easing; saved projects use project schema v9.
+  - Automation can use addLayoutChange, setLayoutPreset and moveLayoutBoundary. Legacy camera executors remain compatibility aliases.
+  - After a Windows update, OpenScreen returns to the recording bar (HUD). Saved projects remain available through Open Studio.
+  - These notes describe the promoted RC5 source. Recording/edit/export/persistence smoke checks ran on Windows, Apple Silicon macOS and Ubuntu; Windows UAC refusal and acceptance were verified on the final candidate. Validation used a targeted scope with documented gaps.
+  Known issue
+  - Legacy v2 project exports through the CLI: some 3D-cursor, click-effect, webcam and master audio-gain settings can fall back to their defaults when loading the older { version, media, editor } format. This has been reported on v2.2.0 and remains open; the issue includes a comparison with a document-format project. #1467
+  Other open reports and feature requests remain tracked in GitHub issues.
+  Download
+  ────────┬──────────────────────────────────────────────
+  Platform│Packages
+  ────────┼──────────────────────────────────────────────
+  Windows │x64 installer · ARM64 installer
+  ────────┼──────────────────────────────────────────────
+  macOS   │Apple Silicon · Intel
+  ────────┼──────────────────────────────────────────────
+  Linux   │AppImage · DEB · RPM · Pacman
+  ────────┴──────────────────────────────────────────────
+  OpenScreen is free and open source. Thanks to everyone who contributed code, translations, bug reports and release testing.
+  Complete changelog
+  Compare all changes from v2.1.2 to v2.2.0.
+  Every commit in the release range (192 entries)
+  This chronological source history includes fixes, features, tests, documentation, packaging, release bookkeeping and intermediate implementation steps. Release branches also carry forward changes previously shipped in 2.1.x; the highlights above describe the resulting changes from v2.1.2.
+  - fix(preview): advance the camera while a screen frame is held — f85f66251
+  - fix(timeline): copy a whole pill, not the fragment clicked — bb754945c
+ReleaseNotesUrl: https://github.com/getopenscreen/openscreen/releases/tag/v2.2.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://getopenscreen.com/docs/intro
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

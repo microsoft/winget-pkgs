@@ -1,0 +1,117 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: SUSE.RancherDesktop
+PackageVersion: 1.25.0
+PackageLocale: en-US
+Publisher: SUSE
+PublisherUrl: https://github.com/rancher-sandbox/rancher-desktop
+PublisherSupportUrl: https://github.com/rancher-sandbox/rancher-desktop/issues
+Author: rancher-sandbox
+PackageName: Rancher Desktop
+PackageUrl: https://rancherdesktop.io/
+License: Apache-2.0
+LicenseUrl: https://github.com/rancher-sandbox/rancher-desktop/blob/HEAD/LICENSE
+CopyrightUrl: https://github.com/rancher-sandbox/rancher-desktop/blob/main/LICENSE
+ShortDescription: Kubernetes and container management to the desktop.
+Description: |-
+  Rancher Desktop is an open-source project to bring Kubernetes and container management to the desktop.
+  Windows, macOS and Linux versions of Rancher Desktop are available for download, though do note that the Linux version is considered a tech preview.
+Moniker: rancher-desktop
+Tags:
+- k3s
+- nerdctl
+- rancher
+ReleaseNotes: |-
+  This Rancher Desktop 1.25.0, an open source desktop application to bring Kubernetes and container management to macOS, Windows, and Linux.
+
+  ## Installers
+
+  • [Windows](https://github.com/rancher-sandbox/rancher-desktop/releases/download/v1.25.0/Rancher.Desktop.Setup.1.25.0.msi)
+  • [macOS x86_64](https://github.com/rancher-sandbox/rancher-desktop/releases/download/v1.25.0/Rancher.Desktop-1.25.0.x86_64.dmg)
+  • [macOS aarch64](https://github.com/rancher-sandbox/rancher-desktop/releases/download/v1.25.0/Rancher.Desktop-1.25.0.aarch64.dmg)
+  • [Linux install notes](https://docs.rancherdesktop.io/1.25/getting-started/installation#linux)
+
+  ## New Contributors
+
+  Thank you to our new contributors：@srtdog64, @PlayerNguyen, @Harshavardhan-28, and @Juhantam!
+
+  ## Release Notes for 1.25.0
+
+  ### What's New
+
+  #### The interface speaks Vietnamese
+
+  Pick Vietnamese under Preferences > Application > General. It joins the eight languages that 1.24.0 added, and like them it is experimental, so feedback from native speakers is welcome. The app's usual font lacks most Vietnamese accented letters, so Vietnamese text uses a font installed on your system instead. Thanks to @PlayerNguyen! ([#11004](https://github.com/rancher-sandbox/rancher-desktop/pull/11004))
+
+  #### Deleting containers and volumes asks first
+
+  The Delete action on the Containers and Volumes pages used to run the moment you clicked it; both pages now ask first, in a dialog that counts the containers or volumes and lists them by name. Cancel is the default button, so Esc and Enter both back out. ([#10957](https://github.com/rancher-sandbox/rancher-desktop/pull/10957))
+
+  #### Tables show up to 1000 rows per page
+
+  The Containers and Volumes pages showed only 10 rows at a time. Forwarding and Diagnostics showed 100. They now show up to 1000. ([#10958](https://github.com/rancher-sandbox/rancher-desktop/pull/10958))
+
+  #### `rdctl start --wait`
+
+  `rdctl start` would return as soon as it has launched the app, so a script that runs `docker` or `kubectl` next could race the backend coming up. With the new `--wait` flag, `rdctl start` returns once the backend has started, and fails if the backend reports an error or `--wait-timeout` (10 minutes by default) runs out. By then the container engine is ready to use. When Rancher Desktop is already running, `--wait` has two problems, described under Known Issues. ([#6915](https://github.com/rancher-sandbox/rancher-desktop/issues/6915))
+
+  #### macOS and Linux：new installs forward ports over gRPC
+
+  New installs, and installs after a factory reset, now forward published ports and the Docker socket through Lima's gRPC port forwarder instead of SSH. On macOS, the SSH forwarder can hold only about 1000 connections at once. Past that limit, 1.24.0 lost every published port and the Docker socket until Rancher Desktop restarted, while 1.25.0 keeps them working and refuses just the extra connections. The gRPC forwarder keeps those connections in Lima's host agent, where that limit does not apply. Existing installs keep their saved forwarder; to switch, run `rdctl set --experimental.virtual-machine.ssh-port-forwarder=false`. ([#11235](https://github.com/rancher-sandbox/rancher-desktop/pull/11235))
+
+  ### Bug Fixes
+
+  #### Windows：Docker stopped answering soon after it started
+
+  Since 1.23.0, a health check inside the WSL distribution failed on every run when using the moby engine. About a minute after each start, the failed check stopped the proxy that forwards Docker requests from Windows, and on some machines the proxy stayed down until Rancher Desktop restarted. Docker commands from Windows then failed with "timed out dialing Hyper-V socket", and `docker.log` could grow by a megabyte every few seconds. The health check passes again, and the proxy now restarts after it is stopped. ([#10739](https://github.com/rancher-sandbox/rancher-desktop/issues/10739))
+
+  #### Windows：startup could hang at "Waiting for Kubernetes API"
+
+  Rancher Desktop could wait forever for a Kubernetes cluster that was already running, looking for the cluster at an address it worked out from WSL's network settings. That lookup failed for some of the network ranges WSL picks, and always under WSL's VirtioProxy networking mode. WSL picks a new range at each start, so the hang came and went. Rancher Desktop now checks the API at 127.0.0.1, the address Windows uses to reach it. A Kubernetes port other than 6443 also left the API unreachable from Windows; that works now too. ([#10657](https://github.com/rancher-sandbox/rancher-desktop/issues/10657))
+
+  #### Windows：the guest agent log could fill the disk
+
+  `rancher-desktop-guestagent.log` recorded debug messages even with debug mode off, so once containers were running it could grow until the disk was full. The guest agent now logs debug messages only when Enable debug mode is checked on the Troubleshooting page. ([#10737](https://github.com/rancher-sandbox/rancher-desktop/issues/10737))
+
+  #### Windows：a `PORT` environment variable broke Docker
+
+  If the environment that started Rancher Desktop set a `PORT` variable, the process that forwards Docker requests from Windows took it as its own port, failed, and restarted every second, so Docker never worked from Windows. It ignores the variable now. ([#10946](https://github.com/rancher-sandbox/rancher-desktop/issues/10946))
+
+  #### Windows：published UDP ports answered only on localhost
+
+  With a per-machine installation (the one available for all users), other machines could not reach a container's published UDP port. The installer's firewall exception for `host-switch.exe` allowed only TCP; it now allows UDP too. ([#10965](https://github.com/rancher-sandbox/rancher-desktop/pull/10965))
+
+  #### Windows：`ping` in a container always got a reply
+
+  On Windows, Rancher Desktop's network stack answered every ping from a container itself, so `ping` reported replies even for addresses where no machine exists. Pings now go out to the real address, and a container sees only the replies that come back. ([#11127](https://github.com/rancher-sandbox/rancher-desktop/pull/11127))
+
+  #### Windows：a `127.0.0.1` port could stop answering after its container restarted
+
+  With the moby engine, a container can publish more than one port on `127.0.0.1`. When such a container stopped, Rancher Desktop removed the forwarding rule for only one of those ports. If the container then started with a different IP address, connections to its other ports went to the old address and timed out until Rancher Desktop restarted. Rancher Desktop now removes the rules for all of them. ([#11138](https://github.com/rancher-sandbox/rancher-desktop/issues/11138))
+
+  #### macOS：outbound connections failed for about a minute after each Kubernetes start
+
+  With the VZ virtual machine type (default) and Kubernetes enabled, Kubernetes tried at startup to reach the metrics server at the address that the server had in the previous boot. When the local network silently dropped those attempts, they filled all ten slots that the virtual machine's network stack has for connections in progress. Every new outbound TCP connection from the virtual machine then failed until the attempts timed out about a minute later, so an image pull in that minute failed with `dial tcp ...：i/o timeout`. The bundled Lima now allows 128 connections in progress and gives up on each after 30 seconds. ([#11136](https://github.com/rancher-sandbox/rancher-desktop/issues/11136))
+
+  #### Startup errors showed a misleading message
+
+  When the virtual machine failed to start on macOS or Linux, the error dialog could say "Invalid state, no container engine client available", and the real cause, such as a failed Kubernetes download, appeared only in the logs. A snapshot taken with `rdctl snapshot create` right after startup could trigger the same message on any platform. It could also make Rancher Desktop report a failed start, or quit when it was started with `--no-modal-dialogs`. The dialog now shows the real error, and a snapshot right after startup causes neither problem. ([#8525](https://github.com/rancher-sandbox/rancher-desktop/issues/8525), [#11264](https://github.com/rancher-sandbox/rancher-desktop/pull/11264))
+
+  #### Docker logged "dangling" warnings every few seconds
+
+  With Kubernetes enabled and the moby engine using the containerd image store, every Kubernetes start reloaded the bundled images, and Docker kept a stale record of each one. `docker.log` then gained about six "multiple images have the same target, but one of them is still dangling" warnings every ten seconds. Rancher Desktop now loads only the images that are missing, for every k3s release published since late July 2025; older k3s versions still load everything. Docker cannot remove the records that earlier starts left behind, but a factory reset clears them. The underlying Docker bug is [moby/moby#53561](https://github.com/moby/moby/issues/53561). ([#10876](https://github.com/rancher-sandbox/rancher-desktop/issues/10876))
+
+  #### Pods inherited the host's DNS search domains
+
+  On macOS and Linux, pods inherited the DNS search domains of the host's network, and they tried those domains before the name itself. Some search domains answer for names that they do not hold, through a public wildcard record or a router that answers for everything under its local domain. So such a search domain sent a pod's lookups of external names to the wrong address, and lookups of full `svc.cluster.local` names could fail. Pods no longer get the host's search domains, so they can't resolve short names through them either; a pod that needs one can set `dnsConfig.searches`. ([#2227](https://github.com/rancher-sandbox/rancher-desktop/issues/2227), [#6316](https://github.com/rancher-sandbox/rancher-desktop/issues/6316), [#8380](https://github.com/rancher-sandbox/rancher-desktop/issues/8380))
+
+  #### Turning off Traefik could leave it running
+
+  When you turned off Traefik, Rancher
+ReleaseNotesUrl: https://github.com/rancher-sandbox/rancher-desktop/releases/tag/v1.25.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/rancher-sandbox/rancher-desktop/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

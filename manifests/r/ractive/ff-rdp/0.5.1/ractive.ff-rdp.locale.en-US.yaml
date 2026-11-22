@@ -1,0 +1,46 @@
+# Created with ractive/release-workflows using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ractive.ff-rdp
+PackageVersion: 0.5.1
+PackageLocale: en-US
+Publisher: ractive
+PublisherUrl: https://github.com/ractive
+PublisherSupportUrl: https://github.com/ractive/ff-rdp/issues
+Author: James Bergamin
+PackageName: ff-rdp
+PackageUrl: https://github.com/ractive/ff-rdp
+License: MIT
+LicenseUrl: https://github.com/ractive/ff-rdp/blob/HEAD/LICENSE
+ShortDescription: Use Firefox's Remote Debugging Protocol via a CLI
+Description: CLI for Firefox Remote Debugging Protocol — inspect, test, and automate Firefox from the terminal. Supports navigation, DOM queries, screenshots, accessibility audits, performance analysis, network monitoring, and more. Designed for both human users and AI agents.
+Moniker: ff-rdp
+Tags:
+- agentic-skills
+- agentic-workflow
+- cli
+- firefox
+- firefox-rdp
+ReleaseNotes: |-
+  ff-rdp 0.5.1 is mostly a Windows release: stop now stops the Firefox that launch started, headed launches work, and non-English Windows no longer breaks port-owner lookups. On every OS, launch <URL> now returns only after the page has loaded.
+  Fixed
+  - Windows: launch/stop own the real browser, not Firefox's launcher process. On Windows, the firefox.exe that ff-rdp starts is a launcher that hands off to the real browser. launch now passes -wait-for-browser, reports the browser as results.pid (with the launcher as the new results.launcher_pid), and stop, stop --all and --replace stop it. Before, stop failed on Windows and headed launches exited at once. A launch whose output is captured by a pipe no longer hangs. (#383)
+  - Windows: non-English display languages. Finding which process owns a port (used by stop, launch's collision check and --replace, doctor) relied on netstat printing the English word LISTENING. It now works in any language; it was broken on German Windows, for example. (#387)
+  - Windows: Firefox that cannot start its tab processes. When Firefox's sandbox fails to start any content process, the first tab never appears and launch used to fail with "listed no tab … currentWindowGlobal is null". launch now detects this, stops that instance and relaunches once, with a results.warnings entry. (#388)
+  - Windows: a failed launch cleans up the browser behind the launcher process. (#392)
+  - navigate, back, forward and reload: when --timeout runs out before the readyState fallback, the error now says what did not reach complete and within how many ms, instead of a bare "no remaining budget for readystate fallback". (#392)
+  - launch <URL> waits for the page. It used to return once a tab existed, while the tab could still hold the initial about:blank, so an immediate eval read the wrong document (22 of 30 runs on macOS). It now returns once the selected tab's document is the URL's (or its redirect's) with readyState complete, within --timeout. With --temporary-addon, a dropped startup navigation is opened again. A URL that fails to load is a warning, not a failed launch. (#385)
+  - Full-page screenshots on Windows: the drawSnapshot fallback writes through a native temp path. (#389)
+  - No surprise updates. Every Firefox ff-rdp starts gets MOZ_DISABLE_UPDATE_PROCESSING, so a pending Firefox update no longer turns a launch into an update-and-restart (Firefox 154+). (#393)
+  - consent accept --timeout now bounds only the settle wait. Connecting, finding the banner and clicking get at least 10 s per reply, so a short --timeout no longer fails on a slow machine. (#393)
+  Added
+  - FF_RDP_FIREFOX=<path> picks the Firefox binary launch starts, for example a portable Firefox next to the installed one. (#393)
+  - results.launcher_pid in launch output on Windows. (#383)
+  Changed
+  - chrono is replaced by jiff (RUSTSEC-2026-0543). Timestamps in page-map and profiles output keep their format, and page maps written by earlier versions still load. (#384)
+  - The README's CI section now installs ff-rdp with ractive/setup-ff-rdp@v1. (#381, #382)
+  Internal
+  CI gained a permanent Windows launch-scenario workflow, a nightly live sweep on windows-latest, and clippy on all three OSes, with the Windows lint findings fixed (#383, #390, #391, #392). Release attestations are verified with --signer-workflow (#380). There are kb notes for the release log, the Windows lab and the nightlies (#379, #386, #397), and the version bump fixes the README's attestation example (#398).
+ReleaseNotesUrl: https://github.com/ractive/ff-rdp/releases/tag/v0.5.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

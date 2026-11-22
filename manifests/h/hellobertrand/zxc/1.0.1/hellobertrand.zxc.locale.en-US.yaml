@@ -1,0 +1,66 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: hellobertrand.zxc
+PackageVersion: 1.0.1
+PackageLocale: en-US
+Publisher: Bertrand Lebonnois
+PackageName: zxc
+License: BSD-3-Clause
+ShortDescription: Asymmetric lossless compression built for ultra-fast decode
+ReleaseNotes: |-
+  # Release Notes
+
+  v1.0.1 is a maintenance release of the **Hydrogen** series：the CLI is hardened against file-system races, GCC 14.2 no longer changes the encoder's output on AVX-512 machines, and macOS x86_64 gets prebuilt binaries.
+
+  **Drop-in for v1.0.0.** Same format v9, same API and ABI, soname still `libzxc.so.6`. No symbol added, removed or changed. Archives written by v1.0.0 and v1.0.1 decode with either.
+
+  ## CLI hardening (#621)
+
+  The first two fixes apply to Linux, macOS and the BSDs.
+
+  • **Inputs are opened without a check-then-open race.** The input used to be checked by name, then opened by name, so a file swapped in between was opened unchecked. It is now opened first, without following a symbolic link, and the open descriptor must be a regular file. A FIFO swapped in no longer hangs the open. A link given on the command line still works：it is resolved before the open.
+  • **`-r` walks directories relative to the one it is in.** Each directory is entered through its descriptor and opened without following links, the starting directory included, so a directory replaced by a symbolic link during the walk is not followed. With `--rm`, this kept a swapped link from removing files outside the tree. A trailing `/` still names a link's target, as documented.
+  • **`--rm` keeps the input when the output is a device.** An output that resolves to a special file, such as a symbolic link to `/dev/null`, no longer removes the only copy of the data.
+  • **`-l` no longer slows down quadratically on archives of many frames.** Listing the dictionaries of a long concatenation used a linear search per frame; a sort replaces it.
+  • **Messages name paths as you typed them,** not their resolved form.
+
+  ## Encoder
+
+  • **GCC 14.2 miscompiled a conditional sum on AVX-512 (#614).** In the analysis that decides where long matches are split at levels 3 and 4, the vectorized sum lost its value, so libraries built with GCC 14.2 and run on an AVX-512 processor split fewer matches. Their archives were valid and decoded correctly, but differed from those of every other build. The sum was redundant and is removed. Output is unchanged on every other compiler and processor; GCC 14.4 was not affected.
+
+  ## Build & Packaging
+
+  • **macOS x86_64 binaries (#601).** Releases now ship a macOS x86_64 archive next to the ARM64 one. Both target macOS 15.0 or later; older versions can build from source.
+  • **Rust 1.100 (#620).** Cargo 1.100 warns that `homepage` repeats `repository`, which the CI treats as an error. The field is removed; the crate page keeps its repository link.
+  • CI covers GCC with `-std=c23` and `-std=c11` (#613), Dependabot pull requests are labelled by ecosystem (#600), and the changelog groups entries by type (#612).
+
+  ## Documentation
+
+  Apple M3 benchmark figures and charts refreshed (#617).
+
+  ## Changelog
+
+  • fix：Remove redundant homepage field (#620)
+  • fix：Drop bad_esc sum miscompiled by GCC 14.2 AVX-512 (#614)
+  • fix：Group changelog entries by type/scope (#612)
+  • cli：Hardens CLI against race conditions and fixes rm/dedup bugs (#621)
+  • build：Use upstream lzbench repo
+  • build：Add GCC c23 + c11 matrix variant (#613)
+  • build：Bump vitest from 5.0.5 to 5.1.0 in /bindings/nodejs (#609)
+  • build：Bump scikit-build-core in /bindings/python (#604)
+  • build：Bump github/codeql-action from 4.39.1 to 4.39.3 (#607)
+  • build：Bump cc from 1.10.0 to 1.11.1 in /bindings/rust (#608)
+  • build：Bump semver from 7.8.5 to 7.8.6 in /bindings/nodejs (#610)
+  • build：Bump marked from 18.1.2 to 18.1.3 in /site (#611)
+  • build：Bump peter-evans/create-pull-request from 8.1.1 to 8.1.2 (#603)
+  • build：Bump actions-rust-lang/setup-rust-toolchain (#606)
+  • build：Add macOS x86_64 release target (#601)
+  • build：Label dependabot PRs by ecosystem (#600)
+  • doc：Clarifies format v9 is frozen and forward-compatible (#627)
+  • doc：Refresh Apple M3 figures and charts (#617)
+
+  Full Changelog：[v1.0.0...v1.0.1](https://github.com/hellobertrand/zxc/compare/v1.0.0...v1.0.1)
+ReleaseNotesUrl: https://github.com/hellobertrand/zxc/releases/tag/v1.0.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

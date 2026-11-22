@@ -1,0 +1,39 @@
+# Created with komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: nextest.cargo-nextest
+PackageVersion: 0.9.152
+PackageLocale: en-US
+Publisher: nextest
+PublisherUrl: https://github.com/nextest-rs
+PublisherSupportUrl: https://github.com/nextest-rs/nextest/issues
+PackageName: cargo-nextest
+PackageUrl: https://github.com/nextest-rs/nextest
+License: Apache-2.0
+ShortDescription: A next-generation test runner for Rust.
+Tags:
+- cargo-plugin
+- cargo-subcommand
+- flaky-tests
+- junit
+- nextest
+- rust
+- testing
+ReleaseNotes: |-
+  Added
+  - cargo nextest self setup accepts a new --source install-script value. The upcoming install scripts at get.nexte.st run cargo nextest self setup --source install-script after installing nextest. As with other sources, setup is currently a no-op.
+  Changed
+  - Nextest now rejects malformed or untrusted inputs in a few more places:
+    - When reusing builds, archive extraction now fails if the archive contains entries other than regular files and directories, such as symlinks, hard links, devices, or FIFOs. Archives created by cargo nextest archive never contain such entries. (#3710)
+      This is not classified as a security issue because build archives are not (and cannot be, because they contain arbitrary executable code) a trust boundary.
+    - When reusing builds for a custom target, nextest now rejects target triples that contain path separators or are absolute paths. (#3711)
+      The common situation where this can happen is with a build archive. Like in the above case, this is not classified as a security issue.
+    - With run recording, replaying a recording now fails with an error if a line in its run log is too large, rather than reading the entire line into memory. (#3712)
+      This is not classified as a security issue because it is a denial of service in an experimental feature. Unlike the recent security fix in nextest 0.9.150, it is not possible to run arbitrary code in this manner.
+  Thanks to inanna-malick for reporting these issues.
+  Fixed
+  - With -Z build-std, nextest no longer prints spurious warnings about standard library package IDs not being produced by cargo metadata. (#3708)
+  - cargo nextest self update now ignores the case of hex digits when verifying checksums. (#3715)
+ReleaseNotesUrl: https://github.com/nextest-rs/nextest/releases/tag/cargo-nextest-0.9.152
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

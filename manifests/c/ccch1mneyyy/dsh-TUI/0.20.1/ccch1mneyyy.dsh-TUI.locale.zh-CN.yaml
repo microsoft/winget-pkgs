@@ -1,0 +1,61 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: ccch1mneyyy.dsh-TUI
+PackageVersion: 0.20.1
+PackageLocale: zh-CN
+ShortDescription: DeepSeek Harness 官方首推的终端界面：高性能、低占用。
+Description: dsh-TUI 是 DeepSeek Harness（DSH）的交互式终端界面，支持全屏会话、像素鲸鱼伴侣、流畅鼠标交互和低占用，并提供供脚本驱动的独立 headless 命令 dst。
+Tags:
+- deepseek
+- deepseek-harness
+- dsh
+- harness
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  自 v0.20.0 以来，dsh-TUI 跟上 DSH 0.2.2-rc.3 验证线（继续兼容 0.2.2-rc.2 及更早验证线），
+  让插件往输入框的 @ 补全里加行，修好迁移在全新 profile 上找不到宿主框架包、Claude 内核在 SDK
+  未就绪时误报「未安装」，以及更新/退出时子进程 stderr 尾部引发的崩溃。
+  亮点
+  - 适配 DSH 0.2.2-rc.3 — 主适配线前移到 0.2.2-rc.3，peer 范围同时保留 0.2.2-rc.2、0.2.2-rc.1 等旧验证线，停在 rc.2 的用户也能直接装这版。rc.3 是版本列车重发：共有包的 .d.ts 零变化，唯一 .js 变化是 dsh-tool-cordis 的 API 目录，宿主复刻指纹与 patch surface 内容都没变，本版没有 TUI 可见行为改动。上游新增的 @deepseek-ai/dsh-deepseek-chat-import 是 web-only bundle（浏览器端导入 DeepSeek 官网对话导出），TUI 没有对应入口，刻意不接入。(#2009 by @Lucas2011wastaken)
+  - 插件可以往 @ 补全里加行（实验性） — 插件用 ctx.tuiMentions.register({ id, title, complete(query, signal) }) 往输入框的 @ 补全浮窗加行，与工作区文件共用一张卡：出现插件行时卡片标题从「文件」变成「提及」，插件行按与文件同一套模糊分并排（文件顺序不动、平分归文件）。行是 { label, detail?, insertText }，选中后把纯文本 insertText 替换敲入的 @query，提交时不按路径解析、不当附件。每次查询单独一个 AbortSignal，继续打字即中止上一次，单次预算 300ms；每提供方每次 ≤50 行，每插件 ≤4 个、全局 ≤16 个。没有提供方时补全浮窗逐帧不变。类型 TuiMentionProvider / TuiMentionItem 进 ./extensions 与 ./api，规则表见准入与开发指南接缝十五。(#1716 by @ccch1mneyyy)
+  需要留意的行为变化
+  - @ 补全的插件行只做文本插入 — 选中插件行只替换当前 token，不参与文件提及展开器；insertText 限纯文本、单行、≤200 字符，含 @ 提及记号的在准入时丢弃。register 对非法输入、重复 id 或超额直接抛错，dispose 随插件 activation 回收。这是实验性接缝，仍可能随 TUI Profile 演进调整；没有插件行时补全浮窗与之前逐帧一致。
+  - Claude 内核行不再显示「未安装」 — SDK 未就绪但检测到 CLI 时，行显示 claude-code vX.Y.Z · SDK 未就绪（英文 SDK unavailable），Enter 仍打开 SDK 安装向导。SDK 仍是 Claude 后端的必要依赖，缺 SDK 时保持不可启动；CLI 路径查找、登录与模型调用逻辑不变。
+  - 迁移失败提示分流 — profile 内编译产物缺失或过旧仍是 needs the profile's compiled copy，提示先跑 dsh-tui update；入口存在但依赖加载或执行失败改报 could not run 与具体包名/原因，不再一律要求升级 TUI。
+  - rc.3 与 /update — rc.3 没有 TUI 可见变化；程序内 /update 会在目标 TUI 的 peer 范围内选已发布的最高版本，因此会把 dsh 引擎从 rc.1 / rc.2 对齐到 0.2.2-rc.3。
+  修复
+  - 更新/退出不再被子进程 stderr 尾部打断 — 子进程 stderr reporter 销毁即进入终态：迟到尾部立即丢弃，不再创建定时器或调用通知，并清空只属于它的冷却表；此前这种尾部会重新调度通知、访问已失效 Channel 并以 exit 7 崩溃。活动期的去重/冷却与真实 lease 错误语义保持不变：未销毁 reporter 的负对照仍以 exit 7 暴露 Channel UI lifetime has ended。(#1981 by @ccch1mneyyy；诊断与补丁建议来自 @frederick-wang 在 #1979 的记录)
+  - Claude 内核检测 — 已检测到的 Claude Code CLI（包括 Homebrew 安装）在 SDK 不可用时仍显示版本，不再笼统标成「未安装」；CLI 版本仍只探测一次，没有 CLI 或取不到版本时不编造版本，SDK 缺失仍不可启动并保留安装向导。(#1978 by @ccch1mneyyy)
+  - 迁移在全新 profile 上可用 — dsh-tui migrate 与 TUI 内 /migrate 的子进程在第一次导入迁移模块前安装宿主（PATH 上的 dsh）的框架包解析，冷 profile 不再因缺少 @deepseek-ai/dsh-session-persistence-jsonl 等 peer 而失败。解析只使用宿主公开的 createRuntimeResolution 与 PluginPackages，不调用会改写 manifest/root 的 loadProfileDirectory / prepareProfile，也不组合用户插件，成功与失败都会释放 Cordis 作用域；旧 profile 只有 cli.js 时仍直接执行。(#1768 by @FlameTN7)
+  - @ 补全的候选与按键 — 接受时读取当前草稿与光标位置、校验当前 query 后再替换当前 token；异步返回期间保留用户当前选择，迟到结果不覆盖高亮；同一 stdin 批次的 Enter/Tab 不再用旧草稿或越界索引，未实际接受候选时继续走原有的实时草稿提交路径。(#1716 by @ccch1mneyyy)
+  兼容与升级
+  - DSH 主适配线：0.2.2-rc.3；0.2.2-rc.2、0.2.2-rc.1、0.2.1-rc.5、0.2.1-rc.4、0.2.1-rc.3、0.2.1-rc.2、0.2.0-rc.2、0.2.0-rc.1、0.1.7-rc.2、0.1.7-rc.1 以及更早的验证线仍在契约内，契约外版本打漂移警告。
+  - DSH 在 npm 上的 latest 仍是 0.2.2-rc.1：0.2.2-rc.3 走 next 标签。程序内 /update 会在目标 TUI 的 peer 范围内选已发布的最高版本，因此会把 dsh 引擎对齐到 0.2.2-rc.3。
+  - 从 v0.20.0 升级：程序内 /update（本版会一并把 dsh 引擎对齐到 0.2.2-rc.3、并对齐全局启动器），或
+    npm install -g @deepseek-ai/dsh @deepseek-harness-tui/dsh-tui@0.20.1。
+  - dst 自动化 CLI 的验证线未同步前移：仍验证到 0.2.1-rc.5；在 0.2.2 宿主上可用 dst dsh 原样转交官方参数。
+  - 嫡系插件清单：随包的 tui-profile/feed/first-party.json 钉到 0.20.1。
+  - DSH 0.2.2 要求 Node >=24.9 — 本包自身仍声明 ^22.19 || >=24；用更旧的 Node 运行 0.2.2 宿主属于上游未支持组合，升级前请先确认 node -v。
+  - Windows 离线安装器：引擎验证范围随契约前移到 0.2.2-rc.3；已装更高的 RC 会降回验证线。
+  安装
+  npm install -g @deepseek-ai/dsh @deepseek-harness-tui/dsh-tui@0.20.1
+  偏好一键安装的用户可下载 Release 中的 dsh-tui-setup.zip（解压后 macOS / Linux 运行 sh install.sh，Windows 双击 install.bat）
+  或 Windows 离线安装程序 dsh-tui-setup-win-x64.exe；便携包解压即用。
+  What's Changed
+  - fix(migrate): resolve host peers for the migrate subprocess by @FlameTN7 in https://github.com/ccch1mneyyy/dsh-TUI/pull/1768
+  - feat(composer): admit plugin @-mention providers by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1716
+  - fix(claude): distinguish unavailable SDK from installed CLI by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1978
+  - fix(stderr): ignore late child output after reporter disposal by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1981
+  - chore(upstream): adapt to dsh 0.2.2-rc.3 by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/2009
+  - chore(release): prepare v0.20.1 by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/2012
+  Full Changelog: https://github.com/ccch1mneyyy/dsh-TUI/compare/v0.20.0...v0.20.1
+ManifestType: locale
+ManifestVersion: 1.28.0

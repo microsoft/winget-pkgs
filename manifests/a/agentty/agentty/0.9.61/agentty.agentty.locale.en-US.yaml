@@ -1,0 +1,88 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: agentty.agentty
+PackageVersion: 0.9.61
+PackageLocale: en-US
+Publisher: agentty
+PublisherUrl: https://agentty.org/
+PublisherSupportUrl: https://github.com/1ay1/agentty/issues
+PackageName: agentty
+PackageUrl: https://agentty.org/
+License: MIT
+LicenseUrl: https://github.com/1ay1/agentty/blob/HEAD/LICENSE
+Copyright: Copyright (c) agentty contributors
+ShortDescription: Blazing-fast Claude in your terminal — a C++26 alternative to claude-code.
+Description: agentty is a native C++26 terminal coding agent and a drop-in alternative to claude-code. A single static binary with sub-millisecond cold start, sandboxed by default, and one-command SSH air-gap. No Node, Python, or Electron. Signs in with your Claude Pro/Max subscription or an ANTHROPIC_API_KEY.
+Moniker: agentty
+Tags:
+- ai
+- claude
+- cli
+- coding-agent
+- developer-tools
+- terminal
+ReleaseNotes: |-
+  Fixed
+  - An oversized SKILL.md no longer costs a real skill its place. Files too
+    large to load are kept so agentty skills can name them, but they used to
+    count against AGENTTY_MAX_SKILLS — three of them at the cap silently
+    pushed three working skills out of the catalog. Only loadable skills count
+    now.
+  - A buffering gateway no longer hides the status bar. When a proxy holds
+    the model's output back, the whole status row used to turn into "network
+    gateway is buffering output — waiting…", re-armed every 15 s, so the
+    context gauge and everything else vanished for the length of the stream.
+    The phase chip now just reads buffered… until the burst lands.
+  - The Skills panel stays inside the terminal. Its header and its detail
+    footer are rows the list does not get, and the shared viewport estimate only
+    knew the two-row hint chrome — so on a short terminal the panel grew taller
+    than the screen and painted the list straight over its own footer, which is
+    where the description, the findings and the caveat live. The list budget is
+    now derived from what the panel actually spends, blank spacer rows yield
+    first when it is still too tight, and a footer line that wraps keeps its
+    indent instead of snapping back to column 0.
+  Added
+  - The prompt cache sits next to the context gauge. CACHE 94% on the
+    status bar: how much of the prefix the last request left warm was served
+    from cache. A healthy hit is just the number, in green. Anything else says
+    why in one word, so a 0% never leaves you guessing: 0% new for an
+    expected cold start (new thread, compaction, a model switch), 3% idle
+    when a long pause simply outlived the cache, and 2% miss in amber when a
+    prefix that should have been warm was re-priced from scratch — the one
+    that costs you 10-20x on time-to-first-token. Hosts that never report
+    cache use read n/a. Judged against what the previous request left warm,
+    so a big new tool output does not look like a miss. On narrow terminals
+    the word goes first, then the number, before the phase or the context
+    gauge. The context bar itself now shows the same split: the part of the
+    window served from cache draws as ▓, the part paid in full this
+    request as █ — same width, readable without colour.
+  - The plan is always in view. The composer footer's empty middle now
+    carries the agent's plan: a task meter, 3/7 and the item in flight
+    (●), or the next one up (○) between steps — no ^T needed. It is
+    responsive at every width: the label shortens with …, then drops to the
+    meter and the count, and steps aside entirely before it would ever push
+    the model badge or the mode chip off the row. An unfinished plan stays
+    when the agent stops ("stopped at 3/7"); a finished one shows its ✓
+    for the rest of the turn and then goes quiet. Switching threads swaps in
+    that thread's plan instead of leaving the last one up.
+  - The skill catalog says what it is leaving out. agentty skills and the
+    Skills panel (Ctrl+K) now report N of M cataloged · cap C · K not cataloged instead of listing a truncated catalog as if it were the whole
+    library — the failure mode where a skill you installed is simply absent.
+    The installed count rides along with the cached discovery, so it costs no
+    extra walk, and the panel stays silent when everything fits. Every other
+    reason a skill is missing gets its own line and its own fix — too large to
+    load, unreadable or nameless, hidden by a same-named skill — and the cap
+    knob is only suggested when the cap is the reason (#134, thanks
+    @davidwed).
+  - The Plugins pane shows the tool cap and what it refused. The header now
+    names the per-request maximum (the provider's limit, your
+    AGENTTY_MCP_TOOL_BUDGET, or "no cap" on providers that defer schemas),
+    how many tools are deferred and addressable by name, and how many were left
+    out — split into "by the cap" (pin it with p) and "by an invalid schema"
+    (only the server can fix it). Previously a tool the cap refused looked
+    exactly like one the model searches for.
+  Full history: CHANGELOG.md
+ReleaseNotesUrl: https://github.com/agentty-org/agentty/releases/tag/v0.9.61
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

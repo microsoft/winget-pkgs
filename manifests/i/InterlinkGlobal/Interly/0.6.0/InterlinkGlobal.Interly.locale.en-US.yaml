@@ -1,0 +1,152 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: InterlinkGlobal.Interly
+PackageVersion: 0.6.0
+PackageLocale: en-US
+Publisher: Interlink Global Technologies
+PublisherUrl: https://github.com/interlinkglobal
+PublisherSupportUrl: https://github.com/interlinkglobal/Interly/issues
+PackageName: Interly
+PackageUrl: https://github.com/interlinkglobal/Interly
+License: MIT
+LicenseUrl: https://github.com/interlinkglobal/Interly/blob/main/LICENSE
+ShortDescription: A permission-aware Windows computer agent powered by Groq.
+Tags:
+- agent
+- automation
+- command-line
+- groq
+- windows
+ReleaseNotes: |-
+  Interly 0.6.0 — Deep Windows Integration
+  Interly 0.6.0 is a major expansion of what the agent can actually do on a Windows computer.
+  Version 0.5.1 established the standalone distribution path, the canonical interly command, bounded automatic approvals with set-free, and the resilient update mechanism. 0.6.0 moves substantially deeper into Windows itself.
+  Interly is no longer limited to reasoning about Windows through commands, processes, files and an isolated browser. It can now inspect the visible desktop, understand what is on screen, identify native interface controls, manipulate application windows, use the mouse and keyboard, interact with the clipboard, and coordinate these capabilities through a stronger permission and planning system.
+  This release is an important step towards Interly becoming a genuine Windows computer agent rather than simply an AI exposed to a collection of Windows tools.
+
+  Windows becomes part of the agent environment
+  The largest change in 0.6.0 is that Interly can now perceive and interact with the ordinary Windows desktop.
+  Interly can enumerate visible top-level windows and receive exact information about them, including their native handles, process IDs, titles and screen rectangles. Once a window has been identified, Interly can focus it, minimise it, maximise it, restore it, move it or resize it.
+  Window operations are revalidated before execution rather than blindly trusting stale window information.
+  This means Interly can begin working with applications as visible pieces of the desktop environment instead of treating every program as nothing more than a process or executable.
+
+  Full desktop and application screenshots
+  Interly can now capture the Windows desktop directly.
+  It supports:
+  - full virtual-desktop screenshots, including multi-monitor desktop space;
+  - screenshots of an exact selected window;
+  - PNG output for later inspection or OCR;
+  - bounded screenshot use within an individual request.
+  Screenshots become an important bridge between Interly's existing system access and the graphical Windows environment.
+  Instead of assuming what a program should currently display, Interly can inspect what the computer is actually showing.
+
+  Built-in OCR
+  0.6.0 introduces bundled optical character recognition.
+  Interly can analyse an approved local screenshot or image and extract visible text along with its approximate bounding boxes.
+  This gives the agent another way to understand software that does not expose useful structured information.
+  For example, Interly can conceptually move through a loop such as:
+  capture window → read visible text → locate relevant area → decide next action
+  The OCR engine is included in the standalone distribution rather than requiring the user to separately configure an OCR installation.
+
+  Windows UI Automation inspection
+  Interly now integrates with Windows UI Automation.
+  It can inspect the controls exposed by the foreground application and return information such as control names, control types, automation identifiers and screen rectangles.
+  Importantly, inspection does not automatically activate those controls.
+  This creates a distinction between perception and action:
+  inspect → identify → decide → request permission → interact
+  That distinction is central to the direction of Interly.
+  Rather than immediately giving an AI arbitrary mouse access and hoping it clicks correctly, the system now has mechanisms for identifying what exists on screen before attempting an interaction.
+
+  Guarded mouse control
+  Interly can now perform generic desktop mouse actions.
+  Supported interaction includes mouse movement, clicking, double-clicking and bounded wheel scrolling.
+  These actions remain permission-aware.
+  The intended desktop interaction model is also explicitly biased towards using known information—such as a UI Automation rectangle, OCR position or previously returned screen coordinate—rather than inventing arbitrary coordinates.
+  Generic mouse control therefore acts as a fallback interaction primitive beneath the desktop-perception system, rather than replacing it.
+
+  Guarded keyboard control
+  Interly can type into the currently focused Windows interface and send bounded keyboard combinations.
+  This allows interaction with ordinary desktop software even where a dedicated Interly tool does not exist.
+  The combination of:
+  window control + screenshots + OCR + UI inspection + mouse + keyboard
+  creates a much more general Windows interaction layer than previous versions had.
+  It means adding explicit integrations for every desktop application is no longer the only path through which Interly can potentially operate that application.
+
+  Clipboard integration
+  Windows clipboard access is now part of Interly's local tool layer.
+  Clipboard reading and clipboard writing are separate operations with separate approval behaviour.
+  Clipboard reads are treated as potentially sensitive local information. Reading something from the clipboard does not automatically mean that content should be sent to Groq.
+  This follows the same privacy model used for other potentially private machine information.
+
+  A stronger execution-governance layer
+  Giving Interly deeper Windows access required improving how actions are governed.
+  0.6.0 therefore introduces a substantial host-side execution layer around the agent.
+  For complex work, Interly can now present a multi-step plan before execution begins.
+  A plan can describe the sequence of tools and scopes required for the request. The user may approve the displayed plan for that request rather than responding to every ordinary action independently.
+  That approval is scoped.
+  It is not a permanent grant of authority, and a tool outside the approved plan does not inherit the plan's permission.
+  The conceptual execution path is now:
+  request → plan → policy evaluation → approval → execution → audit
+  This becomes increasingly important as Interly moves from isolated commands towards operations containing several related Windows actions.
+
+  Dry-run mode
+  Interly now includes a session-level dry-run mode.
+  Available commands are:
+  dry-run
+  dry-run on
+  dry-run off
+  With dry-run enabled, Interly still goes through the normal reasoning, tool selection and permission path, but approved actions are previewed instead of executed.
+  This makes it possible to inspect what Interly intends to do before allowing the same type of workflow to affect the computer.
+  Dry-run is particularly useful for testing new tool combinations and multi-step plans.
+
+  Configurable permission policies
+  0.6.0 introduces persistent permission policies.
+  A tool can be configured to:
+  prompt
+  allow
+  deny
+  Policies can be inspected and managed with:
+  policy
+  policy set <default|tool_name> <prompt|allow|deny>
+  policy reset
+  This allows frequently used low-risk tools to operate with less friction while another category of action can remain prompt-gated or explicitly blocked.
+  The default behaviour remains permission-oriented rather than unrestricted.
+
+  High-risk Windows actions remain exceptional
+  Broader approval mechanisms do not override every safety boundary.
+  Process termination, Windows logout and destructive Windows power actions continue to require individual confirmation.
+  That remains true even when a broader mechanism such as a plan approval, set-free, or an allow-policy would ordinarily remove another prompt.
+  In other words, 0.6.0 adds ways to reduce unnecessary permission friction without treating all computer actions as equivalent.
+
+  Persistent privacy-aware action auditing
+  Interly now keeps a persistent JSONL action audit log.
+  The log records proposed and executed actions so that the user can later inspect what the agent attempted and what actually ran.
+  Recent audit entries can be viewed using:
+  audit
+  audit <1-100>
+  The audit system is privacy-aware.
+  Sensitive payloads such as typed text, clipboard-write contents, file contents and file-edit bodies are not written verbatim into the audit trail. URL credentials, query strings and fragments are also excluded from recorded audit data.
+  The objective is to create useful accountability without turning the audit log itself into a new store of private information.
+
+  Existing Windows capabilities now form a larger system
+  The desktop layer builds on Interly's earlier Windows access rather than replacing it.
+  Interly already had structured capabilities for application discovery and launching, process inspection, exact PID termination, logout and power actions, system information, networking, Wi-Fi, local users, identity, hostname, network adapters, routes, disks, system performance metrics and installed-application reporting.
+  0.6.0 connects those lower-level machine capabilities with the visible desktop.
+  Interly can therefore increasingly reason across several layers of the same computer:
+  system → process → application → window → visible interface → user input
+  That layered Windows model is one of the most important architectural changes in the release.
+
+  Files, web and browser capabilities remain available
+  The existing file system and internet capabilities continue to work alongside the new Windows desktop layer.
+  Interly can search files, read bounded text and source files, create text files, perform exact text edits, compare files, create directories, copy/move/rename files and download approved direct public files with URL validation, size limits and SHA-256 reporting.
+  Its public-web tools can search the internet, read public webpages and perform bounded multi-source research.
+  Its isolated Playwright browser remains separate from the user's ordinary browser and supports rendered-page reading, tabs, scrolling, navigation, control inspection, approved clicking and typing, and screenshots.
+  0.6.0 therefore gives the model three increasingly complementary interaction surfaces:
+  structured tools → isolated browser → Windows desktop
+  The agent can use the most appropriate layer instead of forcing every task through one interface.
+
+  Developer workflow foundations
+ReleaseNotesUrl: https://github.com/interlinkglobal/interly/releases/tag/0.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
