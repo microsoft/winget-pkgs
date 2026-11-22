@@ -1,0 +1,51 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: ruddro-roy.sindook
+PackageVersion: 0.11.1
+PackageLocale: en-US
+Publisher: Ruddro Roy
+PublisherUrl: https://github.com/ruddro-roy
+PublisherSupportUrl: https://github.com/ruddro-roy/sindook/issues
+Author: Ruddro Roy
+PackageName: sindook
+PackageUrl: https://github.com/ruddro-roy/sindook
+License: Apache-2.0
+LicenseUrl: https://github.com/ruddro-roy/sindook/blob/v0.8.1/LICENSE
+Copyright: Copyright 2026 Ruddro Roy
+ShortDescription: 'Hybrid post-quantum file encryption (X-Wing: X25519 + ML-KEM-768)'
+Description: |-
+  Sindook is a command-line tool that seals files with hybrid post-quantum
+  encryption using the X-Wing KEM (X25519 + ML-KEM-768) and can rotate
+  recipients, passphrases, and format versions without decrypting or
+  re-encrypting the payload in fast mode. Pre-1.0 software: the format and
+  design have not received an independent security audit.
+Moniker: sindook
+Tags:
+- cli
+- encryption
+- ml-kem
+- post-quantum
+- pqc
+- x-wing
+ReleaseNotes: |-
+  Added
+  - sindook rotate -i IDENTITY (-to RECIPIENT)... [-deep] [-jobs N] [-glob PATTERN]... [-json] DIR|FILE..., bulk retirement of one identity.
+    Every candidate file is opened with the identity being retired; files it
+    opens are rewrapped to exactly the -to recipients, files it cannot open
+    are reported as skipped with the reason, and a failed rewrap is
+    failed and leaves the original file untouched. Directory operands are
+    walked for *.sindook files, -jobs reuses the bounded worker pool from
+    verify, and -json reports one array of {file, status, error?} with
+    status rotated, skipped, or failed (documented in
+    docs/COMPATIBILITY.md). The exit code is non-zero only when a rewrap
+    failed; skipping is not a failure. Fast mode inherits rewrap's limits: it
+    does not revoke recipients who already hold a copy of the old file, and
+    -deep re-encrypts under a fresh file key.
+  - Running sindook with no command now leads with the three-command
+    quick start (init, seal, open) and states that the tool is
+    command-driven, before the full command list. Human-facing text only;
+    exit codes and -json are unchanged.
+ReleaseNotesUrl: https://github.com/ruddro-roy/sindook/releases/tag/v0.11.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

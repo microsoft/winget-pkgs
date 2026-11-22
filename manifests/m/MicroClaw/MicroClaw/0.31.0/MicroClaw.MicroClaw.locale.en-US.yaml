@@ -1,0 +1,122 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: MicroClaw.MicroClaw
+PackageVersion: 0.31.0
+PackageLocale: en-US
+Publisher: MicroClaw
+PublisherUrl: https://microclaw.ai/
+PublisherSupportUrl: https://github.com/microclaw/microclaw/issues
+PackageName: MicroClaw
+PackageUrl: https://microclaw.ai/
+License: MIT
+LicenseUrl: https://github.com/microclaw/microclaw/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 everettjf
+ShortDescription: An agentic AI assistant that lives in your chats, inspired by nanoclaw and incorporating some of its design ideas. Built with Rust
+Description: |-
+  MicroClaw is a Rust chat bot that connects LLM to your chats with agentic tool execution. It can run shell commands, read and edit files, search codebases, browse the web, schedule tasks, and keep persistent memory across conversations. It is a Rust rewrite of nanoclaw (TypeScript) with additional capabilities and a single-binary deployment model.
+
+  What makes it different
+  - Agentic loop with tool execution, not just a single API call
+  - Full file system and shell tooling from inside chat
+  - Long-lived memory backed by AGENTS.md files
+  - Built-in scheduler for cron and one-time tasks
+  - Group chat catch-up: reads all messages since last reply
+  - Multi-chat permission model (control_chat_ids) for cross-chat tool authorization
+  - Agent skills system with bundled skills (including macOS Apple Notes/Reminders/Calendar helpers)
+  - Customizable personality via SOUL.md files (global + per-chat)
+
+  How it works
+  chat message
+      |
+      v
+   Store in SQLite --> Load chat history + memory
+                           |
+                           v
+                     LLM API (with tools)
+                           |
+                      stop_reason?
+                     /            \
+                end_turn        tool_use
+                   |               |
+                   v               v
+             Send reply      Execute tool(s)
+                                |
+                                v
+                          Feed results back
+                          to LLM (loop)
+  MicroClaw enters an agentic loop for every message. LLM can call tools, inspect results, call more tools, and reason through multi-step tasks before responding. The loop is capped by MAX_TOOL_ITERATIONS for safety.
+
+  Core capabilities
+  - Agentic tool use (bash, file I/O, glob, grep)
+  - Web search, fetch, and browser automation
+  - Scheduling with cron expressions
+  - Mid-conversation messaging for progress updates
+  - Persistent memory (global + per-chat)
+  - Personality customization via SOUL.md
+  - Conversation archiving (automatic before compaction, manual via /archive)
+  - Typing indicator that stays active during tool use
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claw
+- large-language-model
+- llm
+ReleaseNotes: |-
+  MicroClaw Code 0.31: private project memory, Claude Code plugins and idle
+  compaction (docs/roadmap/mccode-competitive-plan-2026-11-cn.md, N5–N7).
+  Added
+  - Private project memory. Besides the shared .microclaw/memory.md
+    (in the repository), trusted projects now have a private memory in
+    ~/.mccode/projects/<repo>-<hash>/memory.md for your preferences and this
+    machine's setup. Both are in the prompt of every turn; the agent is told
+    which kind of fact goes where (a stated preference never goes to the
+    shared file), and writing the private file does not ask for the
+    outside-the-project approval. Worktrees share the main checkout's private
+    memory. /memory opens both files in $EDITOR (shared, private,
+    show). mccode import claude adds Claude Code's auto memory of the same
+    repository, mccode import codex the items of Codex's memories.
+  - Plugins in the Claude Code layout. mccode plugin add <owner/repo | git URL | path> [--plugin <name>] [--project], list, update,
+    enable, disable and remove. A plugin's commands (/name and
+    /plugin:name), agents (for explore and sessions_spawn), skills,
+    hooks and MCP servers work as in Claude Code, with ${CLAUDE_PLUGIN_ROOT}
+    resolved; marketplace repositories are followed to the plugin's own
+    repository. Installing lists every hook and MCP command and asks first
+    (--yes without a terminal); updating asks again when new commands
+    appear. Unsupported parts (output styles, LSP servers, …) are listed as
+    skipped. User plugins are copied to ~/.mccode/plugins/, project plugins
+    to .microclaw/plugins/ and load only in trusted projects. /plugins
+    shows what is in use. Engine: extra_agents_dirs, extra_skills_dirs,
+    extra_mcp_configs; SDK: MicroClawBuilder::plugin_sources.
+  - Idle compaction. The terminal UI compacts a large session (at least
+    half of the compaction budget) that has been idle for 90% of the
+    provider's prompt cache lifetime, while the cache is still warm, so the
+    next prompt does not write the whole conversation to the cache again.
+    Anthropic only (the engine reports prompt_cache_ttl in
+    ContextUsage); tui.idle_compact: false turns it off. pre_compact
+    hooks see trigger auto.
+  - MicroClaw Code desktop app (preview, macOS). A GPUI app in
+    apps/microclaw-code-desktop with onboarding, projects, sessions and a
+    streaming transcript over the same ~/.mccode home and Agent Engine as
+    the terminal UI. Build it from source with scripts/bundle.sh; it is
+    not signed or shipped as a download yet.
+  Fixed
+  - glob no longer scans the disk for hours: its fallback for hidden,
+    ignored and absolute paths walks from the pattern's literal prefix and
+    stops after 50,000 entries (saying so), off the async workers.
+  - Plan mode and read-only profiles offer activate_skill, which only reads
+    a skill's instructions.
+  - mccode -p "/unknown" reports the unknown command instead of sending an
+    empty turn.
+  - The system prompt explains the <context_budget> line, which models
+    otherwise read as text injected into tool output.
+ReleaseNotesUrl: https://github.com/microclaw/microclaw/releases/tag/v0.31.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://microclaw.ai/docs/overview
+- DocumentLabel: Quick Start
+  DocumentUrl: https://microclaw.ai/docs/quickstart
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

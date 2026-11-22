@@ -1,0 +1,76 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.17.0
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  本次发布集中重做 PDF 阅读与翻译：新增原文 / 译文 / 对照三态视图、沉浸式全屏阅读、版面元素选择与逐页翻译标签，并修正正文提取、译文排版和引用预览中的多处问题。设置新增本机使用情况看板，写作构建日志可直接交给 Agent 修复，CLI 也能在无界面环境完成版面分析；工作区布局改为只由 Dockview 持有，窗口与资料库各自保存会话。
+  新功能
+  - PDF 三态阅读视图：工具栏的翻译开关改为「原文 / 译文 / 对照」切换，⌥A 在原文与译文间切换；对照会打开配对译文栏，关闭该栏后回到原文，不再残留上一状态。（869b354 by @Phil-Fan）
+  - 沉浸式全屏阅读：全屏阅读隐藏背景与图表控件，退出后恢复分屏宽度、布局和阅读位置，按 Escape 也可退出。（#1117 · 4062d9d by @JiaheChen2002）
+  - 版面元素选择：按 ⌘. 或底部栏按钮进入元素选择，悬停高亮合并后的版面元素，点击加入对话或选中翻译；元素工具栏同时提供文字批注、便签与图片裁切。（#1135, #1149 · 357cf84, a80a143 by @ffy6511）
+  - 逐页翻译标签：页面左缘标签恢复「翻译本页 / 隐藏本页 / 重译本页」，翻译中与排版中常显状态，不再只在悬停时变色；入口是否显示可在设置里固定。（#1174 · a2e640f, e6f9df5 by @Phil-Fan）
+  - 使用情况看板：设置新增「使用情况」，展示近 26 周热力图、本周阅读与 Agent 用量、workflow 分布和读得最久的论文，点击标题即可打开该论文；数据仅保存在本机。（PR #1167 · 219c829 by @qychen2001）
+  - CLI 无界面版面分析：agentero layout analyze 与 import pdf --layout 可调用 Paddle / MinerU，生成与桌面端一致的 layout.json 与 layout-index.json，并复用桌面写出的结果作为缓存。（#1123 · 7c0a24d by @Phil-Fan）
+  - 对话内联批注：Agent 对话历史按发送时的位置重绘选区与视觉批注芯片，悬停可预览引用、批注、页码和裁图，编辑消息后仍保持同一位置。（#1118 · 5f003c7 by @ffy6511）
+  - 构建日志交给 Agent: 写作编译问题卡新增「用 Agent 修复此错误 / 修复所有错误」，长日志折叠为一行摘要，发送给 Agent 的引用带警告图标与日志摘要。（#1176 · 8742964, 392d7e6 by @Phil-Fan）
+  - Antigravity CLI: 通过官方安装器接入 Agent 模板的安装、更新与卸载，卸载时保留登录会话与 PATH 配置。（0afc5b9 by @Phil-Fan）
+  - 引用预览扩展：悬停引用卡展示完整作者、期刊与 DOI，并修复分组文本引用无法解析、图表预览缺失或指向错误子图的问题。（#1099, #1122 · 1ef8772, 94cc395 by @JiaheChen2002）
+  改进
+  - 工作区布局单一权威：Dockview 独占几何、成员与焦点，每扇窗口和每个 Vault 各自保存会话；跨窗口移动改为目标确认后再关闭源视图，Agent 交接需要对方 ack 才改绑事件。（PR #1160 by @qychen2001）
+  - 划词翻译关闭方式：划词翻译结果默认在点击卡片外关闭，需要常显时在设置中打开「翻译卡片常显示」。（#1140 · d753c4f by @Phil-Fan）
+  - 翻译并发可调：OpenAI 兼容全文翻译的并发数收进高级设置，可按服务限额调整。（#1155 · 0ea95cc by @Phil-Fan）
+  - PDF 操作与高亮：右键拖拽平移页面，缩放上限提升到 400%，视口滚动条常显；句子悬停与双栏配对在单栏和对照视图间共享，浅色纸张上也能看清选中与悬停色。（#1178 · 8b39948, 37452df, 291b97e by @Phil-Fan, @JiaheChen2002, @ffy6511）
+  - 译文排版性能：译文重排构建移入后台 worker，可复用的页位图设有内存上限，长文翻译不再阻塞主线程。（#1188 · 021af00, 2d4f3e5 by @Phil-Fan）
+  - 大文件导入：8 MB 以上的附件按 4 MB 分段并行下载，单次资源超时提高到 15 分钟，大型 arXiv 投稿不再半途截断重试。（PR #1145 by @GitZhaoo）
+  - 机构代理 PDF: 优先采用出版社声明的 citation_pdf_url，跳过补充材料，并为 /doi/pdf/ 补充 /doi/pdfdirect/ 回退。（PR #1147 by @dengfeng-0908）
+  - 资料库同步：统一 Paper scope 分类，修复嵌套目录大小统计、.gitignore 排除与范围开关，发布和恢复时校验并保护本地文件；同步设置草稿不再被状态刷新覆盖。（#1165, #1166 · 21b446e, 5a7af84 by @qychen2001）
+  - 导入导览：工作区与阅读导览分别保存进度，完成后可继续剩余步骤，且不再与 Zotero 导入提示重叠。（#1124 · 7ac0275 by @JiaheChen2002）
+  - 写作源文件切换：打开同项目其他源文件时替换现有面板的源码页，保留 PDF 的页码、缩放与分栏，不再堆叠标签页。（#1158 · 88d67e1 by @Phil-Fan）
+  - 移除 Excalidraw 白板：不再内置 Excalidraw 查看器，已有 .excalidraw 文件改为纯文本打开。（992aa5c by @Phil-Fan）
+  修复
+  - PDF 正文顺序：字体 FontBBox 异常导致相邻行被合并、正文逐词交错时，改用字号作为行容差基准；旧排版缓存会自动重算。（#1189 · 0a499aa by @Phil-Fan）
+  - 翻译失败重试：页面翻译失败改为段尾行内警告与重试，不再弹 Toast；加载圈保持到译文页绘制完成，页码状态与页面同步。（#1151, #1154 · 71d1967, 78a0a55 by @Phil-Fan）
+  - 元素选择工具栏：元素选择模式下双击正文不再同时弹出划词菜单，只保留元素操作卡。（#1175 · 0b274e4 by @Phil-Fan）
+  - 双栏译文栏对齐：译文栏复用阅读工具栏的进度胶囊，部分译文提示独立成块，不再与进度条互相挤压。（#1187 · 27ce461 by @Phil-Fan）
+  - 空白双链：全空白的 [
+
+    ] 不再触发索引 panic，文件夹重命名与双链同步恢复正常。（#1142 · PR #1143 by @YasyaKarasu）
+  - Markdown 标记：高亮 在中文后可正常触发，相邻高亮与下划线保存时不再互相吞并，/ 在 Agent 回复等 Markdown 界面正确渲染。（#1168, #1170 · 6fb6e9a, 2e69d33, 25faf7f by @Phil-Fan）
+  - 笔记公式：单行 \(...\) 按块级公式渲染，含 \tag 或 align 等环境的行内公式自动提升为块公式，不再显示红色报错源码。（#1162 · 1a84947, 3585e46 by @Phil-Fan）
+  - 侧栏宽度：拖动分隔条收起左栏后再展开，分隔条仍在且宽度可继续调整。（#1163 · f9e7820 by @Phil-Fan）
+  - Papers with Code: 搜索与助手入口不再把 Hugging Face 登录页嵌进面板，登录改在系统浏览器完成。（#1164 · 61b2ca7 by @Phil-Fan）
+  - 批注卡片：相邻的长批注卡片不再互相遮挡。（#1097 · ccdede6 by @JiaheChen2002）
+  - Codex 指令告警：指令预算告警不再作为助手消息出现在对话中，改为可关闭的提示。（#1132 · e6f072c by @ffy6511）
+  - MCP 资源：agentero://agent-invariants 不再混入 CLI 指令，无 shell 的客户端不会一开始就被带偏。（#1141 · 3194934 by @qychen2001）
+  - 写作编译失败：编译失败只进问题栏，不再弹 Toast 或留下后台任务行；错误排在警告之前，上传按钮也不在同步时抖动。（#1151 · 06c7edd, 8fdbf47 by @Phil-Fan）
+  - 阅读分栏焦点：切换分屏与阅读模式时保持当前焦点和可见面板，临时最大化不会写回已保存布局。（701b9f7 by @Phil-Fan）
+  安全性
+  - csv-parse 升级：更新到 7.0.3，修复 Dependabot 标记的 columns 路径原型污染告警（GHSA-8cw4-87c7-c6xx），离线词典构建流程保持不变。（c133cf5 by @Phil-Fan）
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.17.0
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

@@ -1,0 +1,70 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.17.0
+PackageLocale: en-US
+ShortDescription: Agent-friendly reference management.
+Description: 'Traditional reference managers are not agent-friendly: highlights and notes stay locked inside single files, making it hard for agents to reuse knowledge across papers; every conversation starts from scratch without a stable local knowledge map; PDFs are human-friendly but not the most comfortable reading material for agents. Agentero aims to build an agent-friendly, agent-native way to manage references, exploring how humans and agents collaborate on reference management. Connect your local agent via ACP (BYOA), select-text chat, import papers and Skills, stay compatible with the Zotero ecosystem, and get paper translation, bidirectional links with a knowledge graph, and deep PDF reading.'
+Tags:
+- academics
+- agent
+- article
+- literature
+- paper
+- pdf
+- reference
+- research
+- thesis
+- zotero
+ReleaseNotes: |-
+  This release reworks PDF reading and translation: a three-way original / translation / compare view, immersive fullscreen reading, layout-element selection, and per-page translation tabs, along with fixes to text extraction, translation typesetting, and citation previews. Settings gains a local usage board, writing build logs can be handed to an Agent, and the CLI can run layout analysis headlessly. The workspace layout now has a single authority in Dockview, with sessions scoped per window and vault.
+  Features
+  - Three-way PDF reading view: The toolbar translate toggle becomes an original / translation / compare switch, with ⌥A toggling original and translation; compare opens the paired translation pane and closing that pane returns to the original instead of a stale translation. (869b354 by @Phil-Fan)
+  - Immersive fullscreen reading: Fullscreen reading hides background and figure controls, and leaving it restores split widths, layout, and reading position; Escape also exits. (#1117 · 4062d9d by @JiaheChen2002)
+  - Layout element selection: Press ⌘. or use the bottom-bar control to inspect merged layout elements, then add them to chat or translate the selection; the element toolbar also offers text markup, notes, and image crops. (#1135, #1149 · 357cf84, a80a143 by @ffy6511)
+  - Per-page translation tab: The left page-edge tab returns with translate / hide / retranslate this page, keeps the translating and typesetting stage visible instead of only on hover, and can be pinned visible from Settings. (#1174 · a2e640f, e6f9df5 by @Phil-Fan)
+  - Usage board: Settings adds Usage with a 26-week heatmap, this week's reading and Agent usage, workflow breakdown, and the papers read longest; clicking a title opens that paper, and the data stays on this computer. (PR #1167 · 219c829 by @qychen2001)
+  - Headless CLI layout analysis: agentero layout analyze and import pdf --layout call Paddle / MinerU and write the same layout.json and layout-index.json as the desktop app, reusing desktop-authored results as a cache. (#1123 · 7c0a24d by @Phil-Fan)
+  - Inline annotations in chat history: Agent transcripts redraw selection and visual annotation chips where they sat when sent, with hover previews of the quote, comment, page, and crop; editing a message keeps the same positions. (#1118 · 5f003c7 by @ffy6511)
+  - Hand build logs to an Agent: The writing problems card gains "Fix this error / fix all errors with Agent", long logs collapse to a one-line summary, and sent references carry a warning icon plus the log summary. (#1176 · 8742964, 392d7e6 by @Phil-Fan)
+  - Antigravity CLI: Agent templates install, update, and uninstall it through the official installer, keeping login sessions and PATH lines on uninstall. (0afc5b9 by @Phil-Fan)
+  - Richer citation previews: Reference hover cards show full authors, journal, and DOI, and grouped text citations now resolve while figure previews no longer go missing or point at the wrong subfigure. (#1099, #1122 · 1ef8772, 94cc395 by @JiaheChen2002)
+  Improvements
+  - Dockview as the only layout authority: Dockview alone owns geometry, membership, and focus, and sessions are stored per window and vault; moving a view across windows closes the source only after the target accepts, and Agent handoff rebinds events after an ack. (PR #1160 by @qychen2001)
+  - Selection translation dismissal: Selection translations now close on a click outside by default; keep them open with "Always show translate card" in Settings. (#1140 · d753c4f by @Phil-Fan)
+  - Configurable translation concurrency: OpenAI-compatible full-text concurrency moves under Advanced so it can match each service's limits. (#1155 · 0ea95cc by @Phil-Fan)
+  - PDF controls and highlights: Right-drag pans the page, zoom goes up to 400%, viewport scrollbars stay visible, sentence hover and dual-pane pairing are shared across single and compare views, and selection tints remain readable on light paper. (#1178 · 8b39948, 37452df, 291b97e by @Phil-Fan, @JiaheChen2002, @ffy6511)
+  - Translation typesetting performance: Reflow building moves to a background worker and reusable page bitmaps are memory-capped, so long translations no longer block the main thread. (#1188 · 021af00, 2d4f3e5 by @Phil-Fan)
+  - Large imports: Assets over 8 MB download as parallel 4 MB ranges, and the asset timeout rises to 15 minutes, so large arXiv submissions no longer stall or restart from zero. (PR #1145 by @GitZhaoo)
+  - Institution-proxy PDFs: The fallback prefers the publisher's citation_pdf_url, skips supplementary material, and queues a /doi/pdfdirect/ retry for /doi/pdf/ links. (PR #1147 by @dengfeng-0908)
+  - Vault sync: Paper scopes share one classification for size reporting, Git exclusions, and blob sync; publication and recovery verify and protect local files, and sync drafts survive status refreshes. (#1165, #1166 · 21b446e, 5a7af84 by @qychen2001)
+  - Onboarding tours: Workspace and reading tours save progress separately, resume the remaining steps, and no longer overlap the Zotero import prompt. (#1124 · 7ac0275 by @JiaheChen2002)
+  - Writing source switching: Opening another source file in the same project swaps the panel's source pane instead of stacking tabs, keeping the PDF page, zoom, and split. (#1158 · 88d67e1 by @Phil-Fan)
+  - Excalidraw removed: The built-in Excalidraw viewer is gone, and existing .excalidraw files open as plain text. (992aa5c by @Phil-Fan)
+  Fixes
+  - PDF body order: When an off-scale font FontBBox merged adjacent lines and interleaved body words, line grouping now uses the em size for tolerance and rebuilds stale caches. (#1189 · 0a499aa by @Phil-Fan)
+  - Translation retry: Page translation failures become an inline warning at the paragraph tail with an inline retry instead of a toast, and the loading ring stays until the translated page paints. (#1151, #1154 · 71d1967, 78a0a55 by @Phil-Fan)
+  - Element selection toolbar: Double-clicking body text in element selection no longer opens the sentence menu on top of the element card. (#1175 · 0b274e4 by @Phil-Fan)
+  - Dual-pane translate meter: The translation pane reuses the reader toolbar's progress capsule, and the partial-translation warning gets its own block instead of squeezing the bar. (#1187 · 27ce461 by @Phil-Fan)
+  - Whitespace wiki links: A whitespace-only [
+
+    ] no longer panics the index, so folder renames and link synchronization work again. (#1142 · PR #1143 by @YasyaKarasu)
+  - Markdown marks: highlight now triggers after Chinese text, adjacent highlights and underlines no longer swallow each other on save, and / render correctly in Agent replies and other Markdown surfaces. (#1168, #1170 · 6fb6e9a, 2e69d33, 25faf7f by @Phil-Fan)
+  - Note math: A standalone single-line \(...\) renders as a block equation again, and inline formulas using \tag, align, and similar environments are promoted to blocks instead of showing red parse errors. (#1162 · 1a84947, 3585e46 by @Phil-Fan)
+  - Sidebar width: Collapsing the left rail by dragging its separator and expanding it again keeps the separator mounted so its width stays adjustable. (#1163 · f9e7820 by @Phil-Fan)
+  - Papers with Code: Search and assistant rows no longer open the Hugging Face login page inside the panel; sign-in happens in the system browser. (#1164 · 61b2ca7 by @Phil-Fan)
+  - Annotation cards: Long adjacent annotation cards no longer cover each other. (#1097 · ccdede6 by @JiaheChen2002)
+  - Codex instruction warnings: Instruction-budget warnings no longer appear as assistant messages; they show as a dismissible toast. (#1132 · e6f072c by @ffy6511)
+  - MCP resources: agentero://agent-invariants no longer mixes CLI commands into MCP guidance, so shell-less clients are not misdirected on first discovery. (#1141 · 3194934 by @qychen2001)
+  - Writing compile failures: Compile failures stay in the problems card instead of raising a toast or leaving a background-task row, errors sort above warnings, and the upload button no longer shifts while syncing. (#1151 · 06c7edd, 8fdbf47 by @Phil-Fan)
+  - Reading focus: Splitting and changing reading modes keep the current focus and visible panels, and temporary maximization is no longer written back to the saved layout. (701b9f7 by @Phil-Fan)
+  Security
+  - csv-parse upgrade: Updates to 7.0.3 to fix the Dependabot-flagged prototype pollution in the columns path (GHSA-8cw4-87c7-c6xx); the offline dictionary build is unchanged. (c133cf5 by @Phil-Fan)
+  Full compare
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.17.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: locale
+ManifestVersion: 1.28.0

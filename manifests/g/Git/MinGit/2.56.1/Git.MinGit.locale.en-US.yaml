@@ -1,0 +1,53 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Git.MinGit
+PackageVersion: 2.56.1
+PackageLocale: en-US
+Publisher: The Git Development Community
+PublisherUrl: https://gitforwindows.org/
+PublisherSupportUrl: https://github.com/git-for-windows/git/issues
+Author: Johannes Schindelin
+PackageName: MinGit
+PackageUrl: https://gitforwindows.org/
+License: GPL-2.0
+LicenseUrl: https://github.com/git-for-windows/git/blob/HEAD/COPYING
+ShortDescription: MinGit is an intentionally minimal, non-interactive distribution of Git for Windows, with third-party applications as its intended audience.
+Description: |-
+  MinGit is a minimal, lightweight version of Git for Windows that includes only the core Git command-line tools.
+  It's designed for automated environments, CI/CD pipelines, and users who need basic Git functionality without the full Git for Windows package, which includes Git Bash, GUI tools, and other utilities.
+  MinGit offers a smaller footprint and can be used portably without installation.
+Moniker: mingit
+Tags:
+- cli
+- command-line
+- commandline
+- cross-platform
+- dvcs
+- foss
+- git
+- open-source
+- tool
+- utility
+- vcs
+ReleaseNotes: |-
+  Security bug fixes
+  - CVE-2026-111760:
+    Recursive clones are susceptible to Remote Code Execution: an attacker-controlled repository can be crafted in a way that exploits a bug in Git whereby Git can be fooled into overwriting a gitfile (used for submodules) with a symbolic link that then points to a directory with malicious config or hooks. The config or hooks may have attacker-specified code.
+  - CVE-2026-113408:
+    It is possible for a server to advertise an unborn HEAD that contains path-traversal characters (e.g., refs/heads/../../../TARGET). With the files ref backend that can lead to ref-updating actions to write to unwanted files.
+  - CVE-2026-114467:
+    When Git strips the GPG signatures from a commit message, it only accounts for two signatures. A commit message containing more than two signatures therefore causes a stack memory corruption.
+    This can be triggered when using git merge with a tag which contains more than two signatures. As such, this makes way for a DoS attack which can potentially also affect forges when such a tag is pushed to a remote and a merge action is initiated.
+  - CVE-2026-114469:
+    Git rejects patches larger than ~1 GiB, because its patch application code does not work well with large files. That check, however, only considered the size of the patch as it appears in the input, which for binary patches is much smaller than the size of the file the patch describes, as binary patches are compressed and encoded. A binary patch that inflates to a very large size therefore slipped past the check and crashed Git with an out-of-bounds read.
+  - CVE-2026-105437:
+    When merging, Git computes the size of the buffer holding the merge result in a way that can overflow for very large merges, which can be triggered by a large number of conflicts combined with a large conflict-marker-size. The resulting buffer can then be too small, and Git writes past its end (and, before and after that, before its start), corrupting the heap.
+  - CVE-2026-114466:
+    In response to CVE-2019-1348, fast-import disallows the export-marks feature by default. The features rewrite-submodules-to and rewrite-submodules-from as well as the option export-pack-edges that were introduced in the meantime also allow reading from arbitrary paths, and are therefore now also disallowed by default.
+
+  New Features
+  - Comes with Git v2.56.1.
+ReleaseNotesUrl: https://github.com/git-for-windows/git/releases/tag/v2.56.1.windows.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

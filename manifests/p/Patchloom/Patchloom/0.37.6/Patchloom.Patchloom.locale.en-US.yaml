@@ -1,0 +1,67 @@
+# Created with WinGet Releaser using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Patchloom.Patchloom
+PackageVersion: 0.37.6
+PackageLocale: en-US
+Publisher: Patchloom
+PublisherUrl: https://github.com/patchloom
+PublisherSupportUrl: https://github.com/patchloom/patchloom/issues
+Author: Patchloom
+PackageName: Patchloom
+PackageUrl: https://github.com/patchloom/patchloom
+License: MIT
+LicenseUrl: https://github.com/patchloom/patchloom/blob/HEAD/LICENSE
+Copyright: Copyright (c) Patchloom contributors
+ShortDescription: Structured file editing CLI for AI agents
+Description: |-
+  Patchloom is a single-binary CLI that gives AI coding agents safe, structured
+  file editing: search and replace, unified diffs, parser-backed JSON/YAML/TOML
+  document ops, markdown section editing, AST-aware renames, multi-file
+  transactions, undo, and an MCP server for tool calls.
+Moniker: patchloom
+Tags:
+- ai
+- cli
+- developer-tools
+- mcp
+- rust
+ReleaseNotes: |-
+  Patchloom 0.37.6
+  Append and prepend follow a symlink to a text file. A patch read outside --contain is guard_rejected, and a YAML string such as 0b0 stays a string.
+  Highlights
+  append and prepend update the file a symlink points at. A preview still exits 2 and does not write. A symlink to a binary file is binary and is left unchanged.
+  doc set keeps a YAML value that looks like a base-2 number as a string. doc get returns that string.
+  Bug fixes
+  - append and prepend said a symlink to a text file was not a file. They follow the link and update the target. A symlink whose target has a NUL byte in the first 8 KiB is binary and is not rewritten. A dangling link, a link to a directory, and a FIFO stay invalid_input (#2718).
+  - rename link real.txt --force said the paths were the same. The link and the file are different entries. The command is invalid_input, and both stay. Renaming ./file to file is still a no-op (#2716).
+  - A patch file outside --contain was reported as parse_error. That read is guard_rejected (exit 1) and nothing is written. An absolute SEARCH/REPLACE destination without --contain is invalid_input. The same destination inside --contain previews and applies. A destination symlink that leaves the workspace is guard_rejected (#2712, #2711).
+  - doc set stored the YAML string 0b0 as the number 0. The value is written as a quoted string, and doc get returns that string (#2712).
+  - Library apply_patch could not update every match. apply_patch and apply_patch_file stay unique. apply_patch_with_replace_all and apply_patch_file_with_replace_all take the flag. Using that flag on a unified diff or a Begin Patch is invalid_input and does not write (#2709).
+  - doc set a.b.c said the number was at key b when a was the number. The error is still type_error and the file is not written. The message says the parent is a number (#2719).
+  - The read guide said a partial success exited 0. A partial success exits 1. When every path is missing, the kind is not_found. When every --lines range is past the end of the file, the kind is no_matches (exit 3). When every path is a directory, the kind is invalid_input. A mix of failures prefers binary, then invalid_encoding, then invalid_input, otherwise not_found (#2715).
+  - search --multiline rebuilt its line index for every hit. It builds that index once per file. The reported line and column are unchanged (#2717).
+  - Certificate checks could accept a distrusted emSign intermediate. The lockfile now uses rustls-webpki 0.103.16, which rejects that path (RUSTSEC-2026-0382, #2707).
+  Numbers
+  ───────┬────────────────────────────────────────────────────────────────────
+  Metric │Notes
+  ───────┼────────────────────────────────────────────────────────────────────
+  Version│0.37.5 -> 0.37.6
+  ───────┼────────────────────────────────────────────────────────────────────
+  Focus  │symlink writes, containment, YAML strings, library patch replace-all
+  ───────┴────────────────────────────────────────────────────────────────────
+  Upgrading
+  - append and prepend write through a symlink to a regular text file. A binary target is refused.
+  - rename --force no longer treats a symlink and its own target as the same path.
+  - Existing apply_patch and apply_patch_file calls stay unique. To replace every exact match, call apply_patch_with_replace_all or apply_patch_file_with_replace_all.
+  - Install from crates.io, npm, Homebrew, or Scoop after the tag ships. On Windows, Scoop is recommended. winget may need winget source update after Microsoft publishes. Chocolatey can lag while moderation runs.
+  Full changelog
+  patchloom-v0.37.5...patchloom-v0.37.6
+ReleaseNotesUrl: https://github.com/patchloom/patchloom/releases/tag/patchloom-v0.37.6
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://patchloom.github.io/patchloom/
+- DocumentLabel: Installation
+  DocumentUrl: https://github.com/patchloom/patchloom/blob/main/docs/getting-started/installation.md
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

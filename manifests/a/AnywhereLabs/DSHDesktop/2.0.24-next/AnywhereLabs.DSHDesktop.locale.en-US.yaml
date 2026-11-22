@@ -1,0 +1,40 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: AnywhereLabs.DSHDesktop
+PackageVersion: 2.0.24-next
+PackageLocale: en-US
+ShortDescription: A community-maintained desktop client for DeepSeek Harness; it is not an official DeepSeek product.
+Description: DSH Desktop is a community-maintained desktop client for DeepSeek Harness. It is an Electron desktop shell and is not an official DeepSeek product.
+Tags:
+- ai
+- deepseek
+- deepseek-harness
+- dsh
+- large-language-model
+- llm
+ReleaseNotes: |-
+  This Next release upgrades upstream to DeepSeek Harness v0.2.2-rc.5, switches macOS builds to separate Apple Silicon (arm64) and Intel (x64) installers, organizes Desktop Settings into four tabs with a switch back to the Classic app icon, optimizes style recalculations when opening or streaming in long sessions, improves Windows installer and portable update handling, and fixes reconnect loops on 39-bit ARM64 Linux devices and desktop LiveShare sharing.
+  DSH NEXT is a community-maintained open-source project, not an official DeepSeek product.
+  Upstream version: DeepSeek Harness v0.2.2-rc.5.
+  New and improved
+  - Split macOS installers by CPU architecture: macOS releases now ship as separate Apple Silicon (arm64) and Intel (x64) DMGs instead of a Universal DMG to reduce download size.
+  - Tabbed Desktop Settings and Classic app icon: Reorganized Desktop Settings into General, Profiles & data, Browser access, and Diagnostics tabs while preserving drafts across switches; added an option in Settings and onboarding to switch back to the Classic whale icon, plus automatic dark-mode icons on Windows and Linux.
+  - Upstream 0.2.2-rc.4 / rc.5 and UI performance improvements: DeepSeek models now default to DeepSeek server-side search with no per-search charge (while other models default to DeepSeek Search API); fixed LiveShare failing to create shares in the desktop app and improved handling of unexpected model refusal responses; optimized onboarding style scoping to reduce style recalculation overhead in long sessions; localized Linux role menus (Edit, View, Window); updated bundled dshmarket to 1.73.21.
+  - Plugin failure attribution and leaner diagnostics: Failure reports and logs now name failing or unloaded plugins from upstream diagnostics, and Quick Recovery can revert port conflicts to automatic; batched diagnostic log writes and folded repeated plugin output to reduce main-thread overhead.
+  Fixes
+  - Windows installer and portable updates: Fixed in-app Windows updates failing when Setup inherited the install working directory or a Low-integrity label on the data directory by staging downloads in the system temp folder; Windows Portable builds now detect updates and open the release page instead of running the regular installer.
+  - ARM64 Linux connectivity and model streaming: Fixed continuous reconnect loops on ARM64 Linux kernels with a 39-bit virtual address space (such as Raspberry Pi 4); aligned upstream pi-ai 1.3.0 patches to fix high CPU during large streamed tool arguments and missing Gemini thought signatures on replay.
+  - macOS native modules and Host exit codes: Fixed missing architecture-specific native modules in macOS builds, and preserved the non-zero exit code when a failed Host shuts down.
+  Usage notes
+  - Split macOS packages: Starting with this release, only separate arm64 and x64 DMGs are provided—choose the package matching your Mac's chip when downloading manually (in-app updates from 2.0.22 / 2.0.23 select your architecture automatically; earlier releases must update manually). On Windows, if 2.0.23 failed to auto-update due to a Low-integrity data directory, install this version manually once.
+  - Quit the previous version and back up ~/.dsh (or use Back up in Settings → Desktop settings) before installing. Verify your usual plugins and workflows afterward.
+  - Before managing plugins for the desktop Profile from the bundled terminal, launch Desktop to initialize that Profile.
+  - When upgrading from 2.0.17-next or earlier, download and install manually; in-app updates in those versions may not complete the download.
+  - The Office skills install the bundled runtime under ~/.dsh/dsh-runtimes/dsh-next-primary-runtime on first use, requiring additional disk space.
+  - Defaults to the shared ~/.dsh home. Profiles do not isolate sessions, accounts, or credentials within that home.
+  - Change the data directory in Settings → Desktop settings or the recovery assistant, or set DSH_DESKTOP_NEXT_HOME to an absolute path to isolate DSH data (an in-app choice takes precedence over the environment variable); this does not isolate AA’s default shared sign-in and device-binding state.
+  Full changelog · Project website
+  DSH NEXT replaces the former Stable edition channel.
+ManifestType: locale
+ManifestVersion: 1.28.0
