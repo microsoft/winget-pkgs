@@ -1,0 +1,46 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: MayDay.SnowApp
+PackageVersion: 0.5.9
+PackageLocale: zh-CN
+Copyright: 版权所有 (c) 2026 MayMay
+ShortDescription: 面向开发者的桌面应用，将 AI 对话、终端模拟、SSH 远程管理、Git 工具和内置浏览器面板整合到统一的工作空间中。
+Description: Snow App 是一款面向开发者的桌面应用，将 AI 对话、终端模拟、SSH 远程管理、Git 工具和内置浏览器面板整合到统一的工作空间中。它通过 Rust 原生模块处理性能关键型操作，包括 SQLite 存储、AI 流式传输、文件监控和 HTTP 请求。此外还支持 MCP 集成、AI 图像生成、技能系统、Hooks、子代理、代码库语义搜索与 AI 驱动的终端会话。
+Tags:
+- ai
+- codex
+- git
+- mcp
+- ssh
+- 终端
+- 聊天
+ReleaseNotes: |-
+  新功能
+  - SSH 远程 Skills：SSH 远程工作区可扫描、安装、卸载与启停项目级 Skills，安装内容经 SSH 通道原子上传到远端 .snow/skills；远端扫描失败会显式报错，不再静默返回空结果，工具链降级为全局 Skills。
+  - IM 聊天样式与自定义头像：主题设置新增 IM 样式开关与 AI / 我的头像，可换成自己的图片（保存在 ~/.snowapp/chat-avatars），未自定义时回退内置宠物头像与默认图标。
+  - 消息窗口化：长会话（含运行中）在渲染层只保留尾部窗口，更早的消息卸载回数据库，翻页时按游标取回；用户上翻阅读、翻页恢复与首屏定位期间暂停裁剪。
+  - 归档会话搜索：归档列表支持按标题、摘要与最后一条消息预览过滤。
+  - 存储占用概览：「存储与资源」页新增占用概览（分类图例、已用总量与刷新），各存储项改为可折叠卡片，「优化与缓存」合并为一张卡片。
+  - 内置字体：随应用附带 ZCOOL XiaoWei 与 Jost Light（SIL OFL 1.1），可直接选为字体预设。
+  - 子代理工具选择器分组：MCP 工具按服务器分组，可展开分组、批量选中搜索命中项，并显示每组已选数量。
+  - 右侧面板按内容类型记忆宽度：浏览器、终端、文件阅读器、资源管理器等各自记住拖拽后的宽度，默认值与拖拽范围也按类型区分。
+  改进
+  - Bash 输出有界捕获：bash 工具与常驻会话只保留头尾窗口并返回 truncatedBytes，超过上限停止流式转发并提示；哨兵检测改为滑动窗口，不再为每个 chunk 重扫全量输出；Windows 用 Job Object 绑定命令进程树（其他平台用独立进程组）；后台标签页截图改为分层超时重试，由主进程 rAF 探测确认帧产出后再截图。
+  - SSH 连接由活动工作区持有：移除命令会话连接池与隐式连接，未连接时统一返回 SSH_WORKSPACE_NOT_CONNECTED；项目列表与树视图显示本地化连接状态图标，SSH 项目未连接时「新建会话」改为显式重连；检查点、Repo Wiki 等后台通道通过工作区租约持有连接。
+  - 窗口与终端外观统一：Windows 11 窗口外边框不再跟随系统强调色，终端底色取自 --terminal-bg，主题预设与布局风格可连同面板一起改写。
+  - 只读工具结果缓存增加条数与字符上限（48 条 / 200 万字符），长 run 不再让整轮只读结果常驻内存。
+  破坏性变更
+  - 移除 FRP 隧道：手机远控公网访问只保留内置 SSH2 反向隧道；配置存储迁移到 schema v3（v2 自动迁移，旧 FRP 包会被拒绝），部署只需一条 snow A 记录加 SSH2 隧道端口。
+  - 移除 Midnight Blue、Forest Green、Rose Pink、Solarized 四个主题预设，旧 id 别名到 snow。
+  修复
+  - 远端不可达时后台 ahead/behind 轮询不再堆积 git fetch 进程：渲染层单飞并对失败指数退避（60s → 600s，成功后重置），主进程按仓库路径共享在途 fetch，原生 fetch 超过 45s 终止。
+  - 上下文压缩错误可关闭，输入框工具栏开关不再双重触发。
+ReleaseNotesUrl: https://github.com/MayDay-wpf/snow-app/blob/HEAD/RELEASE_NOTES_ZH.md#v059
+Documentations:
+- DocumentLabel: 快速开始
+  DocumentUrl: https://github.com/MayDay-wpf/snow-app/blob/main/docs/zh-CN/1-快速开始.md
+- DocumentLabel: 文档
+  DocumentUrl: https://github.com/MayDay-wpf/snow-app/blob/main/docs/README.md
+ManifestType: locale
+ManifestVersion: 1.28.0

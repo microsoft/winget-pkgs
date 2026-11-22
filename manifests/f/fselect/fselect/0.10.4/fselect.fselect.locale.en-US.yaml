@@ -1,0 +1,72 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: fselect.fselect
+PackageVersion: 0.10.4
+PackageLocale: en-US
+Publisher: fselect
+PublisherUrl: https://github.com/jhspetersson/fselect/
+PublisherSupportUrl: https://github.com/jhspetersson/fselect/issues
+Author: jhspetersson
+PackageName: fselect
+PackageUrl: https://github.com/jhspetersson/fselect/
+License: Apache-2.0
+LicenseUrl: https://github.com/jhspetersson/fselect/blob/master/LICENSE-MIT
+Copyright: Copyright (c) 2018-2023, jhspetersson.
+ShortDescription: Find files with SQL-like queries.
+Tags:
+- cli
+- command-line
+- files
+- filesystem
+- find
+- hacktoberfest
+- query
+- rust
+- sql
+- sql-like
+- tool
+- utility
+ReleaseNotes: |-
+  ### Added
+
+  • `IS NULL` and `IS NOT NULL` operators.
+  • `depth` field.
+  • `CONTAINS_CYRILLIC` function; better Japanese text detection.
+  • `STRPOS` function, split from `LOCATE`.
+  • `rlike` as a regex operator alias.
+  • Encrypted entries in zip archives; more fields available for archived files, with archive paths included in their values.
+  • `include:` directives in `.hgignore` and `.dockerignore`.
+  • Function argument counts and literals compared with typed expressions are checked when the query is parsed.
+  • Integration test suite covering traversal, ignore files, formats, grouping, dates, archives and CLI flags.
+
+  ### Changed
+
+  • Expressions carry static types; caches, sorting, grouping and aggregates work on typed values instead of rendered text.
+  • `fsize` is numeric：it compares, groups, sorts and aggregates by byte count while printing the formatted size.
+  • `CURRENT_DATE`, `NOW`, `DATE_ADD`, `DATE_SUB`, `FROM_UNIXTIME`, `LAST_DAY` and `DATE_TRUNC` return datetimes.
+  • `LEAST` and `GREATEST` operate on strings as well as numbers.
+  • `xattr()` returns values that are not UTF-8 as `0x..` hex instead of an empty string ([#187](https://github.com/jhspetersson/fselect/issues/187)).
+  • Unknown columns in `GROUP BY` and `ORDER BY`, ungrouped columns in grouped queries, an empty `IN ()` and an incomplete `WHERE` clause are rejected.
+  • A literal that can never match a typed expression (`length(name) > 'abc'`) is rejected before the search starts.
+  • `LIKE ''` matches the empty string.
+  • Bare words are treated as function calls only for functions that take no arguments.
+  • Root aliases are case-insensitive; JSON column names are lowercase.
+  • Search roots defined by subqueries inherit the root options of the parent query; a grouped subquery in `FROM` yields one entry per group.
+  • Faster sorting, aggregates, subquery caching, BFS traversal with `LIMIT`, deferred evaluation of heavy columns.
+
+  ### Fixed
+
+  • `GROUP BY` merged distinct values that render alike, such as sizes of 10,241 and 10,242 bytes both shown as `10.00KiB`.
+  • Missing boolean values sorted as `false` instead of last.
+  • `HAVING`, aggregate aliases and `MIN`/`MAX`/`COALESCE` corner cases.
+  • Correlated subqueries：caching, nested contexts and the group values they see.
+  • Symlink handling and ignore rules applied across symlinks.
+  • SVG dimension detection, MP4 duration and `exif_alt` for negative altitudes.
+  • Errors no longer break JSON and HTML output or the row count.
+  • `--help` and `--version` after other arguments; paths containing whitespace; floating point literals and unary minus.
+  • Windows：datetime formatting, Unix permission fields, extended attributes on musl builds.
+  • Subquery `OFFSET` applied twice; depth calculation; path under symlinks.
+ReleaseNotesUrl: https://github.com/jhspetersson/fselect/releases/tag/0.10.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

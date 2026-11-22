@@ -1,0 +1,63 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: walterfr.USKMaker
+PackageVersion: 2.6.1
+PackageLocale: en-US
+Publisher: walterfr
+PublisherUrl: https://github.com/walterfr
+PublisherSupportUrl: https://github.com/walterfr/UltraStarKaraokeMaker/issues
+PackageName: USKMaker
+PackageUrl: https://github.com/walterfr/UltraStarKaraokeMaker
+License: MIT
+LicenseUrl: https://github.com/walterfr/UltraStarKaraokeMaker/blob/HEAD/LICENSE
+ShortDescription: AI-powered UltraStar karaoke package generator (lyric sync, pitch, and BPM detection)
+Description: USKMaker generates complete UltraStar Deluxe karaoke packages from a YouTube link or local audio file. It downloads/prepares the audio, separates vocals, aligns your provided lyrics to the singing using local AI (WhisperX + forced alignment), detects pitch and BPM, and writes a ready-to-play UltraStar .txt package - entirely offline after setup, no cloud APIs.
+Moniker: uskmaker
+Tags:
+- ai
+- karaoke
+- lyrics
+- ultrastar
+- whisper
+ReleaseNotes: |-
+  [2.6.1] - 2026-11-13
+  Corrigido
+  - Publicação no itch.io Encadeada ao Build do Release:
+    - O workflow publish-itch.yml nunca disparava sozinho: o Release é criado com o GITHUB_TOKEN dentro do build-windows.yml, e eventos gerados por esse token não acionam outros workflows (release: published). Agora ele é um workflow reutilizável (workflow_call) chamado pelo job publish-itch do build-windows.yml em tags v*, como já acontecia com o publish-winget.
+    - Disparo manual sem release_tag e fora de uma tag agora falha na hora com mensagem clara, em vez de esperar 20 minutos por um release inexistente.
+  - Release sem o MSIX Antigo (2.2.0):
+    - O arquivo packaging/msix/USKMaker_2.2.0_x64.msix deixou de ser versionado e o Release passa a anexar apenas o pacote da versão (USKMaker_vX.Y.Z.0_x64.msix), sem o 2.2.0 obsoleto nem a cópia sem versão no nome.
+  - Limpeza de Títulos de Vídeo do YouTube:
+    - A remoção de emojis não deixa mais caracteres invisíveis (seletores de variação, zero-width joiners) no título e no nome da pasta.
+    - Ruídos em português e espanhol, como (Vídeo Oficial), (Clipe Oficial), (Letra), (Legendado) e o sufixo após |, agora são removidos.
+  - Limites Estritos do .lrc Preservados nos Resgates do Whisper:
+    - Os limites de linha pelo .lrc agora são mantidos quando um passe de resgate do Whisper (vocal principal, VAD sensível ou segunda separação) vence o alinhamento.
+  - Documentação:
+    - Crédito ao Karaokiza (MIT, de vicsaizo), que inspirou as melhorias da v2.6.0, adicionado ao README.
+    - package-lock.json alinhado à versão do app (ainda indicava 2.1.0).
+  - Resoluções Acima de 1080p Voltam a Valer (1440p / 2160p / Sem limite):
+    - A preferência por H.264 (avc1) da v2.6.0 valia para qualquer teto, mas o YouTube não oferece H.264 acima de 1080p: escolher 1440p, 2160p ou "Sem limite" entregava 1080p em silêncio. Agora o H.264 só é preferido até 1080p; acima disso o download segue o teto escolhido (AV1/VP9), e a dica da opção avisa que alguns players não reproduzem esses formatos.
+  [2.6.1] - 2026-11-13
+  Fixed
+  - itch.io Publishing Chained to the Release Build:
+    - The publish-itch.yml workflow never fired on its own: the Release is created with GITHUB_TOKEN inside build-windows.yml, and events created with that token do not trigger other workflows (release: published). It is now a reusable workflow (workflow_call) called by the publish-itch job of build-windows.yml on v* tags, just like publish-winget already was.
+    - A manual dispatch without release_tag and outside a tag now fails immediately with a clear message, instead of waiting 20 minutes for a release that does not exist.
+  - Release Without the Stale MSIX (2.2.0):
+    - packaging/msix/USKMaker_2.2.0_x64.msix is no longer tracked, and the Release now attaches only the versioned package (USKMaker_vX.Y.Z.0_x64.msix), without the obsolete 2.2.0 file or the unversioned copy.
+  - YouTube Video Title Cleanup:
+    - Emoji removal no longer leaves invisible characters (variation selectors, zero-width joiners) in the title and folder name.
+    - Portuguese and Spanish noise such as (Vídeo Oficial), (Clipe Oficial), (Letra), (Legendado) and the suffix after | is now removed.
+  - Strict .lrc Limits Preserved in Whisper Rescue Passes:
+    - Strict .lrc line boundaries are now kept when a Whisper rescue pass (lead vocal, sensitive VAD or second separation) wins the alignment.
+  - Documentation:
+    - Credit to Karaokiza (MIT, by vicsaizo), which inspired the v2.6.0 improvements, added to the README.
+    - package-lock.json aligned with the app version (it still said 2.1.0).
+  - Resolutions Above 1080p Work Again (1440p / 2160p / No limit):
+    - The H.264 (avc1) preference from v2.6.0 applied to every cap, but YouTube offers no H.264 above 1080p: choosing 1440p, 2160p or "No limit" silently delivered 1080p. H.264 is now preferred only up to 1080p; above that the download follows the chosen cap (AV1/VP9), and the option's hint warns that some players cannot play those formats.
+ReleaseNotesUrl: https://github.com/walterfr/UltraStarKaraokeMaker/releases/tag/v2.6.1
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/walterfr/UltraStarKaraokeMaker/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

@@ -1,0 +1,68 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.11.6
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  本次发布聚焦 PDF 阅读与全文翻译体验：翻译高亮与批注可以按句锚回英文原文，引用与图表交叉引用支持悬浮预览，并新增滚动方向与页面布局设置。同时带来机构代理下载、Zotero 集合引用、MiMo Code 和可配置决策 provider 等能力，并集中修复了一批 PDF 版面、Markdown 阅读性能与 Agent 相关问题。
+  新功能
+  - 机构代理下载付费 PDF: OA 链路全部未命中时，可用 EZProxy/WebVPN 前缀重写并带上用户会话 Cookie，凭机构订阅权限获取正文；设置中可配置前缀并"测试连接"。（#685 by @dengfeng-0908）
+  - 翻译高亮按句锚回原文：全文翻译按句对齐，在译文上高亮或批注会锚定对应英文句子，切回英文时高亮这些句子的字形。（#690 by @ffy6511）
+  - 引用与交叉引用悬浮预览：结构化引用未命中时，依据 PDF 目标坐标和文字矩形回退定位参考文献条目并生成裁剪预览，同时支持图表、表格、公式交叉引用预览。（#707 by @bet4it）
+  - PDF 滚动方向与页面布局设置：设置 → 通用新增连续滚动方向（竖直/水平）和页面布局（单页/双页跨页），写入 Host settings.json 并广播到已打开的 PDF 视图。（534a5aa6 by @Phil-Fan）
+  - Zotero 集合引用与迁移元数据：侧栏展示 Zotero 集合引用，保留迁移得到的集合元数据，并说明条目类型被忽略的原因。（#637 by @JiaheChen2002）
+  - MCP 正文读取开关：新增默认关闭的 paper_text_get MCP 工具，需在设置中显式开启后才向外部客户端返回论文正文。（c333e103 by @dengfeng-0908）
+  - MiMo Code Agent: 新增 MiMoCode（mimo acp）模板，并补齐静默安装/更新/卸载与版本检测生命周期；移除 OpenClaw 预设。（#683 by @dengfeng-0908）
+  - 可配置决策 provider: 决策层从 jEV 专用传输泛化为可配置的 System One provider，支持 jev/clef/openai/custom 预设、endpoint 与模型选择。（003b7301 by @Phil-Fan）
+  - 在终端打开 Agent CLI: 设置中可一键在终端打开已安装的 Agent CLI，方便未登录时直接执行登录。（4449fcce by @Phil-Fan）
+  - 不支持的桌面应用检测：设置 → Agent 新增只读的"本地桌面应用"区，探测 ChatGPT、千问办公、腾讯 WorkBuddy 等不支持 ACP 的应用；onboarding 同样列出并标注"暂不支持"。（614cffc4 by @Phil-Fan）
+  - 命令面板搜索标签与别名：快速打开现在可搜索论文标签与笔记别名。（91afe559 by @Phil-Fan）
+  改进
+  - Markdown 阅读性能：长笔记在未聚焦时跳过屏外块的布局与绘制，按文档裁剪 remark 插件，仅在触发语法存在时运行预处理，明显降低打开、滚动与侧栏拖拽的卡顿。（#702 by @Phil-Fan）
+  - PDF 选择与首屏性能：文本选择改为按指针意图惰性装配，并预取可见页选择几何，避免打开文档即整篇触发 PDFium 几何计算。（#606 by @Phil-Fan）
+  - 设置通用面板分组：设置 → 通用拆分为论文库 / PDF 阅读 / 广场 / 网络 / 集成等分组，各面板统一使用分组标题。（09452b5a by @Phil-Fan）
+  - 笔记导出水印默认开启：导出笔记默认带 Agentero 水印，导出对话框可单次关闭，移除冗余设置项。（1bc29c64 by @Phil-Fan）
+  - GitHub 下载代理预检：CLI 安装与应用更新下载前检查代理，未配置时给出可跳转到网络代理设置的可操作提示。（6ba47f04 by @Phil-Fan）
+  - 侧栏 Paper Info 自动隐藏：Paper Info 仅在有论文标签页或悬停论文库行时显示；悬停时可预览该论文元数据。（#695 by @Phil-Fan）
+  - AtomGit 发布同步更稳：以"连续无进度"判定中止而非固定时长，并把 job 上限提高到 180 分钟，修复大附件在低速链路上必然超时的问题。（#694 by @Phil-Fan）
+  - Antigravity 品牌图标：为 antigravity-acp 补上品牌标识，不再回退到通用终端图标。（f72db937 by @Phil-Fan）
+  修复
+  - MinerU 图片丢失：缺少或跨页图注不再导致整图从 Figures 侧栏被删除，接入真实图注几何并支持旧缓存的本地恢复。（#705 by @llamapw）
+  - 版面同行词序与文字层持久化：同一行文字按字形底边排序，修正加粗或更大字号的词被排到左边的问题；文字层抽完写回并标记，重启不再整篇重读。（#703 by @ffy6511）
+  - PDF 链接不再误入批注选中：链接交互归还给链接层，点击引用或外链不再进入批注调整框，外链统一由 Host opener 打开。（#699 by @bet4it）
+  - 翻译滚动保持横向位置：查看译文时滚动不再让原文横向滚动条跳到别处。（a52b67c7 by @JiaheChen2002）
+  - Linux 原生滚动条遮挡：弹层打开时隐藏背景页面原生滚动条，关闭后恢复，弹层内部的滚动条保留。（#693 by @bet4it）
+  - 内联公式渲染与对齐：新插入的行内公式不再因惰性渲染而空白，恢复基线对齐，并支持提交时把 $|$ 转换。（9bab8b5f, 659802af by @Phil-Fan）
+  - opencode 2.0.22 模型目录：修复新版 opencode 分两次推送模型目录时自定义模型列表被覆盖的问题。（#638 by @Phil-Fan）
+  - Zotero 忽略条目上报：迁移时明确上报被忽略的条目类型。（9558e1b2 by @JiaheChen2002）
+  - 翻译失败提示：全屏翻译失败提示新增"打开翻译设置"操作。（5c82f693 by @Phil-Fan）
+  - Onboarding Agent 步骤滚动：Agent 步骤改用统一的滚动容器，新增卡片不再把内容顶出对话框。（24c9f467 by @Phil-Fan）
+  安全性
+  - 依赖告警清理：升级 dompurify、katex，并通过 pnpm override 将 undici、hono、ip-address、proxy-addr、source-map-js、postcss-selector-parser、brace-expansion 等传递依赖锁到补丁版；Rust 侧将 rustls 升级到 0.23.45。（334b9e51, 4cd74e8e by @Phil-Fan）
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.11.6
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

@@ -1,0 +1,111 @@
+# Created with komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: CyberTimon.RapidRAW
+PackageVersion: 1.6.7
+PackageLocale: en-US
+Publisher: Timon Käch
+PublisherUrl: https://github.com/CyberTimon
+PublisherSupportUrl: https://github.com/CyberTimon/RapidRAW/issues
+Author: Timon Käch
+PackageName: RapidRAW
+PackageUrl: https://github.com/CyberTimon/RapidRAW
+License: AGPL-3.0
+LicenseUrl: https://github.com/CyberTimon/RapidRAW/blob/HEAD/LICENSE
+ShortDescription: A beautiful, non-destructive, and GPU-accelerated RAW image editor built with performance in mind.
+Description: |-
+  RapidRAW is a modern, high-performance alternative to Adobe Lightroom®. It delivers a simple, beautiful editing experience in a lightweight package (under 20MB) for Windows, macOS, and Linux.
+
+  RapidRAW is for photographers who love to edit their photos in a clean, fast, and simple workflow. It prioritizes speed, a beautiful user interface, and powerful tools that let you achieve your creative color vision quickly.
+
+  It is not for users who seek absolute, perfect color accuracy. While the results are great for most purposes, the focus is on a fluid, creative process rather than perfect color precision.
+
+  RapidRAW is still in active development and isn't yet as polished as mature tools like Darktable, RawTherapee, or Adobe Lightroom®. Right now, the focus is on building a fast, enjoyable core editing experience. You may encounter bugs - if you do, please report them so I can fix them :) Your feedback really helps!
+Moniker: rapidraw
+Tags:
+- color-grading
+- editing
+- image-processing
+- masks
+- raw
+- react
+- rust
+- tauri
+ReleaseNotes: |-
+  This release is the result of a one-week sprint focused on making the core of RapidRAW faster and lighter on RAM. I rewrote large parts of the image pipeline, so thumbnails, previews, exports and batch actions are now much faster and use a lot less memory. On top of that, this update brings a full Immich integration with edits synced across all your computers, GPU acceleration for AI models, smart AI masks that adapt to every photo, new sky and foreground models, AI Text and Face masks, a rewritten dehaze and noise reduction, more accurate RAW colors and a new job queue.
+  New Features
+  Performance Improvements & Lower RAM Usage
+  This release is all about speed. I went through the whole app to find out where time and memory were wasted and rewrote large parts of the image pipeline:
+  - Faster Library: Thumbnails load much faster and scrolling through big folders feels smoother.
+  - Faster Editing: Previews update quicker while moving sliders, and preset previews render much faster.
+  - Faster Exports: Exports finish noticeably faster and use less RAM. Two new Advanced settings let you choose how many images are exported at the same time and how much free RAM a batch export may use.
+  - Faster Batch Actions: Pasting adjustments, resetting and auto lens correction across many images are now much quicker.
+  - Optimized GPU Shaders: The shaders were optimized and the histogram and scopes now run on a zero-copy pipeline, so they update without slowing down the editor.
+  - Smarter Decoding: Images that are already decoded are reused, for example in the culling view, the collage tool and tethering.
+  - Lower Memory Usage: RAM usage was reduced across the whole app, from the preview pipeline, masks and AI denoise to the UI itself.
+  Immich Integration
+  RapidRAW can now connect directly to your Immich server. A new Immich section in the library lets you browse your albums and timeline, and edit any photo just like a local file. Images show Immich's preview as a thumbnail and the original is only downloaded when you open or export it, so you don't need to sync your whole library to your computer.
+  The best part: your edits are stored together with the photo on your Immich server. This means your edits look the same on every computer and they are kept even if you clear your cache. If you edit the same photo on two computers, nothing gets lost: your local edits stay and the other version is kept as a virtual copy.
+  What you can do:
+  - Browse Albums & Timeline: Navigate your whole Immich library right inside RapidRAW. Large albums load fast, and stacks are shown once and open the RAW file.
+  - Synced Edits & Ratings: Changes are sent to Immich every few seconds and when you close the app. If the server is offline, RapidRAW shows how many edits are still waiting and sends them as soon as the server is back, even after a restart.
+  - Export to Immich: Immich is now a destination in the export panel. Your export is uploaded, stacked on top of its original and added to an album of your choice. This also works for photos from your local folders.
+  - Manage Your Library: Remove images from Immich albums, delete them to Immich's trash (where they can be restored for 30 days), or copy them to your local folders with their edits.
+  - Secure by Default: Your API key is stored in your system's credential store (Windows Credential Manager, macOS Keychain, Secret Service or Android Keystore).
+  Immich 2.5 or newer is required, as it is the first version that lets apps store their own data with a photo. Huge thanks to @cl1x for building this whole integration!
+  image
+  New Before / After Compare Modes
+  Comparing your edit with the original is now much more flexible. Next to the full original view, you can now choose split left/right, split top/bottom and side by side. Just right-click the compare button to choose a mode, or press B to toggle. In split mode, you can drag the divider to any position, and your zoom and position are kept when switching modes, so you can easily compare small details.
+  image
+  Smart AI Masks for Copy & Paste and Presets
+  Until now, when you copied a mask or saved it in a preset, AI masks kept the exact mask of the original photo. A pasted sky mask still showed the sky of the first image, which made AI masks pretty useless for batch editing.
+  Now, AI masks adapt to every photo. When you paste adjustments or apply a preset that contains AI masks, RapidRAW automatically generates them again for each image in the background: a sky mask finds the sky, a subject mask finds the subject and a face mask finds the face in every single photo. The same works for depth & normal maps and AI denoise. Lens Blur, Fog, Relight and AI Denoise are also new groups in the copy & paste dialog.
+  This makes it super easy to edit a whole shoot with local adjustments, without opening every image one by one.
+  Job Queue
+  Everything that runs in the background now shows up in one place. The new job queue replaces the old AI queue and covers exports, imports, file transfers, AI model downloads, AI tagging and all other AI work. You can follow the progress of each job, cancel running exports, and jump to your files with one click when a job is done. AI processing can be paused, resumed or retried, and pending AI work continues where it stopped after a restart.
+  image
+  Non-Destructive Batch Denoise & Classic Denoise
+  In v1.6.6, I promised GPU acceleration and non-destructive batch denoising for AI Denoise. Both are now here. AI Denoise runs on your GPU on Windows and macOS, and you can simply paste your denoise settings onto as many photos as you like. The job queue denoises them in the background, without creating a single extra file.
+  The old denoise modal, which saved a separate TIFF file, is now completely gone. For photographers who use AI-Free Mode, the Details panel now offers a non-destructive Classic Denoise based on BM3D instead.
+  Data Management & Storage
+  The Data Management section in the settings has been redesigned into a clear Storage page. You can now see exactly how much space RapidRAW uses on your device, split into thumbnails, metadata, AI models, AI denoise results, depth & normal maps, Immich downloads and logs. Each one can be cleared on its own, and you can set size limits for thumbnails, AI denoise, depth & normal maps and Immich downloads. Once a limit is reached, the least recently used files are removed automatically. Tools for clearing tags and edits from your library are also on this page.
+  image
+  New AI Sky & Foreground Models
+  The old U2Net models for sky and foreground masks have been replaced with EfficientSAM3 for the sky and BiRefNet for the foreground. The masks are now much more accurate, follow fine details like hair, branches and thin structures, and have cleaner edges. AI models are now also downloaded only when you first use a feature, so you don't need to download everything at once.
+  ──────────────┬─────────────────────
+  Sky comparison│Foreground comparison
+  ──────────────┼─────────────────────
+  image         │image
+  ──────────────┴─────────────────────
+  New Mask Types: AI Text Mask & Face Segmentation
+  There are two new AI mask types:
+  AI Text Mask
+  Simply type what you want to select, for example "person", "car" or "water", and RapidRAW creates a mask for it. This makes it super fast to select objects that are hard to paint by hand.
+  AI Text Mask
+  Face Segmentation
+  The new face mask finds the faces in your photo and lets you pick exactly which parts you want to edit on a small face illustration: face skin, body skin, hair, eyebrows, eye whites, iris & pupil, nose, lips and teeth. This is perfect for portrait retouching, like whitening teeth, brightening eyes or smoothing skin, without painting a single stroke.
+  Face Segmentation
+  GPU Acceleration for AI Models
+  The built-in AI features now run on your graphics card: denoise, masks, depth & normal maps and AI tagging. On Windows this uses DirectML with your high-performance GPU, and on macOS it uses CoreML. If your GPU is not supported, RapidRAW falls back to the CPU automatically, and you can turn GPU acceleration off in the settings if you ever run into problems.
+  image
+  Auto Adjust Levels
+  Auto adjust now comes with three strength levels: Subtle, Normal and Strong. Just right-click the Auto button in the editor, or pick a level from the right-click menu in the library to apply it to many photos at once. Auto adjust also no longer touches the Brightness slider and only sets the exposure, so your results are cleaner and easier to fine-tune.
+  image
+  Color-Preserving Highlight Reconstruction
+  Highlight recovery got another upgrade. RapidRAW now works directly on the RAW data and finds the real clipping point of each color channel in your photo. Areas where all channels are blown out are rebuilt with color from the surrounding pixels, so clipped areas keep their natural color, while bright light sources like lamps and the sun stay neutral instead of turning pink or yellow.
+  Comparison:
+  image image
+  More Accurate RAW Colors
+  RAW colors are now much more accurate, especially under artificial light:
+  - Dual-Illuminant Camera Color: Most cameras store two color profiles, one for daylight and one for warm tungsten light. RapidRAW now blends between them based on the white balance of your photo, just like the DNG standard does. Photos taken under tungsten or stage lights no longer get a magenta or purple cast.
+  - Gamut Compression: Very saturated colors that the camera can capture but sRGB can't show used to be hard clipped. They are now gently compressed instead, so strong stage lights and neon signs no longer turn into noisy blotches.
+  Rewritten Noise Reduction & Sharpening
+  I rewrote the manual noise reduction and sharpening in the main shader, together with the color noise reduction and sharpening that run when a RAW file is first loaded. Noise is now removed more cleanly while fine details stay crisp, and curved edges no longer show jagged artifacts.
+  image
+  Rewritten Dehaze
+ReleaseNotesUrl: https://github.com/CyberTimon/RapidRAW/releases/tag/v1.6.7
+Documentations:
+- DocumentLabel: Documentation & Tutorials
+  DocumentUrl: https://github.com/CyberTimon/RapidRAW-Docs
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

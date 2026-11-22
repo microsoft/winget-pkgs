@@ -1,0 +1,82 @@
+# Created with WinGet Updater using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: abrignoni.ALEAPP
+PackageVersion: 2026.4.5
+PackageLocale: en-US
+Publisher: abrignoni
+PublisherUrl: https://github.com/abrignoni
+PublisherSupportUrl: https://github.com/abrignoni/ALEAPP/issues
+PackageName: ALEAPP
+PackageUrl: https://github.com/abrignoni/ALEAPP
+License: MIT
+LicenseUrl: https://github.com/abrignoni/ALEAPP/blob/HEAD/LICENSE
+ShortDescription: Android Logs Events And Protobuf Parser
+ReleaseNotes: |-
+  ALEAPP v2026.4.5
+  - Android bug reports: a large set of new artifacts read a bug report zip, from device facts, sections, installed packages and package times to usage events, process exit info, settings and settings changes, boot reasons, recovery history, permissions and app ops, notifications, accounts, battery and power, network, Wi-Fi, Bluetooth, telephony, security and storage. Thanks @danjethh.
+  - More from @danjethh: Health Connect (Android 14+), Samsung Smart Switch, Bluetooth File Transfers (btopp.db), Blocked Numbers and Android Auto Rejected Cars, Setup Flags and boot reason entries from the persistent property store, one database per Android user in frosting, Calendar, Settings Search, My Files recents and Android Auto, and image rows kept in cmh when location_view cannot be queried (Android 16).
+  - New artifacts: Instagram Pending Media, Samsung Launcher Search History, Samsung Wi-Fi networks and foreground apps, Package Rollback Records, Permission Controller Safety Label History, Permission Change Dates and Permission Controller Log, Lock Settings (locksettings.db), Google Play Services Screen Lock State History, Google Play Store Install Source and App Data Usage, Google Maps Sync places and people, Battery Stats Daily Package Changes, Wi-Fi IP Memory Store, Call Data Logs (Scone), Telegram Push Messages, Mozilla browser profile times, and a Hive box inventory through a vendored hive-parser.
+  - Chromium browsers: Omnibox Shortcuts, Browsing Topics API usage, web notifications, website usage events and share history, Site Permissions with permission prompt actions and counts, the File System API (including bucket storage), AccountBookmarks in Bookmarks, and ETag and Last-Modified in Downloads. The browser is named from the package, not the whole path.
+  - SQLite WAL: a shared reader for the committed state of a database and its -wal, including the previous WAL generation and an uncommitted tail, now vendored from sqlite-wal v0.1.0. Samsung Honeyboard, Snapchat, Phone Link, Discord, Telegram and Google Chat report rows that only another WAL state holds. is_sqlite_sidecar replaces the hand-written sidecar filters in 56 modules, and eight modules no longer open a sidecar listed first.
+  - Call logs show the SIM ICCID for each call, with SIM account details in a new Phone Accounts artifact. Facebook reads Messenger's contacts store and prefs_db, with an Android User column. C2PA provenance is read through the vendored c2pareader 0.2.0.
+  - Reading acquisitions with -t raw: NTFS, ReFS, exFAT and FAT names now match whatever their case on macOS and Linux, as they already did on Windows, and a file two patterns of one artifact match is handed to it once. Three artifacts (Package Rollback Records, Samsung wipe history, TeleGuard saved images) now match their stores at a bare userdata partition root.
+  - Profiles: the example profile is fixed, and a profile that names a missing artifact now says so. Artifacts have icons and categories the report can show, KML output is declared only where an artifact has coordinate columns, and reports keep a module's own HTML rows when the artifact has a media column.
+  - Builds and CI install the mister_skinnylegs chain from the same lock, with readers that allow Brotli 1.2.1. validate_sample_data.py --emit reads disk images.
+  New Contributors
+  - @danjethh made their first contribution in #1779
+  Full Changelog: v2026.4.4...v2026.4.5
+  Which file to download
+  ─────────────────────────────────────┬───────────────────────────
+  Platform                             │File
+  ─────────────────────────────────────┼───────────────────────────
+  Windows 10 or 11, 64-bit Intel or AMD│-windows-x64-portable.zip
+  ─────────────────────────────────────┼───────────────────────────
+  Windows 11 on ARM                    │-windows-arm64-portable.zip
+  ─────────────────────────────────────┼───────────────────────────
+  macOS, Apple silicon                 │-macos-arm64.dmg
+  ─────────────────────────────────────┼───────────────────────────
+  macOS, Intel                         │-macos-x64.dmg
+  ─────────────────────────────────────┼───────────────────────────
+  Linux, 64-bit Intel or AMD           │-linux-x64.AppImage
+  ─────────────────────────────────────┼───────────────────────────
+  Linux on ARM                         │-linux-arm64.AppImage
+  ─────────────────────────────────────┴───────────────────────────
+  Every download holds one program, aleapp. Started without arguments, from the
+  Applications folder or a double-click, it opens the window. Given arguments in a terminal,
+  it is the command line. On macOS the command line is inside the app:
+  /Applications/ALEAPP.app/Contents/MacOS/aleapp --help
+  For tools that run ALEAPP themselves. The options, output and exit codes of aleapp
+  are those of earlier releases, but there is no aleappGUI any more, since aleapp
+  without arguments opens the window. On Windows the zip holds the whole program as one
+  file, aleapp.exe, which can be put wherever the tool expects it; there is no installer.
+  The executable inside the macOS app needs the folder it came in; on Linux the AppImage is
+  the whole program.
+  aleapp.exe on Windows unpacks itself to a temporary folder each time it starts, so it
+  takes a few seconds to start, and it does not run where a policy (AppLocker, WDAC) forbids
+  running programs from the temporary folder. There, run ALEAPP from source; the README has
+  the steps.
+  First launch
+  The macOS disk images are signed with a Developer ID and notarised by Apple, so they open
+  without a warning.
+  The Windows binaries are not signed yet, so SmartScreen says "Windows protected your PC"
+  the first time. Choose More info, then Run anyway.
+  On Linux, make the AppImage executable once (chmod +x ALEAPP-*.AppImage). It needs FUSE
+  to start; where FUSE is not available, run it with --appimage-extract-and-run.
+  If you would rather not clear a warning, run from source instead; the README has the steps.
+  Verify what you downloaded
+  SHA256SUMS.txt covers every file in this release. On macOS or Linux, from the folder you
+  downloaded into:
+  grep <the file you downloaded> SHA256SUMS.txt | shasum -a 256 -c -
+  Use sha256sum in place of shasum -a 256 on Linux. On Windows, in PowerShell:
+  (Get-FileHash -Algorithm SHA256 .\<the file you downloaded>).Hash
+  and compare it with the line in SHA256SUMS.txt, which is lower case.
+  Linux
+  The build is made on Ubuntu 22.04, so it needs glibc 2.35 or newer and will not start on
+  an older distribution.
+  Code signing policy
+  The code signing policy covers
+  Windows signing, team roles and privacy.
+ReleaseNotesUrl: https://github.com/abrignoni/ALEAPP/releases/tag/v2026.4.5
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

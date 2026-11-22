@@ -1,0 +1,151 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: uutils.coreutils
+PackageVersion: 0.13.0
+PackageLocale: en-US
+Publisher: uutils
+PublisherUrl: https://github.com/uutils
+PublisherSupportUrl: https://github.com/uutils/coreutils/issues
+Author: uutils
+PackageName: coreutils
+PackageUrl: https://github.com/uutils/coreutils
+License: MIT
+LicenseUrl: https://github.com/uutils/coreutils/blob/HEAD/LICENSE
+Copyright: Copyright (c) uutils developers
+CopyrightUrl: https://github.com/uutils/coreutils/blob/main/LICENSE
+ShortDescription: Cross-platform Rust rewrite of the GNU coreutils
+Tags:
+- busybox
+- command-line-tool
+- coreutils
+- cross-platform
+- gnu-coreutils
+- rust
+ReleaseNotes: |-
+  We are happy to announce the release of Rust Coreutils 0.13.0 - a release focused on GNU compatibility of options and edge cases, and on safer file handling.
+  Most of the work went into the details that break scripts: conflicting or ambiguous options in sort, date format flags, dd conversions, ls time styles, tail --follow on symlinks, and what cp, mv, ln and install do when the destination is a symlink or a directory.
+  Alongside that, several utilities got faster (basenc base58 about 35x, cut +23%, date +22%, join +20%, etc), the WASI port got a lot of integration test coverage, a few more dependencies were dropped in favor of std, and more utilities now handle non-UTF-8 input.
+  We are now at 684 passing, 23 failing, 0 errors on the GNU test suite.
+  Counting only the tests that actually run, we are at 684/707 (96.7%).
+
+  GNU Test Suite Compatibility
+
+  Result | 0.12.0 | 0.13.0 | Change 0.12.0 to 0.13.0 | % Total 0.12.0 | % Total 0.13.0 | % Change 0.12.0 to 0.13.0
+  Pass | 653 | 684 | +31 | 94.36% | 95.26% | +0.90%
+  Skip | 18 | 11 | -7 | 2.60% | 1.53% | -1.07%
+  Fail | 21 | 23 | +2 | 3.03% | 3.20% | +0.17%
+  Error | 0 | 0 | 0 | 0% | 0% | 0%
+  Total | 692 | 718 | +26 (new tests)
+
+  Note: the suite grew by 26 tests (backport of GNU tests), and 2 of them currently fail.
+
+  Highlights:
+  - GNU Compatibility
+    - sort rejects conflicting -t, --compress-program and --check modes, validates --parallel like GNU, and rejects --debug together with -c/-C; merge batches and temporary files are handled more carefully
+    - date matches the GNU case flags on %c, %p, %P, %r and %Z, keeps leading zeros of %N with a width, and uses the locale date format verbatim
+    - dd: conv=ibm, conv=block and conv=unblock behave like GNU, and excl/nofollow are checked before seeking in an output FIFO
+    - ls accepts unambiguous --time-style prefixes, applies two-line time formats to old and recent files correctly, and sorts command-line arguments by version properly
+    - tail follows a symlink to its target, accepts the obsolete -cf form, and clamps --max-unchanged-stats instead of overflowing
+    - printf and seq fix %f padding past 1000 zeros; split accepts a leading + in every number and retries short writes; pr, numfmt, stty, stat and od align more options and messages with GNU
+  - Safer File Handling
+    - cp no longer writes a recursive copy through a symlinked target, and checks relative symlink destinations against the working directory
+    - mv and ln refuse to replace a directory with a symlink (or with --backup, -f, -i in ln)
+    - chown/chgrp judge --preserve-root on the stat the traversal is pinned to; chmod -R -L reports dangling symlinks
+    - install backs up a dangling symlink destination; install, cp and mknod warn when an explicit security context is ignored
+    - rm escapes the operand in the --preserve-root error message
+    - uucore: fixed EOVERFLOW in safe traversal
+  - Robustness
+    - Panics fixed on write failures for verbose output in rmdir, chcon, cp and tail, and in printf/seq on zero
+    - Non-UTF-8 input is now preserved in date (format strings and --reference), stat error messages and shred diagnostics
+    - uucore parses a NaN payload such as nan(1) and quotes a lone brace in the shell quoting styles; c-maybe quoting is supported
+  - Performance
+    - tr deletes bytes faster, basenc encodes and decodes base58 faster, and od streams its output line by line instead of buffering it
+  - Dependency Diet
+    - chroot, sync and the permission helpers use std instead of rustix; sort uses rlimit instead of rustix::process; cp and dd use set_len instead of ftruncate; uucore no longer needs unsafe for gettid
+  - Cross-platform Reach
+    - WASI: integration tests enabled for seq, mv, fmt, readlink, dircolors, cksum, realpath, nproc, shred and join, a macro to document why a test is ignored, date clock support, and nice is no longer part of the default WASI build
+    - Windows: ln converts / to \ in symlink targets, and cp handles a recursive copy of a root such as W:/
+    - uucore detects ASIMD on big-endian aarch64 and builds stty on little-endian ppc64
+  - Upstream: while chasing compatibility we found behavior GNU's own suite did not cover, and contributed 82 commits to GNU coreutils during this cycle, almost all of them new tests for edge cases both implementations share, plus two small fixes (tail, fmt)
+  - Contributions: This release landed 931 pull requests from 92 new contributors
+
+  What's Changed
+
+  b2sum
+  - b2sum: report malformed status input by @wondr-wclabs in #12622
+
+  base32
+  - base32/base64/basenc: accept a -w value starting with - to match GNU by @AlejandroCoronadoN in #14084
+  - base32, base64, basenc: drop the "error: " from the invalid-input message by @Socialpranker in #14396
+  - base32/base64/basenc: turn wrapping off for a -w size too large to represent by @emirmrkaljevic in #16181
+
+  base64
+  - base32/base64/basenc: accept a -w value starting with - to match GNU by @AlejandroCoronadoN in #14084
+  - base32, base64, basenc: drop the "error: " from the invalid-input message by @Socialpranker in #14396
+  - base32/base64/basenc: turn wrapping off for a -w size too large to represent by @emirmrkaljevic in #16181
+
+  basename
+  - basename: remove two superseded tests by @cakebaker in #14369
+
+  basenc
+  - base32/base64/basenc: accept a -w value starting with - to match GNU by @AlejandroCoronadoN in #14084
+  - basenc: buffer base16 encoded output by @myunbin in #13885
+  - base32, base64, basenc: drop the "error: " from the invalid-input message by @Socialpranker in #14396
+  - basenc: decode --base58 input in one piece by @vibhuthespeedst in #15852
+  - base32/base64/basenc: turn wrapping off for a -w size too large to represent by @emirmrkaljevic in #16181
+  - basenc: decode unpadded --base64url input by @qodelicious in #15677
+  - basenc: add base58 encode/decode benchmarks by @sylvestre in #16258
+  - basenc: speed up base58 encoding and decoding with num-bigint (35X) by @sylvestre in #16270
+
+  cat
+  - cat: report bad file descriptor when stdin is closed by @ozenyunus35 in #15253
+  - cat: distinguish read and write errors by @wtcpython in #14721
+  - cat: keep a single blank line after a line split across reads with -s by @fixfon in #15683
+  - cat: map wasi eloop to the usual message by @eduardomourar in #16268
+
+  chcon
+  - chcon: report verbose write failures without panicking by @limadog9 in #15382
+  - chcon: rewrite traversal and relabeling by @sylvestre in #16289
+
+  chgrp
+  - chown, chgrp, chmod: bind the recursive operand to a verified descriptor by @sylvestre in #14483
+  - chgrp: use thiserror for the --from error by @Devel08 in #13620
+  - chown, chgrp: accept repeated flags like GNU by @excid3 in #15669
+  - chown, chgrp: say 'cannot access' unless the operand is a dangling symlink by @emirmrkaljevic in #15868
+  - chgrp: reject the :gid format for the group operand by @vatsanbalaji-ossagent in #15284
+
+  chmod
+  - chown, chgrp, chmod: bind the recursive operand to a verified descriptor by @sylvestre in #14483
+  - chmod: preserve metadata errors for overlong paths by @limadog9 in #15499
+  - chmod: report every failure met under -R by @NdekoCode in #15166
+  - chmod: accept modes like -=r, -+x and -,u+x by @fixfon in #15680
+  - chmod: fix EROFS showing as Permission denied by @gabrielhnf in #12200
+  - chmod: report umask conflict below the -R operand by @eylulseyit in #15885
+  - chmod: keep operand order with --reference by @fixfon in #15676
+  - chmod: print 'could not be accessed' with -v for operands that can't be stat'ed by @emirmrkaljevic in #15884
+  - chmod: report dangling symlinks below the -R -L operand by @a7604 in #16162
+  - chmod, chown: check --preserve-root on the directory actually descended into by @abendrothj in #14972
+  - chmod: report the real error for files below the -R operand by @eylulseyit in #15935
+
+  chown
+  - chown, chgrp, chmod: bind the recursive operand to a verified descriptor by @sylvestre in #14483
+  - chown: allow non-utf8 path for --reference by @cakebaker in #14785
+  - chown: set group to owner's login group on "OWNER:" by @varranvar in #15204
+  - chown, chgrp: accept repeated flags like GNU by @excid3 in #15669
+  - chown, chgrp: say 'cannot access' unless the operand is a dangling symlink by @emirmrkaljevic in #15868
+  - chmod, chown: check --preserve-root on the directory actually descended into by @abendrothj in #14972
+
+  chroot
+  - chroot: stop option parsing at NEWROOT like GNU by @sylvestre in #16252
+  - chroot: replace rustix with std by @oech3 in #16465
+
+  cksum
+  - cksum: only report x86 hardware features on x86 targets by @ChihweiLHBird in #14805
+  - cksum family: continue with remaining files after a read error by @sap1110 in #14957
+  - cksum: default warning algorithm to CRC before first tagged line by @thomas-btst in #15062
+  - cksum: report vmull support only when the CPU has PMULL by @ChihweiLHBird in #15145
+  - cksum: prefix --debug lines with the utility name by @ChihweiLHBird in #15158
+ReleaseNotesUrl: https://github.com/uutils/coreutils/releases/tag/0.13.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

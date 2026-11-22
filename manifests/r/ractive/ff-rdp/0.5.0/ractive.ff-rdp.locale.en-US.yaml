@@ -1,0 +1,39 @@
+# Created with ractive/release-workflows using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: ractive.ff-rdp
+PackageVersion: 0.5.0
+PackageLocale: en-US
+Publisher: ractive
+PublisherUrl: https://github.com/ractive
+PublisherSupportUrl: https://github.com/ractive/ff-rdp/issues
+Author: James Bergamin
+PackageName: ff-rdp
+PackageUrl: https://github.com/ractive/ff-rdp
+License: MIT
+LicenseUrl: https://github.com/ractive/ff-rdp/blob/HEAD/LICENSE
+ShortDescription: Use Firefox's Remote Debugging Protocol via a CLI
+Description: CLI for Firefox Remote Debugging Protocol — inspect, test, and automate Firefox from the terminal. Supports navigation, DOM queries, screenshots, accessibility audits, performance analysis, network monitoring, and more. Designed for both human users and AI agents.
+Moniker: ff-rdp
+Tags:
+- agentic-skills
+- agentic-workflow
+- cli
+- firefox
+- firefox-rdp
+ReleaseNotes: |-
+  ff-rdp can now develop and test browser extensions in release Firefox: ff-rdp launch --temporary-addon ./my-extension <URL> loads an unsigned extension before the first page opens, ff-rdp addon reload swaps in a rebuilt version while the tabs stay open, and ff-rdp navigate moz-extension://… opens the extension's own pages. See the README section Developing and testing a WebExtension for a development loop and a CI recipe.
+  Added
+  - launch --temporary-addon <dir|.xpi> (repeatable): installs an unsigned WebExtension over the debug port, the way about:debugging's "Load Temporary Add-on" does. No signing, and the add-on is gone when Firefox exits. With a URL, the add-ons are installed first and the URL opens afterwards, so document_start content scripts already run on the first page. Each install is reported in results.temporary_addons; a missing path fails before Firefox starts, and a manifest Firefox rejects fails the launch with Firefox's message and stops that Firefox. MV3 host permissions are granted at install on Firefox 127+, so headless runs need no click. (#371)
+  - ff-rdp addon install | list | reload | uninstall for a Firefox that is already running. reload replaces the extension in place: open tabs keep their documents, Firefox injects the new content scripts into pages already open, and the extension's UUID, storage.local and IndexedDB stay. list shows each add-on's id, name, UUID and source. (#373)
+  - navigate moz-extension://<uuid>/page.html opens an extension's own pages (options page, popup HTML) with no flag, and eval runs in them, e.g. eval 'await browser.storage.local.get()'. The same applies to navigate --with-network, perf compare and launch --url. (#375)
+  Changed
+  - MSRV is now Rust 1.100, for cargo install ff-rdp-cli. The previous floor (1.95) was declared but never enforced. Dependencies were bumped. (#365)
+  - launch with --temporary-addon and a URL returns only once the page has loaded, so the next command sees it; a navigation that fails is reported in results.warnings instead of failing the launch. (#371)
+  Packages
+  - .deb and .rpm packages are now built for aarch64 Linux too, and the .deb/.rpm packages and the cross-built Linux archives now carry build-provenance attestations (gh attestation verify). (#363, #364, #366)
+  Internal
+  Retired the ralph-loop tooling and moved the xtask checks into cargo tests (#367, #368); Dependabot for Actions and cargo (#366); a flaky live test quarantined; kb notes on the addons actor, the WebExtension descriptor and extension development with ff-rdp (#372, #374, #376).
+ReleaseNotesUrl: https://github.com/ractive/ff-rdp/releases/tag/v0.5.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

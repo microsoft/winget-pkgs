@@ -1,0 +1,83 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: zenolab124.Monet
+PackageVersion: 2.3.0
+PackageLocale: en-US
+Publisher: zenolab124
+PublisherUrl: https://github.com/zenolab124
+PublisherSupportUrl: https://github.com/zenolab124/monet/issues
+PackageName: Monet
+PackageUrl: https://github.com/zenolab124/monet
+License: MIT
+LicenseUrl: https://github.com/zenolab124/monet/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 zenolab124
+ShortDescription: Mission control for Claude Code — browse, search, and drive your Claude Code sessions from a native desktop app.
+Description: Monet is a native desktop app that acts as mission control for Claude Code and Codex. Its multi-column workbench lets you browse and search agent sessions, follow tool calls, and drive work across multiple engines from one place, with local data and privacy in mind.
+Tags:
+- agent
+- agentic
+- ai
+- claude
+- claude-code
+- codex
+- large-language-model
+- llm
+- workbench
+ReleaseNotes: |-
+  Fixed issues
+  - #14 Feature：输入框增加 @ 引用与文件、目录快速补全
+  - #30 win 版引擎设置中 codex 无法自定义安装目录
+  - #31 优化：会话级别权限模式自动更新
+  - #32 Windows 上读取工作区时反复闪现 Git 控制台窗口
+  本次更新
+  Monet 2.3.0 会话内感知 Claude 额度并可在 5 小时额度恢复后自动续跑，实时显示 CLI 状态，修复运行中切换权限模式；同时带来档案标签、Worktree 会话聚合、项目文件引用与多项 Codex、Windows 修复。
+  新增
+  - 额度感知与自动续跑 — 会话内提示 5 小时额度接近上限或已用完；开启续跑后，额度恢复时自动发送“继续”，计划在重启后保留，手动发送消息即取消。
+  - CLI 实时状态 — 会话中显示 API 重试、上下文压缩、模型降级与工具权限被拒；CLI 启动时报告的插件与 MCP 问题也会给出提示。
+  - 档案标签与星标管理 — 支持编辑会话标题、筛选星标会话，以及跨引擎设置标签颜色、重命名、合并和删除标签。
+  - Worktree 会话聚合 — 同一仓库的 Worktree 会话集中展示，并标明来源与分支；原工作区删除后仍可查看历史，支持的引擎可在主目录续写。
+  - 在输入框引用项目文件 — 支持文件和目录路径补全，发送前校验引用是否有效，并在编辑排队输入时保留引用。
+  改进
+  - 命令与模型以 CLI 为准 — 斜杠命令补全纳入 CLI 报告的命令，模型列表采用 CLI 报告的可用模型。
+  - 额度面板少轮询 — 会话收到实时额度后，额度面板与菜单栏优先使用这份数据，减少对额度接口的请求。
+  - Claude 协议诊断 — 引擎设置页显示已验证的 CLI 版本，以及 Monet 尚未识别的协议消息样本。
+  - Codex Computer Use 运行时检查 — 设置页显示插件与本地服务的兼容状态；运行时组件更新后，在下一轮任务前重新连接。
+  - Windows Nightly 安装包 — Nightly 现提供与 macOS 同版本的 Windows 安装包，双平台工件与更新清单验证通过后统一发布。
+  修复
+  - 运行中切换权限模式 — 切换会立即发送给运行中的 CLI，确认成功后才更新界面；被拒绝或超时时回退到实际模式并提示。
+  - CLI 交互请求不再卡住会话 — Monet 暂不支持的 CLI 请求会被回绝并在会话内提示，任务继续执行。
+  - 自定义 Codex CLI 路径与 Windows 检测 — 支持选择 Codex 可执行文件或安装目录，并修复 Windows 上通过 npm 安装的 CLI 检测。
+  - 中断后的 Codex 提问顺序 — 立即中断的提问会保留在原来的时间线位置，避免被后续轮次挤到错误位置。
+  - 图片加载对 Codex 任务的干扰 — 限制并发资源加载，并保护正在执行的轮次，避免历史图片读取干扰当前任务。
+  - Claude 额度凭据续期 — 凭据过期时委托官方 Claude Code CLI 续期，并改进失败提示与重试退避。
+  - Windows 工作区 Git 探测弹窗 — 后台检查工作区和分支信息时隐藏 Git 控制台，避免反复弹出命令行窗口。
+  What's new in Monet
+  Monet 2.3.0 tracks Claude rate limits and can continue after the 5-hour limit resets, shows live CLI status, and fixes mid-run permission switching. Also: archive tags, Worktree grouping, file references, and Codex and Windows fixes.
+  New
+  - Rate-limit awareness and auto-continue — Sessions warn when the 5-hour limit is close or reached. With auto-continue on, Monet sends "continue" once the limit resets; the plan survives restarts and is cancelled when you send a message yourself.
+  - Live CLI status — Sessions show API retries, context compaction, model fallback, and denied tool permissions, plus plugin and MCP problems the CLI reports at startup.
+  - Archive tags and stars — Edit session titles, filter starred sessions, and manage tag colors, renaming, merging, and deletion across engines.
+  - Worktree session grouping — Browse a repository's Worktree sessions together with source and branch labels. History remains readable after a workspace is deleted; supported engines can continue in the main directory.
+  - Project file references in composers — Complete file and directory paths, validate references before sending, and preserve them when editing queued input.
+  Improved
+  - Commands and models from the CLI — Slash-command completion includes commands the CLI reports, and the model list uses the models the CLI makes available.
+  - Less quota polling — Once a session receives live rate-limit data, the quota panel and menu bar use it first and query the quota endpoint less often.
+  - Claude protocol diagnostics — Engine settings show the verified CLI version and samples of protocol messages Monet does not yet recognize.
+  - Codex Computer Use runtime checks — Settings shows plugin and local-service compatibility. Updated runtime components reconnect before the next task turn.
+  - Windows Nightly installers — Nightly now includes Windows installers matching the macOS version, with both platforms' artifacts and updater metadata verified before publication.
+  Fixed
+  - Switching permission mode mid-run — Changes are sent to the running CLI immediately and the UI updates only after the CLI confirms; a rejection or timeout restores the actual mode with a notice.
+  - CLI interactive requests no longer stall sessions — CLI requests Monet does not support yet are declined with a notice in the session, and the task keeps running.
+  - Custom Codex CLI paths and Windows discovery — Select a Codex executable or installation directory, with corrected discovery of npm-installed CLI versions on Windows.
+  - Interrupted Codex prompt ordering — Immediately interrupted prompts stay anchored in their original timeline position instead of moving after later turns.
+  - Image loading during Codex tasks — Limits concurrent asset requests and protects active turns so historical image loading does not interfere with the current task.
+  - Claude quota credential renewal — Delegates expired credential renewal to the official Claude Code CLI and improves failure messages and retry backoff.
+  - Windows workspace Git console popups — Hides Git consoles during background workspace and branch probes to prevent repeated command-window popups.
+  What's Changed
+  - ci: fail fast on notary account issues and surface CI failures by @zenolab124 in https://github.com/zenolab124/monet/pull/34
+  - feat(claude): answer the CLI control protocol and continue after rate limits by @zenolab124 in https://github.com/zenolab124/monet/pull/35
+  Full Changelog: https://github.com/zenolab124/monet/compare/v2.2.23...v2.3.0
+ReleaseNotesUrl: https://github.com/zenolab124/monet/releases/tag/v2.3.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

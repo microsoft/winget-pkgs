@@ -1,0 +1,141 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.6.8
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.6.8
+
+  Patch Changes
+  - #13080 a68137d Thanks @dyc3! - Added the nursery rule noBufferConstructor, which disallows the deprecated Node.js Buffer() and new Buffer() constructors. Use Buffer.from(), Buffer.alloc(), or Buffer.allocUnsafe() instead.
+    new Buffer(5);
+  - #12966 82651f5 Thanks @dyc3! - Added the nursery rule noConfusingArraySplice, which reports splice() and toSpliced() calls that replace a single element or insert at index -1.
+    array.splice(index, 1, element); // use `array[index] = element` instead
+  - #12924 0a9d204 Thanks @dyc3! - Added the nursery rule noDynamicRequire, which disallows require() calls whose module name is built at runtime. When the checkDynamicImports option is enabled, the rule also checks import() calls.
+    require("./locales/" + language);
+  - #12907 6f2635a Thanks @dyc3! - Added the nursery rule noLateCurrentTargetAccess, which reports reads of event.currentTarget that run after the browser has finished handling the event, when currentTarget is null.
+    element.addEventListener("click", async (event) => {
+      await save();
+      event.currentTarget.disabled = false;
+    });
+  - #12904 04f30c4 Thanks @dyc3! - Added the nursery rule noMisusedSpread, which uses type information to report spreads that produce unexpected results: strings spread into arrays or arguments, and promises, functions, maps, arrays, iterables, class instances, and classes spread into objects or JSX attributes.
+    declare function getUser(): Promise<{ name: string }>;
+    const user = { ...getUser() };
+  - #12893 5d7ca32 Thanks @dyc3! - Added the nursery rule noTripleSlashReference, which reports /// <reference path="..." /> comments and /// <reference types="..." /> comments for packages that the file also imports. The lib, path, and types options control which kinds of references are allowed.
+    /// <reference path="./globals.d.ts" />
+  - #12561 746c421 Thanks @dyc3! - Added the nursery rule noVueAsyncComputed, which reports asynchronous code in Vue computed properties, such as async functions, await, promises, setTimeout(), and nextTick().
+    <script>
+    export default {
+      computed: {
+        async user() {
+          return fetchUser(this.userId);
+        },
+      },
+    };
+    </script>
+  - #12964 149d729 Thanks @dyc3! - Added the nursery rule noVueDefineModelDefault, which disallows the default option in Vue's defineModel(). When a parent component passes undefined with v-model, the child component uses the default value while the parent keeps undefined, so the two components show different values.
+    <script setup>
+    const model = defineModel({ type: String, default: "" });
+    </script>
+  - #13060 67bc9d5 Thanks @dyc3! - Added the nursery rule noVueDeprecatedFilter, which reports the filter syntax that Vue 3 removed.
+    For example, the following template uses the currency filter:
+    <template>
+      <p>{{ price | currency }}</p>
+    </template>
+  - #12545 0bbe4f1 Thanks @dyc3! - Added the new nursery rule noVueDeprecatedVIs, which reports the deprecated Vue v-is directive. Use the is attribute with a vue: prefix instead.
+    <template>
+      <div v-is="'MyComponent'"></div>
+    </template>
+  - #12580 3fdc987 Thanks @dyc3! - Added the nursery rule noVueExportInScriptSetup, which disallows export in Vue <script setup> blocks. Vue fails to compile a component when its <script setup> block exports a value. TypeScript type exports are allowed.
+    <script setup>
+    export const message = "Hello";
+    </script>
+  - #13063 d4e90c8 Thanks @dyc3! - Added the nursery rule noYamlEmptyMapKeys, which reports YAML map entries whose key is missing, or has only a tag or an anchor. The rule is recommended.
+    : value
+  - #13061 97aa183 Thanks @dyc3! - Added the nursery rule noYamlEmptyMapValues, which reports keys in YAML maps that have no value.
+    name:
+  - #13062 6aad75f Thanks @dyc3! - Added the new nursery rule noYamlEmptySequenceEntries, which reports empty items in YAML lists.
+    fruits:
+      - apple
+      -
+      - banana
+  - #13082 c1c8c85 Thanks @dyc3! - Added the nursery rule useCalledWith, which reports toHaveBeenCalled(), toBeCalled(), and toHaveBeenCalledOnce() assertions, because they don't check the arguments that the function was called with. The rule belongs to the test domain.
+    expect(sendEmail).toHaveBeenCalled();
+  - #13075 acfeaf9 Thanks @dyc3! - Added the nursery rule useExpectToHaveBeenCalled, which reports tests that compare the number of calls of a mock function to zero, and suggests using toHaveBeenCalled() instead.
+    expect(sendEmail).toHaveBeenCalledTimes(0);
+  - #13076 cf5b1a6 Thanks @dyc3! - Added the nursery rule useExpectToHaveBeenCalledTimes, which reports tests that check the length of mock.calls with toHaveLength(), and suggests using toHaveBeenCalledTimes() instead.
+    expect(onSave.mock.calls).toHaveLength(1);
+  - #13020 5d28641 Thanks @dyc3! - Added the new nursery rule usePackageJsonValidLicense, which reports a license field in package.json that isn't a valid license. The rule accepts SPDX license identifiers and expressions, UNLICENSED, and references to a license file such as SEE LICENSE IN LICENSE.md.
+    For example, the rule reports the following package.json file because GPL3 isn't an SPDX license identifier:
+    {
+      "name": "my-package",
+      "license": "GPL3"
+    }
+  - #13079 058d7a1 Thanks @dyc3! - Added the nursery rule useSpyOn, which reports properties that are overwritten with jest.fn() or vi.fn(). Overwriting a property loses its original value, while jest.spyOn() and vi.spyOn() keep it so it can be restored after the test.
+    Date.now = jest.fn(() => 10);
+  - #13081 be58f67 Thanks @dyc3! - Added the nursery rule useTopLevelRequire, which reports require() calls that aren't at the top level of the module, such as calls inside functions, blocks, or try statements.
+    function readFile(filename, callback) {
+        const fs = require("fs");
+        fs.readFile(filename, callback);
+    }
+  - #13054 4d81f0d Thanks @dyc3! - Added the nursery rule useValidNamespaceImports, which reports names read from a namespace import that the imported module doesn't export. It also reports assignments to members of a namespace import, and namespace imports of modules that have no exports.
+    import * as utils from "./utils.js";
+    utils.subtract(2, 1); // `./utils.js` doesn't export `subtract`
+  - #13058 ae251e4 Thanks @dyc3! - Added the new nursery rule useVueConsistentVOnHandlerStyle, which enforces one style of event handler in Vue v-on directives. By default, it prefers the name of a method, and an inline function where a method name can't be used.
+    <template>
+      <button @click="save()">Save</button>
+    </template>
+  - #12965 c33c03d Thanks @dyc3! - Added the nursery rule useVueRegisteredComponentNameCasing, which requires the names of components registered in the components option of a Vue component to use one casing style. By default, names must be in PascalCase. The casing option switches the rule to camelCase or kebab-case.
+    <script>
+    export default {
+      components: {
+        "todo-item": TodoItem,
+      },
+    };
+    </script>
+  - #12145 596a2b1 Thanks @ematipico! - Added type narrowing for unwritten local let/const variables and parameters after typeof, equality, nullish, and truthiness checks. Type-aware rules now use these refinements in branches, short-circuit expressions, and after early returns, including noUnnecessaryConditions and noFloatingPromises. Types such as {} no longer imply that a value is always truthy.
+  - #12935 e506ff1 Thanks @dyc3! - Improved the performance of the rules noRedeclare and noUnsafeDeclarationMerging. biome lint with Biome's default rules is now about 3% to 5% faster on large projects, and up to 11% faster on some TypeScript projects.
+  - #13181 e1556ae Thanks @dyc3! - Fixed the HTML formatter printing a comment twice when it ends the line of an element's opening tag. For example, <div><!-- comment --> followed by <i>x</i></div> on the next line is now formatted as:
+    - <div><!-- comment -->
+    + <div>
+            <!-- comment -->
+            <i>x</i>
+      </div>
+  - #13130 1b350ed Thanks @dyc3! - Fixed #13107: the unsafe fix of noDistractingElements now removes the whole element, including its closing tag and children, instead of only the opening tag. The fix is no longer offered when removing the element would produce invalid code, such as const Ticker = () => <marquee>News</marquee>;.
+  - #13054 4d81f0d Thanks @dyc3! - Fixed noUnresolvedImports reporting names that a module re-exports from a CommonJS module or from a file that isn't JavaScript, such as export { foo } from "./legacy.cjs". The rule now also reports default imports from a module that only re-exports another module with export * from, because export * from doesn't forward the default export.
+  - #12602 d5da394 Thanks @dyc3! - Fixed #12600: biome lint --suppress now adds suppression comments for diagnostics emitted by plugins, such as // biome-ignore lint/plugin/noFoo: ignored using `--suppress` .
+  - #13097 3be9e3d Thanks @ashokram-si! - Fixed #13064: The noUnknownTypeSelector rule now correctly accepts the valid <selectedcontent> HTML element used in customizable select controls.
+  - #13181 e1556ae Thanks @dyc3! - Fixed #13167: The HTML formatter no longer deletes comments that follow a Svelte block delimiter on the same line, such as {#if}, {:else}, or {#each}. For example, {#if a}<!-- comment --><i>x</i>{/if} is now formatted as:
+      {#if a}
+    -       <i>x</i>
+    +       <!-- comment --><i>x</i>
+      {/if}
+  - #12845 e3ab04d Thanks @dyc3! - Fixed the location of Tailwind CSS diagnostics reported on unquoted object keys. In clsx({ shadow: active }), diagnostics now highlight shadow instead of starting one character later at hadow:.
+  - #13098 d3be626 Thanks @ashokram-si! - Fixed #13084: The useThisInClassMethods rule now correctly recognizes this when used inside parameter default values for methods, setters, and class fields.
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.6.8
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

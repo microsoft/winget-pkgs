@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: caomengxuan666.WinuxCmd
+PackageVersion: 1.2.1
+PackageLocale: en-US
+Publisher: Cao Mengxuan
+PublisherUrl: https://github.com/caomengxuan666
+PublisherSupportUrl: https://github.com/unixwin/WinuxCmd/issues
+Author: Cao Mengxuan
+PackageName: WinuxCmd
+PackageUrl: https://github.com/unixwin/WinuxCmd
+License: MIT
+LicenseUrl: https://github.com/unixwin/WinuxCmd/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 caomengxuan666
+ShortDescription: Linux-style command set for Windows terminals
+Description: |-
+  WinuxCmd provides native Windows implementations of common Linux-style commands for Windows terminals.
+
+  It includes GNU-style commands such as ls, cat, grep, sed, ps, and lsof, works without WSL, and supports
+  Windows and Linux-style command workflows in PowerShell, Command Prompt, and other shells.
+  The bundled `wpm` package manager installs a curated set of portable Unix-side tools with
+  SHA-256 verification and an isolated opt/ layout for DLL-bearing packages.
+Tags:
+- command-line
+- coreutils
+- grep
+- linux
+- ls
+- powershell
+- shell
+- terminal
+- wpm
+ReleaseNotes: "Windows binaries for v1.2.1\n\n### Architectures:\n• **x64**：Windows 64-bit\n• **ARM64**：Windows ARM64 (cross-compiled)\n\n### Full-only commands (edition split, #1438):\nThe default edition does not create entry links for **`[`**, **`env`**, **`false`**, **`kill`**, **`test`**, **`time`**, **`true`** — these commands' user-facing semantics are defined by your host shell's builtins (`winuxcmd <name> ...` still works). The full edition materializes every entry and ships under the `-full` asset names; it is **not** distributed through wpm:\n• WinuxCmd-1.2.1-win-x64-full.7z / .zip / .tar.gz\n• WinuxCmd-1.2.1-win-arm64-full.7z / .zip / .tar.gz\n\n### Files included:\n• WinuxCmd-1.2.1-win-x64.7z / .zip / .tar.gz\n• WinuxCmd-1.2.1-x64-setup.exe\n• WinuxCmd-1.2.1-win-arm64.7z / .zip / .tar.gz\n• WinuxCmd-1.2.1-arm64-setup.exe\n• WinuxCmd-skill-v1.2.1.zip (AI agent skill bundle, attached separately)\n\n### Package Contents:\n• `usr/bin/winuxcmd.exe` - Main executable (multi-call binary：one exe provides all commands)\n• `usr/bin/create_links.ps1` - Generates per-command links (hardlinks on NTFS, symlinks otherwise)\n• Environment and lifecycle scripts：`winux.ps1` / `winux.cmd` / `winux-activate.ps1`, `winuxcmd_init.cmd` / `winuxcmd_uninstall.cmd`\n• `README.md` / `README-ZH.md` / `LICENSE`\n\n### Package Formats:\n• **7Z**：Best compression (requires 7-Zip)\n• **ZIP**：Native Windows support (right-click to extract)\n• **TGZ**：tar.gz format (use `tar -xzf filename.tar.gz`)\n• **EXE**：standalone installer with PATH and PowerShell integration tasks\n\n### Usage:\n1. Download the appropriate package for your architecture\n2. Extract to your desired directory\n3. Navigate to the `usr/bin` directory\n4. Run `create_links.ps1` to generate command links\n   ```powershell\n   # For NTFS filesystems (recommended)\n   .\\create_links.ps1\n   \n   # For non-NTFS filesystems, use symbolic links\n   .\\create_links.ps1 -UseSymbolicLinks\n   \n   # To remove all links later\n   .\\create_links.ps1 -Remove\n   ```\n5. Add the `usr\\bin` directory to your PATH\n\n\n## What's Changed\n• fix(sed)：memoize repeat exploration — nested quantifier no longer hangs (Fixes #1495, Refs rubash#2481) by @caomengxuan666 in https://github.com/unixwin/WinuxCmd/pull/1498\n• fix：readlink -f POSIX separators, unprivileged ln -s (+opt-in copy fallback), wpm --force shims.map refresh (Fixes #1491 #1492 #1497) by @caomengxuan666 in https://github.com/unixwin/WinuxCmd/pull/1499\n• fix(sed)：POSIX subexpression capture rules (Fixes #1496) by @caomengxuan666 in https://github.com/unixwin/WinuxCmd/pull/1501\n• fix：readers bridge the winux fifo marker (Fixes #1493) by @caomengxuan666 in https://github.com/unixwin/WinuxCmd/pull/1502\n• chore(release)：WinuxCmd 1.2.1 by @caomengxuan666 in https://github.com/unixwin/WinuxCmd/pull/1503\n\n\n**Full Changelog**：https://github.com/unixwin/WinuxCmd/compare/v1.2.0...v1.2.1\n\n---\n\n## What's new in 1.2.1\n\n### sed engine\n• **Nested quantifiers no longer hang (#1495)**：`portable_regex`'s `collect_repeat` enumerated every parse of a repetition with no memoization, so a pattern such as `s/^\\(.*\\)*$/X/` split a 32-char line into every ordered chunk decomposition — exponential work. Repeat exploration is memoized now; the historical reproducer (`printf 'abcdef…32chars\\n' | sed 's/^\\(.*\\)*$/X/'`) returns in well under a second (Refs rubash#2481).\n• **POSIX subexpression capture rules (#1496)**：capture groups are numbered by their opening delimiter (POSIX.1-2017 XBD 9.1, as glibc does) instead of closing order, and empty loop iterations are counted toward `\\{m,n\\}` lower bounds (glibc empty-iteration accounting). `printf 'xxxx\\n' | sed 's/^\\(\\(x\\)*\\)*$/[\\1|[\\2]]/'` now prints `[xxxx|[x]]` like GNU sed.\n\n### readlink / ln (#1491)\n• `readlink -f/-e/-m` print `/`-separated canonical names — GNU `canonicalize_filename_mode()` assembles them with `/` by construction. The drive spelling the resolver chose is kept, and the no-mode form still prints the stored target text verbatim. This unblocks bats-core's `BATS_ROOT=$(cd -P ... && pwd -P)` resolution.\n• `ln -s` now tries `CreateSymbolicLinkW` with `SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE` first, so Developer Mode creates real symlinks without elevation; the copy fallback stays opt-in (GNU `ln` has no silent downgrade to mirror, coreutils 9.4 `ln.c`).\n\n### wpm / build (#1492, #1497)\n• `wpm --force` refreshes stale `shims.map` entries.\n• Local MSVC 14.51 source builds no longer break on missing `<ctime>` / `<string_view>` includes (CI toolchains were unaffected).\n\n### FIFO marker read-side bridge (#1493)\nReader applets that opened operands through a raw `std::ifstream` bypassed the `!<fifo>` marker bridge and read the 7 marker bytes as content (`od -c p` printed `!<fifo>` literally while the writer blocked in the rendezvous). Those operand opens now route through `file_io::open_binary_file`, so reader operands rendezvous with the write bridge like the shared readers do.\n\n### Packaging unchanged\n• **No new strip**：the #1438 edition split is untouched — the default edition strips exactly `[`, `env`, `false`, `kill`, `test`, `time`, `true` and keeps `echo`/`printf`/`pwd` (`wpm links rebuild` → created=171); the full edition still materializes all 178 entries under the `-full` asset names, outside wpm.\n• **No FFI changes**：this release touches no FFI surface; `BUILD_FFI` stays off and no FFI artifacts are shipped."
+ReleaseNotesUrl: https://github.com/unixwin/WinuxCmd/releases/tag/v1.2.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

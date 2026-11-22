@@ -1,0 +1,62 @@
+# Created with WinGet Updater using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: CycloneDX.cdxgen
+PackageVersion: 13.4.0
+PackageLocale: en-US
+Publisher: OWASP Foundation
+PublisherUrl: https://owasp.org/
+PublisherSupportUrl: https://github.com/CycloneDX/cdxgen/issues
+Author: CycloneDX
+PackageName: CycloneDX Generator (cdxgen)
+PackageUrl: https://github.com/CycloneDX/cdxgen
+License: Apache-2.0
+LicenseUrl: https://github.com/CycloneDX/cdxgen/blob/HEAD/LICENSE
+ShortDescription: A polyglot tool and a library for generating various Bill of Materials in CycloneDX specification.
+Description: Generate Software Bill of Materials (SBOM) for most applications and container images with a single command. Generate Operations Bill of Materials (OBOM) for Linux and Windows hosts. Integrate with any CI/CD pipeline. Automatically submit the generated BOM to your dependency track server for analysis.
+Moniker: cdxgen
+Tags:
+- bom
+- cbom
+- containers
+- cyclonedx
+- docker
+- oci
+- owasp
+- package-url
+- purl
+- saasbom
+- sbom
+- sca
+- software-bill-of-materials
+- supply-chain
+ReleaseNotes: |-
+  cdxgen 13.4.0
+  cdxgen now supports Terraform modules, brings tracebom to Windows, delivers precise Scala evidence all the way to Scala 3.10 and sbt 2, and asks Maven Central and other registries far less often by putting local caches first. Every major ecosystem got sharper along the way, and JSF signature verification is hardened, with the details at the end.
+  Terraform modules
+  Terraform projects finally get a complete BOM. cdxgen now inventories every module, whether terraform init or tofu init has run or not, and builds a real dependency graph from the root through each module to the providers it requires. Module licenses are read straight from the downloaded packages, with an optional OpenTofu registry and GitHub lookup. Credentials in module sources never reach the BOM, and three new audit rules catch modules on mutable git refs, registry modules without an exact version, and sources with embedded credentials. Default scans pick up Terraform automatically.
+  Scala, from sbt 2 to Scala 3.10
+  With scalasem 2, Scala evidence is built from the compiler's own facts, which brings a big jump in precision and accuracy for Scala 2.13 and Scala 3 projects up to the latest 3.10 on sbt 2. --evidence and evinse -l scala now produce occurrences with exact lines, call stacks, crypto assets with OIDs, and inbound and outbound endpoints, without needing atom. sbt 2 builds are fully supported and faster, with chen's scan dropping from 34 seconds to 9. Mill 1.x and scala-cli projects are inventoried too, --deep sbt scans reuse your Coursier cache, and repeated scans give identical BOMs.
+  Java without the Maven Central bottleneck
+  cdxgen now answers from your local Maven, Gradle and Coursier caches first, so scans send Maven Central far fewer requests, and none at all when your build tools use a repository manager. When a 429 does arrive, cdxgen pauses that host, honours Retry-After, and tells you which mirror setting to use, and the build tools themselves stop retrying into a rate limit. A project's own settings.xml no longer overrides your mirrors and credentials. Gradle builds that use isolated projects or the configuration cache work again, multi-project Gradle reports attribute dependencies to the right subproject, and Maven reactors are resolved once.
+  tracebom on Windows
+  tracebom now supports Windows. With safer-exec 1.1.2, it runs the traced command inside a Microsoft eXecution Container and records every DLL it loads through ETW, so you get a runtime SBOM of what a Windows program actually used, with a valid purl for each DLL. TLS details and egress hosts are captured through --proxy-egress even from a normal prompt, and the Windows standalone binaries now include tracebom. On every platform, tracebom now keeps each traced crypto asset instead of only the last one, writes a CBOM that validates against CycloneDX 1.6 and 1.7, and fails under --strict when the sandbox refuses a run instead of writing an empty BOM.
+  JavaScript
+  Source analysis walks the tree once instead of ten times, which took a -t js scan of aws-sdk-cpp from 18 seconds to 7. Angular's app.config.ts and Astro configs are now analysed, and astgen 4.5.0 adds Ember, Angular, Alpine and Astro templates. Packages with the legacy licenses field get a license, --deep takes metadata from the project you scanned rather than your working directory, and pnpm BOMs no longer leak the absolute install path.
+  Python
+  uv workspace members are kept in every scan. Installed package metadata now fills in poetry, uv, pylock, Pipfile.lock and requirements entries, and a failed PyPI lookup can no longer rename a package, as it once turned a rate-limited redis into django-redis.
+  .NET
+  Multi-project solutions get the right version for every project, taken from each project's own restore output, and direct dependencies point at what was actually installed. MSBuild property versions resolve, and @latest purls are gone. dosai evidence is version-aware, lists each call site once, and stops crediting framework calls to coverlet.
+  C and C++
+  cdxgen reads CMake presets to find your build trees, records the compiler and its hardening flags in the formulation, separates first-party and vendored code from third-party libraries, and attributes evidence through resolved includes.
+  Fewer registry requests everywhere
+  Cargo, Go, NuGet, RubyGems, pub, jsr and Elm enrichment reads local caches first and fills only what is missing, skips packages no public registry can describe, remembers answers for the whole scan, and backs off from hosts that rate limit. In server mode the response cache keys on credentials, so one user's response is never served to another.
+  Tools and images
+  rusi, golem and kosi resolve repo-relative paths correctly and report their failures. New Python 3.15 images are available, and the images ship Maven 3.10.0 and cdxgen-plugins-bin 4.1.1.
+  Signature verification
+  cdx-verify, cdx-validate and verifyBom() could report success for BOM content that the trusted key never signed (GHSA-gph2-38gw-42hr). A BOM with its root signature removed passed on the strength of its nested signatures, cdx-verify fell back to a public.key in the working directory, a signed component could be presented as a signed BOM, and repeated member names or oversized numbers let other JSON parsers read different values from a document that verified. The advisory will be published shortly with full details.
+  These tools are now stricter. cdx-verify needs --public-key (repeatable) or --secret-key and requires a root signature, --allow-nested-only accepts a BOM without one only when every component, service and annotation is signed, and the new --require-all fails when any entry or any given key does not verify. BOMs that are not valid UTF-8, repeat a member name, or hold a number a double cannot represent exactly are refused. cdx-validate exits 4 whenever a key is given and verification fails, and cdx-sign needs --verify-existing-with or --allow-unverified-history before adding a signers entry. The signature format is unchanged, so BOMs signed by 13.3.0 keep verifying. See the cdx-verify documentation.
+  Full Changelog: v13.3.0...v13.4.0
+ReleaseNotesUrl: https://github.com/cdxgen/cdxgen/releases/tag/v13.4.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

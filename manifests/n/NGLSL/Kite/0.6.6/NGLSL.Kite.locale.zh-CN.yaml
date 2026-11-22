@@ -1,0 +1,60 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: NGLSL.Kite
+PackageVersion: 0.6.6
+PackageLocale: zh-CN
+Publisher: NGLSL
+PublisherUrl: https://github.com/NGLSL
+PublisherSupportUrl: https://github.com/NGLSL/Kite/issues
+Author: Leixinxin
+PackageName: Kite
+PackageUrl: https://github.com/NGLSL/Kite
+License: Apache-2.0
+LicenseUrl: https://github.com/NGLSL/Kite/blob/HEAD/LICENSE
+ShortDescription: 按下快捷键即可快速搜索并启动应用的 Windows 轻量启动器，支持拼音搜索。
+Description: Kite 是一款面向 Windows 的轻量应用启动器，使用 Rust 和 Iced 构建原生桌面应用，无需 WebView2 或 Node.js。通过全局快捷键唤起搜索窗口，输入应用名称、别名或拼音即可快速筛选并启动目标程序；支持扫描开始菜单、桌面、注册表 App Paths 和 Windows 打包应用，提供启动历史、固定结果、系统托盘以及可选的 Everything 文件搜索。
+Tags:
+- 启动器
+- 快速启动
+ReleaseNotes: |-
+  Kite v0.6.6
+  版本重点
+  文件搜索恢复失败后继续在后台定时重试，无需重新启用或手动点击恢复。等待期间显示原因和倒计时，环境恢复后自动继续同步。
+  后台重试
+  - 失败后按 30 秒、1 分钟、2 分钟、最长 5 分钟退避重试；文件搜索保持启用期间不限尝试次数。
+  - 达到就绪后清零计数，后续独立故障重新从 30 秒开始；清除已完成的旧重建意图，普通连接失败优先复用已有索引和持久游标。
+  - 首次明确的日志断档仍立即自动重建；重建失败后先等待，避免连续全盘扫描。新索引完整就绪后才替换旧索引。
+  - 等待期间释放当前读取会话，不额外占用卷读取；使用单调时钟计时，关闭、退出或“立即重试”会唤醒等待。
+  - “立即重试”继续原本未完成的任务。未发布的新索引候选和临时清单及时回收，清理失败时先重试清理，避免长期重试堆积磁盘。
+  - 授权被拒绝、读取组件需要安装或更新时等待用户明确操作，后台重试不自动安装组件或反复弹出 UAC。
+  升级与验证
+  - 读取组件协议继续为 4，现有基库和持久变化层格式不变。安装器保留设置与用户数据。
+  - 本机只执行必要编译、目标格式和差异检查；未新增测试用例。
+  - 完整 CI、正式构建和安装验收统一由 GitHub Actions 执行。原有大批真实文件变化、日志切段回收及自动重建验收继续保留。
+  - 在独立 runner 的隔离 profile 上临时独占锁定既有索引清单，实际观察 30 秒和 60 秒后台等待；释放锁后同一 session 必须自动恢复就绪、复用同一代际、清零计数并通过查询，全程不发送手动重试或重建命令。实际结果由下方自动报告提供。
+  验证边界
+  - 后台重试持续到功能关闭或程序退出。需要用户授权时保留提示和入口。
+  - 人工桌面交互、全部旧版本迁移、恢复中强制崩溃、磁盘满及长期运行观察未包含在静默安装验收内。
+  - 安装包未做 Authenticode 数字签名。
+  构建与验证
+  - 发布 tag：v0.6.6
+  - tag 提交：a1e073a30adfd7615a20e371e5b25354c619e570
+  - 上一个发布：v0.6.5
+  - 提交数量：1
+  - 构建环境：GitHub Actions windows-latest
+  - 检查与构建：精确 main 提交 CI、cargo test --locked、cargo build --release --locked、官方插件与 NSIS 打包
+  - 独立 Windows runner 安装验收：全新安装、同版本覆盖、卸载、负载哈希、注册表、用户数据保留、按需读取组件注册／更新／卸载
+  - 真实 NTFS 补读：停机期间创建 70002 个存活文件，查询变化层实际 70026 个对象；新增／改名／删除哨兵查询通过
+  - 分段与恢复：实际生成 2 个 32 MiB feed 段，确认首段已回收；同一 generation 重启从已提交游标续读
+  - 自动恢复：一次性 runner 的 D: 卷保持原 journal 身份和容量配置，通过 11 轮真实文件改名实际越过旧游标保留范围；普通启动观测到 recovering，自动建成新 generation 并通过哨兵查询，全程没有发送手动重建命令
+  - 后台重连：独占锁定现有 current.json，实际观测第 1 次 30 秒、第 2 次 60 秒定时重试；仅释放文件锁后自动就绪，复用同一 generation、计数归零并通过哨兵查询，没有发送手动重试或重建命令
+  - 产物核对：发布 job 重新计算安装器大小和 SHA-256，与验收报告及校验和文件一致后才上传
+  - 验收报告：installer-validation.json
+  - 验证边界：同版本覆盖不包含旧版本迁移；未验证人工 UAC 拒绝、桌面交互、强制崩溃或磁盘满恢复
+  - 构建记录：Release #33
+  本次提交范围
+  - fix: retry file search recovery in the background with backoff (a1e073a)
+ReleaseNotesUrl: https://github.com/NGLSL/Kite/releases/tag/v0.6.6
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
