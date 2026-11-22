@@ -1,0 +1,94 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: agentty.agentty
+PackageVersion: 0.9.62
+PackageLocale: en-US
+Publisher: agentty
+PublisherUrl: https://agentty.org/
+PublisherSupportUrl: https://github.com/1ay1/agentty/issues
+PackageName: agentty
+PackageUrl: https://agentty.org/
+License: MIT
+LicenseUrl: https://github.com/1ay1/agentty/blob/HEAD/LICENSE
+Copyright: Copyright (c) agentty contributors
+ShortDescription: Blazing-fast Claude in your terminal — a C++26 alternative to claude-code.
+Description: agentty is a native C++26 terminal coding agent and a drop-in alternative to claude-code. A single static binary with sub-millisecond cold start, sandboxed by default, and one-command SSH air-gap. No Node, Python, or Electron. Signs in with your Claude Pro/Max subscription or an ANTHROPIC_API_KEY.
+Moniker: agentty
+Tags:
+- ai
+- claude
+- cli
+- coding-agent
+- developer-tools
+- terminal
+ReleaseNotes: |-
+  Added
+  - The agent can ask you to choose. When a request is ambiguous or a
+    decision is yours (which design, whether to delete something), the model
+    can stop and ask up to four multiple-choice questions in a card under the
+    turn. It starts on the model's suggestion (★); pick with the arrows and
+    Enter or a digit, tick several with Space where it allows, or type your
+    own answer in the usual message box and press Enter. Several questions get
+    tabs and a review page before anything is sent. Esc stops the turn, as it
+    does mid-reply. The finished card keeps question →
+    answer in the transcript.
+    Like OpenCode's question and Claude Code's AskUserQuestion. Don't want
+    it? Ctrl+K → Settings → Ask clarifying questions turns it off entirely:
+    the tool is no longer offered to the model. It never appears in
+    agentty run, ACP sessions or subagents, where nobody could answer.
+  Security
+  - MCP servers, ACP agents and retrieval helpers run in the sandbox. They
+    used to start with your full authority — an npx some-mcp-server could
+    read ~/.ssh, ~/.aws and every repo, and reach your LAN. Now each gets
+    walls for what it is: MCP servers get the workspace and the proxied
+    network; ACP agents also get their own sign-in directory (and only their
+    own); retrieval helpers get a read-only workspace and no network. With the
+    sandbox on, a server that cannot be sandboxed is refused with the reason,
+    never started without one. Linux; macOS and Windows next.
+  - Nothing agentty runs can change agentty's own config. ~/.agentty
+    holds the sandbox policy, the MCP servers, hooks and agents that start
+    without asking, and the approval store. The agent's file tools now refuse
+    to write, delete or move anything there under every Trust handoff setting,
+    allow included, and through symlinks; sandboxed commands see it
+    read-only even with the workspace at $HOME. Writing another agent's
+    server list (.mcp.json, ~/.claude.json, .codex/, .gemini/,
+    .junie/) is now a trust handoff too.
+  - The sandbox says what it stopped and what this host can't do. Files a
+    command was refused now appear in the Sandbox pane's blocked list by path
+    (only ones you could have written yourself). On a host without user
+    namespaces the banner names what is missing in words — "other processes:
+    visible", "protected files: tool gate only" — and the model is told what
+    that means for its commands. On Linux 6.15+ the kernel's audit log records
+    each denial too.
+  - The sandbox works, and holds, on hosts without user namespaces. Ubuntu
+    24.04's AppArmor default denies them, and on such a host every sandboxed
+    command failed to start; underneath that, a masked .env could be read in
+    full and "network: Full" meant the open host network. Now, with Landlock
+    alone: secrets stay masked, read-only paths like .vscode/tasks.json and
+    .git/hooks stay read-only, and commands reach the network only through
+    agentty's proxy (private ranges and cloud metadata refused) — or not at
+    all under None. Where the kernel is too old to keep a promise, the
+    command is refused with the reason. The startup banner now names any wall
+    this host could not build, and --sandbox on refuses to start if the
+    configured posture cannot be built. A new CI job runs the sandbox's attack
+    tests on every push with user namespaces disabled.
+  Fixed
+  - The cache gauge works on every provider, not just Anthropic. It was
+    only armed by an event that OpenAI-compatible hosts (OpenRouter, DeepSeek,
+    Groq, …) and Ollama never send, so on those it stayed blank.
+  - A provider that reports cached_tokens: 0 every turn now shows miss,
+    not n/a. Zero counts were mistaken for "doesn't report a cache".
+  - Ollama's cache is counted. Ollama 0.40+ reports
+    prompt_eval_cached_count; it was ignored, so every local cache hit read
+    as fresh input. DeepSeek's prompt_cache_hit_tokens and a top-level
+    cached_tokens are read too.
+  - Stats → Tokens "In" counts the whole prompt. It showed only the
+    uncached part, so on a warm session "In" and "Total" read several times
+    too low.
+  - Turns from a host with no cache no longer drag down the hit rate. A
+    thread that switched providers counted those prompts as cache misses.
+  Full history: CHANGELOG.md
+ReleaseNotesUrl: https://github.com/agentty-org/agentty/releases/tag/v0.9.62
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
