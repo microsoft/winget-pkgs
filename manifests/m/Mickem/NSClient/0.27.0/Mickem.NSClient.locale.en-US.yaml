@@ -1,0 +1,73 @@
+# Created using wingetcreate 1.28.1.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Mickem.NSClient
+PackageVersion: 0.27.0
+PackageLocale: en-US
+Publisher: MySolutions NORDIC
+PublisherUrl: https://nsclient.org/
+PublisherSupportUrl: https://github.com/mickem/nscp/issues
+Author: Michael Medin
+PackageName: NSClient++
+PackageUrl: https://nsclient.org/
+License: Apache-2.0 OR GPL-2.0-only
+LicenseUrl: https://github.com/mickem/nscp/blob/main/COPYING
+Copyright: Copyright (c) Michael Medin
+ShortDescription: A simple, secure and powerful monitoring agent for Windows.
+Description: |-
+  NSClient++ (a.k.a. NSCP) is a free and open-source monitoring agent originally
+  built for Nagios/Icinga and now usable with most modern monitoring systems.
+  It exposes a wide range of system, performance and event-log checks via NRPE,
+  NSCA, NRDP, REST and Prometheus-compatible endpoints, and can run external
+  scripts in PowerShell, Python, Lua, Visual Basic and many more languages.
+Moniker: nscp
+Tags:
+- nagios
+- icinga
+- naemon
+- monitoring
+- nrpe
+- nsca
+- nrdp
+- prometheus
+- agent
+- sysadmin
+ReleaseNotes: |-
+  # Failed checks that explain themselves, a native Icinga 2 agent, and a Checkmk agent that matches the official one
+
+  0.27.0 is about the moment a check fails. The agent now keeps a log of its last failed checks, and can keep the metrics and diagnostics tables (top processes, services in trouble, the last log errors, the usual disk growth spots) from that moment, on the host and for the fleet server. It also adds an experimental `IcingaAgent` module that joins an Icinga 2 cluster natively, brings the Checkmk agent dump in line with the official agent, and adds pressure metrics, per-volume growth, and Hyper-V over-commitment and switch checks.
+
+  ## ✨ Highlights
+
+  - 🧾 **A log of the last failed checks.** The core keeps the last 50 WARNING, CRITICAL and UNKNOWN results from every transport, with output and perfdata. It shows on a new *Failed checks* page, as a dashboard widget and at `GET /api/v2/failures` (#1697).
+  - 🔍 **What the system looked like when it failed.** With `capture metrics` and `capture diagnostics` on, each failure keeps the metrics snapshot and small diagnostics tables from that moment. A new *Diagnostics* page shows them live, and an enrolled agent can send failure context to the fleet server (#1699, #1710).
+  - 🧊 **`IcingaAgent`: NSClient++ as a native Icinga 2 agent (experimental).** It speaks the cluster protocol on port 5665, requests its certificate from the Icinga CA and runs the checks the master schedules with `command_endpoint` (#1736).
+  - 📤 **The Checkmk agent dump matches the official agent.** New Linux `<<<cpu>>>` and `<<<kernel>>>` sections, the full memory data, process owners and exact numbers. `nscp mk install` sets the agent up from the command line (#1719).
+  - 📊 **Pressure metrics and volume growth.** Linux pressure stall figures, the Windows processor queue and page faults, the average disk queue, and how much each volume grew in the last hour and day, as metrics and as `check_drivesize` keywords (#1710).
+  - 🖥️ **Hyper-V over-commitment and virtual switches.** `check_hyperv_host` reports CPU and memory over-commitment, the new `check_hyperv_switches` checks every virtual switch, and `check_hyperv_vms` finds duplicate VM names (#1718).
+  - 🔒 **Security fixes.** A Checkmk dump field read from the OS can no longer forge rows or sections (#1735). The Windows web backend moves to Mongoose 7.24 (#1722).
+
+  ## ⚠️ Upgrade notes
+
+  The full list is on the [upgrading page](https://nsclient.org/docs/setup/upgrading/), and the security fixes are on the [security notices page](https://nsclient.org/docs/security/notices/).
+
+  - **Checkmk sites:** run service discovery on hosts monitored through NSClient++. The memory service moves to Checkmk's own memory check, new CPU services appear, and process rules that match on the user now see the owner. On Linux, enable `CheckDisk` to keep `<<<df>>>`. A Lua line object set with `line:set_line(...)` now sends an embedded line break as a space.
+  - **Custom roles:** the failed-check log needs `failures.list` (`failures.delete` to clear), and diagnostics need `diagnostics.list`.
+  - **`check_hyperv_vms` `health`:** filters on `health_0`, `health_10`, `health_15` or `health_30` must use `unknown`, `degraded`, `minor_failure` or `non_recoverable_error`.
+  - **`check_patch_age`:** replace `age < 0` or `age = -1` with `age_known = 0`.
+  - **`nscp settings --validate`** now fails on a misspelled key under `[/settings/core]`. Fix the spelling it suggests.
+  - **Scripts that wrote an empty string to reset a key** should call `remove_key()` instead.
+  - **Windows web server behind a proxy:** a request with more than 30 headers is now dropped. Trim what the proxy forwards if requests start failing.
+  - **Downgrading** after the first start loses stored module state once: web sessions log out and log bookmarks start over.
+
+  **Full Changelog**: https://github.com/mickem/nscp/compare/0.26.0...0.27.0
+ReleaseNotesUrl: https://github.com/mickem/nscp/releases/tag/0.27.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://nsclient.org/docs/
+- DocumentLabel: Upgrading
+  DocumentUrl: https://nsclient.org/docs/setup/upgrading/
+- DocumentLabel: Security notices
+  DocumentUrl: https://nsclient.org/docs/security/notices/
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0
