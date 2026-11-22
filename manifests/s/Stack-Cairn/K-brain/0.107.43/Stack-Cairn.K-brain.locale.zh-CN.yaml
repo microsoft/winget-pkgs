@@ -1,0 +1,66 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Stack-Cairn.K-brain
+PackageVersion: 0.107.43
+PackageLocale: zh-CN
+Publisher: Stack-Cairn
+PublisherUrl: https://github.com/Stack-Cairn
+PublisherSupportUrl: https://github.com/Stack-Cairn/K-brain/issues
+PackageName: K-brain
+PackageUrl: https://github.com/Stack-Cairn/K-brain
+License: Apache-2.0
+LicenseUrl: https://github.com/Stack-Cairn/K-brain/blob/HEAD/LICENSE
+ShortDescription: 基于 Go 构建、运行在终端里的编程 Agent。
+Description: 氪脑（K-brain）是运行在终端里的编程 Agent，用 Go 构建，也可作为其他前端的后端底座。读代码、改文件、执行命令、验证结果，在同一会话中完成任务。运行 kn 开始使用，取自“氪脑”拼音 Ke Nao。
+Tags:
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  新增
+  MCP 应用界面
+  - 视图现在能拿到原始工具结果。
+    - 不超过 256 KiB 的结果直接内联在事件里。
+    - 不超过 1 MiB 的结果按会话保存，新路由 /v1/sessions/{id}/mcp-ui/results/{ref} 可以读取。
+  - 子代理的结果和历史记录都保留 ui_resource，重新打开对话后应用界面能恢复。
+  - 遵守 _meta.ui.visibility：
+    - 仅供应用调用的工具不再提供给模型；
+    - 仅供模型调用的工具不能从视图调用。
+  MCP 工具调用审批
+  - POST /v1/mcp/tools/call 遇到“每次询问”的工具，不再直接执行，而是返回 approval_required 和一个一次性审批 id（5 分钟后过期）。
+  - 同意后，带上 approval_id 重发同样的请求即可执行。
+  MCP 服务器
+  - /v1/mcp/tools 的 serverId 改为配置里的 id。
+  - 新增字段：serverKey、serverLabel、serverToolName、visibility。
+  - 服务器可以设置显示名称 name。
+  插件
+  - 列表新增 contributes.toolDetails[]，同时给出 manifest 名和面向模型的名字。
+  - 插件面板的入口有问题时，列表会返回 errorCode。
+  - 资源请求失败时，响应带 X-K-Brain-Asset-Error 头，失败的页面还会通知宿主。
+  新能力声明
+  - mcp_apps_structured_content
+  - mcp_tool_visibility
+  - mcp_tool_call_approval
+  - mcp_tool_server_ids
+  - plugin_tool_names
+  - plugin_ui_errors
+  - plugin_manifest_unknown_fields
+  修复
+  - 插件 id 含 _ 时，工具名有歧义，导致调用失败。
+  - plugin.json 里的未知字段会导致插件加载失败，现在改为忽略。
+  兼容性
+  用旧方式调用 /v1/mcp/tools/call 时，“每次询问”的工具现在会返回 approval_required。依赖旧 serverId 的客户端，请改用 serverKey。
+  (#241, via #242)
+ReleaseNotesUrl: https://github.com/Stack-Cairn/K-brain/releases/tag/v0.107.43
+InstallationNotes: 在终端中运行 kn。首次使用前，请在 %USERPROFILE%\.k-brain\config.json 中配置模型提供商。
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://github.com/Stack-Cairn/K-brain/blob/main/README.zh-CN.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
