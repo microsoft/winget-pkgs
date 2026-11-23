@@ -1,0 +1,58 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: FahrenheitResearch.ArWen
+PackageVersion: 3.0.5
+PackageLocale: en-US
+Publisher: Fahrenheit Research
+PublisherUrl: https://github.com/FahrenheitResearch
+PublisherSupportUrl: https://github.com/FahrenheitResearch/arwen/issues
+Author: Fahrenheit Research
+PackageName: ArWen
+PackageUrl: https://github.com/FahrenheitResearch/arwen
+License: Apache-2.0
+LicenseUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+Copyright: Copyright © Fahrenheit Research
+CopyrightUrl: https://github.com/FahrenheitResearch/arwen/blob/main/LICENSE
+ShortDescription: 'ArWen: GPU-native WRF-ARW-class regional weather model, verified against WRF v4.6.1'
+Description: "ArWen is an independent, GPU-native implementation of a WRF-ARW-class regional atmospheric model. It is not affiliated with or endorsed by NCAR or UCAR. The name is a wordmark for \"the ARW solver, GPU-native\"; the Python package is currently named gpuwm. Safety. ArWen is a research and educational tool. It is never a substitute for official forecasts and warnings from your national meteorological service. Do not use it to make safety decisions. Regional numerical weather prediction at convective scale has mostly required institutional clusters, which means most of the world runs on global-model guidance at 10-25 km. ArWen's aim is to put a verified, kilometer-scale limited-area model on a single consumer GPU: pick a point, size a nest ladder to your card, pull public analysis data, and run a 1 km (or 500 m) simulation of your own area on hardware you own -- especially in places where no national convection-permitting model exists."
+Moniker: arwen
+ReleaseNotes: |-
+  Fixed
+
+  - A run on the adaptive time step with a cumulus scheme (Kain-Fritsch, the previous KF, Multiscale KF, KF-CuP, BMJ, Grell-Freitas, Grell-Devenyi, the SAS family or ZM) makes its convective rain again; gpuwm domain writes the adaptive step by default outside the tropics, and on those runs convective rain all but stopped after the first hours.
+  - BMJ with the adaptive time step and cudt above 0 is refused, as WRF resets it; gpuwm import-namelist writes cudt = 0 for such a namelist and says so.
+  - Multiscale Kain-Fritsch and KF-CuP no longer leave a few columns with convective rain just below zero.
+  - Multiscale Kain-Fritsch with RTE+RRTMGP radiation no longer stops a few hours in with "RRTMGP input validation failed: qi is non-finite or negative".
+  - CAM-MG microphysics with RTE+RRTMGP radiation is no longer refused at its radiation calls with "effc, effi or effs is outside the physical-plausibility band".
+  - Lin microphysics on 129 to 256 levels no longer stops with a non-finite state in its first step.
+  - MYNN's WRF 4.7.1 generation runs at any number of levels; at counts other than 49 or 50 it stopped in its first step or computed from overwritten values. MYNN's 4.7.1 and 4.8.0 generations also run from a pip install without nvcc at a level count that has no shipped kernel image.
+  - With sst_skin = 1, the Great Lakes start from the lake temperature the run bound, not from the forcing's skin temperature.
+  - A slab-ocean run started from WRF files keeps WRF's initial mixed-layer depth and deep-layer temperature instead of zeros.
+  - AFWA precipitation type has no missing values over dry columns, and types freezing rain where WRF does.
+  - A wind farm read from WRF's own turbine files puts every turbine in the cell WRF puts it in.
+  - p_lev_diags and z_lev_diags work on a real-data gpuwm go run and on every nest; the run stopped before its first step.
+  - gpuwm domain --source hafs-a and hafs-b take the storm id (--source-parameters STORM=14l), and HAFS and gfs-pressure runs have download estimates.
+  - gpuwm go CONFIG --native-shared-gpu is refused by name instead of being ignored.
+  - In-loop simulated radar no longer hangs when the run folder is reached through a symlink or a relative path.
+  - The Thompson cold start gives the same ice number on Arm hosts as on x86.
+  - A moving nest inside a containment parent no longer stops at a containment slide wider than its own move limit.
+  - KIAPS SAS through the MPAS column seam no longer stops at its first history snapshot or checkpoint.
+  - A nested run whose state blows up is rolled back to its last checkpoint and retried with a shorter step, whether the per-step check or the deferred health check finds it, and its receipt records the failure.
+  - A nested [tiles] run gives the same inner grid on every run.
+  - A model top that float32 cannot hold exactly (1312.2 Pa, say) no longer stops a nested run or the radiation.
+  - A storm track whose surface needs the missing TC bridge says so when its file opens, instead of skipping every row silently.
+  - A source checkout whose shared NetCDF writer is too old for compressed frames builds its own and writes the frame.
+  - The GEFS v11 archives and the GEFS reforecast have download estimates; a reforecast window that starts at forecast hour 0 is refused with the remedy.
+  - The RRFS ensemble member route (--source rrfs-ens) prepares again; it was refused at the companion join.
+  - A forecast started as python -m gpuwm.prepared_single_domain_forecast (the command gpuwm sim --print-command prints) writes its report; it stopped there with a NameError after running every step.
+  - The Noah-MP land census that gpuwm-hex reads on its ArWen physics route is a plain receipt: whole counts, and the glacier path only when glacier columns ran.
+  - gpuwm --help piped on Windows no longer shows a stray character in its title line.
+  - Hail maps label their colour bar "mm (25.4 mm = 1 in)" and mark every inch step.
+ReleaseNotesUrl: https://github.com/recastsystems/arwen/releases/tag/v3.0.5
+InstallationNotes: |-
+  This application requires an NVIDIA GPU with CUDA support to run.
+  Will not function on integrated graphics or non-NVIDIA hardware.
+  Without compatible hardware, the application will fail to launch.
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

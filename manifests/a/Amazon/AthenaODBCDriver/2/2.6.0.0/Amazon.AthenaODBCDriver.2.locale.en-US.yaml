@@ -1,0 +1,64 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Amazon.AthenaODBCDriver.2
+PackageVersion: 2.6.0.0
+PackageLocale: en-US
+Publisher: Amazon.com Services LLC
+PublisherUrl: https://aws.amazon.com/
+PublisherSupportUrl: https://console.aws.amazon.com/support/home/
+PrivacyUrl: https://aws.amazon.com/privacy/
+Author: Amazon Web Services, Inc
+PackageName: Amazon Athena ODBC Driver
+PackageUrl: https://docs.aws.amazon.com/athena/latest/ug/odbc-v2-driver.html
+License: Proprietary
+LicenseUrl: https://aws.amazon.com/agreement/
+Copyright: © 2026, Amazon Web Services, Inc. or its affiliates. All rights reserved.
+CopyrightUrl: https://aws.amazon.com/agreement/
+ShortDescription: Athena ODBC 2.x driver
+Description: Use an ODBC connection to connect to Athena from third-party SQL client tools and applications.
+Tags:
+- athena
+- aws
+- odbc
+ReleaseNotes: |-
+  This release of the Amazon Athena ODBC 2.x driver includes changes made since version 2.5.0.0. It adds support for all ODBC interval C types and makes interval reads follow the ODBC specification, so applications get standard values and SQLSTATEs. Some interval reads now return different values or SQLSTATEs. For details, see the action required note under Fixes.
+  Improvements
+  - All interval C types – SQLBindCol and SQLGetData now support all 13 ODBC interval C types. Previously, reads into SQL_C_INTERVAL_DAY_TO_HOUR, SQL_C_INTERVAL_DAY_TO_MINUTE, SQL_C_INTERVAL_HOUR_TO_MINUTE, SQL_C_INTERVAL_HOUR_TO_SECOND, and SQL_C_INTERVAL_MINUTE_TO_SECOND returned HY000 or 07006 for every value.
+  - SageMaker credentials cache – Added the SageMakerCredentialsCache parameter for SageMakerBrowserIdc and SageMakerIam authentication. When set to 1, the driver saves the Athena connection credentials that Amazon DataZone returns in the driver's cache directory. The driver reuses them across connections and driver processes until two minutes before they expire. Only the value 1 enables the cache, and it is off by default. For more information, see Credentials cache for SageMaker Browser IDC and Credentials cache for SageMaker IAM.
+  - Catalog listing cache – With EnableConnectionCaching=1, the driver now also caches the catalog list for five minutes per driver process. Repeated catalog listings then do not call Athena and AWS Glue again. For more information, see Enable connection caching.
+  - Faster SQLColumns for one table – When SQLColumns names an exact catalog, schema, and table, the driver now reads that table directly. It no longer lists every catalog, schema, and table first. If the direct read fails or finds nothing, the driver uses the full listing as before. This does not apply when UseSingleCatalogAndSchema=1.
+  - Windows DSN options – The Windows DSN configuration dialog has two new checkboxes. Enable Credentials Cache is under Authentication Options for the SageMaker authentication types. Enable Connection Caching is under Advanced Options. Saving a DSN from the dialog now keeps both options.
+  - Smaller schema listing responses – When the driver lists schemas, it now asks for database names only. This applies to Athena ListDatabases and to the AWS Glue GetDatabases fallback. Responses for large catalogs are smaller and faster. The schema names returned are unchanged.
+  Fixes
+  - Fixed an issue that caused the driver to report too small a byte length for declared character columns with multibyte data. For columns declared CHAR(N) or VARCHAR(N), the driver now reports 4 bytes per character. This applies to SQL_DESC_OCTET_LENGTH and to the SQLColumns BUFFER_LENGTH and CHAR_OCTET_LENGTH fields. It applies with or without UseWCharForStringTypes. For example, a VARCHAR(128) column reports 512 instead of 128. SQLColumns also reports 4 bytes for a char column without a length.
+  - Fixed an issue that caused the column size of timestamp with time zone columns to be reported as 65 instead of 67. This applies to result-column metadata and to SQLColumns. The octet length is 67, or 268 when UseWCharForStringTypes=1.
+  - Fixed an issue that caused every later query on a connection to fail after an application set SQL_ATTR_CURRENT_CATALOG to an empty value. The driver now keeps the current catalog and returns SQL_SUCCESS_WITH_INFO with 01S02. This issue caused intermittent Power BI on-premises data gateway refresh failures.
+  - Fixed an issue that caused AWS Glue sub-catalogs, such as Amazon S3 Tables catalogs (s3tablescatalog/<bucket>), to appear empty. This happened when Athena metadata calls were denied. For example, this occurred under a SageMaker Unified Studio project role. The driver now reads the schemas, tables, and columns through AWS Glue. If AWS Glue also denies access, the driver skips the catalog and logs an error that names the permissions to grant.
+  - Fixed an issue that caused SQLBindCol into an interval C type to return 22003 for every value, even for INTERVAL '0' DAY.
+  - Fixed an issue that caused interval reads to return 22003 or HY000 instead of the SQLSTATE that the ODBC specification defines. A value that does not fit the interval leading field now returns 22015 instead of 22003. Reads that cannot succeed now return 07006 or 22015 instead of HY000. For example, this applies to a year-month interval read as SQL_C_INTERVAL_DAY. It also applies to a number read as SQL_C_INTERVAL_DAY_TO_SECOND and to a Boolean value read as a compound interval type.
+    A bound read of a number whose whole part does not fit now returns SQL_ERROR with 22015. Previously, it returned SQL_SUCCESS_WITH_INFO with no value. An example is DOUBLE 100.5 read as SQL_C_INTERVAL_DAY.
+  - Fixed an issue that caused interval text with a fraction, such as '3.5', to lose the fraction. The driver now reads such text as a seconds value. '3.5' read as SQL_C_INTERVAL_SECOND now returns 3.5 seconds instead of 3.
+  - Fixed an issue that caused interval reads to use the wrong leading and seconds precision. SQLBindCol on an interval type now sets SQL_DESC_DATETIME_INTERVAL_PRECISION to 2. For a type with a seconds field, it also sets SQL_DESC_PRECISION to 6. SQL_DESC_PRECISION no longer raises the leading-field limit. Bound reads now check the leading field after the driver converts larger units into the target unit, for example days into hours.
+    For a SQL_C_DEFAULT interval read, an explicit seconds precision of 0 is now kept instead of read as 6.
+
+    Action required: interval read changes
+    If your application reads interval values, review the following cases. Each case now follows the ODBC specification and returns a different result than before.
+    - A leading field with more than two digits, such as INTERVAL '100' DAY, now returns 22015 from SQLGetData(SQL_ARD_TYPE). This happens if you have not set the descriptor record. Previously, it returned 100 days. To read the value, set SQL_DESC_DATETIME_INTERVAL_PRECISION to 3 or more after the bind.
+    - INTERVAL '5' DAY read as SQL_C_INTERVAL_HOUR through SQLBindCol now returns 22015 at the default leading precision. Previously, it returned 120 hours. To read the value, set SQL_DESC_DATETIME_INTERVAL_PRECISION to 3 or more after the bind.
+    - Interval text with a fraction is read as seconds. As a result, '3.5' read as SQL_C_INTERVAL_DAY returns 0 days with 01S07 instead of 3 days. Read as a year-month type, it returns 22018. There is no workaround.
+    - Text that is not a valid interval value returns 22018. Previously, '12abc' read as SQL_C_INTERVAL_DAY returned 12 days, and '1 25:00:00' returned 1 day.
+    - For a SQL_C_DEFAULT interval read, an explicit seconds precision of 0 now returns fraction 0 with 01S07. Previously, the driver returned six fraction digits.
+    SQLBindCol resets both precision fields, so set them after the bind.
+  - Fixed an issue that caused interval reads to drop the seconds fraction. Interval types with a seconds field now default to six fraction digits, and bound and SQL_ARD_TYPE reads apply the application's seconds precision. For example, at precision 3, 1.123456 seconds read as SQL_C_INTERVAL_DAY_TO_SECOND returns fraction 123 with 01S07 instead of 123456.
+  - Fixed an issue that caused interval text to be read only in part. For example, '1 02:03:04' read as SQL_C_INTERVAL_HOUR now returns 26 hours with 01S07 instead of 1 hour. Text with extra spaces or tabs keeps the value that SQLGetData returned before, and SQLBindCol now returns it too.
+  - Fixed an issue that caused interval values too large for the interval structure, above 4294967295, to return a wrapped value or 22003. They now return 22015 on every read path. A REAL value of 4294967296 or -4294967296 and a DOUBLE or REAL NaN read as an interval type also return 22015. Previously, these returned 0 or HY000. A row with an Athena interval value above 4294967295 days now fetches, and only that value returns 22015.
+  - Fixed an issue that caused the driver to send SQL_C_CHAR and SQL_C_WCHAR interval parameters as empty text or to return 22015. This applied to parameters bound as SQL_INTERVAL_DAY_TO_SECOND or SQL_INTERVAL_YEAR_TO_MONTH. The driver now sends the interval text and takes the leading and seconds precision from ColumnSize and DecimalDigits. Year values above 2147483647 are no longer sent as negative numbers.
+  - Fixed an issue that caused SQLFetch to return SQL_SUCCESS_WITH_INFO instead of SQL_ERROR when a bound column conversion failed after a truncation warning.
+  - Fixed an issue that caused a truncated SQLGetData read into SQL_C_WCHAR to report SQL_NO_TOTAL in the length indicator. The driver now reports the number of bytes still available. For example, an 8-character value reports 16 bytes on the first call. The next call reports 10 bytes for the remaining 5 characters.
+  - Fixed an issue that caused SQLColumns to return a null CHAR_OCTET_LENGTH for time with time zone, uuid, json, and binary columns. An AWS Glue column declared binary is now described as varbinary in SQLColumns, the same as in query results.
+  - Fixed an issue that caused the driver to crash on Linux or stop responding on Windows. This happened when an application exited without closing its connections. For example, a Python application whose pyodbc connection belongs to a daemon thread now exits normally.
+  To download the new ODBC v2 driver, see ODBC 2.x driver download. For connection information, see Amazon Athena ODBC 2.x.
+ReleaseNotesUrl: https://docs.aws.amazon.com/athena/latest/ug/odbc-v2-driver-release-notes.html
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

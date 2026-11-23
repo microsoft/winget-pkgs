@@ -1,0 +1,122 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: BytePioneer-AI.CodexHost
+PackageVersion: 0.24.0
+PackageLocale: zh-CN
+Publisher: codexhost
+PublisherUrl: https://github.com/BytePioneer-AI
+PublisherSupportUrl: https://github.com/BytePioneer-AI/codex-host/issues
+PrivacyUrl: https://github.com/BytePioneer-AI/codex-host/blob/HEAD/docs/PRIVACY.md
+Author: BytePioneer-AI
+PackageName: CodexHost
+PackageUrl: https://github.com/BytePioneer-AI/codex-host
+License: MIT
+LicenseUrl: https://github.com/BytePioneer-AI/codex-host/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 BytePioneer-AI
+ShortDescription: 在 Codex Desktop 中直接运行 Pi 和 Claude Code 等 Agent Harness
+Description: |-
+  CodexHost 是一个独立的非官方开源项目，让 Pi、Claude Code 等 Agent Harness 在 Codex Desktop 中运行，并支持跨 Agent 协作。
+  支持通过 SSH 和官方 Codex Desktop Remote Control 使用远程主机上的 Harness。
+  CodexHost 与 OpenAI 无隶属关系，也未获得 OpenAI 的背书。
+
+  我们认为 Codex Desktop 提供了目前最好的桌面开发交互体验。
+  但 Codex 并不是唯一优秀的 Agent Harness，也有人偏好 Claude Code 和 Pi Agent。
+  CodexHost 让你在 Codex Desktop 中选择真正执行任务的 Agent，同时保留 Codex 的原生体验，并让它们协作完成任务。
+  无需切换应用，Pi、Claude Code、OMP、Grok Build 和 DeepSeek Harness 都可以在同一个 Codex Desktop 窗口中直接使用。
+
+  跨 Agent 协作
+
+  你可以让当前 Agent 把独立任务交给另一个 Harness。例如：
+  让 @claude-code 独立审查这次修改，并指出兼容性风险。
+  让 @pi 调查这个测试为什么偶发失败。
+  让 @omp 实现这个功能，我继续整理文档。
+  CodexHost 会为目标 Harness 创建独立的 Native Session。委派会话将出现在 Codex Desktop 的会话列表中，你可以随时打开、查看进度或继续对话。
+Tags:
+- claude-code
+- codex
+- pi
+- 智能体
+- 编程智能体
+ReleaseNotes: |-
+  ✨ 本版重点
+  - 统一插件平台：Desktop 和 Web 共用一套插件，挂件和独立页面两端都能用，旧插件自动迁移
+  - 多 Agent 协作设置：新增设置页，可以给每个 Harness 设置默认的委派 Model 和 Thinking
+  - 适配 Codex Desktop 26.1117：启动、切换 Harness、额度限制都已修好
+  🚀 新功能
+  - 模型选择器：可以只刷新当前 Harness 的模型列表 (#940)
+  - Model ID：所有 Harness 的 Model ID 都可直接书写，单值 Harness 用原生 ID，Pi、OpenCode 等用 provider/model；含 /、括号、空格或中文也能选；CLI 委派可写 --model codex-pi/gpt-5.6-sol~fast，旧设置照常可用 (#986)
+  - Claude Code：任务实时显示在计划面板，重新打开 Thread 也能看到最新计划 (#976)
+  - Antigravity：后台唤醒单独成一轮，不再覆盖上一轮回答 (#1001)
+  - Antigravity：每个请求结束后刷新用量，并显示首字耗时 (#942)
+  - Antigravity：委派 Codex 时遵循指定的速度档位 (#964)
+  - Fork：有轮次正在运行时，也能从更早的轮次 Fork (#944)
+  - Web：划词批注精确定位到所选文字，并高亮原文 (#959)
+  - Web：iOS PWA 可以下载文件，设置页切换更快
+  - 手机端：顶栏、弹窗、审批和设置页布局优化，长问题可以滚动作答 (#957)
+  🐛 修复
+  - Codex Desktop 26.1117：配置了 MCP 时启动超时 (#1003)
+  - Codex Desktop 26.1117：新对话里点 Harness 没反应；以后 Desktop 更新也不容易再失效 (#1010, #1040)
+  - Codex Desktop 26.1117：Codex 额度用完后，外部 Harness 也发不了消息
+  - Windows：远程 SSH 上的 Harness 识别不到 (#978)
+  - Windows：Store 版启动失败时，可以改用 codexhost launch --windows-direct (#1012)
+  - Windows + WSL：本地连接不支持外部 Harness 时反复重试，现在会提示改用 Remote SSH (#1011)
+  - Antigravity：旧 Model 下线后会话无法恢复 (#937)
+  - Antigravity：释放空闲进程时，后台任务被连带取消 (#975)
+  - Antigravity：历史里缺少已完成的工具记录 (#951)
+  - Antigravity：历史回放时轮次错位
+  - Claude Code：子代理卡住，父 Thread 一直显示忙碌 (#958)
+  - DeepSeek：出错时会让 Host 崩溃 (#935)
+  - ZCode：3.18.2 无法读取账号，反复弹出钥匙串授权 (#1014)
+  - Thread：删除后侧栏和委派记录里仍有残留 (#1023)
+  - Thread：首轮回复重复显示 (#963)
+  - Web：通过 Cloudflare Tunnel 等 HTTPS 反向代理访问时被拒绝 (#968)
+  - Desktop：控制进程失去响应后无法恢复 (#1019)
+  - 另有 20 余项 Thread 列表、Harness 会话和 Web 的稳定性修复
+  - ⚠️ 已知问题：在 Codex Desktop 26.1103 及之后的版本里，通过官方 Remote Control 使用 Windows 主机上的外部 Harness 暂时不可用
+
+  ✨ Highlights
+  - Unified Plugins: Desktop and Web share one set of plugins; Widgets and Pages work on both, and existing Desktop plugins migrate automatically
+  - Multi-Agent settings: a new settings page sets the default delegation Model and Thinking for each Harness
+  - Codex Desktop 26.1117 support: startup, Harness switching and usage limits are fixed
+  🚀 Features
+  - Model picker: refresh only the current Harness's models (#940)
+  - Model IDs: every Harness now uses writable Model IDs: native IDs for single-value Harnesses and provider/model for Pi, OpenCode and similar; IDs with /, brackets, spaces or non-ASCII characters work; CLI delegation accepts --model codex-pi/gpt-5.6-sol~fast, and saved settings keep working (#986)
+  - Claude Code: tasks update the plan panel live, and the latest plan returns when a Thread is reopened (#976)
+  - Antigravity: background wakeups appear as their own Turn instead of replacing the previous answer (#1001)
+  - Antigravity: usage refreshes after each request and shows time to first token (#942)
+  - Antigravity: Codex delegations honor the requested speed tier (#964)
+  - Fork: fork an earlier Turn while a later one is still running (#944)
+  - Web: reply annotations anchor to the exact selected text and highlight it (#959)
+  - Web: file downloads in the iOS PWA, and faster Settings tab switching
+  - Mobile: better header, dialog, approval and Settings layouts; long questions scroll (#957)
+  🐛 Fixes
+  - Codex Desktop 26.1117: startup timed out when MCP servers were configured (#1003)
+  - Codex Desktop 26.1117: clicking a Harness in a new chat did nothing; switching is now resilient to future Desktop updates (#1010, #1040)
+  - Codex Desktop 26.1117: external Harnesses could not send once the Codex usage limit was reached
+  - Windows: Harnesses on Remote SSH hosts were not detected (#978)
+  - Windows: when the Store version fails to start, codexhost launch --windows-direct is available (#1012)
+  - Windows + WSL: unsupported local connections retried endlessly; they now point to Remote SSH (#1011)
+  - Antigravity: sessions could not resume after their Model was retired (#937)
+  - Antigravity: background tasks were cancelled when an idle process was released (#975)
+  - Antigravity: completed tool calls were missing from history (#951)
+  - Antigravity: Turns could be misplaced in history replay
+  - Claude Code: subagents got stuck and left the parent Thread busy (#958)
+  - DeepSeek: a failure could crash the Host (#935)
+  - ZCode: 3.18.2 accounts could not be read and Keychain prompts kept reappearing (#1014)
+  - Threads: deleted Threads lingered in the sidebar and delegation records (#1023)
+  - Threads: the first reply could appear twice (#963)
+  - Web: access through HTTPS reverse proxies such as Cloudflare Tunnel was rejected (#968)
+  - Desktop: an unresponsive controller process could not be recovered (#1019)
+  - 20+ more stability fixes for Thread lists, Harness sessions and Web
+  - ⚠️ Known issue: external Harnesses on a Windows host used through official Remote Control are unavailable on Codex Desktop 26.1103 and later
+  Install & Upgrade
+  - New install: npm install -g @codexhost/cli, or download the installer for your platform from Assets below.
+  - Upgrade: codexhost update. For npm installs, run codexhost stop before reinstalling.
+  - macOS "cannot verify this app": xattr -dr com.apple.quarantine /Applications/codexhost.app
+  - More: README
+  Contributors
+  @BytePioneer-AI · @ump45nose (#969, #970, #972, #973, #974, #975, #976, #981, #986, #987, #988, #989, #1004) · @sduhantao-maker (#945, #946, #1023) · @mouzhi (#978, #995, #1009) · @lpmasser (#935, #1040) · @biground (#957, #959) · @hhucz (#954, #955) · @TimYuhong (#937) · @ChaceLyee2101 (#951) · @qbnmmm (#958) · @aabiberyi-prog (#964) · @MGHus4473 (#994) · @bwndlct (#996) · @YanYunCY (#1003)
+ReleaseNotesUrl: https://github.com/BytePioneer-AI/codex-host/releases/tag/v0.24.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
