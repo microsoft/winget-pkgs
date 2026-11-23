@@ -1,0 +1,84 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: MartinPospisil.Gleanvolt
+PackageVersion: 1.3.1
+PackageLocale: en-US
+Publisher: Martin Pospisil
+PublisherUrl: https://github.com/mpospisil
+PublisherSupportUrl: https://github.com/mpospisil/gleanvolt/issues
+PrivacyUrl: https://github.com/mpospisil/gleanvolt/blob/main/docs/PRIVACY.md
+PackageName: Gleanvolt
+PackageUrl: https://github.com/mpospisil/gleanvolt
+License: PolyForm Noncommercial License 1.0.0
+LicenseUrl: https://github.com/mpospisil/gleanvolt/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Martin Pospisil
+CopyrightUrl: https://github.com/mpospisil/gleanvolt/blob/main/LICENSE
+ShortDescription: Locally hosted controller for a SolaX hybrid inverter and EV charger, over Modbus TCP.
+Description: |-
+  A standalone background service for managing and monitoring a SolaX X3-HYB-G4 PRO hybrid inverter and a SolaX X1/X3-HAC EV charger. It operates entirely within the local network over Modbus TCP, with no cloud dependency, so polling is immediate and the data stays on the premises.
+  It reads PV generation, battery state of charge and grid power flow, and uses them to drive EV charging and home-battery use from household surplus: charging the car on live solar, holding the battery back when the forecast says it will be needed, and targeting a departure time. A web UI is built in, and it can publish itself to Home Assistant over MQTT.
+  The built-in web interface requires a password. A fresh installation serves only the page that asks you to set one, and shows no history and no controls until you have; it then asks you to sign in. Authentication can be switched off deliberately for an isolated network, which is not the default. The interface speaks plain HTTP, so it belongs on a network you trust or behind a TLS proxy.
+  This build is free for any noncommercial purpose under the PolyForm Noncommercial License 1.0.0. Commercial use requires a separate licence -- see the LICENSE file.
+Moniker: gleanvolt
+Tags:
+- battery
+- ev-charger
+- home-assistant
+- inverter
+- modbus
+- solar
+- solax
+ReleaseNotes: |-
+  Install
+  Debian, Ubuntu, Raspberry Pi OS (64-bit)
+  Installs the controller and its web UI as a systemd service, started with the default
+  configuration. Run it again to upgrade; settings and data are kept.
+  curl -fsSL https://github.com/mpospisil/gleanvolt/releases/latest/download/install.sh | sudo sh
+  Or by hand, choosing amd64 or arm64:
+  wget https://github.com/mpospisil/gleanvolt/releases/download/v1.3.1/gleanvolt_1.3.1_arm64.deb
+  sudo apt install ./gleanvolt_1.3.1_arm64.deb
+  Then open http://<device>:8090 and set your inverter and charger addresses in
+  /etc/gleanvolt/gleanvolt.env.
+  Docker
+  docker pull ghcr.io/mpospisil/gleanvolt:1.3.1
+  Or download a self-contained build below and run it — no .NET installation needed.
+  gleanvolt-1.3.1-win-x64.zip for Windows, linux-arm64 for a Raspberry Pi,
+  linux-x64 for an x64 Linux host or NAS.
+  Shipped plugins
+  gleanvolt-plugin-openweather-1.3.1-<platform>.zip is the weather from OpenWeatherMap, run
+  beside Gleanvolt with External chosen under Settings → Weather. In Docker it is the image
+  ghcr.io/mpospisil/gleanvolt-plugin-openweather:1.3.1, and the openweather
+  profile of the compose stack. The README inside the zip says how to run it.
+  The charger plugins (SolaX, Huawei SCharger, go-e, Shelly TopAC) are released on their own, from
+  gleanvolt-chargers; the compose stack runs one with
+  GLEANVOLT_PLUGINS. The built-in charger drivers are deprecated and go in 1.4.
+  The .nupkg files are the libraries. The MIT ones a plugin is built on are also on nuget.org:
+  Gleanvolt.Providers.Contracts, Gleanvolt.Providers.Client, Gleanvolt.Providers.Testing,
+  Gleanvolt.Chargers.Hosting and Gleanvolt.Modbus, at 1.3.1.
+  Verify your download
+  SHA256SUMS covers every file here. From the directory you downloaded into:
+  sha256sum -c --ignore-missing SHA256SUMS
+  --ignore-missing because you have probably taken one file rather than all of them.
+  On Windows, without installing anything:
+  Get-FileHash gleanvolt-1.3.1-win-x64.zip -Algorithm SHA256
+  and compare it with the line in SHA256SUMS. PowerShell prints the hash in upper case;
+  the file lists it in lower case, and they are the same hash.
+  Each zip, .deb, install.sh and .nupkg also carries a build provenance attestation, which says
+  which workflow run and which commit produced it rather than only that the bytes are
+  unchanged. That needs no trust in this page:
+  gh attestation verify gleanvolt-1.3.1-linux-arm64.zip --repo mpospisil/gleanvolt
+  Changes
+  - Deprecate the built-in charger drivers, and ship the charger plugins (#444) (#451)
+  - The charger plugins move to gleanvolt-chargers, a charger plugin host for anyone's repository, and the Shelly plugin leaves (#443) (#450)
+  - The wizard becomes Inverter → Site → Finish, and the charger leaves setup (#442) (#449)
+  - Charger availability: a running mode is suspended while the charger is unavailable, and resumed (#441) (#448)
+  - Charger contract 1.1: capabilities in the hello, and the first plugin remembered (#440) (#447)
+  - The plugin SDK on nuget.org, with a test hub and the Modbus client, all MIT (#439) (#446)
+  - Chargers as external plugins, and the Shelly TopAC as the first (#435, #429) (#436)
+  - Read past Modbus replies older than their request (#433) (#434)
+  Licence: free for any noncommercial purpose under the PolyForm Noncommercial
+  License 1.0.0. Commercial use requires a separate licence — see LICENSE.
+ReleaseNotesUrl: https://github.com/mpospisil/gleanvolt/releases/tag/v1.3.1
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
