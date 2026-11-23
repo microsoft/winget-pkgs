@@ -1,0 +1,127 @@
+# Created with WinGet Tracker using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: AnalyseDeCircuit.OxideTerm
+PackageVersion: 2.2.4
+PackageLocale: en-US
+Publisher: AnalyseDeCircuit
+PublisherUrl: https://github.com/AnalyseDeCircuit
+PublisherSupportUrl: https://github.com/AnalyseDeCircuit/oxideterm/issues
+Author: AnalyseDeCircuit
+PackageName: OxideTerm
+PackageUrl: https://github.com/AnalyseDeCircuit/oxideterm
+License: GPL-3.0
+LicenseUrl: https://github.com/AnalyseDeCircuit/oxideterm/blob/HEAD/LICENSE
+ShortDescription: Local-first SSH workspace for local shells and remote machines.Zero Electron, zero OpenSSL, zero telemetry, and no app subscription for core SSH workflows.
+Tags:
+- agent
+- ai-terminal
+- bring-your-own-key
+- filemanager
+- mcp
+- rag
+- russh
+- rust
+- sftp
+- ssh-client
+- tauri
+- terminal
+- terminal-emulator
+- tool-calling
+- wslg
+- xterm-js
+ReleaseNotes: |-
+  中文 | English
+  中文
+  OxideTerm 2.2.4 为 OxideSens 加入图片输入、工具返回图片、小米 MiMo 提供商，以及独立配置的 DeepSeek 搜索与网页读取；同时完善 SSH 提权凭据、命令历史、文件导航和离线端口转发管理，整理设置与首次使用引导，并修复云同步初始化、主机监控和 SSH 重连问题。
+  🖼️ AI 图片输入与工具图片
+  - 对话支持从剪贴板粘贴图片或选择图片文件，输入区以可移除的缩略图展示附件；发送后的图片随对话保存，重新打开历史对话时仍可查看。
+  - 图片输入适配 OpenAI Chat Completions、Responses、Anthropic 和 Gemini 接口。图片会经过格式、尺寸及请求大小检查，并在发送前缩放；上下文预算纳入图片 token 估算，未确定的计费规则按暂估处理，实际用量以服务商返回值为准。
+  - 修正模型图片能力判断：明确不支持图片的模型会在添加附件时提示；能力未知的自定义模型不再被直接当作纯文本模型。模型图片能力仍可在设置中指定。
+  - 切换到不支持图片的模型时，如果历史上下文包含图片，会先确认是否保留对话中的图片、仅以文字继续，不会直接删除历史附件。
+  - 工具返回的图片贯通工具消息、模型请求和对话存储，包括 MCP 图片结果与 ACP 宿主工具回复；图片附件与普通工具文字输出分开处理。
+  - 新增小米 MiMo 提供商配置，并补充对应模型的图片能力与推理设置适配。
+  🌐 独立联网工具与全局子 Agent 设置
+  - 新增 DeepSeek 搜索和网页读取工具，搜索账号独立于聊天模型配置。可在全局 AI 设置中选择已保存的官方 DeepSeek 配置，让其他聊天模型通过工具使用搜索服务。
+  - 搜索与网页读取结果显示来源链接，并区分认证、余额不足、限流、页面不可用及请求失败等情况。网页读取限于受支持的公开 HTTP/HTTPS 地址。
+  - 子 Agent 的启用状态、默认模型和并发限制统一为全局设置；所有对话共享并发上限，等待中的任务释放运行名额。关闭后不再启动新子任务，已运行任务可继续完成。
+  - 工具设置明确区分“允许使用工具”和“自动批准操作”。自动批准列表中未勾选的操作仍可在确认后运行；停用工具则不能运行。子 Agent 沿用父任务允许的工具范围与审批规则。
+  🔑 SSH 提权凭据与动态验证码
+  - 新增 SSH 通用提权凭据范围，可复用 sudo、su 和自定义密码提示凭据；连接专属匹配优先，本地终端保持独立范围。
+  - 密码提示只有一个匹配凭据时，可按 Enter 填入；存在多个匹配时，先显示名称、类型和来源供选择，支持方向键、Enter、鼠标和 Esc。开始手动输入或切换终端会关闭选择器。
+  - 启用敏感凭据同步且同步全部连接时，SSH 通用凭据随连接同步；只同步部分连接时不改动通用范围。包含密码的加密连接导出包会保存按连接限定的副本，导入后不会自动变成全局默认凭据。
+  - 共享 TOTP 凭据支持在设置中编辑连接绑定，保存时应用替换关系；命令行创建和编辑连接支持按名称或 ID 选择已有 TOTP 凭据，也可清除绑定。
+  ⌨️ 命令历史与快捷命令
+  - 已保存的 SSH、Telnet、Mosh 和串口连接可选择在本机保存命令历史，重启后继续使用；补齐 Telnet、Mosh 及串口文本控制台的历史建议。
+  - 历史列表支持当前连接与全部连接范围，可暂停当前连接记录、删除单条记录或清空历史；保留天数可配置，所有已保存连接合计最多保留 10,000 条。
+  - 快捷命令匹配规则支持选择主机地址、连接名称或全部字段，结合通配符与逗号分隔规则定位目标。
+  - 简化命令历史范围切换控件，协调终端输入栏、快捷命令面板与命令发送器在背景下的表面样式。
+  📁 文件导航与端口转发
+  - SFTP 新增“前往终端目录”，按同一服务器的当前终端或最近使用终端定位目录，也适用于独立 SFTP 窗口。默认快捷键为 macOS ⌘⇧G、Windows/Linux Ctrl+Shift+G，支持自定义；终端目录变化不会自动移动文件浏览器。
+  - 本地文件管理器支持拖动收藏项排序、调整收藏侧栏宽度及双击恢复默认宽度，顺序和宽度会保存；系统目录与驱动器保持原有位置。
+  - 已保存的端口转发规则在连接断开时仍可查看、编辑、保存和删除。“保存并启动”可通过现有连接流程建立 SSH 连接，无须额外打开终端。（Issue #694）
+  - 停止转发后保留规则并关闭自动启动，手动停止的规则不会因重连再次启动；断线恢复保留规则身份，避免旧连接清理影响替换后的运行实例。
+  🎨 设置、技能管理与首次使用引导
+  - 统一设置行的名称、说明、控件对齐和窄窗口换行；路径输入、代理表单、带单位数字框和背景预览继续使用适合各自内容的布局。
+  - 技能管理新增名称与说明搜索、范围筛选、启用数量、可展开详情和格式、读取、同名覆盖诊断，并提供打开所在目录的入口；停用技能保留原文件。
+  - 重新组织 AI 提供商与上下文页面，明确当前聊天配置、搜索服务配置和高级上下文容量设置；整理工具审批与子 Agent 的作用范围说明。
+  - 外部 MCP 控制页分别展示服务端点、监听端口、待审批操作和客户端权限；细粒度权限按功能分组，允许使用的工具与审批模式分别设置，保留原有权限含义。
+  - 协调壁纸下的标签、卡片、输入控件和终端辅助面板底色，限制嵌套表面的不透明度累加，并减弱侧栏分隔边缘；文字、强调色和媒体保持各自的绘制规则。
+  - 继续整理五页首次使用引导：统一内容宽度与间距，把连接流程与功能介绍分栏，更多功能按需展开；AI 开关前置，背景素材区限制高度，开始使用页采用更紧凑的操作入口并移除重复快捷键。
+  🛠️ 连接、监控与同步修复
+  - SSH 连接失败时只重置仍在等待连接的窗格，保留已经进入 Shell 启动阶段的重连，防止重复发起。（PR #682）
+  - 修复同一节点同时存在重连和新终端打开请求时，关闭重连窗格会丢失临时节点清理标记的问题。（PR #685）
+  - X11 转发按终端报告协商成功、缺少本地显示或授权、服务端拒绝和超时等状态，并补充 Windows 本地 X Server 的要求；远端 DISPLAY 仍由 SSH 服务端分配。
+  - 远端平台检测显式使用 POSIX Shell，并支持仅接受交互式 Shell、不接受 exec 请求的 SSH 服务端；不支持的 Shell 不再反复触发自动集成检查提示。
+  - 主机监控打开后立即采样，刷新时保留现有数据直到新数据到达；区分环境检测中、无法识别系统和采样失败，并提供重试入口。修复列表行提示状态互相影响的问题。
+  - VNC 查看器断开或失败后保持停止，等待用户明确重连，不因页面重新绘制而重复启动连接。
+  - 修复部分 WebDAV 服务在首次同步目录尚不存在时返回 409 导致初始化失败的问题；首次同步失败或取消后，密码仍可重新设置，已有加密数据则继续走密码更换流程。
+  - 修正工作区启动和生命周期定时任务的调度，改善通知、后台状态和界面更新的时序一致性。
+  📦 构建环境
+  - Nix 开发环境补齐图形运行库搜索路径，以及 libdrm 和 Mesa，使通过 nix develop 后执行 cargo run 的程序能够找到相关运行库；此项针对开发环境，发行包无法启动的反馈仍需单独定位。（PR #688）
+  - macOS 构建通过 Xcode 查找已安装的 Metal 工具链，避免仅依赖默认工具路径；本机仍需安装 Metal Toolchain。
+  👥 贡献者
+  - @m00nLi：修复 SSH 重连状态与临时节点清理问题（PR #682、#685）。
+  - @sincerely-hello-world：修复 Nix 开发环境的图形运行库配置（PR #688）。
+  📌 使用与升级说明
+  - 本机命令历史保存默认关闭；开启后完整命令会写入未加密的本地文件，参数中的密码或令牌也可能被记录。仅记录开启后的命令，默认保留 90 天，设为 0 可永久保留。
+  - 联网工具需启用工具调用并配置官方 DeepSeek 账号；搜索词和网页地址会发送给 DeepSeek，搜索及网页读取按请求单独计费。
+  - 图片输入能力取决于实际模型和接入端点，图片 token 估算不代替服务商账单。
+  - 本版更新日志范围：v2.2.3…v2.2.4。
+  English
+  OxideTerm 2.2.4 adds image input, tool-result images, Xiaomi MiMo, and independently configured DeepSeek web search and page reading to OxideSens. It also improves SSH privilege credentials, command history, file navigation, and offline forwarding management, reorganizes settings and onboarding, and fixes cloud-sync initialization, host monitoring, and SSH reconnection.
+  🖼️ AI image input and tool-result images
+  - Conversations accept pasted images and image files, with removable thumbnails in the composer. Sent attachments are saved with the conversation and remain available when reopening history.
+  - Image input supports OpenAI Chat Completions, Responses, Anthropic, and Gemini interfaces. Images undergo format, size, and request-budget checks and are resized before sending. Context budgeting includes estimated image tokens; unspecified pricing rules remain provisional, and provider-reported usage is authoritative.
+  - Corrected model capability detection: models known to lack image support show an error when adding attachments, while unknown custom models are no longer treated as text-only. Image capability can still be specified in settings.
+  - Switching to a text-only model with images in the conversation context asks whether to retain the images in history and continue with text only, rather than deleting the attachments.
+  - Tool-result images now flow through tool messages, model requests, and conversation storage, including MCP image results and ACP host-tool replies. Attachments remain separate from ordinary tool text output.
+  - Added Xiaomi MiMo provider configuration, with image-capability and reasoning-setting support for its models.
+  🌐 Independent web tools and global subagent settings
+  - Added DeepSeek web search and page-reading tools with a search account configured separately from the chat model. Global AI settings can use a saved official DeepSeek configuration so other chat models can access the search service through tools.
+  - Search and page-reading results show source links and distinguish authentication errors, insufficient balance, rate limits, unavailable pages, and request failures. Page reading accepts supported public HTTP/HTTPS URLs.
+  - Subagent enablement, default model, and concurrency limits are now global. Conversations share the concurrency limit, and waiting tasks release their running slots. Disabling subagents prevents new subtasks while allowing running tasks to finish.
+  - Tool settings distinguish tool availability from automatic approval. Unchecked entries in the automatic-approval list can still run after confirmation; disabled tools cannot run. Subagents retain their parent task's allowed tools and approval rules.
+  🔑 SSH privilege credentials and one-time passwords
+  - Added a common SSH privilege-credential scope for sudo, su, and custom password prompts. Connection-specific matches take priority, and local terminals retain a separate scope.
+  - At a password prompt, Enter fills a single matching credential. Multiple matches open a chooser showing name, type, and source, with arrow-key, Enter, mouse, and Esc support. Manual input or switching terminals closes the chooser.
+  - Full connection sync includes common SSH credentials when sensitive-credential sync is enabled; syncing selected connections leaves the common scope unchanged. Encrypted connection exports that include passwords carry connection-scoped copies, which do not become global defaults on import.
+  - Shared TOTP credentials now support editing connection bindings in settings, with replacements applied on save. CLI connection creation and editing can select an existing TOTP credential by name or ID, or remove its binding.
+  ⌨️ Command history and quick commands
+  - Saved SSH, Telnet, Mosh, and serial connections can optionally retain command history on this device across restarts. Restored history suggestions for Telnet, Mosh, and serial text consoles.
+  - History supports current-connection and all-connection scopes, pausing recording for a connection, deleting individual entries, and clearing history. Retention is configurable, with up to 10,000 entries across saved connections.
+  - Quick-command rules can match host addresses, connection names, or all fields, using wildcards and comma-separated patterns.
+  - Simplified the history scope selector and coordinated wallpaper-backed surfaces in the terminal input bar, quick-command panel, and command sender.
+  📁 File navigation and port forwarding
+  - Added Go to Terminal Directory in SFTP, using the current or most recently used terminal on the same server, including detached SFTP windows. The customizable default shortcut is ⌘⇧G on macOS and Ctrl+Shift+G on Windows/Linux. Terminal navigation does not automatically move the file browser.
+  - Local File Manager favorites can be reordered by dragging, and the favorites sidebar can be resized or reset by double-clicking its edge. Order and width are saved; system folders and drives keep their positions.
+  - Saved forwarding rules remain visible and editable while disconnected and can be saved or deleted offline. Save and Start uses the existing SSH connection flow without opening an extra terminal. (Issue #694)
+  - Stopping a forward retains its rule and disables automatic startup. Manually stopped rules remain stopped after reconnection; interrupted forwards retain their identity, and cleanup from an old connection does not affect its replacement.
+  🎨 Settings, skills, and onboarding
+  - Unified setting labels, descriptions, control alignment, and narrow-window wrapping, while retaining suitable layouts for paths, proxy forms, numeric fields with units, and background previews.
+  - Skill management now offers name and description search, scope filtering, enabled counts, expandable details, and diagnostics for invalid, unreadable, or overridden skills, plus an Open Containing Folder action. Disabling a skill preserves its files.
+  - Reorganized AI provider and context pages to distinguish the current chat configuration, search-service configuration, and advanced context-capacity settings, with clearer tool-approval and subagent scope descriptions.
+  - External MCP controls separate the endpoint, listening port, pending approvals, and client permissions. Fine-grained permissions are grouped by function, with tool access and approval mode configured separately and existing permission semantics preserved.
+ReleaseNotesUrl: https://github.com/AnalyseDeCircuit/oxideterm/releases/tag/v2.2.4
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

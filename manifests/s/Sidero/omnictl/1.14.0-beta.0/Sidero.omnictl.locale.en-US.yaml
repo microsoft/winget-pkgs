@@ -1,0 +1,140 @@
+# Created with WinGet Updater using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Sidero.omnictl
+PackageVersion: 1.14.0-beta.0
+PackageLocale: en-US
+Publisher: Sidero Labs
+PublisherUrl: https://github.com/siderolabs/omni
+PublisherSupportUrl: https://github.com/siderolabs/omni/issues
+PrivacyUrl: https://www.siderolabs.com/privacy-policy/
+Author: Sidero Labs
+PackageName: omnictl
+PackageUrl: https://github.com/siderolabs/omni
+License: Mozilla Public License Version 2.0
+LicenseUrl: https://github.com/siderolabs/omni/blob/HEAD/LICENSE
+ShortDescription: A command line tool for communicating with Omni
+Moniker: omnictl
+Tags:
+- k8s
+- kubernetes
+- omni
+- talos
+ReleaseNotes: |-
+  Omni 1.14.0-beta.0 (2026-11-20)
+  Welcome to the v1.14.0-beta.0 release of Omni!
+  This is a pre-release of Omni
+  Please try out the release binaries and report any issues at
+  https://github.com/siderolabs/omni/issues.
+  Urgent Upgrade Notes (No, really, you MUST read this before you upgrade)
+  The BoltDB storage backend (storage.default.kind: boltdb, --storage-kind boltdb) is still deprecated and will be removed in a future release. There is no automated migration between the two backends, so if your Omni runs on BoltDB, plan the move to etcd, which is the default.
+  The following deprecated flags and config keys are removed. Omni does not start when it gets one of them, so switch to the replacement before the upgrade:
+  - --siderolink-api-bind-addr, --siderolink-api-cert, --siderolink-api-key and --siderolink-api-advertised-url: use --machine-api-bind-addr, --machine-api-cert, --machine-api-key and --machine-api-advertised-url.
+  - --embedded-discovery-service-endpoint: use --embedded-discovery-service-port.
+  - --debug: use --log-level debug.
+  - registries.imageFactoryBaseURL, registries.imageFactoryPXEBaseURL, registries.imageFactoryUsername and registries.imageFactoryPassword, with the flags --image-factory-address, --image-factory-pxe-address, --image-factory-username and --image-factory-password: use registries.factories.primary (--primary-factory-url, --primary-factory-pxe-url, --primary-factory-username and OMNI_PRIMARY_FACTORY_PASSWORD).
+  - auth.auth0.initialUsers: use auth.initialUsers (--initial-users).
+  The OMNI_IMAGE_FACTORY_USERNAME and OMNI_IMAGE_FACTORY_PASSWORD environment variables are removed too. Omni ignores them now, so set OMNI_PRIMARY_FACTORY_USERNAME and OMNI_PRIMARY_FACTORY_PASSWORD instead, or the image factory credentials are missing.
+  Cluster templates now have a locked field on the Cluster document, and omnictl cluster template export writes it for locked clusters. The cluster template is the source of truth for the cluster lock.
+  Syncing a template without locked: true unlocks the cluster, even when it was locked in the UI or with omnictl cluster lock. Previously, a sync that also added or removed machines was rejected by Omni, because the machines were changed before the cluster was unlocked. Now the unlock is applied first, so these changes go through. Add locked: true to the templates of the locked clusters before you sync them.
+  omnictl cluster template sync now fails before it changes anything when a template with locked: true changes the cluster, its machine sets or its machine set nodes. Previously, such a sync failed halfway and left part of the changes applied. A cluster cannot be created from a template with locked: true, sync it without the lock first.
+  Audit Log Filtering and Ordering by IP
+  Audit logs can now be filtered and ordered by client IP address in both the UI and omnictl.
+  Improved Machine Disks View
+  The disks page in the UI now shows more details for each machine:
+  - Disk topology for MD arrays, LVMs and multipath devices, grouped into physical and virtual devices.
+  - Hardware details such as serial number, firmware version and SSD/HDD labels.
+  - Disk space usage.
+  - Volume status and failures.
+  - Health for MD arrays and LVM logical volumes, plus SMART health on Talos 1.15+.
+  Identity Label Rules
+  SAMLLabelRule resources are replaced by IdentityLabelRule resources (IdentityLabelRules.omni.sidero.dev), as the rules assign roles from the labels of both SAML and OIDC logins. Omni migrates the existing rules on startup and keeps their IDs. SAMLLabelRules can no longer be read or written, so manifests and scripts that use them need to switch to the new type.
+  The deprecated assignroleonregistration field is removed. The migration moves its value to assignrole on the rules that still use it.
+  Machine Install and Upgrade Progress
+  Omni now tracks install and upgrade operations it runs on Talos 1.13+ machines in the MachineOperationStatus resource. The active stage (e.g., draining or rebooting) and latest progress message are shown in omnictl cluster status, the cluster machine list, the machine overview page and the machines page.
+  omnictl download Removal
+  The deprecated omnictl download command is removed. Use omnictl media download with an installation media preset instead, for example omnictl media preset create iso-amd64 --arch amd64 and then omnictl media download iso-amd64.
+  Redacted Talos Resources
+  Omni now supports viewing Talos resources that contain secrets in their redacted form when the target node supports resource redaction (upcoming in Talos 1.15). Users whose role allows reading those resources without secret access receive the redacted version instead of a permission error.
+  Talos Version Floor
+  Omni can now disconnect machines running below the Talos version floor (1.6.0). This is enabled with --siderolink-disconnect-talos-below=1.6.0 (services.siderolink.disconnectTalosBelow in the config file) and replaces UnsupportedTalosVersionFailOnStart.
+  When enabled, Omni rejects provisioning requests from machines below the floor and removes their WireGuard peers.
+  Custom CA Delivery to Machines
+  Omni can now deliver custom CA certificates to machines from their first boot, for setups where Omni or the image factory serves certificates signed by a private CA. The PEM bundle is configured with --trusted-roots-file (trustedRootsFile in the config file).
+  Omni adds these CAs as a TrustedRootsConfig document (omni-trusted-roots) to installation media and install images (Talos 1.12+), infrastructure provider join configs, omnictl jointoken machine-config, maintenance configs and cluster machine configs.
+  Contributors
+  - Edward Sammut Alessi
+  - Utku Ozdemir
+  - Oguz Kilcan
+  - Andrey Smirnov
+  - Artem Chernyshev
+  - immanuwell
+  - Andy Longwill
+  - Mateusz Urbanek
+  - Noel Georgi
+  - Spencer Smith
+  Changes
+  93 commits
+  - 9c9bf95b release(v1.14.0-beta.0): prepare release
+  - 2f0173af feat(frontend): show talos containers on a machine tab
+  - 06c7685d feat: allow cluster managers to set the install disk of a machine
+  - 5a393f0a chore: bump deps, rekres, Talos 1.14.6, Kubernetes 1.37.2
+  - 2ed1e75a feat: check the management API with the RBAC v2 model
+  - b4c79457 test: record who reaches the workload proxy and the Kubernetes resources
+  - 690c9682 test: record the Kubernetes groups each caller gets in a token
+  - a2b3a5f9 test: record which Talos role each caller gets through Omni
+  - ef8ffba5 feat: show the install and upgrade operations Omni runs on machines
+  - abbe547e feat(frontend): consolidate cluster machine overview tabs
+  - 062516c1 fix(frontend): cater for emails in names when generating initials
+  - 42c2609e feat: allow locking clusters from cluster templates
+  - 95a551ca refactor: rename the access checks to Check and mark a missing grant
+  - bc6c7c0b fix: reconcile the Talos upgrade status when the cache catches up
+  - 07694bbb fix: remove two races in the Talos upgrade status controller tests
+  - 1ee5ec4d fix: ask the node whether it supports redaction directly
+  - 37b12c5d test: record what each caller gets back from the management API
+  - ca5e86ab fix: return proper status codes from the management API
+  - 5c403001 feat(frontend): align the copy button design of k8s auth
+  - e1729453 fix: bind machines to machine requests by their infra provider
+  - 7c341e33 feat: introduce the RBAC v2 model and use it for resource access
+  - a8d8ab48 feat: track the install and upgrade operations Omni runs on machines
+  - 071eaf5e fix: uncordon nodes left cordoned by failed upgrade attempts
+  - 6355009d fix: skip maintenance upgrades of machines assigned to a cluster
+  - 057471c8 fix: wait for the reboot before uncordoning an upgraded node
+  - 17045986 fix: collect the boot ID on pre-releases of Talos 1.13
+  - bd7b7ad9 feat: support redacting talos resources
+  - f38136f5 fix(frontend): clear highlight from update buttons
+  - bf7faec4 test: split the authz golden file into a YAML file per subject
+  - 95a25058 feat: bump talos machinery to v1.15.0-beta.0
+  - 79db5f96 test: add a suspended access policy user to the authz golden test
+  - fdee2bf5 fix: parse the ID of a LinkStatus at its last slash
+  - e2782582 feat: let access policy users read the machines of their clusters
+  - 72c1d2e7 fix: handle removal of NVIDIA LTS nonfree in Talos 1.15
+  - 03a57242 refactor: check for a missing install section before reading it
+  - 8aa552c9 fix: apply grubUseUKICmdline before a pending upgrade
+  - 81d02239 feat(frontend): show disk space usage
+  - 698e652e fix(frontend): name whole-disk volumes after their Talos volume
+  - 5f33833d refactor: describe resource types for the access checks in one table
+  - c60aed30 chore: rekres
+  - c13d8541 feat(frontend): show disk health on disks view
+  - 7a754c50 test: rework the resource authorization integration test
+  - 3e503e79 feat(frontend): display disk hardware details
+  - 8e7e7b8f fix: mount ephemeral data volume when persistence is disabled
+  - 5c5237b6 chore: rekres and bump go
+  - a8b15822 test: fix sporadic MaintenanceConfigTryMode failures
+  - bcbb0eff feat: disconnect machines below the Talos version floor
+  - 24735b24 feat(frontend): show disk topology on disks view
+  - bea90b1e chore: rekres to enable conform & project workflows
+  - 13048fd3 fix: bump COSI runtime to v1.17.1 to stop a task restart loop
+  - 3bb4c0b9 fix: require list access to a type to get its label completions
+  - 2e746716 feat(frontend): show volume status and failures on disks view
+  - 74822557 fix(frontend): report volume encryption as unknown until prepared
+  - 421588e6 fix(frontend): show whole-disk volumes and RAID membership on disks view
+  - daf2423a test(frontend): fix machine class scale assertion
+  - dea86cea test(frontend): retry dex login submission
+  - d7369963 fix: count a machine holding the upgrade lock only once in the quota
+  - ac3f4523 fix: audit metadata changes: labels, annotations, finalizers
+  - c3f6d13d test: set the Traefik service type in the key its chart reads
+  - 42602642 test: record the authorization outcome of every resource type
+ReleaseNotesUrl: https://github.com/siderolabs/omni/releases/tag/v1.14.0-beta.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

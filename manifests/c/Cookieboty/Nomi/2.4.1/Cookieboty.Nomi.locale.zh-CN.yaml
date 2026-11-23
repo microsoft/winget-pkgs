@@ -1,0 +1,78 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Cookieboty.Nomi
+PackageVersion: 2.4.1
+PackageLocale: zh-CN
+Publisher: Cookieboty
+PublisherUrl: https://withnomi.app/
+PublisherSupportUrl: https://github.com/Cookieboty/nomi-ai/issues
+PrivacyUrl: https://withnomi.app/privacy.html
+PackageName: Nomi
+PackageUrl: https://withnomi.app/download.html
+License: MIT
+LicenseUrl: https://github.com/Cookieboty/nomi-ai/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Cookieboty
+ShortDescription: 桌面上的 AI 伙伴：接上任意模型，自己干活，也能把专业的活派给编程助手。
+Description: |-
+  Nomi 是住在你桌面上的 AI 伙伴：接上任意模型，自己动手干活，也会把专业的活派给专业的 AI。模型、编程助手、MCP 与本地工具都接到一处，由 Nomi 统一调度。
+  模型只接一次就能给所有 AI 使用：添加一次供应商，Nomi 自己和 Claude Code、Codex、Gemini CLI、Grok、dsh 都能用它的任意模型，也可以全部换成本地模型。本机网关自动识别并互转 Anthropic Messages、OpenAI Responses、OpenAI Chat Completions 与 Gemini generateContent，流式、工具调用、推理、图片和上下文压缩都照常工作。
+  任务可以限定能访问的文件夹，编程助手有独立的两栏工作区，桌面角色会显示台词与确认气泡。应用为 Go 内核加原生 WebView，单个安装包约 39 MB，按当前用户安装，不需要管理员权限。
+Tags:
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  Nomi· 诺米 2.4.1
+  侧边工作区可以开内置终端了；空的 Agent 会话会先引导你选模型，网关的熔断降级也改成默认关闭、要自己打开。
+  - 侧边工作区新增内置交互式终端：按标签复用同一个会话并回放最近输出，支持分屏、清屏、切换目录、重启，以及在系统终端中打开。关闭仍有进程在跑的分屏或标签会先确认。「新建标签页」改成按「工作区 / 协作与工具」分组的入口卡片，终端从项目主目录打开。
+  - Agent 空会话在没选模型或没配置账号时，不再一发消息就报错，输入框上方会给出就地引导：点「选择模型」打开选择器，或点「去配置」跳到设置。发送前也会先检查配置。
+  - 网关的熔断降级改成可开关，默认关闭。关着时失败就如实报错，不会自动换到另一家供应商；需要自动换供应商时，在「模型与 Agents → 三方供应商」右上角打开开关。
+  - 「三方模型」标签改称「三方供应商」。同协议的第三方模型默认沿用 CLI 自己的思考档，界面显示「默认」。
+  - 待发消息可以带图片排队，列表里能看到缩略图，并新增「停止并发送」。排队发出去失败时，正文和图片会留在最前面，并给出原因和「重试」，不再悄悄丢掉。
+  - 后台委派结束时改成底部短暂轻提示，不再往会话里堆气泡；已有原位卡片时结果仍会留给模型下一轮阅读。派出的多个同类型 CLI 会分配稳定短名，便于区分。
+  - 侧栏「本机历史」默认展开，滚到底自动加载下一页。长对话滚动不再跳动，并沿会话边缘增加轮次快捷导航。
+  - 其他 CLI 端新建对话时，如果同一项目里已有还没说过话的空会话，会直接切过去，不再每次都新开标签。
+  细节
+  - 内置终端超长粘贴会按完整字符分块写入，不再被静默丢掉；某一块写入失败时会提示，不会自动重试以免执行两遍。
+  - 空的 Agent 标签会在账号或模型目录变化后自动纠偏，多供应商又没有默认模型时进入待选态，不再盲选第一家。切走时会清掉上一条从未使用过的空标签。
+  - 委派出去的子 agent 一律走自动模式，不再因 Nomi 自己处于手动档而卡在「要不要允许」上。对端不支持的权限档会回退到 default，权限请求也不会重复应答。
+  - Claude 新式自适应思考按 adaptive 发送，不再塞固定预算；Claude / Codex 的启动配置也更贴合原生模型。
+  - 内联文件链接的路径解析更准；设置里删除项目时按钮会在进行中置灰；Seed 不会因为软链接再给同一目录建一个重复项目。
+  - Agent 卡片在窄宽度下不再溢出，关闭按钮靠右固定。标签上的关闭按钮不再被当成拖拽手柄。
+  - 设置侧栏顶部去掉「返回对话」，关闭设置仍可用 Esc。标签栏减噪：主标签只留背景色区分，文件标签的选中指示改到下沿。
+  - Windows 内置终端更可靠：以前子 shell 的普通 stdout / stderr 可能被送到宿主自己的控制台而不是伪终端，应用内终端就看不到提示符。现在启动子进程时用空的三个标准句柄（STARTF_USESTDHANDLES），与 ConPTY 测试用例的做法一致，输出始终留在伪终端里。桌面安装版以 -H windowsgui 构建，通常没有宿主控制台，所以这主要影响 CI、调试 / 从控制台启动的运行，以及任何已有控制台的宿主。
+  English
+  The side workspace now has a built-in terminal, empty Agent chats guide you to pick a model, and gateway failover is off by default until you turn it on.
+  - The side workspace gains a built-in interactive terminal: each tab reuses the same session and replays recent output, and you can split the pane, clear the screen, change directory, restart, or open it in the system terminal. Closing a pane or tab that still has a running process asks first. The new-tab page is now grouped entry cards for "Workspace" and "Collaboration & tools", and terminals open at the project's primary folder.
+  - An empty Agent chat no longer fails on the first message when no model or account is set. A card above the composer lets you choose a model or jump to settings, and sending runs a configuration check first.
+  - Circuit breaking and failover are now a switch, off by default. While it is off, a failure is reported as-is and the gateway does not switch to another provider. Turn it on at the top right of Settings → Models & Agents → Third-Party Providers if you want automatic failover.
+  - The "Third-Party Models" tab is now "Third-Party Providers". A third-party model that natively belongs to the running CLI inherits that CLI's own thinking level, and the picker shows "Default".
+  - Queued messages can now carry images, with thumbnails in the pending list and a new "Stop and send" action. If delivery fails, the text and images stay at the front with a visible reason and a Retry button, instead of disappearing.
+  - Background delegations finish with a brief toast instead of stacking chat bubbles. When an in-place card is already on screen, the result is still available to the model on the next turn. Multiple CLIs of the same type get a stable short name so you can tell them apart.
+  - The sidebar's local-history section now starts expanded, and scrolling to the bottom loads the next page automatically. Long conversations no longer jump while scrolling, and a turn quick-nav rail runs alongside the thread.
+  - Creating a new chat on the other CLI endpoints now reuses an existing untouched chat in the same project, instead of opening another tab every time.
+  Details
+  - Oversized pastes into the built-in terminal are written in character-safe chunks instead of being dropped silently. If a chunk fails, a visible error is shown and the remainder is not retried automatically, so half a command is not run twice.
+  - Empty Agent tabs reconcile their source and model after sign-in or catalog changes, and wait for an explicit choice instead of silently picking the first provider when several are configured without a default. Switching away discards the previous never-used empty tab.
+  - Delegated child agents always run in automatic mode, so they no longer stall on a permission prompt just because Nomi itself is in a manual mode. Unsupported permission modes on the other end fall back to default, and permission requests are not answered twice.
+  - Newer Claude adaptive thinking is sent as adaptive, without a fixed token budget. Claude and Codex startup settings also follow the native model more closely.
+  - Inline file links resolve more reliably. The project dialog disables Delete while a removal is in flight, and Seed no longer creates a second project for the same directory when one path is a symlink.
+  - Agent cards no longer overflow at narrow widths, and the close button stays pinned on the right. The close button on a tab is no longer treated as a drag handle.
+  - The "Back to chat" row is removed from the top of the settings sidebar; Esc still closes settings. The tab strips are quieter: top-level tabs use background color only, and file tabs move their selection bar to the bottom edge.
+  - The built-in Windows terminal is more reliable: the child shell's ordinary stdout/stderr could go to the host's own console instead of the pseudoconsole, so the in-app terminal missed the prompt. The child is now started with empty standard handles (STARTF_USESTDHANDLES), the same pattern Microsoft's ConPTY tests use, so its output stays on the pseudoconsole. The released desktop binary is built with -H windowsgui and usually has no host console, so this mainly matters for CI, debug or console-hosted runs, and any host that already has a console.
+ReleaseNotesUrl: https://github.com/Cookieboty/nomi-ai/releases/tag/v2.4.1
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://withnomi.app/docs.html
+- DocumentLabel: 更新日志
+  DocumentUrl: https://withnomi.app/changelog.html
+- DocumentLabel: 功能一览
+  DocumentUrl: https://withnomi.app/features.html
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

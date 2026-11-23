@@ -1,0 +1,136 @@
+# Created with WinGet Tracker using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: AnalyseDeCircuit.OxideTerm
+PackageVersion: 2.3.2
+PackageLocale: en-US
+Publisher: AnalyseDeCircuit
+PublisherUrl: https://github.com/AnalyseDeCircuit
+PublisherSupportUrl: https://github.com/AnalyseDeCircuit/oxideterm/issues
+Author: AnalyseDeCircuit
+PackageName: OxideTerm
+PackageUrl: https://github.com/AnalyseDeCircuit/oxideterm
+License: GPL-3.0
+LicenseUrl: https://github.com/AnalyseDeCircuit/oxideterm/blob/HEAD/LICENSE
+ShortDescription: Local-first SSH workspace for local shells and remote machines.Zero Electron, zero OpenSSL, zero telemetry, and no app subscription for core SSH workflows.
+Tags:
+- agent
+- ai-terminal
+- bring-your-own-key
+- filemanager
+- mcp
+- rag
+- russh
+- rust
+- sftp
+- ssh-client
+- tauri
+- terminal
+- terminal-emulator
+- tool-calling
+- wslg
+- xterm-js
+ReleaseNotes: |-
+  中文 | English
+  中文
+  OxideTerm 2.3.2 扩展了 macOS 主机工具和 Herdr 会话管理，支持从命令行在指定目录打开终端，并改进已保存 BLE 设备的重连。这一版还修复了窗口缩放丢失终端历史、清屏丢失当前输入、连接导入冲突和远程文件保存问题。
+  🧰 主机工具与 macOS 监控
+  - Herdr 按会话加载工作区、标签和窗格，显示代理状态与恢复错误。可新建会话和工作区、重命名对象、拆分窗格、运行命令、读取最近输出，以及附加到会话或未关联的代理。（PR #753）
+  - 停止 Herdr 会话、删除已停止的会话，以及关闭工作区、标签或窗格前会要求确认。面板分别提示未安装、服务器未运行和查询失败，不再把这些情况都显示为空列表。（PR #753）
+  - macOS 主机支持查看 Apple GPU 利用率和已用统一内存；统一内存按实际已用量显示，当前不提供 GPU 进程占用数据。
+  - macOS 本机监控加入逐核心 CPU 数据，macOS 主机监控加入磁盘读写速率。
+  - 修复部分 Linux 主机的磁盘容量被错误显示为约 2 GB、使用率显示为 100% 的问题；旧版 mawk 的整数格式上限不再截断磁盘采样数值。
+  - Homebrew 软件包列表区分 formula 与 cask，显示已安装版本和可用更新，并支持查看详情、升级和卸载。
+  - macOS 服务与计划任务显示所属系统域或用户域、运行状态和启用状态。服务支持启动、停止和重启；计划任务支持启用、禁用，以及立即运行已加载的任务。系统日志保留时间和级别，查询失败时显示错误。
+  - Docker 服务未启动或无法连接时会明确提示原因。仅在权限不足时尝试免密码提权，提权失败后保留原始错误。
+  ⚡ 终端与工作区
+  - 缩窄终端时，自动折行不再丢弃已有历史；随后调整高度也会保留这部分内容。继续输出时仍会回收超出配置上限的历史，避免反复缩放后无限增长。（PR #766）
+  - 清屏保留当前提示符、输入和光标位置，包括折行后延伸到屏幕外的输入，后续键入可以继续原来的命令。（PR #759）
+  - 拖动标签并停在标签栏边缘时，标签栏会持续滚动，便于把标签移到当前可见范围之外；放置标记随滚动更新。
+  - 侧边栏内容刷新时不再反复播放入场动画。
+  - 安装命令行伴侣后，可用 oxideterm terminal --cwd ~/project 打开指定目录，也可在 -- 后指定程序及参数。应用未运行时会启动，已运行时新增标签。参数按原样传递，Shell 表达式需显式调用 Shell；此命令使用应用当前数据目录，不接受 --config-dir 或 --profile。
+  🔗 连接与文件传输
+  - 已保存的 BLE 连接优先使用设备身份直接重连，只有无法直接定位时才扫描；系统重启或适配器重启后，会通过扫描重新找到对应设备。（PR #757）
+  - BLE 连接复用已经验证的设备链路，并处理 Linux 上通知订阅失败后的有限重试和残留连接清理。取消连接或关闭会话后，迟到的连接结果不会重新打开终端。（PR #757）
+  - 兼容部分旧设备在 ECDSA 主机签名中添加的冗余零字节。显式启用旧版 SSH 兼容或选择 SHA-1 分组交换时，允许设备使用 2048 位分组；普通连接维持原有算法与分组限制。
+  - 导入连接时按名称和分组判断冲突，保留连接 ID 匹配。移动或替换连接也会检查目标位置，避免同批导入产生重复名称；“未分组”名称按实际存储规则统一处理。（PR #769）
+  - SFTP 编辑保存前检查远程文件是否已被修改，发生冲突时提示，而不是直接覆盖。保存使用临时文件替换；服务器不支持原子重命名时，先保留原文件备份再替换，不再退回直接截断原文件的写入方式。
+  - SFTP 文件操作保留非 UTF-8 文件名的原始身份，避免显示名称相同的不同文件被混淆；路径处理与 IDE 文件映射同步使用这一身份。
+  - XMODEM 和 YMODEM 上传允许设备在协商前输出启动文字，并在数据块或结束确认超时后进行有限重试。
+  - 只有收到完整的 tmux 控制模式确认后才接管终端；普通输出中出现相似控制序列不会直接触发 tmux 命令。
+  🖥️ 平台兼容与文档
+  - Linux 图形初始化现在读取 wgpu 环境配置，支持通过 WGPU_ALLOW_UNDERLYING_NONCOMPLIANT_ADAPTER=1 显式允许未通过一致性认证的适配器，适用于部分 PanVK 环境。未设置时保持原有行为。（PR #765）
+  - 更新各语言 README 的功能说明和截图，加入混合工作区展示、微信群入口，并补充命令行打开终端与复用器操作说明。
+  👥 贡献者
+  - @idxdy：扩展 Herdr 会话、工作区和窗格管理。（PR #753）
+  - @allegrox：改进已保存 BLE 设备的直接重连与链路恢复。（PR #757）
+  - @HarpeLm：修复清屏时丢失输入、缩放时丢失历史以及导入冲突识别问题。（PR #759、#766、#769）
+  - @alkaid-ops：修复 Linux 图形初始化忽略 wgpu 适配器环境配置的问题。（PR #765）
+  English
+  OxideTerm 2.3.2 expanded macOS Host Tools and Herdr session management, added command-line launches into a chosen directory, and improved reconnection to saved BLE devices. It also fixed terminal history loss during resizing, input loss when clearing the screen, connection import conflicts, and remote file saves.
+  🧰 Host Tools and macOS monitoring
+  - Herdr loads workspaces, tabs and panes per session, with agent status and restore errors. You can create sessions and workspaces, rename objects, split panes, run commands, read recent output, and attach to a session or an unlinked agent. (PR #753)
+  - Stopping a Herdr session, deleting a stopped session, and closing a workspace, tab or pane require confirmation. The panel distinguishes a missing installation, a stopped server and a failed query instead of showing them all as empty lists. (PR #753)
+  - macOS hosts gained Apple GPU utilization and used unified-memory readings. The memory reading shows actual usage rather than a dedicated VRAM capacity; per-process GPU usage is currently unavailable.
+  - Local macOS monitoring gained per-core CPU readings, and macOS host monitoring gained disk read and write rates.
+  - Fixed disk capacity appearing as roughly 2 GB with 100% usage on some Linux hosts. Disk samples no longer hit the integer-format limit in older mawk versions.
+  - Homebrew inventory distinguishes formulae and casks, shows installed versions and available updates, and supports inspection, upgrades and uninstallation.
+  - macOS services and scheduled tasks show their system or user domain, running state and enabled state. Services support start, stop and restart. Scheduled tasks can be enabled or disabled, and loaded tasks can run immediately. System logs retain timestamps and levels, with errors reported when a query fails.
+  - Docker reports when its daemon is stopped or unreachable. Passwordless elevation is attempted only for permission errors, and the original error is retained if that retry fails.
+  ⚡ Terminal and workspace
+  - Narrowing a terminal no longer discards existing history during reflow, and subsequent height changes preserve that content. New output still reclaims history beyond the configured limit, preventing unbounded growth after repeated resizing. (PR #766)
+  - Clearing the screen preserves the current prompt, input and cursor position, including wrapped input extending offscreen, so typing can continue the same command. (PR #759)
+  - Holding a dragged tab at either edge keeps the tab strip scrolling, letting you reorder beyond the visible area. The insertion marker follows the scroll position.
+  - Sidebar content refreshes no longer replay the entrance animation.
+  - After installing the CLI companion, use oxideterm terminal --cwd ~/project to open a chosen directory, optionally adding a program and its arguments after --. OxideTerm starts if needed or opens a tab in the existing instance. Arguments are passed literally; shell expressions require an explicit shell. This command uses the application's active data directory and does not accept --config-dir or --profile.
+  🔗 Connections and file transfers
+  - Saved BLE connections try a direct reconnect using the device identity before scanning. If a system or adapter restart clears the OS cache, discovery finds the matching device again. (PR #757)
+  - BLE sessions reuse the verified device link, with bounded retries after notification subscription failures and stale-link cleanup on Linux. Late connection results cannot reopen a terminal after cancellation or session closure. (PR #757)
+  - Accepted redundant zero padding in ECDSA host signatures from some older SSH devices. Connections explicitly using legacy SSH compatibility or SHA-1 group exchange can use 2048-bit groups; ordinary connections retain their existing algorithm and group limits.
+  - Connection imports match conflicts by name and group while retaining connection-ID matching. Moves and replacements also reserve their destinations, preventing duplicate names within a group during a batch import. Ungrouped aliases follow the same normalization as stored connections. (PR #769)
+  - SFTP editor saves check whether the remote file changed and report a conflict instead of overwriting it. Saves replace the target through a temporary file. When atomic rename is unavailable, the original is backed up before replacement rather than truncated for a direct write.
+  - SFTP operations preserve the original identity of non-UTF-8 filenames, preventing distinct files with identical display labels from being confused. Path handling and IDE file mapping use the same identity.
+  - XMODEM and YMODEM uploads tolerate boot text before negotiation and retry data blocks or transfer completion within a fixed retry limit when acknowledgements time out.
+  - Terminal takeover waits for a complete tmux control-mode confirmation. Similar control sequences in ordinary output no longer trigger tmux commands directly.
+  🖥️ Platform compatibility and documentation
+  - Linux graphics initialization now reads wgpu environment settings. Set WGPU_ALLOW_UNDERLYING_NONCOMPLIANT_ADAPTER=1 to explicitly allow an adapter without conformance certification, as needed in some PanVK environments. Default behavior is unchanged when the variable is unset. (PR #765)
+  - Updated the feature overview and screenshots across README translations, added a mixed-workspace example and WeChat community links, and documented CLI terminal launches and multiplexer controls.
+  👥 Contributors
+  - @idxdy expanded Herdr session, workspace and pane management. (PR #753)
+  - @allegrox improved direct reconnection and link recovery for saved BLE devices. (PR #757)
+  - @HarpeLm fixed input preservation on clear, history preservation during resizing, and group-aware import conflicts. (PR #759, #766, #769)
+  - @alkaid-ops fixed Linux graphics initialization ignoring wgpu adapter environment settings. (PR #765)
+  📥 Download for your system
+  ────────────────┬─────────────────────────────────┬─────────────────────────────────
+  Operating system│x64                              │ARM64
+  ────────────────┼─────────────────────────────────┼─────────────────────────────────
+  Windows         │Setup (.exe)                     │Setup (.exe)
+  ────────────────┼─────────────────────────────────┼─────────────────────────────────
+  macOS           │DMG (Intel)                      │DMG (Apple Silicon)
+  ────────────────┼─────────────────────────────────┼─────────────────────────────────
+  Linux           │AppImage · DEB · RPM             │AppImage · DEB · RPM
+  ────────────────┴─────────────────────────────────┴─────────────────────────────────
+  Portable archives, signatures, and sha256sums.txt remain available in the release assets below.
+  📌 Installation Tips / 安装提示
+  macOS
+  Downloaded .dmg files may be quarantined by Gatekeeper. Run in Terminal:
+  xattr -cr ~/Downloads/OxideTerm_*.dmg
+  # or after install / 或安装后
+  xattr -cr /Applications/OxideTerm.app
+  Windows
+  If SmartScreen warns, click More info -> Run anyway.
+  若 SmartScreen 弹出警告，点击 更多信息 -> 仍要运行。
+  Linux
+  # AppImage
+  chmod +x OxideTerm_*_linux_*.AppImage && ./OxideTerm_*_linux_*.AppImage
+  # Debian/Ubuntu
+  sudo dpkg -i OxideTerm_*_linux_*.deb && sudo apt-get install -f
+  # Fedora/RHEL-compatible systems
+  sudo dnf install ./OxideTerm_*_linux_*.rpm
+  🔗 Links
+  - Documentation: https://oxideterm.app
+  - GitHub Issues: https://github.com/AnalyseDeCircuit/oxideterm/issues
+  - Changelog: https://github.com/AnalyseDeCircuit/oxideterm/blob/main/.github/release-notes/stable-changelog.md
+ReleaseNotesUrl: https://github.com/AnalyseDeCircuit/oxideterm/releases/tag/v2.3.2
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

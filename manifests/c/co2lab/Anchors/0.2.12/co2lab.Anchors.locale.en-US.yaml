@@ -1,0 +1,35 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: co2lab.Anchors
+PackageVersion: 0.2.12
+PackageLocale: en-US
+Publisher: co2lab
+PublisherUrl: https://github.com/co2-lab
+PublisherSupportUrl: https://github.com/co2-lab/anchors/issues
+PackageName: Anchors
+PackageUrl: https://github.com/co2-lab/anchors
+License: Elastic License 2.0
+LicenseUrl: https://github.com/co2-lab/anchors/blob/HEAD/LICENSE
+ShortDescription: Spec-first continuity framework for AI-assisted development
+Description: Anchors ties spec, feature and test together through a shared identity code, then confronts each artifact against the rules declared in anchors.yaml. It maps the project as a graph, propagates change from the anchor outward, and gates every step — so work guided by AI stays anchored to what was decided.
+Moniker: anchors
+Tags:
+- ai
+- ai-agents
+- cli
+- developer-tools
+- golang
+- spec-first
+ReleaseNotes: |-
+  v0.2.12
+  - Three gates stop charging a whole-project pass to one target. On a copy of a project's repository, a check of three changed specs took 298 s, most of it in three gates that each spent their run on a single target: nav-reachable 56 s, symbol-exists 50 s, docs-covered 13 s.
+    - The map's neighbours were found by scanning every edge on each call, which made walking the screens quadratic. They are now read through an index of where each node's edges are, built once for the slice of edges and checked at each read, so a sort in place or a rename builds it again. (GRQRG)
+    - symbol-exists read and scanned every code and test file on every run. Each file's names are now kept between runs, by the file's revision in the map, in the repository's common git folder, shared by its worktrees. A new revision, a file with changes not committed, or another comment syntax reads the file again. (SYMXS)
+    The same check now takes 74 s: nav-reachable 2 s, symbol-exists 1.3 s once its names are kept, docs-covered 4.4 s.
+  Changelog
+  - 244d365 docs(release): v0.2.12 notes
+  - 86bd181 perf(gate): neighbours through an index, project symbols kept between runs
+ReleaseNotesUrl: https://github.com/co2-lab/anchors/releases/tag/v0.2.12
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

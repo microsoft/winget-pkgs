@@ -1,0 +1,74 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: ccch1mneyyy.dsh-TUI
+PackageVersion: 0.20.2
+PackageLocale: zh-CN
+ShortDescription: DeepSeek Harness 官方首推的终端界面：高性能、低占用。
+Description: dsh-TUI 是 DeepSeek Harness（DSH）的交互式终端界面，支持全屏会话、像素鲸鱼伴侣、流畅鼠标交互和低占用，并提供供脚本驱动的独立 headless 命令 dst。
+Tags:
+- deepseek
+- deepseek-harness
+- dsh
+- harness
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  自 v0.20.1 以来，dsh-TUI 跟上 DSH 0.2.2-rc.5 验证线（继续兼容 0.2.2-rc.4、0.2.2-rc.3 及更早验证线），
+  为 present 工具加上专用交付卡，让 /restart 与 /update 在 POSIX 上原地替换进程，并修好 Windows /update
+  引擎解析、全屏跨页选区复制、@ 模糊补全缓存、Linux 终端桌面处理器以及 Host 服务行诊断与 dsh-working-activity 依赖兼容问题。
+  亮点
+  - 适配 DSH 0.2.2-rc.5（含 0.2.2-rc.4） — 主验证线从 0.2.2-rc.3 推进到 0.2.2-rc.5，peer 范围保留 0.2.2-rc.4、0.2.2-rc.3 及更早验证线，停在 rc.3/rc.4 的用户也能直接装这版，程序内 /update 会把 dsh 引擎对齐到 0.2.2-rc.5。rc.4 为 DeepSeek refusal 停止原因新增的 CONTENT_REFUSED 结束码由 TUI 既有 reason.kind 分类自然覆盖；rc.5 起 dsh-base 不再固定 web.searchProvider，/settings → 网页搜索的「搜索」未配置时呈现为「自动」（DeepSeek 模型路由用 Messages 搜索，其他路由与对话外搜索用 Search API），并以 settings.describe() 的 base 层决定是否提供「自动」，同时按凭据引用去重展开 Messages / Search API 密钥控件。宿主复刻指纹与 rc.3 一致，本版新增 0.2.2-rc.5 的 patch surface 键。(#2065 by @Lucas2011wastaken)
+  - present 交付文件卡 — present 工具不再渲染成原始参数 JSON 与纯文本 Presented 行，而是渲染为专用交付卡：折叠态按行显示四格类型徽章（或通过 /settings → 外观 → nerdFontIcons 开启 Nerd Font 图标）、文件名、文件大小与修改时间；展开（Ctrl+O 或点击卡片）后单独分行展示解析后的完整目标路径与模型描述；点击文件行打开既有文件操作菜单，相对路径优先从结果中的 Presented <绝对路径> 行解析（以 meta.cwd 兜底），工作目录切换后仍能命中同一文件。(#2047 by @Lucas2011wastaken)
+  需要留意的行为变化
+  - 网页搜索默认改为「自动」 — 在 DSH 0.2.2-rc.5 上，/settings → 网页搜索中的「搜索」未设置时显示「自动」，选中会清除用户层覆盖并交回按路由选择。若下层组合仍固定 searchProvider（旧验证线 dsh-base 或部署自带的 base 层补丁），界面不提供「自动」且手输 automatic 会被拒绝，与官方 Web 菜单一致；用户 profile 补丁只写用户层，仍可选「自动」清掉覆盖。在「自动」模式下，若 Search API（searchApiKeyEnv）与 Messages（apiKeyEnv / DEEPSEEK_API_KEY）引用不同凭据，会分别显示「Messages API 密钥」与「搜索 API 密钥」；共用同一引用时只显示一个输入框。
+  - present 交付卡底色与 nerdFontIcons — 除极简界面（minimalUi）外，即使 toolBackground 设为 none，present 交付卡也保留自己的底色（无背景时暖橙、subtle/strong 时深紫罗兰）。/settings → 外观新增 nerdFontIcons（默认关闭），开启需终端使用 Nerd Font Mono，否则图标会显示为方框。
+  - /restart 与 /update 原地替换进程 — 在支持 process.execve 的非 Windows 运行时上，普通 /restart 与 /update 会原地替换当前进程（保留 PID 与前台作业，不再保留等待中的父进程，也不再由父进程在启动失败时打印 TUI did not come up / session preserved）；Windows、不支持 execve 的运行时、目标预检未通过与内核切换仍走子进程监督交接。已委托给 dsh --profile 的启动链在普通重启时保持该路径，直到下次冷启动或切换内核。
+  - 全屏跨页选区跟随滚动 — 全屏拖选时按住鼠标配合 PgUp / PgDn 或滚轮跨页扩展选区，起点随文本移动、另一端留在指针处；松手后两端继续随滚动移动，完全离屏后保留已捕获文本且不再高亮边缘无关字符，滚回后恢复位置与列范围。不支持鼠标拖到视口边缘自动滚动；inline 模式仍用终端原生选区。
+  - @ 模糊补全按需刷新 — 工作区文件扫描完成后缓存 2 秒，过期后的下一次 @ 查询才重扫（菜单静止时不轮询，空结果可立即重试）；@src/ 等路径查询及原有 100 文件 / 100 目录扫描预算不变。
+  - Linux Terminal=true 桌面处理器范围 — 只有本地文件的默认 .desktop 处理器声明 Terminal=true 时才包装进终端运行；URL、目录与非终端处理器仍走 xdg-open，带非空 Path= 的条目也保持直接交给 xdg-open（其 generic 路径仍可能无 TTY 或忽略工作目录）。
+  修复
+  - /restart 与 /update 原地替换与委托清理 — 普通 /restart 与 /update 在 POSIX 上通过 process.execve 原地替换进程（替换前预检 process.execPath 并显式刷盘 usageStats）；同时让委托给 dsh 启动的 /update 预先证明当前 DSH 入口归属以免 pnpm 组轮换后失效，并在会话销毁时同步关闭与清理 Claude 侧问及其私有凭据临时文件。(#2024 by @Lucas2011wastaken 与 @FlyingDuck，#2031 by @Lucas2011wastaken)
+  - Windows /update 引擎解析与回退修复 — 按「显式目录 → 正在运行的引擎（argv[1]）→ PATH → 模块回退」的顺序解析当前宿主，不再被旧 npx 缓存遗留的共享回退链接拦住升级；识别带常规 dsh.cmd 且不含项目 manifest/lock 的自定义 Windows npm config set prefix 目录；Windows 共享回退 junction 改为先建暂存链接再换位（失败可恢复旧链接）；npm 就地升级改为以目标 manifest 与 PATH 探测验证结果，profile 安装改为直接执行计划选定宿主的 bin.dsh 入口，不再被另一套 PATH 引擎否决。(#2029 by @Lucas2011wastaken)
+  - 全屏跨页拖选与滚回复制 — 按虚拟滚动实际绘制位移和 boxDeltaY 平移选区，修复快速滚轮 / PgUp / PgDn 及底部页眉卸载时的漏行与重复复制，同时修复反向滚回恢复与源码尾部硬换行保留。(#2043 by @Lucas2011wastaken)
+  - @ 模糊文件候选按需刷新 — 工作区扫描完成后 2 秒过期并在下次查询按需重扫，新建或删除文件无需重启即可出现在 @ 补全中，同时复用在途与快速连续输入时的同一次扫描。(#2017 by @ccch1mneyyy 与 @Lucas2011wastaken)
+  - Linux 下用终端运行 Terminal=true 桌面处理器 — 本地文件通过 xdg-mime 解析默认 .desktop 条目，对 Terminal=true 的条目展开 Exec 字段码并在终端（依次尝试 $TERMINAL、KDE TerminalApplication、xdg-terminal-exec 与常见终端）中启动，不再继承无 TTY 标准输入输出而静默退出；找不到终端、参数不支持或启动失败时回退到 xdg-open。(#2053 by @Lucas2011wastaken)
+  - 点名被禁用的 Host 服务行 — profile 中提供 Host 服务的行被禁用导致 agents.create / agents.resume 失败时，诊断指出被禁用的行 ID、已装包版本与恢复顺序，并在启动 notice 中本地化提示 /kernel、/quit 与需要对齐的包名。（DSH 0.2.2+ 已将模型选择移至会话投影，该特定 model-selection-settings 路径仅在 0.2.1 及更早兼容线上触发；其他被禁用的 Host 服务仍适用。）(#1862 by @MomentDerek)
+  - 更新 dsh-working-activity 至 0.6.0 — 将 dsh-working-activity 范围从 ^0.5.0 升至 ^0.6.0，对齐 DSH 0.2.x 与 React 19 peer 声明，消除自定义 profile 下 pnpm peers check 的未满足 peer 警告。(#1974 by @ccch1mneyyy)
+  - 文档 — 精简 README 的通知概览，将投递预算、原生 toast 注册与回退、让位规则、tmux 配置及 jumpBack 机制说明归入用户指南。(#1941 by @baobaolaodie)
+  兼容与升级
+  - DSH 主适配线：0.2.2-rc.5；0.2.2-rc.4、0.2.2-rc.3、0.2.2-rc.2、0.2.2-rc.1、0.2.1-rc.5、0.2.1-rc.4、0.2.1-rc.3、0.2.1-rc.2、0.2.0-rc.2、0.2.0-rc.1、0.1.7-rc.2、0.1.7-rc.1 以及更早的验证线仍在契约内，契约外版本打漂移警告。
+  - DSH 在 npm 上的 latest 仍是 0.2.2-rc.1：0.2.2-rc.5 走 next 标签。程序内 /update 会在目标 TUI 的 peer 范围内选已发布的最高版本，因此会把 dsh 引擎对齐到 0.2.2-rc.5。
+  - 从 v0.20.1 升级：程序内 /update（本版会一并把 dsh 引擎对齐到 0.2.2-rc.5、并对齐全局启动器），或
+    npm install -g @deepseek-ai/dsh @deepseek-harness-tui/dsh-tui@0.20.2。
+  - dst 自动化 CLI 的验证线未同步前移：仍验证到 0.2.1-rc.5；在 0.2.2 宿主上可用 dst dsh 原样转交官方参数。
+  - 嫡系插件清单：随包的 tui-profile/feed/first-party.json 钉到 0.20.2。
+  - DSH 0.2.2 要求 Node >=24.9：本包自身仍声明 ^22.19 || >=24；用更旧的 Node 运行 0.2.2 宿主属于上游未支持组合，升级前请先确认 node -v。
+  - Windows 离线安装器：引擎验证范围随契约前移到 0.2.2-rc.5；已装更高的 RC 会降回验证线。
+  安装
+  npm install -g @deepseek-ai/dsh @deepseek-harness-tui/dsh-tui@0.20.2
+  偏好一键安装的用户可下载 Release 中的 dsh-tui-setup.zip（解压后 macOS / Linux 运行 sh install.sh，Windows 双击 install.bat）
+  或 Windows 离线安装程序 dsh-tui-setup-win-x64.exe；便携包解压即用。
+  What's Changed
+  - docs(readme): summarize the notifications entry by @baobaolaodie in https://github.com/ccch1mneyyy/dsh-TUI/pull/1941
+  - fix(restart): replace the current process instead of retaining parents by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/2024
+  - fix(restart): repair delegated updates and side-query cleanup by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/2031
+  - fix(update): resolve the running engine before stale fallbacks (#2028) by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/2029
+  - fix(selection): keep cross-page copy complete while scrolling by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/2043
+  - fix(completion): refresh stale fuzzy file candidates on demand by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/2017
+  - fix(deps): update working activity for DSH 0.2.x by @ccch1mneyyy in https://github.com/ccch1mneyyy/dsh-TUI/pull/1974
+  - feat(tool): render present deliveries as a delivery card by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/2047
+  - fix(open): run Terminal=true desktop handlers in a terminal by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/2053
+  - fix(dsh-adapter): name the disabled Host row behind a failed agent start by @MomentDerek in https://github.com/ccch1mneyyy/dsh-TUI/pull/1862
+  - test(dsh-adapter): follow upstream 0.2.2 in the Host-scope oracle by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/2062
+  - chore(upstream): adapt to dsh 0.2.2-rc.5 by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/2065
+  - chore(release): prepare v0.20.2 by @Lucas2011wastaken in https://github.com/ccch1mneyyy/dsh-TUI/pull/2066
+  Full Changelog: https://github.com/ccch1mneyyy/dsh-TUI/compare/v0.20.1...v0.20.2
+ManifestType: locale
+ManifestVersion: 1.28.0

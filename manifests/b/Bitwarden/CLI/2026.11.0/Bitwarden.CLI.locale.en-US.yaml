@@ -1,0 +1,142 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Bitwarden.CLI
+PackageVersion: 2026.11.0
+PackageLocale: en-US
+Publisher: Bitwarden Inc.
+PublisherUrl: https://bitwarden.com/
+PublisherSupportUrl: https://bitwarden.com/help
+PrivacyUrl: https://bitwarden.com/privacy
+Author: Bitwarden Inc.
+PackageName: Bitwarden CLI
+PackageUrl: https://bitwarden.com/download
+License: GPL-3.0 or Bitwarden-1.0
+LicenseUrl: https://github.com/bitwarden/clients/blob/HEAD/LICENSE.txt
+Copyright: Copyright © 2015-2024 Bitwarden Inc.
+CopyrightUrl: https://github.com/bitwarden/server/blob/master/TRADEMARK_GUIDELINES.md
+ShortDescription: A secure and free password manager for all of your devices.
+Tags:
+- credential
+- password
+- protect
+- protection
+- security
+ReleaseNotes: |-
+  Overview
+  - Added shared folder commands to the command line interface
+  - Various under-the-hood improvements and minor bug fixes
+
+  ⚠️ Renamed CLI download files
+  Starting with this release, the commercial-license CLI zips include a bit license prefix. Their names now match the open-source builds, which already use bw-oss-*.
+  ───────────┬────────────────────────────┬────────────────────────────────
+  Platform   │Previous name               │New name
+  ───────────┼────────────────────────────┼────────────────────────────────
+  Windows x64│bw-windows-{version}.zip    │bw-bit-windows-{version}.zip
+  ───────────┼────────────────────────────┼────────────────────────────────
+  macOS x64  │bw-macos-{version}.zip      │bw-bit-macos-{version}.zip
+  ───────────┼────────────────────────────┼────────────────────────────────
+  macOS arm64│bw-macos-arm64-{version}.zip│bw-bit-macos-arm64-{version}.zip
+  ───────────┼────────────────────────────┼────────────────────────────────
+  Linux x64  │bw-linux-{version}.zip      │bw-bit-linux-{version}.zip
+  ───────────┼────────────────────────────┼────────────────────────────────
+  Linux arm64│bw-linux-arm64-{version}.zip│bw-bit-linux-arm64-{version}.zip
+  ───────────┴────────────────────────────┴────────────────────────────────
+  All release zips now follow the pattern bw-{license}-{os}[-arm64]-{version}.zip, where {license} is bit (commercial) or oss (open source). The open-source file names are unchanged.
+  Do I need to do anything?
+  - Scripts, Dockerfiles or CI pipelines that download a zip directly from GitHub releases: update the file name. For example, .../download/cli-v2026.11.0/bw-linux-2026.11.0.zip is now .../download/cli-v2026.11.0/bw-bit-linux-2026.11.0.zip. Older releases keep their original names, so if you pin a version, update the name together with the version number.
+  - https://vault.bitwarden.com/download/?app=cli&platform=… links: no change needed. They point to the new files.
+  - npm (@bitwarden/cli), Chocolatey, Snap and Homebrew: no change needed.
+  bw update: from 2026.11.0, bw update links to the exact zip for your license, operating system and CPU architecture. Earlier versions now show the releases page instead of a direct download link. Previously, open-source and arm64 users could be sent the wrong build.
+
+  What's Changed
+
+  💙 Community Highlight
+  - [PM-45328] Export empty custom field values as empty strings in CSV exports by @sebxt in #23970
+
+  Feature Development
+  - [PM-42819] Route CLI cross-instance Send receive through SendReceiveClient by @adudek-bw in #23714
+  - [PM-42403][PM-42406] feat: Push unlock and organization keys ahead of their state writes by @coroiu in #23879
+  - [PM-42408] feat: Push lock and logout from LockService and LogoutService by @coroiu in #23880
+  - [PM-40202] [PM-40196] Aliases CLI collection items as shared-folder by @aaronjordan in #23897
+  - [PM-42410] feat: Gate vault decryption on SDK client readiness by @coroiu in #24015
+  - [PAM-336] (B2) Vault: edit, attach and delete for restricted ciphers by @shane-melton in #24077
+  - [PAM-335] (B1) Vault: controlled-access seams in the vault list & filters by @patriksvensson in #24214
+  - [PAM-341] (B7) Export: warn when gated items are excluded by @patriksvensson in #24253
+  - [PAM-466] (B10) Vault: keep restricted ciphers out of upsert and URL matching by @abergs in #24281
+  - [PM-45333] Add item-type Send event logs by @mcamirault in #24286
+  - [PAM-469] (B12) Tools: share link reads RestrictedCipherPolicy by @abergs in #24309
+
+  🚩 Flags removed
+  - [PM-37669] Remove flagged logic for Send Controls feature flags by @mcamirault in #23849
+  - [PM-28207] Remove pm-28192-cipher-attachment-ops-to-sdk feature flag by @jaasen-livefront in #23902
+  - [PM-28195] Remove pm-27632-cipher-crud-operations-to-sdk feature flag by @jaasen-livefront in #23921
+  - [PM-40627] Remove pm-40201-derive-ssh-keys feature flag by @jaasen-livefront in #24298
+
+  🐛 Bug fixes
+  - [PM-40690] Bank Account subtitle showing Bank Name when Account type and Account number is not present by @jengstrom-bw in #22002
+  - [PM-45308] perf(cli): Exit once a command has finished by @quexten in #23953
+  - [PM-45308] perf(cli): Take the storage file lock synchronously by @quexten in #23954
+  - [PM-45308] perf(cli): Re-read storage only when data.json changed by @quexten in #23955
+  - [PM-45308] perf(cli): Copy cached storage values without structuredClone by @quexten in #23956
+  - [PM-45308] perf(cli): Skip storage writes that change nothing by @quexten in #23957
+  - Platform/PM-45538 - Scope DefaultSyncService in-flight calls to the syncing user by @JaredSnider-Bitwarden in #24072
+  - [PM-45587] Bugfix - Fix clients typechecking script crashing host machine by @jprusik in #24113
+  - fix(logging): Performance marks and measures grow without limit by @mzieniukbw in #24136
+  - [PM-46036] perf(vault): Decrypt the whole vault in batches, not get_all() by @quexten in #24241
+  - [PM-46036] perf(vault): Decrypt cipher list views in batches by @quexten in #24305
+  - [PM-46030] Load non-SIMD SDK wasm when SIMD is unsupported by @quexten in #24449
+  - [PM-46898] fix: Use "My items" casing consistently by @nick-livefront in #24752
+  - [PM-46898] fix: Use "My items" casing consistently (#24752) by @nick-livefront in #24754
+
+  ⚙️ Maintenance
+  - [deps]: Update actions/create-github-app-token action to v3 by @renovate in #19852
+  - [PM-42855] Rename Send removePassword/putSendRemovePassword to removeAuth by @adudek-bw in #23361
+  - [PM-42213] refactor: Use SDK admin attachment client for admin attachment creation by @jaasen-livefront in #23683
+  - [PM-45308] perf(cli): Add end-to-end CLI benchmark harness by @quexten in #23952
+  - [PM-44990] refactor: Add SDK record mapper for organizations by @eliykat in #24085
+  - [PM-44990] refactor: Add SDK record mapper for policies by @eliykat in #24086
+  - [BRE-2231] Download SDK artifacts with actions/download-artifact@v8 by @brandonbiete in #24179
+  - [PM-44990] Register organization repository in SDK state by @eliykat in #24204
+  - [PM-44990] Register policy repository in SDK state by @eliykat in #24209
+  - ci: Type-check SDK breaking changes without secrets by @coroiu in #24216
+  - [PM-45197] refactor: Move provider domain into libs/common/src/provider by @vchauhan-bitwarden in #24257
+  - Auth/PM-46016 - Move LogoutService from libs/auth to libs/common by @JaredSnider-Bitwarden in #24275
+  - [PM-46050] ci: Run e2e suites against usdev nightly by @quexten in #24312
+  - [PM-46050] ci: Own usdev e2e workflows by @quexten in #24345
+  - [PM-39833] Migrate POLICIES_NEW back to POLICIES by @eliykat in #24407
+  - [PM-46343] Return decryption failures from org cipher fetch methods by @shane-melton in #24447
+  - Bump client version(s) by @github-actions in #24576
+  - [BRE-2395] Sign Windows builds with the win-code-signing managed identity over OIDC by @pixman20 in #24656
+  - [BRE-2375] Cherry-Pick CLI Artifact Name Changes by @bwvgrassia in #24680
+  - [BRE-2409] Cherry-pick OIDC code signing to rc by @pixman20 in #24682
+
+  📦 Dependency Updates
+  - [deps] Platform: Update nx monorepo to v23 by @renovate in #21679
+  - [deps] Tools: Update papaparse to v5.7.0 by @renovate in #23512
+  - Update sdk-internal to 0.2.0-main.1135 by @bw-ghapp in #23912
+  - Update sdk-internal to 0.2.0-main.1149 by @bw-ghapp in #24005
+  - Update sdk-internal to 0.2.0-main.1157 by @bw-ghapp in #24059
+  - [PM-44239] deps: Update multer to 2.4.0 by @jaasen-livefront in #24073
+  - [deps]: Update dtolnay/rust-toolchain digest to b725eda by @renovate in #24141
+  - Update sdk-internal to 0.2.0-main.1169 by @bw-ghapp in #24150
+  - Update sdk-internal to 0.2.0-main.1175 by @bw-ghapp in #24217
+  - Update sdk-internal to 0.2.0-main.1182 by @bw-ghapp in #24245
+  - Revert "[deps] UI Foundation: Update @compodoc/compodoc to v2 (#21680)" by @BryanCunningham in #24260
+  - Update sdk-internal to 0.2.0-main.1201 by @bw-ghapp in #24404
+  - Update sdk-internal to 0.2.0-main.1202 by @bw-ghapp in #24456
+  - Update sdk-internal to 0.2.0-main.1204 by @bw-ghapp in #24457
+  - Update sdk-internal to 0.2.0-main.1205 by @bw-ghapp in #24461
+  - Update sdk-internal to 0.2.0-main.1214 by @bw-ghapp in #24463
+
+  🎨 Other
+  - [PM-44526] docs: Add Claude rule and contributing guide for vault SDK sync by @jaasen-livefront in #23841
+  - [PAM-472] (B11) Platform: sync push tests for restricted local copies by @abergs in #24313
+
+  New Contributors
+  - @aaronjordan made their first contribution in #23871
+  - @sebxt made their first contribution in #23970
+ReleaseNotesUrl: https://github.com/bitwarden/clients/releases/tag/cli-v2026.11.0
+PurchaseUrl: https://bitwarden.com/pricing/business/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
