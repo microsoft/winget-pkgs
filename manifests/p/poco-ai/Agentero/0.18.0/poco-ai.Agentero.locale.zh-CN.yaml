@@ -1,0 +1,84 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: poco-ai.Agentero
+PackageVersion: 0.18.0
+PackageLocale: zh-CN
+Publisher: poco-ai
+PublisherUrl: https://github.com/poco-ai
+PublisherSupportUrl: https://github.com/poco-ai/Agentero/issues
+PackageName: Agentero
+PackageUrl: https://github.com/poco-ai/Agentero
+License: MIT
+LicenseUrl: https://github.com/poco-ai/Agentero/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 poco-ai
+ShortDescription: Agent 友好的文献管理方式。
+Description: 传统文献管理器对 Agent 并不友好：阅读高亮和笔记被锁在单篇文件里，Agent 很难跨论文复用；每次对话都要重新提供上下文，缺少稳定的本地知识地图；PDF 对人友好，但对 Agent 来讲不是最舒服的阅读材料。Agentero 旨在构建 Agent 友好、Agent 原生的文献管理方式，探索人与 Agent 在文献管理中的协作方式。通过 ACP 连接本机 Agent（BYOA），支持划词对话、论文导入与 Skill 导入，兼容 Zotero 生态，提供论文翻译、双链与知识图谱、PDF 深度阅读等功能。
+Tags:
+- agent
+- pdf
+- zotero
+- 学术
+- 引用
+- 文献
+- 文献管理
+- 研究
+- 论文
+ReleaseNotes: |-
+  本次发布把研究能力统一到桌面 Agent、CLI 与 MCP：三者共用 core 的文献、笔记、批注与表格操作，写入、联网和全文读取改为按需授权，命令行与协议接口也有破坏性调整。广场新增 Hugging Face 每日论文，文献库可从 AlphaXiv 文库批量导入；PDF 阅读补齐外链预览、句子悬停与译文排版，导入链路支持 OpenReview、PMC 与通用 Cloudflare 校验并保存网页快照；Linux 现在能检测并复用本机桌面应用的 CLI。
+  破坏性变更
+  - CLI 与 MCP 接口：CLI 命令树、MCP 工具与资源路径统一重排，旧调用需要迁移；终端可用 agentero help --json 导出命令树，外部客户端读取 agentero://guide，并用 vault_list 获取授权库 ID。桌面 MCP 默认只提供查询，修改 Vault、联网与全文读取分别授权，并在下一次调用生效。（#1209 by @qychen2001）
+  新功能
+  - 统一的研究工具：桌面侧栏与 Zen 改用随包 CLI 获取回合授权，终端安装保留独立副本，CLI、MCP 与桌面共享 core 的同一套文献、笔记、批注与表格操作。（#1209 by @qychen2001）
+  - Hugging Face 每日论文：广场新增每日论文页，可按日期浏览官方缩略图、作者、票数与摘要，摘要支持翻译并与原文切换，也能选择目标文件夹逐篇入库。（#1210 by @Tippye）
+  - AlphaXiv 文库导入：设置 → 通用 → 集成可粘贴并验证 AlphaXiv API Key，文献库菜单新增按文库选择导入；私有论文保持可见但不可选，导入复用现有标识符批处理，并按文件夹名打标签。（#1227 · 1180aeb3a · 85559fe1d by @ffy6511）
+  - OpenReview 与通用验证页：下载 PDF 或抓取网页遇到 Turnstile / Cloudflare 校验时打开验证窗口，复用该站点 Cookie 重试一次；未完成校验时返回可读原因，而不是保存校验页。CLI 从 settings.json 读取凭据，没有窗口时报告 openreview_auth_required。（#1157 · 8cb2f1a94 · dc6adc87d by @Phil-Fan）
+  - PDF 外链悬停预览：悬停 PDF 外链时经 agentero-web 代理在卡片内预览网页，可直接滚动并在页面内导航，站外链接交给系统浏览器；图片目标显示缩略图，PDF 与下载类目标继续回退为地址。（#1212 · 73169eb59 by @Phil-Fan）
+  - 文件树多选：按住修饰键点选多行即可多选，选中两条以上时出现批量操作条，可移动或删除；Escape、Delete 与 ⌘A 只作用于当前文件树。（#1218 · 4ebd06eea · c7f67542d by @Phil-Fan）
+  - Linux 桌面应用：设置与引导页按 vendor .desktop、Flatpak、Snap 和默认 scheme handler 探测已安装应用并复用其内置 CLI（QwenWork、WorkBuddy、Codex）；没有 Linux 构建的应用标注为不支持，并提示改用 dsh CLI。（#1150 · 51ad571f3 · 39c06278b by @Phil-Fan）
+  - ACP 会话模式：识别 ACP 标准 category: Mode 与各厂商自定义模式（如 Codex 的 collaboration_mode），切换 Agent 或命中预热池后仍保留模式选项。（#1200 by @bet4it）
+  - EasyScholar 排名：设置可选择要显示哪些排名体系；切换只过滤展示，不重新请求 API，也不改写已存标签。（4d62550d9 by @Phil-Fan）
+  改进
+  - 译文重开复用排版：再次打开全文译文时按源 PDF、IR、译文、字体与构建版本复用最近的成品，关闭磁盘缓存时也能约 0.5 秒显示；每个窗口最多保留一份成品和备用图，合计上限 64 MiB。（#1179 · #1184 by @iiijiashu）
+  - 句子悬停与双栏高亮：句子悬停只发布正文文本块并按真实句界切分，排除图表、表格与算法；双栏阅读悬停原文时译文栏同步高亮。（#1216 · #1173 · 92fefbf3b · 7bf393196 by @ffy6511）
+  - 阅读器左栏：大纲、参考文献与图表共用一个面板槽，每个文档记住打开的面板；书签写入导致 PDF 重新加载后，大纲不再自动关闭。（98de2315f by @Phil-Fan）
+  - 编辑器底栏：格式、导出、查找与属性收进同一条底栏，渲染与源码模式共用；查找栏移到状态行左端，窄窗按宽度收缩计数，避免裁切。（e67e4fe85 · e02e32dac by @Phil-Fan）
+  - 文件树与路径栏菜单：论文路径栏新增打开方式菜单，列出已安装编辑器、终端与论文各处链接；文件树菜单按用途重新分组，Finder / Terminal 回到路径栏，并移除「新建研究表 / 新建实验」入口，已有文件仍可打开编辑。（d0912619e · 05b5a6063 · 9c6768acf by @Phil-Fan）
+  - 后台任务自动消失：完成的任务 6 秒后、失败任务 15 秒后自动收起，展开详情时暂停计时，最后一行消失后整个任务 HUD 卸载。（849b00808 by @Phil-Fan）
+  - 版面分析按需调用：版面分析只请求需要的 Paddle 子流程，PAPER.md 解析保留完整流水线；同一渲染任务只在一个窗口执行，原始 JSONL 仅在调试变量开启时落盘。（#1153 · 279f0fe7f · 30026f9af by @Phil-Fan）
+  - 设置分组与默认项：广场与 PDF 阅读选项移入外观、Vim 移入键盘并默认关闭、OpenReview 移入集成；新安装默认使用免费的 Bilibili Translate 2B。（803f0cd18 · 6d5f8f1e0 by @Phil-Fan）
+  - 网页导入快照：导入网页时保存清理后的 webpage.html 与 PAPER.md，重新打开按实时页面显示，脚本驱动的页面不再退化为纯文本；快照仍作为离线与搜索的后备。（312454354 · 66fb5c69b by @Phil-Fan）
+  - Agent 侧栏响应：本机 Agent 探测移到后台线程，首次展开后保留面板，收起再打开时直接显示输入框与草稿；目录扫描与随包适配器探测也加入缓存。（#1225 · #1226 by @YasyaKarasu）
+  - 窗口与设置写入：创建设置、文档与功能窗口前先在同一个门内检查标签，重叠调用不再留下多余窗口；设置保存按窗口串行提交并移出界面线程，最新编辑不会被旧快照覆盖。（#1144 · b83cb88d4 · fd49e1216 by @JiaheChen2002）
+  修复
+  - 引用与图表预览：悬停引用卡不再因经过展开箭头打开数百人的作者名单，点击或键盘激活后才展开；参考文献文本中的 arXiv / CoRR 编号可识别；eLife 等「Figure 5—figure supplement 1」预览为补充图本身。（#1229 · #1219 · ccad85b7f by @W-RMSL, @Phil-Fan）
+  - 笔记独立加载：打开论文时正文与 NOTES.md 各自加载，iCloud 笔记读取挂起不再阻塞 PDF；读取失败时笔记栏显示错误，正文仍可阅读。（#1220 by @Phil-Fan）
+  - Codex 终端输出：读取 Codex ACP 的 terminal_output_delta，累积 stdout / stderr 与退出码，实时事件与历史回放使用同一转换。（#1206 by @CPbianma）
+  - 补入本地 PDF: 只有网页源的论文补入 PDF 后再打开，现有正文标签切到 PDF，保留标签 ID 与笔记分屏。（#1177 · #1181 by @iiijiashu）
+  - 划词工具栏避让：划词工具栏按译文卡片的实际位置与大小避让，优先放在选区另一侧，不再遮住「标记」「加入对话」。（#1195 by @ErzatIam）
+  - PDF 滚动条：放大溢出后原文与译文视口常显可拖动的原生滚动条，指针离开后仍可见，两个方向都能精确拖动。（#1178 · #1182 by @iiijiashu）
+  - 批注公式：批注卡片编辑态接入与笔记一致的公式插件，行内与块级公式可即时渲染，保存时不再被转义。（#1194 · #1208 by @Shallow-dusty）
+  - Pi 附件引用：独占一行的 Pi 临时附件路径显示为文件名 Chip，悬停或键盘聚焦查看完整路径，用户消息气泡不再被撑成多行。（#1203 by @Shallow-dusty）
+  - 元数据识别兜底：自动识别与标题反查都未命中时保留论文，分别给出警告或错误，并提供「修改元信息」兜底入口。（#1186 · #1202 by @Shallow-dusty）
+  - 划词译文：划词译文的原文色带随纸色绘制，重叠选区不再加深遮挡正文；旧高亮迁移不再把翻译记录转成批注。（#1156 · #1201 by @Shallow-dusty）
+  - 蓝牙音频占用：提示音播完后暂停音频上下文释放输出，Agentero 空闲时耳机可以切回手机播放。（#1204 · #1205 by @YasyaKarasu）
+  - PDF 链接缓存后缀：去掉 Papers.cool 等订阅源附加的 ||md5= 缓存键，导入不再因 404 拿不到 PDF。（#1197 by @GitZhaoo）
+  - 划词对话快捷键：恢复 ⇧⌘L 加入对话与 ⌘K 快速对话，批注刷新时保留尚未发送的快速对话。（#1198 by @ErzatIam）
+  - PMC 全文：从 NCBI 公共 bucket 获取 PMC 开放获取 PDF，绕过 JS 校验页与 Cloudflare，PubMed 导入重新拿到全文。（#1191 by @dengfeng-0908）
+  - 全文翻译稳定性：窗口关闭或宿主失败时中止渲染任务，卡住的公式引擎不再带走阅读器；流式请求按静默时间而不是固定 30 秒截止，服务回显的提示词不再写入译文与缓存。（#1211 · #1190 · #1192 · e2b100684 · f6ed83b2e · d121b44d6 by @ffy6511）
+  - 排版字体下载：排版字体改从 ModelScope 镜像下载，同一文件同一 SHA-256，首次下载失败不再让整篇排版失败。（#1196 · 154d84325 by @Phil-Fan）
+  - 标签溢出列表：从溢出菜单关闭标签后立即刷新列表与计数，头部与弹出列表保持一致。（#1161 · 9c332cac7 by @Phil-Fan）
+  - 公式分隔符：编辑笔记时保留 \[...\] 与 \(...\) 原始分隔符，保存后不再改写为美元符号。（#1171 · eae414383 by @Phil-Fan）
+  - 双链新建：已存在的笔记不再被 [[链接]] 截断覆盖，创建竞态时打开已有文件，链接文本保持原样。（#1169 · 0c173f1d6 · cf6d1e0d5 by @ffy6511）
+  - 重命名失败：重命名被拒绝后清除草稿与输入锁，文件树恢复选择、右键菜单与拖放。（#1185 · 2dfd1205d · f6cfdca0c by @Phil-Fan, @ffy6511）
+  - 隐私授权提示：每个回合信封声明 Vault 边界，helper 进程在 Agentero 私有目录启动；只读一篇论文不再触发 $HOME 相关的文件夹与媒体库授权提示。（#570 · #1119 · 3afdfbbf1 · 6673005fc by @Phil-Fan）
+  - Android 配对：在 Android 注册桥接配对命令，配对名显示 Android 并保留原生错误信息，配对资料写入应用私有目录。（#1093 · #1094 by @iiijiashu）
+  - dsh 会话根：跟随 dsh profile 声明的会话存储根读取历史会话，不再出现列得出但打不开。（#1090 · #1091 by @starxjys）
+  - 模型选择：ACP 报告当前模型与实际请求不一致时重新下发显式选择，模型选择器与真实请求保持一致。（#1087 · ff654ea5f by @Phil-Fan）
+  - 笔记图表路径：笔记按笔记相对路径解析论文图表；paper-reader 没有写出可用笔记时，论文保持未读。（#958 · 1ad814fe1 · 174be383c by @Phil-Fan）
+ReleaseNotesUrl: https://github.com/poco-ai/Agentero/releases/tag/v0.18.0
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://agentero-docs.poco-ai.com/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
