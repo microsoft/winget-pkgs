@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: Jackharvest.ShapeCraft
-PackageVersion: 0.11.2
+PackageVersion: 0.12.0
 PackageLocale: en-US
 Publisher: Jackharvest
 PublisherUrl: https://github.com/jackharvest
@@ -25,21 +25,40 @@ Tags:
 - step
 - stl
 ReleaseNotes: |-
-  Sketches you can shape by dragging, and a fillet's edges you can change afterwards.
+  Open the parts other CAD systems save: SolidWorks, NX, Solid Edge and JT. Export FBX and VRML.
   New
-  - Drag a sketch's curves straight in the view. With no tool running, press on a curve and drag: a rectangle's
-    side slides and the rectangle stays square, its corner moves with the opposite corner held, a circle's rim sets
-    its size, a polygon or an ellipse grows or shrinks about its middle, and a loose line slides sideways. The sizes
-    show as you drag, it snaps to the grid, and one undo takes it back. Before, the drag started a selection box.
-    Thanks @barnabasjohnthomas (#87).
-  - A rectangle has a middle point. It shows as a dot, and the pointer snaps to it as Center, so a circle or a
-    line can start right in the middle without construction lines. Thanks @micide0606 (#86).
-  - Change a fillet's or chamfer's edges afterwards. In the step's card, Edge ▸ Edit... rolls the model back to
-    just before the step with its edges picked: click edges to add or remove them, then Done. Escape leaves it as it
-    was. Thanks @barnabasjohnthomas (#89).
+  - Open SolidWorks parts. File ▸ Import File takes .sldprt files and brings in the part's solid bodies exactly,
+    as if it were a STEP file: same faces, same sizes, ready to model on. A part with several configurations comes in
+    as the first one. Parts saved from SolidWorks 2015 on read best; some older ones don't open yet and say why.
+    No SolidWorks needed.
+  - Open NX, Solid Edge and JT files. File ▸ Import File also takes NX parts (.prt), Solid Edge parts and sheet
+    metal (.par, .psm, .pwd) and JT files saved with exact geometry, and brings their solids in exactly. A JT
+    assembly brings in every part, each where its own file puts it for now. A JT saved for viewing only (meshes, no
+    exact geometry) says so instead of coming in empty.
+  - Edges rounded against an edge come in. Parts with a round that rolls along a face and an edge, which some
+    Parasolid, SolidWorks, NX and Solid Edge files have, used to stop the import; they read now.
+  - A second geometry kernel, in pure Rust (in testing). Preferences ▸ Advanced ▸ Geometry Kernel picks between
+    Open CASCADE (the default) and a new kernel written entirely in Rust, built on the open-source Arris kernel. It
+    models exactly (sketches, extrude with draft, revolve, loft, sweep, threads; booleans, fillets, chamfers, shells,
+    offsets, Offset Edge, deleting holes and pockets; drawings; STEP with part names and colors, IGES solids both
+    ways, and the other files Open CASCADE opens) and passes 179 of the 190 modeling checks Open CASCADE does. Wrap &
+    Emboss works on cylinders and cones as Open CASCADE's does (profiles reaching most of the way round included), and
+    variable-radius fillets ease from one radius to the other the same way, on straight edges between flat faces.
+    Fill, Project as Edge, moving or scaling an edge on its own and two-distance chamfers work in the common cases
+    (flat openings, outlines that land inside a face, round rims and straight edges, chamfers on outside edges) and
+    explain the rest. The Advanced tab says what each kernel is the better pick for and why ShapeCraft keeps two (no single point of failure), and lists what Arris does the same, what works with limits, and what still needs Open
+    CASCADE; while it runs, setback corners are greyed out and say why. IGES files of loose trimmed surfaces still need Open CASCADE to open, and say so. Most modeling runs
+    as fast or faster than on Open CASCADE (fillets, chamfers, shells and lofts several times faster); cuts into faces
+    full of holes and threads are slower. Projects made with it live in a folder of their own, so your work stays on
+    Open CASCADE while you try it. Restart to switch. For developers: --kernel rust or SHAPECRAFT_KERNEL=rust, and
+    the command-line tools build without Open CASCADE at all (cargo build -p shapecraft-cli --no-default-features),
+    checked by CI on every push.
+  - Export to FBX and VRML. File ▸ Export to ▸ FBX… writes a binary FBX that Blender, Unity and Unreal open with
+    each body as its own object, in its color, the right way up and at its real size. VRML… writes a .wrl for older
+    viewers and simulators.
   Fixed
-  - A value typed into a sketch dimension is kept when you click away. It's applied as if you'd pressed Return;
-    before, it was thrown away. Thanks @barnabasjohnthomas (#88).
+  - Wrap & Emboss reaching most of the way round a cylinder raised nothing (the profile came out on the wrong side
+    of the face); it raises and engraves the whole profile now.
 
   Alpha: keep copies of anything important. ShapeCraft updates itself from here on: it downloads new
   versions in the background and installs them when you close it.
@@ -55,6 +74,6 @@ ReleaseNotes: |-
   Sideloadly or a similar tool, signed with your own Apple account (a free one re-signs every 7 days).
   Or build it from source: docs/ios.md.
   Check a download against SHA256SUMS.txt: shasum -a 256 FILE (macOS, Linux) or Get-FileHash FILE (Windows).
-ReleaseNotesUrl: https://github.com/jackharvest/shapecraft/releases/tag/v0.11.2-alpha
+ReleaseNotesUrl: https://github.com/jackharvest/shapecraft/releases/tag/v0.12.0-alpha
 ManifestType: defaultLocale
 ManifestVersion: 1.28.0
