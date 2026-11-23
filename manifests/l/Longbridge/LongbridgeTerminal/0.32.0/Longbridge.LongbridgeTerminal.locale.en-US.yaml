@@ -1,0 +1,56 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: Longbridge.LongbridgeTerminal
+PackageVersion: 0.32.0
+PackageLocale: en-US
+Publisher: Longbridge
+PublisherUrl: https://longbridge.com/
+PublisherSupportUrl: https://github.com/longbridge/longbridge-terminal/issues
+Author: Longbridge
+PackageName: Longbridge Terminal
+PackageUrl: https://github.com/longbridge/longbridge-terminal
+License: MIT
+LicenseUrl: https://github.com/longbridge/longbridge-terminal/blob/HEAD/LICENSE
+ShortDescription: AI-native CLI for Longbridge Securities — real-time market data, portfolio, and trading for HK/US/A-share/SG markets
+Description: |-
+  Longbridge Terminal is an AI-native command-line tool for the Longbridge Securities platform.
+  It provides real-time market data, portfolio management, and trading across HK, US, A-share, and
+  Singapore markets. Outputs structured JSON for AI-agent tool-calling and also ships a full-screen
+  TUI for interactive monitoring.
+
+  Key capabilities:
+  - Real-time quotes, depth, K-lines, options, and warrants
+  - Account balances, stock and fund positions
+  - Order submission, modification, cancellation, and execution history
+  - Designed for scripting, AI-agent integration, and daily trading workflows
+Moniker: longbridge
+Tags:
+- cli
+- finance
+- longbridge
+- market-data
+- portfolio
+- rust
+- securities
+- trading
+- tui
+ReleaseNotes: |-
+  ### Added
+
+  • **`longbridge risk-assessment`** — a new, parameterless command returning the risk assessment profile of the account the token belongs to：risk level, score, assessment date, PI status and end time, approval states, deadlines, and the strategy risk levels the member may trade. Also available over `serve` as `trade.risk_assessment`, returning the same shape as `--format json`.
+
+  ### Fixed
+
+  • **TLS now trusts the operating system's certificate store.** Behind a corporate TLS-inspecting proxy every HTTPS call previously failed with `invalid peer certificate：UnknownIssuer` even though other clients on the same machine worked. The OS store and the bundled roots are unioned, so a machine with an empty or unreadable store behaves exactly as before. Note that this widens what the CLI trusts: a certificate authority installed on the machine can now intercept its traffic. (longbridge/developers#1153)
+  • **`Illegal instruction` on x86_64 CPUs without AVX2.** Since v0.31.1 the `linux-amd64` and `linux-musl-amd64` binaries crashed (SIGILL, exit 132) on CPUs such as the Intel N5105 common in NAS boxes — `--version` and `--help` worked, but anything opening a TLS connection died, including `check`, `quote` and `update`. Those targets are built with `cross` again, which keeps the binary at a baseline-CPU instruction set. (#347)
+  • **A token encrypted on another machine now says so.** On a host that is replaced regularly the home directory survives but the machine identity does not, so the stored token can no longer be decrypted; every command used to fail with an opaque error. The message now names the cause and the fix. (longbridge/developers#1290)
+  • **`longbridge ai` starts a new conversation after signing in.** The server fixes a chat's callable tools when the chat is created, so asking for positions in the conversation you signed in from kept answering that no account tools are connected. (#306)
+
+  ### Changed
+
+  • The SDK moves to **5.5.0**, taken from crates.io instead of a git pin. That brings `history_orders()` returning every page, trade and asset calls accepting zero-padded HK symbols (`00700.HK`), and two OAuth callback security fixes.
+  • Documentation：valuation `high` / `low` are described as fair-value band bounds.
+ReleaseNotesUrl: https://github.com/longbridge/longbridge-terminal/releases/tag/v0.32.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
