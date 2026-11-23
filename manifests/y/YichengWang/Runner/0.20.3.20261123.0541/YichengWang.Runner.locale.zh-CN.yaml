@@ -1,0 +1,30 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: YichengWang.Runner
+PackageVersion: 0.20.3.20261123.0541
+PackageLocale: zh-CN
+ShortDescription: 让 Claude Code、Codex、Copilot CLI 等终端编码智能体在同一个 mission 上协同工作。
+Description: Runner 是一款原生桌面应用，让终端智能体协同工作。Claude Code、Codex、OpenCode、Cursor CLI、Grok Build、Antigravity CLI、Copilot CLI 与 pi 可以在同一个任务、同一个 mission 中配合，每个智能体都保留自己真实终端里的 TUI，由 lead 把决策带回给你。Runner 的一切能力都对应一个 `runner` 命令：mission、crew、role、project、chat、session 与 msg 都能在命令行操作，后台服务是 `runnerd`。智能体在 Windows 上原生运行，不需要 WSL，PowerShell 7 为可选。当前状态：alpha，持续发布。原生支持 macOS（Apple Silicon）与 Windows（x64，Windows 10 1809 或更高版本）；不支持 Intel Mac、Windows ARM64 与 Linux。安装程序、应用与 CLI 辅助程序均使用签发给 Open Source Developer Yicheng Wang 的 Certum 开源代码签名证书签名。
+Tags:
+- claude-code
+- codex
+- 人工智能
+- 命令行
+- 控制台
+- 终端
+ReleaseNotes: |-
+  Runner 0.20.3 是 macOS、Windows 和 Linux 上基于 0.20.2 的功能版本：围绕统一的 Files 与 Changes 查看器重新设计了右侧面板，将 Claude Code、pi、Grok 和 OpenCode 的状态迁移至原生 OSC 7501 终端报告，并包含多项 mission 与平台修复。
+  新功能
+  - 右侧面板全新设计与统一的 Files / Changes 查看器。 用紧凑的 40 px 顶部图标栏（Files、带实时变更提示点的 Changes，以及 mission 下的 Sessions）取代了原有的表面标签页与空白页。聊天和终端标签页现在默认收起右侧面板；打开时显示紧凑的 300 px 文件树或变更列表，仅在打开文件或 diff 时展开，并在切换面板视图时保持每个标签页的宽度稳定，支持就地切换 Code | Diff 与同步 Viewed 勾选状态。在窄窗口和分屏标签页中，面板会以浮层形式打开而不缩放终端；Info 已移入标题栏 ▾ 菜单（⌘I / Ctrl+Shift+I）。 (#1331, #1360, #1403, #1420, #1421)
+  - Claude Code、pi、Grok 和 OpenCode 状态改由 OSC 7501 提供。 Runner 现在在聊天和 mission 中直接读取 Claude Code、pi、Grok Build 和 OpenCode 的原生终端状态报告，不再安装状态 hook，可直接呈现 Approval needed、Answer needed、未读完成标记、Interrupted、Response failed 以及 Claude / Grok 后台任务数量。Settings → Agents → Launch 中对应的 Status hooks 开关已移除。Runner 现在要求 Claude Code 2.1.295+、pi 1.1.0+、Grok 1.0.89+ 和 OpenCode v2 2.1.0+；较旧版本会显示 Update needed，启动时自动更新。 (#1051, #1405, #1408)
+  - Mission 会话卡片显示运行时、模型与推理强度。 Mission 的 Sessions 卡片现在会在名称与状态下方显示每个 agent 槽位的运行时图标、模型和推理强度，远程窗口同样支持。 (#1332)
+  - 更清晰的 Appearance 主题控件与分段选中态。 Settings → Appearance 将控件更名为 Mode（Auto / Light / Dark）、Light mode theme 和 Dark mode theme，用 Active now 胶囊标出当前生效的配色方案，并提升了 Settings 中各分段控件的选中态辨识度。 (#1374)
+  - 更简洁的侧边栏 worktree 提示。 鼠标悬停在关联或缺失 git worktree 的聊天/mission 行上时，现在只显示分支/提交标签或缺失状态，不再附带完整的检出路径。 (#1415)
+  问题修复
+  - Windows：Antigravity 会话不再闪现终端窗口。 Runner 在 Windows 上启动 Antigravity 会话时会自动禁用其后台自动更新（AGY_CLI_DISABLE_AUTO_UPDATE=true，并移除大小写冲突的覆盖项），避免 agy 启动或恢复聊天时闪现控制台窗口。在 Windows 上更新请直接在普通终端中运行 agy。 (#1422)
+  - 关联的 Claude Code 聊天不再因残留的草稿判定丢弃 mission 汇报。 修复了暗淡提示占位符与 NBSP 提示符前缀下的空输入框检测，使关联的 Claude Code 聊天及时释放草稿挂起而不再超时；为基于屏幕观察的汇报挂起增加了 10 分钟兜底上限，并记录被丢弃汇报的原因。 (#1409)
+  - CLI 禁止在 mission 内部向其他 mission 写入。 在一个 mission 内部调用 runner msg post、runner signal 或 runner ask 时，如果 --mission 指向另一个 mission，现在会直接报错退出，不再误写入其他 mission。 (#1372)
+  - pi 会话忽略未带品牌前缀的子进程窗口标题。 Runner 现在只接受以 π - 或 pi - 开头的 pi 终端标题，避免 npm view 等子进程覆盖 pi 会话名称。 (#1396)
+ManifestType: locale
+ManifestVersion: 1.28.0
