@@ -1,0 +1,54 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: aube.aube
+PackageVersion: 2.11.0
+PackageLocale: en-US
+Publisher: en.dev
+PublisherUrl: https://en.dev/
+PublisherSupportUrl: https://github.com/endevco/aube/discussions/categories/troubleshooting-and-bugs
+Author: en.dev
+PackageName: aube
+PackageUrl: https://aube.en.dev/
+License: MIT
+LicenseUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 en.dev inc
+CopyrightUrl: https://github.com/endevco/aube/blob/HEAD/LICENSE
+ShortDescription: A fast Node.js package manager
+Description: |-
+  aube is a package manager for Node.js projects. It uses pnpm-style isolated node_modules for fast, disk-efficient installs.
+
+  Existing projects keep their lockfile format. aube reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place. New projects without a supported lockfile get aube-lock.yaml.
+
+  Why Try It
+  - Fast installs. Warm installs are about 8x faster than pnpm and about 5x faster than Bun in the current benchmarks. Repeat test commands run up to 35x faster than pnpm and up to 5x faster than Bun.
+  - Existing lockfiles. Reads and writes pnpm-lock.yaml, package-lock.json, npm-shrinkwrap.json, yarn.lock, and bun.lock in place.
+  - Cheap repeat commands. aubr test, aube test, and aube exec vitest auto-install when dependencies are stale, then skip that work when nothing changed. aubx uses a local binary when one is installed, or a throwaway environment for one-off tools.
+  - Less disk use. A global content-addressable store lets projects share package files instead of keeping a full copy of the same dependencies in every checkout.
+  - Secure defaults. Out of the box, exotic transitive deps are blocked, lifecycle scripts wait for approval, trust downgrades fail at resolve, and brand-new releases sit in a 24h cooling window. One paranoid: true line adds the build jail and turns the soft gates into hard fails.
+Moniker: aube
+ReleaseNotes: |-
+  Added
+  pnpm v13 lockfile support (#1977, #1979, @jdx): pnpm 12.19 added an experimental lockfile format, which a project turns on in pnpm-workspace.yaml. aube can now read v13 lockfiles in both JSON and YAML form and can write them. The output matches pnpm 12.21 byte for byte. Before, aube failed on these lockfiles with invalid type: map, expected a string or importer . is missing, or it quietly rewrote them as version 9.
+  # pnpm-workspace.yaml
+  lockfile:
+    format: v13
+  - An existing pnpm-lock.yaml keeps its current format, v9 or v13. The new lockfile.format setting (v9 or v13, also AUBE_LOCKFILE_FORMAT) overrides this when aube writes the lockfile. It also picks the format of a new pnpm-lock.yaml. aube-lock.yaml is always written at version 9.
+  - --frozen-lockfile accepts either format. An install that changes nothing leaves the file untouched.
+  - If aube can't write a graph at v13 without losing data, it stops with ERR_AUBE_PNPM_LOCKFILE_V13_NOT_REPRESENTABLE (exit 17) and leaves the file unchanged. Set lockfile.format: v9 to write version 9 instead.
+  - pnpm still treats v13 as experimental, so the format may change.
+
+  Changed
+  pnpm lockfile version check (#1977, @jdx): aube now refuses a pnpm-lock.yaml whose lockfileVersion is not 9 or 13 and reports ERR_AUBE_UNSUPPORTED_PNPM_LOCKFILE_VERSION (exit 16). Before, it read any version 9 or higher as v9.
+  Lockfile write errors keep their error code (#1977, @jdx): when writing the lockfile fails during install, add or a workspace install, aube now reports the specific ERR_AUBE_* code, help text and exit code. Before, these errors exited with code 1.
+
+  Fixed
+  Peer dependencies of git and remote-tarball deps (#1983, @jdx): aube now links the peerDependencies of packages installed from git or tarball URLs, as it already does for registry packages. Before, these peers were not linked. With the global virtual store, this could load two copies of a peer such as vite. The lockfile entry now has the usual (peer@version) suffix.
+  prepare for git-hosted tarball deps (#1984, @jdx): GitHub, GitLab and Bitbucket dependencies that the lockfile records as gitHosted: true tarballs now run their prepare script, as type: git entries already did. Before, a package that builds dist/ in prepare was installed without it. --ignore-scripts still skips the script.
+  Windows .cmd bin shims (#1986, @jdx): a shim started by a quoted name found through PATH, such as cmd /d /s /c ""npm" -v", now finds its target. Before, it looked in the current folder and failed with Cannot find module. aube still recognizes shims written by earlier versions and replaces them with the new form the next time it rewrites them.
+
+  Security
+  Updated the Rust url crate to 2.5.9 to address RUSTSEC-2026-0592 (#1988, @jdx).
+ReleaseNotesUrl: https://github.com/aubepkg/aube/releases/tag/v2.11.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
