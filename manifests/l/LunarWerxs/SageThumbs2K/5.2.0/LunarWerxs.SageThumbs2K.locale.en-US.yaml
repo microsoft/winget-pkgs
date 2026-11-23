@@ -1,0 +1,80 @@
+# Created with WinGet Releaser using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: LunarWerxs.SageThumbs2K
+PackageVersion: 5.2.0
+PackageLocale: en-US
+Publisher: LunarWerx
+PublisherUrl: https://github.com/LunarWerxs
+PublisherSupportUrl: https://github.com/LunarWerxs/SageThumbs-2k/issues
+PackageName: SageThumbs 2K
+PackageUrl: https://github.com/LunarWerxs/SageThumbs-2k
+License: PolyForm Noncommercial License 1.0.0
+LicenseUrl: https://github.com/LunarWerxs/SageThumbs-2k/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2026 LunarWerx
+ShortDescription: Explorer thumbnails for 435 file types Windows can't read, plus a right-click image toolkit.
+Description: SageThumbs 2K is a modern, crash-isolated Windows 11 shell extension written in Rust that rebuilds the classic SageThumbs. It gives File Explorer thumbnails for 435 file types Windows can't preview on its own — camera RAW, HEIC/AVIF, Photoshop, DjVu, ebooks and comics, video frames, 3D-print files and a long tail of obscure formats — plus a right-click image toolkit (convert, resize, rotate, OCR, color picker, metadata strip, combine-to-PDF/CBZ) and a console/AI CLI. Free for personal use.
+Moniker: sagethumbs2k
+Tags:
+- converter
+- explorer
+- heic
+- image
+- raw
+- shell-extension
+- thumbnails
+ReleaseNotes: |-
+  <div align="center">
+  <img src="https://raw.githubusercontent.com/LunarWerxs/SageThumbs-2k/v5.2.0/assets/logo.png" width="96" alt="SageThumbs 2K logo">
+  </div>
+  
+  ## TL;DR
+  
+  **≡ƒåò New**
+  
+  - **Convert shows the estimated size of the output file before you convert, and updates it as you change the format or quality** (for the formats SageThumbs writes itself; #89)
+  - **Quick preview: video and audio in a Markdown file show as cards you can click to open** (fixes #93)
+  
+  **≡ƒ⌐╣ Fixed**
+  
+  - **SVG text is drawn: badges, diagram labels and chart text in SVG thumbnails and in Markdown previews no longer come out blank** (fixes #92)
+  - **Quick preview: the Markdown web-images button stays lit while web images are shown** (#92)
+  - **Greyscale OpenEXR files (a single `Y` luminance channel, with or without alpha) get a thumbnail instead of "cannot decode"**
+  - **Pre-generating thumbnails scans folders about ten times faster, and the scan line shows the folder it is in** (#91)
+  - **Quick preview leaves Outlook alone: pressing Space in Outlook's Attach File dialog no longer loads SageThumbs into Outlook**
+  - **An SVG nested hundreds of levels deep is refused instead of crashing Explorer**
+  - **The diagnostics report (`st2k doctor`) no longer crashes on some Windows 10 PCs**
+  
+  <details>
+  <summary><b>Read more: everything in 5.2.0</b></summary>
+  
+  - **Convert shows the estimated output size (#89).** Under the output format, the dialog says how big the converted file will be at the current format and quality, worked out by encoding the first picture in the background as you change them, so you can find the smallest file that still looks right without converting, checking and deleting. With several pictures selected it is the estimate for the first one. It covers the formats SageThumbs writes itself (JPG, PNG, WebP, BMP, GIF, TIFF, ICO, TGA, QOI, PNM); the ImageMagick formats and PDF show no estimate, and very large source files are skipped.
+  - **Quick preview: video and audio in a Markdown file show as cards (#93).** A `<video>` or `<audio>` tag (or its `<source>`) used to vanish from the preview. It now shows as a card with the file name; click it to open the video or sound in your browser or player. A poster picture shows on the card when web images are on.
+  - **SVG text is drawn (#92).** SVG files rendered their shapes but dropped every piece of text, so a README badge showed two empty coloured blocks and a diagram's boxes had no labels, both in Explorer thumbnails and in Quick preview's Markdown view. The SVG renderer now has the Windows fonts to draw with; they load once, and only for an SVG that contains text.
+  - **Quick preview: the Markdown web-images button stays lit while web images are shown (#92).** Like the contents and source buttons, it now shows its on state.
+  - **Greyscale OpenEXR files get a thumbnail.** An EXR whose picture is a single `Y` (luminance) channel, for example a greyscale render or a luminance pass, failed with "cannot decode" even though Blender opens it. It now decodes as grey in FLOAT, HALF and UINT, keeps its alpha channel when it has one, and the rarer luminance-chroma layout with full-resolution colour (`Y` with `RY`/`BY`) decodes in colour.
+  - **Pre-generating thumbnails scans folders about ten times faster (#91).** The scan asked Windows about every file four separate times; it now reads what the folder listing already returned. A 19,000-file tree went from about 1 s to 0.1 s here, and the gain is larger on USB and network drives. While it scans, the status line shows the folder it is in instead of a fixed "Scanning foldersΓÇª".
+  - **Quick preview leaves Outlook alone.** Pressing Space in an Open or Save dialog loads a small helper into the program that owns the dialog to read the selected file. In Outlook (classic, new Outlook and the Outlook app host) it no longer does: Space is an ordinary key press there.
+  - **An SVG nested hundreds of levels deep is refused instead of crashing Explorer.** Drawing an SVG walks its elements one level at a time, and a file nested hundreds of levels deep ran the thumbnail worker out of stack, which closes the whole Explorer window. Such a file is now refused before it is drawn and keeps its stock icon; real drawings nest a few dozen levels at most.
+  - **The diagnostics report (`st2k doctor`) no longer crashes on some Windows 10 PCs.** Some of its checks ask Windows for shell information, and on a thread that had not set Windows' COM up for that, Windows 10 could crash the report. The report now sets it up for itself.
+  - **Licence:** after a Quick preview or screenshot trial ends, choosing Not now on the Supporter screen hands Space or Print Screen back to Windows, so the screen shows once.
+  
+  </details>
+  
+  ## Downloads
+  
+  Every file below is code-signed by LUNARWERX LLC; the SHA-256 lets you check a download is the one published here.
+  
+  - **x64 installer:** `SageThumbs2K-Setup-5.2.0.exe` ┬╖ SHA-256 `06428403f3648255cdb59b9af9f158d74c284ac746094d710fb8259d937728ac`
+  - **ARM64 installer:** `SageThumbs2K-Setup-5.2.0-arm64.exe` ┬╖ SHA-256 `711a1258bf09bc9ae305a21a0fb1510a00bf6a9ce18b7bfa404edc7a6ba40ebd`
+  - **x64 portable:** `SageThumbs2K-Portable-5.2.0.zip` ┬╖ SHA-256 `3dfe95c140666d30a7a928b3127a8ce95b79bea08d1bf6dd621e363201af6ded`
+  - **arm64 portable:** `SageThumbs2K-Portable-5.2.0-arm64.zip` ┬╖ SHA-256 `4f57e40151758f2987d04c636ac8be269846ca2739c948f7953f9bc225819257`
+  
+  Portable: unzip and run, nothing is installed. `st2k register` (or Settings, Advanced) turns on Explorer thumbnails and the classic right-click menu for your account; only the preview pane, the Details pane and the Windows 11 compact menu still need the installer. `SageThumbs2K-Setup-5.2.0-amd64.exe` is the x64 installer again, under the name copies older than 1.3.6 look for; download the plain one.
+  
+  ---
+  
+  ≡ƒÆ¼ Questions, ideas, or a hello: the [LunarWerx Discord](https://lunarwerx.com/discord).
+ReleaseNotesUrl: https://github.com/LunarWerxs/SageThumbs-2k/releases/tag/v5.2.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
