@@ -1,0 +1,57 @@
+# Created using wingetcreate 1.28.1.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: rizukirr.apic-gui
+PackageVersion: 1.2.0
+PackageLocale: en-US
+Publisher: Rizki Rakasiwi
+PublisherUrl: https://github.com/rizukirr
+PublisherSupportUrl: https://github.com/rizukirr/apic/issues
+PrivacyUrl: https://rizukirr.github.io/apic-web/privacy/
+Author: Rizki Rakasiwi
+PackageName: apic-gui
+PackageUrl: https://github.com/rizukirr/apic
+License: GPL-3.0-only
+LicenseUrl: https://github.com/rizukirr/apic/blob/main/LICENSE
+Copyright: Copyright (c) Rizki Rakasiwi
+ShortDescription: Desktop GUI for apic — design and collaborate on Git-friendly API contracts.
+Description: apic-gui is the desktop front-end for apic, built on the shared apic-core, for designing, validating, and collaborating on API contracts with a graphical interface.
+Moniker: apic-gui
+Tags:
+- api
+- contract
+- gui
+- json
+- rest
+ReleaseNotes: |-
+  An import and export release. apic now reads OpenAPI 3.0, OpenAPI 3.1 and Swagger 2.0 specs, and writes contracts back out as Postman collections and OpenAPI documents, from both the CLI and the desktop GUI. The GUI is now built from one shared set of components, so its text, buttons, menus and inputs look the same on every screen. The contract format is unchanged, so existing projects need no migration.
+
+  ### Added
+
+  - `apic convert --openapi <file>` imports an OpenAPI 3.0, OpenAPI 3.1 or Swagger 2.0 spec, in JSON or YAML, as one contract per operation, in a folder per first tag and named from the `operationId`. Bodies come from the spec's examples, or are built from the schemas with local `$ref`s followed, including `$ref`s inside example values. Several named examples under one status become separate responses. The URL uses the operation, path or document server, with server variables filled from their defaults or kept as apic variables when the default is empty. An operation's security scheme adds an `Authorization: Bearer $token`, `Basic $basic_auth` or API key header. COMMAND.md lists what is mapped and what warns.
+  - `apic export --postman <file>` writes contracts as a Postman Collection v2.1: folders become Postman folders, contracts become requests, and documented responses become saved examples. `$name` variables become `{{name}}` and `{id}` path params become `:id`. `-f` exports one contract or a folder, and `--env` fills the collection variables from that environment's shared file only, so local secrets are never exported.
+  - `apic export --openapi <file>` writes contracts as an OpenAPI 3.0 document, or 3.1 with `--openapi-version 3.1`, in YAML or JSON by the file's extension. Each body is exported as its example plus a schema inferred from it. Leading URL variables become server variables, `Authorization` headers become security schemes, and a status documented more than once becomes named examples. Exporting GitHub's REST spec after importing it and importing it again gives back all 1281 contracts unchanged.
+  - The GUI project menu has Import and Export submenus, each with Postman collection and OpenAPI spec. Export writes the open project to a file you choose, with variable values from the selected environment's shared file.
+
+  ### Changed
+
+  - The git diff opens a changed contract on its field changes. "Show field changes" is now checked by default, and unchecking it shows the line diff.
+  - The GUI Templates section moved from the bottom of the sidebar to the top, under the Contracts and Changes switcher, and its list scrolls once it holds more than about six templates.
+  - Every GUI dropdown now shares one look: menu dropdowns all end in a `Γîä` caret, including the git log's Branch, User, Date and Paths filters, which had none, and the Contracts/Changes switcher highlights the view you are on. The git log's text and path filter boxes use the same bordered input as the dialogs.
+  - The agent skill now covers importing with `apic convert --openapi` and `--postman` and exporting with `apic export --postman` and `--openapi`, including when to pass `--force`, which variables an import leaves for the user to fill, and that exported OpenAPI schemas are inferred. Run `apic skill --install` again to update an installed copy.
+
+  ### Fixed
+
+  - `apic convert --postman` now keeps request descriptions stored on the request, as Postman's own exports write them, query param descriptions, and response headers.
+
+  ### Packaging
+
+  - Flatpak: the app now builds on the `org.freedesktop.Platform` 26.08 runtime, up from 25.08, and the manifest pins its git source to the release commit as well as the tag.
+  - winget: `submit.ps1` takes `ReleaseNotes` from this changelog's section for the version when the GitHub release has no notes.
+  - Copr and Debian: `release.sh` scripts build and upload a release, and Launchpad uploads for the Ubuntu PPA are signed with a new OpenPGP key.
+ReleaseNotesUrl: https://github.com/rizukirr/apic/releases/tag/v1.2.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/rizukirr/apic/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
