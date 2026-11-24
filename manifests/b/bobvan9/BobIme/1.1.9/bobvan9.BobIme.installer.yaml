@@ -1,0 +1,28 @@
+# 跟着版本走的是三处：PackageVersion、InstallerUrl 里的 v<版本> 与文件名、InstallerSha256。
+# 发版时由 installer/winget-submit.sh 自动改、自动提 PR，平常不用手填；要手填就取 Release 附件的 digest：
+# gh api repos/bobvan9/BobIme/releases/latest --jq '.assets[]|.digest'
+# 目录层级照上游 manifests/<小写首字母>/<Publisher>/<App>/<版本>/，整份版本目录拷进 fork 即用。
+# ProductCode 要连大括号和 Inno 的 _is1 后缀一起写，跟装机键的名字一模一样（HKLM\...\Uninstall\{7A3C1E58-...}_is1）。
+# 实测只写裸 GUID 或 {GUID} 时 winget 看不见已装的包（upgrade --manifest 报 No installed package found），
+# 写成 {GUID}_is1 才认。那个 GUID 本身是 installer/BobIme.iss 里不能改的 AppId。
+# 本机自检：winget validate --manifest <这个目录>；已装识别可看 winget --info 列出来的程序里有没有 BobIme。
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.28.0.schema.json
+
+PackageIdentifier: bobvan9.BobIme
+PackageVersion: 1.1.9
+InstallerLocale: en-US
+InstallerType: inno
+ProductCode: "{7A3C1E58-2F4B-4D9A-8C6E-B0B1A7E5D310}_is1"
+UpgradeBehavior: install
+ReleaseDate: 2026-11-24
+InstallerSwitches:
+  Silent: /SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART
+  SilentWithProgress: /SP- /SILENT /SUPPRESSMSGBOXES /NORESTART
+Installers:
+  - Architecture: x64
+    Scope: machine
+    # 包体是 win-x64 自包含发布，ARM64 没有原生包，别给 winget 挂 arm64 条目。
+    InstallerUrl: https://github.com/bobvan9/BobIme/releases/download/v1.1.9/BobIme-Setup-1.1.9.exe
+    InstallerSha256: D01E4A87213E762440943AC9FFC24A20961B77CB3D8B7A8920CA6047D7C9FADA
+ManifestType: installer
+ManifestVersion: 1.28.0
