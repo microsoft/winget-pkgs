@@ -1,0 +1,126 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: aelassas.Servy
+PackageVersion: '11.0'
+PackageLocale: en-US
+Publisher: Akram El Assas
+PublisherUrl: https://github.com/aelassas
+PublisherSupportUrl: https://github.com/aelassas/servy/issues
+Author: Akram El Assas
+PackageName: Servy
+PackageUrl: https://servy-win.github.io/
+License: MIT
+LicenseUrl: https://github.com/aelassas/servy/blob/HEAD/LICENSE.txt
+Copyright: Copyright (c) 2026 Akram El Assas
+ShortDescription: Servy lets you run any app as a native Windows service with full control over the working directory, startup type, process priority, CPU affinity, logging, health checks, hooks, and parameters.
+Description: |-
+  Servy lets you run any app as a native Windows service with full control over the working directory, startup type, process priority, CPU affinity, logging, health checks, environment variables, dependencies, pre-launch and post-launch hooks, pre-stop and post-stop hooks, and parameters.
+
+  Starting from v10.2, Servy provides enterprise-grade per-service isolation between custom accounts, authenticated encryption, and automated ACL hardening. All releases feature signed binaries, SBOMs, and continuous vulnerability scanning.
+
+  Servy offers a desktop app, a CLI, and a PowerShell module that let you create, configure, and manage Windows services interactively or through scripts and CI/CD pipelines. It also includes a Manager app for easily monitoring and managing all installed services in real time.
+
+  Servy continuously monitors your app, restarting it automatically if it crashes, hangs, or stops. It allows non-service apps to run in the background and start automatically at system boot, even before logon, without rewriting them as services. Use it to run Node.js, Python, .NET, Java, Go, Rust, PHP, or Ruby applications; keep web servers, LLMs, background workers, sync tools, or daemons alive after reboots; and automate task runners, schedulers, or scripts in production with built-in health checks, logging, and restart policies.
+
+  Features:
+  - Clean, simple UI
+  - Monitor and manage all installed services with Servy Manager
+  - Real-time CPU and RAM monitoring with live performance graphs for installed services
+  - Real-time service stdout and stderr output preview in Servy Console
+  - Service dependency tree visualization with status indicators
+  - CLI and PowerShell module for full scripting and automated deployments
+  - Run any executable as a Windows service
+  - Set service name, description, startup type, priority, CPU affinity, working directory, environment variables, and dependencies
+  - Environment variable expansion supported in parameters, process paths, and startup directories
+  - Run services as Local System, local or domain accounts, Active Directory accounts, or gMSAs
+  - Redirect stdout/stderr to log files with automatic size-based and date-based rotations
+  - Run pre-launch hooks before starting the service, with retries, timeout, logging and failure handling
+  - Run post-launch hooks after the application starts successfully
+  - Run pre-stop and post-stop hooks before and after the application stops
+  - Supports Ctrl+C for command-line apps, close-window for GUI apps, and force kill if unresponsive
+  - Supports Ctrl+C propagation to descendant processes of the wrapped process
+  - Prevent orphaned/zombie processes with improved lifecycle management while ensuring resource cleanup
+  - Health checks and automatic service recovery
+  - Browse and search logs by level, date, and keyword for faster troubleshooting from Servy Manager
+  - Export/Import service configurations for easy backups and automation
+  - Service Event Notification alerts on service failures via Windows notifications and email
+  - Modern build (default, self-contained): Windows 10 (1809+), Windows 11 and Windows Server 2016+, on x64 and ARM64
+
+  Who is it for?
+  - Developers: Run development servers, scripts, or custom tools as services without extra setup.
+  - Sysadmins & IT professionals: Ensure critical background processes stay alive, monitored, and properly logged.
+  - Teams or organizations: Automate background services reliably across multiple machines.
+Moniker: servy
+Tags:
+- admin
+- automation
+- background-service
+- cli
+- devops
+- dotnet
+- nssm
+- powershell
+- scm
+- service-manager
+- service-supervisor
+- service-wrapper
+- watchdog
+- windows-service
+- windows-tools
+- winsw
+ReleaseNotes: |-
+  Servy v11.0 introduces a Simplified Chinese (简体中文) display language for the Servy Desktop App, Servy Manager, and the installer, and window size, position, and column widths persistence across sessions in Servy Manager, alongside fixes to account handling on service import, recovery and stop handling, and Servy Manager refresh behavior, code quality improvements, and documentation updates.
+  Full Changelog
+  - feat(i18n): add a Simplified Chinese (zh-CN) display language to the Servy Desktop App and Servy Manager, selectable from a new Language menu, the --lang command-line option, or the Language setting in appsettings.desktop.json and appsettings.manager.json (system, en, or zh-CN); the menu asks for confirmation and restarts the app to apply the change, the language is shared by both apps, and the CLI, PowerShell module, logs, and Windows Event Log entries remain in English (#8148, thanks to @xiaciyidingde)
+  - feat(setup): add Simplified Chinese to the installer, which now asks for the setup language at start, preselects the one matching the Windows display language, and accepts /LANG=english or /LANG=chinesesimplified for silent installs (#8169)
+  - feat(manager): persist main window size, position, maximized state, and table column widths across sessions, saving automatically after layout changes settle as well as on window close, and add a View > Reset window layout menu item (#8009)
+  - fix(core): clarify ProcessKiller.KillProcessTree debug log when root start time is unreadable and descendants are skipped (#8031)
+  - fix(core): remove unreachable UnauthorizedAccessException term from the catch filter in LogonAsServiceGrant.Ensure (#8032)
+  - fix(core): document intentional retention of synchronous Write<T> and Read<T> in INamedPipesService (#8033)
+  - fix(core): use ServiceAccounts.ExpandLocalShorthand in AccountSidResolver.Resolve instead of manual .\ expansion (#8035)
+  - fix(core): remove redundant IdentityNotMappedException catch block in AccountSidResolver.TryTranslate (#8036)
+  - fix(core): reuse static AdministratorsSid and LocalSystemSid fields in SecurityHelper.CreateSecureDirectory and ApplySecurityRules instead of allocating them inline (#8037)
+  - fix(core): document intentional retention of string-returning ExportXml and ExportJson overloads in ServiceExporter (#8038)
+  - fix(core): throw Win32Exception in ServiceManager.IsDelayedStart when QueryServiceConfig2 fails so GetAllServices sets DetailsUnavailable and preserves stored delayed startup types (#8048)
+  - fix(core): read the previous log-on account from the Service Control Manager in ServiceManager.InstallServiceAsync so service control rights and vault/pipe permissions are revoked when an account is changed via import (#8052)
+  - fix(core): catch InvalidOperationException alongside ArgumentException when opening the parent handle in ProcessKiller.KillParentProcesses so a parent exiting mid-walk stops the upward walk without aborting target process termination (#8075)
+  - fix(core): exit the stop-wait loop in ServiceHelper.StopServicesAsync as soon as Refresh() observes Stopped, avoiding an extra 500 ms poll delay and no longer reporting a service that reaches Stopped near the deadline as timed out or cancelled (#8077)
+  - fix(core): remove unreachable ?? new List<string>() fallback in ServyHostInstaller.GetRunningServyServices since IServiceHelper.GetRunningServyServices is non-nullable and always returns a list (#8105)
+  - fix(core): remove unreachable ?.ToList() ?? new List<ServiceDto>() null fallback in ServyExePermissionsHardener.RevokeIfUnusedAsync since IServiceRepository.GetAllAsync is non-nullable (#8106)
+  - fix(core): restrict the ProtectedKeyProvider cross-process key-vault mutex ACL from Authenticated Users to Local System and Administrators (retaining the current user on unelevated runs) to match the key files' DACL and prevent unprivileged local users from holding the lock during key generation or migration (#8172)
+  - fix(core): let a second Servy process (such as the service, Manager, or CLI starting at the same time on a fresh install) wait for the ProtectedKeyProvider key-vault mutex during key generation or migration instead of failing with an access-denied error (#8173)
+  - fix(core,manager): remove six redundant using directives already covered by implicit usings in LogLineSplitter, IServyExePermissionsHardener, and ExePermissionsHardeningResult (#8127)
+  - fix(core,service): initialize AllowOverriddenRuntimeVars from AppConfig.DefaultAllowOverriddenRuntimeVars in StartOptions, Service, and InstallServiceOptions, like every other option, instead of leaving it at the implicit false (#8177)
+  - fix(infra): reset a stored passwordless account to LocalSystem when re-importing a service configuration that names no account (#8050)
+  - fix(core,infra,dump): clarify import log messages and Servy-Restore.ps1 / Servy-Dump.ps1 banners to note that existing services with stored password-protected accounts retain their credentials rather than being reset to LocalSystem, and log the retained account on import (#8054)
+  - fix(service): remove seven redundant ?? string.Empty fallbacks in StartOptionsParser ahead of EscapeBackslashes and EnvironmentVariableParser.Parse calls that already handle null inputs (#7993)
+  - fix(service): re-check teardown state in Service.InitiateRecoveryAsync and synchronize process relaunches with teardown so recovery actions cannot run or leave orphaned processes after service stop begins (#8043)
+  - fix(service): log Process restarted. in ServiceHelper.RestartProcess only when the relaunch callback launches a child process rather than when skipped during service stop (#8047)
+  - fix(ui): wait in AppBootstrapper.OnExit for any in-flight ServyServicesPause.ResumeAsync to finish (and skip deferred warning dialogs when shutting down) so closing the splash window or ending the session during a post-upgrade update does not leave stopped Servy services and the Servy host unstarted (#8166)
+  - fix(ui): end AppBootstrapper.OnExit wait as soon as ServyServicesPause.ResumeAsync completes rather than waiting for the entire start-up task, preventing a Windows session end while a deferred warning dialog is open from blocking shutdown for the full 45s+ timeout and logging a false warning (#8171)
+  - fix(ui): treat an explicit script subtag as deciding between Simplified and Traditional Chinese in LocalizationCulture, so zh-Hans-HK and zh-Hans-MO select the Simplified Chinese display language instead of being rejected (#8153)
+  - fix(ui): pass --lang when the Servy Desktop App and Servy Manager launch each other, handing over the language saved in the settings file rather than the one the app started in (#8161)
+  - fix(desktop,manager): invoke base.OnExit before Logger.Shutdown in App.xaml.cs so AppRestarter warnings are flushed to the log when an application restart fails (#8178)
+  - fix(manager): capture only columns configured with an absolute pixel width when saving DataGrid column widths (#8013)
+  - fix(manager): persist the width of a column auto-fitted by double-clicking its header edge in the Services and Logs grids (#8028)
+  - fix(manager): restore the star width of a star-sized column after a header-edge double-click instead of pinning and saving a pixel width (#8030)
+  - fix(manager): raise HasSelectedServices in MainViewModel.RemoveService so bulk action buttons disable after the last checked service is removed (#8041)
+  - fix(manager): preserve stored description for uninstalled services during MainViewModel refresh ticks instead of overwriting it with stale in-memory row text (#8042)
+  - fix(manager): prevent MainViewModel refresh ticks from overwriting stored service descriptions and delayed startup types when native SCM queries fail or time out (#8044)
+  - fix(manager): update display name and user account from stored configuration during MainViewModel refresh ticks for uninstalled services (#8046)
+  - fix(manager): preserve the row's existing Log On As account during MainViewModel refresh ticks when SCM details are unavailable instead of displaying Local System (#8051)
+  - fix(manager): show the translated level name in the Level column of the Logs grid, matching the Level filter above it (#8164)
+  - fix(manager): name the Language menu in the screen-reader help text of the Servy Manager menu bar (#8175)
+  - ci(publish.yml): add cooldown before SignPath signing requests to allow GitHub artifact API propagation
+  - docs(taskschd): correct .EXAMPLE help text in ServyFailureNotification.ps1 to describe one notification per new event
+  - docs(readme): note the Simplified Chinese display language of the Servy Desktop App and Servy Manager in README.md (#8160)
+  - docs(wiki): correct the portable package elevation requirement in Installation Guide, the stored-account exception on restore and import in Backup, Restore & VM Cloning, Export & Import Services, and Security, and the scope of dotnet test in Building from Source (#8053, #8055, #8057, #8058)
+  - docs(wiki): document the display language, the Language setting, and the --lang option in Servy Desktop App, Servy Manager, and Advanced Configuration (#8148)
+  - docs(wiki): document the installer language and the /LANG switch in Installation Guide, and correct the statement in Servy Desktop App and Servy Manager that the installer is in English only (#8169)
+ReleaseNotesUrl: https://github.com/aelassas/servy/releases/tag/v11.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/aelassas/servy/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
