@@ -1,0 +1,89 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: ivankovic.OmniDiff
+PackageVersion: 0.6.0
+PackageLocale: en-GB
+Publisher: Marko Ivankovic
+PublisherUrl: https://www.ivankovic.me
+PublisherSupportUrl: https://github.com/ivankovic/omnidiff/issues
+Author: Marko Ivankovic
+PackageName: OmniDiff
+PackageUrl: https://github.com/ivankovic/omnidiff
+License: AGPL-3.0-only
+LicenseUrl: https://github.com/ivankovic/omnidiff/blob/HEAD/LICENSE
+ShortDescription: Fast, robust, accurate content-aware diffing for code and other file formats.
+Description: |-
+  Fast, robust, accurate content-aware diffing.
+  OmniDiff is robust: it can diff 99.95% of code changes, and it is content-aware: 98.8% of changes are diffed using algorithms specific to what the file holds. It reads code by its syntax, and pictures, archives, fonts, cursors, message catalogues and PDFs by what they contain, so a difference report reflects the structure of the material rather than treating every file as plain text.
+  Code of another language held inside a string is diffed as a file of its own: TSX in a JSON "content" field, shell in a YAML run: or script: block, CSS and HTML in template literals, and YAML in an Ansible module's DOCUMENTATION, EXAMPLES and RETURN. Class lists are diffed class by class.
+  The terminal user interface offers two panels, light and dark themes, and per-platform refresh and highlighting controls, and it integrates with Git and jj as an external difftool.
+Tags:
+- ast-diff
+- code-quality
+- code-review
+- content-aware
+- diff
+- difftool
+- git
+- git-diff
+- git-difftool
+- structural-diff
+- syntax-aware-diff
+- terminal-user-interface
+ReleaseNotes: |-
+  A library API for other Rust crates (changed definitions, git revisions, an embeddable viewer),
+  Vue parsed as code, and the Maximal preset.
+  Added
+  - A library API for other Rust crates: omnidiff::Diff::files(before, after) or
+    omnidiff::Diff::new(before, after, language), then changed_functions(), changed_types(),
+    changed_modules(), changed_top_level_definitions() and changed_definitions(): what
+    happened to each function, method, type, module and impl block (added, removed, modified, moved,
+    renamed, and whether only comments or whitespace changed), each named the way the language's
+    imports name it (crate::parser::Parser::parse, com.acme.Parser.parse,
+    Acme\Parser::parse), in 20 languages. ranges(side, preset) gives the changed text as byte
+    ranges and positions, and enclosing_definition the definition around a byte, like git's hunk
+    header. Use the crate with default-features = false to leave out the terminal viewer
+    (#109).
+  - The git feature adds omnidiff::git: Repository::open(path), then commit("HEAD"),
+    range("main", "HEAD"), staged() or unstaged() (untracked files included), each changed
+    file an omnidiff::Diff read lazily from the object store, and
+    changed_definitions() across all of them. Qualified names are read from the revision's own
+    go.mod and __init__.py. Built on gix: pure Rust, no network, no C.
+  - omnidiff::Diff::from_texts(before, after, before_path, after_path) diffs two texts named by
+    paths that need not exist, each side in the language its name and contents say.
+    line_operations(side, preset) says what happened to each line, and stats(preset) how big the
+    diff is in inserted, deleted, updated and moved lines (omnidiff::Stats, which adds up across
+    files).
+  - omnidiff::tui::embed::DiffView: one file's diff as the viewer draws it, for another ratatui
+    application to host in a Rect of its own, driven by the keys the host passes on and handing
+    back the ones it has no use for.
+  - A new highlighting option, "Highlight changed spaces at the end of a line" in the M panel
+    (changed_trailing_whitespace): spaces or tabs added, removed or changed after the last
+    character of a line that otherwise stayed the same are highlighted, and so is a blank line of
+    spaces that was added or removed. A file that differs only in whitespace at line ends now shows
+    where. On in --maximal, off in --minimal, which never highlights trailing whitespace.
+  - Vue single-file components (.vue) are diffed as code, with the tree-sitter-grammars Vue
+    grammar, when a file parses without errors; other Vue files keep the line diff
+    (#117).
+  - A one-line installer: curl -fsSL https://ivankovic.github.io/omnidiff/install.sh | sh installs
+    through Homebrew where you have it, the signed apt repository on Debian and Ubuntu (it asks
+    before adding the key), and otherwise the prebuilt binary under ~/.local, checked against
+    the release's SHA256SUMS.txt.
+  Deprecated
+  - omnidiff::diff_strings: its node ids pointed into syntax trees it had already dropped. Use
+    omnidiff::Diff::new.
+  Changed
+  - The fuller highlighting preset is now called Maximal instead of Full: --maximal on the
+    command line, 2 Maximal in the M panel, and RenderOptions::MAXIMAL in the library.
+    --full and RenderOptions::FULL (deprecated) still work.
+  - In a file without a grammar, a line that changed only in its trailing whitespace counts as the
+    same line: --minimal shows it unchanged, --maximal highlights just the whitespace.
+  Security
+  - libz-sys 1.1.33, for RUSTSEC-2026-0544, and zip 9.7.3, for RUSTSEC-2026-0548.
+ReleaseNotesUrl: https://github.com/ivankovic/omnidiff/releases/tag/v0.6.0
+Documentations:
+- DocumentLabel: Documentation
+  DocumentUrl: https://ivankovic.github.io/omnidiff/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
