@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
 
 PackageIdentifier: OpenAEC.OpenCalcStudio
-PackageVersion: 26.46.1
+PackageVersion: 26.48.0
 PackageLocale: en-GB
 Publisher: OpenAEC Foundation
 PublisherUrl: https://github.com/OpenAEC-Foundation
@@ -40,12 +40,18 @@ Tags:
 - ifc
 - quantity-takeoff
 ReleaseNotes: |-
-  - #80: PDFs load again in the web version. The PDF.js worker is emitted as .js instead of .mjs, which web servers without .mjs in their MIME table served as application/octet-stream ("Setting up fake worker failed").
-  - Variants (knownbugs 12, 264): grid, status bar, tail/hours panels, header, summary, structure tree, mobile and wizard total only the active variant. The review centre uses the same totals.
-  - Review centre (knownbugs 11, 13, 14): a post with only empty rows is flagged as missing a price; empty rows under a post whose own price carries the total are not; a rate group without a rate does not count as a price.
-  - #69: Calc writes the shared openaec::cost::estimateItem profile (IFC data → Download (OpenAEC IFCX), or MCP export_ifcx with profile: "openaec") and reads free items with an inline quantity. Proposed shared contract in the IFCX profile document; the full Calc IFCX export is unchanged.
-  Upgrade note: in estimates that use variants, displayed totals can be lower than in 2026.46.0, because rows of variants you did not choose no longer count. Without variants nothing changes. Reports and printing still include all variants (knownbug 165).
-ReleaseNotesUrl: https://github.com/OpenAEC-Foundation/open-calc-studio/releases/tag/v2026.46.1
+  Distribution status: signed GitHub installers, the web app, updater metadata and the public container are available for 2026.48.0. The Snap Store remains on 2026.46.1 (revision 11) because its publication credential expired. Recovery is tracked in #109. The 2026.48.0 Snap archive on this release is available with its own checksum.
+  New in 2026.48.0
+  - Own price libraries: import JSON, CSV/Excel and BMEcat libraries side by side. Review custom column mappings, remember layouts, choose libraries per estimate and manage them through MCP (libraries.*). Re-import keeps stable article links; removing a library keeps entered estimate prices.
+  - Country selection: choose the built-in library per estimate. Countries without a library are marked explicitly. This does not convert prices, supply verified worldwide market rates or set country tax defaults.
+  - Measurement lines: itemised dimensions and quantities under budget items, with BC3 import/export; own item codes and improved column layout.
+  - Excel and calculation: stored formula-result diagnostics, per-estimate FIEBDC rounding and BC3 indirect costs.
+  - PDFs: improved measurement workspace and bundled report fonts for macOS/Linux, including currency/Arabic fallbacks in Typst reports.
+  Validation: 1,953 frontend tests passed, 6 skipped, plus 6 platform-isolation tests and 9 server tests. Native ABI, account configuration, quotation VAT and report-font regressions passed on Windows, macOS and Linux. Windows installers and DLLs are Authenticode-signed; macOS has Apple Accepted notarization and Gatekeeper verification; Linux packages have verified OpenPGP signatures. The public web app was tested with a synthetic CSV, custom mapping, missing prices and remembered mappings.
+  Native project format remains 2.4.0; Windows MSI version is 26.48.0. Calculation rounding can change imported totals: review them against the source budget before approval.
+  Remaining work: draft PR #105 is excluded pending the reports-library dependency; #94 still needs acceptance against the private Presto workbook; #86 country tax defaults and translated starter content are incomplete.
+  Full release notes · Price library guide · Merged PR #108
+ReleaseNotesUrl: https://github.com/OpenAEC-Foundation/open-calc-studio/releases/tag/v2026.48.0
 Documentations:
 - DocumentLabel: User guide
   DocumentUrl: https://github.com/OpenAEC-Foundation/open-calc-studio/blob/HEAD/docs/user-guide.md
