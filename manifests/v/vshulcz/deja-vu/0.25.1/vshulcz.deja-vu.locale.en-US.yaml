@@ -1,0 +1,76 @@
+# Created with deja-vu release workflow using komac v2.16.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: vshulcz.deja-vu
+PackageVersion: 0.25.1
+PackageLocale: en-US
+Publisher: vshulcz
+PublisherUrl: https://github.com/vshulcz
+PublisherSupportUrl: https://github.com/vshulcz/deja-vu/issues
+PrivacyUrl: https://vshulcz.github.io/deja-vu/guide/privacy.html
+PackageName: deja-vu
+PackageUrl: https://vshulcz.github.io/deja-vu/
+License: MIT
+LicenseUrl: https://github.com/vshulcz/deja-vu/blob/HEAD/LICENSE
+ShortDescription: Search Claude Code, Codex and Cursor session history locally
+Tags:
+- aider
+- claude-code
+- cli
+- codex
+- cursor
+- mcp
+- memory
+ReleaseNotes: |-
+  Optional encrypted-at-rest memory (deja init --encrypted, deja lock,
+  deja unlock), per-client access scopes and content-free audit logging,
+  ExitPlanMode / exit_plan_mode hook checks, unified cross-harness MCP and
+  hook dialect routing, faster cold sidecar lookups, and prompt-cache prefix
+  preservation across restarts and compactions.
+  Added
+  - Optional encrypted-at-rest memory store (deja init --encrypted, deja lock, deja unlock) seals derived index files, personal notes, and prompt caches into an encrypted .vault archive with OS keychain or passphrase-derived keys and optional --auto-lock idle eviction, alongside per-client token, project, and write scopes in policy.json and content-free access audit events (#6071, #6169).
+  - ExitPlanMode and exit_plan_mode tool calls route through harness hooks and scope coupled-file and friction plan checks to the active project while deduplicating canonical file pairs (#6151).
+  - PreToolUse, PostToolUse, and Antigravity MCP hooks normalize dialect payloads, coalesce Call-0 framing, prepend causal history on file recall, and route recall surfaces by action mode (#6149).
+  - Expanded after-compaction guide with a visual diff, jq check, full compaction study breakdown and provenance, Cursor archived-chat and dsh v4 troubleshooting notes, and the Trendshift Go repository badge (#6154, #6157, #6159, #6167).
+  Changed
+  - Hash-bucketed cooccur.bin and binary DJSYMM01 .symmap sidecars, manifest-metadata session ranking, and recoffsets.bin-bounded role and recall scans replace full gob decodes and whole-log reads on cold paths. On a 9,455-session index (530 MB records.bin), cold median latency drops from 8,960 ms to 5,213 ms for deja recall, from 950 ms to 629 ms for deja how, and from 914 ms to 828 ms for hook-prompt, while .symmap shrinks from 4.5 MB to 2.1 MB (#6153, #6166).
+  Fixed
+  - Per-session digests, prompt recalls, and tool repairs persist across agent restarts and deja_once Hermes resumes, prompt caches isolate per project and harness, and OpenCode, Command Code, Oh My Pi, and Cline strip or avoid rewriting <deja-recall> markup in prior turns so provider KV prefix caches stay intact (#6155, #6160, #6165, #6169).
+  - hook-prompt skips store-wide transcript directory walks when a host sends a null transcript_path, reading the indexed transcript path instead and bounding live session resolvers so large stores under disk load do not hit the 10-second hook deadline. From @vaibhav8a (#6162, #6163, #6165).
+  - MCP recall rereads buckets/ once from a fresh directory listing when an in-flight index append retires a folded postings overlay, preventing transient ENOENT failures while still reporting persistently missing or damaged overlays. Reported by @pedh, fixed by @vaibhav8a (#6168, #6170).
+  - On Windows, deja index, Reasonix, and detached background refresh, version, and warmup children start without flashing console windows when launched from GUI hosts or scheduled tasks, and Hermes subprocesses force UTF-8 encoding. From @vaibhav8a (#6156, #6158, #6161, #6166).
+  - Filtered noisy prompt localization targets, viewer command false positives, and unpinned live rules, snapshotted the MCP HTTP request handler per server instance to prevent a cancellation race, and quoted SQLite workspace strings in Devin tests (from @shgpavel) (#6148, #6150, #6152).
+  Changelog
+  Features
+  - feat(hooks,mcp): unify cross-harness memory routing and dialect hooks (#6149)
+  - feat(plan): wire plan-exit hooks and scope coupled-file plan checks (#6151)
+  - feat(security): add encrypted-at-rest vault, client scopes, and access audit log (#6071)
+  Fixes
+  - fix(hooks): bound live transcript and session resolvers and isolate prompt caches (#6165)
+  - fix(hooks): keep prompt cache markup idempotent and seal cache files (#6169)
+  - fix(hooks): keep the prompt hook off a store-wide session search (#6162) (#6163) (@vaibhav8a)
+  - fix(hooks): persist session recall and digest state across restarts (#6160)
+  - fix(index): reread the token catalog when an append retires an overlay (#6168) (#6170) (@vaibhav8a)
+  - fix(mcp): snapshot request handler per server instance (#6148)
+  - fix(reasonix): hide child console windows on Windows (#6161)
+  - fix(recall): filter noisy prompt targets, viewer fixes, and live rules (#6150)
+  - fix(windows): background children no longer open console windows (#6156) (#6158) (@vaibhav8a)
+  - fix: harden symmap cache, background exec, hermes utf-8, and plan reads (#6166)
+  Performance
+  - perf(index,cli): speed up cold hooks, recall, and sidecar lookups (#6153)
+  Documentation
+  - docs(guide): add visual diff, jq check, and FAQ to after-compaction page (#6157)
+  - docs(guide): cover Cursor archived chats, dsh v4 error, and home links (#6159)
+  - docs(guide): fix compaction study provenance and add full breakdown (#6167)
+  - docs: add Trendshift Go repository of the day badge to root and magpie READMEs (#6154)
+  - docs: prepare 0.25.1 release (#6172)
+  Other
+  - chore: pin the manifests to 0.25.0 (#6146)
+  - test(devin): quote the fixture workspace as an SQL string (#6152) (@shgpavel)
+  Install
+  curl -fsSL https://raw.githubusercontent.com/vshulcz/deja-vu/main/install.sh | sh
+  go install github.com/vshulcz/deja-vu/cmd/deja@v0.25.1
+  brew install deja-vu
+ReleaseNotesUrl: https://github.com/vshulcz/deja-vu/releases/tag/v0.25.1
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
