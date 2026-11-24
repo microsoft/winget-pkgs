@@ -1,0 +1,51 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Stack-Cairn.K-brain
+PackageVersion: 0.107.46
+PackageLocale: zh-CN
+Publisher: Stack-Cairn
+PublisherUrl: https://github.com/Stack-Cairn
+PublisherSupportUrl: https://github.com/Stack-Cairn/K-brain/issues
+PackageName: K-brain
+PackageUrl: https://github.com/Stack-Cairn/K-brain
+License: Apache-2.0
+LicenseUrl: https://github.com/Stack-Cairn/K-brain/blob/HEAD/LICENSE
+ShortDescription: 基于 Go 构建、运行在终端里的编程 Agent。
+Description: 氪脑（K-brain）是运行在终端里的编程 Agent，用 Go 构建，也可作为其他前端的后端底座。读代码、改文件、执行命令、验证结果，在同一会话中完成任务。运行 kn 开始使用，取自“氪脑”拼音 Ke Nao。
+Tags:
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  修复
+  - Gemini 3/4 思考档位不再报 400。
+    - Gemini 3、Gemini 4、gemini-*-latest 和 robotics-er-2 改为发送 thinkingLevel，不再发送 thinkingBudget，修复 Gemini 4 返回的 400 INVALID_ARGUMENT: Thinking budget is not supported for this model。
+    - 档位按官方规范使用大写枚举（MINIMAL / LOW / MEDIUM / HIGH / XHIGH）。
+    - 档位按型号限定：
+      - gemini-4-neon / gemini-4-hydrogen 支持 XHIGH；
+      - Gemini 4 和 gemini-3.8-flash 不发送 MINIMAL；
+      - gemini-3.1-pro-preview 保留 MEDIUM。
+    - Gemini 2.x 和无法识别的中转别名仍使用 thinkingBudget。
+    - 使用完整地址时，模型名从 URL 中解析。（#249，via #250，感谢 @Is14w）
+  - 兼容 Vertex AI 地址。
+    - 基础地址可以填 https://aiplatform.googleapis.com/v1/publishers/google（包括区域端点），也可以填以 /models 结尾的中转地址，不会再被重复拼上 /v1beta/models。
+    - Vertex AI Express Mode 不提供模型列表接口，拉取模型时会提示手动添加模型 ID。
+    - 带 OAuth 头时，从 Model Garden 拉取模型列表，并支持翻页。（#249，via #250）
+  - 兼容原生 JSON 数组流。 Gemini 和 Vertex AI 的流式响应如果是 [{...}, {...}] 数组格式，也能正常解析，单块大小上限和断流重试的处理不变。完整地址里的 :streamGenerateContent 会自动补上 alt=sse。（#249，via #250）
+  兼容性
+  - 只影响 Gemini 服务商。
+  其他
+  - 新增 Gemini 思考档位、Vertex 路径、模型列表翻页和 JSON 数组流的测试。（#250）
+ReleaseNotesUrl: https://github.com/Stack-Cairn/K-brain/releases/tag/v0.107.46
+InstallationNotes: 在终端中运行 kn。首次使用前，请在 %USERPROFILE%\.k-brain\config.json 中配置模型提供商。
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://github.com/Stack-Cairn/K-brain/blob/main/README.zh-CN.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
