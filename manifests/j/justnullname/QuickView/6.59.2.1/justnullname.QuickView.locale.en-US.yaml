@@ -1,0 +1,68 @@
+# Created with komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: justnullname.QuickView
+PackageVersion: 6.59.2.1
+PackageLocale: en-US
+Publisher: justnullname
+PublisherUrl: https://github.com/justnullname
+PublisherSupportUrl: https://github.com/justnullname/QuickView/issues
+PackageName: QuickView
+PackageUrl: https://github.com/justnullname/QuickView
+License: GPL-3.0
+LicenseUrl: https://github.com/justnullname/QuickView/blob/HEAD/LICENSE
+ShortDescription: A blazingly fast, lightweight image viewer for Windows powered by Direct2D and SIMD.
+Description: |-
+  QuickView is a high-performance image viewer for Windows, built with Direct2D hardware acceleration
+  and Google Highway SIMD optimization. It supports 80+ image formats including JPEG XL, AVIF, HEIC,
+  WebP, and RAW files. Features include HDR display support, portable mode, and GPU-accelerated rendering.
+Tags:
+- avif
+- direct2d
+- hdr
+- heic
+- image-viewer
+- jxl
+- photo-viewer
+- raw
+- simd
+- webp
+ReleaseNotes: |-
+  QuickView v6.59.2.1 Stable Release Notes
+  We are excited to announce QuickView v6.59.2.1 Stable!
+  This major feature and stability release introduces Chromium-style Auto Pan, a streaming Highway SIMD pipeline for giant PNGs, an overhauled end-to-end HDR color & Gain Map pipeline, TinyEXR v3.4.0 with Win32 multithreading, and critical stability fixes across Titan huge-image switching, Explorer synchronization, and AI networking.
+  📦 Installation & Updates
+  Get it from Microsoft
+  - Microsoft Store (Recommended): Click the badge above or visit Microsoft Store — QuickView (9N1D85F032CC), or run:
+    winget install 9N1D85F032CC
+  - Scoop (#257): Now officially supported via the built-in manifest (bucket/quickview.json):
+    scoop install https://raw.githubusercontent.com/justnullname/QuickView/main/bucket/quickview.json
+  - WinGet: winget install justnullname.QuickView
+  - Installer / Portable: Download QuickView_Installer_v6.59.2.1_*.exe or QuickView_v6.59.2.1_*.zip from the assets below.
+  ✨ New Features & Performance
+  - [#309] Zero-Config Chromium Power-Law Auto Pan: Replaced legacy linear speed sliders with a C¹-continuous axial-deadzone power-law curve supporting both Click (Toggle) and Drag (Hold) modes, driven by DwmFlush() VSync timing, Direct2D anchor visuals, and full Compare-pane / Minimap synchronization.
+  - [#311] Giant PNG Streaming Decoder: Added lock-free SPSC ring decoding with streaming zlib-ng raw inflate and Google Highway SIMD PNG row unfiltering for fast, low-memory loading of huge non-interlaced PNGs.
+  - TinyEXR v3.4.0 & Core Dependencies Upgrade: Upgraded TinyEXR to v3.4.0 with native Win32 thread pool synchronization (SRWLOCK / CONDITION_VARIABLE), alongside updated third-party decoders and ncnn Vulkan shader caches.
+  - Zero-Compromise Binary Slimming (-487 KB): Stripped unused TinyEXR ZSTD code (EXR_NO_ZSTD), dropped the legacy Skylake-X HWY_AVX3 target while preserving SSE4 / AVX2 / AVX3_ZEN4, and moved pure-cold setup/config translation units to /clang:-Oz—reducing QuickView.exe by ~487 KB with zero hot-path degradation.
+  🎨 End-to-End HDR & Color Pipeline
+  - [#304, #306] Native HDR Decoding & Two-Stage Gamut / Highlight Mapping:
+    - Decodes PQ/HLG JXL as native 16-bit EncodedHdr codewords without forced 80-nit scaling and propagates true PixelColorMetadata + embedded ICC profiles across MasterWarmup, MasterBackingStore, LODCache, and --decode-worker IPC v2 (SEC_RESERVE up to 16 bpp).
+    - Overhauled ToneMapHdrToSdr with decoupled scale-invariant OKLab gamut compression and highlight roll-off, luminance-coupled ITU-R BT.2100 HLG OOTF, proper 8-bit BGRA8888/RGBA8888 unpremultiplication, and bitwise Inf/NaN sanitization.
+    - Added RGB JPEG Gain Map (JCS_EXT_RGBA) & ISO/TS 21496-1 support with SDR monitor ICC routing, scRGB detection for .jxr/.wdp in DecodeWorker, ACES AP0 matrices, and fixed JXL alpha double-premultiplication & LibRaw SDR HEIF mislabeling.
+  🐛 Stability, Security & UI Fixes
+  - Titan Huge-Image & Explorer COM Re-entrancy Crash (0xc0000409): Removed cross-process Explorer COM RPCs from mutex-held ImageEngine telemetry/prefetch paths and D2D BeginDraw loops, added STA COM re-entrancy protection, coalesced Explorer folder view queries per navigation step, and hardened LODCache high-bit-depth / >1 MB tile slab handling.
+  - >1 GB JXL 1×1 Fake Base Crash (0xc0000005): Separated true source dimensions (Width/Height metadata) from the 4-byte 1x1 placeholder buffer dimensions so downstream bilinear resizers never read out of bounds.
+  - [#303, #305, #308, GHSA-r5qf-q487-gwcq] Codec & Plugin Hardening: Fixed heap OOB/overflows & inline/Big-Endian SHORT tags in MiniTiff, heap-allocated LibRaw to prevent stack overflow, resolved a FreeLibrary Use-After-Free in SR plugin parameter descriptors, fixed 32-bit float PSD transparency & guard leaks, and tightened Wuffs PNG allocation bounds.
+  - AI HTTP Transient Retry: Added zero-dependency, -fno-exceptions-safe native WinHTTP retry logic for transient 408/429/5xx/529 responses (honoring Retry-After headers with immediate 50 ms cancellation checks).
+  - [#144, #269, #281, #283, #284, #310, #312] Window, UI & Localization: Added Windows 10 accent borders, square corners & DPI/MSIX taskbar icon fixes; fixed strip-image window sizing & fullscreen/maximized Auto zoom; improved light-theme menu contrast, smooth gallery wheel scaling, localized rename/delete dialogs across all 8 languages, Russian translation fixes, and resolved CodeQL security alerts.
+  ❤️ Special Thanks
+  - @cmixed for Auto Pan (#309)
+  - @Dimmitrius for Russian localization improvements (#310)
+  - @Mattbusel for inspiring the AI HTTP retry improvements (#307)
+  Full Changelog: v6.57.14.2...v6.59.2.1
+ReleaseNotesUrl: https://github.com/justnullname/QuickView/releases/tag/v6.59.2.1
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/justnullname/QuickView/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
