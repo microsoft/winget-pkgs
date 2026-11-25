@@ -1,0 +1,63 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: jdx.usage
+PackageVersion: 7.3.0
+PackageLocale: en-US
+Publisher: jdx
+PublisherUrl: https://jdx.dev/
+PublisherSupportUrl: https://github.com/jdx/usage/issues
+Author: Jeff Dickey
+PackageName: usage
+PackageUrl: https://usage.jdx.dev/
+License: MIT
+LicenseUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2025 Jeff Dickey
+CopyrightUrl: https://github.com/jdx/usage/blob/HEAD/LICENSE
+ShortDescription: A specification for CLIs
+Description: |-
+  Usage is a spec and CLI for defining CLI tools. Arguments, flags, environment variables, and config files can all be defined in a Usage spec. It can be thought of like OpenAPI (swagger) for CLIs. Here are some potential reasons for defining your CLI with a Usage spec:
+
+  - Generate autocompletion scripts
+  - Generate markdown documentation
+  - Generate man pages
+  - Generate type-safe SDK client libraries for TypeScript, Python, and Rust
+  - Use an advanced arg parser in any language
+  - Scaffold one spec into different CLI frameworks-even different languages
+  - [coming soon] Host your CLI documentation on usage.sh
+Moniker: usage
+Tags:
+- cli
+- spec
+ReleaseNotes: |-
+  Added
+  - (lib) New usage_rs::completion::Completion subcommand, available with the completions feature (#1624, @jdx). Until now each tool wrote its own completion command: some had --install, while others printed a script for the user to redirect by hand. You can now mount the shared command instead:
+    use usage_rs::completion::Completion;
+    #[derive(Subcommands)]
+    enum Commands {
+        /// Generate shell completions
+        Completion(Completion),
+    }
+    // in the run function:
+    completion.run("ex", &mut std::io::stdout())?;
+    Any tool that mounts it gets these commands:
+    ex completion fish                     # print the script, e.g. `ex completion fish | source`
+    ex completion fish --install           # write it where fish looks for it
+    ex completion fish --install --force   # also replace a file usage did not generate
+    - Shells: bash, elvish, fish, nu/nushell, powershell/pwsh and zsh are accepted. Any other shell name fails to parse.
+    - Flags: --force requires --install.
+    - Scripts: The scripts are the short callback scripts. They contain no spec and don't need the usage binary. On every Tab they ask the installed tool for candidates, so they stay correct when the tool is upgraded.
+    - Installing: --install never edits a startup file. If a shell needs a line added once, the command prints that line after the install path.
+    - Errors: Completion::run returns Error::Install or Error::Output. A closed pipe (for example ex completion zsh | head) is not treated as an error.
+    - Testing: Completion::run_in takes an explicit Env, so tests can install without touching the real home directory.
+    The Rust completions guide (docs/rust/completions.md) now uses Completion in place of the hand-written example.
+
+  💚 Sponsor usage
+  usage is built and maintained by @jdx, an open source developer at entire.io, the title sponsor of his open source work.
+  If usage powers CLI specs, docs, or completions for a tool you maintain or use, please consider becoming an individual or company sponsor. Your support funds ongoing development and helps keep usage fast, free, and independent.
+ReleaseNotesUrl: https://github.com/jdx/usage/releases/tag/v7.3.0
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://usage.jdx.dev/cli/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

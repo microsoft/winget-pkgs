@@ -1,0 +1,39 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: zsuroy.ctty
+PackageVersion: 1.4.0
+PackageLocale: en-US
+Publisher: zsuroy
+PublisherUrl: https://suroy.cn/
+PublisherSupportUrl: https://github.com/zsuroy/ctty/issues
+PackageName: ctty
+PackageUrl: https://github.com/zsuroy/ctty
+License: MIT
+LicenseUrl: https://github.com/zsuroy/ctty/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 zsuroy
+ShortDescription: Terminal UI that manages SSH, serial, telnet, SFTP, FTP, WebDAV and S3 connections.
+Description: |-
+  ctty is a single-binary terminal connection manager. It reads an existing OpenSSH configuration
+  and adds serial, telnet, SFTP, FTP, WebDAV and S3 clients beside it, so hosts already configured
+  for ssh can be browsed, searched and connected to from one interface.
+
+  Saved sites are stored as separate JSON files and passwords are kept in a local AES-256-GCM
+  credential vault under %APPDATA%\ctty. Each protocol also has a non-interactive subcommand with
+  JSON output for use from scripts. This package installs the Windows console binary, so it runs in
+  Windows Terminal, PowerShell, cmd, or any other terminal rather than in its own window.
+Tags:
+- ftp
+- sftp
+- ssh
+- telnet
+- terminal
+- tui
+- webdav
+ReleaseNotes: |-
+  Added
+  - 🔌 Serial Assistant — serial devices opened from the main TUI now land in a built-in console instead of suspending to a raw terminal. The monitor gives you a scrollable receive pane (PgUp/PgDn, mouse wheel, Alt+↑/↓) with LIVE/PAUSED +N follow-on-scroll, timestamps (F3), ASCII / HEX / aligned HEX+ASCII receive views (F1), HEX send (F2), live RX/TX rate and byte counts, a send box with ↑/↓ history, drag-a-file-to-send, loop send (F5, interval via F6/F7), raw RX logging (Ctrl+L) and buffer search with next/previous jumps (Ctrl+F). Eight quick-command slots per page fire with Alt+1..8 (Tab to focus, Alt/Ctrl+←/→ to page); the F9 editor adds, renames, switches encoding and deletes entries, and each slot keeps its own ASCII/HEX flag so a global send-mode change can never mis-decode a plain AT command or split a binary frame. F10 persists everything to ~/.config/ctty/serial-prefs.json (HEX send/receive, timestamps, HEX+ASCII view, line ending CRLF/CR/LF/LFCR/none with CRLF-on-send, loop interval, buffer cap 100–50000 lines, log directory and append mode, quick-key modifier, page key, TX/RX prefix and [label] prefix toggles). That quick-key setting (Auto / Alt / Option) also fixes Alt+1..8 on a stock Mac, where Option emits ¡™£¢… instead of ESC+1; session toggles (F1/F2/F3/F8) apply immediately without overwriting the saved defaults. F8 hands the port to the classic raw bridge (Ctrl+] returns). A device can also choose Raw passthrough, Assistant monitor, or Follow settings, with a matching global Serial connect mode (Auto / Assistant / Raw) resolved CLI flag → device → global → built-in default (raw for ctty serial, monitor from the TUI); ctty serial <name|device> connects straight away (--raw, --monitor, --baud), and list/info now handle Mark/Space parity and 1.5 stop bits.
+  - 📡 Telnet Assistant — connecting to a host opens an assistant-style plain-text terminal instead of a bare passthrough: timestamps, RX/TX counters with a live rate, input history, search with match jumping, session logging, and F8 hand-off to a raw passthrough terminal (Ctrl+] returns). The receive pane scrolls by page, wheel or Alt+↑/↓, and a view parked in history is not dragged along by arriving bytes (PAUSED +N, End returns to live). Eight plain-text quick commands per page fire with Alt+1..8 (Tab to focus, Alt/Ctrl+←/→ to page, F9 edits the selected slot), and F10 persists display mode (ASCII by default, or HEX), Render ANSI colours (on by default — peer SGR codes render while other control sequences are filtered, and HEX view plus logs keep the raw bytes), Show TX/RX prefix (off by default), Show [label] on quick TX (on by default) and the quick-key modifier (Auto / Alt / Option, so Alt+1..8 also work on a stock Mac where Option sends ¡™£¢…). All traffic goes through the shared RFC 854 session, so IAC negotiation, CR-NUL handling and the refusal-first policy stay active, NAWS reports the monitor's real window size, and automatic login answers login:/Password: prompts inside the monitor with the credentials echoed as TX. Each device carries a connect mode (follow / assistant / raw) plus a global Telnet connect mode (auto / assistant / raw, auto keeping the historical default), and ctty telnet <name|host[:port]> [--raw|--monitor] [--port N] connects from the shell. As a text terminal it deliberately has no HEX send/receive, MODBUS frames, configurable line endings (NVT is always CRLF), timed resend or binary file transfer — those are serial-port debugging concepts.
+ReleaseNotesUrl: https://github.com/zsuroy/ctty/blob/HEAD/CHANGELOG.md#140---2026-11-24
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

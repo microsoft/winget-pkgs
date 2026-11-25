@@ -1,0 +1,112 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: bornova.numara
+PackageVersion: 8.0.0
+PackageLocale: en-US
+Publisher: Timur Atalay
+PublisherUrl: https://github.com/bornova
+PublisherSupportUrl: https://github.com/bornova/numara-calculator/issues
+Author: borova
+PackageName: Numara
+PackageUrl: https://github.com/bornova/numara-calculator
+License: MIT
+LicenseUrl: https://github.com/bornova/numara-calculator/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2021 Timur Atalay
+CopyrightUrl: https://github.com/bornova/numara-calculator/blob/master/LICENSE
+ShortDescription: Simple notepad calculator built on Electron, powered by Math.js
+Tags:
+- calculator
+- electron
+- math
+ReleaseNotes: |-
+  # Numara Calculator v8.0.0
+
+  Numara v8.0.0 is a major release featuring cross-page variable references, bottom-bar page tabs, a redesigned User-Defined Functions & Units manager, multi-function plotting, live selection statistics, offline PWA support, expanded number formats and currencies, and a modular codebase overhaul with seamless v7-to-v8 migration.
+
+  ---
+
+  ## Highlights & New Features
+
+  ### Cross-Page References (`page()`)
+  • Reference variables from any other page using `page("Page Name")` (for example, `r = page("Rates")` followed by `r.hourly * 8`, or inline as `page("Rates").hourly * 2`).
+  • Autocomplete suggestions support both page names inside `page("...")` and exported variable properties on referenced pages.
+  • Clicking a referenced page link in the output panel jumps directly to that page, and hovering displays its exported variable count and names.
+  • Automatic cross-page cache invalidation recalculates dependent pages when referenced pages are modified, renamed, or deleted, with circular/self-reference detection.
+
+  ### Pages, Tabs & Inline Management
+  • **Page Tabs mode**：Set **Page list position** to `Tabs` to display pages as horizontal, scrollable tabs directly in the bottom action bar with left/right scroll arrows and a right-click context menu (`Rename`, `Duplicate`, `Delete`).
+  • **Auto & Docked sidebar**：`Auto` automatically docks the page list on wide windows (`> 900px`) and switches to a floating drawer on narrow screens. Drag the docked edge to resize (`210px` to `510px`), or double-click to reset (`265px`).
+  • **Inline renaming**：Rename pages directly in place via the rename icon, by double-clicking a page item or tab, or from the tab/mobile context menu—replacing the old rename modal.
+  • **Instant page creation**：Clicking **New page** or pressing `Cmd/Ctrl+N` immediately creates and activates a new page with a subtle title flash.
+  • **Pointer drag-and-drop sorting**：Smooth custom pointer-based drag reordering in both the page list and page tabs (with touch-friendly long-press activation on mobile).
+  • **Per-page state preservation**：Cursor position, undo/redo history, and folded Markdown sections are remembered per page.
+
+  ### Redesigned User-Defined Functions & Units (UDFU)
+  • Replaced the raw JavaScript CodeMirror editors with a structured form-and-list UI for adding, editing, and deleting functions, constants, objects, and custom units.
+  • **Functions tab**：Define functions, zero-argument functions (`()`), constants, plain namespace objects, and multi-line control-flow JavaScript bodies with direct access to Math.js functions and constants as well as `math`, `luxon` (`DateTime`), `nerdamer`, and `formulajs`.
+  • **Units tab**：Define custom units with base definitions, comma-separated aliases, and prefix sets (`none`, `short`, `long`, `binary_short`, `binary_long`).
+  • Added delete confirmation prompts for user-defined functions and units, plus safe restoration of overridden built-in Math.js functions and units when definitions are removed.
+
+  ### Expanded Number Formats & Currencies
+  • **Explicit Number Format setting**：Choose between `1,234.56`, `1.234,56`, `1 234.56`, and `1 234,56`, paired with a **Thousands separator** toggle and **Copy with answer** option.
+  • **Expanded currency coverage**：Added symbols and units for all Frankfurter-supported currencies (including Nordic `kr` / `kr.`, `zł`, `Kč`, `R$`, `₺`, `₪`, `₱`, `฿`, `₫`, `₴`, `₦`, `Rp`, `RM`, and crypto symbols such as `₿`, `Ξ`, `Ł`, `₳`).
+  • **Dynamic Currency toggle**：Turning **Currency** on or off takes effect immediately without restarting; when disabled, currency symbols and ISO codes remain usable as standalone units without exchange-rate conversions.
+  • Improved currency formatting for negative prefix values, `Fraction` currencies, and high-precision `BigNumber` amounts.
+
+  ### Multi-Function Plotting & Smart Auto-Range
+  • **Multi-series overlay**：Toggle function chips in the plot dialog header to overlay and compare multiple single-variable functions from the current page on the same graph.
+  • **Smart auto-domain scaling**：Auto Range automatically frames roots, vertices, intersections, discontinuities, and poles, while still allowing custom manual `x`/`y` axis domains (with localized number input support).
+  • **Expanded expression compatibility**：Plot functions can reference page variables, object/page properties, helper functions, Unicode parameters, percentages, and `BigNumber` values.
+
+  ### Live Selection Statistics
+  • Selecting two or more lines in the editor displays live **Sum**, **Avg**, and **Count** statistics in the bottom status bar for numeric answers in the selection.
+  • Clicking the statistics summary copies the sum to the clipboard (respecting the **Copy with answer** thousands separator setting).
+
+  ### UI Zoom Level & Typography Overhaul
+  • **Zoom level setting**：Scale the overall interface (`Smaller`, `Normal`, `Larger`) across typography, icons, controls, and panels.
+  • **Variable fonts**：Migrated to variable `Google Sans` and `Roboto Mono` WOFF2 fonts with integer-pixel sizing and layout metrics for crisp rendering across platforms and DPIs.
+  • Migrated editor font sizes from `rem` to explicit `px` (`12px` to `16px`) and updated line height options (`17px` to `34px`).
+
+  ### Calculation Engine Enhancements
+  • **Incremental line caching**：Unchanged prefix lines reuse cached evaluation results for faster editing on long pages, with mutation isolation for cached objects and matrices.
+  • **Date math improvements**：Added date subtraction (`01/20/2026 - 01/15/2026`, `... in hours`), short duration aliases (`sec`, `min`, `hr`), chained durations, and mixed `Fraction`/`BigNumber` duration support.
+  • **Percentage ratios**：Support natural ratio queries such as `20 as % of 80` and `30 is what % of 120`.
+  • **Base & numeric improvements**：Added `BigInt` support for `bin`, `oct`, and `hex` conversions, improved `Fraction` and `BigNumber` interoperability across `formulajs.*` and `DateTime.*`, preserved small non-zero numbers across exponent limits, and cleaned floating-point noise in `Complex` outputs.
+  • **Safer line labels & continuations**：Preserved object/range colons and string quotes without misinterpreting them as line labels or comments, and guarded `Continue from previous line` against non-numeric/non-date results.
+
+  ### Progressive Web App (PWA) & Offline Support
+  • Added a full service worker (`sw.js`) and web app manifest (`numara.webmanifest`) so the web app at `numara.io` can be installed and used completely offline.
+  • Versioned precaching ensures clean cache upgrades on new releases, excludes desktop-only assets from web precache, strips redirect flags for WebKit/Safari navigation compatibility, and handles cache quota errors gracefully.
+  • Improved mobile and tablet ergonomics, including desktop-UA iPadOS detection and touch-friendly page menus.
+
+  ### Desktop App & Folder Sync Enhancements
+  • **System tray / menu bar mode**：Keep Numara running in the macOS menu bar or Windows/Linux system tray, with quit confirmation when closing from tray mode.
+  • **Start at login**：Optional automatic startup on macOS and Windows (starts hidden when tray mode is enabled).
+  • **Close app on Esc key**：Optional setting to hide/minimize the desktop window on `Esc` (safely ignored while modals, dropdowns, search, autocomplete, select pickers, or inline renames are active).
+  • **Multi-monitor window bounds**：Restores window positions safely across monitor changes and clamps off-screen or oversized bounds onto connected displays.
+  • **Two-way Folder Sync upgrades**：Added external file rename detection (preserving page IDs and active state), external file deletion handling, `.num`-only watcher filtering, transient file-lock retries, debounced watcher updates, and flush-on-unload persistence.
+  • **Multi-file startup & application menu**：Queues multiple `.num` files opened at startup, resolves relative paths on second-instance launches, and restructures the native macOS/Linux application menu.
+
+  ---
+
+  ## UI, Editor & Accessibility Improvements
+
+  • Added a **Search** menu item in the More dropdown, mounted the Find & Replace panel cleanly inside the main panel, added live match updates while typing, and allowed Find/Replace shortcuts while focused in search inputs.
+  • Added **Truncate answers** support across both side-by-side and `Below Expression` answer modes.
+  • Improved Markdown section folding with upward heading scanning on `Ctrl+Q`, custom Lucide ellipsis fold markers, and fold toggling without redundant recalculations.
+  • Improved dark-theme printing by forcing light color scheme and black text in `@media print`.
+  • Added `Cmd/Ctrl+,` shortcut to open Settings, visual copy flash feedback on copied answers, and expanded right-click context menus to support copying plot expressions and non-answer lines.
+  • Refined modal dragging and integer-pixel centering, fixed rapid modal reopen during UIkit hide transitions, and updated custom theme color sanitization.
+  • Improved tokenizer handling for string literals containing `#` or `//`, Unicode member names, complex constants, and currency codes.
+
+  ---
+
+  ## Security & Reliability
+
+  • **Renderer & worker sandboxing**：Enabled Electron `sandbox: true` alongside `contextIsolation: true` and `nodeIntegration: false`, added a strict Content Security Policy (CSP), blocked unexpected window navigation, restricted external links to `http:`/`https:`, and locked down network APIs (`fetch`, `XMLHttpRequest`, `WebSocket`, `EventSource`, `importScripts`) inside the calculation Web Worker.
+  • **XSS & prototype pollution hardening**：Escaped dynamic content across tooltips, notifications, print views, page lists, and autocomplete hints, and blocked reserved prototype keys (`__proto__`, `constructor`, `prototype`) and invalid identifiers in UDF/UDU definitions.
+  • **Resilient storage**：Consolidated `localStorage` under a single cach
+ReleaseNotesUrl: https://github.com/bornova/numara-calculator/releases/tag/v8.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

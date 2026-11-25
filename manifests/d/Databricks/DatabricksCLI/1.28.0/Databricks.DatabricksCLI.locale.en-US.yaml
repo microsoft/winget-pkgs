@@ -1,0 +1,61 @@
+# Created with komac v2.9.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+
+PackageIdentifier: Databricks.DatabricksCLI
+PackageVersion: 1.28.0
+PackageLocale: en-US
+Publisher: Databricks
+PublisherUrl: https://databricks.com/
+PublisherSupportUrl: https://github.com/databricks/cli/issues
+PackageName: DatabricksCLI
+PackageUrl: https://github.com/databricks/cli
+License: DB license
+LicenseUrl: https://github.com/databricks/cli/blob/HEAD/LICENSE
+ShortDescription: Databricks Command Line Interface
+Tags:
+- command-line-interface
+- databricks
+ReleaseNotes: |-
+  CLI
+  - Retry transient errors in fs commands: fs cp to a UC Volume from another Volume or DBFS (files up to 8 MiB) on HTTP 503, DBFS uploads when the upload stream is lost, and stat, read and list on UC Volumes on HTTP 500. (#7607, #7763, #7839)
+  - databricks auth profiles --skip-validate now omits the Valid column instead of reporting NO for every profile. (#7638)
+  - Fix Ctrl-C taking about 10 seconds to stop databricks aitools install, update or uninstall while it runs a coding agent's CLI, and retry reading an agent's config on Windows while the agent rewrites it. (#7832, #7870)
+  - Automatic installation of Databricks AI tools no longer asks in containers or installs for the first time without a terminal, no longer runs as root in another user's home, keeps newer skills you installed, no longer hints to install what it is about to install, and on Linux and macOS stops the calling script on Ctrl-C. (#7828, #7834, #7874, #7888, #7890, #7901)
+  - Wait before retrying a failed automatic install of Databricks AI tools, starting at 5 minutes and doubling after each failure, so a skills source or coding agent CLI that stays broken no longer slows down each of the next commands. (#7900)
+  - databricks aitools install now cancels the agent picker on Esc. (#7721)
+  - databricks aitools uninstall --skills now fails when its value names no skill instead of removing every skill, and aitools update and uninstall no longer prompt when a coding agent runs them; with skills in both scopes they fail and ask for --scope. (#7873)
+  - databricks aitools install --skills-only and databricks aitools update no longer mix skill files with the Databricks plugin: install skips agents that already have the plugin, and update no longer replaces skill files from a --skills-only install made with this release or later while the agent's CLI was on PATH. To keep skill files from an earlier --skills-only install, run databricks aitools install --skills-only again with the agent's CLI on PATH. (#7831, #7903)
+  - apps init no longer suggests installing skills to Codex and Copilot users who installed the Databricks plugin with databricks aitools install. (#7830)
+  - Fix databricks auth login failing with data passed to Set was too big on macOS and Windows for OAuth tokens too large for one keyring item. (#7845)
+  - Fix the token storage mode (auth_storage) being read from the file named by DATABRICKS_CONFIG_FILE instead of the config file the profile was loaded from. (#7733)
+  - databricks auth login no longer waits for the browser that the default opener starts to close before it continues. (#7551)
+  - Allow databricks auth docker configure when several profiles match one workspace; the chosen profile is recorded for the registry and shown by databricks auth docker host. (#7383)
+  - Show the HTTP status, error code and endpoint when an API error has no message, instead of a bare Error: , and the HTTP status and path for Files API errors that used to show an empty databricks-api error:. (#7800, #7839)
+  - AI agents can now submit feedback without confirmation; --yes/-y is deprecated, and agents passing --yes=false now get an error. (#7795)
+  - Log /.well-known/databricks-config fetch failures with a transient HTTP status (408, 429, or 5xx other than 501) at debug level instead of as a warning, like timeouts. (#7912)
+  - Fix interactive list output sometimes dropping or reordering a page of rows. (#7804, #7914)
+  - Allow databricks sandbox forward to forward remote ports below 10000. The sandbox refuses a few reserved platform ports with an error that names the port. (#7861)
+  - Breaking: databricks sandbox ssh now uses local SSH keys and works with sandboxes created through the SDK or API; it no longer accepts --port and needs Python 3 and openssh-server in the sandbox. Add databricks sandbox ssh-setup to configure native SSH and SCP. (#7588, #7589, #7590)
+  - databricks ssh connect to serverless CPU compute now defaults to environment version 5, so the first connection after upgrading starts a new server; pass --environment-version 4 to keep the old one. (#7847)
+  - databricks ssh connect now downloads the SSH server binaries from PyPI when GitHub is unreachable, using PIP_INDEX_URL or index-url from the per-user pip config over HTTPS only, and checks SHA-256 digests. (#7852)
+  AI Runtime
+  - Breaking: compute.pool_id is no longer accepted in AIR workload YAML; use compute.accelerator_pool_id. (#7698)
+  - databricks air convert-to-dabs handles an existing output directory better: it gives the right guidance when the directory already holds the workload's bundle, --force no longer replaces a different bundle or an alternate root file, re-converting removes stale sidecars, and git-pinned code outside the bundle gets an --output-dir suggestion. (#7835, #7853, #7857, #7866)
+  - air list and air get now find the AI Runtime task anywhere in a multi-task job; a job with several such tasks lists one row per task (so run_id is no longer unique in air list -o json), and both report task_key (air get --task-key selects one). air list --all-status now orders runs by submission time instead of by their latest attempt's start. (#7632)
+  - Update fallback messages for pending AI Runtime runs when AIR does not report a status reason. (#7899)
+  - air run -o json now reports config-validation errors as a JSON error envelope, with UNAUTHENTICATED, INVALID_ARGS or the new PERMISSION_DENIED code. (#7864)
+  Bundles
+  - Bundle commands no longer hang after a request timeout on a dead HTTP/2 connection. (#7723)
+  - Fix a panic when the local Terraform state is removed after it is pulled and before it is migrated to the direct engine, for example by a concurrent bundle deploy. (#7778)
+  - The direct deployment engine now uses a Lakebase or postgres catalog that a failed create request still created, instead of failing the deploy. (#7801)
+  - bundle deploy and bundle run for apps now succeed when the app's compute is already active or starting, and deploy the app when the deployment triggered by start failed. (#7709, #7780)
+  - Add thumbnail_path to the apps resource, so bundle deploy sets, updates and deletes the thumbnail shown for the app in the Apps UI. (#7728)
+  - Fix bundle commands failing on a notebook or file path with a colon in its first segment, such as the default workspace notebook name New Notebook 2026-10-28 12:17:43.ipynb. (#7851)
+  - bundle run and pipelines run now retry transient errors from the pipeline events and update status reads while waiting for an update. (#7800)
+  Dependency Updates
+  - Bump dependencies with known vulnerabilities. (#7904)
+  - Update the Go SDK to v0.203.0. (#7869, #7906)
+  - Update github.com/databricks/sdk-go/files to v0.9.0. (#7889)
+ReleaseNotesUrl: https://github.com/databricks/cli/releases/tag/v1.28.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

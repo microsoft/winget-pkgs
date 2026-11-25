@@ -1,0 +1,75 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Niko1221.Strata
+PackageVersion: 0.2.21
+PackageLocale: en-US
+Publisher: strata
+PublisherUrl: https://github.com/Niko1221
+PublisherSupportUrl: https://github.com/Niko1221/Strata/issues
+PrivacyUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/SAFETY.md
+Author: Niko1221
+PackageName: Strata
+PackageUrl: https://github.com/Niko1221/Strata
+License: MIT
+LicenseUrl: https://github.com/Niko1221/Strata/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Niko1221 and the Strata contributors
+ShortDescription: Runs AI models on your own computer for chat, coding and image work.
+Description: |-
+  Strata runs powerful AI models on your own computer. Chat, code and work with images locally, with an OpenAI and Anthropic compatible API served on localhost. No account is needed.
+
+  The installer carries the app, the App Host, Node and Strata Control. On first start the app shows the inference engine for your graphics card with its size and one Download button, and then fetches the model you choose.
+Tags:
+- ai
+- large-language-model
+- llm
+- local-llm
+ReleaseNotes: |-
+  Strata 0.2.21
+  The app and the Terminal are 0.2.21. All three engine families (strata-engine, strata-inkling and strata-hy4) and Control are updated to 0.1.67 on every supported platform and backend.
+  What changes for you
+  - Inkling 2 Mini is much faster on most cards. Compared with 0.2.20 on the same machines:
+    - Long conversations:
+      - RTX 4090 after a 32K prompt: 92 instead of 29 tok/s (UD-Q4_K_XL) and 92 instead of 20 tok/s (SQ-20).
+      - RTX 5090 Laptop 24 GB after a 30K prompt: 72 instead of 44 tok/s.
+    - Smaller cards:
+      - RTX 3060 Ti 8 GB, SQ-10: 43 instead of 11 tok/s.
+      - RTX 5070 12 GB, SQ-10: 68 instead of 12.5 tok/s.
+    - Prompt reading:
+      - RTX 5090: 6,967 instead of 3,923 tok/s (UD-Q4_K_XL), 9,019 instead of 7,568 tok/s (SQ-20).
+      - Apple M5 Max: +62% (SQ-10 / SQ-20).
+      - DGX Spark: +12% to +58%.
+    - Many users at once:
+      - RTX 5090 with 64 requests: 1,040–1,134 tok/s in total, 6–27% above 0.2.20.
+      - 8 users: 15–27% faster on the RTX 4090, the RTX 5090 and the RTX 5090 Laptop.
+    - AMD RX 7900 XT, UD-IQ3_XXS: 66 instead of 4.9 tok/s.
+  - Agent sessions reuse their prompt on every backend, Apple Silicon included. Long agent sessions no longer re-read the whole prompt on every turn.
+  - The DSpark drafter works with Unsloth's re-uploaded GGUF files. 0.2.20 could not start UD models with the drafter on.
+    - A single request is now sent to the slot the drafter runs in, so it gets the drafter's speed even with 2 to 4 slots. On an RTX 5090 Laptop with 2 to 3 slots: agent sessions 85 → 142–152 tok/s, chat 87 → 120 tok/s.
+    - When the request lands in that slot, code is about 2x and chat about 1.4x faster.
+    - At startup a short test decides whether the drafter is turned on for your card. The first start of a new setup takes about 3 minutes longer because of it.
+  - Fixes:
+    - long-conversation crash (#6905);
+    - Qwen "layer 0 never rang" on RTX 30-series and newer (#6713);
+    - repeated engine crashes now stop after three tries with a clear message instead of restarting forever;
+    - downloads are pinned so Unsloth re-uploads no longer break setup, and both GGUF layouts are accepted;
+    - Inkling on CPUs with AVX-512 has a faster path, and AVX2-only CPUs keep working.
+  - Qwen3.8-Flash-Next and HY-4 Flash:
+    - Qwen: one accuracy fix in prompt reading (#6776). It changes the order of one sum, so some answers can differ from 0.2.20 after a few tokens; the first-token choice was the same on every prompt we checked, and speed is the same.
+    - HY-4 Flash: gives the same output as 0.2.20 in our checks on Strix Halo and on CPU.
+  Known limits
+  - Default slots: on 24 GB RTX 40 / 50 cards the app now starts with 1 slot, which gives the best speed for one person and for long documents. You can raise it in the app.
+  - 32 slots is for short requests. With long prompts (3K tokens and up) at 32 slots, each long request can wait several minutes for its first token. On cards up to 24 GB, and on the RTX 5090 at 64K context, a 32-slot start can fail to load. For long documents use 8 slots or fewer.
+  - AMD RX 7900 XT / 7900 XTX with SQ-20: decode is about 7% below 0.2.20. Workaround: --vram-experts-gb 13.2 --ram-experts-gb 2.5.
+  - AMD 12 GB cards (RX 6700 XT class), Inkling: about 13% below 0.2.20. Workaround: --vram-experts-gb 8.5.
+  - Many slots: with 16 or more slots on NVIDIA, the first reply after a long prompt is slightly less exact than with fewer slots. This was already the case in 0.2.20.
+ReleaseNotesUrl: https://github.com/Niko1221/Strata/releases/tag/v0.2.21
+Documentations:
+- DocumentLabel: Installation guide
+  DocumentUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/INSTALL.md
+- DocumentLabel: Supported models
+  DocumentUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/MODELS.md
+- DocumentLabel: Troubleshooting
+  DocumentUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/TROUBLESHOOTING.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

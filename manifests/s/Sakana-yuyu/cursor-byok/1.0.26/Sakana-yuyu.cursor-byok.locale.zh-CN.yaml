@@ -1,0 +1,47 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Sakana-yuyu.cursor-byok
+PackageVersion: 1.0.26
+PackageLocale: zh-CN
+Publisher: Sakana
+PublisherUrl: https://github.com/Sakana-yuyu
+PublisherSupportUrl: https://github.com/Sakana-yuyu/cursor-byok/issues
+PackageName: Cursor助手
+PackageUrl: https://github.com/Sakana-yuyu/cursor-byok
+License: MIT
+LicenseUrl: https://github.com/Sakana-yuyu/cursor-byok/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 leookun
+ShortDescription: 面向 Cursor 的本地模型适配、代理网关、用量统计与 Agent 工作台。
+Description: 把自己的模型 API 接入 Cursor，在本地完成供应商管理、协议适配、模型路由、用量统计、自动委派和问题排查。Cursor 本身负责优秀的编辑器与 Agent 体验，Cursor助手负责把模型连接与本地运行链路整理好：你可以继续使用 Cursor 的工具调用和任务工作流，同时自由选择官方 API、兼容网关或自建服务。
+Tags:
+- byok
+- cursor
+- 代理
+ReleaseNotes: |-
+  v1.0.26
+  - 上下文档位实际生效：在 Cursor 中选择较小档位后，长会话会按该预算压缩并在发送前重新校验。开启 MaxMode 也会保留所选小档位，原始会话历史仍可保留。
+  - 模型能力识别一致：前后端共用模型目录，优先识别供应商返回的完整模型 ID，自动识别时保留手动设定的小窗口。
+  - 切档和续传更稳定：切换上下文档位可保留思考强度。换到上限更小的渠道时会重新检查预算，上下文用量和上限会随压缩结果更新。
+  v1.0.25
+  本版包含未能发布的 v1.0.23、v1.0.24 的全部修复；原标签保留，不替换已推送的版本。
+  修复
+  - macOS 两种架构均在检查阶段以 201 退出：修正 lipo 参数顺序，避免将产物路径解析为架构名。新增独立 macOS 原生门禁，实际验证正确架构、错误架构及缺失产物三种场景，检查失败时阻止打包。
+  - macOS ARM64 构建排队超时导致整版无法发布：改用 Intel Mac runner 交叉编译 Apple Silicon 安装包，生成工具保持宿主架构，最终应用单独设置目标架构并校验 Mach-O 架构，不再依赖容量不足的 ARM runner。
+  - 启动失败不再遗留半启动服务：代理端口被占用、登录态备份失败等情况下，逆序清理本轮启动的组件并恢复登录态，不停止原本已运行的后端；恢复失败会明确报错。
+  - 保护 Cursor 原有配置：配置无法解析时保留原文件，不再删除重建。代理设置与 NODE_EXTRA_CA_CERTS 在修改前保存恢复快照，停止时只恢复仍由助手接管的值，保留用户期间的修改；未接管时清理不再删除原有配置或登录态。
+  - 连续保存设置可能互相覆盖：改为按字段排队保存，在执行时读取最新配置，避免旧快照撤销刚保存的其他设置；模型列表操作也纳入同一写入队列。
+  - Token 统计可能重复或短暂显示旧值：用量事件按 ID 合并最新值后再统计，统一缓冲区与磁盘口径。
+  - 快速离开请求明细页后仍在后台刷新：忽略离页后的异步结果，不再重新启动轮询或注册事件。
+  - 取消子代理后实际并发可能超限：任务可及时显示取消，但并发名额会等执行器真正退出后才释放。
+  - 修复 CA 后代理仍使用旧证书：停止服务后重建代理并同步签名证书；运行中修复会明确提示先停止服务，避免显示修复成功但代理仍使用旧 CA。
+  - 限流冷却结束后退避历史被提前清空：冷却到期只恢复渠道可选性，保留遗忘窗口内的失败历史；统一普通路由和会话粘性的判断。
+  - 单密钥并发上限热更新不准确：扩容优先唤醒已排队请求，缩容等待在途请求释放，已取消请求不再抢占空闲名额。
+  - 显式指定的 Skills 可能未被激活：改进 /技能名、$技能名 及中文相邻文本的识别，多个显式技能按提及顺序保留，并遵守技能开关、来源和排除设置；统一技能目录与使用说明。
+  工程验证
+  - 新增配置并发保存、宿主设置恢复、启动故障回滚、用量去重、取消并发及 CA 实际 TLS 握手等回归测试。
+  - 将前端单元测试接入 CI 必经验证，与现有 lint、浏览器 E2E 及后端验证共同阻断失败构建。
+  Windows 用户注意：安装时若被 SmartScreen 拦截，请先确认下载来源和文件可信；可信时可点击「更多信息」->「仍要运行」。
+ReleaseNotesUrl: https://github.com/Sakana-yuyu/cursor-byok/releases/tag/v1.0.26
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

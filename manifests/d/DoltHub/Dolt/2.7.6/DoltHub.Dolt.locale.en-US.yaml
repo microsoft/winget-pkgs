@@ -1,0 +1,171 @@
+# Created with WinGet Updater using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: DoltHub.Dolt
+PackageVersion: 2.7.6
+PackageLocale: en-US
+Publisher: DoltHub
+PublisherUrl: https://github.com/dolthub/dolt
+PublisherSupportUrl: https://github.com/dolthub/dolt/issues
+Author: DoltHub
+PackageName: Dolt
+PackageUrl: https://www.dolthub.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/dolthub/dolt/blob/HEAD/LICENSE
+CopyrightUrl: https://raw.githubusercontent.com/dolthub/dolt/master/LICENSE
+ShortDescription: Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+Description: |-
+  Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+  Connect to Dolt just like any MySQL database to run queries or update the data using SQL commands.
+  Use the command line interface to import CSV files, commit your changes, push them to a remote, or merge your teammate's changes.
+Moniker: dolt
+Tags:
+- cli
+- data
+- git-for-data
+- versioning
+ReleaseNotes: |-
+  Merged PRs
+  dolt
+  - 12587: Fix index lookups on temporary tables
+    - Fixes #12580: a contradictory WHERE on an indexed temporary table panicked and dropped the connection. Temporary tables now hand out one partition per index range, so an empty range set yields an empty result.
+    - Disjunctions on an indexed temporary table column (x = 1 OR x = 2) no longer fail with "expected a single index range".
+    - Index lookups on temporary tables large enough to have several scan partitions no longer return duplicate rows.
+    - Move engine tests into their own file (last commit).
+  - 12575: Pass a context to the schema formatter when generating column definitions
+    Passes a context to the schema formatter when generating column definitions, so that it can show expressions under the session's search path.
+    Companion PRs: dolthub/go-mysql-server#4186, dolthub/doltgresql#3909
+  - 12574: Bulk dependabot bumps
+    - Bump github.com/klauspost/compress 1.17.8 -> 1.18.7 in go-mysql client tests (#12158)
+    - Bump github.com/go-jose/go-jose/v4 4.1.4 -> 4.1.6 (#12228)
+    - Bump MySqlConnector 2.4.0 -> 2.6.1 in dotnet client tests (#12281)
+    - Bump org.mariadb.jdbc:mariadb-java-client 3.5.9 -> 3.5.11 in java client tests (#12299)
+    - Bump go.opentelemetry.io/otel/trace 1.44.0 -> 1.47.0 (#12491)
+  - 12567: go.mod: Bump eventsapi_schema. Pick up idempotency_level annotation.
+  - 12563: Read archive index with a single ranged read
+    Partial fix for #12558: opening an archive on a blobstore remote issued four ranged GETs for its index, one per contiguous section. It now reads the whole index once. Cloning an S3 remote with 157 small archives drops from 1,415 to 944 GETs.
+  - 12559: binlogreplication: create Dolt commits before advancing gtid_executed
+    Fixes the intermittent TestDoltCommits failure (expected 5 commits, got 4). The binlog replica advanced @@gtid_executed and saved its position before running dolt_commit for the transaction, so anything waiting on gtid_executed could see the replica as caught up before the last Dolt commit existed. The replica now creates the Dolt commits first, then records the GTID.
+  - 12555: Make dolt_tag changes visible to dolt_tags in the same transaction
+    Fixes dolt_tags not showing tags created or deleted by dolt_tag earlier in the same transaction.
+    Fixes #12553
+  - 12554: bats: fix remotesrv tests still using port 50051
+    Fixes lambdabats failures on main in remotesrv: read only server rejects writes and the two shallow-clone: fsck passes tests. They still used port 50051 after remotesrv ports were made per-test in #12053.
+  - 12552: remotesrv: return forward-slash download URL paths on Windows
+    Fixes #12519: on Windows, remotesrv download URLs contained backslashes from filepath.Rel, which the file handler rejects with 400 since the repo path validation was added. Store and oldgen prefixes are now converted to slash form. Based on #12550 by @jay23606.
+  - 12543: /go/{cmd,libraries}: ensure cleanup runs whenever git remote is used
+    Fixes #12328, ensures the cleanup actually runs whenever a Gitr remote is used, previously did not run during dolt sql-server invocations.
+  - 12542: Fix stale docs links in the README
+    - Fix the dead Dolt commits docs link in the getting-started walkthrough (from #12539 by @farisbasha, commit kept as authored).
+    - Point the Gas Town link at its current repo, github.com/gastownhall/gastown.
+  - 12541: Refuse over-long branch and tag names instead of panicking or wrapping
+    Branch and tag names over ~32K bytes panicked with "impossible node", and names over 64K silently wrapped the 16-bit node offsets. Branch and tag names are now limited to 1024 bytes and refused cleanly before anything is written, AddressMap rejects keys over 16 KiB with an error, and invalid-name panics in branch/tag creation are now errors.
+    Fixes: dolthub/doltgresql#3895
+  - 12534: Add a row merge policy hook for transaction commits
+    Adds a hook that decides each row two concurrent transaction commits both changed.
+    Companion PR: dolthub/doltgresql#3887
+  - 12526: Reset table writers after materializing pending edits, not during
+    Rebuilding a table writer with a partial index could read the working set while pending edits were still being saved, which panicked. Writers are now rebuilt after the save finishes.
+    Fixes: dolthub/doltgresql#3877
+  - 12481: Arm GC cancellation wakeups only when waiting, using context.AfterFunc in ValueStore
+    Arm GC cancellation wakeups only when waiting, using context.AfterFunc in ValueStore.
+  - 12472: Remove use of channels from prollyKeylessIndexIter
+    When iterating over indexes for keyless tables, we used to goroutines, where one reads from storage and sends the results over a channel. This was presumably a performance optimization to avoid blocking plan execution on IO, but:
+    - None of the other index types do this
+    - It complicates iteration logic
+    - Removing this shows no significant performance impact, and possible performance gains.
+  - 12162: Bump github.com/klauspost/compress from 1.18.0 to 1.18.7 in /go
+    Bumps github.com/klauspost/compress from 1.18.0 to 1.18.7. Release notes
+    Sourced from github.com/klauspost/compress's releases.
+    > v1.18.7
+    > - Fix s2.NewDict OOB read.
+    >
+    > Security release without other changes.
+    >
+    > Full Changelog: klauspost/compress@v1.18.6...v1.18.7
+    >
+    > v1.18.6
+    >
+    > What's Changed
+    > - s2: Fix amd64 stack frame corruption by @klauspost in klauspost/compress#1145
+    > - gzhttp: Canonicalize ETag header by @justinmayhew in klauspost/compress#1139
+    > - perf: pool hash tables in Go encode paths to reduce allocations by @huynhanx03 in klauspost/compress#1143
+    >
+    > New Contributors
+    > - @justinmayhew made their first contribution in klauspost/compress#1139
+    > - @huynhanx03 made their first contribution in klauspost/compress#1143
+    > - @thaJeztah made their first contribution in klauspost/compress#1144
+    >
+    > Full Changelog: klauspost/compress@v1.18.5...v1.18.6
+    >
+    > v1.18.5
+    >
+    > What's Changed
+    > - zstd: Fix crash when changing encoder dictionary with same ID by @klauspost in klauspost/compress#1135
+    > - zstd: Default to full zero frames by @klauspost in klauspost/compress#1134
+    > - flate: Clean up histogram order by @klauspost in klauspost/compress#1133
+    >
+    > Full Changelog: klauspost/compress@v1.18.4...v1.18.5
+    >
+    > v1.18.4
+    >
+    > What's Changed
+    > - gzhttp: Add zstandard to server handler wrapper by @klauspost in klauspost/compress#1121
+    > - zstd: Add ResetWithOptions to encoder/decoder by @klauspost in klauspost/compress#1122
+    > - gzhttp: preserve qvalue when extra parameters follow in Accept-Encoding by @analytically in klauspost/compress#1116
+    >
+    > New Contributors
+    > - @analytically made their first contribution in klauspost/compress#1116
+    > - @ethaizone made their first contribution in klauspost/compress#1124
+    > - @zwass made their first contribution in klauspost/compress#1125
+    >
+    > Full Changelog: klauspost/compress@v1.18.2...v1.18.4
+    >
+    > v1.18.3
+    >
+    > Downstream CVE-2025-61728
+    >
+    > See golang/go#77102
+    >
+    > Full Changelog: klauspost/compress@v1.18.2...v1.18.3
+    ... (truncated)
+    Commits
+    - 8668e35 Merge commit from fork
+    - ac2f5e8 docs: use unix line-endings for markdown files (#1144)
+    - 620d7b5 s2: Fix amd64 stack frame corruption (#1145)
+    - 1b63f2f build(deps): bump the github-actions group with 2 updates (#1141)
+    - 3d86b89 s2: pool hash tables in Go encode paths to reduce allocations (#1143)
+    - 15967de gzhttp: Canonicalize ETag header (#1139)
+    - c5e0077 zstd: Fix encoder changing dictionary with same ID (#1135)
+    - fd3f23e zstd: Default to full zero frames (#1134)
+    - 8233c58 flate: Clean up histogram order (#1133)
+    - bcf0d12 build(deps): bump the github-actions group with 3 updates (#1132)
+    - Additional commits viewable in compare view
+  - 12053: Bump mariadb from 3.5.3 to 3.5.4 in /integration-tests/mysql-client-tests/node
+    Bumps mariadb from 3.5.3 to 3.5.4. Release notes
+    Sourced from mariadb's releases.
+    > MariaDB Connector/Node.js 3.5.4
+    >
+    > 3.5.4 (Jul 2026)
+    >
+    > Full Changelog
+    >
+    > Notable changes
+    > - CONJS-355: Avoid flat-cloning the connection options for every command, relying on a prototype-chain merge instead (#353 thanks to erulabs)
+    > - CONJS-357: Add JavaScript SAST (CodeQL + eslint-plugin-security) to CI
+    > - CONJS-365: Enable standard TLS certificate identity validation under Deno
+    > - CONJS-366: New option maxAllowedColumns (default 65535) bounding the column count announced by the server, a rogue server being otherwise able to have the client allocate metadata for a result-set that will never complete (report by fg0x0)
+    >
+    > Issues Fixed
+    > - CONJS-329: An exception thrown by a callback was reported to that same callback as a database error, instead of propagating like it does from any other node-style callback (report by Assen Totin)
+    > - CONJS-356: Corrected ed25519 authentication with zero-configuration SSL
+    > - CONJS-358: Refuse multi-part packet (> 16MB) reassembly before authentication completes, a rogue server being otherwise able to exhaust client memory before any credential is even validated
+    > - CONJS-359: Corrected the default maxAllowedPacket value when the option is not set
+    > - CONJS-360: batch() ignored the insertIdAsNumber / supportBigNumbers / bigNumberStrings options for insertId
+    > - CONJS-361: The connection stopped sending commands after a command ending on the last packet of a network chunk: a prepared statement was never executed, without error nor timeout (report by Assen Totin)
+    > - CONJS-362: Limit the parsec authentication PBKDF2 iteration factor and move the key derivation off the event loop, a rogue server being otherwise able to freeze the whole process for minutes (report by fg0x0)
+    > - CONJS-363: typeCast accessors returned corrupted values with prepared statements
+    > - CONJS-364: Types / TypeNumbers enums threw at runtime (#347, contribution by BrianDouglasIE)
+ReleaseNotesUrl: https://github.com/dolthub/dolt/releases/tag/v2.7.6
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

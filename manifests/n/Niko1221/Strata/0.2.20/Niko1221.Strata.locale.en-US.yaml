@@ -1,0 +1,57 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Niko1221.Strata
+PackageVersion: 0.2.20
+PackageLocale: en-US
+Publisher: strata
+PublisherUrl: https://github.com/Niko1221
+PublisherSupportUrl: https://github.com/Niko1221/Strata/issues
+PrivacyUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/SAFETY.md
+Author: Niko1221
+PackageName: Strata
+PackageUrl: https://github.com/Niko1221/Strata
+License: MIT
+LicenseUrl: https://github.com/Niko1221/Strata/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Niko1221 and the Strata contributors
+ShortDescription: Runs AI models on your own computer for chat, coding and image work.
+Description: |-
+  Strata runs powerful AI models on your own computer. Chat, code and work with images locally, with an OpenAI and Anthropic compatible API served on localhost. No account is needed.
+
+  The installer carries the app, the App Host, Node and Strata Control. On first start the app shows the inference engine for your graphics card with its size and one Download button, and then fetches the model you choose.
+Tags:
+- ai
+- large-language-model
+- llm
+- local-llm
+ReleaseNotes: |-
+  Strata 0.2.20
+  The app and the Terminal are 0.2.20. All three engine families (strata-engine, strata-inkling, and strata-hy4) and Control are updated to 0.1.66 across every supported platform and backend. The update feeds are sequence 132 (shared) and 128 (linux-aarch64).
+  What changes for you
+  - Unified 4-tier GPU + RAM + CPU + SSD Mixture-of-Experts execution across Qwen3.8-Flash-Next, HY-4 Flash, and Inkling 2 Mini — down to 4 GiB GPUs.
+    - All three MoE families now share Strata's adaptive 4-tier planner: dense trunk + elastic/quantized KV on GPU (with automatic --kv-offload auto host KV offloading for 32K+ context on mid-VRAM cards), hot experts in remaining VRAM (down to 0 VRAM experts cleanly on 4 GiB / 6 GiB WDDM & Linux GPUs), cold experts in pageable RAM with persistent SIMD CPU worker compute + async PCIe miss-sharing, and SSD Engram / expert streaming — plus first-class GPU+SSD only (--ssd-experts --ram-experts-gb 0) and CPU+SSD only modes.
+    - Multi-GPU --layer-split auto (2..4 GPUs) now works seamlessly across Qwen3.8-Flash-Next, HY-4 Flash, and Inkling 2 Mini.
+  - Major Unsloth GGUF & Strata Quant speedups across every hardware tier (4 GB to 32 GB+, DGX Spark, Strix Halo, Apple Metal, AMD RDNA2/3/3.5/4, Intel Arc SYCL, NVIDIA Pascal–Blackwell):
+    - Lossless direct GGUF_RAW Inkling 2 Mini execution (UD-Q4_K_XL, Q8_0, UD-IQ4_XS, UD-IQ3_XXS, UD-Q6_K_XL, UD-Q5_K_XL, UD-Q3_K_XL, UD-Q2_K_XL) with fixed DSpark speculative drafter (9.5x speedup, 6.5 -> 61.9 tok/s on 12 GB GPUs; 73.4 tok/s multi-buffer SQ-15/SQ-20 on Apple Silicon).
+    - NVIDIA CUDA (sm_60..sm_121, including Tesla V100 sm_70): all 13 Unsloth expert pairs enabled in fused EXP_MODE=8 (1.04x–1.67x faster MoE decode, up to 2.58x down projection) + 10 INT8 Tensor Core dense formats (1.78x–3.26x faster DFlash2 verify & chunked prefill).
+    - Apple Silicon Metal: native IQ3_XXS, Q2_K, Q3_K, Q8_0, NVFP4, and halved-load W8<IQ4_XS/IQ4_NL> across decode and ragged moe_mm prefill (up to 526 GB/s / 89.9% peak bandwidth and 6,769 tok/s prefill on M5 Max).
+    - AMD HIP (RDNA2 / RDNA3 / RDNA3.5 Strix Halo / RDNA4): unified Wave32 WMMA prefill (70.7 TFLOPS dense, 28.5–36.7 TFLOPS fused dequant-to-LDS) + 6-op v_perm_b32 LUT16 Wave32 DP4A decode (451–583 GB/s).
+    - Intel Arc SYCL (Alchemist & Battlemage): hoisted multi-token Split<TY>/KqSplit<TY> + SG16 XMX SLM decoders (1.37x–2.73x faster across IQ3_XXS, Q8_0, IQ4_XS, Q4_K, and NVFP4).
+    - CPU Cold-Expert SIMD & Tier Sizing: 5.59x–5.95x faster quantize_q8_K, +16.5%..+54.8% faster AVX2/AVX-512 cold-expert dot kernels (Q8_0 +54.8%, IQ4_XS +32.7%, Q4_K +26.6%), and exact heterogeneous Unsloth per-layer slot sizing (#4870, #6354).
+  - HY-4 Flash 4.27x hybrid RAM+VRAM boost & Intel Raptor Lake crash fix (strata-hy4 0.1.66 across all 15 platforms):
+    - Boosts RTX 5090 + 128 GB DDR5 SQ-64 generation 30 -> 128.25 tok/s (4.27x) and Intel Arc Pro B70 SYCL prefill 4.11x.
+    - Fixes 0xC000001D STATUS_ILLEGAL_INSTRUCTION crashes on Intel 12th/13th/14th-Gen Alder Lake & Raptor Lake CPUs (#6541, #6570, 0 EVEX zmm instructions in AVX2 translation units).
+  - Critical NVFP4, Long-Context NaN (#879), WDDM, & Setup Stability Fixes:
+    - Fixed NVFP4 mixed-language / garbled output & 0% speculative acceptance (#6575, #6576, #6577, #6584, #6616, #6634) by restoring per-expert L.s_down tail scaling in use_sub8 / multi-token / SYCL / Metal / HIP paths, L.had_block == 0 guards on fused EXP_MODE=8, and 2-byte-aligned mixed-blob loads.
+    - Fixed 24K–45K long-prompt #879 non-finite (NaN) outputs (#6431) by eliminating 65,535 CUDA/HIP/SYCL/Metal grid-dimension overflow and 0/0 zero-amax quantization, plus automatic --kv-offload auto on strata-inkling (32K+ context without VRAM spillover).
+    - Fixed Windows WDDM 0.2.15 -> 0.2.19 regression on 16 GB RTX 4070 Ti SUPER (IQ3_XXS), RX 9060 XT NaN guards, SQ-20 'int' object has no attribute 'get' setup bug, hy4-flash-sq-64 tokenizer auto-provisioning, and exit code 3 startup/spill failures (#6450–#6634).
+ReleaseNotesUrl: https://github.com/Niko1221/Strata/releases/tag/v0.2.20
+Documentations:
+- DocumentLabel: Installation guide
+  DocumentUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/INSTALL.md
+- DocumentLabel: Supported models
+  DocumentUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/MODELS.md
+- DocumentLabel: Troubleshooting
+  DocumentUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/TROUBLESHOOTING.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

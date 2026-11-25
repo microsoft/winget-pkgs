@@ -1,0 +1,46 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: NanmiCoder.ClaudeCodeHaha
+PackageVersion: 0.7.9
+PackageLocale: en-US
+ShortDescription: A local-first desktop workspace for Claude Code with multi-agent, Git worktrees, and diff review.
+Description: Claude Code Haha is a desktop Claude Code workspace for macOS, Windows, and Linux. It offers multi-session workspaces, global search, branch and Worktree launching, diff review, a built-in browser preview, and GUI permission approval. Any model works, including Claude, ChatGPT, Grok, presets, or local endpoints, alongside image generation, visual MCP and SubAgent managers, an Agent Teams workbench, dynamic workflow orchestration, model tracing, Computer Use, a skill marketplace, color themes, desktop pets, H5 remote access, IM integration, and scheduled tasks.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- claude
+- claude-code
+- code
+- coding
+- large-language-model
+- llm
+- programming
+ReleaseNotes: |-
+  This release makes Agent Teams genuinely controllable: you can pause and resume the whole team and its main task, and change member models while paused. It adds Claude plan usage, an app-icon badge, session Markdown export, a neutral dark theme and a resizable workspace preview. Image requests are compressed automatically, so large screenshots no longer fail on size. It also fixes providers overwriting each other's settings, background task notifications leaking into conversations, stale branches and worktrees, MCP through a proxy, and H5 control-plane auth bypasses through path variants. The phone app updates to 0.1.5.
+  Highlights
+  - Team runtime controls (#1890, #1951, #1954, #1860): the team workbench adds a "Team runtime controls" section. You can pause the team and its main task; the paused state survives page refreshes and app restarts. While paused, member models can be changed in bulk while the main agent keeps its own model. Resume starts the members that need it, partial failures can be retried without starting already-resumed members again, pending tool approvals are delivered after resume, and roster refreshes do not interrupt automatic retries. Adding a member to a running team now leaves the lead with a draft plan to submit instead of getting stuck on "the main agent is adjusting the plan".
+  - Claude plan usage (#1861, #1949): Settings → Providers → Claude Official shows the current subscription's usage after signing in, including the 5-hour window, the weekly window and any OAuth-app / Opus / Sonnet windows returned by the API, with reset times and a refresh button; when unavailable it explains why instead of guessing. After switching accounts, the model catalog and ChatGPT Official context windows are resolved for the current account.
+  - App icon badge (#1940): with system notifications enabled, the macOS Dock and Windows taskbar show the number of sessions with pending requests or unread replies. The number drops as you handle approvals or read replies and returns to zero when notifications are off.
+  - Session Markdown (#1908): the sidebar session context menu adds "Copy Markdown" and "Export Markdown". Exported files use the session title, images and attachments become placeholders, and incomplete history is reported instead of producing a partial file.
+  - New appearance and adjustable workspace (#1898, #1889): Appearance adds a "Neutral dark" theme; the workspace preview divider can be dragged to resize, remembers its width, adapts to wide and narrow windows, and stays accurate at 125% UI zoom.
+  - Output token escalation (#1897): Settings → General adds a three-state "Max output tokens escalation" toggle (Auto / Enabled / Disabled). When enabled, supported routes start with a lower output budget and retry with a higher supported budget on truncation; explicit output limits always win and retries are bounded.
+  - Image context compression (#1893): oversized images are compressed before a request and share an inline budget. 4K screenshots and large images read with the Read tool no longer fail on size, while history previews still use the original attachments.
+  Fixes
+  - Providers and settings no longer overwrite each other (#1895, #1927, #1882): saving one provider does not roll back another; worktree roots and proxy-bypass settings survive saves; proxy-managed restarts keep the default effort and UI language; explicit subagent model env values are preserved; cc-switch imports keep their quota query script (#1861).
+  - Teams and plan review (#1925, #1950): changing the execution model during plan review now takes effect; when a submitted runtime is rejected, the previous model is restored, the card explains why and the plan can be submitted again; team plans can be edited and approved while the leader is rewriting its transcript.
+  - Chat reliability (#1930, #1922, #1936, #1947, #1937, #1929): Stop takes effect immediately and aborts proxy streams, with no late "ghost" output; background task notifications move out of the transcript into the activity panel; image/video cards resolve only confirmed workspace files; tool images stay inline when the activity group folds; tool duration reports its own execution time instead of queue and stream waits; plan revisions are no longer counted as failures.
+  - Sessions and workspaces (#1926, #1880, #1919, #1881): the session header and composer follow the live git branch; entering a worktree mid-turn syncs immediately and resumes there after a restart; explicitly created nested projects stay independent; paging and replay no longer duplicate messages.
+  - Connectivity and security (#1871, #1914, #1904): MCP connector checks go through the network proxy and keep host proxy routes, and failures distinguish network/proxy problems from authentication problems; H5 control-plane authorization normalizes paths, so slash variants can no longer bypass restrictions; remote diagnostics exports keep the failure stage, tunnel and proxy details.
+  - Plugins and context (#1928, #1900): plugin slash commands are discovered on the first turn of a new session; the context meter shares compaction accounting, so older summaries no longer roll readings back.
+  - OAuth and phone push (#1949, #1923, #1948): model catalog refreshes follow account changes and stale generations no longer overwrite newer tokens; the phone distinguishes Expo push credential errors from proxy failures and clears old feedback when the delivery channel changes.
+  - Packaging (#1941, #1955): packaged app startup is restored, and an incomplete macOS artifact now fails the build instead of shipping an app that cannot start.
+  - Other: tighter retry bounds for truncated output and stalled Codex tool input; Claude Code compatibility updated to 2.1.321; the WeChat QR code is removed from About. Thanks to @toBerlinWay, @Ericwyc-max, @yuki, @yuehua-meng, @lxcxjxhx and other contributors.
+  Other
+  - Windows installers unsigned by default: the SignPath signing application is still pending, so this release's Windows installers are unsigned and SmartScreen may warn; see the installation notes below.
+  - Phone app 0.1.5: includes the push-error classification and delivery-channel feedback fixes; after the desktop upgrades to v0.7.9 the new APK is built and attached automatically, and iOS ships through TestFlight.
+ReleaseNotesUrl: https://github.com/NanmiCoder/cc-haha/releases/tag/v0.7.9
+ManifestType: locale
+ManifestVersion: 1.28.0

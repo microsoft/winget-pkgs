@@ -1,0 +1,63 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: justhil.piDesktop
+PackageVersion: 0.8.0
+PackageLocale: zh-CN
+Publisher: pi-desktop
+PublisherUrl: https://github.com/justhil
+PublisherSupportUrl: https://github.com/justhil/pi-app/issues
+PackageName: pi Desktop
+PackageUrl: https://github.com/justhil/pi-app
+License: 免费软件
+ShortDescription: 面向个人开发者的 pi 桌面 GUI
+Description: |-
+  面向个人开发者的 pi 桌面 GUI：在 Electron 里跑 pi SDK，复用 ~/.pi/agent 的认证、配置与会话 JSONL，用时间线、工具卡片、改动审查和扩展兼容层替代终端里那套 TUI 交互。
+
+  核心思想
+  1. 会话以 pi 为准
+  - 对话内容、工具调用记录、分支与压缩信息，都以 pi 写在 ~/.pi/agent/sessions/ 里的 JSONL 会话文件为准。
+  - 桌面端不另建一套「聊天记录数据库」来替代 pi；本地只存窗口布局、最近项目、扩展开关、适配器覆盖等应用偏好。
+  - 好处：终端 pi 与桌面 pi 可以接着同一条会话用；卸载桌面也不丢对话历史。
+  2. 配置与认证与终端共用
+  - 模型账号、settings.json、扩展包列表（packages）、项目下 .pi/ 资源，与你在终端用的 pi 同一套路径与规则。
+  - 桌面在 设置 → Pi 里改的项会写回全局 settings.json（与终端一致）；Skills 开关等也落在全局配置里，而不是只在桌面私有文件里「假启用」。
+  3. 扩展：兼容层 + 适配器，而不是改插件源码
+  - 扩展在终端里常用 TUI（选择、确认、问卷、工具结果卡片、/命令 进配置）。桌面没有终端画布。
+  - 兼容层：在应用内部统一接收扩展的 UI 请求，转成 Electron 对话框、时间线卡片、设置表单。
+  - 适配器：每个扩展一份「在桌面上怎么显示、怎么配、哪些命令特殊处理」的说明（内置在应用里，高级用户可用 JSON 覆盖）。
+  - 原则：不动扩展 npm 包、不 fork pi；差异写在适配器说明和文档里。
+  - 给 AI 写适配器：见仓库 doc/（adapter-authoring-guide.md 可整份发给模型定制 adapter.json）。
+Tags:
+- pi
+- pi-agent
+- 人工智能
+- 代码
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  pi Desktop v0.8.0
+  新增
+  - 可拖拽上下组合右侧栏（Right Dock）与浏览器回归：右侧栏升级为默认单栏、可自由拖拽拆分为上下双窗格的解耦工作坞，支持同栏 Tab 拖拽重排、拖入下半区热区自动分栏、上下互拖、一键分栏/对调/合并与面板快选菜单；内置浏览器回归右侧栏一等面板，自动分别记忆常规面板宽度与浏览器宽档宽度，保留一键铺满主对话区、0ms 拖拽静帧防撕裂、跨会话持久页签、起始页（本机 DevServer 探测 + 最近访问 + 书签速拨）、Omnibox 融合联想、持久化书签与下载记录、三轨登录态同步（含 Chrome 扩展 v1.3 绕过 Windows v20 加密），以及 Cursor Design Mode 级元素标注（↑/↓ 切换父子节点、Shift 多选与图形涂鸦）
+  - 并行 Worktrees 看板、GitHub PR / Issue 面板与侧栏分支切换：右侧栏新增 Worktrees 并行指挥台（仓库级串行锁防 .git/config.lock 冲突、支持指定基准分支与后台并发派发独立会话、直达运行中会话、打开终端/目录、一键清理闲置 Worktree）；新增 GitHub 面板（零依赖复用本地 gh 凭据，支持 PR / Issues 列表筛选与搜索、CI Checks 分组、最新 Review 与评论流、git fetch origin pull/<N>/head 真实检出 PR 代码到隔离 Worktree）；左侧栏项目名旁新增「幽灵分支胶囊」，无需切换工作区即可查看/搜索/新建/切换分支或一键跳转已检出的 Worktree
+  - 左侧栏高密度重做与会话收藏置顶：支持对任意项目会话与临时对话一键「收藏置顶」，持久化完整元数据快照跨项目与冷重启不丢失，在侧栏顶部「已置顶」区集中展示且原列表去重；补齐非项目（临时/沙盒）对话与活跃会话抽屉的完整 9 项右键菜单；左栏升级为 30px 紧凑单行会话/项目行与融底无框搜索胶囊，无活跃会话时自动隐藏底部空抽屉
+  - 声明式插件状态栏协议（statusBar）与后台任务查看器：扩展适配器新增声明式 statusBar 协议与内置终端任务查看器，支持外部扩展按契约向底部状态栏注入状态槽位并进一步解耦扩展运行时
+  - 交互式工作台定制与全域 CSS 插槽：在「设置 → 外观」与实时外观调校抽屉中开放 Composer 底栏控件拖拽排序、显隐与显示形态、上下文条（Worktree / 分支）停靠位置与样式、对话中间步骤文字样式三档配置、用户消息气泡/左对齐提示卡切换，并挂载 25+ 处稳定 [data-pi-slot] 语义插槽与实时拾取高亮
+  - 模型渠道重构与 models.dev 目录自动补全：接入 models.dev 上游模型目录自动补全与精简双层模型编辑器；重构「添加模型渠道」支持自定义渠道标识 ID 与在位重命名，新建渠道初始 0 默认模型，并自动检测与 Pi SDK 内置厂商同名 ID 的默认模型混入冲突
+  - 俄语界面完整支持（#144）：新增俄语（ru）全量桌面端本地化与布局校验，完善中/英/俄三语人设、扩展与主进程文案
+  - 对话原地编辑、划选工具条与内联提问卡片：支持在不回退对话树的情况下原地编辑历史消息与工具步回退；对话区新增划选「复制 / 引用」浮动工具条；AskUserQuestion 升级为悬浮在输入框上方的内联可折叠卡片，支持纯键盘导航与 FIFO 请求队列防覆盖
+  - Pi Remote Android 重大更新（#147 / #148）：新增本地持久化缓存、离线发件箱、无限制主机目录浏览与文件预览、用量统计抽屉、桌面小组件与人设切换控制；新增「显示中间消息」设备开关（感谢 @blurman-ai），支持在运行中与结束后按序完整查看智能体中间说明
+  优化与修复
+  - 冷启动回退根治：消除冷启动拉起 Worker 时的双倍初始化与在途历史水合覆盖竞态，正确识别叶子节点 no-op 回退与前景通知绑定，无工具行确认弹窗取消时不再挂起卡死 Worker
+  - 阅读排版与视觉微动效：正文阅读列宽收紧至 800px（基准字号 14.5px），修复 Markdown h1–h4 标题层级与 CJK 引号字形；24 行以内代码块默认展开且不锁纵滚；运行指示器升级为无灰底有机流动九宫格微点，完成通知卡收紧为紧凑透明圆角卡片
+  - Chrome 扩展 v1.3 与 browser_* 工具体验：重做自适应深浅色双语 Chrome 扩展 Popup（一键借出当前标签、立即释放调试黄条、归还全部），右侧栏新增 Chrome 标签借用快选器；时间线新增全部 browser_* 专属图标、自然语言摘要与分段/截图预览卡片，补齐点击/悬停 CDP 目标高亮框
+  - 人设注入（Purge）与用量性能：新增 4 模式 CoT 思考引导、会话中途切换人设与 v2 预设模板；用量页引入持久化 v2 磁盘索引与分窗口异步扫描大幅提速；时间线向上分页加载引入元素锚定消除跳动
+  - 多处稳定性修复：链接预览零依赖按页面字符集（UTF-8/16、GBK、Shift_JIS、Big5、EUC-KR）解码并正确解析 <base href>（#145）；保留超过 10 个项目、排除临时沙盒并修复符号链接移除匹配（#141、#143）；修复解包版 Pi SDK 入口识别（#140）；修复设置模型页清空渠道名称被旧磁盘值覆盖复活的问题
+
+  安装包见本页 Assets。更新说明以本正文为准（应用内「发现新版本」弹窗会展示）。
+ReleaseNotesUrl: https://github.com/justhil/pi-app/releases/tag/v0.8.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

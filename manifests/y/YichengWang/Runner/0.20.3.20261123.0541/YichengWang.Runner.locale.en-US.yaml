@@ -1,0 +1,40 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: YichengWang.Runner
+PackageVersion: 0.20.3.20261123.0541
+PackageLocale: en-US
+Publisher: wyc studios
+PublisherUrl: https://runnersh.dev/
+PublisherSupportUrl: https://github.com/yicheng47/runner/issues
+Author: Yicheng Wang
+PackageName: Runner
+PackageUrl: https://runnersh.dev/downloads/
+License: MIT
+LicenseUrl: https://github.com/yicheng47/runner/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Yicheng Wang (Jason Wang)
+ShortDescription: Runs Claude Code, Codex, Copilot CLI and other terminal coding agents together on one mission.
+Description: 'Runner is a native desktop application where terminal agents work together. Claude Code, Codex, OpenCode, Cursor CLI, Grok Build, Antigravity CLI, Copilot CLI and pi can take the same task in one mission, and each agent keeps its own TUI in a real terminal while the lead brings the decisions back to you. Everything in Runner is also a `runner` command: missions, crews, roles, projects, chats, sessions and messages are all addressable from the command line, with `runnerd` as the background service. Agents run natively on Windows without WSL, and PowerShell 7 is optional. Status: alpha, actively shipping. Native builds target macOS (Apple Silicon) and Windows (x64) on Windows 10 version 1809 or later; Intel Macs, Windows ARM64 and Linux are not supported. The installer, the application and the CLI sidecars are Authenticode-signed with a Certum open-source certificate issued to Open Source Developer Yicheng Wang.'
+Tags:
+- ai
+- claude-code
+- codex
+- command-line
+- console
+- terminal
+ReleaseNotes: |-
+  Runner 0.20.3 is a feature release for macOS, Windows and Linux on top of 0.20.2. It redesigns the right side panel around a unified Files and Changes viewer, moves Claude Code, pi, Grok and OpenCode status to native OSC 7501 terminal reports, and adds several mission and platform fixes.
+  New
+  - Redesigned right side panel with unified Files and Changes viewer. Surface tabs and the empty panel state are replaced by a compact 40 px top icon bar (Files, Changes with a live dirty indicator, and Sessions on missions). Chat and terminal tabs now start with the panel collapsed by default; opening it shows the compact 300 px tree or changes rail and widens only when you open a file or diff, keeping a stable per-tab width across rail switches with an in-place Code | Diff toggle and synced Viewed checkmarks. On narrow windows and split tabs, the panel opens as an overlay sheet without resizing your terminals, and Info moved into the title ▾ menu (⌘I / Ctrl+Shift+I). (#1331, #1360, #1403, #1420, #1421)
+  - Claude Code, pi, Grok and OpenCode status comes from OSC 7501. Runner now reads native terminal status reports from Claude Code, pi, Grok Build and OpenCode in chats and missions instead of installing status hooks, surfacing Approval needed, Answer needed, unread completion badges, Interrupted, Response failed, and Claude/Grok background task counts. Their Status hooks switches are gone from Settings → Agents → Launch. Runner now requires Claude Code 2.1.295+, pi 1.1.0+, Grok 1.0.89+ and OpenCode v2 2.1.0+; older builds show Update needed and update automatically when you start them. (#1051, #1405, #1408)
+  - Runtime, model and effort on mission session cards. Mission Sessions cards now display each agent slot's provider icon, model and effort right below its handle and status, including on remote windows. (#1332)
+  - Clearer Appearance theme controls and segmented selection. Settings → Appearance now labels Mode (Auto / Light / Dark), Light mode theme and Dark mode theme, marks the active palette with an Active now pill, and gives segmented controls across Settings a clearer raised selected state. (#1374)
+  - Cleaner sidebar row tooltips for worktrees. Hovering a chat or mission row in a linked or missing git worktree now shows only the branch/commit label or missing status instead of appending the full checkout path. (#1415)
+  Bug fixes
+  - Windows: no flashing terminal window in Antigravity sessions. Runner now disables Antigravity CLI's background auto-updater on Windows (AGY_CLI_DISABLE_AUTO_UPDATE=true, stripping case-insensitive overrides) so agy no longer flashes a console window when launching or resuming chats. Run agy in a normal terminal to update it on Windows. (#1422)
+  - Linked Claude Code chats no longer drop mission reports on stale drafting holds. Fixed empty-composer detection for dim prompt placeholders and NBSP prompt prefixes so a linked Claude Code chat releases its drafting hold instead of timing out, added a 10-minute fallback cap for screen-observed report holds, and logged dropped reports with their reason. (#1409)
+  - CLI refuses cross-mission writes from inside a mission. Calling runner msg post, runner signal or runner ask from inside one mission with --mission naming another mission now exits with an error instead of writing into the wrong mission. (#1372)
+  - pi sessions ignore unbranded subprocess window titles. Runner now accepts only pi terminal titles prefixed with π - or pi - , so subprocesses such as npm view no longer overwrite a pi session's title. (#1396)
+ReleaseNotesUrl: https://github.com/yicheng47/runner/releases/tag/v0.20.3
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

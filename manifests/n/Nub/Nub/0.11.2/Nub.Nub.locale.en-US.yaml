@@ -1,0 +1,92 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Nub.Nub
+PackageVersion: 0.11.2
+PackageLocale: en-US
+Publisher: nub contributors
+PublisherUrl: https://nubjs.com/
+PublisherSupportUrl: https://github.com/nubjs/nub/issues
+Author: nub contributors
+PackageName: Nub
+PackageUrl: https://nubjs.com/
+License: MIT
+LicenseUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 nub contributors
+CopyrightUrl: https://github.com/nubjs/nub/blob/HEAD/LICENSE
+ShortDescription: The all-in-one JavaScript toolkit that augments Node.js instead of trying to replace it.
+Description: "An all-in-one toolkit for Node.js. One Rust binary to run your files and scripts, install dependencies, and manage Node itself — a Bun-like modern DX on top of the node you already have. There's no new runtime to adopt and no lock-in: every augmentation rides on Node's own public extension surfaces."
+Moniker: nub
+Tags:
+- javascript-runtime
+- node-version-manager
+- nodejs
+- package-manager
+- script-runner
+ReleaseNotes: |-
+  Nub v0.11.2 fixes package-manager pins and private-registry downloads, Node pins in devEngines, tsconfig resolution, and .env parsing.
+  Two setups that used to load are now refused, listed in Upgrading from v0.11.1.
+  Package-manager pins and downloads
+  Pinning pnpm 11 now writes a pin pnpm 11 reads without a warning, and downloading a package manager reads the same registry config npm does (#1137).
+  $ nub pm use pnpm@11.5.3
+  Fetching pnpm 11.5.3 (4 MB)...
+  using pnpm@11.5.3
+    package.json: packageManager = pnpm@11.5.3
+    package.json: devEngines.packageManager =
+      { name: "pnpm", version: "11.5.3", onFail: "warn" }
+  What changed:
+  - pnpm 11 pins. Both fields hold the same exact version with no hash. The integrity goes in pnpm-lock.yaml, and a fresh download is checked against it. With no lockfile, packageManager keeps its hash.
+  - Ranges in packageManager. A range resolves to the newest matching release for Yarn as it does for npm and pnpm. It was ignored, so yarn@^4 failed with "no package manager is pinned". pnpm 10 and later ignore a range there, so Nub warns and points at devEngines.packageManager.
+  - Registry config. The download reads the user config that NPM_CONFIG_USERCONFIG names, and the registry in npm_config_registry or NPM_CONFIG_REGISTRY.
+  - Path-prefixed registries. A registry such as https://example.com/artifactory/api/npm/npm/ keeps its path on the tarball download. It returned 404.
+  - Exact pins. A registry that answers an exact pin with a different version is refused.
+
+  Node pins
+  When package.json pins Node in devEngines.runtime, nub node pin now updates that entry (#1136). It wrote a .node-version, which devEngines.runtime outranks, so the pin changed nothing.
+   "devEngines": {
+     "runtime": {
+       "name": "node",
+  -    "version": "24"
+  +    "version": "26"
+     }
+   }
+  What changed:
+  - Comma ranges. A range such as >=22, <25 is written in the form npm checks, >=22 <25.
+  - Ranges in pin files. A .node-version or .nvmrc holding a range or another non-version now gets a warning naming the file. It was skipped silently. A range belongs in engines.node.
+
+  tsconfig resolution
+  A tsconfig paths target inside an installed package that declares exports now resolves through those exports and the import or require conditions (#1138). It resolved to the package's main.
+  // tsconfig.json
+  {
+    "compilerOptions": {
+      "paths": { "*": ["./node_modules/*"] }
+    }
+  }
+  What changed:
+  - Conditions. The customConditions option is read from the tsconfig governing each importing file. With a file entry, the entry's tsconfig sets the process-wide conditions, so nub app/main.ts from the root runs like nub main.ts inside app.
+  - Empty tsconfig. An empty or comment-only tsconfig.json reads as {}, as in tsc. It errored.
+
+  Snapshot launches
+  Running a startup snapshot with nubr now hands the blob straight to Node, skipping the JavaScript runner and the extra Node startup it cost (#1130). Median launch time for one snapshot on a macOS arm64 machine fell from 82 ms to 47 ms.
+  node --snapshot-blob app.blob --build-snapshot entry.js
+  nubr --snapshot-blob app.blob
+  The blob runs on the Node that Nub resolves for the project, which has to be the Node that built it. Nub's loader is loaded, so code run against the snapshot can import TypeScript.
+
+  Upgrading from v0.11.1
+  - ESM syntax in a .ts file under "type": "commonjs" is now refused on every Node version. Node 20.19+ and 22.12–22.14 loaded such a file as an ES module. Rename it to .mts or set "type": "module" (#1138).
+  - The standalone runner now stops on a tsconfig it cannot read in full, as nub does. Fix or remove the tsconfig the error names (#1138).
+
+  What's Changed
+  - nix: link nixpkgs aws-lc and zstd, bump locked nixpkgs by @colinhacks in #1129
+  - setup-node: front nub's cached Node for an explicit node-version the runner's Node satisfies by @colinhacks in #1131
+  - nubr: launch Node directly for startup snapshots by @jdalton in #1130
+  - env: read KEY= followed by a newline as an empty value by @colinhacks in #1135
+  - node: pin into devEngines.runtime, and name a pin file holding a range by @colinhacks in #1136
+  - pm: fix pnpm 11 pins, packageManager ranges, and registry config for downloads by @colinhacks in #1137
+  - runtime: tsconfig resolution fixes by @colinhacks in #1138
+ReleaseNotesUrl: https://github.com/nubjs/nub/releases/tag/v0.11.2
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://nubjs.com/docs
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

@@ -1,0 +1,138 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: NATSAuthors.NATSServer
+PackageVersion: 2.15.3
+PackageLocale: en-US
+Publisher: NATS Authors
+PublisherUrl: https://github.com/nats-io
+PublisherSupportUrl: https://github.com/nats-io/nats-server/issues
+PackageName: NATS Server
+PackageUrl: https://github.com/nats-io/nats-server
+License: Apache-2.0
+LicenseUrl: https://github.com/nats-io/nats-server/blob/HEAD/LICENSE
+ShortDescription: High-Performance server for NATS.io, the cloud and edge native messaging system.
+Tags:
+- cloud
+- cloud-computing
+- cloud-native
+- distributed-systems
+- go
+- golang
+- message-bus
+- message-queue
+- messaging
+- microservices-architecture
+- nats-server
+ReleaseNotes: |-
+  ## Changelog
+
+  Refer to the [2.15 Upgrade Guide](https://docs.nats.io/release-notes/upgrade-to-2.15) for backwards compatibility notes with 2.14.x.
+
+  ### Go Version
+
+  • 1.27.4
+
+  ### Dependencies
+
+  • github.com/nats-io/jwt/v2 v2.8.3 (#8861)
+  • github.com/nats-io/nkeys v0.4.17 (#8861)
+  • github.com/antithesishq/antithesis-sdk-go v0.9.0-default-no-op (#8885)
+  • github.com/klauspost/compress v1.20.4 (#8885)
+  • golang.org/x/sys v0.50.0 (#8885)
+
+  ### Added
+
+  General
+
+  • Account subject mappings, imports, exports and leafnode remote permissions now support the `{{account-hash()}}`, `{{account-hash-import()}}` and `{{account-hash-leaf-remote()}}` subject mapping functions (#8670)
+  • TLS configuration now supports `verify：optional`, and the command line supports `--tlsverify=optional`, verifying client certificates when provided while allowing clients without certificates (#8812, contributed by @macphersonjamie)
+  • Leafnode connections now support a configurable `ping_interval` (#8718, contributed by @stackedbyaradhya)
+  • Gateway connections now support a configurable `ping_interval` (#8717, contributed by @stackedbyaradhya)
+  • The command line now supports `-t --test_reload <file>` to check whether a configuration change can be reloaded or requires a restart, returning exit code 3 when a restart is required; embedded servers can use `CheckReload` and `CheckReloadOptions` (#8829)
+
+  Monitoring
+
+  • Healthz now supports `leaf-remotes-connected=true`, returning an unavailable status until every enabled solicited leafnode remote is connected (#8735, contributed by @edjeffreys)
+
+  ### Improved
+
+  General
+
+  • Route, gateway and leafnode connection logs now include remote destinations (#8755)
+  • Account import failures now log their reasons at error level (#8771)
+  • Gateway connections now validate protocol operations consistently with route connections (#8780)
+
+  JetStream
+
+  • Filestore subject matching and pending message calculations now avoid unnecessary scans and stop earlier when matches are found (#8784, #8803, #8806, #8808, #8813)
+  • Looking up the last sequence for a subject no longer requires loading the message, reducing work for stream operations and fast batch publishing (#8807)
+  • Filestore scans with single or multiple subject filters now avoid copying messages that do not match (#8854, #8855)
+  • Consumer redelivery queues no longer copy all remaining entries on each dequeue, reducing delays to delivery and acknowledgement processing with large redelivery backlogs (#8635, contributed by @as-clearview)
+  • Filestore scans with multiple subject filters now handle message blocks with many deleted messages more efficiently (#8864)
+  • Filestore subject scans and filtered pending-message counts now skip contiguous ranges of deleted messages (#8875, #8877)
+  • Loading filestore message blocks now avoids fully parsing messages when checking for `Nats-TTL` and `Nats-Schedule` headers (#8870, contributed by @adios-404)
+
+  ### Fixed
+
+  General
+
+  • Lame duck mode is no longer skipped when `SIGTERM` follows `SIGUSR2` immediately, and servers continue to deliver their own replies after the lame duck event (#8750)
+  • Configuration reloads no longer disconnect clients authorized by auth callout when their permissions have not changed (#8759)
+  • Auth callout user JWT names and tags are now propagated to client information (#8720, contributed by @steve-weiland)
+  • Configuration reloads now wait for server startup to finish (#8728, contributed by @edelmanjm)
+  • Connz totals now correctly reflect user, MQTT client and subject filters (#8753, contributed by @NitinKumar004)
+  • Connz and Subsz pagination no longer repeats or skips entries, including connections with equal sort values (#8770)
+  • Windows PDH queries are now released if performance counter initialization fails (#8777, contributed by @cvas22)
+  • Auth callout requests are now rejected safely when system account eventing has already shut down (#8804, contributed by @davidfarah2003)
+  • Wildcard characters inside a subject token are no longer treated as wildcard tokens or allowed to cause subject matching collisions (#8765)
+  • Account updates no longer unnecessarily recheck importers when export revocations have not changed (#8851)
+  • Configuration checks with `-t` now apply command line flags and validate options consistently with server startup (#8829)
+  • Duplicate non-queue subscriptions received over routes no longer leak interest to leafnodes and gateways (#8846)
+  • Gateway accounts in interest-only mode no longer stop receiving messages when an in-flight message races with removal of the last subscription (#8853, contributed by @paulwe)
+  • Encrypted auth callouts are now rejected when the server has no XKey available (#8878)
+
+  JetStream
+
+  • Consumer info requests no longer report success for assignments that have not been committed (#8741)
+  • Push consumers with a `RateLimit` no longer stall indefinitely when a message exceeds the rate limiter burst size (#8748)
+  • Stream scale-up from R1 can now make progress under continuous writes, and scale-down no longer stalls on peers that were never added as members (#8762)
+  • Stalled stream restores now report failure through the restore completion advisory, consistently with other failed restores (#8691, contributed by @akarazhev)
+  • JetStream no longer shuts down prematurely during server shutdown or lame duck mode (#8708, contributed by @yousefissa)
+  • Raft meta-group setup failures now stop the write-ahead log instead of leaking it (#8722, contributed by @clwluvw)
+  • Leader transfers now retry promptly when the selected successor is slow, prefer caught-up peers and avoid persisting the same term and vote twice (#8751)
+  • Interest retention cleanup no longer purges a stream when a consumer has a zero check floor, and compaction is bounded by the stream's last sequence (#8757, contributed by @tsite)
+  • Filestore `MultiLastSeqs` no longer skips matching subjects (#8769)
+  • Fixed a directory creation race when enabling account storage concurrently with stream creation (#8767, contributed by @ansh0014)
+  • Deleting a stream no longer races with account directory cleanup (#8774, contributed by @ansh0014)
+  • Sources no longer discard the remainder of a batch when one sourced message is rejected (#8772)
+  • Pull requests made through service imports are now removed when the requester loses interest, even while response wildcard interest remains (#8797)
+  • Consumers no longer deliver while a reset is in flight or report later deliveries in reset responses, and durable mirrors and sources no longer skip messages after a reset or stale delivery (#8802)
+  • Memory store purge and last-sequence scans are now bounded by the possible sequence range (#8815)
+  • Raft health checks now wait for the leader's initial data to be applied, remain stable between heartbeats and during leader changes, and allow newly assigned replicated streams and consumers time to start (#8817)
+  • Resuming a paused consumer now wakes its delivery loop immediately, allowing pending pull requests and push deliveries to proceed (#8791)
+  • `AckAll` acknowledgements are no longer ignored after acknowledging a redelivered message (#8839)
+  • Filestore recovery failures now return the original error instead of panicking, preserve existing stream data and avoid incorrect storage accounting (#8844, contributed by @rleungx)
+  • Streams and consumers with unsupported configuration values are now correctly marked offline, updates are rejected by meta leaders that cannot support them, and internal proposals preserve their stored configurations (#8843)
+  • Paused Raft followers can now request newer snapshots and compact their logs while catching up, preventing unbounded log growth and excessive memory use when replay resumes (#8842)
+  • Filestore recovery scans now persist per-message state indexes even if no new messages are published, and backward subject scans skip irrelevant blocks (#8849)
+  • Clustered health checks now report write errors on R1 streams (#8850)
+  • Removed peers in unmanaged Raft groups can no longer rejoin as leader (#8847)
+  • Scaling streams and consumers to or from R1 no longer loses writes or acknowledgements during the transition or violates atomic batch guarantees (#8766)
+  • Resetting consumers with the `last_per_subject` delivery policy now rebuilds the last-message-per-subject selection, preserves the correct delivery position after leader changes, and reports lookup errors instead of ignoring them (#8862)
+  • Filestore encryption key creation failures no longer leak file descriptors (#8873)
+  • The filestore access-time worker now shuts down reliably when the last store closes, preventing worker leaks or stopped timestamp updates when stores are reopened (#8794, contributed by @ajaykr0905)
+  • Rebuilding message deduplication state now skips deleted messages and expires restored entries at the end of their original duplicate window (#8874)
+  • Restoring a stream from a V2 snapshot now rebuilds message deduplication state, restoring duplicate detection and `Nats-Expected-Last-Msg-Id` checks without a server restart (#8871, contributed by @muhadyan)
+
+  Leafnodes
+
+  • Isolated spoke leafnodes no longer forward downstream leafnode interest to their hubs, and avoid collecting interest that cannot be forwarded (#8749)
+  • Leafnode interest is now withdrawn correctly when an outbound gateway connection closes (#8758)
+  • Fixed a data race when reading route leafnode origin support (#8779)
+  • Leafnode `deny_imports` no longer drops replies to hub requests, and account JWT or default permission updates no longer lose leafnode interest or reset permissions incorrectly (#8800)
+  • Leafnode connections no longer become stale when a hub sends many subscriptions during connection setup (#8811)
+  • Leafnode connections closed during acceptance are now removed from the server's connection list, preventing inflated leafnode counts and stale Leafz entries (#8838, con
+ReleaseNotesUrl: https://github.com/nats-io/nats-server/releases/tag/v2.15.3
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

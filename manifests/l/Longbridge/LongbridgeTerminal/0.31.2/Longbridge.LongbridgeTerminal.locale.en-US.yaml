@@ -1,0 +1,48 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: Longbridge.LongbridgeTerminal
+PackageVersion: 0.31.2
+PackageLocale: en-US
+Publisher: Longbridge
+PublisherUrl: https://longbridge.com/
+PublisherSupportUrl: https://github.com/longbridge/longbridge-terminal/issues
+Author: Longbridge
+PackageName: Longbridge Terminal
+PackageUrl: https://github.com/longbridge/longbridge-terminal
+License: MIT
+LicenseUrl: https://github.com/longbridge/longbridge-terminal/blob/HEAD/LICENSE
+ShortDescription: AI-native CLI for Longbridge Securities — real-time market data, portfolio, and trading for HK/US/A-share/SG markets
+Description: |-
+  Longbridge Terminal is an AI-native command-line tool for the Longbridge Securities platform.
+  It provides real-time market data, portfolio management, and trading across HK, US, A-share, and
+  Singapore markets. Outputs structured JSON for AI-agent tool-calling and also ships a full-screen
+  TUI for interactive monitoring.
+
+  Key capabilities:
+  - Real-time quotes, depth, K-lines, options, and warrants
+  - Account balances, stock and fund positions
+  - Order submission, modification, cancellation, and execution history
+  - Designed for scripting, AI-agent integration, and daily trading workflows
+Moniker: longbridge
+Tags:
+- cli
+- finance
+- longbridge
+- market-data
+- portfolio
+- rust
+- securities
+- trading
+- tui
+ReleaseNotes: |-
+  ## v0.31.2
+
+  • **`portfolio` USD values are correct for HKD-anchored exchange rates.** When an account's exchange-rate table is anchored on HKD (paper trading accounts today), HKD holdings were multiplied by the HKD/USD rate instead of divided, overstating `market_value_usd`, `total_pl` and `total_today_pl` by about 7×. They are now converted correctly (#344).
+  • **Currencies quoted only against HKD are converted through HKD.** SGD, CNY and CNH holdings in an HKD-anchored table were passed through unconverted under a USD label.
+  • **No more silent pass-through.** When no rate links a holding's currency to USD, `market_value_usd` is `null` and the overview's `total_pl` / `total_today_pl` are `null` (shown as `-` in the table and TUI), instead of the unconverted amount. If a script reads these fields, handle `null`.
+
+  **Full changelog**：https://github.com/longbridge/longbridge-terminal/compare/v0.31.1...v0.31.2
+ReleaseNotesUrl: https://github.com/longbridge/longbridge-terminal/releases/tag/v0.31.2
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

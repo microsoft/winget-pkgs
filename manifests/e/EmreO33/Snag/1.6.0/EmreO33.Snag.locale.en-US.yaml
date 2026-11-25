@@ -1,0 +1,102 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: EmreO33.Snag
+PackageVersion: 1.6.0
+PackageLocale: en-US
+Publisher: EmreO33
+PublisherUrl: https://github.com/EmreO33
+PublisherSupportUrl: https://github.com/EmreO33/snag/issues
+PrivacyUrl: https://github.com/EmreO33/snag/blob/main/PRIVACY.md
+PackageName: Snag
+PackageUrl: https://github.com/EmreO33/snag
+License: GPL-3.0-or-later
+LicenseUrl: https://github.com/EmreO33/snag/blob/main/LICENSE
+ShortDescription: A small, fast, native desktop video downloader built on yt-dlp.
+Description: |-
+  Snag is a native desktop front end for yt-dlp, written in Rust with no webview
+  and no bundled runtime. Paste a link, choose whether you want video with audio,
+  audio only, or video with the audio dropped, and it downloads.
+
+  It also remuxes files you already have: change container, extract audio, mute,
+  or convert to GIF, all through ffmpeg.
+
+  Restricted YouTube videos work too. Snag has no login form and never asks for
+  a password: you sign in to YouTube in your own browser, pick that browser, and
+  Snag borrows the session for YouTube links only.
+
+  Snag does not ship yt-dlp. On first launch it offers to download the current
+  release from the yt-dlp project's own GitHub releases, and keeps it updated for
+  you. It also finds ffmpeg, which merging and converting need, or installs it
+  for you through winget (Gyan.FFmpeg).
+Moniker: snag
+Tags:
+- download
+- downloader
+- ffmpeg
+- media
+- video
+- youtube
+- yt-dlp
+ReleaseNotes: |-
+  What changed
+  Faster, safer and up to date underneath: fixes from a review of the whole
+  codebase, and the interface toolkit moved up eight versions.
+  - Built on egui and eframe 0.37, from 0.29. Snag looks and works the
+    same, but its background work (downloads, the queue, the tray) now runs
+    even while the window is hidden, by design rather than by workaround, and
+    the last security advisory in its dependencies went with the old version.
+  - The interface scale follows your display's scaling again on every
+    change. Snag set it in a way that divided by the display's scaling, which
+    only came out right while that was not known yet.
+  - Link previews and downloads start about 3 seconds sooner on Windows.
+    Snag now installs yt-dlp's unpacked Windows build. The single-file
+    yt-dlp.exe unpacked itself to a temporary folder every time it ran, which
+    took 3.2 to 3.4 seconds before it did anything; the unpacked build starts
+    in 0.3. Existing installs switch over at the next yt-dlp update.
+  - yt-dlp and Deno are checked against their published checksums before
+    Snag uses them, and an update to Snag that cannot be checked is no longer
+    installed anyway.
+  - The proxy in settings now covers all of Snag's own traffic:
+    thumbnails, update checks and downloads of yt-dlp, Deno and Snag. Before,
+    only yt-dlp used it. If the proxy cannot be reached, those requests fail
+    rather than going around it.
+  - Slow connections no longer fail big downloads. Downloading Deno or a
+    Snag update had a time limit on the whole transfer, which a connection
+    slower than about 6 Mbit/s could not meet. Now only a transfer that has
+    actually stalled times out.
+  - Cancelling a download stops everything it started, including the
+    ffmpeg merging or converting it, which used to carry on in the background.
+  - Settings, history and the queue survive a crash while saving. They are
+    written to a new file and swapped in, rather than overwritten in place.
+  - A settings file that cannot be read is now reported. Snag used to set
+    it aside and silently start first-run setup; setup now says what happened
+    and where the old file was kept.
+  - Less work while Snag runs: the history screen no longer checks every
+    file on disk on every frame, download progress no longer forces a redraw
+    per line, the queue is only rebuilt when it changes, Snag in the tray no
+    longer wakes itself twice a second, and on Windows the clipboard is only
+    read after something new is copied.
+  - On Linux, finding out how Snag was installed no longer starts the
+    package manager's tools before the window opens.
+  Windows
+  - Snag-*-windows-setup.exe: the installer. Installs for you or for all
+    users, adds a Start Menu entry, and uninstalls cleanly.
+  - Snag-*-windows-portable.zip: portable. Unzip and run. It keeps
+    everything in a data folder beside the executable and writes nothing else
+    to the machine.
+  - snag-windows-x86_64.exe: the bare executable.
+  Linux
+  - Snag-*-x86_64.AppImage: the recommended Linux build. Runs on any distro
+    with glibc 2.35 or newer and integrates with your application menu. chmod +x it and run it.
+  - snag-linux-x86_64: the bare binary. Needs glibc 2.39 or newer.
+  macOS
+  snag-macos-aarch64, a bare binary. Builds in CI but has not been run by
+  anyone yet, so treat it as untested.
+  Snag does not ship yt-dlp. On first launch it offers to download the current
+  yt-dlp release from the yt-dlp project's own GitHub releases. ffmpeg is
+  required separately and is not installed by Snag.
+  Full Changelog: v1.5.12...v1.6.0
+ReleaseNotesUrl: https://github.com/EmreO33/snag/releases/tag/v1.6.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

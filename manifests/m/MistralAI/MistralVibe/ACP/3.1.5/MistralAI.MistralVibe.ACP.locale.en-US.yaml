@@ -1,0 +1,81 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: MistralAI.MistralVibe.ACP
+PackageVersion: 3.1.5
+PackageLocale: en-US
+Publisher: Mistral AI
+PublisherUrl: https://mistral.ai/
+PublisherSupportUrl: https://github.com/mistralai/mistral-vibe/issues
+PrivacyUrl: https://legal.mistral.ai/terms/privacy-policy
+Author: Mistral AI
+PackageName: Mistral Vibe (ACP mode)
+PackageUrl: https://github.com/mistralai/mistral-vibe
+License: Apache-2.0
+LicenseUrl: https://github.com/mistralai/mistral-vibe/blob/HEAD/LICENSE
+Copyright: Copyright 2026 Mistral AI
+CopyrightUrl: https://legal.mistral.ai/terms
+ShortDescription: Minimal CLI coding agent by Mistral
+Description: |-
+  Mistral's open-source CLI coding assistant.
+  Mistral Vibe is a command-line coding assistant powered by Mistral's models. It provides a conversational interface to your codebase, allowing you to use natural language to explore, modify, and interact with your projects through a powerful set of tools.
+Tags:
+- agent
+- agentic
+- ai
+- code
+- coding
+- develop
+- development
+- programming
+ReleaseNotes: |-
+  Added
+  - Experimental: with experimental_enable_remote_plugins, the plugins that are on in your Mistral plugin library are downloaded to ~/.vibe/remote-plugins and load in sessions. A synced plugin is read-only: a copy changed on disk is downloaded again. A local plugin named like one in your library is not loaded and is reported until you rename it
+  - Sessions page: press ← on an empty prompt (or /sessions) to browse every folder's sessions with a conversation preview, search, sorting, archived sessions, rename and archive; it reopens where you left it
+  - /cd [path] moves the current session to another folder and keeps the conversation, asking to trust the folder first when needed
+  - tool_result_images provider setting: set it to true for a Chat Completions endpoint that takes images in tool results, so its models see the images tools return, such as read_file on a PNG or MCP screenshots (default false)
+  - @ completion lists paths outside the project, such as @~/, @../ or @/, one directory at a time
+  - The /loop manager edits the highlighted loop with Enter or e: change its title, schedule or instructions without deleting and recreating it
+  - The /loop manager runs the highlighted loop now with r, keeping its schedule
+  - Press Enter on a background task to see its live output, and / to search it.
+  - Show when a GitHub pull request is queued to merge in the PR window.
+  - The loading line once again sometimes replaces Generating or Thinking with a playful label, such as "Eating a chocolatine", with extra ones on Halloween and in December
+  Changed
+  - A plugin's Views, the MCP Apps of its own MCP servers and its volumes are not supported yet: the model is now told so for each, so it does not call a render_* tool that does not exist
+  - /resume and vibe --resume open the Sessions page, which lists sessions from every folder instead of only the current one
+  - A goal that cannot go on (its model needs a plan upgrade, its next turn fails to start, or the session is archived) is now marked blocked, with the reason, instead of waiting active
+  - Tab on a folder in the @ popup opens it and keeps the popup open, with the folder itself listed first so Enter keeps it
+  - @ completion quotes paths that contain spaces
+  - The next scheduled loop now shows as a chip on the status rail instead of a line above the input box; click it, or press Ctrl+X then o, to open /loop
+  - The model picker now lists the models Mistral offers for your plan, downloaded from Mistral, for everyone with a Mistral API key or sign-in. Set enable_model_catalog = false to keep only the models built into Vibe
+  - experimental_enable_model_catalog is renamed enable_model_catalog. If you had set it to false, Vibe updates your config file and the setting stays false
+  - VIBE_EXPERIMENTAL_ENABLE_MODEL_CATALOG is no longer read; use VIBE_ENABLE_MODEL_CATALOG instead
+  - The status rail's Ctrl+X to navigate hint hides for 7 days once you use the rail, by Ctrl+X or a chip click
+  - Subagents and PRs stay on the status rail when the row is narrow; other items drop first.
+  - While the agent waits for background work, the empty prompt reads "Send a message to steer"; on a narrow row the waiting line shortens before any rail chip shrinks.
+  - A session is no longer limited to 128 subagents over its lifetime
+  - agents.list shows only live subagents; reusing a closed subagent's name now says it belongs to a closed subagent
+  - The held queue's header lists its shortcuts, including Ctrl+C to cancel the last queued message, and the interrupt row suggests /retry while it can still resume
+  - A message steered into a running turn now shows as ↳ inside the turn, without a separator
+  - With collapse_turn_details, a steer splits the turn's Worked for group into one group before it and one after it
+  - Scrolled past a steer, the pinned prompt shrinks to one row with the latest steer on a second row, which a click jumps to
+  Fixed
+  - After a failed experiment or model list fetch, new sessions wait for the retry again instead of skipping it until restart
+  - A model list your organization turns on mid-session is available from the next turn and after /reload
+  - After a plan upgrade, opening /model now shows the newly included models without /reload or a restart
+  - Models served through a LiteLLM gateway now keep their signed reasoning from earlier turns
+  - /reload now picks up subagent profiles added or edited since the session started, so they can be launched without restarting Vibe.
+  - A loop scheduled before the first prompt of a vibe --worktree session no longer loses the session or the loop on close, and vibe --resume reopens both
+  - A [tools.<name>] permission other than always, never or ask is now reported as a configuration error naming the tool, instead of failing startup with "Invalid request parameters"
+  - Vibe no longer fails to start when the selected model's provider is not configured: it starts on the default model and names the missing provider
+  - Picking a model from your organization's admin configuration, or changing its thinking level, no longer copies the whole model into your config.toml
+  - The install script no longer fails when vibe was installed with Homebrew, pip or pipx, and upgrades Homebrew installs with brew upgrade
+  - A model answer that breaks off mid-stream with a transient server, overload, rate-limit or timeout error is now retried instead of failing the turn
+  - Opening or resuming a session in a Vibe-managed worktree no longer waits while other old worktrees are being cleaned up; resuming a worktree waits only while that worktree itself is being removed
+  - Tool output no longer shows stray escape-code text such as (B from tput sgr0, 7/8 from cursor saves, or inline image data
+  - Background tasks and loops no longer vanish from the screen after a compaction or /clear
+  - /retry and other slash commands now run while queued prompts are held after an interrupt or a failure; the held prompts are sent once the retry completes
+  - Long sessions no longer get slower with each streamed update and each new turn
+ReleaseNotesUrl: https://github.com/mistralai/mistral-vibe/blob/HEAD/CHANGELOG.md#315---2026-11-24
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

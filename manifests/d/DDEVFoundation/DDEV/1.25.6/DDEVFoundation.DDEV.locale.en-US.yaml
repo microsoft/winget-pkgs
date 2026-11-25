@@ -1,0 +1,132 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: DDEVFoundation.DDEV
+PackageVersion: 1.25.6
+PackageLocale: en-US
+Publisher: DDEV Foundation
+PublisherUrl: https://github.com/ddev
+PublisherSupportUrl: https://github.com/ddev/ddev/issues
+PackageName: DDEV
+PackageUrl: https://github.com/ddev/ddev
+License: Apache-2.0
+LicenseUrl: https://github.com/ddev/ddev/blob/HEAD/LICENSE
+ShortDescription: Docker-based local PHP+Node.js web development environments
+Tags:
+- backdrop
+- craftcms
+- ddev
+- development
+- docker
+- drupal
+- laravel
+- linux
+- local-development
+- macos
+- magento
+- magento2
+- mariadb
+- moodle
+- nodejs
+- php
+ReleaseNotes: |-
+  ## Installation
+
+  See the [installation instructions](https://docs.ddev.com/en/stable/users/install/ddev-installation/) for details, but it's easy:
+
+  • macOS：`brew install ddev/ddev/ddev` or just `brew upgrade ddev`.
+  • Linux：Use `sudo apt-get update && sudo apt-get install ddev`, see [apt/yum installation](https://docs.ddev.com/en/stable/users/install/ddev-installation/#linux)
+  • Windows and WSL2：Download the [Windows Installer](https://ddev.com/download/); you can run it for install or upgrade.
+  • Consider `ddev delete images` or `ddev delete images --all` after upgrading to free up disk space used by previous Docker image versions. This does no harm.
+  • Consider `ddev config --auto` to update your projects to current configuration.
+
+  ## Highlights
+
+  Blog announcement：https://ddev.com/blog/release-v1-25-6/
+
+  • **[PHP 8.6.0](https://docs.ddev.com/en/stable/users/configuration/config/#php_version)**, the final release, replacing 8.6.0 RC3. apcu, imagick, memcached, redis, uploadprogress, xdebug, xhprof, xmlrpc, and yaml are not available for 8.6 yet
+  • **PHP security releases** 8.5.13, 8.4.28, 8.3.37, and 8.2.36, see below
+
+  ## PHP Security Fixes
+
+  • PHP 8.5.13, 8.4.28, 8.3.37, and 8.2.36 fix the [17 advisories](https://github.com/php/php-src/security/advisories) published on November 19. deb.sury.org backported the same fixes to PHP 5.6 through 8.1, keeping their version numbers. DDEV installs them when it builds the project's web image
+  • None looks urgent for a default DDEV project. DDEV's settings already block two of the critical ones (`session.upload_progress.enabled = 0` and `zend.exception_ignore_args = On`), and its setup avoids the PHP-FPM ones. A custom config, like a file-based `error_log` or `fastcgi_keep_conn on`, can open some of them again
+  • For future PHP releases, the tip in [`php_version`](https://docs.ddev.com/en/stable/users/configuration/config/#php_version) shows how to get a patch release before DDEV ships it
+
+  ## ⚠️ Breaking Changes
+
+  • `web` and `db` no longer mount the shared `ddev-global-cache` volume. Add-ons that write to `/mnt/ddev-global-cache` from `web`, like ddev-nvm and ddev-pnpm, lose that data on restart until they mount it themselves, see [The `ddev-global-cache` Volume](https://docs.ddev.com/en/stable/users/usage/architecture/#the-ddev-global-cache-volume)
+  • Each project has its own [cache volumes](https://docs.ddev.com/en/stable/users/usage/architecture/#project-cache-volumes). After upgrading, bash and MySQL history start empty, and the first Composer or npm install downloads everything again
+  • nginx now denies what the CMS's `.htaccess` denies on Apache, such as Drupal `*.yml` and `*.twig` files, and Apache denies dotfiles. If you removed `#ddev-generated` from [`.ddev/nginx_full/nginx-site.conf`](https://docs.ddev.com/en/stable/users/extend/customization-extendibility/#custom-nginx-configuration) or [`.ddev/apache/apache-site.conf`](https://docs.ddev.com/en/stable/users/extend/customization-extendibility/#custom-apache-configuration), merge the changes from the new template
+  • The table output of `ddev list`, `ddev describe`, and `ddev snapshot --list` changed. Scripts should use `-j`
+  • Scripts that pipe answers into bare `ddev config` need a leading `no` line
+
+  ## Features
+
+  • Interactive [`ddev config`](https://docs.ddev.com/en/stable/users/usage/commands/#config) shows the detected configuration in a form, where you can change the PHP version, database, and webserver before accepting it
+  • [`ddev list`](https://docs.ddev.com/en/stable/users/usage/commands/#list), [`ddev describe`](https://docs.ddev.com/en/stable/users/usage/commands/#describe), and [`ddev snapshot --list`](https://docs.ddev.com/en/stable/users/usage/commands/#snapshot) fit the terminal width and match [`ddev tui`](https://docs.ddev.com/en/stable/users/usage/commands/#tui)
+  • `CI` from the host is [passed into the `web` container](https://docs.ddev.com/en/stable/users/configuration/environment-variables/#ci-from-the-host)
+  • The [Wagtail quickstart](https://docs.ddev.com/en/stable/users/quickstart/#wagtail) builds its virtual environment in the web image, see [Python Packages from `requirements.txt`](https://docs.ddev.com/en/stable/users/extend/customizing-images/#python-packages-from-requirementstxt)
+  • `ddev start` warns when Docker Desktop on macOS resets connections to router ports
+
+  ## Bug Fixes for Regressions
+
+  • Usage data is sent again when you [opted in](https://docs.ddev.com/en/stable/users/usage/diagnostics/). v1.25.5 sent nothing
+  • Lines typed after a command that reads the terminal, like the Craft CMS setup wizard, are no longer dropped. This broke in v1.25.3
+
+  ## Bug Fixes
+
+  • Global commands no longer go missing or come from another global config directory
+  • A restarted `web` or `xhgui` container no longer takes about 60 seconds to become healthy
+  • Commands that run at the same time no longer drop each other's projects from `project_list.yaml`, and `omit_project_name_by_default` no longer registers a project with an empty name
+  • [Custom command](https://docs.ddev.com/en/stable/users/extend/custom-commands/) files keep their group-write bit and ACLs, thanks to @steffenmaechtel
+  • A renamed project no longer causes "Router configuration errors"
+  • On Windows, `ddev pull` no longer fails with `Unknown command '\U'`, and WordPress and Backdrop no longer get a `.gitignore` in the project root
+  • A substitute port used because the configured one was busy is no longer written into `.ddev/config.yaml`, and neither is a port from the global configuration
+  • Let's Encrypt no longer stops silently when `acme.json` permissions change
+  • XHGui imports profiles up to 100MB, not 5MB
+  • Ctrl-C no longer leaves temporary containers behind when Docker is slow
+  • `ddev start` with Mutagen retries after two intermittent Mutagen races
+  • `ddev composer create-project` no longer hangs on an open stdin pipe, no longer shows stray `tate=working:app=composer` text with Composer 2.11, and passes piped answers to Composer scripts in order
+  • With Podman and Mutagen, the image's default `index.html` is no longer synced into new projects
+
+  ## Security Changes
+
+  • A crafted archive in `ddev add-on get`, `ddev import-db`, or `ddev import-files` can no longer write outside the destination through relative symlinks, see [GHSA-vxj4-5gfg-97c2](https://github.com/ddev/ddev/security/advisories/GHSA-vxj4-5gfg-97c2)
+  • nginx deny rules now come before the PHP location, so PHP files in denied directories (TYPO3 `vendor`, CodeIgniter `system`, hidden directories) no longer run, thanks to @Atesca
+  • The `ddev-xhgui` image gets current Alpine packages instead of PHP 8.3.23 and nginx 1.28.0 from July 2025
+
+  ## Internal Changes
+
+  • Work toward Apple Container support ([#7372](https://github.com/ddev/ddev/issues/7372), [#8895](https://github.com/ddev/ddev/issues/8895))：no DDEV volume is mounted read-write by two containers
+  • [Opt-in usage data](https://docs.ddev.com/en/stable/users/usage/diagnostics/) is sent as weekly summaries instead of an event for every command. Nothing is sent unless you opted in
+
+  ## Minor Updates
+
+  • PHP 8.6.0, 8.5.13, 8.4.28, 8.3.37, and 8.2.36
+  • PHP 8.6 uses PHP's default `fatal_error_backtraces` again
+  • Docker Compose v5.8.0, recommended buildx 0.39.0
+  • `--help` shows `[=true|false]` after boolean flags, and the error for an invalid flag value is worded differently (pflag v1.1.0)
+
+  ## What's Changed
+  • ci(buildkite)：use HEAD ddev in test.sh, clear stray host containers before installer tests, drop Chocolatey by @rfay in https://github.com/ddev/ddev/pull/9014
+  • docs(quickstart)：fix OpenMage Composer install by @stasadev in https://github.com/ddev/ddev/pull/9021
+  • feat(wagtail)：build venv from requirements.txt in web image by @stasadev in https://github.com/ddev/ddev/pull/9018
+  • fix(dbserver)：drop xtrabackup's libcurl4-openssl-dev dependency for MySQL 8.0/8.4/9.7, fixes #8925 by @rfay in https://github.com/ddev/ddev/pull/9023
+  • fix：stop a stale healthy marker from delaying restarted web and xhgui containers by 59s (#9019) [skip ci] by @stasadev in https://github.com/ddev/ddev/pull/9019
+  • feat(router)：give the router its own ddev-router-traefik volume, for #8895, fixes #8975 by @rfay in https://github.com/ddev/ddev/pull/8945
+  • fix：lock and reread project_list.yaml on every change, never register an empty project name, fixes #9004, fixes #9017 by @rfay in https://github.com/ddev/ddev/pull/9020
+  • fix(xhgui)：raise upload limits to 100M so large profiles import, fixes #9025 by @rfay in https://github.com/ddev/ddev/pull/9027
+  • feat：give web and db their own project cache volumes, for #8895 by @rfay in https://github.com/ddev/ddev/pull/9024
+  • chore(claude)：replace the ddev-commit skill with /ddev:commit by @stasadev in https://github.com/ddev/ddev/pull/9030
+  • fix(xhgui)：upgrade Alpine packages so the image gets PHP and nginx security fixes by @rfay in https://github.com/ddev/ddev/pull/9028
+  • fix(router)：detect Docker Desktop connection resets on router ports after alias updates by @rfay in https://github.com/ddev/ddev/pull/9026
+  • fix：copy global commands into each container instead of the shared volume, fixes #5806, for #8895 by @stasadev in https://github.com/ddev/ddev/pull/8956
+  • fix：make custom commands executable without dropping group-write or ACLs, fixes #9031 by @steffenmaechtel in https://github.com/ddev/ddev/pull/9032
+  • build(deps)：bump owenthereal/action-upterm from 1 to 2 (#9033) [skip ci] by @dependabot[bot] in https://github.com/ddev/ddev/pull/9033
+  • fix：use filepath.Base for the pulled database file name on Windows, fixes #8998 by @rfay in https://github.com/ddev/ddev/pull/9039
+  • refactor：omit the project name in WriteConfig's copy, not in app.Name (#9029) [skip ci] by @rfay in https://github.com/ddev/ddev/pull/9029
+  • fix：mount ddev-config read-only in web and db with no_bind_mounts, for #8895 by @rfay in https://github.c
+ReleaseNotesUrl: https://github.com/ddev/ddev/releases/tag/v1.25.6
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

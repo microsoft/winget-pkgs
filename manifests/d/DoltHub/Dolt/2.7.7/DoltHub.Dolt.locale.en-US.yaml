@@ -1,0 +1,141 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: DoltHub.Dolt
+PackageVersion: 2.7.7
+PackageLocale: en-US
+Publisher: DoltHub
+PublisherUrl: https://github.com/dolthub/dolt
+PublisherSupportUrl: https://github.com/dolthub/dolt/issues
+Author: DoltHub
+PackageName: Dolt
+PackageUrl: https://www.dolthub.com/
+License: Apache-2.0
+LicenseUrl: https://github.com/dolthub/dolt/blob/HEAD/LICENSE
+CopyrightUrl: https://raw.githubusercontent.com/dolthub/dolt/master/LICENSE
+ShortDescription: Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+Description: |-
+  Dolt is a SQL database that you can fork, clone, branch, merge, push and pull just like a git repository.
+  Connect to Dolt just like any MySQL database to run queries or update the data using SQL commands.
+  Use the command line interface to import CSV files, commit your changes, push them to a remote, or merge your teammate's changes.
+Moniker: dolt
+Tags:
+- cli
+- data
+- git-for-data
+- versioning
+ReleaseNotes: |-
+  Merged PRs
+
+  dolt
+  - 12657: Merge lossless integer column widenings
+    Allow a one-sided integer widening to merge automatically when the new column type can represent every value of the original type. This covers the customer’s case where a schema-only branch widens INT UNSIGNED to signed BIGINT and all rows are on the receiving branch.
+    Rewrite rows and rebuild indexes when the tuple encoding changes. Same-signed MEDIUMINT and INT share an encoding, so widening between them also works on keyless tables. Conversions that could lose values or require a keyless row rewrite still produce a schema conflict.
+    Depends on: #12656
+  - 12656: Validate unique constraints when rebuilding indexes during merge
+    When a schema merge rebuilds secondary indexes, the destination’s existing unique keys can use a different encoding or collation from the merged rows. Checking those keys during the row merge can reject a valid merge or leave stale constraint violations.
+    Check uniqueness against the final merged rows during the index rebuild, and replace inherited unique violations with the ones that still apply. Keep keys containing NULL in the rebuilt index so indexed lookups can find those rows.
+  - 12635: Retry throttled requests on s3:// and aws:// remotes
+    This change consolidates all AWS client config related to pulling chunk data to use adaptive retries
+    Related: #12558
+  - 12634: Fix panic and incorrect results for range lookups on geometry columns in non-spatial indexes
+    Fixes a panic and incorrect results for range lookups on geometry columns in non-spatial indexes.
+    Fixes #12622
+  - 12632: Fix left outer merge join skipping a right row after a null-extended row
+    Fixes a left outer merge join returning wrong results when a non-merge filter rejects a match.
+    Companion PRs: dolthub/go-mysql-server#4212 dolthub/doltgresql#3944
+    Fixes dolthub/doltgresql#3939
+  - 12631: Distinguish the -H host flag from CLI help
+    dolt sql-server uses -H for the host address. The shared CLI help check lowercased the flag and classified it as -h, so callers could mistake a server invocation for a help request.
+    Match the short help flag case-sensitively and preserve case-insensitive matching for --help. The regression test covers -H localhost and --HELP alongside the existing -h and --help cases.
+  - 12629: add interface to get object type name
+  - 12586: Fix DOLT_CONFLICTS_RESOLVE --theirs panic when neither side holds the row
+    - Fixes #12165: DOLT_CONFLICTS_RESOLVE('--theirs', ...) panicked with malformed tuple when the conflicted row is absent on both sides (a keyless row updated on both branches, or a conflicted row deleted from the working set) and the table has a secondary or Full-Text index. Contributed by @somaz94 in #12208; reopened from a dolthub branch so CI runs.
+    - Doltgres: dolthub/doltgresql#3929 skips the new MySQL-only MATCH ... AGAINST queries.
+  - 12577: Let extended TypeInfos preserve the encoding of altered columns
+    Lets extended TypeInfos keep the storage encoding of existing columns during ALTER TABLE.
+    Fixes dolthub/doltgresql#3923
+    Companion PR: dolthub/doltgresql#3924
+  - 12566: proto: Annotate remotesapi with idempotency levels.
+  - 12462: sqle: return static editor errors from Close so no-op DML statements fail
+    Problem
+    When a write table editor cannot be created for the caller — for example when the
+    branch control check in WritableDoltTable.Updater / Deleter / Inserter fails —
+    the error is wrapped in a sqlutil.StaticErrorEditor. That error is only returned
+    from Insert / Update / Delete, i.e. once per row.
+    Statements that edit no rows never call those methods:
+    - UPDATE t SET c = c — go-mysql-server's updateIter skips Update when the old
+      and new rows are equal (sql/rowexec/update.go),
+    - DELETE FROM t WHERE <no match> — the deleter never sees a row.
+      StaticErrorEditor.Close returned nil (it even carried an // Or e.err? comment),
+      so the statement reported success even though the permission check had failed. No
+      data was written, but the client observes a successful DML statement for a user that
+      is not allowed to run it.
+      Reproduced on Doltgres (which reuses the sqle write path) against a copy of a real
+      deployment, as a user without write permission on main:
+      | statement | before |
+      | --- | --- |
+      | UPDATE salary SET amount = amount WHERE id = 1; | UPDATE 1 (no error) |
+      | UPDATE salary SET amount = 12500 WHERE id = 1; | UPDATE 1 (no error) |
+      | UPDATE salary SET amount = 777 WHERE id = 1; | permission error |
+      | DELETE FROM salary WHERE 1 = 0; | DELETE 0 (no error) |
+      dolt_status stayed empty and the stored values were unchanged after the no-op
+      statements.
+    Fix
+    Return the captured error from StaticErrorEditor.Close, so it surfaces for zero-row
+    updates/deletes as well. Authorized users are unaffected: the editor is only created
+    when editor construction already failed.
+    Tests
+    Two cases added to BranchControlBlockTests:
+    - UPDATE test SET v1 = v1 WHERE pk = 1;
+    - DELETE FROM test WHERE pk = 0;
+      Both fail without the fix (An error is expected but got nil) and pass with it.
+      TestBranchControl and TestBranchControlBlocks pass.
+  - 12460: go/libraries/doltcore/sqle: Push-on-write hooks and read replicas own the remote databases they open.
+    Part of removing the process-global store cache in dbfactory/file.go. Top of a stack of eight.
+    Push-on-write hooks and read replicas now open their remote databases outside the singleton cache, and own them. A DoltDB closes the CloseableCommitHooks registered on it, and ReadReplicaDatabase.Close closes its remote. The cluster replicate thread closes its destination when it exits, which also closes the connection a dropped database used to leak.
+    Behaviour change: a hook or replica whose file:// remote is a journaled database the same server is serving used to get that open store through the cache. A hook silently moved the served database's main. Replication is now disabled at startup with a logged error, and the server still starts.
+    Tests: TestDoltDBCloseClosesCommitHooks, TestDynamicPushOnWriteHookClosesDestinations, TestReadReplicaDatabaseCloseClosesRemote, TestCommitHookReplicateClosesDestDB, and go-sql-server-driver TestReplicationToServedDatabaseIsDisabled.
+  - 12337: go/store/prolly: clarify MutableMap checkpoint/flush invariants; flush on Delete and on superseded edits
+    go/store/prolly: clarify MutableMap checkpoint/flush invariants, and fix two gaps in when edits flush.
+    - Renames stash to flushedCheckpoint and documents when it is set, cleared, and what tuples.Edits holds alongside it. flushPending, CheckpointMap and CheckpointView share a checkpointState helper, which skips copying and replaying the skip list when the checkpoint has no edits.
+    - Removes the unused HasEdits, which went false after a flush, and renames skip.List.HasCheckpoint to HasCheckpointedEdits.
+    - Delete now flushes once pending edits exceed maxPending; previously only Put checked, so a large DELETE kept every tombstone in memory.
+    - The flush threshold now counts skip-list nodes rather than distinct keys. Overwrites append a node without changing Count(), so repeated updates to the same rows grew the edit buffer without ever flushing.
+
+  go-mysql-server
+  - 4212: Add left outer merge join test with a residual filter
+    Adds a test for left outer merge joins with a single right match per key and a residual filter.
+    Companion PRs: #12632 dolthub/doltgresql#3944
+    Fixes dolthub/doltgresql#3939
+  - 4209: Fix unary minus on Go int values and match MySQL result types
+    Builds on #4206 (the contributor's commit is included unchanged).
+    - #12591: negating functions that return a Go `int` (`WEEKDAY`, `YEAR`, `EXTRACT`, `FIND_IN_SET`, ...) and `-(-true)` failed with `invalid type: int`.
+    - Negating an unsigned integer gave wrong values (e.g. `-crc32('a')`, `-` of a `TINYINT UNSIGNED` 200 column, `-` of a max `BIGINT UNSIGNED` value returned 1). It now returns the negated value as a BIGINT, or an out of range error below the BIGINT minimum, as MySQL does.
+    - Result types now match MySQL: negating any integer, `BOOLEAN`, `YEAR` or `BIT` gives BIGINT, negating `FLOAT` gives DOUBLE, and negating a string returns a DOUBLE value. Negating `MEDIUMINT`, `YEAR` and `BIT` columns previously returned wrong values or errors.
+  - 4207: Fix ST_GeomFromGeoJSON panic on NULL SRID
+    Fixes #12600
+  - 4203: Return error instead of panicking on joins with more than 64 tables
+    Fixes #12523
+  - 4202: Prevent invalid intervals for Events
+    Adds a 1,000,000,000 limit on any unit for intervals for events.
+    Partially addresses: #12582
+    Depends on: dolthub/vitess#513
+    Related Issues: #12593
+
+  Closed Issues
+  - 12591: Unary minus on date/time functions fails with invalid type: int
+  - 12581: CREATE EVENT ... ON SCHEDULE EVERY NULL panics with a nil pointer dereference in sql/plan/ddl_event.go and drops the client connection
+  - 12517: Unexpected Anti Join Result
+  - 12312: window SUM over a DECIMAL column returns float results
+  - 10063: Dolt SQL Server Replica Pod Fails to Start After Restart with Nil Pointer Dereference Panic
+  - 12624: CAST('abc' AS CHAR(2)) and CONVERT('abc', CHAR(2)) return 'abc' (the length is ignored for a string literal and for a DATE); a column value is truncated to 'ab' as in MySQL
+  - 12623: SUBSTRING(str FROM pos) and SUBSTR(str FROM pos) fail with a syntax error; only the form with FOR is accepted (MySQL accepts both)
+  - 11907: IN predicate ignores utf8mb4_unicode_ci for accent-insensitive comparisons
+  - 12236: Reading a view inside a transaction commits the transaction; a later ROLLBACK does not undo earlier writes
+  - 12622: A range comparison (g < ...) on an indexed POLYGON or LINESTRING column panics with "comparing uncomparable type types.Polygon" in prollyRangesFromSqlRanges and drops the connection
+  - 12165: DOLT_CONFLICTS_RESOLVE --theirs panics on a keyless table with a Full-Text index
+  - 10334: How to use dolt with a proxy
+ReleaseNotesUrl: https://github.com/dolthub/dolt/releases/tag/v2.7.7
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

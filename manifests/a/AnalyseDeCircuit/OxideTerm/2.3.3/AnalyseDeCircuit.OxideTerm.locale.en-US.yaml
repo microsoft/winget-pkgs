@@ -1,0 +1,94 @@
+# Created with WinGet Tracker using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: AnalyseDeCircuit.OxideTerm
+PackageVersion: 2.3.3
+PackageLocale: en-US
+Publisher: AnalyseDeCircuit
+PublisherUrl: https://github.com/AnalyseDeCircuit
+PublisherSupportUrl: https://github.com/AnalyseDeCircuit/oxideterm/issues
+Author: AnalyseDeCircuit
+PackageName: OxideTerm
+PackageUrl: https://github.com/AnalyseDeCircuit/oxideterm
+License: GPL-3.0
+LicenseUrl: https://github.com/AnalyseDeCircuit/oxideterm/blob/HEAD/LICENSE
+ShortDescription: Local-first SSH workspace for local shells and remote machines.Zero Electron, zero OpenSSL, zero telemetry, and no app subscription for core SSH workflows.
+Tags:
+- agent
+- ai-terminal
+- bring-your-own-key
+- filemanager
+- mcp
+- rag
+- russh
+- rust
+- sftp
+- ssh-client
+- tauri
+- terminal
+- terminal-emulator
+- tool-calling
+- wslg
+- xterm-js
+ReleaseNotes: |-
+  中文 | English
+  中文
+  OxideTerm 2.3.3 将会话管理器迁入侧边栏并重做紧凑主机监控，同时带来模板批量创建 SSH 连接、BLE 设备插件协议、受信任主机密钥管理、默认可编辑的多行粘贴预览、终端缩放与高吞吐渲染优化，以及跨平台字体和输入法修复。
+  🗂️ 会话管理、工作台与导航
+  - 侧边栏会话管理器：会话管理器现可直接作为侧边栏面板使用，在保持 SFTP 停靠于侧栏下方的同时与独立标签页互斥切换；面板支持本地搜索（Esc 关闭并重置输入）、整行拖拽排序，以及基于 Ctrl/Cmd 和 Shift 的多选操作与右键批量删除。（PR #796）
+  - 分组统计修复：会话管理器分组徽标现在将已保存的 BLE 设备配置纳入计数统计。（PR #793）
+  - 模板批量添加 SSH 连接：在会话管理器工具栏与命令行（oxideterm connections batch-create）中支持按 OpenSSH 风格模板搭配逐行主机清单批量生成连接，覆盖 {host}、{profile}、{user}、{port}、{name}、{group} 占位符与最多 2,000 条记录的预检。应用前会区分新增、更新、跳过与错误条目并采用整批原子写入（存在任何无效行即拒绝部分写入）；已保存模板写入系统钥匙串或加密便携保险库，并严格保留 ProxyCommand 的参数边界。（PR #773）
+  - 紧凑主机监控侧栏：重构连接监控面板，以更紧凑的信息布局集中呈现 CPU 使用率与走势、可按需展开的逐核负载网格、内存与交换空间、系统运行时间、磁盘容量与 I/O 速率、网络收发走势以及连接延迟。
+  - 精简活动会话树：移除了活动会话面板中冗余的焦点钻取视图与面包屑导航，统一为树形视图与主机视图，并梳理节点、端口转发和终端编号展示，配合导轨线、分组状态指示与直达操作按钮提升浏览效率。
+  - 欢迎工作台与标签作用域：优化欢迎页最近连接与快捷入口排版，在标题栏新增标签作用域选择器以按组快速筛选标签页，并精简设置页卡片外壳、规则编辑器及快捷命令发送栏布局。
+  ⚡ 终端体验、粘贴与编解码
+  - 多行粘贴默认可编辑：开启粘贴保护时，多行粘贴会直接进入可编辑预览框，支持 Enter 换行、Esc 取消、撤销/重做与一键剥离 Markdown 代码块围栏；若未作修改，则沿用原样文本并保持原始换行交由终端粘贴处理。
+  - 禅模式边缘退出按钮：处于禅模式时将鼠标移至窗口顶部边缘即可呼出退出按钮，无需记忆快捷键也能随时退出，同时避免顶部提示控件抢占终端输入焦点。（PR #799）
+  - 终端缩放与高吞吐输出优化：修复终端调整尺寸时网格短暂空白与提示符重绘不完整的问题；优化 PTY 缩放调度并减少高吞吐输出期间的重复文本快照、样式哈希、高亮扫描与流式链接识别分配，兼顾合并字符输入边界与流畅度。（PR #784）
+  - 传统编码与分包 UTF-8 修复：在 GBK、Big5、Shift_JIS、EUC-JP、EUC-KR、Windows-1252 等旧编码以及 Telnet 用户名输入场景中，无法编码的字符现改为发送 ? 而非 HTML 数字实体；跨多次读取分包到达的合法 UTF-8 字符也不再触发误报编码切换提示。（PR #776、#777）
+  🔐 SSH、主机密钥与 Shell 集成
+  - 受信任主机密钥管理：在「设置 → 连接」中新增受信任主机（Known Hosts）管理界面，支持按主机、端口或指纹搜索、复制指纹、删除条目以及直接打开信任文件；当服务器公钥变更时，确认弹窗支持直接「替换密钥并连接」，且仅替换本次核对过主机、端口、密钥类型与预期指纹的对应条目。
+  - ProxyJump 跳板路由修复：拆分跳板节点的路由归属与连接身份，修复已保存的多跳 SSH 路由在恢复和复用时的匹配问题，保留每一跳独立的连接策略与上游代理策略。
+  - 远程 Shell 集成 v7：仅在经会话校验的对应 SSH 通道内启用 OSC 133 命令标记与私有 OSC 钩子，同时即使服务端拒绝传递 LC_OXIDETERM_SESSION 也继续保留 OSC 7 工作目录追踪；已注入的 v6 集成脚本可平滑升级。
+  - SFTP 与连接表单修复：恢复独立 SFTP 表单的高级选项配置与页面滚动，使 SSH 隧道对话框复用统一的连接表单背景，并修复密钥导入弹窗及多行输入框无法滚动的问题。
+  🔌 插件生态、BLE 与 MCP
+  - BLE 设备插件接口、工具栏与浮窗：新增 ble.read 与 ble.write 插件权限及 ble.sessions、ble.describe、ble.read、ble.write、ble.onNotification、ble.offNotification 宿主接口，支持通过插件配置声明终端工具栏三态功能按钮以及跟随活动终端窗格切换的浮动面板；GATT 负载不落盘、不写入日志或错误文本。由于 BLE 断线重连会分配新的终端会话 ID，插件需重新查询 ble.sessions 并重新订阅通知。（PR #775）
+  - MCP 终端历史分页工具：新增独立于可见视口的 terminals_history 工具，支持 AI 助手基于快照槽位与游标（next_cursor）分页读取完整回滚缓冲区或当前屏幕，用户滚动终端窗口不会打断读取进度。（PR #790）
+  🖥️ 界面统一、输入法与平台兼容
+  - 深色主题层次与菜单统一：增强深色主题（含 One Dark）下侧边栏、标题栏等周边壳层与主工作区画布的明暗对比并补全折叠态边栏边框；统一终端、编辑器、IDE、SFTP、文件管理器、标签页、会话管理器及 SSH 算法编辑器的右键菜单和下拉菜单样式、图标行、快捷键对齐与分割线。
+  - 按钮反馈与知识库弹窗键盘交互：保持实底工具栏按钮悬停时的独立色调及危险操作按钮悬停填充透明度一致；新建知识库文档弹窗支持在标题框直接按 Enter 提交，并将 Tab 焦点循环稳定锁定在弹窗内直至关闭。（PR #781、#783、#785、#786）
+  - 标签栏触控板滚动与编辑器输入法修复：标签栏横向滚动优先跟随触控板主滑动轴以减少斜向手势抖动；修复内置编辑器在输入法组字期间的光标位置、可见性、选区隔离与自动折行锚点错位问题。（PR #780、#782）
+  - GPUI 0.3.12 升级与三大平台底层修复：升级内置 GPUI，恢复 Linux XIM 在异常复合文本编码下的字符提交避免输入丢字，修正 Windows DirectWrite 分段字体渲染时的字距与原生 Windows 路径下的本地项目探测，并修复 macOS Core Graphics 在不同回退字体共享 PostScript 名称时偶发查表错字的问题。
+  👥 贡献者
+  感谢 @idxdy（PR #773）、@allegrox（PR #775、#793、#796）、@HarpeLm（PR #776、#777）、@BilityLeu（PR #782、#784、#790）、@m00nLi（PR #780、#781、#783、#785、#786、#799）对本版本的贡献！
+  English
+  OxideTerm 2.3.3 moves Session Manager into the sidebar and redesigns Host Monitoring with a compact layout, while adding template-driven batch SSH creation, BLE plugin host APIs, Trusted Hosts management, editable multiline paste protection, terminal resize and streaming responsiveness gains, and cross-platform GPUI and IME fixes.
+  🗂️ Session Manager, Workbench, and Navigation
+  - Sidebar Session Manager: Render Session Manager directly in the sidebar with mutual exclusion against the dedicated Session Manager tab while keeping SFTP docked below; supports local search (cleared and closed on Esc), whole-row drag-and-drop, Ctrl/Cmd and Shift multiselect, and context-menu batch deletion across active selections. (PR #796)
+  - Group Badge Count Fix: Saved BLE connection profiles are now included in Session Manager group totals. (PR #793)
+  - Batch SSH Connection Creation: Create up to 2,000 SSH connections at once from Session Manager or the CLI (oxideterm connections batch-create) using an OpenSSH-style Host template with {host}, {profile}, {user}, {port}, {name}, and {group} placeholders and one connection per line. Previews classify additions, in-place updates, skips, and invalid rows with all-or-nothing transactional writes; saved templates live in the system credential store or encrypted portable vault and strictly preserve ProxyCommand argument boundaries. (PR #773)
+  - Compact Host Monitoring Sidebar: Rebuilt the Host Monitoring panel into a denser stacked view showing CPU utilization and trend sparklines, expandable per-core usage grids when supported, memory and swap capacity, uptime and system identity, disk usage and I/O rates, network RX/TX sparklines, and RTT status.
+  - Streamlined Active Sessions Tree: Removed the redundant Focus View and drill-down breadcrumbs from Active Sessions in favor of unified Tree View and Host View modes, cleaner node and Terminal #N labels, tree guide rails, and direct inline controls.
+  - Welcome Workbench, Tab Scope, and Settings Polish: Refined the Welcome page layout, added a titlebar Tab Scope selector to filter tabs with inline clear, and streamlined Settings card shells, inline rule editors, and the terminal command sender bar.
+  ⚡ Terminal, Paste, and Encoding
+  - Editable Multiline Paste Preview: When multiline paste protection is enabled, pasted drafts open ready to edit with Enter for newlines, Esc to cancel, Undo/Redo, and an explicit action to strip Markdown code fences; unmodified drafts pass through normal paste handling with original line endings intact.
+  - Zen Mode Top-Edge Exit Control: Move the pointer to the top edge of the window in Zen mode to reveal an exit button without relying solely on keyboard shortcuts, while isolating the control from terminal focus and input capture. (PR #799)
+  - Resize Redraws and Streaming Responsiveness: Fixed resized terminal grids flashing blank and prompts redrawing incompletely; moved local UI resizes off blocking parser work and cut repeated snapshot, style-hash, highlight, and streaming link-detection allocations during heavy output while bounding combining-character input. (PR #784)
+  - Legacy Encoding and Split UTF-8 Fixes: Unrepresentable characters in legacy encodings (GBK, Big5, Shift_JIS, EUC-JP, EUC-KR, Windows-1252, and Telnet usernames) now send ? instead of HTML numeric character entities, and valid UTF-8 sequences split across serial, Telnet, or BLE reads no longer trigger false encoding-mismatch warnings. (PR #776, #777)
+  🔐 SSH, Host Keys, and Shell Integration
+  - Trusted Hosts Management in Settings: Added a Trusted hosts section in Connection Settings to search saved keys by host, port, or fingerprint, copy fingerprints, delete entries, or open the trust file; when a remote host key changes, the confirmation prompt offers Replace key and connect, replacing only the entry matching the reviewed host, port, key type, and expected fingerprint.
+  - ProxyJump Route Reuse and Hop Identity: Separated jump-hop identity from route ownership so restored multihop SSH routes preserve per-hop connection settings and upstream proxy policies.
+  - Remote Shell Integration v7: Gates OSC 133 command markers and private OSC adapters behind verified SSH session markers (OXIDETERM_PRIVATE_OSC=1) while keeping OSC 7 working-directory tracking active even if servers strip LC_OXIDETERM_SESSION; existing v6 scripts upgrade automatically.
+  - SFTP and Modal Scrolling Fixes: Restored advanced fields and vertical scrolling in the standalone SFTP form, aligned the SSH tunnel modal backdrop with connection dialogs, and restored scrolling in multiline fields and key-import modals.
+  🔌 Plugins, BLE, and MCP
+  - BLE Plugin Host APIs, Toolbars, and Floating Overlays: Added ble.read and ble.write capabilities alongside ble.sessions, ble.describe, ble.read, ble.write, ble.onNotification, and ble.offNotification, plus manifest-declared terminal toolbar chips and pane-bound floating overlays with automatic focus handover. GATT payloads never enter logs or error messages; because reconnect assigns a new BLE terminal session ID, plugins must re-query ble.sessions and re-subscribe after reconnect. (PR #775)
+  - MCP Viewport-Independent Terminal History: Added the terminals_history MCP tool so AI clients can paginate through scrollback or screen contents using snapshot slots and next_cursor without losing their place when the user scrolls the terminal. (PR #790)
+  🖥️ UI Chrome, Input Methods, and Platform Compatibility
+  - Dark Theme Contrast and Unified Menus: Improved luminance separation between sidebars/titlebars and workspace surfaces on dark themes (including One Dark) with crisp collapsed activity-bar borders, and unified borders, icon rows, shortcut alignment, hover highlights, and separators across terminal, editor, IDE, SFTP, file manager, tab, Session Manager, and SSH algorithm menus.
+  - Toolbar Feedback and Knowledge Dialog Keyboard Handling: Preserved per-button hover tints on filled toolbar controls and consistent hover alpha on destructive buttons; in the new knowledge-document dialog, Enter submits from the title field and Tab cycles focus strictly inside the modal until dismissed. (PR #781, #783, #785, #786)
+  - Tab-Bar Trackpad Scroll and Editor IME Caret Fixes: Tab-bar trackpad scrolling locks to the dominant axis to reduce diagonal jitter, and the built-in editor now keeps IME caret position, visibility, buffer selection isolation, and wrapped preedit anchors accurate during composition. (PR #780, #782)
+  - GPUI 0.3.12 Upgrade and Native Platform Fixes: Upgraded patched GPUI to recover malformed compound text in Linux XIM sessions, fix segmented font run kerning under Windows DirectWrite, handle native Windows paths in local project probing, and isolate macOS Core Graphics fallback glyph tables when distinct faces share a PostScript name.
+  👥 Contributors
+ReleaseNotesUrl: https://github.com/AnalyseDeCircuit/oxideterm/releases/tag/v2.3.3
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

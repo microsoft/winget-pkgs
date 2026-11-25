@@ -1,0 +1,38 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: zyno-io.sp2p
+PackageVersion: 0.7.0
+PackageLocale: en-US
+Publisher: Zyno Consulting
+PublisherUrl: https://github.com/zyno-io
+PublisherSupportUrl: https://github.com/zyno-io/sp2p/issues
+PackageName: SP2P
+PackageUrl: https://github.com/zyno-io/sp2p
+License: MIT
+LicenseUrl: https://github.com/zyno-io/sp2p/blob/HEAD/LICENSE
+ShortDescription: Secure peer-to-peer data transfer. End-to-end encrypted. Send files, folders, and streams seamlessly - even between CLI and browser.
+ReleaseNotes: |-
+  Fixed
+  - When a direct connection failed and one side allowed the TURN relay while the other declined, the side that allowed it never learned the peer had declined: it still allocated a relay connection and then failed on a plain 15s (web) / 30s (CLI) timeout or a misleading "peer disconnected" message, instead of a clear "peer declined the relay" error. Relay consent is now split into two signaling stages (asking, then deciding) so a side never treats "the peer is asking" as "the peer agreed," and reports the peer's actual decision — decline, "couldn't be asked," or timeout — promptly and accurately. Fully compatible with peers on 0.6.2 or earlier. See testing.
+  - A received tar archive entry with an absolute POSIX-style path (e.g. /etc/passwd) was silently accepted on a Windows receiver instead of being rejected, because filepath.IsAbs requires a Windows volume name to consider a path absolute. Not an exploitable path traversal (the destination-prefix check still held), but Windows now rejects these entries like every other platform.
+  - On Windows, --status-file could be left stale: replacing the status file failed while another process had it open for reading, and the final result snapshot is written only once. The replacement now retries briefly while a reader holds the file.
+  - A received tar archive entry named after a Windows reserved device (such as NUL or CON) or containing a colon is now rejected, so Windows receivers can't silently discard or redirect file data.
+  - A CLI sending to Safari/WebKit on a Mac with two network interfaces on the same subnet often ended up with fewer than 8 parallel WebRTC connections (as few as 3), making transfers slower. The CLI's WebRTC library kept retrying one connection path whose replies came back from the other interface instead of switching to a working one. sp2p now builds against a patched pion/ice (pion/ice#1021) until the fix is released upstream.
+  - Unix tunnel endpoints (unix://...) now fail with a clear "unsupported on native Windows; use TCP or WSL" error on Windows instead of an unrelated, confusing "must be an absolute unix:///path" parse error.
+
+  Added
+  - CI now runs the Go test suite natively on Windows and CLI↔Microsoft Edge browser interop against a Windows-built CLI, so Windows-specific bugs surface in CI. See testing.
+  - Homebrew, Scoop, AUR, and Chocolatey package manifests are now rendered by a shared script (scripts/packaging/render.sh) and validated in CI — rendered, installed, and (where applicable) audited on their native platform, plus a dry-run WinGet manifest check — on every packaging-related PR and after every release, without ever publishing. See testing.
+  - Each full release is now smoke-tested against production sp2p.io right after deploy: a real CLI→browser (64 MiB, 8 WebRTC lanes) and browser→browser (8 MiB) transfer, using the release's own checksum-verified CLI, with relay denied so only a direct path can succeed. See testing.
+  - Parallel-WebRTC lane setup now records per-lane diagnostics (an address-free connection/ICE/DTLS/DataChannel trace, and why a lane was lost — timeout, EOF, closed, mismatch, or error) instead of silently dropping a lane. The CLI emits a parallel_lanes JSON event and, with -v, a human-readable summary; the browser logs one console line. Never includes IPs, ports, ICE credentials, SDP, or transfer codes. A manual-dispatch-only lanes-stress CI workflow repeats CLI↔Chromium parallel-lane setup, including under CPU contention, to chase rare shortfalls using this new diagnostic surface. See parallel-webrtc.md and testing.
+
+  Changed
+  - Slower CI checks now run after each merge to main and weekly instead of nightly, and releases require them to pass on the tagged commit.
+  Full changelog: https://github.com/zyno-io/sp2p/blob/v0.7.0/CHANGELOG.md
+ReleaseNotesUrl: https://github.com/zyno-io/sp2p/releases/tag/v0.7.0
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/zyno-io/sp2p/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

@@ -87,15 +87,15 @@ jobs:
     runs-on: ubuntu-latest
     needs: spelling
     permissions:
+      actions: read
       contents: write
     if: (success() || failure()) && needs.spelling.outputs.followup && github.event_name == 'push'
     steps:
     - name: comment
       uses: check-spelling/check-spelling@cfb6f7e75bbfc89c71eaa30366d0c166f1bd9c8c # v0.0.26
       with:
-        checkout: true
-        spell_check_this: check-spelling/spell-check-this@prerelease
-        task: ${{ needs.spelling.outputs.followup }}
+        checkout: false
+        task: comment
 
   comment-pr:
     name: Report (PR)
@@ -103,12 +103,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: spelling
     permissions:
+      actions: read
       pull-requests: write
     if: (success() || failure()) && needs.spelling.outputs.followup && contains(github.event_name, 'pull_request')
     steps:
     - name: comment
       uses: check-spelling/check-spelling@cfb6f7e75bbfc89c71eaa30366d0c166f1bd9c8c # v0.0.26
       with:
-        checkout: true
-        spell_check_this: check-spelling/spell-check-this@prerelease
-        task: ${{ needs.spelling.outputs.followup }}
+        checkout: false
+        task: comment

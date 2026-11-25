@@ -1,0 +1,257 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Balena.BalenaCLI
+PackageVersion: 25.2.33
+PackageLocale: en-US
+Publisher: Balena Inc. (https://balena.io/)
+PublisherUrl: https://github.com/balena-io/balena-cli
+PublisherSupportUrl: https://github.com/balena-io/balena-cli/issues
+PrivacyUrl: https://www.balena.io/privacy-policy
+Author: Juan Cruz Viotti
+PackageName: balena-cli
+PackageUrl: https://www.balena.io/docs/reference/balena-cli
+License: Apache-2.0
+LicenseUrl: https://github.com/balena-io/balena-cli/blob/HEAD/LICENSE
+Copyright: Copyright 2023 Balena
+ShortDescription: The balena CLI is a Command Line Interface for balenaCloud or openBalena.
+Description: |-
+  The balena CLI is a Command Line Interface for balenaCloud or openBalena.
+  It is a software tool available for Windows, macOS and Linux, used through a command prompt / terminal window.
+  It can be used interactively or invoked in scripts.
+  The balena CLI builds on the balena API and the balena SDK, and can also be directly imported in Node.js applications.
+  The balena CLI is an open-source project on GitHub, and your contribution is also welcome!
+Tags:
+- balena-io
+- cli
+- command-line-interface
+- iot
+ReleaseNotes: |-
+  Update dependency simple-git to v4 [SECURITY]
+
+  Notable changes
+  - 365f52d: Prepare package.json before publishing.
+  - 98864c6: Major upgrade to v4. In this version:
+  - 98864c6: Support one-shot stdin via git.input(data) (string or Buffer).
+  - d762810: Add allowUnsafeExec detection to rebase -x and rebase --exec.
+  - 76f308e: Parse binary rename entries without byte counts in diff summaries.
+  - Updated dependencies [c427fba]
+  - Updated dependencies [1bb14df]
+  - Updated dependencies [dfeb116]
+  - Updated dependencies [d762810]
+  - Updated dependencies [98864c6]
+  - 89a2294: Extend known exploitable configuration keys and per-task environment variables.
+  - 1ad57e8: Remove conflicting node:buffer import
+  - Updated dependencies [89a2294]
+  - Updated dependencies [675570a]
+  - 0cf9d8c: Improvements for mono-repo publishing pipeline
+  - Updated dependencies [0cf9d8c]
+  - 0de400e: Update monorepo version handling during publish
+  - Updated dependencies [0de400e]
+  - 3d8708b: Updating publish config
+  - Updated dependencies [3d8708b]
+  - 2b68331: Revised dependency tree to add helper modules as dependencies in main simple-git
+  - 2e1f51c: Enhances scanning of arguments before passing on to the spawned child_process.
+  - Updated dependencies [2e1f51c]
+  - a263635: Use pathspec wrappers for remote and local paths when running either git.clone or git.mirror to
+  - e253a0d: Enhanced git -c checks in unsafe plugin.
+  - f704208: Enhanced protocol.allow checks in allowUnsafeExtProtocol handling.
+  - 8d02097: Enhanced clone unsafe switch detection.
+  - 23b070f: Fix regex for detecting unsafe clone options
+  - 1effd8e: Enhances the unsafe plugin to block additional cases where the -u switch may be disguised
+  - d5fd4fe: Use task runner for logging use of deprecated (already no-op) functions.
+  - a44184f: Resolve NPM publ
+  steveukx/git-js (simple-git)
+
+  v4.0.1
+  Compare Source
+
+  Patch Changes
+  - 365f52d: Prepare package.json before publishing.
+
+  v4.0.0
+  Compare Source
+
+  Major Changes
+  - 98864c6: Major upgrade to v4. In this version:
+    - Removed previously available default export, now uses a consistently named simpleGit export.
+    - Removed previously deprecated import simple-git/promise (change to using the main simple-git import).
+    - Removed legacy gitP export (change to using the main simpleGit export).
+    // v3 - previously supported imports
+    import simpleGit from "simple-git";
+    import { gitP } from "simple-git";
+    import simpleGit from "simple-git/promise";
+    const simpleGit = require("simple-git");
+    // v4 - consolidates to a single supported import
+    import { simpleGit } from "simple-git";
+    const { simpleGit } = require("simple-git");
+    - Prevents the use of abbreviated long-form git options:
+    // v3 - allowed the use of unambiguous long-form options
+    git.raw("clone", "--conf=user.name=me", "...");
+    // v4 - requires full option names, abbreviated option names will now throw a GitConfigurationError
+    git.raw("fetch", "--config=user.name=me", "...");
+    Thanks to @anir0y, @CFionaBF, @Leeziao, @internetteletubbie, @idisdi, @the-vibe-dev,
+    @D7EAD, @dellalibera, @gdegrange, @bilguunbicktivism, @cruzryan, @b1ue0ceanRun, @oss-security-shopify
+    for identifying the vulnerability.
+    - Ambient environment variables are filtered before passing into the git child process.
+    // v3
+    process.env.FOO = "bar";
+    process.env.GIT_TEMPLATE_DIR = "./some/path";
+    simpleGit().raw("clone"); // git child process can see both environment variables
+    // v4
+    process.env.FOO = "bar";
+    process.env.GIT_TEMPLATE_DIR = "./some/path";
+    simpleGit().raw("clone"); // git child process now sees only FOO
+    simpleGit({
+      // explicitly allow the named environment variable so it can pass through.
+      allowEnvoronment: ["GIT_TEMPLATE_DIR"],
+      // and enable the use of an unsafe behaviour
+      unsafe: { allowUnsafeTemplateDir: true },
+    });
+    - Explicitly supplied disallowed environment variables will throw when used.
+    // v3 used a single opt-in to potential unsafe actiity
+    simpleGit({ unsafe: { allowUnsafeTemplateDir: true } })
+      .env({ GIT_TEMPLATE_DIR: "./foo" })
+      .init();
+    // v4 uses a double opt-in, allow the behaviour and the mechanism
+    simpleGit({
+      allowEnvoronment: ["GIT_TEMPLATE_DIR"],
+      unsafe: { allowUnsafeTemplateDir: true },
+    })
+      .env({ GIT_TEMPLATE_DIR: "./foo" })
+      .init();
+    - Removed content deprecated during the v2 to v3 major change
+      - simpleGit.silent() logging is configured through environment variables in the debug package
+      - simpleGit.clearQueue() this has been a noop since v3, switch to using the abort plugin
+      - Accessing parsed properties of a GitResponseError through a trailing callback function are available only through the error.git property (previously properties were also spread onto the error itself with a deprecation notice).
+
+  Minor Changes
+  - 98864c6: Support one-shot stdin via git.input(data) (string or Buffer).
+    Thanks to @felipecrs for the feature request and initial implementation.
+
+  Patch Changes
+  - d762810: Add allowUnsafeExec detection to rebase -x and rebase --exec.
+    Thanks to @gdegrange for the vulnerability report.
+  - 76f308e: Parse binary rename entries without byte counts in diff summaries.
+  - Updated dependencies [c427fba]
+  - Updated dependencies [1bb14df]
+  - Updated dependencies [dfeb116]
+  - Updated dependencies [d762810]
+  - Updated dependencies [d762810]
+  - Updated dependencies [98864c6]
+    - @simple-git/argv-parser@2.0.0
+    - @simple-git/args-pathspec@1.0.4
+
+  v3.36.0
+  Compare Source
+
+  Minor Changes
+  - 89a2294: Extend known exploitable configuration keys and per-task environment variables.
+    Note - ParsedVulnerabilities from argv-parser is removed in favour of a readonly array of Vulnerability to match usage in simple-git, rolled into the new vulnerabilityCheck for simpler access to the identified issues.
+    Thanks to @zebbern for identifying the need to block core.fsmonitor.
+    Thanks to @kodareef5 for identifying the need to block GIT_CONFIG_COUNT environment variables and --template / merge related config.
+
+  Patch Changes
+  - 1ad57e8: Remove conflicting node:buffer import
+  - Updated dependencies [89a2294]
+  - Updated dependencies [675570a]
+    - @simple-git/argv-parser@1.1.0
+    - @simple-git/args-pathspec@1.0.3
+
+  v3.35.2
+  Compare Source
+
+  Patch Changes
+  - 0cf9d8c: Improvements for mono-repo publishing pipeline
+  - Updated dependencies [0cf9d8c]
+    - @simple-git/args-pathspec@1.0.2
+    - @simple-git/argv-parser@1.0.3
+
+  v3.35.1
+  Compare Source
+
+  Patch Changes
+  - 0de400e: Update monorepo version handling during publish
+  - Updated dependencies [0de400e]
+    - @simple-git/argv-parser@1.0.2
+
+  v3.35.0
+  Compare Source
+
+  Minor Changes
+  - 3d8708b: Updating publish config
+
+  Patch Changes
+  - Updated dependencies [3d8708b]
+    - @simple-git/args-pathspec@1.0.1
+    - @simple-git/argv-parser@1.0.1
+
+  v3.34.0
+  Compare Source
+
+  Minor Changes
+  - 2b68331: Revised dependency tree to add helper modules as dependencies in main simple-git
+
+  Patch Changes
+  - 2e1f51c: Enhances scanning of arguments before passing on to the spawned child_process.
+    Caters for -c flags prefixing the git task (used when setting global inline config) and suffixing with either -c, --config or --config-env. Detects git config operations that write to the configuration.
+  - Updated dependencies [2e1f51c]
+    - @simple-git/args-pathspec@1.0.0
+    - @simple-git/argv-parser@1.0.0
+
+  v3.33.0
+  Compare Source
+
+  Minor Changes
+  - a263635: Use pathspec wrappers for remote and local paths when running either git.clone or git.mirror to
+    avoid leaving them less open for unexpected outcomes when passing unsanitised data into these tasks.
+
+  Patch Changes
+  - e253a0d: Enhanced git -c checks in unsafe plugin.
+    Thanks to @JohannesLks for identifying the issue
+
+  v3.32.3
+  Compare Source
+
+  Patch Changes
+  - f704208: Enhanced protocol.allow checks in allowUnsafeExtProtocol handling.
+    Thanks to @CodeAnt-AI-Security for identifying the issue
+
+  v3.32.2
+  Compare Source
+
+  Patch Changes
+  - 8d02097: Enhanced clone unsafe switch detection.
+
+  v3.32.1
+  Compare Source
+
+  Patch Changes
+  - 23b070f: Fix regex for detecting unsafe clone options
+    Thanks to @stevenwdv for reporting this issue.
+
+  v3.32.0
+  Compare Source
+
+  Minor Changes
+  - 1effd8e: Enhances the unsafe plugin to block additional cases where the -u switch may be disguised
+    along with other single character options.
+    Thanks to @JuHwiSang for identifying this as vulnerability.
+
+  Patch Changes
+  - d5fd4fe: Use task runner for logging use of deprecated (already no-op) functions.
+
+  v3.31.1
+  Compare Source
+
+  Patch Changes
+  - a44184f: Resolve NPM publ
+  > ✂ Note
+  >
+  > PR body was truncated to here.
+
+  List of commits
+  9a1fc7f (Update dependency simple-git to v4 [SECURITY], 2026-11-20)
+ReleaseNotesUrl: https://github.com/balena-io/balena-cli/releases/tag/v25.2.33
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

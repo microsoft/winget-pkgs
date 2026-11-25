@@ -1,0 +1,52 @@
+# Created using wingetcreate 1.28.1.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Kukisama.gh-usage
+PackageVersion: 1.2.6
+PackageLocale: en-US
+Publisher: kukisama
+PublisherUrl: https://github.com/kukisama
+PublisherSupportUrl: https://github.com/kukisama/gh-usage/issues
+PackageName: gh-usage
+PackageUrl: https://github.com/kukisama/gh-usage
+License: MIT
+LicenseUrl: https://github.com/kukisama/gh-usage/blob/master/LICENSE
+ShortDescription: Fast local GitHub Copilot usage reports from VS Code and Copilot CLI records.
+Description: A fast Rust CLI that scans local GitHub Copilot usage records from VS Code and Copilot CLI, summarizes credit usage, and exports detailed CSV or JSON reports.
+Moniker: gh-usage
+Tags:
+- rust
+- cli
+- github-copilot
+- vscode
+- usage-tracking
+- csv
+- json
+ReleaseNotes: |-
+  Rebuild reports from CSV without rescanning logs, and combine effort across machines without double-counting shared time slots.
+
+  ### Added
+
+  - **Optional Rhythm layout.** Keep Classic or switch to a device atlas with comparable bars and a period inspector, plus a three-column trend workspace. Both layouts keep the same filters and totals.
+
+  - **Separate effort CSV.** File-based usage CSV exports include a companion file with verified human submissions, including those with no recorded credits. The effort CSV does not include chat text. Use `--no-html` to export the CSVs without generating a report.
+  - **Offline reconstruction and merging.** `--from-csv` rebuilds a report from one pair of CSVs without rescanning logs. `--merge` combines multiple machines and counts each occupied Beijing-time half-hour slot once across the selected machines. Older usage-only CSVs still work; AI credits and historical request counts remain separate.
+
+  ### Changed
+
+  - **Source navigation follows the report mode.** Reports generated directly from local logs retain VS Code links to the source file and line. Reports generated with `--from-csv` or `--merge` display source labels without open or copy-path actions. Source coordinates remain in the exported data.
+  - **Separate collection from rendering.** Split the Rust command entry point, collectors, shared records, CSV merge, and HTML rendering into modules. Default file-based CSV runs now generate HTML from the exported files without changing the usage CSV schema or the counting rules.
+
+  ### Fixed
+
+  - **Show every month on the usage chart.** Each calendar month in view has a label, including months with no recorded usage. When the chart does not fit, drag or swipe it sideways. Clicking a bar still opens that month's daily breakdown.
+  - **One standard export per machine.** Directory merges never add multiple snapshots of the same machine. Use `--from-csv` for custom-named archives. New file-based exports include a checksum receipt to bind usage and effort without changing the CSV columns; conflicting billing units or mismatched companions stop the import.
+  - **VS Code workspace copies do not add charges.** Matching records for one request in different source files count once; conflicting amounts are reported instead.
+  - **Accurate effort coverage.** Machines with empty usage exports remain listed. Missing effort CSVs are shown as not imported, not as zero effort.
+  - **Keep sessions distinct across machines.** The session ranking and drill-down distinguish matching session IDs on different machines. Titles found only in historical records can also appear in effort details.
+  - **Keep filters and dates consistent across sheets.** Usage-only filters stay with the Usage sheet. Switching between Usage and Effort keeps the selected date within the visible range, even when their log dates differ.
+  - **Windows portable builds no longer require a separate Visual C++ Redistributable.** The standalone executable links the C runtime statically. Release CI checks its DLL imports and runs `--version` before packaging.
+  - **WinGet updates preserve release metadata.** Generated manifests include the publisher page, support link, release notes, and UTC release date.
+ReleaseNotesUrl: https://github.com/kukisama/gh-usage/releases/tag/v1.2.6
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

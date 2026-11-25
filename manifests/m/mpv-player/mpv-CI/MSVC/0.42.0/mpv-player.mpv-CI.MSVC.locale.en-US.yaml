@@ -1,0 +1,230 @@
+# Created by Anthelion using komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: mpv-player.mpv-CI.MSVC
+PackageVersion: 0.42.0
+PackageLocale: en-US
+Publisher: MPV
+PublisherUrl: https://github.com/mpv-player
+PublisherSupportUrl: https://github.com/mpv-player/mpv/issues
+PackageName: MPV (Official CI build, MSVC)
+PackageUrl: https://github.com/mpv-player/mpv
+License: LGPLv2.1
+LicenseUrl: https://github.com/mpv-player/mpv/blob/HEAD/LICENSE.GPL
+ShortDescription: A free (as in freedom) media player for the command line. It supports a wide variety of media file formats, audio and video codecs, and subtitle types.
+Tags:
+- media-player
+- mediaplayer
+- mpv.io
+- mpvci
+- mpvio
+- mpvplayer
+- music-player
+- musicplayer
+- video-player
+- videoplayer
+ReleaseNotes: |-
+  We are excited to announce the release of mpv 0.42.0.
+  Key highlights:
+  - libcurl based network backend with HTTP/2, HTTP/3 and connection reuse
+  - DVD-Video, Blu-ray HDMV and BD-J menu navigation
+  - DVD-Audio playback
+  - Direct playback of .iso images of DVD-Video, DVD-Audio and Blu-ray discs
+  - Dolby Vision Profile 7 enhancement layer support in gpu-next
+  - MPEG-TS programs and HLS variants are exposed as editions
+  - DSD-over-PCM (DoP) passthrough with --audio-spdif=dsd
+  - Support for SRV3 (YouTube) subtitles via subrandr library
+  - Context menu populated from the new menu.conf, bound to right click
+  - floating OSC layout with Fluent icons (--script-opts=osc-layout=floating)
+  - API that allows integration between the OSC and (third-party) thumbnailer scripts
+  - Wayland session management
+  - Wayland color management through the protocol instead of the Vulkan API
+  - scRGB output with --target-trc=scrgb
+  - Improved HDR colorspace signalling on DRM (Linux)
+  - D3D11 render API backend for libmpv
+  - Reworked terminal video outputs (sixel, kitty and tct)
+  - AMD Frame Rate Conversion filter (--vf=amf_frc)
+  - Rewritten display-sync audio drift compensation
+  - --tls-verify is enabled by default
+  This release requires FFmpeg 6.1 or newer and libplacebo 7.387.0 or newer.
+  Note that the release binary assets are our CI builds. These builds are reasonably useful. The Windows full builds (*-w64-mingw32-full.zip) are bigger and aim to provide the complete experience.
+  Features
+
+  New
+  - sub: add subrandr renderer support
+  - video/filter/vf_amf: add AMD Frame Rate Conversion filter
+  - mac/common: add support for transparent rendering
+  - context_menu.lua: implement key hints
+  - menu.conf: add this file
+  - select.lua: populate the context menu
+  - input.conf: add context menu bindings
+  - vo_gpu_next: add scRGB support
+  - video/out/opengl/context_wayland: export preferred colorspace
+  - vo_dmabuf_wayland: add BT.2100 mapping
+  - wayland_common: add scRGB support
+  - mpv-osd-symbols: add some Fluent UI System Icons to mpv font
+  - osc.lua: add floating layout
+  - vo_gpu_next: add stereo osd support
+  - demux_lavf: add support for programs
+  - demux_timeline: add support for programs
+  - vo_gpu: initial support for tunable parameters
+  - vo_gpu: add support for DEFINE and ENUM parameters
+  - osc: define and add support for "preview" api
+  - demux/packet: add support for SMPTE 2094-50 metadata
+  - vo_gpu: support parameters in RPN expressions
+  - demux_playlist: add support for 'strm' playlist
+  - wayland: implement session management
+  - demux/packet: add support for LCEVC ITU-T35 payloads
+  - demux_lavf: add support for stream groups
+  - video: merge the tiles of grid heif and avif images
+  - stream_curl: add libcurl-based stream backend
+  - demux_lavf: route nested HTTP opens through the curl backend
+  - stream_curl: use for ftp/ftps
+  - video/out/x11_common: add --focus-on support in X11
+  - hwdec_d3d11va: support 4:4:4 and high bit depth zero-copy formats
+  - demux_mkv: support demuxing native VC-1 streams
+  - stream_curl: add support for Icecast metadata
+  - f_enhancement_pair: add filter to match frames of separate video tracks
+  - vo_gpu_next: upload/map EL frame
+  - demux_lavf: add support for splitting EL track from in-band
+  - demux_mkv: add support for splitting EL track from in-band
+  - stream_env: add new stream to read from environment variables
+  - audio/filter: implement lavfi-tempo leveraging lavfi's atempo/ascale
+  - sd_lavc: add support for DVD sub highlight
+  - stream_dvdnav: implement DVD menu navigation
+  - stream_bluray: implement HDMV menu navigation
+  - demux_disc: add a synthetic "Disc Menu" edition
+  - stream_bluray: add BD-J menu support
+  - stream_dvdnav: add support for still frames
+  - stream_bluray: add support for still frames
+  - stream_dvda: add DVD-Audio playback support
+  - stream_dvda: expose DVD-Audio still images as a cover-art video track
+  - stream: auto-detect .iso DVD-Video, DVD-Audio and Blu-ray images
+  - vo_{gpu,gpu_next}/vulkan: enable extensions required for vf_fruc_vulkan
+  - audio/format: add raw DSD sample format
+  - ao_wasapi: add DSD-over-PCM (DoP) output support
+  - audio: add DSD-over-PCM pass-through
+  - mp_image: read stereo 3D layout from AV_FRAME_DATA_STEREO3D
+  - demux_lavf: read the stereo 3D mode from the stream side data
+  - video/out: add a swapchain for terminal VOs
+  - vo_{sixel,tct,kitty}: present frames through the terminal swapchain
+  - stream_aes_ctr: add aes-ctr:// protocol
+  - libmpv: add D3D11 render API backend
+  - vo_drm: add support for RGB565
+  - mp_image: support linear light XYZ
+
+  Changed
+  - wayland: bump libwayland minimum version to 1.22
+  - wayland: bump wayland-protocols minimum version to 1.38
+  - common/msg: allow only SGR sequence in terminal output
+  - video/out/vulkan/context_wayland: implement color_depth
+  - vo_gpu_next: undo dither-depth=auto meaning 8bpc for SDR when undetected
+  - common/playlist: store normalized playlist filenames
+  - player/loadfile: never autoselect tracks with wrong PID
+  - context_drm_egl: use target_csp to signal HDR
+  - vo_gpu_next: set color directly using Wayland protocol
+  - wayland_common: set luminances
+  - meson: bump minimum libdrm version to 2.4.114
+  - vd_lavc: remove Vulkan hwdec from auto-safe selection
+  - player/video: rewrite display-sync audio drift compensation
+  - player/command: hide dependent tracks
+  - input/dnd: move built-in drag and drop handling to mpv client
+  - video/decode: enable APV hwdec by default
+  - input.conf: bind right click to context menu
+  - stream_curl: require libcurl 7.88.0
+  - vo_gpu_next: follow reference white system setting
+  - vo: prefer dmabuf_wayland over other fallback VOs
+  - vo_gpu_next: make subtitles / osd also follow system reference white
+  - f_decoder_wrapper: prefer bitstream stereo 3D layout over container tag
+  - vulkan: bump minimum required Vulkan headers to 1.4.309
+  - meson: prefer LuaJIT over PUC Lua
+  - meson: bump min libplacebo version to v7.387.0
+
+  Removed
+  - options.lua: stop searching in lua-settings
+  - context_angle: remove the D3D9 renderer
+
+  Options and Commands
+
+  Added
+  - player/command: add subrandr-version property
+  - command: add libplacebo-version property
+  - command: add the default-menu property
+  - stats.lua: add track_info_selected_only script option
+  - command: add track-list/N/demux-duration property
+  - mp.input: allow async completions
+  - command: let playlist-play-index current preserve file-local-options
+  - mp.input: allow clients to override console.lua script-opts
+  - player/loadfile: add on_loaded hook
+  - osc.lua: add audioonlyscreen script option
+  - osc.lua: add dynamic_margins, sub-margin, osd-margin, osc-icon_style options
+  - command: add update-clipboard command
+  - player/command: add env property
+  - player/command: add default-value/choices arg fields to command-list
+  - vo_gpu_next: add image-subs-hdr-peak=video-dynamic/video-static
+  - context_menu.lua: set user-data/mpv/context-menu/open
+  - command: allow metadata to be set manually
+  - player/{lua,javascript}: add mp.utils.terminal_display_width function
+  - osc.lua: add option to configure skip_forward/backward buttons
+  - osc.lua: make window control buttons action customizable
+  - context_menu.lua: add background_alpha script-opt
+  - sub: add sub-lines property
+  - osc.lua: add box width option for box and slimbox layouts
+  - demux_{lavf,timeline}: add --flatten-editions
+  - input: add --input-builtin-drag-and-drop option
+  - command: add dropped-file property
+  - demux: add --demuxer-hysteresis-bytes
+  - stream_curl: add --curl-enabled option
+  - select.lua: add keep-open argument to select bindings
+  - vf_format: add vf=format=enhancement-layer option
+  - options: add secondary-sub-scale
+  - options: add --playlist-inherit-options option
+  - command: add colorspace and luminance arguments to overlay-add
+  - options: add disc-menu option
+  - player/command: add disc-menu-active property
+  - player/command: add discnav command and bind default keys
+  - osc.lua: make wheel commands on the seekbar configurable
+  - stream_bluray: add --bluray-key-file
+  - stream_bluray: add --bluray-min-title-length
+  - stream_bluray: add --bluray-region and --bluray-uo-restriction
+  - player/command: add commentary track flag support in commands
+  - player/command: add more disc navigation actions
+  - player/command: make property playlist/N/title writable
+  - lua: utils.format_json: add optional pretty argument
+  - vo_gpu_next: use pl_color_map_params.tone_constants
+  - vo_gpu_next: expose mastering_clip and film_strength color_map params
+
+  Changed
+  - player/command: refactor loadfile and loadlist commands to use flags
+  - f_auto_filters: rework --deinterlace=auto option
+  - player: make effective image_display_duration playback_speed aware
+  - builtin.conf: enable antiringing in high quality profile
+  - vf_d3d11vpp: rename ivctc to ivtc
+  - player/command: apply expand-properties modifier also for string lists
+  - video/out/win_state: don't move window when force-window-position=no
+  - options: target-gamut now accepts custom CIE xy primaries
+  - options: allow selecting workspace using --geometry without specifying size
+  - player/screenshot: validate strftime format string
+  - input/cmd: use _name for command name in mpv_command_node
+  - demux_playlist: only autocreate on regular file
+  - ytdl_hook.lua: default to all_formats=yes
+  - etc/builtin.conf: change gui mode to idle=yes
+  - options: make player-operation-mode readable as a property
+  - options: enable tls-verify by default
+  - demux_lavf: change demuxer-lavf-{probesize,buffersize} to OPT_BYTE_SIZE
+  - player/command: make track-list/N/ff-index optional
+  - input/ipc-win: allow Windows handles for --input-ipc-client
+  - vd_lavc: derive hwdec surface pool size from VO requirements
+  - stream_bluray: use 1-based angle, same as in DVD
+  - stream_curl: use the Content-Disposition file name as the filename
+  - ytdl_hook: pass a default format again
+  - vf_format: make stereo-in=mono override the source mode
+  - m_property: sort the property list and resolve names once
+  - stream_dvdnav: set the VM language registers from --alang and --slang
+
+  Deprecated
+  - vf_format: deprecate --vf=format=sig-peak
+  - mp.input: deprecate log_error()
+ReleaseNotesUrl: https://github.com/mpv-player/mpv/releases/tag/v0.42.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

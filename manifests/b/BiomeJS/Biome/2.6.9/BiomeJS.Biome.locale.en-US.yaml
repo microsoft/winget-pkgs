@@ -1,0 +1,144 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: BiomeJS.Biome
+PackageVersion: 2.6.9
+PackageLocale: en-US
+Publisher: BiomeJS
+PublisherUrl: https://biomejs.dev/
+PublisherSupportUrl: https://github.com/biomejs/biome/issues
+Author: Biome Developers and Contributors
+PackageName: Biome
+PackageUrl: https://biomejs.dev/
+License: Apache-2.0
+Copyright: Copyright (c) 2023-present Biome Developers and Contributors
+ShortDescription: Biome is a toolchain for web projects, aimed at providing functionalities to maintain them. It offers a formatter and linter, usable via CLI and LSP.
+Moniker: biome
+Tags:
+- css
+- formatter
+- javascript
+- json
+- jsx
+- linter
+- static-code-analysis
+- typescript
+- web
+ReleaseNotes: |-
+  2.6.9
+
+  Patch Changes
+  - #13192 d9e86ab Thanks @dyc3! - Added the nursery rule noArrayDelete. It reports the delete operator used on array elements, which leaves an empty slot in the array instead of removing the element. The rule needs type information, and offers an unsafe fix that replaces the delete with a splice() call.
+    declare const array: number[];
+    delete array[0];
+  - #13209 4408dd4 Thanks @dyc3! - Added the nursery rule noExpectToHaveBeenCalledOnce, which reports toHaveBeenCalledOnce() and toBeCalledOnce() assertions and suggests toHaveBeenCalledTimes(1) and toBeCalledTimes(1) instead. The rule belongs to the test domain.
+    expect(sendEmail).toHaveBeenCalledOnce();
+  - #13217 c0dc090 Thanks @dyc3! - Added the new nursery rule noImmediateMutation, which reports arrays, objects, Sets, and Maps that are changed in the statement right after they are created, and variables that are assigned right after they are declared.
+    const array = [1, 2];
+    array.push(3); // reported: write `[1, 2, 3]` instead
+    let foo;
+    foo = 1; // reported: write `let foo = 1` instead
+  - #13120 54eb224 Thanks @dyc3! - Added the nursery rule noJasmineGlobals, which reports Jasmine globals in Jest tests, such as spyOn(), fail(), pending(), and the jasmine object. Jest's default test runner doesn't provide them.
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+  - #13122 6e2b42e Thanks @dyc3! - Added the nursery rule noReturnInTest, which reports return statements directly inside the body of a test function. The rule belongs to the test domain.
+    test("adds two numbers", () => {
+        return expect(add(1, 2)).toBe(3);
+    });
+  - #13161 37692e2 Thanks @dyc3! - Added the nursery rule noTailwindConflictingClasses, which reports Tailwind CSS classes that set the same CSS properties on an element. Only one of the conflicting classes takes effect, so the other one does nothing.
+    <div className="flex grid" />;
+  - #13119 0cc8548 Thanks @dyc3! - Added the nursery rule noTestGlobals, which reports Jest and Vitest APIs that are used as global variables instead of being imported.
+    describe("sum", () => {});
+  - #13121 5065890 Thanks @dyc3! - Added the nursery rule noTestHooks, which reports setup and teardown hooks in tests, such as beforeEach and afterAll.
+    beforeEach(() => { // reported
+            cart = createCart();
+    });
+  - #13207 328be47 Thanks @dyc3! - Added the nursery rule noUnsafeSqliteInterpolation, which reports SQL strings that insert values with ${} or use a tagged template when passed to the exec() and prepare() methods of a node:sqlite database.
+    import { DatabaseSync } from "node:sqlite";
+    const database = new DatabaseSync(":memory:");
+    database.exec(`SELECT * FROM users WHERE id = ${id}`);
+  - #12544 0d70b09 Thanks @dyc3! - Added the new nursery rule noUselessBind, which disallows .bind() calls on functions that don't use this, and on arrow functions.
+    const handler = function () {
+      console.log("clicked");
+    }.bind(this); // reported
+  - #13216 a1c2950 Thanks @dyc3! - Added the nursery rule noUselessDefaultAssignment, which uses type information to report default values that can never be used, because the value they replace can't be undefined.
+    function greet({ name = "friend" }: { name: string }) {} // reported
+  - #13101 981cd33 Thanks @dyc3! - Added the new nursery rule noUselessNestedTernary, which reports nested ternary expressions that repeat a result of the expression around them. The conditions of such expressions can be combined with && or ||.
+    const result = a ? (b ? c : d) : d;
+  - #13100 8ece6a5 Thanks @dyc3! - Added the nursery rule noUselessSetConstruction, which reports a new Set() that only copies a value used with a Set method such as union() or isSubsetOf(). These methods accept a Set or a Map directly, don't change the Set they are called on, and return a new Set when they combine values.
+    const selected = new Set([1, 2]);
+    const other = new Set([2, 3]);
+    selected.union(new Set(other));
+    new Set(selected).union(other);
+    new Set(selected.union(other));
+  - #13164 dc11dea Thanks @dyc3! - Added the nursery rule noVueDuplicateVElseIf, which reports v-else-if conditions in Vue templates that repeat, or are covered by, earlier conditions of the same v-if / v-else-if chain.
+    For example, the second element below can never be rendered:
+    <template>
+      <div v-if="a || b" />
+      <div v-else-if="a" />
+    </template>
+  - #13194 9bd7f56 Thanks @dyc3! - Added the new nursery rule noVueNegationElse, which reports a negated condition in v-if or v-else-if when a v-else branch follows it. Its fix removes the negation and swaps the two branches.
+    <template>
+      <div v-if="!isLoading">Content</div> <!-- reported -->
+      <div v-else>Loading...</div>
+    </template>
+  - #13271 31fad4a Thanks @dyc3! - Added the nursery rule useBiomeKindSets, which reports Biome JS plugins that check the kind of a node or token against several strings. A kind set created with nodeKinds() or tokenKinds() reads the kind natively, which is faster.
+    The rule belongs to the new biomePlugin domain. Biome doesn't enable this domain automatically, so enable it in the linter configuration of your plugin project.
+    if (node.kind === "JS_CALL_EXPRESSION" || node.kind === "JS_NEW_EXPRESSION") {}
+  - #13271 31fad4a Thanks @dyc3! - Added the nursery rule useBiomeTopLevelTypes, which reports the use of nodeKinds(), tokenKinds(), or union() inside a function. The rule belongs to the biomePlugin domain.
+    import { defineRule, nodeKinds } from "@biomejs/runtime/plugin";
+    export const rule = defineRule({
+      run(node) {
+        return nodeKinds("JS_CALL_EXPRESSION").has(node);
+      },
+    });
+  - #13191 4a21426 Thanks @dyc3! - Added the new nursery rule useConsistentIndexedObjectStyle, which requires one style for object types with arbitrary keys. By default, it requires the Record type instead of index signatures and mapped types.
+    // reported, prefer `Record<string, number>`
+    interface Scores {
+      [name: string]: number;
+    }
+  - #13205 adde697 Thanks @dyc3! - Added the nursery rule useDescribeFunctionTitle, which reports test suites (describe blocks) whose title is a string or a .name property that repeats the name of an imported value, and suggests passing the value itself as the title.
+    import { myFunction } from "./myFunction";
+    describe("myFunction", () => {}); // reported
+  - #13206 32daef0 Thanks @dyc3! - Added the nursery rule useEarlyContinue, which reports an if statement that wraps the rest of a loop body and suggests skipping the iteration early with continue instead.
+    for (const item of items) {
+      if (item.isActive) {
+        process(item);
+        save(item);
+      }
+    }
+  - #13211 aaf89d6 Thanks @dyc3! - Added the nursery rule useExpectEqualityMatcher, which reports assertions that compare two values with === or !== inside expect() and check the result against a boolean. Using an equality matcher instead makes failing tests show both values.
+    // Invalid
+    expect(total === 10).toBe(true);
+    // Valid
+    expect(total).toBe(10);
+  - #13092 432e8c8 Thanks @dyc3! - Added the nursery rule useExpectToHaveLength, which reports tests that check the length property with toBe(), toEqual(), or toStrictEqual(), and suggests using toHaveLength() instead.
+    expect(files.length).toBe(1);
+  - #13091 6f231d0 Thanks @dyc3! - Added the nursery rule useExpectToStrictEqual, which reports tests that compare values with toEqual(), and suggests using toStrictEqual() instead. toEqual() ignores properties set to undefined, so the following test passes even though the two objects are different.
+    expect({ a: "a", b: undefined }).toEqual({ a: "a" });
+  - #13215 3677e52 Thanks @dyc3! - Added the new nursery rule useTanstackQueryExhaustiveDependencies, which reports TanStack Query options whose queryKey doesn't include every value that queryFn uses. When the key misses a value, changing that value doesn't fetch new data, and the query keeps returning data for the old value.
+    function Todo({ todoId }) {
+      useQuery({
+        queryKey: ["todo"],
+        queryFn: () => fetchTodo(todoId),
+      });
+    }
+  - #13212 32f5c05 Thanks @dyc3! - Added the nursery rule useTanstackQueryMutationPropertyOrder, which requires onMutate to come before onError and onSettled in the options of TanStack Query's useMutation. The type of the value that onMutate returns can be wrong in a property that comes before it.
+    import { useMutation } from "@tanstack/react-query";
+    useMutation({
+      mutationFn: (todo) => saveTodo(todo),
+      onError: (error, todo, saved) => restoreTodo(saved.previousTodo),
+      onMutate: (todo) => ({ previousTodo: readTodo(todo.id) }),
+    });
+  - #13103 c3f850e Thanks @dyc3! - Added the nursery rule useTopLevelDescribe, which reports tests and hooks that are not inside a describe block. The maxTopLevelDescribes option also limits how many top-level describe blocks a file can have.
+    test("adds two numbers", () => {});
+  - #13344 60da8a9 Thanks @Jayllyz! - Improved the performance of GritQL plugins on files with many matches. Evaluation time no longer grows quadratically with the number of matches.
+  - #13008 01ce2dd Thanks @ematipico! - Improved Astro cross-language JavaScript analysis by resolving embedded bindings and references through Astro scopes instead of document-wide name matching.
+  - #13011 a5aa4f2 Thanks @ematipico! - Fixed #12818: useFilenamingConvention now reports a filename diagnostic once per HTML, Vue, Svelte, or Astro document instead of once per embedded JavaScript snippet.
+  - #11372 6ce9395 Thanks @renovate! - Improved how Biome aligns edits in diagnostic fix previews. Suggested fixes now group nearby edits more clearly, which can change which repeated lines are shown as unchanged.
+  - #13273 9add717 Thanks @tats-u! - Fixed #13267: biome migrate prettier now enables markdown.parser.frontmatter, matching Prettier's parsing of YAML frontmatter in Markdown files.
+ReleaseNotesUrl: https://github.com/biomejs/biome/releases/tag/@biomejs/biome@2.6.9
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://biomejs.dev/guides/getting-started/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0

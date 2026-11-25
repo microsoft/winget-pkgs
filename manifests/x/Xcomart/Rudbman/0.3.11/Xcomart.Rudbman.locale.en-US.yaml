@@ -1,0 +1,72 @@
+# Created using wingetcreate 1.12.13.0
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: Xcomart.Rudbman
+PackageVersion: 0.3.11
+PackageLocale: en-US
+Publisher: Xcomart
+PublisherUrl: https://github.com/xcomart
+PublisherSupportUrl: https://github.com/xcomart/rudbman/issues
+Author: Dennis Soungjin Park
+PackageName: rudbman
+PackageUrl: https://github.com/xcomart/rudbman
+License: MIT
+LicenseUrl: https://github.com/xcomart/rudbman/blob/main/LICENSE
+Copyright: Copyright (c) 2026 Dennis Soungjin Park
+ShortDescription: A multi-platform GUI database workbench that talks to any database with a JDBC driver.
+Description: |-
+  rudbman is a desktop database workbench written in Rust and drawn with gpui, the
+  GPU-accelerated UI framework behind the Zed editor. It reaches a database through
+  that database's own JDBC driver over an embedded JVM bridge, so any product with a
+  JDBC driver is a supported product: drivers come from Maven Central by coordinate or
+  from disk, the driver class is detected from the JAR, and every connection gets an
+  isolated class loader so two vendors' drivers cannot collide.
+
+  Each connection is a tab with its own work area — a schema explorer over catalogs,
+  schemas, tables, views, sequences, routines and triggers, filtered by name or condition
+  and told per connection what to hide; a SQL editor with dialect-aware
+  highlighting, statement splitting, cancellation, execution plans and a searchable
+  history of the statements it ran, over a virtualized grid that
+  scrolls a million rows without loading a million rows; ERD diagrams laid out and
+  routed automatically; a visual query builder that turns dragged tables and columns
+  into SQL; and backup of a schema to a replayable .sql script. Connections can run
+  through an SSH tunnel, and secrets live in the Windows credential store rather than
+  on disk.
+
+  No JDK is required — the installer carries a Java runtime built with jlink and
+  rudbman uses the one next to its executable. The interface is available in English,
+  Korean, Japanese, Simplified Chinese, German, Spanish, French and Russian.
+Moniker: rudbman
+Tags:
+- database
+- database-client
+- dba
+- developer-tools
+- erd
+- gui
+- jdbc
+- mysql
+- oracle
+- postgresql
+- query-builder
+- rust
+- sql
+- sql-client
+- workbench
+ReleaseNotes: |-
+  rudbman 0.3.11 — procedures, functions and triggers dropped from the explorer, ARM64 Windows and Linux, Intel Mac and AppImage downloads, a Linux build that no longer needs libxkbcommon-x11, and rugpui 0.1.18.
+  - Drop procedure, Drop function and Drop trigger in the explorer. The tree holds only a name, so the question looks the object up first and writes one statement for everything found under it: on PostgreSQL each overload with its argument list, under the keyword its kind takes (function, procedure or aggregate), and a trigger through each table it fires on; on Db2 each overload by its specific name; on H2 DROP ALIAS; elsewhere the plain DROP FUNCTION, DROP PROCEDURE or DROP TRIGGER, inside the object's own database on SQL Server. An Oracle routine inside a package is left to its package. A selection goes triggers, views, tables, routines, then sequences, and a name with nothing left to drop under it gets a notice instead of the question.
+  - Three more downloads, and an AppImage. Each release now also carries builds for Windows on ARM64 (aarch64-pc-windows-msvc), Intel Macs (x86_64-apple-darwin) and ARM64 Linux (aarch64-unknown-linux-gnu), each built on a machine of its own architecture and each with its own jlinked Java runtime, and Linux also ships as an AppImage that runs where it is. The winget package lists the ARM64 installer, and the Homebrew cask carries both macOS builds.
+  - The Linux build no longer needs libxkbcommon-x11. xkbcommon, keyboard handling included, is built into the binary together with libxcb-xkb, so the program no longer exits at once on a desktop that does not install libxkbcommon-x11; from the system it asks only for glibc, libgcc_s and libxcb. install.sh no longer checks for xkbcommon.
+  - The updater installs these builds in place. A copy on one of the new targets downloads its own build, and an AppImage replaces its own image file, instead of opening the release page.
+  - Shared libraries are updated to rugpui 0.1.18; rudbkit stays at 0.1.7. UI dependencies, framework patches and the database toolkit are pinned to their published release commits.
+
+  Requirements
+  - Linux: glibc 2.35 or newer: Ubuntu 22.04, Debian 12 and later, or a distribution built on them, MX Linux 23 among them.
+  - Linux AppImage: the same glibc, and FUSE to mount the image (the fuse3 package, which desktop installs of those distributions include). Without FUSE, start it with --appimage-extract-and-run.
+
+  What's Changed
+  - chore: release 0.3.11 by @xcomart in #66
+ReleaseNotesUrl: https://github.com/xcomart/rudbman/releases/tag/v0.3.11
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
