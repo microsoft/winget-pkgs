@@ -1,0 +1,72 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Niko1221.Strata
+PackageVersion: 0.2.22
+PackageLocale: en-US
+Publisher: strata
+PublisherUrl: https://github.com/Niko1221
+PublisherSupportUrl: https://github.com/Niko1221/Strata/issues
+PrivacyUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/SAFETY.md
+Author: Niko1221
+PackageName: Strata
+PackageUrl: https://github.com/Niko1221/Strata
+License: MIT
+LicenseUrl: https://github.com/Niko1221/Strata/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 Niko1221 and the Strata contributors
+ShortDescription: Runs AI models on your own computer for chat, coding and image work.
+Description: |-
+  Strata runs powerful AI models on your own computer. Chat, code and work with images locally, with an OpenAI and Anthropic compatible API served on localhost. No account is needed.
+
+  The installer carries the app, the App Host, Node and Strata Control. On first start the app shows the inference engine for your graphics card with its size and one Download button, and then fetches the model you choose.
+Tags:
+- ai
+- large-language-model
+- llm
+- local-llm
+ReleaseNotes: |-
+  Strata 0.2.22
+  The app and the Terminal are 0.2.22. The Qwen engine (strata-engine), the Inkling engine for NVIDIA cards (strata-inkling, CUDA) and Control are 0.1.69. The Hy4 engine (strata-hy4) and the Inkling engines for AMD, Intel and Apple stay 0.1.67, because nothing in them changed.
+  This release also contains the Control fixes that were prepared for 0.2.21.2, which was never published. You no longer need to restart Strata after updating: the "Agent work is paused" message that followed an update is fixed (#7099).
+  What changes for you
+  - Inkling 2 Mini on two or more NVIDIA cards gives correct answers again (#7093). With a layer split over 2 to 4 NVIDIA cards without NVLink (every GeForce pair) and some of the model held in RAM, Inkling could write garbage with no error (reported on 2 RTX 3060 cards). The engine read the free memory of the wrong card and put experts in RAM on a card that cannot compute them. On 2 x 12 GB the SQ-20 model is now placed with 1,536 experts on each card and none in RAM, and a load that would still put a RAM expert on the second card now stops with a message. Reported by locafra.
+  - A switch for the RAM a 2-card layer split keeps for prompts (#7089). The default does not change. Since 0.1.66 a layer split over 2 cards reserves RAM for the prompt path before it fills the experts that decode reads. On the reporter's RTX 4090 + 3090 with 47 of 64 GiB that costs 9% decode (82.6 against 90.1 tok/s). STRATA_SPLIT_LEND_RESERVE=0 fills the experts first: decode +9% on the reporter's PC and +5.5% on 2 x RTX A6000 (4 of 4 rounds), and a cold 18K-token prompt is 17% slower on the A6000s (4.6% slower on the reporter's PC). A value from 1 to 99 reserves that percent. We tried 50% as a new default: no decode gain and a prompt 5 to 7% slower, so there is no half-way default. Answers do not change (KL 0, identical tokens on the A6000s). Reported by svonolfen.
+  - The app is safer on a computer where other web pages are open (#7130). The app's page and its built-in server now answer only requests that come from the app itself, so other web pages open in your browser can no longer talk to it. Local tools that use the OpenAI-compatible API under /v1 (Open WebUI and similar) work as before. If you reach Strata through a name of your own (a hosts-file alias or a reverse proxy), list it in STRATA_ALLOWED_HOSTS. SVG and HTML files that the app hands to the browser are now shown in a sandbox, so they cannot run script as part of the app. Reported by AntyRia.
+  - Update Strata no longer leaves the chat paused (#7099). After a Control-only update the agents stayed paused and every chat turn failed until Strata was restarted. They now carry on as soon as the update has finished, failed or been cancelled. They stay paused only while a new app is being installed. While paused, the chat toolbar shows Resume agents. The Pause for update button now shows only when an update is waiting.
+  - Ask again, Edit and Branch from here keep the chat's working folder (#7101).
+  - Codex and other custom tool calls no longer lose the connection (#7132). While a model wrote a long custom tool call through /v1/responses, nothing was sent for the whole call, and a proxy that closes an idle connection (125 seconds on the reporter's path) ended a healthy request. Strata now sends a keep-alive whenever nothing has gone out for 10 seconds, so the stream is never silent for longer than that. With a scripted model, a 20.3 second call was silent for 18.76 seconds before the fix. We have not tested it with Codex itself or through a proxy.
+  - Inkling 2 Mini:
+    - Thinking level (#7035). The reasoning_effort of a run config and the level set in the shared Chat settings were ignored for Inkling. Order now: the request, the Chat settings, the config. Only when none is set does Inkling think at "low", as before.
+    - Tool results (#7051). The answer to a tool call reached the model without the tool's name. It is now filled in, for the chat, /v1/messages and the Responses API.
+    - Thinking budget of Claude Code's default request (#7133). Claude Code's default request asks for 31,999 thinking tokens, which made Inkling think for a very long time before it answered. A request that asks for exactly 31,999 on /v1/messages is now held to the default of its level: 8,192 at "high". Every other number goes through as sent (20,000, 32,000, 31,998, or a budget from another client or API). The defaults by level are 2,048 (low), 4,096 (medium), 8,192 (high) and 16,384 (xhigh, max). "inkling_budget_cap": false in the run config or STRATA_INKLING_BUDGET_CAP=0 lets the default use the full 31,999.
+    - Sampling (#7092). A request that names no sampling now uses the model card's temperature 1.0 instead of greedy picking. Anything you set still wins, and temperature: 0 is still greedy. We have not shown that this stops the loops in #7092.
+    - Second thinking turn (#7084). A thinking turn opened after the budget's wrap-up is now capped too (at most 512 tokens). We could not make the real model open one on our own runs, so this is tested against a scripted engine.
+    - Big pictures (#7043). On NVIDIA and CPU the picture is read on the processor: 0.25 megapixels took 15 seconds, 1 MP 74 s, 2.1 MP 334 s, 3 MP 743 s. Pictures above 0.8 MP are now scaled down first (a 1920x1080 screenshot becomes about 1190x670), and a request may stay silent as long as its pictures take, so it is no longer cut off after 5 minutes. inkling_image_max_mp sets another size, 0 turns the cap off.
+    - A failed engine install now says why (#7119). The message used to say "See the line above" with no line above it. It now carries the reason (download error, checksum, no engine for this computer, feed unreadable) and, for a package unpacked by hand in the wrong place, the right folder.
+  - Qwen on a Mac with macOS 15 starts again (#7082, #3915). On macOS below 26, Control sets STRATA_METAL_PROMPT=window, STRATA_METAL_PROMPT_GEMM=0 and COOP_K4=0 (each only if you have not set it) and says so at the start. Prompts are then read about 10 times slower (635 against 60 tok/s on a 1,970-token prompt, measured on macOS 27 because we have no Mac with macOS 15); generation speed is the same (20.7 against 20.8 tok/s). Not run on macOS 15 itself: if you try it, tell us.
+  - Flash-Next and Gyro use the model card's sampling again when MTP is on (#7070). Since 0.2.20 a request with no sampling ran greedy on every model started with --mtp. Only Qwen3.6 stays greedy now.
+  - A fresh Qwen Q2_0 setup on an AVX-512 CPU with a CUDA, HIP or SYCL card starts (#7090). Setup now picks MTP on that pack and fetches the MTP layer (about 5 GB). Before, the start ended with "DFlash2 is off here: it needs a native pack".
+  - A slow disk no longer ends a start after 15 minutes (#7060). The wait for the engine is now the time it may stay without a sign of life, and every new log line or more data read from disk gives it a full period again (at most 2 hours in all). engine_ready_s and STRATA_ENGINE_READY_S set it.
+  - The conversation memory grows with your RAM (#7044). Parked conversations were capped at 8 GiB whatever the RAM, so one above about 490,000 tokens was read again on every turn. On a PC with more than 32 GiB, Control now passes 40% of the free RAM left after the model, at most a quarter of the RAM and 128 GiB (a 125 GiB PC with a 52 GB model got 25 GiB). The engine used the same memory after loading and after three chats (within 0.1%). --conversation-cache-mib N or STRATA_NO_AUTO_CONVERSATION_CACHE=1 keeps your choice.
+  - The web page says where the API key comes from (#7063), in all ten languages of the page.
+  - Smaller: the French key hint has a no-break space before the colon; the Hebrew "Resume agents" button now reads "המשך עבודת הסוכנים"; the four new app sentences exist in all ten languages.
+  - Debug symbols are kept from now on. Every engine build keeps its symbol file (PDB, .debug, dSYM) outside the packages, so crash reports can be read. We compared builds with and without symbols for every compiler: the machine code is the same apart from addresses and the order of a few linker stubs.
+  - Setup plans are unchanged. We compared 120,960 planned setups against 0.2.21.1: every plan is the same.
+  Known limits
+  - Macs with macOS 15: prompts are read about 10 times slower than on macOS 26 and later (see above). Not tried on macOS 15 itself.
+  - Inkling 2 Mini, #7133: only a request that asks for exactly 31,999 thinking tokens on /v1/messages (Claude Code's default) is held to 8,192. A client that sends another large number gets that number, and a long thinking turn can still take minutes. The opt-out for the 31,999 case is the run config or the environment, not a per-request switch (a request's own 0 still means no budget).
+  - Inkling 2 Mini, #7092: temperature 1.0 is the model card's value. We have not shown that it ends the loops some people see.
+  - Inkling 2 Mini, #7084: the second thinking turn is capped, but we never saw the real model open one.
+  - The nine non-English versions of the new app sentences were not read by a native speaker.
+  - Windows AMD engines: hip-rdna3 was run on a Strix Halo PC (gfx1151) under Windows: the same answers as 0.1.67 on 6 prompts up to 18,000 tokens, at the same speed (18,000 tokens read in 33.5 against 33.6 seconds). hip-rx9070 and hip-rdna2 were built and checked as packages, but not run on such a card under Windows before this release. The same holds for the Linux hip-halo package.
+  - Installers: the Windows installer (setup.exe) and the Linux AppImage were built and signed, but not started on a clean PC before this release. The Terminal installers (install.sh, install.ps1) were run on Linux and Windows in a throw-away folder, as a fresh install and as an update from 0.2.21.1.
+ReleaseNotesUrl: https://github.com/Niko1221/Strata/releases/tag/v0.2.22
+Documentations:
+- DocumentLabel: Installation guide
+  DocumentUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/INSTALL.md
+- DocumentLabel: Supported models
+  DocumentUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/MODELS.md
+- DocumentLabel: Troubleshooting
+  DocumentUrl: https://github.com/Niko1221/Strata/blob/HEAD/docs/TROUBLESHOOTING.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
