@@ -1,0 +1,68 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: yjid.Kensaku
+PackageVersion: 1.0.20
+PackageLocale: en-US
+Publisher: Yash Jangid
+PublisherUrl: https://yashjangid.dev
+PublisherSupportUrl: https://github.com/yjid/kensaku/issues
+PrivacyUrl: https://github.com/yjid/kensaku/blob/HEAD/docs/PRIVACY.md
+Author: Yash Jangid
+PackageName: Kensaku
+PackageUrl: https://github.com/yjid/kensaku
+License: MIT
+LicenseUrl: https://github.com/yjid/kensaku/blob/HEAD/LICENSE
+Copyright: Copyright © 2026 Yash Jangid
+ShortDescription: Local file search and launcher with OCR and semantic search.
+Description: Kensaku is an open-source desktop file launcher that indexes file names, document and code text, and text recognised in screenshots, all on the local machine. Searches return instantly without a cloud round-trip, and the same index is exposed to AI agents over MCP or a loopback HTTP server. Full-text extraction covers PDF, Office and other document formats, while optional OCR packs and semantic models download on first use.
+Tags:
+- desktop-search
+- file-search
+- full-text-search
+- launcher
+- ocr
+- semantic-search
+ReleaseNotes: |-
+  Kensaku 1.0.20
+  Memory after big crawls
+  A first crawl that processed a lot of images held its peak after the crawl ended. Two things kept it: PP-OCR sessions pinned ONNX Runtime's CPU arena, and glibc kept the multi-megabyte image buffers in per-thread arenas that only trim their top chunk.
+  Controlled A/B on the 80-image bench_ocr sample (#243):
+
+  |                                         | before   | after    |
+  | --------------------------------------- | -------- | -------- |
+  | peak RSS                                | 738.6 MB | 647.6 MB |
+  | retained after the crawl + idle release | 329.6 MB | 54.3 MB  |
+  | extraction time                         | 12.2 s   | 12.6 s   |
+
+  Re-run today on a different 80-screenshot sample, the fixed side measured 55–60 MB retained and 615–620 MB peak. That sample is not the reporter's 2,676-image corpus, so read these as the controlled before/after, not the absolute memory of the app.
+  Also in this release:
+  - PP-OCR converts each page to RGB once, not once per detected line.
+  - A failed recognition returns its session to the pool; enough errors used to drain it and block other workers.
+  - OCR engines are released two minutes after a crawl ends (cancelled if another crawl starts).
+  - Grid thumbnails decode two at a time, on their own budget, so browsing during a crawl no longer multiplies the peak.
+  - Deleted and renamed files drop their semantic and visual rows, not just their metadata.
+  - 16-bit and float images reserve their real decode size, and PDF/Office/email parsing has a separate byte budget.
+  Updates install themselves
+  Automatic updates are now on by default:
+  - Kensaku downloads signed releases in the background and installs them when the window is hidden or another app has focus — never while you are working in it.
+  - The status bar shows the whole lifecycle: download percentage and progress, the restart countdown, and a waiting-for-indexing state.
+  - A crawl defers the install instead of cancelling it; the update installs as soon as indexing is idle.
+  - An install that does not take stops instead of retrying on every launch, and says so in the status bar.
+  - Turn it off on the last setup step or in Settings → About. MSI, portable and .deb/.rpm copies still update through their own package.
+  Settings → About also shows What's new for the version you are running.
+  Still open
+  These are not fixed by 1.0.20, so don't expect them here:
+  - #206 — the retry-queue stall on a very large corpus still needs the reporter's crawl log.
+  - #207 — Windows whole-volume roots still walk the full tree before indexing and load metadata synchronously at startup.
+  - #174 — Indra returning zero text lines on Fedora 44 with a Zen 5 CPU is still under investigation.
+  - #73 — macOS folder prompts need Developer ID signing and notarization.
+  Closes #242.
+ReleaseNotesUrl: https://github.com/yjid/kensaku/releases/tag/v1.0.20
+Documentations:
+- DocumentLabel: Usage guide
+  DocumentUrl: https://github.com/yjid/kensaku/blob/HEAD/docs/USAGE.md
+- DocumentLabel: Installation guide
+  DocumentUrl: https://github.com/yjid/kensaku/blob/HEAD/docs/INSTALL.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
