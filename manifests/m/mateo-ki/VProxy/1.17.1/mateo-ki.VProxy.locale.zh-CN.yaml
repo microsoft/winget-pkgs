@@ -1,0 +1,34 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: mateo-ki.VProxy
+PackageVersion: 1.17.1
+PackageLocale: zh-CN
+ShortDescription: Windows 桌面程序：采集订阅、解析成节点、跑代理，并把代理质量实测出来。
+Description: VProxy 是用 Rust + egui 编写的 Windows 桌面程序，负责采集免费或自建订阅、解析成节点、跑代理，并把代理质量实测出来。订阅入口包括带 `YYYY-MM-DD` 日期占位符的订阅 URL、Gist 搜索页发现，以及 Telegram 频道预览（裸节点链接和订阅链接两类都取，节点只增不删）。解析支持 `ss` `vmess` `vless` `trojan` `hysteria2/hy2` `socks5` `http(s)` 分享链接，以及 Clash / Clash Meta YAML、Base64 与混合文本。延迟以经内核访问 Google `generate_204` 的真实握手为准，24 小时出口健康条按实测绘制，而不是看内核上报的状态。Windows 上它同时管理系统代理、TUN（提权交接后只保留一个实例）和终端 `HTTP_PROXY` 环境变量，按 exe 路径添加防火墙允许规则，支持单实例互斥与托盘，记录出口切换历史并按天统计规则命中，同时提供强制 bearer 鉴权的本地 HTTP API 与 mihomo / sing-box / xray 配置导出。安装包不含内核，内核缺失时由程序按需下载。
+Tags:
+- clash
+- sing-box
+- 代理
+- 出口健康
+- 测速
+- 节点解析
+- 订阅
+ReleaseNotes: |-
+  🚀 VProxy v1.17.1 发布说明 / Release Notes
+  🎉 VProxy v1.17.1 正式发布！本版本重点带来 VP-Core 原生高并发批量测速引擎与 Clash 兼容 RESTful 探针接口、测速全链路真实性治理（彻底清除合成延迟与估算带宽）、端口映射跨源防误绑与全参数语义去重、节点卡片聚焦高亮修复，以及 Windows 安装器进程清理路径精准化与打包瘦身：
+  ⚡ VP-Core 原生测速与 Clash RESTful 探针接口
+  - VP-Core 高并发批量测速：恢复设置面板中的「测速内核」偏好选择器，接入 vpcore test --json 原生高并发测速通道（附带进程超时守卫、临时目录 RAII 自动清理与中断 kill_on_drop 回收）；
+  - 标准 Clash / Mihomo 兼容 RESTful 探针 API：新增 GET /proxies、GET /proxies/{name}、GET /proxies/{name}/delay 与批量 POST /proxies/delay（以及 /api/proxies*、/api/nodes/{id}/delay 别名与 CORS 预检放行），支持多阶探活（纯 TCP Ping、运行中控制器热委托、明文 HTTP/SOCKS 直通与受信号量限流的单节点内核真实 204 探针）；
+  - VP-Core v1.7.9 兜底资产同步：同步 VPCORE_TAG 至 v1.7.9，并将 Windows / Linux / macOS 三平台官方离线兜底校验摘要与字节数对齐实测发布包，消除限流兜底校验失败风险。
+  🛡️ 测速数据绝对真实化
+  - 拒绝一切合成估算：彻底移除批量测速管线根据延迟公式合成吞吐带宽的逻辑，以及单节点测速与测速弹窗中 85ms 默认假延迟、正弦波模拟速率、12% 估算上传速率与假抖动计算；
+  - 零未代理回退：单节点独立测速无法拉起临时测速代理或配置代理失败时立即报错中止，绝不悄然回退至本机直连测出虚假高速；HTTP API 在 mode=real 下内核探针失败亦严禁回退为 TCP Ping 冒充可用。
+  🔌 端口映射安全性与去重精度提升
+  - 跨订阅源防误绑：为 PortMapping 增加 source_id 归属追踪；节点 ID 失效恢复改绑时优先在原订阅源内按名称找回，无 source_id 的历史映射仅当全库候选归属唯一订阅源时才允许自动改绑，源已删除或存在跨源同名歧义时严格标为失效，绝不跨源盗用节点；
+  - 全参数语义去重：Mihomo 编译期导出端口映射节点改用 clash_proxies_semantically_equal 比对除 name 外的全部出站参数（认证凭据、加密方式、TLS/传输层等），解决同地址端口、不同密码/UUID 的多机场节点被错误合并的问题；同步修正 IN-PORT 规则目标映射。
+  🎨 界面交互与安装器加固
+  - 节点卡片选中与聚焦样式：补全节点列表与调度抽屉节点卡片点击/双击时的聚焦态同步，明确区分「运行中活动节点」与「未运行选中聚焦节点」，恢复清晰的边框高亮与柔光阴影反馈；
+  - 安装器精准进程清理与打包排除：移除安装向导初始化时按通用内核镜像名执行的全局 taskkill，改为在 ssInstall 覆写前按 {app}\ 安装目录精确终止残留内核进程，绝不误伤用户独立运行的其他代理工具；安装包构建排除 .backup* / .old* / .tmp* / .cache* 等历史备份缓存。
+ManifestType: locale
+ManifestVersion: 1.28.0
