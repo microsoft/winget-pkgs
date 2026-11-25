@@ -1,0 +1,166 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 1.2.2
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v1.1.6
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  🏎️ Performance Improvements
+
+  Faster dependency discovery in large repositories
+  run --all, and find or list with --dependencies, are faster in large repositories, including ones with no dependency blocks. The time spent linking units to their dependencies now grows linearly with the number of units instead of quadratically.
+  In benchmarks on an AMD Ryzen AI Max+ 395, discovering units and their dependencies in a generated repository of 10-unit dependency chains:
+  ──────┬──────┬──────
+  units │before│after
+  ──────┼──────┼──────
+  10    │0.63ms│0.63ms
+  ──────┼──────┼──────
+  100   │5.2ms │5.0ms
+  ──────┼──────┼──────
+  1,000 │56ms  │47ms
+  ──────┼──────┼──────
+  10,000│1.32s │443ms
+  ──────┴──────┴──────
+  At 10,000 units, memory allocated during discovery dropped from 8.6 GB to 1.9 GB.
+
+  Faster discovery with dependent filters
+  Terragrunt wastes less time resolving symlinks in discovery. Dependent filters, such as --filter '...vpc' were able to reduce the number of wasted syscalls to resolve symlinks, improving dependent discovery.
+  On a repository of 1,024 units, discovery with a dependent filter took 30% less time from the repository root and 47% less time from the target unit's directory on an M3 Max. It also allocated 12-16% less memory.
+
+  Faster discovery of dependencies
+  Discovery prepared to read a terragrunt.stack.hcl in every directory named by a dependency or dependencies block, even when the directory was a unit. It now does that work only when the stack file exists.
+  In benchmarks on an AMD Ryzen AI Max+ 395, selecting the dependents of a unit that every other unit depends on, run from that unit's directory:
+  ─────┬──────┬─────
+  units│before│after
+  ─────┼──────┼─────
+  10   │2.9ms │2.3ms
+  ─────┼──────┼─────
+  100  │118ms │86ms
+  ─────┼──────┼─────
+  1,000│11.1s │8.0s
+  ─────┴──────┴─────
+  At 1,000 units, memory allocated during discovery dropped from 26.7 GiB to 10.3 GiB.
+
+  💡 Tips Added
+
+  inputs-read-not-tracked — Points at files read in inputs that reading filters miss
+  Terragrunt does not track a file read in inputs. A unit with this configuration is not selected by --filter 'reading=config.yml' or by a Git filter when config.yml changes:
+  # terragrunt.hcl
+  inputs = {
+    message = yamldecode(file("config.yml")).message
+  }
+  The same applies to inputs in an autoinclude block of a stack file.
+  Commands that track reads, such as run --all with a reading or Git filter and find --reading, now print the inputs-read-not-tracked tip pointing at each such read:
+  TIP (inputs-read-not-tracked): Terragrunt does not track files read in `inputs`, so reading and Git filters miss the units and stacks that read them.
+  Untracked file read in `inputs`
+   --> app/terragrunt.hcl:4:24
+    |
+  4 |   message = yamldecode(file("config.yml")).message
+    |                        ^^^^^^^^^^^^^^^^^^ Read the file in `locals` and reference the local here.
+  Untracked file read in an `autoinclude` block's `inputs`
+   --> live/terragrunt.stack.hcl:16:29
+     |
+  16 |       policy = templatefile("policy.json.tftpl", { role_arn = dependency.iam.outputs.role_arn })
+     |                             ^^^^^^^^^^^^^^^^^^^
+     |
+     = Mark the template as read with `mark_as_read` in the stack's `locals`, then pass the local as the path here.
+  See https://docs.terragrunt.com/features/filter/attributes#reading-based-expressions
+  See Reading-Based Expressions. Suppress the tip with --no-tip inputs-read-not-tracked or --no-tips.
+
+  🔒 Strict Controls Added
+
+  cas-source-inside-stack strict control
+  A unit or stack block with update_source_with_cas could set a source inside the directory of its own stack file, e.g. a catalog with its stack at the root and its units under units/:
+  # catalog/terragrunt.stack.hcl
+  unit "foo" {
+    source                 = "./units/foo"
+    update_source_with_cas = true
+    path                   = "foo"
+  }
+  Stack generation copies the stack directory whole. For a stack "bar" block with source = "../catalog", the generated stack contained the unit twice, and run --all ran both, the copy without the values its stack gives the generated unit:
+  .terragrunt-stack/bar/.terragrunt-stack/foo
+  .terragrunt-stack/bar/units/foo
+  Existing support will be retained for v1.x for backwards compatibility, to obey the Terragrunt 1.0 guarantees.
+  Terragrunt now warns about each such block:
+  WARN  Setting the source of a `unit` or `stack` block with `update_source_with_cas` to a directory inside the stack directory is deprecated and will be removed in a future version of Terragrunt. Stack generation copies the stack directory whole, so `run --all` also runs the copy. Move the source out of the stack directory, and select the stack with a `//` subdirectory in its source.
+  WARN  stack bar: unit "foo" in terragrunt.stack.hcl sets update_source_with_cas on source "./units/foo" inside the stack directory, so the generated stack also contains a copy of it; move the source out of the stack directory and select the stack with a // subdirectory in its source
+  With the new cas-source-inside-stack strict control enabled, each of those blocks is an error instead:
+  terragrunt stack generate --strict-control cas-source-inside-stack
+  Move the stack into a subdirectory of the catalog, e.g. stacks/bar, keep its sources outside that subdirectory, and select it with source = "../catalog//stacks/bar". The cas-source-inside-stack control is also part of the deprecated-configs group.
+
+  🧪 Experiments Added
+
+  no-dot-terragrunt-cache experiment adds a terraform.no_dot_terragrunt_cache attribute
+  Enable the no-dot-terragrunt-cache experiment and set no_dot_terragrunt_cache = true in the terraform block of a unit without a source. Terragrunt then runs OpenTofu/Terraform in the unit directory instead of a copy in .terragrunt-cache, so local module paths resolve as written. The attribute is merged through include.
+  terraform {
+    no_dot_terragrunt_cache = true
+  }
+  terragrunt run --experiment no-dot-terragrunt-cache -- plan
+  Setting it to true together with a source, or without the experiment enabled, returns an error.
+
+  variables-block experiment adds a variables block
+  Enable the variables-block experiment to set OpenTofu/Terraform variables with a variables block. Its kind attribute chooses how Terragrunt passes the inputs: TF_VAR_ environment variables (env, the default), a terragrunt.auto.tfvars file (tfvar), or a terragrunt.auto.tfvars.json file (json). Writing inputs to a file avoids the operating system's limit on the size of a process environment, which a unit with many or large inputs can exceed.
+  variables {
+    kind     = "tfvar"
+    validate = true
+    inputs = {
+      vpc_id = dependency.vpc.outputs.vpc_id
+    }
+  }
+  terragrunt run --experiment variables-block -- plan
+  With the experiment enabled, terragrunt.auto.tfvars and terragrunt.auto.tfvars.json are reserved names in .terragrunt-cache. Terragrunt removes a file with either name from the cache when the unit has no inputs of that kind, so rename any such file in a unit, module, or generate block.
+
+  🧪 Experiments Updated
+
+  mcp-command — terragrunt mcp serves a catalog tool
+  The mcp command serves a new catalog tool. It returns the components terragrunt catalog returns, each in the shape terragrunt catalog --format=jsonl prints. Its component_source is the value a terraform block's source takes.
+  limit caps how many components come back, and include_docs adds each component's README. A repository that fails to load is listed in failures, and the components of the others still come back. Cloning a remote repository runs git, which needs --allow=exec. A local directory needs no capability.
+
+  mcp-command — --allow=docs relays the Terragrunt docs MCP server
+  An agent connected to terragrunt mcp could not read the Terragrunt documentation unless the Terragrunt docs MCP server was configured as a second server. --allow=docs now relays that server's tools and resources through terragrunt mcp, each tool under a docs_ prefix, e.g. search_docs is served as docs_search_docs:
+  // .mcp.json
+  {
+    "mcpServers": {
+      "terragrunt": {
+        "command": "terragrunt",
+        "args": ["mcp", "--allow=docs"],
+        "env": {
+          "TG_EXPERIMENT": "mcp-command"
+        }
+      }
+    }
+  }
+  Like every other capability, docs is denied unless granted, and granting http does not grant it. Every argument an agent passes to a docs_ tool leaves the machine, including any configuration it pastes in. If the docs server does not answer when the server starts, the server starts without the docs_ tools and logs a warning, and only a restart tries again.
+  See the mcp command docs for details.
+
+  mcp-command — A fmt tool formats HCL files
+  The mcp server now serves a fmt tool, which rewrites the .hcl files under a directory into canonical format, as hcl fmt does. check reports the files that need formatting without changing any, diff adds a unified diff for each, file formats a single file, and filter narrows the set by path.
+  A server started with no --allow flag still lets an agent rewrite the .hcl files under its root. Symlinks are skipped, and a file outside the root is refused.
+
+  mcp-command — terragrunt mcp serves a scaffold tool
+  The mcp command serves a new scaffold tool. It writes new configuration from a module, unit, or stack source as terragrunt scaffold does, without prompting. values sets what to fill in. A required value left out is written as a TODO placeholder and listed in todo.
+  Files go in output_folder, which defaults to working_dir, must resolve under the server root, and must be empty or not exist yet. A failed call removes what it wrote. A remote source needs --allow=http, or --allow=exec for git. A local source needs no capability.
+  A template's shell helpers and hooks never run, even under --allow=exec. The tool refuses a template that declares dependencies or uses template syntax in a file or directory name, and a source with a symlink leading out of it.
+
+  otel-logs - More reliable log export
+  The otel-logs experiment exports Terragrunt's logs as OpenTelemetry log records. This release makes the export more reliable:
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v1.2.2
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
