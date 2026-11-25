@@ -37,6 +37,102 @@ Description: |-
 
   Free updates
   Our software improves with every update. We continuously test and expand our software based on market feedback. We’re always exploring new features and functionality for all Loxone homes and buildings to come.
+ReleaseNotes: |-
+  New
+  Security
+  - Multi-Factor Authentication now supports authenticator apps (TOTP) in addition to codes sent by email.
+    - Users can add an authenticator app, such as Google or Microsoft Authenticator, in LOXONE Config under Authentication by scanning a QR code. Users without a usable email address set it up at their first login.
+    - The login requests the code of the user’s default method and offers the other methods.
+    - The new project setting “Multi-Factor Methods” defines which methods users may use; new and existing projects allow email and authenticator app.
+    - Authenticator codes require the correct time on both the Miniserver and the device running the app. LOXONE Config indicates when the Miniserver’s clock is incorrect.
+    - After 30 incorrect authenticator codes, the user’s authenticator app is blocked for 24 hours; an administrator can release it in “Logins & Firewall”.
+    - Administrators can view and delete a user’s methods in the user’s Authentication setting. Without a connection, the methods saved in the project are shown.
+    - Trust: Trust users set up the authenticator app at their Trust source and can use it on every Trust member.
+    - Gateway/Client: Miniserver Gen. 2 Clients verify authenticator codes via their Gateway.
+    - Authentication methods are stored encrypted on the Miniserver.
+  - The Logins dialog, now “Logins & Firewall”, shows which clients the application firewall of each Miniserver blocks or slows down, and can release blocks and a Remote Connect lockdown.
+  - AD5-T637: The application firewall now informs apps and browsers how long a block, lockdown or rate limit lasts (Retry-After).
+  General
+  - System Status now shows the day of a planned Miniserver update; postponing moves it by a fixed number of days.
+  Fixed
+  Security
+  - Statistics are now only available for functions the user has access to.
+  - Hardened the Miniserver login against password guessing.
+  - Hardened LAN Intercommunication.
+  - Hardened the network device interface.
+  - Hardened Miniserver web service permissions.
+  - Hardened the Caller key press callback.
+  - Hardened file transfer between LOXONE Config and the Miniserver.
+  - Changing block parameters via the App now requires the expert mode right.
+  - Hardened Gateway/Client communication.
+  - Hardened the HTTPS client.
+  - Configuration access over the Internet can now only be allowed from the local network.
+  - Hardened Gateway communication.
+  - A web command with “./” before its address and a file extension no longer bypasses the login check.
+  - Hardened the LOXONE Config connection and the web server.
+  - Hardened Miniserver network services and the login.
+  - Hardened the Pico C interpreter.
+  - Failed logins and blocks via Remote Connect now apply to the client’s address instead of to all Remote Connect access.
+  Access
+  - A user without a password no longer triggers an insecure password warning.
+  Audio
+  - Security improvements.
+  Config
+  - The message indicating that someone is already connected now shows the IP address of a Remote Connect client.
+  Devices
+  - Live Learning: The Modbus Extension is now shown with its image, and the correct extension type is created.
+  - Wall Display:
+    - Hardened the service interface: test and service functions require Miniserver credentials, the interface is open for only 30 minutes after startup before pairing, and repeated failed logins lead to a lockout.
+    - Hardened the firmware update, the offline update upload and the Miniserver certificate check.
+    - Crash reports no longer contain the serial number, and at most 5 per day are uploaded.
+    - Offline update packages and screenshots no longer remain on the device.
+  Diagnostics
+  - The def.log now records who restarted, rebooted or updated the Miniserver.
+  Energy
+  - Wallbox: VID and ED are now reset reliably after the vehicle is disconnected.
+  Gateway/Client
+  - The device status web services of a Client Miniserver work again for users with Multi-Factor Authentication.
+  General
+  - Energy meters of type Wallbox now use the Inverted wiring type by default.
+  - BG-I54995: The Alarm Clock now shows the correct time for the next alarm.
+  - Fixed an issue where the API connection was only possible from NFC to Wallbox.
+  - BG-I55706: The Sequence Controller indents the lines between if and endif again instead of removing their indentation.
+  Lighting
+  - BG-I55804: Automatic Designer rules setting the Push-button Dimmer to a value work again; value commands with the “/force” suffix were previously rejected.
+  Miniserver
+  - The login code email of an unregistered Miniserver now reports that the Miniserver is not registered.
+  - If a login code email could not be sent, the next login no longer responds with “code already sent”.
+  - Trust now reaches a member via its local address even when the address contains the HTTP port.
+  Plugins
+  - BG-I55429: Husqvarna (1.1.3):
+    - Fixed: The Miniserver no longer stops the plugin for excessive CPU load after the connection to the Husqvarna cloud closes.
+    - Fixed: The plugin now reconnects after the connection to the Husqvarna cloud drops instead of keeping stale mower states.
+    - Improved: Translations have been updated.
+  - LOXONE plugins such as Exosphere are no longer warned about or stopped for exceeding resource limits.
+  - The plugin resource message no longer shows memory values that appear as thousands of MB.
+  Setup
+  - The Miniserver search no longer requests Windows Firewall permission after installation.
+  Stability
+  - The Miniserver no longer crashes in the BACnet service while values change.
+  - The Miniserver no longer hangs at program start when a tablet references an invalid user.
+  - The Miniserver no longer restarts when reading the network configuration takes too long.
+  - The Miniserver no longer crashes on every program start after unpaired tablets are removed.
+  - Miniserver Gen. 1 no longer restarts or crashes when sending emails via the LOXONE mail service.
+  - Config no longer crashes when a Client is added to a standalone Miniserver.
+  - A Trust member of a Gen. 1 Miniserver no longer randomly shows the Miniserver Go icon.
+  - BG-I48809: App connections that no longer respond are now closed after 5 minutes and no longer use up connection slots.
+  Touch Pure Display
+  - C7WT-I241: The Wallbox control now shows the plug-in time and managed mode.
+  - C7WT-I242: The Touch Pure Display send interval is now set in seconds.
+  - C7WT-I226: The Intelligent Room Controller now indicates when heating or cooling is unavailable.
+  - Roof Window Shading and Gate Controller now display arrow badges.
+  - The target temperature is now shown immediately after leaving Eco mode.
+  - BG-I55541: The Touch Pure Display now requests live Wallbox values.
+  Trust
+  - BG-I28413: After the Trust Manager Miniserver is replaced, loading the Miniserver’s changes no longer restores the old serial number of the Trust Manager.
+  - BG-I28413: The serial number of a Trust member can again be set to the serial number of the project’s Miniserver.
+  - Two vehicles can no longer have the same hardware ID.
+  - Vehicles deleted on the Trust source are now also deleted on the Trust members.
 ReleaseNotesUrl: https://www.loxone.com/enen/support/changelog-config/
 ManifestType: defaultLocale
 ManifestVersion: 1.28.0
