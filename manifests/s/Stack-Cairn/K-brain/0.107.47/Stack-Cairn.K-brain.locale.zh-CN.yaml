@@ -1,0 +1,59 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Stack-Cairn.K-brain
+PackageVersion: 0.107.47
+PackageLocale: zh-CN
+Publisher: Stack-Cairn
+PublisherUrl: https://github.com/Stack-Cairn
+PublisherSupportUrl: https://github.com/Stack-Cairn/K-brain/issues
+PackageName: K-brain
+PackageUrl: https://github.com/Stack-Cairn/K-brain
+License: Apache-2.0
+LicenseUrl: https://github.com/Stack-Cairn/K-brain/blob/HEAD/LICENSE
+ShortDescription: 基于 Go 构建、运行在终端里的编程 Agent。
+Description: 氪脑（K-brain）是运行在终端里的编程 Agent，用 Go 构建，也可作为其他前端的后端底座。读代码、改文件、执行命令、验证结果，在同一会话中完成任务。运行 kn 开始使用，取自“氪脑”拼音 Ke Nao。
+Tags:
+- 人工智能
+- 代码
+- 大模型
+- 大语言模型
+- 智能体
+- 编程
+- 聊天机器人
+- 自主智能
+ReleaseNotes: |-
+  修复
+  - 旧版对话导入被中断后，可以原地补齐。
+    - **之前：**导入时源文件还在追加，副本会少最后几条消息。之后每次重新导入都返回 409，没有办法修复。
+    - **现在：**同时满足下面三个条件时，会原地更新已有会话，返回 status:"imported" 和 updated:true：
+      - 已有会话来自同一来源；
+      - 它是新内容的严格前缀；
+      - 导入后没有在 K-brain 里改过。
+    - **更新时保留：**置顶、归档、分享、标签、目标、模型、工作目录、用量和文件检查点。用户改过的标题也保留。
+    - **不会被覆盖的会话：**导入后在 K-brain 里继续对话、回退、编辑或压缩过的会话。（#251，via #252；对应 Stack-Cairn/LiveAgent#1417）
+  新增
+  - 导入冲突带上原因。
+    - 409 响应新增 errorCode:"import_conflict" 和 reason。reason 的取值：
+      - different_source
+      - diverged
+      - modified_after_import
+      - no_new_messages
+      - fingerprint_unchanged
+    - 会话正在运行时返回 errorCode:"session_busy"，这是暂时状态，稍后重试即可。（#252）
+  - 新增能力标识 history_import_prefix_update，在 /v1/health 中声明。（#252）
+  兼容性
+  - 请求格式不变。
+  - 已有字段和原错误文本不变。
+  - 旧客户端会把前缀更新当作普通导入处理。
+  - 本版之前导入的会话没有记录导入时的修订号，改为按导入后的会话结构判断是否改过。有一个已知缺口：这类会话如果只回退了最新几条消息，判断不出来。
+  其他
+  - docs/liveagent-backend.md 补充了导入协议的说明。
+  - 新增存储层和 HTTP 层测试，覆盖前缀更新的各个分支。
+ReleaseNotesUrl: https://github.com/Stack-Cairn/K-brain/releases/tag/v0.107.47
+InstallationNotes: 在终端中运行 kn。首次使用前，请在 %USERPROFILE%\.k-brain\config.json 中配置模型提供商。
+Documentations:
+- DocumentLabel: 文档
+  DocumentUrl: https://github.com/Stack-Cairn/K-brain/blob/main/README.zh-CN.md
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
