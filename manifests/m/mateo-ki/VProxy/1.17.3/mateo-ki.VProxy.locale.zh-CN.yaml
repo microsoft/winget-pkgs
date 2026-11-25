@@ -1,0 +1,29 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: mateo-ki.VProxy
+PackageVersion: 1.17.3
+PackageLocale: zh-CN
+ShortDescription: Windows 桌面程序：采集订阅、解析成节点、跑代理，并把代理质量实测出来。
+Description: VProxy 是用 Rust + egui 编写的 Windows 桌面程序，负责采集免费或自建订阅、解析成节点、跑代理，并把代理质量实测出来。订阅入口包括带 `YYYY-MM-DD` 日期占位符的订阅 URL、Gist 搜索页发现，以及 Telegram 频道预览（裸节点链接和订阅链接两类都取，节点只增不删）。解析支持 `ss` `vmess` `vless` `trojan` `hysteria2/hy2` `socks5` `http(s)` 分享链接，以及 Clash / Clash Meta YAML、Base64 与混合文本。延迟以经内核访问 Google `generate_204` 的真实握手为准，24 小时出口健康条按实测绘制，而不是看内核上报的状态。Windows 上它同时管理系统代理、TUN（提权交接后只保留一个实例）和终端 `HTTP_PROXY` 环境变量，按 exe 路径添加防火墙允许规则，支持单实例互斥与托盘，记录出口切换历史并按天统计规则命中，同时提供强制 bearer 鉴权的本地 HTTP API 与 mihomo / sing-box / xray 配置导出。安装包不含内核，内核缺失时由程序按需下载。
+Tags:
+- clash
+- sing-box
+- 代理
+- 出口健康
+- 测速
+- 节点解析
+- 订阅
+ReleaseNotes: |-
+  🚀 VProxy v1.17.3 发布说明 / Release Notes
+  🎉 VProxy v1.17.3 正式发布！本版本集中修复 IP 检测误改/覆盖主界面出口状态、活动节点与内核 PROXY 策略组状态不同步，并同步接入 VP-Core v1.7.10（根治 AnyTLS 回压重传与明文 HTTP 代理 502）：
+  🔍 IP 检测完全隔离（不切节点、不串数据）
+  - 零切换影响主代理：为 BgMsg::IpRisk 补全 node_id 携带字段并在 GUI 独立维护 ip_risk_target / ip_risk_dialog_front / ip_risk_dialog_busy / ip_risk_dialog_error 弹窗状态；对非当前运行中节点发起 IP 风险检测时严格走独立探测链路，绝不调用内核切换当前运行节点；
+  - 首页出口状态隔离：BgMsg::IpRisk 与 BgMsg::IpEgress 仅在目标匹配当前运行节点（且代理处于运行状态）时更新首页出口 IP / 国家代码 / 风控状态，非运行节点的检测失败或重置不再清空首页正在显示的当前节点出口信息（新增回归测试 ip_risk_check_on_non_running_node_never_switches_or_clobbers_active_egress）。
+  🧭 活动节点与内核 PROXY 策略组双向同步
+  - 首页与代理页真源统一：ui_proxy_charts 解析当前活动节点时在运行期优先读取 proxy_status.node_id，手动节点列表同步采用 kernel_egress_name 与 resolve_node_by_name 对齐；ProxyManager 新增 sync_active_node，切换节点或内核状态轮询（BgMsg::KernelGroups）发现内核实际出口变化时自动同步内部活动节点 ID 并刷新出口 IP 展示（带 last_kernel_group_pick_at 1.2s 防抖避免覆盖刚手动点选的新节点，新增回归测试 kernel_groups_egress_change_syncs_proxy_status_node_and_refreshes_egress）；
+  - 防误切与手动切回修复：手动模式策略组抽屉中成员卡片单击仅设置面板聚焦高亮（不再触发内核切换节点，需点击「切换」/「使用」或双击启动）；修正 switch_proxy_node 跳过判断与通过 select_kernel_member("PROXY", ...) 切回时未同步更新本地活动节点的问题。
+  ⚙️ VP-Core v1.7.10 同步与兜底资产对齐
+  - VP-Core v1.7.10 兜底同步：同步 VPCORE_TAG 至 v1.7.10，并对齐 Windows / Linux / macOS 三平台官方发布包的 SHA-256 校验摘要与字节数，继承上游 AnyTLS 背压防重传与 Mixed/HTTP 入站逐跳头改写修复（消除 502 proxy-reset / UND_ERR_SOCKET）。
+ManifestType: locale
+ManifestVersion: 1.28.0
