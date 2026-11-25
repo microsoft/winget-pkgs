@@ -1,0 +1,69 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Mapillary.MapillaryTools
+PackageVersion: 0.15.2
+PackageLocale: en-US
+Publisher: Mapillary
+PublisherUrl: https://www.mapillary.com/
+PublisherSupportUrl: https://github.com/mapillary/mapillary_tools/issues
+PrivacyUrl: https://www.mapillary.com/privacy
+Author: Meta Platforms Ireland Limited
+PackageName: Mapillary Tools
+PackageUrl: https://github.com/mapillary/mapillary_tools
+License: BSD-2-Clause
+LicenseUrl: https://github.com/mapillary/mapillary_tools/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026, mapillary
+ShortDescription: A command line tool that uploads geotagged images and videos to Mapillary.
+Tags:
+- map
+ReleaseNotes: |-
+  mapillary_tools v0.15.2
+  This release makes process faster and fixes the upload of videos with negative composition offsets, such as
+  videos stitched with DJI Studio. Apart from that fix, process writes the same description file as v0.15.1, and
+  upload uploads the same data.
+  Faster processing
+  process with the macOS binary on an Apple laptop (best of 3 runs):
+
+  | Input                                                             | v0.15.1                  | v0.15.2                 |
+  | ----------------------------------------------------------------- | ------------------------ | ----------------------- |
+  | One 416 MB GoPro MAX 2 video                                      | 0.69 s                   | 0.31 s                  |
+  | 8 GoPro MAX 2 photos                                              | 0.79 s                   | 0.33 s                  |
+  | 5 videos (Ricoh Theta X, BlackVue, Viofo, two GoPro MAX)          | 0.90 s                   | 0.31 s                  |
+  | One video geotagged from a 139 MB GPX file (651,455 track points) | 11.3 s, 2.0 GB of memory | 4.9 s, 0.9 GB of memory |
+
+  The faster start and GPX reading help image sequences as well as videos. For images, the gain is a fixed
+  saving per run, so it shows most for small sets. The GoPro and MP4 changes apply to videos only.
+  Where the time went:
+  - Worker processes. process started a pool of worker processes for each geotag source and another for
+    validation. On macOS and Windows each pool cost 0.3–0.7 s, while most files take a few milliseconds to read.
+    process now starts the work in its own process and hands the rest to workers only when more than about 2 s of
+    work is left (#963). --num_processes works as before.
+  - GoPro videos. The GPS track of GoPro videos is read 4 to 9 times faster, for example in 0.7 s instead of
+    6.5 s for a 21.5 GB HERO12 video (#961).
+  - MP4 sample tables. The sample tables of MP4 tracks are read faster. This helps CAMM videos with many IMU
+    samples (0.15 s instead of 0.39 s for a 626 MB Ricoh Theta X video), and also video sampling, GPX alignment of
+    videos and building the video stream in upload (#962).
+  - GPX files. GPX files are read without building an object for every field of every track point, track points
+    are read as they are parsed, and garbage collection is paused while reading (#965, #967). A GPX file that the
+    fast reader cannot read exactly as gpxpy would is read with gpxpy, as before.
+  Fixes
+  - Videos with negative composition offsets in their MP4 ctts box, such as 360 videos stitched with DJI Studio and
+    some H.265 videos, could not be uploaded since v0.14.6: upload failed with
+    FormatFieldError ... sample_offset. They are uploaded again (#966).
+  Backward compatibility
+
+  | Change                                                                                                                                                                                       | What to do |
+  | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+  | process reads the first file in its own process before it starts any worker. When each of a few files takes long to read, the run can take up to one file's reading time longer than before. | None.      |
+  | The video stream of a video with negative composition offsets is uploaded with a version 1 ctts box, the version for signed offsets.                                                         | None.      |
+
+  Unchanged: command-line options, exit codes, the description file, the upload history, the config file, and the
+  session keys used to resume uploads.
+  Known issues
+  The known issues of v0.15.0
+  still apply.
+  Full Changelog: https://github.com/mapillary/mapillary_tools/compare/v0.15.1...v0.15.2
+ReleaseNotesUrl: https://github.com/mapillary/mapillary_tools/releases/tag/v0.15.2
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
