@@ -1,0 +1,99 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: axpnet.AeroFTP
+PackageVersion: 4.2.8
+PackageLocale: en-US
+Publisher: axpnet
+PublisherUrl: https://github.com/axpnet
+PublisherSupportUrl: https://github.com/axpnet/aeroftp/issues
+Author: axpnet
+PackageName: AeroFTP
+PackageUrl: https://github.com/axpnet/aeroftp
+License: GPL-3.0
+LicenseUrl: https://github.com/axpdev-lab/aeroftp/blob/HEAD/LICENSE
+ShortDescription: A modern, multi-protocol file manager and FTP client with integrated AI, cloud sync, and military-grade encryption.
+Description: |-
+  AeroFTP is an open-source, multi-protocol file manager built with Tauri 2 (Rust + React 18 + TypeScript).
+  It supports 16 protocols (FTP, FTPS, SFTP, WebDAV, S3, Google Drive, Dropbox, OneDrive, MEGA, Box, pCloud, Azure Blob, 4shared, Filen, Zoho WorkDrive, and Cryptomator vaults),
+  features an AI assistant with 45 tools and 15 LLM providers, military-grade encrypted vaults (AES-256-GCM-SIV + Argon2id),
+  bidirectional real-time sync, a built-in code editor, SSH terminal, and media player with visualizers.
+  Available in 47 languages with 4 themes.
+Moniker: aeroftp
+Tags:
+- cloud-storage
+- encryption
+- file-manager
+- file-transfer
+- ftp
+- ftp-client
+- multi-protocol
+- rust
+- s3
+- sftp
+- sync
+- tauri
+- webdav
+ReleaseNotes: |-
+  [4.2.8] - 2026-11-24
+  Direct Launch Links, New Cloud Presets, File Versions and Safer Sessions
+  AeroFTP 4.2.8 makes connecting and managing remote files faster and more dependable. Open remote links and saved profiles straight into a connected tab, connect to four newly added cloud services (Puter, LifetimeCloud, Neon Object Storage and Blomp) or import profiles from INI templates, browse file version history on Nextcloud and MEGA, and refresh Find Duplicates results without running a full rescan. This release also restores local network access on macOS 15+, expands SFTP server compatibility, and hardens transfers, sync and encrypted folders so active work always stays on the right server and account.
+  The complete change record and remaining follow-ups are in the 4.2.8 release tracker.
+  Added
+  - Launch a saved profile or a remote URL straight into a connected tab. sftp, scp, ftp, ftps, webdav and s3 links, and --profile, open one tab, reuse a tab already on that profile, and fall back to the vault. An s3:// link can take AWS credentials from the environment behind a handle bound to that address. Secrets in the link stay out of the log (@kazucata, #1534, #1602).
+  - Puter, LifetimeCloud and Neon Object Storage presets. Puter and LifetimeCloud on WebDAV, Neon on S3 with per-branch endpoints, path-style addressing and four regions, with free-plan limits in the catalog (#1574).
+  - Blomp in Add Services. The Cloud Storage card, registration and help links, and the catalog inventory now match (#1564).
+  - Create profiles from a configuration template. Paste or load an INI with one block per server, preview each block, and write to the vault only on confirm. aeroftp-cli import template previews unless --apply (#1573).
+  - Third-party notices and an AppImage source offer. About, Third-Party Licenses opens the license texts shipped with the packages, the build fails when a dependency change is missing from them, and each AppImage lists bundled system libraries with a three-year source offer kept in the release (#1586).
+  - An accessibility statement. ACCESSIBILITY.md states a WCAG 2.2 AA target via WCAG2ICT, what works today, known limits and how to report a barrier.
+  - File versions on Nextcloud and MEGA in one order. The current file comes first, then older versions newest first, and the live row is never purged (#1600).
+  - Find Duplicates can refresh a result without a full rescan. One processed / total counter, the real file size in fullscreen preview, Refresh drops files that disappeared, and Esc closes the preview before the dialog (@EhudKirsh, #1610, #347).
+  - The two messages a sync shows when a plan is no longer safe, translated in all 47 languages (#1566).
+  Fixed
+  - A sync, a transfer and a panel action stay on the server they started on. A tab switch, a reconnect, a vault change or a reload cannot retarget a run. Queued rows, plans, AeroVault uploads and delete history record that server, and a change stops the run with the reason (#1561).
+  - FTP, FTPS, SFTP and SCP open a relative or ~/ folder under the login folder. AeroCloud saves that folder in absolute form, the encrypted overlay anchors there, and a target outside the encrypted folder is refused before any transfer. A reconnect that cannot return to its folder closes the session (#1568, #1572).
+  - A Windows FTP server that reports a slash-absolute folder cannot leave an encrypted folder with a backslash parent step. FTP and FTPS refuse that step whatever the login folder looks like. SFTP keeps a backslash as a name character. A known POSIX FTP login folder still treats a relative backslash as part of the name (691e352c7 through 046fd01fb).
+  - Saved start folders refuse a backslash parent step, and Change Mode logs name the vault by its folder only. A path that is only .. does not print the home directory, and the derived lock path is redacted (691e352c7 through 046fd01fb).
+  - A launch form that already holds host:port keeps the launch connection, and a bare host:port is the only value that is split. URLs and unbracketed IPv6 addresses stay whole. The connect log redacts userinfo, query and fragment (691e352c7 through 046fd01fb).
+  - An empty secret variable is skipped and the next variable is read (691e352c7).
+  - SFTP delta signs in as the session did, and a refused delta stops the sync. GitHub uploads that fall back to a working branch read and write that branch only, per login and base branch (#1572).
+  - Credentials in URLs are masked in logs, reports and debug output, including escaped JSON (#1572).
+  - Overlapping connects replace only the backend they connected. An OAuth token that cannot be read for that profile stops the connect instead of using a shared legacy token (#1574).
+  - macOS 15 and later can reach servers on the local network. The app declares the Local Network usage text, and every release DMG is checked for it (@gg-vara, @kazucata, #1555, #1557).
+  - SFTP offers NIST ECDH after Curve25519 (P-256, P-384 and P-521) for servers such as IBM Sterling File Gateway, with the same host-key error detail (@tcaduto, #1549, #1552).
+  - A click outside a busy window keeps the work. Backdrop and Esc follow the topmost window, confirmations keep the keyboard, and AeroCloud, Filen Notes and duplicate-submit guards keep a typed draft (@456vv, #1527, #1570).
+  - Transfer rows settle when a batch updates, returning failed ids in the same turn (#1551).
+  - Saved-profile CLI commands keep positional values and reject extras before any effect (#1556).
+  - A pooled CLI or MCP session is dropped on a transport error and the call is not replayed. An authentication failure reloads the vault once (#1554).
+  - Cyberduck S3 bookmarks drop a duplicated bucket prefix in virtual-host mode (#1563).
+  - A full S3 upload no longer hashes the local delta grid, and a later delta refuses a stale baseline (#1558).
+  - An S3 host keeps its provider when a bucket name belongs to another vendor, and the bare Fastly apex maps to Fastly (#1567).
+  - Preset setup steps name the controls the form shows. Filen Desktop Fetch works before the first connect over HTTPS on a verified loopback, and error text omits a secret this session sent (#1598).
+  - Duplicating a profile copies only that account's secrets. An AeroCrypt keystore read failure is reported as an error, a template import does not guess a secret, and an export refuses a value that contains a line break (#1573, #1589, #1591).
+  - keystore repair ignores a piped confirmation unless --yes is passed when input is not a terminal (#1573).
+  - ssh config import follows OpenSSH rules for tokens, Include and host patterns (#1591).
+  - A WebDAV profile whose URL carries a folder or a query opens that folder on connect, in AeroCloud, and in the CLI and MCP (#1573).
+  - AeroVault on aerovault 0.7.0 rebuilds Change Mode with one rename, keeps remote locks in a private session folder, and reports repair truthfully (#1606).
+  - A wrong AEROVAULT3 password shows the translated wrong-password message (#1587).
+  - MEGA sign-in solves an HTTP 402 Hashcash challenge off the async executor and retries inside the SDK budget (#1611). The check allows enough time under a parallel suite (22bd192a5).
+  - The storage chip leaves the server name visible at intermediate window widths (#1588).
+  - A {username} start folder is filled in the app, the CLI and every bridge export (#1574).
+  - A Windows portable update confirms the hand-off both ways and refreshes the third-party notices beside the executable (#1586).
+  - A local copy that must not overwrite leaves the existing file or folder in place. A named pipe is refused at once, and a partial local copy stays private until it is published (#1561).
+  - Server reply text does not decide a sync outcome. An FTP search that cannot return to the session folder closes the session (#1561).
+  - Signing out stays signed out, and a cloud connection keeps the account that began it, including a Jottacloud token rotation (#1561).
+  - A Proton Drive mode switch holds the AeroCloud syncs of the folders it changes until the switch finishes or rolls back (#1568).
+  - AeroCloud settings merge under a cross-process lock, and the tab uses the folder the session actually opened (#1568).
+  - The suite reports a failure instead of hanging on a busy runner. Assertion snapshots, lock order, linear-time checks, timing bounds, extra swap for whole-lib jobs, a 90-minute Rust test step, and an Actions cache kept under the repository limit (#1571, #1590, #1592, #1594, #1599, #1605, #1560).
+  Security
+  - Pre-tag commit audit: PASS. The commits since v4.2.7 were reviewed before this tag. The path, vault-log and launch-URL fixes on 691e352c7 through 046fd01fb are in this release, and the full local pre-push gate passed on 046fd01fb.
+  - A refused folder path is not shown, and a sync target outside the encrypted folder is refused before transfer (#1568).
+  - Advisory updates in this release: rustix 1.1.6 (RUSTSEC-2026-0486), quinn-udp 0.5.16 (RUSTSEC-2026-0538), libz-sys 1.1.33 (RUSTSEC-2026-0544), russh 0.65.4 (GHSA-ppq4-8rhp-9xrq, GHSA-66vf-xq4p-pg7q, GHSA-m6v5-wqxv-mffh, GHSA-7qgr-cjxw-6vjf) and cookie 0.18.3 (RUSTSEC-2026-0594). The chrono unmaintained advisory and the heapless 0.7.17 notes reached through postcard are recorded with their exit path (#1559, #1569, #1593, #1606, #1608, #1619, #1601).
+  - ctrlc 3.5.3, rustls-pki-types 1.16.0 and rpassword 7.5.5, with every other dependency edge left as it was (#1625, 15a05539).
+  - Further compatible dependency updates across Rust and npm, including zip 9.8.2, the embedded FTP server after a 501 reply via libunftp 0.25.1, and the bundles in #1550, #1585, #1606 and #1619.
+  - Pull-request commits are checked against a Chainguard signing policy, and workflow changes receive hardened-action suggestions. Both checks are advisory (#1595, #1596).
+  - New rclone exports recommend 1.76.0 or newer. Older clients still read the file (#1609).
+  Changed
+ReleaseNotesUrl: https://github.com/axpdev-lab/aeroftp/releases/tag/v4.2.8
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
