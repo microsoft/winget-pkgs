@@ -1,0 +1,111 @@
+# Created with WinGet Releaser using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: ZedIndustries.Zed
+PackageVersion: 1.30.2
+PackageLocale: en-US
+Publisher: Zed Industries
+PublisherUrl: https://zed.dev/
+PublisherSupportUrl: https://zed.dev/support
+PrivacyUrl: https://zed.dev/privacy-policy
+Author: The Zed Industries Authors
+PackageName: Zed
+PackageUrl: https://zed.dev/windows
+License: GPL-3.0
+LicenseUrl: https://github.com/zed-industries/zed/blob/main/LICENSE-GPL
+Copyright: Copyright 2022 - 2025 Zed Industries, Inc.
+ShortDescription: High-performance, multiplayer code editor from the creators of Atom and Tree-sitter.
+Description: |-
+  Zed is a next-generation code editor designed for high-performance collaboration with humans and AI.
+  - Written from scratch in Rust to efficiently leverage multiple CPU cores and your GPU.
+  - Integrate upcoming LLMs into your workflow to generate, transform, and analyze code.
+  - Chat with teammates, write notes together, and share your screen and project. All included.
+  - Zed now speaks WSL. You can open a Linux distro as a first-class “remote” target, edit projects that live inside it.
+  - All of Zed’s AI features, including edit predictions and ACP-powered agents, are fully supported on Windows.
+  - All Zed extensions now work seamlessly on Windows; no special steps, no caveats.
+  - To run on almost all Windows versions, including VMs, we created a new rendering backend based on DirectX 11.
+Moniker: zed
+Tags:
+- code-editor
+- developer-tools
+- editor
+- text-editor
+ReleaseNotes: |-
+  This week's release includes reduced GPU usage across the app, a model picker for AI commit message generation in the Git Panel, a setting to hide the title bar, support for GPT-6.1 Terra, and faster scanning of large projects.
+  Features
+  AI
+  - Added support for GPT-6.1 Terra to the OpenAI provider. (#66659; thanks nymo)
+  - Added keyboard navigation to the agent thread switcher (opened with ctrl-tab from the Agent Panel or Threads Sidebar): up / down, ctrl-n / ctrl-p, and home / end move the selection, as do ctrl-up / ctrl-down while ctrl is still held. (#66951; thanks kinoute)
+  - Added support for the Extra High thinking effort level for Gemini 4 Hydrogen (gemini-4-hydrogen), which now defaults to High. (#67011; thanks LorenzoBiassio)
+  - Improved GitHub Copilot models to use their full context window when there is no long-context surcharge, and to display per-token pricing where available. (#64302; thanks Jozef833)
+  - Improved memory usage when saving long agent threads. (#66683; thanks founderinaction)
+  Git
+  - Added a model picker to the Git Panel's commit editor for choosing the model used for commit message generation. The choice is saved to the agent.commit_message_model setting. (#50674; thanks soilSpoon)
+  Vim / Helix
+  - Added the g r t keybinding for editor: go to type definition, matching Neovim's default. (#66759; thanks ask4fusora)
+  - Added the ] n and [ n keybindings in visual mode for vim: select next syntax node and vim: select previous syntax node, matching Neovim's defaults. (#66759; thanks ask4fusora)
+  Languages
+  - Improved syntax highlighting of #pragma and #undef arguments in C and C++. (#66875; thanks imryanthedev)
+  Linux
+  - Improved ACP registry agent installation on musl-based Linux systems, such as Alpine, to use musl builds when available. (#66914)
+  macOS
+  - Updated the Git version bundled with Zed on macOS to 2.56.1. (#67264)
+  Other
+  - Added a title_bar.show setting to hide the title bar always ("never") or only in fullscreen ("hide_in_full_screen"). The default is "always". (#65671; thanks wuemeli, and thanks xipeng-jin for an earlier implementation in #42540)
+  - Added editor: fold at current indentation level to fold the whole document at the current line's indentation level. (#66849)
+  - Added a zed --debug-state CLI flag that prints the running app's window, display, and platform state as JSON for debugging. (#66852)
+  - Improved rendering efficiency to reduce GPU usage across the app, including when drawing paths (such as Git Graph lines), shadows, and content hidden behind other elements. (#66806, #66807, #66809, #66810, #66811, #66812)
+  - Improved battery life by animating spinners without re-rendering the views that contain them. (#66896)
+  - Improved responsiveness during heavy filesystem activity, such as external builds creating or removing many files. (#66835, #66973, #66990, #67008; thanks RemcoSmitsDev)
+  - Improved the time to scan large projects when they are opened. (#67023; thanks ptweezy)
+  - Improved fuzzy matching performance when many candidates match. (#66982; thanks ptweezy)
+  - Improved performance of multibuffers with many files, such as large project search results. (#67053; thanks ptweezy)
+  - Improved performance when large directories are removed or rescanned. (#66962; thanks ptweezy)
+  - Improved responsiveness of the completions menu with many matches. (#66959; thanks ptweezy)
+  - Improved the onboarding page to keep the "Finish Setup" button visible while scrolling. (#67079; thanks aakashbapna)
+  - Improved the time to share or remotely open projects with very many files. (#66961; thanks ptweezy)
+  - Improved the which-key popup to also show inside open dialogs, like Go to Line and the commit editor. (#66838)
+  Bug Fixes
+  - Fixed a bug on Windows and Linux where opening a file or folder while Zed was closed did not restore the last session, losing previously open windows, tabs, and unsaved buffers. (#65463; thanks Verlaire)
+  - Fixed a bug where the worktree trust modal reappeared every time a project was opened after choosing "Stay in Restricted Mode". (#66649)
+  - Fixed a bug where typing in an agent thread lost keyboard focus when another thread automatically sent its queued message. (#66787; thanks daejey)
+  - Fixed a crash when clicking or selecting text in agent messages and other rendered Markdown containing non-ASCII characters. (#67104)
+  - Fixed always_confirm patterns for the agent's edit_file and write_file tools (agent.tool_permissions.tools.<tool>.always_confirm) not prompting for files inside the project. (#67037)
+  - Fixed crashes on Windows when the display containing Zed's window changed. (#66855)
+  - Fixed new windows always opening on the primary display instead of the display of the active window. (#61459; thanks errmayank)
+  - Fixed opening a remote project while it was still reconnecting sometimes causing the connection to fail. (#67336)
+  - Fixed a bug where a file's branch diff stayed broken until Zed was restarted if it failed to load once. (#67116; thanks ptweezy)
+  - Fixed a bug where a project folder containing entries named HEAD and config (such as head and config source directories on case-insensitive filesystems) was detected as a bare Git repository, causing the Git Panel to switch to a bogus repository and show a "detected dubious ownership" message. (#67024; thanks likeaixxx)
+  - Fixed a bug where clicking a tool call's file label or "Go to File" button in an agent thread did nothing for image files. (#67092; thanks daejey)
+  - Fixed a bug where clicking one command in the agent's permission dropdown for chained terminal commands checked every command in the chain. (#56492; thanks tredondo)
+  - Fixed a bug where task: rerun opened the task spawn menu instead of rerunning the last task after any edit to tasks.json. (#66646)
+  - Fixed a bug where terminals closed from the tab switcher stayed in its list until the switcher was reopened. (#66943; thanks csarushan1729)
+  - Fixed a bug where the Agent Panel's Follow toggle turned itself back on after being disabled. (#63467; thanks gumeeee)
+  - Fixed a bug where the agent's grep tool silently ignored misnamed parameters from some smaller models and searched the whole project instead of a specific file or folder. (#66586; thanks AbyssWaIker)
+  - Fixed a bug where the fading of unused code could extend past the unused code. (#66977; thanks ptweezy)
+  - Fixed a bug where Vue prop completions were missing when typing lowercase letters with Emmet enabled. (#66936; thanks GSGFs7)
+  - Fixed a crash in the Markdown preview when rendering certain SVG images. (#67423)
+  - Fixed duplicate language server notifications appearing when switching themes. (#67021; thanks xsadia)
+  - Fixed excess settings notifications when removing project folders that had no settings. (#67268)
+  - Fixed Git blame failing with a broken pipe error for large untracked files. (#67110; thanks dmytrodanilenkov)
+  - Fixed incorrect R extension installation suggestions for Quarto and R Markdown files. (#66928)
+  - Fixed log settings keyed by module path (such as project::lsp_store) not enabling debug or trace logs. (#66985; thanks ptweezy)
+  - Fixed Mermaid diagrams in the Markdown preview having state descriptions that overlapped the state title, sequence diagram titles that were cut off, and labels that overflowed their nodes with wide fonts. (#66874)
+  - Fixed multiple cursors overwriting the primary selection with newlines on Linux. (#66986; thanks ptweezy)
+  - Fixed prompt caching not being used for OpenRouter's Anthropic model aliases (e.g. ~anthropic/claude-sonnet-latest). (#66857; thanks Kioob)
+  - Fixed recent projects displaying incorrectly for Windows remote projects when running Zed on macOS or Linux. (#66465; thanks lingyaochu)
+  - Fixed ssh:// links with a drive letter (for example ssh://user@host/C:/project) failing to open a project on a Windows remote. (#66814; thanks h4nz4)
+  - Fixed syntax highlighting sometimes going missing after Vim method, section, and comment motions. (#66983; thanks ptweezy)
+  - Fixed the agent's read_file tool failing when models pass start_line or end_line as strings. (#67072; thanks ChromaxS)
+  - Fixed the Project Panel showing a leading or trailing whitespace warning instead of an empty-name error when a file or directory name contained only whitespace. (#67125; thanks ptweezy)
+  Breaking Changes and Notices
+  - Changed the default value of file_finder.prefill_query_from_selection from true to false, so the file finder no longer pre-fills its query with the selected text. To return to the previous behavior, set it to true. (#66856)
+ReleaseNotesUrl: https://github.com/zed-industries/zed/releases/tag/v1.30.2
+PurchaseUrl: https://zed.dev/pricing
+Documentations:
+- DocumentLabel: Community Links
+  DocumentUrl: https://zed.dev/community-links
+- DocumentLabel: Getting Started
+  DocumentUrl: https://zed.dev/docs/
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
