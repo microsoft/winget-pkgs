@@ -1,0 +1,145 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Duplicati.Duplicati
+PackageVersion: 2.4.1.1
+PackageLocale: en-US
+Publisher: Duplicati Team
+PublisherUrl: https://www.duplicati.com/
+PublisherSupportUrl: https://github.com/duplicati/duplicati/issues
+Author: Kenneth Skovhede
+PackageName: Duplicati
+PackageUrl: https://www.duplicati.com/
+License: MIT
+LicenseUrl: https://github.com/duplicati/duplicati/blob/HEAD/LICENSE
+ShortDescription: Duplicati is a free, open source, backup client that securely stores encrypted, incremental, compressed backups on cloud storage services and remote file servers.
+Moniker: duplicati
+Tags:
+- backup
+- crypted
+- data
+- duplicati
+- incremental
+ReleaseNotes: |-
+  About this release
+  This release builds on version 2.4.1.0 with a large number of bug fixes, focused on restores, repair and recreate, SMB, and Microsoft 365 and Google Workspace backups. It also adds a few new options, listed below.
+  The local database format is not changed by this release, so it is possible to go back to 2.4.1.0 without downgrading the databases.
+
+  Microsoft 365 and Google Workspace
+  Google Workspace backups now export Drive files that are too large for the regular export API through their export links. Reading from Google Workspace has been made more robust. Two new opt-in options change the paths of a backup and may affect existing filters, so they are off by default:
+  - --google-use-user-ids-in-paths uses the internal user id in the paths instead of the primary email, so the paths stay valid and unique.
+  - --google-use-ou-paths shows the organizational units (OUs) under Users and Shared Drives, so users and drives can be selected or excluded by OU. Changing it makes the next backup list everything in full.
+  Microsoft 365 backups now send at most 4 requests at once to a mailbox and share a throttling backoff between them, to avoid being rate limited. Restores into a document library and the chat API parameters have been fixed, along with other robustness fixes.
+
+  SMB
+  The SMB backend has several fixes for operations that could fail silently or hide the real error:
+  - A failed open, delete or rename is now reported instead of failing later or not at all, and the file handle is closed.
+  - Chunk writes use --read-write-timeout, now 30 seconds by default instead of 5 seconds.
+  - Reading a source over SMB no longer times out while the upload to a slower destination catches up.
+  - A call that times out drops the connection, and the transport option is matched in every culture.
+
+  New options and features
+  - S3: --s3-assume-role-arn lets the backend assume an IAM role through STS, with --s3-assume-role-session-name, --s3-assume-role-external-id and --s3-sts-endpoint.
+  - WebDAV: --webdav-client-certificate and --webdav-client-certificate-password present a TLS client certificate to servers that require one.
+  - Mail reports now accept the same certificate options as HTTP reports, such as accepting a certificate whose revocation status cannot be checked.
+  - Report templates can use %BeginTime%, %EndTime% and %Duration%.
+  - On Windows, .ps1 scripts given to the run-script-* options are run with Windows PowerShell.
+  - --force-locale sets the locale of the server and tray icon, for Windows where the locale environment variables are not read.
+  - Azure Blob Storage now uses the path of the url as a prefix, instead of always storing in the root of the container.
+  - Blomp Cloud Storage has been added to the OpenStack and S3 provider lists, and Dosya and more S3 host suffixes are recognized.
+  - Compact now reports its progress.
+  - The system info reports the install and data folders, whether the server database is encrypted, and where preload settings are read from.
+  - The server reports the result of an update check, so the UI can show when the check failed.
+
+  Web UI
+  The web UI has been updated with new features and many fixes:
+  - A new page compares two versions of a backup, and a run in the log can be compared with the previous version.
+  - Restores can search for files across all versions, show the number of files in each version, and group files that were backed up individually. Saved destinations can be picked for a direct restore from backup files.
+  - The home page can run all backups at once, shows when the last run of a backup failed, and shows the progress of a compact.
+  - Alerts and notifications have "Dismiss all" buttons.
+  - Logs can be downloaded, and older entries of a job log can be browsed.
+  - The settings page can upload an HTTPS certificate, show whether the server database is encrypted and where preload settings are read from, and set a default theme for the server. A theme toggle has been added to the sidebar.
+  - An optional sign-out after a period of inactivity.
+  - The file tree marks folders with excluded subpaths, shows the targets of links and shortcuts, and supports Shift-click range selection and keyboard navigation. An inclusion filter builder has been added.
+  - Creating a backup offers an existing local database for the destination, asks for confirmation before saving a remote backup without encryption, and asks to approve an unknown SSH host key before browsing.
+  - Deleting a backup keeps a local database that a command-line job also uses.
+  - The result of a manual update check and the changelog of an available update are shown.
+  - A "Report an issue" link has been added.
+  Fixes include keeping a backup encrypted when only a passphrase is set, honoring the encryption options of a file export, keeping unchanged destination url values while editing, bracketing IPv6 addresses in destination urls, and better keyboard focus and accessibility throughout.
+
+  Changed behavior
+  - A backup to a local folder now uploads one volume at a time, and a restore from a local folder reads one volume at a time, as these are often external disks. Setting --asynchronous-upload-limit or --restore-volume-downloaders uses the given value as before.
+  - --asynchronous-upload-limit=0 now means no limit.
+  - A backup now stops when a source folder cannot be read, and a backup that is stopped before it processes any files does not create a version.
+  - A restore that could not restore some files now exits with an error code.
+  - Changing the password now invalidates all existing logins.
+  - Expected refresh failures and API answers are no longer logged as errors.
+
+  Fixes
+  Restores have fixes for memory use with many small files, the restore cache, running out of open files, files with a block that cannot be read, symbolic links and their owners, and restoring with a partially recreated database or while a backup is uploading.
+  Repair and recreate have fixes for missing filesets, index files of removed volumes, duplicate blocks, a local database that cannot be opened, and dry runs, and repair now shows the versions found at the destination.
+  Scheduling has fixes for daylight saving time, including with excluded days, and a queued run is skipped when its schedule is removed. Task times are reported in UTC.
+  Backends report their timestamps in UTC, and remote synchronization now compares times correctly. Timeouts have been fixed for Azure Blob, Storj, SFTP listings and calls that ignore their timeout.
+  Telegram reports are sent in the body of a request and split correctly. macOS Photos backups no longer grow in memory, and APFS snapshots are found by date. Errors from files stored only in the cloud (OneDrive, Dropbox, Google Drive and others) are now explained.
+  The Windows installers set the recovery actions of the service with sc.exe, keep the service configuration on a repair, and no longer crash on the preload check. RPM executables are labeled for SELinux.
+  SQLite has been updated to 3.54.1.
+
+  Detailed list of changes:
+  - Support "too large" files in Google Workspace
+  - Avoid not-open files with SMB
+  - Set the recovery actions of the Windows service with sc.exe
+  - Bump ngclient to 0.0.251 (from 0.0.244)
+  - Let a dry-run repair recreate a missing database
+  - Show the versions at the destination after a repair
+  - Send Telegram reports in the body of a POST
+  - Process only the new blocklists after each block volume in a recreate
+  - Report a temporary job as temporary when it is created
+  - Do not split a character between two Telegram message parts
+  - Stamp the start and finish times of a task in UTC
+  - Read the block count of a restore under its lock
+  - Report the result of an update check
+  - Add paused-until indicator
+  - Find created APFS snapshot by date instead of last listed snapshot
+  - Dispose the decrypted volumes a stopped restore was handed
+  - Report progress while compacting
+  - Report database encryption and preload settings paths in system info
+  - Add a Google Drive example to the CLI example help
+  - Add a client certificate option to the WebDAV backend
+  - Match the SMB transport option in every culture
+  - Keep each part of a split Telegram report within the message limit
+  - Run .ps1 scripts through Windows PowerShell
+  - Avoid loading Mono.Unix on Windows
+  - Fix wrong change count
+  - Drop the unused indexes of the restore file list
+  - Read each restored block into a buffer that fits it
+  - Answer a job update with an empty target with 400 instead of 500
+  - Read locked source files through a snapshot when repairing dblocks
+  - Keep a job's fields that an update leaves out
+  - Fix crash on log message
+  - Add BeginTime, EndTime and Duration report template keys
+  - Upload an unchanged full backup that follows a partial backup
+  - Keep a job's operation type when it is saved without one
+  - Respect uncompressed restore paths in restore tests
+  - List the secure MSI properties in wixl builds
+  - Resume a Google upload of a stream that cannot seek
+  - Report a missing FTP folder when the listing is refused with another code
+  - Keep the tray icon host URL in step with TLS on an upgrade or a change
+  - Store the task config of a backup that uses the default encryption module
+  - Set the MSI service config again on a repair
+  - Keep --no-hosted-server on the shortcuts when the installer repairs
+  - Let the immediate tasks of a backup database take turns
+  - Add OU option for Google Workspace
+  - Upload one volume at a time to a local folder by default
+  - Check the total of a Drime listing window only without a date filter
+  - Let the S3 backend assume a role through STS
+  - Read a local folder with one volume downloader by default in restore
+  - Make room in the restore cache before a volume is downloaded
+  - Stable ids for Google Workspace
+  - Report install and data folder in systeminfo
+  - Add Blomp Cloud Storage to the OpenStack and S3 provider lists
+  - Restore with a temporary database when the local one was partially recreated
+  - List the folders of a backup made on another operating system
+  - Add M365 mailbox gate
+ReleaseNotesUrl: https://github.com/duplicati/duplicati/releases/tag/v2.4.1.1_stable_2026-11-25
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
