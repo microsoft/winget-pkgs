@@ -1,0 +1,35 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
+
+PackageIdentifier: YichengWang.Runner
+PackageVersion: 0.20.4.20261125.0507
+PackageLocale: zh-CN
+ShortDescription: 让 Claude Code、Codex、Copilot CLI 等终端编码智能体在同一个 mission 上协同工作。
+Description: Runner 是一款原生桌面应用，让终端智能体协同工作。Claude Code、Codex、OpenCode、Cursor CLI、Grok Build、Antigravity CLI、Copilot CLI 与 pi 可以在同一个任务、同一个 mission 中配合，每个智能体都保留自己真实终端里的 TUI，由 lead 把决策带回给你。Runner 的一切能力都对应一个 `runner` 命令：mission、crew、role、project、chat、session 与 msg 都能在命令行操作，后台服务是 `runnerd`。智能体在 Windows 上原生运行，不需要 WSL，PowerShell 7 为可选。当前状态：alpha，持续发布。原生支持 macOS（Apple Silicon）与 Windows（x64，Windows 10 1809 或更高版本）；不支持 Intel Mac、Windows ARM64 与 Linux。安装程序、应用与 CLI 辅助程序均使用签发给 Open Source Developer Yicheng Wang 的 Certum 开源代码签名证书签名。
+Tags:
+- claude-code
+- codex
+- 人工智能
+- 命令行
+- 控制台
+- 终端
+ReleaseNotes: |-
+  Runner 0.20.4 是 macOS、Windows 和 Linux 上基于 0.20.3 的功能版本：统一了全应用的 Markdown 渲染并为代码块加入标题栏、复制、换行切换与语法高亮，新增远程窗口管理 mission 角色与更智能的终端文件链接识别，支持聊天标题以最新修改为准，并修复了文件查看器滚动条遮挡代码等多项界面与平台问题。
+  新功能
+  - 全应用统一 Markdown 渲染器。 Mission 消息流、问答卡片、角色与 crew 提示词预览、Settings → Skills 预览以及 Info 弹窗中的 System prompt 现在共用 Files 的 Markdown 渲染器，支持 CommonMark 强调语法、嵌套列表、任务复选框、H4–H6 标题、多行引用块、自动换行的表格与代码行，以及按行对齐的选中与复制。 (#1342)
+  - 代码块标题栏：语言标签、换行切换、一键复制与语法高亮。 Files 与各 Markdown 预览中的围栏及缩进代码块现在都会显示标题栏，左侧标出语言名称，悬停时显示 Wrap lines 和 Copy code 按钮（复制后显示 Copied 提示）。关闭自动换行后会显示共享的横向滚动条；mission 消息流、提示词预览等紧凑视图中的代码块也已支持语法高亮。 (#1444)
+  - 在远程窗口中添加和移除 mission 角色。 已连接的远程窗口现在可以通过 Sessions 侧栏或空成员状态下的消息流卡片，从宿主机目录添加角色（支持覆盖 handle、运行时、模型、推理强度、速度与初始任务），并在确认后移除正在运行的 mission 成员。 (#1235)
+  - 跨 agent CLI 的终端文件链接识别增强。 终端文件链接现在可跨行拼接硬换行路径，支持 Unicode 路径、成对圆括号与方括号、含空格路径（保持连续下划线）、@ / a/ / b/ 前缀以及行列范围后缀（:LINE-END、#L…C…、(LINE)），识别 vscode://、vscode-insiders://、cursor://、windsurf://、zed:// 文件 URI 与 OSC 8 裸路径，并支持基于 Files 中所选文件夹解析相对路径。 (#1452)
+  - 聊天始终显示最新名称，无论来自 Runner 还是 agent。 在 Runner 中重命名聊天或在 agent 中改名（/rename、/name）现在遵循“后到生效”原则（角色聊天同样适用），同时忽略重连、恢复或 fork 时重放的旧标题，终端与 mission 成员名称保持原有规则不变。 (#1442)
+  - Codex 新增 TUI workspace 启动选项（默认关闭）。 在 Settings → Agents → Codex → Launch 中新增 TUI workspace 开关（默认 Off，交互式 Codex 聊天与 mission 启动时会传入 -c features.tui_workspace=false，不修改 ~/.codex/config.toml）。 (#1451)
+  问题修复
+  - 文件查看器滚动条不再遮挡代码，Markdown 渲染页新增滚动条。 Code 与 Diff 视图（统一与分栏）现在在可滚动方向预留 10 px 独立通道，4 px 圆角滚动条滑块不再覆盖代码文字、行号、查找高亮或 Mark viewed 底栏，同时 diff 行背景色仍延伸至边缘。Files 中的 Markdown 渲染页也在右侧边距加入了同款滚动条。 (#1475)
+  - Antigravity 聊天标题不再被陈旧摘要回滚覆盖。 Runner 现按会话追踪 last_modified_time 并与实时 OSC 标题协同，避免 agy 后台摘要对账（如 /usage 查询或新开会话）将较新的自动标题、/rename 或 Runner 手动改名回退为旧值，同时在 /resume 切回旧会话时仍能恢复已确认的标题。 (#1472)
+  - 提升 Runner 深色终端配色中 ANSI 蓝色的对比度。 将 Runner 深色主题的 ANSI 蓝色（ansi[4]）从原先与青色重复的 #39E5FF 调整为 One Dark 蓝色（#61AFEF），改善亮白选区文字与 Powerline 提示符的对比度，并与青色明确区分。 (#1470)
+  - Windows：满铺圆角任务栏图标并补齐原生 24 px 尺寸。 改为直接由矢量生成 assets/icon.ico，采用满铺圆角底板并打包全部五种标准 Windows 图标尺寸（16、24、32、48、256 px），不再从带 macOS Dock 留白的图标缩放，使 Runner 在 100% DPI 下与相邻任务栏图标尺寸一致。 (#1426)
+  - Windows 与 Linux：不再注入仅限 macOS 的 LC_CTYPE=UTF-8。 将裸值 LC_CTYPE=UTF-8 兜底限制为仅在 macOS 生效，避免 Git for Windows 的 MSYS2 less 和 Linux glibc 环境因不识别该 BSD locale 而将中文分支名与提交日志显示为 <XX> 字节转义。 (#1433)
+  - 侧边栏面板卡片在打开文件查看器时保持圆角完整。 修复了文件查看器直角背景填充、内层面板边框对齐、高缩放下标签栏渐隐边缘及底部留白，使停靠聊天面板、窄窗浮层、mission 侧栏和已归档聊天面板在各主题与缩放比例下都保持干净的圆角和完整边框。 (#1440)
+  - 收紧工作区卡片间距与侧边栏底部按钮间距。 将工作区各卡片间距收窄至 4 px、外边距收窄至 6 px（保留 macOS 顶部 8 px 以对齐红绿灯，并修正 Windows/Linux 初始终端行数估算）；侧边栏底部的远程主机与设置按钮调整为 28 px、间距 4 px。 (#1438, #1453)
+  - 补全 Files 菜单缺失文案。 为 Files 的 ⋯ 菜单补全英文（Choose another folder…）与简体中文（选择其他文件夹…）翻译，不再显示原始键名 ui.choose_another_folder。 (#1464)
+ManifestType: locale
+ManifestVersion: 1.28.0
