@@ -1,0 +1,34 @@
+# Morphwheel's winget installer manifest (template; see README.md in this folder).
+# Rendered by `python tools/release.py winget <version> --installer <file>`, which fills the placeholders.
+#
+# One installer: x64, Inno Setup, per user. ElevationRequirement elevationProhibited makes winget
+# refuse to run it from an elevated terminal, the same rule the installer itself applies (RD-30e,
+# RD-32). No InstallerSwitches: winget's own Inno defaults (/SP- /VERYSILENT /SUPPRESSMSGBOXES
+# /NORESTART, and /SILENT for silentWithProgress) are right for this installer; a silent run never
+# changes the "start with Windows" choice (RD-30c). ProductCode is Inno's uninstall key name, the
+# AppId plus "_is1", which is how winget finds the installed copy for upgrades and uninstalls.
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.28.0.schema.json
+PackageIdentifier: MorphWheel.Morphwheel
+PackageVersion: 0.1.0
+InstallerType: inno
+Scope: user
+ElevationRequirement: elevationProhibited
+MinimumOSVersion: 10.0.19045.0
+InstallModes:
+- interactive
+- silent
+- silentWithProgress
+UpgradeBehavior: install
+ProductCode: '{5D597E37-BBB5-46D5-853A-E4A925193830}_is1'
+AppsAndFeaturesEntries:
+- DisplayName: Morphwheel
+  Publisher: Morphwheel contributors
+  ProductCode: '{5D597E37-BBB5-46D5-853A-E4A925193830}_is1'
+  InstallerType: inno
+ReleaseDate: 2026-11-23
+Installers:
+- Architecture: x64
+  InstallerUrl: https://github.com/MorphWheel/morphwheel/releases/download/v0.1.0/morphwheel-0.1.0-setup.exe
+  InstallerSha256: 9BD7FB18DDDD5D5E7312BE3BE8822CAB0006FB6DFCA87DA49AF17E5A871CDA44
+ManifestType: installer
+ManifestVersion: 1.28.0
