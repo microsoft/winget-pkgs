@@ -1,0 +1,95 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: myYangyunfan.DSHDesktop
+PackageVersion: 1.1.2
+PackageLocale: zh-CN
+Publisher: deepseek
+PublisherUrl: https://github.com/myYangyunfan
+PublisherSupportUrl: https://github.com/myYangyunfan/dsh_desktop/issues
+PrivacyUrl: https://github.com/myYangyunfan/dsh_desktop/blob/HEAD/PRIVACY.md
+PackageName: DSH Desktop
+PackageUrl: https://github.com/myYangyunfan/dsh_desktop
+License: MIT
+LicenseUrl: https://github.com/myYangyunfan/dsh_desktop/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 DSH Desktop contributors
+ShortDescription: 把 DeepSeek Harness (dsh) CLI 与内置 Node.js 运行时打包在一起的桌面客户端。
+Description: |-
+  DSH Desktop 把 DeepSeek Harness (dsh) CLI、完整 Node.js 运行时与全部官方插件打包为开箱即用的桌面客户端。双击即可在原生窗口中启动 dsh web，无需安装 Node.js；关闭窗口后服务在系统托盘中继续运行。提供会话管理、桌面宠物、余额小组件、插件守护与带 sha256 校验的自动更新。
+
+  ✨ 特性
+  开箱即用
+  - 零依赖 — 内置独立 Node 运行时与 npm CLI，目标机器无需安装任何环境
+  - 完整 dsh — 打包 @deepseek-ai/dsh 及全部官方插件，离线可用
+  - 一键启动 — 双击即启 dsh web，优先复用上次端口，就绪后载入原生窗口
+  - 双形态 — 便携版（免安装、可放 U 盘）+ 安装版（桌面/开始菜单快捷方式）
+  体验增强
+  - 深色玻璃无边框窗口 — 自绘标题栏、Win11 圆角，关闭默认隐藏到系统托盘
+  - 桌面宠物 — 随行小鲸鱼常驻桌面，陪伴工作（设置 → 插件可一键开关）
+  - 侧边会话浮窗 — 随时唤起独立会话窗口，与主会话互不干扰
+  - 会话管理 — 归档 / 恢复 / 删除对话，历史不再堆积
+  - 余额小部件 — 对话底部实时显示「本轮费用 · 余额」，支持 OpenCode Go 订阅额度，点击直达充值
+  - 完成通知 — 任务跑完弹系统通知，一分钟内回到主窗口自动跳到对应会话（Windows 通知无点击回调，聚焦即跳转）
+  工程韧性
+  - 守护瀑布 — 内核 boot 链逐级自愈：坏插件自动修复、坏配置自动重建、内核崩溃环原地重启，任何不兼容形态都不退出（v0.5.0 Tauri 架构核心特性）
+  - 崩溃自愈 — 渲染层假死心跳检测自动重载；内核由 supervisor 探活 + 指数退避拉起
+  - 历史兼容 — 自动修补会话事件词汇表，第三方插件写入的事件不破坏会话历史
+  - 自动更新 — 右上角 ⋯ 菜单一键检查并安装客户端更新（双源 GitHub/Gitee Releases 自动切换，sha256 校验 fail-closed，离线静默）；升级安装自动装回旧位置，零配置丢失；内核随客户端整体分发（无独立更新链）
+  - 快捷方式自愈 — 桌面与开始菜单快捷方式缺失即自动补建
+Tags:
+- deepseek
+- deepseek-harness
+- dsh
+- 大模型
+- 大语言模型
+- 智能体
+- 自主智能
+ReleaseNotes: |-
+  DSH Pack 1.1.2（补丁版 · 上下文压缩件默认关闭 + 免费搜索升 0.9.82）
+  本版是正式版：进入 GitHub 的 releases/latest，客户端右上角 ⋯ 菜单的在线更新检查轮询的正是
+  latest，所以存量用户会收到推送。Rust 壳与界面零功能改动，在册插件仍是 33 条。
+  🎯 本版重点
+  1. billion-context（bili-native）改为随包默认关闭（用户报障「这个记忆插件有问题」）。
+     随包 0.1.213 仍带上游 ranxianglei/billion-context #5911 / #5984 / #6010 的幻影引用与 ref 账本分叉，
+     0.1.216 也没修——不再等上游，直接默认关掉。默认禁用行只写 - id: bili-native，写一次即止：
+     你在 设置 → 插件 → 内置插件 开回来之后，不会再被默认回写。
+  2. bili-compaction-gate 保持启用，这是硬约束。 它承载四个出厂预设
+     inject: [biliBasicCompactionPolicy] 等待的服务（上游 #3662），一起禁就是会话创建永久 pending。
+     安全性由产出字节本身兜住：只有引擎 dist/agent/dsh-native.js 会
+     declareDshCompactionActive() 置 __BILI_DSH_COMPACTION_VERDICT__ = 'active'，
+     gate 只读不写，所以引擎关闭时 gate 的 internal/config 钩子原样返回——
+     预设回落到内核自带压缩，/compact 命令也在。
+  3. dsh-free-search 0.9.80 → 0.9.82：修上游 #159。插件被禁用或卸载后，
+     profiles/<name>/cordis.patch.yml 里会残留它写过的 searchProvider: ddg /
+     fetchProvider: fs-quality-fetch，而 provider 已经不在了——于是每次 web_search / web_fetch
+     都报 WEB_PROVIDER_CONFIGURED_MISSING。0.9.82 新增 lib/restore.js + bin/restore.js，
+     提供独立 CLI dsh-free-search，在插件根本没加载的状态下也能按文本清洗那一行
+     （不走 YAML round-trip，注释与顺序都保留）。
+     本仓的 lib/cache.js 缓存落点 fork（DSH_HOME 优先）已在新字节上重放，逐字节核对过。
+  ⚠️ 升级后你会看到的变化
+  - 上下文压缩从「模型驱动的 bili 代理」回到内核自带压缩：/compact 命令重新出现，
+    compress / decompress / search_context / acp_status 四个模型工具与 /acp-prune 命令消失。
+    这是「插件被关掉」的正常样子，不是装坏了。
+  - 想要回 bili：设置 → 插件 → 内置插件 → 把 billion-context 打开，重启后生效。
+  - 已装存量用户首次启动本版会被关一次（一次性标记之前没写过）；之后你的选择长期保持。
+  🔧 迁移与自愈
+  - 禁用行由 两条入口写入（CLI 同步 scripts/sync-companion-plugins.js 与 Tauri sidecar boot 的
+    scripts/integration/plugin-sync.js），接的是 dsh-synapse 同款 ensureDefaultDisabledOnce 机制。
+  - 块内注释直接写明「只禁本条目：bili-compaction-gate 必须保持启用」，让后来读 patch 文件的人
+    不会「顺手」把 gate 加进去。
+  ✅ 门禁
+  - npm test：2270 例 / pass 2261 / skip 9 / fail 0。
+  - check-syntax.js 全部入口通过；validate-pin ✓ dsh-v0.2.2-rc.5；patch-surface verify 94 文件零漂移。
+  - 打包路径墙：3096 文件，安装态最长 152/240、构建期 170/258、越线 0。
+  - 隔离 sidecar boot + 真内核实跑（dsh web --no-open --port 7812）：HTTP 正常服务，
+    stderr 零 pending (waiting for / 零 failed to load；%TEMP% 下无新增
+    bili-proxy-*.log（引擎确已不加载，代理子进程不再启动）。
+  📦 本版变动件
+
+  | 插件（loader id） | 上一版  | 本版                | 说明                                                             |
+  | ----------------- | ------- | ------------------- | ---------------------------------------------------------------- |
+  | bili-native       | 0.1.213 | 0.1.213（默认关闭） | 版本未动，随包状态改为默认禁用；gate 照旧启用                    |
+  | web-search-free   | 0.9.80  | 0.9.82              | 修 #159 provider 残留；本仓 lib/cache.js 的 DSH_HOME fork 已重放 |
+ReleaseNotesUrl: https://github.com/myYangyunfan/dsh_desktop/releases/tag/v1.1.2
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
