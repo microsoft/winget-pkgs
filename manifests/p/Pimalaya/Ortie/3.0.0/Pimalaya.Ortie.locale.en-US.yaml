@@ -1,0 +1,82 @@
+# Created with komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Pimalaya.Ortie
+PackageVersion: 3.0.0
+PackageLocale: en-US
+Publisher: Pimalaya
+PublisherUrl: https://pimalaya.org/
+PublisherSupportUrl: https://github.com/pimalaya/ortie/issues
+Author: Clément DOUIN
+PackageName: Ortie
+PackageUrl: https://github.com/pimalaya/ortie
+License: Apache-2.0 or MIT
+LicenseUrl: https://github.com/pimalaya/ortie/blob/master/README.md#license
+Copyright: Copyright (c) 2026 Clément DOUIN <pimalaya.org@posteo.net>
+ShortDescription: CLI to manage OAuth tokens
+Moniker: ortie
+Tags:
+- access-token
+- cli
+- oauth
+- pim
+- pimalaya
+- refresh-token
+- rust
+- token
+ReleaseNotes: |-
+  Ortie 3 aligns on the other Pimalaya CLIs. The configuration wizard and the hooks are gone: provider accounts are pasted from the README, and the storage write command does what a hook did. Every --json output is camelCase, described by json-schema, and every failure carries a stable code. New commands revoke a token, catch a handed-off redirection, list, show and check accounts, and serve the token lifecycle to AI agents over MCP without ever handing out the token.
+  MIGRATION.md lists what to act on when upgrading from 2.x, and from 1.x.
+  Added
+  - Added token revoke, revoking at the new endpoints.revocation the stored refresh token, or the access token when none is stored (RFC 7009).
+    --json prints {"revoked": "refresh-token"} or {"revoked": "access-token"}. The storage is left as it is.
+  - Added auth listen, catching the redirection of a flow a non-interactive or --json auth get handed off, then completing it as auth resume does.
+    The auth get handoff object gains redirectUri. With neither --redirect-uri nor endpoints.redirection, auth listen exits 2 coded usage-invalid, pointing at the redirect URI auth get printed; on an endpoints.redirection that is not an http URI on a loopback host it exits 1 coded redirection-unsupported.
+  - Added --handoff <PATH> to auth listen and auth resume, reading the object auth get --json prints from a file, or from stdin for -, in place of --state and --pkce, whose values other local users can read on the command line.
+    ortie --json auth get > flow.json then ortie auth listen --handoff flow.json finishes a flow. It conflicts with both flags and serves the authorization code grant alone, refused coded usage-invalid, exit 2, on another; --handoff - is refused inside a session, coded stdin-taken.
+  - Added ortie mcp, a Model Context Protocol server over stdio running the grants of one account for an agent.
+    Its tools answer receipts and metadata, never a token: the state, the PKCE verifier and the device code stay in the server, which stores the token once the user consents.
+    Without a flag only token_inspect and auth_status are listed. --allow-write adds auth_get, auth_resume and token_refresh, and --allow-revoke, which needs it, adds token_revoke.
+  - Added account list, listing the accounts of the configuration with their grant, {"accounts": [{"name", "default", "grant"}]} under --json.
+  - Added account show, printing every property of one account as the configuration loads it, the -c layers merged and the defaults filled in, reaching nothing.
+    The text is Account: <name> then one aligned field per property, labelled by its configuration key (client-id, endpoints.token, storage.read.command), a list one value per line; --json prints {"account": {"name", ...}}, tls left out when no TLS key is set. A raw secret is never printed: client-secret.raw: <redacted>, or {"raw": null, "redacted": true}.
+  - Added account check, checking that storage.read.command prints a token, that the token is usable, and that each endpoint the grant uses answers, one row each, exiting 3 when one fails.
+    Each row prints as soon as it is checked, a check-finished event ({"event", "account", "check", "ok", "code", "error", "tls"} under --json, a sentence such as Reaching the token endpoint… OK on a terminal), then the report, a blank line apart; the text report counts the checks that passed and lists each failed one and why. --json ends with {"account", "checks": [{"check", "ok", "code", "error", "tls"}]}, the rows storage, token, then endpoints.<key>. The token row fails on an expired token with no way to renew it, coded token-expired. Each endpoint is sent a HEAD request carrying no credential, the redirection none; an https one's row carries tls, the TLS configured.
+  - Added the tls.cert, tls.client.cert and tls.client.key account fields: a PEM certificate to trust beside the platform store, and a PEM client certificate and its key presented to a server asking for one (mutual TLS).
+  - Added the resources account field, the RFC 8707 resource indicators sent on the authorization request and the code exchange.
+  - Added the handoff of an interrupted wait: SIGINT, SIGTERM or SIGHUP reaching an interactive auth get while it waits for the redirection prints the auth resume command, state and verifier included, then exits 130.
+    A REPL session keeps its behaviour: the signal ends it with 130, no handoff printed.
+  - Added the ortie-account-list, ortie-account-show, ortie-account-check (and ortie-account-check.events), ortie-auth-listen, ortie-auth-resume, ortie-token-refresh, ortie-token-revoke and ortie-error schemas to json-schema, and those of completion, manual and json-schema itself.
+  - Added a stable code to the failure object --json prints, for the failures a caller acts on; any other failure prints "code": null.
+    The codes are permission-denied (access_denied, authorization_declined, a bare 403), rate-limited (a bare 429), grant-invalid (invalid_grant), client-invalid (invalid_client), client-unauthorized (unauthorized_client) and scope-invalid (invalid_scope).
+    Then device-code-expired, state-mismatch, token-missing, token-expired, endpoint-missing, redirection-unsupported, account-missing (no account of the name -a gave), account-default-missing, account-default-several, stdin-taken and usage-invalid.
+    The ortie-error schema, the MCP failures and the error answers of auth_status carry the code too.
+  - Added config.sample.toml to the release archives and the Nix package, as share/doc/ortie/config.sample.toml, which install.sh copies under its prefix.
+  Changed
+  - BREAKING: Changed --json keys to camelCase; the configuration keeps its kebab-case keys.
+  - BREAKING: Changed token refresh, auth resume and a token-issuing auth get to print the receipt {account, expiresIn, withRefreshToken} under --json, instead of a {"message": …} sentence; the text names the account too, Access token of account example successfully refreshed (expires in 1h).
+  - BREAKING: Changed the auth get handoff objects to drop interactive, which only told whether stdout was a terminal; a handoff file carrying it is still read.
+  - BREAKING: Changed token inspect --json to print issuedAt as an RFC 3339 instant in UTC, and expiresAt, the instant the token expires, in place of expires_in, the lifetime granted at issue.
+    expiresAt lies in the past once the token expired, and is null when the store holds no issue time, the text then reading Expires: unknown where it read in <lifetime>.
+  - BREAKING: Changed the durations of the text output (token inspect, the issued-token receipt, the auth get device request) to a friendly form balanced up to days of 24 hours: 2d 4h where 2days 4h was printed, 400d where 1year 1month 4days 7h 26m 24s was. The JSON is unchanged.
+  - BREAKING: Changed a command line the grammar refuses under --json to print on stdout the failure object coded usage-invalid, instead of clap's text on stderr; it still exits 2.
+    Without --json, clap's rendering stays on stderr. A bare ortie --json is refused the same way, "A command is required, see --help", where it printed the help.
+  - BREAKING: Changed the refusals Ortie makes after parsing the command line to exit 2 coded usage-invalid, as clap's own refusals do, instead of exit 1 with no code.
+    This covers auth listen on a device or client credentials account or on a --redirect-uri that is not an http URI on a loopback host (the same fault in endpoints.redirection exits 1 coded redirection-unsupported) or given no redirection at all, auth resume on a client credentials account, --state, --pkce or --redirect-uri on a device account, an empty device code, and a redirected URI that does not parse.
+  - BREAKING: Changed ortie repl to print its errors on stdout, interactive or piped, as ortie-error objects under --json.
+    On a terminal, a line that does not parse keeps clap's message on stderr. In a --json session the help goes to stderr, so stdout carries one JSON value per line, and a refused line is coded usage-invalid.
+  - BREAKING: Changed ortie repl to split its lines as a shell does, quotes, escapes and # comments included, and to take any command of the binary, where it took the token and auth trees alone.
+    It infers subcommand prefixes as the command line does and takes --json on a line, for that line only. A line setting -a, -c or a log flag is refused naming it, and a repl or mcp line is refused coded usage-invalid.
+  - BREAKING: Changed auth get to print the authorization link, or the verification URI and user code, without opening a browser.
+  - BREAKING: Changed auto-refresh to default to true: token show refreshes an expired token unless the account sets auto-refresh = false.
+  - BREAKING: Changed -c to take one path per occurrence, repeated to merge several files (-c public.toml -c private.toml).
+    A : is no longer read as a delimiter, which cut Windows paths such as C:\Users\me\config.toml at the drive letter.
+  - BREAKING: Changed the configuration loading to read every existing default path as a layer, each deep-merged on top of the ones before, so $HOME/.ortierc overrides $HOME/.config/ortie/config.toml where only the first file found was read.
+  - BREAKING: Changed -a default to take the account named default, where it took the account marked default = true; omit -a to take that one.
+  - BREAKING: Changed tls to the table every Pimalaya CLI reads, tls.provider (rustls, native-tls) and tls.rustls.crypto (ring, aws); the string tls = "rustls-ring" is refused as a value of the wrong type.
+  - BREAKING: Changed every configured URL to take an ASCII host only, an internationalised one written in Punycode (https://xn--bcher-kva.example for bücher.example).
+  - Changed the client-certificate account field to client-cert, matching tls.cert and tls.client.cert; client-certificate is still read.
+  - Changed token show to end the token with a newline, like every text output; $(ortie token show) and Pimalaya's secret commands strip it.
+ReleaseNotesUrl: https://github.com/pimalaya/ortie/releases/tag/v3.0.0
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
