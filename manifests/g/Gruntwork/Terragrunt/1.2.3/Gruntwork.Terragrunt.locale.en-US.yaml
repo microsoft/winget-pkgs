@@ -1,0 +1,180 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: Gruntwork.Terragrunt
+PackageVersion: 1.2.3
+PackageLocale: en-US
+Publisher: Gruntwork
+PublisherUrl: https://terragrunt.gruntwork.io/
+PublisherSupportUrl: https://terragrunt.gruntwork.io/docs/community/support
+PrivacyUrl: https://gruntwork.io/legal/privacy-policy
+PackageName: Terragrunt
+PackageUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v1.1.6
+License: MIT
+LicenseUrl: https://github.com/gruntwork-io/terragrunt/blob/HEAD/LICENSE.txt
+Copyright: © 2024 Gruntwork, Inc. All rights reserved.
+ShortDescription: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Description: Terragrunt is a thin wrapper for Terraform that provides extra tools for keeping your Terraform configurations DRY, working with multiple Terraform modules, and managing remote state.
+Tags:
+- IaC
+- Infrastructure as Code
+- Terraform
+- Terraform Wrapper
+- terragrunt
+ReleaseNotes: |-
+  🏎️ Performance Improvements
+
+  Faster runs and discovery with less memory
+  run --all plan takes up to 63% less time than in v1.2.2 and uses up to 18% less peak memory, measured at up to 1,000 units.
+  find --dependencies uses up to 89% less peak memory, measured at up to 5,000 units that share configuration through include and read_terragrunt_config, in the layout of BenchmarkDiscoverySharedConfig.
+  These numbers come from benchmarks on an AMD Ryzen AI Max+ 395, with a stand-in for tofu that exits immediately, so they time Terragrunt overhead alone.
+
+  Faster dependent filters from below the repository root
+  A dependent filter, such as --filter '...vpc', is faster when Terragrunt runs from a directory below the repository root. Terragrunt searched the rest of the repository once for the target and again for each dependent it found, so the time grew with the square of the number of dependents. It now searches once.
+  Finding every dependent of a unit from that unit's directory takes up to 99% less time than in v1.2.2, measured at up to 1,000 units. The same filter from the repository root takes up to 26% less time.
+  These numbers come from benchmarks on an AMD Ryzen AI Max+ 395.
+
+  Commands that never run OpenTofu/Terraform stop probing its version
+  Every command ran tofu -version at startup to set up provider caching, including the ones that never run OpenTofu/Terraform. These commands now skip that probe:
+  - find
+  - list
+  - browse
+  - dag graph
+  - hcl fmt
+  - hcl validate
+  - catalog
+  - scaffold
+  - info strict
+  - stack clean
+  They take up to 49% less time than in v1.2.2, measured at 100 units with OpenTofu 1.13.2 on an AMD Ryzen AI Max+ 395:
+  ──────────────────────────┬───────┬───────
+  Command                   │Before │After
+  ──────────────────────────┼───────┼───────
+  terragrunt find           │43.0 ms│21.6 ms
+  ──────────────────────────┼───────┼───────
+  terragrunt list           │37.5 ms│20.6 ms
+  ──────────────────────────┼───────┼───────
+  terragrunt hcl fmt --check│39.3 ms│21.2 ms
+  ──────────────────────────┴───────┴───────
+
+  🔒 Strict Controls Added
+
+  use-partial-parse-config-cache strict control
+  The --use-partial-parse-config-cache flag, and its TG_USE_PARTIAL_PARSE_CONFIG_CACHE environment variable, has no effect, because Terragrunt no longer has a partial parse cache. The flag is deprecated, and Terragrunt warns when it is set:
+  WARN  The `--use-partial-parse-config-cache` flag is deprecated and will be removed in a future version of Terragrunt. Terragrunt no longer has a partial parse cache for it to enable, so this flag has no effect.
+  Remove the flag from your commands. With the new use-partial-parse-config-cache strict control enabled, passing it is an error instead:
+  terragrunt run --all --use-partial-parse-config-cache --strict-control use-partial-parse-config-cache -- plan
+
+  🔒 Strict Controls Updated
+
+  cas-source-inside-stack warnings point at the source
+  The cas-source-inside-stack warning named the unit or stack block and its source in one line:
+  WARN  stack bar: unit "foo" in terragrunt.stack.hcl sets update_source_with_cas on source "./units/foo" inside the stack directory, so the generated stack also contains a copy of it; move the source out of the stack directory and select the stack with a // subdirectory in its source
+  Terragrunt now renders each warning as a diagnostic that shows the source attribute in the stack file:
+  WARN   Source inside the stack directory
+   --> ../catalog/terragrunt.stack.hcl:2:28
+    |
+  2 |   source                 = "./units/foo"
+    |                            ^^^^^^^^^^^^^
+    |
+    = Stack generation copies the directory of this stack file whole, so the
+      generated stack contains this unit twice, and `run --all` runs the copy
+      too. Move the unit directory out of the directory of this stack file, and
+      use `//` in the stack's source to separate the catalog from the stack
+      directory.
+  Move the stack into a subdirectory of the catalog, keep its sources outside that subdirectory, and select it with //, e.g. source = "../catalog//stacks/bar". With the strict control enabled, the error shows the same diagnostic.
+
+  🧪 Experiments Added
+
+  auth-provider-cache — Reuse an auth provider command response across units
+  Terragrunt runs the --auth-provider-cmd command several times for every unit, even when many units share credentials. Enable the auth-provider-cache experiment and return a cache object from the command. Terragrunt then reuses the response for every unit whose directory matches one of its globs, for ttl seconds.
+  {
+    "awsCredentials": {
+      "ACCESS_KEY_ID": "fake-access-key-id",
+      "SECRET_ACCESS_KEY": "fake-secret-access-key"
+    },
+    "cache": {
+      "root": "repo",
+      "globs": ["dev/**"],
+      "ttl": 900
+    }
+  }
+  terragrunt run --all --experiment auth-provider-cache --auth-provider-cmd /path/to/auth-script.sh -- plan
+
+  empty-dependency-outputs — Depend on a unit that has no outputs
+  A dependency block fails with detected no outputs when its unit has no outputs, or has not been applied, and no mock_outputs apply. Enable the empty-dependency-outputs experiment to resolve dependency.<name>.outputs to an empty object in that case, so a dependency block can order a unit after one that has no outputs.
+  dependency "vpc" {
+    config_path = "../vpc"
+  }
+  terragrunt run --experiment empty-dependency-outputs -- plan
+
+  outputs-block — Declare the outputs of a unit and their mock values
+  Enable the outputs-block experiment and declare the outputs of a unit, with their mock values, on the unit itself. Dependents read the mock values through their dependency blocks without setting mock_outputs.
+  outputs {
+    mock_strategy {
+      allowed_commands = ["validate", "plan"]
+    }
+    output "vpc_id" {
+      mock_value = "vpc-mock-id"
+    }
+  }
+  terragrunt run --all --experiment outputs-block -- plan
+  terragrunt hcl validate --outputs checks that each declared output exists in the OpenTofu/Terraform module and that dependents reference only declared outputs. Declaring the block without the experiment enabled returns an error. See the outputs block reference.
+
+  path-variable — Read the paths of a unit by name with the path variable
+  Functions such as get_terragrunt_dir() and get_parent_terragrunt_dir() return a different directory in a unit, in an included file, and in a file that read_terragrunt_config reads. Enable the path-variable experiment to read each location by name: path.unit, path.stack, path.download, path.include, and path.read.
+  # root.hcl
+  remote_state {
+    backend = "s3"
+    config = {
+      bucket = "my-tofu-state"
+      key    = "${trimprefix(path.unit, "${dirname(path.include)}/")}/tofu.tfstate"
+      region = "us-east-1"
+    }
+  }
+  terragrunt run --all --experiment path-variable -- plan
+  See the path variable reference.
+
+  values-block — Declare the values a unit or stack accepts
+  Enable the values-block experiment and add a values block to a terragrunt.hcl or terragrunt.stack.hcl file to declare the values the unit or stack accepts. Each value can have a type, a default, a description, and a nullable setting. Terragrunt checks what each unit and stack block passes against these declarations. values.<name> returns the declared type, with the default applied when nothing sets the value.
+  values {
+    value "name" {
+      type = string
+    }
+    value "tags" {
+      type    = map(string)
+      default = {}
+    }
+  }
+  terragrunt stack generate --experiment values-block
+  stack generate fails when a block passes a key the unit or stack doesn't declare, a value of the wrong type, or no value for a required one:
+  18:10:44.033 ERROR  Error: Undeclared value "tag" for unit "app"
+  18:10:44.033 ERROR    on /path/to/live/terragrunt.stack.hcl line 7, in unit "app":
+  18:10:44.033 ERROR     7:     tag  = { team = "payments" }
+  18:10:44.033 ERROR  The unit at ../catalog/units/app does not declare a value named "tag".
+  18:10:44.033 ERROR  Did you mean "tags"?
+  terragrunt hcl validate reports each values.<name> read that the block doesn't declare. See the values block reference.
+  stack generate also shows a tip, once per run, when a unit or stack without the block reads a value inside try() to fall back to a default:
+  18:10:44.033 INFO   TIP (values-block): The unit at ../catalog/units/app reads `values.tags` inside `try()` to fall back to a default. Declare the value with a default in a `values` block instead. See https://docs.terragrunt.com/reference/hcl/blocks/values
+
+  🧪 Experiments Updated
+
+  variables-block — terragrunt.auto.tfvars quotes only the keys that need it
+  terragrunt.auto.tfvars quoted every object key ("team" = "platform"). It now writes team = "platform", and quotes only a key that is not a valid identifier, e.g. "a b", or is named for.
+
+  🐛 Bug Fixes
+
+  --all commands resolve get_original_terragrunt_dir() and get_working_dir() for each unit
+  With render --all, get_original_terragrunt_dir() returned the directory of the run for every unit, and get_working_dir() returned a path below the .terragrunt-cache of that directory. backend delete --all and aws-provider-patch --all had the same defect, and backend bootstrap --all had it for get_working_dir().
+  Both functions now return the paths of the unit, as they do in run --all. aws-provider-patch --all now patches the .terragrunt-cache of each unit, which is the directory that run --all uses.
+
+  Auto-init no longer repeats an explicit init after a source change
+  When the files of a local source changed, terragrunt init ran init, and the next command, e.g. terragrunt plan, ran it again.
+  A source change writes a .terragrunt-init-required file that only auto-init removed. terragrunt init now removes it too, so the next command skips init. See Auto-init.
+
+  Auto-init no longer runs init before every command
+  Auto-init ran init before every command in two kinds of unit:
+  - A unit that uses no provider, e.g. one whose configuration declares only outputs. init gives such a unit no .terraform.lock.hcl and no .terraform/providers directory, and auto-init read their absence as init never having run.
+ReleaseNotesUrl: https://github.com/gruntwork-io/terragrunt/releases/tag/v1.2.3
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
