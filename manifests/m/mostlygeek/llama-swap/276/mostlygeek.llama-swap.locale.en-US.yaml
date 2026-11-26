@@ -1,0 +1,37 @@
+# Created by Anthelion using komac v2.17.2
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: mostlygeek.llama-swap
+PackageVersion: '276'
+PackageLocale: en-US
+Publisher: mostlygeek
+PublisherUrl: https://mostlygeek.com/
+PublisherSupportUrl: https://github.com/mostlygeek/llama-swap/issues
+PackageName: llama-swap
+PackageUrl: https://github.com/mostlygeek/llama-swap
+License: MIT
+LicenseUrl: https://github.com/mostlygeek/llama-swap/blob/HEAD/LICENSE.md
+Copyright: Copyright (c) 2024 Benson Wong
+ShortDescription: Model swapping for llama.cpp
+Description: llama-swap is a light weight, transparent proxy server that provides automatic model swapping to llama.cpp's server.
+Moniker: llama-swap
+Tags:
+- golang
+- llama
+- llamacpp
+- localllama
+- localllm
+- openai
+- openai-api
+- vllm
+ReleaseNotes: |-
+  Peers now discover their models automatically, and the Models page is split into tabs.
+  A couple of new features in this release. llama-swap now has the ability to fetch and filter a peer's v1/models data. This is convenient if you have a cloude based hosting peer that frequently updates their models. A simple regular expression based match is used to add or remove models from the list. The other changes is some cosmetic changes to the UI's model list. Local, peer, selectors and profiles have been split out into their own tabs.
+  Finally, thanks to @jctim for contributing a new usage parser for FastFlowLM.
+  - PR #1363 internal/router: discover peer models from their catalogs: peers can advertise their models automatically from the peer's /v1/models instead of listing every model ID in the config, so discovered models route, list and update without a restart or config reload; peers.*.models accepts add <regex> and remove <regex> rules (applied top to bottom, omitted list means add .*) and a new peers.*.catalog block sets path, refresh, limit and transitive, with catalogs fetched in the background, cached, and the last good list kept when a fetch fails, plus new GET /api/peers and POST /api/peers/{peer}/refresh endpoints and sidebar/Models grouping by peer by @mostlygeek
+  - PR #1366 ui/models: split the Models page into tabs: replaces the single long Models page with Local, Peers, Selectors and Profiles tabs that show counts, hide when empty and persist the chosen tab; the Profiles tab lists every configured profile (not just the active one) with its description and mappings so switching is one click, and load buttons only appear on the active profile's mappings since only its pins are in effect by @mostlygeek
+  - PR #1369 internal/server: read FastFlowLM throughput metrics: reads FastFlowLM's usage.prefill_speed_tps and usage.decoding_speed_tps so its throughput shows in the Activity view, handled by the automatic usage extractor for regular JSON responses and for the final usage event in streams that request stream_options.include_usage: true, while existing timing formats keep their precedence by @jctim
+  - 9cc0aec README: update splash to hero5: swaps the README header image for the new hero5 screenshot (added as png and webp) by @mostlygeek
+ReleaseNotesUrl: https://github.com/mostlygeek/llama-swap/releases/tag/v276
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
