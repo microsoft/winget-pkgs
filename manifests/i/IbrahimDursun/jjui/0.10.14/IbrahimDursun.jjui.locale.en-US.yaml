@@ -1,0 +1,68 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: IbrahimDursun.jjui
+PackageVersion: 0.10.14
+PackageLocale: en-US
+Publisher: Ibrahim Dursun
+PublisherUrl: https://idursun.com/
+PublisherSupportUrl: https://github.com/idursun/jjui/issues
+Author: Ibrahim Dursun
+PackageName: Jujutsu UI
+PackageUrl: https://github.com/idursun/jjui
+License: MIT
+LicenseUrl: https://github.com/idursun/jjui/blob/HEAD/LICENSE
+Copyright: Copyright (c) 2026 ibrahim dursun
+ShortDescription: Jujutsu UI (jjui) is a Text User Interface (TUI) designed for interacting with the Jujutsu version control system.
+Moniker: jjui
+Tags:
+- jj
+ReleaseNotes: |-
+  A small release to wrap up the v0.10 series before moving on to v0.11.
+  You can now resize the preview from Lua, abandon now works the same way as jj abandon, and there are a few bookmark fixes.
+  Improvements
+  Set the preview size from Lua
+  ui.preview has two new functions: set_size(percent) sets how much space the preview takes, and size() returns the current size. set_size opens the preview if it is hidden and keeps focus on the revisions list. It also accepts 100, which lets the preview take the full screen. Expanding the preview or dragging the separator still stops before that point.
+  For example, this binds alt+p to toggle a full-screen preview:
+  [[actions]]
+  name = "toggle preview full size"
+  lua = '''
+  if jjui.ui.preview.size() == 100 then
+    jjui.ui.preview.set_size(50)
+  else
+    jjui.ui.preview.set_size(100)
+  end
+  '''
+  key = "alt+p"
+  scope = "ui"
+  desc = "Toggle preview full size"
+  (#776)
+  Wider help view
+  The help view can now grow to 120 columns, up from 90. Entries no longer have (when ...) conditions appended to them. Bindings that don't apply to the current selection are still struck through.
+  Fixes
+  Rename bookmarks with spaces
+  The bookmark pane's rename prompt now replaces spaces with hyphens, the same way the set bookmark prompt does. Before, a name with spaces made jj bookmark rename fail.
+  (#779)
+  Filter bookmark items by the exact remote
+  When you pick a remote in the bookmarks menu, it now lists only that remote's track/untrack items. Before, it matched remote names as substrings, so with remotes up and upstream, picking up also listed track 'feature@upstream'.
+  (#787)
+  Notes
+  Abandon now deletes bookmarks
+  Abandon now behaves like jj abandon and deletes bookmarks on the abandoned revisions. Before, jjui passed --retain-bookmarks, which moved them to the parent. To get the old behaviour back, add this to config.toml:
+  [revisions.abandon]
+  retain_bookmarks = true
+  (#783)
+  What's Changed
+  - fix: Make abandon command behave the same as jj abandon by @dnnr in https://github.com/idursun/jjui/pull/783
+  - fix(bookmarkpane): replace spaces with hyphens when renaming a bookmark by @aliassar in https://github.com/idursun/jjui/pull/779
+  - fix(bookmarks): match the selected remote exactly when filtering by @aliassar in https://github.com/idursun/jjui/pull/787
+  New Contributors
+  - @dnnr made their first contribution in https://github.com/idursun/jjui/pull/783
+  - @aliassar made their first contribution in https://github.com/idursun/jjui/pull/779
+  Full Changelog: https://github.com/idursun/jjui/compare/v0.10.13...v0.10.14
+ReleaseNotesUrl: https://github.com/idursun/jjui/releases/tag/v0.10.14
+Documentations:
+- DocumentLabel: Wiki
+  DocumentUrl: https://github.com/idursun/jjui/wiki
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
