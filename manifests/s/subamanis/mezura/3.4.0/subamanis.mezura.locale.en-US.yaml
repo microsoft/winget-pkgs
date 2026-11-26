@@ -1,0 +1,99 @@
+# Created with komac v2.17.1
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+
+PackageIdentifier: subamanis.mezura
+PackageVersion: 3.4.0
+PackageLocale: en-US
+Publisher: subamanis
+PublisherUrl: https://github.com/subamanis
+PublisherSupportUrl: https://github.com/subamanis/mezura/issues
+Author: Petros Papatheodorou
+PackageName: mezura
+PackageUrl: https://github.com/subamanis/mezura
+License: MIT OR Apache-2.0
+LicenseUrl: https://github.com/subamanis/mezura#license
+Copyright: Copyright (c) 2021 Petros Papatheodorou
+ShortDescription: A fast and accurate lines-of-code counter. Splits every line into code, comments and blanks per language, separates test code, counts user-defined keywords like classes and structs, and compares the figures between runs and git revisions.
+Description: A fast and accurate lines-of-code counter. Splits every line into code, comments and blanks per language, separates test code from production code, counts user-defined keywords like classes and structs, and compares the figures between runs and between git revisions. Command line program and MCP server.
+Moniker: mezura
+Tags:
+- analytics
+- cli
+- code
+- counting
+- lines-of-code
+- linux
+- rust
+- statistics
+- tracking
+- windows
+ReleaseNotes: |-
+  v3.4.0 - 2026-11-05
+    55,476 Total lines  -  37,239 Code lines
+  Main changes:
+    -> Local git revisions ('@v3.2.0', './src@030e6e7') and remote repositories
+        ('https://github.com/owner/repo@v1.0', 'git@github.com:owner/repo@main') can be counted as
+        targets, under module names and on either side of '--diff'. '--explain' takes a file at a
+        revision ('src/main.rs@v3.2.0').
+    -> '--diff' compares glob target paths against a git revision, each side matching at its own
+        commit.
+    -> '--badge' draws an SVG badge of the count for a README, a pill of figures or a card with the
+        languages bar.
+    -> '--output html' writes the run as one HTML file with the overview, the details, every shipped
+        theme and the badge.
+    -> '--sort' orders the modules as well as the languages inside them.
+    -> A 'composer.json' requiring 'phpunit/phpunit' turns the '@phpunit' preset on, as a
+        'phpunit.xml' does.
+  Bugfixes:
+    -> '--languages' and '--exclude-languages' no longer change which language a file is counted as,
+        so '--exclude-languages matlab' keeps the Objective-C '.m' files.
+    -> Counting targets other than a project's or a loaded configuration's no longer reads or writes
+        that history.
+    -> '--save-local' together with '--save' or '--load' keeps the project's existing settings.
+    -> Zig's '\\' line strings are read as strings, so a '//' or 'test' inside one is no longer
+        counted as a comment or a test block.
+    -> Test detection keeps the blank and comment lines between a test-marked 'if' arm and its 'else'
+        in the test code.
+    -> Glob target patterns match files inside dotted directories only with '--search-in-dotted', and
+        match nothing inside '.git'.
+    -> An older mezura no longer rewrites the data directory of a newer release. '--version', '--help'
+        and '--changelog' leave it alone, and other runs stop with a message until '--restore'.
+  Change in commands:
+    -> Each argument is one target, so 'mezura ./src ./tests' counts two directories and a path with
+        spaces needs quotes. A name covers only the paths of its argument. '--exclude' and '--tests'
+        also take patterns separated by spaces.
+    -> '--save <name>' writes target paths only when they were given or loaded, so a configuration
+        saved without them works in any directory. 'default' holds no target paths.
+    -> '--save default' adds to the settings 'default' holds and removes the target paths an earlier
+        version wrote there.
+    -> '--load default' and '--save default' inside a project keep the project's settings.
+    -> '--hide modules' prints a run with named modules as one flat report.
+    -> '--hide' on the command line adds to the sections a loaded configuration hides.
+    -> '--output markdown' renders '--layout matrix', the 'Overview' table and the 'History' of
+        '--compare', and prints the notes of a text run on the error output.
+  Other:
+    -> A warning is printed when '--log' or '--compare' is typed beside '--output json', which writes
+        no log and shows no history.
+    -> '--save <name> --compare <N>' with target paths no longer warns that '--compare' is ignored.
+    -> Saving a configuration with '--style' no longer repeats a style line the file already holds.
+    -> The run that writes a project's settings with '--save-local' leaves out the default
+        configuration's counting settings, as later runs in the project do.
+    -> '--load default' together with '--no-default-config' is refused.
+    -> '--help' beside '--output json' prints the help of '--output'.
+    -> A line ending in a comma in a configuration's '===> targets' block no longer continues onto the
+        next line.
+    -> The note about a test tool whose tests were not found also prints under '--output json' and
+        '--output markdown', and names the file that names the tool.
+    -> Test patterns in a configuration file silence the list of applied test presets and the note
+        about missing tests. A '--tests' on the command line silences the note only.
+    -> A document printed on a terminal is followed by a note on saving it to a file.
+    -> Long paths under '--by-file' keep their trailing folders ('.../Services/file.php') and use the
+        full width of the column.
+    -> The first column header of the Details table counts its languages or modules ('Language (N)').
+    -> MATLAB also counts GNU Octave's '#' line comments and '#{' / '#}' block comments, and uses
+        '##' headers to settle '.m' files.
+    -> The default thread count follows process CPU affinity on Windows and cgroups v2 CPU quotas on
+        Linux.
+ReleaseNotesUrl: https://github.com/subamanis/mezura/releases/tag/v3.4.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
