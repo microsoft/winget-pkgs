@@ -2,7 +2,7 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.locale.1.28.0.schema.json
 
 PackageIdentifier: s0ng1v.Octans
-PackageVersion: 1.1.1
+PackageVersion: 1.2.2
 PackageLocale: zh-CN
 ShortDescription: 在 Windows 任务栏实时显示无线外设电量的轻量原生托盘应用。
 Description: |-
@@ -26,12 +26,19 @@ Tags:
 - 键盘
 - 鼠标
 ReleaseNotes: |-
-  Octans v1.1.1
-  更新内容
-  - 新增雷柏（Rapoo）VT0 / 二代 N54 全系鼠标支持：
-    - 精确支持 VT0（24AE:1410/4610）、VT0 MAX（1420/4620）、VT0 Air MAX（14A1/46A1）、VT0 MAX 大师版（144A/464A），以及二代 VT1 / VT3 / VT7 / VT9 系列。
-    - 修复 Windows 下 Report ID 0x07 前导字节偏移、网吧版 0xB0 偏移、满电状态（state=3）识别与路由优先级问题。
-    - 新增 HidD_GetInputReport(0x07) 零写入即时直读，鼠标静止/休眠或与官方 A-HUB 并存时均可直接秒读电量。
-  - 单元测试与清单更新：新增 19 项实机报文与路由断言，全部 557/557 项通过；同步更新中英文 README 与外设清单。
+  Octans v1.2.2 — 修复应用内自动更新与新增每日轻量级版本提醒
+  修复与改进
+  - 修复 WinHTTP 自动更新失败（3 个核心问题）：
+    - 修复 WINHTTP_OPTION_REDIRECT_POLICY 选项常量（63 误设为禁用重定向，已修正为 88），恢复 AtomGit（302 跳转 CDN）与 GitHub（302 跳转 release-assets.githubusercontent.com）自动重定向下载。
+    - 将会话代理模式从 DEFAULT_PROXY(0) 升级为 AUTOMATIC_PROXY(4)，完整兼容系统代理与 Clash 分流规则。
+    - 国内更新源切换为免登录公开接口 https://atomgit.com/api/v5/repos/gcw_dkdsv0bD/Octans/releases/latest（含多级回退与 .exe 资产 SHA-256 摘要提取）。
+  - 新增轻量级每日只读版本提醒：
+    - 启动后延迟 30 秒后台检查（每 24 小时最多 1 次），按需动态加载并立即卸载 winhttp.dll，绝不静默下载或安装，保持常驻 0% CPU、< 5 MB 内存与零遥测。
+    - 检测到新版时在主面板右上角显示 ↑ 新版 提示胶囊（点击直达更新界面），右键菜单新增 「自动检查更新」 开关可随时关闭。
+  质量与体量验证
+  - 单元测试：661/661 断言全部通过
+  - 主程序体积：Octans.exe 380.5 KB（< 400 KB），零非系统/网络/GPU 静态 DLL 导入
+  - 安装包：Octans-Setup-v1.2.2.exe (2,400,758 bytes)
+  - SHA-256：E5E54B38CD5ECF40A7665080E5C5C94829ECB6173E6D0DAAAC603FD8DDF3BD39
 ManifestType: locale
 ManifestVersion: 1.28.0
