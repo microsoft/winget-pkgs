@@ -1,0 +1,72 @@
+# Created with YamlCreate.ps1 Dumplings Mod
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.28.0.schema.json
+
+PackageIdentifier: PrismShadow.PenguinHarness
+PackageVersion: 0.2.20
+PackageLocale: en-US
+Publisher: PrismShadow
+PublisherUrl: https://prismshadow.com/
+PublisherSupportUrl: https://github.com/Prism-Shadow/penguin-harness/issues
+PackageName: PenguinHarness
+PackageUrl: https://penguin.ooo/
+License: Apache-2.0
+LicenseUrl: https://github.com/Prism-Shadow/penguin-harness/blob/HEAD/LICENSE
+Copyright: © 2026 Prism Shadow
+ShortDescription: The desktop app for PenguinHarness, an open-source framework for agent self-evolution.
+Description: |-
+  PenguinHarness is an open-source framework for agent self-evolution (recursive self-improvement, RSI). The model stays fixed; the harness evolves: prompts, Skills, tools and hooks.
+  Every RSI algorithm ships as a plugin - Default, OPRO, APE, ACE and AWM - and runs on the same built-in Benchmarks, scoreboard and snapshots. Pick an algorithm, pick a Benchmark, and an agent improves another agent round by round.
+Tags:
+- agent
+- agentic
+- ai
+- chatbot
+- code
+- coding
+- harness
+- large-language-model
+- llm
+- programming
+- recursive-self-improvement
+- rsi
+- self-evolving
+ReleaseNotes: |-
+  PenguinHarness 0.2.20 is a fix release on top of 0.2.19. Workbenches load again in the desktop app, where 0.2.19 failed them with TS2688. A workbench that fails to load now offers Fix with AI and [Report] beside Reload. A compaction or model switch that produced no full summary shows its hand-over in its Compacted row. The plugin market lists the published plugin index again and says why each failed source could not be read.
+  Highlights
+  A workbench that fails to load offers Fix with AI
+  Wherever the Web App shows that a workbench's files did not load, it now offers two actions besides Reload: Fix with AI and [Report].
+
+  Fix with AI asks first, then opens a new chat for the default agent in a temporary Workspace, with the repair prompt in the composer, not sent. The prompt names the workbench, its agent and machine, its folder (<app_data_dir>/agents/<agent>/agent_state/workbenches/<id>/) and the load error verbatim. It explains that a load type-checks index.ts under options the host fixes, that saving a file loads it again, and that .build/status.json records the result. The agent is asked to say what it will change before changing anything. When the error comes from what the platform provides (Node or TypeScript declarations, host types, packaging), it is told to say so, change nothing and suggest a report. A workbench on a connected machine is repaired on that machine, by that machine's default agent.
+  [Report] opens the shared problem report with the workbench, whether it runs on a connected machine, and the masked load error.
+  The actions appear in the App Center window of an app with no page to show (Reload is now the primary button there), in the App Center's Show error dialog, and in the More menu of a failed workbench row in Agent settings. [Report] alone appears in the toast after an import whose load failed and on the app's full page.
+  A hand-over without a summary shows in its Compacted row
+  When a compaction completes without a full summary, the next context opens with a hand-over instead: the hand-off note, or, for an in-session model switch, the Trace hand-over. The chat now shows that text in the compaction row it follows. The row settles to Compacted, and its mark says why there was no summary.
+
+  The row's body is folded by default. Its Hand-off note section takes the result section's place and lists the reason in the mark's words, the Trace file the note names, and the note itself with its tags stripped. Long paths wrap inside the section, and all of it is selectable text.
+  A switch whose current model cannot be reached sends no compaction request, so its row is derived from the hand-over: it settles with no wall time, and the mark's first line reads "The previous model was unavailable, so no summary was requested". The Model switched divider keeps its label and no longer has a hover hint. Everything is derived from records the Trace already holds.
+  The plugin market says why a source failed
+  The published plugin index lists again. Its npm channel, added to nineteen rows, carries no url. The index reader had refused the whole document at the first such row, so the market reported a source it had reached as unreachable. The reader now requires a url only on the github channel, the one an install fetches.
+
+  The market's notice gains Details, which lists each failed source by its address with the server's reason, as selectable text followed by [Report]. A refused row names the document, its position, the package and the field at fault. A failed fetch names what lies under undici's bare fetch failed: the errno or its code, a certificate refusal's code, and each address of a host that resolved to several. A source tried over several addresses (its own and its mirrors) reports every address's failure in order.
+  Notable in this release
+  - Desktop: Workbenches load again in the desktop app. The packed app carries the declarations of @types/node and undici-types, which electron-builder's *.d.ts exclusion had stripped. The server takes a @types/node only when its entry declarations are present, and with no complete copy a workbench that does not import node: still loads. verify-packed-cli.mjs fails a packed app without those declarations.
+  - Remote machines: Connecting a machine on the Machines page no longer stops at the Sync config step with it answered 503 when asked its version while the machine's server is still starting. The version, handshake and config sync questions wait out that answer for up to a minute, and a restart is done when the App answers, not when the port does. A refusal names the reason the machine's server gave, at most 200 characters.
+  - Plugins: When npm fails to install or look up a plugin, the server now shows npm's error instead of a warning npm printed first, such as npm warn Unknown user config "always-auth". It skips the lines npm prefixes with a lower log level (npm warn, npm notice, and the http, info, verbose, silly and timing lines a raised loglevel adds), and falls back to a warning only when npm printed nothing else.
+  - Agents: The default system prompt's # Success criteria, # Stop rules and # Tool use sections gain six refinements: deliverable verification, reuse of documented checks, low-cost failure narrowing before rerunning suites, saving complete candidate files early, unattended Debian installs (DEBIAN_FRONTEND=noninteractive), and persistent services started on their own. The kernel version is 2026-11-26.
+  - Interface: Tooltips break a run with no break opportunity, such as a file path, at the panel's edge instead of running past it.
+  - Release pipeline: The npm publish job runs its test suites with an empty npm user config, as CI's test jobs do; build and publish keep setup-node's file.
+  Upgrading
+  - Existing agents: Run Update kernel on the Agents page to bring the refined default system prompt to agents whose prompt tab is still the built-in default.
+  - Remote machines: Remote machines must run the server's version. Update each from the Machines page.
+  - Hand-off notes in a live view: A compaction that degrades to its hand-off note with no model switch shows its Hand-off note section in an open conversation only after a reload; the note is written with the next Trace file and is not on the live stream. A model switch's hand-over shows at once.
+  Requirements
+  Linux or macOS (x64 / arm64), or Windows 10+ (x64). The desktop app and the CLI installers bundle their own runtime. Installing from npm needs Node >= 24; the official Docker image carries its own. Running the built-in Benchmarks needs Docker with Compose v2 and uv on the server's machine. The Browser extension needs Chrome 116 or later. All data stays under ~/.penguin/data — the /data volume in the container.
+  Full detail: changelog/0.2.20/.
+ReleaseNotesUrl: https://github.com/Prism-Shadow/penguin-harness/releases/tag/v0.2.20
+Documentations:
+- DocumentLabel: Docs
+  DocumentUrl: https://penguin.ooo/docs/
+- DocumentLabel: Desktop quick start
+  DocumentUrl: https://penguin.ooo/docs/quickstart-desktop
+ManifestType: defaultLocale
+ManifestVersion: 1.28.0
