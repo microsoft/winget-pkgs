@@ -1,0 +1,57 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+# Created with winmatsch
+
+PackageIdentifier: Miller.Miller
+PackageVersion: 6.23.0
+PackageLocale: en-US
+Publisher: John Kerl
+PublisherUrl: https://github.com/johnkerl
+PublisherSupportUrl: https://github.com/johnkerl/miller/issues
+Author: John Kerl
+PackageName: Miller
+PackageUrl: https://github.com/johnkerl/miller
+License: BSD-2-Clause
+LicenseUrl: https://github.com/johnkerl/miller/blob/HEAD/LICENSE.txt
+CopyrightUrl: https://github.com/johnkerl/miller/blob/HEAD/LICENSE.txt
+ShortDescription: Miller is like awk, sed, cut, join, and sort for name-indexed data such as CSV, TSV, and tabular JSON
+Description: |-
+  Miller is like awk, sed, cut, join, and sort for name-indexed data such as CSV, TSV, and tabular JSON. You get to work with your data using named fields, without needing to count positional column indices.
+
+  This is something the Unix toolkit always could have done, and arguably always should have done. It operates on key-value-pair data while the familiar Unix tools operate on integer-indexed fields: if the natural data structure for the latter is the array, then Miller’s natural data structure is the insertion-ordered hash map. This encompasses a variety of data formats, including but not limited to the familiar CSV, TSV, and JSON. (Miller can handle positionally-indexed data as a special case.)
+
+  ## Features
+
+  - Miller is multi-purpose: it’s useful for data cleaning, data reduction, statistical reporting, devops, system administration, log-file processing, format conversion, and database-query post-processing.
+  - You can use Miller to snarf and munge log-file data, including selecting out relevant substreams, then produce CSV format and load that into all-in-memory/data-frame utilities for further statistical and/or graphical processing.
+  - Miller complements data-analysis tools such as R, pandas, etc.: you can use Miller to clean and prepare your data. While you can do basic statistics entirely in Miller, its streaming-data feature and single-pass algorithms enable you to reduce very large data sets.
+  - Miller complements SQL databases: you can slice, dice, and reformat data on the client side on its way into or out of a database. (Examples here and here). You can also reap some of the benefits of databases for quick, setup-free one-off tasks when you just need to query some data in disk files in a hurry.
+  - Miller also goes beyond the classic Unix tools by stepping fully into our modern, no-SQL world: its essential record-heterogeneity property allows Miller to operate on data where records with different schema (field names) are interleaved.
+  - Miller is streaming: most operations need only a single record in memory at a time, rather than ingesting all input before producing any output. For those operations which require deeper retention (sort, tac, stats1), Miller retains only as much data as needed. This means that whenever functionally possible, you can operate on files which are larger than your system’s available RAM, and you can use Miller in tail -f contexts.
+  - Miller is pipe-friendly and interoperates with the Unix toolkit
+  - Miller’s I/O formats include tabular pretty-printing, positionally indexed (Unix-toolkit style), CSV, JSON, and others
+  - Miller does conversion between formats
+  - Miller’s processing is format-aware: e.g. CSV sort and tac keep header lines first
+  - Miller has high-throughput performance on par with the Unix toolkit
+  - Not unlike jq (for JSON), Miller is written in portable, modern C, with zero runtime dependencies. You can download or compile a single binary, scp it to a faraway machine, and expect it to work.
+Moniker: miller
+Tags:
+- csv
+- csv-format
+- data-cleaning
+- data-processing
+- data-reduction
+- data-regression
+- devops
+- devops-tools
+- json
+- json-data
+- statistical-analysis
+- statistics
+- streaming-algorithms
+- streaming-data
+- tabular-data
+- tsv
+ReleaseNotes: "## Performance\n\n• Cached regexes are looked up before compiling in `regexpCompileCached`：https://github.com/johnkerl/miller/pull/2292\n• The CSV reader skips the per-field key lookup when the header has no duplicates：https://github.com/johnkerl/miller/pull/2291\n• The JSON writer skips the escape loop for strings that need no escapes：https://github.com/johnkerl/miller/pull/2321\n\n## Bug fixes\n\n### Input handling\n\n• UTF-8 BOM handling is fixed for gzipped CSV input：https://github.com/johnkerl/miller/pull/2278\n• A leading UTF-8 BOM is now stripped for TSV and CSV-lite：https://github.com/johnkerl/miller/pull/2281\n\n### Time and date functions\n\n• `fsec2hms` and `fsec2dhms` carry rounded fractional seconds correctly：https://github.com/johnkerl/miller/pull/2282\n• `strptime` and `gmt2sec` now work for dates outside the int64 nanosecond range：https://github.com/johnkerl/miller/pull/2285\n• File-backed `TZ` values are supported：https://github.com/johnkerl/miller/pull/2247\n\n### String functions\n\n• `strmatchx` reports starts and ends as UTF-8 character positions, not byte positions：https://github.com/johnkerl/miller/pull/2287\n  Follow-up docs and generated-file regeneration：https://github.com/johnkerl/miller/pull/2288\n\n### Number formatting\n\n• `fmtnum` now picks its formatter from the conversion verb, not from the end of the format string：https://github.com/johnkerl/miller/pull/2295\n  Follow-ups：https://github.com/johnkerl/miller/pull/2297\n• `fmtnum` and `--ofmt` accept the C verbs `%i`, `%u`, `%D` and `%U`：https://github.com/johnkerl/miller/pull/2298\n\n### Integer arithmetic\n\n• `int ** int` is computed exactly rather than through float64 where possible：https://github.com/johnkerl/miller/pull/2296\n  Extra unit-test cases (`5**0`, `MinInt64**1`)：https://github.com/johnkerl/miller/pull/2299\n• Integer zero divisors no longer cause a panic in `./`, `madd`, `msub`, `mmul` and `mexp`：https://github.com/johnkerl/miller/pull/2300\n• `mexp` results are reduced for exponents 0 and 1：https://github.com/johnkerl/miller/pull/2301\n• `abs`, `ceil`, `floor`, `round` and `sgn` stay exact for ints above 2**53：https://github.com/johnkerl/miller/pull/2309\n• Unary minus of the minimum int, and `roundm` on large ints, are fixed：https://github.com/johnkerl/miller/pull/2311\n\n### Other\n\n• `arrayify` leaves its input unchanged：https://github.com/johnkerl/miller/pull/2317\n  Same for the `Mlrval.Arrayify` receiver：https://github.com/johnkerl/miller/pull/2320\n• On Windows under Git Bash or MSYS2, `sh` is now found on the `PATH`：https://github.com/johnkerl/miller/pull/2289\n• The `mand.mlr` magnitude calculation is fixed：https://github.com/johnkerl/miller/pull/2257\n\n## Documentation, build and release tooling\n\n• Doubled `cd` in the library-setup docs is fixed：https://github.com/johnkerl/miller/pull/2276\n• Prepipe commands that take flags are now quoted in help examples：https://github.com/johnkerl/miller/pull/2275\n• `LICENSE.txt` is identified as BSD-2-Clause for GitHub's licensee：https://github.com/johnkerl/miller/pull/2241\n• The releaser script uses Draft rather than Pre-release：https://github.com/johnkerl/miller/pull/2261\n• `make -C man build` fails when `groff` is missing or the manpage pipeline fails：https://github.com/johnkerl/miller/pull/2302\n  Regenerated with the new `groff` version：https://github.com/johnkerl/miller/pull/2303\n• `creach` is no longer used in docgen：https://github.com/johnkerl/miller/pull/2313\n• `~/.mlrrc` is suppressed in `make docs`：https://github.com/johnkerl/miller/pull/2316\n• Go version is now 1.26.10：https://github.com/johnkerl/miller/pull/2274\n• YAML dependency switched to `go.yaml.in/yaml/v3`：https://github.com/johnkerl/miller/pull/2319\n\n## Dependency bumps (Dependabot)\n\n• `github.com/klauspost/compress` 1.20.0 to 1.20.4：https://github.com/johnkerl/miller/pull/2258, https://github.com/johnkerl/miller/pull/2269, https://github.com/johnkerl/miller/pull/2304\n• `golang.org/x/term` 0.46.0 to 0.48.0：https://github.com/johnkerl/miller/pull/2264, https://github.com/johnkerl/miller/pull/2305\n• `golang.org/x/text` 0.42.0 to 0.44.0：https://github.com/johnkerl/miller/pull/2262, https://github.com/johnkerl/miller/pull/2306\n• `golang.org/x/sys` 0.49.0 to 0.50.0：https://github.com/johnkerl/miller/pull/2294\n• `pault.ag/go/debian` 0.21.0 to 0.21.4：https://github.com/johnkerl/miller/pull/2279, https://github.com/johnkerl/miller/pull/2284, https://github.com/johnkerl/miller/pull/2310\n• `github.com/lestrrat-go/strftime` 1.2.0 to 1.2.1：https://github.com/johnkerl/miller/pull/2283\n• `goreleaser/goreleaser-action` 7.2.3 to 7.3.0：https://github.com/johnkerl/miller/pull/2270\n• `actions/upload-artifact` 7.0.1 to 7.0.2：https://github.com/johnkerl/miller/pull/2266\n• `actions/setup-go` 7.0.0 to 7.1.0：https://github.com/johnkerl/miller/pull/2318\n• codeql-action group updates：https://github.com/johnkerl/miller/pull/2259, https://github.com/johnkerl/miller/pull/2265, https://github.com/johnkerl/miller/pull/2272, https://github.com/johnkerl/miller/pull/2280, https://github.com/johnkerl/miller/pull/2290, https://github.com/johnkerl/miller/pull/2293\n\n## New Contributors\n\n• @fzlzjerry made their first contribution in https://github.com/johnkerl/miller/pull/2247\n• @kvnloo made their first contribution in https://github.com/johnkerl/miller/pull/2241\n• @dcadolph made their first contribution in https://github.com/johnkerl/miller/pull/2276\n• @Boulea7 made their first contribution in https://github.com/johnkerl/miller/pull/2278\n• @youdie006 made their first contribution in https://github.com/johnkerl/miller/pull/2281\n• @ChandraChaan made their first contribution in https://github.com/johnkerl/miller/pull/2282\n• @shaurya703 made their first contribution in https://github.com/johnkerl/miller/pull/2285\n• @b84330808 made their first contribution in https://github.com/johnkerl/miller/pull/2287\n• @ptweezy made their first contribution in https://github.com/johnkerl/miller/pull/2292\n• @g4lb made their first contribution in https://github.com/johnkerl/miller/pull/2291\n• @waw666waw666 made their first contribution in https://github.com/johnkerl/miller/pull/2295\n• @Kernel-Hunter made their first contribution in https://github.com/johnkerl/miller/pull/2296\n\n**Full Changelog**：https://github.com/johnkerl/miller/compare/v6.22.0...v6.23.0"
+ReleaseNotesUrl: https://github.com/johnkerl/miller/releases/tag/v6.23.0
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0
